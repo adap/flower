@@ -11,11 +11,41 @@ import NIOPosix
 import CoreML
 import os
 
+/// Set of CoreML machine learning task options.
 public enum MLTask {
     case train
     case test
 }
 
+/// Default Flower client implementation using CoreML as local training pipeline.
+///
+/// ## Topics
+///
+/// ### Usage
+///
+/// - ``init(layerWrappers:dataLoader:compiledModelUrl:)``
+/// - ``getParameters()``
+/// - ``getProperties(ins:)``
+/// - ``fit(ins:)``
+/// - ``evaluate(ins:)``
+/// - ``closeEventLoopGroup()``
+///
+/// ### Data Loader
+///
+/// - ``MLDataLoader``
+///
+/// ### Layer Wrapper
+///
+/// - ``MLLayerWrapper``
+///
+/// ### Model Parameters
+///
+/// - ``MLParameter``
+/// - ``ParameterConverter``
+///
+/// ### Task
+/// 
+///  - ``MLTask``
 @available(iOS 14.0, *)
 public class MLFlwrClient: Client {
     private var eventLoopGroup: EventLoopGroup?
@@ -29,7 +59,7 @@ public class MLFlwrClient: Client {
     private let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? "flwr.Flower",
                                     category: String(describing: MLFlwrClient.self))
     
-    /// Inits the implementation of the Client protocol.
+    /// Creates an MLFlwrClient instance that conforms to Client protocol.
     ///
     /// - Parameters:
     ///   - layerWrappers: A MLLayerWrapper struct that contains layer information.
@@ -51,7 +81,7 @@ public class MLFlwrClient: Client {
         }
     }
     
-    /// Parses the parameters from the local model and returns them as GetParametersRes struct
+    /// Parses the parameters from the local model and returns them as GetParametersRes struct.
     ///
     /// - Returns: Parameters from the local model
     public func getParameters() -> GetParametersRes {
@@ -61,7 +91,7 @@ public class MLFlwrClient: Client {
         return GetParametersRes(parameters: parameters, status: status)
     }
     
-    /// Calls the routine to fit the local model
+    /// Calls the routine to fit the local model.
     ///
     /// - Returns: The result from the local training, e.g., updated parameters
     public func fit(ins: FitIns) -> FitRes {
@@ -72,7 +102,7 @@ public class MLFlwrClient: Client {
         return FitRes(parameters: parameters, numExamples: result.numSamples, status: status)
     }
     
-    /// Calls the routine to evaluate the local model
+    /// Calls the routine to evaluate the local model.
     ///
     /// - Returns: The result from the evaluation, e.g., loss
     public func evaluate(ins: EvaluateIns) -> EvaluateRes {
@@ -140,7 +170,7 @@ public class MLFlwrClient: Client {
         return result ?? MLResult(loss: 1, numSamples: 0, accuracy: 0)
     }
     
-    /// Closes the initiated group of event-loop
+    /// Closes the initiated group of event-loop.
     public func closeEventLoopGroup() {
         do {
             try self.eventLoopGroup?.syncShutdownGracefully()

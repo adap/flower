@@ -226,7 +226,7 @@ class SqliteState(State):
         if node_id == 0:
             msg = (
                 "`node_id` must be >= 1"
-                + "\n\n For requesting anonymous tasks use `node_id` equal `None`"
+                "\n\n For requesting anonymous tasks use `node_id` equal `None`"
             )
             raise AssertionError(msg)
 
