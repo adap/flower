@@ -15,11 +15,14 @@
 """Contextmanager for a gRPC streaming channel to the Flower server."""
 
 
+import collections
 from contextlib import contextmanager
 from logging import DEBUG
 from pathlib import Path
 from queue import Queue
-from typing import Callable, Iterator, Optional, Tuple, Union
+from typing import Callable, Iterator, Optional, Tuple, List, Union
+import grpc
+
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.grpc import create_channel
@@ -33,7 +36,79 @@ from flwr.proto.transport_pb2_grpc import FlowerServiceStub
 # os.environ["GRPC_VERBOSITY"] = "debug"
 # os.environ["GRPC_TRACE"] = "tcp,http"
 
+class _GenericClientInterceptor(grpc.UnaryUnaryClientInterceptor,
+                                grpc.UnaryStreamClientInterceptor,
+                                grpc.StreamUnaryClientInterceptor,
+                                grpc.StreamStreamClientInterceptor):
 
+    def __init__(self, interceptor_function):
+        self._fn = interceptor_function
+
+    def intercept_unary_unary(self, continuation, client_call_details, request):
+        new_details, new_request_iterator, postprocess = self._fn(
+            client_call_details, iter((request,)), False, False)
+        response = continuation(new_details, next(new_request_iterator))
+        return postprocess(response) if postprocess else response
+
+    def intercept_unary_stream(self, continuation, client_call_details,
+                               request):
+        new_details, new_request_iterator, postprocess = self._fn(
+            client_call_details, iter((request,)), False, True)
+        response_it = continuation(new_details, next(new_request_iterator))
+        return postprocess(response_it) if postprocess else response_it
+
+    def intercept_stream_unary(self, continuation, client_call_details,
+                               request_iterator):
+        new_details, new_request_iterator, postprocess = self._fn(
+            client_call_details, request_iterator, True, False)
+        response = continuation(new_details, new_request_iterator)
+        return postprocess(response) if postprocess else response
+
+    def intercept_stream_stream(self, continuation, client_call_details,
+                                request_iterator):
+        new_details, new_request_iterator, postprocess = self._fn(
+            client_call_details, request_iterator, True, True)
+        response_it = continuation(new_details, new_request_iterator)
+        return postprocess(response_it) if postprocess else response_it
+
+
+def create_intercepter(intercept_call):
+    return _GenericClientInterceptor(intercept_call)
+    
+    
+def _unary_unary_rpc_terminator(code, details):
+
+    def terminate(ignored_request, context):
+        context.abort(code, details)
+
+    return grpc.unary_unary_rpc_method_handler(terminate)
+
+class _ClientCallDetails(
+        collections.namedtuple(
+            '_ClientCallDetails',
+            ('method', 'timeout', 'metadata', 'credentials')),
+        grpc.ClientCallDetails):
+    pass
+
+
+def header_adder_interceptor(header, value):
+
+    def intercept_call(client_call_details, request_iterator, request_streaming,
+                       response_streaming):
+        metadata = []
+        if client_call_details.metadata is not None:
+            metadata = list(client_call_details.metadata)
+        metadata.append((
+            header,
+            value,
+        ))
+        client_call_details = _ClientCallDetails(
+            client_call_details.method, client_call_details.timeout, metadata,
+            client_call_details.credentials)
+        return client_call_details, request_iterator, None
+
+    return create_intercepter(intercept_call)
+    
 def on_channel_state_change(channel_connectivity: str) -> None:
     """Log channel connectivity."""
     log(DEBUG, channel_connectivity)
@@ -44,6 +119,8 @@ def grpc_connection(
     server_address: str,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
+    metadata: List[Tuple[str,str]] = []
+
 ) -> Iterator[Tuple[Callable[[], ServerMessage], Callable[[ClientMessage], None]]]:
     """Establish a gRPC connection to a gRPC server.
 
@@ -62,9 +139,13 @@ def grpc_connection(
         increased limit and block larger messages.
         (default: 536_870_912, this equals 512MB)
     root_certificates : Optional[bytes] (default: None)
-        The PEM-encoded root certificates as a byte string or a path string.
-        If provided, a secure connection using the certificates will be
-        established to an SSL-enabled Flower server.
+        The PEM-encoded root certificates as a byte string. If provided, a secure
+        connection using the certificates will be established to a SSL-enabled
+        Flower server.
+    metadata: List[Tuple[str,str]] (default: [])
+        A List of metadata that should be send together with gRPC calls.
+        Entries should be a (key,value) Tuple.
+        The entries will be sent as http-headers to the gRPC endpoint.
 
     Returns
     -------
@@ -84,6 +165,20 @@ def grpc_connection(
     >>>     server_message = receive()
     >>>     # do something here
     >>>     send(client_message)
+
+    Establishing a trusted SSL-enabled connection to the server with an auth token:
+
+    >>> from pathlib import Path
+    >>> with grpc_connection(
+    >>>     server_address,
+    >>>     max_message_length=max_message_length,
+    >>>     root_certificates=Path("/etc/ssl/certs/ca-certificates.crt").read_bytes(),
+    >>>     metadata=[("authorization":"Bearer ey...")]
+    >>> ) as conn:
+    >>>     receive, send = conn
+    >>>     server_message = receive()
+    >>>     # do something here
+    >>>     send(client_message)
     """
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
@@ -93,6 +188,9 @@ def grpc_connection(
         root_certificates=root_certificates,
         max_message_length=max_message_length,
     )
+    for k,v in metadata:
+        channel = grpc.intercept_channel(channel,header_adder_interceptor(k,v))
+
     channel.subscribe(on_channel_state_change)
 
     queue: Queue[ClientMessage] = Queue(  # pylint: disable=unsubscriptable-object

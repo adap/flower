@@ -18,7 +18,7 @@
 import sys
 import time
 from logging import INFO
-from typing import Callable, Dict, Optional, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from flwr.common import (
     GRPC_MAX_MESSAGE_LENGTH,
@@ -95,6 +95,7 @@ def start_client(
     server_address: str,
     client: Client,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+    metadata: List[Tuple[str,str]] = []
     root_certificates: Optional[Union[bytes, str]] = None,
     rest: bool = False,  # Deprecated in favor of `transport`
     transport: Optional[str] = None,
@@ -117,6 +118,10 @@ def start_client(
         value. Note that the Flower server needs to be started with the
         same value (see `flwr.server.start_server`), otherwise it will not
         know about the increased limit and block larger messages.
+    metadata: List[Tuple[str,str]] (default: [])
+        A List of metadata that should be send together with gRPC calls.
+        Entries should be a (key,value) Tuple.
+        The entries will be sent as http-headers to the gRPC endpoint.        
     root_certificates : Optional[Union[bytes, str]] (default: None)
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be
@@ -131,6 +136,9 @@ def start_client(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    Returns
+    -------
+        None
 
     Examples
     --------
@@ -149,6 +157,18 @@ def start_client(
     >>>     client=FlowerClient(),
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
+
+    Starting a trusted SSL-enabled client with authorization metadata:
+
+    >>> from pathlib import Path
+    >>> start_client(
+    >>>     server_address=localhost:8080,
+    >>>     client=FlowerClient(),
+    >>>     root_certificates=Path("/etc/ssl/certs/ca-certificates.crt").read_bytes(),
+    >>>     metadata=[("authorization":"Bearer ey...")]
+    >>> )
+        
+
     """
     event(EventType.START_CLIENT_ENTER)
 
@@ -190,6 +210,7 @@ def start_client(
             address,
             max_message_length=grpc_max_message_length,
             root_certificates=root_certificates,
+            metadata=metadata
         ) as conn:
             receive, send = conn
 
@@ -224,6 +245,7 @@ def start_numpy_client(
     client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
+    metadata: List[Tuple[str,str]] = []
     rest: bool = False,  # Deprecated in favor of `transport`
     transport: Optional[str] = None,
 ) -> None:
@@ -244,10 +266,6 @@ def start_numpy_client(
         value. Note that the Flower server needs to be started with the
         same value (see `flwr.server.start_server`), otherwise it will not
         know about the increased limit and block larger messages.
-    root_certificates : bytes (default: None)
-        The PEM-encoded root certificates as a byte string or a path string.
-        If provided, a secure connection using the certificates will be
-        established to an SSL-enabled Flower server.
     rest : bool (default: False)
         DEPRECATED - USE 'transport' INSTEAD.
         Defines whether or not the client is interacting with the server using the
@@ -258,6 +276,11 @@ def start_numpy_client(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    metadata: List[Tuple[str,str]] (default: [])
+        A List of metadata that should be send together with gRPC calls.
+        Entries should be a (key,value) Tuple.
+        The entries will be sent as http-headers to the gRPC endpoint.        
+
 
     Examples
     --------
@@ -276,6 +299,17 @@ def start_numpy_client(
     >>>     client=FlowerClient(),
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
+
+    Starting a trusted SSL-enabled client with authorization:
+
+    >>> from pathlib import Path
+    >>> start_client(
+    >>>     server_address=localhost:8080,
+    >>>     client=FlowerClient(),
+    >>>     root_certificates=Path("/etc/ssl/certs/ca-certificates.crt").read_bytes(),
+    >>>     metadata=[("authorization":"Bearer ey...")],
+    >>> )
+    
     """
     # Start
     start_client(
@@ -283,6 +317,7 @@ def start_numpy_client(
         client=_wrap_numpy_client(client=client),
         grpc_max_message_length=grpc_max_message_length,
         root_certificates=root_certificates,
+        metadata=metadata
         rest=rest,
         transport=transport,
     )
