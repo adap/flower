@@ -40,10 +40,13 @@ jobs:
         run: |
           cd e2e/pytorch
           python -c "from torchvision.datasets import CIFAR10; CIFAR10('./data', download=True)"
-      - name: Run tests
+      - name: Run edge client test
         run: |
           cd e2e/pytorch
           ./test.sh
+      - name: Run virtual client test
+        run: |
+          cd e2e/pytorch
           python simulation.py
 
   tensorflow:
@@ -73,10 +76,13 @@ jobs:
       - name: Download Datasets
         run: |
           python -c "import tensorflow as tf; tf.keras.datasets.cifar10.load_data()"
-      - name: Run tests
+      - name: Run edge client test
         run: |
           cd e2e/tensorflow
           ./test.sh
+      - name: Run virtual client test
+        run: |
+          cd e2e/tensorflow
           python simulation.py
 
           
@@ -99,10 +105,13 @@ jobs:
         run: |
           cd e2e/bare
           python -m poetry install
-      - name: Run tests
+      - name: Run edge client test
         run: |
           cd e2e/bare
           ./test.sh
+      - name: Run virtual client test
+        run: |
+          cd e2e/bare
           python simulation.py
 
   scikit:
@@ -128,10 +137,13 @@ jobs:
         run: |
           cd e2e/scikit-learn
           python -c "import openml; openml.datasets.get_dataset(554)"
-      - name: Run tests
+      - name: Run edge client test
         run: |
           cd e2e/scikit-learn
           ./test.sh
+      - name: Run virtual client test
+        run: |
+          cd e2e/scikit-learn
           python simulation.py
 
   mxnet:
@@ -157,10 +169,13 @@ jobs:
         run: |
           cd e2e/mxnet
           python -c "import mxnet as mx; mx.test_utils.get_mnist()"
-      - name: Run tests
+      - name: Run edge client test
         run: |
           cd e2e/mxnet
           ./test.sh
+      - name: Run virtual client test
+        run: |
+          cd e2e/scikit-learn
           python simulation.py
 
   jax:
@@ -182,10 +197,13 @@ jobs:
         run: |
           cd e2e/jax
           python -m poetry install
-      - name: Run tests
+      - name: Run edge client test
         run: |
           cd e2e/jax
           ./test.sh
+      - name: Run virtual client test
+        run: |
+          cd e2e/jax
           python simulation.py
 
   pandas:
@@ -217,8 +235,11 @@ jobs:
           cd e2e/pandas
           mkdir -p data
           python -c "from sklearn.datasets import load_iris; load_iris(as_frame=True)['data'].to_csv('./data/client.csv')"
-      - name: Run tests
+      - name: Run edge client test
         run: |
           cd e2e/pandas
           ./test.sh
+      - name: Run virtual client test
+        run: |
+          cd e2e/pandas
           python simulation.py
