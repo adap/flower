@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Adaptive Federated Optimization (FedOpt) [Reddi et al., 2020] abstract
-strategy.
+"""Adaptive Federated Optimization (FedOpt) [Reddi et al., 2020] abstract strategy.
 
-Paper: https://arxiv.org/abs/2003.00295
+Paper: arxiv.org/abs/2003.00295
 """
 
 
@@ -32,11 +31,10 @@ from flwr.common import (
 from .fedavg import FedAvg
 
 
-# flake8: noqa: E501
 class FedOpt(FedAvg):
     """Configurable FedAdagrad strategy implementation."""
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals,line-too-long
+    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals, line-too-long
     def __init__(
         self,
         *,
@@ -87,7 +85,7 @@ class FedOpt(FedAvg):
             Function used to configure validation. Defaults to None.
         accept_failures : bool, optional
             Whether or not accept rounds containing failures. Defaults to True.
-        initial_parameters : Parameters, optional
+        initial_parameters : Parameters
             Initial global model parameters.
         fit_metrics_aggregation_fn : Optional[MetricsAggregationFn]
             Metrics aggregation function, optional.
@@ -128,5 +126,6 @@ class FedOpt(FedAvg):
         self.v_t: Optional[NDArrays] = None
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"FedOpt(accept_failures={self.accept_failures})"
         return rep

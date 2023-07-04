@@ -15,6 +15,7 @@
 """Flower client app."""
 
 
+import sys
 import time
 from logging import INFO
 from typing import Callable, Dict, List, Optional, Tuple, Union
@@ -25,6 +26,14 @@ from flwr.common import (
     event,
     ndarrays_to_parameters,
     parameters_to_ndarrays,
+)
+from flwr.common.address import parse_address
+from flwr.common.constant import (
+    MISSING_EXTRA_REST,
+    TRANSPORT_TYPE_GRPC_BIDI,
+    TRANSPORT_TYPE_GRPC_RERE,
+    TRANSPORT_TYPE_REST,
+    TRANSPORT_TYPES,
 )
 from flwr.common.logger import log
 from flwr.common.typing import (
@@ -43,6 +52,7 @@ from flwr.common.typing import (
 
 from .client import Client
 from .grpc_client.connection import grpc_connection
+from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle
 from .numpy_client import NumPyClient
 from .numpy_client import has_evaluate as numpyclient_has_evaluate
@@ -76,56 +86,70 @@ Example
 
 """
 
-
 ClientLike = Union[Client, NumPyClient]
 
 
+# pylint: disable=import-outside-toplevel,too-many-locals,too-many-branches
 def start_client(
     *,
     server_address: str,
     client: Client,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    root_certificates: Optional[bytes] = None,
     metadata: List[Tuple[str,str]] = []
+    root_certificates: Optional[Union[bytes, str]] = None,
+    rest: bool = False,  # Deprecated in favor of `transport`
+    transport: Optional[str] = None,
 ) -> None:
-    """Start a Flower Client which connects to a gRPC server.
+    """Start a Flower client node which connects to a Flower server.
 
     Parameters
     ----------
-        server_address: str. The IPv6 address of the server. If the Flower
-            server runs on the same machine on port 8080, then `server_address`
-            would be `"[::]:8080"`.
-        client: flwr.client.Client. An implementation of the abstract base
-            class `flwr.client.Client`.
-        grpc_max_message_length: int (default: 536_870_912, this equals 512MB).
-            The maximum length of gRPC messages that can be exchanged with the
-            Flower server. The default should be sufficient for most models.
-            Users who train very large models might need to increase this
-            value. Note that the Flower server needs to be started with the
-            same value (see `flwr.server.start_server`), otherwise it will not
-            know about the increased limit and block larger messages.
-        root_certificates: bytes (default: None)
-            The PEM-encoded root certificates as a byte string. If provided, a secure
-            connection using the certificates will be established to a
-            SSL-enabled Flower server.
-        metadata: List[Tuple[str,str]] (default: [])
-            A List of metadata that should be send together with gRPC calls.
-            Entries should be a (key,value) Tuple.
-            The entries will be sent as http-headers to the gRPC endpoint.
+    server_address : str
+        The IPv4 or IPv6 address of the server. If the Flower
+        server runs on the same machine on port 8080, then `server_address`
+        would be `"[::]:8080"`.
+    client : flwr.client.Client
+        An implementation of the abstract base
+        class `flwr.client.Client`.
+    grpc_max_message_length : int (default: 536_870_912, this equals 512MB)
+        The maximum length of gRPC messages that can be exchanged with the
+        Flower server. The default should be sufficient for most models.
+        Users who train very large models might need to increase this
+        value. Note that the Flower server needs to be started with the
+        same value (see `flwr.server.start_server`), otherwise it will not
+        know about the increased limit and block larger messages.
+    metadata: List[Tuple[str,str]] (default: [])
+        A List of metadata that should be send together with gRPC calls.
+        Entries should be a (key,value) Tuple.
+        The entries will be sent as http-headers to the gRPC endpoint.        
+    root_certificates : Optional[Union[bytes, str]] (default: None)
+        The PEM-encoded root certificates as a byte string or a path string.
+        If provided, a secure connection using the certificates will be
+        established to an SSL-enabled Flower server.
+    rest : bool (default: False)
+        DEPRECATED - USE 'transport' INSTEAD.
+        Defines whether or not the client is interacting with the server using the
+        experimental REST API. This feature is experimental, it might change
+        considerably in future versions of Flower.
+    transport : Optional[str] (default: None)
+        Configure the transport layer. Allowed values:
+        - 'grpc-bidi': gRPC, bidirectional streaming
+        - 'grpc-rere': gRPC, request-response (experimental)
+        - 'rest': HTTP (experimental)
     Returns
     -------
         None
 
     Examples
     --------
-    Starting a client with insecure server connection:
+    Starting a gRPC client with an insecure server connection:
 
     >>> start_client(
     >>>     server_address=localhost:8080,
     >>>     client=FlowerClient(),
     >>> )
 
-    Starting a SSL-enabled client:
+    Starting an SSL-enabled gRPC client:
 
     >>> from pathlib import Path
     >>> start_client(
@@ -148,10 +172,42 @@ def start_client(
     """
     event(EventType.START_CLIENT_ENTER)
 
+    # Parse IP address
+    parsed_address = parse_address(server_address)
+    if not parsed_address:
+        sys.exit(f"Server address ({server_address}) cannot be parsed.")
+    host, port, is_v6 = parsed_address
+    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+
+    # Set the default transport layer
+    if transport is None:
+        transport = TRANSPORT_TYPE_REST if rest else TRANSPORT_TYPE_GRPC_BIDI
+
+    # Use either gRPC bidirectional streaming or REST request/response
+    if transport == TRANSPORT_TYPE_REST:
+        try:
+            from .rest_client.connection import http_request_response
+        except ModuleNotFoundError:
+            sys.exit(MISSING_EXTRA_REST)
+        if server_address[:4] != "http":
+            sys.exit(
+                "When using the REST API, please provide `https://` or "
+                "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
+            )
+        connection = http_request_response
+    elif transport == TRANSPORT_TYPE_GRPC_RERE:
+        connection = grpc_request_response
+    elif transport == TRANSPORT_TYPE_GRPC_BIDI:
+        connection = grpc_connection
+    else:
+        raise ValueError(
+            f"Unknown transport type: {transport} (possible: {TRANSPORT_TYPES})"
+        )
+
     while True:
         sleep_duration: int = 0
-        with grpc_connection(
-            server_address,
+        with connection(
+            address,
             max_message_length=grpc_max_message_length,
             root_certificates=root_certificates,
             metadata=metadata
@@ -160,6 +216,9 @@ def start_client(
 
             while True:
                 server_message = receive()
+                if server_message is None:
+                    time.sleep(3)  # Wait for 3s before asking again
+                    continue
                 client_message, sleep_duration, keep_going = handle(
                     client, server_message
                 )
@@ -187,15 +246,17 @@ def start_numpy_client(
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
     metadata: List[Tuple[str,str]] = []
-
+    rest: bool = False,  # Deprecated in favor of `transport`
+    transport: Optional[str] = None,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
     Parameters
     ----------
     server_address : str
-        The IPv6 address of the server. If the Flower server runs on the same
-        machine on port 8080, then `server_address` would be `"[::]:8080"`.
+        The IPv4 or IPv6 address of the server. If the Flower server runs on
+        the same machine on port 8080, then `server_address` would be
+        `"[::]:8080"`.
     client : flwr.client.NumPyClient
         An implementation of the abstract base class `flwr.client.NumPyClient`.
     grpc_max_message_length : int (default: 536_870_912, this equals 512MB)
@@ -205,14 +266,21 @@ def start_numpy_client(
         value. Note that the Flower server needs to be started with the
         same value (see `flwr.server.start_server`), otherwise it will not
         know about the increased limit and block larger messages.
-    root_certificates : bytes (default: None)
-        The PEM-encoded root certificates a byte string. If provided, a secure
-        connection using the certificates will be established to a
-        SSL-enabled Flower server.
+    rest : bool (default: False)
+        DEPRECATED - USE 'transport' INSTEAD.
+        Defines whether or not the client is interacting with the server using the
+        experimental REST API. This feature is experimental, it might change
+        considerably in future versions of Flower.
+    transport : Optional[str] (default: None)
+        Configure the transport layer. Allowed values:
+        - 'grpc-bidi': gRPC, bidirectional streaming
+        - 'grpc-rere': gRPC, request-response (experimental)
+        - 'rest': HTTP (experimental)
     metadata: List[Tuple[str,str]] (default: [])
         A List of metadata that should be send together with gRPC calls.
         Entries should be a (key,value) Tuple.
-        The entries will be sent as http-headers to the gRPC endpoint.
+        The entries will be sent as http-headers to the gRPC endpoint.        
+
 
     Examples
     --------
@@ -243,7 +311,6 @@ def start_numpy_client(
     >>> )
     
     """
-
     # Start
     start_client(
         server_address=server_address,
@@ -251,6 +318,8 @@ def start_numpy_client(
         grpc_max_message_length=grpc_max_message_length,
         root_certificates=root_certificates,
         metadata=metadata
+        rest=rest,
+        transport=transport,
     )
 
 
@@ -285,7 +354,6 @@ def _get_parameters(self: Client, ins: GetParametersIns) -> GetParametersRes:
 
 def _fit(self: Client, ins: FitIns) -> FitRes:
     """Refine the provided parameters using the locally held dataset."""
-
     # Deconstruct FitIns
     parameters: NDArrays = parameters_to_ndarrays(ins.parameters)
 

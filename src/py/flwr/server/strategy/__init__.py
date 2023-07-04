@@ -24,6 +24,8 @@ from .fedavgm import FedAvgM as FedAvgM
 from .fedmedian import FedMedian as FedMedian
 from .fedopt import FedOpt as FedOpt
 from .fedprox import FedProx as FedProx
+from .fedtrimmedavg import FedTrimmedAvg as FedTrimmedAvg
+from .fedxgb_nn_avg import FedXgbNnAvg as FedXgbNnAvg
 from .fedyogi import FedYogi as FedYogi
 from .qfedavg import QFedAvg as QFedAvg
 from .strategy import Strategy as Strategy
@@ -33,6 +35,7 @@ __all__ = [
     "FedAdagrad",
     "FedAdam",
     "FedAvg",
+    "FedXgbNnAvg",
     "FedAvgAndroid",
     "FedAvgM",
     "FedOpt",
@@ -40,5 +43,6 @@ __all__ = [
     "FedYogi",
     "QFedAvg",
     "FedMedian",
+    "FedTrimmedAvg",
     "Strategy",
 ]

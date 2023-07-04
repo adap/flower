@@ -1,5 +1,6 @@
 """Flower client example using PyTorch for CIFAR-10 image classification."""
 
+
 import os
 import sys
 import timeit
@@ -18,6 +19,7 @@ USE_FEDBN: bool = True
 # pylint: disable=no-member
 DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # pylint: enable=no-member
+
 
 # Flower Client
 class CifarClient(fl.client.NumPyClient):

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""gRPC-related utility functions."""
+"""Utility functions for gRPC."""
 
 
 from logging import INFO
@@ -31,7 +31,6 @@ def create_channel(
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
 ) -> grpc.Channel:
     """Create a gRPC channel, either secure or insecure."""
-
     # Possible options:
     # https://github.com/grpc/grpc/blob/v1.43.x/include/grpc/impl/codegen/grpc_types.h
     channel_options = [

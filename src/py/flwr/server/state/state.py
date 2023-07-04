@@ -12,138 +12,127 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""DriverState."""
+"""Abstract base class State."""
 
 
-from datetime import datetime, timedelta, timezone
-from typing import Dict, List, Optional, Set
-from uuid import UUID, uuid4
+import abc
+from typing import List, Optional, Set
+from uuid import UUID
 
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 
 
-class DriverState:
-    """DriverState."""
+class State(abc.ABC):
+    """Abstract State."""
 
-    def __init__(self) -> None:
-        self.node_ids: Set[int] = set()
-        self.task_ins_store: Dict[UUID, TaskIns] = {}
-        self.task_res_store: Dict[UUID, TaskRes] = {}
-
+    @abc.abstractmethod
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
-        """Store one TaskIns."""
+        """Store one TaskIns.
 
-        # Create and set task_id
-        task_id = uuid4()
-        task_ins.task_id = str(task_id)
+        Usually, the Driver API calls this to schedule instructions.
 
-        # Set created_at
-        created_at: datetime = _now()
-        ttl: datetime = created_at + timedelta(hours=24)
+        Stores the value of the task_ins in the state and, if successful, returns the
+        task_id (UUID) of the task_ins. If, for any reason, storing the task_ins fails,
+        `None` is returned.
 
-        # Store TaskIns
-        task_ins.task.created_at = created_at.isoformat()
-        task_ins.task.ttl = ttl.isoformat()
-        self.task_ins_store[task_id] = task_ins
+        Constraints
+        -----------
+        If `task_ins.task.consumer.anonymous` is `True`, then
+        `task_ins.task.consumer.node_id` MUST NOT be set (equal 0).
 
-        # Return the new task_id
-        return task_id
+        If `task_ins.task.consumer.anonymous` is `False`, then
+        `task_ins.task.consumer.node_id` MUST be set (not 0)
+        """
 
+    @abc.abstractmethod
     def get_task_ins(
         self, node_id: Optional[int], limit: Optional[int]
     ) -> List[TaskIns]:
-        """Get all TaskIns that have not been delivered yet."""
+        """Get TaskIns optionally filtered by node_id.
 
-        if limit is not None and limit < 1:
-            raise AssertionError("`limit` must be >= 1")
+        Usually, the Fleet API calls this for Nodes planning to work on one or more
+        TaskIns.
 
-        # Find TaskIns for node_id that were not delivered yet
-        task_ins_list: List[TaskIns] = []
-        for _, task_ins in self.task_ins_store.items():
-            # pylint: disable=too-many-boolean-expressions
-            if (
-                node_id is not None  # Not anonymous
-                and task_ins.task.consumer.anonymous is False
-                and task_ins.task.consumer.node_id == node_id
-                and task_ins.task.delivered_at == ""
-            ) or (
-                node_id is None  # Anonymous
-                and task_ins.task.consumer.anonymous is True
-                and task_ins.task.consumer.node_id == 0
-                and task_ins.task.delivered_at == ""
-            ):
-                task_ins_list.append(task_ins)
-            if limit and len(task_ins_list) == limit:
-                break
+        Constraints
+        -----------
+        If `node_id` is not `None`, retrieve all TaskIns where
 
-        # Mark all of them as delivered
-        delivered_at = _now().isoformat()
-        for task_ins in task_ins_list:
-            task_ins.task.delivered_at = delivered_at
+            1. the `task_ins.task.consumer.node_id` equals `node_id` AND
+            2. the `task_ins.task.consumer.anonymous` equals `False` AND
+            3. the `task_ins.task.delivered_at` equals `""`.
 
-        # Return TaskIns
-        return task_ins_list
+        If `node_id` is `None`, retrieve all TaskIns where the
+        `task_ins.task.consumer.node_id` equals `0` and
+        `task_ins.task.consumer.anonymous` is set to `True`.
 
+        If `delivered_at` MUST BE set (not `""`) otherwise the TaskIns MUST not be in
+        the result.
+
+        If `limit` is not `None`, return, at most, `limit` number of `task_ins`. If
+        `limit` is set, it has to be greater zero.
+        """
+
+    @abc.abstractmethod
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
-        """Store one TaskRes."""
+        """Store one TaskRes.
 
-        # Create and set task_id
-        task_id = uuid4()
-        task_res.task_id = str(task_id)
+        Usually, the Fleet API calls this for Nodes returning results.
 
-        # Set created_at
-        created_at: datetime = _now()
-        ttl: datetime = created_at + timedelta(hours=24)
+        Stores the TaskRes and, if successful, returns the `task_id` (UUID) of
+        the `task_res`. If storing the `task_res` fails, `None` is returned.
 
-        # Store TaskRes
-        task_res.task.created_at = created_at.isoformat()
-        task_res.task.ttl = ttl.isoformat()
-        self.task_res_store[task_id] = task_res
+        Constraints
+        -----------
+        If `task_res.task.consumer.anonymous` is `True`, then
+        `task_res.task.consumer.node_id` MUST NOT be set (equal 0).
 
-        # Return the new task_id
-        return task_id
+        If `task_res.task.consumer.anonymous` is `False`, then
+        `task_res.task.consumer.node_id` MUST be set (not 0)
+        """
 
+    @abc.abstractmethod
     def get_task_res(self, task_ids: Set[UUID], limit: Optional[int]) -> List[TaskRes]:
-        """Get all TaskRes that have not been delivered yet."""
+        """Get TaskRes for task_ids.
 
-        if limit is not None and limit < 1:
-            raise AssertionError("`limit` must be >= 1")
+        Usually, the Driver API calls this method to get results for instructions it has
+        previously scheduled.
 
-        # Find TaskRes that were not delivered yet
-        task_res_list: List[TaskRes] = []
-        for _, task_res in self.task_res_store.items():
-            if (
-                UUID(task_res.task.ancestry[0]) in task_ids
-                and task_res.task.delivered_at == ""
-            ):
-                task_res_list.append(task_res)
-            if limit and len(task_res_list) == limit:
-                break
+        Retrieves all TaskRes for the given `task_ids` and returns and empty list of
+        none could be found.
 
-        # Mark all of them as delivered
-        delivered_at = _now().isoformat()
-        for task_res in task_res_list:
-            task_res.task.delivered_at = delivered_at
+        Constraints
+        -----------
+        If `limit` is not `None`, return, at most, `limit` number of TaskRes. The limit
+        will only take effect if enough task_ids are in the set AND are currently
+        available. If `limit` is set, it has to be greater zero.
+        """
 
-        # Return TaskRes
-        return task_res_list
+    @abc.abstractmethod
+    def num_task_ins(self) -> int:
+        """Calculate the number of task_ins in store.
 
+        This includes delivered but not yet deleted task_ins.
+        """
+
+    @abc.abstractmethod
+    def num_task_res(self) -> int:
+        """Calculate the number of task_res in store.
+
+        This includes delivered but not yet deleted task_res.
+        """
+
+    @abc.abstractmethod
+    def delete_tasks(self, task_ids: Set[UUID]) -> None:
+        """Delete all delivered TaskIns/TaskRes pairs."""
+
+    @abc.abstractmethod
     def register_node(self, node_id: int) -> None:
-        """Register a client node."""
-        if node_id in self.node_ids:
-            raise ValueError(f"Node {node_id} is already registered")
-        self.node_ids.add(node_id)
+        """Store `node_id` in state."""
 
+    @abc.abstractmethod
     def unregister_node(self, node_id: int) -> None:
-        """Unregister a client node."""
-        if node_id not in self.node_ids:
-            raise ValueError(f"Node {node_id} is not registered")
-        self.node_ids.remove(node_id)
+        """Remove `node_id` from state."""
 
+    @abc.abstractmethod
     def get_nodes(self) -> Set[int]:
-        """Return all available client nodes."""
-        return self.node_ids
-
-
-def _now() -> datetime:
-    return datetime.now(tz=timezone.utc)
+        """Retrieve all currently stored node IDs as a set."""

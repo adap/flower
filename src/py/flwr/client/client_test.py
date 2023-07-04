@@ -48,18 +48,21 @@ class OverridingClient(Client):
     """Client overriding `get_properties`."""
 
     def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
+        """Get empty properties of the client with 'Success' status."""
         return GetPropertiesRes(
             status=Status(code=Code.OK, message="Success"),
             properties={},
         )
 
     def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
+        """Get empty parameters of the client with 'Success' status."""
         return GetParametersRes(
             status=Status(code=Code.OK, message="Success"),
             parameters=Parameters(tensors=[], tensor_type=""),
         )
 
     def fit(self, ins: FitIns) -> FitRes:
+        """Simulate successful training, return no parameters, no metrics."""
         return FitRes(
             status=Status(code=Code.OK, message="Success"),
             parameters=Parameters(tensors=[], tensor_type=""),
@@ -68,6 +71,7 @@ class OverridingClient(Client):
         )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
+        """Simulate successful evaluation, return no metrics."""
         return EvaluateRes(
             status=Status(code=Code.OK, message="Success"),
             loss=1.0,

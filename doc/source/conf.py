@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+
+
 import os
 import sys
 from sphinx.application import ConfigError
@@ -34,7 +36,7 @@ copyright = "2022 Adap GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "1.3.0"
+release = "1.5.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -48,6 +50,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinx.ext.graphviz",
+    "sphinxarg.ext",
     "myst_parser",
     "sphinx_copybutton",
     "sphinx_design",
@@ -68,6 +71,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # To prevent 404 errors and redirect to the new pages.
 redirects = {
     # Renamed pages
+    "installation": "install-flower.html",
     "configuring-clients.html": "configure-clients.html",
     "quickstart_mxnet": "quickstart-mxnet.html",
     "quickstart_pytorch_lightning": "quickstart-pytorch-lightning.html",
@@ -79,6 +83,8 @@ redirects = {
     "saving-progress": "save-progress.html",
     "writing-documentation": "write-documentation.html",
     "quickstart_scikitlearn": "quickstart-scikitlearn.html",
+    "quickstart_xgboost": "quickstart-xgboost.html",
+    "apiref-binaries": "apiref-cli.html",
     # Deleted pages
     "people": "index.html",
     "organizations": "index.html",
@@ -118,7 +124,6 @@ html_theme_options = {
     #     "color-brand-content": "#292F36",
     #     "color-admonition-background": "#F2B705",
     # },
-    "announcement": 'Flower Monthly: Feb 1st 1700 GMT <a href="https://flower.dev/conf/flower-monthly/">join now</a>',
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,

@@ -14,7 +14,7 @@
 # ==============================================================================
 """FAIR RESOURCE ALLOCATION IN FEDERATED LEARNING [Li et al., 2020] strategy.
 
-Paper: https://openreview.net/pdf?id=ByexElSYDr
+Paper: openreview.net/pdf?id=ByexElSYDr
 """
 
 
@@ -85,30 +85,18 @@ class QFedAvg(FedAvg):
             fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
             evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
-        self.min_fit_clients = min_fit_clients
-        self.min_evaluate_clients = min_evaluate_clients
-        self.fraction_fit = fraction_fit
-        self.fraction_evaluate = fraction_evaluate
-        self.min_available_clients = min_available_clients
-        self.evaluate_fn = evaluate_fn
-        self.on_fit_config_fn = on_fit_config_fn
-        self.on_evaluate_config_fn = on_evaluate_config_fn
-        self.accept_failures = accept_failures
         self.learning_rate = qffl_learning_rate
         self.q_param = q_param
         self.pre_weights: Optional[NDArrays] = None
-        self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
-        self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
 
     def __repr__(self) -> str:
-        # pylint: disable=line-too-long
+        """Compute a string representation of the strategy."""
         rep = f"QffedAvg(learning_rate={self.learning_rate}, "
         rep += f"q_param={self.q_param}, pre_weights={self.pre_weights})"
         return rep
 
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Return the sample size and the required number of available
-        clients."""
+        """Return the sample size and the required number of available clients."""
         num_clients = int(num_available_clients * self.fraction_fit)
         return max(num_clients, self.min_fit_clients), self.min_available_clients
 

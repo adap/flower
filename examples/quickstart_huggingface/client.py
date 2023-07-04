@@ -8,14 +8,15 @@ import numpy as np
 import random
 from torch.utils.data import DataLoader
 
-from datasets import load_dataset, load_metric
+from datasets import load_dataset
+from evaluate import load as load_metric
 
 from transformers import AutoTokenizer, DataCollatorWithPadding
 from transformers import AutoModelForSequenceClassification
 from transformers import AdamW
 
 warnings.filterwarnings("ignore", category=UserWarning)
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+DEVICE = torch.device("cpu")
 CHECKPOINT = "distilbert-base-uncased"  # transformer model checkpoint
 
 

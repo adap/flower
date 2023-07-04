@@ -21,11 +21,11 @@ from typing import Any, Callable, Dict, List, Optional
 
 import ray
 
-from flwr.client.client import Client
+from flwr.client import ClientLike
 from flwr.common import EventType, event
 from flwr.common.logger import log
 from flwr.server import Server
-from flwr.server.app import ServerConfig, _fl, _init_defaults
+from flwr.server.app import ServerConfig, init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
@@ -38,7 +38,7 @@ Invalid Arguments in method:
 
 `start_simulation(
     *,
-    client_fn: Callable[[str], Client],
+    client_fn: Callable[[str], ClientLike],
     num_clients: Optional[int] = None,
     clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, float]] = None,
@@ -61,7 +61,7 @@ REASON:
 
 def start_simulation(  # pylint: disable=too-many-arguments
     *,
-    client_fn: Callable[[str], Client],
+    client_fn: Callable[[str], ClientLike],
     num_clients: Optional[int] = None,
     clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, float]] = None,
@@ -76,16 +76,16 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     Parameters
     ----------
-    client_fn : Callable[[str], Client]
+    client_fn : Callable[[str], ClientLike]
         A function creating client instances. The function must take a single
-        str argument called `cid`. It should return a single client instance.
-        Note that the created client instances are ephemeral and will often be
-        destroyed after a single method invocation. Since client instances are
-        not long-lived, they should not attempt to carry state over method
-        invocations. Any state required by the instance (model, dataset,
-        hyperparameters, ...) should be (re-)created in either the call to
-        `client_fn` or the call to any of the client methods (e.g., load
-        evaluation data in the `evaluate` method itself).
+        `str` argument called `cid`. It should return a single client instance
+        of type ClientLike. Note that the created client instances are ephemeral
+        and will often be destroyed after a single method invocation. Since client
+        instances are not long-lived, they should not attempt to carry state over
+        method invocations. Any state required by the instance (model, dataset,
+        hyperparameters, ...) should be (re-)created in either the call to `client_fn`
+        or the call to any of the client methods (e.g., load evaluation data in the
+        `evaluate` method itself).
     num_clients : Optional[int]
         The total number of clients in this simulation. This must be set if
         `clients_ids` is not set and vice-versa.
@@ -126,14 +126,17 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     Returns
     -------
-        hist : flwr.server.history.History.
-            Object containing metrics from training.
+    hist : flwr.server.history.History
+        Object containing metrics from training.
     """
     # pylint: disable-msg=too-many-locals
-    event(EventType.START_SIMULATION_ENTER)
+    event(
+        EventType.START_SIMULATION_ENTER,
+        {"num_clients": len(clients_ids) if clients_ids is not None else num_clients},
+    )
 
     # Initialize server and server config
-    initialized_server, initialized_config = _init_defaults(
+    initialized_server, initialized_config = init_defaults(
         server=server,
         config=config,
         strategy=strategy,
@@ -168,15 +171,15 @@ def start_simulation(  # pylint: disable=too-many-arguments
         }
 
     # Shut down Ray if it has already been initialized (unless asked not to)
-    if ray.is_initialized() and not keep_initialised:  # type: ignore
-        ray.shutdown()  # type: ignore
+    if ray.is_initialized() and not keep_initialised:
+        ray.shutdown()
 
     # Initialize Ray
-    ray.init(**ray_init_args)  # type: ignore
+    ray.init(**ray_init_args)
     log(
         INFO,
         "Flower VCE: Ray initialized with resources: %s",
-        ray.cluster_resources(),  # type: ignore
+        ray.cluster_resources(),
     )
 
     # Register one RayClientProxy object for each client with the ClientManager
@@ -190,7 +193,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
         initialized_server.client_manager().register(client=client_proxy)
 
     # Start training
-    hist = _fl(
+    hist = run_fl(
         server=initialized_server,
         config=initialized_config,
     )
