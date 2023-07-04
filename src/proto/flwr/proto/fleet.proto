@@ -21,9 +21,8 @@ import "flwr/proto/node.proto";
 import "flwr/proto/task.proto";
 
 service Fleet {
-  rpc NodeAvailable(NodeAvailableRequest) returns (NodeAvailableResponse) {}
-  rpc NodeUnavailable(NodeUnavailableRequest)
-      returns (NodeUnavailableResponse) {}
+  rpc CreateNode(CreateNodeRequest) returns (CreateNodeResponse) {}
+  rpc DeleteNode(DeleteNodeRequest) returns (DeleteNodeResponse) {}
 
   // Retrieve one or more tasks, if possible
   //
@@ -36,13 +35,13 @@ service Fleet {
   rpc PushTaskRes(PushTaskResRequest) returns (PushTaskResResponse) {}
 }
 
-// NodeAvailable messages
-message NodeAvailableRequest { Node node = 1; }
-message NodeAvailableResponse {}
+// CreateNode messages
+message CreateNodeRequest {}
+message CreateNodeResponse { Node node = 1; }
 
-// NodeUnavailable messages
-message NodeUnavailableRequest { Node node = 1; }
-message NodeUnavailableResponse {}
+// DeleteNode messages
+message DeleteNodeRequest { Node node = 1; }
+message DeleteNodeResponse {}
 
 // PullTaskIns messages
 message PullTaskInsRequest {

@@ -14,15 +14,15 @@ class FleetStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.NodeAvailable = channel.unary_unary(
-                '/flwr.proto.Fleet/NodeAvailable',
-                request_serializer=flwr_dot_proto_dot_fleet__pb2.NodeAvailableRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_fleet__pb2.NodeAvailableResponse.FromString,
+        self.CreateNode = channel.unary_unary(
+                '/flwr.proto.Fleet/CreateNode',
+                request_serializer=flwr_dot_proto_dot_fleet__pb2.CreateNodeRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_fleet__pb2.CreateNodeResponse.FromString,
                 )
-        self.NodeUnavailable = channel.unary_unary(
-                '/flwr.proto.Fleet/NodeUnavailable',
-                request_serializer=flwr_dot_proto_dot_fleet__pb2.NodeUnavailableRequest.SerializeToString,
-                response_deserializer=flwr_dot_proto_dot_fleet__pb2.NodeUnavailableResponse.FromString,
+        self.DeleteNode = channel.unary_unary(
+                '/flwr.proto.Fleet/DeleteNode',
+                request_serializer=flwr_dot_proto_dot_fleet__pb2.DeleteNodeRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_fleet__pb2.DeleteNodeResponse.FromString,
                 )
         self.PullTaskIns = channel.unary_unary(
                 '/flwr.proto.Fleet/PullTaskIns',
@@ -39,13 +39,13 @@ class FleetStub(object):
 class FleetServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def NodeAvailable(self, request, context):
+    def CreateNode(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def NodeUnavailable(self, request, context):
+    def DeleteNode(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -72,15 +72,15 @@ class FleetServicer(object):
 
 def add_FleetServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'NodeAvailable': grpc.unary_unary_rpc_method_handler(
-                    servicer.NodeAvailable,
-                    request_deserializer=flwr_dot_proto_dot_fleet__pb2.NodeAvailableRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_fleet__pb2.NodeAvailableResponse.SerializeToString,
+            'CreateNode': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreateNode,
+                    request_deserializer=flwr_dot_proto_dot_fleet__pb2.CreateNodeRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_fleet__pb2.CreateNodeResponse.SerializeToString,
             ),
-            'NodeUnavailable': grpc.unary_unary_rpc_method_handler(
-                    servicer.NodeUnavailable,
-                    request_deserializer=flwr_dot_proto_dot_fleet__pb2.NodeUnavailableRequest.FromString,
-                    response_serializer=flwr_dot_proto_dot_fleet__pb2.NodeUnavailableResponse.SerializeToString,
+            'DeleteNode': grpc.unary_unary_rpc_method_handler(
+                    servicer.DeleteNode,
+                    request_deserializer=flwr_dot_proto_dot_fleet__pb2.DeleteNodeRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_fleet__pb2.DeleteNodeResponse.SerializeToString,
             ),
             'PullTaskIns': grpc.unary_unary_rpc_method_handler(
                     servicer.PullTaskIns,
@@ -103,7 +103,7 @@ class Fleet(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def NodeAvailable(request,
+    def CreateNode(request,
             target,
             options=(),
             channel_credentials=None,
@@ -113,14 +113,14 @@ class Fleet(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Fleet/NodeAvailable',
-            flwr_dot_proto_dot_fleet__pb2.NodeAvailableRequest.SerializeToString,
-            flwr_dot_proto_dot_fleet__pb2.NodeAvailableResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Fleet/CreateNode',
+            flwr_dot_proto_dot_fleet__pb2.CreateNodeRequest.SerializeToString,
+            flwr_dot_proto_dot_fleet__pb2.CreateNodeResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def NodeUnavailable(request,
+    def DeleteNode(request,
             target,
             options=(),
             channel_credentials=None,
@@ -130,9 +130,9 @@ class Fleet(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Fleet/NodeUnavailable',
-            flwr_dot_proto_dot_fleet__pb2.NodeUnavailableRequest.SerializeToString,
-            flwr_dot_proto_dot_fleet__pb2.NodeUnavailableResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Fleet/DeleteNode',
+            flwr_dot_proto_dot_fleet__pb2.DeleteNodeRequest.SerializeToString,
+            flwr_dot_proto_dot_fleet__pb2.DeleteNodeResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

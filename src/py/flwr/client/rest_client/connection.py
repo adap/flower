@@ -55,7 +55,12 @@ def http_request_response(
         Union[bytes, str]
     ] = None,  # pylint: disable=unused-argument
 ) -> Iterator[
-    Tuple[Callable[[], Optional[ServerMessage]], Callable[[ClientMessage], None]]
+    Tuple[
+        Callable[[], Optional[ServerMessage]],
+        Callable[[ClientMessage], None],
+        Optional[Callable[[], None]],
+        Optional[Callable[[], None]],
+    ]
 ]:
     """Primitives for request/response-based interaction with a server.
 

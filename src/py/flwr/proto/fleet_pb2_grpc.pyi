@@ -8,13 +8,13 @@ import grpc
 
 class FleetStub:
     def __init__(self, channel: grpc.Channel) -> None: ...
-    NodeAvailable: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.fleet_pb2.NodeAvailableRequest,
-        flwr.proto.fleet_pb2.NodeAvailableResponse]
+    CreateNode: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.fleet_pb2.CreateNodeRequest,
+        flwr.proto.fleet_pb2.CreateNodeResponse]
 
-    NodeUnavailable: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.fleet_pb2.NodeUnavailableRequest,
-        flwr.proto.fleet_pb2.NodeUnavailableResponse]
+    DeleteNode: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.fleet_pb2.DeleteNodeRequest,
+        flwr.proto.fleet_pb2.DeleteNodeResponse]
 
     PullTaskIns: grpc.UnaryUnaryMultiCallable[
         flwr.proto.fleet_pb2.PullTaskInsRequest,
@@ -35,16 +35,16 @@ class FleetStub:
 
 class FleetServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def NodeAvailable(self,
-        request: flwr.proto.fleet_pb2.NodeAvailableRequest,
+    def CreateNode(self,
+        request: flwr.proto.fleet_pb2.CreateNodeRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.fleet_pb2.NodeAvailableResponse: ...
+    ) -> flwr.proto.fleet_pb2.CreateNodeResponse: ...
 
     @abc.abstractmethod
-    def NodeUnavailable(self,
-        request: flwr.proto.fleet_pb2.NodeUnavailableRequest,
+    def DeleteNode(self,
+        request: flwr.proto.fleet_pb2.DeleteNodeRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.fleet_pb2.NodeUnavailableResponse: ...
+    ) -> flwr.proto.fleet_pb2.DeleteNodeResponse: ...
 
     @abc.abstractmethod
     def PullTaskIns(self,

@@ -22,10 +22,10 @@ import grpc
 from flwr.common.logger import log
 from flwr.proto import fleet_pb2_grpc
 from flwr.proto.fleet_pb2 import (
-    NodeAvailableRequest,
-    NodeAvailableResponse,
-    NodeUnavailableRequest,
-    NodeUnavailableResponse,
+    CreateNodeRequest,
+    CreateNodeResponse,
+    DeleteNodeRequest,
+    DeleteNodeResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
     PushTaskResRequest,
@@ -41,22 +41,22 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
     def __init__(self, state: State) -> None:
         self.state = state
 
-    def NodeAvailable(
-        self, request: NodeAvailableRequest, context: grpc.ServicerContext
-    ) -> NodeAvailableResponse:
+    def CreateNode(
+        self, request: CreateNodeRequest, context: grpc.ServicerContext
+    ) -> CreateNodeResponse:
         """."""
-        log(INFO, "FleetServicer.NodeAvailable")
-        return message_handler.node_available(
+        log(INFO, "FleetServicer.CreateNode")
+        return message_handler.create_node(
             request=request,
             state=self.state,
         )
 
-    def NodeUnavailable(
-        self, request: NodeUnavailableRequest, context: grpc.ServicerContext
-    ) -> NodeUnavailableResponse:
+    def DeleteNode(
+        self, request: DeleteNodeRequest, context: grpc.ServicerContext
+    ) -> DeleteNodeResponse:
         """."""
-        log(INFO, "FleetServicer.NodeUnavailable")
-        return message_handler.node_unavailable(
+        log(INFO, "FleetServicer.DeleteNode")
+        return message_handler.delete_node(
             request=request,
             state=self.state,
         )

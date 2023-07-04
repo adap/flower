@@ -13,8 +13,14 @@ import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-class NodeAvailableRequest(google.protobuf.message.Message):
-    """NodeAvailable messages"""
+class CreateNodeRequest(google.protobuf.message.Message):
+    """CreateNode messages"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    def __init__(self,
+        ) -> None: ...
+global___CreateNodeRequest = CreateNodeRequest
+
+class CreateNodeResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     NODE_FIELD_NUMBER: builtins.int
     @property
@@ -25,16 +31,10 @@ class NodeAvailableRequest(google.protobuf.message.Message):
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["node",b"node"]) -> None: ...
-global___NodeAvailableRequest = NodeAvailableRequest
+global___CreateNodeResponse = CreateNodeResponse
 
-class NodeAvailableResponse(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    def __init__(self,
-        ) -> None: ...
-global___NodeAvailableResponse = NodeAvailableResponse
-
-class NodeUnavailableRequest(google.protobuf.message.Message):
-    """NodeUnavailable messages"""
+class DeleteNodeRequest(google.protobuf.message.Message):
+    """DeleteNode messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     NODE_FIELD_NUMBER: builtins.int
     @property
@@ -45,13 +45,13 @@ class NodeUnavailableRequest(google.protobuf.message.Message):
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["node",b"node"]) -> None: ...
-global___NodeUnavailableRequest = NodeUnavailableRequest
+global___DeleteNodeRequest = DeleteNodeRequest
 
-class NodeUnavailableResponse(google.protobuf.message.Message):
+class DeleteNodeResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     def __init__(self,
         ) -> None: ...
-global___NodeUnavailableResponse = NodeUnavailableResponse
+global___DeleteNodeResponse = DeleteNodeResponse
 
 class PullTaskInsRequest(google.protobuf.message.Message):
     """PullTaskIns messages"""
