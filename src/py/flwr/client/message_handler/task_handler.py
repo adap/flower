@@ -18,8 +18,8 @@
 from typing import Optional, Tuple
 
 from flwr.proto.fleet_pb2 import PullTaskInsResponse
-from flwr.proto.task_pb2 import TaskIns
-from flwr.proto.transport_pb2 import ServerMessage
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
+from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 
 
 def get_server_message(
@@ -43,3 +43,42 @@ def get_server_message(
         return None
 
     return task_ins, task_ins.task.legacy_server_message
+
+
+def get_task_ins_from_pull_task_ins_response(
+    pull_task_ins_response: PullTaskInsResponse,
+) -> Optional[TaskIns]:
+    """Get the first TaskIns, if available."""
+    # Extract a single ServerMessage from the response, if possible
+    if len(pull_task_ins_response.task_ins_list) == 0:
+        return None
+
+    # Only evaluate the first message
+    task_ins: TaskIns = pull_task_ins_response.task_ins_list[0]
+
+    return task_ins
+
+
+def get_server_message_from_task_ins(task_ins: TaskIns) -> Optional[ServerMessage]:
+    """Get ServerMessage from TaskIns, if available."""
+    # Discard the message if it is not in
+    # {GetPropertiesIns, GetParametersIns, FitIns, EvaluateIns}
+    if (
+        not task_ins.HasField("task")
+        or not task_ins.task.HasField("legacy_server_message")
+        or task_ins.task.legacy_server_message.WhichOneof("msg") == "reconnect_ins"
+    ):
+        return None
+
+    return task_ins.task.legacy_server_message
+
+
+def wrap_client_message_in_task_res(client_message: ClientMessage) -> TaskRes:
+    """Wrap ClientMessage in TaskRes."""
+    # instantiate a TaskRes, only filling client_message field.
+    return TaskRes(
+        task_id="",
+        group_id="",
+        workload_id="",
+        task=Task(ancestry=[], legacy_client_message=client_message),
+    )
