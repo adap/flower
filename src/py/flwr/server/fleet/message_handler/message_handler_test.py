@@ -17,11 +17,70 @@
 
 from unittest.mock import MagicMock
 
-from flwr.proto.fleet_pb2 import PullTaskInsRequest, PushTaskResRequest
+from flwr.proto.fleet_pb2 import (
+    CreateNodeRequest,
+    DeleteNodeRequest,
+    PullTaskInsRequest,
+    PushTaskResRequest,
+)
 from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import Task, TaskRes
 
-from .message_handler import pull_task_ins, push_task_res
+from .message_handler import create_node, delete_node, pull_task_ins, push_task_res
+
+
+def test_create_node() -> None:
+    """Test create_node."""
+    # Prepare
+    request = CreateNodeRequest()
+    state = MagicMock()
+
+    # Execute
+    create_node(request=request, state=state)
+
+    # Assert
+    state.register_node.assert_called_once()
+    state.unregister_node.assert_not_called()
+    state.store_task_ins.assert_not_called()
+    state.get_task_ins.assert_not_called()
+    state.store_task_res.assert_not_called()
+    state.get_task_res.assert_not_called()
+
+
+def test_delete_node_failure() -> None:
+    """Test delete_node."""
+    # Prepare
+    request = DeleteNodeRequest()
+    state = MagicMock()
+
+    # Execute
+    delete_node(request=request, state=state)
+
+    # Assert
+    state.register_node.assert_not_called()
+    state.unregister_node.assert_not_called()
+    state.store_task_ins.assert_not_called()
+    state.get_task_ins.assert_not_called()
+    state.store_task_res.assert_not_called()
+    state.get_task_res.assert_not_called()
+
+
+def test_delete_node_success() -> None:
+    """Test delete_node."""
+    # Prepare
+    request = DeleteNodeRequest(node=Node(node_id=123, anonymous=False))
+    state = MagicMock()
+
+    # Execute
+    delete_node(request=request, state=state)
+
+    # Assert
+    state.register_node.assert_not_called()
+    state.unregister_node.assert_called_once()
+    state.store_task_ins.assert_not_called()
+    state.get_task_ins.assert_not_called()
+    state.store_task_res.assert_not_called()
+    state.get_task_res.assert_not_called()
 
 
 def test_pull_task_ins() -> None:
@@ -34,6 +93,8 @@ def test_pull_task_ins() -> None:
     pull_task_ins(request=request, state=state)
 
     # Assert
+    state.register_node.assert_not_called()
+    state.unregister_node.assert_not_called()
     state.store_task_ins.assert_not_called()
     state.get_task_ins.assert_called_once()
     state.store_task_res.assert_not_called()
@@ -59,6 +120,8 @@ def test_push_task_res() -> None:
     push_task_res(request=request, state=state)
 
     # Assert
+    state.register_node.assert_not_called()
+    state.unregister_node.assert_not_called()
     state.store_task_ins.assert_not_called()
     state.get_task_ins.assert_not_called()
     state.store_task_res.assert_called_once()

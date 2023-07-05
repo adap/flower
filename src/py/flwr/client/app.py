@@ -191,7 +191,11 @@ def start_client(
             max_message_length=grpc_max_message_length,
             root_certificates=root_certificates,
         ) as conn:
-            receive, send = conn
+            receive, send, create_node, delete_node = conn
+
+            # Register node
+            if create_node is not None:
+                create_node()  # pylint: disable=not-callable
 
             while True:
                 server_message = receive()
@@ -204,6 +208,11 @@ def start_client(
                 send(client_message)
                 if not keep_going:
                     break
+
+            # Unregister node
+            if delete_node is not None:
+                delete_node()  # pylint: disable=not-callable
+
         if sleep_duration == 0:
             log(INFO, "Disconnect and shut down")
             break
