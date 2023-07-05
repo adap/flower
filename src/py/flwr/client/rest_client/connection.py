@@ -55,7 +55,12 @@ def http_request_response(
         Union[bytes, str]
     ] = None,  # pylint: disable=unused-argument
 ) -> Iterator[
-    Tuple[Callable[[], Optional[ServerMessage]], Callable[[ClientMessage], None]]
+    Tuple[
+        Callable[[], Optional[ServerMessage]],
+        Callable[[ClientMessage], None],
+        Optional[Callable[[], None]],
+        Optional[Callable[[], None]],
+    ]
 ]:
     """Primitives for request/response-based interaction with a server.
 
@@ -234,8 +239,8 @@ def http_request_response(
             push_task_res_response_proto.results,  # pylint: disable=no-member
         )
 
-    # yield methods
     try:
-        yield (receive, send)
+        # Yield methods
+        yield (receive, send, None, None)
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)
