@@ -175,7 +175,7 @@ jobs:
           ./test.sh
       - name: Run virtual client test
         run: |
-          cd e2e/scikit-learn
+          cd e2e/mxnet
           python simulation.py
 
   jax:
