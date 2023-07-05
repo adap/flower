@@ -69,6 +69,11 @@ Flower's goal is to make federated learning accessible to everyone. This series 
 
 Stay tuned, more tutorials are coming soon. Topics include **Privacy and Security in Federated Learning**, and **Scaling Federated Learning**.
 
+## 30 minute Federated Learning tutorial
+
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/examples/simulation_pytorch_colab/tutorial.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/examples/simulation_pytorch_colab/tutorial.ipynb))
+
+
 ## Documentation
 
 [Flower Docs](https://flower.dev/docs):
