@@ -29,8 +29,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 class FedAvgWithStragglerDrop(FedAvg):
-    """My customised FedAvg strategy which discards updates sent by clients
-    that were flagged as stragglers."""
+    """Custom FedAvg which discards updates from stragglers."""
 
     def aggregate_fit(
         self,

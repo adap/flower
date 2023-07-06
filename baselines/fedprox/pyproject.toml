@@ -3,9 +3,9 @@ requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
-name = "fedprox" # <----- Ensure it matches the name of your baseline directory containing all the source code
+name = "fedprox"
 version = "1.0.0"
-description = "Flower Baselines"
+description = "Implementation of FedProx (Lin et al. 2020)"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.dev>"]
 readme = "README.md"
@@ -37,10 +37,10 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8.15, <3.12.0"  # don't change this
-flwr = "1.3.0" # don't change this
-ray = "1.11.1" # don't change this
-hydra-core = "1.3.2" # don't change this
+python = ">=3.8.15, <3.12.0"
+flwr = "1.3.0"
+ray = "1.11.1"
+hydra-core = "1.3.2"
 matplotlib = "3.7.1"
 
 [tool.poetry.dev-dependencies]
