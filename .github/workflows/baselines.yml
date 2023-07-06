@@ -13,13 +13,36 @@ env:
 
 defaults:
   run:
-    working-directory: baselines/flwr_baselines
+    working-directory: baselines
 
 jobs:
   test_baselines:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
+      - name: Fetch main branch
+        run: git fetch origin main:main
+      - name: Find changed/new baselines
+        id: find_changed_baselines_dirs
+        run: |
+          current_branch=${{ github.head_ref }}
+          if [ "$current_branch" == "main" ]
+          then
+            current_branch="HEAD~1"
+          fi
+          echo ${current_branch}
+          dirs=$(git diff --dirstat=files,0 main..HEAD . | awk '{print $2}' | grep -E '^baselines/[^/]*/$' | grep -v -e '^baselines/dev' -e '^baselines/baseline_template' -e '^baselines/flwr_baselines' | sed 's/^baselines\///')
+          echo "Detected changed directories: ${dirs}"
+          # Save changed dirs to output of this step
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "dirs<<EOF" >> "$GITHUB_OUTPUT"
+          for dir in $dirs
+          do
+            echo "$dir" >> "$GITHUB_OUTPUT"
+          done
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          echo "github_output:"
+          echo "$GITHUB_OUTPUT"
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -33,5 +56,24 @@ jobs:
       - name: Install dependencies
         run: |
           python -m poetry install
-      - name: Lint + Test (isort/black/mypy/pylint/pytest)
-        run: ./dev/test.sh
+      - name: Test
+        run: |
+          dirs="${{ steps.find_changed_baselines_dirs.outputs.dirs }}"
+          length=$(echo $dirs | grep -c '^')
+          let "length++"
+          echo "The lengths is $length"
+          if [ $length -gt 1 ]; then
+            echo "The changes should only apply to a single baseline"
+            exit 1
+          fi
+          
+          if [ $length -eq 0 ]; then
+            echo "The baselines were not changed"
+            exit 0
+          fi
+          
+          for dir in ${dirs}
+          do
+            echo "Testing ${dir}"
+            ./dev/test.sh $dir
+          done
