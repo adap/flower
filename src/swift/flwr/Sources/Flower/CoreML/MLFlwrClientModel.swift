@@ -9,6 +9,7 @@ import Foundation
 import CoreML
 import os
 
+/// Container for train and test dataset.
 public struct MLDataLoader {
     public let trainBatchProvider: MLBatchProvider
     public let testBatchProvider: MLBatchProvider
@@ -19,6 +20,7 @@ public struct MLDataLoader {
     }
 }
 
+/// Container for neural network layer information.
 public struct MLLayerWrapper {
     let shape: [Int16]
     let name: String
@@ -39,6 +41,7 @@ struct MLResult {
     let accuracy: Double
 }
 
+/// A class responsible for loading and retrieving model parameters to and from the CoreML model.
 @available(iOS 14.0, *)
 public class MLParameter {
     private var parameterConverter = ParameterConverter.shared

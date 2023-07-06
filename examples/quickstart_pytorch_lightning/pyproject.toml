@@ -10,7 +10,11 @@ authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
+<<<<<<< HEAD
 flwr = "1.0.0"
+=======
+flwr = ">=1.0,<2.0"
+>>>>>>> origin/main
 # flwr = { path = "../../", develop = true }  # Development
 pytorch-lightning = "1.4.7"
 torchvision = "0.13.0"
