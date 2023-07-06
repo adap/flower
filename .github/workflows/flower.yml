@@ -35,3 +35,9 @@ jobs:
         run: ./dev/check-protos.sh
       - name: Lint + Test (isort/black/docformatter/mypy/pylint/flake8/pytest)
         run: ./dev/test.sh
+      - name: Check if pyproject.toml and requirements.txt are in sync
+        run: |
+          python -m pip install poetry-add-requirements.txt
+          ./dev/check-requirements-txt.sh
+        if: ${{ matrix.python == '3.10.9' }}
+
