@@ -11,7 +11,3 @@ jax = "0.4.0"
 jaxlib = "0.4.0"
 scikit-learn = "1.1.1"
 numpy = "1.21.4"
-
-[build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.core.masonry.api"
