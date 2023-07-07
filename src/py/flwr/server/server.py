@@ -16,6 +16,7 @@
 
 
 import concurrent.futures
+import time
 import timeit
 from logging import DEBUG, INFO
 from typing import Dict, List, Optional, Tuple, Union
@@ -97,49 +98,171 @@ class Server:
             history.add_loss_centralized(server_round=0, loss=res[0])
             history.add_metrics_centralized(server_round=0, metrics=res[1])
 
+        
+
+        # Step 1) Server sends shared vector_a to clients and they all send back vector_b
+        self.strategy.rlwe.generate_vector_a() 
+        vector_a = self.strategy.rlwe.get_vector_a()
+        vector_a = vector_a.poly_to_list()
+        vector_b_list = []
+
+        # Wait for clients
+        sample_size, min_num_clients = self.strategy.num_fit_clients(
+            self._client_manager.num_available()
+        )
+        clients = self._client_manager.sample(
+            num_clients=sample_size, min_num_clients=min_num_clients
+        )
+
+        # Measure execution time for public key aggregation and execution
+        start_time = time.time()
+
+        # Loop through clients, give vector A, retrieve vector B
+        for c in clients:
+            client_vector_b = c.request_vec_b(vector_a, timeout=timeout)
+            vector_b_list.append(self.strategy.rlwe.list_to_poly(client_vector_b, "q"))
+
+        # same code as loop above but in one line
+        #vector_b_list = [self.strategy.rlwe.list_to_poly(c.request_vec_b(vector_a, timeout=timeout), "q") for client in clients]
+
+
+
+        # Step 2) Server sends aggregated publickey allpub to clients and receive boolean confirmation
+        allpub = vector_b_list[0]
+        for poly in vector_b_list[1:]:
+            allpub = allpub + poly
+        allpub = allpub.poly_to_list()
+
+        for c in clients:
+            confirmed = c.request_allpub_confirmation(allpub, timeout=timeout)
+
+
+        # Calculate the encryption/decryption execution time
+        execution_time = time.time() - start_time
+        # Print the execution time
+        print("Public Key Aggregation/Distribution Time:", execution_time)
+
+
         # Run federated learning for num_rounds
         log(INFO, "FL starting")
         start_time = timeit.default_timer()
 
         for current_round in range(1, num_rounds + 1):
-            # Train model and replace previous global model
+            """ 
+            # Train client models simultaneously, then aggregate to find global model
             res_fit = self.fit_round(server_round=current_round, timeout=timeout)
+            
+            # Update global model
             if res_fit:
                 parameters_prime, fit_metrics, _ = res_fit  # fit_metrics_aggregated
                 if parameters_prime:
                     self.parameters = parameters_prime
-                history.add_metrics_distributed_fit(
-                    server_round=current_round, metrics=fit_metrics
-                )
+                history.add_metrics_distributed_fit(server_round=current_round, metrics=fit_metrics)
 
             # Evaluate model using strategy implementation
             res_cen = self.strategy.evaluate(current_round, parameters=self.parameters)
             if res_cen is not None:
                 loss_cen, metrics_cen = res_cen
-                log(
-                    INFO,
-                    "fit progress: (%s, %s, %s, %s)",
-                    current_round,
-                    loss_cen,
-                    metrics_cen,
-                    timeit.default_timer() - start_time,
-                )
+                log(INFO, "fit progress: (%s, %s, %s, %s)", current_round, loss_cen, metrics_cen, timeit.default_timer() - start_time,)
                 history.add_loss_centralized(server_round=current_round, loss=loss_cen)
-                history.add_metrics_centralized(
-                    server_round=current_round, metrics=metrics_cen
-                )
+                history.add_metrics_centralized(server_round=current_round, metrics=metrics_cen)
 
             # Evaluate model on a sample of available clients
             res_fed = self.evaluate_round(server_round=current_round, timeout=timeout)
             if res_fed:
                 loss_fed, evaluate_metrics_fed, _ = res_fed
                 if loss_fed:
-                    history.add_loss_distributed(
-                        server_round=current_round, loss=loss_fed
-                    )
-                    history.add_metrics_distributed(
-                        server_round=current_round, metrics=evaluate_metrics_fed
-                    )
+                    history.add_loss_distributed(server_round=current_round, loss=loss_fed)
+                    history.add_metrics_distributed(server_round=current_round, metrics=evaluate_metrics_fed)  """
+
+            """
+            The commented code above is from Flower's existing training loop.
+            Below that we have our custom encrypted aggregation process.
+            """
+            
+            # Utilizing Flower's function to signal all clients to train their models simultanously
+            res_fit = self.fit_round(server_round=current_round, timeout=timeout)
+
+            # Measure the encryption/decryption execution time
+            start_time = time.time()
+
+            # Boolean to signal whether to send the full weights or only the change of weights (gradient)
+            request = "full"
+            if current_round > 1:
+                request = "gradient"
+
+            # Step 3) (More Memory)
+            # After round, clients encrypt plaintext p -> (c0, c1) and here we sum up all c0 and c1 polynomials
+            """ clients = list(self._client_manager.clients.values())
+            c0_all, c1_all = [], []
+            for c in clients:
+                c0, c1 = c.request_encrypted_parameters(request, timeout=timeout)
+                c0_all.append(self.strategy.rlwe.list_to_poly(c0, "q"))
+                c1_all.append(self.strategy.rlwe.list_to_poly(c1, "q"))
+            # Add up all the c0's and c1's
+            c0sum, c1sum = c0_all[0], c1_all[0]
+            for c0 in c0_all[1:]:
+                c0sum = c0sum + c0
+            for c1 in c1_all[1:]:
+                c1sum = c1sum + c1 """
+
+            # Step 3) (~20% Less Memory)
+            # After round, clients encrypt plaintext p -> (c0, c1) and here we sum up all c0 and c1 polynomials
+            clients = list(self._client_manager.clients.values())
+            c0, c1 = clients[0].request_encrypted_parameters(request, timeout=timeout)
+            c0sum = self.strategy.rlwe.list_to_poly(c0, "q")
+            c1sum = self.strategy.rlwe.list_to_poly(c1, "q")
+            for c in clients[1:]:
+                c0, c1 = c.request_encrypted_parameters(request, timeout=timeout)
+                c0sum = c0sum + self.strategy.rlwe.list_to_poly(c0, "q")
+                c1sum = c1sum + self.strategy.rlwe.list_to_poly(c1, "q")
+
+
+
+            # Step 4) (More Memory)
+            # Send c1sum to clients and retrieve all decryption shares d_i
+            """ d_all = []
+            c1sum = c1sum.poly_to_list()
+            for c in clients:
+                d = c.request_decryption_share(c1sum, timeout=timeout)
+                d_all.append(self.strategy.rlwe.list_to_poly(d, "t"))
+
+            dsum = d_all[0]
+            for d in d_all[1:]:
+                dsum = dsum + d """
+            
+            # Step 4) (~20% Less Memory)
+            # Send c1sum to clients and retrieve all decryption shares d_i
+            c1sum = c1sum.poly_to_list()
+            d = clients[0].request_decryption_share(c1sum, timeout=timeout)
+            dsum = self.strategy.rlwe.list_to_poly(d, "t")
+            for c in clients[1:]:
+                # getdecshare = time.time()
+                d = c.request_decryption_share(c1sum, timeout=timeout)
+                # getdecsharetime = time.time() - getdecshare
+                # print("Fetch partial decryption time:", getdecsharetime)
+
+                # dsumcalculation = time.time()
+                dsum = dsum + self.strategy.rlwe.list_to_poly(d, "t")
+                # dsumcalculationtime = time.time() - dsumcalculation
+                # print("Polyfunction addition (dsum) time:", dsumcalculationtime)
+            
+
+
+            # Step 5) Use c0sum and decryption shares to retrieve plaintext, find avg and send back final weights to clients
+            plaintext = c0sum + dsum #c0sum is poly_q and dsum is poly_t
+            plaintext = plaintext.testing(self.strategy.rlwe.t)
+            plaintext = plaintext.poly_to_list()
+            avg_weights = [round(weight/len(clients)) for weight in plaintext]
+            for c in clients:
+                confirmed = c.request_modelupdate_confirmation(avg_weights, timeout=timeout)
+            del c0sum, c1sum, dsum
+
+            # Calculate the encryption/decryption execution time
+            execution_time = time.time() - start_time
+            # Print the execution time
+            print("Weight Encryption/Decryption Execution Time:", execution_time)
+
 
         # Bookkeeping
         end_time = timeit.default_timer()
@@ -187,6 +310,7 @@ class Server:
             len(failures),
         )
 
+        #TODO:
         # Aggregate the evaluation results
         aggregated_result: Tuple[
             Optional[float],
@@ -237,11 +361,19 @@ class Server:
             len(failures),
         )
 
+        # Measure default fedavg execution time
+        start_time = time.time()
+
         # Aggregate training results
         aggregated_result: Tuple[
             Optional[Parameters],
             Dict[str, Scalar],
         ] = self.strategy.aggregate_fit(server_round, results, failures)
+
+        # Calculate the flwr default fedavg execution time
+        execution_time = time.time() - start_time
+        # Print the execution time
+        print("Flwr Default FedAvg Execution Time:", execution_time)
 
         parameters_aggregated, metrics_aggregated = aggregated_result
         return parameters_aggregated, metrics_aggregated, (results, failures)
@@ -440,3 +572,15 @@ def _handle_finished_future_after_evaluate(
 
     # Not successful, client returned a result where the status code is not OK
     failures.append(result)
+
+# Testing Example
+def example_request(self, client: ClientProxy) -> Tuple[str, int]:
+    question = "Could you find the sum of the list, Bob?"
+    l = [1, 2, 3]
+    return client.request(question, l)
+
+# Step 1) Example
+def share_vector_a(self, client: ClientProxy) -> List[int]:
+    # key generation
+    vector_a = [1,2,3,4,5,6,7,8]
+    return client.request_vec_b(vector_a) # from grpc_client_proxy.py

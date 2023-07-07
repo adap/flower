@@ -1,5 +1,6 @@
 from typing import List, Tuple
 
+sys.path.insert(0, "/home/ubuntu/flower_master/src/py") # forked flwr
 import flwr as fl
 from flwr.common import Metrics
 
@@ -15,7 +16,10 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 # Define strategy
-strategy = fl.server.strategy.FedAvg(evaluate_metrics_aggregation_fn=weighted_average)
+strategy = fl.server.strategy.FedAvg(evaluate_metrics_aggregation_fn=weighted_average,
+                                    min_available_clients=1,
+                                    min_fit_clients=1,
+                                    min_evaluate_clients=1)
 
 # Start Flower server
 fl.server.start_server(

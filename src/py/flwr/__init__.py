@@ -26,3 +26,7 @@ __all__ = [
 ]
 
 __version__ = _package_version
+
+print("")
+print("Using forked flower module")
+print("")

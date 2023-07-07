@@ -16,7 +16,7 @@
 
 
 from abc import ABC
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List
 
 from flwr.common import Config, NDArrays, Scalar
 
@@ -137,3 +137,33 @@ def has_fit(client: NumPyClient) -> bool:
 def has_evaluate(client: NumPyClient) -> bool:
     """Check if NumPyClient implements evaluate."""
     return type(client).evaluate != NumPyClient.evaluate
+
+def has_example_response(client: NumPyClient) -> bool:
+    return callable(getattr(client, "example_response", None))
+
+# Step 1) Server sends shared vector_a to clients and they all send back vector_b
+def has_generate_pubkey(client: NumPyClient) -> bool:
+    return callable(getattr(client, "generate_pubkey", None))
+
+# Step 2) Server sends aggregated publickey allpub to clients and receive boolean confirmation
+def has_store_aggregated_pubkey(client: NumPyClient) -> bool:
+    return callable(getattr(client, "store_aggregated_pubkey", None))
+
+# Step 3) After round, encrypt flat list of parameters into two lists (c0, c1)
+def has_encrypt_parameters(client: NumPyClient) -> bool:
+    return callable(getattr(client, "encrypt_parameters", None))
+
+# Step 4) Send c1sum to clients and send back decryption share
+def has_compute_decryption_share(client: NumPyClient) -> bool:
+    return callable(getattr(client, "compute_decryption_share", None))
+
+# Step 5) Send updated model weights to clients and return confirmation
+def has_receive_updated_weights(client: NumPyClient) -> bool:
+    return callable(getattr(client, "receive_updated_weights", None))
+
+"""
+def example_response(self, question: str, l: List[int]) -> Tuple[str, int]:
+    response = "Here you go Alice!"
+    answer = sum(l)
+    return response, answer
+"""

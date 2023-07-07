@@ -56,12 +56,37 @@ message ServerMessage {
     Parameters parameters = 1;
     map<string, Scalar> config = 2;
   }
+  message ExampleIns {
+    string question = 1;
+    repeated int64 l = 2;
+  }
+  message SendVectorAIns {
+    repeated int64 vector_a = 1;
+  }
+  message SendAllpubIns {
+    repeated int64 aggregated_allpub = 1;
+  }
+  message RequestEncryptedIns {
+    string request = 1;
+  }
+  message SendCsumIns {
+    repeated int64 csum1 = 1;
+  }
+  message SendNewWeightsIns {
+    repeated int64 new_weights = 1;
+  }
   oneof msg {
     ReconnectIns reconnect_ins = 1;
     GetPropertiesIns get_properties_ins = 2;
     GetParametersIns get_parameters_ins = 3;
     FitIns fit_ins = 4;
     EvaluateIns evaluate_ins = 5;
+    ExampleIns example_ins = 6;
+    SendVectorAIns send_vector_a_ins = 7;
+    SendAllpubIns send_allpub_ins = 8;
+    RequestEncryptedIns request_encrypted_ins = 9;
+    SendCsumIns send_csum_ins = 10;
+    SendNewWeightsIns send_new_weights_ins = 11;
   }
 }
 
@@ -87,12 +112,39 @@ message ClientMessage {
     int64 num_examples = 3;
     map<string, Scalar> metrics = 4;
   }
+  message ExampleRes{
+    string response = 1;
+    int64 answer = 2;
+  }
+  message SendVectorBRes {
+    repeated int64 vector_b = 1;
+  }
+  message SendAllpubRes {
+    bool pubkey_confirmed = 1;
+  }
+  message SendEncryptedRes {
+    repeated int64 c0 = 1;
+    repeated int64 c1 = 2;
+  }
+  message SendDecShareRes {
+    repeated int64 decryption_share = 1;
+  }
+  message SendNewWeightsRes {
+    bool weights_confirmed = 1;
+  }
   oneof msg {
     DisconnectRes disconnect_res = 1;
     GetPropertiesRes get_properties_res = 2;
     GetParametersRes get_parameters_res = 3;
     FitRes fit_res = 4;
     EvaluateRes evaluate_res = 5;
+    ExampleRes example_res = 6;
+    SendVectorBRes send_vector_b_res = 7;
+    SendAllpubRes send_allpub_res = 8;
+    SendEncryptedRes send_encrypted_res = 9;
+    SendDecShareRes send_dec_share_res = 10;
+    SendNewWeightsRes send_new_weights_res = 11;
+
   }
 }
 

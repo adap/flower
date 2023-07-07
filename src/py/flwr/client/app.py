@@ -17,7 +17,7 @@
 
 import time
 from logging import INFO
-from typing import Callable, Dict, Optional, Union
+from typing import Callable, Dict, Optional, Union, List, Tuple
 
 from flwr.common import (
     GRPC_MAX_MESSAGE_LENGTH,
@@ -49,6 +49,12 @@ from .numpy_client import has_evaluate as numpyclient_has_evaluate
 from .numpy_client import has_fit as numpyclient_has_fit
 from .numpy_client import has_get_parameters as numpyclient_has_get_parameters
 from .numpy_client import has_get_properties as numpyclient_has_get_properties
+from .numpy_client import has_example_response as numpyclient_has_example_response
+from .numpy_client import has_example_response as numpyclient_has_generate_pubkey
+from .numpy_client import has_example_response as numpyclient_has_store_aggregated_pubkey
+from .numpy_client import has_example_response as numpyclient_has_encrypt_parameters
+from .numpy_client import has_example_response as numpyclient_has_compute_decryption_share
+from .numpy_client import has_example_response as numpyclient_has_receive_updated_weights
 
 EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT = """
 NumPyClient.fit did not return a tuple with 3 elements.
@@ -325,6 +331,24 @@ def _evaluate(self: Client, ins: EvaluateIns) -> EvaluateRes:
     )
 
 
+def _example_response(self, question: str, l: List[int]) -> Tuple[str, int]:
+    return self.numpy_client.example_response(question, l)
+
+def _generate_pubkey(self, vector_a: List[int]) -> List[int]:
+    return self.numpy_client.generate_pubkey(vector_a)
+
+def _store_aggregated_pubkey(self, allpub: List[int]) -> bool:
+    return self.numpy_client.store_aggregated_pubkey(allpub)
+
+def _encrypt_parameters(self, request: str) -> Tuple[List[int], List[int]]:
+    return self.numpy_client.encrypt_parameters(request)
+
+def _compute_decryption_share(self, csum1: List[int]) -> List[int]:
+    return self.numpy_client.compute_decryption_share(csum1)
+
+def _receive_updated_weights(self, new_weights: List[int]) -> bool:
+    return self.numpy_client.receive_updated_weights(new_weights)
+    
 def _wrap_numpy_client(client: NumPyClient) -> Client:
     member_dict: Dict[str, Callable] = {  # type: ignore
         "__init__": _constructor,
@@ -343,6 +367,24 @@ def _wrap_numpy_client(client: NumPyClient) -> Client:
 
     if numpyclient_has_evaluate(client=client):
         member_dict["evaluate"] = _evaluate
+
+    if numpyclient_has_example_response(client=client):
+        member_dict["example_response"] = _example_response
+
+    if numpyclient_has_generate_pubkey(client=client):
+        member_dict["generate_pubkey"] = _generate_pubkey
+
+    if numpyclient_has_store_aggregated_pubkey(client=client):
+        member_dict["store_aggregated_pubkey"] = _store_aggregated_pubkey
+
+    if numpyclient_has_encrypt_parameters(client=client):
+        member_dict["encrypt_parameters"] = _encrypt_parameters
+
+    if numpyclient_has_compute_decryption_share(client=client):
+        member_dict["compute_decryption_share"] = _compute_decryption_share
+
+    if numpyclient_has_receive_updated_weights(client=client):
+        member_dict["receive_updated_weights"] = _receive_updated_weights
 
     # Create wrapper class
     wrapper_class = type("NumPyClientWrapper", (Client,), member_dict)

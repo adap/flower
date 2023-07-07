@@ -1,6 +1,8 @@
 import warnings
 from collections import OrderedDict
 
+import sys
+sys.path.insert(0, "/home/ubuntu/flower_master/src/py") # forked flwr
 import flwr as fl
 import torch
 import torch.nn as nn

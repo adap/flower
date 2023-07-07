@@ -15,7 +15,7 @@
 """ProtoBuf serialization and deserialization."""
 
 
-from typing import Any, List, cast
+from typing import Any, List, cast, Tuple
 
 from flwr.proto.transport_pb2 import (
     ClientMessage,
@@ -484,3 +484,91 @@ def scalar_from_proto(scalar_msg: Scalar) -> typing.Scalar:
     scalar_field = scalar_msg.WhichOneof("scalar")
     scalar = getattr(scalar_msg, cast(str, scalar_field))
     return cast(typing.Scalar, scalar)
+
+
+# Custom messages
+def example_msg_to_proto(question: str, l: List[int]) -> ServerMessage.ExampleIns:
+    return ServerMessage.ExampleIns(question=question, l=l)
+
+def example_msg_from_proto(msg: ServerMessage.ExampleIns) -> Tuple[str, List[int]]:
+    return msg.question, msg.l
+
+def example_res_to_proto(response: str, answer: int) -> ClientMessage.ExampleRes:
+    return ClientMessage.ExampleRes(response=response, answer=answer)
+
+def example_res_from_proto(res: ClientMessage.ExampleRes) -> Tuple[str, int]:
+    return res.response, res.answer        
+
+
+
+# Step 1) Server sends shared vector_a to clients and they all send back vector_b
+def shared_vec_a_to_proto(vector_a: List[int]) -> ServerMessage.SendVectorAIns:
+    return ServerMessage.SendVectorAIns(vector_a=vector_a)
+
+def shared_vec_a_from_proto(msg: ServerMessage.SendVectorAIns) -> List[int]:
+    return msg.vector_a
+
+def pub_key_b_to_proto(vector_b: List[int]) -> ClientMessage.SendVectorBRes:
+    return ClientMessage.SendVectorBRes(vector_b=vector_b)
+
+def pub_key_b_from_proto(res: ClientMessage.SendVectorBRes) -> List[int]:
+    return res.vector_b  
+
+
+
+# Step 2) Send aggregated public key to client
+def aggregated_pubkey_to_proto(allpub: List[int]) -> ServerMessage.SendAllpubIns:
+    return ServerMessage.SendAllpubIns(aggregated_allpub=allpub)
+
+def aggregated_pubkey_from_proto(msg: ServerMessage.SendAllpubIns) -> List[int]:
+    return msg.aggregated_allpub
+
+def pubkey_confirmation_to_proto(pubkey_confirmed: bool) -> ClientMessage.SendAllpubRes:
+    return ClientMessage.SendAllpubRes(pubkey_confirmed=pubkey_confirmed)
+
+def pubkey_confirmation_from_proto(res: ClientMessage.SendAllpubRes) -> bool:
+    return res.pubkey_confirmed  
+
+
+
+# Step 3) After round, encrypt flat list of parameters into two lists (c0, c1)
+def request_encrypted_to_proto(request: str) -> ServerMessage.RequestEncryptedIns:
+    return ServerMessage.RequestEncryptedIns(request=request)
+
+def request_encrypted_from_proto(msg: ServerMessage.RequestEncryptedIns) -> str:
+    return msg.request
+
+def send_encrypted_to_proto(c0: List[int], c1: List[int]) -> ClientMessage.SendEncryptedRes:
+    return ClientMessage.SendEncryptedRes(c0=c0, c1=c1)
+
+def send_encrypted_from_proto(res: ClientMessage.SendEncryptedRes) -> Tuple[List[int], List[int]]:
+    return res.c0, res.c1  
+
+
+
+# Step 4) Send c1sum to clients and send back decryption share
+def send_csum1_to_proto(csum1: List[int]) -> ServerMessage.SendCsumIns:
+    return ServerMessage.SendCsumIns(csum1=csum1)
+
+def send_csum1_from_proto(msg: ServerMessage.SendCsumIns) -> List[int]:
+    return msg.csum1
+
+def send_decryption_share_to_proto(decryption_share: List[int]) -> ClientMessage.SendDecShareRes:
+    return ClientMessage.SendDecShareRes(decryption_share=decryption_share)
+
+def send_decryption_share_from_proto(res: ClientMessage.SendDecShareRes) -> List[int]:
+    return res.decryption_share
+
+
+# Step 5) Send updated model weights to clients and return confirmation
+def send_new_weights_to_proto(new_weights: List[int]) -> ServerMessage.SendNewWeightsIns:
+    return ServerMessage.SendNewWeightsIns(new_weights=new_weights)
+
+def send_new_weights_from_proto(msg: ServerMessage.SendNewWeightsIns) -> List[int]:
+    return msg.new_weights
+
+def send_update_confirmation_to_proto(weights_confirmed: bool) -> ClientMessage.SendNewWeightsRes:
+    return ClientMessage.SendNewWeightsRes(weights_confirmed=weights_confirmed)
+
+def send_update_confirmation_from_proto(res: ClientMessage.SendNewWeightsRes) -> bool:
+    return res.weights_confirmed  
