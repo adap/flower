@@ -59,9 +59,13 @@ jobs:
       - name: Test
         run: |
           dirs="${{ steps.find_changed_baselines_dirs.outputs.dirs }}"
-          length=$(echo $dirs | grep -c '^')
-          let "length++"
-          echo "The lengths is $length"
+          dirs_array=()
+          while IFS= read -r line; do
+            arr+=("$line")
+          done <<< "dirs"
+          length=${#dirs_array[@]}
+          echo "The number of changed baselines is $length"
+          
           if [ $length -gt 1 ]; then
             echo "The changes should only apply to a single baseline"
             exit 1
@@ -69,7 +73,7 @@ jobs:
           
           if [ $length -eq 0 ]; then
             echo "The baselines were not changed"
-            exit 0
+            exit 1
           fi
           
           for dir in ${dirs}
