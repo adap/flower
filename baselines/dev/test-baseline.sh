@@ -36,4 +36,20 @@ echo "- pylint: start"
 python -m pylint --recursive y .
 echo "- pylint: done"
 
+echo "- flake8: start"
+python -m flake8 .
+echo "- flake8: done"
+
+echo "- pytest: start"
+python -m pytest --cov=.
+echo "- pytest: done"
+
 echo "- All Python checks passed"
+
+echo "- Start Markdown checks"
+
+echo "- mdformat: start"
+python -m mdformat --check --number .
+echo "- mdformat: done"
+
+echo "- All Markdown checks passed"
