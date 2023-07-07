@@ -32,3 +32,5 @@ for file in "${required_files[@]}"; do
   fi
 done
 
+echo "The structure of $baseline_dir is correct."
+
