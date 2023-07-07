@@ -1,0 +1,110 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#f2f2f2"
+        android:orientation="vertical"
+        tools:context=".MainActivity">
+
+    <EditText
+            android:id="@+id/device_id_edit_text"
+            style="@style/Widget.Material3.TextInputEditText.FilledBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:fontFamily="@font/montserrat_light"
+            android:hint="Client Partition ID (1-10)"
+            android:inputType="numberDecimal"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="#4a5663"
+            android:importantForAutofill="no" />
+
+    <EditText
+            android:id="@+id/serverIP"
+            style="@style/Widget.Material3.TextInputEditText.FilledBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:ems="10"
+            android:fontFamily="@font/montserrat_light"
+            android:hint="FL Server IP"
+            android:inputType="phone"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="#4a5663"
+            android:importantForAutofill="no" />
+
+    <EditText
+            android:id="@+id/serverPort"
+            style="@style/Widget.Material3.TextInputEditText.FilledBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:ems="10"
+            android:fontFamily="@font/montserrat_light"
+            android:hint="FL Server Port"
+            android:inputType="numberDecimal"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="#4a5663"
+            android:importantForAutofill="no" />
+
+    <Button
+            android:id="@+id/load_data"
+            style="@android:style/Widget.Material.Button.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:layout_marginHorizontal="16dp"
+            android:background="@drawable/rounded_corner"
+            android:backgroundTint="#F2B705"
+            android:fontFamily="@font/share_tech_mono"
+            android:onClick="loadData"
+            android:text="Load Dataset" />
+
+    <Button
+            android:id="@+id/trainFederated"
+            style="@android:style/Widget.Material.Button.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="5dp"
+            android:background="@drawable/rounded_corner"
+            android:backgroundTint="#F2B705"
+            android:enabled="false"
+            android:fontFamily="@font/share_tech_mono"
+            android:onClick="runGrpc"
+            android:text="Train Federated!" />
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:fontFamily="@font/montserrat_medium"
+            android:paddingTop="12dp"
+            android:text="Activity Log"
+            android:textAlignment="center"
+            android:textColor="#4a5663"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+    <TextView
+            android:id="@+id/grpc_response_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/rounded_corner"
+            android:backgroundTint="#4a5663"
+            android:fontFamily="@font/share_tech_mono"
+            android:gravity="bottom"
+            android:nestedScrollingEnabled="true"
+            android:overScrollMode="always"
+            android:scrollbarAlwaysDrawVerticalTrack="false"
+            android:scrollbars="vertical"
+            android:text="Welcome to Flower! \n"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textColor="#f2f2f2"
+            android:textSize="12sp" />
+
+</LinearLayout>
