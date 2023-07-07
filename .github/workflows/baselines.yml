@@ -61,8 +61,8 @@ jobs:
           dirs="${{ steps.find_changed_baselines_dirs.outputs.dirs }}"
           dirs_array=()
           while IFS= read -r line; do
-            arr+=("$line")
-          done <<< "dirs"
+            dirs_array+=("$line")
+          done <<< "$dirs"
           length=${#dirs_array[@]}
           echo "The number of changed baselines is $length"
           
