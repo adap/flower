@@ -73,7 +73,7 @@ jobs:
           
           if [ $length -eq 0 ]; then
             echo "The baselines were not changed"
-            exit 1
+            exit 0
           fi
           
           for dir in ${dirs}
