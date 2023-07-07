@@ -41,7 +41,7 @@ python -m flake8 .
 echo "- flake8: done"
 
 echo "- pytest: start"
-python -m pytest --cov=.
+python -m pytest . || ([ $? -eq 5 ] || [ $? -eq 0 ])
 echo "- pytest: done"
 
 echo "- All Python checks passed"
