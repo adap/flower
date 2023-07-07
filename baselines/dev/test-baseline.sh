@@ -45,11 +45,3 @@ python -m pytest . || ([ $? -eq 5 ] || [ $? -eq 0 ])
 echo "- pytest: done"
 
 echo "- All Python checks passed"
-
-echo "- Start Markdown checks"
-
-echo "- mdformat: start"
-python -m mdformat --check --number .
-echo "- mdformat: done"
-
-echo "- All Markdown checks passed"

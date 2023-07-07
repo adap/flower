@@ -22,3 +22,5 @@ KEYS="metadata.celltoolbar metadata.language_info metadata.toc metadata.notify_t
 python -m nbstripout doc/source/tutorial/*.ipynb --extra-keys "$KEYS"
 python -m nbstripout examples/*/*.ipynb --extra-keys "$KEYS"
 
+# Markdown
+python -m mdformat --number doc/source/tutorial examples
