@@ -8,6 +8,14 @@ import grpc
 
 class FleetStub:
     def __init__(self, channel: grpc.Channel) -> None: ...
+    CreateNode: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.fleet_pb2.CreateNodeRequest,
+        flwr.proto.fleet_pb2.CreateNodeResponse]
+
+    DeleteNode: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.fleet_pb2.DeleteNodeRequest,
+        flwr.proto.fleet_pb2.DeleteNodeResponse]
+
     PullTaskIns: grpc.UnaryUnaryMultiCallable[
         flwr.proto.fleet_pb2.PullTaskInsRequest,
         flwr.proto.fleet_pb2.PullTaskInsResponse]
@@ -26,6 +34,18 @@ class FleetStub:
 
 
 class FleetServicer(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def CreateNode(self,
+        request: flwr.proto.fleet_pb2.CreateNodeRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.fleet_pb2.CreateNodeResponse: ...
+
+    @abc.abstractmethod
+    def DeleteNode(self,
+        request: flwr.proto.fleet_pb2.DeleteNodeRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.fleet_pb2.DeleteNodeResponse: ...
+
     @abc.abstractmethod
     def PullTaskIns(self,
         request: flwr.proto.fleet_pb2.PullTaskInsRequest,
