@@ -33,7 +33,7 @@ python -m mypy .
 echo "- mypy: done"
 
 echo "- pylint: start"
-python -m pylint --recursive y .
+python -m pylint ./$1
 echo "- pylint: done"
 
 echo "- flake8: start"
