@@ -28,7 +28,7 @@ Install the app on *physical* Android devices and launch it.
 In the user interface, fill in:
 
 - Device number: a unique number among 1 ~ 10.
-    This number is used to choose the partition of the training dataset.
+  This number is used to choose the partition of the training dataset.
 - Server IP: an IPv4 address of the computer your backend server is running on. You can probably find it in your system network settings.
 - Server port: 8080.
 
@@ -36,7 +36,7 @@ Push the first button and load the dataset. This may take a minute.
 
 Push the second button and start the training.
 
----
+______________________________________________________________________
 
 Note: don't follow the instructions below. They are left here for reference only.
 
