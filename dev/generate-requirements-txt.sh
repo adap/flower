@@ -25,7 +25,7 @@ do
         cd $path &&
 
         sed -n '/\[tool.poetry.dependencies/q;p' pyproject.toml > pyproject.new.toml &&
-        echo '[tool.poetry.dependencies]\npython = ">=3.8,<3.11"' >> pyproject.new.toml &&
+        echo -e '[tool.poetry.dependencies]\npython = ">=3.8,<3.11"' >> pyproject.new.toml &&
         mv pyproject.new.toml pyproject.toml &&
         rm -rf poetry.lock &&
 
