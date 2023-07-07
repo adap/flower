@@ -1,9 +1,6 @@
----
-title: title of the paper
-url: URL to the paper page (not the pdf)
-labels: [label1, label2] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [dataset1, dataset2] # list of datasets you include in your baseline
----
+______________________________________________________________________
+
+## title: title of the paper url: URL to the paper page (not the pdf) labels: \[label1, label2\] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo") dataset: \[dataset1, dataset2\] # list of datasets you include in your baseline
 
 # :warning:*_Title of your baseline_*
 
@@ -21,7 +18,6 @@ dataset: [dataset1, dataset2] # list of datasets you include in your baseline
 
 ****Abstract:**** :warning: *_add here the abstract of the paper you are implementing_*
 
-
 ## About this baseline
 
 ****What’s implemented:**** :warning: *_Concisely describe what experiment(s) in the publication can be replicated by running the code. Please only use a few sentences. Start with: “The code in this directory …”_*
@@ -31,7 +27,6 @@ dataset: [dataset1, dataset2] # list of datasets you include in your baseline
 ****Hardware Setup:**** :warning: *_Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Someone out there might not have access to the same resources you have so, could list the absolute minimum hardware needed to run the experiment in a reasonable amount of time ? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?_*
 
 ****Contributors:**** :warning: *_let the world know who contributed to this baseline. This could be either your name, your name and affiliation at the time, or your GitHub profile name if you prefer. If multiple contributors signed up for this baseline, please list yourself and your colleagues_*
-
 
 ## Experimental Setup
 
@@ -43,16 +38,15 @@ dataset: [dataset1, dataset2] # list of datasets you include in your baseline
 
 ****Training Hyperparameters:**** :warning: *_Include a table with all the main hyperparameters in your baseline. Please show them with their default value._*
 
-
 ## Environment Setup
 
 :warning: _The Python environment for all baselines should follow these guidelines in the `EXTENDED_README`. Specify the steps to create and activate your environment. If there are any external system-wide requirements, please include instructions for them too. These instructions should be comprehensive enough so anyone can run them (if non standard, describe them step-by-step)._
 
-
 ## Running the Experiments
 
 :warning: _Provide instructions on the steps to follow to run all the experiments._
-```bash  
+
+```bash
 # The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
 
 poetry run -m <baseline-name>.main <no additional arguments> # where <baseline-name> is the name of this directory and that of the only sub-directory in this directory (i.e. where all your source code is)
@@ -69,7 +63,6 @@ poetry run -m <baseline-name>.main  <override_some_hyperparameters>
 .
 poetry run -m <baseline-name>.main  <override_some_hyperparameters>
 ```
-
 
 ## Expected Results
 
