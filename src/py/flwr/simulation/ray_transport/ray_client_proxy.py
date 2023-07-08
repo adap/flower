@@ -31,7 +31,7 @@ from flwr.client.client import (
 )
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
-from flwr.simulation.ray_transport.ray_actor import VirtualClientEngineActor
+from flwr.simulation.ray_transport.ray_actor import VirtualClientEngineActorPool
 
 ClientFn = Callable[[str], ClientLike]
 
@@ -117,39 +117,14 @@ class RayClientProxy(ClientProxy):
         return common.DisconnectRes(reason="")  # Nothing to do here (yet)
 
 
-class RayClientProxyForActorPool(ClientProxy):
+class RayActorClientProxy(ClientProxy):
     """Flower client proxy which delegates work using Ray."""
 
-    def __init__(self, client_fn: ClientFn, cid: str, actor_pool: VirtualClientEngineActor, cache: Dict):
+    def __init__(self, client_fn: ClientFn, cid: str, actor_pool: VirtualClientEngineActorPool, cache: Dict):
         super().__init__(cid)
         self.client_fn = client_fn
         self.actor_pool = actor_pool
         self.cache = cache
-
-
-    def _wait_for_client_result(self):
-        # TODO: can we do this without while+sleep?
-        # Wait until one result is ready
-        while not(self.actor_pool.has_next()):
-            sleep(0.1)
-            continue
-        # get result
-        cid, res = self.actor_pool.get_next()
-
-        # if it doesn't belong to this client
-        if cid != self.cid:
-            # add to cache
-            self.cache[cid] = res
-
-            # wait until this clientProxy's result is in the cache
-            while self.cid not in self.cache.keys():
-                sleep(0.1)
-            
-            # get this client's result
-            res = self.cache.pop(self.cid)
-
-        return res
-
 
     def get_properties(
         self, ins: common.GetPropertiesIns, timeout: Optional[float]
@@ -162,8 +137,8 @@ class RayClientProxyForActorPool(ClientProxy):
                                              get_properties_ins=ins,
                                              )
         try:
-            self.actor_pool.submit(lambda a, v : a.run.remote(v, self.cid), get_properties)
-            res = self._wait_for_client_result()
+            self.actor_pool.submit_client_job(lambda a, v : a.run.remote(v, self.cid), get_properties, self.cid)
+            res = self.actor_pool.get_client_result(self.cid)
 
         except Exception as ex:
             log(ERROR, ex)
@@ -184,8 +159,8 @@ class RayClientProxyForActorPool(ClientProxy):
                                              get_parameters_ins=ins,
                                              )
         try:
-            self.actor_pool.submit(lambda a, v : a.run.remote(v, self.cid), get_parameters)
-            res = self._wait_for_client_result()
+            self.actor_pool.submit_client_job(lambda a, v : a.run.remote(v, self.cid), get_parameters, self.cid)
+            res = self.actor_pool.get_client_result(self.cid)
 
         except Exception as ex:
             log(ERROR, ex)
@@ -203,9 +178,8 @@ class RayClientProxyForActorPool(ClientProxy):
                                              fit_ins=ins,
                                              )
         try:
-            self.actor_pool.submit(lambda a, v : a.run.remote(v, self.cid), fit)
-            #! This is not ideal. A preferred solution would be to collect results from actor pool in server.fit_clients()
-            res = self._wait_for_client_result()
+            self.actor_pool.submit_client_job(lambda a, v : a.run.remote(v, self.cid), fit, self.cid)
+            res = self.actor_pool.get_client_result(self.cid)
 
         except Exception as ex:
             log(ERROR, ex)
@@ -221,13 +195,12 @@ class RayClientProxyForActorPool(ClientProxy):
         """Evaluate model parameters on the locally held dataset."""
         def evaluate():
             client: Client = _create_client(self.client_fn, self.cid)
-            #! This is not ideal. A preferred solution would be to collect results from actor pool in server.evaluate_clients()
             return maybe_call_evaluate(client=client,
                                              evaluate_ins=ins,
                                              )
         try:
-            self.actor_pool.submit(lambda a, v : a.run.remote(v, self.cid), evaluate)
-            res = self._wait_for_client_result()
+            self.actor_pool.submit_client_job(lambda a, v : a.run.remote(v, self.cid), evaluate, self.cid)
+            res = self.actor_pool.get_client_result(self.cid)
 
         except Exception as ex:
             log(ERROR, ex)

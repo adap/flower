@@ -20,7 +20,6 @@ from logging import ERROR, INFO
 from typing import Any, Callable, Dict, List, Optional
 
 import ray
-from ray.util.actor_pool import ActorPool
 
 from flwr.client import ClientLike
 from flwr.common import EventType, event
@@ -30,8 +29,8 @@ from flwr.server.app import ServerConfig, init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
-from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy, RayClientProxyForActorPool
-from flwr.simulation.ray_transport.ray_actor import VirtualClientEngineActor
+from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy, RayActorClientProxy
+from flwr.simulation.ray_transport.ray_actor import VirtualClientEngineActor, VirtualClientEngineActorPool
 
 INVALID_ARGUMENTS_START_SIMULATION = """
 INVALID ARGUMENTS ERROR
@@ -192,8 +191,8 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     # instantiate ActorPool
     # Let's spawn a pool with as many actors as could be fit in the system
-    num_gpus = ray.cluster_resources()['GPU']
-    num_actors = int(num_gpus / resources['num_gpus'])
+    num_gpus = ray.cluster_resources()['CPU']
+    num_actors = int(num_gpus / resources['num_cpus'])
     actors = [VirtualClientEngineActor.options(**resources).remote(i) for i in range(num_actors)]
     log(
         INFO,
@@ -201,14 +200,14 @@ def start_simulation(  # pylint: disable=too-many-arguments
         len(actors)
     )
     
-    pool = ActorPool(actors)
+    pool = VirtualClientEngineActorPool(actors)
     # ClientProxies might be retrieving results from the ActorPool that belong to other clients
     # when this happens, the client proxy will put that result in the cache. All clients check
     # if their result is in the cache periodically.
     results_cache = {}
 
     for cid in cids:
-        client_proxy = RayClientProxyForActorPool(
+        client_proxy = RayActorClientProxy(
             client_fn=client_fn,
             cid=cid,
             actor_pool=pool,
