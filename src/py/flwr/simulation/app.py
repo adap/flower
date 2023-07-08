@@ -179,39 +179,49 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     # Initialize Ray
     ray.init(**ray_init_args)
+    cluster_resources = ray.cluster_resources()
     log(
         INFO,
         "Flower VCE: Ray initialized with resources: %s",
-        ray.cluster_resources(),
+        cluster_resources,
     )
 
-    # Register one RayClientProxy object for each client with the ClientManager
-    resources = client_resources if client_resources is not None else {}
+    # log resources for each virtual_client
+    # If not specified by user, Ray uses default: 1x CPU, 0x GPU
+    minimal_resources = {'num_cpus': 1.0, 'num_gpus': 0.0}
+    resources = client_resources if client_resources is not None else minimal_resources
+    log(
+        INFO,
+        "Flower VCE: Resources for each Virtual Client: %s",
+        resources,
+    )
 
+    # determine how many actors can be added to the pool.
+    # this a function of the total resources visible to Ray and
+    # the resources allocated for each virtual client
+    num_cpus = cluster_resources['CPU']
+    num_gpus = cluster_resources.get('GPU', 0) # there might not be GPU
 
+    num_actors = int(num_cpus / resources['num_cpus'])
+
+    if num_gpus:
+        num_actors = min(num_actors, int(num_gpus / resources['num_gpus']) )
+ 
     # instantiate ActorPool
-    # Let's spawn a pool with as many actors as could be fit in the system
-    num_gpus = ray.cluster_resources()['CPU']
-    num_actors = int(num_gpus / resources['num_cpus'])
     actors = [VirtualClientEngineActor.options(**resources).remote(i) for i in range(num_actors)]
     log(
         INFO,
-        "Flower VCE: creating ActorPool with %s actors",
+        "Flower VCE: Creating ActorPool with %s actors",
         len(actors)
     )
     
     pool = VirtualClientEngineActorPool(actors)
-    # ClientProxies might be retrieving results from the ActorPool that belong to other clients
-    # when this happens, the client proxy will put that result in the cache. All clients check
-    # if their result is in the cache periodically.
-    results_cache = {}
 
     for cid in cids:
         client_proxy = RayActorClientProxy(
             client_fn=client_fn,
             cid=cid,
             actor_pool=pool,
-            cache=results_cache,
         )
         initialized_server.client_manager().register(client=client_proxy)
 

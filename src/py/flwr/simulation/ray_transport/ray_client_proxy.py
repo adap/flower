@@ -120,11 +120,10 @@ class RayClientProxy(ClientProxy):
 class RayActorClientProxy(ClientProxy):
     """Flower client proxy which delegates work using Ray."""
 
-    def __init__(self, client_fn: ClientFn, cid: str, actor_pool: VirtualClientEngineActorPool, cache: Dict):
+    def __init__(self, client_fn: ClientFn, cid: str, actor_pool: VirtualClientEngineActorPool):
         super().__init__(cid)
         self.client_fn = client_fn
         self.actor_pool = actor_pool
-        self.cache = cache
 
     def get_properties(
         self, ins: common.GetPropertiesIns, timeout: Optional[float]
