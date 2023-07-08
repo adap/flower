@@ -1,53 +1,48 @@
-###########################################################################
-# This is the main file, it creates and connects all the building         #
-# blocks of your experiment (processes the dataset, defines the clients,  #
-# the strategy, and how the global model is going to be evaluated, etc)   #
-# and it starts the simulation. At the end, this script saves the results.#
-###########################################################################
+"""Create and connect the building blocks for your experiments; start the simulation.
 
-
+It includes processioning the dataset, instantiate strategy, specify how the global
+model is going to be evaluated, etc. At the end, this script saves the results.
+"""
 # these are the basic packages you'll need here
 # feel free to remove some if aren't needed
-import flwr as fl
 import hydra
-from hydra.core.hydra_config import HydraConfig
-from hydra.utils import call, instantiate
 from omegaconf import DictConfig, OmegaConf
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig) -> None:
-    """Main function to run this baseline.
+    """Run the baseline.
 
     Parameters
     ----------
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
-
-    ## 1. print parsed config
+    # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
 
-    ## 2. prepare your dataset
+    # 2. Prepare your dataset
     # here you should call a function in datasets.py that returns whatever is needed to:
-    # (1) ensure the server can access the dataset used to evaluate your model after aggregation
-    # (2) tell each client what dataset partitions they should use (e.g. a this could be a location
-    # in the file system, a list of dataloader, a list of ids to extract from a dataset, it's up to you)
+    # (1) ensure the server can access the dataset used to evaluate your model after
+    # aggregation
+    # (2) tell each client what dataset partitions they should use (e.g. a this could
+    # be a location in the file system, a list of dataloader, a list of ids to extract
+    # from a dataset, it's up to you)
 
-    ## 3. Define your clients
-    # Define a function that returns another function that will be used during simulation
-    # to instantiate each individual client
+    # 3. Define your clients
+    # Define a function that returns another function that will be used during
+    # simulation to instantiate each individual client
     # client_fn = client.<my_function_that_returns_a_function>()
 
-    ## 4. Define your strategy
+    # 4. Define your strategy
     # pass all relevant argument (including the global dataset used after aggregation,
     # if needed by your method.)
     # strategy = instantiate(cfg.strategy, <additional arguments if desired>)
 
-    ## 5. Start Simulation
+    # 5. Start Simulation
     # history = fl.simulation.start_simulation(<arguments for simulation>)
 
-    ## 6. Save your results
+    # 6. Save your results
     # Here you can save the `history` returned by the simulation and include
     # also other buffers, statistics, info needed to be saved in order to later
     # on generate the plots you provide in the README.md. You can for instance

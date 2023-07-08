@@ -124,7 +124,6 @@ html_theme_options = {
     #     "color-brand-content": "#292F36",
     #     "color-admonition-background": "#F2B705",
     # },
-    "announcement": 'Flower Summit 2023 <a href="https://flower.dev/conf/flower-summit-2023/">register now</a>',
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
