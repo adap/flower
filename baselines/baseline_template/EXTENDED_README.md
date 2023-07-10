@@ -67,7 +67,7 @@ pyenv local <python-version>
 # set that version for poetry
 poetry env use <python-version>
 
-# then you can install it (see the next setp)
+# then you can install your Poetry environment (see the next setp)
 ```
 
 ### Installing Your Environment
