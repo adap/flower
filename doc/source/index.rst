@@ -42,10 +42,7 @@ Flower Baselines are a collection of organised scripts used to reproduce results
    :maxdepth: 1
    :caption: Flower Baselines
    
-   baselines/tutorials
-   baselines/guides
-   baselines/reference
-   baselines/explanations
+   baselines_link
 
 Contributor Guide
 -----------------
