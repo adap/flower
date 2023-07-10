@@ -46,6 +46,7 @@ jobs:
 
   tensorflow:
     runs-on: ubuntu-22.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
@@ -70,7 +71,7 @@ jobs:
       - name: Download Datasets
         run: |
           python -c "import tensorflow as tf; tf.keras.datasets.cifar10.load_data()"
-      - name: Run tests
+      - name: Run edge client test
         run: |
           cd e2e/tensorflow
           ./test.sh
