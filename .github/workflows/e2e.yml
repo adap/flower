@@ -14,6 +14,7 @@ env:
 jobs:
   pytorch:
     runs-on: ubuntu-22.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
@@ -39,7 +40,7 @@ jobs:
         run: |
           cd e2e/pytorch
           python -c "from torchvision.datasets import CIFAR10; CIFAR10('./data', download=True)"
-      - name: Run tests
+      - name: Run edge client test
         run: |
           cd e2e/pytorch
           ./test.sh
