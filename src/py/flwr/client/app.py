@@ -54,6 +54,7 @@ from .client import Client
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle
+from .message_handler.task_handler import validate_task_ins
 from .numpy_client import NumPyClient
 from .numpy_client import has_evaluate as numpyclient_has_evaluate
 from .numpy_client import has_fit as numpyclient_has_fit
@@ -199,7 +200,7 @@ def start_client(
 
             while True:
                 task_ins = receive()
-                if task_ins is None:
+                if task_ins is None or not validate_task_ins(task_ins):
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
                 task_res, sleep_duration, keep_going = handle(client, task_ins)

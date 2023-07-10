@@ -45,6 +45,32 @@ def get_server_message(
     return task_ins, task_ins.task.legacy_server_message
 
 
+def validate_task_ins(task_ins: TaskIns) -> bool:
+    """Validate a TaskIns before it entering the message handling process.
+
+    Parameters
+    ----------
+    task_ins: TaskIns
+        The task instruction coming from the server.
+
+    Returns
+    -------
+    is_valid: bool
+        True if the TaskIns is deemed valid and therefore suitable for
+        undergoing the message handling process, False otherwise.
+    """
+    # Check if the task_ins contains legacy_server_message.
+    # If so, check if ServerMessage is one of
+    # {GetPropertiesIns, GetParametersIns, FitIns, EvaluateIns}
+    if not task_ins.HasField("task") or (
+        task_ins.task.HasField("legacy_server_message")
+        and task_ins.task.legacy_server_message.WhichOneof("msg") == "reconnect_ins"
+    ):
+        return False
+
+    return True
+
+
 def get_task_ins_from_pull_task_ins_response(
     pull_task_ins_response: PullTaskInsResponse,
 ) -> Optional[TaskIns]:
