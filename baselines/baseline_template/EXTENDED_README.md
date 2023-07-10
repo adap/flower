@@ -36,15 +36,15 @@ While `README.md` should include information about the baseline you implement an
     ./dev/test-baseline.sh <baseline-name>
     ./dev/test-baseline-structure.sh <baseline-name>
     ```
-Both `test-baseline.sh` and `test-baseline-structure.sh` will also be automatically run when you create a PR, and both tests need to pass for the baseline to be merged.
-To automatically solve some formatting issues and apply easy fixes, please run the formatting script:
+    Both `test-baseline.sh` and `test-baseline-structure.sh` will also be automatically run when you create a PR, and both tests need to pass for the baseline to be merged.
+    To automatically solve some formatting issues and apply easy fixes, please run the formatting script:
     ```bash
     # After activating your environment and from your baseline's directory
     cd .. # to go to the top-level directory of all baselines
     ./dev/format-baseline.sh <baseline-name>
     ```
-6. Ensure that the Python environment for your baseline can be created without errors by simply running `poetry install` and that this is properly described later when you complete the `Environment Setup` section in `README.md`. This is specially important if your environment requires additional steps after doing `poetry install`.
-7. Ensure that your baseline runs with default arguments by running `poetry run python -m <baseline-name>.main`. Then, describe this and other forms of running your code in the `Running the Experiments` section in `README.md`.
+7. Ensure that the Python environment for your baseline can be created without errors by simply running `poetry install` and that this is properly described later when you complete the `Environment Setup` section in `README.md`. This is specially important if your environment requires additional steps after doing `poetry install`.
+8. Ensure that your baseline runs with default arguments by running `poetry run python -m <baseline-name>.main`. Then, describe this and other forms of running your code in the `Running the Experiments` section in `README.md`.
 9. Once your code is ready and you have checked:
     *    that following the instructions in your `README.md` the Python environment can be created correctly
 
