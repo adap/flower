@@ -29,9 +29,17 @@ While `README.md` should include information about the baseline you implement an
 > :warning: Make sure the variable `name` in `pyproject.toml` is set to the name of the sub-directory containing all your code.
 
 5. Add your dependencies to the `pyproject.toml` (see below a few examples on how to do it). Read more about Poetry below in this `EXTENDED_README.md`.
-6. You regularly check that your coding style and the documentation you add follows standard practices. We have added a script that would help you achieve this. You can executed as follows:
+6. Regularly check that your coding style and the documentation you add follow good coding practices. To test whether your code meets the requirements, please run the following:
     ```bash
-    # after activating your environment and from your baseline's directory
+    # After activating your environment and from your baseline's directory
+    cd .. # to go to the top-level directory of all baselines
+    ./dev/test-baseline.sh <baseline-name>
+    ./dev/test-baseline-structure.sh <baseline-name>
+    ```
+Both `test-baseline.sh` and `test-baseline-structure.sh` will also be automatically run when you create a PR, and both tests need to pass for the baseline to be merged.
+To automatically solve some formatting issues and apply easy fixes, please run the formatting script:
+    ```bash
+    # After activating your environment and from your baseline's directory
     cd .. # to go to the top-level directory of all baselines
     ./dev/format-baseline.sh <baseline-name>
     ```
