@@ -41,8 +41,27 @@ jobs:
             echo "$dir" >> "$GITHUB_OUTPUT"
           done
           echo "EOF" >> "$GITHUB_OUTPUT"
-          echo "github_output:"
-          echo "$GITHUB_OUTPUT"
+      - name: Validate changed/new baselines
+        id: validate_changed_baselines_dirs
+          dirs="${{ steps.find_changed_baselines_dirs.outputs.dirs }}"
+          dirs_array=()
+          while IFS= read -r line; do
+          dirs_array+=("$line")
+          done <<< "$dirs"
+          length=${#dirs_array[@]}
+          echo "The number of changed baselines is $length"
+  
+          if [ $length -gt 1 ]; then
+          echo "The changes should only apply to a single baseline"
+          exit 1
+          fi
+  
+          if [ $length -eq 0 ]; then
+          echo "The baselines were not changed"
+          exit 0
+          fi
+          
+          echo "$dirs[0]" >> "$GITHUB_OUTPUT"
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -55,29 +74,12 @@ jobs:
           poetry config virtualenvs.create false
       - name: Install dependencies
         run: |
+          dir="${{ steps.validate_changed_baselines_dirs.outputs.dirs }}"
+          cd "${dir}"
           python -m poetry install
       - name: Test
         run: |
-          dirs="${{ steps.find_changed_baselines_dirs.outputs.dirs }}"
-          dirs_array=()
-          while IFS= read -r line; do
-            dirs_array+=("$line")
-          done <<< "$dirs"
-          length=${#dirs_array[@]}
-          echo "The number of changed baselines is $length"
-          
-          if [ $length -gt 1 ]; then
-            echo "The changes should only apply to a single baseline"
-            exit 1
-          fi
-          
-          if [ $length -eq 0 ]; then
-            echo "The baselines were not changed"
-            exit 0
-          fi
-          
-          for dir in ${dirs}
-          do
-            echo "Testing ${dir}"
-            ./dev/test.sh $dir
-          done
+          dir="${{ steps.validate_changed_baselines_dirs.outputs.dirs }}"
+          echo "Testing ${dir}"
+          ./dev/test.sh $dir
+
