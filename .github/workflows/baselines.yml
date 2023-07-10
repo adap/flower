@@ -31,7 +31,6 @@ jobs:
       - name: Find changed/new baselines
         id: find_changed_baselines_dirs
         run: |
-          run: |
           if [ ${{ github.event_name }} == "push" ]
           then
             # Push event triggered when merging to main
