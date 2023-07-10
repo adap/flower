@@ -34,10 +34,10 @@ jobs:
           run: |
           if [ ${{ github.event_name }} == "push" ]
           then
-          # Push to main
+            # Push event triggered when merging to main
             change_references="HEAD..HEAD~1"
           else
-          # Pull request
+            # Pull request event triggered for any commit to a pull request
             change_references="main..HEAD"
           fi
           dirs=$(git diff --dirstat=files,0 ${change_references} . | awk '{print $2}' | grep -E '^baselines/[^/]*/$' | grep -v -e '^baselines/dev' -e '^baselines/baseline_template' -e '^baselines/flwr_baselines' | sed 's/^baselines\///')
