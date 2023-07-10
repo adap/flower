@@ -99,5 +99,11 @@ jobs:
         run: |
           dir="${{ steps.validate_changed_baselines_dirs.outputs.changed_dir }}"
           echo "Testing ${dir}"
-          ./dev/test.sh $dir
+          ./dev/test-baseline.sh $dir
+      - name: Test Structure
+        if: steps.validate_changed_baselines_dirs.outputs.baseline_changed == 'true'
+        run: |
+          dir="${{ steps.validate_changed_baselines_dirs.outputs.changed_dir }}"
+          echo "Testing ${dir}"
+          ./dev/test-baseline-structure.sh $dir
 
