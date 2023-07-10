@@ -80,6 +80,7 @@ jobs:
 
   bare:
     runs-on: ubuntu-22.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
@@ -96,7 +97,7 @@ jobs:
         run: |
           cd e2e/bare
           python -m poetry install
-      - name: Run tests
+      - name: Run edge client test
         run: |
           cd e2e/bare
           ./test.sh
