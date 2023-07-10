@@ -125,3 +125,32 @@ jobs:
         run: |
           cd e2e/jax
           ./test.sh
+
+
+  mxnet:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8.16
+      - name: Install
+        run: |
+          python -m pip install -U pip==22.3.1
+          python -m pip install -U setuptools==65.6.3
+          python -m pip install poetry==1.3.2
+          poetry config virtualenvs.create false
+      - name: Install dependencies
+        run: |
+          cd e2e/mxnet
+          python -m poetry install
+      - name: Download Datasets
+        run: |
+          cd e2e/mxnet
+          python -c "import mxnet as mx; mx.test_utils.get_mnist()"
+      - name: Run edge client test
+        run: |
+          cd e2e/mxnet
+          ./test.sh
