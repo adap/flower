@@ -29,8 +29,14 @@ from flwr.server.app import ServerConfig, init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
-from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy, RayActorClientProxy
-from flwr.simulation.ray_transport.ray_actor import VirtualClientEngineActor, VirtualClientEngineActorPool
+from flwr.simulation.ray_transport.ray_actor import (
+    VirtualClientEngineActor,
+    VirtualClientEngineActorPool,
+)
+from flwr.simulation.ray_transport.ray_client_proxy import (
+    RayActorClientProxy,
+    RayClientProxy,
+)
 
 INVALID_ARGUMENTS_START_SIMULATION = """
 INVALID ARGUMENTS ERROR
@@ -188,8 +194,10 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     # log resources for each virtual_client
     # If not specified by user, Ray uses default: 1x CPU, 0x GPU
-    minimal_resources = {'num_cpus': 1.0, 'num_gpus': 0.0}
-    resources = client_resources if client_resources is not None else minimal_resources
+    resources = {"num_cpus": 1.0, "num_gpus": 0.0}
+    if client_resources:
+        for k, v in client_resources.items():
+            resources[k] = v
     log(
         INFO,
         "Flower VCE: Resources for each Virtual Client: %s",
@@ -199,22 +207,22 @@ def start_simulation(  # pylint: disable=too-many-arguments
     # determine how many actors can be added to the pool.
     # this a function of the total resources visible to Ray and
     # the resources allocated for each virtual client
-    num_cpus = cluster_resources['CPU']
-    num_gpus = cluster_resources.get('GPU', 0) # there might not be GPU
+    num_cpus = cluster_resources["CPU"]
+    num_gpus = cluster_resources.get("GPU", 0)  # there might not be GPU
 
-    num_actors = int(num_cpus / resources['num_cpus'])
+    num_actors = int(num_cpus / resources["num_cpus"])
 
-    if num_gpus:
-        num_actors = min(num_actors, int(num_gpus / resources['num_gpus']) )
- 
+    # if a GPU is present and client resources do require one
+    if num_gpus and resources["num_gpus"] > 0.0:
+        num_actors = min(num_actors, int(num_gpus / resources["num_gpus"]))
+
     # instantiate ActorPool
-    actors = [VirtualClientEngineActor.options(**resources).remote(i) for i in range(num_actors)]
-    log(
-        INFO,
-        "Flower VCE: Creating ActorPool with %s actors",
-        len(actors)
-    )
-    
+    actors = [
+        VirtualClientEngineActor.options(**resources).remote(i)
+        for i in range(num_actors)
+    ]
+    log(INFO, "Flower VCE: Creating ActorPool with %s actors", len(actors))
+
     pool = VirtualClientEngineActorPool(actors)
 
     for cid in cids:

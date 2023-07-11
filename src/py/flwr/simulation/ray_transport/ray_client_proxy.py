@@ -16,8 +16,8 @@
 
 
 from logging import ERROR
-from typing import Callable, Dict, Optional, cast
 from time import sleep
+from typing import Callable, Dict, Optional, cast
 
 import ray
 
@@ -120,7 +120,9 @@ class RayClientProxy(ClientProxy):
 class RayActorClientProxy(ClientProxy):
     """Flower client proxy which delegates work using Ray."""
 
-    def __init__(self, client_fn: ClientFn, cid: str, actor_pool: VirtualClientEngineActorPool):
+    def __init__(
+        self, client_fn: ClientFn, cid: str, actor_pool: VirtualClientEngineActorPool
+    ):
         super().__init__(cid)
         self.client_fn = client_fn
         self.actor_pool = actor_pool
@@ -132,11 +134,15 @@ class RayActorClientProxy(ClientProxy):
 
         def get_properties():
             client: Client = _create_client(self.client_fn, self.cid)
-            return maybe_call_get_properties(client=client,
-                                             get_properties_ins=ins,
-                                             )
+            return maybe_call_get_properties(
+                client=client,
+                get_properties_ins=ins,
+            )
+
         try:
-            self.actor_pool.submit_client_job(lambda a, v : a.run.remote(v, self.cid), get_properties, self.cid)
+            self.actor_pool.submit_client_job(
+                lambda a, v: a.run.remote(v, self.cid), get_properties, self.cid
+            )
             res = self.actor_pool.get_client_result(self.cid)
 
         except Exception as ex:
@@ -154,11 +160,15 @@ class RayActorClientProxy(ClientProxy):
 
         def get_parameters():
             client: Client = _create_client(self.client_fn, self.cid)
-            return maybe_call_get_parameters(client=client,
-                                             get_parameters_ins=ins,
-                                             )
+            return maybe_call_get_parameters(
+                client=client,
+                get_parameters_ins=ins,
+            )
+
         try:
-            self.actor_pool.submit_client_job(lambda a, v : a.run.remote(v, self.cid), get_parameters, self.cid)
+            self.actor_pool.submit_client_job(
+                lambda a, v: a.run.remote(v, self.cid), get_parameters, self.cid
+            )
             res = self.actor_pool.get_client_result(self.cid)
 
         except Exception as ex:
@@ -171,13 +181,18 @@ class RayActorClientProxy(ClientProxy):
 
     def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
+
         def fit():
             client: Client = _create_client(self.client_fn, self.cid)
-            return maybe_call_fit(client=client,
-                                             fit_ins=ins,
-                                             )
+            return maybe_call_fit(
+                client=client,
+                fit_ins=ins,
+            )
+
         try:
-            self.actor_pool.submit_client_job(lambda a, v : a.run.remote(v, self.cid), fit, self.cid)
+            self.actor_pool.submit_client_job(
+                lambda a, v: a.run.remote(v, self.cid), fit, self.cid
+            )
             res = self.actor_pool.get_client_result(self.cid)
 
         except Exception as ex:
@@ -192,13 +207,18 @@ class RayActorClientProxy(ClientProxy):
         self, ins: common.EvaluateIns, timeout: Optional[float]
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
+
         def evaluate():
             client: Client = _create_client(self.client_fn, self.cid)
-            return maybe_call_evaluate(client=client,
-                                             evaluate_ins=ins,
-                                             )
+            return maybe_call_evaluate(
+                client=client,
+                evaluate_ins=ins,
+            )
+
         try:
-            self.actor_pool.submit_client_job(lambda a, v : a.run.remote(v, self.cid), evaluate, self.cid)
+            self.actor_pool.submit_client_job(
+                lambda a, v: a.run.remote(v, self.cid), evaluate, self.cid
+            )
             res = self.actor_pool.get_client_result(self.cid)
 
         except Exception as ex:
