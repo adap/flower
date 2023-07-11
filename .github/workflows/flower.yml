@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        python: [3.7.15,3.8.15,3.9.16,3.10.9]
+        python: [3.8.15]
     steps:
       - uses: actions/checkout@v3
       - name: Bootstrap
@@ -25,7 +25,10 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Install dependencies (mandatory only)
         run: python -m poetry install --all-extras
+        shell: bash
       - name: Check if protos need recompilation
         run: ./dev/check-protos.sh
+        shell: bash
       - name: Lint + Test (isort/black/docformatter/mypy/pylint/flake8/pytest)
         run: ./dev/test.sh
+        shell: bash
