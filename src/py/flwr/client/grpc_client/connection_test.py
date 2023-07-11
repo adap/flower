@@ -93,12 +93,15 @@ def test_integration_connection() -> None:
         messages_received: int = 0
 
         with grpc_connection(server_address=f"[::]:{port}") as conn:
-            receive, send = conn
+            receive, send, _, _ = conn
 
             # Setup processing loop
             while True:
                 # Block until server responds with a message
                 server_message = receive()
+
+                if server_message is None:
+                    raise ValueError("Unexpected None value")
 
                 messages_received += 1
                 if server_message.HasField("reconnect_ins"):

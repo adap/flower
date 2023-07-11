@@ -19,13 +19,13 @@ class Net(nn.Module):
     Decentralized Data] (https://arxiv.org/pdf/1602.05629.pdf)
     """
 
-    def __init__(self) -> None:
+    def __init__(self, num_classes: int) -> None:
         super().__init__()
         self.conv1 = nn.Conv2d(1, 32, 5, padding=1)
         self.conv2 = nn.Conv2d(32, 64, 5, padding=1)
         self.pool = nn.MaxPool2d(kernel_size=(2, 2), padding=1)
         self.fc1 = nn.Linear(64 * 7 * 7, 512)
-        self.fc2 = nn.Linear(512, 10)
+        self.fc2 = nn.Linear(512, num_classes)
 
     def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
         """Forward pass of the CNN.
@@ -44,9 +44,39 @@ class Net(nn.Module):
         output_tensor = self.pool(output_tensor)
         output_tensor = F.relu(self.conv2(output_tensor))
         output_tensor = self.pool(output_tensor)
-        output_tensor = nn.Flatten()(output_tensor)
+        output_tensor = torch.flatten(output_tensor, 1)
         output_tensor = F.relu(self.fc1(output_tensor))
         output_tensor = self.fc2(output_tensor)
+        return output_tensor
+
+
+class LogisticRegression(nn.Module):
+    """A network for logistic regression using a single fully connected layer.
+
+    As described in the Li et al., 2020 paper :
+
+    [Federated Optimization in Heterogeneous Networks]
+    (https://arxiv.org/pdf/1812.06127.pdf)
+    """
+
+    def __init__(self, num_classes: int) -> None:
+        super().__init__()
+        self.fc = nn.Linear(28 * 28, num_classes)
+
+    def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
+        """Forward pass.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input Tensor that will pass through the network
+
+        Returns
+        -------
+        torch.Tensor
+            The resulting Tensor after it has passed through the network
+        """
+        output_tensor = self.fc(torch.flatten(input_tensor, 1))
         return output_tensor
 
 
@@ -76,16 +106,16 @@ def train(  # pylint: disable=too-many-arguments
         Parameter for the weight of the proximal term.
     """
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate)
+    optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, weight_decay=0.001)
     global_params = [val.detach().clone() for val in net.parameters()]
     net.train()
     for _ in range(epochs):
-        net = _training_loop(
+        net = _train_one_epoch(
             net, global_params, trainloader, device, criterion, optimizer, proximal_mu
         )
 
 
-def _training_loop(  # pylint: disable=too-many-arguments
+def _train_one_epoch(  # pylint: disable=too-many-arguments
     net: nn.Module,
     global_params: List[Parameter],
     trainloader: DataLoader,
