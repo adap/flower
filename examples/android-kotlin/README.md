@@ -38,8 +38,6 @@ Push the second button and start the training.
 
 ______________________________________________________________________
 
-Note: don't follow the instructions below. They are left here for reference only.
-
 Original README from Flower Android example:
 
 # Flower Android Example (TensorFlowLite)
