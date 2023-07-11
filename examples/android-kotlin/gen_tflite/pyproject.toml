@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "toy-regression-eg"
+name = "gen_tflite"
 version = "0.1.0"
 description = ""
 authors = ["Steven Hé (Sīchàng) <sichang.he@dukekunshan.edu.cn>"]
