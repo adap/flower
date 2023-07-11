@@ -1,2 +1,2 @@
 include ':app'
-include ':FedCampus'
+include ':flower_tflite'
