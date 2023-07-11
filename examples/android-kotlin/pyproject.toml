@@ -1,13 +1,12 @@
 [tool.poetry]
-name = "gen-tflite"
+name = "flower-android-kotlin"
 version = "0.1.0"
 description = ""
 authors = ["Steven Hé (Sīchàng) <sichang.he@dukekunshan.edu.cn>"]
-readme = "README.md"
-packages = [{include = "tflite_convertor"}]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.8,<3.11"
+flwr = ">=1.0,<2.0"
 
 
 [build-system]

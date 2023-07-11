@@ -3,8 +3,6 @@ name = "toy-regression-eg"
 version = "0.1.0"
 description = ""
 authors = ["Steven Hé (Sīchàng) <sichang.he@dukekunshan.edu.cn>"]
-readme = "README.md"
-packages = [{ include = "toy_regression_eg" }]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
