@@ -22,3 +22,8 @@ cd doc
 make docs
 cd build/html
 aws s3 sync --delete --exclude ".*" --exclude "v/*" --acl public-read --cache-control "no-cache" ./ s3://flower.dev/docs
+
+cd ../../../baselines/doc
+make docs
+cd build/html
+aws s3 sync --delete --exclude ".*" --exclude "v/*" --acl public-read --cache-control "no-cache" ./ s3://flower.dev/docs/baselines
