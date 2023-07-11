@@ -17,7 +17,7 @@ x_test, y_test = x_test[:10], y_test[:10]
 
 
 # Define Flower client
-class CifarClient(fl.client.NumPyClient):
+class FlowerClient(fl.client.NumPyClient):
     def get_parameters(self, config):
         return model.get_weights()
 
@@ -32,5 +32,6 @@ class CifarClient(fl.client.NumPyClient):
         return loss, len(x_test), {"accuracy": accuracy}
 
 
-# Start Flower client
-fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=CifarClient())
+if __name__ == "__main__":
+    # Start Flower client
+    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=FlowerClient())
