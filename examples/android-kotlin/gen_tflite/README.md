@@ -2,6 +2,8 @@
 
 This module provides infrastructure to generate `.tflite` files that are compatible with the Android package.
 
+*Note* that this module currently doesn't work on macOS.
+
 For example implementations, check out `cifar10_eg/` and `toy_regression_eg/`.
 
 ## Dependencies installation
