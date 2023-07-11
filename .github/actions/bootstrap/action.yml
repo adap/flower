@@ -1,5 +1,5 @@
-name: "Flower CI bootstrap action"
-description: "Setup test environment for Flower CI"
+name: "bootstrap"
+description: "Bootstrap Python environment including Python dependencies and configure optimizations."
 inputs:
   python-version:
     description: "Version range or exact version of Python or PyPy to use, using SemVer's version range syntax."
