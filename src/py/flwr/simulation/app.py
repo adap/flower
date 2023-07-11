@@ -33,10 +33,7 @@ from flwr.simulation.ray_transport.ray_actor import (
     VirtualClientEngineActor,
     VirtualClientEngineActorPool,
 )
-from flwr.simulation.ray_transport.ray_client_proxy import (
-    RayActorClientProxy,
-    RayClientProxy,
-)
+from flwr.simulation.ray_transport.ray_client_proxy import RayActorClientProxy
 
 INVALID_ARGUMENTS_START_SIMULATION = """
 INVALID ARGUMENTS ERROR

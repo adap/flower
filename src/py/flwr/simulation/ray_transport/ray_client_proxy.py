@@ -16,7 +16,6 @@
 
 
 from logging import ERROR
-from time import sleep
 from typing import Callable, Dict, Optional, cast
 
 import ray
