@@ -45,7 +45,7 @@ def get_server_message(
     return task_ins, task_ins.task.legacy_server_message
 
 
-def validate_task_ins(task_ins: TaskIns) -> bool:
+def validate_task_ins(task_ins: TaskIns, disgard_reconnect_ins: bool = True) -> bool:
     """Validate a TaskIns before it entering the message handling process.
 
     Parameters
@@ -61,10 +61,15 @@ def validate_task_ins(task_ins: TaskIns) -> bool:
     """
     # Check if the task_ins contains legacy_server_message.
     # If so, check if ServerMessage is one of
-    # {GetPropertiesIns, GetParametersIns, FitIns, EvaluateIns}
-    if not task_ins.HasField("task") or (
-        task_ins.task.HasField("legacy_server_message")
-        and task_ins.task.legacy_server_message.WhichOneof("msg") == "reconnect_ins"
+    # {GetPropertiesIns, GetParametersIns, FitIns, EvaluateIns, ReconnectIns*}
+    # Discard ReconnectIns if disgard_reconnect_ins is true.
+    if (
+        not task_ins.HasField("task")
+        or not task_ins.task.HasField("legacy_server_message")
+        or (
+            disgard_reconnect_ins
+            and task_ins.task.legacy_server_message.WhichOneof("msg") == "reconnect_ins"
+        )
     ):
         return False
 
@@ -85,14 +90,20 @@ def get_task_ins_from_pull_task_ins_response(
     return task_ins
 
 
-def get_server_message_from_task_ins(task_ins: TaskIns) -> Optional[ServerMessage]:
+def get_server_message_from_task_ins(
+    task_ins: TaskIns, exclude_reconnect_ins: bool = True
+) -> Optional[ServerMessage]:
     """Get ServerMessage from TaskIns, if available."""
-    # Discard the message if it is not in
+    # Keep the message if it is in
     # {GetPropertiesIns, GetParametersIns, FitIns, EvaluateIns}
+    # Keep ReconnectIns if exclude_reconnect_ins is False.
     if (
         not task_ins.HasField("task")
         or not task_ins.task.HasField("legacy_server_message")
-        or task_ins.task.legacy_server_message.WhichOneof("msg") == "reconnect_ins"
+        or (
+            exclude_reconnect_ins
+            and task_ins.task.legacy_server_message.WhichOneof("msg") == "reconnect_ins"
+        )
     ):
         return None
 

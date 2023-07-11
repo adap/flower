@@ -58,7 +58,7 @@ def handle(client: Client, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
         next message from the server (True) or disconnect and optionally
         reconnect later (False).
     """
-    server_msg = get_server_message_from_task_ins(task_ins)
+    server_msg = get_server_message_from_task_ins(task_ins, exclude_reconnect_ins=False)
     if server_msg is not None:
         client_msg, sleep_duration, keep_going = handle_legacy_message(
             client, server_msg

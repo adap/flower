@@ -22,6 +22,7 @@ from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast
 
 from flwr.client.message_handler.task_handler import (
     get_task_ins_from_pull_task_ins_response,
+    validate_task_ins,
 )
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.grpc import create_channel
@@ -145,8 +146,12 @@ def grpc_request_response(
         request = PullTaskInsRequest(node=node)
         response = stub.PullTaskIns(request=request)
 
-        # Remember the current TaskIns
+        # Get the current TaskIns
         task_ins: Optional[TaskIns] = get_task_ins_from_pull_task_ins_response(response)
+
+        # Discard the current TaskIns if not valid
+        if task_ins is not None and not validate_task_ins(task_ins):
+            task_ins = None
 
         # Remember `task_ins` until `task_res` is available
         state[KEY_TASK_INS] = task_ins

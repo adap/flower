@@ -22,6 +22,7 @@ from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast
 
 from flwr.client.message_handler.task_handler import (
     get_task_ins_from_pull_task_ins_response,
+    validate_task_ins,
 )
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import MISSING_EXTRA_REST
@@ -49,6 +50,7 @@ PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 
 
 @contextmanager
+# pylint: disable-next=too-many-statements
 def http_request_response(
     server_address: str,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
@@ -157,10 +159,14 @@ def http_request_response(
         pull_task_ins_response_proto = PullTaskInsResponse()
         pull_task_ins_response_proto.ParseFromString(res.content)
 
-        # Remember the current TaskIns
+        # Get the current TaskIns
         task_ins: Optional[TaskIns] = get_task_ins_from_pull_task_ins_response(
             pull_task_ins_response_proto
         )
+
+        # Discard the current TaskIns if not valid
+        if task_ins is not None and not validate_task_ins(task_ins):
+            task_ins = None
 
         # Remember `task_ins` until `task_res` is available
         state[KEY_TASK_INS] = task_ins
