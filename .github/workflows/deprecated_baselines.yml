@@ -1,4 +1,4 @@
-name: Old-Baselines
+name: Deprecated-Baselines
 
 on:
   push:
@@ -16,7 +16,7 @@ defaults:
     working-directory: baselines/flwr_baselines
 
 jobs:
-  test_old_baselines:
+  test_deprecated_baselines:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
