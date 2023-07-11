@@ -54,7 +54,13 @@ jobs:
             # Pull request event triggered for any commit to a pull request
             change_references="main..HEAD"
           fi
-          dirs=$(git diff --dirstat=files,0 ${change_references} . | awk '{print $2}' | grep -E '^baselines/[^/]*/$' | grep -v -e '^baselines/dev' -e '^baselines/baseline_template' -e '^baselines/flwr_baselines' | sed 's/^baselines\///')
+          dirs=$(git diff --dirstat=files,0 ${change_references} . | awk '{print $2}' | grep -E '^baselines/[^/]*/$' | \
+          grep -v \
+            -e '^baselines/dev' \
+            -e '^baselines/baseline_template' \
+            -e '^baselines/flwr_baselines' \
+            -e '^baselines/doc' \
+          | sed 's/^baselines\///')
           # git diff --dirstat=files,0 ${change_references} . - checks the differences
           #   and a file is counted as changed if more than 0 lines were changed
           #   it returns the results in the format x.y% path/to/dir/
