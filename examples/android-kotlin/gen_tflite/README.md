@@ -8,11 +8,16 @@ For example implementations, check out `cifar10_eg/` and `toy_regression_eg/`.
 
 ## Dependencies installation
 
+Using [Poetry](https://python-poetry.org/docs/):
+
+```sh
+poetry install
+poetry shell
+```
+
 ```sh
 python3 -m pip install -r requirements.txt
 ```
-
-Please ignore `./pyproject.toml`.
 
 ## Model declaration
 
