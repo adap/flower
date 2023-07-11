@@ -25,10 +25,7 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Install dependencies (mandatory only)
         run: python -m poetry install --all-extras
-        shell: bash
       - name: Check if protos need recompilation
         run: ./dev/check-protos.sh
-        shell: bash
       - name: Lint + Test (isort/black/docformatter/mypy/pylint/flake8/pytest)
         run: ./dev/test.sh
-        shell: bash
