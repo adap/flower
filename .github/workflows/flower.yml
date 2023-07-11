@@ -16,27 +16,21 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        python: [3.7.15, 3.8.15, 3.9.16, 3.10.9]
+        python: [
+            3.7.15,
+            3.8.15,
+            3.9.16,
+            3.10.9
+          ]
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: ./.github/actions/bootstrap
         with:
           python-version: ${{ matrix.python }}
-      - name: Cache Python dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            **/poetry.lock
-            ~/.cache/pip
-            ~/.cache/pypoetry
-          key: ${{ runner.os }}-python-cache-${{ matrix.python }}-${{ hashFiles('**/pyproject.toml') }}
-      - name: Install build tools
-        run: |
-          python -m pip install -U pip==23.1.2
-          python -m pip install -U setuptools==68.0.0
-          python -m pip install -U poetry==1.5.1
-          poetry config virtualenvs.create false
+          pip-version: 23.1.2
+          setuptools-version: 68.0.0
+          poetry-version: 1.5.1
       - name: Install dependencies (mandatory only)
         run: python -m poetry install --all-extras
       - name: Check if protos need recompilation
