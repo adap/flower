@@ -7,10 +7,10 @@ authors = ["The Flower Authors <hello@flower.dev>"]
 [tool.poetry.dependencies]
 python = "^3.8"
 flwr = { path = "../../", develop = true, extras = ["simulation"] }
-jax = "^0.4.0"
-jaxlib = "^0.4.0"
-scikit-learn = "^1.1.1"
-numpy = "^1.21.4"
+jax = "*"
+jaxlib = "*"
+scikit-learn = "*"
+numpy = "*"
 
 [build-system]
 requires = ["poetry-core>=1.4.0"]
