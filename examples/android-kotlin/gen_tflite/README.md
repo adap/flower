@@ -2,7 +2,7 @@
 
 This module provides infrastructure to generate `.tflite` files that are compatible with the Android package.
 
-*Note* that this module currently doesn't work on macOS.
+*Note* that this module currently doesn't work on macOS due to TensorFlow Lite issues.
 
 For example implementations, check out `cifar10_eg/` and `toy_regression_eg/`.
 
@@ -15,9 +15,14 @@ poetry install
 poetry shell
 ```
 
+<details>
+<summary>Alternatively, with Pip.</summary>
+
 ```sh
 python3 -m pip install -r requirements.txt
 ```
+
+</details>
 
 ## Model declaration
 
