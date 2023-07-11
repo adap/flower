@@ -44,7 +44,10 @@ jobs:
         run: |
           cd e2e/pytorch
           ./test.sh
-
+      - name: Run virtual client test
+        run: |
+          cd e2e/pytorch
+          python simulation.py
 
   tensorflow:
     runs-on: ubuntu-22.04
@@ -77,6 +80,11 @@ jobs:
         run: |
           cd e2e/tensorflow
           ./test.sh
+      - name: Run virtual client test
+        run: |
+          cd e2e/tensorflow
+          python simulation.py
+
 
 
   bare:
@@ -102,6 +110,11 @@ jobs:
         run: |
           cd e2e/bare
           ./test.sh
+      - name: Run virtual client test
+        run: |
+          cd e2e/bare
+          python simulation.py
+
 
 
   pandas:
@@ -137,6 +150,11 @@ jobs:
         run: |
           cd e2e/pandas
           ./test.sh
+      - name: Run virtual client test
+        run: |
+          cd e2e/pandas
+          python simulation.py
+
 
 
   jax:
@@ -162,6 +180,11 @@ jobs:
         run: |
           cd e2e/jax
           ./test.sh
+      - name: Run virtual client test
+        run: |
+          cd e2e/jax
+          python simulation.py
+
 
 
   mxnet:
@@ -191,6 +214,11 @@ jobs:
         run: |
           cd e2e/mxnet
           ./test.sh
+      - name: Run virtual client test
+        run: |
+          cd e2e/mxnet
+          python simulation.py
+
 
   
   scikit:
@@ -220,3 +248,8 @@ jobs:
         run: |
           cd e2e/scikit-learn
           ./test.sh
+      - name: Run virtual client test
+        run: |
+          cd e2e/scikit-learn
+          python simulation.py
+
