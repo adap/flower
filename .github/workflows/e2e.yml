@@ -314,7 +314,7 @@ jobs:
           key: tfds-datasets
       - name: Download Datasets
         run: |
-          python -c "import tensorflow_datasets as tfds; tfds.load(name="iris", split=tfds.Split.TRAIN)"
+          python -c "import tensorflow_datasets as tfds; tfds.load(name='iris', split=tfds.Split.TRAIN)"
       - name: Run edge client test
         run: |
           cd e2e/tabnet
