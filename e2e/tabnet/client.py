@@ -78,5 +78,6 @@ class TabNetClient(fl.client.NumPyClient):
         return loss, len(ds_train), {"accuracy": accuracy}
 
 
-# Start Flower client
-fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=TabNetClient())
+if __name__ == "__main__":
+    # Start Flower client
+    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=TabNetClient())
