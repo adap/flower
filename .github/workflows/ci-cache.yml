@@ -18,6 +18,12 @@ jobs:
     runs-on: ubuntu-22.04-2core
     strategy:
       matrix:
+        # Only use versions found here:
+        # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md#python
+        # to ensure they are loaded from the runner image hosted tool cache
+        # https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#hosted-tool-cache
+        # By not specifying the patch version it is ensured that a version available in
+        # the hosted tool cache is used
         python-version: [3.7, 3.8, 3.9, 3.10]
     steps:
       - uses: actions/checkout@v3
