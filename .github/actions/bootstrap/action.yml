@@ -1,0 +1,38 @@
+name: "bootstrap"
+description: "Bootstrap Python environment (install and configure Python version and build tools)"
+inputs:
+  python-version:
+    description: "Version range or exact version of Python or PyPy to use, using SemVer's version range syntax."
+    required: true
+  pip-version: 
+    description: "Version of pip to be installed using pip"
+    required: true
+  setuptools-version:
+    description: "Version of setuptools to be installed using pip"
+    required: true
+  poetry-version:
+    description: "Version of poetry to be installed using pip"
+    required: true
+  install-pandoc:
+    description: "Boolean indicating if pandoc should be installed"
+    required: true
+    default: false
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ inputs.python-version }}
+    - name: Install pandoc
+      if: ${{ inputs.install-pandoc }}
+      run: |
+        sudo apt install pandoc
+      shell: bash
+    - name: Install build tools
+      run: |
+        python -m pip install -U pip==${{ inputs.pip-version }}
+        python -m pip install -U setuptools==${{ inputs.setuptools-version }}
+        python -m pip install -U poetry==${{ inputs.poetry-version }}
+        python -m poetry config virtualenvs.create false
+      shell: bash

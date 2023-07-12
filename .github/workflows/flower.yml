@@ -19,16 +19,13 @@ jobs:
         python: [3.7.15, 3.8.15, 3.9.16, 3.10.9]
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
         with:
           python-version: ${{ matrix.python }}
-      - name: Install build tools
-        run: |
-          python -m pip install -U pip==23.1.2
-          python -m pip install -U setuptools==68.0.0
-          python -m pip install -U poetry==1.5.1
-          poetry config virtualenvs.create false
+          pip-version: 23.1.2
+          setuptools-version: 68.0.0
+          poetry-version: 1.5.1
       - name: Install dependencies (mandatory only)
         run: python -m poetry install --all-extras
       - name: Check if protos need recompilation
