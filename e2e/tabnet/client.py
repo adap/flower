@@ -63,7 +63,7 @@ model.compile(optimizer, loss="categorical_crossentropy", metrics=["accuracy"])
 
 
 # Define Flower client
-class TabNetClient(fl.client.NumPyClient):
+class FlowerClient(fl.client.NumPyClient):
     def get_parameters(self, config):
         return model.get_weights()
 
@@ -80,4 +80,4 @@ class TabNetClient(fl.client.NumPyClient):
 
 if __name__ == "__main__":
     # Start Flower client
-    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=TabNetClient())
+    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=FlowerClient())
