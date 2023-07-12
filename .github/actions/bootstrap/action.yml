@@ -1,5 +1,5 @@
 name: "bootstrap"
-description: "Bootstrap Python environment including Python dependencies and configure optimizations."
+description: "Bootstrap Python environment (install and configure Python version and build tools)"
 inputs:
   python-version:
     description: "Version range or exact version of Python or PyPy to use, using SemVer's version range syntax."
