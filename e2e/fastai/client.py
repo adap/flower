@@ -1,10 +1,10 @@
 import warnings
 from collections import OrderedDict
 
+import flwr as fl
+import numpy as np
 import torch
 from fastai.vision.all import *
-
-import flwr as fl
 
 
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -16,6 +16,13 @@ path = untar_data(URLs.MNIST)
 dls = ImageDataLoaders.from_folder(
     path, valid_pct=0.5, train="training", valid="testing"
 )
+
+subset_size = 100 # Or whatever
+selected_train = np.random.choice(dls.train_ds.items, subset_size, replace=False)
+selected_valid = np.random.choice(dls.valid_ds.items, subset_size, replace=False)
+# Swap in the subset for the whole thing (Note: this mutates dls, so re-initialize before full training!)
+dls.train = dls.test_dl(selected_train, with_labels=True)
+dls.valid = dls.test_dl(selected_valid, with_labels=True)
 
 # Define model
 learn = vision_learner(dls, squeezenet1_1, metrics=error_rate)
