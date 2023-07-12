@@ -25,7 +25,7 @@ runs:
       with:
         python-version: ${{ inputs.python-version }}
     - name: Install pandoc
-      if: ${{input.install-pandoc}} == true
+      if: ${{inputs.install-pandoc}} == true
       run: |
         sudo apt install pandoc
       shell: bash
