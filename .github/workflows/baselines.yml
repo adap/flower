@@ -104,18 +104,14 @@ jobs:
           
           echo "changed_dir=${dirs[0]}" >> "$GITHUB_OUTPUT"
           echo "baseline_changed=true" >> "$GITHUB_OUTPUT"
-      - name: Set up Python
+      - name: Bootstrap
         if: steps.validate_changed_baselines_dirs.outputs.baseline_changed == 'true'
-        uses: actions/setup-python@v4
+        uses: ./.github/actions/bootstrap
         with:
           python-version: 3.8.15
-      - name: Install build tools
-        if: steps.validate_changed_baselines_dirs.outputs.baseline_changed == 'true'
-        run: |
-          python -m pip install -U pip==23.1.2
-          python -m pip install -U setuptools==68.0.0
-          python -m pip install -U poetry==1.5.1
-          poetry config virtualenvs.create false
+          pip-version: 23.1.2
+          setuptools-version: 68.0.0
+          poetry-version: 1.5.1
       - name: Install dependencies
         if: steps.validate_changed_baselines_dirs.outputs.baseline_changed == 'true'
         run: |
