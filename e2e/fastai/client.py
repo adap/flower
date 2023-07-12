@@ -31,7 +31,7 @@ learn = vision_learner(dls, squeezenet1_1, metrics=error_rate)
 # Define Flower client
 class FlowerClient(fl.client.NumPyClient):
     def get_parameters(self, config):
-        return [val.numpy() for _, val in learn.model.state_dict().items()]
+        return [val.cpu().numpy() for _, val in learn.model.state_dict().items()]
 
     def set_parameters(self, parameters):
         params_dict = zip(learn.model.state_dict().keys(), parameters)
