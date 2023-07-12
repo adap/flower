@@ -16,8 +16,10 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        # Check comment on matrix in ci-cache.yml
-        python: [3.7, 3.8, 3.9, 3.10]
+        # Latest version which comes cached in the host image can be found here:
+        # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md#python
+        # In case of a mismatch, the job has to download Python to install it.
+        python: [3.7.17, 3.8.17, 3.9.17, 3.10.12]
     steps:
       - uses: actions/checkout@v3
       - name: Bootstrap
