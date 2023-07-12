@@ -14,8 +14,6 @@ jobs:
       - uses: actions/checkout@v3
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
-        with:
-          python-version: 3.7.15
       - name: Release nightly
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}

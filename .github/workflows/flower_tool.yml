@@ -22,8 +22,6 @@ jobs:
       - uses: actions/checkout@v3
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
-        with:
-          python-version: 3.7.15
       - name: Install dependencies (mandatory + optional)
         run: |
           python -m poetry install
