@@ -34,7 +34,7 @@ def load_data():
         return tokenizer(examples["text"], truncation=True)
 
     # random 100 samples
-    population = random.sample(range(len(raw_datasets["train"])), 100)
+    population = random.sample(range(len(raw_datasets["train"])), 5)
 
     tokenized_datasets = raw_datasets.map(tokenize_function, batched=True)
     tokenized_datasets["train"] = tokenized_datasets["train"].select(population)
