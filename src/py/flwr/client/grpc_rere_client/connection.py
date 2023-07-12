@@ -20,10 +20,7 @@ from logging import DEBUG, ERROR, WARN
 from pathlib import Path
 from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast
 
-from flwr.client.message_handler.task_handler import (
-    get_task_ins_from_pull_task_ins_response,
-    validate_task_ins,
-)
+from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
@@ -147,7 +144,7 @@ def grpc_request_response(
         response = stub.PullTaskIns(request=request)
 
         # Get the current TaskIns
-        task_ins: Optional[TaskIns] = get_task_ins_from_pull_task_ins_response(response)
+        task_ins: Optional[TaskIns] = get_task_ins(response)
 
         # Discard the current TaskIns if not valid
         if task_ins is not None and not validate_task_ins(

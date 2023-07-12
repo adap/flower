@@ -20,10 +20,7 @@ from contextlib import contextmanager
 from logging import ERROR, INFO, WARN
 from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast
 
-from flwr.client.message_handler.task_handler import (
-    get_task_ins_from_pull_task_ins_response,
-    validate_task_ins,
-)
+from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import MISSING_EXTRA_REST
 from flwr.common.logger import log
@@ -160,9 +157,7 @@ def http_request_response(
         pull_task_ins_response_proto.ParseFromString(res.content)
 
         # Get the current TaskIns
-        task_ins: Optional[TaskIns] = get_task_ins_from_pull_task_ins_response(
-            pull_task_ins_response_proto
-        )
+        task_ins: Optional[TaskIns] = get_task_ins(pull_task_ins_response_proto)
 
         # Discard the current TaskIns if not valid
         if task_ins is not None and not validate_task_ins(
