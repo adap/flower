@@ -21,9 +21,6 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: 3.7.15
-          pip-version: 23.1.2
-          setuptools-version: 68.0.0
-          poetry-version: 1.5.1
       - name: Install dependencies
         run: |
           cd e2e/pytorch
@@ -55,9 +52,6 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: 3.7.15
-          pip-version: 23.1.2
-          setuptools-version: 68.0.0
-          poetry-version: 1.5.1
       - name: Install dependencies
         run: |
           cd e2e/tensorflow
@@ -90,9 +84,6 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: 3.7.15
-          pip-version: 23.1.2
-          setuptools-version: 68.0.0
-          poetry-version: 1.5.1
       - name: Install dependencies
         run: |
           cd e2e/bare
@@ -117,9 +108,6 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: 3.8.16
-          pip-version: 23.1.2
-          setuptools-version: 68.0.0
-          poetry-version: 1.5.1
       - name: Install dependencies
         run: |
           cd e2e/pandas
@@ -154,9 +142,6 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: 3.8.16
-          pip-version: 23.1.2
-          setuptools-version: 68.0.0
-          poetry-version: 1.5.1
       - name: Install dependencies
         run: |
           cd e2e/jax
@@ -181,9 +166,6 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: 3.8.16
-          pip-version: 23.1.2
-          setuptools-version: 68.0.0
-          poetry-version: 1.5.1
       - name: Install dependencies
         run: |
           cd e2e/mxnet
@@ -212,9 +194,6 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: 3.8.16
-          pip-version: 23.1.2
-          setuptools-version: 68.0.0
-          poetry-version: 1.5.1
       - name: Install dependencies
         run: |
           cd e2e/scikit-learn
@@ -242,9 +221,6 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: 3.8.17
-          pip-version: 23.1.2
-          setuptools-version: 68.0.0
-          poetry-version: 1.5.1
       - name: Install dependencies
         run: |
           cd e2e/opacus
@@ -277,9 +253,6 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: 3.8.17
-          pip-version: 23.1.2
-          setuptools-version: 68.0.0
-          poetry-version: 1.5.1
       - name: Install dependencies
         run: |
           cd e2e/fastai

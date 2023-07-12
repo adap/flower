@@ -20,9 +20,6 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: 3.7.15
-          pip-version: 23.1.2
-          setuptools-version: 68.0.0
-          poetry-version: 1.5.1
           install-pandoc: true
       - name: Install dependencies (mandatory only)
         run: python -m poetry install --extras "simulation"
@@ -43,9 +40,6 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: 3.7.15
-          pip-version: 23.1.2
-          setuptools-version: 68.0.0
-          poetry-version: 1.5.1
           install-pandoc: true
       - name: Install dependencies (mandatory only)
         run: python -m poetry install --extras "simulation"

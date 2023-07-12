@@ -16,9 +16,6 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: 3.7.15
-          pip-version: 23.1.2
-          setuptools-version: 68.0.0
-          poetry-version: 1.5.1
       - name: Release nightly
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
