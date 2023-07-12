@@ -15,7 +15,7 @@ env:
 
 jobs:
   test_core:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04-2core
     strategy:
       matrix:
         python-version: [3.7.15, 3.8.16, 3.9.16, 3.10.9]
