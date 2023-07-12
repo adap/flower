@@ -20,7 +20,11 @@ from logging import DEBUG, ERROR, WARN
 from pathlib import Path
 from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast
 
-from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
+from flwr.client.message_handler.task_handler import (
+    get_task_ins,
+    validate_task_ins,
+    validate_task_res,
+)
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
@@ -172,13 +176,10 @@ def grpc_request_response(
             return
         task_ins: TaskIns = cast(TaskIns, state[KEY_TASK_INS])
 
-        # Clear fields to be set
-        task_res.ClearField("task_id")
-        task_res.ClearField("group_id")
-        task_res.ClearField("workload_id")
-        task_res.task.ClearField("producer")
-        task_res.task.ClearField("consumer")
-        task_res.task.ClearField("ancestry")
+        # Check if fields to be set are not initialized
+        if not validate_task_res(task_res):
+            state[KEY_TASK_INS] = None
+            log(ERROR, "TaskRes has been initialized accidentally")
 
         # Fill `group_id` and `workload_id` in TaskRes
         # Note that protobuf API `protobuf.message.MergeFrom(other_msg)`

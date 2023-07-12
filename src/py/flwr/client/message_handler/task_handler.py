@@ -55,6 +55,40 @@ def validate_task_ins(task_ins: TaskIns, discard_reconnect_ins: bool) -> bool:
     return True
 
 
+def validate_task_res(task_res: TaskRes) -> bool:
+    """Validate a TaskRes before filling its fields in the `send()` function.
+
+    Parameters
+    ----------
+    task_res: TaskRes
+        The task response to be sent to the server.
+
+    Returns
+    -------
+    is_valid: bool
+        True if the `task_id`, `group_id`, and `workload_id` fields in TaskRes
+        and the `producer`, `consumer`, and `ancestry` fields in its sub-message Task
+        are not initialized accidentally elsewhere,
+        False otherwise.
+    """
+    # Retrieve initialized fields in TaskRes and Task
+    initialized_fields_in_task_res = {field.name for field, _ in task_res.ListFields()}
+    initialized_fields_in_task = {field.name for field, _ in task_res.task.ListFields()}
+
+    # Check if certain fields are already initialized
+    if (
+        "task_id" in initialized_fields_in_task_res
+        or "group_id" in initialized_fields_in_task_res
+        or "workload_id" in initialized_fields_in_task_res
+        or "producer" in initialized_fields_in_task
+        or "consumer" in initialized_fields_in_task
+        or "ancestry" in initialized_fields_in_task
+    ):
+        return False
+
+    return True
+
+
 def get_task_ins(
     pull_task_ins_response: PullTaskInsResponse,
 ) -> Optional[TaskIns]:
