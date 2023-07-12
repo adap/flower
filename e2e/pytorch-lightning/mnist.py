@@ -64,7 +64,7 @@ def load_data():
     # Training / validation set
     trainset = MNIST("./data", train=True, download=True, transform=transforms.ToTensor())
     trainset = Subset(trainset, range(1000))
-    mnist_train, mnist_val = random_split(trainset, [800, 100])
+    mnist_train, mnist_val = random_split(trainset, [0.8, 0.2])
     train_loader = DataLoader(mnist_train, batch_size=32, shuffle=True, num_workers=16)
     val_loader = DataLoader(mnist_val, batch_size=32, shuffle=False, num_workers=16)
 
