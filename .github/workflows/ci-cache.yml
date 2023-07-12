@@ -4,11 +4,6 @@ on:
   push:
     branches:
       - main
-  # Remove this section before merging as we
-  # only want to populate cache in main
-  pull_request:
-    branches:
-      - main
  
 env:
   FLWR_TELEMETRY_ENABLED: 0
