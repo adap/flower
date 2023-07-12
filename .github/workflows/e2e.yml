@@ -268,3 +268,35 @@ jobs:
         run: |
           cd e2e/fastai
           python simulation.py
+
+
+  huggingface:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+        with:
+          python-version: 3.8.17
+      - name: Install dependencies
+        run: |
+          cd e2e/huggingface
+          python -m poetry install
+      - name: Cache Datasets
+        uses: actions/cache@v2
+        with:
+          path: "~/.cache/huggingface/datasets"
+          key: huggingface-datasets
+      - name: Download Datasets
+        run: |
+          cd e2e/huggingface
+          python -c "from datasets import load_dataset; load_dataset('imdb')"
+      - name: Run edge client test
+        run: |
+          cd e2e/huggingface
+          ./test.sh
+      - name: Run virtual client test
+        run: |
+          cd e2e/huggingface
+          python simulation.py
