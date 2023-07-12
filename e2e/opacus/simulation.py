@@ -1,10 +1,11 @@
 import flwr as fl
 
-from client import FlowerClient
+from client import FlowerClient, Net
 
 def client_fn(cid):
     _ = cid
-    return FlowerClient()
+    model = Net()
+    return FlowerClient(model)
 
 hist = fl.simulation.start_simulation(
     client_fn=client_fn,

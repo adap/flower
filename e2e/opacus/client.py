@@ -94,7 +94,7 @@ trainloader, testloader, sample_rate = load_data()
 
 # Define Flower client.
 class FlowerClient(fl.client.NumPyClient):
-    def __init__(self) -> None:
+    def __init__(self, model) -> None:
         super().__init__()
         # Create a privacy engine which will add DP and keep track of the privacy budget.
         optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
@@ -136,5 +136,5 @@ class FlowerClient(fl.client.NumPyClient):
 if __name__ == "__main__":
     fl.client.start_numpy_client(
         server_address="127.0.0.1:8080",
-        client=FlowerClient()
+        client=FlowerClient(model)
     )
