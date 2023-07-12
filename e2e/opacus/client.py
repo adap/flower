@@ -81,9 +81,9 @@ def load_data():
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
     )
     data = CIFAR10("./data", train=True, download=True, transform=transform)
-    split = math.floor(len(data)* 0.1 * PARAMS["train_split"])
+    split = math.floor(len(data)* 0.01 * PARAMS["train_split"])
     trainset = torch.utils.data.Subset(data, list(range(0, split)))
-    testset = torch.utils.data.Subset(data, list(range(split, math.floor(len(data) * 0.1))))
+    testset = torch.utils.data.Subset(data, list(range(split, math.floor(len(data) * 0.01))))
     trainloader = DataLoader(trainset, PARAMS["batch_size"])
     testloader = DataLoader(testset, PARAMS["batch_size"])
     sample_rate = PARAMS["batch_size"] / len(trainset)
