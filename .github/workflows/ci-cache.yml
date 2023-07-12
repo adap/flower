@@ -1,0 +1,37 @@
+name: CI Cache
+
+on:
+  push:
+    branches:
+      - main
+  # Remove this section before merging as we
+  # only want to populate cache in main
+  pull_request:
+    branches:
+      - main
+ 
+env:
+  FLWR_TELEMETRY_ENABLED: 0
+
+jobs:
+  test_core:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        python-version: [3.7.15, 3.8.16, 3.9.16, 3.10.9]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: python -m poetry install --all-extras
+      - name: Cache Python dependencies
+        uses: actions/cache/save@v3
+        with:
+          path: |
+            **/poetry.lock
+            ~/.cache/pip
+            ~/.cache/pypoetry
+          key: ${{ runner.os }}-python-cache-${{ matrix.python-version }}-${{ hashFiles('**/pyproject.toml') }}

@@ -15,18 +15,6 @@ inputs:
     default: 1.5.1
 runs:
   using: "composite"
-  post:
-    steps:
-      - name: Cache Python dependencies
-        if: github.ref == 'refs/heads/main'
-        uses: actions/cache/save@v3
-        with:
-          path: |
-            **/poetry.lock
-            ~/.cache/pip
-            ~/.cache/pypoetry
-          key: ${{ runner.os }}-python-cache-${{ python-version }}-${{ hashFiles('**/pyproject.toml') }}
-  post-if: success() && github.ref == 'refs/heads/main'
   steps:
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -39,7 +27,7 @@ runs:
           **/poetry.lock
           ~/.cache/pip
           ~/.cache/pypoetry
-        key: ${{ runner.os }}-python-cache-${{ python-version }}-${{ hashFiles('**/pyproject.toml') }}
+        key: ${{ runner.os }}-python-cache-${{ inputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
     - name: Install build tools
       run: |
         python -m pip install -U pip==${{ inputs.pip-version }}
@@ -47,3 +35,4 @@ runs:
         python -m pip install -U poetry==${{ inputs.poetry-version }}
         python -m poetry config virtualenvs.create false
       shell: bash
+
