@@ -23,8 +23,7 @@ jobs:
           pip-version: 23.1.2
           setuptools-version: 68.0.0
           poetry-version: 1.5.1
-      - name: Install pandoc
-        run: sudo apt install pandoc
+          install-pandoc: true
       - name: Install dependencies (mandatory only)
         run: python -m poetry install --extras "simulation"
       - name: Build and deploy docs
@@ -47,8 +46,7 @@ jobs:
           pip-version: 23.1.2
           setuptools-version: 68.0.0
           poetry-version: 1.5.1
-      - name: Install pandoc
-        run: sudo apt install pandoc
+          install-pandoc: true
       - name: Install dependencies (mandatory only)
         run: python -m poetry install --extras "simulation"
       - name: Build and deploy docs
