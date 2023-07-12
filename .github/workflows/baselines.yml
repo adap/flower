@@ -106,8 +106,6 @@ jobs:
           echo "baseline_changed=true" >> "$GITHUB_OUTPUT"
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
-        with:
-          python-version: 3.8.16
       - name: Install dependencies
         if: steps.validate_changed_baselines_dirs.outputs.baseline_changed == 'true'
         run: |
