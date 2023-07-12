@@ -15,26 +15,10 @@
 """Flower driver SDK."""
 
 
-from .driver import Driver as Driver
-from .messages import CreateTasksRequest as CreateTasksRequest
-from .messages import CreateTasksResponse as CreateTasksResponse
-from .messages import GetClientsRequest as GetClientsRequest
-from .messages import GetClientsResponse as GetClientsResponse
-from .messages import GetResultsRequest as GetResultsRequest
-from .messages import GetResultsResponse as GetResultsResponse
-from .messages import Result as Result
-from .messages import Task as Task
-from .messages import TaskAssignment as TaskAssignment
+from .app import start_driver
+from .driver import Driver
 
 __all__ = [
+    "start_driver",
     "Driver",
-    "CreateTasksRequest",
-    "CreateTasksResponse",
-    "GetClientsRequest",
-    "GetClientsResponse",
-    "GetResultsRequest",
-    "GetResultsResponse",
-    "Task",
-    "TaskAssignment",
-    "Result",
 ]

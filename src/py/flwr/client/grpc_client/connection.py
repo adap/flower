@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Contextmanager managing a gRPC channel to the Flower server."""
+"""Contextmanager for a gRPC streaming channel to the Flower server."""
 
 
 from contextlib import contextmanager
 from logging import DEBUG
+from pathlib import Path
 from queue import Queue
-from typing import Callable, Iterator, Optional, Tuple
+from typing import Callable, Iterator, Optional, Tuple, Union
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.grpc import create_channel
@@ -42,8 +43,15 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 def grpc_connection(
     server_address: str,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
-    root_certificates: Optional[bytes] = None,
-) -> Iterator[Tuple[Callable[[], ServerMessage], Callable[[ClientMessage], None]]]:
+    root_certificates: Optional[Union[bytes, str]] = None,
+) -> Iterator[
+    Tuple[
+        Callable[[], Optional[ServerMessage]],
+        Callable[[ClientMessage], None],
+        Optional[Callable[[], None]],
+        Optional[Callable[[], None]],
+    ]
+]:
     """Establish a gRPC connection to a gRPC server.
 
     Parameters
@@ -61,9 +69,9 @@ def grpc_connection(
         increased limit and block larger messages.
         (default: 536_870_912, this equals 512MB)
     root_certificates : Optional[bytes] (default: None)
-        The PEM-encoded root certificates as a byte string. If provided, a secure
-        connection using the certificates will be established to a SSL-enabled
-        Flower server.
+        The PEM-encoded root certificates as a byte string or a path string.
+        If provided, a secure connection using the certificates will be
+        established to an SSL-enabled Flower server.
 
     Returns
     -------
@@ -84,6 +92,9 @@ def grpc_connection(
     >>>     # do something here
     >>>     send(client_message)
     """
+    if isinstance(root_certificates, str):
+        root_certificates = Path(root_certificates).read_bytes()
+
     channel = create_channel(
         server_address=server_address,
         root_certificates=root_certificates,
@@ -98,11 +109,15 @@ def grpc_connection(
 
     server_message_iterator: Iterator[ServerMessage] = stub.Join(iter(queue.get, None))
 
-    receive: Callable[[], ServerMessage] = lambda: next(server_message_iterator)
-    send: Callable[[ClientMessage], None] = lambda msg: queue.put(msg, block=False)
+    def receive() -> ServerMessage:
+        return next(server_message_iterator)
+
+    def send(msg: ClientMessage) -> None:
+        return queue.put(msg, block=False)
 
     try:
-        yield (receive, send)
+        # Yield methods
+        yield (receive, send, None, None)
     finally:
         # Make sure to have a final
         channel.close()

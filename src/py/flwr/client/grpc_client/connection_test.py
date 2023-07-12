@@ -14,6 +14,7 @@
 # ==============================================================================
 """Tests for module connection."""
 
+
 import concurrent.futures
 import socket
 from contextlib import closing
@@ -24,7 +25,7 @@ import grpc
 
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.client_manager import SimpleClientManager
-from flwr.server.grpc_server.grpc_server import start_grpc_server
+from flwr.server.fleet.grpc_bidi.grpc_server import start_grpc_server
 
 from .connection import grpc_connection
 
@@ -70,14 +71,14 @@ def mock_join(  # type: ignore # pylint: disable=invalid-name
 
 
 @patch(
-    "flwr.server.grpc_server.flower_service_servicer.FlowerServiceServicer.Join",
+    "flwr.server.fleet.grpc_bidi.flower_service_servicer.FlowerServiceServicer.Join",
     mock_join,
 )
 def test_integration_connection() -> None:
     """Create a server and establish a connection to it.
 
-    Purpose of this integration test is to simulate multiple clients
-    with multiple roundtrips between server and client.
+    Purpose of this integration test is to simulate multiple clients with multiple
+    roundtrips between server and client.
     """
     # Prepare
     port = unused_tcp_port()
@@ -92,12 +93,15 @@ def test_integration_connection() -> None:
         messages_received: int = 0
 
         with grpc_connection(server_address=f"[::]:{port}") as conn:
-            receive, send = conn
+            receive, send, _, _ = conn
 
             # Setup processing loop
             while True:
                 # Block until server responds with a message
                 server_message = receive()
+
+                if server_message is None:
+                    raise ValueError("Unexpected None value")
 
                 messages_received += 1
                 if server_message.HasField("reconnect_ins"):

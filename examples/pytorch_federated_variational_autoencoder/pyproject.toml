@@ -5,11 +5,11 @@ description = "Federated Variational Autoencoder Example"
 authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
-flwr = "^0.16.0"
-torch = "^1.9.0"
-torchvision = "^0.10.0"
+python = ">=3.8,<3.11"
+flwr = ">=1.0,<2.0"
+torch = "1.13.1"
+torchvision = "0.13.0"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.core.masonry.api"

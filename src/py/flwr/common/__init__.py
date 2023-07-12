@@ -12,14 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower utilities shared between server and client."""
+"""Common components shared between server and client."""
 
 
+from .date import now as now
 from .grpc import GRPC_MAX_MESSAGE_LENGTH
+from .logger import configure as configure
+from .logger import log as log
 from .parameter import bytes_to_ndarray as bytes_to_ndarray
 from .parameter import ndarray_to_bytes as ndarray_to_bytes
 from .parameter import ndarrays_to_parameters as ndarrays_to_parameters
 from .parameter import parameters_to_ndarrays as parameters_to_ndarrays
+from .telemetry import EventType as EventType
+from .telemetry import event as event
 from .typing import ClientMessage as ClientMessage
 from .typing import Code as Code
 from .typing import Config as Config
@@ -48,9 +53,12 @@ __all__ = [
     "ClientMessage",
     "Code",
     "Config",
+    "configure",
     "DisconnectRes",
     "EvaluateIns",
     "EvaluateRes",
+    "event",
+    "EventType",
     "FitIns",
     "FitRes",
     "GetParametersIns",
@@ -58,9 +66,11 @@ __all__ = [
     "GetPropertiesIns",
     "GetPropertiesRes",
     "GRPC_MAX_MESSAGE_LENGTH",
+    "log",
     "Metrics",
     "MetricsAggregationFn",
     "ndarray_to_bytes",
+    "now",
     "NDArray",
     "NDArrays",
     "ndarrays_to_parameters",

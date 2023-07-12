@@ -22,7 +22,7 @@ import numpy as np
 import tensorflow as tf
 
 import flwr as fl
-from flwr.common import Weights
+from flwr.common import NDArrays
 
 from . import DEFAULT_SERVER_ADDRESS, fashion_mnist
 
@@ -40,12 +40,12 @@ class FashionMnistClient(fl.client.KerasClient):
         self.x_train, self.y_train = xy_train
         self.x_test, self.y_test = xy_test
 
-    def get_weights(self) -> Weights:
-        return cast(Weights, self.model.get_weights())
+    def get_weights(self) -> NDArrays:
+        return cast(NDArrays, self.model.get_weights())
 
     def fit(
-        self, weights: Weights, config: Dict[str, fl.common.Scalar]
-    ) -> Tuple[Weights, int, int]:
+        self, weights: NDArrays, config: Dict[str, fl.common.Scalar]
+    ) -> Tuple[NDArrays, int, int]:
         # Use provided weights to update local model
         self.model.set_weights(weights)
 
@@ -61,7 +61,7 @@ class FashionMnistClient(fl.client.KerasClient):
         return self.model.get_weights(), len(self.x_train), len(self.x_train)
 
     def evaluate(
-        self, weights: Weights, config: Dict[str, fl.common.Scalar]
+        self, weights: NDArrays, config: Dict[str, fl.common.Scalar]
     ) -> Tuple[int, float, float]:
         # Update local model and evaluate on local dataset
         self.model.set_weights(weights)

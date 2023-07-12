@@ -13,6 +13,7 @@
 # limitations under the License.
 """End-to-end tests that check model correctness."""
 
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -149,7 +150,7 @@ class TransferModel(object):
         [x_in] = interpreter.get_input_details()
         [bottleneck_out] = interpreter.get_output_details()
 
-        for (x, y) in image_gen:
+        for x, y in image_gen:
             batch_size = x.shape[0]
             interpreter.resize_tensor_input(
                 x_in["index"], (batch_size, IMAGE_SIZE, IMAGE_SIZE, 3)

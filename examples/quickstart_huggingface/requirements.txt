@@ -1,0 +1,6 @@
+datasets~=2.13.1
+evaluate~=0.4.0
+flwr~=1.4.0
+numpy~=1.21.1
+torch~=2.0.1
+transformers~=4.30.2

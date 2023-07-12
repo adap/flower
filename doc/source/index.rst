@@ -32,8 +32,11 @@ A learning-oriented series of federated learning tutorials, the best place to st
    :maxdepth: 1
    :caption: Tutorial
 
+   tutorial/Flower-0-What-is-FL
    tutorial/Flower-1-Intro-to-FL-PyTorch
    tutorial/Flower-2-Strategies-in-FL-PyTorch
+   tutorial/Flower-3-Building-a-Strategy-PyTorch
+   tutorial/Flower-4-Client-and-NumPyClient-PyTorch
 
 .. toctree::
    :maxdepth: 1
@@ -43,11 +46,16 @@ A learning-oriented series of federated learning tutorials, the best place to st
    quickstart-pytorch
    quickstart-tensorflow
    quickstart-huggingface
+   quickstart-jax
+   quickstart-pandas
+   quickstart-fastai
    quickstart-pytorch-lightning
    quickstart-mxnet
    quickstart-scikitlearn
+   quickstart-xgboost
+   quickstart-ios
 
-QUICKSTART TUTORIALS: :ref:`PyTorch <quickstart-pytorch>` | :ref:`TensorFlow <quickstart-tensorflow>` | :ref:`🤗 Transformers <quickstart-huggingface>` | :ref:`PyTorch Lightning <quickstart-pytorch-lightning>` | :ref:`MXNet <quickstart-mxnet>` | :ref:`scikit-learn <quickstart-scikitlearn>`
+QUICKSTART TUTORIALS: :ref:`PyTorch <quickstart-pytorch>` | :ref:`TensorFlow <quickstart-tensorflow>` | :ref:`🤗 Transformers <quickstart-huggingface>` | :ref:`JAX <quickstart-jax>` | :ref:`Pandas <quickstart-pandas>` | :ref:`fastai <quickstart-fastai>` | :ref:`PyTorch Lightning <quickstart-pytorch-lightning>` | :ref:`MXNet <quickstart-mxnet>` | :ref:`scikit-learn <quickstart-scikitlearn>` | :ref:`XGBoost <quickstart-xgboost>` | :ref:`iOS <quickstart-ios>`
 
 How-to guides
 ~~~~~~~~~~~~~
@@ -58,12 +66,13 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    :maxdepth: 1
    :caption: How-to guides
 
-   installation
-   configuring-clients
+   install-flower
+   configure-clients
    strategies
    implementing-strategies
-   saving-progress
+   save-progress
    saving-and-loading-pytorch-checkpoints
+   monitor-simulation
    ssl-enabled-connections
    example-walkthrough-pytorch-mnist
    example-pytorch-from-centralized-to-federated
@@ -83,6 +92,7 @@ Understanding-oriented concept guides explain and discuss key topics and underly
    :caption: Explanations
 
    evaluation
+   differential-privacy-wrappers
 
 Reference
 ~~~~~~~~~
@@ -93,13 +103,15 @@ Information-oriented API reference and other reference material.
    :maxdepth: 2
    :caption: API reference
 
-   flwr <apiref-flwr>
+   flwr (Python package) <apiref-flwr>
+   Flower CLI commands <apiref-cli>
 
 .. toctree::
    :maxdepth: 1
    :caption: Reference docs
 
    examples
+   telemetry
    changelog
    faq
 
@@ -127,15 +139,17 @@ intended to help along the way.
    :maxdepth: 1
    :caption: Contributor guide
 
+   first-time-contributors
    getting-started-for-contributors
    good-first-contributions
    contributor-setup
-   writing-documentation
+   write-documentation
    architecture
    secagg
    release-process
    creating-new-messages
    devcontainer
+   fed/index
 
 
 .. Indices and tables

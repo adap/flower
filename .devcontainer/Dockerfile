@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 # https://code.visualstudio.com/docs/remote/containers-advanced#_creating-a-nonroot-user
 ARG USERNAME=flwr-vscode
@@ -26,12 +26,12 @@ RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhisto
 # Install system dependencies
 RUN apt update 
 RUN apt install -y curl wget gnupg python3 python-is-python3 python3-pip git \
-    build-essential clang-format tmux vim
+    build-essential tmux vim
 
 RUN python -m pip install \
-    pip==22.2 \
-    setuptools==63.2.0 \
-    poetry==1.1.14
+    pip==23.1.2 \
+    setuptools==68.0.0 \
+    poetry==1.5.1
 
 USER $USERNAME
 ENV PATH="/home/$USERNAME/.local/bin:${PATH}"

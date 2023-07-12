@@ -3,7 +3,7 @@
 This example demonstrates an advanced federated learning setup using Flower with PyTorch. It differs from the quickstart example in the following ways:
 
 - 10 clients (instead of just 2)
-- Each client holds a local dataset of 5000 training examples and 1000 test examples
+- Each client holds a local dataset of 5000 training examples and 1000 test examples (note that using the `run.sh` script will only select 10 data samples by default, as the `--toy` argument is set).
 - Server-side model evaluation after parameter aggregation
 - Hyperparameter schedule using config functions
 - Custom return values
@@ -21,13 +21,18 @@ This will create a new directory called `advanced_pytorch` containing the follow
 
 ```shell
 -- pyproject.toml
+-- requirements.txt
 -- client.py
 -- server.py
 -- README.md
 -- run.sh
 ```
 
-Project dependencies (such as `pytorch` and `flwr`) are defined in `pyproject.toml`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
+### Installing Dependencies
+
+Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
+
+#### Poetry
 
 ```shell
 poetry install
@@ -42,12 +47,24 @@ poetry run python3 -c "import flwr"
 
 If you don't see any errors you're good to go!
 
+#### pip
+
+Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
+
+```shell
+pip install -r requirements.txt
+```
+
 # Run Federated Learning with PyTorch and Flower
 
-The included `run.sh` will start the Flower server (using `server.py`), sleep for 2 seconds to ensure the the server is up, and then start 10 Flower clients (using `client.py`). You can simply start everything in a terminal as follows:
+The included `run.sh` will start the Flower server (using `server.py`),
+sleep for 2 seconds to ensure that the server is up, and then start 10 Flower clients (using `client.py`) with only a small subset of the data (in order to run on any machine),
+but this can be changed by removing the `--toy True` argument in the script. You can simply start everything in a terminal as follows:
 
 ```shell
 poetry run ./run.sh
 ```
 
-The `run.sh` script starts processes in the background so that you don't have to open eleven terminal windows. If you experiment with the code example and something goes wrong, simply using `CTRL + C` on Linux (or `CMD + C` on macOS) wouldn't normally kill all these processes, which is why the script ends with `trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT` and `wait`. This simply allows you to stop the experiment using `CTRL + C` (or `CMD + C`). If you change the script and anyhting goes wrong you can still use `killall python` (or `killall python3`) to kill all background processes (or a more specific command if you have other Python processes running that you don't want to kill).
+The `run.sh` script starts processes in the background so that you don't have to open eleven terminal windows. If you experiment with the code example and something goes wrong, simply using `CTRL + C` on Linux (or `CMD + C` on macOS) wouldn't normally kill all these processes, which is why the script ends with `trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT` and `wait`. This simply allows you to stop the experiment using `CTRL + C` (or `CMD + C`). If you change the script and anything goes wrong you can still use `killall python` (or `killall python3`) to kill all background processes (or a more specific command if you have other Python processes running that you don't want to kill).
+
+You can also manually run `poetry run python3 server.py` and `poetry run python3 client.py` for as many clients as you want but you have to make sure that each command is ran in a different terminal window (or a different computer on the network).
