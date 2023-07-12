@@ -15,7 +15,7 @@
 """Ray-based Flower ClientProxy implementation."""
 
 
-from logging import ERROR
+from logging import ERROR, WARNING
 from typing import Callable, Dict, Optional, cast
 
 import ray
@@ -131,7 +131,7 @@ class RayActorClientProxy(ClientProxy):
     ) -> common.GetPropertiesRes:
         """Return client's properties."""
 
-        def get_properties():
+        def get_properties() -> common.GetPropertiesRes:
             client: Client = _create_client(self.client_fn, self.cid)
             return maybe_call_get_properties(
                 client=client,
@@ -144,6 +144,10 @@ class RayActorClientProxy(ClientProxy):
             )
             res = self.actor_pool.get_client_result(self.cid)
 
+        except ray.exceptions.RayActorError as ex:
+            log(WARNING, ex)
+            if hasattr(ex, "actor_id"):
+                self.actor_pool.flag_actor_for_removal(ex.actor_id)
         except Exception as ex:
             log(ERROR, ex)
             raise ex
@@ -157,7 +161,7 @@ class RayActorClientProxy(ClientProxy):
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
 
-        def get_parameters():
+        def get_parameters() -> common.GetParametersRes:
             client: Client = _create_client(self.client_fn, self.cid)
             return maybe_call_get_parameters(
                 client=client,
@@ -170,6 +174,11 @@ class RayActorClientProxy(ClientProxy):
             )
             res = self.actor_pool.get_client_result(self.cid)
 
+        except ray.exceptions.RayActorError as ex:
+            log(WARNING, ex)
+            if hasattr(ex, "actor_id"):
+                self.actor_pool.flag_actor_for_removal(ex.actor_id)
+
         except Exception as ex:
             log(ERROR, ex)
             raise ex
@@ -181,7 +190,7 @@ class RayActorClientProxy(ClientProxy):
     def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
 
-        def fit():
+        def fit() -> common.FitRes:
             client: Client = _create_client(self.client_fn, self.cid)
             return maybe_call_fit(
                 client=client,
@@ -193,6 +202,11 @@ class RayActorClientProxy(ClientProxy):
                 lambda a, v: a.run.remote(v, self.cid), fit, self.cid
             )
             res = self.actor_pool.get_client_result(self.cid)
+
+        except ray.exceptions.RayActorError as ex:
+            log(WARNING, ex)
+            if hasattr(ex, "actor_id"):
+                self.actor_pool.flag_actor_for_removal(ex.actor_id)
 
         except Exception as ex:
             log(ERROR, ex)
@@ -207,7 +221,7 @@ class RayActorClientProxy(ClientProxy):
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
 
-        def evaluate():
+        def evaluate() -> common.EvaluateRes:
             client: Client = _create_client(self.client_fn, self.cid)
             return maybe_call_evaluate(
                 client=client,
@@ -219,6 +233,11 @@ class RayActorClientProxy(ClientProxy):
                 lambda a, v: a.run.remote(v, self.cid), evaluate, self.cid
             )
             res = self.actor_pool.get_client_result(self.cid)
+
+        except ray.exceptions.RayActorError as ex:
+            log(WARNING, ex)
+            if hasattr(ex, "actor_id"):
+                self.actor_pool.flag_actor_for_removal(ex.actor_id)
 
         except Exception as ex:
             log(ERROR, ex)

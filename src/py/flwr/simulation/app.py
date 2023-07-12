@@ -147,7 +147,6 @@ def start_simulation(  # pylint: disable=too-many-arguments
         client_manager=client_manager,
     )
     # Setting simulation ON for server
-    initialized_server.is_simulation = True
     log(
         INFO,
         "Starting Flower simulation, config: %s",
@@ -214,8 +213,13 @@ def start_simulation(  # pylint: disable=too-many-arguments
         num_actors = min(num_actors, int(num_gpus / resources["num_gpus"]))
 
     # instantiate ActorPool
+    # TODO: maybe we want `max_restarts` to be user-defined ?
+    max_restarts = 1  # how many times an actor that crashes should be restarted
+    # after these many restarts, it will be removed from the pool
     actors = [
-        VirtualClientEngineActor.options(**resources).remote(i)
+        VirtualClientEngineActor.options(**resources, max_restarts=max_restarts).remote(
+            i
+        )
         for i in range(num_actors)
     ]
     log(INFO, "Flower VCE: Creating ActorPool with %s actors", len(actors))
