@@ -23,11 +23,6 @@ jobs:
         run: |
           cd e2e/pytorch
           python -m poetry install
-      - name: Cache Datasets
-        uses: actions/cache@v2
-        with:
-          path: "./e2e/pytorch/data"
-          key: pytorch-datasets
       - name: Download Datasets
         run: |
           cd e2e/pytorch
@@ -52,11 +47,6 @@ jobs:
         run: |
           cd e2e/tensorflow
           python -m poetry install
-      - name: Cache Datasets
-        uses: actions/cache@v2
-        with:
-          path: "~/.keras"
-          key: keras-datasets
       - name: Download Datasets
         run: |
           python -c "import tensorflow as tf; tf.keras.datasets.cifar10.load_data()"
@@ -106,11 +96,6 @@ jobs:
         run: |
           cd e2e/pandas
           python -m poetry install
-      - name: Cache Datasets
-        uses: actions/cache@v2
-        with:
-          path: "./e2e/pandas/data"
-          key: pandas-datasets
       - name: Download Datasets
         run: |
           cd e2e/pandas
@@ -219,11 +204,6 @@ jobs:
         run: |
           cd e2e/opacus
           python -m poetry install
-      - name: Cache Datasets
-        uses: actions/cache@v2
-        with:
-          path: "./e2e/opacus/data"
-          key: pytorch-datasets
       - name: Download Datasets
         run: |
           cd e2e/opacus
@@ -251,11 +231,6 @@ jobs:
         run: |
           cd e2e/fastai
           python -m poetry install
-      - name: Cache Datasets
-        uses: actions/cache@v2
-        with:
-          path: "~/.fastai"
-          key: fastai-datasets
       - name: Download Datasets
         run: |
           cd e2e/fastai
