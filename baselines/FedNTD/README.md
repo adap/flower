@@ -1,43 +1,45 @@
 ---
-title: title of the paper
-url: URL to the paper page (not the pdf)
-labels: [label1, label2] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [dataset1, dataset2] # list of datasets you include in your baseline
+title: Preservation of the Global Knowledge by Not-True Distillation in Federated Learning
+url: https://arxiv.org/abs/2106.03097
+labels: [data heterogeneity, image classification] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
+dataset: [MNIST, CIFAR-10, CIFAR-100, CINIC-10] # list of datasets you include in your baseline
 ---
 
-# :warning:*_Title of your baseline_*
+# FedNTD: Preservation of the Global Knowledge by Not-True Distillation in Federated Learning
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
-> :warning: This is the template to follow when creating a new Flower Baseline. Please follow the instructions in `EXTENDED_README.md`
+**Paper:** https://arxiv.org/abs/2106.03097
 
-> :warning: Please follow the instructions carefully. You can see the [FedProx-MNIST baseline](https://github.com/adap/flower/tree/main/baselines/fedprox) as an example of a baseline that followed this guide.
+**Authors:** Gihun Lee, Minchan Jeong, Yongjin Shin, Sangmin Bae and Se-Young Yun.
 
-> :warning: Please complete the metadata section at the very top of this README. This generates a table at the top of the file that will facilitate indexing baselines.
-
-****Paper:**** :warning: *_add the URL of the paper page (not to the .pdf). For instance if you link a paper on ArXiv, add here the URL to the abstract page (e.g. https://arxiv.org/abs/1512.03385). If your paper is in from a journal or conference proceedings, please follow the same logic._*
-
-****Authors:**** :warning: *_list authors of the paper_*
-
-****Abstract:**** :warning: *_add here the abstract of the paper you are implementing_*
+**Abstract:** In federated learning, a strong global model is collaboratively learned by aggregating clients' locally trained models. Although this precludes the need to access clients' data directly, the global model's convergence often suffers from data heterogeneity. This study starts from an analogy to continual learning and suggests that forgetting could be the bottleneck of federated learning. We observe that the global model forgets the knowledge from previous rounds, and the local training induces forgetting the knowledge outside of the local distribution. Based on our findings, we hypothesize that tackling down forgetting will relieve the data heterogeneity problem. To this end, we propose a novel and effective algorithm, Federated Not-True Distillation (FedNTD), which preserves the global perspective on locally available data only for the not-true classes. In the experiments, FedNTD shows state-of-the-art performance on various setups without compromising data privacy or incurring additional communication costs.
 
 
 ## About this baseline
 
-****What’s implemented:**** :warning: *_Concisely describe what experiment(s) in the publication can be replicated by running the code. Please only use a few sentences. Start with: “The code in this directory …”_*
+**What’s implemented:** The code in this directory replicates the experiments in *Preservation of the Global Knowledge by Not-True Distillation in Federated Learning* (Lee et al., 2022) for MNIST, CIFAR-10, CIFAR-100, and CINIC-10, which proposed the FedNTD algorithm. Concretely, it replicates the results for MNIST, CIFAR-10, CIFAR-100, and CINIC-10 in Table 1.
 
-****Datasets:**** :warning: *_List the datasets you used (if you used a medium to large dataset, >10GB please also include the sizes of the dataset)._*
+**Datasets:** MNIST, CIFAR-10, CIFAR-100, and CINIC-10
 
-****Hardware Setup:**** :warning: *_Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Someone out there might not have access to the same resources you have so, could list the absolute minimum hardware needed to run the experiment in a reasonable amount of time ? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?_*
+**Hardware Setup:** These experiments were run on 1 NVIDIA A100 GPU card. Any machine with 1 Titan-RTX and 1 RTX 2080Ti GPU card would be able to run it in a reasonable amount of time.
 
-****Contributors:**** :warning: *_let the world know who contributed to this baseline. This could be either your name, your name and affiliation at the time, or your GitHub profile name if you prefer. If multiple contributors signed up for this baseline, please list yourself and your colleagues_*
+**Contributors:** @WangYangfan and @imchell
 
 
 ## Experimental Setup
 
-****Task:**** :warning: *_what’s the primary task that is being federated? (e.g. image classification, next-word prediction). If you have experiments for several, please list them_*
+**Task:** Image classification
 
-****Model:**** :warning: *_provide details about the model you used in your experiments (if more than use a list). If your model is small, describing it as a table would be :100:. Some FL methods do not use an off-the-shelve model (e.g. ResNet18) instead they create your own. If this is your case, please provide a summary here and give pointers to where in the paper (e.g. Appendix B.4) is detailed._*
+****Model:**** This directory implements eight models:
+* FedCurv
+* FedAvgM
+* Scaffold
+* Fedprox
+* MOON
+* FedNova
+* FedDyn
+* FedNTD (this paper)
 
 ****Dataset:**** :warning: *_Earlier you listed already the datasets that your baseline uses. Now you should include a breakdown of the details about each of them. Please include information about: how the dataset is partitioned (e.g. LDA with alpha 0.1 as default and all clients have the same number of training examples; or each client gets assigned a different number of samples following a power-law distribution with each client only instances of 2 classes)? if  your dataset is naturally partitioned just state “naturally partitioned”; how many partitions there are (i.e. how many clients)? Please include this an all information relevant about the dataset and its partitioning into a table._*
 
