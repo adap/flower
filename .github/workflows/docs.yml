@@ -20,7 +20,8 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: 3.7.15
-          install-pandoc: true
+      - name: Install pandoc
+        run: sudo apt install pandoc
       - name: Install dependencies (mandatory only)
         run: python -m poetry install --extras "simulation"
       - name: Build and deploy docs
@@ -40,7 +41,8 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: 3.7.15
-          install-pandoc: true
+      - name: Install pandoc
+        run: sudo apt install pandoc
       - name: Install dependencies (mandatory only)
         run: python -m poetry install --extras "simulation"
       - name: Build and deploy docs
