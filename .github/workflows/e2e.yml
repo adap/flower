@@ -300,7 +300,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.7.15
+          python-version: 3.8.17
       - name: Install
         run: |
           python -m pip install -U pip==22.3.1
@@ -314,7 +314,7 @@ jobs:
       - name: Cache Datasets
         uses: actions/cache@v2
         with:
-          path: "~/fastai"
+          path: "~/.fastai"
           key: fastai-datasets
       - name: Download Datasets
         run: |
