@@ -14,6 +14,7 @@
 # ==============================================================================
 """Client-side message handler tests."""
 
+
 import uuid
 
 from flwr.client import Client
