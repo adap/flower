@@ -109,9 +109,6 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: 3.8.15
-          pip-version: 23.1.2
-          setuptools-version: 68.0.0
-          poetry-version: 1.5.1
       - name: Install dependencies
         if: steps.validate_changed_baselines_dirs.outputs.baseline_changed == 'true'
         run: |

@@ -6,13 +6,13 @@ inputs:
     required: true
   pip-version: 
     description: "Version of pip to be installed using pip"
-    required: true
+    default: 23.1.2
   setuptools-version:
     description: "Version of setuptools to be installed using pip"
-    required: true
+    default: 68.0.0
   poetry-version:
     description: "Version of poetry to be installed using pip"
-    required: true
+    default: 1.5.1
   install-pandoc:
     description: "Boolean indicating if pandoc should be installed"
     required: true
