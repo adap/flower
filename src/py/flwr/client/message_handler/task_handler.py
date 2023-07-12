@@ -79,6 +79,7 @@ def validate_task_res(task_res: TaskRes) -> bool:
     initialized_fields_in_task = {field.name for field, _ in task_res.task.ListFields()}
 
     # Check if certain fields are already initialized
+    # pylint: disable-next=too-many-boolean-expressions
     if (
         "task_id" in initialized_fields_in_task_res
         or "group_id" in initialized_fields_in_task_res

@@ -96,14 +96,17 @@ def test_validate_task_res() -> None:
     assert not validate_task_res(task_res)
 
     task_res.Clear()
+    # pylint: disable-next=no-member
     task_res.task.producer.node_id = 0
     assert not validate_task_res(task_res)
 
     task_res.Clear()
+    # pylint: disable-next=no-member
     task_res.task.consumer.node_id = 0
     assert not validate_task_res(task_res)
 
     task_res.Clear()
+    # pylint: disable-next=no-member
     task_res.task.ancestry.append("123")
     assert not validate_task_res(task_res)
 
@@ -187,4 +190,5 @@ def test_wrap_client_message_in_task_res() -> None:
     task_res = wrap_client_message_in_task_res(expected_client_message)
 
     assert validate_task_res(task_res)
+    # pylint: disable-next=no-member
     assert task_res.task.legacy_client_message == expected_client_message
