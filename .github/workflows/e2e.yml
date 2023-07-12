@@ -59,8 +59,6 @@ jobs:
           cd e2e/tensorflow
           python simulation.py
 
-
-
   bare:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
@@ -80,8 +78,6 @@ jobs:
         run: |
           cd e2e/bare
           python simulation.py
-
-
 
   pandas:
     runs-on: ubuntu-22.04
@@ -134,8 +130,6 @@ jobs:
           cd e2e/jax
           python simulation.py
 
-
-
   mxnet:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
@@ -162,8 +156,6 @@ jobs:
           cd e2e/mxnet
           python simulation.py
 
-
-  
   scikit:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
@@ -190,7 +182,6 @@ jobs:
           cd e2e/scikit-learn
           python simulation.py
 
-
   opacus:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
@@ -216,7 +207,6 @@ jobs:
         run: |
           cd e2e/opacus
           python simulation.py
-          
 
   fastai:
     runs-on: ubuntu-22.04
