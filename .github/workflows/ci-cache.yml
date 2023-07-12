@@ -24,10 +24,11 @@ jobs:
         # https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#hosted-tool-cache
         # By not specifying the patch version it is ensured that a version available in
         # the hosted tool cache is used
-        python-version: [3.7.17, 3.8.17, 3.9.17, 3.10.12]
+        python-version: [3.7, 3.8, 3.9, 3.10]
     steps:
       - uses: actions/checkout@v3
       - name: Bootstrap
+        id: bootstrap
         uses: ./.github/actions/bootstrap
         with:
           python-version: ${{ matrix.python-version }}
@@ -40,4 +41,4 @@ jobs:
             **/poetry.lock
             ~/.cache/pip
             ~/.cache/pypoetry
-          key: ${{ runner.os }}-python-cache-${{ matrix.python-version }}-${{ hashFiles('**/pyproject.toml') }}
+          key: ${{ runner.os }}-python-cache-${{ steps.bootstrap.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
