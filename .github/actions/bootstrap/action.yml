@@ -28,6 +28,7 @@ runs:
       if: ${{input.install-pandoc}} == true
       run: |
         sudo apt install pandoc
+      shell: bash
     - name: Install build tools
       run: |
         python -m pip install -U pip==${{ inputs.pip-version }}
