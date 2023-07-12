@@ -16,26 +16,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python
-        id: setup-python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.7.15
-      - name: Cache Python dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            **/poetry.lock
-            ~/.cache/pip
-            ~/.cache/pypoetry
-          key: ${{ runner.os }}-python-cache-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
-      - name: Install build tools
-        run: |
-          sudo apt install pandoc
-          python -m pip install -U pip==23.1.2
-          python -m pip install -U setuptools==68.0.0
-          python -m pip install -U poetry==1.5.1
-          poetry config virtualenvs.create false
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
       - name: Install dependencies (mandatory only)
         run: python -m poetry install --extras "simulation"
       - name: Build and deploy docs
@@ -51,17 +33,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - name: Deploy docs
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.7.15
-      - name: Install build tools
-        run: |
-          sudo apt install pandoc
-          python -m pip install -U pip==23.1.2
-          python -m pip install -U setuptools==68.0.0
-          python -m pip install -U poetry==1.5.1
-          poetry config virtualenvs.create false
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
       - name: Install dependencies (mandatory only)
         run: python -m poetry install --extras "simulation"
       - name: Build and deploy docs
