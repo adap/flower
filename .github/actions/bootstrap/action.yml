@@ -6,13 +6,13 @@ inputs:
     required: true
   pip-version: 
     description: "Version of pip to be installed using pip"
-    default: 23.1.2
+    required: true
   setuptools-version:
     description: "Version of setuptools to be installed using pip"
-    default: 68.0.0
+    required: true
   poetry-version:
     description: "Version of poetry to be installed using pip"
-    default: 1.5.1
+    required: true
 runs:
   using: "composite"
   steps:
