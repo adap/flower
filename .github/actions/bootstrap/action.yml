@@ -1,9 +1,9 @@
 name: "bootstrap"
-description: "Bootstrap Python environment including Python dependencies and configure optimizations."
+description: "Bootstrap Python environment (install and configure Python version and build tools)"
 inputs:
   python-version:
     description: "Version range or exact version of Python or PyPy to use, using SemVer's version range syntax."
-    default: 3.8
+    required: true
   pip-version: 
     description: "Version of pip to be installed using pip"
     default: 23.1.2
@@ -35,4 +35,3 @@ runs:
         python -m pip install -U poetry==${{ inputs.poetry-version }}
         python -m poetry config virtualenvs.create false
       shell: bash
-

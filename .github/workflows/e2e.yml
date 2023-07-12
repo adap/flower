@@ -100,6 +100,8 @@ jobs:
       - uses: actions/checkout@v3
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
+        with:
+          python-version: 3.8.16
       - name: Install dependencies
         run: |
           cd e2e/pandas
@@ -132,6 +134,8 @@ jobs:
       - uses: actions/checkout@v3
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
+        with:
+          python-version: 3.8.16
       - name: Install dependencies
         run: |
           cd e2e/jax
@@ -154,6 +158,8 @@ jobs:
       - uses: actions/checkout@v3
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
+        with:
+          python-version: 3.8.16
       - name: Install dependencies
         run: |
           cd e2e/mxnet
@@ -180,6 +186,8 @@ jobs:
       - uses: actions/checkout@v3
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
+        with:
+          python-version: 3.8.16
       - name: Install dependencies
         run: |
           cd e2e/scikit-learn
@@ -197,6 +205,7 @@ jobs:
           cd e2e/scikit-learn
           python simulation.py
 
+
   opacus:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
@@ -204,6 +213,8 @@ jobs:
       - uses: actions/checkout@v3
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
+        with:
+          python-version: 3.8.17
       - name: Install dependencies
         run: |
           cd e2e/opacus
@@ -224,4 +235,36 @@ jobs:
       - name: Run virtual client test
         run: |
           cd e2e/opacus
+          python simulation.py
+          
+
+  fastai:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+        with:
+          python-version: 3.8.17
+      - name: Install dependencies
+        run: |
+          cd e2e/fastai
+          python -m poetry install
+      - name: Cache Datasets
+        uses: actions/cache@v2
+        with:
+          path: "~/.fastai"
+          key: fastai-datasets
+      - name: Download Datasets
+        run: |
+          cd e2e/fastai
+          python -c "from fastai.vision.all import *; untar_data(URLs.MNIST)"
+      - name: Run edge client test
+        run: |
+          cd e2e/fastai
+          ./test.sh
+      - name: Run virtual client test
+        run: |
+          cd e2e/fastai
           python simulation.py
