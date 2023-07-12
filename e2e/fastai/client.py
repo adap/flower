@@ -14,7 +14,7 @@ path = untar_data(URLs.MNIST)
 
 # Load dataset
 dls = ImageDataLoaders.from_folder(
-    path, valid_pct=0.5, train="training", valid="testing"
+    path, valid_pct=0.5, train="training", valid="testing", num_workers=0
 )
 
 subset_size = 100 # Or whatever
