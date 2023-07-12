@@ -197,3 +197,31 @@ jobs:
           cd e2e/scikit-learn
           python simulation.py
 
+  opacus:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Install dependencies
+        run: |
+          cd e2e/opacus
+          python -m poetry install
+      - name: Cache Datasets
+        uses: actions/cache@v2
+        with:
+          path: "./e2e/opacus/data"
+          key: pytorch-datasets
+      - name: Download Datasets
+        run: |
+          cd e2e/opacus
+          python -c "from torchvision.datasets import CIFAR10; CIFAR10('./data', download=True)"
+      - name: Run edge client test
+        run: |
+          cd e2e/opacus
+          ./test.sh
+      - name: Run virtual client test
+        run: |
+          cd e2e/opacus
+          python simulation.py
