@@ -4,7 +4,7 @@ inputs:
   python-version:
     description: "Version range or exact version of Python or PyPy to use, using SemVer's version range syntax."
     default: 3.7
-  pip-version: 
+  pip-version:
     description: "Version of pip to be installed using pip"
     default: 23.1.2
   setuptools-version:
@@ -30,8 +30,9 @@ runs:
         key: ${{ runner.os }}-python-cache-${{ inputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
     - name: Install build tools
       run: |
-        python -m pip install -U pip==${{ inputs.pip-version }}
-        python -m pip install -U setuptools==${{ inputs.setuptools-version }}
-        python -m pip install -U poetry==${{ inputs.poetry-version }}
+        python -m pip install -U \
+          pip==${{ inputs.pip-version }} \
+          setuptools==${{ inputs.setuptools-version }} \
+          poetry==${{ inputs.poetry-version }}
         python -m poetry config virtualenvs.create false
       shell: bash
