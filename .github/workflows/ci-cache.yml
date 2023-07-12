@@ -14,8 +14,8 @@ env:
   FLWR_TELEMETRY_ENABLED: 0
 
 jobs:
-  test_core:
-    runs-on: ubuntu-22.04-2core
+  build_python_cache:
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         # Only use versions found here:
