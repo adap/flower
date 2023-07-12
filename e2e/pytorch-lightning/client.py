@@ -8,9 +8,9 @@ import torch
 class FlowerClient(fl.client.NumPyClient):
     def __init__(self, model, train_loader, val_loader, test_loader):
         self.model = model
-        self.train_loader = train_loader[:50]
-        self.val_loader = val_loader[:50]
-        self.test_loader = test_loader[:50]
+        self.train_loader = train_loader
+        self.val_loader = val_loader
+        self.test_loader = test_loader
 
     def get_parameters(self, config):
         encoder_params = _get_parameters(self.model.encoder)

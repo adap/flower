@@ -64,12 +64,12 @@ def load_data():
     # Training / validation set
     trainset = MNIST("./data", train=True, download=True, transform=transforms.ToTensor())
     mnist_train, mnist_val = random_split(trainset, [55000, 5000])
-    train_loader = DataLoader(mnist_train, batch_size=32, shuffle=True, num_workers=16)
-    val_loader = DataLoader(mnist_val, batch_size=32, shuffle=False, num_workers=16)
+    train_loader = DataLoader(mnist_train[:50], batch_size=32, shuffle=True, num_workers=16)
+    val_loader = DataLoader(mnist_val[:50], batch_size=32, shuffle=False, num_workers=16)
 
     # Test set
     testset = MNIST("./data", train=False, download=True, transform=transforms.ToTensor())
-    test_loader = DataLoader(testset, batch_size=32, shuffle=False, num_workers=16)
+    test_loader = DataLoader(testset[:50], batch_size=32, shuffle=False, num_workers=16)
 
     return train_loader, val_loader, test_loader
 
