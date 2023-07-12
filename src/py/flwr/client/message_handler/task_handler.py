@@ -38,13 +38,16 @@ def validate_task_ins(task_ins: TaskIns, discard_reconnect_ins: bool) -> bool:
         True if the TaskIns is deemed valid and therefore suitable for
         undergoing the message handling process, False otherwise.
     """
-    # Check if the task_ins contains legacy_server_message.
-    # If so, check if ServerMessage is one of
+    # Check if the task_ins contains legacy_server_message or sa.
+    # If legacy_server_message is set, check if ServerMessage is one of
     # {GetPropertiesIns, GetParametersIns, FitIns, EvaluateIns, ReconnectIns*}
     # Discard ReconnectIns if discard_reconnect_ins is true.
     if (
         not task_ins.HasField("task")
-        or not task_ins.task.HasField("legacy_server_message")
+        or (
+            not task_ins.task.HasField("legacy_server_message")
+            and not task_ins.task.HasField("sa")
+        )
         or (
             discard_reconnect_ins
             and task_ins.task.legacy_server_message.WhichOneof("msg") == "reconnect_ins"
@@ -110,7 +113,9 @@ def get_server_message_from_task_ins(
     # Return the message if it is in
     # {GetPropertiesIns, GetParametersIns, FitIns, EvaluateIns}
     # Return the message if it is ReconnectIns and exclude_reconnect_ins is False.
-    if not validate_task_ins(task_ins, discard_reconnect_ins=exclude_reconnect_ins):
+    if not validate_task_ins(
+        task_ins, discard_reconnect_ins=exclude_reconnect_ins
+    ) or not task_ins.task.HasField("legacy_server_message"):
         return None
 
     return task_ins.task.legacy_server_message
