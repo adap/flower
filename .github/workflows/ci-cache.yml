@@ -46,4 +46,4 @@ jobs:
             **/.venv
             ~/.cache/pip
             ~/.cache/pypoetry
-          key: ${{ runner.os }}-${{ steps.bootstrap.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
+          key: ${{ runner.os }}-${{ steps.bootstrap.outputs.python-version }}-${{ hashFiles('pyproject.toml') }}

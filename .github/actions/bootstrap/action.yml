@@ -37,7 +37,7 @@ runs:
           **/.venv
           ~/.cache/pip
           ~/.cache/pypoetry
-        key: ${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
+        key: ${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('pyproject.toml') }}
     - name: Install build tools
       if: steps.cache-restore.outputs.cache-hit != 'true'
       run: |
@@ -48,4 +48,3 @@ runs:
         poetry config virtualenvs.create true
         poetry config virtualenvs.in-project true
       shell: bash
-
