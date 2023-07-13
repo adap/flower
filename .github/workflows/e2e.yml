@@ -32,6 +32,8 @@ jobs:
       - uses: actions/checkout@v3
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
+        with:
+          python-version: 3.8
       - name: Install dependencies
         run: python -m poetry install
       - name: Download dataset
