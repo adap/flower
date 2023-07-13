@@ -78,7 +78,7 @@ jobs:
         id: bootstrap
         uses: ./.github/actions/bootstrap
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: 3.8
       - name: Install dependencies
         run: poetry install --all-extras
       - name: Cache Python dependencies
