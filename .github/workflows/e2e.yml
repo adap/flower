@@ -77,8 +77,8 @@ jobs:
         run: python -m poetry install
       - name: Download dataset
         if: ${{matrix.dataset}}
-        run: python -c "${{ matrix.dataset }}"
+        run: poetry run python -c "${{ matrix.dataset }}"
       - name: Run edge client test
-        run: ./test.sh
+        run: poetry run ./test.sh
       - name: Run virtual client test
-        run: python simulation.py
+        run: poetry run python simulation.py
