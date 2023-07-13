@@ -21,7 +21,7 @@ jobs:
         # In case of a mismatch, the job has to download Python to install it.
         # Note: Due to a bug in actions/setup-python we have to put 3.10 in
         # qoutes as it will otherwise will assume 3.1
-        python: [3.7.16, 3.8.16, 3.9.16, 3.10.11]
+        python: [3.7, 3.8, 3.9, 3.10]
     steps:
       - uses: actions/checkout@v3
       - name: Bootstrap
@@ -31,6 +31,6 @@ jobs:
       - name: Install dependencies (mandatory only)
         run: python -m poetry install --all-extras
       - name: Check if protos need recompilation
-        run: ./dev/check-protos.sh
+        run: poetry run ./dev/check-protos.sh
       - name: Lint + Test (isort/black/docformatter/mypy/pylint/flake8/pytest)
-        run: ./dev/test.sh
+        run: poetry run ./dev/test.sh

@@ -24,7 +24,7 @@ jobs:
         # https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#hosted-tool-cache
         # By not specifying the patch version it is ensured that a version available in
         # the hosted tool cache is used
-        python-version: [3.7.16, 3.8.16, 3.9.16, 3.10.11]
+        python-version: [3.7, 3.8, 3.9, 3.10]
     steps:
       - uses: actions/checkout@v3
       - name: Bootstrap
