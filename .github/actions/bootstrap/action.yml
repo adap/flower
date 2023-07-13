@@ -30,9 +30,9 @@ runs:
       with:
         path: |
           **/poetry.lock
+          **/.venv
           ~/.cache/pip
           ~/.cache/pypoetry
-          **/.venv
         key: ${{ runner.os }}-python-cache-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
     - name: Install build tools
       run: |
