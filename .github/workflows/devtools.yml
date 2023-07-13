@@ -1,4 +1,4 @@
-name: Build Tools
+name: DevTools
 
 on:
   push:
@@ -18,6 +18,7 @@ env:
 jobs:
   test_tools:
     runs-on: ubuntu-22.04
+    name: Test
     steps:
       - uses: actions/checkout@v3
       - name: Bootstrap

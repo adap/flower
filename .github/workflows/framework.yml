@@ -1,4 +1,4 @@
-name: Core
+name: Framework
 
 on:
   push:
