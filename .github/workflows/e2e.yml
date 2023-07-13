@@ -79,6 +79,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Bootstrap
+        id: bootstrap
         uses: ./.github/actions/bootstrap
         with:
           python-version: 3.8
