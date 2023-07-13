@@ -31,6 +31,10 @@ jobs:
       - name: Install dependencies (mandatory only)
         run: python -m poetry install --all-extras
       - name: Check if protos need recompilation
-        run: poetry run ./dev/check-protos.sh
+        run: |
+          source .venv/bin/activate
+          ./dev/check-protos.sh
       - name: Lint + Test (isort/black/docformatter/mypy/pylint/flake8/pytest)
-        run: poetry run ./dev/test.sh
+        run: |
+          source .venv/bin/activate
+          ./dev/test.sh
