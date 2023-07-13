@@ -30,7 +30,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies (mandatory only)
-        if: steps.bootstrap.outputs.cache-hit != 'true'
         run: poetry install --all-extras
       - name: Check if protos need recompilation
         run: poetry run ./dev/check-protos.sh

@@ -35,10 +35,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
-        if: steps.bootstrap.outputs.cache-hit != 'true'
         run: poetry install --all-extras
       - name: Cache Python dependencies
-        if: steps.bootstrap.outputs.cache-hit != 'true'
         uses: actions/cache/save@v3
         with:
           path: |

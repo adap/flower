@@ -26,7 +26,6 @@ jobs:
         with:
           python-version: 3.8
       - name: Install dependencies
-        if: steps.bootstrap.outputs.cache-hit != 'true'
         run: poetry install
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
         run: poetry run ./dev/test.sh
