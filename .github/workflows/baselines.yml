@@ -27,7 +27,6 @@ defaults:
 jobs:
   test_baselines:
     runs-on: ubuntu-22.04
-    name: Test
     steps:
       - uses: actions/checkout@v3
         # The depth two of the checkout is needed in case of merging to the main
