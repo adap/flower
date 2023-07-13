@@ -29,7 +29,7 @@ jobs:
           - directory: opacus
             dataset: from torchvision.datasets import CIFAR10; CIFAR10('./data', download=True)
           - directory: pandas
-            dataset: from pathlib import Path; Path("data").mkdir(exist_ok=True); from sklearn.datasets import load_iris; load_iris(as_frame=True)['data'].to_csv('./data/client.csv')
+            dataset: from pathlib import Path; Path('data').mkdir(exist_ok=True); from sklearn.datasets import load_iris; load_iris(as_frame=True)['data'].to_csv('./data/client.csv')
           - directory: mxnet
             dataset: import mxnet as mx; mx.test_utils.get_mnist()
           - directory: scikit-learn
