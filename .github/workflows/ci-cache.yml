@@ -36,17 +36,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         if: steps.bootstrap.outputs.cache-hit != 'true'
-        run: |
-          poetry install --all-extras
-          (cd e2e/bare && poetry install --all-extras)
-          (cd e2e/jax && poetry install --all-extras)
-          (cd e2e/pytorch && poetry install --all-extras)
-          (cd e2e/tensorflow && poetry install --all-extras)
-          (cd e2e/opacus && poetry install --all-extras)
-          (cd e2e/mxnet && poetry install --all-extras)
-          (cd e2e/scikit-learn && poetry install --all-extras)
-          (cd e2e/fastai && poetry install --all-extras)
-          (cd e2e/pandas && poetry install --all-extras)
+        run: poetry install --all-extras
       - name: Cache Python dependencies
         if: steps.bootstrap.outputs.cache-hit != 'true'
         uses: actions/cache/save@v3
@@ -56,4 +46,41 @@ jobs:
             **/.venv
             ~/.cache/pip
             ~/.cache/pypoetry
-          key: ${{ runner.os }}-python-${{ steps.bootstrap.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
+          key: ${{ runner.os }}-py-${{ steps.bootstrap.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
+
+  build_e2e_cache:
+    runs-on: ubuntu-22.04
+
+    name: "Cache Framework"
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Bootstrap
+        id: bootstrap
+        uses: ./.github/actions/bootstrap
+        with:
+          python-version: 3.8
+          cache-extra-key: -e2e
+      - name: Install dependencies
+        if: steps.bootstrap.outputs.cache-hit != 'true'
+        run: |
+          (cd e2e/bare && poetry install --all-extras)
+          # (cd e2e/jax && poetry install --all-extras)
+          # (cd e2e/pytorch && poetry install --all-extras)
+          # (cd e2e/tensorflow && poetry install --all-extras)
+          # (cd e2e/opacus && poetry install --all-extras)
+          # (cd e2e/mxnet && poetry install --all-extras)
+          # (cd e2e/scikit-learn && poetry install --all-extras)
+          # (cd e2e/fastai && poetry install --all-extras)
+          # (cd e2e/pandas && poetry install --all-extras)
+      - name: Cache Python dependencies
+        if: steps.bootstrap.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v3
+        with:
+          path: |
+            **/poetry.lock
+            **/.venv
+            ~/.cache/pip
+            ~/.cache/pypoetry
+          key: ${{ runner.os }}-py-${{ steps.bootstrap.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}-e2e
+        
