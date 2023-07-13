@@ -14,6 +14,7 @@ env:
 jobs:
   build_docs:
     runs-on: ubuntu-22.04
+    name: Build
     steps:
       - uses: actions/checkout@v3
       - name: Bootstrap
@@ -33,6 +34,7 @@ jobs:
     needs: build_docs
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-22.04
+    name: Deploy 
     steps:
       - uses: actions/checkout@v3
       - name: Bootstrap

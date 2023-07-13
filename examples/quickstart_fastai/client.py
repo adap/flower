@@ -14,7 +14,7 @@ path = untar_data(URLs.MNIST)
 
 # Load dataset
 dls = ImageDataLoaders.from_folder(
-    path, valid_pct=0.5, train="training", valid="testing"
+    path, valid_pct=0.5, train="training", valid="testing", num_workers=0
 )
 
 # Define model
@@ -24,7 +24,7 @@ learn = vision_learner(dls, squeezenet1_1, metrics=error_rate)
 # Define Flower client
 class FlowerClient(fl.client.NumPyClient):
     def get_parameters(self, config):
-        return [val.numpy() for _, val in learn.model.state_dict().items()]
+        return [val.cpu().numpy() for _, val in learn.model.state_dict().items()]
 
     def set_parameters(self, parameters):
         params_dict = zip(learn.model.state_dict().keys(), parameters)
