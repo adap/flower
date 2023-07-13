@@ -15,6 +15,7 @@
 """Contextmanager for a gRPC streaming channel to the Flower server."""
 
 
+import uuid
 from contextlib import contextmanager
 from logging import DEBUG
 from pathlib import Path
@@ -24,6 +25,8 @@ from typing import Callable, Iterator, Optional, Tuple, Union
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
+from flwr.proto.node_pb2 import Node
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.proto.transport_pb2_grpc import FlowerServiceStub
 
@@ -44,7 +47,14 @@ def grpc_connection(
     server_address: str,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
-) -> Iterator[Tuple[Callable[[], ServerMessage], Callable[[ClientMessage], None]]]:
+) -> Iterator[
+    Tuple[
+        Callable[[], Optional[TaskIns]],
+        Callable[[TaskRes], None],
+        Optional[Callable[[], None]],
+        Optional[Callable[[], None]],
+    ]
+]:
     """Establish a gRPC connection to a gRPC server.
 
     Parameters
@@ -102,14 +112,27 @@ def grpc_connection(
 
     server_message_iterator: Iterator[ServerMessage] = stub.Join(iter(queue.get, None))
 
-    def receive() -> ServerMessage:
-        return next(server_message_iterator)
+    def receive() -> TaskIns:
+        server_message = next(server_message_iterator)
+        return TaskIns(
+            task_id=str(uuid.uuid4()),
+            group_id="",
+            workload_id="",
+            task=Task(
+                producer=Node(node_id=0, anonymous=True),
+                consumer=Node(node_id=0, anonymous=True),
+                ancestry=[],
+                legacy_server_message=server_message,
+            ),
+        )
 
-    def send(msg: ClientMessage) -> None:
+    def send(task_res: TaskRes) -> None:
+        msg = task_res.task.legacy_client_message
         return queue.put(msg, block=False)
 
     try:
-        yield (receive, send)
+        # Yield methods
+        yield (receive, send, None, None)
     finally:
         # Make sure to have a final
         channel.close()
