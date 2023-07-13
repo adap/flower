@@ -49,7 +49,7 @@ jobs:
             **/.venv
             ~/.cache/pip
             ~/.cache/pypoetry
-          key: ${{ runner.os }}-python-cache-${{ steps.bootstrap.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
+          key: ${{ runner.os }}-python-${{ steps.bootstrap.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
 
   build_e2e_cache:
     runs-on: ubuntu-22.04
@@ -89,5 +89,5 @@ jobs:
             **/.venv
             ~/.cache/pip
             ~/.cache/pypoetry
-          key: ${{ runner.os }}-python-cache-${{ steps.bootstrap.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
+          key: ${{ runner.os }}-e2e-${{ matrix.directory }}-cache-${{ hashFiles('pyproject.toml') }}
       
