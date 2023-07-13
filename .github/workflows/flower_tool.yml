@@ -24,6 +24,6 @@ jobs:
         uses: ./.github/actions/bootstrap
       - name: Install dependencies (mandatory + optional)
         run: |
-          python -m poetry install
+          poetry install
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
         run: ./dev/test-tool.sh

@@ -14,22 +14,24 @@ env:
   FLWR_TELEMETRY_ENABLED: 0
 
 jobs:
-  build_python_cache:
+  build_framework_cache:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
         # Only use versions found here:
-        # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md#python
-        # to ensure they are loaded from the runner image hosted tool cache
-        # https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#hosted-tool-cache
-        # By not specifying the patch version it is ensured that a version available in
-        # the hosted tool cache is used
-        python-version: [
+          # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md#python
+          # to ensure they are loaded from the runner image hosted tool cache
+          # https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#hosted-tool-cache
+          # By not specifying the patch version it is ensured that a version available in
+          # the hosted tool cache is used
+          python-version: [
             3.7,
             3.8,
             # 3.9,
             # 3.10
-          ]
+            ]
+    name: "Cache Framework"
+
     steps:
       - uses: actions/checkout@v3
       - name: Bootstrap
@@ -38,7 +40,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
-        run: python -m poetry install --all-extras
+        run: poetry install --all-extras
       - name: Cache Python dependencies
         uses: actions/cache/save@v3
         with:
@@ -48,3 +50,44 @@ jobs:
             ~/.cache/pip
             ~/.cache/pypoetry
           key: ${{ runner.os }}-python-cache-${{ steps.bootstrap.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
+
+  build_e2e_cache:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        include:
+          - directory: bare
+          - directory: jax
+          - directory: pytorch
+          - directory: tensorflow
+          - directory: opacus
+          - directory: mxnet
+          - directory: scikit-learn
+          - directory: fastai
+          - directory: pandas
+
+    name: "Cache E2E ${{matrix.directory}}"
+
+    defaults:
+      run:
+        working-directory: e2e/${{ matrix.directory }}
+      
+    steps:
+      - uses: actions/checkout@v3
+      - name: Bootstrap
+        id: bootstrap
+        uses: ./.github/actions/bootstrap
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: poetry install --all-extras
+      - name: Cache Python dependencies
+        uses: actions/cache/save@v3
+        with:
+          path: |
+            **/poetry.lock
+            **/.venv
+            ~/.cache/pip
+            ~/.cache/pypoetry
+          key: ${{ runner.os }}-python-cache-${{ steps.bootstrap.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
+      

@@ -74,7 +74,7 @@ jobs:
         with:
           python-version: 3.8
       - name: Install dependencies
-        run: python -m poetry install
+        run: poetry install
       - name: Download dataset
         if: ${{matrix.dataset}}
         run: poetry run python -c "${{ matrix.dataset }}"

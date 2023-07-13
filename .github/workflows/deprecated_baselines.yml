@@ -25,6 +25,6 @@ jobs:
         with:
           python-version: 3.8
       - name: Install dependencies
-        run: poetry run python -m poetry install
+        run: poetry install
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
         run: poetry run ./dev/test.sh
