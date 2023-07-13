@@ -21,21 +21,45 @@ jobs:
       matrix:
         include:
           - directory: bare
+
           - directory: jax
+
           - directory: pytorch
-            dataset: from torchvision.datasets import CIFAR10; CIFAR10('./data', download=True)
+            dataset: |
+              from torchvision.datasets import CIFAR10
+              CIFAR10('./data', download=True)
+
           - directory: tensorflow
-            dataset: import tensorflow as tf; tf.keras.datasets.cifar10.load_data()
+            dataset: |
+              import tensorflow as tf
+              tf.keras.datasets.cifar10.load_data()
+
           - directory: opacus
-            dataset: from torchvision.datasets import CIFAR10; CIFAR10('./data', download=True)
-          - directory: pandas
-            dataset: from pathlib import Path; Path('data').mkdir(exist_ok=True); from sklearn.datasets import load_iris; load_iris(as_frame=True)['data'].to_csv('./data/client.csv')
+            dataset: |
+              from torchvision.datasets import CIFAR10
+              CIFAR10('./data', download=True)
+
           - directory: mxnet
-            dataset: import mxnet as mx; mx.test_utils.get_mnist()
+            dataset: |
+              import mxnet as mx
+              mx.test_utils.get_mnist()
+
           - directory: scikit-learn
-            dataset: import openml; openml.datasets.get_dataset(554)
+            dataset: |
+              import openml
+              openml.datasets.get_dataset(554)
+
           - directory: fastai
-            dataset: from fastai.vision.all import untar_data, URLS; untar_data(URLs.MNIST) 
+            dataset: |
+              from fastai.vision.all import untar_data, URLs
+              untar_data(URLs.MNIST) 
+
+          - directory: pandas
+            dataset: |
+              from pathlib import Path
+              from sklearn.datasets import load_iris
+              Path('data').mkdir(exist_ok=True)
+              load_iris(as_frame=True)['data'].to_csv('./data/client.csv')
 
     name: ${{matrix.directory}}
 
