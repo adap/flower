@@ -39,6 +39,7 @@ jobs:
         with:
           path: |
             **/poetry.lock
+            **/.venv
             ~/.cache/pip
             ~/.cache/pypoetry
           key: ${{ runner.os }}-python-cache-${{ steps.bootstrap.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
