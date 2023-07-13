@@ -40,4 +40,6 @@ runs:
           pip==${{ inputs.pip-version }} \
           setuptools==${{ inputs.setuptools-version }} \
           poetry==${{ inputs.poetry-version }}
+        poetry config virtualenvs.create true
+        poetry config virtualenvs.in-project true
       shell: bash
