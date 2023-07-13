@@ -44,6 +44,7 @@ jobs:
       - name: Install pandoc
         run: sudo apt install pandoc
       - name: Install dependencies (mandatory only)
+        if: steps.bootstrap.outputs.cache-hit != 'true'
         run: poetry install --extras "simulation"
       - name: Build and deploy docs
         env:
