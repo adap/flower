@@ -17,9 +17,6 @@ outputs:
   python-version:
     description: "Exact Python or PyPy version which was used."
     value: ${{ steps.setup-python.outputs.python-version }}
-  cache-hit:
-    description: "A boolean value to indicate an exact match was found for the primary key"
-    value: ${{ steps.cache-restore.outputs.cache-hit }}
 runs:
   using: "composite"
   steps:
