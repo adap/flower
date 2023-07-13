@@ -15,8 +15,9 @@
 """ProtoBuf serialization and deserialization."""
 
 
-from typing import Any, List, cast
+from typing import Any, List, Optional, cast
 
+from flwr.proto.task_pb2 import SecureAggregation, Task, Value
 from flwr.proto.transport_pb2 import (
     ClientMessage,
     Code,
@@ -483,3 +484,130 @@ def scalar_from_proto(scalar_msg: Scalar) -> typing.Scalar:
     scalar_field = scalar_msg.WhichOneof("scalar")
     scalar = getattr(scalar_msg, cast(str, scalar_field))
     return cast(typing.Scalar, scalar)
+
+
+# === SecureAggregation messages ===
+
+
+__python_type_to_field_name = {
+    float: "double",
+    int: "sint64",
+    bool: "bool",
+    str: "string",
+    bytes: "bytes",
+}
+
+
+__python_list_type_to_message_and_field_name = {
+    float: (Value.DoubleList, "double_list"),
+    int: (Value.Sint64List, "sint64_list"),
+    bool: (Value.BoolList, "bool_list"),
+    str: (Value.StringList, "string_list"),
+    bytes: (Value.BytesList, "bytes_list"),
+}
+
+
+def __check_value(value: typing.Value) -> None:
+    if isinstance(value, tuple(__python_type_to_field_name.keys())):
+        return
+    if isinstance(value, (list, tuple)) and isinstance(
+        value[0], tuple(__python_type_to_field_name.keys())
+    ):
+        data_type = type(value[0])
+        for element in value:
+            if isinstance(element, data_type):
+                continue
+            raise Exception(
+                f"Inconsistent type: the types of elements in the list must be the same"
+                f"(expect {data_type}, but get {type(element)})"
+            )
+    else:
+        raise TypeError(
+            f"Accepted types: {bool, bytes, float, int, str} or "
+            f"list of these types."
+        )
+
+
+def value_to_proto(value: typing.Value) -> Value:
+    """Serialize `Value` to ProtoBuf."""
+    __check_value(value)
+
+    arg = {}
+    if isinstance(value, (list, tuple)):
+        msg_class, field_name = __python_list_type_to_message_and_field_name[
+            type(value[0])
+        ]
+        arg[field_name] = msg_class(vals=value)
+    else:
+        arg[__python_type_to_field_name[type(value)]] = value
+    return Value(**arg)
+
+
+def value_from_proto(value_msg: Value) -> typing.Value:
+    """Deserialize `Value` from ProtoBuf."""
+    value_field = cast(str, value_msg.WhichOneof("value"))
+    if value_field.endswith("list"):
+        value = list(getattr(value_msg, value_field).vals)
+    else:
+        value = getattr(value_msg, value_field)
+    return cast(typing.Value, value)
+
+
+def secagg_msg_to_proto(
+    secure_aggregation: typing.SecureAggregation,
+) -> SecureAggregation:
+    """Serialize `SecureAggregation` to ProtoBuf."""
+    return SecureAggregation(
+        named_values={
+            name: value_to_proto(value)
+            for name, value in secure_aggregation.named_values.items()
+        }
+    )
+
+
+def secagg_msg_from_proto(sa_msg: SecureAggregation) -> typing.SecureAggregation:
+    """Deserialize `SecureAggregation` from ProtoBuf."""
+    return typing.SecureAggregation(
+        named_values={
+            name: value_from_proto(value) for name, value in sa_msg.named_values.items()
+        }
+    )
+
+
+# === Task messages ===
+
+
+def task_msg_to_proto(
+    task: typing.Task, merge_from_proto: Optional[Task] = None
+) -> Task:
+    """Serialize `Task` to ProtoBuf."""
+    proto = Task(
+        sa=secagg_msg_to_proto(task.secure_aggregation_message)
+        if task.secure_aggregation_message
+        else None,
+        legacy_server_message=server_message_to_proto(task.legacy_server_message)
+        if task.legacy_server_message
+        else None,
+        legacy_client_message=client_message_to_proto(task.legacy_client_message)
+        if task.legacy_client_message
+        else None,
+    )
+    if merge_from_proto is not None:
+        proto.MergeFrom(merge_from_proto)
+    return proto
+
+
+def task_msg_from_proto(proto: Task) -> typing.Task:
+    """Deserialize `Task` from ProtoBuf."""
+    task = typing.Task(
+        secure_aggregation_message=secagg_msg_from_proto(proto.sa)
+        if proto.HasField("sa")
+        else None,
+        legacy_server_message=server_message_from_proto(proto.legacy_server_message)
+        if proto.HasField("legacy_server_message")
+        else None,
+        legacy_client_message=client_message_from_proto(proto.legacy_client_message)
+        if proto.HasField("legacy_client_message")
+        else None,
+    )
+    return task
