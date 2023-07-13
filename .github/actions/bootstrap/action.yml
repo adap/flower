@@ -32,6 +32,7 @@ runs:
           **/poetry.lock
           ~/.cache/pip
           ~/.cache/pypoetry
+          **/.venv
         key: ${{ runner.os }}-python-cache-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
     - name: Install build tools
       run: |
@@ -39,5 +40,4 @@ runs:
           pip==${{ inputs.pip-version }} \
           setuptools==${{ inputs.setuptools-version }} \
           poetry==${{ inputs.poetry-version }}
-        python -m poetry config virtualenvs.create false
       shell: bash
