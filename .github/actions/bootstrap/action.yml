@@ -13,9 +13,6 @@ inputs:
   poetry-version:
     description: "Version of poetry to be installed using pip"
     default: 1.5.1
-  cache-extra-key:
-    description: The cache-key to be used
-    default:
 outputs:
   python-version:
     description: "Exact Python or PyPy version which was used."
@@ -40,7 +37,7 @@ runs:
           **/.venv
           ~/.cache/pip
           ~/.cache/pypoetry
-        key: ${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}${{ inputs.cache-extra-key }}
+        key: ${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
     - name: Install build tools
       if: steps.cache-restore.outputs.cache-hit != 'true'
       run: |

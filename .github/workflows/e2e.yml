@@ -74,7 +74,6 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: 3.8
-          cache-extra-key: -e2e
       - name: Install dependencies
         run: poetry install
       - name: Download dataset
