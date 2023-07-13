@@ -24,12 +24,7 @@ jobs:
           # https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#hosted-tool-cache
           # By not specifying the patch version it is ensured that a version available in
           # the hosted tool cache is used
-          python-version: [
-            3.7,
-            3.8,
-            # 3.9,
-            # 3.10
-            ]
+          python-version: [3.7, 3.8, 3.9, 3.10]
     name: "Cache Framework"
 
     steps:
