@@ -32,7 +32,7 @@ runs:
           **/poetry.lock
           ~/.cache/pip
           ~/.cache/pypoetry
-      key: ${{ runner.os }}-python-cache-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
+        key: ${{ runner.os }}-python-cache-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
     - name: Install build tools
       run: |
         python -m pip install -U \
