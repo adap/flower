@@ -21,49 +21,40 @@ jobs:
       matrix:
         include:
           - directory: bare
-            cache-hash-files: e2e/bare/pyproject.toml
 
           - directory: jax
-            cache-hash-files: e2e/jax/pyproject.toml
 
           - directory: pytorch
-            cache-hash-files: e2e/pytorch/pyproject.toml
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
 
           - directory: tensorflow
-            cache-hash-files: e2e/tensorflow/pyproject.toml
             dataset: |
               import tensorflow as tf
               tf.keras.datasets.cifar10.load_data()
 
           - directory: opacus
-            cache-hash-files: e2e/opacus/pyproject.toml
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
 
           - directory: mxnet
-            cache-hash-files: e2e/mxnet/pyproject.toml
             dataset: |
               import mxnet as mx
               mx.test_utils.get_mnist()
 
           - directory: scikit-learn
-            cache-hash-files: e2e/lear/pyproject.toml
             dataset: |
               import openml
               openml.datasets.get_dataset(554)
 
           - directory: fastai
-            cache-hash-files: e2e/fastai/pyproject.toml
             dataset: |
               from fastai.vision.all import untar_data, URLs
               untar_data(URLs.MNIST) 
 
           - directory: pandas
-            cache-hash-files: e2e/pandas/pyproject.toml
             dataset: |
               from pathlib import Path
               from sklearn.datasets import load_iris
@@ -83,7 +74,6 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: 3.8
-          cache-hash-files: ${{ matrix.cache-hash-files }}
       - name: Install dependencies
         run: poetry install
       - name: Download dataset
