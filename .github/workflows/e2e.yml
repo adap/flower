@@ -89,6 +89,4 @@ jobs:
       - name: Run edge client test
         run: ./test.sh
       - name: Run virtual client test
-        run: |
-          cd e2e/fastai
-          python simulation.py
+        run: python simulation.py
