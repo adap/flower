@@ -57,14 +57,23 @@ jobs:
       matrix:
         include:
           - directory: bare
+            cache-hash-files: e2e/bare/pyproject.toml
           - directory: jax
+            cache-hash-files: e2e/jax/pyproject.toml
           - directory: pytorch
+            cache-hash-files: e2e/pytorch/pyproject.toml
           - directory: tensorflow
+            cache-hash-files: e2e/tensorflow/pyproject.toml
           - directory: opacus
+            cache-hash-files: e2e/opacus/pyproject.toml
           - directory: mxnet
+            cache-hash-files: e2e/mxnet/pyproject.toml
           - directory: scikit-learn
+            cache-hash-files: e2e/scikit-learn/pyproject.toml
           - directory: fastai
+            cache-hash-files: e2e/fastai/pyproject.toml
           - directory: pandas
+            cache-hash-files: e2e/pandas/pyproject.toml
 
     name: "Cache E2E ${{matrix.directory}}"
 
@@ -89,5 +98,4 @@ jobs:
             **/.venv
             ~/.cache/pip
             ~/.cache/pypoetry
-          key: ${{ runner.os }}-e2e-${{ matrix.directory }}-cache-${{ hashFiles('pyproject.toml') }}
-      
+          key: ${{ runner.os }}-e2e-${{ matrix.directory }}-cache-${{ hashFiles(matrix.cache-hash-files) }}
