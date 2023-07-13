@@ -51,7 +51,7 @@ jobs:
   build_e2e_cache:
     runs-on: ubuntu-22.04
 
-    name: "Cache Framework"
+    name: "Cache E2E"
 
     steps:
       - uses: actions/checkout@v3
