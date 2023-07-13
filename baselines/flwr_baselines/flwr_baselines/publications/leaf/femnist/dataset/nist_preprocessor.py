@@ -188,7 +188,7 @@ class NISTPreprocessor:
             file_path = row["path_by_writer"]
             img = Image.open(file_path)
             gray = img.convert("L")
-            gray.thumbnail(resized_size, Image.LANCZOS)
+            gray.thumbnail(resized_size, Image.Resampling.LANCZOS)
             writer_id = row["writer_id"]
             character = row["character"]
             if writer_id not in writer_to_character_to_count:
