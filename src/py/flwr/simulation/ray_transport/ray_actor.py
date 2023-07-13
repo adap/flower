@@ -81,8 +81,7 @@ class VirtualClientEngineActorPool(ActorPool):
             self._future_to_actor[future_key] = (self._next_task_index, actor, cid)
             self._next_task_index += 1
 
-            # creating cid to future mapping
-            self._reset_cid_to_future_dict(cid)
+            # update with future
             self._cid_to_future[cid]["future"] = future_key
 
     def submit_client_job(self, fn: Any, value: Callable, cid: str) -> None:
@@ -91,6 +90,8 @@ class VirtualClientEngineActorPool(ActorPool):
         # removing and adding elements from a dictionary. Which creates
         # issues in multi-threaded settings
         with self.lock:
+            # creating cid to future mapping
+            self._reset_cid_to_future_dict(cid)
             if self._idle_actors:
                 # submit job since there is an Actor that's available
                 self.submit(fn, value, cid)
