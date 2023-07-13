@@ -17,7 +17,7 @@ from transformers import AdamW
 
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cpu")
-CHECKPOINT = "distilbert-base-uncased"  # transformer model checkpoint
+CHECKPOINT = "albert-base-v1"  # transformer model checkpoint
 
 
 def load_data():
