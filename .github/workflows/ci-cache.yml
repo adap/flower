@@ -46,51 +46,51 @@ jobs:
             ~/.cache/pypoetry
           key: ${{ runner.os }}-python-${{ steps.bootstrap.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
 
-  build_e2e_cache:
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        include:
-          - directory: bare
-            cache-hash-files: e2e/bare/pyproject.toml
-          - directory: jax
-            cache-hash-files: e2e/jax/pyproject.toml
-          - directory: pytorch
-            cache-hash-files: e2e/pytorch/pyproject.toml
-          - directory: tensorflow
-            cache-hash-files: e2e/tensorflow/pyproject.toml
-          - directory: opacus
-            cache-hash-files: e2e/opacus/pyproject.toml
-          - directory: mxnet
-            cache-hash-files: e2e/mxnet/pyproject.toml
-          - directory: scikit-learn
-            cache-hash-files: e2e/scikit-learn/pyproject.toml
-          - directory: fastai
-            cache-hash-files: e2e/fastai/pyproject.toml
-          - directory: pandas
-            cache-hash-files: e2e/pandas/pyproject.toml
+  # build_e2e_cache:
+  #   runs-on: ubuntu-22.04
+  #   strategy:
+  #     matrix:
+  #       include:
+  #         - directory: bare
+  #           cache-hash-files: e2e/bare/pyproject.toml
+  #         - directory: jax
+  #           cache-hash-files: e2e/jax/pyproject.toml
+  #         - directory: pytorch
+  #           cache-hash-files: e2e/pytorch/pyproject.toml
+  #         - directory: tensorflow
+  #           cache-hash-files: e2e/tensorflow/pyproject.toml
+  #         - directory: opacus
+  #           cache-hash-files: e2e/opacus/pyproject.toml
+  #         - directory: mxnet
+  #           cache-hash-files: e2e/mxnet/pyproject.toml
+  #         - directory: scikit-learn
+  #           cache-hash-files: e2e/scikit-learn/pyproject.toml
+  #         - directory: fastai
+  #           cache-hash-files: e2e/fastai/pyproject.toml
+  #         - directory: pandas
+  #           cache-hash-files: e2e/pandas/pyproject.toml
 
-    name: "Cache E2E ${{matrix.directory}}"
+  #   name: "Cache E2E ${{matrix.directory}}"
 
-    defaults:
-      run:
-        working-directory: e2e/${{ matrix.directory }}
+  #   defaults:
+  #     run:
+  #       working-directory: e2e/${{ matrix.directory }}
       
-    steps:
-      - uses: actions/checkout@v3
-      - name: Bootstrap
-        id: bootstrap
-        uses: ./.github/actions/bootstrap
-        with:
-          python-version: 3.8
-      - name: Install dependencies
-        run: poetry install --all-extras
-      - name: Cache Python dependencies
-        uses: actions/cache/save@v3
-        with:
-          path: |
-            **/poetry.lock
-            **/.venv
-            ~/.cache/pip
-            ~/.cache/pypoetry
-          key: ${{ runner.os }}-e2e-${{ matrix.directory }}-cache-${{ hashFiles(matrix.cache-hash-files) }}
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: Bootstrap
+  #       id: bootstrap
+  #       uses: ./.github/actions/bootstrap
+  #       with:
+  #         python-version: 3.8
+  #     - name: Install dependencies
+  #       run: poetry install --all-extras
+  #     - name: Cache Python dependencies
+  #       uses: actions/cache/save@v3
+  #       with:
+  #         path: |
+  #           **/poetry.lock
+  #           **/.venv
+  #           ~/.cache/pip
+  #           ~/.cache/pypoetry
+  #         key: ${{ runner.os }}-e2e-${{ matrix.directory }}-cache-${{ hashFiles(matrix.cache-hash-files) }}
