@@ -20,6 +20,9 @@ outputs:
   python-version:
     description: "Exact Python or PyPy version which was used."
     value: ${{ steps.setup-python.outputs.python-version }}
+  cache-hit:
+    description: "A boolean value to indicate an exact match was found for the primary key"
+    value: ${{ steps.cache-restore.outputs.cache-hit }}
 runs:
   using: "composite"
   steps:
@@ -29,6 +32,7 @@ runs:
       with:
         python-version: ${{ inputs.python-version }}
     - uses: actions/cache/restore@v3
+      id: cache-restore
       if: github.ref != 'refs/heads/main'
       with:
         path: |
@@ -38,6 +42,7 @@ runs:
           ~/.cache/pypoetry
         key: ${{ runner.os }}-python-cache-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles(inputs.cache-hash-files) }}
     - name: Install build tools
+      if: steps.cache-restore.outputs.cache-hit != 'true'
       run: |
         python -m pip install -U \
           pip==${{ inputs.pip-version }} \
