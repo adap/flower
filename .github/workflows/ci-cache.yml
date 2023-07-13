@@ -65,14 +65,14 @@ jobs:
         if: steps.bootstrap.outputs.cache-hit != 'true'
         run: |
           (cd e2e/bare && poetry install --all-extras)
-          # (cd e2e/jax && poetry install --all-extras)
-          # (cd e2e/pytorch && poetry install --all-extras)
-          # (cd e2e/tensorflow && poetry install --all-extras)
-          # (cd e2e/opacus && poetry install --all-extras)
-          # (cd e2e/mxnet && poetry install --all-extras)
-          # (cd e2e/scikit-learn && poetry install --all-extras)
-          # (cd e2e/fastai && poetry install --all-extras)
-          # (cd e2e/pandas && poetry install --all-extras)
+          (cd e2e/jax && poetry install --all-extras)
+          (cd e2e/pytorch && poetry install --all-extras)
+          (cd e2e/tensorflow && poetry install --all-extras)
+          (cd e2e/opacus && poetry install --all-extras)
+          (cd e2e/mxnet && poetry install --all-extras)
+          (cd e2e/scikit-learn && poetry install --all-extras)
+          (cd e2e/fastai && poetry install --all-extras)
+          (cd e2e/pandas && poetry install --all-extras)
       - name: Cache Python dependencies
         if: steps.bootstrap.outputs.cache-hit != 'true'
         uses: actions/cache/save@v3
