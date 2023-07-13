@@ -35,10 +35,14 @@ jobs:
           - directory: scikit-learn
             dataset: import openml; openml.datasets.get_dataset(554)
           - directory: fastai
-            dataset: from fastai.vision.all import untar_data; untar_data(URLs.MNIST) 
+            dataset: from fastai.vision.all import untar_data, URLS; untar_data(URLs.MNIST) 
+
+    name: ${{matrix.directory}}
+
     defaults:
       run:
         working-directory: e2e/${{ matrix.directory }}
+
     steps:
       - uses: actions/checkout@v3
       - name: Bootstrap
