@@ -40,7 +40,7 @@ runs:
           **/.venv
           ~/.cache/pip
           ~/.cache/pypoetry
-        key: ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}${{ inputs.cache-extra-key }}
+        key: ${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}${{ inputs.cache-extra-key }}
     - name: Install build tools
       if: steps.cache-restore.outputs.cache-hit != 'true'
       run: |
