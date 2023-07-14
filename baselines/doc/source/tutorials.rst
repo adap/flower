@@ -7,3 +7,4 @@ A learning-oriented series for Baselines
    :maxdepth: 1
 
    tutorials/using-baselines
+   tutorials/contributing-baselines

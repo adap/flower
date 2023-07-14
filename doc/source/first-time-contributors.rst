@@ -27,19 +27,19 @@ Setting up the repository
     A fork is a personal copy of a GitHub repository. To create one for Flower, you must navigate to https://github.com/adap/flower (while connected to your GitHub account)
     and click the ``Fork`` button situated on the top right of the page.
 
-    .. image:: ../_static/fork_button.png
+    .. image:: _static/fork_button.png
     
     You can change the name if you want, but this is not necessary as this version of Flower will be yours and will sit inside your own account (i.e., in your own list of repositories).
     Once created, you should see on the top left corner that you are looking at your own version of Flower.
 
-    .. image:: ../_static/fork_link.png
+    .. image:: _static/fork_link.png
 
 3. **Cloning your forked repository**
     The next step is to download the forked repository on your machine to be able to make changes to it.
     On your forked repository page, you should first click on the ``Code`` button on the right, 
     this will give you the ability to copy the HTTPS link of the repository.
 
-    .. image:: ../_static/cloning_fork.png
+    .. image:: _static/cloning_fork.png
 
     Once you copied the \<URL\>, you can open a terminal on your machine, navigate to the place you want to download the repository to and type:
 
@@ -59,7 +59,7 @@ Setting up the repository
     And here we will need to add an origin to our repository. The origin is the \<URL\> of the remote fork repository.
     To obtain it, we can do as previously mentioned by going to our fork repository on our GitHub account and copying the link.
 
-    .. image:: ../_static/cloning_fork.png
+    .. image:: _static/cloning_fork.png
     
     Once the \<URL\> is copied, we can type the following command in our terminal:
 
@@ -78,7 +78,7 @@ Setting up the repository
 
     The following diagram visually explains what we did in the previous steps:
 
-    .. image:: ../_static/github_schema.png 
+    .. image:: _static/github_schema.png 
 
     The upstream is the GitHub remote address of the parent repository (in this case Flower), 
     i.e. the one we eventually want to contribute to and therefore need an up-to-date history of. 
@@ -176,17 +176,17 @@ Creating and merging a pull request (PR)
 1. **Create the PR**
     Once you have pushed changes, on the GitHub webpage of your repository you should see the following message:
 
-    .. image:: ../_static/compare_and_pr.png
+    .. image:: _static/compare_and_pr.png
 
     Otherwise you can always find this option in the `Branches` page.
 
     Once you click the `Compare & pull request` button, you should see something similar to this:
 
-    .. image:: ../_static/creating_pr.png
+    .. image:: _static/creating_pr.png
     
     At the top you have an explanation of which branch will be merged where:
 
-    .. image:: ../_static/merging_branch.png
+    .. image:: _static/merging_branch.png
     
     In this example you can see that the request is to merge the branch ``doc-fixes`` from my forked repository to branch ``main`` from the Flower repository.
 
@@ -198,7 +198,7 @@ Creating and merging a pull request (PR)
 
     If your PR is not yet ready for review, and you don't want to notify anyone, you have the option to create a draft pull request:
 
-    .. image:: ../_static/draft_pr.png
+    .. image:: _static/draft_pr.png
 
 2. **Making new changes**
     Once the PR has been opened (as draft or not), you can still push new commits to it the same way we did before, by making changes to the branch associated with the PR.
@@ -206,21 +206,21 @@ Creating and merging a pull request (PR)
 3. **Review the PR**
     Once the PR has been opened or once the draft PR has been marked as ready, a review from code owners will be automatically requested:
 
-    .. image:: ../_static/opened_pr.png
+    .. image:: _static/opened_pr.png
 
     Code owners will then look into the code, ask questions, request changes or validate the PR.
 
     Merging will be blocked if there are ongoing requested changes.
 
-    .. image:: ../_static/changes_requested.png
+    .. image:: _static/changes_requested.png
     
     To resolve them, just push the necessary changes to the branch associated with the PR:
 
-    .. image:: ../_static/make_changes.png
+    .. image:: _static/make_changes.png
 
     And resolve the conversation:
 
-    .. image:: ../_static/resolve_conv.png
+    .. image:: _static/resolve_conv.png
 
     Once all the conversations have been resolved, you can re-request a review.
 
@@ -228,7 +228,7 @@ Creating and merging a pull request (PR)
 4. **Once the PR is merged**
     If all the automatic tests have passed and reviewers have no more changes to request, they can approve the PR and merge it.
 
-    .. image:: ../_static/merging_pr.png
+    .. image:: _static/merging_pr.png
 
     Once it is merged, you can delete the branch on GitHub (a button should appear to do so) and also delete it locally by doing:
 
