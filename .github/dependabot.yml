@@ -67,4 +67,3 @@ updates:
     schedule:
       interval: "daily"
     open-pull-requests-limit: 2
-    
