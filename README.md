@@ -97,7 +97,7 @@ Flower Baselines is a collection of community-contributed experiments that repro
 * [FedAvg](https://arxiv.org/abs/1602.05629):
   * [MNIST](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/fedavg_mnist)
 * [FedProx](https://arxiv.org/abs/1812.06127):
-  * [MNIST](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/fedprox_mnist)
+  * [MNIST](https://github.com/adap/flower/tree/main/baselines/fedprox/)
 * [FedBN: Federated Learning on non-IID Features via Local Batch Normalization](https://arxiv.org/abs/2102.07623):
   * [Convergence Rate](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/fedbn/convergence_rate)
 * [Adaptive Federated Optimization](https://arxiv.org/abs/2003.00295):
