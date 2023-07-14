@@ -21,11 +21,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Bootstrap
+        id: bootstrap
         uses: ./.github/actions/bootstrap
         with:
           python-version: 3.8
       - name: Install dependencies
-        run: |
-          python -m poetry install
+        run: poetry install
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
-        run: ./dev/test.sh
+        run: poetry run ./dev/test.sh

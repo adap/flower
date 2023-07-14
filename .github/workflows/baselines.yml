@@ -114,7 +114,7 @@ jobs:
         run: |
           changed_dir="${{ steps.validate_changed_baselines_dirs.outputs.changed_dir }}"
           cd "${changed_dir}"
-          python -m poetry install
+          poetry install
       - name: Test
         if: steps.validate_changed_baselines_dirs.outputs.baseline_changed == 'true'
         run: |

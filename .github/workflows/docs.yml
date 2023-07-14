@@ -18,13 +18,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Bootstrap
+        id: bootstrap
         uses: ./.github/actions/bootstrap
       - name: Install pandoc
         run: sudo apt install pandoc
       - name: Install dependencies (mandatory only)
-        run: python -m poetry install --extras "simulation"
+        run: poetry install --extras "simulation"
       - name: Build docs
-        run: ./dev/build-docs.sh
+        run: poetry run ./dev/build-docs.sh
 
   deploy_docs:
     needs: build_docs
@@ -34,14 +35,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Bootstrap
+        id: bootstrap
         uses: ./.github/actions/bootstrap
       - name: Install pandoc
         run: sudo apt install pandoc
       - name: Install dependencies (mandatory only)
-        run: python -m poetry install --extras "simulation"
+        run: poetry install --extras "simulation"
       - name: Build and deploy docs
         env:
           AWS_DEFAULT_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
-        run: ./dev/deploy-docs.sh
+        run: poetry run ./dev/deploy-docs.sh

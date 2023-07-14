@@ -22,9 +22,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Bootstrap
+        id: bootstrap
         uses: ./.github/actions/bootstrap
       - name: Install dependencies (mandatory + optional)
-        run: |
-          python -m poetry install
+        run: poetry install
       - name: Lint + Test (isort/black/mypy/pylint/pytest)
         run: ./dev/test-tool.sh
