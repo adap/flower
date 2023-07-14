@@ -4,11 +4,12 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
 echo "=== test-wheel.sh ==="
 
-# Build the wheel first
-echo "Building the wheel: start"
-./dev/build.sh
-echo "Building the wheel: done"
-
+# Check if the build directory has the wheel
+if [ ! -d ./dist ] || [ -z "$(ls -A ./dist/)" ]; then
+  echo "The build directory does not exist or is empty." \
+  "Make sure to build the wheel before running this script."
+  exit 1
+fi
 # Test
 echo "Twine wheel check: start"
 python -m twine check --strict ./dist/*
