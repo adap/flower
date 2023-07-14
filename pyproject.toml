@@ -12,6 +12,14 @@ readme = "README.md"
 homepage = "https://flower.dev"
 repository = "https://github.com/adap/flower"
 documentation = "https://flower.dev"
+keywords = [
+    "flower",
+    "fl",
+    "federated learning",
+    "federated analytics",
+    "federated evaluation",
+    "machine learning",
+]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
