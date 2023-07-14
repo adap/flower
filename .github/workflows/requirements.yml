@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - id: set-example-matrix
-        run: echo "::set-output name=matrix::$(find ./examples -type f -name 'pyproject.toml' | sed -E 's|/[^/]+$||' | sort -u | jq -R -s -c 'split("\n")[:-1]')"
+        run: echo "matrix=$(find ./examples -type f -name 'pyproject.toml' | sed -E 's|/[^/]+$||' | sort -u | jq -R -s -c 'split("\n")[:-1]')" >> $GITHUB_OUTPUT
     
   requirements_sync_check:
     needs: generate_example_matrices
