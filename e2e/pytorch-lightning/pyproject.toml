@@ -1,15 +1,15 @@
 [build-system]
 requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.core.masonry.api"
+build-backend = "poetry.masonry.api"
 
 [tool.poetry]
-name = "mxnet_example"
+name = "quickstart_pytorch_lightning"
 version = "0.1.0"
-description = "MXNet example with MNIST and CNN"
+description = "Federated Learning E2E test with Flower and PyTorch Lightning"
 authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.7"
 flwr = { path = "../../", develop = true, extras = ["simulation"] }
-mxnet = "^1.7.0"
-numpy = "1.24.4"
+pytorch-lightning = "1.6.0"
+torchvision = "0.13.0"
