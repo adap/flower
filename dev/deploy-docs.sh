@@ -18,7 +18,17 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
+ROOT=`pwd`
+
+# Build and deploy Flower Framework docs
 cd doc
 make docs
 cd build/html
-aws s3 sync --delete --exclude ".*" --exclude "v/*" --acl public-read --cache-control "no-cache" ./ s3://flower.dev/docs
+aws s3 sync --delete --exclude ".*" --exclude "v/*" --acl public-read --cache-control "no-cache" ./ s3://flower.dev/docs/framework
+
+# Build and deploy Flower Baselines docs
+cd $ROOT
+cd baselines/doc
+make docs
+cd build/html
+aws s3 sync --delete --exclude ".*" --exclude "v/*" --acl public-read --cache-control "no-cache" ./ s3://flower.dev/docs/baselines

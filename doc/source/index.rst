@@ -116,19 +116,6 @@ Information-oriented API reference and other reference material.
    faq
 
 
-Flower Baselines
-----------------
-
-Flower Baselines are a collection of organised scripts used to reproduce results from well-known publications or benchmarks. You can check which baselines already exist and/or contribute your own baseline.
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Flower Baselines
-   
-   using-baselines
-   contributing-baselines
-
-
 Contributor Guide
 -----------------
 
