@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - id: set-example-matrix
-        run: ./dev/generate-matrices.sh >> $GITHUB_OUTPUT
+        run: ./dev/generate-matrices.sh
     
   requirements_sync_check:
     needs: generate_example_matrices
