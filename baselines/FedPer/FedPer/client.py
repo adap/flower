@@ -18,6 +18,57 @@ from torch.utils.data import DataLoader
 from FedPer.dataset import load_datasets
 from FedPer.models import test, train
 
+import copy
+import torch
+import torch.nn as nn
+import numpy as np
+import time
+from flcore.clients.clientbase import Client
+
+
+class clientPer(Client):
+    def __init__(self, args, id, train_samples, test_samples, **kwargs):
+        super().__init__(args, id, train_samples, test_samples, **kwargs)
+
+    def train(self):
+        trainloader = self.load_train_data()
+        
+        start_time = time.time()
+
+        # self.model.to(self.device)
+        self.model.train()
+
+        max_local_epochs = self.local_epochs
+        if self.train_slow:
+            max_local_epochs = np.random.randint(1, max_local_epochs // 2)
+
+        for step in range(max_local_epochs):
+            for i, (x, y) in enumerate(trainloader):
+                if type(x) == type([]):
+                    x[0] = x[0].to(self.device)
+                else:
+                    x = x.to(self.device)
+                y = y.to(self.device)
+                if self.train_slow:
+                    time.sleep(0.1 * np.abs(np.random.rand()))
+                output = self.model(x)
+                loss = self.loss(output, y)
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
+
+        # self.model.cpu()
+
+        if self.learning_rate_decay:
+            self.learning_rate_scheduler.step()
+
+        self.train_time_cost['num_rounds'] += 1
+        self.train_time_cost['total_cost'] += time.time() - start_time
+
+    def set_parameters(self, model):
+        for new_param, old_param in zip(model.parameters(), self.model.base.parameters()):
+            old_param.data = new_param.data.clone()
+
 
 class FlowerClient(
     fl.client.NumPyClient
@@ -40,11 +91,14 @@ class FlowerClient(
         self.device = device
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
-        self.straggler_schedule = straggler_schedule
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
         return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
+    
+    def set_parameters_to_use(self, model):
+        for new_param, old_param in zip(model.parameters(), self.model.base.parameters()):
+            old_param.data = new_param.data.clone()
 
     def set_parameters(self, parameters: NDArrays) -> None:
         """Changes the parameters of the model using the given ones."""
@@ -58,33 +112,10 @@ class FlowerClient(
         """Implements distributed fit function for a given client."""
         self.set_parameters(parameters)
 
-        # At each round check if the client is a straggler,
-        # if so, train less epochs (to simulate partial work)
-        # if the client is told to be dropped (e.g. because not using
-        # FedProx in the server), the fit method returns without doing
-        # training.
-        # This method always returns via the metrics (last argument being
-        # returned) whether the client is a straggler or not. This info
-        # is used by strategies other than FedProx to discard the update.
-        if (
-            self.straggler_schedule[int(config["curr_round"]) - 1]
-            and self.num_epochs > 1
-        ):
-            num_epochs = np.random.randint(1, self.num_epochs)
+        # Set number of epochs
+        num_epochs = self.num_epochs
 
-            if config["drop_client"]:
-                # return without doing any training.
-                # The flag in the metric will be used to tell the strategy
-                # to discard the model upon aggregation
-                return (
-                    self.get_parameters({}),
-                    len(self.trainloader),
-                    {"is_straggler": True},
-                )
-
-        else:
-            num_epochs = self.num_epochs
-
+        # Train model
         train(
             self.net,
             self.trainloader,
@@ -147,15 +178,6 @@ def gen_client_fn(
         the DataLoader that will be used for testing
     """
 
-    # Defines a staggling schedule for each clients, i.e at which round will they
-    # be a straggler. This is done so at each round the proportion of staggling
-    # clients is respected
-    stragglers_mat = np.transpose(
-        np.random.choice(
-            [0, 1], size=(num_rounds, num_clients), p=[1 - stragglers, stragglers]
-        )
-    )
-
     def client_fn(cid: str) -> FlowerClient:
         """Create a Flower client representing a single organization."""
 
@@ -175,7 +197,6 @@ def gen_client_fn(
             device,
             num_epochs,
             learning_rate,
-            stragglers_mat[int(cid)],
         )
 
     return client_fn
