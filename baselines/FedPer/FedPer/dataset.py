@@ -16,7 +16,7 @@ import torch
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader, random_split
 
-from dataset_preparation import _partition_data
+from FedPer.dataset_preparation import _partition_data
 
 
 def load_datasets(  # pylint: disable=too-many-arguments
@@ -50,7 +50,7 @@ def load_datasets(  # pylint: disable=too-many-arguments
     print(f"Dataset partitioning config: {config}")
     datasets, testset = _partition_data(
         num_clients,
-        datasets=config.datasets,
+        datasets=config.name,
         iid=config.iid,
         balance=config.balance,
         power_law=config.power_law,
