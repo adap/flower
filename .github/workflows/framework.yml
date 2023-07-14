@@ -23,7 +23,7 @@ jobs:
         # qoutes as it will otherwise will assume 3.1
         python-version: [3.7, 3.8, 3.9, '3.10']
 
-    name: Python ${{ matrix.python }}
+    name: Python ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v3
       - name: Bootstrap
