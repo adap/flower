@@ -26,8 +26,6 @@ class FedAvgKDModel(tf.keras.Model):
             # Compute the loss value
             # (the loss function is configured in `compile()`)
             ce_loss = self.compiled_loss(y, local_output, regularization_losses=self.local_model.losses)
-            # kl_divergence = tf.keras.losses.KLDivergence()
-            # tf.print(tf.shape(z), tf.shape(y_pred))
             kd_loss = self.kd_loss(tf.nn.softmax(global_output, axis=1), tf.nn.softmax(local_output, axis=1))
             fedkd_loss = (1 - self.gamma) * ce_loss + self.gamma * kd_loss
 

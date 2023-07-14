@@ -1,6 +1,5 @@
 import tensorflow as tf
 
-
 class FedMLBModel(tf.keras.Model):
     """ FedMLB implementation from the paper https://arxiv.org/abs/2207.06936
     Based on the original implementation at https://github.com/jinkyu032/FedMLB. """
@@ -25,9 +24,7 @@ class FedMLBModel(tf.keras.Model):
 
         with tf.GradientTape() as tape:
             out_of_local = self.local_model(x, return_feature=True)
-
             local_features = out_of_local[:-1]
-
             logits = out_of_local[-1]
 
             ce_branch = []
@@ -41,23 +38,13 @@ class FedMLBModel(tf.keras.Model):
                 # tf.print("it ", it)
                 this_logits = self.global_model(local_features[it], level=it + 1)
                 this_ce = self.cross_entropy(y, this_logits)
-                # kd_loss(y_true, y_pred)
-                # this_kl = self.kd_loss(tf.nn.softmax(log_probs, axis=1), tf.nn.softmax(this_log_prob, axis=1))
-                # this_kl = self.kd_loss(tf.nn.softmax(this_logits), tf.nn.softmax(logits))
                 this_kl = self.kd_loss(tf.nn.softmax(this_logits), tf.nn.softmax(logits))
-                # tf.print("\nthis_ce", this_ce)
                 ce_branch.append(this_ce)
                 kl_branch.append(this_kl)
 
-            # tf.print("shape ", tf.stack(this_ce))
             ce_hybrid_loss = tf.reduce_mean(tf.stack(ce_branch))
             kd_loss = tf.reduce_mean(tf.stack(kl_branch))
-            # tf.print("ce_loss ", ce_loss)
-            # tf.print("\nhere")
-            # tf.print("\nkd_loss ", kd_loss, "ce_hybrid ", ce_hybrid_loss)
             fedmlb_loss = ce_loss + self.lambda_1 * ce_hybrid_loss + self.lambda_2 * kd_loss
-            # tf.print("FEDMLBLOSS ", fedmlb_loss)
-            # tf.print("FEDMLBLOSS ", fedmlb_loss)
 
         trainable_vars = self.local_model.trainable_variables
         gradients = tape.gradient(fedmlb_loss, trainable_vars)
