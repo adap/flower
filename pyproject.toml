@@ -14,7 +14,7 @@ repository = "https://github.com/adap/flower"
 documentation = "https://flower.dev"
 keywords = [
     "flower",
-    "fl"
+    "fl",
     "federated learning",
     "federated analytics",
     "federated evaluation",
