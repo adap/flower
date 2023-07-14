@@ -35,31 +35,75 @@ block) that this file should be executed first.
 
 from typing import List, Optional, Tuple
 
+import os
+import wget
 import numpy as np
 import torch
 import torchvision.transforms as transforms
+from torchvision.datasets import ImageFolder
+from zipfile import ZipFile
 from torch.utils.data import ConcatDataset, Dataset, Subset, random_split
-from torchvision.datasets import MNIST
+from torchvision.datasets import CIFAR10
 
 
-def _download_data() -> Tuple[Dataset, Dataset]:
+def _download_data(dataset: str) -> Tuple[Dataset, Dataset]:
     """Downloads (if necessary) and returns the MNIST dataset.
 
     Returns
     -------
-    Tuple[MNIST, MNIST]
-        The dataset for training and the dataset for testing MNIST.
+    Tuple[Dataset, Dataset]
+        The training and testing datasets.
     """
-    transform = transforms.Compose(
-        [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
-    )
-    trainset = MNIST("./dataset", train=True, download=True, transform=transform)
-    testset = MNIST("./dataset", train=False, download=True, transform=transform)
-    return trainset, testset
+    if dataset == "cifar10":
+        transform = transforms.Compose(
+            [
+                transforms.Resize((224, 224)),
+                transforms.ToTensor(),
+                transforms.Normalize((0.5,), (0.5,)),
+            ]
+        )
+        trainset = CIFAR10(
+            root="./dataset/cifar10", train=True, download=True, transform=transform
+        )
+        testset = CIFAR10(
+            root="./dataset/cifar10", train=False, download=True, transform=transform
+        )
+        return trainset, testset
+    elif dataset == "FLICKR-AES":
+        # Get zip file from 
+        # https://drive.google.com/file/d/1jY7GMMNaQGQ80AAL99FLrBpWPFCwTKVT/view?usp=drive_link
+        if not os.path.exists("./dataset/FLICKR-AES"):
+            os.makedirs("./dataset/FLICKR-AES")
+        if not os.path.exists("./dataset/FLICKR-AES/FLICKR-AES.zip"):
+            wget.download(
+                "https://drive.google.com/u/0/uc?id=1jY7GMMNaQGQ80AAL99FLrBpWPFCwTKVT&export=download",
+                "./dataset/FLICKR-AES/FLICKR-AES.zip",
+            )
+        with ZipFile("./dataset/FLICKR-AES/FLICKR-AES.zip", "r") as zipObj:
+            zipObj.extractall("./dataset/FLICKR-AES")
+
+        transform = transforms.Compose(
+            [
+                transforms.Resize((224, 224)),
+                transforms.ToTensor(),
+                transforms.Normalize((0.5,), (0.5,)),
+            ]
+        )
+        trainset = ImageFolder(
+            "./dataset/FLICKR-AES/FLICKR-AES/train", transform=transform
+        )
+        testset = ImageFolder(
+            "./dataset/FLICKR-AES/FLICKR-AES/test", transform=transform
+        )
+        return trainset, testset
+
+    else:
+        raise NotImplementedError(f"Dataset {dataset} not implemented.")
 
 
 def _partition_data(
     num_clients,
+    datasets: List[str],
     iid: Optional[bool] = False,
     power_law: Optional[bool] = True,
     balance: Optional[bool] = False,
@@ -72,6 +116,8 @@ def _partition_data(
     ----------
     num_clients : int
         The number of clients that hold a part of the data
+    datasets : List[str]
+        The datasets to be used for training
     iid : bool, optional
         Whether the data should be independent and identically distributed between
         the clients or if the data should first be sorted by labels and distributed by chunks
@@ -90,13 +136,22 @@ def _partition_data(
     Tuple[List[Dataset], Dataset]
         A list of dataset for each client and a single dataset to be use for testing the model.
     """
-    trainset, testset = _download_data()
+    trainsets, testsets = [], []
+    for dataset in datasets:
+        trainset, testset = _download_data(dataset=dataset)
+        trainsets.append(trainset)
+        testsets.append(testset)
+    print("trainsets", trainsets)
+    print("testsets", testsets)
 
     if balance:
         trainset = _balance_classes(trainset, seed)
-        
+    
     partition_size = int(len(trainset) / num_clients)
     lengths = [partition_size] * num_clients
+    if sum(lengths) < len(trainset):
+        remaining_data = len(trainset) - sum(lengths)
+        lengths[-1] += remaining_data
 
     if iid:
         datasets = random_split(trainset, lengths, torch.Generator().manual_seed(seed))
