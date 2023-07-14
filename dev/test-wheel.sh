@@ -21,4 +21,8 @@ if [ -z "$(python -m pyroma ./ | grep 'Final rating: 10/10')" ]; then
 fi
 echo "Pyroma wheel check: done"
 
+echo "Check-wheel-content wheel check: start"
+check-wheel-contents ./dist/ --ignore W002
+echo "Check-wheel-content wheel check: done"
+
 echo "- All wheel checks passed"
