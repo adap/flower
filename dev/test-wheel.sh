@@ -15,4 +15,10 @@ echo "Twine wheel check: start"
 python -m twine check --strict ./dist/*
 echo "Twine wheel check: done"
 
+echo "Pyroma wheel check: start"
+if [ -z "$(python -m pyroma ./ | grep 'Final rating: 10/10')" ]; then
+  exit 1
+fi
+echo "Pyroma wheel check: done"
+
 echo "- All wheel checks passed"
