@@ -30,6 +30,9 @@ updates:
     directory: "/e2e/mxnet"
     schedule:
       interval: "daily"
+    ignore:
+      # Ignore updates from certain packages
+      - dependency-name: "numpy"
     open-pull-requests-limit: 2
 
   - package-ecosystem: "pip"
