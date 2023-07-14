@@ -23,8 +23,7 @@ Flower Baselines are a collection of organised scripts used to reproduce results
 
 .. toctree::
    :maxdepth: 1 
+   :caption: Flower Baselines	
 
-   tutorials
-   guides
-   reference
-   explanations
+   using-baselines	
+   contributing-baselines
