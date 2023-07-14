@@ -77,35 +77,35 @@ Stay tuned, more tutorials are coming soon. Topics include **Privacy and Securit
 ## Documentation
 
 [Flower Docs](https://flower.dev/docs):
-* [Installation](https://flower.dev/docs/installation.html)
-* [Quickstart (TensorFlow)](https://flower.dev/docs/quickstart-tensorflow.html)
-* [Quickstart (PyTorch)](https://flower.dev/docs/quickstart-pytorch.html)
-* [Quickstart (Hugging Face [code example])](https://flower.dev/docs/quickstart-huggingface.html)
-* [Quickstart (PyTorch Lightning [code example])](https://flower.dev/docs/quickstart-pytorch-lightning.html)
-* [Quickstart (MXNet)](https://flower.dev/docs/example-mxnet-walk-through.html)
-* [Quickstart (Pandas)](https://flower.dev/docs/quickstart-pandas.html)
-* [Quickstart (fastai)](https://flower.dev/docs/quickstart-fastai.html)
+* [Installation](https://flower.dev/docs/framework/installation.html)
+* [Quickstart (TensorFlow)](https://flower.dev/framework/docs/quickstart-tensorflow.html)
+* [Quickstart (PyTorch)](https://flower.dev/docs/framework/quickstart-pytorch.html)
+* [Quickstart (Hugging Face [code example])](https://flower.dev/docs/framework/quickstart-huggingface.html)
+* [Quickstart (PyTorch Lightning [code example])](https://flower.dev/docs/framework/quickstart-pytorch-lightning.html)
+* [Quickstart (MXNet)](https://flower.dev/docs/framework/example-mxnet-walk-through.html)
+* [Quickstart (Pandas)](https://flower.dev/docs/framework/quickstart-pandas.html)
+* [Quickstart (fastai)](https://flower.dev/docs/framework/quickstart-fastai.html)
 * [Quickstart (JAX)](https://github.com/adap/flower/tree/main/examples/quickstart_jax)
 * [Quickstart (scikit-learn)](https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist)
 * [Quickstart (TFLite on Android [code example])](https://github.com/adap/flower/tree/main/examples/android)
-* [Quickstart (iOS)](https://flower.dev/docs/quickstart-ios.html)
+* [Quickstart (iOS)](https://flower.dev/docs/framework/quickstart-ios.html)
 
 ## Flower Baselines
 
 Flower Baselines is a collection of community-contributed experiments that reproduce the experiments performed in popular federated learning publications. Researchers can build on Flower Baselines to quickly evaluate new ideas:
 
 * [FedAvg](https://arxiv.org/abs/1602.05629):
-  * [MNIST](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/publications/fedavg_mnist)
+  * [MNIST](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/fedavg_mnist)
 * [FedProx](https://arxiv.org/abs/1812.06127):
-  * [MNIST](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/publications/fedprox_mnist)
+  * [MNIST](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/fedprox_mnist)
 * [FedBN: Federated Learning on non-IID Features via Local Batch Normalization](https://arxiv.org/abs/2102.07623):
-  * [Convergence Rate](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/publications/fedbn/convergence_rate)
+  * [Convergence Rate](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/fedbn/convergence_rate)
 * [Adaptive Federated Optimization](https://arxiv.org/abs/2003.00295):
-  * [CIFAR-10/100](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/publications/adaptive_federated_optimization)
+  * [CIFAR-10/100](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/adaptive_federated_optimization)
 
-Check the Flower documentation to learn more: [Using Baselines](https://flower.dev/docs/using-baselines.html)
+Check the Flower documentation to learn more: [Using Baselines](https://flower.dev/docs/baselines/using-baselines.html)
 
-The Flower community loves contributions! Make your work more visible and enable others to build on it by contributing it as a baseline: [Contributing Baselines](https://flower.dev/docs/contributing-baselines.html)
+The Flower community loves contributions! Make your work more visible and enable others to build on it by contributing it as a baseline: [Contributing Baselines](https://flower.dev/docs/baselines/contributing-baselines.html)
 
 ## Flower Usage Examples
 
