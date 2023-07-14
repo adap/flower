@@ -18,4 +18,4 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
-find ./examples -type f -name 'pyproject.toml' -exec sh -c 'echo "{\"dir\":\"$(dirname "{}")\",\"name\":\"$(basename "$(dirname "{}")")\"}"' \; | jq -s '.'
+find ./examples -type f -name 'pyproject.toml' -exec sh -c 'echo "{\"dir\":\"$(dirname "{}")\",\"name\":\"$(basename "$(dirname "{}")")\"}"' \;
