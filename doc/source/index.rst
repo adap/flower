@@ -24,7 +24,7 @@ to bring existing machine learning workloads into a federated setting. One of
 Flower's design goals was to make this simple. Read on to learn more.
 
 .. toctree::
-   :maxdepth: 1 
+   :maxdepth: 2 
    :caption: Flower Framework
 
    framework/tutorials
@@ -40,7 +40,7 @@ The Flower authors welcome external contributions. The following guides are
 intended to help along the way.
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Contributor guide
 
    contributing/first-time-contributors
