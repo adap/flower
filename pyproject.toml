@@ -12,6 +12,14 @@ readme = "README.md"
 homepage = "https://flower.dev"
 repository = "https://github.com/adap/flower"
 documentation = "https://flower.dev"
+keywords = [
+    "flower",
+    "fl",
+    "federated learning",
+    "federated analytics",
+    "federated evaluation",
+    "machine learning",
+]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
@@ -106,6 +114,8 @@ mdformat-gfm = "==0.3.5"
 mdformat-frontmatter = "==2.0.1"
 mdformat-beautysh = "==0.1.1"
 mdformat-myst = "==0.1.5"
+twine = "==4.0.2"
+pyroma = "==4.2"
 
 [tool.isort]
 line_length = 88

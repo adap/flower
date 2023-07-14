@@ -33,6 +33,11 @@ jobs:
             dataset: |
               import tensorflow as tf
               tf.keras.datasets.cifar10.load_data()
+              
+          - directory: tabnet
+            dataset: |
+              import tensorflow_datasets as tfds
+              tfds.load(name='iris', split=tfds.Split.TRAIN)
 
           - directory: opacus
             dataset: |
