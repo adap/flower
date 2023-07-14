@@ -1,0 +1,48 @@
+name: Core
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**/requirements.txt"
+      - "**/pyproject.toml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "**/requirements.txt"
+      - "**/pyproject.toml"
+
+env:
+  FLWR_TELEMETRY_ENABLED: 0
+
+jobs:
+  generate_example_matrices:
+    runs-on: ubuntu-22.04
+    outputs:
+      matrix: ${{ steps.set-example-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v3
+      - id: set-example-matrix
+        run: echo "::set-output name=matrix::$(ls manifests/opensearch*.yml | jq -R -s -c 'split("\n")[:-1]')"
+    
+  requirements_sync_check:
+    needs: generate_example_matrices
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        dir: ${{ needs.generate_example_matrices.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+        with:
+          python-version: '3.10.9'
+      - name: Install dependencies (mandatory only)
+        run: python -m poetry install --all-extras
+      - name: Check if pyproject.toml and requirements.txt are in sync
+        run: |
+          python -m pip install poetry-add-requirements.txt
+          ./dev/check-requirements-txt.sh
+
