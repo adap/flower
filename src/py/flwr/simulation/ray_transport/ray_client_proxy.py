@@ -126,6 +126,23 @@ class RayActorClientProxy(ClientProxy):
         self.client_fn = client_fn
         self.actor_pool = actor_pool
 
+    def _submit_job(self, job: Callable):
+        try:
+            self.actor_pool.submit_client_job(
+                lambda a, v: a.run.remote(v, self.cid), job, self.cid
+            )
+            res = self.actor_pool.get_client_result(self.cid)
+
+        except ray.exceptions.RayActorError as ex:
+            log(WARNING, ex)
+            if hasattr(ex, "actor_id"):
+                self.actor_pool.flag_actor_for_removal(ex.actor_id)
+        except Exception as ex:
+            log(ERROR, ex)
+            raise ex
+
+        return res
+
     def get_properties(
         self, ins: common.GetPropertiesIns, timeout: Optional[float]
     ) -> common.GetPropertiesRes:
@@ -138,19 +155,8 @@ class RayActorClientProxy(ClientProxy):
                 get_properties_ins=ins,
             )
 
-        try:
-            self.actor_pool.submit_client_job(
-                lambda a, v: a.run.remote(v, self.cid), get_properties, self.cid
-            )
-            res = self.actor_pool.get_client_result(self.cid)
+        res = self._submit_job(get_properties)
 
-        except ray.exceptions.RayActorError as ex:
-            log(WARNING, ex)
-            if hasattr(ex, "actor_id"):
-                self.actor_pool.flag_actor_for_removal(ex.actor_id)
-        except Exception as ex:
-            log(ERROR, ex)
-            raise ex
         return cast(
             common.GetPropertiesRes,
             res,
@@ -168,20 +174,8 @@ class RayActorClientProxy(ClientProxy):
                 get_parameters_ins=ins,
             )
 
-        try:
-            self.actor_pool.submit_client_job(
-                lambda a, v: a.run.remote(v, self.cid), get_parameters, self.cid
-            )
-            res = self.actor_pool.get_client_result(self.cid)
+        res = self._submit_job(get_parameters)
 
-        except ray.exceptions.RayActorError as ex:
-            log(WARNING, ex)
-            if hasattr(ex, "actor_id"):
-                self.actor_pool.flag_actor_for_removal(ex.actor_id)
-
-        except Exception as ex:
-            log(ERROR, ex)
-            raise ex
         return cast(
             common.GetParametersRes,
             res,
@@ -197,20 +191,8 @@ class RayActorClientProxy(ClientProxy):
                 fit_ins=ins,
             )
 
-        try:
-            self.actor_pool.submit_client_job(
-                lambda a, v: a.run.remote(v, self.cid), fit, self.cid
-            )
-            res = self.actor_pool.get_client_result(self.cid)
+        res = self._submit_job(fit)
 
-        except ray.exceptions.RayActorError as ex:
-            log(WARNING, ex)
-            if hasattr(ex, "actor_id"):
-                self.actor_pool.flag_actor_for_removal(ex.actor_id)
-
-        except Exception as ex:
-            log(ERROR, ex)
-            raise ex
         return cast(
             common.FitRes,
             res,
@@ -228,20 +210,8 @@ class RayActorClientProxy(ClientProxy):
                 evaluate_ins=ins,
             )
 
-        try:
-            self.actor_pool.submit_client_job(
-                lambda a, v: a.run.remote(v, self.cid), evaluate, self.cid
-            )
-            res = self.actor_pool.get_client_result(self.cid)
+        res = self._submit_job(evaluate)
 
-        except ray.exceptions.RayActorError as ex:
-            log(WARNING, ex)
-            if hasattr(ex, "actor_id"):
-                self.actor_pool.flag_actor_for_removal(ex.actor_id)
-
-        except Exception as ex:
-            log(ERROR, ex)
-            raise ex
         return cast(
             common.EvaluateRes,
             res,

@@ -203,14 +203,27 @@ def start_simulation(  # pylint: disable=too-many-arguments
     # determine how many actors can be added to the pool.
     # this a function of the total resources visible to Ray and
     # the resources allocated for each virtual client
-    num_cpus = cluster_resources["CPU"]
-    num_gpus = cluster_resources.get("GPU", 0)  # there might not be GPU
+    # TODO: this function needs a better name
+    def pool_actor_size():
+        """Calculate number of Actors that fit in pool given the resources in the.
 
-    num_actors = int(num_cpus / resources["num_cpus"])
+        cluster and those required per client.
+        """
+        cluster_resources = ray.cluster_resources()
+        num_cpus = cluster_resources["CPU"]
+        num_gpus = cluster_resources.get("GPU", 0)  # there might not be GPU
+        num_actors = int(num_cpus / resources["num_cpus"])
+        # if a GPU is present and client resources do require one
+        if resources["num_gpus"] > 0.0:
+            if num_gpus:
+                # if there are gpus in the cluster
+                num_actors = min(num_actors, int(num_gpus / resources["num_gpus"]))
+            else:
+                num_actors = 0
 
-    # if a GPU is present and client resources do require one
-    if num_gpus and resources["num_gpus"] > 0.0:
-        num_actors = min(num_actors, int(num_gpus / resources["num_gpus"]))
+        return num_actors
+
+    num_actors = pool_actor_size()
 
     # instantiate ActorPool
     # TODO: maybe we want `max_restarts` to be user-defined ?
@@ -222,9 +235,15 @@ def start_simulation(  # pylint: disable=too-many-arguments
         )
         for i in range(num_actors)
     ]
-    log(INFO, "Flower VCE: Creating ActorPool with %s actors", len(actors))
+    log(
+        INFO,
+        "Flower VCE: Creating %s with %s %s",
+        VirtualClientEngineActorPool.__name__,
+        len(actors),
+        VirtualClientEngineActor.__class__.__name__,
+    )
 
-    pool = VirtualClientEngineActorPool(actors)
+    pool = VirtualClientEngineActorPool(actors, pool_size_fn=pool_actor_size)
 
     for cid in cids:
         client_proxy = RayActorClientProxy(
