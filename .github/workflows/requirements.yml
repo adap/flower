@@ -16,11 +16,12 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       matrix: ${{ steps.set-example-matrix.outputs.matrix }}
+    name: 'generate matrices'
     steps:
       - uses: actions/checkout@v3
       - id: set-example-matrix
         run: |
-          echo "matrix=$(find ./examples -type f -name 'pyproject.toml' -exec sh -c 'echo "{\"dir\":\"$(dirname "{}")\",\"name\":\"$(basename "$(dirname "{}")")\"}"' \; | sort -t'"' -k4,4 | jq -s '{"include": .}')" >> $GITHUB_OUTPUT
+          echo "matrix=$(find ./examples -type f -name 'pyproject.toml' -exec sh -c 'echo "{\"dir\":\"$(dirname "{}")\",\"name\":\"$(basename "$(dirname "{}")")\"}"' \; | sort -t'"' -k4,4 | jq -s '{\"include\": .}')" >> $GITHUB_OUTPUT
     
   requirements_sync_check:
     needs: generate_example_matrices
