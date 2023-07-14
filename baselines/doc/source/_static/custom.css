@@ -9,3 +9,11 @@ html, body{
 .toctree-wrapper.compound .caption {
     display: none;
 }
+
+.toctree-checkbox~ul {
+    display: block;
+}
+
+.toctree-checkbox~ul li>ul {
+    display: none;
+}
