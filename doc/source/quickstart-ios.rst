@@ -4,7 +4,7 @@
 Quickstart iOS
 ==============
 
-In this tutorial we will learn how to train a Neural Network on MNIST using Flower and CoreML in iOS devices. 
+In this tutorial we will learn how to train a Neural Network on MNIST using Flower and CoreML on iOS devices. 
 
 First of all, for running the Flower Python server, it is recommended to create a virtual environment and run everything within a `virtualenv <https://flower.dev/docs/recommended-env-setup.html>`_.
 For the Flower client implementation in iOS, it is recommended to use Xcode as our IDE.
