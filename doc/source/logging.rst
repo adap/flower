@@ -1,0 +1,66 @@
+Logging
+=============
+
+The Flower logger keeps track of all core events that take place in federated learning workloads.
+It presents information by default following a standard message format:
+
+.. code-block:: python
+
+    DEFAULT_FORMATTER = logging.Formatter(
+    "%(levelname)s %(name)s %(asctime)s | %(filename)s:%(lineno)d | %(message)s"
+    )
+
+containing relevant information including: log message level (e.g. :code:`INFO`, :code:`DEBUG`), a timestamp, the line where the loggging took place from, as well as the log message itself.
+In this way, the logger would typically display information on your termninal as follows:
+
+.. code-block:: bash
+
+    INFO flwr 2023-07-15 15:32:30,935 | server.py:125 | fit progress: (3, 392.5575705766678, {'accuracy': 0.2898}, 13.781953627998519)
+    DEBUG flwr 2023-07-15 15:32:30,935 | server.py:173 | evaluate_round 3: strategy sampled 25 clients (out of 100)
+    DEBUG flwr 2023-07-15 15:32:31,388 | server.py:187 | evaluate_round 3 received 25 results and 0 failures
+    DEBUG flwr 2023-07-15 15:32:31,388 | server.py:222 | fit_round 4: strategy sampled 10 clients (out of 100)
+    DEBUG flwr 2023-07-15 15:32:32,429 | server.py:236 | fit_round 4 received 10 results and 0 failures
+    INFO flwr 2023-07-15 15:32:33,516 | server.py:125 | fit progress: (4, 370.3378576040268, {'accuracy': 0.3294}, 16.36216809399957)
+    DEBUG flwr 2023-07-15 15:32:33,516 | server.py:173 | evaluate_round 4: strategy sampled 25 clients (out of 100)
+    DEBUG flwr 2023-07-15 15:32:33,966 | server.py:187 | evaluate_round 4 received 25 results and 0 failures
+    DEBUG flwr 2023-07-15 15:32:33,966 | server.py:222 | fit_round 5: strategy sampled 10 clients (out of 100)
+    DEBUG flwr 2023-07-15 15:32:34,997 | server.py:236 | fit_round 5 received 10 results and 0 failures
+    INFO flwr 2023-07-15 15:32:36,118 | server.py:125 | fit progress: (5, 358.6936808824539, {'accuracy': 0.3467}, 18.964264554999318)
+
+
+Saving Log to File
+-------------------
+
+By default, the Flower log is outputed to the terminal where you launch your Federated Learning workload from. This applies for both gRPC-based federatation (i.e. when you do :code:`fl.server.start_server`) and when using the :code:`VirtualClientEngine` (i.e. when you do :code:`fl.simulation.start_simulation`).
+In some situations you might want to save this log to disk. You can do so by calling the `fl.common.loger.configure() <https://github.com/adap/flower/blob/main/src/py/flwr/common/logger.py>`_ funtion. For example:
+
+.. code-block:: python
+        
+        import flwr as fl
+        
+        ...
+
+        # in your main file and before launching your experiment
+        # add an identifier to your logger
+        # then specify the name of the file where the log should be outputed to
+        fl.common.logger.configure(identifier="myFlowerExperiment", filename="log.txt")
+
+        # then start your workload
+        fl.simulation.start_simulation(...) # or fl.server.start_server(...)
+
+With the above, Flower will record the log you see on your terminal to :code:`log.txt`. This file will be created in the same directory as were you are running the code from. 
+If we inspect we see the log above is also recorded but prefixing with :code:`identifier` each line:
+
+.. code-block:: bash
+
+    myFlowerExperiment | INFO flwr 2023-07-15 15:32:30,935 | server.py:125 | fit progress: (3, 392.5575705766678, {'accuracy': 0.2898}, 13.781953627998519)
+    myFlowerExperiment | DEBUG flwr 2023-07-15 15:32:30,935 | server.py:173 | evaluate_round 3: strategy sampled 25 clients (out of 100)
+    myFlowerExperiment | DEBUG flwr 2023-07-15 15:32:31,388 | server.py:187 | evaluate_round 3 received 25 results and 0 failures
+    myFlowerExperiment | DEBUG flwr 2023-07-15 15:32:31,388 | server.py:222 | fit_round 4: strategy sampled 10 clients (out of 100)
+    myFlowerExperiment | DEBUG flwr 2023-07-15 15:32:32,429 | server.py:236 | fit_round 4 received 10 results and 0 failures
+    myFlowerExperiment | INFO flwr 2023-07-15 15:32:33,516 | server.py:125 | fit progress: (4, 370.3378576040268, {'accuracy': 0.3294}, 16.36216809399957)
+    myFlowerExperiment | DEBUG flwr 2023-07-15 15:32:33,516 | server.py:173 | evaluate_round 4: strategy sampled 25 clients (out of 100)
+    myFlowerExperiment | DEBUG flwr 2023-07-15 15:32:33,966 | server.py:187 | evaluate_round 4 received 25 results and 0 failures
+    myFlowerExperiment | DEBUG flwr 2023-07-15 15:32:33,966 | server.py:222 | fit_round 5: strategy sampled 10 clients (out of 100)
+    myFlowerExperiment | DEBUG flwr 2023-07-15 15:32:34,997 | server.py:236 | fit_round 5 received 10 results and 0 failures
+    myFlowerExperiment | INFO flwr 2023-07-15 15:32:36,118 | server.py:125 | fit progress: (5, 358.6936808824539, {'accuracy': 0.3467}, 18.964264554999318)
