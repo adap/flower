@@ -111,12 +111,7 @@ To generate the partitions for the other settings, i.e.:
 3. Moderate-scale with Dir(0.3), 100 clients, 5% participation, balanced dataset (500 examples per client).
 4. large-scale experiments have 500 clients with 2% participation rate, balanced dataset (100 examples per client).
 
-Note that, to reproduce those settings, we leverage the .txt files
-contained in the`client_data` folder in this project. Such files store
-the specific id of examples in the dataset that are associated with a specific client. 
-For example, the file `client_data/cifar100/balanced/dirichlet0.3_clients100.txt` contains the
-examples for the default setting of this repository. Note that those files are provided by the authors themselves.
-
+use the following commands:
 ```bash
 # this will generate the setting for 2. (see above)
 python -m FedMLB.main dataset_config.alpha_dirichlet=0.3 total_clients=500
@@ -127,7 +122,13 @@ python -m FedMLB.main dataset_config.alpha_dirichlet=0.6
 # this will generate the setting for 4. (see above)
 python -m FedMLB.main dataset_config.alpha_dirichlet=0.6 total_clients=500
 ```
+Note that, to reproduce those settings, we leverage the .txt files
+contained in the`client_data` folder in this project. Such files store
+the specific id of examples in the dataset that are associated with a specific client. 
+For example, the file `client_data/cifar100/balanced/dirichlet0.3_clients100.txt` contains the
+examples for the default setting of this repository. Note that those files are provided by the authors themselves.
 
+After having generated the setting, simulations can be run.
 The default configuration for `FedMLB.main` uses (1.), and can be run with the following:
 
 ```bash
