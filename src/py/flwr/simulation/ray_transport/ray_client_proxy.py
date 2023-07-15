@@ -133,11 +133,13 @@ class RayActorClientProxy(ClientProxy):
             )
             res = self.actor_pool.get_client_result(self.cid)
 
-        except ray.exceptions.RayActorError as ex:
-            log(WARNING, ex)
-            if hasattr(ex, "actor_id"):
-                self.actor_pool.flag_actor_for_removal(ex.actor_id)
         except Exception as ex:
+            if self.actor_pool.num_actors == 0:
+                # At this point we want to stop the simulation.
+                # since no more client workloads will be executed
+                log(ERROR, "ActorPool is empty!!! Disconnecting VirtualClient")
+                # TODO: the below does nothing?
+                self.reconnect()
             log(ERROR, ex)
             raise ex
 
