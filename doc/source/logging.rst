@@ -15,6 +15,7 @@ In this way, the logger would typically display information on your termninal as
 
 .. code-block:: bash
 
+    ...
     INFO flwr 2023-07-15 15:32:30,935 | server.py:125 | fit progress: (3, 392.5575705766678, {'accuracy': 0.2898}, 13.781953627998519)
     DEBUG flwr 2023-07-15 15:32:30,935 | server.py:173 | evaluate_round 3: strategy sampled 25 clients (out of 100)
     DEBUG flwr 2023-07-15 15:32:31,388 | server.py:187 | evaluate_round 3 received 25 results and 0 failures
@@ -26,6 +27,7 @@ In this way, the logger would typically display information on your termninal as
     DEBUG flwr 2023-07-15 15:32:33,966 | server.py:222 | fit_round 5: strategy sampled 10 clients (out of 100)
     DEBUG flwr 2023-07-15 15:32:34,997 | server.py:236 | fit_round 5 received 10 results and 0 failures
     INFO flwr 2023-07-15 15:32:36,118 | server.py:125 | fit progress: (5, 358.6936808824539, {'accuracy': 0.3467}, 18.964264554999318)
+    ...
 
 
 Saving Log to File
@@ -53,6 +55,7 @@ If we inspect we see the log above is also recorded but prefixing with :code:`id
 
 .. code-block:: bash
 
+    ...
     myFlowerExperiment | INFO flwr 2023-07-15 15:32:30,935 | server.py:125 | fit progress: (3, 392.5575705766678, {'accuracy': 0.2898}, 13.781953627998519)
     myFlowerExperiment | DEBUG flwr 2023-07-15 15:32:30,935 | server.py:173 | evaluate_round 3: strategy sampled 25 clients (out of 100)
     myFlowerExperiment | DEBUG flwr 2023-07-15 15:32:31,388 | server.py:187 | evaluate_round 3 received 25 results and 0 failures
@@ -64,3 +67,59 @@ If we inspect we see the log above is also recorded but prefixing with :code:`id
     myFlowerExperiment | DEBUG flwr 2023-07-15 15:32:33,966 | server.py:222 | fit_round 5: strategy sampled 10 clients (out of 100)
     myFlowerExperiment | DEBUG flwr 2023-07-15 15:32:34,997 | server.py:236 | fit_round 5 received 10 results and 0 failures
     myFlowerExperiment | INFO flwr 2023-07-15 15:32:36,118 | server.py:125 | fit progress: (5, 358.6936808824539, {'accuracy': 0.3467}, 18.964264554999318)
+    ...
+
+
+Logging Your Own Messages
+-------------------------
+
+You might expand the information shown by default with the Flower logger by adding more messages relevant to your application.
+You can achieve this easily as follows.
+
+.. code-block:: python
+
+    # in the python file you want to add custom messages to the Flower log
+    from logging import INFO, DEBUG
+    from flwr.common.logger import log
+
+    # For example, let's say you want to add to the log some info about the training on your client for debugging purposes
+
+    class FlowerClient(fl.client.NumPyClient):
+        def __init__(self, cid: int ...):
+            self.cid = cid
+            self.net = ...
+            ...
+
+        def fit(self, parameters, config):
+            log(INFO, f"Printing a custom INFO message at the start of fit() :)")
+            
+            set_params(self.net, parameters)
+
+            log(DEBUG, f"Client {self.cid} is doing fit() with config: {config}")
+
+            ...
+
+In this way your logger will show, in addition to the default messages, the ones introduced by the clients as specified above.
+
+.. code-block:: bash
+    
+    ...
+    INFO flwr 2023-07-15 16:18:21,726 | server.py:89 | Initializing global parameters
+    INFO flwr 2023-07-15 16:18:21,726 | server.py:276 | Requesting initial parameters from one random client
+    INFO flwr 2023-07-15 16:18:22,511 | server.py:280 | Received initial parameters from one random client
+    INFO flwr 2023-07-15 16:18:22,511 | server.py:91 | Evaluating initial parameters
+    INFO flwr 2023-07-15 16:18:25,200 | server.py:94 | initial parameters (loss, other metrics): 461.2934241294861, {'accuracy': 0.0998}
+    INFO flwr 2023-07-15 16:18:25,200 | server.py:104 | FL starting
+    DEBUG flwr 2023-07-15 16:18:25,200 | server.py:222 | fit_round 1: strategy sampled 10 clients (out of 100)
+    INFO flwr 2023-07-15 16:18:26,391 | main.py:64 | Printing a custom INFO message :)
+    DEBUG flwr 2023-07-15 16:18:26,391 | main.py:63 | Client 44 is doing fit() with config: {'epochs': 5, 'batch_size': 64}
+    INFO flwr 2023-07-15 16:18:26,391 | main.py:64 | Printing a custom INFO message :)
+    DEBUG flwr 2023-07-15 16:18:28,464 | main.py:63 | Client 99 is doing fit() with config: {'epochs': 5, 'batch_size': 64}
+    INFO flwr 2023-07-15 16:18:28,465 | main.py:64 | Printing a custom INFO message :)
+    DEBUG flwr 2023-07-15 16:18:28,519 | main.py:63 | Client 67 is doing fit() with config: {'epochs': 5, 'batch_size': 64}
+    INFO flwr 2023-07-15 16:18:28,519 | main.py:64 | Printing a custom INFO message :)
+    DEBUG flwr 2023-07-15 16:18:28,615 | main.py:63 | Client 11 is doing fit() with config: {'epochs': 5, 'batch_size': 64}
+    INFO flwr 2023-07-15 16:18:28,615 | main.py:64 | Printing a custom INFO message :)
+    DEBUG flwr 2023-07-15 16:18:28,617 | main.py:63 | Client 13 is doing fit() with config: {'epochs': 5, 'batch_size': 64}
+    ...
+
