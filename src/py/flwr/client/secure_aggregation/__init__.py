@@ -12,4 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""The SecAgg/SecAgg+ protocol."""
+"""Secure Aggregation handlers."""
+
+
+from .handler import SecureAggregationHandler
+from .secaggplus_handler import SecAggPlusHandler
+
+__all__ = [
+    "SecureAggregationHandler",
+    "SecAggPlusHandler"
+]

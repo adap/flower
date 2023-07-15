@@ -12,4 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Secure Aggregation functionalities for server and client."""
+"""Cryptographic primitives for Secure Aggregation."""
+

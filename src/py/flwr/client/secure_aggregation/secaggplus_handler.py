@@ -1,16 +1,61 @@
+# Copyright 2020 Adap GmbH. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""Message handler for the SecAgg+ protocol."""
+
+
+import os
 from logging import INFO, WARNING
+from typing import List
+
+import numpy as np
 
 from flwr.common import ndarray_to_bytes
 from flwr.common.logger import log
-from flwr.common.secure_aggregation.message_handler import SecureAggregationHandler
+from flwr.common.secure_aggregation.crypto.shamir import create_shares
+from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    bytes_to_private_key,
+    bytes_to_public_key,
+    decrypt,
+    encrypt,
+    generate_key_pairs,
+    generate_shared_key,
+    private_key_to_bytes,
+    public_key_to_bytes,
+)
+from flwr.common.secure_aggregation.quantization import quantize
+from flwr.common.secure_aggregation.secaggplus import (
+    pseudo_rand_gen,
+    share_keys_plaintext_concat,
+    share_keys_plaintext_separate,
+)
+from flwr.common.secure_aggregation.weights_arithmetic import (
+    factor_weights_combine,
+    weights_addition,
+    weights_mod,
+    weights_multiply,
+    weights_subtraction,
+)
 from flwr.common.typing import SecureAggregation
 
-from .utils import *
-
-stages = ["setup", "share keys", "collect masked input", "unmasking"]
+from .handler import SecureAggregationHandler
 
 
-class SecureAggregationHandler(SecureAggregationHandler):
+_stages = ["setup", "share keys", "collect masked input", "unmasking"]
+
+
+class SecAggPlusHandler(SecureAggregationHandler):
     def handle_secure_aggregation(self, sa: SecureAggregation):
         stage = sa.named_values.pop("stage")
         if not hasattr(self, "current_stage"):
@@ -21,7 +66,7 @@ class SecureAggregationHandler(SecureAggregationHandler):
             self.current_stage = stage
             return _setup(self, sa)
         # if stage is not "setup", the new stage should be the next stage
-        expected_new_stage = stages[stages.index(self.current_stage) + 1]
+        expected_new_stage = _stages[_stages.index(self.current_stage) + 1]
         if stage == expected_new_stage:
             self.current_stage = stage
         else:
@@ -100,7 +145,7 @@ def _share_keys(self, sa: SecureAggregation) -> SecureAggregation:
         )
 
     # Generate private mask seed
-    self.b = rand_bytes(32)
+    self.b = os.urandom(32)
 
     # Create shares
     b_shares = create_shares(self.b, self.threshold, self.share_num)
@@ -176,7 +221,7 @@ def _collect_masked_input(self, sa: SecureAggregation) -> SecureAggregation:
     quantized_weights = weights_multiply(quantized_weights, weights_factor)
     quantized_weights = factor_weights_combine(weights_factor, quantized_weights)
 
-    dimensions_list: List[Tuple] = [a.shape for a in quantized_weights]
+    dimensions_list: List[tuple] = [a.shape for a in quantized_weights]
 
     # add private mask
     private_mask = pseudo_rand_gen(self.b, self.mod_range, dimensions_list)
