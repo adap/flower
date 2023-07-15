@@ -38,11 +38,12 @@ The source code is available in our project page._*
 ## About this baseline
 
 ****What’s implemented:**** The code in this directory reproduces the results for FedMLB, FedAvg, and FedAvg+KD.
-The reproduced results use the CIFAR-100. Four settings are available for CIFAR-100,
-(1) Moderate-scale with Dir(0.3), 100 clients, 5% participation, 
-(2) large-scale experiments have 500 clients with 2% participation rate,
-(3) Moderate-scale with Dir(0.3), 100 clients, 5% participation, 
-(4) large-scale experiments have 500 clients with 2% participation rate.
+The reproduced results use the CIFAR-100 dataset. Four settings are available for CIFAR-100,
+1. Moderate-scale with Dir(0.3), 100 clients, 5% participation, balanced dataset (500 examples per client).
+2. Large-scale experiments with Dir(0.3), 500 clients, 2% participation rate, balanced dataset (100 examples per client).
+3. Moderate-scale with Dir(0.6), 100 clients, 5% participation rate, balanced dataset (500 examples per client).
+4. Large-scale experiments with Dir(0.6), 500 clients, 2% participation rate, balanced dataset (100 examples per client).
+
 
 ****Datasets:**** CIFAR-100.
 
@@ -59,9 +60,9 @@ Be aware that in the default config the memory usage can exceed 10GB.
 
 ****Dataset:**** Four settings are available for CIFAR-100,
 1. Moderate-scale with Dir(0.3), 100 clients, 5% participation, balanced dataset (500 examples per client).
-2. large-scale experiments have 500 clients with 2% participation rate, balanced dataset (100 examples per client).
-3. Moderate-scale with Dir(0.3), 100 clients, 5% participation, balanced dataset (500 examples per client).
-4. large-scale experiments have 500 clients with 2% participation rate, balanced dataset (100 examples per client).
+2. Large-scale experiments with Dir(0.3), 500 clients, 2% participation rate, balanced dataset (100 examples per client).
+3. Moderate-scale with Dir(0.6), 100 clients, 5% participation rate, balanced dataset (500 examples per client).
+4. Large-scale experiments with Dir(0.6), 500 clients, 2% participation rate, balanced dataset (100 examples per client).
 
 ****Training Hyperparameters:**** 
 
@@ -83,6 +84,12 @@ Be aware that in the default config the memory usage can exceed 10GB.
 To construct the Python environment follow these steps:
 
 ```bash
+# cd to your FedMLB directory (i.e. where the `pyproject.toml` is)
+pyenv local 3.10.6
+
+# set that version for poetry
+poetry env use 3.10.6
+
 # install the base Poetry environment
 poetry install
 
