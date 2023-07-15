@@ -29,10 +29,7 @@ from flwr.server.app import ServerConfig, init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
-from flwr.simulation.ray_transport.ray_actor import (
-    VirtualClientEngineActor,
-    VirtualClientEngineActorPool,
-)
+from flwr.simulation.ray_transport.ray_actor import VirtualClientEngineActorPool
 from flwr.simulation.ray_transport.ray_client_proxy import RayActorClientProxy
 
 INVALID_ARGUMENTS_START_SIMULATION = """
@@ -200,50 +197,20 @@ def start_simulation(  # pylint: disable=too-many-arguments
         resources,
     )
 
-    # determine how many actors can be added to the pool.
-    # this a function of the total resources visible to Ray and
-    # the resources allocated for each virtual client
-    # TODO: this function needs a better name
-    def pool_actor_size():
-        """Calculate number of Actors that fit in pool given the resources in the.
-
-        cluster and those required per client.
-        """
-        cluster_resources = ray.cluster_resources()
-        num_cpus = cluster_resources["CPU"]
-        num_gpus = cluster_resources.get("GPU", 0)  # there might not be GPU
-        num_actors = int(num_cpus / resources["num_cpus"])
-        # if a GPU is present and client resources do require one
-        if resources["num_gpus"] > 0.0:
-            if num_gpus:
-                # if there are gpus in the cluster
-                num_actors = min(num_actors, int(num_gpus / resources["num_gpus"]))
-            else:
-                num_actors = 0
-
-        return num_actors
-
-    num_actors = pool_actor_size()
-
     # instantiate ActorPool
     # TODO: maybe we want `max_restarts` to be user-defined ?
     max_restarts = 1  # how many times an actor that crashes should be restarted
     # after these many restarts, it will be removed from the pool
-    actors = [
-        VirtualClientEngineActor.options(**resources, max_restarts=max_restarts).remote(
-            i
-        )
-        for i in range(num_actors)
-    ]
+
+    pool = VirtualClientEngineActorPool(resources, max_restarts)
+
     log(
         INFO,
         "Flower VCE: Creating %s with %s %s",
-        VirtualClientEngineActorPool.__name__,
-        len(actors),
-        VirtualClientEngineActor.__class__.__name__,
+        pool.__class__.__name__,
+        pool.num_actors,
+        pool._idle_actors[0].__class__.__name__,
     )
-
-    pool = VirtualClientEngineActorPool(actors, pool_size_fn=pool_actor_size)
 
     for cid in cids:
         client_proxy = RayActorClientProxy(

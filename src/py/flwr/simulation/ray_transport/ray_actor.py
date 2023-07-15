@@ -17,7 +17,7 @@
 import threading
 import traceback
 from logging import ERROR, WARNING
-from typing import Any, Callable, List, Set
+from typing import Any, Callable, Dict, List, Set
 
 import ray
 from ray.util.actor_pool import ActorPool
@@ -36,9 +36,6 @@ class ClientException(Exception):
 @ray.remote
 class VirtualClientEngineActor:
     """A Ray Actor class that runs client workloads."""
-
-    def __init__(self, actor_id: int):
-        self.actor_id = actor_id
 
     def terminate(self):
         """Terminate Actor."""
@@ -65,22 +62,54 @@ class VirtualClientEngineActor:
         return client_id, client_results
 
 
+def pool_size_from_resources(client_resources: Dict):
+    """Calculate number of Actors that fit in pool given the resources in the.
+
+    cluster and those required per client.
+    """
+    cluster_resources = ray.cluster_resources()
+    num_cpus = cluster_resources["CPU"]
+    num_gpus = cluster_resources.get("GPU", 0)  # there might not be GPU
+    num_actors = int(num_cpus / client_resources["num_cpus"])
+    # if a GPU is present and client resources do require one
+    if client_resources["num_gpus"] > 0.0:
+        if num_gpus:
+            # if there are gpus in the cluster
+            num_actors = min(num_actors, int(num_gpus / client_resources["num_gpus"]))
+        else:
+            num_actors = 0
+
+    return num_actors
+
+
 class VirtualClientEngineActorPool(ActorPool):
     """A pool of VirtualClientEngine Actors."""
 
-    def __init__(self, actors: List[VirtualClientEngineActor], pool_size_fn: Callable):
+    def __init__(self, client_resources: Dict, max_restarts: int = 1):
+        self.client_resources = client_resources
+        self.actor_max_restarts = max_restarts
+        num_actors = pool_size_from_resources(client_resources)
+        actors = [
+            VirtualClientEngineActor.options(
+                **client_resources, max_restarts=max_restarts
+            ).remote()
+            for _ in range(num_actors)
+        ]
+
         super().__init__(actors)
 
         self._cid_to_future = {}  # a dict
         self.actor_to_remove: Set[str] = set()  # a set
-        self.pool_size = pool_size_fn
         self.num_actors = len(actors)
 
         self.lock = threading.RLock()
 
     def __reduce__(self):
         """Make this class serialisable (needed due to lock)."""
-        return VirtualClientEngineActorPool, (self._idle_actors, self.pool_size)
+        return VirtualClientEngineActorPool, (
+            self.client_resources,
+            self.actor_max_restarts,
+        )
 
     def submit(self, fn: Any, value: Callable, cid: str) -> None:
         """Take idle actor and assign it a client workload."""
@@ -179,7 +208,7 @@ class VirtualClientEngineActorPool(ActorPool):
         If true, allow the actor to be added back to the pool. Else don't allow it
         (effectively reducing the size of the pool).
         """
-        num_actors_updated = self.pool_size()
+        num_actors_updated = pool_size_from_resources(self.client_resources)
 
         if num_actors_updated < self.num_actors:
             log(
@@ -190,7 +219,7 @@ class VirtualClientEngineActorPool(ActorPool):
             )
             # we are preventing one actor to be added back in the queue, so we just
             # decreated the number of actors by one eventually `self.num_actors`
-            #  should be equal what self.pool_size() returns
+            # should be equal what pool_size_from_resources(self.resources) returns
             self.num_actors -= 1
             return False
         else:
