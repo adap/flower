@@ -161,12 +161,13 @@ The results of Table 2 and Figure 3 in the paper (for FedAvg, FedAvg+KD, FedMLB)
 are for CIFAR-100 with:
 
 1. Moderate-scale with Dir(0.3), 100 clients, 5% participation rate.
-2. large-scale with Dir(0.3), 500 clients, 2% participation rate.
+2. Large-scale experiments with Dir(0.3), 500 clients, 2% participation rate.
 
 To reproduce (1.) run the following:
 
 ```bash
-poetry run -m FedMLB.main --multirun algorithm="FedMLB", "FedAvg", "FedAvg+KD"
+# this will produce three consecutive runs
+poetry run -m FedMLB.main --multirun algorithm="FedMLB", "FedAvg", "FedAvg+KD" 
 ```
 
 The following table reports the results from the above command compared to the 
@@ -192,8 +193,23 @@ CIFAR-100, Dir(0.3), 500 clients, 2% participation.
 | Method  | Accuracy @500R | Accuracy @1000R |
 | ------------- | ------------- | ------------- |
 | FedAvg  | ()  | () |
-| FedAvg+KD  | () | () |
 | FedMLB   | () | () |
 
+### Results logging via Tensorboard
+Beside storing results in plain text in the `output` folder, the results are also stored via 
+tensorboard logs.
 
+To launch the tensorboard to monitor results:
+```bash
+tensorboard --logdir /{YOUR_LOCAL_PATH_TO_THE_BASELINE}]/FedMLB/FedMLB/tb_logging/
+```
+The command will output an address for localhost,
+and results can be navigated and visualized via tensorboard GUI 
+by using a browser at that address. 
+
+Tensorboard logs in this baselines are stored in a folder with the following path structure: 
+`FedMLB/FedMLB/tb_logging/DATASET/MODEL/{METHOD}/{TOTAL_CLIENTS}_clients/dir_{ALPHA_DIRICHLET}/seed_{RANDOM_SEED}`
+
+For example, for default results with FedAvg, logs will be stored at:
+`FedMLB/FedMLB/tb_logging/cifar100/resnet18/FedAvg/100_clients/dir_0.3`
 
