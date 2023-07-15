@@ -104,6 +104,8 @@ class VirtualClientEngineActorPool(ActorPool):
 
         self.lock = threading.RLock()
 
+        # TODO: asyncio check every N seconds if cluster has grown --> add more actors to the pool if so
+
     def __reduce__(self):
         """Make this class serialisable (needed due to lock)."""
         return VirtualClientEngineActorPool, (
@@ -164,8 +166,8 @@ class VirtualClientEngineActorPool(ActorPool):
         except ray.exceptions.RayActorError as ex:
             log(ERROR, ex)
             log(ERROR, traceback.format_exc())
-            if hasattr(ex, 'actor_id'):
-                # RayActorError only contains the actor_id attribute 
+            if hasattr(ex, "actor_id"):
+                # RayActorError only contains the actor_id attribute
                 # if the actor won't be restarted again.
                 self._flag_actor_for_removal(ex.actor_id)
             raise ex
