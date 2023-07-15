@@ -10,17 +10,11 @@ env:
 jobs:
   nightly_release:
     runs-on: ubuntu-22.04
+    name: Nightly
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.7.15
-      - name: Install build tools
-        run: |
-          python -m pip install -U pip==23.1.2
-          python -m pip install -U setuptools==68.0.0
-          python -m pip install -U poetry==1.5.1
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
       - name: Release nightly
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}

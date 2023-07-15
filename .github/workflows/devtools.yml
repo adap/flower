@@ -1,4 +1,4 @@
-name: Build Tools
+name: DevTools
 
 on:
   push:
@@ -18,18 +18,11 @@ env:
 jobs:
   test_tools:
     runs-on: ubuntu-22.04
+    name: Test
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.7.15
-      - name: Install build tools
-        run: |
-          python -m pip install -U pip==23.1.2
-          python -m pip install -U setuptools==68.0.0
-          python -m pip install -U poetry==1.5.1
-          poetry config virtualenvs.create false
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
       - name: Install dependencies (mandatory + optional)
         run: |
           python -m poetry install

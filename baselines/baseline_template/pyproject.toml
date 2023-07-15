@@ -51,6 +51,7 @@ pylint = "==2.8.2"
 flake8 = "==3.9.2"
 pytest = "==6.2.4"
 pytest-watch = "==4.2.0"
+ruff = "==0.0.272"
 types-requests = "==2.27.7"
 
 [tool.isort]
