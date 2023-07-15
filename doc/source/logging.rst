@@ -10,8 +10,8 @@ It presents information by default following a standard message format:
     "%(levelname)s %(name)s %(asctime)s | %(filename)s:%(lineno)d | %(message)s"
     )
 
-containing relevant information including: log message level (e.g. :code:`INFO`, :code:`DEBUG`), a timestamp, the line where the loggging took place from, as well as the log message itself.
-In this way, the logger would typically display information on your termninal as follows:
+containing relevant information including: log message level (e.g. :code:`INFO`, :code:`DEBUG`), a timestamp, the line where the logging took place from, as well as the log message itself.
+In this way, the logger would typically display information on your terminal as follows:
 
 .. code-block:: bash
 
@@ -33,8 +33,8 @@ In this way, the logger would typically display information on your termninal as
 Saving Log to File
 -------------------
 
-By default, the Flower log is outputed to the terminal where you launch your Federated Learning workload from. This applies for both gRPC-based federatation (i.e. when you do :code:`fl.server.start_server`) and when using the :code:`VirtualClientEngine` (i.e. when you do :code:`fl.simulation.start_simulation`).
-In some situations you might want to save this log to disk. You can do so by calling the `fl.common.loger.configure() <https://github.com/adap/flower/blob/main/src/py/flwr/common/logger.py>`_ funtion. For example:
+By default, the Flower log is outputted to the terminal where you launch your Federated Learning workload from. This applies for both gRPC-based federation (i.e. when you do :code:`fl.server.start_server`) and when using the :code:`VirtualClientEngine` (i.e. when you do :code:`fl.simulation.start_simulation`).
+In some situations you might want to save this log to disk. You can do so by calling the `fl.common.logger.configure() <https://github.com/adap/flower/blob/main/src/py/flwr/common/logger.py>`_ function. For example:
 
 .. code-block:: python
         
@@ -44,7 +44,7 @@ In some situations you might want to save this log to disk. You can do so by cal
 
         # in your main file and before launching your experiment
         # add an identifier to your logger
-        # then specify the name of the file where the log should be outputed to
+        # then specify the name of the file where the log should be outputted to
         fl.common.logger.configure(identifier="myFlowerExperiment", filename="log.txt")
 
         # then start your workload
