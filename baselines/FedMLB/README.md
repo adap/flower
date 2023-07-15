@@ -106,10 +106,16 @@ The default config generates the partitions for Moderate-scale with Dir(0.3), 10
 ```bash
 python -m FedMLB.dataset_preparation # this will run using the default settings in the `conf/base.yaml`
 ```
-To generate the partitions for:
+To generate the partitions for the other settings, i.e.:
 2. large-scale experiments have 500 clients with 2% participation rate, balanced dataset (100 examples per client).
 3. Moderate-scale with Dir(0.3), 100 clients, 5% participation, balanced dataset (500 examples per client).
 4. large-scale experiments have 500 clients with 2% participation rate, balanced dataset (100 examples per client).
+
+Note that, to reproduce those settings, we leverage the .txt files
+contained in the`client_data` folder in this project. Such files store
+the specific id of examples in the dataset that are associated with a specific client. 
+For example, the file `client_data/cifar100/balanced/dirichlet0.3_clients100.txt` contains the
+examples for the default setting of this repository. Note that those files are provided by the authors themselves.
 
 ```bash
 # this will generate the setting for 2. (see above)
@@ -122,11 +128,7 @@ python -m FedMLB.main dataset_config.alpha_dirichlet=0.6
 python -m FedMLB.main dataset_config.alpha_dirichlet=0.6 total_clients=500
 ```
 
-
-The default configuration for `FedMLB.main` uses the FedMLB method on
-the CIFAR-100 dataset, 
-partitioned among 100 clients with distribution-based label skew, 
-(Dirichlet concentration parameter $alpha$ set to 0.3).
+The default configuration for `FedMLB.main` uses (1.), and can be run with the following:
 
 ```bash
 python -m FedMLB.main # this will run using the default settings in the `conf/base.yaml`
@@ -157,8 +159,8 @@ of the original paper: FedAvg, FedAvg+KD, FedMLB.
 The results of Table 2 and Figure 3 in the paper (for FedAvg, FedAvg+KD, FedMLB)
 are for CIFAR-100 with:
 
-1. Moderate-scale with Dir(0.3), 100 clients, 5% participation 
-2. large-scale experiments have 500 clients with 2% participation rate.
+1. Moderate-scale with Dir(0.3), 100 clients, 5% participation rate.
+2. large-scale with Dir(0.3), 500 clients, 2% participation rate.
 
 To reproduce (1.) run the following:
 
@@ -167,7 +169,8 @@ poetry run -m FedMLB.main --multirun algorithm="FedMLB", "FedAvg", "FedAvg+KD"
 ```
 
 The following table reports the results from the above command compared to the 
-results reported in the original paper, which are reported in brackets. Note that (as in the original paper),
+results reported in the original paper. Results from the paper are reported in brackets. 
+Note that (as in the original paper),
 the accuracy at the target round is based on the exponential moving average with the momentum parameter
 0.9.
 
