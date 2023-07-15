@@ -107,9 +107,9 @@ The default config generates the partitions for Moderate-scale with Dir(0.3), 10
 python -m FedMLB.dataset_preparation # this will run using the default settings in the `conf/base.yaml`
 ```
 To generate the partitions for the other settings, i.e.:
-2. large-scale experiments have 500 clients with 2% participation rate, balanced dataset (100 examples per client).
-3. Moderate-scale with Dir(0.3), 100 clients, 5% participation, balanced dataset (500 examples per client).
-4. large-scale experiments have 500 clients with 2% participation rate, balanced dataset (100 examples per client).
+2. Large-scale experiments with Dir(0.3), 500 clients, 2% participation rate, balanced dataset (100 examples per client);
+3. Moderate-scale with Dir(0.6), 100 clients, 5% participation rate, balanced dataset (500 examples per client);
+4. Large-scale experiments with Dir(0.6), 500 clients, 2% participation rate, balanced dataset (100 examples per client),
 
 use the following commands:
 ```bash
