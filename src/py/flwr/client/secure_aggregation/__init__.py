@@ -18,7 +18,4 @@
 from .handler import SecureAggregationHandler
 from .secaggplus_handler import SecAggPlusHandler
 
-__all__ = [
-    "SecureAggregationHandler",
-    "SecAggPlusHandler"
-]
+__all__ = ["SecureAggregationHandler", "SecAggPlusHandler"]

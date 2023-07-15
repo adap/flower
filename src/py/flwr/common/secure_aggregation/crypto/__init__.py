@@ -13,4 +13,3 @@
 # limitations under the License.
 # ==============================================================================
 """Cryptographic primitives for Secure Aggregation."""
-

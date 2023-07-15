@@ -21,14 +21,16 @@ from flwr.common.typing import SecureAggregation
 
 
 class SecureAggregationHandler(ABC):
+    """Abstract base class for secure aggregation message handlers."""
+
     def handle_secure_aggregation(self, sa: SecureAggregation) -> SecureAggregation:
-        """Return final/intermediate results of Secure Aggregation.
+        """Handle incoming Secure Aggregation message and return results.
 
         Parameters
         ----------
         sa : SecureAggregation
-            The SecureAggregation sub-message in Task message received from the server containing
-            a dictionary of named values.
+            The SecureAggregation sub-message in Task message received
+            from the server containing a dictionary of named values.
 
         Returns
         -------

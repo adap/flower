@@ -62,7 +62,9 @@ def handle(client: Client, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
     server_msg = get_server_message_from_task_ins(task_ins, exclude_reconnect_ins=False)
     if server_msg is None:
         # Secure Aggregation
-        if task_ins.task.HasField("sa") and isinstance(client, SecureAggregationHandler):
+        if task_ins.task.HasField("sa") and isinstance(
+            client, SecureAggregationHandler
+        ):
             sa = serde.secagg_msg_from_proto(task_ins.task.sa)
             res_sa = client.handle_secure_aggregation(sa)
             task_res = TaskRes(

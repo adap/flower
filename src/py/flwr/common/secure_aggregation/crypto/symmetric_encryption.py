@@ -24,17 +24,17 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
 
-# Generate private and public key pairs with Cryptography
 def generate_key_pairs() -> (
     Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
 ):
+    """Generate private and public key pairs with Cryptography."""
     sk = ec.generate_private_key(ec.SECP384R1())
     pk = sk.public_key()
     return sk, pk
 
 
-# Serialize private key
 def private_key_to_bytes(sk: ec.EllipticCurvePrivateKey) -> bytes:
+    """Serialize private key to bytes."""
     return sk.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,
@@ -42,29 +42,32 @@ def private_key_to_bytes(sk: ec.EllipticCurvePrivateKey) -> bytes:
     )
 
 
-# Deserialize private key
 def bytes_to_private_key(b: bytes) -> ec.EllipticCurvePrivateKey:
+    """Deserialize private key from bytes."""
     return serialization.load_pem_private_key(data=b, password=None)
 
 
-# Serialize public key
 def public_key_to_bytes(pk: ec.EllipticCurvePublicKey) -> bytes:
+    """Serialize public key to bytes."""
     return pk.public_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PublicFormat.SubjectPublicKeyInfo,
     )
 
 
-# Deserialize public key
 def bytes_to_public_key(b: bytes) -> ec.EllipticCurvePublicKey:
+    """Deserialize public key from bytes."""
     return serialization.load_pem_public_key(data=b)
 
 
-# Generate shared key by exchange function and key derivation function
-# Key derivation function is needed to obtain final shared key of exactly 32 bytes
 def generate_shared_key(
     sk: ec.EllipticCurvePrivateKey, pk: ec.EllipticCurvePublicKey
 ) -> bytes:
+    """Generate a shared key from a secret key and a public key.
+
+    Generate shared key by exchange function and key derivation function Key derivation
+    function is needed to obtain final shared key of exactly 32 bytes
+    """
     # Generate a 32 byte urlsafe(for fernet) shared key
     # from own private key and another public key
     sharedk = sk.exchange(ec.ECDH(), pk)
@@ -77,18 +80,15 @@ def generate_shared_key(
     return base64.urlsafe_b64encode(derivedk)
 
 
-# Authenticated Encryption =========================================================
-
-
-# Encrypt plaintext with Fernet. Key must be 32 bytes.
 def encrypt(key: bytes, plaintext: bytes) -> bytes:
+    """Encrypt plaintext using 32-byte key with Fernet."""
     # key must be url safe
     f = Fernet(key)
     return f.encrypt(plaintext)
 
 
-# Decrypt ciphertext with Fernet. Key must be 32 bytes.
 def decrypt(key: bytes, token: bytes):
+    """Decrypt ciphertext using 32-byte key with Fernet."""
     # key must be url safe
     f = Fernet(key)
     return f.decrypt(token)

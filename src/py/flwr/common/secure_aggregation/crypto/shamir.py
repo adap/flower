@@ -24,12 +24,7 @@ from Crypto.Util.Padding import pad, unpad
 
 
 def create_shares(secret: bytes, threshold: int, num: int) -> List[bytes]:
-    """Return list of list for each user.
-
-    Each sublist contains a share for a 16 byte chunk of the secret. The int part of the
-    tuple represents the index of the share, not the index of the chunk it is
-    representing.
-    """
+    """Return list of shares (bytes)."""
     secret_padded = pad(secret, 16)
     secret_padded_chunk = [
         (threshold, num, secret_padded[i : i + 16])
@@ -60,6 +55,7 @@ def _shamir_split(threshold: int, num: int, chunk: bytes) -> List[Tuple[int, byt
 
 # Reconstructing secret with PyCryptodome
 def combine_shares(share_list: List[bytes]) -> bytes:
+    """Reconstruct secret from shares."""
     # print("receive", [len(i) for i in share_list])
     for idx, share in enumerate(share_list):
         share_list[idx] = pickle.loads(share)

@@ -51,12 +51,26 @@ from flwr.common.typing import SecureAggregation
 
 from .handler import SecureAggregationHandler
 
-
 _stages = ["setup", "share keys", "collect masked input", "unmasking"]
 
 
 class SecAggPlusHandler(SecureAggregationHandler):
+    """Message handler for the SecAgg+ protocol."""
+
     def handle_secure_aggregation(self, sa: SecureAggregation):
+        """Handle incoming message and return results, following the SecAgg+ protocol.
+
+        Parameters
+        ----------
+        sa : SecureAggregation
+            The SecureAggregation sub-message in Task message received
+            from the server containing a dictionary of named values.
+
+        Returns
+        -------
+        SecureAggregation
+            The final/intermediate results of the SecAgg+ protocol.
+        """
         stage = sa.named_values.pop("stage")
         if not hasattr(self, "current_stage"):
             self.current_stage = "unmasking"
@@ -100,7 +114,7 @@ def _setup(self, sa: SecureAggregation) -> SecureAggregation:
     self.mod_range = sec_agg_param_dict["mod_range"]
 
     # key is the secure id of another client (int)
-    # value is the secret share we possess that contributes to the client's secret (bytes)
+    # value is the share of that client's secret (bytes)
     self.b_share_dict = {}
     self.sk1_share_dict = {}
     self.shared_key_2_dict = {}
@@ -193,12 +207,13 @@ def _collect_masked_input(self, sa: SecureAggregation) -> SecureAggregation:
         _src, dst, b_share, sk1_share = share_keys_plaintext_separate(plaintext)
         available_clients.append(src)
         if src != _src:
-            raise Exception(
+            raise ValueError(
                 f"Client {self.sid}: received ciphertext from {_src} instead of {src}"
             )
         if dst != self.sid:
             ValueError(
-                f"Client {self.sid}: received an encrypted message for Client {dst} from Client {src}"
+                f"Client {self.sid}: received an encrypted message"
+                f"for Client {dst} from Client {src}"
             )
         self.b_share_dict[src] = b_share
         self.sk1_share_dict[src] = sk1_share

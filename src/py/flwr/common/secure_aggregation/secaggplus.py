@@ -20,11 +20,27 @@ from typing import List, Tuple
 import numpy as np
 
 
-# Unambiguous string concatenation of source, destination, and two secret shares.
-# We assume they do not contain the 'abcdef' string
 def share_keys_plaintext_concat(
     source: int, destination: int, b_share: bytes, sk_share: bytes
 ) -> bytes:
+    """Combine arguments to bytes.
+
+    Parameters
+    ----------
+    source : int
+        the secure ID of the source.
+    destination : int
+        the secure ID of the destination.
+    b_share : bytes
+        the private key share of the source sent to the destination.
+    sk_share : bytes
+        the secret key share of the source sent to the destination.
+
+    Returns
+    -------
+    bytes
+        The combined bytes of all the arguments.
+    """
     source, destination = int.to_bytes(source, 4, "little"), int.to_bytes(
         destination, 4, "little"
     )
@@ -39,10 +55,25 @@ def share_keys_plaintext_concat(
     )
 
 
-# Unambiguous string splitting to obtain source, destination and two secret shares.
-
-
 def share_keys_plaintext_separate(plaintext: bytes) -> Tuple[int, int, bytes, bytes]:
+    """Retrieve arguments from bytes.
+
+    Parameters
+    ----------
+    plaintext : bytes
+        the bytes containing 4 arguments.
+
+    Returns
+    -------
+    source : int
+        the secure ID of the source.
+    destination : int
+        the secure ID of the destination.
+    b_share : bytes
+        the private key share of the source sent to the destination.
+    sk_share : bytes
+        the secret key share of the source sent to the destination.
+    """
     src, dst, mark = (
         int.from_bytes(plaintext[:4], "little"),
         int.from_bytes(plaintext[4:8], "little"),
@@ -52,14 +83,10 @@ def share_keys_plaintext_separate(plaintext: bytes) -> Tuple[int, int, bytes, by
     return ret
 
 
-# Pseudo Bytes Generator ==============================================================
-
-
-# Pseudo random generator for creating masks.
-# the one use numpy PRG
 def pseudo_rand_gen(
     seed: bytes, num_range: int, dimensions_list: List[Tuple]
 ) -> List[np.ndarray]:
+    """Seeded pseudo-random number generator for noise generation with Numpy."""
     assert len(seed) & 0x3 == 0
     seed32 = 0
     for i in range(0, len(seed), 4):
