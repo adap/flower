@@ -114,13 +114,13 @@ To generate the partitions for the other settings, i.e.:
 use the following commands:
 ```bash
 # this will generate the setting for 2. (see above)
-python -m FedMLB.main dataset_config.alpha_dirichlet=0.3 total_clients=500
+python -m FedMLB.dataset_preparation dataset_config.alpha_dirichlet=0.3 total_clients=500
 
 # this will generate the setting for 3. (see above)
-python -m FedMLB.main dataset_config.alpha_dirichlet=0.6 
+python -m FedMLB.dataset_preparation dataset_config.alpha_dirichlet=0.6 
 
 # this will generate the setting for 4. (see above)
-python -m FedMLB.main dataset_config.alpha_dirichlet=0.6 total_clients=500
+python -m FedMLB.dataset_preparation dataset_config.alpha_dirichlet=0.6 total_clients=500
 ```
 Note that, to reproduce those settings, we leverage the .txt files
 contained in the`client_data` folder in this project. Such files store
@@ -211,5 +211,5 @@ Tensorboard logs in this baselines are stored in a folder with the following pat
 `FedMLB/FedMLB/tb_logging/DATASET/MODEL/{METHOD}/{TOTAL_CLIENTS}_clients/dir_{ALPHA_DIRICHLET}/seed_{RANDOM_SEED}`
 
 For example, for default results with FedAvg, logs will be stored at:
-`FedMLB/FedMLB/tb_logging/cifar100/resnet18/FedAvg/100_clients/dir_0.3`
+`FedMLB/FedMLB/tb_logging/cifar100/resnet18/FedAvg/100_clients/dir_0.3/seed_3`
 
