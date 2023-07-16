@@ -16,7 +16,7 @@
 
 
 import base64
-from typing import Tuple
+from typing import Tuple, cast
 
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes, serialization
@@ -44,7 +44,10 @@ def private_key_to_bytes(sk: ec.EllipticCurvePrivateKey) -> bytes:
 
 def bytes_to_private_key(b: bytes) -> ec.EllipticCurvePrivateKey:
     """Deserialize private key from bytes."""
-    return serialization.load_pem_private_key(data=b, password=None)
+    return cast(
+        ec.EllipticCurvePrivateKey,
+        serialization.load_pem_private_key(data=b, password=None),
+    )
 
 
 def public_key_to_bytes(pk: ec.EllipticCurvePublicKey) -> bytes:
@@ -57,7 +60,7 @@ def public_key_to_bytes(pk: ec.EllipticCurvePublicKey) -> bytes:
 
 def bytes_to_public_key(b: bytes) -> ec.EllipticCurvePublicKey:
     """Deserialize public key from bytes."""
-    return serialization.load_pem_public_key(data=b)
+    return cast(ec.EllipticCurvePublicKey, serialization.load_pem_public_key(data=b))
 
 
 def generate_shared_key(
@@ -87,7 +90,7 @@ def encrypt(key: bytes, plaintext: bytes) -> bytes:
     return f.encrypt(plaintext)
 
 
-def decrypt(key: bytes, token: bytes):
+def decrypt(key: bytes, token: bytes) -> bytes:
     """Decrypt ciphertext using 32-byte key with Fernet."""
     # key must be url safe
     f = Fernet(key)

@@ -30,9 +30,7 @@ def create_shares(secret: bytes, threshold: int, num: int) -> List[bytes]:
         (threshold, num, secret_padded[i : i + 16])
         for i in range(0, len(secret_padded), 16)
     ]
-    share_list = []
-    for _i in range(num):
-        share_list.append([])
+    share_list: List[List[Tuple[int, bytes]]] = [[] for _ in range(num)]
 
     with ThreadPoolExecutor(max_workers=10) as executor:
         for chunk_shares in executor.map(
@@ -42,15 +40,11 @@ def create_shares(secret: bytes, threshold: int, num: int) -> List[bytes]:
                 # idx start with 1
                 share_list[idx - 1].append((idx, share))
 
-    for idx, shares in enumerate(share_list):
-        share_list[idx] = pickle.dumps(shares)
-    # print("send", [len(i) for i in share_list])
-
-    return share_list
+    return [pickle.dumps(shares) for shares in share_list]
 
 
 def _shamir_split(threshold: int, num: int, chunk: bytes) -> List[Tuple[int, bytes]]:
-    return Shamir.split(threshold, num, chunk)
+    return Shamir.split(threshold, num, chunk, ssss=False)
 
 
 # Reconstructing secret with PyCryptodome
@@ -78,4 +72,4 @@ def combine_shares(share_list: List[bytes]) -> bytes:
 
 
 def _shamir_combine(shares: List[Tuple[int, bytes]]) -> bytes:
-    return Shamir.combine(shares)
+    return Shamir.combine(shares, ssss=False)

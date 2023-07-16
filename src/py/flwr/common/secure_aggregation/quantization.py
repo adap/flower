@@ -15,25 +15,27 @@
 """Utility functions for model quantization."""
 
 
-from typing import List
+from typing import List, cast
 
 import numpy as np
 
+from flwr.common.typing import NDArrayFloat, NDArrayInt
 
-def _stochastic_round(arr: np.ndarray):
-    ret = np.ceil(arr).astype(np.int32)
+
+def _stochastic_round(arr: NDArrayInt) -> NDArrayInt:
+    ret: NDArrayInt = np.ceil(arr).astype(arr.dtype)
     rand_arr = np.random.rand(*ret.shape)
     ret[rand_arr < ret - arr] -= 1
     return ret
 
 
 def quantize(
-    weight: List[np.ndarray], clipping_range: float, target_range: int
-) -> List[np.ndarray]:
+    weights: List[NDArrayFloat], clipping_range: float, target_range: int
+) -> List[NDArrayInt]:
     """Quantize float Numpy arrays to integer Numpy arrays."""
     quantized_list = []
     quantizer = target_range / (2 * clipping_range)
-    for arr in weight:
+    for arr in weights:
         # stochastic quantization
         quantized = (
             np.clip(arr, -clipping_range, clipping_range) + clipping_range
@@ -46,13 +48,16 @@ def quantize(
 # Transform weight vector to range [-clipping_range, clipping_range]
 # Convert to float
 def dequantize(
-    weight: List[np.ndarray], clipping_range: float, target_range: int
-) -> List[np.ndarray]:
+    quantized_weights: List[NDArrayInt],
+    clipping_range: float,
+    target_range: int,
+) -> List[NDArrayFloat]:
     """Dequantize integer Numpy arrays to float Numpy arrays."""
-    reverse_quantized_list = []
+    reverse_quantized_list: List[NDArrayFloat] = []
     quantizer = (2 * clipping_range) / target_range
     shift = -clipping_range
-    for arr in weight:
-        arr = arr.view(np.ndarray).astype(float) * quantizer + shift
-        reverse_quantized_list.append(arr)
+    for arr in quantized_weights:
+        recon_arr = arr.view(np.ndarray).astype(float)
+        recon_arr = cast(NDArrayFloat, recon_arr * quantizer + shift)
+        reverse_quantized_list.append(recon_arr)
     return reverse_quantized_list

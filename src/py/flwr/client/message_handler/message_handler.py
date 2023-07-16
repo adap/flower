@@ -28,8 +28,8 @@ from flwr.client.message_handler.task_handler import (
     get_server_message_from_task_ins,
     wrap_client_message_in_task_res,
 )
+from flwr.client.secure_aggregation import SecureAggregationHandler
 from flwr.common import serde
-from flwr.common.secure_aggregation import SecureAggregationHandler
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 
