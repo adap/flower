@@ -19,7 +19,7 @@ def load_selected_client_statistics(selected_client, alpha, dataset, total_clien
     which are stored in a numpy array saved on disk.
     This could be done directly by doing len(ds.to_list()) but it's more expensive at run time."""
 
-    path = os.path.join("FedMLB", dataset + "_mlb_dirichlet_train", str(total_clients), str(round(alpha, 2)),
+    path = os.path.join(dataset + "_mlb_dirichlet_train", str(total_clients), str(round(alpha, 2)),
                             "distribution_train.npy")
 
     # path = os.path.join(dataset+"_mlb_dirichlet_train_and_test", str(round(alpha, 2)), "distribution_train.npy")
@@ -120,7 +120,7 @@ def load_client_datasets_from_files(dataset, sampled_client, batch_size, total_c
     def transform_data(image, label):
         return rotate_flip_crop(image), label
 
-    path = os.path.join("FedMLB", dataset + "_mlb_dirichlet_train", str(total_clients), str(round(alpha, 2)), split)
+    path = os.path.join(dataset + "_mlb_dirichlet_train", str(total_clients), str(round(alpha, 2)), split)
 
     loaded_ds = tf.data.Dataset.load(
         path=os.path.join(path, str(sampled_client)), element_spec=None, compression=None, reader_func=None

@@ -196,7 +196,7 @@ def main(cfg: DictConfig) -> None:
         clients_ids=range(0, cfg.total_clients),
         num_clients=cfg.total_clients,
         client_resources={"num_cpus": 0.28},
-        config=flwr.server.ServerConfig(num_rounds=1000),
+        config=flwr.server.ServerConfig(num_rounds=cfg.num_rounds),
         ray_init_args=ray_init_args,
         strategy=strategy
     )

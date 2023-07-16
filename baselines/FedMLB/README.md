@@ -167,7 +167,7 @@ To reproduce (1.) run the following:
 
 ```bash
 # this will produce three consecutive runs
-poetry run -m FedMLB.main --multirun algorithm="FedMLB", "FedAvg", "FedAvg+KD" 
+python run -m FedMLB.main --multirun algorithm="FedMLB","FedAvg","FedAvg+KD" 
 ```
 
 The following table reports the results from the above command compared to the 
@@ -186,7 +186,7 @@ CIFAR-100, Dir(0.3), 100 clients, 5% participation.
 
 To reproduce (2.) run the following:
 ```bash
-poetry run -m FedMLB.main --multirun algorithm="FedMLB", "FedAvg", "FedAvg+KD" total_clients=500 clients_per_round=10 local_updates=10
+python -m FedMLB.main --multirun algorithm="FedMLB","FedAvg","FedAvg+KD" total_clients=500 clients_per_round=10 local_updates=10
 ```
 CIFAR-100, Dir(0.3), 500 clients, 2% participation.
 
