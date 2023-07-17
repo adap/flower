@@ -1,5 +1,5 @@
 Flower Datasets Documentation
-==============================
+=============================
 
 Welcome to Flower Datasets' documentation. `Flower <https://flower.dev>`_ is a friendly federated learning framework.
 
