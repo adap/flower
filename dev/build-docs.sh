@@ -10,3 +10,7 @@ make html
 cd $ROOT
 cd baselines/doc
 make html
+
+cd $ROOT
+cd examples/doc
+make html
