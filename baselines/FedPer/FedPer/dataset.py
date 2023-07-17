@@ -50,12 +50,13 @@ def load_datasets(  # pylint: disable=too-many-arguments
     print(f"Dataset partitioning config: {config}")
     datasets, testset = _partition_data(
         num_clients,
-        datasets=config.name,
+        dataset=config.name,
         iid=config.iid,
-        balance=config.balance,
-        power_law=config.power_law,
+        num_classes = config.num_classes,
         seed=seed,
     )
+    print("Datasets: ", datasets)
+    quit()
 
     # Split each partition into train/val and create DataLoader
     trainloaders = []

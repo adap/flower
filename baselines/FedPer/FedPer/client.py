@@ -23,52 +23,6 @@ import torch
 import torch.nn as nn
 import numpy as np
 import time
-from flcore.clients.clientbase import Client
-
-
-class clientPer(Client):
-    def __init__(self, args, id, train_samples, test_samples, **kwargs):
-        super().__init__(args, id, train_samples, test_samples, **kwargs)
-
-    def train(self):
-        trainloader = self.load_train_data()
-        
-        start_time = time.time()
-
-        # self.model.to(self.device)
-        self.model.train()
-
-        max_local_epochs = self.local_epochs
-        if self.train_slow:
-            max_local_epochs = np.random.randint(1, max_local_epochs // 2)
-
-        for step in range(max_local_epochs):
-            for i, (x, y) in enumerate(trainloader):
-                if type(x) == type([]):
-                    x[0] = x[0].to(self.device)
-                else:
-                    x = x.to(self.device)
-                y = y.to(self.device)
-                if self.train_slow:
-                    time.sleep(0.1 * np.abs(np.random.rand()))
-                output = self.model(x)
-                loss = self.loss(output, y)
-                self.optimizer.zero_grad()
-                loss.backward()
-                self.optimizer.step()
-
-        # self.model.cpu()
-
-        if self.learning_rate_decay:
-            self.learning_rate_scheduler.step()
-
-        self.train_time_cost['num_rounds'] += 1
-        self.train_time_cost['total_cost'] += time.time() - start_time
-
-    def set_parameters(self, model):
-        for new_param, old_param in zip(model.parameters(), self.model.base.parameters()):
-            old_param.data = new_param.data.clone()
-
 
 class FlowerClient(
     fl.client.NumPyClient
@@ -83,7 +37,6 @@ class FlowerClient(
         device: torch.device,
         num_epochs: int,
         learning_rate: float,
-        straggler_schedule: np.ndarray,
     ):  # pylint: disable=too-many-arguments
         self.net = net
         self.trainloader = trainloader
@@ -94,22 +47,37 @@ class FlowerClient(
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
-        return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
+        return [val.cpu().numpy() for _, val in self.model_manager.model.body.state_dict().items()]
     
-    def set_parameters_to_use(self, model):
-        for new_param, old_param in zip(model.parameters(), self.model.base.parameters()):
-            old_param.data = new_param.data.clone()
 
     def set_parameters(self, parameters: NDArrays) -> None:
-        """Changes the parameters of the model using the given ones."""
-        params_dict = zip(self.net.state_dict().keys(), parameters)
-        state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
-        self.net.load_state_dict(state_dict, strict=True)
+        """
+        Set the local body parameters to the received parameters.
+        In the first train round the head parameters are also set to the global head parameters,
+        to ensure every client head is initialized equally.
+
+        Args:
+            parameters: parameters to set the body to.
+        """
+        # Get model keys for body
+        model_keys = [k for k in self.model_manager.model.state_dict().keys() if k.startswith("_body")]
+
+        if self.train_id == 1:
+            # Only update client's local head if it hasn't trained yet
+            model_keys.extend([k for k in self.model_manager.model.state_dict().keys() if k.startswith("_head")])
+
+        # Zip model keys and parameters
+        params_dict = zip(model_keys, parameters)
+        state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+        self.model_manager.model.set_parameters(state_dict)
 
     def fit(
-        self, parameters: NDArrays, config: Dict[str, Scalar]
+        self, 
+        parameters: NDArrays, 
+        config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, int, Dict]:
         """Implements distributed fit function for a given client."""
+        # Set parameters
         self.set_parameters(parameters)
 
         # Set number of epochs
@@ -122,10 +90,9 @@ class FlowerClient(
             self.device,
             epochs=num_epochs,
             learning_rate=self.learning_rate,
-            proximal_mu=config["proximal_mu"],
         )
 
-        return self.get_parameters({}), len(self.trainloader), {"is_straggler": False}
+        return self.get_parameters({}), len(self.trainloader), {}
 
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]
@@ -135,6 +102,30 @@ class FlowerClient(
         loss, accuracy = test(self.net, self.valloader, self.device)
         return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
 
+def filter_cifar10(dataloader: DataLoader, num_classes: int) -> DataLoader:
+    """Filters out all classes except the first num_classes classes.
+
+    Parameters
+    ----------
+    dataloader : DataLoader
+        The dataloader to filter.
+    num_classes : int
+        The number of classes to keep.
+
+    Returns
+    -------
+    DataLoader
+        The filtered dataloader.
+    """
+    # Filter out all classes except the first num_classes classes
+    dataloader.dataset.targets = np.array(dataloader.dataset.targets)
+    print(dataloader.dataset.targets)
+    quit()
+    mask = np.isin(dataloader.dataset.targets, list(range(num_classes)))
+    dataloader.dataset.targets = dataloader.dataset.targets[mask].tolist()
+    dataloader.dataset.data = dataloader.dataset.data[mask].tolist()
+
+    return dataloader
 
 def gen_client_fn(
     num_clients: int,
@@ -143,8 +134,9 @@ def gen_client_fn(
     trainloaders: List[DataLoader],
     valloaders: List[DataLoader],
     learning_rate: float,
-    stragglers: float,
     model: DictConfig,
+    num_classes: int,
+    dataset_name : str
 ) -> Tuple[
     Callable[[str], FlowerClient], DataLoader
 ]:  # pylint: disable=too-many-arguments
@@ -168,8 +160,12 @@ def gen_client_fn(
         belonging to a particular client.
     learning_rate : float
         The learning rate for the SGD  optimizer of clients.
-    stragglers : float
-        Proportion of stragglers in the clients, between 0 and 1.
+    model : DictConfig
+        The model configuration.
+    num_classes : int
+        The number of classes in the dataset.
+    dataset_name : str 
+        The name of the dataset.
 
     Returns
     -------
@@ -189,6 +185,14 @@ def gen_client_fn(
         # will train and evaluate on their own unique data
         trainloader = trainloaders[int(cid)]
         valloader = valloaders[int(cid)]
+
+        if dataset_name == 'cifar10':
+            if num_classes != 10:
+                # only include num_classes classes in the training and validation set
+                trainloader = filter_cifar10(trainloader, num_classes)
+                valloader = filter_cifar10(valloader, num_classes)
+        else:
+            raise NotImplementedError(f"Dataset {dataset_name} not implemented")
 
         return FlowerClient(
             net,
