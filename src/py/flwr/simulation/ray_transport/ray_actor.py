@@ -247,17 +247,18 @@ class VirtualClientEngineActorPool(ActorPool):
                 # Treat as if nothing happened.
                 return
 
-        _, a, cid = self._future_to_actor.pop(future, (None, None, -1))
-        if a is not None:
-            # still space in queue ? (no if a node died)
-            if self._check_actor_fits_in_pool():
-                if self._check_and_remove_actor_from_pool(a):
-                    self._return_actor(a)
-                # flag future as ready
-                self._flag_future_as_ready(cid)
-                # print(self._cid_to_future[cid])
-            else:
-                a.terminate.remote()
+        with self.lock:
+            _, a, cid = self._future_to_actor.pop(future, (None, None, -1))
+            if a is not None:
+                # still space in queue ? (no if a node died)
+                if self._check_actor_fits_in_pool():
+                    if self._check_and_remove_actor_from_pool(a):
+                        self._return_actor(a)
+                    # flag future as ready
+                    self._flag_future_as_ready(cid)
+                    # print(self._cid_to_future[cid])
+                else:
+                    a.terminate.remote()
 
     def get_client_result(self, cid: str, timeout: int = 3600) -> Any:
         """Get result from VirtualClient with specific cid."""
@@ -265,14 +266,13 @@ class VirtualClientEngineActorPool(ActorPool):
         # if the result for the ClientProxy running this method is ready
         while self.has_next() and not (self._is_future_ready(cid)):
             try:
-                with self.lock:
-                    # in multi-node settings, if one node goes down abruptly, the
-                    # ray.wait() in the method below might wait forever... to get
-                    # around this, we set small timeout (1second). We ignore the
-                    # TimeOutException when this happens. Note none of this is
-                    # strictly necessary if the users decides to manually de-register
-                    # a node from Ray (i.e. via `ray stop` in the cli).
-                    self.process_unordered_future(timeout=1, ignore_if_timedout=True)
+                # in multi-node settings, if one node goes down abruptly, the
+                # ray.wait() in the method below might wait forever... to get
+                # around this, we set small timeout (1second). We ignore the
+                # TimeOutException when this happens. Note none of this is
+                # strictly necessary if the users decides to manually de-register
+                # a node from Ray (i.e. via `ray stop` in the cli).
+                self.process_unordered_future(timeout=1, ignore_if_timedout=True)
             except StopIteration:
                 # there are no pending jobs in the pool
                 break
