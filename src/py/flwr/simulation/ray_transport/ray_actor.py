@@ -16,7 +16,7 @@
 
 import threading
 import traceback
-from logging import ERROR, WARNING, INFO
+from logging import ERROR, INFO, WARNING
 from typing import Any, Callable, Dict, List, Set
 
 import ray
@@ -238,14 +238,14 @@ class VirtualClientEngineActorPool(ActorPool):
             raise StopIteration("No more results to get")
         res, _ = ray.wait(list(self._future_to_actor), num_returns=1, timeout=timeout)
         timeout_msg = "Timed out waiting for result"
-        raise_timeout_after_ignore = False
         if res:
             [future] = res
         else:
             if not ignore_if_timedout:
                 raise TimeoutError(timeout_msg)
             else:
-                raise_timeout_after_ignore = True
+                # Treat as if nothing happened.
+                return
 
         _, a, cid = self._future_to_actor.pop(future, (None, None, -1))
         if a is not None:
@@ -259,9 +259,6 @@ class VirtualClientEngineActorPool(ActorPool):
             else:
                 a.terminate.remote()
 
-        if raise_timeout_after_ignore:
-            raise TimeoutError(timeout_msg + f". The task {future} has been ignored.")
-
     def get_client_result(self, cid: str, timeout: int = 3600) -> Any:
         """Get result from VirtualClient with specific cid."""
         # loop until all jobs submitted to the pool are completed. Break early
@@ -269,7 +266,13 @@ class VirtualClientEngineActorPool(ActorPool):
         while self.has_next() and not (self._is_future_ready(cid)):
             try:
                 with self.lock:
-                    self.process_unordered_future(timeout=timeout)
+                    # in multi-node settings, if one node goes down abruptly, the
+                    # ray.wait() in the method below might wait forever... to get
+                    # around this, we set small timeout (1second). We ignore the
+                    # TimeOutException when this happens. Note none of this is
+                    # strictly necessary if the users decides to manually de-register
+                    # a node from Ray (i.e. via `ray stop` in the cli).
+                    self.process_unordered_future(timeout=1, ignore_if_timedout=True)
             except StopIteration:
                 # there are no pending jobs in the pool
                 break

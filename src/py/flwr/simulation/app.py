@@ -206,10 +206,9 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     log(
         INFO,
-        "Flower VCE: Creating %s with %s %s",
+        "Flower VCE: Creating %s with %s actors",
         pool.__class__.__name__,
         pool.num_actors,
-        pool._idle_actors[0].__class__.__name__,
     )
 
     for cid in cids:

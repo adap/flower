@@ -115,6 +115,7 @@ class RayClientProxy(ClientProxy):
         """Disconnect and (optionally) reconnect later."""
         return common.DisconnectRes(reason="")  # Nothing to do here (yet)
 
+
 class RayActorClientProxy(ClientProxy):
     """Flower client proxy which delegates work using Ray."""
 
