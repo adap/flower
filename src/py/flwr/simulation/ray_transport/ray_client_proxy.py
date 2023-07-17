@@ -14,7 +14,7 @@
 # ==============================================================================
 """Ray-based Flower ClientProxy implementation."""
 
-
+import traceback
 from logging import ERROR
 from typing import Callable, Dict, Optional, cast
 
@@ -115,7 +115,6 @@ class RayClientProxy(ClientProxy):
         """Disconnect and (optionally) reconnect later."""
         return common.DisconnectRes(reason="")  # Nothing to do here (yet)
 
-
 class RayActorClientProxy(ClientProxy):
     """Flower client proxy which delegates work using Ray."""
 
@@ -140,6 +139,7 @@ class RayActorClientProxy(ClientProxy):
                 log(ERROR, "ActorPool is empty!!! Disconnecting VirtualClient")
                 # TODO: the below does nothing?
                 self.reconnect()
+            log(ERROR, traceback.format_exc())
             log(ERROR, ex)
             raise ex
 

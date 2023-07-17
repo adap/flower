@@ -16,7 +16,7 @@
 
 import threading
 import traceback
-from logging import ERROR, WARNING
+from logging import ERROR, WARNING, INFO
 from typing import Any, Callable, Dict, List, Set
 
 import ray
@@ -225,7 +225,7 @@ class VirtualClientEngineActorPool(ActorPool):
                 " might take several intermediate steps",
             )
             # we are preventing one actor to be added back in the queue, so we just
-            # decreated the number of actors by one eventually `self.num_actors`
+            # decrease the number of actors by one eventually `self.num_actors`
             # should be equal what pool_size_from_resources(self.resources) returns
             self.num_actors -= 1
             return False
@@ -247,22 +247,17 @@ class VirtualClientEngineActorPool(ActorPool):
             else:
                 raise_timeout_after_ignore = True
 
-        # it is highly likely that all VirtuaLClientEngine instances were waiting for
-        # the first result to be avaialbe, but only one VCE can do .pop() and fetch the
-        # actor we put this behind a lock since we are removing and adding elements to
-        # dictionaries note that ._return_actor will run .submit() internally
-        with self.lock:
-            _, a, cid = self._future_to_actor.pop(future, (None, None, -1))
-            if a is not None:
-                # still space in queue ? (no if a node died)
-                if self._check_actor_fits_in_pool():
-                    if self._check_and_remove_actor_from_pool(a):
-                        self._return_actor(a)
-                    # flag future as ready
-                    self._flag_future_as_ready(cid)
-                    # print(self._cid_to_future[cid])
-                else:
-                    a.terminate.remote()
+        _, a, cid = self._future_to_actor.pop(future, (None, None, -1))
+        if a is not None:
+            # still space in queue ? (no if a node died)
+            if self._check_actor_fits_in_pool():
+                if self._check_and_remove_actor_from_pool(a):
+                    self._return_actor(a)
+                # flag future as ready
+                self._flag_future_as_ready(cid)
+                # print(self._cid_to_future[cid])
+            else:
+                a.terminate.remote()
 
         if raise_timeout_after_ignore:
             raise TimeoutError(timeout_msg + f". The task {future} has been ignored.")
@@ -273,7 +268,8 @@ class VirtualClientEngineActorPool(ActorPool):
         # if the result for the ClientProxy running this method is ready
         while self.has_next() and not (self._is_future_ready(cid)):
             try:
-                self.process_unordered_future(timeout=timeout)
+                with self.lock:
+                    self.process_unordered_future(timeout=timeout)
             except StopIteration:
                 # there are no pending jobs in the pool
                 break
