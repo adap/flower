@@ -79,6 +79,14 @@ def pool_size_from_resources(client_resources: Dict):
         else:
             num_actors = 0
 
+    if num_actors == 0:
+        log(
+            WARNING,
+            f"Your ActorPool is empty. Your system ({num_cpus = }, {num_gpus = }) "
+            "does not meet the criteria to host at least one client with resources:"
+            f" {client_resources}. Consider lowering your `client_resources`",
+        )
+
     return num_actors
 
 
@@ -142,7 +150,7 @@ class VirtualClientEngineActorPool(ActorPool):
                 self._pending_submits.append((fn, value, cid))
 
     def _flag_future_as_ready(self, cid) -> None:
-        """Flag future for VirtualClient as ready."""
+        """Flag future for VirtualClient with cid=cid as ready."""
         self._cid_to_future[cid]["ready"] = True
 
     def _reset_cid_to_future_dict(self, cid: str) -> None:
@@ -154,7 +162,7 @@ class VirtualClientEngineActorPool(ActorPool):
         self._cid_to_future[cid]["ready"] = False
 
     def _is_future_ready(self, cid: str) -> bool:
-        """Return status of future for this VirtualClient."""
+        """Return status of future associated to the given client id (cid)."""
         if cid not in self._cid_to_future.keys():
             return False
         else:
@@ -166,7 +174,6 @@ class VirtualClientEngineActorPool(ActorPool):
             res_cid, res = ray.get(self._cid_to_future[cid]["future"])
         except ray.exceptions.RayActorError as ex:
             log(ERROR, ex)
-            log(ERROR, traceback.format_exc())
             if hasattr(ex, "actor_id"):
                 # RayActorError only contains the actor_id attribute
                 # if the actor won't be restarted again.
@@ -207,11 +214,10 @@ class VirtualClientEngineActorPool(ActorPool):
                 log(WARNING, f"Pool size: {self.num_actors}")
                 return False
             else:
-                # print(f"actor: {actor_id} should not be killed")
                 return True
 
     def _check_actor_fits_in_pool(self) -> bool:
-        """Determine if available resources are haven't changed.
+        """Determine if available resources haven't changed.
 
         If true, allow the actor to be added back to the pool. Else don't allow it
         (effectively reducing the size of the pool).
@@ -226,7 +232,7 @@ class VirtualClientEngineActorPool(ActorPool):
                 " might take several intermediate steps",
             )
             # we are preventing one actor to be added back in the queue, so we just
-            # decrease the number of actors by one eventually `self.num_actors`
+            # decrease the number of actors by one. Eventually `self.num_actors`
             # should be equal what pool_size_from_resources(self.resources) returns
             self.num_actors -= 1
             return False
@@ -238,13 +244,14 @@ class VirtualClientEngineActorPool(ActorPool):
         if not self.has_next():
             raise StopIteration("No more results to get")
         res, _ = ray.wait(list(self._future_to_actor), num_returns=1, timeout=timeout)
-        timeout_msg = "Timed out waiting for result"
+
         if res:
             [future] = res
         else:
-            raise TimeoutError(timeout_msg)
+            raise TimeoutError("Timed out waiting for result")
 
         with self.lock:
+            # get actor that completed a job
             _, a, cid = self._future_to_actor.pop(future, (None, None, -1))
             if a is not None:
                 # still space in queue ? (no if a node died)
@@ -253,14 +260,15 @@ class VirtualClientEngineActorPool(ActorPool):
                         self._return_actor(a)
                     # flag future as ready
                     self._flag_future_as_ready(cid)
-                    # print(self._cid_to_future[cid])
                 else:
+                    # the actor doesn't fit in the pool anymore.
+                    # Manually terminate the actor
                     a.terminate.remote()
 
     def get_client_result(self, cid: str, timeout: int = 3600) -> Any:
         """Get result from VirtualClient with specific cid."""
         # loop until all jobs submitted to the pool are completed. Break early
-        # if the result for the ClientProxy running this method is ready
+        # if the result for the ClientProxy calling this method is ready
         while self.has_next() and not (self._is_future_ready(cid)):
             try:
                 self.process_unordered_future(timeout=timeout)

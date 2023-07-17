@@ -126,12 +126,12 @@ class RayActorClientProxy(ClientProxy):
         self.client_fn = client_fn
         self.actor_pool = actor_pool
 
-    def _submit_job(self, job: Callable):
+    def _submit_job(self, job: Callable, timeout: Optional[float]):
         try:
             self.actor_pool.submit_client_job(
                 lambda a, v: a.run.remote(v, self.cid), job, self.cid
             )
-            res = self.actor_pool.get_client_result(self.cid)
+            res = self.actor_pool.get_client_result(self.cid, timeout)
 
         except Exception as ex:
             if self.actor_pool.num_actors == 0:
@@ -158,7 +158,7 @@ class RayActorClientProxy(ClientProxy):
                 get_properties_ins=ins,
             )
 
-        res = self._submit_job(get_properties)
+        res = self._submit_job(get_properties, timeout)
 
         return cast(
             common.GetPropertiesRes,
@@ -177,7 +177,7 @@ class RayActorClientProxy(ClientProxy):
                 get_parameters_ins=ins,
             )
 
-        res = self._submit_job(get_parameters)
+        res = self._submit_job(get_parameters, timeout)
 
         return cast(
             common.GetParametersRes,
@@ -194,7 +194,7 @@ class RayActorClientProxy(ClientProxy):
                 fit_ins=ins,
             )
 
-        res = self._submit_job(fit)
+        res = self._submit_job(fit, timeout)
 
         return cast(
             common.FitRes,
@@ -213,7 +213,7 @@ class RayActorClientProxy(ClientProxy):
                 evaluate_ins=ins,
             )
 
-        res = self._submit_job(evaluate)
+        res = self._submit_job(evaluate, timeout)
 
         return cast(
             common.EvaluateRes,
