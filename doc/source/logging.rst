@@ -127,6 +127,6 @@ In this way your logger will show, in addition to the default messages, the ones
 Logging to a Remote Service
 ---------------------------
 
-The :code:`fl.common.logger.configure` function, also allows specifying a host to which logs can be pushed (via :code:`POST) through a native Python :code:`logging.handler.HTTPHandler`.
+The :code:`fl.common.logger.configure` function, also allows specifying a host to which logs can be pushed (via :code:`POST`) through a native Python :code:`logging.handler.HTTPHandler`.
 This is a particularly useful feature in :code:`gRPC`-based Federated Learning workloads where otherwise gathering logs from all entities (i.e. the server and the clients) might be cumbersome.
 Note that in Flower simulation, the server automatically displays all logs. You can still specify a :code:`HTTPHandler` should you whish to backup or analyze the logs somewhere else.
