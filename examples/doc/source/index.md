@@ -4,7 +4,6 @@
 ---
 maxdepth: 1
 ---
-
 sklearn-logreg-mnist
 simulation_tensorflow
 simulation_pytorch_colab

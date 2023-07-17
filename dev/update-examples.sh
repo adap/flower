@@ -4,9 +4,9 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
 ROOT=`pwd`
 INDEX=$ROOT/examples/doc/source/index.md
-INSERT_LINE=7
+INSERT_LINE=6
 
-sed -i.bu '8,$d' $INDEX
+sed -i.bu '7,$d' $INDEX
 
 cd examples/
 for d in */ ; do
