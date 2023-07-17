@@ -39,14 +39,14 @@ import os
 import wget
 import numpy as np
 import torch
+import random
 import torchvision.transforms as transforms
 from torchvision.datasets import ImageFolder
 from zipfile import ZipFile
 from torch.utils.data import ConcatDataset, Dataset, Subset, random_split
 from torchvision.datasets import CIFAR10
 
-
-def _download_data(dataset: str) -> Tuple[Dataset, Dataset]:
+def _download_data(dataset: str = 'cifar10') -> Tuple[Dataset, Dataset]:
     """Downloads (if necessary) and returns the MNIST dataset.
 
     Returns
@@ -70,6 +70,7 @@ def _download_data(dataset: str) -> Tuple[Dataset, Dataset]:
         )
         return trainset, testset
     elif dataset == "FLICKR-AES":
+        raise NotImplementedError("FLICKR-AES dataset not implemented.")
         # Get zip file from 
         # https://drive.google.com/file/d/1jY7GMMNaQGQ80AAL99FLrBpWPFCwTKVT/view?usp=drive_link
         if not os.path.exists("./dataset/FLICKR-AES"):
@@ -103,10 +104,9 @@ def _download_data(dataset: str) -> Tuple[Dataset, Dataset]:
 
 def _partition_data(
     num_clients,
-    datasets: List[str],
+    dataset: str,
     iid: Optional[bool] = False,
-    power_law: Optional[bool] = True,
-    balance: Optional[bool] = False,
+    num_classes : Optional[int] = 10,
     seed: Optional[int] = 42,
 ) -> Tuple[List[Dataset], Dataset]:
     """Split training set into iid or non iid partitions to simulate the
@@ -116,18 +116,14 @@ def _partition_data(
     ----------
     num_clients : int
         The number of clients that hold a part of the data
-    datasets : List[str]
-        The datasets to be used for training
+    dataset : str
+        The name of the dataset to be used
     iid : bool, optional
         Whether the data should be independent and identically distributed between
         the clients or if the data should first be sorted by labels and distributed by chunks
         to each client (used to test the convergence in a worst case scenario), by default False
-    power_law: bool, optional
-        Whether to follow a power-law distribution when assigning number of samples
-        for each client, defaults to True
-    balance : bool, optional
-        Whether the dataset should contain an equal number of samples in each class,
-        by default False
+    num_classes : int, optional
+        The number of classes in the dataset, by default 10
     seed : int, optional
         Used to set a fix seed to replicate experiments, by default 42
 
@@ -136,16 +132,13 @@ def _partition_data(
     Tuple[List[Dataset], Dataset]
         A list of dataset for each client and a single dataset to be use for testing the model.
     """
-    trainsets, testsets = [], []
-    for dataset in datasets:
-        trainset, testset = _download_data(dataset=dataset)
-        trainsets.append(trainset)
-        testsets.append(testset)
-    print("trainsets", trainsets)
-    print("testsets", testsets)
 
-    if balance:
-        trainset = _balance_classes(trainset, seed)
+    trainset, testset = _download_data(dataset=dataset)
+
+    if dataset == "cifar10":
+        total_num_classes = 10
+    else:
+        raise NotImplementedError(f"Dataset {dataset} not implemented.")
     
     partition_size = int(len(trainset) / num_clients)
     lengths = [partition_size] * num_clients
@@ -156,202 +149,62 @@ def _partition_data(
     if iid:
         datasets = random_split(trainset, lengths, torch.Generator().manual_seed(seed))
     else:
-        if power_law:
-            trainset_sorted = _sort_by_class(trainset)
-            datasets = _power_law_split(
-                trainset_sorted,
-                num_partitions=num_clients,
-                num_labels_per_partition=2,
-                min_data_per_partition=10,
-                mean=0.0,
-                sigma=2.0,
-            )
-        else:
-            shard_size = int(partition_size / 2)
-            idxs = trainset.targets.argsort()
-            sorted_data = Subset(trainset, idxs)
-            tmp = []
-            for idx in range(num_clients * 2):
-                tmp.append(
-                    Subset(
-                        sorted_data, np.arange(shard_size * idx, shard_size * (idx + 1))
-                    )
-                )
-            idxs_list = torch.randperm(
-                num_clients * 2, generator=torch.Generator().manual_seed(seed)
-            )
-            datasets = [
-                ConcatDataset((tmp[idxs_list[2 * i]], tmp[idxs_list[2 * i + 1]]))
-                for i in range(num_clients)
-            ]
+        assert num_classes <= total_num_classes, "num_classes must be less than or equal to total_num_classes"
+        
+        times = [0 for i in range(total_num_classes)]
+        contain = []
+        for i in range(num_clients):
+            current = [i%total_num_classes]
+            times[i%total_num_classes] += 1
+            j = 1
+            if i  == num_clients - 1:
+                missing_labels = [i for i in range(total_num_classes) if times[i] == 0]
+                for k in range(len(missing_labels)):
+                    current.append(missing_labels)
+                    times[missing_labels] += 1
+                if len(missing_labels) != num_classes:
+                    remaining_num_labels = num_classes - len(missing_labels)
+                    # ind is a value between 0 and total_num_classes-1, excluding missing values
+                    ind = random.sample([i for i in range(total_num_classes) if i not in missing_labels], remaining_num_labels)
+                    print("ind: ", ind)
+                    print("Missing labels: ", missing_labels)
+                    print("times: ", times)
+                    print("current: ", current)
+                
+                    quit()
+                    for k in range(remaining_num_labels):
+                        current.append(ind[k])
+                        times[ind[k]] += 1
+            else:        
+                while (j < num_classes):             
+                    ind = random.randint(0, total_num_classes-1)
+                    if (ind not in current):
+                        j += 1
+                        current.append(ind)
+                        times[ind] += 1
+                        # print("times: ", times)
+            contain.append(current)
+            print("Client {} contains classes: {}".format(i, current))
+        print("times: ", times)
+        quit()
+        net_dataidx_map = {i:np.ndarray(0, dtype=np.int32) for i in range(num_clients)}
+        for i in range(total_num_classes):
+            idx_k = np.where(trainset.targets == i)[0]
+            print("Class {} has {} samples".format(i, len(idx_k)))
+            np.random.shuffle(idx_k)
+            split = np.array_split(idx_k, times[i])
+            print("Split {} into {} parts".format(i, times[i]))
+            ids=0
+            for j in range(num_clients):
+                if i in contain[j]:
+                    net_dataidx_map[j] = np.append(net_dataidx_map[j], split[ids])
+                    ids += 1
+        datasets = []
+        for i in range(num_clients):
+            datasets.append(Subset(trainset, net_dataidx_map[i]))
 
     return datasets, testset
 
-
-def _balance_classes(
-    trainset: Dataset,
-    seed: Optional[int] = 42,
-) -> Dataset:
-    """Balance the classes of the trainset.
-
-    Trims the dataset so each class contains as many elements as the
-    class that contained the least elements.
-
-    Parameters
-    ----------
-    trainset : Dataset
-        The training dataset that needs to be balanced.
-    seed : int, optional
-        Used to set a fix seed to replicate experiments, by default 42.
-
-    Returns
-    -------
-    Dataset
-        The balanced training dataset.
-    """
-    class_counts = np.bincount(trainset.targets)
-    smallest = np.min(class_counts)
-    idxs = trainset.targets.argsort()
-    tmp = [Subset(trainset, idxs[: int(smallest)])]
-    tmp_targets = [trainset.targets[idxs[: int(smallest)]]]
-    for count in np.cumsum(class_counts):
-        tmp.append(Subset(trainset, idxs[int(count) : int(count + smallest)]))
-        tmp_targets.append(trainset.targets[idxs[int(count) : int(count + smallest)]])
-    unshuffled = ConcatDataset(tmp)
-    unshuffled_targets = torch.cat(tmp_targets)
-    shuffled_idxs = torch.randperm(
-        len(unshuffled), generator=torch.Generator().manual_seed(seed)
-    )
-    shuffled = Subset(unshuffled, shuffled_idxs)
-    shuffled.targets = unshuffled_targets[shuffled_idxs]
-
-    return shuffled
+    
 
 
-def _sort_by_class(
-    trainset: Dataset,
-) -> Dataset:
-    """Sort dataset by class/label.
-
-    Parameters
-    ----------
-    trainset : Dataset
-        The training dataset that needs to be sorted.
-
-    Returns
-    -------
-    Dataset
-        The sorted training dataset.
-    """
-    class_counts = np.bincount(trainset.targets)
-    idxs = trainset.targets.argsort()  # sort targets in ascending order
-
-    tmp = []  # create subset of smallest class
-    tmp_targets = []  # same for targets
-
-    start = 0
-    for count in np.cumsum(class_counts):
-        tmp.append(
-            Subset(trainset, idxs[start : int(count + start)])
-        )  # add rest of classes
-        tmp_targets.append(trainset.targets[idxs[start : int(count + start)]])
-        start += count
-    sorted_dataset = ConcatDataset(tmp)  # concat dataset
-    sorted_dataset.targets = torch.cat(tmp_targets)  # concat targets
-    return sorted_dataset
-
-
-def _power_law_split(
-    sorted_trainset: Dataset,
-    num_partitions: int,
-    num_labels_per_partition: int = 2,
-    min_data_per_partition: int = 10,
-    mean: float = 0.0,
-    sigma: float = 2.0,
-) -> Dataset:
-    """Partitions the dataset following a power-law distribution. It follows
-    the implementation of Li et al 2020: https://arxiv.org/abs/1812.06127 with
-    default values set accordingly.
-
-    Parameters
-    ----------
-    sorted_trainset : Dataset
-        The training dataset sorted by label/class.
-    num_partitions: int
-        Number of partitions to create
-    num_labels_per_partition: int
-        Number of labels to have in each dataset partition. For
-        example if set to two, this means all training examples in
-        a given partition will be long to the same two classes. default 2
-    min_data_per_partition: int
-        Minimum number of datapoints included in each partition, default 10
-    mean: float
-        Mean value for LogNormal distribution to construct power-law, default 0.0
-    sigma: float
-        Sigma value for LogNormal distribution to construct power-law, default 2.0
-
-    Returns
-    -------
-    Dataset
-        The partitioned training dataset.
-    """
-
-    targets = sorted_trainset.targets
-    full_idx = range(len(targets))
-
-    class_counts = np.bincount(sorted_trainset.targets)
-    labels_cs = np.cumsum(class_counts)
-    labels_cs = [0] + labels_cs[:-1].tolist()
-
-    partitions_idx = []
-    num_classes = len(np.bincount(targets))
-    hist = np.zeros(num_classes, dtype=np.int32)
-
-    # assign min_data_per_partition
-    min_data_per_class = int(min_data_per_partition / num_labels_per_partition)
-    for u_id in range(num_partitions):
-        partitions_idx.append([])
-        for cls_idx in range(num_labels_per_partition):
-            # label for the u_id-th client
-            cls = (u_id + cls_idx) % num_classes
-            # record minimum data
-            indices = list(
-                full_idx[
-                    labels_cs[cls]
-                    + hist[cls] : labels_cs[cls]
-                    + hist[cls]
-                    + min_data_per_class
-                ]
-            )
-            partitions_idx[-1].extend(indices)
-            hist[cls] += min_data_per_class
-
-    # add remaining images following power-law
-    probs = np.random.lognormal(
-        mean,
-        sigma,
-        (num_classes, int(num_partitions / num_classes), num_labels_per_partition),
-    )
-    remaining_per_class = class_counts - hist
-    # obtain how many samples each partition should be assigned for each of the labels it contains
-    probs = (
-        remaining_per_class.reshape(-1, 1, 1)
-        * probs
-        / np.sum(probs, (1, 2), keepdims=True)
-    )
-
-    for u_id in range(num_partitions):
-        for cls_idx in range(num_labels_per_partition):
-            cls = (u_id + cls_idx) % num_classes
-            count = int(probs[cls, u_id // num_classes, cls_idx])
-
-            # add count of specific class to partition
-            indices = full_idx[
-                labels_cs[cls] + hist[cls] : labels_cs[cls] + hist[cls] + count
-            ]
-            partitions_idx[u_id].extend(indices)
-            hist[cls] += count
-
-    # construct subsets
-    partitions = [Subset(sorted_trainset, p) for p in partitions_idx]
-    return partitions
