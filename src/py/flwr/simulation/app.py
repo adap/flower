@@ -94,11 +94,11 @@ def start_simulation(  # pylint: disable=too-many-arguments
         List `client_id`s for each client. This is only required if
         `num_clients` is not set. Setting both `num_clients` and `clients_ids`
         with `len(clients_ids)` not equal to `num_clients` generates an error.
-    client_resources : Optional[Dict[str, float]] (default: None)
-        CPU and GPU resources for a single client. Supported keys are
-        `num_cpus` and `num_gpus`. Example: `{"num_cpus": 4, "num_gpus": 1}`.
-        To understand the GPU utilization caused by `num_gpus`, consult the Ray
-        documentation on GPU support.
+    client_resources : Optional[Dict[str, float]] (default: `{"num_cpus": 1,
+        "num_gpus": 0.0}` CPU and GPU resources for a single client. Supported keys
+        are `num_cpus` and `num_gpus`. To understand the GPU utilization caused by
+        `num_gpus`, as well as using custom resources, please consult the Ray
+        documentation.
     server : Optional[flwr.server.Server] (default: None).
         An implementation of the abstract base class `flwr.server.Server`. If no
         instance is provided, then `start_server` will create one.
@@ -186,15 +186,17 @@ def start_simulation(  # pylint: disable=too-many-arguments
     )
 
     # log resources for each virtual_client
-    # If not specified by user, Ray uses default: 1x CPU, 0x GPU
-    resources = {"num_cpus": 1.0, "num_gpus": 0.0}
-    if client_resources:
-        for k, v in client_resources.items():
-            resources[k] = v
+    if client_resources is None:
+        client_resources = {"num_cpus": 1, "num_gpus": 0.0}
+        log(
+            INFO,
+            "No `client_resources` specified. Using minimal resources for clients.",
+        )
+
     log(
         INFO,
         "Flower VCE: Resources for each Virtual Client: %s",
-        resources,
+        client_resources,
     )
 
     # instantiate ActorPool
@@ -202,7 +204,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
     max_restarts = 1  # how many times an actor that crashes should be restarted
     # after these many restarts, it will be removed from the pool
 
-    pool = VirtualClientEngineActorPool(resources, max_restarts)
+    pool = VirtualClientEngineActorPool(client_resources, max_restarts)
 
     log(
         INFO,

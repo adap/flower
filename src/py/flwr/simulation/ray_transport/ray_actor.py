@@ -16,7 +16,7 @@
 
 import threading
 import traceback
-from logging import ERROR, INFO, WARNING
+from logging import ERROR, WARNING
 from typing import Any, Callable, Dict, List, Set
 
 import ray
@@ -104,7 +104,8 @@ class VirtualClientEngineActorPool(ActorPool):
 
         self.lock = threading.RLock()
 
-        # TODO: asyncio check every N seconds if cluster has grown --> add more actors to the pool if so
+        # TODO: asyncio check every N seconds if cluster has grown
+        # --> add more actors to the pool if so
 
     def __reduce__(self):
         """Make this class serialisable (needed due to lock)."""
@@ -232,7 +233,7 @@ class VirtualClientEngineActorPool(ActorPool):
         else:
             return True
 
-    def process_unordered_future(self, timeout=None, ignore_if_timedout=False) -> None:
+    def process_unordered_future(self, timeout=None) -> None:
         """Similar to parent's get_next_unordered() but without final ray.get()."""
         if not self.has_next():
             raise StopIteration("No more results to get")
@@ -241,11 +242,7 @@ class VirtualClientEngineActorPool(ActorPool):
         if res:
             [future] = res
         else:
-            if not ignore_if_timedout:
-                raise TimeoutError(timeout_msg)
-            else:
-                # Treat as if nothing happened.
-                return
+            raise TimeoutError(timeout_msg)
 
         with self.lock:
             _, a, cid = self._future_to_actor.pop(future, (None, None, -1))
@@ -266,13 +263,7 @@ class VirtualClientEngineActorPool(ActorPool):
         # if the result for the ClientProxy running this method is ready
         while self.has_next() and not (self._is_future_ready(cid)):
             try:
-                # in multi-node settings, if one node goes down abruptly, the
-                # ray.wait() in the method below might wait forever... to get
-                # around this, we set small timeout (1second). We ignore the
-                # TimeOutException when this happens. Note none of this is
-                # strictly necessary if the users decides to manually de-register
-                # a node from Ray (i.e. via `ray stop` in the cli).
-                self.process_unordered_future(timeout=1, ignore_if_timedout=True)
+                self.process_unordered_future(timeout=timeout)
             except StopIteration:
                 # there are no pending jobs in the pool
                 break
