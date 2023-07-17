@@ -43,6 +43,11 @@ jobs:
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
+              
+          - directory: pytorch-lightning
+            dataset: |
+              from torchvision.datasets import MNIST
+              MNIST('./data', download=True)
 
           - directory: mxnet
             dataset: |
@@ -85,5 +90,5 @@ jobs:
         run: python -c "${{ matrix.dataset }}"
       - name: Run edge client test
         run: ./test.sh
-      - name: Run virtual client test
+      - name: Run virtual client test 
         run: python simulation.py
