@@ -24,7 +24,12 @@ from flwr.client.client import (
     maybe_call_get_parameters,
     maybe_call_get_properties,
 )
+from flwr.client.message_handler.task_handler import (
+    get_server_message_from_task_ins,
+    wrap_client_message_in_task_res,
+)
 from flwr.common import serde
+from flwr.proto.task_pb2 import TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 
 
@@ -32,7 +37,36 @@ class UnknownServerMessage(Exception):
     """Exception indicating that the received message is unknown."""
 
 
-def handle(
+def handle(client: Client, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
+    """Handle incoming TaskIns from the server.
+
+    Parameters
+    ----------
+    client : Client
+        The Client instance provided by the user.
+    task_ins: TaskIns
+        The task instruction coming from the server, to be processed by the client.
+
+    Returns
+    -------
+    task_res: TaskRes
+        The task response that should be returned to the server.
+    sleep_duration : int
+        Number of seconds that the client should disconnect from the server.
+    keep_going : bool
+        Flag that indicates whether the client should continue to process the
+        next message from the server (True) or disconnect and optionally
+        reconnect later (False).
+    """
+    server_msg = get_server_message_from_task_ins(task_ins, exclude_reconnect_ins=False)
+    if server_msg is None:
+        raise NotImplementedError()
+    client_msg, sleep_duration, keep_going = handle_legacy_message(client, server_msg)
+    task_res = wrap_client_message_in_task_res(client_msg)
+    return task_res, sleep_duration, keep_going
+
+
+def handle_legacy_message(
     client: Client, server_msg: ServerMessage
 ) -> Tuple[ClientMessage, int, bool]:
     """Handle incoming messages from the server.
