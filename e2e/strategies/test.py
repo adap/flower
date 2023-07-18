@@ -1,5 +1,6 @@
 import flwr as fl
 import tensorflow as tf
+from flwr.common import ndarrays_to_parameters
 from flwr.server.strategy import FedMedian, FedTrimmedAvg, QFedAvg, FedAvgM, FedAdam, FedAdagrad, FedYogi
 
 from client import FlowerClient
@@ -33,6 +34,6 @@ for Strategy in STRATEGY_LIST:
         client_fn=client_fn,
         num_clients=2,
         config=fl.server.ServerConfig(num_rounds=3),
-        strategy=Strategy(evaluate_fn=evaluate, initial_parameters=init_model.get_weights()),
+        strategy=Strategy(evaluate_fn=evaluate, initial_parameters=ndarrays_to_parameters(init_model.get_weights())),
     )
     assert (hist.losses_distributed[0][1] / hist.losses_distributed[-1][1]) > 0.98
