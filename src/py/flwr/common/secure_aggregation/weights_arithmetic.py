@@ -48,32 +48,34 @@ def weights_zero_generate(
 
 
 def weights_addition(
-    a: List[NDArray[Any]], b: List[NDArray[Any]]
+    weight1: List[NDArray[Any]], weight2: List[NDArray[Any]]
 ) -> List[NDArray[Any]]:
     """Add two weights."""
-    return [a[idx] + b[idx] for idx in range(len(a))]
+    return [weight1[idx] + weight2[idx] for idx in range(len(weight1))]
 
 
 def weights_subtraction(
-    a: List[NDArray[Any]], b: List[NDArray[Any]]
+    weight1: List[NDArray[Any]], weight2: List[NDArray[Any]]
 ) -> List[NDArray[Any]]:
-    """Subtract one weight from the other."""
-    return [a[idx] - b[idx] for idx in range(len(a))]
+    """Subtract weights from the other weights."""
+    return [weight1[idx] - weight2[idx] for idx in range(len(weight1))]
 
 
-def weights_mod(a: List[NDArray[Any]], b: int) -> List[NDArray[Any]]:
-    """Take mod of a weights with an integer."""
-    if bin(b).count("1") == 1:
-        msk = b - 1
-        return [a[idx] & msk for idx in range(len(a))]
-    return [a[idx] % b for idx in range(len(a))]
+def weights_mod(weight: List[NDArray[Any]], divisor: int) -> List[NDArray[Any]]:
+    """Take mod of weights with an integer divisor."""
+    if bin(divisor).count("1") == 1:
+        msk = divisor - 1
+        return [weight[idx] & msk for idx in range(len(weight))]
+    return [weight[idx] % divisor for idx in range(len(weight))]
 
 
-def weights_multiply(a: List[NDArray[Any]], b: int) -> List[NDArray[Any]]:
-    """Multiply weight by an integer."""
-    return [a[idx] * b for idx in range(len(a))]
+def weights_multiply(
+    weights: List[NDArray[Any]], multiplier: int
+) -> List[NDArray[Any]]:
+    """Multiply weights by an integer multiplier."""
+    return [weights[idx] * multiplier for idx in range(len(weights))]
 
 
-def weights_divide(a: List[NDArray[Any]], b: int) -> List[NDArray[Any]]:
-    """Divide weight by an integer."""
-    return [a[idx] / b for idx in range(len(a))]
+def weights_divide(weights: List[NDArray[Any]], divisor: int) -> List[NDArray[Any]]:
+    """Divide weight by an integer divisor."""
+    return [weights[idx] / divisor for idx in range(len(weights))]

@@ -28,70 +28,73 @@ def generate_key_pairs() -> (
     Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
 ):
     """Generate private and public key pairs with Cryptography."""
-    sk = ec.generate_private_key(ec.SECP384R1())
-    pk = sk.public_key()
-    return sk, pk
+    private_key = ec.generate_private_key(ec.SECP384R1())
+    public_key = private_key.public_key()
+    return private_key, public_key
 
 
-def private_key_to_bytes(sk: ec.EllipticCurvePrivateKey) -> bytes:
+def private_key_to_bytes(private_key: ec.EllipticCurvePrivateKey) -> bytes:
     """Serialize private key to bytes."""
-    return sk.private_bytes(
+    return private_key.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,
         encryption_algorithm=serialization.NoEncryption(),
     )
 
 
-def bytes_to_private_key(b: bytes) -> ec.EllipticCurvePrivateKey:
+def bytes_to_private_key(private_key_bytes: bytes) -> ec.EllipticCurvePrivateKey:
     """Deserialize private key from bytes."""
     return cast(
         ec.EllipticCurvePrivateKey,
-        serialization.load_pem_private_key(data=b, password=None),
+        serialization.load_pem_private_key(data=private_key_bytes, password=None),
     )
 
 
-def public_key_to_bytes(pk: ec.EllipticCurvePublicKey) -> bytes:
+def public_key_to_bytes(public_key: ec.EllipticCurvePublicKey) -> bytes:
     """Serialize public key to bytes."""
-    return pk.public_bytes(
+    return public_key.public_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PublicFormat.SubjectPublicKeyInfo,
     )
 
 
-def bytes_to_public_key(b: bytes) -> ec.EllipticCurvePublicKey:
+def bytes_to_public_key(public_key_bytes: bytes) -> ec.EllipticCurvePublicKey:
     """Deserialize public key from bytes."""
-    return cast(ec.EllipticCurvePublicKey, serialization.load_pem_public_key(data=b))
+    return cast(
+        ec.EllipticCurvePublicKey,
+        serialization.load_pem_public_key(data=public_key_bytes),
+    )
 
 
 def generate_shared_key(
-    sk: ec.EllipticCurvePrivateKey, pk: ec.EllipticCurvePublicKey
+    private_key: ec.EllipticCurvePrivateKey, public_key: ec.EllipticCurvePublicKey
 ) -> bytes:
-    """Generate a shared key from a secret key and a public key.
+    """Generate a shared key from a private key (i.e., a secret key) and a public key.
 
     Generate shared key by exchange function and key derivation function Key derivation
     function is needed to obtain final shared key of exactly 32 bytes
     """
     # Generate a 32 byte urlsafe(for fernet) shared key
     # from own private key and another public key
-    sharedk = sk.exchange(ec.ECDH(), pk)
-    derivedk = HKDF(
+    shared_key = private_key.exchange(ec.ECDH(), public_key)
+    derived_key = HKDF(
         algorithm=hashes.SHA256(),
         length=32,
         salt=None,
         info=None,
-    ).derive(sharedk)
-    return base64.urlsafe_b64encode(derivedk)
+    ).derive(shared_key)
+    return base64.urlsafe_b64encode(derived_key)
 
 
 def encrypt(key: bytes, plaintext: bytes) -> bytes:
     """Encrypt plaintext using 32-byte key with Fernet."""
     # key must be url safe
-    f = Fernet(key)
-    return f.encrypt(plaintext)
+    fernet = Fernet(key)
+    return fernet.encrypt(plaintext)
 
 
-def decrypt(key: bytes, token: bytes) -> bytes:
+def decrypt(key: bytes, ciphertext: bytes) -> bytes:
     """Decrypt ciphertext using 32-byte key with Fernet."""
     # key must be url safe
-    f = Fernet(key)
-    return f.decrypt(token)
+    fernet = Fernet(key)
+    return fernet.decrypt(ciphertext)

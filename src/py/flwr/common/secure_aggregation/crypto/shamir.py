@@ -17,7 +17,7 @@
 
 import pickle
 from concurrent.futures import ThreadPoolExecutor
-from typing import List, Tuple
+from typing import List, Tuple, cast
 
 from Crypto.Protocol.SecretSharing import Shamir
 from Crypto.Util.Padding import pad, unpad
@@ -50,17 +50,17 @@ def _shamir_split(threshold: int, num: int, chunk: bytes) -> List[Tuple[int, byt
 # Reconstructing secret with PyCryptodome
 def combine_shares(share_list: List[bytes]) -> bytes:
     """Reconstruct secret from shares."""
-    # print("receive", [len(i) for i in share_list])
-    for idx, share in enumerate(share_list):
-        share_list[idx] = pickle.loads(share)
+    unpickled_share_list: List[List[Tuple[int, bytes]]] = [
+        cast(List[Tuple[int, bytes]], pickle.loads(share)) for share in share_list
+    ]
 
-    chunk_num = len(share_list[0])
+    chunk_num = len(unpickled_share_list[0])
     secret_padded = bytearray(0)
-    chunk_shares_list = []
+    chunk_shares_list: List[List[Tuple[int, bytes]]] = []
     for i in range(chunk_num):
-        chunk_shares = []
-        for j in range(len(share_list)):
-            chunk_shares.append(share_list[j][i])
+        chunk_shares: List[Tuple[int, bytes]] = []
+        for share in unpickled_share_list:
+            chunk_shares.append(share[i])
         chunk_shares_list.append(chunk_shares)
 
     with ThreadPoolExecutor(max_workers=10) as executor:

@@ -15,7 +15,7 @@
 """Message Handler for Secure Aggregation (abstract base class)."""
 
 
-from abc import ABC
+from abc import ABC, abstractmethod
 
 from flwr.common.typing import SecureAggregation
 
@@ -23,6 +23,8 @@ from flwr.common.typing import SecureAggregation
 class SecureAggregationHandler(ABC):
     """Abstract base class for secure aggregation message handlers."""
 
+    @abstractmethod
+    # pylint: disable-next=invalid-name
     def handle_secure_aggregation(self, sa: SecureAggregation) -> SecureAggregation:
         """Handle incoming Secure Aggregation message and return results.
 
@@ -35,6 +37,5 @@ class SecureAggregationHandler(ABC):
         Returns
         -------
         SecureAggregation
-            The final/intermediate results of Secure Aggregation.
+            The final/intermediate results of the Secure Aggregation protocol.
         """
-        ...

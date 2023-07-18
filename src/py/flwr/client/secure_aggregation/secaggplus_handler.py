@@ -13,6 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Message handler for the SecAgg+ protocol."""
+# pylint: disable=invalid-name
 
 
 import os
@@ -56,15 +57,16 @@ _stages = ["setup", "share keys", "collect masked input", "unmasking"]
 
 
 @dataclass
+# pylint: disable-next=too-many-instance-attributes
 class _State:
-    sample_num: int = -1
-    sid: int = -1
-    share_num: int = -1
-    threshold: int = -1
+    sample_num: int = 0
+    sid: int = 0
+    share_num: int = 0
+    threshold: int = 0
     drop_flag: bool = False
     clipping_range: float = 0.0
-    target_range: int = -1
-    mod_range: int = -1
+    target_range: int = 0
+    mod_range: int = 0
     b_share_dict: Dict[int, bytes] = field(default_factory=dict)
     sk1_share_dict: Dict[int, bytes] = field(default_factory=dict)
     shared_key_2_dict: Dict[int, bytes] = field(default_factory=dict)
@@ -127,7 +129,7 @@ def _setup(state: _State, sa: SecureAggregation) -> SecureAggregation:
     state.sample_num = cast(int, sec_agg_param_dict["share_num"])
     state.sid = cast(int, sec_agg_param_dict["secure_id"])
     # self.sec_agg_id = sec_agg_param_dict["secure_id"]
-    log(INFO, f"Client {state.sid}: starting stage 0...")
+    log(INFO, "Client %d: starting stage 0...", state.sid)
 
     state.share_num = cast(int, sec_agg_param_dict["share_num"])
     state.threshold = cast(int, sec_agg_param_dict["threshold"])
@@ -149,14 +151,15 @@ def _setup(state: _State, sa: SecureAggregation) -> SecureAggregation:
 
     state.sk1, state.pk1 = private_key_to_bytes(sk1), public_key_to_bytes(pk1)
     state.sk2, state.pk2 = private_key_to_bytes(sk2), public_key_to_bytes(pk2)
-    log(INFO, f"Client {state.sid}: stage 0 completes. uploading public keys...")
+    log(INFO, "Client %d: stage 0 completes. uploading public keys...", state.sid)
     return SecureAggregation(named_values={"pk1": state.pk1, "pk2": state.pk2})
 
 
+# pylint: disable-next=too-many-locals
 def _share_keys(state: _State, sa: SecureAggregation) -> SecureAggregation:
     named_values = cast(Dict[str, Tuple[bytes, bytes]], sa.named_values)
     key_dict = {int(sid): (pk1, pk2) for sid, (pk1, pk2) in named_values.items()}
-    log(INFO, f"Client {state.sid}: starting stage 1...")
+    log(INFO, "Client %d: starting stage 1...", state.sid)
     # Distribute shares for private mask seed and first private key
     # share_keys_dict:
     state.public_keys_dict = key_dict
@@ -166,9 +169,9 @@ def _share_keys(state: _State, sa: SecureAggregation) -> SecureAggregation:
 
     # check if all public keys received are unique
     pk_list: List[bytes] = []
-    for i in state.public_keys_dict.values():
-        pk_list.append(i[0])
-        pk_list.append(i[1])
+    for pk1, pk2 in state.public_keys_dict.values():
+        pk_list.append(pk1)
+        pk_list.append(pk2)
     if len(set(pk_list)) != len(pk_list):
         raise Exception("Some public keys are identical")
 
@@ -190,31 +193,31 @@ def _share_keys(state: _State, sa: SecureAggregation) -> SecureAggregation:
 
     srcs, dsts, ciphertexts = [], [], []
 
-    for idx, p in enumerate(state.public_keys_dict.items()):
-        client_sid, client_public_keys = p
-        if client_sid == state.sid:
+    for idx, (sid, (_, pk2)) in enumerate(state.public_keys_dict.items()):
+        if sid == state.sid:
             state.b_share_dict[state.sid] = b_shares[idx]
             state.sk1_share_dict[state.sid] = sk1_shares[idx]
         else:
             shared_key = generate_shared_key(
                 bytes_to_private_key(state.sk2),
-                bytes_to_public_key(client_public_keys[1]),
+                bytes_to_public_key(pk2),
             )
-            state.shared_key_2_dict[client_sid] = shared_key
+            state.shared_key_2_dict[sid] = shared_key
             plaintext = share_keys_plaintext_concat(
-                state.sid, client_sid, b_shares[idx], sk1_shares[idx]
+                state.sid, sid, b_shares[idx], sk1_shares[idx]
             )
             ciphertext = encrypt(shared_key, plaintext)
             srcs.append(state.sid)
-            dsts.append(client_sid)
+            dsts.append(sid)
             ciphertexts.append(ciphertext)
 
-    log(INFO, f"Client {state.sid}: stage 1 completes. uploading key shares...")
+    log(INFO, "Client %d: stage 1 completes. uploading key shares...", state.sid)
     return SecureAggregation(named_values={"dsts": dsts, "ciphertexts": ciphertexts})
 
 
+# pylint: disable-next=too-many-locals
 def _collect_masked_input(state: _State, sa: SecureAggregation) -> SecureAggregation:
-    log(INFO, f"Client {state.sid}: starting stage 2...")
+    log(INFO, "Client %d: starting stage 2...", state.sid)
     # Receive shares and fit model
     available_clients: List[int] = []
     ciphertexts = cast(List[bytes], sa.named_values["ciphertexts"])
@@ -280,7 +283,7 @@ def _collect_masked_input(state: _State, sa: SecureAggregation) -> SecureAggrega
     # Take mod of final weight update vector and return to server
     quantized_weights = weights_mod(quantized_weights, state.mod_range)
     # return ndarrays_to_parameters(quantized_weights)
-    log(INFO, f"Client {state.sid}: stage 2 completes. uploading masked weights...")
+    log(INFO, "Client %d: stage 2 completes. uploading masked weights...", state.sid)
     return SecureAggregation(
         named_values={
             "masked_weights": [ndarray_to_bytes(arr) for arr in quantized_weights]
@@ -289,6 +292,8 @@ def _collect_masked_input(state: _State, sa: SecureAggregation) -> SecureAggrega
 
 
 def _unmasking(state: _State, sa: SecureAggregation) -> SecureAggregation:
+    log(INFO, "Client %d: starting stage 3...", state.sid)
+
     active_sids = cast(List[int], sa.named_values["active_sids"])
     dead_sids = cast(List[int], sa.named_values["dead_sids"])
     # Send private mask seed share for every avaliable client (including itclient)
@@ -302,4 +307,5 @@ def _unmasking(state: _State, sa: SecureAggregation) -> SecureAggregation:
     sids += dead_sids
     shares += [state.sk1_share_dict[sid] for sid in dead_sids]
 
+    log(INFO, "Client %d: stage 3 completes. uploading key shares...", state.sid)
     return SecureAggregation(named_values={"sids": sids, "shares": shares})

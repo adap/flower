@@ -65,6 +65,7 @@ def handle(client: Client, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
         if task_ins.task.HasField("sa") and isinstance(
             client, SecureAggregationHandler
         ):
+            # pylint: disable-next=invalid-name
             sa = serde.secagg_msg_from_proto(task_ins.task.sa)
             res_sa = client.handle_secure_aggregation(sa)
             task_res = TaskRes(
