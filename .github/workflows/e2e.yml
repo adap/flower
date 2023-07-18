@@ -95,7 +95,7 @@ jobs:
 
   strategies:
     runs-on: ubuntu-22.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v3
       - name: Bootstrap
