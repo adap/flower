@@ -14,7 +14,7 @@ From a clean virtualenv or Conda environment with Python 3.7+, the following com
 $ pip install -r requirements.txt
 ```
 
-# How to run
+## How to run
 
 This example:
 

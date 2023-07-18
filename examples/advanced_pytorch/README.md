@@ -55,7 +55,7 @@ Write the command below in your terminal to install the dependencies according t
 pip install -r requirements.txt
 ```
 
-# Run Federated Learning with PyTorch and Flower
+## Run Federated Learning with PyTorch and Flower
 
 The included `run.sh` will start the Flower server (using `server.py`),
 sleep for 2 seconds to ensure that the server is up, and then start 10 Flower clients (using `client.py`) with only a small subset of the data (in order to run on any machine),

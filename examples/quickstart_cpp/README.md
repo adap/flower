@@ -2,7 +2,7 @@
 
 In this example you will train a linear model on synthetic data using C++ clients.
 
-# Acknowledgements
+## Acknowledgements
 
 Many thanks to the original contributors to this code:
 
@@ -10,7 +10,7 @@ Many thanks to the original contributors to this code:
 - Francisco José Solís (code re-organization)
 - Andreea Zaharia (training algorithm and data generation)
 
-# Install requirements
+## Install requirements
 
 You'll need CMake and Python.
 
@@ -23,7 +23,7 @@ cmake -S . -B build
 cmake --build build
 ```
 
-# Run the server and two clients in separate terminals
+## Run the server and two clients in separate terminals
 
 ```bash
 python server.py
