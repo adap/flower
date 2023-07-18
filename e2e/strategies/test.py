@@ -1,11 +1,11 @@
 import flwr as fl
 import tensorflow as tf
-from flwr.server.strategy import FedMedian, FedTrimmedAvg, QFedAvg, FedAvgM, FedAdam, FedAgagrad, FedYogi
+from flwr.server.strategy import FedMedian, FedTrimmedAvg, QFedAvg, FedAvgM, FedAdam, FedAdagrad, FedYogi
 
 from client import FlowerClient
 
 
-STRATEGY_LIST = [FedMedian, FedTrimmedAvg, QFedAvg, FedAvgM, FedAdam, FedAgagrad, FedYogi]
+STRATEGY_LIST = [FedMedian, FedTrimmedAvg, QFedAvg, FedAvgM, FedAdam, FedAdagrad, FedYogi]
 
 init_model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
 init_model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
