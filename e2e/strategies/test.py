@@ -1,12 +1,14 @@
 import flwr as fl
 import tensorflow as tf
-from flwr.server.strategy import FedMedian, FedTrimmedAvg, QFedAvg
+from flwr.server.strategy import FedMedian, FedTrimmedAvg, QFedAvg, FedAvgM, FedAdam, FedAgagrad, FedYogi
 
 from client import FlowerClient
 
 
-STRATEGY_LIST = [FedMedian, FedTrimmedAvg, QFedAvg]
+STRATEGY_LIST = [FedMedian, FedTrimmedAvg, QFedAvg, FedAvgM, FedAdam, FedAgagrad, FedYogi]
 
+init_model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
+init_model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
 
 def client_fn(cid):
     _ = cid
@@ -31,6 +33,6 @@ for Strategy in STRATEGY_LIST:
         client_fn=client_fn,
         num_clients=2,
         config=fl.server.ServerConfig(num_rounds=3),
-        strategy=Strategy(evaluate_fn=evaluate),
+        strategy=Strategy(evaluate_fn=evaluate, initial_parameters=init_model.get_weights()),
     )
     assert (hist.losses_distributed[0][1] / hist.losses_distributed[-1][1]) > 0.98
