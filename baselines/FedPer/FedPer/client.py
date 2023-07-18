@@ -4,25 +4,19 @@ Please overwrite `flwr.client.NumPyClient` or `flwr.client.Client` and create a 
 to instantiate your client.
 """
 
-from collections import OrderedDict
-from typing import Callable, Dict, List, Tuple
-
 import flwr as fl
+import torch
 import numpy as np
-import torch
-from flwr.common.typing import NDArrays, Scalar
-from hydra.utils import instantiate
-from omegaconf import DictConfig
-from torch.utils.data import DataLoader
-
-from FedPer.dataset import load_datasets
-from FedPer.models import test, train
-
-import copy
-import torch
 import torch.nn as nn
-import numpy as np
-import time
+
+from typing import Callable, Dict, List, Tuple, Union
+from omegaconf import DictConfig
+from collections import OrderedDict
+from hydra.utils import instantiate
+from FedPer.utils import ModelManager
+from FedPer.models import test, train
+from torch.utils.data import DataLoader
+from flwr.common.typing import NDArrays, Scalar
 
 class FlowerClient(
     fl.client.NumPyClient
@@ -80,15 +74,14 @@ class FlowerClient(
         # Set parameters
         self.set_parameters(parameters)
 
-        # Set number of epochs
-        num_epochs = self.num_epochs
+        self.model_manager.model.train()
 
         # Train model
         train(
             self.net,
             self.trainloader,
             self.device,
-            epochs=num_epochs,
+            epochs=self.num_epochs,
             learning_rate=self.learning_rate,
         )
 
@@ -102,31 +95,6 @@ class FlowerClient(
         loss, accuracy = test(self.net, self.valloader, self.device)
         return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
 
-def filter_cifar10(dataloader: DataLoader, num_classes: int) -> DataLoader:
-    """Filters out all classes except the first num_classes classes.
-
-    Parameters
-    ----------
-    dataloader : DataLoader
-        The dataloader to filter.
-    num_classes : int
-        The number of classes to keep.
-
-    Returns
-    -------
-    DataLoader
-        The filtered dataloader.
-    """
-    # Filter out all classes except the first num_classes classes
-    dataloader.dataset.targets = np.array(dataloader.dataset.targets)
-    print(dataloader.dataset.targets)
-    quit()
-    mask = np.isin(dataloader.dataset.targets, list(range(num_classes)))
-    dataloader.dataset.targets = dataloader.dataset.targets[mask].tolist()
-    dataloader.dataset.data = dataloader.dataset.data[mask].tolist()
-
-    return dataloader
-
 def gen_client_fn(
     num_clients: int,
     num_rounds: int,
@@ -135,8 +103,6 @@ def gen_client_fn(
     valloaders: List[DataLoader],
     learning_rate: float,
     model: DictConfig,
-    num_classes: int,
-    dataset_name : str
 ) -> Tuple[
     Callable[[str], FlowerClient], DataLoader
 ]:  # pylint: disable=too-many-arguments
@@ -162,10 +128,6 @@ def gen_client_fn(
         The learning rate for the SGD  optimizer of clients.
     model : DictConfig
         The model configuration.
-    num_classes : int
-        The number of classes in the dataset.
-    dataset_name : str 
-        The name of the dataset.
 
     Returns
     -------
@@ -185,14 +147,6 @@ def gen_client_fn(
         # will train and evaluate on their own unique data
         trainloader = trainloaders[int(cid)]
         valloader = valloaders[int(cid)]
-
-        if dataset_name == 'cifar10':
-            if num_classes != 10:
-                # only include num_classes classes in the training and validation set
-                trainloader = filter_cifar10(trainloader, num_classes)
-                valloader = filter_cifar10(valloader, num_classes)
-        else:
-            raise NotImplementedError(f"Dataset {dataset_name} not implemented")
 
         return FlowerClient(
             net,

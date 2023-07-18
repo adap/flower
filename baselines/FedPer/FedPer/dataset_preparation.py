@@ -159,23 +159,24 @@ def _partition_data(
             j = 1
             if i  == num_clients - 1:
                 missing_labels = [i for i in range(total_num_classes) if times[i] == 0]
-                for k in range(len(missing_labels)):
-                    current.append(missing_labels)
-                    times[missing_labels] += 1
-                if len(missing_labels) != num_classes:
-                    remaining_num_labels = num_classes - len(missing_labels)
-                    # ind is a value between 0 and total_num_classes-1, excluding missing values
-                    ind = random.sample([i for i in range(total_num_classes) if i not in missing_labels], remaining_num_labels)
-                    print("ind: ", ind)
-                    print("Missing labels: ", missing_labels)
-                    print("times: ", times)
-                    print("current: ", current)
-                
-                    quit()
-                    for k in range(remaining_num_labels):
-                        current.append(ind[k])
-                        times[ind[k]] += 1
-            else:        
+                print("missing_labels: ", missing_labels)
+                if len(missing_labels) == num_classes:
+                    current = missing_labels
+                elif len(missing_labels) != 0:
+                    for k in missing_labels:
+                        current.append(k)
+                        times[k] += 1
+                    if len(missing_labels) != num_classes:
+                        remaining_num_labels = num_classes - len(current)
+                        # ind is a value between 0 and total_num_classes-1, excluding missing values
+                        if remaining_num_labels > 0:
+                            ind = random.sample([i for i in range(total_num_classes) if i not in missing_labels], remaining_num_labels)
+                            for k in range(remaining_num_labels):
+                                current.append(ind[k])
+                                times[ind[k]] += 1
+                else:
+                    pass      
+            else:       
                 while (j < num_classes):             
                     ind = random.randint(0, total_num_classes-1)
                     if (ind not in current):
@@ -186,14 +187,13 @@ def _partition_data(
             contain.append(current)
             print("Client {} contains classes: {}".format(i, current))
         print("times: ", times)
-        quit()
+
         net_dataidx_map = {i:np.ndarray(0, dtype=np.int32) for i in range(num_clients)}
         for i in range(total_num_classes):
-            idx_k = np.where(trainset.targets == i)[0]
+            idx_k = np.where(np.array(trainset.targets) == i)[0]
             print("Class {} has {} samples".format(i, len(idx_k)))
             np.random.shuffle(idx_k)
             split = np.array_split(idx_k, times[i])
-            print("Split {} into {} parts".format(i, times[i]))
             ids=0
             for j in range(num_clients):
                 if i in contain[j]:
@@ -202,6 +202,11 @@ def _partition_data(
         datasets = []
         for i in range(num_clients):
             datasets.append(Subset(trainset, net_dataidx_map[i]))
+
+    print("Number of samples in each client:")
+    for i in range(num_clients):
+        print("Client {} has {} samples".format(i, len(datasets[i])))
+    print("Number of samples in test set: {}".format(len(testset)))
 
     return datasets, testset
 

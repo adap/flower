@@ -55,8 +55,6 @@ def load_datasets(  # pylint: disable=too-many-arguments
         num_classes = config.num_classes,
         seed=seed,
     )
-    print("Datasets: ", datasets)
-    quit()
 
     # Split each partition into train/val and create DataLoader
     trainloaders = []

@@ -1,18 +1,16 @@
-"""Define any utility function.
-
-They are not directly relevant to  the other (more FL specific) python modules. For
-example, you may define here things like: loading a model from a checkpoint, saving
-results, plotting.
 """
-"""Contains utility functions for CNN FL on MNIST."""
+Utility functions
+"""
 
+""" FIRST PART INCLUDES VISUALIZATION FUNCTIONS """
+
+import numpy as np
 import pickle
+
 from pathlib import Path
 from secrets import token_hex
 from typing import Dict, Optional, Union
-
-import matplotlib.pyplot as plt
-import numpy as np
+from matplotlib import pyplot as plt
 from flwr.server.history import History
 
 
@@ -33,11 +31,7 @@ def plot_metric_from_history(
         Optional string to add at the end of the filename for the plot.
     """
     metric_type = "centralized"
-    metric_dict = (
-        hist.metrics_centralized
-        if metric_type == "centralized"
-        else hist.metrics_distributed
-    )
+    metric_dict = (hist.metrics_centralized if metric_type == "centralized" else hist.metrics_distributed)
     rounds, values = zip(*metric_dict["accuracy"])
 
     # let's extract centralised loss (main metric reported in FedProx paper)
@@ -56,7 +50,6 @@ def plot_metric_from_history(
 
     plt.savefig(Path(save_plot_path) / Path(f"{metric_type}_metrics{suffix}.png"))
     plt.close()
-
 
 def save_results_as_pickle(
     history: History,
@@ -102,17 +95,12 @@ def save_results_as_pickle(
         print("Using default filename")
         return path_ / default_filename
 
-    if path.is_dir():
-        path = _complete_path_with_default_name(path)
+    if path.is_dir(): path = _complete_path_with_default_name(path)
 
-    if path.is_file():
-        # file exists already
-        path = _add_random_suffix(path)
+    if path.is_file(): path = _add_random_suffix(path)
 
     print(f"Results will be saved into: {path}")
-
     data = {"history": history, **extra_results}
-
     # save results to pickle
     with open(str(path), "wb") as handle:
         pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
@@ -125,6 +113,13 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import torch.nn as nn
 from torch import Tensor
+
+
+
+
+
+
+
 
 
 class ModelSplit(ABC, nn.Module):
@@ -288,7 +283,6 @@ class ModelManager(ABC):
     def __init__(
             self,
             client_id: int,
-            config: Dict[str, Any],
             model_split_class: Type[ModelSplit],
             has_fixed_head: bool = False
     ):
@@ -305,7 +299,7 @@ class ModelManager(ABC):
         super().__init__()
 
         self.client_id = client_id
-        self.config = config
+        # self.config = config
         self._model = model_split_class(self._create_model(), has_fixed_head)
 
     @abstractmethod
