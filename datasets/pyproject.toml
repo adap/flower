@@ -22,7 +22,7 @@ keywords = [
     "dataset",
 ]
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
+    "Development Status :: 1 - Planning",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: Apache Software License",
@@ -31,7 +31,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -53,20 +52,20 @@ exclude = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 numpy = "^1.21.0"
 
 [tool.poetry.dev-dependencies]
 isort = "==5.11.5"
-black = "==23.1.0"
-docformatter = "==1.5.1"
-mypy = "==0.961"
-pylint = "==2.8.2"
+black = { version = "==23.3.0", extras = ["jupyter"] }
+docformatter = "==1.7.1"
+mypy = "==1.4.0"
+pylint = "==2.13.9"
 flake8 = "==3.9.2"
-pytest = "==6.2.4"
+pytest = "==7.1.2"
 pytest-watch = "==4.2.0"
-ruff = "==0.0.272"
-types-requests = "==2.27.7"
+ruff = "==0.0.277"
+types-requests = "==2.28.11.17"
 
 [tool.isort]
 line_length = 88
@@ -75,11 +74,11 @@ multi_line_output = 3
 include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true
-known_first_party = ["flwr", "flwr_experimental", "flwr_tool"]
+known_first_party = ["flwr_datasets"]
 
 [tool.black]
 line-length = 88
-target-version = ["py37", "py38", "py39", "py310", "py311"]
+target-version = ["py38", "py39", "py310", "py311"]
 
 [tool.pylint."MESSAGES CONTROL"]
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
