@@ -41,7 +41,7 @@ for Strategy in STRATEGY_LIST:
             initial_parameters=ndarrays_to_parameters(init_model.get_weights()),
         ),
     )
-    assert (hist.losses_distributed[0][1] / hist.losses_distributed[-1][1]) >= 0.96
+    assert (hist.metrics_centralized[0][1] / hist.metrics_centralized[-1][1]) <= 1.04
 
 for Strategy in OPT_STRATEGY_LIST:
     print("Current strategy:", str(Strategy))
@@ -55,4 +55,4 @@ for Strategy in OPT_STRATEGY_LIST:
             tau=0.01,
         ),
     )
-    assert (hist.losses_distributed[0][1] / hist.losses_distributed[-1][1]) >= 0.96
+    assert (hist.metrics_centralized[0][1] / hist.metrics_centralized[-1][1]) <= 1.04
