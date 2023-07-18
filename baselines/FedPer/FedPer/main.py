@@ -38,7 +38,6 @@ def main(cfg: DictConfig) -> None:
         config=cfg.dataset,
         num_clients=cfg.num_clients,
     )
-    quit()
 
     # 3. Define your clients
     # Define a function that returns another function that will be used during
