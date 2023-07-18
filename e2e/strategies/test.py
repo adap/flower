@@ -21,7 +21,7 @@ def evaluate(server_round, parameters, config):
 
     model.set_weights(parameters)
 
-    loss, accuracy = model.test(x_test, y_test)
+    loss, accuracy = model.evaluate(x_test, y_test)
 
     # return statistics
     return loss, {"accuracy": accuracy}
