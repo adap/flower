@@ -30,6 +30,7 @@ def evaluate(server_round, parameters, config):
     return loss, {"accuracy": accuracy}
 
 for Strategy in STRATEGY_LIST:
+    print("Current strategy:", str(Strategy))
     hist = fl.simulation.start_simulation(
         client_fn=client_fn,
         num_clients=2,

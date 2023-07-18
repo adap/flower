@@ -23,12 +23,12 @@ class FlowerClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         model.set_weights(parameters)
-        model.fit(x_train, y_train, epochs=1, batch_size=32)
+        model.fit(x_train, y_train, epochs=1, batch_size=32, verbose=0)
         return model.get_weights(), len(x_train), {}
 
     def evaluate(self, parameters, config):
         model.set_weights(parameters)
-        loss, accuracy = model.evaluate(x_test, y_test)
+        loss, accuracy = model.evaluate(x_test, y_test, verbose=0)
         return loss, len(x_test), {"accuracy": accuracy}
 
 
