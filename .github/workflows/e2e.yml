@@ -12,7 +12,7 @@ env:
   FLWR_TELEMETRY_ENABLED: 0
 
 jobs:
-  e2e:
+  frameworks:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     # Using approach described here:
@@ -92,3 +92,27 @@ jobs:
         run: ./test.sh
       - name: Run virtual client test 
         run: python simulation.py
+
+  strategies:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Install dependencies
+        run: |
+          cd e2e/strategies
+          python -m poetry install
+      - name: Cache Datasets
+        uses: actions/cache@v2
+        with:
+          path: "~/.keras"
+          key: keras-datasets
+      - name: Download Datasets
+        run: |
+          python -c "import tensorflow as tf; tf.keras.datasets.cifar10.load_data()"
+      - name: Test strategies
+        run: |
+          cd e2e/strategies
+          python test.py
