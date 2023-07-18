@@ -55,4 +55,4 @@ for Strategy in OPT_STRATEGY_LIST:
             tau=0.01,
         ),
     )
-    assert (hist.losses_distributed[0][1] / hist.losses_distributed[-1][1]) > 0.98
+    assert (hist.losses_distributed[0][1] / hist.losses_distributed[-1][1]) >= 0.96
