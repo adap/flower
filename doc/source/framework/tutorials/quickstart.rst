@@ -15,3 +15,4 @@ Quickstart examples
    quickstart/quickstart-scikitlearn
    quickstart/quickstart-xgboost
    quickstart/quickstart-ios
+   quickstart/quickstart-android
