@@ -42,7 +42,7 @@ Write the command below in your terminal to install the dependencies according t
 pip install -r requirements.txt
 ```
 
-# Run Federated Learning on Android Devices
+## Run Federated Learning on Android Devices
 
 The included `run.sh` will start the Flower server (using `server.py`). You can simply start it in a terminal as follows:
 
