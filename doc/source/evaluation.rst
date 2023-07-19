@@ -174,4 +174,4 @@ Model parameters can also be evaluated during training. :code:`Client.fit` can r
 Full Code Example
 -----------------
 
-For a full code example that uses both centralized and federated evaluation, see the *Advanced TensorFlow Example* (the same approach can be applied to workloads implemented in any other framework): https://github.com/adap/flower/tree/main/examples/advanced_tensorflow
+For a full code example that uses both centralized and federated evaluation, see the *Advanced TensorFlow Example* (the same approach can be applied to workloads implemented in any other framework): https://github.com/adap/flower/tree/main/examples/advanced-tensorflow

@@ -1,3 +1,0 @@
-flwr>=1.0, <2.0
-pytorch_lightning>=1.4.7
-torchvision==0.13.0
