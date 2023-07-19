@@ -43,7 +43,7 @@ strat_args = {
 
 start_idx, strategy = get_strat(strat)
 
-if start_idx >= 4:
+if start_idx >= OPT_IDX:
     strat_args["tau"] = 0.01
 
 hist = fl.simulation.start_simulation(
