@@ -18,7 +18,7 @@ git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/qui
 
 This will create a new directory called `quickstart_simulation` containing the following files:
 
-```shell
+```
 -- README.md       <- Your're reading this right now
 -- sim.ipynb       <- Example notebook
 -- sim.py          <- Example code
