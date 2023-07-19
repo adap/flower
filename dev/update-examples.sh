@@ -8,8 +8,10 @@ INSERT_LINE=6
 
 sed -i.bu '7,$d' $INDEX
 
+rm -f "examples/doc/source/*.md"
+
 cd examples/
-for d in */ ; do
+for d in $(printf '%s\n' */ | sort -V); do
   example=${d%/}
   [[ $example = doc ]] || cp $example/README.md $ROOT/examples/doc/source/$example.md 2>&1 >/dev/null
   [[ $example = doc ]] || (echo $INSERT_LINE; echo a; echo $example; echo .; echo wq) | ed $INDEX 2>&1 >/dev/null
