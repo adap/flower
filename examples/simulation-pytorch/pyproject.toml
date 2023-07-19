@@ -12,4 +12,4 @@ authors = ["The Flower Authors <hello@flower.dev>"]
 python = ">=3.8,<3.11"
 flwr = {version = ">=1.0,<2.0", extras = ["simulation"]}
 torch = "1.13.1"
-torchvision = "0.13.0"
+torchvision = "0.14.1"
