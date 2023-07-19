@@ -15,7 +15,7 @@
 """(De-)serialization tests."""
 
 
-from typing import Union, cast
+from typing import Dict, Union, cast
 
 from flwr.common import typing
 from flwr.proto import transport_pb2 as pb2
@@ -23,8 +23,12 @@ from flwr.proto import transport_pb2 as pb2
 from .serde import (
     scalar_from_proto,
     scalar_to_proto,
+    secagg_msg_from_proto,
+    secagg_msg_to_proto,
     status_from_proto,
     status_to_proto,
+    value_from_proto,
+    value_to_proto,
 )
 
 
@@ -73,3 +77,84 @@ def test_status_from_proto() -> None:
 
     # Assert
     assert actual_status == status
+
+
+def test_value_serialization_deserialization() -> None:
+    """Test if values are identical after (de-)serialization."""
+    # Prepare
+    values = [
+        # boolean scalar and list
+        True,
+        [True, False, False, True],
+        # bytes scalar and list
+        b"test \x01\x02\x03 !@#$%^&*()",
+        [b"\x0a\x0b", b"\x0c\x0d\x0e", b"\x0f"],
+        # float scalar and list
+        3.14,
+        [2.714, -0.012],
+        # integer scalar and list
+        23,
+        [123456],
+        # string scalar and list
+        "abcdefghijklmnopqrstuvwxy",
+        ["456hgdhfd", "1234567890123456789012345678901", "I'm a string."],
+    ]
+
+    for value in values:
+        # Execute
+        serialized = value_to_proto(cast(typing.Value, value))
+        deserialized = value_from_proto(serialized)
+
+        # Assert
+        if isinstance(value, list):
+            assert isinstance(deserialized, list)
+            assert len(value) == len(deserialized)
+            for elm1, elm2 in zip(value, deserialized):
+                assert elm1 == elm2
+        else:
+            assert value == deserialized
+
+
+def test_secure_aggregation_serialization_deserialization() -> None:
+    """Test if Secure Aggregation message is identical after (de-)serialization."""
+    # Prepare
+    values = [
+        # boolean scalar and list
+        True,
+        [True, False, False, True],
+        # bytes scalar and list
+        b"test \x01\x02\x03 !@#$%^&*()",
+        [b"\x0a\x0b", b"\x0c\x0d\x0e", b"\x0f"],
+        # float scalar and list
+        3.14,
+        [2.714, -0.012],
+        # integer scalar and list
+        23,
+        [123456],
+        # string scalar and list
+        "abcdefghijklmnopqrstuvwxy",
+        ["456hgdhfd", "1234567890123456789012345678901", "I'm a string."],
+    ]
+    named_values = {f"value {i}": value for i, value in enumerate(values)}
+
+    # Execute
+    serialized = secagg_msg_to_proto(
+        typing.SecureAggregation(
+            named_values=cast(Dict[str, typing.Value], named_values)
+        )
+    )
+    deserialized = secagg_msg_from_proto(serialized)
+    deserialized_named_values = deserialized.named_values
+
+    # Assert
+    assert len(named_values) == len(deserialized_named_values)
+    for name in named_values:
+        expected = named_values[name]
+        actual = deserialized_named_values[name]
+        if isinstance(expected, list):
+            assert isinstance(actual, list)
+            assert len(expected) == len(actual)
+            for elm1, elm2 in zip(expected, actual):
+                assert elm1 == elm2
+        else:
+            assert expected == actual

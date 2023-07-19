@@ -486,7 +486,7 @@ def scalar_from_proto(scalar_msg: Scalar) -> typing.Scalar:
     return cast(typing.Scalar, scalar)
 
 
-# === SecureAggregation messages ===
+# === Value messages ===
 
 
 __python_type_to_field_name = {
@@ -551,6 +551,9 @@ def value_from_proto(value_msg: Value) -> typing.Value:
     else:
         value = getattr(value_msg, value_field)
     return cast(typing.Value, value)
+
+
+# === SecureAggregation messages ===
 
 
 def secagg_msg_to_proto(
