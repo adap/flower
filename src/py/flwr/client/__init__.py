@@ -22,6 +22,9 @@ from .app import start_numpy_client as start_numpy_client
 from .app import to_client as to_client
 from .client import Client as Client
 from .numpy_client import NumPyClient as NumPyClient
+from .state import ClientState as ClientState
+from .state import InMemoryClientState as InMemoryClientState
+from .state import InFileSystemClientState as InFileSystemClientState
 
 __all__ = [
     "Client",
@@ -31,4 +34,7 @@ __all__ = [
     "start_client",
     "start_numpy_client",
     "to_client",
+    "ClientState",
+    "InMemoryClientState",
+    "InFileSystemClientState",
 ]
