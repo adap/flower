@@ -53,6 +53,11 @@ class ClientState(ABC):
 class InMemoryClientState(ClientState):
     _state: Dict[str, Any] = {}
 
+    # TODO: this type of state is intended for those settings were client want to preserve some of their info across rounds
+    # but that do now want to save anything to disk (#!!! not even at the end of the experiment). How do we warn users about this?
+    # Should we instead design a flag to save to disk at the end? if so, there is too much overlap between InMemoryClientState and 
+    # InFileSystemClientState
+
     def __init__(self):
         super().__init__()
 
@@ -67,34 +72,37 @@ class InMemoryClientState(ClientState):
         self._state = state
 
 
-class InFileSystemClientState(InMemoryClientState):
+class InFileSystemClientState(ClientState):
+    _state: Dict[str, Any] = {}
+
     def __init__(
         self,
-        state_dir: str,
-        state_filename: str = "state",
+        state_filename: str = "client_state",
         keep_in_memory: bool = True,
-        create_directory: bool = True,
     ):
-        super().__init__()
         self.state_filename = state_filename
-        self.path = Path(state_dir)
         self.keep_in_memory = keep_in_memory
-        self.setup(create_directory)
+        self.path = None # to be setup upon setup() call
 
-    def setup(self, create_directory: bool) -> None:
+    def setup(self, state_dir: str, create_directory: bool) -> None:
         """Initialize state by loading it from disk if exists.
 
         Else, create file directory structure and init an empty state.
         """
+        self.path = Path(state_dir)
         if self.path.exists():
             # load state
             self._load_state()
         else:
+            # state is empty
+            self._state = {}
+
             if create_directory:
                 log(
                     DEBUG, f"Creating directory for client state: {self.path.resolve()}"
                 )
                 self.path.mkdir(parents=True)
+                self._write_state()
             else:
                 log(
                     WARNING,
@@ -108,12 +116,16 @@ class InFileSystemClientState(InMemoryClientState):
                 )
                 # TODO: dynamically revert to InMemoryClientState type?
 
+
     def _load_state(self):
         """Load client state from pickle."""
         state_file = self.path / f"{self.state_filename}.pkl"
-        with open(state_file, "rb") as handle:
-            state = pickle.load(handle)
+        if self.path.exists():
+            with open(state_file, "rb") as handle:
+                state = pickle.load(handle)
 
+        # update state (but don't write to disk since we
+        # just read from it)
         self.update(state, to_disk=False)
 
     def _write_state(self) -> bool:
