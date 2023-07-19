@@ -1,7 +1,7 @@
 from sys import argv
 
 import tensorflow as tf
-from client import SUBSET_SIZE, FlowerClient
+from client import SUBSET_SIZE, FlowerClient, get_model
 
 import flwr as fl
 from flwr.common import ndarrays_to_parameters
@@ -39,8 +39,7 @@ def get_strat(name):
     ][0]
 
 
-init_model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
-init_model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+init_model = get_model()
 
 
 def client_fn(cid):
@@ -49,8 +48,7 @@ def client_fn(cid):
 
 
 def evaluate(server_round, parameters, config):
-    model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
-    model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+    model = get_model()
 
     _, (x_test, y_test) = tf.keras.datasets.mnist.load_data()
     x_test, y_test = x_test[:SUBSET_SIZE], y_test[:SUBSET_SIZE]
