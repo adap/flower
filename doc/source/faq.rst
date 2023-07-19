@@ -12,7 +12,7 @@ This page collects answers to commonly asked questions about Federated Learning 
 
 .. dropdown:: :fa:`eye,mr-1` How can I run Federated Learning on a Raspberry Pi?
 
-    Find the `blog post about federated learning on embedded device here <https://flower.dev/blog/2020-12-16-running_federated_learning_applications_on_embedded_devices_with_flower>`_ and the corresponding `GitHub code example <https://github.com/adap/flower/tree/main/examples/embedded_devices>`_. 
+    Find the `blog post about federated learning on embedded device here <https://flower.dev/blog/2020-12-16-running_federated_learning_applications_on_embedded_devices_with_flower>`_ and the corresponding `GitHub code example <https://github.com/adap/flower/tree/main/examples/embedded-devices>`_. 
 
 .. dropdown:: :fa:`eye,mr-1` Does Flower support federated learning on Android devices?
 
