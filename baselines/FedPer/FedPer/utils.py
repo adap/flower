@@ -114,14 +114,6 @@ import numpy as np
 import torch.nn as nn
 from torch import Tensor
 
-
-
-
-
-
-
-
-
 class ModelSplit(ABC, nn.Module):
     """Abstract class for splitting a model into body and head. Optionally, a fixed head can also be created."""
 
@@ -411,3 +403,4 @@ from enum import Enum
 class Algorithms(Enum):
     FEDAVG = "FedAvg"
     FEDPER = "FedPer"
+

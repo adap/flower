@@ -6,9 +6,8 @@ config. In this way, swapping your model for  another one can be done without ch
 the python code at all
 """
 
-from typing import List, Tuple
-
 import time
+import tqdm
 import copy
 import torch
 import numpy as np
@@ -17,11 +16,13 @@ import torch.nn.functional as F
 
 from abc import ABC, abstractmethod
 from torch import Tensor
-from typing import Type, Any, Callable, Union, List, Optional, Dict
+from typing import Type, Any, Callable, Union, List, Optional, Dict, Tuple
 from collections import OrderedDict
 from torch.utils.data import DataLoader
 from torch.nn.parameter import Parameter
 from torchvision.models import resnet34
+
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class MobileNet_v1(nn.Module):
@@ -122,7 +123,6 @@ class MobileNet_v1_body(nn.Module):
         x = self.model(x)
         return x
 
-
 class MobileNet_v1_head(nn.Module):
     """ 
     MobileNet_v1 head, consists out of n layers that will be added to body of model. 
@@ -136,6 +136,7 @@ class MobileNet_v1_head(nn.Module):
     def __init__(self, num_head_layers : int = 1, architecture : dict = None) -> None:
         super(MobileNet_v1_head, self).__init__()
         assert num_head_layers >= 1, "Number of head layers must be at least 1."
+        self.num_head_layers = num_head_layers
         def conv_bn(inp, oup, stride):
             return nn.Sequential(
                 nn.Conv2d(inp, oup, 3, stride, 1, bias=False),
@@ -154,18 +155,34 @@ class MobileNet_v1_head(nn.Module):
                 nn.ReLU(inplace=True),
             )
         
-        def avg_pool():
-            return nn.AvgPool2d((1, 1))
+        def avg_pool(value : int):
+            return nn.AvgPool2d(value)
         
         def fc(inp, oup):
             return nn.Linear(inp, oup)
         
-        
+        self.model = nn.Sequential()
+        for i in range(len(architecture) - num_head_layers + 1, len(architecture) + 1):
+            for key, value in architecture[f'layer_{i}'].items():
+                if key == 'conv_bn':
+                    self.model.add_module(f'conv_bn_{i}', conv_bn(*value))
+                elif key == 'conv_dw':
+                    self.model.add_module(f'conv_dw_{i}', conv_dw(*value))
+                elif key == 'avg_pool':
+                    self.model.add_module(f'avg_pool_{i}', avg_pool(*value))
+                elif key == 'fc':
+                    self.model.add_module(f'fc_{i}', fc(*value))
+                else:
+                    raise NotImplementedError("Layer type not implemented.")
+    
+    def forward(self, x : Tensor) -> Tensor:
+        if self.num_head_layers != 1:
+            x = self.model(x)
+        x = x.view(-1, 1024)
+        x = self.fc(x)
 
-
-
-class ModelSplit(ABC, nn.Module):
-    """Abstract class for splitting a model into body and head. Optionally, a fixed head can also be created."""
+class ModelSplit(nn.Module):
+    """Class for splitting a model into body and head. Optionally, a fixed head can also be created."""
 
     def __init__(
             self,
@@ -185,7 +202,6 @@ class ModelSplit(ABC, nn.Module):
         self._fixed_head = copy.deepcopy(self.head) if has_fixed_head else None
         self._use_fixed_head = False
 
-    @abstractmethod
     def _get_model_parts(self, model: nn.Module) -> Tuple[nn.Module, nn.Module]:
         """
         Return the body and head of the model.
@@ -196,7 +212,7 @@ class ModelSplit(ABC, nn.Module):
         Returns:
             Tuple where the first element is the body of the model and the second is the head.
         """
-        pass
+        return model.body, model.head
 
     @property
     def body(self) -> nn.Module:
@@ -254,7 +270,11 @@ class ModelSplit(ABC, nn.Module):
         Returns:
             Body and head parameters
         """
-        return [val.cpu().numpy() for val in [*self.body.state_dict().values(), *self.head.state_dict().values()]]
+        return [
+            val.cpu().numpy() for val in [
+                *self.body.state_dict().values(), *self.head.state_dict().values()
+            ]
+        ]
 
     def set_parameters(self, state_dict: Dict[str, Tensor]) -> None:
         """
@@ -311,6 +331,108 @@ class ModelSplit(ABC, nn.Module):
         if self._use_fixed_head and self.fixed_head is not None:
             return self.fixed_head(x)
         return self.head(x)
+    
+class ModelManager():
+    """Manager for models with Body/Head split."""
+
+    def __init__(
+            self,
+            client_id: int,
+            config: Dict[str, Any],
+            has_fixed_head: bool = False,
+            model_split_class: Type[ModelSplit] = ModelSplit,
+    ):
+        """
+        Initialize the attributes of the model manager.
+
+        Args:
+            client_id: The id of the client.
+            config: Dict containing the configurations to be used by the manager.
+            has_fixed_head: Whether a fixed head should be created.
+        """
+        super().__init__()
+        self.client_id = client_id
+        self.config = config
+        self._model = model_split_class(self._create_model(), has_fixed_head=has_fixed_head)
+        # self.trainloader, self.testloader = self.load_data()
+
+    def _create_model(self) -> nn.Module:
+        """Return model to be splitted into head and body."""
+        return MobileNet_v1(split=True, num_head_layers=1)
+
+    def train(
+        self,
+        train_id: int,
+        epochs: int = 1,
+        tag: Optional[str] = None,
+        fine_tuning: bool = False
+    ) -> Dict[str, Union[List[Dict[str, float]], int, float]]:
+        """
+        Train the model maintained in self.model.
+
+        Method adapted from simple CNN from Flower 'Quickstart PyTorch' \
+        (https://flower.dev/docs/quickstart-pytorch.html).
+
+        Args:
+            train_id: id of the train round.
+            epochs: number of training epochs.
+            tag: str of the form <Algorithm>_<model_train_part>.
+                <Algorithm> - indicates the federated algorithm that is being performed\
+                              (FedAvg, FedPer, FedRep, FedBABU or FedHybridAvgLGDual).
+                              In the case of FedHybridAvgLGDual the tag also includes which part of the algorithm\
+                                is being performed, either FedHybridAvgLGDual_FedAvg or FedHybridAvgLGDual_LG-FedAvg.
+                <model_train_part> - indicates the part of the model that is being trained (full, body, head).
+                This tag can be ignored if no difference in train behaviour is desired between federated algortihms.
+            fine_tuning: whether the training performed is for model fine-tuning or not.
+
+        Returns:
+            Dict containing the train metrics.
+        """
+        criterion = torch.nn.CrossEntropyLoss()
+        optimizer = torch.optim.SGD(self.model.parameters(), lr=0.001, momentum=0.9)
+        for _ in range(epochs):
+            for images, labels in tqdm(self.trainloader):
+                optimizer.zero_grad()
+                criterion(self.model(images.to(DEVICE)), labels.to(DEVICE)).backward()
+                optimizer.step()
+        return {}
+
+    def test(self, test_id: int) -> Dict[str, float]:
+        """
+        Test the model maintained in self.model.
+
+        Method adapted from simple CNN from Flower 'Quickstart PyTorch' \
+        (https://flower.dev/docs/quickstart-pytorch.html).
+
+        Args:
+            test_id: id of the test round.
+
+        Returns:
+            Dict containing the test metrics.
+        """
+        criterion = torch.nn.CrossEntropyLoss()
+        correct, total, loss = 0, 0, 0.0
+        with torch.no_grad():
+            for images, labels in tqdm(self.testloader):
+                outputs = self.model(images.to(DEVICE))
+                labels = labels.to(DEVICE)
+                loss += criterion(outputs, labels).item()
+                total += labels.size(0)
+                correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
+        return {"loss": loss / len(self.testloader.dataset), "accuracy": correct / total}
+
+    def train_dataset_size(self) -> int:
+        """Return train data set size."""
+        return len(self.trainloader)
+
+    def test_dataset_size(self) -> int:
+        """Return test data set size."""
+        return len(self.testloader)
+
+    def total_dataset_size(self) -> int:
+        """Return total data set size."""
+        return len(self.trainloader) + len(self.testloader)
+
 
 def train(
     self,
@@ -339,13 +461,11 @@ def train(
         None
         """
         criterion = nn.CrossEntropyLoss()
-        optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9)
-        global_params = [val.detach().clone() for val in net.parameters()]
+        optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, weight_decay=5e-4)
         net.train()
         for _ in range(epochs):
             net = _train_one_epoch(
                 net=net,
-                global_params=global_params,
                 trainloader=trainloader,
                 device=device,
                 criterion=criterion,
@@ -354,7 +474,6 @@ def train(
 
 def _train_one_epoch(
         net: nn.Module,
-        global_params: List[Parameter],
         trainloader: DataLoader,
         device: torch.device,
         criterion: torch.nn.CrossEntropyLoss,
@@ -366,8 +485,6 @@ def _train_one_epoch(
     ----------
     net : nn.Module
         The model to be trained.
-    global_params : List[Parameter]
-        The global parameters to be used for training.
     trainloader : DataLoader
         The data to train the model on.
     device : torch.device
@@ -433,265 +550,3 @@ def test(
     accuracy = 100 * correct / total
 
     return loss, accuracy
-
-
-
-def conv3x3(in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, dilation: int = 1) -> nn.Conv2d:
-    """3x3 convolution with padding"""
-    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
-                     padding=dilation, groups=groups, bias=False, dilation=dilation)
-
-
-def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Conv2d:
-    """1x1 convolution"""
-    return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
-
-
-class BasicBlock(nn.Module):
-    expansion: int = 1
-
-    def __init__(
-        self,
-        inplanes: int,
-        planes: int,
-        stride: int = 1,
-        downsample: Optional[nn.Module] = None,
-        groups: int = 1,
-        base_width: int = 64,
-        dilation: int = 1,
-        norm_layer: Optional[Callable[..., nn.Module]] = None, 
-        has_bn = True,
-    ) -> None:
-        super(BasicBlock, self).__init__()
-        if norm_layer is None:
-            norm_layer = nn.BatchNorm2d
-        if groups != 1 or base_width != 64:
-            raise ValueError('BasicBlock only supports groups=1 and base_width=64')
-        if dilation > 1:
-            raise NotImplementedError("Dilation > 1 not supported in BasicBlock")
-        self.conv1 = conv3x3(inplanes, planes, stride)
-        if has_bn:
-            self.bn2 = norm_layer(planes)
-        else:
-            self.bn2 = nn.Identity()
-        self.relu = nn.ReLU(inplace=True)
-        self.conv2 = conv3x3(planes, planes)
-        if has_bn:
-            self.bn3 = norm_layer(planes)
-        else:
-            self.bn3 = nn.Identity()
-        self.downsample = downsample
-        self.stride = stride
-
-    def forward(self, x: Tensor) -> Tensor:
-        identity = x
-
-        out = self.conv1(x)
-        out = self.bn2(out)
-        out = self.relu(out)
-
-        out = self.conv2(out)
-        out = self.bn3(out)
-
-        if self.downsample is not None:
-            identity = self.downsample(x)
-
-        out += identity
-        out = self.relu(out)
-
-        return out
-    
-
-class Bottleneck(nn.Module):
-    # Bottleneck in torchvision places the stride for downsampling at 3x3 convolution(self.conv2)
-    # while original implementation places the stride at the first 1x1 convolution(self.conv1)
-    # according to "Deep residual learning for image recognition" https://arxiv.org/abs/1512.03385.
-    # This variant is also known as ResNet V1.5 and improves accuracy according to
-    # https://ngc.nvidia.com/catalog/model-scripts/nvidia:resnet_50_v1_5_for_pytorch.
-
-    expansion: int = 4
-
-    def __init__(
-        self,
-        inplanes: int,
-        planes: int,
-        stride: int = 1,
-        downsample: Optional[nn.Module] = None,
-        groups: int = 1,
-        base_width: int = 64,
-        dilation: int = 1,
-        norm_layer: Optional[Callable[..., nn.Module]] = None,
-        has_bn = True,
-    ) -> None:
-        super().__init__()
-        if norm_layer is None:
-            norm_layer = nn.BatchNorm2d
-        width = int(planes * (base_width / 64.0)) * groups
-        # Both self.conv2 and self.downsample layers downsample the input when stride != 1
-        self.conv1 = conv1x1(inplanes, width)
-        if has_bn:
-            self.bn1 = norm_layer(width)
-        else:
-            self.bn1 = nn.Identity()
-        self.conv2 = conv3x3(width, width, stride, groups, dilation)
-        if has_bn:
-            self.bn2 = norm_layer(width)
-        else:
-            self.bn2 = nn.Identity()
-        self.conv3 = conv1x1(width, planes * self.expansion)
-        if has_bn:
-            self.bn3 = norm_layer(planes * self.expansion)
-        else:
-            self.bn3 = nn.Identity()
-        self.relu = nn.ReLU(inplace=True)
-        self.downsample = downsample
-        self.stride = stride
-
-    def forward(self, x: Tensor) -> Tensor:
-        identity = x
-
-        out = self.conv1(x)
-        out = self.bn1(out)
-        out = self.relu(out)
-
-        out = self.conv2(out)
-        out = self.bn2(out)
-        out = self.relu(out)
-
-        out = self.conv3(out)
-        out = self.bn3(out)
-
-        if self.downsample is not None:
-            identity = self.downsample(x)
-
-        out += identity
-        out = self.relu(out)
-
-        return out
-    
-
-class ResNet(nn.Module):
-
-    def __init__(
-        self,
-        block: BasicBlock,
-        layers: List[int],
-        features: List[int] = [64, 128, 256, 512],
-        num_classes: int = 1000,
-        zero_init_residual: bool = False,
-        groups: int = 1,
-        width_per_group: int = 64,
-        replace_stride_with_dilation: Optional[List[bool]] = None,
-        norm_layer: Optional[Callable[..., nn.Module]] = None, 
-        has_bn = True,
-        bn_block_num = 4, 
-    ) -> None:
-        super(ResNet, self).__init__()
-        if norm_layer is None:
-            norm_layer = nn.BatchNorm2d
-        self._norm_layer = norm_layer
-
-        self.inplanes = 64
-        self.dilation = 1
-        if replace_stride_with_dilation is None:
-            replace_stride_with_dilation = [False, False, False]
-        if len(replace_stride_with_dilation) != 3:
-            raise ValueError("replace_stride_with_dilation should be None "
-                             "or a 3-element tuple, got {}".format(replace_stride_with_dilation))
-        self.groups = groups
-        self.base_width = width_per_group
-        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False)
-        if has_bn:
-            self.bn1 = norm_layer(self.inplanes)
-        else:
-            self.bn1 = nn.Identity()
-        self.relu = nn.ReLU(inplace=True)
-        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-
-        self.layers = []
-        self.layers.extend(self._make_layer(block, 64, layers[0], has_bn=has_bn and (bn_block_num > 0)))
-        for num in range(1, len(layers)):
-            self.layers.extend(self._make_layer(block, features[num], layers[num], stride=2,
-                                       dilate=replace_stride_with_dilation[num-1], 
-                                       has_bn=has_bn and (num < bn_block_num)))
-
-        for i, layer in enumerate(self.layers):
-            setattr(self, f'layer_{i}', layer)
-
-        self.avgpool = nn.Sequential(
-            nn.AdaptiveAvgPool2d((1, 1)),
-            nn.Flatten()
-        )
-        self.fc = nn.Linear(features[len(layers)-1] * block.expansion, num_classes)
-
-        # self.fc = nn.Sequential(
-        #     nn.AdaptiveAvgPool2d((1, 1)), 
-        #     nn.Flatten(), 
-        #     nn.Linear(features[len(layers)-1] * block.expansion, num_classes)
-        # )
-
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-            elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
-
-        if zero_init_residual:
-            for m in self.modules():
-                if isinstance(m, Bottleneck) and m.bn3.weight is not None:
-                    nn.init.constant_(m.bn3.weight, 0)  # type: ignore[arg-type]
-                elif isinstance(m, BasicBlock) and m.bn2.weight is not None:
-                    nn.init.constant_(m.bn2.weight, 0)  # type: ignore[arg-type]
-
-    def _make_layer(self, block: BasicBlock, planes: int, blocks: int,
-                    stride: int = 1, dilate: bool = False, has_bn=True) -> List:
-        norm_layer = self._norm_layer
-        downsample = None
-        previous_dilation = self.dilation
-        if dilate:
-            self.dilation *= stride
-            stride = 1
-        if stride != 1 or self.inplanes != planes * block.expansion:
-            if has_bn:
-                downsample = nn.Sequential(
-                    conv1x1(self.inplanes, planes * block.expansion, stride),
-                    norm_layer(planes * block.expansion),
-                )
-            else:
-                downsample = nn.Sequential(
-                    conv1x1(self.inplanes, planes * block.expansion, stride),
-                    nn.Identity(),
-                )
-
-        layers = []
-        layers.append(block(self.inplanes, planes, stride, downsample, self.groups,
-                            self.base_width, previous_dilation, norm_layer, has_bn))
-        self.inplanes = planes * block.expansion
-        for _ in range(1, blocks):
-            layers.append(block(self.inplanes, planes, groups=self.groups,
-                                base_width=self.base_width, dilation=self.dilation,
-                                norm_layer=norm_layer, has_bn=has_bn))
-
-        return layers
-
-    def _forward_impl(self, x: Tensor) -> Tensor:
-        x = self.conv1(x)
-        x = self.bn1(x)
-        x = self.relu(x)
-        x = self.maxpool(x)
-
-        for i in range(len(self.layers)):
-            layer = getattr(self, f'layer_{i}')
-            x = layer(x)
-
-        x = self.avgpool(x)
-        x = self.fc(x)
-
-        return x
-
-    def forward(self, x: Tensor) -> Tensor:
-        return self._forward_impl(x)
-    
-def resnet34(**kwargs: Any) -> ResNet: 
-    return ResNet(BasicBlock, [3, 4, 6, 3], **kwargs)

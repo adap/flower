@@ -14,7 +14,7 @@ from omegaconf import DictConfig
 from collections import OrderedDict
 from hydra.utils import instantiate
 from FedPer.utils import ModelManager
-from FedPer.models import test, train
+from FedPer.models import test, train, ModelManager, ModelSplit, MobileNet_v1
 from torch.utils.data import DataLoader
 from flwr.common.typing import NDArrays, Scalar
 
@@ -38,12 +38,19 @@ class FlowerClient(
         self.device = device
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
+        self.train_id = 1
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
-        return [val.cpu().numpy() for _, val in self.model_manager.model.body.state_dict().items()]
+        if self.net.split: 
+            return [
+                val.cpu().numpy() for _, val in self.net.body.state_dict().items()
+            ]
+        else:
+            return [
+                val.cpu().numpy() for _, val in self.net.state_dict().items()
+            ]
     
-
     def set_parameters(self, parameters: NDArrays) -> None:
         """
         Set the local body parameters to the received parameters.
@@ -54,16 +61,20 @@ class FlowerClient(
             parameters: parameters to set the body to.
         """
         # Get model keys for body
-        model_keys = [k for k in self.model_manager.model.state_dict().keys() if k.startswith("_body")]
+        model_keys = [
+            k for k in self.net.state_dict().keys() if k.startswith("_body")
+        ]
 
         if self.train_id == 1:
             # Only update client's local head if it hasn't trained yet
-            model_keys.extend([k for k in self.model_manager.model.state_dict().keys() if k.startswith("_head")])
+            model_keys.extend(
+                [k for k in self.net.state_dict().keys() if k.startswith("_head")]
+            )
 
         # Zip model keys and parameters
         params_dict = zip(model_keys, parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-        self.model_manager.model.set_parameters(state_dict)
+        self.net.set_parameters(state_dict)
 
     def fit(
         self, 
@@ -74,16 +85,19 @@ class FlowerClient(
         # Set parameters
         self.set_parameters(parameters)
 
-        self.model_manager.model.train()
+        # Epochs
+        epochs = config["epochs"]
 
         # Train model
         train(
             self.net,
             self.trainloader,
             self.device,
-            epochs=self.num_epochs,
+            epochs=epochs,
             learning_rate=self.learning_rate,
         )
+
+        self.train_id += 1
 
         return self.get_parameters({}), len(self.trainloader), {}
 
@@ -96,8 +110,6 @@ class FlowerClient(
         return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
 
 def gen_client_fn(
-    num_clients: int,
-    num_rounds: int,
     num_epochs: int,
     trainloaders: List[DataLoader],
     valloaders: List[DataLoader],
@@ -110,11 +122,6 @@ def gen_client_fn(
 
     Parameters
     ----------
-    num_clients : int
-        The number of clients present in the setup
-    num_rounds: int
-        The number of rounds in the experiment. This is used to construct
-        the scheduling for stragglers
     num_epochs : int
         The number of local epochs each client should run the training for before
         sending it to the server.
@@ -135,6 +142,7 @@ def gen_client_fn(
         A tuple containing the client function that creates Flower Clients and
         the DataLoader that will be used for testing
     """
+    assert model['model'] in ['resnet', 'mobile']
 
     def client_fn(cid: str) -> FlowerClient:
         """Create a Flower client representing a single organization."""
@@ -156,5 +164,5 @@ def gen_client_fn(
             num_epochs,
             learning_rate,
         )
-
+    
     return client_fn
