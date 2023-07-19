@@ -21,7 +21,11 @@ dataset:
   num_classes: 10
 
 model:
-  # model config
+  model: 'mobile'
+  split: true
+  num_head_layers: 1
+  _target_: FedPer.models.MobileNet_v1
+  num_classes: 10
 
 strategy:
   _target_: # points to your strategy (either custom or exiting in Flower)

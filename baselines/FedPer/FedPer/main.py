@@ -7,6 +7,7 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 # feel free to remove some if aren't needed
 import flwr as fl
 import hydra
+
 from omegaconf import DictConfig, OmegaConf
 from hydra.utils import instantiate
 from FedPer import client, server, utils
@@ -28,31 +29,21 @@ def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
 
     # 2. Prepare your dataset
-    # here you should call a function in datasets.py that returns whatever is needed to:
-    # (1) ensure the server can access the dataset used to evaluate your model after
-    # aggregation
-    # (2) tell each client what dataset partitions they should use (e.g. a this could
-    # be a location in the file system, a list of dataloader, a list of ids to extract
-    # from a dataset, it's up to you)
     trainloader, valloader, testloader = load_datasets(
         config=cfg.dataset,
         num_clients=cfg.num_clients,
     )
 
     # 3. Define your clients
-    # Define a function that returns another function that will be used during
-    # simulation to instantiate each individual client
-    # client_fn = client.<my_function_that_returns_a_function>()
     client_fn = client.gen_client_fn(
-        num_clients=cfg.num_clients,
         num_epochs=cfg.num_epochs,
         trainloaders=trainloader,
         valloaders=valloader,
-        num_rounds=cfg.num_rounds,
         learning_rate=cfg.learning_rate,
         model=cfg.model,
-        num_classes=cfg.dataset.num_classes,
     )
+    print("................")
+    print(client_fn)
     quit()
 
     # get function that will executed by the strategy's evaluate() method
