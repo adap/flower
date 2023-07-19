@@ -17,4 +17,4 @@ done
 
 echo "\`\`\`" >> $INDEX
 
-mv $INDEX $ROOT/examples/doc/source/index.md
+cp $INDEX $ROOT/examples/doc/source/index.md
