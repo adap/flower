@@ -12,5 +12,6 @@ cd baselines/doc
 make html
 
 cd $ROOT
+./dev/update-examples.sh
 cd examples/doc
 make html
