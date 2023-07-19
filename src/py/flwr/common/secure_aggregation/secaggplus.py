@@ -89,6 +89,7 @@ def pseudo_rand_gen(
     seed32 = 0
     for i in range(0, len(seed), 4):
         seed32 ^= int.from_bytes(seed[i : i + 4], "little")
+    # pylint: disable-next=no-member
     gen = np.random.RandomState(seed32)
     output = []
     for dimension in dimensions_list:
