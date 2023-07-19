@@ -5,11 +5,12 @@ build-backend = "poetry.masonry.api"
 [tool.poetry]
 name = "quickstart-pytorch-lightning"
 version = "0.1.0"
-description = "Federated Learning E2E test with Flower and PyTorch Lightning"
+description = "Federated Learning Quickstart with Flower and PyTorch Lightning"
 authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-flwr = { path = "../../", develop = true, extras = ["simulation"] }
+flwr = ">=1.0,<2.0"
+# flwr = { path = "../../", develop = true }  # Development
 pytorch-lightning = "1.6.0"
 torchvision = "0.13.0"
