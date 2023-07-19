@@ -63,6 +63,7 @@ class InMemoryClientState(ClientState):
         return self._state
 
     def update(self, state: Dict) -> None:
+        # TODO: deep copy for peace of mind?
         self._state = state
 
 
