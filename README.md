@@ -116,7 +116,7 @@ Quickstart examples:
 * [Quickstart (TensorFlow)](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow)
 * [Quickstart (PyTorch)](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch)
 * [Quickstart (Hugging Face)](https://github.com/adap/flower/tree/main/examples/quickstart-huggingface)
-* [Quickstart (PyTorch Lightning)](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch_lightning)
+* [Quickstart (PyTorch Lightning)](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch-lightning)
 * [Quickstart (fastai)](https://github.com/adap/flower/tree/main/examples/quickstart-fastai)
 * [Quickstart (Pandas)](https://github.com/adap/flower/tree/main/examples/quickstart-pandas)
 * [Quickstart (MXNet)](https://github.com/adap/flower/tree/main/examples/quickstart-mxnet)
