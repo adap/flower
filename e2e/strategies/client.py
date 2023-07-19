@@ -11,7 +11,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 # Load model and data (MobileNetV2, CIFAR-10)
 model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
 model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
-(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 x_train, y_train = x_train[:SUBSET_SIZE], y_train[:SUBSET_SIZE]
 x_test, y_test = x_test[:SUBSET_SIZE], y_test[:SUBSET_SIZE]
 

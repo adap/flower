@@ -120,7 +120,7 @@ jobs:
           key: keras-datasets
       - name: Download Datasets
         run: |
-          python -c "import tensorflow as tf; tf.keras.datasets.cifar10.load_data()"
+          python -c "import tensorflow as tf; tf.keras.datasets.mnist.load_data()"
       - name: Test strategies
         run: |
           python test.py "${{ matrix.strat }}"
