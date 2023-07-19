@@ -34,7 +34,7 @@ class FlowerClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         model.set_weights(parameters)
-        model.fit(x_train, y_train, epochs=3, batch_size=32, verbose=0)
+        model.fit(x_train, y_train, epochs=1, batch_size=32, verbose=0)
         return model.get_weights(), len(x_train), {}
 
     def evaluate(self, parameters, config):
