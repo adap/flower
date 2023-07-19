@@ -1,3 +1,5 @@
+from sys import argv
+
 import flwr as fl
 import tensorflow as tf
 from flwr.common import ndarrays_to_parameters
@@ -5,9 +7,13 @@ from flwr.server.strategy import FedMedian, FedTrimmedAvg, QFedAvg, FedAvgM, Fed
 
 from client import SUBSET_SIZE, FlowerClient
 
+given_strat = argv[1]
 
 STRATEGY_LIST = [FedMedian, FedTrimmedAvg, QFedAvg, FedAvgM]
 OPT_STRATEGY_LIST = [FedAdam, FedAdagrad, FedYogi]
+
+def get_strat(name):
+    return [strat for strat in STRATEGY_LIST if strat.__name__ == given_strat][0]
 
 init_model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
 init_model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
