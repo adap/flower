@@ -3,17 +3,17 @@ from sys import argv
 import flwr as fl
 import tensorflow as tf
 from flwr.common import ndarrays_to_parameters
-from flwr.server.strategy import FedMedian, FedTrimmedAvg, QFedAvg, FedAvgM, FedAdam, FedAdagrad, FedYogi
+from flwr.server.strategy import FedMedian, FedTrimmedAvg, QFedAvg, FaultTolerantFedAvg, FedAvgM, FedAdam, FedAdagrad, FedYogi
 
 from client import SUBSET_SIZE, FlowerClient
 
-given_strat = argv[1]
+STRATEGY_LIST = [FedMedian, FedTrimmedAvg, QFedAvg, FaultTolerantFedAvg, FedAvgM, FedAdam, FedAdagrad, FedYogi]
+OPT_IDX = 5
 
-STRATEGY_LIST = [FedMedian, FedTrimmedAvg, QFedAvg, FedAvgM]
-OPT_STRATEGY_LIST = [FedAdam, FedAdagrad, FedYogi]
+strat = argv[1]
 
 def get_strat(name):
-    return [strat for strat in STRATEGY_LIST if strat.__name__ == given_strat][0]
+    return [(idx, strat) for idx, strat in enumerate(STRATEGY_LIST) if strat.__name__ == name][0]
 
 init_model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
 init_model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
@@ -36,29 +36,21 @@ def evaluate(server_round, parameters, config):
     # return statistics
     return loss, {"accuracy": accuracy}
 
-for Strategy in STRATEGY_LIST:
-    print("Current strategy:", str(Strategy))
-    hist = fl.simulation.start_simulation(
-        client_fn=client_fn,
-        num_clients=2,
-        config=fl.server.ServerConfig(num_rounds=3),
-        strategy=Strategy(
-            evaluate_fn=evaluate,
-            initial_parameters=ndarrays_to_parameters(init_model.get_weights()),
-        ),
-    )
-    assert (hist.metrics_centralized['accuracy'][0][1] / hist.metrics_centralized['accuracy'][-1][1]) <= 1.04
+strat_args = {
+    "evaluate_fn": evaluate,
+    "initial_parameters": ndarrays_to_parameters(init_model.get_weights())
+}
 
-for Strategy in OPT_STRATEGY_LIST:
-    print("Current strategy:", str(Strategy))
-    hist = fl.simulation.start_simulation(
-        client_fn=client_fn,
-        num_clients=2,
-        config=fl.server.ServerConfig(num_rounds=3),
-        strategy=Strategy(
-            evaluate_fn=evaluate,
-            initial_parameters=ndarrays_to_parameters(init_model.get_weights()),
-            tau=0.01,
-        ),
-    )
-    assert (hist.metrics_centralized['accuracy'][0][1] / hist.metrics_centralized['accuracy'][-1][1]) <= 1.04
+start_idx, strategy = get_strat(strat)
+
+if start_idx >= 4:
+    strat_args["tau"] = 0.01
+
+hist = fl.simulation.start_simulation(
+    client_fn=client_fn,
+    num_clients=2,
+    config=fl.server.ServerConfig(num_rounds=3),
+    strategy=strategy(**strat_args),
+)
+
+assert (hist.metrics_centralized['accuracy'][0][1] / hist.metrics_centralized['accuracy'][-1][1]) <= 1.04
