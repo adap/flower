@@ -71,7 +71,7 @@ jobs:
               Path('data').mkdir(exist_ok=True)
               load_iris(as_frame=True)['data'].to_csv('./data/client.csv')
 
-    name: Framework/${{matrix.directory}}
+    name: Framework / ${{matrix.directory}}
 
     defaults:
       run:
@@ -100,7 +100,7 @@ jobs:
       matrix:
         strat: ["FedMedian", "FedTrimmedAvg", "QFedAvg", "FaultTolerantFedAvg", "FedAvgM", "FedAdam", "FedAdagrad", "FedYogi"]
 
-    name: Strategy/${{ matrix.strat }}
+    name: Strategy / ${{ matrix.strat }}
 
     defaults:
       run:
