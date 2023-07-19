@@ -1,1 +1,0 @@
-# Quickstart PyTorch Lightning example

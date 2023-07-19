@@ -3,7 +3,7 @@ set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
 ROOT=`pwd`
-INDEX=$ROOT/examples/doc/source/index.md
+INDEX=$ROOT/examples/README.md
 INSERT_LINE=6
 
 sed -i.bu '7,$d' $INDEX
@@ -16,3 +16,5 @@ for d in */ ; do
 done
 
 echo "\`\`\`" >> $INDEX
+
+mv $INDEX $ROOT/examples/doc/source/index.md
