@@ -8,10 +8,10 @@ Running this example in itself is quite easy.
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-$ git clone --depth=1 https://github.com/adap/flower.git _tmp && mv _tmp/examples/quickstart_pandas . && rm -rf _tmp && cd quickstart_pandas
+$ git clone --depth=1 https://github.com/adap/flower.git _tmp && mv _tmp/examples/quickstart-pandas . && rm -rf _tmp && cd quickstart-pandas
 ```
 
-This will create a new directory called `quickstart_pandas` containing the following files:
+This will create a new directory called `quickstart-pandas` containing the following files:
 
 ```shell
 -- pyproject.toml

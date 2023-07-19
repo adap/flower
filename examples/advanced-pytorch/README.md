@@ -14,10 +14,10 @@ This example demonstrates an advanced federated learning setup using Flower with
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/advanced_pytorch . && rm -rf flower && cd advanced_pytorch
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/advanced-pytorch . && rm -rf flower && cd advanced-pytorch
 ```
 
-This will create a new directory called `advanced_pytorch` containing the following files:
+This will create a new directory called `advanced-pytorch` containing the following files:
 
 ```shell
 -- pyproject.toml

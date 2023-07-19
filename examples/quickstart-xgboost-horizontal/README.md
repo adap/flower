@@ -1,6 +1,6 @@
 # Federated XGBoost in Horizontal Setting (PyTorch)
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/examples/quickstart_xgboost_horizontal/code_horizontal.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/examples/quickstart_xgboost_horizontal/code_horizontal.ipynb))
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/examples/quickstart-xgboost-horizontal/code_horizontal.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/examples/quickstart-xgboost-horizontal/code_horizontal.ipynb))
 
 This example demonstrates a federated XGBoost using Flower with PyTorch. This is a novel method to conduct federated XGBoost in the horizontal setting. It differs from the previous methods in the following ways:
 

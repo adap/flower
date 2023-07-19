@@ -9,10 +9,10 @@ This introductory example for Flower uses JAX, but you're not required to be a J
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart_jax . && rm -rf flower && cd quickstart_jax
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-jax . && rm -rf flower && cd quickstart-jax
 ```
 
-This will create a new directory called `quickstart_jax`, containing the following files:
+This will create a new directory called `quickstart-jax`, containing the following files:
 
 ```shell
 -- pyproject.toml

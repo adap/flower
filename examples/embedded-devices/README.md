@@ -22,7 +22,7 @@ What follows is a step-by-step guide on how to setup your client/s and the serve
 Start with cloning the Flower repo and checking out the example. We have prepared a single line which you can copy into your shell:
 
 ```bash
-$ git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/embedded_devices . && rm -rf flower && cd embedded_devices
+$ git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/embedded-devices . && rm -rf flower && cd embedded-devices
 ```
 
 ## Setting up the server

@@ -3,7 +3,7 @@ requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
-name = "quickstart_ml_cube"
+name = "quickstart-ml-cube"
 version = "0.1.0"
 description = "Keras Federated Learning Quickstart with Flower"
 authors = ["The Flower Authors <hello@flower.dev>"]

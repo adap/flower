@@ -8,10 +8,10 @@ Running this example in itself is quite easy.
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart_pytorch . && rm -rf flower && cd quickstart_pytorch
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-pytorch . && rm -rf flower && cd quickstart-pytorch
 ```
 
-This will create a new directory called `quickstart_pytorch` containing the following files:
+This will create a new directory called `quickstart-pytorch` containing the following files:
 
 ```shell
 -- pyproject.toml

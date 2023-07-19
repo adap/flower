@@ -9,10 +9,10 @@ This introductory example for Flower uses PyTorch, but you're not required to be
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/pytorch_from_centralized_to_federated . && rm -rf flower && cd pytorch_from_centralized_to_federated
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/pytorch-from-centralized-to-federated . && rm -rf flower && cd pytorch-from-centralized-to-federated
 ```
 
-This will create a new directory called `pytorch_from_centralized_to_federated` containing the following files:
+This will create a new directory called `pytorch-from-centralized-to-federated` containing the following files:
 
 ```shell
 -- pyproject.toml

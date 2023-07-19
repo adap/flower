@@ -7,10 +7,10 @@ This introductory example to Flower uses Keras but deep knowledge of Keras is no
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart_tabnet . && rm -rf flower && cd quickstart_tabnet
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-tabnet . && rm -rf flower && cd quickstart-tabnet
 ```
 
-This will create a new directory called `quickstart_tabnet` containing the following files:
+This will create a new directory called `quickstart-tabnet` containing the following files:
 
 ```shell
 -- pyproject.toml

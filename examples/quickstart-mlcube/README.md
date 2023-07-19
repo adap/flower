@@ -7,7 +7,7 @@ This introductory example to Flower uses MLCube together with Keras, but deep kn
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell, which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart_mlcube . && rm -rf flower && cd quickstart_mlcube
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-mlcube . && rm -rf flower && cd quickstart-mlcube
 ```
 
 Project dependencies (such as `tensorflow` and `flwr`) are defined in `pyproject.toml`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.

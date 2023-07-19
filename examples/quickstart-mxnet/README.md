@@ -9,10 +9,10 @@ This introductory example for Flower uses MXNet, but you're not required to be a
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart_mxnet . && rm -rf flower && cd quickstart_mxnet
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-mxnet . && rm -rf flower && cd quickstart-mxnet
 ```
 
-This will create a new directory called `quickstart_mxnet` containing the following files:
+This will create a new directory called `quickstart-mxnet` containing the following files:
 
 ```shell
 -- pyproject.toml
