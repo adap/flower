@@ -52,7 +52,7 @@ Federated Learning on Raspberry Pi and Nvidia Jetson
 This example shows how Flower can be used to build a federated learning system that run across Raspberry Pi and Nvidia Jetson:
 
 - `Federated Learning on Raspberry Pi and Nvidia Jetson (Code) <https://github.com/adap/flower/tree/main/examples/embedded-devices>`_
-- `Federated Learning on Raspberry Pi and Nvidia Jetson (Blog Post) <https://flower.dev/blog/2020-12-16-running_federated_learning_applications_on_embedded-devices_with_flower>`_
+- `Federated Learning on Raspberry Pi and Nvidia Jetson (Blog Post) <https://flower.dev/blog/2020-12-16-running_federated_learning_applications_on_embedded_devices_with_flower>`_
 
 
 
