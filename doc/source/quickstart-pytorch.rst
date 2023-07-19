@@ -264,4 +264,4 @@ You should now see how the training does in the very first terminal (the one tha
 
 Congratulations!
 You've successfully built and run your first federated learning system.
-The full `source code <https://github.com/adap/flower/blob/main/examples/quickstart_pytorch/client.py>`_ for this example can be found in :code:`examples/quickstart_pytorch`.
+The full `source code <https://github.com/adap/flower/blob/main/examples/quickstart-pytorch/client.py>`_ for this example can be found in :code:`examples/quickstart-pytorch`.

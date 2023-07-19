@@ -219,7 +219,7 @@ And they will be able to connect to the server and start the federated training.
 
 If you want to check out everything put together, 
 you should check out the full code example: 
-[https://github.com/adap/flower/tree/main/examples/quickstart_huggingface](https://github.com/adap/flower/tree/main/examples/quickstart_huggingface). 
+[https://github.com/adap/flower/tree/main/examples/quickstart-huggingface](https://github.com/adap/flower/tree/main/examples/quickstart-huggingface). 
 
 Of course, this is a very basic example, and a lot can be added or modified, 
 it was just to showcase how simply we could federate a Hugging Face workflow using Flower.
