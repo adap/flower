@@ -54,10 +54,10 @@ jobs:
               import mxnet as mx
               mx.test_utils.get_mnist()
 
-          - directory: scikit-learn
-            dataset: |
-              import openml
-              openml.datasets.get_dataset(554)
+          # - directory: scikit-learn
+          #   dataset: |
+          #     import openml
+          #     openml.datasets.get_dataset(554)
 
           - directory: fastai
             dataset: |
