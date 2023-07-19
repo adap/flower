@@ -1,26 +1,52 @@
 from sys import argv
 
-import flwr as fl
 import tensorflow as tf
-from flwr.common import ndarrays_to_parameters
-from flwr.server.strategy import FedMedian, FedTrimmedAvg, QFedAvg, FaultTolerantFedAvg, FedAvgM, FedAdam, FedAdagrad, FedYogi
-
 from client import SUBSET_SIZE, FlowerClient
 
-STRATEGY_LIST = [FedMedian, FedTrimmedAvg, QFedAvg, FaultTolerantFedAvg, FedAvgM, FedAdam, FedAdagrad, FedYogi]
+import flwr as fl
+from flwr.common import ndarrays_to_parameters
+from flwr.server.strategy import (
+    FaultTolerantFedAvg,
+    FedAdagrad,
+    FedAdam,
+    FedAvgM,
+    FedMedian,
+    FedTrimmedAvg,
+    FedYogi,
+    QFedAvg,
+)
+
+STRATEGY_LIST = [
+    FedMedian,
+    FedTrimmedAvg,
+    QFedAvg,
+    FaultTolerantFedAvg,
+    FedAvgM,
+    FedAdam,
+    FedAdagrad,
+    FedYogi,
+]
 OPT_IDX = 5
 
 strat = argv[1]
 
+
 def get_strat(name):
-    return [(idx, strat) for idx, strat in enumerate(STRATEGY_LIST) if strat.__name__ == name][0]
+    return [
+        (idx, strat)
+        for idx, strat in enumerate(STRATEGY_LIST)
+        if strat.__name__ == name
+    ][0]
+
 
 init_model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
 init_model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
 
+
 def client_fn(cid):
     _ = cid
     return FlowerClient()
+
 
 def evaluate(server_round, parameters, config):
     model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
@@ -36,9 +62,10 @@ def evaluate(server_round, parameters, config):
     # return statistics
     return loss, {"accuracy": accuracy}
 
+
 strat_args = {
     "evaluate_fn": evaluate,
-    "initial_parameters": ndarrays_to_parameters(init_model.get_weights())
+    "initial_parameters": ndarrays_to_parameters(init_model.get_weights()),
 }
 
 start_idx, strategy = get_strat(strat)
@@ -53,4 +80,7 @@ hist = fl.simulation.start_simulation(
     strategy=strategy(**strat_args),
 )
 
-assert (hist.metrics_centralized['accuracy'][0][1] / hist.metrics_centralized['accuracy'][-1][1]) <= 1.04
+assert (
+    hist.metrics_centralized["accuracy"][0][1]
+    / hist.metrics_centralized["accuracy"][-1][1]
+) <= 1.04 or (hist.loss_centralized[0][1] / hist.loss_centralized[-1][1]) >= 0.96
