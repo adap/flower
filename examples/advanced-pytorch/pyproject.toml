@@ -15,5 +15,5 @@ authors = [
 python = ">=3.8,<3.11"
 flwr = ">=1.0,<2.0"
 torch = "1.13.1"
-torchvision = "0.13.0"
+torchvision = "0.14.1"
 validators = "0.18.2"
