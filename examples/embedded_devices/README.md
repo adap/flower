@@ -15,7 +15,7 @@ What follows is a step-by-step guide on how to setup your client/s and the serve
 
 <!-- jetson xavier-nx image borrowed from: https://developer.nvidia.com/embedded/jetson-xavier-nx-devkit -->
 
-![alt text](media/diagram.png)
+![alt text](_static/diagram.png)
 
 ## Clone this repo
 
@@ -54,7 +54,7 @@ The only requirement for the server is to have flower installed. You can do so b
    ```
 
 6. (optional) additional packages:
-   <img align="right" style="padding-top: 40px; padding-left: 15px" width="575" height="380" src="media/tmux_jtop_view.gif">
+   <img align="right" style="padding-top: 40px; padding-left: 15px" width="575" height="380" src="_static/tmux_jtop_view.gif">
 
    - [jtop](https://github.com/rbonghi/jetson_stats),  to monitor CPU/GPU utilization, power consumption and, many more.
 
@@ -107,13 +107,13 @@ The only requirement for the server is to have flower installed. You can do so b
 
 . (optional) additional packages: you could install `TMUX` (see point `6` above) and `htop` as a replacement for `jtop` (which is only available for Jetson devices). Htop can be installed via: `sudo apt-get install htop -y`.
 
-# Running FL training with Flower
+## Running FL training with Flower
 
 For this demo we'll be using [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html), a popular dataset for image classification comprised of 10 classes (e.g. car, bird, airplane) and a total of 60K `32x32` RGB images. The training set contains 50K images. The server will automatically download the dataset should it not be found in `./data`. To keep the client side simple, the datasets will be downloaded when building the docker image. This will happen as the first stage in both `run_pi.sh` and `run_jetson.sh`.
 
 > If you'd like to make use of your own dataset you could [mount it](https://docs.docker.com/storage/volumes/) to the client docker container when calling `docker run`. We leave this an other more advanced topics for a future example.
 
-## Server
+### Server
 
 Launch the server and define the model you'd like to train. The current code (see `utils.py`) provides two models for CIFAR-10: a small CNN (more suitable for Raspberry Pi) and, a ResNet18, which will run well on the gpu. Each model can be specified using the `--model` flag with options `Net` or `ResNet18`. Launch a FL training setup with one client and doing three rounds as:
 
@@ -122,17 +122,17 @@ Launch the server and define the model you'd like to train. The current code (se
 $ python server.py --server_address <YOUR_SERVER_IP:PORT> --rounds 3 --min_num_clients 1 --min_sample_size 1 --model ResNet18
 ```
 
-## Clients
+### Clients
 
 Asuming you have cloned this repo onto the device/s, then execute the appropiate script to run the docker image, connect with the server and proceed with the training. Note that you can use both a Jetson and a RPi simultaneously, just make sure you modify the script above when launching the server so it waits until 2 clients are online.
 
-### For Jetson
+#### For Jetson
 
 ```bash
 $ ./run_jetson.sh --server_address=<SERVER_ADDRESS> --cid=0 --model=ResNet18
 ```
 
-### For Raspberry Pi
+#### For Raspberry Pi
 
 Depending on the model of RapsberryPi you have, running the smaller `Net` model might be the only option due to the higher RAM budget needed for ResNet18. It should be fine for a RaspberryPi 4 with 4GB of RAM to run a RestNet18 (with an appropiate batch size) but bear in mind that each batch might take several second to complete. The following would run the smaller `Net` model:
 
