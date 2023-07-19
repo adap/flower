@@ -3,7 +3,7 @@ Example: MXNet - Run MXNet Federated
 
 This tutorial will show you how to use Flower to build a federated version of an existing MXNet workload.
 We are using MXNet to train a Sequential model on the MNIST dataset.
-We will structure the example similar to our `PyTorch - From Centralized To Federated <https://github.com/adap/flower/blob/main/examples/pytorch_from_centralized_to_federated>`_ walkthrough. MXNet and PyTorch are very similar and a very good comparison between MXNet and PyTorch is given `here <https://mxnet.apache.org/versions/1.7.0/api/python/docs/tutorials/getting-started/to-mxnet/pytorch.html>`_.
+We will structure the example similar to our `PyTorch - From Centralized To Federated <https://github.com/adap/flower/blob/main/examples/pytorch-from-centralized-to-federated>`_ walkthrough. MXNet and PyTorch are very similar and a very good comparison between MXNet and PyTorch is given `here <https://mxnet.apache.org/versions/1.7.0/api/python/docs/tutorials/getting-started/to-mxnet/pytorch.html>`_.
 First, we build a centralized training approach based on the `Handwritten Digit Recognition <https://mxnet.apache.org/versions/1.7.0/api/python/docs/tutorials/packages/gluon/image/mnist.html>`_ tutorial.
 Then, we build upon the centralized training code to run the training in a federated fashion.
 
@@ -355,6 +355,6 @@ in each window (make sure that the server is still running before you do so) and
 Next Steps
 ----------
 
-The full source code for this example: `MXNet: From Centralized To Federated (Code) <https://github.com/adap/flower/blob/main/examples/mxnet_from_centralized_to_federated>`_.
+The full source code for this example: `MXNet: From Centralized To Federated (Code) <https://github.com/adap/flower/blob/main/examples/mxnet-from-centralized-to-federated>`_.
 Our example is of course somewhat over-simplified because both clients load the exact same dataset, which isn't realistic.
 You're now prepared to explore this topic further. How about using a CNN or using a different dataset? How about adding more clients?
