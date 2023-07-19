@@ -37,7 +37,7 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     public_key_to_bytes,
 )
 from flwr.common.secure_aggregation.quantization import quantize
-from flwr.common.secure_aggregation.secaggplus import (
+from flwr.common.secure_aggregation.secaggplus_utils import (
     pseudo_rand_gen,
     share_keys_plaintext_concat,
     share_keys_plaintext_separate,

@@ -17,7 +17,7 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_shared_key,
 )
 from flwr.common.secure_aggregation.quantization import dequantize
-from flwr.common.secure_aggregation.secaggplus import pseudo_rand_gen
+from flwr.common.secure_aggregation.secaggplus_utils import pseudo_rand_gen
 from flwr.common.secure_aggregation.weights_arithmetic import (
     factor_weights_extract,
     weights_addition,
