@@ -6,7 +6,15 @@ ROOT=`pwd`
 INDEX=$ROOT/examples/README.md
 INSERT_LINE=6
 
-sed -i.bu '7,$d' $INDEX
+rm -f $INDEX
+touch $INDEX
+
+echo "# Flower Examples documentation" >> $INDEX
+echo "" >> $INDEX
+echo "\`\`\`{toctree}" >> $INDEX
+echo "---" >> $INDEX
+echo "maxdepth: 1" >> $INDEX
+echo "---" >> $INDEX
 
 rm -f "examples/doc/source/*.md"
 
