@@ -83,4 +83,4 @@ hist = fl.simulation.start_simulation(
 assert (
     hist.metrics_centralized["accuracy"][0][1]
     / hist.metrics_centralized["accuracy"][-1][1]
-) <= 1.04 or (hist.loss_centralized[0][1] / hist.loss_centralized[-1][1]) >= 0.96
+) <= 1.04 or (hist.losses_centralized[0][1] / hist.losses_centralized[-1][1]) >= 0.96
