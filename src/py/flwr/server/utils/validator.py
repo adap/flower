@@ -121,8 +121,8 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
                 "legacy_client_message"
             ),
         }
-        if sum(has_fields.values()) == 0:
-            err_msg = ", ".join([f"`{o}`" for o in has_fields])
+        if not (has_fields["sa"] or has_fields["legacy_client_message"]):
+            err_msg = ", ".join([f"`{field}`" for field in has_fields])
             validation_errors.append(
                 f"`task` in `TaskRes` must set at least one of fields {{{err_msg}}}"
             )
