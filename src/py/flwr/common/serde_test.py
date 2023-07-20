@@ -21,10 +21,10 @@ from flwr.common import typing
 from flwr.proto import transport_pb2 as pb2
 
 from .serde import (
+    named_values_from_proto,
+    named_values_to_proto,
     scalar_from_proto,
     scalar_to_proto,
-    secagg_msg_from_proto,
-    secagg_msg_to_proto,
     status_from_proto,
     status_to_proto,
     value_from_proto,
@@ -115,7 +115,7 @@ def test_value_serialization_deserialization() -> None:
             assert value == deserialized
 
 
-def test_secure_aggregation_serialization_deserialization() -> None:
+def test_named_values_serialization_deserialization() -> None:
     """Test if Secure Aggregation message is identical after (de-)serialization."""
     # Prepare
     values = [
@@ -138,19 +138,14 @@ def test_secure_aggregation_serialization_deserialization() -> None:
     named_values = {f"value {i}": value for i, value in enumerate(values)}
 
     # Execute
-    serialized = secagg_msg_to_proto(
-        typing.SecureAggregation(
-            named_values=cast(Dict[str, typing.Value], named_values)
-        )
-    )
-    deserialized = secagg_msg_from_proto(serialized)
-    deserialized_named_values = deserialized.named_values
+    serialized = named_values_to_proto(cast(Dict[str, typing.Value], named_values))
+    deserialized = named_values_from_proto(serialized)
 
     # Assert
-    assert len(named_values) == len(deserialized_named_values)
+    assert len(named_values) == len(deserialized)
     for name in named_values:
         expected = named_values[name]
-        actual = deserialized_named_values[name]
+        actual = deserialized[name]
         if isinstance(expected, list):
             assert isinstance(actual, list)
             assert len(expected) == len(actual)
