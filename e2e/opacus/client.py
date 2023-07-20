@@ -1,5 +1,6 @@
 import math
 from collections import OrderedDict
+from sys import argv
 
 import torch
 import torch.nn as nn
@@ -11,6 +12,10 @@ from torchvision.datasets import CIFAR10
 
 import flwr as fl
 
+if len(argv) > 1:
+    transport = argv[1]
+else:
+    transport = "grpc-bidi"
 
 # Define parameters.
 PARAMS = {
@@ -136,5 +141,6 @@ class FlowerClient(fl.client.NumPyClient):
 if __name__ == "__main__":
     fl.client.start_numpy_client(
         server_address="127.0.0.1:8080",
-        client=FlowerClient(model)
+        client=FlowerClient(model),
+        transport=transport,
     )

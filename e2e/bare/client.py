@@ -1,8 +1,14 @@
+from sys import argv
+
 import flwr as fl
 import numpy as np
 
 SUBSET_SIZE = 1000
 
+if len(argv) > 1:
+    transport = argv[1]
+else:
+    transport = "grpc-bidi"
 
 model_params = np.array([1])
 objective = 5
@@ -25,4 +31,4 @@ class FlowerClient(fl.client.NumPyClient):
 
 if __name__ == "__main__":
     # Start Flower client
-    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=FlowerClient())
+    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=FlowerClient(), transport=transport)

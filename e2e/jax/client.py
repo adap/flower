@@ -2,6 +2,7 @@
 
 
 from typing import Dict, List, Tuple, Callable
+from sys import argv
 
 import flwr as fl
 import numpy as np
@@ -10,6 +11,10 @@ import jax.numpy as jnp
 
 import jax_training
 
+if len(argv) > 1:
+    transport = argv[1]
+else:
+    transport = "grpc-bidi"
 
 # Load data and determine model shape
 train_x, train_y, test_x, test_y = jax_training.load_data()
@@ -52,4 +57,4 @@ class FlowerClient(fl.client.NumPyClient):
 
 if __name__ == "__main__":
     # Start Flower client
-    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=FlowerClient())
+    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=FlowerClient(), transport=transport)

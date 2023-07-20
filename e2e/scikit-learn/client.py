@@ -1,4 +1,6 @@
 import warnings
+from sys import argv
+
 import flwr as fl
 import numpy as np
 
@@ -6,6 +8,11 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
 
 import utils
+
+if len(argv) > 1:
+    transport = argv[1]
+else:
+    transport = "grpc-bidi"
 
 # Load MNIST dataset from https://www.openml.org/d/554
 (X_train, y_train), (X_test, y_test) = utils.load_mnist()
@@ -46,4 +53,4 @@ class FlowerClient(fl.client.NumPyClient):
         
 if __name__ == "__main__":
     # Start Flower client
-    fl.client.start_numpy_client(server_address="0.0.0.0:8080", client=FlowerClient())
+    fl.client.start_numpy_client(server_address="0.0.0.0:8080", client=FlowerClient(), transport=transport)

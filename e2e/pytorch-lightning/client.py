@@ -3,7 +3,13 @@ import mnist
 import pytorch_lightning as pl
 from collections import OrderedDict
 import torch
+from sys import argv
 
+
+if len(argv) > 1:
+    transport = argv[1]
+else:
+    transport = "grpc-bidi"
 
 class FlowerClient(fl.client.NumPyClient):
     def __init__(self, model, train_loader, val_loader, test_loader):
@@ -56,7 +62,7 @@ def main() -> None:
 
     # Flower client
     client = FlowerClient(model, train_loader, val_loader, test_loader)
-    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=client)
+    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=client, transport=transport)
 
 
 if __name__ == "__main__":

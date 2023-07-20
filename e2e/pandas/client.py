@@ -1,11 +1,16 @@
 import warnings
 from typing import Dict, List, Tuple
+from sys import argv
 
 import numpy as np
 import pandas as pd
 
 import flwr as fl
 
+if len(argv) > 1:
+    transport = argv[1]
+else:
+    transport = "grpc-bidi"
 
 df = pd.read_csv("./data/client.csv")
 
@@ -38,4 +43,5 @@ if __name__ == "__main__":
     fl.client.start_numpy_client(
         server_address="127.0.0.1:8080",
         client=FlowerClient(),
+        transport=transport,
     )

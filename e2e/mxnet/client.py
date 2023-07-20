@@ -6,6 +6,8 @@ https://mxnet.apache.org/api/python/docs/tutorials/packages/gluon/image/mnist.ht
 """
 
 
+from sys import argv
+
 import flwr as fl
 import numpy as np
 import mxnet as mx
@@ -16,6 +18,11 @@ from mxnet import autograd as ag
 import mxnet.ndarray as F
 
 SUBSET_SIZE = 50
+
+if len(argv) > 1:
+    transport = argv[1]
+else:
+    transport = "grpc-bidi"
 
 # Fixing the random seed
 mx.random.seed(42)
@@ -131,4 +138,4 @@ class FlowerClient(fl.client.NumPyClient):
 
 if __name__ == "__main__":
     # Start Flower client
-    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=FlowerClient())
+    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=FlowerClient(), transport=transport)

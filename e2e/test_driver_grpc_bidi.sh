@@ -4,10 +4,10 @@ set -e
 timeout 2m flower-server --grpc-bidi --grpc-bidi-fleet-api-address 0.0.0.0:8080 &
 sleep 3
 
-python client.py &
+python client.py grpc-bidi &
 sleep 3
 
-python client.py &
+python client.py grpc-bidi &
 sleep 3
 
 timeout 2m python driver.py &
