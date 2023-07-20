@@ -510,7 +510,7 @@ _python_list_type_to_message_and_field_name = {
 def _check_value(value: typing.Value) -> None:
     if isinstance(value, tuple(_python_type_to_field_name.keys())):
         return
-    if isinstance(value, (list, tuple)) and isinstance(
+    if isinstance(value, list) and isinstance(
         value[0], tuple(_python_type_to_field_name.keys())
     ):
         data_type = type(value[0])
@@ -533,7 +533,7 @@ def value_to_proto(value: typing.Value) -> Value:
     _check_value(value)
 
     arg = {}
-    if isinstance(value, (list, tuple)):
+    if isinstance(value, list):
         msg_class, field_name = _python_list_type_to_message_and_field_name[
             type(value[0])
         ]
