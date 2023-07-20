@@ -339,8 +339,8 @@ class ModelManager():
             self,
             client_id: int,
             config: Dict[str, Any],
-            has_fixed_head: bool = False,
-            model_split_class: Type[ModelSplit] = ModelSplit,
+            model_split_class: Type[ModelSplit],
+            has_fixed_head: bool = False
     ):
         """
         Initialize the attributes of the model manager.
@@ -348,13 +348,15 @@ class ModelManager():
         Args:
             client_id: The id of the client.
             config: Dict containing the configurations to be used by the manager.
+            model_split_class: Class to be used to split the model into body and head\
+                (concrete implementation of ModelSplit).
             has_fixed_head: Whether a fixed head should be created.
         """
         super().__init__()
+
         self.client_id = client_id
         self.config = config
-        self._model = model_split_class(self._create_model(), has_fixed_head=has_fixed_head)
-        # self.trainloader, self.testloader = self.load_data()
+        self._model = model_split_class(self._create_model(), has_fixed_head)
 
     def _create_model(self) -> nn.Module:
         """Return model to be splitted into head and body."""
