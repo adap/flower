@@ -20,7 +20,7 @@ import importlib
 is_ray_installed = importlib.util.find_spec("ray") is not None
 
 if is_ray_installed:
-    from flwr.simulation.app import start_simulation
+    from flwr.simulation.app import VirtualClientTemplate, start_simulation
 else:
     RAY_IMPORT_ERROR: str = """Unable to import module `ray`.
 
@@ -36,4 +36,5 @@ To install the necessary dependencies, install `flwr` with the `simulation` extr
 
 __all__ = [
     "start_simulation",
+    "VirtualClientTemplate",
 ]

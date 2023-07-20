@@ -21,7 +21,7 @@ from typing import Callable, Dict, Optional, cast
 import ray
 
 from flwr import common
-from flwr.client import Client, ClientLike, to_client
+from flwr.client import Client, ClientLike, ClientState, InMemoryClientState, InFileSystemVirtualClientState, to_client
 from flwr.client.client import (
     maybe_call_evaluate,
     maybe_call_fit,
@@ -30,17 +30,53 @@ from flwr.client.client import (
 )
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
+from flwr.simulation import VirtualClientTemplate
 
-ClientFn = Callable[[str], ClientLike]
+ClientFn = VirtualClientTemplate  # Callable[[str], ClientLike]
 
 
 class RayClientProxy(ClientProxy):
     """Flower client proxy which delegates work using Ray."""
 
-    def __init__(self, client_fn: ClientFn, cid: str, resources: Dict[str, float]):
+    def __init__(
+        self, client_template: ClientFn, cid: str, resources: Dict[str, float]
+    ):
         super().__init__(cid)
-        self.client_fn = client_fn
+        self.client_fn = client_template
         self.resources = resources
+        self.state: ClientState = None
+
+        self._prepare_client_state()
+
+        # if self.
+    def _prepare_client_state(self):
+        client_state = self.client_fn._get_state()
+        if isinstance(client_state, InMemoryClientState):
+            # the client uses in-memory state, all good! this ClientProxy will
+            # record the state once the client completes its task (e.g. fit())
+            # and before deleting the client object.
+            self.state = InMemoryClientState()
+
+        elif isinstance(client_state, InFileSystemVirtualClientState):
+            self.state = client_state
+            # replace client's internal state with InMemoryClientState and process all
+            # the read/write from/to the file system with the ClientProxy (this object)
+            self.client_fn.client.state = InMemoryClientState()
+        elif client_state is None:
+            # stateless clients
+            pass
+        else:
+            mssg = f"Clients with state {type(client_state)} are not supported for "\
+                    "simulation. Please consider using InMemoryClientState or, if you "\
+                    "need to save the state to disk, use InFileSystemVirtualClientState."
+            raise NotImplementedError(mssg)
+
+    def _fetch_proxy_state(self):
+        """Load state before passing it to a virtual client."""
+
+    def _update_proxy_state(self, client_state: ClientState):
+        """Update persistent state for virtual client."""
+        self.state = client_state
 
     def get_properties(
         self, ins: common.GetPropertiesIns, timeout: Optional[float]
@@ -50,10 +86,12 @@ class RayClientProxy(ClientProxy):
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
         try:
-            res = ray.get(future_get_properties_res, timeout=timeout)
+            res, state = ray.get(future_get_properties_res, timeout=timeout)
         except Exception as ex:
             log(ERROR, ex)
             raise ex
+        # update state
+        self._update_proxy_state(state)
         return cast(
             common.GetPropertiesRes,
             res,
@@ -67,10 +105,12 @@ class RayClientProxy(ClientProxy):
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
         try:
-            res = ray.get(future_paramseters_res, timeout=timeout)
+            res, state = ray.get(future_paramseters_res, timeout=timeout)
         except Exception as ex:
             log(ERROR, ex)
             raise ex
+        # update state
+        self._update_proxy_state(state)
         return cast(
             common.GetParametersRes,
             res,
@@ -82,10 +122,12 @@ class RayClientProxy(ClientProxy):
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
         try:
-            res = ray.get(future_fit_res, timeout=timeout)
+            res, state = ray.get(future_fit_res, timeout=timeout)
         except Exception as ex:
             log(ERROR, ex)
             raise ex
+        # update state
+        self._update_proxy_state(state)
         return cast(
             common.FitRes,
             res,
@@ -99,10 +141,12 @@ class RayClientProxy(ClientProxy):
             **self.resources,
         ).remote(self.client_fn, self.cid, ins)
         try:
-            res = ray.get(future_evaluate_res, timeout=timeout)
+            res, state = ray.get(future_evaluate_res, timeout=timeout)
         except Exception as ex:
             log(ERROR, ex)
             raise ex
+        # update state
+        self._update_proxy_state(state)
         return cast(
             common.EvaluateRes,
             res,
@@ -119,51 +163,62 @@ class RayClientProxy(ClientProxy):
 def launch_and_get_properties(
     client_fn: ClientFn, cid: str, get_properties_ins: common.GetPropertiesIns
 ) -> common.GetPropertiesRes:
-    """Exectue get_properties remotely."""
+    """Execute get_properties remotely."""
     client: Client = _create_client(client_fn, cid)
-    return maybe_call_get_properties(
+    res = maybe_call_get_properties(
         client=client,
         get_properties_ins=get_properties_ins,
     )
+    client_state = client.state.fetch()
+    return res, client_state
 
 
 @ray.remote
 def launch_and_get_parameters(
     client_fn: ClientFn, cid: str, get_parameters_ins: common.GetParametersIns
 ) -> common.GetParametersRes:
-    """Exectue get_parameters remotely."""
+    """Execute get_parameters remotely."""
     client: Client = _create_client(client_fn, cid)
-    return maybe_call_get_parameters(
+    res = maybe_call_get_parameters(
         client=client,
         get_parameters_ins=get_parameters_ins,
     )
+    client_state = client.state.fetch()
+    return res, client_state
 
 
 @ray.remote
 def launch_and_fit(
     client_fn: ClientFn, cid: str, fit_ins: common.FitIns
 ) -> common.FitRes:
-    """Exectue fit remotely."""
+    """Execute fit remotely."""
     client: Client = _create_client(client_fn, cid)
-    return maybe_call_fit(
+    res = maybe_call_fit(
         client=client,
         fit_ins=fit_ins,
     )
+    client_state = client.state.fetch()
+    return res, client_state
 
 
 @ray.remote
 def launch_and_evaluate(
     client_fn: ClientFn, cid: str, evaluate_ins: common.EvaluateIns
 ) -> common.EvaluateRes:
-    """Exectue evaluate remotely."""
+    """Execute evaluate remotely."""
     client: Client = _create_client(client_fn, cid)
-    return maybe_call_evaluate(
+    res = maybe_call_evaluate(
         client=client,
         evaluate_ins=evaluate_ins,
     )
+    client_state = client.state.fetch()
+    return res, client_state
 
 
-def _create_client(client_fn: ClientFn, cid: str) -> Client:
+def _create_client(client_fn: ClientFn, cid: str, client_state: ClientState) -> Client:
     """Create a client instance."""
     client_like: ClientLike = client_fn(cid)
-    return to_client(client_like=client_like)
+    client = to_client(client_like=client_like)
+    # set client state
+    client.state = client_state
+    return client

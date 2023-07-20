@@ -25,6 +25,7 @@ from .numpy_client import NumPyClient as NumPyClient
 from .state import ClientState as ClientState
 from .state import InFileSystemClientState as InFileSystemClientState
 from .state import InMemoryClientState as InMemoryClientState
+from .state import InFileSystemVirtualClientState as InFileSystemVirtualClientState
 
 __all__ = [
     "Client",
@@ -37,4 +38,5 @@ __all__ = [
     "ClientState",
     "InMemoryClientState",
     "InFileSystemClientState",
+    "InFileSystemVirtualClientState",
 ]

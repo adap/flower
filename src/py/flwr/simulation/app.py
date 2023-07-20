@@ -59,9 +59,25 @@ REASON:
 """
 
 
+class VirtualClientTemplate:
+    def __init__(self, client_type):
+        # Pass a client type
+        self.client = client_type
+
+    def _get_state(self):
+        # To be used internally by the ClientProxy object (since, unlike
+        # the client, it persist for the duration of the simulation.)
+        return self.client.state
+
+    def __call__(self, cid: str):
+        # spawns the client, this will be called by the ClientProxy
+        # when it's sampled by the Strategy
+        return self.client()
+
+
 def start_simulation(  # pylint: disable=too-many-arguments
     *,
-    client_fn: Callable[[str], ClientLike],
+    client_template: VirtualClientTemplate,
     num_clients: Optional[int] = None,
     clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, float]] = None,
@@ -76,16 +92,17 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     Parameters
     ----------
-    client_fn : Callable[[str], ClientLike]
-        A function creating client instances. The function must take a single
-        `str` argument called `cid`. It should return a single client instance
-        of type ClientLike. Note that the created client instances are ephemeral
-        and will often be destroyed after a single method invocation. Since client
-        instances are not long-lived, they should not attempt to carry state over
-        method invocations. Any state required by the instance (model, dataset,
-        hyperparameters, ...) should be (re-)created in either the call to `client_fn`
-        or the call to any of the client methods (e.g., load evaluation data in the
-        `evaluate` method itself).
+    client_template : VirtualClientTemplate
+        A wrapper for a ClientLike object. The __call__ method will be executed
+        by the RayClientProxy when the client associated to its client id is
+        sampled by the strategy. You can customize the __call__ method but its
+        signature (i.e. input arguments) shouldn't be modified. If the underlying
+        client is stateful, its state will be managed by RayClientProxy and ensure
+        it persists over the course of the simulation. If an InFileSystem state
+        is used, the file system I/O will be delegated to the RayClientProxy. In
+        other words, the client object itself will behave as if with InMemory state
+        but this will be initialized from the state in disk. Similarly, once the client
+        completes its tasks (e.g. fit()), its state will be stored to disk.
     num_clients : Optional[int]
         The total number of clients in this simulation. This must be set if
         `clients_ids` is not set and vice-versa.
@@ -186,7 +203,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
     resources = client_resources if client_resources is not None else {}
     for cid in cids:
         client_proxy = RayClientProxy(
-            client_fn=client_fn,
+            client_template=client_template,
             cid=cid,
             resources=resources,
         )

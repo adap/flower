@@ -54,7 +54,8 @@ class InMemoryClientState(ClientState):
     """An in-memory Client State class for clients to record their state and use it
     across rounds.
 
-    Note thi state won't persist once the Federated Learning workload is completed. If
+    This in-memory state is suitable for both "real" and "simulated" clients. 
+    Note the state won't persist once the Federated Learning workload is completed. If
     you would like to save/load the state to/from disk, use the
     `InFileSystemClientState` class.
     """
@@ -76,13 +77,14 @@ class InMemoryClientState(ClientState):
         self._state = state
 
 
-class InFileSystemClientState(InMemoryClientState):
+class InFileSystemClientState(ClientState):
     """A Client State class that enables the loading/recording from/to the file system.
 
     In this way, the client state can be retrieved/updated across different Federated
     Learning workloads. This client state class can be used to initialize the client
     state at the beginning of the client's life.
     """
+    _state: Dict[str, Any] = {}
 
     def __init__(
         self,
@@ -171,16 +173,17 @@ class InFileSystemClientState(InMemoryClientState):
             if saved and not self.keep_in_memory:
                 self._state.clear()
 
+class InFileSystemVirtualClientState(InFileSystemClientState):
+    """In-FileSystem Client State for Clients in simulation.
+    
+    It behaves very much like InFileSystemClientState but, since
+    clients do not persist across rounds and might be spawned in
+    different machines each time, accessing the filesystem should
+    be done at specific times. Concretely, before a client is spawned
+    (e.g. to do `fit()`) and when it ends its task. Then, the ClientProxy
+    object (which is the entity that interfaces with the server) can
+    update the state in the file system. In this way, the client gets
+    exposed an InMemoryClientState object at runtime."""
 
-# if __name__ == "__main__":
-#     ss = InMemoryClientState()
-#     print(f"{ss.fetch() = }")
-#     ss.update({"hello": 123})
-#     print(f"{ss.fetch() = }")
-
-#     ssfs = InFileSystemClientState(state_dir="./here/teststate")
-#     print(f"{ssfs.fetch() = }")
-#     ssfs.update({"hello": 123})
-#     ssfs.update({"hello": 1235}, to_disk=False)
-#     print(f"{ssfs.fetch() = }")
-#     print(f"{ssfs.fetch(from_disk=True) = }")
+    def __init__(self, update_fs_each_round: bool = True):
+        self.update_fs_each_round = update_fs_each_round
