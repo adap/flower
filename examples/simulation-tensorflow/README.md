@@ -1,4 +1,4 @@
-# Flower Simulation example using TensorFlow/Keras
+# EXPERIMENTAL Flower Simulation Example using TensorFlow/Keras
 
 This introductory example uses the simulation capabilities of Flower to simulate a large number of clients on either a single machine of a cluster of machines.
 

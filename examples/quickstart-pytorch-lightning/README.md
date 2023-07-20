@@ -1,1 +1,1 @@
-# Flower Examples using PyTorch Lightning
+# Quickstart PyTorch Lightning example

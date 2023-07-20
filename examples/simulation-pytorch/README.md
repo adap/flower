@@ -1,4 +1,4 @@
-# Flower Simulation example using PyTorch
+# example_simulation_ray
 
 This code splits CIFAR-10 dataset into `pool_size` partitions (user defined) and does a few rounds of CIFAR-10 training. In this example, we leverage [`Ray`](https://docs.ray.io/en/latest/index.html) to simulate Flower Clients participating in FL rounds in an resource-aware fashion. This is possible via the [`RayClientProxy`](https://github.com/adap/flower/blob/main/src/py/flwr/simulation/ray_transport/ray_client_proxy.py) which bridges a standard Flower server with standard Flower clients while excluding the gRPC communication protocol and the Client Manager in favour of Ray's scheduling and communication layers.
 
