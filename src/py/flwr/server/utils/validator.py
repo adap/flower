@@ -71,7 +71,7 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
             ),
         }
         if sum(has_fields.values()) == 0:
-            err_msg = ", ".join([f"`{o}`" for o in has_fields])
+            err_msg = ", ".join([f"`{field}`" for field in has_fields])
             validation_errors.append(
                 f"`task` in `TaskIns` must set at least one of fields {{{err_msg}}}"
             )
