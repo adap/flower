@@ -51,17 +51,21 @@ class ClientState(ABC):
 
 
 class InMemoryClientState(ClientState):
-    _state: Dict[str, Any] = {}
+    """An in-memory Client State class for clients to record their state and use it
+    across rounds.
 
-    # TODO: this type of state is intended for those settings were client want to preserve some of their info across rounds
-    # but that do now want to save anything to disk (#!!! not even at the end of the experiment). How do we warn users about this?
-    # Should we instead design a flag to save to disk at the end? if so, there is too much overlap between InMemoryClientState and 
-    # InFileSystemClientState
+    Note thi state won't persist once the Federated Learning workload is completed. If
+    you would like to save/load the state to/from disk, use the
+    `InFileSystemClientState` class.
+    """
+
+    _state: Dict[str, Any] = {}
 
     def __init__(self):
         super().__init__()
 
     def setup(self) -> None:
+        """Initialise the state."""
         self._state = {}
 
     def fetch(self) -> Dict:
@@ -72,17 +76,23 @@ class InMemoryClientState(ClientState):
         self._state = state
 
 
-class InFileSystemClientState(ClientState):
-    _state: Dict[str, Any] = {}
+class InFileSystemClientState(InMemoryClientState):
+    """A Client State class that enables the loading/recording from/to the file system.
+
+    In this way, the client state can be retrieved/updated across different Federated
+    Learning workloads. This client state class can be used to initialize the client
+    state at the beginning of the client's life.
+    """
 
     def __init__(
         self,
         state_filename: str = "client_state",
         keep_in_memory: bool = True,
     ):
+        super().__init__()
         self.state_filename = state_filename
         self.keep_in_memory = keep_in_memory
-        self.path = None # to be setup upon setup() call
+        self.path = None  # to be setup upon setup() call
 
     def setup(self, state_dir: str, create_directory: bool) -> None:
         """Initialize state by loading it from disk if exists.
@@ -94,9 +104,6 @@ class InFileSystemClientState(ClientState):
             # load state
             self._load_state()
         else:
-            # state is empty
-            self._state = {}
-
             if create_directory:
                 log(
                     DEBUG, f"Creating directory for client state: {self.path.resolve()}"
@@ -114,8 +121,6 @@ class InFileSystemClientState(ClientState):
                     "This client's state will remain in memory for the duration of the"
                     "experiment.",
                 )
-                # TODO: dynamically revert to InMemoryClientState type?
-
 
     def _load_state(self):
         """Load client state from pickle."""
