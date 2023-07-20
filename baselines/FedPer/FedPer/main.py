@@ -42,9 +42,6 @@ def main(cfg: DictConfig) -> None:
         learning_rate=cfg.learning_rate,
         model=cfg.model,
     )
-    print("................")
-    print(client_fn)
-    quit()
 
     # get function that will executed by the strategy's evaluate() method
     # Set server's device
@@ -63,11 +60,6 @@ def main(cfg: DictConfig) -> None:
         return fit_config_fn
 
     # 4. Define your strategy
-    # pass all relevant argument (including the global dataset used after aggregation,
-    # if needed by your method.)
-    # strategy = instantiate(cfg.strategy, <additional arguments if desired>)
-    # instantiate strategy according to config. Here we pass other arguments
-    # that are only defined at run time.
     strategy = instantiate(
         cfg.strategy,
         evaluate_fn=evaluate_fn,

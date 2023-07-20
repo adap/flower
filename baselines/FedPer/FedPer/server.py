@@ -4,21 +4,17 @@ Optionally, also define a new Server class (please note this is not needed in mo
 settings).
 """
 
-import random
-#from flcore.clients.clientper import clientPer
-#from flcore.servers.serverbase import Server
-from threading import Thread
-
-from collections import OrderedDict
-from typing import Callable, Dict, Optional, Tuple
-
 import torch
-from flwr.common.typing import NDArrays, Scalar
-from hydra.utils import instantiate
-from omegaconf import DictConfig
-from torch.utils.data import DataLoader
+import random
 
+from typing import Callable, Dict, Optional, Tuple
+from threading import Thread
+from omegaconf import DictConfig
+from collections import OrderedDict
+from hydra.utils import instantiate
 from FedPer.models import test
+from torch.utils.data import DataLoader
+from flwr.common.typing import NDArrays, Scalar
 
 def gen_evaluate_fn(
     testloader: DataLoader,

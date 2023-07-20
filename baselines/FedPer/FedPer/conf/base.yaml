@@ -27,9 +27,11 @@ model:
   _target_: FedPer.models.MobileNet_v1
   num_classes: 10
 
+fit_config:
+  drop_client: false
+
 strategy:
-  _target_: # points to your strategy (either custom or exiting in Flower)
-  # rest of strategy config
+  _target_: FedPer.strategy.AggregateBodyStrategyPipeline
 
 client:
   _target_: flwr.server.strategy.FedAvg
