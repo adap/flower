@@ -116,7 +116,7 @@ def test_value_serialization_deserialization() -> None:
 
 
 def test_named_values_serialization_deserialization() -> None:
-    """Test if Secure Aggregation message is identical after (de-)serialization."""
+    """Test if named values is identical after (de-)serialization."""
     # Prepare
     values = [
         # boolean scalar and list
