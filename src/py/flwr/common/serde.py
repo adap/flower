@@ -489,7 +489,7 @@ def scalar_from_proto(scalar_msg: Scalar) -> typing.Scalar:
 # === Value messages ===
 
 
-__python_type_to_field_name = {
+_python_type_to_field_name = {
     float: "double",
     int: "sint64",
     bool: "bool",
@@ -498,7 +498,7 @@ __python_type_to_field_name = {
 }
 
 
-__python_list_type_to_message_and_field_name = {
+_python_list_type_to_message_and_field_name = {
     float: (Value.DoubleList, "double_list"),
     int: (Value.Sint64List, "sint64_list"),
     bool: (Value.BoolList, "bool_list"),
@@ -507,11 +507,11 @@ __python_list_type_to_message_and_field_name = {
 }
 
 
-def __check_value(value: typing.Value) -> None:
-    if isinstance(value, tuple(__python_type_to_field_name.keys())):
+def _check_value(value: typing.Value) -> None:
+    if isinstance(value, tuple(_python_type_to_field_name.keys())):
         return
     if isinstance(value, (list, tuple)) and isinstance(
-        value[0], tuple(__python_type_to_field_name.keys())
+        value[0], tuple(_python_type_to_field_name.keys())
     ):
         data_type = type(value[0])
         for element in value:
@@ -519,7 +519,7 @@ def __check_value(value: typing.Value) -> None:
                 continue
             raise Exception(
                 f"Inconsistent type: the types of elements in the list must be the same"
-                f"(expect {data_type}, but get {type(element)})"
+                f"(expected {data_type}, but got {type(element)})"
             )
     else:
         raise TypeError(
@@ -530,16 +530,16 @@ def __check_value(value: typing.Value) -> None:
 
 def value_to_proto(value: typing.Value) -> Value:
     """Serialize `Value` to ProtoBuf."""
-    __check_value(value)
+    _check_value(value)
 
     arg = {}
     if isinstance(value, (list, tuple)):
-        msg_class, field_name = __python_list_type_to_message_and_field_name[
+        msg_class, field_name = _python_list_type_to_message_and_field_name[
             type(value[0])
         ]
         arg[field_name] = msg_class(vals=value)
     else:
-        arg[__python_type_to_field_name[type(value)]] = value
+        arg[_python_type_to_field_name[type(value)]] = value
     return Value(**arg)
 
 
