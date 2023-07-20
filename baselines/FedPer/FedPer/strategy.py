@@ -28,10 +28,9 @@ class ServerInitializationStrategy(Strategy):
 
     def __init__(
         self,
-        model_split_class: Type[ModelSplit],
         create_model: Callable[[Dict[str, Any]], nn.Module],
         config: Dict[str, Any] = {},
-        algorithm: str = Algorithms.FEDAVG.value,
+        algorithm: str = 'fedavg',
         has_fixed_head: bool = False,
         *args: Any,
         **kwargs: Any
@@ -68,7 +67,7 @@ class ServerInitializationStrategy(Strategy):
         return initial_parameters
 
 
-class AggregateBodyStrategy(Strategy):
+class AggregateBodyStrategy(ServerInitializationStrategy):
     """Body Aggregation strategy implementation."""
 
     def __init__(

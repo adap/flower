@@ -12,9 +12,8 @@ from omegaconf import DictConfig, OmegaConf
 from hydra.utils import instantiate
 from FedPer import client, server, utils
 from FedPer.dataset import load_datasets
+from FedPer.strategy import AggregateBodyStrategy
 from hydra.core.hydra_config import HydraConfig
-
-
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig) -> None:
