@@ -510,7 +510,7 @@ __python_list_type_to_message_and_field_name = {
 def __check_value(value: typing.Value) -> None:
     if isinstance(value, tuple(__python_type_to_field_name.keys())):
         return
-    if isinstance(value, (list, tuple)) and isinstance(
+    if isinstance(value, list) and isinstance(
         value[0], tuple(__python_type_to_field_name.keys())
     ):
         data_type = type(value[0])
