@@ -71,7 +71,7 @@ Stay tuned, more tutorials are coming soon. Topics include **Privacy and Securit
 
 ## 30-Minute Federated Learning Tutorial
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/examples/simulation_pytorch_colab/tutorial.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/examples/simulation_pytorch_colab/tutorial.ipynb))
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/examples/simulation-pytorch-colab/tutorial.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/examples/simulation-pytorch-colab/tutorial.ipynb))
 
 
 ## Documentation
