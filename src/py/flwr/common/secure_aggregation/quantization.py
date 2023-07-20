@@ -22,8 +22,8 @@ import numpy as np
 from flwr.common.typing import NDArrayFloat, NDArrayInt
 
 
-def _stochastic_round(arr: NDArrayInt) -> NDArrayInt:
-    ret: NDArrayInt = np.ceil(arr).astype(arr.dtype)
+def _stochastic_round(arr: NDArrayFloat) -> NDArrayInt:
+    ret: NDArrayInt = np.ceil(arr).astype(np.int32)
     rand_arr = np.random.rand(*ret.shape)
     ret[rand_arr < ret - arr] -= 1
     return ret

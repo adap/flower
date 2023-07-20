@@ -48,25 +48,25 @@ def weights_zero_generate(
 
 
 def weights_addition(
-    weight1: List[NDArray[Any]], weight2: List[NDArray[Any]]
+    weights1: List[NDArray[Any]], weights2: List[NDArray[Any]]
 ) -> List[NDArray[Any]]:
     """Add two weights."""
-    return [weight1[idx] + weight2[idx] for idx in range(len(weight1))]
+    return [weights1[idx] + weights2[idx] for idx in range(len(weights1))]
 
 
 def weights_subtraction(
-    weight1: List[NDArray[Any]], weight2: List[NDArray[Any]]
+    weights1: List[NDArray[Any]], weights2: List[NDArray[Any]]
 ) -> List[NDArray[Any]]:
     """Subtract weights from the other weights."""
-    return [weight1[idx] - weight2[idx] for idx in range(len(weight1))]
+    return [weights1[idx] - weights2[idx] for idx in range(len(weights1))]
 
 
-def weights_mod(weight: List[NDArray[Any]], divisor: int) -> List[NDArray[Any]]:
+def weights_mod(weights: List[NDArray[Any]], divisor: int) -> List[NDArray[Any]]:
     """Take mod of weights with an integer divisor."""
     if bin(divisor).count("1") == 1:
         msk = divisor - 1
-        return [weight[idx] & msk for idx in range(len(weight))]
-    return [weight[idx] % divisor for idx in range(len(weight))]
+        return [weights[idx] & msk for idx in range(len(weights))]
+    return [weights[idx] % divisor for idx in range(len(weights))]
 
 
 def weights_multiply(

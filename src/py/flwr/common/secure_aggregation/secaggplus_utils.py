@@ -15,10 +15,11 @@
 """Utility functions for the SecAgg/SecAgg+ protocol."""
 
 
-from typing import Any, List, Tuple
+from typing import List, Tuple
 
 import numpy as np
-from numpy.typing import NDArray
+
+from flwr.common.typing import NDArrayInt
 
 
 def share_keys_plaintext_concat(
@@ -83,7 +84,7 @@ def share_keys_plaintext_separate(plaintext: bytes) -> Tuple[int, int, bytes, by
 
 def pseudo_rand_gen(
     seed: bytes, num_range: int, dimensions_list: List[Tuple[int]]
-) -> List[NDArray[Any]]:
+) -> List[NDArrayInt]:
     """Seeded pseudo-random number generator for noise generation with Numpy."""
     assert len(seed) & 0x3 == 0
     seed32 = 0

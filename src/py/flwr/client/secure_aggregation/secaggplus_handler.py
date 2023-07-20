@@ -17,13 +17,19 @@
 
 
 import os
+import time
 from dataclasses import dataclass, field
-from logging import INFO, WARNING
-from typing import Dict, List, Tuple, cast
+from logging import ERROR, INFO, WARNING
+from typing import Dict, List, Optional, Tuple, Union, cast
 
-import numpy as np
-
-from flwr.common import ndarray_to_bytes
+from flwr.client.client import Client
+from flwr.client.numpy_client import NumPyClient
+from flwr.common import (
+    bytes_to_ndarray,
+    ndarray_to_bytes,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
+)
 from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.shamir import create_shares
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
@@ -49,7 +55,7 @@ from flwr.common.secure_aggregation.weights_arithmetic import (
     weights_multiply,
     weights_subtraction,
 )
-from flwr.common.typing import SecureAggregation
+from flwr.common.typing import FitIns, SecureAggregation
 
 from .handler import SecureAggregationHandler
 
@@ -76,6 +82,7 @@ class _State:
     pk2: bytes = b""
     b: bytes = b""
     public_keys_dict: Dict[int, Tuple[bytes, bytes]] = field(default_factory=dict)
+    client: Optional[Union[Client, NumPyClient]] = None
 
 
 class SecAggPlusHandler(SecureAggregationHandler):
@@ -98,10 +105,16 @@ class SecAggPlusHandler(SecureAggregationHandler):
         SecureAggregation
             The final/intermediate results of the SecAgg+ protocol.
         """
+        if not isinstance(self, (Client, NumPyClient)):
+            raise TypeError(
+                "The subclass of SecAggPlusHandler must be "
+                "the subclass of Client or NumPyClient."
+            )
         stage = str(sa.named_values.pop("stage"))
         if stage == "setup":
             if self._current_stage != "unmasking":
                 log(WARNING, "restart from setup stage")
+            self._shared_state = _State(client=self)
             self._current_stage = stage
             return _setup(self._shared_state, sa)
         # if stage is not "setup", the new stage should be the next stage
@@ -128,7 +141,6 @@ def _setup(state: _State, sa: SecureAggregation) -> SecureAggregation:
     sec_agg_param_dict = sa.named_values
     state.sample_num = cast(int, sec_agg_param_dict["share_num"])
     state.sid = cast(int, sec_agg_param_dict["secure_id"])
-    # self.sec_agg_id = sec_agg_param_dict["secure_id"]
     log(INFO, "Client %d: starting stage 0...", state.sid)
 
     state.share_num = cast(int, sec_agg_param_dict["share_num"])
@@ -244,16 +256,24 @@ def _collect_masked_input(state: _State, sa: SecureAggregation) -> SecureAggrega
         state.sk1_share_dict[src] = sk1_share
 
     # fit client
-    # IMPORTANT ASSUMPTION: ASSUME ALL CLIENTS FIT SAME AMOUNT OF DATA
     if state.drop_flag:
-        # log(ERROR, "Force dropout due to testing!!")
-        raise Exception("Force dropout due to testing")
+        # simulate delated response/dropout
+        time.sleep(40)
+    weights_bytes = cast(List[bytes], sa.named_values["parameters"])
+    weights = [bytes_to_ndarray(w) for w in weights_bytes]
+    if isinstance(state.client, Client):
+        fit_res = state.client.fit(
+            FitIns(parameters=ndarrays_to_parameters(weights), config={})
+        )
+        weights_factor = fit_res.num_examples
+        weights = parameters_to_ndarrays(fit_res.parameters)
+    elif isinstance(state.client, NumPyClient):
+        weights, weights_factor, _ = state.client.fit(weights, {})
+    else:
+        log(ERROR, "Client %d: fit function is none", state.sid)
 
-    # weights = [bytes_to_ndarray(w) for w in msg.named_values["parameters"]]
-    # weights, weights_factor, _ = self.fit(weights, {})
-
-    weights = [np.zeros(10000)]
-    weights_factor = 1
+    # weights = [np.zeros(10000)]
+    # weights_factor = 1
 
     # Quantize weight update vector
     quantized_weights = quantize(weights, state.clipping_range, state.target_range)
