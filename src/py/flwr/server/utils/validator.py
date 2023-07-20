@@ -20,8 +20,7 @@ from typing import List, Union
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 
 
-# pylint: disable-next=too-many-branches
-# pylint: disable-next=too-many-statements
+# pylint: disable-next=too-many-branches,too-many-statements
 def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str]:
     """Validate a TaskIns or TaskRes."""
     validation_errors = []
