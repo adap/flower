@@ -15,9 +15,9 @@
 """ProtoBuf serialization and deserialization."""
 
 
-from typing import Any, List, Optional, cast
+from typing import Any, Dict, List, cast
 
-from flwr.proto.task_pb2 import SecureAggregation, Task, Value
+from flwr.proto.task_pb2 import Value
 from flwr.proto.transport_pb2 import (
     ClientMessage,
     Code,
@@ -553,64 +553,18 @@ def value_from_proto(value_msg: Value) -> typing.Value:
     return cast(typing.Value, value)
 
 
-# === SecureAggregation messages ===
+# === Named Values ===
 
 
-def secagg_msg_to_proto(
-    secure_aggregation: typing.SecureAggregation,
-) -> SecureAggregation:
-    """Serialize `SecureAggregation` to ProtoBuf."""
-    return SecureAggregation(
-        named_values={
-            name: value_to_proto(value)
-            for name, value in secure_aggregation.named_values.items()
-        }
-    )
+def named_values_to_proto(
+    named_values: Dict[str, typing.Value],
+) -> Dict[str, Value]:
+    """Serialize named values to ProtoBuf."""
+    return {name: value_to_proto(value) for name, value in named_values.items()}
 
 
-def secagg_msg_from_proto(sa_msg: SecureAggregation) -> typing.SecureAggregation:
-    """Deserialize `SecureAggregation` from ProtoBuf."""
-    return typing.SecureAggregation(
-        named_values={
-            name: value_from_proto(value) for name, value in sa_msg.named_values.items()
-        }
-    )
-
-
-# === Task messages ===
-
-
-def task_msg_to_proto(
-    task: typing.Task, merge_from_proto: Optional[Task] = None
-) -> Task:
-    """Serialize `Task` to ProtoBuf."""
-    proto = Task(
-        sa=secagg_msg_to_proto(task.secure_aggregation_message)
-        if task.secure_aggregation_message
-        else None,
-        legacy_server_message=server_message_to_proto(task.legacy_server_message)
-        if task.legacy_server_message
-        else None,
-        legacy_client_message=client_message_to_proto(task.legacy_client_message)
-        if task.legacy_client_message
-        else None,
-    )
-    if merge_from_proto is not None:
-        proto.MergeFrom(merge_from_proto)
-    return proto
-
-
-def task_msg_from_proto(proto: Task) -> typing.Task:
-    """Deserialize `Task` from ProtoBuf."""
-    task = typing.Task(
-        secure_aggregation_message=secagg_msg_from_proto(proto.sa)
-        if proto.HasField("sa")
-        else None,
-        legacy_server_message=server_message_from_proto(proto.legacy_server_message)
-        if proto.HasField("legacy_server_message")
-        else None,
-        legacy_client_message=client_message_from_proto(proto.legacy_client_message)
-        if proto.HasField("legacy_client_message")
-        else None,
-    )
-    return task
+def named_values_from_proto(
+    named_values_proto: Dict[str, Value]
+) -> Dict[str, typing.Value]:
+    """Deserialize named values from ProtoBuf."""
+    return {name: value_from_proto(value) for name, value in named_values_proto.items()}

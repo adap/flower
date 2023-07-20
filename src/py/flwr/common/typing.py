@@ -15,7 +15,7 @@
 """Flower type definitions."""
 
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
@@ -162,19 +162,3 @@ class ClientMessage:
     get_parameters_res: Optional[GetParametersRes] = None
     fit_res: Optional[FitRes] = None
     evaluate_res: Optional[EvaluateRes] = None
-
-
-@dataclass
-class SecureAggregation:
-    """SecureAggregation supports SA-related communications."""
-
-    named_values: Dict[str, Value] = field(default_factory=dict)
-
-
-@dataclass
-class Task:
-    """Task is a container used to hold all messages."""
-
-    secure_aggregation_message: Optional[SecureAggregation] = None
-    legacy_server_message: Optional[ServerMessage] = None
-    legacy_client_message: Optional[ClientMessage] = None
