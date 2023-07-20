@@ -11,6 +11,8 @@ if len(argv) > 1:
 else:
     transport = "grpc-bidi"
 
+prefix = "http://" if transport == "rest" else ""
+
 class FlowerClient(fl.client.NumPyClient):
     def __init__(self, model, train_loader, val_loader, test_loader):
         self.model = model
@@ -62,7 +64,7 @@ def main() -> None:
 
     # Flower client
     client = FlowerClient(model, train_loader, val_loader, test_loader)
-    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=client, transport=transport)
+    fl.client.start_numpy_client(server_address=f"{prefix}127.0.0.1:8080", client=client, transport=transport)
 
 
 if __name__ == "__main__":

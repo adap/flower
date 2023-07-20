@@ -17,6 +17,8 @@ if len(argv) > 1:
 else:
     transport = "grpc-bidi"
 
+prefix = "http://" if transport == "rest" else ""
+
 # Define parameters.
 PARAMS = {
     "batch_size": 32,
@@ -140,7 +142,7 @@ class FlowerClient(fl.client.NumPyClient):
 
 if __name__ == "__main__":
     fl.client.start_numpy_client(
-        server_address="127.0.0.1:8080",
+        server_address=f"{prefix}127.0.0.1:8080",
         client=FlowerClient(model),
         transport=transport,
     )

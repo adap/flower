@@ -24,6 +24,8 @@ if len(argv) > 1:
 else:
     transport = "grpc-bidi"
 
+prefix = "http://" if transport == "rest" else ""
+
 # Fixing the random seed
 mx.random.seed(42)
 
@@ -138,4 +140,4 @@ class FlowerClient(fl.client.NumPyClient):
 
 if __name__ == "__main__":
     # Start Flower client
-    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=FlowerClient(), transport=transport)
+    fl.client.start_numpy_client(server_address=f"{prefix}127.0.0.1:8080", client=FlowerClient(), transport=transport)

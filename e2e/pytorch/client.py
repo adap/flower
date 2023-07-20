@@ -17,6 +17,8 @@ if len(argv) > 1:
 else:
     transport = "grpc-bidi"
 
+prefix = "http://" if transport == "rest" else ""
+
 # #############################################################################
 # 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
 # #############################################################################
@@ -115,7 +117,7 @@ def set_parameters(model, parameters):
 if __name__ == "__main__":
     # Start Flower client
     fl.client.start_numpy_client(
-        server_address="127.0.0.1:8080",
+        server_address=f"{prefix}127.0.0.1:8080",
         client=FlowerClient(),
         transport=transport,
     )
