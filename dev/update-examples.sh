@@ -21,7 +21,9 @@ rm -f "examples/doc/source/*.md"
 cd examples/
 for d in $(printf '%s\n' */ | sort -V); do
   example=${d%/}
+  # For each example, copy the README into the source of the Example docs
   [[ $example = doc ]] || cp $example/README.md $ROOT/examples/doc/source/$example.md 2>&1 >/dev/null
+  # For each example, insert the name of the example into the index file
   [[ $example = doc ]] || (echo $INSERT_LINE; echo a; echo $example; echo .; echo wq) | ed $INDEX 2>&1 >/dev/null
 done
 
