@@ -10,4 +10,4 @@ authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-flwr = { path = "../../", develop = true, extras = ["simulation"] }
+flwr = { path = "../../", develop = true, extras = ["simulation", "rest"] }

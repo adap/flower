@@ -10,6 +10,6 @@ authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-flwr = { path = "../../", develop = true, extras = ["simulation"] }
+flwr = { path = "../../", develop = true, extras = ["simulation", "rest"] }
 pytorch-lightning = "1.6.0"
 torchvision = "0.13.0"

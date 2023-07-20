@@ -6,7 +6,7 @@ authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-flwr = { path = "../../", develop = true, extras = ["simulation"] }
+flwr = { path = "../../", develop = true, extras = ["simulation", "rest"] }
 jax = "^0.4.0"
 jaxlib = "^0.4.0"
 scikit-learn = "^1.1.1"

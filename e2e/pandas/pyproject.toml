@@ -11,7 +11,7 @@ maintainers = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-flwr = { path = "../../", develop = true, extras = ["simulation"] }
+flwr = { path = "../../", develop = true, extras = ["simulation", "rest"] }
 numpy = "^1.21.0"
 pandas = "^2.0.0"
 scikit-learn = "^1.1.1"

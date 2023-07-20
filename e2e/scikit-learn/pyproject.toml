@@ -13,6 +13,6 @@ authors = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
-flwr = { path = "../../", develop = true, extras = ["simulation"] }
+flwr = { path = "../../", develop = true, extras = ["simulation", "rest"] }
 scikit-learn = "^1.1.1"
 openml = "^0.14.0"
