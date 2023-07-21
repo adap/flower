@@ -89,12 +89,14 @@ jobs:
         if: ${{matrix.dataset}}
         run: python -c "${{ matrix.dataset }}"
       - name: Run edge client test
-        run: ./../test.sh
+        run: ./../test_server.sh
       - name: Run virtual client test 
         run: python simulation.py
-      - name: Run driver test using gRPC bidi
-        run: ./../test_driver_grpc_bidi.sh
+      - name: Run driver test using gRPC bidi and in-memory state
+        run: ./../test_flower_server.sh bidi mem
+      - name: Run driver test using gRPC bidi and SQLite database
+        run: ./../test_flower_server.sh bidi db
       - name: Run driver test using gRPC rere
-        run: ./../test_driver_grpc_rere.sh
-      - name: Run driver test using REST
-        run: ./../test_driver_rest.sh
+        run: ./../test_flower_server.sh rere mem
+      - name: Run driver test using gRPC rere and SQLite database
+        run: ./../test_flower_server.sh rere db
