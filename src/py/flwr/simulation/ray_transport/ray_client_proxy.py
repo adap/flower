@@ -34,7 +34,7 @@ from flwr.server.client_proxy import ClientProxy
 
 
 class VirtualClientTemplate:
-    """This is a wrapper class for a client we want to simulation.
+    """This is a wrapper class for a client we want to simulate.
     
     It essentially behaves very similarly to the callback function
     that Flower previously used with `start_simulation`. This wrapper
@@ -46,11 +46,6 @@ class VirtualClientTemplate:
         self.client = client_type
         self.client_state = client_type.state
         self.client_kwargs = client_kwargs
-
-    def _get_state(self):
-        # To be used internally by the ClientProxy object (since, unlike
-        # the client, it persist for the duration of the simulation.)
-        return self.client.state
 
     def __call__(self, cid: str):
         # spawns the client, this will be called by the ClientProxy
