@@ -30,7 +30,7 @@ from flwr.client.message_handler.task_handler import (
 )
 from flwr.client.secure_aggregation import SecureAggregationHandler
 from flwr.common import serde
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
+from flwr.proto.task_pb2 import SecureAggregation, Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 
 
@@ -66,13 +66,16 @@ def handle(client: Client, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
             client, SecureAggregationHandler
         ):
             # pylint: disable-next=invalid-name
-            sa = serde.secagg_msg_from_proto(task_ins.task.sa)
-            res_sa = client.handle_secure_aggregation(sa)
+            named_values = serde.named_values_from_proto(task_ins.task.sa.named_values)
+            res = client.handle_secure_aggregation(named_values)
             task_res = TaskRes(
                 task_id="",
                 group_id="",
                 workload_id="",
-                task=Task(ancestry=[], sa=serde.secagg_msg_to_proto(res_sa)),
+                task=Task(
+                    ancestry=[],
+                    sa=SecureAggregation(named_values=serde.named_values_to_proto(res)),
+                ),
             )
             return task_res, 0, True
         raise NotImplementedError()

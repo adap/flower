@@ -16,26 +16,28 @@
 
 
 from abc import ABC, abstractmethod
+from typing import Dict
 
-from flwr.common.typing import SecureAggregation
+from flwr.common.typing import Value
 
 
 class SecureAggregationHandler(ABC):
     """Abstract base class for secure aggregation message handlers."""
 
     @abstractmethod
-    # pylint: disable-next=invalid-name
-    def handle_secure_aggregation(self, sa: SecureAggregation) -> SecureAggregation:
+    def handle_secure_aggregation(
+        self, named_values: Dict[str, Value]
+    ) -> Dict[str, Value]:
         """Handle incoming Secure Aggregation message and return results.
 
         Parameters
         ----------
-        sa : SecureAggregation
-            The SecureAggregation sub-message in Task message received
-            from the server containing a dictionary of named values.
+        named_values : Dict[str, Value]
+            The named values retrieved from the SecureAggregation sub-message
+            of Task message in the server's TaskIns.
 
         Returns
         -------
-        SecureAggregation
+        Dict[str, Value]
             The final/intermediate results of the Secure Aggregation protocol.
         """

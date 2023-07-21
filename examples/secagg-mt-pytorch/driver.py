@@ -13,17 +13,21 @@ from flwr.server import History
 
 
 # Convert instruction/result dict to/from list of TaskIns/TaskRes
-def user_tasks_to_task_ins_list(
-    task_dict: Dict[int, typing.Task]
+def task_dict_to_task_ins_list(
+    task_dict: Dict[int, task_pb2.Task]
 ) -> List[task_pb2.TaskIns]:
+    def merge(_task: task_pb2.Task, _merge_task: task_pb2.Task) -> task_pb2.Task:
+        _task.MergeFrom(_merge_task)
+        return _task
+
     return [
         task_pb2.TaskIns(
             task_id="",  # Do not set, will be created and set by the DriverAPI
             group_id="",
             workload_id="",
-            task=serde.task_msg_to_proto(
+            task=merge(
                 task,
-                merge_from_proto=task_pb2.Task(
+                task_pb2.Task(
                     producer=node_pb2.Node(
                         node_id=0,
                         anonymous=True,
@@ -40,13 +44,10 @@ def user_tasks_to_task_ins_list(
     ]
 
 
-def task_res_list_to_user_tasks(
+def task_res_list_to_task_dict(
     task_res_list: List[task_pb2.TaskRes],
-) -> Dict[int, typing.Task]:
-    return {
-        task_res.task.producer.node_id: serde.task_msg_from_proto(task_res.task)
-        for task_res in task_res_list
-    }
+) -> Dict[int, task_pb2.Task]:
+    return {task_res.task.producer.node_id: task_res.task for task_res in task_res_list}
 
 
 # Define metric aggregation function
@@ -145,15 +146,13 @@ for server_round in range(num_rounds):
 
     while True:
         try:
-            instructions: Dict[int, typing.Task] = workflow.send(node_messages)
+            instructions: Dict[int, task_pb2.Task] = workflow.send(node_messages)
             next(workflow)
         except StopIteration:
             break
         # Schedule a task for all sampled nodes
         print(f"DEBUG: send to nodes {list(instructions.keys())}")
-        task_ins_list: List[task_pb2.TaskIns] = user_tasks_to_task_ins_list(
-            instructions
-        )
+        task_ins_list: List[task_pb2.TaskIns] = task_dict_to_task_ins_list(instructions)
 
         push_task_ins_req = driver_pb2.PushTaskInsRequest(task_ins_list=task_ins_list)
 
@@ -199,7 +198,7 @@ for server_round in range(num_rounds):
                 break
 
         # Collect correct results
-        node_messages = task_res_list_to_user_tasks(
+        node_messages = task_res_list_to_task_dict(
             [res for res in all_task_res if res.task.HasField("sa")]
         )
     workflow.close()

@@ -13,7 +13,6 @@
 # limitations under the License.
 # ==============================================================================
 """Message handler for the SecAgg+ protocol."""
-# pylint: disable=invalid-name
 
 
 import os
@@ -54,7 +53,7 @@ from flwr.common.secure_aggregation.weights_arithmetic import (
     weights_multiply,
     weights_subtraction,
 )
-from flwr.common.typing import FitIns, SecureAggregation
+from flwr.common.typing import FitIns, Value
 
 from .handler import SecureAggregationHandler
 
@@ -62,6 +61,7 @@ _stages = ["setup", "share keys", "collect masked input", "unmasking"]
 
 
 @dataclass
+# pylint: disable=invalid-name
 # pylint: disable-next=too-many-instance-attributes
 class _State:
     sample_num: int = 0
@@ -84,24 +84,29 @@ class _State:
     client: Optional[Union[Client, NumPyClient]] = None
 
 
+# pylint: enable=invalid-name
+
+
 class SecAggPlusHandler(SecureAggregationHandler):
     """Message handler for the SecAgg+ protocol."""
 
     _shared_state = _State()
     _current_stage = "unmasking"
 
-    def handle_secure_aggregation(self, sa: SecureAggregation) -> SecureAggregation:
+    def handle_secure_aggregation(
+        self, named_values: Dict[str, Value]
+    ) -> Dict[str, Value]:
         """Handle incoming message and return results, following the SecAgg+ protocol.
 
         Parameters
         ----------
-        sa : SecureAggregation
-            The SecureAggregation sub-message in Task message received
-            from the server containing a dictionary of named values.
+        named_values : Dict[str, Value]
+            The named values retrieved from the SecureAggregation sub-message
+            of Task message in the server's TaskIns.
 
         Returns
         -------
-        SecureAggregation
+        Dict[str, Value]
             The final/intermediate results of the SecAgg+ protocol.
         """
         if not isinstance(self, (Client, NumPyClient)):
@@ -109,13 +114,13 @@ class SecAggPlusHandler(SecureAggregationHandler):
                 "The subclass of SecAggPlusHandler must be "
                 "the subclass of Client or NumPyClient."
             )
-        stage = str(sa.named_values.pop("stage"))
+        stage = str(named_values.pop("stage"))
         if stage == "setup":
             if self._current_stage != "unmasking":
                 log(WARNING, "restart from setup stage")
             self._shared_state = _State(client=self)
             self._current_stage = stage
-            return _setup(self._shared_state, sa)
+            return _setup(self._shared_state, named_values)
         # if stage is not "setup", the new stage should be the next stage
         expected_new_stage = _stages[_stages.index(self._current_stage) + 1]
         if stage == expected_new_stage:
@@ -127,17 +132,17 @@ class SecAggPlusHandler(SecureAggregationHandler):
             )
 
         if stage == "share keys":
-            return _share_keys(self._shared_state, sa)
+            return _share_keys(self._shared_state, named_values)
         if stage == "collect masked input":
-            return _collect_masked_input(self._shared_state, sa)
+            return _collect_masked_input(self._shared_state, named_values)
         if stage == "unmasking":
-            return _unmasking(self._shared_state, sa)
+            return _unmasking(self._shared_state, named_values)
         raise ValueError(f"Unknown secagg stage: {stage}")
 
 
-def _setup(state: _State, sa: SecureAggregation) -> SecureAggregation:
+def _setup(state: _State, named_values: Dict[str, Value]) -> Dict[str, Value]:
     # Assigning parameter values to object fields
-    sec_agg_param_dict = sa.named_values
+    sec_agg_param_dict = named_values
     state.sample_num = cast(int, sec_agg_param_dict["share_num"])
     state.sid = cast(int, sec_agg_param_dict["secure_id"])
     log(INFO, "Client %d: starting stage 0...", state.sid)
@@ -163,13 +168,13 @@ def _setup(state: _State, sa: SecureAggregation) -> SecureAggregation:
     state.sk1, state.pk1 = private_key_to_bytes(sk1), public_key_to_bytes(pk1)
     state.sk2, state.pk2 = private_key_to_bytes(sk2), public_key_to_bytes(pk2)
     log(INFO, "Client %d: stage 0 completes. uploading public keys...", state.sid)
-    return SecureAggregation(named_values={"pk1": state.pk1, "pk2": state.pk2})
+    return {"pk1": state.pk1, "pk2": state.pk2}
 
 
 # pylint: disable-next=too-many-locals
-def _share_keys(state: _State, sa: SecureAggregation) -> SecureAggregation:
-    named_values = cast(Dict[str, Tuple[bytes, bytes]], sa.named_values)
-    key_dict = {int(sid): (pk1, pk2) for sid, (pk1, pk2) in named_values.items()}
+def _share_keys(state: _State, named_values: Dict[str, Value]) -> Dict[str, Value]:
+    named_bytes_tuples = cast(Dict[str, Tuple[bytes, bytes]], named_values)
+    key_dict = {int(sid): (pk1, pk2) for sid, (pk1, pk2) in named_bytes_tuples.items()}
     log(INFO, "Client %d: starting stage 1...", state.sid)
     # Distribute shares for private mask seed and first private key
     # share_keys_dict:
@@ -223,23 +228,25 @@ def _share_keys(state: _State, sa: SecureAggregation) -> SecureAggregation:
             ciphertexts.append(ciphertext)
 
     log(INFO, "Client %d: stage 1 completes. uploading key shares...", state.sid)
-    return SecureAggregation(named_values={"dsts": dsts, "ciphertexts": ciphertexts})
+    return {"dsts": dsts, "ciphertexts": ciphertexts}
 
 
 # pylint: disable-next=too-many-locals
-def _collect_masked_input(state: _State, sa: SecureAggregation) -> SecureAggregation:
+def _collect_masked_input(
+    state: _State, named_values: Dict[str, Value]
+) -> Dict[str, Value]:
     log(INFO, "Client %d: starting stage 2...", state.sid)
     # Receive shares and fit model
     available_clients: List[int] = []
-    ciphertexts = cast(List[bytes], sa.named_values["ciphertexts"])
-    srcs = cast(List[int], sa.named_values["srcs"])
+    ciphertexts = cast(List[bytes], named_values["ciphertexts"])
+    srcs = cast(List[int], named_values["srcs"])
     if len(ciphertexts) + 1 < state.threshold:
         raise Exception("Available neighbours number smaller than threshold")
 
     # decode all packets and verify all packets are valid. Save shares received
-    for src, ct in zip(srcs, ciphertexts):
+    for src, ciphertext in zip(srcs, ciphertexts):
         shared_key = state.shared_key_2_dict[src]
-        plaintext = decrypt(shared_key, ct)
+        plaintext = decrypt(shared_key, ciphertext)
         _src, dst, b_share, sk1_share = share_keys_plaintext_separate(plaintext)
         available_clients.append(src)
         if src != _src:
@@ -255,7 +262,7 @@ def _collect_masked_input(state: _State, sa: SecureAggregation) -> SecureAggrega
         state.sk1_share_dict[src] = sk1_share
 
     # fit client
-    weights_bytes = cast(List[bytes], sa.named_values["parameters"])
+    weights_bytes = cast(List[bytes], named_values["parameters"])
     weights = [bytes_to_ndarray(w) for w in weights_bytes]
     if isinstance(state.client, Client):
         fit_res = state.client.fit(
@@ -267,9 +274,6 @@ def _collect_masked_input(state: _State, sa: SecureAggregation) -> SecureAggrega
         weights, weights_factor, _ = state.client.fit(weights, {})
     else:
         log(ERROR, "Client %d: fit function is none", state.sid)
-
-    # weights = [np.zeros(10000)]
-    # weights_factor = 1
 
     # Quantize weight update vector
     quantized_weights = quantize(weights, state.clipping_range, state.target_range)
@@ -289,7 +293,6 @@ def _collect_masked_input(state: _State, sa: SecureAggregation) -> SecureAggrega
             bytes_to_private_key(state.sk1),
             bytes_to_public_key(state.public_keys_dict[client_id][0]),
         )
-        # print('shared key length: %d' % len(shared_key))
         pairwise_mask = pseudo_rand_gen(shared_key, state.mod_range, dimensions_list)
         if state.sid > client_id:
             quantized_weights = weights_addition(quantized_weights, pairwise_mask)
@@ -300,18 +303,14 @@ def _collect_masked_input(state: _State, sa: SecureAggregation) -> SecureAggrega
     quantized_weights = weights_mod(quantized_weights, state.mod_range)
     # return ndarrays_to_parameters(quantized_weights)
     log(INFO, "Client %d: stage 2 completes. uploading masked weights...", state.sid)
-    return SecureAggregation(
-        named_values={
-            "masked_weights": [ndarray_to_bytes(arr) for arr in quantized_weights]
-        }
-    )
+    return {"masked_weights": [ndarray_to_bytes(arr) for arr in quantized_weights]}
 
 
-def _unmasking(state: _State, sa: SecureAggregation) -> SecureAggregation:
+def _unmasking(state: _State, named_values: Dict[str, Value]) -> Dict[str, Value]:
     log(INFO, "Client %d: starting stage 3...", state.sid)
 
-    active_sids = cast(List[int], sa.named_values["active_sids"])
-    dead_sids = cast(List[int], sa.named_values["dead_sids"])
+    active_sids = cast(List[int], named_values["active_sids"])
+    dead_sids = cast(List[int], named_values["dead_sids"])
     # Send private mask seed share for every avaliable client (including itclient)
     # Send first private key share for building pairwise mask for every dropped client
     if len(active_sids) < state.threshold:
@@ -324,4 +323,4 @@ def _unmasking(state: _State, sa: SecureAggregation) -> SecureAggregation:
     shares += [state.sk1_share_dict[sid] for sid in dead_sids]
 
     log(INFO, "Client %d: stage 3 completes. uploading key shares...", state.sid)
-    return SecureAggregation(named_values={"sids": sids, "shares": shares})
+    return {"sids": sids, "shares": shares}

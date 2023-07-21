@@ -28,13 +28,23 @@ from flwr.common.secure_aggregation.weights_arithmetic import (
     weights_subtraction,
     weights_zero_generate,
 )
-from flwr.common.typing import SecureAggregation, Task
+from flwr.common.serde import named_values_from_proto, named_values_to_proto
+from flwr.common.typing import Value
+from flwr.proto.task_pb2 import SecureAggregation, Task
 
 
 def get_workflow_factory() -> (
     Callable[[Parameters, List[int]], Generator[Dict[int, Task], Dict[int, Task], None]]
 ):
     return _wrap_workflow_with_sec_agg
+
+
+def _wrap_in_task(named_values: Dict[str, Value]) -> Task:
+    return Task(sa=SecureAggregation(named_values=named_values_to_proto(named_values)))
+
+
+def _get_from_task(task: Task) -> Dict[str, Value]:
+    return named_values_from_proto(task.sa.named_values)
 
 
 _secure_aggregation_configuration = {
@@ -98,14 +108,12 @@ def workflow_with_sec_agg(
     surviving_node_ids = sampled_node_ids
     # send setup configuration to clients
     yield {
-        node_id: Task(
-            secure_aggregation_message=SecureAggregation(
-                named_values={
-                    **cfg,
-                    "secure_id": nid2sid[node_id],
-                    "test_drop": nid2sid[node_id] < sec_agg_config["test_dropouts"],
-                }
-            ),
+        node_id: _wrap_in_task(
+            named_values={
+                **cfg,
+                "secure_id": nid2sid[node_id],
+                "test_drop": nid2sid[node_id] < sec_agg_config["test_dropouts"],
+            }
         )
         for node_id in surviving_node_ids
     }
@@ -115,7 +123,7 @@ def workflow_with_sec_agg(
 
     sid2public_keys = {}
     for node_id, task in node_messages.items():
-        key_dict = task.secure_aggregation_message.named_values
+        key_dict = _get_from_task(task)
         pk1, pk2 = key_dict["pk1"], key_dict["pk2"]
         sid2public_keys[nid2sid[node_id]] = [pk1, pk2]
 
@@ -124,13 +132,11 @@ def workflow_with_sec_agg(
     """
 
     # braodcast public keys to clients
-    braodcast_task = Task(
-        secure_aggregation_message=SecureAggregation(
-            named_values={
-                "stage": stages[1],
-                **{str(sid): value for sid, value in sid2public_keys.items()},
-            }
-        ),
+    braodcast_task = _wrap_in_task(
+        named_values={
+            "stage": stages[1],
+            **{str(sid): value for sid, value in sid2public_keys.items()},
+        }
     )
     yield {node_id: braodcast_task for node_id in surviving_node_ids}
 
@@ -146,7 +152,7 @@ def workflow_with_sec_agg(
         sid: [] for sid in fwd_ciphertexts
     }  # dest secure id -> list of src sids
     for node_id, task in node_messages.items():
-        res_dict = task.secure_aggregation_message.named_values
+        res_dict = _get_from_task(task)
         srcs += [nid2sid[node_id]] * len(res_dict["dsts"])
         dsts += res_dict["dsts"]
         ciphertexts += res_dict["ciphertexts"]
@@ -165,15 +171,13 @@ def workflow_with_sec_agg(
     # send encrypted secret key shares to clients (plus model parameters)
     weights = parameters_to_ndarrays(parameters)
     yield {
-        node_id: Task(
-            secure_aggregation_message=SecureAggregation(
-                named_values={
-                    "ciphertexts": fwd_ciphertexts[nid2sid[node_id]],
-                    "srcs": fwd_srcs[nid2sid[node_id]],
-                    "stage": stages[2],
-                    "parameters": [ndarray_to_bytes(arr) for arr in weights],
-                }
-            ),
+        node_id: _wrap_in_task(
+            named_values={
+                "ciphertexts": fwd_ciphertexts[nid2sid[node_id]],
+                "srcs": fwd_srcs[nid2sid[node_id]],
+                "stage": stages[2],
+                "parameters": [ndarray_to_bytes(arr) for arr in weights],
+            }
         )
         for node_id in surviving_node_ids
     }
@@ -192,9 +196,7 @@ def workflow_with_sec_agg(
     ]
     active_sids = [nid2sid[node_id] for node_id in surviving_node_ids]
     for _, task in node_messages.items():
-        client_masked_vec = task.secure_aggregation_message.named_values[
-            "masked_weights"
-        ]
+        client_masked_vec = _get_from_task(task)["masked_weights"]
         client_masked_vec = [bytes_to_ndarray(b) for b in client_masked_vec]
         masked_vector = weights_addition(masked_vector, client_masked_vec)
 
@@ -205,14 +207,12 @@ def workflow_with_sec_agg(
     """
 
     # broadcast secure ids of active and dead clients.
-    braodcast_task = Task(
-        secure_aggregation_message=SecureAggregation(
-            named_values={
-                "stage": stages[3],
-                "dead_sids": dead_sids,
-                "active_sids": active_sids,
-            }
-        ),
+    braodcast_task = _wrap_in_task(
+        named_values={
+            "stage": stages[3],
+            "dead_sids": dead_sids,
+            "active_sids": active_sids,
+        }
     )
     yield {node_id: braodcast_task for node_id in surviving_node_ids}
     # collect key shares from clients
@@ -226,7 +226,7 @@ def workflow_with_sec_agg(
     if len(surviving_node_ids) < sec_agg_config["threshold"]:
         raise Exception("Not enough available clients after unmask vectors stage")
     for _, task in node_messages.items():
-        named_values = task.secure_aggregation_message.named_values
+        named_values = _get_from_task(task)
         for owner_sid, share in zip(named_values["sids"], named_values["shares"]):
             collected_shares_dict[owner_sid].append(share)
     # Remove mask for every client who is available before ask vectors stage,
