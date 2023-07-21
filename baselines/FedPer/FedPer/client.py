@@ -43,13 +43,9 @@ class FlowerClient(
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
         if self.net.split: 
-            return [
-                val.cpu().numpy() for _, val in self.net.body.state_dict().items()
-            ]
+            return [val.cpu().numpy() for _, val in self.net.body.state_dict().items()]
         else:
-            return [
-                val.cpu().numpy() for _, val in self.net.state_dict().items()
-            ]
+            return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
     
     def set_parameters(self, parameters: NDArrays) -> None:
         """
@@ -61,20 +57,16 @@ class FlowerClient(
             parameters: parameters to set the body to.
         """
         # Get model keys for body
-        model_keys = [
-            k for k in self.net.state_dict().keys() if k.startswith("_body")
-        ]
-
+        model_keys = [k for k in self.net.state_dict().keys() if k.startswith("body")]
+        # print("Model keys: ", model_keys)
         if self.train_id == 1:
             # Only update client's local head if it hasn't trained yet
-            model_keys.extend(
-                [k for k in self.net.state_dict().keys() if k.startswith("_head")]
-            )
-
+            model_keys.extend([k for k in self.net.state_dict().keys() if k.startswith("head")])
         # Zip model keys and parameters
         params_dict = zip(model_keys, parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-        self.net.set_parameters(state_dict)
+        # self.net.set_parameters(state_dict)
+        self.net.load_state_dict(state_dict, strict=True)
 
     def fit(
         self, 
@@ -82,17 +74,17 @@ class FlowerClient(
         config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, int, Dict]:
         """Implements distributed fit function for a given client."""
-        # Set parameters
+        # Set parameters 
         self.set_parameters(parameters)
-
+        print("config: ", config)
         # Epochs
         epochs = config["epochs"]
 
         # Train model
         train(
-            self.net,
-            self.trainloader,
-            self.device,
+            net=self.net,
+            trainloader=self.trainloader,
+            device=self.device,
             epochs=epochs,
             learning_rate=self.learning_rate,
         )
@@ -142,7 +134,6 @@ def gen_client_fn(
         A tuple containing the client function that creates Flower Clients and
         the DataLoader that will be used for testing
     """
-    assert model['model'] in ['resnet', 'mobile']
 
     def client_fn(cid: str) -> FlowerClient:
         """Create a Flower client representing a single organization."""

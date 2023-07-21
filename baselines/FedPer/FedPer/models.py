@@ -22,8 +22,7 @@ from torch.utils.data import DataLoader
 from torch.nn.parameter import Parameter
 from torchvision.models import resnet34
 
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class MobileNet_v1(nn.Module):
     """ 
@@ -37,7 +36,12 @@ class MobileNet_v1(nn.Module):
             split: whether to split the model into body and head.
             num_head_layers: number of layers in the head.
     """
-    def __init__(self, split : bool = False, num_head_layers : int = 0) -> None:
+    def __init__(
+            self, 
+            split : bool = False, 
+            num_head_layers : int = 0,
+            num_classes : int = 10
+        ) -> None:
         super(MobileNet_v1, self).__init__()
 
         ARCHITECTURE = {
@@ -56,7 +60,7 @@ class MobileNet_v1(nn.Module):
             'layer_13' : {'conv_dw' : [512, 1024, 2]},
             'layer_14' : {'conv_dw' : [1024, 1024, 1]},
             'layer_15' : {'avg_pool' : [7]},
-            'layer_16' : {'fc' : [1024, 1000]}
+            'layer_16' : {'fc' : [1024, num_classes]}
         }
 
         if split:
@@ -120,7 +124,10 @@ class MobileNet_v1_body(nn.Module):
                     raise NotImplementedError("Layer type not implemented.")
                 
     def forward(self, x : Tensor) -> Tensor:
-        x = self.model(x)
+        for i in range(len(self.model)):
+            x = self.model[i](x)
+            if isinstance(self.model[i], nn.AvgPool2d):
+                x = x.view(-1, 1024)
         return x
 
 class MobileNet_v1_head(nn.Module):
@@ -176,10 +183,11 @@ class MobileNet_v1_head(nn.Module):
                     raise NotImplementedError("Layer type not implemented.")
     
     def forward(self, x : Tensor) -> Tensor:
-        if self.num_head_layers != 1:
-            x = self.model(x)
-        x = x.view(-1, 1024)
-        x = self.fc(x)
+        for i in range(len(self.model)):
+            x = self.model[i](x)
+            if isinstance(self.model[i], nn.AvgPool2d):
+                x = x.view(-1, 1024)
+        return x
 
 class ModelSplit(nn.Module):
     """Class for splitting a model into body and head. Optionally, a fixed head can also be created."""
@@ -437,7 +445,6 @@ class ModelManager():
 
 
 def train(
-    self,
     net: nn.Module,
     trainloader: DataLoader,
     device: torch.device,
@@ -465,7 +472,8 @@ def train(
         criterion = nn.CrossEntropyLoss()
         optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, weight_decay=5e-4)
         net.train()
-        for _ in range(epochs):
+        for i in range(epochs):
+            print(f"Epoch {i+1}/{epochs}")
             net = _train_one_epoch(
                 net=net,
                 trainloader=trainloader,
@@ -503,6 +511,8 @@ def _train_one_epoch(
     """
 
     for images, labels in trainloader:
+        print("Training")
+        print("Labels: ", labels)
         images, labels = images.to(device), labels.to(device)
         optimizer.zero_grad()
         outputs = net(images)
