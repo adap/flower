@@ -12,244 +12,83 @@ env:
   FLWR_TELEMETRY_ENABLED: 0
 
 jobs:
-  pytorch:
+  e2e:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
+    # Using approach described here:
+    # https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs
+    strategy:
+      matrix:
+        include:
+          - directory: bare
+
+          - directory: jax
+
+          - directory: pytorch
+            dataset: |
+              from torchvision.datasets import CIFAR10
+              CIFAR10('./data', download=True)
+
+          - directory: tensorflow
+            dataset: |
+              import tensorflow as tf
+              tf.keras.datasets.cifar10.load_data()
+              
+          - directory: tabnet
+            dataset: |
+              import tensorflow_datasets as tfds
+              tfds.load(name='iris', split=tfds.Split.TRAIN)
+
+          - directory: opacus
+            dataset: |
+              from torchvision.datasets import CIFAR10
+              CIFAR10('./data', download=True)
+              
+          - directory: pytorch-lightning
+            dataset: |
+              from torchvision.datasets import MNIST
+              MNIST('./data', download=True)
+
+          - directory: mxnet
+            dataset: |
+              import mxnet as mx
+              mx.test_utils.get_mnist()
+
+          # - directory: scikit-learn
+          #   dataset: |
+          #     import openml
+          #     openml.datasets.get_dataset(554)
+
+          - directory: fastai
+            dataset: |
+              from fastai.vision.all import untar_data, URLs
+              untar_data(URLs.MNIST) 
+
+          - directory: pandas
+            dataset: |
+              from pathlib import Path
+              from sklearn.datasets import load_iris
+              Path('data').mkdir(exist_ok=True)
+              load_iris(as_frame=True)['data'].to_csv('./data/client.csv')
+
+    name: ${{matrix.directory}}
+
+    defaults:
+      run:
+        working-directory: e2e/${{ matrix.directory }}
+
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
         with:
-          python-version: 3.7.15
-      - name: Install
-        run: |
-          python -m pip install -U pip==22.3.1
-          python -m pip install -U setuptools==65.6.3
-          python -m pip install poetry==1.3.2
-          poetry config virtualenvs.create false
+          python-version: 3.8
       - name: Install dependencies
-        run: |
-          cd e2e/pytorch
-          python -m poetry install
-      - name: Cache Datasets
-        uses: actions/cache@v2
-        with:
-          path: "./e2e/pytorch/data"
-          key: pytorch-datasets
-      - name: Download Datasets
-        run: |
-          cd e2e/pytorch
-          python -c "from torchvision.datasets import CIFAR10; CIFAR10('./data', download=True)"
+        run: python -m poetry install
+      - name: Download dataset
+        if: ${{matrix.dataset}}
+        run: python -c "${{ matrix.dataset }}"
       - name: Run edge client test
-        run: |
-          cd e2e/pytorch
-          ./test.sh
-      - name: Run virtual client test
-        run: |
-          cd e2e/pytorch
-          python simulation.py
-
-  tensorflow:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.7.15
-      - name: Install
-        run: |
-          python -m pip install -U pip==22.3.1
-          python -m pip install -U setuptools==65.6.3
-          python -m pip install poetry==1.3.2
-          poetry config virtualenvs.create false
-      - name: Install dependencies
-        run: |
-          cd e2e/tensorflow
-          python -m poetry install
-      - name: Cache Datasets
-        uses: actions/cache@v2
-        with:
-          path: "~/.keras"
-          key: keras-datasets
-      - name: Download Datasets
-        run: |
-          python -c "import tensorflow as tf; tf.keras.datasets.cifar10.load_data()"
-      - name: Run edge client test
-        run: |
-          cd e2e/tensorflow
-          ./test.sh
-      - name: Run virtual client test
-        run: |
-          cd e2e/tensorflow
-          python simulation.py
-
-
-
-  bare:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.7.15
-      - name: Install
-        run: |
-          python -m pip install -U pip==22.3.1
-          python -m pip install -U setuptools==65.6.3
-          python -m pip install poetry==1.3.2
-          poetry config virtualenvs.create false
-      - name: Install dependencies
-        run: |
-          cd e2e/bare
-          python -m poetry install
-      - name: Run edge client test
-        run: |
-          cd e2e/bare
-          ./test.sh
-      - name: Run virtual client test
-        run: |
-          cd e2e/bare
-          python simulation.py
-
-
-
-  pandas:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.8.16
-      - name: Install
-        run: |
-          python -m pip install -U pip==22.3.1
-          python -m pip install -U setuptools==65.6.3
-          python -m pip install poetry==1.3.2
-          poetry config virtualenvs.create false
-      - name: Install dependencies
-        run: |
-          cd e2e/pandas
-          python -m poetry install
-      - name: Cache Datasets
-        uses: actions/cache@v2
-        with:
-          path: "./e2e/pandas/data"
-          key: pandas-datasets
-      - name: Download Datasets
-        run: |
-          cd e2e/pandas
-          mkdir -p data
-          python -c "from sklearn.datasets import load_iris; load_iris(as_frame=True)['data'].to_csv('./data/client.csv')"
-      - name: Run edge client test
-        run: |
-          cd e2e/pandas
-          ./test.sh
-      - name: Run virtual client test
-        run: |
-          cd e2e/pandas
-          python simulation.py
-
-
-
-  jax:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.8.16
-      - name: Install
-        run: |
-          python -m pip install -U pip==22.3.1
-          python -m pip install -U setuptools==65.6.3
-          python -m pip install poetry==1.3.2
-          poetry config virtualenvs.create false
-      - name: Install dependencies
-        run: |
-          cd e2e/jax
-          python -m poetry install
-      - name: Run edge client test
-        run: |
-          cd e2e/jax
-          ./test.sh
-      - name: Run virtual client test
-        run: |
-          cd e2e/jax
-          python simulation.py
-
-
-
-  mxnet:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.8.16
-      - name: Install
-        run: |
-          python -m pip install -U pip==22.3.1
-          python -m pip install -U setuptools==65.6.3
-          python -m pip install poetry==1.3.2
-          poetry config virtualenvs.create false
-      - name: Install dependencies
-        run: |
-          cd e2e/mxnet
-          python -m poetry install
-      - name: Download Datasets
-        run: |
-          cd e2e/mxnet
-          python -c "import mxnet as mx; mx.test_utils.get_mnist()"
-      - name: Run edge client test
-        run: |
-          cd e2e/mxnet
-          ./test.sh
-      - name: Run virtual client test
-        run: |
-          cd e2e/mxnet
-          python simulation.py
-
-
-  
-  scikit:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.8.16
-      - name: Install
-        run: |
-          python -m pip install -U pip==22.3.1
-          python -m pip install -U setuptools==65.6.3
-          python -m pip install poetry==1.3.2
-          poetry config virtualenvs.create false
-      - name: Install dependencies
-        run: |
-          cd e2e/scikit-learn
-          python -m poetry install
-      - name: Download Datasets
-        run: |
-          cd e2e/scikit-learn
-          python -c "import openml; openml.datasets.get_dataset(554)"
-      - name: Run edge client test
-        run: |
-          cd e2e/scikit-learn
-          ./test.sh
-      - name: Run virtual client test
-        run: |
-          cd e2e/scikit-learn
-          python simulation.py
-
+        run: ./test.sh
+      - name: Run virtual client test 
+        run: python simulation.py

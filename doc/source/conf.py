@@ -55,6 +55,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_design",
     "sphinxcontrib.mermaid",
+    "sphinxcontrib.youtube",
     "sphinx_reredirects",
     "nbsphinx",
 ]
@@ -101,7 +102,7 @@ html_theme = "furo"
 html_title = f"Flower {release}"
 html_logo = "_static/flower-logo.png"
 html_favicon = "_static/favicon.ico"
-html_baseurl = "https://flower.dev/docs/"
+html_baseurl = "https://flower.dev/docs/framework/"
 
 html_theme_options = {
     #

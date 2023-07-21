@@ -6,10 +6,10 @@ timeout 2m python server.py &
 pid=$!
 sleep 3
 
-python client.py > /dev/null 2>&1 &
+python client.py &
 sleep 3
 
-python client.py > /dev/null 2>&1 &
+python client.py &
 sleep 3
 
 wait $pid
