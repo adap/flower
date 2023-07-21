@@ -47,7 +47,15 @@ wait $pid
 res=$?
 
 if [[ "$res" = "0" ]];
-  then echo "Training worked correctly" && kill $client1_pid && kill $client2_pid && kill $server_pid;
+  then 
+    echo "Training worked correctly"
+    sleep 3
+    kill $client1_pid
+    sleep 3
+    kill $client2_pid
+    sleep 3
+    kill $server_pid
+    exit 0
   else echo "Training had an issue" && exit 1;
 fi
 
