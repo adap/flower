@@ -1,10 +1,10 @@
-package org.eu.fedcampus.train
+package dev.flower.flower_tflite
 
 /**
  * Specification of the samples for [FlowerClient].
  * [convertX] and [convertY] are needed only because of the limitation of generics,
  * so simply fill in `{ it.toTypedArray() }`.
- * Feel free to choose the loss and accuracy functions from [org.eu.fedcampus.train.helpers].
+ * Feel free to choose the loss and accuracy functions from [dev.flower.flower_tflite.helpers].
  * @param emptyY Create an array of empty [Y].
  * @param loss Given test samples and logits, calculate test loss.
  * @param accuracy Given test samples and logits, calculate test accuracy.

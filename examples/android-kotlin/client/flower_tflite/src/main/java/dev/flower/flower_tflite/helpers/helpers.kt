@@ -1,4 +1,4 @@
-package org.eu.fedcampus.train.helpers
+package dev.flower.flower_tflite.helpers
 
 import android.content.Context
 import android.util.Log

@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace 'org.eu.fedcampus'
+    namespace 'dev.flower.flower_tflite'
     compileSdk 33
 
     defaultConfig {

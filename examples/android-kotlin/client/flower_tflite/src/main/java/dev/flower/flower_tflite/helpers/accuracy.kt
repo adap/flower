@@ -1,6 +1,6 @@
-package org.eu.fedcampus.train.helpers
+package dev.flower.flower_tflite.helpers
 
-import org.eu.fedcampus.train.Sample
+import dev.flower.flower_tflite.Sample
 
 /** Zero-one accuracy for one-hot classifier. */
 fun <X> classifierAccuracy(

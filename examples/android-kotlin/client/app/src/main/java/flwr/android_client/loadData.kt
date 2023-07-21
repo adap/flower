@@ -4,10 +4,10 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import dev.flower.flower_tflite.FlowerClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.eu.fedcampus.train.FlowerClient
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.util.concurrent.ExecutionException

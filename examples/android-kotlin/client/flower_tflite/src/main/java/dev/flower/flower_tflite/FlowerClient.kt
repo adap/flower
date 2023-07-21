@@ -1,7 +1,7 @@
-package org.eu.fedcampus.train
+package dev.flower.flower_tflite
 
 import android.util.Log
-import org.eu.fedcampus.train.helpers.assertIntsEqual
+import dev.flower.flower_tflite.helpers.assertIntsEqual
 import org.tensorflow.lite.Interpreter
 import java.lang.Integer.min
 import java.nio.ByteBuffer

@@ -1,8 +1,7 @@
-package org.eu.fedcampus
+package dev.flower.flower_tflite
 
+import org.junit.Assert.assertEquals
 import org.junit.Test
-
-import org.junit.Assert.*
 
 /**
  * Example local unit test, which will execute on the development machine (host).

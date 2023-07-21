@@ -14,15 +14,15 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.room.Room
+import dev.flower.flower_tflite.FlowerClient
+import dev.flower.flower_tflite.FlowerServiceRunnable
+import dev.flower.flower_tflite.SampleSpec
+import dev.flower.flower_tflite.createFlowerService
+import dev.flower.flower_tflite.helpers.classifierAccuracy
+import dev.flower.flower_tflite.helpers.loadMappedAssetFile
+import dev.flower.flower_tflite.helpers.negativeLogLikelihoodLoss
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import org.eu.fedcampus.train.FlowerClient
-import org.eu.fedcampus.train.FlowerServiceRunnable
-import org.eu.fedcampus.train.SampleSpec
-import org.eu.fedcampus.train.createFlowerService
-import org.eu.fedcampus.train.helpers.classifierAccuracy
-import org.eu.fedcampus.train.helpers.loadMappedAssetFile
-import org.eu.fedcampus.train.helpers.negativeLogLikelihoodLoss
 import java.util.*
 
 @Suppress("DEPRECATION")

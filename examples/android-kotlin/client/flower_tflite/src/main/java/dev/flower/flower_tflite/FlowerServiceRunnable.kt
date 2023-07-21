@@ -1,7 +1,8 @@
-package org.eu.fedcampus.train
+package dev.flower.flower_tflite
 
 import android.util.Log
 import com.google.protobuf.ByteString
+import dev.flower.flower_tflite.helpers.assertIntsEqual
 import flwr.android_client.ClientMessage
 import flwr.android_client.FlowerServiceGrpc
 import flwr.android_client.Parameters
@@ -12,7 +13,6 @@ import io.grpc.ManagedChannelBuilder
 import io.grpc.stub.StreamObserver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.eu.fedcampus.train.helpers.assertIntsEqual
 import java.nio.ByteBuffer
 import java.util.concurrent.CountDownLatch
 
