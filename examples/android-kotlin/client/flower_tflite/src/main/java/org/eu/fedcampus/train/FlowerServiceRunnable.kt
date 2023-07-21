@@ -64,6 +64,8 @@ class FlowerServiceRunnable<X : Any, Y : Any>
             handleFitIns(message)
         } else if (message.hasEvaluateIns()) {
             handleEvaluateIns(message)
+        } else if (message.hasReconnectIns()) {
+            return requestObserver.onCompleted()
         } else {
             throw Error("Unreachable! Unknown client message")
         }
