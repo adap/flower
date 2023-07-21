@@ -18,7 +18,7 @@ git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/sta
     * If you don't want to use Poetry, use `pip install -r requirements.txt` while sourced in your environment (e.g. `conda`, `pyenv`, `virtualenv`)
 
 
-## Stateful Flower Clients
+## Stateful Flower Clients (gRPC)
 
 Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
 
@@ -41,3 +41,12 @@ python inmemory-client.py # or infilesystem-client.py --client_id=AN_IDENTIFIER_
 ```
 
 You will see that PyTorch is starting a federated training. Have a look to the [Flower Quickstarter documentation](https://flower.dev/docs/quickstart-pytorch.html) for a detailed explanation.
+
+
+## Stateful Flower Clients (simulation)
+
+For simulation with Flower's `VirtualClientEngine` you might want to still use stateful clients without having to manually handle their state. The script `simulation.py` (and the content in the `sim_utils` directory) closely resembles the [simulation-pytorch]() example. It has been extended to use stateful clients. Similarly to the example above with `gRPC` clients, the state the clients record is the time take to do `fit()`. They also use print statements to show that the state is correctly fetched and updated. By default clients use `InFileSystemVirtualClientState` which will record the state of the clients to the FS at the end of each round. You can change it to `InMemoryClientState` if you don't need to save results to the FS. You can run this example by simply doing:
+
+```bash
+python simulation.py
+```

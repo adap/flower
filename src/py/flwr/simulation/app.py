@@ -29,7 +29,7 @@ from flwr.server.app import ServerConfig, init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
-from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy
+from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy, VirtualClientTemplate
 
 INVALID_ARGUMENTS_START_SIMULATION = """
 INVALID ARGUMENTS ERROR
@@ -38,7 +38,7 @@ Invalid Arguments in method:
 
 `start_simulation(
     *,
-    client_fn: Callable[[str], ClientLike],
+    client_template: VirtualClientTemplate,
     num_clients: Optional[int] = None,
     clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, float]] = None,
@@ -57,22 +57,6 @@ REASON:
         - `len(clients_ids)` == `num_clients`
 
 """
-
-
-class VirtualClientTemplate:
-    def __init__(self, client_type):
-        # Pass a client type
-        self.client = client_type
-
-    def _get_state(self):
-        # To be used internally by the ClientProxy object (since, unlike
-        # the client, it persist for the duration of the simulation.)
-        return self.client.state
-
-    def __call__(self, cid: str):
-        # spawns the client, this will be called by the ClientProxy
-        # when it's sampled by the Strategy
-        return self.client()
 
 
 def start_simulation(  # pylint: disable=too-many-arguments

@@ -96,7 +96,7 @@ class InFileSystemClientState(ClientState):
         self.keep_in_memory = keep_in_memory
         self.path = None  # to be setup upon setup() call
 
-    def setup(self, state_dir: str, create_directory: bool) -> None:
+    def setup(self, state_dir: str, create_directory: bool, load_if_exist: bool=True) -> None:
         """Initialize state by loading it from disk if exists.
 
         Else, create file directory structure and init an empty state.
@@ -104,7 +104,8 @@ class InFileSystemClientState(ClientState):
         self.path = Path(state_dir)
         if self.path.exists():
             # load state
-            self._load_state()
+            if load_if_exist:
+                self._load_state()
         else:
             if create_directory:
                 log(
@@ -127,13 +128,15 @@ class InFileSystemClientState(ClientState):
     def _load_state(self):
         """Load client state from pickle."""
         state_file = self.path / f"{self.state_filename}.pkl"
-        if self.path.exists():
+        if state_file.exists():
             with open(state_file, "rb") as handle:
                 state = pickle.load(handle)
 
-        # update state (but don't write to disk since we
-        # just read from it)
-        self.update(state, to_disk=False)
+            # update state (but don't write to disk since we
+            # just read from it)
+            self.update(state, to_disk=False)
+        else:
+            log(WARNING, f"State `{state_file}` does not exist.")
 
     def _write_state(self) -> bool:
         """Write client state to pickle."""
@@ -183,7 +186,27 @@ class InFileSystemVirtualClientState(InFileSystemClientState):
     (e.g. to do `fit()`) and when it ends its task. Then, the ClientProxy
     object (which is the entity that interfaces with the server) can
     update the state in the file system. In this way, the client gets
-    exposed an InMemoryClientState object at runtime."""
+    exposed an InMemoryClientState object at runtime.
+    
+    BEAR IN MIND this class won't do anything smart if the directory
+    of states already exist, and as a result they will likely be overwritten
+    each time you run the same simulation. To avoid this, you might want
+    to pass `state_dir` at init which takes, for instance, the datetime
+    when you run the code.
+    """
 
-    def __init__(self, update_fs_each_round: bool = True):
+    def __init__(self, state_dir: str = "client_states",
+                 update_fs_each_round: bool = True,
+                 load_state_from_disk_at_init: bool=False):
+        super().__init__()
         self.update_fs_each_round = update_fs_each_round
+        # directory where all client states will be stored
+        self.clients_state_dir = state_dir
+        # if true and if the client state is found in the file system
+        # at initialization, then the state will be set by reading from disk
+        self.load_state_from_disk_at_init = load_state_from_disk_at_init
+    
+    def setup(self) -> None:
+        return super().setup(self.clients_state_dir,
+                             create_directory=True,
+                             load_if_exist=self.load_state_from_disk_at_init)

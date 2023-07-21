@@ -379,6 +379,7 @@ def _wrap_numpy_client(client: NumPyClient) -> Client:
     }
 
     # Add wrapper type methods (if overridden)
+    member_dict["state"] = client.state
 
     if numpyclient_has_get_properties(client=client):
         member_dict["get_properties"] = _get_properties
