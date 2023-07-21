@@ -281,7 +281,7 @@ def _collect_masked_input(
     quantized_weights = weights_multiply(quantized_weights, weights_factor)
     quantized_weights = factor_weights_combine(weights_factor, quantized_weights)
 
-    dimensions_list: List[Tuple[int]] = [a.shape for a in quantized_weights]
+    dimensions_list: List[Tuple[int, ...]] = [a.shape for a in quantized_weights]
 
     # add private mask
     private_mask = pseudo_rand_gen(state.b, state.mod_range, dimensions_list)

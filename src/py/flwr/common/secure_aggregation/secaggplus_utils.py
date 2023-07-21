@@ -83,7 +83,7 @@ def share_keys_plaintext_separate(plaintext: bytes) -> Tuple[int, int, bytes, by
 
 
 def pseudo_rand_gen(
-    seed: bytes, num_range: int, dimensions_list: List[Tuple[int]]
+    seed: bytes, num_range: int, dimensions_list: List[Tuple[int, ...]]
 ) -> List[NDArrayInt]:
     """Seeded pseudo-random number generator for noise generation with Numpy."""
     assert len(seed) & 0x3 == 0

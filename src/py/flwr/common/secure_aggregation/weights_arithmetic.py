@@ -35,13 +35,13 @@ def factor_weights_extract(
     return weights[0][0], weights[1:]
 
 
-def weights_shape(weights: List[NDArray[Any]]) -> List[Tuple[int]]:
+def weights_shape(weights: List[NDArray[Any]]) -> List[Tuple[int, ...]]:
     """Get dimensions of each NDArray in weights."""
     return [arr.shape for arr in weights]
 
 
 def weights_zero_generate(
-    dimensions_list: List[Tuple[int]], dtype: DTypeLike = np.int64
+    dimensions_list: List[Tuple[int, ...]], dtype: DTypeLike = np.int64
 ) -> List[NDArray[Any]]:
     """Generate zero weights based on the dimensions list."""
     return [np.zeros(dimensions, dtype=dtype) for dimensions in dimensions_list]
