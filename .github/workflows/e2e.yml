@@ -94,7 +94,7 @@ jobs:
         run: python simulation.py
       - name: Run driver test using gRPC bidi
         run: ./../test_driver_grpc_bidi.sh
-      - name: Run driver test using REST
-        run: ./../test_driver_rest.sh
       - name: Run driver test using gRPC rere
         run: ./../test_driver_grpc_rere.sh
+      - name: Run driver test using REST
+        run: ./../test_driver_rest.sh
