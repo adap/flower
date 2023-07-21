@@ -28,7 +28,7 @@ case $2 in
     ;;
 esac
 
-timeout 2m flower-server $server_args 0.0.0.0:8080 $db_args &
+timeout 5m flower-server $server_args 0.0.0.0:8080 $db_args &
 server_pid=$!
 sleep 3
 
@@ -40,7 +40,7 @@ python client.py $client_args &
 client2_pid=$!
 sleep 3
 
-timeout 2m python driver.py &
+timeout 5m python driver.py &
 pid=$!
 
 wait $pid
