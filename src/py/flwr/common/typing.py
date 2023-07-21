@@ -15,16 +15,13 @@
 """Flower type definitions."""
 
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-import numpy as np
 import numpy.typing as npt
 
 NDArray = npt.NDArray[Any]
-NDArrayInt = npt.NDArray[np.int_]
-NDArrayFloat = npt.NDArray[np.float_]
 NDArrays = List[NDArray]
 
 # The following union type contains Python types corresponding to ProtoBuf types that
@@ -32,7 +29,18 @@ NDArrays = List[NDArray]
 # not conform to other definitions of what a scalar is. Source:
 # https://developers.google.com/protocol-buffers/docs/overview#scalar
 Scalar = Union[bool, bytes, float, int, str]
-Value = Union[Scalar, List[bool], List[bytes], List[float], List[int], List[str]]
+Value = Union[
+    bool,
+    bytes,
+    float,
+    int,
+    str,
+    List[bool],
+    List[bytes],
+    List[float],
+    List[int],
+    List[str],
+]
 
 Metrics = Dict[str, Scalar]
 MetricsAggregationFn = Callable[[List[Tuple[int, Metrics]]], Metrics]
@@ -165,19 +173,3 @@ class ClientMessage:
     get_parameters_res: Optional[GetParametersRes] = None
     fit_res: Optional[FitRes] = None
     evaluate_res: Optional[EvaluateRes] = None
-
-
-@dataclass
-class SecureAggregation:
-    """SecureAggregation supports SA-related communications."""
-
-    named_values: Dict[str, Value] = field(default_factory=dict)
-
-
-@dataclass
-class Task:
-    """Task is a container used to hold all messages."""
-
-    secure_aggregation_message: Optional[SecureAggregation] = None
-    legacy_server_message: Optional[ServerMessage] = None
-    legacy_client_message: Optional[ClientMessage] = None
