@@ -2,15 +2,11 @@ import random
 import time
 from typing import Dict, List, Tuple
 
-from task import Net, get_parameters
+import numpy as np
+from task import IS_VALIDATION, Net, get_parameters
 from workflows import get_workflow_factory
 
-from flwr.common import (
-    Metrics,
-    ndarrays_to_parameters,
-    serde,
-    typing,
-)
+from flwr.common import Metrics, ndarrays_to_parameters, serde, typing
 from flwr.driver import Driver
 from flwr.proto import driver_pb2, node_pb2, task_pb2
 from flwr.server import History
@@ -84,7 +80,9 @@ num_client_nodes_per_round = 3
 sleep_time = 1
 time_out = 30
 num_rounds = 3
-parameters = ndarrays_to_parameters(get_parameters(net=Net()))
+parameters = ndarrays_to_parameters(
+    get_parameters(net=Net()) if not IS_VALIDATION else [np.zeros(10000)]
+)
 wf_factory = get_workflow_factory()
 
 # -------------------------------------------------------------------------- Driver SDK

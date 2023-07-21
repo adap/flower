@@ -17,7 +17,6 @@
 
 
 import os
-import time
 from dataclasses import dataclass, field
 from logging import ERROR, INFO, WARNING
 from typing import Dict, List, Optional, Tuple, Union, cast
@@ -69,7 +68,7 @@ class _State:
     sid: int = 0
     share_num: int = 0
     threshold: int = 0
-    drop_flag: bool = False
+    test_drop: bool = False
     clipping_range: float = 0.0
     target_range: int = 0
     mod_range: int = 0
@@ -145,7 +144,7 @@ def _setup(state: _State, sa: SecureAggregation) -> SecureAggregation:
 
     state.share_num = cast(int, sec_agg_param_dict["share_num"])
     state.threshold = cast(int, sec_agg_param_dict["threshold"])
-    state.drop_flag = cast(bool, sec_agg_param_dict["test_drop"])
+    state.test_drop = cast(bool, sec_agg_param_dict["test_drop"])
     state.clipping_range = cast(float, sec_agg_param_dict["clipping_range"])
     state.target_range = cast(int, sec_agg_param_dict["target_range"])
     state.mod_range = cast(int, sec_agg_param_dict["mod_range"])
@@ -256,9 +255,6 @@ def _collect_masked_input(state: _State, sa: SecureAggregation) -> SecureAggrega
         state.sk1_share_dict[src] = sk1_share
 
     # fit client
-    if state.drop_flag:
-        # simulate delated response/dropout
-        time.sleep(40)
     weights_bytes = cast(List[bytes], sa.named_values["parameters"])
     weights = [bytes_to_ndarray(w) for w in weights_bytes]
     if isinstance(state.client, Client):

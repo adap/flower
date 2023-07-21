@@ -9,6 +9,7 @@ from flwr.common import (
     bytes_to_ndarray,
     ndarray_to_bytes,
     ndarrays_to_parameters,
+    parameters_to_ndarrays,
 )
 from flwr.common.secure_aggregation.crypto.shamir import combine_shares
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
@@ -110,11 +111,6 @@ def workflow_with_sec_agg(
     }
     # receive public keys from clients and build the dict
     node_messages = yield
-    # node_messages = {
-    #     node_id: task
-    #     for node_id, task in node_messages.items()
-    #     if task.message_type != "error"
-    # }
     surviving_node_ids = [node_id for node_id in node_messages]
 
     sid2public_keys = {}
@@ -140,11 +136,6 @@ def workflow_with_sec_agg(
 
     # receive secret key shares from clients
     node_messages = yield
-    # node_messages = {
-    #     node_id: task
-    #     for node_id, task in node_messages.items()
-    #     if task.message_type != "error"
-    # }
     surviving_node_ids = [node_id for node_id in node_messages]
     # Build forward packet list dictionary
     srcs, dsts, ciphertexts = [], [], []
@@ -172,8 +163,7 @@ def workflow_with_sec_agg(
     """
 
     # send encrypted secret key shares to clients (plus model parameters)
-    # weights = parameters_to_ndarrays(parameters)
-    weights = [np.zeros(10000)]
+    weights = parameters_to_ndarrays(parameters)
     yield {
         node_id: Task(
             secure_aggregation_message=SecureAggregation(
@@ -189,11 +179,6 @@ def workflow_with_sec_agg(
     }
     # collect masked input from clients
     node_messages = yield
-    # node_messages = {
-    #     node_id: task
-    #     for node_id, task in node_messages.items()
-    #     if task.message_type != "error"
-    # }
     surviving_node_ids = [node_id for node_id in node_messages]
     # Get shape of vector sent by first client
     masked_vector = [np.array([0], dtype=int)] + weights_zero_generate(
@@ -232,11 +217,6 @@ def workflow_with_sec_agg(
     yield {node_id: braodcast_task for node_id in surviving_node_ids}
     # collect key shares from clients
     node_messages = yield
-    # node_messages = {
-    #     node_id: task
-    #     for node_id, task in node_messages.items()
-    #     if task.message_type != "error"
-    # }
     surviving_node_ids = [node_id for node_id in node_messages]
     # Build collected shares dict
     collected_shares_dict: Dict[int, List[bytes]] = {}
