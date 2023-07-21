@@ -9,15 +9,12 @@ partitioned, please include all those functions and logic in the
 defined here of course.
 """
 
+import torch
 
 from typing import Optional, Tuple
-    
-import torch
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader, random_split
-
 from FedPer.dataset_preparation import _partition_data
-
 
 def load_datasets(  # pylint: disable=too-many-arguments
     config: DictConfig,

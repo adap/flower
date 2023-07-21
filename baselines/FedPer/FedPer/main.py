@@ -11,8 +11,10 @@ import hydra
 from omegaconf import DictConfig, OmegaConf
 from hydra.utils import instantiate
 from FedPer import client, server, utils
+from FedPer.utils import get_model_fn
+from FedPer.models import MobileNet_v1
 from FedPer.dataset import load_datasets
-from FedPer.strategy import AggregateBodyStrategy
+from FedPer.strategy import AggregateBodyStrategyPipeline
 from hydra.core.hydra_config import HydraConfig
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -45,7 +47,7 @@ def main(cfg: DictConfig) -> None:
     # get function that will executed by the strategy's evaluate() method
     # Set server's device
     device = cfg.server_device
-    evaluate_fn = server.gen_evaluate_fn(testloader, device=device, model=cfg.model)
+    # evaluate_fn = server.gen_evaluate_fn(testloader, device=device, model=cfg.model)
 
     # get a function that will be used to construct the config that the client's
     # fit() method will received
@@ -58,11 +60,15 @@ def main(cfg: DictConfig) -> None:
 
         return fit_config_fn
 
+    # Get model function
+    # model_fn = get_model_fn(cfg.model)
+
     # 4. Define your strategy
     strategy = instantiate(
         cfg.strategy,
-        evaluate_fn=evaluate_fn,
+        # evaluate_fn=evaluate_fn,
         on_fit_config_fn=get_on_fit_config(),
+        # create_model=model_fn,
     )
 
     # 5. Start Simulation

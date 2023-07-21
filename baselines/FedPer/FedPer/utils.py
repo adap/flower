@@ -10,8 +10,38 @@ import pickle
 from pathlib import Path
 from secrets import token_hex
 from typing import Dict, Optional, Union
+from omegaconf import DictConfig, OmegaConf
 from matplotlib import pyplot as plt
+from FedPer.models import MobileNet_v1
 from flwr.server.history import History
+
+def get_model_fn(config: DictConfig):
+    """Get model function from config.
+
+    Parameters
+    ----------
+    config : DictConfig
+        An omegaconf object that stores the hydra config.
+
+    Returns
+    -------
+    model_fn : function
+        Function that returns a model.
+    """
+    if config.model == "mobile":
+        if config.split:
+            def _create_model():
+                return MobileNet_v1(
+                    split=True, num_head_layers=config.num_head_layers
+                )
+        else:
+            def _create_model():
+                return MobileNet_v1()
+    else:
+        raise NotImplementedError(f"Model {config.model} not implemented")
+            
+    return _create_model()
+       
 
 
 def plot_metric_from_history(
