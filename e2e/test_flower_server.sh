@@ -20,7 +20,7 @@ esac
 
 case $2 in
   "db")
-    db_args="--database test.db"
+    db_args="--database $(date +%s).db"
     ;;
 
   *)
