@@ -10,7 +10,7 @@ from model_and_dataset import Net, load_data, train, test
 
 parser = argparse.ArgumentParser(description="In-FileSystem Stateful Flower Clients")
 
-parser.add_argument("--client_id", type=int, help="An arbitrary identifier for your client so multiple clients in the same system do not interfere with each others' state")
+parser.add_argument("--client_id", type=str, required=True, help="An arbitrary identifier for your client so multiple clients in the same system do not interfere with each others' state")
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
