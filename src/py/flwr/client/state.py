@@ -50,7 +50,7 @@ class InMemoryClientState(ClientState):
     """An in-memory Client State class for clients to record their state and use it
     across rounds.
 
-    This in-memory state is suitable for both "real" and "simulated" clients. 
+    This in-memory state is suitable for both "real" and "simulated" clients.
     Note the state won't persist once the Federated Learning workload is completed. If
     you would like to save/load the state to/from disk, use the
     `InFileSystemClientState` class.
@@ -62,7 +62,7 @@ class InMemoryClientState(ClientState):
 
     def setup(self) -> None:
         """Initialise the state."""
-        self._state = {}
+        pass
 
     def fetch(self) -> Dict:
         return self._state
@@ -91,7 +91,9 @@ class InFileSystemClientState(ClientState):
         self.path = None  # to be setup upon setup() call
         self._state: Dict[str, Any] = {}
 
-    def setup(self, state_dir: str, create_directory: bool, load_if_exist: bool=True) -> None:
+    def setup(
+        self, state_dir: str, create_directory: bool, load_if_exist: bool = True
+    ) -> None:
         """Initialize state by loading it from disk if exists.
 
         Else, create file directory structure and init an empty state.

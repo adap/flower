@@ -27,11 +27,10 @@ trainloader, testloader = load_data()
 # Define Flower client using In-FileSystem state.
 class FlowerClient(fl.client.NumPyClient):
 
-    state = fl.client.InFileSystemClientState()
-
     def __init__(self, client_identifier) -> None:
         super().__init__()
 
+        self.state = fl.client.InFileSystemClientState()
         # we want each client to have its own state in the file system
         # therefore we should provide the state object with a unique path
         # one way to achieve this is by using a unique identifier for each

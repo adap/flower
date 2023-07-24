@@ -24,10 +24,6 @@ from flwr.common import Config, NDArrays, Scalar
 class NumPyClient(ABC):
     """Abstract base class for Flower clients using NumPy."""
 
-    @property
-    def state(self):
-        """Client state."""
-        raise NotImplementedError
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         """Return a client's set of properties.

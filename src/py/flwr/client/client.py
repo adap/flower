@@ -35,11 +35,6 @@ from flwr.common import (
 class Client(ABC):
     """Abstract base class for Flower clients."""
 
-    @property
-    def state(self):
-        """Client state."""
-        raise NotImplementedError
-
     def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
         """Return set of client's properties.
 
