@@ -1,6 +1,8 @@
+from logging import INFO
 import argparse
 import flwr as fl
 from time import time
+from flwr.common.logger import log
 from flwr.common.typing import Scalar
 from flwr.client.state import InMemoryClientState, InFileSystemVirtualClientState
 import ray
@@ -28,6 +30,7 @@ class FlowerClient(fl.client.NumPyClient):
     with the FS. We signal this by using InFileSystemVirtualClientState as opposed
     to InFileSystemClientState. """
     state = InMemoryClientState()
+    # state = InFileSystemVirtualClientState()
 
     def __init__(self, cid: str, fed_dir_data: str):
         self.cid = cid
@@ -44,10 +47,17 @@ class FlowerClient(fl.client.NumPyClient):
         return get_params(self.net)
 
     def fit(self, parameters, config):
+        # This fit() method showcases how you can make use of the client's state. In this
+        # simple example, we use the state to keep track of the time it takes to perform
+        # the majority of the fit() operations. 
+        # First, we display the state at the beginning of fit (state will be empty the first
+        # time this client participates unless you initialise the state from disk)
+        # Then, before ending fit() we show the updated state.
+
         set_params(self.net, parameters)
 
         # Load data for this client and get trainloader
-        print(f"{self.state.fetch() = } for client: {self.cid}")
+        log(INFO, f"fit begins --> {self.state.fetch() = } for client: {self.cid}")
         t_start = time()
         num_workers = int(ray.get_runtime_context().get_assigned_resources()["CPU"])
         trainloader = get_dataloader(
@@ -64,6 +74,7 @@ class FlowerClient(fl.client.NumPyClient):
         # Train
         train(self.net, trainloader, epochs=config["epochs"], device=self.device)
         self.state.update({'time_fit':time()-t_start})
+        log(INFO, f"fit ends --> {self.state.fetch() = } for client: {self.cid}")
 
         # Return local model and statistics
         return get_params(self.net), len(trainloader.dataset), {}

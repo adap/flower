@@ -15,14 +15,21 @@
 """Ray-based Flower ClientProxy implementation."""
 
 
-from logging import ERROR
 from copy import deepcopy
+from logging import ERROR
 from typing import Callable, Dict, Optional, cast
 
 import ray
 
 from flwr import common
-from flwr.client import Client, ClientLike, ClientState, InMemoryClientState, InFileSystemVirtualClientState, to_client
+from flwr.client import (
+    Client,
+    ClientLike,
+    ClientState,
+    InFileSystemVirtualClientState,
+    InMemoryClientState,
+    to_client,
+)
 from flwr.client.client import (
     maybe_call_evaluate,
     maybe_call_fit,
@@ -31,16 +38,18 @@ from flwr.client.client import (
 )
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
+from flwr.simulation.virtual_client_state_manager import VirtualClientStateManager
 
 
 class VirtualClientTemplate:
     """This is a wrapper class for a client we want to simulate.
-    
+
     It essentially behaves very similarly to the callback function
     that Flower previously used with `start_simulation`. This wrapper
     makes it easier to inspect the client to be simulated and deal
     with its state implementation accordingly in the ClientProxy.
     """
+
     def __init__(self, client_type, **client_kwargs):
         # Init by passing a client type and the keyed arguments to initialise it upon __call__
         self.client = client_type
@@ -55,43 +64,55 @@ class VirtualClientTemplate:
         # arguments specified when constructing the VirtualClientTemplate
         return self.client(**self.client_kwargs)
 
+
 ClientFn = VirtualClientTemplate  # Callable[[str], ClientLike]
+
 
 class RayClientProxy(ClientProxy):
     """Flower client proxy which delegates work using Ray."""
 
     def __init__(
-        self, client_template: ClientFn, cid: str, resources: Dict[str, float]
+        self,
+        client_template: ClientFn,
+        state_manager: VirtualClientStateManager,
+        cid: str,
+        resources: Dict[str, float],
     ):
         super().__init__(cid)
-        self.client_fn = deepcopy(client_template) # yes, deepcopy is needed
+        self.client_fn = deepcopy(client_template)  # yes, deepcopy is needed
         self.resources = resources
-        self.state: ClientState = None
+        self.state_manager = state_manager
 
         self._prepare_client_state()
 
         # if self.
+
     def _prepare_client_state(self):
         """Inspect ClientSate type and act accordingly.
-        
-        Virtual clients shouldn't interface with the file system directly. That
-        is done by the ClientProxy at the beginning or the end of the client life.
-        This can only happen when a client uses InFileSystemVirtualClientState. When
-        that happens, the client will internally use an InMemoryClientState and the
-        FS i/o will be delegated to the ClientProxy (i.e. this class)."""
-    
+
+        Virtual clients shouldn't interface with the file system directly. That is done
+        by the ClientProxy at the beginning or the end of the client life. This can only
+        happen when a client uses InFileSystemVirtualClientState. When that happens, the
+        client will internally use an InMemoryClientState and the FS i/o will be
+        delegated to the ClientProxy (i.e. this class).
+        """
+
+        # TODO: this will load all the states before the simulation actually begins.
+        # Should we instead load the states in a lazy way (i.e. as clients are told
+        # to participate in the simulation?)
+
         client_state = self.client_fn.client_state
         if isinstance(client_state, InMemoryClientState):
             # the client uses in-memory state, all good! this ClientProxy will
             # record the state once the client completes its task (e.g. fit())
             # and before deleting the client object.
-            self.state = InMemoryClientState()
+            self.state_manager.track_state(self.cid, InMemoryClientState())
 
         elif isinstance(client_state, InFileSystemVirtualClientState):
-            self.state = client_state
             # we don't want all clients to collide into the same file
-            self.state.state_filename += f'_{self.cid}'
-            self.state.setup()
+            client_state.state_filename += f"_{self.cid}"
+            client_state.setup()
+            self.state_manager.track_state(self.cid, client_state)
             # replace client's internal state with InMemoryClientState and process all
             # the read/write from/to the file system with the ClientProxy (this object)
             self.client_fn.client.state = InMemoryClientState()
@@ -99,18 +120,20 @@ class RayClientProxy(ClientProxy):
             # stateless clients
             pass
         else:
-            mssg = f"Clients with state {type(client_state)} are not supported for "\
-                    "simulation. Please consider using InMemoryClientState or, if you "\
-                    "need to save the state to disk, use InFileSystemVirtualClientState."
+            mssg = (
+                f"Clients with state {type(client_state)} are not supported for "
+                "simulation. Please consider using InMemoryClientState or, if you "
+                "need to save the state to disk, use InFileSystemVirtualClientState."
+            )
             raise NotImplementedError(mssg)
 
     def _fetch_proxy_state(self):
         """Load state before passing it to a virtual client."""
-        return self.state.fetch()
+        return self.state_manager.get_client_state(self.cid)
 
     def _update_proxy_state(self, client_state: ClientState):
         """Update persistent state for virtual client."""
-        self.state.update(client_state)
+        self.state_manager.update_client_state(self.cid, client_state)
 
     def get_properties(
         self, ins: common.GetPropertiesIns, timeout: Optional[float]
@@ -207,7 +230,10 @@ class RayClientProxy(ClientProxy):
 
 @ray.remote
 def launch_and_get_properties(
-    client_fn: ClientFn, cid: str, get_properties_ins: common.GetPropertiesIns, client_state,
+    client_fn: ClientFn,
+    cid: str,
+    get_properties_ins: common.GetPropertiesIns,
+    client_state,
 ) -> common.GetPropertiesRes:
     """Execute get_properties remotely."""
     client: Client = _create_client(client_fn, cid, client_state)
@@ -221,7 +247,10 @@ def launch_and_get_properties(
 
 @ray.remote
 def launch_and_get_parameters(
-    client_fn: ClientFn, cid: str, get_parameters_ins: common.GetParametersIns, client_state,
+    client_fn: ClientFn,
+    cid: str,
+    get_parameters_ins: common.GetParametersIns,
+    client_state,
 ) -> common.GetParametersRes:
     """Execute get_parameters remotely."""
     client: Client = _create_client(client_fn, cid, client_state)
@@ -235,7 +264,10 @@ def launch_and_get_parameters(
 
 @ray.remote
 def launch_and_fit(
-    client_fn: ClientFn, cid: str, fit_ins: common.FitIns, client_state,
+    client_fn: ClientFn,
+    cid: str,
+    fit_ins: common.FitIns,
+    client_state,
 ) -> common.FitRes:
     """Execute fit remotely."""
     client: Client = _create_client(client_fn, cid, client_state)
@@ -249,7 +281,10 @@ def launch_and_fit(
 
 @ray.remote
 def launch_and_evaluate(
-    client_fn: ClientFn, cid: str, evaluate_ins: common.EvaluateIns, client_state,
+    client_fn: ClientFn,
+    cid: str,
+    evaluate_ins: common.EvaluateIns,
+    client_state,
 ) -> common.EvaluateRes:
     """Execute evaluate remotely."""
     client: Client = _create_client(client_fn, cid, client_state)

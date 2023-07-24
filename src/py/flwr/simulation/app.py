@@ -29,7 +29,14 @@ from flwr.server.app import ServerConfig, init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
-from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy, VirtualClientTemplate
+from flwr.simulation.ray_transport.ray_client_proxy import (
+    RayClientProxy,
+    VirtualClientTemplate,
+)
+from flwr.simulation.virtual_client_state_manager import (
+    SimpleVirtualClientStateManager,
+    VirtualClientStateManager,
+)
 
 INVALID_ARGUMENTS_START_SIMULATION = """
 INVALID ARGUMENTS ERROR
@@ -71,6 +78,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
     client_manager: Optional[ClientManager] = None,
     ray_init_args: Optional[Dict[str, Any]] = None,
     keep_initialised: Optional[bool] = False,
+    state_manager: VirtualClientStateManager = SimpleVirtualClientStateManager(),
 ) -> History:
     """Start a Ray-based Flower simulation server.
 
@@ -188,6 +196,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
     for cid in cids:
         client_proxy = RayClientProxy(
             client_template=client_template,
+            state_manager=state_manager,
             cid=cid,
             resources=resources,
         )
