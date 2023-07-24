@@ -54,7 +54,8 @@ class InMemoryClientState(ClientState):
     """An in-memory Client State class for clients to record their state and use it
     across rounds.
 
-    Note thi state won't persist once the Federated Learning workload is completed. If
+    This in-memory state is suitable for both "real" and "simulated" clients. 
+    Note the state won't persist once the Federated Learning workload is completed. If
     you would like to save/load the state to/from disk, use the
     `InFileSystemClientState` class.
     """
@@ -76,13 +77,14 @@ class InMemoryClientState(ClientState):
         self._state = state
 
 
-class InFileSystemClientState(InMemoryClientState):
+class InFileSystemClientState(ClientState):
     """A Client State class that enables the loading/recording from/to the file system.
 
     In this way, the client state can be retrieved/updated across different Federated
     Learning workloads. This client state class can be used to initialize the client
     state at the beginning of the client's life.
     """
+    _state: Dict[str, Any] = {}
 
     def __init__(
         self,
@@ -94,7 +96,7 @@ class InFileSystemClientState(InMemoryClientState):
         self.keep_in_memory = keep_in_memory
         self.path = None  # to be setup upon setup() call
 
-    def setup(self, state_dir: str, create_directory: bool) -> None:
+    def setup(self, state_dir: str, create_directory: bool, load_if_exist: bool=True) -> None:
         """Initialize state by loading it from disk if exists.
 
         Else, create file directory structure and init an empty state.
@@ -102,7 +104,8 @@ class InFileSystemClientState(InMemoryClientState):
         self.path = Path(state_dir)
         if self.path.exists():
             # load state
-            self._load_state()
+            if load_if_exist:
+                self._load_state()
         else:
             if create_directory:
                 log(
@@ -125,13 +128,15 @@ class InFileSystemClientState(InMemoryClientState):
     def _load_state(self):
         """Load client state from pickle."""
         state_file = self.path / f"{self.state_filename}.pkl"
-        if self.path.exists():
+        if state_file.exists():
             with open(state_file, "rb") as handle:
                 state = pickle.load(handle)
 
-        # update state (but don't write to disk since we
-        # just read from it)
-        self.update(state, to_disk=False)
+            # update state (but don't write to disk since we
+            # just read from it)
+            self.update(state, to_disk=False)
+        else:
+            log(WARNING, f"State `{state_file}` does not exist.")
 
     def _write_state(self) -> bool:
         """Write client state to pickle."""
@@ -170,17 +175,3 @@ class InFileSystemClientState(InMemoryClientState):
             # free state after saving it to disk
             if saved and not self.keep_in_memory:
                 self._state.clear()
-
-
-# if __name__ == "__main__":
-#     ss = InMemoryClientState()
-#     print(f"{ss.fetch() = }")
-#     ss.update({"hello": 123})
-#     print(f"{ss.fetch() = }")
-
-#     ssfs = InFileSystemClientState(state_dir="./here/teststate")
-#     print(f"{ssfs.fetch() = }")
-#     ssfs.update({"hello": 123})
-#     ssfs.update({"hello": 1235}, to_disk=False)
-#     print(f"{ssfs.fetch() = }")
-#     print(f"{ssfs.fetch(from_disk=True) = }")
