@@ -22,7 +22,9 @@ trainloader, testloader = load_data()
 # Define Flower client using In-memory state.
 class FlowerClient(fl.client.NumPyClient):
 
-    state = fl.client.InMemoryClientState()
+    def __init__(self):
+        super().__init__()
+        self.state = fl.client.InMemoryClientState()
 
     def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in net.state_dict().items()]
