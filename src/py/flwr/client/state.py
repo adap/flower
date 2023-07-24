@@ -26,10 +26,6 @@ from flwr.common.logger import log
 class ClientState(ABC):
     """Abstract base class for Flower client state."""
 
-    @property
-    def _state(self):
-        raise NotImplementedError
-
     @abstractmethod
     def setup(self) -> None:
         """Initialize client state."""
@@ -60,10 +56,9 @@ class InMemoryClientState(ClientState):
     `InFileSystemClientState` class.
     """
 
-    _state: Dict[str, Any] = {}
-
     def __init__(self):
         super().__init__()
+        self._state: Dict[str, Any] = {}
 
     def setup(self) -> None:
         """Initialise the state."""
@@ -95,6 +90,7 @@ class InFileSystemClientState(ClientState):
         self.state_filename = state_filename
         self.keep_in_memory = keep_in_memory
         self.path = None  # to be setup upon setup() call
+        self._state: Dict[str, Any] = {}
 
     def setup(self, state_dir: str, create_directory: bool, load_if_exist: bool=True) -> None:
         """Initialize state by loading it from disk if exists.
