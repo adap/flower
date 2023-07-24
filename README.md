@@ -71,7 +71,7 @@ Stay tuned, more tutorials are coming soon. Topics include **Privacy and Securit
 
 ## 30-Minute Federated Learning Tutorial
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/examples/simulation_pytorch_colab/tutorial.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/examples/simulation_pytorch_colab/tutorial.ipynb))
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/examples/simulation-pytorch-colab/tutorial.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/examples/simulation-pytorch-colab/tutorial.ipynb))
 
 
 ## Documentation
@@ -116,7 +116,7 @@ Quickstart examples:
 * [Quickstart (TensorFlow)](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow)
 * [Quickstart (PyTorch)](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch)
 * [Quickstart (Hugging Face)](https://github.com/adap/flower/tree/main/examples/quickstart-huggingface)
-* [Quickstart (PyTorch Lightning)](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch_lightning)
+* [Quickstart (PyTorch Lightning)](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch-lightning)
 * [Quickstart (fastai)](https://github.com/adap/flower/tree/main/examples/quickstart-fastai)
 * [Quickstart (Pandas)](https://github.com/adap/flower/tree/main/examples/quickstart-pandas)
 * [Quickstart (MXNet)](https://github.com/adap/flower/tree/main/examples/quickstart-mxnet)
