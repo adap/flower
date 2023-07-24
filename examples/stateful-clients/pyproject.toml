@@ -3,9 +3,9 @@ requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "quickstart-pytorch"
+name = "stateful-clients"
 version = "0.1.0"
-description = "PyTorch Federated Learning Quickstart with Flower"
+description = "PyTorch Federated Learning with Flower using Stateful Clients"
 authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
@@ -14,3 +14,4 @@ flwr = ">=1.0,<2.0"
 torch = "1.13.1"
 torchvision = "0.14.1"
 tqdm = "4.65.0"
+ray = "2.5.1"

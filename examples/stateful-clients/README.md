@@ -45,6 +45,8 @@ You will see that PyTorch is starting a federated training. Have a look to the [
 
 ## Stateful Flower Clients (simulation)
 
+> This has been tested with a early version of the new [`VirtualClientEngine`](https://github.com/adap/flower/pull/1969). Therefore, `pyproject.toml` and `requirements.txt` reflect this and use `ray==2.5.1`.
+
 For simulation with Flower's `VirtualClientEngine` you might want to still use stateful clients without having to manually handle their state. The script `simulation.py` (and the content in the `sim_utils` directory) closely resembles the [simulation-pytorch]() example. It has been extended to use stateful clients. Similarly to the example above with `gRPC` clients, the state the clients record is the time take to do `fit()`. They also use print statements to show that the state is correctly fetched and updated. By default clients use `InFileSystemVirtualClientState` which will record the state of the clients to the FS at the end of each round. You can change it to `InMemoryClientState` if you don't need to save results to the FS. You can run this example by simply doing:
 
 ```bash
