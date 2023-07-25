@@ -33,6 +33,7 @@ from flwr.client.client import (
     maybe_call_get_parameters,
     maybe_call_get_properties,
 )
+from flwr.client import ClientState
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 from flwr.simulation.virtual_client_state_manager import VirtualClientStateManager
@@ -60,7 +61,11 @@ class RayClientProxy(ClientProxy):
 
 
     def _register_client_state(self):
-        """ """
+        """Register client to track state"""
+
+        # At this point we don't know if the client is stateful
+        # but it doesn't matter much. Tracking it in the state manager
+        # adds virtually zero overhead
         self.state_manager.track_state(client_key=self.cid)
 
     def _fetch_proxy_state(self):
@@ -177,7 +182,7 @@ def launch_and_get_properties(
         client=client,
         get_properties_ins=get_properties_ins,
     )
-    state = client.numpy_client.fetch_state()
+    state = client.numpy_client.fetch_state() if is_stateful(client) else None
     return res, state
 
 
@@ -194,7 +199,7 @@ def launch_and_get_parameters(
         client=client,
         get_parameters_ins=get_parameters_ins,
     )
-    state = client.numpy_client.fetch_state()
+    state = client.numpy_client.fetch_state() if is_stateful(client) else None
     return res, state
 
 @ray.remote
@@ -211,7 +216,7 @@ def launch_and_fit(
         fit_ins=fit_ins,
     )
 
-    state = client.numpy_client.fetch_state()
+    state = client.numpy_client.fetch_state() if is_stateful(client) else None
     return res, state
 
 
@@ -228,7 +233,7 @@ def launch_and_evaluate(
         client=client,
         evaluate_ins=evaluate_ins,
     )
-    state = client.numpy_client.fetch_state()
+    state = client.numpy_client.fetch_state() if is_stateful(client) else None
     return res, state
 
 
@@ -239,5 +244,11 @@ def _create_client(client_fn: ClientFn, cid: str, client_state: Dict[str, Any]) 
 
     # set client state
     # TODO: we'll need to ensure this is a NumPyClientWrapper type -- how?
-    client.numpy_client.update_state(client_state)
+    if is_stateful(client):
+        # TODO: if we expose all the ClientState relevant methods to the wrapper, we won't need to do this via numpy_client access
+        client.numpy_client.update_state(client_state)
     return client
+
+
+def is_stateful(client: Client) -> bool:
+    return isinstance(client, ClientState)
