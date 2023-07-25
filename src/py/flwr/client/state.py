@@ -79,7 +79,6 @@ class InFileSystemClientState(ClientState):
     Learning workloads. This client state class can be used to initialize the client
     state at the beginning of the client's life.
     """
-    _state: Dict[str, Any] = {}
 
     def __init__(
         self,
