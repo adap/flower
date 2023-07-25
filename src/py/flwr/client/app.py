@@ -51,6 +51,7 @@ from flwr.common.typing import (
 )
 
 from .client import Client
+from .state import ClientState
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle
@@ -377,9 +378,6 @@ def _wrap_numpy_client(client: NumPyClient) -> Client:
     member_dict: Dict[str, Callable] = {  # type: ignore
         "__init__": _constructor,
     }
-
-    # Add wrapper type methods (if overridden)
-    member_dict["state"] = client.state
 
     if numpyclient_has_get_properties(client=client):
         member_dict["get_properties"] = _get_properties

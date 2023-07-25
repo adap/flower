@@ -17,7 +17,7 @@
 
 from copy import deepcopy
 from logging import ERROR
-from typing import Callable, Dict, Optional, cast
+from typing import Any, Callable, Dict, Optional, cast
 
 import ray
 
@@ -25,9 +25,6 @@ from flwr import common
 from flwr.client import (
     Client,
     ClientLike,
-    ClientState,
-    InFileSystemVirtualClientState,
-    InMemoryClientState,
     to_client,
 )
 from flwr.client.client import (
@@ -41,31 +38,7 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.simulation.virtual_client_state_manager import VirtualClientStateManager
 
 
-class VirtualClientTemplate:
-    """This is a wrapper class for a client we want to simulate.
-
-    It essentially behaves very similarly to the callback function
-    that Flower previously used with `start_simulation`. This wrapper
-    makes it easier to inspect the client to be simulated and deal
-    with its state implementation accordingly in the ClientProxy.
-    """
-
-    def __init__(self, client_type, **client_kwargs):
-        # Init by passing a client type and the keyed arguments to initialise it upon __call__
-        self.client = client_type
-        self.client_state = client_type.state
-        self.client_kwargs = client_kwargs
-
-    def __call__(self, cid: str):
-        # spawns the client, this will be called by the ClientProxy
-        # when it's sampled by the Strategy
-
-        # by default, do nothing but instantiating the client with the
-        # arguments specified when constructing the VirtualClientTemplate
-        return self.client(**self.client_kwargs)
-
-
-ClientFn = VirtualClientTemplate  # Callable[[str], ClientLike]
+ClientFn = Callable[[str], ClientLike]
 
 
 class RayClientProxy(ClientProxy):
@@ -73,65 +46,28 @@ class RayClientProxy(ClientProxy):
 
     def __init__(
         self,
-        client_template: ClientFn,
+        client_fn: ClientFn,
         state_manager: VirtualClientStateManager,
         cid: str,
         resources: Dict[str, float],
     ):
         super().__init__(cid)
-        self.client_fn = deepcopy(client_template)  # yes, deepcopy is needed
+        self.client_fn = client_fn
         self.resources = resources
         self.state_manager = state_manager
 
-        self._prepare_client_state()
+        self._register_client_state()
 
-        # if self.
 
-    def _prepare_client_state(self):
-        """Inspect ClientSate type and act accordingly.
-
-        Virtual clients shouldn't interface with the file system directly. That is done
-        by the ClientProxy at the beginning or the end of the client life. This can only
-        happen when a client uses InFileSystemVirtualClientState. When that happens, the
-        client will internally use an InMemoryClientState and the FS i/o will be
-        delegated to the ClientProxy (i.e. this class).
-        """
-
-        # TODO: this will load all the states before the simulation actually begins.
-        # Should we instead load the states in a lazy way (i.e. as clients are told
-        # to participate in the simulation?)
-
-        client_state = self.client_fn.client_state
-        if isinstance(client_state, InMemoryClientState):
-            # the client uses in-memory state, all good! this ClientProxy will
-            # record the state once the client completes its task (e.g. fit())
-            # and before deleting the client object.
-            self.state_manager.track_state(self.cid, InMemoryClientState())
-
-        elif isinstance(client_state, InFileSystemVirtualClientState):
-            # we don't want all clients to collide into the same file
-            client_state.state_filename += f"_{self.cid}"
-            client_state.setup()
-            self.state_manager.track_state(self.cid, client_state)
-            # replace client's internal state with InMemoryClientState and process all
-            # the read/write from/to the file system with the ClientProxy (this object)
-            self.client_fn.client.state = InMemoryClientState()
-        elif client_state is None:
-            # stateless clients
-            pass
-        else:
-            mssg = (
-                f"Clients with state {type(client_state)} are not supported for "
-                "simulation. Please consider using InMemoryClientState or, if you "
-                "need to save the state to disk, use InFileSystemVirtualClientState."
-            )
-            raise NotImplementedError(mssg)
+    def _register_client_state(self):
+        """ """
+        self.state_manager.track_state(client_key=self.cid)
 
     def _fetch_proxy_state(self):
         """Load state before passing it to a virtual client."""
         return self.state_manager.get_client_state(self.cid)
 
-    def _update_proxy_state(self, client_state: ClientState):
+    def _update_proxy_state(self, client_state: Dict[str, Any]):
         """Update persistent state for virtual client."""
         self.state_manager.update_client_state(self.cid, client_state)
 
@@ -233,7 +169,7 @@ def launch_and_get_properties(
     client_fn: ClientFn,
     cid: str,
     get_properties_ins: common.GetPropertiesIns,
-    client_state,
+    client_state: Dict[str, Any],
 ) -> common.GetPropertiesRes:
     """Execute get_properties remotely."""
     client: Client = _create_client(client_fn, cid, client_state)
@@ -241,8 +177,8 @@ def launch_and_get_properties(
         client=client,
         get_properties_ins=get_properties_ins,
     )
-    client_state = client.state.fetch()
-    return res, client_state
+    state = client.numpy_client.fetch_state()
+    return res, state
 
 
 @ray.remote
@@ -250,7 +186,7 @@ def launch_and_get_parameters(
     client_fn: ClientFn,
     cid: str,
     get_parameters_ins: common.GetParametersIns,
-    client_state,
+    client_state: Dict[str, Any],
 ) -> common.GetParametersRes:
     """Execute get_parameters remotely."""
     client: Client = _create_client(client_fn, cid, client_state)
@@ -258,16 +194,15 @@ def launch_and_get_parameters(
         client=client,
         get_parameters_ins=get_parameters_ins,
     )
-    client_state = client.state.fetch()
-    return res, client_state
-
+    state = client.numpy_client.fetch_state()
+    return res, state
 
 @ray.remote
 def launch_and_fit(
     client_fn: ClientFn,
     cid: str,
     fit_ins: common.FitIns,
-    client_state,
+    client_state: Dict[str, Any],
 ) -> common.FitRes:
     """Execute fit remotely."""
     client: Client = _create_client(client_fn, cid, client_state)
@@ -275,8 +210,9 @@ def launch_and_fit(
         client=client,
         fit_ins=fit_ins,
     )
-    client_state = client.state.fetch()
-    return res, client_state
+
+    state = client.numpy_client.fetch_state()
+    return res, state
 
 
 @ray.remote
@@ -284,7 +220,7 @@ def launch_and_evaluate(
     client_fn: ClientFn,
     cid: str,
     evaluate_ins: common.EvaluateIns,
-    client_state,
+    client_state: Dict[str, Any],
 ) -> common.EvaluateRes:
     """Execute evaluate remotely."""
     client: Client = _create_client(client_fn, cid, client_state)
@@ -292,14 +228,16 @@ def launch_and_evaluate(
         client=client,
         evaluate_ins=evaluate_ins,
     )
-    client_state = client.state.fetch()
-    return res, client_state
+    state = client.numpy_client.fetch_state()
+    return res, state
 
 
-def _create_client(client_fn: ClientFn, cid: str, client_state: ClientState) -> Client:
+def _create_client(client_fn: ClientFn, cid: str, client_state: Dict[str, Any]) -> Client:
     """Create a client instance."""
     client_like: ClientLike = client_fn(cid)
     client = to_client(client_like=client_like)
+
     # set client state
-    client.state.update(client_state)
+    # TODO: we'll need to ensure this is a NumPyClientWrapper type -- how?
+    client.numpy_client.update_state(client_state)
     return client

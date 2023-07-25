@@ -31,7 +31,6 @@ from flwr.server.history import History
 from flwr.server.strategy import Strategy
 from flwr.simulation.ray_transport.ray_client_proxy import (
     RayClientProxy,
-    VirtualClientTemplate,
 )
 from flwr.simulation.virtual_client_state_manager import (
     SimpleVirtualClientStateManager,
@@ -68,7 +67,7 @@ REASON:
 
 def start_simulation(  # pylint: disable=too-many-arguments
     *,
-    client_template: VirtualClientTemplate,
+    client_fn: Callable,
     num_clients: Optional[int] = None,
     clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, float]] = None,
@@ -84,17 +83,16 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     Parameters
     ----------
-    client_template : VirtualClientTemplate
-        A wrapper for a ClientLike object. The __call__ method will be executed
-        by the RayClientProxy when the client associated to its client id is
-        sampled by the strategy. You can customize the __call__ method but its
-        signature (i.e. input arguments) shouldn't be modified. If the underlying
-        client is stateful, its state will be managed by RayClientProxy and ensure
-        it persists over the course of the simulation. If an InFileSystem state
-        is used, the file system I/O will be delegated to the RayClientProxy. In
-        other words, the client object itself will behave as if with InMemory state
-        but this will be initialized from the state in disk. Similarly, once the client
-        completes its tasks (e.g. fit()), its state will be stored to disk.
+    client_fn : Callable[[str], ClientLike]
+        A function creating client instances. The function must take a single
+        `str` argument called `cid`. It should return a single client instance
+        of type ClientLike. Note that the created client instances are ephemeral
+        and will often be destroyed after a single method invocation. Since client
+        instances are not long-lived, they should not attempt to carry state over
+        method invocations. Any state required by the instance (model, dataset,
+        hyperparameters, ...) should be (re-)created in either the call to `client_fn`
+        or the call to any of the client methods (e.g., load evaluation data in the
+        `evaluate` method itself).
     num_clients : Optional[int]
         The total number of clients in this simulation. This must be set if
         `clients_ids` is not set and vice-versa.
@@ -195,7 +193,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
     resources = client_resources if client_resources is not None else {}
     for cid in cids:
         client_proxy = RayClientProxy(
-            client_template=client_template,
+            client_fn=client_fn,
             state_manager=state_manager,
             cid=cid,
             resources=resources,

@@ -4,7 +4,7 @@ import flwr as fl
 from time import time
 from flwr.common.logger import log
 from flwr.common.typing import Scalar
-from flwr.client.state import InMemoryClientState, InFileSystemVirtualClientState
+from flwr.client import NumPyClient, InMemoryClientState
 import ray
 import torch
 import torchvision
@@ -23,16 +23,11 @@ parser.add_argument("--num_rounds", type=int, default=5)
 
 
 # Flower client, adapted from Pytorch quickstart example
-class FlowerClient(fl.client.NumPyClient):
-    """A standard client that wants to record its state to the FileSystem.
-    
-    Since it will be run in simulation, the ClientProxy will be the one interfacing
-    with the FS. We signal this by using InFileSystemVirtualClientState as opposed
-    to InFileSystemClientState. """
-    state = InMemoryClientState()
-    # state = InFileSystemVirtualClientState()
+class FlowerClient(NumPyClient, InMemoryClientState):
+    """A standard client that wants to record its state across rounds."""
 
     def __init__(self, cid: str, fed_dir_data: str):
+        super().__init__()
         self.cid = cid
         self.fed_dir = Path(fed_dir_data)
         self.properties: Dict[str, Scalar] = {"tensor_type": "numpy.ndarray"}
@@ -57,7 +52,7 @@ class FlowerClient(fl.client.NumPyClient):
         set_params(self.net, parameters)
 
         # Load data for this client and get trainloader
-        log(INFO, f"fit begins --> {self.state.fetch() = } for client: {self.cid}")
+        log(INFO, f"fit begins --> {self.fetch_state() = } for client: {self.cid}")
         t_start = time()
         num_workers = int(ray.get_runtime_context().get_assigned_resources()["CPU"])
         trainloader = get_dataloader(
@@ -73,8 +68,8 @@ class FlowerClient(fl.client.NumPyClient):
 
         # Train
         train(self.net, trainloader, epochs=config["epochs"], device=self.device)
-        self.state.update({'time_fit':time()-t_start})
-        log(INFO, f"fit ends --> {self.state.fetch() = } for client: {self.cid}")
+        self.update_state({'time_fit':time()-t_start})
+        log(INFO, f"fit ends --> {self.fetch_state() = } for client: {self.cid}")
 
         # Return local model and statistics
         return get_params(self.net), len(trainloader.dataset), {}
@@ -179,27 +174,23 @@ if __name__ == "__main__":
     # configure the strategy
     strategy = fl.server.strategy.FedAvg(
         fraction_fit=0.5,
-        fraction_evaluate=0.5,
+        fraction_evaluate=0.0,
         min_fit_clients=5,
-        min_evaluate_clients=5,
+        min_evaluate_clients=0,
         min_available_clients=pool_size,  # All clients should be available
         on_fit_config_fn=fit_config,
         evaluate_fn=get_evaluate_fn(testset),  # centralised evaluation of global model
     )
 
-    class MyVirtualClient(fl.simulation.VirtualClientTemplate):
-        def __call__(self, cid):
-            return self.client(cid, **self.client_kwargs)
-
-    # create a VirtualClient object by firs specifying your ClientClass
-    virtual_client = MyVirtualClient(FlowerClient, fed_dir_data=fed_dir)
+    def client_fn(cid: str):
+        return FlowerClient(cid, fed_dir_data=fed_dir)
 
     # (optional) specify Ray config
     ray_init_args = {"include_dashboard": False}
 
     # start simulation
     fl.simulation.start_simulation(
-        client_template=virtual_client,
+        client_fn=client_fn,
         num_clients=pool_size,
         client_resources=client_resources,
         config=fl.server.ServerConfig(num_rounds=args.num_rounds),
