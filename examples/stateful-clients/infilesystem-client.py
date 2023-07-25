@@ -3,7 +3,8 @@ import argparse
 from time import time
 from collections import OrderedDict
 
-import flwr as fl
+from flwr.client import start_numpy_client, NumPyClient, InFileSystemClientState
+
 import torch
 
 from model_and_dataset import Net, load_data, train, test
@@ -25,20 +26,19 @@ trainloader, testloader = load_data()
 
 
 # Define Flower client using In-FileSystem state.
-class FlowerClient(fl.client.NumPyClient):
+class FlowerClient(NumPyClient, InFileSystemClientState):
 
     def __init__(self, client_identifier) -> None:
         super().__init__()
 
-        self.state = fl.client.InFileSystemClientState()
         # we want each client to have its own state in the file system
         # therefore we should provide the state object with a unique path
         # one way to achieve this is by using a unique identifier for each
         # client. Note this is only needed if multiple clients co-exist in 
         # the same system (as it might happen when you run this example)
         state_path = f'./client_states/{client_identifier}'
-        self.state.setup(state_path, create_directory=True)
-        state = self.state.fetch(from_disk=True)
+        self.setup_state(state_path, create_directory=True)
+        state = self.fetch_state(from_disk=True)
         print(f"Initial state: {state}")
 
     def get_parameters(self, config):
@@ -50,13 +50,13 @@ class FlowerClient(fl.client.NumPyClient):
         net.load_state_dict(state_dict, strict=True)
 
     def fit(self, parameters, config):
-        state = self.state.fetch(from_disk=True)
+        state = self.fetch_state(from_disk=True)
         print(f"Current state: {state}")
         t_start = time()
         self.set_parameters(parameters)
         train(net, trainloader, epochs=1)
         t_end = time() - t_start
-        self.state.update({'fit_time': t_end}, to_disk=True)
+        self.update_state({'fit_time': t_end}, to_disk=True)
         return self.get_parameters(config={}), len(trainloader.dataset), {}
 
     def evaluate(self, parameters, config):
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Start Flower client
-    fl.client.start_numpy_client(
+    start_numpy_client(
         server_address="127.0.0.1:8080",
         client=FlowerClient(args.client_id),
     )
