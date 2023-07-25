@@ -22,7 +22,8 @@ from torch.utils.data import DataLoader
 from torch.nn.parameter import Parameter
 from torchvision.models import resnet34
 
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+DEVICE = torch.device("cuda:0")
 
 class MobileNet_v1(nn.Module):
     """ 
@@ -62,8 +63,9 @@ class MobileNet_v1(nn.Module):
             'layer_15' : {'avg_pool' : [7]},
             'layer_16' : {'fc' : [1024, num_classes]}
         }
+        self.split = split
 
-        if split:
+        if self.split:
             self.body = MobileNet_v1_body(num_head_layers, ARCHITECTURE)
             self.head = MobileNet_v1_head(num_head_layers, ARCHITECTURE)
         else:
@@ -509,10 +511,7 @@ def _train_one_epoch(
     nn.Module
         The model that has been trained for one epoch.
     """
-
     for images, labels in trainloader:
-        print("Training")
-        print("Labels: ", labels)
         images, labels = images.to(device), labels.to(device)
         optimizer.zero_grad()
         outputs = net(images)
