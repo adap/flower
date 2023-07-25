@@ -51,6 +51,7 @@ from flwr.common.typing import (
 )
 
 from .client import Client
+from .state import ClientState
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle
@@ -378,8 +379,6 @@ def _wrap_numpy_client(client: NumPyClient) -> Client:
         "__init__": _constructor,
     }
 
-    # Add wrapper type methods (if overridden)
-
     if numpyclient_has_get_properties(client=client):
         member_dict["get_properties"] = _get_properties
 
@@ -392,8 +391,22 @@ def _wrap_numpy_client(client: NumPyClient) -> Client:
     if numpyclient_has_evaluate(client=client):
         member_dict["evaluate"] = _evaluate
 
+    # TODO: do the below?
+    # if issubclass(type(client), ClientState):
+        # client has a state, therefore we need to expose all methods
+
+
+    # Clients might inherit from a second class (an instance of ClientState)
+    # we need to pass it when constructing the wrapper. Therefore, the first
+    # step is to identify all classes this client inherits from (in addition
+    # to `NumPyClient` which is already known to inherit from.)
+    # get all other classes this clients inherits from but exclude NumPyClient
+    parent_cls = [cls_ for cls_ in type(client).__bases__ if cls_ != NumPyClient]
+    # then append the base Client class and use this tuple in the wrapper
+    parent_cls  = (Client,) + tuple(parent_cls)
+
     # Create wrapper class
-    wrapper_class = type("NumPyClientWrapper", (Client,), member_dict)
+    wrapper_class = type("NumPyClientWrapper", parent_cls, member_dict)
 
     # Create and return an instance of the newly created class
     return wrapper_class(numpy_client=client)  # type: ignore
