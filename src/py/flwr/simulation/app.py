@@ -29,9 +29,7 @@ from flwr.server.app import ServerConfig, init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
-from flwr.simulation.ray_transport.ray_client_proxy import (
-    RayClientProxy,
-)
+from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy
 from flwr.simulation.virtual_client_state_manager import (
     SimpleVirtualClientStateManager,
     VirtualClientStateManager,

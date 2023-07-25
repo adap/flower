@@ -22,22 +22,16 @@ from typing import Any, Callable, Dict, Optional, cast
 import ray
 
 from flwr import common
-from flwr.client import (
-    Client,
-    ClientLike,
-    to_client,
-)
+from flwr.client import Client, ClientLike, ClientState, to_client
 from flwr.client.client import (
     maybe_call_evaluate,
     maybe_call_fit,
     maybe_call_get_parameters,
     maybe_call_get_properties,
 )
-from flwr.client import ClientState
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 from flwr.simulation.virtual_client_state_manager import VirtualClientStateManager
-
 
 ClientFn = Callable[[str], ClientLike]
 
@@ -58,7 +52,6 @@ class RayClientProxy(ClientProxy):
         self.state_manager = state_manager
 
         self._register_client_state()
-
 
     def _register_client_state(self):
         """Register client to track state"""
@@ -202,6 +195,7 @@ def launch_and_get_parameters(
     state = client.numpy_client.fetch_state() if is_stateful(client) else None
     return res, state
 
+
 @ray.remote
 def launch_and_fit(
     client_fn: ClientFn,
@@ -237,7 +231,9 @@ def launch_and_evaluate(
     return res, state
 
 
-def _create_client(client_fn: ClientFn, cid: str, client_state: Dict[str, Any]) -> Client:
+def _create_client(
+    client_fn: ClientFn, cid: str, client_state: Dict[str, Any]
+) -> Client:
     """Create a client instance."""
     client_like: ClientLike = client_fn(cid)
     client = to_client(client_like=client_like)

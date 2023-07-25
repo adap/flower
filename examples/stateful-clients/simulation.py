@@ -15,6 +15,8 @@ from typing import Dict, Callable, Optional, Tuple, List
 from sim_utils.dataset_utils import get_cifar_10, do_fl_partitioning, get_dataloader
 from sim_utils.utils import Net, train, test
 
+from flwr.simulation.virtual_client_state_manager import InFileSystemVirtualClientStateManager
+
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
@@ -196,4 +198,5 @@ if __name__ == "__main__":
         config=fl.server.ServerConfig(num_rounds=args.num_rounds),
         strategy=strategy,
         ray_init_args=ray_init_args,
+        # state_manager=InFileSystemVirtualClientStateManager(state_dir="simulation_state_FS"), # uncomment to use (else the inmemory version is used as default)
     )

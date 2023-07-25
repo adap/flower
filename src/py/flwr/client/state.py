@@ -172,38 +172,3 @@ class InFileSystemClientState(ClientState):
             # free state after saving it to disk
             if saved and not self.keep_in_memory:
                 self.state.clear()
-
-class InFileSystemVirtualClientState(InFileSystemClientState):
-    """In-FileSystem Client State for Clients in simulation.
-    
-    It behaves very much like InFileSystemClientState but, since
-    clients do not persist across rounds and might be spawned in
-    different machines each time, accessing the filesystem should
-    be done at specific times. Concretely, before a client is spawned
-    (e.g. to do `fit()`) and when it ends its task. Then, the ClientProxy
-    object (which is the entity that interfaces with the server) can
-    update the state in the file system. In this way, the client gets
-    exposed an InMemoryClientState object at runtime.
-    
-    BEAR IN MIND this class won't do anything smart if the directory
-    of states already exist, and as a result they will likely be overwritten
-    each time you run the same simulation. To avoid this, you might want
-    to pass `state_dir` at init which takes, for instance, the datetime
-    when you run the code.
-    """
-
-    def __init__(self, state_dir: str = "client_states",
-                 update_fs_each_round: bool = True,
-                 load_state_from_disk_at_init: bool=False):
-        super().__init__()
-        self.update_fs_each_round = update_fs_each_round
-        # directory where all client states will be stored
-        self.clients_state_dir = state_dir
-        # if true and if the client state is found in the file system
-        # at initialization, then the state will be set by reading from disk
-        self.load_state_from_disk_at_init = load_state_from_disk_at_init
-    
-    def state_setup(self) -> None:
-        return super().state_setup(self.clients_state_dir,
-                             create_directory=True,
-                             load_if_exist=self.load_state_from_disk_at_init)
