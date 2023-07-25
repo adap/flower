@@ -27,18 +27,18 @@ class ClientState(ABC):
     """Abstract base class for Flower client state."""
 
     @abstractmethod
-    def setup(self) -> None:
+    def setup_state(self) -> None:
         """Initialize client state."""
 
     @abstractmethod
-    def fetch(
+    def fetch_state(
         self,
         timeout: Optional[float],
     ) -> Dict:
         """Return the client's state."""
 
     @abstractmethod
-    def update(
+    def update_state(
         self,
         state: Dict,
         timeout: Optional[float],
@@ -58,18 +58,18 @@ class InMemoryClientState(ClientState):
 
     def __init__(self):
         super().__init__()
-        self._state: Dict[str, Any] = {}
+        self.state: Dict[str, Any] = {}
 
-    def setup(self) -> None:
+    def setup_state(self) -> None:
         """Initialise the state."""
         pass
 
-    def fetch(self) -> Dict:
-        return self._state
+    def fetch_state(self) -> Dict:
+        return self.state
 
-    def update(self, state: Dict) -> None:
+    def update_state(self, state: Dict) -> None:
         # TODO: deep copy for peace of mind?
-        self._state = state
+        self.state = state
 
 
 class InFileSystemClientState(ClientState):
@@ -89,9 +89,9 @@ class InFileSystemClientState(ClientState):
         self.state_filename = state_filename
         self.keep_in_memory = keep_in_memory
         self.path = None  # to be setup upon setup() call
-        self._state: Dict[str, Any] = {}
+        self.state: Dict[str, Any] = {}
 
-    def setup(
+    def setup_state(
         self, state_dir: str, create_directory: bool, load_if_exist: bool = True
     ) -> None:
         """Initialize state by loading it from disk if exists.
@@ -131,7 +131,7 @@ class InFileSystemClientState(ClientState):
 
             # update state (but don't write to disk since we
             # just read from it)
-            self.update(state, to_disk=False)
+            self.update_state(state, to_disk=False)
         else:
             log(WARNING, f"State `{state_file}` does not exist.")
 
@@ -140,7 +140,7 @@ class InFileSystemClientState(ClientState):
         state_file = self.path / f"{self.state_filename}.pkl"
         if self.path.exists():
             with open(state_file, "wb") as handle:
-                state = self.fetch()
+                state = self.fetch_state()
                 pickle.dump(state, handle, protocol=pickle.HIGHEST_PROTOCOL)
             return True
         else:
@@ -151,7 +151,7 @@ class InFileSystemClientState(ClientState):
             )
             return False
 
-    def fetch(self, from_disk: bool = False) -> Dict:
+    def fetch_state(self, from_disk: bool = False) -> Dict:
         """Return client state."""
         # you might want to read from disk in case there is another application or
         # service updating some of the elements in the state of this client
@@ -159,11 +159,11 @@ class InFileSystemClientState(ClientState):
         if from_disk:
             # TODO: probably we want to wrap this around a FileLock?
             self._load_state()
-        return self._state
+        return self.state
 
-    def update(self, state: Dict, to_disk: bool = True) -> None:
+    def update_state(self, state: Dict, to_disk: bool = True) -> None:
         """Update client state."""
-        self._state = state
+        self.state = state
         if to_disk:
             # save state to disk
             # TODO: probably we want to wrap this around a FileLock?
@@ -171,4 +171,4 @@ class InFileSystemClientState(ClientState):
 
             # free state after saving it to disk
             if saved and not self.keep_in_memory:
-                self._state.clear()
+                self.state.clear()

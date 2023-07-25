@@ -2,7 +2,7 @@
 from time import time
 from collections import OrderedDict
 
-import flwr as fl
+from flwr.client import start_numpy_client, NumPyClient, InMemoryClientState
 import torch
 
 from model_and_dataset import Net, load_data, train, test
@@ -20,11 +20,10 @@ trainloader, testloader = load_data()
 
 
 # Define Flower client using In-memory state.
-class FlowerClient(fl.client.NumPyClient):
+class FlowerClient(NumPyClient, InMemoryClientState):
 
     def __init__(self):
         super().__init__()
-        self.state = fl.client.InMemoryClientState()
 
     def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in net.state_dict().items()]
@@ -35,13 +34,13 @@ class FlowerClient(fl.client.NumPyClient):
         net.load_state_dict(state_dict, strict=True)
 
     def fit(self, parameters, config):
-        state = self.state.fetch()
+        state = self.fetch_state() # get current state
         print(f"Current state: {state}")
         t_start = time()
         self.set_parameters(parameters)
         train(net, trainloader, epochs=1)
         t_end = time() - t_start
-        self.state.update({'fit_time': t_end})
+        self.update_state({'fit_time': t_end}) # update the state
         return self.get_parameters(config={}), len(trainloader.dataset), {}
 
     def evaluate(self, parameters, config):
@@ -50,8 +49,9 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, len(testloader.dataset), {"accuracy": accuracy}
 
 
-# Start Flower client
-fl.client.start_numpy_client(
-    server_address="127.0.0.1:8080",
-    client=FlowerClient(),
-)
+if __name__ == "__main__":
+    # Start Flower client
+    start_numpy_client(
+        server_address="127.0.0.1:8080",
+        client=FlowerClient(),
+    )
