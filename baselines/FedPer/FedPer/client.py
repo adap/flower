@@ -139,7 +139,8 @@ def gen_client_fn(
         """Create a Flower client representing a single organization."""
 
         # Load model
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        device = torch.device("cuda:0")
         net = instantiate(model).to(device)
 
         # Note: each client gets a different trainloader/valloader, so each client

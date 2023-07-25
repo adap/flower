@@ -11,7 +11,7 @@ learning_rate: 0.03
 
 client_resources:
   num_cpus: 1
-  num_gpus: 0.0
+  num_gpus: 1
 
 server_device: gpu
 
