@@ -13,7 +13,7 @@ client_resources:
   num_cpus: 1
   num_gpus: 1
 
-server_device: gpu
+server_device: cuda:0
 
 dataset:
   name : "cifar10"

@@ -1,0 +1,36 @@
+---
+num_clients: 3 # total number of clients
+num_epochs: 2 # number of local epochs
+batch_size: 16
+num_rounds: 3
+clients_per_round: 3
+learning_rate: 0.05
+
+client_resources:
+  num_cpus: 32
+  num_gpus: 1
+
+server_device: cuda
+
+dataset:
+  name : "cifar10"
+  iid: true
+  num_classes: 10
+
+model:
+  _target_: FedPer.models.MobileNet_v1
+  split: true
+  num_head_layers: 1
+  num_classes: 10
+
+fit_config:
+  drop_client: false
+  epochs : ${num_epochs}
+
+strategy:
+  _target_: FedPer.strategy.AggregateBodyStrategyPipeline
+  create_model:
+    _target_: FedPer.models.MobileNet_v1
+    split: true
+    num_head_layers: 1
+    num_classes: 10

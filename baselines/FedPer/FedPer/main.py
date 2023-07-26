@@ -17,7 +17,7 @@ from FedPer.dataset import load_datasets
 from FedPer.strategy import AggregateBodyStrategyPipeline
 from hydra.core.hydra_config import HydraConfig
 
-@hydra.main(config_path="conf", config_name="base", version_base=None)
+@hydra.main(config_path="conf", config_name="new_base", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.
 
@@ -33,7 +33,7 @@ def main(cfg: DictConfig) -> None:
     trainloader, valloader, testloader = load_datasets(
         config=cfg.dataset,
         num_clients=cfg.num_clients,
-    )
+    )   
 
     # 3. Define your clients
     client_fn = client.gen_client_fn(
@@ -47,7 +47,7 @@ def main(cfg: DictConfig) -> None:
     # get function that will executed by the strategy's evaluate() method
     # Set server's device
     device = cfg.server_device
-    # evaluate_fn = server.gen_evaluate_fn(testloader, device=device, model=cfg.model)
+    evaluate_fn = server.gen_evaluate_fn(testloader, device=device, model=cfg.model)
 
     # get a function that will be used to construct the config that the client's
     # fit() method will received
@@ -66,7 +66,7 @@ def main(cfg: DictConfig) -> None:
     # 4. Define your strategy
     strategy = instantiate(
         cfg.strategy,
-        # evaluate_fn=evaluate_fn,
+        evaluate_fn=evaluate_fn,
         on_fit_config_fn=get_on_fit_config(),
         # create_model=model_fn,
     )
