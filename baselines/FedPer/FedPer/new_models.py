@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 from tqdm import tqdm
 from typing import Any, Dict, List, Optional, Tuple, Union
-from FedPer.new_utils import ModelManager, ModelSplit
+from baselines.FedPer.FedPer.utils.new_utils import ModelManager, ModelSplit
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
@@ -43,7 +43,7 @@ class CNNNet(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.body(x)
         return self.head(x)
-    
+
 class CNNModelSplit(ModelSplit):
     """Concrete implementation of ModelSplit for models for node kind prediction in action flows \
         with Body/Head split."""
@@ -58,6 +58,8 @@ class CNNModelManager(ModelManager):
             self,
             client_id: int,
             config: Dict[str, Any],
+            trainloader: DataLoader,
+            testloader: DataLoader,
             has_fixed_head: bool = False
     ):
         """
@@ -75,19 +77,7 @@ class CNNModelManager(ModelManager):
             has_fixed_head=has_fixed_head
         )
 
-        self.trainloader, self.testloader = self.load_data()
-
-    def load_data(self) -> Tuple[DataLoader, DataLoader]:
-        """
-        Load CIFAR-10 (training and test set).
-
-        Method adapted from simple CNN from Flower 'Quickstart PyTorch' \
-        (https://flower.dev/docs/quickstart-pytorch.html).
-        """
-        trf = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-        trainset = CIFAR10("./data", train=True, download=True, transform=trf)
-        testset = CIFAR10("./data", train=False, download=True, transform=trf)
-        return DataLoader(trainset, batch_size=32, shuffle=True), DataLoader(testset)
+        self.trainloader, self.testloader = trainloader, testloader
 
     def _create_model(self) -> nn.Module:
         """Return CNN model to be splitted into head and body."""

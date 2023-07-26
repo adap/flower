@@ -5,8 +5,8 @@ from flwr.common import Parameters, weights_to_parameters
 from flwr.server.client_manager import ClientManager
 from flwr.server.strategy.strategy import Strategy
 
-from fedpfl.federated_learning.constants import Algorithms
-from fedpfl.model.model_split import ModelSplit
+from FedPer.utils.new_utils import Algorithms
+from FedPer.utils.model_split import ModelSplit
 
 
 class ServerInitializationStrategy(Strategy):
