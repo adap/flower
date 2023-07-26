@@ -13,7 +13,7 @@ from flwr.common import Scalar
 from collections import OrderedDict, defaultdict
 from flwr.server.strategy import Strategy
 from FedPer.utils.base_client import BaseClient
-
+from FedPer.utils.fedper_client import FedPerClient
 from FedPer.utils.strategy_pipeline import DefaultStrategyPipeline, AggregateBodyStrategyPipeline
 
 # FL Default Train and Fine-Tuning Epochs
