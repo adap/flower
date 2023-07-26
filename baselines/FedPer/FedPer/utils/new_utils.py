@@ -14,9 +14,7 @@ from collections import OrderedDict, defaultdict
 from flwr.server.strategy import Strategy
 from FedPer.utils.base_client import BaseClient
 
-from fedpfl.federated_learning.strategy.strategy_pipeline import (
-    AggregateBodyStrategyPipeline, DefaultStrategyPipeline,
-)
+from FedPer.utils.strategy_pipeline import DefaultStrategyPipeline, AggregateBodyStrategyPipeline
 
 # FL Default Train and Fine-Tuning Epochs
 DEFAULT_TRAIN_EP = 5

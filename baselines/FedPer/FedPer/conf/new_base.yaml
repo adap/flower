@@ -5,6 +5,7 @@ batch_size: 16
 num_rounds: 3
 clients_per_round: 3
 learning_rate: 0.05
+algorithm: FedPer
 
 client_resources:
   num_cpus: 32

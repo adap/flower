@@ -35,6 +35,9 @@ def main(cfg: DictConfig) -> None:
         num_clients=cfg.num_clients,
     )   
 
+    # Get algorithm 
+    algorithm = cfg.algorithm
+
     # 3. Define your clients
     client_fn = client.gen_client_fn(
         num_epochs=cfg.num_epochs,

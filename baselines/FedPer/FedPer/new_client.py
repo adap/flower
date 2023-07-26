@@ -1,10 +1,12 @@
 import flwr as fl
 import torch
 
+from typing import Dict
+from flwr.common import Scalar, NDArrays
 from torch.utils.data import DataLoader
 from FedPer.new_models import CNNModelManager
 
-from fedpfl.federated_learning.utils import get_client_cls, load_config
+from FedPer.utils.new_utils import get_client_cls, load_config
 
 class FlowerClient(
     fl.client.NumPyClient
