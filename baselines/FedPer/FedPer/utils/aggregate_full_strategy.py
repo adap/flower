@@ -3,7 +3,7 @@ import torch
 from typing import Any, Dict, List, Optional, Tuple
 from pathlib import Path
 from collections import OrderedDict
-from flwr.common import FitRes, Parameters, Scalar, parameters_to_weights
+from flwr.common import FitRes, Parameters, Scalar, parameters_to_ndarrays
 from flwr.server.client_proxy import ClientProxy
 from FedPer.utils.initialization_strategy import ServerInitializationStrategy
 
@@ -49,7 +49,7 @@ class AggregateFullStrategy(ServerInitializationStrategy):
         agg_params, agg_metrics = super().aggregate_fit(rnd=rnd, results=results, failures=failures)
 
         # Update Server Model
-        parameters = parameters_to_weights(agg_params)
+        parameters = parameters_to_ndarrays(agg_params)
         model_keys = [k for k in self.model.state_dict().keys()
                     if k.startswith("_body") or k.startswith("_head")]
         params_dict = zip(model_keys, parameters)

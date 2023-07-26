@@ -4,12 +4,13 @@ import torch.nn.functional as F
 
 from tqdm import tqdm
 from typing import Any, Dict, List, Optional, Tuple, Union
-from baselines.FedPer.FedPer.utils.new_utils import ModelManager, ModelSplit
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
+from FedPer.utils.model_split import ModelSplit
+from FedPer.utils.model_manager import ModelManager
 
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class CNNNetBody(nn.Module):
     """Model adapted from simple CNN from Flower 'Quickstart PyTorch' \
@@ -76,12 +77,16 @@ class CNNModelManager(ModelManager):
             config=config,
             has_fixed_head=has_fixed_head
         )
-
         self.trainloader, self.testloader = trainloader, testloader
+        self.device = self.config['device']
 
     def _create_model(self) -> nn.Module:
         """Return CNN model to be splitted into head and body."""
-        return CNNNet()
+        try:
+            return CNNNet().to(self.device)
+        except AttributeError:
+            self.device = self.config['device']
+            return CNNNet().to(self.device)
 
     def train(
         self,
@@ -116,7 +121,7 @@ class CNNModelManager(ModelManager):
         for _ in range(epochs):
             for images, labels in tqdm(self.trainloader):
                 optimizer.zero_grad()
-                criterion(self.model(images.to(DEVICE)), labels.to(DEVICE)).backward()
+                criterion(self.model(images.to(self.device)), labels.to(self.device)).backward()
                 optimizer.step()
         return {}
 
@@ -137,8 +142,8 @@ class CNNModelManager(ModelManager):
         correct, total, loss = 0, 0, 0.0
         with torch.no_grad():
             for images, labels in tqdm(self.testloader):
-                outputs = self.model(images.to(DEVICE))
-                labels = labels.to(DEVICE)
+                outputs = self.model(images.to(self.device))
+                labels = labels.to(self.device)
                 loss += criterion(outputs, labels).item()
                 total += labels.size(0)
                 correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()

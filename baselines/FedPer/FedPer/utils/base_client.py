@@ -6,17 +6,21 @@ import numpy as np
 from typing import Dict, Any, Type, List, Union, Tuple
 from collections import defaultdict, OrderedDict
 from flwr.common import Scalar
-from FedPer.utils.new_utils import DEFAULT_TRAIN_EP, DEFAULT_FT_EP
-from FedPer.utils.model_manager import ModelManager
+from torch.utils.data import DataLoader
+from FedPer.new_models import CNNModelManager
+from FedPer.utils.constants import DEFAULT_FT_EP, DEFAULT_TRAIN_EP
+# from FedPer.utils.model_manager import ModelManager
 
 class BaseClient(fl.client.NumPyClient):
     """Implementation of Federated Averaging (FedAvg) Client."""
 
     def __init__(
         self,
+        trainloader: DataLoader,
+        testloader: DataLoader, 
         config: Dict[str, Any],
         client_id: int,
-        model_manager_class: Type[ModelManager],
+        model_manager_class: Type[CNNModelManager],
         has_fixed_head: bool = False,
     ):
         """
@@ -37,7 +41,9 @@ class BaseClient(fl.client.NumPyClient):
         self.model_manager = model_manager_class(
             client_id=client_id,
             config=config,
-            has_fixed_head=has_fixed_head
+            has_fixed_head=has_fixed_head, 
+            trainloader=trainloader,
+            testloader=testloader
         )
 
     def get_parameters(self) -> List[np.ndarray]:

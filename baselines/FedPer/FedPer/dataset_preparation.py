@@ -55,13 +55,14 @@ def _download_data(dataset: str = 'cifar10') -> Tuple[Dataset, Dataset]:
         The training and testing datasets.
     """
     if dataset == "cifar10":
-        transform = transforms.Compose(
-            [
-                transforms.Resize((224, 224)),
-                transforms.ToTensor(),
-                transforms.Normalize((0.5,), (0.5,)),
-            ]
-        )
+        #transform = transforms.Compose(
+        #    [
+        #        transforms.Resize((224, 224)),
+        #        transforms.ToTensor(),
+        #      transforms.Normalize((0.5,), (0.5,)),
+        #    ]
+        #)
+        transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
         trainset = CIFAR10(
             root="./dataset/cifar10", train=True, download=True, transform=transform
         )

@@ -45,12 +45,12 @@ def gen_evaluate_fn(
         """Use the entire CIFAR-10 test set for evaluation."""
 
         net = instantiate(model)
-        model_keys = [k for k in net.state_dict().keys() if k.startswith("body")]
-        model_keys = [k.replace("body.", "") for k in model_keys]
-        params_dict = zip(model_keys, parameters_ndarrays)
-        state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-        #params_dict = zip(net.state_dict().keys(), parameters_ndarrays)
-        #state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+        #model_keys = [k for k in net.state_dict().keys() if k.startswith("body")]
+        #model_keys = [k.replace("body.", "") for k in model_keys]
+        #params_dict = zip(model_keys, parameters_ndarrays)
+        #state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+        params_dict = zip(net.state_dict().keys(), parameters_ndarrays)
+        state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         net.body.load_state_dict(state_dict, strict=True)
         net.to(device)
 
