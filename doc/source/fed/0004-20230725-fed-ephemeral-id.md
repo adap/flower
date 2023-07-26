@@ -7,19 +7,19 @@ last-updated: 2023-07-25
 status: provisional
 ---
 
-# FED Template
+# FED Ephemeral ID solution
 
 ## Table of Contents
 
 - [Table of Contents](#table-of-contents)
 - [Summary](#summary)
-- [Motivation](#motivation)
-  - [Goals](#goals)
-  - [Non-Goals](#non-goals)
-- [Proposal](#proposal)
-- [Drawbacks](#drawbacks)
-- [Alternatives Considered](#alternatives-considered)
-- [Appendix](#appendix)
+- [Background](#background)
+  - [Threat models](#threat-models)
+  - [RSA Signatures](#rsa-signatures)
+- [Real-world Concerns](#real-world-concerns)
+- [Performance Analysis](#performance-analysis)
+- [Discussion](#discussion)
+
 
 ## Summary
 
@@ -126,7 +126,7 @@ For example, a driver can send DH public keys with signatures from previous roun
 
 ## Performance Analysis
 
-The following code tests the efficiency of the RSA signature with `Cryptography` library. All experiments are repeated 1024 tims and I take the average CPU time. I also assume a model with 1 million parameters.
+The following code tests the efficiency of the RSA signature with `Cryptography` library. All experiments are repeated 1024/4096 tims and I take the average CPU time. I also assume a model with 1 million double-type parameters, i.e., 8 MB message. 
 
 ``` python
 def eval_generate_keys(times=1 << 10):
@@ -136,16 +136,15 @@ def eval_generate_keys(times=1 << 10):
     print(f"generation time: {(time.time() - mark) / times} s")
 
 
-def eval_sign_message(message=os.urandom(8000000), times=1 << 10):
+def eval_sign_message(message=os.urandom(8000000), times=1 << 12):
     private_key, public_key = generate_keys()
     mark = time.time()
     for _ in range(times):
         sgn = sign_message(message, private_key)
     print(f"signing time: {(time.time() - mark) / times} s")
-    print(f"signature length: {len(sgn)}")
 
 
-def eval_verify_signature(message=os.urandom(8000000), times=1 << 10):
+def eval_verify_signature(message=os.urandom(8000000), times=1 << 12):
     private_key, public_key = generate_keys()
     sgn = sign_message(message, private_key)
     mark = time.time()
@@ -154,12 +153,20 @@ def eval_verify_signature(message=os.urandom(8000000), times=1 << 10):
     print(f"verification time: {(time.time() - mark) / times} s")
 ```
 
+Experiments on `11th Gen Intel(R) Core(TM) i7-11800H @ 2.30GHz` show that generating one 2048-bit RSA key pair takes ~42 ms; signing on one 8 MB message takes ~5.7 ms, and verifying the signature of a 8 MB message takes ~5.1 ms. (8 MB message means a model update with a million parameters, double type.)
+
+In addition, the signature system will cause minor comunication overhead. This includes a 256-bit signature for each message and 451-byte serialized public keys in the setup phase. 
+
+The results indicate that computing capacity on the client side should suffice to create RSA keys, sign, and verify signatures. 
+
 
 ## Discussion
 
 **What are the roles of the flower server?**
 
 The flower server currently acts as a router that receives messages and forwards them to the correct parties (correct means the parites specified in the `Consumer` fields). 
+
+To serve as a trusted third party, the flower server should have a certificate that allows clients to validate our identity to prevent an attacker from pretending the flower server.
 <!-- To introduce a RSA signature systems. -->
 
 <!-- [TODO]
