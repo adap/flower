@@ -104,7 +104,7 @@ def _download_data(dataset: str = 'cifar10') -> Tuple[Dataset, Dataset]:
 
 def _partition_data(
     num_clients,
-    dataset: str,
+    dataset_name: str,
     iid: Optional[bool] = False,
     num_classes : Optional[int] = 10,
     seed: Optional[int] = 42,
@@ -133,19 +133,97 @@ def _partition_data(
         A list of dataset for each client and a single dataset to be use for testing the model.
     """
 
-    trainset, testset = _download_data(dataset=dataset)
+    # Download dataset
+    trainset, testset = _download_data(dataset=dataset_name)
 
-    if dataset == "cifar10":
-        total_num_classes = 10
-    else:
-        raise NotImplementedError(f"Dataset {dataset} not implemented.")
+    # Get number of classes in the dataset
+    total_num_classes = _get_num_classes(dataset_name)
     
-    partition_size = int(len(trainset) / num_clients)
-    lengths = [partition_size] * num_clients
-    if sum(lengths) < len(trainset):
-        remaining_data = len(trainset) - sum(lengths)
-        lengths[-1] += remaining_data
+    # Partition data
+    lengths = _get_split_lenghts(trainset, num_clients)
 
+    # Get datasets 
+    datasets, testset = get_datasets(
+        trainset, testset, 
+        num_clients, total_num_classes, 
+        lengths, iid, num_classes, seed
+    )
+
+    return datasets, testset
+
+    
+def _get_num_classes(dataset_name: str) -> int:
+    """Returns the number of classes in the dataset.
+
+    Parameters
+    ----------
+    dataset_name : str
+        The name of the dataset to be used
+
+    Returns
+    -------
+    int
+        The number of classes in the dataset.
+    """
+    if dataset_name == "cifar10":
+        return 10
+    elif dataset_name == "FLICKR-AES":
+        raise NotImplementedError("FLICKR-AES dataset not implemented.")
+    else:
+        raise ValueError(f"Dataset {dataset_name} not implemented.")
+
+
+def _get_split_lenghts(dataset: Dataset, num_clients: int, ) -> List[int]:
+    """Returns a list with the length of each partition.
+
+    Parameters
+    ----------
+    dataset : Dataset
+        The dataset to be partitioned
+    num_clients : int
+        The number of clients that hold a part of the data
+    seed : int, optional
+        Used to set a fix seed to replicate experiments, by default 42
+
+    Returns
+    -------
+    List[int]
+        A list with the length of each partition.
+    """
+    partition_size = int(len(dataset) / num_clients)
+    lengths = [partition_size] * num_clients
+    if sum(lengths) < len(dataset):
+        remaining_data = len(dataset) - sum(lengths)
+        lengths[-1] += remaining_data
+    return lengths
+
+def get_datasets(
+        trainset : Dataset, testset: Dataset, num_clients: int, total_num_classes: int, lengths : List[int],
+        iid : bool = False, num_classes : int = 10, seed : int = 42, ):
+    """
+        Split training set into iid or non iid partitions to simulate the federated setting.
+        
+        Parameters
+        ----------
+        num_clients : int
+            The number of clients that hold a part of the dataset. 
+        trainset : Dataset
+            The dataset to be partitioned
+        testset : Dataset
+            The dataset to be used for testing
+        iid : bool, optional
+            Whether the data should be independent and identically distributed between
+            the clients or if the data should first be sorted by labels and distributed by chunks
+            to each client (used to test the convergence in a worst case scenario), by default False    
+        num_classes : int, optional
+            The number of classes in the dataset, by default 10
+        seed : int, optional
+            Used to set a fix seed to replicate experiments, by default 42
+        total_num_classes : int
+            The number of classes in the dataset 
+        lengths : List[int]
+            A list with the length of each partition.
+            """
     if iid:
         datasets = random_split(trainset, lengths, torch.Generator().manual_seed(seed))
     else:
@@ -209,7 +287,3 @@ def _partition_data(
     print("Number of samples in test set: {}".format(len(testset)))
 
     return datasets, testset
-
-    
-
-

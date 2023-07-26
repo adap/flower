@@ -117,7 +117,8 @@ class ServerInitializationStrategy(Strategy):
         # Same as superclass method but adds the head
         # Do not configure federated evaluation if a centralized evaluation
         # function is provided
-        if self.eval_fn is not None:
+        # if self.eval_fn is not None:
+        if self.evaluate_fn is not None:
             return []
 
         # Parameters and config
@@ -169,22 +170,16 @@ class ServerInitializationStrategy(Strategy):
             parameters, the updates received in this round are discarded, and
             the global model parameters remain the same.
         """
-        print("Server round: ", server_round)
-        print("Results: ", results)
-        print("Failures: ", failures)
         agg_params, agg_metrics = super().aggregate_fit(server_round=server_round, results=results, failures=failures)
-
-        print("Aggregating parameters...")
-        print("Aggregating parameters: ", agg_params)
-        print("Aggregating metrics: ", agg_metrics)
 
         # Update Server Model
         parameters = parameters_to_ndarrays(agg_params)
-        model_keys = [k for k in self.model.state_dict().keys() if k.startswith("_body")]
+        model_keys = [k for k in self.model.state_dict().keys() if k.startswith("body")]
+        model_keys = [k.replace("body.", "") for k in model_keys]
         params_dict = zip(model_keys, parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
         # self.model.set_parameters(state_dict)
-        self.model.load_state_dict(state_dict, strict=True)
+        self.model.body.load_state_dict(state_dict, strict=True)
 
         return agg_params, agg_metrics
 
