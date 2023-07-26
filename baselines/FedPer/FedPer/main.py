@@ -6,16 +6,21 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 # these are the basic packages you'll need here
 # feel free to remove some if aren't needed
 import flwr as fl
+# from baselines.FedPer.FedPer import utils_file
 import hydra
 
+from typing import Dict, Any
 from omegaconf import DictConfig, OmegaConf
 from hydra.utils import instantiate
-from FedPer import client, server, utils
-from FedPer.utils import get_model_fn
+from FedPer import client, server
+# from baselines.FedPer.FedPer.utils_file import get_model_fn
 from FedPer.models import MobileNet_v1
 from FedPer.dataset import load_datasets
 from FedPer.strategy import AggregateBodyStrategyPipeline
+from FedPer.utils.new_utils import get_client_cls
 from hydra.core.hydra_config import HydraConfig
+from FedPer.new_models import CNNNet, CNNModelSplit
+from FedPer.utils.FedPer_client import get_fedper_client_fn
 
 @hydra.main(config_path="conf", config_name="new_base", version_base=None)
 def main(cfg: DictConfig) -> None:
@@ -35,22 +40,24 @@ def main(cfg: DictConfig) -> None:
         num_clients=cfg.num_clients,
     )   
 
-    # Get algorithm 
-    algorithm = cfg.algorithm
 
     # 3. Define your clients
-    client_fn = client.gen_client_fn(
-        num_epochs=cfg.num_epochs,
-        trainloaders=trainloader,
-        valloaders=valloader,
-        learning_rate=cfg.learning_rate,
-        model=cfg.model,
-    )
+    # Get algorithm 
+    algorithm = cfg.algorithm.lower()
+    # Get client fn 
+    if algorithm.lower() == 'fedper':
+        client_fn = get_fedper_client_fn(
+            trainloaders=trainloader,
+            valloaders=valloader,
+            model=cfg.model,
+        )
+    else: 
+        raise NotImplementedError
 
     # get function that will executed by the strategy's evaluate() method
     # Set server's device
     device = cfg.server_device
-    evaluate_fn = server.gen_evaluate_fn(testloader, device=device, model=cfg.model)
+    # evaluate_fn = server.gen_evaluate_fn(testloader, device=device, model=cfg.model)
 
     # get a function that will be used to construct the config that the client's
     # fit() method will received
@@ -60,18 +67,19 @@ def main(cfg: DictConfig) -> None:
             fit_config = OmegaConf.to_container(cfg.fit_config, resolve=True)
             fit_config["curr_round"] = server_round  # add round info
             return fit_config
-
         return fit_config_fn
-
-    # Get model function
-    # model_fn = get_model_fn(cfg.model)
+    
+    def create_model(config: Dict[str, Any]) -> CNNNet:
+        """Create initial CNN model."""
+        return CNNNet().to(device)
 
     # 4. Define your strategy
     strategy = instantiate(
         cfg.strategy,
-        evaluate_fn=evaluate_fn,
+        create_model=create_model,
+        # evaluate_fn=evaluate_fn,
         on_fit_config_fn=get_on_fit_config(),
-        # create_model=model_fn,
+        model_split_class=CNNModelSplit,
     )
 
     # 5. Start Simulation
@@ -108,7 +116,7 @@ def main(cfg: DictConfig) -> None:
 
     # save results as a Python pickle using a file_path
     # the directory created by Hydra for each run
-    utils.save_results_as_pickle(history, file_path=save_path, extra_results={})
+    utils_file.save_results_as_pickle(history, file_path=save_path, extra_results={})
 
     # plot results and include them in the readme
     strategy_name = strategy.__class__.__name__
@@ -124,7 +132,7 @@ def main(cfg: DictConfig) -> None:
         f"_lr={cfg.learning_rate}"
     )
 
-    utils.plot_metric_from_history(
+    utils_file.plot_metric_from_history(
         history,
         save_path,
         (file_suffix),

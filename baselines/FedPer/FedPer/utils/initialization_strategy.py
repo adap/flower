@@ -1,7 +1,7 @@
 import torch.nn as nn
 
 from typing import Any, Callable, Dict, Optional, Type
-from flwr.common import Parameters, weights_to_parameters
+from flwr.common import Parameters, ndarrays_to_parameters
 from flwr.server.client_manager import ClientManager
 from flwr.server.strategy.strategy import Strategy
 
@@ -43,16 +43,11 @@ class ServerInitializationStrategy(Strategy):
         initial_parameters = self.initial_parameters
         self.initial_parameters = None  # Don't keep initial parameters in memory
         if initial_parameters is None and self.model is not None:
-            if self.algorithm == Algorithms.LG_FEDAVG.value:
-                initial_parameters = [val.cpu().numpy() for _, val in self.model.head.state_dict().items()]
-            elif self.algorithm in [Algorithms.FEDPER.value, Algorithms.FEDREP.value, Algorithms.FEDBABU.value]:
+            if self.algorithm == Algorithms.FEDPER.value:
                 initial_parameters = [val.cpu().numpy() for _, val in self.model.body.state_dict().items()]
-            elif self.algorithm in [Algorithms.PROPOSAL_HYBRID_BABULG_DUAL.value]:
-                initial_parameters = [val.cpu().numpy() for _, val in self.model.body.state_dict().items()]
-                initial_parameters += [val.cpu().numpy() for _, val in self.model.head.state_dict().items()]
-            else:  # FedAvg, Proposal FedHybridAvgLG, Proposal FedHybridAvgLGDual
+            else:  # FedAvg
                 initial_parameters = [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
         if isinstance(initial_parameters, list):
-            initial_parameters = weights_to_parameters(weights=initial_parameters)
+            initial_parameters = ndarrays_to_parameters(initial_parameters)
         return initial_parameters

@@ -12,18 +12,10 @@ from pathlib import Path
 from flwr.common import Scalar
 from collections import OrderedDict, defaultdict
 from flwr.server.strategy import Strategy
+from FedPer.utils.constants import Algorithms
 from FedPer.utils.base_client import BaseClient
-from FedPer.utils.fedper_client import FedPerClient
+from FedPer.utils.FedPer_client import FedPerClient
 from FedPer.utils.strategy_pipeline import DefaultStrategyPipeline, AggregateBodyStrategyPipeline
-
-# FL Default Train and Fine-Tuning Epochs
-DEFAULT_TRAIN_EP = 5
-DEFAULT_FT_EP = 5
-
-# FL Algorithms
-class Algorithms(Enum):
-    FEDAVG = "FedAvg"
-    FEDPER = "FedPer"
     
 def load_config(config_file: Union[str, Path]) -> Dict[str, Any]:
     """Load the config file into a dictionary."""
@@ -39,7 +31,7 @@ def load_config(config_file: Union[str, Path]) -> Dict[str, Any]:
 
 def get_client_cls(algorithm: str) -> Type[BaseClient]:
     """Get client class from algorithm (default is FedAvg)."""
-    if algorithm == Algorithms.FEDPER.value:
+    if algorithm == Algorithms.FEDPER.value.lower():
         return FedPerClient
     elif algorithm == Algorithms.FEDAVG.value:
         return BaseClient

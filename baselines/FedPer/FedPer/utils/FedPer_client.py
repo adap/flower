@@ -2,11 +2,13 @@
 import torch
 import numpy as np
 
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Tuple, Callable
+from omegaconf import DictConfig
 from collections import OrderedDict
-from FedPer.utils.new_utils import Algorithms
+from torch.utils.data import DataLoader
+from FedPer.new_models import CNNModelManager
+from FedPer.utils.constants import Algorithms
 from FedPer.utils.base_client import BaseClient
-
 
 class FedPerClient(BaseClient):
     """Implementation of Federated Learning with Personalization Layers (FedPer) Client."""
@@ -52,3 +54,48 @@ class FedPerClient(BaseClient):
             Dict with the train metrics.
         """
         return super().perform_train(tag=f"{Algorithms.FEDPER.value}_full" if tag is None else tag)
+
+def get_fedper_client_fn(
+    trainloaders: List[DataLoader],
+    valloaders: List[DataLoader],
+    model: DictConfig,
+) -> Tuple[
+    Callable[[str], FedPerClient], DataLoader
+]:  # pylint: disable=too-many-arguments
+    """Generates the client function that creates the Flower Clients.
+
+    Parameters
+    ----------
+    trainloaders: List[DataLoader]
+        A list of DataLoaders, each pointing to the dataset training partition
+        belonging to a particular client.
+    valloaders: List[DataLoader]
+        A list of DataLoaders, each pointing to the dataset validation partition
+        belonging to a particular client.
+    model : DictConfig
+        The model configuration.
+
+    Returns
+    -------
+    Tuple[Callable[[str], FlowerClient], DataLoader]
+        A tuple containing the client function that creates Flower Clients and
+        the DataLoader that will be used for testing
+    """
+
+    def client_fn(cid: str) -> FedPerClient:
+        """Create a Flower client representing a single organization."""
+
+        # Note: each client gets a different trainloader/valloader, so each client
+        # will train and evaluate on their own unique data
+        trainloader = trainloaders[int(cid)]
+        valloader = valloaders[int(cid)]
+
+        return FedPerClient(
+            trainloader=trainloader,
+            testloader=valloader,
+            client_id=cid,
+            config=model,
+            model_manager_class=CNNModelManager
+        )
+    
+    return client_fn

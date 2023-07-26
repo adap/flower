@@ -10,7 +10,7 @@ class StoreMetricsStrategy(StoreHistoryStrategy):
 
     def aggregate_fit(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
@@ -18,7 +18,7 @@ class StoreMetricsStrategy(StoreHistoryStrategy):
         Aggregate the received local parameters and store the train aggregated metrics.
 
         Args:
-            rnd: The current round of federated learning.
+            server_round: The current round of federated learning.
             results: Successful updates from the previously selected and configured
                 clients. Each pair of `(ClientProxy, FitRes)` constitutes a
                 successful update from one of the previously selected clients. Not
@@ -37,15 +37,15 @@ class StoreMetricsStrategy(StoreHistoryStrategy):
             parameters, the updates received in this round are discarded, and
             the global model parameters remain the same.
         """
-        aggregates = super().aggregate_fit(rnd=rnd, results=results, failures=failures)
+        aggregates = super().aggregate_fit(server_round=server_round, results=results, failures=failures)
 
-        self.hist["trn"][rnd] = {k.cid: {"num_examples": v.num_examples, **v.metrics} for k, v in results}
+        self.hist["trn"][server_round] = {k.cid: {"num_examples": v.num_examples, **v.metrics} for k, v in results}
 
         return aggregates
 
     def aggregate_evaluate(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
@@ -53,7 +53,7 @@ class StoreMetricsStrategy(StoreHistoryStrategy):
         Aggregate the received local parameters and store the evaluation aggregated metrics.
 
         Args:
-            rnd: The current round of federated learning.
+            server_round: The current round of federated learning.
             results: Successful updates from the
                 previously selected and configured clients. Each pair of
                 `(ClientProxy, FitRes` constitutes a successful update from one of the
@@ -68,9 +68,9 @@ class StoreMetricsStrategy(StoreHistoryStrategy):
             typically uses some variant of a weighted average.
         """
 
-        aggregates = super().aggregate_evaluate(rnd=rnd, results=results, failures=failures)
+        aggregates = super().aggregate_evaluate(server_round=server_round, results=results, failures=failures)
 
-        self.hist["tst"][rnd] = {
+        self.hist["tst"][server_round] = {
             k.cid: {"num_examples": v.num_examples, "loss": v.loss, **v.metrics} for k, v in results
         }
 

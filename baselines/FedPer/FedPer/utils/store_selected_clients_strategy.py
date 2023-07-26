@@ -9,13 +9,13 @@ class StoreSelectedClientsStrategy(StoreHistoryStrategy):
     """Server FL selected client storage per training/evaluation round strategy implementation."""
 
     def configure_fit(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """
         Configure the next round of training and save the selected clients.
 
         Args:
-            rnd: The current round of federated learning.
+            server_round: The current round of federated learning.
             parameters: The current (global) model parameters.
             client_manager: The client manager which holds all currently connected clients.
 
@@ -25,24 +25,24 @@ class StoreSelectedClientsStrategy(StoreHistoryStrategy):
             is not included in this list, it means that this `ClientProxy`
             will not participate in the next round of federated learning.
         """
-        result = super().configure_fit(rnd=rnd, parameters=parameters, client_manager=client_manager)
+        result = super().configure_fit(server_round=server_round, parameters=parameters, client_manager=client_manager)
 
-        if rnd not in self.hist["trn"].keys():
-            self.hist["trn"][rnd] = {}
+        if server_round not in self.hist["trn"].keys():
+            self.hist["trn"][server_round] = {}
 
-        self.hist["trn"][rnd]["selected_clients"] = [client.cid for client, _ in result]
+        self.hist["trn"][server_round]["selected_clients"] = [client.cid for client, _ in result]
 
         # Return client/config pairs
         return result
 
     def configure_evaluate(
-        self, rnd: int, parameters: Parameters, client_manager: ClientManager
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """
         Configure the next round of evaluation and save the selected clients.
 
         Args:
-            rnd: The current round of federated learning.
+            server_round: The current round of federated learning.
             parameters: The current (global) model parameters.
             client_manager: The client manager which holds all currently
                 connected clients.
@@ -54,12 +54,12 @@ class StoreSelectedClientsStrategy(StoreHistoryStrategy):
             `ClientProxy` will not participate in the next round of federated
             evaluation.
         """
-        result = super().configure_evaluate(rnd=rnd, parameters=parameters, client_manager=client_manager)
+        result = super().configure_evaluate(server_round=server_round, parameters=parameters, client_manager=client_manager)
 
-        if rnd not in self.hist["tst"].keys():
-            self.hist["tst"][rnd] = {}
+        if server_round not in self.hist["tst"].keys():
+            self.hist["tst"][server_round] = {}
 
-        self.hist["tst"][rnd]["selected_clients"] = [client.cid for client, _ in result]
+        self.hist["tst"][server_round]["selected_clients"] = [client.cid for client, _ in result]
 
         # Return client/config pairs
         return result
