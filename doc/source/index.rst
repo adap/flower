@@ -73,6 +73,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    configure-clients
    strategies
    implementing-strategies
+   deploy-server
    save-progress
    logging
    saving-and-loading-pytorch-checkpoints
