@@ -91,14 +91,8 @@ jobs:
       - name: Run edge client test
         run: ./../test.sh "${{ matrix.directory }}"
       - name: Run virtual client test
-        if: |
-          ${{ matrix.directory == 'pandas' 
-            || matrix.directory == 'tabnet' 
-            || matrix.directory == 'tensorflow' }}
+        if: ${{ matrix.directory == 'pandas' || matrix.directory == 'tabnet' || matrix.directory == 'tensorflow' }}
         run: python simulation.py
       - name: Run virtual client test
-        if: |
-          ${{ matrix.directory != 'pandas' 
-            && matrix.directory != 'tabnet' 
-            && matrix.directory != 'tensorflow' }}
+        if: ${{ matrix.directory != 'pandas' && matrix.directory != 'tabnet' && matrix.directory != 'tensorflow' }}
         run: python ../simulation.py
