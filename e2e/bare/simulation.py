@@ -1,7 +1,5 @@
-import sys
 import flwr as fl
 
-sys.path.append(".")
 from client import client_fn
 
 hist = fl.simulation.start_simulation(
