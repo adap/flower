@@ -132,21 +132,29 @@ For example, a driver can send DH public keys with signatures from previous roun
 
 The workflow of the signature system with ephemeral IDs is as follows:
 
-1. **Client establishes TLS connection with Server** I recommend using TLS for transmitting public keys so that Client can verify the identity of Server.
+1. **Client establishes TLS connection with Server** 
+I recommend using TLS for transmitting public keys so that Client can verify the identity of Server.
 
-2. **Client generates RSA key pair** Generate 2048-bit RSA key pair (one private key and one public key) with `public_exponeent=65537`.
+2. **Client generates RSA key pair** 
+Generate 2048-bit RSA key pair (one private key and one public key) with `public_exponeent=65537`.
 
-3. **Client sends `create_node` request to Server with its public key using TLS** TLS guarantees that Client sends its public key to the valid Server not an attacker.
+3. **Client sends `create_node` request to Server with its public key using TLS** 
+TLS guarantees that Client sends its public key to the valid Server not an attacker.
 
-4. **Server sends to Client `node_id` and caches the public key** The Nodee will also be registered under the `node_id`, but the ID will be deleted and disgarded once one aggregation is finished.
+4. **Server sends to Client `node_id` and caches the public key** 
+The Nodee will also be registered under the `node_id`, but the ID will be deleted and disgarded once one aggregation is finished.
 
-5. **Server sends to all sampled Clients RSA public keys using TLS** TLS ensures that all Clients receives public keys from the correct Server instead of an attacker.
+5. **Server sends to all sampled Clients RSA public keys using TLS** 
+TLS ensures that all Clients receives public keys from the correct Server instead of an attacker.
 
-6. **Client and Server closes TLS connection** TLS connections make Clients identifable. Clients will become anonymous again after closing the connections.
+6. **Client and Server closes TLS connection** 
+TLS connections make Clients identifable. Clients will become anonymous again after closing the connections.
 
-7. **Client and Server execute Secure Aggregation** During SA, each Client should add signatures to their messages so that other Clients can verify the identity of the sender.
+7. **Client and Server execute Secure Aggregation** 
+During SA, each Client should add signatures to their messages so that other Clients can verify the identity of the sender.
 
-8. **Client sends `delete_node` request to Server** Meanwhile, it disgards the current `node_id` and RSA key pair.
+8. **Client sends `delete_node` request to Server** 
+Meanwhile, it disgards the current `node_id` and RSA key pair.
 
 
 
