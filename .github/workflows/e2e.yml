@@ -91,4 +91,4 @@ jobs:
       - name: Run edge client test
         run: ./../test.sh "${{ matrix.directory }}"
       - name: Run virtual client test 
-        run: python "$([[ ${{ matrix.directory }} = 'pandas' ]] && echo '' || echo '../')"simulation.py
+        run: python "$([[ ${{ matrix.directory }} = 'pandas' && ${{ matrix.directory }} = 'tabnet' ]] && echo '' || echo '../')"simulation.py
