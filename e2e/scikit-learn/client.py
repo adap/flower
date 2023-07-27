@@ -35,7 +35,6 @@ class FlowerClient(fl.client.NumPyClient):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             model.fit(X_train, y_train)
-        print(f"Training finished for round {config['server_round']}")
         return utils.get_model_parameters(model), len(X_train), {}
 
     def evaluate(self, parameters, config):  # type: ignore
@@ -44,6 +43,10 @@ class FlowerClient(fl.client.NumPyClient):
         accuracy = model.score(X_test, y_test)
         return loss, len(X_test), {"accuracy": accuracy}
         
+def client_fn(cid):
+    _ = cid
+    return FlowerClient()
+
 if __name__ == "__main__":
     # Start Flower client
     fl.client.start_numpy_client(server_address="0.0.0.0:8080", client=FlowerClient())

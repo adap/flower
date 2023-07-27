@@ -1,6 +1,7 @@
 import warnings
 from collections import OrderedDict
 
+import mnist
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -105,6 +106,11 @@ def set_parameters(model, parameters):
     state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
     model.load_state_dict(state_dict, strict=True)
     return 
+
+def client_fn(cid):
+    _ = cid
+    return FlowerClient()
+
 
 if __name__ == "__main__":
     # Start Flower client
