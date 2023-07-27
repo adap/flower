@@ -31,7 +31,6 @@ else
     # If pyenv is already installed, check for a newer version
     read -p 'Pyenv already installed, do you want to updating it y/[n]? ' update
     update="${update:-"n"}"
-    update="${update,,}"
 
     if [ $update == "y" ]
     then

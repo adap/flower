@@ -21,5 +21,10 @@ mv $name/$template $name/$name
 
 # adjusting package name in pyproject.toml
 cd $name
-sed -i '' -e "s/<BASELINE_NAME>/$name/" pyproject.toml
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  sed -i '' -e "s/<BASELINE_NAME>/$name/" pyproject.toml
+else
+  sed -i -e "s/<BASELINE_NAME>/$name/" pyproject.toml
+fi
+
 echo "!!! Your directory for your baseline '$name' is ready."

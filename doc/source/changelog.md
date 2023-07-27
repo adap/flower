@@ -16,7 +16,7 @@
 
   The `mt-pytorch` example shows how to aggregate parameters when writing a driver script. The included `driver.py` and `server.py` have been aligned to demonstrate both the low-level way and the high-level way of building server-side logic.
 
-- **Introduce (experimental) gRPC request-response API** ([#1867](https://github.com/adap/flower/pull/1867))
+- **Introduce (experimental) gRPC request-response API** ([#1867](https://github.com/adap/flower/pull/1867), [#1901](https://github.com/adap/flower/pull/1901))
 
   In addition to the existing gRPC API (based on bidirectional streaming) and the experimental REST API, there is now a new gRPC API that uses a request-response model to communicate with client nodes.
 

@@ -21,6 +21,9 @@ import "flwr/proto/node.proto";
 import "flwr/proto/task.proto";
 
 service Fleet {
+  rpc CreateNode(CreateNodeRequest) returns (CreateNodeResponse) {}
+  rpc DeleteNode(DeleteNodeRequest) returns (DeleteNodeResponse) {}
+
   // Retrieve one or more tasks, if possible
   //
   // HTTP API path: /api/v1/fleet/pull-task-ins
@@ -31,6 +34,14 @@ service Fleet {
   // HTTP API path: /api/v1/fleet/push-task-res
   rpc PushTaskRes(PushTaskResRequest) returns (PushTaskResResponse) {}
 }
+
+// CreateNode messages
+message CreateNodeRequest {}
+message CreateNodeResponse { Node node = 1; }
+
+// DeleteNode messages
+message DeleteNodeRequest { Node node = 1; }
+message DeleteNodeResponse {}
 
 // PullTaskIns messages
 message PullTaskInsRequest {
