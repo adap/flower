@@ -17,6 +17,7 @@ status: provisional
   - [Threat models](#threat-models)
   - [RSA Signatures](#rsa-signatures)
 - [Real-world Concerns](#real-world-concerns)
+- [Proposal](#proposal)
 - [Performance Analysis](#performance-analysis)
 - [Discussion](#discussion)
 
@@ -124,6 +125,31 @@ For example, a driver can send DH public keys with signatures from previous roun
 
 5. **Algorithm choice:** The choice of cryptographic algorithms and hashing functions can significantly impact the security of the system. The SHA-256 and RSA used in the example are generally considered secure.
 
+
+
+
+## Proposal
+
+The workflow of the signature system with ephemeral IDs is as follows:
+
+1. **Client establishes TLS connection with Server** I recommend using TLS for transmitting public keys so that Client can verify the identity of Server.
+
+2. **Client generates RSA key pair** Generate 2048-bit RSA key pair (one private key and one public key) with `public_exponeent=65537`.
+
+3. **Client sends `create_node` request to Server with its public key using TLS** TLS guarantees that Client sends its public key to the valid Server not an attacker.
+
+4. **Server sends to Client `node_id` and caches the public key** The Nodee will also be registered under the `node_id`, but the ID will be deleted and disgarded once one aggregation is finished.
+
+5. **Server sends to all sampled Clients RSA public keys using TLS** TLS ensures that all Clients receives public keys from the correct Server instead of an attacker.
+
+6. **Client and Server closes TLS connection** TLS connections make Clients identifable. Clients will become anonymous again after closing the connections.
+
+7. **Client and Server execute Secure Aggregation** During SA, each Client should add signatures to their messages so that other Clients can verify the identity of the sender.
+
+8. **Client sends `delete_node` request to Server** Meanwhile, it disgards the current `node_id` and RSA key pair.
+
+
+
 ## Performance Analysis
 
 The following code tests the efficiency of the RSA signature with `Cryptography` library. All experiments are repeated 1024/4096 tims and I take the average CPU time. I also assume a model with 1 million double-type parameters, i.e., 8 MB message. 
@@ -155,10 +181,9 @@ def eval_verify_signature(message=os.urandom(8000000), times=1 << 12):
 
 Experiments on `11th Gen Intel(R) Core(TM) i7-11800H @ 2.30GHz` show that generating one 2048-bit RSA key pair takes ~42 ms; signing on one 8 MB message takes ~5.7 ms, and verifying the signature of a 8 MB message takes ~5.1 ms. (8 MB message means a model update with a million parameters, double type.)
 
-In addition, the signature system will cause minor comunication overhead. This includes a 256-bit signature for each message and 451-byte serialized public keys in the setup phase. 
+In addition, the signature system will cause minor comunication overhead. This includes a 256-bit signature for each message and 451-byte (PEM) / 294-byte (DER) serialized public keys in the setup phase. FYI, Privacy-Enhanced Mail (PEM) is a de facto file format for storing and sending cryptographic keys. It was designed to transmit messages through systems that only support ASCII. But we can also use Distinguished Encoding Rules (DER), a binary format of encoding a data value of any data types including nested data structures, which directly store keys as bytes.
 
 The results indicate that computing capacity on the client side should suffice to create RSA keys, sign, and verify signatures. 
-
 
 ## Discussion
 
@@ -167,6 +192,12 @@ The results indicate that computing capacity on the client side should suffice t
 The flower server currently acts as a router that receives messages and forwards them to the correct parties (correct means the parites specified in the `Consumer` fields). 
 
 To serve as a trusted third party, the flower server should have a certificate that allows clients to validate our identity to prevent an attacker from pretending the flower server.
+
+
+**Where can privacy leaks happen?**
+
+It is likely that no system can completely eliminate the possibility of privacy leaks, so neither can the signature system mentioned above. The flower server does not validate the validity of clients, which means that an attacker can emulate the behavior of multiple clients. In the case that most clients in SA are simulated by an attacker, it may be able to reveal confidential information of other real clients.
+
 <!-- To introduce a RSA signature systems. -->
 
 <!-- [TODO]
