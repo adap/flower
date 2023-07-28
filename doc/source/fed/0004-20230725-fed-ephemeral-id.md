@@ -3,7 +3,7 @@ fed-number: 0004
 title: FED Ephemeral ID solution
 authors: ["@adap"]
 creation-date: 2023-07-25
-last-updated: 2023-07-27
+last-updated: 2023-07-28
 status: provisional
 ---
 
@@ -36,7 +36,7 @@ It also includes discussions about threat models, RSA signatures, and industry-l
 ### Threat models
 
 1. **Semi-honest**
-"Semi-honest", AKA "honest but curious", refers to the scenarios where all parties strictly follow the protocols while attackers will try to infer confidential information from received messages.
+"Semi-honest", AKA "honest but curious", refers to the scenarios where all parties strictly follow the protocols while attackers will try to infer confidential information from received messages. It is common to assume that an attacker can observe all plaintext messages and correupt several clients.
 
 2. **Malicious**
 Malicious settings consider situations where attackers actively participate in the whole process, manipulate the protocols, and even emulate multiple clients to trick others.
@@ -140,6 +140,10 @@ Generate 2048-bit RSA key pair (one private key and one public key) with `public
 
 3. **Client sends `create_node` request to Server with its public key using TLS** 
 TLS guarantees that Client sends its public key to the valid Server not an attacker.
+```protobuf
+// CreateNode messages
+message CreateNodeRequest { bytes public_key = 1; }
+```
 
 4. **Server sends to Client `node_id` and caches the public key** 
 The Nodee will also be registered under the `node_id`, but the ID will be deleted and disgarded once one aggregation is finished.
@@ -151,10 +155,29 @@ TLS ensures that all Clients receives public keys from the correct Server instea
 TLS connections make Clients identifable. Clients will become anonymous again after closing the connections.
 
 7. **Client and Server execute Secure Aggregation** 
-During SA, each Client should add signatures to their messages so that other Clients can verify the identity of the sender.
+During SA, each Client should add signatures to their messages so that other Clients can verify the identity of the sender. (Optional: Server verifies the signature of the message to check the authenticity of the sender before forwarding it.) 
+``` protobuf
+message Task {
+  Node producer = 1;
+  Node consumer = 2;
+  string created_at = 3;
+  string delivered_at = 4;
+  string ttl = 5;
+  repeated string ancestry = 6;
+  SecureAggregation sa = 7;
+  map<string, bytes> signatures = 8;
+
+  ServerMessage legacy_server_message = 101 [ deprecated = true ];
+  ClientMessage legacy_client_message = 102 [ deprecated = true ];
+}
+```
 
 8. **Client sends `delete_node` request to Server** 
 Meanwhile, it disgards the current `node_id` and RSA key pair.
+``` protobuf
+// DeleteNode messages
+message DeleteNodeRequest { Node node = 1; bytes signature = 2; }
+```
 
 
 
