@@ -186,7 +186,7 @@ CIFAR-100, Dir(0.3), 100 clients, 5% participation.
 
 To reproduce (2.) run the following:
 ```bash
-python -m FedMLB.main --multirun algorithm="FedMLB","FedAvg","FedAvg+KD" total_clients=500 clients_per_round=10 local_updates=10
+python -m FedMLB.main --multirun algorithm="FedMLB","FedAvg","FedAvg+KD" total_clients=500 clients_per_round=10
 ```
 CIFAR-100, Dir(0.3), 500 clients, 2% participation.
 
@@ -212,4 +212,4 @@ Tensorboard logs in this baselines are stored in a folder with the following pat
 
 For example, for default results with FedAvg, logs will be stored at:
 `FedMLB/FedMLB/tb_logging/cifar100/resnet18/FedAvg/100_clients/dir_0.3/seed_3`
-
+ 
