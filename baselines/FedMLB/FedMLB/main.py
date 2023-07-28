@@ -18,7 +18,7 @@ from omegaconf import DictConfig, OmegaConf
 from FedMLB.client import TFClient
 import FedMLB.dataset as fedmlb_datasets
 from FedMLB.FedMLBModel import FedMLBModel
-from FedMLB.FedAvgKD import FedAvgKDModel
+from FedMLB.FedAvgKDModel import FedAvgKDModel
 import FedMLB.models as fedmlb_models
 from FedMLB.utils import save_results_as_pickle
 from FedMLB.models import create_resnet18
