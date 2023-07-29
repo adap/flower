@@ -3,6 +3,7 @@ from typing import Callable, Dict, Optional, Tuple
 
 import torch
 from flwr.common.typing import NDArrays, Scalar
+from flwr.common import parameters_to_ndarrays
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
@@ -14,9 +15,7 @@ def gen_evaluate_fn(
     testloader: DataLoader,
     device: torch.device,
     model: DictConfig,
-) -> Callable[
-    [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]
-]:
+) -> Callable[[NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]:
     """Generates the function for centralized evaluation.
 
     Parameters
@@ -33,19 +32,17 @@ def gen_evaluate_fn(
     """
 
     def evaluate(
-        server_round: int, parameters_ndarrays: NDArrays, config: Dict[str, Scalar]
+        parameters: NDArrays,
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
-        # pylint: disable=unused-argument
-        """Use the entire CIFAR-10 test set for evaluation."""
+        """Use the entire MNIST test set for evaluation."""
 
         net = instantiate(model)
-        params_dict = zip(net.state_dict().keys(), parameters_ndarrays)
+        params_dict = zip(net.state_dict().keys(), parameters_to_ndarrays(parameters))
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         net.load_state_dict(state_dict, strict=True)
         net.to(device)
 
         loss, accuracy = test(net, testloader, device=device)
-        # return statistics
         return loss, {"accuracy": accuracy}
 
     return evaluate

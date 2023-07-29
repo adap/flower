@@ -19,7 +19,7 @@ class Net(nn.Module):
     Decentralized Data] (https://arxiv.org/pdf/1602.05629.pdf)
     """
 
-    def __init__(self, num_classes: int) -> None:
+    def __init__(self, num_classes: int = 10) -> None:
         super().__init__()
         self.conv1 = nn.Conv2d(1, 32, 5, padding=1)
         self.conv2 = nn.Conv2d(32, 64, 5, padding=1)
@@ -49,12 +49,13 @@ class Net(nn.Module):
         output_tensor = self.fc2(output_tensor)
         return output_tensor
 
-def train(  # pylint: disable=too-many-arguments
+
+def train(
     net: nn.Module,
     trainloader: DataLoader,
     device: torch.device,
     epochs: int,
-    learning_rate: float
+    learning_rate: float,
 ) -> None:
     """Train the network on the training set.
 
@@ -83,13 +84,13 @@ def train(  # pylint: disable=too-many-arguments
         )
 
 
-def _train_one_epoch(  # pylint: disable=too-many-arguments
+def _train_one_epoch(
     net: nn.Module,
     global_params: List[Parameter],
     trainloader: DataLoader,
     device: torch.device,
     criterion: torch.nn.CrossEntropyLoss,
-    optimizer: torch.optim.Adam
+    optimizer: torch.optim.Adam,
 ) -> nn.Module:
     """Train for one epoch.
 
@@ -107,8 +108,6 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
         The loss function to use for training
     optimizer : torch.optim.Adam
         The optimizer to use for training
-    proximal_mu : float
-        Parameter for the weight of the proximal term.
 
     Returns
     -------
@@ -118,9 +117,6 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
     for images, labels in trainloader:
         images, labels = images.to(device), labels.to(device)
         optimizer.zero_grad()
-        proximal_term = 0.0
-        for local_weights, global_weights in zip(net.parameters(), global_params):
-            proximal_term += (local_weights - global_weights).norm(2)
         loss = criterion(net(images), labels)
         loss.backward()
         optimizer.step()

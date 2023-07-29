@@ -2,6 +2,7 @@
 
 import flwr as fl
 import hydra
+import numpy as np
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
@@ -25,45 +26,26 @@ def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
 
     # partition dataset and get dataloaders
-    trainloaders, valloaders, testloader = load_datasets(
-        config=cfg.dataset_config,
-        num_clients=cfg.num_clients,
-        batch_size=cfg.batch_size,
-    )
+    trainloaders, testloader = load_datasets(num_clients=cfg.num_clients)
 
     # prepare function that will be used to spawn each client
     client_fn = client.gen_client_fn(
-        num_clients=cfg.num_clients,
-        num_epochs=cfg.num_epochs,
         trainloaders=trainloaders,
-        valloaders=valloaders,
-        num_rounds=cfg.num_rounds,
         learning_rate=cfg.learning_rate,
         model=cfg.model,
+        client_device=cfg.client_device,
     )
 
-    # get function that will executed by the strategy's evaluate() method
-    # Set server's device
-    device = cfg.server_device
-    evaluate_fn = server.gen_evaluate_fn(testloader, device=device, model=cfg.model)
+    evaluate_fn = server.gen_evaluate_fn(
+        testloader, device=cfg.server_device, model=cfg.model
+    )
 
-    # get a function that will be used to construct the config that the client's
-    # fit() method will received
-    def get_on_fit_config():
-        def fit_config_fn(server_round: int):
-            # resolve and convert to python dict
-            fit_config = OmegaConf.to_container(cfg.fit_config, resolve=True)
-            fit_config["curr_round"] = server_round  # add round info
-            return fit_config
-
-        return fit_config_fn
-
-    # instantiate strategy according to config. Here we pass other arguments
-    # that are only defined at run time.
+    epochs_per_round = np.random.geometric(p=cfg.p, size=cfg.num_rounds)
     strategy = instantiate(
         cfg.strategy,
+        clients_per_round=cfg.clients_per_round,
+        epochs_per_round=epochs_per_round,
         evaluate_fn=evaluate_fn,
-        on_fit_config_fn=get_on_fit_config(),
     )
 
     # Start simulation
@@ -95,15 +77,9 @@ def main(cfg: DictConfig) -> None:
     strategy_name = strategy.__class__.__name__
     file_suffix: str = (
         f"_{strategy_name}"
-        f"{'_iid' if cfg.dataset_config.iid else ''}"
-        f"{'_balanced' if cfg.dataset_config.balance else ''}"
-        f"{'_powerlaw' if cfg.dataset_config.power_law else ''}"
         f"_C={cfg.num_clients}"
-        f"_B={cfg.batch_size}"
-        f"_E={cfg.num_epochs}"
+        f"_E={int(1 / cfg.p)}"
         f"_R={cfg.num_rounds}"
-        f"_mu={cfg.mu}"
-        f"_strag={cfg.stragglers_fraction}"
     )
 
     utils.plot_metric_from_history(

@@ -1,41 +1,34 @@
 """Defines the MNIST Flower Client and a function to instantiate it."""
 
-
 from collections import OrderedDict
 from typing import Callable, Dict, List, Tuple
 
 import flwr as fl
-import numpy as np
+import copy
 import torch
 from flwr.common.typing import NDArrays, Scalar
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
-from tamuna.dataset import load_datasets
 from tamuna.models import test, train
 
 
-class FlowerClient(
-    fl.client.NumPyClient
-):  # pylint: disable=too-many-instance-attributes
+class FlowerClient(fl.client.NumPyClient):
     """Standard Flower client for CNN training."""
 
     def __init__(
         self,
         net: torch.nn.Module,
         trainloader: DataLoader,
-        valloader: DataLoader,
         device: torch.device,
-        num_epochs: int,
-        learning_rate: float
-    ):  # pylint: disable=too-many-arguments
+        learning_rate: float,
+    ):
         self.net = net
         self.trainloader = trainloader
-        self.valloader = valloader
         self.device = device
-        self.num_epochs = num_epochs
         self.learning_rate = learning_rate
+        self.control_variate = self.__model_zeroed_out()
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
@@ -47,66 +40,49 @@ class FlowerClient(
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         self.net.load_state_dict(state_dict, strict=True)
 
+    def __model_zeroed_out(self):
+        control_variate = copy.deepcopy(self.net)
+        state_dict = OrderedDict(
+            {k: torch.zeros_like(v) for k, v in self.net.state_dict().items()}
+        )
+        control_variate.load_state_dict(state_dict, strict=True)
+        return control_variate
+
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
-    ) -> Tuple[NDArrays, int, Dict]:
+    ) -> Tuple[NDArrays, int, Dict[str, int]]:
         """Implements distributed fit function for a given client."""
         self.set_parameters(parameters)
-
-        num_epochs = self.num_epochs
 
         train(
             self.net,
             self.trainloader,
             self.device,
-            epochs=num_epochs,
+            epochs=config["epochs"],
             learning_rate=self.learning_rate,
         )
 
-        return self.get_parameters({}), len(self.trainloader), {"is_straggler": False}
-
-    def evaluate(
-        self, parameters: NDArrays, config: Dict[str, Scalar]
-    ) -> Tuple[float, int, Dict]:
-        """Implements distributed evaluation for a given client."""
-        self.set_parameters(parameters)
-        loss, accuracy = test(self.net, self.valloader, self.device)
-        return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
+        return self.get_parameters({}), len(self.trainloader), {}
 
 
 def gen_client_fn(
-    num_clients: int,
-    num_rounds: int,
-    num_epochs: int,
     trainloaders: List[DataLoader],
-    valloaders: List[DataLoader],
     learning_rate: float,
     model: DictConfig,
-) -> Tuple[
-    Callable[[str], FlowerClient], DataLoader
-]:  # pylint: disable=too-many-arguments
+    client_device: str,
+) -> Callable[[str], FlowerClient]:
     """Generates the client function that creates the Flower Clients.
 
     Parameters
     ----------
-    num_clients : int
-        The number of clients present in the setup
-    num_rounds: int
-        The number of rounds in the experiment. This is used to construct
-        the scheduling for stragglers
     num_epochs : int
         The number of local epochs each client should run the training for before
         sending it to the server.
     trainloaders: List[DataLoader]
         A list of DataLoaders, each pointing to the dataset training partition
         belonging to a particular client.
-    valloaders: List[DataLoader]
-        A list of DataLoaders, each pointing to the dataset validation partition
-        belonging to a particular client.
     learning_rate : float
         The learning rate for the SGD  optimizer of clients.
-    stragglers : float
-        Proportion of stragglers in the clients, between 0 and 1.
 
     Returns
     -------
@@ -115,30 +91,17 @@ def gen_client_fn(
         the DataLoader that will be used for testing
     """
 
-    # Defines a staggling schedule for each clients, i.e at which round will they
-    # be a straggler. This is done so at each round the proportion of staggling
-    # clients is respected
-
-
     def client_fn(cid: str) -> FlowerClient:
         """Create a Flower client representing a single organization."""
 
         # Load model
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        device = torch.device(device=client_device)
         net = instantiate(model).to(device)
 
-        # Note: each client gets a different trainloader/valloader, so each client
-        # will train and evaluate on their own unique data
+        # Note: each client gets a different trainloader, so each client
+        # will train on their own unique data
         trainloader = trainloaders[int(cid)]
-        valloader = valloaders[int(cid)]
 
-        return FlowerClient(
-            net,
-            trainloader,
-            valloader,
-            device,
-            num_epochs,
-            learning_rate
-        )
+        return FlowerClient(net, trainloader, device, learning_rate)
 
     return client_fn
