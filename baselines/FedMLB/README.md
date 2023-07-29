@@ -110,13 +110,6 @@ this directory).
 
 ### Generating clients' dataset
 First of all (and just the first time), the data partitions of clients must be generated.
-> Note: To generate the clients' dataset for the Tiny-Imagenet, the dataset should be downloaded in advance.\
-> It can be downloaded at http://cs231n.stanford.edu/tiny-imagenet-200.zip. Unzip the folder. \
-> Note: This code supposes to find the folder at the path `/{YOUR_LOCAL_PATH_TO_THE_BASELINE}/FedMLB/tiny-imagenet-200`.
-
-> :warning:
-For Tiny-ImageNet, ensure that the unzipped folder is correctly located at `/{YOUR_LOCAL_PATH_TO_THE_BASELINE}/FedMLB/tiny-imagenet-200`.
-The `tiny-imagenet-200` folder contains three folders (`train`, `val`, `test`) and two `.txt` files.
 
 ### Default config and custom config for clients' dataset generation (CIFAR-100)
 
@@ -152,6 +145,14 @@ examples for the default setting of this repository. Note that those files are p
 2. Large-scale experiments with Dir(0.3), 500 clients, balanced dataset (200 examples per client).
 3. Moderate-scale with Dir(0.6), 100 clients, balanced dataset (1000 examples per client).
 4. Large-scale experiments with Dir(0.6), 500 clients, balanced dataset (200 examples per client).
+
+> Note: To generate the clients' dataset for the Tiny-Imagenet, the dataset should be downloaded in advance.\
+> It can be downloaded at http://cs231n.stanford.edu/tiny-imagenet-200.zip. Unzip the folder. \
+> Note: This code supposes to find the folder at the path `/{YOUR_LOCAL_PATH_TO_THE_BASELINE}/FedMLB/tiny-imagenet-200`.
+
+> :warning:
+For Tiny-ImageNet, ensure that the unzipped folder is correctly located at `/{YOUR_LOCAL_PATH_TO_THE_BASELINE}/FedMLB/tiny-imagenet-200`.
+The `tiny-imagenet-200` folder contains three folders (`train`, `val`, `test`) and two `.txt` files.
 
 ```bash
 # commands to generate clients' dataset partitions with Tiny-imagenet
