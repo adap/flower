@@ -76,6 +76,7 @@ Be aware that in the default config the memory usage can exceed 10GB.
 | ------------- | ------------- | ------------- |
 | client optimizer  | Local optimizer. |  SGD|
 | client learning rate  |  |  0.1 |
+| learning rate decay  | Exponential decay rate for clients' learning rate. |  0.998 |
 | server optimizer  | Server optimizer. (SGD with lr=1 is equivalent to applying updated by sum). |  SGD|
 | server learning rate  |  |  1.0 |
 | clip norm  | Clip norm during local training. | 10.0 |
@@ -108,7 +109,7 @@ Ensure you have activated your Poetry environment (execute `poetry shell` from
 this directory).
 
 ### Generating clients' dataset
-First the data partitions of clients must be generated.
+First of all (and just the first time), the data partitions of clients must be generated.
 > Note: To generate the clients' dataset for the Tiny-Imagenet, the dataset should be downloaded in advance.\
 > It can be downloaded at http://cs231n.stanford.edu/tiny-imagenet-200.zip. Unzip the folder. \
 > Note: This code supposes to find the folder at the path `/{YOUR_LOCAL_PATH_TO_THE_BASELINE}/FedMLB/tiny-imagenet-200`.
@@ -118,19 +119,19 @@ For Tiny-ImageNet, ensure that the unzipped folder is correctly located at `/{YO
 The `tiny-imagenet-200` folder contains three folders (`train`, `val`, `test`) and two `.txt` files.
 
 ### Default config and custom config for clients' dataset generation (CIFAR-100)
-The default config uses the CIFAR-100 dataset,
-and it generates the partitions for Moderate-scale with Dir(0.3), 100 clients,
-balanced dataset (500 examples per client).
-```bash
-python -m FedMLB.dataset_preparation # this will run using the default settings in the `conf/base.yaml`
-```
-To generate the partitions for the other settings, i.e.:
+
+To generate the partitions for the CIFAR-100 settings, i.e.:
+1. Moderate-scale with Dir(0.3), 100 clients, balanced dataset (500 examples per client) -- **default config**.
 2. Large-scale experiments with Dir(0.3), 500 clients, balanced dataset (100 examples per client);
 3. Moderate-scale with Dir(0.6), 100 clients, balanced dataset (500 examples per client);
 4. Large-scale experiments with Dir(0.6), 500 clients, balanced dataset (100 examples per client),
 
 use the following commands:
 ```bash
+# this will run using the default settings in the `conf/base.yaml`
+# and will generate the setting for 1. (see above)
+python -m FedMLB.dataset_preparation 
+
 # this will generate the setting for 2. (see above)
 python -m FedMLB.dataset_preparation dataset_config.alpha_dirichlet=0.3 total_clients=500
 
@@ -167,9 +168,11 @@ python -m FedMLB.dataset_preparation dataset_config.dataset="tiny-imagenet" data
 python -m FedMLB.dataset_preparation dataset_config.dataset="tiny-imagenet" dataset_config.alpha_dirichlet=0.6 total_clients=500
 ```
 
-
+### Run simulations and reproduce results
 After having generated the setting, simulations can be run.
-The default configuration for `FedMLB.main` uses (1.), and can be run with the following:
+
+### CIFAR-100
+The default configuration for `FedMLB.main` uses (1.) for CIFAR-100, and can be run with the following:
 
 ```bash
 python -m FedMLB.main # this will run using the default settings in the `conf/base.yaml`
@@ -191,6 +194,27 @@ To run using FedAvg+KD:
 ```bash
 # this will use the regular FedAvg local training
 python -m FedMLB.main algorithm="FedAvg+KD"
+```
+For 500 clients: 200*5/10 = 100 local updates
+100*5/10 =50
+### Tiny-Imagenet
+For Tiny-ImageNet, as in the orginal paper, batch size of local updates should be set 
+to 100 in settings with 100 clients and to 20 in settings with 500 clients;
+this is equal to set the amount of local_updates to 50 (as the default), since 
+local_updates = (num_of_local_examples*local_epochs)/batch_size.
+
+local_updates = (num_of_local_examples*local_epochs)/batch_size
+1000*5/100 = 50
+200*5/20 = 50
+
+```bash
+python -m FedMLB.main dataset_config.dataset="tiny-imagenet" 
+
+python -m FedMLB.main dataset_config.dataset="tiny-imagenet" total_clients=500 clients_per_round=10
+
+python -m FedMLB.main dataset_config.dataset="tiny-imagenet" dataset_config.alpha_dirichlet=0.6  
+
+python -m FedMLB.main dataset_config.dataset="tiny-imagenet" dataset_config.alpha_dirichlet=0.6 total_clients=500 clients_per_round=10
 ```
 
 ## Expected Results
@@ -226,6 +250,7 @@ CIFAR-100, Dir(0.3), 100 clients, 5% participation.
 
 To reproduce (2.) run the following:
 ```bash
+OLD 28 (500R) 32.7 (1000R)
 python -m FedMLB.main --multirun algorithm="FedMLB","FedAvg","FedAvg+KD" total_clients=500 clients_per_round=10
 ```
 CIFAR-100, Dir(0.3), 500 clients, 2% participation.
@@ -235,6 +260,12 @@ CIFAR-100, Dir(0.3), 500 clients, 2% participation.
 | FedAvg  | ()  | () |
 | FedMLB   | () | () |
 
+To reproduce results reported in Table 3 of the paper,
+related to _more local iterations_ (K=100 or K=200 in the
+paper, instead of K=50) run the following:
+```bash
+python -m FedMLB.main --multirun algorithm="FedMLB","FedAvg","FedAvg+KD" local_updates=100 # or local_updates=200 
+```
 ### Results logging via Tensorboard
 Beside storing results in plain text in the `output` folder, the results are also stored via 
 tensorboard logs.

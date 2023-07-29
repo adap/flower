@@ -80,6 +80,8 @@ def main(cfg: DictConfig) -> None:
         config = {
             "current_round": server_round,
             "local_epochs": 5,
+            "exp_decay": cfg.exp_decay,
+            "lr_client_initial": cfg.lr_client
         }
         return config
 
@@ -89,6 +91,7 @@ def main(cfg: DictConfig) -> None:
     algorithm = cfg.algorithm
     random_seed = cfg.random_seed
     lr_client = cfg.lr_client
+    # exp_decay = cfg.exp_decay
     clipnorm = cfg.clipnorm
     l2_weight_decay = cfg.l2_weight_decay
     lambda_1 = cfg.lambda_1

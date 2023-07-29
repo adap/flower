@@ -10,6 +10,7 @@ clients_per_round: 5
 local_updates: 50
 local_epochs: 5 # number of local epochs
 lr_client: 0.1 # client learning rate
+exp_decay: 0.998
 clipnorm: 10.0
 l2_weight_decay: 1e-3
 lambda_1: 1.0 # it can be >= 0
