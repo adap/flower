@@ -3,7 +3,7 @@
 
 import pathlib
 from logging import INFO
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 import numpy as np
 import pandas as pd
@@ -202,7 +202,8 @@ def create_federated_dataloaders(
     train_fraction: float,
     validation_fraction: float,
     test_fraction: float,
-    random_seed: int,
+    random_seed: int = None,
+    n_clients: Optional[int] = None,
 ) -> Tuple[List[DataLoader], List[DataLoader], List[DataLoader]]:
     """Create the federated dataloaders by following all the preprocessing
     steps and division.
@@ -251,9 +252,16 @@ def create_federated_dataloaders(
     df_info_path = pathlib.Path("data/processed_FeMNIST/processed_images_to_labels.csv")
     df_info = pd.read_csv(df_info_path, index_col=0)
     sampler = NistSampler(df_info)
-    sampled_data_info = sampler.sample(
-        sampling_type, dataset_fraction, random_seed=random_seed
-    )
+    if sampling_type == 'niid':
+        sampled_data_info = sampler.sample(
+            sampling_type, dataset_fraction, random_seed=random_seed
+        )
+    elif sampling_type == 'iid':
+        sampled_data_info = sampler.sample(
+            sampling_type, dataset_fraction,
+            n_clients=n_clients,
+            random_seed=random_seed
+        )
     sampled_data_info_path = pathlib.Path(
         f"data/processed_FeMNIST/{sampling_type}_sampled_images_to_labels.csv"
     )
