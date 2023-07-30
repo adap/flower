@@ -15,13 +15,14 @@ from typing import Dict, Callable, Optional, Tuple, List
 from sim_utils.dataset_utils import get_cifar_10, do_fl_partitioning, get_dataloader
 from sim_utils.utils import Net, train, test
 
-from flwr.simulation.virtual_client_state_manager import InFileSystemVirtualClientStateManager
+from flwr.simulation.virtual_client_state_manager import InFileSystemVirtualClientStateManager, SimpleVirtualClientStateManager
 
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
 parser.add_argument("--num_client_cpus", type=int, default=1)
 parser.add_argument("--num_rounds", type=int, default=5)
+parser.add_argument("--state_in_fs", action="store_true", help='Records/loads client states to/from the file system')
 
 
 # Flower client, adapted from Pytorch quickstart example
@@ -142,21 +143,11 @@ def get_evaluate_fn(
     return evaluate
 
 
-# Start simulation (a _default server_ will be created)
-# This example does:
-# 1. Downloads CIFAR-10
-# 2. Partitions the dataset into N splits, where N is the total number of
-#    clients. We refere to this as `pool_size`. The partition can be IID or non-IID
-# 3. Starts a simulation where a % of clients are sample each round.
-# 4. After the M rounds end, the global model is evaluated on the entire testset.
-#    Also, the global model is evaluated on the valset partition residing in each
-#    client. This is useful to get a sense on how well the global model can generalise
-#    to each client's data.
 if __name__ == "__main__":
     # parse input arguments
     args = parser.parse_args()
 
-    pool_size = 10  # number of dataset partions (= number of total clients)
+    pool_size = 10  # number of dataset partitions (= number of total clients)
     client_resources = {
         "num_cpus": args.num_client_cpus
     }  # each client will get allocated 1 CPUs
@@ -190,6 +181,27 @@ if __name__ == "__main__":
     # (optional) specify Ray config
     ray_init_args = {"include_dashboard": False}
 
+    # let's ensure we save the log to a file (note this will append to the same file each time)
+    fl.common.logger.configure(identifier="mySimulation", filename="sim_stateful_log.txt")
+
+    if args.state_in_fs:
+        # Let's record the clients' state to the file system.
+        # In simulation (because clients can run in different machines)
+        # accessing the file system (FS) is done through the VirtualClientStateManager
+
+        # Let's use a simple InFileSystemVirtualClientStateManager which stores the state
+        # of each client individually as a standard python pickle
+        state_fs = InFileSystemVirtualClientStateManager(state_dir="simulation_state_FS")
+        #! If you run this example a second time, your clients will read their initial state
+        # from their corresponding pickle file
+    else:
+        # else, use the default (in-memory state). This will ensure that your clients' state
+        # is preserver throughout the entire simulation
+        state_fs = SimpleVirtualClientStateManager()
+
+    log(INFO, "-----------------------------------------------------------")
+    log(INFO, f"Using VirtualClientStateManager of type: {type(state_fs)}")
+
     # start simulation
     fl.simulation.start_simulation(
         client_fn=client_fn,
@@ -198,5 +210,5 @@ if __name__ == "__main__":
         config=fl.server.ServerConfig(num_rounds=args.num_rounds),
         strategy=strategy,
         ray_init_args=ray_init_args,
-        # state_manager=InFileSystemVirtualClientStateManager(state_dir="simulation_state_FS"), # uncomment to use (else the inmemory version is used as default)
+        state_manager=state_fs,
     )

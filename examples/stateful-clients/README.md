@@ -47,8 +47,15 @@ You will see that PyTorch is starting a federated training. Have a look to the [
 
 > This has been tested with a early version of the new [`VirtualClientEngine`](https://github.com/adap/flower/pull/1969). Therefore, `pyproject.toml` and `requirements.txt` reflect this and use `ray==2.5.1`.
 
-For simulation with Flower's `VirtualClientEngine` you might want to still use stateful clients without having to manually handle their state. The script `simulation.py` (and the content in the `sim_utils` directory) closely resembles the [simulation-pytorch]() example. It has been extended to use stateful clients. Similarly to the example above with `gRPC` clients, the state the clients record is the time take to do `fit()`. They also use print statements to show that the state is correctly fetched and updated. In simulation, clients should only use `InMemoryClientState`. You can run this example by simply doing:
+For simulation with Flower's `VirtualClientEngine` you might want to still use stateful clients without having to manually handle their state. The script `simulation.py` (and the content in the `sim_utils` directory) closely resembles the [simulation-pytorch]() example. It has been extended to use stateful clients. Similarly to the example above with `gRPC` clients, the state the clients record is the time take to do `fit()`. They also use print statements to show that the state is correctly fetched and updated. In simulation, clients should only use `InMemoryClientState`. The handling of the client state is internally offloaded to the `VirtualClientStateManager` via each client's proxy. You can run this example by simply doing:
 
 ```bash
+# run with InMemory state (clients' state is preserved in-memory for
+# the duration of the simulation. State is empty at the beginning)
 python simulation.py
+
+# Clients still run with InMemory state but their state is recorded
+# to a python pickle (by default in a directory called `simulation_state_FS`). At initialisation, clients will read from disk
+# their state (if it exists)
+python simulation.py --state_in_fs
 ```
