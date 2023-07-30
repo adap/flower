@@ -20,10 +20,10 @@ from flwr.simulation.virtual_client_state_manager import InFileSystemVirtualClie
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
-parser.add_argument("--num_client_cpus", type=int, default=1)
+parser.add_argument("--num_client_cpus", type=int, default=2, help='Number of CPU threads to assign to each client')
+parser.add_argument("--num_client_gpus", type=float, default=0.0, help="Portion of GPU VRAM that one client needs to run (this is largely based on your model, and input batch dimensions)")
 parser.add_argument("--num_rounds", type=int, default=5)
 parser.add_argument("--state_in_fs", action="store_true", help='Records/loads client states to/from the file system')
-
 
 # Flower client, adapted from Pytorch quickstart example
 class FlowerClient(NumPyClient, InMemoryClientState):
@@ -100,7 +100,7 @@ def fit_config(server_round: int) -> Dict[str, Scalar]:
     """Return a configuration with static batch size and (local) epochs."""
     config = {
         "epochs": 1,  # number of local epochs
-        "batch_size": 64,
+        "batch_size": 32, # batch size your clients will use during fit()
     }
     return config
 
@@ -147,10 +147,21 @@ if __name__ == "__main__":
     # parse input arguments
     args = parser.parse_args()
 
-    pool_size = 10  # number of dataset partitions (= number of total clients)
+    pool_size = 20  # number of dataset partitions (= number of total clients)
+
+    # use a dictionary to control the number of CPU/GPU resources that the VirtualClientEngine
+    # should allocate to each of your clients. Use key `num_cpus` to indicate the number of 
+    # CPU threads a client needs. Use key `num_gpus` to indicate the portion (!!!) of GPU VRAM
+    # that a client needs. For example, if you set {'num_cpus':2, 'num_gpus': 0.25}, your simulation
+    # will run at most (1/0.25)*N_GPU clients concurrently, where N_GPU is the number of GPUs in 
+    # your system. This, of course, assuming you have enough CPUs to support that many clients.
+    #! Please note that these resource limits are not enforced and therefore a client could exceed
+    # the `num_gpus` ratio. If this happens, you could see out-of-memory (OOM) errors... Raise `num_gpus`
+    # value when this happens.
     client_resources = {
-        "num_cpus": args.num_client_cpus
-    }  # each client will get allocated 1 CPUs
+        "num_cpus": args.num_client_cpus,
+        "num_gpus": args.num_client_gpus   
+    }
 
     # Download CIFAR-10 dataset
     train_path, testset = get_cifar_10()
