@@ -1,12 +1,13 @@
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 # Note the model and functions here defined do not have any FL-specific components.
 
+
 class Net(nn.Module):
     """A simple CNN suitable for simple vision tasks."""
+
     def __init__(self, num_classes: int) -> None:
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(1, 6, 5)
@@ -25,10 +26,12 @@ class Net(nn.Module):
         x = self.fc3(x)
         return x
 
+
 def train(net, trainloader, optimizer, epochs, device: str):
-    """Train the network on the training set. 
-    
-    This is a fairly simple training loop for PyTorch."""
+    """Train the network on the training set.
+
+    This is a fairly simple training loop for PyTorch.
+    """
     criterion = torch.nn.CrossEntropyLoss()
     net.train()
     net.to(device)
@@ -42,9 +45,10 @@ def train(net, trainloader, optimizer, epochs, device: str):
 
 
 def test(net, testloader, device: str):
-    """Validate the network on the entire test set
-    
-    and report loss and accuracy."""
+    """Validate the network on the entire test set.
+
+    and report loss and accuracy.
+    """
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
     net.eval()

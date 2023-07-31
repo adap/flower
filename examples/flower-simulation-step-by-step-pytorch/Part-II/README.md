@@ -1,15 +1,15 @@
-
 # A Complete FL Simulation Pipeline using Flower (w/ better Hydra usage)
 
 The code in this directory is fairly similar to that presented in [`simulation-pytorch example`](https://github.com/adap/flower/tree/main/examples/simulation-pytorch) but extended into a series of [step-by-step video tutorials](https://www.youtube.com/playlist?list=PLNG4feLHqCWlnj8a_E1A_n5zr2-8pafTB) on how to Federated Learning simulations using Flower. In Part-I, we made use of a very simple config structure using a single `YAML` file. With the code here presented, we take a dive into more advanced config structures leveraging some of the core functionality of Hydra. You can find more information about Hydra in the [Hydra Documentation](https://hydra.cc/docs/intro/). To the files I have added a fair amount of comments to support and expand upon what was said in the video tutorial.
 
 The content of the code in this directory is roughly divided into two parts:
-* `toy.py` and its associated config files (i.e. `conf/toy.yaml` and `conf/toy_model/`) which were designed as a playground to test out some of the functionality of Hydra configs that we want to incorporate into our Flower projects.
-* and the rest: which follows the exact same structure as in the code presented in [Part-I](https://github.com/adap/flower/tree/main/examples/flower-simulation-step-by-step-pytorch/Part-I) but that has been _enhanced_ using Hydra. 
+
+- `toy.py` and its associated config files (i.e. `conf/toy.yaml` and `conf/toy_model/`) which were designed as a playground to test out some of the functionality of Hydra configs that we want to incorporate into our Flower projects.
+- and the rest: which follows the exact same structure as in the code presented in [Part-I](https://github.com/adap/flower/tree/main/examples/flower-simulation-step-by-step-pytorch/Part-I) but that has been _enhanced_ using Hydra.
 
 # Link to step-by-step video
 
-This code was written line-by-line as part of a tutorial series first introduced in Part-I. Starting from [video 
+This code was written line-by-line as part of a tutorial series first introduced in Part-I. Starting from [video
 7](https://youtu.be/NYS4IjcDU4I), where a recap of the content developed in Part-I is first presented, then two videos introducing Hydra and applying it to Flower follow.
 
 <div align="center">
@@ -17,7 +17,6 @@ This code was written line-by-line as part of a tutorial series first introduced
          <img src="https://img.youtube.com/vi/yoUcqySkq4U/0.jpg" style="width:75%;">
       </a>
 </div>
-
 
 # Constructing your Python Environment
 
@@ -50,7 +49,7 @@ python main.py # will launch the simulation with default arguments replicating t
 
 # the default config uses FedAvg, you can override this easily by pointing it instead ot use FedAdam
 # internally, Hydra will resolve this command and load `conf/strategy/fedadam.yaml`
-python main.py strategy=fedadam 
+python main.py strategy=fedadam
 
 # you can also further change the default config
 python main.py strategy=fedadam num_rounds=20 # will use FedAdam and 20 rounds

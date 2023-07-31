@@ -1,4 +1,3 @@
-
 import pickle
 from pathlib import Path
 
@@ -22,19 +21,19 @@ from server import get_on_fit_config, get_evalulate_fn
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig):
-
     ## 1. Parse config & get experiment output dir
     print(OmegaConf.to_yaml(cfg))
     save_path = HydraConfig.get().runtime.output_dir
 
     ## 2. Prepare your dataset
-    trainloaders, validationloaders, testloader = prepare_dataset(cfg.num_clients,
-                                                                  cfg.batch_size)
+    trainloaders, validationloaders, testloader = prepare_dataset(
+        cfg.num_clients, cfg.batch_size
+    )
 
     ## 3. Define your clients
     # client_fn = generate_client_fn(trainloaders, validationloaders, cfg.num_classes)
-    
-    # Let's pass the config node that defines the model. in this way changing models doesn't 
+
+    # Let's pass the config node that defines the model. in this way changing models doesn't
     # require any changes to the code (just run the code with a different config)
     client_fn = generate_client_fn(trainloaders, validationloaders, cfg.model)
 
@@ -48,7 +47,7 @@ def main(cfg: DictConfig):
     #                                      evaluate_fn=get_evalulate_fn(cfg.num_classes,
     #                                                                   testloader),
     #                                                                   )
-    
+
     # So we have replaced the above with just a single line. Now if we want to use a different strategy,
     # even if it uses new arguments, you can leave the code below as is and pick a different config
     # The line below is instantiating the `strategy` node in the config. The result is an object of
@@ -57,7 +56,9 @@ def main(cfg: DictConfig):
     # The moment you run the experiment (i.e. when the config is parsed) not all field would be defined.
     # for instance, the testloader is not ready so `evaluate_fn` argument cannot be set. You can pass them
     # manually the moment you call `instantiate`. (if you are familiar with Python partials, this is similar)
-    strategy = instantiate(cfg.strategy, evaluate_fn=get_evalulate_fn(cfg.model, testloader))
+    strategy = instantiate(
+        cfg.strategy, evaluate_fn=get_evalulate_fn(cfg.model, testloader)
+    )
 
     ## 5. Start Simulation
     # As you'll notice, we can start the simulation in exactly the same way as we did in the previous project.
@@ -66,20 +67,18 @@ def main(cfg: DictConfig):
         num_clients=cfg.num_clients,
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
         strategy=strategy,
-        client_resources={'num_cpus': 2, 'num_gpus': 0.0},
+        client_resources={"num_cpus": 2, "num_gpus": 0.0},
     )
-
 
     ## 6. Save your results
     # now we save the results of the simulation.
-    results_path = Path(save_path) / 'results.pkl'
+    results_path = Path(save_path) / "results.pkl"
 
-    results = {'history': history, 'anythingelse': "here"}
+    results = {"history": history, "anythingelse": "here"}
 
-    with open(str(results_path), 'wb') as h:
+    with open(str(results_path), "wb") as h:
         pickle.dump(results, h, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 if __name__ == "__main__":
-
     main()

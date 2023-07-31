@@ -1,9 +1,9 @@
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 from flwr.common.parameter import ndarrays_to_parameters
+
 
 class Net(nn.Module):
     def __init__(self, num_classes: int) -> None:
@@ -23,6 +23,7 @@ class Net(nn.Module):
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
+
 
 def train(net, trainloader, optimizer, epochs, device: str):
     """Train the network on the training set."""
@@ -54,10 +55,13 @@ def test(net, testloader, device: str):
     accuracy = correct / len(testloader.dataset)
     return loss, accuracy
 
+
 def model_to_parameters(model):
     """Note that the model is already instantiated when passing it here.
-    This happens because we call this utility function when instantiating
-    the parent object (i.e. the FedAdam strategy in this example)."""
+
+    This happens because we call this utility function when instantiating the parent
+    object (i.e. the FedAdam strategy in this example).
+    """
     ndarrays = [val.cpu().numpy() for _, val in model.state_dict().items()]
     parameters = ndarrays_to_parameters(ndarrays)
     print("Extracted model parameters!")

@@ -1,13 +1,11 @@
-
 import torch
 from torch.utils.data import random_split, DataLoader
 from torchvision.transforms import ToTensor, Normalize, Compose
 from torchvision.datasets import MNIST
 
 
-def get_mnist(data_path: str = './data'):
+def get_mnist(data_path: str = "./data"):
     """Downlaod MNIST and apply a simple transform."""
-
 
     tr = Compose([ToTensor(), Normalize((0.1307,), (0.3081,))])
 
@@ -17,13 +15,11 @@ def get_mnist(data_path: str = './data'):
     return trainset, testset
 
 
-def prepare_dataset(num_partitions: int,
-                    batch_size: int, 
-                    val_ratio: float = 0.1):
+def prepare_dataset(num_partitions: int, batch_size: int, val_ratio: float = 0.1):
     """Download and partition the MNIST dataset."""
 
     # We are not doing any Hydra magic here but this is one place you'd normally
-    # add some of it. Why? because you probably want different datasets in your 
+    # add some of it. Why? because you probably want different datasets in your
     # Flower experiments. Each could easily require a different partitioning mechanism
     # or none at all. For example, if you want to use MNIST, CIFAR-10, FEMNIST, SpeechCommands,
     # these require very different loading/partitioning/preprocessing methodologies.
@@ -36,7 +32,9 @@ def prepare_dataset(num_partitions: int,
 
     partition_len = [num_images] * num_partitions
 
-    trainsets = random_split(trainset, partition_len, torch.Generator().manual_seed(2023))
+    trainsets = random_split(
+        trainset, partition_len, torch.Generator().manual_seed(2023)
+    )
 
     # create dataloaders with train+val support
     trainloaders = []
@@ -46,11 +44,17 @@ def prepare_dataset(num_partitions: int,
         num_val = int(val_ratio * num_total)
         num_train = num_total - num_val
 
-        for_train, for_val = random_split(trainset_, [num_train, num_val], torch.Generator().manual_seed(2023))
+        for_train, for_val = random_split(
+            trainset_, [num_train, num_val], torch.Generator().manual_seed(2023)
+        )
 
-        trainloaders.append(DataLoader(for_train, batch_size=batch_size, shuffle=True, num_workers=2))
-        valloaders.append(DataLoader(for_val, batch_size=batch_size, shuffle=False, num_workers=2))
-    
+        trainloaders.append(
+            DataLoader(for_train, batch_size=batch_size, shuffle=True, num_workers=2)
+        )
+        valloaders.append(
+            DataLoader(for_val, batch_size=batch_size, shuffle=False, num_workers=2)
+        )
+
     testloader = DataLoader(testset, batch_size=128)
 
     return trainloaders, valloaders, testloader
