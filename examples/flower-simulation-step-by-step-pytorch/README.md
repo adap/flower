@@ -4,7 +4,7 @@ This directory contains the code developed in the `Flower Simulation` tutorial s
 - In `Part-II` (2 videos) we _enhanced_ the code in `Part-I` by making a better use of Hydra configs.
 
 <div align="center">
-      <a href="https://www.youtube.com/playlist?list=PLNG4feLHqCWlnj8a_E1A_n5zr2-8pafTB" target="_blank">
+      <a href="https://www.youtube.com/playlist?list=PLNG4feLHqCWlnj8a_E1A_n5zr2-8pafTB" target="_blank" rel="noopener noreferrer">
          <img src="https://img.youtube.com/vi/cRebUIGB5RU/0.jpg" style="width:75%;">
       </a>
 </div>
