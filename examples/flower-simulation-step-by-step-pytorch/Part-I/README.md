@@ -36,6 +36,14 @@ pip install flwr==1.4.0 hydra-core==1.3.2
 pip install ray==1.11.1
 ```
 
+If you are running this on macOS with Apple Silicon (i.e. M1, M2), you'll need a different `grpcio` package if you see an error when running the code. To fix this do:
+```bash
+# with your conda environment activated
+pip uninstall grpcio
+
+conda install grpcio -y
+```
+
 # Running the Code
 
 In this tutorial we didn't dive in that much into Hydra configs (that's the content of [Part-II](https://github.com/adap/flower/tree/main/examples/flower-simulation-step-by-step-pytorch/Part-II)). However, this doesn't mean we can't easily configure our experiment directly from the command line. Let's see a couple of examples on how to run our simulation.

@@ -74,7 +74,7 @@ def main(cfg: DictConfig):
         on_fit_config_fn=get_on_fit_config(
             cfg.config_fit
         ),  # a function to execute to obtain the configuration to send to the clients during fit()
-        evaluate_fn=get_evalulate_fn(cfg.num_classes, testloader),
+        evaluate_fn=get_evaluate_fn(cfg.num_classes, testloader),
     )  # a function to run on the server side to evaluate the global model.
 
     ## 5. Start Simulation
