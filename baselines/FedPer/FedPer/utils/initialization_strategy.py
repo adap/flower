@@ -1,12 +1,13 @@
 import torch.nn as nn
 
-from typing import Any, Callable, Dict, Optional, Type
+from typing import Any, Callable, Dict, Optional, Type, Union
 from flwr.common import Parameters, ndarrays_to_parameters
 from flwr.server.client_manager import ClientManager
 from flwr.server.strategy.strategy import Strategy
 
 from FedPer.utils.new_utils import Algorithms
 from FedPer.utils.model_split import ModelSplit
+from FedPer.models.mobile_model import MobileNetModelSplit
 
 
 class ServerInitializationStrategy(Strategy):
@@ -14,7 +15,7 @@ class ServerInitializationStrategy(Strategy):
 
     def __init__(
         self,
-        model_split_class: Type[ModelSplit],
+        model_split_class: Union[Type[MobileNetModelSplit],Type[ModelSplit]],
         create_model: Callable[[Dict[str, Any]], nn.Module],
         config: Dict[str, Any] = {},
         algorithm: str = Algorithms.FEDAVG.value,
@@ -25,7 +26,7 @@ class ServerInitializationStrategy(Strategy):
         super().__init__(*args, **kwargs)
         self.config = config
         self.algorithm = algorithm
-        self.model = model_split_class(model=create_model(config), has_fixed_head=has_fixed_head)
+        self.model = model_split_class(model=create_model(), has_fixed_head=has_fixed_head)
 
     def initialize_parameters(
         self, client_manager: ClientManager

@@ -35,6 +35,8 @@ class BaseClient(fl.client.NumPyClient):
         """
         super().__init__()
 
+        print("Model manager class: ", model_manager_class)
+
         self.train_id = 1
         self.test_id = 1
         self.config = config
