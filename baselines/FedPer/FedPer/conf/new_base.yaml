@@ -24,6 +24,8 @@ model:
   num_head_layers: 1
   num_classes: 10
   device: ${server_device}
+  name: mobile
+  num_head_layers: 1
 
 fit_config:
   drop_client: false

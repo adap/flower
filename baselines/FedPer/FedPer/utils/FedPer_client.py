@@ -6,7 +6,8 @@ from typing import Dict, List, Union, Tuple, Callable
 from omegaconf import DictConfig
 from collections import OrderedDict
 from torch.utils.data import DataLoader
-from FedPer.new_models import CNNModelManager
+from FedPer.models.cnn_model import CNNModelManager
+from FedPer.models.mobile_model import MobileNetModelManager
 from FedPer.utils.constants import Algorithms
 from FedPer.utils.base_client import BaseClient
 
@@ -82,6 +83,8 @@ def get_fedper_client_fn(
         the DataLoader that will be used for testing
     """
 
+    assert model['name'].lower() in ['cnn', 'mobile']
+
     def client_fn(cid: str) -> FedPerClient:
         """Create a Flower client representing a single organization."""
 
@@ -90,12 +93,19 @@ def get_fedper_client_fn(
         trainloader = trainloaders[int(cid)]
         valloader = valloaders[int(cid)]
 
+        if model['name'].lower() == 'cnn':
+            manager = CNNModelManager
+        elif model['name'].lower() == 'mobile':
+            manager = MobileNetModelManager
+        else:
+            raise NotImplementedError('Model not implemented, check name.')
+
         return FedPerClient(
             trainloader=trainloader,
             testloader=valloader,
             client_id=cid,
             config=model,
-            model_manager_class=CNNModelManager
+            model_manager_class=manager
         )
     
     return client_fn
