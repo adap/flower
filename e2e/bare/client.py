@@ -23,6 +23,6 @@ class FlowerClient(fl.client.NumPyClient):
         accuracy = 1 - loss
         return loss, 1, {"accuracy": accuracy}
 
-
-# Start Flower client
-fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=FlowerClient())
+if __name__ == "__main__":
+    # Start Flower client
+    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=FlowerClient())

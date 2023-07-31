@@ -10,7 +10,8 @@ authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
-flwr-nightly = {extras = ["rest", "simulation"], version = "^1.5.0.dev20230629"}
-torch = "1.13.1"
-torchvision = "0.13.0"
+flwr-nightly = { version = "^1.5.0.dev20230629", extras = ["simulation", "rest"] }
+# flwr = { path = "../../", develop = true, extras = ["simulation", "rest"] }
+torch = "^2.0.1"
+torchvision = "^0.15.2"
 tqdm = "4.65.0"
