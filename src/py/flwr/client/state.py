@@ -50,10 +50,9 @@ class InMemoryClientState(ClientState):
     """An in-memory Client State class for clients to record their state and use it
     across rounds.
 
-    This in-memory state is suitable for both "real" and "simulated" clients.
-    Note the state won't persist once the Federated Learning workload is completed. If
-    you would like to save/load the state to/from disk, use the
-    `InFileSystemClientState` class.
+    This in-memory state is suitable for both "real" and "simulated" clients. Note the
+    state won't persist once the Federated Learning workload is completed. If you would
+    like to save/load the state to/from disk, use the `InFileSystemClientState` class.
     """
 
     def __init__(self):

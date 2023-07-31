@@ -51,7 +51,6 @@ from flwr.common.typing import (
 )
 
 from .client import Client
-from .state import ClientState
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle
@@ -60,6 +59,7 @@ from .numpy_client import has_evaluate as numpyclient_has_evaluate
 from .numpy_client import has_fit as numpyclient_has_fit
 from .numpy_client import has_get_parameters as numpyclient_has_get_parameters
 from .numpy_client import has_get_properties as numpyclient_has_get_properties
+from .state import ClientState
 
 EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT = """
 NumPyClient.fit did not return a tuple with 3 elements.
@@ -393,8 +393,7 @@ def _wrap_numpy_client(client: NumPyClient) -> Client:
 
     # TODO: do the below?
     # if issubclass(type(client), ClientState):
-        # client has a state, therefore we need to expose all methods
-
+    # client has a state, therefore we need to expose all methods
 
     # Clients might inherit from a second class (an instance of ClientState)
     # we need to pass it when constructing the wrapper. Therefore, the first
@@ -403,7 +402,7 @@ def _wrap_numpy_client(client: NumPyClient) -> Client:
     # get all other classes this clients inherits from but exclude NumPyClient
     parent_cls = [cls_ for cls_ in type(client).__bases__ if cls_ != NumPyClient]
     # then append the base Client class and use this tuple in the wrapper
-    parent_cls  = (Client,) + tuple(parent_cls)
+    parent_cls = (Client,) + tuple(parent_cls)
 
     # Create wrapper class
     wrapper_class = type("NumPyClientWrapper", parent_cls, member_dict)
