@@ -1,13 +1,15 @@
-from typing import Optional, Union, List, Dict
-import datasets
+"""Sampler class that works with HuggingFace Dataset."""
 from abc import ABC, abstractmethod
+from typing import Optional, Union, List, Dict
+
+import datasets
 import numpy as np
-from datasets import Dataset, DatasetDict
+from datasets import Dataset
 
 
 class Sampler(ABC):
-    # does it make a difference if it should work on only the references
-    # or also on the data
+    """The base sampler class that enables obtaining federated partitions."""
+
     def __init__(
             self,
             n_partitions: Optional[int] = None,
@@ -19,18 +21,47 @@ class Sampler(ABC):
         self._partition_size = partition_size
         self._partition_by = partition_by
 
-    def _determine_n_partitions(self, dataset):
+    def _determine_n_partitions(self, dataset: datasets.Dataset):
         dataset_length = dataset.num_rows
         # The remainder is taken care of, document it
         self._n_partitions = dataset_length // self._partition_size
 
     @abstractmethod
-    def get_partition(self, dataset,
-                      partition_index: Union[int, str]) -> datasets.Dataset:
-        pass
+    def get_partition(self, dataset: Dataset,
+                      partition_index: Union[int, str]) -> Dataset:
+        """
+        Get a single partition based on the partition index.
+
+        Parameters
+        ----------
+        dataset: Dataset
+            dataset that will be partitioned
+        partition_index: Union[int, str]
+            the index that corresponds to the requested partition
+
+        Returns
+        -------
+        dataset_partition: Dataset
+            single dataset partition
+
+        """
+        raise NotImplementedError
 
     @abstractmethod
-    def get_partitions(self, dataset) -> List[datasets.Dataset]:
+    def get_partitions(self, dataset: Dataset) -> List[Dataset]:
+        """
+        Get all partitions of the dataset.
+
+        Parameters
+        ----------
+        dataset: Dataset
+            dataset that will be partitioned
+
+        Returns
+        -------
+        all_partitions: List[Dataset]
+            list with all partitions of the dataset
+        """
         raise NotImplementedError
 
     # This methods might be needed for all in samplers in order to provide
@@ -44,9 +75,10 @@ class Sampler(ABC):
 
 
 class CIDSampler(Sampler):  # or Natural Division Sampler
+    """Sampler for dataset that can be divided by reference to clients. """
+
     def __init__(
             self,
-            # dataset: datasets.Dataset,
             n_partitions: Optional[int] = None,
             partition_size: Optional[int] = None,
             partition_by: Optional[str] = None
@@ -54,21 +86,27 @@ class CIDSampler(Sampler):  # or Natural Division Sampler
         super().__init__(n_partitions, partition_size, partition_by)
         self._index_to_cid: Dict[int, str] = {}
 
-    def _create_int_idx_to_cid(self, dataset):
+    def _create_int_idx_to_cid(self, dataset: Dataset):
         unique_cid = dataset.unique(self._partition_by)
         index_to_cid = {index: cid for index, cid in
                         zip(range(len(unique_cid)), unique_cid)}
         self._index_to_cid = index_to_cid
 
-    def get_partition(self, dataset, partition_index) -> datasets.Dataset:
+    def get_partition(self, dataset: Dataset,
+                      partition_index: Union[int, str]) -> datasets.Dataset:
         if self._n_partitions is None:
             self._determine_n_partitions(dataset)
         if len(self._index_to_cid) == 0:
             self._create_int_idx_to_cid(dataset)
         if self._n_partitions is None:
             self._n_partitions = len(self._index_to_cid)
-        return dataset.filter(
-            lambda row: row[self._partition_by] == self._index_to_cid[partition_index])
+        if isinstance(partition_index, int):
+            return dataset.filter(
+                lambda row: row[self._partition_by] == self._index_to_cid[
+                    partition_index])
+        elif isinstance(partition_index, str):
+            return dataset.filter(
+                lambda row: row[self._partition_by] == partition_index)
 
     def get_partitions(self, dataset) -> List[datasets.Dataset]:
         if self._n_partitions is None:
@@ -84,9 +122,9 @@ class CIDSampler(Sampler):  # or Natural Division Sampler
 
 
 class IIDSampler(Sampler):
+    """Sampler that creates each partition that sampled randomly from the dataset."""
     def __init__(
             self,
-            # dataset: datasets.Dataset,
             n_partitions: Optional[int] = None,
             partition_size: Optional[int] = None):
         super().__init__(n_partitions, partition_size, partition_by=None)
