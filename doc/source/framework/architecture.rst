@@ -6,7 +6,7 @@ Edge Client Engine
 
 `Flower <https://flower.dev>`_ core framework architecture with Edge Client Engine
 
-.. figure:: ../../_static/flower-architecture-ECE.png
+.. figure:: ../_static/flower-architecture-ECE.png
      :width: 80 %
 
 Virtual Client Engine
@@ -14,7 +14,7 @@ Virtual Client Engine
 
 `Flower <https://flower.dev>`_ core framework architecture with Virtual Client Engine
 
-.. figure:: ../../_static/flower-architecture-VCE.png
+.. figure:: ../_static/flower-architecture-VCE.png
      :width: 80 %
 
 Virtual Client Engine and Edge Client Engine in the same workload
@@ -22,5 +22,5 @@ Virtual Client Engine and Edge Client Engine in the same workload
 
 `Flower <https://flower.dev>`_ core framework architecture with both Virtual Client Engine and Edge Client Engine
 
-.. figure:: ../../_static/flower-architecture.drawio.png
+.. figure:: ../_static/flower-architecture.drawio.png
      :width: 80 %

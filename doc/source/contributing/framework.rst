@@ -5,5 +5,5 @@ Contributing to the Flower Framework
    :maxdepth: 1
    :caption: Flower Baselines
    
-   framework/good-first-contributions
-   framework/release-process
+   good-first-contributions
+   release-process

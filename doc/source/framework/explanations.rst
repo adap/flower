@@ -7,7 +7,7 @@ Understanding-oriented concept guides explain and discuss key topics and underly
    :maxdepth: 1
    :caption: Explanations
 
-   explanations/evaluation
-   explanations/differential-privacy-wrappers
-   explanations/architecture
-   explanations/secagg
+   evaluation
+   differential-privacy-wrappers
+   architecture
+   secagg

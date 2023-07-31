@@ -5,6 +5,6 @@ Docs reference
    :maxdepth: 1
    :caption: Reference docs
 
-   docs/telemetry
-   docs/changelog
-   docs/faq
+   telemetry
+   changelog
+   faq

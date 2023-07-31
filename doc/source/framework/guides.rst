@@ -7,15 +7,15 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    :maxdepth: 1
    :caption: How-to guides
 
-   guides/setup
-   guides/strategies
-   guides/implementing-strategies
-   guides/configure-clients
-   guides/logging
-   guides/save-progress
-   guides/saving-and-loading-pytorch-checkpoints
-   guides/monitor-simulation
-   guides/creating-new-messages
-   guides/ssl-enabled-connections
-   guides/examples
+   setup
+   strategies
+   implementing-strategies
+   configure-clients
+   logging
+   save-progress
+   saving-and-loading-pytorch-checkpoints
+   monitor-simulation
+   creating-new-messages
+   ssl-enabled-connections
+   examples
 

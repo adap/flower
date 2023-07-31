@@ -6,4 +6,4 @@ Contributing to the documentation
    :maxdepth: 1
    :caption: Flower Baselines
    
-   documentation/write-documentation
+   write-documentation
