@@ -89,9 +89,11 @@ jobs:
         if: ${{matrix.dataset}}
         run: python -c "${{ matrix.dataset }}"
       - name: Run edge client test
-        run: ./test.sh
+        run: ./../test.sh
       - name: Run virtual client test 
         run: python simulation.py
+      - name: Run driver test 
+        run: ./../test_driver.sh
 
   strategies:
     runs-on: ubuntu-22.04
