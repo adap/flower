@@ -87,7 +87,7 @@ def aggregate_krum(
         best_results = [results[i] for i in best_indices]
         return aggregate(best_results)
 
-    # Return the index of the client which minimizes the score (Krum)
+    # Return the model parameters that minimize the score (Krum)
     return weights[np.argmin(scores)]
 
 
@@ -132,3 +132,41 @@ def _compute_distances(weights: List[NDArrays]) -> NDArray:
             norm = np.linalg.norm(delta)  # type: ignore
             distance_matrix[i, j] = norm**2
     return distance_matrix
+
+
+def _trim_mean(array: NDArray, proportiontocut: float) -> NDArray:
+    """Compute trimmed mean along axis=0.
+
+    It is based on the scipy implementation.
+
+    https://docs.scipy.org/doc/scipy/reference/generated/
+    scipy.stats.trim_mean.html.
+    """
+    axis = 0
+    nobs = array.shape[axis]
+    lowercut = int(proportiontocut * nobs)
+    uppercut = nobs - lowercut
+    if lowercut > uppercut:
+        raise ValueError("Proportion too big.")
+
+    atmp = np.partition(array, (lowercut, uppercut - 1), axis)
+
+    slice_list = [slice(None)] * atmp.ndim
+    slice_list[axis] = slice(lowercut, uppercut)
+    result: NDArray = np.mean(atmp[tuple(slice_list)], axis=axis)
+    return result
+
+
+def aggregate_trimmed_avg(
+    results: List[Tuple[NDArrays, int]], proportiontocut: float
+) -> NDArrays:
+    """Compute trimmed average."""
+    # Create a list of weights and ignore the number of examples
+    weights = [weights for weights, _ in results]
+
+    trimmed_w: NDArrays = [
+        _trim_mean(np.asarray(layer), proportiontocut=proportiontocut)
+        for layer in zip(*weights)
+    ]
+
+    return trimmed_w

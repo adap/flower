@@ -74,8 +74,7 @@ class TelemetryTest(unittest.TestCase):
     def test_get_source_id(self) -> None:
         """Test if _get_source_id returns an ID successfully.
 
-        This test might fail if the UNIX user invoking the test has no
-        home directory.
+        This test might fail if the UNIX user invoking the test has no home directory.
         """
         # Prepare
         # nothing to prepare

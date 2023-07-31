@@ -29,8 +29,8 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
-    ParametersRes,
     NDArrays,
+    ParametersRes,
 )
 
 from . import cifar

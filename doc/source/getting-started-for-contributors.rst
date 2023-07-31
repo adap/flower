@@ -115,3 +115,7 @@ convenience script to re-build the documentation yet, but it's pretty easy::
   $ make html
 
 This will generate HTML documentation in ``doc/build/html``.
+
+Note that, in order to build the documentation locally 
+(with ``poetry run make html``, like described below), 
+`Pandoc <https://pandoc.org/installing.html>_` needs to be installed on the system. 

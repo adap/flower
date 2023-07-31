@@ -32,19 +32,23 @@ class OverridingClient(NumPyClient):
     """Client overriding `get_properties`."""
 
     def get_properties(self, config: Config) -> Properties:
-        return Properties()
+        """Get empty properties of the client."""
+        return {}
 
     def get_parameters(self, config: Config) -> NDArrays:
+        """Get empty parameters of the client."""
         return []
 
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
+        """Simulate training by returning empty weights, 0 samples, empty metrics."""
         return [], 0, {}
 
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[float, int, Dict[str, Scalar]]:
+        """Simulate evaluate by returning 0.0 loss, 0 samples, empty metrics."""
         return 0.0, 0, {}
 
 

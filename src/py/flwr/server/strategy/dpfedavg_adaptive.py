@@ -14,7 +14,7 @@
 # ==============================================================================
 """DP-FedAvg [Andrew et al., 2019] with adaptive clipping.
 
-Paper: https://arxiv.org/pdf/1905.03871.pdf
+Paper: arxiv.org/pdf/1905.03871.pdf
 """
 
 
@@ -39,7 +39,7 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
         strategy: Strategy,
         num_sampled_clients: int,
         init_clip_norm: float = 0.1,
-        noise_multiplier: float = 1,
+        noise_multiplier: float = 1.0,
         server_side_noising: bool = True,
         clip_norm_lr: float = 0.2,
         clip_norm_target_quantile: float = 0.5,
@@ -54,11 +54,12 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
         )
         self.clip_norm_lr = clip_norm_lr
         self.clip_norm_target_quantile = clip_norm_target_quantile
-        self.clip_count_stddev = clip_count_stddev
-        if self.clip_count_stddev is None:
-            self.clip_count_stddev = 0
+
+        if clip_count_stddev is None:
+            clip_count_stddev = 0.0
             if noise_multiplier > 0:
-                self.clip_count_stddev = self.num_sampled_clients / 20.0
+                clip_count_stddev = self.num_sampled_clients / 20.0
+        self.clip_count_stddev: float = clip_count_stddev
 
         if noise_multiplier:
             self.noise_multiplier = (
@@ -66,6 +67,7 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
             ) ** (-0.5)
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = "Strategy with DP with Adaptive Clipping enabled."
         return rep
 
@@ -73,7 +75,6 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
-
         additional_config = {"dpfedavg_adaptive_clip_enabled": True}
 
         client_instructions = super().configure_fit(
@@ -113,6 +114,7 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+        """Aggregate training results as in DPFedAvgFixed and update clip norms."""
         if failures:
             return None, {}
         new_global_model = super().aggregate_fit(server_round, results, failures)

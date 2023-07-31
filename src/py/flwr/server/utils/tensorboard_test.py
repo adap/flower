@@ -22,7 +22,6 @@ from .tensorboard import tensorboard
 
 def test_tensorboard() -> None:
     """Test if tensorboard returns a decorator."""
-
     # Prepare
     with TemporaryDirectory() as tmpdir:
         my_decorator = tensorboard(tmpdir)

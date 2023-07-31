@@ -92,6 +92,13 @@ class SimpleClientManager(ClientManager):
         self._cv = threading.Condition()
 
     def __len__(self) -> int:
+        """Return the number of available clients.
+
+        Returns
+        -------
+        num_available : int
+            The number of currently available clients.
+        """
         return len(self.clients)
 
     def num_available(self) -> int:

@@ -120,11 +120,11 @@ class EventType(str, Enum):
     # Ping
     PING = auto()
 
-    # Client
+    # Client: start_client
     START_CLIENT_ENTER = auto()
     START_CLIENT_LEAVE = auto()
 
-    # Server
+    # Server: start_server
     START_SERVER_ENTER = auto()
     START_SERVER_LEAVE = auto()
 
@@ -144,9 +144,13 @@ class EventType(str, Enum):
     START_SIMULATION_ENTER = auto()
     START_SIMULATION_LEAVE = auto()
 
-    # Driver Client
+    # Driver: Driver
     DRIVER_CONNECT = auto()
     DRIVER_DISCONNECT = auto()
+
+    # Driver: start_driver
+    START_DRIVER_ENTER = auto()
+    START_DRIVER_LEAVE = auto()
 
 
 # Use the ThreadPoolExecutor with max_workers=1 to have a queue

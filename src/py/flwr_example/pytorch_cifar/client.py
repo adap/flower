@@ -27,8 +27,8 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
-    ParametersRes,
     NDArrays,
+    ParametersRes,
 )
 
 from . import DEFAULT_SERVER_ADDRESS, cifar

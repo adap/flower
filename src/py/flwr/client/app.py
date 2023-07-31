@@ -28,7 +28,13 @@ from flwr.common import (
     parameters_to_ndarrays,
 )
 from flwr.common.address import parse_address
-from flwr.common.constant import MISSING_EXTRA_REST
+from flwr.common.constant import (
+    MISSING_EXTRA_REST,
+    TRANSPORT_TYPE_GRPC_BIDI,
+    TRANSPORT_TYPE_GRPC_RERE,
+    TRANSPORT_TYPE_REST,
+    TRANSPORT_TYPES,
+)
 from flwr.common.logger import log
 from flwr.common.typing import (
     Code,
@@ -46,6 +52,7 @@ from flwr.common.typing import (
 
 from .client import Client
 from .grpc_client.connection import grpc_connection
+from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle
 from .numpy_client import NumPyClient
 from .numpy_client import has_evaluate as numpyclient_has_evaluate
@@ -79,18 +86,18 @@ Example
 
 """
 
-
 ClientLike = Union[Client, NumPyClient]
 
 
-# pylint: disable=import-outside-toplevel,too-many-locals
+# pylint: disable=import-outside-toplevel,too-many-locals,too-many-branches
 def start_client(
     *,
     server_address: str,
     client: Client,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
-    rest: bool = False,
+    rest: bool = False,  # Deprecated in favor of `transport`
+    transport: Optional[str] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -115,9 +122,15 @@ def start_client(
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
     rest : bool (default: False)
+        DEPRECATED - USE 'transport' INSTEAD.
         Defines whether or not the client is interacting with the server using the
         experimental REST API. This feature is experimental, it might change
         considerably in future versions of Flower.
+    transport : Optional[str] (default: None)
+        Configure the transport layer. Allowed values:
+        - 'grpc-bidi': gRPC, bidirectional streaming
+        - 'grpc-rere': gRPC, request-response (experimental)
+        - 'rest': HTTP (experimental)
 
     Examples
     --------
@@ -137,7 +150,6 @@ def start_client(
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
-
     event(EventType.START_CLIENT_ENTER)
 
     # Parse IP address
@@ -147,8 +159,12 @@ def start_client(
     host, port, is_v6 = parsed_address
     address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
+    # Set the default transport layer
+    if transport is None:
+        transport = TRANSPORT_TYPE_REST if rest else TRANSPORT_TYPE_GRPC_BIDI
+
     # Use either gRPC bidirectional streaming or REST request/response
-    if rest:
+    if transport == TRANSPORT_TYPE_REST:
         try:
             from .rest_client.connection import http_request_response
         except ModuleNotFoundError:
@@ -159,8 +175,15 @@ def start_client(
                 "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
             )
         connection = http_request_response
-    else:
+    elif transport == TRANSPORT_TYPE_GRPC_RERE:
+        connection = grpc_request_response
+    elif transport == TRANSPORT_TYPE_GRPC_BIDI:
         connection = grpc_connection
+    else:
+        raise ValueError(
+            f"Unknown transport type: {transport} (possible: {TRANSPORT_TYPES})"
+        )
+
     while True:
         sleep_duration: int = 0
         with connection(
@@ -168,19 +191,26 @@ def start_client(
             max_message_length=grpc_max_message_length,
             root_certificates=root_certificates,
         ) as conn:
-            receive, send = conn
+            receive, send, create_node, delete_node = conn
+
+            # Register node
+            if create_node is not None:
+                create_node()  # pylint: disable=not-callable
 
             while True:
-                server_message = receive()
-                if server_message is None:
+                task_ins = receive()
+                if task_ins is None:
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
-                client_message, sleep_duration, keep_going = handle(
-                    client, server_message
-                )
-                send(client_message)
+                task_res, sleep_duration, keep_going = handle(client, task_ins)
+                send(task_res)
                 if not keep_going:
                     break
+
+            # Unregister node
+            if delete_node is not None:
+                delete_node()  # pylint: disable=not-callable
+
         if sleep_duration == 0:
             log(INFO, "Disconnect and shut down")
             break
@@ -201,7 +231,8 @@ def start_numpy_client(
     client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
-    rest: bool = False,
+    rest: bool = False,  # Deprecated in favor of `transport`
+    transport: Optional[str] = None,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
@@ -225,9 +256,15 @@ def start_numpy_client(
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
     rest : bool (default: False)
+        DEPRECATED - USE 'transport' INSTEAD.
         Defines whether or not the client is interacting with the server using the
-        experimental REST API. This feature is experimental, it might be change
+        experimental REST API. This feature is experimental, it might change
         considerably in future versions of Flower.
+    transport : Optional[str] (default: None)
+        Configure the transport layer. Allowed values:
+        - 'grpc-bidi': gRPC, bidirectional streaming
+        - 'grpc-rere': gRPC, request-response (experimental)
+        - 'rest': HTTP (experimental)
 
     Examples
     --------
@@ -247,7 +284,6 @@ def start_numpy_client(
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
-
     # Start
     start_client(
         server_address=server_address,
@@ -255,6 +291,7 @@ def start_numpy_client(
         grpc_max_message_length=grpc_max_message_length,
         root_certificates=root_certificates,
         rest=rest,
+        transport=transport,
     )
 
 
@@ -289,7 +326,6 @@ def _get_parameters(self: Client, ins: GetParametersIns) -> GetParametersRes:
 
 def _fit(self: Client, ins: FitIns) -> FitRes:
     """Refine the provided parameters using the locally held dataset."""
-
     # Deconstruct FitIns
     parameters: NDArrays = parameters_to_ndarrays(ins.parameters)
 

@@ -93,6 +93,6 @@ in each window (make sure that the server is still running before you do so) and
 Next Steps
 ----------
 
-The full source code for this example can be found `here <https://github.com/adap/flower/blob/main/examples/pytorch_from_centralized_to_federated>`_.
+The full source code for this example can be found `here <https://github.com/adap/flower/blob/main/examples/pytorch-from-centralized-to-federated>`_.
 Our example is of course somewhat over-simplified because both clients load the exact same dataset, which isn't realistic.
 You're now prepared to explore this topic further. How about using different subsets of CIFAR-10 on each client? How about adding more clients?

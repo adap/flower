@@ -14,7 +14,7 @@
 # ==============================================================================
 """Federated Averaging (FedAvg) [McMahan et al., 2016] strategy.
 
-Paper: https://arxiv.org/abs/1602.05629
+Paper: arxiv.org/abs/1602.05629
 """
 
 
@@ -48,11 +48,10 @@ than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
 """
 
 
-# flake8: noqa: E501
 class FedAvg(Strategy):
     """Configurable FedAvg strategy implementation."""
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes,line-too-long
+    # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
     def __init__(
         self,
         *,
@@ -86,8 +85,8 @@ class FedAvg(Strategy):
             will still be sampled. Defaults to 1.0.
         fraction_evaluate : float, optional
             Fraction of clients used during validation. In case `min_evaluate_clients`
-            is larger than `fraction_evaluate * available_clients`, `min_evaluate_clients`
-            will still be sampled. Defaults to 1.0.
+            is larger than `fraction_evaluate * available_clients`,
+            `min_evaluate_clients` will still be sampled. Defaults to 1.0.
         min_fit_clients : int, optional
             Minimum number of clients used during training. Defaults to 2.
         min_evaluate_clients : int, optional
@@ -131,12 +130,12 @@ class FedAvg(Strategy):
         self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"FedAvg(accept_failures={self.accept_failures})"
         return rep
 
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Return the sample size and the required number of available
-        clients."""
+        """Return the sample size and the required number of available clients."""
         num_clients = int(num_available_clients * self.fraction_fit)
         return max(num_clients, self.min_fit_clients), self.min_available_clients
 

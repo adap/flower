@@ -4,7 +4,6 @@ Secure Aggregation Protocols
 Include SecAgg, SecAgg+, and LightSecAgg protocol. The LightSecAgg protocol has not been implemented yet, so its diagram and abstraction may not be accurate in practice.
 The SecAgg protocol can be considered as a special case of the SecAgg+ protocol.
 
-
 The :code:`SecAgg+` abstraction
 -------------------------------
 
@@ -85,11 +84,11 @@ The Flower server will execute and process received results in the following ord
         activate P
         P->>C1: SetupConfigIns
         deactivate P
-        P->>C2: 
-        P->>C3: 
+        P->>C2: SetupConfigIns
+        P->>C3: SetupConfigIns
         C1->>P: SetupConfigRes (empty)
-        C2->>P: 
-        C3->>P: 
+        C2->>P: SetupConfigRes (empty)
+        C3->>P: SetupConfigRes (empty)
         activate P
         P-->>S: None
         deactivate P
@@ -101,11 +100,11 @@ The Flower server will execute and process received results in the following ord
         activate P
         P->>C1: AskKeysIns (empty)
         deactivate P
-        P->>C2: 
-        P->>C3: 
+        P->>C2: AskKeysIns (empty)
+        P->>C3: AskKeysIns (empty)
         C1->>P: AskKeysRes
-        C2->>P: 
-        C3->>P: 
+        C2->>P: AskKeysRes
+        C3->>P: AskKeysRes
         activate P
         P-->>S: public keys
         deactivate P
@@ -117,11 +116,11 @@ The Flower server will execute and process received results in the following ord
         activate P
         P->>C1: ShareKeysIns
         deactivate P
-        P->>C2: 
-        P->>C3: 
+        P->>C2: ShareKeysIns
+        P->>C3: ShareKeysIns
         C1->>P: ShareKeysRes
-        C2->>P: 
-        C3->>P: 
+        C2->>P: ShareKeysRes
+        C3->>P: ShareKeysRes
         activate P
         P-->>S: encryted key shares
         deactivate P
@@ -133,10 +132,10 @@ The Flower server will execute and process received results in the following ord
         activate P
         P->>C1: AskVectorsIns
         deactivate P
-        P->>C2: 
-        P->>C3: 
+        P->>C2: AskVectorsIns
+        P->>C3: AskVectorsIns
         C1->>P: AskVectorsRes
-        C2->>P: 
+        C2->>P: AskVectorsRes
         activate P
         P-->>S: masked vectors
         deactivate P
@@ -148,14 +147,13 @@ The Flower server will execute and process received results in the following ord
         activate P
         P->>C1: UnmaskVectorsIns
         deactivate P
-        P->>C2: 
+        P->>C2: UnmaskVectorsIns
         C1->>P: UnmaskVectorsRes
-        C2->>P: 
+        C2->>P: UnmaskVectorsRes
         activate P
         P-->>S: key shares
         deactivate P
         end
-
 
 The :code:`LightSecAgg` abstraction
 -----------------------------------
@@ -214,11 +212,11 @@ The Flower server will execute and process received results in the following ord
         activate P
         P->>C1: LightSecAggSetupConfigIns
         deactivate P
-        P->>C2: 
-        P->>C3: 
+        P->>C2: LightSecAggSetupConfigIns
+        P->>C3: LightSecAggSetupConfigIns
         C1->>P: LightSecAggSetupConfigRes
-        C2->>P: 
-        C3->>P: 
+        C2->>P: LightSecAggSetupConfigRes
+        C3->>P: LightSecAggSetupConfigRes
         activate P
         P-->>S: public keys
         deactivate P
@@ -230,11 +228,11 @@ The Flower server will execute and process received results in the following ord
         activate P
         P->>C1: AskEncryptedEncodedMasksIns
         deactivate P
-        P->>C2: 
-        P->>C3: 
+        P->>C2: AskEncryptedEncodedMasksIns
+        P->>C3: AskEncryptedEncodedMasksIns
         C1->>P: AskEncryptedEncodedMasksRes
-        C2->>P: 
-        C3->>P: 
+        C2->>P: AskEncryptedEncodedMasksRes
+        C3->>P: AskEncryptedEncodedMasksRes
         activate P
         P-->>S: forward packets
         deactivate P
@@ -246,10 +244,10 @@ The Flower server will execute and process received results in the following ord
         activate P
         P->>C1: AskMaskedModelsIns
         deactivate P
-        P->>C2: 
-        P->>C3: 
+        P->>C2: AskMaskedModelsIns
+        P->>C3: AskMaskedModelsIns
         C1->>P: AskMaskedModelsRes
-        C2->>P: 
+        C2->>P: AskMaskedModelsRes
         activate P
         P-->>S: masked local models
         deactivate P
@@ -261,14 +259,13 @@ The Flower server will execute and process received results in the following ord
         activate P
         P->>C1: AskAggregatedEncodedMasksIns
         deactivate P
-        P->>C2: 
+        P->>C2: AskAggregatedEncodedMasksIns
         C1->>P: AskAggregatedEncodedMasksRes
-        C2->>P: 
+        C2->>P: AskAggregatedEncodedMasksRes
         activate P
         P-->>S: the aggregated model
         deactivate P
         end
-
 
 Types
 -----
