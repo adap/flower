@@ -33,6 +33,8 @@ Flower's design goals was to make this simple. Read on to learn more.
    framework/explanations
 
 
+Be sure to also checkout our brand new Flower Tutorial series over on YouTube: 
+
 ..  youtube:: FGTc2TQq7VM
 
 
