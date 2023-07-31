@@ -55,6 +55,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_design",
     "sphinxcontrib.mermaid",
+    "sphinxcontrib.youtube",
     "sphinx_reredirects",
     "nbsphinx",
 ]
