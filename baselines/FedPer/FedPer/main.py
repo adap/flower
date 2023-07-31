@@ -12,8 +12,7 @@ import hydra
 from typing import Dict, Any, Union
 from omegaconf import DictConfig, OmegaConf
 from hydra.utils import instantiate
-from FedPer import client, server, utils_file
-# from baselines.FedPer.FedPer.utils_file import get_model_fn
+from FedPer import utils_file
 from FedPer.dataset import load_datasets
 from FedPer.strategy import AggregateBodyStrategyPipeline
 from FedPer.utils.new_utils import get_client_cls
@@ -40,7 +39,6 @@ def main(cfg: DictConfig) -> None:
         num_clients=cfg.num_clients,
     )   
 
-
     # 3. Define your clients
     # Get algorithm 
     algorithm = cfg.algorithm.lower()
@@ -57,6 +55,7 @@ def main(cfg: DictConfig) -> None:
     # get function that will executed by the strategy's evaluate() method
     # Set server's device
     device = cfg.server_device
+    
     # evaluate_fn = server.gen_evaluate_fn(testloader, device=device, model=cfg.model)
 
     # get a function that will be used to construct the config that the client's
@@ -71,13 +70,20 @@ def main(cfg: DictConfig) -> None:
     
     
     if cfg.model.name.lower() == 'cnn':
+        split = CNNModelSplit
         def create_model(config: Dict[str, Any]) -> CNNNet:
             """Create initial CNN model."""
             return CNNNet().to(device)
     elif cfg.model.name.lower() == 'mobile':
-        def create_model(config: Dict[str, Any]) -> MobileNet:
+        split = MobileNetModelSplit
+        def create_model() -> MobileNet:
             """Create initial MobileNet-v1 model."""
-            return MobileNet().to(device)
+            return MobileNet(
+                num_head_layers=cfg.model.num_head_layers,
+                num_classes=cfg.model.num_classes,
+                name=cfg.model.name,
+                device=cfg.model.device
+            ).to(device)
     else:
         raise NotImplementedError('Model not implemented, check name. ')
         
@@ -87,7 +93,7 @@ def main(cfg: DictConfig) -> None:
         create_model=create_model,
         # evaluate_fn=evaluate_fn,
         on_fit_config_fn=get_on_fit_config(),
-        model_split_class=CNNModelSplit,
+        model_split_class=split,
     )
 
     # 5. Start Simulation

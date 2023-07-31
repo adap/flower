@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from tqdm import tqdm
+from torch import Tensor
 from typing import Any, Dict, List, Optional, Tuple, Union
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
@@ -10,33 +11,17 @@ from torchvision.transforms import Compose, Normalize, ToTensor
 from FedPer.utils.model_split import ModelSplit
 from FedPer.utils.model_manager import ModelManager
 
-# DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-class MobileNetBody(nn.Module):
-    """Model adapted from simple CNN from Flower 'Quickstart PyTorch' \
-        (https://flower.dev/docs/quickstart-pytorch.html)."""
-
-    def __init__(self) -> None:
-        super(MobileNetBody, self).__init__()
-        self.conv1 = nn.Conv2d(3, 6, 5)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)
-        self.fc2 = nn.Linear(120, 84)
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(-1, 16 * 5 * 5)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        return x
-
 class MobileNet(nn.Module):
     """Model adapted from simple MobileNet-v1 (PyTorch) \
         (https://github.com/wjc852456/pytorch-mobilenet-v1)."""
 
-    def __init__(self) -> None:
+    def __init__(
+            self, 
+            num_head_layers : int = 1, 
+            num_classes : int = 10, 
+            device : str = 'cpu', 
+            name : str = 'mobile'
+        ) -> None:
         super(MobileNet, self).__init__()
 
         ARCHITECTURE = {
@@ -58,21 +43,127 @@ class MobileNet(nn.Module):
             'layer_16' : {'fc' : [1024, num_classes]}
         }
 
-        self.body = MobileNetBody()
-        self.head = nn.Linear(84, 10)
+        self.body = MobileNetBody(num_head_layers=num_head_layers, architecture=ARCHITECTURE)
+        self.head = MobileNetHead(num_head_layers=num_head_layers, architecture=ARCHITECTURE)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.body(x)
         return self.head(x)
     
-    def set_config(self, config : dict) -> None:
-        """ 
-            Set configuration file. 
+class MobileNetBody(nn.Module):
+    """ 
+    Body of the MobileNet_v1 model, for which n layers at the end are removed. 
+    
+    Args:
+        num_head_layers: number of layers in the head.
+        architecture: architecture of the model.
+    """
+    def __init__(self, num_head_layers : int = 1, architecture : dict = None) -> None: 
+        super(MobileNetBody, self).__init__()
+        assert num_head_layers >= 1, "Number of head layers must be at least 1."
+        def conv_bn(inp, oup, stride):
+            return nn.Sequential(
+                nn.Conv2d(inp, oup, 3, stride, 1, bias=False),
+                nn.BatchNorm2d(oup),
+                nn.ReLU(inplace=True)
+            )
 
-            Parameters: 
-                config: Dictionary with configurations. 
-        """
-        self.config = config
+        def conv_dw(inp, oup, stride):
+            return nn.Sequential(
+                nn.Conv2d(inp, inp, 3, stride, 1, groups=inp, bias=False),
+                nn.BatchNorm2d(inp),
+                nn.ReLU(inplace=True),
+    
+                nn.Conv2d(inp, oup, 1, 1, 0, bias=False),
+                nn.BatchNorm2d(oup),
+                nn.ReLU(inplace=True),
+            )
+        
+        def avg_pool(value : int):
+            return nn.AvgPool2d(value)
+        
+        def fc(inp, oup):
+            return nn.Linear(inp, oup)
+        
+        self.model = nn.Sequential()
+        for i in range(1, len(architecture) - num_head_layers + 1):
+            for key, value in architecture[f'layer_{i}'].items():
+                if key == 'conv_bn':
+                    self.model.add_module(f'conv_bn_{i}', conv_bn(*value))
+                elif key == 'conv_dw':
+                    self.model.add_module(f'conv_dw_{i}', conv_dw(*value))
+                elif key == 'avg_pool':
+                    self.model.add_module(f'avg_pool_{i}', avg_pool(*value))
+                elif key == 'fc':
+                    self.model.add_module(f'fc_{i}', fc(*value))
+                else:
+                    raise NotImplementedError("Layer type not implemented.")
+                
+    def forward(self, x : Tensor) -> Tensor:
+        for i in range(len(self.model)):
+            x = self.model[i](x)
+            if isinstance(self.model[i], nn.AvgPool2d):
+                x = x.view(-1, 1024)
+        return x
+
+class MobileNetHead(nn.Module):
+    """ 
+    MobileNet_v1 head, consists out of n layers that will be added to body of model. 
+    
+    Args:
+        num_head_layers: number of layers in the head.
+        architecture: architecture of the model.
+
+    """
+
+    def __init__(self, num_head_layers : int = 1, architecture : dict = None) -> None:
+        super(MobileNetHead, self).__init__()
+        assert num_head_layers >= 1, "Number of head layers must be at least 1."
+        self.num_head_layers = num_head_layers
+        def conv_bn(inp, oup, stride):
+            return nn.Sequential(
+                nn.Conv2d(inp, oup, 3, stride, 1, bias=False),
+                nn.BatchNorm2d(oup),
+                nn.ReLU(inplace=True)
+            )
+        
+        def conv_dw(inp, oup, stride):
+            return nn.Sequential(
+                nn.Conv2d(inp, inp, 3, stride, 1, groups=inp, bias=False),
+                nn.BatchNorm2d(inp),
+                nn.ReLU(inplace=True),
+    
+                nn.Conv2d(inp, oup, 1, 1, 0, bias=False),
+                nn.BatchNorm2d(oup),
+                nn.ReLU(inplace=True),
+            )
+        
+        def avg_pool(value : int):
+            return nn.AvgPool2d(value)
+        
+        def fc(inp, oup):
+            return nn.Linear(inp, oup)
+        
+        self.model = nn.Sequential()
+        for i in range(len(architecture) - num_head_layers + 1, len(architecture) + 1):
+            for key, value in architecture[f'layer_{i}'].items():
+                if key == 'conv_bn':
+                    self.model.add_module(f'conv_bn_{i}', conv_bn(*value))
+                elif key == 'conv_dw':
+                    self.model.add_module(f'conv_dw_{i}', conv_dw(*value))
+                elif key == 'avg_pool':
+                    self.model.add_module(f'avg_pool_{i}', avg_pool(*value))
+                elif key == 'fc':
+                    self.model.add_module(f'fc_{i}', fc(*value))
+                else:
+                    raise NotImplementedError("Layer type not implemented.")
+    
+    def forward(self, x : Tensor) -> Tensor:
+        for i in range(len(self.model)):
+            x = self.model[i](x)
+            if isinstance(self.model[i], nn.AvgPool2d):
+                x = x.view(-1, 1024)
+        return x
 
 class MobileNetModelSplit(ModelSplit):
     """Concrete implementation of ModelSplit for models for node kind prediction in action flows \

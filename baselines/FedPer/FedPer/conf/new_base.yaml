@@ -19,13 +19,11 @@ dataset:
   num_classes: 10
 
 model:
-  _target_: FedPer.models.MobileNet_v1
-  split: true
+  _target_: FedPer.models.mobile_model.MobileNet
   num_head_layers: 1
   num_classes: 10
   device: ${server_device}
   name: mobile
-  num_head_layers: 1
 
 fit_config:
   drop_client: false
@@ -40,3 +38,4 @@ strategy:
   fraction_evaluate: 0.0
   min_evaluate_clients: ${num_clients}
   min_available_clients: ${num_clients}
+  config: ${model}

@@ -14,7 +14,7 @@ class ModelSplit(ABC, nn.Module):
             self,
             model: nn.Module,
             has_fixed_head: bool = False,
-            config : dict = None
+            #config : dict = None
     ):
         """
         Initialize ModelSplit attributes. A call is made to the _setup_model_parts method.
@@ -25,7 +25,7 @@ class ModelSplit(ABC, nn.Module):
         """
         super().__init__()
 
-        self.num_head_layers = config['num_head_layers']
+        # self.num_head_layers = config['num_head_layers']
         self._body, self._head = self._get_model_parts(model)
 
         self._fixed_head = copy.deepcopy(self.head) if has_fixed_head else None
