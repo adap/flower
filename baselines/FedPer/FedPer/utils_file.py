@@ -60,12 +60,12 @@ def plot_metric_from_history(
     suffix: Optional[str]
         Optional string to add at the end of the filename for the plot.
     """
-    metric_type = "centralized"
+    metric_type = "distributed"
     metric_dict = (hist.metrics_centralized if metric_type == "centralized" else hist.metrics_distributed)
     rounds, values = zip(*metric_dict["accuracy"])
 
-    # let's extract centralised loss (main metric reported in FedProx paper)
-    rounds_loss, values_loss = zip(*hist.losses_centralized)
+    # let's extract decentralized loss (main metric reported in FedProx paper)
+    rounds_loss, values_loss = zip(*hist.losses_distributed)
 
     fig, axs = plt.subplots(nrows=2, ncols=1, sharex="row")
     axs[0].plot(np.asarray(rounds_loss), np.asarray(values_loss))
