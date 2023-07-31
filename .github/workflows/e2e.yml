@@ -92,6 +92,8 @@ jobs:
         run: ./../test.sh "${{ matrix.directory }}"
       - name: Run virtual client test
         run: python simulation.py
+      - name: Run driver test
+        run: ./../test_driver.sh
 
   strategies:
     runs-on: ubuntu-22.04
