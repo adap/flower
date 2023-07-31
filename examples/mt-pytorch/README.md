@@ -1,6 +1,6 @@
 # Multi-Tenant Federated Learning with Flower and PyTorch
 
-This example contains highly experimental code. Please consult the regular PyTorch code examples ([quickstart](https://github.com/adap/flower/tree/main/examples/quickstart_pytorch), [advanced](https://github.com/adap/flower/tree/main/examples/advanced_pytorch)) to learn how to use Flower with PyTorch.
+This example contains experimental code. Please consult the regular PyTorch code examples ([quickstart](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch), [advanced](https://github.com/adap/flower/tree/main/examples/advanced-pytorch)) to learn how to use Flower with PyTorch.
 
 ## Setup
 
@@ -16,7 +16,7 @@ Terminal 1: start Flower server
 flower-server
 ```
 
-Terminal 2+3: start two clients
+Terminal 2+3: start two Flower client nodes
 
 ```bash
 python client.py
