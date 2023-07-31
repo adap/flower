@@ -68,10 +68,23 @@ class StoreMetricsStrategy(StoreHistoryStrategy):
             typically uses some variant of a weighted average.
         """
 
-        aggregates = super().aggregate_evaluate(server_round=server_round, results=results, failures=failures)
+        aggregated_loss, aggregated_metrics = super().aggregate_evaluate(server_round=server_round, results=results, failures=failures)
 
         self.hist["tst"][server_round] = {
             k.cid: {"num_examples": v.num_examples, "loss": v.loss, **v.metrics} for k, v in results
         }
+
+        # Weigh accuracy of each client by number of examples used
+        accuracies = [r.metrics["accuracy"] * r.num_examples for _, r in results]
+        # examples = [r.num_examples for _, r in results]
+        n_accuracies = len(accuracies)
+
+        # Aggregate and print custom metric
+        averaged_accuracy = sum(accuracies) / n_accuracies
+        print(f"Round {server_round} accuracy averaged from client results: {averaged_accuracy}")
+
+        # Return aggregated loss and metrics (i.e., aggregated accuracy)
+        return aggregated_loss, {"accuracy": averaged_accuracy}
+
 
         return aggregates

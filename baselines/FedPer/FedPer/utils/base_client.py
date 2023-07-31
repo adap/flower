@@ -160,6 +160,7 @@ class BaseClient(fl.client.NumPyClient):
         tst_results = self.model_manager.test(
             test_id=self.test_id
         )
+        print("<------- TEST RESULTS -------> :", tst_results)
 
         # Update test history
         self.hist[str(self.test_id)] = {**self.hist[str(self.test_id)], "tst": tst_results}

@@ -12,7 +12,7 @@ import hydra
 from typing import Dict, Any
 from omegaconf import DictConfig, OmegaConf
 from hydra.utils import instantiate
-from FedPer import client, server
+from FedPer import client, server, utils_file
 # from baselines.FedPer.FedPer.utils_file import get_model_fn
 from FedPer.models import MobileNet_v1
 from FedPer.dataset import load_datasets
@@ -122,9 +122,9 @@ def main(cfg: DictConfig) -> None:
     strategy_name = strategy.__class__.__name__
     file_suffix: str = (
         f"_{strategy_name}"
-        f"{'_iid' if cfg.dataset_config.iid else ''}"
-        f"{'_balanced' if cfg.dataset_config.balance else ''}"
-        f"{'_powerlaw' if cfg.dataset_config.power_law else ''}"
+        #f"{'_iid' if cfg.dataset_config.iid else ''}"
+       # f"{'_balanced' if cfg.dataset_config.balance else ''}"
+        #f"{'_powerlaw' if cfg.dataset_config.power_law else ''}"
         f"_C={cfg.num_clients}"
         f"_B={cfg.batch_size}"
         f"_E={cfg.num_epochs}"
