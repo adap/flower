@@ -27,10 +27,10 @@ Flower's design goals was to make this simple. Read on to learn more.
    :maxdepth: 1
    :caption: Flower Framework
 
-   framework/tutorials
-   framework/guides
-   framework/reference
-   framework/explanations
+   tutorials
+   guides
+   reference
+   explanations
 
 
 Be sure to also checkout our brand new Flower Tutorial series over on YouTube: 
@@ -48,12 +48,12 @@ intended to help along the way.
    :maxdepth: 1
    :caption: Contributor guide
 
-   contributing/first-time-contributors
-   contributing/setup
-   contributing/devcontainer
-   contributing/framework
-   contributing/baselines
-   contributing/documentation
+   first-time-contributors
+   setup-contrib
+   devcontainer
+   framework
+   baselines
+   documentation
    fed/index
 
 
