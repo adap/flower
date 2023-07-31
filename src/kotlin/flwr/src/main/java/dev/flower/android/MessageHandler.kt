@@ -17,21 +17,21 @@ internal fun handle(client: Client, taskIns: TaskIns): Triple<TaskRes, Int, Bool
 }
 
 internal fun handleLegacyMessage(client: Client, serverMsg: ServerMessage): Triple<ClientMessage, Int, Boolean> {
-    return when (serverMsg.msgCase.name) {
-        "reconnectIns" -> {
+    return when (serverMsg.msgCase.number) {
+        1 -> {
             val (disconnectMsg, sleepDuration) = reconnect(serverMsg.reconnectIns)
             Triple(disconnectMsg, sleepDuration, false)
         }
-        "getPropertiesIns" -> {
+        2 -> {
             Triple(getProperties(client, serverMsg.getPropertiesIns), 0, true)
         }
-        "getParametersIns" -> {
+        3 -> {
             Triple(getParameters(client, serverMsg.getParametersIns), 0, true)
         }
-        "fitIns" -> {
+        4 -> {
             Triple(fit(client, serverMsg.fitIns), 0, true)
         }
-        "evaluateIns" -> {
+        5 -> {
             Triple(evaluate(client, serverMsg.evaluateIns), 0, true)
         }
         else -> throw IllegalArgumentException("Unknown Server Message")
