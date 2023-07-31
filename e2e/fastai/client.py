@@ -50,7 +50,6 @@ class FlowerClient(fl.client.NumPyClient):
 
 
 def client_fn(cid):
-    _ = cid
     return FlowerClient()
 
 

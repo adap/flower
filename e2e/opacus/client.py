@@ -134,7 +134,6 @@ class FlowerClient(fl.client.NumPyClient):
 
 
 def client_fn(cid):
-    _ = cid
     model = Net()
     return FlowerClient(model)
 

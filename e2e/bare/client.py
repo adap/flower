@@ -24,7 +24,6 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, 1, {"accuracy": accuracy}
 
 def client_fn(cid):
-    _ = cid
     return FlowerClient()
 
 

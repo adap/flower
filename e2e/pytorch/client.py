@@ -107,7 +107,6 @@ def set_parameters(model, parameters):
     return 
 
 def client_fn(cid):
-    _ = cid
     return FlowerClient()
 
 
