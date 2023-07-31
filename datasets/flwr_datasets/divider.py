@@ -11,7 +11,7 @@ class Divider:
     def __init__(
             self,
             dataset: DatasetDict,
-            division_strategy: Union[Dict[str: Optional[str]], str],
+            division_strategy: Union[Dict[str, Optional[str]], str],
     ) -> None:
         """
         Divide and merge the dataset according to the strategy in `division_strategy`.
@@ -117,8 +117,11 @@ class Divider:
                         "federated divisions.")
 
     def _check_correct_dataset_keys_in_division_strategy(self) -> None:
+        if isinstance(self._division_strategy,
+                      str) and self._division_strategy == "merge-all":
+            return
         specified_dataset_keys = []
-        for dataset_key in self._division_strategy:
+        for dataset_key in self._division_strategy.values():
             specified_dataset_keys.extend(dataset_key.split("+"))
 
         if len(specified_dataset_keys) > 3:
@@ -129,6 +132,6 @@ class Divider:
         for key in specified_dataset_keys:
             if key not in self._dataset.keys():
                 raise ValueError(
-                    f"The given dataset key {key} is present in the `dataset`. Make "
-                    f"sure to use only the keywords that are available in your "
+                    f"The given dataset key {key} is not present in the `dataset`. "
+                    f"Make sure to use only the keywords that are available in your "
                     f"dataset.")
