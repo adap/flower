@@ -1,21 +1,27 @@
 
 # A Complete FL Simulation Pipeline using Flower (w/ better Hydra usage)
 
-The code in this directory is fairly similar to that presented in :warning: LINK :warning: as part of the step-by-step video tutorials on how to Federated Learning simulations using Flower. Previously, we made use of a very simple config structure using a single `YAML` file. With the code here presented, we take a dive into more advanced config structures leveraging some of the core functionality of Hydra. You can find more information about Hydra in the [Hydra Documentation](https://hydra.cc/docs/intro/). To the files I have added a fair amount of comments to support and expand upon what was said in the video tutorial.
+The code in this directory is fairly similar to that presented in [`simulation-pytorch example`](https://github.com/adap/flower/tree/main/examples/simulation-pytorch) but extended into a series of [step-by-step video tutorials](https://www.youtube.com/playlist?list=PLNG4feLHqCWlnj8a_E1A_n5zr2-8pafTB) on how to Federated Learning simulations using Flower. In Part-I, we made use of a very simple config structure using a single `YAML` file. With the code here presented, we take a dive into more advanced config structures leveraging some of the core functionality of Hydra. You can find more information about Hydra in the [Hydra Documentation](https://hydra.cc/docs/intro/). To the files I have added a fair amount of comments to support and expand upon what was said in the video tutorial.
 
 The content of the code in this directory is roughly divided into two parts:
 * `toy.py` and its associated config files (i.e. `conf/toy.yaml` and `conf/toy_model/`) which were designed as a playground to test out some of the functionality of Hydra configs that we want to incorporate into our Flower projects.
-* and the rest: which follows the exact same structure as in the code presented in the first part of the tutorial series (:warning: LINK :warning:) but that has been _enhanced_ using Hydra. 
+* and the rest: which follows the exact same structure as in the code presented in [Part-I](https://github.com/adap/flower/tree/main/examples/flower-simulation-step-by-step-pytorch/Part-I) but that has been _enhanced_ using Hydra. 
 
 # Link to step-by-step video
 
-This code was written line-by-line as part of a tutorial series :warning: LINK :warning:. Starting from video :warning: X/Y :warning:
+This code was written line-by-line as part of a tutorial series first introduced in Part-I. Starting from [video 
+7](https://youtu.be/NYS4IjcDU4I), where a recap of the content developed in Part-I is first presented, then two videos introducing Hydra and applying it to Flower follow.
+
+<div align="center">
+      <a href="https://youtu.be/yoUcqySkq4U">
+         <img src="https://img.youtube.com/vi/yoUcqySkq4U/0.jpg" style="width:75%;">
+      </a>
+</div>
 
 
 # Constructing your Python Environment
 
-Please follow the steps shown in the first part of the tutorial :warning: LINK :warning: to the first tutorial code
-
+Please follow the steps shown in [Part-I](https://github.com/adap/flower/tree/main/examples/flower-simulation-step-by-step-pytorch/Part-I)'s readme.
 
 # Running the Code
 

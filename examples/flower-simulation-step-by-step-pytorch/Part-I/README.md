@@ -5,7 +5,13 @@ In the first part of the Flower Simulation series, we go step-by-step through th
 
 # Link to step-by-step videos
 
+This step-by-step tutorial is organized as a 1+9 videos Youtube series. The first video introduces the tutorial and provides an outline for the next 9 videos. You can start the tutorial by clicking on the video thumbnail below.
 
+<div align="center">
+      <a href="https://www.youtube.com/playlist?list=PLNG4feLHqCWlnj8a_E1A_n5zr2-8pafTB">
+         <img src="https://img.youtube.com/vi/cRebUIGB5RU/0.jpg" style="width:75%;">
+      </a>
+</div>
 
 # Constructing your Python Environment
 
@@ -33,7 +39,7 @@ pip install ray==1.11.1
 
 # Running the Code
 
-In this tutorial we didn't dive in that much into Hydra configs (that's the content of this :warning: LINK TO EXAMPLE :warning:). However, this doesn't mean we can't easily configure our experiment directly from the command line. Let's see a couple of examples on how to run our simulation.
+In this tutorial we didn't dive in that much into Hydra configs (that's the content of [Part-II](https://github.com/adap/flower/tree/main/examples/flower-simulation-step-by-step-pytorch/Part-II)). However, this doesn't mean we can't easily configure our experiment directly from the command line. Let's see a couple of examples on how to run our simulation.
 
 ```bash
 
