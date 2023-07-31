@@ -9,17 +9,17 @@ import flwr as fl
 # from baselines.FedPer.FedPer import utils_file
 import hydra
 
-from typing import Dict, Any
+from typing import Dict, Any, Union
 from omegaconf import DictConfig, OmegaConf
 from hydra.utils import instantiate
 from FedPer import client, server, utils_file
 # from baselines.FedPer.FedPer.utils_file import get_model_fn
-from FedPer.models import MobileNet_v1
 from FedPer.dataset import load_datasets
 from FedPer.strategy import AggregateBodyStrategyPipeline
 from FedPer.utils.new_utils import get_client_cls
 from hydra.core.hydra_config import HydraConfig
-from FedPer.new_models import CNNNet, CNNModelSplit
+from FedPer.models.cnn_model import CNNNet, CNNModelSplit
+from FedPer.models.mobile_model import MobileNet, MobileNetModelSplit
 from FedPer.utils.FedPer_client import get_fedper_client_fn
 
 @hydra.main(config_path="conf", config_name="new_base", version_base=None)
@@ -69,10 +69,18 @@ def main(cfg: DictConfig) -> None:
             return fit_config
         return fit_config_fn
     
-    def create_model(config: Dict[str, Any]) -> CNNNet:
-        """Create initial CNN model."""
-        return CNNNet().to(device)
-
+    
+    if cfg.model.name.lower() == 'cnn':
+        def create_model(config: Dict[str, Any]) -> CNNNet:
+            """Create initial CNN model."""
+            return CNNNet().to(device)
+    elif cfg.model.name.lower() == 'mobile':
+        def create_model(config: Dict[str, Any]) -> MobileNet:
+            """Create initial MobileNet-v1 model."""
+            return MobileNet().to(device)
+    else:
+        raise NotImplementedError('Model not implemented, check name. ')
+        
     # 4. Define your strategy
     strategy = instantiate(
         cfg.strategy,

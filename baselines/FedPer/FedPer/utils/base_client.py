@@ -7,7 +7,8 @@ from typing import Dict, Any, Type, List, Union, Tuple
 from collections import defaultdict, OrderedDict
 from flwr.common import Scalar
 from torch.utils.data import DataLoader
-from FedPer.new_models import CNNModelManager
+from FedPer.models.cnn_model import CNNModelManager
+from FedPer.models.mobile_model import MobileNetModelManager
 from FedPer.utils.constants import DEFAULT_FT_EP, DEFAULT_TRAIN_EP
 # from FedPer.utils.model_manager import ModelManager
 
@@ -20,7 +21,7 @@ class BaseClient(fl.client.NumPyClient):
         testloader: DataLoader, 
         config: Dict[str, Any],
         client_id: int,
-        model_manager_class: Type[CNNModelManager],
+        model_manager_class: Union[Type[CNNModelManager], Type[MobileNetModelManager]],
         has_fixed_head: bool = False,
     ):
         """

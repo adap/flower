@@ -43,7 +43,6 @@ def get_model_fn(config: DictConfig):
     return _create_model()
        
 
-
 def plot_metric_from_history(
     hist: History,
     save_plot_path: Path,
