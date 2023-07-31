@@ -161,5 +161,5 @@ that started the server):
     INFO flower 2021-02-25 14:31:02,848 | app.py:127 | app_evaluate: failures [] flower 2020-07-15 10:07:56,396 | app.py:77 | app_evaluate: failures []
 
 Congratulations! You've successfully built and run your first federated
-learning system. The full `source code <https://github.com/adap/flower/blob/main/examples/quickstart_tensorflow/client.py>`_ for this can be found in
-:code:`examples/quickstart_tensorflow/client.py`.
+learning system. The full `source code <https://github.com/adap/flower/blob/main/examples/quickstart-tensorflow/client.py>`_ for this can be found in
+:code:`examples/quickstart-tensorflow/client.py`.

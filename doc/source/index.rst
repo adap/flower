@@ -53,9 +53,12 @@ A learning-oriented series of federated learning tutorials, the best place to st
    quickstart-mxnet
    quickstart-scikitlearn
    quickstart-xgboost
+   quickstart-android
    quickstart-ios
 
-QUICKSTART TUTORIALS: :ref:`PyTorch <quickstart-pytorch>` | :ref:`TensorFlow <quickstart-tensorflow>` | :ref:`🤗 Transformers <quickstart-huggingface>` | :ref:`JAX <quickstart-jax>` | :ref:`Pandas <quickstart-pandas>` | :ref:`fastai <quickstart-fastai>` | :ref:`PyTorch Lightning <quickstart-pytorch-lightning>` | :ref:`MXNet <quickstart-mxnet>` | :ref:`scikit-learn <quickstart-scikitlearn>` | :ref:`XGBoost <quickstart-xgboost>` | :ref:`iOS <quickstart-ios>`
+QUICKSTART TUTORIALS: :ref:`PyTorch <quickstart-pytorch>` | :ref:`TensorFlow <quickstart-tensorflow>` | :ref:`🤗 Transformers <quickstart-huggingface>` | :ref:`JAX <quickstart-jax>` | :ref:`Pandas <quickstart-pandas>` | :ref:`fastai <quickstart-fastai>` | :ref:`PyTorch Lightning <quickstart-pytorch-lightning>` | :ref:`MXNet <quickstart-mxnet>` | :ref:`scikit-learn <quickstart-scikitlearn>` | :ref:`XGBoost <quickstart-xgboost>` | :ref:`Android <quickstart-android>` | :ref:`iOS <quickstart-ios>`
+
+..  youtube:: FGTc2TQq7VM
 
 How-to guides
 ~~~~~~~~~~~~~
@@ -71,6 +74,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    strategies
    implementing-strategies
    save-progress
+   logging
    saving-and-loading-pytorch-checkpoints
    monitor-simulation
    ssl-enabled-connections
@@ -114,19 +118,6 @@ Information-oriented API reference and other reference material.
    telemetry
    changelog
    faq
-
-
-Flower Baselines
-----------------
-
-Flower Baselines are a collection of organised scripts used to reproduce results from well-known publications or benchmarks. You can check which baselines already exist and/or contribute your own baseline.
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Flower Baselines
-   
-   using-baselines
-   contributing-baselines
 
 
 Contributor Guide
