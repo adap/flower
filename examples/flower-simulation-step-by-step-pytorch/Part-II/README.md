@@ -7,7 +7,7 @@ The content of the code in this directory is roughly divided into two parts:
 - `toy.py` and its associated config files (i.e. `conf/toy.yaml` and `conf/toy_model/`) which were designed as a playground to test out some of the functionality of Hydra configs that we want to incorporate into our Flower projects.
 - and the rest: which follows the exact same structure as in the code presented in [Part-I](https://github.com/adap/flower/tree/main/examples/flower-simulation-step-by-step-pytorch/Part-I) but that has been _enhanced_ using Hydra.
 
-# Running the Code
+## Running the Code
 
 You can run the introductory demo code (i.e. `toy.py`) about how to use Hydra as shown below:
 

@@ -1,3 +1,5 @@
+# Flower Simulation Step-by-Step
+
 This directory contains the code developed in the `Flower Simulation` tutorial series on Youtube. You can find all the videos [here](https://www.youtube.com/playlist?list=PLNG4feLHqCWlnj8a_E1A_n5zr2-8pafTB) or clicking on the video preview below.
 
 - In `Part-I` (7 videos) we developed from scratch a complete Federated Learning pipeline for simulation using PyTorch.
@@ -9,7 +11,7 @@ This directory contains the code developed in the `Flower Simulation` tutorial s
       </a>
 </div>
 
-# Constructing your Python Environment
+## Constructing your Python Environment
 
 As presented in the video, we first need to create a Python environment. You are free to choose the tool you are most familiar with, we'll be using `conda` in this tutorial. You can create the conda and setup the environment as follows:
 
