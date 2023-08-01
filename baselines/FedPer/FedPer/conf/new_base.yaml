@@ -19,8 +19,8 @@ dataset:
   num_classes: 10
 
 model:
-  _target_: FedPer.models.mobile_model.MobileNet
-  num_head_layers: 1
+  _target_: FedPer.models.resnet_model.ResNet
+  num_head_layers: 2
   num_classes: 10
   device: ${server_device}
   name: mobile
