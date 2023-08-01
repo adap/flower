@@ -268,8 +268,9 @@ def _check_weights_equality(weights1: NDArrays, weights2: NDArrays) -> bool:
 def _find_reference_weights(
     reference_weights: NDArrays, list_of_weights: List[NDArrays]
 ) -> int:
-    """Loop through the `list_of_weights` to find the reference weights, raise
-    Error if not found.
+    """Find the reference weights by looping through the `list_of_weights`.
+
+    Raise Error if the reference weights is not found.
 
     Parameters
     ----------
@@ -311,6 +312,7 @@ def _aggregate_n_closest_weights(
         The weights from models
     beta_closest: int
         The number of the closest distance weights that will be averaged
+
     Returns
     -------
     aggregated_weights: NDArrays
