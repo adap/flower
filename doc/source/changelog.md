@@ -26,6 +26,10 @@
 
   The (experimental) `start_client` argument `rest` was deprecated in favor of a new argument `transport`. `start_client(transport="rest")` will yield the same behaviour as `start_client(rest=True)` did before. All code should migrate to the new argument `transport`. The deprecated argument `rest` will be removed in a future release.
 
+- **Migrate experimental REST API to Starlette** ([2171](https://github.com/adap/flower/pull/2171))
+
+  The (experimental) REST API used to be implemented in [FastAPI](https://fastapi.tiangolo.com/), but it has now been migrated to use [Starlette](https://www.starlette.io/) directly.
+
 - **General improvements** ([#1872](https://github.com/adap/flower/pull/1872), [#1866](https://github.com/adap/flower/pull/1866), [#1884](https://github.com/adap/flower/pull/1884))
 
 ### Incompatible changes
