@@ -15,23 +15,52 @@
 """Fleet API message handlers."""
 
 
+import random
 from typing import List, Optional
 from uuid import UUID
 
 from flwr.proto.fleet_pb2 import (
+    CreateNodeRequest,
+    CreateNodeResponse,
+    DeleteNodeRequest,
+    DeleteNodeResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
     PushTaskResRequest,
     PushTaskResResponse,
     Reconnect,
 )
+from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 from flwr.server.state import State
 
 
+def create_node(
+    request: CreateNodeRequest,  # pylint: disable=unused-argument
+    state: State,
+) -> CreateNodeResponse:
+    """."""
+    # Generate random node_id
+    random_node_id: int = random.randrange(9223372036854775808)
+
+    # Update state
+    state.register_node(node_id=random_node_id)
+    return CreateNodeResponse(node=Node(node_id=random_node_id, anonymous=False))
+
+
+def delete_node(request: DeleteNodeRequest, state: State) -> DeleteNodeResponse:
+    """."""
+    # Validate node_id
+    if request.node.anonymous or request.node.node_id <= 0:
+        return DeleteNodeResponse()
+
+    # Update state
+    state.unregister_node(node_id=request.node.node_id)
+    return DeleteNodeResponse()
+
+
 def pull_task_ins(request: PullTaskInsRequest, state: State) -> PullTaskInsResponse:
     """Pull TaskIns handler."""
-
     # Get node_id if client node is not anonymous
     node = request.node  # pylint: disable=no-member
     node_id: Optional[int] = None if node.anonymous else node.node_id
@@ -48,7 +77,6 @@ def pull_task_ins(request: PullTaskInsRequest, state: State) -> PullTaskInsRespo
 
 def push_task_res(request: PushTaskResRequest, state: State) -> PushTaskResResponse:
     """Push TaskRes handler."""
-
     # pylint: disable=no-member
     task_res: TaskRes = request.task_res_list[0]
     # pylint: enable=no-member

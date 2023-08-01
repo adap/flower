@@ -43,7 +43,7 @@ class CustomClientProxy(ClientProxy):
         ins: GetPropertiesIns,
         timeout: Optional[float],
     ) -> GetPropertiesRes:
-        """Returns the client's properties."""
+        """Return the client's properties."""
         return GetPropertiesRes(status=Status(code=Code.OK, message=""), properties={})
 
     def get_parameters(

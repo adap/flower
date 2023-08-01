@@ -48,7 +48,7 @@ class ClientProxy(ABC):
         ins: GetPropertiesIns,
         timeout: Optional[float],
     ) -> GetPropertiesRes:
-        """Returns the client's properties."""
+        """Return the client's properties."""
 
     @abstractmethod
     def get_parameters(

@@ -30,7 +30,6 @@ from .aggregate import (
 
 def test_aggregate() -> None:
     """Test aggregate function."""
-
     # Prepare
     weights0_0 = np.array([[1, 2, 3], [4, 5, 6]])
     weights0_1 = np.array([7, 8, 9, 10])

@@ -25,7 +25,7 @@ class NumPyClient(ABC):
     """Abstract base class for Flower clients using NumPy."""
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
-        """Returns a client's set of properties.
+        """Return a client's set of properties.
 
         Parameters
         ----------

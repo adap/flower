@@ -20,10 +20,9 @@ from typing import List, Union
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 
 
-# pylint: disable-next=too-many-branches
+# pylint: disable-next=too-many-branches,too-many-statements
 def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str]:
     """Validate a TaskIns or TaskRes."""
-
     validation_errors = []
 
     if tasks_ins_res.task_id != "":
@@ -64,12 +63,21 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
         ):
             validation_errors.append("non-anonymous consumer MUST provide a `node_id`")
 
-        # Legacy ServerMessage
-        if not tasks_ins_res.task.HasField("legacy_server_message"):
+        # Content check
+        has_fields = {
+            "sa": tasks_ins_res.task.HasField("sa"),
+            "legacy_server_message": tasks_ins_res.task.HasField(
+                "legacy_server_message"
+            ),
+        }
+        if not (has_fields["sa"] or has_fields["legacy_server_message"]):
+            err_msg = ", ".join([f"`{field}`" for field in has_fields])
             validation_errors.append(
-                "`task` does not set field `legacy_server_message`"
+                f"`task` in `TaskIns` must set at least one of fields {{{err_msg}}}"
             )
-        if not tasks_ins_res.task.legacy_server_message.HasField("msg"):
+        if has_fields[
+            "legacy_server_message"
+        ] and not tasks_ins_res.task.legacy_server_message.HasField("msg"):
             validation_errors.append("`legacy_server_message` does not set field `msg`")
 
         # Ancestors
@@ -106,12 +114,21 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
         ):
             validation_errors.append("non-anonymous consumer MUST provide a `node_id`")
 
-        # Legacy ClientMessage
-        if not tasks_ins_res.task.HasField("legacy_client_message"):
+        # Content check
+        has_fields = {
+            "sa": tasks_ins_res.task.HasField("sa"),
+            "legacy_client_message": tasks_ins_res.task.HasField(
+                "legacy_client_message"
+            ),
+        }
+        if not (has_fields["sa"] or has_fields["legacy_client_message"]):
+            err_msg = ", ".join([f"`{field}`" for field in has_fields])
             validation_errors.append(
-                "`task` does not set field `legacy_client_message`"
+                f"`task` in `TaskRes` must set at least one of fields {{{err_msg}}}"
             )
-        if not tasks_ins_res.task.legacy_client_message.HasField("msg"):
+        if has_fields[
+            "legacy_client_message"
+        ] and not tasks_ins_res.task.legacy_client_message.HasField("msg"):
             validation_errors.append("`legacy_client_message` does not set field `msg`")
 
         # Ancestors

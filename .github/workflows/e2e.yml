@@ -1,0 +1,128 @@
+name: E2E
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  FLWR_TELEMETRY_ENABLED: 0
+
+jobs:
+  frameworks:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    # Using approach described here:
+    # https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs
+    strategy:
+      matrix:
+        include:
+          - directory: bare
+
+          - directory: jax
+
+          - directory: pytorch
+            dataset: |
+              from torchvision.datasets import CIFAR10
+              CIFAR10('./data', download=True)
+
+          - directory: tensorflow
+            dataset: |
+              import tensorflow as tf
+              tf.keras.datasets.cifar10.load_data()
+              
+          - directory: tabnet
+            dataset: |
+              import tensorflow_datasets as tfds
+              tfds.load(name='iris', split=tfds.Split.TRAIN)
+
+          - directory: opacus
+            dataset: |
+              from torchvision.datasets import CIFAR10
+              CIFAR10('./data', download=True)
+              
+          - directory: pytorch-lightning
+            dataset: |
+              from torchvision.datasets import MNIST
+              MNIST('./data', download=True)
+
+          - directory: mxnet
+            dataset: |
+              import mxnet as mx
+              mx.test_utils.get_mnist()
+
+          - directory: scikit-learn
+            dataset: |
+              import openml
+              openml.datasets.get_dataset(554)
+
+          - directory: fastai
+            dataset: |
+              from fastai.vision.all import untar_data, URLs
+              untar_data(URLs.MNIST) 
+
+          - directory: pandas
+            dataset: |
+              from pathlib import Path
+              from sklearn.datasets import load_iris
+              Path('data').mkdir(exist_ok=True)
+              load_iris(as_frame=True)['data'].to_csv('./data/client.csv')
+
+    name: Framework / ${{matrix.directory}}
+
+    defaults:
+      run:
+        working-directory: e2e/${{ matrix.directory }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: python -m poetry install
+      - name: Download dataset
+        if: ${{matrix.dataset}}
+        run: python -c "${{ matrix.dataset }}"
+      - name: Run edge client test
+        run: ./../test.sh
+      - name: Run virtual client test 
+        run: python simulation.py
+      - name: Run driver test 
+        run: ./../test_driver.sh
+
+  strategies:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        strat: ["FedMedian", "FedTrimmedAvg", "QFedAvg", "FaultTolerantFedAvg", "FedAvgM", "FedAdam", "FedAdagrad", "FedYogi"]
+
+    name: Strategy / ${{ matrix.strat }}
+
+    defaults:
+      run:
+        working-directory: e2e/strategies
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Install dependencies
+        run: |
+          python -m poetry install
+      - name: Cache Datasets
+        uses: actions/cache@v2
+        with:
+          path: "~/.keras"
+          key: keras-datasets
+      - name: Download Datasets
+        run: |
+          python -c "import tensorflow as tf; tf.keras.datasets.mnist.load_data()"
+      - name: Test strategies
+        run: |
+          python test.py "${{ matrix.strat }}"

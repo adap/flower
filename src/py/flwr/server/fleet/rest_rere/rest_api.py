@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""REST API server."""
+"""Experimental REST API server."""
 
 
 import sys
@@ -23,16 +23,16 @@ from flwr.server.fleet.message_handler import message_handler
 from flwr.server.state import State
 
 try:
-    from fastapi import FastAPI, HTTPException, Request, Response
+    from starlette.applications import Starlette
     from starlette.datastructures import Headers
+    from starlette.exceptions import HTTPException
+    from starlette.requests import Request
+    from starlette.responses import Response
+    from starlette.routing import Route
 except ModuleNotFoundError:
     sys.exit(MISSING_EXTRA_REST)
 
 
-app: FastAPI = FastAPI()
-
-
-@app.post("/api/v0/fleet/pull-task-ins", response_class=Response)  # type: ignore
 async def pull_task_ins(request: Request) -> Response:
     """Pull TaskIns."""
     _check_headers(request.headers)
@@ -62,7 +62,6 @@ async def pull_task_ins(request: Request) -> Response:
     )
 
 
-@app.post("/api/v0/fleet/push-task-res", response_class=Response)  # type: ignore
 async def push_task_res(request: Request) -> Response:  # Check if token is needed here
     """Push TaskRes."""
     _check_headers(request.headers)
@@ -90,6 +89,17 @@ async def push_task_res(request: Request) -> Response:  # Check if token is need
         content=push_task_res_response_bytes,
         headers={"Content-Type": "application/protobuf"},
     )
+
+
+routes = [
+    Route("/api/v0/fleet/pull-task-ins", pull_task_ins, methods=["POST"]),
+    Route("/api/v0/fleet/push-task-res", push_task_res, methods=["POST"]),
+]
+
+app: Starlette = Starlette(
+    debug=False,
+    routes=routes,
+)
 
 
 def _check_headers(headers: Headers) -> None:

@@ -161,7 +161,6 @@ def maybe_call_get_properties(
     client: Client, get_properties_ins: GetPropertiesIns
 ) -> GetPropertiesRes:
     """Call `get_properties` if the client overrides it."""
-
     # Check if client overrides `get_properties`
     if not has_get_properties(client=client):
         # If client does not override `get_properties`, don't call it
@@ -182,7 +181,6 @@ def maybe_call_get_parameters(
     client: Client, get_parameters_ins: GetParametersIns
 ) -> GetParametersRes:
     """Call `get_parameters` if the client overrides it."""
-
     # Check if client overrides `get_parameters`
     if not has_get_parameters(client=client):
         # If client does not override `get_parameters`, don't call it
@@ -201,7 +199,6 @@ def maybe_call_get_parameters(
 
 def maybe_call_fit(client: Client, fit_ins: FitIns) -> FitRes:
     """Call `fit` if the client overrides it."""
-
     # Check if client overrides `fit`
     if not has_fit(client=client):
         # If client does not override `fit`, don't call it
@@ -222,7 +219,6 @@ def maybe_call_fit(client: Client, fit_ins: FitIns) -> FitRes:
 
 def maybe_call_evaluate(client: Client, evaluate_ins: EvaluateIns) -> EvaluateRes:
     """Call `evaluate` if the client overrides it."""
-
     # Check if client overrides `evaluate`
     if not has_evaluate(client=client):
         # If client does not override `evaluate`, don't call it

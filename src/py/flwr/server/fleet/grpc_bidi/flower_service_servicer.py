@@ -78,7 +78,9 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
         request_iterator: Iterator[ClientMessage],
         context: grpc.ServicerContext,
     ) -> Iterator[ServerMessage]:
-        """Invoked by each gRPC client which participates in the network.
+        """Facilitate bi-directional streaming of messages between server and client.
+
+        Invoked by each gRPC client which participates in the network.
 
         Protocol:
         - The first message is sent from the server to the client

@@ -73,6 +73,21 @@ class History:
             self.metrics_centralized[key].append((server_round, metrics[key]))
 
     def __repr__(self) -> str:
+        """Create a representation of History.
+
+        The representation consists of the following data (for each round) if present:
+
+        * distributed loss.
+        * centralized loss.
+        * distributed training metrics.
+        * distributed evaluation metrics.
+        * centralized metrics.
+
+        Returns
+        -------
+        representation : str
+            The string representation of the history object.
+        """
         rep = ""
         if self.losses_distributed:
             rep += "History (loss, distributed):\n" + reduce(

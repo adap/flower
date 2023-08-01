@@ -36,7 +36,6 @@ class InMemoryState(State):
 
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
         """Store one TaskIns."""
-
         # Validate task
         errors = validate_task_ins_or_res(task_ins)
         if any(errors):
@@ -61,7 +60,6 @@ class InMemoryState(State):
         self, node_id: Optional[int], limit: Optional[int]
     ) -> List[TaskIns]:
         """Get all TaskIns that have not been delivered yet."""
-
         if limit is not None and limit < 1:
             raise AssertionError("`limit` must be >= 1")
 
@@ -94,7 +92,6 @@ class InMemoryState(State):
 
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
         """Store one TaskRes."""
-
         # Validate task
         errors = validate_task_ins_or_res(task_res)
         if any(errors):
@@ -117,7 +114,6 @@ class InMemoryState(State):
 
     def get_task_res(self, task_ids: Set[UUID], limit: Optional[int]) -> List[TaskRes]:
         """Get all TaskRes that have not been delivered yet."""
-
         if limit is not None and limit < 1:
             raise AssertionError("`limit` must be >= 1")
 
@@ -142,7 +138,6 @@ class InMemoryState(State):
 
     def delete_tasks(self, task_ids: Set[UUID]) -> None:
         """Delete all delivered TaskIns/TaskRes pairs."""
-
         task_ins_to_be_deleted: Set[UUID] = set()
         task_res_to_be_deleted: Set[UUID] = set()
 
@@ -163,9 +158,17 @@ class InMemoryState(State):
             del self.task_res_store[task_id]
 
     def num_task_ins(self) -> int:
+        """Calculate the number of task_ins in store.
+
+        This includes delivered but not yet deleted task_ins.
+        """
         return len(self.task_ins_store)
 
     def num_task_res(self) -> int:
+        """Calculate the number of task_res in store.
+
+        This includes delivered but not yet deleted task_res.
+        """
         return len(self.task_res_store)
 
     def register_node(self, node_id: int) -> None:

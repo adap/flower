@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Adaptive Federated Optimization (FedOpt) [Reddi et al., 2020] abstract
-strategy.
+"""Adaptive Federated Optimization (FedOpt) [Reddi et al., 2020] abstract strategy.
 
 Paper: arxiv.org/abs/2003.00295
 """
@@ -32,11 +31,10 @@ from flwr.common import (
 from .fedavg import FedAvg
 
 
-# flake8: noqa: E501
 class FedOpt(FedAvg):
     """Configurable FedAdagrad strategy implementation."""
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals,line-too-long
+    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals, line-too-long
     def __init__(
         self,
         *,
@@ -128,5 +126,6 @@ class FedOpt(FedAvg):
         self.v_t: Optional[NDArrays] = None
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"FedOpt(accept_failures={self.accept_failures})"
         return rep

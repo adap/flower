@@ -56,6 +56,7 @@ class DPFedAvgFixed(Strategy):
         self.server_side_noising = server_side_noising
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = "Strategy with DP with Fixed Clipping enabled."
         return rep
 
@@ -67,13 +68,34 @@ class DPFedAvgFixed(Strategy):
     def initialize_parameters(
         self, client_manager: ClientManager
     ) -> Optional[Parameters]:
+        """Initialize global model parameters using given strategy."""
         return self.strategy.initialize_parameters(client_manager)
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
-        """Configure the next round of training."""
+        """Configure the next round of training incorporating Differential Privacy (DP).
 
+        Configuration of the next training round includes information related to DP,
+        such as clip norm and noise stddev.
+
+        Parameters
+        ----------
+        server_round : int
+            The current round of federated learning.
+        parameters : Parameters
+            The current (global) model parameters.
+        client_manager : ClientManager
+            The client manager which holds all currently connected clients.
+
+        Returns
+        -------
+        fit_configuration : List[Tuple[ClientProxy, FitIns]]
+            A list of tuples. Each tuple in the list identifies a `ClientProxy` and the
+            `FitIns` for this particular `ClientProxy`. If a particular `ClientProxy`
+            is not included in this list, it means that this `ClientProxy`
+            will not participate in the next round of federated learning.
+        """
         additional_config = {"dpfedavg_clip_norm": self.clip_norm}
         if not self.server_side_noising:
             additional_config[
@@ -92,6 +114,26 @@ class DPFedAvgFixed(Strategy):
     def configure_evaluate(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
+        """Configure the next round of evaluation using the specified strategy.
+
+        Parameters
+        ----------
+        server_round : int
+            The current round of federated learning.
+        parameters : Parameters
+            The current (global) model parameters.
+        client_manager : ClientManager
+            The client manager which holds all currently connected clients.
+
+        Returns
+        -------
+        evaluate_configuration : List[Tuple[ClientProxy, EvaluateIns]]
+            A list of tuples. Each tuple in the list identifies a `ClientProxy` and the
+            `EvaluateIns` for this particular `ClientProxy`. If a particular
+            `ClientProxy` is not included in this list, it means that this
+            `ClientProxy` will not participate in the next round of federated
+            evaluation.
+        """
         return self.strategy.configure_evaluate(
             server_round, parameters, client_manager
         )
@@ -102,6 +144,7 @@ class DPFedAvgFixed(Strategy):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+        """Aggregate training results using unweighted aggregation."""
         if failures:
             return None, {}
         # Forcing unweighted aggregation, as in https://arxiv.org/abs/1905.03871.
@@ -122,9 +165,11 @@ class DPFedAvgFixed(Strategy):
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
+        """Aggregate evaluation losses using the given strategy."""
         return self.strategy.aggregate_evaluate(server_round, results, failures)
 
     def evaluate(
         self, server_round: int, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+        """Evaluate model parameters using an evaluation function from the strategy."""
         return self.strategy.evaluate(server_round, parameters)
