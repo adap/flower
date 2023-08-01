@@ -164,3 +164,4 @@ poetry.lock
 
 # iOS
 xcuserdata/
+.idea/
