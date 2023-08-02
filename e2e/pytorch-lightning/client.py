@@ -56,6 +56,12 @@ def _set_parameters(model, parameters):
     state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
     model.load_state_dict(state_dict, strict=True)
 
+def client_fn(cid):
+    model = mnist.LitAutoEncoder()
+    train_loader, val_loader, test_loader = mnist.load_data()
+
+    # Flower client
+    return FlowerClient(model, train_loader, val_loader, test_loader)
 
 def main() -> None:
     # Model and data

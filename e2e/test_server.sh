@@ -1,7 +1,17 @@
 #!/bin/bash
 set -e
 
-timeout 2m python server.py &
+case "$1" in
+  pandas)
+    server_file="server.py"
+    ;;
+  *)
+    server_file="../server.py"
+    ;;
+esac
+
+# run the first command in background and save output to a temporary file:
+timeout 2m python $server_file &
 pid=$!
 sleep 3
 
