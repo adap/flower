@@ -335,6 +335,10 @@ def _aggregate_n_closest_weights(
         indices = np.argpartition(diff_np, kth=beta_closest - 1, axis=0)
         # Take the weights (coordinate-wise) corresponding to the beta of the
         # closest distances
-        beta_closest_weights = np.take_along_axis(other_weights_layer_np, indices=indices, axis=0)[:beta_closest]  # type: ignore[no-untyped-call]
+        beta_closest_weights = np.take_along_axis(
+            other_weights_layer_np, indices=indices, axis=0
+        )[
+            :beta_closest
+        ]  # type: ignore[no-untyped-call]
         aggregated_weights.append(np.mean(beta_closest_weights, axis=0))
     return aggregated_weights
