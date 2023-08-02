@@ -15,7 +15,7 @@
 """ProtoBuf serialization and deserialization."""
 
 
-from typing import Any, Dict, List, cast
+from typing import Any, Dict, List, MutableMapping, cast
 
 from flwr.proto.task_pb2 import Value
 from flwr.proto.transport_pb2 import (
@@ -564,7 +564,7 @@ def named_values_to_proto(
 
 
 def named_values_from_proto(
-    named_values_proto: Dict[str, Value]
+    named_values_proto: MutableMapping[str, Value]
 ) -> Dict[str, typing.Value]:
     """Deserialize named values from ProtoBuf."""
     return {name: value_from_proto(value) for name, value in named_values_proto.items()}
