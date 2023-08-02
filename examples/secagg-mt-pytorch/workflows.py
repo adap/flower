@@ -19,14 +19,14 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
 )
 from flwr.common.secure_aggregation.quantization import dequantize
 from flwr.common.secure_aggregation.secaggplus_utils import pseudo_rand_gen
-from flwr.common.secure_aggregation.weights_arithmetic import (
-    factor_weights_extract,
-    weights_addition,
-    weights_divide,
-    weights_mod,
-    weights_shape,
-    weights_subtraction,
-    weights_zero_generate,
+from flwr.common.secure_aggregation.ndarrays_arithmetic import (
+    factor_extract,
+    parameters_addition,
+    parameters_divide,
+    parameters_mod,
+    get_parameters_shape,
+    parameters_subtraction,
+    get_zero_parameters,
 )
 from flwr.common.serde import named_values_from_proto, named_values_to_proto
 from flwr.common.typing import Value
@@ -185,7 +185,7 @@ def workflow_with_sec_agg(
     node_messages = yield
     surviving_node_ids = [node_id for node_id in node_messages]
     # Get shape of vector sent by first client
-    masked_vector = [np.array([0], dtype=int)] + weights_zero_generate(
+    masked_vector = [np.array([0], dtype=int)] + get_zero_parameters(
         [w.shape for w in weights]
     )
     # Add all collected masked vectors and compuute available and dropout clients set
@@ -195,12 +195,13 @@ def workflow_with_sec_agg(
         if node_id not in surviving_node_ids
     ]
     active_sids = [nid2sid[node_id] for node_id in surviving_node_ids]
+    named_values = _get_from_task(task)
     for _, task in node_messages.items():
-        client_masked_vec = _get_from_task(task)["masked_weights"]
+        client_masked_vec = named_values["masked_parameters"]
         client_masked_vec = [bytes_to_ndarray(b) for b in client_masked_vec]
-        masked_vector = weights_addition(masked_vector, client_masked_vec)
+        masked_vector = parameters_addition(masked_vector, client_masked_vec)
 
-    masked_vector = weights_mod(masked_vector, 1 << 24)
+    masked_vector = parameters_mod(masked_vector, 1 << 24)
 
     """
     =============== Unmasking stage ===============   
@@ -241,9 +242,9 @@ def workflow_with_sec_agg(
         if sid in active_sids:
             # seed is an available client's b
             private_mask = pseudo_rand_gen(
-                secret, 1 << 24, weights_shape(masked_vector)
+                secret, 1 << 24, get_parameters_shape(masked_vector)
             )
-            masked_vector = weights_subtraction(masked_vector, private_mask)
+            masked_vector = parameters_subtraction(masked_vector, private_mask)
         else:
             # seed is a dropout client's sk1
             neighbor_list = list(sid2nid.keys())
@@ -255,17 +256,17 @@ def workflow_with_sec_agg(
                     bytes_to_public_key(sid2public_keys[neighbor_sid][0]),
                 )
                 pairwise_mask = pseudo_rand_gen(
-                    shared_key, 1 << 24, weights_shape(masked_vector)
+                    shared_key, 1 << 24, get_parameters_shape(masked_vector)
                 )
                 if sid > neighbor_sid:
-                    masked_vector = weights_addition(masked_vector, pairwise_mask)
+                    masked_vector = parameters_addition(masked_vector, pairwise_mask)
                 else:
-                    masked_vector = weights_subtraction(masked_vector, pairwise_mask)
-    masked_vector = weights_mod(masked_vector, 1 << 24)
+                    masked_vector = parameters_subtraction(masked_vector, pairwise_mask)
+    masked_vector = parameters_mod(masked_vector, 1 << 24)
     # Divide vector by number of clients who have given us their masked vector
     # i.e. those participating in final unmask vectors stage
-    total_weights_factor, masked_vector = factor_weights_extract(masked_vector)
-    masked_vector = weights_divide(masked_vector, total_weights_factor)
+    total_weights_factor, masked_vector = factor_extract(masked_vector)
+    masked_vector = parameters_divide(masked_vector, total_weights_factor)
     aggregated_vector = dequantize(masked_vector, 3, 1 << 16)
     print(aggregated_vector[:10])
     aggregated_parameters = ndarrays_to_parameters(aggregated_vector)

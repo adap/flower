@@ -30,12 +30,12 @@ def _stochastic_round(arr: NDArrayFloat) -> NDArrayInt:
 
 
 def quantize(
-    weights: List[NDArrayFloat], clipping_range: float, target_range: int
+    parameters: List[NDArrayFloat], clipping_range: float, target_range: int
 ) -> List[NDArrayInt]:
     """Quantize float Numpy arrays to integer Numpy arrays."""
     quantized_list = []
     quantizer = target_range / (2 * clipping_range)
-    for arr in weights:
+    for arr in parameters:
         # stochastic quantization
         quantized = (
             np.clip(arr, -clipping_range, clipping_range) + clipping_range
@@ -45,10 +45,9 @@ def quantize(
     return quantized_list
 
 
-# Transform weight vector to range [-clipping_range, clipping_range]
-# Convert to float
+# Dequantize parameters to range [-clipping_range, clipping_range]
 def dequantize(
-    quantized_weights: List[NDArrayInt],
+    quantized_parameters: List[NDArrayInt],
     clipping_range: float,
     target_range: int,
 ) -> List[NDArrayFloat]:
@@ -56,7 +55,7 @@ def dequantize(
     reverse_quantized_list: List[NDArrayFloat] = []
     quantizer = (2 * clipping_range) / target_range
     shift = -clipping_range
-    for arr in quantized_weights:
+    for arr in quantized_parameters:
         recon_arr = arr.view(np.ndarray).astype(float)
         recon_arr = cast(NDArrayFloat, recon_arr * quantizer + shift)
         reverse_quantized_list.append(recon_arr)

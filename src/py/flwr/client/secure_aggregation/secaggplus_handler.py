@@ -40,24 +40,28 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     private_key_to_bytes,
     public_key_to_bytes,
 )
+from flwr.common.secure_aggregation.ndarrays_arithmetic import (
+    factor_combine,
+    parameters_addition,
+    parameters_mod,
+    parameters_multiply,
+    parameters_subtraction,
+)
 from flwr.common.secure_aggregation.quantization import quantize
 from flwr.common.secure_aggregation.secaggplus_utils import (
     pseudo_rand_gen,
     share_keys_plaintext_concat,
     share_keys_plaintext_separate,
 )
-from flwr.common.secure_aggregation.weights_arithmetic import (
-    factor_weights_combine,
-    weights_addition,
-    weights_mod,
-    weights_multiply,
-    weights_subtraction,
-)
 from flwr.common.typing import FitIns, Value
 
 from .handler import SecureAggregationHandler
 
-_stages = ["setup", "share keys", "collect masked input", "unmasking"]
+STAGE_SETUP = "setup"
+STAGE_SHARE_KEYS = "share keys"
+STAGE_COLLECT_MASKED_INPUT = "collect masked input"
+STAGE_UNMASKING = "unmasking"
+STAGES = (STAGE_SETUP, STAGE_SHARE_KEYS, STAGE_COLLECT_MASKED_INPUT, STAGE_UNMASKING)
 
 
 @dataclass
@@ -91,7 +95,7 @@ class SecAggPlusHandler(SecureAggregationHandler):
     """Message handler for the SecAgg+ protocol."""
 
     _shared_state = _State()
-    _current_stage = "unmasking"
+    _current_stage = STAGE_UNMASKING
 
     def handle_secure_aggregation(
         self, named_values: Dict[str, Value]
@@ -115,14 +119,14 @@ class SecAggPlusHandler(SecureAggregationHandler):
                 "the subclass of Client or NumPyClient."
             )
         stage = str(named_values.pop("stage"))
-        if stage == "setup":
-            if self._current_stage != "unmasking":
+        if stage == STAGE_SETUP:
+            if self._current_stage != STAGE_UNMASKING:
                 log(WARNING, "restart from setup stage")
             self._shared_state = _State(client=self)
             self._current_stage = stage
             return _setup(self._shared_state, named_values)
         # if stage is not "setup", the new stage should be the next stage
-        expected_new_stage = _stages[_stages.index(self._current_stage) + 1]
+        expected_new_stage = STAGES[STAGES.index(self._current_stage) + 1]
         if stage == expected_new_stage:
             self._current_stage = stage
         else:
@@ -131,11 +135,11 @@ class SecAggPlusHandler(SecureAggregationHandler):
                 f"expect {expected_new_stage} stage, but receive {stage} stage"
             )
 
-        if stage == "share keys":
+        if stage == STAGE_SHARE_KEYS:
             return _share_keys(self._shared_state, named_values)
-        if stage == "collect masked input":
+        if stage == STAGE_COLLECT_MASKED_INPUT:
             return _collect_masked_input(self._shared_state, named_values)
-        if stage == "unmasking":
+        if stage == STAGE_UNMASKING:
             return _unmasking(self._shared_state, named_values)
         raise ValueError(f"Unknown secagg stage: {stage}")
 
@@ -262,30 +266,32 @@ def _collect_masked_input(
         state.sk1_share_dict[src] = sk1_share
 
     # fit client
-    weights_bytes = cast(List[bytes], named_values["parameters"])
-    weights = [bytes_to_ndarray(w) for w in weights_bytes]
+    parameters_bytes = cast(List[bytes], named_values["parameters"])
+    parameters = [bytes_to_ndarray(w) for w in parameters_bytes]
     if isinstance(state.client, Client):
         fit_res = state.client.fit(
-            FitIns(parameters=ndarrays_to_parameters(weights), config={})
+            FitIns(parameters=ndarrays_to_parameters(parameters), config={})
         )
-        weights_factor = fit_res.num_examples
-        weights = parameters_to_ndarrays(fit_res.parameters)
+        parameters_factor = fit_res.num_examples
+        parameters = parameters_to_ndarrays(fit_res.parameters)
     elif isinstance(state.client, NumPyClient):
-        weights, weights_factor, _ = state.client.fit(weights, {})
+        parameters, parameters_factor, _ = state.client.fit(parameters, {})
     else:
         log(ERROR, "Client %d: fit function is none", state.sid)
 
     # Quantize weight update vector
-    quantized_weights = quantize(weights, state.clipping_range, state.target_range)
+    quantized_parameters = quantize(
+        parameters, state.clipping_range, state.target_range
+    )
 
-    quantized_weights = weights_multiply(quantized_weights, weights_factor)
-    quantized_weights = factor_weights_combine(weights_factor, quantized_weights)
+    quantized_parameters = parameters_multiply(quantized_parameters, parameters_factor)
+    quantized_parameters = factor_combine(parameters_factor, quantized_parameters)
 
-    dimensions_list: List[Tuple[int, ...]] = [a.shape for a in quantized_weights]
+    dimensions_list: List[Tuple[int, ...]] = [a.shape for a in quantized_parameters]
 
     # add private mask
     private_mask = pseudo_rand_gen(state.b, state.mod_range, dimensions_list)
-    quantized_weights = weights_addition(quantized_weights, private_mask)
+    quantized_parameters = parameters_addition(quantized_parameters, private_mask)
 
     for client_id in available_clients:
         # add pairwise mask
@@ -295,15 +301,21 @@ def _collect_masked_input(
         )
         pairwise_mask = pseudo_rand_gen(shared_key, state.mod_range, dimensions_list)
         if state.sid > client_id:
-            quantized_weights = weights_addition(quantized_weights, pairwise_mask)
+            quantized_parameters = parameters_addition(
+                quantized_parameters, pairwise_mask
+            )
         else:
-            quantized_weights = weights_subtraction(quantized_weights, pairwise_mask)
+            quantized_parameters = parameters_subtraction(
+                quantized_parameters, pairwise_mask
+            )
 
     # Take mod of final weight update vector and return to server
-    quantized_weights = weights_mod(quantized_weights, state.mod_range)
-    # return ndarrays_to_parameters(quantized_weights)
-    log(INFO, "Client %d: stage 2 completes. uploading masked weights...", state.sid)
-    return {"masked_weights": [ndarray_to_bytes(arr) for arr in quantized_weights]}
+    quantized_parameters = parameters_mod(quantized_parameters, state.mod_range)
+    # return ndarrays_to_parameters(quantized_parameters)
+    log(INFO, "Client %d: stage 2 completes. uploading masked parameters...", state.sid)
+    return {
+        "masked_parameters": [ndarray_to_bytes(arr) for arr in quantized_parameters]
+    }
 
 
 def _unmasking(state: _State, named_values: Dict[str, Value]) -> Dict[str, Value]:
