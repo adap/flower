@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Aggregation functions for strategy implementations."""
-
+# mypy: disallow_untyped_calls=False
 
 from functools import reduce
 from typing import Any, Callable, List, Tuple
@@ -48,7 +48,7 @@ def aggregate_median(results: List[Tuple[NDArrays, int]]) -> NDArrays:
 
     # Compute median weight of each layer
     median_w: NDArrays = [
-        np.median(np.asarray(layer), axis=0) for layer in zip(*weights)  # type: ignore
+        np.median(np.asarray(layer), axis=0) for layer in zip(*weights)
     ]
     return median_w
 
@@ -205,14 +205,12 @@ def _compute_distances(weights: List[NDArrays]) -> NDArray:
     Input: weights - list of weights vectors
     Output: distances - matrix distance_matrix of squared distances between the vectors
     """
-    flat_w = np.array(
-        [np.concatenate(p, axis=None).ravel() for p in weights]  # type: ignore
-    )
+    flat_w = np.array([np.concatenate(p, axis=None).ravel() for p in weights])
     distance_matrix = np.zeros((len(weights), len(weights)))
     for i, _ in enumerate(flat_w):
         for j, _ in enumerate(flat_w):
             delta = flat_w[i] - flat_w[j]
-            norm = np.linalg.norm(delta)  # type: ignore
+            norm = np.linalg.norm(delta)
             distance_matrix[i, j] = norm**2
     return distance_matrix
 
@@ -337,8 +335,6 @@ def _aggregate_n_closest_weights(
         # closest distances
         beta_closest_weights = np.take_along_axis(
             other_weights_layer_np, indices=indices, axis=0
-        )[
-            :beta_closest
-        ]  # type: ignore[no-untyped-call]
+        )[:beta_closest]
         aggregated_weights.append(np.mean(beta_closest_weights, axis=0))
     return aggregated_weights
