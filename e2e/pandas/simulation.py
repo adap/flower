@@ -4,7 +4,6 @@ from client import FlowerClient
 from strategy import FedAnalytics
 
 def client_fn(cid):
-    _ = cid
     return FlowerClient()
 
 hist = fl.simulation.start_simulation(

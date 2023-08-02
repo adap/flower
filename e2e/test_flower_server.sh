@@ -1,7 +1,16 @@
 #!/bin/bash
 set -e
 
-case $1 in
+case "$1" in
+  pandas)
+    driver_file="driver.py"
+    ;;
+  *)
+    driver_file="../driver.py"
+    ;;
+esac
+
+case "$2" in
   "rere")
     server_args="--grpc-rere --grpc-rere-fleet-api-address"
     client_args="grpc-rere"
@@ -18,7 +27,7 @@ case $1 in
     ;;
 esac
 
-case $2 in
+case "$3" in
   "db")
     db_args="--database $(date +%s).db"
     ;;
@@ -40,7 +49,7 @@ python client.py $client_args &
 client2_pid=$!
 sleep 3
 
-timeout 5m python driver.py &
+timeout 5m python $driver_file &
 pid=$!
 
 wait $pid
