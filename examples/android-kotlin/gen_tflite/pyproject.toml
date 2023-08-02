@@ -9,6 +9,7 @@ python = ">=3.8,<3.11"
 numpy = ">=1.23,<2.0"
 tensorflow-cpu = ">=2.12,<3.0"
 pandas = ">=2.0,<3.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
