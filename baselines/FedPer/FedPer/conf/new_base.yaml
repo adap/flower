@@ -8,7 +8,7 @@ learning_rate: 0.05
 algorithm: FedPer
 
 client_resources:
-  num_cpus: 32
+  num_cpus: 16
   num_gpus: 1
 
 server_device: cuda:0
@@ -20,7 +20,7 @@ dataset:
 
 model:
   _target_: FedPer.models.resnet_model.ResNet
-  num_head_layers: 2
+  num_head_layers: 1
   num_classes: 10
   device: ${server_device}
   name: mobile

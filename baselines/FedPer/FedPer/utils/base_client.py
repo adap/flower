@@ -35,7 +35,7 @@ class BaseClient(fl.client.NumPyClient):
         """
         super().__init__()
 
-        print("Model manager class: ", model_manager_class)
+        #print("Model manager class: ", model_manager_class)
 
         self.train_id = 1
         self.test_id = 1
@@ -163,7 +163,7 @@ class BaseClient(fl.client.NumPyClient):
         tst_results = self.model_manager.test(
             test_id=self.test_id
         )
-        print("<------- TEST RESULTS -------> :", tst_results)
+        #print("<------- TEST RESULTS -------> :", tst_results)
 
         # Update test history
         self.hist[str(self.test_id)] = {**self.hist[str(self.test_id)], "tst": tst_results}

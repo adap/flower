@@ -42,15 +42,31 @@ class ResNet(nn.Module):
             )
             self.body = nn.Sequential(*list(self.resnet.children())[:-2])
         else:
-            add_to_head = nn.Sequential(
-                nn.AdaptiveAvgPool2d((1, 1)),
-                nn.Flatten(),
-                nn.Linear(512, num_classes)
-            )
-            # Check how many basic blocks are in last layer
-            num_blocks = len(list(self.resnet.children())[-1])
-            print("num_blocks", num_blocks)
-            quit()
+            # Add first 4 layers of resnet to body
+            self.body = nn.Sequential(*list(self.resnet.children())[0:4])
+            rest_to_add = list(self.resnet.children())[4:-2]
+            num_body_layers = 16 - num_head_layers + 1 
+            i = 0
+            for j, layer in enumerate(rest_to_add):
+                new_layer = []
+                for n, block in enumerate(layer):
+                    if i < num_body_layers:
+                        new_layer.append(block)
+                        i += 1
+                        # Rest_to_add
+                        to_add = layer[n+1:]
+                        rest_to_add[j] = nn.Sequential(*to_add)
+                        #print(layer[n+1:])
+                    else:
+                        break
+                self.body.add_module('layer' + str(j), nn.Sequential(*new_layer))
+
+                
+            # Add rest of layers to head
+            self.head = nn.Sequential(*rest_to_add)
+            self.head.add_module('avgpool', nn.AdaptiveAvgPool2d((1, 1)))
+            self.head.add_module('flatten', nn.Flatten())
+            self.head.add_module('classifier', nn.Linear(512, num_classes))       
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.body(x)
