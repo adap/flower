@@ -19,10 +19,10 @@ import flwr.proto.NodeOuterClass.Node
 import flwr.proto.TaskOuterClass.TaskIns
 import flwr.proto.TaskOuterClass.TaskRes
 import flwr.proto.Transport.ServerMessage
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
 
 internal class FlowerGRPC
 @Throws constructor(
@@ -98,7 +98,7 @@ internal class FlwrReRe
     private val state = mutableMapOf<String, TaskIns?>()
     private val nodeStore = mutableMapOf<String, Node?>()
 
-    fun createNode() {
+    private fun createNode() {
         val createNodeRequest = CreateNodeRequest.newBuilder().build()
 
         asyncStub.createNode(createNodeRequest, object : StreamObserver<CreateNodeResponse> {
@@ -117,7 +117,7 @@ internal class FlwrReRe
         })
     }
 
-    fun deleteNode() {
+    private fun deleteNode() {
         nodeStore[KEYNODE]?.let { node ->
             val deleteNodeRequest = DeleteNodeRequest.newBuilder().setNode(node).build()
             asyncStub.deleteNode(deleteNodeRequest, object : StreamObserver<DeleteNodeResponse> {
@@ -137,38 +137,70 @@ internal class FlwrReRe
         }
     }
 
-    suspend fun receive(): Flow<TaskIns> = flow {
+    private suspend fun request(requestChannel: Channel<PullTaskInsRequest>, node: Node) {
+        val request = PullTaskInsRequest.newBuilder().setNode(node).build()
+        requestChannel.send(request)
+    }
+
+    private suspend fun receive(requestChannel: Channel<PullTaskInsRequest>, node: Node) = flow {
+        coroutineScope {
+            val responses = Channel<TaskIns?>(1)
+            for (request in requestChannel)
+                asyncStub.pullTaskIns(request, object : StreamObserver<PullTaskInsResponse> {
+                    override fun onNext(value: PullTaskInsResponse?) {
+                        val taskIns = value?.let { getTaskIns(it) }
+                        if (taskIns != null && validateTaskIns(taskIns, true)) {
+                            state[KEYTASKINS] = taskIns
+                            responses.trySend(taskIns).isSuccess
+                        }
+
+                    }
+
+                    override fun onError(t: Throwable?) {
+                        t?.printStackTrace()
+                    }
+
+                    override fun onCompleted() {
+                    }
+                })
+
+            for (response in responses) {
+                if (response == null) {
+                    delay(3000)
+                    request(requestChannel, node)
+                } else {
+                    emit(response)
+                }
+            }
+        }
+    }
+
+    suspend fun startGRPCReRe() {
+        createNode()
+
         val node = nodeStore[KEYNODE]
         if (node == null) {
             println("Node not available")
-            return@flow
+            return
         }
 
-        val request = PullTaskInsRequest.newBuilder().setNode(node).build()
-        asyncStub.pullTaskIns(request, object : StreamObserver<PullTaskInsResponse> {
-            override fun onNext(value: PullTaskInsResponse?) {
-                val taskIns = value?.let { getTaskIns(it) }
-                if (taskIns != null && validateTaskIns(taskIns, true)) {
-                    state[KEYTASKINS] = taskIns
-                    // Using emit inside the coroutine scope
-                    kotlinx.coroutines.GlobalScope.launch {
-                        emit(taskIns)
-                    }
+        val requestChannel = Channel<PullTaskInsRequest>(1)
+        request(requestChannel, node)
+        receive(requestChannel, node)
+            .collect {
+                val (taskRes, sleepDuration, keepGoing) = handle(client, it)
+                send(taskRes)
+                delay(sleepDuration.toLong())
+                if (keepGoing) {
+                    request(requestChannel, node)
+                } else {
+                    deleteNode()
+                    requestChannel.close()
                 }
             }
-
-            override fun onError(t: Throwable?) {
-                t?.printStackTrace()
-                finishLatch.countDown()
-            }
-
-            override fun onCompleted() {
-                finishLatch.countDown()
-            }
-        })
     }
 
-    fun send(taskRes: TaskRes) {
+    private fun send(taskRes: TaskRes) {
         nodeStore[KEYNODE]?.let { node ->
             state[KEYTASKINS]?.let { taskIns ->
                 if (validateTaskRes(taskRes)) {
@@ -188,4 +220,12 @@ internal class FlwrReRe
             }
         }
     }
+}
+
+suspend fun createFlowerReRe(
+    serverAddress: String,
+    useTLS: Boolean,
+    client: Client,
+) {
+    createChannel(serverAddress, useTLS)
 }
