@@ -78,7 +78,7 @@ Stay tuned, more tutorials are coming soon. Topics include **Privacy and Securit
 
 [Flower Docs](https://flower.dev/docs):
 * [Installation](https://flower.dev/docs/framework/installation.html)
-* [Quickstart (TensorFlow)](https://flower.dev/framework/docs/quickstart-tensorflow.html)
+* [Quickstart (TensorFlow)](https://flower.dev/docs/framework/quickstart-tensorflow.html)
 * [Quickstart (PyTorch)](https://flower.dev/docs/framework/quickstart-pytorch.html)
 * [Quickstart (Hugging Face)](https://flower.dev/docs/framework/quickstart-huggingface.html)
 * [Quickstart (PyTorch Lightning [code example])](https://flower.dev/docs/framework/quickstart-pytorch-lightning.html)
