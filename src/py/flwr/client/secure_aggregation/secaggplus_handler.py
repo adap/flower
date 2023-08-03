@@ -78,14 +78,15 @@ class SecAggPlusState:
     target_range: int = 0
     mod_range: int = 0
 
-    # sk, pk, bk stand for secret key, public key and private mask seed
+    # sk, pk stand for secret key, public key
     sk1: bytes = b""
     pk1: bytes = b""
     sk2: bytes = b""
     pk2: bytes = b""
-    bk: bytes = b""
+    # random seed for generating the private mask
+    rd_seed: bytes = b""
 
-    bk_share_dict: Dict[int, bytes] = field(default_factory=dict)
+    rd_seed_share_dict: Dict[int, bytes] = field(default_factory=dict)
     sk1_share_dict: Dict[int, bytes] = field(default_factory=dict)
     # the dict of the shared secrets from sk2
     ss2_dict: Dict[int, bytes] = field(default_factory=dict)
@@ -163,7 +164,7 @@ def _setup(state: SecAggPlusState, named_values: Dict[str, Value]) -> Dict[str, 
 
     # key is the secure id of another client (int)
     # value is the share of that client's secret (bytes)
-    state.bk_share_dict = {}
+    state.rd_seed_share_dict = {}
     state.sk1_share_dict = {}
     state.ss2_dict = {}
     # Create 2 sets private public key pairs
@@ -210,17 +211,17 @@ def _share_keys(
         )
 
     # Generate private mask seed
-    state.bk = os.urandom(32)
+    state.rd_seed = os.urandom(32)
 
     # Create shares
-    b_shares = create_shares(state.bk, state.threshold, state.share_num)
+    b_shares = create_shares(state.rd_seed, state.threshold, state.share_num)
     sk1_shares = create_shares(state.sk1, state.threshold, state.share_num)
 
     srcs, dsts, ciphertexts = [], [], []
 
     for idx, (sid, (_, pk2)) in enumerate(state.public_keys_dict.items()):
         if sid == state.sid:
-            state.bk_share_dict[state.sid] = b_shares[idx]
+            state.rd_seed_share_dict[state.sid] = b_shares[idx]
             state.sk1_share_dict[state.sid] = sk1_shares[idx]
         else:
             shared_key = generate_shared_key(
@@ -267,7 +268,7 @@ def _collect_masked_input(
                 f"Client {state.sid}: received an encrypted message"
                 f"for Client {dst} from Client {src}"
             )
-        state.bk_share_dict[src] = b_share
+        state.rd_seed_share_dict[src] = b_share
         state.sk1_share_dict[src] = sk1_share
 
     # fit client
@@ -295,7 +296,7 @@ def _collect_masked_input(
     dimensions_list: List[Tuple[int, ...]] = [a.shape for a in quantized_parameters]
 
     # add private mask
-    private_mask = pseudo_rand_gen(state.bk, state.mod_range, dimensions_list)
+    private_mask = pseudo_rand_gen(state.rd_seed, state.mod_range, dimensions_list)
     quantized_parameters = parameters_addition(quantized_parameters, private_mask)
 
     for client_id in available_clients:
@@ -337,7 +338,7 @@ def _unmasking(
 
     sids, shares = [], []
     sids += active_sids
-    shares += [state.bk_share_dict[sid] for sid in active_sids]
+    shares += [state.rd_seed_share_dict[sid] for sid in active_sids]
     sids += dead_sids
     shares += [state.sk1_share_dict[sid] for sid in dead_sids]
 
