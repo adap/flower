@@ -65,36 +65,39 @@ STAGES = (STAGE_SETUP, STAGE_SHARE_KEYS, STAGE_COLLECT_MASKED_INPUT, STAGE_UNMAS
 
 
 @dataclass
-# pylint: disable=invalid-name
 # pylint: disable-next=too-many-instance-attributes
-class _State:
-    sample_num: int = 0
+class SecAggPlusState:
+    """State of the SecAgg+ protocol."""
+
     sid: int = 0
+    sample_num: int = 0
     share_num: int = 0
     threshold: int = 0
     test_drop: bool = False
     clipping_range: float = 0.0
     target_range: int = 0
     mod_range: int = 0
-    b_share_dict: Dict[int, bytes] = field(default_factory=dict)
-    sk1_share_dict: Dict[int, bytes] = field(default_factory=dict)
-    shared_key_2_dict: Dict[int, bytes] = field(default_factory=dict)
+
+    # sk, pk, bk stand for secret key, public key and private mask seed
     sk1: bytes = b""
     pk1: bytes = b""
     sk2: bytes = b""
     pk2: bytes = b""
-    b: bytes = b""
+    bk: bytes = b""
+
+    bk_share_dict: Dict[int, bytes] = field(default_factory=dict)
+    sk1_share_dict: Dict[int, bytes] = field(default_factory=dict)
+    # the dict of the shared secrets from sk2
+    ss2_dict: Dict[int, bytes] = field(default_factory=dict)
     public_keys_dict: Dict[int, Tuple[bytes, bytes]] = field(default_factory=dict)
+
     client: Optional[Union[Client, NumPyClient]] = None
-
-
-# pylint: enable=invalid-name
 
 
 class SecAggPlusHandler(SecureAggregationHandler):
     """Message handler for the SecAgg+ protocol."""
 
-    _shared_state = _State()
+    _shared_state = SecAggPlusState()
     _current_stage = STAGE_UNMASKING
 
     def handle_secure_aggregation(
@@ -122,7 +125,7 @@ class SecAggPlusHandler(SecureAggregationHandler):
         if stage == STAGE_SETUP:
             if self._current_stage != STAGE_UNMASKING:
                 log(WARNING, "restart from setup stage")
-            self._shared_state = _State(client=self)
+            self._shared_state = SecAggPlusState(client=self)
             self._current_stage = stage
             return _setup(self._shared_state, named_values)
         # if stage is not "setup", the new stage should be the next stage
@@ -144,7 +147,7 @@ class SecAggPlusHandler(SecureAggregationHandler):
         raise ValueError(f"Unknown secagg stage: {stage}")
 
 
-def _setup(state: _State, named_values: Dict[str, Value]) -> Dict[str, Value]:
+def _setup(state: SecAggPlusState, named_values: Dict[str, Value]) -> Dict[str, Value]:
     # Assigning parameter values to object fields
     sec_agg_param_dict = named_values
     state.sample_num = cast(int, sec_agg_param_dict["share_num"])
@@ -160,9 +163,9 @@ def _setup(state: _State, named_values: Dict[str, Value]) -> Dict[str, Value]:
 
     # key is the secure id of another client (int)
     # value is the share of that client's secret (bytes)
-    state.b_share_dict = {}
+    state.bk_share_dict = {}
     state.sk1_share_dict = {}
-    state.shared_key_2_dict = {}
+    state.ss2_dict = {}
     # Create 2 sets private public key pairs
     # One for creating pairwise masks
     # One for encrypting message to distribute shares
@@ -176,7 +179,9 @@ def _setup(state: _State, named_values: Dict[str, Value]) -> Dict[str, Value]:
 
 
 # pylint: disable-next=too-many-locals
-def _share_keys(state: _State, named_values: Dict[str, Value]) -> Dict[str, Value]:
+def _share_keys(
+    state: SecAggPlusState, named_values: Dict[str, Value]
+) -> Dict[str, Value]:
     named_bytes_tuples = cast(Dict[str, Tuple[bytes, bytes]], named_values)
     key_dict = {int(sid): (pk1, pk2) for sid, (pk1, pk2) in named_bytes_tuples.items()}
     log(INFO, "Client %d: starting stage 1...", state.sid)
@@ -205,24 +210,24 @@ def _share_keys(state: _State, named_values: Dict[str, Value]) -> Dict[str, Valu
         )
 
     # Generate private mask seed
-    state.b = os.urandom(32)
+    state.bk = os.urandom(32)
 
     # Create shares
-    b_shares = create_shares(state.b, state.threshold, state.share_num)
+    b_shares = create_shares(state.bk, state.threshold, state.share_num)
     sk1_shares = create_shares(state.sk1, state.threshold, state.share_num)
 
     srcs, dsts, ciphertexts = [], [], []
 
     for idx, (sid, (_, pk2)) in enumerate(state.public_keys_dict.items()):
         if sid == state.sid:
-            state.b_share_dict[state.sid] = b_shares[idx]
+            state.bk_share_dict[state.sid] = b_shares[idx]
             state.sk1_share_dict[state.sid] = sk1_shares[idx]
         else:
             shared_key = generate_shared_key(
                 bytes_to_private_key(state.sk2),
                 bytes_to_public_key(pk2),
             )
-            state.shared_key_2_dict[sid] = shared_key
+            state.ss2_dict[sid] = shared_key
             plaintext = share_keys_plaintext_concat(
                 state.sid, sid, b_shares[idx], sk1_shares[idx]
             )
@@ -237,7 +242,7 @@ def _share_keys(state: _State, named_values: Dict[str, Value]) -> Dict[str, Valu
 
 # pylint: disable-next=too-many-locals
 def _collect_masked_input(
-    state: _State, named_values: Dict[str, Value]
+    state: SecAggPlusState, named_values: Dict[str, Value]
 ) -> Dict[str, Value]:
     log(INFO, "Client %d: starting stage 2...", state.sid)
     # Receive shares and fit model
@@ -249,7 +254,7 @@ def _collect_masked_input(
 
     # decode all packets and verify all packets are valid. Save shares received
     for src, ciphertext in zip(srcs, ciphertexts):
-        shared_key = state.shared_key_2_dict[src]
+        shared_key = state.ss2_dict[src]
         plaintext = decrypt(shared_key, ciphertext)
         _src, dst, b_share, sk1_share = share_keys_plaintext_separate(plaintext)
         available_clients.append(src)
@@ -262,7 +267,7 @@ def _collect_masked_input(
                 f"Client {state.sid}: received an encrypted message"
                 f"for Client {dst} from Client {src}"
             )
-        state.b_share_dict[src] = b_share
+        state.bk_share_dict[src] = b_share
         state.sk1_share_dict[src] = sk1_share
 
     # fit client
@@ -290,7 +295,7 @@ def _collect_masked_input(
     dimensions_list: List[Tuple[int, ...]] = [a.shape for a in quantized_parameters]
 
     # add private mask
-    private_mask = pseudo_rand_gen(state.b, state.mod_range, dimensions_list)
+    private_mask = pseudo_rand_gen(state.bk, state.mod_range, dimensions_list)
     quantized_parameters = parameters_addition(quantized_parameters, private_mask)
 
     for client_id in available_clients:
@@ -318,7 +323,9 @@ def _collect_masked_input(
     }
 
 
-def _unmasking(state: _State, named_values: Dict[str, Value]) -> Dict[str, Value]:
+def _unmasking(
+    state: SecAggPlusState, named_values: Dict[str, Value]
+) -> Dict[str, Value]:
     log(INFO, "Client %d: starting stage 3...", state.sid)
 
     active_sids = cast(List[int], named_values["active_sids"])
@@ -330,7 +337,7 @@ def _unmasking(state: _State, named_values: Dict[str, Value]) -> Dict[str, Value
 
     sids, shares = [], []
     sids += active_sids
-    shares += [state.b_share_dict[sid] for sid in active_sids]
+    shares += [state.bk_share_dict[sid] for sid in active_sids]
     sids += dead_sids
     shares += [state.sk1_share_dict[sid] for sid in dead_sids]
 
