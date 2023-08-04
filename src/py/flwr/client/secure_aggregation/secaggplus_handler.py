@@ -130,7 +130,9 @@ class SecAggPlusHandler(SecureAggregationHandler):
             self._current_stage = stage
             return _setup(self._shared_state, named_values)
         # if stage is not "setup", the new stage should be the next stage
-        expected_new_stage = STAGES[STAGES.index(self._current_stage) + 1]
+        expected_new_stage = STAGES[
+            (STAGES.index(self._current_stage) + 1) % len(STAGES)
+        ]
         if stage == expected_new_stage:
             self._current_stage = stage
         else:
