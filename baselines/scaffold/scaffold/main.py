@@ -5,9 +5,15 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 """
 # these are the basic packages you'll need here
 # feel free to remove some if aren't needed
+import flwr as fl
 import hydra
+from hydra.utils import instantiate
+from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
+from scaffold.dataset import load_datasets
+from scaffold.client import gen_client_fn
+import scaffold.server as server
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig) -> None:
@@ -28,20 +34,55 @@ def main(cfg: DictConfig) -> None:
     # (2) tell each client what dataset partitions they should use (e.g. a this could
     # be a location in the file system, a list of dataloader, a list of ids to extract
     # from a dataset, it's up to you)
+    trainloaders, valloaders, testloader = load_datasets(
+        config=cfg.dataset,
+        num_clients=cfg.num_clients,
+        batch_size=cfg.batch_size,
+    )
 
     # 3. Define your clients
     # Define a function that returns another function that will be used during
     # simulation to instantiate each individual client
-    # client_fn = client.<my_function_that_returns_a_function>()
+    
+    client_fn = gen_client_fn(
+        trainloaders,
+        valloaders,
+        num_epochs=cfg.num_epochs,
+        learning_rate=cfg.learning_rate,
+        model=cfg.model,
+    )
+
+    device = cfg.server_device
+    evaluate_fn = server.gen_evaluate_fn(testloader, device=device, model=cfg.model)
 
     # 4. Define your strategy
     # pass all relevant argument (including the global dataset used after aggregation,
     # if needed by your method.)
     # strategy = instantiate(cfg.strategy, <additional arguments if desired>)
+    strategy = instantiate(
+        cfg.strategy,
+        evaluate_fn=evaluate_fn,
+    )
 
     # 5. Start Simulation
     # history = fl.simulation.start_simulation(<arguments for simulation>)
+    history = fl.simulation.start_simulation(
+        server=server.ScaffoldServer(strategy=strategy, model=cfg.model),
+        client_fn=client_fn,
+        num_clients=cfg.num_client,
+        config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
+        client_resources={
+            "num_cpus": cfg.client_resources.num_cpus,
+            "num_gpus": cfg.client_resources.num_gpus,
+        },
+        strategy=strategy,
+    )
 
+    print(history)
+
+    save_path = HydraConfig.get().runtime.output_dir
+    print(save_path)
+    
     # 6. Save your results
     # Here you can save the `history` returned by the simulation and include
     # also other buffers, statistics, info needed to be saved in order to later
