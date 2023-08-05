@@ -8,12 +8,14 @@ from flwr.server import Server
 from flwr.server.client_manager import ClientManager, SimpleClientManager
 from flwr.server.strategy import Strategy
 from flwr.server.client_proxy import ClientProxy
-from flwr.common.typing import List, Tuple, Optional, Union, Dict, NDArrays
+from flwr.common.typing import List, Tuple, Optional, Union, Dict, NDArrays, Callable, OrderedDict
 from omegaconf import DictConfig
 from flwr.common.logger import log
 from logging import DEBUG, INFO
 from flwr.common import Code, Parameters, Scalar, parameters_to_ndarrays, ndarrays_to_parameters
 from scaffold.strategy import FitIns, FitRes, FitResultsAndFailures
+from scaffold.models import test
+from torch.utils.data import DataLoader
 
 import torch
 import concurrent.futures
@@ -161,3 +163,46 @@ def _handle_finished_future_after_fit(
 
     # Not successful, client returned a result where the status code is not OK
     failures.append(result)
+
+def gen_evaluate_fn(
+    testloader: DataLoader,
+    device: torch.device,
+    model: DictConfig,
+) -> Callable[
+    [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]
+]:
+    """Generates the function for centralized evaluation.
+
+    Parameters
+    ----------
+    testloader : DataLoader
+        The dataloader to test the model with.
+    device : torch.device
+        The device to test the model on.
+
+    Returns
+    -------
+    Callable[ [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]] ]
+        The centralized evaluation function.
+    """
+
+    def evaluate(
+        server_round: int, parameters_ndarrays: NDArrays, config: Dict[str, Scalar]
+    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+        # pylint: disable=unused-argument
+        """Use the entire Emnist test set for evaluation."""
+
+        net = instantiate(model)
+        params_dict = zip(net.state_dict().keys(), parameters_ndarrays)
+        state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+        net.load_state_dict(state_dict, strict=True)
+        net.to(device)
+
+        loss, accuracy = test(net, testloader, device=device)
+        log(INFO, f"Server -> Round: {server_round} | Loss: {loss} | Accuracy: {accuracy}")
+        if accuracy > 0.5:
+            log(INFO, f"Reached accuracy > 0.5 at round {server_round}")
+        # return statistics
+        return loss, {"accuracy": accuracy}
+
+    return evaluate
