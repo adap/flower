@@ -1,0 +1,147 @@
+"""Define your client class and a function to construct such clients.
+
+Please overwrite `flwr.client.NumPyClient` or `flwr.client.Client` and create a function
+to instantiate your client.
+"""
+import flwr as fl
+from flwr.common import Scalar, Status, Code, ndarrays_to_parameters, parameters_to_ndarrays
+from flwr.common.typing import Parameters
+from typing import Dict, OrderedDict, Union, List, Tuple, Callable
+import torch
+from torch.utils.data import DataLoader
+from omegaconf import DictConfig
+from hydra.utils import instantiate
+
+from scaffold.models import train, test
+from scaffold.strategy import FitRes
+
+
+class FlowerClientScaffold(
+    fl.client.NumPyClient
+):
+    """Flower client implementing scaffold."""
+
+    def __init__(
+        self,
+        net: torch.nn.Module,
+        trainloader: DataLoader,
+        valloader: DataLoader,
+        device: torch.device,
+        num_epochs: int,
+        learning_rate: float,
+    ) -> None:
+        self.net = net
+        self.trainloader = trainloader
+        self.valloader = valloader
+        self.device = device
+        self.num_epochs = num_epochs
+        self.learning_rate = learning_rate
+        # initialize client control variate with 0 and shape of the network parameters
+        self.client_cv = []
+        for param in self.net.parameters():
+            self.client_cv.append(torch.zeros(param.shape))
+    
+    def get_parameters(self):
+        """Return the current local model parameters."""
+        return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
+
+    def set_parameters(self, parameters):
+        """Set the local model parameters using given ones."""
+        params_dict = zip(self.net.state_dict().keys(), parameters)
+        state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+        self.net.load_state_dict(state_dict, strict=True)
+    
+    def fit(self, parameters, config: Dict[str, Union[Scalar, List[torch.Tensor]]]):
+        """Implements distributed fit function for a given client using Scaffold Strategy."""
+        self.set_parameters(parameters)
+        # convert the server control variate to a list of tensors
+        server_cv = config["server_cv"]
+        server_cv = parameters_to_ndarrays(server_cv)
+        server_cv = [torch.Tensor(cv) for cv in server_cv]
+        train(
+            self.net,
+            self.trainloader,
+            self.device,
+            self.num_epochs,
+            self.learning_rate,
+            server_cv,
+            self.client_cv,
+        )
+        x = parameters
+        y_i = self.get_parameters()
+        c_i_n = []
+        server_update_x = []
+        server_update_c = []
+        # update client control variate c_i_1 = c_i - c + 1/eta*K (x - y_i)
+        for c_i_j, c_j, x_j, y_i_j in zip(self.client_cv, server_cv, x, y_i):
+            c_i_n.append(c_i_j - c_j + (1.0/self.learning_rate*self.num_epochs)*(x_j - y_i_j))
+            # y_i - x, c_i_n - c_i for the server
+            server_update_x.append((y_i_j - x_j).cpu().numpy())
+            server_update_c.append((c_i_n[-1] - c_i_j).cpu().numpy())
+        
+        return FitRes(status=Status(code=Code.OK, message="Success"),
+                parameters=ndarrays_to_parameters(server_update_x),
+                num_examples=len(self.trainloader),
+                metrics={"server_update_c": ndarrays_to_parameters(server_update_c)},
+            )
+    
+    def evaluate(self, parameters, config: Dict[str, Scalar]):
+        """Evaluate using given parameters."""
+        self.set_parameters(parameters)
+        loss, acc = test(self.net, self.valloader, self.device)
+        return float(loss), len(self.valloader), {"accuracy": float(acc)}
+
+def gen_client_fn(
+    trainloaders: List[DataLoader],
+    valloaders: List[DataLoader],
+    num_epochs: int,
+    learning_rate: float,
+    model: DictConfig,
+) -> Tuple[
+    Callable[[str], FlowerClientScaffold], DataLoader
+]:  # pylint: disable=too-many-arguments
+    """Generates the client function that creates the scaffold flower clients.
+
+    Parameters
+    ----------
+    trainloaders: List[DataLoader]
+        A list of DataLoaders, each pointing to the dataset training partition
+        belonging to a particular client.
+    valloaders: List[DataLoader]
+        A list of DataLoaders, each pointing to the dataset validation partition
+        belonging to a particular client.
+    num_epochs : int
+        The number of local epochs each client should run the training for before
+        sending it to the server.
+    learning_rate : float
+        The learning rate for the SGD  optimizer of clients.
+
+    Returns
+    -------
+    Tuple[Callable[[str], FlowerClientScaffold], DataLoader]
+        A tuple containing the client function that creates the scaffold flower clients and
+        the DataLoader that will be used for testing
+    """
+
+    def client_fn(cid: str) -> FlowerClientScaffold:
+        """Create a Flower client representing a single organization."""
+
+        # Load model
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        net = instantiate(model).to(device)
+
+        # Note: each client gets a different trainloader/valloader, so each client
+        # will train and evaluate on their own unique data
+        trainloader = trainloaders[int(cid)]
+        valloader = valloaders[int(cid)]
+
+        return FlowerClientScaffold(
+            net,
+            trainloader,
+            valloader,
+            device,
+            num_epochs,
+            learning_rate,
+        )
+
+    return client_fn
