@@ -38,6 +38,8 @@ class HeteroFL(fl.server.strategy.Strategy):
         self.min_fit_clients = min_fit_clients
         self.min_evaluate_clients = min_evaluate_clients
         self.min_available_clients = min_available_clients
+        # # created client_to_model_mapping
+        # self.client_to_model_rate_mapping: Dict[str, ClientProxy] = {}
 
     def __repr__(self) -> str:
         return "FedCustom"
@@ -46,6 +48,7 @@ class HeteroFL(fl.server.strategy.Strategy):
         self, client_manager: ClientManager
     ) -> Optional[Parameters]:
         """Initialize global model parameters."""
+        # self.make_client_to_model_rate_mapping(client_manager)
         net = Net()
         ndarrays = get_parameters(net)
         return fl.common.ndarrays_to_parameters(ndarrays)
@@ -63,28 +66,17 @@ class HeteroFL(fl.server.strategy.Strategy):
 
         # for sampling we pass the criterion to select the required clients
         clients = client_manager.sample(
-            num_clients=sample_size, min_num_clients=min_num_clients
+            num_clients=sample_size, min_num_clients=min_num_clients,
         )
 
-        clients_properties = clients[0].get_properties(ins=None, timeout=10000)
-
-        print('Kanga Knaga Knaguvaaaa')
-        print(clients_properties)
-        print('Kanga Knaga Knaguvaaaa')
-
         # Create custom configs
+        
         n_clients = len(clients)
-        half_clients = n_clients // 2
-        standard_config = {"lr": 0.001}
-        higher_lr_config = {"lr": 0.003}
         fit_configurations = []
         for idx, client in enumerate(clients):
-            if idx < half_clients:
-                fit_configurations.append((client, FitIns(parameters, standard_config)))
-            else:
-                fit_configurations.append(
-                    (client, FitIns(parameters, higher_lr_config))
-                )
+            model_rate = client_mode_rate_mapping[client.cid]
+            client_param = param_model_rate_mapping(parameters , model_rate)
+            fit_configurations.append((client, FitIns(client_param, {'model_rate' : model_rate})))
         return fit_configurations
 
     def aggregate_fit(
@@ -160,3 +152,7 @@ class HeteroFL(fl.server.strategy.Strategy):
         """Use a fraction of available clients for evaluation."""
         num_clients = int(num_available_clients * self.fraction_evaluate)
         return max(num_clients, self.min_evaluate_clients), self.min_available_clients
+    
+    # def make_client_to_model_rate_mapping(self , client_manager : ClientManager):
+    #     for i in range(len(client_manager)):
+    #         self.client_to_model_rate_mapping[str(i)] = client_manager.clients[str(i)].get_properties(None , timeout=1000).parameters['client_model_rate']
