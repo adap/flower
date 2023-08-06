@@ -17,6 +17,7 @@ from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 from FedMLB.client import TFClient
 import FedMLB.dataset as fedmlb_datasets
+import FedMLB.dataset_preparation as fedmlb_ds_preparation
 from FedMLB.FedMLBModel import FedMLBModel
 from FedMLB.FedAvgKDModel import FedAvgKDModel
 import FedMLB.models as fedmlb_models
@@ -24,6 +25,7 @@ from FedMLB.utils import save_results_as_pickle
 from FedMLB.models import create_resnet18
 
 TEST_BATCH_SIZE = 256
+
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig) -> None:
@@ -46,13 +48,28 @@ def main(cfg: DictConfig) -> None:
                                                              np.square(0.2762)])
         return norm_layer(tf.cast(image, tf.float32) / 255.0), label
 
+    def element_fn_norm_tiny_imagenet(image, label):
+        norm_layer = tf.keras.layers.Normalization(mean=[0.4802, 0.4481, 0.3975],
+                                                   variance=[np.square(0.2770),
+                                                             np.square(0.2691),
+                                                             np.square(0.2821)])
+        return norm_layer(tf.cast(image, tf.float32) / 255.0), tf.expand_dims(label, axis=-1)
 
-    def get_evaluate_fn(model, save_path):
+    def get_evaluate_fn(model, save_path, dataset):
         """Return an evaluation function for server-side evaluation."""
+        if dataset in ["cifar100"]:
+            (_, _), (x_test, y_test) = tf.keras.datasets.cifar100.load_data()
+            test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test))
+            test_ds = test_ds.map(element_norm_fn_cifar100).batch(TEST_BATCH_SIZE)
+        else:  # tiny-imagenet
+            # center_crop = tf.keras.layers.CenterCrop(64, 64)
+            center_crop = fedmlb_datasets.PaddedCenterCropCustom(64, 64)
 
-        (_, _), (x_test, y_test) = tf.keras.datasets.cifar100.load_data()
-        test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test))
-        test_ds = test_ds.map(element_norm_fn_cifar100).batch(TEST_BATCH_SIZE)
+            def center_crop_data(image, label):
+                return center_crop(image), label
+
+            test_ds = fedmlb_ds_preparation.load_test_dataset_tiny_imagenet()
+            test_ds = test_ds.map(element_fn_norm_tiny_imagenet).map(center_crop_data).batch(TEST_BATCH_SIZE)
 
         # creating a tensorboard writer to log results
         # then results can be monitored in real-time with tensorboard
@@ -85,7 +102,6 @@ def main(cfg: DictConfig) -> None:
         }
         return config
 
-
     ray_init_args = {"include_dashboard": False}
     # Parse input parameters
     algorithm = cfg.algorithm
@@ -103,9 +119,10 @@ def main(cfg: DictConfig) -> None:
     dataset = cfg.dataset_config.dataset
     if dataset in ["cifar100"]:
         num_classes = 100
-    else: # tiny-imagenet
+        input_shape = (None, 32, 32, 3)
+    else:  # tiny-imagenet
         num_classes = 200
-
+        input_shape = (None, 64, 64, 3)
 
     def client_fn(cid) -> TFClient:
         # print(f"{cid}")
@@ -124,7 +141,7 @@ def main(cfg: DictConfig) -> None:
             seed=random_seed)
 
         if algorithm in ["FedAvg"]:
-            client_model = fedmlb_models.create_resnet18(num_classes=num_classes, input_shape=(None, 32, 32, 3), norm="group",
+            client_model = fedmlb_models.create_resnet18(num_classes=num_classes, input_shape=input_shape, norm="group",
                                                          seed=random_seed)
             client_model.compile(optimizer=tf.keras.optimizers.SGD(learning_rate=lr_client,
                                                                    clipnorm=clipnorm,
@@ -134,10 +151,10 @@ def main(cfg: DictConfig) -> None:
                                  metrics=[tf.keras.metrics.SparseCategoricalAccuracy(name='accuracy')])
 
         elif algorithm in ["FedMLB"]:
-            local_model = fedmlb_models.create_resnet18_mlb(num_classes=num_classes, input_shape=(None, 32, 32, 3),
+            local_model = fedmlb_models.create_resnet18_mlb(num_classes=num_classes, input_shape=input_shape,
                                                             norm="group",
                                                             seed=random_seed)
-            global_model = fedmlb_models.create_resnet18_mlb(num_classes=num_classes, input_shape=(None, 32, 32, 3),
+            global_model = fedmlb_models.create_resnet18_mlb(num_classes=num_classes, input_shape=input_shape,
                                                              norm="group",
                                                              seed=random_seed)
             client_model = FedMLBModel(local_model, global_model)
@@ -153,12 +170,12 @@ def main(cfg: DictConfig) -> None:
                                  lambda_2=lambda_2)
 
         elif algorithm in ["FedAvg+KD"]:
-            local_model = fedmlb_models.create_resnet18(num_classes=num_classes, input_shape=(None, 32, 32, 3),
-                                                            norm="group",
-                                                            seed=random_seed)
-            global_model = fedmlb_models.create_resnet18(num_classes=num_classes, input_shape=(None, 32, 32, 3),
-                                                             norm="group",
-                                                             seed=random_seed)
+            local_model = fedmlb_models.create_resnet18(num_classes=num_classes, input_shape=input_shape,
+                                                        norm="group",
+                                                        seed=random_seed)
+            global_model = fedmlb_models.create_resnet18(num_classes=num_classes, input_shape=input_shape,
+                                                         norm="group",
+                                                         seed=random_seed)
             client_model = FedAvgKDModel(local_model, global_model)
             client_model.compile(optimizer=tf.keras.optimizers.SGD(learning_rate=lr_client,
                                                                    clipnorm=clipnorm,
@@ -176,8 +193,8 @@ def main(cfg: DictConfig) -> None:
         return client
 
     tf.keras.utils.set_random_seed(cfg.random_seed)
-    server_model = create_resnet18(num_classes=num_classes, input_shape=(None, 32, 32, 3), norm="group",
-                                                    seed=cfg.random_seed)
+    server_model = create_resnet18(num_classes=num_classes, input_shape=input_shape, norm="group",
+                                   seed=cfg.random_seed)
     server_model.compile(
         loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
         metrics=[tf.keras.metrics.SparseCategoricalAccuracy(name='accuracy')]
@@ -185,11 +202,11 @@ def main(cfg: DictConfig) -> None:
     params = server_model.get_weights()
 
     save_path = os.path.join("FedMLB", "tb_logging", dataset, "resnet18", algorithm, str(total_clients) + "_clients",
-                                       "dir_" + str(round(alpha_dirichlet, 1)), "seed_" + str(random_seed))
+                             "dir_" + str(round(alpha_dirichlet, 1)), "seed_" + str(random_seed))
     strategy = instantiate(
         cfg.strategy,
         initial_parameters=flwr.common.ndarrays_to_parameters(params),
-        evaluate_fn=get_evaluate_fn(server_model, save_path),
+        evaluate_fn=get_evaluate_fn(server_model, save_path, dataset),
         on_fit_config_fn=fit_config,
     )
 
@@ -216,6 +233,7 @@ def main(cfg: DictConfig) -> None:
     # save results as a Python pickle using a file_path
     # the directory created by Hydra for each run
     save_results_as_pickle(history, file_path=save_path, extra_results={})
+
 
 if __name__ == "__main__":
     main()

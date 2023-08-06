@@ -47,7 +47,7 @@ class TFClient(fl.client.NumPyClient):
         exp_decay: int = config["exp_decay"]
         lr_client_initial: int = config["lr_client_initial"]
         if current_round > 1:
-            lr_client = lr_client_initial * (exp_decay ** current_round)
+            lr_client = lr_client_initial * (exp_decay ** (current_round-1))
             # During training, update the learning rate as needed
             tf.keras.backend.set_value(self.model.optimizer.lr, lr_client)
 

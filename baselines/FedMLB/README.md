@@ -146,7 +146,7 @@ examples for the default setting of this repository. Note that those files are p
 3. Moderate-scale with Dir(0.6), 100 clients, balanced dataset (1000 examples per client).
 4. Large-scale experiments with Dir(0.6), 500 clients, balanced dataset (200 examples per client).
 
-> Note: To generate the clients' dataset for the Tiny-Imagenet, the dataset should be downloaded in advance.\
+> Note: To generate the clients' dataset for the Tiny-Imagenet, the original dataset should be downloaded in advance.\
 > It can be downloaded at http://cs231n.stanford.edu/tiny-imagenet-200.zip. Unzip the folder. \
 > Note: This code supposes to find the folder at the path `/{YOUR_LOCAL_PATH_TO_THE_BASELINE}/FedMLB/tiny-imagenet-200`.
 
@@ -219,11 +219,17 @@ python -m FedMLB.main dataset_config.dataset="tiny-imagenet" dataset_config.alph
 ```
 
 ## Expected Results
+The following tables report the results from the above command compared to the 
+results reported in the original paper. Results from the paper are reported in brackets. 
+Note that (as in the original paper),
+the accuracy at the target round is based on the exponential moving average with the momentum parameter
+0.9.
+
 This repository can reproduce the results for 3 baselines used in the experimental part
 of the original paper: FedAvg, FedAvg+KD, FedMLB.
 
 The results of Table 2 and Figure 3 in the paper (for FedAvg, FedAvg+KD, FedMLB)
-are for CIFAR-100 with:
+are for CIFAR-100 and Tiny-ImageNet with:
 
 1. Moderate-scale with Dir(0.3), 100 clients, 5% participation rate.
 2. Large-scale experiments with Dir(0.3), 500 clients, 2% participation rate.
@@ -231,15 +237,9 @@ are for CIFAR-100 with:
 To reproduce (1.) run the following:
 
 ```bash
-# this will produce three consecutive runs
-python run -m FedMLB.main --multirun algorithm="FedMLB","FedAvg","FedAvg+KD" 
+# this will produce six consecutive runs
+python run -m FedMLB.main --multirun dataset_config.dataset="cifar100", "tiny-imagenet" algorithm="FedMLB","FedAvg","FedAvg+KD" 
 ```
-
-The following table reports the results from the above command compared to the 
-results reported in the original paper. Results from the paper are reported in brackets. 
-Note that (as in the original paper),
-the accuracy at the target round is based on the exponential moving average with the momentum parameter
-0.9.
 
 CIFAR-100, Dir(0.3), 100 clients, 5% participation.
 
@@ -249,10 +249,16 @@ CIFAR-100, Dir(0.3), 100 clients, 5% participation.
 | FedAvg+KD  | (42.99) | (49.17)  |
 | FedMLB   | (47.39) 50.59 | (54.58) 56.5 |
 
+Tiny-ImageNet, Dir(0.3), 100 clients, 5% participation.
+
+| Method  | Accuracy @500R | Accuracy @1000R |
+| ------------- | ------------- | ------------- |
+| FedAvg  | (33.39) 33.39 | (35.42) 35.78 |
+| FedMLB   | () | () |
+
 To reproduce (2.) run the following:
 ```bash
-OLD 28 (500R) 32.7 (1000R)
-python -m FedMLB.main --multirun algorithm="FedMLB","FedAvg","FedAvg+KD" total_clients=500 clients_per_round=10
+python -m FedMLB.main --multirun dataset_config.dataset="cifar100", "tiny-imagenet" algorithm="FedMLB","FedAvg","FedAvg+KD" total_clients=500 clients_per_round=10
 ```
 CIFAR-100, Dir(0.3), 500 clients, 2% participation.
 
@@ -261,12 +267,20 @@ CIFAR-100, Dir(0.3), 500 clients, 2% participation.
 | FedAvg  | ()  | () |
 | FedMLB   | () | () |
 
+Tiny-ImageNet, Dir(0.3), 500 clients, 2% participation.
+
+| Method  | Accuracy @500R | Accuracy @1000R |
+| ------------- | ------------- | ------------- |
+| FedAvg  | (33.39) 33.39 | (35.42) 35.78 |
+| FedMLB   | () | () |
+
 To reproduce results reported in Table 3 of the paper,
 related to _more local iterations_ (K=100 or K=200 in the
 paper, instead of K=50) run the following:
 ```bash
 python -m FedMLB.main --multirun algorithm="FedMLB","FedAvg","FedAvg+KD" local_updates=100 # or local_updates=200 
 ```
+
 ### Results logging via Tensorboard
 Beside storing results in plain text in the `output` folder, the results are also stored via 
 tensorboard logs.
@@ -301,4 +315,15 @@ custom `tf.keras.Model` are contained in `FedAvgKDModel.py` and `FedMLBModel.py`
 Note that `FedMLB` and `FedAvg+KD` are client-side methods, which do not impact the aggregation phase 
 of regular FedAvg (so this means that the built-in Flower strategy for FedAvg does not require
 modifications). For this reason, there is no code in `server.py`.
+
+To reproduce results, preprocessing of data is of paramount importance. 
+For CIFAR-100, the preprocessing of train images includes normalization,
+random rotation, random crop and random flip of images; test images
+are normalized. 
+For Tiny-ImageNet, the preprocessing of train images includes normalization,
+random rotation, random crop and random flip of images; test images
+are normalized and center cropped.
+This code uses or defines subclasses of the `tf.keras.layers.Layer` class
+to leverage a series of preprocessing layer to be used in the `.map()`
+primitive of `tf.data.Dataset` (see `dataset.py`).
 

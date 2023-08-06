@@ -11,8 +11,6 @@ defined here of course.
 import os
 import numpy as np
 import tensorflow as tf
-# import keras_cv
-
 
 def load_selected_client_statistics(selected_client, alpha, dataset, total_clients):
     """Returns the amount of local examples for the selected client (referenced with a client_id)
@@ -57,7 +55,7 @@ class PaddedCenterCropCustom(tf.keras.layers.Layer):
         Same as FedMLB paper.
     """
 
-    def __init__(self, height=32, width=64, **kwargs):
+    def __init__(self, height=64, width=64, **kwargs):
         super().__init__(**kwargs)
         self.height = height
         self.width = width
@@ -98,12 +96,13 @@ def load_client_datasets_from_files(dataset, sampled_client, batch_size, total_c
         return norm_layer(tf.cast(image, tf.float32) / 255.0), tf.expand_dims(label, axis=-1)
 
     # transform images
-    rotate = tf.keras.layers.RandomRotation(0.06, seed=seed)
+    # rotate = tf.keras.layers.RandomRotation(0.06, seed=seed)
+    rotate = tf.keras.layers.RandomRotation(0.028, seed=seed) # transforms.RandomRotation(10)
     flip = tf.keras.layers.RandomFlip(mode="horizontal", seed=seed)
 
-    if dataset not in ["tiny_imagenet"]:
+    if dataset in ["cifar100"]:
         crop = PaddedRandomCropCustom(seed=seed)
-    else:
+    else: #tiny-imagenet
         crop = PaddedRandomCropCustom(seed=seed, height=64, width=64)
 
     rotate_flip_crop = tf.keras.Sequential([
