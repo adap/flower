@@ -1,7 +1,7 @@
 """Used to test the model and the data partitionning."""
 
 
-from flwr_baselines.publications.fedavg_mnist import dataset
+from flwr_baselines.publications.fedavg.mnist import dataset
 
 
 def test_non_iid_partitionning(num_clients: int = 100) -> None:
