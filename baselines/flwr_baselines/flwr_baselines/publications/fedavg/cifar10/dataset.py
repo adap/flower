@@ -157,7 +157,7 @@ def _balance_classes(
     idxs = trainset.targets.argsort()
     tmp = [Subset(trainset, idxs[: int(smallest)])]
     tmp_targets = [trainset.targets[idxs[: int(smallest)]]]
-    for count in class_counts:
+    for count in np.cumsum(class_counts):
         tmp.append(Subset(trainset, idxs[int(count) : int(count + smallest)]))
         tmp_targets.append(trainset.targets[idxs[int(count) : int(count + smallest)]])
     unshuffled = ConcatDataset(tmp)
