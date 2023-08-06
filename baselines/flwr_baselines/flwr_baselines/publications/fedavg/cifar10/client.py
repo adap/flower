@@ -1,3 +1,4 @@
+# pylint: disable=too-many-arguments
 """Defines the CIFAR10 Flower Client and a function to instantiate it."""
 
 from collections import OrderedDict
