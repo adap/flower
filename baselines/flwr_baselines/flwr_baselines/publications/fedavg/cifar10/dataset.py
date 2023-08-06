@@ -116,7 +116,7 @@ def _partition_data(
             trainset = _balance_classes(trainset, seed)
             partition_size = int(len(trainset) / num_clients)
         shard_size = int(partition_size / 2)
-        idxs = trainset.targets.argsort()
+        idxs = torch.tensor(trainset.targets).argsort()
         sorted_data = Subset(trainset, idxs)
         tmp = []
         for idx in range(num_clients * 2):
@@ -155,14 +155,15 @@ def _balance_classes(
     Dataset
         The balanced training dataset.
     """
-    class_counts = np.bincount(trainset.targets)
+    targets = torch.tensor(trainset.targets)
+    class_counts = np.bincount(targets)
     smallest = np.min(class_counts)
-    idxs = torch.tensor(trainset.targets).argsort()
+    idxs = targets.argsort()
     tmp = [Subset(trainset, idxs[: int(smallest)])]
-    tmp_targets = [trainset.targets[idxs[: int(smallest)]]]
+    tmp_targets = [targets[idxs[: int(smallest)]]]
     for count in class_counts:
         tmp.append(Subset(trainset, idxs[int(count) : int(count + smallest)]))
-        tmp_targets.append(trainset.targets[idxs[int(count) : int(count + smallest)]])
+        tmp_targets.append(targets[idxs[int(count) : int(count + smallest)]])
     unshuffled = ConcatDataset(tmp)
     unshuffled_targets = torch.cat(tmp_targets)
     shuffled_idxs = torch.randperm(
