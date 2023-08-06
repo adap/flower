@@ -271,11 +271,11 @@ Tiny-ImageNet, Dir(0.3), 500 clients, 2% participation.
 
 | Method  | Accuracy @500R | Accuracy @1000R |
 | ------------- | ------------- | ------------- |
-| FedAvg  | (33.39) 33.39 | (35.42) 35.78 |
+| FedAvg  | () | () |
 | FedMLB   | () | () |
 
 To reproduce results reported in Table 3 of the paper,
-related to _more local iterations_ (K=100 or K=200 in the
+resulting from _more local iterations_ (K=100 or K=200 in the
 paper, instead of K=50) run the following:
 ```bash
 python -m FedMLB.main --multirun algorithm="FedMLB","FedAvg","FedAvg+KD" local_updates=100 # or local_updates=200 
