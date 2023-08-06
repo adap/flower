@@ -67,9 +67,10 @@ def _download_data() -> Tuple[Dataset, Dataset]:
     Tuple[CIFAR10, CIFAR10]
         The dataset for training and the dataset for testing MNIST.
     """
-    transform = transforms.Compose(
-        [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
-    )
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+    ])
     trainset = CIFAR10("./dataset", train=True, download=True, transform=transform)
     testset = CIFAR10("./dataset", train=False, download=True, transform=transform)
     return trainset, testset
@@ -154,7 +155,7 @@ def _balance_classes(
     """
     class_counts = np.bincount(trainset.targets)
     smallest = np.min(class_counts)
-    idxs = trainset.targets.argsort()
+    idxs = torch.tensor(trainset.targets).argsort()
     tmp = [Subset(trainset, idxs[: int(smallest)])]
     tmp_targets = [trainset.targets[idxs[: int(smallest)]]]
     for count in class_counts:
