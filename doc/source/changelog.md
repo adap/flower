@@ -8,7 +8,11 @@
 
   Since Python 3.7 reached its end of life (EOL) on 2023-06-27, support for Python 3.7 is now deprecated and will be removed in an upcoming release.
 
--  **Add new** `FedTrimmedAvg` **strategy** ([#1769](https://github.com/adap/flower/pull/1769), [#1853](https://github.com/adap/flower/pull/1853))
+- **Add new** `FedAvg+CIFAR10` **Flower Baseline** ([#2190](https://github.com/adap/flower/pull/2190), [#1960](https://github.com/adap/flower/pull/1960)) 
+
+The new `FedAvg+CIFAR10` baseline implements the `CIFAR10` experiment described in the [FedAvg paper](https://arxiv.org/abs/1602.05629).
+
+- **Add new** `FedTrimmedAvg` **strategy** ([#1769](https://github.com/adap/flower/pull/1769), [#1853](https://github.com/adap/flower/pull/1853))
 
   The new `FedTrimmedAvg` strategy implements Trimmed Mean by [Dong Yin, 2018](https://arxiv.org/abs/1803.01498)
 
