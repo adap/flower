@@ -1,5 +1,5 @@
-"""Runs CNN federated learning for CIFAR10 dataset."""
-# pylint: disable=E0401 disable=C0304
+"""Runs CNN federated learning for MNIST dataset."""
+
 
 from pathlib import Path
 
@@ -9,14 +9,14 @@ import numpy as np
 import torch
 from omegaconf import DictConfig
 
-from flwr_baselines.publications.fedavg_cifar10 import client, utils
+from flwr_baselines.publications.fedavg.mnist import client, utils
 
 DEVICE: torch.device = torch.device("cpu")
 
 
 @hydra.main(config_path="docs/conf", config_name="config", version_base=None)
 def main(cfg: DictConfig) -> None:
-    """Main function to run CNN federated learning on CIFAR 10.
+    """Main function to run CNN federated learning on MNIST.
 
     Parameters
     ----------
@@ -37,9 +37,9 @@ def main(cfg: DictConfig) -> None:
 
     strategy = fl.server.strategy.FedAvg(
         fraction_fit=cfg.client_fraction,
-        fraction_evaluate=0.1,
+        fraction_evaluate=0.0,
         min_fit_clients=int(cfg.num_clients * cfg.client_fraction),
-        min_evaluate_clients=10,
+        min_evaluate_clients=0,
         min_available_clients=cfg.num_clients,
         evaluate_fn=evaluate_fn,
         evaluate_metrics_aggregation_fn=utils.weighted_average,
@@ -70,11 +70,7 @@ def main(cfg: DictConfig) -> None:
     utils.plot_metric_from_history(
         history,
         cfg.save_path,
-        file_suffix,
-    )
-    utils.plot_eval_loss_from_history(
-        history,
-        cfg.save_path,
+        cfg.expected_maximum,
         file_suffix,
     )
 

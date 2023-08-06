@@ -15,7 +15,7 @@ from flwr.server.history import History
 from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader
 
-from flwr_baselines.publications.fedavg_cifar10 import model
+from flwr_baselines.publications.fedavg.cifar10 import model
 
 
 def plot_metric_from_history(

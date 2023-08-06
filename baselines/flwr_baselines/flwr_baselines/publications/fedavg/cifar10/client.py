@@ -1,6 +1,6 @@
 # pylint: disable=too-many-arguments
-"""Defines the MNIST Flower Client and a function to instantiate it."""
-
+"""Defines the CIFAR10 Flower Client and a function to instantiate it."""
+# pylint: disable=E0401
 
 from collections import OrderedDict
 from typing import Callable, Dict, Tuple
@@ -10,8 +10,8 @@ import torch
 from flwr.common.typing import NDArrays, Scalar
 from torch.utils.data import DataLoader
 
-from flwr_baselines.publications.fedavg_mnist import model
-from flwr_baselines.publications.fedavg_mnist.dataset import load_datasets
+from flwr_baselines.publications.fedavg.cifar10 import model
+from flwr_baselines.publications.fedavg.cifar10.dataset import load_datasets
 
 
 class FlowerClient(fl.client.NumPyClient):
