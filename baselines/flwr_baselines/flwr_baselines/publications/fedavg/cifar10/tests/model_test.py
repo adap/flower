@@ -1,7 +1,7 @@
 """Used to test the model and the data partitionning."""
 # pylint: disable=E0401 disable=R1728
 
-from flwr_baselines.publications.fedavg_cifar10 import model
+from flwr_baselines.publications.fedavg.cifar10 import model
 
 
 def test_cnn_size_mnist() -> None:

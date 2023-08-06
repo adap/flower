@@ -3,7 +3,7 @@
 
 import unittest
 
-from flwr_baselines.publications.fedavg_cifar10 import dataset
+from flwr_baselines.publications.fedavg.cifar10 import dataset
 
 
 @unittest.skip("no reason")
