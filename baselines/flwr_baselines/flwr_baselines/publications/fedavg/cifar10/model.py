@@ -16,7 +16,7 @@ class Net(nn.Module):
     Decentralized Data] (https://arxiv.org/pdf/1602.05629.pdf)
     """
 
-    # pylint: disable=unsubscriptable-object,too-many-instance-attributes
+    # pylint: disable=too-many-instance-attributes
 
     def __init__(self) -> None:
         super().__init__()

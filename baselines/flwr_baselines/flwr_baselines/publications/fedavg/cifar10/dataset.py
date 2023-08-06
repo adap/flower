@@ -1,5 +1,5 @@
 """CIFAR10 dataset utilities for federated learning."""
-# pylint: disable=C0412
+
 
 from typing import List, Optional, Tuple
 

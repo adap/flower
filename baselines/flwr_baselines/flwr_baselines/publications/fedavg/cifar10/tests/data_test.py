@@ -1,12 +1,9 @@
 """Used to test the model and the data partitionning."""
-# pylint: disable=E0401
 
-import unittest
 
 from flwr_baselines.publications.fedavg.cifar10 import dataset
 
 
-@unittest.skip("no reason")
 def test_non_iid_partitionning(num_clients: int = 100) -> None:
     """Test the non iid partitionning of the CIFAR10 dataset.
 
@@ -22,4 +19,5 @@ def test_non_iid_partitionning(num_clients: int = 100) -> None:
         labels = []
         for _, label in trainloader:
             labels.append(label.item())
+        print(len(set(labels)))
         assert len(set(labels)) <= 2

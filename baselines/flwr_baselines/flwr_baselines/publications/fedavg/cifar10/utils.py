@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
 """Contains utility functions for CNN FL on CIFAR10."""
-# pylint: disable=E0401 disable=W0612
+
 
 from collections import OrderedDict
 from pathlib import Path
@@ -44,7 +42,7 @@ def plot_metric_from_history(
 
     rounds, values = zip(*metric_dict["accuracy"])
 
-    fig, axis = plt.subplots()
+    _, axis = plt.subplots()
     plt.plot(np.asarray(rounds), np.asarray(values), c="b", label="FedAvg")
 
     # Set paper's results
@@ -95,7 +93,7 @@ def plot_eval_loss_from_history(
     x = zip(*loss_dict)
     loss_rounds, eval_loss = list(x)
 
-    fig, axis = plt.subplots()
+    _, axis = plt.subplots()
     plt.plot(np.asarray(loss_rounds), np.asarray(eval_loss), c="r", label="FedAvg")
     # Set paper's results
     plt.axhline(

@@ -1,5 +1,4 @@
 """Runs CNN federated learning for CIFAR10 dataset."""
-# pylint: disable=E0401 disable=C0304
 
 from pathlib import Path
 
@@ -81,3 +80,4 @@ def main(cfg: DictConfig) -> None:
 
 if __name__ == "__main__":
     main()
+
