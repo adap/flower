@@ -13,9 +13,9 @@ from typing import Tuple
 class LogisticRegression(nn.Module):
     """Simple logistic regression."""
 
-    def __init__(self, input_dim, output_dim):
+    def __init__(self, num_classes, input_dim=28*28):
         super().__init__()
-        self.linear = nn.Linear(input_dim, output_dim)
+        self.linear = nn.Linear(input_dim, num_classes)
 
     def forward(self, x):
         return self.linear(x)

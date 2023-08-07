@@ -43,8 +43,10 @@ class ScaffoldStrategy(FedAvg):
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager, server_cv: List[torch.Tensor]
     ) -> List[Tuple[ClientProxy, FitIns]]:
+        # convert server cv into ndarrays
+        server_cv_np = [cv.numpy() for cv in server_cv]
         """Configure the next round of training."""
-        config = {"server_cv": parameters_to_ndarrays(server_cv)}
+        config = {"server_cv": ndarrays_to_parameters(server_cv_np)}
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
             config.update(self.on_fit_config_fn(server_round))
@@ -86,7 +88,6 @@ class ScaffoldStrategy(FedAvg):
         # zip client cvs and num_examples
         client_cv_updates = list(zip(client_cv_updates, [fit_res.num_examples for _, fit_res in results]))
         aggregated_cv_update = aggregate(client_cv_updates)
-        
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}

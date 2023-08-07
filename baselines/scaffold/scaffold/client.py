@@ -11,6 +11,8 @@ import torch
 from torch.utils.data import DataLoader
 from omegaconf import DictConfig
 from hydra.utils import instantiate
+from flwr.common.logger import log
+from logging import DEBUG, INFO
 
 from scaffold.models import train, test
 from scaffold.strategy import FitRes
@@ -41,7 +43,7 @@ class FlowerClientScaffold(
         for param in self.net.parameters():
             self.client_cv.append(torch.zeros(param.shape))
     
-    def get_parameters(self):
+    def get_parameters(self, config: Dict[str, Scalar]):
         """Return the current local model parameters."""
         return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
 
@@ -68,28 +70,24 @@ class FlowerClientScaffold(
             self.client_cv,
         )
         x = parameters
-        y_i = self.get_parameters()
+        y_i = self.get_parameters(config={})
         c_i_n = []
         server_update_x = []
         server_update_c = []
         # update client control variate c_i_1 = c_i - c + 1/eta*K (x - y_i)
         for c_i_j, c_j, x_j, y_i_j in zip(self.client_cv, server_cv, x, y_i):
-            c_i_n.append(c_i_j - c_j + (1.0/self.learning_rate*self.num_epochs)*(x_j - y_i_j))
+            c_i_n.append(c_i_j - c_j + (1.0/(self.learning_rate*self.num_epochs))*(x_j - y_i_j))
             # y_i - x, c_i_n - c_i for the server
-            server_update_x.append((y_i_j - x_j).cpu().numpy())
+            server_update_x.append((y_i_j - x_j))
             server_update_c.append((c_i_n[-1] - c_i_j).cpu().numpy())
-        
-        return FitRes(status=Status(code=Code.OK, message="Success"),
-                parameters=ndarrays_to_parameters(server_update_x),
-                num_examples=len(self.trainloader),
-                metrics={"server_update_c": ndarrays_to_parameters(server_update_c)},
-            )
+        self.client_cv = c_i_n
+        return (server_update_x, len(self.trainloader.dataset), {"server_update_c": ndarrays_to_parameters(server_update_c)})
     
     def evaluate(self, parameters, config: Dict[str, Scalar]):
         """Evaluate using given parameters."""
         self.set_parameters(parameters)
         loss, acc = test(self.net, self.valloader, self.device)
-        return float(loss), len(self.valloader), {"accuracy": float(acc)}
+        return float(loss), len(self.valloader.dataset), {"accuracy": float(acc)}
 
 def gen_client_fn(
     trainloaders: List[DataLoader],

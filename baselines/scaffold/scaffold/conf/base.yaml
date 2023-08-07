@@ -4,10 +4,10 @@
 # a similar configuration structure and hence be easy to customise)
 
 num_clients: 100
-num_epochs: 5
+num_epochs: 1
 batch_size_ratio: 0.2
-clients_per_round: 10
-learning_rate: 0.01
+clients_per_round: 20
+learning_rate: 0.2
 num_rounds: 1000
 mu: 0.0
 
@@ -15,7 +15,7 @@ dataset:
   # dataset config
   similarity: 1.0 # similarity for sampling data
   batch_size_ratio: ${batch_size_ratio} # batch_size = batch_size_ratio * total_local_data_size
-  val_split: 0.1
+  val_split: 0.0
 
 model:
   # model config
@@ -23,7 +23,7 @@ model:
   num_classes: 47
 
 strategy:
-  _target_: scaffold.strategy.ScaffodStrategy # points to your strategy (either custom or exiting in Flower)
+  _target_: scaffold.strategy.ScaffoldStrategy # points to your strategy (either custom or exiting in Flower)
   # rest of strategy config
   fraction_fit: 0.00001 # because we want the number of clients to sample on each round to be solely defined by min_fit_clients
   fraction_evaluate: 0.0

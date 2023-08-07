@@ -37,7 +37,7 @@ from typing import List, Tuple
 from torch.utils.data import Dataset, Subset, ConcatDataset
 from torchvision.datasets import EMNIST
 import numpy as np
-
+import torchvision.transforms as transforms
 
 def _download_data() -> Tuple[Dataset, Dataset]:
     """Downloads the EMNIST dataset.
@@ -47,17 +47,26 @@ def _download_data() -> Tuple[Dataset, Dataset]:
     Tuple[Dataset, Dataset]
         The training dataset, the test dataset.
     """
+    # unsqueeze, flatten
+    transform = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Lambda(lambda x: x.view(-1)),
+        ]
+    )
     trainset = EMNIST(
         root="data",
         split="balanced",
         train=True,
         download=True,
+        transform=transform,
     )
     testset = EMNIST(
         root="data",
         split="balanced",
         train=False,
         download=True,
+        transform=transform,
     )
 
     return trainset, testset
@@ -140,7 +149,7 @@ def _partition_data(
         end = start + noniid_samples_per_client[i]
         t_ids = np.arange(start, end)
         d_ids = sorted_trainset.indices[t_ids]
-        trainsets_per_client[i] = Subset(sorted_trainset.dataset, d_ids)
+        trainsets_per_client[i] = ConcatDataset([trainsets_per_client[i], Subset(sorted_trainset.dataset, d_ids)])
         start = end
     return trainsets_per_client, testset
 

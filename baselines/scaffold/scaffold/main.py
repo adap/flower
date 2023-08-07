@@ -37,7 +37,7 @@ def main(cfg: DictConfig) -> None:
     trainloaders, valloaders, testloader = load_datasets(
         config=cfg.dataset,
         num_clients=cfg.num_clients,
-        batch_size=cfg.batch_size,
+        batch_size_ratio=cfg.batch_size_ratio,
     )
 
     # 3. Define your clients
@@ -69,7 +69,7 @@ def main(cfg: DictConfig) -> None:
     history = fl.simulation.start_simulation(
         server=server.ScaffoldServer(strategy=strategy, model=cfg.model),
         client_fn=client_fn,
-        num_clients=cfg.num_client,
+        num_clients=cfg.num_clients,
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
         client_resources={
             "num_cpus": cfg.client_resources.num_cpus,
@@ -82,7 +82,7 @@ def main(cfg: DictConfig) -> None:
 
     save_path = HydraConfig.get().runtime.output_dir
     print(save_path)
-    
+
     # 6. Save your results
     # Here you can save the `history` returned by the simulation and include
     # also other buffers, statistics, info needed to be saved in order to later
@@ -92,3 +92,7 @@ def main(cfg: DictConfig) -> None:
     # Hydra will generate for you a directory each time you run the code. You
     # can retrieve the path to that directory with this:
     # save_path = HydraConfig.get().runtime.output_dir
+
+
+if __name__ == "__main__":
+    main()

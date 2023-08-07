@@ -8,7 +8,7 @@ from flwr.server import Server
 from flwr.server.client_manager import ClientManager, SimpleClientManager
 from flwr.server.strategy import Strategy
 from flwr.server.client_proxy import ClientProxy
-from flwr.common.typing import List, Tuple, Optional, Union, Dict, NDArrays, Callable, OrderedDict
+from flwr.common.typing import List, Tuple, Optional, Union, Dict, NDArrays, Callable
 from omegaconf import DictConfig
 from flwr.common.logger import log
 from logging import DEBUG, INFO
@@ -16,7 +16,7 @@ from flwr.common import Code, Parameters, Scalar, parameters_to_ndarrays, ndarra
 from scaffold.strategy import FitIns, FitRes, FitResultsAndFailures
 from scaffold.models import test
 from torch.utils.data import DataLoader
-
+from typing import OrderedDict
 import torch
 import concurrent.futures
 from hydra.utils import instantiate
@@ -102,6 +102,7 @@ class ScaffoldServer(Server):
         curr_params = parameters_to_ndarrays(self.parameters)
         updated_params = [x + aggregated_result[0][i] for i, x in enumerate(curr_params)]
         parameters_aggregated = ndarrays_to_parameters(updated_params)
+        # self.parameters = parameters_aggregated
         
         # metrics
         metrics_aggregated = aggregated_result[1]
@@ -164,6 +165,9 @@ def _handle_finished_future_after_fit(
     # Not successful, client returned a result where the status code is not OK
     failures.append(result)
 
+
+
+
 def gen_evaluate_fn(
     testloader: DataLoader,
     device: torch.device,
@@ -199,9 +203,10 @@ def gen_evaluate_fn(
         net.to(device)
 
         loss, accuracy = test(net, testloader, device=device)
-        log(INFO, f"Server -> Round: {server_round} | Loss: {loss} | Accuracy: {accuracy}")
         if accuracy > 0.5:
             log(INFO, f"Reached accuracy > 0.5 at round {server_round}")
+            import sys
+            sys.exit(0)
         # return statistics
         return loss, {"accuracy": accuracy}
 
