@@ -25,6 +25,11 @@ jobs:
         run: python -m poetry install --extras "simulation"
       - name: Build docs
         run: ./dev/build-docs.sh
+      - name: HTML Preview
+        id: html_preview
+        uses: pavi2410/html-preview-action@v2
+        with:
+          html_file: 'doc/build/html/index.html'
 
   deploy_docs:
     needs: build_docs
