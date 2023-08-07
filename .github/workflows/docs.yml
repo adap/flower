@@ -30,6 +30,8 @@ jobs:
         uses: pavi2410/html-preview-action@v2
         with:
           html_file: 'doc/build/html/index.html'
+      - name: Preview URL
+        run: echo "${{ steps.html_preview.outputs.url }}"
 
   deploy_docs:
     needs: build_docs
