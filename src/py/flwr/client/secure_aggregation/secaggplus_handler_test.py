@@ -71,7 +71,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
 
         # Test valid transitions
         # If the next stage is valid, the function should update the current stage
-        # and then raise KeyError when trying to read the input dictionary.
+        # and then raise KeyError or other exceptions when trying to execute SA.
         for current_stage, next_stage in valid_transitions:
             # pylint: disable-next=protected-access
             handler._current_stage = current_stage
