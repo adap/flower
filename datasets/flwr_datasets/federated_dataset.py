@@ -3,7 +3,8 @@ from typing import Dict, Optional
 
 import datasets
 from datasets import Dataset, DatasetDict
-from flwr_datasets.partitioner import IidPartitioner, Partitioner
+from flwr_datasets.partitioner import Partitioner
+from flwr_datasets.utils import _check_if_dataset_supported, _instantiate_partitioners
 
 
 class FederatedDataset:
@@ -32,9 +33,9 @@ class FederatedDataset:
     """
 
     def __init__(self, *, dataset: str, partitioners: Dict[str, int]) -> None:
-        self._check_if_dataset_supported(dataset)
+        _check_if_dataset_supported(dataset)
         self._dataset_name: str = dataset
-        self._partitioners: Dict[str, Partitioner] = self._instantiate_partitioners(
+        self._partitioners: Dict[str, Partitioner] = _instantiate_partitioners(
             partitioners
         )
         #  Init (download) lazily on the first call to `load_partition` or `load_full`
@@ -82,26 +83,6 @@ class FederatedDataset:
         self._check_if_split_present(split)
         return self._dataset[split]
 
-    def _instantiate_partitioners(
-        self, partitioners: Dict[str, int]
-    ) -> Dict[str, Partitioner]:
-        """Transform the partitioners from the initial format to instantiated objects.
-
-        Parameters
-        ----------
-        partitioners: Dict[str, int]
-            Partitioners specified as split to the number of partitions format.
-
-        Returns
-        -------
-        partitioners: Dict[str, Partitioner]
-            Partitioners specified as split to Partitioner object.
-        """
-        instantiated_partitioners: Dict[str, Partitioner] = {}
-        for key, value in partitioners.items():
-            instantiated_partitioners[key] = IidPartitioner(num_partitions=value)
-        return instantiated_partitioners
-
     def _download_dataset_if_none(self) -> None:
         """Download dataset if the dataset is None = not downloaded yet.
 
@@ -110,14 +91,6 @@ class FederatedDataset:
         """
         if self._dataset is None:
             self._dataset = datasets.load_dataset(self._dataset_name)
-
-    def _check_if_dataset_supported(self, dataset: str) -> None:
-        """Check if the dataset is in the narrowed down list of the tested datasets."""
-        if dataset not in ["mnist", "cifar10"]:
-            raise ValueError(
-                f"The currently tested and supported dataset are 'mnist' and "
-                f"'cifar10'. Given: {dataset}"
-            )
 
     def _check_if_split_present(self, split: str) -> None:
         """Check if the split (for partitioning or full return) is in the dataset."""
