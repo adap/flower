@@ -62,7 +62,7 @@ QUICKSTART TUTORIALS: :ref:`PyTorch <quickstart-pytorch>` | :ref:`TensorFlow <qu
 
   .. grid-item-card::  PyTorch
 
-    ..  youtube:: FGTc2TQq7VM
+    ..  youtube:: jOmmuzMIQ4c
        :width: 100%
 
   .. grid-item-card::  TensorFlow
