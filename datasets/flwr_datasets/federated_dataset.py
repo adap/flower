@@ -9,17 +9,19 @@ from datasets import Dataset, DatasetDict
 
 class FederatedDataset:
     def __init__(self, *, dataset: str, partitioners: Dict[str, int]) -> None:
-        """
-        FederatedDataset downloads and partitions data among clients (edge devices).
+        """Representation of a dataset for the federated learning/analytics.
 
-        It also supports access to the unmodified downloaded dataset.
+         Download, partition data among clients (edge devices), load full dataset.
+
+         Partitions are created using IidPartitioner. Support for different partitioners
+         specification and types will come in the future releases.
 
         Parameters
         ----------
         dataset: str
             The name of the dataset in the HuggingFace Hub.
         partitioners: Dict[str, int]
-            Dataset split to the number of partitions created using IidPartitioner.
+            Dataset split to the number of iid partitions.
 
         """
         self._check_if_dataset_supported(dataset)
@@ -32,15 +34,14 @@ class FederatedDataset:
         self._dataset: Optional[DatasetDict] = None
 
     def load_partition(self, idx: int, split: str) -> Dataset:
-        """
-        Load a partition given by an idx in the given split.
+        """Load the partition specified by the idx in the selected split.
 
         Parameters
         ----------
         idx: int
-            Partition index for the given split.
+            Partition index for the selected split, idx in {0, ..., num_partitions - 1}.
         split: str
-            Split that is partitioned (e.g. "train", "test").
+            Split name of the dataset to partition (e.g. "train", "test").
 
         Returns
         -------
@@ -55,33 +56,47 @@ class FederatedDataset:
         return partitioner.load_partition(self._dataset[split], idx)
 
     def load_full(self, split: str) -> Dataset:
-        """
-        Load the full split of the dataset.
+        """Load the full split of the dataset.
 
         Parameters
         ----------
         split: str
-            Split of the downloaded dataset (e.g. "train", "test").
+            Split name of the downloaded dataset (e.g. "train", "test").
 
         Returns
         -------
         dataset_split: Dataset
-            Split of the dataset.
+            Part of the dataset identified by its split name.
         """
         self._download_dataset_if_none()
         return self._dataset[split]
 
     def _instantiate_partitioners(
-            self, partitioners: Dict[str, int]
+        self, partitioners: Dict[str, int]
     ) -> Dict[str, Partitioner]:
-        """Transform the partitioners from the init format to instantiated objects. """
+        """Transform the partitioners from the initial format to instantiated objects.
+
+        Parameters
+        ----------
+        partitioners: Dict[str, int]
+            Partitioners specified as split to the number of partitions format.
+
+        Returns
+        -------
+        partitioners: Dict[str, Partitioner]
+            Partitioners specified as split to Partitioner object.
+        """
         instantiated_partitioners = {}
         for key, value in partitioners.items():
             instantiated_partitioners[key] = IidPartitioner(num_partitions=value)
         return instantiated_partitioners
 
     def _download_dataset_if_none(self) -> None:
-        """Download dataset if the dataset is None = not downloaded yet."""
+        """Download dataset if the dataset is None = not downloaded yet.
+
+        The dataset is downloaded only when the first call to `load_partition` or
+        `load_full` is made.
+        """
         if self._dataset is None:
             self._dataset = datasets.load_dataset(self._dataset_name)
 
@@ -95,17 +110,19 @@ class FederatedDataset:
 
     def _check_if_split_present(self, split: str) -> None:
         """Check if the split (for partitioning or full return) is in the dataset."""
-        available_splits = self._dataset.keys()
+        available_splits = list(self._dataset.keys())
         if split not in available_splits:
             raise ValueError(
                 f"The given split: '{split}' is not present in the dataset's splits: "
-                f"'{available_splits}'.")
+                f"'{available_splits}'."
+            )
 
     def _check_if_split_possible_to_federate(self, split: str):
-        """Check if the split for partitioning has corresponding partitioner."""
-        partitioners_keys = self._partitioners.keys()
+        """Check if the split has corresponding partitioner."""
+        partitioners_keys = list(self._partitioners.keys())
         if split not in partitioners_keys:
             raise ValueError(
                 f"The given split: '{split}' does not have partitioner to perform a "
                 f"splits. Partitioners are present for the following splits:"
-                f"'{partitioners_keys}'.")
+                f"'{partitioners_keys}'."
+            )
