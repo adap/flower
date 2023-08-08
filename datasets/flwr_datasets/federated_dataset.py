@@ -1,10 +1,9 @@
 """Federated Dataset."""
 from typing import Dict, Optional
 
-from partitioner import IidPartitioner, Partitioner
-
 import datasets
 from datasets import Dataset, DatasetDict
+from flwr_datasets.partitioner import IidPartitioner, Partitioner
 
 
 class FederatedDataset:
@@ -38,7 +37,6 @@ class FederatedDataset:
         self._partitioners: Dict[str, Partitioner] = self._instantiate_partitioners(
             partitioners
         )
-
         #  Init (download) lazily on the first call to `load_partition` or `load_full`
         self._dataset: Optional[DatasetDict] = None
 
@@ -58,9 +56,11 @@ class FederatedDataset:
             Single partition from the dataset split.
         """
         self._download_dataset_if_none()
+        if self._dataset is None:
+            raise ValueError("Dataset is not loaded yet.")
         self._check_if_split_present(split)
         self._check_if_split_possible_to_federate(split)
-        partitioner = self._partitioners[split]
+        partitioner: Partitioner = self._partitioners[split]
         return partitioner.load_partition(self._dataset[split], idx)
 
     def load_full(self, split: str) -> Dataset:
@@ -77,6 +77,8 @@ class FederatedDataset:
             Part of the dataset identified by its split name.
         """
         self._download_dataset_if_none()
+        if self._dataset is None:
+            raise ValueError("Dataset is not loaded yet.")
         self._check_if_split_present(split)
         return self._dataset[split]
 
@@ -95,7 +97,7 @@ class FederatedDataset:
         partitioners: Dict[str, Partitioner]
             Partitioners specified as split to Partitioner object.
         """
-        instantiated_partitioners = {}
+        instantiated_partitioners: Dict[str, Partitioner] = {}
         for key, value in partitioners.items():
             instantiated_partitioners[key] = IidPartitioner(num_partitions=value)
         return instantiated_partitioners
@@ -109,7 +111,7 @@ class FederatedDataset:
         if self._dataset is None:
             self._dataset = datasets.load_dataset(self._dataset_name)
 
-    def _check_if_dataset_supported(self, dataset):
+    def _check_if_dataset_supported(self, dataset: str) -> None:
         """Check if the dataset is in the narrowed down list of the tested datasets."""
         if dataset not in ["mnist", "cifar10"]:
             raise ValueError(
@@ -119,6 +121,8 @@ class FederatedDataset:
 
     def _check_if_split_present(self, split: str) -> None:
         """Check if the split (for partitioning or full return) is in the dataset."""
+        if self._dataset is None:
+            raise ValueError("Dataset is not loaded yet.")
         available_splits = list(self._dataset.keys())
         if split not in available_splits:
             raise ValueError(
@@ -126,7 +130,7 @@ class FederatedDataset:
                 f"'{available_splits}'."
             )
 
-    def _check_if_split_possible_to_federate(self, split: str):
+    def _check_if_split_possible_to_federate(self, split: str) -> None:
         """Check if the split has corresponding partitioner."""
         partitioners_keys = list(self._partitioners.keys())
         if split not in partitioners_keys:
