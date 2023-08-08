@@ -8,22 +8,22 @@ from datasets import Dataset, DatasetDict
 
 
 class FederatedDataset:
+    """Representation of a dataset for the federated learning/analytics.
+
+     Download, partition data among clients (edge devices), load full dataset.
+
+     Partitions are created using IidPartitioner. Support for different partitioners
+     specification and types will come in the future releases.
+
+    Parameters
+    ----------
+    dataset: str
+        The name of the dataset in the HuggingFace Hub.
+    partitioners: Dict[str, int]
+        Dataset split to the number of iid partitions.
+    """
+
     def __init__(self, *, dataset: str, partitioners: Dict[str, int]) -> None:
-        """Representation of a dataset for the federated learning/analytics.
-
-         Download, partition data among clients (edge devices), load full dataset.
-
-         Partitions are created using IidPartitioner. Support for different partitioners
-         specification and types will come in the future releases.
-
-        Parameters
-        ----------
-        dataset: str
-            The name of the dataset in the HuggingFace Hub.
-        partitioners: Dict[str, int]
-            Dataset split to the number of iid partitions.
-
-        """
         self._check_if_dataset_supported(dataset)
         self._dataset_name: str = dataset
         self._partitioners: Dict[str, Partitioner] = self._instantiate_partitioners(
