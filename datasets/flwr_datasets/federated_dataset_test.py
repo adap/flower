@@ -66,5 +66,26 @@ class RealDatasetsFederatedDatasets(unittest.TestCase):
             len(dataset_test_partition0), len(dataset["test"]) // num_test_partitions
         )
 
+
+class IncorrectUsageFederatedDatasets(unittest.TestCase):
+    """Test incorrect usages in FederatedDatasets."""
+
+    def test_no_partitioner_for_split(self):
+        """Test using load_partition with missing partitioner."""
+        dataset_fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
+
+        with pytest.raises(ValueError):
+            dataset_fds.load_partition(0, "test")
+
+    def test_no_split_in_the_dataset(self):
+        """Test using load_partition with non-existent split name."""
+        dataset_fds = FederatedDataset(
+            dataset="mnist", partitioners={"non-existent-split": 100}
+        )
+
+        with pytest.raises(ValueError):
+            dataset_fds.load_partition(0, "non-existent-split")
+
+
 if __name__ == "__main__":
     unittest.main()
