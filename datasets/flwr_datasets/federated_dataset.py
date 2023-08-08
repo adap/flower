@@ -60,7 +60,6 @@ class FederatedDataset:
         self._download_dataset_if_none()
         self._check_if_split_present(split)
         self._check_if_split_possible_to_federate(split)
-
         partitioner = self._partitioners[split]
         return partitioner.load_partition(self._dataset[split], idx)
 
@@ -78,6 +77,7 @@ class FederatedDataset:
             Part of the dataset identified by its split name.
         """
         self._download_dataset_if_none()
+        self._check_if_split_present(split)
         return self._dataset[split]
 
     def _instantiate_partitioners(
