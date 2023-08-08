@@ -19,17 +19,18 @@ class TestIidPartitioner(unittest.TestCase):
         self.num_partitions = 10
         self.partition_size = self.dataset.num_rows // self.num_partitions
         self.sampler = IidPartitioner(num_partitions=self.num_partitions)
+        self.sampler.dataset = self.dataset
 
     def test_load_partition_size(self) -> None:
         """Test if the partition size matches the manually computed size."""
         partition_index = 2
-        partition = self.sampler.load_partition(self.dataset, partition_index)
+        partition = self.sampler.load_partition(partition_index)
         self.assertEqual(len(partition), self.partition_size)
 
     def test_load_partition_correct_data(self) -> None:
         """Test if the data in partition is equal to the expected."""
         partition_index = 2
-        partition = self.sampler.load_partition(self.dataset, partition_index)
+        partition = self.sampler.load_partition(partition_index)
         self.assertEqual(
             partition["features"][0], partition_index * self.partition_size
         )
