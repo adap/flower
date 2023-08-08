@@ -106,6 +106,10 @@ def set_parameters(model, parameters):
     model.load_state_dict(state_dict, strict=True)
     return 
 
+def client_fn(cid):
+    return FlowerClient()
+
+
 if __name__ == "__main__":
     # Start Flower client
     fl.client.start_numpy_client(

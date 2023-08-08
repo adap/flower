@@ -71,14 +71,14 @@ Stay tuned, more tutorials are coming soon. Topics include **Privacy and Securit
 
 ## 30-Minute Federated Learning Tutorial
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/examples/simulation_pytorch_colab/tutorial.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/examples/simulation_pytorch_colab/tutorial.ipynb))
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/examples/simulation-pytorch-colab/tutorial.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/examples/simulation-pytorch-colab/tutorial.ipynb))
 
 
 ## Documentation
 
 [Flower Docs](https://flower.dev/docs):
 * [Installation](https://flower.dev/docs/framework/installation.html)
-* [Quickstart (TensorFlow)](https://flower.dev/framework/docs/quickstart-tensorflow.html)
+* [Quickstart (TensorFlow)](https://flower.dev/docs/framework/quickstart-tensorflow.html)
 * [Quickstart (PyTorch)](https://flower.dev/docs/framework/quickstart-pytorch.html)
 * [Quickstart (Hugging Face)](https://flower.dev/docs/framework/quickstart-huggingface.html)
 * [Quickstart (PyTorch Lightning [code example])](https://flower.dev/docs/framework/quickstart-pytorch-lightning.html)
