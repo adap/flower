@@ -2,10 +2,10 @@
 import unittest
 
 import pytest
-from federated_dataset import FederatedDataset
 from parameterized import parameterized, parameterized_class
 
 import datasets
+from flwr_datasets.federated_dataset import FederatedDataset
 
 
 @parameterized_class(
@@ -19,7 +19,7 @@ class RealDatasetsFederatedDatasets(unittest.TestCase):
 
     dataset_name = ""
 
-    @parameterized.expand(
+    @parameterized.expand(  # type: ignore
         [
             (
                 "10",
@@ -31,7 +31,7 @@ class RealDatasetsFederatedDatasets(unittest.TestCase):
             ),
         ]
     )
-    def test_load_partition_size(self, _: str, train_num_partitions: int):
+    def test_load_partition_size(self, _: str, train_num_partitions: int) -> None:
         """Test if the partition size is correct based on the number of partitions."""
         dataset_fds = FederatedDataset(
             dataset=self.dataset_name, partitioners={"train": train_num_partitions}
@@ -42,7 +42,7 @@ class RealDatasetsFederatedDatasets(unittest.TestCase):
             len(dataset_partition0), len(dataset["train"]) // train_num_partitions
         )
 
-    def test_load_full(self):
+    def test_load_full(self) -> None:
         """Test if the load_full works on the correct split name."""
         dataset_fds = FederatedDataset(
             dataset=self.dataset_name, partitioners={"train": 100}
@@ -51,7 +51,7 @@ class RealDatasetsFederatedDatasets(unittest.TestCase):
         dataset_test = datasets.load_dataset(self.dataset_name)["test"]
         self.assertEqual(len(dataset_fds_test), len(dataset_test))
 
-    def test_multiple_partitioners(self):
+    def test_multiple_partitioners(self) -> None:
         """Test if the dataset works when multiple partitioners are specified."""
         num_train_partitions = 100
         num_test_partitions = 100
@@ -70,14 +70,14 @@ class RealDatasetsFederatedDatasets(unittest.TestCase):
 class IncorrectUsageFederatedDatasets(unittest.TestCase):
     """Test incorrect usages in FederatedDatasets."""
 
-    def test_no_partitioner_for_split(self):
+    def test_no_partitioner_for_split(self) -> None:
         """Test using load_partition with missing partitioner."""
         dataset_fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
 
         with pytest.raises(ValueError):
             dataset_fds.load_partition(0, "test")
 
-    def test_no_split_in_the_dataset(self):
+    def test_no_split_in_the_dataset(self) -> None:
         """Test using load_partition with non-existent split name."""
         dataset_fds = FederatedDataset(
             dataset="mnist", partitioners={"non-existent-split": 100}
