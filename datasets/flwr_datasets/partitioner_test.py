@@ -1,9 +1,8 @@
 """Partitioner tests."""
 import unittest
 
-from partitioner import IidPartitioner
-
 from datasets import Dataset
+from flwr_datasets.partitioner import IidPartitioner
 
 
 class TestIidPartitioner(unittest.TestCase):
