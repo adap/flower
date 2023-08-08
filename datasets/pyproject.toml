@@ -54,6 +54,7 @@ exclude = [
 [tool.poetry.dependencies]
 python = "^3.8"
 numpy = "^1.21.0"
+datasets = "^2.14.3"
 
 [tool.poetry.dev-dependencies]
 isort = "==5.11.5"
