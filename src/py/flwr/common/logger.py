@@ -49,7 +49,7 @@ class CustomHTTPHandler(HTTPHandler):
         secure: bool = False,
         credentials: Optional[Tuple[str, str]] = None,
     ) -> None:
-        super(CustomHTTPHandler, self).__init__(host, url, method, secure, credentials)
+        super().__init__(host, url, method, secure, credentials)
         self.identifier = identifier
 
     def mapLogRecord(self, record: LogRecord) -> Dict[str, Any]:

@@ -28,10 +28,24 @@ While `README.md` should include information about the baseline you implement an
     ```
 > :warning: Make sure the variable `name` in `pyproject.toml` is set to the name of the sub-directory containing all your code.
 
-5. Add your dependencies to the `pyproject.toml` (see below a few examples on how to do it)
-6. Ensure that the Python environment for your baseline can be created without errors by simply running `poetry install` and that this is properly described later when you complete the `Environment Setup` section in `README.md`. This is specially important if your environment requires additional steps after doing `poetry install`.
-7. Ensure that your baseline runs with default argument by running `poetry run python -m <baseline-name>.main`. Then, describe this and other forms of running your code in the `Running the Experiments` section in `README.md`.
-8. Once your code is ready and you have checked:
+5. Add your dependencies to the `pyproject.toml` (see below a few examples on how to do it). Read more about Poetry below in this `EXTENDED_README.md`.
+6. Regularly check that your coding style and the documentation you add follow good coding practices. To test whether your code meets the requirements, please run the following:
+    ```bash
+    # After activating your environment and from your baseline's directory
+    cd .. # to go to the top-level directory of all baselines
+    ./dev/test-baseline.sh <baseline-name>
+    ./dev/test-baseline-structure.sh <baseline-name>
+    ```
+    Both `test-baseline.sh` and `test-baseline-structure.sh` will also be automatically run when you create a PR, and both tests need to pass for the baseline to be merged.
+    To automatically solve some formatting issues and apply easy fixes, please run the formatting script:
+    ```bash
+    # After activating your environment and from your baseline's directory
+    cd .. # to go to the top-level directory of all baselines
+    ./dev/format-baseline.sh <baseline-name>
+    ```
+7. Ensure that the Python environment for your baseline can be created without errors by simply running `poetry install` and that this is properly described later when you complete the `Environment Setup` section in `README.md`. This is specially important if your environment requires additional steps after doing `poetry install`.
+8. Ensure that your baseline runs with default arguments by running `poetry run python -m <baseline-name>.main`. Then, describe this and other forms of running your code in the `Running the Experiments` section in `README.md`.
+9. Once your code is ready and you have checked:
     *    that following the instructions in your `README.md` the Python environment can be created correctly
 
     *    that running the code following your instructions can reproduce the experiments in the paper
@@ -45,7 +59,27 @@ While `README.md` should include information about the baseline you implement an
 
 We use Poetry to manage the Python environment for each individual baseline. You can follow the instructions [here](https://python-poetry.org/docs/) to install Poetry in your machine. 
 
-With Poetry already installed, you can create an environment for this baseline with commands:
+
+### Specifying a Python Version (optional)
+By default, Poetry will use the Python version in your system. In some settings, you might want to specify a particular version of Python to use inside your Poetry environment. You can do so with [`pyenv`](https://github.com/pyenv/pyenv). Check the documentation for the different ways of installing `pyenv`, but one easy way is using the [automatic installer](https://github.com/pyenv/pyenv-installer):
+```bash
+curl https://pyenv.run | bash # then, don't forget links to your .bashrc/.zshrc
+```
+
+You can then install any Python version with `pyenv install <python-version>` (e.g. `pyenv install 3.9.17`). Then, in order to use that version for your baseline, you'd do the following:
+
+```bash
+# cd to your baseline directory (i.e. where the `pyproject.toml` is)
+pyenv local <python-version>
+
+# set that version for poetry
+poetry env use <python-version>
+
+# then you can install your Poetry environment (see the next setp)
+```
+
+### Installing Your Environment
+With the Poetry tool already installed, you can create an environment for this baseline with commands:
 ```bash
 # run this from the same directory as the `pyproject.toml` file is
 poetry install

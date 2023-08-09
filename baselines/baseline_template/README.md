@@ -11,7 +11,7 @@ dataset: [dataset1, dataset2] # list of datasets you include in your baseline
 
 > :warning: This is the template to follow when creating a new Flower Baseline. Please follow the instructions in `EXTENDED_README.md`
 
-> :warning: Please follow the instructions carefully. You can see the [FedProx-MNIST baseline](~https://github.com/adap/flower/tree/fedprox_mnist_refresh/baselines/flwr_baselines/publications/fedprox_mnist~) as an example of a baseline that followed this guide.
+> :warning: Please follow the instructions carefully. You can see the [FedProx-MNIST baseline](https://github.com/adap/flower/tree/main/baselines/fedprox) as an example of a baseline that followed this guide.
 
 > :warning: Please complete the metadata section at the very top of this README. This generates a table at the top of the file that will facilitate indexing baselines.
 
