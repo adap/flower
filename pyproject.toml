@@ -85,7 +85,7 @@ types-dataclasses = "==0.6.6"
 types-protobuf = "==3.19.18"
 types-requests = "==2.31.0.2"
 types-setuptools = "==68.0.0.3"
-clang-format = "==16.0.3"
+clang-format = "==16.0.6"
 isort = "==5.11.5"
 black = { version = "==23.3.0", extras = ["jupyter"] }
 docformatter = "==1.7.5"
