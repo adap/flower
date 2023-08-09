@@ -14,7 +14,7 @@
 # ==============================================================================
 """Federated Optimization (FedProx) [Li et al., 2018] strategy.
 
-Paper: https://arxiv.org/abs/1812.06127
+Paper: arxiv.org/abs/1812.06127
 """
 
 
@@ -27,11 +27,10 @@ from flwr.server.client_proxy import ClientProxy
 from .fedavg import FedAvg
 
 
-# flake8: noqa: E501
 class FedProx(FedAvg):
     """Configurable FedProx strategy implementation."""
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes,line-too-long
+    # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
     def __init__(
         self,
         *,
@@ -54,18 +53,19 @@ class FedProx(FedAvg):
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         proximal_mu: float,
     ) -> None:
-        """Federated Optimization strategy.
+        r"""Federated Optimization strategy.
 
         Implementation based on https://arxiv.org/abs/1812.06127
 
-        The strategy in itself will not be different than FedAvg, the client needs to be adjusted.
+        The strategy in itself will not be different than FedAvg, the client needs to
+        be adjusted.
         A proximal term needs to be added to the loss function during the training:
 
         .. math::
             \\frac{\\mu}{2} || w - w^t ||^2
 
-        Where $w^t$ are the global parameters and $w$ are the local weights the function will
-        be optimized with.
+        Where $w^t$ are the global parameters and $w$ are the local weights the function
+        will be optimized with.
 
         In PyTorch, for example, the loss would go from:
 
@@ -79,9 +79,11 @@ class FedProx(FedAvg):
 
           for local_weights, global_weights in zip(net.parameters(), global_params):
               proximal_term += (local_weights - global_weights).norm(2)
-          loss = criterion(net(inputs), labels) + (config["proximal_mu"] / 2) * proximal_term
+          loss = criterion(net(inputs), labels) + (config["proximal_mu"] / 2) *
+          proximal_term
 
-        With `global_params` being a copy of the parameters before the training takes place.
+        With `global_params` being a copy of the parameters before the training takes
+        place.
 
         .. code:: python
 
@@ -95,8 +97,8 @@ class FedProx(FedAvg):
             will still be sampled. Defaults to 1.0.
         fraction_evaluate : float, optional
             Fraction of clients used during validation. In case `min_evaluate_clients`
-            is larger than `fraction_evaluate * available_clients`, `min_evaluate_clients`
-            will still be sampled. Defaults to 1.0.
+            is larger than `fraction_evaluate * available_clients`,
+            `min_evaluate_clients` will still be sampled. Defaults to 1.0.
         min_fit_clients : int, optional
             Minimum number of clients used during training. Defaults to 2.
         min_evaluate_clients : int, optional
@@ -123,7 +125,6 @@ class FedProx(FedAvg):
             regularization will be used (that is, the client parameters will need to be
             closer to the server parameters during training).
         """
-
         super().__init__(
             fraction_fit=fraction_fit,
             fraction_evaluate=fraction_evaluate,
@@ -141,6 +142,7 @@ class FedProx(FedAvg):
         self.proximal_mu = proximal_mu
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"FedProx(accept_failures={self.accept_failures})"
         return rep
 

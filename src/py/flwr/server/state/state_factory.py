@@ -34,7 +34,6 @@ class StateFactory:
 
     def state(self) -> State:
         """Return a State instance and create it, if necessary."""
-
         # InMemoryState
         if self.database == ":flwr-in-memory-state:":
             if self.state_instance is None:

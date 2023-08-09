@@ -226,7 +226,7 @@ class SqliteState(State):
         if node_id == 0:
             msg = (
                 "`node_id` must be >= 1"
-                + "\n\n For requesting anonymous tasks use `node_id` equal `None`"
+                "\n\n For requesting anonymous tasks use `node_id` equal `None`"
             )
             raise AssertionError(msg)
 
@@ -390,7 +390,7 @@ class SqliteState(State):
         return result
 
     def num_task_ins(self) -> int:
-        """Number of task_ins in store.
+        """Calculate the number of task_ins in store.
 
         This includes delivered but not yet deleted task_ins.
         """
@@ -401,7 +401,7 @@ class SqliteState(State):
         return num
 
     def num_task_res(self) -> int:
-        """Number of task_res in store.
+        """Calculate the number of task_res in store.
 
         This includes delivered but not yet deleted task_res.
         """
@@ -467,12 +467,11 @@ class SqliteState(State):
 
 def dict_factory(
     cursor: sqlite3.Cursor,
-    row: sqlite3.Row,  # type: ignore
+    row: sqlite3.Row,
 ) -> Dict[str, Any]:
-    """Used to turn SQLite results into dicts.
+    """Turn SQLite results into dicts.
 
-    Less efficent for retrival of large amounts of data but easier to
-    use.
+    Less efficent for retrival of large amounts of data but easier to use.
     """
     fields = [column[0] for column in cursor.description]
     return dict(zip(fields, row))

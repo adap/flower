@@ -137,7 +137,7 @@ def _compute_distances(weights: List[NDArrays]) -> NDArray:
 def _trim_mean(array: NDArray, proportiontocut: float) -> NDArray:
     """Compute trimmed mean along axis=0.
 
-     It is based on the scipy implementation.
+    It is based on the scipy implementation.
 
     https://docs.scipy.org/doc/scipy/reference/generated/
     scipy.stats.trim_mean.html.

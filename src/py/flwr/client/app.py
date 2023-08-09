@@ -150,7 +150,6 @@ def start_client(
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
-
     event(EventType.START_CLIENT_ENTER)
 
     # Parse IP address
@@ -192,19 +191,26 @@ def start_client(
             max_message_length=grpc_max_message_length,
             root_certificates=root_certificates,
         ) as conn:
-            receive, send = conn
+            receive, send, create_node, delete_node = conn
+
+            # Register node
+            if create_node is not None:
+                create_node()  # pylint: disable=not-callable
 
             while True:
-                server_message = receive()
-                if server_message is None:
+                task_ins = receive()
+                if task_ins is None:
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
-                client_message, sleep_duration, keep_going = handle(
-                    client, server_message
-                )
-                send(client_message)
+                task_res, sleep_duration, keep_going = handle(client, task_ins)
+                send(task_res)
                 if not keep_going:
                     break
+
+            # Unregister node
+            if delete_node is not None:
+                delete_node()  # pylint: disable=not-callable
+
         if sleep_duration == 0:
             log(INFO, "Disconnect and shut down")
             break
@@ -278,7 +284,6 @@ def start_numpy_client(
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
-
     # Start
     start_client(
         server_address=server_address,
@@ -321,7 +326,6 @@ def _get_parameters(self: Client, ins: GetParametersIns) -> GetParametersRes:
 
 def _fit(self: Client, ins: FitIns) -> FitRes:
     """Refine the provided parameters using the locally held dataset."""
-
     # Deconstruct FitIns
     parameters: NDArrays = parameters_to_ndarrays(ins.parameters)
 

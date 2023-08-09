@@ -49,7 +49,7 @@ Write the command below in your terminal to install the dependencies according t
 pip install -r requirements.txt
 ```
 
-# Run Federated Learning with scikit-learn and Flower
+## Run Federated Learning with scikit-learn and Flower
 
 Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
 
@@ -71,4 +71,4 @@ poetry run python3 client.py &
 poetry run python3 client.py
 ```
 
-You will see that Flower is starting a federated training. 
+You will see that Flower is starting a federated training.

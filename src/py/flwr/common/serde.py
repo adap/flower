@@ -15,8 +15,9 @@
 """ProtoBuf serialization and deserialization."""
 
 
-from typing import Any, List, cast
+from typing import Any, Dict, List, MutableMapping, cast
 
+from flwr.proto.task_pb2 import Value
 from flwr.proto.transport_pb2 import (
     ClientMessage,
     Code,
@@ -458,7 +459,6 @@ def metrics_from_proto(proto: Any) -> typing.Metrics:
 
 def scalar_to_proto(scalar: typing.Scalar) -> Scalar:
     """Serialize `Scalar` to ProtoBuf."""
-
     if isinstance(scalar, bool):
         return Scalar(bool=scalar)
 
@@ -484,3 +484,87 @@ def scalar_from_proto(scalar_msg: Scalar) -> typing.Scalar:
     scalar_field = scalar_msg.WhichOneof("scalar")
     scalar = getattr(scalar_msg, cast(str, scalar_field))
     return cast(typing.Scalar, scalar)
+
+
+# === Value messages ===
+
+
+_python_type_to_field_name = {
+    float: "double",
+    int: "sint64",
+    bool: "bool",
+    str: "string",
+    bytes: "bytes",
+}
+
+
+_python_list_type_to_message_and_field_name = {
+    float: (Value.DoubleList, "double_list"),
+    int: (Value.Sint64List, "sint64_list"),
+    bool: (Value.BoolList, "bool_list"),
+    str: (Value.StringList, "string_list"),
+    bytes: (Value.BytesList, "bytes_list"),
+}
+
+
+def _check_value(value: typing.Value) -> None:
+    if isinstance(value, tuple(_python_type_to_field_name.keys())):
+        return
+    if isinstance(value, list) and isinstance(
+        value[0], tuple(_python_type_to_field_name.keys())
+    ):
+        data_type = type(value[0])
+        for element in value:
+            if isinstance(element, data_type):
+                continue
+            raise Exception(
+                f"Inconsistent type: the types of elements in the list must be the same"
+                f"(expected {data_type}, but got {type(element)})"
+            )
+    else:
+        raise TypeError(
+            f"Accepted types: {bool, bytes, float, int, str} or "
+            f"list of these types."
+        )
+
+
+def value_to_proto(value: typing.Value) -> Value:
+    """Serialize `Value` to ProtoBuf."""
+    _check_value(value)
+
+    arg = {}
+    if isinstance(value, list):
+        msg_class, field_name = _python_list_type_to_message_and_field_name[
+            type(value[0])
+        ]
+        arg[field_name] = msg_class(vals=value)
+    else:
+        arg[_python_type_to_field_name[type(value)]] = value
+    return Value(**arg)
+
+
+def value_from_proto(value_msg: Value) -> typing.Value:
+    """Deserialize `Value` from ProtoBuf."""
+    value_field = cast(str, value_msg.WhichOneof("value"))
+    if value_field.endswith("list"):
+        value = list(getattr(value_msg, value_field).vals)
+    else:
+        value = getattr(value_msg, value_field)
+    return cast(typing.Value, value)
+
+
+# === Named Values ===
+
+
+def named_values_to_proto(
+    named_values: Dict[str, typing.Value],
+) -> Dict[str, Value]:
+    """Serialize named values to ProtoBuf."""
+    return {name: value_to_proto(value) for name, value in named_values.items()}
+
+
+def named_values_from_proto(
+    named_values_proto: MutableMapping[str, Value]
+) -> Dict[str, typing.Value]:
+    """Deserialize named values from ProtoBuf."""
+    return {name: value_from_proto(value) for name, value in named_values_proto.items()}

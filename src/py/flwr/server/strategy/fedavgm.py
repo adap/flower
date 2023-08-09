@@ -14,7 +14,7 @@
 # ==============================================================================
 """Federated Averaging with Momentum (FedAvgM) [Hsu et al., 2019] strategy.
 
-Paper: https://arxiv.org/pdf/1909.06335.pdf
+Paper: arxiv.org/pdf/1909.06335.pdf
 """
 
 
@@ -38,11 +38,10 @@ from .aggregate import aggregate
 from .fedavg import FedAvg
 
 
-# flake8: noqa: E501
 class FedAvgM(FedAvg):
     """Configurable FedAvg with Momentum strategy implementation."""
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes,line-too-long
+    # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
     def __init__(
         self,
         *,
@@ -98,7 +97,6 @@ class FedAvgM(FedAvg):
         server_momentum: float
             Server-side momentum factor used for FedAvgM. Defaults to 0.0.
         """
-
         super().__init__(
             fraction_fit=fraction_fit,
             fraction_evaluate=fraction_evaluate,
@@ -121,6 +119,7 @@ class FedAvgM(FedAvg):
         self.momentum_vector: Optional[NDArrays] = None
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"FedAvgM(accept_failures={self.accept_failures})"
         return rep
 

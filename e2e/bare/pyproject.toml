@@ -1,0 +1,13 @@
+[build-system]
+requires = ["poetry-core>=1.4.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "bare_test"
+version = "0.1.0"
+description = "Bare Federated Learning test with Flower"
+authors = ["The Flower Authors <hello@flower.dev>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+flwr = { path = "../../", develop = true, extras = ["simulation"] }

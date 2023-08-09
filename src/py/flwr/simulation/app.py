@@ -78,15 +78,14 @@ def start_simulation(  # pylint: disable=too-many-arguments
     ----------
     client_fn : Callable[[str], ClientLike]
         A function creating client instances. The function must take a single
-        str argument called `cid`. It should return a single client instance
-        of type ClientLike. Note that the created client instances
-        are ephemeral and will often be destroyed after a single method
-        invocation. Since client instances are not long-lived, they should not
-         attempt to carry state over method invocations. Any state required by
-        the instance (model, dataset,hyperparameters, ...) should be
-        (re-)created in either the call to `client_fn` or the call to any of
-        the client methods (e.g., load evaluation data in the `evaluate`
-        method itself).
+        `str` argument called `cid`. It should return a single client instance
+        of type ClientLike. Note that the created client instances are ephemeral
+        and will often be destroyed after a single method invocation. Since client
+        instances are not long-lived, they should not attempt to carry state over
+        method invocations. Any state required by the instance (model, dataset,
+        hyperparameters, ...) should be (re-)created in either the call to `client_fn`
+        or the call to any of the client methods (e.g., load evaluation data in the
+        `evaluate` method itself).
     num_clients : Optional[int]
         The total number of clients in this simulation. This must be set if
         `clients_ids` is not set and vice-versa.
@@ -127,8 +126,8 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     Returns
     -------
-        hist : flwr.server.history.History.
-            Object containing metrics from training.
+    hist : flwr.server.history.History
+        Object containing metrics from training.
     """
     # pylint: disable-msg=too-many-locals
     event(

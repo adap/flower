@@ -35,13 +35,12 @@ class DriverClientProxyTestCase(unittest.TestCase):
     """Tests for DriverClientProxy."""
 
     def setUp(self) -> None:
-        """Setup mocks for tests."""
+        """Set up mocks for tests."""
         self.driver = MagicMock()
         self.driver.get_nodes.return_value = driver_pb2.GetNodesResponse(node_ids=[1])
 
     def test_get_properties(self) -> None:
         """Test positive case."""
-
         # Prepare
         self.driver.push_task_ins.return_value = driver_pb2.PushTaskInsResponse(
             task_ids=["19341fd7-62e1-4eb4-beb4-9876d3acda32"]
@@ -76,7 +75,6 @@ class DriverClientProxyTestCase(unittest.TestCase):
 
     def test_get_parameters(self) -> None:
         """Test positive case."""
-
         # Prepare
         self.driver.push_task_ins.return_value = driver_pb2.PushTaskInsResponse(
             task_ids=["19341fd7-62e1-4eb4-beb4-9876d3acda32"]
@@ -110,7 +108,6 @@ class DriverClientProxyTestCase(unittest.TestCase):
 
     def test_fit(self) -> None:
         """Test positive case."""
-
         # Prepare
         self.driver.push_task_ins.return_value = driver_pb2.PushTaskInsResponse(
             task_ids=["19341fd7-62e1-4eb4-beb4-9876d3acda32"]
@@ -146,7 +143,6 @@ class DriverClientProxyTestCase(unittest.TestCase):
 
     def test_evaluate(self) -> None:
         """Test positive case."""
-
         # Prepare
         self.driver.push_task_ins.return_value = driver_pb2.PushTaskInsResponse(
             task_ids=["19341fd7-62e1-4eb4-beb4-9876d3acda32"]

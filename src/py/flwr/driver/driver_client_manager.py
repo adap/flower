@@ -85,10 +85,12 @@ class DriverClientManager(ClientManager):
         raise NotImplementedError("DriverClientManager.unregister is not implemented")
 
     def all(self) -> Dict[str, ClientProxy]:
+        """Return all available clients."""
         self._update_nodes()
         return self.clients
 
     def wait_for(self, num_clients: int, timeout: int = 86400) -> bool:
+        """Wait until at least `num_clients` are available."""
         start_time = time.time()
         while time.time() < start_time + timeout:
             self._update_nodes()
@@ -103,6 +105,7 @@ class DriverClientManager(ClientManager):
         min_num_clients: Optional[int] = None,
         criterion: Optional[Criterion] = None,
     ) -> List[ClientProxy]:
+        """Sample a number of Flower ClientProxy instances."""
         if min_num_clients is None:
             min_num_clients = num_clients
         self.wait_for(min_num_clients)
@@ -128,6 +131,12 @@ class DriverClientManager(ClientManager):
         return [self.clients[cid] for cid in sampled_cids]
 
     def _update_nodes(self) -> None:
+        """Update the nodes list in the client manager.
+
+        This method communicates with the associated driver to get all node ids. Each
+        node id is then converted into a `DriverClientProxy` instance and stored in the
+        `clients` dictionary with node id as key.
+        """
         get_nodes_res = self.driver.get_nodes(req=driver_pb2.GetNodesRequest())
         all_node_ids = get_nodes_res.node_ids
         for node_id in all_node_ids:

@@ -4,6 +4,10 @@
 
 ### What's new?
 
+- **Deprecate Python 3.7**
+
+  Since Python 3.7 reached its end of life (EOL) on 2023-06-27, support for Python 3.7 is now deprecated and will be removed in an upcoming release.
+
 -  **Add new** `FedTrimmedAvg` **strategy** ([#1769](https://github.com/adap/flower/pull/1769), [#1853](https://github.com/adap/flower/pull/1853))
 
   The new `FedTrimmedAvg` strategy implements Trimmed Mean by [Dong Yin, 2018](https://arxiv.org/abs/1803.01498)
@@ -12,7 +16,7 @@
 
   The `mt-pytorch` example shows how to aggregate parameters when writing a driver script. The included `driver.py` and `server.py` have been aligned to demonstrate both the low-level way and the high-level way of building server-side logic.
 
-- **Introduce (experimental) gRPC request-response API** ([#1867](https://github.com/adap/flower/pull/1867))
+- **Introduce (experimental) gRPC request-response API** ([#1867](https://github.com/adap/flower/pull/1867), [#1901](https://github.com/adap/flower/pull/1901))
 
   In addition to the existing gRPC API (based on bidirectional streaming) and the experimental REST API, there is now a new gRPC API that uses a request-response model to communicate with client nodes.
 
@@ -21,6 +25,14 @@
 - **Replace the eperimental** `start_client(rest=True)` **with the new** `start_client(transport="rest")` ([#1880](https://github.com/adap/flower/pull/1880))
 
   The (experimental) `start_client` argument `rest` was deprecated in favor of a new argument `transport`. `start_client(transport="rest")` will yield the same behaviour as `start_client(rest=True)` did before. All code should migrate to the new argument `transport`. The deprecated argument `rest` will be removed in a future release.
+
+- **Migrate experimental REST API to Starlette** ([2171](https://github.com/adap/flower/pull/2171))
+
+  The (experimental) REST API used to be implemented in [FastAPI](https://fastapi.tiangolo.com/), but it has now been migrated to use [Starlette](https://www.starlette.io/) directly.
+
+- **Add a new gRPC option** ([#2197](https://github.com/adap/flower/pull/2197))
+
+  We now start a gRPC server with the `grpc.keepalive_permit_without_calls` option set to 0 by default. This prevents the clients from sending keepalive pings when there is no outstanding stream.
 
 - **General improvements** ([#1872](https://github.com/adap/flower/pull/1872), [#1866](https://github.com/adap/flower/pull/1866), [#1884](https://github.com/adap/flower/pull/1884))
 

@@ -22,7 +22,6 @@ from flwr.server.driver.driver_servicer import _raise_if
 
 def test_raise_if_false() -> None:
     """."""
-
     # Prepare
     validation_error = False
     detail = "test"
@@ -33,15 +32,14 @@ def test_raise_if_false() -> None:
 
         # Assert
         assert True
-    except ValueError:
-        assert False
-    except Exception:
-        assert False
+    except ValueError as err:
+        raise AssertionError() from err
+    except Exception as err:
+        raise AssertionError() from err
 
 
 def test_raise_if_true() -> None:
     """."""
-
     # Prepare
     validation_error = True
     detail = "test"
@@ -51,8 +49,8 @@ def test_raise_if_true() -> None:
         _raise_if(validation_error, detail)
 
         # Assert
-        assert False
+        raise AssertionError()
     except ValueError as err:
         assert str(err) == "Malformed PushTaskInsRequest: test"
-    except Exception:
-        assert False
+    except Exception as err:
+        raise AssertionError() from err
