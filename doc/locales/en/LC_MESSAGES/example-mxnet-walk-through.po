@@ -1,0 +1,285 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022 Adap GmbH
+# This file is distributed under the same license as the Flower package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Flower \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-08-09 15:41+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../source/example-mxnet-walk-through.rst:2
+msgid "Example: MXNet - Run MXNet Federated"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:4
+msgid ""
+"This tutorial will show you how to use Flower to build a federated "
+"version of an existing MXNet workload. We are using MXNet to train a "
+"Sequential model on the MNIST dataset. We will structure the example "
+"similar to our `PyTorch - From Centralized To Federated "
+"<https://github.com/adap/flower/blob/main/examples/pytorch-from-"
+"centralized-to-federated>`_ walkthrough. MXNet and PyTorch are very "
+"similar and a very good comparison between MXNet and PyTorch is given "
+"`here <https://mxnet.apache.org/versions/1.7.0/api/python/docs/tutorials"
+"/getting-started/to-mxnet/pytorch.html>`_. First, we build a centralized "
+"training approach based on the `Handwritten Digit Recognition "
+"<https://mxnet.apache.org/versions/1.7.0/api/python/docs/tutorials/packages/gluon/image/mnist.html>`_"
+" tutorial. Then, we build upon the centralized training code to run the "
+"training in a federated fashion."
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:10
+msgid ""
+"Before we start setting up our MXNet example, we install the "
+":code:`mxnet` and :code:`flwr` packages:"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:19
+msgid "MNIST Training with MXNet"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:21
+msgid ""
+"We begin with a brief description of the centralized training code based "
+"on a :code:`Sequential` model. If you want a more in-depth explanation of"
+" what's going on then have a look at the official `MXNet tutorial "
+"<https://mxnet.apache.org/versions/1.7.0/api/python/docs/tutorials/>`_."
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:24
+msgid ""
+"Let's create a new file called:code:`mxnet_mnist.py` with all the "
+"components required for a traditional (centralized) MNIST training. "
+"First, the MXNet package :code:`mxnet` needs to be imported. You can see "
+"that we do not yet import the :code:`flwr` package for federated "
+"learning. This will be done later."
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:42
+msgid "The :code:`load_data()` function loads the MNIST training and test sets."
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:57
+msgid ""
+"As already mentioned, we will use the MNIST dataset for this machine "
+"learning workload. The model architecture (a very simple "
+":code:`Sequential` model) is defined in :code:`model()`."
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:70
+msgid ""
+"We now need to define the training (function :code:`train()`) which loops"
+" over the training set and measures the loss for each batch of training "
+"examples."
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:123
+msgid ""
+"The evaluation of the model is defined in function :code:`test()`. The "
+"function loops over all test samples and measures the loss and accuracy "
+"of the model based on the test dataset."
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:158
+msgid ""
+"Having defined the data loading, model architecture, training, and "
+"evaluation we can put everything together and train our model on MNIST. "
+"Note that the GPU/CPU device for the training and testing is defined "
+"within the :code:`ctx` (context)."
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:184
+msgid "You can now run your (centralized) MXNet machine learning workload:"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:190
+msgid ""
+"So far this should all look fairly familiar if you've used MXNet (or even"
+" PyTorch) before. Let's take the next step and use what we've built to "
+"create a simple federated learning system consisting of one server and "
+"two clients."
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:194
+msgid "MXNet meets Flower"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:196
+msgid ""
+"So far, it was not easily possible to use MXNet workloads for federated "
+"learning because federated learning is not supported in MXNet. Since "
+"Flower is fully agnostic towards the underlying machine learning "
+"framework, it can be used to federated arbitrary machine learning "
+"workloads. This section will show you how Flower can be used to federate "
+"our centralized MXNet workload."
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:198
+msgid ""
+"The concept to federate an existing workload is always the same and easy "
+"to understand. We have to start a *server* and then use the code in "
+":code:`mxnet_mnist.py` for the *clients* that are connected to the "
+"*server*. The *server* sends model parameters to the clients. The "
+"*clients* run the training and update the parameters. The updated "
+"parameters are sent back to the *server* which averages all received "
+"parameter updates. This describes one round of the federated learning "
+"process and we repeat this for multiple rounds."
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:204
+msgid ""
+"Our example consists of one *server* and two *clients*. Let's set up "
+":code:`server.py` first. The *server* needs to import the Flower package "
+":code:`flwr`. Next, we use the :code:`start_server` function to start a "
+"server and tell it to perform three rounds of federated learning."
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:214
+msgid "We can already start the *server*:"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:220
+msgid ""
+"Finally, we will define our *client* logic in :code:`client.py` and build"
+" upon the previously defined MXNet training in :code:`mxnet_mnist.py`. "
+"Our *client* needs to import :code:`flwr`, but also :code:`mxnet` to "
+"update the parameters on our MXNet model:"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:235
+msgid ""
+"Implementing a Flower *client* basically means implementing a subclass of"
+" either :code:`flwr.client.Client` or :code:`flwr.client.NumPyClient`. "
+"Our implementation will be based on :code:`flwr.client.NumPyClient` and "
+"we'll call it :code:`MNISTClient`. :code:`NumPyClient` is slighly easier "
+"to implement than :code:`Client` if you use a framework with good NumPy "
+"interoperability (like PyTorch or MXNet) because it avoids some of the "
+"boilerplate that would otherwise be necessary. :code:`MNISTClient` needs "
+"to implement four methods, two methods for getting/setting model "
+"parameters, one method for training the model, and one method for testing"
+" the model:"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:242
+msgid ":code:`set_parameters (optional)`"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:241
+msgid ""
+"set the model parameters on the local model that are received from the "
+"server"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:242
+msgid "transform MXNet :code:`NDArray`'s to NumPy :code:`ndarray`'s"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:243
+msgid ""
+"loop over the list of model parameters received as NumPy "
+":code:`ndarray`'s (think list of neural network layers)"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:244
+msgid ":code:`get_parameters`"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:245
+msgid ""
+"get the model parameters and return them as a list of NumPy "
+":code:`ndarray`'s (which is what :code:`flwr.client.NumPyClient` expects)"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:248
+msgid ":code:`fit`"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:247
+#: ../../source/example-mxnet-walk-through.rst:251
+msgid ""
+"update the parameters of the local model with the parameters received "
+"from the server"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:248
+msgid "train the model on the local training set"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:249
+msgid "get the updated local model weights and return them to the server"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:253
+msgid ":code:`evaluate`"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:252
+msgid "evaluate the updated model on the local test set"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:253
+msgid "return the local loss and accuracy to the server"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:255
+msgid ""
+"The challenging part is to transform the MXNet parameters from "
+":code:`NDArray` to :code:`NumPy Arrays` to make it readable for Flower."
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:257
+msgid ""
+"The two :code:`NumPyClient` methods :code:`fit` and :code:`evaluate` make"
+" use of the functions :code:`train()` and :code:`test()` previously "
+"defined in :code:`mxnet_mnist.py`. So what we really do here is we tell "
+"Flower through our :code:`NumPyClient` subclass which of our already "
+"defined functions to call for training and evaluation. We included type "
+"annotations to give you a better understanding of the data types that get"
+" passed around."
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:319
+msgid ""
+"Having defined data loading, model architecture, training, and evaluation"
+" we can put everything together and train our :code:`Sequential` model on"
+" MNIST."
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:347
+msgid "And that's it. You can now open two additional terminal windows and run"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:353
+msgid ""
+"in each window (make sure that the server is still running before you do "
+"so) and see your MXNet project run federated learning across two clients."
+" Congratulations!"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:356
+msgid "Next Steps"
+msgstr ""
+
+#: ../../source/example-mxnet-walk-through.rst:358
+msgid ""
+"The full source code for this example: `MXNet: From Centralized To "
+"Federated (Code) <https://github.com/adap/flower/blob/main/examples"
+"/mxnet-from-centralized-to-federated>`_. Our example is of course "
+"somewhat over-simplified because both clients load the exact same "
+"dataset, which isn't realistic. You're now prepared to explore this topic"
+" further. How about using a CNN or using a different dataset? How about "
+"adding more clients?"
+msgstr ""
+

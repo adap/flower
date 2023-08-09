@@ -1,0 +1,273 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022 Adap GmbH
+# This file is distributed under the same license as the Flower package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Flower \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-08-09 15:41+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:2
+msgid "Example: PyTorch - From Centralized To Federated"
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:4
+msgid ""
+"This tutorial will show you how to use Flower to build a federated "
+"version of an existing machine learning workload. We are using PyTorch to"
+" train a Convolutional Neural Network on the CIFAR-10 dataset. First, we "
+"introduce this machine learning task with a centralized training approach"
+" based on the `Deep Learning with PyTorch "
+"<https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html>`_ "
+"tutorial. Then, we build upon the centralized training code to run the "
+"training in a federated fashion."
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:10
+msgid "Centralized Training"
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:12
+msgid ""
+"We begin with a brief description of the centralized CNN training code. "
+"If you want a more in-depth explanation of what's going on then have a "
+"look at the official `PyTorch tutorial "
+"<https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html>`_."
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:15
+msgid ""
+"Let's create a new file called :code:`cifar.py` with all the components "
+"required for a traditional (centralized) training on CIFAR-10. First, all"
+" required packages (such as :code:`torch` and :code:`torchvision`) need "
+"to be imported. You can see that we do not import any package for "
+"federated learning. You can keep all these imports as they are even when "
+"we add the federated learning components at a later point."
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:32
+msgid ""
+"As already mentioned we will use the CIFAR-10 dataset for this machine "
+"learning workload. The model architecture (a very simple Convolutional "
+"Neural Network) is defined in :code:`class Net()`."
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:56
+msgid ""
+"The :code:`load_data()` function loads the CIFAR-10 training and test "
+"sets. The :code:`transform` normalized the data after loading."
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:74
+msgid ""
+"We now need to define the training (function :code:`train()`) which loops"
+" over the training set, measures the loss, backpropagates it, and then "
+"takes one optimizer step for each batch of training examples."
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:76
+msgid ""
+"The evaluation of the model is defined in the function :code:`test()`. "
+"The function loops over all test samples and measures the loss of the "
+"model based on the test dataset."
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:136
+msgid ""
+"Having defined the data loading, model architecture, training, and "
+"evaluation we can put everything together and train our CNN on CIFAR-10."
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:157
+msgid "You can now run your machine learning workload:"
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:163
+msgid ""
+"So far, this should all look fairly familiar if you've used PyTorch "
+"before. Let's take the next step and use what we've built to create a "
+"simple federated learning system consisting of one server and two "
+"clients."
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:167
+msgid "Federated Training"
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:169
+msgid ""
+"The simple machine learning project discussed in the previous section "
+"trains the model on a single dataset (CIFAR-10), we call this centralized"
+" learning. This concept of centralized learning, as shown in the previous"
+" section, is probably known to most of you, and many of you have used it "
+"previously. Normally, if you'd want to run machine learning workloads in "
+"a federated fashion, then you'd have to change most of your code and set "
+"everything up from scratch. This can be a considerable effort."
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:173
+msgid ""
+"However, with Flower you can evolve your pre-existing code into a "
+"federated learning setup without the need for a major rewrite."
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:175
+msgid ""
+"The concept is easy to understand. We have to start a *server* and then "
+"use the code in :code:`cifar.py` for the *clients* that are connected to "
+"the *server*. The *server* sends model parameters to the clients. The "
+"*clients* run the training and update the paramters. The updated "
+"parameters are sent back to the *server* which averages all received "
+"parameter updates. This describes one round of the federated learning "
+"process and we repeat this for multiple rounds."
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:181
+msgid ""
+"Our example consists of one *server* and two *clients*. Let's set up "
+":code:`server.py` first. The *server* needs to import the Flower package "
+":code:`flwr`. Next, we use the :code:`start_server` function to start a "
+"server and tell it to perform three rounds of federated learning."
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:191
+msgid "We can already start the *server*:"
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:197
+msgid ""
+"Finally, we will define our *client* logic in :code:`client.py` and build"
+" upon the previously defined centralized training in :code:`cifar.py`. "
+"Our *client* needs to import :code:`flwr`, but also :code:`torch` to "
+"update the paramters on our PyTorch model:"
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:213
+msgid ""
+"Implementing a Flower *client* basically means implementing a subclass of"
+" either :code:`flwr.client.Client` or :code:`flwr.client.NumPyClient`. "
+"Our implementation will be based on :code:`flwr.client.NumPyClient` and "
+"we'll call it :code:`CifarClient`. :code:`NumPyClient` is slighly easier "
+"to implement than :code:`Client` if you use a framework with good NumPy "
+"interoperability (like PyTorch or TensorFlow/Keras) because it avoids "
+"some of the boilerplate that would otherwise be necessary. "
+":code:`CifarClient` needs to implement four methods, two methods for "
+"getting/setting model parameters, one method for training the model, and "
+"one method for testing the model:"
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:219
+msgid ":code:`set_parameters`"
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:219
+msgid ""
+"set the model parameters on the local model that are received from the "
+"server"
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:220
+msgid ""
+"loop over the list of model parameters received as NumPy "
+":code:`ndarray`'s (think list of neural network layers)"
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:221
+msgid ":code:`get_parameters`"
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:222
+msgid ""
+"get the model parameters and return them as a list of NumPy "
+":code:`ndarray`'s (which is what :code:`flwr.client.NumPyClient` expects)"
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:225
+msgid ":code:`fit`"
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:224
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:228
+msgid ""
+"update the parameters of the local model with the parameters received "
+"from the server"
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:225
+msgid "train the model on the local training set"
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:226
+msgid "get the updated local model weights and return them to the server"
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:230
+msgid ":code:`evaluate`"
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:229
+msgid "evaluate the updated model on the local test set"
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:230
+msgid "return the local loss and accuracy to the server"
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:232
+msgid ""
+"The two :code:`NumPyClient` methods :code:`fit` and :code:`evaluate` make"
+" use of the functions :code:`train()` and :code:`test()` previously "
+"defined in :code:`cifar.py`. So what we really do here is we tell Flower "
+"through our :code:`NumPyClient` subclass which of our already defined "
+"functions to call for training and evaluation. We included type "
+"annotations to give you a better understanding of the data types that get"
+" passed around."
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:280
+msgid ""
+"All that's left to do it to define a function that loads both model and "
+"data, creates a :code:`CifarClient`, and starts this client. You load "
+"your data and model by using :code:`cifar.py`. Start :code:`CifarClient` "
+"with the function :code:`fl.client.start_numpy_client()` by pointing it "
+"at the same IP adress we used in :code:`server.py`:"
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:301
+msgid "And that's it. You can now open two additional terminal windows and run"
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:307
+msgid ""
+"in each window (make sure that the server is running before you do so) "
+"and see your (previously centralized) PyTorch project run federated "
+"learning across two clients. Congratulations!"
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:310
+msgid "Next Steps"
+msgstr ""
+
+#: ../../source/example-pytorch-from-centralized-to-federated.rst:312
+msgid ""
+"The full source code for this example: `PyTorch: From Centralized To "
+"Federated (Code) <https://github.com/adap/flower/blob/main/examples"
+"/pytorch-from-centralized-to-federated>`_. Our example is, of course, "
+"somewhat over-simplified because both clients load the exact same "
+"dataset, which isn't realistic. You're now prepared to explore this topic"
+" further. How about using different subsets of CIFAR-10 on each client? "
+"How about adding more clients?"
+msgstr ""
+

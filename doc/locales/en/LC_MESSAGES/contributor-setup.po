@@ -1,0 +1,173 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022 Adap GmbH
+# This file is distributed under the same license as the Flower package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Flower \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-08-09 15:41+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../source/contributor-setup.rst:2
+msgid "Contributor setup"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:5
+msgid "Install development versions of Flower"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:8
+msgid "Using Poetry (recommended)"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:10
+msgid ""
+"Install a ``flwr`` pre-release from PyPI: update the ``flwr`` dependency "
+"in ``pyproject.toml`` and then reinstall (don't forget to delete "
+"``poetry.lock`` (``rm poetry.lock``) before running ``poetry install``)."
+msgstr ""
+
+#: ../../source/contributor-setup.rst:12
+msgid ""
+"``flwr = { version = \"1.0.0a0\", allow-prereleases = true }`` (without "
+"extras)"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:13
+msgid ""
+"``flwr = { version = \"1.0.0a0\", allow-prereleases = true, extras = "
+"[\"simulation\"] }`` (with extras)"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:15
+msgid ""
+"Install ``flwr`` from a local copy of the Flower source code via "
+"``pyproject.toml``:"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:17
+msgid "``flwr = { path = \"../../\", develop = true }`` (without extras)"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:18
+msgid ""
+"``flwr = { path = \"../../\", develop = true, extras = [\"simulation\"] "
+"}`` (with extras)"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:20
+msgid "Install ``flwr`` from a local wheel file via ``pyproject.toml``:"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:22
+msgid ""
+"``flwr = { path = \"../../dist/flwr-1.0.0-py3-none-any.whl\" }`` (without"
+" extras)"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:23
+msgid ""
+"``flwr = { path = \"../../dist/flwr-1.0.0-py3-none-any.whl\", extras = "
+"[\"simulation\"] }`` (with extras)"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:25
+msgid ""
+"Please refer to the Poetry documentation for further details: `Poetry "
+"Dependency Specification <https://python-poetry.org/docs/dependency-"
+"specification/>`_"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:28
+msgid "Using pip (recommended on Colab)"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:30
+msgid "Install a ``flwr`` pre-release from PyPI:"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:32
+msgid "``pip install -U --pre flwr`` (without extras)"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:33
+msgid "``pip install -U --pre flwr[simulation]`` (with extras)"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:35
+msgid ""
+"Python packages can be installed from git repositories. Use one of the "
+"following commands to install the Flower directly from GitHub."
+msgstr ""
+
+#: ../../source/contributor-setup.rst:37
+msgid "Install ``flwr`` from the default GitHub branch (``main``):"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:39
+msgid ""
+"``pip install flwr@git+https://github.com/adap/flower.git`` (without "
+"extras)"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:40
+msgid ""
+"``pip install flwr[simulation]@git+https://github.com/adap/flower.git`` "
+"(with extras)"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:42
+msgid "Install ``flwr`` from a specific GitHub branch (``branch-name``):"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:44
+msgid ""
+"``pip install flwr@git+https://github.com/adap/flower.git@branch-name`` "
+"(without extras)"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:45
+msgid ""
+"``pip install flwr[simulation]@git+https://github.com/adap/flower.git"
+"@branch-name`` (with extras)"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:49
+msgid "Open Jupyter Notebooks on Google Colab"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:51
+msgid ""
+"Open the notebook ``doc/source/tutorial/Flower-1-Intro-to-FL-"
+"PyTorch.ipynb``:"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:53
+msgid ""
+"https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial/Flower-1"
+"-Intro-to-FL-PyTorch.ipynb"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:55
+msgid ""
+"Open a development version of the same notebook from branch `branch-name`"
+" by changing ``main`` to ``branch-name`` (right after ``blob``):"
+msgstr ""
+
+#: ../../source/contributor-setup.rst:57
+msgid ""
+"https://colab.research.google.com/github/adap/flower/blob/branch-"
+"name/doc/source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb"
+msgstr ""
+

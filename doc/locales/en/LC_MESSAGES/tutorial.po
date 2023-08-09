@@ -1,0 +1,1753 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022 Adap GmbH
+# This file is distributed under the same license as the Flower package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Flower \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-08-09 15:41+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:9
+msgid "What is Federated Learning?"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:11
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:11
+msgid "Welcome to the Flower federated learning tutorial!"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:13
+msgid ""
+"In this tutorial, you will learn what federated learning is, build your "
+"first system in Flower, and gradually extend it. If you work through all "
+"parts of the tutorial, you will be able to build advanced federated "
+"learning systems that approach the current state of the art in the field."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:15
+msgid ""
+"🧑‍🏫 This tutorial starts at zero and expects no familiarity with "
+"federated learning. Only a basic understanding of data science and Python"
+" programming is assumed."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:17
+msgid ""
+"`Star Flower on GitHub <https://github.com/adap/flower>`__ ⭐️ and join "
+"the open-source Flower community on Slack to connect, ask questions, and "
+"get help: `Join Slack <https://flower.dev/join-slack>`__ 🌼 We'd love to "
+"hear from you in the ``#introductions`` channel! And if anything is "
+"unclear, head over to the ``#questions`` channel."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:19
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:17
+msgid "Let's get stated!"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:31
+msgid "Classic machine learning"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:33
+msgid ""
+"Before we begin to discuss federated learning, let us quickly recap how "
+"most machine learning works today."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:35
+msgid ""
+"In machine learning, we have a model, and we have data. The model could "
+"be a neural network (as depicted here), or something else, like classical"
+" linear regression."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:41
+msgid "|7eeeddea8a6b4806ac8926baed89c796|"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:109
+msgid "Model and data"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:47
+msgid ""
+"We train the model using the data to perform a useful task. A task could "
+"be to detect objects in images, transcribe an audio recording, or play a "
+"game like Go."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:53
+msgid "|d4f0ee3716f749649e746591750450e9|"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:111
+msgid "Train model using data"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:59
+msgid ""
+"Now, in practice, the training data we work with doesn't originate on the"
+" machine we train the model on. It gets created somewhere else."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:61
+msgid ""
+"It originates on a smartphone by the user interacting with an app, a car "
+"collecting sensor data, a laptop receiving input via the keyboard, or a "
+"smart speaker listening to someone trying to sing a song."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:67
+msgid "|525dddd5119e487eab7c0d908e538a06|"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:113
+msgid "Data on a phone"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:73
+msgid ""
+"What's also important to mention, this \"somewhere else\" is usually not "
+"just one place, it's many places. It could be several devices all running"
+" the same app. But it could also be several organizations, all generating"
+" data for the same task."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:79
+msgid "|e9664a1001334453b270bfcacec99a67|"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:115
+msgid "Data is on many devices"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:85
+msgid ""
+"So to use machine learning, or any kind of data analysis, the approach "
+"that has been used in the past was to collect all data on a central "
+"server. This server can be somewhere in a data center, or somewhere in "
+"the cloud."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:91
+msgid "|42324573e4374cfcac9cb715e40016e6|"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:117
+msgid "Central data collection"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:97
+msgid ""
+"Once all the data is collected in one place, we can finally use machine "
+"learning algorithms to train our model on the data. This is the machine "
+"learning approach that we've basically always relied on."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:103
+msgid "|195cb622fb704f5fa79476080826e12a|"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:119
+msgid "Central model training"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:130
+msgid "Challenges of classical machine learning"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:132
+msgid ""
+"The classic machine learning approach we've just seen can be used in some"
+" cases. Great examples include categorizing holiday photos, or analyzing "
+"web traffic. Cases, where all the data is naturally available on a "
+"centralized server."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:138
+msgid "|7a9f3b3fee01402ea76e93fbd5f7ddc9|"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:173
+msgid "Centralized possible"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:144
+msgid ""
+"But the approach can not be used in many other cases. Cases, where the "
+"data is not available on a centralized server, or cases where the data "
+"available on one server is not enough to train a good model."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:150
+msgid "|4725da6b1f3147d683d2680fd1bd8ec4|"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:175
+msgid "Centralized impossible"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:156
+msgid ""
+"There are many reasons why the classic centralized machine learning "
+"approach does not work for a large number of highly important real-world "
+"use cases. Those reasons include:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:158
+msgid ""
+"**Regulations**: GDPR (Europe), CCPA (California), PIPEDA (Canada), LGPD "
+"(Brazil), PDPL (Argentina), KVKK (Turkey), POPI (South Africa), FSS "
+"(Russia), CDPR (China), PDPB (India), PIPA (Korea), APPI (Japan), PDP "
+"(Indonesia), PDPA (Singapore), APP (Australia), and other regulations "
+"protect sensitive data from being moved. In fact, those regulations "
+"sometimes even prevent single organizations from combining their own "
+"users' data for artificial intelligence training because those users live"
+" in different parts of the world, and their data is governed by different"
+" data protection regulations."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:160
+msgid ""
+"**User preference**: In addition to regulation, there are use cases where"
+" users just expect that no data leaves their device, ever. If you type "
+"your passwords and credit card info into the digital keyboard of your "
+"phone, you don't expect those passwords to end up on the server of the "
+"company that developed that keyboard, do you? In fact, that use case was "
+"the reason federated learning was invented in the first place."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:161
+msgid ""
+"**Data volume**: Some sensors, like cameras, produce such a high data "
+"volume that it is neither feasible nor economic to collect all the data "
+"(due to, for example, bandwidth or communication efficiency). Think about"
+" a national rail service with hundreds of train stations across the "
+"country. If each of these train stations is outfitted with a number of "
+"security cameras, the volume of raw on-device data they produce requires "
+"incredibly powerful and exceedingly expensive infrastructure to process "
+"and store. And most of the data isn't even useful."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:164
+msgid "Examples where centralized machine learning does not work include:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:166
+msgid ""
+"Sensitive healthcare records from multiple hospitals to train cancer "
+"detection models"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:167
+msgid ""
+"Financial information from different organizations to detect financial "
+"fraud"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:168
+msgid "Location data from your electric car to make better range prediction"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:169
+msgid "End-to-end encrypted messages to train better auto-complete models"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:171
+msgid ""
+"The popularity of privacy-enhancing systems like the `Brave "
+"<https://brave.com/>`__ browser or the `Signal <https://signal.org/>`__ "
+"messenger shows that users care about privacy. In fact, they choose the "
+"privacy-enhancing version over other alternatives, if such an alernative "
+"exists. But what can we do to apply machine learning and data science to "
+"these cases to utilize private data? After all, these are all areas that "
+"would benefit significantly from recent advances in AI."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:186
+msgid "Federated learning"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:188
+msgid ""
+"Federated learning simply reverses this approach. It enables machine "
+"learning on distributed data by moving the training to the data, instead "
+"of moving the data to the training. Here's the single-sentence "
+"explanation:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:190
+msgid "Central machine learning: move the data to the computation"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:191
+msgid "Federated (machine) learning: move the computation to the data"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:193
+msgid ""
+"By doing so, it enables us to use machine learning (and other data "
+"science approaches) in areas where it wasn't possible before. We can now "
+"train excellent medical AI models by enabling different hospitals to work"
+" together. We can solve financial fraud by training AI models on the data"
+" of different financial institutions. We can build novel privacy-"
+"enhancing applications (such as secure messaging) that have better built-"
+"in AI than their non-privacy-enhancing alternatives. And those are just a"
+" few of the examples that come to mind. As we deploy federated learning, "
+"we discover more and more areas that can suddenly be reinvented because "
+"they now have access to vast amounts of previously inaccessible data."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:196
+msgid ""
+"So how does federated learning work, exactly? Let's start with an "
+"intuitive explanation."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:199
+msgid "Federated learning in five steps"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:202
+msgid "Step 0: Initialize global model"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:204
+msgid ""
+"We start by initializing the model on the server. This is exactly the "
+"same in classic centralized learning: we initialize the model parameters,"
+" either randomly or from a previously saved checkpoint."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:210
+msgid "|5e42e2082ddb44b9acf95d0ce49e7304|"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:307
+msgid "Initialize global model"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:217
+msgid ""
+"Step 1: Send model to a number of connected organizations/devices (client"
+" nodes)"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:219
+msgid ""
+"Next, we send the parameters of the global model to the connected client "
+"nodes (think: edge devices like smartphones or servers belonging to "
+"organizations). This is to ensure that each participating node starts "
+"their local training using the same model parameters. We often use only a"
+" few of the connected nodes instead of all nodes. The reason for this is "
+"that selecting more and more client nodes has diminishing returns."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:225
+msgid "|6875c57b28104110aedfde22207f493e|"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:309
+msgid "Send global model"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:232
+msgid ""
+"Step 2: Train model locally on the data of each organization/device "
+"(client node)"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:234
+msgid ""
+"Now that all (selected) client nodes have the latest version of the "
+"global model parameters, they start the local training. They use their "
+"own local dataset to train their own local model. They don't train the "
+"model until full convergence, but they only train for a little while. "
+"This could be as little as one epoch on the local data, or even just a "
+"few steps (mini-batches)."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:240
+msgid "|05ee049b1e0f4196b1abdc0e132a3fbf|"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:311
+msgid "Train on local data"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:247
+msgid "Step 3: Return model updates back to the server"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:249
+msgid ""
+"After local training, each client node has a slightly different version "
+"of the model parameters they originally received. The parameters are all "
+"different because each client node has different examples in its local "
+"dataset. The client nodes then send those model updates back to the "
+"server. The model updates they send can either be the full model "
+"parameters or just the gradients that were accumulated during local "
+"training."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:255
+msgid "|34f1003ae381479aa93186e3731f8c44|"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:313
+msgid "Send model updates"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:262
+msgid "Step 4: Aggregate model updates into a new global model"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:264
+msgid ""
+"The server receives model updates from the selected client nodes. If it "
+"selected 100 client nodes, it now has 100 slightly different versions of "
+"the original global model, each trained on the local data of one client. "
+"But didn't we want to have one model that contains the learnings from the"
+" data of all 100 client nodes?"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:266
+msgid ""
+"In order to get one single model, we have to combine all the model "
+"updates we received from the client nodes. This process is called "
+"*aggregation*, and there are many different ways to do it. The most basic"
+" way to do it is called *Federated Averaging* (`McMahan et al., 2016 "
+"<https://arxiv.org/abs/1602.05629>`__), often abbreviated as *FedAvg*. "
+"*FedAvg* takes the 100 model updates and, as the name suggests, averages "
+"them. To be more precise, it takes the *weighted average* of the model "
+"updates, weighted by the number of examples each client used for "
+"training. The weighting is important to make sure that each data example "
+"has the same \"influence\" on the resulting global model. If one client "
+"has 10 examples, and another client has 100 examples, then - without "
+"weighting - each of the 10 examples would influence the global model ten "
+"times as much as each of the 100 examples."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:273
+msgid "|baddae5dd85e413fa3ca80a7917d24d1|"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:315
+msgid "Aggregate model updates"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:280
+msgid "Step 5: Repeat steps 1 to 4 until the model converges"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:282
+msgid ""
+"Steps 1 to 4 are what we call a single round of federated learning. The "
+"global model parameters get sent to the participating client nodes (step "
+"1), the client nodes train on their local data (step 2), they send their "
+"updated models to the server (step 3), and the server then aggregates the"
+" model updates to get a new version of the global model (step 4)."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:284
+msgid ""
+"During a single round, each client node that participates in that "
+"iteration only trains for a little while. This means that after the "
+"aggregation step (step 4), we have a model that has been trained on all "
+"the data of all participating client nodes, but only for a little while. "
+"We then have to repeat this training process over and over again to "
+"eventually arrive at a fully trained model that performs well across the "
+"data of all client nodes."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:287
+msgid "Conclusion"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:289
+msgid ""
+"Congratulations, you now understand the basics of federated learning. "
+"There's a lot more to discuss, of course, but that was federated learning"
+" in a nutshell. In later parts of this tutorial, we will go into more "
+"detail. Interesting questions include: How can we select the best client "
+"nodes that should participate in the next round? What's the best way to "
+"aggregate model updates? How can we handle failing client nodes "
+"(stragglers)?"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:292
+msgid "Federated evaluation"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:294
+msgid ""
+"Just like we can train a model on the decentralized data of different "
+"client nodes, we can also evaluate the model on that data to receive "
+"valuable metrics. This is called federated evaluation, sometimes "
+"abbreviated as FE. In fact, federated evaluation is an integral part of "
+"most federated learning systems."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:297
+msgid "Federated analytics"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:299
+msgid ""
+"In many cases, machine learning isn't necessary to derive value from "
+"data. Data analysis can yield valuable insights, but again, there's often"
+" not enough data to get a clear answer. What's the average age at which "
+"people develop a certain type of health condition? Federated analytics "
+"enables such queries over multiple client nodes. It is usually used in "
+"conjunction with other privacy-enhancing technologies like secure "
+"aggregation to prevent the server from seeing the results submitted by "
+"individual client nodes."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:303
+msgid "Differential Privacy"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:305
+msgid ""
+"Differential privacy (DP) is often mentioned in the context of Federated "
+"Learning. It is a privacy-preserving method used when analyzing and "
+"sharing statistical data, ensuring the privacy of individual "
+"participants. DP achieves this by adding statistical noise to the model "
+"updates, ensuring any individual participants’ information cannot be "
+"distinguished or re-identified. This technique can be considered an "
+"optimization that provides a quantifiable privacy protection measure."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:326
+msgid "Flower"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:328
+msgid ""
+"Federated learning, federated evaluation, and federated analytics require"
+" infrastructure to move machine learning models back and forth, train and"
+" evaluate them on local data, and then aggregate the updated models. "
+"Flower provides the infrastructure to do exactly that in an easy, "
+"scalable, and secure way. In short, Flower presents a unified approach to"
+" federated learning, analytics, and evaluation. It allows the user to "
+"federate any workload, any ML framework, and any programming language."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:334
+msgid "|97f847675e7f4a61825610d5f1125ad0|"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:340
+msgid ""
+"Flower federated learning server and client nodes (car, scooter, personal"
+" computer, roomba, and phone)"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:351
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:731
+msgid "Final remarks"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:353
+msgid ""
+"Congratulations, you just learned the basics of federated learning and "
+"how it relates to the classic (centralized) machine learning!"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:355
+msgid ""
+"In the next part of this tutorial, we are going to build a first "
+"federated learning system with Flower."
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:367
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:747
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:713
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:548
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:946
+msgid "Next steps"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:369
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:749
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:715
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:550
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:948
+msgid ""
+"Before you continue, make sure to join the Flower community on Slack: "
+"`Join Slack <https://flower.dev/join-slack/>`__"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:371
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:751
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:717
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:552
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:950
+msgid ""
+"There's a dedicated ``#questions`` channel if you need help, but we'd "
+"also love to hear who you are in ``#introductions``!"
+msgstr ""
+
+#: ../../source/tutorial/Flower-0-What-is-FL.ipynb:373
+msgid ""
+"The `Flower Federated Learning Tutorial - Part 1 "
+"<https://flower.dev/docs/tutorial/Flower-1-Intro-to-FL-PyTorch.html>`__ "
+"shows how to build a simple federated learning system with PyTorch and "
+"Flower."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:9
+msgid "An Introduction to Federated Learning"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:13
+msgid ""
+"In this notebook, we'll build a federated learning system using Flower "
+"and PyTorch. In part 1, we use PyTorch for the model training pipeline "
+"and data loading. In part 2, we continue to federate the PyTorch-based "
+"pipeline using Flower."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:15
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:15
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:15
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:16
+msgid ""
+"`Star Flower on GitHub <https://github.com/adap/flower>`__ ⭐️ and join "
+"the Flower community on Slack to connect, ask questions, and get help: "
+"`Join Slack <https://flower.dev/join-slack>`__ 🌼 We'd love to hear from "
+"you in the ``#introductions`` channel! And if anything is unclear, head "
+"over to the ``#questions`` channel."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:29
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:30
+msgid "Step 0: Preparation"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:31
+msgid ""
+"Before we begin with any actual code, let's make sure that we have "
+"everything we need."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:43
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:43
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:43
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:44
+msgid "Installing dependencies"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:45
+msgid ""
+"Next, we install the necessary packages for PyTorch (``torch`` and "
+"``torchvision``) and Flower (``flwr``):"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:65
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:65
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:65
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:66
+msgid ""
+"Now that we have all dependencies installed, we can import everything we "
+"need for this tutorial:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:104
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:101
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:101
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:102
+msgid ""
+"It is possible to switch to a runtime that has GPU acceleration enabled "
+"(on Google Colab: ``Runtime > Change runtime type > Hardware acclerator: "
+"GPU > Save``). Note, however, that Google Colab is not always able to "
+"offer GPU acceleration. If you see an error related to GPU availability "
+"in one of the following sections, consider switching back to CPU-based "
+"execution by setting ``DEVICE = torch.device(\"cpu\")``. If the runtime "
+"has GPU acceleration enabled, you should see the output ``Training on "
+"cuda``, otherwise it'll say ``Training on cpu``."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:117
+msgid "Loading the data"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:119
+msgid ""
+"Federated learning can be applied to many different types of tasks across"
+" different domains. In this tutorial, we introduce federated learning by "
+"training a simple convolutional neural network (CNN) on the popular "
+"CIFAR-10 dataset. CIFAR-10 can be used to train image classifiers that "
+"distinguish between images from ten different classes:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:150
+msgid ""
+"We simulate having multiple datasets from multiple organizations (also "
+"called the \"cross-silo\" setting in federated learning) by splitting the"
+" original CIFAR-10 dataset into multiple partitions. Each partition will "
+"represent the data from a single organization. We're doing this purely "
+"for experimentation purposes, in the real world there's no need for data "
+"splitting because each organization already has their own data (so the "
+"data is naturally partitioned)."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:152
+msgid ""
+"Each organization will act as a client in the federated learning system. "
+"So having ten organizations participate in a federation means having ten "
+"clients connected to the federated learning server:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:172
+msgid ""
+"Let's now load the CIFAR-10 training and test set, partition them into "
+"ten smaller datasets (each split into training and validation set), and "
+"wrap the resulting partitions by creating a PyTorch ``DataLoader`` for "
+"each of them:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:222
+msgid ""
+"We now have a list of ten training sets and ten validation sets "
+"(``trainloaders`` and ``valloaders``) representing the data of ten "
+"different organizations. Each ``trainloader``/``valloader`` pair contains"
+" 4500 training examples and 500 validation examples. There's also a "
+"single ``testloader`` (we did not split the test set). Again, this is "
+"only necessary for building research or educational systems, actual "
+"federated learning systems have their data naturally distributed across "
+"multiple partitions."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:225
+msgid ""
+"Let's take a look at the first batch of images and labels in the first "
+"training set (i.e., ``trainloaders[0]``) before we move on:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:264
+msgid ""
+"The output above shows a random batch of images from the first "
+"``trainloader`` in our list of ten ``trainloaders``. It also prints the "
+"labels associated with each image (i.e., one of the ten possible labels "
+"we've seen above). If you run the cell again, you should see another "
+"batch of images."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:276
+msgid "Step 1: Centralized Training with PyTorch"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:287
+msgid ""
+"Next, we're going to use PyTorch to define a simple convolutional neural "
+"network. This introduction assumes basic familiarity with PyTorch, so it "
+"doesn't cover the PyTorch-related aspects in full detail. If you want to "
+"dive deeper into PyTorch, we recommend `DEEP LEARNING WITH PYTORCH: A 60 "
+"MINUTE BLITZ "
+"<https://pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html>`__."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:299
+msgid "Defining the model"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:301
+msgid ""
+"We use the simple CNN described in the `PyTorch tutorial "
+"<https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html#define-a"
+"-convolutional-neural-network>`__:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:338
+msgid "Let's continue with the usual training and test functions:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:398
+msgid "Training the model"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:400
+msgid ""
+"We now have all the basic building blocks we need: a dataset, a model, a "
+"training function, and a test function. Let's put them together to train "
+"the model on the dataset of one of our organizations "
+"(``trainloaders[0]``). This simulates the reality of most machine "
+"learning projects today: each organization has their own data and trains "
+"models only on this internal data:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:430
+msgid ""
+"Training the simple CNN on our CIFAR-10 split for 5 epochs should result "
+"in a test set accuracy of about 41%, which is not good, but at the same "
+"time, it doesn't really matter for the purposes of this tutorial. The "
+"intent was just to show a simplistic centralized training pipeline that "
+"sets the stage for what comes next - federated learning!"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:442
+msgid "Step 2: Federated Learning with Flower"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:444
+msgid ""
+"Step 1 demonstrated a simple centralized training pipeline. All data was "
+"in one place (i.e., a single ``trainloader`` and a single ``valloader``)."
+" Next, we'll simulate a situation where we have multiple datasets in "
+"multiple organizations and where we train a model over these "
+"organizations using federated learning."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:456
+msgid "Updating model parameters"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:458
+msgid ""
+"In federated learning, the server sends the global model parameters to "
+"the client, and the client updates the local model with the parameters "
+"received from the server. It then trains the model on the local data "
+"(which changes the model parameters locally) and sends the "
+"updated/changed model parameters back to the server (or, alternatively, "
+"it sends just the gradients back to the server, not the full model "
+"parameters)."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:460
+msgid ""
+"We need two helper functions to update the local model with parameters "
+"received from the server and to get the updated model parameters from the"
+" local model: ``set_parameters`` and ``get_parameters``. The following "
+"two functions do just that for the PyTorch model above."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:462
+msgid ""
+"The details of how this works are not really important here (feel free to"
+" consult the PyTorch documentation if you want to learn more). In "
+"essence, we use ``state_dict`` to access PyTorch model parameter tensors."
+" The parameter tensors are then converted to/from a list of NumPy "
+"ndarray's (which Flower knows how to serialize/deserialize):"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:490
+msgid "Implementing a Flower client"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:492
+msgid ""
+"With that out of the way, let's move on to the interesting part. "
+"Federated learning systems consist of a server and multiple clients. In "
+"Flower, we create clients by implementing subclasses of "
+"``flwr.client.Client`` or ``flwr.client.NumPyClient``. We use "
+"``NumPyClient`` in this tutorial because it is easier to implement and "
+"requires us to write less boilerplate."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:494
+msgid ""
+"To implement the Flower client, we create a subclass of "
+"``flwr.client.NumPyClient`` and implement the three methods "
+"``get_parameters``, ``fit``, and ``evaluate``:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:496
+msgid "``get_parameters``: Return the current local model parameters"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:497
+msgid ""
+"``fit``: Receive model parameters from the server, train the model "
+"parameters on the local data, and return the (updated) model parameters "
+"to the server"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:498
+msgid ""
+"``evaluate``: Receive model parameters from the server, evaluate the "
+"model parameters on the local data, and return the evaluation result to "
+"the server"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:500
+msgid ""
+"We mentioned that our clients will use the previously defined PyTorch "
+"components for model training and evaluation. Let's see a simple Flower "
+"client implementation that brings everything together:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:537
+msgid ""
+"Our class ``FlowerClient`` defines how local training/evaluation will be "
+"performed and allows Flower to call the local training/evaluation through"
+" ``fit`` and ``evaluate``. Each instance of ``FlowerClient`` represents a"
+" *single client* in our federated learning system. Federated learning "
+"systems have multiple clients (otherwise, there's not much to federate), "
+"so each client will be represented by its own instance of "
+"``FlowerClient``. If we have, for example, three clients in our workload,"
+" then we'd have three instances of ``FlowerClient``. Flower calls "
+"``FlowerClient.fit`` on the respective instance when the server selects a"
+" particular client for training (and ``FlowerClient.evaluate`` for "
+"evaluation)."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:541
+msgid "Using the Virtual Client Engine"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:543
+msgid ""
+"In this notebook, we want to simulate a federated learning system with 10"
+" clients on a single machine. This means that the server and all 10 "
+"clients will live on a single machine and share resources such as CPU, "
+"GPU, and memory. Having 10 clients would mean having 10 instances of "
+"``FlowerClient`` in memory. Doing this on a single machine can quickly "
+"exhaust the available memory resources, even if only a subset of these "
+"clients participates in a single round of federated learning."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:545
+msgid ""
+"In addition to the regular capabilities where server and clients run on "
+"multiple machines, Flower, therefore, provides special simulation "
+"capabilities that create ``FlowerClient`` instances only when they are "
+"actually necessary for training or evaluation. To enable the Flower "
+"framework to create clients when necessary, we need to implement a "
+"function called ``client_fn`` that creates a ``FlowerClient`` instance on"
+" demand. Flower calls ``client_fn`` whenever it needs an instance of one "
+"particular client to call ``fit`` or ``evaluate`` (those instances are "
+"usually discarded after use, so they should not keep any local state). "
+"Clients are identified by a client ID, or short ``cid``. The ``cid`` can "
+"be used, for example, to load different local data partitions for "
+"different clients, as can be seen below:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:580
+msgid "Starting the training"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:582
+msgid ""
+"We now have the class ``FlowerClient`` which defines client-side "
+"training/evaluation and ``client_fn`` which allows Flower to create "
+"``FlowerClient`` instances whenever it needs to call ``fit`` or "
+"``evaluate`` on one particular client. The last step is to start the "
+"actual simulation using ``flwr.simulation.start_simulation``."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:584
+msgid ""
+"The function ``start_simulation`` accepts a number of arguments, amongst "
+"them the ``client_fn`` used to create ``FlowerClient`` instances, the "
+"number of clients to simulate (``num_clients``), the number of federated "
+"learning rounds (``num_rounds``), and the strategy. The strategy "
+"encapsulates the federated learning approach/algorithm, for example, "
+"*Federated Averaging* (FedAvg)."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:586
+msgid ""
+"Flower has a number of built-in strategies, but we can also use our own "
+"strategy implementations to customize nearly all aspects of the federated"
+" learning approach. For this example, we use the built-in ``FedAvg`` "
+"implementation and customize it using a few basic parameters. The last "
+"step is the actual call to ``start_simulation`` which - you guessed it - "
+"starts the simulation:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:628
+msgid "Behind the scenes"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:630
+msgid "So how does this work? How does Flower execute this simulation?"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:632
+#, python-format
+msgid ""
+"When we call ``start_simulation``, we tell Flower that there are 10 "
+"clients (``num_clients=10``). Flower then goes ahead an asks the "
+"``FedAvg`` strategy to select clients. ``FedAvg`` knows that it should "
+"select 100% of the available clients (``fraction_fit=1.0``), so it goes "
+"ahead and selects 10 random clients (i.e., 100% of 10)."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:634
+msgid ""
+"Flower then asks the selected 10 clients to train the model. When the "
+"server receives the model parameter updates from the clients, it hands "
+"those updates over to the strategy (*FedAvg*) for aggregation. The "
+"strategy aggregates those updates and returns the new global model, which"
+" then gets used in the next round of federated learning."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:646
+msgid "Where's the accuracy?"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:648
+msgid ""
+"You may have noticed that all metrics except for ``losses_distributed`` "
+"are empty. Where did the ``{\"accuracy\": float(accuracy)}`` go?"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:650
+msgid ""
+"Flower can automatically aggregate losses returned by individual clients,"
+" but it cannot do the same for metrics in the generic metrics dictionary "
+"(the one with the ``accuracy`` key). Metrics dictionaries can contain "
+"very different kinds of metrics and even key/value pairs that are not "
+"metrics at all, so the framework does not (and can not) know how to "
+"handle these automatically."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:652
+msgid ""
+"As users, we need to tell the framework how to handle/aggregate these "
+"custom metrics, and we do so by passing metric aggregation functions to "
+"the strategy. The strategy will then call these functions whenever it "
+"receives fit or evaluate metrics from clients. The two possible functions"
+" are ``fit_metrics_aggregation_fn`` and "
+"``evaluate_metrics_aggregation_fn``."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:654
+msgid ""
+"Let's create a simple weighted averaging function to aggregate the "
+"``accuracy`` metric we return from ``evaluate``:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:680
+msgid ""
+"The only thing left to do is to tell the strategy to call this function "
+"whenever it receives evaluation metric dictionaries from the clients:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:717
+msgid ""
+"We now have a full system that performs federated training and federated "
+"evaluation. It uses the ``weighted_average`` function to aggregate custom"
+" evaluation metrics and calculates a single ``accuracy`` metric across "
+"all clients on the server side."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:719
+msgid ""
+"The other two categories of metrics (``losses_centralized`` and "
+"``metrics_centralized``) are still empty because they only apply when "
+"centralized evaluation is being used. Part two of the Flower tutorial "
+"will cover centralized evaluation."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:733
+msgid ""
+"Congratulations, you just trained a convolutional neural network, "
+"federated over 10 clients! With that, you understand the basics of "
+"federated learning with Flower. The same approach you've seen can be used"
+" with other machine learning frameworks (not just PyTorch) and tasks (not"
+" just CIFAR-10 images classification), for example NLP with Hugging Face "
+"Transformers or speech with SpeechBrain."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:735
+msgid ""
+"In the next notebook, we're going to cover some more advanced concepts. "
+"Want to customize your strategy? Initialize parameters on the server "
+"side? Or evaluate the aggregated model on the server side? We'll cover "
+"all this and more in the next tutorial."
+msgstr ""
+
+#: ../../source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb:753
+msgid ""
+"The `Flower Federated Learning Tutorial - Part 2 "
+"<https://flower.dev/docs/tutorial/Flower-2-Strategies-in-FL-"
+"PyTorch.html>`__ goes into more depth about strategies and all the "
+"advanced things you can build with them."
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:9
+msgid "Strategies in Federated Learning"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:11
+msgid ""
+"Welcome to the next part of the federated learning tutorial. In previous "
+"parts of this tutorial, we introduced federated learning with PyTorch and"
+" Flower (`part 1 <https://flower.dev/docs/tutorial/Flower-1-Intro-to-FL-"
+"PyTorch.html>`__)."
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:13
+msgid ""
+"In this notebook, we'll begin to customize the federated learning system "
+"we built in the introductory notebook (again, using `Flower "
+"<https://flower.dev/>`__ and `PyTorch <https://pytorch.org/>`__)."
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:17
+msgid "Let's move beyond FedAvg with Flower Strategies!"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:29
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:29
+msgid "Preparation"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:31
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:31
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:32
+msgid ""
+"Before we begin with the actual code, let's make sure that we have "
+"everything we need."
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:45
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:45
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:46
+msgid "First, we install the necessary packages:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:114
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:114
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:115
+msgid "Data loading"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:116
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:116
+msgid ""
+"Let's now load the CIFAR-10 training and test set, partition them into "
+"ten smaller datasets (each split into training and validation set), and "
+"wrap everything in their own ``DataLoader``. We introduce a new parameter"
+" ``num_clients`` which allows us to call ``load_datasets`` with different"
+" numbers of clients."
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:167
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:167
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:168
+msgid "Model training/evaluation"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:169
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:169
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:170
+msgid ""
+"Let's continue with the usual model definition (including "
+"``set_parameters`` and ``get_parameters``), training and test functions:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:258
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:258
+msgid "Flower client"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:260
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:260
+msgid ""
+"To implement the Flower client, we (again) create a subclass of "
+"``flwr.client.NumPyClient`` and implement the three methods "
+"``get_parameters``, ``fit``, and ``evaluate``. Here, we also pass the "
+"``cid`` to the client and use it log additional details:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:309
+msgid "Strategy customization"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:311
+msgid ""
+"So far, everything should look familiar if you've worked through the "
+"introductory notebook. With that, we're ready to introduce a number of "
+"new features."
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:323
+msgid "Server-side parameter **initialization**"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:325
+msgid ""
+"Flower, by default, initializes the global model by asking one random "
+"client for the initial parameters. In many cases, we want more control "
+"over parameter initialization though. Flower therefore allows you to "
+"directly pass the initial parameters to the Strategy:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:370
+msgid ""
+"Passing ``initial_parameters`` to the ``FedAvg`` strategy prevents Flower"
+" from asking one of the clients for the initial parameters. If we look "
+"closely, we can see that the logs do not show any calls to the "
+"``FlowerClient.get_parameters`` method."
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:382
+msgid "Starting with a customized strategy"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:384
+msgid ""
+"We've seen the function ``start_simulation`` before. It accepts a number "
+"of arguments, amongst them the ``client_fn`` used to create "
+"``FlowerClient`` instances, the number of clients to simulate "
+"``num_clients``, the number of rounds ``num_rounds``, and the strategy."
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:386
+msgid ""
+"The strategy encapsulates the federated learning approach/algorithm, for "
+"example, ``FedAvg`` or ``FedAdagrad``. Let's try to use a different "
+"strategy this time:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:424
+msgid "Server-side parameter **evaluation**"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:426
+msgid ""
+"Flower can evaluate the aggregated model on the server-side or on the "
+"client-side. Client-side and server-side evaluation are similar in some "
+"ways, but different in others."
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:428
+msgid ""
+"**Centralized Evaluation** (or *server-side evaluation*) is conceptually "
+"simple: it works the same way that evaluation in centralized machine "
+"learning does. If there is a server-side dataset that can be used for "
+"evaluation purposes, then that's great. We can evaluate the newly "
+"aggregated model after each round of training without having to send the "
+"model to clients. We're also fortunate in the sense that our entire "
+"evaluation dataset is available at all times."
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:430
+msgid ""
+"**Federated Evaluation** (or *client-side evaluation*) is more complex, "
+"but also more powerful: it doesn't require a centralized dataset and "
+"allows us to evaluate models over a larger set of data, which often "
+"yields more realistic evaluation results. In fact, many scenarios require"
+" us to use **Federated Evaluation** if we want to get representative "
+"evaluation results at all. But this power comes at a cost: once we start "
+"to evaluate on the client side, we should be aware that our evaluation "
+"dataset can change over consecutive rounds of learning if those clients "
+"are not always available. Moreover, the dataset held by each client can "
+"also change over consecutive rounds. This can lead to evaluation results "
+"that are not stable, so even if we would not change the model, we'd see "
+"our evaluation results fluctuate over consecutive rounds."
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:433
+msgid ""
+"We've seen how federated evaluation works on the client side (i.e., by "
+"implementing the ``evaluate`` method in ``FlowerClient``). Now let's see "
+"how we can evaluate aggregated model parameters on the server-side:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:490
+msgid "Sending/receiving arbitrary values to/from clients"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:492
+msgid ""
+"In some situations, we want to configure client-side execution (training,"
+" evaluation) from the server-side. One example for that is the server "
+"asking the clients to train for a certain number of local epochs. Flower "
+"provides a way to send configuration values from the server to the "
+"clients using a dictionary. Let's look at an example where the clients "
+"receive values from the server through the ``config`` parameter in "
+"``fit`` (``config`` is also available in ``evaluate``). The ``fit`` "
+"method receives the configuration dictionary through the ``config`` "
+"parameter and can then read values from this dictionary. In this example,"
+" it reads ``server_round`` and ``local_epochs`` and uses those values to "
+"improve the logging and configure the number of local training epochs:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:546
+msgid ""
+"So how can we send this config dictionary from server to clients? The "
+"built-in Flower Strategies provide way to do this, and it works similarly"
+" to the way server-side evaluation works. We provide a function to the "
+"strategy, and the strategy calls this function for every round of "
+"federated learning:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:576
+msgid ""
+"Next, we'll just pass this function to the FedAvg strategy before "
+"starting the simulation:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:613
+msgid ""
+"As we can see, the client logs now include the current round of federated"
+" learning (which they read from the ``config`` dictionary). We can also "
+"configure local training to run for one epoch during the first and second"
+" round of federated learning, and then for two epochs during the third "
+"round."
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:615
+msgid ""
+"Clients can also return arbitrary values to the server. To do so, they "
+"return a dictionary from ``fit`` and/or ``evaluate``. We have seen and "
+"used this concept throughout this notebook without mentioning it "
+"explicitly: our ``FlowerClient`` returns a dictionary containing a custom"
+" key/value pair as the third return value in ``evaluate``."
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:627
+msgid "Scaling federated learning"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:629
+msgid ""
+"As a last step in this notebook, let's see how we can use Flower to "
+"experiment with a large number of clients."
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:651
+#, python-format
+msgid ""
+"We now have 1000 partitions, each holding 45 training and 5 validation "
+"examples. Given that the number of training examples on each client is "
+"quite small, we should probably train the model a bit longer, so we "
+"configure the clients to perform 3 local training epochs. We should also "
+"adjust the fraction of clients selected for training during each round "
+"(we don't want all 1000 clients participating in every round), so we "
+"adjust ``fraction_fit`` to ``0.05``, which means that only 5% of "
+"available clients (so 50 clients) will be selected for training each "
+"round:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:697
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:534
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:932
+msgid "Recap"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:699
+msgid ""
+"In this notebook, we've seen how we can gradually enhance our system by "
+"customizing the strategy, initializing parameters on the server side, "
+"choosing a different strategy, and evaluating models on the server-side. "
+"That's quite a bit of flexibility with so little code, right?"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:701
+msgid ""
+"In the later sections, we've seen how we can communicate arbitrary values"
+" between server and clients to fully customize client-side execution. "
+"With that capability, we built a large-scale Federated Learning "
+"simulation using the Flower Virtual Client Engine and ran an experiment "
+"involving 1000 clients in the same workload - all in a Jupyter Notebook!"
+msgstr ""
+
+#: ../../source/tutorial/Flower-2-Strategies-in-FL-PyTorch.ipynb:719
+msgid ""
+"The `Flower Federated Learning Tutorial - Part 3 [WIP] "
+"<https://flower.dev/docs/tutorial/Flower-3-Building-a-Strategy-"
+"PyTorch.html>`__ shows how to build a fully custom ``Strategy`` from "
+"scratch."
+msgstr ""
+
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:9
+msgid "Building a Strategy"
+msgstr ""
+
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:11
+msgid ""
+"Welcome to the third part of the Flower federated learning tutorial. In "
+"previous parts of this tutorial, we introduced federated learning with "
+"PyTorch and Flower (`part 1 <https://flower.dev/docs/tutorial/Flower-1"
+"-Intro-to-FL-PyTorch.html>`__) and we learned how strategies can be used "
+"to customize the execution on both the server and the clients (`part 2 "
+"<https://flower.dev/docs/tutorial/Flower-2-Strategies-in-FL-"
+"PyTorch.html>`__)."
+msgstr ""
+
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:13
+msgid ""
+"In this notebook, we'll continue to customize the federated learning "
+"system we built previously by creating a custom version of FedAvg (again,"
+" using `Flower <https://flower.dev/>`__ and `PyTorch "
+"<https://pytorch.org/>`__)."
+msgstr ""
+
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:17
+msgid "Let's build a new ``Strategy`` from scratch!"
+msgstr ""
+
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:308
+msgid "Let's test what we have so far before we continue:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:339
+msgid "Build a Strategy from scratch"
+msgstr ""
+
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:341
+msgid ""
+"Let’s overwrite the ``configure_fit`` method such that it passes a higher"
+" learning rate (potentially also other hyperparameters) to the optimizer "
+"of a fraction of the clients. We will keep the sampling of the clients as"
+" it is in ``FedAvg`` and then change the configuration dictionary (one of"
+" the ``FitIns`` attributes)."
+msgstr ""
+
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:507
+msgid ""
+"The only thing left is to use the newly created custom Strategy "
+"``FedCustom`` when starting the experiment:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:536
+msgid ""
+"In this notebook, we’ve seen how to implement a custom strategy. A custom"
+" strategy enables granular control over client node configuration, result"
+" aggregation, and more. To define a custom strategy, you only have to "
+"overwrite the abstract methods of the (abstract) base class ``Strategy``."
+" To make custom strategies even more powerful, you can pass custom "
+"functions to the constructor of your new class (``__init__``) and then "
+"call these functions whenever needed."
+msgstr ""
+
+#: ../../source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb:554
+msgid ""
+"The `Flower Federated Learning Tutorial - Part 4 "
+"<https://flower.dev/docs/tutorial/Flower-4-Client-and-NumPyClient-"
+"PyTorch.html>`__ introduces ``Client``, the flexible API underlying "
+"``NumPyClient``."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:9
+msgid "Client and NumPyClient"
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:11
+msgid ""
+"Welcome to the fourth part of the Flower federated learning tutorial. In "
+"the previous parts of this tutorial, we introduced federated learning "
+"with PyTorch and Flower (`part 1 "
+"<https://flower.dev/docs/tutorial/Flower-1-Intro-to-FL-PyTorch.html>`__),"
+" we learned how strategies can be used to customize the execution on both"
+" the server and the clients (`part 2 "
+"<https://flower.dev/docs/tutorial/Flower-2-Strategies-in-FL-"
+"PyTorch.html>`__), and we built our own custom strategy from scratch "
+"(`part 3 - WIP <https://flower.dev/docs/tutorial/Flower-3-Building-a"
+"-Strategy-PyTorch.html>`__)."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:14
+msgid ""
+"In this notebook, we revisit ``NumPyClient`` and introduce a new "
+"baseclass for building clients, simply named ``Client``. In previous "
+"parts of this tutorial, we've based our client on ``NumPyClient``, a "
+"convenience class which makes it easy to work with machine learning "
+"libraries that have good NumPy interoperability. With ``Client``, we gain"
+" a lot of flexibility that we didn't have before, but we'll also have to "
+"do a few things the we didn't have to do before."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:18
+msgid ""
+"Let's go deeper and see what it takes to move from ``NumPyClient`` to "
+"``Client``!"
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:117
+msgid ""
+"Let's now load the CIFAR-10 training and test set, partition them into "
+"ten smaller datasets (each split into training and validation set), and "
+"wrap everything in their own ``DataLoader``."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:259
+msgid "Step 1: Revisiting NumPyClient"
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:261
+msgid ""
+"So far, we've implemented our client by subclassing "
+"``flwr.client.NumPyClient``. The three methods we implemented are "
+"``get_parameters``, ``fit``, and ``evaluate``. Finally, we wrap the "
+"creation of instances of this class in a function called ``client_fn``:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:309
+msgid ""
+"We've seen this before, there's nothing new so far. The only *tiny* "
+"difference compared to the previous notebook is naming, we've changed "
+"``FlowerClient`` to ``FlowerNumPyClient`` and ``client_fn`` to "
+"``numpyclient_fn``. Let's run it to see the output we get:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:339
+msgid ""
+"This works as expected, two clients are training for three rounds of "
+"federated learning."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:341
+msgid ""
+"Let's dive a little bit deeper and discuss how Flower executes this "
+"simulation. Whenever a client is selected to do some work, "
+"``start_simulation`` calls the function ``numpyclient_fn`` to create an "
+"instance of our ``FlowerNumPyClient`` (along with loading the model and "
+"the data)."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:343
+msgid ""
+"But here's the perhaps surprising part: Flower doesn't actually use the "
+"``FlowerNumPyClient`` object directly. Instead, it wraps the object to "
+"makes it look like a subclass of ``flwr.client.Client``, not "
+"``flwr.client.NumPyClient``. In fact, the Flower core framework doesn't "
+"know how to handle ``NumPyClient``'s, it only knows how to handle "
+"``Client``'s. ``NumPyClient`` is just a convenience abstraction built on "
+"top of ``Client``."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:345
+msgid ""
+"Instead of building on top of ``NumPyClient``, we can directly build on "
+"top of ``Client``."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:357
+msgid "Step 2: Moving from ``NumPyClient`` to ``Client``"
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:359
+msgid ""
+"Let's try to do the same thing using ``Client`` instead of "
+"``NumPyClient``."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:465
+msgid ""
+"Before we discuss the code in more detail, let's try to run it! Gotta "
+"make sure our new ``Client``-based client works, right?"
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:490
+msgid ""
+"That's it, we're now using ``Client``. It probably looks similar to what "
+"we've done with ``NumPyClient``. So what's the difference?"
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:492
+msgid ""
+"First of all, it's more code. But why? The difference comes from the fact"
+" that ``Client`` expects us to take care of parameter serialization and "
+"deserialization. For Flower to be able to send parameters over the "
+"network, it eventually needs to turn these parameters into ``bytes``. "
+"Turning parameters (e.g., NumPy ``ndarray``'s) into raw bytes is called "
+"serialization. Turning raw bytes into something more useful (like NumPy "
+"``ndarray``'s) is called deserialization. Flower needs to do both: it "
+"needs to serialize parameters on the server-side and send them to the "
+"client, the client needs to deserialize them to use them for local "
+"training, and then serialize the updated parameters again to send them "
+"back to the server, which (finally!) deserializes them again in order to "
+"aggregate them with the updates received from other clients."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:495
+msgid ""
+"The only *real* difference between Client and NumPyClient is that "
+"NumPyClient takes care of serialization and deserialization for you. It "
+"can do so because it expects you to return parameters as NumPy ndarray's,"
+" and it knows how to handle these. This makes working with machine "
+"learning libraries that have good NumPy support (most of them) a breeze."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:497
+msgid ""
+"In terms of API, there's one major difference: all methods in Client take"
+" exactly one argument (e.g., ``FitIns`` in ``Client.fit``) and return "
+"exactly one value (e.g., ``FitRes`` in ``Client.fit``). The methods in "
+"``NumPyClient`` on the other hand have multiple arguments (e.g., "
+"``parameters`` and ``config`` in ``NumPyClient.fit``) and multiple return"
+" values (e.g., ``parameters``, ``num_example``, and ``metrics`` in "
+"``NumPyClient.fit``) if there are multiple things to handle. These "
+"``*Ins`` and ``*Res`` objects in ``Client`` wrap all the individual "
+"values you're used to from ``NumPyClient``."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:510
+msgid "Step 3: Custom serialization"
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:512
+msgid ""
+"Here we will explore how to implement custom serialization with a simple "
+"example."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:514
+msgid ""
+"But first what is serialization? Serialization is just the process of "
+"converting an object into raw bytes, and equally as important, "
+"deserialization is the process of converting raw bytes back into an "
+"object. This is very useful for network communication. Indeed, without "
+"serialization, you could not just a Python object through the internet."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:516
+msgid ""
+"Federated Learning relies heavily on internet communication for training "
+"by sending Python objects back and forth between the clients and the "
+"server. This means that serialization is an essential part of Federated "
+"Learning."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:518
+msgid ""
+"In the following section, we will write a basic example where instead of "
+"sending a serialized version of our ``ndarray``\\ s containing our "
+"parameters, we will first convert the ``ndarray`` into sparse matrices, "
+"before sending them. This technique can be used to save bandwidth, as in "
+"certain cases where the weights of a model are sparse (containing many 0 "
+"entries), converting them to a sparse matrix can greatly improve their "
+"bytesize."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:521
+msgid "Our custom serialization/deserialization functions"
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:523
+msgid ""
+"This is where the real serialization/deserialization will happen, "
+"especially in ``ndarray_to_sparse_bytes`` for serialization and "
+"``sparse_bytes_to_ndarray`` for deserialization."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:525
+msgid ""
+"Note that we imported the ``scipy.sparse`` library in order to convert "
+"our arrays."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:613
+msgid "Client-side"
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:615
+msgid ""
+"To be able to able to serialize our ``ndarray``\\ s into sparse "
+"parameters, we will just have to call our custom functions in our "
+"``flwr.client.Client``."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:617
+msgid ""
+"Indeed, in ``get_parameters`` we need to serialize the parameters we got "
+"from our network using our custom ``ndarrays_to_sparse_parameters`` "
+"defined above."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:619
+msgid ""
+"In ``fit``, we first need to deserialize the parameters coming from the "
+"server using our custom ``sparse_parameters_to_ndarrays`` and then we "
+"need to serialize our local results with "
+"``ndarrays_to_sparse_parameters``."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:621
+msgid ""
+"In ``evaluate``, we will only need to deserialize the global parameters "
+"with our custom function."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:725
+msgid "Server-side"
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:727
+msgid ""
+"For this example, we will just use ``FedAvg`` as a strategy. To change "
+"the serialization and deserialization here, we only need to reimplement "
+"the ``evaluate`` and ``aggregate_fit`` functions of ``FedAvg``. The other"
+" functions of the strategy will be inherited from the super class "
+"``FedAvg``."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:729
+msgid "As you can see only one line as change in ``evaluate``:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:735
+msgid ""
+"And for ``aggregate_fit``, we will first deserialize every result we "
+"received:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:744
+msgid "And then serialize the aggregated result:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:903
+msgid "We can now run our custom serialization example!"
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:934
+msgid ""
+"In this part of the tutorial, we've seen how we can build clients by "
+"subclassing either ``NumPyClient`` or ``Client``. ``NumPyClient`` is a "
+"convenience abstraction that makes it easier to work with machine "
+"learning libraries that have good NumPy interoperability. ``Client`` is a"
+" more flexible abstraction that allows us to do things that are not "
+"possible in ``NumPyClient``. In order to do so, it requires us to handle "
+"parameter serialization and deserialization ourselves."
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:952
+msgid ""
+"This is the final part of the Flower tutorial (for now!), "
+"congratulations! You're now well equipped to understand the rest of the "
+"documentation. There are many topics we didn't cover in the tutorial, we "
+"recommend the following resources:"
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:954
+msgid "`Read Flower Docs <https://flower.dev/docs/>`__"
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:955
+msgid ""
+"`Check out Flower Code Examples "
+"<https://github.com/adap/flower/tree/main/examples>`__"
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:956
+msgid ""
+"`Use Flower Baselines for your research <https://flower.dev/docs/using-"
+"baselines.html>`__"
+msgstr ""
+
+#: ../../source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb:957
+msgid ""
+"`Watch Flower Summit 2022 videos <https://flower.dev/conf/flower-"
+"summit-2022/>`__"
+msgstr ""
+

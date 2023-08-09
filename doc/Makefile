@@ -15,8 +15,19 @@ help:
 .PHONY: help Makefile
 
 docs:
-	rm -rf build
+	make clean
 	make html
+
+build-lang:
+	rm -rf build/html/$(lang)
+	$(SPHINXBUILD) -D language=$(lang) source build/html/$(lang)
+
+update-text:
+	rm -rf build/gettext
+	make gettext
+
+update-lang:
+	sphinx-intl update -p build/gettext -l $(lang)
 
 serve:
 	make docs

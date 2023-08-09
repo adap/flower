@@ -1,0 +1,290 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022 Adap GmbH
+# This file is distributed under the same license as the Flower package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Flower \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-08-09 15:41+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../source/upgrade-to-flower-1.0.rst:2
+msgid "Upgrade to Flower 1.0"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:4
+msgid ""
+"Flower 1.0 is here. Along with new features, Flower 1.0 provides a stable"
+" foundation for future growth. Compared to Flower 0.19 (and other 0.x "
+"series releases), there are a few breaking changes that make it necessary"
+" to change the code of existing 0.x-series projects."
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:8
+msgid "Install update"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:10
+msgid ""
+"Here's how to update an existing installation to Flower 1.0 using either "
+"pip or Poetry:"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:12
+msgid "pip: add ``-U`` when installing."
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:14
+msgid ""
+"``python -m pip install -U flwr`` (when using ``start_server`` and "
+"``start_client``)"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:15
+msgid ""
+"``python -m pip install -U flwr[simulation]`` (when using "
+"``start_simulation``)"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:17
+msgid ""
+"Poetry: update the ``flwr`` dependency in ``pyproject.toml`` and then "
+"reinstall (don't forget to delete ``poetry.lock`` via ``rm poetry.lock`` "
+"before running ``poetry install``)."
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:19
+msgid "``flwr = \"^1.0.0\"`` (when using ``start_server`` and ``start_client``)"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:20
+msgid ""
+"``flwr = { version = \"^1.0.0\", extras = [\"simulation\"] }`` (when "
+"using ``start_simulation``)"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:24
+msgid "Required changes"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:26
+msgid "The following breaking changes require manual updates."
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:29
+msgid "General"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:31
+msgid ""
+"Pass all arguments as keyword arguments (not as positional arguments). "
+"Here's an example:"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:33
+msgid ""
+"Flower 0.19 (positional arguments): ``start_client(\"127.0.0.1:8080\", "
+"FlowerClient())``"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:34
+msgid ""
+"Flower 1.0 (keyword arguments): "
+"``start_client(server_address=\"127.0.0.1:8080\", "
+"client=FlowerClient())``"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:37
+msgid "Client"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:39
+msgid ""
+"Subclasses of ``NumPyClient``: change ``def get_parameters(self):``` to "
+"``def get_parameters(self, config):``"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:40
+msgid ""
+"Subclasses of ``Client``: change ``def get_parameters(self):``` to ``def "
+"get_parameters(self, ins: GetParametersIns):``"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:43
+msgid "Strategies / ``start_server`` / ``start_simulation``"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:45
+msgid ""
+"Pass ``ServerConfig`` (instead of a dictionary) to ``start_server`` and "
+"``start_simulation``. Here's an example:"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:47
+msgid ""
+"Flower 0.19: ``start_server(..., config={\"num_rounds\": 3, "
+"\"round_timeout\": 600.0}, ...)``"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:48
+msgid ""
+"Flower 1.0: ``start_server(..., "
+"config=flwr.server.ServerConfig(num_rounds=3, round_timeout=600.0), "
+"...)``"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:50
+msgid ""
+"Replace ``num_rounds=1`` in ``start_simulation`` with the new "
+"``config=ServerConfig(...)`` (see previous item)"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:51
+msgid ""
+"Remove ``force_final_distributed_eval`` parameter from calls to "
+"``start_server``. Distributed evaluation on all clients can be enabled by"
+" configuring the strategy to sample all clients for evaluation after the "
+"last round of training."
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:52
+msgid "Rename parameter/ndarray conversion functions:"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:54
+msgid "``parameters_to_weights`` --> ``parameters_to_ndarrays``"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:55
+msgid "``weights_to_parameters`` --> ``ndarrays_to_parameters``"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:57
+msgid ""
+"Strategy initialization: if the strategy relies on the default values for"
+" ``fraction_fit`` and ``fraction_evaluate``, set ``fraction_fit`` and "
+"``fraction_evaluate`` manually to ``0.1``. Projects that do not manually "
+"create a strategy (by calling ``start_server`` or ``start_simulation`` "
+"without passing a strategy instance) should now manually initialize "
+"FedAvg with ``fraction_fit`` and ``fraction_evaluate`` set to ``0.1``."
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:58
+msgid "Rename built-in strategy parameters (e.g., ``FedAvg``):"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:60
+msgid "``fraction_eval`` --> ``fraction_evaluate``"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:61
+msgid "``min_eval_clients`` --> ``min_evaluate_clients``"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:62
+msgid "``eval_fn`` --> ``evaluate_fn``"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:64
+msgid ""
+"Rename ``rnd`` to ``server_round``. This impacts multiple methods and "
+"functions, for example, ``configure_fit``, ``aggregate_fit``, "
+"``configure_evaluate``, ``aggregate_evaluate``, and ``evaluate_fn``."
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:65
+msgid "Add ``server_round`` and ``config`` to ``evaluate_fn``:"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:67
+msgid ""
+"Flower 0.19: ``def evaluate(parameters: NDArrays) -> "
+"Optional[Tuple[float, Dict[str, Scalar]]]:``"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:68
+msgid ""
+"Flower 1.0: ``def evaluate(server_round: int, parameters: NDArrays, "
+"config: Dict[str, Scalar]) -> Optional[Tuple[float, Dict[str, "
+"Scalar]]]:``"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:71
+msgid "Custom strategies"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:73
+msgid ""
+"The type of parameter ``failures`` has changed from "
+"``List[BaseException]`` to ``List[Union[Tuple[ClientProxy, FitRes], "
+"BaseException]]`` (in ``aggregate_fit``) and "
+"``List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]]`` (in "
+"``aggregate_evaluate``)"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:74
+msgid ""
+"The ``Strategy`` method ``evaluate`` now receives the current round of "
+"federated learning/evaluation as the first parameter:"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:76
+msgid ""
+"Flower 0.19: ``def evaluate(self, parameters: Parameters) -> "
+"Optional[Tuple[float, Dict[str, Scalar]]]:``"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:77
+msgid ""
+"Flower 1.0: ``def evaluate(self, server_round: int, parameters: "
+"Parameters) -> Optional[Tuple[float, Dict[str, Scalar]]]:``"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:80
+msgid "Optional improvements"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:82
+msgid ""
+"Along with the necessary changes above, there are a number of potential "
+"improvements that just became possible:"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:84
+msgid ""
+"Remove \"placeholder\" methods from subclasses of ``Client`` or "
+"``NumPyClient``. If you, for example, use server-side evaluation, then "
+"empy placeholder implementations of ``evaluate`` are no longer necessary."
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:85
+msgid ""
+"Configure the round timeout via ``start_simulation``: "
+"``start_simulation(..., config=flwr.server.ServerConfig(num_rounds=3, "
+"round_timeout=600.0), ...)``"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:89
+msgid "Further help"
+msgstr ""
+
+#: ../../source/upgrade-to-flower-1.0.rst:91
+msgid ""
+"Most official `Flower code examples "
+"<https://github.com/adap/flower/tree/main/examples>`_ are already updated"
+" to Flower 1.0, they can serve as a reference for using the Flower 1.0 "
+"API. If there are further questionsm, `join the Flower Slack "
+"<https://flower.dev/join-slack/>`_ and use the channgel ``#questions``."
+msgstr ""
+

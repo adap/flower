@@ -1,0 +1,1227 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022 Adap GmbH
+# This file is distributed under the same license as the Flower package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Flower \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-08-09 15:41+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../source/apiref-flwr.rst:2
+msgid "API Reference - flwr (Python package)"
+msgstr ""
+
+#: ../../source/apiref-flwr.rst:8
+msgid "client"
+msgstr ""
+
+#: flwr.client:1 of
+msgid "Flower client."
+msgstr ""
+
+#: ../../source/apiref-flwr.rst:15
+msgid "Client"
+msgstr ""
+
+#: flwr.client.client.Client:1 of
+msgid "Abstract base class for Flower clients."
+msgstr ""
+
+#: flwr.client.client.Client.evaluate:1
+#: flwr.client.numpy_client.NumPyClient.evaluate:1 of
+msgid "Evaluate the provided parameters using the locally held dataset."
+msgstr ""
+
+#: flwr.client.app.start_client flwr.client.app.start_numpy_client
+#: flwr.client.client.Client.evaluate flwr.client.client.Client.fit
+#: flwr.client.client.Client.get_parameters
+#: flwr.client.client.Client.get_properties
+#: flwr.client.numpy_client.NumPyClient.evaluate
+#: flwr.client.numpy_client.NumPyClient.fit
+#: flwr.client.numpy_client.NumPyClient.get_parameters
+#: flwr.client.numpy_client.NumPyClient.get_properties
+#: flwr.server.app.start_server
+#: flwr.server.strategy.fault_tolerant_fedavg.FaultTolerantFedAvg.__init__
+#: flwr.server.strategy.fedadagrad.FedAdagrad.__init__
+#: flwr.server.strategy.fedadam.FedAdam.__init__
+#: flwr.server.strategy.fedavg.FedAvg.__init__
+#: flwr.server.strategy.fedavgm.FedAvgM.__init__
+#: flwr.server.strategy.fedopt.FedOpt.__init__
+#: flwr.server.strategy.fedprox.FedProx.__init__
+#: flwr.server.strategy.fedyogi.FedYogi.__init__
+#: flwr.server.strategy.qfedavg.QFedAvg.__init__
+#: flwr.server.strategy.strategy.Strategy.aggregate_evaluate
+#: flwr.server.strategy.strategy.Strategy.aggregate_fit
+#: flwr.server.strategy.strategy.Strategy.configure_evaluate
+#: flwr.server.strategy.strategy.Strategy.configure_fit
+#: flwr.server.strategy.strategy.Strategy.evaluate
+#: flwr.server.strategy.strategy.Strategy.initialize_parameters
+#: flwr.simulation.app.start_simulation of
+msgid "Parameters"
+msgstr ""
+
+#: flwr.client.client.Client.evaluate:3 of
+msgid ""
+"The evaluation instructions containing (global) model parameters received"
+" from the server and a dictionary of configuration values used to "
+"customize the local evaluation process."
+msgstr ""
+
+#: flwr.client.client.Client.evaluate flwr.client.client.Client.fit
+#: flwr.client.client.Client.get_parameters
+#: flwr.client.client.Client.get_properties
+#: flwr.client.numpy_client.NumPyClient.evaluate
+#: flwr.client.numpy_client.NumPyClient.fit
+#: flwr.client.numpy_client.NumPyClient.get_parameters
+#: flwr.client.numpy_client.NumPyClient.get_properties
+#: flwr.server.app.start_server
+#: flwr.server.strategy.strategy.Strategy.aggregate_evaluate
+#: flwr.server.strategy.strategy.Strategy.aggregate_fit
+#: flwr.server.strategy.strategy.Strategy.configure_evaluate
+#: flwr.server.strategy.strategy.Strategy.configure_fit
+#: flwr.server.strategy.strategy.Strategy.evaluate
+#: flwr.server.strategy.strategy.Strategy.initialize_parameters
+#: flwr.simulation.app.start_simulation of
+msgid "Returns"
+msgstr ""
+
+#: flwr.client.client.Client.evaluate:8 of
+msgid ""
+"The evaluation result containing the loss on the local dataset and other "
+"details such as the number of local data examples used for evaluation."
+msgstr ""
+
+#: flwr.client.client.Client.evaluate flwr.client.client.Client.fit
+#: flwr.client.client.Client.get_parameters
+#: flwr.client.client.Client.get_properties
+#: flwr.client.numpy_client.NumPyClient.get_parameters
+#: flwr.client.numpy_client.NumPyClient.get_properties
+#: flwr.server.app.start_server
+#: flwr.server.strategy.strategy.Strategy.aggregate_evaluate
+#: flwr.server.strategy.strategy.Strategy.aggregate_fit
+#: flwr.server.strategy.strategy.Strategy.configure_evaluate
+#: flwr.server.strategy.strategy.Strategy.configure_fit
+#: flwr.server.strategy.strategy.Strategy.evaluate
+#: flwr.server.strategy.strategy.Strategy.initialize_parameters
+#: flwr.simulation.app.start_simulation of
+msgid "Return type"
+msgstr ""
+
+#: flwr.client.client.Client.fit:1 of
+msgid "Refine the provided parameters using the locally held dataset."
+msgstr ""
+
+#: flwr.client.client.Client.fit:3 of
+msgid ""
+"The training instructions containing (global) model parameters received "
+"from the server and a dictionary of configuration values used to "
+"customize the local training process."
+msgstr ""
+
+#: flwr.client.client.Client.fit:8 of
+msgid ""
+"The training result containing updated parameters and other details such "
+"as the number of local training examples used for training."
+msgstr ""
+
+#: flwr.client.client.Client.get_parameters:1
+#: flwr.client.numpy_client.NumPyClient.get_parameters:1 of
+msgid "Return the current local model parameters."
+msgstr ""
+
+#: flwr.client.client.Client.get_parameters:3 of
+msgid ""
+"The get parameters instructions received from the server containing a "
+"dictionary of configuration values."
+msgstr ""
+
+#: flwr.client.client.Client.get_parameters:7 of
+msgid "The current local model parameters."
+msgstr ""
+
+#: flwr.client.client.Client.get_properties:1 of
+msgid "Return set of client's properties."
+msgstr ""
+
+#: flwr.client.client.Client.get_properties:3 of
+msgid ""
+"The get properties instructions received from the server containing a "
+"dictionary of configuration values."
+msgstr ""
+
+#: flwr.client.client.Client.get_properties:7 of
+msgid "The current client properties."
+msgstr ""
+
+#: ../../source/apiref-flwr.rst:24
+msgid "start_client"
+msgstr ""
+
+#: flwr.client.app.start_client:1 of
+msgid "Start a Flower client node which connects to a Flower server."
+msgstr ""
+
+#: flwr.client.app.start_client:3 flwr.client.app.start_numpy_client:3 of
+msgid ""
+"The IPv4 or IPv6 address of the server. If the Flower server runs on the "
+"same machine on port 8080, then `server_address` would be "
+"`\"[::]:8080\"`."
+msgstr ""
+
+#: flwr.client.app.start_client:7 of
+msgid "An implementation of the abstract base class `flwr.client.Client`."
+msgstr ""
+
+#: flwr.client.app.start_client:10 flwr.client.app.start_numpy_client:9 of
+msgid ""
+"The maximum length of gRPC messages that can be exchanged with the Flower"
+" server. The default should be sufficient for most models. Users who "
+"train very large models might need to increase this value. Note that the "
+"Flower server needs to be started with the same value (see "
+"`flwr.server.start_server`), otherwise it will not know about the "
+"increased limit and block larger messages."
+msgstr ""
+
+#: flwr.client.app.start_client:17 flwr.client.app.start_numpy_client:16 of
+msgid ""
+"The PEM-encoded root certificates as a byte string or a path string. If "
+"provided, a secure connection using the certificates will be established "
+"to an SSL-enabled Flower server."
+msgstr ""
+
+#: flwr.client.app.start_client:21 flwr.client.app.start_numpy_client:20 of
+msgid ""
+"DEPRECATED - USE 'transport' INSTEAD. Defines whether or not the client "
+"is interacting with the server using the experimental REST API. This "
+"feature is experimental, it might change considerably in future versions "
+"of Flower."
+msgstr ""
+
+#: flwr.client.app.start_client:26 flwr.client.app.start_numpy_client:25 of
+msgid ""
+"Configure the transport layer. Allowed values: - 'grpc-bidi': gRPC, "
+"bidirectional streaming - 'grpc-rere': gRPC, request-response "
+"(experimental) - 'rest': HTTP (experimental)"
+msgstr ""
+
+#: flwr.client.app.start_client:33 flwr.client.app.start_numpy_client:32
+#: flwr.server.app.start_server:41 of
+msgid "Examples"
+msgstr ""
+
+#: flwr.client.app.start_client:34 of
+msgid "Starting a gRPC client with an insecure server connection:"
+msgstr ""
+
+#: flwr.client.app.start_client:41 of
+msgid "Starting an SSL-enabled gRPC client:"
+msgstr ""
+
+#: ../../source/apiref-flwr.rst:32
+msgid "NumPyClient"
+msgstr ""
+
+#: flwr.client.numpy_client.NumPyClient:1 of
+msgid "Abstract base class for Flower clients using NumPy."
+msgstr ""
+
+#: flwr.client.numpy_client.NumPyClient.evaluate:3
+#: flwr.client.numpy_client.NumPyClient.fit:3
+#: flwr.server.strategy.strategy.Strategy.configure_evaluate:5
+#: flwr.server.strategy.strategy.Strategy.configure_fit:5
+#: flwr.server.strategy.strategy.Strategy.evaluate:8 of
+msgid "The current (global) model parameters."
+msgstr ""
+
+#: flwr.client.numpy_client.NumPyClient.evaluate:5 of
+msgid ""
+"Configuration parameters which allow the server to influence evaluation "
+"on the client. It can be used to communicate arbitrary values from the "
+"server to the client, for example, to influence the number of examples "
+"used for evaluation."
+msgstr ""
+
+#: flwr.client.numpy_client.NumPyClient.evaluate:11 of
+msgid ""
+"* **loss** (*float*) -- The evaluation loss of the model on the local "
+"dataset. * **num_examples** (*int*) -- The number of examples used for "
+"evaluation. * **metrics** (*Dict[str, Scalar]*) -- A dictionary mapping "
+"arbitrary string keys to values of   type bool, bytes, float, int, or "
+"str. It can be used to   communicate arbitrary values back to the server."
+msgstr ""
+
+#: flwr.client.numpy_client.NumPyClient.evaluate:11 of
+msgid ""
+"**loss** (*float*) -- The evaluation loss of the model on the local "
+"dataset."
+msgstr ""
+
+#: flwr.client.numpy_client.NumPyClient.evaluate:12 of
+msgid "**num_examples** (*int*) -- The number of examples used for evaluation."
+msgstr ""
+
+#: flwr.client.numpy_client.NumPyClient.evaluate:13
+#: flwr.client.numpy_client.NumPyClient.fit:13 of
+msgid ""
+"**metrics** (*Dict[str, Scalar]*) -- A dictionary mapping arbitrary "
+"string keys to values of type bool, bytes, float, int, or str. It can be "
+"used to communicate arbitrary values back to the server."
+msgstr ""
+
+#: flwr.client.numpy_client.NumPyClient.evaluate:19 of
+msgid ""
+"The previous return type format (int, float, float) and the extended "
+"format (int, float, float, Dict[str, Scalar]) have been deprecated and "
+"removed since Flower 0.19."
+msgstr ""
+
+#: flwr.client.numpy_client.NumPyClient.fit:1 of
+msgid "Train the provided parameters using the locally held dataset."
+msgstr ""
+
+#: flwr.client.numpy_client.NumPyClient.fit:5 of
+msgid ""
+"Configuration parameters which allow the server to influence training on "
+"the client. It can be used to communicate arbitrary values from the "
+"server to the client, for example, to set the number of (local) training "
+"epochs."
+msgstr ""
+
+#: flwr.client.numpy_client.NumPyClient.fit:11 of
+msgid ""
+"* **parameters** (*NDArrays*) -- The locally updated model parameters. * "
+"**num_examples** (*int*) -- The number of examples used for training. * "
+"**metrics** (*Dict[str, Scalar]*) -- A dictionary mapping arbitrary "
+"string keys to values of type   bool, bytes, float, int, or str. It can "
+"be used to communicate   arbitrary values back to the server."
+msgstr ""
+
+#: flwr.client.numpy_client.NumPyClient.fit:11 of
+msgid "**parameters** (*NDArrays*) -- The locally updated model parameters."
+msgstr ""
+
+#: flwr.client.numpy_client.NumPyClient.fit:12 of
+msgid "**num_examples** (*int*) -- The number of examples used for training."
+msgstr ""
+
+#: flwr.client.numpy_client.NumPyClient.get_parameters:3 of
+msgid ""
+"Configuration parameters requested by the server. This can be used to "
+"tell the client which parameters are needed along with some Scalar "
+"attributes."
+msgstr ""
+
+#: flwr.client.numpy_client.NumPyClient.get_parameters:8 of
+msgid "**parameters** -- The local model parameters as a list of NumPy ndarrays."
+msgstr ""
+
+#: flwr.client.numpy_client.NumPyClient.get_properties:1 of
+msgid "Return a client's set of properties."
+msgstr ""
+
+#: flwr.client.numpy_client.NumPyClient.get_properties:3 of
+msgid ""
+"Configuration parameters requested by the server. This can be used to "
+"tell the client which properties are needed along with some Scalar "
+"attributes."
+msgstr ""
+
+#: flwr.client.numpy_client.NumPyClient.get_properties:8 of
+msgid ""
+"**properties** -- A dictionary mapping arbitrary string keys to values of"
+" type bool, bytes, float, int, or str. It can be used to communicate "
+"arbitrary property values back to the server."
+msgstr ""
+
+#: ../../source/apiref-flwr.rst:41
+msgid "start_numpy_client"
+msgstr ""
+
+#: flwr.client.app.start_numpy_client:1 of
+msgid "Start a Flower NumPyClient which connects to a gRPC server."
+msgstr ""
+
+#: flwr.client.app.start_numpy_client:7 of
+msgid "An implementation of the abstract base class `flwr.client.NumPyClient`."
+msgstr ""
+
+#: flwr.client.app.start_numpy_client:33 of
+msgid "Starting a client with an insecure server connection:"
+msgstr ""
+
+#: flwr.client.app.start_numpy_client:40 of
+msgid "Starting a SSL-enabled client:"
+msgstr ""
+
+#: ../../source/apiref-flwr.rst:49
+msgid "start_simulation"
+msgstr ""
+
+#: flwr.simulation.app.start_simulation:1 of
+msgid "Start a Ray-based Flower simulation server."
+msgstr ""
+
+#: flwr.simulation.app.start_simulation:3 of
+msgid ""
+"A function creating client instances. The function must take a single "
+"`str` argument called `cid`. It should return a single client instance of"
+" type ClientLike. Note that the created client instances are ephemeral "
+"and will often be destroyed after a single method invocation. Since "
+"client instances are not long-lived, they should not attempt to carry "
+"state over method invocations. Any state required by the instance (model,"
+" dataset, hyperparameters, ...) should be (re-)created in either the call"
+" to `client_fn` or the call to any of the client methods (e.g., load "
+"evaluation data in the `evaluate` method itself)."
+msgstr ""
+
+#: flwr.simulation.app.start_simulation:13 of
+msgid ""
+"The total number of clients in this simulation. This must be set if "
+"`clients_ids` is not set and vice-versa."
+msgstr ""
+
+#: flwr.simulation.app.start_simulation:16 of
+msgid ""
+"List `client_id`s for each client. This is only required if `num_clients`"
+" is not set. Setting both `num_clients` and `clients_ids` with "
+"`len(clients_ids)` not equal to `num_clients` generates an error."
+msgstr ""
+
+#: flwr.simulation.app.start_simulation:20 of
+msgid ""
+"CPU and GPU resources for a single client. Supported keys are `num_cpus` "
+"and `num_gpus`. Example: `{\"num_cpus\": 4, \"num_gpus\": 1}`. To "
+"understand the GPU utilization caused by `num_gpus`, consult the Ray "
+"documentation on GPU support."
+msgstr ""
+
+#: flwr.simulation.app.start_simulation:25 of
+msgid ""
+"An implementation of the abstract base class `flwr.server.Server`. If no "
+"instance is provided, then `start_server` will create one."
+msgstr ""
+
+#: flwr.server.app.start_server:9 flwr.simulation.app.start_simulation:28 of
+msgid ""
+"Currently supported values are `num_rounds` (int, default: 1) and "
+"`round_timeout` in seconds (float, default: None)."
+msgstr ""
+
+#: flwr.simulation.app.start_simulation:31 of
+msgid ""
+"An implementation of the abstract base class `flwr.server.Strategy`. If "
+"no strategy is provided, then `start_server` will use "
+"`flwr.server.strategy.FedAvg`."
+msgstr ""
+
+#: flwr.simulation.app.start_simulation:35 of
+msgid ""
+"An implementation of the abstract base class `flwr.server.ClientManager`."
+" If no implementation is provided, then `start_simulation` will use "
+"`flwr.server.client_manager.SimpleClientManager`."
+msgstr ""
+
+#: flwr.simulation.app.start_simulation:39 of
+msgid ""
+"Optional dictionary containing arguments for the call to `ray.init`. If "
+"ray_init_args is None (the default), Ray will be initialized with the "
+"following default args:  { \"ignore_reinit_error\": True, "
+"\"include_dashboard\": False }  An empty dictionary can be used "
+"(ray_init_args={}) to prevent any arguments from being passed to "
+"ray.init."
+msgstr ""
+
+#: flwr.simulation.app.start_simulation:39 of
+msgid ""
+"Optional dictionary containing arguments for the call to `ray.init`. If "
+"ray_init_args is None (the default), Ray will be initialized with the "
+"following default args:"
+msgstr ""
+
+#: flwr.simulation.app.start_simulation:43 of
+msgid "{ \"ignore_reinit_error\": True, \"include_dashboard\": False }"
+msgstr ""
+
+#: flwr.simulation.app.start_simulation:45 of
+msgid ""
+"An empty dictionary can be used (ray_init_args={}) to prevent any "
+"arguments from being passed to ray.init."
+msgstr ""
+
+#: flwr.simulation.app.start_simulation:48 of
+msgid ""
+"Set to True to prevent `ray.shutdown()` in case "
+"`ray.is_initialized()=True`."
+msgstr ""
+
+#: flwr.simulation.app.start_simulation:51 of
+msgid "**hist** -- Object containing metrics from training."
+msgstr ""
+
+#: ../../source/apiref-flwr.rst:57
+msgid "server"
+msgstr ""
+
+#: flwr.server:1 of
+msgid "Flower server."
+msgstr ""
+
+#: ../../source/apiref-flwr.rst:65
+msgid "server.start_server"
+msgstr ""
+
+#: flwr.server.app.start_server:1 of
+msgid "Start a Flower server using the gRPC transport layer."
+msgstr ""
+
+#: flwr.server.app.start_server:3 of
+msgid "The IPv4 or IPv6 address of the server. Defaults to `\"[::]:8080\"`."
+msgstr ""
+
+#: flwr.server.app.start_server:5 of
+msgid ""
+"A server implementation, either `flwr.server.Server` or a subclass "
+"thereof. If no instance is provided, then `start_server` will create one."
+msgstr ""
+
+#: flwr.server.app.start_server:12 of
+msgid ""
+"An implementation of the abstract base class "
+"`flwr.server.strategy.Strategy`. If no strategy is provided, then "
+"`start_server` will use `flwr.server.strategy.FedAvg`."
+msgstr ""
+
+#: flwr.server.app.start_server:16 of
+msgid ""
+"An implementation of the abstract base class `flwr.server.ClientManager`."
+" If no implementation is provided, then `start_server` will use "
+"`flwr.server.client_manager.SimpleClientManager`."
+msgstr ""
+
+#: flwr.server.app.start_server:21 of
+msgid ""
+"The maximum length of gRPC messages that can be exchanged with the Flower"
+" clients. The default should be sufficient for most models. Users who "
+"train very large models might need to increase this value. Note that the "
+"Flower clients need to be started with the same value (see "
+"`flwr.client.start_client`), otherwise clients will not know about the "
+"increased limit and block larger messages."
+msgstr ""
+
+#: flwr.server.app.start_server:28 of
+msgid ""
+"Tuple containing root certificate, server certificate, and private key to"
+" start a secure SSL-enabled server. The tuple is expected to have three "
+"bytes elements in the following order:      * CA certificate.     * "
+"server certificate.     * server private key."
+msgstr ""
+
+#: flwr.server.app.start_server:28 of
+msgid ""
+"Tuple containing root certificate, server certificate, and private key to"
+" start a secure SSL-enabled server. The tuple is expected to have three "
+"bytes elements in the following order:"
+msgstr ""
+
+#: flwr.server.app.start_server:32 of
+msgid "CA certificate."
+msgstr ""
+
+#: flwr.server.app.start_server:33 of
+msgid "server certificate."
+msgstr ""
+
+#: flwr.server.app.start_server:34 of
+msgid "server private key."
+msgstr ""
+
+#: flwr.server.app.start_server:37 of
+msgid "**hist** -- Object containing training and evaluation metrics."
+msgstr ""
+
+#: flwr.server.app.start_server:42 of
+msgid "Starting an insecure server:"
+msgstr ""
+
+#: flwr.server.app.start_server:46 of
+msgid "Starting an SSL-enabled server:"
+msgstr ""
+
+#: ../../source/apiref-flwr.rst:73
+msgid "server.strategy"
+msgstr ""
+
+#: flwr.server.strategy:1 of
+msgid "Contains the strategy abstraction and different implementations."
+msgstr ""
+
+#: ../../source/apiref-flwr.rst:81
+msgid "server.strategy.Strategy"
+msgstr ""
+
+#: flwr.server.strategy.strategy.Strategy:1 of
+msgid "Abstract base class for server strategy implementations."
+msgstr ""
+
+#: flwr.server.strategy.strategy.Strategy.aggregate_evaluate:1 of
+msgid "Aggregate evaluation results."
+msgstr ""
+
+#: flwr.server.strategy.strategy.Strategy.aggregate_evaluate:3
+#: flwr.server.strategy.strategy.Strategy.aggregate_fit:3
+#: flwr.server.strategy.strategy.Strategy.configure_evaluate:3
+#: flwr.server.strategy.strategy.Strategy.configure_fit:3
+#: flwr.server.strategy.strategy.Strategy.evaluate:6 of
+msgid "The current round of federated learning."
+msgstr ""
+
+#: flwr.server.strategy.strategy.Strategy.aggregate_evaluate:5 of
+msgid ""
+"Successful updates from the previously selected and configured clients. "
+"Each pair of `(ClientProxy, FitRes` constitutes a successful update from "
+"one of the previously selected clients. Not that not all previously "
+"selected clients are necessarily included in this list: a client might "
+"drop out and not submit a result. For each client that did not submit an "
+"update, there should be an `Exception` in `failures`."
+msgstr ""
+
+#: flwr.server.strategy.strategy.Strategy.aggregate_evaluate:13
+#: flwr.server.strategy.strategy.Strategy.aggregate_fit:13 of
+msgid "Exceptions that occurred while the server was waiting for client updates."
+msgstr ""
+
+#: flwr.server.strategy.strategy.Strategy.aggregate_evaluate:16 of
+msgid ""
+"**aggregation_result** -- The aggregated evaluation result. Aggregation "
+"typically uses some variant of a weighted average."
+msgstr ""
+
+#: flwr.server.strategy.strategy.Strategy.aggregate_fit:1 of
+msgid "Aggregate training results."
+msgstr ""
+
+#: flwr.server.strategy.strategy.Strategy.aggregate_fit:5 of
+msgid ""
+"Successful updates from the previously selected and configured clients. "
+"Each pair of `(ClientProxy, FitRes)` constitutes a successful update from"
+" one of the previously selected clients. Not that not all previously "
+"selected clients are necessarily included in this list: a client might "
+"drop out and not submit a result. For each client that did not submit an "
+"update, there should be an `Exception` in `failures`."
+msgstr ""
+
+#: flwr.server.strategy.strategy.Strategy.aggregate_fit:17 of
+msgid ""
+"**parameters** -- If parameters are returned, then the server will treat "
+"these as the new global model parameters (i.e., it will replace the "
+"previous parameters with the ones returned from this method). If `None` "
+"is returned (e.g., because there were only failures and no viable "
+"results) then the server will no update the previous model parameters, "
+"the updates received in this round are discarded, and the global model "
+"parameters remain the same."
+msgstr ""
+
+#: flwr.server.strategy.fedavg.FedAvg.configure_evaluate:1
+#: flwr.server.strategy.qfedavg.QFedAvg.configure_evaluate:1
+#: flwr.server.strategy.strategy.Strategy.configure_evaluate:1 of
+msgid "Configure the next round of evaluation."
+msgstr ""
+
+#: flwr.server.strategy.strategy.Strategy.configure_evaluate:7
+#: flwr.server.strategy.strategy.Strategy.configure_fit:7
+#: flwr.server.strategy.strategy.Strategy.initialize_parameters:3 of
+msgid "The client manager which holds all currently connected clients."
+msgstr ""
+
+#: flwr.server.strategy.strategy.Strategy.configure_evaluate:10 of
+msgid ""
+"**evaluate_configuration** -- A list of tuples. Each tuple in the list "
+"identifies a `ClientProxy` and the `EvaluateIns` for this particular "
+"`ClientProxy`. If a particular `ClientProxy` is not included in this "
+"list, it means that this `ClientProxy` will not participate in the next "
+"round of federated evaluation."
+msgstr ""
+
+#: flwr.server.strategy.fedavg.FedAvg.configure_fit:1
+#: flwr.server.strategy.fedprox.FedProx.configure_fit:1
+#: flwr.server.strategy.qfedavg.QFedAvg.configure_fit:1
+#: flwr.server.strategy.strategy.Strategy.configure_fit:1 of
+msgid "Configure the next round of training."
+msgstr ""
+
+#: flwr.server.strategy.strategy.Strategy.configure_fit:10 of
+msgid ""
+"**fit_configuration** -- A list of tuples. Each tuple in the list "
+"identifies a `ClientProxy` and the `FitIns` for this particular "
+"`ClientProxy`. If a particular `ClientProxy` is not included in this "
+"list, it means that this `ClientProxy` will not participate in the next "
+"round of federated learning."
+msgstr ""
+
+#: flwr.server.strategy.strategy.Strategy.evaluate:1 of
+msgid "Evaluate the current model parameters."
+msgstr ""
+
+#: flwr.server.strategy.strategy.Strategy.evaluate:3 of
+msgid ""
+"This function can be used to perform centralized (i.e., server-side) "
+"evaluation of model parameters."
+msgstr ""
+
+#: flwr.server.strategy.strategy.Strategy.evaluate:11 of
+msgid ""
+"**evaluation_result** -- The evaluation result, usually a Tuple "
+"containing loss and a dictionary containing task-specific metrics (e.g., "
+"accuracy)."
+msgstr ""
+
+#: flwr.server.strategy.strategy.Strategy.initialize_parameters:1 of
+msgid "Initialize the (global) model parameters."
+msgstr ""
+
+#: flwr.server.strategy.strategy.Strategy.initialize_parameters:6 of
+msgid ""
+"**parameters** -- If parameters are returned, then the server will treat "
+"these as the initial global model parameters."
+msgstr ""
+
+#: ../../source/apiref-flwr.rst:90
+msgid "server.strategy.FedAvg"
+msgstr ""
+
+#: flwr.server.strategy.fedavg.FedAvg:1 of
+msgid "Configurable FedAvg strategy implementation."
+msgstr ""
+
+#: flwr.server.strategy.fault_tolerant_fedavg.FaultTolerantFedAvg.__init__:1
+#: flwr.server.strategy.fedavg.FedAvg.__init__:1
+#: flwr.server.strategy.qfedavg.QFedAvg.__init__:1 of
+msgid "Federated Averaging strategy."
+msgstr ""
+
+#: flwr.server.strategy.fault_tolerant_fedavg.FaultTolerantFedAvg.__init__:3
+#: flwr.server.strategy.fedavg.FedAvg.__init__:3
+#: flwr.server.strategy.qfedavg.QFedAvg.__init__:3 of
+msgid "Implementation based on https://arxiv.org/abs/1602.05629"
+msgstr ""
+
+#: flwr.server.strategy.fault_tolerant_fedavg.FaultTolerantFedAvg.__init__:5
+#: flwr.server.strategy.fedavg.FedAvg.__init__:5
+#: flwr.server.strategy.fedprox.FedProx.__init__:37
+#: flwr.server.strategy.qfedavg.QFedAvg.__init__:5 of
+msgid ""
+"Fraction of clients used during training. In case `min_fit_clients` is "
+"larger than `fraction_fit * available_clients`, `min_fit_clients` will "
+"still be sampled. Defaults to 1.0."
+msgstr ""
+
+#: flwr.server.strategy.fault_tolerant_fedavg.FaultTolerantFedAvg.__init__:9
+#: flwr.server.strategy.fedavg.FedAvg.__init__:9
+#: flwr.server.strategy.fedprox.FedProx.__init__:41
+#: flwr.server.strategy.qfedavg.QFedAvg.__init__:9 of
+msgid ""
+"Fraction of clients used during validation. In case "
+"`min_evaluate_clients` is larger than `fraction_evaluate * "
+"available_clients`, `min_evaluate_clients` will still be sampled. "
+"Defaults to 1.0."
+msgstr ""
+
+#: flwr.server.strategy.fault_tolerant_fedavg.FaultTolerantFedAvg.__init__:13
+#: flwr.server.strategy.fedadagrad.FedAdagrad.__init__:9
+#: flwr.server.strategy.fedadam.FedAdam.__init__:9
+#: flwr.server.strategy.fedavg.FedAvg.__init__:13
+#: flwr.server.strategy.fedavgm.FedAvgM.__init__:9
+#: flwr.server.strategy.fedopt.FedOpt.__init__:9
+#: flwr.server.strategy.fedprox.FedProx.__init__:45
+#: flwr.server.strategy.fedyogi.FedYogi.__init__:9
+#: flwr.server.strategy.qfedavg.QFedAvg.__init__:13 of
+msgid "Minimum number of clients used during training. Defaults to 2."
+msgstr ""
+
+#: flwr.server.strategy.fault_tolerant_fedavg.FaultTolerantFedAvg.__init__:15
+#: flwr.server.strategy.fedadagrad.FedAdagrad.__init__:11
+#: flwr.server.strategy.fedadam.FedAdam.__init__:11
+#: flwr.server.strategy.fedavg.FedAvg.__init__:15
+#: flwr.server.strategy.fedavgm.FedAvgM.__init__:11
+#: flwr.server.strategy.fedopt.FedOpt.__init__:11
+#: flwr.server.strategy.fedprox.FedProx.__init__:47
+#: flwr.server.strategy.fedyogi.FedYogi.__init__:11
+#: flwr.server.strategy.qfedavg.QFedAvg.__init__:15 of
+msgid "Minimum number of clients used during validation. Defaults to 2."
+msgstr ""
+
+#: flwr.server.strategy.fault_tolerant_fedavg.FaultTolerantFedAvg.__init__:17
+#: flwr.server.strategy.fedadagrad.FedAdagrad.__init__:13
+#: flwr.server.strategy.fedadam.FedAdam.__init__:13
+#: flwr.server.strategy.fedavg.FedAvg.__init__:17
+#: flwr.server.strategy.fedavgm.FedAvgM.__init__:13
+#: flwr.server.strategy.fedopt.FedOpt.__init__:13
+#: flwr.server.strategy.fedprox.FedProx.__init__:49
+#: flwr.server.strategy.fedyogi.FedYogi.__init__:13
+#: flwr.server.strategy.qfedavg.QFedAvg.__init__:17 of
+msgid "Minimum number of total clients in the system. Defaults to 2."
+msgstr ""
+
+#: flwr.server.strategy.fault_tolerant_fedavg.FaultTolerantFedAvg.__init__:19
+#: flwr.server.strategy.fedadagrad.FedAdagrad.__init__:15
+#: flwr.server.strategy.fedadam.FedAdam.__init__:15
+#: flwr.server.strategy.fedavg.FedAvg.__init__:19
+#: flwr.server.strategy.fedavgm.FedAvgM.__init__:15
+#: flwr.server.strategy.fedopt.FedOpt.__init__:15
+#: flwr.server.strategy.fedprox.FedProx.__init__:51
+#: flwr.server.strategy.fedyogi.FedYogi.__init__:15
+#: flwr.server.strategy.qfedavg.QFedAvg.__init__:19 of
+msgid "Optional function used for validation. Defaults to None."
+msgstr ""
+
+#: flwr.server.strategy.fault_tolerant_fedavg.FaultTolerantFedAvg.__init__:21
+#: flwr.server.strategy.fedadagrad.FedAdagrad.__init__:17
+#: flwr.server.strategy.fedadam.FedAdam.__init__:17
+#: flwr.server.strategy.fedavg.FedAvg.__init__:21
+#: flwr.server.strategy.fedavgm.FedAvgM.__init__:17
+#: flwr.server.strategy.fedopt.FedOpt.__init__:17
+#: flwr.server.strategy.fedprox.FedProx.__init__:53
+#: flwr.server.strategy.fedyogi.FedYogi.__init__:17
+#: flwr.server.strategy.qfedavg.QFedAvg.__init__:21 of
+msgid "Function used to configure training. Defaults to None."
+msgstr ""
+
+#: flwr.server.strategy.fault_tolerant_fedavg.FaultTolerantFedAvg.__init__:23
+#: flwr.server.strategy.fedadagrad.FedAdagrad.__init__:19
+#: flwr.server.strategy.fedadam.FedAdam.__init__:19
+#: flwr.server.strategy.fedavg.FedAvg.__init__:23
+#: flwr.server.strategy.fedavgm.FedAvgM.__init__:19
+#: flwr.server.strategy.fedopt.FedOpt.__init__:19
+#: flwr.server.strategy.fedprox.FedProx.__init__:55
+#: flwr.server.strategy.fedyogi.FedYogi.__init__:19
+#: flwr.server.strategy.qfedavg.QFedAvg.__init__:23 of
+msgid "Function used to configure validation. Defaults to None."
+msgstr ""
+
+#: flwr.server.strategy.fault_tolerant_fedavg.FaultTolerantFedAvg.__init__:25
+#: flwr.server.strategy.fedadagrad.FedAdagrad.__init__:25
+#: flwr.server.strategy.fedadam.FedAdam.__init__:21
+#: flwr.server.strategy.fedavg.FedAvg.__init__:25
+#: flwr.server.strategy.fedavgm.FedAvgM.__init__:21
+#: flwr.server.strategy.fedopt.FedOpt.__init__:21
+#: flwr.server.strategy.fedprox.FedProx.__init__:57
+#: flwr.server.strategy.fedyogi.FedYogi.__init__:21
+#: flwr.server.strategy.qfedavg.QFedAvg.__init__:25 of
+msgid "Whether or not accept rounds containing failures. Defaults to True."
+msgstr ""
+
+#: flwr.server.strategy.fault_tolerant_fedavg.FaultTolerantFedAvg.__init__:27
+#: flwr.server.strategy.fedadagrad.FedAdagrad.__init__:27
+#: flwr.server.strategy.fedadam.FedAdam.__init__:23
+#: flwr.server.strategy.fedavg.FedAvg.__init__:27
+#: flwr.server.strategy.fedavgm.FedAvgM.__init__:23
+#: flwr.server.strategy.fedopt.FedOpt.__init__:23
+#: flwr.server.strategy.fedprox.FedProx.__init__:59
+#: flwr.server.strategy.fedyogi.FedYogi.__init__:23
+#: flwr.server.strategy.qfedavg.QFedAvg.__init__:27 of
+msgid "Initial global model parameters."
+msgstr ""
+
+#: flwr.server.strategy.fault_tolerant_fedavg.FaultTolerantFedAvg.__init__:29
+#: flwr.server.strategy.fault_tolerant_fedavg.FaultTolerantFedAvg.__init__:31
+#: flwr.server.strategy.fedadagrad.FedAdagrad.__init__:21
+#: flwr.server.strategy.fedadagrad.FedAdagrad.__init__:23
+#: flwr.server.strategy.fedadam.FedAdam.__init__:25
+#: flwr.server.strategy.fedadam.FedAdam.__init__:27
+#: flwr.server.strategy.fedavg.FedAvg.__init__:29
+#: flwr.server.strategy.fedavg.FedAvg.__init__:31
+#: flwr.server.strategy.fedopt.FedOpt.__init__:25
+#: flwr.server.strategy.fedopt.FedOpt.__init__:27
+#: flwr.server.strategy.fedprox.FedProx.__init__:61
+#: flwr.server.strategy.fedprox.FedProx.__init__:63
+#: flwr.server.strategy.fedyogi.FedYogi.__init__:25
+#: flwr.server.strategy.fedyogi.FedYogi.__init__:27
+#: flwr.server.strategy.qfedavg.QFedAvg.__init__:29
+#: flwr.server.strategy.qfedavg.QFedAvg.__init__:31 of
+msgid "Metrics aggregation function, optional."
+msgstr ""
+
+#: flwr.server.strategy.fault_tolerant_fedavg.FaultTolerantFedAvg.aggregate_evaluate:1
+#: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1
+#: flwr.server.strategy.qfedavg.QFedAvg.aggregate_evaluate:1 of
+msgid "Aggregate evaluation losses using weighted average."
+msgstr ""
+
+#: flwr.server.strategy.fault_tolerant_fedavg.FaultTolerantFedAvg.aggregate_fit:1
+#: flwr.server.strategy.fedadagrad.FedAdagrad.aggregate_fit:1
+#: flwr.server.strategy.fedadam.FedAdam.aggregate_fit:1
+#: flwr.server.strategy.fedavg.FedAvg.aggregate_fit:1
+#: flwr.server.strategy.fedavgm.FedAvgM.aggregate_fit:1
+#: flwr.server.strategy.fedyogi.FedYogi.aggregate_fit:1
+#: flwr.server.strategy.qfedavg.QFedAvg.aggregate_fit:1 of
+msgid "Aggregate fit results using weighted average."
+msgstr ""
+
+#: flwr.server.strategy.fedavg.FedAvg.evaluate:1 of
+msgid "Evaluate model parameters using an evaluation function."
+msgstr ""
+
+#: flwr.server.strategy.fedavg.FedAvg.initialize_parameters:1
+#: flwr.server.strategy.fedavgm.FedAvgM.initialize_parameters:1 of
+msgid "Initialize global model parameters."
+msgstr ""
+
+#: flwr.server.strategy.fedavg.FedAvg.num_evaluation_clients:1
+#: flwr.server.strategy.qfedavg.QFedAvg.num_evaluation_clients:1 of
+msgid "Use a fraction of available clients for evaluation."
+msgstr ""
+
+#: flwr.server.strategy.fedavg.FedAvg.num_fit_clients:1
+#: flwr.server.strategy.qfedavg.QFedAvg.num_fit_clients:1 of
+msgid "Return the sample size and the required number of available clients."
+msgstr ""
+
+#: ../../source/apiref-flwr.rst:101
+msgid "server.strategy.FedAvgM"
+msgstr ""
+
+#: flwr.server.strategy.fedavgm.FedAvgM:1 of
+msgid "Configurable FedAvg with Momentum strategy implementation."
+msgstr ""
+
+#: flwr.server.strategy.fedavgm.FedAvgM.__init__:1 of
+msgid "Federated Averaging with Momentum strategy."
+msgstr ""
+
+#: flwr.server.strategy.fedavgm.FedAvgM.__init__:3 of
+msgid "Implementation based on https://arxiv.org/pdf/1909.06335.pdf"
+msgstr ""
+
+#: flwr.server.strategy.fedavgm.FedAvgM.__init__:5 of
+msgid "Fraction of clients used during training. Defaults to 0.1."
+msgstr ""
+
+#: flwr.server.strategy.fedavgm.FedAvgM.__init__:7 of
+msgid "Fraction of clients used during validation. Defaults to 0.1."
+msgstr ""
+
+#: flwr.server.strategy.fedavgm.FedAvgM.__init__:25 of
+msgid ""
+"Server-side learning rate used in server-side optimization. Defaults to "
+"1.0."
+msgstr ""
+
+#: flwr.server.strategy.fedavgm.FedAvgM.__init__:28 of
+msgid "Server-side momentum factor used for FedAvgM. Defaults to 0.0."
+msgstr ""
+
+#: ../../source/apiref-flwr.rst:112
+msgid "server.strategy.QFedAvg"
+msgstr ""
+
+#: flwr.server.strategy.qfedavg.QFedAvg:1 of
+msgid "Configurable QFedAvg strategy implementation."
+msgstr ""
+
+#: ../../source/apiref-flwr.rst:123
+msgid "server.strategy.FaultTolerantFedAvg"
+msgstr ""
+
+#: flwr.server.strategy.fault_tolerant_fedavg.FaultTolerantFedAvg:1 of
+msgid "Configurable fault-tolerant FedAvg strategy implementation."
+msgstr ""
+
+#: ../../source/apiref-flwr.rst:134
+msgid "server.strategy.FedOpt"
+msgstr ""
+
+#: flwr.server.strategy.fedopt.FedOpt:1 of
+msgid "Configurable FedAdagrad strategy implementation."
+msgstr ""
+
+#: flwr.server.strategy.fedopt.FedOpt.__init__:1 of
+msgid "Federated Optim strategy interface."
+msgstr ""
+
+#: flwr.server.strategy.fedadagrad.FedAdagrad.__init__:3
+#: flwr.server.strategy.fedadam.FedAdam.__init__:3
+#: flwr.server.strategy.fedopt.FedOpt.__init__:3
+#: flwr.server.strategy.fedyogi.FedYogi.__init__:3 of
+msgid "Implementation based on https://arxiv.org/abs/2003.00295v5"
+msgstr ""
+
+#: flwr.server.strategy.fedadagrad.FedAdagrad.__init__:5
+#: flwr.server.strategy.fedadam.FedAdam.__init__:5
+#: flwr.server.strategy.fedopt.FedOpt.__init__:5
+#: flwr.server.strategy.fedyogi.FedYogi.__init__:5 of
+msgid "Fraction of clients used during training. Defaults to 1.0."
+msgstr ""
+
+#: flwr.server.strategy.fedadagrad.FedAdagrad.__init__:7
+#: flwr.server.strategy.fedadam.FedAdam.__init__:7
+#: flwr.server.strategy.fedopt.FedOpt.__init__:7
+#: flwr.server.strategy.fedyogi.FedYogi.__init__:7 of
+msgid "Fraction of clients used during validation. Defaults to 1.0."
+msgstr ""
+
+#: flwr.server.strategy.fedadagrad.FedAdagrad.__init__:29
+#: flwr.server.strategy.fedadam.FedAdam.__init__:29
+#: flwr.server.strategy.fedopt.FedOpt.__init__:29
+#: flwr.server.strategy.fedyogi.FedYogi.__init__:29 of
+msgid "Server-side learning rate. Defaults to 1e-1."
+msgstr ""
+
+#: flwr.server.strategy.fedadagrad.FedAdagrad.__init__:31
+#: flwr.server.strategy.fedadam.FedAdam.__init__:31
+#: flwr.server.strategy.fedopt.FedOpt.__init__:31
+#: flwr.server.strategy.fedyogi.FedYogi.__init__:31 of
+msgid "Client-side learning rate. Defaults to 1e-1."
+msgstr ""
+
+#: flwr.server.strategy.fedopt.FedOpt.__init__:33 of
+msgid "Momentum parameter. Defaults to 0.0."
+msgstr ""
+
+#: flwr.server.strategy.fedopt.FedOpt.__init__:35 of
+msgid "Second moment parameter. Defaults to 0.0."
+msgstr ""
+
+#: flwr.server.strategy.fedadagrad.FedAdagrad.__init__:33
+#: flwr.server.strategy.fedadam.FedAdam.__init__:37
+#: flwr.server.strategy.fedopt.FedOpt.__init__:37
+#: flwr.server.strategy.fedyogi.FedYogi.__init__:37 of
+msgid "Controls the algorithm's degree of adaptability. Defaults to 1e-9."
+msgstr ""
+
+#: ../../source/apiref-flwr.rst:145
+msgid "server.strategy.FedProx"
+msgstr ""
+
+#: flwr.server.strategy.fedprox.FedProx:1 of
+msgid "Configurable FedProx strategy implementation."
+msgstr ""
+
+#: flwr.server.strategy.fedprox.FedProx.__init__:1 of
+msgid "Federated Optimization strategy."
+msgstr ""
+
+#: flwr.server.strategy.fedprox.FedProx.__init__:3 of
+msgid "Implementation based on https://arxiv.org/abs/1812.06127"
+msgstr ""
+
+#: flwr.server.strategy.fedprox.FedProx.__init__:5 of
+msgid ""
+"The strategy in itself will not be different than FedAvg, the client "
+"needs to be adjusted. A proximal term needs to be added to the loss "
+"function during the training:"
+msgstr ""
+
+#: flwr.server.strategy.fedprox.FedProx.__init__:9 of
+msgid ""
+"\\\\frac{\\\\mu}{2} || w - w^t ||^2\n"
+"\n"
+msgstr ""
+
+#: flwr.server.strategy.fedprox.FedProx.__init__:12 of
+msgid ""
+"Where $w^t$ are the global parameters and $w$ are the local weights the "
+"function will be optimized with."
+msgstr ""
+
+#: flwr.server.strategy.fedprox.FedProx.__init__:15 of
+msgid "In PyTorch, for example, the loss would go from:"
+msgstr ""
+
+#: flwr.server.strategy.fedprox.FedProx.__init__:21 of
+msgid "To:"
+msgstr ""
+
+#: flwr.server.strategy.fedprox.FedProx.__init__:30 of
+msgid ""
+"With `global_params` being a copy of the parameters before the training "
+"takes place."
+msgstr ""
+
+#: flwr.server.strategy.fedprox.FedProx.__init__:65 of
+msgid ""
+"The weight of the proximal term used in the optimization. 0.0 makes this "
+"strategy equivalent to FedAvg, and the higher the coefficient, the more "
+"regularization will be used (that is, the client parameters will need to "
+"be closer to the server parameters during training)."
+msgstr ""
+
+#: flwr.server.strategy.fedprox.FedProx.configure_fit:3 of
+msgid "Sends the proximal factor mu to the clients"
+msgstr ""
+
+#: ../../source/apiref-flwr.rst:156
+msgid "server.strategy.FedAdagrad"
+msgstr ""
+
+#: flwr.server.strategy.fedadagrad.FedAdagrad:1 of
+msgid "FedAdagrad strategy - Adaptive Federated Optimization using Adagrad."
+msgstr ""
+
+#: flwr.server.strategy.fedadagrad.FedAdagrad:3
+#: flwr.server.strategy.fedadam.FedAdam:3
+#: flwr.server.strategy.fedyogi.FedYogi:5 of
+msgid "Paper: https://arxiv.org/abs/2003.00295"
+msgstr ""
+
+#: flwr.server.strategy.fedadagrad.FedAdagrad.__init__:1
+#: flwr.server.strategy.fedadam.FedAdam.__init__:1 of
+msgid "Federated learning strategy using Adagrad on server-side."
+msgstr ""
+
+#: ../../source/apiref-flwr.rst:167
+msgid "server.strategy.FedAdam"
+msgstr ""
+
+#: flwr.server.strategy.fedadam.FedAdam:1 of
+msgid "FedAdam - Adaptive Federated Optimization using Adam."
+msgstr ""
+
+#: flwr.server.strategy.fedadam.FedAdam.__init__:33
+#: flwr.server.strategy.fedyogi.FedYogi.__init__:33 of
+msgid "Momentum parameter. Defaults to 0.9."
+msgstr ""
+
+#: flwr.server.strategy.fedadam.FedAdam.__init__:35
+#: flwr.server.strategy.fedyogi.FedYogi.__init__:35 of
+msgid "Second moment parameter. Defaults to 0.99."
+msgstr ""
+
+#: ../../source/apiref-flwr.rst:178
+msgid "server.strategy.FedYogi"
+msgstr ""
+
+#: flwr.server.strategy.fedyogi.FedYogi:1 of
+msgid "FedYogi [Reddi et al., 2020] strategy."
+msgstr ""
+
+#: flwr.server.strategy.fedyogi.FedYogi:3 of
+msgid "Adaptive Federated Optimization using Yogi."
+msgstr ""
+
+#: flwr.server.strategy.fedyogi.FedYogi.__init__:1 of
+msgid "Federated learning strategy using Yogi on server-side."
+msgstr ""
+
+#: ../../source/apiref-flwr.rst:186
+msgid "common"
+msgstr ""
+
+#: flwr.common:1 of
+msgid "Common components shared between server and client."
+msgstr ""
+
+#: flwr.common.typing.ClientMessage:1 of
+msgid "ClientMessage is a container used to hold one result message."
+msgstr ""
+
+#: flwr.common.typing.Code:1 of
+msgid "Client status codes."
+msgstr ""
+
+#: flwr.common.typing.DisconnectRes:1 of
+msgid "DisconnectRes message from client to server."
+msgstr ""
+
+#: flwr.common.typing.EvaluateIns:1 of
+msgid "Evaluate instructions for a client."
+msgstr ""
+
+#: flwr.common.typing.EvaluateRes:1 of
+msgid "Evaluate response from a client."
+msgstr ""
+
+#: flwr.common.telemetry.EventType:1 of
+msgid "Types of telemetry events."
+msgstr ""
+
+#: flwr.common.typing.FitIns:1 of
+msgid "Fit instructions for a client."
+msgstr ""
+
+#: flwr.common.typing.FitRes:1 of
+msgid "Fit response from a client."
+msgstr ""
+
+#: flwr.common.typing.GetParametersIns:1 of
+msgid "Parameters request for a client."
+msgstr ""
+
+#: flwr.common.typing.GetParametersRes:1 of
+msgid "Response when asked to return parameters."
+msgstr ""
+
+#: flwr.common.typing.GetPropertiesIns:1 of
+msgid "Properties request for a client."
+msgstr ""
+
+#: flwr.common.typing.GetPropertiesRes:1 of
+msgid "Properties response from a client."
+msgstr ""
+
+#: flwr.common.typing.Parameters:1 of
+msgid "Model parameters."
+msgstr ""
+
+#: flwr.common.typing.ReconnectIns:1 of
+msgid "ReconnectIns message from server to client."
+msgstr ""
+
+#: flwr.common.typing.ServerMessage:1 of
+msgid "ServerMessage is a container used to hold one instruction message."
+msgstr ""
+
+#: flwr.common.typing.Status:1 of
+msgid "Client status."
+msgstr ""
+
+#: flwr.common.parameter.bytes_to_ndarray:1 of
+msgid "Deserialize NumPy ndarray from bytes."
+msgstr ""
+
+#: flwr.common.logger.configure:1 of
+msgid "Configure logging to file and/or remote log server."
+msgstr ""
+
+#: logging.Logger.log:1 of
+msgid "Log 'msg % args' with the integer severity 'level'."
+msgstr ""
+
+#: logging.Logger.log:3 of
+msgid ""
+"To pass exception information, use the keyword argument exc_info with a "
+"true value, e.g."
+msgstr ""
+
+#: logging.Logger.log:6 of
+#, python-format
+msgid "logger.log(level, \"We have a %s\", \"mysterious problem\", exc_info=1)"
+msgstr ""
+
+#: flwr.common.parameter.ndarray_to_bytes:1 of
+msgid "Serialize NumPy ndarray to bytes."
+msgstr ""
+
+#: flwr.common.parameter.ndarrays_to_parameters:1 of
+msgid "Convert NumPy ndarrays to parameters object."
+msgstr ""
+
+#: flwr.common.date.now:1 of
+msgid "Construct a datetime from time.time() with time zone set to UTC."
+msgstr ""
+
+#: flwr.common.parameter.parameters_to_ndarrays:1 of
+msgid "Convert parameters object to NumPy ndarrays."
+msgstr ""
+

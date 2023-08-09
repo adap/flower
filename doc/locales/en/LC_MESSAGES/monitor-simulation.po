@@ -1,0 +1,257 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022 Adap GmbH
+# This file is distributed under the same license as the Flower package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Flower \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-08-09 15:41+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../source/monitor-simulation.rst:2
+msgid "Monitor Simulation"
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:4
+msgid ""
+"Flower allows you to monitor system resources while running your "
+"simulation. Moreover, the Flower simulation engine is powerful and "
+"enables you to decide how to allocate resources per client manner and "
+"constrain the total usage. Insights from resource consumption can help "
+"you make smarter decisions and speed up the execution time."
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:6
+msgid ""
+"The specific instructions assume you are using macOS and have the "
+"`Homebrew <https://brew.sh/>`_ package manager installed."
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:9
+msgid "Downloads"
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:14
+msgid ""
+"`Prometheus <https://prometheus.io/>`_ is used for data collection, while"
+" `Grafana <https://grafana.com/>`_ will enable you to visualize the "
+"collected data. They are both well integrated with `Ray "
+"<https://www.ray.io/>`_ which Flower uses under the hood."
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:16
+msgid ""
+"Overwrite the configuration files (depending on your device, it might be "
+"installed on a different path)."
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:18
+msgid "If you are on an M1 Mac, it should be:"
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:25
+msgid "On the previous generation Intel Mac devices, it should be:"
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:32
+msgid ""
+"Open the respective configuration files and change them. Depending on "
+"your device, use one of the two following commands:"
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:42
+msgid ""
+"and then delete all the text in the file and paste a new Prometheus "
+"config you see below. You may adjust the time intervals to your "
+"requirements:"
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:57
+msgid ""
+"Now after you have edited the Prometheus configuration, do the same with "
+"the Grafana configuration files. Open those using one of the following "
+"commands as before:"
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:67
+msgid ""
+"Your terminal editor should open and allow you to apply the following "
+"configuration as before."
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:82
+msgid ""
+"Congratulations, you just downloaded all the necessary software needed "
+"for metrics tracking. Now, let’s start it."
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:85
+msgid "Tracking metrics"
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:87
+msgid ""
+"Before running your Flower simulation, you have to start the monitoring "
+"tools you have just installed and configured."
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:94
+msgid ""
+"Please include the following argument in your Python code when starting a"
+" simulation."
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:105
+msgid "Now, you are ready to start your workload."
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:107
+msgid ""
+"Shortly after the simulation starts, you should see the following logs in"
+" your terminal:"
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:114
+msgid "You can look at everything at `<http://127.0.0.1:8265>`_ ."
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:116
+msgid ""
+"It's a Ray Dashboard. You can navigate to Metrics (on the left panel, the"
+" lowest option)."
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:118
+msgid ""
+"Or alternatively, you can just see them in Grafana by clicking on the "
+"right-up corner, “View in Grafana”. Please note that the Ray dashboard is"
+" only accessible during the simulation. After the simulation ends, you "
+"can only use Grafana to explore the metrics. You can start Grafana by "
+"going to ``http://localhost:3000/``."
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:120
+msgid ""
+"After you finish the visualization, stop Prometheus and Grafana. This is "
+"important as they will otherwise block, for example port :code:`3000` on "
+"your machine as long as they are running."
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:129
+msgid "Resource allocation"
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:130
+msgid ""
+"You must understand how the Ray library works to efficiently allocate "
+"system resources to simulation clients on your own."
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:132
+msgid ""
+"Initially, the simulation (which Ray handles under the hood) starts by "
+"default with all the available resources on the system, which it shares "
+"among the clients. It doesn't mean it divides it equally among all of "
+"them, nor that the model training happens at all of them simultaneously. "
+"You will learn more about that in the later part of this blog. You can "
+"check the system resources by running the following:"
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:139
+msgid "In Google Colab, the result you see might be similar to this:"
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:151
+msgid ""
+"However, you can overwrite the defaults. When starting a simulation, do "
+"the following (you don't need to overwrite all of them):"
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:171
+msgid "Let’s also specify the resource for a single client."
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:201
+msgid ""
+"Now comes the crucial part. Ray will start a new client only when it has "
+"all the required resources (such that they run in parallel) when the "
+"resources allow."
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:203
+msgid ""
+"In the example above, only one client will be run, so your clients won't "
+"run concurrently. Setting :code:`client_num_gpus = 0.5` would allow "
+"running two clients and therefore enable them to run concurrently. Be "
+"careful not to require more resources than available. If you specified "
+":code:`client_num_gpus = 2`, the simulation wouldn't start (even if you "
+"had 2 GPUs but decided to set 1 in :code:`ray_init_args`)."
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:207
+msgid "FAQ"
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:208
+msgid "Q: I don't see any metrics logged."
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:210
+msgid ""
+"A: The timeframe might not be properly set. The setting is in the top "
+"right corner (\"Last 30 minutes\" by default). Please change the "
+"timeframe to reflect the period when the simulation was running."
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:212
+msgid ""
+"Q: I see “Grafana server not detected. Please make sure the Grafana "
+"server is running and refresh this page” after going to the Metrics tab "
+"in Ray Dashboard."
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:214
+msgid ""
+"A: You probably don't have Grafana running. Please check the running "
+"services"
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:220
+msgid ""
+"Q: I see \"This site can't be reached\" when going to "
+"`<http://127.0.0.1:8265>`_."
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:222
+msgid ""
+"A: Either the simulation has already finished, or you still need to start"
+" Prometheus."
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:225
+msgid "Resources"
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:226
+msgid ""
+"Ray Dashboard: `<https://docs.ray.io/en/latest/ray-core/ray-"
+"dashboard.html>`_"
+msgstr ""
+
+#: ../../source/monitor-simulation.rst:228
+msgid ""
+"Ray Metrics: `<https://docs.ray.io/en/latest/ray-observability/ray-"
+"metrics.html>`_"
+msgstr ""
+

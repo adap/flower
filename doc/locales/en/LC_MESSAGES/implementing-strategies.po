@@ -1,0 +1,276 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022 Adap GmbH
+# This file is distributed under the same license as the Flower package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Flower \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-08-09 15:41+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../source/implementing-strategies.rst:2
+msgid "Implementing Strategies"
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:4
+msgid ""
+"The strategy abstraction enables implementation of fully custom "
+"strategies. A strategy is basically the federated learning algorithm that"
+" runs on the server. Strategies decide how to sample clients, how to "
+"configure clients for training, how to aggregate updates, and how to "
+"evaluate models. Flower provides a few built-in strategies which are "
+"based on the same API described below."
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:11
+msgid "The :code:`Strategy` abstraction"
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:13
+msgid ""
+"All strategy implementation are derived from the abstract base class "
+":code:`flwr.server.strategy.Strategy`, both built-in implementations and "
+"third party implementations. This means that custom strategy "
+"implementations have the exact same capabilities at their disposal as "
+"built-in ones."
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:18
+msgid ""
+"The strategy abstraction defines a few abstract methods that need to be "
+"implemented:"
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:75
+msgid ""
+"Creating a new strategy means implementing a new :code:`class` (derived "
+"from the abstract base class :code:`Strategy`) that implements for the "
+"previously shown abstract methods:"
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:100
+msgid "The Flower server calls these methods in the following order:"
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:177
+msgid "The following sections describe each of those methods in more detail."
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:180
+msgid "The :code:`initialize_parameters` method"
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:182
+msgid ""
+":code:`initialize_parameters` is called only once, at the very beginning "
+"of an execution. It is responsible for providing the initial global model"
+" parameters in a serialized form (i.e., as a :code:`Parameters` object)."
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:184
+msgid ""
+"Built-in strategies return user-provided initial parameters. The "
+"following example shows how initial parameters can be passed to "
+":code:`FedAvg`:"
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:209
+msgid ""
+"The Flower server will call :code:`initialize_parameters`, which either "
+"returns the parameters that were passed to :code:`initial_parameters`, or"
+" :code:`None`. If no parameters are returned from "
+":code:`initialize_parameters` (i.e., :code:`None`), the server will "
+"randomly select one client and ask it to provide its parameters. This is "
+"a convenience feature and not recommended in practice, but it can be "
+"useful for prototyping. In practice, it is recommended to always use "
+"server-side parameter initialization."
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:213
+msgid ""
+"Server-side parameter initialization is a powerful mechanism. It can be "
+"used, for example, to resume training from a previously saved checkpoint."
+" It is also the fundamental capability needed to implement hybrid "
+"approaches, for example, to fine-tune a pre-trained model using federated"
+" learning."
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:216
+msgid "The :code:`configure_fit` method"
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:218
+msgid ""
+":code:`configure_fit` is responsible for configuring the upcoming round "
+"of training. What does *configure* mean in this context? Configuring a "
+"round means selecting clients and deciding what instructions to send to "
+"these clients. The signature of :code:`configure_fit` makes this clear:"
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:231
+msgid ""
+"The return value is a list of tuples, each representing the instructions "
+"that will be sent to a particular client. Strategy implementations "
+"usually perform the following steps in :code:`configure_fit`:"
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:233
+#: ../../source/implementing-strategies.rst:280
+msgid ""
+"Use the :code:`client_manager` to randomly sample all (or a subset of) "
+"available clients (each represented as a :code:`ClientProxy` object)"
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:234
+msgid ""
+"Pair each :code:`ClientProxy` with the same :code:`FitIns` holding the "
+"current global model :code:`parameters` and :code:`config` dict"
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:236
+msgid ""
+"More sophisticated implementations can use :code:`configure_fit` to "
+"implement custom client selection logic. A client will only participate "
+"in a round if the corresponding :code:`ClientProxy` is included in the "
+"the list returned from :code:`configure_fit`."
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:240
+msgid ""
+"The structure of this return value provides a lot of flexibility to the "
+"user. Since instructions are defined on a per-client basis, different "
+"instructions can be sent to each client. This enables custom strategies "
+"to train, for example, different models on different clients, or use "
+"different hyperparameters on different clients (via the :code:`config` "
+"dict)."
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:243
+msgid "The :code:`aggregate_fit` method"
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:245
+msgid ""
+":code:`aggregate_fit` is responsible for aggregating the results returned"
+" by the clients that were selected and asked to train in "
+":code:`configure_fit`."
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:258
+msgid ""
+"Of course, failures can happen, so there is no guarantee that the server "
+"will get results from all the clients it sent instructions to (via "
+":code:`configure_fit`). :code:`aggregate_fit` therefore receives a list "
+"of :code:`results`, but also a list of :code:`failures`."
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:260
+msgid ""
+":code:`aggregate_fit` returns an optional :code:`Parameters` object and a"
+" dictionary of aggregated metrics. The :code:`Parameters` return value is"
+" optional because :code:`aggregate_fit` might decide that the results "
+"provided are not sufficient for aggregation (e.g., too many failures)."
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:263
+msgid "The :code:`configure_evaluate` method"
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:265
+msgid ""
+":code:`configure_evaluate` is responsible for configuring the upcoming "
+"round of evaluation. What does *configure* mean in this context? "
+"Configuring a round means selecting clients and deciding what "
+"instructions to send to these clients. The signature of "
+":code:`configure_evaluate` makes this clear:"
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:278
+msgid ""
+"The return value is a list of tuples, each representing the instructions "
+"that will be sent to a particular client. Strategy implementations "
+"usually perform the following steps in :code:`configure_evaluate`:"
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:281
+msgid ""
+"Pair each :code:`ClientProxy` with the same :code:`EvaluateIns` holding "
+"the current global model :code:`parameters` and :code:`config` dict"
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:283
+msgid ""
+"More sophisticated implementations can use :code:`configure_evaluate` to "
+"implement custom client selection logic. A client will only participate "
+"in a round if the corresponding :code:`ClientProxy` is included in the "
+"the list returned from :code:`configure_evaluate`."
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:287
+msgid ""
+"The structure of this return value provides a lot of flexibility to the "
+"user. Since instructions are defined on a per-client basis, different "
+"instructions can be sent to each client. This enables custom strategies "
+"to evaluate, for example, different models on different clients, or use "
+"different hyperparameters on different clients (via the :code:`config` "
+"dict)."
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:291
+msgid "The :code:`aggregate_evaluate` method"
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:293
+msgid ""
+":code:`aggregate_evaluate` is responsible for aggregating the results "
+"returned by the clients that were selected and asked to evaluate in "
+":code:`configure_evaluate`."
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:306
+msgid ""
+"Of course, failures can happen, so there is no guarantee that the server "
+"will get results from all the clients it sent instructions to (via "
+":code:`configure_evaluate`). :code:`aggregate_evaluate` therefore "
+"receives a list of :code:`results`, but also a list of :code:`failures`."
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:308
+msgid ""
+":code:`aggregate_evaluate` returns an optional :code:`float` (loss) and a"
+" dictionary of aggregated metrics. The :code:`float` return value is "
+"optional because :code:`aggregate_evaluate` might decide that the results"
+" provided are not sufficient for aggregation (e.g., too many failures)."
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:311
+msgid "The :code:`evaluate` method"
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:313
+msgid ""
+":code:`evaluate` is responsible for evaluating model parameters on the "
+"server-side. Having :code:`evaluate` in addition to "
+":code:`configure_evaluate`/:code:`aggregate_evaluate` enables strategies "
+"to perform both servers-side and client-side (federated) evaluation."
+msgstr ""
+
+#: ../../source/implementing-strategies.rst:323
+msgid ""
+"The return value is again optional because the strategy might not need to"
+" implement server-side evaluation or because the user-defined "
+":code:`evaluate` method might not complete successfully (e.g., it might "
+"fail to load the server-side evaluation data)."
+msgstr ""
+

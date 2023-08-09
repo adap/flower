@@ -1,0 +1,255 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022 Adap GmbH
+# This file is distributed under the same license as the Flower package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Flower \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-08-09 15:41+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:2
+msgid "Example: Walk-Through PyTorch & MNIST"
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:4
+msgid ""
+"In this tutorial we will learn, how to train a Convolutional Neural "
+"Network on MNIST using Flower and PyTorch."
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:6
+msgid ""
+"Our example consists of one *server* and two *clients* all having the "
+"same model."
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:8
+msgid ""
+"*Clients* are responsible for generating individual weight-updates for "
+"the model based on their local datasets. These updates are then sent to "
+"the *server* which will aggregate them to produce a better model. "
+"Finally, the *server* sends this improved version of the model back to "
+"each *client*. A complete cycle of weight updates is called a *round*."
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:12
+msgid ""
+"Now that we have a rough idea of what is going on, let's get started. We "
+"first need to install Flower. You can do this by running :"
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:18
+msgid ""
+"Since we want to use PyTorch to solve a computer vision task, let's go "
+"ahead an install PyTorch and the **torchvision** library:"
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:26
+msgid "Ready... Set... Train!"
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:28
+msgid ""
+"Now that we have all our dependencies installed, let's run a simple "
+"distributed training with two clients and one server. Our training "
+"procedure and network architecture are based on PyTorch's `Basic MNIST "
+"Example <https://github.com/pytorch/examples/tree/master/mnist>`_. This "
+"will allow you see how easy it is to wrap your code with Flower and begin"
+" training in a federated way. We provide you with two helper scripts, "
+"namely *run-server.sh*, and *run-clients.sh*. Don't be afraid to look "
+"inside, they are simple enough =)."
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:31
+msgid ""
+"Go ahead and launch on a terminal the *run-server.sh* script first as "
+"follows:"
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:38
+msgid "Now that the server is up and running, go ahead and launch the clients."
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:45
+msgid ""
+"Et voilà! You should be seeing the training procedure and, after a few "
+"iterations, the test accuracy for each client."
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:66
+msgid "Now, let's see what is really happening inside."
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:69
+msgid "Flower Server"
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:71
+msgid ""
+"Inside the server helper script *run-server.sh* you will find the "
+"following code that basically runs the :code:`server.py`"
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:78
+msgid ""
+"We can go a bit deeper and see that :code:`server.py` simply launches a "
+"server that will coordinate three rounds of training. Flower Servers are "
+"very customizable, but for simple workloads, we can start a server using "
+"the :ref:`start_server <flwr-server-start_server-apiref>` function and "
+"leave all the configuration possibilities at their default values, as "
+"seen below."
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:89
+msgid "Flower Client"
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:91
+msgid ""
+"Next, let's take a look at the *run-clients.sh* file. You will see that "
+"it contains the main loop that starts a set of *clients*."
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:100
+msgid ""
+"**cid**: is the client ID. It is an integer that uniquely identifies "
+"client identifier."
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:101
+msgid "**sever_address**: String that identifies IP and port of the server."
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:102
+msgid ""
+"**nb_clients**: This defines the number of clients being created. This "
+"piece of information is not required by the client, but it helps us "
+"partition the original MNIST dataset to make sure that every client is "
+"working on unique subsets of both *training* and *test* sets."
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:104
+msgid ""
+"Again, we can go deeper and look inside :code:`flwr_example/quickstart-"
+"pytorch/client.py`. After going through the argument parsing code at the "
+"beginning of our :code:`main` function, you will find a call to "
+":code:`mnist.load_data`. This function is responsible for partitioning "
+"the original MNIST datasets (*training* and *test*) and returning a "
+":code:`torch.utils.data.DataLoader` s for each of them. We then "
+"instantiate a :code:`PytorchMNISTClient` object with our client ID, our "
+"DataLoaders, the number of epochs in each round, and which device we want"
+" to use for training (CPU or GPU)."
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:119
+msgid ""
+"The :code:`PytorchMNISTClient` object when finally passed to "
+":code:`fl.client.start_client` along with the server's address as the "
+"training process begins."
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:123
+msgid "A Closer Look"
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:125
+msgid ""
+"Now, let's look closely into the :code:`PytorchMNISTClient` inside "
+":code:`flwr_example.quickstart-pytorch.mnist` and see what it is doing:"
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:226
+msgid ""
+"The first thing to notice is that :code:`PytorchMNISTClient` instantiates"
+" a CNN model inside its constructor"
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:244
+msgid ""
+"The code for the CNN is available under :code:`quickstart-pytorch.mnist` "
+"and it is reproduced below. It is the same network found in `Basic MNIST "
+"Example <https://github.com/pytorch/examples/tree/master/mnist>`_."
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:290
+msgid ""
+"The second thing to notice is that :code:`PytorchMNISTClient` class "
+"inherits from the :code:`fl.client.Client`, and hence it must implement "
+"the following methods:"
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:315
+msgid ""
+"When comparing the abstract class to its derived class "
+":code:`PytorchMNISTClient` you will notice that :code:`fit` calls a "
+":code:`train` function and that :code:`evaluate` calls a :code:`test`: "
+"function."
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:317
+msgid ""
+"These functions can both be found inside the same :code:`quickstart-"
+"pytorch.mnist` module:"
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:437
+msgid ""
+"Observe that these functions encapsulate regular training and test loops "
+"and provide :code:`fit` and :code:`evaluate` with final statistics for "
+"each round. You could substitute them with your custom train and test "
+"loops and change the network architecture, and the entire example would "
+"still work flawlessly. As a matter of fact, why not try and modify the "
+"code to an example of your liking?"
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:444
+msgid "Give It a Try"
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:445
+msgid ""
+"Looking through the quickstart code description above will have given a "
+"good understanding of how *clients* and *servers* work in Flower, how to "
+"run a simple experiment, and the internals of a client wrapper. Here are "
+"a few things you could try on your own and get more experience with "
+"Flower:"
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:448
+msgid ""
+"Try and change :code:`PytorchMNISTClient` so it can accept different "
+"architectures."
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:449
+msgid "Modify the :code:`train` function so that it accepts different optimizers"
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:450
+msgid ""
+"Modify the :code:`test` function so that it proves not only the top-1 "
+"(regular accuracy) but also the top-5 accuracy?"
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:451
+msgid ""
+"Go larger! Try to adapt the code to larger images and datasets. Why not "
+"try training on ImageNet with a ResNet-50?"
+msgstr ""
+
+#: ../../source/example-walkthrough-pytorch-mnist.rst:453
+msgid "You are ready now. Enjoy learning in a federated way!"
+msgstr ""
+

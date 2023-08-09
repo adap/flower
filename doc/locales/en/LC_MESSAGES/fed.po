@@ -1,0 +1,488 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022 Adap GmbH
+# This file is distributed under the same license as the Flower package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Flower \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-08-09 15:41+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../source/fed/0000-20200102-fed-template.md:10
+msgid "FED Template"
+msgstr ""
+
+#: ../../source/fed/0000-20200102-fed-template.md:12
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:12
+msgid "Table of Contents"
+msgstr ""
+
+#: ../../source/fed/0000-20200102-fed-template.md:14
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:14
+msgid "[Table of Contents](#table-of-contents)"
+msgstr ""
+
+#: ../../source/fed/0000-20200102-fed-template.md:15
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:15
+msgid "[Summary](#summary)"
+msgstr ""
+
+#: ../../source/fed/0000-20200102-fed-template.md:16
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:16
+msgid "[Motivation](#motivation)"
+msgstr ""
+
+#: ../../source/fed/0000-20200102-fed-template.md:17
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:17
+msgid "[Goals](#goals)"
+msgstr ""
+
+#: ../../source/fed/0000-20200102-fed-template.md:18
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:18
+msgid "[Non-Goals](#non-goals)"
+msgstr ""
+
+#: ../../source/fed/0000-20200102-fed-template.md:19
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:19
+msgid "[Proposal](#proposal)"
+msgstr ""
+
+#: ../../source/fed/0000-20200102-fed-template.md:20
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:23
+msgid "[Drawbacks](#drawbacks)"
+msgstr ""
+
+#: ../../source/fed/0000-20200102-fed-template.md:21
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:24
+msgid "[Alternatives Considered](#alternatives-considered)"
+msgstr ""
+
+#: ../../source/fed/0000-20200102-fed-template.md:22
+msgid "[Appendix](#appendix)"
+msgstr ""
+
+#: ../../source/fed/0000-20200102-fed-template.md:24
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:28
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:76
+msgid "Summary"
+msgstr ""
+
+#: ../../source/fed/0000-20200102-fed-template.md:26
+msgid "[TODO - sentence 1: summary of the problem]"
+msgstr ""
+
+#: ../../source/fed/0000-20200102-fed-template.md:28
+msgid "[TODO - sentence 2: summary of the solution]"
+msgstr ""
+
+#: ../../source/fed/0000-20200102-fed-template.md:30
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:47
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:77
+msgid "Motivation"
+msgstr ""
+
+#: ../../source/fed/0000-20200102-fed-template.md:32
+#: ../../source/fed/0000-20200102-fed-template.md:36
+#: ../../source/fed/0000-20200102-fed-template.md:40
+#: ../../source/fed/0000-20200102-fed-template.md:44
+#: ../../source/fed/0000-20200102-fed-template.md:48
+#: ../../source/fed/0000-20200102-fed-template.md:54
+#: ../../source/fed/0000-20200102-fed-template.md:58
+msgid "[TODO]"
+msgstr ""
+
+#: ../../source/fed/0000-20200102-fed-template.md:34
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:53
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:78
+msgid "Goals"
+msgstr ""
+
+#: ../../source/fed/0000-20200102-fed-template.md:38
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:59
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:79
+msgid "Non-Goals"
+msgstr ""
+
+#: ../../source/fed/0000-20200102-fed-template.md:42
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:65
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:80
+msgid "Proposal"
+msgstr ""
+
+#: ../../source/fed/0000-20200102-fed-template.md:46
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:85
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:129
+msgid "Drawbacks"
+msgstr ""
+
+#: ../../source/fed/0000-20200102-fed-template.md:50
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:86
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:135
+msgid "Alternatives Considered"
+msgstr ""
+
+#: ../../source/fed/0000-20200102-fed-template.md:52
+msgid "[Alternative 1]"
+msgstr ""
+
+#: ../../source/fed/0000-20200102-fed-template.md:56
+msgid "[Alternative 2]"
+msgstr ""
+
+#: ../../source/fed/0000-20200102-fed-template.md:60
+msgid "Appendix"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:10
+msgid "Flower Enhancement Doc"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:20
+msgid "[Enhancement Doc Template](#enhancement-doc-template)"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:21
+msgid "[Metadata](#metadata)"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:22
+msgid "[Workflow](#workflow)"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:25
+msgid "[GitHub Issues](#github-issues)"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:26
+msgid "[Google Docs](#google-docs)"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:30
+msgid "A Flower Enhancement is a standardized development process to"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:32
+msgid "provide a common structure for proposing larger changes"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:33
+msgid "ensure that the motivation for a change is clear"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:34
+msgid "persist project information in a version control system"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:35
+msgid "document the motivation for impactful user-facing changes"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:36
+msgid "reserve GitHub issues for tracking work in flight"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:37
+msgid ""
+"ensure community participants can successfully drive changes to "
+"completion across one or more releases while stakeholders are adequately "
+"represented throughout the process"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:39
+msgid "Hence, an Enhancement Doc combines aspects of"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:41
+msgid "a feature, and effort-tracking document"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:42
+msgid "a product requirements document"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:43
+msgid "a design document"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:45
+msgid ""
+"into one file, which is created incrementally in collaboration with the "
+"community."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:49
+msgid ""
+"For far-fetching changes or features proposed to Flower, an abstraction "
+"beyond a single GitHub issue or pull request is required to understand "
+"and communicate upcoming changes to the project."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:51
+msgid ""
+"The purpose of this process is to reduce the amount of \"tribal "
+"knowledge\" in our community. By moving decisions from Slack threads, "
+"video calls, and hallway conversations into a well-tracked artifact, this"
+" process aims to enhance communication and discoverability."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:55
+msgid ""
+"Roughly any larger, user-facing enhancement should follow the Enhancement"
+" process. If an enhancement would be described in either written or "
+"verbal communication to anyone besides the author or developer, then "
+"consider creating an Enhancement Doc."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:57
+msgid ""
+"Similarly, any technical effort (refactoring, major architectural change)"
+" that will impact a large section of the development community should "
+"also be communicated widely. The Enhancement process is suited for this "
+"even if it will have zero impact on the typical user or operator."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:61
+msgid ""
+"For small changes and additions, going through the Enhancement process "
+"would be time-consuming and unnecessary. This includes, for example, "
+"adding new Federated Learning algorithms, as these only add features "
+"without changing how Flower works or is used."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:63
+msgid ""
+"Enhancements are different from feature requests, as they are already "
+"providing a laid-out path for implementation and are championed by "
+"members of the community."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:67
+msgid ""
+"An Enhancement is captured in a Markdown file that follows a defined "
+"template and a workflow to review and store enhancement docs for "
+"reference — the Enhancement Doc."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:69
+msgid "Enhancement Doc Template"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:71
+msgid ""
+"Each enhancement doc is provided as a Markdown file having the following "
+"structure"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:73
+msgid "Metadata (as [described below](#metadata) in form of a YAML preamble)"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:74
+msgid "Title (same as in metadata)"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:75
+msgid "Table of Contents (if needed)"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:81
+msgid "Notes/Constraints/Caveats (optional)"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:82
+msgid "Design Details (optional)"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:83
+msgid "Graduation Criteria"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:84
+msgid "Upgrade/Downgrade Strategy (if applicable)"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:88
+msgid "As a reference, this document follows the above structure."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:90
+msgid "Metadata"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:92
+msgid ""
+"**fed-number** (Required) The `fed-number` of the last Flower Enhancement"
+" Doc + 1. With this number, it becomes easy to reference other proposals."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:94
+msgid "**title** (Required) The title of the proposal in plain language."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:96
+msgid ""
+"**status** (Required) The current status of the proposal. See "
+"[workflow](#workflow) for the possible states."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:98
+msgid ""
+"**authors** (Required) A list of authors of the proposal. This is simply "
+"the GitHub ID."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:100
+msgid ""
+"**creation-date** (Required) The date that the proposal was first "
+"submitted in a PR."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:102
+msgid ""
+"**last-updated** (Optional) The date that the proposal was last changed "
+"significantly."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:104
+msgid ""
+"**see-also** (Optional) A list of other proposals that are relevant to "
+"this one."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:106
+msgid "**replaces** (Optional) A list of proposals that this one replaces."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:108
+msgid "**superseded-by** (Optional) A list of proposals that this one supersedes."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:111
+msgid "Workflow"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:113
+msgid ""
+"The idea forming the enhancement should already have been discussed or "
+"pitched in the community. As such, it needs a champion, usually the "
+"author, who shepherds the enhancement. This person also has to find "
+"committers to Flower willing to review the proposal."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:115
+msgid ""
+"New enhancements are checked in with a file name in the form of `NNNN-"
+"YYYYMMDD-enhancement-title.md`, with `NNNN` being the Flower Enhancement "
+"Doc number, to `enhancements`. All enhancements start in `provisional` "
+"state as part of a pull request. Discussions are done as part of the pull"
+" request review."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:117
+msgid ""
+"Once an enhancement has been reviewed and approved, its status is changed"
+" to `implementable`. The actual implementation is then done in separate "
+"pull requests. These pull requests should mention the respective "
+"enhancement as part of their description. After the implementation is "
+"done, the proposal status is changed to `implemented`."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:119
+msgid ""
+"Under certain conditions, other states are possible. An Enhancement has "
+"the following states:"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:121
+msgid ""
+"`provisional`: The enhancement has been proposed and is actively being "
+"defined. This is the starting state while the proposal is being fleshed "
+"out and actively defined and discussed."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:122
+msgid "`implementable`: The enhancement has been reviewed and approved."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:123
+msgid ""
+"`implemented`: The enhancement has been implemented and is no longer "
+"actively changed."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:124
+msgid "`deferred`: The enhancement is proposed but not actively being worked on."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:125
+msgid ""
+"`rejected`: The authors and reviewers have decided that this enhancement "
+"is not moving forward."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:126
+msgid "`withdrawn`: The authors have withdrawn the enhancement."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:127
+msgid "`replaced`: The enhancement has been replaced by a new enhancement."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:131
+msgid ""
+"Adding an additional process to the ones already provided by GitHub "
+"(Issues and Pull Requests) adds more complexity and can be a barrier for "
+"potential first-time contributors."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:133
+msgid ""
+"Expanding the proposal template beyond the single-sentence description "
+"currently required in the features issue template may be a heavy burden "
+"for non-native English speakers."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:137
+msgid "GitHub Issues"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:139
+msgid ""
+"Using GitHub Issues for these kinds of enhancements is doable. One could "
+"use, for example, tags, to differentiate and filter them from other "
+"issues. The main issue is in discussing and reviewing an enhancement: "
+"GitHub issues only have a single thread for comments. Enhancements "
+"usually have multiple threads of discussion at the same time for various "
+"parts of the doc. Managing these multiple discussions can be confusing "
+"when using GitHub Issues."
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:141
+msgid "Google Docs"
+msgstr ""
+
+#: ../../source/fed/0001-20220311-flower-enhancement-doc.md:143
+msgid ""
+"Google Docs allow for multiple threads of discussions. But as Google Docs"
+" are hosted outside the project, their discoverability by the community "
+"needs to be taken care of. A list of links to all proposals has to be "
+"managed and made available for the community. Compared to shipping "
+"proposals as part of Flower's repository, the potential for missing links"
+" is much higher."
+msgstr ""
+
+#: ../../source/fed/index.md:1
+msgid "FED - Flower Enhancement Doc"
+msgstr ""
+

@@ -1,0 +1,118 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022 Adap GmbH
+# This file is distributed under the same license as the Flower package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Flower \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-08-09 15:41+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../source/faq.rst:2
+msgid "FAQ"
+msgstr ""
+
+#: ../../source/faq.rst:4
+msgid ""
+"This page collects answers to commonly asked questions about Federated "
+"Learning with Flower."
+msgstr ""
+
+#: ../../source/faq.rst
+msgid ":fa:`eye,mr-1` Can Flower run on Juptyter Notebooks / Google Colab?"
+msgstr ""
+
+#: ../../source/faq.rst:8
+msgid ""
+"Yes, it can! Flower even comes with a few under-the-hood optimizations to"
+" make it work even better on Colab. Here's a quickstart example:"
+msgstr ""
+
+#: ../../source/faq.rst:10
+msgid ""
+"`Flower Quickstart (TensorFlow/Keras) "
+"<https://colab.research.google.com/github/adap/flower/blob/main/examples/simulation_tensorflow/sim.ipynb>`_"
+msgstr ""
+
+#: ../../source/faq.rst:11
+msgid ""
+"Flower Quickstart (PyTorch): coming soon (the TensorFlow/Keras example "
+"can easily be changed to make it work with PyTorch)"
+msgstr ""
+
+#: ../../source/faq.rst
+msgid ":fa:`eye,mr-1` How can I run Federated Learning on a Raspberry Pi?"
+msgstr ""
+
+#: ../../source/faq.rst:15
+msgid ""
+"Find the `blog post about federated learning on embedded device here "
+"<https://flower.dev/blog/2020-12-16-running_federated_learning_applications_on_embedded_devices_with_flower>`_"
+" and the corresponding `GitHub code example "
+"<https://github.com/adap/flower/tree/main/examples/embedded-devices>`_."
+msgstr ""
+
+#: ../../source/faq.rst
+msgid ":fa:`eye,mr-1` Does Flower support federated learning on Android devices?"
+msgstr ""
+
+#: ../../source/faq.rst:19
+msgid ""
+"Yes, it does. Please take a look at our `blog post "
+"<https://flower.dev/blog/2021-12-15-federated-learning-on-android-"
+"devices-with-flower>`_ or check out the `Android code example on GitHub "
+"<https://github.com/adap/flower/tree/main/examples/android>`_."
+msgstr ""
+
+#: ../../source/faq.rst
+msgid ":fa:`eye,mr-1` Can I combine federated learning with blockchain?"
+msgstr ""
+
+#: ../../source/faq.rst:23
+msgid ""
+"Yes, of course. A list of available examples using Flower within a "
+"blockchain environment is available here:"
+msgstr ""
+
+#: ../../source/faq.rst:25
+msgid ""
+"`Flower meets Nevermined GitHub Repository <https://github.com"
+"/nevermined-io/fl-demo/tree/master/image-classification-flower>`_."
+msgstr ""
+
+#: ../../source/faq.rst:26
+msgid ""
+"`Flower meets Nevermined YouTube video "
+"<https://www.youtube.com/watch?v=A0A9hSlPhKI>`_."
+msgstr ""
+
+#: ../../source/faq.rst:27
+msgid ""
+"`Flower meets KOSMoS <https://www.kosmos-bmbf.de/wp-"
+"content/uploads/sites/13/2021/05/Talk-Flower-Summit-2021.pdf>`_."
+msgstr ""
+
+#: ../../source/faq.rst:28
+msgid ""
+"`Flower meets Talan blog post <https://www.linkedin.com/pulse/federated-"
+"learning-same-mask-different-faces-imen-"
+"ayari/?trackingId=971oIlxLQ9%2BA9RB0IQ73XQ%3D%3D>`_ ."
+msgstr ""
+
+#: ../../source/faq.rst:29
+msgid ""
+"`Flower meets Talan GitHub Repository "
+"<https://gitlab.com/Talan_Innovation_Factory/food-waste-prevention>`_ ."
+msgstr ""
+

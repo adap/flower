@@ -1,0 +1,97 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022 Adap GmbH
+# This file is distributed under the same license as the Flower package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Flower \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-08-09 15:41+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../source/install-flower.rst:2
+msgid "Install Flower"
+msgstr ""
+
+#: ../../source/install-flower.rst:6
+msgid "Python Version"
+msgstr ""
+
+#: ../../source/install-flower.rst:8
+msgid "Flower requires `Python 3.7 <https://docs.python.org/3.7/>`_ or above."
+msgstr ""
+
+#: ../../source/install-flower.rst:12
+msgid "Install stable release"
+msgstr ""
+
+#: ../../source/install-flower.rst:14
+msgid ""
+"Stable releases are available on `PyPI "
+"<https://pypi.org/project/flwr/>`_::"
+msgstr ""
+
+#: ../../source/install-flower.rst:18
+msgid ""
+"For simulations that use the Virtual Client Engine, ``flwr`` should be "
+"installed with the ``simulation`` extra::"
+msgstr ""
+
+#: ../../source/install-flower.rst:24
+msgid "Verify installation"
+msgstr ""
+
+#: ../../source/install-flower.rst:26
+msgid ""
+"The following command can be used to verfiy if Flower was successfully "
+"installed. If everything worked, it should print the version of Flower to"
+" the command line::"
+msgstr ""
+
+#: ../../source/install-flower.rst:33
+msgid "Advanced installation options"
+msgstr ""
+
+#: ../../source/install-flower.rst:36
+msgid "Install pre-release"
+msgstr ""
+
+#: ../../source/install-flower.rst:38
+msgid ""
+"New (possibly unstable) versions of Flower are sometimes available as "
+"pre-release versions (alpha, beta, release candidate) before the stable "
+"release happens::"
+msgstr ""
+
+#: ../../source/install-flower.rst:42
+msgid ""
+"For simulations that use the Virtual Client Engine, ``flwr`` pre-releases"
+" should be installed with the ``simulation`` extra::"
+msgstr ""
+
+#: ../../source/install-flower.rst:47
+msgid "Install nightly release"
+msgstr ""
+
+#: ../../source/install-flower.rst:49
+msgid ""
+"The latest (potentially unstable) changes in Flower are available as "
+"nightly releases::"
+msgstr ""
+
+#: ../../source/install-flower.rst:53
+msgid ""
+"For simulations that use the Virtual Client Engine, ``flwr-nightly`` "
+"should be installed with the ``simulation`` extra::"
+msgstr ""
+

@@ -1,0 +1,148 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022 Adap GmbH
+# This file is distributed under the same license as the Flower package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Flower \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-08-09 15:41+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../source/quickstart-tensorflow.rst:5
+msgid "Quickstart TensorFlow"
+msgstr ""
+
+#: ../../source/quickstart-tensorflow.rst:10
+msgid "Let's build a federated learning system in less than 20 lines of code!"
+msgstr ""
+
+#: ../../source/quickstart-tensorflow.rst:12
+msgid "Before Flower can be imported we have to install it:"
+msgstr ""
+
+#: ../../source/quickstart-tensorflow.rst:18
+msgid ""
+"Since we want to use the Keras API of TensorFlow (TF), we have to install"
+" TF as well:"
+msgstr ""
+
+#: ../../source/quickstart-tensorflow.rst:26
+msgid "Flower Client"
+msgstr ""
+
+#: ../../source/quickstart-tensorflow.rst:28
+msgid "Next, in a file called :code:`client.py`, import Flower and TensorFlow:"
+msgstr ""
+
+#: ../../source/quickstart-tensorflow.rst:35
+msgid ""
+"We use the Keras utilities of TF to load CIFAR10, a popular colored image"
+" classification dataset for machine learning. The call to "
+":code:`tf.keras.datasets.cifar10.load_data()` downloads CIFAR10, caches "
+"it locally, and then returns the entire training and test set as NumPy "
+"ndarrays."
+msgstr ""
+
+#: ../../source/quickstart-tensorflow.rst:44
+msgid ""
+"Next, we need a model. For the purpose of this tutorial, we use "
+"MobilNetV2 with 10 output classes:"
+msgstr ""
+
+#: ../../source/quickstart-tensorflow.rst:51
+msgid ""
+"The Flower server interacts with clients through an interface called "
+":code:`Client`. When the server selects a particular client for training,"
+" it sends training instructions over the network. The client receives "
+"those instructions and calls one of the :code:`Client` methods to run "
+"your code (i.e., to train the neural network we defined earlier)."
+msgstr ""
+
+#: ../../source/quickstart-tensorflow.rst:57
+msgid ""
+"Flower provides a convenience class called :code:`NumPyClient` which "
+"makes it easier to implement the :code:`Client` interface when your "
+"workload uses Keras. The :code:`NumPyClient` interface defines three "
+"methods which can be implemented in the following way:"
+msgstr ""
+
+#: ../../source/quickstart-tensorflow.rst:79
+msgid ""
+"We can now create an instance of our class :code:`CifarClient` and add "
+"one line to actually run this client:"
+msgstr ""
+
+#: ../../source/quickstart-tensorflow.rst:87
+msgid ""
+"That's it for the client. We only have to implement :code:`Client` or "
+":code:`NumPyClient` and call :code:`fl.client.start_client()` or "
+":code:`fl.client.start_numpy_client()`. The string :code:`\"[::]:8080\"` "
+"tells the client which server to connect to. In our case we can run the "
+"server and the client on the same machine, therefore we use "
+":code:`\"[::]:8080\"`. If we run a truly federated workload with the "
+"server and clients running on different machines, all that needs to "
+"change is the :code:`server_address` we point the client at."
+msgstr ""
+
+#: ../../source/quickstart-tensorflow.rst:95
+msgid "Flower Server"
+msgstr ""
+
+#: ../../source/quickstart-tensorflow.rst:97
+msgid ""
+"For simple workloads we can start a Flower server and leave all the "
+"configuration possibilities at their default values. In a file named "
+":code:`server.py`, import Flower and start the server:"
+msgstr ""
+
+#: ../../source/quickstart-tensorflow.rst:109
+msgid "Train the model, federated!"
+msgstr ""
+
+#: ../../source/quickstart-tensorflow.rst:111
+msgid ""
+"With both client and server ready, we can now run everything and see "
+"federated learning in action. FL systems usually have a server and "
+"multiple clients. We therefore have to start the server first:"
+msgstr ""
+
+#: ../../source/quickstart-tensorflow.rst:119
+msgid ""
+"Once the server is running we can start the clients in different "
+"terminals. Open a new terminal and start the first client:"
+msgstr ""
+
+#: ../../source/quickstart-tensorflow.rst:126
+msgid "Open another terminal and start the second client:"
+msgstr ""
+
+#: ../../source/quickstart-tensorflow.rst:132
+msgid "Each client will have its own dataset."
+msgstr ""
+
+#: ../../source/quickstart-tensorflow.rst:134
+msgid ""
+"You should now see how the training does in the very first terminal (the "
+"one that started the server):"
+msgstr ""
+
+#: ../../source/quickstart-tensorflow.rst:166
+msgid ""
+"Congratulations! You've successfully built and run your first federated "
+"learning system. The full `source code "
+"<https://github.com/adap/flower/blob/main/examples/quickstart-"
+"tensorflow/client.py>`_ for this can be found in :code:`examples"
+"/quickstart-tensorflow/client.py`."
+msgstr ""
+
