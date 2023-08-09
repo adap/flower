@@ -94,6 +94,7 @@ redirects = {
 }
 
 # Versioning options
+smv_tag_whitelist = r'^v(([1-9]|[0-9]{2,}).*)$'
 smv_branch_whitelist = r'^main$'
 
 # -- Options for HTML output -------------------------------------------------
