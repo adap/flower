@@ -186,7 +186,10 @@ class SecAggPlusHandler(SecureAggregationHandler):
                         f"Stage {STAGE_SETUP}: the required key '{key}' is "
                         "missing from the input `named_values`."
                     )
-                if not isinstance(named_values[key], expected_type):
+                # Bool is a subclass of int in Python,
+                # so `isinstance(v, int)` will return True even if v is a boolean.
+                # pylint: disable-next=unidiomatic-typecheck
+                if type(named_values[key]) is not expected_type:
                     raise TypeError(
                         f"Stage {STAGE_SETUP}: The value for the key '{key}' "
                         f"must be of type {expected_type}, "
@@ -220,7 +223,8 @@ class SecAggPlusHandler(SecureAggregationHandler):
                 if not isinstance(named_values[key], list) or any(
                     elm
                     for elm in cast(List[Any], named_values[key])
-                    if not isinstance(elm, expected_type)
+                    # pylint: disable-next=unidiomatic-typecheck
+                    if type(elm) is not expected_type
                 ):
                     raise TypeError(
                         f"Stage {STAGE_COLLECT_MASKED_INPUT}: "
@@ -242,7 +246,8 @@ class SecAggPlusHandler(SecureAggregationHandler):
                 if not isinstance(named_values[key], list) or any(
                     elm
                     for elm in cast(List[Any], named_values[key])
-                    if not isinstance(elm, expected_type)
+                    # pylint: disable-next=unidiomatic-typecheck
+                    if type(elm) is not expected_type
                 ):
                     raise TypeError(
                         f"Stage {STAGE_UNMASKING}: "
