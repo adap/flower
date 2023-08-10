@@ -1,0 +1,30 @@
+name: Wheel Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  FLWR_TELEMETRY_ENABLED: 0
+
+jobs:
+  test_wheel:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+        with:
+          python-version: 3.10
+      - name: Install dependencies (mandatory only)
+        run: python -m poetry install --all-extras
+      - name: Build wheel
+        run: |
+          ./dev/build.sh
+      - name: Test wheel
+        run: |
+          ./dev/test-wheel.sh
