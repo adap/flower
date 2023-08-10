@@ -1,0 +1,37 @@
+name: Android Client Publish
+
+on:
+  release:
+    # We'll run this workflow when a new GitHub release is created
+    types: [released]
+
+jobs:
+  publish:
+    defaults:
+        run:
+            working-directory: src/kotlin
+    name: Release build and publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: adopt
+          java-version: 11
+
+        # Builds the release artifacts of the library
+      - name: Release build
+        run: ./gradlew :flwr-android:assembleRelease
+
+        # Runs upload, and then closes & releases the repository
+      - name: Publish to MavenCentral
+        run: ./gradlew publishReleasePublicationToSonatypeRepository --max-workers 1 closeAndReleaseSonatypeStagingRepository
+        env:
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          
