@@ -50,7 +50,7 @@ def _get_from_task(task: Task) -> Dict[str, Value]:
 _secure_aggregation_configuration = {
     "threshold": 2,
     "test_dropouts": 1,
-    "clipping_range": 3.,
+    "clipping_range": 3.0,
     "target_range": 1 << 16,
     "mod_range": 1 << 24,
 }
