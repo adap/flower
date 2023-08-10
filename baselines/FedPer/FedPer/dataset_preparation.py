@@ -229,12 +229,13 @@ def get_datasets(
         datasets = random_split(trainset, lengths, torch.Generator().manual_seed(seed))
     else:
         assert num_classes <= total_num_classes, "num_classes must be less than or equal to total_num_classes"
-        
         times = [0 for i in range(total_num_classes)]
         contain = []
         for i in range(num_clients):
             current = [i%total_num_classes]
+            print("Current: ", current)
             times[i%total_num_classes] += 1
+            print("Times: ", current)
             j = 1
             if i  == num_clients - 1:
                 missing_labels = [i for i in range(total_num_classes) if times[i] == 0]
@@ -258,11 +259,12 @@ def get_datasets(
             else:       
                 while (j < num_classes):             
                     ind = random.randint(0, total_num_classes-1)
+                    print("Index: ", ind)
                     if (ind not in current):
                         j += 1
                         current.append(ind)
                         times[ind] += 1
-                        # print("times: ", times)
+                        print("times: ", times)
             contain.append(current)
             print("Client {} contains classes: {}".format(i, current))
         print("times: ", times)
