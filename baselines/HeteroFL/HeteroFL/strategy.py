@@ -5,6 +5,7 @@ extend or modify the functionality of an existing strategy.
 """
 from typing import Callable, Union , Dict, List, Optional, Tuple
 import flwr as fl
+import torch
 
 from flwr.common import (
     EvaluateIns,
@@ -22,6 +23,8 @@ from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
 
+from models import param_model_rate_mapping , param_idx_to_local_params , get_state_dict_from_param, get_parameters
+
 
 class HeteroFL(fl.server.strategy.Strategy):
     def __init__(
@@ -31,6 +34,9 @@ class HeteroFL(fl.server.strategy.Strategy):
         min_fit_clients: int = 2,
         min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
+
+        global_model = None,
+
     ) -> None:
         super().__init__()
         self.fraction_fit = fraction_fit
@@ -41,16 +47,20 @@ class HeteroFL(fl.server.strategy.Strategy):
         # # created client_to_model_mapping
         # self.client_to_model_rate_mapping: Dict[str, ClientProxy] = {}
 
+        self.global_model = global_model
+        self.local_param_model_rate = None
+
     def __repr__(self) -> str:
-        return "FedCustom"
+        return "HeteroFL"
 
     def initialize_parameters(
         self, client_manager: ClientManager
     ) -> Optional[Parameters]:
         """Initialize global model parameters."""
         # self.make_client_to_model_rate_mapping(client_manager)
-        net = Net()
+        net = self.global_model()
         ndarrays = get_parameters(net)
+        self.local_param_model_rate = param_model_rate_mapping(net.state_dict() , client_manager.get_all_clients_to_model_mapping())
         return fl.common.ndarrays_to_parameters(ndarrays)
 
     def configure_fit(
@@ -69,14 +79,20 @@ class HeteroFL(fl.server.strategy.Strategy):
             num_clients=sample_size, min_num_clients=min_num_clients,
         )
 
-        # Create custom configs
+
+        # update client model rate mapping
+        client_manager.update(server_round)
+
         
-        n_clients = len(clients)
+        global_parameters = get_state_dict_from_param(self.global_model() , parameters)
+
+        # Create custom configs
         fit_configurations = []
         for idx, client in enumerate(clients):
-            model_rate = client_mode_rate_mapping[client.cid]
-            client_param = param_model_rate_mapping(parameters , model_rate)
-            fit_configurations.append((client, FitIns(client_param, {'model_rate' : model_rate})))
+            model_rate = client_manager.get_client_to_model_mapping(client.cid)
+            client_param_idx = self.local_param_model_rate[model_rate]
+            local_param = param_idx_to_local_params(global_parameters , client_param_idx)
+            fit_configurations.append((client, FitIns(ndarrays_to_parameters(local_param) , {})))
         return fit_configurations
 
     def aggregate_fit(
@@ -152,7 +168,3 @@ class HeteroFL(fl.server.strategy.Strategy):
         """Use a fraction of available clients for evaluation."""
         num_clients = int(num_available_clients * self.fraction_evaluate)
         return max(num_clients, self.min_evaluate_clients), self.min_available_clients
-    
-    # def make_client_to_model_rate_mapping(self , client_manager : ClientManager):
-    #     for i in range(len(client_manager)):
-    #         self.client_to_model_rate_mapping[str(i)] = client_manager.clients[str(i)].get_properties(None , timeout=1000).parameters['client_model_rate']

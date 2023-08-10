@@ -8,13 +8,24 @@ import random
 from flwr.server.criterion import Criterion
 from flwr.server.client_proxy import ClientProxy
 
+from utils import Model_rate_manager
 
-class client_manager_HeteroFL(fl.ClientManager):
+class client_manager_HeteroFL(fl.server.ClientManager):
     """Provides a pool of available clients."""
 
-    def __init__(self) -> None:
+    def __init__(self, model_rate_manager : Model_rate_manager = None, clients_to_model_rate_mapping = None) -> None:
         self.clients: Dict[str, ClientProxy] = {}
-        self.clients_to_model_rate_mapping: Dict[str, float] = {}
+        self.model_rate_manager = model_rate_manager  
+
+        # have a common array in simulation to access in the client and server side
+        if clients_to_model_rate_mapping != None:
+            self.clients_to_model_rate_mapping = clients_to_model_rate_mapping
+            ans = self.model_rate_manager.create_model_rate_mapping(len(clients_to_model_rate_mapping))
+            # copy self.clients_to_model_rate_mapping , ans
+            for i in range(len(ans)):
+                self.clients_to_model_rate_mapping[i] = ans[i]
+            
+             
         self._cv = threading.Condition()
 
     def __len__(self) -> int:
@@ -69,7 +80,10 @@ class client_manager_HeteroFL(fl.ClientManager):
             return False
 
         self.clients[client.cid] = client
-        self.clients_to_model_rate_mapping[client.cid] = client.get_properties(None, timeout= 86400)
+        
+        if(self.clients_to_model_rate_mapping == None):
+            self.clients_to_model_rate_mapping[int(client.cid)] = client.get_properties(None, timeout= 86400)
+    
         with self._cv:
             self._cv.notify_all()
 
@@ -86,7 +100,7 @@ class client_manager_HeteroFL(fl.ClientManager):
         """
         if client.cid in self.clients:
             del self.clients[client.cid]
-            del self.clients_to_model_rate_mapping[client.cid]
+            del self.clients_to_model_rate_mapping[int(client.cid)]
 
             with self._cv:
                 self._cv.notify_all()
@@ -95,10 +109,32 @@ class client_manager_HeteroFL(fl.ClientManager):
         """Return all available clients."""
         return self.clients
     
-    def get_clients_to_model_mapping(self) -> Dict[str , float]:
+    def get_client_to_model_mapping(self , cid) -> float:
         """Return all available clients to model rate mapping."""
-        return self.clients_to_model_rate_mapping
+        return self.clients_to_model_rate_mapping[str(cid)]
     
+    def get_all_clients_to_model_mapping(self):
+        """Return all available clients to model rate mapping."""
+        temp_list = []
+        for i in range(self.num_available()):
+            temp_list.append(self.clients_to_model_rate_mapping[str(i)])
+            print("returned {}".format(self.clients_to_model_rate_mapping[str(i)]))
+        
+        return temp_list
+    
+    def update(self , server_round):
+        if self.model_rate_manager != None:
+            if(server_round == 1 and self. model_rate_manager.model_mode == 'fix') or (self.model_rate_manager.model_mode == 'dynamic'):
+                ans = self.model_rate_manager.create_model_rate_mapping(self.num_available)
+                for i in range(len(ans)):
+                    self.clients_to_model_rate_mapping[i] = ans[i]
+                # copy self.clients_to_model_rate_mapping , ans
+            return
+        
+        # for i in range(self.num_available):
+        #     # need to test this , accumilates the changing model rate of the client
+        #     self.clients_to_model_rate_mapping[i] = self.clients[str(i)].get_properties['model_rate']
+        # return
 
     def sample(
         self,
