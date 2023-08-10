@@ -50,7 +50,7 @@ def _get_from_task(task: Task) -> Dict[str, Value]:
 _secure_aggregation_configuration = {
     "threshold": 2,
     "test_dropouts": 1,
-    "clipping_range": 3,
+    "clipping_range": 3.,
     "target_range": 1 << 16,
     "mod_range": 1 << 24,
 }
@@ -94,6 +94,7 @@ def workflow_with_sec_agg(
 
     cfg = {
         "stage": stages[0],
+        "sample_num": len(sampled_node_ids),
         "share_num": len(sampled_node_ids),
         "threshold": sec_agg_config["threshold"],
         "clipping_range": sec_agg_config["clipping_range"],
@@ -195,8 +196,8 @@ def workflow_with_sec_agg(
         if node_id not in surviving_node_ids
     ]
     active_sids = [nid2sid[node_id] for node_id in surviving_node_ids]
-    named_values = _get_from_task(task)
     for _, task in node_messages.items():
+        named_values = _get_from_task(task)
         client_masked_vec = named_values["masked_parameters"]
         client_masked_vec = [bytes_to_ndarray(b) for b in client_masked_vec]
         masked_vector = parameters_addition(masked_vector, client_masked_vec)
