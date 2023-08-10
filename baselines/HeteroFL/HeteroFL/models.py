@@ -9,18 +9,13 @@ the python code at all
 from typing import Dict, OrderedDict
 import numpy as np
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
 import copy
 
 from flwr.common import parameters_to_ndarrays
 
-import flwr.server.strategy.fedavg
-
-
-import numpy as np
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-# from modules import Scaler
 
 
 def init_param(m):
@@ -32,22 +27,19 @@ def init_param(m):
     return m
 
 class Conv(nn.Module):
-    def __init__(self, data_shape, hidden_size, classes_size, rate=1, track=False , norm = 'bn' ,scale = 1 ,  device='cpu', mask=1):
+    def __init__(self, data_shape, hidden_size, classes_size, rate=1, track=False , norm_spceified = 'bn' , scale = 1 , device='cpu'):
         super().__init__()
-        self.mask = mask
-        self.classes_size = classes_size
         self.device = device
-        self.norm = norm
         
-        if self.norm == 'bn':
+        if norm_spceified == 'bn':
             norm = nn.BatchNorm2d(hidden_size[0], momentum=None, track_running_stats=track)
-        elif self.norm == 'in':
+        elif norm_spceified == 'in':
             norm = nn.GroupNorm(hidden_size[0], hidden_size[0])
-        elif self.norm == 'ln':
+        elif norm_spceified == 'ln':
             norm = nn.GroupNorm(1, hidden_size[0])
-        elif self.norm == 'gn':
+        elif norm_spceified == 'gn':
             norm = nn.GroupNorm(4, hidden_size[0])
-        elif self.norm == 'none':
+        elif norm_spceified == 'none':
             norm = nn.Identity()
         else:
             raise ValueError('Not valid norm')
@@ -61,15 +53,15 @@ class Conv(nn.Module):
                   nn.ReLU(inplace=True),
                   nn.MaxPool2d(2)]
         for i in range(len(hidden_size) - 1):
-            if self.norm == 'bn':
+            if norm_spceified == 'bn':
                 norm = nn.BatchNorm2d(hidden_size[i + 1], momentum=None, track_running_stats=track)
-            elif self.norm == 'in':
+            elif norm_spceified == 'in':
                 norm = nn.GroupNorm(hidden_size[i + 1], hidden_size[i + 1])
-            elif self.norm == 'ln':
+            elif norm_spceified == 'ln':
                 norm = nn.GroupNorm(1, hidden_size[i + 1])
-            elif self.norm == 'gn':
+            elif norm_spceified == 'gn':
                 norm = nn.GroupNorm(4, hidden_size[i + 1])
-            elif self.norm == 'none':
+            elif norm_spceified == 'none':
                 norm = nn.Identity()
             else:
                 raise ValueError('Not valid norm')
@@ -92,8 +84,8 @@ class Conv(nn.Module):
         output = {'loss': torch.tensor(0, device=self.device, dtype=torch.float32)}
         x = input['img']
         out = self.blocks(x)
-        if 'label_split' in input and self.mask:
-            label_mask = torch.zeros(self.classes_size, device=out.device)
+        if 'label_split' in input:
+            label_mask = torch.zeros(10, device=out.device)
             label_mask[input['label_split']] = 1
             out = out.masked_fill(label_mask == 0, 0)
         output['score'] = out
@@ -101,8 +93,8 @@ class Conv(nn.Module):
         return output
 
 
-def conv(model_rate=1, track=False , device='cpu', data_shape = (28 , 28 , 1)):
-    data_shape = data_shape
+def conv(model_rate=1, track=False):
+    data_shape = [1 , 28 , 28]
     hidden_size = [int(np.ceil(model_rate * x)) for x in [64, 128, 256, 512]]
     classes_size = 10
     scaler_rate = model_rate / 1
@@ -110,6 +102,15 @@ def conv(model_rate=1, track=False , device='cpu', data_shape = (28 , 28 , 1)):
     model.apply(init_param)
     return model
 
+
+
+def init_param(m):
+    if isinstance(m, (nn.BatchNorm2d, nn.InstanceNorm2d)):
+        m.weight.data.fill_(1)
+        m.bias.data.zero_()
+    elif isinstance(m, nn.Linear):
+        m.bias.data.zero_()
+    return m
 
 class Scaler(nn.Module):
     def __init__(self, rate):
