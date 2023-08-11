@@ -248,3 +248,8 @@ It is likely that no system can completely eliminate the possibility of privacy 
 ## Drawbacks
 
 [TODO] -->
+
+## Appendix
+
+### `create_node()`-`delete_node()`-based ephemeral IDs
+
