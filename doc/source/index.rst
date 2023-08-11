@@ -35,7 +35,17 @@ Flower's design goals was to make this simple. Read on to learn more.
 
 Be sure to also checkout our brand new Flower Tutorial series over on YouTube: 
 
-..  youtube:: FGTc2TQq7VM
+.. grid:: 2
+
+  .. grid-item-card::  PyTorch
+
+    ..  youtube:: jOmmuzMIQ4c
+       :width: 100%
+
+  .. grid-item-card::  TensorFlow
+
+    ..  youtube:: FGTc2TQq7VM
+       :width: 100%
 
 
 Contributor Guide
