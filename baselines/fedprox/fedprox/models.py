@@ -153,7 +153,7 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
         optimizer.zero_grad()
         proximal_term = 0.0
         for local_weights, global_weights in zip(net.parameters(), global_params):
-            proximal_term += (local_weights - global_weights).norm(2)
+            proximal_term += torch.square((local_weights - global_weights).norm(2))
         loss = criterion(net(images), labels) + (proximal_mu / 2) * proximal_term
         loss.backward()
         optimizer.step()
