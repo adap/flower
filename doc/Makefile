@@ -29,6 +29,13 @@ update-text:
 update-lang:
 	sphinx-intl update -p build/gettext -l $(lang)
 
+build-deploy:
+	rm -rf build/html
+	make update-text
+	make build-lang lang=en SPHINXBUILD=sphinx-multiversion 
+	make build-lang lang=fr
+	cp -r build/html/en/$(version)/* build/html/
+
 serve:
 	make docs
 	python -m http.server --directory build/html

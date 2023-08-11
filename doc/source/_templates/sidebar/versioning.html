@@ -33,6 +33,7 @@ input[type='checkbox'] {
 
 .collapsible-content {
   max-height: 0px;
+  padding-top: 0px;
   overflow: hidden;
 
   transition: max-height .25s ease-in-out;
@@ -50,6 +51,10 @@ input[type='checkbox'] {
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
 }
+
+.content-inner {
+  padding-bottom: 1rem;
+}
 </style>
 
 <div class="wrap-collabsible"> 
@@ -59,7 +64,7 @@ input[type='checkbox'] {
     <div class="content-inner">
       <ul>
         {%- for item in versions %}
-        <li><a href="{{ item.url }}/../../../en/{{ item.name }}/{{ pagename }}.html">{{ item.name }} EN</a><a href="{{ item.url }}/../../../fr/{{ item.name }}/{{ pagename }}.html"> FR</a></li>
+        <li><a href="https://flower.dev/docs/framework/en/{{ item.name }}/{{ pagename }}.html" style="text-decoration:none;">{{ item.name }}</a></li>
         {%- endfor %}
       </ul>
     </div>

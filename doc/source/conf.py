@@ -38,6 +38,7 @@ author = "The Flower Authors"
 # The full version, including alpha/beta/rc tags
 release = "1.5.0"
 
+locale_dirs = ['../locales']
 
 # -- General configuration ---------------------------------------------------
 
@@ -145,6 +146,7 @@ html_sidebars = {
         "sidebar/navigation.html",
         "sidebar/scroll-end.html",
         "sidebar/versioning.html",
+        "sidebar/lang.html",
     ]
 }
 # -- Options for nbsphinx -------------------------------------------------
