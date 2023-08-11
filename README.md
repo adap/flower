@@ -71,14 +71,14 @@ Stay tuned, more tutorials are coming soon. Topics include **Privacy and Securit
 
 ## 30-Minute Federated Learning Tutorial
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/examples/simulation_pytorch_colab/tutorial.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/examples/simulation_pytorch_colab/tutorial.ipynb))
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/examples/simulation-pytorch-colab/tutorial.ipynb) (or open the [Jupyter Notebook](https://github.com/adap/flower/blob/main/examples/simulation-pytorch-colab/tutorial.ipynb))
 
 
 ## Documentation
 
 [Flower Docs](https://flower.dev/docs):
 * [Installation](https://flower.dev/docs/framework/installation.html)
-* [Quickstart (TensorFlow)](https://flower.dev/framework/docs/quickstart-tensorflow.html)
+* [Quickstart (TensorFlow)](https://flower.dev/docs/framework/quickstart-tensorflow.html)
 * [Quickstart (PyTorch)](https://flower.dev/docs/framework/quickstart-pytorch.html)
 * [Quickstart (Hugging Face)](https://flower.dev/docs/framework/quickstart-huggingface.html)
 * [Quickstart (PyTorch Lightning [code example])](https://flower.dev/docs/framework/quickstart-pytorch-lightning.html)
@@ -113,25 +113,25 @@ Several code examples show different usage scenarios of Flower (in combination w
 
 Quickstart examples:
 
-* [Quickstart (TensorFlow)](https://github.com/adap/flower/tree/main/examples/quickstart_tensorflow)
-* [Quickstart (PyTorch)](https://github.com/adap/flower/tree/main/examples/quickstart_pytorch)
-* [Quickstart (Hugging Face)](https://github.com/adap/flower/tree/main/examples/quickstart_huggingface)
-* [Quickstart (PyTorch Lightning)](https://github.com/adap/flower/tree/main/examples/quickstart_pytorch_lightning)
-* [Quickstart (fastai)](https://github.com/adap/flower/tree/main/examples/quickstart_fastai)
-* [Quickstart (Pandas)](https://github.com/adap/flower/tree/main/examples/quickstart_pandas)
-* [Quickstart (MXNet)](https://github.com/adap/flower/tree/main/examples/quickstart_mxnet)
-* [Quickstart (JAX)](https://github.com/adap/flower/tree/main/examples/quickstart_jax)
+* [Quickstart (TensorFlow)](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow)
+* [Quickstart (PyTorch)](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch)
+* [Quickstart (Hugging Face)](https://github.com/adap/flower/tree/main/examples/quickstart-huggingface)
+* [Quickstart (PyTorch Lightning)](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch-lightning)
+* [Quickstart (fastai)](https://github.com/adap/flower/tree/main/examples/quickstart-fastai)
+* [Quickstart (Pandas)](https://github.com/adap/flower/tree/main/examples/quickstart-pandas)
+* [Quickstart (MXNet)](https://github.com/adap/flower/tree/main/examples/quickstart-mxnet)
+* [Quickstart (JAX)](https://github.com/adap/flower/tree/main/examples/quickstart-jax)
 * [Quickstart (scikit-learn)](https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist)
 * [Quickstart (Android [TFLite])](https://github.com/adap/flower/tree/main/examples/android)
 * [Quickstart (iOS [CoreML])](https://github.com/adap/flower/tree/main/examples/ios)
 
 Other [examples](https://github.com/adap/flower/tree/main/examples):
 
-* [Raspberry Pi & Nvidia Jetson Tutorial](https://github.com/adap/flower/tree/main/examples/embedded_devices)
-* [PyTorch: From Centralized to Federated](https://github.com/adap/flower/tree/main/examples/pytorch_from_centralized_to_federated)
-* [MXNet: From Centralized to Federated](https://github.com/adap/flower/tree/main/examples/mxnet_from_centralized_to_federated)
-* [Advanced Flower with TensorFlow/Keras](https://github.com/adap/flower/tree/main/examples/advanced_tensorflow)
-* [Advanced Flower with PyTorch](https://github.com/adap/flower/tree/main/examples/advanced_pytorch)
+* [Raspberry Pi & Nvidia Jetson Tutorial](https://github.com/adap/flower/tree/main/examples/embedded-devices)
+* [PyTorch: From Centralized to Federated](https://github.com/adap/flower/tree/main/examples/pytorch-from-centralized-to-federated)
+* [MXNet: From Centralized to Federated](https://github.com/adap/flower/tree/main/examples/mxnet-from-centralized-to-federated)
+* [Advanced Flower with TensorFlow/Keras](https://github.com/adap/flower/tree/main/examples/advanced-tensorflow)
+* [Advanced Flower with PyTorch](https://github.com/adap/flower/tree/main/examples/advanced-pytorch)
 * Single-Machine Simulation of Federated Learning Systems ([PyTorch](https://github.com/adap/flower/tree/main/examples/simulation_pytorch)) ([Tensorflow](https://github.com/adap/flower/tree/main/examples/simulation_tensorflow))
 
 ## Community

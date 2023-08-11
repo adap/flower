@@ -4,6 +4,9 @@
 Quickstart PyTorch
 ==================
 
+..  youtube:: jOmmuzMIQ4c
+   :width: 100%
+
 In this tutorial we will learn how to train a Convolutional Neural Network on CIFAR10 using Flower and PyTorch. 
 
 First of all, it is recommended to create a virtual environment and run everything within a `virtualenv <https://flower.dev/docs/recommended-env-setup.html>`_. 
@@ -264,4 +267,4 @@ You should now see how the training does in the very first terminal (the one tha
 
 Congratulations!
 You've successfully built and run your first federated learning system.
-The full `source code <https://github.com/adap/flower/blob/main/examples/quickstart_pytorch/client.py>`_ for this example can be found in :code:`examples/quickstart_pytorch`.
+The full `source code <https://github.com/adap/flower/blob/main/examples/quickstart-pytorch/client.py>`_ for this example can be found in :code:`examples/quickstart-pytorch`.
