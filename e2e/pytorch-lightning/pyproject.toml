@@ -3,7 +3,7 @@ requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
-name = "quickstart_pytorch_lightning"
+name = "quickstart-pytorch-lightning"
 version = "0.1.0"
 description = "Federated Learning E2E test with Flower and PyTorch Lightning"
 authors = ["The Flower Authors <hello@flower.dev>"]
@@ -12,4 +12,4 @@ authors = ["The Flower Authors <hello@flower.dev>"]
 python = "^3.7"
 flwr = { path = "../../", develop = true, extras = ["simulation"] }
 pytorch-lightning = "1.6.0"
-torchvision = "0.13.0"
+torchvision = "0.14.1"

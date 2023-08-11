@@ -1,0 +1,7 @@
+**__pycache__/
+**.DS_Store
+**build/
+**.sqlite3*
+**.settings/
+**.tflite
+saved_model/
