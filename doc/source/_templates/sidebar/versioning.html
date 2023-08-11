@@ -50,14 +50,6 @@ input[type='checkbox'] {
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
 }
-
-.content-inner {
-  padding-bottom: 1rem;
-}
-
-.wrap-collabsible {
-  background-color: var(--color-background-item);
-}
 </style>
 
 <div class="wrap-collabsible"> 
@@ -66,8 +58,8 @@ input[type='checkbox'] {
   <div class="collapsible-content">
     <div class="content-inner">
       <ul>
-        {%- for item in versions|sort(reverse = True) %}
-        <li><a href="{{ item.url }}" style="text-decoration:none">{{ item.name }}{{ ' (unstable)' if item.name == 'main' else '' }}</a></li>
+        {%- for item in versions %}
+        <li><a href="{{ item.url }}/../../../en/{{ item.name }}/{{ pagename }}.html">{{ item.name }} EN</a><a href="{{ item.url }}/../../../fr/{{ item.name }}/{{ pagename }}.html"> FR</a></li>
         {%- endfor %}
       </ul>
     </div>
