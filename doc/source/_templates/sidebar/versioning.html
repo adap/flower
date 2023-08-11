@@ -64,7 +64,7 @@ input[type='checkbox'] {
     <div class="content-inner">
       <ul>
         {%- for item in versions %}
-        <li><a href="https://flower.dev/docs/framework/en/{{ item.name }}/{{ pagename }}.html" style="text-decoration:none;">{{ item.name }}</a></li>
+        <li><a href="https://flower.dev/docs/framework/en/{{ item.name }}/{{ pagename }}.html" style="text-decoration:none">{{ item.name }}{{ ' (unstable)' if item.name == 'main' else '' }}</a></li>
         {%- endfor %}
       </ul>
     </div>

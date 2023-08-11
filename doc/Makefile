@@ -33,7 +33,7 @@ build-deploy:
 	rm -rf build/html
 	make update-text
 	make build-lang lang=en SPHINXBUILD=sphinx-multiversion
-	make build-lang lang=fr
+	sphinx-build -D language=fr -A lang=True source build/html/fr
 	cp -r build/html/en/$(version)/* build/html/
 
 serve:
