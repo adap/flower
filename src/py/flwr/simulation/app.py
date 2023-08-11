@@ -244,7 +244,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
             "disconnected. The head node might still be alive but cannot accommodate "
             f"any actor with resources: {client_resources}."
             "\n\t\t - Your Actors crashed because of an unknown reason and all their "
-            f"restarts attempts ({max_restarts=}) have been exhausted."
+            f"restarts attempts ({max_restarts=}) have been exhausted.",
         )
         hist = None
 
