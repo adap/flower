@@ -81,10 +81,10 @@ Be aware that in the default config the memory usage can exceed 10GB.
 | server learning rate  |  |  1.0 |
 | clip norm  | Clip norm during local training. | 10.0 |
 | weight decay  | Weight decay during local training. |  1e-3 |
-| $lambda_1$  | Used in FedMLB. See Eq. 8 in the original paper. It weights the impact of hybrid cross-entropy loss.|  1.0 |
-| $lambda_2$  | Used in FedMLB. See Eq. 8 in the original paper. It weights the impact of hybrid KL loss.| 1.0 |
+| $\lambda_1$  | Used in FedMLB. See Eq. 8 in the original paper. It weights the impact of hybrid cross-entropy loss.|  1.0 |
+| $\lambda_2$  | Used in FedMLB. See Eq. 8 in the original paper. It weights the impact of hybrid KL loss.| 1.0 |
 | $temperature$  | Regulates the smoothness of local and global predictions in distillation. | 1.0 |
-| $gamma$   | Used in FedAvg+KD. It weights the impact of local-global distillation on local training.| 0.2 |
+| $\gamma$   | Used in FedAvg+KD. It weights the impact of local-global distillation on local training.| 0.2 |
 
 ## Environment Setup
 By default, Poetry will use the Python version in your system. 
