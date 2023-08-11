@@ -79,7 +79,7 @@ class ResNetModelSplit(ModelSplit):
     def _get_model_parts(self, model: ResNet) -> Tuple[nn.Module, nn.Module]:
         return model.body, model.head
 
-class MobileNetModelManager(ModelManager):
+class ResNetModelManager(ModelManager):
     """Manager for models with Body/Head split."""
 
     def __init__(

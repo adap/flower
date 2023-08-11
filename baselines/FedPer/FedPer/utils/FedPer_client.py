@@ -8,6 +8,7 @@ from collections import OrderedDict
 from torch.utils.data import DataLoader
 from FedPer.models.cnn_model import CNNModelManager
 from FedPer.models.mobile_model import MobileNetModelManager
+from FedPer.models.resnet_model import ResNetModelManager
 from FedPer.utils.constants import Algorithms
 from FedPer.utils.base_client import BaseClient
 
@@ -83,7 +84,7 @@ def get_fedper_client_fn(
         the DataLoader that will be used for testing
     """
 
-    assert model['name'].lower() in ['cnn', 'mobile']
+    assert model['name'].lower() in ['cnn', 'mobile', 'resnet']
 
     def client_fn(cid: str) -> FedPerClient:
         """Create a Flower client representing a single organization."""
@@ -97,6 +98,8 @@ def get_fedper_client_fn(
             manager = CNNModelManager
         elif model['name'].lower() == 'mobile':
             manager = MobileNetModelManager
+        elif model['name'].lower() == 'resnet':
+            manager = ResNetModelManager
         else:
             raise NotImplementedError('Model not implemented, check name.')
 

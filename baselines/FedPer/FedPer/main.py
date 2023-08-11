@@ -3,22 +3,21 @@
 It includes processioning the dataset, instantiate strategy, specify how the global
 model is going to be evaluated, etc. At the end, this script saves the results.
 """
-# these are the basic packages you'll need here
-# feel free to remove some if aren't needed
 import flwr as fl
-# from baselines.FedPer.FedPer import utils_file
 import hydra
 
 from typing import Dict, Any, Union
 from omegaconf import DictConfig, OmegaConf
 from hydra.utils import instantiate
-from FedPer import utils_file
+from FedPer.utils import utils_file
 from FedPer.dataset import load_datasets
 from FedPer.strategy import AggregateBodyStrategyPipeline
 from FedPer.utils.new_utils import get_client_cls
 from hydra.core.hydra_config import HydraConfig
 from FedPer.models.cnn_model import CNNNet, CNNModelSplit
+from FedPer.utils.base_client import get_fedavg_client_fn
 from FedPer.models.mobile_model import MobileNet, MobileNetModelSplit
+from FedPer.models.resnet_model import ResNet, ResNetModelSplit
 from FedPer.utils.FedPer_client import get_fedper_client_fn
 
 @hydra.main(config_path="conf", config_name="new_base", version_base=None)
@@ -49,14 +48,17 @@ def main(cfg: DictConfig) -> None:
             valloaders=valloader,
             model=cfg.model,
         )
+    elif algorithm.lower() == 'fedavg':
+        client_fn = get_fedavg_client_fn(
+            trainloaders=trainloader,
+            valloaders=valloader,
+            model=cfg.model,
+        )
     else: 
         raise NotImplementedError
-
-    # get function that will executed by the strategy's evaluate() method
+    
     # Set server's device
     device = cfg.server_device
-    
-    # evaluate_fn = server.gen_evaluate_fn(testloader, device=device, model=cfg.model)
 
     # get a function that will be used to construct the config that the client's
     # fit() method will received
@@ -84,6 +86,16 @@ def main(cfg: DictConfig) -> None:
                 name=cfg.model.name,
                 device=cfg.model.device
             ).to(device)
+    elif cfg.model.name.lower() == 'resnet':
+        split = ResNetModelSplit
+        def create_model() -> ResNet:
+            """Create initial ResNet model."""
+            return ResNet(
+                num_head_layers=cfg.model.num_head_layers,
+                num_classes=cfg.model.num_classes,
+                name=cfg.model.name,
+                device=cfg.model.device
+            ).to(device)
     else:
         raise NotImplementedError('Model not implemented, check name. ')
         
@@ -97,8 +109,6 @@ def main(cfg: DictConfig) -> None:
     )
 
     # 5. Start Simulation
-    # history = fl.simulation.start_simulation(<arguments for simulation>)
-    # Start simulation
     history = fl.simulation.start_simulation(
         client_fn=client_fn,
         num_clients=cfg.num_clients,
@@ -116,16 +126,6 @@ def main(cfg: DictConfig) -> None:
     print(history)
 
     # 6. Save your results
-    # Here you can save the `history` returned by the simulation and include
-    # also other buffers, statistics, info needed to be saved in order to later
-    # on generate the plots you provide in the README.md. You can for instance
-    # access elements that belong to the strategy for example:
-    # data = strategy.get_my_custom_data() -- assuming you have such method defined.
-    # Hydra will generate for you a directory each time you run the code. You
-    # can retrieve the path to that directory with this:
-    # save_path = HydraConfig.get().runtime.output_dir
-    # Hydra automatically creates an output directory
-    # Let's retrieve it and save some results there
     save_path = HydraConfig.get().runtime.output_dir
 
     # save results as a Python pickle using a file_path
@@ -136,9 +136,6 @@ def main(cfg: DictConfig) -> None:
     strategy_name = strategy.__class__.__name__
     file_suffix: str = (
         f"_{strategy_name}"
-        #f"{'_iid' if cfg.dataset_config.iid else ''}"
-       # f"{'_balanced' if cfg.dataset_config.balance else ''}"
-        #f"{'_powerlaw' if cfg.dataset_config.power_law else ''}"
         f"_C={cfg.num_clients}"
         f"_B={cfg.batch_size}"
         f"_E={cfg.num_epochs}"

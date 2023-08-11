@@ -3,14 +3,15 @@ import flwr as fl
 import torch 
 import numpy as np
 
-from typing import Dict, Any, Type, List, Union, Tuple
+from typing import Dict, Any, Type, List, Union, Tuple, Optional, Callable
+from omegaconf import DictConfig
 from collections import defaultdict, OrderedDict
 from flwr.common import Scalar
 from torch.utils.data import DataLoader
 from FedPer.models.cnn_model import CNNModelManager
 from FedPer.models.mobile_model import MobileNetModelManager
+from FedPer.models.resnet_model import ResNetModelManager
 from FedPer.utils.constants import DEFAULT_FT_EP, DEFAULT_TRAIN_EP
-# from FedPer.utils.model_manager import ModelManager
 
 class BaseClient(fl.client.NumPyClient):
     """Implementation of Federated Averaging (FedAvg) Client."""
@@ -179,3 +180,60 @@ class BaseClient(fl.client.NumPyClient):
         return tst_results.get('loss', 0.0),\
             self.model_manager.test_dataset_size(),\
             {k: v for k, v in tst_results.items() if not isinstance(v, (dict, list))}
+    
+
+def get_fedavg_client_fn(
+    trainloaders: List[DataLoader],
+    valloaders: List[DataLoader],
+    model: DictConfig,
+) -> Tuple[
+    Callable[[str], BaseClient], DataLoader
+]:  # pylint: disable=too-many-arguments
+    """Generates the client function that creates the Flower Clients.
+
+    Parameters
+    ----------
+    trainloaders: List[DataLoader]
+        A list of DataLoaders, each pointing to the dataset training partition
+        belonging to a particular client.
+    valloaders: List[DataLoader]
+        A list of DataLoaders, each pointing to the dataset validation partition
+        belonging to a particular client.
+    model : DictConfig
+        The model configuration.
+
+    Returns
+    -------
+    Tuple[Callable[[str], FlowerClient], DataLoader]
+        A tuple containing the client function that creates Flower Clients and
+        the DataLoader that will be used for testing
+    """
+
+    assert model['name'].lower() in ['cnn', 'mobile', 'resnet']
+
+    def client_fn(cid: str) -> BaseClient:
+        """Create a Flower client representing a single organization."""
+
+        # Note: each client gets a different trainloader/valloader, so each client
+        # will train and evaluate on their own unique data
+        trainloader = trainloaders[int(cid)]
+        valloader = valloaders[int(cid)]
+
+        if model['name'].lower() == 'cnn':
+            manager = CNNModelManager
+        elif model['name'].lower() == 'mobile':
+            manager = MobileNetModelManager
+        elif model['name'].lower() == 'resnet':
+            manager = ResNetModelManager
+        else:
+            raise NotImplementedError('Model not implemented, check name.')
+
+        return BaseClient(
+            trainloader=trainloader,
+            testloader=valloader,
+            client_id=cid,
+            config=model,
+            model_manager_class=manager
+        )
+    
+    return client_fn
