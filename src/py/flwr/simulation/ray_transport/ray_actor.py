@@ -17,8 +17,9 @@
 
 import threading
 import traceback
+from abc import ABC
 from logging import ERROR, WARNING
-from typing import Any, Callable, Dict, List, Set
+from typing import Any, Callable, Dict, List, Set, Union
 
 import ray
 from ray.util.actor_pool import ActorPool
@@ -34,15 +35,14 @@ class ClientException(Exception):
         super().__init__(self.message)
 
 
-@ray.remote
-class VirtualClientEngineActor:
-    """A Ray Actor class that runs client workloads."""
+class VirtualClientEngineActor(ABC):
+    """Abstract base class for VirtualClientEngine Actors"""
 
     def terminate(self):
-        """Terminate Actor."""
+        """Manually terminate Actor object."""
         log(WARNING, f"Manually terminating {self.__class__.__name__}")
         ray.actor.exit_actor()
-
+    
     def run(self, job_fn: Callable, cid: str):
         """Run a client workload."""
         # execute tasks and return result
@@ -61,6 +61,45 @@ class VirtualClientEngineActor:
             raise ClientException(message) from ex
 
         return cid, job_results
+
+
+@ray.remote
+class DefaultActor(VirtualClientEngineActor):
+    """A Ray Actor class that runs client workloads."""
+
+
+@ray.remote
+class DefaultActor_TF(VirtualClientEngineActor):
+    """A Ray Actor class that runs TF client workloads.
+    
+    It enables GPU memory growth to prevent premature OOM."""
+
+    def __init__(self):
+        super().__init__()
+        # By default, TF attempts maps all GPU memory to the process.
+        # We don't this behaviour in simulation, since it prevents us
+        # from having multiple Actors (and therefore Flower clients) sharing
+        # the same GPU.
+        # Luckily we can disable this behaviour by enabling memory growth
+        # on the GPU. In this way, VRAM allocated to the processes grows based
+        # on the needs for the workload. (this is for instance the default 
+        # behaviour in Pytorch)
+        try:
+            import tensorflow as tf
+            gpus = tf.config.list_physical_devices('GPU')
+            if gpus:
+                try:
+                    # Currently, memory growth needs to be the same across GPUs
+                    for gpu in gpus:
+                        tf.config.experimental.set_memory_growth(gpu, True)
+                    logical_gpus = tf.config.list_logical_devices('GPU')
+                except RuntimeError as e:
+                    # Memory growth must be set before GPUs have been initialized
+                    print(e)
+        except Exception as e:
+            log(ERROR, "Do you have Tensorflow installed?")
+            raise e
+
 
 
 def pool_size_from_resources(client_resources: Dict):
@@ -87,23 +126,30 @@ def pool_size_from_resources(client_resources: Dict):
             "does not meet the criteria to host at least one client with resources:"
             f" {client_resources}. Consider lowering your `client_resources`",
         )
-        raise ValueError(f"ActorPool is empty. Stopping Simulation."\
+        raise ValueError(f"ActorPool is empty. Stopping Simulation." \
                          "Check 'client_resources'")
-    
+
     return num_actors
 
 
 class VirtualClientEngineActorPool(ActorPool):
     """A pool of VirtualClientEngine Actors."""
 
-    def __init__(self, client_resources: Dict, max_restarts: int = 1):
+    def __init__(self,
+                 client_resources: Dict[str, Union[int, float]],
+                 actor_type: VirtualClientEngineActor,
+                 actor_kwargs: Dict[str, Any],
+                 max_restarts: int,
+                 ):
         self.client_resources = client_resources
+        self.actor_type = actor_type
+        self.actor_kwargs = actor_kwargs
         self.actor_max_restarts = max_restarts
         num_actors = pool_size_from_resources(client_resources)
         actors = [
-            VirtualClientEngineActor.options(
+            actor_type.options(
                 **client_resources, max_restarts=max_restarts
-            ).remote()
+            ).remote(**actor_kwargs)
             for _ in range(num_actors)
         ]
 
@@ -124,6 +170,8 @@ class VirtualClientEngineActorPool(ActorPool):
         """Make this class serialisable (needed due to lock)."""
         return VirtualClientEngineActorPool, (
             self.client_resources,
+            self.actor_type,
+            self.actor_kwargs,
             self.actor_max_restarts,
         )
 

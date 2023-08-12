@@ -29,7 +29,7 @@ from flwr.server.app import ServerConfig, init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
-from flwr.simulation.ray_transport.ray_actor import VirtualClientEngineActorPool
+from flwr.simulation.ray_transport.ray_actor import VirtualClientEngineActorPool, VirtualClientEngineActor, DefaultActor
 from flwr.simulation.ray_transport.ray_client_proxy import RayActorClientProxy
 
 INVALID_ARGUMENTS_START_SIMULATION = """
@@ -72,6 +72,8 @@ def start_simulation(  # pylint: disable=too-many-arguments
     client_manager: Optional[ClientManager] = None,
     ray_init_args: Optional[Dict[str, Any]] = None,
     keep_initialised: Optional[bool] = False,
+    actor_type: Optional[VirtualClientEngineActor] = DefaultActor,
+    actor_kwargs: Optional[Dict[str, Any]] = {},
 ) -> History:
     """Start a Ray-based Flower simulation server.
 
@@ -124,6 +126,18 @@ def start_simulation(  # pylint: disable=too-many-arguments
         arguments from being passed to ray.init.
     keep_initialised: Optional[bool] (default: False)
         Set to True to prevent `ray.shutdown()` in case `ray.is_initialized()=True`.
+    
+    actor_type: Optional[VirtualClientEngineActor] (default: DefaultActor)
+
+        Optionally specify the type of actor to use. The actor object, which
+        persist throughout the simulation will be the process in charged of
+        running the clients' jobs (i.e. their fit() method). If you are using
+        Tensorflow, you should use type `DefaultActor_TF` which will set TF's
+        GPU memory growth to True at initialisation (preventing premature OOM).
+
+    actor_kwargs: Optional[Dict[str, Any]] (default: {})
+        If you want to create your own Actor classes, you might need to pass
+        some input argument. You can use this dictionary for such purpose.
 
     Returns
     -------
@@ -205,7 +219,10 @@ def start_simulation(  # pylint: disable=too-many-arguments
     # after these many restarts, it will be removed from the pool
     max_restarts = 1 
 
-    pool = VirtualClientEngineActorPool(client_resources, max_restarts)
+    pool = VirtualClientEngineActorPool(client_resources,
+                                        actor_type,
+                                        actor_kwargs,
+                                        max_restarts)
 
     log(
         INFO,
