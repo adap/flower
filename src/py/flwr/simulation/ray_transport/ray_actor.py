@@ -76,7 +76,7 @@ class DefaultActor_TF(VirtualClientEngineActor):
 
     def __init__(self):
         super().__init__()
-        # By default, TF attempts maps all GPU memory to the process.
+        # By default, TF maps all GPU memory to the process.
         # We don't this behaviour in simulation, since it prevents us
         # from having multiple Actors (and therefore Flower clients) sharing
         # the same GPU.
@@ -86,13 +86,14 @@ class DefaultActor_TF(VirtualClientEngineActor):
         # behaviour in Pytorch)
         try:
             import tensorflow as tf
+            # this bit of code follows the guidelines for GPU usage
+            # in https://www.tensorflow.org/guide/gpu
             gpus = tf.config.list_physical_devices('GPU')
             if gpus:
                 try:
                     # Currently, memory growth needs to be the same across GPUs
                     for gpu in gpus:
                         tf.config.experimental.set_memory_growth(gpu, True)
-                    logical_gpus = tf.config.list_logical_devices('GPU')
                 except RuntimeError as e:
                     # Memory growth must be set before GPUs have been initialized
                     print(e)
