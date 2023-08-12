@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,13 +54,13 @@ class VirtualClientEngineActor:
             client_trace = traceback.format_exc()
             message = (
                 "\n\tSomething went wrong when running your client workload."
-                f"\n\tClient {client_id} crashed when the {self.__class__.__name__}"
+                f"\n\tClient {cid} crashed when the {self.__class__.__name__}"
                 " was running its workload."
                 f"\n\tException triggered on the client side: {client_trace}"
             )
             raise ClientException(message) from ex
 
-        return client_id, client_results
+        return cid, job_results
 
 
 def pool_size_from_resources(client_resources: Dict):
@@ -73,7 +73,7 @@ def pool_size_from_resources(client_resources: Dict):
     num_gpus = cluster_resources.get("GPU", 0)  # there might not be GPU
     num_actors = int(num_cpus / client_resources["num_cpus"])
     # if a GPU is present and client resources do require one
-    if client_resources["num_gpus"] > 0.0:
+    if "num_gpus" in client_resources.keys() and client_resources["num_gpus"] > 0.0:
         if num_gpus:
             # if there are gpus in the cluster
             num_actors = min(num_actors, int(num_gpus / client_resources["num_gpus"]))
@@ -87,7 +87,9 @@ def pool_size_from_resources(client_resources: Dict):
             "does not meet the criteria to host at least one client with resources:"
             f" {client_resources}. Consider lowering your `client_resources`",
         )
-
+        raise ValueError(f"ActorPool is empty. Stopping Simulation."\
+                         "Check 'client_resources'")
+    
     return num_actors
 
 
@@ -107,7 +109,9 @@ class VirtualClientEngineActorPool(ActorPool):
 
         super().__init__(actors)
 
-        self._cid_to_future = {}  # a dict
+        # A dict that maps cid to another dict containing: a reference to the remote job
+        # and its status (i.e. whether it is ready or not)
+        self._cid_to_future: Dict[str, Dict[str, Any]] = {}
         self.actor_to_remove: Set[str] = set()  # a set
         self.num_actors = len(actors)
 
@@ -127,7 +131,7 @@ class VirtualClientEngineActorPool(ActorPool):
         """Take idle actor and assign it a client workload."""
         actor = self._idle_actors.pop()
         if self._check_and_remove_actor_from_pool(actor):
-            future = fn(actor, value)
+            future = fn(actor, job_fn)
             future_key = tuple(future) if isinstance(future, List) else future
             self._future_to_actor[future_key] = (self._next_task_index, actor, cid)
             self._next_task_index += 1
@@ -145,10 +149,10 @@ class VirtualClientEngineActorPool(ActorPool):
             self._reset_cid_to_future_dict(cid)
             if self._idle_actors:
                 # submit job since there is an Actor that's available
-                self.submit(fn, value, cid)
+                self.submit(fn, job_fn, cid)
             else:
                 # no actors are available, append to list of jobs to run later
-                self._pending_submits.append((fn, value, cid))
+                self._pending_submits.append((fn, job_fn, cid))
 
     def _flag_future_as_ready(self, cid) -> None:
         """Flag future for VirtualClient with cid=cid as ready."""

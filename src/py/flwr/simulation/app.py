@@ -143,7 +143,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
         strategy=strategy,
         client_manager=client_manager,
     )
-    # Setting simulation ON for server
+
     log(
         INFO,
         "Starting Flower simulation, config: %s",
@@ -214,6 +214,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
         pool.num_actors,
     )
 
+    # Register one RayClientProxy object for each client with the ClientManager
     for cid in cids:
         client_proxy = RayActorClientProxy(
             client_fn=client_fn,
