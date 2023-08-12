@@ -14,6 +14,7 @@
 # ==============================================================================
 """Ray-based Flower ClientProxy implementation."""
 
+
 import traceback
 from logging import ERROR
 from typing import Callable, Dict, Optional, cast
@@ -126,7 +127,7 @@ class RayActorClientProxy(ClientProxy):
         self.client_fn = client_fn
         self.actor_pool = actor_pool
 
-    def _submit_job(self, job: Callable, timeout: Optional[float]):
+    def _submit_job(self, job_fn: Callable, timeout: Optional[float]):
         try:
             self.actor_pool.submit_client_job(
                 lambda a, v: a.run.remote(v, self.cid), job, self.cid

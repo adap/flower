@@ -43,13 +43,13 @@ class VirtualClientEngineActor:
         log(WARNING, f"Manually terminating {self.__class__.__name__}")
         ray.actor.exit_actor()
 
-    def run(self, client_fn: Callable, client_id):
+    def run(self, job_fn: Callable, cid: str):
         """Run a client workload."""
         # execute tasks and return result
         # return also cid which is needed to ensure results
         # from the pool are correctly assigned to each ClientProxy
         try:
-            client_results = client_fn()
+            job_results = job_fn()
         except Exception as ex:
             client_trace = traceback.format_exc()
             message = (
@@ -123,7 +123,7 @@ class VirtualClientEngineActorPool(ActorPool):
             self.actor_max_restarts,
         )
 
-    def submit(self, fn: Any, value: Callable, cid: str) -> None:
+    def submit(self, fn: Any, job_fn: Callable, cid: str) -> None:
         """Take idle actor and assign it a client workload."""
         actor = self._idle_actors.pop()
         if self._check_and_remove_actor_from_pool(actor):
@@ -135,7 +135,7 @@ class VirtualClientEngineActorPool(ActorPool):
             # update with future
             self._cid_to_future[cid]["future"] = future_key
 
-    def submit_client_job(self, fn: Any, value: Callable, cid: str) -> None:
+    def submit_client_job(self, fn: Any, job_fn: Callable, cid: str) -> None:
         """Submit a job while tracking client ids."""
         # We need to put this behind a lock since .submit() involves
         # removing and adding elements from a dictionary. Which creates

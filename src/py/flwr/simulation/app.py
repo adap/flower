@@ -185,13 +185,13 @@ def start_simulation(  # pylint: disable=too-many-arguments
         cluster_resources,
     )
 
-    # log resources for each virtual_client
+    # Log the resources that a single client will be able to use
     if client_resources is None:
-        client_resources = {"num_cpus": 1, "num_gpus": 0.0}
         log(
             INFO,
             "No `client_resources` specified. Using minimal resources for clients.",
         )
+        client_resources = {"num_cpus": 1, "num_gpus": 0.0}
 
     log(
         INFO,
@@ -199,10 +199,11 @@ def start_simulation(  # pylint: disable=too-many-arguments
         client_resources,
     )
 
-    # instantiate ActorPool
+    # Instantiate ActorPool
     # TODO: maybe we want `max_restarts` to be user-defined ?
-    max_restarts = 1  # how many times an actor that crashes should be restarted
+    # `max_restarts` determines how many times an actor that crashes should be restarted
     # after these many restarts, it will be removed from the pool
+    max_restarts = 1 
 
     pool = VirtualClientEngineActorPool(client_resources, max_restarts)
 
