@@ -83,7 +83,7 @@ Be aware that in the default config the memory usage can exceed 10GB.
 | weight decay  | Weight decay during local training. |  1e-3 |
 | $\lambda_1$  | Used in FedMLB. See Eq. 8 in the original paper. It weights the impact of hybrid cross-entropy loss.|  1.0 |
 | $\lambda_2$  | Used in FedMLB. See Eq. 8 in the original paper. It weights the impact of hybrid KL loss.| 1.0 |
-| $temperature$  | Regulates the smoothness of local and global predictions in distillation. | 1.0 |
+| temperature  | Regulates the smoothness of local and global predictions in distillation. | 1.0 |
 | $\gamma$   | Used in FedAvg+KD. It weights the impact of local-global distillation on local training.| 0.2 |
 
 ## Environment Setup
@@ -97,16 +97,15 @@ but one easy way is using the automatic installer:
 curl https://pyenv.run | bash
 ```
 You can then install any Python version with `pyenv install <python-version>`
-(e.g. `pyenv install 3.9.17`). 
-Then, in order to use that Python version, use the following commands:
+(e.g. `pyenv install 3.9.17`) and set that version as the one to be used. 
 ```bash
 # cd to your FedMLB directory (i.e. where the `pyproject.toml` is)
-pyenv install 3.10.6
+pyenv install 3.9.0
 
-pyenv local 3.10.6
+pyenv local 3.9.0
 
 # set that version for poetry
-poetry env use 3.10.6
+poetry env use 3.9.0
 ```
 To build the Python environment as specified in the `pyproject.toml`, use the following commands:
 ```bash
@@ -245,6 +244,7 @@ the accuracy at the target round is based on the exponential moving average with
 0.9. Tensorboard allows to easily visualize/calculate the moving average of a run.
 
 ###Table 1a
+
 The results of Table 1a in the paper (for FedAvg and FedMLB) refers
 to CIFAR-100 (Figure 3) and Tiny-ImageNet (Figure 7a) with 
 the setting (1.) Moderate-scale with Dir(0.3), 100 clients, 5% participation rate.
@@ -271,6 +271,7 @@ python run -m FedMLB.main --multirun dataset_config.dataset="cifar100", "tiny-im
 | FedMLB   | () | () |
 
 ###Table 1b
+
 The results of Table 1a in the paper (for FedAvg and FedMLB) refers
 to CIFAR-100 (Figure 3) and Tiny-ImageNet (Figure 7a) with 
 the setting (2.) Large-scale experiments with Dir(0.3), 500 clients, 2% participation rate.
@@ -294,6 +295,7 @@ python -m FedMLB.main --multirun dataset_config.dataset="cifar100", "tiny-imagen
 | FedMLB   | () | () |
 
 ###Table 3
+
 To reproduce results reported in Table 3 of the paper,
 resulting from _more local iterations_ (K=100 or K=200 in the
 paper, instead of K=50), run the following:
@@ -314,7 +316,7 @@ and results can be navigated and visualized via tensorboard GUI
 by using a browser at that address. 
 
 Tensorboard logs in this baselines are stored in a folder with the following path structure: 
-`FedMLB/FedMLB/tb_logging/DATASET/MODEL/{METHOD}/{TOTAL_CLIENTS}_clients/dir_{ALPHA_DIRICHLET}/seed_{RANDOM_SEED}`
+`FedMLB/FedMLB/tb_logging/{DATASET}/{MODEL}/{METHOD}/{TOTAL_CLIENTS}_clients/dir_{ALPHA_DIRICHLET}/seed_{RANDOM_SEED}`
 
 For example, for default results with FedAvg, logs will be stored at:
 `FedMLB/FedMLB/tb_logging/cifar100/resnet18/FedAvg/100_clients/dir_0.3/seed_3`
