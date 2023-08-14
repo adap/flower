@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,13 +26,14 @@ from sphinx.application import ConfigError
 
 
 # Fixing path issue for autodoc
-sys.path.insert(0, os.path.abspath("../../src/py"))
+sys.path.insert(0, os.path.abspath("../../"))
+sys.path.insert(0, os.path.abspath("../../flwr_datasets"))
 
 
 # -- Project information -----------------------------------------------------
 
 project = "Flower Datasets"
-copyright = "2023 Adap GmbH"
+copyright = "2023 Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
