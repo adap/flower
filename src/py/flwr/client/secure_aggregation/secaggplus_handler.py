@@ -77,12 +77,13 @@ class SecAggPlusState:
     target_range: int = 0
     mod_range: int = 0
 
-    # sk, pk stand for secret key, public key
+    # Secret key (sk) and public key (pk)
     sk1: bytes = b""
     pk1: bytes = b""
     sk2: bytes = b""
     pk2: bytes = b""
-    # random seed for generating the private mask
+
+    # Random seed for generating the private mask
     rd_seed: bytes = b""
 
     rd_seed_share_dict: Dict[int, bytes] = field(default_factory=dict)
