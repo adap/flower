@@ -122,12 +122,14 @@ def get_server_message_from_task_ins(
     return task_ins.task.legacy_server_message
 
 
-def wrap_client_message_in_task_res(client_message: ClientMessage) -> TaskRes:
+def wrap_client_message_in_task_res(
+    client_message: ClientMessage, workload_id: str
+) -> TaskRes:
     """Wrap ClientMessage in TaskRes."""
     # Instantiate a TaskRes, only filling client_message field.
     return TaskRes(
         task_id="",
         group_id="",
-        workload_id="",
+        workload_id=workload_id,
         task=Task(ancestry=[], legacy_client_message=client_message),
     )
