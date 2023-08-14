@@ -60,7 +60,7 @@ from .handler import SecureAggregationHandler
 STAGE_SETUP = "setup"
 STAGE_SHARE_KEYS = "share_keys"
 STAGE_COLLECT_MASKED_INPUT = "collect_masked_input"
-STAGE_UNMASKING = "unmasking"
+STAGE_UNMASK = "unmask"
 STAGES = (STAGE_SETUP, STAGE_SHARE_KEYS, STAGE_COLLECT_MASKED_INPUT, STAGE_UNMASKING)
 
 
