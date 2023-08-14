@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Shamir's secret sharing (with PyCryptodome)."""
+"""Shamir's secret sharing."""
 
 
 import pickle

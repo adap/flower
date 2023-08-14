@@ -58,8 +58,8 @@ from flwr.common.typing import FitIns, Value
 from .handler import SecureAggregationHandler
 
 STAGE_SETUP = "setup"
-STAGE_SHARE_KEYS = "share keys"
-STAGE_COLLECT_MASKED_INPUT = "collect masked input"
+STAGE_SHARE_KEYS = "share_keys"
+STAGE_COLLECT_MASKED_INPUT = "collect_masked_input"
 STAGE_UNMASKING = "unmasking"
 STAGES = (STAGE_SETUP, STAGE_SHARE_KEYS, STAGE_COLLECT_MASKED_INPUT, STAGE_UNMASKING)
 
