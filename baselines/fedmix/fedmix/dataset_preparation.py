@@ -1,16 +1,19 @@
+"""..."""
+
 import numpy as np
 import torch
-from torchvision.datasets import CIFAR10, CIFAR100
-from torch.utils.data import Subset
-import torchvision.transforms as transforms
 import torch.nn.functional as F
+import torchvision.transforms as transforms
+from torch.utils.data import Subset
+from torchvision.datasets import CIFAR10, CIFAR100
+
 
 def _download_cifar10():
+    """..."""
     transform = transforms.Compose(
         [
             transforms.ToTensor(),
-            transforms.Normalize((0.4914, 0.4822, 0.4465),
-                                 (0.2023, 0.1994, 0.2010))
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
         ]
     )
 
@@ -18,12 +21,13 @@ def _download_cifar10():
     testset = CIFAR10("./dataset", train=False, download=True, transform=transform)
     return trainset, testset
 
+
 def _download_cifar100():
+    """..."""
     transform = transforms.Compose(
         [
             transforms.ToTensor(),
-            transforms.Normalize((0.5071, 0.4867, 0.4408),
-                                 (0.2675, 0.2565, 0.2761))
+            transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
         ]
     )
 
@@ -31,7 +35,11 @@ def _download_cifar100():
     testset = CIFAR100("./dataset", train=False, download=True, transform=transform)
     return trainset, testset
 
-def _partition_trainset(trainset, num_classes, num_clients, num_classes_per_client, seed):
+
+def _partition_trainset(
+    trainset, num_classes, num_clients, num_classes_per_client, seed
+):
+    """..."""
     partition_size = int(len(trainset) / num_clients)
     np.random.seed(seed)
 
@@ -41,9 +49,10 @@ def _partition_trainset(trainset, num_classes, num_clients, num_classes_per_clie
 
     client_datasets = []
 
-    for client_id in range(num_clients):
+    for _client_id in range(num_clients):
         selected_classes = np.random.choice(
-            num_classes, num_classes_per_client, replace=False)
+            num_classes, num_classes_per_client, replace=False
+        )
         selected_indices = []
 
         for class_idx in selected_classes:
@@ -57,7 +66,9 @@ def _partition_trainset(trainset, num_classes, num_clients, num_classes_per_clie
 
     return client_datasets
 
+
 def _mash_data(client_datasets, mash_batch_size, num_classes):
+    """..."""
     mashed_data = []
     for client_dataset in client_datasets:
         mashed_image, mashed_label = [], []
@@ -70,11 +81,10 @@ def _mash_data(client_datasets, mash_batch_size, num_classes):
                         torch.mean(torch.stack(mashed_image), dim=0),
                         torch.mean(
                             F.one_hot(
-                                torch.squeeze(torch.stack(mashed_label)),
-                                num_classes
+                                torch.squeeze(torch.stack(mashed_label)), num_classes
                             ).to(dtype=torch.float32),
-                            dim=0
-                        )
+                            dim=0,
+                        ),
                     )
                 )
                 # print(mashed_data[0][1])

@@ -1,8 +1,14 @@
-from pathlib import Path
+"""..."""
+
 import pickle
+from pathlib import Path
 from secrets import token_hex
 
-def save_results_as_pickle(history, file_path, extra_results, default_filename="results.pkl"):
+
+def save_results_as_pickle(
+    history, file_path, extra_results, default_filename="results.pkl"
+):
+    """..."""
     path = Path(file_path)
 
     # ensure path exists

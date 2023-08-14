@@ -1,7 +1,12 @@
-from flwr.server.strategy import Strategy, FedAvg
+"""..."""
+
 from flwr.common import FitIns
+from flwr.server.strategy import FedAvg
+
 
 class FedMix(FedAvg):
+    """..."""
+
     def __init__(
         self,
         *,
@@ -19,8 +24,9 @@ class FedMix(FedAvg):
         evaluate_metrics_aggregation_fn=None,
         mashed_data,
         mixup_ratio,
-        lr_decay_after_each_round
+        lr_decay_after_each_round,
     ):
+        """..."""
         super().__init__(
             fraction_fit=fraction_fit,
             fraction_evaluate=fraction_evaluate,
@@ -43,16 +49,25 @@ class FedMix(FedAvg):
         self.decay = lr_decay_after_each_round
 
     def configure_fit(self, server_round, parameters, client_manager):
+        """..."""
         sample_size, min_num_clients = self.num_fit_clients(
-            client_manager.num_available())
+            client_manager.num_available()
+        )
         clients = client_manager.sample(
-            num_clients=sample_size, min_num_clients=min_num_clients)
+            num_clients=sample_size, min_num_clients=min_num_clients
+        )
 
         return [
-            (client, FitIns(parameters, {
-                'mashed_data': self.mashed_data,
-                'mixup_ratio': self.mixup_ratio,
-                'lr_decay_accumulated': self.decay ** (server_round - 1)
-            }))
+            (
+                client,
+                FitIns(
+                    parameters,
+                    {
+                        "mashed_data": self.mashed_data,
+                        "mixup_ratio": self.mixup_ratio,
+                        "lr_decay_accumulated": self.decay ** (server_round - 1),
+                    },
+                ),
+            )
             for client in clients
         ]

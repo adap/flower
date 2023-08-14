@@ -1,10 +1,15 @@
+"""..."""
 from collections import OrderedDict
 
 import torch
 from hydra.utils import instantiate
 
+
 def gen_evaluate_fn(testloader, device, model):
+    """..."""
+
     def evaluate(server_round, parameters_ndarrays, config):
+        """..."""
         net = instantiate(model)
         params_dict = zip(net.state_dict().keys(), parameters_ndarrays)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
@@ -16,7 +21,9 @@ def gen_evaluate_fn(testloader, device, model):
 
     return evaluate
 
+
 def test(net, dataloader, device):
+    """..."""
     criterion = torch.nn.CrossEntropyLoss(reduction="sum")
     if len(dataloader) == 0:
         raise ValueError("Dataloader can't be 0, exiting...")
