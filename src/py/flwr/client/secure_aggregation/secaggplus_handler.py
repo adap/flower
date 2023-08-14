@@ -432,7 +432,7 @@ def _collect_masked_input(
     }
 
 
-def _unmasking(
+def _unmask(
     state: SecAggPlusState, named_values: Dict[str, Value]
 ) -> Dict[str, Value]:
     log(INFO, "Client %d: starting stage 3...", state.sid)
