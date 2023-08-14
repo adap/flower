@@ -88,13 +88,13 @@ def generate_shared_key(
 
 def encrypt(key: bytes, plaintext: bytes) -> bytes:
     """Encrypt plaintext using 32-byte key with Fernet."""
-    # key must be url safe
+    # The input key must be url safe
     fernet = Fernet(key)
     return fernet.encrypt(plaintext)
 
 
 def decrypt(key: bytes, ciphertext: bytes) -> bytes:
     """Decrypt ciphertext using 32-byte key with Fernet."""
-    # key must be url safe
+    # The input key must be url safe
     fernet = Fernet(key)
     return fernet.decrypt(ciphertext)

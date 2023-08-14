@@ -73,7 +73,6 @@ class SecAggPlusState:
     sample_num: int = 0
     share_num: int = 0
     threshold: int = 0
-    test_drop: bool = False
     clipping_range: float = 0.0
     target_range: int = 0
     mod_range: int = 0
@@ -175,7 +174,6 @@ class SecAggPlusHandler(SecureAggregationHandler):
                 ("secure_id", int),
                 ("share_num", int),
                 ("threshold", int),
-                ("test_drop", bool),
                 ("clipping_range", float),
                 ("target_range", int),
                 ("mod_range", int),
@@ -267,7 +265,6 @@ def _setup(state: SecAggPlusState, named_values: Dict[str, Value]) -> Dict[str, 
 
     state.share_num = cast(int, sec_agg_param_dict["share_num"])
     state.threshold = cast(int, sec_agg_param_dict["threshold"])
-    state.test_drop = cast(bool, sec_agg_param_dict["test_drop"])
     state.clipping_range = cast(float, sec_agg_param_dict["clipping_range"])
     state.target_range = cast(int, sec_agg_param_dict["target_range"])
     state.mod_range = cast(int, sec_agg_param_dict["mod_range"])

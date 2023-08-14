@@ -37,7 +37,7 @@ def create_shares(secret: bytes, threshold: int, num: int) -> List[bytes]:
             lambda arg: _shamir_split(*arg), secret_padded_chunk
         ):
             for idx, share in chunk_shares:
-                # idx start with 1
+                # Index in `chunk_shares` starts from 1
                 share_list[idx - 1].append((idx, share))
 
     return [pickle.dumps(shares) for shares in share_list]

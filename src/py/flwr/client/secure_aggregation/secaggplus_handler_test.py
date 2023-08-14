@@ -103,7 +103,6 @@ class TestSecAggPlusHandler(unittest.TestCase):
             ("secure_id", int),
             ("share_num", int),
             ("threshold", int),
-            ("test_drop", bool),
             ("clipping_range", float),
             ("target_range", int),
             ("mod_range", int),
