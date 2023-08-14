@@ -12,37 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Partitioner class that works with HuggingFace Dataset."""
-from abc import ABC, abstractmethod
-
+"""Iid partitioner class that works with HuggingFace Dataset."""
 import datasets
-from datasets import Dataset
-
-
-class Partitioner(ABC):
-    """The base partitioner class that enables obtaining federated partitions.
-
-    The initialization is intended to take all necessary arguments such that the call to
-    the `load_partition` method can be use the same for all partitioners.
-    """
-
-    @abstractmethod
-    def load_partition(self, dataset: Dataset, partition_index: int) -> Dataset:
-        """Load a single partition based on the partition index.
-
-        Parameters
-        ----------
-        dataset: Dataset
-            dataset that will be partitioned
-        partition_index: int
-            the index that corresponds to the requested partition
-
-        Returns
-        -------
-        dataset_partition: Dataset
-            single dataset partition
-        """
-        raise NotImplementedError
+from flwr_datasets.partitioner.partitioner import Partitioner
 
 
 class IidPartitioner(Partitioner):
@@ -58,10 +30,9 @@ class IidPartitioner(Partitioner):
         super().__init__()
         self._num_partitions = num_partitions
 
-    def load_partition(
-        self, dataset: Dataset, partition_index: int
-    ) -> datasets.Dataset:
+    def load_partition(self, partition_index: int) -> datasets.Dataset:
         """Load a single iid partition based on the partition index."""
-        return dataset.shard(
+        self._check_if_dataset_assigned()
+        return self.dataset.shard(
             num_shards=self._num_partitions, index=partition_index, contiguous=True
         )

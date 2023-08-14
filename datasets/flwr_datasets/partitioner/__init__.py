@@ -12,4 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Datasets main package."""
+"""Flower Datasets Partitioner package."""
+from .partitioner import Partitioner
+from .iid_partitioner import IidPartitioner
