@@ -40,8 +40,11 @@ class Partitioner(ABC):
         if self._dataset is None:
             self._dataset = value
         else:
-            raise ValueError(
-                "The dataset can be assigned only once to the partitioner."
+            raise Warning(
+                "The dataset should be assigned only once to the partitioner."
+                "This operation might also wipe out the saved references to the "
+                "created partitions (in case the partitioning scheme needs to create "
+                "the full partitioning also in order to return a single partition)."
             )
 
     @abstractmethod
