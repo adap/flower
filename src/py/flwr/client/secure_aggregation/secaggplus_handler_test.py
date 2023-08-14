@@ -32,7 +32,7 @@ from .secaggplus_handler import (
 
 
 class EmptyFlowerNumPyClient(NumPyClient, SecAggPlusHandler):
-    """Empty Numpy client."""
+    """Empty NumPyClient."""
 
 
 class TestSecAggPlusHandler(unittest.TestCase):
