@@ -66,24 +66,3 @@ class Partitioner(ABC):
             raise ValueError(
                 "The dataset field should be set before using the load_partition."
             )
-
-
-class IidPartitioner(Partitioner):
-    """Partitioner creates each partition sampled randomly from the dataset.
-
-    Parameters
-    ----------
-    num_partitions: int
-        The total number of partitions that the data will be divided into.
-    """
-
-    def __init__(self, num_partitions: int) -> None:
-        super().__init__()
-        self._num_partitions = num_partitions
-
-    def load_partition(self, partition_index: int) -> datasets.Dataset:
-        """Load a single iid partition based on the partition index."""
-        self._check_if_dataset_assigned()
-        return self.dataset.shard(
-            num_shards=self._num_partitions, index=partition_index, contiguous=True
-        )

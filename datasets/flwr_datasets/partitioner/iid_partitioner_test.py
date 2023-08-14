@@ -15,7 +15,7 @@
 """Partitioner tests."""
 import unittest
 
-from partitioner import IidPartitioner
+from flwr_datasets.partitioner.iid_partitioner import IidPartitioner
 
 from datasets import Dataset
 
