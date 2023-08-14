@@ -14,11 +14,11 @@ dataset:
   mash_batch_size: 800 # 833 training points for each client according to config
 
 model:
-  _target_: FedMix.models.CustomVGG
+  _target_: fedmix.models.CustomVGG
   num_classes: 10
 
 strategy:
-  _target_: FedMix.strategy.FedMix
+  _target_: fedmix.strategy.FedMix
   fraction_fit: 0.000001
   fraction_evaluate: 0.0
   min_fit_clients: ${clients_per_round}
