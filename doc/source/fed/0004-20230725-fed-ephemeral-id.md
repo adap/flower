@@ -3,7 +3,7 @@ fed-number: 0004
 title: FED Ephemeral ID solution
 authors: ["@adap"]
 creation-date: 2023-07-25
-last-updated: 2023-07-28
+last-updated: 2023-08-16
 status: provisional
 ---
 
