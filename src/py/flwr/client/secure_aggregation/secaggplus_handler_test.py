@@ -25,9 +25,10 @@ from .secaggplus_handler import (
     STAGE_COLLECT_MASKED_INPUT,
     STAGE_SETUP,
     STAGE_SHARE_KEYS,
-    STAGE_UNMASKING,
+    STAGE_UNMASK,
     STAGES,
     SecAggPlusHandler,
+    check_named_values,
 )
 
 
@@ -53,21 +54,21 @@ class TestSecAggPlusHandler(unittest.TestCase):
             STAGE_SETUP,
             STAGE_SHARE_KEYS,
             STAGE_COLLECT_MASKED_INPUT,
-            STAGE_UNMASKING,
+            STAGE_UNMASK,
         )
 
-        valid_transitions = set(
-            [
-                # From one stage to the next stage
-                (STAGES[i], STAGES[(i + 1) % len(STAGES)])
-                for i in range(len(STAGES))
-            ]
-            + [
-                # From any stage to the initial stage
-                (stage, STAGES[0])
-                for stage in STAGES
-            ]
-        )
+        valid_transitions = {
+            # From one stage to the next stage
+            (STAGE_UNMASK, STAGE_SETUP),
+            (STAGE_SETUP, STAGE_SHARE_KEYS),
+            (STAGE_SHARE_KEYS, STAGE_COLLECT_MASKED_INPUT),
+            (STAGE_COLLECT_MASKED_INPUT, STAGE_UNMASK),
+            # From any stage to the initial stage
+            # Such transitions will log a warning.
+            (STAGE_SETUP, STAGE_SETUP),
+            (STAGE_SHARE_KEYS, STAGE_SETUP),
+            (STAGE_COLLECT_MASKED_INPUT, STAGE_SETUP),
+        }
 
         invalid_transitions = set(product(STAGES, STAGES)).difference(valid_transitions)
 
@@ -123,10 +124,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
 
         # Test valid `named_values`
         try:
-            # pylint: disable=protected-access
-            handler._current_stage = STAGE_SETUP
-            handler._check_named_values(valid_named_values.copy())
-            # pylint: enable=protected-access
+            check_named_values(STAGE_SETUP, valid_named_values.copy())
         # pylint: disable-next=broad-except
         except Exception as exc:
             self.fail(
@@ -147,14 +145,14 @@ class TestSecAggPlusHandler(unittest.TestCase):
                     continue
                 invalid_named_values[key] = other_value
                 # pylint: disable-next=protected-access
-                handler._current_stage = STAGE_UNMASKING
+                handler._current_stage = STAGE_UNMASK
                 with self.assertRaises(TypeError):
                     handler.handle_secure_aggregation(invalid_named_values.copy())
 
             # Test missing key
             invalid_named_values.pop(key)
             # pylint: disable-next=protected-access
-            handler._current_stage = STAGE_UNMASKING
+            handler._current_stage = STAGE_UNMASK
             with self.assertRaises(KeyError):
                 handler.handle_secure_aggregation(invalid_named_values.copy())
 
@@ -170,10 +168,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
 
         # Test valid `named_values`
         try:
-            # pylint: disable=protected-access
-            handler._current_stage = STAGE_SHARE_KEYS
-            handler._check_named_values(valid_named_values.copy())
-            # pylint: enable=protected-access
+            check_named_values(STAGE_SHARE_KEYS, valid_named_values.copy())
         # pylint: disable-next=broad-except
         except Exception as exc:
             self.fail(
@@ -212,10 +207,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
 
         # Test valid `named_values`
         try:
-            # pylint: disable=protected-access
-            handler._current_stage = STAGE_COLLECT_MASKED_INPUT
-            handler._check_named_values(valid_named_values.copy())
-            # pylint: enable=protected-access
+            check_named_values(STAGE_COLLECT_MASKED_INPUT, valid_named_values.copy())
         # pylint: disable-next=broad-except
         except Exception as exc:
             self.fail(
@@ -249,7 +241,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
             with self.assertRaises(TypeError):
                 handler.handle_secure_aggregation(invalid_named_values)
 
-    def test_stage_unmasking_check(self) -> None:
+    def test_stage_unmask_check(self) -> None:
         """Test content checking for the unmasking stage."""
         handler = EmptyFlowerNumPyClient()
 
@@ -260,10 +252,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
 
         # Test valid `named_values`
         try:
-            # pylint: disable=protected-access
-            handler._current_stage = STAGE_UNMASKING
-            handler._check_named_values(valid_named_values.copy())
-            # pylint: enable=protected-access
+            check_named_values(STAGE_UNMASK, valid_named_values.copy())
         # pylint: disable-next=broad-except
         except Exception as exc:
             self.fail(
@@ -272,7 +261,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
             )
 
         # Set the stage
-        valid_named_values["stage"] = STAGE_UNMASKING
+        valid_named_values["stage"] = STAGE_UNMASK
 
         # Test invalid `named_values`
         # Test missing keys

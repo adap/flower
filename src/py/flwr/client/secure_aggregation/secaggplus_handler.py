@@ -61,7 +61,7 @@ STAGE_SETUP = "setup"
 STAGE_SHARE_KEYS = "share_keys"
 STAGE_COLLECT_MASKED_INPUT = "collect_masked_input"
 STAGE_UNMASK = "unmask"
-STAGES = (STAGE_SETUP, STAGE_SHARE_KEYS, STAGE_COLLECT_MASKED_INPUT, STAGE_UNMASKING)
+STAGES = (STAGE_SETUP, STAGE_SHARE_KEYS, STAGE_COLLECT_MASKED_INPUT, STAGE_UNMASK)
 
 
 @dataclass
@@ -99,7 +99,7 @@ class SecAggPlusHandler(SecureAggregationHandler):
     """Message handler for the SecAgg+ protocol."""
 
     _shared_state = SecAggPlusState()
-    _current_stage = STAGE_UNMASKING
+    _current_stage = STAGE_UNMASK
 
     def handle_secure_aggregation(
         self, named_values: Dict[str, Value]
@@ -117,144 +117,156 @@ class SecAggPlusHandler(SecureAggregationHandler):
         Dict[str, Value]
             The final/intermediate results of the SecAgg+ protocol.
         """
+        # Check if self is a client
         if not isinstance(self, (Client, NumPyClient)):
             raise TypeError(
                 "The subclass of SecAggPlusHandler must be "
                 "the subclass of Client or NumPyClient."
             )
 
-        self._check_stage(named_values)
-        stage = str(named_values.pop("stage"))
-        self._current_stage = stage
+        # Check the validity of the next stage
+        check_stage(self._current_stage, named_values)
 
-        self._check_named_values(named_values)
-        if stage == STAGE_SETUP:
+        # Update the current stage
+        self._current_stage = cast(str, named_values.pop("stage"))
+
+        # Check the validity of the `named_values` based on the current stage
+        check_named_values(self._current_stage, named_values)
+
+        # Execute
+        if self._current_stage == STAGE_SETUP:
             self._shared_state = SecAggPlusState(client=self)
             return _setup(self._shared_state, named_values)
-        if stage == STAGE_SHARE_KEYS:
+        if self._current_stage == STAGE_SHARE_KEYS:
             return _share_keys(self._shared_state, named_values)
-        if stage == STAGE_COLLECT_MASKED_INPUT:
+        if self._current_stage == STAGE_COLLECT_MASKED_INPUT:
             return _collect_masked_input(self._shared_state, named_values)
-        if stage == STAGE_UNMASKING:
-            return _unmasking(self._shared_state, named_values)
-        raise ValueError(f"Unknown secagg stage: {stage}")
+        if self._current_stage == STAGE_UNMASK:
+            return _unmask(self._shared_state, named_values)
+        raise ValueError(f"Unknown secagg stage: {self._current_stage}")
 
-    def _check_stage(self, named_values: Dict[str, Value]) -> None:
-        """Check the validity of the next stage."""
-        # Check the existence of 'stage'
-        if "stage" not in named_values:
-            KeyError(
-                "The required key 'stage' is missing from the input `named_values`."
+
+def check_stage(current_stage: str, named_values: Dict[str, Value]) -> None:
+    """Check the validity of the next stage."""
+    # Check the existence of 'stage'
+    if "stage" not in named_values:
+        raise KeyError(
+            "The required key 'stage' is missing from the input `named_values`."
+        )
+
+    # Check the value type of the 'stage'
+    next_stage = named_values["stage"]
+    if not isinstance(next_stage, str):
+        raise TypeError(
+            f"The value for the key 'stage' must be of type {str}, "
+            f"but got {type(next_stage)} instead."
+        )
+
+    # Check the validity of the next stage
+    if next_stage == STAGE_SETUP:
+        if current_stage != STAGE_UNMASK:
+            log(WARNING, "restart from setup stage")
+    # if stage is not "setup",
+    # the stage from `named_values` should be the expected next stage
+    else:
+        expected_next_stage = STAGES[(STAGES.index(current_stage) + 1) % len(STAGES)]
+        if next_stage != expected_next_stage:
+            raise ValueError(
+                "Abort secure aggregation: "
+                f"expect {expected_next_stage} stage, but receive {next_stage} stage"
             )
 
-        # Check the validity of the next stage
-        stage = str(named_values["stage"])
-        if stage == STAGE_SETUP:
-            if self._current_stage != STAGE_UNMASKING:
-                log(WARNING, "restart from setup stage")
-        # if stage is not "setup",
-        # the stage from `named_values` should be the expected next stage
-        else:
-            expected_next_stage = STAGES[
-                (STAGES.index(self._current_stage) + 1) % len(STAGES)
-            ]
-            if stage != expected_next_stage:
-                raise ValueError(
-                    "Abort secure aggregation: "
-                    f"expect {expected_next_stage} stage, but receive {stage} stage"
-                )
 
-    # pylint: disable-next=too-many-branches
-    def _check_named_values(self, named_values: Dict[str, Value]) -> None:
-        """Check the validity of the input `named_values`."""
-        stage = self._current_stage
-        # Check `named_values` for the setup stage
-        if stage == STAGE_SETUP:
-            key_type_pairs = [
-                ("sample_num", int),
-                ("secure_id", int),
-                ("share_num", int),
-                ("threshold", int),
-                ("clipping_range", float),
-                ("target_range", int),
-                ("mod_range", int),
-            ]
-            for key, expected_type in key_type_pairs:
-                if key not in named_values:
-                    raise KeyError(
-                        f"Stage {STAGE_SETUP}: the required key '{key}' is "
-                        "missing from the input `named_values`."
-                    )
-                # Bool is a subclass of int in Python,
-                # so `isinstance(v, int)` will return True even if v is a boolean.
+# pylint: disable-next=too-many-branches
+def check_named_values(stage: str, named_values: Dict[str, Value]) -> None:
+    """Check the validity of the input `named_values`."""
+    # Check `named_values` for the setup stage
+    if stage == STAGE_SETUP:
+        key_type_pairs = [
+            ("sample_num", int),
+            ("secure_id", int),
+            ("share_num", int),
+            ("threshold", int),
+            ("clipping_range", float),
+            ("target_range", int),
+            ("mod_range", int),
+        ]
+        for key, expected_type in key_type_pairs:
+            if key not in named_values:
+                raise KeyError(
+                    f"Stage {STAGE_SETUP}: the required key '{key}' is "
+                    "missing from the input `named_values`."
+                )
+            # Bool is a subclass of int in Python,
+            # so `isinstance(v, int)` will return True even if v is a boolean.
+            # pylint: disable-next=unidiomatic-typecheck
+            if type(named_values[key]) is not expected_type:
+                raise TypeError(
+                    f"Stage {STAGE_SETUP}: The value for the key '{key}' "
+                    f"must be of type {expected_type}, "
+                    f"but got {type(named_values[key])} instead."
+                )
+    elif stage == STAGE_SHARE_KEYS:
+        for key, value in named_values.items():
+            if (
+                not isinstance(value, list)
+                or len(value) != 2
+                or not isinstance(value[0], bytes)
+                or not isinstance(value[1], bytes)
+            ):
+                raise TypeError(
+                    f"Stage {STAGE_SHARE_KEYS}: "
+                    f"the value for the key '{key}' must be a list of two bytes."
+                )
+    elif stage == STAGE_COLLECT_MASKED_INPUT:
+        key_type_pairs = [
+            ("ciphertexts", bytes),
+            ("srcs", int),
+            ("parameters", bytes),
+        ]
+        for key, expected_type in key_type_pairs:
+            if key not in named_values:
+                raise KeyError(
+                    f"Stage {STAGE_COLLECT_MASKED_INPUT}: "
+                    f"the required key '{key}' is "
+                    "missing from the input `named_values`."
+                )
+            if not isinstance(named_values[key], list) or any(
+                elm
+                for elm in cast(List[Any], named_values[key])
                 # pylint: disable-next=unidiomatic-typecheck
-                if type(named_values[key]) is not expected_type:
-                    raise TypeError(
-                        f"Stage {STAGE_SETUP}: The value for the key '{key}' "
-                        f"must be of type {expected_type}, "
-                        f"but got {type(named_values[key])} instead."
-                    )
-        elif stage == STAGE_SHARE_KEYS:
-            for key, value in named_values.items():
-                if (
-                    not isinstance(value, list)
-                    or len(value) != 2
-                    or not isinstance(value[0], bytes)
-                    or not isinstance(value[1], bytes)
-                ):
-                    raise TypeError(
-                        f"Stage {STAGE_SHARE_KEYS}: "
-                        f"the value for the key '{key}' must be a list of two bytes."
-                    )
-        elif stage == STAGE_COLLECT_MASKED_INPUT:
-            key_type_pairs = [
-                ("ciphertexts", bytes),
-                ("srcs", int),
-                ("parameters", bytes),
-            ]
-            for key, expected_type in key_type_pairs:
-                if key not in named_values:
-                    raise KeyError(
-                        f"Stage {STAGE_COLLECT_MASKED_INPUT}: "
-                        f"the required key '{key}' is "
-                        "missing from the input `named_values`."
-                    )
-                if not isinstance(named_values[key], list) or any(
-                    elm
-                    for elm in cast(List[Any], named_values[key])
-                    # pylint: disable-next=unidiomatic-typecheck
-                    if type(elm) is not expected_type
-                ):
-                    raise TypeError(
-                        f"Stage {STAGE_COLLECT_MASKED_INPUT}: "
-                        f"the value for the key '{key}' "
-                        f"must be of type List[{expected_type.__name__}]"
-                    )
-        elif stage == STAGE_UNMASKING:
-            key_type_pairs = [
-                ("active_sids", int),
-                ("dead_sids", int),
-            ]
-            for key, expected_type in key_type_pairs:
-                if key not in named_values:
-                    raise KeyError(
-                        f"Stage {STAGE_UNMASKING}: "
-                        f"the required key '{key}' is "
-                        "missing from the input `named_values`."
-                    )
-                if not isinstance(named_values[key], list) or any(
-                    elm
-                    for elm in cast(List[Any], named_values[key])
-                    # pylint: disable-next=unidiomatic-typecheck
-                    if type(elm) is not expected_type
-                ):
-                    raise TypeError(
-                        f"Stage {STAGE_UNMASKING}: "
-                        f"the value for the key '{key}' "
-                        f"must be of type List[{expected_type.__name__}]"
-                    )
-        else:
-            raise ValueError(f"Unknown secagg stage: {stage}")
+                if type(elm) is not expected_type
+            ):
+                raise TypeError(
+                    f"Stage {STAGE_COLLECT_MASKED_INPUT}: "
+                    f"the value for the key '{key}' "
+                    f"must be of type List[{expected_type.__name__}]"
+                )
+    elif stage == STAGE_UNMASK:
+        key_type_pairs = [
+            ("active_sids", int),
+            ("dead_sids", int),
+        ]
+        for key, expected_type in key_type_pairs:
+            if key not in named_values:
+                raise KeyError(
+                    f"Stage {STAGE_UNMASK}: "
+                    f"the required key '{key}' is "
+                    "missing from the input `named_values`."
+                )
+            if not isinstance(named_values[key], list) or any(
+                elm
+                for elm in cast(List[Any], named_values[key])
+                # pylint: disable-next=unidiomatic-typecheck
+                if type(elm) is not expected_type
+            ):
+                raise TypeError(
+                    f"Stage {STAGE_UNMASK}: "
+                    f"the value for the key '{key}' "
+                    f"must be of type List[{expected_type.__name__}]"
+                )
+    else:
+        raise ValueError(f"Unknown secagg stage: {stage}")
 
 
 def _setup(state: SecAggPlusState, named_values: Dict[str, Value]) -> Dict[str, Value]:
@@ -432,9 +444,7 @@ def _collect_masked_input(
     }
 
 
-def _unmask(
-    state: SecAggPlusState, named_values: Dict[str, Value]
-) -> Dict[str, Value]:
+def _unmask(state: SecAggPlusState, named_values: Dict[str, Value]) -> Dict[str, Value]:
     log(INFO, "Client %d: starting stage 3...", state.sid)
 
     active_sids = cast(List[int], named_values["active_sids"])
