@@ -30,7 +30,11 @@ from flwr.server.app import ServerConfig, init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
-from flwr.simulation.ray_transport.ray_actor import VirtualClientEngineActorPool, VirtualClientEngineActor, DefaultActor
+from flwr.simulation.ray_transport.ray_actor import (
+    DefaultActor,
+    VirtualClientEngineActor,
+    VirtualClientEngineActorPool,
+)
 from flwr.simulation.ray_transport.ray_client_proxy import RayActorClientProxy
 
 INVALID_ARGUMENTS_START_SIMULATION = """
@@ -74,10 +78,8 @@ def start_simulation(  # pylint: disable=too-many-arguments
     ray_init_args: Optional[Dict[str, Any]] = None,
     keep_initialised: Optional[bool] = False,
     actor_type: Optional[VirtualClientEngineActor] = DefaultActor,
-    actor_kwargs: Optional[Dict[str, Any]] = {},
-    actor_scheduling: Optional[Union[str,
-                                     NodeAffinitySchedulingStrategy]
-                                     ] = "DEFAULT",
+    actor_kwargs: Optional[Dict[str, Any]] = None,
+    actor_scheduling: Optional[Union[str, NodeAffinitySchedulingStrategy]] = "DEFAULT",
 ) -> History:
     """Start a Ray-based Flower simulation server.
 
@@ -139,11 +141,12 @@ def start_simulation(  # pylint: disable=too-many-arguments
         Tensorflow, you should use type `DefaultActor_TF` which will set TF's
         GPU memory growth to True at initialisation (preventing premature OOM).
 
-    actor_kwargs: Optional[Dict[str, Any]] (default: {})
+    actor_kwargs: Optional[Dict[str, Any]] (default: None)
         If you want to create your own Actor classes, you might need to pass
         some input argument. You can use this dictionary for such purpose.
 
-    actor_scheduling: Optional[Union[str, NodeAffinitySchedulingStrategy]] (default: "DEFAULT")
+    actor_scheduling: Optional[Union[str, NodeAffinitySchedulingStrategy]]
+        (default: "DEFAULT")
         Optional string ("DEFAULT" or "SPREAD") for the VCE to choose in which
         node the actor is placed. If you are an advanced user needed more control
         you can use lower-level scheduling strategies to pin actors to specific
@@ -228,13 +231,15 @@ def start_simulation(  # pylint: disable=too-many-arguments
     # TODO: maybe we want `max_restarts` to be user-defined ?
     # `max_restarts` determines how many times an actor that crashes should be restarted
     # after these many restarts, it will be removed from the pool
-    max_restarts = 1 
+    max_restarts = 1
 
-    pool = VirtualClientEngineActorPool(client_resources=client_resources,
-                                        actor_type=actor_type,
-                                        actor_kwargs=actor_kwargs,
-                                        actor_scheduling=actor_scheduling,
-                                        max_restarts=max_restarts)
+    pool = VirtualClientEngineActorPool(
+        client_resources=client_resources,
+        actor_type=actor_type,
+        actor_kwargs=actor_kwargs,
+        actor_scheduling=actor_scheduling,
+        max_restarts=max_restarts,
+    )
 
     log(
         INFO,

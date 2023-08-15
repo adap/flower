@@ -36,13 +36,13 @@ class ClientException(Exception):
 
 
 class VirtualClientEngineActor(ABC):
-    """Abstract base class for VirtualClientEngine Actors"""
+    """Abstract base class for VirtualClientEngine Actors."""
 
     def terminate(self):
         """Manually terminate Actor object."""
         log(WARNING, f"Manually terminating {self.__class__.__name__}")
         ray.actor.exit_actor()
-    
+
     def run(self, job_fn: Callable, cid: str):
         """Run a client workload."""
         # execute tasks and return result
@@ -71,8 +71,9 @@ class DefaultActor(VirtualClientEngineActor):
 @ray.remote
 class DefaultActor_TF(VirtualClientEngineActor):
     """A Ray Actor class that runs TF client workloads.
-    
-    It enables GPU memory growth to prevent premature OOM."""
+
+    It enables GPU memory growth to prevent premature OOM.
+    """
 
     def __init__(self):
         super().__init__()
@@ -82,13 +83,14 @@ class DefaultActor_TF(VirtualClientEngineActor):
         # the same GPU.
         # Luckily we can disable this behaviour by enabling memory growth
         # on the GPU. In this way, VRAM allocated to the processes grows based
-        # on the needs for the workload. (this is for instance the default 
+        # on the needs for the workload. (this is for instance the default
         # behaviour in Pytorch)
         try:
             import tensorflow as tf
+
             # this bit of code follows the guidelines for GPU usage
             # in https://www.tensorflow.org/guide/gpu
-            gpus = tf.config.list_physical_devices('GPU')
+            gpus = tf.config.list_physical_devices("GPU")
             if gpus:
                 try:
                     # Currently, memory growth needs to be the same across GPUs
@@ -100,7 +102,6 @@ class DefaultActor_TF(VirtualClientEngineActor):
         except Exception as e:
             log(ERROR, "Do you have Tensorflow installed?")
             raise e
-
 
 
 def pool_size_from_resources(client_resources: Dict):
@@ -127,8 +128,9 @@ def pool_size_from_resources(client_resources: Dict):
             "does not meet the criteria to host at least one client with resources:"
             f" {client_resources}. Consider lowering your `client_resources`",
         )
-        raise ValueError(f"ActorPool is empty. Stopping Simulation." \
-                         "Check 'client_resources'")
+        raise ValueError(
+            "ActorPool is empty. Stopping Simulation. Check 'client_resources'"
+        )
 
     return num_actors
 
@@ -136,25 +138,29 @@ def pool_size_from_resources(client_resources: Dict):
 class VirtualClientEngineActorPool(ActorPool):
     """A pool of VirtualClientEngine Actors."""
 
-    def __init__(self,
-                 client_resources: Dict[str, Union[int, float]],
-                 actor_type: VirtualClientEngineActor,
-                 actor_kwargs: Dict[str, Any],
-                 actor_scheduling: str, 
-                 max_restarts: int,
-                 ):
+    def __init__(
+        self,
+        client_resources: Dict[str, Union[int, float]],
+        actor_type: VirtualClientEngineActor,
+        actor_kwargs: Dict[str, Any],
+        actor_scheduling: str,
+        max_restarts: int,
+    ):
         self.client_resources = client_resources
         self.actor_type = actor_type
         self.actor_kwargs = actor_kwargs
         self.actor_scheduling = actor_scheduling
         self.actor_max_restarts = max_restarts
         num_actors = pool_size_from_resources(client_resources)
+
+        args = actor_kwargs if actor_kwargs is not None else {}
+
         actors = [
             actor_type.options(
                 **client_resources,
                 scheduling_strategy=actor_scheduling,
-                max_restarts=max_restarts
-            ).remote(**actor_kwargs)
+                max_restarts=max_restarts,
+            ).remote(**args)
             for _ in range(num_actors)
         ]
 
