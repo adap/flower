@@ -15,6 +15,7 @@
 """Constants for the SecAgg/SecAgg+ protocol."""
 
 
+# Names of stages
 STAGE_SETUP = "setup"
 STAGE_SHARE_KEYS = "share_keys"
 STAGE_COLLECT_MASKED_INPUT = "collect_masked_input"
