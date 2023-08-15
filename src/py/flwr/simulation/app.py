@@ -153,6 +153,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
         compute nodes (e.g. via NodeAffinitySchedulingStrategy). Please note this
         is an advanced feature. For all details, please refer to the Ray documentation:
         https://docs.ray.io/en/latest/ray-core/scheduling/index.html
+
     Returns
     -------
     hist : flwr.server.history.History
