@@ -48,6 +48,32 @@ from flwr.common.secure_aggregation.ndarrays_arithmetic import (
     parameters_subtraction,
 )
 from flwr.common.secure_aggregation.quantization import quantize
+from flwr.common.secure_aggregation.secaggplus_constants import (
+    KEY_ACTIVE_SECURE_ID_LIST,
+    KEY_CIPHERTEXT_LIST,
+    KEY_CLIPPING_RANGE,
+    KEY_DEAD_SECURE_ID_LIST,
+    KEY_DESTINATION_LIST,
+    KEY_MASKED_PARAMETERS,
+    KEY_MOD_RANGE,
+    KEY_PARAMETERS,
+    KEY_PUBLIC_KEY_1,
+    KEY_PUBLIC_KEY_2,
+    KEY_SAMPLE_NUMBER,
+    KEY_SECURE_ID,
+    KEY_SECURE_ID_LIST,
+    KEY_SHARE_LIST,
+    KEY_SHARE_NUMBER,
+    KEY_SOURCE_LIST,
+    KEY_STAGE,
+    KEY_TARGET_RANGE,
+    KEY_THRESHOLD,
+    STAGE_COLLECT_MASKED_INPUT,
+    STAGE_SETUP,
+    STAGE_SHARE_KEYS,
+    STAGE_UNMASK,
+    STAGES,
+)
 from flwr.common.secure_aggregation.secaggplus_utils import (
     pseudo_rand_gen,
     share_keys_plaintext_concat,
@@ -56,12 +82,6 @@ from flwr.common.secure_aggregation.secaggplus_utils import (
 from flwr.common.typing import FitIns, Value
 
 from .handler import SecureAggregationHandler
-
-STAGE_SETUP = "setup"
-STAGE_SHARE_KEYS = "share_keys"
-STAGE_COLLECT_MASKED_INPUT = "collect_masked_input"
-STAGE_UNMASK = "unmask"
-STAGES = (STAGE_SETUP, STAGE_SHARE_KEYS, STAGE_COLLECT_MASKED_INPUT, STAGE_UNMASK)
 
 
 @dataclass
@@ -128,7 +148,7 @@ class SecAggPlusHandler(SecureAggregationHandler):
         check_stage(self._current_stage, named_values)
 
         # Update the current stage
-        self._current_stage = cast(str, named_values.pop("stage"))
+        self._current_stage = cast(str, named_values.pop(KEY_STAGE))
 
         # Check the validity of the `named_values` based on the current stage
         check_named_values(self._current_stage, named_values)
@@ -148,24 +168,24 @@ class SecAggPlusHandler(SecureAggregationHandler):
 
 def check_stage(current_stage: str, named_values: Dict[str, Value]) -> None:
     """Check the validity of the next stage."""
-    # Check the existence of 'stage'
-    if "stage" not in named_values:
+    # Check the existence of KEY_STAGE
+    if KEY_STAGE not in named_values:
         raise KeyError(
-            "The required key 'stage' is missing from the input `named_values`."
+            f"The required key {KEY_STAGE} is missing from the input `named_values`."
         )
 
-    # Check the value type of the 'stage'
-    next_stage = named_values["stage"]
+    # Check the value type of the KEY_STAGE
+    next_stage = named_values[KEY_STAGE]
     if not isinstance(next_stage, str):
         raise TypeError(
-            f"The value for the key 'stage' must be of type {str}, "
+            f"The value for the key {KEY_STAGE} must be of type {str}, "
             f"but got {type(next_stage)} instead."
         )
 
     # Check the validity of the next stage
     if next_stage == STAGE_SETUP:
         if current_stage != STAGE_UNMASK:
-            log(WARNING, "restart from setup stage")
+            log(WARNING, "Restart from the setup stage")
     # If stage is not "setup",
     # the stage from `named_values` should be the expected next stage
     else:
@@ -183,13 +203,13 @@ def check_named_values(stage: str, named_values: Dict[str, Value]) -> None:
     # Check `named_values` for the setup stage
     if stage == STAGE_SETUP:
         key_type_pairs = [
-            ("sample_num", int),
-            ("secure_id", int),
-            ("share_num", int),
-            ("threshold", int),
-            ("clipping_range", float),
-            ("target_range", int),
-            ("mod_range", int),
+            (KEY_SAMPLE_NUMBER, int),
+            (KEY_SECURE_ID, int),
+            (KEY_SHARE_NUMBER, int),
+            (KEY_THRESHOLD, int),
+            (KEY_CLIPPING_RANGE, float),
+            (KEY_TARGET_RANGE, int),
+            (KEY_MOD_RANGE, int),
         ]
         for key, expected_type in key_type_pairs:
             if key not in named_values:
@@ -220,9 +240,9 @@ def check_named_values(stage: str, named_values: Dict[str, Value]) -> None:
                 )
     elif stage == STAGE_COLLECT_MASKED_INPUT:
         key_type_pairs = [
-            ("ciphertexts", bytes),
-            ("srcs", int),
-            ("parameters", bytes),
+            (KEY_CIPHERTEXT_LIST, bytes),
+            (KEY_SOURCE_LIST, int),
+            (KEY_PARAMETERS, bytes),
         ]
         for key, expected_type in key_type_pairs:
             if key not in named_values:
@@ -244,8 +264,8 @@ def check_named_values(stage: str, named_values: Dict[str, Value]) -> None:
                 )
     elif stage == STAGE_UNMASK:
         key_type_pairs = [
-            ("active_sids", int),
-            ("dead_sids", int),
+            (KEY_ACTIVE_SECURE_ID_LIST, int),
+            (KEY_DEAD_SECURE_ID_LIST, int),
         ]
         for key, expected_type in key_type_pairs:
             if key not in named_values:
@@ -272,15 +292,15 @@ def check_named_values(stage: str, named_values: Dict[str, Value]) -> None:
 def _setup(state: SecAggPlusState, named_values: Dict[str, Value]) -> Dict[str, Value]:
     # Assigning parameter values to object fields
     sec_agg_param_dict = named_values
-    state.sample_num = cast(int, sec_agg_param_dict["share_num"])
-    state.sid = cast(int, sec_agg_param_dict["secure_id"])
+    state.sample_num = cast(int, sec_agg_param_dict[KEY_SAMPLE_NUMBER])
+    state.sid = cast(int, sec_agg_param_dict[KEY_SECURE_ID])
     log(INFO, "Client %d: starting stage 0...", state.sid)
 
-    state.share_num = cast(int, sec_agg_param_dict["share_num"])
-    state.threshold = cast(int, sec_agg_param_dict["threshold"])
-    state.clipping_range = cast(float, sec_agg_param_dict["clipping_range"])
-    state.target_range = cast(int, sec_agg_param_dict["target_range"])
-    state.mod_range = cast(int, sec_agg_param_dict["mod_range"])
+    state.share_num = cast(int, sec_agg_param_dict[KEY_SHARE_NUMBER])
+    state.threshold = cast(int, sec_agg_param_dict[KEY_THRESHOLD])
+    state.clipping_range = cast(float, sec_agg_param_dict[KEY_CLIPPING_RANGE])
+    state.target_range = cast(int, sec_agg_param_dict[KEY_TARGET_RANGE])
+    state.mod_range = cast(int, sec_agg_param_dict[KEY_MOD_RANGE])
 
     # Dictionaries containing client secure IDs as keys
     # and their respective secret shares as values.
@@ -299,7 +319,7 @@ def _setup(state: SecAggPlusState, named_values: Dict[str, Value]) -> Dict[str, 
     state.sk1, state.pk1 = private_key_to_bytes(sk1), public_key_to_bytes(pk1)
     state.sk2, state.pk2 = private_key_to_bytes(sk2), public_key_to_bytes(pk2)
     log(INFO, "Client %d: stage 0 completes. uploading public keys...", state.sid)
-    return {"pk1": state.pk1, "pk2": state.pk2}
+    return {KEY_PUBLIC_KEY_1: state.pk1, KEY_PUBLIC_KEY_2: state.pk2}
 
 
 # pylint: disable-next=too-many-locals
@@ -361,7 +381,7 @@ def _share_keys(
             ciphertexts.append(ciphertext)
 
     log(INFO, "Client %d: stage 1 completes. uploading key shares...", state.sid)
-    return {"dsts": dsts, "ciphertexts": ciphertexts}
+    return {KEY_DESTINATION_LIST: dsts, KEY_CIPHERTEXT_LIST: ciphertexts}
 
 
 # pylint: disable-next=too-many-locals
@@ -370,8 +390,8 @@ def _collect_masked_input(
 ) -> Dict[str, Value]:
     log(INFO, "Client %d: starting stage 2...", state.sid)
     available_clients: List[int] = []
-    ciphertexts = cast(List[bytes], named_values["ciphertexts"])
-    srcs = cast(List[int], named_values["srcs"])
+    ciphertexts = cast(List[bytes], named_values[KEY_CIPHERTEXT_LIST])
+    srcs = cast(List[int], named_values[KEY_SOURCE_LIST])
     if len(ciphertexts) + 1 < state.threshold:
         raise Exception("Not enough available neighbour clients.")
 
@@ -397,7 +417,7 @@ def _collect_masked_input(
         state.sk1_share_dict[src] = sk1_share
 
     # Fit client
-    parameters_bytes = cast(List[bytes], named_values["parameters"])
+    parameters_bytes = cast(List[bytes], named_values[KEY_PARAMETERS])
     parameters = [bytes_to_ndarray(w) for w in parameters_bytes]
     if isinstance(state.client, Client):
         fit_res = state.client.fit(
@@ -444,15 +464,15 @@ def _collect_masked_input(
     quantized_parameters = parameters_mod(quantized_parameters, state.mod_range)
     log(INFO, "Client %d: stage 2 completes. uploading masked parameters...", state.sid)
     return {
-        "masked_parameters": [ndarray_to_bytes(arr) for arr in quantized_parameters]
+        KEY_MASKED_PARAMETERS: [ndarray_to_bytes(arr) for arr in quantized_parameters]
     }
 
 
 def _unmask(state: SecAggPlusState, named_values: Dict[str, Value]) -> Dict[str, Value]:
     log(INFO, "Client %d: starting stage 3...", state.sid)
 
-    active_sids = cast(List[int], named_values["active_sids"])
-    dead_sids = cast(List[int], named_values["dead_sids"])
+    active_sids = cast(List[int], named_values[KEY_ACTIVE_SECURE_ID_LIST])
+    dead_sids = cast(List[int], named_values[KEY_DEAD_SECURE_ID_LIST])
     # Send private mask seed share for every avaliable client (including itclient)
     # Send first private key share for building pairwise mask for every dropped client
     if len(active_sids) < state.threshold:
@@ -465,4 +485,4 @@ def _unmask(state: SecAggPlusState, named_values: Dict[str, Value]) -> Dict[str,
     shares += [state.sk1_share_dict[sid] for sid in dead_sids]
 
     log(INFO, "Client %d: stage 3 completes. uploading key shares...", state.sid)
-    return {"sids": sids, "shares": shares}
+    return {KEY_SECURE_ID_LIST: sids, KEY_SHARE_LIST: shares}
