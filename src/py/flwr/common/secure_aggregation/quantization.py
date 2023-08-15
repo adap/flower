@@ -36,7 +36,7 @@ def quantize(
     quantized_list = []
     quantizer = target_range / (2 * clipping_range)
     for arr in parameters:
-        # stochastic quantization
+        # Stochastic quantization
         quantized = (
             np.clip(arr, -clipping_range, clipping_range) + clipping_range
         ) * quantizer

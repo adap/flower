@@ -88,7 +88,7 @@ class SecAggPlusState:
 
     rd_seed_share_dict: Dict[int, bytes] = field(default_factory=dict)
     sk1_share_dict: Dict[int, bytes] = field(default_factory=dict)
-    # the dict of the shared secrets from sk2
+    # The dict of the shared secrets from sk2
     ss2_dict: Dict[int, bytes] = field(default_factory=dict)
     public_keys_dict: Dict[int, Tuple[bytes, bytes]] = field(default_factory=dict)
 
@@ -166,7 +166,7 @@ def check_stage(current_stage: str, named_values: Dict[str, Value]) -> None:
     if next_stage == STAGE_SETUP:
         if current_stage != STAGE_UNMASK:
             log(WARNING, "restart from setup stage")
-    # if stage is not "setup",
+    # If stage is not "setup",
     # the stage from `named_values` should be the expected next stage
     else:
         expected_next_stage = STAGES[(STAGES.index(current_stage) + 1) % len(STAGES)]
@@ -282,11 +282,14 @@ def _setup(state: SecAggPlusState, named_values: Dict[str, Value]) -> Dict[str, 
     state.target_range = cast(int, sec_agg_param_dict["target_range"])
     state.mod_range = cast(int, sec_agg_param_dict["mod_range"])
 
-    # key is the secure id of another client (int)
-    # value is the share of that client's secret (bytes)
+    # Dictionaries containing client secure IDs as keys
+    # and their respective secret shares as values.
     state.rd_seed_share_dict = {}
     state.sk1_share_dict = {}
+    # Dictionary containing client secure IDs as keys
+    # and their respective shared secrets (with this client) as values.
     state.ss2_dict = {}
+
     # Create 2 sets private public key pairs
     # One for creating pairwise masks
     # One for encrypting message to distribute shares
@@ -306,14 +309,13 @@ def _share_keys(
     named_bytes_tuples = cast(Dict[str, Tuple[bytes, bytes]], named_values)
     key_dict = {int(sid): (pk1, pk2) for sid, (pk1, pk2) in named_bytes_tuples.items()}
     log(INFO, "Client %d: starting stage 1...", state.sid)
-    # Distribute shares for private mask seed and first private key
-    # share_keys_dict:
     state.public_keys_dict = key_dict
-    # check size is larger than threshold
+
+    # Check if the size is larger than threshold
     if len(state.public_keys_dict) < state.threshold:
         raise Exception("Available neighbours number smaller than threshold")
 
-    # check if all public keys received are unique
+    # Check if all public keys are unique
     pk_list: List[bytes] = []
     for pk1, pk2 in state.public_keys_dict.values():
         pk_list.append(pk1)
@@ -321,7 +323,7 @@ def _share_keys(
     if len(set(pk_list)) != len(pk_list):
         raise Exception("Some public keys are identical")
 
-    # sanity check that own public keys are correct in dict
+    # Check if public keys of this client are correct in the dictionary
     if (
         state.public_keys_dict[state.sid][0] != state.pk1
         or state.public_keys_dict[state.sid][1] != state.pk2
@@ -330,15 +332,16 @@ def _share_keys(
             "Own public keys are displayed in dict incorrectly, should not happen!"
         )
 
-    # Generate private mask seed
+    # Generate the private mask seed
     state.rd_seed = os.urandom(32)
 
-    # Create shares
+    # Create shares for the private mask seed and the first private key
     b_shares = create_shares(state.rd_seed, state.threshold, state.share_num)
     sk1_shares = create_shares(state.sk1, state.threshold, state.share_num)
 
     srcs, dsts, ciphertexts = [], [], []
 
+    # Distribute shares
     for idx, (sid, (_, pk2)) in enumerate(state.public_keys_dict.items()):
         if sid == state.sid:
             state.rd_seed_share_dict[state.sid] = b_shares[idx]
@@ -366,32 +369,34 @@ def _collect_masked_input(
     state: SecAggPlusState, named_values: Dict[str, Value]
 ) -> Dict[str, Value]:
     log(INFO, "Client %d: starting stage 2...", state.sid)
-    # Receive shares and fit model
     available_clients: List[int] = []
     ciphertexts = cast(List[bytes], named_values["ciphertexts"])
     srcs = cast(List[int], named_values["srcs"])
     if len(ciphertexts) + 1 < state.threshold:
-        raise Exception("Available neighbours number smaller than threshold")
+        raise Exception("Not enough available neighbour clients.")
 
-    # decode all packets and verify all packets are valid. Save shares received
+    # Decrypt ciphertexts, verify their sources, and store shares.
     for src, ciphertext in zip(srcs, ciphertexts):
         shared_key = state.ss2_dict[src]
         plaintext = decrypt(shared_key, ciphertext)
-        _src, dst, b_share, sk1_share = share_keys_plaintext_separate(plaintext)
+        actual_src, dst, rd_seed_share, sk1_share = share_keys_plaintext_separate(
+            plaintext
+        )
         available_clients.append(src)
-        if src != _src:
+        if src != actual_src:
             raise ValueError(
-                f"Client {state.sid}: received ciphertext from {_src} instead of {src}"
+                f"Client {state.sid}: received ciphertext "
+                f"from {actual_src} instead of {src}."
             )
         if dst != state.sid:
             ValueError(
                 f"Client {state.sid}: received an encrypted message"
-                f"for Client {dst} from Client {src}"
+                f"for Client {dst} from Client {src}."
             )
-        state.rd_seed_share_dict[src] = b_share
+        state.rd_seed_share_dict[src] = rd_seed_share
         state.sk1_share_dict[src] = sk1_share
 
-    # fit client
+    # Fit client
     parameters_bytes = cast(List[bytes], named_values["parameters"])
     parameters = [bytes_to_ndarray(w) for w in parameters_bytes]
     if isinstance(state.client, Client):
@@ -403,9 +408,9 @@ def _collect_masked_input(
     elif isinstance(state.client, NumPyClient):
         parameters, parameters_factor, _ = state.client.fit(parameters, {})
     else:
-        log(ERROR, "Client %d: fit function is none", state.sid)
+        log(ERROR, "Client %d: fit function is missing.", state.sid)
 
-    # Quantize weight update vector
+    # Quantize parameter update (vector)
     quantized_parameters = quantize(
         parameters, state.clipping_range, state.target_range
     )
@@ -415,12 +420,12 @@ def _collect_masked_input(
 
     dimensions_list: List[Tuple[int, ...]] = [a.shape for a in quantized_parameters]
 
-    # add private mask
+    # Add private mask
     private_mask = pseudo_rand_gen(state.rd_seed, state.mod_range, dimensions_list)
     quantized_parameters = parameters_addition(quantized_parameters, private_mask)
 
     for client_id in available_clients:
-        # add pairwise mask
+        # Add pairwise masks
         shared_key = generate_shared_key(
             bytes_to_private_key(state.sk1),
             bytes_to_public_key(state.public_keys_dict[client_id][0]),
@@ -437,7 +442,6 @@ def _collect_masked_input(
 
     # Take mod of final weight update vector and return to server
     quantized_parameters = parameters_mod(quantized_parameters, state.mod_range)
-    # return ndarrays_to_parameters(quantized_parameters)
     log(INFO, "Client %d: stage 2 completes. uploading masked parameters...", state.sid)
     return {
         "masked_parameters": [ndarray_to_bytes(arr) for arr in quantized_parameters]
