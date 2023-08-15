@@ -140,16 +140,20 @@ class VirtualClientEngineActorPool(ActorPool):
                  client_resources: Dict[str, Union[int, float]],
                  actor_type: VirtualClientEngineActor,
                  actor_kwargs: Dict[str, Any],
+                 actor_scheduling: str, 
                  max_restarts: int,
                  ):
         self.client_resources = client_resources
         self.actor_type = actor_type
         self.actor_kwargs = actor_kwargs
+        self.actor_scheduling = actor_scheduling
         self.actor_max_restarts = max_restarts
         num_actors = pool_size_from_resources(client_resources)
         actors = [
             actor_type.options(
-                **client_resources, max_restarts=max_restarts
+                **client_resources,
+                scheduling_strategy=actor_scheduling,
+                max_restarts=max_restarts
             ).remote(**actor_kwargs)
             for _ in range(num_actors)
         ]
@@ -173,6 +177,7 @@ class VirtualClientEngineActorPool(ActorPool):
             self.client_resources,
             self.actor_type,
             self.actor_kwargs,
+            self.actor_scheduling,
             self.actor_max_restarts,
         )
 

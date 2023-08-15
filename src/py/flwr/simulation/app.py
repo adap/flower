@@ -17,9 +17,10 @@
 
 import sys
 from logging import ERROR, INFO
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import ray
+from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 
 from flwr.client import ClientLike
 from flwr.common import EventType, event
@@ -74,6 +75,9 @@ def start_simulation(  # pylint: disable=too-many-arguments
     keep_initialised: Optional[bool] = False,
     actor_type: Optional[VirtualClientEngineActor] = DefaultActor,
     actor_kwargs: Optional[Dict[str, Any]] = {},
+    actor_scheduling: Optional[Union[str,
+                                     NodeAffinitySchedulingStrategy]
+                                     ] = "DEFAULT",
 ) -> History:
     """Start a Ray-based Flower simulation server.
 
@@ -126,7 +130,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
         arguments from being passed to ray.init.
     keep_initialised: Optional[bool] (default: False)
         Set to True to prevent `ray.shutdown()` in case `ray.is_initialized()=True`.
-    
+
     actor_type: Optional[VirtualClientEngineActor] (default: DefaultActor)
 
         Optionally specify the type of actor to use. The actor object, which
@@ -139,6 +143,13 @@ def start_simulation(  # pylint: disable=too-many-arguments
         If you want to create your own Actor classes, you might need to pass
         some input argument. You can use this dictionary for such purpose.
 
+    actor_scheduling: Optional[Union[str, NodeAffinitySchedulingStrategy]] (default: "DEFAULT")
+        Optional string ("DEFAULT" or "SPREAD") for the VCE to choose in which
+        node the actor is placed. If you are an advanced user needed more control
+        you can use lower-level scheduling strategies to pin actors to specific
+        compute nodes (e.g. via NodeAffinitySchedulingStrategy). Please note this
+        is an advanced feature. For all details, please refer to the Ray documentation:
+        https://docs.ray.io/en/latest/ray-core/scheduling/index.html
     Returns
     -------
     hist : flwr.server.history.History
@@ -219,10 +230,11 @@ def start_simulation(  # pylint: disable=too-many-arguments
     # after these many restarts, it will be removed from the pool
     max_restarts = 1 
 
-    pool = VirtualClientEngineActorPool(client_resources,
-                                        actor_type,
-                                        actor_kwargs,
-                                        max_restarts)
+    pool = VirtualClientEngineActorPool(client_resources=client_resources,
+                                        actor_type=actor_type,
+                                        actor_kwargs=actor_kwargs,
+                                        actor_scheduling=actor_scheduling,
+                                        max_restarts=max_restarts)
 
     log(
         INFO,
