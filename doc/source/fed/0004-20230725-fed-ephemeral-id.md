@@ -20,6 +20,7 @@ status: provisional
 - [Proposal](#proposal)
 - [Performance Analysis](#performance-analysis)
 - [Discussion](#discussion)
+- [Appendix](#appendix)
 
 
 ## Summary
@@ -251,5 +252,98 @@ It is likely that no system can completely eliminate the possibility of privacy 
 
 ## Appendix
 
-### `create_node()`-`delete_node()`-based ephemeral IDs
+### `create_node()`-`delete_node()`-based ephemeral IDs (ad hoc)
+
+#### Introduction
+In the context of FL with SA, maintaining client anonymity is critical in many real-world applications. In this proposal, I aim to introduce an (ad hoc) Ephemeral ID assignment system, designed to provide temporary IDs for anonymous clients participating in SA. This system ensures that clients can be identified for the purpose of SA while preserving their anonymity in the long term.
+
+#### High-level View
+The proposed system introduces an `EphemeralIDHelper` class, responsible for the creation and deletion of ephemeral IDs. The `EphemeralIDHelper` class provides two functions:
+
+1. `EphemeralIDHelper.create()`: Creates an ephemeral ID for the client. It takes parameters for TTL (Time-To-Live) and the maximum number of communication rounds after which the ID should be discarded.
+2. `EphemeralIDHelper.delete()`: Deletes the ephemeral ID assigned to the client. This function can be called any time to delete the ephemeral ID before it expires.
+
+At this point, the `create_node()` and `delete_node()` functions will continue to be used for client registration and unregistration. However, we may want to consider using a separate mechanism to create/delete the ephemeral IDs for the purposes of minimizing the number of extra communication rounds.
+
+Given that the current Flower framework adopts a singleton pattern for the client that ensures only one client runs in one process. Thus, the `EphemeralIDHelper` will be designed to provide static methods.
+
+<!-- Additionally, on the server side, i.e., the `FleetServicer`, we should distinguish between permanent node IDs and ephemeral IDs -->
+
+#### Illustrative Code Example
+
+In `secaggplus_handler.py`,
+``` python
+from flwr.client.ephemeral_id_helper import EphemeralIdHelper
+
+...
+
+class SecAggPlusHandler(SecureAggregationHandler):
+    """Message handler for the SecAgg+ protocol."""
+
+    _shared_state = SecAggPlusState()
+    _current_stage = STAGE_UNMASK
+
+    def handle_secure_aggregation(
+        self, named_values: Dict[str, Value]
+    ) -> Dict[str, Value]:
+        
+        ...
+
+        # Execute
+        if self._current_stage == STAGE_SETUP:
+            self._shared_state = SecAggPlusState(client=self)
+
+            """Add one line here"""
+            EphemeralIdHelper.create(ttl=3600*24, max_rounds=4)
+
+            return _setup(self._shared_state, named_values)
+        if self._current_stage == STAGE_SHARE_KEYS:
+            return _share_keys(self._shared_state, named_values)
+        if self._current_stage == STAGE_COLLECT_MASKED_INPUT:
+            return _collect_masked_input(self._shared_state, named_values)
+        if self._current_stage == STAGE_UNMASK:
+            return _unmask(self._shared_state, named_values)
+        raise ValueError(f"Unknown secagg stage: {self._current_stage}")
+```
+
+In `flwr/client/app.py`
+```python
+from flwr.client.ephemeral_id_helper import eid_state
+
+...
+
+"""No register node by default"""
+
+while True:
+    task_ins = receive()
+    if task_ins is None:
+        time.sleep(3)  # Wait for 3s before asking again
+        continue
+    task_res, sleep_duration, keep_going = handle(client, task_ins)
+    # Check if we need to create an ephemeral ID (we can have simpler code here)
+    if create_node is not None and eid_state.is_waiting_for_create():
+        create_node()
+        eid_state.create()
+
+    send(task_res)
+
+    # Count the number of rounds
+    eid_state.count_round()
+
+    # Check if we need to delete an ephemeral ID (we can have simpler code here)
+    if delete_node is not None and eid_state.is_waiting_for_delete():
+        delete_node()
+        eid_state.delete()
+    if not keep_going:
+        break
+
+# Unregister node
+if delete_node is not None:
+    delete_node()  # pylint: disable=not-callable
+
+...
+```
+
+The above example is only an simple illustration of the proposed system. Both the server-side and the client-side code in `grpc-rere` will need to be adjusted to facilitate anonymous clients and ephemeral IDs. 
+
 
