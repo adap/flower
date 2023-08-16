@@ -229,17 +229,11 @@ def start_simulation(  # pylint: disable=too-many-arguments
     )
 
     # Instantiate ActorPool
-    # TODO: maybe we want `max_restarts` to be user-defined ?
-    # `max_restarts` determines how many times an actor that crashes should be restarted
-    # after these many restarts, it will be removed from the pool
-    max_restarts = 1
-
     pool = VirtualClientEngineActorPool(
         client_resources=client_resources,
         actor_type=actor_type,
         actor_kwargs=actor_kwargs,
         actor_scheduling=actor_scheduling,
-        max_restarts=max_restarts,
     )
 
     log(
@@ -279,9 +273,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
             "not enough for your workload). Use fewer concurrent actors. "
             "\n\t\t - You were running a multi-node simulation and all worker nodes "
             "disconnected. The head node might still be alive but cannot accommodate "
-            f"any actor with resources: {client_resources}."
-            "\n\t\t - Your Actors crashed because of an unknown reason and all their "
-            f"restarts attempts ({max_restarts=}) have been exhausted.",
+            f"any actor with resources: {client_resources}.",
         )
         hist = None
 

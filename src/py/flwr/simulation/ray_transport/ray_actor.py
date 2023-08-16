@@ -19,12 +19,18 @@ import threading
 import traceback
 from abc import ABC
 from logging import ERROR, WARNING
-from typing import Any, Callable, Dict, List, Set, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import ray
 from ray.util.actor_pool import ActorPool
 
+from flwr import common
 from flwr.common.logger import log
+
+# All possible returns by a client
+ClientRes = Union[
+    common.GetPropertiesRes, common.GetParametersRes, common.FitRes, common.EvaluateRes
+]
 
 
 class ClientException(Exception):
@@ -38,14 +44,14 @@ class ClientException(Exception):
 class VirtualClientEngineActor(ABC):
     """Abstract base class for VirtualClientEngine Actors."""
 
-    def terminate(self):
+    def terminate(self) -> None:
         """Manually terminate Actor object."""
         log(WARNING, f"Manually terminating {self.__class__.__name__}")
         ray.actor.exit_actor()
 
-    def run(self, job_fn: Callable, cid: str):
+    def run(self, job_fn: Callable[[], ClientRes], cid: str) -> Tuple[str, Any]:
         """Run a client workload."""
-        # execute tasks and return result
+        # Execute tasks and return result
         # return also cid which is needed to ensure results
         # from the pool are correctly assigned to each ClientProxy
         try:
@@ -75,7 +81,7 @@ class DefaultActor_TF(VirtualClientEngineActor):
     It enables GPU memory growth to prevent premature OOM.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         # By default, TF maps all GPU memory to the process.
         # We don't this behaviour in simulation, since it prevents us
@@ -88,7 +94,7 @@ class DefaultActor_TF(VirtualClientEngineActor):
         try:
             import tensorflow as tf
 
-            # this bit of code follows the guidelines for GPU usage
+            # This bit of code follows the guidelines for GPU usage
             # in https://www.tensorflow.org/guide/gpu
             gpus = tf.config.list_physical_devices("GPU")
             if gpus:
@@ -104,19 +110,19 @@ class DefaultActor_TF(VirtualClientEngineActor):
             raise e
 
 
-def pool_size_from_resources(client_resources: Dict):
+def pool_size_from_resources(client_resources: Dict) -> int:
     """Calculate number of Actors that fit in pool given the resources in the.
 
     cluster and those required per client.
     """
     cluster_resources = ray.cluster_resources()
     num_cpus = cluster_resources["CPU"]
-    num_gpus = cluster_resources.get("GPU", 0)  # there might not be GPU
+    num_gpus = cluster_resources.get("GPU", 0)  # There might not be GPU
     num_actors = int(num_cpus / client_resources["num_cpus"])
-    # if a GPU is present and client resources do require one
+    # If a GPU is present and client resources do require one
     if "num_gpus" in client_resources.keys() and client_resources["num_gpus"] > 0.0:
         if num_gpus:
-            # if there are gpus in the cluster
+            # If there are gpus in the cluster
             num_actors = min(num_actors, int(num_gpus / client_resources["num_gpus"]))
         else:
             num_actors = 0
@@ -144,22 +150,19 @@ class VirtualClientEngineActorPool(ActorPool):
         actor_type: VirtualClientEngineActor,
         actor_kwargs: Dict[str, Any],
         actor_scheduling: str,
-        max_restarts: int,
     ):
         self.client_resources = client_resources
         self.actor_type = actor_type
         self.actor_kwargs = actor_kwargs
         self.actor_scheduling = actor_scheduling
-        self.actor_max_restarts = max_restarts
         num_actors = pool_size_from_resources(client_resources)
 
         args = actor_kwargs if actor_kwargs is not None else {}
 
         actors = [
-            actor_type.options(
+            actor_type.options(  # type: ignore
                 **client_resources,
                 scheduling_strategy=actor_scheduling,
-                max_restarts=max_restarts,
             ).remote(**args)
             for _ in range(num_actors)
         ]
@@ -168,23 +171,19 @@ class VirtualClientEngineActorPool(ActorPool):
 
         # A dict that maps cid to another dict containing: a reference to the remote job
         # and its status (i.e. whether it is ready or not)
-        self._cid_to_future: Dict[str, Dict[str, Any]] = {}
+        self._cid_to_future: Dict[str, Dict[str, Union[bool, Any]]] = {}
         self.actor_to_remove: Set[str] = set()  # a set
         self.num_actors = len(actors)
 
         self.lock = threading.RLock()
 
-        # TODO: asyncio check every N seconds if cluster has grown
-        # --> add more actors to the pool if so
-
-    def __reduce__(self):
+    def __reduce__(self):  # type: ignore
         """Make this class serialisable (needed due to lock)."""
         return VirtualClientEngineActorPool, (
             self.client_resources,
             self.actor_type,
             self.actor_kwargs,
             self.actor_scheduling,
-            self.actor_max_restarts,
         )
 
     def submit(self, fn: Any, job_fn: Callable, cid: str) -> None:
@@ -204,17 +203,19 @@ class VirtualClientEngineActorPool(ActorPool):
         # We need to put this behind a lock since .submit() involves
         # removing and adding elements from a dictionary. Which creates
         # issues in multi-threaded settings
+
         with self.lock:
-            # creating cid to future mapping
+            #TODO: w/ timestamp check, call ray.resources() and add more actors to pool if more resources available
+            # Creating cid to future mapping
             self._reset_cid_to_future_dict(cid)
             if self._idle_actors:
-                # submit job since there is an Actor that's available
+                # Submit job since there is an Actor that's available
                 self.submit(fn, job_fn, cid)
             else:
-                # no actors are available, append to list of jobs to run later
+                # No actors are available, append to list of jobs to run later
                 self._pending_submits.append((fn, job_fn, cid))
 
-    def _flag_future_as_ready(self, cid) -> None:
+    def _flag_future_as_ready(self, cid: str) -> None:
         """Flag future for VirtualClient with cid=cid as ready."""
         self._cid_to_future[cid]["ready"] = True
 
@@ -233,7 +234,7 @@ class VirtualClientEngineActorPool(ActorPool):
         else:
             return self._cid_to_future[cid]["ready"]
 
-    def _fetch_future_result(self, cid: str) -> Any:
+    def _fetch_future_result(self, cid: str) -> ClientRes:
         """Fetch result for VirtualClient from Object Store."""
         try:
             res_cid, res = ray.get(self._cid_to_future[cid]["future"])
@@ -245,12 +246,12 @@ class VirtualClientEngineActorPool(ActorPool):
                 self._flag_actor_for_removal(ex.actor_id)
             raise ex
 
-        # sanity check: was the result fetched generated by a client with cid=cid?
-        assert res_cid != res, log(
+        # Sanity check: was the result fetched generated by a client with cid=cid?
+        assert res_cid == cid, log(
             ERROR, f"The VirtualClient {cid} got result from client {res_cid}"
         )
 
-        # reset mapping
+        # Reset mapping
         self._reset_cid_to_future_dict(cid)
 
         return res
@@ -269,10 +270,10 @@ class VirtualClientEngineActorPool(ActorPool):
         Remove the actor if so.
         """
         with self.lock:
-            actor_id = actor._actor_id.hex()
-            # print(f"{self.actor_to_remove = }")
+            actor_id = actor._actor_id.hex()  # type: ignore
+
             if actor_id in self.actor_to_remove:
-                # the actor should be removed
+                # The actor should be removed
                 self.actor_to_remove.remove(actor_id)
                 self.num_actors -= 1
                 log(WARNING, f"REMOVED actor {actor_id} from pool")
@@ -296,7 +297,7 @@ class VirtualClientEngineActorPool(ActorPool):
                 f" reduced from {self.num_actors} down to {num_actors_updated}. This"
                 " might take several intermediate steps",
             )
-            # we are preventing one actor to be added back in the queue, so we just
+            # We are preventing one actor to be added back in the queue, so we just
             # decrease the number of actors by one. Eventually `self.num_actors`
             # should be equal what pool_size_from_resources(self.resources) returns
             self.num_actors -= 1
@@ -304,9 +305,9 @@ class VirtualClientEngineActorPool(ActorPool):
         else:
             return True
 
-    def process_unordered_future(self, timeout=None) -> None:
+    def process_unordered_future(self, timeout: Optional[float] = None) -> None:
         """Similar to parent's get_next_unordered() but without final ray.get()."""
-        if not self.has_next():
+        if not self.has_next():  # type: ignore
             raise StopIteration("No more results to get")
         res, _ = ray.wait(list(self._future_to_actor), num_returns=1, timeout=timeout)
 
@@ -316,29 +317,29 @@ class VirtualClientEngineActorPool(ActorPool):
             raise TimeoutError("Timed out waiting for result")
 
         with self.lock:
-            # get actor that completed a job
+            # Get actor that completed a job
             _, a, cid = self._future_to_actor.pop(future, (None, None, -1))
             if a is not None:
-                # still space in queue ? (no if a node died)
+                # Still space in queue ? (no if a node died)
                 if self._check_actor_fits_in_pool():
                     if self._check_and_remove_actor_from_pool(a):
-                        self._return_actor(a)
-                    # flag future as ready
+                        self._return_actor(a)  # type: ignore
+                    # Flag future as ready
                     self._flag_future_as_ready(cid)
                 else:
-                    # the actor doesn't fit in the pool anymore.
+                    # The actor doesn't fit in the pool anymore.
                     # Manually terminate the actor
                     a.terminate.remote()
 
-    def get_client_result(self, cid: str, timeout: int = 3600) -> Any:
+    def get_client_result(self, cid: str, timeout: Optional[float]) -> ClientRes:
         """Get result from VirtualClient with specific cid."""
-        # loop until all jobs submitted to the pool are completed. Break early
+        # Loop until all jobs submitted to the pool are completed. Break early
         # if the result for the ClientProxy calling this method is ready
-        while self.has_next() and not (self._is_future_ready(cid)):
+        while self.has_next() and not (self._is_future_ready(cid)):  # type: ignore
             try:
                 self.process_unordered_future(timeout=timeout)
             except StopIteration:
-                # there are no pending jobs in the pool
+                # There are no pending jobs in the pool
                 break
 
         # Fetch result belonging to the VirtualClient calling this method
