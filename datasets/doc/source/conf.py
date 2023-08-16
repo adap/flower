@@ -28,6 +28,7 @@ from sphinx.application import ConfigError
 # Fixing path issue for autodoc
 sys.path.insert(0, os.path.abspath("../../"))
 sys.path.insert(0, os.path.abspath("../../flwr_datasets"))
+sys.path.insert(0, os.path.abspath("../../flwr_datasets/federated_dataset"))
 
 
 # -- Project information -----------------------------------------------------
@@ -49,6 +50,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
+    "sphinx_autodoc_typehints",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinx.ext.graphviz",
@@ -60,6 +62,8 @@ extensions = [
     "sphinx_reredirects",
     "nbsphinx",
 ]
+
+autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -82,7 +86,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 #
 html_theme = "furo"
 html_title = f"Flower Datasets {release}"
-html_logo = "_static/flower-logo.png"
+html_logo = "_static/flower-datasets-logo.png"
 html_favicon = "_static/favicon.ico"
 html_baseurl = "https://flower.dev/docs/datasets/"
 
