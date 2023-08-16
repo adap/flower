@@ -1,2 +1,0 @@
-Contributing to Flower Baselines
-================================
