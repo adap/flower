@@ -81,7 +81,8 @@ class FederatedDataset:
         self._check_if_split_present(split)
         self._check_if_split_possible_to_federate(split)
         partitioner: Partitioner = self._partitioners[split]
-        return partitioner.load_partition(self._dataset[split], idx)
+        self._assign_dataset_if_none(split, self._dataset[split])
+        return partitioner.load_partition(idx)
 
     def load_full(self, split: str) -> Dataset:
         """Load the full split of the dataset.
@@ -131,3 +132,7 @@ class FederatedDataset:
                 f"splits. Partitioners are present for the following splits:"
                 f"'{partitioners_keys}'."
             )
+
+    def _assign_dataset_if_none(self, split: str, dataset: Dataset):
+        self._partitioners[split].dataset = dataset
+
