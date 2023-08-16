@@ -19,7 +19,7 @@ import threading
 import traceback
 from abc import ABC
 from logging import ERROR, WARNING
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union
 
 import ray
 from ray import ObjectRef
@@ -145,7 +145,7 @@ class VirtualClientEngineActorPool(ActorPool):
     def __init__(
         self,
         client_resources: Dict[str, Union[int, float]],
-        actor_type: type[VirtualClientEngineActor],
+        actor_type: Type[VirtualClientEngineActor],
         actor_kwargs: Optional[Dict[str, Any]],
         actor_scheduling: Union[str, NodeAffinitySchedulingStrategy],
         actor_list: Optional[List[VirtualClientEngineActor]] = None,
