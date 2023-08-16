@@ -58,7 +58,15 @@ internal class FlowerGRPC
     }
 }
 
-suspend fun createFlowerService(
+/**
+ * Start a Flower client node which connects to a Flower server.
+ *
+ * @param serverAddress The IPv4 or IPv6 address of the server. If the Flower server runs on the
+ * same machine on port 8080, then server_address would be “[::]:8080”.
+ * @param useTLS Whether to use TLS to connect to the Flower server.
+ * @param client The Flower client implementation.
+ */
+suspend fun startClient(
     serverAddress: String,
     useTLS: Boolean,
     client: Client,
@@ -66,10 +74,7 @@ suspend fun createFlowerService(
     FlowerGRPC(createChannel(serverAddress, useTLS), client)
 }
 
-/**
- * @param address Address of the gRPC server, like "dns:///$host:$port".
- */
-suspend fun createChannel(address: String, useTLS: Boolean = false): ManagedChannel {
+internal suspend fun createChannel(address: String, useTLS: Boolean = false): ManagedChannel {
     val channelBuilder =
         ManagedChannelBuilder.forTarget(address).maxInboundMessageSize(HUNDRED_MEBIBYTE)
     if (!useTLS) {
