@@ -19,20 +19,33 @@ from itertools import product
 from typing import Any, Dict, List, cast
 
 from flwr.client import NumPyClient
-from flwr.common.typing import Value
-
-from .secaggplus_handler import (
+from flwr.common.secure_aggregation.secaggplus_constants import (
+    KEY_ACTIVE_SECURE_ID_LIST,
+    KEY_CIPHERTEXT_LIST,
+    KEY_CLIPPING_RANGE,
+    KEY_DEAD_SECURE_ID_LIST,
+    KEY_MOD_RANGE,
+    KEY_PARAMETERS,
+    KEY_SAMPLE_NUMBER,
+    KEY_SECURE_ID,
+    KEY_SHARE_NUMBER,
+    KEY_SOURCE_LIST,
+    KEY_STAGE,
+    KEY_TARGET_RANGE,
+    KEY_THRESHOLD,
     STAGE_COLLECT_MASKED_INPUT,
     STAGE_SETUP,
     STAGE_SHARE_KEYS,
-    STAGE_UNMASKING,
+    STAGE_UNMASK,
     STAGES,
-    SecAggPlusHandler,
 )
+from flwr.common.typing import Value
+
+from .secaggplus_handler import SecAggPlusHandler, check_named_values
 
 
 class EmptyFlowerNumPyClient(NumPyClient, SecAggPlusHandler):
-    """Empty Numpy client."""
+    """Empty NumPyClient."""
 
 
 class TestSecAggPlusHandler(unittest.TestCase):
@@ -53,21 +66,21 @@ class TestSecAggPlusHandler(unittest.TestCase):
             STAGE_SETUP,
             STAGE_SHARE_KEYS,
             STAGE_COLLECT_MASKED_INPUT,
-            STAGE_UNMASKING,
+            STAGE_UNMASK,
         )
 
-        valid_transitions = set(
-            [
-                # From one stage to the next stage
-                (STAGES[i], STAGES[(i + 1) % len(STAGES)])
-                for i in range(len(STAGES))
-            ]
-            + [
-                # From any stage to the initial stage
-                (stage, STAGES[0])
-                for stage in STAGES
-            ]
-        )
+        valid_transitions = {
+            # From one stage to the next stage
+            (STAGE_UNMASK, STAGE_SETUP),
+            (STAGE_SETUP, STAGE_SHARE_KEYS),
+            (STAGE_SHARE_KEYS, STAGE_COLLECT_MASKED_INPUT),
+            (STAGE_COLLECT_MASKED_INPUT, STAGE_UNMASK),
+            # From any stage to the initial stage
+            # Such transitions will log a warning.
+            (STAGE_SETUP, STAGE_SETUP),
+            (STAGE_SHARE_KEYS, STAGE_SETUP),
+            (STAGE_COLLECT_MASKED_INPUT, STAGE_SETUP),
+        }
 
         invalid_transitions = set(product(STAGES, STAGES)).difference(valid_transitions)
 
@@ -79,7 +92,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
             handler._current_stage = current_stage
 
             with self.assertRaises(KeyError):
-                handler.handle_secure_aggregation({"stage": next_stage})
+                handler.handle_secure_aggregation({KEY_STAGE: next_stage})
             # pylint: disable-next=protected-access
             assert handler._current_stage == next_stage
 
@@ -90,7 +103,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
             handler._current_stage = current_stage
 
             with self.assertRaises(ValueError):
-                handler.handle_secure_aggregation({"stage": next_stage})
+                handler.handle_secure_aggregation({KEY_STAGE: next_stage})
             # pylint: disable-next=protected-access
             assert handler._current_stage == current_stage
 
@@ -99,14 +112,13 @@ class TestSecAggPlusHandler(unittest.TestCase):
         handler = EmptyFlowerNumPyClient()
 
         valid_key_type_pairs = [
-            ("sample_num", int),
-            ("secure_id", int),
-            ("share_num", int),
-            ("threshold", int),
-            ("test_drop", bool),
-            ("clipping_range", float),
-            ("target_range", int),
-            ("mod_range", int),
+            (KEY_SAMPLE_NUMBER, int),
+            (KEY_SECURE_ID, int),
+            (KEY_SHARE_NUMBER, int),
+            (KEY_THRESHOLD, int),
+            (KEY_CLIPPING_RANGE, float),
+            (KEY_TARGET_RANGE, int),
+            (KEY_MOD_RANGE, int),
         ]
 
         type_to_test_value: Dict[type, Value] = {
@@ -124,19 +136,13 @@ class TestSecAggPlusHandler(unittest.TestCase):
 
         # Test valid `named_values`
         try:
-            # pylint: disable=protected-access
-            handler._current_stage = STAGE_SETUP
-            handler._check_named_values(valid_named_values.copy())
-            # pylint: enable=protected-access
+            check_named_values(STAGE_SETUP, valid_named_values.copy())
         # pylint: disable-next=broad-except
         except Exception as exc:
-            self.fail(
-                "SecAggPlusHandler._check_named_values() "
-                f"raised {type(exc)} unexpectedly!"
-            )
+            self.fail(f"check_named_values() raised {type(exc)} unexpectedly!")
 
         # Set the stage
-        valid_named_values["stage"] = STAGE_SETUP
+        valid_named_values[KEY_STAGE] = STAGE_SETUP
 
         # Test invalid `named_values`
         for key, value_type in valid_key_type_pairs:
@@ -148,14 +154,14 @@ class TestSecAggPlusHandler(unittest.TestCase):
                     continue
                 invalid_named_values[key] = other_value
                 # pylint: disable-next=protected-access
-                handler._current_stage = STAGE_UNMASKING
+                handler._current_stage = STAGE_UNMASK
                 with self.assertRaises(TypeError):
                     handler.handle_secure_aggregation(invalid_named_values.copy())
 
             # Test missing key
             invalid_named_values.pop(key)
             # pylint: disable-next=protected-access
-            handler._current_stage = STAGE_UNMASKING
+            handler._current_stage = STAGE_UNMASK
             with self.assertRaises(KeyError):
                 handler.handle_secure_aggregation(invalid_named_values.copy())
 
@@ -171,19 +177,13 @@ class TestSecAggPlusHandler(unittest.TestCase):
 
         # Test valid `named_values`
         try:
-            # pylint: disable=protected-access
-            handler._current_stage = STAGE_SHARE_KEYS
-            handler._check_named_values(valid_named_values.copy())
-            # pylint: enable=protected-access
+            check_named_values(STAGE_SHARE_KEYS, valid_named_values.copy())
         # pylint: disable-next=broad-except
         except Exception as exc:
-            self.fail(
-                "SecAggPlusHandler._check_named_values() "
-                f"raised {type(exc)} unexpectedly!"
-            )
+            self.fail(f"check_named_values() raised {type(exc)} unexpectedly!")
 
         # Set the stage
-        valid_named_values["stage"] = STAGE_SHARE_KEYS
+        valid_named_values[KEY_STAGE] = STAGE_SHARE_KEYS
 
         # Test invalid `named_values`
         invalid_values: List[Value] = [
@@ -206,31 +206,25 @@ class TestSecAggPlusHandler(unittest.TestCase):
         handler = EmptyFlowerNumPyClient()
 
         valid_named_values: Dict[str, Value] = {
-            "ciphertexts": [b"ctxt!", b"ctxt@", b"ctxt#", b"ctxt?"],
-            "srcs": [32, 51324, 32324123, -3],
-            "parameters": [b"params1", b"params2"],
+            KEY_CIPHERTEXT_LIST: [b"ctxt!", b"ctxt@", b"ctxt#", b"ctxt?"],
+            KEY_SOURCE_LIST: [32, 51324, 32324123, -3],
+            KEY_PARAMETERS: [b"params1", b"params2"],
         }
 
         # Test valid `named_values`
         try:
-            # pylint: disable=protected-access
-            handler._current_stage = STAGE_COLLECT_MASKED_INPUT
-            handler._check_named_values(valid_named_values.copy())
-            # pylint: enable=protected-access
+            check_named_values(STAGE_COLLECT_MASKED_INPUT, valid_named_values.copy())
         # pylint: disable-next=broad-except
         except Exception as exc:
-            self.fail(
-                "SecAggPlusHandler._check_named_values() "
-                f"raised {type(exc)} unexpectedly!"
-            )
+            self.fail(f"check_named_values() raised {type(exc)} unexpectedly!")
 
         # Set the stage
-        valid_named_values["stage"] = STAGE_COLLECT_MASKED_INPUT
+        valid_named_values[KEY_STAGE] = STAGE_COLLECT_MASKED_INPUT
 
         # Test invalid `named_values`
         # Test missing keys
         for key in list(valid_named_values.keys()):
-            if key == "stage":
+            if key == KEY_STAGE:
                 continue
             invalid_named_values = valid_named_values.copy()
             invalid_named_values.pop(key)
@@ -241,7 +235,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
 
         # Test wrong value type for the key
         for key in valid_named_values:
-            if key == "stage":
+            if key == KEY_STAGE:
                 continue
             invalid_named_values = valid_named_values.copy()
             cast(List[Any], invalid_named_values[key]).append(3.1415926)
@@ -250,35 +244,29 @@ class TestSecAggPlusHandler(unittest.TestCase):
             with self.assertRaises(TypeError):
                 handler.handle_secure_aggregation(invalid_named_values)
 
-    def test_stage_unmasking_check(self) -> None:
+    def test_stage_unmask_check(self) -> None:
         """Test content checking for the unmasking stage."""
         handler = EmptyFlowerNumPyClient()
 
         valid_named_values: Dict[str, Value] = {
-            "active_sids": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            "dead_sids": [32, 51324, 32324123, -3],
+            KEY_ACTIVE_SECURE_ID_LIST: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            KEY_DEAD_SECURE_ID_LIST: [32, 51324, 32324123, -3],
         }
 
         # Test valid `named_values`
         try:
-            # pylint: disable=protected-access
-            handler._current_stage = STAGE_UNMASKING
-            handler._check_named_values(valid_named_values.copy())
-            # pylint: enable=protected-access
+            check_named_values(STAGE_UNMASK, valid_named_values.copy())
         # pylint: disable-next=broad-except
         except Exception as exc:
-            self.fail(
-                "SecAggPlusHandler._check_named_values() "
-                f"raised {type(exc)} unexpectedly!"
-            )
+            self.fail(f"check_named_values() raised {type(exc)} unexpectedly!")
 
         # Set the stage
-        valid_named_values["stage"] = STAGE_UNMASKING
+        valid_named_values[KEY_STAGE] = STAGE_UNMASK
 
         # Test invalid `named_values`
         # Test missing keys
         for key in list(valid_named_values.keys()):
-            if key == "stage":
+            if key == KEY_STAGE:
                 continue
             invalid_named_values = valid_named_values.copy()
             invalid_named_values.pop(key)
@@ -289,7 +277,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
 
         # Test wrong value type for the key
         for key in valid_named_values:
-            if key == "stage":
+            if key == KEY_STAGE:
                 continue
             invalid_named_values = valid_named_values.copy()
             cast(List[Any], invalid_named_values[key]).append(True)

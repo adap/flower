@@ -48,6 +48,32 @@ from flwr.common.secure_aggregation.ndarrays_arithmetic import (
     parameters_subtraction,
 )
 from flwr.common.secure_aggregation.quantization import quantize
+from flwr.common.secure_aggregation.secaggplus_constants import (
+    KEY_ACTIVE_SECURE_ID_LIST,
+    KEY_CIPHERTEXT_LIST,
+    KEY_CLIPPING_RANGE,
+    KEY_DEAD_SECURE_ID_LIST,
+    KEY_DESTINATION_LIST,
+    KEY_MASKED_PARAMETERS,
+    KEY_MOD_RANGE,
+    KEY_PARAMETERS,
+    KEY_PUBLIC_KEY_1,
+    KEY_PUBLIC_KEY_2,
+    KEY_SAMPLE_NUMBER,
+    KEY_SECURE_ID,
+    KEY_SECURE_ID_LIST,
+    KEY_SHARE_LIST,
+    KEY_SHARE_NUMBER,
+    KEY_SOURCE_LIST,
+    KEY_STAGE,
+    KEY_TARGET_RANGE,
+    KEY_THRESHOLD,
+    STAGE_COLLECT_MASKED_INPUT,
+    STAGE_SETUP,
+    STAGE_SHARE_KEYS,
+    STAGE_UNMASK,
+    STAGES,
+)
 from flwr.common.secure_aggregation.secaggplus_utils import (
     pseudo_rand_gen,
     share_keys_plaintext_concat,
@@ -56,12 +82,6 @@ from flwr.common.secure_aggregation.secaggplus_utils import (
 from flwr.common.typing import FitIns, Value
 
 from .handler import SecureAggregationHandler
-
-STAGE_SETUP = "setup"
-STAGE_SHARE_KEYS = "share keys"
-STAGE_COLLECT_MASKED_INPUT = "collect masked input"
-STAGE_UNMASKING = "unmasking"
-STAGES = (STAGE_SETUP, STAGE_SHARE_KEYS, STAGE_COLLECT_MASKED_INPUT, STAGE_UNMASKING)
 
 
 @dataclass
@@ -73,22 +93,22 @@ class SecAggPlusState:
     sample_num: int = 0
     share_num: int = 0
     threshold: int = 0
-    test_drop: bool = False
     clipping_range: float = 0.0
     target_range: int = 0
     mod_range: int = 0
 
-    # sk, pk stand for secret key, public key
+    # Secret key (sk) and public key (pk)
     sk1: bytes = b""
     pk1: bytes = b""
     sk2: bytes = b""
     pk2: bytes = b""
-    # random seed for generating the private mask
+
+    # Random seed for generating the private mask
     rd_seed: bytes = b""
 
     rd_seed_share_dict: Dict[int, bytes] = field(default_factory=dict)
     sk1_share_dict: Dict[int, bytes] = field(default_factory=dict)
-    # the dict of the shared secrets from sk2
+    # The dict of the shared secrets from sk2
     ss2_dict: Dict[int, bytes] = field(default_factory=dict)
     public_keys_dict: Dict[int, Tuple[bytes, bytes]] = field(default_factory=dict)
 
@@ -99,7 +119,7 @@ class SecAggPlusHandler(SecureAggregationHandler):
     """Message handler for the SecAgg+ protocol."""
 
     _shared_state = SecAggPlusState()
-    _current_stage = STAGE_UNMASKING
+    _current_stage = STAGE_UNMASK
 
     def handle_secure_aggregation(
         self, named_values: Dict[str, Value]
@@ -117,166 +137,179 @@ class SecAggPlusHandler(SecureAggregationHandler):
         Dict[str, Value]
             The final/intermediate results of the SecAgg+ protocol.
         """
+        # Check if self is a client
         if not isinstance(self, (Client, NumPyClient)):
             raise TypeError(
                 "The subclass of SecAggPlusHandler must be "
                 "the subclass of Client or NumPyClient."
             )
 
-        self._check_stage(named_values)
-        stage = str(named_values.pop("stage"))
-        self._current_stage = stage
+        # Check the validity of the next stage
+        check_stage(self._current_stage, named_values)
 
-        self._check_named_values(named_values)
-        if stage == STAGE_SETUP:
+        # Update the current stage
+        self._current_stage = cast(str, named_values.pop(KEY_STAGE))
+
+        # Check the validity of the `named_values` based on the current stage
+        check_named_values(self._current_stage, named_values)
+
+        # Execute
+        if self._current_stage == STAGE_SETUP:
             self._shared_state = SecAggPlusState(client=self)
             return _setup(self._shared_state, named_values)
-        if stage == STAGE_SHARE_KEYS:
+        if self._current_stage == STAGE_SHARE_KEYS:
             return _share_keys(self._shared_state, named_values)
-        if stage == STAGE_COLLECT_MASKED_INPUT:
+        if self._current_stage == STAGE_COLLECT_MASKED_INPUT:
             return _collect_masked_input(self._shared_state, named_values)
-        if stage == STAGE_UNMASKING:
-            return _unmasking(self._shared_state, named_values)
-        raise ValueError(f"Unknown secagg stage: {stage}")
+        if self._current_stage == STAGE_UNMASK:
+            return _unmask(self._shared_state, named_values)
+        raise ValueError(f"Unknown secagg stage: {self._current_stage}")
 
-    def _check_stage(self, named_values: Dict[str, Value]) -> None:
-        """Check the validity of the next stage."""
-        # Check the existence of 'stage'
-        if "stage" not in named_values:
-            KeyError(
-                "The required key 'stage' is missing from the input `named_values`."
+
+def check_stage(current_stage: str, named_values: Dict[str, Value]) -> None:
+    """Check the validity of the next stage."""
+    # Check the existence of KEY_STAGE
+    if KEY_STAGE not in named_values:
+        raise KeyError(
+            f"The required key '{KEY_STAGE}' is missing from the input `named_values`."
+        )
+
+    # Check the value type of the KEY_STAGE
+    next_stage = named_values[KEY_STAGE]
+    if not isinstance(next_stage, str):
+        raise TypeError(
+            f"The value for the key '{KEY_STAGE}' must be of type {str}, "
+            f"but got {type(next_stage)} instead."
+        )
+
+    # Check the validity of the next stage
+    if next_stage == STAGE_SETUP:
+        if current_stage != STAGE_UNMASK:
+            log(WARNING, "Restart from the setup stage")
+    # If stage is not "setup",
+    # the stage from `named_values` should be the expected next stage
+    else:
+        expected_next_stage = STAGES[(STAGES.index(current_stage) + 1) % len(STAGES)]
+        if next_stage != expected_next_stage:
+            raise ValueError(
+                "Abort secure aggregation: "
+                f"expect {expected_next_stage} stage, but receive {next_stage} stage"
             )
 
-        # Check the validity of the next stage
-        stage = str(named_values["stage"])
-        if stage == STAGE_SETUP:
-            if self._current_stage != STAGE_UNMASKING:
-                log(WARNING, "restart from setup stage")
-        # if stage is not "setup",
-        # the stage from `named_values` should be the expected next stage
-        else:
-            expected_next_stage = STAGES[
-                (STAGES.index(self._current_stage) + 1) % len(STAGES)
-            ]
-            if stage != expected_next_stage:
-                raise ValueError(
-                    "Abort secure aggregation: "
-                    f"expect {expected_next_stage} stage, but receive {stage} stage"
-                )
 
-    # pylint: disable-next=too-many-branches
-    def _check_named_values(self, named_values: Dict[str, Value]) -> None:
-        """Check the validity of the input `named_values`."""
-        stage = self._current_stage
-        # Check `named_values` for the setup stage
-        if stage == STAGE_SETUP:
-            key_type_pairs = [
-                ("sample_num", int),
-                ("secure_id", int),
-                ("share_num", int),
-                ("threshold", int),
-                ("test_drop", bool),
-                ("clipping_range", float),
-                ("target_range", int),
-                ("mod_range", int),
-            ]
-            for key, expected_type in key_type_pairs:
-                if key not in named_values:
-                    raise KeyError(
-                        f"Stage {STAGE_SETUP}: the required key '{key}' is "
-                        "missing from the input `named_values`."
-                    )
-                # Bool is a subclass of int in Python,
-                # so `isinstance(v, int)` will return True even if v is a boolean.
+# pylint: disable-next=too-many-branches
+def check_named_values(stage: str, named_values: Dict[str, Value]) -> None:
+    """Check the validity of the input `named_values`."""
+    # Check `named_values` for the setup stage
+    if stage == STAGE_SETUP:
+        key_type_pairs = [
+            (KEY_SAMPLE_NUMBER, int),
+            (KEY_SECURE_ID, int),
+            (KEY_SHARE_NUMBER, int),
+            (KEY_THRESHOLD, int),
+            (KEY_CLIPPING_RANGE, float),
+            (KEY_TARGET_RANGE, int),
+            (KEY_MOD_RANGE, int),
+        ]
+        for key, expected_type in key_type_pairs:
+            if key not in named_values:
+                raise KeyError(
+                    f"Stage {STAGE_SETUP}: the required key '{key}' is "
+                    "missing from the input `named_values`."
+                )
+            # Bool is a subclass of int in Python,
+            # so `isinstance(v, int)` will return True even if v is a boolean.
+            # pylint: disable-next=unidiomatic-typecheck
+            if type(named_values[key]) is not expected_type:
+                raise TypeError(
+                    f"Stage {STAGE_SETUP}: The value for the key '{key}' "
+                    f"must be of type {expected_type}, "
+                    f"but got {type(named_values[key])} instead."
+                )
+    elif stage == STAGE_SHARE_KEYS:
+        for key, value in named_values.items():
+            if (
+                not isinstance(value, list)
+                or len(value) != 2
+                or not isinstance(value[0], bytes)
+                or not isinstance(value[1], bytes)
+            ):
+                raise TypeError(
+                    f"Stage {STAGE_SHARE_KEYS}: "
+                    f"the value for the key '{key}' must be a list of two bytes."
+                )
+    elif stage == STAGE_COLLECT_MASKED_INPUT:
+        key_type_pairs = [
+            (KEY_CIPHERTEXT_LIST, bytes),
+            (KEY_SOURCE_LIST, int),
+            (KEY_PARAMETERS, bytes),
+        ]
+        for key, expected_type in key_type_pairs:
+            if key not in named_values:
+                raise KeyError(
+                    f"Stage {STAGE_COLLECT_MASKED_INPUT}: "
+                    f"the required key '{key}' is "
+                    "missing from the input `named_values`."
+                )
+            if not isinstance(named_values[key], list) or any(
+                elm
+                for elm in cast(List[Any], named_values[key])
                 # pylint: disable-next=unidiomatic-typecheck
-                if type(named_values[key]) is not expected_type:
-                    raise TypeError(
-                        f"Stage {STAGE_SETUP}: The value for the key '{key}' "
-                        f"must be of type {expected_type}, "
-                        f"but got {type(named_values[key])} instead."
-                    )
-        elif stage == STAGE_SHARE_KEYS:
-            for key, value in named_values.items():
-                if (
-                    not isinstance(value, list)
-                    or len(value) != 2
-                    or not isinstance(value[0], bytes)
-                    or not isinstance(value[1], bytes)
-                ):
-                    raise TypeError(
-                        f"Stage {STAGE_SHARE_KEYS}: "
-                        f"the value for the key '{key}' must be a list of two bytes."
-                    )
-        elif stage == STAGE_COLLECT_MASKED_INPUT:
-            key_type_pairs = [
-                ("ciphertexts", bytes),
-                ("srcs", int),
-                ("parameters", bytes),
-            ]
-            for key, expected_type in key_type_pairs:
-                if key not in named_values:
-                    raise KeyError(
-                        f"Stage {STAGE_COLLECT_MASKED_INPUT}: "
-                        f"the required key '{key}' is "
-                        "missing from the input `named_values`."
-                    )
-                if not isinstance(named_values[key], list) or any(
-                    elm
-                    for elm in cast(List[Any], named_values[key])
-                    # pylint: disable-next=unidiomatic-typecheck
-                    if type(elm) is not expected_type
-                ):
-                    raise TypeError(
-                        f"Stage {STAGE_COLLECT_MASKED_INPUT}: "
-                        f"the value for the key '{key}' "
-                        f"must be of type List[{expected_type.__name__}]"
-                    )
-        elif stage == STAGE_UNMASKING:
-            key_type_pairs = [
-                ("active_sids", int),
-                ("dead_sids", int),
-            ]
-            for key, expected_type in key_type_pairs:
-                if key not in named_values:
-                    raise KeyError(
-                        f"Stage {STAGE_UNMASKING}: "
-                        f"the required key '{key}' is "
-                        "missing from the input `named_values`."
-                    )
-                if not isinstance(named_values[key], list) or any(
-                    elm
-                    for elm in cast(List[Any], named_values[key])
-                    # pylint: disable-next=unidiomatic-typecheck
-                    if type(elm) is not expected_type
-                ):
-                    raise TypeError(
-                        f"Stage {STAGE_UNMASKING}: "
-                        f"the value for the key '{key}' "
-                        f"must be of type List[{expected_type.__name__}]"
-                    )
-        else:
-            raise ValueError(f"Unknown secagg stage: {stage}")
+                if type(elm) is not expected_type
+            ):
+                raise TypeError(
+                    f"Stage {STAGE_COLLECT_MASKED_INPUT}: "
+                    f"the value for the key '{key}' "
+                    f"must be of type List[{expected_type.__name__}]"
+                )
+    elif stage == STAGE_UNMASK:
+        key_type_pairs = [
+            (KEY_ACTIVE_SECURE_ID_LIST, int),
+            (KEY_DEAD_SECURE_ID_LIST, int),
+        ]
+        for key, expected_type in key_type_pairs:
+            if key not in named_values:
+                raise KeyError(
+                    f"Stage {STAGE_UNMASK}: "
+                    f"the required key '{key}' is "
+                    "missing from the input `named_values`."
+                )
+            if not isinstance(named_values[key], list) or any(
+                elm
+                for elm in cast(List[Any], named_values[key])
+                # pylint: disable-next=unidiomatic-typecheck
+                if type(elm) is not expected_type
+            ):
+                raise TypeError(
+                    f"Stage {STAGE_UNMASK}: "
+                    f"the value for the key '{key}' "
+                    f"must be of type List[{expected_type.__name__}]"
+                )
+    else:
+        raise ValueError(f"Unknown secagg stage: {stage}")
 
 
 def _setup(state: SecAggPlusState, named_values: Dict[str, Value]) -> Dict[str, Value]:
     # Assigning parameter values to object fields
     sec_agg_param_dict = named_values
-    state.sample_num = cast(int, sec_agg_param_dict["share_num"])
-    state.sid = cast(int, sec_agg_param_dict["secure_id"])
+    state.sample_num = cast(int, sec_agg_param_dict[KEY_SAMPLE_NUMBER])
+    state.sid = cast(int, sec_agg_param_dict[KEY_SECURE_ID])
     log(INFO, "Client %d: starting stage 0...", state.sid)
 
-    state.share_num = cast(int, sec_agg_param_dict["share_num"])
-    state.threshold = cast(int, sec_agg_param_dict["threshold"])
-    state.test_drop = cast(bool, sec_agg_param_dict["test_drop"])
-    state.clipping_range = cast(float, sec_agg_param_dict["clipping_range"])
-    state.target_range = cast(int, sec_agg_param_dict["target_range"])
-    state.mod_range = cast(int, sec_agg_param_dict["mod_range"])
+    state.share_num = cast(int, sec_agg_param_dict[KEY_SHARE_NUMBER])
+    state.threshold = cast(int, sec_agg_param_dict[KEY_THRESHOLD])
+    state.clipping_range = cast(float, sec_agg_param_dict[KEY_CLIPPING_RANGE])
+    state.target_range = cast(int, sec_agg_param_dict[KEY_TARGET_RANGE])
+    state.mod_range = cast(int, sec_agg_param_dict[KEY_MOD_RANGE])
 
-    # key is the secure id of another client (int)
-    # value is the share of that client's secret (bytes)
+    # Dictionaries containing client secure IDs as keys
+    # and their respective secret shares as values.
     state.rd_seed_share_dict = {}
     state.sk1_share_dict = {}
+    # Dictionary containing client secure IDs as keys
+    # and their respective shared secrets (with this client) as values.
     state.ss2_dict = {}
+
     # Create 2 sets private public key pairs
     # One for creating pairwise masks
     # One for encrypting message to distribute shares
@@ -286,7 +319,7 @@ def _setup(state: SecAggPlusState, named_values: Dict[str, Value]) -> Dict[str, 
     state.sk1, state.pk1 = private_key_to_bytes(sk1), public_key_to_bytes(pk1)
     state.sk2, state.pk2 = private_key_to_bytes(sk2), public_key_to_bytes(pk2)
     log(INFO, "Client %d: stage 0 completes. uploading public keys...", state.sid)
-    return {"pk1": state.pk1, "pk2": state.pk2}
+    return {KEY_PUBLIC_KEY_1: state.pk1, KEY_PUBLIC_KEY_2: state.pk2}
 
 
 # pylint: disable-next=too-many-locals
@@ -296,14 +329,13 @@ def _share_keys(
     named_bytes_tuples = cast(Dict[str, Tuple[bytes, bytes]], named_values)
     key_dict = {int(sid): (pk1, pk2) for sid, (pk1, pk2) in named_bytes_tuples.items()}
     log(INFO, "Client %d: starting stage 1...", state.sid)
-    # Distribute shares for private mask seed and first private key
-    # share_keys_dict:
     state.public_keys_dict = key_dict
-    # check size is larger than threshold
+
+    # Check if the size is larger than threshold
     if len(state.public_keys_dict) < state.threshold:
         raise Exception("Available neighbours number smaller than threshold")
 
-    # check if all public keys received are unique
+    # Check if all public keys are unique
     pk_list: List[bytes] = []
     for pk1, pk2 in state.public_keys_dict.values():
         pk_list.append(pk1)
@@ -311,7 +343,7 @@ def _share_keys(
     if len(set(pk_list)) != len(pk_list):
         raise Exception("Some public keys are identical")
 
-    # sanity check that own public keys are correct in dict
+    # Check if public keys of this client are correct in the dictionary
     if (
         state.public_keys_dict[state.sid][0] != state.pk1
         or state.public_keys_dict[state.sid][1] != state.pk2
@@ -320,15 +352,16 @@ def _share_keys(
             "Own public keys are displayed in dict incorrectly, should not happen!"
         )
 
-    # Generate private mask seed
+    # Generate the private mask seed
     state.rd_seed = os.urandom(32)
 
-    # Create shares
+    # Create shares for the private mask seed and the first private key
     b_shares = create_shares(state.rd_seed, state.threshold, state.share_num)
     sk1_shares = create_shares(state.sk1, state.threshold, state.share_num)
 
     srcs, dsts, ciphertexts = [], [], []
 
+    # Distribute shares
     for idx, (sid, (_, pk2)) in enumerate(state.public_keys_dict.items()):
         if sid == state.sid:
             state.rd_seed_share_dict[state.sid] = b_shares[idx]
@@ -348,7 +381,7 @@ def _share_keys(
             ciphertexts.append(ciphertext)
 
     log(INFO, "Client %d: stage 1 completes. uploading key shares...", state.sid)
-    return {"dsts": dsts, "ciphertexts": ciphertexts}
+    return {KEY_DESTINATION_LIST: dsts, KEY_CIPHERTEXT_LIST: ciphertexts}
 
 
 # pylint: disable-next=too-many-locals
@@ -356,33 +389,35 @@ def _collect_masked_input(
     state: SecAggPlusState, named_values: Dict[str, Value]
 ) -> Dict[str, Value]:
     log(INFO, "Client %d: starting stage 2...", state.sid)
-    # Receive shares and fit model
     available_clients: List[int] = []
-    ciphertexts = cast(List[bytes], named_values["ciphertexts"])
-    srcs = cast(List[int], named_values["srcs"])
+    ciphertexts = cast(List[bytes], named_values[KEY_CIPHERTEXT_LIST])
+    srcs = cast(List[int], named_values[KEY_SOURCE_LIST])
     if len(ciphertexts) + 1 < state.threshold:
-        raise Exception("Available neighbours number smaller than threshold")
+        raise Exception("Not enough available neighbour clients.")
 
-    # decode all packets and verify all packets are valid. Save shares received
+    # Decrypt ciphertexts, verify their sources, and store shares.
     for src, ciphertext in zip(srcs, ciphertexts):
         shared_key = state.ss2_dict[src]
         plaintext = decrypt(shared_key, ciphertext)
-        _src, dst, b_share, sk1_share = share_keys_plaintext_separate(plaintext)
+        actual_src, dst, rd_seed_share, sk1_share = share_keys_plaintext_separate(
+            plaintext
+        )
         available_clients.append(src)
-        if src != _src:
+        if src != actual_src:
             raise ValueError(
-                f"Client {state.sid}: received ciphertext from {_src} instead of {src}"
+                f"Client {state.sid}: received ciphertext "
+                f"from {actual_src} instead of {src}."
             )
         if dst != state.sid:
             ValueError(
                 f"Client {state.sid}: received an encrypted message"
-                f"for Client {dst} from Client {src}"
+                f"for Client {dst} from Client {src}."
             )
-        state.rd_seed_share_dict[src] = b_share
+        state.rd_seed_share_dict[src] = rd_seed_share
         state.sk1_share_dict[src] = sk1_share
 
-    # fit client
-    parameters_bytes = cast(List[bytes], named_values["parameters"])
+    # Fit client
+    parameters_bytes = cast(List[bytes], named_values[KEY_PARAMETERS])
     parameters = [bytes_to_ndarray(w) for w in parameters_bytes]
     if isinstance(state.client, Client):
         fit_res = state.client.fit(
@@ -393,9 +428,9 @@ def _collect_masked_input(
     elif isinstance(state.client, NumPyClient):
         parameters, parameters_factor, _ = state.client.fit(parameters, {})
     else:
-        log(ERROR, "Client %d: fit function is none", state.sid)
+        log(ERROR, "Client %d: fit function is missing.", state.sid)
 
-    # Quantize weight update vector
+    # Quantize parameter update (vector)
     quantized_parameters = quantize(
         parameters, state.clipping_range, state.target_range
     )
@@ -405,12 +440,12 @@ def _collect_masked_input(
 
     dimensions_list: List[Tuple[int, ...]] = [a.shape for a in quantized_parameters]
 
-    # add private mask
+    # Add private mask
     private_mask = pseudo_rand_gen(state.rd_seed, state.mod_range, dimensions_list)
     quantized_parameters = parameters_addition(quantized_parameters, private_mask)
 
     for client_id in available_clients:
-        # add pairwise mask
+        # Add pairwise masks
         shared_key = generate_shared_key(
             bytes_to_private_key(state.sk1),
             bytes_to_public_key(state.public_keys_dict[client_id][0]),
@@ -427,20 +462,17 @@ def _collect_masked_input(
 
     # Take mod of final weight update vector and return to server
     quantized_parameters = parameters_mod(quantized_parameters, state.mod_range)
-    # return ndarrays_to_parameters(quantized_parameters)
     log(INFO, "Client %d: stage 2 completes. uploading masked parameters...", state.sid)
     return {
-        "masked_parameters": [ndarray_to_bytes(arr) for arr in quantized_parameters]
+        KEY_MASKED_PARAMETERS: [ndarray_to_bytes(arr) for arr in quantized_parameters]
     }
 
 
-def _unmasking(
-    state: SecAggPlusState, named_values: Dict[str, Value]
-) -> Dict[str, Value]:
+def _unmask(state: SecAggPlusState, named_values: Dict[str, Value]) -> Dict[str, Value]:
     log(INFO, "Client %d: starting stage 3...", state.sid)
 
-    active_sids = cast(List[int], named_values["active_sids"])
-    dead_sids = cast(List[int], named_values["dead_sids"])
+    active_sids = cast(List[int], named_values[KEY_ACTIVE_SECURE_ID_LIST])
+    dead_sids = cast(List[int], named_values[KEY_DEAD_SECURE_ID_LIST])
     # Send private mask seed share for every avaliable client (including itclient)
     # Send first private key share for building pairwise mask for every dropped client
     if len(active_sids) < state.threshold:
@@ -453,4 +485,4 @@ def _unmasking(
     shares += [state.sk1_share_dict[sid] for sid in dead_sids]
 
     log(INFO, "Client %d: stage 3 completes. uploading key shares...", state.sid)
-    return {"sids": sids, "shares": shares}
+    return {KEY_SECURE_ID_LIST: sids, KEY_SHARE_LIST: shares}
