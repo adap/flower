@@ -23,6 +23,7 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import ray
 from ray.util.actor_pool import ActorPool
+from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 
 from flwr import common
 from flwr.common.logger import log
@@ -74,42 +75,6 @@ class DefaultActor(VirtualClientEngineActor):
     """A Ray Actor class that runs client workloads."""
 
 
-@ray.remote
-class DefaultActor_TF(VirtualClientEngineActor):
-    """A Ray Actor class that runs TF client workloads.
-
-    It enables GPU memory growth to prevent premature OOM.
-    """
-
-    def __init__(self) -> None:
-        super().__init__()
-        # By default, TF maps all GPU memory to the process.
-        # We don't this behaviour in simulation, since it prevents us
-        # from having multiple Actors (and therefore Flower clients) sharing
-        # the same GPU.
-        # Luckily we can disable this behaviour by enabling memory growth
-        # on the GPU. In this way, VRAM allocated to the processes grows based
-        # on the needs for the workload. (this is for instance the default
-        # behaviour in Pytorch)
-        try:
-            import tensorflow as tf
-
-            # This bit of code follows the guidelines for GPU usage
-            # in https://www.tensorflow.org/guide/gpu
-            gpus = tf.config.list_physical_devices("GPU")
-            if gpus:
-                try:
-                    # Currently, memory growth needs to be the same across GPUs
-                    for gpu in gpus:
-                        tf.config.experimental.set_memory_growth(gpu, True)
-                except RuntimeError as e:
-                    # Memory growth must be set before GPUs have been initialized
-                    print(e)
-        except Exception as e:
-            log(ERROR, "Do you have Tensorflow installed?")
-            raise e
-
-
 def pool_size_from_resources(client_resources: Dict) -> int:
     """Calculate number of Actors that fit in pool given the resources in the.
 
@@ -142,14 +107,48 @@ def pool_size_from_resources(client_resources: Dict) -> int:
 
 
 class VirtualClientEngineActorPool(ActorPool):
-    """A pool of VirtualClientEngine Actors."""
+    """A pool of VirtualClientEngine Actors.
+    
+    
+    Parameters
+    ----------
+    client_resources : Dict[str, Union[int, float]]
+        A dictionary specifying the system resources that each
+        actor should have access. This will be used to calculate
+        the number of actors that fit in your cluster. Supported keys
+        are `num_cpus` and `num_gpus`. E.g. {`num_cpus`: 2, `num_gpus`: 0.5}
+        would allocate two Actors per GPU in your system assuming you have
+        enough CPUs. To understand the GPU utilization caused by `num_gpus`,
+        as well as using custom resources, please consult the Ray documentation.
+
+    actor_type : VirtualClientEngineActor
+        A class defining how your Actor behaves. It should have the @ray.remote
+        decorator. Recall actors run workloads of virtual/simulated clients. In
+        this way, an actor would first "spawn" a particular client, then run the
+        method that indicated by the strategy (e.g. `fit()`), then it will return
+        the results back to the client proxy.
+    
+    actor_kwargs : Dict[str, Any]
+        If you implement your own Actor class, you might want to pass it some arguments
+        for initialization. You should use this argument to achieve so.
+
+    actor_scheduling : Union[str, NodeAffinitySchedulingStrategy]
+        This allows you to control how Actors are scheduled/placed in the nodes
+        available to your simulation.
+    
+    actor_lists: List[VirtualClientEngineActor] (default: None)
+        This argument should not be used. It's only needed for serialization purposes
+        (see the `__reduce__` method). Each time it is executed, we want to retain
+        the same list of actors.
+    """
 
     def __init__(
         self,
         client_resources: Dict[str, Union[int, float]],
         actor_type: VirtualClientEngineActor,
         actor_kwargs: Dict[str, Any],
-        actor_scheduling: str,
+        actor_scheduling: Union[str, NodeAffinitySchedulingStrategy],
+        actor_list: List[VirtualClientEngineActor] = None,
     ):
         self.client_resources = client_resources
         self.actor_type = actor_type
@@ -159,13 +158,18 @@ class VirtualClientEngineActorPool(ActorPool):
 
         args = actor_kwargs if actor_kwargs is not None else {}
 
-        actors = [
-            actor_type.options(  # type: ignore
-                **client_resources,
-                scheduling_strategy=actor_scheduling,
-            ).remote(**args)
-            for _ in range(num_actors)
-        ]
+        if actor_list is None:
+            # When __reduce__ is executed, we don't want to created
+            # a new list of actors again.
+            actors = [
+                actor_type.options(  # type: ignore
+                    **client_resources,
+                    scheduling_strategy=actor_scheduling,
+                ).remote(**args)
+                for _ in range(num_actors)
+            ]
+        else:
+            actors = actor_list
 
         super().__init__(actors)
 
@@ -184,6 +188,7 @@ class VirtualClientEngineActorPool(ActorPool):
             self.actor_type,
             self.actor_kwargs,
             self.actor_scheduling,
+            self._idle_actors, # Pass existing actors to avoid killing/re-creating
         )
 
     def submit(self, fn: Any, job_fn: Callable, cid: str) -> None:
@@ -230,12 +235,19 @@ class VirtualClientEngineActorPool(ActorPool):
     def _is_future_ready(self, cid: str) -> bool:
         """Return status of future associated to the given client id (cid)."""
         if cid not in self._cid_to_future.keys():
+            # With the current ClientProxy<-->ActorPool interaction
+            # we should never be hitting this condition.
+            log(WARNING, "This shouldn't be happening")
             return False
         else:
             return self._cid_to_future[cid]["ready"]
 
     def _fetch_future_result(self, cid: str) -> ClientRes:
-        """Fetch result for VirtualClient from Object Store."""
+        """Fetch result for VirtualClient from Object Store.
+        
+        The job submitted by the ClientProxy interfacing with client with
+        cid=cid is ready. Here we fetch it from the object store and return. 
+        """
         try:
             res_cid, res = ray.get(self._cid_to_future[cid]["future"])
         except ray.exceptions.RayActorError as ex:
@@ -309,6 +321,7 @@ class VirtualClientEngineActorPool(ActorPool):
         """Similar to parent's get_next_unordered() but without final ray.get()."""
         if not self.has_next():  # type: ignore
             raise StopIteration("No more results to get")
+        # Block until one result is ready
         res, _ = ray.wait(list(self._future_to_actor), num_returns=1, timeout=timeout)
 
         if res:
@@ -320,11 +333,13 @@ class VirtualClientEngineActorPool(ActorPool):
             # Get actor that completed a job
             _, a, cid = self._future_to_actor.pop(future, (None, None, -1))
             if a is not None:
-                # Still space in queue ? (no if a node died)
+                # Still space in queue ? (no if a node in the cluster died)
                 if self._check_actor_fits_in_pool():
                     if self._check_and_remove_actor_from_pool(a):
                         self._return_actor(a)  # type: ignore
-                    # Flag future as ready
+                    # Flag future as ready so ClientProxy with cid
+                    # can break from the while loop (in `get_client_result()`)
+                    # and fetch its result
                     self._flag_future_as_ready(cid)
                 else:
                     # The actor doesn't fit in the pool anymore.

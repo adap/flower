@@ -137,9 +137,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
         Optionally specify the type of actor to use. The actor object, which
         persist throughout the simulation will be the process in charged of
-        running the clients' jobs (i.e. their fit() method). If you are using
-        Tensorflow, you should use type `DefaultActor_TF` which will set TF's
-        GPU memory growth to True at initialisation (preventing premature OOM).
+        running the clients' jobs (i.e. their fit() method).
 
     actor_kwargs: Optional[Dict[str, Any]] (default: None)
         If you want to create your own Actor classes, you might need to pass
@@ -253,29 +251,10 @@ def start_simulation(  # pylint: disable=too-many-arguments
         initialized_server.client_manager().register(client=client_proxy)
 
     # Start training
-    try:
-        hist = run_fl(
-            server=initialized_server,
-            config=initialized_config,
-        )
-    except Exception as ex:
-        log(ERROR, ex)
-        log(
-            ERROR,
-            "Your simulation crashed :(. This could be because of several reasons."
-            "The most common are: "
-            "\n\t > Your system couldn't fit a single VirtualClient: try lowering "
-            "`client_resources`."
-            "\n\t > All the actors in your pool crashed. This could be because: "
-            "\n\t\t - You clients hit an out-of-memory (OOM) error and actors couldn't "
-            "recover from it. Try launching your simulation with more generous "
-            f"`client_resources` setting (i.e. it seems {client_resources} is "
-            "not enough for your workload). Use fewer concurrent actors. "
-            "\n\t\t - You were running a multi-node simulation and all worker nodes "
-            "disconnected. The head node might still be alive but cannot accommodate "
-            f"any actor with resources: {client_resources}.",
-        )
-        hist = None
+    hist = run_fl(
+        server=initialized_server,
+        config=initialized_config,
+    )
 
     event(EventType.START_SIMULATION_LEAVE)
 
