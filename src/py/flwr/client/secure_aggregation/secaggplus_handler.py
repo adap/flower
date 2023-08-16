@@ -171,14 +171,14 @@ def check_stage(current_stage: str, named_values: Dict[str, Value]) -> None:
     # Check the existence of KEY_STAGE
     if KEY_STAGE not in named_values:
         raise KeyError(
-            f"The required key {KEY_STAGE} is missing from the input `named_values`."
+            f"The required key '{KEY_STAGE}' is missing from the input `named_values`."
         )
 
     # Check the value type of the KEY_STAGE
     next_stage = named_values[KEY_STAGE]
     if not isinstance(next_stage, str):
         raise TypeError(
-            f"The value for the key {KEY_STAGE} must be of type {str}, "
+            f"The value for the key '{KEY_STAGE}' must be of type {str}, "
             f"but got {type(next_stage)} instead."
         )
 
