@@ -195,7 +195,6 @@ def start_simulation(  # pylint: disable=too-many-arguments
     # pylint: disable=broad-except
     try:
         # Start training
-        print(dfsfsfs)
         hist = run_fl(
             server=initialized_server,
             config=initialized_config,
@@ -210,7 +209,8 @@ def start_simulation(  # pylint: disable=too-many-arguments
             "`client_resources`. You used: %s"
             "\n\t > Too many VirtualClients were spawned causing an issue: try raising "
             "`client_resources`. You used: %s",
-            client_resources, client_resources
+            client_resources,
+            client_resources,
         )
         hist = History()
 
