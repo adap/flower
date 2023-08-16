@@ -1,5 +1,5 @@
-API Reference - Flower CLI commands
-===================================
+Flower CLI commands
+===================
 
 .. _flower-driver-apiref:
 

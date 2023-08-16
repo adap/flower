@@ -1,5 +1,5 @@
-API Reference - flwr (Python package)
-=====================================
+flwr (Python package API reference)
+===================================
 
 
 .. _flwr-client-apiref:

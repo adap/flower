@@ -87,6 +87,7 @@ redirects = {
     "quickstart_scikitlearn": "quickstart-scikitlearn.html",
     "quickstart_xgboost": "quickstart-xgboost.html",
     "apiref-binaries": "apiref-cli.html",
+    "fedbn-example-pytorch-from-centralized-to-federated": "example-fedbn-pytorch-from-centralized-to-federated.html",
     # Deleted pages
     "people": "index.html",
     "organizations": "index.html",
