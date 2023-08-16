@@ -22,6 +22,7 @@ import math
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
+import warnings
 
 from flwr.common import FitIns, FitRes, Parameters, Scalar
 from flwr.server.client_manager import ClientManager
@@ -77,13 +78,13 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
 
             added_noise_factor = self.noise_multiplier / noise_multiplier
             if added_noise_factor >= 2:
-            warnings.warn(
-                f'A significant amount of noise ({added_noise_factor:.2f}x) has to '
-                'be added for record aggregation to achieve the desired effective '
-                f'`noise_multiplier` ({noise_multiplier}). If you are manually '
-                'specifying `clipped_count_stddev` you may want to increase it. Or '
-                'you may need more `expected_clients_per_round`.'
-            )
+                warnings.warn(
+                    f'A significant amount of noise ({added_noise_factor:.2f}x) has to '
+                    'be added for record aggregation to achieve the desired effective '
+                    f'`noise_multiplier` ({noise_multiplier}). If you are manually '
+                    'specifying `clipped_count_stddev` you may want to increase it. Or '
+                    'you may need more `expected_clients_per_round`.'
+                )
         else:
             if clip_count_stddev is None:
                 clip_count_stddev = 0.0
