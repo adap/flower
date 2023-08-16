@@ -22,6 +22,7 @@ from logging import ERROR, WARNING
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import ray
+from ray import ObjectRef
 from ray.util.actor_pool import ActorPool
 from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 
@@ -50,7 +51,7 @@ class VirtualClientEngineActor(ABC):
         log(WARNING, f"Manually terminating {self.__class__.__name__}")
         ray.actor.exit_actor()
 
-    def run(self, job_fn: Callable[[], ClientRes], cid: str) -> Tuple[str, Any]:
+    def run(self, job_fn: Callable[[], ClientRes], cid: str) -> Tuple[str, ClientRes]:
         """Run a client workload."""
         # Execute tasks and return result
         # return also cid which is needed to ensure results
@@ -75,7 +76,7 @@ class DefaultActor(VirtualClientEngineActor):
     """A Ray Actor class that runs client workloads."""
 
 
-def pool_size_from_resources(client_resources: Dict) -> int:
+def pool_size_from_resources(client_resources: Dict[str, Union[int, float]]) -> int:
     """Calculate number of Actors that fit in pool given the resources in the.
 
     cluster and those required per client.
@@ -108,8 +109,7 @@ def pool_size_from_resources(client_resources: Dict) -> int:
 
 class VirtualClientEngineActorPool(ActorPool):
     """A pool of VirtualClientEngine Actors.
-    
-    
+
     Parameters
     ----------
     client_resources : Dict[str, Union[int, float]]
@@ -127,7 +127,7 @@ class VirtualClientEngineActorPool(ActorPool):
         this way, an actor would first "spawn" a particular client, then run the
         method that indicated by the strategy (e.g. `fit()`), then it will return
         the results back to the client proxy.
-    
+
     actor_kwargs : Dict[str, Any]
         If you implement your own Actor class, you might want to pass it some arguments
         for initialization. You should use this argument to achieve so.
@@ -135,7 +135,7 @@ class VirtualClientEngineActorPool(ActorPool):
     actor_scheduling : Union[str, NodeAffinitySchedulingStrategy]
         This allows you to control how Actors are scheduled/placed in the nodes
         available to your simulation.
-    
+
     actor_lists: List[VirtualClientEngineActor] (default: None)
         This argument should not be used. It's only needed for serialization purposes
         (see the `__reduce__` method). Each time it is executed, we want to retain
@@ -145,10 +145,10 @@ class VirtualClientEngineActorPool(ActorPool):
     def __init__(
         self,
         client_resources: Dict[str, Union[int, float]],
-        actor_type: VirtualClientEngineActor,
-        actor_kwargs: Dict[str, Any],
+        actor_type: type[VirtualClientEngineActor],
+        actor_kwargs: Optional[Dict[str, Any]],
         actor_scheduling: Union[str, NodeAffinitySchedulingStrategy],
-        actor_list: List[VirtualClientEngineActor] = None,
+        actor_list: Optional[List[VirtualClientEngineActor]] = None,
     ):
         self.client_resources = client_resources
         self.actor_type = actor_type
@@ -175,24 +175,32 @@ class VirtualClientEngineActorPool(ActorPool):
 
         # A dict that maps cid to another dict containing: a reference to the remote job
         # and its status (i.e. whether it is ready or not)
-        self._cid_to_future: Dict[str, Dict[str, Union[bool, Any]]] = {}
+        self._cid_to_future: Dict[
+            str, Dict[str, Union[bool, Optional[ObjectRef[Any]]]]
+        ] = {}
         self.actor_to_remove: Set[str] = set()  # a set
         self.num_actors = len(actors)
 
         self.lock = threading.RLock()
 
     def __reduce__(self):  # type: ignore
-        """Make this class serialisable (needed due to lock)."""
+        """Make this class serializable (needed due to lock)."""
         return VirtualClientEngineActorPool, (
             self.client_resources,
             self.actor_type,
             self.actor_kwargs,
             self.actor_scheduling,
-            self._idle_actors, # Pass existing actors to avoid killing/re-creating
+            self._idle_actors,  # Pass existing actors to avoid killing/re-creating
         )
 
-    def submit(self, fn: Any, job_fn: Callable, cid: str) -> None:
-        """Take idle actor and assign it a client workload."""
+    def submit(  # type: ignore[override]
+        self, fn: Any, job_fn: Callable[[], ClientRes], cid: str
+    ) -> None:
+        """Take idle actor and assign it a client workload.
+
+        Submit a job to an actor by first removing it from the list of idle actors, then
+        check if this actor was flagged to be removed from the pool
+        """
         actor = self._idle_actors.pop()
         if self._check_and_remove_actor_from_pool(actor):
             future = fn(actor, job_fn)
@@ -203,14 +211,16 @@ class VirtualClientEngineActorPool(ActorPool):
             # update with future
             self._cid_to_future[cid]["future"] = future_key
 
-    def submit_client_job(self, fn: Any, job_fn: Callable, cid: str) -> None:
+    def submit_client_job(
+        self, fn: Any, job_fn: Callable[[], ClientRes], cid: str
+    ) -> None:
         """Submit a job while tracking client ids."""
         # We need to put this behind a lock since .submit() involves
         # removing and adding elements from a dictionary. Which creates
         # issues in multi-threaded settings
 
         with self.lock:
-            #TODO: w/ timestamp check, call ray.resources() and add more actors to pool if more resources available
+            # TODO: w/ timestamp check, call ray.resources()
             # Creating cid to future mapping
             self._reset_cid_to_future_dict(cid)
             if self._idle_actors:
@@ -240,16 +250,18 @@ class VirtualClientEngineActorPool(ActorPool):
             log(WARNING, "This shouldn't be happening")
             return False
         else:
-            return self._cid_to_future[cid]["ready"]
+            is_ready: bool = self._cid_to_future[cid]["ready"]  # type: ignore
+            return is_ready
 
     def _fetch_future_result(self, cid: str) -> ClientRes:
         """Fetch result for VirtualClient from Object Store.
-        
-        The job submitted by the ClientProxy interfacing with client with
-        cid=cid is ready. Here we fetch it from the object store and return. 
+
+        The job submitted by the ClientProxy interfacing with client with cid=cid is
+        ready. Here we fetch it from the object store and return.
         """
         try:
-            res_cid, res = ray.get(self._cid_to_future[cid]["future"])
+            future: ObjectRef[Any] = self._cid_to_future[cid]["future"]  # type: ignore
+            res_cid, res = ray.get(future)  # type: (str, ClientRes)
         except ray.exceptions.RayActorError as ex:
             log(ERROR, ex)
             if hasattr(ex, "actor_id"):
@@ -350,7 +362,7 @@ class VirtualClientEngineActorPool(ActorPool):
         """Get result from VirtualClient with specific cid."""
         # Loop until all jobs submitted to the pool are completed. Break early
         # if the result for the ClientProxy calling this method is ready
-        while self.has_next() and not (self._is_future_ready(cid)):  # type: ignore
+        while self.has_next() and not self._is_future_ready(cid):  # type: ignore
             try:
                 self.process_unordered_future(timeout=timeout)
             except StopIteration:

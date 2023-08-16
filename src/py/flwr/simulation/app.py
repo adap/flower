@@ -77,9 +77,9 @@ def start_simulation(  # pylint: disable=too-many-arguments
     client_manager: Optional[ClientManager] = None,
     ray_init_args: Optional[Dict[str, Any]] = None,
     keep_initialised: Optional[bool] = False,
-    actor_type: Optional[VirtualClientEngineActor] = DefaultActor,
+    actor_type: type[VirtualClientEngineActor] = DefaultActor,
     actor_kwargs: Optional[Dict[str, Any]] = None,
-    actor_scheduling: Optional[Union[str, NodeAffinitySchedulingStrategy]] = "DEFAULT",
+    actor_scheduling: Union[str, NodeAffinitySchedulingStrategy] = "DEFAULT",
 ) -> History:
     """Start a Ray-based Flower simulation server.
 
@@ -133,7 +133,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
     keep_initialised: Optional[bool] (default: False)
         Set to True to prevent `ray.shutdown()` in case `ray.is_initialized()=True`.
 
-    actor_type: Optional[VirtualClientEngineActor] (default: DefaultActor)
+    actor_type: VirtualClientEngineActor (default: DefaultActor)
 
         Optionally specify the type of actor to use. The actor object, which
         persist throughout the simulation will be the process in charged of
@@ -264,9 +264,15 @@ def start_simulation(  # pylint: disable=too-many-arguments
             "Your simulation crashed :(. This could be because of several reasons."
             "The most common are: "
             "\n\t > Your system couldn't fit a single VirtualClient: try lowering "
-            "`client_resources`. You used: %s"
-            "\n\t > Too many VirtualClients were spawned causing an issue: try raising "
-            "`client_resources`. You used: %s",
+            "`client_resources`."
+            "\n\t > All the actors in your pool crashed. This could be because: "
+            "\n\t\t - You clients hit an out-of-memory (OOM) error and actors couldn't "
+            "recover from it. Try launching your simulation with more generous "
+            "`client_resources` setting (i.e. it seems %s is "
+            "not enough for your workload). Use fewer concurrent actors. "
+            "\n\t\t - You were running a multi-node simulation and all worker nodes "
+            "disconnected. The head node might still be alive but cannot accommodate "
+            "any actor with resources: %s.",
             client_resources,
             client_resources,
         )

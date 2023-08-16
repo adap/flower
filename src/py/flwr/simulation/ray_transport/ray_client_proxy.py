@@ -17,7 +17,7 @@
 
 import traceback
 from logging import ERROR
-from typing import Callable, Dict, Optional, cast
+from typing import Callable, Dict, Optional, Union, cast
 
 import ray
 
@@ -34,6 +34,9 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.simulation.ray_transport.ray_actor import VirtualClientEngineActorPool
 
 ClientFn = Callable[[str], ClientLike]
+ClientRes = Union[
+    common.GetPropertiesRes, common.GetParametersRes, common.FitRes, common.EvaluateRes
+]
 
 
 class RayClientProxy(ClientProxy):
@@ -127,7 +130,9 @@ class RayActorClientProxy(ClientProxy):
         self.client_fn = client_fn
         self.actor_pool = actor_pool
 
-    def _submit_job(self, job_fn: Callable, timeout: Optional[float]):
+    def _submit_job(
+        self, job_fn: Callable[[], ClientRes], timeout: Optional[float]
+    ) -> ClientRes:
         try:
             self.actor_pool.submit_client_job(
                 lambda a, v: a.run.remote(v, self.cid), job_fn, self.cid
@@ -138,9 +143,9 @@ class RayActorClientProxy(ClientProxy):
             if self.actor_pool.num_actors == 0:
                 # At this point we want to stop the simulation.
                 # since no more client workloads will be executed
-                log(ERROR, "ActorPool is empty!!! Disconnecting VirtualClient")
-                # TODO: the below does nothing?
-                self.reconnect()
+                log(ERROR, "ActorPool is empty!!!")
+                # TODO: Figure out how to disconnect ClientProxy
+                # self.reconnect()
             log(ERROR, traceback.format_exc())
             log(ERROR, ex)
             raise ex
