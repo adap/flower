@@ -1,10 +1,15 @@
 API Reference
 =============
-
-
-
-
+.. rubric:: Federated Dataset
 .. toctree::
+   :maxdepth: 3
 
-   _autosummary/partitioner
-   _autosummary/federated_dataset
+   federated_dataset.FederatedDataset
+
+.. rubric:: Partitioners
+.. toctree::
+   :maxdepth: 3
+
+   partitioner
+
+
