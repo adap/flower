@@ -55,16 +55,40 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
         self.clip_norm_lr = clip_norm_lr
         self.clip_norm_target_quantile = clip_norm_target_quantile
 
-        if clip_count_stddev is None:
-            clip_count_stddev = 0.0
-            if noise_multiplier > 0:
+        if noise_multiplier > 0.0:
+            if clip_count_stddev is None:
                 clip_count_stddev = self.num_sampled_clients / 20.0
-        self.clip_count_stddev: float = clip_count_stddev
 
-        if noise_multiplier:
-            self.noise_multiplier = (
-                self.noise_multiplier ** (-2) - (2 * self.clip_count_stddev) ** (-2)
-            ) ** (-0.5)
+            if noise_multiplier >= 2 * clip_count_stddev:
+                raise ValueError(
+            f'clipped_count_stddev = {clip_count_stddev} (defaults to '
+            'self.num_sampled_clients` / 20.0 , if not specified) is too low '
+            'to achieve the desired effective `noise_multiplier` '
+            f'({noise_multiplier}). You must either increase '
+            '`clip_count_stddev` or decrease `noise_multiplier`.'
+            )
+            
+            self.clip_count_stddev: float = clip_count_stddev
+
+            if noise_multiplier:
+                self.noise_multiplier = (
+                    self.noise_multiplier ** (-2) - (2 * self.clip_count_stddev) ** (-2)
+                ) ** (-0.5)
+
+            added_noise_factor = self.noise_multiplier / noise_multiplier
+            if added_noise_factor >= 2:
+            warnings.warn(
+                f'A significant amount of noise ({added_noise_factor:.2f}x) has to '
+                'be added for record aggregation to achieve the desired effective '
+                f'`noise_multiplier` ({noise_multiplier}). If you are manually '
+                'specifying `clipped_count_stddev` you may want to increase it. Or '
+                'you may need more `expected_clients_per_round`.'
+            )
+        else:
+            if clip_count_stddev is None:
+                clip_count_stddev = 0.0
+                self.noise_multiplier = 0.0
+
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
