@@ -39,11 +39,14 @@ class FederatedDataset:
     Examples
     --------
     Use MNIST dataset for Federated Learning with 100 clients (edge devices):
-    >>>mnist_fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
+
+    >>> mnist_fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
     Load partition for client with id 10.
-    >>>partition = mnist_fds.load_partition(10, "train")
+
+    >>> partition = mnist_fds.load_partition(10, "train")
     Use test split for centralized evaluation.
-    >>>centralized = mnist_fds.load_full("test")
+
+    >>> centralized = mnist_fds.load_full("test")
     """
 
     def __init__(self, *, dataset: str, partitioners: Dict[str, int]) -> None:
