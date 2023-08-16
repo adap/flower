@@ -114,7 +114,9 @@ def pool_size_from_resources(client_resources: Dict[str, Union[int, float]]) -> 
     return num_actors
 
 
-class VirtualClientEngineActorPool(ActorPool):
+class VirtualClientEngineActorPool(
+    ActorPool
+):  # pylint: disable=[too-many-instance-attributes, too-many-arguments]
     """A pool of VirtualClientEngine Actors.
 
     Parameters
@@ -200,14 +202,13 @@ class VirtualClientEngineActorPool(ActorPool):
             self._idle_actors,  # Pass existing actors to avoid killing/re-creating
         )
 
-    def submit(  # type: ignore[override]
-        self, fn: Any, job_fn: Callable[[], ClientRes], cid: str
-    ) -> None:
+    def submit(self, fn: Any, value: Tuple[Callable[[], ClientRes], str]) -> None:
         """Take idle actor and assign it a client workload.
 
         Submit a job to an actor by first removing it from the list of idle actors, then
         check if this actor was flagged to be removed from the pool
         """
+        job_fn, cid = value
         actor = self._idle_actors.pop()
         if self._check_and_remove_actor_from_pool(actor):
             future = fn(actor, job_fn)
@@ -219,23 +220,24 @@ class VirtualClientEngineActorPool(ActorPool):
             self._cid_to_future[cid]["future"] = future_key
 
     def submit_client_job(
-        self, fn: Any, job_fn: Callable[[], ClientRes], cid: str
+        self, actor_fn: Any, job: Tuple[Callable[[], ClientRes], str]
     ) -> None:
         """Submit a job while tracking client ids."""
         # We need to put this behind a lock since .submit() involves
         # removing and adding elements from a dictionary. Which creates
         # issues in multi-threaded settings
 
+        _, cid = job
         with self.lock:
-            # TODO: w/ timestamp check, call ray.resources()
+            # TODO: w/ timestamp check, call ray.resources()  # pylint: disable=fixme
             # Creating cid to future mapping
             self._reset_cid_to_future_dict(cid)
             if self._idle_actors:
                 # Submit job since there is an Actor that's available
-                self.submit(fn, job_fn, cid)
+                self.submit(actor_fn, job)
             else:
                 # No actors are available, append to list of jobs to run later
-                self._pending_submits.append((fn, job_fn, cid))
+                self._pending_submits.append((actor_fn, job))
 
     def _flag_future_as_ready(self, cid: str) -> None:
         """Flag future for VirtualClient with cid=cid as ready."""
@@ -243,7 +245,7 @@ class VirtualClientEngineActorPool(ActorPool):
 
     def _reset_cid_to_future_dict(self, cid: str) -> None:
         """Reset cid:future mapping info."""
-        if cid not in self._cid_to_future.keys():
+        if cid not in self._cid_to_future:
             self._cid_to_future[cid] = {}
 
         self._cid_to_future[cid]["future"] = None
@@ -251,14 +253,13 @@ class VirtualClientEngineActorPool(ActorPool):
 
     def _is_future_ready(self, cid: str) -> bool:
         """Return status of future associated to the given client id (cid)."""
-        if cid not in self._cid_to_future.keys():
+        if cid not in self._cid_to_future:
             # With the current ClientProxy<-->ActorPool interaction
             # we should never be hitting this condition.
             log(WARNING, "This shouldn't be happening")
             return False
-        else:
-            is_ready: bool = self._cid_to_future[cid]["ready"]  # type: ignore
-            return is_ready
+
+        return self._cid_to_future[cid]["ready"]  # type: ignore
 
     def _fetch_future_result(self, cid: str) -> ClientRes:
         """Fetch result for VirtualClient from Object Store.
@@ -301,7 +302,9 @@ class VirtualClientEngineActorPool(ActorPool):
         Remove the actor if so.
         """
         with self.lock:
-            actor_id = actor._actor_id.hex()  # type: ignore
+            actor_id = (
+                actor._actor_id.hex()  # type: ignore # pylint: disable=protected-access
+            )
 
             if actor_id in self.actor_to_remove:
                 # The actor should be removed
@@ -310,8 +313,8 @@ class VirtualClientEngineActorPool(ActorPool):
                 log(WARNING, "REMOVED actor %s from pool", actor_id)
                 log(WARNING, "Pool size: %s", self.num_actors)
                 return False
-            else:
-                return True
+
+            return True
 
     def _check_actor_fits_in_pool(self) -> bool:
         """Determine if available resources haven't changed.
@@ -335,8 +338,8 @@ class VirtualClientEngineActorPool(ActorPool):
             # should be equal what pool_size_from_resources(self.resources) returns
             self.num_actors -= 1
             return False
-        else:
-            return True
+
+        return True
 
     def process_unordered_future(self, timeout: Optional[float] = None) -> None:
         """Similar to parent's get_next_unordered() but without final ray.get()."""
@@ -352,12 +355,12 @@ class VirtualClientEngineActorPool(ActorPool):
 
         with self.lock:
             # Get actor that completed a job
-            _, a, cid = self._future_to_actor.pop(future, (None, None, -1))
-            if a is not None:
+            _, actor, cid = self._future_to_actor.pop(future, (None, None, -1))
+            if actor is not None:
                 # Still space in queue ? (no if a node in the cluster died)
                 if self._check_actor_fits_in_pool():
-                    if self._check_and_remove_actor_from_pool(a):
-                        self._return_actor(a)  # type: ignore
+                    if self._check_and_remove_actor_from_pool(actor):
+                        self._return_actor(actor)  # type: ignore
                     # Flag future as ready so ClientProxy with cid
                     # can break from the while loop (in `get_client_result()`)
                     # and fetch its result
@@ -365,7 +368,7 @@ class VirtualClientEngineActorPool(ActorPool):
                 else:
                     # The actor doesn't fit in the pool anymore.
                     # Manually terminate the actor
-                    a.terminate.remote()
+                    actor.terminate.remote()
 
     def get_client_result(self, cid: str, timeout: Optional[float]) -> ClientRes:
         """Get result from VirtualClient with specific cid."""

@@ -135,7 +135,7 @@ class RayActorClientProxy(ClientProxy):
     ) -> ClientRes:
         try:
             self.actor_pool.submit_client_job(
-                lambda a, v: a.run.remote(v, self.cid), job_fn, self.cid
+                lambda a, v: a.run.remote(v, self.cid), (job_fn, self.cid)
             )
             res = self.actor_pool.get_client_result(self.cid, timeout)
 
@@ -144,7 +144,7 @@ class RayActorClientProxy(ClientProxy):
                 # At this point we want to stop the simulation.
                 # since no more client workloads will be executed
                 log(ERROR, "ActorPool is empty!!!")
-                # TODO: Figure out how to disconnect ClientProxy
+                # TODO: Implement ClientProxy disconnect  # pylint: disable=fixme
                 # self.reconnect()
             log(ERROR, traceback.format_exc())
             log(ERROR, ex)
