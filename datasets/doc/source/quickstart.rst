@@ -20,24 +20,32 @@ PyTorch::
 
 **Partition the dataset**::
 
-  from flwr_dataset import FederatedDataset
+  from flwr_datasets import FederatedDataset
   mnist_fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
-  partition_idx_10 = mnist_fds.get_partition(10, "train")
-  centralized_dataset = mnist_fds.get_full("test")
+  partition_idx_10 = mnist_fds.load_partition(10, "train")
+  centralized_dataset = mnist_fds.load_full("test")
 
 Now you're ready to go. You have 100 partitions created from the train split of the MNIST dataset and the test split for the centralized evaluation.
 Now change the type of the dataset (from datasets.Dataset - HuggingFace type of the dataset) to the one supported by your framework.
 
+
 **Change the type to Numpy**
 
-Often, especially for the smaller dataset, one uses Numpy as the input type of the dataset for TensorFlow.
+Often, especially for the smaller dataset, one uses Numpy as the input type of the dataset for TensorFlow::
 
-todo
+  partition_idx_10_np = partition_idx_10.with_format("numpy")
+  X_idx_10 = partition_idx_10_np["image"]
+  y_idx_10 = partition_idx_10_np["label"]
 
 **Create PyTorch DataLoader**
+Transform the Dataset directly into the DataLoader::
 
-todo
+  from torch.utils.data import DataLoader
+  partition_idx_10_torch = partition_idx_10.with_format("torch")
+  dataloader_idx_10 = DataLoader(partition_idx_10_torch, batch_size=16)
 
-**Create TensorFlow Dataset**
+**Create TensorFlow Tensors**::
+It's enough to just call the method below and pass this dataset to the .fit() method.
 
-todo
+  partition_idx_10_tf = partition_idx_10.with_format("tf")
+
