@@ -58,6 +58,7 @@ extensions = [
     "sphinxcontrib.youtube",
     "sphinx_reredirects",
     "nbsphinx",
+    "sphinx_multiversion",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -92,6 +93,9 @@ redirects = {
     "publications": "index.html",
 }
 
+# Versioning options
+smv_tag_whitelist = r'^v(([1-9]|[0-9]{2,}).*)$'
+smv_branch_whitelist = r'^main$'
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -133,6 +137,16 @@ html_theme_options = {
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 
+html_sidebars = {
+    "**": [
+        "sidebar/brand.html",
+        "sidebar/search.html",
+        "sidebar/scroll-start.html",
+        "sidebar/navigation.html",
+        "sidebar/scroll-end.html",
+        "sidebar/versioning.html",
+    ]
+}
 # -- Options for nbsphinx -------------------------------------------------
 
 nbsphinx_execute = "never"
