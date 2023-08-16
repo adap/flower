@@ -1,4 +1,4 @@
-partitioner.partitioner
+﻿partitioner.partitioner
 =======================
 
 .. automodule:: partitioner.partitioner
