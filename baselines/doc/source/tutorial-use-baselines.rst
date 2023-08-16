@@ -1,5 +1,5 @@
-Using Baselines
-===============
+Use Baselines
+=============
 
 .. warning::
   We are changing the way we structure the Flower baselines. While we complete the transition to the new format, you can still find the existing baselines and use them: `baselines (old) <https://github.com/adap/flower/tree/main/baselines/flwr_baselines>`_.
