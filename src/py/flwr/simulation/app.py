@@ -205,9 +205,11 @@ def start_simulation(  # pylint: disable=too-many-arguments
             "Your simulation crashed :(. This could be because of several reasons."
             "The most common are: "
             "\n\t > Your system couldn't fit a single VirtualClient: try lowering "
+            f"`client_resources`. You used: {client_resources}"
+            "\n\t > Too many VirtualClients were spawned causing an issue: try raising "
             f"`client_resources`. You used: {client_resources}",
         )
-        hist = None
+        hist = History()
 
     event(EventType.START_SIMULATION_LEAVE)
 
