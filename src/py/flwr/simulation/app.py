@@ -192,8 +192,10 @@ def start_simulation(  # pylint: disable=too-many-arguments
         )
         initialized_server.client_manager().register(client=client_proxy)
 
-    # Start training
+    # pylint: disable=broad-except
     try:
+        # Start training
+        print(dfsfsfs)
         hist = run_fl(
             server=initialized_server,
             config=initialized_config,
@@ -205,9 +207,10 @@ def start_simulation(  # pylint: disable=too-many-arguments
             "Your simulation crashed :(. This could be because of several reasons."
             "The most common are: "
             "\n\t > Your system couldn't fit a single VirtualClient: try lowering "
-            f"`client_resources`. You used: {client_resources}"
+            "`client_resources`. You used: %s"
             "\n\t > Too many VirtualClients were spawned causing an issue: try raising "
-            f"`client_resources`. You used: {client_resources}",
+            "`client_resources`. You used: %s",
+            client_resources, client_resources
         )
         hist = History()
 
