@@ -11,7 +11,7 @@ from omegaconf import DictConfig, OmegaConf
 from hydra.utils import instantiate
 from FedPer.utils import utils_file
 from FedPer.dataset import load_datasets
-from FedPer.strategy import AggregateBodyStrategyPipeline
+# from FedPer.strategy import AggregateBodyStrategyPipeline
 from FedPer.utils.new_utils import get_client_cls
 from hydra.core.hydra_config import HydraConfig
 from FedPer.models.cnn_model import CNNNet, CNNModelSplit
