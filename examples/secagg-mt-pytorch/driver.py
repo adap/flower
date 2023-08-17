@@ -71,13 +71,12 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     }
 
 
-# print(get_parameters(net=Net()))
 # -------------------------------------------------------------------------- Driver SDK
 driver = Driver(driver_service_address="0.0.0.0:9091", certificates=None)
 # -------------------------------------------------------------------------- Driver SDK
 
 anonymous_client_nodes = False
-num_client_nodes_per_round = 3
+num_client_nodes_per_round = 5
 sleep_time = 1
 time_out = 30
 num_rounds = 3
@@ -205,12 +204,6 @@ for server_round in range(num_rounds):
 
     # Slow down the start of the next round
     time.sleep(sleep_time)
-
-# print("app_fit: losses_distributed %s", str(history.losses_distributed))
-# print("app_fit: metrics_distributed_fit %s", str(history.metrics_distributed_fit))
-# print("app_fit: metrics_distributed %s", str(history.metrics_distributed))
-# print("app_fit: losses_centralized %s", str(history.losses_centralized))
-# print("app_fit: metrics_centralized %s", str(history.metrics_centralized))
 
 # -------------------------------------------------------------------------- Driver SDK
 driver.disconnect()

@@ -11,6 +11,7 @@ from tqdm import tqdm
 
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+NUM_ITERATIONS = 3
 IS_VALIDATION = True
 
 
@@ -35,20 +36,29 @@ class Net(nn.Module):
         return self.fc3(x)
 
 
-def train(net, trainloader, valloader, epochs, device):
+def train(net, trainloader, valloader, num_iterations, device):
     """Train the model on the training set."""
     print("Starting training...")
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
     net.train()
-    for _ in range(epochs):
+    
+    iter_cnt = 0
+    break_flag = False
+    while True:
         for images, labels in trainloader:
             images, labels = images.to(device), labels.to(device)
             optimizer.zero_grad()
             loss = criterion(net(images), labels)
             loss.backward()
             optimizer.step()
+            iter_cnt += 1
+            if iter_cnt >= num_iterations:
+                break_flag = True
+                break
+        if break_flag:
+            break
 
     train_loss, train_acc = test(net, trainloader)
     val_loss, val_acc = test(net, valloader)

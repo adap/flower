@@ -4,6 +4,7 @@ import numpy as np
 from task import (
     DEVICE,
     IS_VALIDATION,
+    NUM_ITERATIONS,
     Net,
     get_parameters,
     load_data,
@@ -19,24 +20,18 @@ net = Net().to(DEVICE)
 trainloader, testloader = load_data()
 
 
-# Define Flower client
+# Define Flower client with the SecAgg/SecAgg+ protocol
 class FlowerClient(fl.client.NumPyClient, SecAggPlusHandler):
-    # def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
-    #     return get_parameters(net)
 
     def fit(self, parameters, config):
-        if self._shared_state.test_drop:
+        # Force a significant delay for teshing purposes
+        if self._shared_state.sid == 0:
             time.sleep(40)
         if IS_VALIDATION:
             return [np.zeros(10000)], 1, {}
         set_parameters(net, parameters)
-        results = train(net, trainloader, testloader, epochs=1, device=DEVICE)
-        return get_parameters(net), len(trainloader.dataset), results
-
-    # def evaluate(self, parameters, config):
-    #     set_parameters(net, parameters)
-    #     loss, accuracy = test(net, testloader)
-    #     return loss, len(testloader.dataset), {"accuracy": accuracy}
+        results = train(net, trainloader, testloader, num_iterations=NUM_ITERATIONS, device=DEVICE)
+        return get_parameters(net), len(trainloader.batch_size * NUM_ITERATIONS), results
 
 
 # Start Flower client

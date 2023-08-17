@@ -16,7 +16,7 @@ Terminal 1: start Flower server
 flower-server --grpc-rere
 ```
 
-Terminal 2+3+4: start three clients
+Terminal 2: start three clients
 
 ```bash
 python client.py
