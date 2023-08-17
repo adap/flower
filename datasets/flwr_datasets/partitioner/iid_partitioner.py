@@ -34,7 +34,6 @@ class IidPartitioner(Partitioner):
 
     def load_partition(self, idx: int) -> datasets.Dataset:
         """Load a single IID partition based on the partition index."""
-        self._check_if_dataset_assigned()
         return self.dataset.shard(
             num_shards=self._num_partitions, index=idx, contiguous=True
         )

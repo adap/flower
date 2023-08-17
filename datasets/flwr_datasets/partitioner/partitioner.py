@@ -34,6 +34,11 @@ class Partitioner(ABC):
     @property
     def dataset(self) -> Dataset:
         """Dataset property."""
+        if self._dataset is None:
+            raise AttributeError(
+                "The dataset field should be set before using it (directly, via the "
+                "load_partition or other methods). "
+            )
         return self._dataset
 
     @dataset.setter
@@ -62,10 +67,3 @@ class Partitioner(ABC):
             single dataset partition
         """
         raise NotImplementedError
-
-    def _check_if_dataset_assigned(self) -> None:
-        """Check if dataset is assigned - it should be prior to using load_partition."""
-        if self._dataset is None:
-            raise ValueError(
-                "The dataset field should be set before using the load_partition."
-            )
