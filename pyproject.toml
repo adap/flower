@@ -207,6 +207,3 @@ exclude = [
 
 [tool.ruff.pydocstyle]
 convention = "numpy"
-
-[tool.ruff.per-file-ignores]
-"src/py/flwr/server/strategy/*.py" = ["E501"]
