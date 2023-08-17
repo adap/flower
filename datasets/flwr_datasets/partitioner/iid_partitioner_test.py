@@ -13,11 +13,12 @@
 # limitations under the License.
 # ==============================================================================
 """Partitioner tests."""
+
+
 import unittest
 
-from flwr_datasets.partitioner.iid_partitioner import IidPartitioner
-
 from datasets import Dataset
+from flwr_datasets.partitioner.iid_partitioner import IidPartitioner
 
 
 class TestIidPartitioner(unittest.TestCase):

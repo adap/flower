@@ -13,5 +13,12 @@
 # limitations under the License.
 # ==============================================================================
 """Flower Datasets Partitioner package."""
-from .partitioner import Partitioner
+
+
 from .iid_partitioner import IidPartitioner
+from .partitioner import Partitioner
+
+__all__ = [
+    "IidPartitioner",
+    "Partitioner",
+]

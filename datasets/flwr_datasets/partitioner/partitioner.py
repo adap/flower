@@ -13,10 +13,11 @@
 # limitations under the License.
 # ==============================================================================
 """Partitioner class that works with HuggingFace Dataset."""
+
+
 from abc import ABC, abstractmethod
 from typing import Optional
 
-import datasets
 from datasets import Dataset
 
 
@@ -24,36 +25,40 @@ class Partitioner(ABC):
     """The base partitioner class that enables obtaining federated partitions.
 
     The initialization is intended to take all necessary arguments such that the call to
-    the `load_partition` method can be use the same for all partitioners.
+    the `load_partition` method can be used in the same way for all partitioners.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._dataset: Optional[Dataset] = None
 
     @property
-    def dataset(self):
+    def dataset(self) -> Dataset:
         """Dataset property."""
+        if self._dataset is None:
+            raise AttributeError(
+                "The dataset field should be set before using it (directly, via the "
+                "load_partition or other methods). "
+            )
         return self._dataset
 
     @dataset.setter
-    def dataset(self, value: Dataset):
-        if self._dataset is None:
-            self._dataset = value
-        else:
+    def dataset(self, value: Dataset) -> None:
+        if self._dataset is not None:
             raise Warning(
                 "The dataset should be assigned only once to the partitioner."
                 "This operation might also wipe out the saved references to the "
                 "created partitions (in case the partitioning scheme needs to create "
                 "the full partitioning also in order to return a single partition)."
             )
+        self._dataset = value
 
     @abstractmethod
-    def load_partition(self, partition_index: int) -> Dataset:
+    def load_partition(self, idx: int) -> Dataset:
         """Load a single partition based on the partition index.
 
         Parameters
         ----------
-        partition_index: int
+        idx: int
             the index that corresponds to the requested partition
 
         Returns
@@ -62,10 +67,3 @@ class Partitioner(ABC):
             single dataset partition
         """
         raise NotImplementedError
-
-    def _check_if_dataset_assigned(self):
-        """Check if dataset is assigned - it should be prior to using load_partition."""
-        if self._dataset is None:
-            raise ValueError(
-                "The dataset field should be set before using the load_partition."
-            )

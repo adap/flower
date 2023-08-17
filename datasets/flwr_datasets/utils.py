@@ -13,6 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 """Utils for FederatedDatasets."""
+
+
 from typing import Dict
 
 from flwr_datasets.partitioner import IidPartitioner, Partitioner
@@ -39,9 +41,14 @@ def _instantiate_partitioners(partitioners: Dict[str, int]) -> Dict[str, Partiti
 
 def _check_if_dataset_supported(dataset: str) -> None:
     """Check if the dataset is in the narrowed down list of the tested datasets."""
-    supported_datasets = ["mnist", "cifar10", "fashion_mnist", "food101",
-                          "sasha/dog-food",
-                          "zh-plus/tiny-imagenet"]
+    supported_datasets = [
+        "mnist",
+        "cifar10",
+        "fashion_mnist",
+        "food101",
+        "sasha/dog-food",
+        "zh-plus/tiny-imagenet",
+    ]
     if dataset not in supported_datasets:
         raise Warning(
             f"The currently tested and supported dataset are {supported_datasets}. "
