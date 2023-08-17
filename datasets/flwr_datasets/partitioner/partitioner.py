@@ -25,7 +25,7 @@ class Partitioner(ABC):
     """The base partitioner class that enables obtaining federated partitions.
 
     The initialization is intended to take all necessary arguments such that the call to
-    the `load_partition` method can be use the same for all partitioners.
+    the `load_partition` method can be used in the same way for all partitioners.
     """
 
     def __init__(self) -> None:

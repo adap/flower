@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Iid partitioner class that works with HuggingFace Dataset."""
+"""IID partitioner class that works with HuggingFace Dataset."""
 
 
 import datasets
@@ -33,7 +33,7 @@ class IidPartitioner(Partitioner):
         self._num_partitions = num_partitions
 
     def load_partition(self, partition_index: int) -> datasets.Dataset:
-        """Load a single iid partition based on the partition index."""
+        """Load a single IID partition based on the partition index."""
         self._check_if_dataset_assigned()
         return self.dataset.shard(
             num_shards=self._num_partitions, index=partition_index, contiguous=True
