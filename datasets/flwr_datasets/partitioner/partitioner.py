@@ -13,10 +13,11 @@
 # limitations under the License.
 # ==============================================================================
 """Partitioner class that works with HuggingFace Dataset."""
+
+
 from abc import ABC, abstractmethod
 from typing import Optional
 
-import datasets
 from datasets import Dataset
 
 
@@ -27,16 +28,16 @@ class Partitioner(ABC):
     the `load_partition` method can be use the same for all partitioners.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._dataset: Optional[Dataset] = None
 
     @property
-    def dataset(self):
+    def dataset(self) -> Dataset:
         """Dataset property."""
         return self._dataset
 
     @dataset.setter
-    def dataset(self, value: Dataset):
+    def dataset(self, value: Dataset) -> None:
         if self._dataset is None:
             self._dataset = value
         else:
@@ -63,7 +64,7 @@ class Partitioner(ABC):
         """
         raise NotImplementedError
 
-    def _check_if_dataset_assigned(self):
+    def _check_if_dataset_assigned(self) -> None:
         """Check if dataset is assigned - it should be prior to using load_partition."""
         if self._dataset is None:
             raise ValueError(
