@@ -56,6 +56,7 @@ def train(
     device: torch.device,
     epochs: int,
     learning_rate: float,
+    control_variate: torch.Tensor
 ) -> None:
     """Train the network on the training set.
 

@@ -67,7 +67,12 @@ class TamunaStrategy(Strategy):
 
     def configure_fit(self, server_round: int, parameters, client_manager):
         clients = client_manager.sample(self.clients_per_round)
-        config = {"epochs": self.epochs_per_round[server_round - 1]}
+        config = {
+            "epochs": self.epochs_per_round[server_round - 1],
+        }
+
+        # save compression mask to files {[self.cid]}_mask.bin
+
         fit_ins = FitIns(parameters, config)
         return [(client, fit_ins) for client in clients]
 

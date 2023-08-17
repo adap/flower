@@ -1,8 +1,9 @@
 """Defines the MNIST Flower Client and a function to instantiate it."""
-
+import pickle
 from collections import OrderedDict
 from typing import Callable, Dict, List, Tuple
 
+import os
 import flwr as fl
 import copy
 import torch
@@ -23,12 +24,25 @@ class FlowerClient(fl.client.NumPyClient):
         trainloader: DataLoader,
         device: torch.device,
         learning_rate: float,
+        cid: str,
     ):
         self.net = net
         self.trainloader = trainloader
         self.device = device
         self.learning_rate = learning_rate
         self.control_variate = self.__model_zeroed_out()
+        self.old_compression_mask = None
+        self.old_compressed_net = None
+        self.cid = cid
+
+        with open(f"{self.cid}_state.bin", "wb") as f:
+            state = (
+                self.control_variate,
+                self.old_compression_mask,
+                self.old_compressed_net,
+            )
+            pickle.dump(state, f, protocol=pickle.HIGHEST_PROTOCOL)
+            print(f"Client {self.cid}.")
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
@@ -54,11 +68,22 @@ class FlowerClient(fl.client.NumPyClient):
         """Implements distributed fit function for a given client."""
         self.set_parameters(parameters)
 
+        # load compression mask from file {self.cid}_mask.bin
+
+        with open(f"{self.cid}_state.bin", "rb") as f:
+            state = pickle.load(f)
+            (
+                self.control_variate,
+                self.old_compression_mask,
+                self.old_compressed_net,
+            ) = state
+
         train(
             self.net,
             self.trainloader,
             self.device,
             epochs=config["epochs"],
+            control_variate=self.control_variate,
             learning_rate=self.learning_rate,
         )
 
@@ -75,9 +100,6 @@ def gen_client_fn(
 
     Parameters
     ----------
-    num_epochs : int
-        The number of local epochs each client should run the training for before
-        sending it to the server.
     trainloaders: List[DataLoader]
         A list of DataLoaders, each pointing to the dataset training partition
         belonging to a particular client.
@@ -102,6 +124,6 @@ def gen_client_fn(
         # will train on their own unique data
         trainloader = trainloaders[int(cid)]
 
-        return FlowerClient(net, trainloader, device, learning_rate)
+        return FlowerClient(net, trainloader, device, learning_rate, cid)
 
     return client_fn
