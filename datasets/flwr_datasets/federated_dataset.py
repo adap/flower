@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Federated Dataset."""
+"""FederatedDataset."""
 
 
 from typing import Dict, Optional
@@ -24,7 +24,7 @@ from flwr_datasets.utils import _check_if_dataset_supported, _instantiate_partit
 
 
 class FederatedDataset:
-    """Representation of a dataset for federated learning/analytics.
+    """Representation of a dataset for federated learning/evaluation/analytics.
 
      Download, partition data among clients (edge devices), or load full dataset.
 
@@ -34,9 +34,9 @@ class FederatedDataset:
     Parameters
     ----------
     dataset: str
-        The name of the dataset in the HuggingFace Hub.
+        The name of the dataset in the Hugging Face Hub.
     partitioners: Dict[str, int]
-        Dataset split to the number of iid partitions.
+        Dataset split to the number of IID partitions.
 
     Examples
     --------
@@ -44,7 +44,7 @@ class FederatedDataset:
 
     >>> mnist_fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
 
-    Load partition for client with id 10.
+    Load partition for client with ID 10.
 
     >>> partition = mnist_fds.load_partition(10, "train")
 
@@ -65,12 +65,15 @@ class FederatedDataset:
     def load_partition(self, idx: int, split: str) -> Dataset:
         """Load the partition specified by the idx in the selected split.
 
+        The dataset is downloaded only when the first call to `load_partition` or
+        `load_full` is made.
+
         Parameters
         ----------
         idx: int
             Partition index for the selected split, idx in {0, ..., num_partitions - 1}.
         split: str
-            Split name of the dataset to partition (e.g. "train", "test").
+            Name of the (partitioned) split (e.g. "train", "test").
 
         Returns
         -------
@@ -89,6 +92,9 @@ class FederatedDataset:
     def load_full(self, split: str) -> Dataset:
         """Load the full split of the dataset.
 
+        The dataset is downloaded only when the first call to `load_partition` or
+        `load_full` is made.
+
         Parameters
         ----------
         split: str
@@ -106,11 +112,7 @@ class FederatedDataset:
         return self._dataset[split]
 
     def _download_dataset_if_none(self) -> None:
-        """Download dataset if the dataset is None - meaning it is not downloaded yet.
-
-        The dataset is downloaded only when the first call to `load_partition` or
-        `load_full` is made.
-        """
+        """Lazily load (and potentially download) the Dataset instance into memory."""
         if self._dataset is None:
             self._dataset = datasets.load_dataset(self._dataset_name)
 
