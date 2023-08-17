@@ -4,6 +4,9 @@
 Quickstart TensorFlow
 =====================
 
+..  youtube:: FGTc2TQq7VM
+   :width: 100%
+
 Let's build a federated learning system in less than 20 lines of code!
 
 Before Flower can be imported we have to install it:
