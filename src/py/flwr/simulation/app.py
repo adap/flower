@@ -251,6 +251,9 @@ def start_simulation(  # pylint: disable=too-many-arguments
     # node has been added). When this happens, we likely want to enlarge
     # the actor pool by adding more Actors to it.
     def update_resources(f_stop: threading.Event) -> None:
+        """Periodically check if more actors can be added to the pool.
+        
+        If so, extend the pool."""
         if not f_stop.is_set():
             num_max_actors = pool_size_from_resources(client_resources)
             if num_max_actors > pool.num_actors:
