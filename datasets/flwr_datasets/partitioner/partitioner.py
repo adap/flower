@@ -66,4 +66,3 @@ class Partitioner(ABC):
         dataset_partition: Dataset
             single dataset partition
         """
-        raise NotImplementedError
