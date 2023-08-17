@@ -17,3 +17,4 @@
 
 from .federated_dataset import FederatedDataset
 
+__all__ = ["FederatedDataset"]
