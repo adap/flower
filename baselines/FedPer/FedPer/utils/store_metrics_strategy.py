@@ -75,7 +75,8 @@ class StoreMetricsStrategy(StoreHistoryStrategy):
         }
 
         # Weigh accuracy of each client by number of examples used
-        accuracies = [r.metrics["accuracy"] * r.num_examples for _, r in results]
+        # accuracies = [r.metrics["accuracy"] * r.num_examples for _, r in results]
+        accuracies = [r.metrics["accuracy"] for _, r in results]
         # examples = [r.num_examples for _, r in results]
         n_accuracies = len(accuracies)
 

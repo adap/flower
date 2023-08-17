@@ -225,53 +225,50 @@ def get_datasets(
         lengths : List[int]
             A list with the length of each partition.
             """
-    if iid:
+    if iid or num_classes == total_num_classes:
         datasets = random_split(trainset, lengths, torch.Generator().manual_seed(seed))
+        print("here")
     else:
-        assert num_classes <= total_num_classes, "num_classes must be less than or equal to total_num_classes"
-        if num_classes < total_num_classes:
-            times = [0 for i in range(total_num_classes)]
-            contain = []
-            for i in range(num_clients):
-                current = [i%total_num_classes]
-                print("Current: ", current)
-                times[i%total_num_classes] += 1
-                print("Times: ", current)
-                j = 1
-                if i  == num_clients - 1:
-                    missing_labels = [i for i in range(total_num_classes) if times[i] == 0]
-                    print("missing_labels: ", missing_labels)
-                    if len(missing_labels) == num_classes:
-                        current = missing_labels
-                    elif len(missing_labels) != 0:
-                        for k in missing_labels:
-                            current.append(k)
-                            times[k] += 1
-                        if len(missing_labels) != num_classes:
-                            remaining_num_labels = num_classes - len(current)
-                            # ind is a value between 0 and total_num_classes-1, excluding missing values
-                            if remaining_num_labels > 0:
-                                ind = random.sample([i for i in range(total_num_classes) if i not in missing_labels], remaining_num_labels)
-                                for k in range(remaining_num_labels):
-                                    current.append(ind[k])
-                                    times[ind[k]] += 1
-                    else:
-                        pass      
-                else:       
-                    while (j < num_classes):             
-                        ind = random.randint(0, total_num_classes-1)
-                        print("Index: ", ind)
-                        if (ind not in current):
-                            j += 1
-                            current.append(ind)
-                            times[ind] += 1
-                            print("times: ", times)
-                contain.append(current)
-                print("Client {} contains classes: {}".format(i, current))
-            print("times: ", times)
-        else:
-            times = np.ones(num_classes) * 10
-
+        assert num_classes < total_num_classes, "num_classes must be less than or equal to total_num_classes"
+        times = [0 for i in range(total_num_classes)]
+        contain = []
+        for i in range(num_clients):
+            current = [i%total_num_classes]
+            print("Current: ", current)
+            times[i%total_num_classes] += 1
+            print("Times: ", current)
+            j = 1
+            if i  == num_clients - 1:
+                missing_labels = [i for i in range(total_num_classes) if times[i] == 0]
+                print("missing_labels: ", missing_labels)
+                if len(missing_labels) == num_classes:
+                    current = missing_labels
+                elif len(missing_labels) != 0:
+                    for k in missing_labels:
+                        current.append(k)
+                        times[k] += 1
+                    if len(missing_labels) != num_classes:
+                        remaining_num_labels = num_classes - len(current)
+                        # ind is a value between 0 and total_num_classes-1, excluding missing values
+                        if remaining_num_labels > 0:
+                            ind = random.sample([i for i in range(total_num_classes) if i not in missing_labels], remaining_num_labels)
+                            for k in range(remaining_num_labels):
+                                current.append(ind[k])
+                                times[ind[k]] += 1
+                else:
+                    pass      
+            else:       
+                while (j < num_classes):             
+                    ind = random.randint(0, total_num_classes-1)
+                    print("Index: ", ind)
+                    if (ind not in current):
+                        j += 1
+                        current.append(ind)
+                        times[ind] += 1
+                        print("times: ", times)
+            contain.append(current)
+            print("Client {} contains classes: {}".format(i, current))
+        print("times: ", times)
         net_dataidx_map = {i:np.ndarray(0, dtype=np.int32) for i in range(num_clients)}
         for i in range(total_num_classes):
             idx_k = np.where(np.array(trainset.targets) == i)[0]
@@ -291,5 +288,4 @@ def get_datasets(
     for i in range(num_clients):
         print("Client {} has {} samples".format(i, len(datasets[i])))
     print("Number of samples in test set: {}".format(len(testset)))
-    quit()
     return datasets, testset
