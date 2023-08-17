@@ -38,15 +38,14 @@ class Partitioner(ABC):
 
     @dataset.setter
     def dataset(self, value: Dataset) -> None:
-        if self._dataset is None:
-            self._dataset = value
-        else:
+        if self._dataset is not None:
             raise Warning(
                 "The dataset should be assigned only once to the partitioner."
                 "This operation might also wipe out the saved references to the "
                 "created partitions (in case the partitioning scheme needs to create "
                 "the full partitioning also in order to return a single partition)."
             )
+        self._dataset = value
 
     @abstractmethod
     def load_partition(self, partition_index: int) -> Dataset:
