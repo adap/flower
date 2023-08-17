@@ -136,5 +136,5 @@ class FederatedDataset:
             )
 
     def _assign_dataset_if_none(self, split: str, dataset: Dataset) -> None:
-        """Assign the dataset from split to the partitioner"""
+        """Assign the dataset from split to the partitioner."""
         self._partitioners[split].dataset = dataset
