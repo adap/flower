@@ -32,9 +32,9 @@ class IidPartitioner(Partitioner):
         super().__init__()
         self._num_partitions = num_partitions
 
-    def load_partition(self, partition_index: int) -> datasets.Dataset:
+    def load_partition(self, idx: int) -> datasets.Dataset:
         """Load a single IID partition based on the partition index."""
         self._check_if_dataset_assigned()
         return self.dataset.shard(
-            num_shards=self._num_partitions, index=partition_index, contiguous=True
+            num_shards=self._num_partitions, index=idx, contiguous=True
         )

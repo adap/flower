@@ -48,12 +48,12 @@ class Partitioner(ABC):
         self._dataset = value
 
     @abstractmethod
-    def load_partition(self, partition_index: int) -> Dataset:
+    def load_partition(self, idx: int) -> Dataset:
         """Load a single partition based on the partition index.
 
         Parameters
         ----------
-        partition_index: int
+        idx: int
             the index that corresponds to the requested partition
 
         Returns
