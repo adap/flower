@@ -17,3 +17,8 @@
 
 from .iid_partitioner import IidPartitioner
 from .partitioner import Partitioner
+
+__all__ = [
+    "IidPartitioner",
+    "Partitioner",
+]
