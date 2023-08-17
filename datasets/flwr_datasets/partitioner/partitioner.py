@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Partitioner class that works with HuggingFace Dataset."""
+"""Partitioner class that works with Hugging Face Datasets."""
 
 
 from abc import ABC, abstractmethod
@@ -37,7 +37,7 @@ class Partitioner(ABC):
         if self._dataset is None:
             raise AttributeError(
                 "The dataset field should be set before using it (directly, via the "
-                "load_partition or other methods). "
+                "`load_partition` or some other method). "
             )
         return self._dataset
 
