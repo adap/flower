@@ -13,6 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 """Federated Dataset."""
+
+
 from typing import Dict, Optional
 
 import datasets
@@ -135,4 +137,3 @@ class FederatedDataset:
 
     def _assign_dataset_if_none(self, split: str, dataset: Dataset):
         self._partitioners[split].dataset = dataset
-
