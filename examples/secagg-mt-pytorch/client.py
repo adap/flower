@@ -22,7 +22,6 @@ trainloader, testloader = load_data()
 
 # Define Flower client with the SecAgg/SecAgg+ protocol
 class FlowerClient(fl.client.NumPyClient, SecAggPlusHandler):
-
     def fit(self, parameters, config):
         # Force a significant delay for teshing purposes
         if self._shared_state.sid == 0:
@@ -30,8 +29,14 @@ class FlowerClient(fl.client.NumPyClient, SecAggPlusHandler):
         if IS_VALIDATION:
             return [np.zeros(10000)], 1, {}
         set_parameters(net, parameters)
-        results = train(net, trainloader, testloader, num_iterations=NUM_ITERATIONS, device=DEVICE)
-        return get_parameters(net), len(trainloader.batch_size * NUM_ITERATIONS), results
+        results = train(
+            net, trainloader, testloader, num_iterations=NUM_ITERATIONS, device=DEVICE
+        )
+        return (
+            get_parameters(net),
+            len(trainloader.batch_size * NUM_ITERATIONS),
+            results,
+        )
 
 
 # Start Flower client

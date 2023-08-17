@@ -90,11 +90,10 @@ def workflow_with_sec_agg(
     sampled_node_ids: List[int],
     sec_agg_config: Dict[str, Scalar],
 ) -> Generator[Dict[int, Task], Dict[int, Task], None]:
+    """
+    =============== Setup stage ===============
+    """
 
-    """
-    =============== Setup stage ===============   
-    """
-    
     # Protocol config
     num_samples = len(sampled_node_ids)
     num_shares = sec_agg_config[KEY_SHARE_NUMBER]
@@ -117,7 +116,7 @@ def workflow_with_sec_agg(
     if num_samples != num_shares and num_shares & 0x1 == 0:
         log(WARNING, "Number of shares in the SecAgg+ protocol should be odd.")
         num_shares += 1
-    
+
     # Randomly assign secure IDs to clients
     sids = [i for i in range(len(sampled_node_ids))]
     random.shuffle(sids)
@@ -127,12 +126,12 @@ def workflow_with_sec_agg(
     half_share = num_shares >> 1
     nid2neighbours = {
         node_id: {
-            (nid2sid[node_id] + offset) % num_samples 
+            (nid2sid[node_id] + offset) % num_samples
             for offset in range(-half_share, half_share + 1)
         }
         for node_id in sampled_node_ids
     }
-    
+
     surviving_node_ids = sampled_node_ids
     # Send setup configuration to clients
     yield {
@@ -163,8 +162,8 @@ def workflow_with_sec_agg(
             named_values={
                 KEY_STAGE: STAGE_SHARE_KEYS,
                 **{
-                    str(sid): value 
-                    for sid, value in sid2public_keys.items() 
+                    str(sid): value
+                    for sid, value in sid2public_keys.items()
                     if sid in nid2neighbours[node_id]
                 },
             }
@@ -260,7 +259,9 @@ def workflow_with_sec_agg(
         raise Exception("Not enough available clients after unmask vectors stage")
     for _, task in node_messages.items():
         named_values = _get_from_task(task)
-        for owner_sid, share in zip(named_values[KEY_SECURE_ID_LIST], named_values[KEY_SHARE_LIST]):
+        for owner_sid, share in zip(
+            named_values[KEY_SECURE_ID_LIST], named_values[KEY_SHARE_LIST]
+        ):
             collected_shares_dict[owner_sid].append(share)
     # Remove mask for every client who is available before ask vectors stage,
     # Divide vector by first element
@@ -272,7 +273,7 @@ def workflow_with_sec_agg(
             )
         secret = combine_shares(share_list)
         if sid in active_sids:
-            # The seed for PRG is the private mask seed of an active client. 
+            # The seed for PRG is the private mask seed of an active client.
             private_mask = pseudo_rand_gen(
                 secret, mod_range, get_parameters_shape(masked_vector)
             )
@@ -300,9 +301,9 @@ def workflow_with_sec_agg(
     total_weights_factor, recon_parameters = factor_extract(recon_parameters)
     recon_parameters = parameters_divide(recon_parameters, total_weights_factor)
     aggregated_vector = dequantize(
-        quantized_parameters=recon_parameters, 
-        clipping_range=clipping_range, 
-        target_range=target_range
+        quantized_parameters=recon_parameters,
+        clipping_range=clipping_range,
+        target_range=target_range,
     )
     if IS_VALIDATION:
         print(aggregated_vector[:10])

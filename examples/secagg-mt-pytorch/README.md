@@ -16,13 +16,13 @@ Terminal 1: start Flower server
 flower-server --grpc-rere
 ```
 
-Terminal 2: start three clients
+Terminal 2: start 5 clients
 
 ```bash
-python client.py
+./run_client.sh
 ```
 
-Terminal 4: start Driver script
+Terminal 3: start Driver script
 
 Using:
 

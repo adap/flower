@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Number of client processes to start
-N=4 # Replace with your desired value
+N=5 # Replace with your desired value
 
 # Start N client processes
 for i in $(seq 1 $N)

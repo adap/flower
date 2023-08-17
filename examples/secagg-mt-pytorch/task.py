@@ -43,7 +43,7 @@ def train(net, trainloader, valloader, num_iterations, device):
     criterion = torch.nn.CrossEntropyLoss().to(device)
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
     net.train()
-    
+
     iter_cnt = 0
     break_flag = False
     while True:
