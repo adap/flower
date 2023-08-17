@@ -1,5 +1,5 @@
-Contributing Baselines
-======================
+Contribute Baselines
+====================
 
 Do you have a new federated learning paper and want to add a new baseline to Flower? Or do you want to add an experiment to an existing baseline paper? Great, we really appreciate your contribution.
 
@@ -7,8 +7,8 @@ The goal of Flower Baselines is to reproduce experiments from popular papers to 
 
 Before you start to work on a new baseline or experiment, please check the `Flower Issues <https://github.com/adap/flower/issues>`_ or `Flower Pull Requests <https://github.com/adap/flower/pulls>`_ to see if someone else is already working on it. Please open a new issue if you are planning to work on a new baseline or experiment with a short description of the corresponding paper and the experiment you want to contribute.
 
-TL;DR: Adding a new Flower Baseline
------------------------------------
+TL;DR: Add a new Flower Baseline
+--------------------------------
 .. warning::
     We are in the process of changing how Flower Baselines are structured and updating the instructions for new contributors. Bear with us until we have finalised this transition. For now, follow the steps described below and reach out to us if something is not clear. We look forward to welcoming your baseline into Flower!!
 .. note::
