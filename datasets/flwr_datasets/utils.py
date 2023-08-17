@@ -34,8 +34,10 @@ def _instantiate_partitioners(partitioners: Dict[str, int]) -> Dict[str, Partiti
         Partitioners specified as split to Partitioner object.
     """
     instantiated_partitioners: Dict[str, Partitioner] = {}
-    for key, value in partitioners.items():
-        instantiated_partitioners[key] = IidPartitioner(num_partitions=value)
+    for split_name, num_partitions in partitioners.items():
+        instantiated_partitioners[split_name] = IidPartitioner(
+            num_partitions=num_partitions
+        )
     return instantiated_partitioners
 
 
