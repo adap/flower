@@ -16,6 +16,7 @@
 
 
 import sys
+import threading
 from logging import ERROR, INFO
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
@@ -34,6 +35,7 @@ from flwr.simulation.ray_transport.ray_actor import (
     DefaultActor,
     VirtualClientEngineActor,
     VirtualClientEngineActorPool,
+    pool_size_from_resources,
 )
 from flwr.simulation.ray_transport.ray_client_proxy import RayActorClientProxy
 
@@ -226,13 +228,39 @@ def start_simulation(  # pylint: disable=too-many-arguments
         client_resources,
     )
 
+    actor_args = {} if actor_kwargs is None else actor_kwargs
+
+    # An actor generator. This is called N times to add N actors
+    # to the pool. If at some point the pool can accommodate more actors
+    # this will be called again.
+    def create_actor_fn() -> Type[VirtualClientEngineActor]:
+        return actor_type.options(  # type: ignore
+            **client_resources,
+            scheduling_strategy=actor_scheduling,
+        ).remote(**actor_args)
+
     # Instantiate ActorPool
     pool = VirtualClientEngineActorPool(
+        create_actor_fn=create_actor_fn,
         client_resources=client_resources,
-        actor_type=actor_type,
-        actor_kwargs=actor_kwargs,
-        actor_scheduling=actor_scheduling,
     )
+
+    f_stop = threading.Event()
+
+    # Periodically, we want to check if the cluster has grown (i.e. a new
+    # node has been added). When this happens, we likely want to enlarge
+    # the actor pool by adding more Actors to it.
+    def update_resources(f_stop: threading.Event) -> None:
+        if not f_stop.is_set():
+            num_max_actors = pool_size_from_resources(client_resources)
+            if num_max_actors > pool.num_actors:
+                num = num_max_actors - pool.num_actors
+                log(INFO, "The cluster expanded. Adding %s actors to the pool.", num)
+                pool.add_actors_to_pool(num_actors=num)
+
+            threading.Timer(10, update_resources, [f_stop]).start()
+
+    update_resources(f_stop)
 
     log(
         INFO,
@@ -277,6 +305,9 @@ def start_simulation(  # pylint: disable=too-many-arguments
             client_resources,
         )
         hist = History()
+
+    # Stop time monitoring resources in cluster
+    f_stop.set()
 
     event(EventType.START_SIMULATION_LEAVE)
 

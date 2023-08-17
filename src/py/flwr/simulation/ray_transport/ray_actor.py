@@ -24,7 +24,6 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union
 import ray
 from ray import ObjectRef
 from ray.util.actor_pool import ActorPool
-from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 
 from flwr import common
 from flwr.common.logger import log
@@ -114,13 +113,14 @@ def pool_size_from_resources(client_resources: Dict[str, Union[int, float]]) -> 
     return num_actors
 
 
-class VirtualClientEngineActorPool(
-    ActorPool
-):  # pylint: disable=[too-many-instance-attributes, too-many-arguments]
+class VirtualClientEngineActorPool(ActorPool):
     """A pool of VirtualClientEngine Actors.
 
     Parameters
     ----------
+    create_actor_fn : Callable[[], Type[VirtualClientEngineActor]]
+        A function that returns an actor that can be added to the pool.
+
     client_resources : Dict[str, Union[int, float]]
         A dictionary specifying the system resources that each
         actor should have access. This will be used to calculate
@@ -130,21 +130,6 @@ class VirtualClientEngineActorPool(
         enough CPUs. To understand the GPU utilization caused by `num_gpus`,
         as well as using custom resources, please consult the Ray documentation.
 
-    actor_type : VirtualClientEngineActor
-        A class defining how your Actor behaves. It should have the @ray.remote
-        decorator. Recall actors run workloads of virtual/simulated clients. In
-        this way, an actor would first "spawn" a particular client, then run the
-        method that indicated by the strategy (e.g. `fit()`), then it will return
-        the results back to the client proxy.
-
-    actor_kwargs : Dict[str, Any]
-        If you implement your own Actor class, you might want to pass it some arguments
-        for initialization. You should use this argument to achieve so.
-
-    actor_scheduling : Union[str, NodeAffinitySchedulingStrategy]
-        This allows you to control how Actors are scheduled/placed in the nodes
-        available to your simulation.
-
     actor_lists: List[VirtualClientEngineActor] (default: None)
         This argument should not be used. It's only needed for serialization purposes
         (see the `__reduce__` method). Each time it is executed, we want to retain
@@ -153,31 +138,21 @@ class VirtualClientEngineActorPool(
 
     def __init__(
         self,
+        create_actor_fn: Callable[[], Type[VirtualClientEngineActor]],
         client_resources: Dict[str, Union[int, float]],
-        actor_type: Type[VirtualClientEngineActor],
-        actor_kwargs: Optional[Dict[str, Any]],
-        actor_scheduling: Union[str, NodeAffinitySchedulingStrategy],
-        actor_list: Optional[List[VirtualClientEngineActor]] = None,
+        actor_list: Optional[List[Type[VirtualClientEngineActor]]] = None,
     ):
         self.client_resources = client_resources
-        self.actor_type = actor_type
-        self.actor_kwargs = actor_kwargs
-        self.actor_scheduling = actor_scheduling
-        num_actors = pool_size_from_resources(client_resources)
-
-        args = actor_kwargs if actor_kwargs is not None else {}
+        self.create_actor_fn = create_actor_fn
 
         if actor_list is None:
+            # Figure out how many actors can be created given the cluster resources
+            # and the resources the user indicates each VirtualClient will need.
+            num_actors = pool_size_from_resources(client_resources)
+            actors = [create_actor_fn() for _ in range(num_actors)]
+        else:
             # When __reduce__ is executed, we don't want to created
             # a new list of actors again.
-            actors = [
-                actor_type.options(  # type: ignore
-                    **client_resources,
-                    scheduling_strategy=actor_scheduling,
-                ).remote(**args)
-                for _ in range(num_actors)
-            ]
-        else:
             actors = actor_list
 
         super().__init__(actors)
@@ -195,12 +170,20 @@ class VirtualClientEngineActorPool(
     def __reduce__(self):  # type: ignore
         """Make this class serializable (needed due to lock)."""
         return VirtualClientEngineActorPool, (
+            self.create_actor_fn,
             self.client_resources,
-            self.actor_type,
-            self.actor_kwargs,
-            self.actor_scheduling,
             self._idle_actors,  # Pass existing actors to avoid killing/re-creating
         )
+
+    def add_actors_to_pool(self, num_actors: int) -> None:
+        """Add actors to the pool.
+
+        This expands the pool after it has been created iif new resources are added to
+        your Ray cluster (e.g. you add a new node).
+        """
+        with self.lock:
+            new_actors = [self.create_actor_fn() for _ in range(num_actors)]
+            self._idle_actors.extend(new_actors)
 
     def submit(self, fn: Any, value: Tuple[Callable[[], ClientRes], str]) -> None:
         """Take idle actor and assign it a client workload.
