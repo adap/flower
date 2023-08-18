@@ -30,6 +30,8 @@ class IidPartitioner(Partitioner):
 
     def __init__(self, num_partitions: int) -> None:
         super().__init__()
+        if num_partitions <= 0:
+            raise ValueError("The number of partitions must be greater than zero.")
         self._num_partitions = num_partitions
 
     def load_partition(self, idx: int) -> datasets.Dataset:
