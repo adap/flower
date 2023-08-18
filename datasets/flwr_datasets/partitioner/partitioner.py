@@ -78,7 +78,4 @@ class Partitioner(ABC):
         dataset_assigned: bool
             True if a dataset is assigned, otherwise False.
         """
-        if self._dataset is not None:
-            return True
-        else:
-            return False
+        return self._dataset is not None
