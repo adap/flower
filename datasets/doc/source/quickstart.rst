@@ -17,7 +17,6 @@ PyTorch::
 
   pip install torch, torchvision
 
-
 **Partition the dataset**::
 
   from flwr_datasets import FederatedDataset
