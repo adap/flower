@@ -66,3 +66,19 @@ class Partitioner(ABC):
         dataset_partition: Dataset
             single dataset partition
         """
+
+    def is_dataset_assigned(self) -> bool:
+        """Check if a dataset has been assigned to the partitioner.
+
+        This method returns True if a dataset is already set for the partitioner,
+        otherwise, it returns False.
+
+        Returns
+        -------
+        dataset_assigned: bool
+            True if a dataset is assigned, otherwise False.
+        """
+        if self._dataset is not None:
+            return True
+        else:
+            return False
