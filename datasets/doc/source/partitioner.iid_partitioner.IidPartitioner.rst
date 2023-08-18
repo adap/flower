@@ -1,4 +1,4 @@
-﻿partitioner.iid\_partitioner.IidPartitioner
+﻿iid\_partitioner.IidPartitioner
 ===========================================
 
 .. currentmodule:: partitioner.iid_partitioner

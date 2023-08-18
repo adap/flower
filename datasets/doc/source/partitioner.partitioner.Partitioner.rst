@@ -1,4 +1,4 @@
-﻿partitioner.partitioner.Partitioner
+﻿partitioner.Partitioner
 ===================================
 
 .. currentmodule:: partitioner.partitioner
