@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Partitioner class that works with HuggingFace Dataset."""
+"""Partitioner class that works with Hugging Face Datasets."""
 
 
 from abc import ABC, abstractmethod
@@ -36,15 +36,15 @@ class Partitioner(ABC):
         """Dataset property."""
         if self._dataset is None:
             raise AttributeError(
-                "The dataset field should be set before using it (directly, via the "
-                "load_partition or other methods). "
+                "The dataset field should be set before using it (directly, via "
+                "`load_partition` or some other method). "
             )
         return self._dataset
 
     @dataset.setter
     def dataset(self, value: Dataset) -> None:
         if self._dataset is not None:
-            raise Warning(
+            raise Exception(
                 "The dataset should be assigned only once to the partitioner."
                 "This operation might also wipe out the saved references to the "
                 "created partitions (in case the partitioning scheme needs to create "
@@ -66,4 +66,16 @@ class Partitioner(ABC):
         dataset_partition: Dataset
             single dataset partition
         """
-        raise NotImplementedError
+
+    def is_dataset_assigned(self) -> bool:
+        """Check if a dataset has been assigned to the partitioner.
+
+        This method returns True if a dataset is already set for the partitioner,
+        otherwise, it returns False.
+
+        Returns
+        -------
+        dataset_assigned: bool
+            True if a dataset is assigned, otherwise False.
+        """
+        return self._dataset is not None

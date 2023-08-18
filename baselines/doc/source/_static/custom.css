@@ -5,3 +5,7 @@ html, body{
 .mermaid {
     background: #f8f8f8
 }
+
+.toctree-wrapper.compound .caption {
+    display: none;
+}

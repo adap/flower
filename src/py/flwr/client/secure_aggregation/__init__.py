@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2020 Adap GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,9 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Datasets main package."""
+"""Secure Aggregation handlers."""
 
 
-from .federated_dataset import FederatedDataset
+from .handler import SecureAggregationHandler
+from .secaggplus_handler import SecAggPlusHandler
 
-__all__ = ["FederatedDataset"]
+__all__ = [
+    "SecAggPlusHandler",
+    "SecureAggregationHandler",
+]
