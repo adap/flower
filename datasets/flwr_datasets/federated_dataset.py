@@ -142,5 +142,5 @@ class FederatedDataset:
 
         Assign only if the dataset is not assigned yet.
         """
-        if self._partitioners[split].dataset is None:
+        if not self._partitioners[split].is_dataset_assigned():
             self._partitioners[split].dataset = self._dataset[split]
