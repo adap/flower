@@ -1,7 +1,52 @@
 Flower Datasets
 ===============
 
-Welcome to Flower Datasets' documentation. `Flower <https://flower.dev>`_ is a friendly federated learning framework.
+Flower Datasets (``flwr-datasets``) is a library to quickly and easily create datasets for federated
+learning/analytics/evaluation. It is created by the ``Flower Labs`` team that also created `Flower <https://flower.dev>`_ - a Friendly Federated Learning Framework.
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   get_started
+   how_to
+   api_reference
+
+Main features
+-------------
+Flower Datasets library supports:
+
+- **downloading datasets** - choose the dataset from Hugging Face's ``dataset``
+- **partitioning datasets** - customize the partitioning scheme
+- **creating centralized datasets** - leave parts of the dataset unpartitioned (e.g. for centralized evaluation)
+
+Thanks to using Hugging Face's ``datasets`` used under the hood, Flower Datasets integrates with the following popular formats/frameworks:
+
+- Hugging Face
+- PyTorch
+- TensorFlow
+- Numpy
+- Pandas
+- Jax
+- Arrow
+
+Install
+-------
+
+The simplest install is::
+
+  python -m pip install flwr_datasets
+
+Or, if you plan to use the image datasets::
+
+  python -m pip install flwr_datasets[image]
+
+Check out the full details on the download in :doc:`installation`.
+
+How To Use the library
+----------------------
+Learn how to use the ``flwr-datasets`` library from the :doc:`quickstart` examples .
+
 
 
 Join the Flower Community
@@ -14,15 +59,3 @@ The Flower Community is growing quickly - we're a friendly group of researchers,
     :shadow:
 
     Join us on Slack
-
-
-Flower Datasets
----------------
-
-.. toctree::
-   :maxdepth: 2
-
-   get_started
-   how_to
-   api_reference
-
