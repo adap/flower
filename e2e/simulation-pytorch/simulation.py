@@ -7,7 +7,6 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader, Subset
 from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
-from tqdm import tqdm
 
 import flwr as fl
 
