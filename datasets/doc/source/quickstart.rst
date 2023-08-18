@@ -45,7 +45,7 @@ Transform the Dataset directly into the DataLoader::
   dataloader_idx_10 = DataLoader(partition_idx_10_torch, batch_size=16)
 
 **Create TensorFlow Tensors**::
-It's enough to just call the method below and pass this dataset to the .fit() method.
+It's enough to just call the method below and pass this dataset to the .fit() method::
 
   partition_idx_10_tf = partition_idx_10.with_format("tf")
 
