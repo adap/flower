@@ -8,7 +8,7 @@ API Reference
 
 .. rubric:: Partitioners
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
 
    partitioner
 
