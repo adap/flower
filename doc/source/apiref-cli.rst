@@ -1,6 +1,16 @@
 Flower CLI reference
 ====================
 
+.. _flower-server-apiref:
+
+flower-server
+~~~~~~~~~~~~~
+
+.. argparse::
+   :module: flwr.server.app
+   :func:  _parse_args_server
+   :prog: flower-server
+
 .. _flower-driver-apiref:
 
 flower-driver-api
@@ -20,16 +30,6 @@ flower-fleet-api
    :module: flwr.server.app
    :func:  _parse_args_fleet
    :prog: flower-fleet-api
-
-.. _flower-server-apiref:
-
-flower-server
-~~~~~~~~~~~~~
-
-.. argparse::
-   :module: flwr.server.app
-   :func:  _parse_args_server
-   :prog: flower-server
 
 .. .. _flower-client-apiref:
 
