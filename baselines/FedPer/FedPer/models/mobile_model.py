@@ -13,20 +13,20 @@ from FedPer.utils.model_manager import ModelManager
 
 # Set model architecture
 ARCHITECTURE = {
-            'layer_1' : {'conv_bn' : [3, 32, 2]},
-            'layer_2' : {'conv_dw' : [32, 64, 1]},
-            'layer_3' : {'conv_dw' : [64, 128, 2]},
-            'layer_4' : {'conv_dw' : [128, 128, 1]},
-            'layer_5' : {'conv_dw' : [128, 256, 2]},
-            'layer_6' : {'conv_dw' : [256, 256, 1]},
-            'layer_7' : {'conv_dw' : [256, 512, 2]},
+            # 'layer_1' : {'conv_bn' : [3, 32, 2]},
+            'layer_1' : {'conv_dw' : [32, 64, 1]},
+            'layer_2' : {'conv_dw' : [64, 128, 2]},
+            'layer_3' : {'conv_dw' : [128, 128, 1]},
+            'layer_4' : {'conv_dw' : [128, 256, 2]},
+            'layer_5' : {'conv_dw' : [256, 256, 1]},
+            'layer_6' : {'conv_dw' : [256, 512, 2]},
+            'layer_7' : {'conv_dw' : [512, 512, 1]},
             'layer_8' : {'conv_dw' : [512, 512, 1]},
             'layer_9' : {'conv_dw' : [512, 512, 1]},
             'layer_10' : {'conv_dw' : [512, 512, 1]},
             'layer_11' : {'conv_dw' : [512, 512, 1]},
-            'layer_12' : {'conv_dw' : [512, 512, 1]},
-            'layer_13' : {'conv_dw' : [512, 1024, 2]},
-            'layer_14' : {'conv_dw' : [1024, 1024, 1]},
+            'layer_12' : {'conv_dw' : [512, 1024, 2]},
+            'layer_13' : {'conv_dw' : [1024, 1024, 1]},
             #'layer_15' : {'avg_pool' : [7]},
             #'layer_16' : {'fc' : [1024, num_classes]}
         }
@@ -98,16 +98,13 @@ class MobileNetBody(nn.Module):
         #    return nn.Linear(inp, oup)
         
         self.model = nn.Sequential()
+        self.model.add_module(f'conv_bn_{i}', conv_bn([3, 32, 2]))
         for i in range(1, len(architecture) - num_head_layers + 1):
             for key, value in architecture[f'layer_{i}'].items():
-                if key == 'conv_bn':
-                    self.model.add_module(f'conv_bn_{i}', conv_bn(*value))
-                elif key == 'conv_dw':
+                #if key == 'conv_bn':
+                #    self.model.add_module(f'conv_bn_{i}', conv_bn(*value))
+                if key == 'conv_dw':
                     self.model.add_module(f'conv_dw_{i}', conv_dw(*value))
-                #elif key == 'avg_pool':
-                    #self.model.add_module(f'avg_pool_{i}', avg_pool(*value))
-                #elif key == 'fc':
-                    #self.model.add_module(f'fc_{i}', fc(*value))
                 else:
                     raise NotImplementedError("Layer type not implemented.")
                 
@@ -164,14 +161,10 @@ class MobileNetHead(nn.Module):
         self.model = nn.Sequential()
         for i in range(len(architecture) - num_head_layers + 1, len(architecture) + 1):
             for key, value in architecture[f'layer_{i}'].items():
-                if key == 'conv_bn':
-                    self.model.add_module(f'conv_bn_{i}', conv_bn(*value))
-                elif key == 'conv_dw':
+                #if key == 'conv_bn':
+                #    self.model.add_module(f'conv_bn_{i}', conv_bn(*value))
+                if key == 'conv_dw':
                     self.model.add_module(f'conv_dw_{i}', conv_dw(*value))
-                #elif key == 'avg_pool':
-                    #self.model.add_module(f'avg_pool_{i}', avg_pool(*value))
-                #elif key == 'fc':
-                    #self.model.add_module(f'fc_{i}', fc(*value))
                 else:
                     raise NotImplementedError("Layer type not implemented.")
         self.model.add_module(f'avg_pool_{i}', avg_pool([7]))

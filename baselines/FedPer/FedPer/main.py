@@ -5,6 +5,7 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 """
 import flwr as fl
 import hydra
+import argparse
 
 from typing import Dict, Any, Union
 from omegaconf import DictConfig, OmegaConf
@@ -20,7 +21,7 @@ from FedPer.models.mobile_model import MobileNet, MobileNetModelSplit
 from FedPer.models.resnet_model import ResNet, ResNetModelSplit
 from FedPer.utils.FedPer_client import get_fedper_client_fn
 
-@hydra.main(config_path="conf", config_name="new_base", version_base=None)
+@hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.
 
@@ -29,6 +30,8 @@ def main(cfg: DictConfig) -> None:
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
+    
+
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
 
@@ -37,7 +40,7 @@ def main(cfg: DictConfig) -> None:
         config=cfg.dataset,
         num_clients=cfg.num_clients,
     )   
-
+    
     # 3. Define your clients
     # Get algorithm 
     algorithm = cfg.algorithm.lower()
@@ -73,9 +76,9 @@ def main(cfg: DictConfig) -> None:
     
     if cfg.model.name.lower() == 'cnn':
         split = CNNModelSplit
-        def create_model(config: Dict[str, Any]) -> CNNNet:
+        def create_model() -> CNNNet:
             """Create initial CNN model."""
-            return CNNNet().to(device)
+            return CNNNet(name='cnn').to(device)
     elif cfg.model.name.lower() == 'mobile':
         split = MobileNetModelSplit
         def create_model() -> MobileNet:

@@ -113,7 +113,7 @@ class ModelSplit(ABC, nn.Module):
         ordered_state_dict = OrderedDict(self.state_dict().copy())
         # Update with the values of the state_dict
         ordered_state_dict.update({k: v for k, v in state_dict.items()})
-        self.load_state_dict(ordered_state_dict, strict=True)
+        self.load_state_dict(ordered_state_dict, strict=False)
 
     def enable_head(self) -> None:
         """Enable gradient tracking for the head parameters."""

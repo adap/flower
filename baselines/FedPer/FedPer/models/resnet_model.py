@@ -13,60 +13,118 @@ from FedPer.utils.model_manager import ModelManager
 
 from torchvision.models.resnet import resnet34
 
-class ResNet(nn.Module):
-    """Model adapted from simple MobileNet-v1 (PyTorch) \
-        (https://github.com/wjc852456/pytorch-mobilenet-v1)."""
-
+class ResNetHead(nn.Module):
+    """ 
+    MobileNet_v1 head, consists out of n layers that will be added to body of model. 
+    
+    Args:
+        num_head_layers: number of layers in the head.
+        num_classes: number of classes (outputs)
+    """
     def __init__(
             self, 
             num_head_layers : int = 1, 
             num_classes : int = 10, 
-            device : str = 'cpu', 
-            name : str = 'mobile'
+            rest_to_add : list = None
         ) -> None:
-        super(ResNet, self).__init__()
-        assert num_head_layers > 0 and num_head_layers < 16, "num_head_layers must be greater than 0 and less than 16"
-        self.body = None
-        self.head = None
-
-        # Create resnet34 model
-        self.resnet = resnet34()
-
-        # Self head is classifier and avgpool (initially)
-        # body is the rest
+        super(ResNetHead, self).__init__()
+        
+        # if only one head layer
         if num_head_layers == 1:
             self.head = nn.Sequential(
                 nn.AdaptiveAvgPool2d((1, 1)),
                 nn.Flatten(),
                 nn.Linear(512, num_classes)
             )
-            self.body = nn.Sequential(*list(self.resnet.children())[:-2])
         else:
-            # Add first 4 layers of resnet to body
-            self.body = nn.Sequential(*list(self.resnet.children())[0:4])
-            rest_to_add = list(self.resnet.children())[4:-2]
-            num_body_layers = 16 - num_head_layers + 1 
-            i = 0
-            for j, layer in enumerate(rest_to_add):
-                new_layer = []
-                for n, block in enumerate(layer):
-                    if i < num_body_layers:
-                        new_layer.append(block)
-                        i += 1
-                        # Rest_to_add
-                        to_add = layer[n+1:]
-                        rest_to_add[j] = nn.Sequential(*to_add)
-                        #print(layer[n+1:])
-                    else:
-                        break
-                self.body.add_module('layer' + str(j), nn.Sequential(*new_layer))
-
+            assert rest_to_add is not None
+            rest_to_add = [i for i in rest_to_add if i is not None]
                 
             # Add rest of layers to head
             self.head = nn.Sequential(*rest_to_add)
             self.head.add_module('avgpool', nn.AdaptiveAvgPool2d((1, 1)))
             self.head.add_module('flatten', nn.Flatten())
-            self.head.add_module('classifier', nn.Linear(512, num_classes))       
+            self.head.add_module('classifier', nn.Linear(512, num_classes))  
+        
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.head(x)
+
+class ResNetBody(nn.Module):
+    """ 
+    ResNet Body, consists out of n layers that will be added to body of model. 
+    
+    Args:
+        num_head_layers: number of layers in the head.
+        num_classes: number of classes (outputs)
+    """
+    def __init__(
+            self, 
+            num_head_layers : int = 1, 
+            num_classes : int = 10, 
+        ) -> None:
+        super(ResNetBody, self).__init__()
+
+        resnet = resnet34()
+        print(resnet)
+        quit()
+        
+        # if only one head layer
+        if num_head_layers == 1:
+            self.body = nn.Sequential(*list(resnet.children())[:-2])
+        else:
+            conv1 = 
+            self.body = nn.Sequential(*list(resnet.children())[0:4])
+            self.rest_to_add = list(resnet.children())[4:-2]
+            num_body_blocks = 16 - num_head_layers + 1 
+            i = 0
+            for j, layer in enumerate(self.rest_to_add):
+                new_layer = []
+                for n, block in enumerate(layer):
+                    if i < num_body_blocks:
+                        new_layer.append(block)
+                        i += 1
+                        # Rest_to_add
+                        to_add = layer[n+1:]
+                        if len(to_add) == 0:
+                            self.rest_to_add[j] = None
+                        else:
+                            self.rest_to_add[j] = nn.Sequential(*to_add)      
+                    else:
+                        break
+                self.body.add_module('layer' + str(j), nn.Sequential(*new_layer))
+        
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.body(x)
+
+    def get_rest_to_add(self,) -> list:
+        """ Return list of rest to add blocks (for head). """
+        return self.rest_to_add
+
+class ResNet(nn.Module):
+    """ ResNet model. """
+
+    def __init__(
+            self, 
+            num_head_layers : int = 1, 
+            num_classes : int = 10, 
+            device : str = 'cpu', 
+            name : str = 'resnet'
+        ) -> None:
+        super(ResNet, self).__init__()
+        assert num_head_layers > 0 and num_head_layers < 16, "num_head_layers must be greater than 0 and less than 16"
+        self.body = None
+        self.head = None
+
+        # Get body and head
+        self.body = ResNetBody(num_head_layers=num_head_layers, num_classes=num_classes)
+        if num_head_layers > 1:
+            rest_to_add = self.body.get_rest_to_add()
+            self.head = ResNetHead(
+                num_head_layers=num_head_layers, num_classes=num_classes,
+                rest_to_add = rest_to_add
+            )
+        else:
+            self.head = ResNetHead(num_head_layers=num_head_layers, num_classes=num_classes)  
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.body(x)
