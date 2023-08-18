@@ -28,26 +28,27 @@ class ResNetHead(nn.Module):
             rest_to_add : list = None
         ) -> None:
         super(ResNetHead, self).__init__()
+
+        self.rest_to_add = rest_to_add
         
         # if only one head layer
         if num_head_layers == 1:
-            self.head = nn.Sequential(
-                nn.AdaptiveAvgPool2d((1, 1)),
-                nn.Flatten(),
-                nn.Linear(512, num_classes)
-            )
+            self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+            self.fc = nn.Linear(512, num_classes)
         else:
-            assert rest_to_add is not None
-            rest_to_add = [i for i in rest_to_add if i is not None]
+            assert self.rest_to_add is not None
+            self.rest_to_add = [i for i in self.rest_to_add if i is not None]
                 
             # Add rest of layers to head
-            self.head = nn.Sequential(*rest_to_add)
-            self.head.add_module('avgpool', nn.AdaptiveAvgPool2d((1, 1)))
-            self.head.add_module('flatten', nn.Flatten())
-            self.head.add_module('classifier', nn.Linear(512, num_classes))  
+            self.head = nn.Sequential(*rest_to_add) 
         
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.head(x)
+        if self.rest_to_add is not None:
+            x = self.head(x)
+        x = self.avgpool(x)
+        # x = nn.Flatten(x, 1)
+        x = torch.flatten(x,1)
+        return self.fc(x)
 
 class ResNetBody(nn.Module):
     """ 
@@ -63,17 +64,18 @@ class ResNetBody(nn.Module):
             num_classes : int = 10, 
         ) -> None:
         super(ResNetBody, self).__init__()
-
+        self.num_head_layers = num_head_layers
         resnet = resnet34()
-        print(resnet)
-        quit()
-        
+             
         # if only one head layer
-        if num_head_layers == 1:
+        if self.num_head_layers == 1:
             self.body = nn.Sequential(*list(resnet.children())[:-2])
         else:
-            conv1 = 
-            self.body = nn.Sequential(*list(resnet.children())[0:4])
+            self.conv1 = nn.Conv2d(3, 64, kernel_size=(7,7), stride=(2,2), padding=(3,3), bias=False)
+            self.bn1 = nn.BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+            self.relu = nn.ReLU(inplace=True)
+            self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1, dilation=1, ceil_mode=False)
+            self.body = nn.Sequential()
             self.rest_to_add = list(resnet.children())[4:-2]
             num_body_blocks = 16 - num_head_layers + 1 
             i = 0
@@ -94,7 +96,14 @@ class ResNetBody(nn.Module):
                 self.body.add_module('layer' + str(j), nn.Sequential(*new_layer))
         
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.body(x)
+        if self.num_head_layers == 1:
+            return self.body(x)
+        else:
+            x = self.conv1(x)
+            x = self.bn1(x)
+            x = self.relu(x)
+            x = self.maxpool(x)
+            return self.body(x)
 
     def get_rest_to_add(self,) -> list:
         """ Return list of rest to add blocks (for head). """
@@ -111,7 +120,7 @@ class ResNet(nn.Module):
             name : str = 'resnet'
         ) -> None:
         super(ResNet, self).__init__()
-        assert num_head_layers > 0 and num_head_layers < 16, "num_head_layers must be greater than 0 and less than 16"
+        assert num_head_layers > 0 and num_head_layers <= 17, "num_head_layers must be greater than 0 and less than 16"
         self.body = None
         self.head = None
 
