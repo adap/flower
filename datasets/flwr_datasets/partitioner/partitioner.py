@@ -36,7 +36,7 @@ class Partitioner(ABC):
         """Dataset property."""
         if self._dataset is None:
             raise AttributeError(
-                "The dataset field should be set before using it (directly, via the "
+                "The dataset field should be set before using it (directly, via "
                 "`load_partition` or some other method). "
             )
         return self._dataset
@@ -44,7 +44,7 @@ class Partitioner(ABC):
     @dataset.setter
     def dataset(self, value: Dataset) -> None:
         if self._dataset is not None:
-            raise Warning(
+            raise Exception(
                 "The dataset should be assigned only once to the partitioner."
                 "This operation might also wipe out the saved references to the "
                 "created partitions (in case the partitioning scheme needs to create "
@@ -66,3 +66,19 @@ class Partitioner(ABC):
         dataset_partition: Dataset
             single dataset partition
         """
+
+    def is_dataset_assigned(self) -> bool:
+        """Check if a dataset has been assigned to the partitioner.
+
+        This method returns True if a dataset is already set for the partitioner,
+        otherwise, it returns False.
+
+        Returns
+        -------
+        dataset_assigned: bool
+            True if a dataset is assigned, otherwise False.
+        """
+        if self._dataset is not None:
+            return True
+        else:
+            return False
