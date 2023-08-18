@@ -1,9 +1,9 @@
 ---
-num_clients: 10 # total number of clients
-num_epochs: 4 # number of local epochs
+num_clients: 2 # total number of clients
+num_epochs: 2 # number of local epochs
 batch_size: 128
-num_rounds: 50
-clients_per_round: 10
+num_rounds: 2
+clients_per_round: 2
 learning_rate: 0.01
 algorithm: FedPer
 
@@ -19,11 +19,11 @@ dataset:
   num_classes: 10
 
 model:
-  _target_: FedPer.models.resnet_model.ResNet
-  num_head_layers: 1
+  _target_: FedPer.models.mobile_model.MobileNet
+  num_head_layers: 2
   num_classes: 10
   device: ${server_device}
-  name: resnet
+  name: mobile
 
 fit_config:
   drop_client: false

@@ -16,30 +16,46 @@ class CNNNetBody(nn.Module):
     """Model adapted from simple CNN from Flower 'Quickstart PyTorch' \
         (https://flower.dev/docs/quickstart-pytorch.html)."""
 
-    def __init__(self) -> None:
-        super(CNNNetBody, self).__init__()
+    def __init__(self):
+        super().__init__()
         self.conv1 = nn.Conv2d(3, 6, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)
         self.fc1 = nn.Linear(16 * 5 * 5, 120)
-        self.fc2 = nn.Linear(120, 84)
+        #self.fc2 = nn.Linear(120, 84)
+        #self.fc3 = nn.Linear(84, 10)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(-1, 16 * 5 * 5)
+        x = x.view(-1, 16 * 5 * 5) # flatten all dimensions except batch
         x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
+        #x = F.relu(self.fc2(x))
+        #x = self.fc3(x)
         return x
+
+class CNNHead(nn.Module):
+    """Model adapted from simple CNN from Flower 'Quickstart PyTorch' \
+        (https://flower.dev/docs/quickstart-pytorch.html)."""
+
+    def __init__(self,) -> None:
+        super(CNNHead, self,).__init__()
+        self.fc2 = nn.Linear(120, 84)
+        self.fc3 = nn.Linear(84, 10)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = F.relu(self.fc2(x))
+        return self.fc3(x)
 
 class CNNNet(nn.Module):
     """Model adapted from simple CNN from Flower 'Quickstart PyTorch' \
         (https://flower.dev/docs/quickstart-pytorch.html)."""
 
-    def __init__(self) -> None:
+    def __init__(self, name : str, num_head_layers : int = 2, num_classes : int = 10, device : str = 'cuda:0') -> None:
         super(CNNNet, self).__init__()
         self.body = CNNNetBody()
-        self.head = nn.Linear(84, 10)
+        self.head = CNNHead()
+        # self.head = nn.Linear(84, 10)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.body(x)
@@ -83,10 +99,10 @@ class CNNModelManager(ModelManager):
     def _create_model(self) -> nn.Module:
         """Return CNN model to be splitted into head and body."""
         try:
-            return CNNNet().to(self.device)
+            return CNNNet(name='cnn').to(self.device)
         except AttributeError:
             self.device = self.config['device']
-            return CNNNet().to(self.device)
+            return CNNNet(name='cnn').to(self.device)
 
     def train(
         self,
