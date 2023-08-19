@@ -10,23 +10,13 @@ import flwr as fl
 from flwr.common import Metrics
 from flwr.common.typing import Scalar
 
-from utils import Net, train, test, get_cifar_10
+from utils import Net, train, test, get_mnist
 
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
-parser.add_argument(
-    "--num_cpus",
-    type=int,
-    default=1,
-    help="Number of CPUs to assign to a virtual client",
-)
-parser.add_argument(
-    "--num_gpus",
-    type=float,
-    default=0.0,
-    help="Ratio of GPU memory to assign to a virtual client",
-)
+parser.add_argument("--num_cpus", type=int, default=1, help="Number of CPUs to assign to a virtual client")
+parser.add_argument("--num_gpus", type=float, default=0.0, help="Ratio of GPU memory to assign to a virtual client")
 parser.add_argument("--num_rounds", type=int, default=10, help="Number of FL rounds.")
 
 NUM_CLIENTS = 100
@@ -35,6 +25,10 @@ NUM_CLIENTS = 100
 # Flower client, adapted from Pytorch quickstart example
 class FlowerClient(fl.client.NumPyClient):
     def __init__(self, trainset, valset):
+
+        self.trainset = trainset
+        self.valset = valset
+
         # Instantiate model
         self.model = Net()
 
@@ -42,23 +36,22 @@ class FlowerClient(fl.client.NumPyClient):
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.model.to(self.device)  # send model to device
 
-        self.trainset = trainset
-        self.valset = valset
-
     def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
     def fit(self, parameters, config):
         set_params(self.model, parameters)
 
+        # read from config
+        batch, epochs = config["batch_size"], config["epochs"]
+
         # Construct dataloader
-        trainloader = DataLoader(
-            self.trainset,
-            batch_size=config["batch_size"],
-            shuffle=True,
-        )
+        trainloader = DataLoader(self.trainset, batch_size=batch,shuffle=True)
+
+        # Define optimizer
+        optimizer = torch.optim.SGD(self.model.parameters(), lr=0.01, momentum=0.9)
         # Train
-        train(self.model, trainloader, epochs=config["epochs"], device=self.device)
+        train(self.model, trainloader,optimizer,epochs=epochs,device=self.device)
 
         # Return local model and statistics
         return self.get_parameters({}), len(trainloader.dataset), {}
@@ -67,10 +60,7 @@ class FlowerClient(fl.client.NumPyClient):
         set_params(self.model, parameters)
 
         # Construct dataloader
-        valloader = DataLoader(
-            self.valset,
-            batch_size=64,
-        )
+        valloader = DataLoader(self.valset, batch_size=64)
 
         # Evaluate
         loss, accuracy = test(self.model, valloader, device=self.device)
@@ -78,7 +68,7 @@ class FlowerClient(fl.client.NumPyClient):
         # Return statistics
         return float(loss), len(valloader.dataset), {"accuracy": float(accuracy)}
 
-
+    
 def get_client_fn(train_partitions, val_partitions):
     """Return a function to be executed by the VirtualClientEngine in order to construct
     a client."""
@@ -111,11 +101,11 @@ def set_params(model: torch.nn.ModuleList, params: List[fl.common.NDArrays]):
     model.load_state_dict(state_dict, strict=True)
 
 
-def partition_cifar():
-    """Download and partitions the CIFAR10 dataset."""
+def prepare_dataset():
+    """Download and partitions the MNIST dataset."""
 
-    # get the CIFAR10 dataset
-    trainset, testset = get_cifar_10()
+    # get the MNIST dataset
+    trainset, testset = get_mnist()
 
     # split trainset into `num_partitions` trainsets
     num_images = len(trainset) // NUM_CLIENTS
@@ -185,7 +175,7 @@ def main():
     args = parser.parse_args()
 
     # Download CIFAR-10 dataset and partition it
-    trainsets, valsets, testset = partition_cifar()
+    trainsets, valsets, testset = prepare_dataset()
 
     # configure the strategy
     strategy = fl.server.strategy.FedAvg(

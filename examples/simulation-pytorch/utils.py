@@ -2,25 +2,25 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from torchvision import transforms, datasets
+from torchvision.transforms import ToTensor, Normalize, Compose
+from torchvision.datasets import MNIST
 
 
 # Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')
-# borrowed from Pytorch quickstart example
 class Net(nn.Module):
-    def __init__(self) -> None:
+    def __init__(self, num_classes: int=10) -> None:
         super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(3, 6, 5)
+        self.conv1 = nn.Conv2d(1, 6, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)
+        self.fc1 = nn.Linear(16 * 4 * 4, 120)
         self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, 10)
+        self.fc3 = nn.Linear(84, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(-1, 16 * 5 * 5)
+        x = x.view(-1, 16 * 4 * 4)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
@@ -28,18 +28,17 @@ class Net(nn.Module):
 
 
 # borrowed from Pytorch quickstart example
-def train(net, trainloader, epochs, device: str):
+def train(net, trainloader, optim, epochs, device: str):
     """Train the network on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(net.parameters(), lr=0.01, momentum=0.9)
     net.train()
     for _ in range(epochs):
         for images, labels in trainloader:
             images, labels = images.to(device), labels.to(device)
-            optimizer.zero_grad()
+            optim.zero_grad()
             loss = criterion(net(images), labels)
             loss.backward()
-            optimizer.step()
+            optim.step()
 
 
 # borrowed from Pytorch quickstart example
@@ -59,25 +58,14 @@ def test(net, testloader, device: str):
     return loss, accuracy
 
 
-def cifar10Transformation():
-    return transforms.Compose(
-        [
-            transforms.ToTensor(),
-            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-        ]
-    )
+def get_mnist(data_path: str = "./data"):
+    """Download MNIST and apply transform."""
 
+    # transformation to convert images to tensors and apply normalization
+    tr = Compose([ToTensor(), Normalize((0.1307,), (0.3081,))])
 
-def get_cifar_10(path_to_data="./data"):
-    """Downloads CIFAR10 dataset and generates a unified training set (it will be
-    partitioned later using the LDA partitioning mechanism."""
+    # prepare train and test set
+    trainset = MNIST(data_path, train=True, download=True, transform=tr)
+    testset = MNIST(data_path, train=False, download=True, transform=tr)
 
-    # download dataset and load train set
-    train_set = datasets.CIFAR10(
-        root=path_to_data, train=True, download=True, transform=cifar10Transformation()
-    )
-    test_set = datasets.CIFAR10(
-        root=path_to_data, train=False, transform=cifar10Transformation()
-    )
-
-    return train_set, test_set
+    return trainset, testset

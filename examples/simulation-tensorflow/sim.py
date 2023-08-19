@@ -167,8 +167,8 @@ def main() -> None:
         strategy=strategy,
         client_resources=client_resources,
         actor_kwargs={
-            "on_actor_init_fn": enable_tf_gpu_growth # enable GPU growth upon actor init.
-        }
+            "on_actor_init_fn": enable_tf_gpu_growth  # Enable GPU growth upon actor init.
+        },
     )
 
 
