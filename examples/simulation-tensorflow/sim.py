@@ -1,6 +1,8 @@
 import math
+from typing import Dict, List, Tuple
 
 import flwr as fl
+from flwr.common import Metrics
 import tensorflow as tf
 
 
@@ -11,17 +13,7 @@ VERBOSE = 0
 class FlowerClient(fl.client.NumPyClient):
     def __init__(self, x_train, y_train, x_val, y_val) -> None:
         # Create model
-        self.model = tf.keras.models.Sequential(
-            [
-                tf.keras.layers.Flatten(input_shape=(28, 28)),
-                tf.keras.layers.Dense(128, activation="relu"),
-                tf.keras.layers.Dropout(0.2),
-                tf.keras.layers.Dense(10, activation="softmax"),
-            ]
-        )
-        self.model.compile(
-            "adam", "sparse_categorical_crossentropy", metrics=["accuracy"]
-        )
+        self.model = get_model()
         self.x_train, self.y_train = x_train, y_train
         self.x_val, self.y_val = x_val, y_val
 
@@ -41,6 +33,20 @@ class FlowerClient(fl.client.NumPyClient):
             self.x_val, self.y_val, batch_size=64, verbose=VERBOSE
         )
         return loss, len(self.x_val), {"accuracy": acc}
+
+
+def get_model():
+    """Constructs a simple model architecture suitable for MNIST."""
+    model = tf.keras.models.Sequential(
+        [
+            tf.keras.layers.Flatten(input_shape=(28, 28)),
+            tf.keras.layers.Dense(128, activation="relu"),
+            tf.keras.layers.Dropout(0.2),
+            tf.keras.layers.Dense(10, activation="softmax"),
+        ]
+    )
+    model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+    return model
 
 
 def get_client_fn(dataset_partitions):
@@ -67,8 +73,8 @@ def get_client_fn(dataset_partitions):
 
 
 def partition_mnist():
-    # Downloads and partitions the MNIST dataset
-    (x_train, y_train), _ = tf.keras.datasets.mnist.load_data()
+    """Download and partitions the MNIST dataset."""
+    (x_train, y_train), testset = tf.keras.datasets.mnist.load_data()
     partitions = []
     # We keep all partitions equal-sized in this example
     partition_size = math.floor(len(x_train) / NUM_CLIENTS)
@@ -76,12 +82,41 @@ def partition_mnist():
         # Split dataset into non-overlapping NUM_CLIENT partitions
         idx_from, idx_to = int(cid) * partition_size, (int(cid) + 1) * partition_size
         partitions.append((x_train[idx_from:idx_to] / 255.0, y_train[idx_from:idx_to]))
-    return partitions
+    return partitions, testset
+
+
+def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
+    """Aggregation function for (federated) evaluation metrics, i.e. those returned by
+    the client's evaluate() method."""
+    # Multiply accuracy of each client by number of examples used
+    accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
+    examples = [num_examples for num_examples, _ in metrics]
+
+    # Aggregate and return custom metric (weighted average)
+    return {"accuracy": sum(accuracies) / sum(examples)}
+
+
+def get_evaluate_fn(testset):
+    """Return an evaluation function for server-side (i.e. centralised) evaluation."""
+    x_test, y_test = testset
+
+    # The `evaluate` function will be called after every round by the strategy
+    def evaluate(
+        server_round: int,
+        parameters: fl.common.NDArrays,
+        config: Dict[str, fl.common.Scalar],
+    ):
+        model = get_model()  # Construct the model
+        model.set_weights(parameters)  # Update model with the latest parameters
+        loss, accuracy = model.evaluate(x_test, y_test, verbose=VERBOSE)
+        return loss, {"accuracy": accuracy}
+
+    return evaluate
 
 
 def main() -> None:
     # Create dataset partitions (needed if your dataset is not pre-partitioned)
-    partitions = partition_mnist()
+    partitions, testset = partition_mnist()
 
     # Create FedAvg strategy
     strategy = fl.server.strategy.FedAvg(
@@ -92,6 +127,8 @@ def main() -> None:
         min_available_clients=int(
             NUM_CLIENTS * 0.75
         ),  # Wait until at least 75 clients are available
+        evaluate_metrics_aggregation_fn=weighted_average,  # aggregates federated metrics
+        evaluate_fn=get_evaluate_fn(testset),  # global evaluation function
     )
 
     # With a dictionary, you tell Flower's VirtualClientEngine that each
@@ -102,7 +139,7 @@ def main() -> None:
     fl.simulation.start_simulation(
         client_fn=get_client_fn(partitions),
         num_clients=NUM_CLIENTS,
-        config=fl.server.ServerConfig(num_rounds=20),
+        config=fl.server.ServerConfig(num_rounds=10),
         strategy=strategy,
         client_resources=client_resources,
     )
