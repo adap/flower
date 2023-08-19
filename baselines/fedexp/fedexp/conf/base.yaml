@@ -1,0 +1,38 @@
+---
+seed : 0
+
+num_clients: 100
+num_rounds: 500
+clients_per_round: 5
+num_epochs: 20
+batch_size: 50
+
+dataset_config:
+  name: "CIFAR10"
+  num_classes: 10
+  alpha: 0.5
+
+model:
+  _target_: fedexp.models.ResNet18
+  num_classes: ${dataset_config.num_classes}
+
+hyperparams:
+  eta_l: 0.01     # local learning rate
+  eta_g: adaptive # global learning rate
+  epsilon: 0.001
+  decay : 0.998
+  weight_decay: 0.0001
+  max_norm: 10
+  use_data_augmentation: true
+  use_gradient_clipping: true
+
+strategy:
+  _target_: fedexp.strategy.FedExP
+  fraction_fit: 0.00001
+  fraction_evaluate: 0.0
+  min_evaluate_clients: 0
+  min_fit_clients: ${clients_per_round}
+  min_available_clients: ${clients_per_round}
+
+client:
+  # client config
