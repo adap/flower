@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from torchvision import transforms, datasets
+
 
 # Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')
 # borrowed from Pytorch quickstart example
@@ -55,3 +57,27 @@ def test(net, testloader, device: str):
             correct += (predicted == labels).sum().item()
     accuracy = correct / len(testloader.dataset)
     return loss, accuracy
+
+
+def cifar10Transformation():
+    return transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        ]
+    )
+
+
+def get_cifar_10(path_to_data="./data"):
+    """Downloads CIFAR10 dataset and generates a unified training set (it will be
+    partitioned later using the LDA partitioning mechanism."""
+
+    # download dataset and load train set
+    train_set = datasets.CIFAR10(
+        root=path_to_data, train=True, download=True, transform=cifar10Transformation()
+    )
+    test_set = datasets.CIFAR10(
+        root=path_to_data, train=False, transform=cifar10Transformation()
+    )
+
+    return train_set, test_set

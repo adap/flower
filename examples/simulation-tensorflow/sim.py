@@ -1,10 +1,28 @@
 import math
+import argparse
 from typing import Dict, List, Tuple
+
+import tensorflow as tf
 
 import flwr as fl
 from flwr.common import Metrics
-import tensorflow as tf
+from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
 
+parser = argparse.ArgumentParser(description="Flower Simulation with Tensorflow/Keras")
+
+parser.add_argument(
+    "--num_cpus",
+    type=int,
+    default=1,
+    help="Number of CPUs to assign to a virtual client",
+)
+parser.add_argument(
+    "--num_gpus",
+    type=float,
+    default=0.0,
+    help="Ratio of GPU memory to assign to a virtual client",
+)
+parser.add_argument("--num_rounds", type=int, default=10, help="Number of FL rounds.")
 
 NUM_CLIENTS = 100
 VERBOSE = 0
@@ -115,6 +133,9 @@ def get_evaluate_fn(testset):
 
 
 def main() -> None:
+    # Parse input arguments
+    args = parser.parse_args()
+
     # Create dataset partitions (needed if your dataset is not pre-partitioned)
     partitions, testset = partition_mnist()
 
@@ -133,17 +154,25 @@ def main() -> None:
 
     # With a dictionary, you tell Flower's VirtualClientEngine that each
     # client needs exclusive access to these many resources in order to run
-    client_resources = {"num_cpus": 1, "num_gpus": 0.0}
+    client_resources = {
+        "num_cpus": args.num_cpus,
+        "num_gpus": args.num_gpus,
+    }
 
     # Start simulation
     fl.simulation.start_simulation(
         client_fn=get_client_fn(partitions),
         num_clients=NUM_CLIENTS,
-        config=fl.server.ServerConfig(num_rounds=10),
+        config=fl.server.ServerConfig(num_rounds=args.num_rounds),
         strategy=strategy,
         client_resources=client_resources,
+        actor_kwargs={
+            "on_actor_init_fn": enable_tf_gpu_growth # enable GPU growth upon actor init.
+        }
     )
 
 
 if __name__ == "__main__":
+    # Enable GPU growth in your main process
+    enable_tf_gpu_growth()
     main()
