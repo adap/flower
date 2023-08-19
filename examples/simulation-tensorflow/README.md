@@ -4,7 +4,7 @@ This introductory example uses the simulation capabilities of Flower to simulate
 
 ## Running the example (via Jupyter Notebook)
 
-Run the example on Google Colab: [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/examples/simulation_tensorflow/sim.ipynb)
+Run the example on Google Colab: [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/examples/simulation-tensorflow/sim.ipynb)
 
 Alternatively, you can run `sim.ipynb` locally or in any other Jupyter environment.
 
@@ -56,5 +56,12 @@ pip install -r requirements.txt
 ### Run Federated Learning Example
 
 ```bash
+# You can run the example without activating your environemnt
 poetry run python3 sim.py
+
+# Or by first activating it
+poetry shell
+# and then run the example
+python sim.py
+# you can exit your environment by typing "exit"
 ```
