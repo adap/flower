@@ -165,3 +165,6 @@ poetry.lock
 # iOS
 xcuserdata/
 .idea/
+*/.DS_Store
+*/__pycache__
+*__pycache__
