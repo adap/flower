@@ -43,18 +43,18 @@ A learning-oriented series of federated learning tutorials, the best place to st
    :caption: Quickstart tutorials
    :hidden:
 
-   quickstart-pytorch
-   quickstart-tensorflow
-   quickstart-huggingface
-   quickstart-jax
-   quickstart-pandas
-   quickstart-fastai
-   quickstart-pytorch-lightning
-   quickstart-mxnet
-   quickstart-scikitlearn
-   quickstart-xgboost
-   quickstart-android
-   quickstart-ios
+   tutorial-quickstart-pytorch
+   tutorial-quickstart-tensorflow
+   tutorial-quickstart-huggingface
+   tutorial-quickstart-jax
+   tutorial-quickstart-pandas
+   tutorial-quickstart-fastai
+   tutorial-quickstart-pytorch-lightning
+   tutorial-quickstart-mxnet
+   tutorial-quickstart-scikitlearn
+   tutorial-quickstart-xgboost
+   tutorial-quickstart-android
+   tutorial-quickstart-ios
 
 QUICKSTART TUTORIALS: :ref:`PyTorch <quickstart-pytorch>` | :ref:`TensorFlow <quickstart-tensorflow>` | :ref:`🤗 Transformers <quickstart-huggingface>` | :ref:`JAX <quickstart-jax>` | :ref:`Pandas <quickstart-pandas>` | :ref:`fastai <quickstart-fastai>` | :ref:`PyTorch Lightning <quickstart-pytorch-lightning>` | :ref:`MXNet <quickstart-mxnet>` | :ref:`scikit-learn <quickstart-scikitlearn>` | :ref:`XGBoost <quickstart-xgboost>` | :ref:`Android <quickstart-android>` | :ref:`iOS <quickstart-ios>`
 
