@@ -125,20 +125,55 @@ Considerations for Simulations
   We are actively working on these fronts so to make it trivial to run any FL workload with Flower simulation.
 
 
+The current VCE allows you to run Federated Learning workloads in simulation mode whether you are prototyping simple scenarios on your personal laptop or you want to train a complex FL pipeline across multiple high-performance GPU nodes. While we add more capabilities to the VCE, the points below highlight some of the considerations to keep in mind when designing your FL pipeline with Flower. We also highlight a couple of current limitations in our implementation.
+
+
+GPU Resources
+~~~~~~~~~~~~~
+
+The VCE assigns a share of GPU memory to a client that specifies the key :code:`num_gpus` in :code:`client_resources`. This being said, Ray (used internally by the VCE) is by default:
+
+
+* not aware of the total VRAM available on the GPUs. This means that if you set :code:`num_gpus=0.5` and you have two GPUs in your system with different (e.g. 32GB and 8GB) VRAM amounts, they both would run 2 clients concurrently.
+
+* not aware of other unrelated (i.e. not created by the VCE) workloads are running on the GPU. Two takeaways from this are:
+    * Your Flower server might need a GPU to evaluate the `global model` after aggregation (only if you make use of the `evaluate method <implementing-strategies.html#the-evaluate-method>`_)
+    * If you want to run several independent Flower simulations on the same machine you need to mask-out your GPUs with :code:`CUDA_VISIBLE_DEVICES="<GPU_IDs>"` when launching your experiment. 
+
+
+In addition, the GPU resource limits passed to :code:`client_resources` are not `enforced` (i.e. they can be exceeded) which can result in the situation of client using more VRAM than the ratio specified when starting the simulation. 
+
+TensorFlow and GPUs
+"""""""""""""""""""
+
+When `using a GPU with TensorFlow <https://www.tensorflow.org/guide/gpu>`_ nearly your entire GPU memory of all your GPUs visible to the process will be mapped. This is done by TensorFlow for optimization purposes. However, in settings such as FL simulations where we want to split the GPU into multiple `virtual` clients, this is not a desirable mechanism. Luckily we can disable this default behavior by `enabling memory growth <https://www.tensorflow.org/guide/gpu#limiting_gpu_memory_growth>`_. 
+
+This would need to be done in the main process (which is where the server would run) and in each Actor created by the VCE. By means of :code:`actor_kwargs` we can pass the reserved key `"on_actor_init_fn"` in order to specify a function that we would like to be executed upon actor initialization. In this case, to enable GPU growth for TF workloads. It would look as follows:
+
+.. code-block:: python
+
+    import flwr as fl
+    from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
+
+    # Enable GPU growth in the main thread (the one used by the
+    # server to quite likely run global evaluation using GPU)
+    enable_tf_gpu_growth()
+
+    # Start Flower simulation
+    hist = fl.simulation.start_simulation(
+        ...
+        actor_kwargs={
+            "on_actor_init_fn": enable_tf_gpu_growth # <-- To be executed upon actor init.
+        },
+    )
+
+This is precisely the mechanism used in `Tensorflow/Keras Simulation <https://github.com/adap/flower/tree/main/examples/simulation-tensorflow>`_ example.
+
+
 Multi-node setups
 ~~~~~~~~~~~~~~~~~
 
 * The VCE does not currently offer a way to control on which node a particular `virtual` client is executed. In other words, if more than a single node have the resources needed by a client to run, then any of those nodes could get the client workload scheduled onto. Later in the FL process (i.e. in a different round) the same client could be executed by a different node.
 
 * By definition virtual clients are `stateless` due to their ephemeral nature. A client state can be implemented as part of the Flower client class but users need to ensure this saved to persistent storage (e.g. a database, disk) and that can be retrieve later by the same client regardless on which node it is running from.
-
-
-
-* Fault tolerance
-* Expected homogeneous nodes (as far as GPU memory is concerned) -- client-to-node pinning (TODO)
-* GPU growth ?
-
-
-
-
 
