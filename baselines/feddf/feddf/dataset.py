@@ -8,3 +8,7 @@ partitioned, please include all those functions and logic in the
 `dataset_preparation.py` module. You can use all those functions from functions/methods
 defined here of course.
 """
+
+import torch
+from omegaconf import DicConfig
+from feddf.dataset_preparation import _partition_data
