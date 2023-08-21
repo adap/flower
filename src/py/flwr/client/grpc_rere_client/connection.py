@@ -118,6 +118,11 @@ def grpc_request_response(
 
     def create_node() -> None:
         """Set create_node."""
+        # Check if Node is already created
+        if node_store[KEY_NODE] is not None:
+            log(ERROR, "Node instance already exists")
+            return
+
         create_node_request = CreateNodeRequest()
         create_node_response = stub.CreateNode(
             request=create_node_request,
@@ -134,14 +139,16 @@ def grpc_request_response(
 
         delete_node_request = DeleteNodeRequest(node=node)
         stub.DeleteNode(request=delete_node_request)
+        node_store[KEY_NODE] = None
 
     def receive() -> Optional[TaskIns]:
         """Receive next task from server."""
         # Get Node
-        if node_store[KEY_NODE] is None:
-            log(ERROR, "Node instance missing")
-            return None
-        node: Node = cast(Node, node_store[KEY_NODE])
+        node: Node = (
+            Node(node_id=0, anonymous=True)
+            if node_store[KEY_NODE] is None
+            else cast(Node, node_store[KEY_NODE])
+        )
 
         # Request instructions (task) from server
         request = PullTaskInsRequest(node=node)
@@ -165,10 +172,11 @@ def grpc_request_response(
     def send(task_res: TaskRes) -> None:
         """Send task result back to server."""
         # Get Node
-        if node_store[KEY_NODE] is None:
-            log(ERROR, "Node instance missing")
-            return
-        node: Node = cast(Node, node_store[KEY_NODE])
+        node: Node = (
+            Node(node_id=0, anonymous=True)
+            if node_store[KEY_NODE] is None
+            else cast(Node, node_store[KEY_NODE])
+        )
 
         # Get incoming TaskIns
         if state[KEY_TASK_INS] is None:

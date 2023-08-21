@@ -21,6 +21,7 @@ from logging import ERROR, INFO, WARNING
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 from flwr.client.client import Client
+from flwr.client.client_binder import ClientBinder
 from flwr.client.numpy_client import NumPyClient
 from flwr.common import (
     bytes_to_ndarray,
@@ -156,6 +157,7 @@ class SecAggPlusHandler(SecureAggregationHandler):
         # Execute
         if self._current_stage == STAGE_SETUP:
             self._shared_state = SecAggPlusState(client=self)
+            ClientBinder.bind(max_rounds=4, max_time_seconds=3600 * 24)
             return _setup(self._shared_state, named_values)
         if self._current_stage == STAGE_SHARE_KEYS:
             return _share_keys(self._shared_state, named_values)

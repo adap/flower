@@ -51,6 +51,7 @@ from flwr.common.typing import (
 )
 
 from .client import Client
+from .client_binder import EphemeralIDManager
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle
@@ -98,6 +99,7 @@ def start_client(
     root_certificates: Optional[Union[bytes, str]] = None,
     rest: bool = False,  # Deprecated in favor of `transport`
     transport: Optional[str] = None,
+    anonymous: bool = False,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -193,8 +195,12 @@ def start_client(
         ) as conn:
             receive, send, create_node, delete_node = conn
 
-            # Register node
-            if create_node is not None:
+            # Register `create_node()` and `delete_node()`
+            if anonymous:
+                EphemeralIDManager.set_create_node_delete_node(create_node, delete_node)
+
+            # Register node for the non-anonymous client
+            if not anonymous and create_node is not None:
                 create_node()  # pylint: disable=not-callable
 
             while True:
@@ -203,12 +209,16 @@ def start_client(
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
                 task_res, sleep_duration, keep_going = handle(client, task_ins)
+                if anonymous:
+                    EphemeralIDManager.before_send()
                 send(task_res)
+                if anonymous:
+                    EphemeralIDManager.after_send()
                 if not keep_going:
                     break
 
             # Unregister node
-            if delete_node is not None:
+            if not anonymous and delete_node is not None:
                 delete_node()  # pylint: disable=not-callable
 
         if sleep_duration == 0:
