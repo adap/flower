@@ -78,17 +78,17 @@ Stay tuned, more tutorials are coming soon. Topics include **Privacy and Securit
 
 [Flower Docs](https://flower.dev/docs):
 * [Installation](https://flower.dev/docs/framework/how-to-install-flower.html)
-* [Quickstart (TensorFlow)](https://flower.dev/docs/framework/quickstart-tensorflow.html)
-* [Quickstart (PyTorch)](https://flower.dev/docs/framework/quickstart-pytorch.html)
-* [Quickstart (Hugging Face)](https://flower.dev/docs/framework/quickstart-huggingface.html)
-* [Quickstart (PyTorch Lightning [code example])](https://flower.dev/docs/framework/quickstart-pytorch-lightning.html)
+* [Quickstart (TensorFlow)](https://flower.dev/docs/framework/tutorial-quickstart-tensorflow.html)
+* [Quickstart (PyTorch)](https://flower.dev/docs/framework/tutorial-quickstart-pytorch.html)
+* [Quickstart (Hugging Face)](https://flower.dev/docs/framework/tutorial-quickstart-huggingface.html)
+* [Quickstart (PyTorch Lightning [code example])](https://flower.dev/docs/framework/tutorial-quickstart-pytorch-lightning.html)
 * [Quickstart (MXNet)](https://flower.dev/docs/framework/example-mxnet-walk-through.html)
-* [Quickstart (Pandas)](https://flower.dev/docs/framework/quickstart-pandas.html)
-* [Quickstart (fastai)](https://flower.dev/docs/framework/quickstart-fastai.html)
-* [Quickstart (JAX)](https://flower.dev/docs/framework/quickstart-jax.html)
-* [Quickstart (scikit-learn)](https://flower.dev/docs/framework/quickstart-scikitlearn.html)
-* [Quickstart (Android [TFLite])](https://flower.dev/docs/framework/quickstart-android.html)
-* [Quickstart (iOS [CoreML])](https://flower.dev/docs/framework/quickstart-ios.html)
+* [Quickstart (Pandas)](https://flower.dev/docs/framework/tutorial-quickstart-pandas.html)
+* [Quickstart (fastai)](https://flower.dev/docs/framework/tutorial-quickstart-fastai.html)
+* [Quickstart (JAX)](https://flower.dev/docs/framework/tutorial-quickstart-jax.html)
+* [Quickstart (scikit-learn)](https://flower.dev/docs/framework/tutorial-quickstart-scikitlearn.html)
+* [Quickstart (Android [TFLite])](https://flower.dev/docs/framework/tutorial-quickstart-android.html)
+* [Quickstart (iOS [CoreML])](https://flower.dev/docs/framework/tutorial-quickstart-ios.html)
 
 ## Flower Baselines
 
