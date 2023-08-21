@@ -1,5 +1,5 @@
-Strategies
-==========
+Use strategies
+==============
 
 Flower allows full customization of the learning process through the :code:`Strategy` abstraction. A number of built-in strategies are provided in the core framework.  
 
