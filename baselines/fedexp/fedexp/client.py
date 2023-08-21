@@ -20,12 +20,14 @@ class FlowerClient(fl.client.NumPyClient):
                  trainloader: DataLoader,
                  device: torch.device,
                  num_epochs: int,
+                 p, 
                  ):
         self.cid = cid
         self.net = net
         self.trainloader = trainloader
         self.device = device
         self.num_epochs = num_epochs
+        self.p = p
         print(f"Client {self.cid} created.")
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
@@ -54,13 +56,18 @@ class FlowerClient(fl.client.NumPyClient):
             vec_curr = parameters_to_vector(self.net.parameters())
             vec_prev = parameters_to_vector(prev_net.parameters())
             params_delta_vec = vec_curr - vec_prev
-            model_to_return = params_delta_vec
-        return self.get_parameters({}), len(self.trainloader), {}
+            grad = params_delta_vec
+            grad_p = self.p * grad
+            grad_norm = self.p * torch.linalg.norm(grad) ** 2
+
+        return self.get_parameters({}), len(self.trainloader), {"p": self.p, "grad_p": grad_p,
+                                                                "grad_norm":grad_norm, "epsilon":config["epsilon"]}
 
 
 def gen_client_fn(trainloaders: List[DataLoader],
                   model: DictConfig,
                   num_epochs: int,
+                  args: Dict,
                   ) -> Callable[[str], FlowerClient]:
     """Return a function which creates a new FlowerClient for a given cid."""
 
@@ -70,6 +77,7 @@ def gen_client_fn(trainloaders: List[DataLoader],
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         net = instantiate(model).to(device)
         trainloader = trainloaders[int(cid)]
+        p = args["p"][int(cid)]
 
         return FlowerClient(
             cid=int(cid),
@@ -77,6 +85,7 @@ def gen_client_fn(trainloaders: List[DataLoader],
             trainloader=trainloader,
             device=device,
             num_epochs=num_epochs,
+            p=p,
         )
 
     return client_fn

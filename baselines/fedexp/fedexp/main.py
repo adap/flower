@@ -6,6 +6,7 @@ import flwr as fl
 from fedexp import client, server
 from fedexp.dataset import load_datasets
 from fedexp.utils import seed_everything
+import numpy as np
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -25,13 +26,24 @@ def main(cfg: DictConfig) -> None:
                                              num_clients=cfg.num_clients,
                                              batch_size=cfg.batch_size,
                                              partition_equal=True)
+    
+    
+    p = np.zeros(cfg.num_clients)
+    
+    for i in range(cfg.num_clients):
+        p[i] = len(trainloaders[i])
+
+    p /= np.sum(p)
 
     client_fn = client.gen_client_fn(trainloaders=trainloaders,
                                      model=cfg.model,
                                      num_epochs=cfg.num_epochs,
+                                     args = {"p":p},
                                      )
 
     evaluate_fn = server.gen_evaluate_fn(test_loader=testloader, model=cfg.model)
+
+
 
     def get_on_fit_config():
         def fit_config_fn(server_round: int):
