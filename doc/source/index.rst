@@ -1,6 +1,10 @@
 Flower Framework Documentation
 ==============================
 
+.. meta::
+   :description: Documentation of the Flower Federated Learning Framework.
+   :keywords: machine learning, federated learning, federated pytorch
+
 Welcome to Flower's documentation. `Flower <https://flower.dev>`_ is a friendly federated learning framework.
 
 
