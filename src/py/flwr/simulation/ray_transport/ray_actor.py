@@ -118,7 +118,7 @@ def pool_size_from_resources(client_resources: Dict[str, Union[int, float]]) -> 
     if total_num_actors == 0:
         log(
             WARNING,
-            "Your ActorPool is empty. Your system (CPUs=%s, GPUs=%s) "
+            "Your ActorPool is empty. Your system (%s, %s) "
             "does not meet the criteria to host at least one client with resources:"
             " %s. Consider lowering your `client_resources`",
             num_cpus,
@@ -126,8 +126,7 @@ def pool_size_from_resources(client_resources: Dict[str, Union[int, float]]) -> 
             client_resources,
         )
         raise ValueError(
-            "ActorPool is empty. Stopping Simulation. "
-            "Check 'client_resources' passed to `start_simulation`"
+            "ActorPool is empty. Stopping Simulation. Check 'client_resources'"
         )
 
     return total_num_actors

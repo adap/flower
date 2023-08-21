@@ -70,13 +70,6 @@ jobs:
               from sklearn.datasets import load_iris
               Path('data').mkdir(exist_ok=True)
               load_iris(as_frame=True)['data'].to_csv('./data/client.csv')
-          
-          - directory: simulation-pytorch
-            dataset: |
-              from torchvision.datasets import CIFAR10
-              CIFAR10('./data', download=True)
-            skip-ece: True
-            skip-driver: True
 
     name: Framework / ${{matrix.directory}}
 
@@ -96,12 +89,10 @@ jobs:
         if: ${{ matrix.dataset }}
         run: python -c "${{ matrix.dataset }}"
       - name: Run edge client test
-        if: ${{!matrix.skip-ece}}
         run: ./../test.sh "${{ matrix.directory }}"
       - name: Run virtual client test
         run: python simulation.py
       - name: Run driver test
-        if: ${{!matrix.skip-driver}}
         run: ./../test_driver.sh
 
   strategies:
