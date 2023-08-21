@@ -36,7 +36,7 @@ A learning-oriented series of federated learning tutorials, the best place to st
    tutorial-get-started-with-flower-pytorch
    tutorial-use-a-federated-learning-strategy-pytorch
    tutorial-build-a-strategy-from-scratch-pytorch
-   tutorial-client-and-numpyclient-pytorch
+   tutorial-customize-the-client-pytorch
 
 .. toctree::
    :maxdepth: 1
