@@ -32,11 +32,11 @@ A learning-oriented series of federated learning tutorials, the best place to st
    :maxdepth: 1
    :caption: Tutorial
 
-   tutorial/Flower-0-What-is-FL
-   tutorial/Flower-1-Intro-to-FL-PyTorch
-   tutorial/Flower-2-Strategies-in-FL-PyTorch
-   tutorial/Flower-3-Building-a-Strategy-PyTorch
-   tutorial/Flower-4-Client-and-NumPyClient-PyTorch
+   tutorial-what-is-federated-learning
+   tutorial-intro-to-fl-pytorch
+   tutorial-strategies-in-fl-pytorch
+   tutorial-building-a-strategy-pytorch
+   tutorial-client-and-numpyclient-pytorch
 
 .. toctree::
    :maxdepth: 1
