@@ -4,6 +4,7 @@ plugins {
     id("com.google.protobuf")
     id("maven-publish")
     id("com.vanniktech.maven.publish")
+    id("org.jetbrains.dokka") version "1.8.20"
 }
 
 android {
@@ -74,14 +75,13 @@ protobuf {
 dependencies {
     implementation("androidx.core:core-ktx:1.10.1")
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.0"))
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
-    implementation("androidx.activity:activity-compose:1.7.2")
     implementation("io.grpc:grpc-okhttp:$grpcVersion")
     implementation("io.grpc:grpc-protobuf-lite:$grpcVersion")
     implementation("io.grpc:grpc-stub:$grpcVersion")
     implementation("javax.annotation:javax.annotation-api:1.3.2")
 
     protobuf(files("../../proto"))
+    dokkaPlugin("org.jetbrains.dokka:android-documentation-plugin:1.8.20")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
