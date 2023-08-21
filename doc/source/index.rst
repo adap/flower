@@ -86,7 +86,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    save-progress
    logging
    saving-and-loading-pytorch-checkpoints
-   simulation
+   run-simulation
    monitor-simulation
    ssl-enabled-connections
    recommended-env-setup
