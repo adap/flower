@@ -90,11 +90,11 @@ redirects = {
     "fedbn-example-pytorch-from-centralized-to-federated": "example-fedbn-pytorch-from-centralized-to-federated.html",
 
     # Restructuring: tutorials
-    "Flower-0-What-is-FL": "tutorial-what-is-federated-learning.html",
-    "Flower-1-Intro-to-FL-PyTorch": "tutorial-get-started-with-flower-pytorch.html",
-    "Flower-2-Strategies-in-FL-PyTorch": "tutorial-strategies-in-fl-pytorch.html",
-    "Flower-3-Building-a-Strategy-PyTorch": "tutorial-build-a-strategy-from-scratch-pytorch.html",
-    "Flower-4-Client-and-NumPyClient-PyTorch": "tutorial-client-and-numpyclient-pytorch.html",
+    "tutorial/Flower-0-What-is-FL": "tutorial-what-is-federated-learning.html",
+    "tutorial/Flower-1-Intro-to-FL-PyTorch": "tutorial-get-started-with-flower-pytorch.html",
+    "tutorial/Flower-2-Strategies-in-FL-PyTorch": "tutorial-strategies-in-fl-pytorch.html",
+    "tutorial/Flower-3-Building-a-Strategy-PyTorch": "tutorial-build-a-strategy-from-scratch-pytorch.html",
+    "tutorial/Flower-4-Client-and-NumPyClient-PyTorch": "tutorial-client-and-numpyclient-pytorch.html",
     "quickstart-pytorch": "tutorial-quickstart-pytorch.html",
     "quickstart-tensorflow": "tutorial-quickstart-tensorflow.html",
     "quickstart-huggingface": "tutorial-quickstart-huggingface.html",
