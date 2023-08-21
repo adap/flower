@@ -92,7 +92,7 @@ redirects = {
     # Restructuring: tutorials
     "tutorial/Flower-0-What-is-FL": "tutorial-what-is-federated-learning.html",
     "tutorial/Flower-1-Intro-to-FL-PyTorch": "tutorial-get-started-with-flower-pytorch.html",
-    "tutorial/Flower-2-Strategies-in-FL-PyTorch": "tutorial-strategies-in-fl-pytorch.html",
+    "tutorial/Flower-2-Strategies-in-FL-PyTorch": "tutorial-use-a-federated-learning-strategy-pytorch.html",
     "tutorial/Flower-3-Building-a-Strategy-PyTorch": "tutorial-build-a-strategy-from-scratch-pytorch.html",
     "tutorial/Flower-4-Client-and-NumPyClient-PyTorch": "tutorial-client-and-numpyclient-pytorch.html",
     "quickstart-pytorch": "tutorial-quickstart-pytorch.html",

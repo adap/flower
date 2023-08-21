@@ -34,7 +34,7 @@ A learning-oriented series of federated learning tutorials, the best place to st
 
    tutorial-what-is-federated-learning
    tutorial-get-started-with-flower-pytorch
-   tutorial-strategies-in-fl-pytorch
+   tutorial-use-a-federated-learning-strategy-pytorch
    tutorial-build-a-strategy-from-scratch-pytorch
    tutorial-client-and-numpyclient-pytorch
 

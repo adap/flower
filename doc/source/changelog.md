@@ -185,7 +185,7 @@ We would like to give our special thanks to all the contributors who made the ne
   Some users reported that Jupyter Notebooks have not always been easy to use on GPU instances. We listened and made improvements to all of our Jupyter notebooks! Check out the updated notebooks here:
 
   - [An Introduction to Federated Learning](https://flower.dev/docs/framework/tutorial-get-started-with-flower-pytorch.html)
-  - [Strategies in Federated Learning](https://flower.dev/docs/framework/tutorial-strategies-in-fl-pytorch.html)
+  - [Strategies in Federated Learning](https://flower.dev/docs/framework/tutorial-use-a-federated-learning-strategy-pytorch.html)
   - [Building a Strategy](https://flower.dev/docs/framework/tutorial-build-a-strategy-from-scratch-pytorch.html)
   - [Client and NumPyClient](https://flower.dev/docs/framework/tutorial-client-and-numpyclient-pytorch.html)
 
