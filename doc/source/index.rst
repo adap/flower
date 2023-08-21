@@ -134,27 +134,42 @@ Information-oriented API reference and other reference material.
    ref-faq
 
 
-Contributor Guide
------------------
+Contributor docs
+----------------
 
-The Flower authors welcome external contributions. The following guides are
-intended to help along the way.
+The Flower community welcomes contributions. The following docs are intended to help along the way.
+
 
 .. toctree::
    :maxdepth: 1
-   :caption: Contributor guide
+   :caption: Contributor tutorials
 
-   first-time-contributors
-   getting-started-for-contributors
-   good-first-contributions
-   recommended-env-setup
-   contributor-setup
-   write-documentation
-   architecture
-   secagg
-   release-process
-   creating-new-messages
-   devcontainer
+   contributor-tutorial-contribute-on-github
+   contributor-tutorial-get-started-as-a-contributor
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contributor how-to guides
+
+   contributor-how-to-install-development-versions
+   contributor-how-to-set-up-a-virtual-env
+   contributor-how-to-develop-in-vscode-dev-containers
+   contributor-how-to-create-new-messages
+   contributor-how-to-write-documentation
+   contributor-how-to-release-flower
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contributor explanations
+
+   contributor-explanation-architecture
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contributor references
+
+   contributor-ref-good-first-contributions
+   contributor-ref-secure-aggregation-protocols
    fed/index
 
 

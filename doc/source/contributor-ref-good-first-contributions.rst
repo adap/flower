@@ -1,4 +1,4 @@
-Good First Contributions
+Good first contributions
 ========================
 
 We welcome contributions to Flower! However, it is not always easy to know
