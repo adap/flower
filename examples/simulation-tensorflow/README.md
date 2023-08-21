@@ -13,10 +13,10 @@ Alternatively, you can run `sim.ipynb` locally or in any other Jupyter environme
 Start by cloning the code example. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-simulation . && rm -rf flower && cd quickstart-simulation
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/simulation-tensorflow . && rm -rf flower && cd simulation-tensorflow
 ```
 
-This will create a new directory called `quickstart-simulation` containing the following files:
+This will create a new directory called `simulation-tensorflow` containing the following files:
 
 ```
 -- README.md       <- Your're reading this right now
