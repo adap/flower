@@ -1,4 +1,4 @@
-Run Simulation
+Run simulation
 ==============
 
 Simulating Federated Learning workloads is useful for a multitude of use-cases: you might want to run your workload on a large cohort of clients but without having to source, configure and mange large number of physical devices; you might want to run your FL workloads as fast as possible on the compute systems you have access to without having to go through a complex setup process; you might want to validate your algorithm on different scenarios at varying levels of data and system heterogeneity, client availability, privacy budgets, etc. These are among some of the use-cases where simulating FL workloads makes sense. Flower can accommodate these scenarios by means of its `VirtualClientEngine <architecture.html#virtual-client-engine>`_ or VCE.
@@ -11,7 +11,7 @@ The :code:`VirtualClientEngine` schedules, launches and manages `virtual` client
 
 The :code:`VirtualClientEngine` implements `virtual` clients using `Ray <https://www.ray.io/>`_, an open-source framework for scalable Python workloads. In particular, Flower's :code:`VirtualClientEngine` makes use of `Actors <https://docs.ray.io/en/latest/ray-core/actors.html>`_ to spawn `virtual` clients and run their workload. 
 
-Launch your Flower FL Simulation
+Launch your Flower FL simulation
 --------------------------------
 
 Running Flower simulations still require you to define your client class, a strategy, and utility functions to download and load (and potentially partition) your dataset. With that out of the way, launching your simulation is done with `start_simulation <apiref-flwr.html#flwr.simulation.start_simulation>`_ and a minimal example looks as follows:
@@ -53,7 +53,7 @@ By default the VCE has access to all system resources (i.e. all CPUs, all GPUs, 
 
 
 
-Assigning Client Resources
+Assigning client resources
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 By default the :code:`VirtualClientEngine` assigns a single CPU core (and nothing else) to each virtual client. This means that if your system has 10 cores, that many virtual clients can be concurrently running.
 
@@ -85,7 +85,7 @@ While the :code:`client_resources` can be used to control the degree of concurre
 
 To understand all the intricate details on how resources are used to schedule FL clients and how to define custom resources, please take a look at the `Ray documentation <https://docs.ray.io/en/latest/ray-core/scheduling/resources.html>`_.
 
-Simulation Examples
+Simulation examples
 ~~~~~~~~~~~~~~~~~~~
 
 A few ready-to-run complete examples for Flower simulation in Tensorflow/Keras and PyTorch are provided in the `Flower repository <https://github.com/adap/flower>`_. You can run them on Google Colab too:
@@ -95,7 +95,7 @@ A few ready-to-run complete examples for Flower simulation in Tensorflow/Keras a
 
 
 
-Multi-node Flower Simulations
+Multi-node Flower simulations
 -----------------------------
 
 Flower's :code:`VirtualClientEngine` allows you to run FL simulations across multiple compute nodes. Before starting your multi-node simulation ensure that you:
@@ -111,7 +111,7 @@ With all the above done, you can run your code from the head node as you would i
 
 Once your simulation is finished, if you'd like to dismantle your cluster you simply need to run the command :code:`ray stop` in each node's terminal (including the head node).
 
-Multi-node Simulation good-to-know
+Multi-node simulation good-to-know
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Here we list a few interesting functionality when running multi-node FL simulations:
@@ -122,7 +122,7 @@ When attaching a new node to the head, all its resources (i.e. all CPUs, all GPU
 
 .. _considerations-for-simulations:
 
-Considerations for Simulations
+Considerations for simulations
 ------------------------------
 
 
@@ -133,7 +133,7 @@ Considerations for Simulations
 The current VCE allows you to run Federated Learning workloads in simulation mode whether you are prototyping simple scenarios on your personal laptop or you want to train a complex FL pipeline across multiple high-performance GPU nodes. While we add more capabilities to the VCE, the points below highlight some of the considerations to keep in mind when designing your FL pipeline with Flower. We also highlight a couple of current limitations in our implementation.
 
 
-GPU Resources
+GPU resources
 ~~~~~~~~~~~~~
 
 The VCE assigns a share of GPU memory to a client that specifies the key :code:`num_gpus` in :code:`client_resources`. This being said, Ray (used internally by the VCE) is by default:
