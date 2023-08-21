@@ -103,7 +103,7 @@ smv_branch_whitelist = r'^main$'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "furo"
+html_theme = "auto"
 html_title = f"Flower Framework {release}"
 html_logo = "_static/flower-logo.png"
 html_favicon = "_static/favicon.ico"
@@ -131,6 +131,8 @@ html_theme_options = {
     #     "color-admonition-background": "#F2B705",
     # },
 }
+
+html_context = {"default_mode": "light"}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
