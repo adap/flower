@@ -56,7 +56,7 @@ A learning-oriented series of federated learning tutorials, the best place to st
    tutorial-quickstart-android
    tutorial-quickstart-ios
 
-QUICKSTART TUTORIALS: :ref:`PyTorch <quickstart-pytorch>` | :ref:`TensorFlow <quickstart-tensorflow>` | :ref:`🤗 Transformers <quickstart-huggingface>` | :ref:`JAX <quickstart-jax>` | :ref:`Pandas <quickstart-pandas>` | :ref:`fastai <quickstart-fastai>` | :ref:`PyTorch Lightning <quickstart-pytorch-lightning>` | :ref:`MXNet <quickstart-mxnet>` | :ref:`scikit-learn <quickstart-scikitlearn>` | :ref:`XGBoost <quickstart-xgboost>` | :ref:`Android <quickstart-android>` | :ref:`iOS <quickstart-ios>`
+QUICKSTART TUTORIALS: :ref:`PyTorch <tutorial-quickstart-pytorch>` | :ref:`TensorFlow <tutorial-quickstart-tensorflow>` | :ref:`🤗 Transformers <tutorial-quickstart-huggingface>` | :ref:`JAX <tutorial-quickstart-jax>` | :ref:`Pandas <tutorial-quickstart-pandas>` | :ref:`fastai <tutorial-quickstart-fastai>` | :ref:`PyTorch Lightning <tutorial-quickstart-pytorch-lightning>` | :ref:`MXNet <tutorial-quickstart-mxnet>` | :ref:`scikit-learn <tutorial-quickstart-scikitlearn>` | :ref:`XGBoost <tutorial-quickstart-xgboost>` | :ref:`Android <tutorial-quickstart-android>` | :ref:`iOS <tutorial-quickstart-ios>`
 
 .. grid:: 2
 
