@@ -58,17 +58,19 @@ pip install -r requirements.txt
 
 ### Run Federated Learning Example
 
-
 #### With the EdgeClientEngine
 
 On different terminals, first run the server, then run at least two clients:
+
 ```bash
 poetry run python server.py
 
 # on another terminal
 poetry run python clietn.py # run at least two (yes, on separate terminals)
 ```
+
 We provide you with a script `run.sh` that will spawn a server and five client for you. You can run it as follows:
+
 ```bash
 poetry run bash run.sh
 ```
@@ -76,6 +78,7 @@ poetry run bash run.sh
 #### With the VirtualClientEngine
 
 Run the simulation from a single command:
+
 ```bash
 poetry run python sim.py
 ```

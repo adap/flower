@@ -1,4 +1,3 @@
-
 import argparse
 
 
@@ -17,7 +16,6 @@ parser.add_argument("--num_gpus", type=float, default=0.0, help="Ratio of GPU me
 TOTAL_CLIENTS = 100
 
 
-
 def get_client_fn(train_partitions, val_partitions):
     """Return a function to be executed by the VirtualClientEngine in order to construct
     a client."""
@@ -34,13 +32,11 @@ def get_client_fn(train_partitions, val_partitions):
     return client_fn
 
 
-
 def main():
     # Parse input arguments
     args = parser.parse_args()
 
     clients_trainset, clients_valset, testset = prepare_dataset(TOTAL_CLIENTS)
-
 
     # Resources to be assigned to each virtual client
     client_resources = {
@@ -57,7 +53,8 @@ def main():
         min_evaluate_clients=10,  # Never sample less than 10 clients for evaluation
         min_available_clients=TOTAL_CLIENTS,
         evaluate_fn=get_evaluate_fn(testset),
-        evaluate_metrics_aggregation_fn=weighted_average)
+        evaluate_metrics_aggregation_fn=weighted_average,
+    )
 
     # Start simulation
     fl.simulation.start_simulation(

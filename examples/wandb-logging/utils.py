@@ -1,4 +1,3 @@
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -10,7 +9,7 @@ from torchvision.transforms import Compose, Normalize, ToTensor
 class Net(nn.Module):
     """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""
 
-    def __init__(self, num_classes: int=10) -> None:
+    def __init__(self, num_classes: int = 10) -> None:
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(1, 6, 5)
         self.pool = nn.MaxPool2d(2, 2)
@@ -27,7 +26,7 @@ class Net(nn.Module):
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
-    
+
 
 def test(net, testloader, device):
     """Validate the model on the test set."""
@@ -54,6 +53,7 @@ def get_mnist(data_path: str = "./data"):
     testset = MNIST(data_path, train=False, download=True, transform=tr)
 
     return trainset, testset
+
 
 def prepare_dataset(total_clients: int = None):
     """Download and partitions the MNIST dataset."""
