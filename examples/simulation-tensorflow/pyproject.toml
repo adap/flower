@@ -3,9 +3,9 @@ requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "simulation_tensorflow"
+name = "simulation-tensorflow"
 version = "0.1.0"
-description = "Federated Learning Simulation Quickstart with Flower"
+description = "Federated Learning Simulation with Flower and Tensorflow"
 authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
