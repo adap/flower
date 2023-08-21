@@ -18,28 +18,6 @@ from functools import reduce
 import torch
 
 
-def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
-    """Aggregation function for weighted average during evaluation.
-
-    Parameters
-    ----------
-    metrics : List[Tuple[int, Metrics]]
-        The list of metrics to aggregate.
-
-    Returns
-    -------
-    Metrics
-        The weighted average metric.
-    """
-    # Multiply accuracy of each client by number of examples used
-    accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
-    examples = [num_examples for num_examples, _ in metrics]
-
-    # Aggregate and return custom metric (weighted average)
-    print("here and nothing is breaking!!!")
-    return {"accuracy": int(sum(accuracies)) / int(sum(examples))}
-
-
 def aggregate(weights: List[NDArrays]) -> NDArrays:
     """Computes average."""
     num_clients = len(weights)
@@ -51,11 +29,16 @@ def aggregate(weights: List[NDArrays]) -> NDArrays:
 
 class TamunaStrategy(Strategy):
     def __init__(
-        self, clients_per_round: int, epochs_per_round: List[int], evaluate_fn: Callable
+        self,
+        clients_per_round: int,
+        epochs_per_round: List[int],
+        eta: float,
+        evaluate_fn: Callable,
     ) -> None:
         self.clients_per_round = clients_per_round
         self.epochs_per_round = epochs_per_round
         self.evaluate_fn = evaluate_fn
+        self.eta = eta
         self.server_model = None
 
     def initialize_parameters(self, client_manager):
@@ -67,9 +50,7 @@ class TamunaStrategy(Strategy):
 
     def configure_fit(self, server_round: int, parameters, client_manager):
         clients = client_manager.sample(self.clients_per_round)
-        config = {
-            "epochs": self.epochs_per_round[server_round - 1],
-        }
+        config = {"epochs": self.epochs_per_round[server_round - 1], "eta": self.eta}
 
         # save compression mask to files {[self.cid]}_mask.bin
 
@@ -88,6 +69,4 @@ class TamunaStrategy(Strategy):
         return None, {}
 
     def evaluate(self, server_round: int, parameters):
-        if server_round == 0:
-            return None
         return self.evaluate_fn(parameters)

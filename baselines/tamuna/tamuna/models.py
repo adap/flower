@@ -2,8 +2,10 @@
 
 
 from typing import List, Tuple
+from collections import OrderedDict
 
 import torch
+import copy
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.parameter import Parameter
@@ -50,14 +52,25 @@ class Net(nn.Module):
         return output_tensor
 
 
+def __model_zeroed_out(net):
+    control_variate = copy.deepcopy(net)
+    state_dict = OrderedDict(
+        {k: torch.zeros_like(v) for k, v in net.state_dict().items()}
+    )
+    control_variate.load_state_dict(state_dict, strict=True)
+    return control_variate
+
+
 def train(
     net: nn.Module,
     trainloader: DataLoader,
     device: torch.device,
     epochs: int,
-    learning_rate: float,
-    control_variate: torch.Tensor
-) -> None:
+    lr: float,
+    eta: float,
+    server_net: nn.Module,
+    control_variate: nn.Module,
+) -> (nn.Module, nn.Module):
     """Train the network on the training set.
 
     Parameters
@@ -76,13 +89,53 @@ def train(
         Parameter for the weight of the proximal term.
     """
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, weight_decay=0.001)
     global_params = [val.detach().clone() for val in net.parameters()]
     net.train()
+
+    if control_variate is not None:
+        with torch.no_grad():
+            control_variate.to(device)
+
+            modules = []
+            for module in list(net.modules())[1:]:
+                if len(list(module.parameters())) != 0:
+                    modules.append(module)
+
+            server_modules = []
+            for server_module in list(server_net.modules())[1:]:
+                if len(list(server_module.parameters())) != 0:
+                    server_modules.append(server_module)
+
+            control_variate_modules = []
+            for control_variate_module in list(control_variate.modules())[1:]:
+                if len(list(control_variate_module.parameters())) != 0:
+                    control_variate_modules.append(control_variate_module)
+
+            for i, module in enumerate(control_variate_modules):
+                module.weight.copy_(
+                    module.weight.data
+                    + (eta / lr)
+                    * (server_modules[i].weight.data - modules[i].weight.data)
+                )
+                module.bias.copy_(
+                    module.bias.data
+                    + (eta / lr) * (server_modules[i].bias.data - modules[i].bias.data)
+                )
+    else:
+        control_variate = __model_zeroed_out(net)
+
     for _ in range(epochs):
         net = _train_one_epoch(
-            net, global_params, trainloader, device, criterion, optimizer
+            net,
+            global_params,
+            trainloader,
+            device,
+            criterion,
+            lr,
+            control_variate,
         )
+
+    return net, control_variate
 
 
 def _train_one_epoch(
@@ -91,7 +144,8 @@ def _train_one_epoch(
     trainloader: DataLoader,
     device: torch.device,
     criterion: torch.nn.CrossEntropyLoss,
-    optimizer: torch.optim.Adam,
+    lr,
+    control_variate,
 ) -> nn.Module:
     """Train for one epoch.
 
@@ -115,12 +169,39 @@ def _train_one_epoch(
     nn.Module
         The model that has been trained for one epoch.
     """
+
     for images, labels in trainloader:
         images, labels = images.to(device), labels.to(device)
-        optimizer.zero_grad()
+
+        net.zero_grad(set_to_none=False)
+
         loss = criterion(net(images), labels)
         loss.backward()
-        optimizer.step()
+
+        with torch.no_grad():
+            control_variate.to(device)
+
+            modules = []
+            for module in list(net.modules())[1:]:
+                if len(list(module.parameters())) != 0:
+                    modules.append(module)
+
+            control_variate_modules = []
+            for control_variate_module in list(control_variate.modules())[1:]:
+                if len(list(control_variate_module.parameters())) != 0:
+                    control_variate_modules.append(control_variate_module)
+
+            for i, module in enumerate(modules):
+                module.weight.copy_(
+                    module.weight.data
+                    - lr
+                    * (module.weight.grad.data - control_variate_modules[i].weight.data)
+                )
+                module.bias.copy_(
+                    module.bias.data
+                    - lr
+                    * (module.bias.grad.data - control_variate_modules[i].bias.data)
+                )
     return net
 
 

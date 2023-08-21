@@ -45,6 +45,7 @@ def main(cfg: DictConfig) -> None:
         cfg.strategy,
         clients_per_round=cfg.clients_per_round,
         epochs_per_round=epochs_per_round,
+        eta=cfg.eta,
         evaluate_fn=evaluate_fn,
     )
 
