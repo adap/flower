@@ -103,7 +103,7 @@ smv_branch_whitelist = r'^main$'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "auto"
+html_theme = "furo"
 html_title = f"Flower Framework {release}"
 html_logo = "_static/flower-logo.png"
 html_favicon = "_static/favicon.ico"
