@@ -1,5 +1,5 @@
-Flower Documentation
-====================
+Flower Framework Documentation
+==============================
 
 Welcome to Flower's documentation. `Flower <https://flower.dev>`_ is a friendly federated learning framework.
 
@@ -89,13 +89,18 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    simulation
    monitor-simulation
    ssl-enabled-connections
+   recommended-env-setup
+   upgrade-to-flower-1.0
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Legacy example guides
+
    example-walkthrough-pytorch-mnist
    example-pytorch-from-centralized-to-federated
    example-mxnet-walk-through
    example-jax-from-centralized-to-federated
-   fedbn-example-pytorch-from-centralized-to-federated
-   recommended-env-setup
-   upgrade-to-flower-1.0
+   example-fedbn-pytorch-from-centralized-to-federated
 
 Explanations
 ~~~~~~~~~~~~
@@ -109,8 +114,8 @@ Understanding-oriented concept guides explain and discuss key topics and underly
    evaluation
    differential-privacy-wrappers
 
-Reference
-~~~~~~~~~
+References
+~~~~~~~~~~
 
 Information-oriented API reference and other reference material.
 
@@ -118,8 +123,8 @@ Information-oriented API reference and other reference material.
    :maxdepth: 2
    :caption: API reference
 
-   flwr (Python package) <apiref-flwr>
-   Flower CLI commands <apiref-cli>
+   apiref-flwr
+   apiref-cli
 
 .. toctree::
    :maxdepth: 1
