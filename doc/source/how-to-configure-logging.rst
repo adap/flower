@@ -1,5 +1,5 @@
-Logging
-=============
+Configure logging
+=================
 
 The Flower logger keeps track of all core events that take place in federated learning workloads.
 It presents information by default following a standard message format:
@@ -30,7 +30,7 @@ In this way, the logger would typically display information on your terminal as 
     ...
 
 
-Saving Log to File
+Saving log to file
 -------------------
 
 By default, the Flower log is outputted to the terminal where you launch your Federated Learning workload from. This applies for both gRPC-based federation (i.e. when you do :code:`fl.server.start_server`) and when using the :code:`VirtualClientEngine` (i.e. when you do :code:`fl.simulation.start_simulation`).
@@ -70,8 +70,8 @@ If we inspect we see the log above is also recorded but prefixing with :code:`id
     ...
 
 
-Logging Your Own Messages
--------------------------
+Log your own messages
+---------------------
 
 You might expand the information shown by default with the Flower logger by adding more messages relevant to your application.
 You can achieve this easily as follows.
@@ -124,8 +124,8 @@ In this way your logger will show, in addition to the default messages, the ones
     ...
 
 
-Logging to a Remote Service
----------------------------
+Log to a remote service
+-----------------------
 
 The :code:`fl.common.logger.configure` function, also allows specifying a host to which logs can be pushed (via :code:`POST`) through a native Python :code:`logging.handler.HTTPHandler`.
 This is a particularly useful feature in :code:`gRPC`-based Federated Learning workloads where otherwise gathering logs from all entities (i.e. the server and the clients) might be cumbersome.
