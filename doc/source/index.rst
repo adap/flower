@@ -32,31 +32,31 @@ A learning-oriented series of federated learning tutorials, the best place to st
    :maxdepth: 1
    :caption: Tutorial
 
-   tutorial/Flower-0-What-is-FL
-   tutorial/Flower-1-Intro-to-FL-PyTorch
-   tutorial/Flower-2-Strategies-in-FL-PyTorch
-   tutorial/Flower-3-Building-a-Strategy-PyTorch
-   tutorial/Flower-4-Client-and-NumPyClient-PyTorch
+   tutorial-what-is-federated-learning
+   tutorial-get-started-with-flower-pytorch
+   tutorial-use-a-federated-learning-strategy-pytorch
+   tutorial-build-a-strategy-from-scratch-pytorch
+   tutorial-customize-the-client-pytorch
 
 .. toctree::
    :maxdepth: 1
    :caption: Quickstart tutorials
    :hidden:
 
-   quickstart-pytorch
-   quickstart-tensorflow
-   quickstart-huggingface
-   quickstart-jax
-   quickstart-pandas
-   quickstart-fastai
-   quickstart-pytorch-lightning
-   quickstart-mxnet
-   quickstart-scikitlearn
-   quickstart-xgboost
-   quickstart-android
-   quickstart-ios
+   tutorial-quickstart-pytorch
+   tutorial-quickstart-tensorflow
+   tutorial-quickstart-huggingface
+   tutorial-quickstart-jax
+   tutorial-quickstart-pandas
+   tutorial-quickstart-fastai
+   tutorial-quickstart-pytorch-lightning
+   tutorial-quickstart-mxnet
+   tutorial-quickstart-scikitlearn
+   tutorial-quickstart-xgboost
+   tutorial-quickstart-android
+   tutorial-quickstart-ios
 
-QUICKSTART TUTORIALS: :ref:`PyTorch <quickstart-pytorch>` | :ref:`TensorFlow <quickstart-tensorflow>` | :ref:`🤗 Transformers <quickstart-huggingface>` | :ref:`JAX <quickstart-jax>` | :ref:`Pandas <quickstart-pandas>` | :ref:`fastai <quickstart-fastai>` | :ref:`PyTorch Lightning <quickstart-pytorch-lightning>` | :ref:`MXNet <quickstart-mxnet>` | :ref:`scikit-learn <quickstart-scikitlearn>` | :ref:`XGBoost <quickstart-xgboost>` | :ref:`Android <quickstart-android>` | :ref:`iOS <quickstart-ios>`
+QUICKSTART TUTORIALS: :ref:`PyTorch <tutorial-quickstart-pytorch>` | :ref:`TensorFlow <tutorial-quickstart-tensorflow>` | :ref:`🤗 Transformers <tutorial-quickstart-huggingface>` | :ref:`JAX <tutorial-quickstart-jax>` | :ref:`Pandas <tutorial-quickstart-pandas>` | :ref:`fastai <tutorial-quickstart-fastai>` | :ref:`PyTorch Lightning <tutorial-quickstart-pytorch-lightning>` | :ref:`MXNet <tutorial-quickstart-mxnet>` | :ref:`scikit-learn <tutorial-quickstart-scikitlearn>` | :ref:`XGBoost <tutorial-quickstart-xgboost>` | :ref:`Android <tutorial-quickstart-android>` | :ref:`iOS <tutorial-quickstart-ios>`
 
 .. grid:: 2
 
@@ -110,8 +110,8 @@ Understanding-oriented concept guides explain and discuss key topics and underly
    :maxdepth: 1
    :caption: Explanations
 
-   evaluation
-   differential-privacy-wrappers
+   explanation-federated-evaluation
+   explanation-differential-privacy
 
 References
 ~~~~~~~~~~
@@ -122,17 +122,17 @@ Information-oriented API reference and other reference material.
    :maxdepth: 2
    :caption: API reference
 
-   apiref-flwr
-   apiref-cli
+   ref-api-flwr
+   ref-api-cli
 
 .. toctree::
    :maxdepth: 1
    :caption: Reference docs
 
-   examples
-   telemetry
-   changelog
-   faq
+   ref-example-projects
+   ref-telemetry
+   ref-changelog
+   ref-faq
 
 
 Contributor Guide

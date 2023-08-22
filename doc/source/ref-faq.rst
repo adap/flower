@@ -7,8 +7,8 @@ This page collects answers to commonly asked questions about Federated Learning 
 
     Yes, it can! Flower even comes with a few under-the-hood optimizations to make it work even better on Colab. Here's a quickstart example:
     
-    * `Flower Quickstart (TensorFlow/Keras) <https://colab.research.google.com/github/adap/flower/blob/main/examples/simulation_tensorflow/sim.ipynb>`_
-    * Flower Quickstart (PyTorch): coming soon (the TensorFlow/Keras example can easily be changed to make it work with PyTorch)
+    * `Flower simulation PyTorch <https://colab.research.google.com/github/adap/flower/blob/main/examples/simulation-pytorch-colab/tutorial.ipynb>`_
+    * `Flower simulation TensorFlow/Keras <https://colab.research.google.com/github/adap/flower/blob/main/examples/simulation-tensorflow/sim.ipynb>`_
 
 .. dropdown:: :fa:`eye,mr-1` How can I run Federated Learning on a Raspberry Pi?
 
@@ -16,7 +16,10 @@ This page collects answers to commonly asked questions about Federated Learning 
 
 .. dropdown:: :fa:`eye,mr-1` Does Flower support federated learning on Android devices?
 
-    Yes, it does. Please take a look at our `blog post <https://flower.dev/blog/2021-12-15-federated-learning-on-android-devices-with-flower>`_ or check out the `Android code example on GitHub <https://github.com/adap/flower/tree/main/examples/android>`_.
+    Yes, it does. Please take a look at our `blog post <https://flower.dev/blog/2021-12-15-federated-learning-on-android-devices-with-flower>`_ or check out the code examples:
+
+    * `Android Kotlin example <https://flower.dev/docs/examples/android-kotlin.html>`_
+    * `Android Java example <https://flower.dev/docs/examples/android.html>`_
 
 .. dropdown:: :fa:`eye,mr-1` Can I combine federated learning with blockchain?
 
