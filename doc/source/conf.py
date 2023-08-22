@@ -119,6 +119,10 @@ redirects = {
     "logging": "how-to-configure-logging.html",
     "ssl-enabled-connections": "how-to-enable-ssl-connections.html",
     "upgrade-to-flower-1.0": "how-to-upgrade-to-flower-1.0.html",
+
+    # Restructuring: explanations
+    "evaluation": "explanation-federated-evaluation.html",
+    "differential-privacy-wrappers": "explanation-differential-privacy.html",
     
     # Deleted pages
     "people": "index.html",
