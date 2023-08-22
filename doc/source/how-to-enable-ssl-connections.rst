@@ -1,5 +1,5 @@
-SSL-enabled Server and Client
-=============================
+Enable SSL connections
+======================
 
 This guide describes how to a SSL-enabled secure Flower server can be started and
 how a Flower client can establish a secure connections to it.
@@ -92,7 +92,7 @@ You should now have learned how to generate self-signed certificates using the g
 SSL-enabled server, and have a client establish a secure connection to it.
 
 
-Additional Resources
+Additional resources
 --------------------
 
 These additional sources might be relevant if you would like to dive deeper into the topic of certificates:

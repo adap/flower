@@ -1,47 +1,8 @@
-Save Progress
-=============
+Aggregate evaluation results
+============================
 
-The Flower server does not prescribe a way to persist model updates or evaluation results.
-Flower does not (yet) automatically save model updates on the server-side.
-It's on the roadmap to provide a built-in way of doing this.
+The Flower server does not prescribe a way to aggregate evaluation results, but it enables the user to fully customize result aggregation.
 
-Model Checkpointing
--------------------
-
-Model updates can be persisted on the server-side by customizing :code:`Strategy` methods.
-Implementing custom strategies is always an option, but for many cases it may be more convenient to simply customize an existing strategy.
-The following code example defines a new :code:`SaveModelStrategy` which customized the existing built-in :code:`FedAvg` strategy.
-In particular, it customizes :code:`aggregate_fit` by calling :code:`aggregate_fit` in the base class (:code:`FedAvg`).
-It then continues to save returned (aggregated) weights before it returns those aggregated weights to the caller (i.e., the server):
-
-.. code-block:: python
-
-    class SaveModelStrategy(fl.server.strategy.FedAvg):
-        def aggregate_fit(
-            self,
-            server_round: int,
-            results: List[Tuple[fl.server.client_proxy.ClientProxy, fl.common.FitRes]],
-            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-        ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-
-            # Call aggregate_fit from base class (FedAvg) to aggregate parameters and metrics
-            aggregated_parameters, aggregated_metrics = super().aggregate_fit(server_round, results, failures)
-        
-            if aggregated_parameters is not None:
-                # Convert `Parameters` to `List[np.ndarray]`
-                aggregated_ndarrays: List[np.ndarray] = fl.common.parameters_to_ndarrays(aggregated_parameters)
-
-                # Save aggregated_ndarrays
-                print(f"Saving round {server_round} aggregated_ndarrays...")
-                np.savez(f"round-{server_round}-weights.npz", *aggregated_ndarrays)
-
-            return aggregated_parameters, aggregated_metrics
-
-    # Create strategy and run server
-    strategy = SaveModelStrategy(
-        # (same arguments as FedAvg here)
-    )
-    fl.server.start_server(strategy=strategy)
 
 Aggregate Custom Evaluation Results
 -----------------------------------
