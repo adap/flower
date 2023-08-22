@@ -168,9 +168,9 @@ The Flower community welcomes contributions. The following docs are intended to 
    :maxdepth: 1
    :caption: Contributor references
 
+   fed/index
    contributor-ref-good-first-contributions
    contributor-ref-secure-aggregation-protocols
-   fed/index
 
 
 .. Indices and tables

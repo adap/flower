@@ -7,7 +7,7 @@ start to increase your chances of getting your PR accepted into the Flower
 codebase.
 
 
-Where to Start
+Where to start
 --------------
 
 Until the Flower core library matures it will be easier to get PR's accepted if
@@ -19,8 +19,8 @@ are:
 - Examples: See below.
 
 
-Request for Baselines
----------------------
+Request for Flower Baselines
+----------------------------
 
 If you are not familiar with Flower Baselines, you should probably check-out our `contributing guide for baselines <https://flower.dev/docs/contributing-baselines.html>`_.
 
@@ -30,15 +30,13 @@ If you find a baseline that you'd like to work on and that has no assignes, feel
 
 Otherwise, if you don't find a baseline you'd like to work on, be sure to open a new issue with the baseline request template!
 
-Request for Examples
+Request for examples
 --------------------
 
 We wish we had more time to write usage examples because we believe they help
 users to get started with building what they want to build. Here are a few
 ideas where we'd be happy to accept a PR:
 
-- First MXNet 1.6 example (MNIST)
-- ImageNet (PyTorch/TensorFlow)
-- LSTM (PyTorch/TensorFlow)
-- Transformer (PyTorch/TensorFlow)
-- BERT (PyTorch/TensorFlow)
+- Llama 2 fine-tuning, with Hugging Face Transformers and PyTorch
+- XGBoost
+- Android ONNX on-device training
