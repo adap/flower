@@ -11,6 +11,7 @@ The :code:`VirtualClientEngine` schedules, launches and manages `virtual` client
 
 The :code:`VirtualClientEngine` implements `virtual` clients using `Ray <https://www.ray.io/>`_, an open-source framework for scalable Python workloads. In particular, Flower's :code:`VirtualClientEngine` makes use of `Actors <https://docs.ray.io/en/latest/ray-core/actors.html>`_ to spawn `virtual` clients and run their workload. 
 
+
 Launch your Flower simulation
 -----------------------------
 
