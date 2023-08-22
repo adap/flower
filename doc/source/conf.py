@@ -123,7 +123,15 @@ redirects = {
     # Restructuring: explanations
     "evaluation": "explanation-federated-evaluation.html",
     "differential-privacy-wrappers": "explanation-differential-privacy.html",
-    
+
+    # Restructuring: references
+    "apiref-flwr": "ref-api-flwr.html",
+    "apiref-cli": "ref-api-cli.html",
+    "examples": "ref-example-projects.html",
+    "telemetry": "ref-telemetry.html",
+    "changelog": "ref-changelog.html",
+    "faq": "ref-faq.html",
+
     # Deleted pages
     "people": "index.html",
     "organizations": "index.html",

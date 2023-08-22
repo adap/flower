@@ -121,17 +121,17 @@ Information-oriented API reference and other reference material.
    :maxdepth: 2
    :caption: API reference
 
-   apiref-flwr
-   apiref-cli
+   ref-api-flwr
+   ref-api-cli
 
 .. toctree::
    :maxdepth: 1
    :caption: Reference docs
 
-   examples
-   telemetry
-   changelog
-   faq
+   ref-example-projects
+   ref-telemetry
+   ref-changelog
+   ref-faq
 
 
 Contributor Guide
