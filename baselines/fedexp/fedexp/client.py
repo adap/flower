@@ -11,6 +11,7 @@ from torch.nn.utils import parameters_to_vector
 from torch.utils.data import DataLoader
 
 from fedexp.models import train
+from fedexp.utils import get_parameters
 
 
 class FlowerClient(fl.client.NumPyClient):
@@ -20,7 +21,7 @@ class FlowerClient(fl.client.NumPyClient):
                  trainloader: DataLoader,
                  device: torch.device,
                  num_epochs: int,
-                 p, 
+                 p,
                  ):
         self.cid = cid
         self.net = net
@@ -32,7 +33,7 @@ class FlowerClient(fl.client.NumPyClient):
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
-        return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
+        return get_parameters(self.net)
 
     def set_parameters(self, parameters: NDArrays) -> None:
         """Changes the parameters of the model using the given ones."""
@@ -59,9 +60,11 @@ class FlowerClient(fl.client.NumPyClient):
             grad = params_delta_vec
             grad_p = self.p * grad
             grad_norm = self.p * torch.linalg.norm(grad) ** 2
-
-        return self.get_parameters({}), len(self.trainloader), {"p": self.p, "grad_p": grad_p,
-                                                                "grad_norm":grad_norm, "epsilon":config["epsilon"]}
+        return self.get_parameters({}), len(self.trainloader), {"p": self.p,
+                                                                "grad_p": grad_p,
+                                                                "grad_norm": grad_norm,
+                                                                "epsilon": config["epsilon"]
+                                                                }
 
 
 def gen_client_fn(trainloaders: List[DataLoader],
