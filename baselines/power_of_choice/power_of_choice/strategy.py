@@ -6,6 +6,7 @@ extend or modify the functionality of an existing strategy.
 
 from logging import INFO, WARNING
 from typing import Callable, Dict, List, Optional, Tuple
+from flwr.common.parameter import parameters_to_ndarrays
 from flwr.common.typing import EvaluateIns, FitIns, GetPropertiesIns, MetricsAggregationFn, NDArrays, Parameters, Scalar
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy

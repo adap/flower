@@ -5,11 +5,18 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 """
 # these are the basic packages you'll need here
 # feel free to remove some if aren't needed
+import os
+from typing import Callable, Dict, Optional, Tuple
+from models import create_MLP_model
+from flwr.common.typing import Scalar
+from utils import plot_metric_from_history, save_results_as_pickle
 from server import PowerOfChoiceServer
 from client import gen_client_fn
 from flwr.server.client_manager import SimpleClientManager
 import hydra
 import flwr as fl
+import numpy as np
+from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
@@ -77,11 +84,37 @@ def main(cfg: DictConfig) -> None:
         
         return fit_config
     
+    def get_evaluate_fn(model):
+        """Return an evaluation function for server-side evaluation."""
+        
+        print(f"Current folder is {os.getcwd()}")
+
+        # Load data and model here to avoid the overhead of doing it in `evaluate` itself
+        x_test = np.load(os.path.join("fmnist", "x_test.npy"))
+        y_test = np.load(os.path.join("fmnist", "y_test.npy"))
+
+        # The `evaluate` function will be called after every round
+        def evaluate(
+            server_round: int,
+            parameters: fl.common.NDArrays,
+            config: Dict[str, fl.common.Scalar],
+        ) -> Optional[Tuple[float, Dict[str, fl.common.Scalar]]]:
+            model.set_weights(parameters)  # Update model with the latest parameters
+            loss, accuracy = model.evaluate(x_test, y_test, verbose=2)
+            return loss, {"accuracy": accuracy}
+
+        return evaluate
+    
+    server_model = create_MLP_model()
+    server_model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+
+    
     # instantiate strategy according to config. Here we pass other arguments
     # that are only defined at run time.
     strategy = instantiate(
         cfg.strategy,
         on_fit_config_fn=get_on_fit_config(),
+        evaluate_fn=get_evaluate_fn(server_model),
     )
 
     client_manager = SimpleClientManager()
@@ -106,14 +139,35 @@ def main(cfg: DictConfig) -> None:
     )
 
     # 6. Save your results
-    # Here you can save the `history` returned by the simulation and include
-    # also other buffers, statistics, info needed to be saved in order to later
-    # on generate the plots you provide in the README.md. You can for instance
-    # access elements that belong to the strategy for example:
-    # data = strategy.get_my_custom_data() -- assuming you have such method defined.
-    # Hydra will generate for you a directory each time you run the code. You
-    # can retrieve the path to that directory with this:
-    # save_path = HydraConfig.get().runtime.output_dir
+    # Experiment completed. Now we save the results and
+    # generate plots using the `history`
+    print("................")
+    print(history)
 
+    # Hydra automatically creates an output directory
+    # Let's retrieve it and save some results there
+    save_path = HydraConfig.get().runtime.output_dir
+
+    # save results as a Python pickle using a file_path
+    # the directory created by Hydra for each run
+    save_results_as_pickle(history, file_path=save_path, extra_results={})
+
+    # plot results and include them in the readme
+    strategy_name = strategy.__class__.__name__
+    file_suffix: str = (
+        f"_{strategy_name}"
+        f"_C={cfg.num_clients}"
+        f"_B={cfg.batch_size}"
+        f"_E={cfg.local_epochs}"
+        f"_R={cfg.num_rounds}"
+        f"_d={cfg.strategy.d}"
+        f"_CK={cfg.strategy.ck}"
+    )
+
+    plot_metric_from_history(
+        history,
+        save_path,
+        (file_suffix),
+    )
 if __name__ == "__main__":
     main()

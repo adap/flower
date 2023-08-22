@@ -562,6 +562,14 @@ def download_and_preprocess(cfg: DictConfig) -> None:
     path = os.path.join(folder, "distribution_train.npy")
     np.save(path, distribution)
 
+    # Save the x and y together of the test set to disk using numpy
+    path = os.path.join(folder, "x_test.npy")
+    np.save(path, x_test)
+    path = os.path.join(folder, "y_test.npy")
+    np.save(path, y_test)
+
+
+
 if __name__ == "__main__":
 
     download_and_preprocess()
