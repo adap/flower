@@ -1,5 +1,5 @@
-Getting Started (for Contributors)
-==================================
+Get started as a contributor
+============================
 
 Prerequisites
 -------------
