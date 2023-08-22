@@ -2,12 +2,12 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/
 
-# Download the CIFAR-10 dataset
-python -c "from torchvision.datasets import CIFAR10; CIFAR10('./data', download=True)"
+# Download the MNIST dataset
+python -c "from torchvision.datasets import MNIST; MNIST('./data', download=True)"
 
 echo "Starting server"
 python server.py &
-sleep 10 # Sleep for 5s to give the server enough time to start
+sleep 10 # Sleep for 10s to give the server enough time to start
 
 for i in `seq 0 4`; do
     echo "Starting client $i"
