@@ -32,31 +32,31 @@ A learning-oriented series of federated learning tutorials, the best place to st
    :maxdepth: 1
    :caption: Tutorial
 
-   tutorial/Flower-0-What-is-FL
-   tutorial/Flower-1-Intro-to-FL-PyTorch
-   tutorial/Flower-2-Strategies-in-FL-PyTorch
-   tutorial/Flower-3-Building-a-Strategy-PyTorch
-   tutorial/Flower-4-Client-and-NumPyClient-PyTorch
+   tutorial-what-is-federated-learning
+   tutorial-get-started-with-flower-pytorch
+   tutorial-use-a-federated-learning-strategy-pytorch
+   tutorial-build-a-strategy-from-scratch-pytorch
+   tutorial-customize-the-client-pytorch
 
 .. toctree::
    :maxdepth: 1
    :caption: Quickstart tutorials
    :hidden:
 
-   quickstart-pytorch
-   quickstart-tensorflow
-   quickstart-huggingface
-   quickstart-jax
-   quickstart-pandas
-   quickstart-fastai
-   quickstart-pytorch-lightning
-   quickstart-mxnet
-   quickstart-scikitlearn
-   quickstart-xgboost
-   quickstart-android
-   quickstart-ios
+   tutorial-quickstart-pytorch
+   tutorial-quickstart-tensorflow
+   tutorial-quickstart-huggingface
+   tutorial-quickstart-jax
+   tutorial-quickstart-pandas
+   tutorial-quickstart-fastai
+   tutorial-quickstart-pytorch-lightning
+   tutorial-quickstart-mxnet
+   tutorial-quickstart-scikitlearn
+   tutorial-quickstart-xgboost
+   tutorial-quickstart-android
+   tutorial-quickstart-ios
 
-QUICKSTART TUTORIALS: :ref:`PyTorch <quickstart-pytorch>` | :ref:`TensorFlow <quickstart-tensorflow>` | :ref:`🤗 Transformers <quickstart-huggingface>` | :ref:`JAX <quickstart-jax>` | :ref:`Pandas <quickstart-pandas>` | :ref:`fastai <quickstart-fastai>` | :ref:`PyTorch Lightning <quickstart-pytorch-lightning>` | :ref:`MXNet <quickstart-mxnet>` | :ref:`scikit-learn <quickstart-scikitlearn>` | :ref:`XGBoost <quickstart-xgboost>` | :ref:`Android <quickstart-android>` | :ref:`iOS <quickstart-ios>`
+QUICKSTART TUTORIALS: :ref:`PyTorch <tutorial-quickstart-pytorch>` | :ref:`TensorFlow <tutorial-quickstart-tensorflow>` | :ref:`🤗 Transformers <tutorial-quickstart-huggingface>` | :ref:`JAX <tutorial-quickstart-jax>` | :ref:`Pandas <tutorial-quickstart-pandas>` | :ref:`fastai <tutorial-quickstart-fastai>` | :ref:`PyTorch Lightning <tutorial-quickstart-pytorch-lightning>` | :ref:`MXNet <tutorial-quickstart-mxnet>` | :ref:`scikit-learn <tutorial-quickstart-scikitlearn>` | :ref:`XGBoost <tutorial-quickstart-xgboost>` | :ref:`Android <tutorial-quickstart-android>` | :ref:`iOS <tutorial-quickstart-ios>`
 
 .. grid:: 2
 
@@ -79,17 +79,16 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    :maxdepth: 1
    :caption: How-to guides
 
-   install-flower
-   configure-clients
-   strategies
-   implementing-strategies
-   save-progress
-   logging
-   saving-and-loading-pytorch-checkpoints
-   monitor-simulation
-   ssl-enabled-connections
-   recommended-env-setup
-   upgrade-to-flower-1.0
+   how-to-install-flower
+   how-to-configure-clients
+   how-to-use-strategies
+   how-to-implement-strategies
+   how-to-aggregate-evaluation-results
+   how-to-save-and-load-model-checkpoints
+   how-to-monitor-simulation
+   how-to-configure-logging
+   how-to-enable-ssl-connections
+   how-to-upgrade-to-flower-1.0
 
 .. toctree::
    :maxdepth: 1
@@ -110,8 +109,8 @@ Understanding-oriented concept guides explain and discuss key topics and underly
    :maxdepth: 1
    :caption: Explanations
 
-   evaluation
-   differential-privacy-wrappers
+   explanation-federated-evaluation
+   explanation-differential-privacy
 
 References
 ~~~~~~~~~~
@@ -122,40 +121,56 @@ Information-oriented API reference and other reference material.
    :maxdepth: 2
    :caption: API reference
 
-   apiref-flwr
-   apiref-cli
+   ref-api-flwr
+   ref-api-cli
 
 .. toctree::
    :maxdepth: 1
    :caption: Reference docs
 
-   examples
-   telemetry
-   changelog
-   faq
+   ref-example-projects
+   ref-telemetry
+   ref-changelog
+   ref-faq
 
 
-Contributor Guide
------------------
+Contributor docs
+----------------
 
-The Flower authors welcome external contributions. The following guides are
-intended to help along the way.
+The Flower community welcomes contributions. The following docs are intended to help along the way.
+
 
 .. toctree::
    :maxdepth: 1
-   :caption: Contributor guide
+   :caption: Contributor tutorials
 
-   first-time-contributors
-   getting-started-for-contributors
-   good-first-contributions
-   contributor-setup
-   write-documentation
-   architecture
-   secagg
-   release-process
-   creating-new-messages
-   devcontainer
+   contributor-tutorial-contribute-on-github
+   contributor-tutorial-get-started-as-a-contributor
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contributor how-to guides
+
+   contributor-how-to-install-development-versions
+   contributor-how-to-set-up-a-virtual-env
+   contributor-how-to-develop-in-vscode-dev-containers
+   contributor-how-to-create-new-messages
+   contributor-how-to-write-documentation
+   contributor-how-to-release-flower
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contributor explanations
+
+   contributor-explanation-architecture
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contributor references
+
    fed/index
+   contributor-ref-good-first-contributions
+   contributor-ref-secure-aggregation-protocols
 
 
 .. Indices and tables

@@ -11,8 +11,7 @@ We follow strong principles guarding anonymous usage metrics collection:
 - **Optional:** You will always be able to disable telemetry; read on to learn “[How to opt-out](#how-to-opt-out)”.
 - **Anonymous:** The reported usage metrics are anonymous and do not contain any personally identifiable information (PII). See “[Collected metrics](#collected-metrics)” to understand what metrics are being reported.
 - **Transparent:** You can easily inspect what anonymous metrics are being reported; see the section “[How to inspect what is being reported](#how-to-inspect-what-is-being-reported)”
-- **Open for feedback:** You can always reach out to us if you have feedback; see the section “[How to contact us
-](#how-to-contact-us)” for details.
+- **Open for feedback:** You can always reach out to us if you have feedback; see the section “[How to contact us](#how-to-contact-us)” for details.
 
 ## How to opt-out
 

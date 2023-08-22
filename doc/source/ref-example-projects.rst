@@ -1,5 +1,5 @@
-Code examples
-=============
+Example projects
+================
 
 Flower comes with a number of usage examples. The examples demonstrate how
 Flower can be used to federate different kinds of existing machine learning

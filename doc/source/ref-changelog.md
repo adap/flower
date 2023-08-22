@@ -8,7 +8,7 @@
 
   Since Python 3.7 reached its end of life (EOL) on 2023-06-27, support for Python 3.7 is now deprecated and will be removed in an upcoming release.
 
--  **Add new** `FedTrimmedAvg` **strategy** ([#1769](https://github.com/adap/flower/pull/1769), [#1853](https://github.com/adap/flower/pull/1853))
+- **Add new** `FedTrimmedAvg` **strategy** ([#1769](https://github.com/adap/flower/pull/1769), [#1853](https://github.com/adap/flower/pull/1853))
 
   The new `FedTrimmedAvg` strategy implements Trimmed Mean by [Dong Yin, 2018](https://arxiv.org/abs/1803.01498)
 
@@ -52,7 +52,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Introduce support for XGBoost (**`FedXgbNnAvg` **strategy and example)** ([#1694](https://github.com/adap/flower/pull/1694), [#1709](https://github.com/adap/flower/pull/1709), [#1715](https://github.com/adap/flower/pull/1715), [#1717](https://github.com/adap/flower/pull/1717), [#1763](https://github.com/adap/flower/pull/1763), [#1795](https://github.com/adap/flower/pull/1795))
 
-  XGBoost is a tree-based ensemble machine learning algorithm that uses gradient boosting to improve model accuracy. We added a new `FedXgbNnAvg` [strategy](https://github.com/adap/flower/tree/main/src/py/flwr/server/strategy/fedxgb_nn_avg.py), and a [code example](https://github.com/adap/flower/tree/main/examples/quickstart_xgboost_horizontal) that demonstrates the usage of this new strategy in an XGBoost project. 
+  XGBoost is a tree-based ensemble machine learning algorithm that uses gradient boosting to improve model accuracy. We added a new `FedXgbNnAvg` [strategy](https://github.com/adap/flower/tree/main/src/py/flwr/server/strategy/fedxgb_nn_avg.py), and a [code example](https://github.com/adap/flower/tree/main/examples/quickstart_xgboost_horizontal) that demonstrates the usage of this new strategy in an XGBoost project.
 
 - **Introduce iOS SDK (preview)** ([#1621](https://github.com/adap/flower/pull/1621), [#1764](https://github.com/adap/flower/pull/1764))
 
@@ -60,13 +60,13 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Introduce new "What is Federated Learning?" tutorial** ([#1657](https://github.com/adap/flower/pull/1657), [#1721](https://github.com/adap/flower/pull/1721))
 
-  A new [entry-level tutorial](https://flower.dev/docs/tutorial/Flower-0-What-is-FL.html) in our documentation explains the basics of Fedetated Learning. It enables anyone who's unfamiliar with Federated Learning to start their journey with Flower. Forward it to anyone who's interested in Federated Learning!
+  A new [entry-level tutorial](https://flower.dev/docs/framework/tutorial-what-is-federated-learning.html) in our documentation explains the basics of Fedetated Learning. It enables anyone who's unfamiliar with Federated Learning to start their journey with Flower. Forward it to anyone who's interested in Federated Learning!
 
 - **Introduce new Flower Baseline: FedProx MNIST** ([#1513](https://github.com/adap/flower/pull/1513), [#1680](https://github.com/adap/flower/pull/1680), [#1681](https://github.com/adap/flower/pull/1681), [#1679](https://github.com/adap/flower/pull/1679))
 
   This new baseline replicates the MNIST+CNN task from the paper [Federated Optimization in Heterogeneous Networks (Li et al., 2018)](https://arxiv.org/abs/1812.06127). It uses the `FedProx` strategy, which aims at making convergence more robust in heterogenous settings.
 
-- **Introduce new Flower Baseline: FedAvg FEMNIST** ([#1655](https://github.com/adap/flower/pull/1655)) 
+- **Introduce new Flower Baseline: FedAvg FEMNIST** ([#1655](https://github.com/adap/flower/pull/1655))
 
   This new baseline replicates an experiment evaluating the performance of the FedAvg algorithm on the FEMNIST dataset from the paper [LEAF: A Benchmark for Federated Settings (Caldas et al., 2018)](https://arxiv.org/abs/1812.01097).
 
@@ -122,7 +122,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
   The (experimental) long-running Flower server (Driver API and Fleet API) can now configure the server address of both Driver API (via `--driver-api-address`) and Fleet API (via `--fleet-api-address`) when starting:
 
-  ``flower-server --driver-api-address "0.0.0.0:8081" --fleet-api-address "0.0.0.0:8086"``
+  `flower-server --driver-api-address "0.0.0.0:8081" --fleet-api-address "0.0.0.0:8086"`
 
   Both IPv4 and IPv6 addresses are supported.
 
@@ -144,11 +144,11 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Add new custom strategy tutorial section** [#1623](https://github.com/adap/flower/pull/1623)
 
-  The Flower tutorial now has a new section that covers implementing a custom strategy from scratch: [Open in Colab](https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial/Flower-3-Building-a-Strategy-PyTorch.ipynb)
+  The Flower tutorial now has a new section that covers implementing a custom strategy from scratch: [Open in Colab](https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial-build-a-strategy-from-scratch-pytorch.ipynb)
 
 - **Add new custom serialization tutorial section** ([#1622](https://github.com/adap/flower/pull/1622))
 
-  The Flower tutorial now has a new section that covers custom serialization: [Open in Colab](https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.ipynb)
+  The Flower tutorial now has a new section that covers custom serialization: [Open in Colab](https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial-customize-the-client-pytorch.ipynb)
 
 - **General improvements** ([#1638](https://github.com/adap/flower/pull/1638), [#1634](https://github.com/adap/flower/pull/1634), [#1636](https://github.com/adap/flower/pull/1636), [#1635](https://github.com/adap/flower/pull/1635), [#1633](https://github.com/adap/flower/pull/1633), [#1632](https://github.com/adap/flower/pull/1632), [#1631](https://github.com/adap/flower/pull/1631), [#1630](https://github.com/adap/flower/pull/1630), [#1627](https://github.com/adap/flower/pull/1627), [#1593](https://github.com/adap/flower/pull/1593), [#1616](https://github.com/adap/flower/pull/1616), [#1615](https://github.com/adap/flower/pull/1615), [#1607](https://github.com/adap/flower/pull/1607), [#1609](https://github.com/adap/flower/pull/1609), [#1608](https://github.com/adap/flower/pull/1608), [#1603](https://github.com/adap/flower/pull/1603), [#1590](https://github.com/adap/flower/pull/1590), [#1580](https://github.com/adap/flower/pull/1580), [#1599](https://github.com/adap/flower/pull/1599), [#1600](https://github.com/adap/flower/pull/1600), [#1601](https://github.com/adap/flower/pull/1601), [#1597](https://github.com/adap/flower/pull/1597), [#1595](https://github.com/adap/flower/pull/1595), [#1591](https://github.com/adap/flower/pull/1591), [#1588](https://github.com/adap/flower/pull/1588), [#1589](https://github.com/adap/flower/pull/1589), [#1587](https://github.com/adap/flower/pull/1587), [#1573](https://github.com/adap/flower/pull/1573), [#1581](https://github.com/adap/flower/pull/1581), [#1578](https://github.com/adap/flower/pull/1578), [#1574](https://github.com/adap/flower/pull/1574), [#1572](https://github.com/adap/flower/pull/1572), [#1586](https://github.com/adap/flower/pull/1586))
 
@@ -178,16 +178,16 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Improve GPU support in simulations** ([#1555](https://github.com/adap/flower/pull/1555))
 
-  The Ray-based Virtual Client Engine (`start_simulation`) has been updated to improve GPU support. The update includes some of the hard-earned lessons from scaling simulations in GPU cluster environments. New defaults make running GPU-based simulations substantially more robust.  
+  The Ray-based Virtual Client Engine (`start_simulation`) has been updated to improve GPU support. The update includes some of the hard-earned lessons from scaling simulations in GPU cluster environments. New defaults make running GPU-based simulations substantially more robust.
 
 - **Improve GPU support in Jupyter Notebook tutorials** ([#1527](https://github.com/adap/flower/pull/1527), [#1558](https://github.com/adap/flower/pull/1558))
 
   Some users reported that Jupyter Notebooks have not always been easy to use on GPU instances. We listened and made improvements to all of our Jupyter notebooks! Check out the updated notebooks here:
 
-  - [An Introduction to Federated Learning](https://flower.dev/docs/tutorial/Flower-1-Intro-to-FL-PyTorch.html)
-  - [Strategies in Federated Learning](https://flower.dev/docs/tutorial/Flower-2-Strategies-in-FL-PyTorch.html)
-  - [Building a Strategy](https://flower.dev/docs/tutorial/Flower-3-Building-a-Strategy-PyTorch.html)
-  - [Client and NumPyClient](https://flower.dev/docs/tutorial/Flower-4-Client-and-NumPyClient-PyTorch.html)
+  - [An Introduction to Federated Learning](https://flower.dev/docs/framework/tutorial-get-started-with-flower-pytorch.html)
+  - [Strategies in Federated Learning](https://flower.dev/docs/framework/tutorial-use-a-federated-learning-strategy-pytorch.html)
+  - [Building a Strategy](https://flower.dev/docs/framework/tutorial-build-a-strategy-from-scratch-pytorch.html)
+  - [Client and NumPyClient](https://flower.dev/docs/framework/tutorial-customize-the-client-pytorch.html)
 
 - **Introduce optional telemetry** ([#1533](https://github.com/adap/flower/pull/1533), [#1544](https://github.com/adap/flower/pull/1544), [#1584](https://github.com/adap/flower/pull/1584))
 
@@ -202,7 +202,7 @@ We would like to give our special thanks to all the contributors who made the ne
   The Driver API also enables a new execution mode in which the server runs indefinitely. Multiple individual workloads can run concurrently and start and stop their execution independent of the server. This is especially useful for users who want to deploy Flower in production.
 
   To learn more, check out the `mt-pytorch` code example. We look forward to you feedback!
-  
+
   Please note: *The Driver API is still experimental and will likely change significantly over time.*
 
 - **Add new Federated Analytics with Pandas example** ([#1469](https://github.com/adap/flower/pull/1469), [#1535](https://github.com/adap/flower/pull/1535))
@@ -312,7 +312,7 @@ We would like to give our **special thanks** to all the contributors who made Fl
 
 - **All arguments must be passed as keyword arguments** ([#1338](https://github.com/adap/flower/pull/1338))
 
-  Pass all arguments as keyword arguments, positional arguments are not longer supported. Code that uses positional arguments (e.g., ``start_client("127.0.0.1:8080", FlowerClient())``) must add the keyword for each positional argument (e.g., ``start_client(server_address="127.0.0.1:8080", client=FlowerClient())``).
+  Pass all arguments as keyword arguments, positional arguments are not longer supported. Code that uses positional arguments (e.g., `start_client("127.0.0.1:8080", FlowerClient())`) must add the keyword for each positional argument (e.g., `start_client(server_address="127.0.0.1:8080", client=FlowerClient())`).
 
 - **Introduce configuration object** `ServerConfig` **in** `start_server` **and** `start_simulation` ([#1317](https://github.com/adap/flower/pull/1317))
 
@@ -321,6 +321,7 @@ We would like to give our **special thanks** to all the contributors who made Fl
 - **Rename built-in strategy parameters for clarity** ([#1334](https://github.com/adap/flower/pull/1334))
 
   The following built-in strategy parameters were renamed to improve readability and consistency with other API's:
+
   - `fraction_eval` --> `fraction_evaluate`
   - `min_eval_clients` --> `min_evaluate_clients`
   - `eval_fn` --> `evaluate_fn`
@@ -364,7 +365,7 @@ We would like to give our **special thanks** to all the contributors who made Fl
   The `get_parameters` method now accepts a configuration dictionary, just like `get_properties`, `fit`, and `evaluate`.
 
 - **Replace** `num_rounds` **in** `start_simulation` **with new** `config` **parameter** ([#1281](https://github.com/adap/flower/pull/1281))
-  
+
   The `start_simulation` function now accepts a configuration dictionary `config` instead of the `num_rounds` integer. This improves the consistency between `start_simulation` and `start_server` and makes transitioning between the two easier.
 
 ### What's new?
@@ -384,6 +385,7 @@ We would like to give our **special thanks** to all the contributors who made Fl
 - **Update code examples** ([#1291](https://github.com/adap/flower/pull/1291), [#1286](https://github.com/adap/flower/pull/1286), [#1282](https://github.com/adap/flower/pull/1282))
 
   Many code examples received small or even large maintenance updates, among them are
+
   - `scikit-learn`
   - `simulation_pytorch`
   - `quickstart_pytorch`
@@ -400,6 +402,7 @@ We would like to give our **special thanks** to all the contributors who made Fl
   One substantial documentation update fixes multiple smaller rendering issues, makes titles more succinct to improve navigation, removes a deprecated library, updates documentation dependencies, includes the `flwr.common` module in the API reference, includes support for markdown-based documentation, migrates the changelog from `.rst` to `.md`, and fixes a number of smaller details!
 
 - **Minor updates**
+
   - Add round number to fit and evaluate log messages ([#1266](https://github.com/adap/flower/pull/1266))
   - Add secure gRPC connection to the `advanced_tensorflow` code example ([#847](https://github.com/adap/flower/pull/847))
   - Update developer tooling ([#1231](https://github.com/adap/flower/pull/1231), [#1276](https://github.com/adap/flower/pull/1276), [#1301](https://github.com/adap/flower/pull/1301), [#1310](https://github.com/adap/flower/pull/1310))
@@ -443,7 +446,7 @@ We would like to give our **special thanks** to all the contributors who made Fl
 
 - **New FedAvgM strategy (Federated Averaging with Server Momentum)** ([#1076](https://github.com/adap/flower/pull/1076))
 
-  The new `FedAvgM` strategy implements Federated Averaging with Server Momentum [Hsu et al., 2019].
+  The new `FedAvgM` strategy implements Federated Averaging with Server Momentum \[Hsu et al., 2019\].
 
 - **New advanced PyTorch code example** ([#1007](https://github.com/adap/flower/pull/1007))
 
@@ -454,11 +457,12 @@ We would like to give our **special thanks** to all the contributors who made Fl
   A new code example (`jax_from_centralized_to_federated`) shows federated learning with JAX and Flower.
 
 - **Minor updates**
-    - New option to keep Ray running if Ray was already initialized in `start_simulation` ([#1177](https://github.com/adap/flower/pull/1177))
-    - Add support for custom `ClientManager` as a `start_simulation` parameter ([#1171](https://github.com/adap/flower/pull/1171))
-    - New documentation for [implementing strategies](https://flower.dev/docs/implementing-strategies.html) ([#1097](https://github.com/adap/flower/pull/1097), [#1175](https://github.com/adap/flower/pull/1175))
-    - New mobile-friendly documentation theme ([#1174](https://github.com/adap/flower/pull/1174))
-    - Limit version range for (optional) `ray` dependency to include only compatible releases (`>=1.9.2,<1.12.0`) ([#1205](https://github.com/adap/flower/pull/1205))
+
+  - New option to keep Ray running if Ray was already initialized in `start_simulation` ([#1177](https://github.com/adap/flower/pull/1177))
+  - Add support for custom `ClientManager` as a `start_simulation` parameter ([#1171](https://github.com/adap/flower/pull/1171))
+  - New documentation for [implementing strategies](https://flower.dev/docs/implementing-strategies.html) ([#1097](https://github.com/adap/flower/pull/1097), [#1175](https://github.com/adap/flower/pull/1175))
+  - New mobile-friendly documentation theme ([#1174](https://github.com/adap/flower/pull/1174))
+  - Limit version range for (optional) `ray` dependency to include only compatible releases (`>=1.9.2,<1.12.0`) ([#1205](https://github.com/adap/flower/pull/1205))
 
 ### Incompatible changes
 
@@ -522,18 +526,19 @@ We would like to give our **special thanks** to all the contributors who made Fl
   `start_simulation` can now be called with a list of client IDs (`clients_ids`, type: `List[str]`). Those IDs will be passed to the `client_fn` whenever a client needs to be initialized, which can make it easier to load data partitions that are not accessible through `int` identifiers.
 
 - **Minor updates**
-    - Update `num_examples` calculation in PyTorch code examples in ([#909](https://github.com/adap/flower/pull/909))
-    - Expose Flower version through `flwr.__version__` ([#952](https://github.com/adap/flower/pull/952))
-    - `start_server` in `app.py` now returns a `History` object containing metrics from training ([#974](https://github.com/adap/flower/pull/974))
-    - Make `max_workers` (used by `ThreadPoolExecutor`) configurable ([#978](https://github.com/adap/flower/pull/978))
-    - Increase sleep time after server start to three seconds in all code examples ([#1086](https://github.com/adap/flower/pull/1086))
-    - Added a new FAQ section to the documentation ([#948](https://github.com/adap/flower/pull/948))
-    - And many more under-the-hood changes, library updates, documentation changes, and tooling improvements!
+
+  - Update `num_examples` calculation in PyTorch code examples in ([#909](https://github.com/adap/flower/pull/909))
+  - Expose Flower version through `flwr.__version__` ([#952](https://github.com/adap/flower/pull/952))
+  - `start_server` in `app.py` now returns a `History` object containing metrics from training ([#974](https://github.com/adap/flower/pull/974))
+  - Make `max_workers` (used by `ThreadPoolExecutor`) configurable ([#978](https://github.com/adap/flower/pull/978))
+  - Increase sleep time after server start to three seconds in all code examples ([#1086](https://github.com/adap/flower/pull/1086))
+  - Added a new FAQ section to the documentation ([#948](https://github.com/adap/flower/pull/948))
+  - And many more under-the-hood changes, library updates, documentation changes, and tooling improvements!
 
 ### Incompatible changes
 
 - **Removed** `flwr_example` **and** `flwr_experimental` **from release build** ([#869](https://github.com/adap/flower/pull/869))
-  
+
   The packages `flwr_example` and `flwr_experimental` have been deprecated since Flower 0.12.0 and they are not longer included in Flower release builds. The associated extras (`baseline`, `examples-pytorch`, `examples-tensorflow`, `http-logger`, `ops`) are now no-op and will be removed in an upcoming release.
 
 ## v0.17.0 (2021-09-24)
@@ -547,8 +552,9 @@ We would like to give our **special thanks** to all the contributors who made Fl
   The feature is still experimental, so there's no stability guarantee for the API. It's also not quite ready for prime time and comes with a few known caveats. However, those who are curious are encouraged to try it out and share their thoughts.
 
 - **New built-in strategies** ([#828](https://github.com/adap/flower/pull/828) [#822](https://github.com/adap/flower/pull/822))
-    - FedYogi - Federated learning strategy using Yogi on server-side. Implementation based on https://arxiv.org/abs/2003.00295
-    - FedAdam - Federated learning strategy using Adam on server-side. Implementation based on https://arxiv.org/abs/2003.00295
+
+  - FedYogi - Federated learning strategy using Yogi on server-side. Implementation based on https://arxiv.org/abs/2003.00295
+  - FedAdam - Federated learning strategy using Adam on server-side. Implementation based on https://arxiv.org/abs/2003.00295
 
 - **New PyTorch Lightning code example** ([#617](https://github.com/adap/flower/pull/617))
 
@@ -559,11 +565,12 @@ We would like to give our **special thanks** to all the contributors who made Fl
 - **New experimental TensorBoard strategy** ([#789](https://github.com/adap/flower/pull/789))
 
 - **Minor updates**
-    - Improved advanced TensorFlow code example ([#769](https://github.com/adap/flower/pull/769))
-    - Warning when `min_available_clients` is misconfigured ([#830](https://github.com/adap/flower/pull/830))
-    - Improved gRPC server docs ([#841](https://github.com/adap/flower/pull/841))
-    - Improved error message in `NumPyClient` ([#851](https://github.com/adap/flower/pull/851))
-    - Improved PyTorch quickstart code example ([#852](https://github.com/adap/flower/pull/852))
+
+  - Improved advanced TensorFlow code example ([#769](https://github.com/adap/flower/pull/769))
+  - Warning when `min_available_clients` is misconfigured ([#830](https://github.com/adap/flower/pull/830))
+  - Improved gRPC server docs ([#841](https://github.com/adap/flower/pull/841))
+  - Improved error message in `NumPyClient` ([#851](https://github.com/adap/flower/pull/851))
+  - Improved PyTorch quickstart code example ([#852](https://github.com/adap/flower/pull/852))
 
 ### Incompatible changes
 
@@ -584,8 +591,9 @@ We would like to give our **special thanks** to all the contributors who made Fl
 ### What's new?
 
 - **New built-in strategies** ([#549](https://github.com/adap/flower/pull/549))
-    - (abstract) FedOpt
-    - FedAdagrad
+
+  - (abstract) FedOpt
+  - FedAdagrad
 
 - **Custom metrics for server and strategies** ([#717](https://github.com/adap/flower/pull/717))
 
@@ -657,12 +665,12 @@ What's new?
 - **Generalized** `Client.fit` **and** `Client.evaluate` **return values** ([#610](https://github.com/adap/flower/pull/610) [#572](https://github.com/adap/flower/pull/572) [#633](https://github.com/adap/flower/pull/633))
 
   Clients can now return an additional dictionary mapping `str` keys to values of the following types: `bool`, `bytes`, `float`, `int`, `str`. This means one can return almost arbitrary values from `fit`/`evaluate` and make use of them on the server side!
-  
-  This improvement also allowed for more consistent return types between `fit` and `evaluate`: `evaluate` should now return a tuple `(float, int, dict)` representing the loss, number of examples, and a dictionary holding arbitrary problem-specific values like accuracy. 
-  
+
+  This improvement also allowed for more consistent return types between `fit` and `evaluate`: `evaluate` should now return a tuple `(float, int, dict)` representing the loss, number of examples, and a dictionary holding arbitrary problem-specific values like accuracy.
+
   In case you wondered: this feature is compatible with existing projects, the additional dictionary return value is optional. New code should however migrate to the new return types to be compatible with upcoming Flower releases (`fit`: `List[np.ndarray], int, Dict[str, Scalar]`, `evaluate`: `float, int, Dict[str, Scalar]`). See the example below for details.
 
-  *Code example:* note the additional dictionary return values in both `FlwrClient.fit` and `FlwrClient.evaluate`: 
+  *Code example:* note the additional dictionary return values in both `FlwrClient.fit` and `FlwrClient.evaluate`:
 
   ```python
   class FlwrClient(fl.client.NumPyClient):
@@ -680,10 +688,10 @@ What's new?
 - **Generalized** `config` **argument in** `Client.fit` **and** `Client.evaluate` ([#595](https://github.com/adap/flower/pull/595))
 
   The `config` argument used to be of type `Dict[str, str]`, which means that dictionary values were expected to be strings. The new release generalizes this to enable values of the following types: `bool`, `bytes`, `float`, `int`, `str`.
-  
+
   This means one can now pass almost arbitrary values to `fit`/`evaluate` using the `config` dictionary. Yay, no more `str(epochs)` on the server-side and `int(config["epochs"])` on the client side!
 
-  *Code example:* note that the `config` dictionary now contains non-`str` values in both `Client.fit` and `Client.evaluate`: 
+  *Code example:* note that the `config` dictionary now contains non-`str` values in both `Client.fit` and `Client.evaluate`:
 
   ```python
   class FlwrClient(fl.client.NumPyClient):
@@ -706,10 +714,10 @@ What's new?
 
 - New example: PyTorch From Centralized To Federated ([#549](https://github.com/adap/flower/pull/549))
 - Improved documentation
-    - New documentation theme ([#551](https://github.com/adap/flower/pull/551))
-    - New API reference ([#554](https://github.com/adap/flower/pull/554))
-    - Updated examples documentation ([#549](https://github.com/adap/flower/pull/549))
-    - Removed obsolete documentation ([#548](https://github.com/adap/flower/pull/548))
+  - New documentation theme ([#551](https://github.com/adap/flower/pull/551))
+  - New API reference ([#554](https://github.com/adap/flower/pull/554))
+  - Updated examples documentation ([#549](https://github.com/adap/flower/pull/549))
+  - Removed obsolete documentation ([#548](https://github.com/adap/flower/pull/548))
 
 Bugfix:
 
@@ -728,10 +736,10 @@ Important changes:
 Incompatible changes:
 
 - Renamed strategy methods ([#486](https://github.com/adap/flower/pull/486)) to unify the naming of Flower's public APIs. Other public methods/functions (e.g., every method in `Client`, but also `Strategy.evaluate`) do not use the `on_` prefix, which is why we're removing it from the four methods in Strategy. To migrate rename the following `Strategy` methods accordingly:
-    - `on_configure_evaluate` => `configure_evaluate`
-    - `on_aggregate_evaluate` => `aggregate_evaluate`
-    - `on_configure_fit` => `configure_fit`
-    - `on_aggregate_fit` => `aggregate_fit`
+  - `on_configure_evaluate` => `configure_evaluate`
+  - `on_aggregate_evaluate` => `aggregate_evaluate`
+  - `on_configure_fit` => `configure_fit`
+  - `on_aggregate_fit` => `aggregate_fit`
 
 Important changes:
 
