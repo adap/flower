@@ -378,7 +378,6 @@ class VirtualClientEngineActorPool(ActorPool):
 
     def get_client_result(self, cid: str, timeout: Optional[float]) -> ClientRes:
         """Get result from VirtualClient with specific cid."""
-
         # Loop until all jobs submitted to the pool are completed. Break early
         # if the result for the ClientProxy calling this method is ready
         while self.has_next() and not self._is_future_ready(cid):  # type: ignore
