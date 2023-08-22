@@ -73,20 +73,34 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # To prevent 404 errors and redirect to the new pages.
 redirects = {
     # Renamed pages
-    "installation": "install-flower.html",
-    "configuring-clients.html": "configure-clients.html",
+    "installation": "how-to-install-flower.html",
+    "configuring-clients.html": "how-to-configure-clients.html",
     "quickstart_mxnet": "quickstart-mxnet.html",
     "quickstart_pytorch_lightning": "quickstart-pytorch-lightning.html",
-    "example_walkthrough_pytorch_mnist": "example-walkthrough-pytorch-mnist.html",
     "quickstart_huggingface": "quickstart-huggingface.html",
     "quickstart_pytorch": "quickstart-pytorch.html",
     "quickstart_tensorflow": "quickstart-tensorflow.html",
-    "release_process": "release-process.html",
-    "saving-progress": "save-progress.html",
-    "writing-documentation": "write-documentation.html",
     "quickstart_scikitlearn": "quickstart-scikitlearn.html",
     "quickstart_xgboost": "quickstart-xgboost.html",
+    "example_walkthrough_pytorch_mnist": "example-walkthrough-pytorch-mnist.html",
+    "release_process": "release-process.html",
+    "saving-progress": "how-to-save-and-load-model-checkpoints.html",
+    "writing-documentation": "write-documentation.html",
     "apiref-binaries": "apiref-cli.html",
+    "fedbn-example-pytorch-from-centralized-to-federated": "example-fedbn-pytorch-from-centralized-to-federated.html",
+    
+    # Restructuring: how-to guides
+    "install-flower": "how-to-install-flower.html",
+    "configure-clients": "how-to-configure-clients.html",
+    "strategies": "how-to-use-strategies.html",
+    "implementing-strategies": "how-to-implement-strategies.html",
+    "save-progress": "how-to-save-and-load-model-checkpoints.html",
+    "saving-and-loading-pytorch-checkpoints": "how-to-save-and-load-model-checkpoints.html",
+    "monitor-simulation": "how-to-monitor-simulation.html",
+    "logging": "how-to-configure-logging.html",
+    "ssl-enabled-connections": "how-to-enable-ssl-connections.html",
+    "upgrade-to-flower-1.0": "how-to-upgrade-to-flower-1.0.html",
+    
     # Deleted pages
     "people": "index.html",
     "organizations": "index.html",
@@ -103,7 +117,7 @@ smv_branch_whitelist = r'^main$'
 # a list of builtin themes.
 #
 html_theme = "furo"
-html_title = f"Flower {release}"
+html_title = f"Flower Framework {release}"
 html_logo = "_static/flower-logo.png"
 html_favicon = "_static/favicon.ico"
 html_baseurl = "https://flower.dev/docs/framework/"

@@ -1,5 +1,5 @@
-Implementing Strategies
-=======================
+Implement strategies
+====================
 
 The strategy abstraction enables implementation of fully custom strategies. A
 strategy is basically the federated learning algorithm that runs on the server.
