@@ -162,9 +162,9 @@ def download_and_preprocess(cfg: DictConfig) -> None:
     # if the folder exist it is deleted and the ds partitions are re-created
     # if the folder does not exist, firstly the folder is created
     # and then the ds partitions are generated
-    exist = os.path.exists(folder)
-    if not exist:
-        os.makedirs(folder)
+    # exist = os.path.exists(folder)
+    # if not exist:
+    #     os.makedirs(folder)
     folder_path = os.path.join(folder, str(total_clients), str(round(alpha, 2)))
     exist = os.path.exists(folder_path)
     if not exist:

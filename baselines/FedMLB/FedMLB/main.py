@@ -24,6 +24,12 @@ import FedMLB.models as fedmlb_models
 from FedMLB.utils import save_results_as_pickle
 from FedMLB.models import create_resnet18
 
+gpus = tf.config.experimental.list_physical_devices('GPU')
+for gpu in gpus:
+    tf.config.experimental.set_memory_growth(
+        device=gpu, enable=True
+    )
+
 TEST_BATCH_SIZE = 256
 
 
@@ -215,7 +221,7 @@ def main(cfg: DictConfig) -> None:
         client_fn=client_fn,
         clients_ids=range(0, cfg.total_clients),
         num_clients=cfg.total_clients,
-        client_resources={"num_cpus": 0.28},
+        client_resources={"num_cpus": cfg.client_resources.num_cpus, "num_gpus": cfg.client_resources.amamnum_gpus},
         config=flwr.server.ServerConfig(num_rounds=cfg.num_rounds),
         ray_init_args=ray_init_args,
         strategy=strategy

@@ -15,7 +15,7 @@ clipnorm: 10.0
 l2_weight_decay: 1e-3
 lambda_1: 1.0 # it can be >= 0
 lambda_2: 1.0 # it can be >= 0
-random_seed: 3
+random_seed: 1
 
 client_resources:
   num_cpus: 1

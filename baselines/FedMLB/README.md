@@ -2,7 +2,7 @@
 title: Multi-Level Branched Regularization for Federated Learning
 url: https://proceedings.mlr.press/v162/kim22a.html
 labels: [data heterogeneity, knowledge distillation, image classification] 
-dataset: [cifar100] 
+dataset: [cifar100, tiny-imagenet] 
 ---
 
 # *_FedMLB_*
@@ -185,6 +185,19 @@ python -m FedMLB.dataset_preparation dataset_config.dataset="tiny-imagenet" data
 ### Run simulations and reproduce results
 After having generated the setting, simulations can be run.
 
+### Using GPUs
+The code in this repository relies on TF library.
+To make the simulations run on GPUs use the option `client_resources.num_cpus={PER_CLIENT_FRACTION_OF_GPU_MEMORY}`.
+The default is `num_cpus=0.0`. 
+For example, the following command will run on CPU only. 
+```bash
+python -m FedMLB.main # `client_resources.num_gpus=0.0` default
+```
+
+> :warning:
+Ensure that TensorFlow is configured to use GPUs.
+
+ 
 #### CIFAR-100
 The default configuration for `FedMLB.main` uses (1.) for CIFAR-100, and can be run with the following:
 
@@ -209,18 +222,12 @@ To run using FedAvg+KD:
 # this will use the regular FedAvg local training
 python -m FedMLB.main algorithm="FedAvg+KD"
 ```
-For 500 clients: 200*5/10 = 100 local updates
-100*5/10 =50
 
 #### Tiny-Imagenet
 For Tiny-ImageNet, as in the orginal paper, batch size of local updates should be set 
 to 100 in settings with 100 clients and to 20 in settings with 500 clients;
 this is equal to set the amount of local_updates to 50 (as the default), since 
 local_updates = (num_of_local_examples*local_epochs)/batch_size.
-
-local_updates = (num_of_local_examples*local_epochs)/batch_size
-1000*5/100 = 50
-200*5/20 = 50
 
 ```bash
 python -m FedMLB.main dataset_config.dataset="tiny-imagenet" 
@@ -253,22 +260,76 @@ To reproduce the results run the following:
 
 ```bash
 # this will produce six consecutive runs
-python run -m FedMLB.main --multirun dataset_config.dataset="cifar100", "tiny-imagenet" algorithm="FedMLB","FedAvg","FedAvg+KD" 
+python -m FedMLB.main --multirun dataset_config.dataset="cifar100", "tiny-imagenet" algorithm="FedMLB","FedAvg","FedAvg+KD" 
 ```
 #### CIFAR-100, Dir(0.3), 100 clients, 5% participation.
 
-| Method  | Accuracy @500R | Accuracy @1000R |
-| ------------- | ------------- | ------------- |
-| FedAvg  | (41.88) 42.78 | (47.83) 47.02 |
-| FedAvg+KD  | (42.99) | (49.17)  |
-| FedMLB   | (47.39) 50.59 | (54.58) 56.5 |
+<table>
+  <tr>
+    <td></td>
+    <td colspan="2">Accuracy @500R</td>
+    <td colspan="2">Accuracy @1000R</td>
+  </tr>
+  <tr>
+    <td>Method</td>
+    <td>Paper</td>
+    <td>This repo</td>
+    <td>Paper</td>
+    <td>This repo</td>
+  </tr>
+  <tr>
+    <td>FedAvg</td>
+    <td>41.88</td>
+    <td></td>
+    <td>47.83</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>FedAvg+KD</td>
+    <td>42.99</td>
+    <td></td>
+    <td>49.17</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>FedMLB</td>
+    <td>47.39</td>
+    <td>51.11</td>
+    <td>54.58</td>
+    <td>57.33</td>
+  </tr>
+</table>
 
 #### Tiny-ImageNet, Dir(0.3), 100 clients, 5% participation.
 
-| Method  | Accuracy @500R | Accuracy @1000R |
-| ------------- | ------------- | ------------- |
-| FedAvg  | (33.39) 33.39 | (35.42) 35.78 |
-| FedMLB   | () | () |
+<table>
+  <tr>
+    <td></td>
+    <td colspan="2">Accuracy @500R</td>
+    <td colspan="2">Accuracy @1000R</td>
+  </tr>
+  <tr>
+    <td>Method</td>
+    <td>Paper</td>
+    <td>This repo</td>
+    <td>Paper</td>
+    <td>This repo</td>
+  </tr>
+  <tr>
+    <td>FedAvg</td>
+    <td>33.94</td>
+    <td>33.39</td>
+    <td>35.42</td>
+    <td>35.78</td>
+  </tr>
+  <tr>
+    <td>FedMLB</td>
+    <td>37.20</td>
+    <td>35.42</td>
+    <td>40.16</td>
+    <td>39.14</td>
+  </tr>
+</table>
 
 ###Table 1b
 
