@@ -1,7 +1,7 @@
 Run simulation
 ==============
 
-Simulating Federated Learning workloads is useful for a multitude of use-cases: you might want to run your workload on a large cohort of clients but without having to source, configure and mange large number of physical devices; you might want to run your FL workloads as fast as possible on the compute systems you have access to without having to go through a complex setup process; you might want to validate your algorithm on different scenarios at varying levels of data and system heterogeneity, client availability, privacy budgets, etc. These are among some of the use-cases where simulating FL workloads makes sense. Flower can accommodate these scenarios by means of its `VirtualClientEngine <architecture.html#virtual-client-engine>`_ or VCE.
+Simulating Federated Learning workloads is useful for a multitude of use-cases: you might want to run your workload on a large cohort of clients but without having to source, configure and mange large number of physical devices; you might want to run your FL workloads as fast as possible on the compute systems you have access to without having to go through a complex setup process; you might want to validate your algorithm on different scenarios at varying levels of data and system heterogeneity, client availability, privacy budgets, etc. These are among some of the use-cases where simulating FL workloads makes sense. Flower can accommodate these scenarios by means of its `VirtualClientEngine <contributor-explanation-architecture.html#virtual-client-engine>`_ or VCE.
 
 The :code:`VirtualClientEngine` schedules, launches and manages `virtual` clients. These clients are identical to `non-virtual` clients (i.e. the ones you launch via the command `flwr.client.start_numpy_client <ref-api-flwr.html#start-numpy-client>`_) in the sense that they can be configure by creating a class inheriting, for example, from `flwr.client.NumPyClient <ref-api-flwr.html#flwr.client.NumPyClient>`_ and therefore behave in an identical way. In addition to that, clients managed by the :code:`VirtualClientEngine` are:
 
@@ -142,7 +142,7 @@ The VCE assigns a share of GPU memory to a client that specifies the key :code:`
 *   not aware of the total VRAM available on the GPUs. This means that if you set :code:`num_gpus=0.5` and you have two GPUs in your system with different (e.g. 32GB and 8GB) VRAM amounts, they both would run 2 clients concurrently.
 *   not aware of other unrelated (i.e. not created by the VCE) workloads are running on the GPU. Two takeaways from this are:
 
-    *    Your Flower server might need a GPU to evaluate the `global model` after aggregation (only if you make use of the `evaluate method <implementing-strategies.html#the-evaluate-method>`_)
+    *    Your Flower server might need a GPU to evaluate the `global model` after aggregation (by instance when making use of the `evaluate method <how-to-implement-strategies.html#the-evaluate-method>`_)
     *    If you want to run several independent Flower simulations on the same machine you need to mask-out your GPUs with :code:`CUDA_VISIBLE_DEVICES="<GPU_IDs>"` when launching your experiment. 
 
 
