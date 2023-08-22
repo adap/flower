@@ -19,7 +19,6 @@ parser.add_argument(
 )
 
 PROJECT_NAME = "Flower_WandB_logging_example"
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 # Define metric aggregation function
@@ -40,14 +39,15 @@ def get_evaluate_fn(
     def evaluate(server_round: int, parameters: NDArrays, config: Dict[str, Scalar]):
         """Use the entire CIFAR-10 test set for evaluation."""
 
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         model = Net()
         params_dict = zip(model.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
         model.load_state_dict(state_dict, strict=True)
-        model.to(DEVICE)
+        model.to(device)
 
         testloader = DataLoader(testset, batch_size=50)
-        loss, accuracy = test(model, testloader, device=DEVICE)
+        loss, accuracy = test(model, testloader, device=device)
 
         # return statistics
         return loss, {"entralised_evaluate_accuracy": accuracy}

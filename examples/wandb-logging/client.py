@@ -24,17 +24,16 @@ parser.add_argument(
 
 
 TOTAL_CLIENTS = 50  # the dataset will be partitioned in this many clients
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-def train(net, optimizer, trainloader, epochs):
+def train(net, optimizer, trainloader, epochs, device):
     """Train the model on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
     total_loss = 0
     for _ in range(epochs):
         for images, labels in trainloader:
             optimizer.zero_grad()
-            loss = criterion(net(images.to(DEVICE)), labels.to(DEVICE))
+            loss = criterion(net(images.to(device)), labels.to(device))
             total_loss += loss.item()
             loss.backward()
             optimizer.step()
@@ -46,7 +45,8 @@ class FlowerClient(fl.client.NumPyClient):
     def __init__(self, cid, trainset, valset):
         super().__init__()
         self.cid = cid
-        self.model = Net().to(DEVICE)
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.model = Net().to(self.device)
         self.trainloader = DataLoader(trainset, batch_size=32, shuffle=True)
         self.valloader = DataLoader(valset, batch_size=32, shuffle=False)
 
@@ -73,7 +73,7 @@ class FlowerClient(fl.client.NumPyClient):
         # let's add some randomness in the number of local epochs too
         # this will simulate some clients take longer than others to train
         epochs = random.randint(1, 5)
-        train_loss = train(self.model, optim, self.trainloader, epochs=epochs)
+        train_loss = train(self.model, optim, self.trainloader, epochs=epochs, device=self.device)
 
         # Log something to W&B
         wandb.log({"train_loss": train_loss, "local_train_time": time() - t_start})
@@ -81,7 +81,7 @@ class FlowerClient(fl.client.NumPyClient):
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
-        loss, accuracy = test(self.model, self.valloader, DEVICE)
+        loss, accuracy = test(self.model, self.valloader, self.device)
         return loss, len(self.valloader.dataset), {"accuracy": accuracy}
 
 
