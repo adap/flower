@@ -3,18 +3,18 @@ Run simulation
 
 Simulating Federated Learning workloads is useful for a multitude of use-cases: you might want to run your workload on a large cohort of clients but without having to source, configure and mange large number of physical devices; you might want to run your FL workloads as fast as possible on the compute systems you have access to without having to go through a complex setup process; you might want to validate your algorithm on different scenarios at varying levels of data and system heterogeneity, client availability, privacy budgets, etc. These are among some of the use-cases where simulating FL workloads makes sense. Flower can accommodate these scenarios by means of its `VirtualClientEngine <architecture.html#virtual-client-engine>`_ or VCE.
 
-The :code:`VirtualClientEngine` schedules, launches and manages `virtual` clients. These clients are identical to `non-virtual` clients (i.e. the ones you launch via the command `flwr.client.start_numpy_client <apiref-flwr.html#start-numpy-client>`_) in the sense that they can be configure by creating a class inheriting, for example, from `flwr.client.NumPyClient <apiref-flwr.html#flwr.client.NumPyClient>`_ and therefore behave in an identical way. In addition to that, clients managed by the :code:`VirtualClientEngine` are:
+The :code:`VirtualClientEngine` schedules, launches and manages `virtual` clients. These clients are identical to `non-virtual` clients (i.e. the ones you launch via the command `flwr.client.start_numpy_client <ref-api-flwr.html#start-numpy-client>`_) in the sense that they can be configure by creating a class inheriting, for example, from `flwr.client.NumPyClient <ref-api-flwr.html#flwr.client.NumPyClient>`_ and therefore behave in an identical way. In addition to that, clients managed by the :code:`VirtualClientEngine` are:
 
 * resource-aware: this means that each client gets assigned a portion of the compute and memory on your system. You as a user can control this at the beginning of the simulation and allows you to control the degree of parallelism of your Flower FL simulation. The fewer the resources per client, the more clients can run concurrently on the same hardware.
 * self-managed: this means that you as a user do not need to launch clients manually, instead this gets delegated to :code:`VirtualClientEngine`'s :code:`ClientProxy`.
-* ephemeral: this means that a client is only materialized when it is required in the FL process (e.g. to do `fit() <apiref-flwr.html#flwr.client.Client.fit>`_). The object is destroyed afterwards, releasing the resources it was assigned and allowing in this way other clients to participate.
+* ephemeral: this means that a client is only materialized when it is required in the FL process (e.g. to do `fit() <ref-api-flwr.html#flwr.client.Client.fit>`_). The object is destroyed afterwards, releasing the resources it was assigned and allowing in this way other clients to participate.
 
 The :code:`VirtualClientEngine` implements `virtual` clients using `Ray <https://www.ray.io/>`_, an open-source framework for scalable Python workloads. In particular, Flower's :code:`VirtualClientEngine` makes use of `Actors <https://docs.ray.io/en/latest/ray-core/actors.html>`_ to spawn `virtual` clients and run their workload. 
 
 Launch your Flower simulation
 -----------------------------
 
-Running Flower simulations still require you to define your client class, a strategy, and utility functions to download and load (and potentially partition) your dataset. With that out of the way, launching your simulation is done with `start_simulation <apiref-flwr.html#flwr.simulation.start_simulation>`_ and a minimal example looks as follows:
+Running Flower simulations still require you to define your client class, a strategy, and utility functions to download and load (and potentially partition) your dataset. With that out of the way, launching your simulation is done with `start_simulation <ref-api-flwr.html#flwr.simulation.start_simulation>`_ and a minimal example looks as follows:
 
 
 .. code-block:: python
@@ -57,7 +57,7 @@ Assigning client resources
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 By default the :code:`VirtualClientEngine` assigns a single CPU core (and nothing else) to each virtual client. This means that if your system has 10 cores, that many virtual clients can be concurrently running.
 
-More often than not, you would probably like to adjust the resources your clients get assigned based on the complexity (i.e. compute and memory footprint) of your FL workload. You can do so when starting your simulation by setting the argument `client_resources` to `start_simulation <apiref-flwr.html#flwr.simulation.start_simulation>`_. Two keys are internally used by Ray to schedule and spawn workloads (in our case Flower clients): 
+More often than not, you would probably like to adjust the resources your clients get assigned based on the complexity (i.e. compute and memory footprint) of your FL workload. You can do so when starting your simulation by setting the argument `client_resources` to `start_simulation <ref-api-flwr.html#flwr.simulation.start_simulation>`_. Two keys are internally used by Ray to schedule and spawn workloads (in our case Flower clients): 
 
 * :code:`num_cpus` indicates the number of CPU cores a client would get.
 * :code:`num_gpus` indicates the **ratio** of GPU memory a client gets assigned.
@@ -103,7 +103,7 @@ Flower's :code:`VirtualClientEngine` allows you to run FL simulations across mul
 #. Have the same Python environment in all nodes.
 #. Have a copy of your code (e.g. your entire repo) in all nodes.
 #. Have a copy of your dataset in all nodes (more about this in :ref:`simulation considerations <considerations-for-simulations>`) 
-#. Pass :code:`ray_init_args={"address"="auto"}` to `start_simulation <apiref-flwr.html#flwr.simulation.start_simulation>`_ so the :code:`VirtualClientEngine` attaches to a running Ray instance.
+#. Pass :code:`ray_init_args={"address"="auto"}` to `start_simulation <ref-api-flwr.html#flwr.simulation.start_simulation>`_ so the :code:`VirtualClientEngine` attaches to a running Ray instance.
 #. Start Ray on you head node: on the terminal type :code:`ray start --head`. This command will print a few lines, one of which indicates how to attach other nodes to the head node.
 #. Attach other nodes to the head node: copy the command shown after starting the head and execute it on terminal of a new node: for example :code:`ray start --address='192.168.1.132:6379'`
 
