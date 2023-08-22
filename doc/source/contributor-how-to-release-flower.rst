@@ -1,5 +1,5 @@
-Release Process
-===============
+Release Flower
+==============
 
 This document describes the current release process. It may or may not change in the future.
 

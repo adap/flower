@@ -1,5 +1,5 @@
-Contributor setup
-=================
+Install development versions
+============================
 
 Install development versions of Flower
 --------------------------------------
