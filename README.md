@@ -17,7 +17,7 @@
 [![GitHub license](https://img.shields.io/github/license/adap/flower)](https://github.com/adap/flower/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/adap/flower/blob/main/CONTRIBUTING.md)
 ![Build](https://github.com/adap/flower/actions/workflows/framework.yml/badge.svg)
-![Downloads](https://pepy.tech/badge/flwr)
+[![Downloads](https://static.pepy.tech/badge/flwr)](https://pepy.tech/project/flwr)
 [![Slack](https://img.shields.io/badge/Chat-Slack-red)](https://flower.dev/join-slack)
 
 Flower (`flwr`) is a framework for building federated learning systems. The
