@@ -123,16 +123,15 @@ When attaching a new node to the head, all its resources (i.e. all CPUs, all GPU
 
 .. _considerations-for-simulations:
 
+
 Considerations for simulations
 ------------------------------
-
 
 .. note::
   We are actively working on these fronts so to make it trivial to run any FL workload with Flower simulation.
 
 
 The current VCE allows you to run Federated Learning workloads in simulation mode whether you are prototyping simple scenarios on your personal laptop or you want to train a complex FL pipeline across multiple high-performance GPU nodes. While we add more capabilities to the VCE, the points below highlight some of the considerations to keep in mind when designing your FL pipeline with Flower. We also highlight a couple of current limitations in our implementation.
-
 
 GPU resources
 ~~~~~~~~~~~~~
