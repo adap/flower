@@ -132,6 +132,25 @@ redirects = {
     "changelog": "ref-changelog.html",
     "faq": "ref-faq.html",
 
+    # Restructuring: contributor tutorials
+    "first-time-contributors": "contributor-tutorial-contribute-on-github.html",
+    "getting-started-for-contributors": "contributor-tutorial-get-started-as-a-contributor.html",
+
+    # Restructuring: contributor how-to guides
+    "contributor-setup": "contributor-how-to-install-development-versions.html",
+    "recommended-env-setup": "contributor-how-to-set-up-a-virtual-env.html",
+    "devcontainers": "contributor-how-to-develop-in-vscode-dev-containers.html",
+    "creating-new-messages": "contributor-how-to-create-new-messages.html",
+    "write-documentation": "contributor-how-to-write-documentation.html",
+    "release-process": "contributor-how-to-release-flower.html",
+
+    # Restructuring: contributor explanations
+    "architecture": "contributor-explanation-architecture.html",
+
+    # Restructuring: contributor references
+    "good-first-contributions": "contributor-ref-good-first-contributions.html",
+    "secagg": "contributor-ref-secure-aggregation-protocols.html",
+
     # Deleted pages
     "people": "index.html",
     "organizations": "index.html",

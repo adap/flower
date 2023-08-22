@@ -1,13 +1,12 @@
-First time contributors
-=======================
+Contribute on GitHub
+====================
 
-This guide is for people who want to get involved with Flower
-but who are not used to contributing to GitHub projects.
+This guide is for people who want to get involved with Flower, but who are not used to contributing to GitHub projects.
 
-If you're familiar with how contributing on GitHub works, 
-you can directly checkout our 
+If you're familiar with how contributing on GitHub works, you can directly checkout our 
 `getting started guide for contributors <https://flower.dev/docs/getting-started-for-contributors.html>`_ 
 and examples of `good first contributions <https://flower.dev/docs/good-first-contributions.html>`_.
+
 
 Setting up the repository
 -------------------------
@@ -91,11 +90,13 @@ Setting up the repository
 
         $ git pull upstream main
 
+
 Setting up the coding environment
 ---------------------------------
 
 This can be achieved by following this `getting started guide for contributors`_ (note that you won't need to clone the repository).
 Once you are able to write code and test it, you can finally start making changes!
+
 
 Making changes
 --------------
@@ -169,6 +170,7 @@ And with Flower's repository:
         $ git push -u origin <branch_name>
 
     Once this is done, you will see on the GitHub that your forked repo was updated with the changes you have made.
+
 
 Creating and merging a pull request (PR)
 ----------------------------------------
@@ -332,9 +334,10 @@ Here are a few positive examples which provide helpful information without repea
 * Add CI job to deploy the staging system when the `main` branch changes
 * Add new amazing library which will be used to improve the simulation engine
 
+
 Next steps
 ----------
 
 Once you have made your first PR, and want to contribute more, be sure to check out the following :
 
-- `Good first contributions <https://flower.dev/docs/good-first-contributions.html>`_, where you should particularly look into the :code:`baselines` contributions.
+- `Good first contributions <https://flower.dev/docs/framework/contributor-ref-good-first-contributions.html>`_, where you should particularly look into the :code:`baselines` contributions.

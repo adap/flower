@@ -1,5 +1,5 @@
-Virtual Env Installation
-========================
+Set up a virtual env
+====================
 
 It is recommended to run your Python setup within a virtual environment.
 This guide shows three different examples how to create a virtual environment with pyenv virtualenv, poetry, or Anaconda.
