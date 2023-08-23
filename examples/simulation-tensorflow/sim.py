@@ -1,3 +1,4 @@
+import os
 import math
 import argparse
 from typing import Dict, List, Tuple
@@ -7,6 +8,10 @@ import tensorflow as tf
 import flwr as fl
 from flwr.common import Metrics
 from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
+
+
+# Make TensorFlow logs less verbose
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 parser = argparse.ArgumentParser(description="Flower Simulation with Tensorflow/Keras")
 
@@ -172,7 +177,9 @@ def main() -> None:
         strategy=strategy,
         client_resources=client_resources,
         actor_kwargs={
-            "on_actor_init_fn": enable_tf_gpu_growth  # Enable GPU growth upon actor init.
+            "on_actor_init_fn": enable_tf_gpu_growth  # Enable GPU growth upon actor init
+                                                      # does nothing if `num_gpus` in 
+                                                      # client_resources is 0.0
         },
     )
 

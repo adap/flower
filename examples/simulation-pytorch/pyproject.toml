@@ -10,6 +10,6 @@ authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
-flwr = {version = ">=1.0,<2.0", extras = ["simulation"]}
+flwr = {git = "https://github.com/adap/flower.git", branch = "main", extras = ["simulation"]}
 torch = "1.13.1"
 torchvision = "0.14.1"
