@@ -1,3 +1,0 @@
-LOG_EXPLAIN = True
-
-NUM_ROUNDS = 3
