@@ -116,7 +116,7 @@ def set_params(model: torch.nn.ModuleList, params: List[fl.common.NDArrays]):
 def prepare_dataset():
     """Download and partitions the MNIST dataset."""
 
-    # get the MNIST dataset
+    # Get the MNIST dataset
     trainset, testset = get_mnist()
 
     # split trainset into `num_partitions` trainsets
