@@ -7,19 +7,31 @@ to instantiate your client.
 import flwr as fl
 import torch
 import numpy as np
+import pickle
 import torch.nn as nn
 
 from typing import Callable, Dict, List, Tuple, Union
+from pathlib import Path
 from omegaconf import DictConfig
 from collections import OrderedDict
 from hydra.utils import instantiate
-# from baselines.FedPer.FedPer.utils_file import ModelManager
-from FedPer.models import test, train, ModelManager, ModelSplit, MobileNet_v1
 from torch.utils.data import DataLoader
 from flwr.common.typing import NDArrays, Scalar
 
-class FlowerClient(
-    fl.client.NumPyClient
+from FedPer_new.model import DecoupledModel, train, test
+from FedPer_new.utils import MEAN, STD
+from FedPer_new.dataset_preparation import DATASETS
+
+from FedPer_new.fedavg_client import FlowerClient as FedAvgFlowerClient
+
+from hydra.utils import instantiate
+from torchvision import transforms
+from torch.utils.data import Subset
+
+PROJECT_DIR = Path(__file__).parent.parent.absolute()
+
+class FedPerClient(
+    FedAvgFlowerClient
 ):  # pylint: disable=too-many-instance-attributes
     """Standard Flower client for CNN training."""
 
@@ -42,10 +54,7 @@ class FlowerClient(
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
-        if self.net.split: 
-            return [val.cpu().numpy() for _, val in self.net.body.state_dict().items()]
-        else:
-            return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
+        return [val.cpu().numpy() for _, val in self.net.body.state_dict().items()]
     
     def set_parameters(self, parameters: NDArrays) -> None:
         """
@@ -61,7 +70,7 @@ class FlowerClient(
         # print("Model keys: ", model_keys)
         if self.train_id == 1:
             # Only update client's local head if it hasn't trained yet
-            model_keys.extend([k for k in self.net.state_dict().keys() if k.startswith("head")])
+            model_keys.extend([k for k in self.net.state_dict().keys() if k.startswith("classifier")])
         # Zip model keys and parameters
         params_dict = zip(model_keys, parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
@@ -76,7 +85,6 @@ class FlowerClient(
         """Implements distributed fit function for a given client."""
         # Set parameters 
         self.set_parameters(parameters)
-        print("config: ", config)
         # Epochs
         epochs = config["epochs"]
 
@@ -93,40 +101,24 @@ class FlowerClient(
 
         return self.get_parameters({}), len(self.trainloader), {}
 
+    # super class evaluate function
     def evaluate(
-        self, parameters: NDArrays, config: Dict[str, Scalar]
+        self, 
+        parameters: NDArrays, 
+        config: Dict[str, Scalar]
     ) -> Tuple[float, int, Dict]:
-        """Implements distributed evaluation for a given client."""
-        self.set_parameters(parameters)
-        loss, accuracy = test(self.net, self.valloader, self.device)
-        return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
+        super().evaluate(parameters, config)     
+        
 
 def gen_client_fn(
-    num_epochs: int,
-    trainloaders: List[DataLoader],
-    valloaders: List[DataLoader],
-    learning_rate: float,
-    model: DictConfig,
-) -> Tuple[
-    Callable[[str], FlowerClient], DataLoader
-]:  # pylint: disable=too-many-arguments
+    config: dict
+) -> Tuple[Callable[[str], FedPerClient], DataLoader]:
     """Generates the client function that creates the Flower Clients.
 
     Parameters
     ----------
-    num_epochs : int
-        The number of local epochs each client should run the training for before
-        sending it to the server.
-    trainloaders: List[DataLoader]
-        A list of DataLoaders, each pointing to the dataset training partition
-        belonging to a particular client.
-    valloaders: List[DataLoader]
-        A list of DataLoaders, each pointing to the dataset validation partition
-        belonging to a particular client.
-    learning_rate : float
-        The learning rate for the SGD  optimizer of clients.
-    model : DictConfig
-        The model configuration.
+    config : dict
+        The configuration dictionary containing the parameters for the client
 
     Returns
     -------
@@ -134,27 +126,72 @@ def gen_client_fn(
         A tuple containing the client function that creates Flower Clients and
         the DataLoader that will be used for testing
     """
+    # load dataset and clients' data indices
+    try:
+        partition_path = PROJECT_DIR / "datasets" / config.dataset.name / "partition.pkl"
+        print(f"Loading partition from {partition_path}")
+        with open(partition_path, "rb") as f:
+            partition = pickle.load(f)
+    except:
+        raise FileNotFoundError(f"Please partition {config.dataset.name} first.")
 
-    def client_fn(cid: str) -> FlowerClient:
+    data_indices: List[List[int]] = partition["data_indices"]
+
+    # --------- you can define your own data transformation strategy here ------------
+    general_data_transform = transforms.Compose(
+        [transforms.Normalize(MEAN[config.dataset.name], STD[config.dataset.name])]
+    )
+    general_target_transform = transforms.Compose([])
+    train_data_transform = transforms.Compose([])
+    train_target_transform = transforms.Compose([])
+    # --------------------------------------------------------------------------------
+
+    dataset = DATASETS[config.dataset.name](
+        root=PROJECT_DIR / "data" / config.dataset.name,
+        config=config.dataset,
+        general_data_transform=general_data_transform,
+        general_target_transform=general_target_transform,
+        train_data_transform=train_data_transform,
+        train_target_transform=train_target_transform,
+    )
+
+    trainset: Subset = Subset(dataset, indices=[])
+    testset: Subset = Subset(dataset, indices=[])
+    global_testset: Subset = None
+    if config['global_testset']:
+        all_testdata_indices = []
+        for indices in data_indices:
+            all_testdata_indices.extend(indices["test"])
+        global_testset = Subset(dataset, all_testdata_indices)
+
+    # Get model
+    model = instantiate(config.model)
+
+    def client_fn(cid: str) -> FedPerClient:
         """Create a Flower client representing a single organization."""
 
         # Load model
-        # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        device = torch.device("cuda:0")
-        net = instantiate(model).to(device)
+        net = model.to(config.model.device)
 
         # Note: each client gets a different trainloader/valloader, so each client
         # will train and evaluate on their own unique data
-        trainloader = trainloaders[int(cid)]
-        valloader = valloaders[int(cid)]
+        cid = int(cid)
+        trainset.indices = data_indices[cid]["train"]
+        testset.indices = data_indices[cid]["test"]
+        trainloader = DataLoader(trainset, config.batch_size)
+        if config.global_testset:
+            testloader = DataLoader(global_testset, config.batch_size)
+        else:
+            testloader = DataLoader(testset, config.batch_size)
 
-        return FlowerClient(
-            net,
-            trainloader,
-            valloader,
-            device,
-            num_epochs,
-            learning_rate,
+        # Create a  single Flower client representing a single organization
+        return FedPerClient(
+            net, 
+            trainloader, 
+            testloader, 
+            config.server_device, 
+            config.num_epochs, 
+            config.learning_rate
         )
-    
+
     return client_fn

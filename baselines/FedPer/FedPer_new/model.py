@@ -33,6 +33,12 @@ class DecoupledModel(nn.Module):
         self.classifier: nn.Module = None
         self.dropout: List[nn.Module] = []
 
+        self.num_classes = num_classes
+        self.num_classifier_layer = num_classifier_layer
+        self.device = device
+        self.name = name
+
+
     def need_all_features(self):
         target_modules = [
             module
@@ -59,7 +65,14 @@ class DecoupledModel(nn.Module):
         ]
 
     def forward(self, x: torch.Tensor):
-        return self.classifier(F.relu(self.base(x)))
+        if self.num_classifier_layer == 1:
+            return self.classifier(F.relu(self.base(x)))
+        elif self.num_classifier_layer == 2:
+            x = self.base(x)
+            x = F.relu(x)
+            x = x.view(x.size(0), 512, 1, 1)
+            x = self.classifier(x)
+            return x
 
     def get_final_features(self, x: torch.Tensor, detach=True) -> torch.Tensor:
         if len(self.dropout) > 0:
@@ -139,6 +152,77 @@ class ResNet18(DecoupledModel):
         )
         self.classifier = nn.Linear(self.base.fc.in_features, config[dataset])
         self.base.fc = nn.Identity()
+
+    def forward(self, x):
+        if x.shape[1] == 1:
+            x = torch.expand_copy(x, (x.shape[0], 3, *x.shape[2:]))
+        return super().forward(x)
+
+    def get_all_features(self, x):
+        if x.shape[1] == 1:
+            x = torch.expand_copy(x, (x.shape[0], 3, *x.shape[2:]))
+        return super().get_all_features(x)
+
+    def get_final_features(self, x, detach=True):
+        if x.shape[1] == 1:
+            x = torch.expand_copy(x, (x.shape[0], 3, *x.shape[2:]))
+        return super().get_final_features(x, detach)
+
+class ResNet34(DecoupledModel):
+    def __init__(
+            self, 
+            dataset: str = "cifar10",
+            num_classes : int = 10,
+            num_classifier_layers : int = 1,
+            device : str = "cpu",
+            name : str = "resnet"
+        ):
+        super(ResNet18, self).__init__()
+        self.num_classes = num_classes
+        self.num_classifier_layers = num_classifier_layers
+        self.device = device
+        self.name = name
+
+        config = {
+            "cifar10": 10,
+            "cifar100": 100,
+        }
+        # NOTE: If you don't want parameters pretrained, set `pretrained` as False
+        pretrained = True
+        self.base = models.resnet34(
+            weights=models.ResNet34_Weights.DEFAULT if pretrained else None
+        )
+
+        def basic_block(in_planes, planes, stride=1):
+            """Basic ResNet building block."""
+            return nn.Sequential(
+                nn.Conv2d(in_planes, planes, kernel_size=3, stride=stride, padding=1, bias=False),
+                nn.BatchNorm2d(planes),
+                nn.ReLU(inplace=True),
+                nn.Conv2d(planes, planes, kernel_size=3, stride=1, padding=1, bias=False),
+                nn.BatchNorm2d(planes)
+            )
+
+        def downsample(in_planes, planes, stride=1):
+            """Downsample for ResNet."""
+            return nn.Sequential(
+                nn.Conv2d(in_planes, planes, kernel_size=1, stride=stride, bias=False),
+                nn.BatchNorm2d(planes)
+            )
+
+        if num_classifier_layers == 1:
+            self.classifier = nn.Linear(self.base.fc.in_features, config[dataset])
+            self.base.fc = nn.Identity()
+        elif num_classifier_layers == 2:
+            self.classifier = nn.Sequential(
+                basic_block(self.base.fc.in_features, self.base.fc.in_features),
+                nn.AdaptiveAvgPool2d((1, 1)),
+                nn.Flatten(),
+                nn.Linear(self.base.fc.in_features, config[dataset])
+            )
+            self.base.fc = nn.Identity()
+            self.base.avgpool = nn.Identity()
+            self.base.layer4[-1] = nn.Identity()
 
     def forward(self, x):
         if x.shape[1] == 1:

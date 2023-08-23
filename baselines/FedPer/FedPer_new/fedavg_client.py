@@ -159,9 +159,12 @@ def gen_client_fn(
 
         # Create a  single Flower client representing a single organization
         return FlowerClient(
-            net, trainloader, testloader, config.server_device, 
-            config.num_epochs, config.learning_rate
+            net, 
+            trainloader, 
+            testloader, 
+            config.server_device, 
+            config.num_epochs, 
+            config.learning_rate
         )
 
     return client_fn
-    # return client_fn, testloader
