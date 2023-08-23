@@ -7,8 +7,8 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 # feel free to remove some if aren't needed
 import hydra
 from omegaconf import DictConfig, OmegaConf
-# from dataset import prepare_dataset
-from dataset_preparation import download_and_preprocess
+from dataset import prepare_dataset
+# from dataset_preparation import download_and_preprocess
 from client import generate_client_fn
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -31,8 +31,7 @@ def main(cfg: DictConfig) -> None:
     # be a location in the file system, a list of dataloader, a list of ids to extract
     # from a dataset, it's up to you)
     
-    x_train, y_train, x_test, y_test, input_shape, num_classes = download_and_preprocess()
-
+    x_train, y_train, x_test, y_test, input_shape, num_classes = prepare_dataset(cfg.dataset.FEMNIST)
 
     # 3. Define your clients
     # Define a function that returns another function that will be used during
