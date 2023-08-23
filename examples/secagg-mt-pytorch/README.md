@@ -10,22 +10,7 @@ This example contains highly experimental code. Please consult the regular PyTor
 
 ## Run with Driver API
 
-Terminal 1: start Flower server
-
 ```bash
-flower-server --grpc-rere
+./run.sh
 ```
 
-Terminal 2: start 5 clients
-
-```bash
-./run_client.sh
-```
-
-Terminal 3: start Driver script
-
-Using:
-
-```bash
-python driver.py
-```

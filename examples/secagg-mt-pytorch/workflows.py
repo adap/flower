@@ -1,5 +1,5 @@
 import random
-from logging import WARNING
+from logging import INFO, WARNING
 from typing import Callable, Dict, Generator, List
 
 import numpy as np
@@ -28,7 +28,7 @@ from flwr.common.secure_aggregation.ndarrays_arithmetic import (
     parameters_mod,
     parameters_subtraction,
 )
-from flwr.common.secure_aggregation.quantization import dequantize
+from flwr.common.secure_aggregation.quantization import quantize, dequantize
 from flwr.common.secure_aggregation.secaggplus_constants import (
     KEY_ACTIVE_SECURE_ID_LIST,
     KEY_CIPHERTEXT_LIST,
@@ -59,7 +59,7 @@ from flwr.common.serde import named_values_from_proto, named_values_to_proto
 from flwr.common.typing import Value
 from flwr.proto.task_pb2 import SecureAggregation, Task
 
-from task import IS_VALIDATION
+from settings import LOG_EXPLAIN
 
 
 def get_workflow_factory() -> (
@@ -93,7 +93,6 @@ def workflow_with_sec_agg(
     """
     =============== Setup stage ===============
     """
-
     # Protocol config
     num_samples = len(sampled_node_ids)
     num_shares = sec_agg_config[KEY_SHARE_NUMBER]
@@ -103,6 +102,29 @@ def workflow_with_sec_agg(
     clipping_range = sec_agg_config[KEY_CLIPPING_RANGE]
     target_range = sec_agg_config[KEY_TARGET_RANGE]
 
+    if LOG_EXPLAIN:
+        _quantized = quantize(
+            [np.ones(3) for _ in range(num_samples)], clipping_range, target_range
+        )
+        print(
+            "\n\n################################ Introduction ################################\n"
+            "In the example, each client will upload a vector [1.0, 1.0, 1.0] instead of\n"
+            "model updates for demonstration purposes.\n"
+            "Client 0 is configured to drop out before uploading the masked vector.\n"
+            f"After quantization, the raw vectors will be:"
+        )
+        for i in range(1, num_samples):
+            print(f"\t{_quantized[i]} from Client {i}")
+        print(
+            f"Numbers are rounded to integers stochastically during the quantization\n"
+            ", and thus not all entries are identical."
+        )
+        print(
+            "The above raw vectors are hidden from the driver through adding masks.\n"
+        )
+        print(
+            "########################## Secure Aggregation Start ##########################"
+        )
     cfg = {
         KEY_STAGE: STAGE_SETUP,
         KEY_SAMPLE_NUMBER: num_samples,
@@ -133,6 +155,10 @@ def workflow_with_sec_agg(
     }
 
     surviving_node_ids = sampled_node_ids
+    if LOG_EXPLAIN:
+        print(
+            f"Sending configurations to {num_samples} clients and allocating secure IDs..."
+        )
     # Send setup configuration to clients
     yield {
         node_id: _wrap_in_task(
@@ -147,6 +173,9 @@ def workflow_with_sec_agg(
     node_messages = yield
     surviving_node_ids = [node_id for node_id in node_messages]
 
+    if LOG_EXPLAIN:
+        print(f"Received public keys from  {len(surviving_node_ids)} clients.")
+
     sid2public_keys = {}
     for node_id, task in node_messages.items():
         key_dict = _get_from_task(task)
@@ -156,6 +185,8 @@ def workflow_with_sec_agg(
     """
     =============== Share keys stage ===============   
     """
+    if LOG_EXPLAIN:
+        print(f"Forwarding public keys...")
     # Braodcast public keys to clients
     yield {
         node_id: _wrap_in_task(
@@ -174,6 +205,8 @@ def workflow_with_sec_agg(
     # Receive secret key shares from clients
     node_messages = yield
     surviving_node_ids = [node_id for node_id in node_messages]
+    if LOG_EXPLAIN:
+        print(f"Received encrypted key shares from {len(surviving_node_ids)} clients.")
     # Build forward packet list dictionary
     srcs, dsts, ciphertexts = [], [], []
     fwd_ciphertexts: Dict[int, List[bytes]] = {
@@ -197,6 +230,8 @@ def workflow_with_sec_agg(
     =============== Collect masked input stage ===============   
     """
 
+    if LOG_EXPLAIN:
+        print(f"Forwarding encrypted key shares and requesting masked input...")
     # Send encrypted secret key shares to clients (plus model parameters)
     weights = parameters_to_ndarrays(parameters)
     yield {
@@ -224,10 +259,15 @@ def workflow_with_sec_agg(
         if node_id not in surviving_node_ids
     }
     active_sids = {nid2sid[node_id] for node_id in surviving_node_ids}
-    for _, task in node_messages.items():
+    if LOG_EXPLAIN:
+        for sid in dead_sids:
+            print(f"Client {sid} dropped out.")
+    for node_id, task in node_messages.items():
         named_values = _get_from_task(task)
         client_masked_vec = named_values[KEY_MASKED_PARAMETERS]
         client_masked_vec = [bytes_to_ndarray(b) for b in client_masked_vec]
+        if LOG_EXPLAIN:
+            print(f"Received {client_masked_vec[1]} from Client {nid2sid[node_id]}.")
         masked_vector = parameters_addition(masked_vector, client_masked_vec)
 
     masked_vector = parameters_mod(masked_vector, mod_range)
@@ -235,7 +275,8 @@ def workflow_with_sec_agg(
     """
     =============== Unmask stage ===============   
     """
-
+    if LOG_EXPLAIN:
+        print("Requesting key shares to unmask the aggregate vector...")
     # Send secure IDs of active and dead clients.
     yield {
         node_id: _wrap_in_task(
@@ -250,6 +291,8 @@ def workflow_with_sec_agg(
     # Collect key shares from clients
     node_messages = yield
     surviving_node_ids = [node_id for node_id in node_messages]
+    if LOG_EXPLAIN:
+        print(f"Received key shares from  {len(surviving_node_ids)} clients.")
     # Build collected shares dict
     collected_shares_dict: Dict[int, List[bytes]] = {}
     for nid in sampled_node_ids:
@@ -299,14 +342,20 @@ def workflow_with_sec_agg(
     # Divide vector by number of clients who have given us their masked vector
     # i.e. those participating in final unmask vectors stage
     total_weights_factor, recon_parameters = factor_extract(recon_parameters)
-    recon_parameters = parameters_divide(recon_parameters, total_weights_factor)
+    if LOG_EXPLAIN:
+        print(f"Unmasked aggregate vector (quantized): {recon_parameters[0]}")
+    # recon_parameters = parameters_divide(recon_parameters, total_weights_factor)
     aggregated_vector = dequantize(
         quantized_parameters=recon_parameters,
         clipping_range=clipping_range,
         target_range=target_range,
     )
-    if IS_VALIDATION:
-        print(aggregated_vector[:10])
+    aggregated_vector[0] -= (len(active_sids) - 1) * clipping_range
+    if LOG_EXPLAIN:
+        print(f"Unmasked aggregate vector (dequantized): {aggregated_vector[0]}")
+        print(
+            "########################### Secure Aggregation End ###########################\n\n"
+        )
     aggregated_parameters = ndarrays_to_parameters(aggregated_vector)
     # Update model parameters
     parameters.tensors = aggregated_parameters.tensors

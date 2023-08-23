@@ -3,13 +3,14 @@ import time
 from typing import Dict, List, Tuple
 
 import numpy as np
-from task import IS_VALIDATION, Net, get_parameters
 from workflows import get_workflow_factory
 
 from flwr.common import Metrics, ndarrays_to_parameters
 from flwr.driver import Driver
 from flwr.proto import driver_pb2, node_pb2, task_pb2
 from flwr.server import History
+
+from settings import NUM_ROUNDS
 
 
 # Convert instruction/result dict to/from list of TaskIns/TaskRes
@@ -77,12 +78,10 @@ driver = Driver(driver_service_address="0.0.0.0:9091", certificates=None)
 
 anonymous_client_nodes = False
 num_client_nodes_per_round = 5
-sleep_time = 1
-time_out = 30
-num_rounds = 3
-parameters = ndarrays_to_parameters(
-    get_parameters(net=Net()) if not IS_VALIDATION else [np.zeros(10000)]
-)
+sleep_time = 0.5
+time_out = 3.9
+num_rounds = NUM_ROUNDS
+parameters = ndarrays_to_parameters([np.ones(3)])
 wf_factory = get_workflow_factory()
 
 # -------------------------------------------------------------------------- Driver SDK
@@ -125,7 +124,6 @@ for server_round in range(num_rounds):
             # ---------------------------------------------------------------------- Driver SDK
 
             all_node_ids: List[int] = get_nodes_res.node_ids
-            print(f"Got {len(all_node_ids)} node IDs")
 
             if len(all_node_ids) >= num_client_nodes_per_round:
                 # Sample client nodes
@@ -137,7 +135,6 @@ for server_round in range(num_rounds):
             time.sleep(3)
 
     # Log sampled node IDs
-    print(f"Sampled {len(sampled_node_ids)} node IDs: {sampled_node_ids}")
     time.sleep(sleep_time)
 
     workflow = wf_factory(parameters, sampled_node_ids)
@@ -150,7 +147,6 @@ for server_round in range(num_rounds):
         except StopIteration:
             break
         # Schedule a task for all sampled nodes
-        print(f"DEBUG: send to nodes {list(instructions.keys())}")
         task_ins_list: List[task_pb2.TaskIns] = task_dict_to_task_ins_list(instructions)
 
         push_task_ins_req = driver_pb2.PushTaskInsRequest(task_ins_list=task_ins_list)
@@ -161,10 +157,6 @@ for server_round in range(num_rounds):
         )
         # ---------------------------------------------------------------------- Driver SDK
 
-        print(
-            f"Scheduled {len(push_task_ins_res.task_ids)} tasks: {push_task_ins_res.task_ids}"
-        )
-
         time.sleep(sleep_time)
 
         # Wait for results, ignore empty task_ids
@@ -174,6 +166,8 @@ for server_round in range(num_rounds):
         ]
         all_task_res: List[task_pb2.TaskRes] = []
         while True:
+            if time.time() - start_time >= time_out:
+                break
             pull_task_res_req = driver_pb2.PullTaskResRequest(
                 node=node_pb2.Node(node_id=0, anonymous=True),
                 task_ids=task_ids,
@@ -186,14 +180,11 @@ for server_round in range(num_rounds):
             # ------------------------------------------------------------------ Driver SDK
 
             task_res_list: List[task_pb2.TaskRes] = pull_task_res_res.task_res_list
-            print(f"Got {len(task_res_list)} results")
 
             time.sleep(sleep_time)
 
             all_task_res += task_res_list
             if len(all_task_res) == len(task_ids):
-                break
-            if time.time() - start_time >= time_out:
                 break
 
         # Collect correct results
