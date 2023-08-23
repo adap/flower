@@ -43,16 +43,21 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, len(self.x_val), {"accuracy": acc}
 
 
-def client_fn(cid: str) -> fl.client.Client:
-  partitions = partition(CONCENTRATION)
-  full_x_train_cid, full_y_train_cid = partitions[int(cid)]
-  full_y_train_cid = to_categorical(full_y_train_cid, num_classes=num_classes)
+def generate_client_fn(x_train, y_train, input_shape, num_classes):
 
-  # Use 10% of the client's training data for validation
-  split_idx = math.floor(len(full_x_train_cid) * 0.9)
-  x_train_cid, y_train_cid = (
-    full_x_train_cid[:split_idx],
-    full_y_train_cid[:split_idx],
-  )
-  x_val_cid, y_val_cid = full_x_train_cid[split_idx:], full_y_train_cid[split_idx:]
-  return FlowerClient(model, x_train_cid, y_train_cid, x_val_cid, y_val_cid)
+    def client_fn(cid: str) -> fl.client.Client:
+      partitions = partition(CONCENTRATION)
+      full_x_train_cid, full_y_train_cid = partitions[int(cid)]
+      full_y_train_cid = to_categorical(full_y_train_cid, num_classes=num_classes)
+    
+      # Use 10% of the client's training data for validation
+      split_idx = math.floor(len(full_x_train_cid) * 0.9)
+      x_train_cid, y_train_cid = (
+        full_x_train_cid[:split_idx],
+        full_y_train_cid[:split_idx],
+      )
+      x_val_cid, y_val_cid = full_x_train_cid[split_idx:], full_y_train_cid[split_idx:]
+        
+      return FlowerClient(model, x_train_cid, y_train_cid, x_val_cid, y_val_cid, input_shape, num_classes, local_epochs)
+
+    return client_fn
