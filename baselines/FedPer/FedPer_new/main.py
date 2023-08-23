@@ -16,6 +16,7 @@ from FedPer_new.models.mobile_model import MobileNet, MobileNetModelSplit
 from FedPer_new.models.resnet_model import ResNet, ResNetModelSplit
 
 from FedPer_new.fedavg_client import gen_client_fn
+from FedPer_new.fedper_client import gen_client_fn as gen_fedper_client_fn
 from FedPer_new.utils import weighted_average, save_results_as_pickle, plot_metric_from_history
 from flwr.server.strategy import FedAvg
 
@@ -48,6 +49,8 @@ def main(cfg: DictConfig) -> None:
     # Get client fn 
     if algo == 'fedavg':
         client_fn = gen_client_fn(cfg)
+    elif algo == 'fedper':
+        client_fn = gen_fedper_client_fn(cfg)
     else: 
         raise NotImplementedError(f"Algorithm {algo} not implemented")
 
@@ -71,6 +74,8 @@ def main(cfg: DictConfig) -> None:
             min_available_clients=cfg.strategy.min_available_clients,
             evaluate_metrics_aggregation_fn=weighted_average,
         )
+    if algo == 'fedper':
+        
     else:
         raise NotImplementedError(f"Algorithm {algo} not implemented")
 

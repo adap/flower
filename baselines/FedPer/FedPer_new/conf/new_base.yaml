@@ -1,16 +1,16 @@
 ---
-num_clients: 10 # total number of clients
-num_epochs: 4 # number of local epochs
+num_clients: 6 # total number of clients
+num_epochs: 1 # number of local epochs
 batch_size: 128
-num_rounds: 100
+num_rounds: 3
 clients_per_round: 3
 learning_rate: 0.01
-algorithm: fedavg
-algo: fedavg
+algorithm: fedper
+algo: fedper
 global_testset: False
 
 client_resources:
-  num_cpus: 16
+  num_cpus: 32
   num_gpus: 1
 
 server_device: cuda:0
@@ -26,7 +26,7 @@ dataset:
   fraction: 0.83
 
 model:
-  _target_: FedPer.model.resnet_model.ResNet
+  _target_: FedPer_new.model.ResNet34
   num_classifier_layers: 2
   num_classes: 10
   device: ${server_device}
