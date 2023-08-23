@@ -178,8 +178,7 @@ def main() -> None:
         client_resources=client_resources,
         actor_kwargs={
             "on_actor_init_fn": enable_tf_gpu_growth  # Enable GPU growth upon actor init
-                                                      # does nothing if `num_gpus` in 
-                                                      # client_resources is 0.0
+            # does nothing if `num_gpus` in client_resources is 0.0
         },
     )
 
