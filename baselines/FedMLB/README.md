@@ -45,7 +45,7 @@ The reproduced results use the CIFAR-100 dataset. Four settings are available fo
 4. Large-scale experiments with Dir(0.6), 500 clients, 2% participation rate, balanced dataset (100 examples per client).
 
 
-****Datasets:**** CIFAR-100.
+****Datasets:**** CIFAR-100, Tiny-ImageNet.
 
 ****Hardware Setup:**** The code in this repository has been tested on a Linux machine with 64GB RAM. 
 Be aware that in the default config the memory usage can exceed 10GB.
@@ -182,9 +182,6 @@ python -m FedMLB.dataset_preparation dataset_config.dataset="tiny-imagenet" data
 python -m FedMLB.dataset_preparation dataset_config.dataset="tiny-imagenet" dataset_config.alpha_dirichlet=0.6 total_clients=500
 ```
 
-### Run simulations and reproduce results
-After having generated the setting, simulations can be run.
-
 ### Using GPUs
 The code in this repository relies on TF library.
 To make the simulations run on GPUs use the option `client_resources.num_cpus={PER_CLIENT_FRACTION_OF_GPU_MEMORY}`.
@@ -197,6 +194,9 @@ python -m FedMLB.main # `client_resources.num_gpus=0.0` default
 > :warning:
 Ensure that TensorFlow is configured to use GPUs.
 
+
+### Run simulations and reproduce results
+After having generated the setting, simulations can be run.
  
 #### CIFAR-100
 The default configuration for `FedMLB.main` uses (1.) for CIFAR-100, and can be run with the following:
@@ -250,7 +250,7 @@ Note that (as in the original paper),
 the accuracy at the target round is based on the exponential moving average with the momentum parameter
 0.9. Tensorboard allows to easily visualize/calculate the moving average of a run.
 
-###Table 1a
+### Table 1a
 
 The results of Table 1a in the paper (for FedAvg and FedMLB) refers
 to CIFAR-100 (Figure 3) and Tiny-ImageNet (Figure 7a) with 
@@ -260,7 +260,7 @@ To reproduce the results run the following:
 
 ```bash
 # this will produce six consecutive runs
-python -m FedMLB.main --multirun dataset_config.dataset="cifar100", "tiny-imagenet" algorithm="FedMLB","FedAvg","FedAvg+KD" 
+python -m FedMLB.main --multirun dataset_config.dataset="cifar100","tiny-imagenet" algorithm="FedMLB","FedAvg","FedAvg+KD" 
 ```
 #### CIFAR-100, Dir(0.3), 100 clients, 5% participation.
 
@@ -280,16 +280,16 @@ python -m FedMLB.main --multirun dataset_config.dataset="cifar100", "tiny-imagen
   <tr>
     <td>FedAvg</td>
     <td>41.88</td>
-    <td></td>
+    <td>44.52</td>
     <td>47.83</td>
-    <td></td>
+    <td>48.88</td>
   </tr>
   <tr>
     <td>FedAvg+KD</td>
     <td>42.99</td>
-    <td></td>
+    <td>46.03</td>
     <td>49.17</td>
-    <td></td>
+    <td>50.54</td>
   </tr>
   <tr>
     <td>FedMLB</td>
@@ -331,7 +331,7 @@ python -m FedMLB.main --multirun dataset_config.dataset="cifar100", "tiny-imagen
   </tr>
 </table>
 
-###Table 1b
+### Table 1b
 
 The results of Table 1a in the paper (for FedAvg and FedMLB) refers
 to CIFAR-100 (Figure 3) and Tiny-ImageNet (Figure 7a) with 
@@ -355,7 +355,7 @@ python -m FedMLB.main --multirun dataset_config.dataset="cifar100", "tiny-imagen
 | FedAvg  | () | () |
 | FedMLB   | () | () |
 
-###Table 3
+### Table 3
 
 To reproduce results reported in Table 3 of the paper,
 resulting from _more local iterations_ (K=100 or K=200 in the
