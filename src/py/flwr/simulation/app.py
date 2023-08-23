@@ -136,10 +136,9 @@ def start_simulation(  # pylint: disable=too-many-arguments
         Set to True to prevent `ray.shutdown()` in case `ray.is_initialized()=True`.
 
     actor_type: VirtualClientEngineActor (default: DefaultActor)
-
         Optionally specify the type of actor to use. The actor object, which
-        persist throughout the simulation will be the process in charged of
-        running the clients' jobs (i.e. their fit() method).
+        persists throughout the simulation, will be the process in charge of
+        running the clients' jobs (i.e. their `fit()` method).
 
     actor_kwargs: Optional[Dict[str, Any]] (default: None)
         If you want to create your own Actor classes, you might need to pass
@@ -230,7 +229,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     actor_args = {} if actor_kwargs is None else actor_kwargs
 
-    # An actor generator. This is called N times to add N actors
+    # An actor factory. This is called N times to add N actors
     # to the pool. If at some point the pool can accommodate more actors
     # this will be called again.
     def create_actor_fn() -> Type[VirtualClientEngineActor]:
@@ -247,8 +246,8 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     f_stop = threading.Event()
 
-    # Periodically, we want to check if the cluster has grown (i.e. a new
-    # node has been added). When this happens, we likely want to enlarge
+    # Periodically, check if the cluster has grown (i.e. a new
+    # node has been added). If this happens, we likely want to grow
     # the actor pool by adding more Actors to it.
     def update_resources(f_stop: threading.Event) -> None:
         """Periodically check if more actors can be added to the pool.
@@ -258,9 +257,11 @@ def start_simulation(  # pylint: disable=too-many-arguments
         if not f_stop.is_set():
             num_max_actors = pool_size_from_resources(client_resources)
             if num_max_actors > pool.num_actors:
-                num = num_max_actors - pool.num_actors
-                log(INFO, "The cluster expanded. Adding %s actors to the pool.", num)
-                pool.add_actors_to_pool(num_actors=num)
+                num_new = num_max_actors - pool.num_actors
+                log(
+                    INFO, "The cluster expanded. Adding %s actors to the pool.", num_new
+                )
+                pool.add_actors_to_pool(num_actors=num_new)
 
             threading.Timer(10, update_resources, [f_stop]).start()
 

@@ -1,5 +1,5 @@
-VS Code Remote - Containers 
-===========================
+Develop in VSCode Dev Containers 
+================================
 
 When working on the Flower framework we want to ensure that all contributors use the same developer environment to format code or run tests. For this purpose we are using the VSCode Remote Containers extension. What is it? Read the following quote:
 

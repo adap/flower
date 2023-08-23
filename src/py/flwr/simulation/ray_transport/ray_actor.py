@@ -129,9 +129,9 @@ def pool_size_from_resources(client_resources: Dict[str, Union[int, float]]) -> 
     if total_num_actors == 0:
         log(
             WARNING,
-            "Your ActorPool is empty. Your system (CPUs=%s, GPUs=%s) "
+            "Your ActorPool is empty. The system (CPUs=%s, GPUs=%s) "
             "does not meet the criteria to host at least one client with resources:"
-            " %s. Consider lowering your `client_resources`",
+            " %s. Lowering the `client_resources` could help.",
             num_cpus,
             num_gpus,
             client_resources,
@@ -178,7 +178,7 @@ class VirtualClientEngineActorPool(ActorPool):
 
         if actor_list is None:
             # Figure out how many actors can be created given the cluster resources
-            # and the resources the user indicates each VirtualClient will need.
+            # and the resources the user indicates each VirtualClient will need
             num_actors = pool_size_from_resources(client_resources)
             actors = [create_actor_fn() for _ in range(num_actors)]
         else:
@@ -231,21 +231,20 @@ class VirtualClientEngineActorPool(ActorPool):
             self._future_to_actor[future_key] = (self._next_task_index, actor, cid)
             self._next_task_index += 1
 
-            # update with future
+            # Update with future
             self._cid_to_future[cid]["future"] = future_key
 
     def submit_client_job(
         self, actor_fn: Any, job: Tuple[Callable[[], ClientRes], str]
     ) -> None:
         """Submit a job while tracking client ids."""
+        _, cid = job
+
         # We need to put this behind a lock since .submit() involves
         # removing and adding elements from a dictionary. Which creates
         # issues in multi-threaded settings
-
-        _, cid = job
         with self.lock:
-            # TODO: w/ timestamp check, call ray.resources()  # pylint: disable=fixme
-            # Creating cid to future mapping
+            # Create cid to future mapping
             self._reset_cid_to_future_dict(cid)
             if self._idle_actors:
                 # Submit job since there is an Actor that's available
@@ -348,9 +347,9 @@ class VirtualClientEngineActorPool(ActorPool):
                 self.num_actors,
                 num_actors_updated,
             )
-            # We are preventing one actor to be added back in the queue, so we just
+            # We are preventing one actor from being added back to the queue, so we just
             # decrease the number of actors by one. Eventually `self.num_actors`
-            # should be equal what pool_size_from_resources(self.resources) returns
+            # should be equal to what `pool_size_from_resources(self.resources)` returns
             self.num_actors -= 1
             return False
 
@@ -372,7 +371,7 @@ class VirtualClientEngineActorPool(ActorPool):
             # Get actor that completed a job
             _, actor, cid = self._future_to_actor.pop(future, (None, None, -1))
             if actor is not None:
-                # Still space in queue ? (no if a node in the cluster died)
+                # Still space in queue? (no if a node in the cluster died)
                 if self._check_actor_fits_in_pool():
                     if self._check_and_remove_actor_from_pool(actor):
                         self._return_actor(actor)  # type: ignore

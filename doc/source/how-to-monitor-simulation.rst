@@ -1,12 +1,14 @@
-Monitor Simulation
+Monitor simulation
 ==================
 
 Flower allows you to monitor system resources while running your simulation. Moreover, the Flower simulation engine is powerful and enables you to decide how to allocate resources per client manner and constrain the total usage. Insights from resource consumption can help you make smarter decisions and speed up the execution time.
 
 The specific instructions assume you are using macOS and have the `Homebrew <https://brew.sh/>`_ package manager installed.
 
+
 Downloads
 ---------
+
 .. code-block:: bash
 
   brew install prometheus grafana
@@ -81,6 +83,7 @@ Your terminal editor should open and allow you to apply the following configurat
 
 Congratulations, you just downloaded all the necessary software needed for metrics tracking. Now, let’s start it.
 
+
 Tracking metrics
 ----------------
 
@@ -127,6 +130,7 @@ After you finish the visualization, stop Prometheus and Grafana. This is importa
 
 Resource allocation
 -------------------
+
 You must understand how the Ray library works to efficiently allocate system resources to simulation clients on your own.
 
 Initially, the simulation (which Ray handles under the hood) starts by default with all the available resources on the system, which it shares among the clients. It doesn't mean it divides it equally among all of them, nor that the model training happens at all of them simultaneously. You will learn more about that in the later part of this blog. You can check the system resources by running the following:
@@ -203,8 +207,10 @@ Now comes the crucial part. Ray will start a new client only when it has all the
 In the example above, only one client will be run, so your clients won't run concurrently. Setting :code:`client_num_gpus = 0.5` would allow running two clients and therefore enable them to run concurrently.
 Be careful not to require more resources than available. If you specified :code:`client_num_gpus = 2`, the simulation wouldn't start (even if you had 2 GPUs but decided to set 1 in :code:`ray_init_args`).
 
+
 FAQ
 ---
+
 Q: I don't see any metrics logged.
 
 A: The timeframe might not be properly set. The setting is in the top right corner ("Last 30 minutes" by default). Please change the timeframe to reflect the period when the simulation was running.
@@ -221,8 +227,10 @@ Q: I see "This site can't be reached" when going to `<http://127.0.0.1:8265>`_.
 
 A: Either the simulation has already finished, or you still need to start Prometheus.
 
+
 Resources
 ---------
+
 Ray Dashboard: `<https://docs.ray.io/en/latest/ray-core/ray-dashboard.html>`_
 
 Ray Metrics: `<https://docs.ray.io/en/latest/ray-observability/ray-metrics.html>`_
