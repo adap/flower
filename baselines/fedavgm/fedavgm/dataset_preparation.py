@@ -10,6 +10,7 @@ block) that this file should be executed first.
 # from hydra.core.hydra_config import HydraConfig
 # from hydra.utils import call, instantiate
 # from omegaconf import DictConfig, OmegaConf
+from tensorflow import keras
 
 
 # @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -32,3 +33,16 @@ block) that this file should be executed first.
 # if __name__ == "__main__":
 
 #     download_and_preprocess()
+
+if FEMNIST == True:
+  (x_train, y_train), (x_test, y_test) = keras.datasets.fashion_mnist.load_data()
+  x_train = x_train.astype('float32') / 255
+  x_test = x_test.astype('float32') / 255
+  input_shape = x_train.shape[1:]
+  num_classes = len(np.unique(y_train))
+else:
+  (x_train, y_train), (x_test, y_test) = keras.datasets.cifar10.load_data()
+  x_train = x_train.astype('float32') / 255
+  x_test = x_test.astype('float32') / 255
+  input_shape = x_train.shape[1:]
+  num_classes = len(np.unique(y_train))
