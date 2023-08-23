@@ -7,7 +7,9 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 # feel free to remove some if aren't needed
 import hydra
 from omegaconf import DictConfig, OmegaConf
+# from dataset import prepare_dataset
 from dataset_preparation import download_and_preprocess
+from client import generate_client_fn
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig) -> None:
@@ -36,6 +38,7 @@ def main(cfg: DictConfig) -> None:
     # Define a function that returns another function that will be used during
     # simulation to instantiate each individual client
     # client_fn = client.<my_function_that_returns_a_function>()
+    client_fn = generate_client_fn(x_train, y_train, input_shape, num_classes, cfg.concentration, cfg.local_epochs)
 
     # 4. Define your strategy
     # pass all relevant argument (including the global dataset used after aggregation,
