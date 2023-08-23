@@ -23,21 +23,11 @@ def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
 
     # 2. Prepare your dataset
-    # here you should call a function in datasets.py that returns whatever is needed to:
-    # (1) ensure the server can access the dataset used to evaluate your model after
-    # aggregation
-    # (2) tell each client what dataset partitions they should use (e.g. a this could
-    # be a location in the file system, a list of dataloader, a list of ids to extract
-    # from a dataset, it's up to you)
-    
     x_train, y_train, x_test, y_test, input_shape, num_classes = prepare_dataset(cfg.dataset.FEMNIST)
     partitions = partition(x_train, y_train, cfg.num_clients, cfg.dataset.concentration, num_classes)
 
     # 3. Define your clients
-    # Define a function that returns another function that will be used during
-    # simulation to instantiate each individual client
-    # client_fn = client.<my_function_that_returns_a_function>()
-    client_fn = generate_client_fn(partitions, input_shape, num_classes, cfg.local_epochs)
+    client_fn = generate_client_fn(partitions, input_shape, num_classes, cfg.client.local_epochs, cfg.client.batch_size)
 
     # 4. Define your strategy
     # pass all relevant argument (including the global dataset used after aggregation,
