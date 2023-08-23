@@ -97,6 +97,7 @@ def pool_size_from_resources(client_resources: Dict[str, Union[int, float]]) -> 
     client.
     """
     total_num_actors = 0
+
     # We calculate the number of actors that fit in a node per node basis. This is
     # the right way of doing it otherwise situations like the following arise: imagine
     # each client needs 3 CPUs and Ray has w nodes (one with 2 CPUs and another with 4)
@@ -115,6 +116,7 @@ def pool_size_from_resources(client_resources: Dict[str, Union[int, float]]) -> 
         num_cpus = node_resources["CPU"]
         num_gpus = node_resources.get("GPU", 0)  # There might not be GPU
         num_actors = int(num_cpus / client_resources["num_cpus"])
+
         # If a GPU is present and client resources do require one
         if "num_gpus" in client_resources.keys() and client_resources["num_gpus"] > 0.0:
             if num_gpus:
@@ -359,6 +361,7 @@ class VirtualClientEngineActorPool(ActorPool):
         """Similar to parent's get_next_unordered() but without final ray.get()."""
         if not self.has_next():  # type: ignore
             raise StopIteration("No more results to get")
+
         # Block until one result is ready
         res, _ = ray.wait(list(self._future_to_actor), num_returns=1, timeout=timeout)
 
