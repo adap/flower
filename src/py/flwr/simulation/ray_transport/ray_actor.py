@@ -234,7 +234,6 @@ class VirtualClientEngineActorPool(ActorPool):
         # removing and adding elements from a dictionary. Which creates
         # issues in multi-threaded settings
         with self.lock:
-            # TODO: w/ timestamp check, call ray.resources()  # pylint: disable=fixme
             # Create cid to future mapping
             self._reset_cid_to_future_dict(cid)
             if self._idle_actors:

@@ -144,8 +144,6 @@ class RayActorClientProxy(ClientProxy):
                 # At this point we want to stop the simulation.
                 # since no more client workloads will be executed
                 log(ERROR, "ActorPool is empty!!!")
-                # TODO: Implement ClientProxy disconnect  # pylint: disable=fixme
-                # self.reconnect()
             log(ERROR, traceback.format_exc())
             log(ERROR, ex)
             raise ex
