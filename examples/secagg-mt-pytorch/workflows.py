@@ -1,8 +1,9 @@
 import random
-from logging import INFO, WARNING
+from logging import WARNING
 from typing import Callable, Dict, Generator, List
 
 import numpy as np
+from settings import LOG_EXPLAIN
 
 from flwr.common import (
     Parameters,
@@ -24,11 +25,10 @@ from flwr.common.secure_aggregation.ndarrays_arithmetic import (
     get_parameters_shape,
     get_zero_parameters,
     parameters_addition,
-    parameters_divide,
     parameters_mod,
     parameters_subtraction,
 )
-from flwr.common.secure_aggregation.quantization import quantize, dequantize
+from flwr.common.secure_aggregation.quantization import dequantize, quantize
 from flwr.common.secure_aggregation.secaggplus_constants import (
     KEY_ACTIVE_SECURE_ID_LIST,
     KEY_CIPHERTEXT_LIST,
@@ -58,8 +58,6 @@ from flwr.common.secure_aggregation.secaggplus_utils import pseudo_rand_gen
 from flwr.common.serde import named_values_from_proto, named_values_to_proto
 from flwr.common.typing import Value
 from flwr.proto.task_pb2 import SecureAggregation, Task
-
-from settings import LOG_EXPLAIN
 
 
 def get_workflow_factory() -> (
@@ -174,7 +172,7 @@ def workflow_with_sec_agg(
     surviving_node_ids = [node_id for node_id in node_messages]
 
     if LOG_EXPLAIN:
-        print(f"Received public keys from  {len(surviving_node_ids)} clients.")
+        print(f"Received public keys from {len(surviving_node_ids)} clients.")
 
     sid2public_keys = {}
     for node_id, task in node_messages.items():
@@ -186,7 +184,7 @@ def workflow_with_sec_agg(
     =============== Share keys stage ===============   
     """
     if LOG_EXPLAIN:
-        print(f"Forwarding public keys...")
+        print(f"\nForwarding public keys...")
     # Braodcast public keys to clients
     yield {
         node_id: _wrap_in_task(
@@ -231,7 +229,7 @@ def workflow_with_sec_agg(
     """
 
     if LOG_EXPLAIN:
-        print(f"Forwarding encrypted key shares and requesting masked input...")
+        print(f"\nForwarding encrypted key shares and requesting masked input...")
     # Send encrypted secret key shares to clients (plus model parameters)
     weights = parameters_to_ndarrays(parameters)
     yield {
@@ -276,7 +274,7 @@ def workflow_with_sec_agg(
     =============== Unmask stage ===============   
     """
     if LOG_EXPLAIN:
-        print("Requesting key shares to unmask the aggregate vector...")
+        print("\nRequesting key shares to unmask the aggregate vector...")
     # Send secure IDs of active and dead clients.
     yield {
         node_id: _wrap_in_task(
@@ -292,7 +290,7 @@ def workflow_with_sec_agg(
     node_messages = yield
     surviving_node_ids = [node_id for node_id in node_messages]
     if LOG_EXPLAIN:
-        print(f"Received key shares from  {len(surviving_node_ids)} clients.")
+        print(f"Received key shares from {len(surviving_node_ids)} clients.")
     # Build collected shares dict
     collected_shares_dict: Dict[int, List[bytes]] = {}
     for nid in sampled_node_ids:

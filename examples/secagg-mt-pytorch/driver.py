@@ -3,14 +3,13 @@ import time
 from typing import Dict, List, Tuple
 
 import numpy as np
+from settings import NUM_ROUNDS
 from workflows import get_workflow_factory
 
 from flwr.common import Metrics, ndarrays_to_parameters
 from flwr.driver import Driver
 from flwr.proto import driver_pb2, node_pb2, task_pb2
 from flwr.server import History
-
-from settings import NUM_ROUNDS
 
 
 # Convert instruction/result dict to/from list of TaskIns/TaskRes
