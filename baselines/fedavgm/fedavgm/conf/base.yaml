@@ -1,4 +1,7 @@
 ---
+num_rounds: 10000
+num_clients: 100
+
 dataset:
   fmnist: False
 
@@ -8,6 +11,10 @@ model:
 strategy:
   _target_: # points to your strategy (either custom or exiting in Flower)
   # rest of strategy config
+
+server:
+  momentum: 0.9
+  learning_rate: 1.0
 
 client:
   concentration: 10
