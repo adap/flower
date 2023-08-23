@@ -79,7 +79,7 @@ class FlowerClient(fl.client.NumPyClient):
 
 
 def get_client_fn(train_partitions, val_partitions):
-    """Return a function to construc a client.
+    """Return a function to construct a client.
 
     The VirtualClientEngine will exectue this function whenever a client is sampled by
     the strategy to participate.
