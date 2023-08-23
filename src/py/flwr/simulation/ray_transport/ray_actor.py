@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -76,7 +76,18 @@ class VirtualClientEngineActor(ABC):
 
 @ray.remote
 class DefaultActor(VirtualClientEngineActor):
-    """A Ray Actor class that runs client workloads."""
+    """A Ray Actor class that runs client workloads.
+
+    Parameters
+    ----------
+    on_actor_init_fn: Optional[Callable[[], None]] (default: None)
+        A function to execute upon actor initialization.
+    """
+
+    def __init__(self, on_actor_init_fn: Optional[Callable[[], None]] = None) -> None:
+        super().__init__()
+        if on_actor_init_fn:
+            on_actor_init_fn()
 
 
 def pool_size_from_resources(client_resources: Dict[str, Union[int, float]]) -> int:
@@ -120,7 +131,7 @@ def pool_size_from_resources(client_resources: Dict[str, Union[int, float]]) -> 
     if total_num_actors == 0:
         log(
             WARNING,
-            "The ActorPool is empty. The system (%s, %s) "
+            "The ActorPool is empty. The system (CPUs=%s, GPUs=%s) "
             "does not meet the criteria to host at least one client with resources:"
             " %s. Lowering the `client_resources` could help.",
             num_cpus,
@@ -128,7 +139,8 @@ def pool_size_from_resources(client_resources: Dict[str, Union[int, float]]) -> 
             client_resources,
         )
         raise ValueError(
-            "ActorPool is empty. Stopping Simulation. Check 'client_resources'"
+            "ActorPool is empty. Stopping Simulation. "
+            "Check 'client_resources' passed to `start_simulation`"
         )
 
     return total_num_actors
