@@ -18,9 +18,9 @@ dataset: [Femnist, Shakespeare] # list of datasets you include in your baseline
 
 ****What’s implemented:**** : I implement ~~
 
-****Datasets:**** :
+****Datasets:**** : Dataset~
 
-****Hardware Setup:**** :
+****Hardware Setup:**** : Hardware Setup ~
 
 ****Contributors:**** :
 
