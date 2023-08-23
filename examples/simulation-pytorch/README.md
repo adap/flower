@@ -1,6 +1,6 @@
 # Flower Simulation example using PyTorch
 
-This introductory example uses the simulation capabilities of Flower to simulate a large number of clients on either a single machine of a cluster of machines.
+This introductory example uses the simulation capabilities of Flower to simulate a large number of clients on either a single machine or a cluster of machines.
 
 ## Running the example (via Jupyter Notebook)
 
@@ -19,11 +19,11 @@ git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/sim
 This will create a new directory called `simulation-pytorch` containing the following files:
 
 ```
--- README.md       <- Your're reading this right now
--- sim.ipynb       <- Example notebook
--- sim.py          <- Example code
--- utils.py        <- auxiliary functions for this example
--- pyproject.toml  <- Example dependencies
+-- README.md         <- Your're reading this right now
+-- sim.ipynb         <- Example notebook
+-- sim.py            <- Example code
+-- utils.py          <- auxiliary functions for this example
+-- pyproject.toml    <- Example dependencies
 -- requirements.txt  <- Example dependencies
 ```
 

@@ -187,8 +187,8 @@ def main():
             NUM_CLIENTS * 0.75
         ),  # Wait until at least 75 clients are available
         on_fit_config_fn=fit_config,
-        evaluate_metrics_aggregation_fn=weighted_average,  # aggregates federated metrics
-        evaluate_fn=get_evaluate_fn(testset),  # global evaluation function
+        evaluate_metrics_aggregation_fn=weighted_average,  # Aggregate federated metrics
+        evaluate_fn=get_evaluate_fn(testset),  # Global evaluation function
     )
 
     # Resources to be assigned to each virtual client
