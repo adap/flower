@@ -119,7 +119,7 @@ def prepare_dataset():
     # Get the MNIST dataset
     trainset, testset = get_mnist()
 
-    # split trainset into `num_partitions` trainsets
+    # Split trainset into `num_partitions` trainsets
     num_images = len(trainset) // NUM_CLIENTS
     partition_len = [num_images] * NUM_CLIENTS
 
