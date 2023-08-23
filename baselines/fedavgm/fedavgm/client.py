@@ -43,10 +43,10 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, len(self.x_val), {"accuracy": acc}
 
 
-def generate_client_fn(x_train, y_train, input_shape, num_classes):
+def generate_client_fn(x_train, y_train, input_shape, num_classes, concentration, local_epochs):
 
     def client_fn(cid: str) -> fl.client.Client:
-      partitions = partition(CONCENTRATION)
+      partitions = partition(concentration)
       full_x_train_cid, full_y_train_cid = partitions[int(cid)]
       full_y_train_cid = to_categorical(full_y_train_cid, num_classes=num_classes)
     
