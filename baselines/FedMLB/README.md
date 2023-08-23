@@ -282,7 +282,7 @@ python -m FedMLB.main --multirun dataset_config.dataset="cifar100","tiny-imagene
     <td>41.88</td>
     <td>44.52</td>
     <td>47.83</td>
-    <td>48.88</td>
+    <td>49.15</td>
   </tr>
   <tr>
     <td>FedAvg+KD</td>
