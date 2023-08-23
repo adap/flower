@@ -190,7 +190,7 @@ def main():
     # Download CIFAR-10 dataset and partition it
     trainsets, valsets, testset = prepare_dataset()
 
-    # configure the strategy
+    # Configure the strategy
     strategy = fl.server.strategy.FedAvg(
         fraction_fit=0.1,  # Sample 10% of available clients for training
         fraction_evaluate=0.05,  # Sample 5% of available clients for evaluation
