@@ -8,7 +8,7 @@ from torchvision.datasets import MNIST
 
 # Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')
 class Net(nn.Module):
-    def __init__(self, num_classes: int=10) -> None:
+    def __init__(self, num_classes: int = 10) -> None:
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(1, 6, 5)
         self.pool = nn.MaxPool2d(2, 2)

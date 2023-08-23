@@ -68,8 +68,11 @@ def get_model():
 
 
 def get_client_fn(dataset_partitions):
-    """Return a function to be executed by the VirtualClientEngine in order to construct
-    a client."""
+    """Return a function to construc a client.
+
+    The VirtualClientEngine will exectue this function whenever a client is sampled by
+    the strategy to participate.
+    """
 
     def client_fn(cid: str) -> fl.client.Client:
         """Construct a FlowerClient with its own dataset partition."""

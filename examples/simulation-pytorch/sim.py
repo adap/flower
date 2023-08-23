@@ -15,8 +15,18 @@ from utils import Net, train, test, get_mnist
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
-parser.add_argument("--num_cpus", type=int, default=1, help="Number of CPUs to assign to a virtual client")
-parser.add_argument("--num_gpus", type=float, default=0.0, help="Ratio of GPU memory to assign to a virtual client")
+parser.add_argument(
+    "--num_cpus",
+    type=int,
+    default=1,
+    help="Number of CPUs to assign to a virtual client",
+)
+parser.add_argument(
+    "--num_gpus",
+    type=float,
+    default=0.0,
+    help="Ratio of GPU memory to assign to a virtual client",
+)
 parser.add_argument("--num_rounds", type=int, default=10, help="Number of FL rounds.")
 
 NUM_CLIENTS = 100
@@ -25,7 +35,6 @@ NUM_CLIENTS = 100
 # Flower client, adapted from Pytorch quickstart example
 class FlowerClient(fl.client.NumPyClient):
     def __init__(self, trainset, valset):
-
         self.trainset = trainset
         self.valset = valset
 
@@ -46,12 +55,12 @@ class FlowerClient(fl.client.NumPyClient):
         batch, epochs = config["batch_size"], config["epochs"]
 
         # Construct dataloader
-        trainloader = DataLoader(self.trainset, batch_size=batch,shuffle=True)
+        trainloader = DataLoader(self.trainset, batch_size=batch, shuffle=True)
 
         # Define optimizer
         optimizer = torch.optim.SGD(self.model.parameters(), lr=0.01, momentum=0.9)
         # Train
-        train(self.model, trainloader,optimizer,epochs=epochs,device=self.device)
+        train(self.model, trainloader, optimizer, epochs=epochs, device=self.device)
 
         # Return local model and statistics
         return self.get_parameters({}), len(trainloader.dataset), {}
@@ -68,10 +77,13 @@ class FlowerClient(fl.client.NumPyClient):
         # Return statistics
         return float(loss), len(valloader.dataset), {"accuracy": float(accuracy)}
 
-    
+
 def get_client_fn(train_partitions, val_partitions):
-    """Return a function to be executed by the VirtualClientEngine in order to construct
-    a client."""
+    """Return a function to construc a client.
+
+    The VirtualClientEngine will exectue this function whenever a client is sampled by
+    the strategy to participate.
+    """
 
     def client_fn(cid: str) -> fl.client.Client:
         """Construct a FlowerClient with its own dataset partition."""
