@@ -17,7 +17,7 @@
 
 import traceback
 from logging import ERROR
-from typing import Callable, Dict, Optional, Union, cast
+from typing import Callable, Dict, Optional, cast
 
 import ray
 
