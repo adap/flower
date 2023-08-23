@@ -16,7 +16,7 @@ dataset: [Femnist, Shakespeare] # list of datasets you include in your baseline
 
 ## About this baseline
 
-****What’s implemented:**** :warning: *_Concisely describe what experiment(s) in the publication can be replicated by running the code. Please only use a few sentences. Start with: “The code in this directory …”_*
+****What’s implemented:**** : I implement ~~~~~
 
 ****Datasets:**** :warning: *_List the datasets you used (if you used a medium to large dataset, >10GB please also include the sizes of the dataset)._*
 
