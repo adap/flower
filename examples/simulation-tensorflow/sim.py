@@ -107,8 +107,10 @@ def partition_mnist():
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
-    """Aggregation function for (federated) evaluation metrics, i.e. those returned by
-    the client's evaluate() method."""
+    """Aggregation function for (federated) evaluation metrics.
+
+    It ill aggregate those metrics returned by the client's evaluate() method.
+    """
     # Multiply accuracy of each client by number of examples used
     accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
     examples = [num_examples for num_examples, _ in metrics]
