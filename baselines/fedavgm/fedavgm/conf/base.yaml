@@ -4,7 +4,8 @@ num_clients: 100
 
 dataset:
   fmnist: False
-
+  concentration: 10
+  
 model:
   # model config
 
@@ -17,5 +18,4 @@ server:
   learning_rate: 1.0
 
 client:
-  concentration: 10
   local_epochs: 1
