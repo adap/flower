@@ -7,21 +7,24 @@ from tensorflow.keras.utils import to_categorical
 
 
 class FlowerClient(fl.client.NumPyClient):
-    def __init__(self, model, x_train, y_train, x_val, y_val) -> None:
+    def __init__(self, model, x_train, y_train, x_val, y_val, input_shape, num_classes, local_epochs) -> None:
         self.model = model()
         self.x_train, self.y_train = x_train, y_train
         self.x_val, self.y_val = x_val, y_val
+        self.input_shape = input_shape
+        self.num_classes = num_classes
+        self.local_epochs = local_epochs
     
     def model(self):
         # CNN Model from (McMahan et. al., 2017) Communication-efficient learning of deep networks from decentralized data
         model = keras.Sequential([
-          keras.layers.Conv2D(32, (5,5), activation='relu', input_shape=input_shape),
+          keras.layers.Conv2D(32, (5,5), activation='relu', input_shape=self.input_shape),
           keras.layers.MaxPooling2D(2,2),
           keras.layers.Conv2D(64, (5,5), activation='relu'),
           keras.layers.MaxPooling2D(2,2),
           keras.layers.Flatten(),
           keras.layers.Dense(512, activation='relu'),
-          keras.layers.Dense(num_classes, activation='softmax')
+          keras.layers.Dense(self.num_classes, activation='softmax')
         ])
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
         return model
@@ -31,12 +34,12 @@ class FlowerClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         self.model.set_weights(parameters)
-        self.model.fit(self.x_train, self.y_train, epochs=LOCAL_EPOCHS, verbose=2)
+        self.model.fit(self.x_train, self.y_train, epochs=self.local_epochs)
         return self.model.get_weights(), len(self.x_train), {}
 
     def evaluate(self, parameters, config):
         self.model.set_weights(parameters)
-        loss, acc = self.model.evaluate(self.x_val, self.y_val, verbose=2)
+        loss, acc = self.model.evaluate(self.x_val, self.y_val)
         return loss, len(self.x_val), {"accuracy": acc}
 
 
