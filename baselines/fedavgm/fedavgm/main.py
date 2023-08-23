@@ -32,12 +32,13 @@ def main(cfg: DictConfig) -> None:
     # from a dataset, it's up to you)
     
     x_train, y_train, x_test, y_test, input_shape, num_classes = prepare_dataset(cfg.dataset.FEMNIST)
+    partitions = partition(x_train, y_train, cfg.num_clients, cfg.dataset.concentration, num_classes)
 
     # 3. Define your clients
     # Define a function that returns another function that will be used during
     # simulation to instantiate each individual client
     # client_fn = client.<my_function_that_returns_a_function>()
-    client_fn = generate_client_fn(x_train, y_train, input_shape, num_classes, cfg.concentration, cfg.local_epochs)
+    client_fn = generate_client_fn(partitions, input_shape, num_classes, cfg.local_epochs)
 
     # 4. Define your strategy
     # pass all relevant argument (including the global dataset used after aggregation,
