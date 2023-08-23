@@ -7,8 +7,7 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 # feel free to remove some if aren't needed
 import hydra
 from omegaconf import DictConfig, OmegaConf
-from dataset import prepare_dataset
-# from dataset_preparation import download_and_preprocess
+from dataset import prepare_dataset, partition
 from client import generate_client_fn
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
