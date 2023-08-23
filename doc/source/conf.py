@@ -88,7 +88,26 @@ redirects = {
     "writing-documentation": "write-documentation.html",
     "apiref-binaries": "apiref-cli.html",
     "fedbn-example-pytorch-from-centralized-to-federated": "example-fedbn-pytorch-from-centralized-to-federated.html",
-    
+
+    # Restructuring: tutorials
+    "tutorial/Flower-0-What-is-FL": "tutorial-what-is-federated-learning.html",
+    "tutorial/Flower-1-Intro-to-FL-PyTorch": "tutorial-get-started-with-flower-pytorch.html",
+    "tutorial/Flower-2-Strategies-in-FL-PyTorch": "tutorial-use-a-federated-learning-strategy-pytorch.html",
+    "tutorial/Flower-3-Building-a-Strategy-PyTorch": "tutorial-build-a-strategy-from-scratch-pytorch.html",
+    "tutorial/Flower-4-Client-and-NumPyClient-PyTorch": "tutorial-customize-the-client-pytorch.html",
+    "quickstart-pytorch": "tutorial-quickstart-pytorch.html",
+    "quickstart-tensorflow": "tutorial-quickstart-tensorflow.html",
+    "quickstart-huggingface": "tutorial-quickstart-huggingface.html",
+    "quickstart-jax": "tutorial-quickstart-jax.html",
+    "quickstart-pandas": "tutorial-quickstart-pandas.html",
+    "quickstart-fastai": "tutorial-quickstart-fastai.html",
+    "quickstart-pytorch-lightning": "tutorial-quickstart-pytorch-lightning.html",
+    "quickstart-mxnet": "tutorial-quickstart-mxnet.html",
+    "quickstart-scikitlearn": "tutorial-quickstart-scikitlearn.html",
+    "quickstart-xgboost": "tutorial-quickstart-xgboost.html",
+    "quickstart-android": "tutorial-quickstart-android.html",
+    "quickstart-ios": "tutorial-quickstart-ios.html",
+
     # Restructuring: how-to guides
     "install-flower": "how-to-install-flower.html",
     "configure-clients": "how-to-configure-clients.html",
@@ -100,7 +119,38 @@ redirects = {
     "logging": "how-to-configure-logging.html",
     "ssl-enabled-connections": "how-to-enable-ssl-connections.html",
     "upgrade-to-flower-1.0": "how-to-upgrade-to-flower-1.0.html",
-    
+
+    # Restructuring: explanations
+    "evaluation": "explanation-federated-evaluation.html",
+    "differential-privacy-wrappers": "explanation-differential-privacy.html",
+
+    # Restructuring: references
+    "apiref-flwr": "ref-api-flwr.html",
+    "apiref-cli": "ref-api-cli.html",
+    "examples": "ref-example-projects.html",
+    "telemetry": "ref-telemetry.html",
+    "changelog": "ref-changelog.html",
+    "faq": "ref-faq.html",
+
+    # Restructuring: contributor tutorials
+    "first-time-contributors": "contributor-tutorial-contribute-on-github.html",
+    "getting-started-for-contributors": "contributor-tutorial-get-started-as-a-contributor.html",
+
+    # Restructuring: contributor how-to guides
+    "contributor-setup": "contributor-how-to-install-development-versions.html",
+    "recommended-env-setup": "contributor-how-to-set-up-a-virtual-env.html",
+    "devcontainers": "contributor-how-to-develop-in-vscode-dev-containers.html",
+    "creating-new-messages": "contributor-how-to-create-new-messages.html",
+    "write-documentation": "contributor-how-to-write-documentation.html",
+    "release-process": "contributor-how-to-release-flower.html",
+
+    # Restructuring: contributor explanations
+    "architecture": "contributor-explanation-architecture.html",
+
+    # Restructuring: contributor references
+    "good-first-contributions": "contributor-ref-good-first-contributions.html",
+    "secagg": "contributor-ref-secure-aggregation-protocols.html",
+
     # Deleted pages
     "people": "index.html",
     "organizations": "index.html",

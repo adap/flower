@@ -1,7 +1,8 @@
-Evaluation
-==========
+Federated evaluation
+====================
 
 There are two main approaches to evaluating models in federated learning systems: centralized (or server-side) evaluation and federated (or client-side) evaluation.
+
 
 Centralized Evaluation
 ----------------------
@@ -170,6 +171,7 @@ Model parameters can also be evaluated during training. :code:`Client.fit` can r
 
         def evaluate(self, parameters, config):
             # ...
+
 
 Full Code Example
 -----------------
