@@ -51,7 +51,7 @@ class FlowerClient(fl.client.NumPyClient):
     def fit(self, parameters, config):
         set_params(self.model, parameters)
 
-        # read from config
+        # Read from config
         batch, epochs = config["batch_size"], config["epochs"]
 
         # Construct dataloader
