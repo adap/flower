@@ -8,10 +8,24 @@ from tensorflow.keras.utils import to_categorical
 
 class FlowerClient(fl.client.NumPyClient):
     def __init__(self, model, x_train, y_train, x_val, y_val) -> None:
-        self.model = model
+        self.model = model()
         self.x_train, self.y_train = x_train, y_train
         self.x_val, self.y_val = x_val, y_val
-
+    
+    def model(self):
+        # CNN Model from (McMahan et. al., 2017) Communication-efficient learning of deep networks from decentralized data
+        model = keras.Sequential([
+          keras.layers.Conv2D(32, (5,5), activation='relu', input_shape=input_shape),
+          keras.layers.MaxPooling2D(2,2),
+          keras.layers.Conv2D(64, (5,5), activation='relu'),
+          keras.layers.MaxPooling2D(2,2),
+          keras.layers.Flatten(),
+          keras.layers.Dense(512, activation='relu'),
+          keras.layers.Dense(num_classes, activation='softmax')
+        ])
+        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+        return model
+    
     def get_parameters(self, config):
         return self.model.get_weights()
 
@@ -38,6 +52,4 @@ def client_fn(cid: str) -> fl.client.Client:
     full_y_train_cid[:split_idx],
   )
   x_val_cid, y_val_cid = full_x_train_cid[split_idx:], full_y_train_cid[split_idx:]
-
-
   return FlowerClient(model, x_train_cid, y_train_cid, x_val_cid, y_val_cid)
