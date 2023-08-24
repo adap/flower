@@ -47,7 +47,7 @@ By default the VCE has access to all system resources (i.e. all CPUs, all GPUs, 
     # Launch the simulation by limiting resources visible to Flower's VCE
     hist = fl.simulation.start_simulation(
         ...
-        # Out of all CPUs and GPUs available in your system
+        # Out of all CPUs and GPUs available in your system,
         # only 8xCPUs and 1xGPUs would be used for simulation.
         ray_init_args = {'num_cpus': 8, 'num_gpus': 1}
     )
