@@ -18,12 +18,14 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-TAG="${TAG:=`cat ../../pyproject.toml | grep "^version = " | awk '{print $3}' | tr -d '"'`}"
+BROWN='\033[0;33m'
+NC='\033[0m' # No Color
 
-for platform in $PLATFORMS; do
-    echo "Push image flwr/base with tag $TAG to Docker hub"
-    docker push flwr/base:$TAG flwr/base:latest
+# Define default values first
+FLWR_VERSION="${FLWR_VERSION:=1.4.0}"
 
-    echo "Push image flwr/server with tag $TAG to Docker hub"
-    docker push flwr/server:$TAG flwr/server:latest
-done
+echo -e "${BROWN}\nUsing:"
+echo -e "FLWR_VERSION: $FLWR_VERSION"
+echo -e "${NC}"
+
+docker push flwr/server:$TAG flwr/server:latest
