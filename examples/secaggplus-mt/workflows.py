@@ -268,9 +268,11 @@ def workflow_with_sec_agg(
             print(f"Received {client_masked_vec[1]} from Client {nid2sid[node_id]}.")
         masked_vector = parameters_addition(masked_vector, client_masked_vec)
     masked_vector = parameters_mod(masked_vector, mod_range)
+
     """
     =============== Unmask stage ===============   
     """
+
     if LOG_EXPLAIN:
         print("\nRequesting key shares to unmask the aggregate vector...")
     # Send secure IDs of active and dead clients.
