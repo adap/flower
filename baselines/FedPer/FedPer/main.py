@@ -5,23 +5,21 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 """
 import flwr as fl
 import hydra
-import argparse
 
 from typing import Dict, Any, Union
 from omegaconf import DictConfig, OmegaConf
 from hydra.utils import instantiate
-from FedPer.utils import utils_file
-from FedPer.dataset import load_datasets
-# from FedPer.strategy import AggregateBodyStrategyPipeline
-from FedPer.utils.new_utils import get_client_cls
+from FedPer.dataset import dataset_main
 from hydra.core.hydra_config import HydraConfig
-from FedPer.models.cnn_model import CNNNet, CNNModelSplit
-from FedPer.utils.base_client import get_fedavg_client_fn
-from FedPer.models.mobile_model import MobileNet, MobileNetModelSplit
-from FedPer.models.resnet_model import ResNet, ResNetModelSplit
-from FedPer.utils.FedPer_client import get_fedper_client_fn
 
-@hydra.main(config_path="conf", config_name="base", version_base=None)
+from FedPer.fedavg_client import gen_client_fn
+from FedPer.fedper_client import gen_client_fn as gen_fedper_client_fn
+from FedPer.utils import weighted_average, save_results_as_pickle, plot_metric_from_history
+from flwr.server.strategy import FedAvg
+
+from FedPer.strategy import AggregateBodyStrategy
+
+@hydra.main(config_path="conf", config_name="new_base", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.
 
@@ -29,39 +27,31 @@ def main(cfg: DictConfig) -> None:
     ----------
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
-    """
-    
+    """  
 
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
+    if cfg.model.name.lower() == 'resnet':
+        cfg.model._target_ = 'FedPer.model.ResNet34'
+    elif cfg.model.name.lower() == 'mobile':
+        cfg.model._target_ = 'FedPer.model.MobileNet_v2'
+    else:
+        raise NotImplementedError(f"Model {cfg.model.name} not implemented")
 
     # 2. Prepare your dataset
-    trainloader, valloader, testloader = load_datasets(
-        config=cfg.dataset,
-        num_clients=cfg.num_clients,
-    )   
+    dataset_main(cfg.dataset)
     
     # 3. Define your clients
     # Get algorithm 
-    algorithm = cfg.algorithm.lower()
+    algo = cfg.algo.lower()
+
     # Get client fn 
-    if algorithm.lower() == 'fedper':
-        client_fn = get_fedper_client_fn(
-            trainloaders=trainloader,
-            valloaders=valloader,
-            model=cfg.model,
-        )
-    elif algorithm.lower() == 'fedavg':
-        client_fn = get_fedavg_client_fn(
-            trainloaders=trainloader,
-            valloaders=valloader,
-            model=cfg.model,
-        )
+    if algo == 'fedavg':
+        client_fn = gen_client_fn(cfg)
+    elif algo == 'fedper':
+        client_fn = gen_fedper_client_fn(cfg)
     else: 
-        raise NotImplementedError
-    
-    # Set server's device
-    device = cfg.server_device
+        raise NotImplementedError(f"Algorithm {algo} not implemented")
 
     # get a function that will be used to construct the config that the client's
     # fit() method will received
@@ -72,44 +62,31 @@ def main(cfg: DictConfig) -> None:
             fit_config["curr_round"] = server_round  # add round info
             return fit_config
         return fit_config_fn
-    
-    
-    if cfg.model.name.lower() == 'cnn':
-        split = CNNModelSplit
-        def create_model() -> CNNNet:
-            """Create initial CNN model."""
-            return CNNNet(name='cnn').to(device)
-    elif cfg.model.name.lower() == 'mobile':
-        split = MobileNetModelSplit
-        def create_model() -> MobileNet:
-            """Create initial MobileNet-v1 model."""
-            return MobileNet(
-                num_head_layers=cfg.model.num_head_layers,
-                num_classes=cfg.model.num_classes,
-                name=cfg.model.name,
-                device=cfg.model.device
-            ).to(device)
-    elif cfg.model.name.lower() == 'resnet':
-        split = ResNetModelSplit
-        def create_model() -> ResNet:
-            """Create initial ResNet model."""
-            return ResNet(
-                num_head_layers=cfg.model.num_head_layers,
-                num_classes=cfg.model.num_classes,
-                name=cfg.model.name,
-                device=cfg.model.device
-            ).to(device)
-    else:
-        raise NotImplementedError('Model not implemented, check name. ')
         
     # 4. Define your strategy
-    strategy = instantiate(
-        cfg.strategy,
-        create_model=create_model,
-        # evaluate_fn=evaluate_fn,
-        on_fit_config_fn=get_on_fit_config(),
-        model_split_class=split,
-    )
+    if algo == 'fedavg':
+        strategy = FedAvg(
+            fraction_fit=cfg.strategy.fraction_fit,
+            fraction_evaluate=cfg.strategy.fraction_evaluate,
+            min_fit_clients=cfg.strategy.min_fit_clients,
+            min_evaluate_clients=cfg.strategy.min_evaluate_clients,
+            min_available_clients=cfg.strategy.min_available_clients,
+            #evaluate_metrics_aggregation_fn=weighted_average,
+        )
+    if algo == 'fedper':
+        strategy = AggregateBodyStrategy(
+            fraction_fit=cfg.strategy.fraction_fit,
+            fraction_evaluate=cfg.strategy.fraction_evaluate,
+            min_fit_clients=cfg.strategy.min_fit_clients,
+            min_evaluate_clients=cfg.strategy.min_evaluate_clients,
+            min_available_clients=cfg.strategy.min_available_clients,
+            #evaluate_metrics_aggregation_fn=weighted_average,
+            save_path=HydraConfig.get().runtime.output_dir,
+            config=cfg,
+            on_fit_config_fn=get_on_fit_config(),
+        )
+    else:
+        raise NotImplementedError(f"Algorithm {algo} not implemented")
 
     # 5. Start Simulation
     history = fl.simulation.start_simulation(
@@ -133,7 +110,7 @@ def main(cfg: DictConfig) -> None:
 
     # save results as a Python pickle using a file_path
     # the directory created by Hydra for each run
-    utils_file.save_results_as_pickle(history, file_path=save_path, extra_results={})
+    save_results_as_pickle(history, file_path=save_path, extra_results={})
 
     # plot results and include them in the readme
     strategy_name = strategy.__class__.__name__
@@ -146,7 +123,7 @@ def main(cfg: DictConfig) -> None:
         f"_lr={cfg.learning_rate}"
     )
 
-    utils_file.plot_metric_from_history(
+    plot_metric_from_history(
         history,
         save_path,
         (file_suffix),

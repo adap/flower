@@ -1,291 +1,201 @@
-"""Handle the dataset partitioning and (optionally) complex downloads.
-
-Please add here all the necessary logic to either download, uncompress, pre/post-process
-your dataset (or all of the above). If the desired way of running your baseline is to
-first download the dataset and partition it and then run the experiments, please
-uncomment the lines below and tell us in the README.md (see the "Running the Experiment"
-block) that this file should be executed first.
-"""
-# import hydra
-# from hydra.core.hydra_config import HydraConfig
-# from hydra.utils import call, instantiate
-# from omegaconf import DictConfig, OmegaConf
-
-
-# @hydra.main(config_path="conf", config_name="base", version_base=None)
-# def download_and_preprocess(cfg: DictConfig) -> None:
-#     """Does everything needed to get the dataset.
-
-#     Parameters
-#     ----------
-#     cfg : DictConfig
-#         An omegaconf object that stores the hydra config.
-#     """
-
-#     ## 1. print parsed config
-#     print(OmegaConf.to_yaml(cfg))
-
-#     # Please include here all the logic
-#     # Please use the Hydra config style as much as possible specially
-#     # for parts that can be customised (e.g. how data is partitioned)
-
-# if __name__ == "__main__":
-
-#     download_and_preprocess()
-
-from typing import List, Optional, Tuple
-
 import os
-import wget
-import numpy as np
+import json
 import torch
+import numpy as np
+import pandas as pd
+import pickle
 import random
-import torchvision.transforms as transforms
-from torchvision.datasets import ImageFolder
-from zipfile import ZipFile
-from torch.utils.data import ConcatDataset, Dataset, Subset, random_split
-from torchvision.datasets import CIFAR10
+import torchvision
 
-def _download_data(dataset: str = 'cifar10') -> Tuple[Dataset, Dataset]:
-    """Downloads (if necessary) and returns the MNIST dataset.
+from PIL import Image
+from typing import List, Type, Dict, Tuple
+from pathlib import Path
+from argparse import Namespace
+from torchvision import transforms
+from collections import Counter
+from torchvision.transforms.functional import pil_to_tensor
+from torch.utils.data import Dataset
 
-    Returns
-    -------
-    Tuple[Dataset, Dataset]
-        The training and testing datasets.
-    """
-    if dataset == "cifar10":
-        transform = transforms.Compose(
-            [
-                transforms.Resize((224, 224)),
-                transforms.ToTensor(),
-                transforms.Normalize((0.5,), (0.5,)),
-            ]
-        )
-        # transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-        trainset = CIFAR10(
-            root="./dataset/cifar10", train=True, download=True, transform=transform
-        )
-        testset = CIFAR10(
-            root="./dataset/cifar10", train=False, download=True, transform=transform
-        )
-        return trainset, testset
-    elif dataset == "FLICKR-AES":
-        raise NotImplementedError("FLICKR-AES dataset not implemented.")
-        # Get zip file from 
-        # https://drive.google.com/file/d/1jY7GMMNaQGQ80AAL99FLrBpWPFCwTKVT/view?usp=drive_link
-        if not os.path.exists("./dataset/FLICKR-AES"):
-            os.makedirs("./dataset/FLICKR-AES")
-        if not os.path.exists("./dataset/FLICKR-AES/FLICKR-AES.zip"):
-            wget.download(
-                "https://drive.google.com/u/0/uc?id=1jY7GMMNaQGQ80AAL99FLrBpWPFCwTKVT&export=download",
-                "./dataset/FLICKR-AES/FLICKR-AES.zip",
+class BaseDataset(Dataset):
+    """ Base class for all datasets."""
+    def __init__(self) -> None:
+        """ Initialize the dataset."""
+        self.classes: List = None
+        self.data: torch.Tensor = None
+        self.targets: torch.Tensor = None
+        self.train_data_transform = None
+        self.train_target_transform = None
+        self.general_data_transform = None
+        self.general_target_transform = None
+        self.enable_train_transform = True
+
+    def __getitem__(self, index):
+        """ Get the item at the given index."""
+        data, targets = self.data[index], self.targets[index]
+        if self.enable_train_transform and self.train_data_transform is not None:
+            data = self.train_data_transform(data)
+        if self.enable_train_transform and self.train_target_transform is not None:
+            targets = self.train_target_transform(targets)
+        if self.general_data_transform is not None:
+            data = self.general_data_transform(data)
+        if self.general_target_transform is not None:
+            targets = self.general_target_transform(targets)
+        return data, targets
+
+    def __len__(self):
+        return len(self.targets)
+
+class CIFAR10(BaseDataset):
+    """ CIFAR10 dataset."""
+    def __init__(
+        self,
+        root,
+        config=None,
+        general_data_transform=None,
+        general_target_transform=None,
+        train_data_transform=None,
+        train_target_transform=None,
+    ):
+        """ Initialize the dataset."""
+        super().__init__()
+        train_part = torchvision.datasets.CIFAR10(root, True, download=True)
+        test_part = torchvision.datasets.CIFAR10(root, False, download=True)
+        train_data = torch.Tensor(train_part.data).permute([0, -1, 1, 2]).float()
+        test_data = torch.Tensor(test_part.data).permute([0, -1, 1, 2]).float()
+        train_targets = torch.Tensor(train_part.targets).long().squeeze()
+        test_targets = torch.Tensor(test_part.targets).long().squeeze()
+        self.data = torch.cat([train_data, test_data])
+        self.targets = torch.cat([train_targets, test_targets])
+        self.classes = train_part.classes
+        self.general_data_transform = general_data_transform
+        self.general_target_transform = general_target_transform
+        self.train_data_transform = train_data_transform
+        self.train_target_transform = train_target_transform
+
+
+class CIFAR100(BaseDataset):
+    """ CIFAR100 dataset."""
+    def __init__(
+        self,
+        root,
+        config,
+        general_data_transform=None,
+        general_target_transform=None,
+        train_data_transform=None,
+        train_target_transform=None,
+    ):
+        super().__init__()
+        train_part = torchvision.datasets.CIFAR100(root, True, download=True)
+        test_part = torchvision.datasets.CIFAR100(root, False, download=True)
+        train_data = torch.Tensor(train_part.data).permute([0, -1, 1, 2]).float()
+        test_data = torch.Tensor(test_part.data).permute([0, -1, 1, 2]).float()
+        train_targets = torch.Tensor(train_part.targets).long().squeeze()
+        test_targets = torch.Tensor(test_part.targets).long().squeeze()
+        self.data = torch.cat([train_data, test_data])
+        self.targets = torch.cat([train_targets, test_targets])
+        self.classes = train_part.classes
+        self.general_data_transform = general_data_transform
+        self.general_target_transform = general_target_transform
+        self.train_data_transform = train_data_transform
+        self.train_target_transform = train_target_transform
+        super_class = None
+        if isinstance(config, dict):
+            super_class = config['super_class']
+
+        if super_class:
+            # super_class: [sub_classes]
+            CIFAR100_SUPER_CLASS = {
+                0: ["beaver", "dolphin", "otter", "seal", "whale"],
+                1: ["aquarium_fish", "flatfish", "ray", "shark", "trout"],
+                2: ["orchid", "poppy", "rose", "sunflower", "tulip"],
+                3: ["bottle", "bowl", "can", "cup", "plate"],
+                4: ["apple", "mushroom", "orange", "pear", "sweet_pepper"],
+                5: ["clock", "keyboard", "lamp", "telephone", "television"],
+                6: ["bed", "chair", "couch", "table", "wardrobe"],
+                7: ["bee", "beetle", "butterfly", "caterpillar", "cockroach"],
+                8: ["bear", "leopard", "lion", "tiger", "wolf"],
+                9: ["cloud", "forest", "mountain", "plain", "sea"],
+                10: ["bridge", "castle", "house", "road", "skyscraper"],
+                11: ["camel", "cattle", "chimpanzee", "elephant", "kangaroo"],
+                12: ["fox", "porcupine", "possum", "raccoon", "skunk"],
+                13: ["crab", "lobster", "snail", "spider", "worm"],
+                14: ["baby", "boy", "girl", "man", "woman"],
+                15: ["crocodile", "dinosaur", "lizard", "snake", "turtle"],
+                16: ["hamster", "mouse", "rabbit", "shrew", "squirrel"],
+                17: ["maple_tree", "oak_tree", "palm_tree", "pine_tree", "willow_tree"],
+                18: ["bicycle", "bus", "motorcycle", "pickup_truck", "train"],
+                19: ["lawn_mower", "rocket", "streetcar", "tank", "tractor"],
+            }
+            mapping = {}
+            for super_cls, sub_cls in CIFAR100_SUPER_CLASS.items():
+                for cls in sub_cls:
+                    mapping[cls] = super_cls
+            new_targets = []
+            for cls in self.targets:
+                new_targets.append(mapping[self.classes[cls]])
+            self.targets = torch.tensor(new_targets, dtype=torch.long)
+
+DATASETS: Dict[str, Type[BaseDataset]] = {
+    "cifar10": CIFAR10,
+    "cifar100": CIFAR100,
+}
+
+def randomly_assign_classes(
+    dataset: Dataset, client_num: int, class_num: int
+) -> Tuple[List[List[int]], Dict[str, Dict[str, int]]]:
+    partition = {"separation": None, "data_indices": None}
+    data_indices = [[] for _ in range(client_num)]
+    targets_numpy = np.array(dataset.targets, dtype=np.int32)
+    label_list = list(range(len(dataset.classes)))
+
+    data_idx_for_each_label = [
+        np.where(targets_numpy == i)[0].tolist() for i in label_list
+    ]
+    assigned_labels = []
+    selected_times = [0 for _ in label_list]
+    for i in range(client_num):
+        sampled_labels = random.sample(label_list, class_num)
+        assigned_labels.append(sampled_labels)
+        for j in sampled_labels:
+            selected_times[j] += 1
+
+    labels_count = Counter(targets_numpy)
+
+    batch_sizes = np.zeros_like(label_list)
+    for i in label_list:
+        print("label: {}, count: {}".format(i, labels_count[i]))
+        print("selected times: {}".format(selected_times[i]))
+        batch_sizes[i] = int(labels_count[i] / selected_times[i])
+
+    for i in range(client_num):
+        for cls in assigned_labels[i]:
+            if len(data_idx_for_each_label[cls]) < 2 * batch_sizes[cls]:
+                batch_size = len(data_idx_for_each_label[cls])
+            else:
+                batch_size = batch_sizes[cls]
+            selected_idx = random.sample(data_idx_for_each_label[cls], batch_size)
+            data_indices[i] = np.concatenate(
+                [data_indices[i], selected_idx], axis=0
+            ).astype(np.int64)
+            data_idx_for_each_label[cls] = list(
+                set(data_idx_for_each_label[cls]) - set(selected_idx)
             )
-        with ZipFile("./dataset/FLICKR-AES/FLICKR-AES.zip", "r") as zipObj:
-            zipObj.extractall("./dataset/FLICKR-AES")
 
-        transform = transforms.Compose(
-            [
-                transforms.Resize((224, 224)),
-                transforms.ToTensor(),
-                transforms.Normalize((0.5,), (0.5,)),
-            ]
-        )
-        trainset = ImageFolder(
-            "./dataset/FLICKR-AES/FLICKR-AES/train", transform=transform
-        )
-        testset = ImageFolder(
-            "./dataset/FLICKR-AES/FLICKR-AES/test", transform=transform
-        )
-        return trainset, testset
+        data_indices[i] = data_indices[i].tolist()
 
-    else:
-        raise NotImplementedError(f"Dataset {dataset} not implemented.")
+    stats = {}
+    for i, idx in enumerate(data_indices):
+        stats[i] = {"x": None, "y": None}
+        stats[i]["x"] = len(idx)
+        stats[i]["y"] = Counter(targets_numpy[idx].tolist())
 
+    num_samples = np.array(list(map(lambda stat_i: stat_i["x"], stats.values())))
+    stats["sample per client"] = {
+        "std": num_samples.mean(),
+        "stddev": num_samples.std(),
+    }
 
-def _partition_data(
-    num_clients,
-    dataset_name: str,
-    iid: Optional[bool] = False,
-    num_classes : Optional[int] = 10,
-    seed: Optional[int] = 42,
-) -> Tuple[List[Dataset], Dataset]:
-    """Split training set into iid or non iid partitions to simulate the
-    federated setting.
+    partition["data_indices"] = data_indices
 
-    Parameters
-    ----------
-    num_clients : int
-        The number of clients that hold a part of the data
-    dataset : str
-        The name of the dataset to be used
-    iid : bool, optional
-        Whether the data should be independent and identically distributed between
-        the clients or if the data should first be sorted by labels and distributed by chunks
-        to each client (used to test the convergence in a worst case scenario), by default False
-    num_classes : int, optional
-        The number of classes in the dataset, by default 10
-    seed : int, optional
-        Used to set a fix seed to replicate experiments, by default 42
+    return partition, stats
 
-    Returns
-    -------
-    Tuple[List[Dataset], Dataset]
-        A list of dataset for each client and a single dataset to be use for testing the model.
-    """
-
-    # Download dataset
-    trainset, testset = _download_data(dataset=dataset_name)
-
-    # Get number of classes in the dataset
-    total_num_classes = _get_num_classes(dataset_name)
-    
-    # Partition data
-    lengths = _get_split_lenghts(trainset, num_clients)
-
-    # Get datasets 
-    datasets, testset = get_datasets(
-        trainset, testset, 
-        num_clients, total_num_classes, 
-        lengths, iid, num_classes, seed
-    )
-
-    return datasets, testset
-
-    
-def _get_num_classes(dataset_name: str) -> int:
-    """Returns the number of classes in the dataset.
-
-    Parameters
-    ----------
-    dataset_name : str
-        The name of the dataset to be used
-
-    Returns
-    -------
-    int
-        The number of classes in the dataset.
-    """
-    if dataset_name == "cifar10":
-        return 10
-    elif dataset_name == "FLICKR-AES":
-        raise NotImplementedError("FLICKR-AES dataset not implemented.")
-    else:
-        raise ValueError(f"Dataset {dataset_name} not implemented.")
-
-
-def _get_split_lenghts(dataset: Dataset, num_clients: int, ) -> List[int]:
-    """Returns a list with the length of each partition.
-
-    Parameters
-    ----------
-    dataset : Dataset
-        The dataset to be partitioned
-    num_clients : int
-        The number of clients that hold a part of the data
-    seed : int, optional
-        Used to set a fix seed to replicate experiments, by default 42
-
-    Returns
-    -------
-    List[int]
-        A list with the length of each partition.
-    """
-    partition_size = int(len(dataset) / num_clients)
-    lengths = [partition_size] * num_clients
-    if sum(lengths) < len(dataset):
-        remaining_data = len(dataset) - sum(lengths)
-        lengths[-1] += remaining_data
-    return lengths
-
-def get_datasets(
-        trainset : Dataset, testset: Dataset, num_clients: int, total_num_classes: int, lengths : List[int],
-        iid : bool = False, num_classes : int = 10, seed : int = 42, ):
-    """
-        Split training set into iid or non iid partitions to simulate the federated setting.
-        
-        Parameters
-        ----------
-        num_clients : int
-            The number of clients that hold a part of the dataset. 
-        trainset : Dataset
-            The dataset to be partitioned
-        testset : Dataset
-            The dataset to be used for testing
-        iid : bool, optional
-            Whether the data should be independent and identically distributed between
-            the clients or if the data should first be sorted by labels and distributed by chunks
-            to each client (used to test the convergence in a worst case scenario), by default False    
-        num_classes : int, optional
-            The number of classes in the dataset, by default 10
-        seed : int, optional
-            Used to set a fix seed to replicate experiments, by default 42
-        total_num_classes : int
-            The number of classes in the dataset 
-        lengths : List[int]
-            A list with the length of each partition.
-            """
-    if iid or num_classes == total_num_classes:
-        datasets = random_split(trainset, lengths, torch.Generator().manual_seed(seed))
-        print("here")
-    else:
-        assert num_classes < total_num_classes, "num_classes must be less than or equal to total_num_classes"
-        times = [0 for i in range(total_num_classes)]
-        contain = []
-        for i in range(num_clients):
-            current = [i%total_num_classes]
-            print("Current: ", current)
-            times[i%total_num_classes] += 1
-            print("Times: ", current)
-            j = 1
-            if i  == num_clients - 1:
-                missing_labels = [i for i in range(total_num_classes) if times[i] == 0]
-                print("missing_labels: ", missing_labels)
-                if len(missing_labels) == num_classes:
-                    current = missing_labels
-                elif len(missing_labels) != 0:
-                    for k in missing_labels:
-                        current.append(k)
-                        times[k] += 1
-                    if len(missing_labels) != num_classes:
-                        remaining_num_labels = num_classes - len(current)
-                        # ind is a value between 0 and total_num_classes-1, excluding missing values
-                        if remaining_num_labels > 0:
-                            ind = random.sample([i for i in range(total_num_classes) if i not in missing_labels], remaining_num_labels)
-                            for k in range(remaining_num_labels):
-                                current.append(ind[k])
-                                times[ind[k]] += 1
-                else:
-                    pass      
-            else:       
-                while (j < num_classes):             
-                    ind = random.randint(0, total_num_classes-1)
-                    print("Index: ", ind)
-                    if (ind not in current):
-                        j += 1
-                        current.append(ind)
-                        times[ind] += 1
-                        print("times: ", times)
-            contain.append(current)
-            print("Client {} contains classes: {}".format(i, current))
-        print("times: ", times)
-        net_dataidx_map = {i:np.ndarray(0, dtype=np.int32) for i in range(num_clients)}
-        for i in range(total_num_classes):
-            idx_k = np.where(np.array(trainset.targets) == i)[0]
-            print("Class {} has {} samples".format(i, len(idx_k)))
-            np.random.shuffle(idx_k)
-            split = np.array_split(idx_k, times[i])
-            ids=0
-            for j in range(num_clients):
-                if i in contain[j]:
-                    net_dataidx_map[j] = np.append(net_dataidx_map[j], split[ids])
-                    ids += 1
-        datasets = []
-        for i in range(num_clients):
-            datasets.append(Subset(trainset, net_dataidx_map[i]))
-
-    print("Number of samples in each client:")
-    for i in range(num_clients):
-        print("Client {} has {} samples".format(i, len(datasets[i])))
-    print("Number of samples in test set: {}".format(len(testset)))
-    return datasets, testset

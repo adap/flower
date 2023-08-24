@@ -4,23 +4,48 @@ from typing import Any, Dict, List, Optional, Tuple
 from pathlib import Path
 from collections import OrderedDict
 from flwr.common import (
-    EvaluateIns, FitIns, FitRes, Parameters,
+    EvaluateIns, EvaluateRes, FitIns, FitRes, Parameters,
     Scalar, parameters_to_ndarrays, ndarrays_to_parameters
 )
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.client_manager import ClientManager
-from FedPer.utils.initialization_strategy import ServerInitializationStrategy
+# from FedPer.utils.initialization_strategy import ServerInitializationStrategy
 
+from flwr.server.strategy import Strategy, FedAvg
+from FedPer.model import DecoupledModel
 
-class AggregateBodyStrategy(ServerInitializationStrategy):
+from hydra.utils import instantiate
+
+class AggregateBodyStrategy(FedAvg):
     """Body Aggregation strategy implementation."""
 
-    def __init__(self, save_path: Path = None, *args: Any, **kwargs: Any) -> None:
+    def __init__(
+            self, 
+            save_path: Path = None, 
+            config: Dict[str, Any] = {},
+            *args: Any, 
+            **kwargs: Any
+        ) -> None:
         super().__init__(*args, **kwargs)
         self.save_path = save_path
+        self.model = instantiate(config.model)
         if save_path is not None:
-            self.save_path = save_path / "models"
+            # save path is save_path + "/models"
+            self.save_path = Path(save_path) / "models"
             self.save_path.mkdir(parents=True, exist_ok=True)
+
+    def initialize_parameters(
+        self, client_manager: ClientManager
+    ) -> Optional[Parameters]:
+        """Initialize global model parameters."""
+        initial_parameters = self.initial_parameters
+        self.initial_parameters = None  # Don't keep initial parameters in memory
+        if initial_parameters is None and self.model is not None:
+            initial_parameters = [val.cpu().numpy() for _, val in self.model.base.state_dict().items()]
+
+        if isinstance(initial_parameters, list):
+            initial_parameters = ndarrays_to_parameters(initial_parameters)
+        return initial_parameters
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -49,7 +74,11 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
         weights = parameters_to_ndarrays(parameters)
 
         # Add head parameters to received body parameters
-        weights.extend([val.cpu().numpy() for _, val in self.model.head.state_dict().items()])
+        weights.extend(
+            [
+                val.cpu().numpy() for _, val in self.model.classifier.state_dict().items()
+            ]
+        )
 
         parameters = ndarrays_to_parameters(weights)
 
@@ -101,7 +130,11 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
         weights = parameters_to_ndarrays(parameters)
 
         # Add head parameters to received body parameters
-        weights.extend([val.cpu().numpy() for _, val in self.model.head.state_dict().items()])
+        weights.extend(
+            [
+                val.cpu().numpy() for _, val in self.model.classifier.state_dict().items()
+            ]
+        )
 
         parameters = ndarrays_to_parameters(weights)
 
@@ -154,10 +187,12 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
 
         # Update Server Model
         parameters = parameters_to_ndarrays(agg_params)
-        model_keys = [k for k in self.model.state_dict().keys() if k.startswith("_body")]
+        model_keys = [k for k in self.model.state_dict().keys() if k.startswith("base")]
+        # remove base from model keys
+        model_keys = [k[5:] for k in model_keys]
         params_dict = zip(model_keys, parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-        self.model.set_parameters(state_dict)
+        self.model.base.load_state_dict(state_dict, strict=True)
 
         if self.save_path is not None:
             # Save Model
@@ -165,3 +200,41 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
 
 
         return agg_params, agg_metrics
+    
+    def aggregate_evaluate(
+        self,
+        server_round: int,
+        results: List[Tuple[ClientProxy, EvaluateRes]],
+        failures: List[BaseException],
+    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
+        """
+        Aggregate the received local parameters and store the evaluation aggregated metrics.
+
+        Args:
+            server_round: The current round of federated learning.
+            results: Successful updates from the
+                previously selected and configured clients. Each pair of
+                `(ClientProxy, FitRes` constitutes a successful update from one of the
+                previously selected clients. Not that not all previously selected
+                clients are necessarily included in this list: a client might drop out
+                and not submit a result. For each client that did not submit an update,
+                there should be an `Exception` in `failures`.
+            failures: Exceptions that occurred while the server
+                was waiting for client updates.
+        Returns:
+            Optional `float` representing the aggregated evaluation result. Aggregation
+            typically uses some variant of a weighted average.
+        """
+
+        aggregated_loss, aggregated_metrics = super().aggregate_evaluate(server_round=server_round, results=results, failures=failures)
+
+        # Weigh accuracy of each client by number of examples used
+        accuracies = [r.metrics["accuracy"] for _, r in results]
+        n_accuracies = len(accuracies)
+
+        # Aggregate and print custom metric
+        averaged_accuracy = sum(accuracies) / n_accuracies
+        print(f"Round {server_round} accuracy averaged from client results: {averaged_accuracy}")
+
+        # Return aggregated loss and metrics (i.e., aggregated accuracy)
+        return aggregated_loss, {"accuracy": averaged_accuracy}
