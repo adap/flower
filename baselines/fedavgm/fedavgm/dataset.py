@@ -1,8 +1,9 @@
+import numpy as np
 from tensorflow import keras
 from common import create_lda_partitions
 
-def prepare_dataset(FEMNIST):
-    if FEMNIST == True:
+def prepare_dataset(FMNIST):
+    if FMNIST == True:
         (x_train, y_train), (x_test, y_test) = keras.datasets.fashion_mnist.load_data()
         x_train = x_train.astype('float32') / 255
         x_test = x_test.astype('float32') / 255

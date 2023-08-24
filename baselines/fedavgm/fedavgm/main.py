@@ -19,11 +19,12 @@ def main(cfg: DictConfig) -> None:
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
+    
     # 1. Print parsed config
-    print(OmegaConf.to_yaml(cfg))
+    # print(OmegaConf.to_yaml(cfg))
 
     # 2. Prepare your dataset
-    x_train, y_train, x_test, y_test, input_shape, num_classes = prepare_dataset(cfg.dataset.FEMNIST)
+    x_train, y_train, x_test, y_test, input_shape, num_classes = prepare_dataset(cfg.dataset.fmnist)
     partitions = partition(x_train, y_train, cfg.num_clients, cfg.dataset.concentration, num_classes)
 
     # 3. Define your clients
