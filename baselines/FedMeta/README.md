@@ -22,7 +22,7 @@ dataset: [Femnist, Shakespeare] # list of datasets you include in your baseline
 
 ****Hardware Setup:**** : Hardware Setup ~
 
-****Contributors:**** :
+****Contributors:**** : Jinsoo Kim and Kangyoon Lee
 
 
 ## Experimental Setup

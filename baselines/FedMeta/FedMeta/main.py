@@ -7,6 +7,11 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 # feel free to remove some if aren't needed
 import hydra
 from omegaconf import DictConfig, OmegaConf
+from hydra.utils import instantiate
+from strategy import FedMeta
+
+import flwr as fl
+
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -20,7 +25,6 @@ def main(cfg: DictConfig) -> None:
     """
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
-
     # 2. Prepare your dataset
     # here you should call a function in datasets.py that returns whatever is needed to:
     # (1) ensure the server can access the dataset used to evaluate your model after
@@ -37,10 +41,22 @@ def main(cfg: DictConfig) -> None:
     # 4. Define your strategy
     # pass all relevant argument (including the global dataset used after aggregation,
     # if needed by your method.)
-    # strategy = instantiate(cfg.strategy, <additional arguments if desired>)
+    strategy = instantiate(
+        cfg.strategy,
+        evaluate_fn=evaluate_fn,
+        on_fit_config_fn=get_on_fit_config(),
+    )
 
     # 5. Start Simulation
-    # history = fl.simulation.start_simulation(<arguments for simulation>)
+    history = fl.simulation.start_simulation(
+        client_fn = "test",
+        num_clients = "test",
+        config = fl.server.ServerConfig(num_rounds=),
+        client_resources = {
+
+        },
+        strategy = strategy
+    )
 
     # 6. Save your results
     # Here you can save the `history` returned by the simulation and include
@@ -51,3 +67,6 @@ def main(cfg: DictConfig) -> None:
     # Hydra will generate for you a directory each time you run the code. You
     # can retrieve the path to that directory with this:
     # save_path = HydraConfig.get().runtime.output_dir
+
+if __name__ == "__main__":
+    main()
