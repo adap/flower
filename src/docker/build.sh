@@ -22,33 +22,28 @@ BROWN='\033[0;33m'
 NC='\033[0m' # No Color
 
 # Define default values first
-BUILD_STAGE="${BUILD_STAGE:=build}"
-TAG="${TAG:=`cat ../../pyproject.toml | grep "^version = " | awk '{print $3}' | tr -d '"'`}"
+BUILD_TARGET="${BUILD_TARGET:=base}"
 PYTHON_VERSION="${PYTHON_VERSION:=3.9.17}"
+PIP_VERSION="${PIP_VERSION:=23.2.1}"
 POETRY_VERSION="${POETRY_VERSION:=1.5.1}"
+SETUPTOOLS_VERSION="${SETUPTOOLS_VERSION:=68.1.2}"
+FLWR_VERSION="${TAG:=1.4.0}"
 
 echo -e "${BROWN}\nUsing:"
-echo -e "BUILD_STAGE: $BUILD_STAGE"
-echo -e "TAG: $TAG"
+echo -e "BUILD_TARGET: $BUILD_TARGET"
 echo -e "PYTHON_VERSION: $PYTHON_VERSION"
 echo -e "POETRY_VERSION: $POETRY_VERSION"
+echo -e "FLWR_VERSION: $FLWR_VERSION"
 echo -e "${NC}"
 
-echo -e "${BROWN}\nBuilding image base with tag $TAG${NC}"
 docker build \
-    --target $BUILD_STAGE \
-    -f 10_base.Dockerfile \
+    --progress plain \
+    --target $BUILD_TARGET \
     --build-arg PYTHON_VERSION=$PYTHON_VERSION \
+    --build-arg PIP_VERSION=$PIP_VERSION \
     --build-arg POETRY_VERSION=$POETRY_VERSION \
-    -t flwr/base:$TAG \
-    -t flwr/base:latest \
-    .
-
-echo -e "${BROWN}\nBuilding image server with tag $TAG${NC}"
-docker build \
-    --target $BUILD_STAGE \
-    -f 20_server.Dockerfile \
-    --build-arg BASE_VERSION=$TAG \
-    -t flwr/server:$TAG \
+    --build-arg SETUPTOOLS_VERSION=$SETUPTOOLS_VERSION \
+    --build-arg FLWR_VERSION=$FLWR_VERSION \
+    -t flwr/server:$FLWR_VERSION \
     -t flwr/server:latest \
     .

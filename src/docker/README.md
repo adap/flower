@@ -17,16 +17,16 @@ Default Flower server image.
 This guide is for contributors and developers who want to build the images themself.
 Regular users can just pull the images from Docker hub.
 
-### Test
+### Run all tests
 
 ```bash
-# ./build build my_version_tag
-./build test test
+./test.sh
 ```
 
 ### Production
 
+Build server image for specific Flower version.
+
 ```bash
-# ./build build my_version_tag
-./build build 0.1.0
+FLWR_VERSION=1.4.0 BUILD_TARGET=server ./build.sh
 ```
