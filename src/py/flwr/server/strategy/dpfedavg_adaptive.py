@@ -22,6 +22,7 @@ import math
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
+import warnings
 
 from flwr.common import FitIns, FitRes, Parameters, Scalar
 from flwr.server.client_manager import ClientManager
@@ -53,18 +54,43 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
             server_side_noising=server_side_noising,
         )
         self.clip_norm_lr = clip_norm_lr
+        self.init_clip_norm = init_clip_norm 
         self.clip_norm_target_quantile = clip_norm_target_quantile
 
-        if clip_count_stddev is None:
-            clip_count_stddev = 0.0
-            if noise_multiplier > 0:
+        if noise_multiplier > 0.0:
+            if clip_count_stddev is None:
                 clip_count_stddev = self.num_sampled_clients / 20.0
-        self.clip_count_stddev: float = clip_count_stddev
 
-        if noise_multiplier:
-            self.noise_multiplier = (
-                self.noise_multiplier ** (-2) - (2 * self.clip_count_stddev) ** (-2)
-            ) ** (-0.5)
+            if noise_multiplier >= 2 * clip_count_stddev:
+                raise ValueError(
+            f'clipped_count_stddev = {clip_count_stddev} (defaults to '
+            'self.num_sampled_clients` / 20.0 , if not specified) is too low '
+            'to achieve the desired effective `noise_multiplier` '
+            f'({noise_multiplier}). You must either increase '
+            '`clip_count_stddev` or decrease `noise_multiplier`.'
+            )
+            
+            self.clip_count_stddev: float = clip_count_stddev
+
+            if noise_multiplier:
+                self.noise_multiplier = (
+                    self.noise_multiplier ** (-2) - (2 * self.clip_count_stddev) ** (-2)
+                ) ** (-0.5)
+
+            added_noise_factor = self.noise_multiplier / noise_multiplier
+            if added_noise_factor >= 2:
+                warnings.warn(
+                    f'A significant amount of noise ({added_noise_factor:.2f}x) has to '
+                    'be added for record aggregation to achieve the desired effective '
+                    f'`noise_multiplier` ({noise_multiplier}). If you are manually '
+                    'specifying `clipped_count_stddev` you may want to increase it. Or '
+                    'you may need more `expected_clients_per_round`.'
+                )
+        else:
+            if clip_count_stddev is None:
+                self.clip_count_stddev = 0.0
+            self.noise_multiplier = 0.0
+
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
@@ -85,14 +111,27 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
             fit_ins.config.update(additional_config)
 
         return client_instructions
+        
+    
 
     def _update_clip_norm(self, results: List[Tuple[ClientProxy, FitRes]]) -> None:
         # Calculating number of clients which set the norm indicator bit
-        norm_bit_set_count = 0
+        norm_bit_set_count = 0       
+        
+        #Adding the indicator bit returned by the client if the clip norm fits the following condition
+        # (1 if update norm <= clipping threshold, 0 otherwise) 
+
+        if self.clip_norm <= self.init_clip_norm:
+            additional_config_res = {"dpfedavg_norm_bit": 1}
+        else:
+            additional_config_res = {"dpfedavg_norm_bit": 0}
+        for _, fit_res in results:
+            fit_res.metrics.update(additional_config_res)
+            
         for client_proxy, fit_res in results:
             if "dpfedavg_norm_bit" not in fit_res.metrics:
                 raise Exception(
-                    f"Indicator bit not returned by client with id {client_proxy.cid}."
+                    f"Indicator bit not returned by client with id {client_proxy.cid, fit_res.metrics }."
                 )
             if fit_res.metrics["dpfedavg_norm_bit"]:
                 norm_bit_set_count += 1
