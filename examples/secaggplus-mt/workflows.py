@@ -305,7 +305,7 @@ def workflow_with_sec_agg(
         ):
             collected_shares_dict[owner_sid].append(share)
     # Remove mask for every client who is available before ask vectors stage,
-    # Divide vector by first element
+    # divide vector by first element
     active_sids, dead_sids = set(active_sids), set(dead_sids)
     for sid, share_list in collected_shares_dict.items():
         if len(share_list) < threshold:
