@@ -3,7 +3,6 @@ import time
 from typing import Dict, List, Tuple
 
 import numpy as np
-from settings import NUM_ROUNDS
 from workflows import get_workflow_factory
 
 from flwr.common import Metrics, ndarrays_to_parameters
@@ -79,7 +78,7 @@ anonymous_client_nodes = False
 num_client_nodes_per_round = 5
 sleep_time = 0.5
 time_out = 3.9
-num_rounds = NUM_ROUNDS
+num_rounds = 3
 parameters = ndarrays_to_parameters([np.ones(3)])
 wf_factory = get_workflow_factory()
 

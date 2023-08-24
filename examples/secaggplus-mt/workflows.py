@@ -3,7 +3,6 @@ from logging import WARNING
 from typing import Callable, Dict, Generator, List
 
 import numpy as np
-from settings import LOG_EXPLAIN
 
 from flwr.common import (
     Parameters,
@@ -60,6 +59,9 @@ from flwr.common.typing import Value
 from flwr.proto.task_pb2 import SecureAggregation, Task
 
 
+LOG_EXPLAIN  = True
+
+
 def get_workflow_factory() -> (
     Callable[[Parameters, List[int]], Generator[Dict[int, Task], Dict[int, Task], None]]
 ):
@@ -78,7 +80,7 @@ _secure_aggregation_configuration = {
     KEY_SHARE_NUMBER: 3,
     KEY_THRESHOLD: 2,
     KEY_CLIPPING_RANGE: 3.0,
-    KEY_TARGET_RANGE: 1 << 16,
+    KEY_TARGET_RANGE: 1 << 20,
     KEY_MOD_RANGE: 1 << 30,
 }
 
@@ -339,7 +341,7 @@ def workflow_with_sec_agg(
     # i.e. those participating in final unmask vectors stage
     total_weights_factor, recon_parameters = factor_extract(recon_parameters)
     if LOG_EXPLAIN:
-        print(f"Unmasked aggregate vector (quantized): {recon_parameters[0]}")
+        print(f"Unmasked sum of vectors (quantized): {recon_parameters[0]}")
     # recon_parameters = parameters_divide(recon_parameters, total_weights_factor)
     aggregated_vector = dequantize(
         quantized_parameters=recon_parameters,
@@ -348,7 +350,8 @@ def workflow_with_sec_agg(
     )
     aggregated_vector[0] -= (len(active_sids) - 1) * clipping_range
     if LOG_EXPLAIN:
-        print(f"Unmasked aggregate vector (dequantized): {aggregated_vector[0]}")
+        print(f"Unmasked sum of vectors (dequantized): {aggregated_vector[0]}")
+        print(f"Aggregate vector using FedAvg: {aggregated_vector[0] / len(active_sids)}")
         print(
             "########################### Secure Aggregation End ###########################\n\n"
         )
