@@ -18,7 +18,7 @@ class FlowerClient(fl.client.Client, SecAggPlusHandler):
             num_examples=1,
             metrics={},
         )
-        # Force a significant delay for teshing purposes
+        # Force a significant delay for testing purposes
         if self._shared_state.sid == 0:
             print(f"Client {self._shared_state.sid} dropped for testing purposes.")
             time.sleep(4)
