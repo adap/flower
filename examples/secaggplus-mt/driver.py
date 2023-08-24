@@ -33,8 +33,8 @@ def task_dict_to_task_ins_list(
                     ),
                     consumer=node_pb2.Node(
                         node_id=sampled_node_id,
-                        anonymous=False,
                         # Must be False for this Secure Aggregation example
+                        anonymous=False,
                     ),
                 ),
             ),

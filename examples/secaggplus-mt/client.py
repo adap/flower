@@ -8,7 +8,7 @@ from flwr.common.parameter import ndarrays_to_parameters
 from flwr.client.secure_aggregation import SecAggPlusHandler
 
 
-# Define Flower client with the SecAgg/SecAgg+ protocol
+# Define Flower client with the SecAgg+ protocol
 class FlowerClient(fl.client.Client, SecAggPlusHandler):
     def fit(self, fit_ins: FitIns) -> FitRes:
         ret_vec = [np.ones(3)]

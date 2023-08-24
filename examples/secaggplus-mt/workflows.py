@@ -187,7 +187,7 @@ def workflow_with_sec_agg(
     """
     if LOG_EXPLAIN:
         print(f"\nForwarding public keys...")
-    # Braodcast public keys to clients
+    # Broadcast public keys to clients
     yield {
         node_id: _wrap_in_task(
             named_values={
@@ -270,9 +270,11 @@ def workflow_with_sec_agg(
             print(f"Received {client_masked_vec[1]} from Client {nid2sid[node_id]}.")
         masked_vector = parameters_addition(masked_vector, client_masked_vec)
     masked_vector = parameters_mod(masked_vector, mod_range)
+
     """
     =============== Unmask stage ===============   
     """
+
     if LOG_EXPLAIN:
         print("\nRequesting key shares to unmask the aggregate vector...")
     # Send secure IDs of active and dead clients.
@@ -305,7 +307,7 @@ def workflow_with_sec_agg(
         ):
             collected_shares_dict[owner_sid].append(share)
     # Remove mask for every client who is available before ask vectors stage,
-    # Divide vector by first element
+    # divide vector by first element
     active_sids, dead_sids = set(active_sids), set(dead_sids)
     for sid, share_list in collected_shares_dict.items():
         if len(share_list) < threshold:
