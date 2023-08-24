@@ -54,7 +54,13 @@ parameters = ndarrays_to_parameters(get_parameters(net=Net()))
 
 # -------------------------------------------------------------------------- Driver SDK
 driver.connect()
+create_workload_res: driver_pb2.CreateWorkloadResponse = driver.create_workload(
+    req=driver_pb2.CreateWorkloadRequest()
+)
 # -------------------------------------------------------------------------- Driver SDK
+
+workload_id = create_workload_res.workload_id
+print(f"Get workload id {workload_id}")
 
 history = History()
 for server_round in range(num_rounds):
@@ -117,7 +123,7 @@ for server_round in range(num_rounds):
         new_task_ins = task_pb2.TaskIns(
             task_id="",  # Do not set, will be created and set by the DriverAPI
             group_id="",
-            workload_id="",
+            workload_id=workload_id,
             task=task_pb2.Task(
                 producer=node_pb2.Node(
                     node_id=0,

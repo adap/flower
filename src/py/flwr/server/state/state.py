@@ -136,3 +136,7 @@ class State(abc.ABC):
     @abc.abstractmethod
     def get_nodes(self) -> Set[int]:
         """Retrieve all currently stored node IDs as a set."""
+
+    @abc.abstractmethod
+    def create_workload(self) -> UUID:
+        """Create one workload."""

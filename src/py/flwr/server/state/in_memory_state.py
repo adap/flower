@@ -31,6 +31,7 @@ class InMemoryState(State):
 
     def __init__(self) -> None:
         self.node_ids: Set[int] = set()
+        self.workload_ids: Set[UUID] = set()
         self.task_ins_store: Dict[UUID, TaskIns] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
 
@@ -186,3 +187,10 @@ class InMemoryState(State):
     def get_nodes(self) -> Set[int]:
         """Return all available client nodes."""
         return self.node_ids
+
+    def create_workload(self) -> UUID:
+        """Create one workload."""
+        # Create, store, and return workload ID
+        workload_id = uuid4()
+        self.workload_ids.add(workload_id)
+        return workload_id

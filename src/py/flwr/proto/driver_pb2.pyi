@@ -13,6 +13,24 @@ import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
+class CreateWorkloadRequest(google.protobuf.message.Message):
+    """CreateWorkload"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    def __init__(self,
+        ) -> None: ...
+global___CreateWorkloadRequest = CreateWorkloadRequest
+
+class CreateWorkloadResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    WORKLOAD_ID_FIELD_NUMBER: builtins.int
+    workload_id: typing.Text
+    def __init__(self,
+        *,
+        workload_id: typing.Text = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["workload_id",b"workload_id"]) -> None: ...
+global___CreateWorkloadResponse = CreateWorkloadResponse
+
 class GetNodesRequest(google.protobuf.message.Message):
     """GetNodes messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor

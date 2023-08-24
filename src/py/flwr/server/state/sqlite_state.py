@@ -464,6 +464,10 @@ class SqliteState(State):
         result: Set[int] = {row["node_id"] for row in rows}
         return result
 
+    def create_workload(self) -> UUID:
+        """Create one workload."""
+        raise NotImplementedError()
+
 
 def dict_factory(
     cursor: sqlite3.Cursor,
