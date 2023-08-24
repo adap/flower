@@ -18,19 +18,37 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-HASH=$(printf "$(git rev-parse HEAD)\n$(git diff | sha1sum)" | sha1sum | cut -c1-7)
-VERSION="0.0.1"
-TAGS=`ls | grep ".Dockerfile" | sed 's/\.[^.]*$//'`
-PLATFORMS="linux/amd64"
+BROWN='\033[0;33m'
+NC='\033[0m' # No Color
 
-for tag in $TAGS; do
-    for platform in $PLATFORMS; do
-        echo "Building tag $tag for $platform"
-        docker build \
-            --platform $platform \
-            -f $tag.Dockerfile \
-            -t flwr/$tag:latest \
-            -t flwr/$tag:$VERSION \
-            .
-    done
-done
+# Define default values first
+BUILD_STAGE="${BUILD_STAGE:=build}"
+TAG="${TAG:=`cat ../../pyproject.toml | grep "^version = " | awk '{print $3}' | tr -d '"'`}"
+PYTHON_VERSION="${PYTHON_VERSION:=3.9.17}"
+POETRY_VERSION="${POETRY_VERSION:=1.5.1}"
+
+echo -e "${BROWN}\nUsing:"
+echo -e "BUILD_STAGE: $BUILD_STAGE"
+echo -e "TAG: $TAG"
+echo -e "PYTHON_VERSION: $PYTHON_VERSION"
+echo -e "POETRY_VERSION: $POETRY_VERSION"
+echo -e "${NC}"
+
+echo -e "${BROWN}\nBuilding image base with tag $TAG${NC}"
+docker build \
+    --target $BUILD_STAGE \
+    -f 10_base.Dockerfile \
+    --build-arg PYTHON_VERSION=$PYTHON_VERSION \
+    --build-arg POETRY_VERSION=$POETRY_VERSION \
+    -t flwr/base:$TAG \
+    -t flwr/base:latest \
+    .
+
+echo -e "${BROWN}\nBuilding image server with tag $TAG${NC}"
+docker build \
+    --target $BUILD_STAGE \
+    -f 20_server.Dockerfile \
+    --build-arg BASE_VERSION=$TAG \
+    -t flwr/server:$TAG \
+    -t flwr/server:latest \
+    .

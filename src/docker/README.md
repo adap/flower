@@ -2,10 +2,31 @@
 
 This directory contains the Flower Docker images for various purposes.
 
-## Base
+## Images
 
-This is the default image usually used when working on a Flower project and still beeing in the experimentation phase.
+### Base
 
-### Tags
+This is the default base image on which all others build.
 
-- cuda_py3.8_...
+### Server
+
+Default Flower server image.
+
+## How to use
+
+This guide is for contributors and developers who want to build the images themself.
+Regular users can just pull the images from Docker hub.
+
+### Test
+
+```bash
+# ./build build my_version_tag
+./build test test
+```
+
+### Production
+
+```bash
+# ./build build my_version_tag
+./build build 0.1.0
+```
