@@ -6,7 +6,7 @@ import flwr as fl
 from flwr.client.secure_aggregation import SecAggPlusHandler
 
 
-# Define Flower client with the SecAgg/SecAgg+ protocol
+# Define Flower client with the SecAgg+ protocol
 class FlowerClient(fl.client.NumPyClient, SecAggPlusHandler):
     def fit(self, parameters, config):
         # Force a significant delay for teshing purposes
