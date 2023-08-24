@@ -33,6 +33,3 @@ strategy:
   min_evaluate_clients: 0
   min_fit_clients: ${clients_per_round}
   min_available_clients: ${clients_per_round}
-
-client:
-  # client config

@@ -1,9 +1,10 @@
 import hydra
+from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 import flwr as fl
 
-from fedexp import client, server
+from fedexp import client, server, utils
 from fedexp.dataset import load_datasets
 from fedexp.utils import seed_everything, get_parameters
 import numpy as np
@@ -67,15 +68,24 @@ def main(cfg: DictConfig) -> None:
         strategy=strategy,
     )
 
-    # 6. Save your results
-    # Here you can save the `history` returned by the simulation and include
-    # also other buffers, statistics, info needed to be saved in order to later
-    # on generate the plots you provide in the README.md. You can for instance
-    # access elements that belong to the strategy for example:
-    # data = strategy.get_my_custom_data() -- assuming you have such method defined.
-    # Hydra will generate for you a directory each time you run the code. You
-    # can retrieve the path to that directory with this:
-    # save_path = HydraConfig.get().runtime.output_dir
+    save_path = HydraConfig.get().runtime.output_dir
+    strategy_name = strategy.__class__.__name__
+    file_suffix = "_".join([strategy_name,
+                            cfg.dataset_config.name,
+                            f"{cfg.seed}",
+                            f"{cfg.dataset_config.alpha}",
+                            f"{cfg.num_clients}",
+                            f"{cfg.num_rounds}",
+                            f"{cfg.clients_per_round}",
+                            f"{cfg.hyperparams.eta_l}"
+                            ])
+
+    utils.plot_metric_from_history(
+        hist=history,
+        save_plot_path=save_path,
+        server_steps=strategy.server_steps,
+        suffix=file_suffix,
+    )
 
 
 if __name__ == '__main__':

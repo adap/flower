@@ -24,6 +24,7 @@ class FedExP(FedAvg):
         self.epsilon = epsilon
         self.decay = decay
         self.w_vec_estimate = np.zeros(parameters_to_vector(self.net_glob.parameters()).numel())
+        self.server_steps = []
 
     def __repr__(self) -> str:
         return "FedExP"
@@ -46,6 +47,7 @@ class FedExP(FedAvg):
             grad_norm_avg = grad_norm_sum / p_sum
             eta_g = max(1, (0.5 * grad_norm_avg /
                             (grad_avg_norm + clients_per_round * self.epsilon)).cpu())
+            self.server_steps.append(eta_g)
             w_vec_prev = self.w_vec_estimate
             self.w_vec_estimate = parameters_to_vector(self.net_glob.parameters()) + eta_g * grad_avg
             w_vec_avg = self.w_vec_estimate if server_round == 0 else (self.w_vec_estimate + w_vec_prev) / 2
