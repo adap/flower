@@ -185,7 +185,7 @@ def workflow_with_sec_agg(
     """
     if LOG_EXPLAIN:
         print(f"\nForwarding public keys...")
-    # Braodcast public keys to clients
+    # Broadcast public keys to clients
     yield {
         node_id: _wrap_in_task(
             named_values={
