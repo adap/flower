@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Build the server image
+    - name: Run all tests
       env:
           FLWR_VERSION: 1.3.0
       run: ./test.sh
