@@ -1,11 +1,13 @@
 ---
-num_clients: 3 # total number of clients
+num_clients: 10 # total number of clients
 num_epochs: 1 # number of local epochs
 batch_size: 128
 num_rounds: 3
 clients_per_round: 2
 learning_rate: 0.01
 algorithm: FedPer
+algo: FedPer
+global_test_set: False
 
 client_resources:
   num_cpus: 16
@@ -16,7 +18,12 @@ server_device: cuda:0
 dataset:
   name : "cifar10"
   iid: false
-  num_classes: 10
+  num_classes: 4
+  classes_per_client: 4
+  seed: 42
+  split: 'sample' # sample, user
+  num_clients: ${num_clients}
+  fraction: 0.83
 
 model:
   _target_: FedPer.models.resnet_model.ResNet

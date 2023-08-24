@@ -30,16 +30,19 @@ dataset: ["CIFAR-10", "FLICKR-AES"] # list of datasets you include in your basel
 
 ****Task:**** : Image Classification
 
-****Model:**** :warning: *_provide details about the model you used in your experiments (if more than use a list). If your model is small, describing it as a table would be :100:. Some FL methods do not use an off-the-shelve model (e.g. ResNet18) instead they create your own. If this is your case, please provide a summary here and give pointers to where in the paper (e.g. Appendix B.4) is detailed._*
+****Model:**** : Currently using ResNet34 (MobileNet-V1 will be implemented). 
 
-****Dataset:**** :warning: *_Earlier you listed already the datasets that your baseline uses. Now you should include a breakdown of the details about each of them. Please include information about: how the dataset is partitioned (e.g. LDA with alpha 0.1 as default and all clients have the same number of training examples; or each client gets assigned a different number of samples following a power-law distribution with each client only instances of 2 classes)? if  your dataset is naturally partitioned just state “naturally partitioned”; how many partitions there are (i.e. how many clients)? Please include this an all information relevant about the dataset and its partitioning into a table._*
+****Dataset:**** : CIFAR10, CIFAR100, FLICKR-AES
 
 ****Training Hyperparameters:**** :warning: *_Include a table with all the main hyperparameters in your baseline. Please show them with their default value._*
 
 
 ## Environment Setup
 
-:warning: _The Python environment for all baselines should follow these guidelines in the `EXTENDED_README`. Specify the steps to create and activate your environment. If there are any external system-wide requirements, please include instructions for them too. These instructions should be comprehensive enough so anyone can run them (if non standard, describe them step-by-step)._
+- Ensure you are in ./baselines/FedPer
+- running with Python 3.9.5
+- `poetry shell` there to active environment. 
+- Run module using python -m FedPer.main
 
 
 ## Running the Experiments
