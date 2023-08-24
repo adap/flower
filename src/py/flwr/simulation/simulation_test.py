@@ -44,7 +44,7 @@ def test_cid_consistency() -> None:
         return DefaultActor.options(**client_resources).remote()
 
     # Create actor pool
-    ray.init(num_cpus=1)
+    ray.init()
     pool = VirtualClientEngineActorPool(
         create_actor_fn=create_actor_fn,
         client_resources=client_resources,
