@@ -28,8 +28,9 @@ from flwr.client.message_handler.task_handler import (
     get_server_message_from_task_ins,
     wrap_client_message_in_task_res,
 )
+from flwr.client.secure_aggregation import SecureAggregationHandler
 from flwr.common import serde
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.proto.task_pb2 import SecureAggregation, Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 
 
@@ -61,6 +62,23 @@ def handle(client: Client, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
     workload_id: str = task_ins.workload_id
     server_msg = get_server_message_from_task_ins(task_ins, exclude_reconnect_ins=False)
     if server_msg is None:
+        # Secure Aggregation
+        if task_ins.task.HasField("sa") and isinstance(
+            client, SecureAggregationHandler
+        ):
+            # pylint: disable-next=invalid-name
+            named_values = serde.named_values_from_proto(task_ins.task.sa.named_values)
+            res = client.handle_secure_aggregation(named_values)
+            task_res = TaskRes(
+                task_id="",
+                group_id="",
+                workload_id="",
+                task=Task(
+                    ancestry=[],
+                    sa=SecureAggregation(named_values=serde.named_values_to_proto(res)),
+                ),
+            )
+            return task_res, 0, True
         raise NotImplementedError()
     client_msg, sleep_duration, keep_going = handle_legacy_message(client, server_msg)
     task_res = wrap_client_message_in_task_res(client_msg, workload_id=workload_id)

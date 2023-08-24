@@ -21,10 +21,38 @@ Flower Baselines
 
 Flower Baselines are a collection of organised scripts used to reproduce results from well-known publications or benchmarks. You can check which baselines already exist and/or contribute your own baseline.
 
-.. toctree::
-   :maxdepth: 1
-   :caption: Flower Baselines
-   
-   using-baselines
-   contributing-baselines
+Tutorials
+~~~~~~~~~
 
+A learning-oriented series of tutorials, the best place to start.
+
+.. toctree::
+  :maxdepth: 1
+  :caption: Tutorials
+   
+  tutorial-use-baselines
+  tutorial-contribute-baselines
+
+How-to guides
+~~~~~~~~~~~~~
+
+Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
+
+.. note::
+  Coming soon
+
+Explanations
+~~~~~~~~~~~~
+
+Understanding-oriented concept guides explain and discuss key topics and underlying ideas behind Flower and collaborative AI.
+
+.. note::
+  Coming soon
+
+References
+~~~~~~~~~~
+
+Information-oriented API reference and other reference material.
+
+.. note::
+  This section will soon list all available Flower Baselines
