@@ -258,7 +258,9 @@ def start_simulation(  # pylint: disable=too-many-arguments
             num_max_actors = pool_size_from_resources(client_resources)
             if num_max_actors > pool.num_actors:
                 num_new = num_max_actors - pool.num_actors
-                log(INFO, "The cluster expanded. Adding %s actors to the pool.", num_new)
+                log(
+                    INFO, "The cluster expanded. Adding %s actors to the pool.", num_new
+                )
                 pool.add_actors_to_pool(num_actors=num_new)
 
             threading.Timer(10, update_resources, [f_stop]).start()

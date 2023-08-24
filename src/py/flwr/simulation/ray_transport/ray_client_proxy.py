@@ -31,8 +31,10 @@ from flwr.client.client import (
 )
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
-from flwr.simulation.ray_transport.ray_actor import VirtualClientEngineActorPool
-
+from flwr.simulation.ray_transport.ray_actor import (
+    ClientRes,
+    VirtualClientEngineActorPool,
+)
 ClientFn = Callable[[str], ClientLike]
 ClientRes = Union[
     common.GetPropertiesRes, common.GetParametersRes, common.FitRes, common.EvaluateRes
@@ -144,8 +146,6 @@ class RayActorClientProxy(ClientProxy):
                 # At this point we want to stop the simulation.
                 # since no more client workloads will be executed
                 log(ERROR, "ActorPool is empty!!!")
-                # TODO: Implement ClientProxy disconnect  # pylint: disable=fixme
-                # self.reconnect()
             log(ERROR, traceback.format_exc())
             log(ERROR, ex)
             raise ex

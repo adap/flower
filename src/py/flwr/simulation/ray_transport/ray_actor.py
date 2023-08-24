@@ -76,7 +76,18 @@ class VirtualClientEngineActor(ABC):
 
 @ray.remote
 class DefaultActor(VirtualClientEngineActor):
-    """A Ray Actor class that runs client workloads."""
+    """A Ray Actor class that runs client workloads.
+
+    Parameters
+    ----------
+    on_actor_init_fn: Optional[Callable[[], None]] (default: None)
+        A function to execute upon actor initialization.
+    """
+
+    def __init__(self, on_actor_init_fn: Optional[Callable[[], None]] = None) -> None:
+        super().__init__()
+        if on_actor_init_fn:
+            on_actor_init_fn()
 
 
 def pool_size_from_resources(client_resources: Dict[str, Union[int, float]]) -> int:
@@ -120,7 +131,7 @@ def pool_size_from_resources(client_resources: Dict[str, Union[int, float]]) -> 
     if total_num_actors == 0:
         log(
             WARNING,
-            "The ActorPool is empty. The system (%s, %s) "
+            "The ActorPool is empty. The system (CPUs=%s, GPUs=%s) "
             "does not meet the criteria to host at least one client with resources:"
             " %s. Lowering the `client_resources` could help.",
             num_cpus,
@@ -128,7 +139,8 @@ def pool_size_from_resources(client_resources: Dict[str, Union[int, float]]) -> 
             client_resources,
         )
         raise ValueError(
-            "ActorPool is empty. Stopping Simulation. Check 'client_resources'"
+            "ActorPool is empty. Stopping Simulation. "
+            "Check 'client_resources' passed to `start_simulation`"
         )
 
     return total_num_actors
@@ -234,7 +246,6 @@ class VirtualClientEngineActorPool(ActorPool):
         # removing and adding elements from a dictionary. Which creates
         # issues in multi-threaded settings
         with self.lock:
-            # TODO: w/ timestamp check, call ray.resources()  # pylint: disable=fixme
             # Create cid to future mapping
             self._reset_cid_to_future_dict(cid)
             if self._idle_actors:
@@ -378,7 +389,6 @@ class VirtualClientEngineActorPool(ActorPool):
 
     def get_client_result(self, cid: str, timeout: Optional[float]) -> ClientRes:
         """Get result from VirtualClient with specific cid."""
-
         # Loop until all jobs submitted to the pool are completed. Break early
         # if the result for the ClientProxy calling this method is ready
         while self.has_next() and not self._is_future_ready(cid):  # type: ignore
