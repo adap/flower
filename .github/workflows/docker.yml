@@ -12,6 +12,7 @@ defaults:
 
 jobs:
   test:
+    name: Test Image
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -20,7 +21,8 @@ jobs:
           FLWR_VERSION: 1.3.0
       run: ./test.sh
 
-  build and push:
+  build-and-push:
+    name: Build Image
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
