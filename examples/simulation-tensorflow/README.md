@@ -1,6 +1,6 @@
 # Flower Simulation example using TensorFlow/Keras
 
-This introductory example uses the simulation capabilities of Flower to simulate a large number of clients on either a single machine of a cluster of machines. Take a look at the [Documentation](https://flower.dev/docs/framework/how-to-run-simulation.html) for a deep dive on how Flower simulation works.
+This introductory example uses the simulation capabilities of Flower to simulate a large number of clients on either a single machine of a cluster of machines. Take a look at the [Documentation](https://flower.dev/docs/framework/how-to-run-simulations.html) for a deep dive on how Flower simulation works.
 
 ## Running the example (via Jupyter Notebook)
 
@@ -78,4 +78,4 @@ python sim.py --num_cpus=2
 python sim.py --num_cpus=2 --num_gpus=0.2
 ```
 
-Take a look at the [Documentation](https://flower.dev/docs/framework/how-to-run-simulation.html) for more details on how you can customise your simulation.
+Take a look at the [Documentation](https://flower.dev/docs/framework/how-to-run-simulations.html) for more details on how you can customise your simulation.
