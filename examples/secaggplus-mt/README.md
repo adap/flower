@@ -19,6 +19,14 @@ Poetry will install all your dependencies in a newly created virtual environment
 poetry run python3 -c "import flwr"
 ```
 
+### pip
+
+Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
+
+```shell
+pip install -r requirements.txt
+```
+
 If you don't see any errors you're good to go!
 
 ## Run with Driver API
