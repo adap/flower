@@ -1,7 +1,15 @@
-"""Define our models, and training and eval functions.
+from tensorflow import keras
 
-If your model is 100% off-the-shelf (e.g. directly from torchvision without requiring
-modifications) you might be better off instantiating your  model directly from the Hydra
-config. In this way, swapping your model for  another one can be done without changing
-the python code at all
-"""
+def create_model(input_shape, num_classes):
+    # CNN Model from (McMahan et. al., 2017) Communication-efficient learning of deep networks from decentralized data
+    model = keras.Sequential([
+        keras.layers.Conv2D(32, (5,5), activation='relu', input_shape=input_shape),
+        keras.layers.MaxPooling2D(2,2),
+        keras.layers.Conv2D(64, (5,5), activation='relu'),
+        keras.layers.MaxPooling2D(2,2),
+        keras.layers.Flatten(),
+        keras.layers.Dense(512, activation='relu'),
+        keras.layers.Dense(num_classes, activation='softmax')
+        ])
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    return model

@@ -1,10 +1,11 @@
 ---
-num_rounds: 10000
+num_rounds: 5  # original experiments (paper) uses 10000
 num_clients: 100
+fedavgm: True
 
 dataset:
   fmnist: False
-  concentration: 10
+  concentration: 10 # concentrations used in the paper [100., 10., 1., 0.5, 0.2, 0.1, 0.05, 0.0]
   
 model:
   # model config
@@ -16,7 +17,10 @@ strategy:
 server:
   momentum: 0.9
   learning_rate: 1.0
+  reporting_fraction: 0.05  # values used in the paper 0.05, 0.1, 0.2 (not used for Figure 5), 0.4
 
 client:
-  local_epochs: 1
-  batch_size: 64
+  local_epochs: 1   # in the paper it is used 1 or 5
+  batch_size: 64    # in the paper fixed at 64
+  lr: 0.01
+  momentum: 0.9
