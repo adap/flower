@@ -20,8 +20,8 @@ from pathlib import Path
 from argparse import ArgumentParser
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader, random_split
-from FedPer.utils import fix_random_seed, prune_args
-from FedPer.dataset_preparation import (
+from FedPer_old.utils import fix_random_seed, prune_args
+from FedPer_old.dataset_preparation import (
     DATASETS, randomly_assign_classes
 )
 
@@ -35,7 +35,7 @@ def dataset_main(config : dict) -> None:
     dataset_name = config['name'].lower()
     dataset_folder = Path(WORKING_DIR, "datasets")
     dataset_root = Path(dataset_folder, dataset_name)
-
+    
     fix_random_seed(config['seed'])
 
     if not os.path.isdir(dataset_root):

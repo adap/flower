@@ -65,35 +65,34 @@ class ResNetBody(nn.Module):
         ) -> None:
         super(ResNetBody, self).__init__()
         self.num_head_layers = num_head_layers
-        resnet = resnet34()
+        self.body = resnet34()
+
+        def basic_block(in_planes, out_planes, stride=1):
+            """Basic ResNet block."""
+            return nn.Sequential(
+                nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False),
+                nn.BatchNorm2d(out_planes),
+                nn.ReLU(inplace=True),
+                nn.Conv2d(out_planes, out_planes, kernel_size=3, stride=1, padding=1, bias=False),
+                nn.BatchNorm2d(out_planes)
+            )
              
         # if only one head layer
         if self.num_head_layers == 1:
-            self.body = nn.Sequential(*list(resnet.children())[:-2])
-        else:
-            self.conv1 = nn.Conv2d(3, 64, kernel_size=(7,7), stride=(2,2), padding=(3,3), bias=False)
-            self.bn1 = nn.BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-            self.relu = nn.ReLU(inplace=True)
-            self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1, dilation=1, ceil_mode=False)
-            self.body = nn.Sequential()
-            self.rest_to_add = list(resnet.children())[4:-2]
-            num_body_blocks = 16 - num_head_layers + 1 
-            i = 0
-            for j, layer in enumerate(self.rest_to_add):
-                new_layer = []
-                for n, block in enumerate(layer):
-                    if i < num_body_blocks:
-                        new_layer.append(block)
-                        i += 1
-                        # Rest_to_add
-                        to_add = layer[n+1:]
-                        if len(to_add) == 0:
-                            self.rest_to_add[j] = None
-                        else:
-                            self.rest_to_add[j] = nn.Sequential(*to_add)      
-                    else:
-                        break
-                self.body.add_module('layer' + str(j), nn.Sequential(*new_layer))
+            self.head = self.body.fc
+            self.body.fc = nn.Identity()
+        elif self.num_head_layers == 2:
+            self.head = nn.Sequential(
+                basic_block(512, 512),
+                nn.AdaptiveAvgPool2d((1, 1)),
+                nn.Flatten(),
+                nn.Linear(512, num_classes)
+            )
+            self.body.fc = nn.Identity()
+            self.body.avgpool = nn.Identity()
+            self.body.layer4[-1] = nn.Identity()
+        else: 
+            raise NotImplementedError("Only 1 or 2 head layers supported")
         
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         if self.num_head_layers == 1:
@@ -121,23 +120,48 @@ class ResNet(nn.Module):
         ) -> None:
         super(ResNet, self).__init__()
         assert num_head_layers > 0 and num_head_layers <= 17, "num_head_layers must be greater than 0 and less than 16"
-        self.body = None
-        self.head = None
+        self.num_head_layers = num_head_layers
+        self.body = resnet34()
 
-        # Get body and head
-        self.body = ResNetBody(num_head_layers=num_head_layers, num_classes=num_classes)
-        if num_head_layers > 1:
-            rest_to_add = self.body.get_rest_to_add()
-            self.head = ResNetHead(
-                num_head_layers=num_head_layers, num_classes=num_classes,
-                rest_to_add = rest_to_add
+        def basic_block(in_planes, out_planes, stride_use=1):
+            """Basic ResNet block."""
+            return nn.Sequential(
+                nn.Conv2d(in_planes, out_planes, kernel_size=(3,3), stride=(stride_use, stride_use), padding=(1,1), bias=False),
+                nn.BatchNorm2d(out_planes, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
+                nn.ReLU(inplace=True),
+                nn.Conv2d(out_planes, out_planes, kernel_size=(3,3), stride=(stride_use, stride_use), padding=(1,1), bias=False),
+                nn.BatchNorm2d(out_planes, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
             )
-        else:
-            self.head = ResNetHead(num_head_layers=num_head_layers, num_classes=num_classes)  
-
+             
+        # if only one head layer
+        if self.num_head_layers == 1:
+            self.head = self.body.fc
+            self.body.fc = nn.Identity()
+        elif self.num_head_layers == 2:
+            self.head = nn.Sequential(
+                basic_block(512, 512),
+                nn.AdaptiveAvgPool2d((1, 1)),
+                nn.Flatten(),
+                nn.Linear(512, num_classes)
+            )
+            # remove head layers from body
+            self.body = nn.Sequential(*list(self.body.children())[:-2])
+            body_layer4 = list(self.body.children())[-1]
+            self.body = nn.Sequential(*list(self.body.children())[:-1])
+            self.body.layer4 = nn.Sequential(*list(body_layer4.children())[:-1])
+        else: 
+            raise NotImplementedError("Only 1 or 2 head layers supported")
+        
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.body(x)
-        return self.head(x)
+        if self.num_head_layers == 1:
+            return self.head(F.relu(self.body(x)))
+        elif self.num_head_layers == 2:
+            x = self.body(x)
+            # x = F.relu(x)
+            # x = x.view(x.size(0), 512, 1, 1)
+            return self.head(x)
+        else:
+            raise NotImplementedError("Only 1 or 2 head layers supported")
 
 class ResNetModelSplit(ModelSplit):
     """Concrete implementation of ModelSplit for models for node kind prediction in action flows \
@@ -177,10 +201,16 @@ class ResNetModelManager(ModelManager):
     def _create_model(self) -> nn.Module:
         """Return MobileNet-v1 model to be splitted into head and body."""
         try:
-            return ResNet().to(self.device)
+            return ResNet(
+                num_head_layers=self.config['num_head_layers'],
+                num_classes=self.config['num_classes'],
+            ).to(self.device)
         except AttributeError:
             self.device = self.config['device']
-            return ResNet().to(self.device)
+            return ResNet(
+                num_head_layers=self.config['num_head_layers'],
+                num_classes=self.config['num_classes'],
+            ).to(self.device)
 
     def train(
         self,
@@ -211,13 +241,21 @@ class ResNetModelManager(ModelManager):
             Dict containing the train metrics.
         """
         criterion = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.SGD(self.model.parameters(), lr=0.001, momentum=0.9)
+        optimizer = torch.optim.SGD(self.model.parameters(), lr=0.01)
+        correct, total, loss = 0, 0, 0.0
+        #self.model.train()
         for _ in range(epochs):
             for images, labels in tqdm(self.trainloader):
                 optimizer.zero_grad()
-                criterion(self.model(images.to(self.device)), labels.to(self.device)).backward()
+                outputs = self.model(images.to(self.device))
+                labels = labels.to(self.device)
+                loss = criterion(outputs, labels)
+                loss.backward()
                 optimizer.step()
-        return {}
+                total += labels.size(0)
+                correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
+        return {"loss": loss.item(), "accuracy": correct / total}
+
 
     def test(self, test_id: int) -> Dict[str, float]:
         """
@@ -234,6 +272,7 @@ class ResNetModelManager(ModelManager):
         """
         criterion = torch.nn.CrossEntropyLoss()
         correct, total, loss = 0, 0, 0.0
+        #self.model.eval()
         with torch.no_grad():
             for images, labels in tqdm(self.testloader):
                 outputs = self.model(images.to(self.device))
@@ -241,6 +280,7 @@ class ResNetModelManager(ModelManager):
                 loss += criterion(outputs, labels).item()
                 total += labels.size(0)
                 correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
+        print("Test Accuracy: {:.4f}".format(correct / total))
         return {"loss": loss / len(self.testloader.dataset), "accuracy": correct / total}
 
     def train_dataset_size(self) -> int:

@@ -6,6 +6,7 @@ num_rounds: 100
 clients_per_round: 10
 learning_rate: 0.01
 algorithm: FedPer
+algo: FedPer
 
 client_resources:
   num_cpus: 32
@@ -17,9 +18,13 @@ dataset:
   name : "cifar10"
   iid: false
   num_classes: 4
+  seed: 42
+  num_clients: 10
+  split: 'sample' # sample or user
+  fraction: 0.83
 
 model:
-  _target_: FedPer.models.resnet_model.ResNet
+  _target_: rest2.models.resnet_model.ResNet
   num_head_layers: 2
   num_classes: 10
   device: ${server_device}
@@ -31,7 +36,7 @@ fit_config:
   batch_size: ${batch_size}
 
 strategy:
-  _target_: FedPer.utils.strategy_pipeline.AggregateBodyStrategyPipeline
+  _target_: rest2.utils.strategy_pipeline.AggregateBodyStrategyPipeline
   algorithm: ${algorithm}
   fraction_fit: 0.00001 # because we want the number of clients to sample on each roudn to be solely defined by min_fit_clients
   min_fit_clients: ${num_clients}

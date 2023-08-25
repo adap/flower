@@ -43,6 +43,7 @@ dataset: ["CIFAR-10", "FLICKR-AES"] # list of datasets you include in your basel
 - running with Python 3.9.5
 - `poetry shell` there to active environment. 
 - Run module using python -m FedPer.main
+- base.yaml has the configuration. Set to 2 `num_head_layers` for the same experiment set up as in Figure 2, see [paper](https://arxiv.org/pdf/1912.00818.pdf). 
 
 
 ## Running the Experiments

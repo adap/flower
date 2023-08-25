@@ -12,7 +12,7 @@ from threading import Thread
 from omegaconf import DictConfig
 from collections import OrderedDict
 from hydra.utils import instantiate
-from FedPer.models import test
+from FedPer_old.models import test
 from torch.utils.data import DataLoader
 from flwr.common.typing import NDArrays, Scalar
 
