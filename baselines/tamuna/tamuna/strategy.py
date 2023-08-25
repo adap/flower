@@ -15,16 +15,34 @@ from tamuna.models import Net
 
 def aggregate(weights: List[NDArrays]) -> NDArrays:
     """Computes average of the clients' weights."""
-    num_clients = len(weights)
+    cohort_size = len(weights)
     averaged_weights = [
-        np.sum(layer_updates, axis=0) / num_clients for layer_updates in zip(*weights)
+        np.sum(layer_updates, axis=0) / cohort_size for layer_updates in zip(*weights)
     ]
     return averaged_weights
 
 
-def create_pattern(dim: int, clients_per_round: int, s: int):
+def create_pattern(dim: int, cohort_size: int, sparsity: int, rand_shuffle_flag: bool):
     """Creates compression pattern for each client."""
-    return torch.ones(size=(dim, clients_per_round))
+
+    q = torch.zeros(size=(dim, cohort_size))
+    if dim >= cohort_size / sparsity:
+        k = 0
+        for i in range(dim):
+            for j in range(sparsity):
+                q[i, k] = 1
+                k = (k + 1) % cohort_size
+    else:
+        k = 0
+        for j in range(sparsity):
+            for i in range(dim):
+                q[i, k] = 1
+                k += 1
+
+    if rand_shuffle_flag:
+        q = q[:, torch.randperm(q.size()[1])]
+
+    return q
 
 
 def save_client_mask_to_file(cid, mask):
@@ -65,7 +83,7 @@ class TamunaStrategy(Strategy):
         dim = sum(p.numel() for p in self.server_model.parameters())
 
         compression_pattern = create_pattern(
-            dim, self.clients_per_round, self.s
+            dim, self.clients_per_round, self.s, rand_shuffle_flag=True
         )  # dim x cohort_size
 
         for i in range(self.clients_per_round):
