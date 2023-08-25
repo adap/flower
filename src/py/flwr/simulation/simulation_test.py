@@ -80,7 +80,10 @@ def prep(
 
 
 def test_cid_consistency_one_at_a_time() -> None:
-    """Test that ClientProxies get the result of client job they submit."""
+    """Test that ClientProxies get the result of client job they submit.
+
+    Submit one job and waits for copmletion. Then submits the next and so on
+    """
     proxies, _ = prep()
     # submit jobs one at a time
     for prox in proxies:
@@ -95,7 +98,10 @@ def test_cid_consistency_one_at_a_time() -> None:
 
 
 def test_cid_consistency_all_submit_first() -> None:
-    """Test that ClientProxies get the result of client job they submit."""
+    """Test that ClientProxies get the result of client job they submit.
+
+    All jobs are submitted at the same time. Then fetched one at a time.
+    """
     proxies, _ = prep()
 
     # submit all jobs (collect later)
