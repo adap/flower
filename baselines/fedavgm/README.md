@@ -66,9 +66,32 @@ The following table shows the main hyperparameters for this baseline with their 
 | client learning rate | 0.01 |
 | client momentum | 0.9 |
 
+## Specifying the Python Version
+This baseline was tested with Python 3.9.16.
+
+By default, Poetry will use the Python version in your system. In some settings, you might want to specify a particular version of Python to use inside your Poetry environment. You can do so with [`pyenv`](https://github.com/pyenv/pyenv). Check the documentation for the different ways of installing `pyenv`, but one easy way is using the [automatic installer](https://github.com/pyenv/pyenv-installer):
+
+```bash
+curl https://pyenv.run | bash # then, don't forget links to your .bashrc/.zshrc
+```
+
+You can then install any Python version with `pyenv install <python-version>` (e.g. `pyenv install 3.9.16`). Then, in order to use that version for this baseline, you'd do the following:
+
+```bash
+# cd to your baseline directory (i.e. where the `pyproject.toml` is)
+pyenv local 3.9.16
+
+# set that version for poetry
+poetry env use 3.9.16
+
+# then you can install your Poetry environment (see the next setp)
+```
+
 ## Environment Setup
 
-To construct the Python environment follow these steps:
+This baseline works with TensorFlow 2.10, no additional step required once using Poetry to set up the environment.
+
+To construct the Python environment with Poetry follow these steps:
 
 ```bash
 # install the base Poetry environment
