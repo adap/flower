@@ -11,6 +11,8 @@ import torch.nn.functional as F
 from torch.nn.parameter import Parameter
 from torch.utils.data import DataLoader
 
+from utils import apply_nn_compression
+
 
 class Net(nn.Module):
     """Convolutional Neural Network architecture.
@@ -70,6 +72,8 @@ def train(
     eta: float,
     server_net: nn.Module,
     control_variate: nn.Module,
+    old_compression_mask: torch.tensor,
+    old_compressed_net: nn.Module,
 ) -> (nn.Module, nn.Module):
     """Train the network on the training set.
 
@@ -96,10 +100,12 @@ def train(
         with torch.no_grad():
             control_variate.to(device)
 
-            modules = []
-            for module in list(net.modules())[1:]:
+            old_compressed_modules = []
+            for module in list(old_compressed_net.modules())[1:]:
                 if len(list(module.parameters())) != 0:
-                    modules.append(module)
+                    old_compressed_modules.append(module)
+
+            server_net = apply_nn_compression(server_net, old_compression_mask)
 
             server_modules = []
             for server_module in list(server_net.modules())[1:]:
@@ -115,11 +121,18 @@ def train(
                 module.weight.copy_(
                     module.weight.data
                     + (eta / lr)
-                    * (server_modules[i].weight.data - modules[i].weight.data)
+                    * (
+                        server_modules[i].weight.data
+                        - old_compressed_modules[i].weight.data
+                    )
                 )
                 module.bias.copy_(
                     module.bias.data
-                    + (eta / lr) * (server_modules[i].bias.data - modules[i].bias.data)
+                    + (eta / lr)
+                    * (
+                        server_modules[i].bias.data
+                        - old_compressed_modules[i].bias.data
+                    )
                 )
     else:
         control_variate = __model_zeroed_out(net)

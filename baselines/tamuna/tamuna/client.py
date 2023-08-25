@@ -7,18 +7,14 @@ import os
 import flwr as fl
 import copy
 
-import numpy as np
 import torch
+from utils import apply_nn_compression
 from flwr.common.typing import NDArrays, Scalar
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
-from tamuna.models import test, train
-
-
-def apply_compression(net, mask):
-    return net
+from tamuna.models import train
 
 
 class FlowerClient(fl.client.NumPyClient):
@@ -43,6 +39,9 @@ class FlowerClient(fl.client.NumPyClient):
 
         state_file_name = f"{self.cid}_state.bin"
 
+        self.__create_state(state_file_name)
+
+    def __create_state(self, state_file_name):
         if not os.path.exists(state_file_name):
             with open(state_file_name, "wb") as f:
                 state = (
@@ -71,16 +70,10 @@ class FlowerClient(fl.client.NumPyClient):
         """Implements distributed fit function for a given client."""
         self.set_parameters(parameters)
 
-        # load compression mask from file {self.cid}_mask.bin
-        mask = np.zeros(1)  # todo
+        with open(f"{self.cid}_mask.bin", "rb") as f:
+            mask = pickle.load(f)
 
-        with open(f"{self.cid}_state.bin", "rb") as f:
-            state = pickle.load(f)
-            (
-                self.control_variate,
-                self.old_compression_mask,
-                self.old_compressed_net,
-            ) = state
+        self.__load_state()
 
         self.net, self.control_variate = train(
             self.net,
@@ -89,12 +82,19 @@ class FlowerClient(fl.client.NumPyClient):
             epochs=config["epochs"],
             eta=config["eta"],
             control_variate=self.control_variate,
+            old_compression_mask=self.old_compression_mask,
+            old_compressed_net=self.old_compressed_net,
             server_net=copy.deepcopy(self.net),
             lr=self.learning_rate,
         )
 
-        self.net = apply_compression(self.net, mask)
+        self.net = apply_nn_compression(self.net, mask)
 
+        self.__save_state(mask)
+
+        return self.get_parameters({}), len(self.trainloader), {}
+
+    def __save_state(self, mask):
         with open(f"{self.cid}_state.bin", "wb") as f:
             state = (
                 self.control_variate,
@@ -103,7 +103,14 @@ class FlowerClient(fl.client.NumPyClient):
             )
             pickle.dump(state, f, protocol=pickle.HIGHEST_PROTOCOL)
 
-        return self.get_parameters({}), len(self.trainloader), {}
+    def __load_state(self):
+        with open(f"{self.cid}_state.bin", "rb") as f:
+            state = pickle.load(f)
+            (
+                self.control_variate,
+                self.old_compression_mask,
+                self.old_compressed_net,
+            ) = state
 
 
 def gen_client_fn(

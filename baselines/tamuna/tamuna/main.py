@@ -1,4 +1,5 @@
 """Runs CNN federated learning for MNIST dataset."""
+import os
 
 import flwr as fl
 import hydra
@@ -21,6 +22,10 @@ def main(cfg: DictConfig) -> None:
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
+
+    for filename in os.listdir():
+        if filename.endswith("_state.bin") or filename.endswith("_mask.bin"):
+            os.remove(filename)
 
     # print config structured as YAML
     print(OmegaConf.to_yaml(cfg))
@@ -46,6 +51,7 @@ def main(cfg: DictConfig) -> None:
         clients_per_round=cfg.clients_per_round,
         epochs_per_round=epochs_per_round,
         eta=cfg.eta,
+        s=cfg.s,
         evaluate_fn=evaluate_fn,
     )
 

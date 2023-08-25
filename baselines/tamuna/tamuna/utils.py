@@ -1,6 +1,9 @@
 """Contains utility functions for CNN FL on MNIST."""
 
 import pickle
+import torch
+from torch import nn
+from functools import reduce
 from pathlib import Path
 from secrets import token_hex
 from typing import Dict, Optional, Union
@@ -8,6 +11,26 @@ from typing import Dict, Optional, Union
 import matplotlib.pyplot as plt
 import numpy as np
 from flwr.server.history import History
+
+
+def apply_nn_compression(net: nn.Module, mask: torch.tensor) -> nn.Module:
+    list_of_reshaped_layers = []
+    list_of_shapes = []
+
+    for layer in net.parameters():
+        reshaped_layer = torch.flatten(layer.data)
+        list_of_reshaped_layers.append(reshaped_layer)
+        shape = reduce((lambda x, y: x * y), list(layer.data.shape))
+        list_of_shapes.append(shape)
+    cat_full_vec = torch.cat(list_of_reshaped_layers)
+    compressed_full_vec = torch.mul(cat_full_vec, mask)
+
+    compressed_split_vec = torch.split(compressed_full_vec, list_of_shapes)
+
+    for i, layer in enumerate(net.parameters()):
+        layer.data = compressed_split_vec[i].reshape(layer.data.shape)
+
+    return net
 
 
 def plot_metric_from_history(
@@ -43,6 +66,8 @@ def plot_metric_from_history(
 
     axs[0].set_ylabel("Loss")
     axs[1].set_ylabel("Accuracy")
+
+    axs[1].set_ylim(bottom=0, top=1)
 
     # plt.title(f"{metric_type.capitalize()} Validation - MNIST")
     plt.xlabel("Rounds")

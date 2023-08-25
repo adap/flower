@@ -18,12 +18,12 @@
 ---
 
 num_clients: 4
-num_rounds: 5
+num_rounds: 10
 clients_per_round: 2
 learning_rate: 0.02
-s: 40
+s: 2
 p: 0.333
-eta: 0.33
+eta: 0.333
 client_device: 'cpu'
 
 client_resources:
