@@ -40,16 +40,16 @@ def float_to_int(i: float) -> int:
 def sort_by_label(x: np.ndarray, y: np.ndarray) -> XY:
     """Sort by label.
 
-    Assuming two labels and four examples the resulting label order
-    would be 1,1,2,2
+    Assuming two labels and four examples the resulting label order would be 1,1,2,2
     """
     idx = np.argsort(y, axis=0).reshape((y.shape[0]))
     return (x[idx], y[idx])
 
 
 def sort_by_label_repeating(x: np.ndarray, y: np.ndarray) -> XY:
-    """Sort by label in repeating groups. Assuming two labels and four examples
-    the resulting label order would be 1,2,1,2.
+    """Sort by label in repeating groups.
+
+    Assuming two labels and four examples the resulting label order would be 1,2,1,2.
 
     Create sorting index which is applied to by label sorted x, y
 
@@ -114,8 +114,10 @@ def combine_partitions(xy_list_0: XYList, xy_list_1: XYList) -> XYList:
 
 
 def shift(x: np.ndarray, y: np.ndarray) -> XY:
-    """Shift x_1, y_1 so that the first half contains only labels 0 to 4 and
-    the second half 5 to 9."""
+    """Shift x_1, y_1.
+
+    so that the first half contains only labels 0 to 4 and the second half 5 to 9.
+    """
     x, y = sort_by_label(x, y)
 
     (x_0, y_0), (x_1, y_1) = split_at_fraction(x, y, fraction=0.5)
@@ -131,8 +133,7 @@ def create_partitions(
 ) -> XYList:
     """Create partitioned version of a training or test set.
 
-    Currently tested and supported are MNIST, FashionMNIST and
-    CIFAR-10/100
+    Currently tested and supported are MNIST, FashionMNIST and CIFAR-10/100
     """
     x, y = unpartitioned_dataset
 
@@ -160,8 +161,7 @@ def create_partitioned_dataset(
 ) -> Tuple[PartitionedDataset, XY]:
     """Create partitioned version of keras dataset.
 
-    Currently tested and supported are MNIST, FashionMNIST and
-    CIFAR-10/100
+    Currently tested and supported are MNIST, FashionMNIST and CIFAR-10/100
     """
     xy_train, xy_test = keras_dataset
 
@@ -212,7 +212,9 @@ def adjust_y_shape(nda: np.ndarray) -> np.ndarray:
 def split_array_at_indices(
     x: np.ndarray, split_idx: np.ndarray
 ) -> List[List[np.ndarray]]:
-    """Splits an array `x` into list of elements using starting indices from
+    """Split the array `x`.
+
+    into list of elements using starting indices from
     `split_idx`.
 
         This function should be used with `unique_indices` from `np.unique()` after
@@ -224,10 +226,10 @@ def split_array_at_indices(
             indices to be used as partitions. Initial value must be zero. Last value
             must be less than N.
 
-    Returns:
+    Returns
+    -------
         List[List[np.ndarray]]: List of list of samples.
     """
-
     if split_idx.ndim != 1:
         raise ValueError("Variable `split_idx` must be a 1-D numpy array.")
     if split_idx.dtype != np.int64:
@@ -270,7 +272,8 @@ def exclude_classes_and_normalize(
         eps (float, optional): Small value to be addad to non-excluded dimensions.
             Defaults to 1e-5.
 
-    Returns:
+    Returns
+    -------
         np.ndarray: Normalized distributions.
     """
     if np.any(distribution < 0) or (not np.isclose(np.sum(distribution), 1.0)):
@@ -298,7 +301,9 @@ def sample_without_replacement(
     num_samples: int,
     empty_classes: List[bool],
 ) -> Tuple[XY, List[bool]]:
-    """Samples from a list without replacement using a given distribution.
+    """Sample from a list without replacement.
+
+    using a given distribution.
 
     Args:
         distribution (np.ndarray): Distribution used for sampling.
@@ -307,7 +312,8 @@ def sample_without_replacement(
         empty_classes (List[bool]): List of booleans indicating which classes are empty.
             This is useful to differentiate which classes should still be sampled.
 
-    Returns:
+    Returns
+    -------
         XY: Dataset contaning samples
         List[bool]: empty_classes.
     """
@@ -351,19 +357,20 @@ def sample_without_replacement(
 
 
 def get_partitions_distributions(partitions: XYList) -> Tuple[np.ndarray, List[int]]:
-    """Evaluates the distribution over classes for a set of partitions.
+    """Evaluate the distribution over classes for a set of partitions.
 
     Args:
         partitions (XYList): Input partitions
 
-    Returns:
+    Returns
+    -------
         np.ndarray: Distributions of size (num_partitions, num_classes)
     """
     # Get largest available label
     labels = set()
     for _, y in partitions:
         labels.update(set(y))
-    list_labels = sorted(list(labels))
+    list_labels = sorted(labels)
     bin_edges = np.arange(len(list_labels) + 1)
 
     # Pre-allocate distributions
@@ -383,8 +390,9 @@ def create_lda_partitions(
     accept_imbalanced: bool = False,
     seed: Optional[Union[int, SeedSequence, BitGenerator, Generator]] = None,
 ) -> Tuple[XYList, np.ndarray]:
-    """Create imbalanced non-iid partitions using Latent Dirichlet Allocation
-    (LDA) without resampling.
+    r"""Create imbalanced non-iid partitions using Latent Dirichlet Allocation (LDA).
+
+    without resampling.
 
     Args:
         dataset (XY): Dataset containing samples X and labels Y.
@@ -408,7 +416,8 @@ def create_lda_partitions(
             If passed a Generator, it will be returned unaltered.
             See official Numpy Documentation for further details.
 
-    Returns:
+    Returns
+    -------
         Tuple[XYList, numpy.ndarray]: List of XYList containing partitions
             for each dataset and the dirichlet probability density functions.
     """
