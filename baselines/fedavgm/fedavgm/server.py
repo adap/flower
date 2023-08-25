@@ -15,8 +15,6 @@ def get_on_fit_config(config: DictConfig):
         #     lr = config.lr / 10
 
         return {
-            "lr": config.lr,
-            "momentum": config.momentum,
             "local_epochs": config.local_epochs,
             "batch_size": config.batch_size,
         }
@@ -30,7 +28,7 @@ def get_evaluate_fn(input_shape, num_classes, x_test, y_test, num_rounds):
     def evaluate_fn(server_round: int, parameters, config):
         if server_round == num_rounds:
             # instantiate the model
-            model = create_model(input_shape=input_shape, num_classes=num_classes)
+            model = create_model(input_shape, num_classes)
             model.set_weights(parameters)
             loss, accuracy = model.evaluate(x_test, to_categorical(y_test))
 

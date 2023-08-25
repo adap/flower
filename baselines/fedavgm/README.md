@@ -63,8 +63,6 @@ The following table shows the main hyperparameters for this baseline with their 
 | server reporting fraction | 0.05 |
 | client local epochs | 1 |
 | client batch size | 64 |
-| client learning rate | 0.01 |
-| client momentum | 0.9 |
 
 ## Specifying the Python Version
 This baseline was tested with Python 3.9.16.

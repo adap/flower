@@ -19,8 +19,6 @@ class FlowerClient(fl.client.NumPyClient):
         y_val,
         input_shape,
         num_classes,
-        local_epochs,
-        batch_size,
     ) -> None:
         # local model
         self.input_shape = input_shape
@@ -30,10 +28,6 @@ class FlowerClient(fl.client.NumPyClient):
         # local dataset
         self.x_train, self.y_train = x_train, y_train
         self.x_val, self.y_val = x_val, y_val
-
-        # local model params
-        self.local_epochs = local_epochs
-        self.batch_size = batch_size
 
     def new_model(self):
         """Generate the CNN model input_shape and num_classes."""
@@ -46,12 +40,14 @@ class FlowerClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         """Implement distributed fit function for a given client."""
+        
         self.model.set_weights(parameters)
+        
         self.model.fit(
             self.x_train,
             self.y_train,
-            epochs=self.local_epochs,
-            batch_size=self.batch_size,
+            epochs=config['local_epochs'],
+            batch_size=config['batch_size'],
         )
         return self.model.get_weights(), len(self.x_train), {}
 
@@ -62,7 +58,7 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, len(self.x_val), {"accuracy": acc}
 
 
-def generate_client_fn(partitions, input_shape, num_classes, local_epochs, batch_size):
+def generate_client_fn(partitions, input_shape, num_classes, lr, momentum):
     """Generate the client function that creates the Flower Clients."""
 
     def client_fn(cid: str) -> FlowerClient:
@@ -88,8 +84,6 @@ def generate_client_fn(partitions, input_shape, num_classes, local_epochs, batch
             y_val_cid,
             input_shape,
             num_classes,
-            local_epochs,
-            batch_size,
         )
 
     return client_fn

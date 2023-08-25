@@ -40,8 +40,6 @@ def main(cfg: DictConfig) -> None:
         partitions,
         input_shape,
         num_classes,
-        cfg.client.local_epochs,
-        cfg.client.batch_size,
     )
 
     # 4. Define your strategy
