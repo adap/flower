@@ -30,3 +30,11 @@ Build server image for specific Flower version.
 ```bash
 FLWR_VERSION=1.4.0 BUILD_TARGET=server ./build.sh
 ```
+
+Start the image using:
+
+```
+docker run -p 9091:9091 -p 9092:9092 flwr/server --rest
+```
+
+You can pass any option you would pass to flwr-server here after the image name as seen in the example. This works because the flwr-server is defined as an entrypoint in the image.
