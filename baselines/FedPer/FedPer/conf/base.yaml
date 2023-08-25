@@ -1,16 +1,15 @@
 ---
 num_clients: 10 # total number of clients
-num_epochs: 1 # number of local epochs
+num_epochs: 4 # number of local epochs
 batch_size: 128
-num_rounds: 3
-clients_per_round: 2
+num_rounds: 30
+clients_per_round: 10
 learning_rate: 0.01
-algorithm: FedPer
-algo: FedPer
-global_test_set: False
+algorithm: fedper
+algo: fedper
 
 client_resources:
-  num_cpus: 16
+  num_cpus: 32
   num_gpus: 1
 
 server_device: cuda:0
@@ -18,11 +17,10 @@ server_device: cuda:0
 dataset:
   name : "cifar10"
   iid: false
-  num_classes: 4
-  classes_per_client: 4
+  num_classes: 10
   seed: 42
-  split: 'sample' # sample, user
-  num_clients: ${num_clients}
+  num_clients: 10
+  split: 'sample' # sample or user
   fraction: 0.83
 
 model:
