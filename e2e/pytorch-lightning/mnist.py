@@ -65,13 +65,13 @@ def load_data():
     trainset = MNIST("./data", train=True, download=True, transform=transforms.ToTensor())
     trainset = Subset(trainset, range(1000))
     mnist_train, mnist_val = random_split(trainset, [800, 200])
-    train_loader = DataLoader(mnist_train, batch_size=32, shuffle=True, num_workers=2)
-    val_loader = DataLoader(mnist_val, batch_size=32, shuffle=False, num_workers=2)
+    train_loader = DataLoader(mnist_train, batch_size=32, shuffle=True, num_workers=0)
+    val_loader = DataLoader(mnist_val, batch_size=32, shuffle=False, num_workers=0)
 
     # Test set
     testset = MNIST("./data", train=False, download=True, transform=transforms.ToTensor())
     testset = Subset(testset, range(10))
-    test_loader = DataLoader(testset, batch_size=32, shuffle=False, num_workers=2)
+    test_loader = DataLoader(testset, batch_size=32, shuffle=False, num_workers=0)
 
     return train_loader, val_loader, test_loader
 
