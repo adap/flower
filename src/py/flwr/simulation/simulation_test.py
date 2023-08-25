@@ -46,12 +46,14 @@ def job_fn(cid: str) -> Callable[[], ClientRes]:  # pragma: no cover
     return cid_times_pi
 
 
-def prep() -> List[RayActorClientProxy]:  # pragma: no cover
+def prep(
+    actor_type: Type[VirtualClientEngineActor] = DefaultActor,
+) -> List[RayActorClientProxy]:  # pragma: no cover
     """Prepare ClientProxies and pool for tests."""
     client_resources = {"num_cpus": 1, "num_gpus": 0.0}
 
     def create_actor_fn() -> Type[VirtualClientEngineActor]:
-        return DefaultActor.options(**client_resources).remote()  # type: ignore
+        return actor_type.options(**client_resources).remote()  # type: ignore
 
     # Create actor pool
     ray.init(include_dashboard=False)
@@ -60,7 +62,7 @@ def prep() -> List[RayActorClientProxy]:  # pragma: no cover
         client_resources=client_resources,
     )
 
-    def dummy_client(cid: str) -> NumPyClient:
+    def dummy_client(cid: str) -> NumPyClient:  # pylint: disable=unused-argument
         return NumPyClient()
 
     # Create 1009 client proxies
@@ -82,7 +84,9 @@ def test_cid_consistency_one_at_a_time() -> None:
     proxies = prep()
     # submit jobs one at a time
     for prox in proxies:
-        res = prox._submit_job(job_fn=job_fn(prox.cid), timeout=None)
+        res = prox._submit_job(  # pylint: disable=protected-access
+            job_fn=job_fn(prox.cid), timeout=None
+        )
 
         res = cast(GetPropertiesRes, res)
         assert int(prox.cid) * pi == res.properties["result"]
