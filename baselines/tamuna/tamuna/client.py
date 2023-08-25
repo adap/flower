@@ -37,9 +37,9 @@ class FlowerClient(fl.client.NumPyClient):
         self.old_compressed_net = None
         self.cid = cid
 
-        state_file_name = f"{self.cid}_state.bin"
-
-        self.__create_state(state_file_name)
+        self.state_file_name = f"{self.cid}_state.bin"
+        self.mask_file_name = f"{self.cid}_mask.bin"
+        self.__create_state(self.state_file_name)
 
     def __create_state(self, state_file_name):
         if not os.path.exists(state_file_name):
@@ -70,7 +70,7 @@ class FlowerClient(fl.client.NumPyClient):
         """Implements distributed fit function for a given client."""
         self.set_parameters(parameters)
 
-        with open(f"{self.cid}_mask.bin", "rb") as f:
+        with open(self.mask_file_name, "rb") as f:
             mask = pickle.load(f)
 
         self.__load_state()
@@ -95,7 +95,7 @@ class FlowerClient(fl.client.NumPyClient):
         return self.get_parameters({}), len(self.trainloader), {}
 
     def __save_state(self, mask):
-        with open(f"{self.cid}_state.bin", "wb") as f:
+        with open(self.state_file_name, "wb") as f:
             state = (
                 self.control_variate,
                 mask,
@@ -104,7 +104,7 @@ class FlowerClient(fl.client.NumPyClient):
             pickle.dump(state, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     def __load_state(self):
-        with open(f"{self.cid}_state.bin", "rb") as f:
+        with open(self.state_file_name, "rb") as f:
             state = pickle.load(f)
             (
                 self.control_variate,

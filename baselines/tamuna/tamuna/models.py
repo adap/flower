@@ -93,7 +93,6 @@ def train(
         Parameter for the weight of the proximal term.
     """
     criterion = torch.nn.CrossEntropyLoss()
-    global_params = [val.detach().clone() for val in net.parameters()]
     net.train()
 
     if control_variate is not None:
@@ -140,7 +139,6 @@ def train(
     for _ in range(epochs):
         net = _train_one_epoch(
             net,
-            global_params,
             trainloader,
             device,
             criterion,
@@ -153,7 +151,6 @@ def train(
 
 def _train_one_epoch(
     net: nn.Module,
-    global_params: List[Parameter],
     trainloader: DataLoader,
     device: torch.device,
     criterion: torch.nn.CrossEntropyLoss,
@@ -166,8 +163,6 @@ def _train_one_epoch(
     ----------
     net : nn.Module
         The neural network to train.
-    global_params : List[Parameter]
-        The parameters of the global model (from the server).
     trainloader : DataLoader
         The DataLoader containing the data to train the network on.
     device : torch.device
