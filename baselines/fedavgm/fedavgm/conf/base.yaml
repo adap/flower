@@ -1,11 +1,11 @@
 ---
-num_rounds: 5  # original experiments (paper) uses 10000
 num_clients: 100
+num_rounds: 5  # original experiments (paper) uses 10000
 fedavgm: True
 
 dataset:
   fmnist: False
-  concentration: 10 # concentrations used in the paper [100., 10., 1., 0.5, 0.2, 0.1, 0.05, 0.0]
+  concentration: 0.1 # concentrations used in the paper [100., 10., 1., 0.5, 0.2, 0.1, 0.05, 0.0]
   
 model:
   # model config
