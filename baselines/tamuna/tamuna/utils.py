@@ -14,6 +14,16 @@ from flwr.server.history import History
 
 
 def apply_nn_compression(net: nn.Module, mask: torch.tensor) -> nn.Module:
+    """Function to zero out some of the model weights.
+
+    Parameters
+    ----------
+    net : nn.Module
+        Model to be compressed.
+    mask: torch.Tensor
+        One dimensional binary vector having ones for weights that are preserved.
+    """
+
     list_of_reshaped_layers = []
     list_of_shapes = []
 
@@ -57,7 +67,7 @@ def plot_metric_from_history(
     )
     rounds, values = zip(*metric_dict["accuracy"])
 
-    # let's extract centralised loss (main metric reported in FedProx paper)
+    # let's extract centralised loss
     rounds_loss, values_loss = zip(*hist.losses_centralized)
 
     fig, axs = plt.subplots(nrows=2, ncols=1, sharex="row")
@@ -69,9 +79,7 @@ def plot_metric_from_history(
 
     axs[1].set_ylim(bottom=0, top=1)
 
-    # plt.title(f"{metric_type.capitalize()} Validation - MNIST")
     plt.xlabel("Rounds")
-    # plt.legend(loc="lower right")
 
     plt.savefig(Path(save_plot_path) / Path(f"{metric_type}_metrics{suffix}.png"))
     plt.close()

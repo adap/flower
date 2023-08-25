@@ -1,14 +1,13 @@
 """CNN model architecutre, training, and testing functions for MNIST."""
 
 
-from typing import List, Tuple
+from typing import Tuple
 from collections import OrderedDict
 
 import torch
 import copy
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.nn.parameter import Parameter
 from torch.utils.data import DataLoader
 
 from utils import apply_nn_compression
@@ -31,7 +30,7 @@ class Net(nn.Module):
         self.fc1 = nn.Linear(64 * 7 * 7, 512)
         self.fc2 = nn.Linear(512, num_classes)
 
-    def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass of the CNN.
 
         Parameters
@@ -44,17 +43,25 @@ class Net(nn.Module):
         torch.Tensor
             The resulting Tensor after it has passed through the network
         """
-        output_tensor = F.relu(self.conv1(input_tensor))
-        output_tensor = self.pool(output_tensor)
-        output_tensor = F.relu(self.conv2(output_tensor))
-        output_tensor = self.pool(output_tensor)
-        output_tensor = torch.flatten(output_tensor, 1)
-        output_tensor = F.relu(self.fc1(output_tensor))
-        output_tensor = self.fc2(output_tensor)
-        return output_tensor
+        x = F.relu(self.conv1(x))
+        x = self.pool(x)
+        x = F.relu(self.conv2(x))
+        x = self.pool(x)
+        x = torch.flatten(x, 1)
+        x = F.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x
 
 
 def __model_zeroed_out(net):
+    """Returns network with all the weights zeroed-out.
+
+    Parameters
+    ----------
+    net : nn.Module
+        Model to be zeroed-out.
+
+    """
     control_variate = copy.deepcopy(net)
     state_dict = OrderedDict(
         {k: torch.zeros_like(v) for k, v in net.state_dict().items()}
@@ -87,10 +94,18 @@ def train(
         The device on which the model should be trained, either 'cpu' or 'cuda'.
     epochs : int
         The number of epochs the model should be trained for.
-    learning_rate : float
-        The learning rate for the SGD optimizer.
-    proximal_mu : float
-        Parameter for the weight of the proximal term.
+    lr: float
+        Learning rate to be used.
+    eta: float
+        TAMUNA hyperparameter used during training.
+    server_net: nn.Module
+        Current server model.
+    control_variate: nn.Module
+        Current control variate for this client.
+    old_compression_mask: torch.tensor
+        Previous compression vector for this client.
+    old_compressed_net: nn.Module
+        Compressed model that was sent to the server from this client the previous round.
     """
     criterion = torch.nn.CrossEntropyLoss()
     net.train()
@@ -98,46 +113,19 @@ def train(
     if control_variate is not None:
         with torch.no_grad():
             control_variate.to(device)
-
-            old_compressed_modules = []
-            for module in list(old_compressed_net.modules())[1:]:
-                if len(list(module.parameters())) != 0:
-                    old_compressed_modules.append(module)
-
-            server_net = apply_nn_compression(server_net, old_compression_mask)
-
-            server_modules = []
-            for server_module in list(server_net.modules())[1:]:
-                if len(list(server_module.parameters())) != 0:
-                    server_modules.append(server_module)
-
-            control_variate_modules = []
-            for control_variate_module in list(control_variate.modules())[1:]:
-                if len(list(control_variate_module.parameters())) != 0:
-                    control_variate_modules.append(control_variate_module)
-
-            for i, module in enumerate(control_variate_modules):
-                module.weight.copy_(
-                    module.weight.data
-                    + (eta / lr)
-                    * (
-                        server_modules[i].weight.data
-                        - old_compressed_modules[i].weight.data
-                    )
-                )
-                module.bias.copy_(
-                    module.bias.data
-                    + (eta / lr)
-                    * (
-                        server_modules[i].bias.data
-                        - old_compressed_modules[i].bias.data
-                    )
-                )
+            __update_control_variate(
+                control_variate,
+                eta,
+                lr,
+                old_compressed_net,
+                old_compression_mask,
+                server_net,
+            )
     else:
         control_variate = __model_zeroed_out(net)
 
     for _ in range(epochs):
-        net = _train_one_epoch(
+        net = __train_one_epoch(
             net,
             trainloader,
             device,
@@ -149,7 +137,62 @@ def train(
     return net, control_variate
 
 
-def _train_one_epoch(
+def __update_control_variate(
+    control_variate: nn.Module,
+    eta: float,
+    lr: float,
+    old_compressed_net: nn.Module,
+    old_compression_mask: torch.tensor,
+    server_net: nn.Module,
+):
+    """Updates the control variate for current client.
+
+    Parameters
+    ----------
+    control_variate: nn.Module
+        Current control variate for this client.
+    eta: float
+        TAMUNA hyperparameter used during training.
+    lr: float
+        Learning rate to be used.
+    old_compressed_net: nn.Module
+        Compressed model that was sent to the server from this client the previous round.
+    old_compression_mask: torch.tensor
+        Previous compression vector for this client.
+    server_net: nn.Module
+        Current server model.
+    """
+
+    old_compressed_modules = []
+    for module in list(old_compressed_net.modules())[1:]:
+        if len(list(module.parameters())) != 0:
+            old_compressed_modules.append(module)
+
+    server_net = apply_nn_compression(server_net, old_compression_mask)
+    server_modules = []
+    for server_module in list(server_net.modules())[1:]:
+        if len(list(server_module.parameters())) != 0:
+            server_modules.append(server_module)
+
+    control_variate_modules = []
+    for control_variate_module in list(control_variate.modules())[1:]:
+        if len(list(control_variate_module.parameters())) != 0:
+            control_variate_modules.append(control_variate_module)
+
+    for i, module in enumerate(control_variate_modules):
+        module.weight.copy_(
+            module.weight.data
+            + (eta / lr)
+            * (server_modules[i].weight.data - old_compressed_modules[i].weight.data)
+        )
+        module.bias.copy_(
+            module.bias.data
+            + (eta / lr)
+            * (server_modules[i].bias.data - old_compressed_modules[i].bias.data)
+        )
+
+
+def __train_one_epoch(
     net: nn.Module,
     trainloader: DataLoader,
     device: torch.device,
@@ -169,8 +212,10 @@ def _train_one_epoch(
         The device on which the model should be trained, either 'cpu' or 'cuda'.
     criterion : torch.nn.CrossEntropyLoss
         The loss function to use for training
-    optimizer : torch.optim.Adam
-        The optimizer to use for training
+    lr : float
+        Learning rate to be used.
+    control_variate: nn.Module
+        Control variate for this client.
 
     Returns
     -------

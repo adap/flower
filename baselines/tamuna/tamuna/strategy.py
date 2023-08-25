@@ -14,7 +14,7 @@ from tamuna.models import Net
 
 
 def aggregate(weights: List[NDArrays]) -> NDArrays:
-    """Computes average."""
+    """Computes average of the clients' weights."""
     num_clients = len(weights)
     averaged_weights = [
         np.sum(layer_updates, axis=0) / num_clients for layer_updates in zip(*weights)
@@ -23,10 +23,12 @@ def aggregate(weights: List[NDArrays]) -> NDArrays:
 
 
 def create_pattern(dim: int, clients_per_round: int, s: int):
+    """Creates compression pattern for each client."""
     return torch.ones(size=(dim, clients_per_round))
 
 
 def save_client_mask_to_file(cid, mask):
+    """Saves client mask to file, so client can read it later."""
     with open(f"{cid}_mask.bin", "wb") as f:
         pickle.dump(mask, f, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -48,6 +50,7 @@ class TamunaStrategy(Strategy):
         self.server_model = None
 
     def initialize_parameters(self, client_manager):
+        """Initialize the server model."""
         self.server_model = Net()
         ndarrays = [
             val.cpu().numpy() for _, val in self.server_model.state_dict().items()
@@ -55,6 +58,7 @@ class TamunaStrategy(Strategy):
         return flwr.common.ndarrays_to_parameters(ndarrays)
 
     def configure_fit(self, server_round: int, parameters, client_manager):
+        """Sample clients and create compression pattern for each of them."""
         sampled_clients = client_manager.sample(self.clients_per_round)
         config = {"epochs": self.epochs_per_round[server_round - 1], "eta": self.eta}
 
@@ -71,6 +75,7 @@ class TamunaStrategy(Strategy):
         return [(client, fit_ins) for client in sampled_clients]
 
     def aggregate_fit(self, server_round, results, failures):
+        """Average the clients' weights."""
         weights = [parameters_to_ndarrays(fit_res.parameters) for _, fit_res in results]
         parameters_aggregated = ndarrays_to_parameters(aggregate(weights))
         return parameters_aggregated, {}

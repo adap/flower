@@ -42,6 +42,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.__create_state(self.state_file_name)
 
     def __create_state(self, state_file_name):
+        """Creates client state."""
         if not os.path.exists(state_file_name):
             with open(state_file_name, "wb") as f:
                 state = (
@@ -95,6 +96,7 @@ class FlowerClient(fl.client.NumPyClient):
         return self.get_parameters({}), len(self.trainloader), {}
 
     def __save_state(self, mask):
+        """Saves client state."""
         with open(self.state_file_name, "wb") as f:
             state = (
                 self.control_variate,
@@ -104,6 +106,7 @@ class FlowerClient(fl.client.NumPyClient):
             pickle.dump(state, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     def __load_state(self):
+        """Loads client state."""
         with open(self.state_file_name, "rb") as f:
             state = pickle.load(f)
             (
@@ -128,6 +131,10 @@ def gen_client_fn(
         belonging to a particular client.
     learning_rate : float
         The learning rate for the SGD  optimizer of clients.
+    model: DictConfig
+        Architecture of the model being instantiated
+    client_device: str
+        Device to use for client training (cpu, cuda)
 
     Returns
     -------
@@ -139,7 +146,7 @@ def gen_client_fn(
     def client_fn(cid: str) -> FlowerClient:
         """Create a Flower client representing a single organization."""
 
-        print(f"Generating client {cid}.")
+        print(f"Creating client {cid}.")
 
         # Load model
         device = torch.device(device=client_device)

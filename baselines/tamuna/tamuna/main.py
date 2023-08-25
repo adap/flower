@@ -1,5 +1,6 @@
 """Runs CNN federated learning for MNIST dataset."""
 import os
+from pathlib import Path
 
 import flwr as fl
 import hydra
@@ -23,6 +24,7 @@ def main(cfg: DictConfig) -> None:
         An omegaconf object that stores the hydra config.
     """
 
+    # remove possible previous client states
     for filename in os.listdir():
         if filename.endswith("_state.bin") or filename.endswith("_mask.bin"):
             os.remove(filename)
@@ -31,38 +33,41 @@ def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
 
     # partition dataset and get dataloaders
-    trainloaders, testloader = load_datasets(num_clients=cfg.num_clients)
+    trainloaders, testloader = load_datasets(num_clients=cfg.server.num_clients)
 
     # prepare function that will be used to spawn each client
     client_fn = client.gen_client_fn(
         trainloaders=trainloaders,
-        learning_rate=cfg.learning_rate,
+        learning_rate=cfg.client.learning_rate,
         model=cfg.model,
-        client_device=cfg.client_device,
+        client_device=cfg.client.client_device,
     )
 
+    # using only central evaluation
     evaluate_fn = server.gen_evaluate_fn(
-        testloader, device=cfg.server_device, model=cfg.model
+        testloader, device=cfg.server.server_device, model=cfg.model
     )
 
-    epochs_per_round = np.random.geometric(p=cfg.p, size=cfg.num_rounds)
+    # number of epochs per round is determined by probability p
+    epochs_per_round = np.random.geometric(p=cfg.server.p, size=cfg.server.num_rounds)
+
     strategy = instantiate(
         cfg.strategy,
-        clients_per_round=cfg.clients_per_round,
+        clients_per_round=cfg.server.clients_per_round,
         epochs_per_round=epochs_per_round,
-        eta=cfg.eta,
-        s=cfg.s,
+        eta=cfg.client.eta,
+        s=cfg.server.s,
         evaluate_fn=evaluate_fn,
     )
 
     # Start simulation
     history = fl.simulation.start_simulation(
         client_fn=client_fn,
-        num_clients=cfg.num_clients,
-        config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
+        num_clients=cfg.server.num_clients,
+        config=fl.server.ServerConfig(num_rounds=cfg.server.num_rounds),
         client_resources={
-            "num_cpus": cfg.client_resources.num_cpus,
-            "num_gpus": cfg.client_resources.num_gpus,
+            "num_cpus": cfg.client.client_resources.num_cpus,
+            "num_gpus": cfg.client.client_resources.num_gpus,
         },
         strategy=strategy,
     )
@@ -84,15 +89,18 @@ def main(cfg: DictConfig) -> None:
     strategy_name = strategy.__class__.__name__
     file_suffix: str = (
         f"_{strategy_name}"
-        f"_C={cfg.num_clients}"
-        f"_E={int(1 / cfg.p)}"
-        f"_R={cfg.num_rounds}"
+        f"_N={cfg.server.num_clients}"
+        f"_C={cfg.server.clients_per_round}"
+        f"_K={int(1 / cfg.server.p)}"
+        f"_S={cfg.server.s}"
+        f"_E={cfg.client.eta}"
+        f"_R={cfg.server.num_rounds}"
     )
 
     utils.plot_metric_from_history(
         history,
-        save_path,
-        (file_suffix),
+        Path(save_path),
+        file_suffix,
     )
 
 

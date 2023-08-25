@@ -24,6 +24,8 @@ def gen_evaluate_fn(
         The dataloader to test the model with.
     device : torch.device
         The device to test the model on.
+    model: DictConfig
+        Architecture of the model being evaluated.
 
     Returns
     -------

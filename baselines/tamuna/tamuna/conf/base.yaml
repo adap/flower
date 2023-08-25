@@ -17,24 +17,25 @@
 #  # client config
 ---
 
-num_clients: 4
-num_rounds: 10
-clients_per_round: 2
-learning_rate: 0.02
-s: 2
-p: 0.333
-eta: 0.333
-client_device: 'cpu'
-
-client_resources:
-  num_cpus: 2
-  num_gpus: 0
-
-server_device: 'cuda'
-
 model:
   _target_: tamuna.models.Net
   num_classes: 10
 
 strategy:
   _target_: tamuna.strategy.TamunaStrategy
+
+server:
+  clients_per_round: 2
+  num_clients: 5
+  num_rounds: 5
+  s: 2
+  p: 0.333
+  server_device: 'cuda'
+
+client:
+  client_device: 'cpu'
+  client_resources:
+    num_cpus: 2
+    num_gpus: 0
+  learning_rate: 0.02
+  eta: 0.333
