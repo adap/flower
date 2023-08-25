@@ -12,7 +12,7 @@ env:
   FLWR_TELEMETRY_ENABLED: 0
 
 jobs:
-  e2e:
+  frameworks:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     # Using approach described here:
@@ -71,7 +71,7 @@ jobs:
               Path('data').mkdir(exist_ok=True)
               load_iris(as_frame=True)['data'].to_csv('./data/client.csv')
 
-    name: ${{matrix.directory}}
+    name: Framework / ${{matrix.directory}}
 
     defaults:
       run:
@@ -86,9 +86,43 @@ jobs:
       - name: Install dependencies
         run: python -m poetry install
       - name: Download dataset
-        if: ${{matrix.dataset}}
+        if: ${{ matrix.dataset }}
         run: python -c "${{ matrix.dataset }}"
       - name: Run edge client test
-        run: ./test.sh
-      - name: Run virtual client test 
+        run: ./../test.sh "${{ matrix.directory }}"
+      - name: Run virtual client test
         run: python simulation.py
+      - name: Run driver test
+        run: ./../test_driver.sh
+
+  strategies:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        strat: ["FedMedian", "FedTrimmedAvg", "QFedAvg", "FaultTolerantFedAvg", "FedAvgM", "FedAdam", "FedAdagrad", "FedYogi"]
+
+    name: Strategy / ${{ matrix.strat }}
+
+    defaults:
+      run:
+        working-directory: e2e/strategies
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Install dependencies
+        run: |
+          python -m poetry install
+      - name: Cache Datasets
+        uses: actions/cache@v2
+        with:
+          path: "~/.keras"
+          key: keras-datasets
+      - name: Download Datasets
+        run: |
+          python -c "import tensorflow as tf; tf.keras.datasets.mnist.load_data()"
+      - name: Test strategies
+        run: |
+          python test.py "${{ matrix.strat }}"
