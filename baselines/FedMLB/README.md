@@ -270,7 +270,7 @@ python -m FedMLB.main --multirun dataset_config.dataset="cifar100","tiny-imagene
     <td colspan="2">Accuracy @500R</td>
     <td colspan="2">Accuracy @1000R</td>
   </tr>
-  <tr>
+  <tr> 
     <td>Method</td>
     <td>Paper</td>
     <td>This repo</td>
@@ -292,7 +292,7 @@ python -m FedMLB.main --multirun dataset_config.dataset="cifar100","tiny-imagene
     <td>50.54</td>
   </tr>
   <tr>
-    <td>FedMLB</td>
+    <td>FedMLB</td> 
     <td>47.39</td>
     <td>51.11</td>
     <td>54.58</td>
@@ -339,21 +339,71 @@ the setting (2.) Large-scale experiments with Dir(0.3), 500 clients, 2% particip
 
 To reproduce the results run the following:
 ```bash
-python -m FedMLB.main --multirun dataset_config.dataset="cifar100", "tiny-imagenet" algorithm="FedMLB","FedAvg","FedAvg+KD" total_clients=500 clients_per_round=10
+python -m FedMLB.main --multirun dataset_config.dataset="cifar100","tiny-imagenet" algorithm="FedMLB","FedAvg","FedAvg+KD" total_clients=500 clients_per_round=10
 ```
 #### CIFAR-100, Dir(0.3), 500 clients, 2% participation.
 
-| Method  | Accuracy @500R | Accuracy @1000R |
-| ------------- | ------------- | ------------- |
-| FedAvg  | ()  | () |
-| FedMLB   | () | () |
+<table>
+  <tr>
+    <td></td>
+    <td colspan="2">Accuracy @500R</td>
+    <td colspan="2">Accuracy @1000R</td>
+  </tr>
+  <tr>
+    <td>Method</td>
+    <td>Paper</td>
+    <td>This repo</td>
+    <td>Paper</td>
+    <td>This repo</td>
+  </tr>
+  <tr>
+    <td>FedAvg</td>
+    <td>29.87</td>
+    <td>32.54</td>
+    <td>37.48</td>
+    <td>38.75</td>
+  </tr>
+  <tr>
+    <td>FedMLB</td>
+    <td>32.03</td>
+    <td>36.63</td>
+    <td>42.61</td>
+    <td>46.65</td>
+  </tr>
+</table>
 
 #### Tiny-ImageNet, Dir(0.3), 500 clients, 2% participation.
 
-| Method  | Accuracy @500R | Accuracy @1000R |
-| ------------- | ------------- | ------------- |
-| FedAvg  | () | () |
-| FedMLB   | () | () |
+
+<table>
+  <tr>
+    <td></td>
+    <td colspan="2">Accuracy @500R</td>
+    <td colspan="2">Accuracy @1000R</td>
+  </tr>
+  <tr>
+    <td>Method</td>
+    <td>Paper</td>
+    <td>This repo</td>
+    <td>Paper</td>
+    <td>This repo</td>
+  </tr>
+  <tr>
+    <td>FedAvg</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>FedMLB</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+</table>
+
 
 ### Table 3
 
