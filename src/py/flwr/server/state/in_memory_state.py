@@ -15,6 +15,7 @@
 """In-memory State implementation."""
 
 
+import random
 from datetime import datetime, timedelta
 from logging import ERROR
 from typing import Dict, List, Optional, Set
@@ -31,7 +32,7 @@ class InMemoryState(State):
 
     def __init__(self) -> None:
         self.node_ids: Set[int] = set()
-        self.workload_ids: Set[UUID] = set()
+        self.workload_ids: Set[str] = set()
         self.task_ins_store: Dict[UUID, TaskIns] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
 
@@ -41,6 +42,11 @@ class InMemoryState(State):
         errors = validate_task_ins_or_res(task_ins)
         if any(errors):
             log(ERROR, errors)
+            return None
+
+        # Validate workload_id
+        if task_ins.workload_id not in self.workload_ids:
+            log(ERROR, "`workload_id` is invalid")
             return None
 
         # Create task_id, created_at and ttl
@@ -188,9 +194,9 @@ class InMemoryState(State):
         """Return all available client nodes."""
         return self.node_ids
 
-    def create_workload(self) -> UUID:
+    def create_workload(self) -> str:
         """Create one workload."""
         # Create, store, and return workload ID
-        workload_id = uuid4()
+        workload_id = str(random.randrange(9223372036854775808))
         self.workload_ids.add(workload_id)
         return workload_id

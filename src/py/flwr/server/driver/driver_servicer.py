@@ -60,7 +60,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         log(INFO, "DriverServicer.CreateWorkload")
         state: State = self.state_factory.state()
         workload_id = state.create_workload()
-        return CreateWorkloadResponse(workload_id=str(workload_id))
+        return CreateWorkloadResponse(workload_id=workload_id)
 
     def PushTaskIns(
         self, request: PushTaskInsRequest, context: grpc.ServicerContext

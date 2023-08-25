@@ -15,6 +15,7 @@
 """SQLite based implemenation of server state."""
 
 
+import random
 import re
 import sqlite3
 from datetime import datetime, timedelta
@@ -33,6 +34,12 @@ from .state import State
 SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
     node_id INTEGER UNIQUE
+);
+"""
+
+SQL_CREATE_TABLE_WORKLOAD = """
+CREATE TABLE IF NOT EXISTS workload(
+    workload_id TEXT UNIQUE
 );
 """
 
@@ -112,6 +119,7 @@ class SqliteState(State):
         cur.execute(SQL_CREATE_TABLE_TASK_INS)
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
         cur.execute(SQL_CREATE_TABLE_NODE)
+        cur.execute(SQL_CREATE_TABLE_WORKLOAD)
 
         res = cur.execute("SELECT name FROM sqlite_schema;")
 
@@ -175,6 +183,15 @@ class SqliteState(State):
         errors = validate_task_ins_or_res(task_ins)
         if any(errors):
             log(ERROR, errors)
+            return None
+
+        # Validate workload ID
+        result = self.query(
+            "SELECT COUNT(*) FROM workload WHERE workload_id = :workload_id;",
+            {"workload_id": task_ins.workload_id},
+        )
+        if result[0]["COUNT(*)"] == 0:
+            log(ERROR, "`workload_id` is invalid")
             return None
 
         # Create task_id, created_at and ttl
@@ -464,9 +481,12 @@ class SqliteState(State):
         result: Set[int] = {row["node_id"] for row in rows}
         return result
 
-    def create_workload(self) -> UUID:
-        """Create one workload."""
-        raise NotImplementedError()
+    def create_workload(self) -> str:
+        """Create one workload and store it in state."""
+        query = "INSERT INTO workload VALUES(:workload_id);"
+        workload_id = str(random.randrange(9223372036854775808))
+        self.query(query, {"workload_id": workload_id})
+        return workload_id
 
 
 def dict_factory(

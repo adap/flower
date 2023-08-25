@@ -66,7 +66,10 @@ class StateTest(unittest.TestCase):
         # Prepare
         consumer_node_id = 1
         state = self.state_factory()
-        task_ins = create_task_ins(consumer_node_id=consumer_node_id, anonymous=False)
+        workload_id = state.create_workload()
+        task_ins = create_task_ins(
+            consumer_node_id=consumer_node_id, anonymous=False, workload_id=workload_id
+        )
 
         assert task_ins.task.created_at == ""  # pylint: disable=no-member
         assert task_ins.task.delivered_at == ""  # pylint: disable=no-member
@@ -105,9 +108,16 @@ class StateTest(unittest.TestCase):
         # Prepare
         consumer_node_id = 1
         state = self.state_factory()
-        task_ins_0 = create_task_ins(consumer_node_id=consumer_node_id, anonymous=False)
-        task_ins_1 = create_task_ins(consumer_node_id=consumer_node_id, anonymous=False)
-        task_ins_2 = create_task_ins(consumer_node_id=consumer_node_id, anonymous=False)
+        workload_id = state.create_workload()
+        task_ins_0 = create_task_ins(
+            consumer_node_id=consumer_node_id, anonymous=False, workload_id=workload_id
+        )
+        task_ins_1 = create_task_ins(
+            consumer_node_id=consumer_node_id, anonymous=False, workload_id=workload_id
+        )
+        task_ins_2 = create_task_ins(
+            consumer_node_id=consumer_node_id, anonymous=False, workload_id=workload_id
+        )
 
         # Insert three TaskIns
         task_id_0 = state.store_task_ins(task_ins=task_ins_0)
@@ -166,7 +176,10 @@ class StateTest(unittest.TestCase):
         """
         # Prepare
         state: State = self.state_factory()
-        task_ins = create_task_ins(consumer_node_id=0, anonymous=True)
+        workload_id = state.create_workload()
+        task_ins = create_task_ins(
+            consumer_node_id=0, anonymous=True, workload_id=workload_id
+        )
 
         # Execute
         task_ins_uuid = state.store_task_ins(task_ins)
@@ -180,7 +193,10 @@ class StateTest(unittest.TestCase):
         """Store anonymous TaskIns and fail to retrieve it."""
         # Prepare
         state: State = self.state_factory()
-        task_ins = create_task_ins(consumer_node_id=0, anonymous=True)
+        workload_id = state.create_workload()
+        task_ins = create_task_ins(
+            consumer_node_id=0, anonymous=True, workload_id=workload_id
+        )
 
         # Execute
         _ = state.store_task_ins(task_ins)
@@ -193,7 +209,10 @@ class StateTest(unittest.TestCase):
         """Store identity TaskIns and fail retrieving it as anonymous."""
         # Prepare
         state: State = self.state_factory()
-        task_ins = create_task_ins(consumer_node_id=1, anonymous=False)
+        workload_id = state.create_workload()
+        task_ins = create_task_ins(
+            consumer_node_id=1, anonymous=False, workload_id=workload_id
+        )
 
         # Execute
         _ = state.store_task_ins(task_ins)
@@ -206,7 +225,10 @@ class StateTest(unittest.TestCase):
         """Store identity TaskIns and retrieve it."""
         # Prepare
         state: State = self.state_factory()
-        task_ins = create_task_ins(consumer_node_id=1, anonymous=False)
+        workload_id = state.create_workload()
+        task_ins = create_task_ins(
+            consumer_node_id=1, anonymous=False, workload_id=workload_id
+        )
 
         # Execute
         task_ins_uuid = state.store_task_ins(task_ins)
@@ -222,7 +244,10 @@ class StateTest(unittest.TestCase):
         """Fail retrieving delivered task."""
         # Prepare
         state: State = self.state_factory()
-        task_ins = create_task_ins(consumer_node_id=1, anonymous=False)
+        workload_id = state.create_workload()
+        task_ins = create_task_ins(
+            consumer_node_id=1, anonymous=False, workload_id=workload_id
+        )
 
         # Execute
         _ = state.store_task_ins(task_ins)
@@ -246,6 +271,20 @@ class StateTest(unittest.TestCase):
         # Execute & Assert
         with self.assertRaises(AssertionError):
             state.get_task_ins(node_id=1, limit=0)
+
+    def test_task_ins_store_invalid_workload_id_and_fail(self) -> None:
+        """Store TaskIns with invalid workload ID and fail."""
+        # Prepare
+        state: State = self.state_factory()
+        task_ins = create_task_ins(
+            consumer_node_id=0, anonymous=True, workload_id="I'm invalid"
+        )
+
+        # Execute
+        task_id = state.store_task_ins(task_ins)
+
+        # Assert
+        assert task_id is None
 
     # TaskRes tests
     def test_task_res_store_and_retrieve_by_task_ins_id(self) -> None:
@@ -309,8 +348,13 @@ class StateTest(unittest.TestCase):
         """Test if num_tasks returns correct number of not delivered task_ins."""
         # Prepare
         state: State = self.state_factory()
-        task_0 = create_task_ins(consumer_node_id=0, anonymous=True)
-        task_1 = create_task_ins(consumer_node_id=0, anonymous=True)
+        workload_id = state.create_workload()
+        task_0 = create_task_ins(
+            consumer_node_id=0, anonymous=True, workload_id=workload_id
+        )
+        task_1 = create_task_ins(
+            consumer_node_id=0, anonymous=True, workload_id=workload_id
+        )
 
         # Store two tasks
         state.store_task_ins(task_0)
@@ -341,7 +385,10 @@ class StateTest(unittest.TestCase):
 
 
 def create_task_ins(
-    consumer_node_id: int, anonymous: bool, delivered_at: str = ""
+    consumer_node_id: int,
+    anonymous: bool,
+    delivered_at: str = "",
+    workload_id: str = "",
 ) -> TaskIns:
     """Create a TaskIns for testing."""
     consumer = Node(
@@ -351,7 +398,7 @@ def create_task_ins(
     task = TaskIns(
         task_id="",
         group_id="",
-        workload_id="",
+        workload_id=workload_id,
         task=Task(
             delivered_at=delivered_at,
             producer=Node(node_id=0, anonymous=True),
@@ -414,7 +461,7 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 6
+        assert len(result) == 8
 
 
 class SqliteFileBasedTest(StateTest, unittest.TestCase):
@@ -439,7 +486,7 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 6
+        assert len(result) == 8
 
 
 if __name__ == "__main__":
