@@ -228,7 +228,6 @@ class VirtualClientEngineActorPool(ActorPool):
         job_fn, cid = value
         actor = self._idle_actors.pop()
         if self._check_and_remove_actor_from_pool(actor):
-            # future = fn(actor, job_fn)
             future = fn(actor, job_fn, cid)
             future_key = tuple(future) if isinstance(future, List) else future
             self._future_to_actor[future_key] = (self._next_task_index, actor, cid)

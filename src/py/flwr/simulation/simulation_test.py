@@ -14,76 +14,85 @@
 # ==============================================================================
 """Flower simulation tests."""
 
-from time import sleep
 from math import pi
-from typing import Type
 from random import shuffle
+from typing import Type
 
 import ray
 
-from flwr.simulation.ray_transport.ray_client_proxy import RayActorClientProxy
 from flwr.simulation.ray_transport.ray_actor import (
     DefaultActor,
     VirtualClientEngineActor,
     VirtualClientEngineActorPool,
 )
+from flwr.simulation.ray_transport.ray_client_proxy import RayActorClientProxy
 
 
-def test_cid_consistency() -> None:
-    """Test that ClientProxies get the result of client job they submit."""
+# A dummy workload
+def job_fn(cid: str):  # pragma: no cover
+    """Construct a simple job with cid dependency."""
 
-    # A dummy workload
-    def job_fn(cid: str):
-        def cid_times_pi() -> float:
-            return int(cid) * pi
-        return cid_times_pi
+    def cid_times_pi() -> float:
+        return int(cid) * pi
 
-    client_resources = {'num_cpus': 1}
+    return cid_times_pi
+
+
+def prep():  # pragma: no cover
+    """Prepare ClientProxies and pool for tests."""
+    client_resources = {"num_cpus": 1}
 
     def create_actor_fn() -> Type[VirtualClientEngineActor]:
         return DefaultActor.options(**client_resources).remote()
 
     # Create actor pool
-    ray.init()
+    ray.init(include_dashboard=False)
     pool = VirtualClientEngineActorPool(
         create_actor_fn=create_actor_fn,
         client_resources=client_resources,
     )
 
-    # # Create 100 client proxies
-    N = 100
-    proxies = [RayActorClientProxy(client_fn=None,
-                                   cid=str(cid),
-                                   actor_pool=pool,) for cid in range(N)]
+    # # Create 1009 client proxies
+    N = 1009  # a prime number
+    proxies = [
+        RayActorClientProxy(
+            client_fn=None,
+            cid=str(cid),
+            actor_pool=pool,
+        )
+        for cid in range(N)
+    ]
 
+    return proxies
+
+
+def test_cid_consistency_one_at_a_time() -> None:
+    """Test that ClientProxies get the result of client job they submit."""
+    proxies = prep()
     # submit jobs one at a time
     for prox in proxies:
         res = prox._submit_job(job_fn=job_fn(prox.cid), timeout=None)
         assert int(prox.cid) * pi == res
 
+    ray.shutdown()
+
+
+def test_cid_consistency_all_submit_first() -> None:
+    """Test that ClientProxies get the result of client job they submit."""
+    proxies = prep()
+
     # submit all jobs (collect later)
     shuffle(proxies)
     for prox in proxies:
-        # print("--------------------------------", prox.cid)
         job = job_fn(prox.cid)
         prox.actor_pool.submit_client_job(
-                # lambda a, v: a.run.remote(v, prox.cid), (job, prox.cid)
-                lambda a, v, cid: a.run.remote(v, cid), (job, prox.cid)
+            lambda a, v, cid: a.run.remote(v, cid), (job, prox.cid)
+        )
 
-            )
-        
-        # print(f"{prox.cid = } ----> result should be: {job() = }")
-
-    sleep(5)
-    # print(f"----------------------- FETCHING RESULTS --------------------------------")
     # fetch results one at a time
     shuffle(proxies)
     for prox in proxies:
-
-        # print("--------------------------------", prox.cid)
         res = prox.actor_pool.get_client_result(prox.cid, timeout=None)
-
-        # print(f"proxy {prox.cid} got result {res}")
-
         assert int(prox.cid) * pi == res
-        # print("OK")
+
+    ray.shutdown()
