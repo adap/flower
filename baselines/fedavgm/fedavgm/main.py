@@ -10,6 +10,7 @@ from omegaconf import DictConfig, OmegaConf
 
 from fedavgm.client import generate_client_fn
 from fedavgm.dataset import partition, prepare_dataset
+from fedavgm.models import create_model
 from fedavgm.server import get_evaluate_fn, get_on_fit_config
 
 
@@ -58,7 +59,9 @@ def main(cfg: DictConfig) -> None:
             ),  # server evaluation of the global model
             server_learning_rate=cfg.server.learning_rate,
             server_momentum=cfg.server.momentum,
-            # initial_parameters=
+            initial_parameters=fl.common.ndarrays_to_parameters(
+                create_model(input_shape, num_classes).get_weights()
+            ),
         )
         print(
             f">>> [Strategy] FedAvgM | Num. Clients: {cfg.num_clients} | \

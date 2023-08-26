@@ -40,14 +40,13 @@ class FlowerClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         """Implement distributed fit function for a given client."""
-        
         self.model.set_weights(parameters)
-        
+
         self.model.fit(
             self.x_train,
             self.y_train,
-            epochs=config['local_epochs'],
-            batch_size=config['batch_size'],
+            epochs=config["local_epochs"],
+            batch_size=config["batch_size"],
         )
         return self.model.get_weights(), len(self.x_train), {}
 
@@ -58,7 +57,7 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, len(self.x_val), {"accuracy": acc}
 
 
-def generate_client_fn(partitions, input_shape, num_classes, lr, momentum):
+def generate_client_fn(partitions, input_shape, num_classes):
     """Generate the client function that creates the Flower Clients."""
 
     def client_fn(cid: str) -> FlowerClient:
