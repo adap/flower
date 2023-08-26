@@ -56,7 +56,7 @@ A learning-oriented series of federated learning tutorials, the best place to st
    tutorial-quickstart-android
    tutorial-quickstart-ios
 
-QUICKSTART TUTORIALS: :ref:`PyTorch <tutorial-quickstart-pytorch>` | :ref:`TensorFlow <tutorial-quickstart-tensorflow>` | :ref:`🤗 Transformers <tutorial-quickstart-huggingface>` | :ref:`JAX <tutorial-quickstart-jax>` | :ref:`Pandas <tutorial-quickstart-pandas>` | :ref:`fastai <tutorial-quickstart-fastai>` | :ref:`PyTorch Lightning <tutorial-quickstart-pytorch-lightning>` | :ref:`MXNet <tutorial-quickstart-mxnet>` | :ref:`scikit-learn <tutorial-quickstart-scikitlearn>` | :ref:`XGBoost <tutorial-quickstart-xgboost>` | :ref:`Android <tutorial-quickstart-android>` | :ref:`iOS <tutorial-quickstart-ios>`
+QUICKSTART TUTORIALS: :doc:`PyTorch <tutorial-quickstart-pytorch>` | :doc:`TensorFlow <tutorial-quickstart-tensorflow>` | :doc:`🤗 Transformers <tutorial-quickstart-huggingface>` | :doc:`JAX <tutorial-quickstart-jax>` | :doc:`Pandas <tutorial-quickstart-pandas>` | :doc:`fastai <tutorial-quickstart-fastai>` | :doc:`PyTorch Lightning <tutorial-quickstart-pytorch-lightning>` | :doc:`MXNet <tutorial-quickstart-mxnet>` | :doc:`scikit-learn <tutorial-quickstart-scikitlearn>` | :doc:`XGBoost <tutorial-quickstart-xgboost>` | :doc:`Android <tutorial-quickstart-android>` | :doc:`iOS <tutorial-quickstart-ios>`
 
 .. grid:: 2
 
@@ -85,6 +85,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    how-to-implement-strategies
    how-to-aggregate-evaluation-results
    how-to-save-and-load-model-checkpoints
+   how-to-run-simulations
    how-to-monitor-simulation
    how-to-configure-logging
    how-to-enable-ssl-connections
