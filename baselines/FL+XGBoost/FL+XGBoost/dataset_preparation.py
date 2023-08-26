@@ -38,22 +38,29 @@ import os
 import urllib.request
 import bz2
 import shutil
+import numpy as np
+
+from sklearn.datasets import load_svmlight_file
 
 def _download_data(
-        dataset_name: Optional[str]="all"
-) -> None:
+        dataset_name: Optional[str]="cod-rna"
+):
     """
-    Downloads (if necessary) and returns the dataset assigned by the dataset_name pparm.
+    Downloads (if necessary) and returns the dataset path assigned by the dataset_name parm.
     Parameters
     ----------
     dataset_name : String
         A string stating the name of the dataset that need to be dowenloaded.
+    Returns
+    -------
+    List[Dataset Pathes]
+        The pathes for the data that will be used in train and test, with train of full dataset
+        in index 0
     """
     
     ALL_DATASETS_PATH="./baselines/FL+XGBoost/FL+XGBoost/dataset"
-    #CLASSIFICATION_PATH = os.path.join(DATASETS_PATH, "binary_classification")
-    #REGRESSION_PATH = os.path.join(DATASETS_PATH, "regression")
-    if dataset_name=="a9a" or dataset_name=="all" :
+    
+    if dataset_name=="a9a":
         DATASET_PATH=os.path.join(ALL_DATASETS_PATH, "a9a")
         if not os.path.exists(DATASET_PATH):
             os.makedirs(DATASET_PATH)
@@ -65,8 +72,9 @@ def _download_data(
                 "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/a9a.t",
                 f"{os.path.join(DATASET_PATH, 'a9a.t')}",
             )
-            
-    if dataset_name=="cod-rna" or dataset_name=="all" :
+        #trainig then test ✅
+        return [os.path.join(DATASET_PATH, 'a9a'),os.path.join(DATASET_PATH, 'a9a.t')]    
+    if dataset_name=="cod-rna":
         DATASET_PATH=os.path.join(ALL_DATASETS_PATH, "cod-rna")
         if not os.path.exists(DATASET_PATH):
             os.makedirs(DATASET_PATH)
@@ -82,8 +90,10 @@ def _download_data(
                 "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/cod-rna.r",
                 f"{os.path.join(DATASET_PATH, 'cod-rna.r')}",
             )
+        #trainig then test ✅
+        return [os.path.join(DATASET_PATH, 'cod-rna.t'),os.path.join(DATASET_PATH, 'cod-rna.r')]
 
-    if dataset_name=="ijcnn1" or dataset_name=="all" :
+    if dataset_name=="ijcnn1":
         DATASET_PATH=os.path.join(ALL_DATASETS_PATH, "ijcnn1")
         if not os.path.exists(DATASET_PATH):
             os.makedirs(DATASET_PATH)
@@ -109,9 +119,10 @@ def _download_data(
                 abs_filepath = os.path.join(DATASET_PATH, filepath)
                 with bz2.BZ2File(abs_filepath) as fr, open(abs_filepath[:-4], "wb") as fw:
                     shutil.copyfileobj(fr, fw)
+        #trainig then test ✅
+        return [os.path.join(DATASET_PATH, 'ijcnn1.t'),os.path.join(DATASET_PATH, 'ijcnn1.tr')]
 
-
-    if dataset_name=="space_ga" or dataset_name=="all":
+    if dataset_name=="space_ga":
         DATASET_PATH=os.path.join(ALL_DATASETS_PATH, "space_ga")
         if not os.path.exists(DATASET_PATH):
             os.makedirs(DATASET_PATH)
@@ -123,8 +134,8 @@ def _download_data(
                 "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression/space_ga_scale",
                 f"{os.path.join(DATASET_PATH, 'space_ga_scale')}",
             )
-
-    if dataset_name=="abalone" or dataset_name=="all":
+        return [os.path.join(DATASET_PATH, 'space_ga')]
+    if dataset_name=="abalone":
         DATASET_PATH=os.path.join(ALL_DATASETS_PATH, "abalone")
         if not os.path.exists(DATASET_PATH): 
             os.makedirs(DATASET_PATH)       
@@ -136,7 +147,8 @@ def _download_data(
                 "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression/abalone_scale",
                 f"{os.path.join(DATASET_PATH, 'abalone_scale')}",
             )
-    if dataset_name=="cpusmall" or dataset_name=="all":
+        return [os.path.join(DATASET_PATH, 'abalone')]
+    if dataset_name=="cpusmall":
         DATASET_PATH=os.path.join(ALL_DATASETS_PATH, "cpusmall")
         if not os.path.exists(DATASET_PATH):  
             os.makedirs(DATASET_PATH)      
@@ -148,3 +160,52 @@ def _download_data(
                 "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression/cpusmall_scale",
                 f"{os.path.join(DATASET_PATH, 'cpusmall_scale')}",
             )
+        return [os.path.join(DATASET_PATH, 'cpusmall')]
+    
+def datafiles_fusion(data_paths):
+    """
+    Merge (if necessary) the data files and returns the features and labels sperated in
+    numpy arrays.
+
+    Parameters
+    ----------
+    data_paths: List[Dataset Pathes]
+        The pathes for the data that will be used in train and test, with train of full dataset
+        in index 0    
+    Returns
+    -------
+    X: Numpy array
+        The full features of the dataset.
+    y: Numpy array
+        The full labels of the dataset.
+    """
+    
+    data=load_svmlight_file(data_paths[0], zero_based=False)
+    X=data[0].toarray()
+    Y=data[1]
+    for i in range(1,len(data_paths)):
+        data= load_svmlight_file(data_paths[i], zero_based=False,n_features=X.shape[1])
+        X=np.concatenate((X,data[0].toarray()), axis=0)
+        Y=np.concatenate((Y,data[1]), axis=0)
+    return X,Y
+
+def train_test_split(X,y,train_ratio=.75):
+    q=int(X.shape[0]*train_ratio)
+    X_train = X[0:q]
+    y_train = y[0:q]
+
+    X_test = X[q:]
+    y_test = y[q:]
+
+    X_train.flags.writeable = True
+    y_train.flags.writeable = True
+    X_test.flags.writeable = True
+    y_test.flags.writeable = True
+
+    return X_train,y_train,X_test,y_test
+
+def modify_labels(y_train,y_test):
+    y_train[y_train == -1] = 0
+    y_test[y_test == -1] = 0
+    return y_train,y_test
+
