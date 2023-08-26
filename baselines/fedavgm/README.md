@@ -39,7 +39,7 @@ As the following excerpt:
 
 "*A CNN with two 5x5 convolution layers (the first with 32 channels, the second with 64, each followed with 2x2 max pooling), a fully connected layer with 512 units and ReLu activation, and a final softmax output layer (1,663,370 total parameters)"*
 
-:warning: However, this architecture implemented in this baseline results in 878,538 parameters.
+:warning: However, this architecture implemented on this baseline results in 878,538 parameters. Regarding this architecture, the historical references mentioned on the FedAvgM paper are [this](https://web.archive.org/web/20190415103404/https://www.tensorflow.org/tutorials/images/deep_cnn) and [this](https://web.archive.org/web/20170807002954/https://github.com/tensorflow/models/blob/master/tutorials/image/cifar10/cifar10.py).
 
 **Dataset:** This baseline includes the CIFAR-10 and FMNIST datasets. By default it will run with the CIFAR-10. The data partition uses a configurable Latent Dirichlet Allocation (LDA) distribution (`concentration` parameter equals 0.1 as default) to create **non-iid distributions** between the clients. The understanding for this `concentration` (α) is that α→∞ all clients have identical distribution, and α→𝟢 each client hold samples from only one class.
 
@@ -89,6 +89,8 @@ poetry env use 3.9.16
 
 This baseline works with TensorFlow 2.10, no additional step required once using Poetry to set up the environment.
 
+We use Poetry to manage the Python environment for each individual baseline. You can follow the instructions [here](https://python-poetry.org/docs/) to install Poetry in your machine. 
+
 To construct the Python environment with Poetry follow these steps:
 
 ```bash
@@ -108,9 +110,9 @@ poetry run python -m fedavgm.main # this will run using the default setting in t
 
 # you can override settings directly from the command line
 
-poetry run python -m fedavgm.main num_clients=1000 num_rounds=50 fedavgm=False # will set the FedAvg with 1000 clients and 50 rounds
+poetry run python -m fedavgm.main strategy=fedavg num_clients=1000 num_rounds=50 # will set the FedAvg with 1000 clients and 50 rounds
 
-poetry run python -m fedavgm.main dataset.fmnist=True dataset.concentration=10 # will set the FMNIST dataset and a different concentration for the LDA-based partition
+poetry run python -m fedavgm.main dataset=fmnist dataset.concentration=10 # use the FMNIST dataset and a different concentration for the LDA-based partition
 
 poetry run python -m fedavgm.main server.reporting_fraction=0.2 client.local_epochs=5 # will set the reporting fraction to 20% and the local epochs in the clients to 5
 ```
@@ -122,7 +124,7 @@ poetry run python -m fedavgm.main server.reporting_fraction=0.2 client.local_epo
 ```bash
 # it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameteres
 
-poetry run python -m fedavgm.main --multirun client.local_epochs=1,5 dataset.concentration=100,10,1,0.5,0.2,0.1,0.05,0 fedavgm=True,False server.reporting_fraction=0.05,0.1,0.4 num_rounds=10000
+poetry run python -m fedavgm.main --multirun client.local_epochs=1,5 dataset.concentration=100,10,1,0.5,0.2,0.1,0.05,0 strategy=fedavgm,fedavg server.reporting_fraction=0.05,0.1,0.4 num_rounds=10000
 # the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
 
 [Now show a figure/table displaying the results of the above command]

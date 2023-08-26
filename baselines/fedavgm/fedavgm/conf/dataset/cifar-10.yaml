@@ -1,0 +1,4 @@
+---
+num_classes: 10
+input_shape: (32, 32, 3)
+fmnist: False

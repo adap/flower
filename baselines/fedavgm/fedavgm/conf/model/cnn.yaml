@@ -1,0 +1,4 @@
+---
+_target_: models.create_model
+input_shape: ${dataset.input_shape}
+num_classes: ${dataset.num_classes}

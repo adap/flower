@@ -1,9 +1,7 @@
 """Define the Flower Server and function to instantiate it."""
 
-from keras.utils import to_categorical
 from omegaconf import DictConfig
-
-from fedavgm.models import create_model
+from hydra.utils import instantiate
 
 
 def get_on_fit_config(config: DictConfig):
@@ -24,7 +22,7 @@ def get_on_fit_config(config: DictConfig):
     return fit_config_fn
 
 
-def get_evaluate_fn(input_shape, num_classes, x_test, y_test, num_rounds):
+def get_evaluate_fn(model, x_test, y_test, num_rounds):
     """Generate the function for server global model evaluation.
     
     The method evaluate_fn runs after global model aggregation.
@@ -35,9 +33,9 @@ def get_evaluate_fn(input_shape, num_classes, x_test, y_test, num_rounds):
         #    return None
 
         # instantiate the model
-        model = create_model(input_shape, num_classes)
+        model = instantiate(model)
         model.set_weights(parameters)
-        loss, accuracy = model.evaluate(x_test, to_categorical(y_test, num_classes))
+        loss, accuracy = model.evaluate(x_test, y_test)
 
         return loss, {"accuracy": accuracy}
 

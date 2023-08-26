@@ -3,9 +3,7 @@
 import math
 
 import flwr as fl
-from keras.utils import to_categorical
-
-from fedavgm.models import create_model
+from hydra.utils import instantiate
 
 
 class FlowerClient(fl.client.NumPyClient):
@@ -17,22 +15,14 @@ class FlowerClient(fl.client.NumPyClient):
         y_train,
         x_val,
         y_val,
-        input_shape,
-        num_classes,
+        model
     ) -> None:
         # local model
-        self.input_shape = input_shape
-        self.num_classes = num_classes
-        self.model = self.new_model()
+        self.model = instantiate(model)
 
         # local dataset
         self.x_train, self.y_train = x_train, y_train
         self.x_val, self.y_val = x_val, y_val
-
-    def new_model(self):
-        """Generate the CNN model input_shape and num_classes."""
-        model = create_model(self.input_shape, self.num_classes)
-        return model
 
     def get_parameters(self, config):
         """Return the parameters of the current local model."""
@@ -57,13 +47,12 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, len(self.x_val), {"accuracy": acc}
 
 
-def generate_client_fn(partitions, input_shape, num_classes):
+def generate_client_fn(partitions, model):
     """Generate the client function that creates the Flower Clients."""
 
     def client_fn(cid: str) -> FlowerClient:
         """Create a Flower client representing a single organization."""
         full_x_train_cid, full_y_train_cid = partitions[int(cid)]
-        full_y_train_cid = to_categorical(full_y_train_cid, num_classes=num_classes)
 
         # Use 10% of the client's training data for validation
         split_idx = math.floor(len(full_x_train_cid) * 0.9)
@@ -81,8 +70,7 @@ def generate_client_fn(partitions, input_shape, num_classes):
             y_train_cid,
             x_val_cid,
             y_val_cid,
-            input_shape,
-            num_classes,
+            model
         )
 
     return client_fn

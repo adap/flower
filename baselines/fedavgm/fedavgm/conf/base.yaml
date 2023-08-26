@@ -1,18 +1,14 @@
 ---
 num_clients: 100
 num_rounds: 5  # original experiments (paper) uses 10000
-fedavgm: True
 
 dataset:
-  fmnist: False
   concentration: 0.1 # concentrations used in the paper [100., 10., 1., 0.5, 0.2, 0.1, 0.05, 0.0]
   
 model:
-  # model config
-
-strategy:
-  _target_: # points to your strategy (either custom or exiting in Flower)
-  # rest of strategy config
+  _target_: models.create_model
+  input_shape: ${dataset.input_shape}
+  num_classes: ${dataset.num_classes}
 
 server:
   momentum: 0.9
@@ -22,3 +18,8 @@ server:
 client:
   local_epochs: 1   # in the paper it is used 1 or 5
   batch_size: 64    # in the paper fixed at 64
+
+defaults:
+  - strategy: fedavgm
+  - model: cnn
+  - dataset: cifar-10

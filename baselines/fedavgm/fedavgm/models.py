@@ -3,6 +3,7 @@
 from keras.optimizers import SGD
 from keras.regularizers import l2
 from tensorflow import keras
+from flwr.common import ndarrays_to_parameters
 
 
 def create_model(input_shape, num_classes):
@@ -36,3 +37,6 @@ def create_model(input_shape, num_classes):
     )
 
     return model
+
+def model_to_parameters(model):
+    return ndarrays_to_parameters(model.get_weights())
