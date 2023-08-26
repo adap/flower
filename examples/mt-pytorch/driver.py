@@ -60,7 +60,7 @@ create_workload_res: driver_pb2.CreateWorkloadResponse = driver.create_workload(
 # -------------------------------------------------------------------------- Driver SDK
 
 workload_id = create_workload_res.workload_id
-print(f"Get workload id {workload_id}")
+print(f"Created workload id {workload_id}")
 
 history = History()
 for server_round in range(num_rounds):
