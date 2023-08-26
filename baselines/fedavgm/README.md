@@ -104,15 +104,15 @@ poetry shell
 To run this FedAvgM with CIFAR-10 baseline, first ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
 
 ```bash  
-poetry run -m fedavgm.main # this will run using the default setting in the `conf/base.yaml`
+poetry run python -m fedavgm.main # this will run using the default setting in the `conf/base.yaml`
 
 # you can override settings directly from the command line
 
-poetry run -m fedavgm.main num_clients=1000 num_rounds=50 fedavgm=False # will set the FedAvg with 1000 clients and 50 rounds
+poetry run python -m fedavgm.main num_clients=1000 num_rounds=50 fedavgm=False # will set the FedAvg with 1000 clients and 50 rounds
 
-poetry run -m fedavgm.main dataset.fmnist=True dataset.concentration=10 # will set the FMNIST dataset and a different concentration for the LDA-based partition
+poetry run python -m fedavgm.main dataset.fmnist=True dataset.concentration=10 # will set the FMNIST dataset and a different concentration for the LDA-based partition
 
-poetry run -m fedavgm.main server.reporting_fraction=0.2 client.local_epochs=5 # will set the reporting fraction to 20% and the local epochs in the clients to 5
+poetry run python -m fedavgm.main server.reporting_fraction=0.2 client.local_epochs=5 # will set the reporting fraction to 20% and the local epochs in the clients to 5
 ```
 
 ## Expected Results
@@ -122,7 +122,7 @@ poetry run -m fedavgm.main server.reporting_fraction=0.2 client.local_epochs=5 #
 ```bash
 # it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameteres
 
-poetry run -m <baseline-name>.main --multirun num_client_per_round=5,10,50 dataset=femnist,cifar10
+poetry run python -m fedavgm.main --multirun client.local_epochs=1,5 dataset.concentration=100,10,1,0.5,0.2,0.1,0.05,0 fedavgm=True,False server.reporting_fraction=0.05,0.1,0.4 num_rounds=10000
 # the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
 
 [Now show a figure/table displaying the results of the above command]

@@ -37,12 +37,13 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8.15, <3.12.0"  # don't change this
+python = ">=3.9, <3.12.0"  # changed! original baseline template uses >= 3.8.15
 flwr = "1.3.0" # don't change this
 ray = "1.11.1" # don't change this
 hydra-core = "1.3.2" # don't change this
 cython = "^3.0.0"
 tensorflow = "2.10"
+numpy = "1.25.2"
 
 [tool.poetry.dev-dependencies]
 isort = "==5.11.5"
