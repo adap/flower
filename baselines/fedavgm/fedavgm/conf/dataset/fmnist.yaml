@@ -1,4 +1,4 @@
 ---
+_target_: fedavgm.datasets.fmnist
 num_classes: 10
-input_shape: (28, 28, 3)
-fmnist: True
+input_shape: [28, 28, 1]

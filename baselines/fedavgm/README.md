@@ -26,7 +26,6 @@ dataset: [CIFAR-10, FMNIST] # list of datasets you include in your baseline
 
 **Contributors:** Gustavo de Carvalho Bertoli
 
-
 ## Experimental Setup
 
 **Task:** Image Classification
@@ -55,11 +54,12 @@ The following table shows the main hyperparameters for this baseline with their 
 | ----------- | ----- |
 | total clients | 10 |
 | number of rounds | 5 |
+| model | CNN |
 | strategy | FedAvgM |
 | dataset | CIFAR-10 |
 | concentration | 0.1 |
 | server momentum | 0.9 |
-| server learning rate | 0.1 |
+| server learning rate | 1.0 |
 | server reporting fraction | 0.05 |
 | client local epochs | 1 |
 | client batch size | 64 |
@@ -112,7 +112,7 @@ poetry run python -m fedavgm.main # this will run using the default setting in t
 
 poetry run python -m fedavgm.main strategy=fedavg num_clients=1000 num_rounds=50 # will set the FedAvg with 1000 clients and 50 rounds
 
-poetry run python -m fedavgm.main dataset=fmnist dataset.concentration=10 # use the FMNIST dataset and a different concentration for the LDA-based partition
+poetry run python -m fedavgm.main dataset=fmnist noniid.concentration=10 # use the FMNIST dataset and a different concentration for the LDA-based partition
 
 poetry run python -m fedavgm.main server.reporting_fraction=0.2 client.local_epochs=5 # will set the reporting fraction to 20% and the local epochs in the clients to 5
 ```
@@ -124,7 +124,7 @@ poetry run python -m fedavgm.main server.reporting_fraction=0.2 client.local_epo
 ```bash
 # it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameteres
 
-poetry run python -m fedavgm.main --multirun client.local_epochs=1,5 dataset.concentration=100,10,1,0.5,0.2,0.1,0.05,0 strategy=fedavgm,fedavg server.reporting_fraction=0.05,0.1,0.4 num_rounds=10000
+poetry run python -m fedavgm.main --multirun client.local_epochs=1,5 noniid.concentration=100,10,1,0.5,0.2,0.1,0.05,0 strategy=fedavgm,fedavg server.reporting_fraction=0.05,0.1,0.4 num_rounds=10000
 # the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
 
 [Now show a figure/table displaying the results of the above command]

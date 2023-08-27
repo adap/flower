@@ -3,14 +3,17 @@
 from keras.optimizers import SGD
 from keras.regularizers import l2
 from tensorflow import keras
+from hydra.utils import instantiate
 from flwr.common import ndarrays_to_parameters
 
 
-def create_model(input_shape, num_classes):
+def cnn(input_shape, num_classes):
     """CNN Model from (McMahan et. al., 2017).
 
     Communication-efficient learning of deep networks from decentralized data
     """
+    input_shape = tuple(input_shape)
+    
     weight_decay = 0.004
     model = keras.Sequential(
         [

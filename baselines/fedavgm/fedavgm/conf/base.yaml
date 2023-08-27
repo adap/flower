@@ -1,15 +1,10 @@
 ---
-num_clients: 100
+num_clients: 10
 num_rounds: 5  # original experiments (paper) uses 10000
 
-dataset:
+noniid:
   concentration: 0.1 # concentrations used in the paper [100., 10., 1., 0.5, 0.2, 0.1, 0.05, 0.0]
   
-model:
-  _target_: models.create_model
-  input_shape: ${dataset.input_shape}
-  num_classes: ${dataset.num_classes}
-
 server:
   momentum: 0.9
   learning_rate: 1.0
@@ -22,4 +17,4 @@ client:
 defaults:
   - strategy: fedavgm
   - model: cnn
-  - dataset: cifar-10
+  - dataset: cifar10

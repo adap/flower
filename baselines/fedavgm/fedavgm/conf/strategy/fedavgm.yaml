@@ -1,13 +1,13 @@
 ---
 _target_: flwr.server.strategy.FedAvgM
 min_available_clients: ${num_clients}
-fraction_fit: ${reporting_fraction}
-fraction_evaluate: ${reporting_fraction}
+fraction_fit: ${server.reporting_fraction}
+fraction_evaluate: ${server.reporting_fraction}
 server_learning_rate: ${server.learning_rate}
 server_momentum: ${server.momentum}
 on_fit_config_fn:
-  _target_: server.get_on_fit_config
+  _target_: fedavgm.server.get_on_fit_config
   config: ${client}
 initial_parameters:
-  _target_: models.model_to_parameters
+  _target_: fedavgm.models.model_to_parameters
   model: ${model}
