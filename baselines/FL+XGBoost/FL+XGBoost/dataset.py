@@ -14,14 +14,11 @@ from flwr.common import NDArray, NDArrays
 from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 
-def load_single_dataset(task_type,dataset_name):
+def load_single_dataset(task_type,dataset_name,train_ratio=.75):
     datafiles_paths=_download_data(dataset_name)
     X,Y=datafiles_fusion(datafiles_paths)
-    X_train,y_train,X_test,y_test=train_test_split(X,Y,train_ratio=.75)
+    X_train,y_train,X_test,y_test=train_test_split(X,Y,train_ratio=train_ratio)
     if task_type.upper()=="BINARY":
         y_train,y_test=modify_labels(y_train,y_test)
     return X_train,y_train,X_test,y_test
-
-def load_dataset(dataset_name="cod-rna"):
-    dataset_paths=_download_data(dataset_name)
 

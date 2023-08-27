@@ -134,7 +134,7 @@ def _download_data(
                 "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression/space_ga_scale",
                 f"{os.path.join(DATASET_PATH, 'space_ga_scale')}",
             )
-        return [os.path.join(DATASET_PATH, 'space_ga')]
+        return [os.path.join(DATASET_PATH, 'space_ga_scale')]
     if dataset_name=="abalone":
         DATASET_PATH=os.path.join(ALL_DATASETS_PATH, "abalone")
         if not os.path.exists(DATASET_PATH): 
@@ -147,7 +147,7 @@ def _download_data(
                 "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression/abalone_scale",
                 f"{os.path.join(DATASET_PATH, 'abalone_scale')}",
             )
-        return [os.path.join(DATASET_PATH, 'abalone')]
+        return [os.path.join(DATASET_PATH, 'abalone_scale')]
     if dataset_name=="cpusmall":
         DATASET_PATH=os.path.join(ALL_DATASETS_PATH, "cpusmall")
         if not os.path.exists(DATASET_PATH):  
@@ -160,7 +160,7 @@ def _download_data(
                 "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression/cpusmall_scale",
                 f"{os.path.join(DATASET_PATH, 'cpusmall_scale')}",
             )
-        return [os.path.join(DATASET_PATH, 'cpusmall')]
+        return [os.path.join(DATASET_PATH, 'cpusmall_scale')]
     
 def datafiles_fusion(data_paths):
     """
@@ -191,6 +191,7 @@ def datafiles_fusion(data_paths):
 
 def train_test_split(X,y,train_ratio=.75):
     q=int(X.shape[0]*train_ratio)
+
     X_train = X[0:q]
     y_train = y[0:q]
 

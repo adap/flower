@@ -8,10 +8,9 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 import hydra
 from omegaconf import DictConfig, OmegaConf
 
-from dataset import load_single_dataset
-from models import construct_tree
-from utils import evaluate
-@hydra.main(config_path="conf", config_name="base", version_base=None)
+from utils import run_exp
+
+@hydra.main(config_path="conf", config_name="Centralized Baseline", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.
 
@@ -22,17 +21,7 @@ def main(cfg: DictConfig) -> None:
     """
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
-    task_type="reg"
-    dataset_name="cpusmall"
-    n_trees=100
-    X_train,y_train,X_test,y_test=load_single_dataset(task_type,dataset_name)
-    global_tree = construct_tree(X_train, y_train, n_trees, task_type)
-    preds_train = global_tree.predict(X_train)
-    result_train=evaluate(task_type,y_train,preds_train)
-    preds_test = global_tree.predict(X_test)
-    result_test=evaluate(task_type,y_test,preds_test)
-    print("Global XGBoost Training Accuracy: %f" % (result_train))
-    print("Global XGBoost Testing Accuracy: %f" % (result_test))
+    run_exp(cfg,dataset_name=cfg.dataset.dataset_name)
     # 2. Prepare your dataset
     # here you should call a function in datasets.py that returns whatever is needed to:
     # (1) ensure the server can access the dataset used to evaluate your model after
