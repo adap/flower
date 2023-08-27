@@ -35,7 +35,9 @@ class DriverClientManager(ClientManager):
 
     def __init__(self, driver: Driver) -> None:
         self.driver = driver
-        self.workload_id = driver.create_workload()
+        self.workload_id = driver.create_workload(
+            driver_pb2.CreateWorkloadRequest()
+        ).workload_id
         self.clients: Dict[str, ClientProxy] = {}
 
     def __len__(self) -> int:
