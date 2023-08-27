@@ -149,4 +149,5 @@ class DriverClientManager(ClientManager):
                 node_id=node_id,
                 driver=self.driver,
                 anonymous=False,
+                workload_id=self.workload_id,
             )
