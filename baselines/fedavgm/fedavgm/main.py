@@ -58,7 +58,6 @@ def main(cfg: DictConfig) -> None:
 
     strategy = instantiate(cfg.strategy, evaluate_fn=evaluate_fn)
 
-
     # 5. Start Simulation
     history = fl.simulation.start_simulation(
         client_fn=client_fn,
@@ -68,12 +67,23 @@ def main(cfg: DictConfig) -> None:
     )
 
     # 6. Save your results
-    # save_path = HydraConfig.get().runtime.output_dir
-    # results_path = Path(save_path) / 'results.pkl'
-    # results = {"history" : history}
+    save_path = HydraConfig.get().runtime.output_dir
+    
+    strategy_name = strategy.__class__.__name__
+    file_suffix: str = (
+        f"_{strategy_name}"
+        f"{'_cifar10' if cfg.dataset.input_shape == [32, 32, 3] else '_fmnist'}"
+        f"_C={cfg.server.reporting_fraction}"
+        f"_E={cfg.client.local_epochs}"
+        f"_alpha={cfg.noniid.concentration}"
+    )
+    
+    filename = 'results' + file_suffix + '.pkl'
+    results_path = Path(save_path) / filename
+    results = {"history" : history}
 
-    # with open(str(results_path), 'wb') as h:
-    #     pickle.dump(results, h, protocol=pickle.HIGHEST_PROTOCOL)
+    with open(str(results_path), 'wb') as h:
+        pickle.dump(results, h, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 if __name__ == "__main__":
