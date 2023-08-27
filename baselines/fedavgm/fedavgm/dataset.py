@@ -9,8 +9,8 @@ from fedavgm.common import create_lda_partitions
 def cifar10(num_classes, input_shape):
     """Prepare the CIFAR-10.
 
-    This method considers CIFAR-10 for creating both train and test sets. The
-    sets are already normalized.
+    This method considers CIFAR-10 for creating both train and test sets. The sets are
+    already normalized.
     """
     print(f">>> [Dataset] Loading CIFAR-10. {num_classes} | {input_shape}.")
     (x_train, y_train), (x_test, y_test) = keras.datasets.cifar10.load_data()
@@ -18,24 +18,23 @@ def cifar10(num_classes, input_shape):
     x_test = x_test.astype("float32") / 255
     input_shape = x_train.shape[1:]
     num_classes = len(np.unique(y_train))
-        
+
     return x_train, y_train, x_test, y_test, input_shape, num_classes
 
 
 def fmnist(num_classes, input_shape):
     """Prepare the FMNIST.
 
-    This method considers FMNIST for creating both train and test sets. The
-    sets are already normalized.
+    This method considers FMNIST for creating both train and test sets. The sets are
+    already normalized.
     """
-    
     print(f">>> [Dataset] Loading FMNIST. {num_classes} | {input_shape}.")
     (x_train, y_train), (x_test, y_test) = keras.datasets.fashion_mnist.load_data()
     x_train = x_train.astype("float32") / 255
     x_test = x_test.astype("float32") / 255
     input_shape = x_train.shape[1:]
     num_classes = len(np.unique(y_train))
-        
+
     return x_train, y_train, x_test, y_test, input_shape, num_classes
 
 

@@ -1,12 +1,12 @@
 """Define the Flower Server and function to instantiate it."""
 
-from omegaconf import DictConfig
 from keras.utils import to_categorical
+from omegaconf import DictConfig
 
 
 def get_on_fit_config(config: DictConfig):
     """Generate the function for config.
-    
+
     The config dict is sent to the client fit() method.
     """
 
@@ -24,7 +24,7 @@ def get_on_fit_config(config: DictConfig):
 
 def get_evaluate_fn(model, x_test, y_test, num_rounds, num_classes):
     """Generate the function for server global model evaluation.
-    
+
     The method evaluate_fn runs after global model aggregation.
     """
 

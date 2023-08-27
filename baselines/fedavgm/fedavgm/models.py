@@ -1,10 +1,9 @@
 """CNN model architecture."""
 
+from flwr.common import ndarrays_to_parameters
 from keras.optimizers import SGD
 from keras.regularizers import l2
 from tensorflow import keras
-from hydra.utils import instantiate
-from flwr.common import ndarrays_to_parameters
 
 
 def cnn(input_shape, num_classes):
@@ -13,7 +12,7 @@ def cnn(input_shape, num_classes):
     Communication-efficient learning of deep networks from decentralized data
     """
     input_shape = tuple(input_shape)
-    
+
     weight_decay = 0.004
     model = keras.Sequential(
         [
@@ -41,5 +40,7 @@ def cnn(input_shape, num_classes):
 
     return model
 
+
 def model_to_parameters(model):
+    """Retrieve model weigths and convert to ndarrays."""
     return ndarrays_to_parameters(model.get_weights())

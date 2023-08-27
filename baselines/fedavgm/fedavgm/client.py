@@ -10,20 +10,14 @@ from keras.utils import to_categorical
 class FlowerClient(fl.client.NumPyClient):
     """Standard Flower client."""
 
-    def __init__(
-        self,
-        x_train,
-        y_train,
-        x_val,
-        y_val,
-        model,
-        num_classes
-    ) -> None:
+    def __init__(self, x_train, y_train, x_val, y_val, model, num_classes) -> None:
         # local model
         self.model = instantiate(model)
 
         # local dataset
-        self.x_train, self.y_train = x_train, to_categorical(y_train, num_classes=num_classes)
+        self.x_train, self.y_train = x_train, to_categorical(
+            y_train, num_classes=num_classes
+        )
         self.x_val, self.y_val = x_val, to_categorical(y_val, num_classes=num_classes)
 
     def get_parameters(self, config):
@@ -68,12 +62,7 @@ def generate_client_fn(partitions, model, num_classes):
         )
 
         return FlowerClient(
-            x_train_cid,
-            y_train_cid,
-            x_val_cid,
-            y_val_cid,
-            model,
-            num_classes
+            x_train_cid, y_train_cid, x_val_cid, y_val_cid, model, num_classes
         )
 
     return client_fn

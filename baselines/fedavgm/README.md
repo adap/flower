@@ -129,5 +129,7 @@ poetry run python -m fedavgm.main --multirun client.local_epochs=1,5 noniid.conc
 
 [Now show a figure/table displaying the results of the above command]
 
+poetry run python -m fedavgm.main --multirun client.local_epochs=1,5 noniid.concentration=100,10,1,0.5,0.2,0.1,0.05,0 strategy=fedavgm,fedavg server.reporting_fraction=0.05,0.1,0.4 num_rounds=10000 dataset=fmnist
+
 # add more commands + plots for additional experiments.
 ```
