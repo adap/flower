@@ -15,7 +15,7 @@
 """SQLite based implemenation of server state."""
 
 
-import random
+import os
 import re
 import sqlite3
 from datetime import datetime, timedelta
@@ -186,11 +186,8 @@ class SqliteState(State):
             return None
 
         # Validate workload ID
-        result = self.query(
-            "SELECT COUNT(*) FROM workload WHERE workload_id = :workload_id;",
-            {"workload_id": task_ins.workload_id},
-        )
-        if result[0]["COUNT(*)"] == 0:
+        query = "SELECT COUNT(*) FROM workload WHERE workload_id = ?;"
+        if self.query(query, (task_ins.workload_id,))[0]["COUNT(*)"] == 0:
             log(ERROR, "`workload_id` is invalid")
             return None
 
@@ -474,8 +471,15 @@ class SqliteState(State):
         query = "DELETE FROM node WHERE node_id = :node_id;"
         self.query(query, {"node_id": node_id})
 
-    def get_nodes(self) -> Set[int]:
+    def get_nodes(self, workload_id: str) -> Set[int]:
         """Retrieve all currently stored node IDs as a set."""
+        # Validate workload ID
+        query = "SELECT COUNT(*) FROM workload WHERE workload_id = ?;"
+        if self.query(query, (workload_id,))[0]["COUNT(*)"] == 0:
+            log(ERROR, "`workload_id` is invalid")
+            return set()
+
+        # Get nodes
         query = "SELECT * FROM node;"
         rows = self.query(query)
         result: Set[int] = {row["node_id"] for row in rows}
@@ -483,10 +487,18 @@ class SqliteState(State):
 
     def create_workload(self) -> str:
         """Create one workload and store it in state."""
-        query = "INSERT INTO workload VALUES(:workload_id);"
-        workload_id = str(random.randrange(9223372036854775808))
-        self.query(query, {"workload_id": workload_id})
-        return workload_id
+        for _ in range(100):
+            # String representation of random integer from 0 to 9223372036854775807
+            workload_id = str(int.from_bytes(os.urandom(8), "little") >> 1)
+            # Check conflicts
+            query = "SELECT COUNT(*) FROM workload WHERE workload_id = ?;"
+            # If workload_is does not exist
+            if self.query(query, (workload_id,))[0]["COUNT(*)"] == 0:
+                query = "INSERT INTO workload VALUES(:workload_id);"
+                self.query(query, {"workload_id": workload_id})
+                return workload_id
+        log(ERROR, "Unexpected workload creation failure.")
+        return ""
 
 
 def dict_factory(

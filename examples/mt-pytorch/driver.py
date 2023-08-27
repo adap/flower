@@ -89,7 +89,7 @@ for server_round in range(num_rounds):
         # loop and wait until enough client nodes are available.
         while True:
             # Get a list of node ID's from the server
-            get_nodes_req = driver_pb2.GetNodesRequest()
+            get_nodes_req = driver_pb2.GetNodesRequest(workload_id=workload_id)
 
             # ---------------------------------------------------------------------- Driver SDK
             get_nodes_res: driver_pb2.GetNodesResponse = driver.get_nodes(

@@ -16,7 +16,7 @@ from flwr.proto import node_pb2 as flwr_dot_proto_dot_node__pb2
 from flwr.proto import task_pb2 as flwr_dot_proto_dot_task__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17\x66lwr/proto/driver.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/node.proto\x1a\x15\x66lwr/proto/task.proto\"\x17\n\x15\x43reateWorkloadRequest\"-\n\x16\x43reateWorkloadResponse\x12\x13\n\x0bworkload_id\x18\x01 \x01(\t\"\x11\n\x0fGetNodesRequest\"$\n\x10GetNodesResponse\x12\x10\n\x08node_ids\x18\x01 \x03(\x04\"@\n\x12PushTaskInsRequest\x12*\n\rtask_ins_list\x18\x01 \x03(\x0b\x32\x13.flwr.proto.TaskIns\"\'\n\x13PushTaskInsResponse\x12\x10\n\x08task_ids\x18\x02 \x03(\t\"F\n\x12PullTaskResRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\x12\x10\n\x08task_ids\x18\x02 \x03(\t\"A\n\x13PullTaskResResponse\x12*\n\rtask_res_list\x18\x01 \x03(\x0b\x32\x13.flwr.proto.TaskRes2\xd0\x02\n\x06\x44river\x12Y\n\x0e\x43reateWorkload\x12!.flwr.proto.CreateWorkloadRequest\x1a\".flwr.proto.CreateWorkloadResponse\"\x00\x12G\n\x08GetNodes\x12\x1b.flwr.proto.GetNodesRequest\x1a\x1c.flwr.proto.GetNodesResponse\"\x00\x12P\n\x0bPushTaskIns\x12\x1e.flwr.proto.PushTaskInsRequest\x1a\x1f.flwr.proto.PushTaskInsResponse\"\x00\x12P\n\x0bPullTaskRes\x12\x1e.flwr.proto.PullTaskResRequest\x1a\x1f.flwr.proto.PullTaskResResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17\x66lwr/proto/driver.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/node.proto\x1a\x15\x66lwr/proto/task.proto\"\x17\n\x15\x43reateWorkloadRequest\"-\n\x16\x43reateWorkloadResponse\x12\x13\n\x0bworkload_id\x18\x01 \x01(\t\"&\n\x0fGetNodesRequest\x12\x13\n\x0bworkload_id\x18\x01 \x01(\t\"$\n\x10GetNodesResponse\x12\x10\n\x08node_ids\x18\x01 \x03(\x04\"@\n\x12PushTaskInsRequest\x12*\n\rtask_ins_list\x18\x01 \x03(\x0b\x32\x13.flwr.proto.TaskIns\"\'\n\x13PushTaskInsResponse\x12\x10\n\x08task_ids\x18\x02 \x03(\t\"F\n\x12PullTaskResRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\x12\x10\n\x08task_ids\x18\x02 \x03(\t\"A\n\x13PullTaskResResponse\x12*\n\rtask_res_list\x18\x01 \x03(\x0b\x32\x13.flwr.proto.TaskRes2\xd0\x02\n\x06\x44river\x12Y\n\x0e\x43reateWorkload\x12!.flwr.proto.CreateWorkloadRequest\x1a\".flwr.proto.CreateWorkloadResponse\"\x00\x12G\n\x08GetNodes\x12\x1b.flwr.proto.GetNodesRequest\x1a\x1c.flwr.proto.GetNodesResponse\"\x00\x12P\n\x0bPushTaskIns\x12\x1e.flwr.proto.PushTaskInsRequest\x1a\x1f.flwr.proto.PushTaskInsResponse\"\x00\x12P\n\x0bPullTaskRes\x12\x1e.flwr.proto.PullTaskResRequest\x1a\x1f.flwr.proto.PullTaskResResponse\"\x00\x62\x06proto3')
 
 
 
@@ -93,17 +93,17 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _CREATEWORKLOADRESPONSE._serialized_start=110
   _CREATEWORKLOADRESPONSE._serialized_end=155
   _GETNODESREQUEST._serialized_start=157
-  _GETNODESREQUEST._serialized_end=174
-  _GETNODESRESPONSE._serialized_start=176
-  _GETNODESRESPONSE._serialized_end=212
-  _PUSHTASKINSREQUEST._serialized_start=214
-  _PUSHTASKINSREQUEST._serialized_end=278
-  _PUSHTASKINSRESPONSE._serialized_start=280
-  _PUSHTASKINSRESPONSE._serialized_end=319
-  _PULLTASKRESREQUEST._serialized_start=321
-  _PULLTASKRESREQUEST._serialized_end=391
-  _PULLTASKRESRESPONSE._serialized_start=393
-  _PULLTASKRESRESPONSE._serialized_end=458
-  _DRIVER._serialized_start=461
-  _DRIVER._serialized_end=797
+  _GETNODESREQUEST._serialized_end=195
+  _GETNODESRESPONSE._serialized_start=197
+  _GETNODESRESPONSE._serialized_end=233
+  _PUSHTASKINSREQUEST._serialized_start=235
+  _PUSHTASKINSREQUEST._serialized_end=299
+  _PUSHTASKINSRESPONSE._serialized_start=301
+  _PUSHTASKINSRESPONSE._serialized_end=340
+  _PULLTASKRESREQUEST._serialized_start=342
+  _PULLTASKRESREQUEST._serialized_end=412
+  _PULLTASKRESRESPONSE._serialized_start=414
+  _PULLTASKRESRESPONSE._serialized_end=479
+  _DRIVER._serialized_start=482
+  _DRIVER._serialized_end=818
 # @@protoc_insertion_point(module_scope)

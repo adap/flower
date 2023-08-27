@@ -39,7 +39,7 @@ message CreateWorkloadRequest {}
 message CreateWorkloadResponse { string workload_id = 1; }
 
 // GetNodes messages
-message GetNodesRequest {}
+message GetNodesRequest { string workload_id = 1; }
 message GetNodesResponse { repeated uint64 node_ids = 1; }
 
 // PushTaskIns messages

@@ -15,7 +15,7 @@
 """In-memory State implementation."""
 
 
-import random
+import os
 from datetime import datetime, timedelta
 from logging import ERROR
 from typing import Dict, List, Optional, Set
@@ -190,13 +190,21 @@ class InMemoryState(State):
             raise ValueError(f"Node {node_id} is not registered")
         self.node_ids.remove(node_id)
 
-    def get_nodes(self) -> Set[int]:
+    def get_nodes(self, workload_id: str) -> Set[int]:
         """Return all available client nodes."""
+        if workload_id not in self.workload_ids:
+            log(ERROR, "`workload_id` is invalid")
+            return set()
         return self.node_ids
 
     def create_workload(self) -> str:
         """Create one workload."""
         # Create, store, and return workload ID
-        workload_id = str(random.randrange(9223372036854775808))
-        self.workload_ids.add(workload_id)
-        return workload_id
+        for _ in range(100):
+            # String representation of random integer from 0 to 9223372036854775807
+            workload_id = str(int.from_bytes(os.urandom(8), "little") >> 1)
+            if workload_id not in self.workload_ids:
+                self.workload_ids.add(workload_id)
+                return workload_id
+        log(ERROR, "Unexpected workload creation failure.")
+        return ""

@@ -50,7 +50,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         """Get available nodes."""
         log(INFO, "DriverServicer.GetNodes")
         state: State = self.state_factory.state()
-        all_ids: Set[int] = state.get_nodes()
+        all_ids: Set[int] = state.get_nodes(request.workload_id)
         return GetNodesResponse(node_ids=list(all_ids))
 
     def CreateWorkload(

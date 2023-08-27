@@ -273,7 +273,7 @@ class StateTest(unittest.TestCase):
             state.get_task_ins(node_id=1, limit=0)
 
     def test_task_ins_store_invalid_workload_id_and_fail(self) -> None:
-        """Store TaskIns with invalid workload ID and fail."""
+        """Store TaskIns with invalid workload_id and fail."""
         # Prepare
         state: State = self.state_factory()
         task_ins = create_task_ins(
@@ -308,9 +308,10 @@ class StateTest(unittest.TestCase):
         """Test retrieving all node_ids and empty initial state."""
         # Prepare
         state: State = self.state_factory()
+        workload_id = state.create_workload()
 
         # Execute
-        retrieved_node_ids = state.get_nodes()
+        retrieved_node_ids = state.get_nodes(workload_id)
 
         # Assert
         assert len(retrieved_node_ids) == 0
@@ -319,12 +320,13 @@ class StateTest(unittest.TestCase):
         """Test registering a client node."""
         # Prepare
         state: State = self.state_factory()
+        workload_id = state.create_workload()
         node_ids = list(range(1, 11))
 
         # Execute
         for i in node_ids:
             state.register_node(i)
-        retrieved_node_ids = state.get_nodes()
+        retrieved_node_ids = state.get_nodes(workload_id)
 
         # Assert
         for i in retrieved_node_ids:
@@ -334,12 +336,28 @@ class StateTest(unittest.TestCase):
         """Test unregistering a client node."""
         # Prepare
         state: State = self.state_factory()
+        workload_id = state.create_workload()
         node_id = 2
 
         # Execute
         state.register_node(node_id)
         state.unregister_node(node_id)
-        retrieved_node_ids = state.get_nodes()
+        retrieved_node_ids = state.get_nodes(workload_id)
+
+        # Assert
+        assert len(retrieved_node_ids) == 0
+
+    def test_get_nodes_invalid_workload_id(self) -> None:
+        """Test retrieving all node_ids with invalid workload_id."""
+        # Prepare
+        state: State = self.state_factory()
+        state.create_workload()
+        invalid_workload_id = ""
+        node_id = 2
+
+        # Execute
+        state.register_node(node_id)
+        retrieved_node_ids = state.get_nodes(invalid_workload_id)
 
         # Assert
         assert len(retrieved_node_ids) == 0
@@ -387,8 +405,8 @@ class StateTest(unittest.TestCase):
 def create_task_ins(
     consumer_node_id: int,
     anonymous: bool,
+    workload_id: str,
     delivered_at: str = "",
-    workload_id: str = "",
 ) -> TaskIns:
     """Create a TaskIns for testing."""
     consumer = Node(
