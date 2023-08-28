@@ -58,6 +58,9 @@ The following table shows the main hyperparameters for this baseline with their 
 | strategy | FedAvgM |
 | dataset | CIFAR-10 |
 | concentration | 0.1 |
+| fraction evaluate | 0 |
+| num cpus | 1 |
+| num gpus | 0 |
 | server momentum | 0.9 |
 | server learning rate | 1.0 |
 | server reporting fraction | 0.05 |

@@ -1,6 +1,9 @@
 ---
 num_clients: 10
 num_rounds: 5  # original experiments (paper) uses 10000
+fraction_evaluate: 0 # fraction of clients usied during validation
+num_cpus: 1
+num_gpus: 0
 
 noniid:
   concentration: 0.1 # concentrations used in the paper [100., 10., 1., 0.5, 0.2, 0.1, 0.05, 0.0]
