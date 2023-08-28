@@ -1,11 +1,12 @@
 ---
-num_clients: 2 # total number of clients
-num_epochs: 2 # number of local epochs
+num_clients: 10 # total number of clients
+num_epochs: 4 # number of local epochs
 batch_size: 128
-num_rounds: 2
-clients_per_round: 2
+num_rounds: 50
+clients_per_round: 10
 learning_rate: 0.01
 algorithm: FedPer
+algo: FedPer
 
 client_resources:
   num_cpus: 32
@@ -17,6 +18,10 @@ dataset:
   name : "cifar10"
   iid: false
   num_classes: 10
+  seed: 42
+  num_clients: 10
+  split: 'sample' # sample or user
+  fraction: 0.83
 
 model:
   _target_: FedPer.models.mobile_model.MobileNet

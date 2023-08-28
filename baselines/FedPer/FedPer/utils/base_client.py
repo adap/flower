@@ -33,8 +33,12 @@ class BaseClient(fl.client.NumPyClient):
         testloader: DataLoader, 
         config: Dict[str, Any],
         client_id: int,
-        model_manager_class: Union[Type[CNNModelManager], Type[MobileNetModelManager]],
+        model_manager_class: Union[
+            Type[CNNModelManager], Type[MobileNetModelManager],
+            Type[ResNetModelManager]
+            ],
         has_fixed_head: bool = False,
+        client_state_save_path: str = None,
     ):
         """
         Initialize client attributes.
@@ -47,19 +51,20 @@ class BaseClient(fl.client.NumPyClient):
         """
         super().__init__()
 
-        #print("Model manager class: ", model_manager_class)
-
         self.train_id = 1
         self.test_id = 1
         self.config = config
         self.client_id = client_id
+        self.client_state_save_path = client_state_save_path + f"/client_{self.client_id}"
         self.hist: Dict[str, Dict[str, Any]] = defaultdict(dict)
         self.model_manager = model_manager_class(
             client_id=self.client_id,
             config=config,
             has_fixed_head=has_fixed_head, 
             trainloader=trainloader,
-            testloader=testloader
+            testloader=testloader,
+            client_save_path=self.client_state_save_path,
+
         )
 
     def get_parameters(self) -> List[np.ndarray]:
@@ -96,7 +101,12 @@ class BaseClient(fl.client.NumPyClient):
         Returns:
             Dict with the train metrics.
         """
-        epochs = self.config.get("epochs", {"full": DEFAULT_TRAIN_EP})
+
+        epochs = self.config.get("epochs", {"full": 4})
+
+        print("Epochs: ", epochs)
+        print("Tag: ", tag)
+
         self.model_manager.model.enable_body()
         self.model_manager.model.enable_head()
 
@@ -198,6 +208,7 @@ class BaseClient(fl.client.NumPyClient):
 
 def get_fedavg_client_fn(
     cfg: DictConfig,
+    client_state_save_path: str = None,
 ) -> Tuple[
     Callable[[str], BaseClient], DataLoader
 ]:  # pylint: disable=too-many-arguments
@@ -207,7 +218,8 @@ def get_fedavg_client_fn(
     ----------
     model : DictConfig
         The model configuration.
-
+    cleint_state_save_path : str
+        The path to save the client state.
     Returns
     -------
     Tuple[Callable[[str], FlowerClient], DataLoader]
@@ -227,16 +239,16 @@ def get_fedavg_client_fn(
     data_indices: List[List[int]] = partition["data_indices"]
 
     # --------- you can define your own data transformation strategy here ------------
-    general_data_transform = transforms.Compose(
-        [transforms.Normalize(MEAN[cfg.dataset.name], STD[cfg.dataset.name])]
-    )
+    #general_data_transform = transforms.Compose(
+    #    [transforms.Normalize(MEAN[cfg.dataset.name], STD[cfg.dataset.name])]
+    #)
 
-    #general_data_transform = transforms.Compose([
+    general_data_transform = transforms.Compose([
     #    transforms.ToPILImage(),
-    #    transforms.Resize((224, 224)),
+        transforms.Resize((224, 224)),
     #    transforms.ToTensor(),
-    #    transforms.Normalize((0.5,), (0.5,)),
-    #])
+        transforms.Normalize(MEAN[cfg.dataset.name], STD[cfg.dataset.name])
+    ])
     general_target_transform = transforms.Compose([])
     train_data_transform = transforms.Compose([])
     train_target_transform = transforms.Compose([])
@@ -280,7 +292,8 @@ def get_fedavg_client_fn(
             testloader=testloader,
             client_id=cid,
             config=cfg.model,
-            model_manager_class=manager
+            model_manager_class=manager,
+            client_state_save_path=client_state_save_path,
         )
     
     return client_fn

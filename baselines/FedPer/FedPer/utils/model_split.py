@@ -157,9 +157,11 @@ class ModelSplit(ABC, nn.Module):
         """Forward inputs through the body and the head (or fixed head)."""
         x = self.body(inputs)
         x = F.relu(x)
-        if len(self.head) == 4:
-            x = x.view(x.size(0), 512, 1, 1)
-        
+        #try:
+        #    if len(self.head) == 4:
+        #        x = x.view(x.size(0), -1)
+        #except TypeError:
+        #    pass
         if self._use_fixed_head and self.fixed_head is not None:
             return self.fixed_head(x)
         return self.head(x)

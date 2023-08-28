@@ -155,8 +155,6 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
         # Update Server Model
         parameters = parameters_to_ndarrays(agg_params)
         model_keys = [k for k in self.model.state_dict().keys() if k.startswith("_body")]
-        # print(self.model.state_dict().keys())
-        # model_keys = [k for k in self.model.state_dict().keys() if k.startswith("body")]
         params_dict = zip(model_keys, parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
         self.model.set_parameters(state_dict)

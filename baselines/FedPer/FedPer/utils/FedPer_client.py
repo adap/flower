@@ -72,6 +72,7 @@ class FedPerClient(BaseClient):
 
 def get_fedper_client_fn(
     cfg: DictConfig,
+    client_state_save_path: str,
 ) -> Tuple[
     Callable[[str], FedPerClient], DataLoader
 ]:  # pylint: disable=too-many-arguments
@@ -79,15 +80,11 @@ def get_fedper_client_fn(
 
     Parameters
     ----------
-    trainloaders: List[DataLoader]
-        A list of DataLoaders, each pointing to the dataset training partition
-        belonging to a particular client.
-    valloaders: List[DataLoader]
-        A list of DataLoaders, each pointing to the dataset validation partition
-        belonging to a particular client.
-    model : DictConfig
+    cfg : DictConfig
         The model configuration.
 
+    client_state_save_path : str
+        The path to save the client state.
     Returns
     -------
     Tuple[Callable[[str], FlowerClient], DataLoader]
@@ -96,6 +93,7 @@ def get_fedper_client_fn(
     """
 
     assert cfg.model.name.lower() in ['cnn', 'mobile', 'resnet']
+    assert client_state_save_path is not None, "Please provide a path to save the client state."
     # load dataset and clients' data indices
     try:
         partition_path = PROJECT_DIR / "datasets" / cfg.dataset.name / "partition.pkl"
@@ -108,16 +106,16 @@ def get_fedper_client_fn(
     data_indices: List[List[int]] = partition["data_indices"]
 
     # --------- you can define your own data transformation strategy here ------------
-    general_data_transform = transforms.Compose(
-        [transforms.Normalize(MEAN[cfg.dataset.name], STD[cfg.dataset.name])]
-    )
+    #general_data_transform = transforms.Compose(
+    #    [transforms.Normalize(MEAN[cfg.dataset.name], STD[cfg.dataset.name])]
+    #)
 
-    #general_data_transform = transforms.Compose([
-    #    transforms.ToPILImage(),
-    #    transforms.Resize((224, 224)),
-    #    transforms.ToTensor(),
-    #    transforms.Normalize((0.5,), (0.5,)),
-    #])
+    general_data_transform = transforms.Compose([
+        # transforms.ToPILImage(),
+        transforms.Resize((224, 224)),
+        # transforms.ToTensor(),
+        transforms.Normalize(MEAN[cfg.dataset.name], STD[cfg.dataset.name])
+    ])
 
     general_target_transform = transforms.Compose([])
     train_data_transform = transforms.Compose([])
@@ -162,7 +160,8 @@ def get_fedper_client_fn(
             testloader=testloader,
             client_id=cid,
             config=cfg.model,
-            model_manager_class=manager
+            model_manager_class=manager,
+            client_state_save_path=client_state_save_path,
         )
     
     return client_fn

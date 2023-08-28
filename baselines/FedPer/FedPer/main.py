@@ -3,9 +3,12 @@
 It includes processioning the dataset, instantiate strategy, specify how the global
 model is going to be evaluated, etc. At the end, this script saves the results.
 """
+import os
 import flwr as fl
+import time
 import hydra
 import argparse
+import pathlib
 
 from typing import Dict, Any, Union
 from omegaconf import DictConfig, OmegaConf
@@ -34,12 +37,21 @@ def main(cfg: DictConfig) -> None:
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
 
+    # Set the model class
     if cfg.model.name.lower() == 'resnet':
         cfg.model._target_ = 'FedPer.models.resnet_model.ResNet'
     elif cfg.model.name.lower() == 'mobile':
         cfg.model._target_ = 'FedPer.models.mobile_model.MobileNet'
     else:
         raise NotImplementedError(f"Model {cfg.model.name} not implemented")
+    
+    # Create directory to store client states if it does not exist
+    # Client state has subdirectories with the name of current time 
+    client_state_save_path = time.strftime("%Y-%m-%d")
+    client_state_sub_path = time.strftime("%H-%M-%S")
+    client_state_save_path = f"./client_states/{client_state_save_path}/{client_state_sub_path}"
+    if not os.path.exists(client_state_save_path):
+        os.makedirs(client_state_save_path)
 
     # 2. Prepare your dataset
     dataset_main(cfg.dataset)
@@ -51,6 +63,7 @@ def main(cfg: DictConfig) -> None:
     if algo.lower() == 'fedper':
         client_fn = get_fedper_client_fn(
             cfg=cfg,
+            client_state_save_path=client_state_save_path,
         )
     elif algo.lower() == 'fedavg':
         client_fn = get_fedavg_client_fn(
