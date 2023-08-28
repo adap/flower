@@ -1,3 +1,7 @@
+import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.dokka.base.DokkaBase
+import org.jetbrains.dokka.base.DokkaBaseConfiguration
+
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
@@ -5,6 +9,12 @@ plugins {
     id("maven-publish")
     id("com.vanniktech.maven.publish")
     id("org.jetbrains.dokka") version "1.8.20"
+}
+
+buildscript {
+    dependencies {
+        classpath("org.jetbrains.dokka:dokka-base:1.8.20")
+    }
 }
 
 android {
@@ -69,6 +79,14 @@ protobuf {
                 }
             }
         }
+    }
+}
+
+tasks.dokkaHtml {
+    pluginConfiguration<DokkaBase, DokkaBaseConfiguration> {
+        customStyleSheets = listOf(file("res/style.css"))
+        customAssets = listOf(file("res/logo-icon.svg"))
+        footerMessage = "(c) 2023 Flower Labs GmbH"
     }
 }
 
