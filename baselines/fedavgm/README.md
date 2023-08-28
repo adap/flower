@@ -124,12 +124,13 @@ poetry run python -m fedavgm.main server.reporting_fraction=0.2 client.local_epo
 ```bash
 # it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameteres
 
-poetry run python -m fedavgm.main --multirun client.local_epochs=1,5 noniid.concentration=100,10,1,0.5,0.2,0.1,0.05,0 strategy=fedavgm,fedavg server.reporting_fraction=0.05,0.1,0.4 num_rounds=10000
+poetry run python -m fedavgm.main --multirun client.local_epochs=1,5 noniid.concentration=100,10,1,0.5,0.2,0.1,0.05,0 strategy=fedavgm,fedavg server.reporting_fraction=0.05,0.1,0.4 num_rounds=10000 num_clients=100
+
 # the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
 
 [Now show a figure/table displaying the results of the above command]
 
-poetry run python -m fedavgm.main --multirun client.local_epochs=1,5 noniid.concentration=100,10,1,0.5,0.2,0.1,0.05,0 strategy=fedavgm,fedavg server.reporting_fraction=0.05,0.1,0.4 num_rounds=10000 dataset=fmnist
+poetry run python -m fedavgm.main --multirun client.local_epochs=1,5 noniid.concentration=100,10,1,0.5,0.2,0.1,0.05,0 strategy=fedavgm,fedavg server.reporting_fraction=0.05,0.1,0.4 num_rounds=10000 dataset=fmnist num_clients=100
 
 # add more commands + plots for additional experiments.
 ```
