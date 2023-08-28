@@ -63,7 +63,11 @@ class MainActivity : AppCompatActivity() {
             ::negativeLogLikelihoodLoss,
             ::classifierAccuracy,
         )
-        flowerClient = FlowerClient(buffer, layersSizes, sampleSpec)
+        flowerClient = FlowerClient(buffer, layersSizes, sampleSpec) {
+            runOnUiThread {
+                setResultText(it)
+            }
+        }
     }
 
     suspend fun restoreInput() {

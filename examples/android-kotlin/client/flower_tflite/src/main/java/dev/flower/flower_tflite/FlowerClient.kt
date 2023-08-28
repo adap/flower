@@ -12,6 +12,19 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
 import kotlin.concurrent.withLock
 import kotlin.concurrent.write
+import dev.flower.android.Client
+import dev.flower.android.Code
+import dev.flower.android.EvaluateIns
+import dev.flower.android.EvaluateRes
+import dev.flower.android.FitIns
+import dev.flower.android.FitRes
+import dev.flower.android.GetParametersIns
+import dev.flower.android.GetParametersRes
+import dev.flower.android.GetPropertiesIns
+import dev.flower.android.GetPropertiesRes
+import dev.flower.android.Parameters
+import dev.flower.android.Status
+import com.google.protobuf.ByteString
 
 /**
  * Flower client that handles TensorFlow Lite model [Interpreter] and sample data.
@@ -23,7 +36,8 @@ class FlowerClient<X : Any, Y : Any>(
     tfliteFileBuffer: MappedByteBuffer,
     val layersSizes: IntArray,
     val spec: SampleSpec<X, Y>,
-) : AutoCloseable {
+    val callback: (String) -> Unit,
+) : AutoCloseable, Client {
     val interpreter = Interpreter(tfliteFileBuffer)
     val interpreterLock = ReentrantLock()
     val trainingSamples = mutableListOf<Sample<X, Y>>()
@@ -78,7 +92,7 @@ class FlowerClient<X : Any, Y : Any>(
      * @param lossCallback Called after every epoch with the [List] of training losses.
      * @return [List] of average training losses for each epoch.
      */
-    fun fit(
+    fun startLocalTraining(
         epochs: Int = 1, batchSize: Int = 32, lossCallback: ((List<Float>) -> Unit)? = null
     ): List<Double> {
         Log.d(TAG, "Starting to train for $epochs epochs with batch size $batchSize.")
@@ -99,7 +113,7 @@ class FlowerClient<X : Any, Y : Any>(
      * Thread-safe, and block operations on [testSamples].
      * @return (loss, accuracy).
      */
-    fun evaluate(): Pair<Float, Float> {
+    fun startLocalEvaluate(): Pair<Float, Float> {
         val result = testSampleLock.read {
             val bottlenecks = testSamples.map { it.bottleneck }
             val logits = inference(spec.convertX(bottlenecks))
@@ -215,6 +229,47 @@ class FlowerClient<X : Any, Y : Any>(
 
     override fun close() {
         interpreter.close()
+    }
+
+    override fun evaluate(ins: EvaluateIns): EvaluateRes {
+        callback("Handling Evaluate request from the server")
+        val layers = ins.parameters.tensors
+        assertIntsEqual(layers.size, layersSizes.size)
+        updateParameters(layers)
+        val (loss, accuracy) = startLocalEvaluate()
+        callback("Test Accuracy after this round = $accuracy")
+        return EvaluateRes(Status(Code.OK, "Success"), loss, trainingSamples.size, emptyMap())
+    }
+
+    override fun fit(ins: FitIns): FitRes {
+        val layers = ins.parameters.tensors
+        assertIntsEqual(layers.size, layersSizes.size)
+        val epochs = ins.config.getOrDefault(
+            "local_epochs", 1
+        )!!
+        updateParameters(layers)
+        startLocalTraining(
+            1,
+            lossCallback = { callback("Average loss: ${it.average()}.") })
+        return FitRes(
+            Status(Code.OK, "Success"),
+            Parameters(getParameters(), "ndarray"),
+            trainingSamples.size,
+            emptyMap()
+        )
+    }
+
+    override fun getParameters(ins: GetParametersIns): GetParametersRes {
+        val inputs: Map<String, Any> = FakeNonEmptyMap()
+        val outputs = emptyParameterMap()
+        runSignatureLocked(inputs, outputs, "parameters")
+        Log.i(TAG, "Raw weights: $outputs.")
+        val parameters = parametersFromMap(outputs)
+        return GetParametersRes(Status(Code.OK, "Success"), Parameters(parameters, "ndarray"))
+    }
+
+    override fun getProperties(ins: GetPropertiesIns): GetPropertiesRes {
+        return GetPropertiesRes(Status(Code.GET_PROPERTIES_NOT_IMPLEMENTED, "GetProperties not implemented"), emptyMap())
     }
 }
 
