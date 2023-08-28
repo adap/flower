@@ -1,0 +1,3 @@
+flwr[simulation] @ git+https://github.com/adap/flower.git@main
+torch==1.13.1
+torchvision==0.14.1
