@@ -8,13 +8,13 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 import hydra
 from omegaconf import DictConfig, OmegaConf
 from hydra.utils import instantiate
-from strategy import FedMeta
+from strategy import weighted_average
 
 import flwr as fl
+import client
 
 
-
-@hydra.main(config_path="conf", config_name="base", version_base=None)
+@hydra.main(config_path="conf", config_name="config", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.
 
@@ -38,22 +38,28 @@ def main(cfg: DictConfig) -> None:
     # simulation to instantiate each individual client
     # client_fn = client.<my_function_that_returns_a_function>()
 
+    client_fn = client.gen_client_fn(
+        num_epochs=cfg.num_epochs,
+        learning_rate=cfg.learning_rate,
+        model=cfg.model
+    )
     # 4. Define your strategy
     # pass all relevant argument (including the global dataset used after aggregation,
     # if needed by your method.)
+
     strategy = instantiate(
         cfg.strategy,
-        evaluate_fn=evaluate_fn,
-        on_fit_config_fn=get_on_fit_config(),
+        evaluate_metrics_aggregation_fn = weighted_average
     )
 
     # 5. Start Simulation
     history = fl.simulation.start_simulation(
-        client_fn = "test",
-        num_clients = "test",
-        config = fl.server.ServerConfig(num_rounds=),
-        client_resources = {
-
+        client_fn = client_fn,
+        num_clients=cfg.num_clients,
+        config = fl.server.ServerConfig(num_rounds=cfg.num_rounds),
+        client_resources={
+            "num_cpus": cfg.client_resources.num_cpus,
+            "num_gpus": cfg.client_resources.num_gpus,
         },
         strategy = strategy
     )
