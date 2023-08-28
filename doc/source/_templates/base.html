@@ -41,7 +41,9 @@
 
     {#- Site title -#}
     {%- block htmltitle -%}
-      {% if not docstitle %}
+      {% if versions %}
+        <title>{{ docstitle }} {{ current_version.name }}</title>
+      {% elif not docstitle %}
         <title>{{ title|striptags|e }}</title>
       {% elif pagename == master_doc %}
         <title>{{ docstitle|striptags|e }}</title>
