@@ -1,3 +1,4 @@
+centralized: True
 dataset:
   dataset_name: "all"
   train_ratio: .75
