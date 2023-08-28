@@ -30,7 +30,7 @@ def run_single_exp(config,dataset_name,task_type):
     preds_test = tree.predict(X_test)
     result_test=evaluate(task_type,y_test,preds_test)
     return result_train,result_test
-def run_exp(config,dataset_name="all",task_type=None):
+def run_centralized(config,dataset_name="all",task_type=None):
     dataset_tasks={
         "a9a":"BINARY",
         "cod-rna":"BINARY",
