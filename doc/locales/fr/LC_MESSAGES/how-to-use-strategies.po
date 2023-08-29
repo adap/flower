@@ -2084,8 +2084,8 @@ msgid "Add support for custom `ClientManager` as a `start_simulation` parameter 
 msgstr "Ajout de la prise en charge d'un `ClientManager` personnalisé comme paramètre de `start_simulation` ([#1171](https://github.com/adap/flower/pull/1171))"
 
 #: ../../source/ref-changelog.md:459
-msgid "New documentation for [implementing how-to-use-strategies](https://flower.dev/docs/implementing-how-to-use-strategies.html) ([#1097](https://github.com/adap/flower/pull/1097), [#1175](https://github.com/adap/flower/pull/1175))"
-msgstr "Nouvelle documentation pour [mettre en œuvre des stratégies](https://flower.dev/docs/implementing-how-to-use-strategies.html) ([#1097](https://github.com/adap/flower/pull/1097), [#1175](https://github.com/adap/flower/pull/1175))"
+msgid "New documentation for [implementing how-to-use-strategies](https://flower.dev/docs/framework/how-to-implement-strategies.html) ([#1097](https://github.com/adap/flower/pull/1097), [#1175](https://github.com/adap/flower/pull/1175))"
+msgstr "Nouvelle documentation pour [mettre en œuvre des stratégies](https://flower.dev/docs/framework/how-to-implement-strategies.html) ([#1097](https://github.com/adap/flower/pull/1097), [#1175](https://github.com/adap/flower/pull/1175))"
 
 #: ../../source/ref-changelog.md:460
 msgid "New mobile-friendly documentation theme ([#1174](https://github.com/adap/flower/pull/1174))"
@@ -2688,8 +2688,8 @@ msgid "In some cases, it is necessary to send different configuration values to 
 msgstr "Dans certains cas, il est nécessaire d'envoyer des valeurs de configuration différentes à des clients différents."
 
 #: ../../source/how-to-configure-clients.rst:89
-msgid "This can be achieved by customizing an existing strategy or by `implementing a custom strategy from scratch <https://flower.dev/docs/implementing-how-to-use-strategies.html>`_. Here's a nonsensical example that customizes :code:`FedAvg` by adding a custom ``\"hello\": \"world\"`` configuration key/value pair to the config dict of a *single client* (only the first client in the list, the other clients in this round to not receive this \"special\" config value):"
-msgstr "Ceci peut être réalisé en personnalisant une stratégie existante ou en `mettant en œuvre une stratégie personnalisée à partir de zéro <https://flower.dev/docs/implementing-how-to-use-strategies.html>`_. Voici un exemple absurde qui personnalise :code:`FedAvg` en ajoutant une paire clé/valeur de configuration personnalisée ``\"hello\" : \"world\"`` au config dict d'un *seul client* (uniquement le premier client de la liste, les autres clients de cette série ne recevant pas cette valeur de configuration \"spéciale\") :"
+msgid "This can be achieved by customizing an existing strategy or by `implementing a custom strategy from scratch <https://flower.dev/docs/framework/how-to-implement-strategies.html>`_. Here's a nonsensical example that customizes :code:`FedAvg` by adding a custom ``\"hello\": \"world\"`` configuration key/value pair to the config dict of a *single client* (only the first client in the list, the other clients in this round to not receive this \"special\" config value):"
+msgstr "Ceci peut être réalisé en personnalisant une stratégie existante ou en `mettant en œuvre une stratégie personnalisée à partir de zéro <https://flower.dev/docs/framework/how-to-implement-strategies.html>`_. Voici un exemple absurde qui personnalise :code:`FedAvg` en ajoutant une paire clé/valeur de configuration personnalisée ``\"hello\" : \"world\"`` au config dict d'un *seul client* (uniquement le premier client de la liste, les autres clients de cette série ne recevant pas cette valeur de configuration \"spéciale\") :"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:2
 msgid "Contributor setup"
@@ -4934,152 +4934,152 @@ msgstr "Transformateur (PyTorch/TensorFlow)"
 msgid "BERT (PyTorch/TensorFlow)"
 msgstr "BERT (PyTorch/TensorFlow)"
 
-#: ../../source/implementing-how-to-use-strategies.rst:2
+#: ../../source/how-to-implement-strategies.rst:2
 msgid "Implementing Strategies"
 msgstr "Mettre en place des stratégies"
 
-#: ../../source/implementing-how-to-use-strategies.rst:4
+#: ../../source/how-to-implement-strategies.rst:4
 msgid "The strategy abstraction enables implementation of fully custom how-to-use-strategies. A strategy is basically the federated learning algorithm that runs on the server. Strategies decide how to sample clients, how to configure clients for training, how to aggregate updates, and how to evaluate models. Flower provides a few built-in how-to-use-strategies which are based on the same API described below."
 msgstr "L'abstraction de la stratégie permet de mettre en œuvre des stratégies entièrement personnalisées. Une stratégie est essentiellement l'algorithme d'apprentissage fédéré qui s'exécute sur le serveur. Les stratégies décident comment échantillonner les clients, comment configurer les clients pour la formation, comment agréger les mises à jour et comment évaluer les modèles. Flower fournit quelques stratégies intégrées qui sont basées sur la même API que celle décrite ci-dessous."
 
-#: ../../source/implementing-how-to-use-strategies.rst:11
+#: ../../source/how-to-implement-strategies.rst:11
 msgid "The :code:`Strategy` abstraction"
 msgstr "L'abstraction :code:`Stratégie`"
 
-#: ../../source/implementing-how-to-use-strategies.rst:13
+#: ../../source/how-to-implement-strategies.rst:13
 msgid "All strategy implementation are derived from the abstract base class :code:`flwr.server.strategy.Strategy`, both built-in implementations and third party implementations. This means that custom strategy implementations have the exact same capabilities at their disposal as built-in ones."
 msgstr "Toutes les implémentations de stratégies sont dérivées de la classe de base abstraite :code:`flwr.server.strategy.Strategy`, qu'il s'agisse d'implémentations intégrées ou d'implémentations tierces. Cela signifie que les implémentations de stratégies personnalisées ont exactement les mêmes capacités à leur disposition que les implémentations intégrées."
 
-#: ../../source/implementing-how-to-use-strategies.rst:18
+#: ../../source/how-to-implement-strategies.rst:18
 msgid "The strategy abstraction defines a few abstract methods that need to be implemented:"
 msgstr "L'abstraction de la stratégie définit quelques méthodes abstraites qui doivent être mises en œuvre :"
 
-#: ../../source/implementing-how-to-use-strategies.rst:75
+#: ../../source/how-to-implement-strategies.rst:75
 msgid "Creating a new strategy means implementing a new :code:`class` (derived from the abstract base class :code:`Strategy`) that implements for the previously shown abstract methods:"
 msgstr "La création d'une nouvelle stratégie implique la mise en œuvre d'une nouvelle :code:`classe` (dérivée de la classe de base abstraite :code:`Stratégie`) qui met en œuvre les méthodes abstraites présentées précédemment :"
 
-#: ../../source/implementing-how-to-use-strategies.rst:100
+#: ../../source/how-to-implement-strategies.rst:100
 msgid "The Flower server calls these methods in the following order:"
 msgstr "Le serveur Flower appelle ces méthodes dans l'ordre suivant :"
 
-#: ../../source/implementing-how-to-use-strategies.rst:177
+#: ../../source/how-to-implement-strategies.rst:177
 msgid "The following sections describe each of those methods in more detail."
 msgstr "Les sections suivantes décrivent chacune de ces méthodes plus en détail."
 
-#: ../../source/implementing-how-to-use-strategies.rst:180
+#: ../../source/how-to-implement-strategies.rst:180
 msgid "The :code:`initialize_parameters` method"
 msgstr "La méthode :code:`initialize_parameters` (initialisation des paramètres)"
 
-#: ../../source/implementing-how-to-use-strategies.rst:182
+#: ../../source/how-to-implement-strategies.rst:182
 msgid ":code:`initialize_parameters` is called only once, at the very beginning of an execution. It is responsible for providing the initial global model parameters in a serialized form (i.e., as a :code:`Parameters` object)."
 msgstr ":code:`initialize_parameters` n'est appelé qu'une seule fois, au tout début d'une exécution. Il est chargé de fournir les paramètres initiaux du modèle global sous une forme sérialisée (c'est-à-dire sous la forme d'un objet :code:`Parameters`)."
 
-#: ../../source/implementing-how-to-use-strategies.rst:184
+#: ../../source/how-to-implement-strategies.rst:184
 msgid "Built-in how-to-use-strategies return user-provided initial parameters. The following example shows how initial parameters can be passed to :code:`FedAvg`:"
 msgstr "Les stratégies intégrées renvoient les paramètres initiaux fournis par l'utilisateur. L'exemple suivant montre comment les paramètres initiaux peuvent être transmis à :code:`FedAvg` :"
 
-#: ../../source/implementing-how-to-use-strategies.rst:209
+#: ../../source/how-to-implement-strategies.rst:209
 msgid "The Flower server will call :code:`initialize_parameters`, which either returns the parameters that were passed to :code:`initial_parameters`, or :code:`None`. If no parameters are returned from :code:`initialize_parameters` (i.e., :code:`None`), the server will randomly select one client and ask it to provide its parameters. This is a convenience feature and not recommended in practice, but it can be useful for prototyping. In practice, it is recommended to always use server-side parameter initialization."
 msgstr "Le serveur Flower appelle :code:`initialize_parameters`, qui renvoie les paramètres passés à :code:`initial_parameters`, ou :code:`None`. Si aucun paramètre n'est renvoyé par :code:`initialize_parameters` (c'est-à-dire :code:`None`), le serveur sélectionne au hasard un client et lui demande de fournir ses paramètres. Il s'agit d'une fonction de commodité qui n'est pas recommandée dans la pratique, mais qui peut être utile pour le prototypage. Dans la pratique, il est recommandé de toujours utiliser l'initialisation des paramètres du côté du serveur."
 
-#: ../../source/implementing-how-to-use-strategies.rst:213
+#: ../../source/how-to-implement-strategies.rst:213
 msgid "Server-side parameter initialization is a powerful mechanism. It can be used, for example, to resume training from a previously saved checkpoint. It is also the fundamental capability needed to implement hybrid approaches, for example, to fine-tune a pre-trained model using federated learning."
 msgstr "L'initialisation des paramètres côté serveur est un mécanisme puissant. Elle peut être utilisée, par exemple, pour reprendre l'entraînement à partir d'un point de contrôle précédemment sauvegardé. C'est également la capacité fondamentale nécessaire pour mettre en œuvre des approches hybrides, par exemple, pour affiner un modèle pré-entraîné à l'aide de l'apprentissage fédéré."
 
-#: ../../source/implementing-how-to-use-strategies.rst:216
+#: ../../source/how-to-implement-strategies.rst:216
 msgid "The :code:`configure_fit` method"
 msgstr "La méthode :code:`configure_fit`"
 
-#: ../../source/implementing-how-to-use-strategies.rst:218
+#: ../../source/how-to-implement-strategies.rst:218
 msgid ":code:`configure_fit` is responsible for configuring the upcoming round of training. What does *configure* mean in this context? Configuring a round means selecting clients and deciding what instructions to send to these clients. The signature of :code:`configure_fit` makes this clear:"
 msgstr ":code:`configure_fit` est chargé de configurer le prochain tour de formation. Que signifie *configurer* dans ce contexte ? Configurer un tour signifie sélectionner des clients et décider des instructions à leur envoyer. La signature de :code:`configure_fit` l'indique clairement :"
 
-#: ../../source/implementing-how-to-use-strategies.rst:231
+#: ../../source/how-to-implement-strategies.rst:231
 msgid "The return value is a list of tuples, each representing the instructions that will be sent to a particular client. Strategy implementations usually perform the following steps in :code:`configure_fit`:"
 msgstr "La valeur de retour est une liste de tuples, chacun représentant les instructions qui seront envoyées à un client particulier. Les implémentations de stratégies effectuent généralement les étapes suivantes dans :code:`configure_fit` :"
 
-#: ../../source/implementing-how-to-use-strategies.rst:233
-#: ../../source/implementing-how-to-use-strategies.rst:280
+#: ../../source/how-to-implement-strategies.rst:233
+#: ../../source/how-to-implement-strategies.rst:280
 msgid "Use the :code:`client_manager` to randomly sample all (or a subset of) available clients (each represented as a :code:`ClientProxy` object)"
 msgstr "Utilise le :code:`client_manager` pour échantillonner au hasard tous les clients disponibles (ou un sous-ensemble d'entre eux) (chacun représenté par un objet :code:`ClientProxy`)"
 
-#: ../../source/implementing-how-to-use-strategies.rst:234
+#: ../../source/how-to-implement-strategies.rst:234
 msgid "Pair each :code:`ClientProxy` with the same :code:`FitIns` holding the current global model :code:`parameters` and :code:`config` dict"
 msgstr "Associe chaque :code:`ClientProxy` au même :code:`FitIns` contenant le modèle global actuel :code:`parameters` et :code:`config` dict"
 
-#: ../../source/implementing-how-to-use-strategies.rst:236
+#: ../../source/how-to-implement-strategies.rst:236
 msgid "More sophisticated implementations can use :code:`configure_fit` to implement custom client selection logic. A client will only participate in a round if the corresponding :code:`ClientProxy` is included in the the list returned from :code:`configure_fit`."
 msgstr "Les implémentations plus sophistiquées peuvent utiliser :code:`configure_fit` pour mettre en œuvre une logique de sélection des clients personnalisée. Un client ne participera à un tour que si le :code:`ClientProxy` correspondant est inclus dans la liste renvoyée par :code:`configure_fit`."
 
-#: ../../source/implementing-how-to-use-strategies.rst:240
+#: ../../source/how-to-implement-strategies.rst:240
 msgid "The structure of this return value provides a lot of flexibility to the user. Since instructions are defined on a per-client basis, different instructions can be sent to each client. This enables custom how-to-use-strategies to train, for example, different models on different clients, or use different hyperparameters on different clients (via the :code:`config` dict)."
 msgstr "La structure de cette valeur de retour offre beaucoup de souplesse à l'utilisateur. Comme les instructions sont définies par client, des instructions différentes peuvent être envoyées à chaque client, ce qui permet d'élaborer des stratégies personnalisées pour former, par exemple, différents modèles sur différents clients, ou utiliser différents hyperparamètres sur différents clients (via le dict :code:`config`)."
 
-#: ../../source/implementing-how-to-use-strategies.rst:243
+#: ../../source/how-to-implement-strategies.rst:243
 msgid "The :code:`aggregate_fit` method"
 msgstr "La méthode :code:`aggregate_fit` (agrégation)"
 
-#: ../../source/implementing-how-to-use-strategies.rst:245
+#: ../../source/how-to-implement-strategies.rst:245
 msgid ":code:`aggregate_fit` is responsible for aggregating the results returned by the clients that were selected and asked to train in :code:`configure_fit`."
 msgstr ":code:`aggregate_fit` est chargé d'agréger les résultats renvoyés par les clients qui ont été sélectionnés et à qui on a demandé de s'entraîner dans :code:`configure_fit`."
 
-#: ../../source/implementing-how-to-use-strategies.rst:258
+#: ../../source/how-to-implement-strategies.rst:258
 msgid "Of course, failures can happen, so there is no guarantee that the server will get results from all the clients it sent instructions to (via :code:`configure_fit`). :code:`aggregate_fit` therefore receives a list of :code:`results`, but also a list of :code:`failures`."
 msgstr "Bien sûr, des échecs peuvent se produire, il n'y a donc aucune garantie que le serveur obtienne des résultats de tous les clients auxquels il a envoyé des instructions (via :code:`configure_fit`). :code:`aggregate_fit` reçoit donc une liste de :code:`résultats`, mais aussi une liste de :code:`échecs`."
 
-#: ../../source/implementing-how-to-use-strategies.rst:260
+#: ../../source/how-to-implement-strategies.rst:260
 msgid ":code:`aggregate_fit` returns an optional :code:`Parameters` object and a dictionary of aggregated metrics. The :code:`Parameters` return value is optional because :code:`aggregate_fit` might decide that the results provided are not sufficient for aggregation (e.g., too many failures)."
 msgstr ":code:`aggregate_fit` renvoie un objet :code:`Parameters` facultatif et un dictionnaire de métriques agrégées. La valeur de retour :code:`Parameters` est facultative car :code:`aggregate_fit` peut décider que les résultats fournis ne sont pas suffisants pour l'agrégation (par exemple, trop d'échecs)."
 
-#: ../../source/implementing-how-to-use-strategies.rst:263
+#: ../../source/how-to-implement-strategies.rst:263
 msgid "The :code:`configure_evaluate` method"
 msgstr "La méthode :code:`configure_evaluate` (en anglais)"
 
-#: ../../source/implementing-how-to-use-strategies.rst:265
+#: ../../source/how-to-implement-strategies.rst:265
 msgid ":code:`configure_evaluate` is responsible for configuring the upcoming round of explanation-federated-evaluation. What does *configure* mean in this context? Configuring a round means selecting clients and deciding what instructions to send to these clients. The signature of :code:`configure_evaluate` makes this clear:"
 msgstr ":code:`configure_evaluate` est chargé de configurer le prochain tour d'évaluation. Que signifie *configurer* dans ce contexte ? Configurer un tour signifie sélectionner des clients et décider des instructions à leur envoyer. La signature de :code:`configure_evaluate` l'indique clairement :"
 
-#: ../../source/implementing-how-to-use-strategies.rst:278
+#: ../../source/how-to-implement-strategies.rst:278
 msgid "The return value is a list of tuples, each representing the instructions that will be sent to a particular client. Strategy implementations usually perform the following steps in :code:`configure_evaluate`:"
 msgstr "La valeur de retour est une liste de tuples, chacun représentant les instructions qui seront envoyées à un client particulier. Les implémentations de stratégies effectuent généralement les étapes suivantes dans :code:`configure_evaluate` :"
 
-#: ../../source/implementing-how-to-use-strategies.rst:281
+#: ../../source/how-to-implement-strategies.rst:281
 msgid "Pair each :code:`ClientProxy` with the same :code:`EvaluateIns` holding the current global model :code:`parameters` and :code:`config` dict"
 msgstr "Associe chaque :code:`ClientProxy` au même :code:`EvaluateIns` contenant le modèle global actuel :code:`parameters` et :code:`config` dict"
 
-#: ../../source/implementing-how-to-use-strategies.rst:283
+#: ../../source/how-to-implement-strategies.rst:283
 msgid "More sophisticated implementations can use :code:`configure_evaluate` to implement custom client selection logic. A client will only participate in a round if the corresponding :code:`ClientProxy` is included in the the list returned from :code:`configure_evaluate`."
 msgstr "Les implémentations plus sophistiquées peuvent utiliser :code:`configure_evaluate` pour mettre en œuvre une logique de sélection des clients personnalisée. Un client ne participera à un tour que si le :code:`ClientProxy` correspondant est inclus dans la liste renvoyée par :code:`configure_evaluate`."
 
-#: ../../source/implementing-how-to-use-strategies.rst:287
+#: ../../source/how-to-implement-strategies.rst:287
 msgid "The structure of this return value provides a lot of flexibility to the user. Since instructions are defined on a per-client basis, different instructions can be sent to each client. This enables custom how-to-use-strategies to evaluate, for example, different models on different clients, or use different hyperparameters on different clients (via the :code:`config` dict)."
 msgstr "La structure de cette valeur de retour offre beaucoup de souplesse à l'utilisateur. Comme les instructions sont définies par client, des instructions différentes peuvent être envoyées à chaque client. Cela permet aux stratégies personnalisées d'évaluer, par exemple, différents modèles sur différents clients, ou d'utiliser différents hyperparamètres sur différents clients (via le dict :code:`config`)."
 
-#: ../../source/implementing-how-to-use-strategies.rst:291
+#: ../../source/how-to-implement-strategies.rst:291
 msgid "The :code:`aggregate_evaluate` method"
 msgstr "La méthode :code:`aggregate_evaluate` (agréger_évaluer)"
 
-#: ../../source/implementing-how-to-use-strategies.rst:293
+#: ../../source/how-to-implement-strategies.rst:293
 msgid ":code:`aggregate_evaluate` is responsible for aggregating the results returned by the clients that were selected and asked to evaluate in :code:`configure_evaluate`."
 msgstr ":code:`aggregate_evaluate` est chargé d'agréger les résultats renvoyés par les clients qui ont été sélectionnés et à qui l'on a demandé d'évaluer dans :code:`configure_evaluate`."
 
-#: ../../source/implementing-how-to-use-strategies.rst:306
+#: ../../source/how-to-implement-strategies.rst:306
 msgid "Of course, failures can happen, so there is no guarantee that the server will get results from all the clients it sent instructions to (via :code:`configure_evaluate`). :code:`aggregate_evaluate` therefore receives a list of :code:`results`, but also a list of :code:`failures`."
 msgstr "Bien sûr, des échecs peuvent se produire, il n'y a donc aucune garantie que le serveur obtienne des résultats de tous les clients auxquels il a envoyé des instructions (via :code:`configure_evaluate`). :code:`aggregate_evaluate` reçoit donc une liste de :code:`résultats`, mais aussi une liste d' :code:`échecs`."
 
-#: ../../source/implementing-how-to-use-strategies.rst:308
+#: ../../source/how-to-implement-strategies.rst:308
 msgid ":code:`aggregate_evaluate` returns an optional :code:`float` (loss) and a dictionary of aggregated metrics. The :code:`float` return value is optional because :code:`aggregate_evaluate` might decide that the results provided are not sufficient for aggregation (e.g., too many failures)."
 msgstr ":code:`aggregate_evaluate` renvoie un :code:`float` facultatif (perte) et un dictionnaire de mesures agrégées. La valeur de retour :code:`float` est facultative car :code:`aggregate_evaluate` peut décider que les résultats fournis ne sont pas suffisants pour l'agrégation (par exemple, trop d'échecs)."
 
-#: ../../source/implementing-how-to-use-strategies.rst:311
+#: ../../source/how-to-implement-strategies.rst:311
 msgid "The :code:`evaluate` method"
 msgstr "La méthode :code:`évaluer`"
 
-#: ../../source/implementing-how-to-use-strategies.rst:313
+#: ../../source/how-to-implement-strategies.rst:313
 msgid ":code:`evaluate` is responsible for evaluating model parameters on the server-side. Having :code:`evaluate` in addition to :code:`configure_evaluate`/:code:`aggregate_evaluate` enables how-to-use-strategies to perform both servers-side and client-side (federated) explanation-federated-evaluation."
 msgstr "le fait d'avoir :code:`evaluate` en plus de :code:`configure_evaluate`/:code:`aggregate_evaluate` permet aux stratégies d'effectuer des évaluations à la fois côté serveur et côté client (fédéré)."
 
-#: ../../source/implementing-how-to-use-strategies.rst:323
+#: ../../source/how-to-implement-strategies.rst:323
 msgid "The return value is again optional because the strategy might not need to implement server-side explanation-federated-evaluation or because the user-defined :code:`evaluate` method might not complete successfully (e.g., it might fail to load the server-side explanation-federated-evaluation data)."
 msgstr "La valeur de retour est à nouveau facultative parce que la stratégie peut ne pas avoir besoin de mettre en œuvre l'évaluation côté serveur ou parce que la méthode :code:`evaluate` définie par l'utilisateur peut ne pas se terminer avec succès (par exemple, elle peut échouer à charger les données de l'évaluation côté serveur)."
 
@@ -6574,8 +6574,8 @@ msgid "Server-side explanation-federated-evaluation can be enabled by passing an
 msgstr "L'évaluation côté serveur peut être activée en passant une fonction d'évaluation à :code:`evaluate_fn`."
 
 #: ../../source/how-to-use-strategies.rst:89
-msgid "Writing a fully custom strategy is a bit more involved, but it provides the most flexibility. Read the `Implementing Strategies <implementing-how-to-use-strategies.html>`_ guide to learn more."
-msgstr "L'écriture d'une stratégie entièrement personnalisée est un peu plus complexe, mais c'est celle qui offre le plus de souplesse. Lis le guide `Implémentation des stratégies <implementing-how-to-use-strategies.html>`_ pour en savoir plus."
+msgid "Writing a fully custom strategy is a bit more involved, but it provides the most flexibility. Read the `Implementing Strategies <how-to-implement-strategies.html>`_ guide to learn more."
+msgstr "L'écriture d'une stratégie entièrement personnalisée est un peu plus complexe, mais c'est celle qui offre le plus de souplesse. Lis le guide `Implémentation des stratégies <how-to-implement-strategies.html>`_ pour en savoir plus."
 
 #: ../../source/how-to-enable-ssl-connections.rst:2
 msgid "SSL-enabled Server and Client"
