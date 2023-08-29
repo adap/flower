@@ -40,3 +40,9 @@ cd examples/doc
 make docs
 cd build/html
 aws s3 sync --delete --exclude ".*" --exclude "v/*" --acl public-read --cache-control "no-cache" ./ s3://flower.dev/docs/examples
+
+# Build and deploy Flower iOS docs
+cd $ROOT
+./dev/build-swift-api-ref.sh
+cd SwiftDoc/html
+aws s3 sync --delete --exclude ".*" --exclude "v/*" --acl public-read --cache-control "no-cache" ./ s3://flower.dev/docs/ios
