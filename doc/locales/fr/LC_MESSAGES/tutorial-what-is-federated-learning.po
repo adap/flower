@@ -1,0 +1,681 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022 Adap GmbH
+# This file is distributed under the same license as the Flower package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Flower \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-08-29 14:36+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:9
+msgid "What is Federated Learning?"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:11
+msgid "Welcome to the Flower federated learning tutorial!"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:13
+msgid ""
+"In this tutorial, you will learn what federated learning is, build your "
+"first system in Flower, and gradually extend it. If you work through all "
+"parts of the tutorial, you will be able to build advanced federated "
+"learning systems that approach the current state of the art in the field."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:15
+msgid ""
+"🧑‍🏫 This tutorial starts at zero and expects no familiarity with "
+"federated learning. Only a basic understanding of data science and Python"
+" programming is assumed."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:17
+msgid ""
+"`Star Flower on GitHub <https://github.com/adap/flower>`__ ⭐️ and join "
+"the open-source Flower community on Slack to connect, ask questions, and "
+"get help: `Join Slack <https://flower.dev/join-slack>`__ 🌼 We'd love to "
+"hear from you in the ``#introductions`` channel! And if anything is "
+"unclear, head over to the ``#questions`` channel."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:19
+msgid "Let's get stated!"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:31
+msgid "Classic machine learning"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:33
+msgid ""
+"Before we begin to discuss federated learning, let us quickly recap how "
+"most machine learning works today."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:35
+msgid ""
+"In machine learning, we have a model, and we have data. The model could "
+"be a neural network (as depicted here), or something else, like classical"
+" linear regression."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:41
+msgid "|a156933883f24cdca73e8915978d5a87|"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:109
+msgid "Model and data"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:47
+msgid ""
+"We train the model using the data to perform a useful task. A task could "
+"be to detect objects in images, transcribe an audio recording, or play a "
+"game like Go."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:53
+msgid "|82414eec6d1b477cb6442ac4222eda24|"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:111
+msgid "Train model using data"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:59
+msgid ""
+"Now, in practice, the training data we work with doesn't originate on the"
+" machine we train the model on. It gets created somewhere else."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:61
+msgid ""
+"It originates on a smartphone by the user interacting with an app, a car "
+"collecting sensor data, a laptop receiving input via the keyboard, or a "
+"smart speaker listening to someone trying to sing a song."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:67
+msgid "|ca6de66a13804481b89cb170c2a51651|"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:113
+msgid "Data on a phone"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:73
+msgid ""
+"What's also important to mention, this \"somewhere else\" is usually not "
+"just one place, it's many places. It could be several devices all running"
+" the same app. But it could also be several organizations, all generating"
+" data for the same task."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:79
+msgid "|a7a18bc077fe41b0bd80c6197040fc84|"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:115
+msgid "Data is on many devices"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:85
+msgid ""
+"So to use machine learning, or any kind of data analysis, the approach "
+"that has been used in the past was to collect all data on a central "
+"server. This server can be somewhere in a data center, or somewhere in "
+"the cloud."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:91
+msgid "|1a146d767bf94e9db91f7154d05ee372|"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:117
+msgid "Central data collection"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:97
+msgid ""
+"Once all the data is collected in one place, we can finally use machine "
+"learning algorithms to train our model on the data. This is the machine "
+"learning approach that we've basically always relied on."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:103
+msgid "|8d7f3c77b18d457ca64af65c79676957|"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:119
+msgid "Central model training"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:130
+msgid "Challenges of classical machine learning"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:132
+msgid ""
+"The classic machine learning approach we've just seen can be used in some"
+" cases. Great examples include categorizing holiday photos, or analyzing "
+"web traffic. Cases, where all the data is naturally available on a "
+"centralized server."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:138
+msgid "|1f8312065d29482fae246c0c83af29d4|"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:173
+msgid "Centralized possible"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:144
+msgid ""
+"But the approach can not be used in many other cases. Cases, where the "
+"data is not available on a centralized server, or cases where the data "
+"available on one server is not enough to train a good model."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:150
+msgid "|5f17d2586475437d8595a8c8b98badba|"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:175
+msgid "Centralized impossible"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:156
+msgid ""
+"There are many reasons why the classic centralized machine learning "
+"approach does not work for a large number of highly important real-world "
+"use cases. Those reasons include:"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:158
+msgid ""
+"**Regulations**: GDPR (Europe), CCPA (California), PIPEDA (Canada), LGPD "
+"(Brazil), PDPL (Argentina), KVKK (Turkey), POPI (South Africa), FSS "
+"(Russia), CDPR (China), PDPB (India), PIPA (Korea), APPI (Japan), PDP "
+"(Indonesia), PDPA (Singapore), APP (Australia), and other regulations "
+"protect sensitive data from being moved. In fact, those regulations "
+"sometimes even prevent single organizations from combining their own "
+"users' data for artificial intelligence training because those users live"
+" in different parts of the world, and their data is governed by different"
+" data protection regulations."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:160
+msgid ""
+"**User preference**: In addition to regulation, there are use cases where"
+" users just expect that no data leaves their device, ever. If you type "
+"your passwords and credit card info into the digital keyboard of your "
+"phone, you don't expect those passwords to end up on the server of the "
+"company that developed that keyboard, do you? In fact, that use case was "
+"the reason federated learning was invented in the first place."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:161
+msgid ""
+"**Data volume**: Some sensors, like cameras, produce such a high data "
+"volume that it is neither feasible nor economic to collect all the data "
+"(due to, for example, bandwidth or communication efficiency). Think about"
+" a national rail service with hundreds of train stations across the "
+"country. If each of these train stations is outfitted with a number of "
+"security cameras, the volume of raw on-device data they produce requires "
+"incredibly powerful and exceedingly expensive infrastructure to process "
+"and store. And most of the data isn't even useful."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:164
+msgid "Examples where centralized machine learning does not work include:"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:166
+msgid ""
+"Sensitive healthcare records from multiple hospitals to train cancer "
+"detection models"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:167
+msgid ""
+"Financial information from different organizations to detect financial "
+"fraud"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:168
+msgid "Location data from your electric car to make better range prediction"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:169
+msgid "End-to-end encrypted messages to train better auto-complete models"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:171
+msgid ""
+"The popularity of privacy-enhancing systems like the `Brave "
+"<https://brave.com/>`__ browser or the `Signal <https://signal.org/>`__ "
+"messenger shows that users care about privacy. In fact, they choose the "
+"privacy-enhancing version over other alternatives, if such an alernative "
+"exists. But what can we do to apply machine learning and data science to "
+"these cases to utilize private data? After all, these are all areas that "
+"would benefit significantly from recent advances in AI."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:186
+msgid "Federated learning"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:188
+msgid ""
+"Federated learning simply reverses this approach. It enables machine "
+"learning on distributed data by moving the training to the data, instead "
+"of moving the data to the training. Here's the single-sentence "
+"explanation:"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:190
+msgid "Central machine learning: move the data to the computation"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:191
+msgid "Federated (machine) learning: move the computation to the data"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:193
+msgid ""
+"By doing so, it enables us to use machine learning (and other data "
+"science approaches) in areas where it wasn't possible before. We can now "
+"train excellent medical AI models by enabling different hospitals to work"
+" together. We can solve financial fraud by training AI models on the data"
+" of different financial institutions. We can build novel privacy-"
+"enhancing applications (such as secure messaging) that have better built-"
+"in AI than their non-privacy-enhancing alternatives. And those are just a"
+" few of the examples that come to mind. As we deploy federated learning, "
+"we discover more and more areas that can suddenly be reinvented because "
+"they now have access to vast amounts of previously inaccessible data."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:196
+msgid ""
+"So how does federated learning work, exactly? Let's start with an "
+"intuitive explanation."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:199
+msgid "Federated learning in five steps"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:202
+msgid "Step 0: Initialize global model"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:204
+msgid ""
+"We start by initializing the model on the server. This is exactly the "
+"same in classic centralized learning: we initialize the model parameters,"
+" either randomly or from a previously saved checkpoint."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:210
+msgid "|4e9e0aa5c36c4490a7786685325fe273|"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:307
+msgid "Initialize global model"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:217
+msgid ""
+"Step 1: Send model to a number of connected organizations/devices (client"
+" nodes)"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:219
+msgid ""
+"Next, we send the parameters of the global model to the connected client "
+"nodes (think: edge devices like smartphones or servers belonging to "
+"organizations). This is to ensure that each participating node starts "
+"their local training using the same model parameters. We often use only a"
+" few of the connected nodes instead of all nodes. The reason for this is "
+"that selecting more and more client nodes has diminishing returns."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:225
+msgid "|7601ba6a364e49cabb3a43b102e9bcf9|"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:309
+msgid "Send global model"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:232
+msgid ""
+"Step 2: Train model locally on the data of each organization/device "
+"(client node)"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:234
+msgid ""
+"Now that all (selected) client nodes have the latest version of the "
+"global model parameters, they start the local training. They use their "
+"own local dataset to train their own local model. They don't train the "
+"model until full convergence, but they only train for a little while. "
+"This could be as little as one epoch on the local data, or even just a "
+"few steps (mini-batches)."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:240
+msgid "|5e1e8968f5a64deb9830231f9bc63602|"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:311
+msgid "Train on local data"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:247
+msgid "Step 3: Return model updates back to the server"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:249
+msgid ""
+"After local training, each client node has a slightly different version "
+"of the model parameters they originally received. The parameters are all "
+"different because each client node has different examples in its local "
+"dataset. The client nodes then send those model updates back to the "
+"server. The model updates they send can either be the full model "
+"parameters or just the gradients that were accumulated during local "
+"training."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:255
+msgid "|8c2c8df33cbc4fd2992074f9d6bcca48|"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:313
+msgid "Send model updates"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:262
+msgid "Step 4: Aggregate model updates into a new global model"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:264
+msgid ""
+"The server receives model updates from the selected client nodes. If it "
+"selected 100 client nodes, it now has 100 slightly different versions of "
+"the original global model, each trained on the local data of one client. "
+"But didn't we want to have one model that contains the learnings from the"
+" data of all 100 client nodes?"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:266
+msgid ""
+"In order to get one single model, we have to combine all the model "
+"updates we received from the client nodes. This process is called "
+"*aggregation*, and there are many different ways to do it. The most basic"
+" way to do it is called *Federated Averaging* (`McMahan et al., 2016 "
+"<https://arxiv.org/abs/1602.05629>`__), often abbreviated as *FedAvg*. "
+"*FedAvg* takes the 100 model updates and, as the name suggests, averages "
+"them. To be more precise, it takes the *weighted average* of the model "
+"updates, weighted by the number of examples each client used for "
+"training. The weighting is important to make sure that each data example "
+"has the same \"influence\" on the resulting global model. If one client "
+"has 10 examples, and another client has 100 examples, then - without "
+"weighting - each of the 10 examples would influence the global model ten "
+"times as much as each of the 100 examples."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:273
+msgid "|94c61daba6764a33acac06e03582df32|"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:315
+msgid "Aggregate model updates"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:280
+msgid "Step 5: Repeat steps 1 to 4 until the model converges"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:282
+msgid ""
+"Steps 1 to 4 are what we call a single round of federated learning. The "
+"global model parameters get sent to the participating client nodes (step "
+"1), the client nodes train on their local data (step 2), they send their "
+"updated models to the server (step 3), and the server then aggregates the"
+" model updates to get a new version of the global model (step 4)."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:284
+msgid ""
+"During a single round, each client node that participates in that "
+"iteration only trains for a little while. This means that after the "
+"aggregation step (step 4), we have a model that has been trained on all "
+"the data of all participating client nodes, but only for a little while. "
+"We then have to repeat this training process over and over again to "
+"eventually arrive at a fully trained model that performs well across the "
+"data of all client nodes."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:287
+msgid "Conclusion"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:289
+msgid ""
+"Congratulations, you now understand the basics of federated learning. "
+"There's a lot more to discuss, of course, but that was federated learning"
+" in a nutshell. In later parts of this tutorial, we will go into more "
+"detail. Interesting questions include: How can we select the best client "
+"nodes that should participate in the next round? What's the best way to "
+"aggregate model updates? How can we handle failing client nodes "
+"(stragglers)?"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:292
+msgid "Federated evaluation"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:294
+msgid ""
+"Just like we can train a model on the decentralized data of different "
+"client nodes, we can also evaluate the model on that data to receive "
+"valuable metrics. This is called federated evaluation, sometimes "
+"abbreviated as FE. In fact, federated evaluation is an integral part of "
+"most federated learning systems."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:297
+msgid "Federated analytics"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:299
+msgid ""
+"In many cases, machine learning isn't necessary to derive value from "
+"data. Data analysis can yield valuable insights, but again, there's often"
+" not enough data to get a clear answer. What's the average age at which "
+"people develop a certain type of health condition? Federated analytics "
+"enables such queries over multiple client nodes. It is usually used in "
+"conjunction with other privacy-enhancing technologies like secure "
+"aggregation to prevent the server from seeing the results submitted by "
+"individual client nodes."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:303
+msgid "Differential Privacy"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:305
+msgid ""
+"Differential privacy (DP) is often mentioned in the context of Federated "
+"Learning. It is a privacy-preserving method used when analyzing and "
+"sharing statistical data, ensuring the privacy of individual "
+"participants. DP achieves this by adding statistical noise to the model "
+"updates, ensuring any individual participants’ information cannot be "
+"distinguished or re-identified. This technique can be considered an "
+"optimization that provides a quantifiable privacy protection measure."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:326
+msgid "Flower"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:328
+msgid ""
+"Federated learning, federated evaluation, and federated analytics require"
+" infrastructure to move machine learning models back and forth, train and"
+" evaluate them on local data, and then aggregate the updated models. "
+"Flower provides the infrastructure to do exactly that in an easy, "
+"scalable, and secure way. In short, Flower presents a unified approach to"
+" federated learning, analytics, and evaluation. It allows the user to "
+"federate any workload, any ML framework, and any programming language."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:334
+msgid "|fb2f14d7a7f74e92a751b2d78d9b8e62|"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:340
+msgid ""
+"Flower federated learning server and client nodes (car, scooter, personal"
+" computer, roomba, and phone)"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:351
+msgid "Final remarks"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:353
+msgid ""
+"Congratulations, you just learned the basics of federated learning and "
+"how it relates to the classic (centralized) machine learning!"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:355
+msgid ""
+"In the next part of this tutorial, we are going to build a first "
+"federated learning system with Flower."
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:367
+msgid "Next steps"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:369
+msgid ""
+"Before you continue, make sure to join the Flower community on Slack: "
+"`Join Slack <https://flower.dev/join-slack/>`__"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:371
+msgid ""
+"There's a dedicated ``#questions`` channel if you need help, but we'd "
+"also love to hear who you are in ``#introductions``!"
+msgstr ""
+
+#: ../../source/tutorial-what-is-federated-learning.ipynb:373
+msgid ""
+"The `Flower Federated Learning Tutorial - Part 1 "
+"<https://flower.dev/docs/framework/tutorial-get-started-with-flower-"
+"pytorch.html>`__ shows how to build a simple federated learning system "
+"with PyTorch and Flower."
+msgstr ""
+
+#~ msgid "|5d540b85cedf4071a803f77237490bb6|"
+#~ msgstr ""
+
+#~ msgid "|45b89ab3e0d9438d9c31c3b607f0969c|"
+#~ msgstr ""
+
+#~ msgid "|947049f1820d400e8ad0a3e11993f360|"
+#~ msgstr ""
+
+#~ msgid "|15ee3d586dc84389a44459c968b6f676|"
+#~ msgstr ""
+
+#~ msgid "|662a2622c94644a3a200bf33d7cebee3|"
+#~ msgstr ""
+
+#~ msgid "|6af8b9563b9c4ee2a5213d60fe02fd4b|"
+#~ msgstr ""
+
+#~ msgid "|fdb2f164adfb4a8d9c749b72c3dbf982|"
+#~ msgstr ""
+
+#~ msgid "|86d841c146c148f3bd2d9069e76feeaa|"
+#~ msgstr ""
+
+#~ msgid "|dcf439229087411ab44775b84e1dcc51|"
+#~ msgstr ""
+
+#~ msgid "|4c693f4a0d744f4d98c0db6ef53c8ac2|"
+#~ msgstr ""
+
+#~ msgid "|b1265f688014436f832b6e015171e687|"
+#~ msgstr ""
+
+#~ msgid "|7609a855624341c6855a8f4f350ff00f|"
+#~ msgstr ""
+
+#~ msgid "|917864f274fb4ed38fd5d56ef6cdf5ae|"
+#~ msgstr ""
+
+#~ msgid "|af07402dbc37494fa69ef6fef6dabcad|"
+#~ msgstr ""
+
+#~ msgid "|9740867fbceb422f940aff4b7f854db6|"
+#~ msgstr ""
+
+#~ msgid "|fb1e305093834e7c98d65002b8684c45|"
+#~ msgstr ""
+
+#~ msgid "|46e527a6372847409294a51c508d8b42|"
+#~ msgstr ""
+
+#~ msgid "|b1adc930280749a5af7ca58a075e6a16|"
+#~ msgstr ""
+
+#~ msgid "|609debb3ada34668a7b6a646c0999d9b|"
+#~ msgstr ""
+
+#~ msgid "|645eec3e9a1840bab35a048f7f994a2a|"
+#~ msgstr ""
+
+#~ msgid "|6f1faabc3427405aadb1858f2b5acd4c|"
+#~ msgstr ""
+
+#~ msgid "|771d538b9a974dcd938e2d56e15a67bd|"
+#~ msgstr ""
+
+#~ msgid "|4d7d9968e7974fe9a115111a9b034acb|"
+#~ msgstr ""
+
+#~ msgid "|8b9999e9c81a40709686e6e6b05dc816|"
+#~ msgstr ""
+
+#~ msgid "|1348f20807504383b2c3fba3f38f4788|"
+#~ msgstr ""
+
+#~ msgid "|60740b7c2df343beabb74b9ef464c6d3|"
+#~ msgstr ""
+
+#~ msgid "|b85a3cd83fe748acae855c734c858ba5|"
+#~ msgstr ""
+
+#~ msgid "|135846911b64436083fb2d2260a5d0db|"
+#~ msgstr ""
+
