@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from flwr.server.history import History
 
+import subprocess as sp
+import os
 
 def plot_metric_from_history(
     hist: History,
@@ -110,3 +112,11 @@ def save_results_as_pickle(
     # save results to pickle
     with open(str(path), "wb") as handle:
         pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+
+def get_gpu_memory():
+    command = "nvidia-smi --query-gpu=memory.free --format=csv"
+    memory_free_info = sp.check_output(command.split()).decode('ascii').split('\n')[:-1][1:]
+    memory_free_values = [int(x.split()[0]) for i, x in enumerate(memory_free_info)]
+    return memory_free_values
