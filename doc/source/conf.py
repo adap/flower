@@ -39,6 +39,7 @@ author = "The Flower Authors"
 release = "1.5.0"
 
 locale_dirs = ['../locales']
+gettext_compact = "framework-docs"
 
 # -- General configuration ---------------------------------------------------
 
