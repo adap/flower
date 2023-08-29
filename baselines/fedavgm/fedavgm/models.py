@@ -22,7 +22,6 @@ def cnn(input_shape, num_classes):
                 padding="same",
                 activation="relu",
                 input_shape=input_shape,
-                kernel_regularizer=l2(weight_decay),
             ),
             keras.layers.MaxPooling2D((3, 3), strides=(2, 2)),
             keras.layers.BatchNormalization(),
@@ -31,17 +30,20 @@ def cnn(input_shape, num_classes):
                 (5, 5),
                 padding="same",
                 activation="relu",
-                kernel_regularizer=l2(weight_decay),
             ),
             keras.layers.BatchNormalization(),
             keras.layers.MaxPooling2D((3, 3), strides=(2, 2)),
             keras.layers.Flatten(),
-            keras.layers.Dense(384, activation="relu"),
-            keras.layers.Dense(192, activation="relu"),
+            keras.layers.Dense(
+                384, activation="relu", kernel_regularizer=l2(weight_decay)
+            ),
+            keras.layers.Dense(
+                192, activation="relu", kernel_regularizer=l2(weight_decay)
+            ),
             keras.layers.Dense(num_classes, activation="softmax"),
         ]
     )
-    optimizer = SGD(decay=weight_decay)
+    optimizer = SGD(learning_rate=0.1)
     model.compile(
         loss="categorical_crossentropy", optimizer=optimizer, metrics=["accuracy"]
     )
