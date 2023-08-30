@@ -45,4 +45,4 @@ aws s3 sync --delete --exclude ".*" --exclude "v/*" --acl public-read --cache-co
 cd $ROOT
 ./dev/build-swift-api-ref.sh
 cd SwiftDoc/html
-aws s3 sync --delete --exclude ".*" --exclude "v/*" --acl public-read --cache-control "no-cache" ./ s3://flower.dev/docs/ios
+aws s3 sync --delete --exclude ".*" --acl public-read --cache-control "no-cache" ./ s3://flower.dev/docs/ios
