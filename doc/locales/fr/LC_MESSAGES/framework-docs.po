@@ -1,17 +1,18 @@
-
 msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2023-08-29 18:59+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2023-08-30 15:44+0000\n"
+"Last-Translator: charles0641010f2bb54b6a <charles@adap.com>\n"
+"Language-Team: French <https://hosted.weblate.org/projects/"
+"flower-framework-docs/framework-docs/fr/>\n"
 "Language: fr\n"
-"Language-Team: fr <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 5.0.1-dev\n"
 "Generated-By: Babel 2.12.1\n"
 
 #: ../../source/contributor-explanation-architecture.rst:2
@@ -194,9 +195,8 @@ msgstr ""
 " le résultat escompté !"
 
 #: ../../source/contributor-how-to-develop-in-vscode-dev-containers.rst:2
-#, fuzzy
 msgid "Develop in VSCode Dev Containers"
-msgstr "VS Code Remote - Conteneurs"
+msgstr "Utiliser les conteneurs VS Code Remote"
 
 #: ../../source/contributor-how-to-develop-in-vscode-dev-containers.rst:4
 msgid ""
@@ -205,11 +205,10 @@ msgid ""
 "tests. For this purpose we are using the VSCode Remote Containers "
 "extension. What is it? Read the following quote:"
 msgstr ""
-"Lorsque nous travaillons sur le cadre Flower, nous voulons nous assurer "
-"que tous les contributeurs utilisent le même environnement de "
-"développement pour formater le code ou exécuter des tests. À cette fin, "
-"nous utilisons l'extension VSCode Remote Containers. Qu'est-ce que c'est "
-"? Lis la citation suivante :"
+"Lorsque nous travaillons sur Flower, nous voulons nous assurer que tous les "
+"contributeurs utilisent le même environnement de développement pour formater "
+"le code ou exécuter des tests. À cette fin, nous utilisons l'extension "
+"VSCode Remote Containers. Qu'est-ce que c'est ?"
 
 #: ../../source/contributor-how-to-develop-in-vscode-dev-containers.rst:7
 msgid ""
@@ -323,9 +322,8 @@ msgstr ""
 "<https://code.visualstudio.com/docs/remote/containers-tutorial>`_"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:2
-#, fuzzy
 msgid "Install development versions"
-msgstr "Installe les versions de développement de Flower"
+msgstr "Installer les versions de développement de Flower"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:5
 msgid "Install development versions of Flower"
@@ -433,9 +431,9 @@ msgid ""
 "Python packages can be installed from git repositories. Use one of the "
 "following commands to install the Flower directly from GitHub."
 msgstr ""
-"Les paquets Python peuvent être installés à partir des dépôts git. "
-"Utilise l'une des commandes suivantes pour installer la Fleur directement"
-" à partir de GitHub."
+"Les paquets Python peuvent être installés à partir des dépôts git. Utilise "
+"l'une des commandes suivantes pour installer Flower directement à partir de "
+"GitHub."
 
 #: ../../source/contributor-how-to-install-development-versions.rst:37
 msgid "Install ``flwr`` from the default GitHub branch (``main``):"
@@ -484,22 +482,20 @@ msgid "Open Jupyter Notebooks on Google Colab"
 msgstr "Ouvre les carnets Jupyter sur Google Colab"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:51
-#, fuzzy
 msgid ""
 "Open the notebook ``doc/source/tutorial-get-started-with-flower-"
 "pytorch.ipynb``:"
 msgstr ""
-"Ouvre le carnet ``doc/source/tutorial/Flower-1-Intro-to-FL-"
-"PyTorch.ipynb`` :"
+"Ouvrir le notebook ``doc/source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb``"
+" :"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:53
-#, fuzzy
 msgid ""
 "https://colab.research.google.com/github/adap/flower/blob/main/doc/source"
 "/tutorial-get-started-with-flower-pytorch.ipynb"
 msgstr ""
-"https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial/Flower-1"
-"-Intro-to-FL-PyTorch.ipynb"
+"https://colab.research.google.com/github/adap/flower/blob/main/doc/source/"
+"tutorial-get-started-with-flower-pytorch.ipynb"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:55
 msgid ""
@@ -511,18 +507,16 @@ msgstr ""
 " :"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:57
-#, fuzzy
 msgid ""
 "https://colab.research.google.com/github/adap/flower/blob/branch-"
 "name/doc/source/tutorial-get-started-with-flower-pytorch.ipynb"
 msgstr ""
-"https://colab.research.google.com/github/adap/flower/blob/branch-"
-"name/doc/source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb"
+"https://colab.research.google.com/github/adap/flower/blob/branch-name/doc/"
+"source/tutorial-get-started-with-flower-pytorch.ipynb"
 
 #: ../../source/contributor-how-to-release-flower.rst:2
-#, fuzzy
 msgid "Release Flower"
-msgstr "Renommer le fichier"
+msgstr "Publier Flower"
 
 #: ../../source/contributor-how-to-release-flower.rst:4
 msgid ""
@@ -762,7 +756,7 @@ msgstr ""
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:2
 msgid "Set up a virtual env"
-msgstr ""
+msgstr "Mettre en place un environment virtuel"
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:4
 msgid ""
@@ -878,9 +872,8 @@ msgstr ""
 " de `Flower <https://github.com/adap/flower/tree/main/examples/>`_."
 
 #: ../../source/contributor-how-to-write-documentation.rst:2
-#, fuzzy
 msgid "Write documentation"
-msgstr "Comment rédiger une documentation"
+msgstr "Rédiger de la documentation"
 
 #: ../../source/contributor-how-to-write-documentation.rst:6
 msgid "Project layout"
@@ -945,9 +938,8 @@ msgid "Link to the new rst from ``index.rst``"
 msgstr "Lien vers le nouveau rst depuis ``index.rst``"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:2
-#, fuzzy
 msgid "Good first contributions"
-msgstr "De bonnes premières contributions"
+msgstr "Bonnes premières contributions"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:4
 msgid ""
@@ -962,9 +954,8 @@ msgstr ""
 "chances de voir ton PR accepté dans la base de code de Flower."
 
 #: ../../source/contributor-ref-good-first-contributions.rst:11
-#, fuzzy
 msgid "Where to start"
-msgstr "Par où commencer ?"
+msgstr "Par où commencer"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:13
 msgid ""
@@ -992,9 +983,8 @@ msgid "Examples: See below."
 msgstr "Exemples : voir ci-dessous."
 
 #: ../../source/contributor-ref-good-first-contributions.rst:23
-#, fuzzy
 msgid "Request for Flower Baselines"
-msgstr "Demande de données de base"
+msgstr "Demande pour une nouvelle Flower Baseline"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:25
 msgid ""
@@ -1030,9 +1020,8 @@ msgstr ""
 "de demande de ligne de base !"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:34
-#, fuzzy
 msgid "Request for examples"
-msgstr "Demande d'exemples"
+msgstr "Demande pour un nouveau Flower Example"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:36
 msgid ""
@@ -1046,19 +1035,17 @@ msgstr ""
 "serions heureux d'accepter un RP :"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:40
-#, fuzzy
 msgid "Llama 2 fine-tuning, with Hugging Face Transformers and PyTorch"
-msgstr ""
-"Construisons un système d'apprentissage fédéré à l'aide des "
-"transformateurs Hugging Face et de Flower !"
+msgstr "Un fine-tuning de LLaMA 2 avec Hugging Face et PyTorch"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:41
 msgid "XGBoost"
-msgstr ""
+msgstr "XGBoost"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:42
 msgid "Android ONNX on-device training"
 msgstr ""
+"Utiliser Android ONNX pour faire du training directement sur le téléphone"
 
 #: ../../source/contributor-ref-secure-aggregation-protocols.rst:2
 msgid "Secure Aggregation Protocols"
@@ -1111,18 +1098,16 @@ msgid "Types"
 msgstr "Types"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:2
-#, fuzzy
 msgid "Contribute on GitHub"
-msgstr "Configuration du contributeur"
+msgstr "Contribuer sur GitHub"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:4
-#, fuzzy
 msgid ""
 "This guide is for people who want to get involved with Flower, but who "
 "are not used to contributing to GitHub projects."
 msgstr ""
-"Ce guide s'adresse aux personnes qui veulent s'impliquer dans Flower mais"
-" qui n'ont pas l'habitude de contribuer à des projets GitHub."
+"Ce guide s'adresse aux personnes qui veulent participer au développement de "
+"Flower mais qui n'ont pas l'habitude de contribuer à des projets GitHub."
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:6
 msgid ""
@@ -1192,7 +1177,7 @@ msgstr ""
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:34
 msgid "**Forking the Flower repository**"
-msgstr "**Fourche le dépôt de fleurs**"
+msgstr "**Fourche le dépôt de Flower**"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:26
 msgid ""
@@ -1932,41 +1917,39 @@ msgstr ""
 "davantage, ne manque pas de consulter les sites suivants :"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:343
-#, fuzzy
 msgid ""
 "`Good first contributions <https://flower.dev/docs/framework/contributor-"
 "ref-good-first-contributions.html>`_, where you should particularly look "
 "into the :code:`baselines` contributions."
 msgstr ""
-"`Bonnes premières contributions <https://flower.dev/docs/good-first-"
-"contributions.html>`_, où vous devriez particulièrement regarder les "
-"contributions :code:`baselines`."
+"`Bonnes premières contributions <https://flower.dev/docs/framework/"
+"contributor-ref-good-first-contributions.html>`_, où vous devriez "
+"particulièrement regarder les contributions :code:`baselines`."
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:2
 msgid "Get started as a contributor"
-msgstr ""
+msgstr "Devenez un·e contributeur·ice"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:5
 msgid "Prerequisites"
-msgstr ""
+msgstr "Prérequis"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:7
-#, fuzzy
 msgid "`Python 3.7 <https://docs.python.org/3.7/>`_ or above"
-msgstr "Flower nécessite `Python 3.7 <https://docs.python.org/3.7/>`_ ou plus."
+msgstr "`Python 3.7 <https://docs.python.org/3.7/>`_ ou plus"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:8
-#, fuzzy
 msgid "`Poetry 1.3 <https://python-poetry.org/>`_ or above"
-msgstr "Flower nécessite `Python 3.7 <https://docs.python.org/3.7/>`_ ou plus."
+msgstr "`Poetry 1.3 <https://python-poetry.org/>`_ ou plus"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:9
 msgid "(Optional) `pyenv <https://github.com/pyenv/pyenv>`_"
-msgstr ""
+msgstr "(Optionnel) `pyenv <https://github.com/pyenv/pyenv>`_"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:10
 msgid "(Optional) `pyenv-virtualenv <https://github.com/pyenv/pyenv-virtualenv>`_"
 msgstr ""
+"(Optionnel) `pyenv-virtualenv <https://github.com/pyenv/pyenv-virtualenv>`_"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:12
 msgid ""
@@ -1974,6 +1957,10 @@ msgid ""
 "development tools (the ones which support it). Poetry is a build tool "
 "which supports `PEP 517 <https://www.python.org/dev/peps/pep-0517/>`_."
 msgstr ""
+"Flower utilise un fichier :code:`pyproject.toml` pour gérer les dependences "
+"et configurer les outils de développement (du moins ceux qui le supportent). "
+"Poetry est un outil qui support `PEP 517 <https://www.python.org/dev/peps/"
+"pep-0517/>`_."
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:18
 msgid "Developer Machine Setup"
@@ -3373,7 +3360,7 @@ msgstr "Maintenant, voyons ce qui se passe réellement à l'intérieur."
 #: ../../source/tutorial-quickstart-scikitlearn.rst:154
 #: ../../source/tutorial-quickstart-tensorflow.rst:95
 msgid "Flower Server"
-msgstr "Serveur de fleurs"
+msgstr "Serveur de Flower"
 
 #: ../../source/example-walkthrough-pytorch-mnist.rst:71
 msgid ""
@@ -5053,8 +5040,8 @@ msgid ""
 "federated learning workloads. It presents information by default "
 "following a standard message format:"
 msgstr ""
-"L'enregistreur de fleurs garde la trace de tous les événements principaux"
-" qui ont lieu dans les charges de travail de l'apprentissage fédéré. Il "
+"L'enregistreur de Flower garde la trace de tous les événements principaux "
+"qui ont lieu dans les charges de travail de l'apprentissage fédéré. Il "
 "présente les informations par défaut en suivant un format de message "
 "standard :"
 
@@ -7293,7 +7280,7 @@ msgstr ""
 #: ../../source/ref-api-cli.rst:2
 #, fuzzy
 msgid "Flower CLI reference"
-msgstr "Client de fleurs"
+msgstr "Client de Flower"
 
 #: ../../source/ref-api-cli.rst:7
 msgid "flower-server"
@@ -9986,9 +9973,9 @@ msgid ""
 "simulations using the Virtual Client Engine through Jupyter Notebook "
 "(incl. Google Colab)."
 msgstr ""
-"Un nouvel exemple de code (`quickstart_simulation`) démontre des "
-"simulations de fleurs en utilisant le moteur de client virtuel via "
-"Jupyter Notebook (y compris Google Colab)."
+"Un nouvel exemple de code (`quickstart_simulation`) démontre des simulations "
+"de Flower en utilisant le moteur de client virtuel via Jupyter Notebook (y "
+"compris Google Colab)."
 
 #: ../../source/ref-changelog.md:490
 msgid ""
@@ -11951,7 +11938,7 @@ msgstr ""
 #: ../../source/tutorial-build-a-strategy-from-scratch-pytorch.ipynb:258
 #: ../../source/tutorial-use-a-federated-learning-strategy-pytorch.ipynb:258
 msgid "Flower client"
-msgstr "Client de fleurs"
+msgstr "Client de Flower"
 
 #: ../../source/tutorial-build-a-strategy-from-scratch-pytorch.ipynb:260
 #: ../../source/tutorial-use-a-federated-learning-strategy-pytorch.ipynb:260
@@ -12529,8 +12516,8 @@ msgid ""
 "`Watch Flower Summit 2023 videos <https://flower.dev/conf/flower-"
 "summit-2023/>`__"
 msgstr ""
-"`Regardez les vidéos du Sommet de la Fleur 2022 <https://flower.dev/conf"
-"/flower-summit-2022/>`__"
+"`Regardez les vidéos du Flower Summit 2022 <https://flower.dev/conf/"
+"flower-summit-2022/>`__"
 
 #: ../../source/tutorial-get-started-with-flower-pytorch.ipynb:9
 msgid "Get started with Flower"
@@ -14252,7 +14239,7 @@ msgstr ":code:`set_initial_params()`"
 
 #: ../../source/tutorial-quickstart-scikitlearn.rst:47
 msgid "Initializes the model parameters that the Flower server will ask for"
-msgstr "Initialise les paramètres du modèle que le serveur de fleurs demandera"
+msgstr "Initialise les paramètres du modèle que le serveur de Flower demandera"
 
 #: ../../source/tutorial-quickstart-scikitlearn.rst:48
 msgid ":code:`load_mnist()`"
@@ -14762,11 +14749,10 @@ msgid ""
 "federated learning:"
 msgstr ""
 "Comment pouvons-nous donc envoyer ce dictionnaire de configuration du "
-"serveur aux clients ? Les stratégies de fleurs intégrées fournissent un "
-"moyen de le faire, et cela fonctionne de la même façon que l'évaluation "
-"côté serveur. Nous fournissons une fonction à la stratégie, et la "
-"stratégie appelle cette fonction pour chaque cycle d'apprentissage fédéré"
-" :"
+"serveur aux clients ? Les stratégies de Flower intégrées fournissent un "
+"moyen de le faire, et cela fonctionne de la même façon que l'évaluation côté "
+"serveur. Nous fournissons une fonction à la stratégie, et la stratégie "
+"appelle cette fonction pour chaque cycle d'apprentissage fédéré :"
 
 #: ../../source/tutorial-use-a-federated-learning-strategy-pytorch.ipynb:576
 msgid ""
@@ -15641,8 +15627,8 @@ msgid ""
 "Flower federated learning server and client nodes (car, scooter, personal"
 " computer, roomba, and phone)"
 msgstr ""
-"Serveur d'apprentissage fédéré de fleurs et nœuds clients (voiture, "
-"scooter, ordinateur personnel, roomba et téléphone)"
+"Serveur d'apprentissage fédéré de Flower et nœuds clients (voiture, scooter, "
+"ordinateur personnel, roomba et téléphone)"
 
 #: ../../source/tutorial-what-is-federated-learning.ipynb:353
 msgid ""
@@ -17043,4 +17029,3 @@ msgstr ""
 
 #~ msgid "Virtual Env Installation"
 #~ msgstr "Installation de Virtual Env"
-
