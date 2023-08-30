@@ -53,4 +53,4 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
-        run: ./dev/build-swift-api-ref.sh
+        run: ./dev/deploy-swift-docs.sh
