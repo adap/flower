@@ -8,7 +8,7 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
-from tamuna.models import test
+from models import test
 
 
 def gen_evaluate_fn(

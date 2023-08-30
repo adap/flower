@@ -10,7 +10,7 @@ from flwr.common import (
     NDArrays,
 )
 from flwr.server.strategy import Strategy
-from tamuna.models import Net
+from models import Net
 
 
 def aggregate(weights: List[NDArrays], s: float) -> NDArrays:
@@ -21,8 +21,8 @@ def aggregate(weights: List[NDArrays], s: float) -> NDArrays:
     return averaged_weights
 
 
-def create_pattern(dim: int, cohort_size: int, sparsity: int, rand_shuffle_flag: bool):
-    """Creates compression pattern for each client."""
+def create_pattern(dim: int, cohort_size: int, sparsity: int):
+    """Creates compression pattern."""
 
     q = torch.zeros(size=(dim, cohort_size))
     if dim >= cohort_size / sparsity:
@@ -38,9 +38,11 @@ def create_pattern(dim: int, cohort_size: int, sparsity: int, rand_shuffle_flag:
                 q[i, k] = 1
                 k += 1
 
-    if rand_shuffle_flag:
-        q = q[:, torch.randperm(q.size()[1])]
+    return q
 
+
+def shuffle_columns(q: torch.Tensor):
+    q = q[:, torch.randperm(q.size()[1])]
     return q
 
 
@@ -66,11 +68,17 @@ class TamunaStrategy(Strategy):
         self.s = s
         self.dim = None
         self.server_model = None
+        self.compression_pattern = None
 
     def initialize_parameters(self, client_manager):
         """Initialize the server model."""
         self.server_model = Net()
         self.dim = sum(p.numel() for p in self.server_model.parameters())
+
+        self.compression_pattern = create_pattern(
+            self.dim, self.clients_per_round, self.s
+        )  # dim x cohort_size
+
         ndarrays = [
             val.cpu().numpy() for _, val in self.server_model.state_dict().items()
         ]
@@ -81,12 +89,10 @@ class TamunaStrategy(Strategy):
         sampled_clients = client_manager.sample(self.clients_per_round)
         config = {"epochs": self.epochs_per_round[server_round - 1], "eta": self.eta}
 
-        compression_pattern = create_pattern(
-            self.dim, self.clients_per_round, self.s, rand_shuffle_flag=True
-        )  # dim x cohort_size
+        self.compression_pattern = shuffle_columns(self.compression_pattern)
 
         for i in range(self.clients_per_round):
-            save_client_mask_to_file(sampled_clients[i].cid, compression_pattern[:, i])
+            save_client_mask_to_file(sampled_clients[i].cid, self.compression_pattern[:, i])
 
         fit_ins = FitIns(parameters, config)
         return [(client, fit_ins) for client in sampled_clients]

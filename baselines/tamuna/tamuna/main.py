@@ -9,9 +9,11 @@ from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
-from tamuna import client, server, utils
-from tamuna.dataset import load_datasets
-from tamuna.utils import save_results_as_pickle
+import client
+import server
+import utils
+from dataset import load_datasets
+from utils import save_results_as_pickle
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -33,7 +35,7 @@ def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
 
     # partition dataset and get dataloaders
-    trainloaders, testloader = load_datasets(num_clients=cfg.server.num_clients)
+    trainloaders, testloader = load_datasets(num_clients=cfg.server.num_clients, iid=cfg.dataset.iid)
 
     # prepare function that will be used to spawn each client
     client_fn = client.gen_client_fn(
@@ -48,45 +50,44 @@ def main(cfg: DictConfig) -> None:
         testloader, device=cfg.server.server_device, model=cfg.model
     )
 
-    # number of epochs per round is determined by probability p
-    epochs_per_round = np.random.geometric(p=cfg.server.p, size=cfg.server.num_rounds)
-
-    strategy = instantiate(
-        cfg.strategy,
-        clients_per_round=cfg.server.clients_per_round,
-        epochs_per_round=epochs_per_round,
-        eta=cfg.client.eta,
-        s=cfg.server.s,
-        evaluate_fn=evaluate_fn,
-    )
-
-    # Start simulation
-    history = fl.simulation.start_simulation(
-        client_fn=client_fn,
-        num_clients=cfg.server.num_clients,
-        config=fl.server.ServerConfig(num_rounds=cfg.server.num_rounds),
-        client_resources={
-            "num_cpus": cfg.client.client_resources.num_cpus,
-            "num_gpus": cfg.client.client_resources.num_gpus,
-        },
-        strategy=strategy,
-    )
-
-    # Experiment completed. Now we save the results and
-    # generate plots using the `history`
-    print("................")
-    print(history)
-
     # Hydra automatically creates an output directory
     # Let's retrieve it and save some results there
     save_path = HydraConfig.get().runtime.output_dir
 
-    # save results as a Python pickle using a file_path
-    # the directory created by Hydra for each run
-    save_results_as_pickle(history, file_path=save_path, extra_results={})
+    histories = []
+    for i in range(cfg.meta.n_repeats):
+        # number of epochs per round is determined by probability p
+        epochs_per_round = np.random.geometric(p=cfg.server.p, size=cfg.server.num_rounds)
 
-    # plot results and include them in the readme
-    strategy_name = strategy.__class__.__name__
+        strategy = instantiate(
+            cfg.strategy,
+            clients_per_round=cfg.server.clients_per_round,
+            epochs_per_round=epochs_per_round,
+            eta=cfg.client.eta,
+            s=cfg.server.s,
+            evaluate_fn=evaluate_fn,
+        )
+
+        # Start simulation
+        history = fl.simulation.start_simulation(
+            client_fn=client_fn,
+            num_clients=cfg.server.num_clients,
+            config=fl.server.ServerConfig(num_rounds=cfg.server.num_rounds),
+            client_resources={
+                "num_cpus": cfg.client.client_resources.num_cpus,
+                "num_gpus": cfg.client.client_resources.num_gpus,
+            },
+            strategy=strategy,
+        )
+
+        # save results as a Python pickle using a file_path
+        # the directory created by Hydra
+        save_results_as_pickle(history, file_path=save_path, extra_results={}, default_filename=f"results_{i}.pkl")
+
+        histories.append(history)
+
+    # plot results
+    strategy_name = cfg.strategy.__name__
     file_suffix: str = (
         f"_{strategy_name}"
         f"_N={cfg.server.num_clients}"
@@ -97,8 +98,8 @@ def main(cfg: DictConfig) -> None:
         f"_R={cfg.server.num_rounds}"
     )
 
-    utils.plot_metric_from_history(
-        history,
+    utils.plot_metric_from_histories(
+        histories,
         Path(save_path),
         file_suffix,
     )

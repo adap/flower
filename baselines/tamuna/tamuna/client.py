@@ -14,7 +14,7 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
-from tamuna.models import train
+from models import train
 
 
 class FlowerClient(fl.client.NumPyClient):
@@ -73,6 +73,7 @@ class FlowerClient(fl.client.NumPyClient):
 
         with open(self.mask_file_name, "rb") as f:
             mask = pickle.load(f)
+            mask = mask.to(self.device)
 
         self.__load_state()
 

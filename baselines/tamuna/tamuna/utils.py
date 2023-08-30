@@ -6,7 +6,7 @@ from torch import nn
 from functools import reduce
 from pathlib import Path
 from secrets import token_hex
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Union, List
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -43,8 +43,8 @@ def apply_nn_compression(net: nn.Module, mask: torch.tensor) -> nn.Module:
     return net
 
 
-def plot_metric_from_history(
-    hist: History,
+def plot_metric_from_histories(
+    hist: List[History],
     save_plot_path: Path,
     suffix: Optional[str] = "",
 ) -> None:
@@ -52,36 +52,45 @@ def plot_metric_from_history(
 
     Parameters
     ----------
-    hist : History
-        Object containing evaluation for all rounds.
+    hist : Histories
+        Lists of objects containing evaluation for all rounds.
     save_plot_path : Path
         Folder to save the plot to.
     suffix: Optional[str]
         Optional string to add at the end of the filename for the plot.
     """
-    metric_type = "centralized"
-    metric_dict = (
-        hist.metrics_centralized
-        if metric_type == "centralized"
-        else hist.metrics_distributed
-    )
-    rounds, values = zip(*metric_dict["accuracy"])
+    accuracies_across_runs = []
+    losses_across_runs = []
+    rounds = None
 
-    # let's extract centralised loss
-    rounds_loss, values_loss = zip(*hist.losses_centralized)
+    for i in range(len(hist)):
+        rounds, accuracy_values = zip(*hist[i].metrics_centralized["accuracy"])
+        _, loss_values = zip(*hist[i].losses_centralized)
+        accuracies_across_runs.append(accuracy_values)
+        losses_across_runs.append(loss_values)
 
-    fig, axs = plt.subplots(nrows=2, ncols=1, sharex="row")
-    axs[0].plot(np.asarray(rounds_loss), np.asarray(values_loss))
-    axs[1].plot(np.asarray(rounds_loss), np.asarray(values))
+    x_axis = range(rounds + 1)
+
+    lowest_loss_across_runs = np.min(losses_across_runs, axis=0)
+    largest_loss_across_runs = np.max(losses_across_runs, axis=0)
+    lowest_accuracy_across_runs = np.min(accuracies_across_runs, axis=0)
+    highest_accuracy_across_runs = np.max(accuracies_across_runs, axis=0)
+
+    fig, axs = plt.subplots(nrows=2, ncols=1, sharex="row", dpi=300)
+    axs[0].fill_between(x_axis, largest_loss_across_runs, lowest_loss_across_runs, alpha=0.4)
+    axs[1].fill_between(x_axis, highest_accuracy_across_runs, lowest_accuracy_across_runs, alpha=0.4)
 
     axs[0].set_ylabel("Loss")
     axs[1].set_ylabel("Accuracy")
 
     axs[1].set_ylim(bottom=0, top=1)
+    axs[0].set_yscale('log')
 
     plt.xlabel("Rounds")
 
-    plt.savefig(Path(save_plot_path) / Path(f"{metric_type}_metrics{suffix}.png"))
+    plt.tight_layout()
+
+    plt.savefig(Path(save_plot_path) / Path(f"centralized_metrics{suffix}.png"))
     plt.close()
 
 

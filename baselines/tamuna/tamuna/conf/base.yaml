@@ -1,29 +1,32 @@
+meta:
+  n_repeats: 1
+
 dataset:
-  # iid or power-law
-  split: 'iid'
+  iid: False
 
 model:
-  _target_: tamuna.models.Net
+  _target_: models.Net
   num_classes: 10
 
 strategy:
-  _target_: tamuna.strategy.TamunaStrategy
+  _target_: strategy.TamunaStrategy
 
 server:
   clients_per_round: 10
   num_clients: 1000
-  num_rounds: 50
+  num_rounds: 35
   # sparsity parameter, 2 <= s <= clients_per_round
-  s: 8
+  s: 3
   # probability of server communication, i.e. clients will in expectation do 1 / p local epochs
+  # Number of local epochs each round is synchronized across the clients
   p: 0.333
-  server_device: 'cuda'
+  server_device: 'cuda:0'
 
 client:
-  client_device: 'cuda'
+  client_device: 'cuda:0'
   client_resources:
     num_cpus: 4
     num_gpus: 1
-  learning_rate: 0.003
+  learning_rate: 0.01
   # eta should be between p / 2 and p * [(clients_per_round * (s - 1))/(s * (clients_per_round - 1))]
   eta: 0.323

@@ -45,6 +45,7 @@ matplotlib = "3.7.1"
 torch = {version = "^2.0.1+cu118", source = "pytorch"}
 torchvision = {version = "^0.15.2+cu118", source = "pytorch"}
 torchaudio = {version = "^2.0.2+cu118", source = "pytorch"}
+chardet = "^5.2.0"
 
 [tool.poetry.dev-dependencies]
 isort = "==5.11.5"
