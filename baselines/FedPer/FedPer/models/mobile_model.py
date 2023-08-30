@@ -97,7 +97,7 @@ class MobileNetModelSplit(ModelSplit):
     """Concrete implementation of ModelSplit for models for node kind prediction in
     action flows \\ with Body/Head split.
     """
-
+    
     def _get_model_parts(self, model: MobileNet) -> Tuple[nn.Module, nn.Module]:
         return model.body, model.head
 
