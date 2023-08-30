@@ -103,7 +103,13 @@ for current_version in ${versions}; do
   
 done
   
-git switch $current_branch
+if [[ $GITHUB_ACTIONS ]]
+then
+  git switch main
+else
+  git switch $current_branch
+fi
+
 current_version=main
 export current_version
 for current_language in ${languages}; do

@@ -40,6 +40,8 @@ repo = Repo( search_parent_directories=True )
 local = False
 if 'current_version' in os.environ:
     current_version = os.environ['current_version']
+elif os.getenv("GITHUB_ACTIONS"):
+    current_version = 'main'
 else:
     local = True
     current_version = repo.active_branch.name
