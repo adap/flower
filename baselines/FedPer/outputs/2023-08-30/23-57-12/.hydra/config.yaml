@@ -1,0 +1,39 @@
+num_clients: 10
+num_epochs: 4
+batch_size: 128
+num_rounds: 50
+clients_per_round: 10
+learning_rate: 0.01
+algorithm: fedavg
+algo: fedavg
+client_resources:
+  num_cpus: 32
+  num_gpus: 1
+server_device: cuda:0
+dataset:
+  name: cifar10
+  iid: false
+  num_classes: 4
+  seed: 42
+  num_clients: 10
+  split: sample
+  fraction: 0.83
+model:
+  _target_: FedPer.models.resnet_model.ResNet
+  num_head_layers: 2
+  num_classes: 10
+  device: ${server_device}
+  name: resnet
+fit_config:
+  drop_client: false
+  epochs: ${num_epochs}
+  batch_size: ${batch_size}
+strategy:
+  _target_: FedPer.utils.strategy_pipeline.DefaultStrategyPipeline
+  algorithm: ${algorithm}
+  fraction_fit: 1.0e-05
+  min_fit_clients: ${num_clients}
+  fraction_evaluate: 0.0
+  min_evaluate_clients: ${num_clients}
+  min_available_clients: ${num_clients}
+  config: ${model}
