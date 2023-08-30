@@ -7,15 +7,21 @@ on:
   pull_request:
     branches:
       - main
-      - publish-ios-docs
 
 env:
   FLWR_TELEMETRY_ENABLED: 0
 
+concurrency:
+  # Use github.run_id on main branch
+  # Use github.event.pull_request.number on pull requests, so it's unique per pull request
+  # Use github.ref on other branches, so it's unique per branch
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build_docs:
+  build_python_docs:
     runs-on: ubuntu-22.04
-    name: Build
+    name: Build Python Docs
     steps:
       - uses: actions/checkout@v3
       - name: Bootstrap
@@ -27,9 +33,19 @@ jobs:
       - name: Build docs
         run: ./dev/build-docs.sh
 
+  build_swift_docs:
+    runs-on: ubuntu-22.04
+    name: Build Swift Docs
+    steps:
+      - uses: actions/checkout@v3
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Build docs
+        run: ./dev/build-swift-api-ref.sh
+
   deploy_docs:
-    needs: build_docs
-    # if: github.ref == 'refs/heads/main'
+    needs: ["build_python_docs", ""build_swift_docs""]
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-22.04
     name: Deploy 
     steps:
