@@ -26,8 +26,10 @@ from ray import ObjectRef
 from ray.util.actor_pool import ActorPool
 
 from flwr import common
+from flwr.client import Client, ClientLike, to_client
 from flwr.common.logger import log
 
+ClientFn = Callable[[str], ClientLike]
 # All possible returns by a client
 ClientRes = Union[
     common.GetPropertiesRes, common.GetParametersRes, common.FitRes, common.EvaluateRes
@@ -51,13 +53,24 @@ class VirtualClientEngineActor(ABC):
         log(WARNING, "Manually terminating %s}", self.__class__.__name__)
         ray.actor.exit_actor()
 
-    def run(self, job_fn: Callable[[], ClientRes], cid: str) -> Tuple[str, ClientRes]:
+    def run(
+        self,
+        client_fn: Callable[[], Client],
+        job_fn: Callable[[Client], ClientRes],
+        cid: str,
+    ) -> Tuple[str, ClientRes]:
         """Run a client workload."""
         # Execute tasks and return result
         # return also cid which is needed to ensure results
         # from the pool are correctly assigned to each ClientProxy
         try:
-            job_results = job_fn()
+            client = client_fn(cid)
+            # TODO: as in `_create_client` in `ray_client_proxy_test.py`
+            client_like: ClientLike = client_fn(cid)
+            client = to_client(client_like=client_like)
+            # for example if we want to now inject something into the client object
+            # we'd do it with `client.numpy_client.<variable> = <new_value>`
+            job_results = job_fn(client)
         except Exception as ex:
             client_trace = traceback.format_exc()
             message = (
@@ -219,16 +232,16 @@ class VirtualClientEngineActorPool(ActorPool):
             self._idle_actors.extend(new_actors)
             self.num_actors += num_actors
 
-    def submit(self, fn: Any, value: Tuple[Callable[[], ClientRes], str]) -> None:
+    def submit(self, fn: Any, value: Tuple[Callable[[Client], ClientRes], str]) -> None:
         """Take idle actor and assign it a client workload.
 
         Submit a job to an actor by first removing it from the list of idle actors, then
         check if this actor was flagged to be removed from the pool
         """
-        job_fn, cid = value
+        client_fn, job_fn, cid = value
         actor = self._idle_actors.pop()
         if self._check_and_remove_actor_from_pool(actor):
-            future = fn(actor, job_fn, cid)
+            future = fn(actor, client_fn, job_fn, cid)
             future_key = tuple(future) if isinstance(future, List) else future
             self._future_to_actor[future_key] = (self._next_task_index, actor, cid)
             self._next_task_index += 1
@@ -237,10 +250,10 @@ class VirtualClientEngineActorPool(ActorPool):
             self._cid_to_future[cid]["future"] = future_key
 
     def submit_client_job(
-        self, actor_fn: Any, job: Tuple[Callable[[], ClientRes], str]
+        self, actor_fn: Any, job: Tuple[ClientFn, Callable[[], ClientRes], str]
     ) -> None:
         """Submit a job while tracking client ids."""
-        _, cid = job
+        _, _, cid = job
 
         # We need to put this behind a lock since .submit() involves
         # removing and adding elements from a dictionary. Which creates
