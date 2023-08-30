@@ -83,7 +83,7 @@ def prep(
 def test_cid_consistency_one_at_a_time() -> None:
     """Test that ClientProxies get the result of client job they submit.
 
-    Submit one job and waits for copmletion. Then submits the next and so on
+    Submit one job and waits for completion. Then submits the next and so on
     """
     proxies, _ = prep()
     # submit jobs one at a time
@@ -124,7 +124,7 @@ def test_cid_consistency_all_submit_first() -> None:
 
 
 def test_cid_consistency_without_proxies() -> None:
-    """Test cid consistency of jobs submited/retrieved to/from pool w/o ClientProxy."""
+    """Test cid consistency of jobs submitted/retrieved to/from pool w/o ClientProxy."""
     proxies, pool = prep()
     num_clients = len(proxies)
     cids = [str(cid) for cid in range(num_clients)]
