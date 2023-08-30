@@ -1,18 +1,18 @@
-
 msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2023-08-30 18:55+0200\n"
-"PO-Revision-Date: 2023-08-30 15:44+0000\n"
-"Last-Translator: charles0641010f2bb54b6a <charles@adap.com>\n"
+"PO-Revision-Date: 2023-08-30 17:38+0000\n"
+"Last-Translator: Charles Beauville <charles@adap.com>\n"
+"Language-Team: French <https://hosted.weblate.org/projects/flower-docs/"
+"framework/fr/>\n"
 "Language: fr\n"
-"Language-Team: French <https://hosted.weblate.org/projects/flower-"
-"framework-docs/framework-docs/fr/>\n"
-"Plural-Forms: nplurals=2; plural=n > 1;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 5.0.1-dev\n"
 "Generated-By: Babel 2.12.1\n"
 
 #: ../../source/contributor-explanation-architecture.rst:2
@@ -195,7 +195,6 @@ msgstr ""
 " le résultat escompté !"
 
 #: ../../source/contributor-how-to-develop-in-vscode-dev-containers.rst:2
-#, fuzzy
 msgid "Develop in VSCode Dev Containers"
 msgstr "Utiliser les conteneurs VS Code Remote"
 
@@ -323,9 +322,8 @@ msgstr ""
 "<https://code.visualstudio.com/docs/remote/containers-tutorial>`_"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:2
-#, fuzzy
 msgid "Install development versions"
-msgstr "Installe les versions de développement de Flower"
+msgstr "Installer les versions de développement de Flower"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:5
 msgid "Install development versions of Flower"
@@ -484,22 +482,20 @@ msgid "Open Jupyter Notebooks on Google Colab"
 msgstr "Ouvre les carnets Jupyter sur Google Colab"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:51
-#, fuzzy
 msgid ""
 "Open the notebook ``doc/source/tutorial-get-started-with-flower-"
 "pytorch.ipynb``:"
 msgstr ""
-"Ouvrir le notebook ``doc/source/tutorial/Flower-1-Intro-to-FL-"
-"PyTorch.ipynb`` :"
+"Ouvrir le notebook ``doc/source/tutorial/Flower-1-Intro-to-FL-PyTorch.ipynb``"
+" :"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:53
-#, fuzzy
 msgid ""
 "https://colab.research.google.com/github/adap/flower/blob/main/doc/source"
 "/tutorial-get-started-with-flower-pytorch.ipynb"
 msgstr ""
-"https://colab.research.google.com/github/adap/flower/blob/main/doc/source"
-"/tutorial-get-started-with-flower-pytorch.ipynb"
+"https://colab.research.google.com/github/adap/flower/blob/main/doc/source/"
+"tutorial-get-started-with-flower-pytorch.ipynb"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:55
 msgid ""
@@ -511,18 +507,16 @@ msgstr ""
 " :"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:57
-#, fuzzy
 msgid ""
 "https://colab.research.google.com/github/adap/flower/blob/branch-"
 "name/doc/source/tutorial-get-started-with-flower-pytorch.ipynb"
 msgstr ""
-"https://colab.research.google.com/github/adap/flower/blob/branch-"
-"name/doc/source/tutorial-get-started-with-flower-pytorch.ipynb"
+"https://colab.research.google.com/github/adap/flower/blob/branch-name/doc/"
+"source/tutorial-get-started-with-flower-pytorch.ipynb"
 
 #: ../../source/contributor-how-to-release-flower.rst:2
-#, fuzzy
 msgid "Release Flower"
-msgstr "Renommer le fichier"
+msgstr "Publier Flower"
 
 #: ../../source/contributor-how-to-release-flower.rst:4
 msgid ""
@@ -762,7 +756,7 @@ msgstr ""
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:2
 msgid "Set up a virtual env"
-msgstr ""
+msgstr "Mettre un environment virtuel en place"
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:4
 msgid ""
@@ -878,7 +872,6 @@ msgstr ""
 " de `Flower <https://github.com/adap/flower/tree/main/examples/>`_."
 
 #: ../../source/contributor-how-to-write-documentation.rst:2
-#, fuzzy
 msgid "Write documentation"
 msgstr "Rédiger de la documentation"
 
@@ -904,6 +897,9 @@ msgid ""
 "<https://pandoc.org/installing.html>_` needs to be installed on the "
 "system."
 msgstr ""
+"Noter que, pour compiler la documentation localement (avec ``poetry run make "
+"html``, comme décrit plus bas), `Pandoc <https://pandoc.org/installing."
+"html>_` doit être installé sur le système."
 
 #: ../../source/contributor-how-to-write-documentation.rst:14
 msgid "Edit an existing page"
@@ -942,7 +938,6 @@ msgid "Link to the new rst from ``index.rst``"
 msgstr "Lien vers le nouveau rst depuis ``index.rst``"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:2
-#, fuzzy
 msgid "Good first contributions"
 msgstr "Bonnes premières contributions"
 
@@ -959,7 +954,6 @@ msgstr ""
 "chances de voir ton PR accepté dans la base de code de Flower."
 
 #: ../../source/contributor-ref-good-first-contributions.rst:11
-#, fuzzy
 msgid "Where to start"
 msgstr "Par où commencer"
 
@@ -989,7 +983,6 @@ msgid "Examples: See below."
 msgstr "Exemples : voir ci-dessous."
 
 #: ../../source/contributor-ref-good-first-contributions.rst:23
-#, fuzzy
 msgid "Request for Flower Baselines"
 msgstr "Demande pour une nouvelle Flower Baseline"
 
@@ -1027,7 +1020,6 @@ msgstr ""
 "de demande de ligne de base !"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:34
-#, fuzzy
 msgid "Request for examples"
 msgstr "Demande pour un nouveau Flower Example"
 
@@ -1043,19 +1035,16 @@ msgstr ""
 "serions heureux d'accepter un RP :"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:40
-#, fuzzy
 msgid "Llama 2 fine-tuning, with Hugging Face Transformers and PyTorch"
-msgstr ""
-"Construisons un système d'apprentissage fédéré à l'aide des "
-"transformateurs Hugging Face et de Flower !"
+msgstr "LLaMA 2 fine-tuning avec Hugging Face et PyTorch"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:41
 msgid "XGBoost"
-msgstr ""
+msgstr "XGBoost"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:42
 msgid "Android ONNX on-device training"
-msgstr ""
+msgstr "Training sur téléphone à l'aide d'Android ONNX"
 
 #: ../../source/contributor-ref-secure-aggregation-protocols.rst:2
 msgid "Secure Aggregation Protocols"
@@ -1108,19 +1097,16 @@ msgid "Types"
 msgstr "Types"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:2
-#, fuzzy
 msgid "Contribute on GitHub"
-msgstr "Configuration du contributeur"
+msgstr "Contribuer sur GitHub"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:4
-#, fuzzy
 msgid ""
 "This guide is for people who want to get involved with Flower, but who "
 "are not used to contributing to GitHub projects."
 msgstr ""
-"Ce guide s'adresse aux personnes qui veulent participer au développement "
-"de Flower mais qui n'ont pas l'habitude de contribuer à des projets "
-"GitHub."
+"Ce guide s'adresse aux personnes qui veulent participer au développement de "
+"Flower mais qui n'ont pas l'habitude de contribuer à des projets GitHub."
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:6
 msgid ""
@@ -1814,7 +1800,7 @@ msgstr ""
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:311
 msgid "How to write a good PR title"
-msgstr ""
+msgstr "Comment écrire un bon titre de PR"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:313
 msgid ""
@@ -1822,6 +1808,9 @@ msgid ""
 " and scope of the changes being proposed. Here's a guide to help you "
 "write a good GitHub PR title:"
 msgstr ""
+"Un titre de PR bien choisi permet aux autres développeurs de rapidement "
+"comprendre l'intérêt et le scope des changements proposés. Voici un guide "
+"pour vous aider à écrire des bons titres de PR :"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:315
 msgid ""
@@ -1832,33 +1821,41 @@ msgid ""
 "it Short: Avoid lengthy titles for easy readability. 1. Use Proper "
 "Capitalization and Punctuation: Follow grammar rules for clarity."
 msgstr ""
+"1. Soyez clair et concis : Donnez un résumé clair des changements de manière "
+"concise. 1. Utilisez des verbes actionnables : Commencez par des verbes "
+"comme \"Add\", \"Update\", ou \"Fix\" pour indiquer le but. 1. Inclure des "
+"renseignements pertinents : Mentionner la caractéristique ou le module "
+"concerné pour le contexte. 1. Gardez le court : Évitez les longs titres pour "
+"une lisibilité facile. 1. Utiliser une bonne capitalisation et une "
+"ponctuation : Suivre les règles de grammaire pour la clarté."
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:321
 msgid ""
 "Let's start with a few examples for titles that should be avoided because"
 " they do not provide meaningful information:"
 msgstr ""
+"Commençons par quelques exemples de titres qui devraient être évités parce "
+"qu'ils ne fournissent pas d'information significative :"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:323
-#, fuzzy
 msgid "Implement Algorithm"
-msgstr "Mise en place d'un client Flower"
+msgstr "Implement Algorithm"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:324
 msgid "Database"
-msgstr ""
+msgstr "Database"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:325
 msgid "Add my_new_file.py to codebase"
-msgstr ""
+msgstr "Add my_new_file.py to codebase"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:326
 msgid "Improve code in module"
-msgstr ""
+msgstr "Improve code in module"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:327
 msgid "Change SomeModule"
-msgstr ""
+msgstr "Change SomeModule"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:329
 msgid ""
@@ -1866,28 +1863,32 @@ msgid ""
 "without repeating how they do it, as that is already visible in the "
 "\"Files changed\" section of the PR:"
 msgstr ""
+"Voici quelques bons exemples qui fournissent de l'information utile sans "
+"répéter comment ils le font, comme cela est déjà visible dans la section "
+"\"Files changed\" de la PR :"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:331
 msgid "Update docs banner to mention Flower Summit 2023"
-msgstr ""
+msgstr "Update docs banner to mention Flower Summit 2023"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:332
 msgid "Remove unnecessary XGBoost dependency"
-msgstr ""
+msgstr "Remove unnecessary XGBoost dependency"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:333
 msgid "Remove redundant attributes in strategies subclassing FedAvg"
-msgstr ""
+msgstr "Remove redundant attributes in strategies subclassing FedAvg"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:334
 msgid "Add CI job to deploy the staging system when the `main` branch changes"
-msgstr ""
+msgstr "Add CI job to deploy the staging system when the `main` branch changes"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:335
 msgid ""
 "Add new amazing library which will be used to improve the simulation "
 "engine"
 msgstr ""
+"Add new amazing library which will be used to improve the simulation engine"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:339
 #: ../../source/tutorial-build-a-strategy-from-scratch-pytorch.ipynb:548
@@ -1907,18 +1908,16 @@ msgstr ""
 "davantage, ne manque pas de consulter les sites suivants :"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:343
-#, fuzzy
 msgid ""
 "`Good first contributions <https://flower.dev/docs/framework/contributor-"
 "ref-good-first-contributions.html>`_, where you should particularly look "
 "into the :code:`baselines` contributions."
 msgstr ""
-"`Bonnes premières contributions <https://flower.dev/docs/framework"
-"/contributor-ref-good-first-contributions.html>`_, où vous devriez "
+"`Bonnes premières contributions <https://flower.dev/docs/framework/"
+"contributor-ref-good-first-contributions.html>`_, où vous devriez "
 "particulièrement regarder les contributions :code:`baselines`."
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:2
-#, fuzzy
 msgid "Get started as a contributor"
 msgstr "Devenez un·e contributeur·ice"
 
@@ -1957,13 +1956,15 @@ msgstr ""
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:18
 msgid "Developer Machine Setup"
-msgstr ""
+msgstr "Setup de la machine"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:20
 msgid ""
 "First, clone the `Flower repository <https://github.com/adap/flower>`_ "
 "from GitHub::"
 msgstr ""
+"Pour commencer, cloner la `repo Flower <https://github.com/adap/flower>`_ "
+"depuis GitHub::"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:26
 msgid ""
@@ -1973,6 +1974,11 @@ msgid ""
 "default it will use :code:`Python 3.7.15`, but you can change it by "
 "providing a specific :code:`<version>`)::"
 msgstr ""
+"Deuxièmement, créer un environnement virtuel (et l'activer). Si vous "
+"choisissez d'utiliser :code:`pyenv` (avec le plugin :code:`pyenv-virtualenv`)"
+" et que vous l'avez déjà installé, vous pouvez utiliser le script suivant ("
+"par défaut il utilisera:code:`Python 3.7.15`, mais vous pouvez le changer en "
+"fournissant une :code:`<version>` spécifique)::"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:33
 msgid ""
@@ -1980,16 +1986,21 @@ msgid ""
 "script that will install pyenv, set it up and create the virtual "
 "environment (with :code:`Python 3.7.15` by default)::"
 msgstr ""
+"Si vous n'avez pas :code:`pyenv` installé, vous pouvez utiliser le script "
+"suivant qui l'installera, le configurera et créera l'environnement virtuel ("
+"avec :code:`Python 3.7.15` par défaut)::"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:39
 msgid ""
 "Third, install the Flower package in development mode (think :code:`pip "
 "install -e`) along with all necessary dependencies::"
 msgstr ""
+"Troisièmement, installez le paquet Flower en mode de développement ( :code :`"
+"pip install -e`) avec toutes les dépendances nécessaires :"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:46
 msgid "Convenience Scripts"
-msgstr ""
+msgstr "Scripts pratiques"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:48
 msgid ""
@@ -1998,15 +2009,18 @@ msgid ""
 ":code:`/dev` subdirectory for a full list. The following scripts are "
 "amonst the most important ones:"
 msgstr ""
+"La repo de Flower contient un certain nombre de scripts de commodité pour "
+"rendre les tâches de développement récurrentes plus faciles et moins "
+"problématiques. Voir le sous-répertoire :code :`/dev` pour une liste "
+"complète. Les scripts suivants sont parmis les plus importants :"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:54
-#, fuzzy
 msgid "Create/Delete Virtual Environment"
-msgstr "Crée le virtualenv avec :"
+msgstr "Créer/Supprimer l'environment virtuel"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:62
 msgid "Compile ProtoBuf Definitions"
-msgstr ""
+msgstr "Compiler les définitions ProtoBuf"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:69
 msgid "Auto-Format Code"
@@ -18587,4 +18601,3 @@ msgstr ""
 
 #~ msgid ":code:`flower/baselines/flwr_baselines/publications/fedbn/convergence_rate`"
 #~ msgstr ""
-
