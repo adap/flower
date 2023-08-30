@@ -1,7 +1,14 @@
 #!/bin/sh
 
-# Defining content to add to the outdated config files
-content=$(cat <<-END
+# Defining some language parameters to add to the outdated config files
+language_config=$(cat <<-END
+locale_dirs = ['../locales']
+gettext_compact = 'framework-docs'
+END
+)
+
+# Defining the code necessary to add to the outdated config files for the version switcher
+version_switcher=$(cat <<-END
 html_context = dict()
 html_context['current_language'] = '$current_language'
 from git import Repo
@@ -78,18 +85,25 @@ for current_version in ${versions}; do
         # Adding translation to versions that didn't contain one
         if [[ $current_language != "en" ]]; then
           echo "No translation, using default one"
+
+          # Remove any previous file in locales
           rm -rf locales/$current_language
           mkdir -p locales
+
+          # Copy updated version of locales
           cp -r ${tmp_dir}/locales/$current_language locales/
-          echo "locale_dirs = ['../locales']" >> source/conf.py
-          echo "gettext_compact = 'framework-docs'" >> source/conf.py
+          # Add necessary config to conf.py
+          echo "$language_config" >> source/conf.py
+
+          # Update the text and the translation to match the source files
           make gettext
           sphinx-intl update -p build/gettext -l ${current_language}
         fi
 
-        # Adding version switcher to versions that didn't contain it
+        # Copy updated version of html files
         cp -r ${tmp_dir}/_templates source
-        echo "$content" >> source/conf.py
+        # Adding version switcher to conf.py of versions that didn't contain it
+        echo "$version_switcher" >> source/conf.py
 
         changed=true
       fi
