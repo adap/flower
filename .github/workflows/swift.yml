@@ -40,7 +40,7 @@ jobs:
 
   deploy_docs:
     needs: "build_docs"
-    if: github.ref == 'refs/heads/main'
+    # if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-22.04
     name: Deploy docs 
     steps:
