@@ -69,9 +69,11 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # Sphinx redirects, implemented after the doc filename changes.
 # To prevent 404 errors and redirect to the new pages.
-# redirects = {
-# }
-
+redirects = {
+    # Renamed pages
+    "contributing-baselines": "tutorial-contribute-baselines.html",
+    "using-baselines": "tutorial-use-baselines.html",
+}
 
 # -- Options for HTML output -------------------------------------------------
 
