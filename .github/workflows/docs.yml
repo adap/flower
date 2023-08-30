@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - publish-ios-docs
   pull_request:
     branches:
       - main
