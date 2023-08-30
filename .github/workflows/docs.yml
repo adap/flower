@@ -34,7 +34,7 @@ jobs:
         run: ./dev/build-docs.sh
 
   build_swift_docs:
-    runs-on: ubuntu-22.04
+    runs-on: macos-latest
     name: Build Swift Docs
     steps:
       - uses: actions/checkout@v3
