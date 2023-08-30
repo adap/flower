@@ -180,7 +180,7 @@ internal class FlwrReRe
         }
     }
 
-    suspend fun startGRPCReRe() {
+    suspend fun startGrpcRere() {
         createNode()
 
         val node = nodeStore[KEYNODE]
