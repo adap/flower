@@ -118,7 +118,7 @@ mdformat-beautysh = "==0.1.1"
 mdformat-myst = "==0.1.5"
 twine = "==4.0.2"
 pyroma = "==4.2"
-sphinx-multiversion = "==0.2.4"
+GitPython = "==3.1.32"
 
 [tool.isort]
 line_length = 88

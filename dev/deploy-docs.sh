@@ -22,7 +22,7 @@ ROOT=`pwd`
 
 # Build and deploy Flower Framework docs
 cd doc
-make docs
+sh build-versioned-docs.sh
 cd build/html
 aws s3 sync --delete --exclude ".*" --exclude "v/*" --acl public-read --cache-control "no-cache" ./ s3://flower.dev/docs/framework
 
