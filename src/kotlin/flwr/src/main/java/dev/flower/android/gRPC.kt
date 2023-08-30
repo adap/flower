@@ -68,7 +68,7 @@ internal class FlowerGRPC
  */
 suspend fun startClient(
     serverAddress: String,
-    useTLS: Boolean,
+    useTls: Boolean,
     client: Client,
 ) {
     FlowerGRPC(createChannel(serverAddress, useTLS), client)
