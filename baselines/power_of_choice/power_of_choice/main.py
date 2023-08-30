@@ -7,6 +7,7 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 # feel free to remove some if aren't needed
 import os
 from typing import Callable, Dict, Optional, Tuple
+from server import PowerOfChoiceCommAndCompVariant
 from models import create_MLP_model
 from flwr.common.typing import Scalar
 from utils import plot_metric_from_history, save_results_as_pickle
@@ -84,6 +85,25 @@ def main(cfg: DictConfig) -> None:
         
         return fit_config
     
+    def get_on_evaluate_config(is_cpow: bool, b: Optional[int] = None):
+        def evaluate_config(server_round: int):
+            """Return evaluation configuration dict for each round.
+
+            In case we are using cpow variant, we set b to the value specified in the configuration file.
+            """
+
+            config = {
+                "is_cpow": False,
+            }
+
+            if is_cpow:
+                config["is_cpow"] = True
+                config["b"] = b
+
+            return config
+        
+        return evaluate_config
+    
     def get_evaluate_fn(model):
         """Return an evaluation function for server-side evaluation."""
         
@@ -108,18 +128,48 @@ def main(cfg: DictConfig) -> None:
     server_model = create_MLP_model()
     server_model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
 
+    is_cpow = False
+    is_rpow = False
+    if cfg.variant == "cpow":
+        is_cpow = True
+    elif cfg.variant == "rpow":
+        is_rpow = True
+
     
     # instantiate strategy according to config. Here we pass other arguments
     # that are only defined at run time.
-    strategy = instantiate(
-        cfg.strategy,
-        on_fit_config_fn=get_on_fit_config(),
-        evaluate_fn=get_evaluate_fn(server_model),
-    )
+    if is_rpow:
+        # Build Atmp dictionary with number of clients items with key = client id and value = inf
+        atmp = {}
+        for i in range(cfg.num_clients):
+            atmp[str(i)] = float("inf")
+        
+        # Instantiate strategy
+        strategy = instantiate(
+            cfg.strategy,
+            variant="rpow",
+            atmp=atmp,
+            on_fit_config_fn=get_on_fit_config(),
+            evaluate_fn=get_evaluate_fn(server_model),
+            on_evaluate_config_fn=get_on_evaluate_config(is_cpow),
+        )
+    else:
+        # Instantiate strategy with base config
+        strategy = instantiate(
+            cfg.strategy,
+            on_fit_config_fn=get_on_fit_config(),
+            evaluate_fn=get_evaluate_fn(server_model),
+            on_evaluate_config_fn=get_on_evaluate_config(is_cpow, cfg.b),
+        )
 
     client_manager = SimpleClientManager()
 
-    server = PowerOfChoiceServer(strategy=strategy, client_manager=client_manager)
+    if is_rpow:
+        # Instantiate rpow server with strategy and client manager
+        server = PowerOfChoiceCommAndCompVariant(strategy=strategy, client_manager=client_manager)
+    else:
+        # Instantiate base server with strategy and client manager
+        server = PowerOfChoiceServer(strategy=strategy, client_manager=client_manager)
 
     # 5. Start Simulation
 

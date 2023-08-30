@@ -21,9 +21,13 @@ dataset:
 model:
   # model config
 
+# variant of the strategy: "base", "cpow" for cpow, "rpow" for rpow
+variant: "rpow"
+b: 64
+
 strategy:
   _target_: strategy.PowerOfChoice
-  d: 6
+  d: 15
   ck: 3
 
 client:

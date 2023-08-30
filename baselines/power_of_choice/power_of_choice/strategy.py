@@ -49,7 +49,9 @@ class PowerOfChoice(FedAvg):
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         d: int,
-        ck: int
+        ck: int,
+        variant: Optional[str] = "base",
+        atmp: Optional[Dict[str, float]] = None
     ) -> None:
         """Federated Averaging strategy.
 
@@ -113,6 +115,8 @@ class PowerOfChoice(FedAvg):
         self.res_first_phase = None
         self.candidate_set_clients = None
         self.selected_clients_criterion = None
+        self.variant = variant
+        self.atmp = atmp
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -132,15 +136,29 @@ class PowerOfChoice(FedAvg):
             f"Server {server_round}: about to sample {sample_size} clients"
         )
 
-        # Assumption is that all the clients in d have returned a result from the first phase
-        # Sort the list based on the loss attribute of EvaluateRes in descending order
-        sorted_client_losses = sorted(self.res_first_phase, key=lambda x: x[1].loss, reverse=True)
+        if self.variant == "base":
+            # Assumption is that all the clients in d have returned a result from the first phase
+            # Sort the list based on the loss attribute of EvaluateRes in descending order
+            sorted_client_losses = sorted(self.res_first_phase, key=lambda x: x[1].loss, reverse=True)
 
-        # Take the top m clients from the sorted list
-        chosen_clients = [client[0] for client in sorted_client_losses[:sample_size]]
+            # Take the top m clients from the sorted list
+            chosen_clients = [client[0] for client in sorted_client_losses[:sample_size]]
 
-        # Build criterion
-        self.selected_clients_criterion = SimpleCriterion(list(map(lambda x: x.cid, chosen_clients)))
+            # Build criterion
+            self.selected_clients_criterion = SimpleCriterion(list(map(lambda x: x.cid, chosen_clients)))
+        else:
+            # In case of the rpow variant, we need to sample the d clients from the Amax set
+            # Sort the atmp dictionary based on the value in descending order
+            sorted_atmp = sorted(self.atmp.items(), key=lambda x: x[1], reverse=True)
+
+            # Filter out the clients that are not in the candidate set
+            sorted_atmp = list(filter(lambda x: x[0] in self.candidate_set_clients, sorted_atmp))
+
+            # Take the top m clients from the sorted list
+            chosen_clients = [client[0] for client in sorted_atmp[:sample_size]]
+
+            # Build criterion
+            self.selected_clients_criterion = SimpleCriterion(list(chosen_clients))
         
         # Sample clients
         clients = client_manager.sample(
@@ -178,34 +196,7 @@ class PowerOfChoice(FedAvg):
 
         if first_phase:
             # Sample d clients from the available clients
-            num_available_clients = client_manager.num_available()
-            sample_size = min(self.d, num_available_clients)
-
-            available_clients = client_manager.all()
-
-            data_samples_per_client = {}
-
-            for cid, available_client in available_clients.items():
-                propertiesRes = available_client.get_properties(GetPropertiesIns(config), None)
-                data_size = propertiesRes.properties["data_size"]
-                data_samples_per_client[cid] = data_size
-
-            log(
-                INFO,
-                f"Server {server_round}: data samples per client {data_samples_per_client}.",
-            )
-
-            # Extract a subset of t clients, where each client has a probability of being extracted proportional to its data size
-            client_ids = list(data_samples_per_client.keys())
-            client_probabilities = [data_samples_per_client[cid] for cid in client_ids]
-            client_probabilities_normalized = [p / sum(client_probabilities) for p in client_probabilities]
-
-            self.candidate_set_clients = np.random.choice(
-                client_ids,
-                size=sample_size,
-                replace=False,
-                p=client_probabilities_normalized,
-            )
+            self.sample_clients(client_manager)
 
             criterion = SimpleCriterion(self.candidate_set_clients)
 
@@ -237,3 +228,38 @@ class PowerOfChoice(FedAvg):
     
     def set_res_first_phase(self, res_first_phase):
         self.res_first_phase = res_first_phase
+
+    def sample_clients(self, client_manager: ClientManager) -> None:
+        """Sample d clients from the client manager."""
+        num_available_clients = client_manager.num_available()
+        sample_size = min(self.d, num_available_clients)
+
+        available_clients = client_manager.all()
+
+        data_samples_per_client = {}
+
+        # Pass an empty config dictionary, no need to tell the clients any config
+        config = {}
+
+        # Get the data size of each client
+        for cid, available_client in available_clients.items():
+            propertiesRes = available_client.get_properties(GetPropertiesIns(config), None)
+            data_size = propertiesRes.properties["data_size"]
+            data_samples_per_client[cid] = data_size
+
+        # Extract a subset of t clients, where each client has a probability of being extracted proportional to its data size
+        client_ids = list(data_samples_per_client.keys())
+        client_probabilities = [data_samples_per_client[cid] for cid in client_ids]
+        client_probabilities_normalized = [p / sum(client_probabilities) for p in client_probabilities]
+
+        self.candidate_set_clients = np.random.choice(
+            client_ids,
+            size=sample_size,
+            replace=False,
+            p=client_probabilities_normalized,
+        )
+
+    def update_atmp(self, res_eval):
+        """Update the atmp dictionary with the loss of the clients in res_eval"""
+        for result in res_eval:
+            self.atmp[result[0].cid] = result[1].loss

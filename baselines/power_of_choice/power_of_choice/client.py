@@ -67,10 +67,18 @@ class FlwrClient(fl.client.NumPyClient):
     def evaluate(self, parameters, config):
         self.model.set_weights(parameters)
         if config["first_phase"]:
-            # In the first phase, we evaluate on the entire dataset
             x_entire = np.concatenate((self.x_train, self.x_val))
             y_entire = np.concatenate((self.y_train, self.y_val))
-            loss, acc = self.model.evaluate(x_entire, y_entire, verbose=2)
+            if config["is_cpow"] == False:
+                # In the base variant, during the first phase we evaluate on the entire dataset
+                loss, acc = self.model.evaluate(x_entire, y_entire, verbose=2)
+            else:
+                # In the cpow variant, during the first phase we evaluate on a mini-batch of b samples
+                b = config["b"]
+                idx = np.random.choice(len(x_entire), b, replace=False)
+                x_entire_selected = x_entire[idx]
+                y_entire_selected = y_entire[idx]
+                loss, acc = self.model.evaluate(x_entire_selected, y_entire_selected, verbose=2)
         else:
             # In the normal evaluation phase, we evaluate on the validation set
             loss, acc = self.model.evaluate(self.x_val, self.y_val, verbose=2)
