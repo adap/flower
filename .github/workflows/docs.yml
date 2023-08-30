@@ -44,7 +44,7 @@ jobs:
         run: ./dev/build-swift-api-ref.sh
 
   deploy_docs:
-    needs: ["build_python_docs", ""build_swift_docs""]
+    needs: ["build_python_docs", "build_swift_docs"]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-22.04
     name: Deploy 
