@@ -24,7 +24,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 
-internal class FlowerGRPC
+internal class FlowerGrpc
 @Throws constructor(
     channel: ManagedChannel,
     private val client: Client,
