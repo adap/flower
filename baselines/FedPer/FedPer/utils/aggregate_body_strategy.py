@@ -1,14 +1,20 @@
-import torch
-
-from typing import Any, Dict, List, Optional, Tuple
-from pathlib import Path
 from collections import OrderedDict
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import torch
 from flwr.common import (
-    EvaluateIns, FitIns, FitRes, Parameters,
-    Scalar, parameters_to_ndarrays, ndarrays_to_parameters
+    EvaluateIns,
+    FitIns,
+    FitRes,
+    Parameters,
+    Scalar,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
 )
-from flwr.server.client_proxy import ClientProxy
 from flwr.server.client_manager import ClientManager
+from flwr.server.client_proxy import ClientProxy
+
 from FedPer.utils.initialization_strategy import ServerInitializationStrategy
 
 
@@ -25,15 +31,16 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
-        """
-        Configure the next round of training. Adds the global head to the aggregated global body.
+        """Configure the next round of training. Adds the global head to the aggregated
+        global body.
 
         Args:
             server_round: The current round of federated learning.
             parameters: The current (global) model parameters.
             client_manager: The client manager which holds all currently connected clients.
 
-        Returns:
+        Returns
+        -------
             A list of tuples. Each tuple in the list identifies a `ClientProxy` and the
             `FitIns` for this particular `ClientProxy`. If a particular `ClientProxy`
             is not included in this list, it means that this `ClientProxy`
@@ -49,7 +56,9 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
         weights = parameters_to_ndarrays(parameters)
 
         # Add head parameters to received body parameters
-        weights.extend([val.cpu().numpy() for _, val in self.model.head.state_dict().items()])
+        weights.extend(
+            [val.cpu().numpy() for _, val in self.model.head.state_dict().items()]
+        )
 
         parameters = ndarrays_to_parameters(weights)
 
@@ -69,8 +78,7 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
     def configure_evaluate(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
-        """
-        Configure the next round of evaluation.
+        """Configure the next round of evaluation.
 
         Args:
             server_round: The current round of federated learning.
@@ -78,7 +86,8 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
             client_manager: The client manager which holds all currently
                 connected clients.
 
-        Returns:
+        Returns
+        -------
             A list of tuples. Each tuple in the list identifies a `ClientProxy` and the
             `EvaluateIns` for this particular `ClientProxy`. If a particular
             `ClientProxy` is not included in this list, it means that this
@@ -101,7 +110,9 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
         weights = parameters_to_ndarrays(parameters)
 
         # Add head parameters to received body parameters
-        weights.extend([val.cpu().numpy() for _, val in self.model.head.state_dict().items()])
+        weights.extend(
+            [val.cpu().numpy() for _, val in self.model.head.state_dict().items()]
+        )
 
         parameters = ndarrays_to_parameters(weights)
 
@@ -127,8 +138,8 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """
-        Aggregate the received local parameters, set the global model parameters and save the global model.
+        """Aggregate the received local parameters, set the global model parameters and
+        save the global model.
 
         Args:
             server_round: The current round of federated learning.
@@ -141,7 +152,9 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
                 in `failures`.
             failures: Exceptions that occurred while the server was waiting for client
                 updates.
-        Returns:
+
+        Returns
+        -------
             If parameters are returned, then the server will treat these as the
             new global model parameters (i.e., it will replace the previous
             parameters with the ones returned from this method). If `None` is
@@ -150,11 +163,15 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
             parameters, the updates received in this round are discarded, and
             the global model parameters remain the same.
         """
-        agg_params, agg_metrics = super().aggregate_fit(server_round=server_round, results=results, failures=failures)
+        agg_params, agg_metrics = super().aggregate_fit(
+            server_round=server_round, results=results, failures=failures
+        )
 
         # Update Server Model
         parameters = parameters_to_ndarrays(agg_params)
-        model_keys = [k for k in self.model.state_dict().keys() if k.startswith("_body")]
+        model_keys = [
+            k for k in self.model.state_dict().keys() if k.startswith("_body")
+        ]
         params_dict = zip(model_keys, parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
         self.model.set_parameters(state_dict)

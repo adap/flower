@@ -4,19 +4,19 @@ Please overwrite `flwr.client.NumPyClient` or `flwr.client.Client` and create a 
 to instantiate your client.
 """
 
+from collections import OrderedDict
+from typing import Callable, Dict, List, Tuple
+
 import flwr as fl
 import torch
-import numpy as np
-import torch.nn as nn
 
-from typing import Callable, Dict, List, Tuple, Union
-from omegaconf import DictConfig
-from collections import OrderedDict
-from hydra.utils import instantiate
 # from baselines.FedPer.FedPer.utils_file import ModelManager
-from FedPer_old.models import test, train, ModelManager, ModelSplit, MobileNet_v1
-from torch.utils.data import DataLoader
+from FedPer_old.models import test, train
 from flwr.common.typing import NDArrays, Scalar
+from hydra.utils import instantiate
+from omegaconf import DictConfig
+from torch.utils.data import DataLoader
+
 
 class FlowerClient(
     fl.client.NumPyClient
@@ -42,16 +42,15 @@ class FlowerClient(
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
-        if self.net.split: 
+        if self.net.split:
             return [val.cpu().numpy() for _, val in self.net.body.state_dict().items()]
         else:
             return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
-    
+
     def set_parameters(self, parameters: NDArrays) -> None:
-        """
-        Set the local body parameters to the received parameters.
-        In the first train round the head parameters are also set to the global head parameters,
-        to ensure every client head is initialized equally.
+        """Set the local body parameters to the received parameters. In the first train
+        round the head parameters are also set to the global head parameters, to ensure
+        every client head is initialized equally.
 
         Args:
             parameters: parameters to set the body to.
@@ -61,7 +60,9 @@ class FlowerClient(
         # print("Model keys: ", model_keys)
         if self.train_id == 1:
             # Only update client's local head if it hasn't trained yet
-            model_keys.extend([k for k in self.net.state_dict().keys() if k.startswith("head")])
+            model_keys.extend(
+                [k for k in self.net.state_dict().keys() if k.startswith("head")]
+            )
         # Zip model keys and parameters
         params_dict = zip(model_keys, parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
@@ -69,12 +70,10 @@ class FlowerClient(
         self.net.load_state_dict(state_dict, strict=True)
 
     def fit(
-        self, 
-        parameters: NDArrays, 
-        config: Dict[str, Scalar]
+        self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, int, Dict]:
         """Implements distributed fit function for a given client."""
-        # Set parameters 
+        # Set parameters
         self.set_parameters(parameters)
         print("config: ", config)
         # Epochs
@@ -100,6 +99,7 @@ class FlowerClient(
         self.set_parameters(parameters)
         loss, accuracy = test(self.net, self.valloader, self.device)
         return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
+
 
 def gen_client_fn(
     num_epochs: int,
@@ -137,7 +137,6 @@ def gen_client_fn(
 
     def client_fn(cid: str) -> FlowerClient:
         """Create a Flower client representing a single organization."""
-
         # Load model
         # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         device = torch.device("cuda:0")
@@ -156,5 +155,5 @@ def gen_client_fn(
             num_epochs,
             learning_rate,
         )
-    
+
     return client_fn

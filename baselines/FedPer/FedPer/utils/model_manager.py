@@ -1,21 +1,22 @@
+from abc import ABC, abstractmethod
+from typing import Any, Dict, List, Optional, Type, Union
+
 import torch.nn as nn
 
-from abc import ABC, abstractmethod
-from typing import Any, Dict, Type, Optional, Union, List
 from FedPer.utils.model_split import ModelSplit
+
 
 class ModelManager(ABC):
     """Manager for models with Body/Head split."""
 
     def __init__(
-            self,
-            client_id: int,
-            config: Dict[str, Any],
-            model_split_class: Type[ModelSplit],
-            has_fixed_head: bool = False
+        self,
+        client_id: int,
+        config: Dict[str, Any],
+        model_split_class: Type[ModelSplit],
+        has_fixed_head: bool = False,
     ):
-        """
-        Initialize the attributes of the model manager.
+        """Initialize the attributes of the model manager.
 
         Args:
             client_id: The id of the client.
@@ -41,10 +42,9 @@ class ModelManager(ABC):
         train_id: int,
         epochs: int = 1,
         tag: Optional[str] = None,
-        fine_tuning: bool = False
+        fine_tuning: bool = False,
     ) -> Dict[str, Union[List[Dict[str, float]], int, float]]:
-        """
-        Train the model maintained in self.model.
+        """Train the model maintained in self.model.
 
         Args:
             train_id: id of the train round.
@@ -58,20 +58,21 @@ class ModelManager(ABC):
                 This tag can be ignored if no difference in train behaviour is desired between federated algortihms.
             fine_tuning: whether the training performed is for model fine-tuning or not.
 
-        Returns:
+        Returns
+        -------
             Dict containing the train metrics.
         """
         pass
 
     @abstractmethod
     def test(self, test_id: int) -> Dict[str, float]:
-        """
-        Test the model maintained in self.model.
+        """Test the model maintained in self.model.
 
         Args:
             test_id: id of the test round.
 
-        Returns:
+        Returns
+        -------
             Dict containing the test metrics.
         """
         pass
@@ -95,4 +96,3 @@ class ModelManager(ABC):
     def model(self) -> nn.Module:
         """Return model."""
         return self._model
-    

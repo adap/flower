@@ -2,11 +2,14 @@ from typing import Dict, List, Optional, Tuple
 
 from flwr.common import EvaluateRes, FitRes, Parameters, Scalar
 from flwr.server.client_proxy import ClientProxy
+
 from FedPer.utils.store_history_strategy import StoreHistoryStrategy
 
 
 class StoreMetricsStrategy(StoreHistoryStrategy):
-    """Server FL metrics storage per training/evaluation round strategy implementation."""
+    """Server FL metrics storage per training/evaluation round strategy
+    implementation.
+    """
 
     def aggregate_fit(
         self,
@@ -14,8 +17,8 @@ class StoreMetricsStrategy(StoreHistoryStrategy):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """
-        Aggregate the received local parameters and store the train aggregated metrics.
+        """Aggregate the received local parameters and store the train aggregated
+        metrics.
 
         Args:
             server_round: The current round of federated learning.
@@ -28,7 +31,9 @@ class StoreMetricsStrategy(StoreHistoryStrategy):
                 in `failures`.
             failures: Exceptions that occurred while the server was waiting for client
                 updates.
-        Returns:
+
+        Returns
+        -------
             If parameters are returned, then the server will treat these as the
             new global model parameters (i.e., it will replace the previous
             parameters with the ones returned from this method). If `None` is
@@ -37,9 +42,13 @@ class StoreMetricsStrategy(StoreHistoryStrategy):
             parameters, the updates received in this round are discarded, and
             the global model parameters remain the same.
         """
-        aggregates = super().aggregate_fit(server_round=server_round, results=results, failures=failures)
+        aggregates = super().aggregate_fit(
+            server_round=server_round, results=results, failures=failures
+        )
 
-        self.hist["trn"][server_round] = {k.cid: {"num_examples": v.num_examples, **v.metrics} for k, v in results}
+        self.hist["trn"][server_round] = {
+            k.cid: {"num_examples": v.num_examples, **v.metrics} for k, v in results
+        }
 
         return aggregates
 
@@ -49,8 +58,8 @@ class StoreMetricsStrategy(StoreHistoryStrategy):
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
-        """
-        Aggregate the received local parameters and store the evaluation aggregated metrics.
+        """Aggregate the received local parameters and store the evaluation aggregated
+        metrics.
 
         Args:
             server_round: The current round of federated learning.
@@ -63,13 +72,18 @@ class StoreMetricsStrategy(StoreHistoryStrategy):
                 there should be an `Exception` in `failures`.
             failures: Exceptions that occurred while the server
                 was waiting for client updates.
-        Returns:
+
+        Returns
+        -------
             Optional `float` representing the aggregated evaluation result. Aggregation
             typically uses some variant of a weighted average.
         """
-        aggregated_loss, aggregated_metrics = super().aggregate_evaluate(server_round=server_round, results=results, failures=failures)
+        aggregated_loss, aggregated_metrics = super().aggregate_evaluate(
+            server_round=server_round, results=results, failures=failures
+        )
         self.hist["tst"][server_round] = {
-            k.cid: {"num_examples": v.num_examples, "loss": v.loss, **v.metrics} for k, v in results
+            k.cid: {"num_examples": v.num_examples, "loss": v.loss, **v.metrics}
+            for k, v in results
         }
 
         # Weigh accuracy of each client by number of examples used
@@ -77,5 +91,7 @@ class StoreMetricsStrategy(StoreHistoryStrategy):
 
         # Aggregate and print custom metric
         averaged_accuracy = sum(accuracies) / len(accuracies)
-        print(f"Round {server_round} accuracy averaged from client results: {averaged_accuracy}")
+        print(
+            f"Round {server_round} accuracy averaged from client results: {averaged_accuracy}"
+        )
         return aggregated_loss, {"accuracy": averaged_accuracy}

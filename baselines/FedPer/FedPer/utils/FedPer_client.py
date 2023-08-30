@@ -1,50 +1,61 @@
-
-import torch
-import numpy as np
-
-from typing import Dict, List, Union, Tuple, Callable
-from omegaconf import DictConfig
+import pickle
 from collections import OrderedDict
-from torch.utils.data import DataLoader
+from pathlib import Path
+from typing import Callable, Dict, List, Tuple, Union
+
+import numpy as np
+import torch
+from omegaconf import DictConfig
+from torch.utils.data import DataLoader, Subset
+from torchvision import transforms
+
+from FedPer.dataset_preparation import DATASETS
 from FedPer.models.cnn_model import CNNModelManager
 from FedPer.models.mobile_model import MobileNetModelManager
 from FedPer.models.resnet_model import ResNetModelManager
-from FedPer.utils.constants import Algorithms
 from FedPer.utils.base_client import BaseClient
-
-from pathlib import Path
-import pickle
-from torchvision import transforms
-from torch.utils.data import Subset, DataLoader
-from FedPer.dataset_preparation import DATASETS
-
-from tqdm import tqdm
+from FedPer.utils.constants import Algorithms
 from FedPer.utils.utils_file import MEAN, STD
 
 PROJECT_DIR = Path(__file__).parent.parent.parent.absolute()
 
+
 class FedPerClient(BaseClient):
-    """Implementation of Federated Learning with Personalization Layers (FedPer) Client."""
+    """Implementation of Federated Learning with Personalization Layers (FedPer)
+    Client.
+    """
 
     def get_parameters(self) -> List[np.ndarray]:
         """Return the current local head parameters."""
-        return [val.cpu().numpy() for _, val in self.model_manager.model.body.state_dict().items()]
+        return [
+            val.cpu().numpy()
+            for _, val in self.model_manager.model.body.state_dict().items()
+        ]
 
     def set_parameters(self, parameters: List[np.ndarray], evaluate=False) -> None:
-        """
-        Set the local body parameters to the received parameters.
-        In the first train round the head parameters are also set to the global head parameters,
-        to ensure every client head is initialized equally.
+        """Set the local body parameters to the received parameters. In the first train
+        round the head parameters are also set to the global head parameters, to ensure
+        every client head is initialized equally.
 
         Args:
             parameters: parameters to set the body to.
         """
-        model_keys = [k for k in self.model_manager.model.state_dict().keys() if k.startswith("_body")]
+        model_keys = [
+            k
+            for k in self.model_manager.model.state_dict().keys()
+            if k.startswith("_body")
+        ]
 
         if not evaluate:
             # Only update client's local head if it hasn't trained yet
             print("Setting head parameters to global head parameters.")
-            model_keys.extend([k for k in self.model_manager.model.state_dict().keys() if k.startswith("_head")])
+            model_keys.extend(
+                [
+                    k
+                    for k in self.model_manager.model.state_dict().keys()
+                    if k.startswith("_head")
+                ]
+            )
 
         params_dict = zip(model_keys, parameters)
 
@@ -52,9 +63,10 @@ class FedPerClient(BaseClient):
 
         self.model_manager.model.set_parameters(state_dict)
 
-    def perform_train(self, tag: str = None) -> Dict[str, Union[List[Dict[str, float]], int, float]]:
-        """
-        Perform local training to the whole model.
+    def perform_train(
+        self, tag: str = None
+    ) -> Dict[str, Union[List[Dict[str, float]], int, float]]:
+        """Perform local training to the whole model.
 
         Args:
             tag: str of the form <Algorithm>_<model_train_part>.
@@ -64,11 +76,15 @@ class FedPerClient(BaseClient):
                                 is being performed, either FedHybridAvgLGDual_FedAvg or FedHybridAvgLGDual_LG-FedAvg.
                 <model_train_part> - indicates the part of the model that is being trained (full, body, head).
                 This tag can be ignored if no difference in train behaviour is desired between federated algortihms.
-        Returns:
+
+        Returns
+        -------
             Dict with the train metrics.
         """
+        return super().perform_train(
+            tag=f"{Algorithms.FEDPER.value}_full" if tag is None else tag
+        )
 
-        return super().perform_train(tag=f"{Algorithms.FEDPER.value}_full" if tag is None else tag)
 
 def get_fedper_client_fn(
     cfg: DictConfig,
@@ -85,15 +101,17 @@ def get_fedper_client_fn(
 
     client_state_save_path : str
         The path to save the client state.
+
     Returns
     -------
     Tuple[Callable[[str], FlowerClient], DataLoader]
         A tuple containing the client function that creates Flower Clients and
         the DataLoader that will be used for testing
     """
-
-    assert cfg.model.name.lower() in ['cnn', 'mobile', 'resnet']
-    assert client_state_save_path is not None, "Please provide a path to save the client state."
+    assert cfg.model.name.lower() in ["cnn", "mobile", "resnet"]
+    assert (
+        client_state_save_path is not None
+    ), "Please provide a path to save the client state."
     # load dataset and clients' data indices
     try:
         partition_path = PROJECT_DIR / "datasets" / cfg.dataset.name / "partition.pkl"
@@ -106,16 +124,18 @@ def get_fedper_client_fn(
     data_indices: List[List[int]] = partition["data_indices"]
 
     # --------- you can define your own data transformation strategy here ------------
-    #general_data_transform = transforms.Compose(
+    # general_data_transform = transforms.Compose(
     #    [transforms.Normalize(MEAN[cfg.dataset.name], STD[cfg.dataset.name])]
-    #)
+    # )
 
-    general_data_transform = transforms.Compose([
-        # transforms.ToPILImage(),
-        transforms.Resize((224, 224)),
-        # transforms.ToTensor(),
-        transforms.Normalize(MEAN[cfg.dataset.name], STD[cfg.dataset.name])
-    ])
+    general_data_transform = transforms.Compose(
+        [
+            # transforms.ToPILImage(),
+            transforms.Resize((224, 224)),
+            # transforms.ToTensor(),
+            transforms.Normalize(MEAN[cfg.dataset.name], STD[cfg.dataset.name]),
+        ]
+    )
 
     general_target_transform = transforms.Compose([])
     train_data_transform = transforms.Compose([])
@@ -136,7 +156,6 @@ def get_fedper_client_fn(
 
     def client_fn(cid: str) -> FedPerClient:
         """Create a Flower client representing a single organization."""
-
         cid = int(cid)
         trainset.indices = data_indices[cid]["train"]
         testset.indices = data_indices[cid]["test"]
@@ -146,14 +165,14 @@ def get_fedper_client_fn(
         trainloader = DataLoader(trainset, cfg.batch_size)
         testloader = DataLoader(testset, cfg.batch_size)
 
-        if cfg.model.name.lower() == 'cnn':
+        if cfg.model.name.lower() == "cnn":
             manager = CNNModelManager
-        elif cfg.model.name.lower() == 'mobile':
+        elif cfg.model.name.lower() == "mobile":
             manager = MobileNetModelManager
-        elif cfg.model.name.lower() == 'resnet':
+        elif cfg.model.name.lower() == "resnet":
             manager = ResNetModelManager
         else:
-            raise NotImplementedError('Model not implemented, check name.')
+            raise NotImplementedError("Model not implemented, check name.")
 
         return FedPerClient(
             trainloader=trainloader,
@@ -163,5 +182,5 @@ def get_fedper_client_fn(
             model_manager_class=manager,
             client_state_save_path=client_state_save_path,
         )
-    
+
     return client_fn

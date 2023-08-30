@@ -1,25 +1,18 @@
-import os
-import json
-import torch
-import numpy as np
-import pandas as pd
-import pickle
 import random
-import torchvision
-
-from PIL import Image
-from typing import List, Type, Dict, Tuple
-from pathlib import Path
-from argparse import Namespace
-from torchvision import transforms
 from collections import Counter
-from torchvision.transforms.functional import pil_to_tensor
+from typing import Dict, List, Tuple, Type
+
+import numpy as np
+import torch
+import torchvision
 from torch.utils.data import Dataset
 
+
 class BaseDataset(Dataset):
-    """ Base class for all datasets."""
+    """Base class for all datasets."""
+
     def __init__(self) -> None:
-        """ Initialize the dataset."""
+        """Initialize the dataset."""
         self.classes: List = None
         self.data: torch.Tensor = None
         self.targets: torch.Tensor = None
@@ -30,7 +23,7 @@ class BaseDataset(Dataset):
         self.enable_train_transform = True
 
     def __getitem__(self, index):
-        """ Get the item at the given index."""
+        """Get the item at the given index."""
         data, targets = self.data[index], self.targets[index]
         if self.enable_train_transform and self.train_data_transform is not None:
             data = self.train_data_transform(data)
@@ -45,8 +38,10 @@ class BaseDataset(Dataset):
     def __len__(self):
         return len(self.targets)
 
+
 class CIFAR10(BaseDataset):
-    """ CIFAR10 dataset."""
+    """CIFAR10 dataset."""
+
     def __init__(
         self,
         root,
@@ -56,7 +51,7 @@ class CIFAR10(BaseDataset):
         train_data_transform=None,
         train_target_transform=None,
     ):
-        """ Initialize the dataset."""
+        """Initialize the dataset."""
         super().__init__()
         train_part = torchvision.datasets.CIFAR10(root, True, download=True)
         test_part = torchvision.datasets.CIFAR10(root, False, download=True)
@@ -74,7 +69,8 @@ class CIFAR10(BaseDataset):
 
 
 class CIFAR100(BaseDataset):
-    """ CIFAR100 dataset."""
+    """CIFAR100 dataset."""
+
     def __init__(
         self,
         root,
@@ -100,7 +96,7 @@ class CIFAR100(BaseDataset):
         self.train_target_transform = train_target_transform
         super_class = None
         if isinstance(config, dict):
-            super_class = config['super_class']
+            super_class = config["super_class"]
 
         if super_class:
             # super_class: [sub_classes]
@@ -135,10 +131,12 @@ class CIFAR100(BaseDataset):
                 new_targets.append(mapping[self.classes[cls]])
             self.targets = torch.tensor(new_targets, dtype=torch.long)
 
+
 DATASETS: Dict[str, Type[BaseDataset]] = {
     "cifar10": CIFAR10,
     "cifar100": CIFAR100,
 }
+
 
 def randomly_assign_classes(
     dataset: Dataset, client_num: int, class_num: int
@@ -189,7 +187,7 @@ def randomly_assign_classes(
         stats[i]["x"] = len(idx)
         stats[i]["y"] = Counter(targets_numpy[idx].tolist())
 
-    num_samples = np.array(list(map(lambda stat_i: stat_i["x"], stats.values())))
+    num_samples = np.array([stat_i["x"] for stat_i in stats.values()])
     stats["sample per client"] = {
         "std": num_samples.mean(),
         "stddev": num_samples.std(),
@@ -198,4 +196,3 @@ def randomly_assign_classes(
     partition["data_indices"] = data_indices
 
     return partition, stats
-

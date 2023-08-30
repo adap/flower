@@ -1,19 +1,18 @@
-"""
-Utility functions
-"""
+"""Utility functions."""
 
 """ FIRST PART INCLUDES VISUALIZATION FUNCTIONS """
 
-import numpy as np
 import pickle
-
 from pathlib import Path
 from secrets import token_hex
 from typing import Dict, Optional, Union
-from omegaconf import DictConfig, OmegaConf
-from matplotlib import pyplot as plt
+
+import numpy as np
+
 # from FedPer.models import MobileNet_v1
 from flwr.server.history import History
+from matplotlib import pyplot as plt
+from omegaconf import DictConfig
 
 MEAN = {
     "cifar10": [0.4914, 0.4822, 0.4465],
@@ -24,6 +23,7 @@ STD = {
     "cifar10": [0.2023, 0.1994, 0.201],
     "cifar100": [0.2009, 0.1984, 0.2023],
 }
+
 
 def get_model_fn(config: DictConfig):
     """Get model function from config.
@@ -40,18 +40,20 @@ def get_model_fn(config: DictConfig):
     """
     if config.model == "mobile":
         if config.split:
+
             def _create_model():
-                return MobileNet_v1(
-                    split=True, num_head_layers=config.num_head_layers
-                )
+                return MobileNet_v1(split=True, num_head_layers=config.num_head_layers)
+
         else:
+
             def _create_model():
                 return MobileNet_v1()
+
     else:
         raise NotImplementedError(f"Model {config.model} not implemented")
-            
+
     return _create_model()
-       
+
 
 def plot_metric_from_history(
     hist: History,
@@ -70,7 +72,11 @@ def plot_metric_from_history(
         Optional string to add at the end of the filename for the plot.
     """
     metric_type = "distributed"
-    metric_dict = (hist.metrics_centralized if metric_type == "centralized" else hist.metrics_distributed)
+    metric_dict = (
+        hist.metrics_centralized
+        if metric_type == "centralized"
+        else hist.metrics_distributed
+    )
     rounds, values = zip(*metric_dict["accuracy"])
 
     # let's extract decentralized loss (main metric reported in FedProx paper)
@@ -89,6 +95,7 @@ def plot_metric_from_history(
 
     plt.savefig(Path(save_plot_path) / Path(f"{metric_type}_metrics{suffix}.png"))
     plt.close()
+
 
 def save_results_as_pickle(
     history: History,
@@ -115,15 +122,15 @@ def save_results_as_pickle(
         File used by default if file_path points to a directory instead
         to a file. Default: "results.pkl"
     """
-
     path = Path(file_path)
 
     # ensure path exists
     path.mkdir(exist_ok=True, parents=True)
 
     def _add_random_suffix(path_: Path):
-        """Adds a randomly generated suffix to the file name (so it doesn't
-        overwrite the file)."""
+        """Adds a randomly generated suffix to the file name (so it doesn't overwrite
+        the file).
+        """
         print(f"File `{path_}` exists! ")
         suffix = token_hex(4)
         print(f"New results to be saved with suffix: {suffix}")
@@ -134,9 +141,11 @@ def save_results_as_pickle(
         print("Using default filename")
         return path_ / default_filename
 
-    if path.is_dir(): path = _complete_path_with_default_name(path)
+    if path.is_dir():
+        path = _complete_path_with_default_name(path)
 
-    if path.is_file(): path = _add_random_suffix(path)
+    if path.is_file():
+        path = _add_random_suffix(path)
 
     print(f"Results will be saved into: {path}")
     data = {"history": history, **extra_results}

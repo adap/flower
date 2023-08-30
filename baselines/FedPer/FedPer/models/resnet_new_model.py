@@ -1,43 +1,69 @@
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
-from tqdm import tqdm
-from torch import Tensor
-from typing import Any, Dict, List, Optional, Tuple, Union
 from torch.utils.data import DataLoader
-from torchvision.datasets import CIFAR10
-from torchvision.transforms import Compose, Normalize, ToTensor
-from FedPer.utils.model_split import ModelSplit
-from FedPer.utils.model_manager import ModelManager
-
 from torchvision.models.resnet import resnet34
+from tqdm import tqdm
+
+from FedPer.utils.model_manager import ModelManager
+from FedPer.utils.model_split import ModelSplit
+
 
 class ResNet(nn.Module):
-    """ ResNet model. """
+    """ResNet model."""
 
     def __init__(
-            self, 
-            num_head_layers : int = 1, 
-            num_classes : int = 10, 
-            device : str = 'cpu', 
-            name : str = 'resnet'
-        ) -> None:
+        self,
+        num_head_layers: int = 1,
+        num_classes: int = 10,
+        device: str = "cpu",
+        name: str = "resnet",
+    ) -> None:
         super(ResNet, self).__init__()
-        assert num_head_layers > 0 and num_head_layers <= 17, "num_head_layers must be greater than 0 and less than 16"
+        assert (
+            num_head_layers > 0 and num_head_layers <= 17
+        ), "num_head_layers must be greater than 0 and less than 16"
         self.num_head_layers = num_head_layers
         self.body = resnet34()
 
         def basic_block(in_planes, out_planes, stride_use=1):
             """Basic ResNet block."""
             return nn.Sequential(
-                nn.Conv2d(in_planes, out_planes, kernel_size=(3,3), stride=(stride_use, stride_use), padding=(1,1), bias=False),
-                nn.BatchNorm2d(out_planes, eps=1e-05, momentum=0.01, affine=True, track_running_stats=True),
+                nn.Conv2d(
+                    in_planes,
+                    out_planes,
+                    kernel_size=(3, 3),
+                    stride=(stride_use, stride_use),
+                    padding=(1, 1),
+                    bias=False,
+                ),
+                nn.BatchNorm2d(
+                    out_planes,
+                    eps=1e-05,
+                    momentum=0.01,
+                    affine=True,
+                    track_running_stats=True,
+                ),
                 nn.ReLU(inplace=True),
-                nn.Conv2d(out_planes, out_planes, kernel_size=(3,3), stride=(stride_use, stride_use), padding=(1,1), bias=False),
-                nn.BatchNorm2d(out_planes, eps=1e-05, momentum=0.01, affine=True, track_running_stats=True)
+                nn.Conv2d(
+                    out_planes,
+                    out_planes,
+                    kernel_size=(3, 3),
+                    stride=(stride_use, stride_use),
+                    padding=(1, 1),
+                    bias=False,
+                ),
+                nn.BatchNorm2d(
+                    out_planes,
+                    eps=1e-05,
+                    momentum=0.01,
+                    affine=True,
+                    track_running_stats=True,
+                ),
             )
-             
+
         # if only one head layer
         if self.num_head_layers == 1:
             self.head = self.body.fc
@@ -47,16 +73,16 @@ class ResNet(nn.Module):
                 basic_block(512, 512),
                 nn.AdaptiveAvgPool2d((1, 1)),
                 nn.Flatten(),
-                nn.Linear(512, num_classes)
+                nn.Linear(512, num_classes),
             )
             # remove head layers from body
             self.body = nn.Sequential(*list(self.body.children())[:-2])
             body_layer4 = list(self.body.children())[-1]
             self.body = nn.Sequential(*list(self.body.children())[:-1])
             self.body.layer4 = nn.Sequential(*list(body_layer4.children())[:-1])
-        else: 
+        else:
             raise NotImplementedError("Only 1 or 2 head layers supported")
-        
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         print("Forwarding through ResNet model")
         if self.num_head_layers == 1:
@@ -70,27 +96,29 @@ class ResNet(nn.Module):
         else:
             raise NotImplementedError("Only 1 or 2 head layers supported")
 
+
 class ResNetModelSplit(ModelSplit):
-    """Concrete implementation of ModelSplit for models for node kind prediction in action flows \
-        with Body/Head split."""
+    """Concrete implementation of ModelSplit for models for node kind prediction in
+    action flows \\ with Body/Head split.
+    """
 
     def _get_model_parts(self, model: ResNet) -> Tuple[nn.Module, nn.Module]:
         return model.body, model.head
+
 
 class ResNetModelManager(ModelManager):
     """Manager for models with Body/Head split."""
 
     def __init__(
-            self,
-            client_id: int,
-            config: Dict[str, Any],
-            trainloader: DataLoader,
-            testloader: DataLoader,
-            has_fixed_head: bool = False,
-            client_save_path: str = None
+        self,
+        client_id: int,
+        config: Dict[str, Any],
+        trainloader: DataLoader,
+        testloader: DataLoader,
+        has_fixed_head: bool = False,
+        client_save_path: str = None,
     ):
-        """
-        Initialize the attributes of the model manager.
+        """Initialize the attributes of the model manager.
 
         Args:
             client_id: The id of the client.
@@ -101,24 +129,24 @@ class ResNetModelManager(ModelManager):
             model_split_class=ResNetModelSplit,
             client_id=client_id,
             config=config,
-            has_fixed_head=has_fixed_head
+            has_fixed_head=has_fixed_head,
         )
         self.trainloader, self.testloader = trainloader, testloader
-        self.device = self.config['device']
+        self.device = self.config["device"]
         self.client_save_path = client_save_path
 
     def _create_model(self) -> nn.Module:
         """Return MobileNet-v1 model to be splitted into head and body."""
         try:
             return ResNet(
-                num_head_layers=self.config['num_head_layers'],
-                num_classes=self.config['num_classes'],
+                num_head_layers=self.config["num_head_layers"],
+                num_classes=self.config["num_classes"],
             ).to(self.device)
         except AttributeError:
-            self.device = self.config['device']
+            self.device = self.config["device"]
             return ResNet(
-                num_head_layers=self.config['num_head_layers'],
-                num_classes=self.config['num_classes'],
+                num_head_layers=self.config["num_head_layers"],
+                num_classes=self.config["num_classes"],
             ).to(self.device)
 
     def train(
@@ -126,10 +154,9 @@ class ResNetModelManager(ModelManager):
         train_id: int,
         epochs: int = 1,
         tag: Optional[str] = None,
-        fine_tuning: bool = False
+        fine_tuning: bool = False,
     ) -> Dict[str, Union[List[Dict[str, float]], int, float]]:
-        """
-        Train the model maintained in self.model.
+        """Train the model maintained in self.model.
 
         Method adapted from simple MobileNet-v1 (PyTorch) \
         https://github.com/wjc852456/pytorch-mobilenet-v1.
@@ -146,7 +173,8 @@ class ResNetModelManager(ModelManager):
                 This tag can be ignored if no difference in train behaviour is desired between federated algortihms.
             fine_tuning: whether the training performed is for model fine-tuning or not.
 
-        Returns:
+        Returns
+        -------
             Dict containing the train metrics.
         """
         # Load client state (head) if client_save_path is not None and it is not empty
@@ -179,8 +207,7 @@ class ResNetModelManager(ModelManager):
         return {"loss": loss.item(), "accuracy": correct / total}
 
     def test(self, test_id: int) -> Dict[str, float]:
-        """
-        Test the model maintained in self.model.
+        """Test the model maintained in self.model.
 
         Method adapted from simple CNN from Flower 'Quickstart PyTorch' \
         (https://flower.dev/docs/quickstart-pytorch.html).
@@ -188,10 +215,10 @@ class ResNetModelManager(ModelManager):
         Args:
             test_id: id of the test round.
 
-        Returns:
+        Returns
+        -------
             Dict containing the test metrics.
         """
-
         # Load client state (head)
         if self.client_save_path is not None:
             self.model.head.load_state_dict(torch.load(self.client_save_path))
@@ -211,7 +238,10 @@ class ResNetModelManager(ModelManager):
         if self.client_save_path is not None:
             torch.save(self.model.head.state_dict(), self.client_save_path)
 
-        return {"loss": loss / len(self.testloader.dataset), "accuracy": correct / total}
+        return {
+            "loss": loss / len(self.testloader.dataset),
+            "accuracy": correct / total,
+        }
 
     def train_dataset_size(self) -> int:
         """Return train data set size."""

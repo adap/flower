@@ -1,25 +1,28 @@
 import copy
+from abc import ABC, abstractmethod
+from collections import OrderedDict
+from typing import Any, Dict, List, Optional, Tuple
+
 import numpy as np
 import torch.nn as nn
-
-from abc import ABC, abstractmethod
 from torch import Tensor
-from typing import Tuple, Optional, List, Dict, Any
-from collections import OrderedDict
-
 from torch.nn import functional as F
 
+
 class ModelSplit(ABC, nn.Module):
-    """Abstract class for splitting a model into body and head. Optionally, a fixed head can also be created."""
+    """Abstract class for splitting a model into body and head.
+
+    Optionally, a fixed head can also be created.
+    """
 
     def __init__(
-            self,
-            model: nn.Module,
-            has_fixed_head: bool = False,
-            #config : dict = None
+        self,
+        model: nn.Module,
+        has_fixed_head: bool = False,
+        # config : dict = None
     ):
-        """
-        Initialize ModelSplit attributes. A call is made to the _setup_model_parts method.
+        """Initialize ModelSplit attributes. A call is made to the _setup_model_parts
+        method.
 
         Args:
             model: dict containing the vocab sizes of the input attributes.
@@ -35,13 +38,13 @@ class ModelSplit(ABC, nn.Module):
 
     @abstractmethod
     def _get_model_parts(self, model: nn.Module) -> Tuple[nn.Module, nn.Module]:
-        """
-        Return the body and head of the model.
+        """Return the body and head of the model.
 
         Args:
             model: model to be split into head and body
 
-        Returns:
+        Returns
+        -------
             Tuple where the first element is the body of the model and the second is the head.
         """
         pass
@@ -53,8 +56,7 @@ class ModelSplit(ABC, nn.Module):
 
     @body.setter
     def body(self, state_dict: "OrderedDict[str, Tensor]") -> None:
-        """
-        Set model body.
+        """Set model body.
 
         Args:
             state_dict: dictionary of the state to set the model body to.
@@ -68,8 +70,7 @@ class ModelSplit(ABC, nn.Module):
 
     @head.setter
     def head(self, state_dict: "OrderedDict[str, Tensor]") -> None:
-        """
-        Set model head.
+        """Set model head.
 
         Args:
             state_dict: dictionary of the state to set the model head to.
@@ -83,8 +84,7 @@ class ModelSplit(ABC, nn.Module):
 
     @fixed_head.setter
     def fixed_head(self, state_dict: "OrderedDict[str, Tensor]") -> None:
-        """
-        Set model fixed_head.
+        """Set model fixed_head.
 
         Args:
             state_dict: dictionary of the state to set the model fixed head to.
@@ -96,17 +96,22 @@ class ModelSplit(ABC, nn.Module):
         self.disable_fixed_head()
 
     def get_parameters(self) -> List[np.ndarray]:
-        """
-        Get model parameters (without fixed head).
+        """Get model parameters (without fixed head).
 
-        Returns:
+        Returns
+        -------
             Body and head parameters
         """
-        return [val.cpu().numpy() for val in [*self.body.state_dict().values(), *self.head.state_dict().values()]]
+        return [
+            val.cpu().numpy()
+            for val in [
+                *self.body.state_dict().values(),
+                *self.head.state_dict().values(),
+            ]
+        ]
 
     def set_parameters(self, state_dict: Dict[str, Tensor]) -> None:
-        """
-        Set model parameters.
+        """Set model parameters.
 
         Args:
             state_dict: dictionary of the state to set the model to.
@@ -114,7 +119,7 @@ class ModelSplit(ABC, nn.Module):
         # Copy to maintain the order of the parameters and add the missing parameters to the state_dict
         ordered_state_dict = OrderedDict(self.state_dict().copy())
         # Update with the values of the state_dict
-        ordered_state_dict.update({k: v for k, v in state_dict.items()})
+        ordered_state_dict.update(dict(state_dict.items()))
         self.load_state_dict(ordered_state_dict, strict=False)
 
     def enable_head(self) -> None:
@@ -145,8 +150,7 @@ class ModelSplit(ABC, nn.Module):
             param.requires_grad = False
 
     def use_fixed_head(self, use_fixed_head: bool) -> None:
-        """
-        Set whether the fixed head should be used for forward.
+        """Set whether the fixed head should be used for forward.
 
         Args:
             use_fixed_head: boolean indicating whether to use the fixed head or not.
@@ -157,10 +161,10 @@ class ModelSplit(ABC, nn.Module):
         """Forward inputs through the body and the head (or fixed head)."""
         x = self.body(inputs)
         x = F.relu(x)
-        #try:
+        # try:
         #    if len(self.head) == 4:
         #        x = x.view(x.size(0), -1)
-        #except TypeError:
+        # except TypeError:
         #    pass
         if self._use_fixed_head and self.fixed_head is not None:
             return self.fixed_head(x)
