@@ -36,7 +36,7 @@ fit_config:
   batch_size: ${batch_size}
 
 strategy:
-  _target_: FedPer.utils.strategy_pipeline.AggregateBodyStrategyPipeline
+  _target_: FedPer.utils.strategy_pipeline.DefaultStrategyPipeline
   algorithm: ${algorithm}
   fraction_fit: 0.00001 # because we want the number of clients to sample on each roudn to be solely defined by min_fit_clients
   min_fit_clients: ${num_clients}
