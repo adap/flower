@@ -44,6 +44,7 @@ hydra-core = "1.3.2" # don't change this
 cython = "^3.0.0"
 tensorflow = "2.10"
 numpy = "1.25.2"
+matplotlib = "^3.7.2"
 
 [tool.poetry.dev-dependencies]
 isort = "==5.11.5"

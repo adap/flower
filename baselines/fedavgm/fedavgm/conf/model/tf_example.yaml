@@ -1,0 +1,4 @@
+---
+_target_: fedavgm.models.tf_example
+input_shape: ${dataset.input_shape}
+num_classes: ${dataset.num_classes}
