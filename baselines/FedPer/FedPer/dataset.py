@@ -15,8 +15,8 @@ import sys
 from pathlib import Path
 
 import numpy as np
-from FedPer_old.dataset_preparation import DATASETS, randomly_assign_classes
-from FedPer_old.utils import fix_random_seed
+
+from FedPer.dataset_preparation import DATASETS, randomly_assign_classes
 
 # working dir is two up
 WORKING_DIR = Path(__file__).resolve().parent.parent
@@ -29,8 +29,6 @@ def dataset_main(config: dict) -> None:
     dataset_name = config["name"].lower()
     dataset_folder = Path(WORKING_DIR, "datasets")
     dataset_root = Path(dataset_folder, dataset_name)
-
-    fix_random_seed(config["seed"])
 
     if not os.path.isdir(dataset_root):
         os.makedirs(dataset_root)

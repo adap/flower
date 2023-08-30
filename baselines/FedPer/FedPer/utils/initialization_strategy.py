@@ -7,7 +7,7 @@ from flwr.server.strategy.strategy import Strategy
 
 from FedPer.models.mobile_model import MobileNetModelSplit
 from FedPer.utils.model_split import ModelSplit
-from FedPer.utils.new_utils import Algorithms
+from FedPer.utils.constants import Algorithms
 
 
 class ServerInitializationStrategy(Strategy):
