@@ -13,11 +13,10 @@ from flwr.server.strategy import Strategy
 from tamuna.models import Net
 
 
-def aggregate(weights: List[NDArrays]) -> NDArrays:
+def aggregate(weights: List[NDArrays], s: float) -> NDArrays:
     """Computes average of the clients' weights."""
-    cohort_size = len(weights)
     averaged_weights = [
-        np.sum(layer_updates, axis=0) / cohort_size for layer_updates in zip(*weights)
+        np.sum(layer_updates, axis=0) / s for layer_updates in zip(*weights)
     ]
     return averaged_weights
 
@@ -65,11 +64,13 @@ class TamunaStrategy(Strategy):
         self.evaluate_fn = evaluate_fn
         self.eta = eta
         self.s = s
+        self.dim = None
         self.server_model = None
 
     def initialize_parameters(self, client_manager):
         """Initialize the server model."""
         self.server_model = Net()
+        self.dim = sum(p.numel() for p in self.server_model.parameters())
         ndarrays = [
             val.cpu().numpy() for _, val in self.server_model.state_dict().items()
         ]
@@ -80,10 +81,8 @@ class TamunaStrategy(Strategy):
         sampled_clients = client_manager.sample(self.clients_per_round)
         config = {"epochs": self.epochs_per_round[server_round - 1], "eta": self.eta}
 
-        dim = sum(p.numel() for p in self.server_model.parameters())
-
         compression_pattern = create_pattern(
-            dim, self.clients_per_round, self.s, rand_shuffle_flag=True
+            self.dim, self.clients_per_round, self.s, rand_shuffle_flag=True
         )  # dim x cohort_size
 
         for i in range(self.clients_per_round):
@@ -95,7 +94,7 @@ class TamunaStrategy(Strategy):
     def aggregate_fit(self, server_round, results, failures):
         """Average the clients' weights."""
         weights = [parameters_to_ndarrays(fit_res.parameters) for _, fit_res in results]
-        parameters_aggregated = ndarrays_to_parameters(aggregate(weights))
+        parameters_aggregated = ndarrays_to_parameters(aggregate(weights, self.s))
         return parameters_aggregated, {}
 
     def configure_evaluate(self, server_round, parameters, client_manager):

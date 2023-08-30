@@ -1,21 +1,6 @@
-#---
-# this is the config that will be loaded as default by main.py
-# Please follow the provided structure (this will ensuring all baseline follow
-# a similar configuration structure and hence be easy to customise)
-
-#dataset:
-#  # dataset config
-#
-#model:
-#  # model config
-#
-#strategy:
-#  _target_: # points to your strategy (either custom or exiting in Flower)
-#  # rest of strategy config
-#
-#client:
-#  # client config
----
+dataset:
+  # iid or power-law
+  split: 'iid'
 
 model:
   _target_: tamuna.models.Net
@@ -25,17 +10,20 @@ strategy:
   _target_: tamuna.strategy.TamunaStrategy
 
 server:
-  clients_per_round: 2
-  num_clients: 5
-  num_rounds: 5
-  s: 2
+  clients_per_round: 10
+  num_clients: 1000
+  num_rounds: 50
+  # sparsity parameter, 2 <= s <= clients_per_round
+  s: 8
+  # probability of server communication, i.e. clients will in expectation do 1 / p local epochs
   p: 0.333
   server_device: 'cuda'
 
 client:
-  client_device: 'cpu'
+  client_device: 'cuda'
   client_resources:
-    num_cpus: 2
-    num_gpus: 0
-  learning_rate: 0.02
-  eta: 0.333
+    num_cpus: 4
+    num_gpus: 1
+  learning_rate: 0.003
+  # eta should be between p / 2 and p * [(clients_per_round * (s - 1))/(s * (clients_per_round - 1))]
+  eta: 0.323

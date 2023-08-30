@@ -51,9 +51,9 @@ class FlowerClient(fl.client.NumPyClient):
                     self.old_compressed_net,
                 )
                 pickle.dump(state, f, protocol=pickle.HIGHEST_PROTOCOL)
-                print(f"Client {self.cid} state created.")
-        else:
-            print(f"Client {self.cid} state already exists.")
+                # print(f"Client {self.cid} state created.")
+        # else:
+            # print(f"Client {self.cid} state already exists.")
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
@@ -146,7 +146,7 @@ def gen_client_fn(
     def client_fn(cid: str) -> FlowerClient:
         """Create a Flower client representing a single organization."""
 
-        print(f"Creating client {cid}.")
+        # print(f"Creating client {cid}.")
 
         # Load model
         device = torch.device(device=client_device)
