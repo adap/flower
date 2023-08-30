@@ -64,7 +64,6 @@ class VirtualClientEngineActor(ABC):
         # return also cid which is needed to ensure results
         # from the pool are correctly assigned to each ClientProxy
         try:
-            client = client_fn(cid)
             # TODO: as in `_create_client` in `ray_client_proxy_test.py`
             client_like: ClientLike = client_fn(cid)
             client = to_client(client_like=client_like)
