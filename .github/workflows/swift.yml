@@ -6,7 +6,7 @@ on:
     paths: ['src/swift/**']
   pull_request:
     branches: ['main']
-    # paths: ['src/swift/**']
+    paths: ['src/swift/**']
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
