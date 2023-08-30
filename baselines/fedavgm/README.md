@@ -5,7 +5,7 @@ labels: [non-iid, image classification] # please add between 4 and 10 single-wor
 dataset: [CIFAR-10, FMNIST] # list of datasets you include in your baseline
 ---
 
-# FedAvgM: Measuring the effects of non-identical data distribution for federated visual classification
+# Measuring the effects of non-identical data distribution for federated visual classification
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
@@ -24,7 +24,7 @@ dataset: [CIFAR-10, FMNIST] # list of datasets you include in your baseline
 
 **Hardware Setup:** :warning: *_Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Someone out there might not have access to the same resources you have so, could list the absolute minimum hardware needed to run the experiment in a reasonable amount of time ? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?_*
 
-**Contributors:** Gustavo de Carvalho Bertoli
+**Contributors:** Gustavo de Carvalho Bertoli (@gubertoli)
 
 ## Experimental Setup
 
@@ -46,6 +46,10 @@ Regarding this architecture, the historical references mentioned on the FedAvg a
 | :------ | :---: | :---: | :---: | :---: |
 | CIFAR-10 | 10 | `num_clients` | Latent Dirichlet Allocation (LDA) | `concentration` |
 | FMNIST | 10 | `num_clients` | Latent Dirichlet Allocation (LDA) | `concentration` |
+
+**Data distribution:** The following figure illustrates the use of multiple `concentration` values to generate the data distribution over 30 clients for CIFAR-10 (10 classes):
+
+![](docs/concentration_cifar10.png)
 
 **Training Hyperparameters:**
 The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python main.py` directly)
