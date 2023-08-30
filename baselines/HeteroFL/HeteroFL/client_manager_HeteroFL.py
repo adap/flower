@@ -13,18 +13,28 @@ from utils import Model_rate_manager
 class client_manager_HeteroFL(fl.server.ClientManager):
     """Provides a pool of available clients."""
 
-    def __init__(self, model_rate_manager : Model_rate_manager = None, clients_to_model_rate_mapping = None) -> None:
+    def __init__(self, model_rate_manager : Model_rate_manager = None, clients_to_model_rate_mapping = None , client_label_split = None , seed = 42) -> None:
         self.clients: Dict[str, ClientProxy] = {}
+        
+        self.is_simulation = False
+        if model_rate_manager != None:
+            self.is_simulation = True
+        
         self.model_rate_manager = model_rate_manager  
-
-        # have a common array in simulation to access in the client and server side
+        
+        # have a common array in simulation to access in the client_fn and server side
         if clients_to_model_rate_mapping != None:
             self.clients_to_model_rate_mapping = clients_to_model_rate_mapping
             ans = self.model_rate_manager.create_model_rate_mapping(len(clients_to_model_rate_mapping))
             # copy self.clients_to_model_rate_mapping , ans
             for i in range(len(ans)):
                 self.clients_to_model_rate_mapping[i] = ans[i]
-            
+        
+        # shall handle in case of not_simulation...
+        self.client_label_split = client_label_split
+
+        # control the randomness of sampling the clients
+        random.seed(seed)
              
         self._cv = threading.Condition()
 
@@ -81,8 +91,11 @@ class client_manager_HeteroFL(fl.server.ClientManager):
 
         self.clients[client.cid] = client
         
-        if(self.clients_to_model_rate_mapping == None):
-            self.clients_to_model_rate_mapping[int(client.cid)] = client.get_properties(None, timeout= 86400)
+        # shall look into this, as this might not work as intended
+        if(self.is_simulation == False):
+            prop = client.get_properties(None, timeout= 86400)
+            self.clients_to_model_rate_mapping[int(client.cid)] = prop['model_rate']
+            self.client_label_split[int(client.cid)] = prop['label_split']
     
         with self._cv:
             self._cv.notify_all()
@@ -101,6 +114,7 @@ class client_manager_HeteroFL(fl.server.ClientManager):
         if client.cid in self.clients:
             del self.clients[client.cid]
             del self.clients_to_model_rate_mapping[int(client.cid)]
+            del self.client_label_split[int(client.cid)]
 
             with self._cv:
                 self._cv.notify_all()
@@ -111,26 +125,23 @@ class client_manager_HeteroFL(fl.server.ClientManager):
     
     def get_client_to_model_mapping(self , cid) -> float:
         """Return all available clients to model rate mapping."""
-        return self.clients_to_model_rate_mapping[str(cid)]
+        return self.clients_to_model_rate_mapping[int(cid)]
     
     def get_all_clients_to_model_mapping(self):
         """Return all available clients to model rate mapping."""
-        temp_list = []
-        for i in range(self.num_available()):
-            temp_list.append(self.clients_to_model_rate_mapping[str(i)])
-            print("returned {}".format(self.clients_to_model_rate_mapping[str(i)]))
-        
-        return temp_list
+        return self.clients_to_model_rate_mapping.copy()
     
     def update(self , server_round):
-        if self.model_rate_manager != None:
+        if self.is_simulation == True:
             if(server_round == 1 and self. model_rate_manager.model_mode == 'fix') or (self.model_rate_manager.model_mode == 'dynamic'):
                 ans = self.model_rate_manager.create_model_rate_mapping(self.num_available)
+                # copy self.clients_to_model_rate_mapping , ans
                 for i in range(len(ans)):
                     self.clients_to_model_rate_mapping[i] = ans[i]
-                # copy self.clients_to_model_rate_mapping , ans
             return
         
+
+        # to be handled in case of not simulation, i.e. to get the properties again from the clients as they can change the model_rate
         # for i in range(self.num_available):
         #     # need to test this , accumilates the changing model rate of the client
         #     self.clients_to_model_rate_mapping[i] = self.clients[str(i)].get_properties['model_rate']

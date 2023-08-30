@@ -1,0 +1,34 @@
+# dataset_config
+num_clients: 100
+num_epochs: 16
+num_rounds: 200
+seed: 42
+
+control:
+  model_split_rate: 'fix'
+  model_mode: 'a2-b8'
+
+dataset_config:
+  dataset_name: 'MNIST'
+  iid: false
+  shard_per_user : 2 # only used in case of non-iid (i.e. iid = false)
+  balance: false
+  batch_size:
+    train: 128
+    test: 128
+  shuffle:
+    train: true
+    test: false
+
+
+model:
+  model_name: conv
+  hidden_layers: [64 , 128 , 216 , 512]
+
+strategy:
+  optimizer:
+  lr:
+  momentum:
+  weight_decay:
+  scheduler:
+  milestones:
