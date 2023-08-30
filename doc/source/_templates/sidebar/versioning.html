@@ -33,6 +33,7 @@ input[type='checkbox'] {
 
 .collapsible-content {
   max-height: 0px;
+  padding-top: 0px;
   overflow: hidden;
 
   transition: max-height .25s ease-in-out;
@@ -54,10 +55,6 @@ input[type='checkbox'] {
 .content-inner {
   padding-bottom: 1rem;
 }
-
-.wrap-collabsible {
-  background-color: var(--color-background-item);
-}
 </style>
 
 <div class="wrap-collabsible"> 
@@ -66,8 +63,8 @@ input[type='checkbox'] {
   <div class="collapsible-content">
     <div class="content-inner">
       <ul>
-        {%- for item in versions|sort(reverse = True) %}
-        <li><a href="{{ item.url }}" style="text-decoration:none">{{ item.name }}{{ ' (unstable)' if item.name == 'main' else '' }}</a></li>
+        {%- for item in versions %}
+        <li><a href="https://flower.dev/docs/framework/{{ item.name }}/{{ current_language }}/{{ pagename }}.html" style="text-decoration:none">{{ item.name }}</a></li>
         {%- endfor %}
       </ul>
     </div>
