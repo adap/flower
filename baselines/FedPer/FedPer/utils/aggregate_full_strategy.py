@@ -3,8 +3,9 @@ import torch
 from typing import Any, Dict, List, Optional, Tuple
 from pathlib import Path
 from collections import OrderedDict
-from flwr.common import FitRes, Parameters, Scalar, parameters_to_ndarrays
+from flwr.common import FitRes, Parameters, Scalar, parameters_to_ndarrays, ndarrays_to_parameters, EvaluateIns
 from flwr.server.client_proxy import ClientProxy
+from flwr.server.client_manager import ClientManager
 from FedPer.utils.initialization_strategy import ServerInitializationStrategy
 
 class AggregateFullStrategy(ServerInitializationStrategy):
@@ -17,9 +18,67 @@ class AggregateFullStrategy(ServerInitializationStrategy):
             self.save_path = save_path / "models"
             self.save_path.mkdir(parents=True, exist_ok=True)
 
+    def configure_evaluate(
+        self, server_round: int, 
+        parameters: Parameters, 
+        client_manager: ClientManager
+    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
+        """
+        Configure the next round of evaluation.
+
+        Args:
+            server_round: The current round of federated learning.
+            parameters: The current (global) model parameters.
+            client_manager: The client manager which holds all currently
+                connected clients.
+
+        Returns:
+            A list of tuples. Each tuple in the list identifies a `ClientProxy` and the
+            `EvaluateIns` for this particular `ClientProxy`. If a particular
+            `ClientProxy` is not included in this list, it means that this
+            `ClientProxy` will not participate in the next round of federated
+            evaluation.
+        """
+        # Same as superclass method but adds the head
+
+        # Do not configure federated evaluation if a centralized evaluation
+        # function is provided
+        if self.evaluate_fn is not None:
+            return []
+
+        # Parameters and config
+        config = {}
+        if self.on_evaluate_config_fn is not None:
+            # Custom evaluation config function provided
+            config = self.on_evaluate_config_fn(server_round)
+
+        weights = parameters_to_ndarrays(parameters)
+
+        # Add head parameters to received body parameters
+        # weights.extend([val.cpu().numpy() for _, val in self.model.head.state_dict().items()])
+
+        parameters = ndarrays_to_parameters(weights)
+
+        evaluate_ins = EvaluateIns(parameters, config)
+
+        # Sample clients
+        if server_round >= 0:
+            sample_size, min_num_clients = self.num_evaluation_clients(
+                client_manager.num_available()
+            )
+            clients = client_manager.sample(
+                num_clients=sample_size, min_num_clients=min_num_clients
+            )
+        else:
+            clients = list(client_manager.all().values())
+
+        # Return client/config pairs
+        return [(client, evaluate_ins) for client in clients]
+
+
     def aggregate_fit(
         self,
-        rnd: int,
+        server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
@@ -27,7 +86,7 @@ class AggregateFullStrategy(ServerInitializationStrategy):
         Aggregate the received local parameters, set the global model parameters and save the global model.
 
         Args:
-            rnd: The current round of federated learning.
+            server_round: The current round of federated learning.
             results: Successful updates from the previously selected and configured
                 clients. Each pair of `(ClientProxy, FitRes)` constitutes a
                 successful update from one of the previously selected clients. Not
@@ -46,19 +105,18 @@ class AggregateFullStrategy(ServerInitializationStrategy):
             parameters, the updates received in this round are discarded, and
             the global model parameters remain the same.
         """
-        agg_params, agg_metrics = super().aggregate_fit(rnd=rnd, results=results, failures=failures)
+        agg_params, agg_metrics = super().aggregate_fit(server_round=server_round, results=results, failures=failures)
 
         # Update Server Model
         parameters = parameters_to_ndarrays(agg_params)
-        model_keys = [k for k in self.model.state_dict().keys()
-                    if k.startswith("_body") or k.startswith("_head")]
+        model_keys = [k for k in self.model.state_dict().keys() if k.startswith("_body") or k.startswith("_head")]
         params_dict = zip(model_keys, parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
         self.model.set_parameters(state_dict)
 
         if self.save_path is not None:
             # Save Model
-            torch.save(self.model, self.save_path / f"model-ep_{rnd}.pt")
+            torch.save(self.model, self.save_path / f"model-ep_{server_round}.pt")
 
 
         return agg_params, agg_metrics

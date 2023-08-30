@@ -55,7 +55,10 @@ class BaseClient(fl.client.NumPyClient):
         self.test_id = 1
         self.config = config
         self.client_id = client_id
-        self.client_state_save_path = client_state_save_path + f"/client_{self.client_id}"
+        try:
+            self.client_state_save_path = client_state_save_path + f"/client_{self.client_id}"
+        except TypeError:
+            self.client_state_save_path = None
         self.hist: Dict[str, Dict[str, Any]] = defaultdict(dict)
         self.model_manager = model_manager_class(
             client_id=self.client_id,
@@ -71,7 +74,7 @@ class BaseClient(fl.client.NumPyClient):
         """Return the current local model parameters."""
         return self.model_manager.model.get_parameters()
 
-    def set_parameters(self, parameters: List[np.ndarray]) -> None:
+    def set_parameters(self, parameters: List[np.ndarray], evaluate : bool = False) -> None:
         """
         Set the local model parameters to the received parameters.
 
@@ -103,7 +106,6 @@ class BaseClient(fl.client.NumPyClient):
         """
 
         epochs = self.config.get("epochs", {"full": 4})
-
         print("Epochs: ", epochs)
         print("Tag: ", tag)
 
@@ -112,7 +114,7 @@ class BaseClient(fl.client.NumPyClient):
 
         return self.model_manager.train(
             train_id=self.train_id,
-            epochs=epochs.get("full", DEFAULT_TRAIN_EP),
+            epochs=epochs.get("full", 4),
             tag="FedAvg_full" if tag is None else tag
         )
 
