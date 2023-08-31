@@ -80,10 +80,10 @@ for current_version in ${versions}; do
   
       echo "INFO: Building for ${current_language}"
 
-      if [[ ! -f "locales/$current_language/LC_MESSAGES/framework-docs.po" ]]; then
+      if [ ! -f "locales/$current_language/LC_MESSAGES/framework-docs.po" ]; then
 
         # Adding translation to versions that didn't contain one
-        if [[ $current_language != "en" ]]; then
+        if [ $current_language != "en" ]; then
           echo "No translation, using default one"
 
           # Remove any previous file in locales
@@ -114,7 +114,7 @@ for current_version in ${versions}; do
       sphinx-build -b html source/ build/html/${current_version}/${current_language} -A lang=True -D language=${current_language}
 
       # Restore branch as it was to avoid conflicts
-      if [[ changed ]]; then
+      if [ changed ]; then
         git restore source/conf.py
         rm -rf locales/${current_language}
         rm -rf source/_templates/sidebar
@@ -124,7 +124,7 @@ for current_version in ${versions}; do
 done
   
 # Build the main version (main for GH CI, local branch for local) 
-if [[ $GITHUB_ACTIONS ]]
+if [ $GITHUB_ACTIONS ]
 then
   git switch main
 else
