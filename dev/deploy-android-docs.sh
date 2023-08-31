@@ -25,4 +25,4 @@ cd $ROOT
 cd src/kotlin
 ./gradlew dokkaHtml
 cd flwr/build/dokka/html
-aws s3 sync --delete --exclude ".*" --exclude "v/*" --acl public-read --cache-control "no-cache" ./ s3://flower.dev/docs/android
+aws s3 sync --delete --exclude ".*" --acl public-read --cache-control "no-cache" ./ s3://flower.dev/docs/android
