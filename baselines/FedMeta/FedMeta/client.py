@@ -70,14 +70,13 @@ class FlowerClient(
         """Implements distributed evaluation for a given client."""
         self.set_parameters(parameters)
         loss, accuracy = test(self.net, self.valloader, self.device)
-        print("test now")
         return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
 
 
 def gen_client_fn(
         num_epochs: int,
-        # trainloaders: List[DataLoader],
-        # valloaders: List[DataLoader],
+        # dataset: Tuple[Dict],
+        # client_list: List[str],
         learning_rate: float,
         model: DictConfig,
 ) -> Callable[[str], FlowerClient]:  # pylint: disable=too-many-arguments

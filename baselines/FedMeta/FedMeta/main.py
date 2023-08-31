@@ -9,6 +9,8 @@ import hydra
 from omegaconf import DictConfig, OmegaConf
 from hydra.utils import instantiate
 from strategy import weighted_average
+from dataset import load_datasets
+from Fedmeta_client_manager import Fedmeta_client_manager
 
 import flwr as fl
 import client
@@ -23,45 +25,39 @@ def main(cfg: DictConfig) -> None:
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
-    # 1. Print parsed config
+    # print config structured as YAML
     print(OmegaConf.to_yaml(cfg))
-    # 2. Prepare your dataset
-    # here you should call a function in datasets.py that returns whatever is needed to:
-    # (1) ensure the server can access the dataset used to evaluate your model after
-    # aggregation
-    # (2) tell each client what dataset partitions they should use (e.g. a this could
-    # be a location in the file system, a list of dataloader, a list of ids to extract
-    # from a dataset, it's up to you)
 
-    # 3. Define your clients
-    # Define a function that returns another function that will be used during
-    # simulation to instantiate each individual client
-    # client_fn = client.<my_function_that_returns_a_function>()
+    # partition dataset and get dataloaders
+    # dataset, client_list = load_datasets(config=cfg.dataset)
+    # train_clients, val_clients, test_clients = client_list
 
+    # prepare function that will be used to spawn each client
     client_fn = client.gen_client_fn(
         num_epochs=cfg.num_epochs,
+        # dataset=dataset,
+        # client_list=client_list,
         learning_rate=cfg.learning_rate,
-        model=cfg.model
+        model=cfg.model,
     )
-    # 4. Define your strategy
-    # pass all relevant argument (including the global dataset used after aggregation,
-    # if needed by your method.)
 
     strategy = instantiate(
         cfg.strategy,
-        evaluate_metrics_aggregation_fn = weighted_average
+        evaluate_metrics_aggregation_fn=weighted_average,
+        # min_evaluate_clients=len(val_clients),
+        min_fit_clients=7,
+        min_evaluate_clients=3,
+        # min_fit_client=len(train_clients)
     )
 
     # 5. Start Simulation
     history = fl.simulation.start_simulation(
-        client_fn = client_fn,
+        client_fn=client_fn,
+        # num_clients=len(train_clients),
         num_clients=cfg.num_clients,
-        config = fl.server.ServerConfig(num_rounds=cfg.num_rounds),
-        client_resources={
-            "num_cpus": cfg.client_resources.num_cpus,
-            "num_gpus": cfg.client_resources.num_gpus,
-        },
-        strategy = strategy
+        config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
+        strategy=strategy,
+        client_manager=Fedmeta_client_manager()
     )
 
     # 6. Save your results
