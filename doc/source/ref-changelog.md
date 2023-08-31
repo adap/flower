@@ -1,12 +1,18 @@
 # Changelog
 
-## Unreleased
+## v1.5.0 (2023-08-31)
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`achiverram28`, `Adam Narozniak`, `Anass Anhari`, `Charles Beauville`, `Dana-Farber`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Edoardo Gabrielli`, `eunchung`, `Gustavo Bertoli`, `Heng Pan`, `Javier`, `Mahdi`, `Ruth Galindo`, `Steven Hé (Sīchàng)`, `Taner Topal`
 
 ### What's new?
 
 - **Introduce new simulation engine** ([#1969](https://github.com/adap/flower/pull/1969), [#2221](https://github.com/adap/flower/pull/2221), [#2248](https://github.com/adap/flower/pull/2248))
 
-  The new simulation engine hsa been rewritten from the ground up, yet it remains fully backwards compatible. It offers much improves stability and memory handling, especially when working with GPUs. Simulations transparently adapt to different settings to scale simulation in CPU-only, CPU+GPU, multi-GPU, or multi-node multi-GPU environments.
+  The new simulation engine has been rewritten from the ground up, yet it remains fully backwards compatible. It offers much improved stability and memory handling, especially when working with GPUs. Simulations transparently adapt to different settings to scale simulation in CPU-only, CPU+GPU, multi-GPU, or multi-node multi-GPU environments.
 
   Comprehensive documentation includes a new [how-to run simulations](https://flower.dev/docs/framework/how-to-run-simulations.html) guide, new [simulation-pytorch](https://flower.dev/docs/examples/simulation-pytorch.html) and [simulation-tensorflow](https://flower.dev/docs/examples/simulation-tensorflow.html) notebooks, and a new [YouTube tutorial series](https://www.youtube.com/watch?v=cRebUIGB5RU&list=PLNG4feLHqCWlnj8a_E1A_n5zr2-8pafTB).
 
