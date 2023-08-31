@@ -227,7 +227,7 @@ internal class FlwrReRe
     }
 }
 
-suspend fun createFlowerReRe(
+suspend fun createFlowerRere(
     serverAddress: String,
     useTLS: Boolean,
     client: Client,
