@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Defining some language parameters to add to the outdated config files
 language_config=$(cat <<-END
@@ -66,7 +66,7 @@ for current_version in ${versions}; do
    echo "INFO: Building sites for ${current_version}"
   
    # Skip this branch if it doesn't have our docs dir & sphinx config
-   if [ ! -e 'source/conf.py' ]; then
+   if [[ ! -e 'source/conf.py' ]]; then
       echo "INFO: Couldn't find 'doc/source/conf.py' (skipped)"
       continue
    fi
