@@ -1,0 +1,14 @@
+{
+  "theme": {
+    "color": {
+      "documentation-intro-fill": "rebeccapurple"
+    },
+    "typography": {
+      "html-font": "\"Montserrat\"",
+      "html-font-mono": "\"Share Tech Mono\""
+    },
+    "icons": {
+        "api-reference": "/images/flwr-icon.png"
+    }
+  }
+}

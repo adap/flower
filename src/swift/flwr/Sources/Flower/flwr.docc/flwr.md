@@ -2,6 +2,13 @@
 
 Seamlessly integrate Flower federated learning framework into your existing machine learning project.
 
+@Metadata {
+    @PageImage(
+        purpose: icon, 
+        source: "flwr-icon", 
+        alt: "Flower icon.")
+}
+
 ## Overview
 
 Flower Swift client SDK provides tools and functionalities for federating your machine learning project easily using Flower. The framework provides protocol to create a Flower ``Client``, and a default ``MLFlwrClient`` implementation that uses CoreML as its local training pipeline. You can create your own custom Flower clients by conforming to the provided protocol.
