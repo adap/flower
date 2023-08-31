@@ -18,7 +18,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Restructure Flower Docs** ([#1824](https://github.com/adap/flower/pull/1824), [#1865](https://github.com/adap/flower/pull/1865), [#1884](https://github.com/adap/flower/pull/1884), [#1887](https://github.com/adap/flower/pull/1887), [#1919](https://github.com/adap/flower/pull/1919), [#1922](https://github.com/adap/flower/pull/1922), [#1920](https://github.com/adap/flower/pull/1920), [#1923](https://github.com/adap/flower/pull/1923), [#1924](https://github.com/adap/flower/pull/1924), [#1962](https://github.com/adap/flower/pull/1962), [#2006](https://github.com/adap/flower/pull/2006), [#2133](https://github.com/adap/flower/pull/2133), [#2203](https://github.com/adap/flower/pull/2203), [#2215](https://github.com/adap/flower/pull/2215), [#2122](https://github.com/adap/flower/pull/2122), [#2223](https://github.com/adap/flower/pull/2223), [#2219](https://github.com/adap/flower/pull/2219), [#2232](https://github.com/adap/flower/pull/2232), [#2233](https://github.com/adap/flower/pull/2233), [#2234](https://github.com/adap/flower/pull/2234), [#2235](https://github.com/adap/flower/pull/2235), [#2237](https://github.com/adap/flower/pull/2237), [#2238](https://github.com/adap/flower/pull/2238), [#2242](https://github.com/adap/flower/pull/2242), [#2231](https://github.com/adap/flower/pull/2231), [#2243](https://github.com/adap/flower/pull/2243), [#2227](https://github.com/adap/flower/pull/2227))
 
-  Much effort went into a completely restructured Flower docs experience. The documentation on [flower.dev/docs](flower.dev/docs) is divided into Flower Framework, Flower Baselines, Flower Android SDK, Flower iOS SDK, and code example projects.
+  Much effort went into a completely restructured Flower docs experience. The documentation on [flower.dev/docs](flower.dev/docs) is now divided into Flower Framework, Flower Baselines, Flower Android SDK, Flower iOS SDK, and code example projects.
 
 - **Introduce Flower Swift SDK** ([#1858](https://github.com/adap/flower/pull/1858), [#1897](https://github.com/adap/flower/pull/1897))
 
@@ -30,7 +30,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Introduce new end-to-end testing infrastructure** ([#1842](https://github.com/adap/flower/pull/1842), [#2071](https://github.com/adap/flower/pull/2071), [#2072](https://github.com/adap/flower/pull/2072), [#2068](https://github.com/adap/flower/pull/2068), [#2067](https://github.com/adap/flower/pull/2067), [#2069](https://github.com/adap/flower/pull/2069), [#2073](https://github.com/adap/flower/pull/2073), [#2070](https://github.com/adap/flower/pull/2070), [#2074](https://github.com/adap/flower/pull/2074), [#2082](https://github.com/adap/flower/pull/2082), [#2084](https://github.com/adap/flower/pull/2084), [#2093](https://github.com/adap/flower/pull/2093), [#2109](https://github.com/adap/flower/pull/2109), [#2095](https://github.com/adap/flower/pull/2095), [#2140](https://github.com/adap/flower/pull/2140), [#2137](https://github.com/adap/flower/pull/2137), [#2165](https://github.com/adap/flower/pull/2165))
 
-  A new testing infrastructure ensures that new changes don't break compatibility with existing framework integrations or strategies.
+  A new testing infrastructure ensures that new changes stay compatible with existing framework integrations or strategies.
 
 - **Deprecate Python 3.7**
 
@@ -60,9 +60,9 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Please note: The gRPC request-response API is still experimental and will likely change significantly over time.
 
-- **Replace the eperimental** `start_client(rest=True)` **with the new** `start_client(transport="rest")` ([#1880](https://github.com/adap/flower/pull/1880))
+- **Replace the experimental** `start_client(rest=True)` **with the new** `start_client(transport="rest")` ([#1880](https://github.com/adap/flower/pull/1880))
 
-  The (experimental) `start_client` argument `rest` was deprecated in favor of a new argument `transport`. `start_client(transport="rest")` will yield the same behaviour as `start_client(rest=True)` did before. All code should migrate to the new argument `transport`. The deprecated argument `rest` will be removed in a future release.
+  The (experimental) `start_client` argument `rest` was deprecated in favour of a new argument `transport`. `start_client(transport="rest")` will yield the same behaviour as `start_client(rest=True)` did before. All code should migrate to the new argument `transport`. The deprecated argument `rest` will be removed in a future release.
 
 - **Add a new gRPC option** ([#2197](https://github.com/adap/flower/pull/2197))
 
@@ -74,7 +74,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Example updates** ([#1772](https://github.com/adap/flower/pull/1772), [#1873](https://github.com/adap/flower/pull/1873), [#1981](https://github.com/adap/flower/pull/1981), [#1988](https://github.com/adap/flower/pull/1988), [#1984](https://github.com/adap/flower/pull/1984), [#1982](https://github.com/adap/flower/pull/1982), [#2112](https://github.com/adap/flower/pull/2112), [#2144](https://github.com/adap/flower/pull/2144), [#2174](https://github.com/adap/flower/pull/2174), [#2225](https://github.com/adap/flower/pull/2225), [#2183](https://github.com/adap/flower/pull/2183))
 
-  Many examples have received significant updates, including simplified advanced-tensorflow and advanced-pytorch examples, improved macOS compatibility of TensorFlow examples, and code examples for simulation. A major upgrad is that all code examples now have a `requirements.txt` (in addition to `pyproject.toml`).
+  Many examples have received significant updates, including simplified advanced-tensorflow and advanced-pytorch examples, improved macOS compatibility of TensorFlow examples, and code examples for simulation. A major upgrade is that all code examples now have a `requirements.txt` (in addition to `pyproject.toml`).
 
 - **General improvements** ([#1872](https://github.com/adap/flower/pull/1872), [#1866](https://github.com/adap/flower/pull/1866), [#1884](https://github.com/adap/flower/pull/1884), [#1837](https://github.com/adap/flower/pull/1837), [#1477](https://github.com/adap/flower/pull/1477), [#2171](https://github.com/adap/flower/pull/2171))
 
@@ -126,7 +126,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Fix spilling issues related to Ray during simulations** ([#1698](https://github.com/adap/flower/pull/1698))
 
-  While running long simulationa, `ray` was sometimes spilling huge amounts of data that would make the training unable to continue. This is now fixed! 🎉
+  While running long simulations, `ray` was sometimes spilling huge amounts of data that would make the training unable to continue. This is now fixed! 🎉
 
 - **Add new example using** `TabNet` **and Flower** ([#1725](https://github.com/adap/flower/pull/1725))
 
@@ -176,7 +176,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Make Android example compatible with** `flwr >= 1.0.0` **and the latest versions of Android** ([#1603](https://github.com/adap/flower/pull/1603))
 
-  The Android code example has received a substantial update: the project is compatible with Flower 1.0 and later, the UI received a full refresh, and the project is updated to be compatible with newer Android tooling.
+  The Android code example has received a substantial update: the project is compatible with Flower 1.0 (and later), the UI received a full refresh, and the project is updated to be compatible with newer Android tooling.
 
 - **Add new `FedProx` strategy** ([#1619](https://github.com/adap/flower/pull/1619))
 
@@ -237,7 +237,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
   After a [request for feedback](https://github.com/adap/flower/issues/1534) from the community, the Flower open-source project introduces optional collection of *anonymous* usage metrics to make well-informed decisions to improve Flower. Doing this enables the Flower team to understand how Flower is used and what challenges users might face.
 
-  **Flower is a friendly framework for collaborative AI and data science.** Staying true to this statement, Flower makes it easy to disable telemetry for users that do not want to share anonymous usage metrics. [Read more.](https://flower.dev/docs/telemetry.html).
+  **Flower is a friendly framework for collaborative AI and data science.** Staying true to this statement, Flower makes it easy to disable telemetry for users who do not want to share anonymous usage metrics. [Read more.](https://flower.dev/docs/telemetry.html).
 
 - **Introduce (experimental) Driver API** ([#1520](https://github.com/adap/flower/pull/1520), [#1525](https://github.com/adap/flower/pull/1525), [#1545](https://github.com/adap/flower/pull/1545), [#1546](https://github.com/adap/flower/pull/1546), [#1550](https://github.com/adap/flower/pull/1550), [#1551](https://github.com/adap/flower/pull/1551), [#1567](https://github.com/adap/flower/pull/1567))
 
