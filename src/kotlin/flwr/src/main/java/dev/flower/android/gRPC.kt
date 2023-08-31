@@ -24,7 +24,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 
-internal class FlowerGRPC
+internal class FlowerGrpc
 @Throws constructor(
     channel: ManagedChannel,
     private val client: Client,
@@ -68,7 +68,7 @@ internal class FlowerGRPC
  */
 suspend fun startClient(
     serverAddress: String,
-    useTLS: Boolean,
+    useTls: Boolean,
     client: Client,
 ) {
     FlowerGRPC(createChannel(serverAddress, useTLS), client)
@@ -180,7 +180,7 @@ internal class FlwrReRe
         }
     }
 
-    suspend fun startGRPCReRe() {
+    suspend fun startGrpcRere() {
         createNode()
 
         val node = nodeStore[KEYNODE]

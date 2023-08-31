@@ -9,7 +9,7 @@ INSERT_LINE=6
 rm -f $INDEX
 touch $INDEX
 
-echo "# Flower Examples documentation" >> $INDEX
+echo "# Flower Examples Documentation" >> $INDEX
 echo "" >> $INDEX
 echo "\`\`\`{toctree}" >> $INDEX
 echo "---" >> $INDEX
