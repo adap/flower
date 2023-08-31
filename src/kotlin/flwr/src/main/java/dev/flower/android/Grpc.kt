@@ -71,7 +71,7 @@ suspend fun startClient(
     useTls: Boolean,
     client: Client,
 ) {
-    FlowerGRPC(createChannel(serverAddress, useTLS), client)
+    FlowerGrpc(createChannel(serverAddress, useTls), client)
 }
 
 internal suspend fun createChannel(address: String, useTLS: Boolean = false): ManagedChannel {
@@ -87,7 +87,7 @@ internal suspend fun createChannel(address: String, useTLS: Boolean = false): Ma
 
 const val HUNDRED_MEBIBYTE = 100 * 1024 * 1024
 
-internal class FlwrReRe
+internal class FlwrRere
 @Throws constructor(
     channel: ManagedChannel,
     private val client: Client,
@@ -232,5 +232,5 @@ suspend fun createFlowerRere(
     useTLS: Boolean,
     client: Client,
 ) {
-    createChannel(serverAddress, useTLS)
+    FlwrRere(createChannel(serverAddress, useTLS), client)
 }
