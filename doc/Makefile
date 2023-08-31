@@ -15,8 +15,15 @@ help:
 .PHONY: help Makefile
 
 docs:
-	rm -rf build
-	make html
+	rm -rf build/html
+	sphinx-build -D language=en -A lang=True source build/html/
+
+update-text:
+	rm -rf build/gettext
+	make gettext
+
+update-lang:
+	sphinx-intl update -p build/gettext -l $(lang)
 
 serve:
 	make docs
