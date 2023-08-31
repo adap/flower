@@ -11,6 +11,9 @@ from hydra.utils import instantiate
 from strategy import weighted_average
 from dataset import load_datasets
 from Fedmeta_client_manager import Fedmeta_client_manager
+from flwr.common.logger import log
+from logging import WARNING
+import server
 
 import flwr as fl
 import client
@@ -29,35 +32,48 @@ def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
 
     # partition dataset and get dataloaders
-    # dataset, client_list = load_datasets(config=cfg.dataset)
-    # train_clients, val_clients, test_clients = client_list
+    dataset, client_list = load_datasets(config=cfg.dataset)
+    train_clients, val_clients, test_clients = client_list
+
+    # Check config Clients value
+    if cfg.num_clients > len(train_clients):
+        raise ImportError(f"Total Clients num is {len(train_clients)}")
+
+    if cfg.min_evaluate_clients > len(val_clients):
+        min_evaluate_clients = min(len(val_clients), cfg.min_evaluate_clients)
+        log(WARNING, "min_evaluate_clients iis smaller than Validation Clients")
 
     # prepare function that will be used to spawn each client
     client_fn = client.gen_client_fn(
         num_epochs=cfg.num_epochs,
-        # dataset=dataset,
-        # client_list=client_list,
+        dataset=dataset,
+        client_list=client_list,
         learning_rate=cfg.learning_rate,
         model=cfg.model,
     )
 
+    # device = cfg.server_device
+    # evaluate_fn = server.gen_evaluate_fn(
+    #     dataset=dataset,
+    #     device=device,
+    #     model=cfg.model
+    # )
+
+
     strategy = instantiate(
         cfg.strategy,
+        # evaluate_fn=evaluate_fn,
         evaluate_metrics_aggregation_fn=weighted_average,
-        # min_evaluate_clients=len(val_clients),
-        min_fit_clients=7,
-        min_evaluate_clients=3,
-        # min_fit_client=len(train_clients)
+        min_evaluate_clients=int(min_evaluate_clients),
     )
 
     # 5. Start Simulation
     history = fl.simulation.start_simulation(
         client_fn=client_fn,
-        # num_clients=len(train_clients),
         num_clients=cfg.num_clients,
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
+        client_manager=Fedmeta_client_manager(),
         strategy=strategy,
-        client_manager=Fedmeta_client_manager()
     )
 
     # 6. Save your results
@@ -69,6 +85,7 @@ def main(cfg: DictConfig) -> None:
     # Hydra will generate for you a directory each time you run the code. You
     # can retrieve the path to that directory with this:
     # save_path = HydraConfig.get().runtime.output_dir
+
 
 if __name__ == "__main__":
     main()

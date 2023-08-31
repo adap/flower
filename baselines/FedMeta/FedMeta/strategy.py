@@ -48,27 +48,6 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 class FedMeta(FedAvg):
-    def configure_fit(
-        self, server_round: int, parameters: Parameters, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, FitIns]]:
-        """Configure the next round of training."""
-        config = {}
-        if self.on_fit_config_fn is not None:
-            # Custom fit config function provided
-            config = self.on_fit_config_fn(server_round)
-        fit_ins = FitIns(parameters, config)
-
-        # Sample clients
-        sample_size, min_num_clients = self.num_fit_clients(
-            client_manager.num_available()
-        )
-        clients = client_manager.sample(
-            num_clients=sample_size, min_num_clients=min_num_clients
-        )
-
-        # Return client/config pairs
-        return [(client, fit_ins) for client in clients]
-
     def configure_evaluate(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
@@ -91,13 +70,11 @@ class FedMeta(FedAvg):
         clients = client_manager.sample(
             num_clients=sample_size,
             min_num_clients=min_num_clients,
-            min_evaluate_clients=self.min_evaluate_clients,
-            criterion=evaluate_client_Criterion()
+            criterion=evaluate_client_Criterion(self.min_evaluate_clients)
         )
 
         # Return client/config pairs
         return [(client, evaluate_ins) for client in clients]
-
 
     def aggregate_fit(
             self,

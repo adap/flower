@@ -8,9 +8,12 @@ import random
 
 
 class evaluate_client_Criterion(Criterion):
+    def __init__(self, min_evaluate_clients):
+        self.min_evaluate_clients = min_evaluate_clients
+
     """Criterion to select evaluate clients."""
-    def select(self, evaluate_clients: int) -> bool:
-        return [str(result) for result in range(0, evaluate_clients)]
+    def select(self, clients_num: int) -> bool:
+        return [str(result) for result in range(0, min(self.min_evaluate_clients, clients_num))]
 
 
 class Fedmeta_client_manager(SimpleClientManager):
@@ -18,7 +21,6 @@ class Fedmeta_client_manager(SimpleClientManager):
         self,
         num_clients: int,
         min_num_clients: Optional[int] = None,
-        min_evaluate_clients: Optional[int] = None,
         criterion: Optional[Criterion] = None,
     ) -> List[ClientProxy]:
         """Sample a number of Flower ClientProxy instances."""
@@ -29,7 +31,7 @@ class Fedmeta_client_manager(SimpleClientManager):
         # Sample clients which meet the criterion
         available_cids = list(self.clients)
         if criterion is not None:
-            available_cids = criterion.select(min_evaluate_clients)
+            available_cids = criterion.select(len(self.clients))
 
         if num_clients > len(available_cids):
             log(

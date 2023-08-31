@@ -9,13 +9,12 @@ from hydra.utils import instantiate
 import flwr as fl
 from flwr.common.typing import NDArrays, Scalar
 
+import torch
 import torch.nn
 from torch.utils.data import DataLoader
 
 from models import train, test
 
-import json
-import random
 from dataset import  FemnistDataset
 import torchvision.transforms as transforms
 
@@ -75,8 +74,8 @@ class FlowerClient(
 
 def gen_client_fn(
         num_epochs: int,
-        # dataset: Tuple[Dict],
-        # client_list: List[str],
+        dataset: Tuple[Dict],
+        client_list: List[str],
         learning_rate: float,
         model: DictConfig,
 ) -> Callable[[str], FlowerClient]:  # pylint: disable=too-many-arguments
@@ -103,7 +102,6 @@ def gen_client_fn(
         the DataLoader that will be used for testing
     """
 
-
     def client_fn(cid: str) -> FlowerClient:
         """Create a Flower client representing a single organization."""
 
@@ -112,25 +110,18 @@ def gen_client_fn(
         # Load model
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         net = instantiate(model).to(device)
-        '''
-        Test Dataset
-        '''
         transform = transforms.Compose([transforms.ToTensor()])
-        with open("/Users/jinsookim/PycharmProjects/fedmeta/leaf_data/train/all_data_" + str(cid) + "_niid_1_keep_0_train_9.json", "r") as f:
-            train_json = json.load(f)
-        with open("/Users/jinsookim/PycharmProjects/fedmeta/leaf_data/test/all_data_" + str(cid) + "_niid_1_keep_0_test_9.json", "r") as f:
-            test_json = json.load(f)
-        round_user = random.choice(train_json['users'])
-        trainset = FemnistDataset(train_json['user_data'][round_user], transform)
-        testset = FemnistDataset(test_json['user_data'][round_user],transform)
 
         # Note: each client gets a different trainloader/valloader, so each client
         # will train and evaluate on their own unique data
-        # trainloader = trainloaders[int(cid)]
-        # valloader = valloaders[int(cid)]
+        sup_set, qry_set = dataset
+        train_clients, val_client, _ = client_list
 
-        trainloader = DataLoader(trainset, batch_size=10, shuffle=True)
-        valloader = DataLoader(testset)
+        train_set = sup_set['user_data'][train_clients[int(cid)]]
+        valid_set = sup_set['user_data'][val_client[int(cid)]]
+
+        trainloader = DataLoader(FemnistDataset(train_set, transform), batch_size=10, shuffle=True)
+        valloader = DataLoader(FemnistDataset(valid_set, transform))
 
         return FlowerClient(
             net,

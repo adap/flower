@@ -3,9 +3,9 @@
 # Please follow the provided structure (this will ensuring all baseline follow
 # a similar configuration structure and hence be easy to customise)
 
-num_clients: 35 # total number of clients
+num_clients: 15 # total number of clients
 num_epochs: 1 # number of local epochs
-clients_per_round: 10
+clients_per_round: 4
 num_rounds: 10
 learning_rate: 0.03
 
@@ -25,8 +25,10 @@ model:
 strategy:
   _target_: baselines.fedmeta.fedmeta.strategy.FedMeta
   # points to your strategy (either custom or exiting in Flower)
-  fraction_fit : 0.1
-  fraction_evaluate : 0.1
+  fraction_fit: 0.00001
+  fraction_evaluate: 0.00001
+  min_fit_clients : ${clients_per_round}
+  min_evaluate_clients : ${clients_per_round}
   min_available_clients : ${clients_per_round}
   # rest of strategy config
 

@@ -77,7 +77,7 @@ def train(  # pylint: disable=too-many-arguments
         The learning rate for the SGD optimizer.
     """
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, weight_decay=0.001)
+    optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate, weight_decay=0.001)
     net.train()
     for _ in range(epochs):
         net = _train_one_epoch(
