@@ -133,7 +133,10 @@ class StateTest(unittest.TestCase):
 
         # Insert one TaskRes and retrive it to mark it as delivered
         task_res_0 = create_task_res(
-            producer_node_id=100, anonymous=False, ancestry=[str(task_id_0)]
+            producer_node_id=100,
+            anonymous=False,
+            ancestry=[str(task_id_0)],
+            workload_id=workload_id,
         )
 
         _ = state.store_task_res(task_res=task_res_0)
@@ -141,7 +144,10 @@ class StateTest(unittest.TestCase):
 
         # Insert one TaskRes, but don't retrive it
         task_res_1: TaskRes = create_task_res(
-            producer_node_id=100, anonymous=False, ancestry=[str(task_id_1)]
+            producer_node_id=100,
+            anonymous=False,
+            ancestry=[str(task_id_1)],
+            workload_id=workload_id,
         )
         _ = state.store_task_res(task_res=task_res_1)
 
@@ -279,6 +285,8 @@ class StateTest(unittest.TestCase):
         task_ins = create_task_ins(
             consumer_node_id=0, anonymous=True, workload_id="I'm invalid"
         )
+        print("I am here")
+        print(task_ins.workload_id)
 
         # Execute
         task_id = state.store_task_ins(task_ins)
@@ -291,9 +299,13 @@ class StateTest(unittest.TestCase):
         """Store TaskRes retrieve it by task_ins_id."""
         # Prepare
         state: State = self.state_factory()
+        workload_id = state.create_workload()
         task_ins_id = uuid4()
         task_res = create_task_res(
-            producer_node_id=0, anonymous=True, ancestry=[str(task_ins_id)]
+            producer_node_id=0,
+            anonymous=True,
+            ancestry=[str(task_ins_id)],
+            workload_id=workload_id,
         )
 
         # Execute
@@ -388,8 +400,13 @@ class StateTest(unittest.TestCase):
         """Test if num_tasks returns correct number of not delivered task_res."""
         # Prepare
         state: State = self.state_factory()
-        task_0 = create_task_res(producer_node_id=0, anonymous=True, ancestry=["1"])
-        task_1 = create_task_res(producer_node_id=0, anonymous=True, ancestry=["1"])
+        workload_id = state.create_workload()
+        task_0 = create_task_res(
+            producer_node_id=0, anonymous=True, ancestry=["1"], workload_id=workload_id
+        )
+        task_1 = create_task_res(
+            producer_node_id=0, anonymous=True, ancestry=["1"], workload_id=workload_id
+        )
 
         # Store two tasks
         state.store_task_res(task_0)
@@ -430,13 +447,16 @@ def create_task_ins(
 
 
 def create_task_res(
-    producer_node_id: int, anonymous: bool, ancestry: List[str]
+    producer_node_id: int,
+    anonymous: bool,
+    ancestry: List[str],
+    workload_id: str,
 ) -> TaskRes:
     """Create a TaskRes for testing."""
     task_res = TaskRes(
         task_id="",
         group_id="",
-        workload_id="",
+        workload_id=workload_id,
         task=Task(
             producer=Node(node_id=producer_node_id, anonymous=anonymous),
             consumer=Node(node_id=0, anonymous=True),

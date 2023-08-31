@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS node(
 
 SQL_CREATE_TABLE_WORKLOAD = """
 CREATE TABLE IF NOT EXISTS workload(
-    workload_id TEXT UNIQUE
+    workload_id TEXT PRIMARY KEY
 );
 """
 
@@ -57,7 +57,8 @@ CREATE TABLE IF NOT EXISTS task_ins(
     ttl                     TEXT,
     ancestry                TEXT,
     legacy_server_message   BLOB,
-    legacy_client_message   BLOB
+    legacy_client_message   BLOB,
+    FOREIGN KEY(workload_id) REFERENCES workload(workload_id)
 );
 """
 
@@ -76,7 +77,8 @@ CREATE TABLE IF NOT EXISTS task_res(
     ttl                     TEXT,
     ancestry                TEXT,
     legacy_server_message   BLOB,
-    legacy_client_message   BLOB
+    legacy_client_message   BLOB,
+    FOREIGN KEY(workload_id) REFERENCES workload(workload_id)
 );
 """
 
@@ -110,17 +112,17 @@ class SqliteState(State):
             Log each query which is executed.
         """
         self.conn = sqlite3.connect(self.database_path)
+        self.conn.execute("PRAGMA foreign_keys = ON;")
         self.conn.row_factory = dict_factory
         if log_queries:
             self.conn.set_trace_callback(lambda query: log(DEBUG, query))
         cur = self.conn.cursor()
 
         # Create each table if not exists queries
+        cur.execute(SQL_CREATE_TABLE_WORKLOAD)
         cur.execute(SQL_CREATE_TABLE_TASK_INS)
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
         cur.execute(SQL_CREATE_TABLE_NODE)
-        cur.execute(SQL_CREATE_TABLE_WORKLOAD)
-
         res = cur.execute("SELECT name FROM sqlite_schema;")
 
         return res.fetchall()
@@ -185,12 +187,6 @@ class SqliteState(State):
             log(ERROR, errors)
             return None
 
-        # Validate workload ID
-        query = "SELECT COUNT(*) FROM workload WHERE workload_id = ?;"
-        if self.query(query, (task_ins.workload_id,))[0]["COUNT(*)"] == 0:
-            log(ERROR, "`workload_id` is invalid")
-            return None
-
         # Create task_id, created_at and ttl
         task_id = uuid4()
         created_at: datetime = now()
@@ -204,7 +200,13 @@ class SqliteState(State):
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_ins VALUES({columns});"
 
-        self.query(query, data)
+        # Only invalid workload_id can trigger IntegrityError.
+        # This may need to be changed in the future version with more integrity checks.
+        try:
+            self.query(query, data)
+        except sqlite3.IntegrityError:
+            log(ERROR, "`workload` is invalid")
+            return None
 
         return task_id
 
@@ -333,7 +335,13 @@ class SqliteState(State):
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_res VALUES({columns});"
 
-        self.query(query, data)
+        # Only invalid workload_id can trigger IntegrityError.
+        # This may need to be changed in the future version with more integrity checks.
+        try:
+            self.query(query, data)
+        except sqlite3.IntegrityError:
+            log(ERROR, "`workload` is invalid")
+            return None
 
         return task_id
 
@@ -487,16 +495,15 @@ class SqliteState(State):
 
     def create_workload(self) -> str:
         """Create one workload and store it in state."""
-        for _ in range(100):
-            # String representation of random integer from 0 to 9223372036854775807
-            workload_id = str(int.from_bytes(os.urandom(8), "little") >> 1)
-            # Check conflicts
-            query = "SELECT COUNT(*) FROM workload WHERE workload_id = ?;"
-            # If workload_is does not exist
-            if self.query(query, (workload_id,))[0]["COUNT(*)"] == 0:
-                query = "INSERT INTO workload VALUES(:workload_id);"
-                self.query(query, {"workload_id": workload_id})
-                return workload_id
+        # String representation of random integer from 0 to 9223372036854775807
+        workload_id = str(int.from_bytes(os.urandom(8), "little") >> 1)
+        # Check conflicts
+        query = "SELECT COUNT(*) FROM workload WHERE workload_id = ?;"
+        # If workload_id does not exist
+        if self.query(query, (workload_id,))[0]["COUNT(*)"] == 0:
+            query = "INSERT INTO workload VALUES(:workload_id);"
+            self.query(query, {"workload_id": workload_id})
+            return workload_id
         log(ERROR, "Unexpected workload creation failure.")
         return ""
 

@@ -43,7 +43,6 @@ class InMemoryState(State):
         if any(errors):
             log(ERROR, errors)
             return None
-
         # Validate workload_id
         if task_ins.workload_id not in self.workload_ids:
             log(ERROR, "`workload_id` is invalid")
@@ -103,6 +102,11 @@ class InMemoryState(State):
         errors = validate_task_ins_or_res(task_res)
         if any(errors):
             log(ERROR, errors)
+            return None
+
+        # Validate workload_id
+        if task_res.workload_id not in self.workload_ids:
+            log(ERROR, "`workload_id` is invalid")
             return None
 
         # Create task_id, created_at and ttl
@@ -199,12 +203,10 @@ class InMemoryState(State):
 
     def create_workload(self) -> str:
         """Create one workload."""
-        # Create, store, and return workload ID
-        for _ in range(100):
-            # String representation of random integer from 0 to 9223372036854775807
-            workload_id = str(int.from_bytes(os.urandom(8), "little") >> 1)
-            if workload_id not in self.workload_ids:
-                self.workload_ids.add(workload_id)
-                return workload_id
+        # String representation of random integer from 0 to 9223372036854775807
+        workload_id = str(int.from_bytes(os.urandom(8), "little") >> 1)
+        if workload_id not in self.workload_ids:
+            self.workload_ids.add(workload_id)
+            return workload_id
         log(ERROR, "Unexpected workload creation failure.")
         return ""
