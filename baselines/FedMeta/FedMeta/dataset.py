@@ -38,10 +38,16 @@ def load_datasets(  # pylint: disable=too-many-arguments
 ) -> Tuple[DataLoader, DataLoader, DataLoader]:
     print(f"Dataset partitioning config: {config}")
 
-    dataset = _partition_data(
-        dir_path= config.path,
-        support_ratio= config.support_ratio
-    )
+    if config.algo == 'fedavg':
+        dataset = _partition_data(
+            dir_path= config.path
+        )
+
+    elif config.algo == 'fedmeta(maml)':
+        dataset = _partition_data(
+            dir_path= config.path,
+            support_ratio= config.support_ratio
+        )
 
     clients_list = split_train_validation_test_clients(
         dataset[0]['users']

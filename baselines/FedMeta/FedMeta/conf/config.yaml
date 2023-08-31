@@ -14,6 +14,7 @@ client_resources:
 server_device: cpu
 
 dataset:
+  algo: fedavg #fedavg, fedavg(meta), fedmeta(maml), fedmeta(meta-sgd)
   path: /Users/jinsookim/PycharmProjects/fedmeta/leaf_data # Leaf Dataset path (Femnist or Shakespeare)
   support_ratio : 0.2
   batch_size : 10
