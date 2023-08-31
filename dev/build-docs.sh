@@ -5,7 +5,7 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 ROOT=`pwd`
 
 cd doc
-make html
+sh build-versioned-docs.sh no_translate
 
 cd $ROOT
 cd baselines/doc
