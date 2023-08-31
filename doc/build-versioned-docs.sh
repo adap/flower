@@ -96,7 +96,7 @@ for current_version in ${versions}; do
           echo "$language_config" >> source/conf.py
 
           # Update the text and the translation to match the source files if no_translate is not provided
-          if [ ! $1 == "no_translate" || ! $1 ]; then
+          if [ ! $1 ] || [ ! $1 == "no_translate" ]; then
             make gettext
             sphinx-intl update -p build/gettext -l ${current_language}
           fi
