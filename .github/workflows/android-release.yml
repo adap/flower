@@ -2,10 +2,9 @@ name: Android Client Publish
 
 on:
   pull_request
-  
+
 jobs:
   deploy_docs:
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     name: Deploy Android docs 
     steps:
