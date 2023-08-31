@@ -285,8 +285,6 @@ class StateTest(unittest.TestCase):
         task_ins = create_task_ins(
             consumer_node_id=0, anonymous=True, workload_id="I'm invalid"
         )
-        print("I am here")
-        print(task_ins.workload_id)
 
         # Execute
         task_id = state.store_task_ins(task_ins)

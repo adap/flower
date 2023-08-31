@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS node(
 
 SQL_CREATE_TABLE_WORKLOAD = """
 CREATE TABLE IF NOT EXISTS workload(
-    workload_id TEXT PRIMARY KEY
+    workload_id TEXT UNIQUE
 );
 """
 
