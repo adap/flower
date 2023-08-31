@@ -92,11 +92,13 @@ tasks.dokkaHtml {
 
 dependencies {
     implementation("androidx.core:core-ktx:1.10.1")
+    implementation("androidx.compose.runtime:runtime:1.5.0")
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.0"))
     implementation("io.grpc:grpc-okhttp:$grpcVersion")
     implementation("io.grpc:grpc-protobuf-lite:$grpcVersion")
     implementation("io.grpc:grpc-stub:$grpcVersion")
     implementation("javax.annotation:javax.annotation-api:1.3.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
 
     protobuf(files("../../proto"))
     dokkaPlugin("org.jetbrains.dokka:android-documentation-plugin:1.8.20")
