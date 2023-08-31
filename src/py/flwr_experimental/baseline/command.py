@@ -35,8 +35,8 @@ def install_wheel(
     extras_str = ",".join(extras)
 
     return (
-        "python3.7 -m pip uninstall -y flwr && "
-        + f"python3.7 -m pip install '{wheel_remote_path}[{extras_str}]'"
+        "python3.8 -m pip uninstall -y flwr && "
+        + f"python3.8 -m pip install '{wheel_remote_path}[{extras_str}]'"
     )
 
 
@@ -44,7 +44,7 @@ def start_logserver(
     logserver_s3_bucket: Optional[str] = None, logserver_s3_key: Optional[str] = None
 ) -> str:
     """Return command to run logserver."""
-    cmd = "screen -d -m python3.7 -m flwr_experimental.logserver"
+    cmd = "screen -d -m python3.8 -m flwr_experimental.logserver"
 
     if logserver_s3_bucket is not None and logserver_s3_key is not None:
         cmd += f" --s3_bucket={logserver_s3_bucket}" + f" --s3_key={logserver_s3_key}"
@@ -57,7 +57,7 @@ def start_server(log_host: str, baseline: str, setting: str) -> str:
     """Build command to run server."""
     return (
         "screen -d -m"
-        + f" python3.7 -m flwr_experimental.baseline.{baseline}.server"
+        + f" python3.8 -m flwr_experimental.baseline.{baseline}.server"
         + f" --log_host={log_host}"
         + f" --setting={setting}"
     )
@@ -69,7 +69,7 @@ def start_client(
     """Build command to run client."""
     return (
         "screen -d -m"
-        + f" python3.7 -m flwr_experimental.baseline.{baseline}.client"
+        + f" python3.8 -m flwr_experimental.baseline.{baseline}.client"
         + f" --server_address={server_address}"
         + f" --log_host={log_host}"
         + f" --setting={setting}"
@@ -79,7 +79,7 @@ def start_client(
 
 def download_dataset(baseline: str) -> str:
     """Return command which makes dataset locally available."""
-    return f"python3.7 -m flwr_experimental.baseline.{baseline}.download"
+    return f"python3.8 -m flwr_experimental.baseline.{baseline}.download"
 
 
 def watch_and_shutdown(keyword: str, adapter: str) -> str:

@@ -24,13 +24,13 @@ sudo apt update
 sudo apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev \
     libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev \
     liblzma-dev python-openssl git
-sudo apt install -y python3.7 python3-pip
+sudo apt install -y python3.8 python3-pip
 
 # Install project dependencies
-python3.7 -m pip install -U pip==23.1.2 setuptools==68.0.0
-python3.7 -m pip install -U numpy==1.18.1 grpcio==1.27.2 google==2.0.3 protobuf==3.12.1 \
+python3.8 -m pip install -U pip==23.1.2 setuptools==68.0.0
+python3.8 -m pip install -U numpy==1.18.1 grpcio==1.27.2 google==2.0.3 protobuf==3.12.1 \
     boto3==1.12.36 boto3_type_annotations==0.3.1 paramiko==2.7.1 docker==4.2.0 matplotlib==3.2.1 \
     tqdm==4.48.2 torch==1.6.0 torchvision==0.7.0
 
 # Preload datasets
-python3.7 -m flwr_experimental.baseline.dataset.pytorch_cifar_partitioned
+python3.8 -m flwr_experimental.baseline.dataset.pytorch_cifar_partitioned
