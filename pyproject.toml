@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "1.5.0"
+version = "1.6.0"
 description = "Flower: A Friendly Federated Learning Framework"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.dev>"]
@@ -100,6 +100,7 @@ jupyterlab = "==3.6.5"
 rope = "==1.9.0"
 semver = "==2.13.0"
 sphinx = "==5.3.0"
+sphinx-intl = "==2.1.0"
 myst-parser = "==1.0.0"
 sphinx-design = "==0.4.1"
 sphinx-copybutton = "==0.5.2"
