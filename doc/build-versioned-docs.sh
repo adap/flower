@@ -94,10 +94,6 @@ for current_version in ${versions}; do
           cp -r ${tmp_dir}/locales/$current_language locales/
           # Add necessary config to conf.py
           echo "$language_config" >> source/conf.py
-
-          # Update the text and the translation to match the source files
-          make gettext
-          sphinx-intl update -p build/gettext -l ${current_language}
         fi
 
         # Copy updated version of html files
@@ -114,8 +110,8 @@ for current_version in ${versions}; do
       # Restore branch as it was to avoid conflicts
       if [ changed ]; then
         git restore source/conf.py
-        rm -rf locales/${current_language}
-        rm -rf source/_templates/sidebar
+        git restore locales/${current_language} || rm -rf locales/${current_language}
+        git restore source/_templates/sidebar || rm -rf source/_templates/sidebar
         git restore source/_templates/base.html
       fi
    done
