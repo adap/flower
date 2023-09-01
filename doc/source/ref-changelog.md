@@ -6,7 +6,7 @@
 
 ### Incompatible changes
 
-- **Remove support for Python 3.7** ([#2279](https://github.com/adap/flower/pull/2279))
+- **Remove support for Python 3.7** ([#2280](https://github.com/adap/flower/pull/2280), [#2279](https://github.com/adap/flower/pull/2279))
 
   Python 3.7 support was deprecated in Flower 1.5, and this release removes support. Flower now requires Python 3.8.
 
