@@ -11,8 +11,7 @@ from hydra.utils import instantiate
 from strategy import weighted_average
 from dataset import load_datasets
 from Fedmeta_client_manager import Fedmeta_client_manager
-from flwr.common.logger import log
-from logging import WARNING
+
 
 import flwr as fl
 import client
@@ -33,14 +32,9 @@ def main(cfg: DictConfig) -> None:
     # partition dataset and get dataloaders
     dataset, client_list = load_datasets(config=cfg.dataset)
     train_clients, val_clients, test_clients = client_list
-
     # Check config Clients value
     if cfg.num_clients > len(train_clients):
         raise ImportError(f"Total Clients num is {len(train_clients)}")
-
-    if cfg.min_evaluate_clients > len(val_clients):
-        min_evaluate_clients = min(len(val_clients), cfg.min_evaluate_clients)
-        log(WARNING, "min_evaluate_clients iis smaller than Validation Clients")
 
     # prepare function that will be used to spawn each client
     client_fn = client.gen_client_fn(
@@ -49,21 +43,14 @@ def main(cfg: DictConfig) -> None:
         client_list=client_list,
         learning_rate=cfg.learning_rate,
         model=cfg.model,
+
     )
-
-    # device = cfg.server_device
-    # evaluate_fn = server.gen_evaluate_fn(
-    #     dataset=dataset,
-    #     device=device,
-    #     model=cfg.model
-    # )
-
 
     strategy = instantiate(
         cfg.strategy,
         # evaluate_fn=evaluate_fn,
         evaluate_metrics_aggregation_fn=weighted_average,
-        min_evaluate_clients=int(min_evaluate_clients),
+        min_evaluate_clients=len(val_clients)
     )
 
     # 5. Start Simulation
@@ -71,7 +58,11 @@ def main(cfg: DictConfig) -> None:
         client_fn=client_fn,
         num_clients=cfg.num_clients,
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
-        client_manager=Fedmeta_client_manager(),
+        client_resources={
+            "num_cpus": cfg.client_resources.num_cpus,
+            "num_gpus": cfg.client_resources.num_gpus,
+        },
+        client_manager=Fedmeta_client_manager(valid_client=len(val_clients)),
         strategy=strategy,
     )
 

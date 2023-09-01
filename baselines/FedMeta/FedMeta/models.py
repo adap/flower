@@ -154,5 +154,5 @@ def test(
     if len(testloader.dataset) == 0:
         raise ValueError("Testloader can't be 0, exiting...")
     loss /= len(testloader.dataset)
-    accuracy = correct / total
+    accuracy = correct
     return loss, accuracy

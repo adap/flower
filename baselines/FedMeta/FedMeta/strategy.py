@@ -40,11 +40,11 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
         The weighted average metric.
     """
     # Multiply accuracy of each client by number of examples used
-    accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
+    correct = [num_examples * m["correct"] for num_examples, m in metrics]
     examples = [num_examples for num_examples, _ in metrics]
 
     # Aggregate and return custom metric (weighted average)
-    return {"accuracy": int(sum(accuracies)) / int(sum(examples))}
+    return {"accuracy": sum(correct) / sum(examples)}
 
 
 class FedMeta(FedAvg):
@@ -132,6 +132,8 @@ class FedMeta(FedAvg):
         if self.evaluate_metrics_aggregation_fn:
             eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
+            log(WARNING, f"Test Accuracy : {metrics_aggregated['accuracy']}")
+
         elif server_round == 1:  # Only log this warning once
             log(WARNING, "No evaluate_metrics_aggregation_fn provided")
 

@@ -25,18 +25,28 @@ class FlowerClient(
     def __init__(
             self,
             net: torch.nn.Module,
-            trainloader: DataLoader,
-            valloader: DataLoader,
+            # trainloader: DataLoader,
+            # valloader: DataLoader,
+            cid: int,
+            dataset: Tuple[Dict],
+            client_list: List[str],
             device: torch.device,
             num_epochs: int,
             learning_rate: float
     ) -> object:
         self.net = net
-        self.trainloader = trainloader
-        self.valloader = valloader
+        self.trainloader = None
+        self.valloader = None
+        self.cid = cid
         self.device = device
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
+        self.train_set, self.valid_set = dataset
+        self.train_client, self.valid_client, _ = client_list
+
+
+        self.transform = transforms.Compose([transforms.ToTensor()])
+
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
@@ -53,6 +63,8 @@ class FlowerClient(
     ) -> Tuple[NDArrays, int, Dict]:
         """Implements distributed fit function for a given client."""
         self.set_parameters(parameters)
+        train_set = self.train_set['user_data'][self.train_client[int(self.cid)]]
+        self.trainloader = DataLoader(FemnistDataset(train_set, self.transform), batch_size=10, shuffle=True)
         train(
             self.net,
             self.trainloader,
@@ -68,8 +80,10 @@ class FlowerClient(
     ) -> Tuple[float, int, Dict]:
         """Implements distributed evaluation for a given client."""
         self.set_parameters(parameters)
+        valid_set = self.valid_set['user_data'][self.valid_client[int(self.cid)]]
+        self.valloader = DataLoader(FemnistDataset(valid_set, self.transform))
         loss, accuracy = test(self.net, self.valloader, self.device)
-        return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
+        return float(loss), len(self.valloader), {"correct": accuracy}
 
 
 def gen_client_fn(
@@ -79,6 +93,7 @@ def gen_client_fn(
         learning_rate: float,
         model: DictConfig,
 ) -> Callable[[str], FlowerClient]:  # pylint: disable=too-many-arguments
+
     """Generates the client function that creates the Flower Clients.
 
     Parameters
@@ -109,24 +124,25 @@ def gen_client_fn(
 
         # Load model
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        # device = 'cpu'
         net = instantiate(model).to(device)
-        transform = transforms.Compose([transforms.ToTensor()])
+        # transform = transforms.Compose([transforms.ToTensor()])
 
         # Note: each client gets a different trainloader/valloader, so each client
         # will train and evaluate on their own unique data
-        sup_set, qry_set = dataset
-        train_clients, val_client, _ = client_list
+        # train_clients, val_client, _ = client_list
 
-        train_set = sup_set['user_data'][train_clients[int(cid)]]
-        valid_set = sup_set['user_data'][val_client[int(cid)]]
+        # train_set = sup_set['user_data'][train_clients[int(cid)]]
+        # valid_set = sup_set['user_data'][val_client[int(cid)]]
 
-        trainloader = DataLoader(FemnistDataset(train_set, transform), batch_size=10, shuffle=True)
-        valloader = DataLoader(FemnistDataset(valid_set, transform))
+        # trainloader = DataLoader(FemnistDataset(train_set, transform), batch_size=10, shuffle=True)
+        # valloader = DataLoader(FemnistDataset(valid_set, transform), batch_size=10)
 
         return FlowerClient(
             net,
-            trainloader,
-            valloader,
+            cid,
+            dataset,
+            client_list,
             device,
             num_epochs,
             learning_rate,

@@ -12,11 +12,15 @@ class evaluate_client_Criterion(Criterion):
         self.min_evaluate_clients = min_evaluate_clients
 
     """Criterion to select evaluate clients."""
-    def select(self, clients_num: int) -> bool:
-        return [str(result) for result in range(0, min(self.min_evaluate_clients, clients_num))]
+    def select(self, valid_client: int) -> bool:
+        return [str(result) for result in range(0, valid_client)]
 
 
 class Fedmeta_client_manager(SimpleClientManager):
+    def __init__(self, valid_client, **kwargs):
+        super().__init__(**kwargs)
+        self.valid_client = valid_client
+
     def sample(
         self,
         num_clients: int,
@@ -31,7 +35,7 @@ class Fedmeta_client_manager(SimpleClientManager):
         # Sample clients which meet the criterion
         available_cids = list(self.clients)
         if criterion is not None:
-            available_cids = criterion.select(len(self.clients))
+            available_cids = criterion.select(self.valid_client)
 
         if num_clients > len(available_cids):
             log(
