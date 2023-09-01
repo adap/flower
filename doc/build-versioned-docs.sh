@@ -37,7 +37,7 @@ for current_version in ${versions}; do
  
     echo "INFO: Building for ${current_language}"
 
-    if [ ! -f "locales/$current_language/LC_MESSAGES/framework-docs.po" && $current_language != "en" ]; then
+    if [ ! -f "locales/$current_language/LC_MESSAGES/framework-docs.po" ] && [ $current_language != "en" ]; then
 
       # Adding translation to versions that didn't contain one
       echo "No translation, using default one"
