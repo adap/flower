@@ -1412,7 +1412,7 @@ msgstr "Implementar un *cliente* Flower básicamente significa implementar una s
 #: ../../source/example-mxnet-walk-through.rst:242
 #: ../../source/tutorial-quickstart-jax.rst:164
 msgid ":code:`set_parameters (optional)`"
-msgstr ":código:`set_parameters (opcional)`"
+msgstr ":code:`set_parameters (opcional)`"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:160
 #: ../../source/example-mxnet-walk-through.rst:241
@@ -1441,7 +1441,7 @@ msgstr "recorra la lista de parámetros del modelo recibidos como NumPy :code:`n
 #: ../../source/tutorial-quickstart-pytorch.rst:152
 #: ../../source/tutorial-quickstart-scikitlearn.rst:105
 msgid ":code:`get_parameters`"
-msgstr ":código:`get_parameters`"
+msgstr ":code:`get_parameters`"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:164
 #: ../../source/example-mxnet-walk-through.rst:245
@@ -1458,7 +1458,7 @@ msgstr "obtener los parámetros del modelo y devolverlos como una lista de NumPy
 #: ../../source/tutorial-quickstart-pytorch.rst:158
 #: ../../source/tutorial-quickstart-scikitlearn.rst:112
 msgid ":code:`fit`"
-msgstr ":código:`encajar`"
+msgstr ":code:`encajar`"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:166
 #: ../../source/example-jax-from-centralized-to-federated.rst:170
@@ -1491,7 +1491,7 @@ msgstr "obtener los parámetros del modelo local actualizados y devolverlos al s
 #: ../../source/tutorial-quickstart-pytorch.rst:161
 #: ../../source/tutorial-quickstart-scikitlearn.rst:115
 msgid ":code:`evaluate`"
-msgstr ":código:`evaluar`"
+msgstr ":code:`evaluar`"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:171
 #: ../../source/example-mxnet-walk-through.rst:252
@@ -1616,7 +1616,7 @@ msgstr "Implementar un *cliente* Flower básicamente significa implementar una s
 
 #: ../../source/example-mxnet-walk-through.rst:242
 msgid "transform MXNet :code:`NDArray`'s to NumPy :code:`ndarray`'s"
-msgstr "transformar MXNet :código:`NDArray`'s a NumPy :código:`ndarray`s"
+msgstr "transformar MXNet :code:`NDArray`'s a NumPy :código:`ndarray`s"
 
 #: ../../source/example-mxnet-walk-through.rst:249
 #: ../../source/example-pytorch-from-centralized-to-federated.rst:226
@@ -1710,7 +1710,7 @@ msgstr "Implementar un *cliente* Flower básicamente significa implementar una s
 
 #: ../../source/example-pytorch-from-centralized-to-federated.rst:219
 msgid ":code:`set_parameters`"
-msgstr ":código:`set_parameters`"
+msgstr ":code:`set_parameters`"
 
 #: ../../source/example-pytorch-from-centralized-to-federated.rst:232
 msgid "The two :code:`NumPyClient` methods :code:`fit` and :code:`evaluate` make use of the functions :code:`train()` and :code:`test()` previously defined in :code:`cifar.py`. So what we really do here is we tell Flower through our :code:`NumPyClient` subclass which of our already defined functions to call for training and evaluation. We included type annotations to give you a better understanding of the data types that get passed around."
@@ -3231,7 +3231,7 @@ msgstr "Pase :code:`ray_init_args={\"address\"=\"auto\"}` a `start_simulation <r
 
 #: ../../source/how-to-run-simulations.rst:108
 msgid "Start Ray on you head node: on the terminal type :code:`ray start --head`. This command will print a few lines, one of which indicates how to attach other nodes to the head node."
-msgstr "Inicie Ray en su nodo principal: en el terminal escriba :código:`ray start --head`. Este comando imprimirá algunas líneas, una de las cuales indica cómo conectar otros nodos al nodo principal."
+msgstr "Inicie Ray en su nodo principal: en el terminal escriba :code:`ray start --head`. Este comando imprimirá algunas líneas, una de las cuales indica cómo conectar otros nodos al nodo principal."
 
 #: ../../source/how-to-run-simulations.rst:109
 msgid "Attach other nodes to the head node: copy the command shown after starting the head and execute it on terminal of a new node: for example :code:`ray start --address='192.168.1.132:6379'`"
@@ -6312,7 +6312,7 @@ msgstr "$ ./src/py/flwr_example/pytorch_cifar/run-clients.sh"
 
 #: ../../source/ref-example-projects.rst:112
 msgid "For more details, see :code:`src/py/flwr_example/pytorch_cifar`."
-msgstr "Para obtener más detalles, consulte :código:`src/py/flwr_example/pytorch_cifar`."
+msgstr "Para obtener más detalles, consulte :code:`src/py/flwr_example/pytorch_cifar`."
 
 #: ../../source/ref-example-projects.rst:115
 msgid "ImageNet-2012 Image Classification"
@@ -6332,7 +6332,7 @@ msgstr "$ ./src/py/flwr_example/pytorch_imagenet/run-clients.sh"
 
 #: ../../source/ref-example-projects.rst:129
 msgid "For more details, see :code:`src/py/flwr_example/pytorch_imagenet`."
-msgstr "Para obtener más detalles, consulte :código:`src/py/flwr_example/pytorch_imagenet`."
+msgstr "Para obtener más detalles, consulte :code:`src/py/flwr_example/pytorch_imagenet`."
 
 #: ../../source/ref-example-projects.rst:133
 msgid "TensorFlow Examples"
@@ -6360,7 +6360,7 @@ msgstr "$ ./src/py/flwr_example/tensorflow_fashion_mnist/run-clients.sh"
 
 #: ../../source/ref-example-projects.rst:154
 msgid "For more details, see :code:`src/py/flwr_example/tensorflow_fashion_mnist`."
-msgstr "Para obtener más detalles, consulte :código:`src/py/flwr_example/tensorflow_fashion_mnist`."
+msgstr "Para obtener más detalles, consulte :code:`src/py/flwr_example/tensorflow_fashion_mnist`."
 
 #: ../../source/ref-faq.rst:4
 msgid "This page collects answers to commonly asked questions about Federated Learning with Flower."
@@ -7180,7 +7180,7 @@ msgstr "Creando el modelo en sí."
 
 #: ../../source/tutorial-quickstart-huggingface.rst:120
 msgid "To create the model itself, we will just load the pre-trained distillBERT model using Hugging Face’s :code:`AutoModelForSequenceClassification` :"
-msgstr "Para crear el modelo en sí, simplemente cargaremos el modelo distillBERT previamente entrenado usando el :código:`AutoModelForSequenceClassification` de Hugging Face:"
+msgstr "Para crear el modelo en sí, simplemente cargaremos el modelo distillBERT previamente entrenado usando el :code:`AutoModelForSequenceClassification` de Hugging Face:"
 
 #: ../../source/tutorial-quickstart-huggingface.rst:133
 msgid "Federating the example"
@@ -7204,7 +7204,7 @@ msgstr "Iniciando el servidor"
 
 #: ../../source/tutorial-quickstart-huggingface.rst:174
 msgid "Now that we have a way to instantiate clients, we need to create our server in order to aggregate the results. Using Flower, this can be done very easily by first choosing a strategy (here, we are using :code:`FedAvg`, which will define the global weights as the average of all the clients' weights at each round) and then using the :code:`flwr.server.start_server` function:"
-msgstr "Ahora que tenemos una forma de crear instancias de clientes, necesitamos crear nuestro servidor para agregar los resultados. Usando Flower, esto se puede hacer muy fácilmente eligiendo primero una estrategia (aquí estamos usando :code:`FedAvg`, que definirá las ponderaciones globales como el promedio de las ponderaciones de todos los clientes en cada ronda) y luego usando el :código:`flwr.server.start_server` función:"
+msgstr "Ahora que tenemos una forma de crear instancias de clientes, necesitamos crear nuestro servidor para agregar los resultados. Usando Flower, esto se puede hacer muy fácilmente eligiendo primero una estrategia (aquí estamos usando :code:`FedAvg`, que definirá las ponderaciones globales como el promedio de las ponderaciones de todos los clientes en cada ronda) y luego usando el :code:`flwr.server.start_server` función:"
 
 #: ../../source/tutorial-quickstart-huggingface.rst:202
 msgid "The :code:`weighted_average` function is there to provide a way to aggregate the metrics distributed amongst the clients (basically this allows us to display a nice average accuracy and loss for every round)."
@@ -7410,7 +7410,7 @@ msgstr "devolver el peso del modelo como una lista de NumPy ndarrays"
 #: ../../source/tutorial-quickstart-pytorch.rst:154
 #: ../../source/tutorial-quickstart-scikitlearn.rst:108
 msgid ":code:`set_parameters` (optional)"
-msgstr ":código:`set_parameters` (opcional)"
+msgstr ":code:`set_parameters` (opcional)"
 
 #: ../../source/tutorial-quickstart-mxnet.rst:169
 #: ../../source/tutorial-quickstart-pytorch.rst:155
@@ -7599,7 +7599,7 @@ msgstr "Ahora que tenemos todas nuestras dependencias instaladas, ejecutemos una
 
 #: ../../source/tutorial-quickstart-scikitlearn.rst:42
 msgid ":code:`get_model_parameters()`"
-msgstr ":código:`get_model_parameters()`"
+msgstr ":code:`get_model_parameters()`"
 
 #: ../../source/tutorial-quickstart-scikitlearn.rst:43
 msgid "Returns the paramters of a :code:`sklearn` LogisticRegression model"
@@ -7607,7 +7607,7 @@ msgstr "Devuelve los parámetros de un modelo :code:`sklearn` LogisticRegression
 
 #: ../../source/tutorial-quickstart-scikitlearn.rst:44
 msgid ":code:`set_model_params()`"
-msgstr ":código:`set_model_params()`"
+msgstr ":code:`set_model_params()`"
 
 #: ../../source/tutorial-quickstart-scikitlearn.rst:45
 msgid "Sets the parameters of a :code:`sklean` LogisticRegression model"
@@ -7615,7 +7615,7 @@ msgstr "Establece los parámetros de un modelo :code:`sklean` LogisticRegression
 
 #: ../../source/tutorial-quickstart-scikitlearn.rst:46
 msgid ":code:`set_initial_params()`"
-msgstr ":código:`set_initial_params()`"
+msgstr ":code:`set_initial_params()`"
 
 #: ../../source/tutorial-quickstart-scikitlearn.rst:47
 msgid "Initializes the model parameters that the Flower server will ask for"
@@ -7623,7 +7623,7 @@ msgstr "Inicializa los parámetros del modelo que solicitará el servidor Flower
 
 #: ../../source/tutorial-quickstart-scikitlearn.rst:48
 msgid ":code:`load_mnist()`"
-msgstr ":código:`load_mnist()`"
+msgstr ":code:`load_mnist()`"
 
 #: ../../source/tutorial-quickstart-scikitlearn.rst:49
 msgid "Loads the MNIST dataset using OpenML"
@@ -7631,7 +7631,7 @@ msgstr "Carga el conjunto de datos MNIST usando OpenML"
 
 #: ../../source/tutorial-quickstart-scikitlearn.rst:50
 msgid ":code:`shuffle()`"
-msgstr ":código:`barajar()`"
+msgstr ":code:`barajar()`"
 
 #: ../../source/tutorial-quickstart-scikitlearn.rst:51
 msgid "Shuffles data and its label"
@@ -7639,7 +7639,7 @@ msgstr "Mezcla datos y su etiqueta."
 
 #: ../../source/tutorial-quickstart-scikitlearn.rst:53
 msgid ":code:`partition()`"
-msgstr ":código:`partición()`"
+msgstr ":code:`partición()`"
 
 #: ../../source/tutorial-quickstart-scikitlearn.rst:53
 msgid "Splits datasets into a number of partitions"
