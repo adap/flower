@@ -40,6 +40,10 @@ As the following excerpt:
 
 Regarding this architecture, the historical references mentioned on the FedAvg and FedAvgM papers are [this](https://web.archive.org/web/20190415103404/https://www.tensorflow.org/tutorials/images/deep_cnn) and [this](https://web.archive.org/web/20170807002954/https://github.com/tensorflow/models/blob/master/tutorials/image/cifar10/cifar10.py).
 
+Important to highlight the rationale with this CNN model stated on FedAvgM paper:
+
+> "*This model is not the state-of-the-art on the CIFAR-10 dataset, but is sufficient to show relative performance for the purposes of our investigation."*
+
 **Dataset:** This baseline includes the CIFAR-10 and FMNIST datasets. By default it will run with the CIFAR-10. The data partition uses a configurable Latent Dirichlet Allocation (LDA) distribution (`concentration` parameter equals 0.1 as default) to create **non-iid distributions** between the clients. The understanding for this `concentration` (α) is that α→∞ all clients have identical distribution, and α→𝟢 each client hold samples from only one class.
 
 | Dataset | # classes | # partitions | partition method | partition settings|
@@ -47,7 +51,7 @@ Regarding this architecture, the historical references mentioned on the FedAvg a
 | CIFAR-10 | 10 | `num_clients` | Latent Dirichlet Allocation (LDA) | `concentration` |
 | FMNIST | 10 | `num_clients` | Latent Dirichlet Allocation (LDA) | `concentration` |
 
-**Data distribution:** The following figure illustrates the use of multiple `concentration` values to generate the data distribution over 30 clients for CIFAR-10 (10 classes):
+**Data distribution:** The following figure illustrates the use of multiple `concentration` values to generate the data distribution over 30 clients for CIFAR-10 (10 classes) - [source code](fedavgm/utils.py):
 
 ![](docs/concentration_cifar10.png)
 
