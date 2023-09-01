@@ -9,6 +9,7 @@ from pathlib import Path
 
 import flwr as fl
 import hydra
+import numpy as np
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
@@ -27,6 +28,8 @@ def main(cfg: DictConfig) -> None:
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
+    np.random.seed(2020)
+
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
 

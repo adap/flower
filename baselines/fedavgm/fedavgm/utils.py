@@ -25,7 +25,7 @@ def plot_concentrations_cifar10():
     color = plt.get_cmap("RdYlGn")(np.linspace(0.15, 0.85, num_classes))
     num_plots = len(concentration_values)
     fig, axs = plt.subplots(1, num_plots, figsize=(15, 5), sharey=True)
-    
+
     pos = axs[0].get_position()
     pos.x0 += 0.1
     axs[0].set_position(pos)
