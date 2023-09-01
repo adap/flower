@@ -13,7 +13,6 @@ from dataset import load_datasets
 from Fedmeta_client_manager import Fedmeta_client_manager
 from flwr.common.logger import log
 from logging import WARNING
-import server
 
 import flwr as fl
 import client

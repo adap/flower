@@ -40,13 +40,13 @@ def load_datasets(  # pylint: disable=too-many-arguments
 
     if config.algo == 'fedavg':
         dataset = _partition_data(
-            dir_path= config.path
+            dir_path=config.path
         )
 
     elif config.algo == 'fedmeta(maml)':
         dataset = _partition_data(
-            dir_path= config.path,
-            support_ratio= config.support_ratio
+            dir_path=config.path,
+            support_ratio=config.support_ratio
         )
 
     clients_list = split_train_validation_test_clients(
