@@ -72,7 +72,10 @@ class MobileNet(nn.Module):
         self.body.add_module("fc", nn.Linear(1024, num_classes))
 
         if num_head_layers == 1:
-            self.head = nn.Sequential(nn.AvgPool2d([7]), nn.Linear(1024, num_classes))
+            self.head = nn.Sequential(
+                nn.AvgPool2d([7]), 
+                nn.Flatten(),
+                nn.Linear(1024, num_classes))
             self.body.avg_pool = nn.Identity()
             self.body.fc = nn.Identity()
         elif num_head_layers == 2:
@@ -82,6 +85,32 @@ class MobileNet(nn.Module):
                 nn.Flatten(),
                 nn.Linear(1024, num_classes),
             )
+            self.body.conv_dw_13 = nn.Identity()
+            self.body.avg_pool = nn.Identity()
+            self.body.fc = nn.Identity()
+        elif num_head_layers == 3:
+            self.head = nn.Sequential(
+                conv_dw(512, 1024, 2),
+                conv_dw(1024, 1024, 1),
+                nn.AvgPool2d([7]),
+                nn.Flatten(),
+                nn.Linear(1024, num_classes),
+            )
+            self.body.conv_dw_12 = nn.Identity()
+            self.body.conv_dw_13 = nn.Identity()
+            self.body.avg_pool = nn.Identity()
+            self.body.fc = nn.Identity()
+        elif num_head_layers == 4:
+            self.head = nn.Sequential(
+                conv_dw(512, 512, 1),
+                conv_dw(512, 1024, 2),
+                conv_dw(1024, 1024, 1),
+                nn.AvgPool2d([7]),
+                nn.Flatten(),
+                nn.Linear(1024, num_classes),
+            )
+            self.body.conv_dw_11 = nn.Identity()
+            self.body.conv_dw_12 = nn.Identity()
             self.body.conv_dw_13 = nn.Identity()
             self.body.avg_pool = nn.Identity()
             self.body.fc = nn.Identity()

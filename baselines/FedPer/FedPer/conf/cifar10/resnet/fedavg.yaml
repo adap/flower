@@ -1,12 +1,12 @@
 ---
-num_clients: 3 # total number of clients
-num_epochs: 2 # number of local epochs
+num_clients: 10 # total number of clients
+num_epochs: 4 # number of local epochs
 batch_size: 128
-num_rounds: 2
-clients_per_round: 3
+num_rounds: 25
+clients_per_round: 10
 learning_rate: 0.01
-algorithm: fedper
-algo: fedper
+algorithm: fedavg
+algo: fedavg
 
 client_resources:
   num_cpus: 32
@@ -24,11 +24,11 @@ dataset:
   fraction: 0.83
 
 model:
-  _target_: FedPer.models.mobile_model.MobileNet
-  num_head_layers: 4
+  _target_: FedPer.models.resnet_model.ResNet
+  num_head_layers: 1
   num_classes: 10
   device: ${server_device}
-  name: mobile
+  name: resnet
 
 fit_config:
   drop_client: false
@@ -36,7 +36,7 @@ fit_config:
   batch_size: ${batch_size}
 
 strategy:
-  _target_: FedPer.utils.strategy_pipeline.AggregateBodyStrategyPipeline
+  _target_: FedPer.utils.strategy_pipeline.DefaultStrategyPipeline
   algorithm: ${algorithm}
   fraction_fit: 0.00001 # because we want the number of clients to sample on each roudn to be solely defined by min_fit_clients
   min_fit_clients: ${num_clients}

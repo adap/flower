@@ -10,7 +10,6 @@ from tqdm import tqdm
 from FedPer.utils.model_manager import ModelManager
 from FedPer.utils.model_split import ModelSplit
 
-
 class ResNet(nn.Module):
     """ResNet model."""
 
@@ -80,6 +79,19 @@ class ResNet(nn.Module):
             body_layer4 = list(self.body.children())[-1]
             self.body = nn.Sequential(*list(self.body.children())[:-1])
             self.body.layer4 = nn.Sequential(*list(body_layer4.children())[:-1])
+        elif self.num_head_layers == 3:
+            self.head = nn.Sequential(
+                basic_block(512, 512),
+                basic_block(512, 512),
+                nn.AdaptiveAvgPool2d((1, 1)),
+                nn.Flatten(),
+                nn.Linear(512, num_classes),
+            )
+            # remove head layers from body
+            self.body = nn.Sequential(*list(self.body.children())[:-2])
+            body_layer4 = list(self.body.children())[-1]
+            self.body = nn.Sequential(*list(self.body.children())[:-1])
+            self.body.layer4 = nn.Sequential(*list(body_layer4.children())[:-2])
         else:
             raise NotImplementedError("Only 1 or 2 head layers supported")
 
@@ -88,10 +100,7 @@ class ResNet(nn.Module):
         if self.num_head_layers == 1:
             return self.head(F.relu(self.body(x)))
         elif self.num_head_layers == 2:
-            # print("x.shape: ", x.shape)
             x = self.body(x)
-            # x = F.relu(x)
-            # x = x.view(x.size(0), 512, 1, 1)
             return self.head(x)
         else:
             raise NotImplementedError("Only 1 or 2 head layers supported")
