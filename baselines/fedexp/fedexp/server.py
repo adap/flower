@@ -3,7 +3,7 @@
 Optionally, also define a new Server class (please note this is not needed in most
 settings).
 """
-from models import test
+from fedexp.models import test
 from collections import OrderedDict
 from typing import Callable, Dict, Optional, Tuple
 
