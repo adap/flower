@@ -29,7 +29,6 @@ class FlowerClient(fl.client.NumPyClient):
         self.device = device
         self.num_epochs = num_epochs
         self.p = p
-        print(f"Client {self.cid} created.")
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
@@ -76,7 +75,7 @@ def gen_client_fn(trainloaders: List[DataLoader],
     def client_fn(cid: str) -> FlowerClient:
         """Create a new FlowerClient for a given cid."""
 
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        device = args["device"]
         net = instantiate(model).to(device)
         trainloader = trainloaders[int(cid)]
         p = args["p"][int(cid)]

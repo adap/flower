@@ -36,10 +36,15 @@ def main(cfg: DictConfig) -> None:
     client_fn = client.gen_client_fn(trainloaders=trainloaders,
                                      model=cfg.model,
                                      num_epochs=cfg.num_epochs,
-                                     args={"p": p},
+                                     args={
+                                         "p": p,
+                                         "device": cfg.client_device,
+                                     },
                                      )
 
-    evaluate_fn = server.gen_evaluate_fn(test_loader=testloader, model=cfg.model)
+    evaluate_fn = server.gen_evaluate_fn(test_loader=testloader,
+                                         model=cfg.model,
+                                         device=cfg.server_device)
 
     def get_on_fit_config():
         def fit_config_fn(server_round: int):

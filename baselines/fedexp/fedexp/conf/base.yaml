@@ -2,10 +2,12 @@
 seed : 0
 
 num_clients: 100
-num_rounds: 500
+num_rounds: 3
 clients_per_round: 5
 num_epochs: 20
 batch_size: 50
+server_device: cpu
+client_device: cpu
 
 dataset_config:
   name: "CIFAR10"

@@ -7,6 +7,7 @@ from torch import nn
 from torch.nn.utils import parameters_to_vector
 from torch.utils.data import DataLoader
 from torchvision import transforms
+from tqdm import tqdm
 
 
 class BasicBlock(nn.Module):
@@ -138,7 +139,7 @@ def train(  # pylint: disable=too-many-arguments
                                 weight_decay=hyperparams["weight_decay"]
                                 )
     net.train()
-    for _ in range(epochs):
+    for _ in tqdm(epochs, desc="Local Training ..."):
         net = _train_one_epoch(net=net,
                                trainloader=trainloader,
                                device=device,
@@ -203,4 +204,3 @@ if __name__ == '__main__':
     m2_params = model2.parameters()
     m2_vec = parameters_to_vector(m2_params)
     print("Testing")
-

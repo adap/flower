@@ -78,6 +78,7 @@ def load_datasets(config,
                   num_clients,
                   batch_size,
                   partition_equal=True) -> [DataLoader, DataLoader]:
+    print("Loading data...")
     trans_cifar = transforms.Compose([transforms.ToTensor(),
                                       transforms.Normalize(mean=[0.491, 0.482, 0.447],
                                                            std=[0.247, 0.243, 0.262])])
@@ -101,6 +102,7 @@ def load_datasets(config,
     # X_test = next(iter(test_loader))[0].numpy()
     # Y_test = next(iter(test_loader))[1].numpy()
 
+    print("Preparing data...")
     inds = get_dirichlet_data(Y_train,
                               num_clients,
                               config.alpha,
