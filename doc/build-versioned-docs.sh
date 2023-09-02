@@ -108,16 +108,15 @@ END
     # Actually building the docs for a given language and version
     sphinx-build -b html source/ build/html/${current_version}/${current_language} -A lang=True -D language=${current_language}
 
+    # Restore branch as it was to avoid conflicts
+    if [ changed ]; then
+      git restore locales/${current_language} || rm -rf locales/${current_language}
+      git restore source/conf.py
+      git restore source/_templates/sidebar || rm -rf source/_templates/sidebar
+      git restore source/_templates/base.html
+    fi
+
   done
-
-  # Restore branch as it was to avoid conflicts
-  if [ changed ]; then
-    git restore locales/${current_language} || rm -rf locales/${current_language}
-    git restore source/conf.py
-    git restore source/_templates/sidebar || rm -rf source/_templates/sidebar
-    git restore source/_templates/base.html
-  fi
-
 done
   
 # Build the main version (main for GH CI, local branch for local) 
