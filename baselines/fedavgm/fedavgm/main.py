@@ -63,6 +63,8 @@ def main(cfg: DictConfig) -> None:
         client_resources={"num_cpus": cfg.num_cpus, "num_gpus": cfg.num_gpus},
     )
 
+    _, final_acc = history.metrics_centralized["accuracy"][-1]
+
     # 6. Save your results
     save_path = HydraConfig.get().runtime.output_dir
 
@@ -75,9 +77,12 @@ def main(cfg: DictConfig) -> None:
         f"_C={cfg.server.reporting_fraction}"
         f"_E={cfg.client.local_epochs}"
         f"_alpha={cfg.noniid.concentration}"
+        f"_acc={final_acc:.4f}"
     )
-
+    
     filename = "results" + file_suffix + ".pkl"
+
+    print(f">>> Saving {filename}...")
     results_path = Path(save_path) / filename
     results = {"history": history}
 
