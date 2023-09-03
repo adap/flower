@@ -49,3 +49,26 @@ Terminal 2+3: start two clients
 ```bash
 python client.py
 ```
+
+## Run Restful API mode
+
+
+Terminal 1: start Flower server restful mode
+
+```bash
+flower-server --rest
+```
+
+Terminal 2: start driver
+
+```bash
+python driver
+```
+
+Open file ```client.py``` set variable ```restful_mode``` is ```True```
+
+Terminal 3+4: start two Flower client nodes
+
+```bash
+python client.py
+```
