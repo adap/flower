@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "1.5.0"
+version = "1.6.0"
 description = "Flower: A Friendly Federated Learning Framework"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.dev>"]
@@ -68,7 +68,7 @@ pycryptodome = "^3.18.0"
 importlib-metadata = { version = "^4.0.0", markers = "python_version < '3.8'" }
 iterators = "^0.0.2"
 # Optional dependencies (VCE)
-ray = { version = "==2.5.1", extras = ["default"], optional = true }
+ray = { version = "==2.6.3", extras = ["default"], optional = true }
 pydantic = { version = "<2.0.0", optional = true }
 # Optional dependencies (REST transport layer)
 requests = { version = "^2.31.0", optional = true }
@@ -91,7 +91,7 @@ docformatter = "==1.7.5"
 mypy = "==1.4.1"
 pylint = "==2.13.9"
 flake8 = "==3.9.2"
-pytest = "==7.1.2"
+pytest = "==7.4.0"
 pytest-cov = "==3.0.0"
 pytest-watch = "==4.2.0"
 grpcio-tools = "==1.48.2"
@@ -100,6 +100,7 @@ jupyterlab = "==3.6.5"
 rope = "==1.9.0"
 semver = "==2.13.0"
 sphinx = "==5.3.0"
+sphinx-intl = "==2.1.0"
 myst-parser = "==1.0.0"
 sphinx-design = "==0.4.1"
 sphinx-copybutton = "==0.5.2"
@@ -118,7 +119,7 @@ mdformat-beautysh = "==0.1.1"
 mdformat-myst = "==0.1.5"
 twine = "==4.0.2"
 pyroma = "==4.2"
-sphinx-multiversion = "==0.2.4"
+GitPython = "==3.1.32"
 
 [tool.isort]
 line_length = 88
