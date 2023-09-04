@@ -22,13 +22,15 @@ BROWN='\033[0;33m'
 NC='\033[0m' # No Color
 
 # Define default values first
+BUILD_TARGET="${BUILD_TARGET:=base}"
 FLWR_VERSION="${FLWR_VERSION:=1.5.0}"
 
 echo -e "${BROWN}\nUsing:"
+echo -e "BUILD_TARGET: $BUILD_TARGET"
 echo -e "FLWR_VERSION: $FLWR_VERSION"
 echo -e "${NC}"
 
-# docker push flwr/server:$FLWR_VERSION 
-# docker push flwr/server:latest
-
-docker push flwr/base:$FLWR_VERSION
+# Tag image with FLWR_VERSION as latest and push all to remote
+docker tag flwr/$BUILD_TARGET:$FLWR_VERSION flwr/base:latest
+docker push flwr/$BUILD_TARGET:$FLWR_VERSION
+docker push flwr/$BUILD_TARGET:latest
