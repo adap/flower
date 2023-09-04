@@ -29,14 +29,19 @@ from sphinx.application import ConfigError
 # Fixing path issue for autodoc
 sys.path.insert(0, os.path.abspath("../../src/py"))
 
+# -- Versioning switcher -----------------------------------------------------
+
 html_context = dict()
+
+# Make current language accessible for the html templates
 if 'current_language' in os.environ:
     current_language = os.environ['current_language']
 else:
     current_language = 'en'
 html_context['current_language'] = current_language
-repo = Repo( search_parent_directories=True )
 
+# Make current version accessible for the html templates
+repo = Repo( search_parent_directories=True )
 local = False
 if 'current_version' in os.environ:
     current_version = os.environ['current_version']
@@ -46,19 +51,24 @@ else:
     local = True
     current_version = repo.active_branch.name
 
+# Format current version for the html templates
 html_context['current_version'] = {}
 html_context['current_version']['url'] = current_version
 html_context['current_version']['full_name'] = "main" if current_version=="main" else f"{'' if local else 'Flower Framework '}{current_version}"
 
+# Make version list accessible for the html templates
 html_context['versions'] = list()
-versions = [tag.name for tag in repo.tags if int(tag.name[1]) != 0 and int(tag.name.split('.')[1]) >= 5]
+versions = [tag.name for tag in repo.tags if int(tag.name[1]) > 0 and int(tag.name.split('.')[1]) >= 5]
 versions.append('main')
 for version in versions:
     html_context['versions'].append({"name": version})
 
-# Translation options
+
+# -- Translation options -----------------------------------------------------
+
 locale_dirs = ['../locales']
 gettext_compact = "framework-docs"
+
 
 # -- Project information -----------------------------------------------------
 
@@ -226,6 +236,7 @@ html_theme_options = {
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 
+# Set modules for custom sidebar
 html_sidebars = {
     "**": [
         "sidebar/brand.html",
