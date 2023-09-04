@@ -134,5 +134,9 @@ class State(abc.ABC):
         """Remove `node_id` from state."""
 
     @abc.abstractmethod
-    def get_nodes(self) -> Set[int]:
+    def get_nodes(self, workload_id: str) -> Set[int]:
         """Retrieve all currently stored node IDs as a set."""
+
+    @abc.abstractmethod
+    def create_workload(self) -> str:
+        """Create one workload."""
