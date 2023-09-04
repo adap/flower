@@ -26,14 +26,18 @@ from flwr_datasets.federated_dataset import FederatedDataset
 
 @parameterized_class(
     [
-        {"dataset_name": "mnist"},
-        {"dataset_name": "cifar10"},
+        {"dataset_name": "mnist", "test_split": "test"},
+        {"dataset_name": "cifar10", "test_split": "test"},
+        {"dataset_name": "fashion_mnist", "test_split": "test"},
+        {"dataset_name": "sasha/dog-food", "test_split": "test"},
+        {"dataset_name": "zh-plus/tiny-imagenet", "test_split": "valid"},
     ]
 )
-class RealDatasetsFederatedDatasets(unittest.TestCase):
+class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
     """Test Real Dataset (MNIST, CIFAR10) in FederatedDatasets."""
 
     dataset_name = ""
+    test_split = ""
 
     @parameterized.expand(  # type: ignore
         [
@@ -59,12 +63,12 @@ class RealDatasetsFederatedDatasets(unittest.TestCase):
         )
 
     def test_load_full(self) -> None:
-        """Test if the load_full works on the correct split name."""
+        """Test if the load_full works with the correct split name."""
         dataset_fds = FederatedDataset(
             dataset=self.dataset_name, partitioners={"train": 100}
         )
-        dataset_fds_test = dataset_fds.load_full("test")
-        dataset_test = datasets.load_dataset(self.dataset_name)["test"]
+        dataset_fds_test = dataset_fds.load_full(self.test_split)
+        dataset_test = datasets.load_dataset(self.dataset_name)[self.test_split]
         self.assertEqual(len(dataset_fds_test), len(dataset_test))
 
     def test_multiple_partitioners(self) -> None:
@@ -73,13 +77,17 @@ class RealDatasetsFederatedDatasets(unittest.TestCase):
         num_test_partitions = 100
         dataset_fds = FederatedDataset(
             dataset=self.dataset_name,
-            partitioners={"train": num_train_partitions, "test": num_test_partitions},
+            partitioners={
+                "train": num_train_partitions,
+                self.test_split: num_test_partitions,
+            },
         )
-        dataset_test_partition0 = dataset_fds.load_partition(0, "test")
+        dataset_test_partition0 = dataset_fds.load_partition(0, self.test_split)
 
         dataset = datasets.load_dataset(self.dataset_name)
         self.assertEqual(
-            len(dataset_test_partition0), len(dataset["test"]) // num_test_partitions
+            len(dataset_test_partition0),
+            len(dataset[self.test_split]) // num_test_partitions,
         )
 
 
