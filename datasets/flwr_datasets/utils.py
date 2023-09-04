@@ -47,7 +47,6 @@ def _check_if_dataset_supported(dataset: str) -> None:
         "mnist",
         "cifar10",
         "fashion_mnist",
-        "food101",
         "sasha/dog-food",
         "zh-plus/tiny-imagenet",
     ]
