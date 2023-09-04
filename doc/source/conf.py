@@ -16,6 +16,7 @@
 
 import os
 import sys
+from git import Repo
 from sphinx.application import ConfigError
 
 # Configuration file for the Sphinx documentation builder.
@@ -28,6 +29,36 @@ from sphinx.application import ConfigError
 # Fixing path issue for autodoc
 sys.path.insert(0, os.path.abspath("../../src/py"))
 
+html_context = dict()
+if 'current_language' in os.environ:
+    current_language = os.environ['current_language']
+else:
+    current_language = 'en'
+html_context['current_language'] = current_language
+repo = Repo( search_parent_directories=True )
+
+local = False
+if 'current_version' in os.environ:
+    current_version = os.environ['current_version']
+elif os.getenv("GITHUB_ACTIONS"):
+    current_version = 'main'
+else:
+    local = True
+    current_version = repo.active_branch.name
+
+html_context['current_version'] = {}
+html_context['current_version']['url'] = current_version
+html_context['current_version']['full_name'] = "main" if current_version=="main" else f"{'' if local else 'Flower Framework '}{current_version}"
+
+html_context['versions'] = list()
+versions = [tag.name for tag in repo.tags if int(tag.name[1]) != 0]
+versions.append('main')
+for version in versions:
+    html_context['versions'].append({"name": version})
+
+# Translation options
+locale_dirs = ['../locales']
+gettext_compact = "framework-docs"
 
 # -- Project information -----------------------------------------------------
 
@@ -36,8 +67,7 @@ copyright = "2022 Adap GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "1.5.0"
-
+release = "1.6.0"
 
 # -- General configuration ---------------------------------------------------
 
@@ -58,7 +88,6 @@ extensions = [
     "sphinxcontrib.youtube",
     "sphinx_reredirects",
     "nbsphinx",
-    "sphinx_multiversion",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -157,17 +186,13 @@ redirects = {
     "publications": "index.html",
 }
 
-# Versioning options
-smv_tag_whitelist = r'^v(([1-9]|[0-9]{2,}).*)$'
-smv_branch_whitelist = r'^main$'
-
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
 html_theme = "furo"
-html_title = f"Flower Framework {release}"
+html_title = f"Flower Framework"
 html_logo = "_static/flower-logo.png"
 html_favicon = "_static/favicon.ico"
 html_baseurl = "https://flower.dev/docs/framework/"
@@ -209,6 +234,7 @@ html_sidebars = {
         "sidebar/navigation.html",
         "sidebar/scroll-end.html",
         "sidebar/versioning.html",
+        "sidebar/lang.html",
     ]
 }
 # -- Options for nbsphinx -------------------------------------------------
