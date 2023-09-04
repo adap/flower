@@ -51,7 +51,7 @@ def _check_if_dataset_supported(dataset: str) -> None:
         "zh-plus/tiny-imagenet",
     ]
     if dataset not in supported_datasets:
-        raise Warning(
+        raise Exception(
             f"The currently tested and supported dataset are {supported_datasets}. "
             f"Given: {dataset}"
         )
