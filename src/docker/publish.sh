@@ -31,6 +31,6 @@ echo -e "FLWR_VERSION: $FLWR_VERSION"
 echo -e "${NC}"
 
 # Tag image with FLWR_VERSION as latest and push all to remote
-docker tag flwr/$BUILD_TARGET:$FLWR_VERSION flwr/base:latest
+docker tag flwr/$BUILD_TARGET:$FLWR_VERSION flwr/$BUILD_TARGET:latest
 docker push flwr/$BUILD_TARGET:$FLWR_VERSION
 docker push flwr/$BUILD_TARGET:latest
