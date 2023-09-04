@@ -28,8 +28,8 @@ class Femnist_network(nn.Module):
         self.maxpool1 = nn.MaxPool2d(kernel_size=(2, 2))
         self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=5, padding=2)
         self.maxpool2 = nn.MaxPool2d(kernel_size=(2, 2))
-        self.linear1 = nn.Linear(7 * 7 * 64, 2048)
-        self.linear2 = nn.Linear(2048, 62)
+        self.linear1 = nn.Linear(7 * 7 * 64, 1024)
+        self.linear2 = nn.Linear(1024, 62)
 
     def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
         """Forward pass of the CNN.

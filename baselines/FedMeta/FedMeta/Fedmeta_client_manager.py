@@ -24,6 +24,7 @@ class Fedmeta_client_manager(SimpleClientManager):
     def sample(
         self,
         num_clients: int,
+        server_round: Optional[int] = None,
         min_num_clients: Optional[int] = None,
         criterion: Optional[Criterion] = None,
     ) -> List[ClientProxy]:
@@ -46,6 +47,7 @@ class Fedmeta_client_manager(SimpleClientManager):
                 num_clients,
             )
             return []
-
+        if server_round is not None:
+            random.seed(server_round-1)
         sampled_cids = random.sample(available_cids, num_clients)
         return [self.clients[cid] for cid in sampled_cids]

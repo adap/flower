@@ -15,38 +15,26 @@ from torch.utils.data import DataLoader
 
 from models import train, test
 
-from dataset import  FemnistDataset
-import torchvision.transforms as transforms
-
-
 class FlowerClient(
     fl.client.NumPyClient
 ):
     def __init__(
             self,
             net: torch.nn.Module,
-            # trainloader: DataLoader,
-            # valloader: DataLoader,
-            cid: int,
-            dataset: Tuple[Dict],
-            client_list: List[str],
+            trainloaders: DataLoader,
+            valloaders: DataLoader,
+            cid: str,
             device: torch.device,
             num_epochs: int,
             learning_rate: float
     ) -> object:
         self.net = net
-        self.trainloader = None
-        self.valloader = None
-        self.cid = cid
+        self.trainloaders = trainloaders
+        self.valloaders = valloaders
+        self.cid = int(cid)
         self.device = device
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
-        self.train_set, self.valid_set = dataset
-        self.train_client, self.valid_client, _ = client_list
-
-
-        self.transform = transforms.Compose([transforms.ToTensor()])
-
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
@@ -63,33 +51,29 @@ class FlowerClient(
     ) -> Tuple[NDArrays, int, Dict]:
         """Implements distributed fit function for a given client."""
         self.set_parameters(parameters)
-        train_set = self.train_set['user_data'][self.train_client[int(self.cid)]]
-        self.trainloader = DataLoader(FemnistDataset(train_set, self.transform), batch_size=10, shuffle=True)
         train(
             self.net,
-            self.trainloader,
+            self.trainloaders['train'][self.cid],
             self.device,
             epochs=self.num_epochs,
             learning_rate=self.learning_rate,
         )
 
-        return self.get_parameters({}), len(self.trainloader), {}
+        return self.get_parameters({}), len(self.trainloaders['train'][self.cid]), {}
 
     def evaluate(
             self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[float, int, Dict]:
         """Implements distributed evaluation for a given client."""
         self.set_parameters(parameters)
-        valid_set = self.valid_set['user_data'][self.valid_client[int(self.cid)]]
-        self.valloader = DataLoader(FemnistDataset(valid_set, self.transform))
-        loss, accuracy = test(self.net, self.valloader, self.device)
-        return float(loss), len(self.valloader), {"correct": accuracy}
+        loss, accuracy = test(self.net, self.valloaders['test'][self.cid], self.device)
+        return float(loss), len(self.valloaders['test'][self.cid]), {"correct": accuracy}
 
 
 def gen_client_fn(
         num_epochs: int,
-        dataset: Tuple[Dict],
-        client_list: List[str],
+        trainloaders: List[DataLoader],
+        valloaders: List[DataLoader],
         learning_rate: float,
         model: DictConfig,
 ) -> Callable[[str], FlowerClient]:  # pylint: disable=too-many-arguments
@@ -123,26 +107,18 @@ def gen_client_fn(
         print(f'cid : {cid}')
 
         # Load model
+        torch.manual_seed(123)
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        # device = 'cpu'
         net = instantiate(model).to(device)
-        # transform = transforms.Compose([transforms.ToTensor()])
 
         # Note: each client gets a different trainloader/valloader, so each client
         # will train and evaluate on their own unique data
-        # train_clients, val_client, _ = client_list
-
-        # train_set = sup_set['user_data'][train_clients[int(cid)]]
-        # valid_set = sup_set['user_data'][val_client[int(cid)]]
-
-        # trainloader = DataLoader(FemnistDataset(train_set, transform), batch_size=10, shuffle=True)
-        # valloader = DataLoader(FemnistDataset(valid_set, transform), batch_size=10)
 
         return FlowerClient(
             net,
+            trainloaders,
+            valloaders,
             cid,
-            dataset,
-            client_list,
             device,
             num_epochs,
             learning_rate,

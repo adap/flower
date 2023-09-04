@@ -4,7 +4,7 @@ Needed only when the strategy is not yet implemented in Flower or because you wa
 extend or modify the functionality of an existing strategy.
 """
 from typing import Dict, List, Optional, Tuple, Union
-from logging import WARNING
+from logging import WARNING, INFO
 
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
@@ -40,7 +40,8 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
         The weighted average metric.
     """
     # Multiply accuracy of each client by number of examples used
-    correct = [num_examples * m["correct"] for num_examples, m in metrics]
+    # correct = [num_examples * m["correct"] for num_examples, m in metrics]
+    correct = [ m["correct"] for _, m in metrics]
     examples = [num_examples for num_examples, _ in metrics]
 
     # Aggregate and return custom metric (weighted average)
@@ -48,6 +49,29 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 class FedMeta(FedAvg):
+    def configure_fit(
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+    ) -> List[Tuple[ClientProxy, FitIns]]:
+        """Configure the next round of training."""
+        config = {}
+        if self.on_fit_config_fn is not None:
+            # Custom fit config function provided
+            config = self.on_fit_config_fn(server_round)
+        fit_ins = FitIns(parameters, config)
+
+        # Sample clients
+        sample_size, min_num_clients = self.num_fit_clients(
+            client_manager.num_available()
+        )
+        clients = client_manager.sample(
+            num_clients=sample_size,
+            min_num_clients=min_num_clients,
+            server_round=server_round
+        )
+
+        # Return client/config pairs
+        return [(client, fit_ins) for client in clients]
+
     def configure_evaluate(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
@@ -70,7 +94,7 @@ class FedMeta(FedAvg):
         clients = client_manager.sample(
             num_clients=sample_size,
             min_num_clients=min_num_clients,
-            criterion=evaluate_client_Criterion(self.min_evaluate_clients)
+            criterion=evaluate_client_Criterion(self.min_evaluate_clients),
         )
 
         # Return client/config pairs
@@ -132,7 +156,7 @@ class FedMeta(FedAvg):
         if self.evaluate_metrics_aggregation_fn:
             eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
-            log(WARNING, f"Test Accuracy : {metrics_aggregated['accuracy']}")
+            log(INFO, f'Test Accuracy : {metrics_aggregated["accuracy"]:.3%}')
 
         elif server_round == 1:  # Only log this warning once
             log(WARNING, "No evaluate_metrics_aggregation_fn provided")

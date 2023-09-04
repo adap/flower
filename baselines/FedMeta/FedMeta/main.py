@@ -30,27 +30,25 @@ def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
 
     # partition dataset and get dataloaders
-    dataset, client_list = load_datasets(config=cfg.dataset)
-    train_clients, val_clients, test_clients = client_list
+    trainloaders, valloaders, testloaders= load_datasets(config=cfg.dataset)
     # Check config Clients value
-    if cfg.num_clients > len(train_clients):
-        raise ImportError(f"Total Clients num is {len(train_clients)}")
+    if cfg.num_clients > len(trainloaders['train']):
+        raise ImportError(f"Total Clients num is {len(trainloaders['train'])}")
 
     # prepare function that will be used to spawn each client
     client_fn = client.gen_client_fn(
         num_epochs=cfg.num_epochs,
-        dataset=dataset,
-        client_list=client_list,
+        trainloaders=trainloaders,
+        valloaders=valloaders,
         learning_rate=cfg.learning_rate,
         model=cfg.model,
-
     )
 
     strategy = instantiate(
         cfg.strategy,
         # evaluate_fn=evaluate_fn,
         evaluate_metrics_aggregation_fn=weighted_average,
-        min_evaluate_clients=len(val_clients)
+        min_evaluate_clients=len(valloaders['train'])
     )
 
     # 5. Start Simulation
@@ -62,7 +60,7 @@ def main(cfg: DictConfig) -> None:
             "num_cpus": cfg.client_resources.num_cpus,
             "num_gpus": cfg.client_resources.num_gpus,
         },
-        client_manager=Fedmeta_client_manager(valid_client=len(val_clients)),
+        client_manager=Fedmeta_client_manager(valid_client=len(valloaders['train'])),
         strategy=strategy,
     )
 

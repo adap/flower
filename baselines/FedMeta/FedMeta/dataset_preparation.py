@@ -11,6 +11,8 @@ import os
 from typing import List, Optional, Tuple, Dict, DefaultDict
 from collections import defaultdict
 import numpy as np
+import torch
+import random
 
 
 # def _read_dataset() -> Dict[List, Dict, List]:
@@ -35,6 +37,7 @@ def _read_dataset(
         users.extend(dataset['users'])
         data.update(dataset['user_data'])
 
+    users = list(sorted(data.keys()))
     return users, data
 
 
@@ -42,9 +45,8 @@ def support_query_split(
         data: DefaultDict,
         label: List,
         support_ratio: int,
-        seed: Optional[int] = 42,
 ):
-    np.random.seed(seed)
+    np.random.seed(42)
     random_index = np.random.permutation(len(label))
     slice_index = int(len(label) * support_ratio)
     train_index = random_index[:slice_index]
@@ -57,9 +59,8 @@ def split_train_validation_test_clients(
         clients: List,
         train_rate: Optional[float] = 0.8,
         val_rate: Optional[float] = 0.1,
-        seed: Optional[int] = 42
 ) -> Tuple[List[str], List[str], List[str]]:
-    np.random.seed(seed)
+    np.random.seed(42)
     train_rate = int(train_rate * len(clients))
     val_rate = int(val_rate * len(clients))
     test_rate = len(clients) - train_rate - val_rate
@@ -76,7 +77,6 @@ def split_train_validation_test_clients(
 def _partition_data(
         dir_path: str,
         support_ratio: Optional[float] = None,
-        seed: Optional[int] = 42,
 ) -> Tuple[Dict, Dict]:
 
     train_path = f'{dir_path}/train'
@@ -108,7 +108,7 @@ def _partition_data(
             print(f'now preprocessing user : {user}')
             all_x = np.asarray(train_data[user]['x'] + test_data[user]['x'])
             all_y = np.asarray(train_data[user]['y'] + test_data[user]['y'])
-            sup_x, qry_x, sup_y, qry_y = support_query_split(all_x, all_y, support_ratio, seed)
+            sup_x, qry_x, sup_y, qry_y = support_query_split(all_x, all_y, support_ratio)
 
             support_dataset['users'].append(user)
             support_dataset['user_data'][user] = {'x': sup_x, 'y': sup_y}

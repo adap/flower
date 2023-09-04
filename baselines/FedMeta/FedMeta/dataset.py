@@ -14,6 +14,11 @@ from torch.utils.data import DataLoader, Dataset
 from omegaconf import DictConfig
 from typing import Optional, Tuple
 from dataset_preparation import _partition_data, split_train_validation_test_clients
+import numpy as np
+from torch.utils.data import DataLoader
+import torchvision.transforms as transforms
+
+
 
 class FemnistDataset(Dataset):
     def __init__(self, dataset, transform):
@@ -34,7 +39,6 @@ class FemnistDataset(Dataset):
 
 def load_datasets(  # pylint: disable=too-many-arguments
     config: DictConfig,
-    seed: Optional[int] = 42,
 ) -> Tuple[DataLoader, DataLoader, DataLoader]:
     print(f"Dataset partitioning config: {config}")
 
@@ -53,7 +57,22 @@ def load_datasets(  # pylint: disable=too-many-arguments
         dataset[0]['users']
     )
 
-    return dataset, clients_list
+    trainloaders = {'train': [], 'test': []}
+    valloaders = {'train': [], 'test': []}
+    testloaders = {'train': [], 'test': []}
+
+    transform = transforms.Compose([transforms.ToTensor()])
+    for user in clients_list[0]:
+        trainloaders['train'].append(DataLoader(FemnistDataset(dataset[0]['user_data'][user], transform), batch_size=10, shuffle=True))
+        trainloaders['test'].append(DataLoader(FemnistDataset(dataset[1]['user_data'][user], transform)))
+    for user in clients_list[2]:
+        valloaders['train'].append(DataLoader(FemnistDataset(dataset[0]['user_data'][user], transform), batch_size=10, shuffle=True))
+        valloaders['test'].append(DataLoader(FemnistDataset(dataset[1]['user_data'][user], transform)))
+    for user in clients_list[1]:
+        testloaders['train'].append(DataLoader(FemnistDataset(dataset[0]['user_data'][user], transform), batch_size=10, shuffle=True))
+        testloaders['test'].append(DataLoader(FemnistDataset(dataset[1]['user_data'][user], transform)))
+
+    return trainloaders, valloaders, testloaders
 
 
 
