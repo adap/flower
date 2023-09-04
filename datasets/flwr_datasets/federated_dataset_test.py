@@ -110,6 +110,11 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
         with pytest.raises(ValueError):
             dataset_fds.load_partition(0, "non-existent-split")
 
+    def test_unsupported_dataset(self) -> None:  # pylint: disable=R0201
+        """Test creating FederatedDataset for unsupported dataset."""
+        with pytest.raises(ValueError):
+            FederatedDataset(dataset="food101", partitioners={"train": 100})
+
 
 if __name__ == "__main__":
     unittest.main()
