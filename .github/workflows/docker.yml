@@ -18,10 +18,10 @@ jobs:
     - uses: actions/checkout@v3
     - name: Run all tests
       env:
-          FLWR_VERSION: 1.4.0
+          FLWR_VERSION: 1.5.0
       run: ./test.sh
 
-  build-and-push:
+  build:
     name: Build Image
     runs-on: ubuntu-latest
     steps:
@@ -34,5 +34,5 @@ jobs:
     - name: Build the server image
       env:
           BUILD_TARGET: server
-          FLWR_VERSION: 1.4.0
+          FLWR_VERSION: 1.5.0
       run: ./build.sh
