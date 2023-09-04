@@ -22,10 +22,13 @@ BROWN='\033[0;33m'
 NC='\033[0m' # No Color
 
 # Define default values first
-FLWR_VERSION="${FLWR_VERSION:=1.4.0}"
+FLWR_VERSION="${FLWR_VERSION:=1.5.0}"
 
 echo -e "${BROWN}\nUsing:"
 echo -e "FLWR_VERSION: $FLWR_VERSION"
 echo -e "${NC}"
 
-docker push flwr/server:$TAG flwr/server:latest
+# docker push flwr/server:$FLWR_VERSION 
+# docker push flwr/server:latest
+
+docker push flwr/base:$FLWR_VERSION

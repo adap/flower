@@ -27,7 +27,7 @@ PYTHON_VERSION="${PYTHON_VERSION:=3.9.17}"
 PIP_VERSION="${PIP_VERSION:=23.2.1}"
 POETRY_VERSION="${POETRY_VERSION:=1.5.1}"
 SETUPTOOLS_VERSION="${SETUPTOOLS_VERSION:=68.1.2}"
-FLWR_VERSION="${FLWR_VERSION:=1.4.0}"
+FLWR_VERSION="${FLWR_VERSION:=1.5.0}"
 
 echo -e "${BROWN}\nUsing:"
 echo -e "BUILD_TARGET: $BUILD_TARGET"
@@ -44,6 +44,6 @@ docker build \
     --build-arg POETRY_VERSION=$POETRY_VERSION \
     --build-arg SETUPTOOLS_VERSION=$SETUPTOOLS_VERSION \
     --build-arg FLWR_VERSION=$FLWR_VERSION \
-    -t flwr/server:$FLWR_VERSION \
-    -t flwr/server:latest \
+    -t flwr/$BUILD_TARGET:$FLWR_VERSION \
+    -t flwr/$BUILD_TARGET:latest \
     .
