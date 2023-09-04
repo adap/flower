@@ -166,3 +166,21 @@ poetry.lock
 
 # iOS
 xcuserdata/
+
+# Android
+.gradle
+.idea
+local.properties
+app/src/main/assets
+/build
+*.iml
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/captures
+.externalNativeBuild
+.cxx
