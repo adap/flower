@@ -47,7 +47,10 @@ async def create_node(request: Request) -> Response:
     state: State = app.state.STATE_FACTORY.state()
     
     # Handle message
-    new_node_data = message_handler.create_node(create_node_request_proto, state)
+    new_node_data = message_handler.create_node(
+        request=create_node_request_proto, 
+        state=state
+    )
     # Return serialized ProtoBuf
     new_node_data_bytes = new_node_data.SerializeToString()
     return Response(
@@ -71,7 +74,10 @@ async def delete_node(request: Request) -> Response:
     state: State = app.state.STATE_FACTORY.state()
     
     # Handle message
-    delete_node_response = message_handler.delete_node(request=request, state=state)
+    delete_node_response = message_handler.delete_node(
+        request=delete_node_request_proto,
+        state=state
+    )
     # Return Serialize Protobuf
     delete_node_response_bytes = delete_node_response.SerializeToString()
     return Response(
