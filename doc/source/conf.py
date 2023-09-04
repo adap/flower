@@ -51,7 +51,7 @@ html_context['current_version']['url'] = current_version
 html_context['current_version']['full_name'] = "main" if current_version=="main" else f"{'' if local else 'Flower Framework '}{current_version}"
 
 html_context['versions'] = list()
-versions = [tag.name for tag in repo.tags if int(tag.name[1]) != 0]
+versions = [tag.name for tag in repo.tags if int(tag.name[1]) != 0 and int(tag.name.split('.')[1]) >= 5]
 versions.append('main')
 for version in versions:
     html_context['versions'].append({"name": version})
