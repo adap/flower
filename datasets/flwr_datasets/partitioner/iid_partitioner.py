@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""IID partitioner class that works with HuggingFace Dataset."""
+"""IID partitioner class that works with Hugging Face Datasets."""
 
 
 import datasets
