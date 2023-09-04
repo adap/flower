@@ -480,11 +480,16 @@ class SqliteState(State):
         self.query(query, {"node_id": node_id})
 
     def get_nodes(self, workload_id: str) -> Set[int]:
-        """Retrieve all currently stored node IDs as a set."""
+        """Retrieve all currently stored node IDs as a set.
+
+        Constraints
+        -----------
+        If the provided `workload_id` does not exist or has no matching nodes,
+        an empty `Set` MUST be returned.
+        """
         # Validate workload ID
         query = "SELECT COUNT(*) FROM workload WHERE workload_id = ?;"
         if self.query(query, (workload_id,))[0]["COUNT(*)"] == 0:
-            log(ERROR, "`workload_id` is invalid")
             return set()
 
         # Get nodes

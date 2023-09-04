@@ -195,9 +195,14 @@ class InMemoryState(State):
         self.node_ids.remove(node_id)
 
     def get_nodes(self, workload_id: str) -> Set[int]:
-        """Return all available client nodes."""
+        """Return all available client nodes.
+
+        Constraints
+        -----------
+        If the provided `workload_id` does not exist or has no matching nodes,
+        an empty `Set` MUST be returned.
+        """
         if workload_id not in self.workload_ids:
-            log(ERROR, "`workload_id` is invalid")
             return set()
         return self.node_ids
 
