@@ -50,7 +50,7 @@ pip install -r requierments_pytorch.txt # to install Flower and PyTorch
 
 1. **Installing Ubuntu server on your Raspberry Pi** is easy with the [Raspberry Pi Imager](https://www.raspberrypi.com/software/). Before starting ensure you have a uSD card attached to your PC/Laptop and that it has sufficient space (ideally larger than 16GB). Then:
    * Click on `CHOOSE OS` > `Other general-pupose OS` > `Ubuntu` > `Ubuntu Server 22.04.03 LTS (64-bit)`. Other versions of `Ubuntu Server` would likely work but try to use a `64-bit` one.
-   * Select the uSD you want to flash the OS onto. (this will be the uSD you insert in your Raspberry Pi)
+   * Select the uSD you want to flash the OS onto. (This will be the uSD you insert in your Raspberry Pi)
    * Click on the gear icon on the bottom right of the `Raspberry Pi Imager` window (the icon only appears after choosing your OS image). Here you can very conveniently set the username/password to access your device over ssh. You'll see I use as username `piubuntu` (you can choose something different) It's also the ideal place to select your WiFi network and add the password (this is of course not needed if you plan to connect the Raspberry Pi via ethernet). Click "save" when you are done.
    * Finally, click on `WRITE` to start flashing Ubuntu onto the uSD card.
 
@@ -66,8 +66,8 @@ pip install -r requierments_pytorch.txt # to install Flower and PyTorch
 3. **Preparations for your Flower experiments**
 
    * Install `pip`. In the terminal type: `sudo apt install python3-pip -y`
-   * Now clone this directory. You just need to exectue the `git clone` command shown at the top of this README.md in your device.
-   * Install Flower and your ML framework: We have prepare some conveniency installation scripts that will install everything you need. You are free to install other versions of these ML frameworks to suit your needs.
+   * Now clone this directory. You just need to execute the `git clone` command shown at the top of this README.md on your device.
+   * Install Flower and your ML framework: We have prepared some convenient installation scripts that will install everything you need. You are free to install other versions of these ML frameworks to suit your needs.
       * If you want your clients to use PyTorch: `pip3 install -r requirements_pytorch.txt`
       * If you want your clients to use TensorFlow: `pip3 install -r requirements_tf.txt`
 
@@ -84,20 +84,20 @@ pip install -r requierments_pytorch.txt # to install Flower and PyTorch
    sudo cp /etc/fstab /etc/fstab.bak
    echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
    ```
-   Please noted using swap as if it was RAM comes with a large penalty in terms of data movement.
+   Please note using swap as if it was RAM comes with a large penalty in terms of data movement.
 
 ## Setting up a Jetson Xavier-NX
 
 > These steps have been validated for a Jetson Xavier-NX Dev Kit. An identical setup is needed for a Jetson Nano once you get ssh access to it (i.e. jumping straight to point `4` below). For instructions on how to setup these devices please refer to the "getting started guides" for [Jetson Nano](https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#intro).
 
 1. **Install JetPack 5.1.2 on your Jetson device**
-   *  Download the JetPack 5.1.2 image from [NVIDIA-embedded](https://developer.nvidia.com/embedded/jetpack-sdk-512), note that you might need a NVIDIA developer account. You can find the download link under the `SD Card Image Method` section on NVIDIA's site. This image comes with Docker pre-installed as well as PyTorch+Torchvision and TensorFlow compiled with GPU support.
+   *  Download the JetPack 5.1.2 image from [NVIDIA-embedded](https://developer.nvidia.com/embedded/jetpack-sdk-512), note that you might need an NVIDIA developer account. You can find the download link under the `SD Card Image Method` section on NVIDIA's site. This image comes with Docker pre-installed as well as PyTorch+Torchvision and TensorFlow compiled with GPU support.
 
    * Extract the image (~18GB and named `sd-blob.img`) and flash it onto the uSD card using [balenaEtcher](https://www.balena.io/etcher/) (or equivalent).
 
-2. **Follow [the instructions](https://developer.nvidia.com/embedded/learn/get-started-jetson-xavier-nx-devkit) to setup the device.** The first time you boot your Xavier-NX you should plug it to a display in order to complete the installation process. After that, a display is no longer needed for this example but you could still use it instead of connecting to your device over ssh.
+2. **Follow [the instructions](https://developer.nvidia.com/embedded/learn/get-started-jetson-xavier-nx-devkit) to set up the device.** The first time you boot your Xavier-NX you should plug it into a display to complete the installation process. After that, a display is no longer needed for this example but you could still use it instead of connecting to your device over ssh.
 
-3. **Setup Docker**: Docker comes pre-installed with the Ubuntu image provided by NVIDIA. But for convinience we will create a new user group and add our user to it (with the idea of not having to use `sudo` for every command involving docker (e.g. `docker run`, `docker ps`, etc)). More details about what this entails can be found in the [Docker documentation](https://docs.docker.com/engine/install/linux-postinstall/). You can achieve this by doing:
+3. **Setup Docker**: Docker comes pre-installed with the Ubuntu image provided by NVIDIA. But for convenience, we will create a new user group and add our user to it (with the idea of not having to use `sudo` for every command involving docker (e.g. `docker run`, `docker ps`, etc)). More details about what this entails can be found in the [Docker documentation](https://docs.docker.com/engine/install/linux-postinstall/). You can achieve this by doing:
 
    ```bash
    sudo usermod -aG docker $USER
@@ -116,7 +116,7 @@ pip install -r requierments_pytorch.txt # to install Flower and PyTorch
 
    <img align="right" style="padding-top: 40px; padding-left: 15px" width="575" height="380" src="_static/tmux_jtop_view.gif">
 
-   - [jtop](https://github.com/rbonghi/jetson_stats),  to monitor CPU/GPU utilization, power consumption and, many more. You can read more about it in [this blogpost](https://jetsonhacks.com/2023/02/07/jtop-the-ultimate-tool-for-monitoring-nvidia-jetson-devices/).
+   - [jtop](https://github.com/rbonghi/jetson_stats),  to monitor CPU/GPU utilization, power consumption and, many more. You can read more about it in [this blog post](https://jetsonhacks.com/2023/02/07/jtop-the-ultimate-tool-for-monitoring-nvidia-jetson-devices/).
 
      ```bash
      # First we need to install pip3
@@ -126,9 +126,9 @@ pip install -r requierments_pytorch.txt # to install Flower and PyTorch
      # now reboot (or run `sudo systemctl restart jtop.service` and login again)
      sudo reboot
      ```
-      Now you have installed `jtop`, just launch it by running the `jtop` command on your terminal. An interactive pannel similar to the one shown on the right will show up. `jtop` allows to monitor and control a great deal of features of your Jetson device. Read more in the [jtop documentation](https://rnext.it/jetson_stats/jtop/jtop.html)
+      Now you have installed `jtop`, just launch it by running the `jtop` command on your terminal. An interactive panel similar to the one shown on the right will show up. `jtop` allows you to monitor and control many features of your Jetson device. Read more in the [jtop documentation](https://rnext.it/jetson_stats/jtop/jtop.html)
 
-   - [TMUX](https://github.com/tmux/tmux/wiki), a terminal multiplexer. As its name suggest, it allows you to device a single terminal window into multiple pannels. In this way you could (for example) use one pannel to show your terminal and another to show `jtop`. That's precisely what the visualisation on the right shows.
+   - [TMUX](https://github.com/tmux/tmux/wiki), a terminal multiplexer. As its name suggests, it allows you to device a single terminal window into multiple panels. In this way, you could (for example) use one panel to show your terminal and another to show `jtop`. That's precisely what the visualization on the right shows.
 
      ```bash
      # install tmux
@@ -137,14 +137,14 @@ pip install -r requierments_pytorch.txt # to install Flower and PyTorch
      echo set -g mouse on > ~/.tmux.conf
      ```
 
-5. **Power modes**. The Jetson devices can operate at different power modes, each making use of more or less CPU cores clocked at different freqencies. The right power mode might very much depend on the application and scenario. When power consumption is not a limiting factor, we could use the highest 15W mode using all 6 CPU cores. On the other hand, if the devices are battery-powered we might want to make use of a low power mode using 10W and 2 CPU cores. All the details regarding the different power modes of a Jetson Xavier-NX can be found [here](https://docs.nvidia.com/jetson/l4t/index.html#page/Tegra%2520Linux%2520Driver%2520Package%2520Development%2520Guide%2Fpower_management_jetson_xavier.html%23wwpID0E0NO0HA). For this demo we'll be setting the device to the high performance mode:
+5. **Power modes**. The Jetson devices can operate at different power modes, each making use of more or less CPU cores clocked at different frequencies. The right power mode might very much depend on the application and scenario. When power consumption is not a limiting factor, we could use the highest 15W mode using all 6 CPU cores. On the other hand, if the devices are battery-powered we might want to make use of a low-power mode using 10W and 2 CPU cores. All the details regarding the different power modes of a Jetson Xavier-NX can be found [here](https://docs.nvidia.com/jetson/l4t/index.html#page/Tegra%2520Linux%2520Driver%2520Package%2520Development%2520Guide%2Fpower_management_jetson_xavier.html%23wwpID0E0NO0HA). For this demo, we'll be setting the device to high-performance mode:
 
    ```bash
    sudo /usr/sbin/nvpmodel -m 2 # 15W with 6cpus @ 1.4GHz
    ```
-   Jetson Stats (that you launch via `jtop`) also allows you to see and set the power mode on your device. Naviage to the `CTRL` panel and click on one of the `NVM modes` available.
+   Jetson Stats (that you launch via `jtop`) also allows you to see and set the power mode on your device. Navigate to the `CTRL` panel and click on one of the `NVM modes` available.
 
-6. **Build base client image**. Before running a Flower client, we need to install `Flower` and other ML dependencies (i.e. Pytorch or Tensorflow). Instead of installing this manually via `pip3 install ...`, let's use the pre-built Docker images provided by NVIDIA. In this way, we can be confident of ML infrastructure is optimised for these devices. Build your Flower client image with:
+6. **Build base client image**. Before running a Flower client, we need to install `Flower` and other ML dependencies (i.e. Pytorch or Tensorflow). Instead of installing this manually via `pip3 install ...`, let's use the pre-built Docker images provided by NVIDIA. In this way, we can be confident that the ML infrastructure is optimized for these devices. Build your Flower client image with:
 
    ```bash
    # On your Jetson's terminal run
@@ -152,7 +152,7 @@ pip install -r requierments_pytorch.txt # to install Flower and PyTorch
    # Bear in mind this might take a few minutes since the base images need to be donwloaded (~7GB) and decompressed.
    ```
 
-   Once your script finished, verify your `flower_client` Docker image is present. If you type `docker images` you'll see something like the following:
+   Once your script is finished, verify your `flower_client` Docker image is present. If you type `docker images` you'll see something like the following:
    ```bash
     REPOSITORY      TAG       IMAGE ID       CREATED          SIZE
     flower_client   latest    87e935a8ee37   18 seconds ago   12.6GB
@@ -171,9 +171,9 @@ pip install -r requierments_pytorch.txt # to install Flower and PyTorch
 
 ## Running FL training with Flower
 
-For this demo we'll be using [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html), a popular dataset for image classification comprised of 10 classes (e.g. car, bird, airplane) and a total of 60K `32x32` RGB images. The training set contains 50K images. The server will automatically download the dataset should it not be found in `./data`. The clients do the same. The dataset is by default split into 50 partitions (each to be assigned to a different client). This can be controlled with the `NUM_CLIENTS` global variable in the clinet scripts. In this example, each device will play the role of a specific user (specified by the command line -- we'll show this later) and therefore only do local training with that portion of the data. For CIFAR-10, clients will be training a MobileNet-v2/3 model.
+For this demo, we'll be using [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html), a popular dataset for image classification comprised of 10 classes (e.g. car, bird, airplane) and a total of 60K `32x32` RGB images. The training set contains 50K images. The server will automatically download the dataset should it not be found in `./data`. The clients do the same. The dataset is by default split into 50 partitions (each to be assigned to a different client). This can be controlled with the `NUM_CLIENTS` global variable in the client scripts. In this example, each device will play the role of a specific user (specified by the command line -- we'll show this later) and therefore only do local training with that portion of the data. For CIFAR-10, clients will be training a MobileNet-v2/3 model.
 
-You can run this example using MNIST and a smaller CNN model by passing flag `--mnist`. This is useful if you are using devices with very limited amount of memory. The partioting of the dataset is done in the same way.
+You can run this example using MNIST and a smaller CNN model by passing flag `--mnist`. This is useful if you are using devices with a very limited amount of memory. The partitioning of the dataset is done in the same way.
 
 
 ### Start your Flower Server
@@ -189,9 +189,9 @@ python server.py --rounds 3 --min_num_clients 2 --min_sample_size 2
 
 ### Start the Flower Clients
 
-It's time to launch your clients!!! The first time you run this, the dataset will be downloaded. From the commands below, replace `<FRAMEWORK>` with either `pytorch` or `tf` to run the corresponding client Python file. In a FL setting, each client has its own unique dataset. In this example you can simulate this by manually assigning an id to a client (`cid)`) which should be an integer `[0, NUM_CLIENTS]`, where `NUM_CLIENTS` is the total number of partitions or clients that could participate at any point. This is defined at the top of the client files and defaults to 50. You can change this value to make each partition larger or smaller.
+It's time to launch your clients!!! The first time you run this, the dataset will be downloaded. From the commands below, replace `<FRAMEWORK>` with either `pytorch` or `tf` to run the corresponding client Python file. In a FL setting, each client has its unique dataset. In this example you can simulate this by manually assigning an ID to a client (`cid)`) which should be an integer `[0, NUM_CLIENTS]`, where `NUM_CLIENTS` is the total number of partitions or clients that could participate at any point. This is defined at the top of the client files and defaults to 50. You can change this value to make each partition larger or smaller.
 
-Launch your Flower clients as follow. Remember that if you are using a Jetson device, you need first to run your Docker container.
+Launch your Flower clients as follows. Remember that if you are using a Jetson device, you need first to run your Docker container.
 
 ```bash
 # Run the default example (CIFAR-10)
@@ -201,4 +201,4 @@ python3 client_<FRAMEWORK>.py --cid=<CLIENT_ID> --server_address=<SERVER_ADDRESS
 python3 client_<FRAMEWORK>.py --cid=<CLIENT_ID> --server_address=<SERVER_ADDRESS> --mnist
 ```
 
-Repeat the above for as many devices you have. Pass a different `CLIENT_ID` to each device. You can naturally run this example using different types of devices at the same time as long as they are training the same model. 
+Repeat the above for as many devices as you have. Pass a different `CLIENT_ID` to each device. You can naturally run this example using different types of devices at the same time as long as they are training the same model. 
