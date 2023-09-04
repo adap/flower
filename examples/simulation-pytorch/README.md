@@ -1,35 +1,82 @@
-# example_simulation_ray
+# Flower Simulation example using PyTorch
 
-This code splits CIFAR-10 dataset into `pool_size` partitions (user defined) and does a few rounds of CIFAR-10 training. In this example, we leverage [`Ray`](https://docs.ray.io/en/latest/index.html) to simulate Flower Clients participating in FL rounds in an resource-aware fashion. This is possible via the [`RayClientProxy`](https://github.com/adap/flower/blob/main/src/py/flwr/simulation/ray_transport/ray_client_proxy.py) which bridges a standard Flower server with standard Flower clients while excluding the gRPC communication protocol and the Client Manager in favour of Ray's scheduling and communication layers.
+This introductory example uses the simulation capabilities of Flower to simulate a large number of clients on either a single machine or a cluster of machines. Take a look at the [Documentation](https://flower.dev/docs/framework/how-to-run-simulations.html) for a deep dive on how Flower simulation works.
 
-## Requirements
+## Running the example (via Jupyter Notebook)
 
-- Flower 0.18.0
-- A recent version of PyTorch. This example has been tested with Pytorch 1.7.1, 1.8.2 (LTS) and 1.10.2.
-- A recent version of Ray. This example has been tested with Ray 1.4.1, 1.6 and 1.9.2.
+Run the example on Google Colab: [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/examples/simulation-pytorch/sim.ipynb)
 
-From a clean virtualenv or Conda environment with Python 3.7+, the following command will isntall all the dependencies needed:
+Alternatively, you can run `sim.ipynb` locally or in any other Jupyter environment.
 
-```bash
-$ pip install -r requirements.txt
+## Running the example
+
+Start by cloning the code example. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+
+```shell
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/simulation-pytorch . && rm -rf flower && cd simulation-pytorch
 ```
 
-## How to run
+This will create a new directory called `simulation-pytorch` containing the following files:
 
-This example:
+```
+-- README.md         <- Your're reading this right now
+-- sim.ipynb         <- Example notebook
+-- sim.py            <- Example code
+-- utils.py          <- auxiliary functions for this example
+-- pyproject.toml    <- Example dependencies
+-- requirements.txt  <- Example dependencies
+```
 
-1. Downloads CIFAR-10
-2. Partitions the dataset into N splits, where N is the total number of
-   clients. We refere to this as `pool_size`. The partition can be IID or non-IID
-3. Starts a Ray-based simulation where a % of clients are sample each round.
-   This example uses N=10, so 10 clients will be sampled each round.
-4. After the M rounds end, the global model is evaluated on the entire testset.
-   Also, the global model is evaluated on the valset partition residing in each
-   client. This is useful to get a sense on how well the global model can generalise
-   to each client's data.
+### Installing Dependencies
 
-The command below will assign each client 2 CPU threads. If your system does not have 2xN(=10) = 20 threads to run all 10 clients in parallel, they will be queued but eventually run. The server will wait until all N clients have completed their local training stage before aggregating the results. After that, a new round will begin.
+Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
+
+#### Poetry
+
+```shell
+poetry install
+poetry shell
+```
+
+Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
+
+```shell
+poetry run python3 -c "import flwr"
+```
+
+If you don't see any errors you're good to go!
+
+#### pip
+
+Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
+
+```shell
+pip install -r requirements.txt
+```
+
+### Run Federated Learning Example
 
 ```bash
-$ python main.py --num_client_cpus 2 # note that `num_client_cpus` should be <= the number of threads in your system.
+# You can run the example without activating your environemnt
+poetry run python3 sim.py
+
+# Or by first activating it
+poetry shell
+# and then run the example
+python sim.py
+# you can exit your environment by typing "exit"
 ```
+
+You can adjust the CPU/GPU resources you assign to each of your virtual clients. By default, your clients will only use 1xCPU core. For example:
+
+```bash
+# Will assign 2xCPUs to each client
+python sim.py --num_cpus=2
+
+# Will assign 2xCPUs and 20% of the GPU's VRAM to each client
+# This means that you can have 5 concurrent clients on each GPU
+# (assuming you have enough CPUs)
+python sim.py --num_cpus=2 --num_gpus=0.2
+```
+
+Take a look at the [Documentation](https://flower.dev/docs/framework/how-to-run-simulations.html) for more details on how you can customise your simulation.

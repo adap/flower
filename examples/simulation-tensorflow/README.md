@@ -1,10 +1,10 @@
-# EXPERIMENTAL Flower Simulation Example using TensorFlow/Keras
+# Flower Simulation example using TensorFlow/Keras
 
-This introductory example uses the simulation capabilities of Flower to simulate a large number of clients on either a single machine of a cluster of machines.
+This introductory example uses the simulation capabilities of Flower to simulate a large number of clients on either a single machine of a cluster of machines. Take a look at the [Documentation](https://flower.dev/docs/framework/how-to-run-simulations.html) for a deep dive on how Flower simulation works.
 
 ## Running the example (via Jupyter Notebook)
 
-Run the example on Google Colab: [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/examples/simulation_tensorflow/sim.ipynb)
+Run the example on Google Colab: [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/examples/simulation-tensorflow/sim.ipynb)
 
 Alternatively, you can run `sim.ipynb` locally or in any other Jupyter environment.
 
@@ -13,10 +13,10 @@ Alternatively, you can run `sim.ipynb` locally or in any other Jupyter environme
 Start by cloning the code example. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-simulation . && rm -rf flower && cd quickstart-simulation
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/simulation-tensorflow . && rm -rf flower && cd simulation-tensorflow
 ```
 
-This will create a new directory called `quickstart-simulation` containing the following files:
+This will create a new directory called `simulation-tensorflow` containing the following files:
 
 ```
 -- README.md       <- Your're reading this right now
@@ -28,7 +28,7 @@ This will create a new directory called `quickstart-simulation` containing the f
 
 ### Installing Dependencies
 
-Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
+Project dependencies (such as `tensorflow` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
 
 #### Poetry
 
@@ -56,5 +56,26 @@ pip install -r requirements.txt
 ### Run Federated Learning Example
 
 ```bash
+# You can run the example without activating your environemnt
 poetry run python3 sim.py
+
+# Or by first activating it
+poetry shell
+# and then run the example
+python sim.py
+# you can exit your environment by typing "exit"
 ```
+
+You can adjust the CPU/GPU resources you assign to each of your virtual clients. By default, your clients will only use 1xCPU core. For example:
+
+```bash
+# Will assign 2xCPUs to each client
+python sim.py --num_cpus=2
+
+# Will assign 2xCPUs and 20% of the GPU's VRAM to each client
+# This means that you can have 5 concurrent clients on each GPU
+# (assuming you have enough CPUs)
+python sim.py --num_cpus=2 --num_gpus=0.2
+```
+
+Take a look at the [Documentation](https://flower.dev/docs/framework/how-to-run-simulations.html) for more details on how you can customise your simulation.
