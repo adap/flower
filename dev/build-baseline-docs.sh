@@ -54,5 +54,5 @@ make html
 git restore source/
 rm source/*.md
 for image in "${images_arr[@]}"; do
-  rm image
+  rm $image
 done
