@@ -17,6 +17,7 @@ END
 rm -f "baselines/doc/source/*.md"
 
 cd $ROOT/baselines/
+
 for d in $(printf '%s\n' */ | sort -V); do
 
   # Select directories
