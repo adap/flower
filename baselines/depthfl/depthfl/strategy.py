@@ -1,0 +1,155 @@
+from typing import List, Tuple, Union, Optional, Dict
+from functools import reduce
+from logging import DEBUG, INFO, WARNING
+from hydra.utils import instantiate
+from omegaconf import DictConfig
+
+from flwr.common import (
+    NDArrays,
+    Parameters,
+    Scalar,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
+    Metrics,
+)
+
+from flwr.common.typing import FitRes
+from flwr.common.logger import log
+from flwr.server.client_proxy import ClientProxy
+from flwr.server.client_manager import ClientManager
+from flwr.server.strategy import FedAvg
+from depthfl import FitIns, FitRes
+
+import numpy as np
+import torch
+import torch.nn as nn
+
+
+def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
+    """Aggregation function for weighted average during evaluation.
+
+    Parameters
+    ----------
+    metrics : List[Tuple[int, Metrics]]
+        The list of metrics to aggregate.
+
+    Returns
+    -------
+    Metrics
+        The weighted average metric.
+    """
+    # Multiply accuracy of each client by number of examples used
+    accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
+    examples = [num_examples for num_examples, _ in metrics]
+
+    # Aggregate and return custom metric (weighted average)
+    print("here and nothing is breaking!!!")
+    return {"accuracy": int(sum(accuracies)) / int(sum(examples))}
+
+
+class FedDyn(FedAvg):
+    """Applying dynamic regularization in FedDyn paper"""
+    def __init__(self, cfg:DictConfig, net: nn.Module, *args, **kwargs):
+        self.cfg = cfg
+        self.h = [np.zeros(v.shape) for (k, v) in net.state_dict().items()]
+        self.prev_grads = [{k: torch.zeros(v.numel()) for (k, v) in net.named_parameters()}]*100
+        self.is_weight = []
+
+        # tagging real weights / biases
+        for k in net.state_dict().keys():
+            if 'weight' not in k and 'bias' not in k:
+                self.is_weight.append(False)
+            else:
+                self.is_weight.append(True)
+
+        super().__init__(*args, **kwargs)
+
+    def configure_fit(
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+        ) -> List[Tuple[ClientProxy, FitIns]]:
+        """Configure the next round of training."""
+        config = {}
+        if self.on_fit_config_fn is not None:
+            # Custom fit config function provided
+            config = self.on_fit_config_fn(server_round)
+    
+        # Sample clients
+        sample_size, min_num_clients = self.num_fit_clients(
+            client_manager.num_available()
+        )
+        clients = client_manager.sample(
+            num_clients=sample_size, min_num_clients=min_num_clients
+        )
+
+        # Return client/config pairs
+        return [(client, FitIns(parameters, self.prev_grads[int(client.cid)], config)) for client in clients]
+
+    def aggregate_fit(
+        self,
+        server_round: int,
+        results: List[Tuple[ClientProxy, FitRes]],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+        origin: NDArrays
+    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+        """Aggregate fit results using weighted average."""
+        if not results:
+            return None, {}
+        # Do not aggregate if there are failures and failures are not accepted
+        if not self.accept_failures and failures:
+            return None, {}
+        
+        for _, fit_res in results:
+            self.prev_grads[fit_res.cid] = fit_res.prev_grads
+
+        # Convert results
+        weights_results = [
+            (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
+            for _, fit_res in results
+        ]
+        parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results, origin, self.h, self.is_weight, self.cfg))
+
+        # Aggregate custom metrics if aggregation fn was provided
+        metrics_aggregated = {}
+        if self.fit_metrics_aggregation_fn:
+            fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
+            metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
+        elif server_round == 1:  # Only log this warning once
+            log(WARNING, "No fit_metrics_aggregation_fn provided")
+
+        return parameters_aggregated, metrics_aggregated
+
+ 
+
+def aggregate(results: List[Tuple[NDArrays, int]], origin: NDArrays, h:List, is_weight:List, cfg:DictConfig) -> NDArrays:
+
+    param_count = [0] * len(origin)
+    weights_sum = [np.zeros(v.shape) for v in origin]
+    
+    # summation & counting of parameters
+    for weight, _ in results:
+        for i, layer in enumerate(weight):
+            weights_sum[i] += layer
+            param_count[i] += 1
+
+    # update parameters
+    for i, weight in enumerate(weights_sum):
+
+        if param_count[i] > 0:
+            weight = weight / param_count[i]
+            # print(np.isscalar(weight))
+
+            # update h variable for FedDyn
+            h[i] = h[i] - cfg.fit_config.alpha * param_count[i] * (weight - origin[i]) / cfg.num_clients
+            
+            # applying h only for weights / biases
+            if is_weight[i] and cfg.fit_config.feddyn:
+                weights_sum[i] = weight - h[i] / cfg.fit_config.alpha
+            else:
+                weights_sum[i] = weight
+        
+        else:
+            weights_sum[i] = origin[i]
+        
+    return weights_sum
+
+

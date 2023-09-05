@@ -1,0 +1,3 @@
+- exclusive_learning=true
+- model_size=1
+- model.scale=false
