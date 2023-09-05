@@ -18,7 +18,12 @@
 import sys
 
 from flwr.common.constant import MISSING_EXTRA_REST
-from flwr.proto.fleet_pb2 import PullTaskInsRequest, PushTaskResRequest, CreateNodeRequest, DeleteNodeRequest
+from flwr.proto.fleet_pb2 import (
+    PullTaskInsRequest,
+    PushTaskResRequest,
+    CreateNodeRequest,
+    DeleteNodeRequest
+)
 from flwr.server.fleet.message_handler import message_handler
 from flwr.server.state import State
 
