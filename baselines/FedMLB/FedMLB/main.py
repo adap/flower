@@ -22,13 +22,14 @@ from FedMLB.FedMLBModel import FedMLBModel
 from FedMLB.FedAvgKDModel import FedAvgKDModel
 import FedMLB.models as fedmlb_models
 from FedMLB.utils import save_results_as_pickle
+from FedMLB.utils import get_gpu_memory, get_cpu_memory
 from FedMLB.models import create_resnet18
+from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
 
-gpus = tf.config.experimental.list_physical_devices('GPU')
-for gpu in gpus:
-    tf.config.experimental.set_memory_growth(
-        device=gpu, enable=True
-    )
+
+# Make TensorFlow logs less verbose
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+enable_tf_gpu_growth()
 
 TEST_BATCH_SIZE = 256
 
@@ -90,9 +91,17 @@ def main(cfg: DictConfig) -> None:
             model.set_weights(parameters)  # Update model with the latest parameters
             loss, accuracy = model.evaluate(test_ds)
 
+            # logging metrics on memory usage
+            gpu_free_memory = get_gpu_memory()
+            cpu_free_memory = get_cpu_memory()
+
             with global_summary_writer.as_default():
                 tf.summary.scalar('loss', loss, step=server_round)
                 tf.summary.scalar('accuracy', accuracy, step=server_round)
+
+                tf.summary.scalar('cpu_free_mem', cpu_free_memory, step=server_round)
+                tf.summary.scalar('gpu_free_mem', gpu_free_memory, step=server_round)
+
 
             return loss, {"accuracy": accuracy}
 
@@ -221,10 +230,14 @@ def main(cfg: DictConfig) -> None:
         client_fn=client_fn,
         clients_ids=range(0, cfg.total_clients),
         num_clients=cfg.total_clients,
-        client_resources={"num_cpus": cfg.client_resources.num_cpus, "num_gpus": cfg.client_resources.amamnum_gpus},
+        client_resources={"num_cpus": cfg.client_resources.num_cpus, "num_gpus": cfg.client_resources.num_gpus},
         config=flwr.server.ServerConfig(num_rounds=cfg.num_rounds),
         ray_init_args=ray_init_args,
-        strategy=strategy
+        strategy=strategy,
+        actor_kwargs={
+            "on_actor_init_fn": enable_tf_gpu_growth  # Enable GPU growth upon actor init
+            # does nothing if `num_gpus` in client_resources is 0.0
+            },
     )
 
     # Experiment completed. Now we save the results and
@@ -243,3 +256,5 @@ def main(cfg: DictConfig) -> None:
 
 if __name__ == "__main__":
     main()
+
+# Hi Javier, sorry to bother you again. I'm trying to investigate the issue with gpu. However, from the moment I updated the requirements to the last flwr 1.5 i'm getting this error, with basically any client_config at the beginning of the simulation. I'm a bit confused about it, cpu-only configs (e.g., num_cpus =1.0 num_gpus=0.0) that were working before now incur this error. Maybe Im missing something trivial.

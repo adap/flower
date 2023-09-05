@@ -11,6 +11,7 @@ from flwr.server.history import History
 
 import subprocess as sp
 import os
+import psutil
 
 def plot_metric_from_history(
     hist: History,
@@ -118,5 +119,19 @@ def save_results_as_pickle(
 def get_gpu_memory():
     command = "nvidia-smi --query-gpu=memory.free --format=csv"
     memory_free_info = sp.check_output(command.split()).decode('ascii').split('\n')[:-1][1:]
-    memory_free_values = [int(x.split()[0]) for i, x in enumerate(memory_free_info)]
+    memory_free_values = [int(x.split()[0]) for i, x in enumerate(memory_free_info)][0]
+    memory_percent = (memory_free_values / 24564) *100
+    print(f"[Memory monitoring] Free memory GPU {memory_free_values} MB, {memory_percent} %.")
+    return memory_free_values
+
+
+def get_cpu_memory():
+    # you can convert that object to a dictionary
+    memory_info = psutil.virtual_memory()
+    # you can have the percentage of used RAM
+    memory_percent = 100.0-memory_info.percent
+    memory_free_values = memory_info.available / (1024 * 1024) # in MB
+
+    print(f"[Memory monitoring] Free memory CPU {memory_free_values} MB, {memory_percent} %.")
+    # you can calculate percentage of available memory
     return memory_free_values

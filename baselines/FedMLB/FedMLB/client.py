@@ -4,31 +4,10 @@ Please overwrite `flwr.client.NumPyClient` or `flwr.client.Client` and create a 
 to instantiate your client.
 """
 
-# os.environ['CUDA_VISIBLE_DEVICES'] = "0"
-
 import flwr as fl
 from typing import Dict, Tuple
 from flwr.common import NDArrays, Scalar
 import tensorflow as tf
-# import FedMLB.utils as utils
-
-gpus = tf.config.experimental.list_physical_devices('GPU')
-for gpu in gpus:
-    tf.config.experimental.set_memory_growth(
-        device=gpu, enable=True
-    )
-
-# gpu_free_memory = utils.get_gpu_memory()
-# i=0
-# for gpu in gpus:
-#    print(f"GPU [{i}] free memory {gpu_free_memory[i]}")
-   # if gpu_free_memory[i] > 0:
-
-
-
-
-# warnings.filterwarnings("ignore")
-
 
 class TFClient(fl.client.NumPyClient):
     def __init__(
