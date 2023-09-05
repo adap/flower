@@ -32,5 +32,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
         run: |
           cd ./dist
-          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./ s3://artifact.flower.dev/${{ github.event.number }}/${{ github.sha }}
+          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./*.tar.gz s3://artifact.flower.dev/py/${{ github.event.number }}/${{ github.sha }}
+          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./*.whl s3://artifact.flower.dev/py/${{ github.event.number }}/${{ github.sha }}
 
