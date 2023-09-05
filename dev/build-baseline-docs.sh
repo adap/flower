@@ -18,6 +18,8 @@ rm -f "baselines/doc/source/*.md"
 
 cd $ROOT/baselines/
 
+images_arr=()
+
 for d in $(printf '%s\n' */ | sort -V); do
 
   # Select directories
@@ -34,6 +36,8 @@ for d in $(printf '%s\n' */ | sort -V); do
 
     mkdir -p $ROOT/baselines/doc/source/$image_dir && cp $baseline/$image_path $_
 
+    images_arr+=("$ROOT/baselines/doc/source/$image_path")
+
     if [[ $(grep -L "$baseline" $INDEX) ]]; then
 
       # For each baseline, insert the name of the baseline into the index file
@@ -46,4 +50,9 @@ done
 cd $ROOT/baselines/doc
 make html
 
+# Restore everything back to the initial state
 git restore source/
+rm source/*.md
+for image in "${images_arr[@]}"; do
+  rm image
+done
