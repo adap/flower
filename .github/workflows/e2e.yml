@@ -13,6 +13,7 @@ env:
 
 jobs:
   wheel:
+    name: Wheel
     uses: ./.github/workflows/wheel.yml  # use the callable tests job to run tests
   frameworks:
     needs: [wheel]
@@ -101,6 +102,7 @@ jobs:
         run: ./../test_driver.sh
 
   strategies:
+    needs: [wheel]
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     strategy:
