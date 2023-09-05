@@ -102,8 +102,14 @@ public class MLParameter {
                             continue
                         }
                         switch neuralNetworkLayer.layer! {
-                        case .convolution: model!.neuralNetwork.layers[indexB].convolution.weights.floatValue = layerWrappers[index].weights
-                        case .innerProduct: model!.neuralNetwork.layers[indexB].innerProduct.weights.floatValue = layerWrappers[index].weights
+                        case .convolution:
+                            print(model!.neuralNetwork.layers[indexB].convolution.weights.floatValue.prefix(10))
+                            model!.neuralNetwork.layers[indexB].convolution.weights.floatValue = layerWrappers[index].weights
+                            print(model!.neuralNetwork.layers[indexB].convolution.weights.floatValue.prefix(10))
+                        case .innerProduct:
+                            print(model!.neuralNetwork.layers[indexB].innerProduct.weights.floatValue.prefix(10))
+                            model!.neuralNetwork.layers[indexB].innerProduct.weights.floatValue = layerWrappers[index].weights
+                            print(model!.neuralNetwork.layers[indexB].innerProduct.weights.floatValue.prefix(10))
                         default:
                             log.info("unexpected layer \(neuralNetworkLayer.name)")
                             continue
@@ -149,20 +155,22 @@ public class MLParameter {
                 if layer.name != neuralNetworkLayer.name { continue }
                 switch neuralNetworkLayer.layer! {
                 case .convolution:
-                    print(neuralNetworkLayer.convolution.weights.floatValue.prefix(10))
+                    print(model?.neuralNetwork.layers[indexA].convolution.weights.floatValue.prefix(10))
                     let convolution = neuralNetworkLayer.convolution
                     //shape definition = [outputChannels, kernelChannels, kernelHeight, kernelWidth]
                     let upperLower = Float(6.0 / Float(Int16(convolution.outputChannels) + Int16(convolution.kernelChannels) + Int16(convolution.kernelSize[0]) + Int16(convolution.kernelSize[1]))).squareRoot()
                     let initialise = (0..<(neuralNetworkLayer.convolution.weights.floatValue.count)).map { _ in Float.random(in: -upperLower...upperLower) }
                     model?.neuralNetwork.layers[indexA].convolution.weights.floatValue = initialise
+                    print(model?.neuralNetwork.layers[indexA].convolution.weights.floatValue.prefix(10))
                     layerWrappers[indexB].weights = initialise
                 case .innerProduct:
-                    print(neuralNetworkLayer.innerProduct.weights.floatValue.prefix(10))
+                    print(model?.neuralNetwork.layers[indexA].innerProduct.weights.floatValue.prefix(10))
                     let innerProduct = neuralNetworkLayer.innerProduct
                     //shape definition = [C_out, C_in].
                     let upperLower = Float(6.0 / Float(Int16(innerProduct.outputChannels) + Int16(innerProduct.inputChannels))).squareRoot()
                     let initialise = (0..<(neuralNetworkLayer.innerProduct.weights.floatValue.count)).map { _ in Float.random(in: -upperLower...upperLower) }
                     model?.neuralNetwork.layers[indexA].innerProduct.weights.floatValue = initialise
+                    print(model?.neuralNetwork.layers[indexA].innerProduct.weights.floatValue.prefix(10))
                     layerWrappers[indexB].weights = initialise
                 default:
                     log.info("unexpected layer \(neuralNetworkLayer.name)")
