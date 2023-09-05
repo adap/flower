@@ -16,19 +16,23 @@
 
 
 import sys
+import threading
+import time
 from logging import INFO
-from typing import Optional
+from typing import Dict, Optional
 
 from flwr.common import EventType, event
 from flwr.common.address import parse_address
 from flwr.common.logger import log
+from flwr.proto import driver_pb2
 from flwr.server.app import ServerConfig, init_defaults, run_fl
+from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.server import Server
 from flwr.server.strategy import Strategy
 
 from .driver import Driver
-from .driver_client_manager import DriverClientManager
+from .driver_client_proxy import DriverClientProxy
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
 
@@ -40,13 +44,13 @@ methods.
 """
 
 
-def start_driver(  # pylint: disable=too-many-arguments
+def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     *,
     server_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
     server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,
     strategy: Optional[Strategy] = None,
-    client_manager: Optional[DriverClientManager] = None,
+    client_manager: Optional[ClientManager] = None,
     certificates: Optional[bytes] = None,
 ) -> History:
     """Start a Flower Driver API server.
@@ -107,12 +111,9 @@ def start_driver(  # pylint: disable=too-many-arguments
     host, port, is_v6 = parsed_address
     address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
-    # Create the Driver and DriverClientManager if None is provided
-    if client_manager is None:
-        driver = Driver(driver_service_address=address, certificates=certificates)
-        driver.connect()
-
-        client_manager = DriverClientManager(driver=driver)
+    # Create the Driver
+    driver = Driver(driver_service_address=address, certificates=certificates)
+    driver.connect()
 
     # Initialize the Driver API server and config
     initialized_server, initialized_config = init_defaults(
@@ -127,6 +128,14 @@ def start_driver(  # pylint: disable=too-many-arguments
         initialized_config,
     )
 
+    # Start the thread updating nodes
+    thread = threading.Thread(
+        target=_update_nodes,
+        args=(driver, initialized_server.client_manager()),
+        daemon=True,
+    )
+    thread.start()
+
     # Start training
     hist = run_fl(
         server=initialized_server,
@@ -134,8 +143,48 @@ def start_driver(  # pylint: disable=too-many-arguments
     )
 
     # Stop the Driver API server
-    client_manager.driver.disconnect()
+    driver.disconnect()
 
     event(EventType.START_SERVER_LEAVE)
 
     return hist
+
+
+def _update_nodes(driver: Driver, client_manager: ClientManager) -> None:
+    """Update the nodes list in the client manager.
+
+    This function periodically communicates with the associated driver to get all
+    node_ids. Each node_id is then converted into a `DriverClientProxy` instance
+    and stored in the `registered_nodes` dictionary with node_id as key.
+
+    New nodes will be added to the ClientManager via `client_manager.register()`,
+    and dead nodes will be removed from the ClientManager via
+    `client_manager.unregister()`.
+    """
+    registered_nodes: Dict[int, DriverClientProxy] = {}
+    # Request for workload_id
+    workload_id = driver.create_workload(driver_pb2.CreateWorkloadRequest()).workload_id
+
+    # Loop until the driver is disconnected
+    while driver.stub is not None:
+        get_nodes_res = driver.get_nodes(
+            req=driver_pb2.GetNodesRequest(workload_id=workload_id)
+        )
+        all_node_ids = set(get_nodes_res.node_ids)
+        new_nodes = all_node_ids.difference(registered_nodes)
+        # Register new nodes
+        for node_id in new_nodes:
+            client_proxy = DriverClientProxy(
+                node_id=node_id,
+                driver=driver,
+                anonymous=False,
+                workload_id=workload_id,
+            )
+            client_manager.register(client_proxy)
+        # Unregister dead nodes
+        dead_nodes = set(registered_nodes).difference(all_node_ids)
+        for node_id in dead_nodes:
+            client_proxy = registered_nodes[node_id]
+            client_manager.unregister(client_proxy)
+        # Sleep for 3 seconds
+        time.sleep(3)
