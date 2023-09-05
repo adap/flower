@@ -1,25 +1,16 @@
 name: E2E
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_run:
+    workflows: [Wheel]
+    types:
+      - completed
 
 env:
   FLWR_TELEMETRY_ENABLED: 0
-  AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
 jobs:
-  wheel:
-    name: Wheel
-    uses: ./.github/workflows/wheel.yml  # use the callable tests job to run tests
   frameworks:
-    needs: [wheel]
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     # Using approach described here:
@@ -105,7 +96,6 @@ jobs:
         run: ./../test_driver.sh
 
   strategies:
-    needs: [wheel]
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     strategy:
