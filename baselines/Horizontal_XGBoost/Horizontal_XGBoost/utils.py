@@ -10,6 +10,19 @@ from omegaconf import DictConfig, OmegaConf
 from hydra.utils import instantiate
 
 from dataset import load_single_dataset
+from xgboost import XGBClassifier, XGBRegressor
+from typing import Any, Dict, List, Optional, Tuple, Union
+from flwr.common import NDArray, NDArrays
+
+
+dataset_tasks={
+        "a9a":"BINARY",
+        "cod-rna":"BINARY",
+        "ijcnn1":"BINARY",
+        "abalone":"REG",
+        "cpusmall":"REG",
+        "space_ga":"REG"
+    }
 
 def evaluate(task_type,y,preds):
     if task_type.upper() == "BINARY":
@@ -18,27 +31,24 @@ def evaluate(task_type,y,preds):
         result = mean_squared_error(y, preds)
     return result
 
+def fit_XGBoost(
+    config: DictConfig, task_type:str, X_train: NDArray,y_train: NDArray, n_estimators: int
+) -> Union[XGBClassifier, XGBRegressor]:
+    if task_type.upper() == "REG":
+        tree = instantiate(config.XGBoost.regressor,n_estimators=n_estimators)
+    elif task_type.upper() == "BINARY":
+        tree = instantiate(config.XGBoost.classifier,n_estimators=n_estimators)
+    tree.fit(X_train, y_train)
+    return tree
 def run_single_exp(config,dataset_name,task_type):
     X_train,y_train,X_test,y_test=load_single_dataset(task_type,dataset_name,train_ratio=config.dataset.train_ratio)
-    if task_type.upper() == "REG":
-        tree = instantiate(config.XGBoost.regressor)
-    elif task_type.upper() == "BINARY":
-        tree = instantiate(config.XGBoost.classifier)
-    tree.fit(X_train, y_train)
+    tree=fit_XGBoost(config,task_type,X_train,y_train,config.n_estimators)
     preds_train = tree.predict(X_train)
     result_train=evaluate(task_type,y_train,preds_train)
     preds_test = tree.predict(X_test)
     result_test=evaluate(task_type,y_test,preds_test)
     return result_train,result_test
 def run_centralized(config,dataset_name="all",task_type=None):
-    dataset_tasks={
-        "a9a":"BINARY",
-        "cod-rna":"BINARY",
-        "ijcnn1":"BINARY",
-        "abalone":"REG",
-        "cpusmall":"REG",
-        "space_ga":"REG"
-    }
     if dataset_name=="all":
         for dataset in dataset_tasks:
             result_train,result_test=run_single_exp(config,dataset,dataset_tasks[dataset])
