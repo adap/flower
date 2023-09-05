@@ -98,7 +98,7 @@ def test(net: nn.Module,
     correct, total, loss = 0, 0, 0.0
     net.eval()
     with torch.no_grad():
-        for images, labels in tqdm(test_loader, "Testing ..."):
+        for images, labels in test_loader:
             images, labels = images.to(device), labels.to(device)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
@@ -139,7 +139,7 @@ def train(  # pylint: disable=too-many-arguments
                                 weight_decay=hyperparams["weight_decay"]
                                 )
     net.train()
-    for _ in tqdm(epochs, desc="Local Training ..."):
+    for _ in tqdm(range(epochs), desc="Local Training ..."):
         net = _train_one_epoch(net=net,
                                trainloader=trainloader,
                                device=device,
