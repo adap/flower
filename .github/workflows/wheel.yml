@@ -1,0 +1,36 @@
+name: Wheel
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  FLWR_TELEMETRY_ENABLED: 0
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    name: Build
+    steps:
+      - uses: actions/checkout@v3
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Install dependencies (mandatory only)
+        run: python -m poetry install
+      - name: Build wheel
+        run: ./dev/build.sh
+      - name: Test wheel
+        run: ./dev/test-wheel.sh
+      - name: Build and deploy docs
+        env:
+          AWS_DEFAULT_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
+        run: |
+          cd ./dist
+          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./ s3://artifact.flower.dev/${{ github.event.number }}/${{ github.sha }}
+
