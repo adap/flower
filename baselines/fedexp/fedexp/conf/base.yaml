@@ -2,7 +2,7 @@
 seed : 0
 
 num_clients: 100
-num_rounds: 3
+num_rounds: 500
 clients_per_round: 5
 num_epochs: 20
 batch_size: 50
