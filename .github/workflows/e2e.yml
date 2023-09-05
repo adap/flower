@@ -85,6 +85,8 @@ jobs:
           python-version: 3.8
       - name: Install dependencies
         run: python -m poetry install
+      - name: Install Flower wheel from artifact store
+        run: python -m pip install https://artifact.flower.dev/py/${{ github.event.number }}/${{ github.sha }}
       - name: Download dataset
         if: ${{ matrix.dataset }}
         run: python -c "${{ matrix.dataset }}"
@@ -115,6 +117,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m poetry install
+      - name: Install Flower wheel from artifact store
+        run: python -m pip install https://artifact.flower.dev/py/${{ github.event.number }}/${{ github.sha }}
       - name: Cache Datasets
         uses: actions/cache@v2
         with:
