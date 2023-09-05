@@ -1,12 +1,5 @@
 name: Wheel
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+on: [workflow_call]  # allow this workflow to be called from other workflows
 
 env:
   FLWR_TELEMETRY_ENABLED: 0

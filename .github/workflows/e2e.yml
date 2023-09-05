@@ -12,7 +12,10 @@ env:
   FLWR_TELEMETRY_ENABLED: 0
 
 jobs:
+  wheel:
+    uses: ./.github/workflows/wheel.yml  # use the callable tests job to run tests
   frameworks:
+    needs: [wheel]
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     # Using approach described here:
