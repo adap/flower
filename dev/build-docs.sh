@@ -8,8 +8,7 @@ cd doc
 ./build-versioned-docs.sh
 
 cd $ROOT
-cd baselines/doc
-make html
+./dev/build-baseline-docs.sh
 
 cd $ROOT
 ./dev/update-examples.sh
