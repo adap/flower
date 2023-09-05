@@ -8,6 +8,11 @@
 import Foundation
 import CoreML
 import os
+import flwr
+
+typealias Model = CoreML_Specification_Model
+typealias NeuralNetwork = CoreML_Specification_NeuralNetwork
+typealias NeuralNetworkLayer = CoreML_Specification_NeuralNetworkLayer
 
 /// Container for train and test dataset.
 public struct MLDataLoader {
@@ -47,6 +52,10 @@ public class MLParameter {
     private var parameterConverter = ParameterConverter.shared
     
     var layerWrappers: [MLLayerWrapper]
+    var model: Model?
+    let modelUrl: URL
+    let compiledModelUrl: URL
+    
     private let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? "flwr.Flower",
                                     category: String(describing: MLParameter.self))
     
@@ -54,8 +63,12 @@ public class MLParameter {
     ///
     /// - Parameters:
     ///   - layerWrappers: Information about the layer provided with primitive data types.
-    public init(layerWrappers: [MLLayerWrapper]) {
+    public init(layerWrappers: [MLLayerWrapper], modelUrl: URL, compiledModelUrl: URL) {
         self.layerWrappers = layerWrappers
+        self.modelUrl = modelUrl
+        self.compiledModelUrl = compiledModelUrl
+        self.model = try? Model(serializedData: try Data(contentsOf: modelUrl))
+        print(self.model != nil)
     }
     
     /// Converts the Parameters structure to MLModelConfiguration to interface with CoreML.
@@ -81,19 +94,26 @@ public class MLParameter {
                 
                 layerWrappers[index].weights = weightsArray
                 if layerWrappers[index].isUpdatable {
-                    if let weightsMultiArray = parameterConverter.dataToMultiArray(data: data) {
-                        let weightsShape = weightsMultiArray.shape.map { Int16(truncating: $0) }
-                        guard weightsShape == layerWrappers[index].shape else {
-                            log.info("shape not the same")
+                    guard model?.neuralNetwork.layers != nil else {
+                        continue
+                    }
+                    for (indexB, neuralNetworkLayer) in model!.neuralNetwork.layers.enumerated() {
+                        guard layerWrappers[index].name == neuralNetworkLayer.name else {
                             continue
                         }
-                        let paramKey = MLParameterKey.weights.scoped(to: layerWrappers[index].name)
-                        config.parameters?[paramKey] = weightsMultiArray
+                        switch neuralNetworkLayer.layer! {
+                        case .convolution: model!.neuralNetwork.layers[indexB].convolution.weights.floatValue = layerWrappers[index].weights
+                        case .innerProduct: model!.neuralNetwork.layers[indexB].innerProduct.weights.floatValue = layerWrappers[index].weights
+                        default:
+                            log.info("unexpected layer \(neuralNetworkLayer.name)")
+                            continue
+                        }
                     }
                 }
             }
         }
         
+        exportModel()
         return config
     }
     
@@ -106,6 +126,51 @@ public class MLParameter {
             log.info("dataArray size != layerWrappers size")
         }
         return Parameters(tensors: dataArray, tensorType: "ndarray")
+    }
+    
+    private func exportModel()  {
+        let modelFileName = modelUrl.deletingPathExtension().lastPathComponent
+        let fileManager = FileManager.default
+        let tempModelUrl = appDirectory.appendingPathComponent("temp\(modelFileName).mlmodel")
+        try? model?.serializedData().write(to: tempModelUrl)
+        print(tempModelUrl)
+        if let compiledTempModelUrl = try? MLModel.compileModel(at: tempModelUrl) {
+            _ = try? fileManager.replaceItemAt(compiledModelUrl, withItemAt: compiledTempModelUrl)
+        }
+    }
+    
+    func initializeParameters() {
+        guard ((model?.neuralNetwork.layers) != nil) else {
+            print("hello")
+            return
+        }
+        for (indexA, neuralNetworkLayer) in model!.neuralNetwork.layers.enumerated() {
+            for (indexB, layer) in layerWrappers.enumerated() {
+                if layer.name != neuralNetworkLayer.name { continue }
+                switch neuralNetworkLayer.layer! {
+                case .convolution:
+                    print(neuralNetworkLayer.convolution.weights.floatValue.prefix(10))
+                    let convolution = neuralNetworkLayer.convolution
+                    //shape definition = [outputChannels, kernelChannels, kernelHeight, kernelWidth]
+                    let upperLower = Float(6.0 / Float(Int16(convolution.outputChannels) + Int16(convolution.kernelChannels) + Int16(convolution.kernelSize[0]) + Int16(convolution.kernelSize[1]))).squareRoot()
+                    let initialise = (0..<(neuralNetworkLayer.convolution.weights.floatValue.count)).map { _ in Float.random(in: -upperLower...upperLower) }
+                    model?.neuralNetwork.layers[indexA].convolution.weights.floatValue = initialise
+                    layerWrappers[indexB].weights = initialise
+                case .innerProduct:
+                    print(neuralNetworkLayer.innerProduct.weights.floatValue.prefix(10))
+                    let innerProduct = neuralNetworkLayer.innerProduct
+                    //shape definition = [C_out, C_in].
+                    let upperLower = Float(6.0 / Float(Int16(innerProduct.outputChannels) + Int16(innerProduct.inputChannels))).squareRoot()
+                    let initialise = (0..<(neuralNetworkLayer.innerProduct.weights.floatValue.count)).map { _ in Float.random(in: -upperLower...upperLower) }
+                    model?.neuralNetwork.layers[indexA].innerProduct.weights.floatValue = initialise
+                    layerWrappers[indexB].weights = initialise
+                default:
+                    log.info("unexpected layer \(neuralNetworkLayer.name)")
+                    continue
+                }
+            }
+        }
+        exportModel()
     }
     
     /// Updates the layers given the CoreML update context

@@ -11,7 +11,9 @@
 		19764EED297D3ABE009F3E5D /* BenchmarkModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19764EEC297D3ABE009F3E5D /* BenchmarkModel.swift */; };
 		19764EEF297D3AC9009F3E5D /* BenchmarkSuite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19764EEE297D3AC9009F3E5D /* BenchmarkSuite.swift */; };
 		21075DC929788ED400311461 /* FLiOSModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21075DC829788ED400311461 /* FLiOSModel.swift */; };
-		216A90382A0CBE5400E0B532 /* flwr in Frameworks */ = {isa = PBXBuildFile; productRef = 216A90372A0CBE5400E0B532 /* flwr */; };
+		210BBB812AA5D10C00B283AC /* MLFlwrClientModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210BBB802AA5D10C00B283AC /* MLFlwrClientModel.swift */; };
+		210BBB822AA5D10C00B283AC /* MLFlwrClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210BBB7F2AA5D10C00B283AC /* MLFlwrClient.swift */; };
+		210BBB842AA712E800B283AC /* Parameter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210BBB832AA712E800B283AC /* Parameter.swift */; };
 		21A77AC32865B22B0062EBD8 /* Array+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A6F2865B22A0062EBD8 /* Array+Extensions.swift */; };
 		21A77AC42865B22B0062EBD8 /* Math.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A702865B22A0062EBD8 /* Math.swift */; };
 		21A77AC52865B22B0062EBD8 /* UIImage+CVPixelBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A712865B22A0062EBD8 /* UIImage+CVPixelBuffer.swift */; };
@@ -127,6 +129,10 @@
 		19764EEC297D3ABE009F3E5D /* BenchmarkModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkModel.swift; sourceTree = "<group>"; };
 		19764EEE297D3AC9009F3E5D /* BenchmarkSuite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkSuite.swift; sourceTree = "<group>"; };
 		21075DC829788ED400311461 /* FLiOSModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLiOSModel.swift; sourceTree = "<group>"; };
+		210BBB7E2AA5D04500B283AC /* flwr */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = flwr; path = ../../src/swift/flwr; sourceTree = "<group>"; };
+		210BBB7F2AA5D10C00B283AC /* MLFlwrClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLFlwrClient.swift; sourceTree = "<group>"; };
+		210BBB802AA5D10C00B283AC /* MLFlwrClientModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLFlwrClientModel.swift; sourceTree = "<group>"; };
+		210BBB832AA712E800B283AC /* Parameter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parameter.swift; sourceTree = "<group>"; };
 		21A77A6F2865B22A0062EBD8 /* Array+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Array+Extensions.swift"; sourceTree = "<group>"; };
 		21A77A702865B22A0062EBD8 /* Math.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Math.swift; sourceTree = "<group>"; };
 		21A77A712865B22A0062EBD8 /* UIImage+CVPixelBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIImage+CVPixelBuffer.swift"; sourceTree = "<group>"; };
@@ -229,7 +235,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				50B5A2C6294C848000B0ABC6 /* flwr in Frameworks */,
-				216A90382A0CBE5400E0B532 /* flwr in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -244,6 +249,14 @@
 				19764EEE297D3AC9009F3E5D /* BenchmarkSuite.swift */,
 			);
 			path = Benchmark;
+			sourceTree = "<group>";
+		};
+		210BBB7D2AA5D04500B283AC /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				210BBB7E2AA5D04500B283AC /* flwr */,
+			);
+			name = Packages;
 			sourceTree = "<group>";
 		};
 		21A77A6E2865B22A0062EBD8 /* CoreMLHelpers */ = {
@@ -346,6 +359,9 @@
 		21A77B162865B23D0062EBD8 /* CoreMLClient */ = {
 			isa = PBXGroup;
 			children = (
+				210BBB832AA712E800B283AC /* Parameter.swift */,
+				210BBB7F2AA5D10C00B283AC /* MLFlwrClient.swift */,
+				210BBB802AA5D10C00B283AC /* MLFlwrClientModel.swift */,
 				50CDF0E0299D807300AEBD55 /* DataLoader.swift */,
 				21A77B202865B3B10062EBD8 /* MLModelInspect.swift */,
 				50EB97C929AC9C94000AC771 /* Constants.swift */,
@@ -363,6 +379,7 @@
 		21B540642865B14000185DEE = {
 			isa = PBXGroup;
 			children = (
+				210BBB7D2AA5D04500B283AC /* Packages */,
 				21B5406F2865B14000185DEE /* FLiOS */,
 				21B5406E2865B14000185DEE /* Products */,
 				21A77B2E2865B5420062EBD8 /* Frameworks */,
@@ -440,7 +457,6 @@
 			name = FLiOS;
 			packageProductDependencies = (
 				50B5A2C5294C848000B0ABC6 /* flwr */,
-				216A90372A0CBE5400E0B532 /* flwr */,
 			);
 			productName = FlowerCoreML;
 			productReference = 21B5406D2865B14000185DEE /* FLiOS.app */;
@@ -471,7 +487,6 @@
 			);
 			mainGroup = 21B540642865B14000185DEE;
 			packageReferences = (
-				216A90362A0CBE5400E0B532 /* XCRemoteSwiftPackageReference "flower-swift" */,
 			);
 			productRefGroup = 21B5406E2865B14000185DEE /* Products */;
 			projectDirPath = "";
@@ -522,6 +537,7 @@
 				21A77ADC2865B22B0062EBD8 /* BayesianProbitRegressor.proto in Sources */,
 				21A77ADE2865B22B0062EBD8 /* Gazetteer.proto in Sources */,
 				21A77ADB2865B22B0062EBD8 /* SoundAnalysisPreprocessing.pb.swift in Sources */,
+				210BBB822AA5D10C00B283AC /* MLFlwrClient.swift in Sources */,
 				21A77AC32865B22B0062EBD8 /* Array+Extensions.swift in Sources */,
 				21A77B152865B22B0062EBD8 /* Scaler.pb.swift in Sources */,
 				21A77B092865B22B0062EBD8 /* Parameters.pb.swift in Sources */,
@@ -563,6 +579,7 @@
 				21A77B032865B22B0062EBD8 /* ItemSimilarityRecommender.proto in Sources */,
 				21A77AD22865B22B0062EBD8 /* CVPixelBuffer+Resize.swift in Sources */,
 				21A77AFD2865B22B0062EBD8 /* SVM.proto in Sources */,
+				210BBB842AA712E800B283AC /* Parameter.swift in Sources */,
 				21A77AFF2865B22B0062EBD8 /* VisionFeaturePrint.proto in Sources */,
 				21A77AD02865B22B0062EBD8 /* CGImage+RawBytes.swift in Sources */,
 				21A77B232865B3B10062EBD8 /* MLModelInspect.swift in Sources */,
@@ -585,6 +602,7 @@
 				21A77AF72865B22B0062EBD8 /* ItemSimilarityRecommender.pb.swift in Sources */,
 				21A77AD92865B22B0062EBD8 /* FeatureVectorizer.proto in Sources */,
 				21A77B012865B22B0062EBD8 /* TextClassifier.proto in Sources */,
+				210BBB812AA5D10C00B283AC /* MLFlwrClientModel.swift in Sources */,
 				21A77B0F2865B22B0062EBD8 /* LinkedModel.proto in Sources */,
 				21A77ADF2865B22B0062EBD8 /* MIL.pb.swift in Sources */,
 				21A77AE52865B22B0062EBD8 /* GLMRegressor.pb.swift in Sources */,
@@ -804,23 +822,7 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		216A90362A0CBE5400E0B532 /* XCRemoteSwiftPackageReference "flower-swift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/adap/flower-swift.git";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
 /* Begin XCSwiftPackageProductDependency section */
-		216A90372A0CBE5400E0B532 /* flwr */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 216A90362A0CBE5400E0B532 /* XCRemoteSwiftPackageReference "flower-swift" */;
-			productName = flwr;
-		};
 		21A77B312865B55D0062EBD8 /* Flower */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Flower;
