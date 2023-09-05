@@ -42,7 +42,7 @@ import numpy as np
 
 from sklearn.datasets import load_svmlight_file
 
-def _download_data(
+def download_data(
         dataset_name: Optional[str]="cod-rna"
 ):
     """
@@ -190,6 +190,28 @@ def datafiles_fusion(data_paths):
     return X,Y
 
 def train_test_split(X,y,train_ratio=.75):
+    """
+    Split the dataset into training and testing 
+
+    Parameters
+    ----------
+        X: Numpy array
+            The full features of the dataset.
+        y: Numpy array
+            The full labels of the dataset.
+        train_ratio: float
+            the ratio that training should take from the full dataset
+    Returns
+    -------
+        X_train: Numpy array
+            The training dataset features.
+        y_train: Numpy array
+            The labels of the training dataset.
+        X_test: Numpy array
+            The testing dataset features.
+        y_test: Numpy array
+            The labels of the testing dataset.
+    """
     q=int(X.shape[0]*train_ratio)
 
     X_train = X[0:q]
@@ -206,6 +228,22 @@ def train_test_split(X,y,train_ratio=.75):
     return X_train,y_train,X_test,y_test
 
 def modify_labels(y_train,y_test):
+    """
+    Switch the -1 in the classification dataset with 0
+
+    Parameters
+    ----------
+        y_train: Numpy array
+            The labels of the training dataset.
+        y_test: Numpy array
+            The labels of the testing dataset.
+    Returns
+    -------
+        y_train: Numpy array
+            The labels of the training dataset.
+        y_test: Numpy array
+            The labels of the testing dataset.
+    """
     y_train[y_train == -1] = 0
     y_test[y_test == -1] = 0
     return y_train,y_test
