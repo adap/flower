@@ -132,7 +132,7 @@ public class MLFlwrClient: Client {
         }
         
         let progressHandler: (MLUpdateContext) -> Void = { contextProgress in
-            let loss = String(format: "%.4f", contextProgress.metrics[.lossValue] as! Double)
+            let loss = String(format: "%.20f", contextProgress.metrics[.lossValue] as! Float)
             switch task {
             case .train:
                 self.log.info("Epoch \(contextProgress.metrics[.epochIndex] as! Int + 1) finished with loss \(loss)")
@@ -147,8 +147,8 @@ public class MLFlwrClient: Client {
                 self.saveModel(finalContext)
             }
             
-            let loss = finalContext.metrics[.lossValue] as! Double
-            let result = MLResult(loss: loss, numSamples: dataset.count, accuracy: (1.0 - loss) * 100)
+            let loss = String(format: "%.20f", finalContext.metrics[.lossValue] as! Double)
+            let result = MLResult(loss: Double(loss)!, numSamples: dataset.count, accuracy: (1.0 - Double(loss)!) * 100)
             promise?.succeed(result)
         }
         
