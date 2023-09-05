@@ -6,14 +6,13 @@ results, plotting.
 """
 from sklearn.metrics import mean_squared_error, accuracy_score
 import hydra
-from omegaconf import DictConfig, OmegaConf
 from hydra.utils import instantiate
 
 from dataset import load_single_dataset
-from xgboost import XGBClassifier, XGBRegressor
 from typing import Any, Dict, List, Optional, Tuple, Union
 from flwr.common import NDArray, NDArrays
 
+from models import fit_XGBoost
 
 dataset_tasks={
         "a9a":"BINARY",
@@ -24,6 +23,7 @@ dataset_tasks={
         "space_ga":"REG"
     }
 
+
 def evaluate(task_type,y,preds):
     if task_type.upper() == "BINARY":
         result = accuracy_score(y, preds)
@@ -31,15 +31,7 @@ def evaluate(task_type,y,preds):
         result = mean_squared_error(y, preds)
     return result
 
-def fit_XGBoost(
-    config: DictConfig, task_type:str, X_train: NDArray,y_train: NDArray, n_estimators: int
-) -> Union[XGBClassifier, XGBRegressor]:
-    if task_type.upper() == "REG":
-        tree = instantiate(config.XGBoost.regressor,n_estimators=n_estimators)
-    elif task_type.upper() == "BINARY":
-        tree = instantiate(config.XGBoost.classifier,n_estimators=n_estimators)
-    tree.fit(X_train, y_train)
-    return tree
+
 def run_single_exp(config,dataset_name,task_type):
     X_train,y_train,X_test,y_test=load_single_dataset(task_type,dataset_name,train_ratio=config.dataset.train_ratio)
     tree=fit_XGBoost(config,task_type,X_train,y_train,config.n_estimators)
@@ -48,6 +40,8 @@ def run_single_exp(config,dataset_name,task_type):
     preds_test = tree.predict(X_test)
     result_test=evaluate(task_type,y_test,preds_test)
     return result_train,result_test
+
+
 def run_centralized(config,dataset_name="all",task_type=None):
     if dataset_name=="all":
         for dataset in dataset_tasks:
