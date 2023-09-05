@@ -108,7 +108,6 @@ class DataLoader {
         while let line = readLine()?.split(separator: ",") {
             count += 1
             progressHandler(count)
-            if (count == 1000) { break }
             let imageMultiArr = try! MLMultiArray(shape: scenario.shapeData, dataType: .float32)
             let outputMultiArr = try! MLMultiArray(shape: scenario.shapeTarget, dataType: .int32)
             for i in 0..<lengthEntry {
