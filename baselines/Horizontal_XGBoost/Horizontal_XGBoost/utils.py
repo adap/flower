@@ -7,6 +7,7 @@ results, plotting.
 from sklearn.metrics import mean_squared_error, accuracy_score
 import hydra
 from hydra.utils import instantiate
+from omegaconf import DictConfig, OmegaConf
 
 from dataset import load_single_dataset,do_fl_partitioning
 
@@ -15,8 +16,6 @@ from flwr.common import NDArray, NDArrays
 
 from models import fit_XGBoost
 
-import torch
-from torch.utils.data import TensorDataset
 
 dataset_tasks={
         "a9a":"BINARY",
@@ -46,7 +45,9 @@ def run_single_exp(config,dataset_name,task_type,n_estimators):
     return result_train,result_test
 
 
-def run_centralized(config,dataset_name="all",task_type=None):
+def run_centralized(config: DictConfig,
+                    dataset_name:str ="all",
+                    task_type:str =None):
     if dataset_name=="all":
         for dataset in dataset_tasks:
             result_train,result_test=run_single_exp(config,dataset,dataset_tasks[dataset],config.n_estimators)
@@ -68,29 +69,22 @@ def run_centralized(config,dataset_name="all",task_type=None):
                     )
 
 
-def show_local_clients_preformance_for_comparison_on_single_dataset(config,dataset_name="ijcnn1",task_type="REG"):
-    X_train,y_train,X_test,y_test=load_single_dataset(task_type,dataset_name,train_ratio=config.dataset.train_ratio)
-    trainset=TensorDataset(torch.from_numpy(X_train), torch.from_numpy (y_train))
-    testset = TensorDataset(torch.from_numpy(X_test), torch.from_numpy (y_test))
-    trainloaders, _, testloader = do_fl_partitioning(
-        trainset, testset, pool_size=config.client_num, batch_size="whole", val_ratio=0.0
-    )
+def clients_preformance_on_local_data(config: DictConfig,
+                                      trainloaders,
+                                      X_test,
+                                      y_test,
+                                      task_type:str):
     n_estimators_client=500//config.client_num
     for i, trainloader in enumerate(trainloaders):
         for local_dataset in trainloader:
             local_X_train, local_y_train = local_dataset[0], local_dataset[1]
-            tree = tree=fit_XGBoost(config,task_type,X_train,y_train,n_estimators_client)#construct_tree(local_X_train, local_y_train, client_tree_num, task_type)
+            tree=fit_XGBoost(config,task_type,local_X_train, local_y_train,n_estimators_client)#construct_tree(local_X_train, local_y_train, client_tree_num, task_type)
 
             preds_train = tree.predict(local_X_train)
-            preds_test = tree.predict(X_test)
+            result_train=evaluate(task_type,local_y_train,preds_train)
 
-            if task_type == "BINARY":
-                result_train = accuracy_score(local_y_train, preds_train)
-                result_test = accuracy_score(y_test, preds_test)
-                print("Local Client %d XGBoost Training Accuracy: %f" % (i, result_train))
-                print("Local Client %d XGBoost Testing Accuracy: %f" % (i, result_test))
-            elif task_type == "REG":
-                result_train = mean_squared_error(local_y_train, preds_train)
-                result_test = mean_squared_error(y_test, preds_test)
-                print("Local Client %d XGBoost Training MSE: %f" % (i, result_train))
-                print("Local Client %d XGBoost Testing MSE: %f" % (i, result_test))
+            preds_test = tree.predict(X_test)
+            result_test=evaluate(task_type,y_test,preds_test)
+            print("Local Client %d XGBoost Training Results: %f" % (i, result_train))
+            print("Local Client %d XGBoost Testing Results: %f" % (i, result_test))
+        

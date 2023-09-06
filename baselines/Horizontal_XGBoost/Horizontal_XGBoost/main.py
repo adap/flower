@@ -8,7 +8,10 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 import hydra
 from omegaconf import DictConfig, OmegaConf
 
-from utils import run_centralized,show_local_clients_preformance_for_comparison_on_single_dataset
+from utils import run_centralized,clients_preformance_on_local_data,load_single_dataset,do_fl_partitioning
+from torch.utils.data import TensorDataset
+import torch
+
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig) -> None:
@@ -23,7 +26,16 @@ def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
     if cfg.centralized:
         run_centralized(cfg,dataset_name=cfg.dataset.dataset_name)
-    show_local_clients_preformance_for_comparison_on_single_dataset(cfg)
+    task_type="REG"
+    dataset_name="ijcnn1"
+    X_train,y_train,X_test,y_test=load_single_dataset(task_type,dataset_name,train_ratio=cfg.dataset.train_ratio)
+    trainset=TensorDataset(torch.from_numpy(X_train), torch.from_numpy (y_train))
+    testset = TensorDataset(torch.from_numpy(X_test), torch.from_numpy (y_test))
+    trainloaders, _, testloader = do_fl_partitioning(
+                                        trainset, testset, pool_size=cfg.client_num, 
+                                        batch_size="whole", val_ratio=0.0
+    )
+    clients_preformance_on_local_data(cfg,trainloaders,X_test,y_test,task_type)
     # 2. Prepare your dataset
     # here you should call a function in datasets.py that returns whatever is needed to:
     # (1) ensure the server can access the dataset used to evaluate your model after
