@@ -26,6 +26,7 @@ jobs:
       - name: Test wheel
         run: ./dev/test-wheel.sh
       - name: Build and deploy docs
+        id: upload
         env:
           AWS_DEFAULT_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -33,6 +34,9 @@ jobs:
         run: |
           cd ./dist
           aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./ s3://artifact.flower.dev/py/${{ github.event.number }}/${{ github.sha }} --recursive
+          echo "WHL_PATH=$(aws s3 ls s3://artifact.flower.dev/py/${{ github.event.number }}/${{ github.sha }}/*.whl | awk '{print $4}')" >> "$GITHUB_OUTPUT"
+    outputs:
+      whl_path: ${{ steps.upload.outputs.WHL_PATH }}
 
   frameworks:
     runs-on: ubuntu-22.04
@@ -110,8 +114,7 @@ jobs:
         run: python -m poetry install
       - name: Install Flower wheel from artifact store
         run: |
-          version=$(grep -m 1 version pyproject.toml | tr -s ' ' | tr -d '"' | tr -d "'" | cut -d' ' -f3)
-          python -m pip install https://artifact.flower.dev/py/${{ github.event.number }}/${{ github.sha }}/flwr-$version-py3-none-any.whl
+          python -m pip install https://artifact.flower.dev/py/${{ github.event.number }}/${{ github.sha }}/${{ needs.wheel.outputs.whl_path }}
       - name: Download dataset
         if: ${{ matrix.dataset }}
         run: python -c "${{ matrix.dataset }}"
@@ -145,8 +148,7 @@ jobs:
           python -m poetry install
       - name: Install Flower wheel from artifact store
         run: |
-          version=$(grep -m 1 version pyproject.toml | tr -s ' ' | tr -d '"' | tr -d "'" | cut -d' ' -f3)
-          python -m pip install https://artifact.flower.dev/py/${{ github.event.number }}/${{ github.sha }}/flwr-$version-py3-none-any.whl
+          python -m pip install https://artifact.flower.dev/py/${{ github.event.number }}/${{ github.sha }}/${{ needs.wheel.outputs.whl_path }}
       - name: Cache Datasets
         uses: actions/cache@v2
         with:
