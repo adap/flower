@@ -38,15 +38,14 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = ">=3.8.15, <3.12.0"  # don't change this
-flwr = "1.3.0" # don't change this
-ray = "1.11.1" # don't change this
+flwr = { extras = ["simulation"], version = "1.5.0" }
 hydra-core = "1.3.2" # don't change this
 
 [tool.poetry.dev-dependencies]
 isort = "==5.11.5"
 black = "==23.1.0"
 docformatter = "==1.5.1"
-mypy = "==0.961"
+mypy = "==1.4.1"
 pylint = "==2.8.2"
 flake8 = "==3.9.2"
 pytest = "==6.2.4"

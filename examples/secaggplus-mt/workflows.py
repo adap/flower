@@ -59,7 +59,7 @@ from flwr.common.typing import Value
 from flwr.proto.task_pb2 import SecureAggregation, Task
 
 
-LOG_EXPLAIN  = True
+LOG_EXPLAIN = True
 
 
 def get_workflow_factory() -> (
@@ -270,7 +270,6 @@ def workflow_with_sec_agg(
             print(f"Received {client_masked_vec[1]} from Client {nid2sid[node_id]}.")
         masked_vector = parameters_addition(masked_vector, client_masked_vec)
     masked_vector = parameters_mod(masked_vector, mod_range)
-
     """
     =============== Unmask stage ===============   
     """
@@ -353,7 +352,9 @@ def workflow_with_sec_agg(
     aggregated_vector[0] -= (len(active_sids) - 1) * clipping_range
     if LOG_EXPLAIN:
         print(f"Unmasked sum of vectors (dequantized): {aggregated_vector[0]}")
-        print(f"Aggregate vector using FedAvg: {aggregated_vector[0] / len(active_sids)}")
+        print(
+            f"Aggregate vector using FedAvg: {aggregated_vector[0] / len(active_sids)}"
+        )
         print(
             "########################### Secure Aggregation End ###########################\n\n"
         )
