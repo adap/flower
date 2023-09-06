@@ -1977,7 +1977,7 @@ msgstr ""
 "Deuxièmement, créer un environnement virtuel (et l'activer). Si vous "
 "choisissez d'utiliser :code:`pyenv` (avec le plugin :code:`pyenv-virtualenv`)"
 " et que vous l'avez déjà installé, vous pouvez utiliser le script suivant ("
-"par défaut il utilisera:code:`Python 3.8.17`, mais vous pouvez le changer en "
+"par défaut il utilisera :code:`Python 3.8.17`, mais vous pouvez le changer en "
 "fournissant une :code:`<version>` spécifique)::"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:33
