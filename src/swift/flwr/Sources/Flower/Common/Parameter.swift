@@ -14,6 +14,8 @@ import NIOCore
 import NIOPosix
 import os
 
+let appDirectory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+
 /// A class responsible for (de)serializing model parameters.
 ///
 /// ## Topics
