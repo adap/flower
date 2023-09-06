@@ -61,7 +61,9 @@ jobs:
 
           - directory: fastai
             dataset: |
+              import fastai
               from fastai.vision.all import untar_data, URLs
+              fastai.torch_core.defaults.device = 'cpu'
               untar_data(URLs.MNIST) 
 
           - directory: pandas
@@ -87,7 +89,7 @@ jobs:
         run: python -m poetry install
       - name: Download dataset
         if: ${{ matrix.dataset }}
-        run: python -c "${{ matrix.dataset }}"
+        run: CUDA_VISIBLE_DEVICES="" python -c "${{ matrix.dataset }}"
       - name: Run edge client test
         run: ./../test.sh "${{ matrix.directory }}"
       - name: Run virtual client test
