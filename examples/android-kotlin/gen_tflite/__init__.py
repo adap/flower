@@ -8,9 +8,9 @@ def red(string: str) -> str:
 
 
 class BaseTFLiteModel(tf.Module):
-    """Base TFLite model class to inherit from.
-    # Usage
-    Inherent from this class and then annotate with `@tflite_model_class`.
+    """Base TFLite model class to inherit from. # Usage Inherent from this class and
+    then annotate with `@tflite_model_class`.
+
     Override these attributes:
     - `X_SHAPE`: Shape of the input to the model.
     - `Y_SHAPE`: Shape of the output from the model.
@@ -18,7 +18,8 @@ class BaseTFLiteModel(tf.Module):
     # Functionality
     Provides default implementation of `train`, `infer`, `parameters`, `restore`.
     These methods are not annotated with `@tf.function`;
-    they are supposed to be converted by `@tflite_model_class`."""
+    they are supposed to be converted by `@tflite_model_class`.
+    """
 
     X_SHAPE: list[int]
     Y_SHAPE: list[int]
@@ -46,11 +47,13 @@ class BaseTFLiteModel(tf.Module):
 
 def tflite_model_class(cls):
     """Convert `cls` that inherits from `BaseTFLiteModel` to a TFLite model class.
+
     Convert `cls`'s methods using `@tf.function` with proper `input_signature`
     according to `X_SHAPE` and `Y_SHAPE`.
     The converted methods are `train`, `infer`, `parameters`, `restore`.
     Only `restore`'s `input_signature` is not specified because it need to be
-    determined after examples of parameters are given."""
+    determined after examples of parameters are given.
+    """
     cls.x_spec = tf.TensorSpec([None] + cls.X_SHAPE, tf.float32)  # type: ignore
     cls.y_spec = tf.TensorSpec([None] + cls.Y_SHAPE, tf.float32)  # type: ignore
     cls.train = tf.function(
