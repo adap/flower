@@ -7,7 +7,9 @@
 - **General updates to baselines** ([#2301](https://github.com/adap/flower/pull/2301).[#2305](https://github.com/adap/flower/pull/2305))
 
 - **New or updates baselines**
-    * FedProx ([#2286](https://github.com/adap/flower/pull/2286))
+
+  - FedProx ([#2286](https://github.com/adap/flower/pull/2286))
+
 ### Incompatible changes
 
 - **Remove support for Python 3.7** ([#2280](https://github.com/adap/flower/pull/2280), [#2299](https://github.com/adap/flower/pull/2299))
