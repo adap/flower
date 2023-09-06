@@ -256,5 +256,3 @@ def main(cfg: DictConfig) -> None:
 
 if __name__ == "__main__":
     main()
-
-# Hi Javier, sorry to bother you again. I'm trying to investigate the issue with gpu. However, from the moment I updated the requirements to the last flwr 1.5 i'm getting this error, with basically any client_config at the beginning of the simulation. I'm a bit confused about it, cpu-only configs (e.g., num_cpus =1.0 num_gpus=0.0) that were working before now incur this error. Maybe Im missing something trivial.
