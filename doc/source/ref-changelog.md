@@ -4,6 +4,8 @@
 
 ### What's new?
 
+- **General updates to baselines** ([#2301](https://github.com/adap/flower/pull/2301))
+
 ### Incompatible changes
 
 - **Remove support for Python 3.7** ([#2280](https://github.com/adap/flower/pull/2280), [#2299](https://github.com/adap/flower/pull/2299))
