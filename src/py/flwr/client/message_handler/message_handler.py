@@ -15,7 +15,7 @@
 """Client-side message handler."""
 
 
-from typing import Tuple
+from typing import Callable, Tuple
 
 from flwr.client.client import (
     Client,
@@ -38,13 +38,13 @@ class UnknownServerMessage(Exception):
     """Exception indicating that the received message is unknown."""
 
 
-def handle(client: Client, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
+def handle(client_fn: Callable, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
     """Handle incoming TaskIns from the server.
 
     Parameters
     ----------
-    client : Client
-        The Client instance provided by the user.
+    client_fn : Callable
+        ...
     task_ins: TaskIns
         The task instruction coming from the server, to be processed by the client.
 
@@ -60,6 +60,7 @@ def handle(client: Client, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
         reconnect later (False).
     """
     server_msg = get_server_message_from_task_ins(task_ins, exclude_reconnect_ins=False)
+    client = client_fn(cid="0")  # TODO which cid should we use?
     if server_msg is None:
         # Secure Aggregation
         if task_ins.task.HasField("sa") and isinstance(

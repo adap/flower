@@ -93,7 +93,8 @@ ClientLike = Union[Client, NumPyClient]
 def start_client(
     *,
     server_address: str,
-    client: Client,
+    client_fn: Optional[Callable[[str], ClientLike]] = None,
+    client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
     rest: bool = False,  # Deprecated in favor of `transport`
@@ -107,6 +108,8 @@ def start_client(
         The IPv4 or IPv6 address of the server. If the Flower
         server runs on the same machine on port 8080, then `server_address`
         would be `"[::]:8080"`.
+    client_fn : Callable
+        ...
     client : flwr.client.Client
         An implementation of the abstract base
         class `flwr.client.Client`.
@@ -151,6 +154,24 @@ def start_client(
     >>> )
     """
     event(EventType.START_CLIENT_ENTER)
+
+    if client_fn is None and client is None:
+        raise Exception("Both `client_fn` and `client` are `None`, but one is required")
+
+    if client_fn is not None and client is not None:
+        raise Exception(
+            "Both `client_fn` and `client` are provided, but only one is allowed"
+        )
+
+    if client_fn is None:
+        # Wrap `Client` instance in `client_fn`
+        def single_client_factory(cid):
+            return client  # Always return the same instance
+
+        client_fn = single_client_factory
+
+    # Don't use `client` going forward
+    client = None
 
     # Parse IP address
     parsed_address = parse_address(server_address)
@@ -202,7 +223,7 @@ def start_client(
                 if task_ins is None:
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
-                task_res, sleep_duration, keep_going = handle(client, task_ins)
+                task_res, sleep_duration, keep_going = handle(client_fn, task_ins)
                 send(task_res)
                 if not keep_going:
                     break
