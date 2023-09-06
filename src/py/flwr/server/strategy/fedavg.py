@@ -109,7 +109,7 @@ class FedAvg(Strategy):
         evaluate_metrics_aggregation_fn : Optional[MetricsAggregationFn]
             Metrics aggregation function, optional.
         inplace: bool, optional
-            Whether or not to perform in-place aggregation. Defaults to False
+            Whether or not to perform in-place aggregation. Defaults to False.
         """
         super().__init__()
 
