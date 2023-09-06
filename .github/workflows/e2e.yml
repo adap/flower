@@ -14,7 +14,7 @@ env:
 jobs:
   wheel:
     runs-on: ubuntu-22.04
-    name: Wheel
+    name: Build, test and upload wheel
     steps:
       - uses: actions/checkout@v3
       - name: Bootstrap
@@ -25,7 +25,7 @@ jobs:
         run: ./dev/build.sh
       - name: Test wheel
         run: ./dev/test-wheel.sh
-      - name: Build and deploy docs
+      - name: Upload wheel
         id: upload
         env:
           AWS_DEFAULT_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
