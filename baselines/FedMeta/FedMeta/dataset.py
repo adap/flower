@@ -42,35 +42,29 @@ def load_datasets(  # pylint: disable=too-many-arguments
 ) -> Tuple[DataLoader, DataLoader, DataLoader]:
     print(f"Dataset partitioning config: {config}")
 
-    if config.algo == 'fedavg':
-        dataset = _partition_data(
-            dir_path=config.path
-        )
-
-    elif config.algo == 'fedmeta(maml)':
-        dataset = _partition_data(
-            dir_path=config.path,
-            support_ratio=config.support_ratio
-        )
+    dataset = _partition_data(
+        dir_path=config.path,
+        support_ratio=config.support_ratio
+    )
 
     clients_list = split_train_validation_test_clients(
         dataset[0]['users']
     )
 
-    trainloaders = {'train': [], 'test': []}
-    valloaders = {'train': [], 'test': []}
-    testloaders = {'train': [], 'test': []}
+    trainloaders = {'sup': [], 'qry': []}
+    valloaders = {'sup': [], 'qry': []}
+    testloaders = {'sup': [], 'qry': []}
 
     transform = transforms.Compose([transforms.ToTensor()])
     for user in clients_list[0]:
-        trainloaders['train'].append(DataLoader(FemnistDataset(dataset[0]['user_data'][user], transform), batch_size=10, shuffle=True))
-        trainloaders['test'].append(DataLoader(FemnistDataset(dataset[1]['user_data'][user], transform)))
+        trainloaders['sup'].append(DataLoader(FemnistDataset(dataset[0]['user_data'][user], transform), batch_size=10, shuffle=True))
+        trainloaders['qry'].append(DataLoader(FemnistDataset(dataset[1]['user_data'][user], transform), batch_size=10))
     for user in clients_list[2]:
-        valloaders['train'].append(DataLoader(FemnistDataset(dataset[0]['user_data'][user], transform), batch_size=10, shuffle=True))
-        valloaders['test'].append(DataLoader(FemnistDataset(dataset[1]['user_data'][user], transform)))
+        valloaders['sup'].append(DataLoader(FemnistDataset(dataset[0]['user_data'][user], transform), batch_size=10, shuffle=True))
+        valloaders['qry'].append(DataLoader(FemnistDataset(dataset[1]['user_data'][user], transform), batch_size=10))
     for user in clients_list[1]:
-        testloaders['train'].append(DataLoader(FemnistDataset(dataset[0]['user_data'][user], transform), batch_size=10, shuffle=True))
-        testloaders['test'].append(DataLoader(FemnistDataset(dataset[1]['user_data'][user], transform)))
+        testloaders['sup'].append(DataLoader(FemnistDataset(dataset[0]['user_data'][user], transform), batch_size=10, shuffle=True))
+        testloaders['qry'].append(DataLoader(FemnistDataset(dataset[1]['user_data'][user], transform), batch_size=10))
 
     return trainloaders, valloaders, testloaders
 

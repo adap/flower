@@ -11,6 +11,8 @@ from typing import Tuple
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
+import torch.nn.functional as F
+
 
 
 class Femnist_network(nn.Module):
@@ -24,14 +26,15 @@ class Femnist_network(nn.Module):
 
     def __init__(self) -> None:
         super(Femnist_network, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels=1, out_channels=32, kernel_size=5, padding=2)
-        self.maxpool1 = nn.MaxPool2d(kernel_size=(2, 2))
-        self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=5, padding=2)
-        self.maxpool2 = nn.MaxPool2d(kernel_size=(2, 2))
-        self.linear1 = nn.Linear(7 * 7 * 64, 1024)
-        self.linear2 = nn.Linear(1024, 62)
 
-    def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
+        self.conv1 = nn.Conv2d(in_channels=1, out_channels=32, kernel_size=5, padding=2)
+        self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=5, padding=2)
+        self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.fc1 = nn.Linear(7 * 7 * 64, 2048)
+        self.fc2 = nn.Linear(2048, 62)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass of the CNN.
 
         Parameters
@@ -44,14 +47,14 @@ class Femnist_network(nn.Module):
         torch.Tensor
             The resulting Tensor after it has passed through the network
         """
-        output_tensor = torch.relu(self.conv1(input_tensor))
-        output_tensor = self.maxpool1(output_tensor)
-        output_tensor = torch.relu(self.conv2(output_tensor))
-        output_tensor = self.maxpool2(output_tensor)
-        output_tensor = torch.flatten(output_tensor, start_dim=1)
-        output_tensor = torch.relu((self.linear1(output_tensor)))
-        output_tensor = self.linear2(output_tensor)
-        return output_tensor
+        x = F.relu(self.conv1(x))
+        x = self.pool1(x)
+        x = F.relu(self.conv2(x))
+        x = self.pool2(x)
+        x = x.view(-1, 7 * 7 * 64)  # Flatten
+        x = F.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x
 
 
 def train(  # pylint: disable=too-many-arguments
@@ -77,7 +80,8 @@ def train(  # pylint: disable=too-many-arguments
         The learning rate for the SGD optimizer.
     """
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate, weight_decay=0.001)
+    # optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate, weight_decay=0.001)
+    optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
     net.train()
     for _ in range(epochs):
         net = _train_one_epoch(
@@ -155,4 +159,4 @@ def test(
         raise ValueError("Testloader can't be 0, exiting...")
     loss /= len(testloader.dataset)
     accuracy = correct
-    return loss, accuracy
+    return loss, accuracy, total

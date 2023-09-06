@@ -85,37 +85,36 @@ def _partition_data(
     train_users, train_data = _read_dataset(train_path)
     test_users, test_data = _read_dataset(test_path)
 
-    if support_ratio is None:
-        train_dataset = {'users': [], 'user_data': {}, 'num_samples': []}
-        test_dataset = {'users': [], 'user_data': {}, 'num_samples': []}
+    # if support_ratio is None:
+    #     train_dataset = {'users': [], 'user_data': {}, 'num_samples': []}
+    #     test_dataset = {'users': [], 'user_data': {}, 'num_samples': []}
+    #
+    #     for user in train_users:
+    #         train_dataset['users'].append(user)
+    #         train_dataset['user_data'][user] = {'x': train_data[user]['x'], 'y': train_data[user]['y']}
+    #         train_dataset['num_samples'].append(len(train_data[user]['y']))
+    #
+    #         test_dataset['users'].append(user)
+    #         test_dataset['user_data'][user] = {'x': test_data[user]['x'], 'y': test_data[user]['y']}
+    #         test_dataset['num_samples'].append(len(test_data[user]['y']))
+    #
+    #     return train_dataset, test_dataset
 
-        for user in train_users:
-            train_dataset['users'].append(user)
-            train_dataset['user_data'][user] = {'x': train_data[user]['x'], 'y': train_data[user]['y']}
-            train_dataset['num_samples'].append(len(train_data[user]['y']))
+    support_dataset = {'users': [], 'user_data': {}, 'num_samples': []}
+    query_dataset = {'users': [], 'user_data': {}, 'num_samples': []}
 
-            test_dataset['users'].append(user)
-            test_dataset['user_data'][user] = {'x': test_data[user]['x'], 'y': test_data[user]['y']}
-            test_dataset['num_samples'].append(len(test_data[user]['y']))
+    for user in train_users:
+        print(f'now preprocessing user : {user}')
+        all_x = np.asarray(train_data[user]['x'] + test_data[user]['x'])
+        all_y = np.asarray(train_data[user]['y'] + test_data[user]['y'])
+        sup_x, qry_x, sup_y, qry_y = support_query_split(all_x, all_y, support_ratio)
 
-        return train_dataset, test_dataset
+        support_dataset['users'].append(user)
+        support_dataset['user_data'][user] = {'x': sup_x, 'y': sup_y}
+        support_dataset['num_samples'].append(len(sup_y))
 
-    else:
-        support_dataset = {'users': [], 'user_data': {}, 'num_samples': []}
-        query_dataset = {'users': [], 'user_data': {}, 'num_samples': []}
+        query_dataset['users'].append(user)
+        query_dataset['user_data'][user] = {'x': qry_x, 'y': qry_y}
+        query_dataset['num_samples'].append(len(qry_y))
 
-        for user in train_users:
-            print(f'now preprocessing user : {user}')
-            all_x = np.asarray(train_data[user]['x'] + test_data[user]['x'])
-            all_y = np.asarray(train_data[user]['y'] + test_data[user]['y'])
-            sup_x, qry_x, sup_y, qry_y = support_query_split(all_x, all_y, support_ratio)
-
-            support_dataset['users'].append(user)
-            support_dataset['user_data'][user] = {'x': sup_x, 'y': sup_y}
-            support_dataset['num_samples'].append(len(sup_y))
-
-            query_dataset['users'].append(user)
-            query_dataset['user_data'][user] = {'x': qry_x, 'y': qry_y}
-            query_dataset['num_samples'].append(len(qry_y))
-
-        return support_dataset, query_dataset
+    return support_dataset, query_dataset

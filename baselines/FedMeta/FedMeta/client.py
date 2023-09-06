@@ -53,21 +53,22 @@ class FlowerClient(
         self.set_parameters(parameters)
         train(
             self.net,
-            self.trainloaders['train'][self.cid],
+            self.trainloaders['sup'][self.cid],
             self.device,
             epochs=self.num_epochs,
             learning_rate=self.learning_rate,
         )
 
-        return self.get_parameters({}), len(self.trainloaders['train'][self.cid]), {}
+        return self.get_parameters({}), len(self.trainloaders['sup'][self.cid]), {}
 
     def evaluate(
             self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[float, int, Dict]:
         """Implements distributed evaluation for a given client."""
         self.set_parameters(parameters)
-        loss, accuracy = test(self.net, self.valloaders['test'][self.cid], self.device)
-        return float(loss), len(self.valloaders['test'][self.cid]), {"correct": accuracy}
+        loss, accuracy, total = test(self.net, self.valloaders['qry'][self.cid], self.device)
+        # return float(loss), len(self.valloaders['test'][self.cid]), {"correct": accuracy}
+        return float(loss), total, {"correct": accuracy}
 
 
 def gen_client_fn(

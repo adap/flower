@@ -41,7 +41,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     """
     # Multiply accuracy of each client by number of examples used
     # correct = [num_examples * m["correct"] for num_examples, m in metrics]
-    correct = [ m["correct"] for _, m in metrics]
+    correct = [m["correct"] for _, m in metrics]
     examples = [num_examples for num_examples, _ in metrics]
 
     # Aggregate and return custom metric (weighted average)
@@ -118,6 +118,7 @@ class FedMeta(FedAvg):
             (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for _, fit_res in results
         ]
+
         parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
 
         # Aggregate custom metrics if aggregation fn was provided

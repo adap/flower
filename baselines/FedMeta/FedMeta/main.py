@@ -11,10 +11,12 @@ from hydra.utils import instantiate
 from strategy import weighted_average
 from dataset import load_datasets
 from Fedmeta_client_manager import Fedmeta_client_manager
-
+import os
 
 import flwr as fl
 import client
+
+os.environ['PYTHONHASHSEED'] = str(0)
 
 
 @hydra.main(config_path="conf", config_name="config", version_base=None)
@@ -32,8 +34,8 @@ def main(cfg: DictConfig) -> None:
     # partition dataset and get dataloaders
     trainloaders, valloaders, testloaders= load_datasets(config=cfg.dataset)
     # Check config Clients value
-    if cfg.num_clients > len(trainloaders['train']):
-        raise ImportError(f"Total Clients num is {len(trainloaders['train'])}")
+    if cfg.num_clients > len(trainloaders['sup']):
+        raise ImportError(f"Total Clients num is {len(trainloaders['sup'])}")
 
     # prepare function that will be used to spawn each client
     client_fn = client.gen_client_fn(
@@ -48,7 +50,7 @@ def main(cfg: DictConfig) -> None:
         cfg.strategy,
         # evaluate_fn=evaluate_fn,
         evaluate_metrics_aggregation_fn=weighted_average,
-        min_evaluate_clients=len(valloaders['train'])
+        # min_evaluate_clients=len(valloaders['sup'])
     )
 
     # 5. Start Simulation
@@ -60,7 +62,7 @@ def main(cfg: DictConfig) -> None:
             "num_cpus": cfg.client_resources.num_cpus,
             "num_gpus": cfg.client_resources.num_gpus,
         },
-        client_manager=Fedmeta_client_manager(valid_client=len(valloaders['train'])),
+        client_manager=Fedmeta_client_manager(valid_client=len(valloaders['sup'])),
         strategy=strategy,
     )
 
