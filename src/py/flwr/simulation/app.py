@@ -17,6 +17,7 @@
 
 import sys
 import threading
+import traceback
 from logging import ERROR, INFO
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
@@ -292,6 +293,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
         )
     except Exception as ex:
         log(ERROR, ex)
+        log(ERROR, traceback.format_exc())
         log(
             ERROR,
             "Your simulation crashed :(. This could be because of several reasons."
