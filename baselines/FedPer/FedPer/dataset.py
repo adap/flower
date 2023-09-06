@@ -14,15 +14,19 @@ import json
 import torch
 import numpy as np
 import pickle
+import pandas as pd
 
 from typing import Optional, Tuple
 from pathlib import Path
 from argparse import ArgumentParser
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader, random_split
-from FedPer_old.utils import fix_random_seed, prune_args
-from FedPer_old.dataset_preparation import (
-    DATASETS, randomly_assign_classes
+# from FedPer_old.utils import fix_random_seed, prune_args
+#from FedPer_old.dataset_preparation import (
+#    DATASETS, randomly_assign_classes
+#)
+from FedPer.dataset_preparation import (
+    DATASETS, randomly_assign_classes, flickr_preprocess
 )
 
 # working dir is two up
@@ -35,8 +39,6 @@ def dataset_main(config : dict) -> None:
     dataset_name = config['name'].lower()
     dataset_folder = Path(WORKING_DIR, "datasets")
     dataset_root = Path(dataset_folder, dataset_name)
-    
-    fix_random_seed(config['seed'])
 
     if not os.path.isdir(dataset_root):
         os.makedirs(dataset_root)
@@ -55,20 +57,21 @@ def dataset_main(config : dict) -> None:
         partition, stats = randomly_assign_classes(
             dataset=dataset, client_num=config['num_clients'], class_num=config['num_classes']
         )
+    elif dataset_name.lower() == 'flickr':
+        flickr_preprocess(dataset_root, config)
     else:
         raise RuntimeError("Please implement the dataset preparation for your dataset.")
 
-    if partition["separation"] is None:
-        clients_4_train = list(range(config['num_clients']))
-        clients_4_test = list(range(config['num_clients']))
-
-        partition["separation"] = {
-            "train": clients_4_train,
-            "test": clients_4_test,
-            "total": config['num_clients'],
-        }
-
     if config['name'] in ["cifar10", "cifar100"]:
+        if partition["separation"] is None:
+            clients_4_train = list(range(config['num_clients']))
+            clients_4_test = list(range(config['num_clients']))
+
+            partition["separation"] = {
+                "train": clients_4_train,
+                "test": clients_4_test,
+                "total": config['num_clients'],
+            }
         for client_id, idx in enumerate(partition["data_indices"]):
             if config['split'] == "sample":
                 num_train_samples = int(len(idx) * config['fraction'])
@@ -84,11 +87,11 @@ def dataset_main(config : dict) -> None:
                     partition["data_indices"][client_id] = {"train": idx, "test": []}
                 else:
                     partition["data_indices"][client_id] = {"train": [], "test": idx}
-    with open(dataset_root / "partition.pkl", "wb") as f:
-        pickle.dump(partition, f)
+        with open(dataset_root / "partition.pkl", "wb") as f:
+            pickle.dump(partition, f)
 
-    with open(dataset_root / "all_stats.json", "w") as f:
-        json.dump(stats, f)
+        with open(dataset_root / "all_stats.json", "w") as f:
+            json.dump(stats, f)
 
     #with open(dataset_root / "args.json", "w") as f:
     #    json.dump(prune_args(config), f)

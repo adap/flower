@@ -11,8 +11,15 @@
 # CIFAR10 Resnet
 #python -m FedPer.main --config-path conf/cifar/resnet --config-name fedper_10 &&
 #python -m FedPer.main --config-path conf/cifar/resnet --config-name fedper_8 &&
-# python -m FedPer.main --config-path conf/cifar/resnet --config-name fedper_4 &&
-python -m FedPer.main --config-path conf/cifar/resnet --config-name fedavg_10 &&
-python -m FedPer.main --config-path conf/cifar/resnet --config-name fedavg_8 &&
-python -m FedPer.main --config-path conf/cifar/resnet --config-name fedavg_4
+#python -m FedPer.main --config-path conf/cifar/resnet --config-name fedper_4 &&
+#python -m FedPer.main --config-path conf/cifar/resnet --config-name fedavg_10 &&
+#python -m FedPer.main --config-path conf/cifar/resnet --config-name fedavg_8 &&
+#python -m FedPer.main --config-path conf/cifar/resnet --config-name fedavg_4
 
+# FLICKR Mobile
+# python -m FedPer.main --config-path conf/flickr/mobile --config-name 2_head_layers &&
+python -m FedPer.main --config-path conf/flickr/mobile --config-name fedavg &&
+
+# FLICKR Resnet
+python -m FedPer.main --config-path conf/flickr/resnet --config-name 2_head_layers &&
+python -m FedPer.main --config-path conf/flickr/resnet --config-name fedavg

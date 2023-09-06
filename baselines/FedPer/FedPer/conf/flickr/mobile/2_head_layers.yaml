@@ -1,9 +1,9 @@
 ---
 num_clients: 30 # total number of clients
-num_epochs: 1 # number of local epochs
+num_epochs: 4 # number of local epochs
 batch_size: 4
-num_rounds: 2
-clients_per_round: 30
+num_rounds: 35
+clients_per_round: 15
 learning_rate: 0.01
 algorithm: fedper
 algo: fedper

@@ -76,6 +76,7 @@ class MobileNet(nn.Module):
         if num_head_layers == 1:
             self.head = nn.Sequential(
                 nn.AvgPool2d([7]),
+                nn.Flatten(),
                 nn.Linear(1024, num_classes)
             )
             self.body.avg_pool = nn.Identity()

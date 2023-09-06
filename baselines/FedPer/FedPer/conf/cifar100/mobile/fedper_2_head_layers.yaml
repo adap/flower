@@ -1,12 +1,12 @@
 ---
-num_clients: 30 # total number of clients
-num_epochs: 1 # number of local epochs
-batch_size: 4
-num_rounds: 2
-clients_per_round: 30
+num_clients: 10 # total number of clients
+num_epochs: 4 # number of local epochs
+batch_size: 128
+num_rounds: 50
+clients_per_round: 10
 learning_rate: 0.01
-algorithm: fedper
-algo: fedper
+algorithm: FedPer
+algo: FedPer
 
 client_resources:
   num_cpus: 16
@@ -15,18 +15,18 @@ client_resources:
 server_device: cuda:0
 
 dataset:
-  name : "flickr"
+  name : "cifar100"
   iid: false
-  num_classes: 5
+  num_classes: 100
   seed: 42
-  num_clients: ${num_clients}
+  num_clients: 10
   split: 'sample' # sample or user
-  fraction: 0.8
+  fraction: 0.83
 
 model:
   _target_: FedPer.models.mobile_model.MobileNet
   num_head_layers: 2
-  num_classes: 5
+  num_classes: 100
   device: ${server_device}
   name: mobile
 
