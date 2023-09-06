@@ -6,7 +6,6 @@ num_rounds: 2
 clients_per_round: 3
 learning_rate: 0.01
 algorithm: fedper
-algo: fedper
 
 client_resources:
   num_cpus: 32
@@ -16,7 +15,6 @@ server_device: cuda:0
 
 dataset:
   name : "cifar10"
-  iid: false
   num_classes: 10
   seed: 42
   num_clients: 10

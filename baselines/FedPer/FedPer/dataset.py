@@ -21,10 +21,7 @@ from pathlib import Path
 from argparse import ArgumentParser
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader, random_split
-# from FedPer_old.utils import fix_random_seed, prune_args
-#from FedPer_old.dataset_preparation import (
-#    DATASETS, randomly_assign_classes
-#)
+
 from FedPer.dataset_preparation import (
     DATASETS, randomly_assign_classes, flickr_preprocess
 )
@@ -36,6 +33,7 @@ FL_BENCH_ROOT = WORKING_DIR.parent
 sys.path.append(FL_BENCH_ROOT.as_posix())
 
 def dataset_main(config : dict) -> None:
+    """ Prepare the dataset."""
     dataset_name = config['name'].lower()
     dataset_folder = Path(WORKING_DIR, "datasets")
     dataset_root = Path(dataset_folder, dataset_name)
@@ -57,12 +55,7 @@ def dataset_main(config : dict) -> None:
         partition, stats = randomly_assign_classes(
             dataset=dataset, client_num=config['num_clients'], class_num=config['num_classes']
         )
-    elif dataset_name.lower() == 'flickr':
-        flickr_preprocess(dataset_root, config)
-    else:
-        raise RuntimeError("Please implement the dataset preparation for your dataset.")
 
-    if config['name'] in ["cifar10", "cifar100"]:
         if partition["separation"] is None:
             clients_4_train = list(range(config['num_clients']))
             clients_4_test = list(range(config['num_clients']))
@@ -93,5 +86,7 @@ def dataset_main(config : dict) -> None:
         with open(dataset_root / "all_stats.json", "w") as f:
             json.dump(stats, f)
 
-    #with open(dataset_root / "args.json", "w") as f:
-    #    json.dump(prune_args(config), f)
+    elif dataset_name.lower() == 'flickr':
+        flickr_preprocess(dataset_root, config)
+    else:
+        raise RuntimeError("Please implement the dataset preparation for your dataset.")

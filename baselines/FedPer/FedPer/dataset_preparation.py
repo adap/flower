@@ -174,7 +174,6 @@ def flickr_preprocess(root, config):
             img_path = Path(root, "40K", row[' imagePair'])
             score_path = Path(client_path, str(row[' score']))
             if not os.path.isfile(img_path):
-                # print(f"Image {img_path} does not exist.")
                 continue
             else:
                 os.system(f"cp {img_path} {score_path}")
@@ -202,11 +201,13 @@ class FLICKR_DATASET(BaseDataset):
 DATASETS: Dict[str, Type[BaseDataset]] = {
     "cifar10": CIFAR10,
     "cifar100": CIFAR100,
+    # flickr is being processed in other way
 }
 
 def randomly_assign_classes(
     dataset: Dataset, client_num: int, class_num: int
 ) -> Tuple[List[List[int]], Dict[str, Dict[str, int]]]:
+    """ Randomly assign number classes to clients."""
     partition = {"separation": None, "data_indices": None}
     data_indices = [[] for _ in range(client_num)]
     targets_numpy = np.array(dataset.targets, dtype=np.int32)

@@ -1,18 +1,20 @@
-"""Utility functions."""
-
-""" FIRST PART INCLUDES VISUALIZATION FUNCTIONS """
-
+import os
+import time
 import pickle
+import numpy as np
+import matplotlib.pyplot as plt
+
+from typing import Callable, Dict, List, Optional, Tuple, Union
 from pathlib import Path
 from secrets import token_hex
-from typing import Dict, Optional, Union
 
-import numpy as np
-
-# from FedPer.models import MobileNet_v1
 from flwr.server.history import History
-from matplotlib import pyplot as plt
-from omegaconf import DictConfig
+
+from FedPer.utils.base_client import get_fedavg_client_fn
+from FedPer.utils.FedPer_client import get_fedper_client_fn
+from FedPer.models.cnn_model import CNNModelSplit, CNNNet
+from FedPer.models.mobile_model import MobileNet, MobileNetModelSplit
+from FedPer.models.resnet_model import ResNet, ResNetModelSplit
 
 MEAN = {
     "cifar10": [0.4914, 0.4822, 0.4465],
@@ -24,35 +26,88 @@ STD = {
     "cifar100": [0.2009, 0.1984, 0.2023],
 }
 
-def get_model_fn(config: DictConfig):
-    """Get model function from config.
+def set_model_class(config : dict) -> dict: 
+    """ Set model class based on the model name in the config file. """
+    # Set the model class
+    if config.model.name.lower() == "resnet":
+        config.model._target_ = "FedPer.models.resnet_model.ResNet"
+    elif config.model.name.lower() == "mobile":
+        config.model._target_ = "FedPer.models.mobile_model.MobileNet"
+    else:
+        raise NotImplementedError(f"Model {config.model.name} not implemented")
+    return config
 
-    Parameters
-    ----------
-    config : DictConfig
-        An omegaconf object that stores the hydra config.
+def set_client_state_save_path() -> str:
+    """ Set the client state save path. """
+    client_state_save_path = time.strftime("%Y-%m-%d")
+    client_state_sub_path = time.strftime("%H-%M-%S")
+    client_state_save_path = (
+        f"./client_states/{client_state_save_path}/{client_state_sub_path}"
+    )
+    if not os.path.exists(client_state_save_path):
+        os.makedirs(client_state_save_path)
+    return client_state_save_path
 
-    Returns
-    -------
-    model_fn : function
-        Function that returns a model.
-    """
-    if config.model == "mobile":
-        if config.split:
+def get_client_fn(config : dict, client_state_save_path : str = None) -> dict:
+    """ Get client function. """
+    # Get algorithm
+    algorithm = config.algorithm.lower()
+    # Get client fn
+    if algorithm == "fedper":
+        client_fn = get_fedper_client_fn(
+            config=config,
+            client_state_save_path=client_state_save_path,
+        )
+    elif algorithm == "fedavg":
+        client_fn = get_fedavg_client_fn(
+            config=config,
+        )
+    else:
+        raise NotImplementedError
+    return client_fn
 
-            def _create_model():
-                return MobileNet_v1(split=True, num_head_layers=config.num_head_layers)
+def get_create_model_fn(config : dict) -> Union[
+    Tuple[Callable[[], CNNNet], CNNModelSplit],
+    Tuple[Callable[[], MobileNet], MobileNetModelSplit],
+    Tuple[Callable[[], ResNet], ResNetModelSplit],
+]:
+    """ Get create model function. """
+    device = config.server_device
 
-        else:
+    if config.model.name.lower() == "cnn":
+        split = CNNModelSplit
 
-            def _create_model():
-                return MobileNet_v1()
+        def create_model() -> CNNNet:
+            """Create initial CNN model."""
+            return CNNNet(name="cnn").to(device)
+
+    elif config.model.name.lower() == "mobile":
+        split = MobileNetModelSplit
+
+        def create_model() -> MobileNet:
+            """Create initial MobileNet-v1 model."""
+            return MobileNet(
+                num_head_layers=config.model.num_head_layers,
+                num_classes=config.model.num_classes,
+                name=config.model.name,
+                device=config.model.device,
+            ).to(device)
+
+    elif config.model.name.lower() == "resnet":
+        split = ResNetModelSplit
+
+        def create_model() -> ResNet:
+            """Create initial ResNet model."""
+            return ResNet(
+                num_head_layers=config.model.num_head_layers,
+                num_classes=config.model.num_classes,
+                name=config.model.name,
+                device=config.model.device,
+            ).to(device)
 
     else:
-        raise NotImplementedError(f"Model {config.model} not implemented")
-
-    return _create_model()
-
+        raise NotImplementedError("Model not implemented, check name. ")
+    return create_model, split
 
 def plot_metric_from_history(
     hist: History,

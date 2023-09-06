@@ -13,14 +13,14 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
 from FedPer.dataset import dataset_main
-from FedPer.models.cnn_model import CNNModelSplit, CNNNet
-from FedPer.models.mobile_model import MobileNet, MobileNetModelSplit
-from FedPer.models.resnet_model import ResNet, ResNetModelSplit
-from FedPer.utils import utils_file
-from FedPer.utils.base_client import get_fedavg_client_fn
-from FedPer.utils.FedPer_client import get_fedper_client_fn
-
-# from FedPer.strategy import AggregateBodyStrategyPipeline
+from FedPer.utils_file import (
+    set_model_class, 
+    set_client_state_save_path,
+    get_client_fn,
+    get_create_model_fn,
+    plot_metric_from_history,
+    save_results_as_pickle,
+)
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -36,41 +36,21 @@ def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
 
     # Set the model class
-    if cfg.model.name.lower() == "resnet":
-        cfg.model._target_ = "FedPer.models.resnet_model.ResNet"
-    elif cfg.model.name.lower() == "mobile":
-        cfg.model._target_ = "FedPer.models.mobile_model.MobileNet"
-    else:
-        raise NotImplementedError(f"Model {cfg.model.name} not implemented")
+    cfg = set_model_class(cfg)
 
     # Create directory to store client states if it does not exist
     # Client state has subdirectories with the name of current time
-    client_state_save_path = time.strftime("%Y-%m-%d")
-    client_state_sub_path = time.strftime("%H-%M-%S")
-    client_state_save_path = (
-        f"./client_states/{client_state_save_path}/{client_state_sub_path}"
-    )
-    if not os.path.exists(client_state_save_path):
-        os.makedirs(client_state_save_path)
+    client_state_save_path = set_client_state_save_path()
 
     # 2. Prepare your dataset
     dataset_main(cfg.dataset)
 
     # 3. Define your clients
-    # Get algorithm
-    algo = cfg.algo.lower()
-    # Get client fn
-    if algo.lower() == "fedper":
-        client_fn = get_fedper_client_fn(
-            cfg=cfg,
-            client_state_save_path=client_state_save_path,
-        )
-    elif algo.lower() == "fedavg":
-        client_fn = get_fedavg_client_fn(
-            cfg=cfg,
-        )
-    else:
-        raise NotImplementedError
+    # Get client function
+    client_fn = get_client_fn(
+        config=cfg,
+        client_state_save_path=client_state_save_path,
+    )
 
     # get a function that will be used to construct the config that the client's
     # fit() method will received
@@ -82,42 +62,9 @@ def main(cfg: DictConfig) -> None:
             return fit_config
 
         return fit_config_fn
-
-    device = cfg.server_device
-
-    if cfg.model.name.lower() == "cnn":
-        split = CNNModelSplit
-
-        def create_model() -> CNNNet:
-            """Create initial CNN model."""
-            return CNNNet(name="cnn").to(device)
-
-    elif cfg.model.name.lower() == "mobile":
-        split = MobileNetModelSplit
-
-        def create_model() -> MobileNet:
-            """Create initial MobileNet-v1 model."""
-            return MobileNet(
-                num_head_layers=cfg.model.num_head_layers,
-                num_classes=cfg.model.num_classes,
-                name=cfg.model.name,
-                device=cfg.model.device,
-            ).to(device)
-
-    elif cfg.model.name.lower() == "resnet":
-        split = ResNetModelSplit
-
-        def create_model() -> ResNet:
-            """Create initial ResNet model."""
-            return ResNet(
-                num_head_layers=cfg.model.num_head_layers,
-                num_classes=cfg.model.num_classes,
-                name=cfg.model.name,
-                device=cfg.model.device,
-            ).to(device)
-
-    else:
-        raise NotImplementedError("Model not implemented, check name. ")
+    
+    # get a function that will be used to construct the model
+    create_model, split = get_create_model_fn(cfg)
 
     # 4. Define your strategy
     strategy = instantiate(
@@ -149,7 +96,7 @@ def main(cfg: DictConfig) -> None:
 
     # save results as a Python pickle using a file_path
     # the directory created by Hydra for each run
-    utils_file.save_results_as_pickle(history, file_path=save_path, extra_results={})
+    save_results_as_pickle(history, file_path=save_path, extra_results={})
 
     # plot results and include them in the readme
     strategy_name = strategy.__class__.__name__
@@ -162,7 +109,7 @@ def main(cfg: DictConfig) -> None:
         f"_lr={cfg.learning_rate}"
     )
 
-    utils_file.plot_metric_from_history(
+    plot_metric_from_history(
         history,
         save_path,
         (file_suffix),
