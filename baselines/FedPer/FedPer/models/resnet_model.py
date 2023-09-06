@@ -7,8 +7,8 @@ from torch.utils.data import DataLoader
 from torchvision.models.resnet import resnet34
 from tqdm import tqdm
 
-from FedPer.utils.model_manager import ModelManager
-from FedPer.utils.model_split import ModelSplit
+from FedPer.models.model_manager import ModelManager
+from FedPer.models.model_split import ModelSplit
 
 class ResNet(nn.Module):
     """ResNet model."""

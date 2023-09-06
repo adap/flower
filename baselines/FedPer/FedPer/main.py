@@ -3,19 +3,19 @@
 It includes processioning the dataset, instantiate strategy, specify how the global
 model is going to be evaluated, etc. At the end, this script saves the results.
 """
-import os
-import time
 
 import flwr as fl
+
 import hydra
-from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
+from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
 from FedPer.dataset import dataset_main
-from FedPer.utils_file import (
+from FedPer.utils import (
     set_model_class, 
     set_client_state_save_path,
+    set_server_target,
     get_client_fn,
     get_create_model_fn,
     plot_metric_from_history,
@@ -35,8 +35,9 @@ def main(cfg: DictConfig) -> None:
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
 
-    # Set the model class
+    # Set the model class and server target
     cfg = set_model_class(cfg)
+    cfg = set_server_target(cfg)
 
     # Create directory to store client states if it does not exist
     # Client state has subdirectories with the name of current time

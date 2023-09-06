@@ -6,8 +6,8 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from FedPer.utils.model_manager import ModelManager
-from FedPer.utils.model_split import ModelSplit
+from FedPer.models.model_manager import ModelManager
+from FedPer.models.model_split import ModelSplit
 
 # DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 

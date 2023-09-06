@@ -22,8 +22,9 @@ def open_pickle(path: str) -> dict:
 
 
 if __name__ == "__main__":
-    # use directories if they start with mobile
-    directories = [d for d in os.listdir("./use") if d.startswith("mobile")]
+    # use directories 
+    directories = [d for d in os.listdir("./use") if d.endswith("flickr")]
+    directories = [d for d in directories if d.startswith("mobile")]
 
     results_for_plot = []
     for directory in directories:
@@ -37,21 +38,19 @@ if __name__ == "__main__":
         _, values = zip(*metric_dict["accuracy"])
 
         results_for_plot.append(values)
-
+    quit()
     keys = [
-        "FedPer #class-10",
-        "FedAvg #class-8",
-        "FedAvg #class-10",
-        "FedAvg #class-4",
-        "FedPer #class-8",
-        "FedPer #class-4",
+        "Fedper (1 block + classifier)",
+        "Fedper (3 blocks + classifier)",
+        "FedAvg",
+        "FedPer (2 blocks + classifier)"
     ]
 
     plt.figure()
     for i, result in enumerate(results_for_plot):
         # set y axis to cross 0
         plt.xlim(left=0)
-        plt.xlim(right=50)
+        plt.xlim(right=25)
         label = keys[i]
         if "fedavg" in label.lower():
             plt.plot(result, label=keys[i], linestyle="dashed")
@@ -60,5 +59,5 @@ if __name__ == "__main__":
     plt.ylabel("Accuracy")
     plt.xlabel("Rounds")
     plt.legend()
-    plt.savefig("./use/mobile_plot_figure_2.png")
+    plt.savefig("./use/mobile_plot_figure_4.png")
     plt.show()
