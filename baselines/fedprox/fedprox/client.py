@@ -15,6 +15,7 @@ from torch.utils.data import DataLoader
 from fedprox.models import test, train
 
 
+# pylint: disable=too-many-arguments
 class FlowerClient(
     fl.client.NumPyClient
 ):  # pylint: disable=too-many-instance-attributes

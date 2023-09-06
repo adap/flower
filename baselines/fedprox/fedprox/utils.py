@@ -32,12 +32,12 @@ def plot_metric_from_history(
         if metric_type == "centralized"
         else hist.metrics_distributed
     )
-    rounds, values = zip(*metric_dict["accuracy"])
+    _, values = zip(*metric_dict["accuracy"])
 
     # let's extract centralised loss (main metric reported in FedProx paper)
     rounds_loss, values_loss = zip(*hist.losses_centralized)
 
-    fig, axs = plt.subplots(nrows=2, ncols=1, sharex="row")
+    _, axs = plt.subplots(nrows=2, ncols=1, sharex="row")
     axs[0].plot(np.asarray(rounds_loss), np.asarray(values_loss))
     axs[1].plot(np.asarray(rounds_loss), np.asarray(values))
 

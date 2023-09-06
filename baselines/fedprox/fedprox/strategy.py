@@ -21,7 +21,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
         The weighted average metric.
     """
     # Multiply accuracy of each client by number of examples used
-    accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
+    accuracies = [num_examples * float(m["accuracy"]) for num_examples, m in metrics]
     examples = [num_examples for num_examples, _ in metrics]
 
     # Aggregate and return custom metric (weighted average)
@@ -47,7 +47,7 @@ class FedAvgWithStragglerDrop(FedAvg):
         # print(f"Num stragglers in round: {sum(stragglers_mask)}")
 
         # keep those results that are not from stragglers
-        results = [res for i, res in enumerate(results) if not (stragglers_mask[i])]
+        results = [res for i, res in enumerate(results) if not stragglers_mask[i]]
 
         # call the parent `aggregate_fit()` (i.e. that in standard FedAvg)
         return super().aggregate_fit(server_round, results, failures)

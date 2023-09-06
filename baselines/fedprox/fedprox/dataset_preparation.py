@@ -24,6 +24,7 @@ def _download_data() -> Tuple[Dataset, Dataset]:
     return trainset, testset
 
 
+# pylint: disable=too-many-locals
 def _partition_data(
     num_clients,
     iid: Optional[bool] = False,
@@ -175,6 +176,7 @@ def _sort_by_class(
     return sorted_dataset
 
 
+# pylint: disable=too-many-locals, too-many-arguments
 def _power_law_split(
     sorted_trainset: Dataset,
     num_partitions: int,
@@ -249,6 +251,7 @@ def _power_law_split(
     remaining_per_class = class_counts - hist
     # obtain how many samples each partition should be assigned for each of the
     # labels it contains
+    # pylint: disable=too-many-function-args
     probs = (
         remaining_per_class.reshape(-1, 1, 1)
         * probs
