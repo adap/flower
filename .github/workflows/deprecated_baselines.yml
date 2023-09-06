@@ -17,6 +17,7 @@ defaults:
 
 jobs:
   test_deprecated_baselines:
+    name: Test
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
