@@ -1,7 +1,7 @@
 ---
 title: DepthFL:Depthwise Federated Learning for Heterogeneous Clients
 url: https://openreview.net/forum?id=pf8RIZTMU58
-labels: [image classification, cross-device, system heterogeneity] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
+labels: [image classification, system heterogeneity] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
 dataset: [CIFAR100] # list of datasets you include in your baseline
 ---
 
@@ -18,20 +18,20 @@ dataset: [CIFAR100] # list of datasets you include in your baseline
 
 ## About this baseline
 
-****What’s implemented:**** : The code in this directory replicates the experiments in DepthFL: Depthwise Federated Learning for Heterogeneous Clients (Kim et al., 2023) for CIFAR100, which proposed the DepthFL algorithm. Concretely, it replicates the results for CIFAR100 in Table 2,3 and 4.
+****What’s implemented:**** The code in this directory replicates the experiments in DepthFL: Depthwise Federated Learning for Heterogeneous Clients (Kim et al., 2023) for CIFAR100, which proposed the DepthFL algorithm. Concretely, it replicates the results for CIFAR100 dataset in Table 2,3 and 4.
 
-****Datasets:**** : CIFAR100 from PyTorch's Torchvision
+****Datasets:**** CIFAR100 from PyTorch's Torchvision
 
-****Hardware Setup:**** : These experiments were run on a server with Nvidia 3090 GPUs. Any machine with 1x 8GB GPU or more would be able to run it in a reasonable amount of time. 
+****Hardware Setup:**** These experiments were run on a server with Nvidia 3090 GPUs. Any machine with 1x 8GB GPU or more would be able to run it in a reasonable amount of time. 
 
-****Contributors:**** : Minjae Kim
+****Contributors:**** Minjae Kim
 
 
 ## Experimental Setup
 
-****Task:**** : Image Classification
+****Task:**** Image Classification
 
-****Model:**** : ResNet18 with additional bottleneck layers
+****Model:**** ResNet18
 
 **Dataset:** This baseline only includes the CIFAR100 dataset. By default it will be partitioned into 100 clients following IID distribution. The settings are as follow:
 
@@ -44,54 +44,119 @@ The following table shows the main hyperparameters for this baseline with their 
 
 | Description | Default Value |
 | ----------- | ----- |
-| total clients | 1000 |
-| clients per round | 10 |
-| number of rounds | 100 |
-| client resources | {'num_cpus': 2.0, 'num_gpus': 0.0 }|
-| data partition | pathological with power law (2 classes per client) |
-| optimizer | SGD with proximal term |
-| proximal mu | 1.0 |
-| stragglers_fraction | 0.9 |
+| total clients | 100 |
+| local epoch | 5 |
+| batch size | 50 |
+| number of rounds | 1000 |
+| participation ratio | 10% |
+| learning rate | 0.1 |
+| learning rate decay | 0.998 |
+| client resources | {'num_cpus': 1.0, 'num_gpus': 0.5 }|
+| data partition | IID |
+| optimizer | SGD with dynamic regularization |
+| alpha | 0.1 |
 
 
 ## Environment Setup
 
-:warning: _The Python environment for all baselines should follow these guidelines in the `EXTENDED_README`. Specify the steps to create and activate your environment. If there are any external system-wide requirements, please include instructions for them too. These instructions should be comprehensive enough so anyone can run them (if non standard, describe them step-by-step)._
+To construct the Python environment follow these steps:
+
+```bash
+# install the base Poetry environment
+poetry install
+
+# activate the environment
+poetry shell
+
+# install PyTorch with GPU support. 
+pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116
+```
 
 
 ## Running the Experiments
 
-:warning: _Provide instructions on the steps to follow to run all the experiments._
-```bash  
-# The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
+To run this DepthFL, first ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
 
-poetry run -m <baseline-name>.main <no additional arguments> # where <baseline-name> is the name of this directory and that of the only sub-directory in this directory (i.e. where all your source code is)
+```bash
+python -m depthfl.main # this will run using the default settings in the `conf/config.yaml`
 
-# If you are using a dataset that requires a complicated download (i.e. not using one natively supported by TF/PyTorch) + preprocessing logic, you might want to tell people to run one script first that will do all that. Please ensure the download + preprocessing can be configured to suit (at least!) a different download directory (and use as default the current directory). The expected command to run to do this is:
+# you can override settings directly from the command line
+python -m depthfl.main exclusive_learning=true model_size=1 # exclusive learning - 100% (a)
+python -m depthfl.main exclusive_learning=true model_size=4 # exclusive learning - 25% (d)
+python -m depthfl.main fit_config.feddyn=false fit_config.kd=false # DepthFL (FedAvg)
+python -m depthfl.main fit_config.feddyn=false fit_config.kd=false fit_config.extended=false # InclusiveFL
+```
 
-poetry run -m <baseline-name>.dataset_preparation <optional arguments, but default should always run>
-
-# It is expected that you baseline supports more than one dataset and different FL settings (e.g. different number of clients, dataset partitioning methods, etc). Please provide a list of commands showing how these experiments are run. Include also a short explanation of what each one does. Here it is expected you'll be using the Hydra syntax to override the default config.
-
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
-.
-.
-.
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
+To run using HeteroFL:
+```bash
+# since sbn takes too long, we test global model every 50 rounds. 
+python -m fedprox.main --config-name="heterofl" # HeteroFL
+python -m fedprox.main --config-name="heterofl" exclusive_learning=true model_size=1 # exclusive learning - 100% (a)
 ```
 
 
 ## Expected Results
 
-:warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
+With the following command we run DepthFL (FedDyn / FedAvg), InclusiveFL, and HeteroFL to replicate the results of table 2,3,4 in DepthFL paper. 
 
 ```bash
-# it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameteres
+python -m depthfl.main --config-name="heterofl" 
+python -m depthfl.main --config-name="heterofl" exclusive_learning=true model_size=1 model.scale=false
+python -m depthfl.main --config-name="heterofl" exclusive_learning=true model_size=2 model.scale=false
+python -m depthfl.main --config-name="heterofl" exclusive_learning=true model_size=3 model.scale=false
+python -m depthfl.main --config-name="heterofl" exclusive_learning=true model_size=4 model.scale=false
 
-poetry run -m <baseline-name>.main --multirun num_client_per_round=5,10,50 dataset=femnist,cifar10
-# the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
+python -m depthfl.main fit_config.feddyn=false fit_config.kd=false  
+python -m depthfl.main fit_config.feddyn=false fit_config.kd=false  exclusive_learning=true model_size=1
+python -m depthfl.main fit_config.feddyn=false fit_config.kd=false  exclusive_learning=true model_size=2
+python -m depthfl.main fit_config.feddyn=false fit_config.kd=false  exclusive_learning=true model_size=3
+python -m depthfl.main fit_config.feddyn=false fit_config.kd=false  exclusive_learning=true model_size=4
 
-[Now show a figure/table displaying the results of the above command]
+python -m depthfl.main 
+python -m depthfl.main exclusive_learning=true model_size=1
+python -m depthfl.main exclusive_learning=true model_size=2
+python -m depthfl.main exclusive_learning=true model_size=3
+python -m depthfl.main exclusive_learning=true model_size=4
 
-# add more commands + plots for additional experiments.
+python -m depthfl.main fit_config.feddyn=false fit_config.kd=false fit_config.extended=false
+
+python -m depthfl.main fit_config.kd=false
 ```
+
+The above commands would generate results in DepthFL paper. The numbers below are the results of a single run, and although they do not perfectly match the numbers recorded in the paper, they are very close.
+
+**Table 2** 
+
+100% (a), 75%(b), 50%(c), 25% (d) cases are exclusive learning scenario. 100% (a) exclusive learning means, the global model and every local model are equal to the smallest local model, and 100% clients participate in learning. Likewise, 25% (d) exclusive learning means, the global model and every local model are equal to the larget local model, and only 25% clients participate in learning.
+
+| Scaling Method | Dataset | Global Model | 100% (a) | 75% (b) | 50% (c) | 25% (d) | 
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | 
+| HeterFL | CIFAR100 | 57.61 | 64.39 | 66.08 | 62.03 | 51.99 |
+| DepthFL (FedAvg) | CIFAR100 | 72.67 | 67.08 | a | a | a |
+| DepthFL | CIFAR100 | a | a | a | a | a |
+
+**Table 3** 
+
+Accuracy of global sub-models compared to exclusive learning on CIFAR-100.
+
+| Method | Algorithm | Classifier 1/4 | Classifier 2/4 | Classifier 3/4 | Classifier 4/4 |
+| :---: | :---: | :---: | :---: | :---: | :---: |
+| Width Scaling | Exclusive Learning | a | a | a | a |
+| Width Scaling | HeteroFL | a | a | a | a |
+
+| Method | Algorithm | Classifier 1/4 | Classifier 2/4 | Classifier 3/4 | Classifier 4/4 |
+| :---: | :---: | :---: | :---: | :---: | :---: |
+| Depth Scaling | Exclusive Learning | a | a | a | a |
+| Depth Scaling | InclusiveFL | a | a | a | a |
+| Depth Scaling | DepthFL (FedAvg)| a | a | a | a |
+
+**Table 4** 
+
+Accuracy of the global model with/without self distillation on CIFAR-100.
+
+| Distribution | Dataset | KD | Classifier 1/4 | Classifier 2/4 | Classifier 3/4 | Classifier 4/4 |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| IID | CIFAR-100 | &cross; | a | a | a |  a |
+| IID | CIFAR-100 | &check; | a | a | a | a |
+
+
