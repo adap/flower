@@ -8,7 +8,7 @@
 
 - **Strategies**
 
-  - Add an in-place implementation of FedAvg [#2293](https://github.com/adap/flower/pull/2293)
+  - Support for in-place aggregation in `FedAvg` ([#2293](https://github.com/adap/flower/pull/2293))
 
 ### Incompatible changes
 
