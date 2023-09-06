@@ -36,11 +36,11 @@ from flwr.common import (
     parameters_to_weights,
     weights_to_parameters,
 )
-
+from strategy import FedVSSL
 
 if __name__ == "__main__":
     import _init_paths
-    import videossl
+    import utilis 
 
     os.chdir("/fedssl/")
     pool_size = 100  # number of dataset partions (= number of total clients)
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     rounds = 1
 
     # configure the strategy
-    strategy = SaveModelStrategy(
+    strategy = FedVSSL(
         fraction_fit=0.05,
         fraction_eval=0.02,
         min_fit_clients=5,
@@ -64,7 +64,7 @@ if __name__ == "__main__":
         # Parse command line argument `cid` (client ID)
         #        os.environ["CUDA_VISIBLE_DEVICES"] = cid
         args, cfg, distributed, logger, model, train_dataset, test_dataset, videossl = initial_setup(cid, base_work_dir, rounds)
-        return SslClient(model, train_dataset, test_dataset, cfg, args, distributed, logger, videossl)
+        return SslClient(model, train_dataset, test_dataset, cfg, args, distributed, logger, utils)
 
 
     # (optional) specify ray config
@@ -75,14 +75,14 @@ if __name__ == "__main__":
         client_fn=main,
         num_clients=pool_size,
         client_resources=client_resources,
-        num_rounds=rounds,
+        num_rounds=fl.server.ServerConfig(num_rounds=1),
         strategy=strategy,
         ray_init_args=ray_config,
     )
 
 def initial_setup(cid, base_work_dir, rounds, light=False):
     import _init_paths
-    import videossl
+    import utils
     cid_plus_one = str(int(cid) + 1)
     args = Namespace(
         cfg='path to the configuration file.py',
@@ -103,10 +103,10 @@ def initial_setup(cid, base_work_dir, rounds, light=False):
     model = videossl.load_model(args, cfg)
     # load the training data
     
-    train_dataset = videossl.load_data(args, cfg)
+    train_dataset = utils.load_data(args, cfg)
     
     # load the test data
-    test_dataset = videossl.load_test_data(args, cfg)
+    test_dataset = utils.load_test_data(args, cfg)
     
     return args, cfg, distributed, logger, model, train_dataset, test_dataset, videossl
 # import hydra
