@@ -1,18 +1,43 @@
 name: E2E
 
 on:
-  workflow_run:
-    workflows: [Wheel]
-    types:
-      - completed
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 env:
   FLWR_TELEMETRY_ENABLED: 0
 
 jobs:
+  wheel:
+    runs-on: ubuntu-22.04
+    name: Wheel
+    steps:
+      - uses: actions/checkout@v3
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Install dependencies (mandatory only)
+        run: python -m poetry install
+      - name: Build wheel
+        run: ./dev/build.sh
+      - name: Test wheel
+        run: ./dev/test-wheel.sh
+      - name: Build and deploy docs
+        env:
+          AWS_DEFAULT_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
+        run: |
+          cd ./dist
+          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./ s3://artifact.flower.dev/py/${{ github.event.number }}/${{ github.sha }} --recursive
+
   frameworks:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
+    needs: wheel
     # Using approach described here:
     # https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs
     strategy:
@@ -98,6 +123,7 @@ jobs:
   strategies:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
+    needs: wheel
     strategy:
       matrix:
         strat: ["FedMedian", "FedTrimmedAvg", "QFedAvg", "FaultTolerantFedAvg", "FedAvgM", "FedAdam", "FedAdagrad", "FedYogi"]
