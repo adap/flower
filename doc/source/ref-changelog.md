@@ -4,7 +4,7 @@
 
 ### What's new?
 
-- **General Updates to baselines** ([#2301](https://github.com/adap/flower/pull/2301))
+- **General updates to baselines** ([#2301](https://github.com/adap/flower/pull/2301))
 
 ### Incompatible changes
 
