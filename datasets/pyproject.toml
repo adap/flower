@@ -69,6 +69,10 @@ pytest-watch = "==4.2.0"
 ruff = "==0.0.277"
 types-requests = "==2.28.11.17"
 
+[tool.poetry.extras]
+vision = ["datasets[vision]"]
+audio = ["datasets[audio]"]
+
 [tool.isort]
 line_length = 88
 indent = "    "
