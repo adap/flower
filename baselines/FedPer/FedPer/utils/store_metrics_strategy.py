@@ -2,7 +2,6 @@ from typing import Dict, List, Optional, Tuple
 
 from flwr.common import EvaluateRes, FitRes, Parameters, Scalar
 from flwr.server.client_proxy import ClientProxy
-
 from FedPer.utils.store_history_strategy import StoreHistoryStrategy
 
 

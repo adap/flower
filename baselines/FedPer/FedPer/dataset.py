@@ -8,15 +8,26 @@ partitioned, please include all those functions and logic in the
 `dataset_preparation.py` module. You can use all those functions from functions/methods
 defined here of course.
 """
-import json
 import os
-import pickle
 import sys
-from pathlib import Path
-
+import json
+import torch
 import numpy as np
+import pickle
+import pandas as pd
 
-from FedPer.dataset_preparation import DATASETS, randomly_assign_classes
+from typing import Optional, Tuple
+from pathlib import Path
+from argparse import ArgumentParser
+from omegaconf import DictConfig
+from torch.utils.data import DataLoader, random_split
+# from FedPer_old.utils import fix_random_seed, prune_args
+#from FedPer_old.dataset_preparation import (
+#    DATASETS, randomly_assign_classes
+#)
+from FedPer.dataset_preparation import (
+    DATASETS, randomly_assign_classes, flickr_preprocess
+)
 
 # working dir is two up
 WORKING_DIR = Path(__file__).resolve().parent.parent
@@ -24,46 +35,47 @@ FL_BENCH_ROOT = WORKING_DIR.parent
 
 sys.path.append(FL_BENCH_ROOT.as_posix())
 
-
-def dataset_main(config: dict) -> None:
-    dataset_name = config["name"].lower()
+def dataset_main(config : dict) -> None:
+    dataset_name = config['name'].lower()
     dataset_folder = Path(WORKING_DIR, "datasets")
     dataset_root = Path(dataset_folder, dataset_name)
 
     if not os.path.isdir(dataset_root):
         os.makedirs(dataset_root)
 
-    partition = {"separation": None, "data_indices": None}
+    partition = {
+        "separation": None, 
+        "data_indices": None
+    }
 
-    if dataset_name in ["cifar10", "cifar100"]:
+    if dataset_name in ['cifar10', 'cifar100']:
         dataset = DATASETS[dataset_name](dataset_root, config)
 
         # randomly assign classes
-        assert config["num_classes"] > 0, "Number of classes must be positive"
-        config["num_classes"] = max(1, min(config["num_classes"], len(dataset.classes)))
+        assert config['num_classes'] > 0, "Number of classes must be positive"
+        config['num_classes'] = max(1, min(config['num_classes'], len(dataset.classes)))
         partition, stats = randomly_assign_classes(
-            dataset=dataset,
-            client_num=config["num_clients"],
-            class_num=config["num_classes"],
+            dataset=dataset, client_num=config['num_clients'], class_num=config['num_classes']
         )
+    elif dataset_name.lower() == 'flickr':
+        flickr_preprocess(dataset_root, config)
     else:
         raise RuntimeError("Please implement the dataset preparation for your dataset.")
 
-    if partition["separation"] is None:
-        clients_4_train = list(range(config["num_clients"]))
-        clients_4_test = list(range(config["num_clients"]))
+    if config['name'] in ["cifar10", "cifar100"]:
+        if partition["separation"] is None:
+            clients_4_train = list(range(config['num_clients']))
+            clients_4_test = list(range(config['num_clients']))
 
-        partition["separation"] = {
-            "train": clients_4_train,
-            "test": clients_4_test,
-            "total": config["num_clients"],
-        }
-
-    if config["name"] in ["cifar10", "cifar100"]:
+            partition["separation"] = {
+                "train": clients_4_train,
+                "test": clients_4_test,
+                "total": config['num_clients'],
+            }
         for client_id, idx in enumerate(partition["data_indices"]):
-            if config["split"] == "sample":
-                num_train_samples = int(len(idx) * config["fraction"])
-
+            if config['split'] == "sample":
+                num_train_samples = int(len(idx) * config['fraction'])
+                
                 np.random.shuffle(idx)
                 idx_train, idx_test = idx[:num_train_samples], idx[num_train_samples:]
                 partition["data_indices"][client_id] = {
@@ -75,11 +87,11 @@ def dataset_main(config: dict) -> None:
                     partition["data_indices"][client_id] = {"train": idx, "test": []}
                 else:
                     partition["data_indices"][client_id] = {"train": [], "test": idx}
-    with open(dataset_root / "partition.pkl", "wb") as f:
-        pickle.dump(partition, f)
+        with open(dataset_root / "partition.pkl", "wb") as f:
+            pickle.dump(partition, f)
 
-    with open(dataset_root / "all_stats.json", "w") as f:
-        json.dump(stats, f)
+        with open(dataset_root / "all_stats.json", "w") as f:
+            json.dump(stats, f)
 
-    # with open(dataset_root / "args.json", "w") as f:
+    #with open(dataset_root / "args.json", "w") as f:
     #    json.dump(prune_args(config), f)

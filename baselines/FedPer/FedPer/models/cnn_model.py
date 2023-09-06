@@ -86,7 +86,6 @@ class CNNModelSplit(ModelSplit):
     def _get_model_parts(self, model: CNNNet) -> Tuple[nn.Module, nn.Module]:
         return model.body, model.head
 
-
 class CNNModelManager(ModelManager):
     """Manager for models with Body/Head split."""
 

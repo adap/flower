@@ -100,7 +100,6 @@ class FlowerClient(
         loss, accuracy = test(self.net, self.valloader, self.device)
         return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
 
-
 def gen_client_fn(
     num_epochs: int,
     trainloaders: List[DataLoader],

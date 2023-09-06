@@ -28,3 +28,10 @@ python -m FedPer.main --config-path conf/cifar10/mobile --config-name fedavg &&
 #python -m FedPer.main --config-path conf/cifar10/resnet --config-name n_3_head_layers &&
 python -m FedPer.main --config-path conf/cifar10/resnet --config-name fedavg
 
+# FLICKR Mobile
+# python -m FedPer.main --config-path conf/flickr/mobile --config-name 2_head_layers &&
+python -m FedPer.main --config-path conf/flickr/mobile --config-name fedavg &&
+
+# FLICKR Resnet
+python -m FedPer.main --config-path conf/flickr/resnet --config-name 2_head_layers &&
+python -m FedPer.main --config-path conf/flickr/resnet --config-name fedavg

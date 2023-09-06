@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 # FL Algorithms
 class Algorithms(Enum):
     FEDAVG = "FedAvg"

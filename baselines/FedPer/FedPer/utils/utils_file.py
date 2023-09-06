@@ -24,7 +24,6 @@ STD = {
     "cifar100": [0.2009, 0.1984, 0.2023],
 }
 
-
 def get_model_fn(config: DictConfig):
     """Get model function from config.
 
@@ -95,7 +94,6 @@ def plot_metric_from_history(
 
     plt.savefig(Path(save_plot_path) / Path(f"{metric_type}_metrics{suffix}.png"))
     plt.close()
-
 
 def save_results_as_pickle(
     history: History,
