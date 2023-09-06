@@ -8,9 +8,9 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 import hydra
 from omegaconf import DictConfig, OmegaConf
 
-from utils import run_centralized
+from utils import run_centralized,show_local_clients_preformance_for_comparison_on_single_dataset
 
-@hydra.main(config_path="conf", config_name="Centralized Baseline", version_base=None)
+@hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.
 
@@ -23,6 +23,7 @@ def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
     if cfg.centralized:
         run_centralized(cfg,dataset_name=cfg.dataset.dataset_name)
+    show_local_clients_preformance_for_comparison_on_single_dataset(cfg)
     # 2. Prepare your dataset
     # here you should call a function in datasets.py that returns whatever is needed to:
     # (1) ensure the server can access the dataset used to evaluate your model after
