@@ -1,9 +1,12 @@
-from typing import Dict, Tuple, cast
-
+from typing import Tuple, cast
 import numpy as np
 import tensorflow as tf
 
 import flwr as fl
+
+### uncomment this if you are getting the ssl error
+# ssl._create_default_https_context = ssl._create_unverified_context
+###
 
 
 def main() -> None:
@@ -16,50 +19,35 @@ def main() -> None:
             tf.keras.layers.Dense(10, activation="softmax"),
         ]
     )
+
     model.compile(
         optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"]
     )
-
-    # Implement a Flower client
-    class MnistClient(fl.client.keras_client.KerasClient):
-        def __init__(
-            self,
-            model: tf.keras.Model,
-            x_train: np.ndarray,
-            y_train: np.ndarray,
-            x_test: np.ndarray,
-            y_test: np.ndarray,
-        ) -> None:
-            self.model = model
-            self.x_train, self.y_train = x_train, y_train
-            self.x_test, self.y_test = x_test, y_test
-
-        def get_weights(self) -> fl.common.NDArrays:
-            return cast(fl.common.NDArrays, self.model.get_weights())
-
-        def fit(
-            self, weights: fl.common.NDArrays, config: Dict[str, fl.common.Scalar]
-        ) -> Tuple[fl.common.NDArrays, int, int]:
-            self.model.set_weights(weights)
-            self.model.fit(self.x_train, self.y_train, epochs=5)
-            return self.model.get_weights(), len(self.x_train), len(self.x_train)
-
-        def evaluate(
-            self, weights: fl.common.NDArrays, config: Dict[str, fl.common.Scalar]
-        ) -> Tuple[int, float, float]:
-            self.model.set_weights(weights)
-            loss, accuracy = self.model.evaluate(self.x_test, self.y_test)
-            return len(self.x_test), loss, accuracy
 
     # Load MNIST data
     (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
     x_train, x_test = x_train / 255.0, x_test / 255.0
 
-    # Instanstiate client
-    client = MnistClient(model, x_train, y_train, x_test, y_test)
+    # Implement a Flower client
+    class MnistClient(fl.client.NumPyClient):
+        def get_parameters(self, config) -> fl.common.NDArrays:
+            return cast(fl.common.NDArrays, model.get_weights())
+
+        def fit(self, parameters, config) -> Tuple[fl.common.NDArrays, int, dict]:
+            model.set_weights(parameters)
+            model.fit(x_train, y_train, epochs=1, batch_size=32)
+            return model.get_weights(), len(x_train), {}
+
+        def evaluate(self, parameters, config) -> Tuple[int, int, dict]:
+            model.set_weights(parameters)
+            loss, accuracy = model.evaluate(x_test, y_test)
+            return loss, len(x_test), {"accuracy": accuracy}
 
     # Start client
-    fl.client.start_keras_client(server_address="[::]:8080", client=client)
+    fl.client.start_numpy_client(
+        server_address="127.0.0.1:8080",
+        client=MnistClient(),
+    )
 
 
 if __name__ == "__main__":
