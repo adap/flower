@@ -13,10 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          sparse-checkout: |
-            doc/source/ref-changelog.md
-          sparse-checkout-cone-mode: false
+          fetch: true
+          # sparse-checkout: doc/source/ref-changelog.md
+          # sparse-checkout-cone-mode: false
       - name: Test change
         run: |
+          git fetch origin main
           CHANGED=`git diff --name-only origin/main -- doc/source/ref-changelog.md`
           [[ ! -z "$CHANGED" ]] || echo "doc/source/ref-changelog.md must be updated" && exit 1
