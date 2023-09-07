@@ -1,0 +1,18 @@
+# Contains repository level tests opposed to language level tests
+name: Repository
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    name: Changelog check
+    steps:
+      - uses: actions/checkout@v3
+      - name: Test change
+        run: |
+          CHANGED=`git diff --name-only main CHANGELOG.md`
+          [[ ! -z "$CHANGED" ]] || echo "CHANGLOG.md must be updated" && exit 1
