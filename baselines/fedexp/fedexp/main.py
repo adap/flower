@@ -37,8 +37,7 @@ def main(cfg: DictConfig) -> None:
                                      model=cfg.model,
                                      num_epochs=cfg.num_epochs,
                                      args={
-                                         "p": p,
-                                         "device": cfg.client_device,
+                                         "p": p
                                      },
                                      )
 
