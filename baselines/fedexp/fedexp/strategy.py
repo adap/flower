@@ -36,6 +36,8 @@ class FedExP(FedAvg):
             failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using FedProx."""
+        if not self.accept_failures and failures:
+            return None, {}
         # Aggregate results
         grad_sum = sum([res.metrics["grad_p"] for _, res in results])
         p_sum = sum([res.metrics["p"] for _, res in results])
