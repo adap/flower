@@ -7,10 +7,10 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 # feel free to remove some if aren't needed
 import hydra
 from omegaconf import DictConfig, OmegaConf
-
-from utils import run_centralized,clients_preformance_on_local_data,load_single_dataset,do_fl_partitioning
 from torch.utils.data import TensorDataset
 import torch
+from utils import run_centralized,clients_preformance_on_local_data,load_single_dataset,dataset_tasks
+from dataset import do_fl_partitioning
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -26,8 +26,8 @@ def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
     if cfg.centralized:
         run_centralized(cfg,dataset_name=cfg.dataset.dataset_name)
-    task_type="REG"
-    dataset_name="ijcnn1"
+    dataset_name="cod-rna"
+    task_type=dataset_tasks[dataset_name]
     X_train,y_train,X_test,y_test=load_single_dataset(task_type,dataset_name,train_ratio=cfg.dataset.train_ratio)
     trainset=TensorDataset(torch.from_numpy(X_train), torch.from_numpy (y_train))
     testset = TensorDataset(torch.from_numpy(X_test), torch.from_numpy (y_test))

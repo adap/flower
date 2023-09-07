@@ -5,7 +5,6 @@ modifications) you might be better off instantiating your  model directly from t
 config. In this way, swapping your model for  another one can be done without changing
 the python code at all
 """
-import xgboost as xgb
 from xgboost import XGBClassifier, XGBRegressor
 from torch.utils.data import Dataset
 from flwr.common import NDArray, NDArrays
@@ -13,6 +12,10 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from omegaconf import DictConfig, OmegaConf
 from hydra.utils import instantiate
 from torch.utils.data import DataLoader, Dataset
+import numpy as np
+import torch
+import torch.nn as nn
+
 
 def fit_XGBoost(
     config: DictConfig, task_type:str, X_train: NDArray,y_train: NDArray, n_estimators: int
@@ -25,10 +28,3 @@ def fit_XGBoost(
     return tree
 
 
-def construct_tree_from_loader(
-    dataset_loader: DataLoader, n_estimators: int, tree_type: str
-) -> Union[XGBClassifier, XGBRegressor]:
-    """Construct a xgboost tree form tabular dataset loader."""
-    for dataset in dataset_loader:
-        data, label = dataset[0], dataset[1]
-    return fit_XGBoost(data, label, n_estimators, tree_type)

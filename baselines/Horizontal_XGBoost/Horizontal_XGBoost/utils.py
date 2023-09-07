@@ -9,7 +9,7 @@ import hydra
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
-from dataset import load_single_dataset,do_fl_partitioning
+from dataset import load_single_dataset
 
 from typing import Any, Dict, List, Optional, Tuple, Union
 from flwr.common import NDArray, NDArrays
@@ -57,7 +57,7 @@ def run_centralized(config: DictConfig,
             result_train,result_test=run_single_exp(config,dataset,task_type,config.n_estimators)
             print("Results for",dataset,", Task:",task_type,", Train:",result_train,", Test:",result_test)
         else:
-            if dataset_name in dataset_tasks.keys:
+            if dataset_name in dataset_tasks.keys():
                 result_train,result_test=run_single_exp(config,dataset,dataset_tasks[dataset],config.n_estimators)
                 print("Results for",dataset,", Task:",dataset_tasks[dataset],", Train:",result_train,", Test:",result_test)
             else:
