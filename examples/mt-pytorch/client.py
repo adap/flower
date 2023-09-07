@@ -45,7 +45,7 @@ if restful_mode:
     )
 else:
     fl.client.start_numpy_client(
-        server_address="0.0.0.0:9092",
+        server_address="0.0.0.0:9092",  # "0.0.0.0:9093" for REST
         client=FlowerClient(),
-        transport="grpc-rere",
+        transport="grpc-rere",  # "rest" for REST
     )

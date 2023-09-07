@@ -42,8 +42,9 @@ async def create_node(request: Request) -> Response:
     """Create Node"""
     _check_headers(request.headers)
 
-    # parse base 64 to string
+    # Parse base 64 to string
     create_node_request_bytes: bytes = await request.body()
+
     # Deserialize ProtoBuf
     create_node_request_proto = CreateNodeRequest()
     create_node_request_proto.ParseFromString(create_node_request_bytes)
@@ -56,6 +57,7 @@ async def create_node(request: Request) -> Response:
         request=create_node_request_proto, 
         state=state
     )
+
     # Return serialized ProtoBuf
     new_node_data_bytes = new_node_data.SerializeToString()
     return Response(
@@ -71,6 +73,7 @@ async def delete_node(request: Request) -> Response:
 
     # Get the request body as raw bytes
     delete_node_request_bytes: bytes = await request.body()
+
     # Deserialize ProtoBuf
     delete_node_request_proto = DeleteNodeRequest()
     delete_node_request_proto.ParseFromString(delete_node_request_bytes)
@@ -83,7 +86,8 @@ async def delete_node(request: Request) -> Response:
         request=delete_node_request_proto,
         state=state
     )
-    # Return Serialize Protobuf
+
+    # Return serialized ProtoBuf
     delete_node_response_bytes = delete_node_response.SerializeToString()
     return Response(
         status_code=200,

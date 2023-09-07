@@ -1,7 +1,9 @@
 # Changelog
 
 ## Unreleased
+
 -  **Update REST API to support create and delete nodes** ([#2283](https://github.com/adap/flower/pull/2283))
+
 ### What's new?
 
 - **General updates to baselines** ([#2301](https://github.com/adap/flower/pull/2301).[#2305](https://github.com/adap/flower/pull/2305), [#2307](https://github.com/adap/flower/pull/2307))

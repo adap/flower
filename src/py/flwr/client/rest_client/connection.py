@@ -51,10 +51,10 @@ KEY_NODE = "node"
 KEY_TASK_INS = "current_task_ins"
 
 
-PATH_PULL_TASK_INS: str = "api/v0/fleet/pull-task-ins"
-PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 PATH_CREATE_NODE: str = "api/v0/fleet/create-node"
 PATH_DELETE_NODE: str = "api/v0/fleet/delete-node"
+PATH_PULL_TASK_INS: str = "api/v0/fleet/pull-task-ins"
+PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 
 
 @contextmanager
@@ -213,7 +213,7 @@ def http_request_response(
             return None
         node: Node = cast(Node, node_store[KEY_NODE])
         
-        pull_task_ins_req_proto = PullTaskInsRequest( node=node)
+        pull_task_ins_req_proto = PullTaskInsRequest(node=node)
         pull_task_ins_req_bytes: bytes = pull_task_ins_req_proto.SerializeToString()
 
         # Request instructions (task) from server
@@ -268,7 +268,7 @@ def http_request_response(
 
     def send(task_res: TaskRes) -> None:
         """Send task result back to server."""
-        # get Node
+        # Get Node
         if node_store[KEY_NODE] is None:
             log(ERROR, "Node instance missing")
             return None
