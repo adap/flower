@@ -16,7 +16,4 @@ jobs:
           # sparse-checkout: doc/source/ref-changelog.md
           # sparse-checkout-cone-mode: false
       - name: Test change
-        run: |
-          git fetch --quiet origin main
-          CHANGED=`git diff --name-only origin/main -- doc/source/ref-changelog.md`
-          [[ ! -z "$CHANGED" ]] || echo "doc/source/ref-changelog.md must be updated" && exit 1
+        run: ./dev/test-repository.sh
