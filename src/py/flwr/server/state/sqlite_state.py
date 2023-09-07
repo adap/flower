@@ -15,6 +15,7 @@
 """SQLite based implemenation of server state."""
 
 
+import os
 import re
 import sqlite3
 from datetime import datetime, timedelta
@@ -36,6 +37,12 @@ CREATE TABLE IF NOT EXISTS node(
 );
 """
 
+SQL_CREATE_TABLE_WORKLOAD = """
+CREATE TABLE IF NOT EXISTS workload(
+    workload_id TEXT UNIQUE
+);
+"""
+
 SQL_CREATE_TABLE_TASK_INS = """
 CREATE TABLE IF NOT EXISTS task_ins(
     task_id                 TEXT UNIQUE,
@@ -50,7 +57,8 @@ CREATE TABLE IF NOT EXISTS task_ins(
     ttl                     TEXT,
     ancestry                TEXT,
     legacy_server_message   BLOB,
-    legacy_client_message   BLOB
+    legacy_client_message   BLOB,
+    FOREIGN KEY(workload_id) REFERENCES workload(workload_id)
 );
 """
 
@@ -69,7 +77,8 @@ CREATE TABLE IF NOT EXISTS task_res(
     ttl                     TEXT,
     ancestry                TEXT,
     legacy_server_message   BLOB,
-    legacy_client_message   BLOB
+    legacy_client_message   BLOB,
+    FOREIGN KEY(workload_id) REFERENCES workload(workload_id)
 );
 """
 
@@ -103,16 +112,17 @@ class SqliteState(State):
             Log each query which is executed.
         """
         self.conn = sqlite3.connect(self.database_path)
+        self.conn.execute("PRAGMA foreign_keys = ON;")
         self.conn.row_factory = dict_factory
         if log_queries:
             self.conn.set_trace_callback(lambda query: log(DEBUG, query))
         cur = self.conn.cursor()
 
         # Create each table if not exists queries
+        cur.execute(SQL_CREATE_TABLE_WORKLOAD)
         cur.execute(SQL_CREATE_TABLE_TASK_INS)
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
         cur.execute(SQL_CREATE_TABLE_NODE)
-
         res = cur.execute("SELECT name FROM sqlite_schema;")
 
         return res.fetchall()
@@ -190,7 +200,13 @@ class SqliteState(State):
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_ins VALUES({columns});"
 
-        self.query(query, data)
+        # Only invalid workload_id can trigger IntegrityError.
+        # This may need to be changed in the future version with more integrity checks.
+        try:
+            self.query(query, data)
+        except sqlite3.IntegrityError:
+            log(ERROR, "`workload` is invalid")
+            return None
 
         return task_id
 
@@ -319,7 +335,13 @@ class SqliteState(State):
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_res VALUES({columns});"
 
-        self.query(query, data)
+        # Only invalid workload_id can trigger IntegrityError.
+        # This may need to be changed in the future version with more integrity checks.
+        try:
+            self.query(query, data)
+        except sqlite3.IntegrityError:
+            log(ERROR, "`workload` is invalid")
+            return None
 
         return task_id
 
@@ -457,12 +479,38 @@ class SqliteState(State):
         query = "DELETE FROM node WHERE node_id = :node_id;"
         self.query(query, {"node_id": node_id})
 
-    def get_nodes(self) -> Set[int]:
-        """Retrieve all currently stored node IDs as a set."""
+    def get_nodes(self, workload_id: str) -> Set[int]:
+        """Retrieve all currently stored node IDs as a set.
+
+        Constraints
+        -----------
+        If the provided `workload_id` does not exist or has no matching nodes,
+        an empty `Set` MUST be returned.
+        """
+        # Validate workload ID
+        query = "SELECT COUNT(*) FROM workload WHERE workload_id = ?;"
+        if self.query(query, (workload_id,))[0]["COUNT(*)"] == 0:
+            return set()
+
+        # Get nodes
         query = "SELECT * FROM node;"
         rows = self.query(query)
         result: Set[int] = {row["node_id"] for row in rows}
         return result
+
+    def create_workload(self) -> str:
+        """Create one workload and store it in state."""
+        # String representation of random integer from 0 to 9223372036854775807
+        workload_id = str(int.from_bytes(os.urandom(8), "little") >> 1)
+        # Check conflicts
+        query = "SELECT COUNT(*) FROM workload WHERE workload_id = ?;"
+        # If workload_id does not exist
+        if self.query(query, (workload_id,))[0]["COUNT(*)"] == 0:
+            query = "INSERT INTO workload VALUES(:workload_id);"
+            self.query(query, {"workload_id": workload_id})
+            return workload_id
+        log(ERROR, "Unexpected workload creation failure.")
+        return ""
 
 
 def dict_factory(
