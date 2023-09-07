@@ -17,7 +17,7 @@ FitConfig = Dict[str, Union[bool, float]]
 
 @hydra.main(config_path="conf", config_name="config", version_base=None)
 def main(cfg: DictConfig) -> None:
-    """Rrun CNN federated learning on MNIST.
+    """Run CNN federated learning on MNIST.
 
     Parameters
     ----------
