@@ -14,11 +14,13 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
-from models import train
+from models import tamuna_train, fedavg_train
 
 
-class FlowerClient(fl.client.NumPyClient):
-    """Standard Flower client for CNN training."""
+class TamunaClient(fl.client.NumPyClient):
+    """Tamuna client for CNN training."""
+
+    STATE_DIR = "client_states"
 
     def __init__(
         self,
@@ -37,23 +39,19 @@ class FlowerClient(fl.client.NumPyClient):
         self.old_compressed_net = None
         self.cid = cid
 
-        self.state_file_name = f"{self.cid}_state.bin"
-        self.mask_file_name = f"{self.cid}_mask.bin"
-        self.__create_state(self.state_file_name)
+        self.state_file_name = f"{TamunaClient.STATE_DIR}/{self.cid}_state.bin"
+        self.__create_state()
 
-    def __create_state(self, state_file_name):
+    def __create_state(self):
         """Creates client state."""
-        if not os.path.exists(state_file_name):
-            with open(state_file_name, "wb") as f:
+        if not os.path.exists(self.state_file_name):
+            with open(self.state_file_name, "wb") as f:
                 state = (
                     self.control_variate,
                     self.old_compression_mask,
                     self.old_compressed_net,
                 )
                 pickle.dump(state, f, protocol=pickle.HIGHEST_PROTOCOL)
-                # print(f"Client {self.cid} state created.")
-        # else:
-            # print(f"Client {self.cid} state already exists.")
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
@@ -71,13 +69,12 @@ class FlowerClient(fl.client.NumPyClient):
         """Implements distributed fit function for a given client."""
         self.set_parameters(parameters)
 
-        with open(self.mask_file_name, "rb") as f:
-            mask = pickle.load(f)
-            mask = mask.to(self.device)
+        mask = config["mask"]
+        mask = mask.to(self.device)
 
         self.__load_state()
 
-        self.net, self.control_variate = train(
+        self.net, self.control_variate = tamuna_train(
             self.net,
             self.trainloader,
             self.device,
@@ -117,13 +114,38 @@ class FlowerClient(fl.client.NumPyClient):
             ) = state
 
 
-def gen_client_fn(
+class FedAvgClient(fl.client.NumPyClient):
+    def __init__(self, net: torch.nn.Module, trainloader: DataLoader,
+                 device: torch.device, lr: float, cid: int) -> None:
+        super().__init__()
+        self.trainloader = trainloader
+        self.device = device
+        self.lr = lr
+        self.cid = cid
+        self.net = net
+
+    def set_parameters(self, parameters):
+        params_dict = zip(self.net.state_dict().keys(), parameters)
+        state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+        self.net.load_state_dict(state_dict, strict=True)
+
+    def get_parameters(self, config: Dict[str, Scalar]):
+        return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
+
+    def fit(self, parameters, config):
+        self.set_parameters(parameters)
+        self.net = fedavg_train(self.net, self.trainloader, epochs=config["epochs"],
+                                lr=self.lr, device=self.device)
+        return self.get_parameters({}), len(self.trainloader), {}
+
+
+def gen_tamuna_client_fn(
     trainloaders: List[DataLoader],
     learning_rate: float,
     model: DictConfig,
     client_device: str,
-) -> Callable[[str], FlowerClient]:
-    """Generates the client function that creates the Flower Clients.
+) -> Callable[[str], TamunaClient]:
+    """Generates the client function that creates Tamuna clients.
 
     Parameters
     ----------
@@ -139,15 +161,12 @@ def gen_client_fn(
 
     Returns
     -------
-    Tuple[Callable[[str], FlowerClient], DataLoader]
-        A tuple containing the client function that creates Flower Clients and
-        the DataLoader that will be used for testing
+    Callable[[str], FlowerClient]
+        A tuple containing the client function that creates Tamuna clients
     """
 
-    def client_fn(cid: str) -> FlowerClient:
-        """Create a Flower client representing a single organization."""
-
-        # print(f"Creating client {cid}.")
+    def tamuna_client_fn(cid: str) -> TamunaClient:
+        """Create a Tamuna client."""
 
         # Load model
         device = torch.device(device=client_device)
@@ -157,6 +176,48 @@ def gen_client_fn(
         # will train on their own unique data
         trainloader = trainloaders[int(cid)]
 
-        return FlowerClient(net, trainloader, device, learning_rate, cid)
+        return TamunaClient(net, trainloader, device, learning_rate, cid)
 
-    return client_fn
+    return tamuna_client_fn
+
+
+def gen_fedavg_client_fn(
+    trainloaders: List[DataLoader],
+    lr: float,
+    model: DictConfig,
+    client_device: str,
+) -> Callable[[str], FedAvgClient]:
+    """Generates the client function that creates Tamuna clients.
+
+    Parameters
+    ----------
+    trainloaders: List[DataLoader]
+        A list of DataLoaders, each pointing to the dataset training partition
+        belonging to a particular client.
+    learning_rate : float
+        The learning rate for the SGD  optimizer of clients.
+    model: DictConfig
+        Architecture of the model being instantiated
+    client_device: str
+        Device to use for client training (cpu, cuda)
+
+    Returns
+    -------
+    Callable[[str], FlowerClient]
+        A tuple containing the client function that creates Tamuna clients
+    """
+
+    def fedavg_client_fn(cid: str) -> FedAvgClient:
+        """Create a Tamuna client."""
+
+        # Load model
+        device = torch.device(device=client_device)
+        net = instantiate(model).to(device)
+
+        # Note: each client gets a different trainloader, so each client
+        # will train on their own unique data
+        trainloader = trainloaders[int(cid)]
+
+        return FedAvgClient(net, trainloader, device, lr=lr, cid=int(cid))
+
+    return fedavg_client_fn

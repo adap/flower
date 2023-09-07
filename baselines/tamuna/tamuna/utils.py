@@ -5,8 +5,8 @@ import torch
 from torch import nn
 from functools import reduce
 from pathlib import Path
-from secrets import token_hex
 from typing import Dict, Optional, Union, List
+from omegaconf import DictConfig
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -45,8 +45,10 @@ def apply_nn_compression(net: nn.Module, mask: torch.tensor) -> nn.Module:
 
 def plot_metric_from_histories(
     hist: List[History],
+    cfg: DictConfig,
+    client_to_server_communication_complexity: int,
+    server_to_client_communication_complexity: int,
     save_plot_path: Path,
-    suffix: Optional[str] = "",
 ) -> None:
     """Function to plot from Flower server History.
 
@@ -69,36 +71,52 @@ def plot_metric_from_histories(
         accuracies_across_runs.append(accuracy_values)
         losses_across_runs.append(loss_values)
 
-    x_axis = range(rounds + 1)
+    x_axis = range(len(rounds))
 
     lowest_loss_across_runs = np.min(losses_across_runs, axis=0)
     largest_loss_across_runs = np.max(losses_across_runs, axis=0)
     lowest_accuracy_across_runs = np.min(accuracies_across_runs, axis=0)
     highest_accuracy_across_runs = np.max(accuracies_across_runs, axis=0)
 
+    plot_loss_accuracy(highest_accuracy_across_runs, largest_loss_across_runs, lowest_accuracy_across_runs,
+                       lowest_loss_across_runs, Path(save_plot_path) / Path(f"loss_accuracy.png"), x_axis)
+
+    plot_communication_complexity(cfg, largest_loss_across_runs, lowest_loss_across_runs, rounds,
+                                  Path(save_plot_path) / Path(f"communication_complexity.png"),
+                                  client_to_server_communication_complexity, server_to_client_communication_complexity)
+
+
+def plot_loss_accuracy(highest_accuracy_across_runs, largest_loss_across_runs, lowest_accuracy_across_runs,
+                       lowest_loss_across_runs, save_plot_path, x_axis):
     fig, axs = plt.subplots(nrows=2, ncols=1, sharex="row", dpi=300)
     axs[0].fill_between(x_axis, largest_loss_across_runs, lowest_loss_across_runs, alpha=0.4)
     axs[1].fill_between(x_axis, highest_accuracy_across_runs, lowest_accuracy_across_runs, alpha=0.4)
-
     axs[0].set_ylabel("Loss")
     axs[1].set_ylabel("Accuracy")
-
     axs[1].set_ylim(bottom=0, top=1)
     axs[0].set_yscale('log')
-
     plt.xlabel("Rounds")
-
     plt.tight_layout()
+    plt.savefig(save_plot_path)
+    plt.close()
 
-    plt.savefig(Path(save_plot_path) / Path(f"centralized_metrics{suffix}.png"))
+
+def plot_communication_complexity(cfg, largest_loss_across_runs, lowest_loss_across_runs, rounds, save_plot_path,
+                                  client_to_server_communication_complexity, server_to_client_communication_complexity):
+    x_axis = np.arange(len(rounds)) * (cfg.server.uplink_factor * client_to_server_communication_complexity +
+                                       cfg.server.downlink_factor * server_to_client_communication_complexity)
+    plt.fill_between(x_axis, largest_loss_across_runs, lowest_loss_across_runs, alpha=0.4)
+    plt.ylabel("Loss")
+    plt.yscale("log")
+    plt.xlabel("Communicated real numbers")
+    plt.tight_layout()
+    plt.savefig(save_plot_path)
     plt.close()
 
 
 def save_results_as_pickle(
     history: History,
-    file_path: Union[str, Path],
-    extra_results: Optional[Dict] = {},
-    default_filename: Optional[str] = "results.pkl",
+    file_path: str,
 ) -> None:
     """Saves results from simulation to pickle.
 
@@ -112,43 +130,97 @@ def save_results_as_pickle(
         path doesn't exist, it will be created. If file exists, a
         randomly generated suffix will be added to the file name. This
         is done to avoid overwritting results.
-    extra_results : Optional[Dict]
-        A dictionary containing additional results you would like
-        to be saved to disk. Default: {} (an empty dictionary)
-    default_filename: Optional[str]
-        File used by default if file_path points to a directory instead
-        to a file. Default: "results.pkl"
     """
 
-    path = Path(file_path)
-
-    # ensure path exists
-    path.mkdir(exist_ok=True, parents=True)
-
-    def _add_random_suffix(path_: Path):
-        """Adds a randomly generated suffix to the file name (so it doesn't
-        overwrite the file)."""
-        print(f"File `{path_}` exists! ")
-        suffix = token_hex(4)
-        print(f"New results to be saved with suffix: {suffix}")
-        return path_.parent / (path_.stem + "_" + suffix + ".pkl")
-
-    def _complete_path_with_default_name(path_: Path):
-        """Appends the default file name to the path."""
-        print("Using default filename")
-        return path_ / default_filename
-
-    if path.is_dir():
-        path = _complete_path_with_default_name(path)
-
-    if path.is_file():
-        # file exists already
-        path = _add_random_suffix(path)
-
-    print(f"Results will be saved into: {path}")
-
-    data = {"history": history, **extra_results}
+    data = {"history": history}
 
     # save results to pickle
-    with open(str(path), "wb") as handle:
-        pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    with open(file_path, "wb") as f:
+        pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+def compare_communication_complexity(fedavg_histories: List[History],
+                                     tamuna_histories: List[History],
+                                     save_path: str,
+                                     dim: int,
+                                     cfg: DictConfig):
+    up_complexities = [np.ceil((cfg.server.s * dim) / cfg.server.clients_per_round), dim]
+    down_complexities = [dim, dim]
+    labels = ["Tamuna", "FedAvg"]
+
+    for j, hist in enumerate([tamuna_histories, fedavg_histories]):
+        accuracies_across_runs = []
+        losses_across_runs = []
+        rounds = None
+
+        for i in range(len(hist)):
+            rounds, accuracy_values = zip(*hist[i].metrics_centralized["accuracy"])
+            _, loss_values = zip(*hist[i].losses_centralized)
+            accuracies_across_runs.append(accuracy_values)
+            losses_across_runs.append(loss_values)
+
+        x_axis = np.arange(len(rounds)) * (cfg.server.uplink_factor * up_complexities[j] +
+                                           cfg.server.downlink_factor * down_complexities[j])
+
+        lowest_loss_across_runs = np.min(losses_across_runs, axis=0)
+        largest_loss_across_runs = np.max(losses_across_runs, axis=0)
+
+        plt.fill_between(x_axis, largest_loss_across_runs, lowest_loss_across_runs, alpha=0.4, label=labels[j])
+
+    plt.ylabel("Loss")
+    plt.yscale("log")
+    plt.xlabel("Communicated real numbers")
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(Path(save_path) / Path(f"communication_complexity.png"))
+    plt.close()
+
+
+def compare_histories(tamuna_histories: List[History],
+                      fedavg_histories: List[History],
+                      dim: int,
+                      save_path: str,
+                      cfg: DictConfig):
+    compare_loss_and_accuracy(fedavg_histories, tamuna_histories, save_path)
+    compare_communication_complexity(fedavg_histories, tamuna_histories, save_path, dim, cfg)
+
+
+def compare_loss_and_accuracy(fedavg_histories: List[History], tamuna_histories: List[History], save_path: str):
+    fig, axs = plt.subplots(nrows=2, ncols=1, sharex="row", dpi=300)
+    labels = ["Tamuna", "FedAvg"]
+
+    for j, hist in enumerate([tamuna_histories, fedavg_histories]):
+        accuracies_across_runs = []
+        losses_across_runs = []
+        rounds = None
+
+        for i in range(len(hist)):
+            rounds, accuracy_values = zip(*hist[i].metrics_centralized["accuracy"])
+            _, loss_values = zip(*hist[i].losses_centralized)
+            accuracies_across_runs.append(accuracy_values)
+            losses_across_runs.append(loss_values)
+
+        x_axis = range(len(rounds))
+
+        lowest_loss_across_runs = np.min(losses_across_runs, axis=0)
+        largest_loss_across_runs = np.max(losses_across_runs, axis=0)
+        lowest_accuracy_across_runs = np.min(accuracies_across_runs, axis=0)
+        highest_accuracy_across_runs = np.max(accuracies_across_runs, axis=0)
+
+        axs[0].fill_between(x_axis, largest_loss_across_runs, lowest_loss_across_runs, alpha=0.4, label=labels[j])
+        axs[1].fill_between(x_axis, highest_accuracy_across_runs, lowest_accuracy_across_runs, alpha=0.4, label=labels[j])
+
+    axs[0].set_ylabel("Loss")
+    axs[0].set_yscale('log')
+    axs[0].legend()
+
+    axs[1].set_ylabel("Accuracy")
+    axs[1].set_ylim(bottom=0, top=1)
+    axs[1].legend()
+
+
+    plt.xlabel("Rounds")
+    plt.tight_layout()
+    plt.savefig(Path(save_path) / Path(f"loss_accuracy.png"))
+    plt.close()
+

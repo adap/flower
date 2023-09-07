@@ -1,4 +1,4 @@
-"""CNN model architecutre, training, and testing functions for MNIST."""
+"""CNN model architecture, training, and testing functions for MNIST."""
 
 
 from typing import Tuple
@@ -53,7 +53,7 @@ class Net(nn.Module):
         return x
 
 
-def __model_zeroed_out(net):
+def __model_zeroed_out(net: nn.Module):
     """Returns network with all the weights zeroed-out.
 
     Parameters
@@ -70,7 +70,7 @@ def __model_zeroed_out(net):
     return control_variate
 
 
-def train(
+def tamuna_train(
     net: nn.Module,
     trainloader: DataLoader,
     device: torch.device,
@@ -125,7 +125,7 @@ def train(
         control_variate = __model_zeroed_out(net)
 
     for _ in range(epochs):
-        net = __train_one_epoch(
+        net = __tamuna_train_one_epoch(
             net,
             trainloader,
             device,
@@ -135,6 +135,25 @@ def train(
         )
 
     return net, control_variate
+
+
+def fedavg_train(
+    net: torch.nn.Module,
+    trainloader: DataLoader,
+    epochs: int,
+    lr: float,
+    device
+):
+    criterion = torch.nn.CrossEntropyLoss()
+    optim = torch.optim.SGD(net.parameters(), lr=lr)
+    for _ in range(epochs):
+        for images, labels in trainloader:
+            images, labels = images.to(device), labels.to(device)
+            optim.zero_grad()
+            loss = criterion(net(images), labels)
+            loss.backward()
+            optim.step()
+    return net
 
 
 def __update_control_variate(
@@ -192,13 +211,13 @@ def __update_control_variate(
         )
 
 
-def __train_one_epoch(
+def __tamuna_train_one_epoch(
     net: nn.Module,
     trainloader: DataLoader,
     device: torch.device,
     criterion: torch.nn.CrossEntropyLoss,
-    lr,
-    control_variate,
+    lr: float,
+    control_variate: nn.Module,
 ) -> nn.Module:
     """Train for one epoch.
 
@@ -259,7 +278,9 @@ def __train_one_epoch(
 
 
 def test(
-    net: nn.Module, testloader: DataLoader, device: torch.device
+    net: nn.Module,
+    testloader: DataLoader,
+    device: torch.device
 ) -> Tuple[float, float]:
     """Evaluate the network on the entire test set.
 
