@@ -12,8 +12,7 @@ jobs:
     name: Changelog check
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch: true
+        # with:
           # sparse-checkout: doc/source/ref-changelog.md
           # sparse-checkout-cone-mode: false
       - name: Test change
