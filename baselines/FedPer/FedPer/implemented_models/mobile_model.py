@@ -5,8 +5,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from FedPer.models.model_manager import ModelManager
-from FedPer.models.model_split import ModelSplit
+from FedPer.models import ModelManager, ModelSplit
 
 # Set model architecture
 ARCHITECTURE = {

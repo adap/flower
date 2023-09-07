@@ -11,17 +11,19 @@ from secrets import token_hex
 from flwr.server.history import History
 
 from FedPer.client import get_client_fn_simulation
-from FedPer.models.cnn_model import CNNModelSplit, CNNNet
-from FedPer.models.mobile_model import MobileNet, MobileNetModelSplit
-from FedPer.models.resnet_model import ResNet, ResNetModelSplit
+from FedPer.implemented_models.cnn_model import CNNModelSplit, CNNNet
+from FedPer.implemented_models.mobile_model import MobileNet, MobileNetModelSplit
+from FedPer.implemented_models.resnet_model import ResNet, ResNetModelSplit
 
 def set_model_class(config : dict) -> dict: 
     """ Set model class based on the model name in the config file. """
     # Set the model class
     if config.model.name.lower() == "resnet":
-        config.model._target_ = "FedPer.models.resnet_model.ResNet"
+        config.model._target_ = "FedPer.implemented_models.resnet_model.ResNet"
     elif config.model.name.lower() == "mobile":
-        config.model._target_ = "FedPer.models.mobile_model.MobileNet"
+        config.model._target_ = "FedPer.implemented_models.mobile_model.MobileNet"
+    elif config.model.name.lower() == 'cnn':
+        config.model._target_ = "FedPer.implemented_models.cnn_model.CNNNet"
     else:
         raise NotImplementedError(f"Model {config.model.name} not implemented")
     return config

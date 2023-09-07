@@ -38,7 +38,7 @@ dataset: ["CIFAR-10", "FLICKR-AES"] # list of datasets you include in your basel
 - ResNet34 which can be imported directly (after having installed the packages) from PyTorch, using `from torchvision.models import resnet34 
 - MobileNet-v1
 
-Please see how models are implemented using a so called model_manager and model_split class since FedPer uses head and base layers in a neural network. 
+Please see how models are implemented using a so called model_manager and model_split class since FedPer uses head and base layers in a neural network. These classes are defined in the models.py file and thereafter called when building new models in the directory /implemented_models. Please, extend and add new models as you wish. 
 
 ****Dataset:**** : CIFAR10, FLICKR-AES. CIFAR10 will be partitioned based on number of classes for data that each client shall recieve e.g. 4 allocated classes could be [1, 3, 5, 9]. FLICKR-AES is an unbalanced dataset, so there we only apply random sampling. 
 
@@ -72,11 +72,7 @@ pip install torch==2.0.1+cu117 torchvision==0.15.2+cu117
 ```
 ## Running the Experiments
 ```bash
-python -m FedPer.main # this will run using the default settings in the `conf/base.yaml`
-
-# you can change settings by copying the base file, renaming it, change the values to the ones you want to use, and run in command line: 
-python -m FedPer.main mu=1 --config-name <name_of_new_config_file> 
-
+python -m FedPer.main # this will run using the default settings in the `conf/base.yaml`    
 ```
 
 To reproduce figures:

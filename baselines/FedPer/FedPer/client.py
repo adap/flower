@@ -15,9 +15,9 @@ from torchvision.datasets import ImageFolder
 
 from FedPer.constants import Algorithms, MEAN, STD, DEFAULT_FT_EP
 from FedPer.dataset_preparation import DATASETS
-from FedPer.models.cnn_model import CNNModelManager
-from FedPer.models.mobile_model import MobileNetModelManager
-from FedPer.models.resnet_model import ResNetModelManager
+from FedPer.implemented_models.cnn_model import CNNModelManager
+from FedPer.implemented_models.mobile_model import MobileNetModelManager
+from FedPer.implemented_models.resnet_model import ResNetModelManager
 
 PROJECT_DIR = Path(__file__).parent.parent.absolute()
 

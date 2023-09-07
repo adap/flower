@@ -6,10 +6,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from FedPer.models.model_manager import ModelManager
-from FedPer.models.model_split import ModelSplit
-
-# DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+from FedPer.models import ModelManager, ModelSplit
 
 
 class CNNNetBody(nn.Module):

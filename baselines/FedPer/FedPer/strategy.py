@@ -19,9 +19,11 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.client_manager import ClientManager
 from flwr.server.strategy.strategy import Strategy
 
+from FedPer.models import ModelSplit
 from FedPer.constants import Algorithms
-from FedPer.models.mobile_model import MobileNetModelSplit
-from FedPer.models.model_split import ModelSplit
+from FedPer.implemented_models.mobile_model import MobileNetModelSplit
+from FedPer.implemented_models.resnet_model import ResNetModelSplit
+
 
 
 class ServerInitializationStrategy(Strategy):
@@ -29,7 +31,11 @@ class ServerInitializationStrategy(Strategy):
 
     def __init__(
         self,
-        model_split_class: Union[Type[MobileNetModelSplit], Type[ModelSplit]],
+        model_split_class: Union[
+            Type[MobileNetModelSplit], 
+            Type[ModelSplit],
+            Type[ResNetModelSplit]
+        ],
         create_model: Callable[[Dict[str, Any]], nn.Module],
         config: Dict[str, Any] = {},
         algorithm: str = Algorithms.FEDAVG.value,

@@ -15,13 +15,14 @@ server_device: cuda:0
 
 dataset:
   name : "cifar10"
+  split: sample
   num_classes: 10
   seed: 42
   num_clients: 10
   fraction: 0.83
 
 model:
-  _target_: FedPer.models.mobile_model.MobileNet
+  _target_: FedPer.implemented_models.mobile_model.MobileNet
   num_head_layers: 1
   num_classes: ${dataset.num_classes}
   device: ${server_device}
