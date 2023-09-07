@@ -45,15 +45,13 @@ android {
     }
 }
 
-val grpcVersion = "1.56.1"
-
 protobuf {
     protoc {
         artifact = "com.google.protobuf:protoc:3.23.4"
     }
     plugins {
         create("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:$grpcVersion"
+            artifact = "io.grpc:protoc-gen-grpc-java:1.58.0"
         }
     }
     generateProtoTasks {
@@ -75,15 +73,22 @@ protobuf {
 dependencies {
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.compose.runtime:runtime:1.5.0")
-    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.0"))
-    implementation("io.grpc:grpc-okhttp:$grpcVersion")
-    implementation("io.grpc:grpc-protobuf-lite:$grpcVersion")
-    implementation("io.grpc:grpc-stub:$grpcVersion")
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.9.10"))
+    implementation("io.grpc:grpc-okhttp:1.58.0")
+    implementation("io.grpc:grpc-protobuf-lite:1.58.0")
+    implementation("io.grpc:grpc-stub:1.58.0")
     implementation("javax.annotation:javax.annotation-api:1.3.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    // define a BOM and its version
+    implementation(platform("com.squareup.okhttp3:okhttp-bom:4.10.0"))
+
+    // define any required OkHttp artifacts without version
+    implementation("com.squareup.okhttp3:okhttp")
+    implementation("com.squareup.okhttp3:logging-interceptor")
 
     protobuf(files("../../proto"))
-    dokkaPlugin("org.jetbrains.dokka:android-documentation-plugin:1.8.20")
+    dokkaPlugin("org.jetbrains.dokka:android-documentation-plugin:1.9.0")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
