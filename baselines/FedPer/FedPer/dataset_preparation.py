@@ -1,27 +1,22 @@
+"""Dataset preparation."""
 import os
-import json
-import torch
+import random
+from collections import Counter
+from pathlib import Path
+from typing import Dict, List, Tuple, Type
+
 import numpy as np
 import pandas as pd
-import pickle
-import random
+import torch
 import torchvision
-
-from PIL import Image
-from typing import List, Type, Dict, Tuple
-from pathlib import Path
-from argparse import Namespace
-from torchvision import transforms
-from collections import Counter
-from torchvision.transforms.functional import pil_to_tensor
 from torch.utils.data import Dataset
 
-from pathlib import Path
 
 class BaseDataset(Dataset):
-    """ Base class for all datasets."""
+    """Base class for all datasets."""
+
     def __init__(self) -> None:
-        """ Initialize the dataset."""
+        """Initialize the dataset."""
         self.classes: List = None
         self.data: torch.Tensor = None
         self.targets: torch.Tensor = None
@@ -32,7 +27,7 @@ class BaseDataset(Dataset):
         self.enable_train_transform = True
 
     def __getitem__(self, index):
-        """ Get the item at the given index."""
+        """Get the item at the given index."""
         data, targets = self.data[index], self.targets[index]
         if self.enable_train_transform and self.train_data_transform is not None:
             data = self.train_data_transform(data)
@@ -45,10 +40,13 @@ class BaseDataset(Dataset):
         return data, targets
 
     def __len__(self):
+        """Return the length of the dataset."""
         return len(self.targets)
 
+
 class CIFAR10(BaseDataset):
-    """ CIFAR10 dataset."""
+    """CIFAR10 dataset."""
+
     def __init__(
         self,
         root,
@@ -58,7 +56,7 @@ class CIFAR10(BaseDataset):
         train_data_transform=None,
         train_target_transform=None,
     ):
-        """ Initialize the dataset."""
+        """Initialize the dataset."""
         super().__init__()
         train_part = torchvision.datasets.CIFAR10(root, True, download=True)
         test_part = torchvision.datasets.CIFAR10(root, False, download=True)
@@ -76,7 +74,8 @@ class CIFAR10(BaseDataset):
 
 
 class CIFAR100(BaseDataset):
-    """ CIFAR100 dataset."""
+    """CIFAR100 dataset."""
+
     def __init__(
         self,
         root,
@@ -102,7 +101,7 @@ class CIFAR100(BaseDataset):
         self.train_target_transform = train_target_transform
         super_class = None
         if isinstance(config, dict):
-            super_class = config['super_class']
+            super_class = config["super_class"]
 
         if super_class:
             # super_class: [sub_classes]
@@ -137,8 +136,9 @@ class CIFAR100(BaseDataset):
                 new_targets.append(mapping[self.classes[cls]])
             self.targets = torch.tensor(new_targets, dtype=torch.long)
 
+
 def flickr_preprocess(root, config):
-    """ Preprocess the FLICKR dataset."""
+    """Preprocess the FLICKR dataset."""
     print("Preprocessing FLICKR dataset...")
     # create a tmp folder to store the preprocessed data
     tmp_folder = Path(root, "tmp")
@@ -147,20 +147,29 @@ def flickr_preprocess(root, config):
 
     # remove any folder or file in tmp folder, even if it is not empty
     os.system(f"rm -rf {tmp_folder.as_posix()}/*")
-    
+
     # get number of clients
-    num_clients = config['num_clients']
+    num_clients = config["num_clients"]
     # get flickr image labels per clients
-    df_labelled_igms = pd.read_csv(Path(root, "FLICKR-AES_image_labeled_by_each_worker.csv"))
-    # take num_clients random workers from df where workers have minimum 60 images and maximum 290
-    df_labelled_igms = df_labelled_igms.groupby('worker').filter(lambda x: len(x) >= 60 and len(x) <= 290)
+    df_labelled_igms = pd.read_csv(
+        Path(root, "FLICKR-AES_image_labeled_by_each_worker.csv")
+    )
+    # take num_clients random workers from df
+    # where workers have minimum 60 images and maximum 290
+    df_labelled_igms = df_labelled_igms.groupby("worker").filter(
+        lambda x: len(x) >= 60 and len(x) <= 290
+    )
     # only take workers that have at least 1 image for each score (1-5)
-    df_labelled_igms = df_labelled_igms.groupby('worker').filter(lambda x: len(x[' score'].unique()) == 5)
+    df_labelled_igms = df_labelled_igms.groupby("worker").filter(
+        lambda x: len(x[" score"].unique()) == 5
+    )
     # get num_clients random workers
-    clients = np.random.choice(df_labelled_igms['worker'].unique(), num_clients, replace=False)
+    clients = np.random.choice(
+        df_labelled_igms["worker"].unique(), num_clients, replace=False
+    )
     for i, client in enumerate(clients):
         print(f"Processing client {i}...")
-        df_client = df_labelled_igms[df_labelled_igms['worker'] == client]
+        df_client = df_labelled_igms[df_labelled_igms["worker"] == client]
         client_path = Path(tmp_folder, f"client_{i}")
         if not os.path.isdir(client_path):
             os.makedirs(client_path)
@@ -171,32 +180,34 @@ def flickr_preprocess(root, config):
                 os.makedirs(score_path)
         # copy images to score folder
         for _, row in df_client.iterrows():
-            img_path = Path(root, "40K", row[' imagePair'])
-            score_path = Path(client_path, str(row[' score']))
+            img_path = Path(root, "40K", row[" imagePair"])
+            score_path = Path(client_path, str(row[" score"]))
             if not os.path.isfile(img_path):
                 continue
             else:
                 os.system(f"cp {img_path} {score_path}")
 
+
 class FLICKR_DATASET(BaseDataset):
-    """ FLICKR dataset."""
+    """FLICKR dataset."""
+
     def __init__(
         self,
-        root = None,
-        config = None,
+        root=None,
+        config=None,
         general_data_transform=None,
         general_target_transform=None,
         train_data_transform=None,
         train_target_transform=None,
-        classes = None,
+        classes=None,
         data=None,
-        targets=None
+        targets=None,
     ):
         super().__init__()
         self.data = data
         self.targets = targets
         self.classes = classes
-        
+
 
 DATASETS: Dict[str, Type[BaseDataset]] = {
     "cifar10": CIFAR10,
@@ -204,10 +215,11 @@ DATASETS: Dict[str, Type[BaseDataset]] = {
     # flickr is being processed in other way
 }
 
+
 def randomly_assign_classes(
     dataset: Dataset, client_num: int, class_num: int
 ) -> Tuple[List[List[int]], Dict[str, Dict[str, int]]]:
-    """ Randomly assign number classes to clients."""
+    """Randomly assign number classes to clients."""
     partition = {"separation": None, "data_indices": None}
     data_indices = [[] for _ in range(client_num)]
     targets_numpy = np.array(dataset.targets, dtype=np.int32)
@@ -218,7 +230,7 @@ def randomly_assign_classes(
     ]
     assigned_labels = []
     selected_times = [0 for _ in label_list]
-    for i in range(client_num):
+    for _ in range(client_num):
         sampled_labels = random.sample(label_list, class_num)
         assigned_labels.append(sampled_labels)
         for j in sampled_labels:
@@ -254,7 +266,7 @@ def randomly_assign_classes(
         stats[i]["x"] = len(idx)
         stats[i]["y"] = Counter(targets_numpy[idx].tolist())
 
-    num_samples = np.array(list(map(lambda stat_i: stat_i["x"], stats.values())))
+    num_samples = np.array([stat_i["x"] for stat_i in stats.values()])
     stats["sample per client"] = {
         "std": num_samples.mean(),
         "stddev": num_samples.std(),

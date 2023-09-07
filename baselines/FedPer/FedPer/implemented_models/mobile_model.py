@@ -1,3 +1,4 @@
+"""MobileNet-v1 model, model manager and model split."""
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import torch
@@ -29,9 +30,7 @@ ARCHITECTURE = {
 
 
 class MobileNet(nn.Module):
-    """Model adapted from simple MobileNet-v1 (PyTorch) \
-    (https://github.com/wjc852456/pytorch-mobilenet-v1).
-    """
+    """Model from MobileNet-v1 (https://github.com/wjc852456/pytorch-mobilenet-v1)."""
 
     def __init__(
         self,
@@ -72,9 +71,8 @@ class MobileNet(nn.Module):
 
         if num_head_layers == 1:
             self.head = nn.Sequential(
-                nn.AvgPool2d([7]), 
-                nn.Flatten(),
-                nn.Linear(1024, num_classes))
+                nn.AvgPool2d([7]), nn.Flatten(), nn.Linear(1024, num_classes)
+            )
             self.body.avg_pool = nn.Identity()
             self.body.fc = nn.Identity()
         elif num_head_layers == 2:
@@ -117,15 +115,14 @@ class MobileNet(nn.Module):
             raise NotImplementedError("Number of head layers not implemented.")
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward pass of the model."""
         x = self.body(x)
         return self.head(x)
 
 
 class MobileNetModelSplit(ModelSplit):
-    """Concrete implementation of ModelSplit for models for node kind prediction in
-    action flows \\ with Body/Head split.
-    """
-    
+    """Split MobileNet model into body and head."""
+
     def _get_model_parts(self, model: MobileNet) -> Tuple[nn.Module, nn.Module]:
         return model.body, model.head
 
@@ -190,11 +187,10 @@ class MobileNetModelManager(ModelManager):
             epochs: number of training epochs.
             tag: str of the form <Algorithm>_<model_train_part>.
                 <Algorithm> - indicates the federated algorithm that is being performed\
-                              (FedAvg, FedPer, FedRep, FedBABU or FedHybridAvgLGDual).
-                              In the case of FedHybridAvgLGDual the tag also includes which part of the algorithm\
-                                is being performed, either FedHybridAvgLGDual_FedAvg or FedHybridAvgLGDual_LG-FedAvg.
-                <model_train_part> - indicates the part of the model that is being trained (full, body, head).
-                This tag can be ignored if no difference in train behaviour is desired between federated algortihms.
+                    (FedAvg, FedPer).
+                <model_train_part> - indicates the part of the model that is
+                being trained (full, body, head). This tag can be ignored if no
+                difference in train behaviour is desired between federated algortihms.
             fine_tuning: whether the training performed is for model fine-tuning or not.
 
         Returns

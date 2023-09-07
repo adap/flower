@@ -1,7 +1,11 @@
+"""Constants used in machine learning pipeline."""
 from enum import Enum
+
 
 # FL Algorithms
 class Algorithms(Enum):
+    """Enum for FL algorithms."""
+
     FEDAVG = "FedAvg"
     FEDPER = "FedPer"
 

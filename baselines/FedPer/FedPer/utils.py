@@ -1,13 +1,13 @@
+"""Utility functions for FedPer."""
 import os
-import time
 import pickle
-import numpy as np
-import matplotlib.pyplot as plt
-
-from typing import Callable, Dict, List, Optional, Tuple, Union
+import time
 from pathlib import Path
 from secrets import token_hex
+from typing import Callable, Dict, Optional, Tuple, Union
 
+import matplotlib.pyplot as plt
+import numpy as np
 from flwr.server.history import History
 
 from FedPer.client import get_client_fn_simulation
@@ -15,21 +15,23 @@ from FedPer.implemented_models.cnn_model import CNNModelSplit, CNNNet
 from FedPer.implemented_models.mobile_model import MobileNet, MobileNetModelSplit
 from FedPer.implemented_models.resnet_model import ResNet, ResNetModelSplit
 
-def set_model_class(config : dict) -> dict: 
-    """ Set model class based on the model name in the config file. """
+
+def set_model_class(config: dict) -> dict:
+    """Set model class based on the model name in the config file."""
     # Set the model class
     if config.model.name.lower() == "resnet":
         config.model._target_ = "FedPer.implemented_models.resnet_model.ResNet"
     elif config.model.name.lower() == "mobile":
         config.model._target_ = "FedPer.implemented_models.mobile_model.MobileNet"
-    elif config.model.name.lower() == 'cnn':
+    elif config.model.name.lower() == "cnn":
         config.model._target_ = "FedPer.implemented_models.cnn_model.CNNNet"
     else:
         raise NotImplementedError(f"Model {config.model.name} not implemented")
     return config
 
-def set_num_classes(config : dict) -> dict:
-    """ Set the number of classes based on the dataset name in the config file. """
+
+def set_num_classes(config: dict) -> dict:
+    """Set the number of classes based on the dataset name in the config file."""
     # Set the number of classes
     if config.dataset.name.lower() == "cifar10":
         config.dataset.num_classes = 10
@@ -41,21 +43,21 @@ def set_num_classes(config : dict) -> dict:
         raise NotImplementedError(f"Dataset {config.dataset.name} not implemented")
     return config
 
-def set_server_target(config : dict) -> dict:
-    """ Set the server target based on the algorithm in the config file. """
+
+def set_server_target(config: dict) -> dict:
+    """Set the server target based on the algorithm in the config file."""
     # Set the server target
     if config.algorithm.lower() == "fedper":
-        config.strategy._target_ = (
-            "FedPer.server.AggregateBodyStrategyPipeline"
-        )
+        config.strategy._target_ = "FedPer.server.AggregateBodyStrategyPipeline"
     elif config.algorithm.lower() == "fedavg":
         config.strategy._target_ = "FedPer.server.DefaultStrategyPipeline"
     else:
         raise NotImplementedError(f"Algorithm {config.algorithm} not implemented")
     return config
 
+
 def set_client_state_save_path() -> str:
-    """ Set the client state save path. """
+    """Set the client state save path."""
     client_state_save_path = time.strftime("%Y-%m-%d")
     client_state_sub_path = time.strftime("%H-%M-%S")
     client_state_save_path = (
@@ -65,8 +67,9 @@ def set_client_state_save_path() -> str:
         os.makedirs(client_state_save_path)
     return client_state_save_path
 
-def get_client_fn(config : dict, client_state_save_path : str = None) -> dict:
-    """ Get client function. """
+
+def get_client_fn(config: dict, client_state_save_path: str = None) -> dict:
+    """Get client function."""
     # Get algorithm
     algorithm = config.algorithm.lower()
     # Get client fn
@@ -83,12 +86,15 @@ def get_client_fn(config : dict, client_state_save_path : str = None) -> dict:
         raise NotImplementedError
     return client_fn
 
-def get_create_model_fn(config : dict) -> Union[
+
+def get_create_model_fn(
+    config: dict,
+) -> Union[
     Tuple[Callable[[], CNNNet], CNNModelSplit],
     Tuple[Callable[[], MobileNet], MobileNetModelSplit],
     Tuple[Callable[[], ResNet], ResNetModelSplit],
 ]:
-    """ Get create model function. """
+    """Get create model function."""
     device = config.server_device
 
     if config.model.name.lower() == "cnn":
@@ -126,12 +132,13 @@ def get_create_model_fn(config : dict) -> Union[
         raise NotImplementedError("Model not implemented, check name. ")
     return create_model, split
 
+
 def plot_metric_from_history(
     hist: History,
     save_plot_path: Path,
     suffix: Optional[str] = "",
 ) -> None:
-    """Function to plot from Flower server History.
+    """Plot from Flower server History.
 
     Parameters
     ----------
@@ -167,13 +174,14 @@ def plot_metric_from_history(
     plt.savefig(Path(save_plot_path) / Path(f"{metric_type}_metrics{suffix}.png"))
     plt.close()
 
+
 def save_results_as_pickle(
     history: History,
     file_path: Union[str, Path],
-    extra_results: Optional[Dict] = {},
+    extra_results: Optional[Dict],
     default_filename: Optional[str] = "results.pkl",
 ) -> None:
-    """Saves results from simulation to pickle.
+    """Save results from simulation to pickle.
 
     Parameters
     ----------
@@ -198,16 +206,14 @@ def save_results_as_pickle(
     path.mkdir(exist_ok=True, parents=True)
 
     def _add_random_suffix(path_: Path):
-        """Adds a randomly generated suffix to the file name (so it doesn't overwrite
-        the file).
-        """
+        """Add a random suffix to the file name."""
         print(f"File `{path_}` exists! ")
         suffix = token_hex(4)
         print(f"New results to be saved with suffix: {suffix}")
         return path_.parent / (path_.stem + "_" + suffix + ".pkl")
 
     def _complete_path_with_default_name(path_: Path):
-        """Appends the default file name to the path."""
+        """Append the default file name to the path."""
         print("Using default filename")
         return path_ / default_filename
 

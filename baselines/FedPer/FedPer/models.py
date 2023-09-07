@@ -1,12 +1,12 @@
+"""Abstract class for splitting a model into body and head."""
 import copy
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from typing import Any, Dict, List, Optional, Tuple, Type, Union, Callable
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
 import torch.nn as nn
 from torch import Tensor
-from torch.nn import functional as F
 
 
 class ModelSplit(ABC, nn.Module):
@@ -20,8 +20,7 @@ class ModelSplit(ABC, nn.Module):
         model: nn.Module,
         has_fixed_head: bool = False,
     ):
-        """Initialize ModelSplit attributes. A call is made to the _setup_model_parts
-        method.
+        """Initialize the attributes of the model split.
 
         Args:
             model: dict containing the vocab sizes of the input attributes.
@@ -43,7 +42,8 @@ class ModelSplit(ABC, nn.Module):
 
         Returns
         -------
-            Tuple where the first element is the body of the model and the second is the head.
+            Tuple where the first element is the body of the model
+            and the second is the head.
         """
         pass
 
@@ -114,7 +114,6 @@ class ModelSplit(ABC, nn.Module):
         Args:
             state_dict: dictionary of the state to set the model to.
         """
-        # Copy to maintain the order of the parameters and add the missing parameters to the state_dict
         ordered_state_dict = OrderedDict(self.state_dict().copy())
         # Update with the values of the state_dict
         ordered_state_dict.update(dict(state_dict.items()))
@@ -162,6 +161,7 @@ class ModelSplit(ABC, nn.Module):
             return self.fixed_head(x)
         return self.head(x)
 
+
 class ModelManager(ABC):
     """Manager for models with Body/Head split."""
 
@@ -207,11 +207,10 @@ class ModelManager(ABC):
             epochs: number of training epochs.
             tag: str of the form <Algorithm>_<model_train_part>.
                 <Algorithm> - indicates the federated algorithm that is being performed\
-                              (FedAvg, FedPer, FedRep, FedBABU or FedHybridAvgLGDual).
-                              In the case of FedHybridAvgLGDual the tag also includes which part of the algorithm\
-                                is being performed, either FedHybridAvgLGDual_FedAvg or FedHybridAvgLGDual_LG-FedAvg.
-                <model_train_part> - indicates the part of the model that is being trained (full, body, head).
-                This tag can be ignored if no difference in train behaviour is desired between federated algortihms.
+                    (FedAvg, FedPer).
+                <model_train_part> - indicates the part of the model that is
+                being trained (full, body, head). This tag can be ignored if no
+                difference in train behaviour is desired between federated algortihms.
             fine_tuning: whether the training performed is for model fine-tuning or not.
 
         Returns

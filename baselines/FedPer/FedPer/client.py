@@ -1,3 +1,4 @@
+"""Client implementation - can call FedPer and FedAvg clients."""
 import copy
 import pickle
 from collections import OrderedDict, defaultdict
@@ -13,13 +14,14 @@ from torch.utils.data import DataLoader, Subset, random_split
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
 
-from FedPer.constants import Algorithms, MEAN, STD, DEFAULT_FT_EP
+from FedPer.constants import DEFAULT_FT_EP, MEAN, STD, Algorithms
 from FedPer.dataset_preparation import DATASETS
 from FedPer.implemented_models.cnn_model import CNNModelManager
 from FedPer.implemented_models.mobile_model import MobileNetModelManager
 from FedPer.implemented_models.resnet_model import ResNetModelManager
 
 PROJECT_DIR = Path(__file__).parent.parent.absolute()
+
 
 class BaseClient(fl.client.NumPyClient):
     """Implementation of Federated Averaging (FedAvg) Client."""
@@ -97,11 +99,11 @@ class BaseClient(fl.client.NumPyClient):
         Args:
             tag: str of the form <Algorithm>_<model_train_part>.
                 <Algorithm> - indicates the federated algorithm that is being performed\
-                              (FedAvg, FedPer, FedRep, FedBABU or FedHybridAvgLGDual).
-                              In the case of FedHybridAvgLGDual the tag also includes which part of the algorithm\
-                                is being performed, either FedHybridAvgLGDual_FedAvg or FedHybridAvgLGDual_LG-FedAvg.
-                <model_train_part> - indicates the part of the model that is being trained (full, body, head).
-                This tag can be ignored if no difference in train behaviour is desired between federated algortihms.
+                    (FedAvg, FedPer).
+                <model_train_part> - indicates the part of the model that is
+                    being trained (full, body, head).
+                    This tag can be ignored if no difference in train behaviour is
+                    desired between federated algortihms.
 
         Returns
         -------
@@ -213,25 +215,23 @@ class BaseClient(fl.client.NumPyClient):
             {k: v for k, v in tst_results.items() if not isinstance(v, (dict, list))},
         )
 
+
 class FedPerClient(BaseClient):
-    """Implementation of Federated Learning with Personalization Layers (FedPer)
-    Client.
-    """
+    """Implementation of Federated Personalization (FedPer) Client."""
 
     def get_parameters(self) -> List[np.ndarray]:
-        """Return the current local head parameters."""
+        """Return the current local body parameters."""
         return [
             val.cpu().numpy()
             for _, val in self.model_manager.model.body.state_dict().items()
         ]
 
     def set_parameters(self, parameters: List[np.ndarray], evaluate=False) -> None:
-        """Set the local body parameters to the received parameters. In the first train
-        round the head parameters are also set to the global head parameters, to ensure
-        every client head is initialized equally.
+        """Set the local body parameters to the received parameters.
 
         Args:
             parameters: parameters to set the body to.
+            evaluate: whether the client is evaluating or not.
         """
         model_keys = [
             k
@@ -264,11 +264,10 @@ class FedPerClient(BaseClient):
         Args:
             tag: str of the form <Algorithm>_<model_train_part>.
                 <Algorithm> - indicates the federated algorithm that is being performed\
-                              (FedAvg, FedPer, FedRep, FedBABU or FedHybridAvgLGDual).
-                              In the case of FedHybridAvgLGDual the tag also includes which part of the algorithm\
-                                is being performed, either FedHybridAvgLGDual_FedAvg or FedHybridAvgLGDual_LG-FedAvg.
-                <model_train_part> - indicates the part of the model that is being trained (full, body, head).
-                This tag can be ignored if no difference in train behaviour is desired between federated algortihms.
+                    (FedAvg, FedPer).
+                <model_train_part> - indicates the part of the model that is
+                being trained (full, body, head). This tag can be ignored if no
+                difference in train behaviour is desired between federated algortihms.
 
         Returns
         -------
@@ -282,10 +281,8 @@ class FedPerClient(BaseClient):
 def get_client_fn_simulation(
     config: DictConfig,
     client_state_save_path: str = None,
-) -> Tuple[
-    Callable[[str], BaseClient], DataLoader
-]:  # pylint: disable=too-many-arguments
-    """Generates the client function that creates the Flower Clients.
+) -> Tuple[Callable[[str], BaseClient], DataLoader]:
+    """Generate the client function that creates the Flower Clients.
 
     Parameters
     ----------
@@ -293,46 +290,64 @@ def get_client_fn_simulation(
         The model configuration.
     cleint_state_save_path : str
         The path to save the client state.
+
     Returns
     -------
     Tuple[Callable[[str], FlowerClient], DataLoader]
         A tuple containing the client function that creates Flower Clients and
         the DataLoader that will be used for testing
     """
-    assert config.model.name.lower() in ['cnn', 'mobile', 'resnet'], f"Model {config.model.name} not implemented"
+    assert config.model.name.lower() in [
+        "cnn",
+        "mobile",
+        "resnet",
+    ], f"Model {config.model.name} not implemented"
     # load dataset and clients' data indices
-    if config.dataset.name.lower() in['cifar10', 'cifar100']:
+    if config.dataset.name.lower() in ["cifar10", "cifar100"]:
         try:
-            partition_path = PROJECT_DIR / "datasets" / config.dataset.name / "partition.pkl"
+            partition_path = (
+                PROJECT_DIR / "datasets" / config.dataset.name / "partition.pkl"
+            )
             print(f"Loading partition from {partition_path}")
             with open(partition_path, "rb") as f:
                 partition = pickle.load(f)
             data_indices: List[List[int]] = partition["data_indices"]
-        except:
-            raise FileNotFoundError(f"Please partition {config.dataset.name} first.")
+        except FileNotFoundError as e:
+            print(f"Partition not found at {partition_path}")
+            raise e
 
-        # --------- you can define your own data transformation strategy here ------------
-        general_data_transform = transforms.Compose([
-            transforms.Resize((224, 224)),
-            transforms.Normalize(MEAN[config.dataset.name], STD[config.dataset.name])
-        ])
+        # - you can define your own data transformation strategy here -
+        general_data_transform = transforms.Compose(
+            [
+                transforms.Resize((224, 224)),
+                transforms.Normalize(
+                    MEAN[config.dataset.name], STD[config.dataset.name]
+                ),
+            ]
+        )
         general_target_transform = transforms.Compose([])
         train_data_transform = transforms.Compose([])
         train_target_transform = transforms.Compose([])
-        # --------------------------------------------------------------------------------
+        # ------------------------------------------------------------
 
     def client_fn(cid: str) -> BaseClient:
         """Create a Flower client representing a single organization."""
-
         cid = int(cid)
-        if config.dataset.name.lower() == 'flickr':
-            transform = transforms.Compose([
-                transforms.Resize((224, 224)),
-                transforms.ToTensor(),
-            ])
-            data_path = PROJECT_DIR / "datasets" / config.dataset.name / "tmp" / f"client_{cid}"
+        if config.dataset.name.lower() == "flickr":
+            transform = transforms.Compose(
+                [
+                    transforms.Resize((224, 224)),
+                    transforms.ToTensor(),
+                ]
+            )
+            data_path = (
+                PROJECT_DIR / "datasets" / config.dataset.name / "tmp" / f"client_{cid}"
+            )
             dataset = ImageFolder(root=data_path, transform=transform)
-            trainset, testset = random_split(dataset, [int(len(dataset)*0.8), len(dataset)-int(len(dataset)*0.8)])
+            trainset, testset = random_split(
+                dataset,
+                [int(len(dataset) * 0.8), len(dataset) - int(len(dataset) * 0.8)],
+            )
         else:
             dataset = DATASETS[config.dataset.name](
                 root=PROJECT_DIR / "datasets" / config.dataset.name,
@@ -346,20 +361,20 @@ def get_client_fn_simulation(
             testset = Subset(dataset, indices=[])
             trainset.indices = data_indices[cid]["train"]
             testset.indices = data_indices[cid]["test"]
-        
+
         # Create the train loader
         trainloader = DataLoader(trainset, config.batch_size, shuffle=True)
         # Create the test loader
         testloader = DataLoader(testset, config.batch_size)
 
-        if config.model.name.lower() == 'cnn':
+        if config.model.name.lower() == "cnn":
             manager = CNNModelManager
-        elif config.model.name.lower() == 'mobile':
+        elif config.model.name.lower() == "mobile":
             manager = MobileNetModelManager
-        elif config.model.name.lower() == 'resnet':
+        elif config.model.name.lower() == "resnet":
             manager = ResNetModelManager
         else:
-            raise NotImplementedError('Model not implemented, check name.')
+            raise NotImplementedError("Model not implemented, check name.")
         if client_state_save_path is not None:
             return FedPerClient(
                 trainloader=trainloader,
@@ -378,4 +393,5 @@ def get_client_fn_simulation(
                 model_manager_class=manager,
                 client_state_save_path=client_state_save_path,
             )
+
     return client_fn

@@ -1,9 +1,10 @@
-from typing import Any, Callable, Dict, Optional, Type, Union, Tuple, List
+"""FL server strategies."""
+from collections import OrderedDict, defaultdict
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import torch
 import torch.nn as nn
-from pathlib import Path
-from collections import OrderedDict, defaultdict
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -14,16 +15,14 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
-
-from flwr.server.client_proxy import ClientProxy
 from flwr.server.client_manager import ClientManager
+from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.strategy import Strategy
 
-from FedPer.models import ModelSplit
 from FedPer.constants import Algorithms
 from FedPer.implemented_models.mobile_model import MobileNetModelSplit
 from FedPer.implemented_models.resnet_model import ResNetModelSplit
-
+from FedPer.models import ModelSplit
 
 
 class ServerInitializationStrategy(Strategy):
@@ -32,12 +31,10 @@ class ServerInitializationStrategy(Strategy):
     def __init__(
         self,
         model_split_class: Union[
-            Type[MobileNetModelSplit], 
-            Type[ModelSplit],
-            Type[ResNetModelSplit]
+            Type[MobileNetModelSplit], Type[ModelSplit], Type[ResNetModelSplit]
         ],
         create_model: Callable[[Dict[str, Any]], nn.Module],
-        config: Dict[str, Any] = {},
+        config: Dict[str, Any],
         algorithm: str = Algorithms.FEDAVG.value,
         has_fixed_head: bool = False,
         *args: Any,
@@ -149,8 +146,7 @@ class AggregateFullStrategy(ServerInitializationStrategy):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """Aggregate the received local parameters, set the global model parameters and
-        save the global model.
+        """Aggregate received local parameters, set global model parameters and save.
 
         Args:
             server_round: The current round of federated learning.
@@ -209,13 +205,13 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
-        """Configure the next round of training. Adds the global head to the aggregated
-        global body.
+        """Configure the next round of training.
 
         Args:
             server_round: The current round of federated learning.
             parameters: The current (global) model parameters.
-            client_manager: The client manager which holds all currently connected clients.
+            client_manager: The client manager which holds all
+                currently connected clients.
 
         Returns
         -------
@@ -316,8 +312,7 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """Aggregate the received local parameters, set the global model parameters and
-        save the global model.
+        """Aggregate received local parameters, set global model parameters and save.
 
         Args:
             server_round: The current round of federated learning.
@@ -362,9 +357,7 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
 
 
 class StoreHistoryStrategy(Strategy):
-    """Server FL history storage per training/evaluation round strategy
-    implementation.
-    """
+    """Server FL history storage per round strategy implementation."""
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
@@ -375,9 +368,7 @@ class StoreHistoryStrategy(Strategy):
 
 
 class StoreMetricsStrategy(StoreHistoryStrategy):
-    """Server FL metrics storage per training/evaluation round strategy
-    implementation.
-    """
+    """Server FL metrics storage per round strategy implementation."""
 
     def aggregate_fit(
         self,
@@ -385,8 +376,7 @@ class StoreMetricsStrategy(StoreHistoryStrategy):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """Aggregate the received local parameters and store the train aggregated
-        metrics.
+        """Aggregate the received local parameters and store the training aggregated.
 
         Args:
             server_round: The current round of federated learning.
@@ -426,8 +416,7 @@ class StoreMetricsStrategy(StoreHistoryStrategy):
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[BaseException],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
-        """Aggregate the received local parameters and store the evaluation aggregated
-        metrics.
+        """Aggregate the received local parameters and store the test aggregated.
 
         Args:
             server_round: The current round of federated learning.
@@ -459,16 +448,12 @@ class StoreMetricsStrategy(StoreHistoryStrategy):
 
         # Aggregate and print custom metric
         averaged_accuracy = sum(accuracies) / len(accuracies)
-        print(
-            f"Round {server_round} accuracy averaged from client results: {averaged_accuracy}"
-        )
+        print(f"Round {server_round} accuracy averaged: {averaged_accuracy}")
         return aggregated_loss, {"accuracy": averaged_accuracy}
 
 
 class StoreSelectedClientsStrategy(StoreHistoryStrategy):
-    """Server FL selected client storage per training/evaluation round strategy
-    implementation.
-    """
+    """Server FL selected clients storage per training/evaluation round strategy."""
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -478,7 +463,8 @@ class StoreSelectedClientsStrategy(StoreHistoryStrategy):
         Args:
             server_round: The current round of federated learning.
             parameters: The current (global) model parameters.
-            client_manager: The client manager which holds all currently connected clients.
+            client_manager: The client manager which holds all currently
+                connected clients.
 
         Returns
         -------

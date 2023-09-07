@@ -1,3 +1,4 @@
+"""Used to plot results from a pickle file."""
 import os
 import pickle
 
@@ -5,6 +6,7 @@ import matplotlib.pyplot as plt
 
 
 def plot_results(results, title, xlabel, ylabel, legend, save_path):
+    """Plot results from a list of results."""
     plt.figure()
     for result in results:
         plt.plot(result)
@@ -17,12 +19,15 @@ def plot_results(results, title, xlabel, ylabel, legend, save_path):
 
 
 def open_pickle(path: str) -> dict:
+    """Open a pickle file and return the contents as a dictionary."""
     with open(path, "rb") as f:
         return pickle.load(f)
 
 
 if __name__ == "__main__":
-    # use directories 
+    """Plot results for the following experiments:"""
+
+    # use directories
     directories = [d for d in os.listdir("./use") if d.startswith("head")]
     directories = [d for d in directories if d.endswith("resnet")]
 

@@ -1,3 +1,4 @@
+"""Implementation of CNN model for node kind prediction in action flows."""
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import torch
@@ -10,9 +11,7 @@ from FedPer.models import ModelManager, ModelSplit
 
 
 class CNNNetBody(nn.Module):
-    """Model adapted from simple CNN from Flower 'Quickstart PyTorch' \
-    (https://flower.dev/docs/quickstart-pytorch.html).
-    """
+    """Model from CNN from Flower (https://flower.dev/docs/quickstart-pytorch.html)."""
 
     def __init__(self):
         super().__init__()
@@ -24,6 +23,7 @@ class CNNNetBody(nn.Module):
         # self.fc3 = nn.Linear(84, 10)
 
     def forward(self, x):
+        """Forward pass."""
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
         x = x.view(-1, 16 * 5 * 5)  # flatten all dimensions except batch
@@ -34,9 +34,7 @@ class CNNNetBody(nn.Module):
 
 
 class CNNHead(nn.Module):
-    """Model adapted from simple CNN from Flower 'Quickstart PyTorch' \
-    (https://flower.dev/docs/quickstart-pytorch.html).
-    """
+    """Model from CNN from Flower (https://flower.dev/docs/quickstart-pytorch.html)."""
 
     def __init__(
         self,
@@ -49,14 +47,13 @@ class CNNHead(nn.Module):
         self.fc3 = nn.Linear(84, 10)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward pass."""
         x = F.relu(self.fc2(x))
         return self.fc3(x)
 
 
 class CNNNet(nn.Module):
-    """Model adapted from simple CNN from Flower 'Quickstart PyTorch' \
-    (https://flower.dev/docs/quickstart-pytorch.html).
-    """
+    """Model from CNN from Flower (https://flower.dev/docs/quickstart-pytorch.html)."""
 
     def __init__(
         self,
@@ -71,17 +68,17 @@ class CNNNet(nn.Module):
         # self.head = nn.Linear(84, 10)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward pass."""
         x = self.body(x)
         return self.head(x)
 
 
 class CNNModelSplit(ModelSplit):
-    """Concrete implementation of ModelSplit for models for node kind prediction in
-    action flows \\ with Body/Head split.
-    """
+    """Split the CNN model into body and head."""
 
     def _get_model_parts(self, model: CNNNet) -> Tuple[nn.Module, nn.Module]:
         return model.body, model.head
+
 
 class CNNModelManager(ModelManager):
     """Manager for models with Body/Head split."""
@@ -135,11 +132,10 @@ class CNNModelManager(ModelManager):
             epochs: number of training epochs.
             tag: str of the form <Algorithm>_<model_train_part>.
                 <Algorithm> - indicates the federated algorithm that is being performed\
-                              (FedAvg, FedPer, FedRep, FedBABU or FedHybridAvgLGDual).
-                              In the case of FedHybridAvgLGDual the tag also includes which part of the algorithm\
-                                is being performed, either FedHybridAvgLGDual_FedAvg or FedHybridAvgLGDual_LG-FedAvg.
-                <model_train_part> - indicates the part of the model that is being trained (full, body, head).
-                This tag can be ignored if no difference in train behaviour is desired between federated algortihms.
+                              (FedAvg, FedPer).
+                <model_train_part> - indicates the part of the model that is
+                being trained (full, body, head). This tag can be ignored if no
+                difference in train behaviour is desired between federated algortihms.
             fine_tuning: whether the training performed is for model fine-tuning or not.
 
         Returns

@@ -5,22 +5,21 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 """
 
 import flwr as fl
-
 import hydra
-from hydra.utils import instantiate
 from hydra.core.hydra_config import HydraConfig
+from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
 from FedPer.dataset import dataset_main
 from FedPer.utils import (
-    set_model_class, 
-    set_client_state_save_path,
-    set_server_target,
     get_client_fn,
     get_create_model_fn,
     plot_metric_from_history,
     save_results_as_pickle,
-    set_num_classes
+    set_client_state_save_path,
+    set_model_class,
+    set_num_classes,
+    set_server_target,
 )
 
 
@@ -65,7 +64,7 @@ def main(cfg: DictConfig) -> None:
             return fit_config
 
         return fit_config_fn
-    
+
     # get a function that will be used to construct the model
     create_model, split = get_create_model_fn(cfg)
 

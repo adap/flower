@@ -1,3 +1,4 @@
+"""ResNet model, model manager and split."""
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import torch
@@ -8,6 +9,7 @@ from torchvision.models.resnet import resnet34
 from tqdm import tqdm
 
 from FedPer.models import ModelManager, ModelSplit
+
 
 class ResNet(nn.Module):
     """ResNet model."""
@@ -28,7 +30,7 @@ class ResNet(nn.Module):
         self.body = resnet34()
 
         def basic_block(in_planes, out_planes, stride_use=1):
-            """Basic ResNet block."""
+            """Return Basic ResNet block."""
             return nn.Sequential(
                 nn.Conv2d(
                     in_planes,
@@ -62,6 +64,7 @@ class ResNet(nn.Module):
                     track_running_stats=True,
                 ),
             )
+
         # if only one head layer
         if self.num_head_layers == 1:
             self.head = self.body.fc
@@ -95,6 +98,7 @@ class ResNet(nn.Module):
             raise NotImplementedError("Only 1 or 2 head layers supported")
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward inputs through the model."""
         print("Forwarding through ResNet model")
         if self.num_head_layers == 1:
             return self.head(F.relu(self.body(x)))
@@ -104,13 +108,13 @@ class ResNet(nn.Module):
         else:
             raise NotImplementedError("Only 1 or 2 head layers supported")
 
+
 class ResNetModelSplit(ModelSplit):
-    """Concrete implementation of ModelSplit for models for node kind prediction in
-    action flows \\ with Body/Head split.
-    """
+    """Split ResNet model into body and head."""
 
     def _get_model_parts(self, model: ResNet) -> Tuple[nn.Module, nn.Module]:
         return model.body, model.head
+
 
 class ResNetModelManager(ModelManager):
     """Manager for models with Body/Head split."""
@@ -171,11 +175,10 @@ class ResNetModelManager(ModelManager):
             epochs: number of training epochs.
             tag: str of the form <Algorithm>_<model_train_part>.
                 <Algorithm> - indicates the federated algorithm that is being performed\
-                              (FedAvg, FedPer, FedRep, FedBABU or FedHybridAvgLGDual).
-                              In the case of FedHybridAvgLGDual the tag also includes which part of the algorithm\
-                                is being performed, either FedHybridAvgLGDual_FedAvg or FedHybridAvgLGDual_LG-FedAvg.
-                <model_train_part> - indicates the part of the model that is being trained (full, body, head).
-                This tag can be ignored if no difference in train behaviour is desired between federated algortihms.
+                    (FedAvg, FedPer).
+                <model_train_part> - indicates the part of the model that is
+                being trained (full, body, head). This tag can be ignored if no
+                difference in train behaviour is desired between federated algortihms.
             fine_tuning: whether the training performed is for model fine-tuning or not.
 
         Returns
@@ -213,7 +216,6 @@ class ResNetModelManager(ModelManager):
 
     def test(self, test_id: int) -> Dict[str, float]:
         """Test the model maintained in self.model."""
-
         # Load client state (head)
         if self.client_save_path is not None:
             self.model.head.load_state_dict(torch.load(self.client_save_path))
