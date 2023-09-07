@@ -8,6 +8,8 @@ partitioned, please include all those functions and logic in the
 `dataset_preparation.py` module. You can use all those functions from functions/methods
 defined here of course.
 """
+import pickle
+
 import numpy as np
 import torch
 from torch.utils.data import TensorDataset, DataLoader
@@ -74,67 +76,62 @@ def get_dirichlet_data(y, n, alpha, num_c, partition_equal=False):
     return idx_batch
 
 
+def split_dataset(train_dataset, num_clients, alpha, num_classes, save_path, partition_equal=False):
+    print("Preparing dataset...")
+    train_loader = DataLoader(train_dataset, batch_size=len(train_dataset))
+    X_train = next(iter(train_loader))[0].numpy()
+    Y_train = next(iter(train_loader))[1].numpy()
+    inds = get_dirichlet_data(Y_train,
+                              num_clients,
+                              alpha,
+                              num_classes,
+                              partition_equal=partition_equal)
+    train_datasets = []
+    for i, ind in enumerate(inds):
+        n_i = len(ind)
+        x = X_train[ind]
+        x_train = torch.Tensor(x[0:n_i])
+        y = Y_train[ind]
+        y_train = torch.LongTensor(y[0:n_i])
+        print(f"Client {i} : Training examples - {len(x_train)}")
+        dataset_train_torch = TensorDataset(x_train, y_train)
+        train_datasets.append(dataset_train_torch)
+
+    with open(save_path, 'wb') as file:
+        pickle.dump(train_datasets, file)
+
+    return train_datasets
+
+
 def load_datasets(config,
                   num_clients,
                   batch_size,
                   partition_equal=True) -> [DataLoader, DataLoader]:
     print("Loading data...")
-    trans_cifar = transforms.Compose([transforms.ToTensor(),
-                                      transforms.Normalize(mean=[0.491, 0.482, 0.447],
-                                                           std=[0.247, 0.243, 0.262])])
+
     if config.name == 'CIFAR10':
-        dataset_train_global = datasets.CIFAR10('./data/cifar10', train=True, download=True,
-                                                transform=trans_cifar)
-        dataset_test_global = datasets.CIFAR10('./data/cifar10', train=False, download=True,
-                                               transform=trans_cifar)
-    elif config.datatype == 'CIFAR100':
-        dataset_train_global = datasets.CIFAR100('./data/cifar100', train=True, download=True,
-                                                 transform=trans_cifar)
-        dataset_test_global = datasets.CIFAR100('./data/cifar100', train=False, download=True,
-                                                transform=trans_cifar)
+        Dataset = datasets.CIFAR10
+    elif config.name == 'CIFAR100':
+        Dataset = datasets.CIFAR100
     else:
         raise NotImplementedError
 
-    train_loader = DataLoader(dataset_train_global, batch_size=len(dataset_train_global))
-    X_train = next(iter(train_loader))[0].numpy()
-    Y_train = next(iter(train_loader))[1].numpy()
-    test_loader = DataLoader(dataset_test_global, batch_size=len(dataset_test_global))
-    # X_test = next(iter(test_loader))[0].numpy()
-    # Y_test = next(iter(test_loader))[1].numpy()
+    data_directory = f'./data/{config.name.lower()}/'
+    ds_path = f'{data_directory}train_{num_clients}_{config.alpha:.2f}.pkl'
+    trans_cifar = transforms.Compose([transforms.ToTensor(),
+                                      transforms.Normalize(mean=[0.491, 0.482, 0.447],
+                                                           std=[0.247, 0.243, 0.262])])
+    try:
+        with open(ds_path, 'rb') as file:
+            train_datasets = pickle.load(file)
+    except FileNotFoundError:
+        dataset_train = Dataset(data_directory, train=True, download=True, transform=trans_cifar)
+        train_datasets = split_dataset(dataset_train, num_clients, config.alpha,
+                                       config.num_classes, ds_path, partition_equal)
 
-    print("Preparing data...")
-    inds = get_dirichlet_data(Y_train,
-                              num_clients,
-                              config.alpha,
-                              config.num_classes,
-                              partition_equal=partition_equal)
+    dataset_test = Dataset(data_directory, train=False, download=True, transform=trans_cifar)
+    test_loader = DataLoader(dataset_test, batch_size=len(dataset_test), num_workers=1)
+    train_loaders = list(map(lambda ds: DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=1),
+                             train_datasets))
 
-    trainloaders = []
-    # dataset_test = []
-    # len_test = int(len(X_test) / num_clients)
-
-    for i, ind in enumerate(inds):
-        n_i = len(ind)
-
-        x = X_train[ind]
-        x_train = torch.Tensor(x[0:n_i])
-        y = Y_train[ind]
-        y_train = torch.LongTensor(y[0:n_i])
-
-        dataset_train_torch = TensorDataset(x_train, y_train)
-        trainloaders.append(DataLoader(dataset_train_torch, batch_size=batch_size, shuffle=True, num_workers=1))
-
-        # x_test = X_test[i * len_test:(i + 1) * len_test]
-        # x_test = torch.Tensor(x_test)
-        # y_test = Y_test[i * len_test:(i + 1) * len_test]
-        # y_test = torch.LongTensor(y_test)
-
-        # dataset_test_torch = TensorDataset(x_test, y_test)
-        # dataset_test.append(dataset_test_torch)
-
-        print("Client ", i,
-              " Training examples-", len(x_train),
-              # " Test examples-", len(x_test)
-              )
-
-    return trainloaders, test_loader
+    return train_loaders, test_loader
