@@ -8,6 +8,7 @@ from typing import Any, Callable, Dict, List, Tuple, Type, Union
 import flwr as fl
 import numpy as np
 import torch
+from flwr.client.client import Client
 from flwr.common import Scalar
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader, Subset, random_split
@@ -281,7 +282,7 @@ class FedPerClient(BaseClient):
 def get_client_fn_simulation(
     config: DictConfig,
     client_state_save_path: str = None,
-) -> Tuple[Callable[[str], BaseClient], DataLoader]:
+) -> Callable[[str], Union[Client, BaseClient, FedPerClient]]:
     """Generate the client function that creates the Flower Clients.
 
     Parameters

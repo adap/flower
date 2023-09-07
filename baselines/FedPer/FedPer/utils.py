@@ -8,15 +8,17 @@ from typing import Callable, Dict, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
+from flwr.client import Client
 from flwr.server.history import History
+from omegaconf import DictConfig
 
-from FedPer.client import get_client_fn_simulation
+from FedPer.client import BaseClient, FedPerClient, get_client_fn_simulation
 from FedPer.implemented_models.cnn_model import CNNModelSplit, CNNNet
 from FedPer.implemented_models.mobile_model import MobileNet, MobileNetModelSplit
 from FedPer.implemented_models.resnet_model import ResNet, ResNetModelSplit
 
 
-def set_model_class(config: dict) -> dict:
+def set_model_class(config: DictConfig) -> DictConfig:
     """Set model class based on the model name in the config file."""
     # Set the model class
     if config.model.name.lower() == "resnet":
@@ -30,7 +32,7 @@ def set_model_class(config: dict) -> dict:
     return config
 
 
-def set_num_classes(config: dict) -> dict:
+def set_num_classes(config: DictConfig) -> DictConfig:
     """Set the number of classes based on the dataset name in the config file."""
     # Set the number of classes
     if config.dataset.name.lower() == "cifar10":
@@ -44,7 +46,7 @@ def set_num_classes(config: dict) -> dict:
     return config
 
 
-def set_server_target(config: dict) -> dict:
+def set_server_target(config: DictConfig) -> DictConfig:
     """Set the server target based on the algorithm in the config file."""
     # Set the server target
     if config.algorithm.lower() == "fedper":
@@ -68,7 +70,9 @@ def set_client_state_save_path() -> str:
     return client_state_save_path
 
 
-def get_client_fn(config: dict, client_state_save_path: str = None) -> dict:
+def get_client_fn(
+    config: DictConfig, client_state_save_path: str = None
+) -> Callable[[str], Union[Client, BaseClient, FedPerClient]]:
     """Get client function."""
     # Get algorithm
     algorithm = config.algorithm.lower()
@@ -88,7 +92,7 @@ def get_client_fn(config: dict, client_state_save_path: str = None) -> dict:
 
 
 def get_create_model_fn(
-    config: dict,
+    config: DictConfig,
 ) -> Union[
     Tuple[Callable[[], CNNNet], CNNModelSplit],
     Tuple[Callable[[], MobileNet], MobileNetModelSplit],
@@ -215,7 +219,10 @@ def save_results_as_pickle(
     def _complete_path_with_default_name(path_: Path):
         """Append the default file name to the path."""
         print("Using default filename")
-        return path_ / default_filename
+        if default_filename is None:
+            return path_
+        else:
+            return path_ / default_filename
 
     if path.is_dir():
         path = _complete_path_with_default_name(path)
@@ -224,7 +231,8 @@ def save_results_as_pickle(
         path = _add_random_suffix(path)
 
     print(f"Results will be saved into: {path}")
-    data = {"history": history, **extra_results}
+    # data = {"history": history, **extra_results}
+    data = {"history": history}
     # save results to pickle
     with open(str(path), "wb") as handle:
         pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)

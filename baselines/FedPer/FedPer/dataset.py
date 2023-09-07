@@ -8,7 +8,6 @@ partitioned, please include all those functions and logic in the
 `dataset_preparation.py` module. You can use all those functions from functions/methods
 defined here of course.
 """
-import json
 import os
 import pickle
 import sys
@@ -46,7 +45,8 @@ def dataset_main(config: dict) -> None:
         # randomly assign classes
         assert config["num_classes"] > 0, "Number of classes must be positive"
         config["num_classes"] = max(1, min(config["num_classes"], len(dataset.classes)))
-        partition, stats = randomly_assign_classes(
+        # partition, stats = randomly_assign_classes(
+        partition = randomly_assign_classes(
             dataset=dataset,
             client_num=config["num_clients"],
             class_num=config["num_classes"],
@@ -79,8 +79,8 @@ def dataset_main(config: dict) -> None:
         with open(dataset_root / "partition.pkl", "wb") as f:
             pickle.dump(partition, f)
 
-        with open(dataset_root / "all_stats.json", "w") as f:
-            json.dump(stats, f)
+        # with open(dataset_root / "all_stats.json", "w") as f:
+        #    json.dump(stats, f)
 
     elif dataset_name.lower() == "flickr":
         flickr_preprocess(dataset_root, config)

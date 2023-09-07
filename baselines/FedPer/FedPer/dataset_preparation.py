@@ -3,7 +3,7 @@ import os
 import random
 from collections import Counter
 from pathlib import Path
-from typing import Dict, List, Tuple, Type
+from typing import Dict, List, Type, Any
 
 import numpy as np
 import pandas as pd
@@ -17,7 +17,7 @@ class BaseDataset(Dataset):
 
     def __init__(self) -> None:
         """Initialize the dataset."""
-        self.classes: List = None
+        self.classes = None
         self.data: torch.Tensor = None
         self.targets: torch.Tensor = None
         self.train_data_transform = None
@@ -155,7 +155,7 @@ def flickr_preprocess(root, config):
         Path(root, "FLICKR-AES_image_labeled_by_each_worker.csv")
     )
     # take num_clients random workers from df
-    # where workers have minimum 60 images and maximum 290
+    # #where workers have minimum 60 images and maximum 290
     df_labelled_igms = df_labelled_igms.groupby("worker").filter(
         lambda x: len(x) >= 60 and len(x) <= 290
     )
@@ -217,11 +217,14 @@ DATASETS: Dict[str, Type[BaseDataset]] = {
 
 
 def randomly_assign_classes(
-    dataset: Dataset, client_num: int, class_num: int
-) -> Tuple[List[List[int]], Dict[str, Dict[str, int]]]:
+    dataset: Dataset,
+    client_num: int,
+    class_num: int
+    # ) -> Tuple[List[List[int]], Dict[str, Dict[str, int]]]:
+) -> Dict[str, Any]:
     """Randomly assign number classes to clients."""
     partition = {"separation": None, "data_indices": None}
-    data_indices = [[] for _ in range(client_num)]
+    data_indices: List = [[] for _ in range(client_num)]
     targets_numpy = np.array(dataset.targets, dtype=np.int32)
     label_list = list(range(len(dataset.classes)))
 
@@ -258,20 +261,20 @@ def randomly_assign_classes(
                 set(data_idx_for_each_label[cls]) - set(selected_idx)
             )
 
-        data_indices[i] = data_indices[i].tolist()
+        data_indices[i] = data_indices[i]
 
-    stats = {}
-    for i, idx in enumerate(data_indices):
-        stats[i] = {"x": None, "y": None}
-        stats[i]["x"] = len(idx)
-        stats[i]["y"] = Counter(targets_numpy[idx].tolist())
+    # stats = {}
+    # for i, idx in enumerate(data_indices):
+    #    stats[i] = {"x": None, "y": None}
+    #    stats[i]["x"] = len(idx)
+    #   stats[i]["y"] = Counter(targets_numpy[idx].tolist())
 
-    num_samples = np.array([stat_i["x"] for stat_i in stats.values()])
-    stats["sample per client"] = {
-        "std": num_samples.mean(),
-        "stddev": num_samples.std(),
-    }
+    # num_samples = np.array([stat_i["x"] for stat_i in stats.values()])
+    # stats["sample per client"] = {
+    #    "std": num_samples.mean(),
+    #    "stddev": num_samples.std(),
+    # }
 
     partition["data_indices"] = data_indices
 
-    return partition, stats
+    return partition  # , stats
