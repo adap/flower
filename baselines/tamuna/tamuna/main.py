@@ -99,14 +99,6 @@ def run_tamuna(cfg: DictConfig,
                testloader: DataLoader,
                trainloaders: List[DataLoader]
 ):
-    # remove possible previous client states
-    if os.path.exists(client.TamunaClient.STATE_DIR):
-        for filename in os.listdir(client.TamunaClient.STATE_DIR):
-            if filename.endswith("_state.bin"):
-                os.remove(f"{client.TamunaClient.STATE_DIR}/{filename}")
-    else:
-        os.mkdir(client.TamunaClient.STATE_DIR)
-
     # prepare function that will be used to spawn each client
     client_fn = client.gen_tamuna_client_fn(
         trainloaders=trainloaders,
@@ -124,6 +116,14 @@ def run_tamuna(cfg: DictConfig,
     for i in range(cfg.meta.n_repeats):
         np.random.seed(cfg.meta.seed)
         torch.manual_seed(cfg.meta.seed)
+
+        # remove possible previous client states
+        if os.path.exists(client.TamunaClient.STATE_DIR):
+            for filename in os.listdir(client.TamunaClient.STATE_DIR):
+                if filename.endswith("_state.bin"):
+                    os.remove(f"{client.TamunaClient.STATE_DIR}/{filename}")
+        else:
+            os.mkdir(client.TamunaClient.STATE_DIR)
 
         # number of epochs per round is determined by probability p
         epochs_per_round = np.random.geometric(p=cfg.server.p, size=cfg.server.num_rounds).tolist()
