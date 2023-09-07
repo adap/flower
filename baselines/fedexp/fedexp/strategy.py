@@ -24,7 +24,7 @@ class FedExP(FedAvg):
         self.epsilon = epsilon
         self.decay = decay
         self.w_vec_estimate = np.zeros(parameters_to_vector(self.net_glob.parameters()).numel())
-        self.server_steps = []
+        self.server_steps = [0]
 
     def __repr__(self) -> str:
         return "FedExP"
@@ -48,7 +48,7 @@ class FedExP(FedAvg):
             grad_avg_norm = torch.linalg.norm(grad_avg) ** 2
             grad_norm_avg = grad_norm_sum / p_sum
             eta_g = max(1, (0.5 * grad_norm_avg /
-                            (grad_avg_norm + clients_per_round * self.epsilon)).cpu())
+                            (grad_avg_norm + clients_per_round * self.epsilon).cpu()).item())
             self.server_steps.append(eta_g)
             w_vec_prev = self.w_vec_estimate
             self.w_vec_estimate = parameters_to_vector(self.net_glob.parameters()) + eta_g * grad_avg

@@ -1,13 +1,13 @@
+import flwr as fl
 import hydra
+import numpy as np
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
-import flwr as fl
 
 from fedexp import client, server, utils
 from fedexp.dataset import load_datasets
 from fedexp.utils import seed_everything, get_parameters
-import numpy as np
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -65,7 +65,6 @@ def main(cfg: DictConfig) -> None:
         net_glob=net_glob,
         epsilon=cfg.hyperparams.epsilon,
         decay=cfg.hyperparams.decay,
-        device=cfg.client_device,
     )
 
     history = fl.simulation.start_simulation(
@@ -73,10 +72,10 @@ def main(cfg: DictConfig) -> None:
         num_clients=cfg.num_clients,
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
         strategy=strategy,
-        # client_resources={
-        #     "num_cpus": cfg.client_resources.num_cpus,
-        #     "num_gpus": cfg.client_resources.num_gpus,
-        # }
+        client_resources={
+            "num_cpus": cfg.client_resources.num_cpus,
+            "num_gpus": cfg.client_resources.num_gpus,
+        }
     )
 
     save_path = HydraConfig.get().runtime.output_dir

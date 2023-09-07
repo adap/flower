@@ -3,7 +3,6 @@
 Optionally, also define a new Server class (please note this is not needed in most
 settings).
 """
-from fedexp.models import test
 from collections import OrderedDict
 from typing import Callable, Dict, Optional, Tuple
 
@@ -13,11 +12,13 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
+from fedexp.models import test
+
 
 def gen_evaluate_fn(
         test_loader: DataLoader,
         model: DictConfig,
-        device=None,
+        device,
 ) -> Callable[
     [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]
 ]:
@@ -37,8 +38,6 @@ def gen_evaluate_fn(
     Callable[ [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]] ]
         The centralized evaluation function.
     """
-    device = device if device is not None else torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
     def evaluate(
             server_round: int,
             parameters_ndarrays: NDArrays,

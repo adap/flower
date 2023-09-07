@@ -61,8 +61,8 @@ class FlowerClient(fl.client.NumPyClient):
             grad_p = self.p * grad
             grad_norm = self.p * torch.linalg.norm(grad) ** 2
         return [], len(self.trainloader), {"p": self.p,
-                                           "grad_p": grad_p,
-                                           "grad_norm": grad_norm,
+                                           "grad_p": grad_p.to("cpu"),
+                                           "grad_norm": grad_norm.to("cpu"),
                                            }
 
 

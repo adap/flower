@@ -45,12 +45,11 @@ def plot_metric_from_history(
 
     # rounds_loss, values_loss = zip(*hist.losses_centralized)
 
-    fig, axs = plt.subplots(nrows=1, ncols=1, sharex="row")
+    fig, axs = plt.subplots(nrows=2, ncols=1, sharex="row")
     axs[0].plot(np.asarray(rounds), np.asarray(values))
     axs[0].set_ylabel("Accuracy")
-
-    # axs[1].plot(np.asarray(rounds), np.asarray(server_steps))
-    # axs[1].set_ylabel("Server Step Size")
+    axs[1].plot(np.asarray(rounds), np.asarray(server_steps))
+    axs[1].set_ylabel("Server Step Size")
 
     plt.xlabel("Rounds")
 
