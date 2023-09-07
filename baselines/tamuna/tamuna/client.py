@@ -115,8 +115,14 @@ class TamunaClient(fl.client.NumPyClient):
 
 
 class FedAvgClient(fl.client.NumPyClient):
-    def __init__(self, net: torch.nn.Module, trainloader: DataLoader,
-                 device: torch.device, lr: float, cid: int) -> None:
+    def __init__(
+        self,
+        net: torch.nn.Module,
+        trainloader: DataLoader,
+        device: torch.device,
+        lr: float,
+        cid: int,
+    ) -> None:
         super().__init__()
         self.trainloader = trainloader
         self.device = device
@@ -134,8 +140,13 @@ class FedAvgClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         self.set_parameters(parameters)
-        self.net = fedavg_train(self.net, self.trainloader, epochs=config["epochs"],
-                                lr=self.lr, device=self.device)
+        self.net = fedavg_train(
+            self.net,
+            self.trainloader,
+            epochs=config["epochs"],
+            lr=self.lr,
+            device=self.device,
+        )
         return self.get_parameters({}), len(self.trainloader), {}
 
 
@@ -153,7 +164,7 @@ def gen_tamuna_client_fn(
         A list of DataLoaders, each pointing to the dataset training partition
         belonging to a particular client.
     learning_rate : float
-        The learning rate for the SGD  optimizer of clients.
+        The learning rate for Tamuna optimizer for clients.
     model: DictConfig
         Architecture of the model being instantiated
     client_device: str
@@ -187,15 +198,15 @@ def gen_fedavg_client_fn(
     model: DictConfig,
     client_device: str,
 ) -> Callable[[str], FedAvgClient]:
-    """Generates the client function that creates Tamuna clients.
+    """Generates the client function that creates FedAvg clients.
 
     Parameters
     ----------
     trainloaders: List[DataLoader]
         A list of DataLoaders, each pointing to the dataset training partition
         belonging to a particular client.
-    learning_rate : float
-        The learning rate for the SGD  optimizer of clients.
+    lr : float
+        The learning rate for the SGD optimizer for clients.
     model: DictConfig
         Architecture of the model being instantiated
     client_device: str
@@ -204,11 +215,11 @@ def gen_fedavg_client_fn(
     Returns
     -------
     Callable[[str], FlowerClient]
-        A tuple containing the client function that creates Tamuna clients
+        A tuple containing the client function that creates FedAvg clients
     """
 
     def fedavg_client_fn(cid: str) -> FedAvgClient:
-        """Create a Tamuna client."""
+        """Create a FedAvg client."""
 
         # Load model
         device = torch.device(device=client_device)

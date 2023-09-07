@@ -30,12 +30,16 @@ def main(cfg: DictConfig) -> None:
     # print config structured as YAML
     print(OmegaConf.to_yaml(cfg))
 
-    # partition dataset and get dataloaders
-    trainloaders, testloader = load_datasets(num_clients=cfg.server.num_clients, iid=cfg.dataset.iid)
-
     # Hydra automatically creates an output directory
     # Let's retrieve it and save some results there
     save_path = HydraConfig.get().runtime.output_dir
+    with open(f"{save_path}/config.yaml", "wt") as f:
+        OmegaConf.save(cfg, f)
+
+    # partition dataset and get dataloaders
+    trainloaders, testloader = load_datasets(
+        num_clients=cfg.server.num_clients, iid=cfg.dataset.iid
+    )
 
     tamuna_histories = run_tamuna(cfg, save_path, testloader, trainloaders)
     fedavg_histories = run_fedavg(cfg, save_path, testloader, trainloaders)
@@ -46,10 +50,11 @@ def main(cfg: DictConfig) -> None:
     compare_histories(tamuna_histories, fedavg_histories, dim, save_path, cfg)
 
 
-def run_fedavg(cfg: DictConfig,
-               save_path: str,
-               testloader: DataLoader,
-               trainloaders: List[DataLoader]
+def run_fedavg(
+    cfg: DictConfig,
+    save_path: str,
+    testloader: DataLoader,
+    trainloaders: List[DataLoader],
 ):
     # prepare function that will be used to spawn each client
     client_fn = client.gen_fedavg_client_fn(
@@ -81,8 +86,8 @@ def run_fedavg(cfg: DictConfig,
             strategy=CentralizedFedAvgStrategy(
                 clients_per_round=cfg.server.clients_per_round,
                 epochs_per_round=int(1 / cfg.server.p),
-                evaluate_fn=evaluate_fn
-            )
+                evaluate_fn=evaluate_fn,
+            ),
         )
 
         # save results as a Python pickle using a file_path
@@ -94,10 +99,11 @@ def run_fedavg(cfg: DictConfig,
     return histories
 
 
-def run_tamuna(cfg: DictConfig,
-               save_path: str,
-               testloader: DataLoader,
-               trainloaders: List[DataLoader]
+def run_tamuna(
+    cfg: DictConfig,
+    save_path: str,
+    testloader: DataLoader,
+    trainloaders: List[DataLoader],
 ):
     # prepare function that will be used to spawn each client
     client_fn = client.gen_tamuna_client_fn(
@@ -126,7 +132,9 @@ def run_tamuna(cfg: DictConfig,
             os.mkdir(client.TamunaClient.STATE_DIR)
 
         # number of epochs per round is determined by probability p
-        epochs_per_round = np.random.geometric(p=cfg.server.p, size=cfg.server.num_rounds).tolist()
+        epochs_per_round = np.random.geometric(
+            p=cfg.server.p, size=cfg.server.num_rounds
+        ).tolist()
 
         # Start simulation
         history = fl.simulation.start_simulation(
@@ -142,7 +150,7 @@ def run_tamuna(cfg: DictConfig,
                 epochs_per_round=epochs_per_round,
                 eta=cfg.client.eta,
                 s=cfg.server.s,
-                evaluate_fn=evaluate_fn
+                evaluate_fn=evaluate_fn,
             ),
         )
 

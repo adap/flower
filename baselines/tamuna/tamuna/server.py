@@ -29,7 +29,7 @@ def gen_evaluate_fn(
 
     Returns
     -------
-    Callable[ [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]] ]
+    Callable[ [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]
         The centralized evaluation function.
     """
 

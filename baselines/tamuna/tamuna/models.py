@@ -142,8 +142,23 @@ def fedavg_train(
     trainloader: DataLoader,
     epochs: int,
     lr: float,
-    device
+    device: torch.device,
 ):
+    """Train the network on the training set.
+
+    Parameters
+    ----------
+    net : nn.Module
+        The neural network to train.
+    trainloader : DataLoader
+        The DataLoader containing the data to train the network on.
+    epochs : int
+        The number of epochs the model should be trained for.
+    lr: float
+        Learning rate to be used.
+    device : torch.device
+        The device on which the model should be trained, either 'cpu' or 'cuda'.
+    """
     criterion = torch.nn.CrossEntropyLoss()
     optim = torch.optim.SGD(net.parameters(), lr=lr)
     for _ in range(epochs):
@@ -278,9 +293,7 @@ def __tamuna_train_one_epoch(
 
 
 def test(
-    net: nn.Module,
-    testloader: DataLoader,
-    device: torch.device
+    net: nn.Module, testloader: DataLoader, device: torch.device
 ) -> Tuple[float, float]:
     """Evaluate the network on the entire test set.
 
