@@ -114,6 +114,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     # Create the Driver
     driver = Driver(driver_service_address=address, certificates=certificates)
     driver.connect()
+    lock = threading.Lock()
 
     # Initialize the Driver API server and config
     initialized_server, initialized_config = init_defaults(
@@ -131,7 +132,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     # Start the thread updating nodes
     thread = threading.Thread(
         target=_update_nodes,
-        args=(driver, initialized_server.client_manager()),
+        args=(driver, initialized_server.client_manager(), lock),
         daemon=True,
     )
     thread.start()
@@ -143,14 +144,17 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     )
 
     # Stop the Driver API server
-    driver.disconnect()
+    with lock:
+        driver.disconnect()
 
     event(EventType.START_SERVER_LEAVE)
 
     return hist
 
 
-def _update_nodes(driver: Driver, client_manager: ClientManager) -> None:
+def _update_nodes(
+    driver: Driver, client_manager: ClientManager, lock: threading.Lock
+) -> None:
     """Update the nodes list in the client manager.
 
     This function periodically communicates with the associated driver to get all
@@ -166,10 +170,14 @@ def _update_nodes(driver: Driver, client_manager: ClientManager) -> None:
     workload_id = driver.create_workload(driver_pb2.CreateWorkloadRequest()).workload_id
 
     # Loop until the driver is disconnected
-    while driver.stub is not None:
-        get_nodes_res = driver.get_nodes(
-            req=driver_pb2.GetNodesRequest(workload_id=workload_id)
-        )
+    while True:
+        with lock:
+            # End the while loop if the driver is disconnected.
+            if driver.stub is None:
+                break
+            get_nodes_res = driver.get_nodes(
+                req=driver_pb2.GetNodesRequest(workload_id=workload_id)
+            )
         all_node_ids = set(get_nodes_res.node_ids)
         new_nodes = all_node_ids.difference(registered_nodes)
         # Register new nodes
