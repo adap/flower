@@ -17,11 +17,14 @@ dataset: ["CIFAR-10", "FLICKR-AES"] # list of datasets you include in your basel
 
 ## About this baseline
 
-****What’s implemented:**** : The code in this directory replicates the experiments in _Federated Learning with Personalization Layers_ (Arivazhagan et al., 2019) for MNIST and FLICKR-AES datasets, which proposed the `FedPer` model. Specifically, it replicates the results found in figures 2, 4, 7, and 8 in their paper. 
+****What’s implemented:**** : The code in this directory replicates the experiments in _Federated Learning with Personalization Layers_ (Arivazhagan et al., 2019) for CIFAR10 and FLICKR-AES datasets, which proposed the `FedPer` model. Specifically, it replicates the results found in figures 2, 4, 7, and 8 in their paper. __Note__ that there is typo in the caption of Figure 4 in the article, it should be CIFAR10 and __not__ CIFAR100. 
 
-****Datasets:**** : MNIST from PyTorch's Torchvision and FLICKR-AES. FLICKR-AES was proposed as dataset in _Personalized Image Aesthetics_ (Ren et al., 2017) and can be found on thier [GitHub](https://github.com/alanspike/personalizedImageAesthetics). 
+****Datasets:**** : CIFAR10 from PyTorch's Torchvision and FLICKR-AES. FLICKR-AES was proposed as dataset in _Personalized Image Aesthetics_ (Ren et al., 2017) and can be downloaded using a link provided on thier [GitHub](https://github.com/alanspike/personalizedImageAesthetics). One must first download FLICKR-AES-001.zip (5.76GB), extract all inside and place in baseline/FedPer/datasets. To this location, also download the other 2 related files: (1) FLICKR-AES_image_labeled_by_each_worker.csv, and (2) FLICKR-AES_image_score.txt. Current repository supports CIFAR100 but it hasn't been used to reproduce figures. 
 
-****Hardware Setup:**** :warning: *_Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Someone out there might not have access to the same resources you have so, could list the absolute minimum hardware needed to run the experiment in a reasonable amount of time ? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?_*
+****Hardware Setup:**** : Experiments have been carried out on GPU. 2 different computers managed to run experiments: 
+
+- GeForce RTX 3080 16GB
+- GeForce RTX 4090 24GB
 
 ****Contributors:**** : William Lindskog
 
@@ -30,55 +33,97 @@ dataset: ["CIFAR-10", "FLICKR-AES"] # list of datasets you include in your basel
 
 ****Task:**** : Image Classification
 
-****Model:**** : Currently using ResNet34 (MobileNet-V1 will be implemented). 
+****Model:**** : This directory implements 2 models:
 
-****Dataset:**** : CIFAR10, CIFAR100, FLICKR-AES
+- ResNet34 which can be imported directly (after having installed the packages) from PyTorch, using `from torchvision.models import resnet34 
+- MobileNet-v1
 
-****Training Hyperparameters:**** :warning: *_Include a table with all the main hyperparameters in your baseline. Please show them with their default value._*
+Please see how models are implemented using a so called model_manager and model_split class since FedPer uses head and base layers in a neural network. 
+
+****Dataset:**** : CIFAR10, FLICKR-AES. CIFAR10 will be partitioned based on number of classes for data that each client shall recieve e.g. 4 allocated classes could be [1, 3, 5, 9]. FLICKR-AES is an unbalanced dataset, so there we only apply random sampling. 
+
+****Training Hyperparameters:**** : The hyperparameters can be found in conf/base.yaml file which is the configuration file for the main script. 
+
+| Description | Default Value |
+| ----------- | ----- |
+| num_clients | 10 |
+| clients per round | 10 |
+| number of rounds | 50 |
+| client resources | {'num_cpus': 32, 'num_gpus': 1 }|
+| learning_rate | 0.01 |
+| batch_size | 128 |
+| optimizer | SGD |
+| algorithm | fedavg|
 
 
 ## Environment Setup
 
-- Ensure you are in ./baselines/FedPer
-- running with Python 3.9.5
-- `poetry shell` there to active environment. 
-- Run module using python -m FedPer.main
-- base.yaml has the configuration. Set to 2 `num_head_layers` for the same experiment set up as in Figure 2, see [paper](https://arxiv.org/pdf/1912.00818.pdf). 
+To construct the Python environment follow these steps:
 
+```bash
+# install the base Poetry environment
+poetry install
 
+# activate the environment
+poetry shell
+
+# install PyTorch with GPU support. Please note this baseline is very lightweight so it can run fine on a CPU.
+pip install torch==2.0.1+cu117 torchvision==0.15.2+cu117 
+```
 ## Running the Experiments
+```bash
+python -m FedPer.main # this will run using the default settings in the `conf/base.yaml`
 
-:warning: _Provide instructions on the steps to follow to run all the experiments._
-```bash  
-# The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
+# you can change settings by copying the base file, renaming it, change the values to the ones you want to use, and run in command line: 
+python -m FedPer.main mu=1 --config-name <name_of_new_config_file> 
 
-poetry run -m <baseline-name>.main <no additional arguments> # where <baseline-name> is the name of this directory and that of the only sub-directory in this directory (i.e. where all your source code is)
+```
 
-# If you are using a dataset that requires a complicated download (i.e. not using one natively supported by TF/PyTorch) + preprocessing logic, you might want to tell people to run one script first that will do all that. Please ensure the download + preprocessing can be configured to suit (at least!) a different download directory (and use as default the current directory). The expected command to run to do this is:
+To reproduce figures:
+```bash
+# make FedPer/run_scripts.sh executable
+chmod u+x FedPer/run_scripts.sh
+# uncomment lines in script that you want to run, then  
+bash FedPer/run_scripts.sh
 
-poetry run -m <baseline-name>.dataset_preparation <optional arguments, but default should always run>
+# this config can also be overriden from the CLI
+```
 
-# It is expected that you baseline supports more than one dataset and different FL settings (e.g. different number of clients, dataset partitioning methods, etc). Please provide a list of commands showing how these experiments are run. Include also a short explanation of what each one does. Here it is expected you'll be using the Hydra syntax to override the default config.
-
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
-.
-.
-.
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
+What you need to change in configuration files: 
+```bash
+algorithm: fedavg, fedper # these are currently supported
+server_device: 'cuda:0', 'cpu'
+dataset.name: 'cifar10', 'cifar100', 'flickr'
+num_classes: 10, 100, 5 # respectively 
+model.name: mobile, resnet
 ```
 
 
 ## Expected Results
 
-:warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
+Having run the `run_script.sh`, the expected results should look something like this: 
 
-```bash
-# it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameteres
+__MobileNet-v1 on CIFAR10__
 
-poetry run -m <baseline-name>.main --multirun num_client_per_round=5,10,50 dataset=femnist,cifar10
-# the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
+![](FedPer/visuals/use/mobile_plot_figure_2.png)
 
-[Now show a figure/table displaying the results of the above command]
+__ResNet on CIFAR10__
 
-# add more commands + plots for additional experiments.
-```
+![](FedPer/visuals/use/resnet_plot_figure_2.png)
+
+__MobileNet-v1 on CIFAR10 using varying size of head__
+
+![](FedPer/visuals/use/mobile_plot_figure_num_head.png)
+
+
+__ResNet on CIFAR10 using varying size of head__
+
+![](FedPer/visuals/use/resnet_plot_figure_num_head.png)
+
+__MobileNet-v1 on FLICKR-AES__
+
+![](FedPer/visuals/use/mobile_plot_figure_flickr.png)
+
+__ResNet on FLICKR-AES__
+
+![](FedPer/visuals/use/resnet_plot_figure_flickr.png)

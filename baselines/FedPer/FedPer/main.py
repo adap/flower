@@ -20,6 +20,7 @@ from FedPer.utils import (
     get_create_model_fn,
     plot_metric_from_history,
     save_results_as_pickle,
+    set_num_classes
 )
 
 
@@ -35,9 +36,10 @@ def main(cfg: DictConfig) -> None:
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
 
-    # Set the model class and server target
+    # Set the model class, server target, and number of classes
     cfg = set_model_class(cfg)
     cfg = set_server_target(cfg)
+    cfg = set_num_classes(cfg)
 
     # Create directory to store client states if it does not exist
     # Client state has subdirectories with the name of current time

@@ -11,7 +11,6 @@ defined here of course.
 import os
 import sys
 import json
-import torch
 import numpy as np
 import pickle
 import pandas as pd

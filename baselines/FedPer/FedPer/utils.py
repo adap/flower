@@ -26,6 +26,19 @@ def set_model_class(config : dict) -> dict:
         raise NotImplementedError(f"Model {config.model.name} not implemented")
     return config
 
+def set_num_classes(config : dict) -> dict:
+    """ Set the number of classes based on the dataset name in the config file. """
+    # Set the number of classes
+    if config.dataset.name.lower() == "cifar10":
+        config.dataset.num_classes = 10
+    elif config.dataset.name.lower() == "cifar100":
+        config.dataset.num_classes = 100
+    elif config.dataset.name.lower() == "flickr":
+        config.dataset.num_classes = 5
+    else:
+        raise NotImplementedError(f"Dataset {config.dataset.name} not implemented")
+    return config
+
 def set_server_target(config : dict) -> dict:
     """ Set the server target based on the algorithm in the config file. """
     # Set the server target

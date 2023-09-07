@@ -23,8 +23,8 @@ def open_pickle(path: str) -> dict:
 
 if __name__ == "__main__":
     # use directories 
-    directories = [d for d in os.listdir("./use") if d.endswith("flickr")]
-    directories = [d for d in directories if d.startswith("mobile")]
+    directories = [d for d in os.listdir("./use") if d.startswith("head")]
+    directories = [d for d in directories if d.endswith("resnet")]
 
     results_for_plot = []
     for directory in directories:
@@ -36,14 +36,15 @@ if __name__ == "__main__":
         metric_type = "distributed"
         metric_dict = history.metrics_distributed
         _, values = zip(*metric_dict["accuracy"])
+        # take first 25 rounds
+        values = values[:25]
 
         results_for_plot.append(values)
-    quit()
     keys = [
         "Fedper (1 block + classifier)",
-        "Fedper (3 blocks + classifier)",
+        "Fedper (2 blocks + classifier)",
+        "Fedper (classifier)",
         "FedAvg",
-        "FedPer (2 blocks + classifier)"
     ]
 
     plt.figure()
@@ -59,5 +60,5 @@ if __name__ == "__main__":
     plt.ylabel("Accuracy")
     plt.xlabel("Rounds")
     plt.legend()
-    plt.savefig("./use/mobile_plot_figure_4.png")
+    plt.savefig("./use/resnet_plot_figure_#head.png")
     plt.show()
