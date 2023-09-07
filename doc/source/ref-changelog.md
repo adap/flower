@@ -4,9 +4,15 @@
 -  **Update REST API to support create and delete nodes** ([#2283](https://github.com/adap/flower/pull/2283))
 ### What's new?
 
+- **General updates to baselines** ([#2301](https://github.com/adap/flower/pull/2301).[#2305](https://github.com/adap/flower/pull/2305), [#2307](https://github.com/adap/flower/pull/2307))
+
+- **General improvements** ([#2309](https://github.com/adap/flower/pull/2309), [#2310](https://github.com/adap/flower/pull/2310), [2313](https://github.com/adap/flower/pull/2313))
+
+  Flower received many improvements under the hood, too many to list here.
+
 ### Incompatible changes
 
-- **Remove support for Python 3.7** ([#2280](https://github.com/adap/flower/pull/2280))
+- **Remove support for Python 3.7** ([#2280](https://github.com/adap/flower/pull/2280), [#2299](https://github.com/adap/flower/pull/2299), [2304](https://github.com/adap/flower/pull/2304), [#2306](https://github.com/adap/flower/pull/2306))
 
   Python 3.7 support was deprecated in Flower 1.5, and this release removes support. Flower now requires Python 3.8.
 

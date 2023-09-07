@@ -10,6 +10,7 @@ import NIOCore
 import NIOPosix
 import CoreML
 import os
+import flwr
 
 /// Set of CoreML machine learning task options.
 public enum MLTask {
@@ -55,6 +56,7 @@ public class MLFlwrClient: Client {
     
     private var compiledModelUrl: URL
     private var tempModelUrl: URL
+    private var modelUrl: URL
     
     private let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? "flwr.Flower",
                                     category: String(describing: MLFlwrClient.self))
@@ -65,8 +67,9 @@ public class MLFlwrClient: Client {
     ///   - layerWrappers: A MLLayerWrapper struct that contains layer information.
     ///   - dataLoader: A MLDataLoader struct that contains train- and testdata batches.
     ///   - compiledModelUrl: An URL specifying the location or path of the compiled model.
-    public init(layerWrappers: [MLLayerWrapper], dataLoader: MLDataLoader, compiledModelUrl: URL) {
-        self.parameters = MLParameter(layerWrappers: layerWrappers)
+    public init(layerWrappers: [MLLayerWrapper], dataLoader: MLDataLoader, compiledModelUrl: URL, modelUrl: URL) {
+        self.modelUrl = modelUrl
+        self.parameters = MLParameter(layerWrappers: layerWrappers, modelUrl: modelUrl, compiledModelUrl: compiledModelUrl)
         self.eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         self.dataLoader = dataLoader
         self.compiledModelUrl = compiledModelUrl
@@ -85,6 +88,7 @@ public class MLFlwrClient: Client {
     ///
     /// - Returns: Parameters from the local model
     public func getParameters() -> GetParametersRes {
+        parameters.initializeParameters()
         let parameters = parameters.weightsToParameters()
         let status = Status(code: .ok, message: String())
         
@@ -128,7 +132,7 @@ public class MLFlwrClient: Client {
         }
         
         let progressHandler: (MLUpdateContext) -> Void = { contextProgress in
-            let loss = String(format: "%.4f", contextProgress.metrics[.lossValue] as! Double)
+            let loss = String(format: "%.20f", contextProgress.metrics[.lossValue] as! Float)
             switch task {
             case .train:
                 self.log.info("Epoch \(contextProgress.metrics[.epochIndex] as! Int + 1) finished with loss \(loss)")
@@ -143,8 +147,8 @@ public class MLFlwrClient: Client {
                 self.saveModel(finalContext)
             }
             
-            let loss = finalContext.metrics[.lossValue] as! Double
-            let result = MLResult(loss: loss, numSamples: dataset.count, accuracy: (1.0 - loss) * 100)
+            let loss = String(format: "%.20f", finalContext.metrics[.lossValue] as! Double)
+            let result = MLResult(loss: Double(loss)!, numSamples: dataset.count, accuracy: (1.0 - Double(loss)!) * 100)
             promise?.succeed(result)
         }
         
