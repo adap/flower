@@ -40,7 +40,6 @@ if restful_mode:
     fl.client.start_numpy_client(
         server_address="http://0.0.0.0:9093",
         client=FlowerClient(),
-        rest=True,
         transport="rest",
     )
 else:

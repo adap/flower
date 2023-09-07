@@ -169,6 +169,7 @@ def http_request_response(
         return True
     
     def delete_node() -> bool:
+        """Set delete_node."""
         if node_store[KEY_NODE] is None:
             log(ERROR, "Node instance missing")
             return
