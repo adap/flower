@@ -6,16 +6,13 @@
 
 - **General updates to baselines** ([#2301](https://github.com/adap/flower/pull/2301).[#2305](https://github.com/adap/flower/pull/2305), [#2307](https://github.com/adap/flower/pull/2307))
 
-
 - **New or updates baselines**
 
   - FedProx ([#2286](https://github.com/adap/flower/pull/2286))
 
-
 - **General improvements** ([#2309](https://github.com/adap/flower/pull/2309), [#2310](https://github.com/adap/flower/pull/2310), [2313](https://github.com/adap/flower/pull/2313), [#2316](https://github.com/adap/flower/pull/2316), [2317](https://github.com/adap/flower/pull/2317))
 
   Flower received many improvements under the hood, too many to list here.
-
 
 ### Incompatible changes
 
