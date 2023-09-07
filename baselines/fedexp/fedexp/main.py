@@ -37,7 +37,8 @@ def main(cfg: DictConfig) -> None:
                                      model=cfg.model,
                                      num_epochs=cfg.num_epochs,
                                      args={
-                                         "p": p
+                                         "p": p,
+                                         "device": cfg.client_device
                                      },
                                      )
 
@@ -51,6 +52,7 @@ def main(cfg: DictConfig) -> None:
             fit_config["curr_round"] = server_round
             cfg.hyperparams.eta_l *= cfg.hyperparams.decay
             return fit_config
+
         return fit_config_fn
 
     net_glob = instantiate(cfg.model)
@@ -63,6 +65,7 @@ def main(cfg: DictConfig) -> None:
         net_glob=net_glob,
         epsilon=cfg.hyperparams.epsilon,
         decay=cfg.hyperparams.decay,
+        device=cfg.client_device,
     )
 
     history = fl.simulation.start_simulation(
@@ -70,10 +73,10 @@ def main(cfg: DictConfig) -> None:
         num_clients=cfg.num_clients,
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
         strategy=strategy,
-        client_resources={
-            "num_cpus": cfg.client_resources.num_cpus,
-            "num_gpus": cfg.client_resources.num_gpus,
-        }
+        # client_resources={
+        #     "num_cpus": cfg.client_resources.num_cpus,
+        #     "num_gpus": cfg.client_resources.num_gpus,
+        # }
     )
 
     save_path = HydraConfig.get().runtime.output_dir

@@ -122,7 +122,7 @@ def load_datasets(config,
         y_train = torch.LongTensor(y[0:n_i])
 
         dataset_train_torch = TensorDataset(x_train, y_train)
-        trainloaders.append(DataLoader(dataset_train_torch, batch_size=batch_size, shuffle=True))
+        trainloaders.append(DataLoader(dataset_train_torch, batch_size=batch_size, shuffle=True, num_workers=1))
 
         # x_test = X_test[i * len_test:(i + 1) * len_test]
         # x_test = torch.Tensor(x_test)

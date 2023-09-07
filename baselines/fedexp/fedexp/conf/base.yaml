@@ -8,6 +8,8 @@ num_epochs: 20
 batch_size: 50
 
 server_device: cpu
+client_device: cpu
+
 client_resources:
   num_cpus: 10
   num_gpus: 0.0
