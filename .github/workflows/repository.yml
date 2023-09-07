@@ -11,8 +11,8 @@ jobs:
     runs-on: ubuntu-22.04
     name: Changelog check
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Test change
         run: |
-          CHANGED=`git diff --name-only main -- doc/source/ref-changelog.md`
+          CHANGED=`git diff --name-only origin/main -- doc/source/ref-changelog.md`
           [[ ! -z "$CHANGED" ]] || echo "doc/source/ref-changelog.md must be updated" && exit 1
