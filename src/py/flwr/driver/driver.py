@@ -73,6 +73,19 @@ class Driver:
         channel.close()
         log(INFO, "[Driver] Disconnected")
 
+    def create_workload(
+        self, req: driver_pb2.CreateWorkloadRequest
+    ) -> driver_pb2.CreateWorkloadResponse:
+        """Request for workload ID."""
+        # Check if channel is open
+        if self.stub is None:
+            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
+            raise Exception("`Driver` instance not connected")
+
+        # Call Driver API
+        res: driver_pb2.CreateWorkloadResponse = self.stub.CreateWorkload(request=req)
+        return res
+
     def get_nodes(self, req: driver_pb2.GetNodesRequest) -> driver_pb2.GetNodesResponse:
         """Get client IDs."""
         # Check if channel is open
