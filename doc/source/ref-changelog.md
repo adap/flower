@@ -4,7 +4,7 @@
 
 ### What's new?
 
-- **General updates to baselines** ([#2301](https://github.com/adap/flower/pull/2301).[#2305](https://github.com/adap/flower/pull/2305))
+- **General updates to baselines** ([#2301](https://github.com/adap/flower/pull/2301).[#2305](https://github.com/adap/flower/pull/2305), [#2307](https://github.com/adap/flower/pull/2307))
 
 - **New or updates baselines**
 
@@ -12,7 +12,7 @@
 
 ### Incompatible changes
 
-- **Remove support for Python 3.7** ([#2280](https://github.com/adap/flower/pull/2280), [#2299](https://github.com/adap/flower/pull/2299))
+- **Remove support for Python 3.7** ([#2280](https://github.com/adap/flower/pull/2280), [#2299](https://github.com/adap/flower/pull/2299), [2304](https://github.com/adap/flower/pull/2304))
 
   Python 3.7 support was deprecated in Flower 1.5, and this release removes support. Flower now requires Python 3.8.
 
