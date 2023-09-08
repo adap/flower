@@ -5,7 +5,7 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 SHELL_BIN=$(basename "$SHELL")
 
 case "$SHELL_BIN" in
-  *"bash"*) CONFIG_FILE="$HOME/.bashrc"
+  *"bash"*) CONFIG_FILE="$HOME/.bash_profile"
   ;;
   *"zsh"*) CONFIG_FILE="$HOME/.zshrc"
   ;;
