@@ -1,32 +1,32 @@
-"""Runs CNN federated learning for MNIST dataset."""
+"""Run CNN federated learning for MNIST dataset."""
 import os
+from typing import List
 
 import flwr as fl
 import hydra
 import numpy as np
 import torch.random
-from strategy import CentralizedFedAvgStrategy, TamunaStrategy
+from flwr.server.history import History
 from hydra.core.hydra_config import HydraConfig
-from torch.utils.data import DataLoader
 from omegaconf import DictConfig, OmegaConf
-from typing import List
+from torch.utils.data import DataLoader
 
-import client
-import server
-from dataset import load_datasets
-from utils import save_results_as_pickle, compare_histories
+import tamuna.client as client
+import tamuna.server as server
+from tamuna.dataset import load_datasets
+from tamuna.strategy import CentralizedFedAvgStrategy, TamunaStrategy
+from tamuna.utils import compare_histories, save_results_as_pickle
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig) -> None:
-    """Main function to run CNN federated learning on MNIST.
+    """Run CNN federated learning on MNIST.
 
     Parameters
     ----------
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
-
     # print config structured as YAML
     print(OmegaConf.to_yaml(cfg))
 
@@ -55,7 +55,25 @@ def run_fedavg(
     save_path: str,
     testloader: DataLoader,
     trainloaders: List[DataLoader],
-):
+) -> List[History]:
+    """Run FedAvg.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        An omegaconf object that stores the hydra config.
+    save_path: str
+         Path where to save the results of the training.
+    testloader: DataLoader
+        Dataloader contaning test split for centralized evaluation
+    trainloaders: List[DataLoader]
+        Dataloaders for clients
+
+    Returns
+    -------
+    List[History]
+        Histories of every run (based of n_repeats).
+    """
     # prepare function that will be used to spawn each client
     client_fn = client.gen_fedavg_client_fn(
         trainloaders=trainloaders,
@@ -105,6 +123,24 @@ def run_tamuna(
     testloader: DataLoader,
     trainloaders: List[DataLoader],
 ):
+    """Run Tamuna.
+
+    Parameters
+    ----------
+    cfg : DictConfig
+        An omegaconf object that stores the hydra config.
+    save_path: str
+         Path where to save the results of the training.
+    testloader: DataLoader
+        Dataloader contaning test split for centralized evaluation
+    trainloaders: List[DataLoader]
+        Dataloaders for clients
+
+    Returns
+    -------
+    List[History]
+        Histories of every run (based of n_repeats).
+    """
     # prepare function that will be used to spawn each client
     client_fn = client.gen_tamuna_client_fn(
         trainloaders=trainloaders,

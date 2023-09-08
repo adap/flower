@@ -1,20 +1,20 @@
 """Contains utility functions for CNN FL on MNIST."""
 
 import pickle
-import torch
-from torch import nn
 from functools import reduce
 from pathlib import Path
 from typing import List
-from omegaconf import DictConfig
 
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
 from flwr.server.history import History
+from omegaconf import DictConfig
+from torch import nn
 
 
 def apply_nn_compression(net: nn.Module, mask: torch.tensor) -> nn.Module:
-    """Function to zero out some of the model weights.
+    """Zero out some of the model weights based on compression mask.
 
     Parameters
     ----------
@@ -23,7 +23,6 @@ def apply_nn_compression(net: nn.Module, mask: torch.tensor) -> nn.Module:
     mask: torch.Tensor
         One dimensional binary vector having ones for weights that are preserved.
     """
-
     list_of_reshaped_layers = []
     list_of_shapes = []
 
@@ -47,7 +46,7 @@ def save_results_as_pickle(
     history: History,
     file_path: str,
 ) -> None:
-    """Saves results from simulation using pickle.
+    """Save results from simulation using pickle.
 
     Parameters
     ----------
@@ -56,7 +55,6 @@ def save_results_as_pickle(
     file_path: str
         Path to file to create and store history.
     """
-
     data = {"history": history}
 
     # save results to pickle
@@ -71,6 +69,7 @@ def compare_histories(
     save_path: str,
     cfg: DictConfig,
 ):
+    """Compare Tamuna and FedAvg histories."""
     compare_loss_and_accuracy(fedavg_histories, tamuna_histories, save_path)
     compare_communication_complexity(
         fedavg_histories, tamuna_histories, save_path, dim, cfg
@@ -84,6 +83,7 @@ def compare_communication_complexity(
     dim: int,
     cfg: DictConfig,
 ):
+    """Compare Tamuna with FedAvg based on communication complexity."""
     up_complexities = [
         np.ceil((cfg.server.s * dim) / cfg.server.clients_per_round),
         dim,
@@ -94,7 +94,7 @@ def compare_communication_complexity(
     for j, hist in enumerate([tamuna_histories, fedavg_histories]):
         accuracies_across_runs = []
         losses_across_runs = []
-        rounds = None
+        rounds = [0]
 
         for i in range(len(hist)):
             rounds, accuracy_values = zip(*hist[i].metrics_centralized["accuracy"])
@@ -129,20 +129,21 @@ def compare_communication_complexity(
     plt.xlabel("Communicated real numbers")
     plt.legend()
     plt.tight_layout()
-    plt.savefig(Path(save_path) / Path(f"communication_complexity.png"))
+    plt.savefig(Path(save_path) / Path("communication_complexity.png"))
     plt.close()
 
 
 def compare_loss_and_accuracy(
     fedavg_histories: List[History], tamuna_histories: List[History], save_path: str
 ):
+    """Compare Tamuna with FedAvg based on loss and accuracy."""
     fig, axs = plt.subplots(nrows=2, ncols=1, sharex="row", dpi=300)
     labels = ["Tamuna", "FedAvg"]
 
     for j, hist in enumerate([tamuna_histories, fedavg_histories]):
         accuracies_across_runs = []
         losses_across_runs = []
-        rounds = None
+        rounds = [0]
 
         for i in range(len(hist)):
             rounds, accuracy_values = zip(*hist[i].metrics_centralized["accuracy"])
@@ -150,7 +151,7 @@ def compare_loss_and_accuracy(
             accuracies_across_runs.append(accuracy_values)
             losses_across_runs.append(loss_values)
 
-        x_axis = range(len(rounds))
+        x_axis = list(rounds)
 
         lowest_loss_across_runs = np.min(losses_across_runs, axis=0)
         highest_loss_across_runs = np.max(losses_across_runs, axis=0)
@@ -192,5 +193,5 @@ def compare_loss_and_accuracy(
 
     plt.xlabel("Rounds")
     plt.tight_layout()
-    plt.savefig(Path(save_path) / Path(f"loss_accuracy.png"))
+    plt.savefig(Path(save_path) / Path("loss_accuracy.png"))
     plt.close()

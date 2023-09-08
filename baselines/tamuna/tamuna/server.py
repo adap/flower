@@ -1,22 +1,24 @@
+"""Centralized server evaluation function generation."""
+
 from collections import OrderedDict
-from typing import Callable, Dict, Optional, Tuple
+from typing import Callable, Dict, Tuple
 
 import torch
-from flwr.common.typing import NDArrays, Scalar
 from flwr.common import parameters_to_ndarrays
+from flwr.common.typing import NDArrays, Scalar
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
-from models import test
+from tamuna.models import test
 
 
 def gen_evaluate_fn(
     testloader: DataLoader,
     device: torch.device,
     model: DictConfig,
-) -> Callable[[NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]:
-    """Generates the function for centralized evaluation.
+) -> Callable[[NDArrays], Tuple[float, Dict[str, Scalar]]]:
+    """Generate the function for centralized evaluation.
 
     Parameters
     ----------
@@ -29,15 +31,12 @@ def gen_evaluate_fn(
 
     Returns
     -------
-    Callable[ [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]
+    Callable[[NDArrays], Tuple[float, Dict[str, Scalar]]]
         The centralized evaluation function.
     """
 
-    def evaluate(
-        parameters: NDArrays,
-    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+    def evaluate(parameters: NDArrays) -> Tuple[float, Dict[str, Scalar]]:
         """Use the entire MNIST test set for evaluation."""
-
         net = instantiate(model)
         params_dict = zip(net.state_dict().keys(), parameters_to_ndarrays(parameters))
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})

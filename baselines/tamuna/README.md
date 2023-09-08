@@ -91,7 +91,7 @@ poetry install
 
 ```bash
 # Default experimental setup in defined in conf/base.yaml, this can be changed if needed  
-poetry run python tamuna/main.py
+poetry run python -m tamuna.main
 
 # Running time for default experimental setup is less than 14min on Intel Core i5-12400F and Nvidia GeForce RTX 3060 Ti.
 ```

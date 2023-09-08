@@ -1,19 +1,18 @@
-import torch
-from typing import List, Callable
-import numpy as np
+"""Tamuna and FedAvg strategies."""
+
+from typing import Callable, List
+
 import flwr.common
-from flwr.common import (
-    FitIns,
-    parameters_to_ndarrays,
-    ndarrays_to_parameters,
-    NDArrays,
-)
+import numpy as np
+import torch
+from flwr.common import FitIns, NDArrays, ndarrays_to_parameters, parameters_to_ndarrays
 from flwr.server.strategy import Strategy
-from models import Net
+
+from tamuna.models import Net
 
 
 def aggregate(weights: List[NDArrays], s: float) -> NDArrays:
-    """Computes average of the clients' weights."""
+    """Compute average of the clients' weights."""
     averaged_weights = [
         np.sum(layer_updates, axis=0) / s for layer_updates in zip(*weights)
     ]
@@ -21,18 +20,17 @@ def aggregate(weights: List[NDArrays], s: float) -> NDArrays:
 
 
 def create_pattern(dim: int, cohort_size: int, sparsity: int):
-    """Creates compression pattern."""
-
+    """Create compression pattern."""
     q = torch.zeros(size=(dim, cohort_size))
     if dim >= cohort_size / sparsity:
         k = 0
         for i in range(dim):
-            for j in range(sparsity):
+            for _j in range(sparsity):
                 q[i, k] = 1
                 k = (k + 1) % cohort_size
     else:
         k = 0
-        for j in range(sparsity):
+        for _j in range(sparsity):
             for i in range(dim):
                 q[i, k] = 1
                 k += 1
@@ -41,11 +39,14 @@ def create_pattern(dim: int, cohort_size: int, sparsity: int):
 
 
 def shuffle_columns(q: torch.Tensor):
+    """Shuffle the columns of the compression pattern."""
     q = q[:, torch.randperm(q.size()[1])]
     return q
 
 
 class TamunaStrategy(Strategy):
+    """Tamuna Strategy with control variates and compression."""
+
     def __init__(
         self,
         clients_per_round: int,
@@ -104,16 +105,21 @@ class TamunaStrategy(Strategy):
         return parameters_aggregated, {}
 
     def configure_evaluate(self, server_round, parameters, client_manager):
+        """Not used."""
         return []
 
     def aggregate_evaluate(self, server_round, results, failures):
+        """Not used."""
         return None, {}
 
     def evaluate(self, server_round: int, parameters):
+        """Centralized evaluation."""
         return self.evaluate_fn(parameters)
 
 
 class CentralizedFedAvgStrategy(Strategy):
+    """FedAvg Strategy with centralized evaluation."""
+
     def __init__(
         self,
         clients_per_round: int,
@@ -152,10 +158,13 @@ class CentralizedFedAvgStrategy(Strategy):
         return parameters_aggregated, {}
 
     def configure_evaluate(self, server_round, parameters, client_manager):
+        """Not used."""
         return []
 
     def aggregate_evaluate(self, server_round, results, failures):
+        """Not used."""
         return None, {}
 
     def evaluate(self, server_round: int, parameters):
+        """Centralized evaluation."""
         return self.evaluate_fn(parameters)

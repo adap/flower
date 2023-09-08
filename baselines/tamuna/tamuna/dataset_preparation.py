@@ -1,3 +1,5 @@
+"""Functions to download and partition the MNIST dataset."""
+
 from typing import List, Optional, Tuple
 
 import numpy as np
@@ -8,7 +10,8 @@ from torchvision.datasets import MNIST
 
 
 def download_data() -> Tuple[Dataset, Dataset]:
-    """
+    """Download MNIST.
+
     Returns
     -------
     Tuple[MNIST, MNIST]
@@ -58,22 +61,23 @@ def sort_by_class(
 def partition_data(
     num_clients: int, iid: bool, seed: Optional[int] = 42
 ) -> Tuple[List[Dataset], Dataset]:
-    """Split training set into iid partitions or power law split to simulate the federated setting.
+    """Split training set into iid partitions or power law split.
 
     Parameters
     ----------
     num_clients : int
         The number of clients that hold a part of the data
     iid : bool
-        Whether the data should be split in independent identically distributed (iid) fashion or not.
-        If False, data will be split according to power law.
+        Whether the data should be split in independent identically distributed (iid)
+        fashion or not. If False, data will be split according to power law.
     seed : int, optional
         Used to set a fix seed to replicate experiments, by default 42
 
     Returns
     -------
     Tuple[List[Dataset], Dataset]
-        A list of dataset for each client and a single dataset to be used for testing the model.
+        A list of dataset for each client and a single dataset to be used
+        for testing the model.
     """
     trainset, testset = download_data()
 
@@ -104,9 +108,10 @@ def power_law_split(
     mean: float = 0.0,
     sigma: float = 2.0,
 ) -> List[Dataset]:
-    """Partitions the dataset following a power-law distribution. It follows
-    the implementation of Li et al 2020: https://arxiv.org/abs/1812.06127 with
-    default values set accordingly.
+    """Partitions the dataset following a power-law distribution.
+
+    It follows the implementation of Li et al 2020: https://arxiv.org/abs/1812.06127
+    with default values set accordingly.
 
     Parameters
     ----------
@@ -130,7 +135,6 @@ def power_law_split(
     Dataset
         The partitioned training dataset.
     """
-
     targets = sorted_trainset.targets
     full_idx = range(len(targets))
 
@@ -168,7 +172,8 @@ def power_law_split(
         (num_classes, int(num_partitions / num_classes), num_labels_per_partition),
     )
     remaining_per_class = class_counts - hist
-    # obtain how many samples each partition should be assigned for each of the labels it contains
+    # obtain how many samples each partition should be assigned for each of
+    # the labels it contains
     probs = (
         remaining_per_class.reshape(-1, 1, 1)
         * probs

@@ -1,16 +1,16 @@
 """CNN model architecture, training, and testing functions for MNIST."""
 
 
-from typing import Tuple
+import copy
 from collections import OrderedDict
+from typing import Tuple
 
 import torch
-import copy
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
-from utils import apply_nn_compression
+from tamuna.utils import apply_nn_compression
 
 
 class Net(nn.Module):
@@ -54,13 +54,12 @@ class Net(nn.Module):
 
 
 def __model_zeroed_out(net: nn.Module):
-    """Returns network with all the weights zeroed-out.
+    """Return network with all the weights zeroed-out.
 
     Parameters
     ----------
     net : nn.Module
         Model to be zeroed-out.
-
     """
     control_variate = copy.deepcopy(net)
     state_dict = OrderedDict(
@@ -81,7 +80,7 @@ def tamuna_train(
     control_variate: nn.Module,
     old_compression_mask: torch.tensor,
     old_compressed_net: nn.Module,
-) -> (nn.Module, nn.Module):
+) -> Tuple[nn.Module, nn.Module]:
     """Train the network on the training set.
 
     Parameters
@@ -105,7 +104,8 @@ def tamuna_train(
     old_compression_mask: torch.tensor
         Previous compression vector for this client.
     old_compressed_net: nn.Module
-        Compressed model that was sent to the server from this client the previous round.
+        Compressed model that was sent to the server from this client
+        in the previous round.
     """
     criterion = torch.nn.CrossEntropyLoss()
     net.train()
@@ -179,7 +179,7 @@ def __update_control_variate(
     old_compression_mask: torch.tensor,
     server_net: nn.Module,
 ):
-    """Updates the control variate for current client.
+    """Update the control variate for current client.
 
     Parameters
     ----------
@@ -190,13 +190,13 @@ def __update_control_variate(
     lr: float
         Learning rate to be used.
     old_compressed_net: nn.Module
-        Compressed model that was sent to the server from this client the previous round.
+        Compressed model that was sent to the server from this client
+        in the previous round.
     old_compression_mask: torch.tensor
         Previous compression vector for this client.
     server_net: nn.Module
         Current server model.
     """
-
     old_compressed_modules = []
     for module in list(old_compressed_net.modules())[1:]:
         if len(list(module.parameters())) != 0:
@@ -256,7 +256,6 @@ def __tamuna_train_one_epoch(
     nn.Module
         The model that has been trained for one epoch.
     """
-
     for images, labels in trainloader:
         images, labels = images.to(device), labels.to(device)
 
