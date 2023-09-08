@@ -42,7 +42,7 @@ async def create_node(request: Request) -> Response:
     """Create Node"""
     _check_headers(request.headers)
 
-    # Parse base 64 to string
+    # Get the request body as raw bytes
     create_node_request_bytes: bytes = await request.body()
 
     # Deserialize ProtoBuf
@@ -53,16 +53,16 @@ async def create_node(request: Request) -> Response:
     state: State = app.state.STATE_FACTORY.state()
 
     # Handle message
-    new_node_data = message_handler.create_node(
+    create_node_response_proto = message_handler.create_node(
         request=create_node_request_proto,
         state=state
     )
 
     # Return serialized ProtoBuf
-    new_node_data_bytes = new_node_data.SerializeToString()
+    create_node_response_bytes = create_node_response_proto.SerializeToString()
     return Response(
         status_code=200,
-        content=new_node_data_bytes,
+        content=create_node_response_bytes,
         headers={"Content-Type": "application/protobuf"},
     )
 
@@ -82,13 +82,13 @@ async def delete_node(request: Request) -> Response:
     state: State = app.state.STATE_FACTORY.state()
 
     # Handle message
-    delete_node_response = message_handler.delete_node(
+    delete_node_response_proto = message_handler.delete_node(
         request=delete_node_request_proto,
         state=state
     )
 
     # Return serialized ProtoBuf
-    delete_node_response_bytes = delete_node_response.SerializeToString()
+    delete_node_response_bytes = delete_node_response_proto.SerializeToString()
     return Response(
         status_code=200,
         content=delete_node_response_bytes,

@@ -128,7 +128,7 @@ def http_request_response(
     # receive/send functions
     ###########################################################################
 
-    def create_node() -> bool:
+    def create_node() -> None:
         """Set create_node."""
         create_node_req_proto = CreateNodeRequest()
         create_node_req_bytes: bytes = create_node_req_proto.SerializeToString()
@@ -152,23 +152,22 @@ def http_request_response(
                 "[Node] POST /%s: missing header `Content-Type`",
                 PATH_PULL_TASK_INS,
             )
-            return False
+            return
         if res.headers["content-type"] != "application/protobuf":
             log(
                 WARN,
                 "[Node] POST /%s: header `Content-Type` has wrong value",
                 PATH_PULL_TASK_INS,
             )
-            return False
+            return
         
         # Deserialize ProtoBuf from bytes
         create_node_response_proto = CreateNodeResponse()
         create_node_response_proto.ParseFromString(res.content)
    
         node_store[KEY_NODE] = create_node_response_proto.node
-        return True
     
-    def delete_node() -> bool:
+    def delete_node() -> None:
         """Set delete_node."""
         if node_store[KEY_NODE] is None:
             log(ERROR, "Node instance missing")
@@ -188,32 +187,31 @@ def http_request_response(
         
         # Check status code and headers
         if res.status_code != 200:
-            return False
+            return
         if "content-type" not in res.headers:
             log(
                 WARN,
                 "[Node] POST /%s: missing header `Content-Type`",
                 PATH_PULL_TASK_INS,
             )
-            return False
+            return
         if res.headers["content-type"] != "application/protobuf":
             log(
                 WARN,
                 "[Node] POST /%s: header `Content-Type` has wrong value",
                 PATH_PULL_TASK_INS,
             )
-            return False
-        # Deserialize ProtoBuf from bytes
-        return True
 
     def receive() -> Optional[TaskIns]:
         """Receive next task from server."""
         # Serialize ProtoBuf to bytes
+        # Get Node
         if node_store[KEY_NODE] is None:
             log(ERROR, "Node instance missing")
             return None
         node: Node = cast(Node, node_store[KEY_NODE])
         
+        # Request instructions (task) from server
         pull_task_ins_req_proto = PullTaskInsRequest(node=node)
         pull_task_ins_req_bytes: bytes = pull_task_ins_req_proto.SerializeToString()
 

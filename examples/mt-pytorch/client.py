@@ -13,7 +13,6 @@ from task import (
 )
 
 
-restful_mode = False
 # Load model and data (simple CNN, CIFAR-10)
 net = Net().to(DEVICE)
 trainloader, testloader = load_data()
