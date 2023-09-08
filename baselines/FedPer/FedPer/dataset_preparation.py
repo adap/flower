@@ -3,7 +3,7 @@ import os
 import random
 from collections import Counter
 from pathlib import Path
-from typing import Any, Dict, List, Type
+from typing import Any, Dict, List, Union
 
 import numpy as np
 import pandas as pd
@@ -16,15 +16,25 @@ from torchvision import transforms
 class BaseDataset(Dataset):
     """Base class for all datasets."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        root: Path = None,
+        config: dict = None,
+        general_data_transform: transforms.transforms.Compose = None,
+        general_target_transform: transforms.transforms.Compose = None,
+        train_data_transform: transforms.transforms.Compose = None,
+        train_target_transform: transforms.transforms.Compose = None,
+    ) -> None:
         """Initialize the dataset."""
+        self.root = root
+        self.config = config
         self.classes = None
         self.data: torch.Tensor = None
         self.targets: torch.Tensor = None
-        self.train_data_transform: transforms.transforms.Compose = None
-        self.train_target_transform: transforms.transforms.Compose = None
-        self.general_data_transform: transforms.transforms.Compose = None
-        self.general_target_transform: transforms.transforms.Compose = None
+        self.train_data_transform = train_data_transform
+        self.train_target_transform = train_target_transform
+        self.general_data_transform = general_data_transform
+        self.general_target_transform = general_target_transform
         self.enable_train_transform = True
 
     def __getitem__(self, index):
@@ -50,15 +60,15 @@ class CIFAR10(BaseDataset):
 
     def __init__(
         self,
-        root,
         config=None,
         general_data_transform=None,
         general_target_transform=None,
         train_data_transform=None,
         train_target_transform=None,
+        root: Path = None,
     ):
         """Initialize the dataset."""
-        super().__init__()
+        super().__init__(root=root, config=config)
         train_part = torchvision.datasets.CIFAR10(root, True, download=True)
         test_part = torchvision.datasets.CIFAR10(root, False, download=True)
         train_data = torch.Tensor(train_part.data).permute([0, -1, 1, 2]).float()
@@ -210,20 +220,33 @@ class FLICKR_DATASET(BaseDataset):
         self.classes = classes
 
 
-DATASETS: Dict[str, Type[BaseDataset]] = {
-    "cifar10": CIFAR10,
-    "cifar100": CIFAR100,
-    # flickr is being processed in other way
-}
+def call_dataset(dataset_name, root, config, **kwargs):
+    """Call the dataset."""
+    if dataset_name == "cifar10":
+        return CIFAR10(root=root, config=config, **kwargs)
+    elif dataset_name == "cifar100":
+        return CIFAR100(root=root, config=config, **kwargs)
+    elif dataset_name == "flickr":
+        print("Flickr is processed in other way")
+        # return FLICKR_DATASET(root, config)
+    else:
+        raise NotImplementedError
+
+
+# DATASETS: Dict[str, Type[BaseDataset]] = {
+#    "cifar10": CIFAR10,
+#    "cifar100": CIFAR100,
+#    # flickr is being processed in other way
+# }
 
 
 def randomly_assign_classes(
     dataset: Dataset, client_num: int, class_num: int
-) -> Dict[str, Dict[str, int]]:
+) -> Dict[str, Union[Dict[Any, Any], List[Any]]]:
     # ) -> Dict[str, Any]:
     """Randomly assign number classes to clients."""
-    partition: Dict[str, Any] = {"separation": None, "data_indices": None}
-    data_indices: List = [[] for _ in range(client_num)]
+    partition: Dict[str, Union[Dict, List]] = {"separation": {}, "data_indices": []}
+    data_indices: List[List[int]] = [[] for _ in range(client_num)]
     targets_numpy = np.array(dataset.targets, dtype=np.int32)
     label_list = list(range(len(dataset.classes)))
 
@@ -253,9 +276,13 @@ def randomly_assign_classes(
             else:
                 batch_size = batch_sizes[cls]
             selected_idx = random.sample(data_idx_for_each_label[cls], batch_size)
-            data_indices[i] = np.concatenate(
+            data_indices_use: np.ndarray = np.concatenate(
                 [data_indices[i], selected_idx], axis=0
             ).astype(np.int64)
+            data_indices[i] = data_indices_use.tolist()
+            # data_indices[i]: np.ndarray = np.concatenate(
+            #    [data_indices[i], selected_idx], axis=0
+            # ).astype(np.int64)
             data_idx_for_each_label[cls] = list(
                 set(data_idx_for_each_label[cls]) - set(selected_idx)
             )

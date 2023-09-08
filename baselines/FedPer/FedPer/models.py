@@ -169,7 +169,7 @@ class ModelManager(ABC):
         self,
         client_id: int,
         config: Dict[str, Any],
-        model_split_class: Type[ModelSplit],
+        model_split_class: Type[Any],  # ModelSplit
         has_fixed_head: bool = False,
     ):
         """Initialize the attributes of the model manager.

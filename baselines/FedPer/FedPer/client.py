@@ -5,10 +5,9 @@ from collections import OrderedDict, defaultdict
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Tuple, Type, Union
 
-import flwr as fl
 import numpy as np
 import torch
-from flwr.client.client import Client
+from flwr.client import NumPyClient
 from flwr.common import NDArrays, Scalar
 from numpy import dtype, ndarray
 from omegaconf import DictConfig
@@ -17,7 +16,7 @@ from torchvision import transforms
 from torchvision.datasets import ImageFolder
 
 from FedPer.constants import DEFAULT_FT_EP, MEAN, STD, Algorithms
-from FedPer.dataset_preparation import DATASETS
+from FedPer.dataset_preparation import call_dataset
 from FedPer.implemented_models.cnn_model import CNNModelManager
 from FedPer.implemented_models.mobile_model import MobileNetModelManager
 from FedPer.implemented_models.resnet_model import ResNetModelManager
@@ -25,7 +24,7 @@ from FedPer.implemented_models.resnet_model import ResNetModelManager
 PROJECT_DIR = Path(__file__).parent.parent.absolute()
 
 
-class BaseClient(fl.client.NumPyClient):
+class BaseClient(NumPyClient):
     """Implementation of Federated Averaging (FedAvg) Client."""
 
     def __init__(
@@ -54,12 +53,10 @@ class BaseClient(fl.client.NumPyClient):
         self.test_id = 1
         self.config = config
         self.client_id = int(client_id)
-        try:
+        if client_state_save_path is not None:
             self.client_state_save_path = (
                 client_state_save_path + f"/client_{self.client_id}"
             )
-        except TypeError:
-            self.client_state_save_path = None
         self.hist: Dict[str, Dict[str, Any]] = defaultdict(dict)
         self.model_manager = model_manager_class(
             client_id=self.client_id,
@@ -281,7 +278,7 @@ class FedPerClient(BaseClient):
 def get_client_fn_simulation(
     config: DictConfig,
     client_state_save_path: str = None,
-) -> Callable[[str], Union[Client, BaseClient, FedPerClient]]:
+) -> Callable[[str], Union[FedPerClient, BaseClient]]:
     """Generate the client function that creates the Flower Clients.
 
     Parameters
@@ -311,7 +308,7 @@ def get_client_fn_simulation(
             print(f"Loading partition from {partition_path}")
             with open(partition_path, "rb") as f:
                 partition = pickle.load(f)
-            data_indices: Dict[str, Dict[str, List[int]]] = partition["data_indices"]
+            data_indices: Dict[int, Dict[str, List[int]]] = partition["data_indices"]
         except FileNotFoundError as e:
             print(f"Partition not found at {partition_path}")
             raise e
@@ -332,7 +329,7 @@ def get_client_fn_simulation(
 
     def client_fn(cid: str) -> BaseClient:
         """Create a Flower client representing a single organization."""
-        cid = int(cid)
+        cid_use = int(cid)
         if config.dataset.name.lower() == "flickr":
             transform = transforms.Compose(
                 [
@@ -349,7 +346,8 @@ def get_client_fn_simulation(
                 [int(len(dataset) * 0.8), len(dataset) - int(len(dataset) * 0.8)],
             )
         else:
-            dataset = DATASETS[config.dataset.name](
+            dataset = call_dataset(
+                dataset_name=config.dataset.name,
                 root=PROJECT_DIR / "datasets" / config.dataset.name,
                 config=config.dataset,
                 general_data_transform=general_data_transform,
@@ -359,8 +357,8 @@ def get_client_fn_simulation(
             )
             trainset = Subset(dataset, indices=[])
             testset = Subset(dataset, indices=[])
-            trainset.indices = data_indices[cid]["train"]
-            testset.indices = data_indices[cid]["test"]
+            trainset.indices = data_indices[cid_use]["train"]
+            testset.indices = data_indices[cid_use]["test"]
 
         # Create the train loader
         trainloader = DataLoader(trainset, config.batch_size, shuffle=True)

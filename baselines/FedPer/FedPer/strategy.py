@@ -10,6 +10,7 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
+    NDArrays,
     Parameters,
     Scalar,
     ndarrays_to_parameters,
@@ -37,12 +38,28 @@ class ServerInitializationStrategy(Strategy):
         config: Dict[str, Any],
         algorithm: str = Algorithms.FEDAVG.value,
         has_fixed_head: bool = False,
+        initial_parameters: Optional[Parameters] = None,
+        on_fit_config_fn: Optional[Callable[[int], Dict[str, Any]]] = None,
+        evaluate_fn: Optional[
+            Callable[
+                [int, NDArrays, Dict[str, Scalar]],
+                Optional[Tuple[float, Dict[str, Scalar]]],
+            ]
+        ] = None,
+        min_available_clients: int = 1,
+        min_evaluate_clients: int = 1,
+        min_fit_clients: int = 1,
         *args: Any,
         **kwargs: Any,
     ) -> None:
         super().__init__(*args, **kwargs)
         self.config = config
         self.algorithm = algorithm
+        self.on_fit_config_fn = on_fit_config_fn
+        self.initial_parameters = initial_parameters
+        self.min_available_clients = min_available_clients
+        self.min_evaluate_clients = min_evaluate_clients
+        self.min_fit_clients = min_fit_clients
         self.model = model_split_class(
             model=create_model(), has_fixed_head=has_fixed_head
         )
@@ -61,20 +78,20 @@ class ServerInitializationStrategy(Strategy):
             If parameters are returned, then the server will treat these as the
             initial global model parameters.
         """
-        initial_parameters: Parameters = self.initial_parameters
+        initial_parameters: Optional[Parameters] = self.initial_parameters
         self.initial_parameters = None  # Don't keep initial parameters in memory
         if initial_parameters is None and self.model is not None:
             if self.algorithm == Algorithms.FEDPER.value:
-                initial_parameters = [
+                initial_parameters_use = [
                     val.cpu().numpy() for _, val in self.model.body.state_dict().items()
                 ]
             else:  # FedAvg
-                initial_parameters = [
+                initial_parameters_use = [
                     val.cpu().numpy() for _, val in self.model.state_dict().items()
                 ]
 
-        if isinstance(initial_parameters, list):
-            initial_parameters = ndarrays_to_parameters(initial_parameters)
+        if isinstance(initial_parameters_use, list):
+            initial_parameters = ndarrays_to_parameters(initial_parameters_use)
         return initial_parameters
 
 
@@ -109,16 +126,8 @@ class AggregateFullStrategy(ServerInitializationStrategy):
         """
         # Same as superclass method but adds the head
 
-        # Do not configure federated evaluation if a centralized evaluation
-        # function is provided
-        if self.evaluate_fn is not None:
-            return []
-
         # Parameters and config
-        config = {}
-        if self.on_evaluate_config_fn is not None:
-            # Custom evaluation config function provided
-            config = self.on_evaluate_config_fn(server_round)
+        config: Dict[Any, Any] = {}
 
         weights = parameters_to_ndarrays(parameters)
 
@@ -128,11 +137,9 @@ class AggregateFullStrategy(ServerInitializationStrategy):
 
         # Sample clients
         if server_round >= 0:
-            sample_size, min_num_clients = self.num_evaluation_clients(
-                client_manager.num_available()
-            )
             clients = client_manager.sample(
-                num_clients=sample_size, min_num_clients=min_num_clients
+                num_clients=self.min_available_clients,
+                min_num_clients=self.min_evaluate_clients,
             )
         else:
             clients = list(client_manager.all().values())
@@ -144,7 +151,7 @@ class AggregateFullStrategy(ServerInitializationStrategy):
         self,
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate received local parameters, set global model parameters and save.
 
@@ -172,6 +179,9 @@ class AggregateFullStrategy(ServerInitializationStrategy):
         """
         agg_params, agg_metrics = super().aggregate_fit(
             server_round=server_round, results=results, failures=failures
+        )
+        agg_params = ndarrays_to_parameters(
+            [val.cpu().numpy() for _, val in self.model.state_dict().items()]
         )
 
         # Update Server Model
@@ -239,11 +249,8 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
         fit_ins = FitIns(parameters, config)
 
         # Sample clients
-        sample_size, min_num_clients = self.num_fit_clients(
-            client_manager.num_available()
-        )
         clients = client_manager.sample(
-            num_clients=sample_size, min_num_clients=min_num_clients
+            num_clients=self.min_available_clients, min_num_clients=self.min_fit_clients
         )
 
         # Return client/config pairs
@@ -270,16 +277,8 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
         """
         # Same as superclass method but adds the head
 
-        # Do not configure federated evaluation if a centralized evaluation
-        # function is provided
-        if self.evaluate_fn is not None:
-            return []
-
         # Parameters and config
-        config = {}
-        if self.on_evaluate_config_fn is not None:
-            # Custom evaluation config function provided
-            config = self.on_evaluate_config_fn(server_round)
+        config: Dict[Any, Any] = {}
 
         weights = parameters_to_ndarrays(parameters)
 
@@ -294,11 +293,9 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
 
         # Sample clients
         if server_round >= 0:
-            sample_size, min_num_clients = self.num_evaluation_clients(
-                client_manager.num_available()
-            )
             clients = client_manager.sample(
-                num_clients=sample_size, min_num_clients=min_num_clients
+                num_clients=self.min_available_clients,
+                min_num_clients=self.min_evaluate_clients,
             )
         else:
             clients = list(client_manager.all().values())
@@ -310,8 +307,8 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
         self,
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[BaseException],
-    ) -> Tuple[Parameters, Dict[str, Union[bool, bytes, float, int, str]]]:
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+    ) -> Tuple[Optional[Parameters], Dict[str, Union[bool, bytes, float, int, str]]]:
         """Aggregate received local parameters, set global model parameters and save.
 
         Args:
@@ -339,7 +336,9 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
         agg_params, agg_metrics = super().aggregate_fit(
             server_round=server_round, results=results, failures=failures
         )
-
+        agg_params = ndarrays_to_parameters(
+            [val.cpu().numpy() for _, val in self.model.state_dict().items()]
+        )
         # Update Server Model
         parameters = parameters_to_ndarrays(agg_params)
         model_keys = [
@@ -361,7 +360,7 @@ class StoreHistoryStrategy(Strategy):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        self.hist: Dict[str, Dict[str, Any]] = {
+        self.hist: Dict[str, Dict[int, Any]] = {
             "trn": defaultdict(dict),
             "tst": defaultdict(dict),
         }
@@ -444,7 +443,11 @@ class StoreMetricsStrategy(StoreHistoryStrategy):
         }
 
         # Weigh accuracy of each client by number of examples used
-        accuracies = [r.metrics["accuracy"] for _, r in results]
+        accuracies: List[float] = []
+        for _, r in results:
+            accuracy: float = float(r.metrics["accuracy"])
+            accuracies.append(accuracy)
+        print(f"Round {server_round} accuracies: {accuracies}")
 
         # Aggregate and print custom metric
         averaged_accuracy = sum(accuracies) / len(accuracies)

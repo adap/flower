@@ -8,7 +8,6 @@ from typing import Callable, Dict, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
-from flwr.client import Client
 from flwr.server.history import History
 from omegaconf import DictConfig
 
@@ -72,7 +71,7 @@ def set_client_state_save_path() -> str:
 
 def get_client_fn(
     config: DictConfig, client_state_save_path: str = None
-) -> Callable[[str], Union[Client, BaseClient, FedPerClient]]:
+) -> Callable[[str], Union[FedPerClient, BaseClient]]:
     """Get client function."""
     # Get algorithm
     algorithm = config.algorithm.lower()

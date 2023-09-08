@@ -1,11 +1,11 @@
 ---
-num_clients: 10 # total number of clients
-num_epochs: 4 # number of local epochs
+num_clients: 2 # total number of clients
+num_epochs: 1 # number of local epochs
 batch_size: 128
-num_rounds: 100
-clients_per_round: 10
+num_rounds: 2
+clients_per_round: 2
 learning_rate: 0.01
-algorithm: fedavg
+algorithm: fedper
 
 client_resources:
   num_cpus: 32
@@ -42,3 +42,5 @@ strategy:
   min_evaluate_clients: ${num_clients}
   min_available_clients: ${num_clients}
   config: ${model}
+  evaluate_fn: None
+  on_evaluate_config_fn: None

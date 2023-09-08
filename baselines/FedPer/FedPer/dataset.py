@@ -16,7 +16,7 @@ from pathlib import Path
 import numpy as np
 
 from FedPer.dataset_preparation import (
-    DATASETS,
+    call_dataset,
     flickr_preprocess,
     randomly_assign_classes,
 )
@@ -37,10 +37,10 @@ def dataset_main(config: dict) -> None:
     if not os.path.isdir(dataset_root):
         os.makedirs(dataset_root)
 
-    partition = {"separation": None, "data_indices": None}
-
     if dataset_name in ["cifar10", "cifar100"]:
-        dataset = DATASETS[dataset_name](dataset_root, config)
+        dataset = call_dataset(
+            dataset_name=dataset_name, root=dataset_root, config=config
+        )
 
         # randomly assign classes
         assert config["num_classes"] > 0, "Number of classes must be positive"
@@ -52,15 +52,14 @@ def dataset_main(config: dict) -> None:
             class_num=config["num_classes"],
         )
 
-        if partition["separation"] is None:
-            clients_4_train = list(range(config["num_clients"]))
-            clients_4_test = list(range(config["num_clients"]))
+        clients_4_train = list(range(config["num_clients"]))
+        clients_4_test = list(range(config["num_clients"]))
 
-            partition["separation"] = {
-                "train": clients_4_train,
-                "test": clients_4_test,
-                "total": config["num_clients"],
-            }
+        partition["separation"] = {
+            "train": clients_4_train,
+            "test": clients_4_test,
+            "total": config["num_clients"],
+        }
         for client_id, idx in enumerate(partition["data_indices"]):
             if config["split"] == "sample":
                 num_train_samples = int(len(idx) * config["fraction"])
