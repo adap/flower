@@ -4,17 +4,11 @@ from logging import DEBUG, INFO
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import torch
-from flwr.common import (
-    Parameters,
-    Scalar,
-    parameters_to_ndarrays,
-    FitRes,
-)
-from flwr.common import Scalar
+from flwr.common import FitRes, Parameters, Scalar, parameters_to_ndarrays
 from flwr.common.logger import log
 from flwr.common.typing import NDArrays, Scalar
-from flwr.server.server import Server, fit_clients
 from flwr.server.client_proxy import ClientProxy
+from flwr.server.server import Server, fit_clients
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
@@ -26,6 +20,7 @@ FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
     List[Union[Tuple[ClientProxy, FitRes], BaseException]],
 ]
+
 
 def gen_evaluate_fn(
     testloader: DataLoader,
@@ -136,14 +131,14 @@ def gen_evaluate_fn_hetero(
 
     return evaluate
 
-class Server_FedDyn(Server):
 
+class Server_FedDyn(Server):
     def fit_round(
-    self,
-    server_round: int,
-    timeout: Optional[float],
+        self,
+        server_round: int,
+        timeout: Optional[float],
     ) -> Optional[
-    Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
+        Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
     ]:
         """Perform a single round of federated averaging."""
         # Get clients and their respective instructions from strategy
@@ -182,7 +177,9 @@ class Server_FedDyn(Server):
         aggregated_result: Tuple[
             Optional[Parameters],
             Dict[str, Scalar],
-        ] = self.strategy.aggregate_fit(server_round, results, failures, parameters_to_ndarrays(self.parameters))
+        ] = self.strategy.aggregate_fit(
+            server_round, results, failures, parameters_to_ndarrays(self.parameters)
+        )
         # ] = self.strategy.aggregate_fit(server_round, results, failures)
 
         parameters_aggregated, metrics_aggregated = aggregated_result

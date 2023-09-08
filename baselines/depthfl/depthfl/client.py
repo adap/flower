@@ -8,10 +8,7 @@ from typing import Callable, Dict, List, Tuple
 import flwr as fl
 import numpy as np
 import torch
-from flwr.client import Client
-from flwr.client.numpy_client import NumPyClient
-from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
-from flwr.common.typing import Code, NDArrays, Scalar, Status
+from flwr.common.typing import NDArrays, Scalar
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
@@ -102,9 +99,9 @@ class FlowerClient(
             prev_grads=self.prev_grads,
             alpha=config["alpha"],
             extended=config["extended"],
-        )  
+        )
 
-        with open(f'prev_grads/client_{self.cid}', 'wb') as f:
+        with open(f"prev_grads/client_{self.cid}", "wb") as f:
             pickle.dump(self.prev_grads, f)
 
         return self.get_parameters({}), len(self.trainloader), {"cid": self.cid}
@@ -180,7 +177,7 @@ def gen_client_fn(
         trainloader = trainloaders[int(cid)]
         valloader = valloaders[int(cid)]
 
-        with open(f'prev_grads/client_{int(cid)}', 'rb') as f:
+        with open(f"prev_grads/client_{int(cid)}", "rb") as f:
             prev_grads = pickle.load(f)
 
         return FlowerClient(
@@ -196,5 +193,3 @@ def gen_client_fn(
         )
 
     return client_fn
-
-

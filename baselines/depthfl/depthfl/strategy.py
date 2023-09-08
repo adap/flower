@@ -49,15 +49,17 @@ class FedDyn(FedAvg):
     def __init__(self, cfg: DictConfig, net: nn.Module, *args, **kwargs):
         self.cfg = cfg
         self.h = [np.zeros(v.shape) for (k, v) in net.state_dict().items()]
-        self.prev_grads = [{k: torch.zeros(v.numel()) for (k, v) in net.named_parameters()}] * cfg.num_clients
+        self.prev_grads = [
+            {k: torch.zeros(v.numel()) for (k, v) in net.named_parameters()}
+        ] * cfg.num_clients
 
         if not os.path.exists("prev_grads"):
             os.makedirs("prev_grads")
 
         for idx in range(cfg.num_clients):
-            with open(f'prev_grads/client_{idx}', 'wb') as f:
+            with open(f"prev_grads/client_{idx}", "wb") as f:
                 pickle.dump(self.prev_grads[idx], f)
-        
+
         self.is_weight = []
 
         # tagging real weights / biases
@@ -68,7 +70,6 @@ class FedDyn(FedAvg):
                 self.is_weight.append(True)
 
         super().__init__(*args, **kwargs)
-
 
     def aggregate_fit(
         self,
@@ -85,7 +86,7 @@ class FedDyn(FedAvg):
             return None, {}
 
         for idx in range(self.cfg.num_clients):
-            with open(f'prev_grads/client_{idx}', 'rb') as f:
+            with open(f"prev_grads/client_{idx}", "rb") as f:
                 self.prev_grads[idx] = pickle.load(f)
 
         # Convert results

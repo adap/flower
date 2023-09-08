@@ -113,7 +113,9 @@ def main(cfg: DictConfig) -> None:
             "num_gpus": cfg.client_resources.num_gpus,
         },
         strategy=strategy,
-        server=server.Server_FedDyn(client_manager=SimpleClientManager(), strategy=strategy),
+        server=server.Server_FedDyn(
+            client_manager=SimpleClientManager(), strategy=strategy
+        ),
     )
 
     # Experiment completed. Now we save the results and

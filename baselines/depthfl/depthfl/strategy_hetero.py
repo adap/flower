@@ -13,7 +13,6 @@ from flwr.common import (
 )
 from flwr.common.logger import log
 from flwr.common.typing import FitRes
-from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
 from hydra.utils import instantiate
@@ -55,7 +54,6 @@ class HeteroFL(FedAvg):
                 self.is_weight.append(True)
 
         super().__init__(*args, **kwargs)
-
 
     def aggregate_fit(
         self,
