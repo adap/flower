@@ -147,11 +147,13 @@ python -m FedMLB.dataset_preparation dataset_config.alpha_dirichlet=0.6
 # this will generate the setting for 4. (see above)
 python -m FedMLB.dataset_preparation dataset_config.alpha_dirichlet=0.6 total_clients=500
 ```
-Note that, to reproduce those settings, we leverage the .txt files
+Note that, to reproduce those settings, we leverage the `.txt` files
 contained in the`client_data` folder in this project. Such files store
 the specific id of examples in the dataset that are associated with a specific client. 
 For example, the file `client_data/cifar100/balanced/dirichlet0.3_clients100.txt` contains the
-examples for the default setting of this repository. Note that those files are provided by the authors themselves.
+examples for the default setting of this repository. 
+Note that those files are provided by the authors themselves
+on the [paper's GitHub](https://github.com/jinkyu032/FedMLB/tree/main/client_data).
 
 #### Custom config for clients' dataset generation (Tiny-ImageNet)
 1. Moderate-scale with Dir(0.3), 100 clients, balanced dataset (1000 examples per client).
@@ -442,17 +444,19 @@ that is a custom version of the regular ResNet18 containing the support for such
 
 This baseline implementation is based on TensorFlow and Keras primitives. Note that the custom
 local training of `FedMLB` and `FedAvg+KD` is implemented by subclassing the `tf.keras.Model` class 
-and overriding the `train_step` method (which is called automatically at each batch iteration). Those 
+and overriding the `train_step` method (which is called automatically at each batch iteration). The
 custom `tf.keras.Model` are contained in `FedAvgKDModel.py` and `FedMLBModel.py`.
 
 Note that `FedMLB` and `FedAvg+KD` are client-side methods, which do not impact the aggregation phase 
 of regular FedAvg (so this means that the built-in Flower strategy for FedAvg does not require
-modifications). For this reason, there is no code in `server.py`.
+modifications). For this reason, there is no relevant modification in `server.py`; the `MyServer` class
+just allows to start the training starting from a round > 1 (useful to stop and restart a training
+saving/loading its state).
 
 To reproduce results, preprocessing of data is of paramount importance. 
 For CIFAR-100, the preprocessing of train images includes normalization,
 random rotation, random crop and random flip of images; test images
-are normalized. 
+are just normalized. 
 For Tiny-ImageNet, the preprocessing of train images includes normalization,
 random rotation, random crop and random flip of images; test images
 are normalized and center cropped.
@@ -460,3 +464,17 @@ This code uses or defines subclasses of the `tf.keras.layers.Layer` class
 to leverage a series of preprocessing layer to be used in the `.map()`
 primitive of `tf.data.Dataset` (see `dataset.py`).
 
+## Differences with the Original Implementation
+In the original implementation from 
+[paper's GitHub](https://github.com/jinkyu032/FedMLB/blob/main/federated_train.py#L47C12-L47C12)
+CIFAR-100 images are normalized as follows:
+
+`normalize = transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2470, 0.2435, 0.2616))`
+
+In this repository, normalization values for the three channels are slightly different, i.e.:
+
+`tf.keras.layers.Normalization(mean=[0.5071, 0.4865, 0.4409], 
+                                variance=[np.square(0.2673), np.square(0.2564), np.square(0.2762)])`
+
+This may be the reason for the slightly improved results reported in this repo with CIFAR-100 clients 
+with respect to the results in the original paper.

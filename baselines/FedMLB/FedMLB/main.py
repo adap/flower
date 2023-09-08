@@ -22,12 +22,15 @@ from FedMLB.FedMLBModel import FedMLBModel
 from FedMLB.FedAvgKDModel import FedAvgKDModel
 import FedMLB.models as fedmlb_models
 from FedMLB.utils import save_results_as_pickle
-from FedMLB.utils import get_gpu_memory, get_cpu_memory
+from FedMLB.utils import get_gpu_memory, get_cpu_memory, dic_save, dic_load
 from FedMLB.models import create_resnet18
 from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
-
+import shutil
+from FedMLB.server import MyServer
 
 # Make TensorFlow logs less verbose
+
+
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 enable_tf_gpu_growth()
 
@@ -62,7 +65,7 @@ def main(cfg: DictConfig) -> None:
                                                              np.square(0.2821)])
         return norm_layer(tf.cast(image, tf.float32) / 255.0), tf.expand_dims(label, axis=-1)
 
-    def get_evaluate_fn(model, save_path, dataset):
+    def get_evaluate_fn(model, save_path, dataset, starting_round):
         """Return an evaluation function for server-side evaluation."""
         if dataset in ["cifar100"]:
             (_, _), (x_test, y_test) = tf.keras.datasets.cifar100.load_data()
@@ -91,17 +94,25 @@ def main(cfg: DictConfig) -> None:
             model.set_weights(parameters)  # Update model with the latest parameters
             loss, accuracy = model.evaluate(test_ds)
 
-            # logging metrics on memory usage
-            gpu_free_memory = get_gpu_memory()
-            cpu_free_memory = get_cpu_memory()
 
             with global_summary_writer.as_default():
                 tf.summary.scalar('loss', loss, step=server_round)
                 tf.summary.scalar('accuracy', accuracy, step=server_round)
 
-                tf.summary.scalar('cpu_free_mem', cpu_free_memory, step=server_round)
-                tf.summary.scalar('gpu_free_mem', gpu_free_memory, step=server_round)
+                if cfg.logging_memory_usage:
+                    # logging metrics on memory usage
+                    gpu_free_memory = get_gpu_memory()
+                    cpu_free_memory = get_cpu_memory()
+                    tf.summary.scalar('cpu_free_mem', cpu_free_memory, step=server_round)
+                    tf.summary.scalar('gpu_free_mem', gpu_free_memory, step=server_round)
 
+            # saving the checkpoint before the end of simulation
+            if cfg.save_checkpoint and server_round == (cfg.num_rounds + starting_round -1):
+                path = os.path.join(save_path_checkpoints, "checkpoints_R" + str(server_round), "server_model")
+                server_model.save_weights(path)
+
+                path = os.path.join(save_path_checkpoints, "dict_info")
+                dic_save({"checkpoint_round": server_round}, path)
 
             return loss, {"accuracy": accuracy}
 
@@ -132,6 +143,8 @@ def main(cfg: DictConfig) -> None:
     local_epochs = cfg.local_epochs
     total_clients = cfg.total_clients
     dataset = cfg.dataset_config.dataset
+    restart_from_checkpoint = cfg.restart_from_checkpoint
+
     if dataset in ["cifar100"]:
         num_classes = 100
         input_shape = (None, 32, 32, 3)
@@ -207,37 +220,66 @@ def main(cfg: DictConfig) -> None:
         # Create and return client
         return client
 
-    tf.keras.utils.set_random_seed(cfg.random_seed)
     server_model = create_resnet18(num_classes=num_classes, input_shape=input_shape, norm="group",
                                    seed=cfg.random_seed)
     server_model.compile(
         loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
         metrics=[tf.keras.metrics.SparseCategoricalAccuracy(name='accuracy')]
     )
+
+    save_path_logging = os.path.join("FedMLB", "tb_logging", dataset, "resnet18", algorithm,
+                                     str(total_clients) + "_clients",
+                                     "dir_" + str(round(alpha_dirichlet, 1)), "seed_" + str(random_seed))
+
+    save_path_checkpoints = os.path.join("FedMLB", "model_checkpoints", dataset, "resnet18", algorithm,
+                                         str(total_clients) + "_clients",
+                                         "dir_" + str(round(alpha_dirichlet, 1)), "seed_" + str(random_seed))
+
+    starting_round = 1
+    if restart_from_checkpoint:
+        # if there is a checkpoint and restart_from_checkpoint is True
+        # the training restart from the state saved in the most recent checkpoint
+        # i.e., the one indicated in a dictionary named dict_info
+        path = os.path.join(save_path_checkpoints, "dict_info.pickle")
+        last_checkpoint = dic_load(path)["checkpoint_round"]
+        print("---- last check ", last_checkpoint)
+        if last_checkpoint:
+            print(f"Loading saved checkpoint round {last_checkpoint}")
+            path = os.path.join(save_path_checkpoints, "checkpoints_R" + str(last_checkpoint), "server_model")
+            server_model.load_weights(path)
+            starting_round = last_checkpoint +1
+    else:
+        # this will delete the checkpoints of previous simulations for that config
+        exist = os.path.exists(save_path_checkpoints)
+        if exist:
+            shutil.rmtree(save_path_checkpoints, ignore_errors=True)
+
+    tf.keras.utils.set_random_seed(cfg.random_seed*starting_round)
     params = server_model.get_weights()
 
-    save_path = os.path.join("FedMLB", "tb_logging", dataset, "resnet18", algorithm, str(total_clients) + "_clients",
-                             "dir_" + str(round(alpha_dirichlet, 1)), "seed_" + str(random_seed))
     strategy = instantiate(
         cfg.strategy,
         initial_parameters=flwr.common.ndarrays_to_parameters(params),
-        evaluate_fn=get_evaluate_fn(server_model, save_path, dataset),
+        evaluate_fn=get_evaluate_fn(server_model, save_path_logging, dataset, starting_round),
         on_fit_config_fn=fit_config,
     )
 
+    # my_server = MyServer(cfg.starting_round)
+    my_server = MyServer(strategy=strategy, starting_round=starting_round)
     # Start Flower simulation
     history = flwr.simulation.start_simulation(
         client_fn=client_fn,
         clients_ids=range(0, cfg.total_clients),
         num_clients=cfg.total_clients,
         client_resources={"num_cpus": cfg.client_resources.num_cpus, "num_gpus": cfg.client_resources.num_gpus},
+        server=my_server,
         config=flwr.server.ServerConfig(num_rounds=cfg.num_rounds),
         ray_init_args=ray_init_args,
-        strategy=strategy,
+        # strategy=strategy,
         actor_kwargs={
             "on_actor_init_fn": enable_tf_gpu_growth  # Enable GPU growth upon actor init
             # does nothing if `num_gpus` in client_resources is 0.0
-            },
+        },
     )
 
     # Experiment completed. Now we save the results and
