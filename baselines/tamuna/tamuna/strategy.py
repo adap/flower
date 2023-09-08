@@ -88,9 +88,11 @@ class TamunaStrategy(Strategy):
         self.compression_pattern = shuffle_columns(self.compression_pattern)
 
         for i in range(self.clients_per_round):
-            config = {"epochs": self.epochs_per_round[server_round - 1],
-                      "eta": self.eta,
-                      "mask": self.compression_pattern[:, i]}
+            config = {
+                "epochs": self.epochs_per_round[server_round - 1],
+                "eta": self.eta,
+                "mask": self.compression_pattern[:, i],
+            }
             client_fit_ins.append(FitIns(parameters, config))
 
         return [(client, client_fit_ins[i]) for i, client in enumerate(sampled_clients)]
@@ -127,6 +129,7 @@ class CentralizedFedAvgStrategy(Strategy):
     def initialize_parameters(self, client_manager):
         """Initialize the server model."""
         self.server_model = Net()
+
         self.dim = sum(p.numel() for p in self.server_model.parameters())
 
         ndarrays = [
@@ -143,7 +146,9 @@ class CentralizedFedAvgStrategy(Strategy):
     def aggregate_fit(self, server_round, results, failures):
         """Average the clients' weights."""
         weights = [parameters_to_ndarrays(fit_res.parameters) for _, fit_res in results]
-        parameters_aggregated = ndarrays_to_parameters(aggregate(weights, self.clients_per_round))
+        parameters_aggregated = ndarrays_to_parameters(
+            aggregate(weights, self.clients_per_round)
+        )
         return parameters_aggregated, {}
 
     def configure_evaluate(self, server_round, parameters, client_manager):

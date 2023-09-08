@@ -1,87 +1,102 @@
 ---
-title: title of the paper
-url: URL to the paper page (not the pdf)
-labels: [label1, label2] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [dataset1, dataset2] # list of datasets you include in your baseline
+title: "TAMUNA: Doubly Accelerated Federated Learning with Local Training, Compression, and Partial Participation"
+url: https://arxiv.org/abs/2302.09832
+labels: [local training, communication compression, partial participation, variance reduction]
+dataset: [MNIST]
 ---
 
-# :warning:*_Title of your baseline_*
+# Tamuna baseline
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
-> :warning: This is the template to follow when creating a new Flower Baseline. Please follow the instructions in `EXTENDED_README.md`
+****Paper:**** https://arxiv.org/abs/2302.09832
 
-> :warning: Please follow the instructions carefully. You can see the [FedProx-MNIST baseline](https://github.com/adap/flower/tree/main/baselines/fedprox) as an example of a baseline that followed this guide.
+****Authors:**** Laurent Condat, Ivan Agarský, Grigory Malinovsky, Peter Richtárik
 
-> :warning: Please complete the metadata section at the very top of this README. This generates a table at the top of the file that will facilitate indexing baselines.
-
-****Paper:**** :warning: *_add the URL of the paper page (not to the .pdf). For instance if you link a paper on ArXiv, add here the URL to the abstract page (e.g. https://arxiv.org/abs/1512.03385). If your paper is in from a journal or conference proceedings, please follow the same logic._*
-
-****Authors:**** :warning: *_list authors of the paper_*
-
-****Abstract:**** :warning: *_add here the abstract of the paper you are implementing_*
+****Abstract:**** In federated learning, a large number of users collaborate to learn a global model. They alternate local computations and communication with a distant server. Communication, which can be slow and costly, is the main bottleneck in this setting. In addition to communication-efficiency, a robust algorithm should allow for partial participation, the desirable feature that not all clients need to participate to every round of the training process. To reduce the communication load and therefore accelerate distributed gradient descent, two strategies are popular: 1) communicate less frequently; that is, perform several iterations of local computations between the communication rounds; and 2) communicate compressed information instead of full-dimensional vectors. We propose TAMUNA, the first algorithm for distributed optimization and federated learning, which harnesses these two strategies jointly and allows for partial participation. TAMUNA converges linearly to an exact solution in the strongly convex setting, with a doubly accelerated rate: it provably benefits from the two acceleration mechanisms provided by local training and compression, namely a better dependency on the condition number of the functions and on the model dimension, respectively.
 
 
 ## About this baseline
 
-****What’s implemented:**** :warning: *_Concisely describe what experiment(s) in the publication can be replicated by running the code. Please only use a few sentences. Start with: “The code in this directory …”_*
+****What’s implemented:**** The code in this directory compares Tamuna with FedAvg. It produces three plots comparing loss, accuracy and communication complexity of the two algorithms. 
 
-****Datasets:**** :warning: *_List the datasets you used (if you used a medium to large dataset, >10GB please also include the sizes of the dataset)._*
+****Datasets:**** MNIST
 
-****Hardware Setup:**** :warning: *_Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Someone out there might not have access to the same resources you have so, could list the absolute minimum hardware needed to run the experiment in a reasonable amount of time ? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?_*
+****Hardware Setup:**** By default, the experiments expect at least one gpu, but this can be changed to cpu only by specifying client and server devices. Default setup uses around 2.5 GB of dedicated GPU memory.
 
-****Contributors:**** :warning: *_let the world know who contributed to this baseline. This could be either your name, your name and affiliation at the time, or your GitHub profile name if you prefer. If multiple contributors signed up for this baseline, please list yourself and your colleagues_*
+****Contributors:**** Ivan Agarský @Crabzmatic, Grigory Malinovsky @gsmalinovsky
 
 
 ## Experimental Setup
 
-****Task:**** :warning: *_what’s the primary task that is being federated? (e.g. image classification, next-word prediction). If you have experiments for several, please list them_*
+****Task:**** image classification
 
-****Model:**** :warning: *_provide details about the model you used in your experiments (if more than use a list). If your model is small, describing it as a table would be :100:. Some FL methods do not use an off-the-shelve model (e.g. ResNet18) instead they create your own. If this is your case, please provide a summary here and give pointers to where in the paper (e.g. Appendix B.4) is detailed._*
+****Model:**** 
 
-****Dataset:**** :warning: *_Earlier you listed already the datasets that your baseline uses. Now you should include a breakdown of the details about each of them. Please include information about: how the dataset is partitioned (e.g. LDA with alpha 0.1 as default and all clients have the same number of training examples; or each client gets assigned a different number of samples following a power-law distribution with each client only instances of 2 classes)? if  your dataset is naturally partitioned just state “naturally partitioned”; how many partitions there are (i.e. how many clients)? Please include this an all information relevant about the dataset and its partitioning into a table._*
+As described in (McMahan, 2017): _Communication-Efficient Learning of Deep Networks from Decentralized Data_ (https://arxiv.org/pdf/1602.05629.pdf)
 
-****Training Hyperparameters:**** :warning: *_Include a table with all the main hyperparameters in your baseline. Please show them with their default value._*
+|     | Layer     | Input Shape  | Output Shape | Param #   | Kernel Shape |
+|-----|-----------|--------------|--------------|-----------|--------------|
+| Net |           | [1, 28, 28]  | [10]         | --        | --           |
+|     | Conv2d    | [1, 28, 28]  | [32, 26, 26] | 832       | [5, 5]       |
+|     | MaxPool2d | [32, 26, 26] | [32, 14, 14] | --        | [2, 2]       |
+|     | Conv2d    | [32, 14, 14] | [64, 12, 12] | 51,264    | [5, 5]       |
+|     | MaxPool2d | [64, 12, 12] | [64, 7, 7]   | --        | [2, 2]       |
+|     | Linear    | [3136]       | [512]        | 1,606,144 | --           |
+|     | Linear    | [512]        | [10]         | 5,130     | --           |
 
+Total trainable params: 1,663,370
+
+****Dataset:**** By default, training split of MNIST dataset is divided in iid fashion across all 1000 clients, while test split stays on the server for centralized evaluation. Training dataset can also be divided using power law by setting `dataset.iid` to `False` in `base.yaml` config.
+
+****Training Hyperparameters:**** 
+
+| Hyperparameter             | Description                                                                                                                                                                                                                                                 | Default value |
+|----------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
+| `server.clients_per_round` | Number of active/participating clients each round.                                                                                                                                                                                                          | 10            |
+| `server.num_clients`       | Number of total clients.                                                                                                                                                                                                                                    | 1000          |
+| `server_num_rounds`        | Number of training rounds, this does not include local training epochs.                                                                                                                                                                                     | 35            |
+| `server.s`                 | This describes the level of sparsity in the compression mask, needs to be between 2 and `server.clients_per_round`.                                                                                                                                         | 4             |
+| `server.p`                 | Describes the probability of server communication while doing local training, in other words, clients will in expectation do 1/p local epochs. Number of local epochs each rounds is synchronized across clients.                                           | 0.333         |
+| `uplink_factor`            | Weight of uplink (client to server) communication when calculating communication complexity.                                                                                                                                                                | 1             |
+| `downlink_factor`          | Weight of downlink (server to client) communication when calculating communication complexity.                                                                                                                                                              | 1             |
+| `client.learning_rate`     | Learning rate for client local training.                                                                                                                                                                                                                    | 0.01          |
+| `client.eta`               | Learning rate for updating control variates, needs to be between `server.p`/2 and `server.p` * (`server.clients_per_round` * (`server.s` - 1))/(`server.s` * (`server.clients_per_round` - 1)). Usually works very well when simply set to the upper bound. | 0.246         |
 
 ## Environment Setup
 
-:warning: _The Python environment for all baselines should follow these guidelines in the `EXTENDED_README`. Specify the steps to create and activate your environment. If there are any external system-wide requirements, please include instructions for them too. These instructions should be comprehensive enough so anyone can run them (if non standard, describe them step-by-step)._
+```bash
+# Create new conda environment with Python 3.9
+conda create -n tamuna python=3.9
+
+# Activate the newly created virtual environment
+conda activate tamuna
+
+# Install poetry using pip
+pip install poetry
+
+# In some cases there are issues when installing the poetry environment if chardet package is not previously installed
+pip install chardet
+
+# Navigate to tamuna directory containing pyproject.toml
+# Install all other packages using poetry
+poetry install
+
+# Note: If you get and error saying permission/access was denied in the middle of package installations, just rerun the poetry install command. It is most probably a bug in poetry. 
+```
 
 
 ## Running the Experiments
 
-:warning: _Provide instructions on the steps to follow to run all the experiments._
-```bash  
-# The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
-
-poetry run -m <baseline-name>.main <no additional arguments> # where <baseline-name> is the name of this directory and that of the only sub-directory in this directory (i.e. where all your source code is)
-
-# If you are using a dataset that requires a complicated download (i.e. not using one natively supported by TF/PyTorch) + preprocessing logic, you might want to tell people to run one script first that will do all that. Please ensure the download + preprocessing can be configured to suit (at least!) a different download directory (and use as default the current directory). The expected command to run to do this is:
-
-poetry run -m <baseline-name>.dataset_preparation <optional arguments, but default should always run>
-
-# It is expected that you baseline supports more than one dataset and different FL settings (e.g. different number of clients, dataset partitioning methods, etc). Please provide a list of commands showing how these experiments are run. Include also a short explanation of what each one does. Here it is expected you'll be using the Hydra syntax to override the default config.
-
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
-.
-.
-.
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
+```bash
+# Default experimental setup in defined in conf/base.yaml, this can be changed if needed  
+poetry run python tamuna/main.py
 ```
 
 
 ## Expected Results
 
-:warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
+The resulting directory in `./outputs/` should contain (among other things) `communication_complexity.png` and `loss_accuracy.png`.
 
-```bash
-# it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameteres
-
-poetry run -m <baseline-name>.main --multirun num_client_per_round=5,10,50 dataset=femnist,cifar10
-# the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
-
-[Now show a figure/table displaying the results of the above command]
-
-# add more commands + plots for additional experiments.
-```
+![Communication complexity](docs/communication_complexity.png)
+![Loss and accuracy](docs/loss_accuracy.png)

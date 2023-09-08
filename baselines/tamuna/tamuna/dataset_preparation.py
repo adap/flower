@@ -56,11 +56,9 @@ def sort_by_class(
 
 
 def partition_data(
-        num_clients: int,
-        iid: bool,
-        seed: Optional[int] = 42
+    num_clients: int, iid: bool, seed: Optional[int] = 42
 ) -> Tuple[List[Dataset], Dataset]:
-    """Split training set into iid partitions to simulate the federated setting.
+    """Split training set into iid partitions or power law split to simulate the federated setting.
 
     Parameters
     ----------
@@ -119,7 +117,7 @@ def power_law_split(
     num_labels_per_partition: int
         Number of labels to have in each dataset partition. For
         example if set to two, this means all training examples in
-        a given partition will be long to the same two classes. default 2
+        a given partition will belong to the same two classes. default 2
     min_data_per_partition: int
         Minimum number of datapoints included in each partition, default 10
     mean: float
