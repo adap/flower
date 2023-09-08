@@ -39,7 +39,7 @@ The simplest install is::
 
 Or, if you plan to use the image datasets::
 
-  python -m pip install flwr_datasets[image]
+  python -m pip install flwr_datasets[vision]
 
 Check out the full details on the download in :doc:`get-started-installation`.
 

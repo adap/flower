@@ -16,7 +16,7 @@ Stable releases are available on `PyPI <https://pypi.org/project/flwr_datasets/>
 
 For Image Datasets (e.g. MNIST, CIFAR10) ``flwr_datasets`` should be installed with the ``image`` extra::
 
-  python -m pip install flwr_datasets[image]
+  python -m pip install flwr_datasets[vision]
 
 For Audio Datasets (e.g. Speech Command) ``flwr_datasets`` should be installed with the ``audio`` extra::
 

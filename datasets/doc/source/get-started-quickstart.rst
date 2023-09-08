@@ -7,7 +7,7 @@ Install Federated Datasets
 --------------------------
 Run in command line::
 
-  pip install flwr_datasets[image]
+  python -m pip install flwr_datasets[vision]
 
 Install the ML framework
 ------------------------
