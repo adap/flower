@@ -55,3 +55,9 @@ Open the notebook ``doc/source/tutorial-get-started-with-flower-pytorch.ipynb``:
 Open a development version of the same notebook from branch `branch-name` by changing ``main`` to ``branch-name`` (right after ``blob``):
 
 - https://colab.research.google.com/github/adap/flower/blob/branch-name/doc/source/tutorial-get-started-with-flower-pytorch.ipynb
+
+Install a `whl` on Google Colab:
+
+1. In the vertical icon grid on the left hand side, select ``Files`` > ``Upload to session storage``
+2. Upload the whl (e.g., ``flwr-1.6.0-py3-none-any.whl``)
+3. Change ``!pip install -q 'flwr[simulation]' torch torchvision matplotlib`` to ``!pip install -q 'flwr-1.6.0-py3-none-any.whl[simulation]' torch torchvision matplotlib``

@@ -8,22 +8,49 @@ on:
     branches: ['main']
     paths: ['src/swift/**']
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
+  test:
     defaults:
         run:
             working-directory: src/swift/flwr
     name: Test
-    strategy:
-      matrix:
-        os: [macos-latest]
-        swift: ["5"]
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-latest
     steps:
       - uses: fwal/setup-swift@2040b795e5c453c3a05fcb8316496afc8a74f192
         with:
-          swift-version: ${{ matrix.swift }}
+          swift-version: 5
       - uses: actions/checkout@v3
       - name: Run tests
         run: arch -x86_64 xcodebuild test -scheme flwr -destination 'platform=iOS Simulator,name=iPhone 14 Pro Max,OS=16.2'
+
+  build_docs:
+    runs-on: macos-latest
+    name: Build docs
+    steps:
+      - uses: fwal/setup-swift@2040b795e5c453c3a05fcb8316496afc8a74f192
+        with:
+          swift-version: 5
+      - uses: actions/checkout@v3
+      - name: Build docs
+        run: ./dev/build-swift-api-ref.sh
+
+  deploy_docs:
+    needs: "build_docs"
+    if: github.ref == 'refs/heads/main'
+    runs-on: macos-latest
+    name: Deploy docs 
+    steps:
+      - uses: fwal/setup-swift@2040b795e5c453c3a05fcb8316496afc8a74f192
+        with:
+          swift-version: 5
+      - uses: actions/checkout@v3
+      - name: Build and deploy docs
+        env:
+          AWS_DEFAULT_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
+        run: ./dev/deploy-swift-docs.sh

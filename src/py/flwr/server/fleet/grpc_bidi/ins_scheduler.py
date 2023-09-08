@@ -99,11 +99,11 @@ def _worker(
             timeout=None,
         )
 
-        # Step 3: wrap FitRes in a ServerMessage in a Task in a TaskRes
+        # Step 3: wrap FitRes in a ClientMessage in a Task in a TaskRes
         task_res = TaskRes(
             task_id="",  # Will be created and set by the State
-            group_id="",
-            workload_id="",
+            group_id=task_ins.group_id,
+            workload_id=task_ins.workload_id,
             task=Task(
                 producer=Node(node_id=client_proxy.node_id, anonymous=False),
                 consumer=Node(node_id=0, anonymous=True),
