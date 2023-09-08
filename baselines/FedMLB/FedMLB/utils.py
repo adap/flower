@@ -13,6 +13,20 @@ import subprocess as sp
 import os
 import psutil
 
+
+def dic_save(dictionary, filename):
+    with open(filename + '.pickle', 'wb') as f:
+        pickle.dump(dictionary, f, pickle.HIGHEST_PROTOCOL)
+
+
+def dic_load(filename):
+    try:
+        with open(filename, 'rb') as fp:
+            return pickle.load(fp)
+    except IOError:
+        return {"checkpoint_round": 0}
+
+
 def plot_metric_from_history(
     hist: History,
     save_plot_path: Path,
