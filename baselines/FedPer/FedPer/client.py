@@ -9,7 +9,8 @@ import flwr as fl
 import numpy as np
 import torch
 from flwr.client.client import Client
-from flwr.common import Scalar
+from flwr.common import NDArrays, Scalar
+from numpy import dtype, ndarray
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader, Subset, random_split
 from torchvision import transforms
@@ -32,7 +33,7 @@ class BaseClient(fl.client.NumPyClient):
         trainloader: DataLoader,
         testloader: DataLoader,
         config: Dict[str, Any],
-        client_id: int,
+        client_id: str,
         model_manager_class: Union[
             Type[CNNModelManager], Type[MobileNetModelManager], Type[ResNetModelManager]
         ],
@@ -52,7 +53,7 @@ class BaseClient(fl.client.NumPyClient):
         self.train_id = 1
         self.test_id = 1
         self.config = config
-        self.client_id = client_id
+        self.client_id = int(client_id)
         try:
             self.client_state_save_path = (
                 client_state_save_path + f"/client_{self.client_id}"
@@ -69,7 +70,7 @@ class BaseClient(fl.client.NumPyClient):
             client_save_path=self.client_state_save_path,
         )
 
-    def get_parameters(self) -> List[np.ndarray]:
+    def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Return the current local model parameters."""
         return self.model_manager.model.get_parameters()
 
@@ -125,8 +126,10 @@ class BaseClient(fl.client.NumPyClient):
 
     def fit(
         self, parameters: List[np.ndarray], config: Dict[str, Scalar]
-    ) -> Union[
-        Tuple[List[np.ndarray], int, Dict[str, Scalar]], Tuple[List[np.ndarray], int]
+    ) -> Tuple[
+        List[ndarray[Any, dtype[Any]]],
+        int,
+        Dict[str, Union[bool, bytes, float, int, str]],
     ]:
         """Train the provided parameters using the locally held dataset.
 
@@ -153,15 +156,11 @@ class BaseClient(fl.client.NumPyClient):
 
         self.train_id += 1
 
-        return self.get_parameters(), self.model_manager.train_dataset_size(), {}
+        return self.get_parameters(config), self.model_manager.train_dataset_size(), {}
 
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict[str, Scalar]
-    ) -> Union[
-        Tuple[float, int, Dict[str, Scalar]],
-        Tuple[int, float, float],
-        Tuple[int, float, float, Dict[str, Scalar]],
-    ]:
+    ) -> Tuple[float, int, Dict[str, Union[bool, bytes, float, int, str]]]:
         """Evaluate the provided global parameters using the locally held dataset.
 
         Args:
@@ -220,7 +219,7 @@ class BaseClient(fl.client.NumPyClient):
 class FedPerClient(BaseClient):
     """Implementation of Federated Personalization (FedPer) Client."""
 
-    def get_parameters(self) -> List[np.ndarray]:
+    def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Return the current local body parameters."""
         return [
             val.cpu().numpy()
@@ -312,7 +311,7 @@ def get_client_fn_simulation(
             print(f"Loading partition from {partition_path}")
             with open(partition_path, "rb") as f:
                 partition = pickle.load(f)
-            data_indices: List[List[int]] = partition["data_indices"]
+            data_indices: Dict[str, Dict[str, List[int]]] = partition["data_indices"]
         except FileNotFoundError as e:
             print(f"Partition not found at {partition_path}")
             raise e

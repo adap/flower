@@ -33,7 +33,7 @@ class ServerInitializationStrategy(Strategy):
         model_split_class: Union[
             Type[MobileNetModelSplit], Type[ModelSplit], Type[ResNetModelSplit]
         ],
-        create_model: Callable[[Dict[str, Any]], nn.Module],
+        create_model: Callable[[], nn.Module],
         config: Dict[str, Any],
         algorithm: str = Algorithms.FEDAVG.value,
         has_fixed_head: bool = False,
@@ -61,7 +61,7 @@ class ServerInitializationStrategy(Strategy):
             If parameters are returned, then the server will treat these as the
             initial global model parameters.
         """
-        initial_parameters = self.initial_parameters
+        initial_parameters: Parameters = self.initial_parameters
         self.initial_parameters = None  # Don't keep initial parameters in memory
         if initial_parameters is None and self.model is not None:
             if self.algorithm == Algorithms.FEDPER.value:
@@ -311,7 +311,7 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[BaseException],
-    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+    ) -> Tuple[Parameters, Dict[str, Union[bool, bytes, float, int, str]]]:
         """Aggregate received local parameters, set global model parameters and save.
 
         Args:
@@ -374,7 +374,7 @@ class StoreMetricsStrategy(StoreHistoryStrategy):
         self,
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate the received local parameters and store the training aggregated.
 
@@ -414,7 +414,7 @@ class StoreMetricsStrategy(StoreHistoryStrategy):
         self,
         server_round: int,
         results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[BaseException],
+        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate the received local parameters and store the test aggregated.
 

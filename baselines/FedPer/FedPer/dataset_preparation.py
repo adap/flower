@@ -3,13 +3,14 @@ import os
 import random
 from collections import Counter
 from pathlib import Path
-from typing import Dict, List, Type, Any
+from typing import Any, Dict, List, Type
 
 import numpy as np
 import pandas as pd
 import torch
 import torchvision
 from torch.utils.data import Dataset
+from torchvision import transforms
 
 
 class BaseDataset(Dataset):
@@ -20,10 +21,10 @@ class BaseDataset(Dataset):
         self.classes = None
         self.data: torch.Tensor = None
         self.targets: torch.Tensor = None
-        self.train_data_transform = None
-        self.train_target_transform = None
-        self.general_data_transform = None
-        self.general_target_transform = None
+        self.train_data_transform: transforms.transforms.Compose = None
+        self.train_target_transform: transforms.transforms.Compose = None
+        self.general_data_transform: transforms.transforms.Compose = None
+        self.general_target_transform: transforms.transforms.Compose = None
         self.enable_train_transform = True
 
     def __getitem__(self, index):
@@ -217,13 +218,11 @@ DATASETS: Dict[str, Type[BaseDataset]] = {
 
 
 def randomly_assign_classes(
-    dataset: Dataset,
-    client_num: int,
-    class_num: int
-    # ) -> Tuple[List[List[int]], Dict[str, Dict[str, int]]]:
-) -> Dict[str, Any]:
+    dataset: Dataset, client_num: int, class_num: int
+) -> Dict[str, Dict[str, int]]:
+    # ) -> Dict[str, Any]:
     """Randomly assign number classes to clients."""
-    partition = {"separation": None, "data_indices": None}
+    partition: Dict[str, Any] = {"separation": None, "data_indices": None}
     data_indices: List = [[] for _ in range(client_num)]
     targets_numpy = np.array(dataset.targets, dtype=np.int32)
     label_list = list(range(len(dataset.classes)))

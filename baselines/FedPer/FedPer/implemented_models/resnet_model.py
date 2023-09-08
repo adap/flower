@@ -141,6 +141,7 @@ class ResNetModelManager(ModelManager):
             config=config,
             has_fixed_head=has_fixed_head,
         )
+        self.client_save_path = client_save_path
         self.trainloader, self.testloader = trainloader, testloader
         self.device = self.config["device"]
 
@@ -195,7 +196,8 @@ class ResNetModelManager(ModelManager):
 
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.SGD(self.model.parameters(), lr=0.01)
-        correct, total, loss = 0, 0, 0.0
+        correct, total = 0, 0
+        loss: torch.Tensor = 0.0
         # self.model.train()
         for _ in range(epochs):
             for images, labels in tqdm(self.trainloader):
@@ -204,6 +206,7 @@ class ResNetModelManager(ModelManager):
                 labels = labels.to(self.device)
                 loss = criterion(outputs, labels)
                 loss.backward()
+
                 optimizer.step()
                 total += labels.size(0)
                 correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
