@@ -1,23 +1,14 @@
 """Defines the DepthFL Flower Client and a function to instantiate it."""
 
 import copy
+import pickle
 from collections import OrderedDict
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Callable, Dict, List, Tuple
 
 import flwr as fl
 import numpy as np
 import torch
 from flwr.client import Client
-from flwr.client.app import (
-    _constructor,
-    _evaluate,
-    _get_parameters,
-    _get_properties,
-    numpyclient_has_evaluate,
-    numpyclient_has_fit,
-    numpyclient_has_get_parameters,
-    numpyclient_has_get_properties,
-)
 from flwr.client.numpy_client import NumPyClient
 from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
 from flwr.common.typing import Code, NDArrays, Scalar, Status
@@ -25,17 +16,7 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
-from depthfl import FitIns, FitRes
 from depthfl.models import test, train
-
-EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT = """
-NumPyClient.fit did not return a tuple with 3 elements.
-The returned values should have the following type signature:
-
-    Tuple[NDArrays, Dict, int]
-"""
-
-ClientLike = Union[Client, NumPyClient]
 
 
 def prune(state_dict, param_idx):
@@ -63,6 +44,8 @@ class FlowerClient(
         num_epochs: int,
         learning_rate: float,
         learning_rate_decay: float,
+        prev_grads: Dict,
+        cid: int,
     ):  # pylint: disable=too-many-arguments
         self.net = net
         self.trainloader = trainloader
@@ -71,6 +54,8 @@ class FlowerClient(
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
         self.learning_rate_decay = learning_rate_decay
+        self.prev_grads = prev_grads
+        self.cid = cid
         self.param_idx = {}
         state_dict = net.state_dict()
 
@@ -91,7 +76,7 @@ class FlowerClient(
         self.net.load_state_dict(prune(state_dict, self.param_idx), strict=True)
 
     def fit(
-        self, parameters: NDArrays, prev_grads: Dict, config: Dict[str, Scalar]
+        self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, Dict, int]:
         """Implements distributed fit function for a given client."""
         self.set_parameters(parameters)
@@ -114,12 +99,15 @@ class FlowerClient(
             feddyn=config["feddyn"],
             kd=config["kd"],
             consistency_weight=consistency_weight,
-            prev_grads=prev_grads,
+            prev_grads=self.prev_grads,
             alpha=config["alpha"],
             extended=config["extended"],
-        )
+        )  
 
-        return self.get_parameters({}), prev_grads, len(self.trainloader)
+        with open(f'prev_grads/client_{self.cid}', 'wb') as f:
+            pickle.dump(self.prev_grads, f)
+
+        return self.get_parameters({}), len(self.trainloader), {"cid": self.cid}
 
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]
@@ -192,6 +180,9 @@ def gen_client_fn(
         trainloader = trainloaders[int(cid)]
         valloader = valloaders[int(cid)]
 
+        with open(f'prev_grads/client_{int(cid)}', 'rb') as f:
+            prev_grads = pickle.load(f)
+
         return FlowerClient(
             net,
             trainloader,
@@ -200,70 +191,10 @@ def gen_client_fn(
             num_epochs,
             learning_rate,
             learning_rate_decay,
+            prev_grads,
+            int(cid),
         )
 
     return client_fn
 
 
-def _fit(self: Client, ins: FitIns) -> FitRes:
-    """Refine the provided parameters using the locally held dataset.
-
-    FitIns & FitRes were modified for FedDyn. Fit function gets prev_grads as input and
-    return the updated prev_grads with updated parameters
-    """
-    # Deconstruct FitIns
-    parameters: NDArrays = parameters_to_ndarrays(ins.parameters)
-
-    # Train
-    results = self.numpy_client.fit(parameters, ins.prev_grads, ins.config)  # type: ignore
-    if not (
-        len(results) == 3
-        and isinstance(results[0], list)
-        and isinstance(results[1], Dict)
-        and isinstance(results[2], int)
-    ):
-        raise Exception(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT)
-
-    # Return FitRes
-    parameters_prime, prev_grads, num_examples = results
-    parameters_prime_proto = ndarrays_to_parameters(parameters_prime)
-    return FitRes(
-        status=Status(code=Code.OK, message="Success"),
-        parameters=parameters_prime_proto,
-        prev_grads=prev_grads,
-        num_examples=num_examples,
-        cid=-1,
-    )
-
-
-def _wrap_numpy_client(client: NumPyClient) -> Client:
-    member_dict: Dict[str, Callable] = {  # type: ignore
-        "__init__": _constructor,
-    }
-
-    # Add wrapper type methods (if overridden)
-
-    if numpyclient_has_get_properties(client=client):
-        member_dict["get_properties"] = _get_properties
-
-    if numpyclient_has_get_parameters(client=client):
-        member_dict["get_parameters"] = _get_parameters
-
-    if numpyclient_has_fit(client=client):
-        member_dict["fit"] = _fit
-
-    if numpyclient_has_evaluate(client=client):
-        member_dict["evaluate"] = _evaluate
-
-    # Create wrapper class
-    wrapper_class = type("NumPyClientWrapper", (Client,), member_dict)
-
-    # Create and return an instance of the newly created class
-    return wrapper_class(numpy_client=client)  # type: ignore
-
-
-def to_client(client_like: ClientLike) -> Client:
-    """Take any Client-like object and return it as a Client."""
-    if isinstance(client_like, NumPyClient):
-        return _wrap_numpy_client(client=client_like)
-    return client_like

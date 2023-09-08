@@ -1,21 +1,24 @@
-import concurrent.futures
 import copy
 from collections import OrderedDict
 from logging import DEBUG, INFO
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import torch
-from flwr.common import Code, Parameters, Scalar, parameters_to_ndarrays
+from flwr.common import (
+    Parameters,
+    Scalar,
+    parameters_to_ndarrays,
+    FitRes,
+)
+from flwr.common import Scalar
 from flwr.common.logger import log
 from flwr.common.typing import NDArrays, Scalar
-from flwr.server import Server
+from flwr.server.server import Server, fit_clients
 from flwr.server.client_proxy import ClientProxy
-from flwr.server.server import fit_clients
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
-from depthfl import FitIns, FitRes
 from depthfl.client import prune
 from depthfl.models import test, test_sbn
 
@@ -23,7 +26,6 @@ FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
     List[Union[Tuple[ClientProxy, FitRes], BaseException]],
 ]
-
 
 def gen_evaluate_fn(
     testloader: DataLoader,
@@ -134,14 +136,14 @@ def gen_evaluate_fn_hetero(
 
     return evaluate
 
-
 class Server_FedDyn(Server):
+
     def fit_round(
-        self,
-        server_round: int,
-        timeout: Optional[float],
+    self,
+    server_round: int,
+    timeout: Optional[float],
     ) -> Optional[
-        Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
+    Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
     ]:
         """Perform a single round of federated averaging."""
         # Get clients and their respective instructions from strategy
@@ -180,71 +182,8 @@ class Server_FedDyn(Server):
         aggregated_result: Tuple[
             Optional[Parameters],
             Dict[str, Scalar],
-        ] = self.strategy.aggregate_fit(
-            server_round, results, failures, parameters_to_ndarrays(self.parameters)
-        )
+        ] = self.strategy.aggregate_fit(server_round, results, failures, parameters_to_ndarrays(self.parameters))
         # ] = self.strategy.aggregate_fit(server_round, results, failures)
 
         parameters_aggregated, metrics_aggregated = aggregated_result
         return parameters_aggregated, metrics_aggregated, (results, failures)
-
-
-def fit_clients(
-    client_instructions: List[Tuple[ClientProxy, FitIns]],
-    max_workers: Optional[int],
-    timeout: Optional[float],
-) -> FitResultsAndFailures:
-    """Refine parameters concurrently on all selected clients."""
-    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-        submitted_fs = {
-            executor.submit(fit_client, client_proxy, ins, timeout)
-            for client_proxy, ins in client_instructions
-        }
-        finished_fs, _ = concurrent.futures.wait(
-            fs=submitted_fs,
-            timeout=None,  # Handled in the respective communication stack
-        )
-
-    # Gather results
-    results: List[Tuple[ClientProxy, FitRes]] = []
-    failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]] = []
-    for future in finished_fs:
-        _handle_finished_future_after_fit(
-            future=future, results=results, failures=failures
-        )
-    return results, failures
-
-
-def fit_client(
-    client: ClientProxy, ins: FitIns, timeout: Optional[float]
-) -> Tuple[ClientProxy, FitRes]:
-    """Refine parameters on a single client."""
-    fit_res = client.fit(ins, timeout=timeout)
-    # tag client id
-    fit_res.cid = int(client.cid)
-    return client, fit_res
-
-
-def _handle_finished_future_after_fit(
-    future: concurrent.futures.Future,  # type: ignore
-    results: List[Tuple[ClientProxy, FitRes]],
-    failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-) -> None:
-    """Convert finished future into either a result or a failure."""
-    # Check if there was an exception
-    failure = future.exception()
-    if failure is not None:
-        failures.append(failure)
-        return
-
-    # Successfully received a result from a client
-    result: Tuple[ClientProxy, FitRes] = future.result()
-    _, res = result
-
-    # Check result status code
-    if res.status.code == Code.OK:
-        results.append(result)
-        return
-
-    # Not successful, client returned a result where the status code is not OK
-    failures.append(result)

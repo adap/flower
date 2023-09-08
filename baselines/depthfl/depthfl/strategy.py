@@ -1,3 +1,5 @@
+import os
+import pickle
 from logging import WARNING
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -14,12 +16,9 @@ from flwr.common import (
 )
 from flwr.common.logger import log
 from flwr.common.typing import FitRes
-from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
 from omegaconf import DictConfig
-
-from depthfl import FitIns, FitRes
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
@@ -50,9 +49,15 @@ class FedDyn(FedAvg):
     def __init__(self, cfg: DictConfig, net: nn.Module, *args, **kwargs):
         self.cfg = cfg
         self.h = [np.zeros(v.shape) for (k, v) in net.state_dict().items()]
-        self.prev_grads = [
-            {k: torch.zeros(v.numel()) for (k, v) in net.named_parameters()}
-        ] * 100
+        self.prev_grads = [{k: torch.zeros(v.numel()) for (k, v) in net.named_parameters()}] * cfg.num_clients
+
+        if not os.path.exists("prev_grads"):
+            os.makedirs("prev_grads")
+
+        for idx in range(cfg.num_clients):
+            with open(f'prev_grads/client_{idx}', 'wb') as f:
+                pickle.dump(self.prev_grads[idx], f)
+        
         self.is_weight = []
 
         # tagging real weights / biases
@@ -64,28 +69,6 @@ class FedDyn(FedAvg):
 
         super().__init__(*args, **kwargs)
 
-    def configure_fit(
-        self, server_round: int, parameters: Parameters, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, FitIns]]:
-        """Configure the next round of training."""
-        config = {}
-        if self.on_fit_config_fn is not None:
-            # Custom fit config function provided
-            config = self.on_fit_config_fn(server_round)
-
-        # Sample clients
-        sample_size, min_num_clients = self.num_fit_clients(
-            client_manager.num_available()
-        )
-        clients = client_manager.sample(
-            num_clients=sample_size, min_num_clients=min_num_clients
-        )
-
-        # Return client/config pairs
-        return [
-            (client, FitIns(parameters, self.prev_grads[int(client.cid)], config))
-            for client in clients
-        ]
 
     def aggregate_fit(
         self,
@@ -101,8 +84,9 @@ class FedDyn(FedAvg):
         if not self.accept_failures and failures:
             return None, {}
 
-        for _, fit_res in results:
-            self.prev_grads[fit_res.cid] = fit_res.prev_grads
+        for idx in range(self.cfg.num_clients):
+            with open(f'prev_grads/client_{idx}', 'rb') as f:
+                self.prev_grads[idx] = pickle.load(f)
 
         # Convert results
         weights_results = [

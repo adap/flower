@@ -19,8 +19,6 @@ from flwr.server.strategy import FedAvg
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 
-from depthfl import FitIns, FitRes
-
 
 class HeteroFL(FedAvg):
     """Custom FedAvg for HeteroFL."""
@@ -58,28 +56,6 @@ class HeteroFL(FedAvg):
 
         super().__init__(*args, **kwargs)
 
-    def configure_fit(
-        self, server_round: int, parameters: Parameters, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, FitIns]]:
-        """Configure the next round of training."""
-        config = {}
-        if self.on_fit_config_fn is not None:
-            # Custom fit config function provided
-            config = self.on_fit_config_fn(server_round)
-
-        # Sample clients
-        sample_size, min_num_clients = self.num_fit_clients(
-            client_manager.num_available()
-        )
-        clients = client_manager.sample(
-            num_clients=sample_size, min_num_clients=min_num_clients
-        )
-
-        # Return client/config pairs
-        return [
-            (client, FitIns(parameters, self.prev_grads[int(client.cid)], config))
-            for client in clients
-        ]
 
     def aggregate_fit(
         self,
@@ -95,12 +71,9 @@ class HeteroFL(FedAvg):
         if not self.accept_failures and failures:
             return None, {}
 
-        for _, fit_res in results:
-            self.prev_grads[fit_res.cid] = fit_res.prev_grads
-
         # Convert results
         weights_results = [
-            (parameters_to_ndarrays(fit_res.parameters), fit_res.cid)
+            (parameters_to_ndarrays(fit_res.parameters), fit_res.metrics["cid"])
             for _, fit_res in results
         ]
 

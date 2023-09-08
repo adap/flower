@@ -10,7 +10,6 @@ from omegaconf import DictConfig, OmegaConf
 
 from depthfl import client, server, utils
 from depthfl.dataset import load_datasets
-from depthfl.simulation import start_simulation
 from depthfl.utils import save_results_as_pickle
 
 
@@ -105,7 +104,7 @@ def main(cfg: DictConfig) -> None:
     )
 
     # Start simulation
-    history = start_simulation(
+    history = fl.simulation.start_simulation(
         client_fn=client_fn,
         num_clients=cfg.num_clients,
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
@@ -114,9 +113,7 @@ def main(cfg: DictConfig) -> None:
             "num_gpus": cfg.client_resources.num_gpus,
         },
         strategy=strategy,
-        server=server.Server_FedDyn(
-            client_manager=SimpleClientManager(), strategy=strategy
-        ),
+        server=server.Server_FedDyn(client_manager=SimpleClientManager(), strategy=strategy),
     )
 
     # Experiment completed. Now we save the results and
