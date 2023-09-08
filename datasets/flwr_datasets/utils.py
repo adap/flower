@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Utils for FederatedDatasets."""
+"""Utils for FederatedDataset."""
 
 
 from typing import Dict
@@ -47,12 +47,11 @@ def _check_if_dataset_supported(dataset: str) -> None:
         "mnist",
         "cifar10",
         "fashion_mnist",
-        "food101",
         "sasha/dog-food",
         "zh-plus/tiny-imagenet",
     ]
     if dataset not in supported_datasets:
-        raise Warning(
+        raise ValueError(
             f"The currently tested and supported dataset are {supported_datasets}. "
             f"Given: {dataset}"
         )
