@@ -15,11 +15,15 @@ clipnorm: 10.0
 l2_weight_decay: 1e-3
 lambda_1: 1.0 # it can be >= 0
 lambda_2: 1.0 # it can be >= 0
-random_seed: 1
+random_seed: 2
+starting_round: 1
+restart_from_checkpoint: True
+save_checkpoint: True
+logging_memory_usage: False
 
 client_resources:
   num_cpus: 1.0
-  num_gpus: 1.0
+  num_gpus: 0.0
 
 server_device: cpu
 
