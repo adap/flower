@@ -54,7 +54,7 @@ class FedVSSL(fl.server.strategy.FedAvg):
         server_round: int,
         results: List[Tuple[fl.server.client_proxy.ClientProxy, fl.common.FitRes]],
         failures: List[BaseException],
-    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+    ):
         """Aggregate fit results using weighted average."""
         if not results:
             return None, {}
@@ -105,7 +105,7 @@ class FedVSSL(fl.server.strategy.FedAvg):
 
         return weights_avg, {}
 
-def aggregate(results: List[Tuple[Weights, float]]) -> Weights:
+def aggregate(results):
     """Compute weighted average."""
     # Calculate the total number of examples used during training
     num_examples_total = sum([num_examples for _, num_examples in results])

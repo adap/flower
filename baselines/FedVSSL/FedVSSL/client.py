@@ -29,11 +29,10 @@ from flwr.common import (
     FitRes,
     Parameters,
     Scalar,
-    Weights,
-    parameters_to_weights,
-    weights_to_parameters,
+    NDArrays,
+    ndarrays_to_parameters,   # parameters_to_weights,
+    parameters_to_ndarrays,   # weights_to_parameters,
 )
-
 # pylint: disable=no-member
 # DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # pylint: enable=no-member

@@ -32,32 +32,69 @@ from flwr.common import (
     FitRes,
     Parameters,
     Scalar,
-    Weights,
-    parameters_to_weights,
-    weights_to_parameters,
+    NDArrays,
+    ndarrays_to_parameters,   # parameters_to_weights,
+    parameters_to_ndarrays,   # weights_to_parameters,
 )
 from strategy import FedVSSL
 
 if __name__ == "__main__":
-    import _init_paths
-    import utilis 
+    # import _init_paths
+    # import utils
+    
+    train_flag = False
+    if train_flag:
 
-    os.chdir("/fedssl/")
-    pool_size = 100  # number of dataset partions (= number of total clients)
-    client_resources = {"num_cpus": 2, "num_gpus": 1}  # each client will get allocated 1 CPUs
-    # timestr = time.strftime("%Y%m%d_%H%M%S")
-    base_work_dir = '/k400_' + DIR
-    rounds = 1
+        os.chdir("/fedssl/")
+        pool_size = 100  # number of dataset partions (= number of total clients)
+        client_resources = {"num_cpus": 2, "num_gpus": 1}  # each client will get allocated 1 CPUs
+        # timestr = time.strftime("%Y%m%d_%H%M%S")
+        base_work_dir = '/k400_' + DIR
+        rounds = 1
 
-    # configure the strategy
-    strategy = FedVSSL(
-        fraction_fit=0.05,
-        fraction_eval=0.02,
-        min_fit_clients=5,
-        min_eval_clients=1,
-        min_available_clients=pool_size,
-        on_fit_config_fn=fit_config,
-    )
+        # configure the strategy
+        strategy = FedVSSL(
+            fraction_fit=0.05,
+            fraction_eval=0.02,
+            min_fit_clients=5,
+            min_eval_clients=1,
+            min_available_clients=pool_size,
+            on_fit_config_fn=fit_config,
+        )
+         # (optional) specify ray config
+        ray_config = {"include_dashboard": False}
+
+        # start simulation
+        fl.simulation.start_simulation(
+            client_fn=main,
+            num_clients=pool_size,
+            client_resources=client_resources,
+            num_rounds=fl.server.ServerConfig(num_rounds=1),
+            strategy=strategy,
+            ray_init_args=ray_config,
+        )
+    else:
+        import subprocess
+        import os
+        import CtP
+        import CtP.tools._init_paths
+        from CtP.configs.ctp.r3d_18_kinetics import finetune_ucf101
+        print(dir(finetune_ucf101))
+        print(finetune_ucf101._base_)
+
+        process_obj = subprocess.run(["bash", "CtP/tools/dist_train.sh",\
+        "CtP/configs/ctp/r3d_18_kinetics/finetune_ucf101.py", "4",\
+        f"--work_dir /finetune/ucf101/",
+        f"--data_dir /DATA",\
+        f"--pretrained /path to the pretrained checkpoint",\
+        f"--validate"])
+        
+
+        
+    
+
+
+
 
 
     def main(cid: str):
@@ -67,18 +104,7 @@ if __name__ == "__main__":
         return SslClient(model, train_dataset, test_dataset, cfg, args, distributed, logger, utils)
 
 
-    # (optional) specify ray config
-    ray_config = {"include_dashboard": False}
-
-    # start simulation
-    fl.simulation.start_simulation(
-        client_fn=main,
-        num_clients=pool_size,
-        client_resources=client_resources,
-        num_rounds=fl.server.ServerConfig(num_rounds=1),
-        strategy=strategy,
-        ray_init_args=ray_config,
-    )
+   
 
 def initial_setup(cid, base_work_dir, rounds, light=False):
     import _init_paths

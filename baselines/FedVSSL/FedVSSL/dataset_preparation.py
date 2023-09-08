@@ -6,6 +6,40 @@ first download the dataset and partition it and then run the experiments, please
 uncomment the lines below and tell us in the README.md (see the "Running the Experiment"
 block) that this file should be executed first.
 """
+
+# make sure you have installed unrar package. One can install it using apt install unrar
+
+import subprocess
+import CtP
+# 
+# first download the raw videos from the official websit
+# subprocess.run(["mkdir -p data/ucf101/"], shell=True)
+# subprocess.run(["wget https://www.crcv.ucf.edu/data/UCF101/UCF101.rar -O data/ucf101/UCF101.rar --no-check-certificate && \
+# unrar e data/ucf101/UCF101.rar data/ucf101/UCF101_raw/"], shell=True)
+
+# print("---unzipping the compressed file---")
+# subprocess.run(["unrar e data/ucf101/UCF101.rar data/ucf101/UCF101_raw/"], shell=True)
+
+# print("--Downloading the train/test split---")
+# subprocess.run(["wget https://www.crcv.ucf.edu/data/UCF101/UCF101TrainTestSplits-RecognitionTask.zip -O \
+# data/ucf101/UCF101TrainTestSplits-RecognitionTask.zip --no-check-certificate"], shell=True)
+
+# subprocess.run(["unzip data/ucf101/UCF101TrainTestSplits-RecognitionTask.zip -d data/ucf101/."], shell=True)
+
+print("--Preprocessing the dataset script---")
+subprocess.run(["python CtP/scripts/process_ucf101.py --raw_dir data/ucf101/UCF101_raw/ \
+--ann_dir data/ucf101/ucfTrainTestlist/ --out_dir data/ucf101/"], shell=True)
+
+# print("---converting the annotation files into json format---")
+# subprocess.run(["python CtP/scripts/cvt_txt_to_json.py"], shell=True)
+
+# optional 
+# rm data/ucf101/UCF101.rar
+# rm -r data/ucf101/UCF101_raw/
+
+
+
+
 # import hydra
 # from hydra.core.hydra_config import HydraConfig
 # from hydra.utils import call, instantiate
