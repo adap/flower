@@ -25,8 +25,8 @@
 
 .. toctree::
 
-   partitioner.partitioner.Partitioner
-   partitioner.iid_partitioner.IidPartitioner
+   ref-partitioner.partitioner.Partitioner
+   ref-partitioner.iid_partitioner.IidPartitioner
 
 
 

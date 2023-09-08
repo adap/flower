@@ -4,12 +4,12 @@ API Reference
 .. toctree::
    :maxdepth: 3
 
-   federated_dataset.FederatedDataset
+   ref-federated_dataset.FederatedDataset
 
 .. rubric:: Partitioners
 .. toctree::
    :maxdepth: 4
 
-   partitioner
+   ref-partitioner
 
 

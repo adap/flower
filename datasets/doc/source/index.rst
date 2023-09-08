@@ -8,9 +8,9 @@ learning/analytics/evaluation. It is created by the ``Flower Labs`` team that al
    :maxdepth: 2
    :hidden:
 
-   get_started
-   how_to
-   api_reference
+   get-started
+   how-to
+   ref-api-flwr-datasets
 
 Main features
 -------------
@@ -41,11 +41,11 @@ Or, if you plan to use the image datasets::
 
   python -m pip install flwr_datasets[image]
 
-Check out the full details on the download in :doc:`installation`.
+Check out the full details on the download in :doc:`get-started-installation`.
 
 How To Use the library
 ----------------------
-Learn how to use the ``flwr-datasets`` library from the :doc:`quickstart` examples .
+Learn how to use the ``flwr-datasets`` library from the :doc:`get-started-quickstart` examples .
 
 
 

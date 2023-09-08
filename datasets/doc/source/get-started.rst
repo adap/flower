@@ -6,5 +6,5 @@ This is the collection of the most essential guides for you to start using the F
 .. toctree::
    :maxdepth: 4
 
-   installation
-   quickstart
+   get-started-installation
+   get-started-quickstart

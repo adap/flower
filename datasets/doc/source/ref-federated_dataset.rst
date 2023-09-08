@@ -4,7 +4,7 @@
 .. toctree::
    :hidden:
 
-   federated_dataset.FederatedDataset
+   ref-federated_dataset.FederatedDataset
 
 .. automodule:: federated_dataset
 

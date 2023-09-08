@@ -7,5 +7,5 @@ Learn how to transform the HuggingFace dataset to the framework of your choice. 
 .. toctree::
    :maxdepth: 4
 
-   use_with_tf
-   use_with_torch
+   how-to-use-with-tf
+   how-to-use-with-torch
