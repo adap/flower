@@ -1,0 +1,1 @@
+flwr-nightly[simulation,rest]
