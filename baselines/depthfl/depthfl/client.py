@@ -1,36 +1,32 @@
 """Defines the DepthFL Flower Client and a function to instantiate it."""
 
 import copy
-import torch
-import numpy as np
-import flwr as fl
 from collections import OrderedDict
 from typing import Callable, Dict, List, Tuple, Union
+
+import flwr as fl
+import numpy as np
+import torch
+from flwr.client import Client
+from flwr.client.app import (
+    _constructor,
+    _evaluate,
+    _get_parameters,
+    _get_properties,
+    numpyclient_has_evaluate,
+    numpyclient_has_fit,
+    numpyclient_has_get_parameters,
+    numpyclient_has_get_properties,
+)
+from flwr.client.numpy_client import NumPyClient
+from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
+from flwr.common.typing import Code, NDArrays, Scalar, Status
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
-from flwr.common import (
-    ndarrays_to_parameters,
-    parameters_to_ndarrays,
-)
-
-from flwr.common.typing import NDArrays, Scalar, Status, Code
-from flwr.client import Client
-from flwr.client.app import (
-    numpyclient_has_get_properties,
-    numpyclient_has_get_parameters,
-    numpyclient_has_fit,
-    numpyclient_has_evaluate,
-    _get_properties,
-    _get_parameters,
-    _evaluate,
-    _constructor,
-)
-from flwr.client.numpy_client import NumPyClient
-
-from depthfl.models import test, train
 from depthfl import FitIns, FitRes
+from depthfl.models import test, train
 
 EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT = """
 NumPyClient.fit did not return a tuple with 3 elements.
@@ -41,16 +37,17 @@ The returned values should have the following type signature:
 
 ClientLike = Union[Client, NumPyClient]
 
-def prune(state_dict, param_idx):
-    """prune width of DNN (for HeteroFL)"""
 
+def prune(state_dict, param_idx):
+    """Prune width of DNN (for HeteroFL)."""
     ret_dict = {}
     for k in state_dict.keys():
-        if 'num' not in k:
+        if "num" not in k:
             ret_dict[k] = state_dict[k][torch.meshgrid(param_idx[k])]
         else:
             ret_dict[k] = state_dict[k]
     return copy.deepcopy(ret_dict)
+
 
 class FlowerClient(
     fl.client.NumPyClient
@@ -79,18 +76,19 @@ class FlowerClient(
 
         # for HeteroFL
         for k in state_dict.keys():
-            self.param_idx[k] = [torch.arange(size) for size in state_dict[k].shape] # store client's weights' shape (for HeteroFL)
-        
+            self.param_idx[k] = [
+                torch.arange(size) for size in state_dict[k].shape
+            ]  # store client's weights' shape (for HeteroFL)
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
         return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
-    
+
     def set_parameters(self, parameters: NDArrays) -> None:
         """Changes the parameters of the model using the given ones."""
         params_dict = zip(self.net.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-        self.net.load_state_dict(prune(state_dict, self.param_idx), strict=True) 
+        self.net.load_state_dict(prune(state_dict, self.param_idx), strict=True)
 
     def fit(
         self, parameters: NDArrays, prev_grads: Dict, config: Dict[str, Scalar]
@@ -112,11 +110,11 @@ class FlowerClient(
             self.trainloader,
             self.device,
             epochs=num_epochs,
-            learning_rate=self.learning_rate * self.learning_rate_decay ** curr_round,
+            learning_rate=self.learning_rate * self.learning_rate_decay**curr_round,
             feddyn=config["feddyn"],
             kd=config["kd"],
             consistency_weight=consistency_weight,
-            prev_grads = prev_grads,
+            prev_grads=prev_grads,
             alpha=config["alpha"],
             extended=config["extended"],
         )
@@ -129,7 +127,11 @@ class FlowerClient(
         """Implements distributed evaluation for a given client."""
         self.set_parameters(parameters)
         loss, accuracy, accuracy_single = test(self.net, self.valloader, self.device)
-        return float(loss), len(self.valloader), {"accuracy": float(accuracy), "accuracy_single":accuracy_single}
+        return (
+            float(loss),
+            len(self.valloader),
+            {"accuracy": float(accuracy), "accuracy_single": accuracy_single},
+        )
 
 
 def gen_client_fn(
@@ -141,7 +143,7 @@ def gen_client_fn(
     learning_rate: float,
     learning_rate_decay: float,
     models: List[DictConfig],
-    cfg: DictConfig
+    cfg: DictConfig,
 ) -> Tuple[
     Callable[[str], FlowerClient], DataLoader
 ]:  # pylint: disable=too-many-arguments
@@ -179,7 +181,6 @@ def gen_client_fn(
 
     def client_fn(cid: str) -> FlowerClient:
         """Create a Flower client representing a single organization."""
-
         # Load model
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -190,7 +191,7 @@ def gen_client_fn(
         # will train and evaluate on their own unique data
         trainloader = trainloaders[int(cid)]
         valloader = valloaders[int(cid)]
-        
+
         return FlowerClient(
             net,
             trainloader,
@@ -204,14 +205,12 @@ def gen_client_fn(
     return client_fn
 
 
-
 def _fit(self: Client, ins: FitIns) -> FitRes:
-
     """Refine the provided parameters using the locally held dataset.
-    FitIns & FitRes were modified for FedDyn. Fit function gets prev_grads 
-    as input and return the updated prev_grads with updated parameters
-    """
 
+    FitIns & FitRes were modified for FedDyn. Fit function gets prev_grads as input and
+    return the updated prev_grads with updated parameters
+    """
     # Deconstruct FitIns
     parameters: NDArrays = parameters_to_ndarrays(ins.parameters)
 
@@ -233,7 +232,7 @@ def _fit(self: Client, ins: FitIns) -> FitRes:
         parameters=parameters_prime_proto,
         prev_grads=prev_grads,
         num_examples=num_examples,
-        cid = -1,
+        cid=-1,
     )
 
 
@@ -261,6 +260,7 @@ def _wrap_numpy_client(client: NumPyClient) -> Client:
 
     # Create and return an instance of the newly created class
     return wrapper_class(numpy_client=client)  # type: ignore
+
 
 def to_client(client_like: ClientLike) -> Client:
     """Take any Client-like object and return it as a Client."""

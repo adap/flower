@@ -1,22 +1,20 @@
-from typing import Callable, Dict, Optional, cast
 from logging import ERROR
-import ray
+from typing import Callable, Optional, cast
 
+import ray
 from flwr import common
 from flwr.client import Client, ClientLike
-from depthfl.client import to_client
-from flwr.client.client import (
-    maybe_call_fit,
-)
-from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy
+from flwr.client.client import maybe_call_fit
 from flwr.common.logger import log
+from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy
+
+from depthfl.client import to_client
 
 ClientFn = Callable[[str], ClientLike]
 
+
 class RayClientProxy_FedDyn(RayClientProxy):
-    
     def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
-   
         """Train model parameters on the locally held dataset."""
         future_fit_res = launch_and_fit.options(  # type: ignore
             **self.resources,
@@ -30,7 +28,7 @@ class RayClientProxy_FedDyn(RayClientProxy):
             common.FitRes,
             res,
         )
-    
+
 
 @ray.remote
 def launch_and_fit(
@@ -42,6 +40,7 @@ def launch_and_fit(
         client=client,
         fit_ins=fit_ins,
     )
+
 
 def _create_client(client_fn: ClientFn, cid: str) -> Client:
     """Create a client instance."""

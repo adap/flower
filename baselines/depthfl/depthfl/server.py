@@ -1,29 +1,23 @@
 import concurrent.futures
 import copy
-import torch
 from collections import OrderedDict
-from typing import Callable, Dict, Optional, Tuple, List, Union
 from logging import DEBUG, INFO
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
-from flwr.common.typing import NDArrays, Scalar
+import torch
+from flwr.common import Code, Parameters, Scalar, parameters_to_ndarrays
 from flwr.common.logger import log
+from flwr.common.typing import NDArrays, Scalar
 from flwr.server import Server
-from flwr.server.server import fit_clients
 from flwr.server.client_proxy import ClientProxy
+from flwr.server.server import fit_clients
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
 from depthfl import FitIns, FitRes
-from depthfl.models import test, test_sbn
 from depthfl.client import prune
-
-from flwr.common import (
-    Code,
-    Parameters,
-    Scalar,
-    parameters_to_ndarrays,
-)
+from depthfl.models import test, test_sbn
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
@@ -58,7 +52,6 @@ def gen_evaluate_fn(
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         # pylint: disable=unused-argument
         """Use the entire CIFAR-100 test set for evaluation."""
-
         net = instantiate(model)
         params_dict = zip(net.state_dict().keys(), parameters_ndarrays)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
@@ -67,9 +60,10 @@ def gen_evaluate_fn(
 
         loss, accuracy, accuracy_single = test(net, testloader, device=device)
         # return statistics
-        return loss, {"accuracy": accuracy, "accuracy_single":accuracy_single}
+        return loss, {"accuracy": accuracy, "accuracy_single": accuracy_single}
 
     return evaluate
+
 
 def gen_evaluate_fn_hetero(
     trainloaders: List[DataLoader],
@@ -99,11 +93,10 @@ def gen_evaluate_fn_hetero(
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         # pylint: disable=unused-argument
         """Use the entire CIFAR-100 test set for evaluation."""
-
         # test per 50 rounds (sbn takes a long time)
         if server_round % 50 != 0:
-            return 0., {"accuracy": 0., "accuracy_single":[0]*4}
-        
+            return 0.0, {"accuracy": 0.0, "accuracy_single": [0] * 4}
+
         # models with different width
         models = []
         for i in range(4):
@@ -120,7 +113,9 @@ def gen_evaluate_fn_hetero(
             nets.append(net)
             param_idx = {}
             for k in net_tmp.state_dict().keys():
-                param_idx[k] = [torch.arange(size) for size in net.state_dict()[k].shape]
+                param_idx[k] = [
+                    torch.arange(size) for size in net.state_dict()[k].shape
+                ]
             param_idx_lst.append(param_idx)
 
         params_dict = zip(net_tmp.state_dict().keys(), parameters_ndarrays)
@@ -131,20 +126,22 @@ def gen_evaluate_fn_hetero(
             net.to(device)
             net.train()
 
-        loss, accuracy, accuracy_single = test_sbn(nets, trainloaders, testloader, device=device)
+        loss, accuracy, accuracy_single = test_sbn(
+            nets, trainloaders, testloader, device=device
+        )
         # return statistics
-        return loss, {"accuracy": accuracy, "accuracy_single":accuracy_single}
+        return loss, {"accuracy": accuracy, "accuracy_single": accuracy_single}
 
     return evaluate
 
-class Server_FedDyn(Server):
 
+class Server_FedDyn(Server):
     def fit_round(
-    self,
-    server_round: int,
-    timeout: Optional[float],
+        self,
+        server_round: int,
+        timeout: Optional[float],
     ) -> Optional[
-    Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
+        Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
     ]:
         """Perform a single round of federated averaging."""
         # Get clients and their respective instructions from strategy
@@ -183,7 +180,9 @@ class Server_FedDyn(Server):
         aggregated_result: Tuple[
             Optional[Parameters],
             Dict[str, Scalar],
-        ] = self.strategy.aggregate_fit(server_round, results, failures, parameters_to_ndarrays(self.parameters))
+        ] = self.strategy.aggregate_fit(
+            server_round, results, failures, parameters_to_ndarrays(self.parameters)
+        )
         # ] = self.strategy.aggregate_fit(server_round, results, failures)
 
         parameters_aggregated, metrics_aggregated = aggregated_result
@@ -220,11 +219,11 @@ def fit_client(
     client: ClientProxy, ins: FitIns, timeout: Optional[float]
 ) -> Tuple[ClientProxy, FitRes]:
     """Refine parameters on a single client."""
-
     fit_res = client.fit(ins, timeout=timeout)
-    # tag client id 
+    # tag client id
     fit_res.cid = int(client.cid)
     return client, fit_res
+
 
 def _handle_finished_future_after_fit(
     future: concurrent.futures.Future,  # type: ignore

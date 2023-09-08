@@ -1,8 +1,9 @@
-from enum import Enum
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from enum import Enum
+from typing import Dict, List, Union
 
 Scalar = Union[bool, bytes, float, int, str]
+
 
 class Code(Enum):
     """Client status codes."""
@@ -13,12 +14,14 @@ class Code(Enum):
     FIT_NOT_IMPLEMENTED = 3
     EVALUATE_NOT_IMPLEMENTED = 4
 
+
 @dataclass
 class Status:
     """Client status."""
 
     code: Code
     message: str
+
 
 @dataclass
 class Parameters:
@@ -27,6 +30,7 @@ class Parameters:
     tensors: List[bytes]
     tensor_type: str
 
+
 @dataclass
 class FitIns:
     """Fit instructions for a client."""
@@ -34,6 +38,7 @@ class FitIns:
     parameters: Parameters
     prev_grads: Dict
     config: Dict[str, Scalar]
+
 
 @dataclass
 class FitRes:

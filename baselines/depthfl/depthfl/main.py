@@ -1,16 +1,18 @@
 import copy
-import hydra
+
 import flwr as fl
+import hydra
+from flwr.common import ndarrays_to_parameters
+from flwr.server.client_manager import SimpleClientManager
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
-from flwr.server.client_manager import ClientManager, SimpleClientManager
-from flwr.common import ndarrays_to_parameters
 from depthfl import client, server, utils
-from depthfl.simulation import start_simulation
 from depthfl.dataset import load_datasets
+from depthfl.simulation import start_simulation
 from depthfl.utils import save_results_as_pickle
+
 
 @hydra.main(config_path="conf", config_name="config", version_base=None)
 def main(cfg: DictConfig) -> None:
@@ -21,7 +23,6 @@ def main(cfg: DictConfig) -> None:
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
-    
     print(OmegaConf.to_yaml(cfg))
 
     # partition dataset and get dataloaders
@@ -34,16 +35,18 @@ def main(cfg: DictConfig) -> None:
     # exclusive learning baseline in DepthFL paper
     # (model_size, % of clients) = (a,100), (b,75), (c,50), (d,25)
     if cfg.exclusive_learning:
-        cfg.num_clients = int(cfg.num_clients - (cfg.model_size-1) * (cfg.num_clients // 4))
+        cfg.num_clients = int(
+            cfg.num_clients - (cfg.model_size - 1) * (cfg.num_clients // 4)
+        )
 
     models = []
     for i in range(cfg.num_clients):
         model = copy.deepcopy(cfg.model)
 
-        # each client gets different model depth / width 
+        # each client gets different model depth / width
         model.n_blocks = i // (cfg.num_clients // 4) + 1
 
-        # In exclusive learning, every client has same model depth / width 
+        # In exclusive learning, every client has same model depth / width
         if cfg.exclusive_learning:
             model.n_blocks = cfg.model_size
 
@@ -65,10 +68,12 @@ def main(cfg: DictConfig) -> None:
     # get function that will executed by the strategy's evaluate() method
     # Set server's device
     device = cfg.server_device
-    
+
     # Static Batch Normalization for HeteroFL
     if cfg.static_bn:
-        evaluate_fn = server.gen_evaluate_fn_hetero(trainloaders, testloader, device=device, model_cfg=model)
+        evaluate_fn = server.gen_evaluate_fn_hetero(
+            trainloaders, testloader, device=device, model_cfg=model
+        )
     else:
         evaluate_fn = server.gen_evaluate_fn(testloader, device=device, model=model)
 
@@ -89,14 +94,16 @@ def main(cfg: DictConfig) -> None:
     strategy = instantiate(
         cfg.strategy,
         cfg,
-        net, 
+        net,
         evaluate_fn=evaluate_fn,
         on_fit_config_fn=get_on_fit_config(),
-        initial_parameters=ndarrays_to_parameters([val.cpu().numpy() for _, val in net.state_dict().items()]),
-        min_fit_clients= int(cfg.num_clients * cfg.fraction),
-        min_available_clients= int(cfg.num_clients * cfg.fraction),
+        initial_parameters=ndarrays_to_parameters(
+            [val.cpu().numpy() for _, val in net.state_dict().items()]
+        ),
+        min_fit_clients=int(cfg.num_clients * cfg.fraction),
+        min_available_clients=int(cfg.num_clients * cfg.fraction),
     )
-    
+
     # Start simulation
     history = start_simulation(
         client_fn=client_fn,
@@ -107,7 +114,9 @@ def main(cfg: DictConfig) -> None:
             "num_gpus": cfg.client_resources.num_gpus,
         },
         strategy=strategy,
-        server=server.Server_FedDyn(client_manager=SimpleClientManager(), strategy=strategy),
+        server=server.Server_FedDyn(
+            client_manager=SimpleClientManager(), strategy=strategy
+        ),
     )
 
     # Experiment completed. Now we save the results and

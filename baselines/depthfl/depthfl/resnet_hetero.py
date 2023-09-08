@@ -1,7 +1,7 @@
+import numpy as np
 import torch
 import torch.nn as nn
-from typing import Type, Any, Callable, Union, List, Optional
-import numpy as np
+
 
 class Scaler(nn.Module):
     def __init__(self, rate, scale):
@@ -21,15 +21,17 @@ class MyBatchNorm(nn.Module):
         super(MyBatchNorm, self).__init__()
         ## change num_groups to 32
         self.norm = nn.BatchNorm2d(num_channels, track_running_stats=track)
-    
+
     def forward(self, x):
         x = self.norm(x)
         return x
 
 
 def conv3x3(in_planes, out_planes, stride=1):
-    return nn.Conv2d(in_planes, out_planes, kernel_size=3, 
-                        stride=stride, padding=1, bias=False)
+    return nn.Conv2d(
+        in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False
+    )
+
 
 def conv1x1(in_planes, planes, stride=1):
     return nn.Conv2d(in_planes, planes, kernel_size=1, stride=stride, bias=False)
@@ -37,7 +39,17 @@ def conv1x1(in_planes, planes, stride=1):
 
 class BasicBlock(nn.Module):
     expansion = 1
-    def __init__(self, inplanes, planes, stride=1,  scaler_rate=1, downsample=None, track=True, scale=True):
+
+    def __init__(
+        self,
+        inplanes,
+        planes,
+        stride=1,
+        scaler_rate=1,
+        downsample=None,
+        track=True,
+        scale=True,
+    ):
         super(BasicBlock, self).__init__()
         self.conv1 = conv3x3(inplanes, planes, stride)
         self.scaler = Scaler(scaler_rate, scale)
@@ -47,7 +59,7 @@ class BasicBlock(nn.Module):
         self.bn2 = MyBatchNorm(planes, track)
         self.downsample = downsample
         self.stride = stride
-    
+
     def forward(self, x):
         residual = x
 
@@ -62,7 +74,7 @@ class BasicBlock(nn.Module):
 
         if self.downsample is not None:
             residual = self.downsample(x)
-        
+
         output += residual
         output = self.relu(output)
         return output
@@ -70,7 +82,17 @@ class BasicBlock(nn.Module):
 
 class BottleneckBlock(nn.Module):
     expansion = 4
-    def __init__(self, inplanes, planes, stride=1,  scaler_rate=1, downsample=None, track=True, scale=True):
+
+    def __init__(
+        self,
+        inplanes,
+        planes,
+        stride=1,
+        scaler_rate=1,
+        downsample=None,
+        track=True,
+        scale=True,
+    ):
         super(BottleneckBlock, self).__init__()
         self.conv1 = conv1x1(inplanes, planes)
         self.bn1 = MyBatchNorm(planes)
@@ -79,12 +101,12 @@ class BottleneckBlock(nn.Module):
         self.conv2 = conv3x3(planes, planes, stride)
         self.bn2 = MyBatchNorm(planes)
 
-        self.conv3 = conv1x1(planes, planes*self.expansion)
-        self.bn3 = MyBatchNorm(planes*self.expansion)
+        self.conv3 = conv1x1(planes, planes * self.expansion)
+        self.bn3 = MyBatchNorm(planes * self.expansion)
 
         self.downsample = downsample
         self.stride = stride
-    
+
     def forward(self, x):
         residual = x
 
@@ -98,7 +120,7 @@ class BottleneckBlock(nn.Module):
 
         output = self.conv3(output)
         output = self.bn3(output)
-        
+
         if self.downsample is not None:
             residual = self.downsample(x)
 
@@ -109,64 +131,117 @@ class BottleneckBlock(nn.Module):
 
 
 class Multi_ResNet(nn.Module):
-
-    def __init__(self, hidden_size, block, layers, num_classes, scaler_rate, track, scale):
-
+    def __init__(
+        self, hidden_size, block, layers, num_classes, scaler_rate, track, scale
+    ):
         super(Multi_ResNet, self).__init__()
-        
+
         self.inplanes = hidden_size[0]
         self.norm_layer = MyBatchNorm
-        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv1 = nn.Conv2d(
+            3, self.inplanes, kernel_size=3, stride=1, padding=1, bias=False
+        )
         self.scaler = Scaler(scaler_rate, scale)
         self.bn1 = self.norm_layer(self.inplanes, track)
 
         self.relu = nn.ReLU(inplace=True)
-        #self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        # self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
-        self.layer1 = self._make_layer(block, hidden_size[0], layers[0], scaler_rate = scaler_rate, track=track, scale=scale)
-        self.layer2 = self._make_layer(block, hidden_size[1], layers[1], stride=2, scaler_rate = scaler_rate, track=track, scale=scale)
-        self.layer3 = self._make_layer(block, hidden_size[2], layers[2], stride=2, scaler_rate = scaler_rate, track=track, scale=scale)
-        self.layer4 = self._make_layer(block, hidden_size[3], layers[3], stride=2, scaler_rate = scaler_rate, track=track, scale=scale)
+        self.layer1 = self._make_layer(
+            block,
+            hidden_size[0],
+            layers[0],
+            scaler_rate=scaler_rate,
+            track=track,
+            scale=scale,
+        )
+        self.layer2 = self._make_layer(
+            block,
+            hidden_size[1],
+            layers[1],
+            stride=2,
+            scaler_rate=scaler_rate,
+            track=track,
+            scale=scale,
+        )
+        self.layer3 = self._make_layer(
+            block,
+            hidden_size[2],
+            layers[2],
+            stride=2,
+            scaler_rate=scaler_rate,
+            track=track,
+            scale=scale,
+        )
+        self.layer4 = self._make_layer(
+            block,
+            hidden_size[3],
+            layers[3],
+            stride=2,
+            scaler_rate=scaler_rate,
+            track=track,
+            scale=scale,
+        )
         self.fc = nn.Linear(hidden_size[3] * block.expansion, num_classes)
         self.scala = nn.AdaptiveAvgPool2d(1)
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-            elif isinstance(m, nn.GroupNorm) or isinstance(m, nn.BatchNorm2d): 
+                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
+            elif isinstance(m, nn.GroupNorm) or isinstance(m, nn.BatchNorm2d):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
-        
-    def _make_layer(self, block, planes, layers, stride=1, scaler_rate = 1, track=True, scale=True):
+
+    def _make_layer(
+        self, block, planes, layers, stride=1, scaler_rate=1, track=True, scale=True
+    ):
         """A block with 'layers' layers
         Args:
             block (class): block type
             planes (int): output channels = planes * expansion
             layers (int): layer num in the block
-            stride (int): the first layer stride in the block
+            stride (int): the first layer stride in the block.
         """
         norm_layer = self.norm_layer
         downsample = None
-        if stride !=1 or self.inplanes != planes * block.expansion:
+        if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
                 conv1x1(self.inplanes, planes * block.expansion, stride),
                 norm_layer(planes * block.expansion, track),
             )
         layer = []
-        layer.append(block(self.inplanes, planes, stride=stride, scaler_rate = scaler_rate, downsample=downsample, track=track, scale=scale))
+        layer.append(
+            block(
+                self.inplanes,
+                planes,
+                stride=stride,
+                scaler_rate=scaler_rate,
+                downsample=downsample,
+                track=track,
+                scale=scale,
+            )
+        )
         self.inplanes = planes * block.expansion
-        for i in range(1, layers):
-            layer.append(block(self.inplanes, planes, scaler_rate = scaler_rate, track=track, scale=scale))
-        
+        for _i in range(1, layers):
+            layer.append(
+                block(
+                    self.inplanes,
+                    planes,
+                    scaler_rate=scaler_rate,
+                    track=track,
+                    scale=scale,
+                )
+            )
+
         return nn.Sequential(*layer)
-    
+
     def forward(self, x):
         x = self.conv1(x)
         x = self.scaler(x)
         x = self.bn1(x)
         x = self.relu(x)
-        #x = self.maxpool(x)
-            
+        # x = self.maxpool(x)
+
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
@@ -178,7 +253,6 @@ class Multi_ResNet(nn.Module):
 
 
 def resnet18(n_blocks=4, track=False, scale=True, num_classes=100):
-
     # width pruning ratio : (0.25, 0.50, 0.75, 0.10)
     model_rate = n_blocks / 4
     classes_size = num_classes
@@ -188,18 +262,31 @@ def resnet18(n_blocks=4, track=False, scale=True, num_classes=100):
 
     scaler_rate = model_rate
 
-    return Multi_ResNet(hidden_size, BasicBlock, [2,2,2,2], num_classes=classes_size, scaler_rate=scaler_rate, track=track, scale=scale)
+    return Multi_ResNet(
+        hidden_size,
+        BasicBlock,
+        [2, 2, 2, 2],
+        num_classes=classes_size,
+        scaler_rate=scaler_rate,
+        track=track,
+        scale=scale,
+    )
 
 
 if __name__ == "__main__":
     from ptflops import get_model_complexity_info
 
     model = resnet18(100, 1.0)
-    
+
     with torch.cuda.device(0):
-        macs, params = get_model_complexity_info(model, (3, 32, 32), as_strings=True,
-                                                print_per_layer_stat=False, verbose=True, units='MMac')
+        macs, params = get_model_complexity_info(
+            model,
+            (3, 32, 32),
+            as_strings=True,
+            print_per_layer_stat=False,
+            verbose=True,
+            units="MMac",
+        )
 
-        print('{:<30}  {:<8}'.format('Computational complexity: ', macs))
-        print('{:<30}  {:<8}'.format('Number of parameters: ', params))
-
+        print("{:<30}  {:<8}".format("Computational complexity: ", macs))
+        print("{:<30}  {:<8}".format("Number of parameters: ", params))

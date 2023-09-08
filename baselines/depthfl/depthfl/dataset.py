@@ -47,7 +47,7 @@ def load_datasets(  # pylint: disable=too-many-arguments
     trainloaders = []
     valloaders = []
     for dataset in datasets:
-        len_val = 0 
+        len_val = 0
         if val_ratio > 0:
             len_val = int(len(dataset) / (1 / val_ratio))
         lengths = [len(dataset) - len_val, len_val]
