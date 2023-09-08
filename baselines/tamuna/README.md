@@ -58,10 +58,11 @@ Total trainable params: 1,663,370
 | `server_num_rounds`        | Number of training rounds, this does not include local training epochs.                                                                                                                                                                                     | 35            |
 | `server.s`                 | This describes the level of sparsity in the compression mask, needs to be between 2 and `server.clients_per_round`.                                                                                                                                         | 4             |
 | `server.p`                 | Describes the probability of server communication while doing local training, in other words, clients will in expectation do 1/p local epochs. Number of local epochs each rounds is synchronized across clients.                                           | 0.333         |
-| `uplink_factor`            | Weight of uplink (client to server) communication when calculating communication complexity.                                                                                                                                                                | 1             |
-| `downlink_factor`          | Weight of downlink (server to client) communication when calculating communication complexity.                                                                                                                                                              | 1             |
+| `server.uplink_factor`     | Weight of uplink (client to server) communication when calculating communication complexity.                                                                                                                                                                | 1             |
+| `server.downlink_factor`   | Weight of downlink (server to client) communication when calculating communication complexity.                                                                                                                                                              | 1             |
 | `client.learning_rate`     | Learning rate for client local training.                                                                                                                                                                                                                    | 0.01          |
 | `client.eta`               | Learning rate for updating control variates, needs to be between `server.p`/2 and `server.p` * (`server.clients_per_round` * (`server.s` - 1))/(`server.s` * (`server.clients_per_round` - 1)). Usually works very well when simply set to the upper bound. | 0.246         |
+| `meta.n_repeats`           | How many times should the training be repeated from the beginning for both Tamuna and FedAvg. Values bigger than 1 will produce plots that show how the randomness affects the algorithms.                                                                  | 3             |   
 
 ## Environment Setup
 
@@ -91,6 +92,8 @@ poetry install
 ```bash
 # Default experimental setup in defined in conf/base.yaml, this can be changed if needed  
 poetry run python tamuna/main.py
+
+# Running time for default experimental setup is less than 14min on Intel Core i5-12400F and Nvidia GeForce RTX 3060 Ti.
 ```
 
 
