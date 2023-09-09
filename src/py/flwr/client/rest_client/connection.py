@@ -32,7 +32,6 @@ from flwr.proto.fleet_pb2 import (
     CreateNodeRequest,
     CreateNodeResponse,
     DeleteNodeRequest,
-    DeleteNodeResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
     PushTaskResRequest,
@@ -123,7 +122,7 @@ def http_request_response(
     state: Dict[str, Optional[TaskIns]] = {KEY_TASK_INS: None}
     # Enable create_node and delete_node to store node
     node_store: Dict[str, Optional[Node]] = {KEY_NODE: None}
-    
+
     ###########################################################################
     # receive/send functions
     ###########################################################################
@@ -132,7 +131,7 @@ def http_request_response(
         """Set create_node."""
         create_node_req_proto = CreateNodeRequest()
         create_node_req_bytes: bytes = create_node_req_proto.SerializeToString()
-    
+
         res = requests.post(
             url=f"{base_url}/{PATH_CREATE_NODE}",
             headers={
@@ -160,14 +159,14 @@ def http_request_response(
                 PATH_PULL_TASK_INS,
             )
             return False
-        
+
         # Deserialize ProtoBuf from bytes
         create_node_response_proto = CreateNodeResponse()
         create_node_response_proto.ParseFromString(res.content)
-   
+
         node_store[KEY_NODE] = create_node_response_proto.node
         return True
-    
+
     def delete_node() -> bool:
         """Set delete_node."""
         if node_store[KEY_NODE] is None:
@@ -185,7 +184,7 @@ def http_request_response(
             data=delete_node_req_req_bytes,
             verify=verify,
         )
-        
+
         # Check status code and headers
         if res.status_code != 200:
             return False
@@ -213,7 +212,7 @@ def http_request_response(
             log(ERROR, "Node instance missing")
             return None
         node: Node = cast(Node, node_store[KEY_NODE])
-        
+
         pull_task_ins_req_proto = PullTaskInsRequest(node=node)
         pull_task_ins_req_bytes: bytes = pull_task_ins_req_proto.SerializeToString()
 
@@ -274,7 +273,7 @@ def http_request_response(
             log(ERROR, "Node instance missing")
             return None
         node: Node = cast(Node, node_store[KEY_NODE])
-        
+
         if state[KEY_TASK_INS] is None:
             log(ERROR, "No current TaskIns")
             return

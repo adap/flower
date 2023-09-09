@@ -19,10 +19,10 @@ import sys
 
 from flwr.common.constant import MISSING_EXTRA_REST
 from flwr.proto.fleet_pb2 import (
+    CreateNodeRequest,
+    DeleteNodeRequest,
     PullTaskInsRequest,
     PushTaskResRequest,
-    CreateNodeRequest,
-    DeleteNodeRequest
 )
 from flwr.server.fleet.message_handler import message_handler
 from flwr.server.state import State
@@ -39,7 +39,7 @@ except ModuleNotFoundError:
 
 
 async def create_node(request: Request) -> Response:
-    """Create Node"""
+    """Create Node."""
     _check_headers(request.headers)
 
     # Parse base 64 to string
@@ -54,8 +54,7 @@ async def create_node(request: Request) -> Response:
 
     # Handle message
     new_node_data = message_handler.create_node(
-        request=create_node_request_proto,
-        state=state
+        request=create_node_request_proto, state=state
     )
 
     # Return serialized ProtoBuf
@@ -68,7 +67,7 @@ async def create_node(request: Request) -> Response:
 
 
 async def delete_node(request: Request) -> Response:
-    """Delete Node Id"""
+    """Delete Node Id."""
     _check_headers(request.headers)
 
     # Get the request body as raw bytes
@@ -83,8 +82,7 @@ async def delete_node(request: Request) -> Response:
 
     # Handle message
     delete_node_response = message_handler.delete_node(
-        request=delete_node_request_proto,
-        state=state
+        request=delete_node_request_proto, state=state
     )
 
     # Return serialized ProtoBuf
