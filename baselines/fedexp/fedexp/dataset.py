@@ -130,7 +130,7 @@ def load_datasets(config,
                                        config.num_classes, ds_path, partition_equal)
 
     dataset_test = Dataset(data_directory, train=False, download=True, transform=trans_cifar)
-    test_loader = DataLoader(dataset_test, batch_size=len(dataset_test), num_workers=1)
+    test_loader = DataLoader(dataset_test, batch_size=batch_size, num_workers=1)
     train_loaders = list(map(lambda ds: DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=1),
                              train_datasets))
 
