@@ -13,7 +13,6 @@ from task import (
 )
 
 
-restful_mode = False
 # Load model and data (simple CNN, CIFAR-10)
 net = Net().to(DEVICE)
 trainloader, testloader = load_data()
@@ -36,15 +35,8 @@ class FlowerClient(fl.client.NumPyClient):
 
 
 # Start Flower client
-if restful_mode:
-    fl.client.start_numpy_client(
-        server_address="http://0.0.0.0:9093",
-        client=FlowerClient(),
-        transport="rest",
-    )
-else:
-    fl.client.start_numpy_client(
-        server_address="0.0.0.0:9092",  # "0.0.0.0:9093" for REST
-        client=FlowerClient(),
-        transport="grpc-rere",  # "rest" for REST
-    )
+fl.client.start_numpy_client(
+    server_address="0.0.0.0:9092",  # "0.0.0.0:9093" for REST
+    client=FlowerClient(),
+    transport="grpc-rere",  # "rest" for REST
+)
