@@ -79,8 +79,7 @@ def main(cfg: DictConfig) -> None:
     )
 
     save_path = HydraConfig.get().runtime.output_dir
-    strategy_name = strategy.__class__.__name__
-    file_suffix = "_".join([strategy_name,
+    file_suffix = "_".join([repr(strategy),
                             cfg.dataset_config.name,
                             f"{cfg.seed}",
                             f"{cfg.dataset_config.alpha}",

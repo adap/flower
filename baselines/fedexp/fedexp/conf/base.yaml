@@ -25,7 +25,6 @@ model:
 
 hyperparams:
   eta_l: 0.01     # local learning rate
-  eta_g: adaptive # global learning rate
   epsilon: 0.001
   decay : 0.998
   weight_decay: 0.0001
@@ -35,6 +34,7 @@ hyperparams:
 
 strategy:
   _target_: fedexp.strategy.FedExP
+  algorithm: fedExp
   fraction_fit: 0.00001
   fraction_evaluate: 0.0
   min_evaluate_clients: 0
