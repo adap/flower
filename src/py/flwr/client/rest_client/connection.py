@@ -269,7 +269,7 @@ def http_request_response(
         # Get Node
         if node_store[KEY_NODE] is None:
             log(ERROR, "Node instance missing")
-            return None
+            return
         node: Node = cast(Node, node_store[KEY_NODE])
 
         if state[KEY_TASK_INS] is None:
