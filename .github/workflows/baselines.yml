@@ -109,14 +109,13 @@ jobs:
         if: steps.validate_changed_baselines_dirs.outputs.baseline_changed == 'true'
         uses: ./.github/actions/bootstrap
         with:
-          python-version: '3.10'
+          python-version: 3.8
       - name: Install dependencies
         if: steps.validate_changed_baselines_dirs.outputs.baseline_changed == 'true'
         run: |
           changed_dir="${{ steps.validate_changed_baselines_dirs.outputs.changed_dir }}"
           cd "${changed_dir}"
           python -m poetry install
-          python -m poetry config virtualenvs.create true
       - name: Test
         if: steps.validate_changed_baselines_dirs.outputs.baseline_changed == 'true'
         run: |
