@@ -1,7 +1,7 @@
 ---
 title: Towards Understanding Biased Client Selection in Federated Learning
 url: https://proceedings.mlr.press/v151/jee-cho22a.html
-labels: [label1, label2] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
+labels: [client selection, dynamic selection, heterogeneous clients] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
 dataset: [FMNIST, CIFAR10] # list of datasets you include in your baseline
 ---
 

@@ -4,7 +4,7 @@ import os
 import pickle
 import matplotlib.pyplot as plt
 from flwr.common.logger import log
-from utils import plot_dloss_from_history
+from utils import plot_metric_from_history
 
 def main():
     parser = argparse.ArgumentParser(description="Plot Distributed Losses from History")
@@ -26,7 +26,7 @@ def main():
     log(INFO, f"Saving plot to {save_plot_path}")
 
     # Plot distributed losses using the provided function
-    plot_dloss_from_history(history_data["history"], save_plot_path)
+    plot_metric_from_history(history_data["history"], save_plot_path)
 
 if __name__ == "__main__":
     main()

@@ -202,22 +202,22 @@ def main(cfg: DictConfig) -> None:
     # the directory created by Hydra for each run
     save_results_as_pickle(history, file_path=save_path, extra_results={})
 
-    # plot results and include them in the readme
-    strategy_name = strategy.__class__.__name__
-    file_suffix: str = (
-        f"_{strategy_name}"
-        f"_C={cfg.num_clients}"
-        f"_B={cfg.batch_size}"
-        f"_E={cfg.local_epochs}"
-        f"_R={cfg.num_rounds}"
-        f"_d={cfg.strategy.d}"
-        f"_CK={cfg.strategy.ck}"
-    )
+    # # plot results and include them in the readme
+    # strategy_name = strategy.__class__.__name__
+    # file_suffix: str = (
+    #     f"_{strategy_name}"
+    #     f"_C={cfg.num_clients}"
+    #     f"_B={cfg.batch_size}"
+    #     f"_E={cfg.local_epochs}"
+    #     f"_R={cfg.num_rounds}"
+    #     f"_d={cfg.strategy.d}"
+    #     f"_CK={cfg.strategy.ck}"
+    # )
 
-    plot_metric_from_history(
-        history,
-        save_path,
-        (file_suffix),
-    )
+    # plot_metric_from_history(
+    #     history,
+    #     save_path,
+    #     (file_suffix),
+    # )
 if __name__ == "__main__":
     main()
