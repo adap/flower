@@ -15,8 +15,8 @@ client_resources:
   num_gpus: 0.2
 
 dataset_config:
-  name: CIFAR10
-  num_classes: 10
+  name: CIFAR100
+  num_classes: 100
   alpha: 0.5
 
 model:

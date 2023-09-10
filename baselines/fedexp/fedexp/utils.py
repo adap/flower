@@ -19,7 +19,6 @@ from torch.nn import Module
 def plot_metric_from_history(
         hist: History,
         save_plot_path: Path,
-        server_steps: List[float],
         suffix: Optional[str] = "",
 ) -> None:
     """Function to plot from Flower server History.
@@ -32,8 +31,6 @@ def plot_metric_from_history(
         Folder to save the plot to.
     suffix: Optional[str]
         Optional string to add at the end of the filename for the plot.
-    server_steps: List[float]
-        Server Learning rate across the training rounds.
     """
     metric_type = "centralized"
     metric_dict = (
@@ -41,18 +38,11 @@ def plot_metric_from_history(
         if metric_type == "centralized"
         else hist.metrics_distributed
     )
-    rounds, values = zip(*metric_dict["accuracy"])
-
-    # rounds_loss, values_loss = zip(*hist.losses_centralized)
-
-    fig, axs = plt.subplots(nrows=2, ncols=1, sharex="row")
-    axs[0].plot(np.asarray(rounds), np.asarray(values))
-    axs[0].set_ylabel("Accuracy")
-    axs[1].plot(np.asarray(rounds), np.asarray(server_steps))
-    axs[1].set_ylabel("Server Step Size")
-
-    plt.xlabel("Rounds")
-
+    rounds, values_accuracy = zip(*metric_dict["accuracy"])
+    fig, ax = plt.subplots()
+    ax.plot(np.asarray(rounds), np.asarray(values_accuracy))
+    ax.set_ylabel("Accuracy")
+    ax.set_xlabel("Rounds")
     plt.savefig(Path(save_plot_path) / Path(f"{metric_type}_metrics{suffix}.png"))
     plt.close()
 

@@ -98,7 +98,7 @@ def test(net: nn.Module,
     correct, total, loss = 0, 0, 0.0
     net.eval()
     with torch.no_grad():
-        for images, labels in test_loader:
+        for images, labels in tqdm(test_loader, "Testing ..."):
             images, labels = images.to(device), labels.to(device)
             outputs = net(images)
             loss += criterion(outputs, labels).item()

@@ -89,12 +89,7 @@ def main(cfg: DictConfig) -> None:
                             f"{cfg.hyperparams.eta_l}"
                             ])
 
-    utils.plot_metric_from_history(
-        hist=history,
-        save_plot_path=save_path,
-        server_steps=strategy.server_steps,
-        suffix=file_suffix,
-    )
+    utils.plot_metric_from_history(hist=history, save_plot_path=save_path, suffix=file_suffix)
 
 
 if __name__ == '__main__':
