@@ -164,7 +164,7 @@ def http_request_response(
         create_node_response_proto = CreateNodeResponse()
         create_node_response_proto.ParseFromString(res.content)
 
-        node_store[KEY_NODE] = create_node_response_proto.node
+        node_store[KEY_NODE] = create_node_response_proto.node  # pylint: disable=no-member
 
     def delete_node() -> None:
         """Set delete_node."""
