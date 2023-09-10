@@ -163,8 +163,8 @@ def http_request_response(
         # Deserialize ProtoBuf from bytes
         create_node_response_proto = CreateNodeResponse()
         create_node_response_proto.ParseFromString(res.content)
-
-        node_store[KEY_NODE] = create_node_response_proto.node  # pylint: disable=no-member
+        # pylint: disable-next=no-member
+        node_store[KEY_NODE] = create_node_response_proto.node
 
     def delete_node() -> None:
         """Set delete_node."""
