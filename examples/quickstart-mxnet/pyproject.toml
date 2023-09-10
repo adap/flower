@@ -12,5 +12,5 @@ authors = ["The Flower Authors <hello@flower.dev>"]
 python = ">=3.8,<3.11"
 flwr = ">=1.0,<2.0"
 # flwr = { path = "../../", develop = true }  # Development
-mxnet = "1.6.0"
-numpy = "1.23.1"
+mxnet = "^1.9"
+numpy = "^1.24"
