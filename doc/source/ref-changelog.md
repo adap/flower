@@ -20,6 +20,10 @@
 
   Python 3.7 support was deprecated in Flower 1.5, and this release removes support. Flower now requires Python 3.8.
 
+- **Remove experimental argument** `rest` **from** `start_client` ([#2324](https://github.com/adap/flower/pull/2324))
+
+  The (still experimental) argument `rest` was removed from `start_client` and `start_numpy_client`. Use `transport="rest"` to opt into the experimental REST API instead.
+
 ## v1.5.0 (2023-08-31)
 
 ### Thanks to our contributors
