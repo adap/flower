@@ -144,7 +144,7 @@ def http_request_response(
 
         # Check status code and headers
         if res.status_code != 200:
-            return False
+            return
         if "content-type" not in res.headers:
             log(
                 WARN,
