@@ -68,7 +68,6 @@ class CIFAR10(BaseDataset):
         root: Path = None,
     ):
         """Initialize the dataset."""
-        super().__init__(root=root, config=config)
         train_part = torchvision.datasets.CIFAR10(root, True, download=True)
         test_part = torchvision.datasets.CIFAR10(root, False, download=True)
         train_data = torch.Tensor(train_part.data).permute([0, -1, 1, 2]).float()
@@ -82,6 +81,7 @@ class CIFAR10(BaseDataset):
         self.general_target_transform = general_target_transform
         self.train_data_transform = train_data_transform
         self.train_target_transform = train_target_transform
+        print("General data transformation: ", self.general_data_transform)
 
 
 class CIFAR100(BaseDataset):

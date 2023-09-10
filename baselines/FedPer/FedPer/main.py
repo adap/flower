@@ -35,13 +35,13 @@ def main(cfg: DictConfig) -> None:
         An omegaconf object that stores the hydra config.
     """
     # 1. Print parsed config
-    print(OmegaConf.to_yaml(cfg))
-
     # Set the model class, server target, and number of classes
     cfg = set_model_class(cfg)
     cfg = set_server_target(cfg)
     cfg = set_num_classes(cfg)
 
+    print(OmegaConf.to_yaml(cfg))
+    
     # Create directory to store client states if it does not exist
     # Client state has subdirectories with the name of current time
     client_state_save_path = set_client_state_save_path()
