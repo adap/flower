@@ -22,7 +22,7 @@ dataset: [MNIST]
 
 ****Datasets:**** MNIST
 
-****Hardware Setup:**** By default, the experiments expect at least one gpu, but this can be changed to cpu only by specifying client and server devices. Default setup uses around 2.5 GB of dedicated GPU memory.
+****Hardware Setup:**** By default, the experiments expect at least one gpu, but this can be changed to cpu only by specifying client and server devices. Default setup less than 5 GB of dedicated GPU memory.
 
 ****Contributors:**** Ivan Agarský @Crabzmatic, Grigory Malinovsky @gsmalinovsky
 
@@ -89,12 +89,14 @@ poetry install
 
 ## Running the Experiments
 
-```bash
-# Default experimental setup in defined in conf/base.yaml, this can be changed if needed  
-poetry run python -m tamuna.main
+Default experimental setup in defined in `conf/base.yaml`, this can be changed if needed.
 
-# Running time for default experimental setup is less than 14min on Intel Core i5-12400F and Nvidia GeForce RTX 3060 Ti.
+```bash
+poetry run python -m tamuna.main
 ```
+
+Running time for default experimental setup is around 13min on Intel Core i5-12400F and Nvidia GeForce RTX 3060 Ti, 
+while the CPU-only version, which can be found in `conf/base-cpu.yaml`, takes around 20min.
 
 
 ## Expected Results

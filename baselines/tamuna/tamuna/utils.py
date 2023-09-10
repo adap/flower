@@ -128,8 +128,11 @@ def compare_communication_complexity(
     plt.yscale("log")
     plt.xlabel("Communicated real numbers")
     plt.legend()
+    plt.grid(visible=True, which='both', linewidth=0.5, alpha=0.5)
+    plt.minorticks_on()
+    plt.title("Communication complexity")
     plt.tight_layout()
-    plt.savefig(Path(save_path) / Path("communication_complexity.png"))
+    plt.savefig(Path(save_path) / Path("communication_complexity.png"), dpi=300)
     plt.close()
 
 
@@ -137,7 +140,7 @@ def compare_loss_and_accuracy(
     fedavg_histories: List[History], tamuna_histories: List[History], save_path: str
 ):
     """Compare Tamuna with FedAvg based on loss and accuracy."""
-    fig, axs = plt.subplots(nrows=2, ncols=1, sharex="row", dpi=300)
+    fig, axs = plt.subplots(nrows=2, ncols=1, sharex="row")
     labels = ["Tamuna", "FedAvg"]
 
     for j, hist in enumerate([tamuna_histories, fedavg_histories]):
@@ -183,15 +186,22 @@ def compare_loss_and_accuracy(
         )
         axs[1].plot(x_axis, avg_accuracy_across_runs, linewidth=2)
 
+    axs[0].set_title("MNIST Test Loss")
     axs[0].set_ylabel("Loss")
     axs[0].set_yscale("log")
     axs[0].legend()
+    axs[0].grid(visible=True, which='both', linewidth=0.5, alpha=0.5)
+    axs[0].minorticks_on()
+    axs[0].set_xlabel("Rounds")
 
+    axs[1].set_title("MNIST Test Accuracy")
     axs[1].set_ylabel("Accuracy")
     axs[1].set_ylim(bottom=0, top=1)
     axs[1].legend()
+    axs[1].grid(visible=True, which='both', linewidth=0.5, alpha=0.5)
+    axs[1].minorticks_on()
+    axs[1].set_xlabel("Rounds")
 
-    plt.xlabel("Rounds")
     plt.tight_layout()
-    plt.savefig(Path(save_path) / Path("loss_accuracy.png"))
+    plt.savefig(Path(save_path) / Path("loss_accuracy.png"), dpi=300)
     plt.close()

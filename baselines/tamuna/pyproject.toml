@@ -37,10 +37,10 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8.15, <3.12.0"  # don't change this
-flwr = "1.3.0" # don't change this
-ray = "1.11.1" # don't change this
-hydra-core = "1.3.2" # don't change this
+python = ">=3.8.15, <3.12.0"
+flwr = { extras = ["simulation"], version = "1.5.0" }
+ray = "2.6.3"
+hydra-core = "1.3.2"
 matplotlib = "3.7.1"
 torch = {version = "2.0.1+cu118", source = "pytorch"}
 torchvision = {version = "0.15.2+cu118", source = "pytorch"}

@@ -21,15 +21,15 @@ server:
   # probability of server communication, i.e. clients will in expectation do 1 / p local epochs
   # number of local epochs each round is synchronized across the clients
   p: 0.333
-  server_device: 'cuda:0'
+  server_device: 'cpu'
   uplink_factor: 1
   downlink_factor: 1
 
 client:
-  client_device: 'cuda:0'
+  client_device: 'cpu'
   client_resources:
     num_cpus: 2
-    num_gpus: 0.2
+    num_gpus: 0
   learning_rate: 0.01
   # eta should be between p / 2 and p * [(clients_per_round * (s - 1))/(s * (clients_per_round - 1))]
   eta: 0.246
