@@ -65,7 +65,7 @@ if __name__ == "__main__":
         ray_config = {"include_dashboard": False}
 
         # start simulation
-        fl.simulation.start_simulation(
+        hist= fl.simulation.start_simulation(
             client_fn=main,
             num_clients=pool_size,
             client_resources=client_resources,
@@ -111,7 +111,7 @@ def initial_setup(cid, base_work_dir, rounds, light=False):
     import utils
     cid_plus_one = str(int(cid) + 1)
     args = Namespace(
-        cfg='path to the configuration file.py',
+        cfg='conf/mmcv_conf/r3d_18_kinetics/pretraining.py',
         checkpoint=None, cid=int(cid), data_dir='/DATA', gpus=1,
         launcher='none',  
         local_rank=0, progress=False, resume_from=None, rounds=6, seed=7, validate=False,
@@ -181,4 +181,4 @@ def initial_setup(cid, base_work_dir, rounds, light=False):
     # Hydra will generate for you a directory each time you run the code. You
     # can retrieve the path to that directory with this:
     # save_path = HydraConfig.get().runtime.output_dir
-# 
+#
