@@ -106,6 +106,16 @@ server.strategy.FedAvgM
     .. automethod:: __init__
 
 
+.. _flwr-server-strategy-FedAvgMedian-apiref:
+
+server.strategy.FedAvgMedian
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: flwr.server.strategy.FedAvgMedian
+    :members:
+
+    .. automethod:: __init__
+
 .. _flwr-server-strategy-QFedAvg-apiref:
 
 server.strategy.QFedAvg
@@ -178,6 +188,61 @@ server.strategy.FedYogi
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: flwr.server.strategy.FedYogi
+    :members:
+
+    .. automethod:: __init__
+
+
+.. _flwr-server-strategy-FedTrimmedAvg-apiref:
+
+server.strategy.FedTrimmedAvg
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: flwr.server.strategy.FedTrimmedAvg
+    :members:
+
+    .. automethod:: __init__
+
+
+.. _flwr-server-strategy-Krum-apiref:
+
+server.strategy.Krum
+^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: flwr.server.strategy.Krum
+    :members:
+
+    .. automethod:: __init__
+
+
+.. _flwr-server-strategy-FedXgbNnAvg-apiref:
+
+server.strategy.FedXgbNnAvg
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: flwr.server.strategy.FedXgbNnAvg
+    :members:
+
+    .. automethod:: __init__
+
+
+.. _flwr-server-strategy-DPFedAvgAdaptive-apiref:
+
+server.strategy.DPFedAvgAdaptive
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: flwr.server.strategy.DPFedAvgAdaptive
+    :members:
+
+    .. automethod:: __init__
+
+
+.. _flwr-server-strategy-DPFedAvgFixed-apiref:
+
+server.strategy.DPFedAvgFixed
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: flwr.server.strategy.DPFedAvgFixed
     :members:
 
     .. automethod:: __init__
