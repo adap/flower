@@ -104,7 +104,7 @@ def _worker(
         task_res = configure_task_res(
             TaskRes(task=Task(legacy_client_message=client_message_proto)),
             task_ins,
-            Node(node_id=0, anonymous=True),
+            Node(node_id=client_proxy.node_id, anonymous=False),
         )
 
         # Step 4: write *Res (result) back to `state`
