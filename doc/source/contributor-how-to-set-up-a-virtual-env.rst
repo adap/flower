@@ -8,31 +8,31 @@ You can follow the instructions or choose your preferred setup.
 Python Version
 --------------
 
-Flower requires `Python 3.7 <https://docs.python.org/3.7/>`_ or above, we recommend `Python 3.8 <https://docs.python.org/3.8/>`_.
+Flower requires at least `Python 3.8 <https://docs.python.org/3.8/>`_, but `Python 3.10 <https://docs.python.org/3.10/>`_ or above is recommended.
 
 Virutualenv with Pyenv/Virtualenv
 ---------------------------------
 
 One of the recommended virtual environment is `pyenv <https://github.com/pyenv/pyenv>`_/`virtualenv <https://github.com/pyenv/pyenv-virtualenv>`_. Please see `Flower examples <https://github.com/adap/flower/tree/main/examples/>`_ for details.
 
-Once Pyenv is set up, you can use it to install `Python Version 3.7 <https://docs.python.org/3.7/>`_ or above:
+Once Pyenv is set up, you can use it to install `Python Version 3.10 <https://docs.python.org/3.10/>`_ or above:
 
 .. code-block:: shell
 
-    pyenv install 3.7.13
+    pyenv install 3.10.12
 
 Create the virtualenv with:
 
 .. code-block:: shell
 
-    pyenv virtualenv 3.7.13 flower-3.7.13
+    pyenv virtualenv 3.10.12 flower-3.10.12
 
 
 Activate the virtualenv by running the following command:
 
 .. code-block:: shell
 
-    echo flower-3.7.13 > .python-version
+    echo flower-3.10.12 > .python-version
 
 
 Virtualenv with Poetry
@@ -58,13 +58,13 @@ If you prefer to use Anaconda for your virtual environment then install and setu
 
 .. code-block:: shell
 
-    conda create -n flower-3.7.13 python=3.7.13
+    conda create -n flower-3.10.12 python=3.10.12
 
 and activate the virtual environment with:
 
 .. code-block:: shell
 
-    conda activate flower-3.7.13
+    conda activate flower-3.10.12
 
 
 And then?

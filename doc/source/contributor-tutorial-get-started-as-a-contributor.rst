@@ -25,14 +25,14 @@ GitHub::
 
 Second, create a virtual environment (and activate it). If you chose to use
 :code:`pyenv` (with the :code:`pyenv-virtualenv` plugin) and already have it installed
-, you can use the following convenience script (by default it will use :code:`Python 3.7.15`,
+, you can use the following convenience script (by default it will use :code:`Python 3.8.17`,
 but you can change it by providing a specific :code:`<version>`)::
 
   $ ./dev/venv-create.sh <version>
 
 If you don't have :code:`pyenv` installed, 
 you can use the following script that will install pyenv, 
-set it up and create the virtual environment (with :code:`Python 3.7.15` by default)::
+set it up and create the virtual environment (with :code:`Python 3.8.17` by default)::
 
   $ ./dev/setup-defaults.sh <version>
 
@@ -55,8 +55,8 @@ Create/Delete Virtual Environment
 
 ::
 
-  $ ./dev/venv-create.sh <version> # Default is 3.7.15
-  $ ./dev/venv-delete.sh <version> # Default is 3.7.15
+  $ ./dev/venv-create.sh <version> # Default is 3.8.17
+  $ ./dev/venv-delete.sh <version> # Default is 3.8.17
 
 Compile ProtoBuf Definitions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
