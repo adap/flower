@@ -131,8 +131,6 @@ def main(cfg: DictConfig) -> None:
     # the directory created by Hydra for each run
     save_results_as_pickle(history, file_path=save_path, extra_results={})
 
-    # plot results and include them in the readme
-
 
 if __name__ == "__main__":
     main()
