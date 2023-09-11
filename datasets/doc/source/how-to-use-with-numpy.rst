@@ -25,8 +25,8 @@ You should see::
   The shape of X_train is: (500, 32, 32, 3), dtype: uint8.
   The shape of y_train is: (500,), dtype: int64.
 
-Note that the ``X_train`` is values are of type ``uint8``. It is not a problem for TensorFlow model when passing the
-data as input but it might remind us to normalize the data - global normalization, pre-channel normalization, or simply
+Note that the ``X_train`` values are of type ``uint8``. It is not a problem for the TensorFlow model when passing the
+data as input, but it might remind us to normalize the data - global normalization, pre-channel normalization, or simply
 rescale the data to [0, 1] range::
 
   X_train = (X_train - X_train.mean()) / X_train.std() # Global normalization
@@ -34,7 +34,7 @@ rescale the data to [0, 1] range::
 
 CNN Keras Model
 ---------------
-Here's a quick example how you can use that data with a simple CNN model::
+Here's a quick example of how you can use that data with a simple CNN model::
 
   import tensorflow as tf
   from tensorflow.keras import datasets, layers, models
@@ -53,9 +53,7 @@ Here's a quick example how you can use that data with a simple CNN model::
   model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
   model.fit(X_train, y_train, epochs=20, batch_size=64)
 
-You should see the about 98% accuracy on the training data at the end of the training.
+You should see about 98% accuracy on the training data at the end of the training.
 
-Note that I used ``"sparse_categorical_crossentropy"``, make sure to keep it that way if you don't want to one-hot-encode
+Note that I used ``"sparse_categorical_crossentropy"``. Make sure to keep it that way if you don't want to one-hot-encode
 the labels.
-
-You can find the whole example on our GitHub, click here.

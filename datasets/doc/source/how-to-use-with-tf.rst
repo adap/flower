@@ -1,14 +1,14 @@
 Use with TensorFlow
 ===================
 
-Let's integrate ``flwr-datasets`` with TensorFlow. We show you three ways how to transform the data into the formats
-that ``TensorFlow``'s models expect. Please note that especially for the smaller datasets the performance of all of the
-following methods is very close therefore we recommend for you to choose the method you are the most comfortable using.
+Let's integrate ``flwr-datasets`` with TensorFlow. We show you three ways how to convert the data into the formats
+that ``TensorFlow``'s models expect.  Please note that, especially for the smaller datasets, the performance of the
+following methods is very close. We recommend you choose the most comfortable method.
 
 Numpy
 -----
 The first way is to transform the data into the numpy arrays. It's an easier option that is commonly used. Feel free to
-follow the :doc:`how-to-use-with-numpy` tutorial especially if you are a beginner.
+follow the :doc:`how-to-use-with-numpy` tutorial, especially if you are a beginner.
 
 TensorFlow Tensors
 ------------------
@@ -48,7 +48,7 @@ Transformation to the TensorFlow Dataset::
 
 CNN Keras Model
 ---------------
-Here's a quick example how you can use that data with a simple CNN model::
+Here's a quick example of how you can use that data with a simple CNN model::
 
   import tensorflow as tf
   from tensorflow.keras import datasets, layers, models
