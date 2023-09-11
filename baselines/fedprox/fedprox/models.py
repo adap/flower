@@ -1,4 +1,4 @@
-"""CNN model architecutre, training, and testing functions for MNIST."""
+"""CNN model architecture, training, and testing functions for MNIST."""
 
 
 from typing import List, Tuple

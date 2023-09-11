@@ -46,8 +46,6 @@ class FedAvgWithStragglerDrop(FedAvg):
         # Record which client was a straggler in this round
         stragglers_mask = [res.metrics["is_straggler"] for _, res in results]
 
-        # print(f"Num stragglers in round: {sum(stragglers_mask)}")
-
         # keep those results that are not from stragglers
         results = [res for i, res in enumerate(results) if not stragglers_mask[i]]
 
