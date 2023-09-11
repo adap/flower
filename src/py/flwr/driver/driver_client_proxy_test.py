@@ -63,7 +63,9 @@ class DriverClientProxyTestCase(unittest.TestCase):
                 )
             ]
         )
-        client = DriverClientProxy(node_id=1, driver=self.driver, anonymous=True)
+        client = DriverClientProxy(
+            node_id=1, driver=self.driver, anonymous=True, workload_id=""
+        )
         request_properties: Config = {"tensor_type": "str"}
         ins: flwr.common.GetPropertiesIns = flwr.common.GetPropertiesIns(
             config=request_properties
@@ -97,7 +99,9 @@ class DriverClientProxyTestCase(unittest.TestCase):
                 )
             ]
         )
-        client = DriverClientProxy(node_id=1, driver=self.driver, anonymous=True)
+        client = DriverClientProxy(
+            node_id=1, driver=self.driver, anonymous=True, workload_id=""
+        )
         get_parameters_ins = GetParametersIns(config={})
 
         # Execute
@@ -131,7 +135,9 @@ class DriverClientProxyTestCase(unittest.TestCase):
                 )
             ]
         )
-        client = DriverClientProxy(node_id=1, driver=self.driver, anonymous=True)
+        client = DriverClientProxy(
+            node_id=1, driver=self.driver, anonymous=True, workload_id=""
+        )
         parameters = flwr.common.ndarrays_to_parameters([np.ones((2, 2))])
         ins: flwr.common.FitIns = flwr.common.FitIns(parameters, {})
 
@@ -165,7 +171,9 @@ class DriverClientProxyTestCase(unittest.TestCase):
                 )
             ]
         )
-        client = DriverClientProxy(node_id=1, driver=self.driver, anonymous=True)
+        client = DriverClientProxy(
+            node_id=1, driver=self.driver, anonymous=True, workload_id=""
+        )
         parameters = flwr.common.Parameters(tensors=[], tensor_type="np")
         evaluate_ins: flwr.common.EvaluateIns = flwr.common.EvaluateIns(parameters, {})
 
