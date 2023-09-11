@@ -31,9 +31,9 @@ class State(abc.ABC):
 
         Usually, the Driver API calls this to schedule instructions.
 
-        Stores the value of the task_ins in the state and, if successful, returns the
-        task_id (UUID) of the task_ins. If, for any reason, storing the task_ins fails,
-        `None` is returned.
+        Stores the value of the `task_ins` in the state and, if successful, returns the
+        `task_id` (UUID) of the `task_ins`. If, for any reason,
+        storing the `task_ins` fails, `None` is returned.
 
         Constraints
         -----------
@@ -42,6 +42,9 @@ class State(abc.ABC):
 
         If `task_ins.task.consumer.anonymous` is `False`, then
         `task_ins.task.consumer.node_id` MUST be set (not 0)
+
+        If `task_ins.workload_id` is invalid, then
+        storing the `task_ins` MUST fail.
         """
 
     @abc.abstractmethod
@@ -88,6 +91,9 @@ class State(abc.ABC):
 
         If `task_res.task.consumer.anonymous` is `False`, then
         `task_res.task.consumer.node_id` MUST be set (not 0)
+
+        If `task_res.workload_id` is invalid, then
+        storing the `task_res` MUST fail.
         """
 
     @abc.abstractmethod
@@ -134,5 +140,15 @@ class State(abc.ABC):
         """Remove `node_id` from state."""
 
     @abc.abstractmethod
-    def get_nodes(self) -> Set[int]:
-        """Retrieve all currently stored node IDs as a set."""
+    def get_nodes(self, workload_id: str) -> Set[int]:
+        """Retrieve all currently stored node IDs as a set.
+
+        Constraints
+        -----------
+        If the provided `workload_id` does not exist or has no matching nodes,
+        an empty `Set` MUST be returned.
+        """
+
+    @abc.abstractmethod
+    def create_workload(self) -> str:
+        """Create one workload."""
