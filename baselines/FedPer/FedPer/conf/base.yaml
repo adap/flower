@@ -1,20 +1,20 @@
 ---
-num_clients: 10 # total number of clients
+num_clients: 30 # total number of clients
 num_epochs: 4 # number of local epochs
-batch_size: 128
-num_rounds: 10
-clients_per_round: 10
+batch_size: 4
+num_rounds: 3
+clients_per_round: 30
 learning_rate: 0.01
 algorithm: fedper
 
 client_resources:
-  num_cpus: 32
+  num_cpus: 16
   num_gpus: 1
 
 server_device: cuda:0
 
 dataset:
-  name : "cifar10"
+  name : "flickr"
   split: sample
   num_classes: 10
   seed: 42

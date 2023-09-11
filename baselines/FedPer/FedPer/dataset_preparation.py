@@ -176,6 +176,11 @@ def flickr_preprocess(root, config):
     df_labelled_igms = df_labelled_igms.groupby("worker").filter(
         lambda x: len(x[" score"].unique()) == 5
     )
+    df_labelled_igms = df_labelled_igms.groupby("worker").filter(
+        lambda x: x[" score"].value_counts().min() >= 4
+    )
+    # only take workers that have at least 4 images for each score (1-5)
+
     # get num_clients random workers
     clients = np.random.choice(
         df_labelled_igms["worker"].unique(), num_clients, replace=False

@@ -40,6 +40,10 @@ def set_num_classes(config: DictConfig) -> DictConfig:
         config.model.num_classes = 100
     elif config.dataset.name.lower() == "flickr":
         config.model.num_classes = 5
+        # additionally for flickr
+        config.batch_size = 4
+        config.num_clients = 30
+        config.clients_per_round = 30
     else:
         raise NotImplementedError(f"Dataset {config.dataset.name} not implemented")
     return config
