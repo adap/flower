@@ -393,14 +393,14 @@ python -m FedMLB.main --multirun dataset_config.dataset="cifar100","tiny-imagene
   <tr>
     <td>FedAvg</td>
     <td>23.63</td>
-    <td></td>
+    <td>22.62</td>
     <td>29.48</td>
-    <td></td>
+    <td>28.37</td>
   </tr>
   <tr>
     <td>FedMLB</td>
     <td>28.39</td>
-    <td></td>
+    <td>26.84</td>
     <td>33.67</td>
     <td></td>
   </tr>
@@ -463,6 +463,18 @@ are normalized and center cropped.
 This code uses or defines subclasses of the `tf.keras.layers.Layer` class
 to leverage a series of preprocessing layer to be used in the `.map()`
 primitive of `tf.data.Dataset` (see `dataset.py`).
+
+### Special Configs
+`restart_from_checkpoint: True`
+If True, looks for a checkpoint of that config to restart the training,
+otherwise initializes a new model.
+
+`save_checkpoint: True`
+If True, saves a checkpoint server model at the end of the training.
+
+`logging_memory_usage: False`
+If True, logs memory and GPU's memory usage (need for psutil and nvidia-smi 
+installed).
 
 ## Differences with the Original Implementation
 In the original implementation from 

@@ -47,7 +47,7 @@ flwr = { extras = ["simulation"], version = ">=1.0,<2.0" }
 tensorflow = "2.12.0"
 #tensorflow = "2.13.0"
 matplotlib = "3.7.1"
-psutil = "5.9.5"
+psutil = "5.9.5" # this is just to log some info about memory usage
 
 [tool.poetry.dev-dependencies]
 isort = "==5.11.5"
