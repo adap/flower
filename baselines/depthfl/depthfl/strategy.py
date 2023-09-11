@@ -70,7 +70,6 @@ class FedDyn(FedAvg):
             with open(f"prev_grads/client_{idx}", "wb") as f:
                 pickle.dump(prev_grads[idx], f)
 
-
         super().__init__(*args, **kwargs)
 
     def aggregate_fit(
@@ -86,10 +85,6 @@ class FedDyn(FedAvg):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
-
-        # for idx in range(self.cfg.num_clients):
-        #     with open(f"prev_grads/client_{idx}", "rb") as f:
-        #         self.prev_grads[idx] = pickle.load(f)
 
         # Convert results
         weights_results = [

@@ -25,12 +25,9 @@ class HeteroFL(FedAvg):
     def __init__(self, cfg: DictConfig, net: nn.Module, *args, **kwargs):
         self.cfg = cfg
         self.parameters = [np.zeros(v.shape) for (k, v) in net.state_dict().items()]
-        self.prev_grads = [
-            {k: torch.zeros(v.numel()) for (k, v) in net.named_parameters()}
-        ] * 100
         self.param_idx_lst = []
-        model = cfg.model
 
+        model = cfg.model
         # store parameter shapes of different width
         for i in range(4):
             model.n_blocks = i + 1

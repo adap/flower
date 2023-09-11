@@ -5,50 +5,7 @@ from pathlib import Path
 from secrets import token_hex
 from typing import Dict, Optional, Union
 
-import matplotlib.pyplot as plt
-import numpy as np
 from flwr.server.history import History
-
-
-# def plot_metric_from_history(
-#     hist: History,
-#     save_plot_path: Path,
-#     suffix: Optional[str] = "",
-# ) -> None:
-#     """Function to plot from Flower server History.
-
-#     Parameters
-#     ----------
-#     hist : History
-#         Object containing evaluation for all rounds.
-#     save_plot_path : Path
-#         Folder to save the plot to.
-#     suffix: Optional[str]
-#         Optional string to add at the end of the filename for the plot.
-#     """
-#     metric_type = "centralized"
-#     metric_dict = (
-#         hist.metrics_centralized
-#         if metric_type == "centralized"
-#         else hist.metrics_distributed
-#     )
-#     rounds, values = zip(*metric_dict["accuracy"])
-
-#     rounds_loss, values_loss = zip(*hist.losses_centralized)
-
-#     fig, axs = plt.subplots(nrows=2, ncols=1, sharex="row")
-#     axs[0].plot(np.asarray(rounds_loss), np.asarray(values_loss))
-#     axs[1].plot(np.asarray(rounds_loss), np.asarray(values))
-
-#     axs[0].set_ylabel("Loss")
-#     axs[1].set_ylabel("Accuracy")
-
-#     # plt.title(f"{metric_type.capitalize()} Validation - MNIST")
-#     plt.xlabel("Rounds")
-#     # plt.legend(loc="lower right")
-
-#     plt.savefig(Path(save_plot_path) / Path(f"{metric_type}_metrics{suffix}.png"))
-#     plt.close()
 
 
 def save_results_as_pickle(
