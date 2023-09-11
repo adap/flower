@@ -67,9 +67,6 @@ poetry install
 
 # activate the environment
 poetry shell
-
-# install PyTorch with GPU support. 
-pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116
 ```
 
 
@@ -94,32 +91,39 @@ python -m fedprox.main --config-name="heterofl" # HeteroFL
 python -m fedprox.main --config-name="heterofl" exclusive_learning=true model_size=1 # exclusive learning - 100% (a)
 ```
 
+### Stateful clients comment
+
+To implement feddyn, stateful clients that store prev_grads information are needed. Since flwr does not yet officially support stateful clients, it was implemented as a temporary measure by loading prev_grads from disk when creating a client, and then storing it again on disk after learning. Specifically, there are files that store the state of each client in the prev_grads folder.
+
 
 ## Expected Results
 
-With the following command we run DepthFL (FedDyn / FedAvg), InclusiveFL, and HeteroFL to replicate the results of table 2,3,4 in DepthFL paper. 
+With the following command we run DepthFL (FedDyn / FedAvg), InclusiveFL, and HeteroFL to replicate the results of table 2,3,4 in DepthFL paper. Tables 2, 3, and 4 may contain results from the same experiment in multiple tables. 
 
 ```bash
+# table 2
+python -m depthfl.main # table 2 & 4
+python -m depthfl.main exclusive_learning=true model_size=1
+python -m depthfl.main exclusive_learning=true model_size=2
+python -m depthfl.main exclusive_learning=true model_size=3
+python -m depthfl.main exclusive_learning=true model_size=4
+
+# table 2 & 3
 python -m depthfl.main --config-name="heterofl" 
 python -m depthfl.main --config-name="heterofl" exclusive_learning=true model_size=1 model.scale=false
 python -m depthfl.main --config-name="heterofl" exclusive_learning=true model_size=2 model.scale=false
 python -m depthfl.main --config-name="heterofl" exclusive_learning=true model_size=3 model.scale=false
 python -m depthfl.main --config-name="heterofl" exclusive_learning=true model_size=4 model.scale=false
-
 python -m depthfl.main fit_config.feddyn=false fit_config.kd=false  
 python -m depthfl.main fit_config.feddyn=false fit_config.kd=false  exclusive_learning=true model_size=1
 python -m depthfl.main fit_config.feddyn=false fit_config.kd=false  exclusive_learning=true model_size=2
 python -m depthfl.main fit_config.feddyn=false fit_config.kd=false  exclusive_learning=true model_size=3
 python -m depthfl.main fit_config.feddyn=false fit_config.kd=false  exclusive_learning=true model_size=4
 
-python -m depthfl.main 
-python -m depthfl.main exclusive_learning=true model_size=1
-python -m depthfl.main exclusive_learning=true model_size=2
-python -m depthfl.main exclusive_learning=true model_size=3
-python -m depthfl.main exclusive_learning=true model_size=4
-
+# table 3
 python -m depthfl.main fit_config.feddyn=false fit_config.kd=false fit_config.extended=false
 
+# table 4
 python -m depthfl.main fit_config.kd=false
 ```
 

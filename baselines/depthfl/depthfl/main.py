@@ -142,11 +142,11 @@ def main(cfg: DictConfig) -> None:
         f"_R={cfg.num_rounds}"
     )
 
-    utils.plot_metric_from_history(
-        history,
-        save_path,
-        (file_suffix),
-    )
+    # utils.plot_metric_from_history(
+    #     history,
+    #     save_path,
+    #     (file_suffix),
+    # )
 
 
 if __name__ == "__main__":

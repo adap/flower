@@ -49,7 +49,17 @@ class FedDyn(FedAvg):
     def __init__(self, cfg: DictConfig, net: nn.Module, *args, **kwargs):
         self.cfg = cfg
         self.h = [np.zeros(v.shape) for (k, v) in net.state_dict().items()]
-        self.prev_grads = [
+
+        # tagging real weights / biases
+        self.is_weight = []
+        for k in net.state_dict().keys():
+            if "weight" not in k and "bias" not in k:
+                self.is_weight.append(False)
+            else:
+                self.is_weight.append(True)
+
+        # prev_grads file for each client
+        prev_grads = [
             {k: torch.zeros(v.numel()) for (k, v) in net.named_parameters()}
         ] * cfg.num_clients
 
@@ -58,16 +68,8 @@ class FedDyn(FedAvg):
 
         for idx in range(cfg.num_clients):
             with open(f"prev_grads/client_{idx}", "wb") as f:
-                pickle.dump(self.prev_grads[idx], f)
+                pickle.dump(prev_grads[idx], f)
 
-        self.is_weight = []
-
-        # tagging real weights / biases
-        for k in net.state_dict().keys():
-            if "weight" not in k and "bias" not in k:
-                self.is_weight.append(False)
-            else:
-                self.is_weight.append(True)
 
         super().__init__(*args, **kwargs)
 
@@ -85,9 +87,9 @@ class FedDyn(FedAvg):
         if not self.accept_failures and failures:
             return None, {}
 
-        for idx in range(self.cfg.num_clients):
-            with open(f"prev_grads/client_{idx}", "rb") as f:
-                self.prev_grads[idx] = pickle.load(f)
+        # for idx in range(self.cfg.num_clients):
+        #     with open(f"prev_grads/client_{idx}", "rb") as f:
+        #         self.prev_grads[idx] = pickle.load(f)
 
         # Convert results
         weights_results = [
