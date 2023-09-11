@@ -72,7 +72,9 @@ pip install torch==2.0.1+cu117 torchvision==0.15.2+cu117
 ```
 ## Running the Experiments
 ```bash
-python -m FedPer.main # this will run using the default settings in the `conf/base.yaml`    
+python -m FedPer.main # this will run using the default settings in the `conf/base.yaml` 
+
+# When running models for flickr dataset, it is important to keep batch size at 4 or lower since some clients (for reproducing experiment) will have very few examples of one class
 ```
 
 To reproduce figures:
