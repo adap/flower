@@ -35,6 +35,20 @@ Flower Datasets can be installed from PyPi
 pip install flwr-datasets
 ```
 
+Install with an extension:
+
+* for image datasets:
+
+```bash
+pip install flwr-datasets[vision]
+```
+
+* for audio datasets:
+
+```bash
+pip install flwr-datasets[audio]
+```
+
 If you plan to change the type of the dataset to run the code with your ML framework, make sure to have it installed too.
 
 # Usage
@@ -43,6 +57,16 @@ The Flower Datasets exposes `FederatedDataset(dataset, partitioners)` abstractio
 
 Here's a quick example of how to partition the MNIST dataset:
 
+```
+from flwr_datasets import FederatedDataset
+
+# The train split of the MNIST dataset will be partitioned into 100 partitions
+mnist_fds = FederatedDataset("mnist", partitioners={"train": 100}
+
+mnist_partition_0 = mnist_fds.load_partition(0, "train")
+
+centralized_data = mnist_fds.load_full("test")
+```
 
 `FederatedDataset(dataset, partitioners)` allows you specification of:
 
