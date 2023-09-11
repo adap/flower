@@ -89,6 +89,18 @@ Example
 ClientLike = Union[Client, NumPyClient]
 
 
+def _check_actionable_client(
+    client: Optional[ClientLike], client_fn: Optional[Callable[[str], ClientLike]]
+) -> None:
+    if client_fn is None and client is None:
+        raise Exception("Both `client_fn` and `client` are `None`, but one is required")
+
+    if client_fn is not None and client is not None:
+        raise Exception(
+            "Both `client_fn` and `client` are provided, but only one is allowed"
+        )
+
+
 # pylint: disable=import-outside-toplevel,too-many-locals,too-many-branches
 # pylint: disable=too-many-statements
 def start_client(
@@ -156,13 +168,7 @@ def start_client(
     """
     event(EventType.START_CLIENT_ENTER)
 
-    if client_fn is None and client is None:
-        raise Exception("Both `client_fn` and `client` are `None`, but one is required")
-
-    if client_fn is not None and client is not None:
-        raise Exception(
-            "Both `client_fn` and `client` are provided, but only one is allowed"
-        )
+    _check_actionable_client(client, client_fn)
 
     if client_fn is None:
         # Wrap `Client` instance in `client_fn`
@@ -319,6 +325,8 @@ def start_numpy_client(
     >>> )
     """
     # Start
+    _check_actionable_client(client, client_fn)
+
     wrp_client = _wrap_numpy_client(client=client) if client else None
     start_client(
         server_address=server_address,
