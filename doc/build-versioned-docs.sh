@@ -23,6 +23,9 @@ versions="`git for-each-ref '--format=%(refname:lstrip=-1)' refs/tags/ | grep -i
 
 for current_version in ${versions}; do
  
+  if [ "$current_version" = "v.1.5.0" ]; then
+    echo "MAIIIIIIIIIIIIIIIIIIIIIIIIIS"
+  fi
   # Make the current language available to conf.py
   export current_version
   git checkout ${current_version}
