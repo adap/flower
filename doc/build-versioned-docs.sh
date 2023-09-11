@@ -53,19 +53,19 @@ for current_version in ${versions}; do
     fi
 
     # Only for v1.5.0, update the versions listed in the switcher
-    if [ $current_version == 'v.1.5.0' ]; then
+    if [ $current_version == "v.1.5.0" ]; then
       echo "HEHEEH"
       corrected_versions=$(cat <<-END
-  html_context["versions"] = list()
-  versions = [
-      tag.name
-      for tag in repo.tags
-      if int(tag.name[1]) > 0 and int(tag.name.split(".")[1]) >= 5
-  ]
-  versions.append("main")
-  for version in versions:
-      html_context["versions"].append({"name": version})
-  END
+html_context['versions'] = list()
+versions = [
+    tag.name
+    for tag in repo.tags
+    if int(tag.name[1]) > 0 and int(tag.name.split('.')[1]) >= 5
+]
+versions.append('main')
+for version in versions:
+    html_context['versions'].append({'name': version})
+END
       )
       echo "$corrected_versions" >> source/conf.py
     fi
