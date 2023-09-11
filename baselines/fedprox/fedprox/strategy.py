@@ -39,8 +39,7 @@ class FedAvgWithStragglerDrop(FedAvg):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ):
-        """Discard all the models sent by the clients that were stragglers.
-        """
+        """Discard all the models sent by the clients that were stragglers."""
         # Record which client was a straggler in this round
         stragglers_mask = [res.metrics["is_straggler"] for _, res in results]
 
