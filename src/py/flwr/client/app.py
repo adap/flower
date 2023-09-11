@@ -171,9 +171,6 @@ def start_client(
 
         client_fn = single_client_factory
 
-    # Don't use `client` going forward
-    client = None
-
     # Parse IP address
     parsed_address = parse_address(server_address)
     if not parsed_address:
@@ -225,8 +222,8 @@ def start_client(
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
                 client_like: ClientLike = client_fn("-1")
-                client = to_client(client_like)
-                task_res, sleep_duration, keep_going = handle(client, task_ins)
+                client_ = to_client(client_like)
+                task_res, sleep_duration, keep_going = handle(client_, task_ins)
                 send(task_res)
                 if not keep_going:
                     break
