@@ -10,15 +10,22 @@ defaults:
   run:
     working-directory: src/docker
 
+env:
+  FLWR_VERSION: 1.5.0
+
 jobs:
   test:
     name: Test Image
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Run all tests
+    - name: Run base tests
       env:
-          FLWR_VERSION: 1.5.0
+        BUILD_TARGET: base
+      run: ./test.sh
+    - name: Run server tests
+      env:
+          BUILD_TARGET: server
       run: ./test.sh
 
   build:
@@ -34,5 +41,4 @@ jobs:
     - name: Build the server image
       env:
           BUILD_TARGET: server
-          FLWR_VERSION: 1.5.0
       run: ./build.sh
