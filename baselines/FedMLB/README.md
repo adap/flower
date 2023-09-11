@@ -325,6 +325,8 @@ python -m FedMLB.main --multirun dataset_config.dataset="cifar100","tiny-imagene
   </tr>
 </table>
 
+![cifar100, 100 clients, 5% participation rate, alpha = 0.3](readme_chart_results/accuracy_comparison_cifar100_dirichlet_0.3_100_.png)
+
 #### Tiny-ImageNet, Dir(0.3), 100 clients, 5% participation.
 
 <table>
@@ -356,13 +358,8 @@ python -m FedMLB.main --multirun dataset_config.dataset="cifar100","tiny-imagene
   </tr>
 </table>
 
-![cifar100, 100 clients, 5% participation rate, alpha = 0.3](readme_chart_results/accuracy_comparison_cifar100_dirichlet_0.3_100_.pdf)
+![cifar100, 500 clients, 2% participation rate, alpha = 0.3](readme_chart_results/accuracy_comparison_cifar100_dirichlet_0.3_500_.png)
 
-object data="readme_chart_results/accuracy_comparison_cifar100_dirichlet_0.3_100_.pdf" type="application/pdf" width="700px" height="700px">
-    <embed src="readme_chart_results/accuracy_comparison_cifar100_dirichlet_0.3_100_.pdf">
-        <p>This browser does not support PDFs. Please download the PDF to view it: <a href="http://yoursite.com/the.pdf">Download PDF</a>.</p>
-    </embed>
-</object>
 ### Table 1b
 
 The results of Table 1a in the paper (for FedAvg and FedMLB) refers
@@ -404,6 +401,9 @@ python -m FedMLB.main --multirun dataset_config.dataset="cifar100","tiny-imagene
   </tr>
 </table>
 
+![cifar100, 100 clients, 5% participation rate, alpha = 0.3](readme_chart_results/accuracy_comparison_tiny-imagenet_dirichlet_0.3_100_.png)
+
+
 #### Tiny-ImageNet, Dir(0.3), 500 clients, 2% participation.
 
 
@@ -436,6 +436,8 @@ python -m FedMLB.main --multirun dataset_config.dataset="cifar100","tiny-imagene
   </tr>
 </table>
 
+
+![cifar100, 100 clients, 5% participation rate, alpha = 0.3](readme_chart_results/accuracy_comparison_tiny-imagenet_dirichlet_0.3_500_.png)
 
 ### Table 3
 
