@@ -17,7 +17,7 @@
 
 import traceback
 from logging import ERROR
-from typing import Callable, Dict, Optional, cast
+from typing import Dict, Optional, cast
 
 import ray
 
@@ -33,6 +33,7 @@ from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 from flwr.simulation.ray_transport.ray_actor import (
     ClientFn,
+    ClientJobFn,
     ClientRes,
     VirtualClientEngineActorPool,
 )
@@ -129,9 +130,7 @@ class RayActorClientProxy(ClientProxy):
         self.client_fn = client_fn
         self.actor_pool = actor_pool
 
-    def _submit_job(
-        self, job_fn: Callable[[ClientFn], ClientRes], timeout: Optional[float]
-    ) -> ClientRes:
+    def _submit_job(self, job_fn: ClientJobFn, timeout: Optional[float]) -> ClientRes:
         try:
             self.actor_pool.submit_client_job(
                 lambda a, c_fn, j_fn, cid: a.run.remote(c_fn, j_fn, cid),

@@ -17,13 +17,14 @@
 
 from math import pi
 from random import shuffle
-from typing import Callable, List, Tuple, Type, cast
+from typing import List, Tuple, Type, cast
 
 import ray
 
-from flwr.client import NumPyClient
+from flwr.client import Client, NumPyClient
 from flwr.common import Code, GetPropertiesRes, Status
 from flwr.simulation.ray_transport.ray_actor import (
+    ClientJobFn,
     ClientRes,
     DefaultActor,
     VirtualClientEngineActor,
@@ -32,11 +33,23 @@ from flwr.simulation.ray_transport.ray_actor import (
 from flwr.simulation.ray_transport.ray_client_proxy import RayActorClientProxy
 
 
+class DummyClient(NumPyClient):
+    """A dummy NumPyClient for tests."""
+
+    def __init__(self, cid: str) -> None:
+        self.cid = int(cid)
+
+
+def get_dummy_client(cid: str) -> DummyClient:
+    """Return a DummyClient."""
+    return DummyClient(cid)
+
+
 # A dummy workload
-def job_fn(cid: str) -> Callable[[], ClientRes]:  # pragma: no cover
+def job_fn(cid: str) -> ClientJobFn:  # pragma: no cover
     """Construct a simple job with cid dependency."""
 
-    def cid_times_pi() -> ClientRes:
+    def cid_times_pi(client: Client) -> ClientRes:  # pylint: disable=unused-argument
         result = int(cid) * pi
 
         # now let's convert it to a GetPropertiesRes response
@@ -63,14 +76,11 @@ def prep(
         client_resources=client_resources,
     )
 
-    def dummy_client(cid: str) -> NumPyClient:  # pylint: disable=unused-argument
-        return NumPyClient()
-
     # Create 373 client proxies
     num_proxies = 373  # a prime number
     proxies = [
         RayActorClientProxy(
-            client_fn=dummy_client,
+            client_fn=get_dummy_client,
             cid=str(cid),
             actor_pool=pool,
         )
@@ -110,7 +120,8 @@ def test_cid_consistency_all_submit_first() -> None:
     for prox in proxies:
         job = job_fn(prox.cid)
         prox.actor_pool.submit_client_job(
-            lambda a, v, cid: a.run.remote(v, cid), (job, prox.cid)
+            lambda a, c_fn, j_fn, cid: a.run.remote(c_fn, j_fn, cid),
+            (prox.client_fn, job, prox.cid),
         )
 
     # fetch results one at a time
@@ -133,7 +144,10 @@ def test_cid_consistency_without_proxies() -> None:
     shuffle(cids)
     for cid in cids:
         job = job_fn(cid)
-        pool.submit_client_job(lambda a, v, cid_: a.run.remote(v, cid_), (job, cid))
+        pool.submit_client_job(
+            lambda a, c_fn, j_fn, cid_: a.run.remote(c_fn, j_fn, cid_),
+            (get_dummy_client, job, cid),
+        )
 
     # fetch results one at a time
     shuffle(cids)

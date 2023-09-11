@@ -34,6 +34,8 @@ ClientFn = Callable[[str], ClientLike]
 ClientRes = Union[
     common.GetPropertiesRes, common.GetParametersRes, common.FitRes, common.EvaluateRes
 ]
+# A function to be executed by a client to obtain some results
+ClientJobFn = Callable[[Client], ClientRes]
 
 
 class ClientException(Exception):
@@ -55,8 +57,8 @@ class VirtualClientEngineActor(ABC):
 
     def run(
         self,
-        client_fn: Callable[[], Client],
-        job_fn: Callable[[Client], ClientRes],
+        client_fn: ClientFn,
+        job_fn: ClientJobFn,
         cid: str,
     ) -> Tuple[str, ClientRes]:
         """Run a client workload."""
@@ -64,8 +66,7 @@ class VirtualClientEngineActor(ABC):
         # return also cid which is needed to ensure results
         # from the pool are correctly assigned to each ClientProxy
         try:
-            # TODO: as in `_create_client` in `ray_client_proxy_test.py`
-            client_like: ClientLike = client_fn(cid)
+            client_like = client_fn(cid)
             client = to_client(client_like=client_like)
             # for example if we want to now inject something into the client object
             # we'd do it with `client.numpy_client.<variable> = <new_value>`
@@ -231,7 +232,7 @@ class VirtualClientEngineActorPool(ActorPool):
             self._idle_actors.extend(new_actors)
             self.num_actors += num_actors
 
-    def submit(self, fn: Any, value: Tuple[Callable[[Client], ClientRes], str]) -> None:
+    def submit(self, fn: Any, value: Tuple[ClientFn, ClientJobFn, str]) -> None:
         """Take idle actor and assign it a client workload.
 
         Submit a job to an actor by first removing it from the list of idle actors, then
@@ -249,7 +250,7 @@ class VirtualClientEngineActorPool(ActorPool):
             self._cid_to_future[cid]["future"] = future_key
 
     def submit_client_job(
-        self, actor_fn: Any, job: Tuple[ClientFn, Callable[[], ClientRes], str]
+        self, actor_fn: Any, job: Tuple[ClientFn, ClientJobFn, str]
     ) -> None:
         """Submit a job while tracking client ids."""
         _, _, cid = job
