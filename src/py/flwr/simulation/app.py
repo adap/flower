@@ -24,7 +24,7 @@ from typing import Any, Callable, Dict, List, Optional, Type, Union
 import ray
 from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 
-from flwr.client import ClientLike
+from flwr.client import ClientLike, ClientState
 from flwr.common import EventType, event
 from flwr.common.logger import log
 from flwr.server import Server
@@ -239,10 +239,16 @@ def start_simulation(  # pylint: disable=too-many-arguments
             scheduling_strategy=actor_scheduling,
         ).remote(**actor_args)
 
+    # Prepare client states for all clients involved in the simulation
+    client_states = {}
+    for cid in cids:
+        client_states[cid] = ClientState(cid)
+
     # Instantiate ActorPool
     pool = VirtualClientEngineActorPool(
         create_actor_fn=create_actor_fn,
         client_resources=client_resources,
+        client_states=client_states,
     )
 
     f_stop = threading.Event()

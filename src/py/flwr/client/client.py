@@ -17,6 +17,7 @@
 
 from abc import ABC
 
+from flwr.client.client_state import ClientState
 from flwr.common import (
     Code,
     EvaluateIns,
@@ -34,6 +35,26 @@ from flwr.common import (
 
 class Client(ABC):
     """Abstract base class for Flower clients."""
+
+    def set_state(self, state: ClientState) -> None:
+        """Set client state.
+
+        Parameters
+        ----------
+        state: ClientState
+            The flwr.client.ClientState object to use for this client instance.
+        """
+        self.state: ClientState = state  # easiest/recommended implementation
+
+    def get_state(self) -> ClientState:
+        """Get client state.
+
+        Returns
+        -------
+        ClientState
+            The flwr.client.ClientState object representing this client's state.
+        """
+        return self.state  # easiest/recommended implementation
 
     def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
         """Return set of client's properties.

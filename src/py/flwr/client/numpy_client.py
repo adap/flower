@@ -18,11 +18,32 @@
 from abc import ABC
 from typing import Dict, Tuple
 
+from flwr.client.client_state import ClientState
 from flwr.common import Config, NDArrays, Scalar
 
 
 class NumPyClient(ABC):
     """Abstract base class for Flower clients using NumPy."""
+
+    def set_state(self, state: ClientState) -> None:
+        """Set client state.
+
+        Parameters
+        ----------
+        state: ClientState
+            The flwr.client.ClientState object to use for this client instance.
+        """
+        self.state: ClientState = state  # easiest/recommended implementation
+
+    def get_state(self) -> ClientState:
+        """Get client state.
+
+        Returns
+        -------
+        ClientState
+            The flwr.client.ClientState object representing this client's state.
+        """
+        return self.state  # easiest/recommended implementation
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         """Return a client's set of properties.

@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,25 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower client."""
+"""Client state."""
+
+from dataclasses import dataclass
 
 
-from .app import ClientLike as ClientLike
-from .app import run_client as run_client
-from .app import start_client as start_client
-from .app import start_numpy_client as start_numpy_client
-from .app import to_client as to_client
-from .client import Client as Client
-from .client_state import ClientState as ClientState
-from .numpy_client import NumPyClient as NumPyClient
+@dataclass
+class ClientState:
+    """Client state definition as a standard Python dataclass."""
 
-__all__ = [
-    "Client",
-    "ClientLike",
-    "ClientState",
-    "NumPyClient",
-    "run_client",
-    "start_client",
-    "start_numpy_client",
-    "to_client",
-]
+    cid: str
+
+    def __repr__(self) -> str:
+        """Return a string representation of a ClientState."""
+        return f"{self.__class__.__name__}(cid={self.cid}): {self.__dict__}"

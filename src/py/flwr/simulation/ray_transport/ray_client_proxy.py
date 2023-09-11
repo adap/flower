@@ -133,7 +133,9 @@ class RayActorClientProxy(ClientProxy):
     def _submit_job(self, job_fn: ClientJobFn, timeout: Optional[float]) -> ClientRes:
         try:
             self.actor_pool.submit_client_job(
-                lambda a, c_fn, j_fn, cid: a.run.remote(c_fn, j_fn, cid),
+                lambda a, c_fn, j_fn, c_state, cid: a.run.remote(
+                    c_fn, j_fn, c_state, cid
+                ),
                 (self.client_fn, job_fn, self.cid),
             )
             res = self.actor_pool.get_client_result(self.cid, timeout)

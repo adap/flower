@@ -50,7 +50,7 @@ from flwr.common.typing import (
     Status,
 )
 
-from .client import Client
+from .client import Client, ClientState
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle
@@ -360,6 +360,16 @@ def _evaluate(self: Client, ins: EvaluateIns) -> EvaluateRes:
     )
 
 
+def _get_state(self: Client) -> ClientState:
+    """Return state of underlying numpy client."""
+    return self.numpy_client.get_state()
+
+
+def _set_state(self: Client, state: ClientState) -> None:
+    """Set state of underlying numpy client."""
+    self.numpy_client.set_state(state)
+
+
 def _wrap_numpy_client(client: NumPyClient) -> Client:
     member_dict: Dict[str, Callable] = {  # type: ignore
         "__init__": _constructor,
@@ -378,6 +388,9 @@ def _wrap_numpy_client(client: NumPyClient) -> Client:
 
     if numpyclient_has_evaluate(client=client):
         member_dict["evaluate"] = _evaluate
+
+    member_dict["get_state"] = _get_state
+    member_dict["set_state"] = _set_state
 
     # Create wrapper class
     wrapper_class = type("NumPyClientWrapper", (Client,), member_dict)

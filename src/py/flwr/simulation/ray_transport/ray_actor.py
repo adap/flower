@@ -26,7 +26,7 @@ from ray import ObjectRef
 from ray.util.actor_pool import ActorPool
 
 from flwr import common
-from flwr.client import Client, ClientLike, to_client
+from flwr.client import Client, ClientLike, ClientState, to_client
 from flwr.common.logger import log
 
 ClientFn = Callable[[str], ClientLike]
@@ -36,6 +36,8 @@ ClientRes = Union[
 ]
 # A function to be executed by a client to obtain some results
 ClientJobFn = Callable[[Client], ClientRes]
+# Client state cid:state mapping
+ClientStatesDict = Dict[str, ClientState]
 
 
 class ClientException(Exception):
@@ -59,8 +61,9 @@ class VirtualClientEngineActor(ABC):
         self,
         client_fn: ClientFn,
         job_fn: ClientJobFn,
+        client_state: ClientState,
         cid: str,
-    ) -> Tuple[str, ClientRes]:
+    ) -> Tuple[str, ClientRes, ClientState]:
         """Run a client workload."""
         # Execute tasks and return result
         # return also cid which is needed to ensure results
@@ -68,9 +71,12 @@ class VirtualClientEngineActor(ABC):
         try:
             client_like = client_fn(cid)
             client = to_client(client_like=client_like)
-            # for example if we want to now inject something into the client object
-            # we'd do it with `client.numpy_client.<variable> = <new_value>`
+            # Set state
+            client.set_state(client_state)
+            # Run client's task
             job_results = job_fn(client)
+            # Fetch state
+            client_state_updated = client.get_state()
         except Exception as ex:
             client_trace = traceback.format_exc()
             message = (
@@ -84,7 +90,7 @@ class VirtualClientEngineActor(ABC):
             )
             raise ClientException(str(message)) from ex
 
-        return cid, job_results
+        return cid, job_results, client_state_updated
 
 
 @ray.remote
@@ -186,6 +192,7 @@ class VirtualClientEngineActorPool(ActorPool):
         self,
         create_actor_fn: Callable[[], Type[VirtualClientEngineActor]],
         client_resources: Dict[str, Union[int, float]],
+        client_states: ClientStatesDict,
         actor_list: Optional[List[Type[VirtualClientEngineActor]]] = None,
     ):
         self.client_resources = client_resources
@@ -211,6 +218,8 @@ class VirtualClientEngineActorPool(ActorPool):
         self.actor_to_remove: Set[str] = set()  # a set
         self.num_actors = len(actors)
 
+        self.client_states = client_states
+
         self.lock = threading.RLock()
 
     def __reduce__(self):  # type: ignore
@@ -218,6 +227,7 @@ class VirtualClientEngineActorPool(ActorPool):
         return VirtualClientEngineActorPool, (
             self.create_actor_fn,
             self.client_resources,
+            self.client_states,
             self._idle_actors,  # Pass existing actors to avoid killing/re-creating
         )
 
@@ -241,7 +251,9 @@ class VirtualClientEngineActorPool(ActorPool):
         client_fn, job_fn, cid = value
         actor = self._idle_actors.pop()
         if self._check_and_remove_actor_from_pool(actor):
-            future = fn(actor, client_fn, job_fn, cid)
+            # Get cid-th client state
+            client_state = self.client_states[cid]
+            future = fn(actor, client_fn, job_fn, client_state, cid)
             future_key = tuple(future) if isinstance(future, List) else future
             self._future_to_actor[future_key] = (self._next_task_index, actor, cid)
             self._next_task_index += 1
@@ -298,7 +310,11 @@ class VirtualClientEngineActorPool(ActorPool):
         """
         try:
             future: ObjectRef[Any] = self._cid_to_future[cid]["future"]  # type: ignore
-            res_cid, res = ray.get(future)  # type: (str, ClientRes)
+            res_cid, res, client_state = ray.get(
+                future
+            )  # type: (str, ClientRes, ClientState)
+            # Update client's state
+            self.client_states[res_cid] = client_state
         except ray.exceptions.RayActorError as ex:
             log(ERROR, ex)
             if hasattr(ex, "actor_id"):
