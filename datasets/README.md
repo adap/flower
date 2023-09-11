@@ -33,6 +33,7 @@ Flower Datasets can be installed from PyPi
 
 ```bash
 pip install flwr-datasets
+```
 
 If you plan to change the type of the dataset to run the code with your ML framework, make sure to have it installed too.
 
