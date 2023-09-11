@@ -203,7 +203,6 @@ def http_request_response(
 
     def receive() -> Optional[TaskIns]:
         """Receive next task from server."""
-        # Serialize ProtoBuf to bytes
         # Get Node
         if node_store[KEY_NODE] is None:
             log(ERROR, "Node instance missing")
