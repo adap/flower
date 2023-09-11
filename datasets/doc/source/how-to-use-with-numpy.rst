@@ -6,9 +6,9 @@ Let's integrate ``flwr-datasets`` with Numpy.
 Prepare the desired partitioning::
 
   from flwr_datasets import FederatedDataset
-  fds = FederatedDataset(dataset="cifar10", partitioners={"train": 10}) # Divide "train" into 10 partitions
-  partition = fds.load_partition(0, "train") # Load 0-th index partition
-  centralized_dataset = fds.load_full("test") # Load dataset for centralized dataset
+  fds = FederatedDataset(dataset="cifar10", partitioners={"train": 10})
+  partition = fds.load_partition(0, "train")
+  centralized_dataset = fds.load_full("test")
 
 Transform to Numpy::
 
@@ -50,7 +50,8 @@ Here's a quick example of how you can use that data with a simple CNN model::
       layers.Dense(10, activation='softmax')
   ])
 
-  model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+  model.compile(optimizer='adam', loss='sparse_categorical_crossentropy',
+              metrics=['accuracy'])
   model.fit(X_train, y_train, epochs=20, batch_size=64)
 
 You should see about 98% accuracy on the training data at the end of the training.

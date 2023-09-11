@@ -17,9 +17,9 @@ Change the data type to TensorFlow Tensors (it's not the TensorFlow dataset).
 Standard setup::
 
   from flwr_datasets import FederatedDataset
-  fds = FederatedDataset(dataset="cifar10", partitioners={"train": 10}) # Divide "train" into 10 partitions
-  partition = fds.load_partition(0, "train") # Load 0-th index partition
-  centralized_dataset = fds.load_full("test") # Load dataset for centralized dataset
+  fds = FederatedDataset(dataset="cifar10", partitioners={"train": 10})
+  partition = fds.load_partition(0, "train")
+  centralized_dataset = fds.load_full("test")
 
 Transformation to the TensorFlow Tensors ::
 
@@ -34,17 +34,16 @@ Work with ``TensorFlow Dataset`` abstraction.
 Standard setup::
 
   from flwr_datasets import FederatedDataset
-  fds = FederatedDataset(dataset="cifar10", partitioners={"train": 10}) # Divide "train" into 10 partitions
-  partition = fds.load_partition(0, "train") # Load 0-th index partition
-  centralized_dataset = fds.load_full("test") # Load dataset for centralized dataset
+  fds = FederatedDataset(dataset="cifar10", partitioners={"train": 10})
+  partition = fds.load_partition(0, "train")
+  centralized_dataset = fds.load_full("test")
 
 Transformation to the TensorFlow Dataset::
 
-  tf_dataset = partition.to_tf_dataset(columns="img", label_cols="label", batch_size=64, shuffle=True)
+  tf_dataset = partition.to_tf_dataset(columns="img", label_cols="label", batch_size=64,
+                                     shuffle=True)
   # Assuming you have defined your model and compiled it
   model.fit(tf_dataset, epochs=20)
-
-
 
 CNN Keras Model
 ---------------
@@ -64,7 +63,6 @@ Here's a quick example of how you can use that data with a simple CNN model::
       layers.Dense(10, activation='softmax')
   ])
 
-  model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+  model.compile(optimizer='adam', loss='sparse_categorical_crossentropy',
+              metrics=['accuracy'])
   model.fit(X_train, y_train, epochs=20, batch_size=64)
-
-
