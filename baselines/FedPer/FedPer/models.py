@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union
 import numpy as np
 import torch.nn as nn
 from torch import Tensor
+from torch.nn import functional as F
 
 
 class ModelSplit(ABC, nn.Module):
@@ -157,6 +158,7 @@ class ModelSplit(ABC, nn.Module):
     def forward(self, inputs: Any) -> Any:
         """Forward inputs through the body and the head (or fixed head)."""
         x = self.body(inputs)
+        x = F.relu(x)
         if self._use_fixed_head and self.fixed_head is not None:
             return self.fixed_head(x)
         return self.head(x)

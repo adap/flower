@@ -41,11 +41,11 @@ def dataset_main(config: dict) -> None:
         dataset = call_dataset(
             dataset_name=dataset_name, root=dataset_root, config=config
         )
-        print("Dataset prepared successfully")
 
         # randomly assign classes
         assert config["num_classes"] > 0, "Number of classes must be positive"
         config["num_classes"] = max(1, min(config["num_classes"], len(dataset.classes)))
+
         # partition, stats = randomly_assign_classes(
         partition = randomly_assign_classes(
             dataset=dataset,

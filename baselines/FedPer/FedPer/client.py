@@ -58,6 +58,7 @@ class BaseClient(NumPyClient):
                 client_state_save_path + f"/client_{self.client_id}"
             )
         self.hist: Dict[str, Dict[str, Any]] = defaultdict(dict)
+        self.num_epochs: int = self.config["num_epochs"]
         self.model_manager = model_manager_class(
             client_id=self.client_id,
             config=config,
@@ -65,6 +66,7 @@ class BaseClient(NumPyClient):
             trainloader=trainloader,
             testloader=testloader,
             client_save_path=self.client_state_save_path,
+            learning_rate=self.config.learning_rate,
         )
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
@@ -108,7 +110,7 @@ class BaseClient(NumPyClient):
         -------
             Dict with the train metrics.
         """
-        epochs = self.config.get("epochs", {"full": 4})
+        epochs = self.config.get("epochs", {"full": self.num_epochs})
         print("Epochs: ", epochs)
         print("Tag: ", tag)
 
@@ -117,7 +119,7 @@ class BaseClient(NumPyClient):
 
         return self.model_manager.train(
             train_id=self.train_id,
-            epochs=epochs.get("full", 4),
+            epochs=epochs.get("full", self.num_epochs),
             tag="FedAvg_full" if tag is None else tag,
         )
 
@@ -299,6 +301,7 @@ def get_client_fn_simulation(
         "mobile",
         "resnet",
     ], f"Model {config.model.name} not implemented"
+
     # load dataset and clients' data indices
     if config.dataset.name.lower() in ["cifar10", "cifar100"]:
         try:
@@ -355,6 +358,7 @@ def get_client_fn_simulation(
                 train_data_transform=train_data_transform,
                 train_target_transform=train_target_transform,
             )
+
             trainset = Subset(dataset, indices=[])
             testset = Subset(dataset, indices=[])
             trainset.indices = data_indices[cid_use]["train"]

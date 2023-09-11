@@ -20,6 +20,8 @@ class ResNet(nn.Module):
         num_classes: int = 10,
         device: str = "cpu",
         name: str = "resnet",
+        num_epochs: int = 1,
+        learning_rate: float = 0.01,
     ) -> None:
         super(ResNet, self).__init__()
         assert (
@@ -127,6 +129,7 @@ class ResNetModelManager(ModelManager):
         testloader: DataLoader,
         has_fixed_head: bool = False,
         client_save_path: str = None,
+        learning_rate: float = 0.01,
     ):
         """Initialize the attributes of the model manager.
 
@@ -144,6 +147,7 @@ class ResNetModelManager(ModelManager):
         self.client_save_path = client_save_path
         self.trainloader, self.testloader = trainloader, testloader
         self.device = self.config["device"]
+        self.learning_rate = learning_rate
 
     def _create_model(self) -> nn.Module:
         """Return MobileNet-v1 model to be splitted into head and body."""
@@ -195,7 +199,7 @@ class ResNetModelManager(ModelManager):
                 pass
 
         criterion = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.SGD(self.model.parameters(), lr=0.01)
+        optimizer = torch.optim.SGD(self.model.parameters(), lr=self.learning_rate)
         correct, total = 0, 0
         loss: torch.Tensor = 0.0
         # self.model.train()

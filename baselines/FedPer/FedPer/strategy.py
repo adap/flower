@@ -180,9 +180,9 @@ class AggregateFullStrategy(ServerInitializationStrategy):
         agg_params, agg_metrics = super().aggregate_fit(
             server_round=server_round, results=results, failures=failures
         )
-        agg_params = ndarrays_to_parameters(
-            [val.cpu().numpy() for _, val in self.model.state_dict().items()]
-        )
+        # agg_params = ndarrays_to_parameters(
+        #    [val.cpu().numpy() for _, val in self.model.state_dict().items()]
+        # )
 
         # Update Server Model
         parameters = parameters_to_ndarrays(agg_params)
@@ -336,9 +336,9 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
         agg_params, agg_metrics = super().aggregate_fit(
             server_round=server_round, results=results, failures=failures
         )
-        agg_params = ndarrays_to_parameters(
-            [val.cpu().numpy() for _, val in self.model.state_dict().items()]
-        )
+        # agg_params = ndarrays_to_parameters(
+        #    [val.cpu().numpy() for _, val in self.model.body.state_dict().items()]
+        # )
         # Update Server Model
         parameters = parameters_to_ndarrays(agg_params)
         model_keys = [

@@ -2,7 +2,7 @@
 num_clients: 10 # total number of clients
 num_epochs: 4 # number of local epochs
 batch_size: 128
-num_rounds: 5
+num_rounds: 10
 clients_per_round: 10
 learning_rate: 0.01
 algorithm: fedper
@@ -18,15 +18,17 @@ dataset:
   split: sample
   num_classes: 10
   seed: 42
-  num_clients: 10
+  num_clients: ${num_clients}
   fraction: 0.83
 
 model:
   _target_: FedPer.implemented_models.mobile_model.MobileNet
   num_head_layers: 2
-  num_classes: ${dataset.num_classes}
+  num_classes: 10
   device: ${server_device}
   name: mobile
+  num_epochs: ${num_epochs}
+  learning_rate: ${learning_rate}
 
 fit_config:
   drop_client: false

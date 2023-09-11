@@ -35,11 +35,11 @@ def set_num_classes(config: DictConfig) -> DictConfig:
     """Set the number of classes based on the dataset name in the config file."""
     # Set the number of classes
     if config.dataset.name.lower() == "cifar10":
-        config.dataset.num_classes = 10
+        config.model.num_classes = 10
     elif config.dataset.name.lower() == "cifar100":
-        config.dataset.num_classes = 100
+        config.model.num_classes = 100
     elif config.dataset.name.lower() == "flickr":
-        config.dataset.num_classes = 5
+        config.model.num_classes = 5
     else:
         raise NotImplementedError(f"Dataset {config.dataset.name} not implemented")
     return config

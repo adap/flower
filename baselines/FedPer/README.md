@@ -91,7 +91,17 @@ algorithm: fedavg, fedper # these are currently supported
 server_device: 'cuda:0', 'cpu'
 dataset.name: 'cifar10', 'cifar100', 'flickr'
 num_classes: 10, 100, 5 # respectively 
+dataset.num_classes: 4, 8, 10 #for non-iid split assigning n num_classes to each client (these numbers for CIFAR10 experiments)
 model.name: mobile, resnet
+```
+
+To run multiple runs, one can also reside to `HYDRA`'s multirun option. 
+```bash
+# for CIFAR10
+python -m FedPer.main --multirun dataset.num_classes=4,8,10 model.name=resnet,mobile algorithm=fedper,fedavg model.num_head_layers=2,3
+
+# to repeat each run 5 times, one can also add
+python -m FedPer.main --multirun dataset.num_classes=4,8,10 model.name=resnet,mobile algorithm=fedper,fedavg model.num_head_layers=2,3 '+repeat_num=range(5)'
 ```
 
 
@@ -101,25 +111,25 @@ Having run the `run_script.sh`, the expected results should look something like 
 
 __MobileNet-v1 on CIFAR10__
 
-![](FedPer/visuals/use/mobile_plot_figure_2.png)
+![](_static/mobile_plot_figure_2.png)
 
 __ResNet on CIFAR10__
 
-![](FedPer/visuals/use/resnet_plot_figure_2.png)
+![](_static/resnet_plot_figure_2.png)
 
 __MobileNet-v1 on CIFAR10 using varying size of head__
 
-![](FedPer/visuals/use/mobile_plot_figure_num_head.png)
+![](_static/mobile_plot_figure_num_head.png)
 
 
 __ResNet on CIFAR10 using varying size of head__
 
-![](FedPer/visuals/use/resnet_plot_figure_num_head.png)
+![](_static/resnet_plot_figure_num_head.png)
 
 __MobileNet-v1 on FLICKR-AES__
 
-![](FedPer/visuals/use/mobile_plot_figure_flickr.png)
+![](_static/mobile_plot_figure_flickr.png)
 
 __ResNet on FLICKR-AES__
 
-![](FedPer/visuals/use/resnet_plot_figure_flickr.png)
+![](_static/resnet_plot_figure_flickr.png)

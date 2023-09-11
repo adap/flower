@@ -35,12 +35,13 @@ class BaseDataset(Dataset):
         self.train_target_transform = train_target_transform
         self.general_data_transform = general_data_transform
         self.general_target_transform = general_target_transform
-        self.enable_train_transform = True
+        self.enable_train_transform = False
 
     def __getitem__(self, index):
         """Get the item at the given index."""
         data, targets = self.data[index], self.targets[index]
         if self.enable_train_transform and self.train_data_transform is not None:
+            print("train_data_transform")
             data = self.train_data_transform(data)
         if self.enable_train_transform and self.train_target_transform is not None:
             targets = self.train_target_transform(targets)
@@ -65,6 +66,7 @@ class CIFAR10(BaseDataset):
         general_target_transform=None,
         train_data_transform=None,
         train_target_transform=None,
+        enable_train_transform=False,
         root: Path = None,
     ):
         """Initialize the dataset."""
@@ -81,7 +83,7 @@ class CIFAR10(BaseDataset):
         self.general_target_transform = general_target_transform
         self.train_data_transform = train_data_transform
         self.train_target_transform = train_target_transform
-        print("General data transformation: ", self.general_data_transform)
+        self.enable_train_transform = enable_train_transform
 
 
 class CIFAR100(BaseDataset):
@@ -233,13 +235,6 @@ def call_dataset(dataset_name, root, config, **kwargs):
         raise NotImplementedError
 
 
-# DATASETS: Dict[str, Type[BaseDataset]] = {
-#    "cifar10": CIFAR10,
-#    "cifar100": CIFAR100,
-#    # flickr is being processed in other way
-# }
-
-
 def randomly_assign_classes(
     dataset: Dataset, client_num: int, class_num: int
 ) -> Dict[str, Union[Dict[Any, Any], List[Any]]]:
@@ -253,6 +248,7 @@ def randomly_assign_classes(
     data_idx_for_each_label = [
         np.where(targets_numpy == i)[0].tolist() for i in label_list
     ]
+
     assigned_labels = []
     selected_times = [0 for _ in label_list]
     for _ in range(client_num):

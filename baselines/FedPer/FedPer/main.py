@@ -41,7 +41,7 @@ def main(cfg: DictConfig) -> None:
     cfg = set_num_classes(cfg)
 
     print(OmegaConf.to_yaml(cfg))
-    
+
     # Create directory to store client states if it does not exist
     # Client state has subdirectories with the name of current time
     client_state_save_path = set_client_state_save_path()
