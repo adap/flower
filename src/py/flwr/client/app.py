@@ -108,7 +108,7 @@ def start_client(
         The IPv4 or IPv6 address of the server. If the Flower
         server runs on the same machine on port 8080, then `server_address`
         would be `"[::]:8080"`.
-    client_fn : Optional[Callable[[str], Client]]
+    client_fn : Optional[Callable[[str], ClientLike]]
         A callable that instantiates a Client. (default: None)
     client : Optional[flwr.client.Client]
         An implementation of the abstract base
@@ -231,6 +231,7 @@ def start_client(
                 # Instantiate the client
                 client_like: ClientLike = client_fn("-1")
                 client_ = to_client(client_like)
+
                 # Tell client to run task
                 task_res, sleep_duration, keep_going = handle(client_, task_ins)
                 send(task_res)
