@@ -1,11 +1,14 @@
 How-To Guides
 =============
 
-Flower Datasets easily integrates with the common frameworks like TensorFlow and PyTorch (among others) because it uses Hugging Face under the hood.
-Learn how to transform the HuggingFace dataset to the framework of your choice. Feel free to also check the original HuggingFace documentation.
+Flower Datasets library easily integrates with common frameworks like TensorFlow and PyTorch (among others) because it uses Hugging Face under the hood.
+Learn how to transform the HuggingFace dataset to the framework of your choice.
 
 .. toctree::
    :maxdepth: 4
 
    how-to-use-with-tf
    how-to-use-with-torch
+   how-to-use-with-numpy
+
+Feel free to check the original HuggingFace `documentation <https://huggingface.co/docs/datasets/index>`_ if you didn't find the things you were looking for.
