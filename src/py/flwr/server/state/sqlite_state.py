@@ -15,6 +15,7 @@
 """SQLite based implemenation of server state."""
 
 
+import random
 import re
 import sqlite3
 from datetime import datetime, timedelta
@@ -496,6 +497,22 @@ class SqliteState(State):
         rows = self.query(query)
         result: Set[int] = {row["node_id"] for row in rows}
         return result
+
+    def create_workload(self) -> str:
+        """Create one workload and store it in state."""
+        # String representation of random integer from 0 to 9223372036854775807
+        random_workload_id: int = random.randrange(9223372036854775808)
+        workload_id = str(random_workload_id)
+
+        # Check conflicts
+        query = "SELECT COUNT(*) FROM workload WHERE workload_id = ?;"
+        # If workload_id does not exist
+        if self.query(query, (workload_id,))[0]["COUNT(*)"] == 0:
+            query = "INSERT INTO workload VALUES(:workload_id);"
+            self.query(query, {"workload_id": workload_id})
+            return workload_id
+        log(ERROR, "Unexpected workload creation failure.")
+        return ""
 
 
 def dict_factory(

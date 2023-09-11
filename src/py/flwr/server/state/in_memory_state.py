@@ -15,6 +15,7 @@
 """In-memory State implementation."""
 
 
+import random
 from datetime import datetime, timedelta
 from logging import ERROR
 from typing import Dict, List, Optional, Set
@@ -204,3 +205,15 @@ class InMemoryState(State):
         if workload_id not in self.workload_ids:
             return set()
         return self.node_ids
+
+    def create_workload(self) -> str:
+        """Create one workload."""
+        # String representation of random integer from 0 to 9223372036854775807
+        random_workload_id: int = random.randrange(9223372036854775808)
+        workload_id = str(random_workload_id)
+
+        if workload_id not in self.workload_ids:
+            self.workload_ids.add(workload_id)
+            return workload_id
+        log(ERROR, "Unexpected workload creation failure.")
+        return ""
