@@ -53,8 +53,7 @@ for current_version in ${versions}; do
     fi
 
     # Only for v1.5.0, update the versions listed in the switcher
-    if [ $current_version == "v.1.5.0" ]; then
-      echo "HEHEEH"
+    if [ "$current_version" = "v.1.5.0" ]; then
       corrected_versions=$(cat <<-END
 html_context['versions'] = list()
 versions = [
