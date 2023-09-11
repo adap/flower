@@ -356,6 +356,7 @@ python -m FedMLB.main --multirun dataset_config.dataset="cifar100","tiny-imagene
   </tr>
 </table>
 
+![cifar100, 100 clients, 5% participation rate, alpha = 0.3](results_charts/accuracy_comparison_cifar100_dirichlet_0.3_100_.pdf)
 ### Table 1b
 
 The results of Table 1a in the paper (for FedAvg and FedMLB) refers
@@ -488,16 +489,20 @@ to leverage a series of preprocessing layer to be used in the `.map()`
 primitive of `tf.data.Dataset` (see `dataset.py`).
 
 ### Special Configs
-`restart_from_checkpoint: True`
+The config file (`base.yaml`) contains some flags to enable features like restarting from
+saved checkpoint, saving a checkpoint at the end of the training, and logging
+memory usage.
+
+- `restart_from_checkpoint: True`
 If True, looks for a checkpoint of that config to restart the training,
 otherwise initializes a new model.
 
-`save_checkpoint: True`
+- `save_checkpoint: True`
 If True, saves a checkpoint server model at the end of the training. Checkpoints 
-will be saved at 
+will be saved at the local path:
 `FedMLB/FedMLB/model_checkpoints/{DATASET}/{MODEL}/{METHOD}/{TOTAL_CLIENTS}_clients/dir_{ALPHA_DIRICHLET}/seed_{RANDOM_SEED}/checkpoint_R{CURRENT_ROUND}`.
 
-`logging_memory_usage: False`
+- `logging_memory_usage: False`
 If True, logs memory and GPU's memory usage (need for psutil and nvidia-smi 
 installed).
 
