@@ -18,5 +18,4 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-BUILD_TARGET=base-test ./build.sh
-BUILD_TARGET=server-test ./build.sh
+BUILD_TARGET=$BUILD_TARGET-test ./build.sh
