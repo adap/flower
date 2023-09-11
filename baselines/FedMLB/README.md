@@ -156,19 +156,14 @@ Note that those files are provided by the authors themselves
 on the [paper's GitHub](https://github.com/jinkyu032/FedMLB/tree/main/client_data).
 
 #### Custom config for clients' dataset generation (Tiny-ImageNet)
+
+To generate the partitions for the Tiny-ImageNet settings, i.e.:
 1. Moderate-scale with Dir(0.3), 100 clients, balanced dataset (1000 examples per client).
 2. Large-scale experiments with Dir(0.3), 500 clients, balanced dataset (200 examples per client).
 3. Moderate-scale with Dir(0.6), 100 clients, balanced dataset (1000 examples per client).
 4. Large-scale experiments with Dir(0.6), 500 clients, balanced dataset (200 examples per client).
 
-> Note: To generate the clients' dataset for the Tiny-Imagenet, the original dataset should be downloaded in advance.\
-> It can be downloaded at http://cs231n.stanford.edu/tiny-imagenet-200.zip. Unzip the folder. \
-> Note: This code supposes to find the folder at the path `/{YOUR_LOCAL_PATH_TO_THE_BASELINE}/FedMLB/tiny-imagenet-200`.
-
-> :warning:
-For Tiny-ImageNet, ensure that the unzipped folder is correctly located at `/{YOUR_LOCAL_PATH_TO_THE_BASELINE}/FedMLB/tiny-imagenet-200`.
-The `tiny-imagenet-200` folder contains three folders (`train`, `val`, `test`) and two `.txt` files.
-
+use the following commands:
 ```bash
 # commands to generate clients' dataset partitions with Tiny-imagenet
 # this will generate the setting for 1. (see above)
@@ -183,6 +178,13 @@ python -m FedMLB.dataset_preparation dataset_config.dataset="tiny-imagenet" data
 # this will generate the setting for 4. (see above)
 python -m FedMLB.dataset_preparation dataset_config.dataset="tiny-imagenet" dataset_config.alpha_dirichlet=0.6 total_clients=500
 ```
+> Note: To generate the clients' dataset for the Tiny-Imagenet, the original dataset should be downloaded in advance.\
+> It can be downloaded at http://cs231n.stanford.edu/tiny-imagenet-200.zip. Unzip the folder. \
+> Note: This code supposes to find the folder at the path `/{YOUR_LOCAL_PATH_TO_THE_BASELINE}/FedMLB/tiny-imagenet-200`.
+
+> :warning:
+For Tiny-ImageNet, ensure that the unzipped folder is correctly located at `/{YOUR_LOCAL_PATH_TO_THE_BASELINE}/FedMLB/tiny-imagenet-200`.
+The `tiny-imagenet-200` folder contains three folders (`train`, `val`, `test`) and two `.txt` files.
 
 ### Using GPUs
 The code in this repository relies on TF library.
