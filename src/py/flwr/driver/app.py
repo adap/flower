@@ -129,10 +129,32 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         initialized_config,
     )
 
+    # Request for workload_id
+    workload_id = driver.create_workload(driver_pb2.CreateWorkloadRequest()).workload_id
+    get_nodes_res = driver.get_nodes(
+        req=driver_pb2.GetNodesRequest(workload_id=workload_id)
+    )
+
+    # Register nodes
+    registered_nodes: Dict[int, DriverClientProxy] = {}
+    _compare_and_update(
+        get_nodes_res,
+        driver,
+        workload_id,
+        registered_nodes,
+        initialized_server.client_manager(),
+    )
+
     # Start the thread updating nodes
     thread = threading.Thread(
-        target=_update_nodes,
-        args=(driver, initialized_server.client_manager(), lock),
+        target=_bg_client_manager_update,
+        args=(
+            driver,
+            workload_id,
+            registered_nodes,
+            initialized_server.client_manager(),
+            lock,
+        ),
         daemon=True,
     )
     thread.start()
@@ -152,8 +174,12 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     return hist
 
 
-def _update_nodes(
-    driver: Driver, client_manager: ClientManager, lock: threading.Lock
+def _bg_client_manager_update(
+    driver: Driver,
+    workload_id: str,
+    registered_nodes: Dict[int, DriverClientProxy],
+    client_manager: ClientManager,
+    lock: threading.Lock,
 ) -> None:
     """Update the nodes list in the client manager.
 
@@ -165,10 +191,6 @@ def _update_nodes(
     and dead nodes will be removed from the ClientManager via
     `client_manager.unregister()`.
     """
-    registered_nodes: Dict[int, DriverClientProxy] = {}
-    # Request for workload_id
-    workload_id = driver.create_workload(driver_pb2.CreateWorkloadRequest()).workload_id
-
     # Loop until the driver is disconnected
     while True:
         with lock:
@@ -178,21 +200,38 @@ def _update_nodes(
             get_nodes_res = driver.get_nodes(
                 req=driver_pb2.GetNodesRequest(workload_id=workload_id)
             )
-        all_node_ids = set(get_nodes_res.node_ids)
-        new_nodes = all_node_ids.difference(registered_nodes)
-        # Register new nodes
-        for node_id in new_nodes:
-            client_proxy = DriverClientProxy(
-                node_id=node_id,
-                driver=driver,
-                anonymous=False,
-                workload_id=workload_id,
-            )
-            client_manager.register(client_proxy)
-        # Unregister dead nodes
-        dead_nodes = set(registered_nodes).difference(all_node_ids)
-        for node_id in dead_nodes:
-            client_proxy = registered_nodes[node_id]
-            client_manager.unregister(client_proxy)
+        _compare_and_update(
+            get_nodes_res, driver, workload_id, registered_nodes, client_manager
+        )
         # Sleep for 3 seconds
         time.sleep(3)
+
+
+def _compare_and_update(
+    get_nodes_res: driver_pb2.GetNodesResponse,
+    driver: Driver,
+    workload_id: str,
+    registered_nodes: Dict[int, DriverClientProxy],
+    client_manager: ClientManager,
+) -> None:
+    """Compare node_ids in GetNodesResponse to registered_nodes and update."""
+    all_node_ids = set(get_nodes_res.node_ids)
+    new_nodes = all_node_ids.difference(registered_nodes)
+    # Register new nodes
+    for node_id in new_nodes:
+        client_proxy = DriverClientProxy(
+            node_id=node_id,
+            driver=driver,
+            anonymous=False,
+            workload_id=workload_id,
+        )
+        if client_manager.register(client_proxy):
+            registered_nodes[node_id] = client_proxy
+        else:
+            raise RuntimeError("Could not register node.")
+    # Unregister dead nodes
+    dead_nodes = set(registered_nodes).difference(all_node_ids)
+    for node_id in dead_nodes:
+        client_proxy = registered_nodes[node_id]
+        client_manager.unregister(client_proxy)
+        del registered_nodes[node_id]
