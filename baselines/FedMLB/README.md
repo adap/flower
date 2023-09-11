@@ -187,7 +187,7 @@ python -m FedMLB.dataset_preparation dataset_config.dataset="tiny-imagenet" data
 ### Using GPUs
 The code in this repository relies on TF library.
 To make the simulations run on GPUs use the option `client_resources.num_cpus={PER_CLIENT_FRACTION_OF_GPU_MEMORY}`.
-The default is `num_cpus=0.0`. 
+The default is `num_gpus=0.0`. 
 For example, the following command will run on CPU only. 
 ```bash
 python -m FedMLB.main # `client_resources.num_gpus=0.0` default
@@ -228,11 +228,13 @@ python -m FedMLB.main algorithm="FedAvg+KD"
 #### Tiny-Imagenet
 For Tiny-ImageNet, as in the orginal paper, batch size of local updates should be set 
 to 100 in settings with 100 clients and to 20 in settings with 500 clients;
-this is equal to set the amount of local_updates to 50 (as the default), since 
-local_updates = (num_of_local_examples*local_epochs)/batch_size.
+this is equal to set the amount of local_updates to 50 (as the default) -- 
+so no change to batch size is required --, in fact
+
+$local_updates = \frac{num_of_local_examples*local_epochs}{batch_size}$
 
 ```bash
-python -m FedMLB.main dataset_config.dataset="tiny-imagenet" 
+python -m FedMLB.main da}aset_config.dataset="tiny-imagenet" 
 
 python -m FedMLB.main dataset_config.dataset="tiny-imagenet" total_clients=500 clients_per_round=10
 
