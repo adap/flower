@@ -22,7 +22,7 @@ from typing import Callable, Dict, Optional, cast
 import ray
 
 from flwr import common
-from flwr.client import Client, ClientLike, to_client
+from flwr.client import Client, ClientFn, ClientLike, to_client
 from flwr.client.client import (
     maybe_call_evaluate,
     maybe_call_fit,
@@ -35,8 +35,6 @@ from flwr.simulation.ray_transport.ray_actor import (
     ClientRes,
     VirtualClientEngineActorPool,
 )
-
-ClientFn = Callable[[str], ClientLike]
 
 
 class RayClientProxy(ClientProxy):

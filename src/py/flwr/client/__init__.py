@@ -15,6 +15,7 @@
 """Flower client."""
 
 
+from .app import ClientFn as ClientFn
 from .app import ClientLike as ClientLike
 from .app import run_client as run_client
 from .app import start_client as start_client
@@ -26,6 +27,7 @@ from .numpy_client import NumPyClient as NumPyClient
 __all__ = [
     "Client",
     "ClientLike",
+    "ClientFn",
     "NumPyClient",
     "run_client",
     "start_client",

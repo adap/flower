@@ -17,6 +17,7 @@
 
 from typing import Tuple
 
+from flwr.client import ClientFn, ClientLike, to_client
 from flwr.client.client import (
     Client,
     maybe_call_evaluate,
@@ -38,7 +39,7 @@ class UnknownServerMessage(Exception):
     """Exception indicating that the received message is unknown."""
 
 
-def handle(client: Client, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
+def handle(client_fn: ClientFn, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
     """Handle incoming TaskIns from the server.
 
     Parameters
@@ -61,6 +62,10 @@ def handle(client: Client, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
     """
     server_msg = get_server_message_from_task_ins(task_ins, exclude_reconnect_ins=False)
     if server_msg is None:
+        # Instantiate the client
+        client_like: ClientLike = client_fn("-1")
+        client = to_client(client_like)
+
         # Secure Aggregation
         if task_ins.task.HasField("sa") and isinstance(
             client, SecureAggregationHandler

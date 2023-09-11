@@ -87,10 +87,11 @@ Example
 """
 
 ClientLike = Union[Client, NumPyClient]
+ClientFn = Callable[[str], ClientLike]
 
 
 def _check_actionable_client(
-    client: Optional[ClientLike], client_fn: Optional[Callable[[str], ClientLike]]
+    client: Optional[ClientLike], client_fn: Optional[ClientFn]
 ) -> None:
     if client_fn is None and client is None:
         raise Exception("Both `client_fn` and `client` are `None`, but one is required")
@@ -106,7 +107,7 @@ def _check_actionable_client(
 def start_client(
     *,
     server_address: str,
-    client_fn: Optional[Callable[[str], ClientLike]] = None,
+    client_fn: Optional[ClientFn] = None,
     client: Optional[ClientLike] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
@@ -120,7 +121,7 @@ def start_client(
         The IPv4 or IPv6 address of the server. If the Flower
         server runs on the same machine on port 8080, then `server_address`
         would be `"[::]:8080"`.
-    client_fn : Optional[Callable[[str], ClientLike]]
+    client_fn : Optional[ClientFn]
         A callable that instantiates a Client. (default: None)
     client : Optional[flwr.client.Client]
         An implementation of the abstract base
@@ -233,13 +234,7 @@ def start_client(
                 if task_ins is None:
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
-
-                # Instantiate the client
-                client_like: ClientLike = client_fn("-1")
-                client_ = to_client(client_like)
-
-                # Tell client to run task
-                task_res, sleep_duration, keep_going = handle(client_, task_ins)
+                task_res, sleep_duration, keep_going = handle(client_fn, task_ins)
                 send(task_res)
                 if not keep_going:
                     break

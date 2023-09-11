@@ -1,3 +1,4 @@
+from time import time
 import argparse
 from collections import OrderedDict
 from typing import Dict, Tuple, List
@@ -49,6 +50,9 @@ class FlowerClient(fl.client.NumPyClient):
         return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
     def fit(self, parameters, config):
+        client_state = self.get_state()
+        print(f"{client_state}")
+        t_start = time()
         set_params(self.model, parameters)
 
         # Read from config
@@ -61,6 +65,10 @@ class FlowerClient(fl.client.NumPyClient):
         optimizer = torch.optim.SGD(self.model.parameters(), lr=0.01, momentum=0.9)
         # Train
         train(self.model, trainloader, optimizer, epochs=epochs, device=self.device)
+        t_end = time() - t_start
+        client_state.time_taken = t_end
+        print(f"{client_state.cid} --> {t_end}")
+        self.set_state(client_state)
 
         # Return local model and statistics
         return self.get_parameters({}), len(trainloader.dataset), {}
