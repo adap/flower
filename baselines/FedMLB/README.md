@@ -231,7 +231,7 @@ to 100 in settings with 100 clients and to 20 in settings with 500 clients;
 this is equal to set the amount of local_updates to 50 (as the default) -- 
 so no change to batch size is required --, in fact
 
-$local_updates = \frac{num_of_local_examples*local_epochs}{batch_size}$
+$local\_updates = \frac{num\_of\_local_examples*local\_epochs}{batch\_size}$
 
 ```bash
 python -m FedMLB.main da}aset_config.dataset="tiny-imagenet" 
