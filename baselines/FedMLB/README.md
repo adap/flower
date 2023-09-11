@@ -356,7 +356,7 @@ python -m FedMLB.main --multirun dataset_config.dataset="cifar100","tiny-imagene
   </tr>
 </table>
 
-![cifar100, 100 clients, 5% participation rate, alpha = 0.3](results_charts/accuracy_comparison_cifar100_dirichlet_0.3_100_.pdf)
+![cifar100, 100 clients, 5% participation rate, alpha = 0.3](readme_chart_results/accuracy_comparison_cifar100_dirichlet_0.3_100_.pdf)
 ### Table 1b
 
 The results of Table 1a in the paper (for FedAvg and FedMLB) refers
