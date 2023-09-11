@@ -28,7 +28,6 @@ from sphinx.application import ConfigError
 # Fixing path issue for autodoc
 sys.path.insert(0, os.path.abspath("../../"))
 sys.path.insert(0, os.path.abspath("../../flwr_datasets"))
-sys.path.insert(0, os.path.abspath("../../flwr_datasets/federated_dataset"))
 
 
 # -- Project information -----------------------------------------------------
