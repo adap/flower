@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Utility Functions for custom ClientManager via Driver APIs."""
+"""Utility functions for custom ClientManager via Driver APIs."""
 
 
 import threading
