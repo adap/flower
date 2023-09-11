@@ -52,7 +52,6 @@ python client.py
 
 ## Run with Driver API (REST transport layer)
 
-
 Terminal 1: start Flower server and enable REST transport layer
 
 ```bash

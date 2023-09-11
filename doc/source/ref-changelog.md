@@ -2,7 +2,7 @@
 
 ## Unreleased
 
--  **Update REST API to support create and delete nodes** ([#2283](https://github.com/adap/flower/pull/2283))
+- **Update REST API to support create and delete nodes** ([#2283](https://github.com/adap/flower/pull/2283))
 
 ### What's new?
 
