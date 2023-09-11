@@ -5,7 +5,7 @@ Flower Datasets library easily integrates with common frameworks like TensorFlow
 Learn how to transform the HuggingFace dataset to the framework of your choice.
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 1
 
    how-to-use-with-tf
    how-to-use-with-torch
