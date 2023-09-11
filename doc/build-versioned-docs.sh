@@ -23,9 +23,6 @@ versions="`git for-each-ref '--format=%(refname:lstrip=-1)' refs/tags/ | grep -i
 
 for current_version in ${versions}; do
  
-  if [ "${current_version}" = "v.1.5.0" ]; then
-    echo "dlkfjlsadkjf"
-  fi
   # Make the current language available to conf.py
   export current_version
   git checkout ${current_version}
@@ -56,7 +53,7 @@ for current_version in ${versions}; do
     fi
 
     # Only for v1.5.0, update the versions listed in the switcher
-    if [ "$current_version" = "v.1.5.0" ]; then
+    if [ "$current_version" = "v1.5.0" ]; then
       corrected_versions=$(cat <<-END
 html_context['versions'] = list()
 versions = [
