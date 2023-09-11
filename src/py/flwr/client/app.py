@@ -108,11 +108,11 @@ def start_client(
         The IPv4 or IPv6 address of the server. If the Flower
         server runs on the same machine on port 8080, then `server_address`
         would be `"[::]:8080"`.
-    client_fn : Callable
-        ...
-    client : flwr.client.Client
+    client_fn : Optional[Callable[[str], Client]]
+        A callable that instantiates a Client. (default: None)
+    client : Optional[flwr.client.Client]
         An implementation of the abstract base
-        class `flwr.client.Client`.
+        class `flwr.client.Client`. (default: None)
     grpc_max_message_length : int (default: 536_870_912, this equals 512MB)
         The maximum length of gRPC messages that can be exchanged with the
         Flower server. The default should be sufficient for most models.
@@ -223,6 +223,7 @@ def start_client(
                     continue
                 client_like: ClientLike = client_fn("-1")
                 client_ = to_client(client_like)
+                print("created client!!!")
                 task_res, sleep_duration, keep_going = handle(client_, task_ins)
                 send(task_res)
                 if not keep_going:
@@ -249,7 +250,8 @@ def start_client(
 def start_numpy_client(
     *,
     server_address: str,
-    client: NumPyClient,
+    client_fn: Optional[Callable[[str], NumPyClient]] = None,
+    client: Optional[NumPyClient] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
     transport: Optional[str] = None,
@@ -262,7 +264,9 @@ def start_numpy_client(
         The IPv4 or IPv6 address of the server. If the Flower server runs on
         the same machine on port 8080, then `server_address` would be
         `"[::]:8080"`.
-    client : flwr.client.NumPyClient
+    client_fn : Optional[Callable[[str], NumPyClient]]
+        A callable that instantiates a NumPyClient. (default: None)
+    client : Optional[flwr.client.NumPyClient]
         An implementation of the abstract base class `flwr.client.NumPyClient`.
     grpc_max_message_length : int (default: 536_870_912, this equals 512MB)
         The maximum length of gRPC messages that can be exchanged with the
@@ -300,9 +304,11 @@ def start_numpy_client(
     >>> )
     """
     # Start
+    wrp_client = _wrap_numpy_client(client=client) if client else None
     start_client(
         server_address=server_address,
-        client=_wrap_numpy_client(client=client),
+        client_fn=client_fn,
+        client=wrp_client,
         grpc_max_message_length=grpc_max_message_length,
         root_certificates=root_certificates,
         transport=transport,
