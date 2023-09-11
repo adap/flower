@@ -134,17 +134,23 @@ def start_client(
     --------
     Starting a gRPC client with an insecure server connection:
 
+    >>> def client_fn(cid: str):
+    >>>     return FlowerClient()
+    >>>
     >>> start_client(
     >>>     server_address=localhost:8080,
-    >>>     client=FlowerClient(),
+    >>>     client_fn=client_fn,
     >>> )
 
     Starting an SSL-enabled gRPC client:
 
     >>> from pathlib import Path
+    >>> def client_fn(cid: str):
+    >>>     return FlowerClient()
+    >>>
     >>> start_client(
     >>>     server_address=localhost:8080,
-    >>>     client=FlowerClient(),
+    >>>     client_fn=client_fn,
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
@@ -221,8 +227,11 @@ def start_client(
                 if task_ins is None:
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
+
+                # Instantiate the client
                 client_like: ClientLike = client_fn("-1")
                 client_ = to_client(client_like)
+                # Tell client to run task
                 task_res, sleep_duration, keep_going = handle(client_, task_ins)
                 send(task_res)
                 if not keep_going:
@@ -288,17 +297,23 @@ def start_numpy_client(
     --------
     Starting a client with an insecure server connection:
 
-    >>> start_client(
+    >>> def client_fn(cid: str):
+    >>>     return FlowerClient()
+    >>>
+    >>> start_numpy_client(
     >>>     server_address=localhost:8080,
-    >>>     client=FlowerClient(),
+    >>>     client_fn=client_fn,
     >>> )
 
-    Starting a SSL-enabled client:
+    Starting an SSL-enabled gRPC client:
 
     >>> from pathlib import Path
-    >>> start_client(
+    >>> def client_fn(cid: str):
+    >>>     return FlowerClient()
+    >>>
+    >>> start_numpy_client(
     >>>     server_address=localhost:8080,
-    >>>     client=FlowerClient(),
+    >>>     client_fn=client_fn,
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
