@@ -5,8 +5,8 @@ Let's integrate ``flwr-datasets`` with PyTorch DataLoaders and keep your PyTorch
 Standard setup - download the dataset, choose the partitioning::
 
   from flwr_datasets import FederatedDataset
-  mnist_fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
-  partition_idx_10 = mnist_fds.load_partition(10, "train")
+  mnist_fds = FederatedDataset(dataset="mnist", partitioners={"train": 10})
+  partition = mnist_fds.load_partition(0, "train")
   centralized_dataset = mnist_fds.load_full("test")
 
 Apply Transforms, Create DataLoader::
@@ -15,10 +15,10 @@ Apply Transforms, Create DataLoader::
   from torchvision.transforms import ToTensor
 
   transforms = ToTensor()
-  partition_idx_10_torch = partition_idx_10.map(
+  partition_torch = partition.map(
         lambda img: {"img": transforms(img)}, input_columns="img"
     ).with_format("torch")
-  dataloader_idx_10 = DataLoader(partition_idx_10_torch, batch_size=16)
+  dataloader = DataLoader(partition_torch, batch_size=64)
 
 
 We advise you to keep the
@@ -28,15 +28,15 @@ expected by a model with a convolutional layer.
 
 If you want to divide the dataset, you can use (at any point before passing the dataset to the DataLoader)::
 
-  partition_train_test = partition_idx_10.train_test_split(test_size=0.2)
+  partition_train_test = partition.train_test_split(test_size=0.2)
   partition_train = partition_train_test["train"]
   partition_test = partition_train_test["test"]
 
 Or you can simply calculate the indices yourself::
 
-  partition_len = len(partition_idx_10)
-  partition_train = partition_idx_10[:int(0.8 * partition_len)]
-  partition_test = partition_idx_10[int(0.8 * partition_len):]
+  partition_len = len(partition)
+  partition_train = partition[:int(0.8 * partition_len)]
+  partition_test = partition[int(0.8 * partition_len):]
 
 And during the training loop, you need to apply one change. With a typical dataloader you get a list returned for each iteration::
 
