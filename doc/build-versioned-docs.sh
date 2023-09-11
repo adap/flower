@@ -49,7 +49,6 @@ for current_version in ${versions}; do
       # Copy updated version of locales
       cp -r ${tmp_dir}/locales/$current_language locales/
       changed=true
-
     fi
 
     # Only for v1.5.0, update the versions listed in the switcher
@@ -77,8 +76,8 @@ END
 
     # Restore branch as it was to avoid conflicts
     git restore source/_templates
-    if [ $current_version == 'v.1.5.0' ]; then
-     git restore source/conf.py
+    if [ "$current_version" = "v1.5.0" ]; then
+      git restore source/conf.py
     fi
     if [ changed ]; then
       git restore locales/${current_language} || rm -rf locales/${current_language}
