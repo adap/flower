@@ -44,8 +44,8 @@ FLWR_VERSION=1.5.0 BUILD_TARGET=server ./publish.sh
 
 The default behaviour here is that an image will be published to Docker Hub under the names:
 
-* `flwr/[BUILD-TARGET]:[FLWR_VERSION]`
-* `flwr/[BUILD-TARGET]:latest`
+- `flwr/[BUILD-TARGET]:[FLWR_VERSION]`
+- `flwr/[BUILD-TARGET]:latest`
 
 Beware that the latest tag will be bound to the latest published image.
 
