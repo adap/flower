@@ -493,7 +493,9 @@ If True, looks for a checkpoint of that config to restart the training,
 otherwise initializes a new model.
 
 `save_checkpoint: True`
-If True, saves a checkpoint server model at the end of the training.
+If True, saves a checkpoint server model at the end of the training. Checkpoints 
+will be saved at 
+`FedMLB/FedMLB/model_checkpoints/{DATASET}/{MODEL}/{METHOD}/{TOTAL_CLIENTS}_clients/dir_{ALPHA_DIRICHLET}/seed_{RANDOM_SEED}/checkpoint_R{CURRENT_ROUND}`.
 
 `logging_memory_usage: False`
 If True, logs memory and GPU's memory usage (need for psutil and nvidia-smi 
