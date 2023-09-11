@@ -56,7 +56,7 @@ The following table shows the main hyperparameters for this baseline with their 
 
 ## Environment Setup
 
-To construct the Python environment simply run:
+To construct the Python environment, simply run:
 
 ```bash
 poetry install

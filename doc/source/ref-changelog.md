@@ -8,7 +8,7 @@
 
 - **General updates to baselines** ([#2301](https://github.com/adap/flower/pull/2301).[#2305](https://github.com/adap/flower/pull/2305), [#2307](https://github.com/adap/flower/pull/2307), [#2327](https://github.com/adap/flower/pull/2327))
 
-- **New or updates baselines**
+- **Update Flower Baselines**
 
   - FedProx ([#2286](https://github.com/adap/flower/pull/2286))
 
