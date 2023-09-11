@@ -52,15 +52,34 @@ for current_version in ${versions}; do
 
     fi
 
+    # Only for v1.5.0, update the versions listed in the switcher
+    if [ $current_version == 'v.1.5.0' ]; then
+     corrected_versions=$(cat <<-END
+ html_context["versions"] = list()
+ versions = [
+     tag.name
+     for tag in repo.tags
+     if int(tag.name[1]) > 0 and int(tag.name.split(".")[1]) >= 5
+ ]
+ versions.append("main")
+ for version in versions:
+     html_context["versions"].append({"name": version})
+ END
+     )
+     echo "$corrected_versions" >> source/conf.py
+    fi
+    
     # Copy updated version of html files
     cp -r ${tmp_dir}/_templates source
  
     # Actually building the docs for a given language and version
     sphinx-build -b html source/ build/html/${current_version}/${current_language} -A lang=True -D language=${current_language}
 
-    git restore source/_templates
-
     # Restore branch as it was to avoid conflicts
+    git restore source/_templates
+    if [ $current_version == 'v.1.5.0' ]; then
+     git restore source/conf.py
+    fi
     if [ changed ]; then
       git restore locales/${current_language} || rm -rf locales/${current_language}
     fi
