@@ -223,7 +223,6 @@ def start_client(
                     continue
                 client_like: ClientLike = client_fn("-1")
                 client_ = to_client(client_like)
-                print("created client!!!")
                 task_res, sleep_duration, keep_going = handle(client_, task_ins)
                 send(task_res)
                 if not keep_going:
