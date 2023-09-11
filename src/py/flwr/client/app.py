@@ -50,7 +50,8 @@ from flwr.common.typing import (
     Status,
 )
 
-from .client import Client, ClientState
+from .client import Client
+from .client_state import ClientState
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle
@@ -362,12 +363,12 @@ def _evaluate(self: Client, ins: EvaluateIns) -> EvaluateRes:
 
 def _get_state(self: Client) -> ClientState:
     """Return state of underlying numpy client."""
-    return self.numpy_client.get_state()
+    return self.numpy_client.get_state()  # type: ignore
 
 
 def _set_state(self: Client, state: ClientState) -> None:
     """Set state of underlying numpy client."""
-    self.numpy_client.set_state(state)
+    self.numpy_client.set_state(state)  # type: ignore
 
 
 def _wrap_numpy_client(client: NumPyClient) -> Client:
