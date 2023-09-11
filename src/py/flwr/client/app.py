@@ -90,11 +90,12 @@ ClientLike = Union[Client, NumPyClient]
 
 
 # pylint: disable=import-outside-toplevel,too-many-locals,too-many-branches
+# pylint: disable=too-many-statements
 def start_client(
     *,
     server_address: str,
     client_fn: Optional[Callable[[str], ClientLike]] = None,
-    client: Optional[Client] = None,
+    client: Optional[ClientLike] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
     transport: Optional[str] = None,
@@ -159,7 +160,13 @@ def start_client(
 
     if client_fn is None:
         # Wrap `Client` instance in `client_fn`
-        def single_client_factory(cid):
+        def single_client_factory(
+            cid: str,  # pylint: disable=unused-argument
+        ) -> ClientLike:
+            if client is None:  # Added this to keep mypy happy
+                raise Exception(
+                    "Both `client_fn` and `client` are `None`, but one is required"
+                )
             return client  # Always return the same instance
 
         client_fn = single_client_factory
@@ -217,7 +224,9 @@ def start_client(
                 if task_ins is None:
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
-                task_res, sleep_duration, keep_going = handle(client_fn, task_ins)
+                client_like: ClientLike = client_fn("-1")
+                client = to_client(client_like)
+                task_res, sleep_duration, keep_going = handle(client, task_ins)
                 send(task_res)
                 if not keep_going:
                     break
