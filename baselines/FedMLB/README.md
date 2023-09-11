@@ -205,8 +205,11 @@ The default configuration for `FedMLB.main` uses (1.) for CIFAR-100, and can be 
 
 ```bash
 python -m FedMLB.main # this will run using the default settings in the `conf/base.yaml`
+```
 
-# you can override settings directly from the command line
+You can override settings directly from the command line in this way:
+
+```bash
 python -m FedMLB.main clients_per_round=10 # this will run using 10 clients per round instead of 5 clients as the default config 
 
 # this will select the dataset partitioned with 0.6 concentration paramater instead of 0.3 as the default config
@@ -219,10 +222,20 @@ To run using FedAvg:
 python -m FedMLB.main algorithm="FedAvg"
 ```
 
-To run using FedAvg+KD:
+To run experiments with all the configurations of CIFAR-100, use the followings:
+
 ```bash
-# this will use the regular FedAvg local training
-python -m FedMLB.main algorithm="FedAvg+KD"
+# this will use the setting for 1. (default)
+python -m FedMLB.main
+ 
+# this will use the setting for 2. (see above)
+python -m FedMLB.main total_clients=500 clients_per_round=10 
+
+# this will use the setting for 3. (see above)
+python -m FedMLB.main dataset_config.alpha_dirichlet=0.6  
+
+# this will use the setting for 4. (see above)
+python -m FedMLB.main dataset_config.alpha_dirichlet=0.6 total_clients=500 clients_per_round=10
 ```
 
 #### Tiny-Imagenet
@@ -233,15 +246,19 @@ so no change to batch size is required --, in fact
 
 local_updates = num_of_local_examples*local_epochs / batch_size
 
-To reproduce results with Tiny-ImageNet, use the followings:
+To run experiments with all the configurations of Tiny-ImageNet, use the followings:
 
 ```bash
-python -m FedMLB.main da}aset_config.dataset="tiny-imagenet" 
+# this will use the setting for 1. (see above)
+python -m FedMLB.main dataset_config.dataset="tiny-imagenet" 
 
+# this will use the setting for 2. (see above)
 python -m FedMLB.main dataset_config.dataset="tiny-imagenet" total_clients=500 clients_per_round=10
 
+# this will use the setting for 3. (see above)
 python -m FedMLB.main dataset_config.dataset="tiny-imagenet" dataset_config.alpha_dirichlet=0.6  
 
+# this will use the setting for 4. (see above)
 python -m FedMLB.main dataset_config.dataset="tiny-imagenet" dataset_config.alpha_dirichlet=0.6 total_clients=500 clients_per_round=10
 ```
 
