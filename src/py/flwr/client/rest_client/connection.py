@@ -120,6 +120,7 @@ def http_request_response(
 
     # Necessary state to link TaskRes to TaskIns
     state: Dict[str, Optional[TaskIns]] = {KEY_TASK_INS: None}
+
     # Enable create_node and delete_node to store node
     node_store: Dict[str, Optional[Node]] = {KEY_NODE: None}
 
