@@ -21,8 +21,8 @@ Apply Transforms, Create DataLoader::
   dataloader_idx_10 = DataLoader(partition_idx_10_torch, batch_size=16)
 
 
-We advise you to keep the `
-ToTensor() <https://pytorch.org/vision/stable/generated/torchvision.transforms.ToTensor.html>` transform (especially if
+We advise you to keep the
+`ToTensor() <https://pytorch.org/vision/stable/generated/torchvision.transforms.ToTensor.html>`_ transform (especially if
 you used it in your PyTorch code) because it swaps the dimensions from (H x W x C) to (C x H x W). This order is
 expected by a model with a convolutional layer.
 
