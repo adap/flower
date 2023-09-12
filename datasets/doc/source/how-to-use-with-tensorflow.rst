@@ -5,7 +5,7 @@ Let's integrate ``flwr-datasets`` with TensorFlow. We show you three ways how to
 that ``TensorFlow``'s models expect.  Please note that, especially for the smaller datasets, the performance of the
 following methods is very close. We recommend you choose the most comfortable method.
 
-Numpy
+NumPy
 -----
 The first way is to transform the data into the numpy arrays. It's an easier option that is commonly used. Feel free to
 follow the :doc:`how-to-use-with-numpy` tutorial, especially if you are a beginner.

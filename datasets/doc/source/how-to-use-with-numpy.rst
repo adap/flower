@@ -1,7 +1,7 @@
-Use with Numpy
-===================
+Use with NumPy
+==============
 
-Let's integrate ``flwr-datasets`` with Numpy.
+Let's integrate ``flwr-datasets`` with NumPy.
 
 Prepare the desired partitioning::
 
@@ -10,7 +10,7 @@ Prepare the desired partitioning::
   partition = fds.load_partition(0, "train")
   centralized_dataset = fds.load_full("test")
 
-Transform to Numpy::
+Transform to NumPy::
 
   partition_np = partition.with_format("numpy")
   X_train, y_train = partition_np["img"], partition_np["label"]
