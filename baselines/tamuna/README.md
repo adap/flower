@@ -24,7 +24,7 @@ dataset: [MNIST]
 
 ****Hardware Setup:**** By default, the experiments expect at least one gpu, but this can be changed to cpu only by specifying client and server devices. Default setup less than 5 GB of dedicated GPU memory.
 
-****Contributors:**** Ivan Agarský @Crabzmatic, Grigory Malinovsky @gsmalinovsky
+****Contributors:**** Ivan Agarský https://github.com/Crabzmatic, Grigory Malinovsky https://github.com/gsmalinovsky
 
 
 ## Experimental Setup
