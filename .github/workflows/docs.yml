@@ -12,7 +12,7 @@ env:
   FLWR_TELEMETRY_ENABLED: 0
 
 jobs:
-  build_docs:
+  build_and_deploy:
     runs-on: ubuntu-22.04
     name: Build and deploy
     steps:
