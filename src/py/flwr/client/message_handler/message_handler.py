@@ -17,7 +17,6 @@
 
 from typing import Tuple
 
-from flwr.client import ClientFn, ClientLike, to_client
 from flwr.client.client import (
     Client,
     maybe_call_evaluate,
@@ -29,7 +28,9 @@ from flwr.client.message_handler.task_handler import (
     get_server_message_from_task_ins,
     wrap_client_message_in_task_res,
 )
+from flwr.client.numpy_client_wrapper import to_client
 from flwr.client.secure_aggregation import SecureAggregationHandler
+from flwr.client.typing import ClientFn, ClientLike
 from flwr.common import serde
 from flwr.proto.task_pb2 import SecureAggregation, Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
@@ -61,11 +62,10 @@ def handle(client_fn: ClientFn, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
         reconnect later (False).
     """
     server_msg = get_server_message_from_task_ins(task_ins, exclude_reconnect_ins=False)
+    # Instantiate the client
+    client_like: ClientLike = client_fn("-1")
+    client = to_client(client_like)
     if server_msg is None:
-        # Instantiate the client
-        client_like: ClientLike = client_fn("-1")
-        client = to_client(client_like)
-
         # Secure Aggregation
         if task_ins.task.HasField("sa") and isinstance(
             client, SecureAggregationHandler

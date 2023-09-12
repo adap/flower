@@ -17,7 +17,8 @@
 
 import uuid
 
-from flwr.client import Client, ClientFn
+from flwr.client import Client
+from flwr.client.typing import ClientFn
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
