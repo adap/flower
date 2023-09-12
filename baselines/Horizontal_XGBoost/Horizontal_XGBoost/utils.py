@@ -9,12 +9,12 @@ import hydra
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
-from dataset import load_single_dataset
+from .dataset import load_single_dataset
 
 from typing import Any, Dict, List, Optional, Tuple, Union
 from flwr.common import NDArray, NDArrays
 
-from models import fit_XGBoost
+from .models import fit_XGBoost
 
 
 dataset_tasks={

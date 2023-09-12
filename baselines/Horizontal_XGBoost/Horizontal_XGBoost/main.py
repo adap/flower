@@ -9,8 +9,8 @@ import hydra
 from omegaconf import DictConfig, OmegaConf
 from torch.utils.data import TensorDataset
 import torch
-from utils import run_centralized,clients_preformance_on_local_data,load_single_dataset,dataset_tasks
-from dataset import do_fl_partitioning
+from .utils import run_centralized,clients_preformance_on_local_data,load_single_dataset,dataset_tasks
+from .dataset import do_fl_partitioning
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)

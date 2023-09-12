@@ -58,8 +58,7 @@ def download_data(
         in index 0
     """
     
-    ALL_DATASETS_PATH="./baselines/FL+XGBoost/FL+XGBoost/dataset"
-    
+    ALL_DATASETS_PATH="./dataset"
     if dataset_name=="a9a":
         DATASET_PATH=os.path.join(ALL_DATASETS_PATH, "a9a")
         if not os.path.exists(DATASET_PATH):
