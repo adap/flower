@@ -24,9 +24,9 @@ import ray
 from flwr.client import Client, NumPyClient
 from flwr.common import Code, GetPropertiesRes, Status
 from flwr.simulation.ray_transport.ray_actor import (
-    ClientJobFn,
     ClientRes,
     DefaultActor,
+    JobFn,
     VirtualClientEngineActor,
     VirtualClientEngineActorPool,
 )
@@ -46,7 +46,7 @@ def get_dummy_client(cid: str) -> DummyClient:
 
 
 # A dummy workload
-def job_fn(cid: str) -> ClientJobFn:  # pragma: no cover
+def job_fn(cid: str) -> JobFn:  # pragma: no cover
     """Construct a simple job with cid dependency."""
 
     def cid_times_pi(client: Client) -> ClientRes:  # pylint: disable=unused-argument
