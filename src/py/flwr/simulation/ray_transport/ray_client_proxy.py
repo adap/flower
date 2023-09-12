@@ -22,7 +22,7 @@ from typing import Dict, Optional, cast
 import ray
 
 from flwr import common
-from flwr.client import Client, ClientLike, to_client
+from flwr.client import Client, ClientFn, ClientLike, to_client
 from flwr.client.client import (
     maybe_call_evaluate,
     maybe_call_fit,
@@ -32,7 +32,6 @@ from flwr.client.client import (
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 from flwr.simulation.ray_transport.ray_actor import (
-    ClientFn,
     ClientJobFn,
     ClientRes,
     VirtualClientEngineActorPool,
