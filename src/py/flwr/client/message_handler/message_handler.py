@@ -28,7 +28,9 @@ from flwr.client.message_handler.task_handler import (
     get_server_message_from_task_ins,
     wrap_client_message_in_task_res,
 )
+from flwr.client.numpy_client_wrapper import to_client
 from flwr.client.secure_aggregation import SecureAggregationHandler
+from flwr.client.typing import ClientFn, ClientLike
 from flwr.common import serde
 from flwr.proto.task_pb2 import SecureAggregation, Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
@@ -38,13 +40,13 @@ class UnknownServerMessage(Exception):
     """Exception indicating that the received message is unknown."""
 
 
-def handle(client: Client, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
+def handle(client_fn: ClientFn, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
     """Handle incoming TaskIns from the server.
 
     Parameters
     ----------
-    client : Client
-        The Client instance provided by the user.
+    client_fn : ClientFn
+        A callable that instantiates a Client.
     task_ins: TaskIns
         The task instruction coming from the server, to be processed by the client.
 
@@ -61,6 +63,9 @@ def handle(client: Client, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
     """
     server_msg = get_server_message_from_task_ins(task_ins, exclude_reconnect_ins=False)
     if server_msg is None:
+        # Instantiate the client
+        client_like: ClientLike = client_fn("-1")
+        client = to_client(client_like)
         # Secure Aggregation
         if task_ins.task.HasField("sa") and isinstance(
             client, SecureAggregationHandler
@@ -79,20 +84,22 @@ def handle(client: Client, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
             )
             return task_res, 0, True
         raise NotImplementedError()
-    client_msg, sleep_duration, keep_going = handle_legacy_message(client, server_msg)
+    client_msg, sleep_duration, keep_going = handle_legacy_message(
+        client_fn, server_msg
+    )
     task_res = wrap_client_message_in_task_res(client_msg)
     return task_res, sleep_duration, keep_going
 
 
 def handle_legacy_message(
-    client: Client, server_msg: ServerMessage
+    client_fn: ClientFn, server_msg: ServerMessage
 ) -> Tuple[ClientMessage, int, bool]:
     """Handle incoming messages from the server.
 
     Parameters
     ----------
-    client : Client
-        The Client instance provided by the user.
+    client_fn : ClientFn
+        A callable that instantiates a Client.
     server_msg: ServerMessage
         The message coming from the server, to be processed by the client.
 
@@ -111,6 +118,11 @@ def handle_legacy_message(
     if field == "reconnect_ins":
         disconnect_msg, sleep_duration = _reconnect(server_msg.reconnect_ins)
         return disconnect_msg, sleep_duration, False
+
+    # Instantiate the client
+    client_like: ClientLike = client_fn("-1")
+    client = to_client(client_like)
+    # Execute task
     if field == "get_properties_ins":
         return _get_properties(client, server_msg.get_properties_ins), 0, True
     if field == "get_parameters_ins":
