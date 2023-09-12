@@ -62,7 +62,7 @@ class VirtualClientEngineActor(ABC):
         job_fn: JobFn,
         client_state: ClientState,
         cid: str,
-    ) -> Tuple[str, ClientRes, ClientState]:
+    ) -> Tuple[str, ClientRes, Optional[ClientState]]:
         """Run a client workload."""
         # Execute tasks and return result
         # return also cid which is needed to ensure results

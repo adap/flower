@@ -16,6 +16,7 @@
 
 
 from abc import ABC
+from typing import Optional
 
 from flwr.client.client_state import ClientState
 from flwr.common import (
@@ -36,7 +37,7 @@ from flwr.common import (
 class Client(ABC):
     """Abstract base class for Flower clients."""
 
-    state = ClientState("-1")
+    state = None
 
     def set_state(self, state: ClientState) -> None:
         """Set client state.
@@ -48,7 +49,7 @@ class Client(ABC):
         """
         self.state = state
 
-    def get_state(self) -> ClientState:
+    def get_state(self) -> Optional[ClientState]:
         """Get client state.
 
         Returns
