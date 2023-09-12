@@ -39,7 +39,7 @@ from .fedavg import FedAvg
 
 # flake8: noqa: E501
 class Bulyan(FedAvg):
-    """Configurable Bulyan strategy implementation."""
+    """Bulyan strategy implementation."""
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes,line-too-long, too-many-locals
     def __init__(
@@ -66,7 +66,7 @@ class Bulyan(FedAvg):
         first_aggregation_rule: Callable = aggregate_krum,  # type: ignore
         **aggregation_rule_kwargs: Any,
     ) -> None:
-        """Configurable Bulyan strategy.
+        """Bulyan strategy.
 
         Implementation based on arxiv.org/abs/1802.07927.
 
@@ -118,6 +118,7 @@ class Bulyan(FedAvg):
         self.aggregation_rule_kwargs = aggregation_rule_kwargs
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"Bulyan(accept_failures={self.accept_failures})"
         return rep
 
