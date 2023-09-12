@@ -1,0 +1,42 @@
+name: Flower Baselines
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "datasets/flwr_datasets/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "datasets/flwr_datasets/**"
+
+defaults:
+  run:
+    working-directory: datasets
+
+jobs:
+  test_core:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        # Latest version which comes cached in the host image can be found here:
+        # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md#python
+        # In case of a mismatch, the job has to download Python to install it.
+        # Note: Due to a bug in actions/setup-python we have to put 3.10 in
+        # qoutes as it will otherwise will assume 3.1
+        python: [3.8, 3.9, '3.10']
+
+    name: Python ${{ matrix.python }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Bootstrap
+        uses: ./../.github/actions/bootstrap
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install dependencies (mandatory only)
+        run: python -m poetry install --all-extras
+      - name: Test (formatting + unit tests)
+        run: ./dev/test.sh
