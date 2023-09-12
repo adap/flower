@@ -276,7 +276,7 @@ the accuracy at the target round is based on the exponential moving average with
 0.9. Tensorboard allows to easily visualize/calculate the moving average of a run.
 
 All the results reported in this repository can be also browsed 
-on this [tesnsordev online dashboard](https://tensorboard.dev/experiment/n5QWJWP8QWagUxcWuOtAUA/#scalars).
+on this [tesnsorboard.dev online dashboard](https://tensorboard.dev/experiment/n5QWJWP8QWagUxcWuOtAUA/#scalars).
 
 ### Table 1a
 
