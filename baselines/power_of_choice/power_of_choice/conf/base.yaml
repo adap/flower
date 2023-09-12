@@ -10,6 +10,7 @@ local_epochs: 5
 fraction_samples: 1.0
 seed: 42
 alpha: 2
+is_cnn: False
 
 client_resources:
   num_cpus: 1

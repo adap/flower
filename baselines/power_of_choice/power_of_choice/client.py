@@ -5,6 +5,7 @@ to instantiate your client.
 """
 
 from typing import Callable, Dict
+from models import create_CNN_model
 from models import create_MLP_model
 from dataset import load_dataset
 from flwr.common import Config, Scalar
@@ -86,11 +87,15 @@ class FlwrClient(fl.client.NumPyClient):
         return loss, len(self.x_val), {"accuracy": acc}
 
 
-def gen_client_fn() -> Callable[[str], fl.client.Client]:
+def gen_client_fn(is_cnn: bool = False) -> Callable[[str], fl.client.Client]:
 
     def client_fn(cid: str) -> fl.client.Client:
         # Load model
-        model = create_MLP_model()
+        if(is_cnn):
+            model = create_CNN_model()
+        else:
+            model = create_MLP_model()
+        
         model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
 
         # Load data partition (divide MNIST into NUM_CLIENTS distinct partitions)

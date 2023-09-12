@@ -16,3 +16,22 @@ def create_MLP_model():
         tf.keras.layers.Dense(10, activation="softmax"),
     ])
     return model
+
+def create_CNN_model():
+    # CNN on CIFAR10 for Image Classification: a deep convolutional neural network with 2
+    # convolutional layers with max pooling and 4 hidden fully connected linear layers of units [120, 100, 84, 50].
+    # The input is the flattened convolution output and the output is consisted of 10 units each of one of the 0-9
+    # labels.
+    model = tf.keras.models.Sequential([
+        tf.keras.layers.Conv2D(6, kernel_size=(5, 5), strides=(1, 1), activation="relu", input_shape=(32, 32, 3)),
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2)),
+        tf.keras.layers.Conv2D(16, kernel_size=(5, 5), strides=(1, 1), activation="relu"),
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2)),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(120, activation="relu"),
+        tf.keras.layers.Dense(84, activation="relu"),
+        tf.keras.layers.Dense(50, activation="relu"),
+        tf.keras.layers.Dense(10, activation="softmax"),
+    ])
+
+    return model
