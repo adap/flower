@@ -24,7 +24,7 @@ import dev.flower.android.GetPropertiesIns
 import dev.flower.android.GetPropertiesRes
 import dev.flower.android.Parameters
 import dev.flower.android.Status
-import com.google.protobuf.ByteString
+import dev.flower.android.startClient
 
 /**
  * Flower client that handles TensorFlow Lite model [Interpreter] and sample data.
@@ -232,25 +232,35 @@ class FlowerClient<X : Any, Y : Any>(
     }
 
     override fun evaluate(ins: EvaluateIns): EvaluateRes {
+        // Update the local parameters
         callback("Handling Evaluate request from the server")
         val layers = ins.parameters.tensors
         assertIntsEqual(layers.size, layersSizes.size)
         updateParameters(layers)
+
+        // Start local evaluate
         val (loss, accuracy) = startLocalEvaluate()
         callback("Test Accuracy after this round = $accuracy")
+
+        // Return loss as EvaluateRes
         return EvaluateRes(Status(Code.OK, "Success"), loss, trainingSamples.size, emptyMap())
     }
 
     override fun fit(ins: FitIns): FitRes {
+        // Update the local parameters
         val layers = ins.parameters.tensors
         assertIntsEqual(layers.size, layersSizes.size)
         val epochs = ins.config.getOrDefault(
             "local_epochs", 1
         )!!
         updateParameters(layers)
+
+        // Start local training
         startLocalTraining(
             1,
             lossCallback = { callback("Average loss: ${it.average()}.") })
+
+        // Return trained parameters as FitRes
         return FitRes(
             Status(Code.OK, "Success"),
             Parameters(getParameters(), "ndarray"),
@@ -286,4 +296,8 @@ class FakeNonEmptyMap<K, V> : HashMap<K, V>() {
     override fun isEmpty(): Boolean {
         return false
     }
+}
+
+suspend fun createFlowerClient(address: String, client: Client) {
+    startClient(address, false, client)
 }

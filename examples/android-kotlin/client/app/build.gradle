@@ -10,7 +10,7 @@ android {
     defaultConfig {
         applicationId "flwr.android_client"
         // API level 14+ is required for TLS since Google Play Services v10.2
-        minSdkVersion 24
+        minSdkVersion 28
         targetSdkVersion 33
         versionCode 1
         versionName "1.0"
@@ -64,6 +64,7 @@ dependencies {
     kapt("androidx.room:room-compiler:$room_version")
     implementation("androidx.room:room-ktx:$room_version")
     testImplementation("androidx.room:room-testing:$room_version")
+    implementation 'dev.flower:flwr-android:0.0.2'
 
     // Local dependencies.
     implementation project(path: ':flower_tflite')

@@ -15,9 +15,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.room.Room
 import dev.flower.flower_tflite.FlowerClient
-import dev.flower.flower_tflite.FlowerServiceRunnable
 import dev.flower.flower_tflite.SampleSpec
-import dev.flower.flower_tflite.createFlowerService
 import dev.flower.flower_tflite.helpers.classifierAccuracy
 import dev.flower.flower_tflite.helpers.loadMappedAssetFile
 import dev.flower.flower_tflite.helpers.negativeLogLikelihoodLoss
@@ -29,7 +27,6 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
     private val scope = MainScope()
     lateinit var flowerClient: FlowerClient<Float3DArray, FloatArray>
-    lateinit var flowerServiceRunnable: FlowerServiceRunnable<Float3DArray, FloatArray>
     private lateinit var ip: EditText
     private lateinit var port: EditText
     private lateinit var loadDataButton: Button
@@ -171,11 +168,7 @@ class MainActivity : AppCompatActivity() {
     suspend fun runGrpcInBackground(host: String, port: Int) {
         val address = "dns:///$host:$port"
         val result = runWithStacktraceOr("Failed to connect to the FL server \n") {
-            flowerServiceRunnable = createFlowerService(address, false, flowerClient) {
-                runOnUiThread {
-                    setResultText(it)
-                }
-            }
+            dev.flower.flower_tflite.createFlowerClient(address, flowerClient)
             "Connection to the FL server successful \n"
         }
         runOnUiThread {
