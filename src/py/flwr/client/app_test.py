@@ -17,8 +17,7 @@
 
 from typing import Dict, Tuple
 
-from flwr.client.numpy_client_wrapper import to_client
-from flwr.client.typing import ClientLike
+from flwr.client import ClientLike, to_client
 from flwr.common import (
     Config,
     EvaluateIns,
