@@ -57,6 +57,11 @@ Please see how models are implemented using a so called model_manager and model_
 | optimizer | SGD |
 | algorithm | fedavg|
 
+****Stateful Clients:****
+In this Baseline (FedPer), we must store the state of the local client head while aggregation of body parameters happen at the server. Flower is currently making this possible but for the time being, we reside to storing client _head_ state in a folder called client_states. We store the values after each fit and evaluate function carried out on each client, and call for the state before executing these funcitons. Moreover, the state of a unique client is accessed using the client ID. 
+
+__NOTE:__ This is a work-around so that the local head parameters are not reset before each fit and evaluate. Nevertheless, it can come to change with future releases. 
+
 
 ## Environment Setup
 
@@ -69,7 +74,7 @@ poetry install
 # activate the environment
 poetry shell
 
-# install PyTorch with GPU support. Please note this baseline is very lightweight so it can run fine on a CPU.
+# install PyTorch with GPU support. 
 pip install torch==2.0.1+cu117 torchvision==0.15.2+cu117 
 ```
 ## Running the Experiments
