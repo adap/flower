@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,19 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower client."""
+"""Custom types for Flower clients."""
 
+from typing import Callable, Union
 
-from .app import run_client as run_client
-from .app import start_client as start_client
-from .app import start_numpy_client as start_numpy_client
 from .client import Client as Client
 from .numpy_client import NumPyClient as NumPyClient
 
-__all__ = [
-    "Client",
-    "NumPyClient",
-    "run_client",
-    "start_client",
-    "start_numpy_client",
-]
+ClientLike = Union[Client, NumPyClient]
+ClientFn = Callable[[str], ClientLike]
