@@ -37,7 +37,7 @@ from flwr.common import (
 class Client(ABC):
     """Abstract base class for Flower clients."""
 
-    state = None
+    state: Optional[ClientState] = None
 
     def set_state(self, state: ClientState) -> None:
         """Set client state.

@@ -17,12 +17,12 @@
 
 from math import pi
 from random import shuffle
-from typing import List, Tuple, Type, cast
+from typing import Dict, List, Tuple, Type, cast
 
 import ray
 
 from flwr.client import Client, ClientState, NumPyClient
-from flwr.common import Code, GetPropertiesRes, Status
+from flwr.common import Code, Config, GetPropertiesIns, GetPropertiesRes, Scalar, Status
 from flwr.simulation.ray_transport.ray_actor import (
     ClientRes,
     DefaultActor,
@@ -39,6 +39,19 @@ class DummyClient(NumPyClient):
     def __init__(self, cid: str) -> None:
         self.cid = int(cid)
 
+    def get_properties(self, config: Config) -> Dict[str, Scalar]:
+        """Update state."""
+        # Let's now do something with the client state
+        # Let's add a new entry to the state. However, if it
+        # exists we'll double its value (this tests in-memory state persistance
+        # across several client spawn events -- or rounds in the case of full FL)
+        if hasattr(self.state, "result_cache"):
+            self.state.result_cache *= 2  # type: ignore
+        else:
+            self.state.result_cache = config["result"]  # type: ignore
+
+        return {}
+
 
 def get_dummy_client(cid: str) -> DummyClient:
     """Return a DummyClient."""
@@ -49,8 +62,14 @@ def get_dummy_client(cid: str) -> DummyClient:
 def job_fn(cid: str) -> JobFn:  # pragma: no cover
     """Construct a simple job with cid dependency."""
 
-    def cid_times_pi(client: Client) -> ClientRes:  # pylint: disable=unused-argument
+    def cid_times_pi(
+        client: Client,
+    ) -> ClientRes:  # pylint: disable=unused-argument
         result = int(cid) * pi
+
+        cfg: Config = {"result": result}
+        ins = GetPropertiesIns(cfg)
+        client.get_properties(ins)
 
         # now let's convert it to a GetPropertiesRes response
         return GetPropertiesRes(
@@ -69,7 +88,7 @@ def prep(
     def create_actor_fn() -> Type[VirtualClientEngineActor]:
         return actor_type.options(**client_resources).remote()  # type: ignore
 
-    num_proxies = 373  # a prime number
+    num_proxies = 113  # a prime number
     cids = [str(cid) for cid in range(num_proxies)]
 
     # Prepare client states for all clients involved in the simulation
@@ -103,15 +122,25 @@ def test_cid_consistency_one_at_a_time() -> None:
 
     Submit one job and waits for completion. Then submits the next and so on
     """
-    proxies, _ = prep()
-    # submit jobs one at a time
-    for prox in proxies:
-        res = prox._submit_job(  # pylint: disable=protected-access
-            job_fn=job_fn(prox.cid), timeout=None
-        )
+    proxies, pool = prep()
 
-        res = cast(GetPropertiesRes, res)
-        assert int(prox.cid) * pi == res.properties["result"]
+    def run_once(iter_num: int) -> None:
+        for prox in proxies:
+            res = prox._submit_job(  # pylint: disable=protected-access
+                job_fn=job_fn(prox.cid), timeout=None
+            )
+
+            res = cast(GetPropertiesRes, res)
+            assert int(prox.cid) * pi == res.properties["result"]
+
+            # Check state value
+            result_cache = pool.client_states[prox.cid].result_cache  # type: ignore
+            assert result_cache == int(prox.cid) * pi * iter_num
+
+    # Submit jobs one at a time (start from uninitialised client states)
+    run_once(1)
+    # Submit a second time (test that client state is applied and updated fine)
+    run_once(2)
 
     ray.shutdown()
 
@@ -121,24 +150,37 @@ def test_cid_consistency_all_submit_first() -> None:
 
     All jobs are submitted at the same time. Then fetched one at a time.
     """
-    proxies, _ = prep()
+    proxies, pool = prep()
 
     # submit all jobs (collect later)
-    shuffle(proxies)
-    for prox in proxies:
-        job = job_fn(prox.cid)
-        prox.actor_pool.submit_client_job(
-            lambda a, c_fn, j_fn, c_state, cid: a.run.remote(c_fn, j_fn, c_state, cid),
-            (prox.client_fn, job, prox.cid),
-        )
+    def submit_once() -> None:
+        shuffle(proxies)
+        for prox in proxies:
+            job = job_fn(prox.cid)
+            prox.actor_pool.submit_client_job(
+                lambda a, c_fn, j_fn, c_state, cid: a.run.remote(
+                    c_fn, j_fn, c_state, cid
+                ),
+                (prox.client_fn, job, prox.cid),
+            )
 
     # fetch results one at a time
-    shuffle(proxies)
-    for prox in proxies:
-        res = prox.actor_pool.get_client_result(prox.cid, timeout=None)
-        res = cast(GetPropertiesRes, res)
-        assert int(prox.cid) * pi == res.properties["result"]
+    def fetch_and_test_once(iter_num: int) -> None:
+        shuffle(proxies)
+        for prox in proxies:
+            res = prox.actor_pool.get_client_result(prox.cid, timeout=None)
+            res = cast(GetPropertiesRes, res)
+            assert int(prox.cid) * pi == res.properties["result"]
+            # Check state value
+            result_cache = pool.client_states[prox.cid].result_cache  # type: ignore
+            assert result_cache == int(prox.cid) * pi * iter_num
 
+    # Submit jobs one at a time (start from uninitialised client states)
+    submit_once()
+    fetch_and_test_once(1)
+    # Submit a second time (test that client state is applied and updated fine)
+    submit_once()
+    fetch_and_test_once(2)
     ray.shutdown()
 
 
@@ -149,21 +191,33 @@ def test_cid_consistency_without_proxies() -> None:
     cids = [str(cid) for cid in range(num_clients)]
 
     # submit all jobs (collect later)
-    shuffle(cids)
-    for cid in cids:
-        job = job_fn(cid)
-        pool.submit_client_job(
-            lambda a, c_fn, j_fn, c_state, cid_: a.run.remote(
-                c_fn, j_fn, c_state, cid_
-            ),
-            (get_dummy_client, job, cid),
-        )
+    def submit_once() -> None:
+        shuffle(cids)
+        for cid in cids:
+            job = job_fn(cid)
+            pool.submit_client_job(
+                lambda a, c_fn, j_fn, c_state, cid_: a.run.remote(
+                    c_fn, j_fn, c_state, cid_
+                ),
+                (get_dummy_client, job, cid),
+            )
 
     # fetch results one at a time
-    shuffle(cids)
-    for cid in cids:
-        res = pool.get_client_result(cid, timeout=None)
-        res = cast(GetPropertiesRes, res)
-        assert int(cid) * pi == res.properties["result"]
+    def fetch_and_test_once(iter_num: int) -> None:
+        shuffle(cids)
+        for cid in cids:
+            res = pool.get_client_result(cid, timeout=None)
+            res = cast(GetPropertiesRes, res)
+            assert int(cid) * pi == res.properties["result"]
+            # Check state value
+            result_cache = pool.client_states[cid].result_cache  # type: ignore
+            assert result_cache == int(cid) * pi * iter_num
+
+    # Submit jobs one at a time (start from uninitialised client states)
+    submit_once()
+    fetch_and_test_once(1)
+    # Submit a second time (test that client state is applied and updated fine)
+    submit_once()
+    fetch_and_test_once(2)
 
     ray.shutdown()

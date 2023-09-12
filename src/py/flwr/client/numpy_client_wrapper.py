@@ -14,7 +14,7 @@
 # ==============================================================================
 """Wrapper for NumPyClient objects."""
 
-from typing import Callable, Dict
+from typing import Callable, Dict, Optional
 
 from flwr.client.typing import ClientLike
 from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
@@ -145,14 +145,14 @@ def _evaluate(self: Client, ins: EvaluateIns) -> EvaluateRes:
     )
 
 
-def _get_state(self: Client) -> ClientState:
+def _get_state(self: Client) -> Optional[ClientState]:
     """Return state of underlying numpy client."""
-    return self.numpy_client.get_state()  # type: ignore
+    return self.numpy_client.state  # type: ignore
 
 
 def _set_state(self: Client, state: ClientState) -> None:
     """Set state of underlying numpy client."""
-    self.numpy_client.set_state(state)  # type: ignore
+    self.numpy_client.state = state  # type: ignore
 
 
 def _wrap_numpy_client(client: NumPyClient) -> Client:

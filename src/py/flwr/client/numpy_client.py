@@ -25,27 +25,7 @@ from flwr.common import Config, NDArrays, Scalar
 class NumPyClient(ABC):
     """Abstract base class for Flower clients using NumPy."""
 
-    state = None
-
-    def set_state(self, state: ClientState) -> None:
-        """Set client state.
-
-        Parameters
-        ----------
-        state: ClientState
-            The flwr.client.ClientState object to use for this client instance.
-        """
-        self.state = state
-
-    def get_state(self) -> Optional[ClientState]:
-        """Get client state.
-
-        Returns
-        -------
-        ClientState
-            The flwr.client.ClientState object representing this client's state.
-        """
-        return self.state
+    state: Optional[ClientState] = None
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         """Return a client's set of properties.
