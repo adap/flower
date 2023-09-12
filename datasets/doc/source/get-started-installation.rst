@@ -4,7 +4,7 @@ Installation
 Python Version
 --------------
 
-Federated Datasets requires `Python 3.8 <https://docs.python.org/3.8/>`_ or above.
+Flower Datasets requires `Python 3.8 <https://docs.python.org/3.8/>`_ or above.
 
 
 Install stable release (pip)
