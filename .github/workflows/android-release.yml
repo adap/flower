@@ -5,6 +5,10 @@ on:
     # We'll run this workflow when a new GitHub release is created
     types: [released]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   publish:
     defaults:
