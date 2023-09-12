@@ -26,16 +26,17 @@ def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
     if cfg.centralized:
         run_centralized(cfg,dataset_name=cfg.dataset.dataset_name)
-    dataset_name="cod-rna"
-    task_type=dataset_tasks[dataset_name]
-    X_train,y_train,X_test,y_test=load_single_dataset(task_type,dataset_name,train_ratio=cfg.dataset.train_ratio)
-    trainset=TensorDataset(torch.from_numpy(X_train), torch.from_numpy (y_train))
-    testset = TensorDataset(torch.from_numpy(X_test), torch.from_numpy (y_test))
-    trainloaders, _, testloader = do_fl_partitioning(
-                                        trainset, testset, pool_size=cfg.client_num, 
-                                        batch_size="whole", val_ratio=0.0
-    )
-    clients_preformance_on_local_data(cfg,trainloaders,X_test,y_test,task_type)
+    else:
+        dataset_name="cod-rna"
+        task_type=dataset_tasks[dataset_name]
+        X_train,y_train,X_test,y_test=load_single_dataset(task_type,dataset_name,train_ratio=cfg.dataset.train_ratio)
+        trainset=TensorDataset(torch.from_numpy(X_train), torch.from_numpy (y_train))
+        testset = TensorDataset(torch.from_numpy(X_test), torch.from_numpy (y_test))
+        trainloaders, _, testloader = do_fl_partitioning(
+                                            trainset, testset, pool_size=cfg.client_num, 
+                                            batch_size="whole", val_ratio=0.0
+        )
+        clients_preformance_on_local_data(cfg,trainloaders,X_test,y_test,task_type)
     # 2. Prepare your dataset
     # here you should call a function in datasets.py that returns whatever is needed to:
     # (1) ensure the server can access the dataset used to evaluate your model after
