@@ -26,8 +26,7 @@ from ray import ObjectRef
 from ray.util.actor_pool import ActorPool
 
 from flwr import common
-from flwr.client import Client, ClientFn
-from flwr.client.numpy_client_wrapper import to_client
+from flwr.client import Client, ClientFn, to_client
 from flwr.common.logger import log
 
 # All possible returns by a client
@@ -66,10 +65,10 @@ class VirtualClientEngineActor(ABC):
         # return also cid which is needed to ensure results
         # from the pool are correctly assigned to each ClientProxy
         try:
+            # Instantiate client
             client_like = client_fn(cid)
             client = to_client(client_like=client_like)
-            # for example if we want to now inject something into the client object
-            # we'd do it with `client.numpy_client.<variable> = <new_value>`
+            # Run client job
             job_results = job_fn(client)
         except Exception as ex:
             client_trace = traceback.format_exc()
