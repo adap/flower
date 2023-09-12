@@ -122,6 +122,7 @@ def handle_legacy_message(
     # Instantiate the client
     client_like: ClientLike = client_fn("-1")
     client = to_client(client_like)
+    # Execute task
     if field == "get_properties_ins":
         return _get_properties(client, server_msg.get_properties_ins), 0, True
     if field == "get_parameters_ins":

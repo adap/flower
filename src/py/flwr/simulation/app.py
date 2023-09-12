@@ -24,7 +24,7 @@ from typing import Any, Dict, List, Optional, Type, Union
 import ray
 from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 
-from flwr.client.typing import ClientFn
+from flwr.client import ClientFn
 from flwr.common import EventType, event
 from flwr.common.logger import log
 from flwr.server import Server
