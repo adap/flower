@@ -26,9 +26,9 @@ from .typing import ClientLike as ClientLike
 
 __all__ = [
     "Client",
-    "NumPyClient",
-    "ClientLike",
     "ClientFn",
+    "ClientLike",
+    "NumPyClient",
     "run_client",
     "start_client",
     "start_numpy_client",
