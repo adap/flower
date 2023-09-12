@@ -21,12 +21,12 @@ from typing import List, Tuple, Type, cast
 
 import ray
 
-from flwr.client import Client, NumPyClient
+from flwr.client import Client, ClientState, NumPyClient
 from flwr.common import Code, GetPropertiesRes, Status
 from flwr.simulation.ray_transport.ray_actor import (
-    ClientJobFn,
     ClientRes,
     DefaultActor,
+    JobFn,
     VirtualClientEngineActor,
     VirtualClientEngineActorPool,
 )
@@ -46,7 +46,7 @@ def get_dummy_client(cid: str) -> DummyClient:
 
 
 # A dummy workload
-def job_fn(cid: str) -> ClientJobFn:  # pragma: no cover
+def job_fn(cid: str) -> JobFn:  # pragma: no cover
     """Construct a simple job with cid dependency."""
 
     def cid_times_pi(client: Client) -> ClientRes:  # pylint: disable=unused-argument
@@ -69,15 +69,23 @@ def prep(
     def create_actor_fn() -> Type[VirtualClientEngineActor]:
         return actor_type.options(**client_resources).remote()  # type: ignore
 
+    num_proxies = 373  # a prime number
+    cids = [str(cid) for cid in range(num_proxies)]
+
+    # Prepare client states for all clients involved in the simulation
+    client_states = {}
+    for cid in cids:
+        client_states[cid] = ClientState(cid)
+
     # Create actor pool
     ray.init(include_dashboard=False)
     pool = VirtualClientEngineActorPool(
         create_actor_fn=create_actor_fn,
         client_resources=client_resources,
+        client_states=client_states,
     )
 
-    # Create 373 client proxies
-    num_proxies = 373  # a prime number
+    # Create client proxies
     proxies = [
         RayActorClientProxy(
             client_fn=get_dummy_client,
@@ -120,7 +128,7 @@ def test_cid_consistency_all_submit_first() -> None:
     for prox in proxies:
         job = job_fn(prox.cid)
         prox.actor_pool.submit_client_job(
-            lambda a, c_fn, j_fn, cid: a.run.remote(c_fn, j_fn, cid),
+            lambda a, c_fn, j_fn, c_state, cid: a.run.remote(c_fn, j_fn, c_state, cid),
             (prox.client_fn, job, prox.cid),
         )
 
@@ -145,7 +153,9 @@ def test_cid_consistency_without_proxies() -> None:
     for cid in cids:
         job = job_fn(cid)
         pool.submit_client_job(
-            lambda a, c_fn, j_fn, cid_: a.run.remote(c_fn, j_fn, cid_),
+            lambda a, c_fn, j_fn, c_state, cid_: a.run.remote(
+                c_fn, j_fn, c_state, cid_
+            ),
             (get_dummy_client, job, cid),
         )
 

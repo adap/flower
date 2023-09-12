@@ -34,7 +34,7 @@ ClientRes = Union[
     common.GetPropertiesRes, common.GetParametersRes, common.FitRes, common.EvaluateRes
 ]
 # A function to be executed by a client to obtain some results
-ClientJobFn = Callable[[Client], ClientRes]
+JobFn = Callable[[Client], ClientRes]
 # Client state cid:state mapping
 ClientStatesDict = Dict[str, ClientState]
 
@@ -59,7 +59,7 @@ class VirtualClientEngineActor(ABC):
     def run(
         self,
         client_fn: ClientFn,
-        job_fn: ClientJobFn,
+        job_fn: JobFn,
         client_state: ClientState,
         cid: str,
     ) -> Tuple[str, ClientRes, ClientState]:
@@ -68,11 +68,12 @@ class VirtualClientEngineActor(ABC):
         # return also cid which is needed to ensure results
         # from the pool are correctly assigned to each ClientProxy
         try:
+            # Instantiate client
             client_like = client_fn(cid)
             client = to_client(client_like=client_like)
             # Set state
             client.set_state(client_state)
-            # Run client's task
+            # Run client job
             job_results = job_fn(client)
             # Fetch state
             client_state_updated = client.get_state()
@@ -164,7 +165,9 @@ def pool_size_from_resources(client_resources: Dict[str, Union[int, float]]) -> 
     return total_num_actors
 
 
-class VirtualClientEngineActorPool(ActorPool):
+class VirtualClientEngineActorPool(
+    ActorPool
+):  # pylint: disable=too-many-instance-attributes
     """A pool of VirtualClientEngine Actors.
 
     Parameters
@@ -241,7 +244,7 @@ class VirtualClientEngineActorPool(ActorPool):
             self._idle_actors.extend(new_actors)
             self.num_actors += num_actors
 
-    def submit(self, fn: Any, value: Tuple[ClientFn, ClientJobFn, str]) -> None:
+    def submit(self, fn: Any, value: Tuple[ClientFn, JobFn, str]) -> None:
         """Take idle actor and assign it a client workload.
 
         Submit a job to an actor by first removing it from the list of idle actors, then
@@ -261,7 +264,7 @@ class VirtualClientEngineActorPool(ActorPool):
             self._cid_to_future[cid]["future"] = future_key
 
     def submit_client_job(
-        self, actor_fn: Any, job: Tuple[ClientFn, ClientJobFn, str]
+        self, actor_fn: Any, job: Tuple[ClientFn, JobFn, str]
     ) -> None:
         """Submit a job while tracking client ids."""
         _, _, cid = job

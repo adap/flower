@@ -36,6 +36,8 @@ from flwr.common import (
 class Client(ABC):
     """Abstract base class for Flower clients."""
 
+    state = ClientState("-1")
+
     def set_state(self, state: ClientState) -> None:
         """Set client state.
 
@@ -44,7 +46,7 @@ class Client(ABC):
         state: ClientState
             The flwr.client.ClientState object to use for this client instance.
         """
-        self.state: ClientState = state  # easiest/recommended implementation
+        self.state = state
 
     def get_state(self) -> ClientState:
         """Get client state.
@@ -54,7 +56,7 @@ class Client(ABC):
         ClientState
             The flwr.client.ClientState object representing this client's state.
         """
-        return self.state  # easiest/recommended implementation
+        return self.state
 
     def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
         """Return set of client's properties.
