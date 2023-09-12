@@ -18,8 +18,9 @@
 import sys
 import time
 from logging import INFO
-from typing import Optional, Union
+from typing import Callable, Optional, Union
 
+from flwr.client.typing import ClientFn, ClientLike
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
@@ -31,7 +32,6 @@ from flwr.common.constant import (
 )
 from flwr.common.logger import log
 
-from .client import Client
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle
@@ -39,11 +39,25 @@ from .numpy_client import NumPyClient
 from .numpy_client_wrapper import _wrap_numpy_client
 
 
+def _check_actionable_client(
+    client: Optional[ClientLike], client_fn: Optional[ClientFn]
+) -> None:
+    if client_fn is None and client is None:
+        raise Exception("Both `client_fn` and `client` are `None`, but one is required")
+
+    if client_fn is not None and client is not None:
+        raise Exception(
+            "Both `client_fn` and `client` are provided, but only one is allowed"
+        )
+
+
 # pylint: disable=import-outside-toplevel,too-many-locals,too-many-branches
+# pylint: disable=too-many-statements
 def start_client(
     *,
     server_address: str,
-    client: Client,
+    client_fn: Optional[ClientFn] = None,
+    client: Optional[ClientLike] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
     transport: Optional[str] = None,
@@ -56,9 +70,11 @@ def start_client(
         The IPv4 or IPv6 address of the server. If the Flower
         server runs on the same machine on port 8080, then `server_address`
         would be `"[::]:8080"`.
-    client : flwr.client.Client
+    client_fn : Optional[ClientFn]
+        A callable that instantiates a Client. (default: None)
+    client : Optional[flwr.client.Client]
         An implementation of the abstract base
-        class `flwr.client.Client`.
+        class `flwr.client.Client` (default: None)
     grpc_max_message_length : int (default: 536_870_912, this equals 512MB)
         The maximum length of gRPC messages that can be exchanged with the
         Flower server. The default should be sufficient for most models.
@@ -80,21 +96,42 @@ def start_client(
     --------
     Starting a gRPC client with an insecure server connection:
 
+    >>> def client_fn(cid: str):
+    >>>     return FlowerClient()
+    >>>
     >>> start_client(
     >>>     server_address=localhost:8080,
-    >>>     client=FlowerClient(),
+    >>>     client_fn=client_fn,
     >>> )
 
     Starting an SSL-enabled gRPC client:
 
     >>> from pathlib import Path
+    >>> def client_fn(cid: str):
+    >>>     return FlowerClient()
+    >>>
     >>> start_client(
     >>>     server_address=localhost:8080,
-    >>>     client=FlowerClient(),
+    >>>     client_fn=client_fn,
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
     event(EventType.START_CLIENT_ENTER)
+
+    _check_actionable_client(client, client_fn)
+
+    if client_fn is None:
+        # Wrap `Client` instance in `client_fn`
+        def single_client_factory(
+            cid: str,  # pylint: disable=unused-argument
+        ) -> ClientLike:
+            if client is None:  # Added this to keep mypy happy
+                raise Exception(
+                    "Both `client_fn` and `client` are `None`, but one is required"
+                )
+            return client  # Always return the same instance
+
+        client_fn = single_client_factory
 
     # Parse IP address
     parsed_address = parse_address(server_address)
@@ -146,7 +183,7 @@ def start_client(
                 if task_ins is None:
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
-                task_res, sleep_duration, keep_going = handle(client, task_ins)
+                task_res, sleep_duration, keep_going = handle(client_fn, task_ins)
                 send(task_res)
                 if not keep_going:
                     break
@@ -172,7 +209,8 @@ def start_client(
 def start_numpy_client(
     *,
     server_address: str,
-    client: NumPyClient,
+    client_fn: Optional[Callable[[str], NumPyClient]] = None,
+    client: Optional[NumPyClient] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
     transport: Optional[str] = None,
@@ -185,7 +223,9 @@ def start_numpy_client(
         The IPv4 or IPv6 address of the server. If the Flower server runs on
         the same machine on port 8080, then `server_address` would be
         `"[::]:8080"`.
-    client : flwr.client.NumPyClient
+    client_fn : Optional[Callable[[str], NumPyClient]]
+        A callable that instantiates a NumPyClient. (default: None)
+    client : Optional[flwr.client.NumPyClient]
         An implementation of the abstract base class `flwr.client.NumPyClient`.
     grpc_max_message_length : int (default: 536_870_912, this equals 512MB)
         The maximum length of gRPC messages that can be exchanged with the
@@ -208,24 +248,34 @@ def start_numpy_client(
     --------
     Starting a client with an insecure server connection:
 
-    >>> start_client(
+    >>> def client_fn(cid: str):
+    >>>     return FlowerClient()
+    >>>
+    >>> start_numpy_client(
     >>>     server_address=localhost:8080,
-    >>>     client=FlowerClient(),
+    >>>     client_fn=client_fn,
     >>> )
 
-    Starting a SSL-enabled client:
+    Starting an SSL-enabled gRPC client:
 
     >>> from pathlib import Path
-    >>> start_client(
+    >>> def client_fn(cid: str):
+    >>>     return FlowerClient()
+    >>>
+    >>> start_numpy_client(
     >>>     server_address=localhost:8080,
-    >>>     client=FlowerClient(),
+    >>>     client_fn=client_fn,
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
     # Start
+    _check_actionable_client(client, client_fn)
+
+    wrp_client = _wrap_numpy_client(client=client) if client else None
     start_client(
         server_address=server_address,
-        client=_wrap_numpy_client(client=client),
+        client_fn=client_fn,
+        client=wrp_client,
         grpc_max_message_length=grpc_max_message_length,
         root_certificates=root_certificates,
         transport=transport,
