@@ -197,23 +197,12 @@ class ModelManager(ABC):
     @abstractmethod
     def train(
         self,
-        train_id: int,
         epochs: int = 1,
-        tag: Optional[str] = None,
-        fine_tuning: bool = False,
     ) -> Dict[str, Union[List[Dict[str, float]], int, float]]:
         """Train the model maintained in self.model.
 
         Args:
-            train_id: id of the train round.
             epochs: number of training epochs.
-            tag: str of the form <Algorithm>_<model_train_part>.
-                <Algorithm> - indicates the federated algorithm that is being performed\
-                    (FedAvg, FedPer).
-                <model_train_part> - indicates the part of the model that is
-                being trained (full, body, head). This tag can be ignored if no
-                difference in train behaviour is desired between federated algortihms.
-            fine_tuning: whether the training performed is for model fine-tuning or not.
 
         Returns
         -------

@@ -10,7 +10,6 @@ from FedPer.models import ModelManager, ModelSplit
 
 # Set model architecture
 ARCHITECTURE = {
-    # 'layer_1' : {'conv_bn' : [3, 32, 2]},
     "layer_1": {"conv_dw": [32, 64, 1]},
     "layer_2": {"conv_dw": [64, 128, 2]},
     "layer_3": {"conv_dw": [128, 128, 1]},
@@ -24,8 +23,6 @@ ARCHITECTURE = {
     "layer_11": {"conv_dw": [512, 512, 1]},
     "layer_12": {"conv_dw": [512, 1024, 2]},
     "layer_13": {"conv_dw": [1024, 1024, 1]},
-    #'layer_15' : {'avg_pool' : [7]},
-    #'layer_16' : {'fc' : [1024, num_classes]}
 }
 
 
@@ -36,10 +33,10 @@ class MobileNet(nn.Module):
         self,
         num_head_layers: int = 1,
         num_classes: int = 10,
-        device: str = "cpu",
-        name: str = "mobile",
-        num_epochs: int = 1,
-        learning_rate: float = 0.01,
+        #device: str = "cpu",
+        #name: str = "mobile",
+        #num_epochs: int = 1,
+        #learning_rate: float = 0.01,
     ) -> None:
         super(MobileNet, self).__init__()
 
@@ -156,7 +153,7 @@ class MobileNetModelManager(ModelManager):
             has_fixed_head=has_fixed_head,
         )
         self.trainloader, self.testloader = trainloader, testloader
-        self.device = self.config["device"]
+        self.device = self.config["server_device"]
         self.client_save_path = client_save_path
         self.learning_rate = learning_rate
 
@@ -164,22 +161,19 @@ class MobileNetModelManager(ModelManager):
         """Return MobileNet-v1 model to be splitted into head and body."""
         try:
             return MobileNet(
-                num_head_layers=self.config["num_head_layers"],
-                num_classes=self.config["num_classes"],
+                num_head_layers=self.config.model["num_head_layers"],
+                num_classes=self.config.model["num_classes"],
             ).to(self.device)
         except AttributeError:
-            self.device = self.config["device"]
+            self.device = self.config["server_device"]
             return MobileNet(
-                num_head_layers=self.config["num_head_layers"],
-                num_classes=self.config["num_classes"],
+                num_head_layers=self.config.model["num_head_layers"],
+                num_classes=self.config.model["num_classes"],
             ).to(self.device)
 
     def train(
         self,
-        train_id: int,
         epochs: int = 1,
-        tag: Optional[str] = None,
-        fine_tuning: bool = False,
     ) -> Dict[str, Union[List[Dict[str, float]], int, float]]:
         """Train the model maintained in self.model.
 
@@ -187,15 +181,7 @@ class MobileNetModelManager(ModelManager):
         https://github.com/wjc852456/pytorch-mobilenet-v1.
 
         Args:
-            train_id: id of the train round.
             epochs: number of training epochs.
-            tag: str of the form <Algorithm>_<model_train_part>.
-                <Algorithm> - indicates the federated algorithm that is being performed\
-                    (FedAvg, FedPer).
-                <model_train_part> - indicates the part of the model that is
-                being trained (full, body, head). This tag can be ignored if no
-                difference in train behaviour is desired between federated algortihms.
-            fine_tuning: whether the training performed is for model fine-tuning or not.
 
         Returns
         -------
@@ -231,14 +217,8 @@ class MobileNetModelManager(ModelManager):
 
         return {"loss": loss.item(), "accuracy": correct / total}
 
-    def test(self, test_id: int) -> Dict[str, float]:
+    def test(self,) -> Dict[str, float]:
         """Test the model maintained in self.model.
-
-        Method adapted from simple CNN from Flower 'Quickstart PyTorch' \
-        (https://flower.dev/docs/quickstart-pytorch.html).
-
-        Args:
-            test_id: id of the test round.
 
         Returns
         -------

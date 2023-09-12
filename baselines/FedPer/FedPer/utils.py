@@ -12,7 +12,6 @@ from flwr.server.history import History
 from omegaconf import DictConfig
 
 from FedPer.client import BaseClient, FedPerClient, get_client_fn_simulation
-from FedPer.implemented_models.cnn_model import CNNModelSplit, CNNNet
 from FedPer.implemented_models.mobile_model import MobileNet, MobileNetModelSplit
 from FedPer.implemented_models.resnet_model import ResNet, ResNetModelSplit
 
@@ -20,11 +19,11 @@ from FedPer.implemented_models.resnet_model import ResNet, ResNetModelSplit
 def set_model_class(config: DictConfig) -> DictConfig:
     """Set model class based on the model name in the config file."""
     # Set the model class
-    if config.model.name.lower() == "resnet":
+    if config.model_name.lower() == "resnet":
         config.model._target_ = "FedPer.implemented_models.resnet_model.ResNet"
-    elif config.model.name.lower() == "mobile":
+    elif config.model_name.lower() == "mobile":
         config.model._target_ = "FedPer.implemented_models.mobile_model.MobileNet"
-    elif config.model.name.lower() == "cnn":
+    elif config.model_name.lower() == "cnn":
         config.model._target_ = "FedPer.implemented_models.cnn_model.CNNNet"
     else:
         raise NotImplementedError(f"Model {config.model.name} not implemented")
@@ -97,21 +96,13 @@ def get_client_fn(
 def get_create_model_fn(
     config: DictConfig,
 ) -> Union[
-    Tuple[Callable[[], CNNNet], CNNModelSplit],
     Tuple[Callable[[], MobileNet], MobileNetModelSplit],
     Tuple[Callable[[], ResNet], ResNetModelSplit],
 ]:
     """Get create model function."""
     device = config.server_device
 
-    if config.model.name.lower() == "cnn":
-        split = CNNModelSplit
-
-        def create_model() -> CNNNet:
-            """Create initial CNN model."""
-            return CNNNet(name="cnn").to(device)
-
-    elif config.model.name.lower() == "mobile":
+    if config.model_name.lower() == "mobile":
         split = MobileNetModelSplit
 
         def create_model() -> MobileNet:
@@ -119,11 +110,9 @@ def get_create_model_fn(
             return MobileNet(
                 num_head_layers=config.model.num_head_layers,
                 num_classes=config.model.num_classes,
-                name=config.model.name,
-                device=config.model.device,
             ).to(device)
 
-    elif config.model.name.lower() == "resnet":
+    elif config.model_name.lower() == "resnet":
         split = ResNetModelSplit
 
         def create_model() -> ResNet:
@@ -131,8 +120,6 @@ def get_create_model_fn(
             return ResNet(
                 num_head_layers=config.model.num_head_layers,
                 num_classes=config.model.num_classes,
-                name=config.model.name,
-                device=config.model.device,
             ).to(device)
 
     else:

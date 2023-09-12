@@ -21,12 +21,24 @@ dataset: ["CIFAR-10", "FLICKR-AES"] # list of datasets you include in your basel
 
 ****Datasets:**** : CIFAR10 from PyTorch's Torchvision and FLICKR-AES. FLICKR-AES was proposed as dataset in _Personalized Image Aesthetics_ (Ren et al., 2017) and can be downloaded using a link provided on thier [GitHub](https://github.com/alanspike/personalizedImageAesthetics). One must first download FLICKR-AES-001.zip (5.76GB), extract all inside and place in baseline/FedPer/datasets. To this location, also download the other 2 related files: (1) FLICKR-AES_image_labeled_by_each_worker.csv, and (2) FLICKR-AES_image_score.txt. Current repository supports CIFAR100 but it hasn't been used to reproduce figures. 
 
+```bash
+# cd into FedPer/datasets
+# unzip dataset to a directory named `flickr`
+unzip FLICKR-AES-001.zip -d flickr
+
+# then move the .csv files inside flickr
+mv FLICKR-AES_image_labeled_by_each_worker.csv flickr
+mv FLICKR-AES_image_score.txt flickr
+```
+
 ****Hardware Setup:**** : Experiments have been carried out on GPU. 2 different computers managed to run experiments: 
 
 - GeForce RTX 3080 16GB
 - GeForce RTX 4090 24GB
 
 It's worth mentioning that GPU memory for each client is ~7.5GB. When training on less powerful GPUs, one can reduce the number of GPU in the configuration setting to e.g. 0.33. 
+
+__NOTE:__ One experiment carried out using 1 GPU (RTX 4090) takes somehwere between 1-3h depending on dataset and model. Running ResNet34 compared to MobileNet-v1 takes approximately 10-15% longer.  
 
 ****Contributors:**** : William Lindskog
 

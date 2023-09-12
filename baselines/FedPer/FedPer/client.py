@@ -17,7 +17,6 @@ from torchvision.datasets import ImageFolder
 
 from FedPer.constants import DEFAULT_FT_EP, MEAN, STD, Algorithms
 from FedPer.dataset_preparation import call_dataset
-from FedPer.implemented_models.cnn_model import CNNModelManager
 from FedPer.implemented_models.mobile_model import MobileNetModelManager
 from FedPer.implemented_models.resnet_model import ResNetModelManager
 
@@ -34,7 +33,7 @@ class BaseClient(NumPyClient):
         config: Dict[str, Any],
         client_id: str,
         model_manager_class: Union[
-            Type[CNNModelManager], Type[MobileNetModelManager], Type[ResNetModelManager]
+            Type[MobileNetModelManager], Type[ResNetModelManager]
         ],
         has_fixed_head: bool = False,
         client_state_save_path: str = None,
@@ -113,16 +112,12 @@ class BaseClient(NumPyClient):
             Dict with the train metrics.
         """
         epochs = self.config.get("epochs", {"full": self.num_epochs})
-        print("Epochs: ", epochs)
-        print("Tag: ", tag)
 
         self.model_manager.model.enable_body()
         self.model_manager.model.enable_head()
 
         return self.model_manager.train(
-            train_id=self.train_id,
             epochs=epochs.get("full", self.num_epochs),
-            tag="FedAvg_full" if tag is None else tag,
         )
 
     def fit(
@@ -176,21 +171,8 @@ class BaseClient(NumPyClient):
         """
         self.set_parameters(parameters, evaluate=True)
 
-        if self.config.get("fine-tuning", False):
-            # Save the model parameters before fine-tuning
-            model_state_dict = copy.deepcopy(self.model_manager.model.state_dict())
-
-            # Fine-tune the model before testing
-            epochs = self.config.get("epochs", {"fine-tuning": DEFAULT_FT_EP})
-            ft_trn_results = self.model_manager.train(
-                train_id=self.test_id,
-                epochs=epochs.get("fine-tuning", DEFAULT_FT_EP),
-                fine_tuning=True,
-                tag=f"{self.config.get('algorithm', 'FedAvg')}_full",
-            )
-
         # Test the model
-        tst_results = self.model_manager.test(test_id=self.test_id)
+        tst_results = self.model_manager.test()
         print("<------- TEST RESULTS -------> :", tst_results)
 
         # Update test history
@@ -198,16 +180,6 @@ class BaseClient(NumPyClient):
             **self.hist[str(self.test_id)],
             "tst": tst_results,
         }
-
-        if self.config.get("fine-tuning", False):
-            # Set the model parameters as they were before fine-tuning
-            self.model_manager.model.set_parameters(model_state_dict)
-
-            # Update the history with the ft_trn results
-            self.hist[str(self.test_id)]["trn"] = {
-                **(self.hist[str(self.test_id)].get("trn", {})),
-                **ft_trn_results,
-            }
         self.test_id += 1
 
         return (
@@ -258,25 +230,15 @@ class FedPerClient(BaseClient):
         self.model_manager.model.set_parameters(state_dict)
 
     def perform_train(
-        self, tag: str = None
+        self,
     ) -> Dict[str, Union[List[Dict[str, float]], int, float]]:
         """Perform local training to the whole model.
-
-        Args:
-            tag: str of the form <Algorithm>_<model_train_part>.
-                <Algorithm> - indicates the federated algorithm that is being performed\
-                    (FedAvg, FedPer).
-                <model_train_part> - indicates the part of the model that is
-                being trained (full, body, head). This tag can be ignored if no
-                difference in train behaviour is desired between federated algortihms.
 
         Returns
         -------
             Dict with the train metrics.
         """
-        return super().perform_train(
-            tag=f"{Algorithms.FEDPER.value}_full" if tag is None else tag
-        )
+        return super().perform_train()
 
 
 def get_client_fn_simulation(
@@ -298,7 +260,7 @@ def get_client_fn_simulation(
         A tuple containing the client function that creates Flower Clients and
         the DataLoader that will be used for testing
     """
-    assert config.model.name.lower() in [
+    assert config.model_name.lower() in [
         "cnn",
         "mobile",
         "resnet",
@@ -371,11 +333,11 @@ def get_client_fn_simulation(
         # Create the test loader
         testloader = DataLoader(testset, config.batch_size)
 
-        if config.model.name.lower() == "cnn":
+        if config.model_name.lower() == "cnn":
             manager = CNNModelManager
-        elif config.model.name.lower() == "mobile":
+        elif config.model_name.lower() == "mobile":
             manager = MobileNetModelManager
-        elif config.model.name.lower() == "resnet":
+        elif config.model_name.lower() == "resnet":
             manager = ResNetModelManager
         else:
             raise NotImplementedError("Model not implemented, check name.")
@@ -384,7 +346,7 @@ def get_client_fn_simulation(
                 trainloader=trainloader,
                 testloader=testloader,
                 client_id=cid,
-                config=config.model,
+                config=config,
                 model_manager_class=manager,
                 client_state_save_path=client_state_save_path,
             )
@@ -393,7 +355,7 @@ def get_client_fn_simulation(
                 trainloader=trainloader,
                 testloader=testloader,
                 client_id=cid,
-                config=config.model,
+                config=config,
                 model_manager_class=manager,
                 client_state_save_path=client_state_save_path,
             )

@@ -1,11 +1,12 @@
 ---
-num_clients: 30 # total number of clients
-num_epochs: 4 # number of local epochs
-batch_size: 4
-num_rounds: 3
-clients_per_round: 30
+num_clients: 2 # total number of clients
+num_epochs: 1 # number of local epochs
+batch_size: 128
+num_rounds: 2
+clients_per_round: 10
 learning_rate: 0.01
 algorithm: fedper
+model_name: resnet
 
 client_resources:
   num_cpus: 4
@@ -14,7 +15,7 @@ client_resources:
 server_device: cuda:0
 
 dataset:
-  name : "flickr"
+  name : "cifar10"
   split: sample
   num_classes: 10
   seed: 42
@@ -25,10 +26,6 @@ model:
   _target_: FedPer.implemented_models.mobile_model.MobileNet
   num_head_layers: 2
   num_classes: 10
-  device: ${server_device}
-  name: mobile
-  num_epochs: ${num_epochs}
-  learning_rate: ${learning_rate}
 
 fit_config:
   drop_client: false

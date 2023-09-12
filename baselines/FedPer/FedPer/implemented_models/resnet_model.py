@@ -18,10 +18,6 @@ class ResNet(nn.Module):
         self,
         num_head_layers: int = 1,
         num_classes: int = 10,
-        device: str = "cpu",
-        name: str = "resnet",
-        num_epochs: int = 1,
-        learning_rate: float = 0.01,
     ) -> None:
         super(ResNet, self).__init__()
         assert (
@@ -146,29 +142,26 @@ class ResNetModelManager(ModelManager):
         )
         self.client_save_path = client_save_path
         self.trainloader, self.testloader = trainloader, testloader
-        self.device = self.config["device"]
+        self.device = self.config["server_device"]
         self.learning_rate = learning_rate
 
     def _create_model(self) -> nn.Module:
         """Return MobileNet-v1 model to be splitted into head and body."""
         try:
             return ResNet(
-                num_head_layers=self.config["num_head_layers"],
-                num_classes=self.config["num_classes"],
+                num_head_layers=self.config.model["num_head_layers"],
+                num_classes=self.config.model["num_classes"],
             ).to(self.device)
         except AttributeError:
-            self.device = self.config["device"]
+            self.device = self.config["server_device"]
             return ResNet(
-                num_head_layers=self.config["num_head_layers"],
-                num_classes=self.config["num_classes"],
+                num_head_layers=self.config.model["num_head_layers"],
+                num_classes=self.config.model["num_classes"],
             ).to(self.device)
 
     def train(
         self,
-        train_id: int,
         epochs: int = 1,
-        tag: Optional[str] = None,
-        fine_tuning: bool = False,
     ) -> Dict[str, Union[List[Dict[str, float]], int, float]]:
         """Train the model maintained in self.model.
 
@@ -176,15 +169,7 @@ class ResNetModelManager(ModelManager):
         https://github.com/wjc852456/pytorch-mobilenet-v1.
 
         Args:
-            train_id: id of the train round.
             epochs: number of training epochs.
-            tag: str of the form <Algorithm>_<model_train_part>.
-                <Algorithm> - indicates the federated algorithm that is being performed\
-                    (FedAvg, FedPer).
-                <model_train_part> - indicates the part of the model that is
-                being trained (full, body, head). This tag can be ignored if no
-                difference in train behaviour is desired between federated algortihms.
-            fine_tuning: whether the training performed is for model fine-tuning or not.
 
         Returns
         -------
@@ -221,7 +206,7 @@ class ResNetModelManager(ModelManager):
 
         return {"loss": loss.item(), "accuracy": correct / total}
 
-    def test(self, test_id: int) -> Dict[str, float]:
+    def test(self,) -> Dict[str, float]:
         """Test the model maintained in self.model."""
         # Load client state (head)
         if self.client_save_path is not None:
