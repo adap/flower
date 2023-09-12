@@ -184,8 +184,8 @@ def weighted_loss_avg(results: List[Tuple[int, float]]) -> float:
 def aggregate_qffl(
     parameters: NDArrays, deltas: List[NDArrays], hs_fll: List[NDArrays]
 ) -> NDArrays:
-    """Compute weighted average based on  Q-FFL paper."""
-    demominator = np.sum(np.asarray(hs_fll))
+    """Compute weighted average based on Q-FFL paper."""
+    demominator: float = np.sum(np.asarray(hs_fll))
     scaled_deltas = []
     for client_delta in deltas:
         scaled_deltas.append([layer * 1.0 / demominator for layer in client_delta])
