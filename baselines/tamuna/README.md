@@ -9,7 +9,7 @@ dataset: [MNIST]
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
-****Paper:**** https://arxiv.org/abs/2302.09832
+****Paper:**** [arxiv.org/abs/2302.09832](https://arxiv.org/abs/2302.098320)
 
 ****Authors:**** Laurent Condat, Ivan Agarský, Grigory Malinovsky, Peter Richtárik
 
