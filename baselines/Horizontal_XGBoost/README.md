@@ -52,7 +52,10 @@ dataset: [dataset1, dataset2] # list of datasets you include in your baseline
 ## Running the Experiments
 
 :warning: _Provide instructions on the steps to follow to run all the experiments._
-```bash  
+```bash
+#to run all the experiments for the centralized model
+python -m Horizontal_XGBoost.main --config-name "Centralized Baseline"
+
 # The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
 
 poetry run -m <baseline-name>.main <no additional arguments> # where <baseline-name> is the name of this directory and that of the only sub-directory in this directory (i.e. where all your source code is)
