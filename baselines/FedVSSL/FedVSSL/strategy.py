@@ -40,14 +40,11 @@ DIR = '1E_up_theta_b_only_FedAvg+SWA_wo_moment'
 
 
 class FedVSSL(fl.server.strategy.FedAvg):
-
     def __init__(self, num_rounds: int, mix_coeff:float,  *args, **kwargs):
         
         self.num_rounds = num_rounds,
         self.mix_coeff: mix_coeff
         super().__init__(*args, **kwargs)
-
-
 
     def aggregate_fit(
         self,
@@ -75,7 +72,7 @@ class FedVSSL(fl.server.strategy.FedAvg):
         weights = aggregate(weight_results) # loss-based
 
         # create a directory to save the global checkpoints
-        glb_dir = '/SSL_name/k400_' + DIR
+        glb_dir = 'ucf_' + DIR
         mmcv.mkdir_or_exist(os.path.abspath(glb_dir))
 
 

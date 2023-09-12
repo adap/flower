@@ -40,26 +40,72 @@ from flwr.common import (
 )
 from strategy import FedVSSL
 
+
+DIR = '1E_up_theta_b_only_FedAvg+SWA_wo_moment'
+
+def initial_setup(cid, base_work_dir, rounds, light=False):
+    import _init_paths
+    import utils
+    cid_plus_one = str(int(cid) + 1)
+    args = Namespace(
+        cfg='conf/mmcv_conf/r3d_18_ucf101/pretraining.py',
+        checkpoint=None, cid=int(cid), data_dir='/local/scratch/ucf101', gpus=1,
+        launcher='none',
+        local_rank=0, progress=False, resume_from=None, rounds=6, seed=7, validate=False,
+        work_dir=base_work_dir + '/client' + cid_plus_one)
+
+    print("Starting client", args.cid)
+    cfg = Config.fromfile(args.cfg)
+    cfg.total_epochs = 1  ### Used for debugging. Comment to let config file set number of epochs
+    cfg.data.train.data_source.ann_file = 'non_iid/client_dist' + cid_plus_one + '.json'
+
+    distributed, logger = utils.set_config_mmcv(args, cfg)
+
+    # load the model
+    model = utils.load_model(args, cfg)
+    # load the training data
+
+    train_dataset = utils.load_data(args, cfg)
+
+    # load the test data
+    test_dataset = utils.load_test_data(args, cfg)
+
+    return args, cfg, distributed, logger, model, train_dataset, test_dataset, utils
+
+def fit_config(rnd: int) -> Dict[str, str]:
+    """Return a configuration with static batch size and (local) epochs."""
+    config = {
+        "epoch_global": str(rnd),
+    }
+    return config
+
+
 if __name__ == "__main__":
     # import _init_paths
     # import utils
     
-    train_flag = False
+    train_flag = True
+    # train_flag = False
     if train_flag:
-
-        os.chdir("/fedssl/")
-        pool_size = 100  # number of dataset partions (= number of total clients)
+        pool_size = 2  # number of dataset partions (= number of total clients)
         client_resources = {"num_cpus": 2, "num_gpus": 1}  # each client will get allocated 1 CPUs
         # timestr = time.strftime("%Y%m%d_%H%M%S")
-        base_work_dir = '/k400_' + DIR
+        base_work_dir = 'ucf_' + DIR
         rounds = 1
+
+        def main(cid: str):
+            # Parse command line argument `cid` (client ID)
+            #        os.environ["CUDA_VISIBLE_DEVICES"] = cid
+            args, cfg, distributed, logger, model, train_dataset, test_dataset, videossl = initial_setup(cid,
+                                                                                                         base_work_dir,                                                                                            rounds)
+            return SslClient(model, train_dataset, test_dataset, cfg, args, distributed, logger, utils)
 
         # configure the strategy
         strategy = FedVSSL(
-            fraction_fit=0.05,
-            fraction_eval=0.02,
-            min_fit_clients=5,
-            min_eval_clients=1,
+            fraction_fit=1,
+            fraction_eval=0,
+            min_fit_clients=2,
+            min_eval_clients=0,
             min_available_clients=pool_size,
             on_fit_config_fn=fit_config,
         )
@@ -191,53 +237,9 @@ if __name__ == "__main__":
         f"--data_dir /DATA",\
         f"--pretrained /path to the pretrained checkpoint",\
         f"--validate"])
-        
-
-        
-    
 
 
 
-
-
-    def main(cid: str):
-        # Parse command line argument `cid` (client ID)
-        #        os.environ["CUDA_VISIBLE_DEVICES"] = cid
-        args, cfg, distributed, logger, model, train_dataset, test_dataset, videossl = initial_setup(cid, base_work_dir, rounds)
-        return SslClient(model, train_dataset, test_dataset, cfg, args, distributed, logger, utils)
-
-
-   
-
-def initial_setup(cid, base_work_dir, rounds, light=False):
-    import _init_paths
-    import utils
-    cid_plus_one = str(int(cid) + 1)
-    args = Namespace(
-        cfg='conf/mmcv_conf/r3d_18_kinetics/pretraining.py',
-        checkpoint=None, cid=int(cid), data_dir='/DATA', gpus=1,
-        launcher='none',  
-        local_rank=0, progress=False, resume_from=None, rounds=6, seed=7, validate=False,
-        work_dir=base_work_dir + '/client' + cid_plus_one)
-    
-    print("Starting client", args.cid)
-    cfg = Config.fromfile(args.cfg)
-    cfg.total_epochs = 1  ### Used for debugging. Comment to let config file set number of epochs
-    cfg.data.train.data_source.ann_file = 'DATA/Kinetics-400_annotations/client_dist' + cid_plus_one + '.json'
-    
-    
-    distributed, logger = videossl.set_config_mmcv(args, cfg)
-    
-    # load the model
-    model = videossl.load_model(args, cfg)
-    # load the training data
-    
-    train_dataset = utils.load_data(args, cfg)
-    
-    # load the test data
-    test_dataset = utils.load_test_data(args, cfg)
-    
-    return args, cfg, distributed, logger, model, train_dataset, test_dataset, videossl
 # import hydra
 # from omegaconf import DictConfig, OmegaConf
 

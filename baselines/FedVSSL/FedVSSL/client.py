@@ -147,10 +147,4 @@ def _temp_get_parameters(model):
     # Return local model parameters as a list of NumPy ndarrays
     return [val.cpu().numpy() for _, val in model.state_dict().items()]
 
-def fit_config(rnd: int) -> Dict[str, str]:
-    """Return a configuration with static batch size and (local) epochs."""
-    config = {
-        "epoch_global": str(rnd),
-    }
-    return config
 
