@@ -260,7 +260,8 @@ class TransferModel(object):
         ]
 
     def measure_inference_accuracy(self):
-        """Runs the inference model and measures accuracy on the validation set."""
+        """Runs the inference model and measures accuracy on the validation
+        set."""
         interpreter = tf.lite.Interpreter(model_content=self.inference_model)
         bottleneck_in = interpreter.get_input_details()[0]
         variable_ins = interpreter.get_input_details()[1:]

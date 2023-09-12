@@ -32,23 +32,59 @@ from tfltransfer import utils
 class KerasModelHead(object):
     """Head model configuration for arbitrary Keras models.
 
-    This configuration uses Keras-specific signatures to generate the transfer learning
-    head model. Keras loss function that the model was compiled with is what the
-    gradients will be computed on. Note that the optimizer used in Keras is not taken
-    into account.
+    This configuration uses Keras-specific signatures to generate the
+    transfer learning head model. Keras loss function that the model was
+    compiled with is what the gradients will be computed on. Note that
+    the optimizer used in Keras is not taken into account.
     """
 
     def __init__(self, keras_model):
         # Convert Keras model to SavedModel.
         saved_model_dir = tempfile.mkdtemp("tflite-transfer-keras-model")
-        tf.compat.v1.keras.experimental.export_saved_model(keras_model, saved_model_dir)
+        # tf.compat.v1.keras.experimental.export_saved_model(keras_model, saved_model_dir)
+
+        # saved_model_path = "./my_model.h5" # or you can simply use 'my_mode.h5'
+        
+        # keras_model.save(saved_model_dir)
+        # # to reload your model 
+        # model = tf.compat.v1.keras.models.load_model(saved_model_dir)
+        
+
+        # Save the model with the SaveOptions
+        # tf.compat.v1.keras.saving.save_model(
+        #     keras_model,
+        #     saved_model_dir
+         
+        # )
+
+        tf.saved_model.save(keras_model, saved_model_dir)
+
+        # tf.saved_model.save(keras_model, saved_model_dir, tags=["eval"])
+
+        # Save the model with the "eval" tag
+        # save_options = tf.saved_model.SaveOptions(save_traces=True, tags={"eval"})
+        # tf.saved_model.save(keras_model, saved_model_dir, options=save_options)
+
+        # save_options = tf.saved_model.SaveOptions(experimental_io_device="/job:localhost", tags={"eval"})
+        # tf.saved_model.save(keras_model, saved_model_dir, options=save_options)
+
+        print("my model is : ", saved_model_dir)
 
         # Pre-fetch some information about the model.
         with tfv1.Session(graph=tf.Graph()) as sess:
             metagraph = tfv1.saved_model.load(
                 sess, [tf.saved_model.SERVING], saved_model_dir
             )
+
+            # metagraph = tf.compat.v1.keras.models.load_model(saved_model_dir)
+            
+            ### OLD LINE 
             self._predict_signature = metagraph.signature_def.get("serving_default")
+
+            ### NEW LINE 
+            # 
+            # self._predict_signature = metagraph.signatures["serving_default"]
+
 
             input_def = next(self._predict_signature.inputs.values().__iter__())
             self._input_shape = tuple(
@@ -64,8 +100,8 @@ class KerasModelHead(object):
             ]
 
         with tfv1.Session(graph=tf.Graph()) as sess:
-            eval_metagraph = tfv1.saved_model.load(sess, ["eval"], saved_model_dir)
-            self._eval_signature = eval_metagraph.signature_def.get("eval")
+            eval_metagraph = tfv1.saved_model.load(sess, tf.saved_model, saved_model_dir)
+            self._eval_signature = eval_metagraph.signature_def.get("serve")
 
         if len(self._predict_signature.inputs) != 1:
             raise ValueError("Only single-input head models are supported")

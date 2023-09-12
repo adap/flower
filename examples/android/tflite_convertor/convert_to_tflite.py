@@ -1,6 +1,6 @@
 import tensorflow as tf
-from tensorflow.keras import layers
-from tensorflow.keras.regularizers import l2
+# from tensorflow.keras import layers
+# from tensorflow.keras.regularizers import l2
 from tfltransfer import bases
 from tfltransfer import heads
 from tfltransfer import optimizers

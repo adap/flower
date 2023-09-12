@@ -13,9 +13,10 @@
 # limitations under the License.
 """TFLite converter for transfer learning models.
 
-This converter is the first stage in the transfer learning pipeline. It allows to
-convert a pair of models representing fixed base and trainable head models to a set of
-TFLite models, which can be then used by the transfer learning library.
+This converter is the first stage in the transfer learning pipeline. It
+allows to convert a pair of models representing fixed base and trainable
+head models to a set of TFLite models, which can be then used by the
+transfer learning library.
 """
 
 

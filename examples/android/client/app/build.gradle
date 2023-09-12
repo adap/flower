@@ -1,5 +1,7 @@
 apply plugin: 'com.google.protobuf'
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
+
 
 android {
     compileSdkVersion 33
@@ -12,13 +14,20 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
+
     buildTypes {
-        debug { minifyEnabled false }
+        debug {
+            minifyEnabled false
+
+        }
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -44,7 +53,7 @@ android {
 def grpc_version = '1.43.0'
 
 protobuf {
-    protoc { artifact = 'com.google.protobuf:protoc:3.11.0' }
+    protoc { artifact = 'com.google.protobuf:protoc:3.17.3' }
     plugins {
         grpc { artifact = "io.grpc:protoc-gen-grpc-java:$grpc_version"
         }
@@ -66,15 +75,14 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.0'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.work:work-runtime:2.8.1'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test:runner:1.5.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     implementation project(path: ':transfer_api')
-
     implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly-SNAPSHOT'
     // This dependency adds the necessary TF op support.
     implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:0.0.0-nightly-SNAPSHOT'
-
     implementation "io.grpc:grpc-okhttp:$grpc_version"
     implementation "io.grpc:grpc-protobuf-lite:$grpc_version"
     implementation "io.grpc:grpc-stub:$grpc_version"
@@ -83,10 +91,10 @@ dependencies {
     def lifecycle_version = '2.2.0'
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
-
     implementation 'com.google.android.material:material:1.7.0'
 
 }
+
 
 def modelUrl = 'https://www.dropbox.com/s/tubgpepk2q6xiny/models.zip?dl=1'
 def modelArchivePath = "${buildDir}/model.zip"

@@ -392,7 +392,7 @@ public final class TransferLearningModel implements Closeable {
     } finally {
       parameterLock.readLock().unlock();
     }
-
+      Log.e("TestingSample" , testingSamples.size() + " : ");
       Log.e("Accuracy", (float) correct/testingSamples.size() + "--" + loss / testingSamples.size() );
       return Pair.create(loss/testingSamples.size(), (float) correct /testingSamples.size());
   }
