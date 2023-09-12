@@ -24,7 +24,7 @@ dataset: [MNIST]
 
 ****Hardware Setup:**** By default, the experiments expect at least one gpu, but this can be changed to cpu only by specifying client and server devices. Default setup less than 5 GB of dedicated GPU memory.
 
-****Contributors:**** Ivan Agarský https://github.com/Crabzmatic, Grigory Malinovsky https://github.com/gsmalinovsky
+****Contributors:**** Ivan Agarský [github.com/Crabzmatic](https://github.com/Crabzmatic), Grigory Malinovsky [github.com/gsmalinovsky](https://github.com/gsmalinovsky)
 
 
 ## Experimental Setup
@@ -33,7 +33,7 @@ dataset: [MNIST]
 
 ****Model:**** 
 
-As described in (McMahan, 2017): _Communication-Efficient Learning of Deep Networks from Decentralized Data_ (https://arxiv.org/pdf/1602.05629.pdf)
+As described in (McMahan, 2017): _Communication-Efficient Learning of Deep Networks from Decentralized Data_ ([arxiv.org/abs/1602.05629](https://arxiv.org/abs/1602.05629))
 
 |     | Layer     | Input Shape  | Output Shape | Param #   | Kernel Shape |
 |-----|-----------|--------------|--------------|-----------|--------------|
@@ -66,24 +66,15 @@ Total trainable params: 1,663,370
 
 ## Environment Setup
 
+This requires `pyenv` and `poetry` already installed.
+
 ```bash
-# Create new conda environment with Python 3.9
-conda create -n tamuna python=3.9
-
-# Activate the newly created virtual environment
-conda activate tamuna
-
-# Install poetry using pip
-pip install poetry
-
-# In some cases there are issues when installing the poetry environment if chardet package is not previously installed
-pip install chardet
-
-# Navigate to tamuna directory containing pyproject.toml
-# Install all other packages using poetry
+# set local python version via pyenv
+pyenv local 3.9.17
+# then fix that for poetry
+poetry env use 3.9.17
+# then install poetry env
 poetry install
-
-# Note: If you get and error saying permission/access was denied in the middle of package installations, just rerun the poetry install command. It is most probably a bug in poetry. 
 ```
 
 
@@ -103,5 +94,5 @@ while the CPU-only version, which can be found in `conf/base-cpu.yaml`, takes ar
 
 The resulting directory in `./outputs/` should contain (among other things) `communication_complexity.png` and `loss_accuracy.png`.
 
-![Communication complexity](docs/communication_complexity.png)
-![Loss and accuracy](docs/loss_accuracy.png)
+![Communication complexity](_static/communication_complexity.png)
+![Loss and accuracy](_static/loss_accuracy.png)

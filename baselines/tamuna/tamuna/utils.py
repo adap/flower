@@ -128,7 +128,7 @@ def compare_communication_complexity(
     plt.yscale("log")
     plt.xlabel("Communicated real numbers")
     plt.legend()
-    plt.grid(visible=True, which='both', linewidth=0.5, alpha=0.5)
+    plt.grid(visible=True, which="both", linewidth=0.5, alpha=0.5)
     plt.minorticks_on()
     plt.title("Communication complexity")
     plt.tight_layout()
@@ -190,7 +190,7 @@ def compare_loss_and_accuracy(
     axs[0].set_ylabel("Loss")
     axs[0].set_yscale("log")
     axs[0].legend()
-    axs[0].grid(visible=True, which='both', linewidth=0.5, alpha=0.5)
+    axs[0].grid(visible=True, which="both", linewidth=0.5, alpha=0.5)
     axs[0].minorticks_on()
     axs[0].set_xlabel("Rounds")
 
@@ -198,7 +198,7 @@ def compare_loss_and_accuracy(
     axs[1].set_ylabel("Accuracy")
     axs[1].set_ylim(bottom=0, top=1)
     axs[1].legend()
-    axs[1].grid(visible=True, which='both', linewidth=0.5, alpha=0.5)
+    axs[1].grid(visible=True, which="both", linewidth=0.5, alpha=0.5)
     axs[1].minorticks_on()
     axs[1].set_xlabel("Rounds")
 
