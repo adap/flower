@@ -13,9 +13,9 @@ import torchvision
 from CtP.pyvrl.apis import train_network, get_root_logger, set_random_seed, test_network 
 from CtP.pyvrl.builder import build_model, build_dataset
 from CtP.tools import train_net as  train_model_cl
-from CtP.tools import test_net as test_model_cl
+# from CtP.tools import test_net as test_model_cl
 
-import _init_paths
+# import _init_paths
 import os
 import re
 import mmcv
@@ -34,7 +34,7 @@ def set_config_mmcv(args, cfg):
 
     # update configs according to CLI args
     # os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpus)
-    cfg.gpus = [args.gpus]
+    cfg.gpus = args.gpus
     if args.work_dir is not None:
         cfg.work_dir = args.work_dir
 
@@ -111,22 +111,22 @@ def load_test_data(args, cfg):
 
 def train_model_cl(model, train_dataset, args, cfg, distributed, logger):
     # model code
-    train_network_fed(model,
+    train_network(model,
         train_dataset,
         cfg,
         distributed=distributed,
         logger=logger
     )
     
-def test_model_cl(model, test_dataset, args, cfg, distributed, logger):
-    result = test_network(model,
-        test_dataset, 
-        cfg,
-        args,
-        distributed=distributed,
-        logger=logger
-    )
-    return result
+# def test_model_cl(model, test_dataset, args, cfg, distributed, logger):
+#     result = test_network(model,
+#         test_dataset,
+#         cfg,
+#         args,
+#         distributed=distributed,
+#         logger=logger
+#     )
+#     return result
 
 
 

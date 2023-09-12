@@ -38,13 +38,14 @@ from flwr.common import (
     ndarrays_to_parameters,   # parameters_to_weights,
     parameters_to_ndarrays,   # weights_to_parameters,
 )
+import CtP.tools._init_paths
 from strategy import FedVSSL
+from client import SslClient
 
 
 DIR = '1E_up_theta_b_only_FedAvg+SWA_wo_moment'
 
 def initial_setup(cid, base_work_dir, rounds, light=False):
-    import _init_paths
     import utils
     cid_plus_one = str(int(cid) + 1)
     args = Namespace(
@@ -81,9 +82,6 @@ def fit_config(rnd: int) -> Dict[str, str]:
 
 
 if __name__ == "__main__":
-    # import _init_paths
-    # import utils
-    
     train_flag = True
     # train_flag = False
     if train_flag:
@@ -96,16 +94,15 @@ if __name__ == "__main__":
         def main(cid: str):
             # Parse command line argument `cid` (client ID)
             #        os.environ["CUDA_VISIBLE_DEVICES"] = cid
-            args, cfg, distributed, logger, model, train_dataset, test_dataset, videossl = initial_setup(cid,
-                                                                                                         base_work_dir,                                                                                            rounds)
-            return SslClient(model, train_dataset, test_dataset, cfg, args, distributed, logger, utils)
+            args, cfg, distributed, logger, model, train_dataset, test_dataset, videossl = initial_setup(cid, base_work_dir, rounds)
+            return SslClient(model, train_dataset, test_dataset, cfg, args, distributed, logger, videossl)
 
         # configure the strategy
         strategy = FedVSSL(
             fraction_fit=1,
-            fraction_eval=0,
+            # fraction_eval=0,
             min_fit_clients=2,
-            min_eval_clients=0,
+            # min_eval_clients=0,
             min_available_clients=pool_size,
             on_fit_config_fn=fit_config,
         )
@@ -113,11 +110,11 @@ if __name__ == "__main__":
         ray_config = {"include_dashboard": False}
 
         # start simulation
-        hist= fl.simulation.start_simulation(
+        hist = fl.simulation.start_simulation(
             client_fn=main,
             num_clients=pool_size,
             client_resources=client_resources,
-            num_rounds=fl.server.ServerConfig(num_rounds=1),
+            config=fl.server.ServerConfig(num_rounds=rounds),
             strategy=strategy,
             ray_init_args=ray_config,
         )
@@ -129,7 +126,6 @@ if __name__ == "__main__":
         import textwrap
         from mmcv.runner import load_state_dict
         import CtP
-        import CtP.tools._init_paths
         from CtP.configs.ctp.r3d_18_kinetics import finetune_ucf101
         from CtP.pyvrl.builder import build_model, build_dataset
         

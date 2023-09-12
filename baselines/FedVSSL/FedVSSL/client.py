@@ -39,6 +39,10 @@ from flwr.common import (
 
 DIR = '1E_up_theta_b_only_FedAvg+SWA_wo_moment'
 
+# order classes by number of samples
+def takeSecond(elem):
+    return elem[1]
+
 class SslClient(fl.client.NumPyClient):
     """Flower client implementing video SSL w/ PyTorch."""
 
@@ -132,7 +136,7 @@ class SslClient(fl.client.NumPyClient):
         # get the model keys 
         metrics['state_dict_key'] = [k for k in self.model.state_dict().keys()]
 
-        return self.get_parameters(), num_examples, metrics
+        return self.get_parameters(config=None), num_examples, metrics
 
     def evaluate(self, parameters, config):
         
@@ -140,7 +144,6 @@ class SslClient(fl.client.NumPyClient):
         result = 0
        
         return float(0), int(len(self.test_dataset)), {"accuracy": float(result)}
-
 
 
 def _temp_get_parameters(model):
