@@ -35,6 +35,7 @@ class DriverClientManager(ClientManager):
 
     def __init__(self, driver: Driver) -> None:
         self.driver = driver
+        self.workload_id = ""
         self.clients: Dict[str, ClientProxy] = {}
 
     def __len__(self) -> int:
@@ -137,11 +138,18 @@ class DriverClientManager(ClientManager):
         node id is then converted into a `DriverClientProxy` instance and stored in the
         `clients` dictionary with node id as key.
         """
-        get_nodes_res = self.driver.get_nodes(req=driver_pb2.GetNodesRequest())
-        all_node_ids = get_nodes_res.node_ids
-        for node_id in all_node_ids:
-            self.clients[str(node_id)] = DriverClientProxy(
-                node_id=node_id,
+        if self.workload_id == "":
+            self.workload_id = self.driver.create_workload(
+                driver_pb2.CreateWorkloadRequest()
+            ).workload_id
+        get_nodes_res = self.driver.get_nodes(
+            req=driver_pb2.GetNodesRequest(workload_id=self.workload_id)
+        )
+        all_nodes = get_nodes_res.nodes
+        for node in all_nodes:
+            self.clients[str(node.node_id)] = DriverClientProxy(
+                node_id=node.node_id,
                 driver=self.driver,
                 anonymous=False,
+                workload_id=self.workload_id,
             )
