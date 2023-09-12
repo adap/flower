@@ -74,7 +74,7 @@ def start_client(
         A callable that instantiates a Client. (default: None)
     client : Optional[flwr.client.Client]
         An implementation of the abstract base
-        class `flwr.client.Client`. (default: None)
+        class `flwr.client.Client` (default: None)
     grpc_max_message_length : int (default: 536_870_912, this equals 512MB)
         The maximum length of gRPC messages that can be exchanged with the
         Flower server. The default should be sufficient for most models.
