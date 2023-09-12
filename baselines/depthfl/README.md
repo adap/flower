@@ -135,7 +135,7 @@ The above commands would generate results in DepthFL paper. The numbers below ar
 
 | Scaling Method | Dataset | Global Model | 100% (a) | 75% (b) | 50% (c) | 25% (d) | 
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | 
-| HeterFL | CIFAR100 | 57.61 | 64.39 | 66.08 | 62.03 | 51.99 |
+| HeteroFL | CIFAR100 | 57.61 | 64.39 | 66.08 | 62.03 | 51.99 |
 | DepthFL (FedAvg) | CIFAR100 | 72.67 | 67.08 | 70.78 | 68.41 | 59.17 |
 | DepthFL | CIFAR100 | 76.06 | 69.68 | 73.21 | 70.29 | 60.32 |
 
