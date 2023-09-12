@@ -367,8 +367,9 @@ python -m FedMLB.main --multirun dataset_config.dataset="cifar100","tiny-imagene
 ### Table 1b
 
 The results of Table 1a in the paper (for FedAvg and FedMLB) refers
-to CIFAR-100 (Figure 3) and Tiny-ImageNet (Figure 7a) with 
-the setting (2.) Large-scale experiments with Dir(0.3), 500 clients, 2% participation rate.
+to CIFAR-100 (Figure 3) and Tiny-ImageNet (Figure 7b) with 
+the setting (2.) Large-scale experiments with Dir(0.3), 500 clients, 
+2% participation rate.
 
 To reproduce the results run the following:
 ```bash
@@ -488,10 +489,10 @@ just allows to start the training starting from a round > 1 (useful to stop and 
 saving/loading its state).
 
 To reproduce results, preprocessing of data is of paramount importance. 
-For CIFAR-100, the preprocessing of train images includes normalization,
+For CIFAR-100, the preprocessing of training images includes normalization,
 random rotation, random crop and random flip of images; test images
 are just normalized. 
-For Tiny-ImageNet, the preprocessing of train images includes normalization,
+For Tiny-ImageNet, the preprocessing of training images includes normalization,
 random rotation, random crop and random flip of images; test images
 are normalized and center cropped.
 This code uses or defines subclasses of the `tf.keras.layers.Layer` class
