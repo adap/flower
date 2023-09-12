@@ -91,12 +91,12 @@ class CIFAR100(BaseDataset):
 
     def __init__(
         self,
-        root,
         config,
         general_data_transform=None,
         general_target_transform=None,
         train_data_transform=None,
         train_target_transform=None,
+        root: Path = None,
     ):
         super().__init__()
         train_part = torchvision.datasets.CIFAR100(root, True, download=True)

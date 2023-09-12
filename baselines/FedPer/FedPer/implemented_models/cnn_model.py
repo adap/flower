@@ -145,7 +145,7 @@ class CNNModelManager(ModelManager):
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.SGD(self.model.parameters(), lr=0.001, momentum=0.9)
         for _ in range(epochs):
-            for images, labels in tqdm(self.trainloader):
+            for images, labels in self.trainloader:
                 optimizer.zero_grad()
                 criterion(
                     self.model(images.to(self.device)), labels.to(self.device)

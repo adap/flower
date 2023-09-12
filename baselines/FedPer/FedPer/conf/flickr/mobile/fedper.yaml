@@ -5,30 +5,30 @@ batch_size: 128
 num_rounds: 50
 clients_per_round: 10
 learning_rate: 0.01
-algorithm: FedPer
-algo: FedPer
+algorithm: fedper
 
 client_resources:
-  num_cpus: 16
+  num_cpus: 4
   num_gpus: 1
 
 server_device: cuda:0
 
 dataset:
-  name : "cifar100"
-  iid: false
-  num_classes: 100
+  name : "cifar10"
+  split: sample
+  num_classes: 10
   seed: 42
-  num_clients: 10
-  split: 'sample' # sample or user
+  num_clients: ${num_clients}
   fraction: 0.83
 
 model:
-  _target_: FedPer.models.mobile_model.MobileNet
-  num_head_layers: 1
-  num_classes: 100
+  _target_: FedPer.implemented_models.mobile_model.MobileNet
+  num_head_layers: 2
+  num_classes: 10
   device: ${server_device}
   name: mobile
+  num_epochs: ${num_epochs}
+  learning_rate: ${learning_rate}
 
 fit_config:
   drop_client: false
@@ -36,7 +36,7 @@ fit_config:
   batch_size: ${batch_size}
 
 strategy:
-  _target_: FedPer.utils.strategy_pipeline.AggregateBodyStrategyPipeline
+  _target_: FedPer.server.DefaultStrategyPipeline
   algorithm: ${algorithm}
   fraction_fit: 0.00001 # because we want the number of clients to sample on each roudn to be solely defined by min_fit_clients
   min_fit_clients: ${num_clients}
@@ -44,3 +44,5 @@ strategy:
   min_evaluate_clients: ${num_clients}
   min_available_clients: ${num_clients}
   config: ${model}
+  evaluate_fn: None
+  on_evaluate_config_fn: None

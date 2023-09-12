@@ -1,39 +1,33 @@
 #!/bin/bash
 
-### UNCOMMENT THE FOLLOWING LINES TO RUN THE EXPERIMENTS ###
+# CIFAR10 Mobile and Resnet (non-iid n classes (FIGURE 2a&b))
+for model in mobile resnet
+do 
+    for num_classes in 4 8 10
+    do
+        python -m FedPer.main --config-path conf/cifar10/${model} --config-name fedper dataset.num_classes=${num_classes} &&
+        python -m FedPer.main --config-path conf/cifar10/${model} --config-name fedavg dataset.num_classes=${num_classes} && 
+    done
+done
 
-# CIFAR10 Mobile
-#python -m FedPer.main --config-path conf/cifar10/mobile --config-name fedper_10 &&
-#python -m FedPer.main --config-path conf/cifar10/mobile --config-name fedper_8 &&
-#python -m FedPer.main --config-path conf/cifar10/mobile --config-name fedper_4 &&
-#python -m FedPer.main --config-path conf/cifar10/mobile --config-name fedavg_10 &&
-#python -m FedPer.main --config-path conf/cifar10/mobile --config-name fedavg_8 &&
-#python -m FedPer.main --config-path conf/cifar10/mobile --config-name fedavg_4 &&
+# CIFAR10 Mobile (n head layers (FIGURE 4a))
+for num_head_layers in 2 3 4
+do
+    python -m FedPer.main --config-path conf/cifar10/mobile --config-name fedper model.num_head_layers=${num_head_layers} &&
+    python -m FedPer.main --config-path conf/cifar10/mobile --config-name fedavg && 
+done
 
-# CIFAR10 Resnet
-#python -m FedPer.main --config-path conf/cifar10/resnet --config-name fedper_10 &&
-#python -m FedPer.main --config-path conf/cifar10/resnet --config-name fedper_8 &&
-#python -m FedPer.main --config-path conf/cifar10/resnet --config-name fedper_4 &&
-#python -m FedPer.main --config-path conf/cifar10/resnet --config-name fedavg_10 &&
-#python -m FedPer.main --config-path conf/cifar10/resnet --config-name fedavg_8 &&
-#python -m FedPer.main --config-path conf/cifar10/resnet --config-name fedavg_4
+# CIFAR10 Resnet (n head layers (FIGURE 4b))
+for num_head_layers in 1 2 3
+do
+    python -m FedPer.main --config-path conf/cifar10/resnet --config-name fedper model.num_head_layers=${num_head_layers} &&
+    python -m FedPer.main --config-path conf/cifar10/resnet --config-name fedavg &&
+done
 
-# CIFAR10 Mobile (x head layers)
-#python -m FedPer.main --config-path conf/cifar10/mobile --config-name n_2_head_layers &&
-#python -m FedPer.main --config-path conf/cifar10/mobile --config-name n_3_head_layers &&
-#python -m FedPer.main --config-path conf/cifar10/mobile --config-name n_4_head_layers &&
-#python -m FedPer.main --config-path conf/cifar10/mobile --config-name fedavg &&
+# FLICKR
+for model in mobile resnet
+do 
+    python -m FedPer.main --config-path conf/flickr/${model} --config-name fedper model.num_head_layers=2&&
+    python -m FedPer.main --config-path conf/flickr/${model} --config-name fedavg &&
+done
 
-# CIFAR10 Resnet (x head layers)
-#python -m FedPer.main --config-path conf/cifar10/resnet --config-name n_1_head_layers &&
-#python -m FedPer.main --config-path conf/cifar10/resnet --config-name n_2_head_layers &&
-#python -m FedPer.main --config-path conf/cifar10/resnet --config-name n_3_head_layers &&
-#python -m FedPer.main --config-path conf/cifar10/resnet --config-name fedavg
-
-# FLICKR Mobile
-#python -m FedPer.main --config-path conf/flickr/mobile --config-name 2_head_layers &&
-#python -m FedPer.main --config-path conf/flickr/mobile --config-name fedavg &&
-
-# FLICKR Resnet
-#python -m FedPer.main --config-path conf/flickr/resnet --config-name 2_head_layers &&
-#python -m FedPer.main --config-path conf/flickr/resnet --config-name fedavg

@@ -8,7 +8,7 @@ learning_rate: 0.01
 algorithm: fedper
 
 client_resources:
-  num_cpus: 16
+  num_cpus: 4
   num_gpus: 1
 
 server_device: cuda:0

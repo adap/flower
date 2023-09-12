@@ -215,7 +215,7 @@ class MobileNetModelManager(ModelManager):
         loss: torch.Tensor = 0.0
         # self.model.train()
         for _ in range(epochs):
-            for images, labels in tqdm(self.trainloader):
+            for images, labels in self.trainloader:
                 optimizer.zero_grad()
                 outputs = self.model(images.to(self.device))
                 labels = labels.to(self.device)
@@ -252,7 +252,7 @@ class MobileNetModelManager(ModelManager):
         correct, total, loss = 0, 0, 0.0
         # self.model.eval()
         with torch.no_grad():
-            for images, labels in tqdm(self.testloader):
+            for images, labels in self.testloader:
                 outputs = self.model(images.to(self.device))
                 labels = labels.to(self.device)
                 loss += criterion(outputs, labels).item()

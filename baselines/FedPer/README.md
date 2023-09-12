@@ -26,6 +26,8 @@ dataset: ["CIFAR-10", "FLICKR-AES"] # list of datasets you include in your basel
 - GeForce RTX 3080 16GB
 - GeForce RTX 4090 24GB
 
+It's worth mentioning that GPU memory for each client is ~7.5GB. When training on less powerful GPUs, one can reduce the number of GPU in the configuration setting to e.g. 0.33. 
+
 ****Contributors:**** : William Lindskog
 
 
@@ -49,7 +51,7 @@ Please see how models are implemented using a so called model_manager and model_
 | num_clients | 10 |
 | clients per round | 10 |
 | number of rounds | 50 |
-| client resources | {'num_cpus': 32, 'num_gpus': 1 }|
+| client resources | {'num_cpus': 4, 'num_gpus': 1 }|
 | learning_rate | 0.01 |
 | batch_size | 128 |
 | optimizer | SGD |
