@@ -12,6 +12,10 @@ on:
     paths:
       - "src/py/flwr_tool/**"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   FLWR_TELEMETRY_ENABLED: 0
 
