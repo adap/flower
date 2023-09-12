@@ -28,8 +28,6 @@ from .driver_client_proxy import DriverClientProxy
 
 def client_manager_update(
     driver: Driver,
-    workload_id: str,
-    registered_nodes: Dict[int, DriverClientProxy],
     client_manager: ClientManager,
     lock: threading.Lock,
 ) -> None:
@@ -43,7 +41,11 @@ def client_manager_update(
     and dead nodes will be removed from the ClientManager via
     `client_manager.unregister()`.
     """
+    # Request for workload_id
+    workload_id = driver.create_workload(driver_pb2.CreateWorkloadRequest()).workload_id
+
     # Loop until the driver is disconnected
+    registered_nodes: Dict[int, DriverClientProxy] = {}
     while True:
         with lock:
             # End the while loop if the driver is disconnected.
@@ -52,45 +54,28 @@ def client_manager_update(
             get_nodes_res = driver.get_nodes(
                 req=driver_pb2.GetNodesRequest(workload_id=workload_id)
             )
-        compare_and_update(
-            get_nodes_res, driver, workload_id, registered_nodes, client_manager
-        )
+        all_node_ids = {node.node_id for node in get_nodes_res.nodes}
+        new_nodes = all_node_ids.difference(registered_nodes)
+
+        # Register new nodes
+        for node_id in new_nodes:
+            client_proxy = DriverClientProxy(
+                node_id=node_id,
+                driver=driver,
+                anonymous=False,
+                workload_id=workload_id,
+            )
+            if client_manager.register(client_proxy):
+                registered_nodes[node_id] = client_proxy
+            else:
+                raise RuntimeError("Could not register node.")
+
+        # Unregister dead nodes
+        dead_nodes = set(registered_nodes).difference(all_node_ids)
+        for node_id in dead_nodes:
+            client_proxy = registered_nodes[node_id]
+            client_manager.unregister(client_proxy)
+            del registered_nodes[node_id]
+
         # Sleep for 3 seconds
         time.sleep(3)
-
-
-def compare_and_update(
-    get_nodes_res: driver_pb2.GetNodesResponse,
-    driver: Driver,
-    workload_id: str,
-    registered_nodes: Dict[int, DriverClientProxy],
-    client_manager: ClientManager,
-) -> None:
-    """Compare node_ids in GetNodesResponse to registered_nodes and update.
-
-    New nodes will be added to the ClientManager via `client_manager.register()`,
-    and dead nodes will be removed from the ClientManager via
-    `client_manager.unregister()`. The `registered_nodes` dictionary will be updated.
-    """
-    all_node_ids = set(get_nodes_res.node_ids)
-    new_nodes = all_node_ids.difference(registered_nodes)
-
-    # Register new nodes
-    for node_id in new_nodes:
-        client_proxy = DriverClientProxy(
-            node_id=node_id,
-            driver=driver,
-            anonymous=False,
-            workload_id=workload_id,
-        )
-        if client_manager.register(client_proxy):
-            registered_nodes[node_id] = client_proxy
-        else:
-            raise RuntimeError("Could not register node.")
-
-    # Unregister dead nodes
-    dead_nodes = set(registered_nodes).difference(all_node_ids)
-    for node_id in dead_nodes:
-        client_proxy = registered_nodes[node_id]
-        client_manager.unregister(client_proxy)
-        del registered_nodes[node_id]

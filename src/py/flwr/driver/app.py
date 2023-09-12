@@ -18,12 +18,11 @@
 import sys
 import threading
 from logging import INFO
-from typing import Dict, Optional
+from typing import Optional
 
 from flwr.common import EventType, event
 from flwr.common.address import parse_address
 from flwr.common.logger import log
-from flwr.proto import driver_pb2
 from flwr.server.app import ServerConfig, init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
@@ -31,8 +30,7 @@ from flwr.server.server import Server
 from flwr.server.strategy import Strategy
 
 from .driver import Driver
-from .driver_client_manager_utils import client_manager_update, compare_and_update
-from .driver_client_proxy import DriverClientProxy
+from .driver_client_manager_utils import client_manager_update
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
 
@@ -129,35 +127,16 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         initialized_config,
     )
 
-    # Request for workload_id
-    workload_id = driver.create_workload(driver_pb2.CreateWorkloadRequest()).workload_id
-    get_nodes_res = driver.get_nodes(
-        req=driver_pb2.GetNodesRequest(workload_id=workload_id)
-    )
-
-    # Register nodes
-    registered_nodes: Dict[int, DriverClientProxy] = {}
-    compare_and_update(
-        get_nodes_res,
-        driver,
-        workload_id,
-        registered_nodes,
-        initialized_server.client_manager(),
-    )
-
     # Start the thread updating nodes
-    thread = threading.Thread(
+    threading.Thread(
         target=client_manager_update,
         args=(
             driver,
-            workload_id,
-            registered_nodes,
             initialized_server.client_manager(),
             lock,
         ),
         daemon=True,
-    )
-    thread.start()
+    ).start()
 
     # Start training
     hist = run_fl(
