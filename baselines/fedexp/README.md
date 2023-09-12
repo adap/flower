@@ -1,7 +1,7 @@
 ---
 title: FedExP Speeding Up Federated Averaging via Extrapolation
 url: https://openreview.net/forum?id=IPrzNbddXV
-labels: [image classification, label2] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
+labels: [image classification, Optimization,  Step Size] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
 dataset: [Cifar10, Cifar100] # list of datasets you include in your baseline
 ---
 
@@ -11,7 +11,7 @@ dataset: [Cifar10, Cifar100] # list of datasets you include in your baseline
 
 ****Paper:**** https://openreview.net/forum?id=IPrzNbddXV
 
-****Authors:**** : Divyansh Jhunjhunwala1, Shiqiang Wang2, Gauri Joshi1
+****Authors:**** : Divyansh Jhunjhunwala, Shiqiang Wang, Gauri Joshi
 
 ****Abstract:**** : Federated Averaging (FedAvg) remains the most popular algorithm for Federated Learning (FL) optimization due to its simple implementation, stateless nature, and privacy guarantees combined with secure aggregation. Recent work has sought to generalize the vanilla averaging in FedAvg to a generalized gradient descent step by treating client updates as pseudo-gradients and using a server step size. While
 the use of a server step size has been shown to provide performance improvement theoretically, the practical benefit of the server step size has not been seen in most existing works. In this work, we present FedExP, a method to adaptively determine the server step size in FL based on dynamically varying pseudo-gradients throughout the FL process. We begin by considering the overparameterized convex regime, where we reveal an interesting similarity between FedAvg and the Projection Onto Convex Sets (POCS) algorithm. We then show how FedExP can be motivated as a novel extension to the extrapolation mechanism that is used to speed up POCS. Our theoretical analysis later also discusses the implications of FedExP in underparameterized and non-convex settings. Experimental results show that
@@ -22,11 +22,11 @@ FedExP consistently converges faster than FedAvg and competing baselines on a ra
 
 ****What’s implemented:**** : The code in this directory replicates the experiments in the paper(FedExP : Speeding Up Federated Averaging via Exptrapolation), which proposed the FedExP strategy. Specifically, it replicates the results for For Cifar10 and Cifar100 in Figure 3.
 
-****Datasets:**** : Cifar10, Cifar100
+****Datasets:**** : Cifar10 and Cifar100 from PyTorch's Torchvision
 
 ****Hardware Setup:**** :warning: *_Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Someone out there might not have access to the same resources you have so, could list the absolute minimum hardware needed to run the experiment in a reasonable amount of time ? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?_*
 
-****Contributors:**** : 
+****Contributors:**** : Omar Mokhtar and Roeia Amr
 
 
 ## Experimental Setup
@@ -39,10 +39,10 @@ The ResNet-18 model is employed in the paper as the core architecture for experi
 ****Dataset:**** :
 The baseline utilizes both CIFAR-10 and CIFAR-100 datasets, which will be distributed among 100 clients. The Dirichlet distribution is employed to introduce variability in the composition of client datasets for CIFAR.
 
-| Dataset | #classes | #partitions | partitioning method | partition settings |
-| :------ | :---: | :---: | :---: | :---: |
-| Cifar10 | 10 | 100 |  | |
-| Cifar100 | 100 | 100 |  | |
+| Dataset | #classes | #partitions | partitioning method |
+| :------ | :---: | :---: | :---: |
+| Cifar10 | 10 | 100 | Dirichlet distribution |
+| Cifar100 | 100 | 100 | Dirichlet distribution |
 
 
 ****Training Hyperparameters:**** :
@@ -57,25 +57,31 @@ The following tables shows the main hyperparameters for this baseline with their
 | batch_size | 50 |
 | client resources | {'num_cpus': 2.0, 'num_gpus': 0.2 }|
 | eta_l (local learning rate)| 0.01 |
-
-Fot Dataset:
-Choice of alpha parameter for the Dirichlet distribution used to create heterogeneity in the client datasets for CIFAR
-| Description | Default Value |
-| ----------- | ----- |
-| alpha | 0.5 |
-
-hyperparams specifically for FedExP strategy:
-| Description | Default Value |
-| ----------- | ----- |
 | epsilon | 0.001 |
 | decay | 0.998 |
 | weight_decay | 0.0001 |
 | max_norm | 10 |
 
+For Dataset:
+Choice of alpha parameter for the Dirichlet distribution used to create heterogeneity in the client datasets for CIFAR
+| Description | Default Value |
+| ----------- | ----- |
+| alpha | 0.5 |
+
 ## Environment Setup
 
-:warning: _The Python environment for all baselines should follow these guidelines in the `EXTENDED_README`. Specify the steps to create and activate your environment. If there are any external system-wide requirements, please include instructions for them too. These instructions should be comprehensive enough so anyone can run them (if non standard, describe them step-by-step)._
+To construct the Python environment follow these steps:
 
+```bash
+# install the base Poetry environment
+poetry install
+
+# activate the environment
+poetry shell
+
+# install PyTorch with GPU support.
+pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 --extra-index-url https://download.pytorch.org/whl/cu116
+```
 
 ## Running the Experiments
 
