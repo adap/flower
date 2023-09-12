@@ -22,7 +22,7 @@ BROWN='\033[0;33m'
 NC='\033[0m' # No Color
 
 # Define default values first
-BUILD_TARGET="${BUILD_TARGET:=invalid}"
+BUILD_TARGET="${BUILD_TARGET:=server}"
 FLWR_VERSION="${FLWR_VERSION:=1.5.0}"
 
 echo -e "${BROWN}\nUsing:"

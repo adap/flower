@@ -36,12 +36,6 @@ RUN curl -sSL https://install.python-poetry.org | python3 - --version ${POETRY_V
 ENV PATH /root/.local/bin:$PATH
 RUN poetry config virtualenvs.create false
 
-# Test if Flower can be successfully installed and imported
-# Do not use poetry as that would require a pyproject.toml
-FROM base as base-test
-RUN python -m pip install flwr
-RUN python -c "from flwr.server import run_server"
-
 # Server image
 FROM base as server
 

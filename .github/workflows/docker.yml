@@ -8,7 +8,7 @@ on:
 
 defaults:
   run:
-    working-directory: src/docker
+    
 
 env:
   FLWR_VERSION: 1.5.0
@@ -17,6 +17,7 @@ jobs:
   test:
     name: Test Image
     runs-on: ubuntu-latest
+    
     steps:
     - uses: actions/checkout@v3
     - name: Run base tests
