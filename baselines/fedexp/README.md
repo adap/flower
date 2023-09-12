@@ -39,34 +39,35 @@ The ResNet-18 model is employed in the paper as the core architecture for experi
 ****Dataset:**** :
 The baseline utilizes both CIFAR-10 and CIFAR-100 datasets, which will be distributed among 100 clients. The Dirichlet distribution is employed to introduce variability in the composition of client datasets for CIFAR.
 
-| Dataset | #classes | #partitions | partitioning method |
-| :------ | :---: | :---: | :---: |
-| Cifar10 | 10 | 100 | Dirichlet distribution |
-| Cifar100 | 100 | 100 | Dirichlet distribution |
+| Dataset  | #classes | #partitions |  partitioning method   |
+|:---------|:--------:|:-----------:|:----------------------:|
+| Cifar10  |    10    |     100     | Dirichlet distribution |
+| Cifar100 |   100    |     100     | Dirichlet distribution |
 
 
 ****Training Hyperparameters:**** :
 The following tables shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python main.py` directly)
 
-| Description | Default Value |
-| ----------- | ----- |
-| total clients | 100 |
-| clients per round | 20 |
-| number of rounds | 500 |
-| number of local rounds | 20 |
-| batch_size | 50 |
-| client resources | {'num_cpus': 2.0, 'num_gpus': 0.2 }|
-| eta_l (local learning rate)| 0.01 |
-| epsilon | 0.001 |
-| decay | 0.998 |
-| weight_decay | 0.0001 |
-| max_norm | 10 |
+| Description                 | Default Value                       |
+|-----------------------------|-------------------------------------|
+| total clients               | 100                                 |
+| clients per round           | 20                                  |
+| number of rounds            | 500                                 |
+| number of local rounds      | 20                                  |
+| batch_size                  | 50                                  |
+| client resources            | {'num_cpus': 2.0, 'num_gpus': 0.2 } |
+| eta_l (local learning rate) | 0.01                                |
+| epsilon                     | 0.001                               |
+| decay                       | 0.998                               |
+| weight_decay                | 0.0001                              |
+| max_norm                    | 10                                  |
 
 For Dataset:
 Choice of alpha parameter for the Dirichlet distribution used to create heterogeneity in the client datasets for CIFAR
+
 | Description | Default Value |
-| ----------- | ----- |
-| alpha | 0.5 |
+|-------------|---------------|
+| alpha       | 0.5           |
 
 ## Environment Setup
 
@@ -78,6 +79,10 @@ poetry install
 
 # activate the environment
 poetry shell
+
+#install required libs
+# install PyTorch with GPU support. Please note this baseline is very lightweight so it can run fine on a CPU.
+pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 --extra-index-url https://download.pytorch.org/whl/cu116
 
 ```
 
