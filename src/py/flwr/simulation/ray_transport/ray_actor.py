@@ -26,9 +26,8 @@ from ray import ObjectRef
 from ray.util.actor_pool import ActorPool
 
 from flwr import common
-from flwr.client import Client
+from flwr.client import Client, ClientFn
 from flwr.client.numpy_client_wrapper import to_client
-from flwr.client.typing import ClientFn
 from flwr.common.logger import log
 
 # All possible returns by a client
