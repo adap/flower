@@ -432,7 +432,7 @@ python -m FedMLB.main --multirun dataset_config.dataset="cifar100","tiny-imagene
     <td>28.39</td>
     <td>26.84</td>
     <td>33.67</td>
-    <td></td>
+    <td>33.13</td>
   </tr>
 </table>
 
