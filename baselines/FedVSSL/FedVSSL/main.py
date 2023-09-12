@@ -16,8 +16,10 @@ import numpy as np
 from math import exp
 import torch
 import torch.nn as nn
+# pip install mmcv-full==1.2.4 -f https://download.openmmlab.com/mmcv/dist/cu110/torch1.7.1/index.html
 import mmcv
-from mmcv import Config
+# from mmcv import Config
+from mmengine.config import Config
 from mmcv.runner.checkpoint import load_state_dict, get_state_dict, save_checkpoint
 import re
 import ray
@@ -76,18 +78,95 @@ if __name__ == "__main__":
     else:
         import subprocess
         import os
+        import textwrap
+        from mmcv.runner import load_state_dict
         import CtP
         import CtP.tools._init_paths
         from CtP.configs.ctp.r3d_18_kinetics import finetune_ucf101
-        print(dir(finetune_ucf101))
-        print(finetune_ucf101._base_)
+        from CtP.pyvrl.builder import build_model, build_dataset
+        
+        # we give an example on how one can perform fine-tuning uisng UCF-101 dataset. 
+        cfg_path = "CtP/configs/ctp/r3d_18_kinetics/finetune_ucf101.py" 
+        cfg = Config.fromfile(cfg_path)
+        cfg.model.backbone['pretrained'] = None
+        
+        # build a model using the configuration file from Ctp repository
+        model = build_model(cfg.model)
 
+        # path to the pretrained model. We provide certain federated pretrained model that can be easily downloaded 
+        # from the following link: https://github.com/yasar-rehman/FEDVSSL
+        # here we gave an exampe with FedVSSL (alpha=0, beta=0) checkpoint file
+        # The files after federated pretraining are usually saved in .npz format. 
+        
+        pretrained = "/home/data1/round-540-weights.array.npz"
+        
+        # conversion of the .npz files to the .pth format. If the files are saved in .npz format
+        if pretrained.endswith('.npz'):
+            # following changes are made here
+            params = np.load(pretrained, allow_pickle=True)
+            params = params['arr_0'].item()
+            params = parameters_to_ndarrays(params)
+            params_dict = zip(model.state_dict().keys(), params)
+            state_dict = {
+                'state_dict':OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
+            }
+            torch.save(state_dict, './model_pretrained.pth')
+        
+       
+    #-----------------------------------------------------------------------------------------------------------------------
+    # The cfg_path need to be updated with the following updated configuration contents to be able to load the pretrained model.
+    # Instead of executing the blow mentioned code, one can also directly modify the "pretrained" variable by opening the path represented
+    # by the config_path variable
+    #
+        config_content = textwrap.dedent('''\
+        _base_ = ['../../recognizers/_base_/model_r3d18.py',
+        '../../recognizers/_base_/runtime_ucf101.py']
+        work_dir = './output/ctp/r3d_18_kinetics/finetune_ucf101/'
+        model = dict(
+            backbone=dict(
+                pretrained='./model_pretrained.pth',
+            ),
+        )
+       ''').strip("\n")
+
+        with open(cfg_path, 'w') as f:
+            f.write(config_content)
+
+        # start the finetuning with ucf-101.
         process_obj = subprocess.run(["bash", "CtP/tools/dist_train.sh",\
         "CtP/configs/ctp/r3d_18_kinetics/finetune_ucf101.py", "4",\
         f"--work_dir /finetune/ucf101/",
-        f"--data_dir /DATA",\
-        f"--pretrained /path to the pretrained checkpoint",\
-        f"--validate"])
+        f"--data_dir /home/data1/data/"])
+    # -------------------------------------------------------------------------------------------------------------------------
+        # after finetuning one can use the following code to evaluate the finetuned model on UCF-101
+        cfg_path_test = "CtP/configs/ctp/r3d_18_ucf101/finetune_ucf101.py"
+        
+        config_content_test = textwrap.dedent('''\
+        _base_ = ['../../recognizers/_base_/model_r3d18.py',
+        '../../recognizers/_base_/runtime_ucf101.py']
+        work_dir = './output/ctp/r3d_18_ucf101/finetune_ucf101/'
+        model = dict(
+            backbone=dict(
+                pretrained='/finetune/ucf101/epoch_150.pth',
+            ),
+        )
+        ''').strip("\n")
+        with open(cfg_path_test, 'w') as f:
+            f.write(config_content_test)
+
+
+        process_obj = subprocess.run(["bash", "CtP/tools/dist_test.sh",\
+        "CtP/configs/ctp/r3d_18_ucf101/finetune_ucf101.py", "1",\
+        f"--work_dir /finetune/ucf101/",
+        f"--data_dir /home/data1/data/", 
+        f"--progress"])
+    # ---------------------------------------------------------------------------------------------------------------------------    
+    
+
+
+      
+      
+        
         
 
         
