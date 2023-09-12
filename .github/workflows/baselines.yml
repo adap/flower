@@ -23,7 +23,6 @@ concurrency:
 
 env:
   FLWR_TELEMETRY_ENABLED: 0
-  
 defaults:
   run:
     working-directory: baselines
