@@ -18,8 +18,8 @@ class BaseDataset(Dataset):
 
     def __init__(
         self,
-        root: Path = None,
-        config: dict = None,
+        root,
+        config,
         general_data_transform: transforms.transforms.Compose = None,
         general_target_transform: transforms.transforms.Compose = None,
         train_data_transform: transforms.transforms.Compose = None,
@@ -61,13 +61,13 @@ class CIFAR10(BaseDataset):
 
     def __init__(
         self,
+        root,
         config=None,
         general_data_transform=None,
         general_target_transform=None,
         train_data_transform=None,
         train_target_transform=None,
         enable_train_transform=False,
-        root: Path = None,
     ):
         """Initialize the dataset."""
         train_part = torchvision.datasets.CIFAR10(root, True, download=True)
@@ -91,12 +91,12 @@ class CIFAR100(BaseDataset):
 
     def __init__(
         self,
+        root,
         config,
         general_data_transform=None,
         general_target_transform=None,
         train_data_transform=None,
         train_target_transform=None,
-        root: Path = None,
     ):
         super().__init__()
         train_part = torchvision.datasets.CIFAR100(root, True, download=True)

@@ -1,5 +1,5 @@
 """FL server strategies."""
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
@@ -18,7 +18,7 @@ from flwr.common import (
 )
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
-from flwr.server.strategy.strategy import Strategy
+from flwr.server.strategy.fedavg import FedAvg
 
 from fedper.constants import Algorithms
 from fedper.implemented_models.mobile_model import MobileNetModelSplit
@@ -26,7 +26,7 @@ from fedper.implemented_models.resnet_model import ResNetModelSplit
 from fedper.models import ModelSplit
 
 
-class ServerInitializationStrategy(Strategy):
+class ServerInitializationStrategy(FedAvg):
     """Server FL Parameter Initialization strategy implementation."""
 
     def __init__(
@@ -36,7 +36,6 @@ class ServerInitializationStrategy(Strategy):
         ],
         create_model: Callable[[], nn.Module],
         config: Dict[str, Any],
-        algorithm: str = Algorithms.FEDAVG.value,
         has_fixed_head: bool = False,
         initial_parameters: Optional[Parameters] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Any]]] = None,
@@ -54,7 +53,12 @@ class ServerInitializationStrategy(Strategy):
     ) -> None:
         super().__init__(*args, **kwargs)
         self.config = config
-        self.algorithm = algorithm
+        _ = evaluate_fn
+        self.algorithm = (
+            Algorithms.FEDAVG.value
+            if self.config["_target_"] == "fedper.server.DefaultStrategyPipeline"
+            else Algorithms.FEDPER.value
+        )
         self.on_fit_config_fn = on_fit_config_fn
         self.initial_parameters = initial_parameters
         self.min_available_clients = min_available_clients
@@ -99,9 +103,9 @@ class ServerInitializationStrategy(Strategy):
 class AggregateFullStrategy(ServerInitializationStrategy):
     """Full model aggregation strategy implementation."""
 
-    def __init__(self, save_path: Path = None, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, save_path: Path = Path(""), *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.save_path = save_path
+        self.save_path = save_path if save_path != "" else None
         if save_path is not None:
             self.save_path = save_path / "models"
             self.save_path.mkdir(parents=True, exist_ok=True)
@@ -199,13 +203,55 @@ class AggregateFullStrategy(ServerInitializationStrategy):
 
         return agg_params, agg_metrics
 
+    def aggregate_evaluate(
+        self,
+        server_round: int,
+        results: List[Tuple[ClientProxy, EvaluateRes]],
+        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
+    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
+        """Aggregate the received local parameters and store the test aggregated.
+
+        Args:
+            server_round: The current round of federated learning.
+            results: Successful updates from the
+                previously selected and configured clients. Each pair of
+                `(ClientProxy, FitRes` constitutes a successful update from one of the
+                previously selected clients. Not that not all previously selected
+                clients are necessarily included in this list: a client might drop out
+                and not submit a result. For each client that did not submit an update,
+                there should be an `Exception` in `failures`.
+            failures: Exceptions that occurred while the server
+                was waiting for client updates.
+
+        Returns
+        -------
+            Optional `float` representing the aggregated evaluation result. Aggregation
+            typically uses some variant of a weighted average.
+        """
+        aggregated_loss, aggregated_metrics = super().aggregate_evaluate(
+            server_round=server_round, results=results, failures=failures
+        )
+        _ = aggregated_metrics  # Avoid unused variable warning
+
+        # Weigh accuracy of each client by number of examples used
+        accuracies: List[float] = []
+        for _, res in results:
+            accuracy: float = float(res.metrics["accuracy"])
+            accuracies.append(accuracy)
+        print(f"Round {server_round} accuracies: {accuracies}")
+
+        # Aggregate and print custom metric
+        averaged_accuracy = sum(accuracies) / len(accuracies)
+        print(f"Round {server_round} accuracy averaged: {averaged_accuracy}")
+        return aggregated_loss, {"accuracy": averaged_accuracy}
+
 
 class AggregateBodyStrategy(ServerInitializationStrategy):
     """Body Aggregation strategy implementation."""
 
-    def __init__(self, save_path: Path = None, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, save_path: Path = Path(""), *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        self.save_path = save_path
+        self.save_path = save_path if save_path != "" else None
         if save_path is not None:
             self.save_path = save_path / "models"
             self.save_path.mkdir(parents=True, exist_ok=True)
@@ -349,61 +395,6 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
 
         return agg_params, agg_metrics
 
-
-class StoreHistoryStrategy(Strategy):
-    """Server FL history storage per round strategy implementation."""
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        self.hist: Dict[str, Dict[int, Any]] = {
-            "trn": defaultdict(dict),
-            "tst": defaultdict(dict),
-        }
-
-
-class StoreMetricsStrategy(StoreHistoryStrategy):
-    """Server FL metrics storage per round strategy implementation."""
-
-    def aggregate_fit(
-        self,
-        server_round: int,
-        results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """Aggregate the received local parameters and store the training aggregated.
-
-        Args:
-            server_round: The current round of federated learning.
-            results: Successful updates from the previously selected and configured
-                clients. Each pair of `(ClientProxy, FitRes)` constitutes a
-                successful update from one of the previously selected clients. Not
-                that not all previously selected clients are necessarily included in
-                this list: a client might drop out and not submit a result. For each
-                client that did not submit an update, there should be an `Exception`
-                in `failures`.
-            failures: Exceptions that occurred while the server was waiting for client
-                updates.
-
-        Returns
-        -------
-            If parameters are returned, then the server will treat these as the
-            new global model parameters (i.e., it will replace the previous
-            parameters with the ones returned from this method). If `None` is
-            returned (e.g., because there were only failures and no viable
-            results) then the server will no update the previous model
-            parameters, the updates received in this round are discarded, and
-            the global model parameters remain the same.
-        """
-        aggregates = super().aggregate_fit(
-            server_round=server_round, results=results, failures=failures
-        )
-
-        self.hist["trn"][server_round] = {
-            k.cid: {"num_examples": v.num_examples, **v.metrics} for k, v in results
-        }
-
-        return aggregates
-
     def aggregate_evaluate(
         self,
         server_round: int,
@@ -433,10 +424,6 @@ class StoreMetricsStrategy(StoreHistoryStrategy):
             server_round=server_round, results=results, failures=failures
         )
         _ = aggregated_metrics  # Avoid unused variable warning
-        self.hist["tst"][server_round] = {
-            k.cid: {"num_examples": v.num_examples, "loss": v.loss, **v.metrics}
-            for k, v in results
-        }
 
         # Weigh accuracy of each client by number of examples used
         accuracies: List[float] = []
@@ -449,76 +436,3 @@ class StoreMetricsStrategy(StoreHistoryStrategy):
         averaged_accuracy = sum(accuracies) / len(accuracies)
         print(f"Round {server_round} accuracy averaged: {averaged_accuracy}")
         return aggregated_loss, {"accuracy": averaged_accuracy}
-
-
-class StoreSelectedClientsStrategy(StoreHistoryStrategy):
-    """Server FL selected clients storage per training/evaluation round strategy."""
-
-    def configure_fit(
-        self, server_round: int, parameters: Parameters, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, FitIns]]:
-        """Configure the next round of training and save the selected clients.
-
-        Args:
-            server_round: The current round of federated learning.
-            parameters: The current (global) model parameters.
-            client_manager: The client manager which holds all currently
-                connected clients.
-
-        Returns
-        -------
-            A list of tuples. Each tuple in the list identifies a `ClientProxy` and the
-            `FitIns` for this particular `ClientProxy`. If a particular `ClientProxy`
-            is not included in this list, it means that this `ClientProxy`
-            will not participate in the next round of federated learning.
-        """
-        result = super().configure_fit(
-            server_round=server_round,
-            parameters=parameters,
-            client_manager=client_manager,
-        )
-
-        if server_round not in self.hist["trn"].keys():
-            self.hist["trn"][server_round] = {}
-
-        self.hist["trn"][server_round]["selected_clients"] = [
-            client.cid for client, _ in result
-        ]
-
-        # Return client/config pairs
-        return result
-
-    def configure_evaluate(
-        self, server_round: int, parameters: Parameters, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
-        """Configure the next round of evaluation and save the selected clients.
-
-        Args:
-            server_round: The current round of federated learning.
-            parameters: The current (global) model parameters.
-            client_manager: The client manager which holds all currently
-                connected clients.
-
-        Returns
-        -------
-            A list of tuples. Each tuple in the list identifies a `ClientProxy` and the
-            `EvaluateIns` for this particular `ClientProxy`. If a particular
-            `ClientProxy` is not included in this list, it means that this
-            `ClientProxy` will not participate in the next round of federated
-            evaluation.
-        """
-        result = super().configure_evaluate(
-            server_round=server_round,
-            parameters=parameters,
-            client_manager=client_manager,
-        )
-
-        if server_round not in self.hist["tst"].keys():
-            self.hist["tst"][server_round] = {}
-
-        self.hist["tst"][server_round]["selected_clients"] = [
-            client.cid for client, _ in result
-        ]
-
-        # Return client/config pairs
-        return result

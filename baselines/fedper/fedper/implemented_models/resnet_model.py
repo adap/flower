@@ -1,9 +1,10 @@
 """ResNet model, model manager and split."""
-from typing import Any, Dict, List, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 from torchvision.models.resnet import resnet34
 
@@ -118,20 +119,24 @@ class ResNetModelManager(ModelManager):
 
     def __init__(
         self,
+        client_save_path: Optional[str],
         client_id: int,
-        config: Dict[str, Any],
+        config: DictConfig,
         trainloader: DataLoader,
         testloader: DataLoader,
         has_fixed_head: bool = False,
-        client_save_path: str = None,
         learning_rate: float = 0.01,
     ):
         """Initialize the attributes of the model manager.
 
         Args:
+            client_save_path: Path to save the client state.
             client_id: The id of the client.
             config: Dict containing the configurations to be used by the manager.
+            trainloader: DataLoader containing the train data.
+            testloader: DataLoader containing the test data.
             has_fixed_head: Whether a fixed head should be created.
+            learning_rate: Learning rate for the optimizer.
         """
         super().__init__(
             model_split_class=ResNetModelSplit,

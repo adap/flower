@@ -34,7 +34,6 @@ fit_config:
 
 strategy:
   _target_: fedPer.server.DefaultStrategyPipeline
-  algorithm: ${algorithm}
   fraction_fit: 0.00001 # because we want the number of clients to sample on each roudn to be solely defined by min_fit_clients
   min_fit_clients: ${num_clients}
   fraction_evaluate: 0.0

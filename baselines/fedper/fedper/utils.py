@@ -4,7 +4,7 @@ import pickle
 import time
 from pathlib import Path
 from secrets import token_hex
-from typing import Callable, Optional, Tuple, Union
+from typing import Callable, Optional, Type, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -71,7 +71,7 @@ def set_client_state_save_path() -> str:
 
 
 def get_client_fn(
-    config: DictConfig, client_state_save_path: str = None
+    config: DictConfig, client_state_save_path: str = ""
 ) -> Callable[[str], Union[FedPerClient, BaseClient]]:
     """Get client function."""
     # Get algorithm
@@ -93,17 +93,18 @@ def get_client_fn(
 
 def get_create_model_fn(
     config: DictConfig,
-) -> Union[
-    Tuple[Callable[[], MobileNet], MobileNetModelSplit],
-    Tuple[Callable[[], ResNet], ResNetModelSplit],
+) -> tuple[
+    Callable[[], Union[type[MobileNet], type[ResNet]]],
+    Union[type[MobileNetModelSplit], type[ResNetModelSplit]],
 ]:
     """Get create model function."""
     device = config.server_device
-
+    split: Union[
+        Type[MobileNetModelSplit], Type[ResNetModelSplit]
+    ] = MobileNetModelSplit
     if config.model_name.lower() == "mobile":
-        split = MobileNetModelSplit
 
-        def create_model() -> MobileNet:
+        def create_model() -> Union[Type[MobileNet], Type[ResNet]]:
             """Create initial MobileNet-v1 model."""
             return MobileNet(
                 num_head_layers=config.model.num_head_layers,
@@ -113,7 +114,7 @@ def get_create_model_fn(
     elif config.model_name.lower() == "resnet":
         split = ResNetModelSplit
 
-        def create_model() -> ResNet:
+        def create_model() -> Union[Type[MobileNet], Type[ResNet]]:
             """Create initial ResNet model."""
             return ResNet(
                 num_head_layers=config.model.num_head_layers,

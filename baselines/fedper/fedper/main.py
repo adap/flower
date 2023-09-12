@@ -62,7 +62,7 @@ def main(cfg: DictConfig) -> None:
         def fit_config_fn(server_round: int):
             # resolve and convert to python dict
             fit_config = OmegaConf.to_container(cfg.fit_config, resolve=True)
-            fit_config["curr_round"] = server_round
+            _ = server_round
             return fit_config
 
         return fit_config_fn

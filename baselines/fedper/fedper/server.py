@@ -5,24 +5,20 @@ from fedper.strategy import (
     AggregateBodyStrategy,
     AggregateFullStrategy,
     ServerInitializationStrategy,
-    StoreMetricsStrategy,
-    StoreSelectedClientsStrategy,
 )
 
 
-class FederatedServerPipelineStrategy(
-    StoreSelectedClientsStrategy, StoreMetricsStrategy, ServerInitializationStrategy
-):
-    """Federated server pipeline strategy."""
+class InitializationStrategyPipeline(ServerInitializationStrategy):
+    """Initialization strategy pipeline."""
 
 
 class AggregateBodyStrategyPipeline(
-    FederatedServerPipelineStrategy, AggregateBodyStrategy, FedAvg
+    InitializationStrategyPipeline, AggregateBodyStrategy, FedAvg
 ):
     """Aggregate body strategy pipeline."""
 
 
 class DefaultStrategyPipeline(
-    FederatedServerPipelineStrategy, AggregateFullStrategy, FedAvg
+    InitializationStrategyPipeline, AggregateFullStrategy, FedAvg
 ):
     """Default strategy pipeline."""

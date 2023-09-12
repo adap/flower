@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
 import torch.nn as nn
+from omegaconf import DictConfig
 from torch import Tensor
 from torch.nn import functional as F
 
@@ -167,7 +168,7 @@ class ModelManager(ABC):
     def __init__(
         self,
         client_id: int,
-        config: Dict[str, Any],
+        config: DictConfig,
         model_split_class: Type[Any],  # ModelSplit
         has_fixed_head: bool = False,
     ):

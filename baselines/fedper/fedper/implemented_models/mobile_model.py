@@ -1,8 +1,9 @@
 """MobileNet-v1 model, model manager and model split."""
-from typing import Any, Dict, List, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import torch
 import torch.nn as nn
+from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
 from fedper.models import ModelManager, ModelSplit
@@ -131,11 +132,11 @@ class MobileNetModelManager(ModelManager):
     def __init__(
         self,
         client_id: int,
-        config: Dict[str, Any],
+        config: DictConfig,
         trainloader: DataLoader,
         testloader: DataLoader,
         has_fixed_head: bool = False,
-        client_save_path: str = None,
+        client_save_path: Optional[str] = "",
         learning_rate: float = 0.01,
     ):
         """Initialize the attributes of the model manager.
@@ -153,7 +154,7 @@ class MobileNetModelManager(ModelManager):
         )
         self.trainloader, self.testloader = trainloader, testloader
         self.device = self.config["server_device"]
-        self.client_save_path = client_save_path
+        self.client_save_path = client_save_path if client_save_path != "" else None
         self.learning_rate = learning_rate
 
     def _create_model(self) -> nn.Module:

@@ -29,13 +29,13 @@ class BaseClient(NumPyClient):
         self,
         trainloader: DataLoader,
         testloader: DataLoader,
-        config: Dict[str, Any],
+        config: DictConfig,
         client_id: str,
         model_manager_class: Union[
             Type[MobileNetModelManager], Type[ResNetModelManager]
         ],
         has_fixed_head: bool = False,
-        client_state_save_path: str = None,
+        client_state_save_path: str = "",
     ):
         """Initialize client attributes.
 
@@ -51,12 +51,11 @@ class BaseClient(NumPyClient):
         self.test_id = 1
         self.config = config
         self.client_id = int(client_id)
-        if client_state_save_path is not None:
-            self.client_state_save_path = (
-                client_state_save_path + f"/client_{self.client_id}"
-            )
-        else:
-            self.client_state_save_path = None
+        self.client_state_save_path = (
+            (client_state_save_path + f"/client_{self.client_id}")
+            if client_state_save_path != ""
+            else None
+        )
         self.hist: Dict[str, Dict[str, Any]] = defaultdict(dict)
         self.num_epochs: int = self.config["num_epochs"]
         self.model_manager = model_manager_class(
@@ -66,7 +65,7 @@ class BaseClient(NumPyClient):
             trainloader=trainloader,
             testloader=testloader,
             client_save_path=self.client_state_save_path,
-            learning_rate=self.config.learning_rate,
+            learning_rate=self.config["learning_rate"],
         )
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
@@ -222,7 +221,7 @@ class FedPerClient(BaseClient):
 
 def get_client_fn_simulation(
     config: DictConfig,
-    client_state_save_path: str = None,
+    client_state_save_path: str = "",
 ) -> Callable[[str], Union[FedPerClient, BaseClient]]:
     """Generate the client function that creates the Flower Clients.
 
@@ -311,13 +310,14 @@ def get_client_fn_simulation(
         # Create the test loader
         testloader = DataLoader(testset, config.batch_size)
 
-        if config.model_name.lower() == "mobile":
-            manager = MobileNetModelManager
-        elif config.model_name.lower() == "resnet":
+        manager: Union[
+            Type[MobileNetModelManager], Type[ResNetModelManager]
+        ] = MobileNetModelManager
+        if config.model_name.lower() == "resnet":
             manager = ResNetModelManager
         else:
             raise NotImplementedError("Model not implemented, check name.")
-        if client_state_save_path is not None:
+        if client_state_save_path != "":
             return FedPerClient(
                 trainloader=trainloader,
                 testloader=testloader,
