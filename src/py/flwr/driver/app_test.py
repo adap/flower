@@ -21,7 +21,7 @@ import time
 import unittest
 from unittest.mock import MagicMock
 
-from flwr.driver.driver_client_manager_utils import client_manager_update
+from flwr.driver.driver_client_manager_utils import update_client_manager
 from flwr.proto.driver_pb2 import CreateWorkloadResponse, GetNodesResponse
 from flwr.proto.node_pb2 import Node
 from flwr.server.client_manager import SimpleClientManager
@@ -50,7 +50,7 @@ class TestClientManagerWithDriver(unittest.TestCase):
 
         # Execute
         threading.Thread(
-            target=client_manager_update,
+            target=update_client_manager,
             args=(
                 driver,
                 client_manager,

@@ -30,7 +30,7 @@ from flwr.server.server import Server
 from flwr.server.strategy import Strategy
 
 from .driver import Driver
-from .driver_client_manager_utils import client_manager_update
+from .driver_client_manager_utils import update_client_manager
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
 
@@ -129,7 +129,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
 
     # Start the thread updating nodes
     threading.Thread(
-        target=client_manager_update,
+        target=update_client_manager,
         args=(
             driver,
             initialized_server.client_manager(),

@@ -26,7 +26,7 @@ from .driver import Driver
 from .driver_client_proxy import DriverClientProxy
 
 
-def client_manager_update(
+def update_client_manager(
     driver: Driver,
     client_manager: ClientManager,
     lock: threading.Lock,
@@ -48,14 +48,21 @@ def client_manager_update(
     registered_nodes: Dict[int, DriverClientProxy] = {}
     while True:
         with lock:
-            # End the while loop if the driver is disconnected.
+            # End the while loop if the driver is disconnected
             if driver.stub is None:
                 break
             get_nodes_res = driver.get_nodes(
                 req=driver_pb2.GetNodesRequest(workload_id=workload_id)
             )
         all_node_ids = {node.node_id for node in get_nodes_res.nodes}
+        dead_nodes = set(registered_nodes).difference(all_node_ids)
         new_nodes = all_node_ids.difference(registered_nodes)
+
+        # Unregister dead nodes
+        for node_id in dead_nodes:
+            client_proxy = registered_nodes[node_id]
+            client_manager.unregister(client_proxy)
+            del registered_nodes[node_id]
 
         # Register new nodes
         for node_id in new_nodes:
@@ -69,13 +76,6 @@ def client_manager_update(
                 registered_nodes[node_id] = client_proxy
             else:
                 raise RuntimeError("Could not register node.")
-
-        # Unregister dead nodes
-        dead_nodes = set(registered_nodes).difference(all_node_ids)
-        for node_id in dead_nodes:
-            client_proxy = registered_nodes[node_id]
-            client_manager.unregister(client_proxy)
-            del registered_nodes[node_id]
 
         # Sleep for 3 seconds
         time.sleep(3)
