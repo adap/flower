@@ -33,7 +33,8 @@ block) that this file should be executed first.
 
 #     download_and_preprocess()
 
-from typing import List, Tuple
+from typing import List, Tuple, Dict
+from collections import Counter
 from torch.utils.data import Dataset, Subset, ConcatDataset
 from torchvision.datasets import EMNIST
 import numpy as np
@@ -56,14 +57,14 @@ def _download_data() -> Tuple[Dataset, Dataset]:
     )
     trainset = EMNIST(
         root="data",
-        split="balanced",
+        split="byclass",
         train=True,
         download=True,
         transform=transform,
     )
     testset = EMNIST(
         root="data",
-        split="balanced",
+        split="byclass",
         train=False,
         download=True,
         transform=transform,
@@ -132,25 +133,48 @@ def _partition_data(
     for i in range(len(iid_samples_per_client)):
         if sum(iid_samples_per_client) < len(iid_trainset):
             iid_samples_per_client[i] += 1
+
+    all_ids = np.arange(len(iid_trainset))
     for i in range(num_clients):
         c_ids = np.random.choice(
-            len(iid_trainset), iid_samples_per_client[i], replace=False
+            all_ids, iid_samples_per_client[i], replace=False
         )
-        trainsets_per_client.append(Subset(iid_trainset, c_ids))
-    # sample non-iid data per client from rem_trainset
-    noniid_samples_per_client = [len(rem_trainset) // num_clients] * num_clients
-    for i in range(len(noniid_samples_per_client)):
-        if sum(noniid_samples_per_client) < len(rem_trainset):
-            noniid_samples_per_client[i] += 1
+        d_ids = iid_trainset.indices[c_ids]
+        trainsets_per_client.append(Subset(iid_trainset.dataset, d_ids))
+        # remove the sampled data from iid_trainset
+        all_ids = np.setdiff1d(all_ids, c_ids)
 
     sorted_trainset = _sort_by_class(rem_trainset)
-    start = 0
+    # sample non-iid data per client from rem_trainset by sort method 
+    # [logic adapted from this repo](https://github.com/KarhouTam/SCAFFOLD-PyTorch/blob/master/data/utils/partition/assign_classes.py)
+    num_classes = len(rem_trainset.dataset.classes)
+    num_shards = num_clients * num_classes
+    size_shard = len(rem_trainset) // num_shards
+    idx_shard = range(num_shards)
     for i in range(num_clients):
-        end = start + noniid_samples_per_client[i]
-        t_ids = np.arange(start, end)
-        d_ids = sorted_trainset.indices[t_ids]
-        trainsets_per_client[i] = ConcatDataset([trainsets_per_client[i], Subset(sorted_trainset.dataset, d_ids)])
-        start = end
+        selected_shard_idx = np.random.choice(idx_shard, num_classes, replace=False)
+        idx_shard = np.setdiff1d(idx_shard, selected_shard_idx)
+        t_datasets = [trainsets_per_client[i]]
+        for shard_idx in selected_shard_idx:
+            t_ids = np.arange(shard_idx * size_shard, (shard_idx + 1) * size_shard)
+            d_ids = sorted_trainset.indices[t_ids]
+            t_datasets.append(Subset(sorted_trainset.dataset, d_ids))
+        trainsets_per_client[i] = ConcatDataset(t_datasets)
+
+    # noniid_samples_per_client = [len(rem_trainset) // num_clients] * num_clients
+    # for i in range(len(noniid_samples_per_client)):
+    #     if sum(noniid_samples_per_client) < len(rem_trainset):
+    #         noniid_samples_per_client[i] += 1
+
+    # start = 0
+    # for i in range(num_clients):
+    #     end = start + noniid_samples_per_client[i]
+    #     t_ids = np.arange(start, end)
+    #     d_ids = sorted_trainset.indices[t_ids]
+    #     trainsets_per_client[i] = ConcatDataset([trainsets_per_client[i], Subset(sorted_trainset.dataset, d_ids)])
+    #     start = end
+    
+    
     return trainsets_per_client, testset
 
 if __name__ == "__main__":
