@@ -22,17 +22,18 @@ from typing import Dict, Optional, cast
 import ray
 
 from flwr import common
-from flwr.client import Client, ClientLike, to_client
+from flwr.client import Client
 from flwr.client.client import (
     maybe_call_evaluate,
     maybe_call_fit,
     maybe_call_get_parameters,
     maybe_call_get_properties,
 )
+from flwr.client.numpy_client_wrapper import to_client
+from flwr.client.typing import ClientFn, ClientLike
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 from flwr.simulation.ray_transport.ray_actor import (
-    ClientFn,
     ClientJobFn,
     ClientRes,
     VirtualClientEngineActorPool,

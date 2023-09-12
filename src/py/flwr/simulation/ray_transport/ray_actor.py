@@ -26,10 +26,11 @@ from ray import ObjectRef
 from ray.util.actor_pool import ActorPool
 
 from flwr import common
-from flwr.client import Client, ClientLike, to_client
+from flwr.client import Client
+from flwr.client.numpy_client_wrapper import to_client
+from flwr.client.typing import ClientFn
 from flwr.common.logger import log
 
-ClientFn = Callable[[str], ClientLike]
 # All possible returns by a client
 ClientRes = Union[
     common.GetPropertiesRes, common.GetParametersRes, common.FitRes, common.EvaluateRes
