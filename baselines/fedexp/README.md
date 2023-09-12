@@ -1,48 +1,76 @@
 ---
-title: title of the paper
-url: URL to the paper page (not the pdf)
-labels: [label1, label2] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [dataset1, dataset2] # list of datasets you include in your baseline
+title: FedExP Speeding Up Federated Averaging via Extrapolation
+url: https://openreview.net/forum?id=IPrzNbddXV
+labels: [image classification, label2] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
+dataset: [Cifar10, Cifar100] # list of datasets you include in your baseline
 ---
 
-# :warning:*_Title of your baseline_*
+# FedExP : Speeding Up Federated Averaging via Exptrapolation
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
-> :warning: This is the template to follow when creating a new Flower Baseline. Please follow the instructions in `EXTENDED_README.md`
+****Paper:**** https://openreview.net/forum?id=IPrzNbddXV
 
-> :warning: Please follow the instructions carefully. You can see the [FedProx-MNIST baseline](https://github.com/adap/flower/tree/main/baselines/fedprox) as an example of a baseline that followed this guide.
+****Authors:**** : Divyansh Jhunjhunwala1, Shiqiang Wang2, Gauri Joshi1
 
-> :warning: Please complete the metadata section at the very top of this README. This generates a table at the top of the file that will facilitate indexing baselines.
-
-****Paper:**** :warning: *_add the URL of the paper page (not to the .pdf). For instance if you link a paper on ArXiv, add here the URL to the abstract page (e.g. https://arxiv.org/abs/1512.03385). If your paper is in from a journal or conference proceedings, please follow the same logic._*
-
-****Authors:**** :warning: *_list authors of the paper_*
-
-****Abstract:**** :warning: *_add here the abstract of the paper you are implementing_*
+****Abstract:**** : Federated Averaging (FedAvg) remains the most popular algorithm for Federated Learning (FL) optimization due to its simple implementation, stateless nature, and privacy guarantees combined with secure aggregation. Recent work has sought to generalize the vanilla averaging in FedAvg to a generalized gradient descent step by treating client updates as pseudo-gradients and using a server step size. While
+the use of a server step size has been shown to provide performance improvement theoretically, the practical benefit of the server step size has not been seen in most existing works. In this work, we present FedExP, a method to adaptively determine the server step size in FL based on dynamically varying pseudo-gradients throughout the FL process. We begin by considering the overparameterized convex regime, where we reveal an interesting similarity between FedAvg and the Projection Onto Convex Sets (POCS) algorithm. We then show how FedExP can be motivated as a novel extension to the extrapolation mechanism that is used to speed up POCS. Our theoretical analysis later also discusses the implications of FedExP in underparameterized and non-convex settings. Experimental results show that
+FedExP consistently converges faster than FedAvg and competing baselines on a range of realistic FL datasets.
 
 
 ## About this baseline
 
-****What’s implemented:**** :warning: *_Concisely describe what experiment(s) in the publication can be replicated by running the code. Please only use a few sentences. Start with: “The code in this directory …”_*
+****What’s implemented:**** : The code in this directory replicates the experiments in the paper(FedExP : Speeding Up Federated Averaging via Exptrapolation), which proposed the FedExP strategy. Specifically, it replicates the results for For Cifar10 and Cifar100 in Figure 3.
 
-****Datasets:**** :warning: *_List the datasets you used (if you used a medium to large dataset, >10GB please also include the sizes of the dataset)._*
+****Datasets:**** : Cifar10, Cifar100
 
 ****Hardware Setup:**** :warning: *_Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Someone out there might not have access to the same resources you have so, could list the absolute minimum hardware needed to run the experiment in a reasonable amount of time ? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?_*
 
-****Contributors:**** :warning: *_let the world know who contributed to this baseline. This could be either your name, your name and affiliation at the time, or your GitHub profile name if you prefer. If multiple contributors signed up for this baseline, please list yourself and your colleagues_*
+****Contributors:**** : 
 
 
 ## Experimental Setup
 
-****Task:**** :warning: *_what’s the primary task that is being federated? (e.g. image classification, next-word prediction). If you have experiments for several, please list them_*
+****Task:**** : Image classification
 
-****Model:**** :warning: *_provide details about the model you used in your experiments (if more than use a list). If your model is small, describing it as a table would be :100:. Some FL methods do not use an off-the-shelve model (e.g. ResNet18) instead they create your own. If this is your case, please provide a summary here and give pointers to where in the paper (e.g. Appendix B.4) is detailed._*
+****Model:**** : This directory implements the ResNet-18 Model:
+The ResNet-18 model is employed in the paper as the core architecture for experiments on CIFAR-10 and CIFAR-100 datasets.
 
-****Dataset:**** :warning: *_Earlier you listed already the datasets that your baseline uses. Now you should include a breakdown of the details about each of them. Please include information about: how the dataset is partitioned (e.g. LDA with alpha 0.1 as default and all clients have the same number of training examples; or each client gets assigned a different number of samples following a power-law distribution with each client only instances of 2 classes)? if  your dataset is naturally partitioned just state “naturally partitioned”; how many partitions there are (i.e. how many clients)? Please include this an all information relevant about the dataset and its partitioning into a table._*
+****Dataset:**** :
+The baseline utilizes both CIFAR-10 and CIFAR-100 datasets, which will be distributed among 100 clients. The Dirichlet distribution is employed to introduce variability in the composition of client datasets for CIFAR.
 
-****Training Hyperparameters:**** :warning: *_Include a table with all the main hyperparameters in your baseline. Please show them with their default value._*
+| Dataset | #classes | #partitions | partitioning method | partition settings |
+| :------ | :---: | :---: | :---: | :---: |
+| Cifar10 | 10 | 100 |  | |
+| Cifar100 | 100 | 100 |  | |
 
+
+****Training Hyperparameters:**** :
+The following tables shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python main.py` directly)
+
+| Description | Default Value |
+| ----------- | ----- |
+| total clients | 100 |
+| clients per round | 20 |
+| number of rounds | 500 |
+| number of local rounds | 20 |
+| batch_size | 50 |
+| client resources | {'num_cpus': 2.0, 'num_gpus': 0.2 }|
+| eta_l (local learning rate)| 0.01 |
+
+Fot Dataset:
+Choice of alpha parameter for the Dirichlet distribution used to create heterogeneity in the client datasets for CIFAR
+| Description | Default Value |
+| ----------- | ----- |
+| alpha | 0.5 |
+
+hyperparams specifically for FedExP strategy:
+| Description | Default Value |
+| ----------- | ----- |
+| epsilon | 0.001 |
+| decay | 0.998 |
+| weight_decay | 0.0001 |
+| max_norm | 10 |
 
 ## Environment Setup
 
