@@ -59,6 +59,13 @@ The following table shows the main hyperparameters for this baseline with their 
 To construct the Python environment, simply run:
 
 ```bash
+# Set directory to use python 3.10 (install with `pyenv install <version>` if you don't have it)
+pyenv local 3.10.6
+
+# Tell poetry to use python3.10
+poetry env use 3.10.6
+
+# Install
 poetry install
 ```
 

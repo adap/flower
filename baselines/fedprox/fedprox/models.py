@@ -55,8 +55,9 @@ class LogisticRegression(nn.Module):
 
     As described in the Li et al., 2020 paper :
 
-    [Federated Optimization in Heterogeneous Networks]
-    (https://arxiv.org/pdf/1812.06127.pdf)
+    [Federated Optimization in Heterogeneous Networks] (
+
+    https://arxiv.org/pdf/1812.06127.pdf)
     """
 
     def __init__(self, num_classes: int) -> None:
