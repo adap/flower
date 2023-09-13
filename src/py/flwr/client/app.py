@@ -166,6 +166,7 @@ def start_client(
             f"Unknown transport type: {transport} (possible: {TRANSPORT_TYPES})"
         )
 
+    # A state for this client
     client_state = ClientState()
 
     while True:
@@ -187,15 +188,21 @@ def start_client(
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
 
+                # Register workload if it's first time encountered
                 client_state.register_workload(task_ins.workload_id)
+
+                # Fetch workload state
                 workload_state = client_state[task_ins.workload_id]
+
+                # Execute TaskIns
                 task_res, sleep_duration, keep_going, workload_state_updated = handle(
                     client_fn, task_ins, workload_state
                 )
 
-                # Update state
+                # Update state of completed workload
                 client_state.update_workload_state(workload_state_updated)
 
+                # Return TaskRes
                 send(task_res)
                 if not keep_going:
                     break
