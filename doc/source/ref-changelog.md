@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **Support custom CLientManager in `start_driver()`** ([#2292](https://github.com/adap/flower/pull/2292))
+
 - **Update REST API to support create and delete nodes** ([#2283](https://github.com/adap/flower/pull/2283))
 
 ### What's new?
