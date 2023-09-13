@@ -38,12 +38,12 @@ The source code is available in our project page._*
 ## About this baseline
 
 ****What’s implemented:**** The code in this directory reproduces the results for FedMLB, FedAvg, and FedAvg+KD.
-The reproduced results use the CIFAR-100 dataset. Four settings are available for CIFAR-100,
-1. Moderate-scale with Dir(0.3), 100 clients, 5% participation, balanced dataset (500 examples per client).
-2. Large-scale experiments with Dir(0.3), 500 clients, 2% participation rate, balanced dataset (100 examples per client).
-3. Moderate-scale with Dir(0.6), 100 clients, 5% participation rate, balanced dataset (500 examples per client).
-4. Large-scale experiments with Dir(0.6), 500 clients, 2% participation rate, balanced dataset (100 examples per client).
-
+The reproduced results use the CIFAR-100 dataset or the TinyImagenet dataset. Four settings are available for both
+the datasets,
+1. Moderate-scale with Dir(0.3), 100 clients, 5% participation, balanced dataset.
+2. Large-scale experiments with Dir(0.3), 500 clients, 2% participation rate, balanced dataset.
+3. Moderate-scale with Dir(0.6), 100 clients, 5% participation rate, balanced dataset.
+4. Large-scale experiments with Dir(0.6), 500 clients, 2% participation rate, balanced dataset.
 
 ****Datasets:**** CIFAR-100, Tiny-ImageNet.
 
