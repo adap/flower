@@ -60,6 +60,7 @@ class TestClientManagerWithDriver(unittest.TestCase):
         )
         thread.start()
 
+        client_manager.sample(len(expected_nodes))
         node_ids = {proxy.node_id for proxy in client_manager.all().values()}
 
         driver.get_nodes.return_value = GetNodesResponse(nodes=expected_updated_nodes)
