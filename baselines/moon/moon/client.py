@@ -115,14 +115,9 @@ class FlowerClient(
 
 
 def gen_client_fn(
-    num_clients: int,
-    num_rounds: int,
-    num_epochs: int,
     trainloaders: List[DataLoader],
-    valloaders: List[DataLoader],
-    learning_rate: float,
-    stragglers: float,
-    model: DictConfig,
+    testloaders: List[DataLoader],
+    cfg: DictConfig,
 ) -> Tuple[
     Callable[[str], FlowerClient], DataLoader
 ]:  # pylint: disable=too-many-arguments
@@ -161,23 +156,27 @@ def gen_client_fn(
 
         # Load model
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        net = init_net(model.dataset, model.model, model.output_dim)
-        net = instantiate(model).to(device)
+        net = init_net(cfg.dataset.name, cfg.model.name, cfg.model.output_dim)
 
         # Note: each client gets a different trainloader/valloader, so each client
         # will train and evaluate on their own unique data
         trainloader = trainloaders[int(cid)]
-        valloader = valloaders[int(cid)]
+        testloader = testloaders[int(cid)]
 
         return FlowerClient(
             net,
-            net_id, 
+            int(cid),
+            cfg.dataset.name,
+            cfg.model.name,
+            cfg.model.output_dim,
             trainloader,
-            valloader,
+            testloader,
             device,
-            num_epochs,
-            learning_rate,
-            stragglers_mat[int(cid)],
+            cfg.num_epochs,
+            cfg.learning_rate,
+            cfg.mu,
+            cfg.temperature,
+            cfg.model.dir,
+            cfg.alg,
         )
-
     return client_fn

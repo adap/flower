@@ -434,3 +434,7 @@ def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu
     net.to('cpu')
     print(' ** Training complete **')
     return net
+
+def test(net, test_dataloader, device='cpu'):
+    test_acc, loss = compute_accuracy(net, test_dataloader, device=device)
+    return test_acc, loss

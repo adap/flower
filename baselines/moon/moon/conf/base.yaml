@@ -4,7 +4,15 @@
 # a similar configuration structure and hence be easy to customise)
 
 num_clients: 10
+num_epochs: 10
+fraction_fit: 1.0
 batch_size: 32
+learning_rate: 0.01
+mu: 1
+temperature: 0.5
+alg: moon
+
+
 
 dataset:
   # dataset config
@@ -15,6 +23,9 @@ dataset:
 
 model:
   # model config
+  name: simple-cnn
+  output_dim: 256
+  dir: ./models/moon/
 
 strategy:
   _target_: # points to your strategy (either custom or exiting in Flower)
