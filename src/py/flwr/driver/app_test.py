@@ -49,7 +49,7 @@ class TestClientManagerWithDriver(unittest.TestCase):
         lock = threading.Lock()
 
         # Execute
-        threading.Thread(
+        thread = threading.Thread(
             target=update_client_manager,
             args=(
                 driver,
@@ -57,7 +57,8 @@ class TestClientManagerWithDriver(unittest.TestCase):
                 lock,
             ),
             daemon=True,
-        ).start()
+        )
+        thread.start()
 
         node_ids = {proxy.node_id for proxy in client_manager.all().values()}
 
@@ -70,7 +71,11 @@ class TestClientManagerWithDriver(unittest.TestCase):
 
         updated_node_ids = {proxy.node_id for proxy in client_manager.all().values()}
 
+        driver.stub = None
+
         # Assert
         driver.create_workload.assert_called_once()
         assert node_ids == {node.node_id for node in expected_nodes}
         assert updated_node_ids == {node.node_id for node in expected_updated_nodes}
+
+        thread.join()
