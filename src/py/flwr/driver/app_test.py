@@ -59,19 +59,20 @@ class TestClientManagerWithDriver(unittest.TestCase):
             daemon=True,
         )
         thread.start()
-
+        # Wait until all nodes are registered via `client_manager.sample()`
         client_manager.sample(len(expected_nodes))
+        # Retrieve all nodes in `client_manager`
         node_ids = {proxy.node_id for proxy in client_manager.all().values()}
-
+        # Update the GetNodesResponse and wait until the `client_manager` is updated
         driver.get_nodes.return_value = GetNodesResponse(nodes=expected_updated_nodes)
         while True:
             with lock:
                 if len(client_manager.all()) == len(expected_updated_nodes):
                     break
             time.sleep(1.3)
-
+        # Retrieve all nodes in `client_manager`
         updated_node_ids = {proxy.node_id for proxy in client_manager.all().values()}
-
+        # Simulate `driver.disconnect()`
         driver.stub = None
 
         # Assert
@@ -79,4 +80,5 @@ class TestClientManagerWithDriver(unittest.TestCase):
         assert node_ids == {node.node_id for node in expected_nodes}
         assert updated_node_ids == {node.node_id for node in expected_updated_nodes}
 
+        # Exit
         thread.join()
