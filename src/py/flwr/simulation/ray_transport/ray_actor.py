@@ -75,7 +75,7 @@ class VirtualClientEngineActor(ABC):
             client = to_client(client_like=client_like)
             # Set state
             # get state for the current workload
-            workload_state = client_state.get_workload_state(workload_id=WORKLOAD_ID)
+            workload_state = client_state[WORKLOAD_ID]
             client.set_state(workload_state)
             # Run client job
             job_results = job_fn(client)

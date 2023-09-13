@@ -19,6 +19,7 @@ from .app import start_client as start_client
 from .app import start_numpy_client as start_numpy_client
 from .client import Client as Client
 from .client_state import ClientState as ClientState
+from .client_state import WorkloadState as WorkloadState
 from .numpy_client import NumPyClient as NumPyClient
 from .numpy_client_wrapper import to_client as to_client
 from .run import run_client as run_client
@@ -31,6 +32,7 @@ __all__ = [
     "ClientLike",
     "ClientState",
     "NumPyClient",
+    "WorkloadState",
     "run_client",
     "start_client",
     "start_numpy_client",

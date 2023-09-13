@@ -20,6 +20,7 @@ import time
 from logging import INFO
 from typing import Callable, Optional, Union
 
+from flwr.client.client_state import ClientState
 from flwr.client.typing import ClientFn, ClientLike
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
@@ -165,6 +166,8 @@ def start_client(
             f"Unknown transport type: {transport} (possible: {TRANSPORT_TYPES})"
         )
 
+    client_state = ClientState()
+
     while True:
         sleep_duration: int = 0
         with connection(
@@ -183,7 +186,16 @@ def start_client(
                 if task_ins is None:
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
-                task_res, sleep_duration, keep_going = handle(client_fn, task_ins)
+
+                client_state.register_workload(task_ins.workload_id)
+                workload_state = client_state[task_ins.workload_id]
+                task_res, sleep_duration, keep_going, workload_state_updated = handle(
+                    client_fn, task_ins, workload_state
+                )
+
+                # Update state
+                client_state.update_workload_state(workload_state_updated)
+
                 send(task_res)
                 if not keep_going:
                     break

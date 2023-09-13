@@ -15,7 +15,7 @@
 """Client-side message handler."""
 
 
-from typing import Tuple
+from typing import Optional, Tuple
 
 from flwr.client.client import (
     Client,
@@ -24,6 +24,7 @@ from flwr.client.client import (
     maybe_call_get_parameters,
     maybe_call_get_properties,
 )
+from flwr.client.client_state import WorkloadState
 from flwr.client.message_handler.task_handler import (
     get_server_message_from_task_ins,
     wrap_client_message_in_task_res,
@@ -40,7 +41,9 @@ class UnknownServerMessage(Exception):
     """Exception indicating that the received message is unknown."""
 
 
-def handle(client_fn: ClientFn, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
+def handle(
+    client_fn: ClientFn, task_ins: TaskIns, workload_state: WorkloadState
+) -> Tuple[TaskRes, int, bool, Optional[WorkloadState]]:
     """Handle incoming TaskIns from the server.
 
     Parameters
@@ -49,6 +52,8 @@ def handle(client_fn: ClientFn, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
         A callable that instantiates a Client.
     task_ins: TaskIns
         The task instruction coming from the server, to be processed by the client.
+    workload_state: WorkloadState
+        The state the client uses for local in-memory storage for the given task.
 
     Returns
     -------
@@ -82,18 +87,27 @@ def handle(client_fn: ClientFn, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
                     sa=SecureAggregation(named_values=serde.named_values_to_proto(res)),
                 ),
             )
-            return task_res, 0, True
+            return task_res, 0, True, workload_state
         raise NotImplementedError()
-    client_msg, sleep_duration, keep_going = handle_legacy_message(
-        client_fn, server_msg
+    (
+        client_msg,
+        sleep_duration,
+        keep_going,
+        workload_state_updated,
+    ) = handle_legacy_message(
+        client_fn,
+        server_msg,
+        workload_state,
     )
     task_res = wrap_client_message_in_task_res(client_msg)
-    return task_res, sleep_duration, keep_going
+    return task_res, sleep_duration, keep_going, workload_state_updated
 
 
 def handle_legacy_message(
-    client_fn: ClientFn, server_msg: ServerMessage
-) -> Tuple[ClientMessage, int, bool]:
+    client_fn: ClientFn,
+    server_msg: ServerMessage,
+    workload_state: WorkloadState,
+) -> Tuple[ClientMessage, int, bool, Optional[WorkloadState]]:
     """Handle incoming messages from the server.
 
     Parameters
@@ -102,6 +116,8 @@ def handle_legacy_message(
         A callable that instantiates a Client.
     server_msg: ServerMessage
         The message coming from the server, to be processed by the client.
+    workload_state: WorkloadState
+        The state the client uses for local in-memory storage for the given task.
 
     Returns
     -------
@@ -117,20 +133,32 @@ def handle_legacy_message(
     field = server_msg.WhichOneof("msg")
     if field == "reconnect_ins":
         disconnect_msg, sleep_duration = _reconnect(server_msg.reconnect_ins)
-        return disconnect_msg, sleep_duration, False
+        return disconnect_msg, sleep_duration, False, workload_state
 
     # Instantiate the client
     client_like: ClientLike = client_fn("-1")
     client = to_client(client_like)
+    # Set state for current task/workload
+    client.set_state(workload_state)
     # Execute task
     if field == "get_properties_ins":
-        return _get_properties(client, server_msg.get_properties_ins), 0, True
+        return (
+            _get_properties(client, server_msg.get_properties_ins),
+            0,
+            True,
+            client.get_state(),
+        )
     if field == "get_parameters_ins":
-        return _get_parameters(client, server_msg.get_parameters_ins), 0, True
+        return (
+            _get_parameters(client, server_msg.get_parameters_ins),
+            0,
+            True,
+            client.get_state(),
+        )
     if field == "fit_ins":
-        return _fit(client, server_msg.fit_ins), 0, True
+        return _fit(client, server_msg.fit_ins), 0, True, client.get_state()
     if field == "evaluate_ins":
-        return _evaluate(client, server_msg.evaluate_ins), 0, True
+        return _evaluate(client, server_msg.evaluate_ins), 0, True, client.get_state()
     raise UnknownServerMessage()
 
 

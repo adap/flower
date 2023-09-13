@@ -44,7 +44,7 @@ class ClientState:
         if workload_id not in self.workload_states:
             self.workload_states[workload_id] = WorkloadState(cid, workload_id)
 
-    def get_workload_state(self, workload_id: str) -> WorkloadState:
+    def __getitem__(self, workload_id: str) -> WorkloadState:
         """Get client's state for a particular workload."""
         return self.workload_states[workload_id]
 

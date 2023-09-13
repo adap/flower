@@ -17,7 +17,7 @@
 
 import uuid
 
-from flwr.client import Client
+from flwr.client import Client, ClientState
 from flwr.client.typing import ClientFn
 from flwr.common import (
     EvaluateIns,
@@ -116,6 +116,7 @@ def test_client_without_get_properties() -> None:
     # Prepare
     client = ClientWithoutProps()
     ins = ServerMessage.GetPropertiesIns()
+    client_state = ClientState()
 
     task_ins: TaskIns = TaskIns(
         task_id=str(uuid.uuid4()),
@@ -129,10 +130,19 @@ def test_client_without_get_properties() -> None:
         ),
     )
 
+    # Prepare state
+    client_state.register_workload(task_ins.workload_id)  # pylint: disable=no-member
+    workload_state = client_state[task_ins.workload_id]  # pylint: disable=no-member
+
     # Execute
-    task_res, actual_sleep_duration, actual_keep_going = handle(
-        client_fn=_get_client_fn(client), task_ins=task_ins
+    task_res, actual_sleep_duration, actual_keep_going, workload_state_updated = handle(
+        client_fn=_get_client_fn(client),
+        task_ins=task_ins,
+        workload_state=workload_state,
     )
+
+    # Update state
+    client_state.update_workload_state(workload_state_updated)
 
     if not task_res.HasField("task"):
         raise ValueError("Task value not found")
@@ -180,6 +190,7 @@ def test_client_with_get_properties() -> None:
     # Prepare
     client = ClientWithProps()
     ins = ServerMessage.GetPropertiesIns()
+    client_state = ClientState()
     task_ins = TaskIns(
         task_id=str(uuid.uuid4()),
         group_id="",
@@ -192,10 +203,19 @@ def test_client_with_get_properties() -> None:
         ),
     )
 
+    # Prepare state
+    client_state.register_workload(task_ins.workload_id)  # pylint: disable=no-member
+    workload_state = client_state[task_ins.workload_id]  # pylint: disable=no-member
+
     # Execute
-    task_res, actual_sleep_duration, actual_keep_going = handle(
-        client_fn=_get_client_fn(client), task_ins=task_ins
+    task_res, actual_sleep_duration, actual_keep_going, workload_state_updated = handle(
+        client_fn=_get_client_fn(client),
+        task_ins=task_ins,
+        workload_state=workload_state,
     )
+
+    # Update state
+    client_state.update_workload_state(workload_state_updated)
 
     if not task_res.HasField("task"):
         raise ValueError("Task value not found")
