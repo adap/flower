@@ -176,37 +176,7 @@ if __name__ == "__main__":
         with open(cfg_path, 'w') as f:
             f.write(config_content)
 
-        # start the finetuning with ucf-101.
-        from CtP.pyvrl.builder import build_model, build_dataset
-        
-        # we give an example on how one can perform fine-tuning uisng UCF-101 dataset. 
-        cfg_path = "CtP/configs/ctp/r3d_18_kinetics/finetune_ucf101.py" 
-        cfg = Config.fromfile(cfg_path)
-        cfg.model.backbone['pretrained'] = None
-        
-        # build a model using the configuration file from Ctp repository
-        model = build_model(cfg.model)
-
-        # path to the pretrained model. We provide certain federated pretrained model that can be easily downloaded 
-        # from the following link: https://github.com/yasar-rehman/FEDVSSL
-        # here we gave an exampe with FedVSSL (alpha=0, beta=0) checkpoint file
-        # The files after federated pretraining are usually saved in .npz format. 
-        
-        pretrained = "/home/data1/round-540-weights.array.npz"
-        
-        # conversion of the .npz files to the .pth format. If the files are saved in .npz format
-        if pretrained.endswith('.npz'):
-            # following changes are made here
-            params = np.load(pretrained, allow_pickle=True)
-            params = params['arr_0'].item()
-            params = parameters_to_ndarrays(params)
-            params_dict = zip(model.state_dict().keys(), params)
-            state_dict = {
-                'state_dict':OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
-            }
-            torch.save(state_dict, './model_pretrained.pth')
-        
-       
+                 
     #-----------------------------------------------------------------------------------------------------------------------
     # The cfg_path need to be updated with the following updated configuration contents to be able to load the pretrained model.
     # Instead of executing the blow mentioned code, one can also directly modify the "pretrained" variable by opening the path represented
