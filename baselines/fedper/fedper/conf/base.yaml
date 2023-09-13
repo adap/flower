@@ -15,7 +15,7 @@ client_resources:
 server_device: cuda:0
 
 dataset:
-  name : "cifar10"
+  name : "cifar100"
   split: sample
   num_classes: 10
   seed: 42
@@ -39,6 +39,6 @@ strategy:
   fraction_evaluate: 0.0
   min_evaluate_clients: ${num_clients}
   min_available_clients: ${num_clients}
-  config: ${model}
+  algorithm: ${algorithm}
   evaluate_fn: None
   on_evaluate_config_fn: None

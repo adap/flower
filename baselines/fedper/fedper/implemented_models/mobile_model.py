@@ -33,10 +33,6 @@ class MobileNet(nn.Module):
         self,
         num_head_layers: int = 1,
         num_classes: int = 10,
-        # device: str = "cpu",
-        # name: str = "mobile",
-        # num_epochs: int = 1,
-        # learning_rate: float = 0.01,
     ) -> None:
         super(MobileNet, self).__init__()
 
@@ -135,7 +131,6 @@ class MobileNetModelManager(ModelManager):
         config: DictConfig,
         trainloader: DataLoader,
         testloader: DataLoader,
-        has_fixed_head: bool = False,
         client_save_path: Optional[str] = "",
         learning_rate: float = 0.01,
     ):
@@ -144,13 +139,11 @@ class MobileNetModelManager(ModelManager):
         Args:
             client_id: The id of the client.
             config: Dict containing the configurations to be used by the manager.
-            has_fixed_head: Whether a fixed head should be created.
         """
         super().__init__(
             model_split_class=MobileNetModelSplit,
             client_id=client_id,
             config=config,
-            has_fixed_head=has_fixed_head,
         )
         self.trainloader, self.testloader = trainloader, testloader
         self.device = self.config["server_device"]

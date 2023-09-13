@@ -37,10 +37,8 @@ def dataset_main(config: dict) -> None:
     if not os.path.isdir(dataset_root):
         os.makedirs(dataset_root)
 
-    if dataset_name in ["cifar10", "cifar100"]:
-        dataset = call_dataset(
-            dataset_name=dataset_name, root=dataset_root, config=config
-        )
+    if dataset_name == "cifar10":
+        dataset = call_dataset(dataset_name=dataset_name, root=dataset_root)
 
         # randomly assign classes
         assert config["num_classes"] > 0, "Number of classes must be positive"

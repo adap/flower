@@ -33,8 +33,6 @@ def set_num_classes(config: DictConfig) -> DictConfig:
     # Set the number of classes
     if config.dataset.name.lower() == "cifar10":
         config.model.num_classes = 10
-    elif config.dataset.name.lower() == "cifar100":
-        config.model.num_classes = 100
     elif config.dataset.name.lower() == "flickr":
         config.model.num_classes = 5
         # additionally for flickr

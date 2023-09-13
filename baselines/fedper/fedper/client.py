@@ -8,7 +8,6 @@ import numpy as np
 import torch
 from flwr.client import NumPyClient
 from flwr.common import NDArrays, Scalar
-from numpy import dtype, ndarray
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader, Subset, random_split
 from torchvision import transforms
@@ -22,20 +21,47 @@ from fedper.implemented_models.resnet_model import ResNetModelManager
 PROJECT_DIR = Path(__file__).parent.parent.absolute()
 
 
-class BaseClient(NumPyClient):
-    """Implementation of Federated Averaging (FedAvg) Client."""
+class ClientDataloaders:
+    """Client dataloaders."""
 
     def __init__(
         self,
         trainloader: DataLoader,
         testloader: DataLoader,
-        config: DictConfig,
+    ) -> None:
+        """Initialize the client dataloaders."""
+        self.trainloader = trainloader
+        self.testloader = testloader
+
+
+class ClientEssentials:
+    """Client essentials."""
+
+    def __init__(
+        self,
         client_id: str,
+        client_state_save_path: str = "",
+    ) -> None:
+        """Set client state save path and client ID."""
+        self.client_id = int(client_id)
+        self.client_state_save_path = (
+            (client_state_save_path + f"/client_{self.client_id}")
+            if client_state_save_path != ""
+            else None
+        )
+
+
+class BaseClient(NumPyClient):
+    """Implementation of Federated Averaging (FedAvg) Client."""
+
+    def __init__(
+        self,
+        data_oaders: ClientDataloaders,
+        config: DictConfig,
+        client_essentials: ClientEssentials,
         model_manager_class: Union[
             Type[MobileNetModelManager], Type[ResNetModelManager]
         ],
-        has_fixed_head: bool = False,
-        client_state_save_path: str = "",
     ):
         """Initialize client attributes.
 
@@ -43,29 +69,22 @@ class BaseClient(NumPyClient):
             config: dictionary containing the client configurations.
             client_id: id of the client.
             model_manager_class: class to be used as the model manager.
-            has_fixed_head: whether a fixed head should be used or not.
         """
         super().__init__()
 
         self.train_id = 1
         self.test_id = 1
-        self.config = config
-        self.client_id = int(client_id)
-        self.client_state_save_path = (
-            (client_state_save_path + f"/client_{self.client_id}")
-            if client_state_save_path != ""
-            else None
-        )
+        self.client_id = int(client_essentials.client_id)
+        self.client_state_save_path = client_essentials.client_state_save_path
         self.hist: Dict[str, Dict[str, Any]] = defaultdict(dict)
-        self.num_epochs: int = self.config["num_epochs"]
+        self.num_epochs: int = config["num_epochs"]
         self.model_manager = model_manager_class(
             client_id=self.client_id,
             config=config,
-            has_fixed_head=has_fixed_head,
-            trainloader=trainloader,
-            testloader=testloader,
+            trainloader=data_oaders.trainloader,
+            testloader=data_oaders.testloader,
             client_save_path=self.client_state_save_path,
-            learning_rate=self.config["learning_rate"],
+            learning_rate=config["learning_rate"],
         )
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
@@ -80,6 +99,7 @@ class BaseClient(NumPyClient):
         Args:
             parameters: parameters to set the model to.
         """
+        _ = evaluate
         model_keys = [
             k
             for k in self.model_manager.model.state_dict().keys()
@@ -100,22 +120,18 @@ class BaseClient(NumPyClient):
         -------
             Dict with the train metrics.
         """
-        epochs = self.config.get("epochs", {"full": self.num_epochs})
+        epochs = self.num_epochs
 
         self.model_manager.model.enable_body()
         self.model_manager.model.enable_head()
 
         return self.model_manager.train(
-            epochs=epochs.get("full", self.num_epochs),
+            epochs=epochs,
         )
 
     def fit(
-        self, parameters: List[np.ndarray], config: Dict[str, Scalar]
-    ) -> Tuple[
-        List[ndarray[Any, dtype[Any]]],
-        int,
-        Dict[str, Union[bool, bytes, float, int, str]],
-    ]:
+        self, parameters: NDArrays, config: Dict[str, Scalar]
+    ) -> Tuple[NDArrays, int, Dict[str, Union[bool, bytes, float, int, str]]]:
         """Train the provided parameters using the locally held dataset.
 
         Args:
@@ -144,7 +160,7 @@ class BaseClient(NumPyClient):
         return self.get_parameters(config), self.model_manager.train_dataset_size(), {}
 
     def evaluate(
-        self, parameters: List[np.ndarray], config: Dict[str, Scalar]
+        self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[float, int, Dict[str, Union[bool, bytes, float, int, str]]]:
         """Evaluate the provided global parameters using the locally held dataset.
 
@@ -244,7 +260,7 @@ def get_client_fn_simulation(
     ], f"Model {config.model.name} not implemented"
 
     # load dataset and clients' data indices
-    if config.dataset.name.lower() in ["cifar10", "cifar100"]:
+    if config.dataset.name.lower() == "cifar10":
         try:
             partition_path = (
                 PROJECT_DIR / "datasets" / config.dataset.name / "partition.pkl"
@@ -266,9 +282,6 @@ def get_client_fn_simulation(
                 ),
             ]
         )
-        general_target_transform = transforms.Compose([])
-        train_data_transform = transforms.Compose([])
-        train_target_transform = transforms.Compose([])
         # ------------------------------------------------------------
 
     def client_fn(cid: str) -> BaseClient:
@@ -293,11 +306,7 @@ def get_client_fn_simulation(
             dataset = call_dataset(
                 dataset_name=config.dataset.name,
                 root=PROJECT_DIR / "datasets" / config.dataset.name,
-                config=config.dataset,
                 general_data_transform=general_data_transform,
-                general_target_transform=general_target_transform,
-                train_data_transform=train_data_transform,
-                train_target_transform=train_target_transform,
             )
 
             trainset = Subset(dataset, indices=[])
@@ -317,22 +326,23 @@ def get_client_fn_simulation(
             manager = ResNetModelManager
         else:
             raise NotImplementedError("Model not implemented, check name.")
+        client_data_loaders = ClientDataloaders(trainloader, testloader)
+        client_essentials = ClientEssentials(
+            client_id=cid,
+            client_state_save_path=client_state_save_path,
+        )
         if client_state_save_path != "":
             return FedPerClient(
-                trainloader=trainloader,
-                testloader=testloader,
-                client_id=cid,
+                data_oaders=client_data_loaders,
+                client_essentials=client_essentials,
                 config=config,
                 model_manager_class=manager,
-                client_state_save_path=client_state_save_path,
             )
         return BaseClient(
-            trainloader=trainloader,
-            testloader=testloader,
-            client_id=cid,
+            data_oaders=client_data_loaders,
+            client_essentials=client_essentials,
             config=config,
             model_manager_class=manager,
-            client_state_save_path=client_state_save_path,
         )
 
     return client_fn

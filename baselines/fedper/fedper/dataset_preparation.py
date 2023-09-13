@@ -18,37 +18,21 @@ class BaseDataset(Dataset):
 
     def __init__(
         self,
-        root,
-        config,
+        root: Path = Path("datasets/cifar10"),
         general_data_transform: transforms.transforms.Compose = None,
-        general_target_transform: transforms.transforms.Compose = None,
-        train_data_transform: transforms.transforms.Compose = None,
-        train_target_transform: transforms.transforms.Compose = None,
     ) -> None:
         """Initialize the dataset."""
         self.root = root
-        self.config = config
         self.classes = None
-        self.data: torch.Tensor = None
-        self.targets: torch.Tensor = None
-        self.train_data_transform = train_data_transform
-        self.train_target_transform = train_target_transform
+        self.data: torch.tensor = None
+        self.targets: torch.tensor = None
         self.general_data_transform = general_data_transform
-        self.general_target_transform = general_target_transform
-        self.enable_train_transform = False
 
     def __getitem__(self, index):
         """Get the item at the given index."""
         data, targets = self.data[index], self.targets[index]
-        if self.enable_train_transform and self.train_data_transform is not None:
-            print("train_data_transform")
-            data = self.train_data_transform(data)
-        if self.enable_train_transform and self.train_target_transform is not None:
-            targets = self.train_target_transform(targets)
         if self.general_data_transform is not None:
             data = self.general_data_transform(data)
-        if self.general_target_transform is not None:
-            targets = self.general_target_transform(targets)
         return data, targets
 
     def __len__(self):
@@ -61,57 +45,20 @@ class CIFAR10(BaseDataset):
 
     def __init__(
         self,
-        root,
-        config=None,
+        root: Path = Path("datasets/cifar10"),
         general_data_transform=None,
-        general_target_transform=None,
-        train_data_transform=None,
-        train_target_transform=None,
-        enable_train_transform=False,
-    ):
-        """Initialize the dataset."""
-        train_part = torchvision.datasets.CIFAR10(root, True, download=True)
-        test_part = torchvision.datasets.CIFAR10(root, False, download=True)
-        train_data = torch.Tensor(train_part.data).permute([0, -1, 1, 2]).float()
-        test_data = torch.Tensor(test_part.data).permute([0, -1, 1, 2]).float()
-        train_targets = torch.Tensor(train_part.targets).long().squeeze()
-        test_targets = torch.Tensor(test_part.targets).long().squeeze()
-        self.data = torch.cat([train_data, test_data])
-        self.targets = torch.cat([train_targets, test_targets])
-        self.classes = train_part.classes
-        self.general_data_transform = general_data_transform
-        self.general_target_transform = general_target_transform
-        self.train_data_transform = train_data_transform
-        self.train_target_transform = train_target_transform
-        self.enable_train_transform = enable_train_transform
-
-
-class CIFAR100(BaseDataset):
-    """CIFAR100 dataset."""
-
-    def __init__(
-        self,
-        root,
-        config,
-        general_data_transform=None,
-        general_target_transform=None,
-        train_data_transform=None,
-        train_target_transform=None,
     ):
         super().__init__()
-        train_part = torchvision.datasets.CIFAR100(root, True, download=True)
-        test_part = torchvision.datasets.CIFAR100(root, False, download=True)
-        train_data = torch.Tensor(train_part.data).permute([0, -1, 1, 2]).float()
-        test_data = torch.Tensor(test_part.data).permute([0, -1, 1, 2]).float()
-        train_targets = torch.Tensor(train_part.targets).long().squeeze()
-        test_targets = torch.Tensor(test_part.targets).long().squeeze()
+        train_part = torchvision.datasets.CIFAR10(root, True, download=True)
+        test_part = torchvision.datasets.CIFAR10(root, False, download=True)
+        train_data = torch.tensor(train_part.data).permute([0, -1, 1, 2]).float()
+        test_data = torch.tensor(test_part.data).permute([0, -1, 1, 2]).float()
+        train_targets = torch.tensor(train_part.targets).long().squeeze()
+        test_targets = torch.tensor(test_part.targets).long().squeeze()
         self.data = torch.cat([train_data, test_data])
         self.targets = torch.cat([train_targets, test_targets])
         self.classes = train_part.classes
         self.general_data_transform = general_data_transform
-        self.general_target_transform = general_target_transform
-        self.train_data_transform = train_data_transform
-        self.train_target_transform = train_target_transform
 
 
 def flickr_preprocess(root, config):
@@ -168,11 +115,11 @@ def flickr_preprocess(root, config):
                 os.system(f"cp {img_path} {score_path}")
 
 
-def call_dataset(dataset_name, root, config, **kwargs):
+def call_dataset(dataset_name, root, **kwargs):
     """Call the dataset."""
     if dataset_name == "cifar10":
-        return CIFAR10(root=root, config=config, **kwargs)
-    return CIFAR100(root=root, config=config, **kwargs)
+        return CIFAR10(root, **kwargs)
+    raise ValueError(f"Dataset {dataset_name} not supported.")
 
 
 def randomly_assign_classes(
@@ -197,14 +144,48 @@ def randomly_assign_classes(
         for j in sampled_labels:
             selected_times[j] += 1
 
-    labels_count = Counter(targets_numpy)
+    batch_sizes = _get_batch_sizes(
+        targets_numpy=targets_numpy,
+        label_list=label_list,
+        selected_times=selected_times,
+    )
 
+    data_indices = _get_data_indices(
+        batch_sizes=batch_sizes,
+        data_indices=data_indices,
+        data_idx_for_each_label=data_idx_for_each_label,
+        assigned_labels=assigned_labels,
+        client_num=client_num,
+    )
+
+    partition["data_indices"] = data_indices
+
+    return partition  # , stats
+
+
+def _get_batch_sizes(
+    targets_numpy: np.ndarray,
+    label_list: List[int],
+    selected_times: List[int],
+) -> np.ndarray:
+    """Get batch sizes for each label."""
+    labels_count = Counter(targets_numpy)
     batch_sizes = np.zeros_like(label_list)
     for i in label_list:
-        print("label: {}, count: {}".format(i, labels_count[i]))
-        print("selected times: {}".format(selected_times[i]))
+        print(f"label: {i}, count: {labels_count[i]}")
+        print(f"selected times: {selected_times[i]}")
         batch_sizes[i] = int(labels_count[i] / selected_times[i])
 
+    return batch_sizes
+
+
+def _get_data_indices(
+    batch_sizes: np.ndarray,
+    data_indices: List[List[int]],
+    data_idx_for_each_label: List[List[int]],
+    assigned_labels: List[List[int]],
+    client_num: int,
+) -> List[List[int]]:
     for i in range(client_num):
         for cls in assigned_labels[i]:
             if len(data_idx_for_each_label[cls]) < 2 * batch_sizes[cls]:
@@ -225,18 +206,4 @@ def randomly_assign_classes(
 
         data_indices[i] = data_indices[i]
 
-    # stats = {}
-    # for i, idx in enumerate(data_indices):
-    #    stats[i] = {"x": None, "y": None}
-    #    stats[i]["x"] = len(idx)
-    #   stats[i]["y"] = Counter(targets_numpy[idx].tolist())
-
-    # num_samples = np.array([stat_i["x"] for stat_i in stats.values()])
-    # stats["sample per client"] = {
-    #    "std": num_samples.mean(),
-    #    "stddev": num_samples.std(),
-    # }
-
-    partition["data_indices"] = data_indices
-
-    return partition  # , stats
+    return data_indices

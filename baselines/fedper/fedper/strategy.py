@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import torch
-import torch.nn as nn
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -19,6 +18,7 @@ from flwr.common import (
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.fedavg import FedAvg
+from torch import nn as nn
 
 from fedper.constants import Algorithms
 from fedper.implemented_models.mobile_model import MobileNetModelSplit
@@ -31,12 +31,11 @@ class ServerInitializationStrategy(FedAvg):
 
     def __init__(
         self,
+        *args: Any,
         model_split_class: Union[
             Type[MobileNetModelSplit], Type[ModelSplit], Type[ResNetModelSplit]
         ],
         create_model: Callable[[], nn.Module],
-        config: Dict[str, Any],
-        has_fixed_head: bool = False,
         initial_parameters: Optional[Parameters] = None,
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Any]]] = None,
         evaluate_fn: Optional[
@@ -48,26 +47,18 @@ class ServerInitializationStrategy(FedAvg):
         min_available_clients: int = 1,
         min_evaluate_clients: int = 1,
         min_fit_clients: int = 1,
-        *args: Any,
+        algorithm: str = Algorithms.FEDPER.value,
         **kwargs: Any,
     ) -> None:
         super().__init__(*args, **kwargs)
-        self.config = config
         _ = evaluate_fn
-        self.algorithm = (
-            Algorithms.FEDAVG.value
-            if self.config["_target_"] == "fedper.server.DefaultStrategyPipeline"
-            else Algorithms.FEDPER.value
-        )
         self.on_fit_config_fn = on_fit_config_fn
         self.initial_parameters = initial_parameters
         self.min_available_clients = min_available_clients
         self.min_evaluate_clients = min_evaluate_clients
         self.min_fit_clients = min_fit_clients
-        # self.evaluate_fn = evaluate_fn
-        self.model = model_split_class(
-            model=create_model(), has_fixed_head=has_fixed_head
-        )
+        self.algorithm = algorithm
+        self.model = model_split_class(model=create_model())
 
     def initialize_parameters(
         self, client_manager: ClientManager
@@ -103,7 +94,7 @@ class ServerInitializationStrategy(FedAvg):
 class AggregateFullStrategy(ServerInitializationStrategy):
     """Full model aggregation strategy implementation."""
 
-    def __init__(self, save_path: Path = Path(""), *args, **kwargs) -> None:
+    def __init__(self, *args, save_path: Path = Path(""), **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.save_path = save_path if save_path != "" else None
         if save_path is not None:
@@ -249,7 +240,7 @@ class AggregateFullStrategy(ServerInitializationStrategy):
 class AggregateBodyStrategy(ServerInitializationStrategy):
     """Body Aggregation strategy implementation."""
 
-    def __init__(self, save_path: Path = Path(""), *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args, save_path: Path = Path(""), **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.save_path = save_path if save_path != "" else None
         if save_path is not None:

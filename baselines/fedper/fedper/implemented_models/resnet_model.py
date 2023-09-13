@@ -124,7 +124,6 @@ class ResNetModelManager(ModelManager):
         config: DictConfig,
         trainloader: DataLoader,
         testloader: DataLoader,
-        has_fixed_head: bool = False,
         learning_rate: float = 0.01,
     ):
         """Initialize the attributes of the model manager.
@@ -135,14 +134,12 @@ class ResNetModelManager(ModelManager):
             config: Dict containing the configurations to be used by the manager.
             trainloader: DataLoader containing the train data.
             testloader: DataLoader containing the test data.
-            has_fixed_head: Whether a fixed head should be created.
             learning_rate: Learning rate for the optimizer.
         """
         super().__init__(
             model_split_class=ResNetModelSplit,
             client_id=client_id,
             config=config,
-            has_fixed_head=has_fixed_head,
         )
         self.client_save_path = client_save_path
         self.trainloader, self.testloader = trainloader, testloader

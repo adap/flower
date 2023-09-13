@@ -1,39 +1,30 @@
 """Abstract class for splitting a model into body and head."""
-import copy
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Dict, List, Tuple, Type, Union
 
 import numpy as np
-import torch.nn as nn
 from omegaconf import DictConfig
 from torch import Tensor
+from torch import nn as nn
 from torch.nn import functional as F
 
 
 class ModelSplit(ABC, nn.Module):
-    """Abstract class for splitting a model into body and head.
-
-    Optionally, a fixed head can also be created.
-    """
+    """Abstract class for splitting a model into body and head."""
 
     def __init__(
         self,
         model: nn.Module,
-        has_fixed_head: bool = False,
     ):
         """Initialize the attributes of the model split.
 
         Args:
             model: dict containing the vocab sizes of the input attributes.
-            has_fixed_head: whether the model should contain a fixed_head.
         """
         super().__init__()
 
         self._body, self._head = self._get_model_parts(model)
-
-        self._fixed_head = copy.deepcopy(self.head) if has_fixed_head else None
-        self._use_fixed_head = False
 
     @abstractmethod
     def _get_model_parts(self, model: nn.Module) -> Tuple[nn.Module, nn.Module]:
@@ -75,24 +66,6 @@ class ModelSplit(ABC, nn.Module):
             state_dict: dictionary of the state to set the model head to.
         """
         self.head.load_state_dict(state_dict, strict=True)
-
-    @property
-    def fixed_head(self) -> Optional[nn.Module]:
-        """Return model fixed_head."""
-        return self._fixed_head
-
-    @fixed_head.setter
-    def fixed_head(self, state_dict: "OrderedDict[str, Tensor]") -> None:
-        """Set model fixed_head.
-
-        Args:
-            state_dict: dictionary of the state to set the model fixed head to.
-        """
-        if self._fixed_head is None:
-            # When the fixed_head was not initialized
-            return
-        self._fixed_head.load_state_dict(state_dict, strict=True)
-        self.disable_fixed_head()
 
     def get_parameters(self) -> List[np.ndarray]:
         """Get model parameters (without fixed head).
@@ -140,23 +113,8 @@ class ModelSplit(ABC, nn.Module):
         for param in self.body.parameters():
             param.requires_grad = False
 
-    def disable_fixed_head(self) -> None:
-        """Disable gradient tracking for the fixed head parameters."""
-        if self._fixed_head is None:
-            return
-        for param in self._fixed_head.parameters():
-            param.requires_grad = False
-
-    def use_fixed_head(self, use_fixed_head: bool) -> None:
-        """Set whether the fixed head should be used for forward.
-
-        Args:
-            use_fixed_head: boolean indicating whether to use the fixed head or not.
-        """
-        self._use_fixed_head = use_fixed_head
-
     def forward(self, inputs: Any) -> Any:
-        """Forward inputs through the body and the head (or fixed head)."""
+        """Forward inputs through the body and the head."""
         x = self.body(inputs)
         x = F.relu(x)
         return self.head(x)
@@ -170,7 +128,6 @@ class ModelManager(ABC):
         client_id: int,
         config: DictConfig,
         model_split_class: Type[Any],  # ModelSplit
-        has_fixed_head: bool = False,
     ):
         """Initialize the attributes of the model manager.
 
@@ -179,13 +136,12 @@ class ModelManager(ABC):
             config: Dict containing the configurations to be used by the manager.
             model_split_class: Class to be used to split the model into body and head\
                 (concrete implementation of ModelSplit).
-            has_fixed_head: Whether a fixed head should be created.
         """
         super().__init__()
 
         self.client_id = client_id
         self.config = config
-        self._model = model_split_class(self._create_model(), has_fixed_head)
+        self._model = model_split_class(self._create_model())
 
     @abstractmethod
     def _create_model(self) -> nn.Module:
