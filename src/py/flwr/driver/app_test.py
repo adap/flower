@@ -21,7 +21,7 @@ import time
 import unittest
 from unittest.mock import MagicMock
 
-from flwr.driver.driver_client_manager_utils import update_client_manager
+from flwr.driver.app import update_client_manager
 from flwr.proto.driver_pb2 import CreateWorkloadResponse, GetNodesResponse
 from flwr.proto.node_pb2 import Node
 from flwr.server.client_manager import SimpleClientManager
@@ -58,9 +58,13 @@ class TestClientManagerWithDriver(unittest.TestCase):
             ),
             daemon=True,
         ).start()
+
         node_ids = {proxy.node_id for proxy in client_manager.all().values()}
+
         driver.get_nodes.return_value = GetNodesResponse(nodes=expected_updated_nodes)
-        time.sleep(3.1)
+        while len(client_manager.all()) == len(node_ids):
+            time.sleep(1)
+
         updated_node_ids = {proxy.node_id for proxy in client_manager.all().values()}
 
         # Assert
