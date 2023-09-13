@@ -280,9 +280,3 @@ def start_numpy_client(
         root_certificates=root_certificates,
         transport=transport,
     )
-
-
-def run_client() -> None:
-    """Run Flower client."""
-    log(INFO, "Running Flower client...")
-    time.sleep(3)
