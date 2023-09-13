@@ -130,15 +130,15 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     )
 
     # Start the thread updating nodes
-    threading.Thread(
+    thread = threading.Thread(
         target=update_client_manager,
         args=(
             driver,
             initialized_server.client_manager(),
             lock,
         ),
-        daemon=True,
-    ).start()
+    )
+    thread.start()
 
     # Start training
     hist = run_fl(
@@ -146,9 +146,10 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         config=initialized_config,
     )
 
-    # Stop the Driver API server
+    # Stop the Driver API server and the thread
     with lock:
         driver.disconnect()
+    thread.join()
 
     event(EventType.START_SERVER_LEAVE)
 

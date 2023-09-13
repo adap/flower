@@ -45,8 +45,8 @@ class TestClientManagerWithDriver(unittest.TestCase):
         driver.stub = "driver stub"
         driver.create_workload.return_value = CreateWorkloadResponse(workload_id="1")
         driver.get_nodes.return_value = GetNodesResponse(nodes=expected_nodes)
-
         client_manager = SimpleClientManager()
+        lock = threading.Lock()
 
         # Execute
         threading.Thread(
@@ -54,7 +54,7 @@ class TestClientManagerWithDriver(unittest.TestCase):
             args=(
                 driver,
                 client_manager,
-                threading.Lock(),
+                lock,
             ),
             daemon=True,
         ).start()
@@ -62,8 +62,11 @@ class TestClientManagerWithDriver(unittest.TestCase):
         node_ids = {proxy.node_id for proxy in client_manager.all().values()}
 
         driver.get_nodes.return_value = GetNodesResponse(nodes=expected_updated_nodes)
-        while len(client_manager.all()) == len(node_ids):
-            time.sleep(1)
+        while True:
+            with lock:
+                if len(client_manager.all()) == len(expected_updated_nodes):
+                    break
+            time.sleep(1.3)
 
         updated_node_ids = {proxy.node_id for proxy in client_manager.all().values()}
 
