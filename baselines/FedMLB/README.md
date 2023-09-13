@@ -9,7 +9,7 @@ dataset: [cifar100, tiny-imagenet]
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
-****Paper:**** https://proceedings.mlr.press/v162/kim22a.html
+****Paper:**** [proceedings.mlr.press/v162/kim22a.html](https://proceedings.mlr.press/v162/kim22a.html)
 
 ****Authors:**** Jinkyu Kim, Geeho Kim, Bohyung Han
 
