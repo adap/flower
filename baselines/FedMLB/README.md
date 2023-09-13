@@ -278,7 +278,7 @@ and the amount of local epochs (default to 5), so that the batch size correspond
 
 `local_batch_size = round(local_examples * local_epochs / local_updates)`
 
-This is the default configurations also in this repository.
+This is the default configuration also in this repository.
 
 To override this behaviour, and set a specific local batch size (local epochs will still 
 be valid), use the following argument when launching the simulation.
@@ -306,8 +306,18 @@ For example, it can divide a simulation of 1000 rounds
 50 consecutive simulations of 20 rounds each (`rounds_per_run`).
 By the automatic retrieve of last checkpoint, 
 the current simulation
-restarts from where the previous one stopped.
+restarts from where the previous one stopped and saves a
+checkpoint at the end.
 
+To be able to run the script, first give it the execution permission
+(for Linux machines) with:
+``` 
+chmod +x ./simulation_manager.sh
+``` 
+Then launch it with:
+``` 
+./simulation_manager.sh
+``` 
 ## Expected Results
 This repository can reproduce the results for 3 baselines used in the experimental part
 of the original paper: FedMLB, FedAvg, FedAvg+KD.
