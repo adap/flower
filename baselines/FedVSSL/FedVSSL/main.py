@@ -82,8 +82,8 @@ def fit_config(rnd: int) -> Dict[str, str]:
 
 
 if __name__ == "__main__":
-    train_flag = True
-    # train_flag = False
+    # train_flag = True
+    train_flag = False
     if train_flag:
         pool_size = 2  # number of dataset partions (= number of total clients)
         client_resources = {"num_cpus": 2, "num_gpus": 1}  # each client will get allocated 1 CPUs
@@ -176,33 +176,39 @@ if __name__ == "__main__":
         with open(cfg_path, 'w') as f:
             f.write(config_content)
 
+        
+        process_obj = subprocess.run(["bash", "CtP/tools/dist_train.sh",\
+        f"{cfg_path}", "4",\
+        f"--work_dir /finetune/ucf101/",
+        f"--data_dir /home/data1/data/"])
+
                  
     #-----------------------------------------------------------------------------------------------------------------------
     # The cfg_path need to be updated with the following updated configuration contents to be able to load the pretrained model.
     # Instead of executing the blow mentioned code, one can also directly modify the "pretrained" variable by opening the path represented
     # by the config_path variable
     #
-        config_content = textwrap.dedent('''\
+        config_content_test = textwrap.dedent('''\
         _base_ = ['../../recognizers/_base_/model_r3d18.py',
         '../../recognizers/_base_/runtime_ucf101.py']
-        work_dir = './output/ctp/r3d_18_kinetics/finetune_ucf101/'
+        work_dir = './output/ctp/r3d_18_ucf101/finetune_ucf101/'
         model = dict(
             backbone=dict(
-                pretrained='./model_pretrained.pth',
-            ),
+            pretrained='/finetune/ucf101/epoch_150.pth',
+        ),
         )
        ''').strip("\n")
 
-        with open(cfg_path, 'w') as f:
-            f.write(config_content)
+        cfg_path_test= "CtP/configs/ctp/r3d_18_ucf101/finetune_ucf101.py"
+        with open(cfg_path_test, 'w') as f:
+            f.write(config_content_test)
 
-        # start the finetuning with ucf-101.
-        process_obj = subprocess.run(["bash", "CtP/tools/dist_train.sh",\
-        "CtP/configs/ctp/r3d_18_kinetics/finetune_ucf101.py", "4",\
+        # Evaluating the finetuned model 
+        process_obj = subprocess.run(["bash", "CtP/tools/dist_test.sh",\
+        f"{cfg_path_test}", "4",\
         f"--work_dir /finetune/ucf101/",
-        f"--data_dir /DATA",\
-        f"--pretrained /path to the pretrained checkpoint",\
-        f"--validate"])
+        f"--data_dir /home/data1/data",\
+        f"--progress"])
 
 
 
