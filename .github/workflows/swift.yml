@@ -23,7 +23,7 @@ jobs:
       - uses: fwal/setup-swift@2040b795e5c453c3a05fcb8316496afc8a74f192
         with:
           swift-version: 5
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run tests
         run: arch -x86_64 xcodebuild test -scheme flwr -destination 'platform=iOS Simulator,name=iPhone 14 Pro Max,OS=16.2'
 
@@ -34,7 +34,7 @@ jobs:
       - uses: fwal/setup-swift@2040b795e5c453c3a05fcb8316496afc8a74f192
         with:
           swift-version: 5
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Build docs
         run: ./dev/build-swift-api-ref.sh
 
@@ -47,7 +47,7 @@ jobs:
       - uses: fwal/setup-swift@2040b795e5c453c3a05fcb8316496afc8a74f192
         with:
           swift-version: 5
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Build and deploy docs
         env:
           AWS_DEFAULT_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
