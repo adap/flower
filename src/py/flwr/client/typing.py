@@ -1,6 +1,4 @@
-#!/bin/bash
-
-# Copyright 2022 Adap GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+"""Custom types for Flower clients."""
 
-set -e
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
+from typing import Callable, Union
 
-rm -rf dist
-./dev/build.sh
-./dev/publish.sh
+from .client import Client as Client
+from .numpy_client import NumPyClient as NumPyClient
+
+ClientLike = Union[Client, NumPyClient]
+ClientFn = Callable[[str], ClientLike]
