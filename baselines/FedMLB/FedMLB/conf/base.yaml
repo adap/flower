@@ -8,6 +8,7 @@ total_clients: 100 # total number of clients
 num_rounds: 1000
 clients_per_round: 5
 local_updates: 50
+batch_size: null # if set to null, it will calculates local_batch_size as round(local_examples * local_epochs / local_updates)
 local_epochs: 5 # number of local epochs
 lr_client: 0.1 # client learning rate
 exp_decay: 0.998

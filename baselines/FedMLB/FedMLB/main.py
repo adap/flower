@@ -144,6 +144,7 @@ def main(cfg: DictConfig) -> None:
     total_clients = cfg.total_clients
     dataset = cfg.dataset_config.dataset
     restart_from_checkpoint = cfg.restart_from_checkpoint
+    batch_size = cfg.batch_size
 
     if dataset in ["cifar100"]:
         num_classes = 100
@@ -157,8 +158,11 @@ def main(cfg: DictConfig) -> None:
 
         local_examples = fedmlb_datasets.load_selected_client_statistics(int(cid), total_clients=total_clients,
                                                                          alpha=alpha_dirichlet, dataset=dataset)
-        # print(local_examples)
-        local_batch_size = round(local_examples * local_epochs / local_updates)
+
+        # if cfg.batch_size is set to null,
+        # local_batch_size = round(local_examples * local_epochs / local_updates)
+        # if cfg.batch_size is set to a value, it will be used as local_batch_size
+        local_batch_size = round(local_examples * local_epochs / local_updates) if batch_size is None else batch_size
 
         training_dataset = fedmlb_datasets.load_client_datasets_from_files(
             dataset=dataset,

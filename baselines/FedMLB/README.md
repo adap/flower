@@ -198,6 +198,14 @@ python -m FedMLB.main # `client_resources.num_gpus=0.0` default
 > :warning:
 Ensure that TensorFlow is configured to use GPUs.
 
+> To use TensorFlow with GPU, CUDA and cuDNN
+> have to be installed.
+> Check the compatibility of versions here:
+> https://www.tensorflow.org/install/source#gpu.
+> For TF==2.12.0 (as required for this baseline implementation)
+> CUDA==11.8 and cuDNN==8.6 are required. 
+> 
+
 
 ### Run simulations and reproduce results
 After having generated the setting, simulations can be run.
@@ -264,6 +272,42 @@ python -m FedMLB.main dataset_config.dataset="tiny-imagenet" dataset_config.alph
 python -m FedMLB.main dataset_config.dataset="tiny-imagenet" dataset_config.alpha_dirichlet=0.6 total_clients=500 clients_per_round=10
 ```
 
+#### Setting a custom local batch size value
+In the original paper, authors specify the amount of local updates (default to 50), 
+and the amount of local epochs (default to 5), so that the batch size corresponds to:
+
+`local_batch_size = round(local_examples * local_epochs / local_updates)`
+
+This is the default configurations also in this repository.
+
+To override this behaviour, and set a specific local batch size (local epochs will still 
+be valid), use the following argument when launching the simulation.
+
+```
+# this will set the local batch size to 64
+python -m FedMLB.main batch_size=64
+```
+
+Alternatively, it can be done by directly modifying the `base.yaml` config file by changing the value
+of `batch_size`, as follows:
+```
+# base.yaml
+...
+batch_size=64 # default to null
+...
+``` 
+
+
+### Splitting a Simulation in a bunch of Shorter Simulations
+`simulation_manager.sh` contains a simple bash script to
+divide a simulation in a bunch of shorter simulations.
+For example, it can divide a simulation of 1000 rounds 
+(`total_round`) in
+50 consecutive simulations of 20 rounds each (`rounds_per_run`).
+By the automatic retrieve of last checkpoint, 
+the current simulation
+restarts from where the previous one stopped.
+
 ## Expected Results
 This repository can reproduce the results for 3 baselines used in the experimental part
 of the original paper: FedMLB, FedAvg, FedAvg+KD.
@@ -328,7 +372,7 @@ python -m FedMLB.main --multirun dataset_config.dataset="cifar100","tiny-imagene
   </tr>
 </table>
 
-![cifar100, 100 clients, 5% participation rate, alpha = 0.3](readme_chart_results/accuracy_comparison_cifar100_dirichlet_0.3_100_.png)
+![cifar100, 100 clients, 5% participation rate, alpha = 0.3](_static/accuracy_comparison_cifar100_dirichlet_0.3_100_.png)
 
 #### Tiny-ImageNet, Dir(0.3), 100 clients, 5% participation.
 
@@ -361,7 +405,7 @@ python -m FedMLB.main --multirun dataset_config.dataset="cifar100","tiny-imagene
   </tr>
 </table>
 
-![tiny imagenet, 100 clients, 5% participation rate, alpha = 0.3](readme_chart_results/accuracy_comparison_tiny-imagenet_dirichlet_0.3_100_.png)
+![tiny imagenet, 100 clients, 5% participation rate, alpha = 0.3](_static/accuracy_comparison_tiny-imagenet_dirichlet_0.3_100_.png)
 
 
 ### Table 1b
@@ -406,7 +450,7 @@ python -m FedMLB.main --multirun dataset_config.dataset="cifar100","tiny-imagene
   </tr>
 </table>
 
-![cifar100, 500 clients, 2% participation rate, alpha = 0.3](readme_chart_results/accuracy_comparison_cifar100_dirichlet_0.3_500_.png)
+![cifar100, 500 clients, 2% participation rate, alpha = 0.3](_static/accuracy_comparison_cifar100_dirichlet_0.3_500_.png)
 
 #### Tiny-ImageNet, Dir(0.3), 500 clients, 2% participation.
 
@@ -440,7 +484,7 @@ python -m FedMLB.main --multirun dataset_config.dataset="cifar100","tiny-imagene
   </tr>
 </table>
 
-![tiny imagenet, 500 clients, 2% participation rate, alpha = 0.3](readme_chart_results/accuracy_comparison_tiny-imagenet_dirichlet_0.3_500_.png)
+![tiny imagenet, 500 clients, 2% participation rate, alpha = 0.3](_static/accuracy_comparison_tiny-imagenet_dirichlet_0.3_500_.png)
 
 ### Table 3
 
@@ -455,7 +499,8 @@ python -m FedMLB.main --multirun algorithm="FedMLB","FedAvg","FedAvg+KD" local_u
 Beside storing results in plain text in the `output` folder, the results are also stored via 
 tensorboard logs.
 
-To launch the tensorboard to monitor results:
+To launch the tensorboard to monitor results use the following command
+in your activated python environment:
 ```bash
 tensorboard --logdir /{YOUR_LOCAL_PATH_TO_THE_BASELINE}/FedMLB/FedMLB/tb_logging/
 ```
