@@ -53,7 +53,7 @@ class TFClient(fl.client.NumPyClient):
         # in model.fit it is not mandatory to specify
         # batch_size if the dataset is already batched
         # as in our case
-        results = self.model.fit(self.train_ds, epochs=epochs)
+        results = self.model.fit(self.train_ds, epochs=epochs, verbose=0)
 
         parameters_prime = self.model.get_weights()
         num_examples_train = self.num_examples_train
