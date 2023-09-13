@@ -33,6 +33,7 @@ from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
 from flwr.simulation.ray_transport.ray_actor import (
+    WORKLOAD_ID,
     DefaultActor,
     VirtualClientEngineActor,
     VirtualClientEngineActorPool,
@@ -240,9 +241,13 @@ def start_simulation(  # pylint: disable=too-many-arguments, too-many-statements
         ).remote(**actor_args)
 
     # Prepare client states for all clients involved in the simulation
-    client_states = {}
+    client_states: Dict[str, ClientState] = {}
     for cid in cids:
-        client_states[cid] = ClientState(cid)
+        # The VCE still doesn't support multiple workloads, we therefore
+        # assign the same `workload_id` (e.g. "sim") to all of them.
+        # This identifier is used so this is future-ready.
+        client_states[cid] = ClientState()
+        client_states[cid].register_workload(workload_id=WORKLOAD_ID, cid=cid)
 
     # Instantiate ActorPool
     pool = VirtualClientEngineActorPool(

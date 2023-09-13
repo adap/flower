@@ -38,6 +38,8 @@ JobFn = Callable[[Client], ClientRes]
 # Client state cid:state mapping
 ClientStatesDict = Dict[str, ClientState]
 
+WORKLOAD_ID = "sim"
+
 
 class ClientException(Exception):
     """Raised when client side logic crashes with an exception."""
@@ -72,11 +74,15 @@ class VirtualClientEngineActor(ABC):
             client_like = client_fn(cid)
             client = to_client(client_like=client_like)
             # Set state
-            client.set_state(client_state)
+            # get state for the current workload
+            workload_state = client_state.get_workload_state(workload_id=WORKLOAD_ID)
+            client.set_state(workload_state)
             # Run client job
             job_results = job_fn(client)
             # Fetch state
-            client_state_updated = client.get_state()
+            workload_state_updated = client.get_state()
+            # Update client state for this workload
+            client_state.update_workload_state(workload_state_updated)
         except Exception as ex:
             client_trace = traceback.format_exc()
             message = (
@@ -90,7 +96,7 @@ class VirtualClientEngineActor(ABC):
             )
             raise ClientException(str(message)) from ex
 
-        return cid, job_results, client_state_updated
+        return cid, job_results, client_state
 
 
 @ray.remote

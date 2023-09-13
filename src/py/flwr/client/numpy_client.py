@@ -18,14 +18,14 @@
 from abc import ABC
 from typing import Dict, Optional, Tuple
 
-from flwr.client.client_state import ClientState
+from flwr.client.client_state import WorkloadState
 from flwr.common import Config, NDArrays, Scalar
 
 
 class NumPyClient(ABC):
     """Abstract base class for Flower clients using NumPy."""
 
-    state: Optional[ClientState] = None
+    state: Optional[WorkloadState] = None
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         """Return a client's set of properties.

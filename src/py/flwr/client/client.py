@@ -18,7 +18,7 @@
 from abc import ABC
 from typing import Optional
 
-from flwr.client.client_state import ClientState
+from flwr.client.client_state import WorkloadState
 from flwr.common import (
     Code,
     EvaluateIns,
@@ -37,25 +37,25 @@ from flwr.common import (
 class Client(ABC):
     """Abstract base class for Flower clients."""
 
-    state: Optional[ClientState] = None
+    state: Optional[WorkloadState] = None
 
-    def set_state(self, state: ClientState) -> None:
+    def set_state(self, state: WorkloadState) -> None:
         """Set client state.
 
         Parameters
         ----------
-        state: ClientState
-            The flwr.client.ClientState object to use for this client instance.
+        state: WorkloadState
+            The flwr.client.WorkloadState object to use for this client instance.
         """
         self.state = state
 
-    def get_state(self) -> Optional[ClientState]:
+    def get_state(self) -> Optional[WorkloadState]:
         """Get client state.
 
         Returns
         -------
-        ClientState
-            The flwr.client.ClientState object representing this client's state.
+        Optional[WorkloadState]
+            The flwr.client.WorkloadState object representing this client's state.
         """
         return self.state
 

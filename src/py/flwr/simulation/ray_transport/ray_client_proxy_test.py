@@ -24,6 +24,7 @@ import ray
 from flwr.client import Client, ClientState, NumPyClient
 from flwr.common import Code, Config, GetPropertiesIns, GetPropertiesRes, Scalar, Status
 from flwr.simulation.ray_transport.ray_actor import (
+    WORKLOAD_ID,
     ClientRes,
     DefaultActor,
     JobFn,
@@ -92,9 +93,13 @@ def prep(
     cids = [str(cid) for cid in range(num_proxies)]
 
     # Prepare client states for all clients involved in the simulation
-    client_states = {}
+    client_states: Dict[str, ClientState] = {}
     for cid in cids:
-        client_states[cid] = ClientState(cid)
+        # The VCE still doesn't support multiple workloads, we therefore
+        # assign the same `workload_id` (i.e. "sim") to all of them.
+        # This identifier is used so this is future-ready.
+        client_states[cid] = ClientState()
+        client_states[cid].register_workload(workload_id=WORKLOAD_ID, cid=cid)
 
     # Create actor pool
     ray.init(include_dashboard=False)
@@ -134,7 +139,10 @@ def test_cid_consistency_one_at_a_time() -> None:
             assert int(prox.cid) * pi == res.properties["result"]
 
             # Check state value
-            result_cache = pool.client_states[prox.cid].result_cache  # type: ignore
+            workload_state = pool.client_states[prox.cid].get_workload_state(
+                WORKLOAD_ID
+            )
+            result_cache = workload_state.result_cache  # type: ignore
             assert result_cache == int(prox.cid) * pi * iter_num
 
     # Submit jobs one at a time (start from uninitialised client states)
@@ -172,7 +180,10 @@ def test_cid_consistency_all_submit_first() -> None:
             res = cast(GetPropertiesRes, res)
             assert int(prox.cid) * pi == res.properties["result"]
             # Check state value
-            result_cache = pool.client_states[prox.cid].result_cache  # type: ignore
+            workload_state = pool.client_states[prox.cid].get_workload_state(
+                WORKLOAD_ID
+            )
+            result_cache = workload_state.result_cache  # type: ignore
             assert result_cache == int(prox.cid) * pi * iter_num
 
     # Submit jobs one at a time (start from uninitialised client states)
@@ -210,7 +221,8 @@ def test_cid_consistency_without_proxies() -> None:
             res = cast(GetPropertiesRes, res)
             assert int(cid) * pi == res.properties["result"]
             # Check state value
-            result_cache = pool.client_states[cid].result_cache  # type: ignore
+            workload_state = pool.client_states[cid].get_workload_state(WORKLOAD_ID)
+            result_cache = workload_state.result_cache  # type: ignore
             assert result_cache == int(cid) * pi * iter_num
 
     # Submit jobs one at a time (start from uninitialised client states)

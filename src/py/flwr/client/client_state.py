@@ -14,15 +14,41 @@
 # ==============================================================================
 """Client state."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Dict, Optional
+
+
+@dataclass
+class WorkloadState:
+    """Client state when performing a particular workload."""
+
+    cid: Optional[str]
+    workload_id: str
+
+    def __repr__(self) -> str:
+        """Return a string representation of a ClientState."""
+        return (
+            f"{self.__class__.__name__}"
+            f"(cid:{self.cid}, workload: {self.workload_id}): {self.__dict__}"
+        )
 
 
 @dataclass
 class ClientState:
-    """Client state definition as a standard Python dataclass."""
+    """Client state."""
 
-    cid: str
+    workload_states: Dict[str, WorkloadState] = field(default_factory=dict)
 
-    def __repr__(self) -> str:
-        """Return a string representation of a ClientState."""
-        return f"{self.__class__.__name__}(cid={self.cid}): {self.__dict__}"
+    def register_workload(self, workload_id: str, cid: Optional[str] = None) -> None:
+        """Register a new WorkloadState for a client if it does not exist."""
+        if workload_id not in self.workload_states:
+            self.workload_states[workload_id] = WorkloadState(cid, workload_id)
+
+    def get_workload_state(self, workload_id: str) -> WorkloadState:
+        """Get client's state for a particular workload."""
+        return self.workload_states[workload_id]
+
+    def update_workload_state(self, workload_state: Optional[WorkloadState]) -> None:
+        """Update workload state with the one passed."""
+        if workload_state:
+            self.workload_states[workload_state.workload_id] = workload_state
