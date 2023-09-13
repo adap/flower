@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Test
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Install dependencies (mandatory + optional)

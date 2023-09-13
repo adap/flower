@@ -33,7 +33,7 @@ jobs:
     name: Test
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         # The depth two of the checkout is needed in case of merging to the main
         # because we compare the HEAD (current version) with HEAD~1 (version before
         # the PR was merged)
