@@ -19,7 +19,7 @@ dataset: ["CIFAR-10", "FLICKR-AES"] # list of datasets you include in your basel
 
 ****What’s implemented:**** : The code in this directory replicates the experiments in _Federated Learning with Personalization Layers_ (Arivazhagan et al., 2019) for CIFAR10 and FLICKR-AES datasets, which proposed the `FedPer` model. Specifically, it replicates the results found in figures 2, 4, 7, and 8 in their paper. __Note__ that there is typo in the caption of Figure 4 in the article, it should be CIFAR10 and __not__ CIFAR100. 
 
-****Datasets:**** : CIFAR10 from PyTorch's Torchvision and FLICKR-AES. FLICKR-AES was proposed as dataset in _Personalized Image Aesthetics_ (Ren et al., 2017) and can be downloaded using a link provided on thier [GitHub](https://github.com/alanspike/personalizedImageAesthetics). One must first download FLICKR-AES-001.zip (5.76GB), extract all inside and place in baseline/FedPer/datasets. To this location, also download the other 2 related files: (1) FLICKR-AES_image_labeled_by_each_worker.csv, and (2) FLICKR-AES_image_score.txt. Current repository supports CIFAR100 but it hasn't been used to reproduce figures. 
+****Datasets:**** : CIFAR10 from PyTorch's Torchvision and FLICKR-AES. FLICKR-AES was proposed as dataset in _Personalized Image Aesthetics_ (Ren et al., 2017) and can be downloaded using a link provided on thier [GitHub](https://github.com/alanspike/personalizedImageAesthetics). One must first download FLICKR-AES-001.zip (5.76GB), extract all inside and place in baseline/FedPer/datasets. To this location, also download the other 2 related files: (1) FLICKR-AES_image_labeled_by_each_worker.csv, and (2) FLICKR-AES_image_score.txt. 
 
 ```bash
 # cd into fedper/datasets
@@ -110,7 +110,7 @@ What you need to change in configuration files:
 ```bash
 algorithm: fedavg, fedper # these are currently supported
 server_device: 'cuda:0', 'cpu'
-dataset.name: 'cifar10', 'cifar100', 'flickr'
+dataset.name: 'cifar10', 'flickr'
 num_classes: 10, 100, 5 # respectively 
 dataset.num_classes: 4, 8, 10 #for non-iid split assigning n num_classes to each client (these numbers for CIFAR10 experiments)
 model.name: mobile, resnet
