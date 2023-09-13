@@ -3,7 +3,7 @@ requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
-name = "FedPer" # <----- Ensure it matches the name of your baseline directory containing all the source code
+name = "fedper" # <----- Ensure it matches the name of your baseline directory containing all the source code
 version = "1.0.0"
 description = "Flower Baselines"
 license = "Apache-2.0"
@@ -46,6 +46,7 @@ tqdm = "^4.66.1"
 torch = { url = "https://download.pytorch.org/whl/cu117/torch-2.0.1%2Bcu117-cp39-cp39-linux_x86_64.whl"}
 torchvision = { url = "https://download.pytorch.org/whl/cu117/torchvision-0.15.2%2Bcu117-cp39-cp39-linux_x86_64.whl"}
 
+
 [tool.poetry.dev-dependencies]
 isort = "==5.11.5"
 black = "==23.1.0"
@@ -86,6 +87,9 @@ plugins = "numpy.typing.mypy_plugin"
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
 good-names = "i,j,k,_,x,y,X,Y"
 signature-mutators="hydra.main.main"
+
+[tool.pylint."TYPECHECK"]
+generated-members="numpy.*, torch.*, tensorflow.*"
 
 [[tool.mypy.overrides]]
 module = [
