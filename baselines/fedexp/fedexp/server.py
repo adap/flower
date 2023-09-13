@@ -1,8 +1,5 @@
-"""Create global evaluation function.
+"""Global evaluation function."""
 
-Optionally, also define a new Server class (please note this is not needed in most
-settings).
-"""
 from collections import OrderedDict
 from typing import Callable, Dict, Optional, Tuple
 
@@ -16,13 +13,13 @@ from fedexp.models import test
 
 
 def gen_evaluate_fn(
-        test_loader: DataLoader,
-        model: DictConfig,
-        device,
+    test_loader: DataLoader,
+    model: DictConfig,
+    device,
 ) -> Callable[
     [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]
 ]:
-    """Generates the function for centralized evaluation.
+    """Generate a centralized evaluation function.
 
     Parameters
     ----------
@@ -35,16 +32,15 @@ def gen_evaluate_fn(
 
     Returns
     -------
-    Callable[ [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]] ]
+    Callable[ [int, NDArrays, Dict[str, Scalar]],
+            Optional[Tuple[float, Dict[str, Scalar]]] ]
         The centralized evaluation function.
     """
+
     def evaluate(
-            server_round: int,
-            parameters_ndarrays: NDArrays,
-            config: Dict[str, Scalar]
+        server_round: int, parameters_ndarrays: NDArrays, config: Dict[str, Scalar]
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Use the entire CIFAR-10/100 test set for evaluation."""
-
         net = instantiate(model)
         params_dict = zip(net.state_dict().keys(), parameters_ndarrays)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})

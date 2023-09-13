@@ -1,3 +1,5 @@
+"""Main script for running FedExp."""
+
 import flwr as fl
 import hydra
 import numpy as np
@@ -7,7 +9,7 @@ from omegaconf import DictConfig, OmegaConf
 
 from fedexp import client, server, utils
 from fedexp.dataset import load_datasets
-from fedexp.utils import seed_everything, get_parameters
+from fedexp.utils import get_parameters, seed_everything
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -23,28 +25,28 @@ def main(cfg: DictConfig) -> None:
 
     seed_everything(cfg.seed)
 
-    trainloaders, testloader = load_datasets(config=cfg.dataset_config,
-                                             num_clients=cfg.num_clients,
-                                             batch_size=cfg.batch_size,
-                                             partition_equal=True)
+    trainloaders, testloader = load_datasets(
+        config=cfg.dataset_config,
+        num_clients=cfg.num_clients,
+        batch_size=cfg.batch_size,
+        partition_equal=True,
+    )
 
     p = np.zeros(cfg.num_clients)
     for i in range(cfg.num_clients):
         p[i] = len(trainloaders[i])
     p /= np.sum(p)
 
-    client_fn = client.gen_client_fn(trainloaders=trainloaders,
-                                     model=cfg.model,
-                                     num_epochs=cfg.num_epochs,
-                                     args={
-                                         "p": p,
-                                         "device": cfg.client_device
-                                     },
-                                     )
+    client_fn = client.gen_client_fn(
+        trainloaders=trainloaders,
+        model=cfg.model,
+        num_epochs=cfg.num_epochs,
+        args={"p": p, "device": cfg.client_device},
+    )
 
-    evaluate_fn = server.gen_evaluate_fn(test_loader=testloader,
-                                         model=cfg.model,
-                                         device=cfg.server_device)
+    evaluate_fn = server.gen_evaluate_fn(
+        test_loader=testloader, model=cfg.model, device=cfg.server_device
+    )
 
     def get_on_fit_config():
         def fit_config_fn(server_round: int):
@@ -75,22 +77,27 @@ def main(cfg: DictConfig) -> None:
         client_resources={
             "num_cpus": cfg.client_resources.num_cpus,
             "num_gpus": cfg.client_resources.num_gpus,
-        }
+        },
     )
 
     save_path = HydraConfig.get().runtime.output_dir
-    file_suffix = "_".join([repr(strategy),
-                            cfg.dataset_config.name,
-                            f"{cfg.seed}",
-                            f"{cfg.dataset_config.alpha}",
-                            f"{cfg.num_clients}",
-                            f"{cfg.num_rounds}",
-                            f"{cfg.clients_per_round}",
-                            f"{cfg.hyperparams.eta_l}"
-                            ])
+    file_suffix = "_".join(
+        [
+            repr(strategy),
+            cfg.dataset_config.name,
+            f"{cfg.seed}",
+            f"{cfg.dataset_config.alpha}",
+            f"{cfg.num_clients}",
+            f"{cfg.num_rounds}",
+            f"{cfg.clients_per_round}",
+            f"{cfg.hyperparams.eta_l}",
+        ]
+    )
 
-    utils.plot_metric_from_history(hist=history, save_plot_path=save_path, suffix=file_suffix)
+    utils.plot_metric_from_history(
+        hist=history, save_plot_path=save_path, suffix=file_suffix
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

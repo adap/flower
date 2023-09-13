@@ -1,12 +1,8 @@
-"""Define any utility function.
+"""Utility functions for FedExp."""
 
-They are not directly relevant to  the other (more FL specific) python modules. For
-example, you may define here things like: loading a model from a checkpoint, saving
-results, plotting.
-"""
 import random
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,11 +13,11 @@ from torch.nn import Module
 
 
 def plot_metric_from_history(
-        hist: History,
-        save_plot_path: Path,
-        suffix: Optional[str] = "",
+    hist: History,
+    save_plot_path: Path,
+    suffix: Optional[str] = "",
 ) -> None:
-    """Function to plot from Flower server History.
+    """Plot the metrics from the history of the server.
 
     Parameters
     ----------
@@ -48,6 +44,7 @@ def plot_metric_from_history(
 
 
 def seed_everything(seed):
+    """Seed everything for reproducibility."""
     np.random.seed(seed)
     torch.manual_seed(seed)
     random.seed(seed)
@@ -55,5 +52,5 @@ def seed_everything(seed):
 
 
 def get_parameters(net: Module) -> NDArrays:
-    """Returns the parameters of a neural network."""
+    """Get the parameters of the network."""
     return [val.cpu().numpy() for _, val in net.state_dict().items()]

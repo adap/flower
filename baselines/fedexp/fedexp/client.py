@@ -1,28 +1,32 @@
+"""Client for FedExp."""
+
 import copy
 from collections import OrderedDict
-from typing import List, Callable, Tuple, Dict
+from typing import Callable, Dict, List, Tuple
 
 import flwr as fl
 import torch
-from flwr.common import Scalar, NDArrays
+from flwr.common import NDArrays, Scalar
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.nn.utils import parameters_to_vector
 from torch.utils.data import DataLoader
 
 from fedexp.models import train
-from fedexp.utils import get_parameters
 
 
 class FlowerClient(fl.client.NumPyClient):
-    def __init__(self,
-                 cid: int,
-                 net: torch.nn.Module,
-                 trainloader: DataLoader,
-                 device: torch.device,
-                 num_epochs: int,
-                 p,
-                 ):
+    """Standard Flower client for CNN training."""
+
+    def __init__(
+        self,
+        cid: int,
+        net: torch.nn.Module,
+        trainloader: DataLoader,
+        device: torch.device,
+        num_epochs: int,
+        p,
+    ):
         print(f"Initializing Client {cid}")
         self.cid = cid
         self.net = net
@@ -31,19 +35,16 @@ class FlowerClient(fl.client.NumPyClient):
         self.num_epochs = num_epochs
         self.p = p
 
-    def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
-        """Returns the parameters of the current net."""
-        return get_parameters(self.net)
-
-    def set_parameters(self, parameters: NDArrays) -> None:
-        """Changes the parameters of the model using the given ones."""
+    def _set_parameters(self, parameters: NDArrays) -> None:
         params_dict = zip(self.net.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         self.net.load_state_dict(state_dict, strict=True)
 
-    def fit(self, parameters: NDArrays, config: Dict[str, Scalar]) -> Tuple[NDArrays, int, Dict]:
-        """Implements distributed fit function for a given client."""
-        self.set_parameters(parameters)
+    def fit(
+        self, parameters: NDArrays, config: Dict[str, Scalar]
+    ) -> Tuple[NDArrays, int, Dict]:
+        """Train the network on the training set."""
+        self._set_parameters(parameters)
         print(f"Client {self.cid} Training...")
         prev_net = copy.deepcopy(self.net)
         train(
@@ -60,17 +61,23 @@ class FlowerClient(fl.client.NumPyClient):
             grad = params_delta_vec
             grad_p = self.p * grad
             grad_norm = self.p * torch.linalg.norm(grad) ** 2
-        return [], len(self.trainloader), {"p": self.p,
-                                           "grad_p": grad_p.to("cpu"),
-                                           "grad_norm": grad_norm.to("cpu"),
-                                           }
+        return (
+            [],
+            len(self.trainloader),
+            {
+                "p": self.p,
+                "grad_p": grad_p.to("cpu"),
+                "grad_norm": grad_norm.to("cpu"),
+            },
+        )
 
 
-def gen_client_fn(trainloaders: List[DataLoader],
-                  model: DictConfig,
-                  num_epochs: int,
-                  args: Dict,
-                  ) -> Callable[[str], FlowerClient]:
+def gen_client_fn(
+    trainloaders: List[DataLoader],
+    model: DictConfig,
+    num_epochs: int,
+    args: Dict,
+) -> Callable[[str], FlowerClient]:
     """Return a function which creates a new FlowerClient for a given cid."""
 
     def client_fn(cid: str) -> FlowerClient:

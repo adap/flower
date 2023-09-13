@@ -1,22 +1,15 @@
-"""Handle basic dataset creation.
+"""Dataset loading and processing utilities."""
 
-In case of PyTorch it should return dataloaders for your dataset (for both the clients
-and the server). If you are using a custom dataset class, this module is the place to
-define it. If your dataset requires to be downloaded (and this is not done
-automatically -- e.g. as it is the case for many dataset in TorchVision) and
-partitioned, please include all those functions and logic in the
-`dataset_preparation.py` module. You can use all those functions from functions/methods
-defined here of course.
-"""
 import pickle
+from typing import List, Tuple
 
 import numpy as np
 import torch
-from torch.utils.data import TensorDataset, DataLoader
+from torch.utils.data import DataLoader, TensorDataset
 from torchvision import datasets, transforms
 
 
-def get_dirichlet_data(y, n, alpha, num_c, partition_equal=False):
+def _get_dirichlet_data(y, n, alpha, num_c, partition_equal=False):
     n_nets = n
     K = num_c
     labelList_true = y
@@ -35,7 +28,10 @@ def get_dirichlet_data(y, n, alpha, num_c, partition_equal=False):
             proportions = p_client[:, k]
             proportions /= proportions.sum()
             proportions = (np.cumsum(proportions) * len(idx_k)).astype(int)[:-1]
-            idx_batch = [idx_j + idx.tolist() for idx_j, idx in zip(idx_batch, np.split(idx_k, proportions))]
+            idx_batch = [
+                idx_j + idx.tolist()
+                for idx_j, idx in zip(idx_batch, np.split(idx_k, proportions))
+            ]
     else:
         idx_labels = [np.where(labelList_true == k)[0] for k in range(K)]
         idx_counter = [0 for k in range(K)]
@@ -52,7 +48,9 @@ def get_dirichlet_data(y, n, alpha, num_c, partition_equal=False):
                 cls_label = np.argmax(np.random.uniform() <= curr_prior)
                 if idx_counter[cls_label] >= len(idx_labels[cls_label]):
                     continue
-                idx_batch[curr_clnt].append(idx_labels[cls_label][idx_counter[cls_label]])
+                idx_batch[curr_clnt].append(
+                    idx_labels[cls_label][idx_counter[cls_label]]
+                )
                 idx_counter[cls_label] += 1
                 break
 
@@ -70,22 +68,22 @@ def get_dirichlet_data(y, n, alpha, num_c, partition_equal=False):
     local_sizes = np.array(local_sizes)
     weights = local_sizes / np.sum(local_sizes)
 
-    print('Data statistics: %s' % str(net_cls_counts))
-    print('Data ratio: %s' % str(weights))
+    print("Data statistics: %s" % str(net_cls_counts))
+    print("Data ratio: %s" % str(weights))
 
     return idx_batch
 
 
-def split_dataset(train_dataset, num_clients, alpha, num_classes, save_path, partition_equal=False):
+def _split_dataset(
+    train_dataset, num_clients, alpha, num_classes, save_path, partition_equal=False
+):
     print("Preparing dataset...")
     train_loader = DataLoader(train_dataset, batch_size=len(train_dataset))
     X_train = next(iter(train_loader))[0].numpy()
     Y_train = next(iter(train_loader))[1].numpy()
-    inds = get_dirichlet_data(Y_train,
-                              num_clients,
-                              alpha,
-                              num_classes,
-                              partition_equal=partition_equal)
+    inds = _get_dirichlet_data(
+        Y_train, num_clients, alpha, num_classes, partition_equal=partition_equal
+    )
     train_datasets = []
     for i, ind in enumerate(inds):
         n_i = len(ind)
@@ -97,41 +95,56 @@ def split_dataset(train_dataset, num_clients, alpha, num_classes, save_path, par
         dataset_train_torch = TensorDataset(x_train, y_train)
         train_datasets.append(dataset_train_torch)
 
-    with open(save_path, 'wb') as file:
+    with open(save_path, "wb") as file:
         pickle.dump(train_datasets, file)
 
     return train_datasets
 
 
-def load_datasets(config,
-                  num_clients,
-                  batch_size,
-                  partition_equal=True) -> [DataLoader, DataLoader]:
+def load_datasets(
+    config, num_clients, batch_size, partition_equal=True
+) -> Tuple[List[DataLoader], DataLoader]:
+    """Load the dataset and return the dataloaders for the clients and the server."""
     print("Loading data...")
 
-    if config.name == 'CIFAR10':
+    if config.name == "CIFAR10":
         Dataset = datasets.CIFAR10
-    elif config.name == 'CIFAR100':
+    elif config.name == "CIFAR100":
         Dataset = datasets.CIFAR100
     else:
         raise NotImplementedError
 
-    data_directory = f'./data/{config.name.lower()}/'
-    ds_path = f'{data_directory}train_{num_clients}_{config.alpha:.2f}.pkl'
-    trans_cifar = transforms.Compose([transforms.ToTensor(),
-                                      transforms.Normalize(mean=[0.491, 0.482, 0.447],
-                                                           std=[0.247, 0.243, 0.262])])
+    data_directory = f"./data/{config.name.lower()}/"
+    ds_path = f"{data_directory}train_{num_clients}_{config.alpha:.2f}.pkl"
+    trans_cifar = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.491, 0.482, 0.447], std=[0.247, 0.243, 0.262]),
+        ]
+    )
     try:
-        with open(ds_path, 'rb') as file:
+        with open(ds_path, "rb") as file:
             train_datasets = pickle.load(file)
     except FileNotFoundError:
-        dataset_train = Dataset(data_directory, train=True, download=True, transform=trans_cifar)
-        train_datasets = split_dataset(dataset_train, num_clients, config.alpha,
-                                       config.num_classes, ds_path, partition_equal)
+        dataset_train = Dataset(
+            data_directory, train=True, download=True, transform=trans_cifar
+        )
+        train_datasets = _split_dataset(
+            dataset_train,
+            num_clients,
+            config.alpha,
+            config.num_classes,
+            ds_path,
+            partition_equal,
+        )
 
-    dataset_test = Dataset(data_directory, train=False, download=True, transform=trans_cifar)
+    dataset_test = Dataset(
+        data_directory, train=False, download=True, transform=trans_cifar
+    )
     test_loader = DataLoader(dataset_test, batch_size=batch_size, num_workers=1)
-    train_loaders = list(map(lambda ds: DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=1),
-                             train_datasets))
+    train_loaders = [
+        DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=1)
+        for ds in train_datasets
+    ]
 
     return train_loaders, test_loader
