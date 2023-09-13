@@ -13,9 +13,10 @@ defined here of course.
 from typing import Optional, Tuple
 
 import torch
+from dataset_preparation import _partition_data
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader, random_split
-from dataset_preparation import _partition_data
+
 
 def load_datasets(  # pylint: disable=too-many-arguments
     config: DictConfig,
@@ -39,15 +40,39 @@ def load_datasets(  # pylint: disable=too-many-arguments
         The DataLoader for training, the DataLoader for validation, the DataLoader for testing.
     """
     print(f"Dataset partitioning config: {config}")
-    datasets, label_split , client_testsets, testset = _partition_data(
+    datasets, label_split, client_testsets, testset = _partition_data(
         num_clients,
-        dataset_name = config.dataset_name,
-        iid = config.iid,
-        balance = config.balance,
-        seed = seed,
+        dataset_name=config.dataset_name,
+        iid=config.iid,
+        balance=config.balance,
+        seed=seed,
     )
     # Split each partition into train/val and create DataLoader
     trainloaders = []
+    valloaders = []
     for dataset in datasets:
-        trainloaders.append(DataLoader(dataset, batch_size=config.batch_size.train, shuffle=True))
-    return trainloaders, label_split, client_testsets , DataLoader(testset, batch_size=config.batch_size.test)
+        trainloaders.append(
+            DataLoader(
+                dataset,
+                batch_size=config.batch_size.train,
+                shuffle=config.shuffle.train,
+            )
+        )
+
+    for client_testset in client_testsets:
+        valloaders.append(
+            DataLoader(
+                client_testset,
+                batch_size=config.batch_size.test,
+                shuffle=config.shuffle.test,
+            )
+        )
+
+    return (
+        trainloaders,
+        label_split,
+        valloaders,
+        DataLoader(
+            testset, batch_size=config.batch_size.test, shuffle=config.shuffle.test
+        ),
+    )

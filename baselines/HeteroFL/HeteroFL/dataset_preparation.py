@@ -1,18 +1,10 @@
-"""Handle the dataset partitioning and (optionally) complex downloads.
-
-Please add here all the necessary logic to either download, uncompress, pre/post-process
-your dataset (or all of the above). If the desired way of running your baseline is to
-first download the dataset and partition it and then run the experiments, please
-uncomment the lines below and tell us in the README.md (see the "Running the Experiment"
-block) that this file should be executed first.
-"""
 from typing import List, Optional, Tuple
+
 import numpy as np
 import torch
 import torchvision.transforms as transforms
 from torch.utils.data import ConcatDataset, Dataset, Subset, random_split
-from torchvision.datasets import MNIST, CIFAR10
-
+from torchvision.datasets import CIFAR10, MNIST
 
 # import hydra
 # from hydra.core.hydra_config import HydraConfig
@@ -42,105 +34,88 @@ from torchvision.datasets import MNIST, CIFAR10
 #     download_and_preprocess()
 
 
-
-
-
 def _download_data(dataset_name) -> Tuple[Dataset, Dataset]:
-    """Downloads (if necessary) and returns the MNIST dataset.
-
-    Returns
-    -------
-    Tuple[MNIST, MNIST]
-        The dataset for training and the dataset for testing MNIST.
-    """
-    if dataset_name == 'MNIST':
+    if dataset_name == "MNIST":
         transform = transforms.Compose(
             [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
         )
         trainset = MNIST("./dataset", train=True, download=True, transform=transform)
         testset = MNIST("./dataset", train=False, download=True, transform=transform)
-    elif dataset_name == 'CIFAR10':
-        transform = transforms.Compose([transforms.RandomCrop(32, padding=4),
-                                        transforms.RandomHorizontalFlip(),
-                                        transforms.ToTensor(),
-                                        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))])
+    elif dataset_name == "CIFAR10":
+        transform = transforms.Compose(
+            [
+                transforms.RandomCrop(32, padding=4),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
+                ),
+            ]
+        )
         trainset = CIFAR10("./dataset", train=True, download=True, transform=transform)
         testset = CIFAR10("./dataset", train=False, download=True, transform=transform)
     else:
-        raise ValueError(f'{dataset_name} is not valid')
-    
-    return trainset , testset
+        raise ValueError(f"{dataset_name} is not valid")
+
+    return trainset, testset
 
 
 def _partition_data(
     num_clients,
     dataset_name,
     iid: Optional[bool] = False,
-    shard_per_user = 2,#only in case of non-iid
+    shard_per_user=2,  # only in case of non-iid
     balance: Optional[bool] = False,
     seed: Optional[int] = 42,
 ) -> Tuple[List[Dataset], Dataset]:
-    """Split training set into iid or non iid partitions to simulate the
-    federated setting.
-
-    Parameters
-    ----------
-    num_clients : int
-        The number of clients that hold a part of the data
-    iid : bool, optional
-        Whether the data should be independent and identically distributed between
-        the clients or if the data should first be sorted by labels and distributed by chunks
-        to each client (used to test the convergence in a worst case scenario), by default False
-    power_law: bool, optional
-        Whether to follow a power-law distribution when assigning number of samples
-        for each client, defaults to True
-    balance : bool, optional
-        Whether the dataset should contain an equal number of samples in each class,
-        by default False
-    seed : int, optional
-        Used to set a fix seed to replicate experiments, by default 42
-
-    Returns
-    -------
-    Tuple[List[Dataset], Dataset]
-        A list of dataset for each client and a single dataset to be use for testing the model.
-    """
     trainset, testset = _download_data(dataset_name)
 
-    if(dataset_name == 'MNIST' or dataset_name == 'CIFAR10'):
+    if dataset_name == "MNIST" or dataset_name == "CIFAR10":
         classes_size = 10
     # else:
-        # dataset_classes_size needs to be calculated
+    # dataset_classes_size needs to be calculated
 
     if balance:
         trainset = _balance_classes(trainset, seed)
-        
 
     if iid:
-        datasets , label_split =  iid_partition(trainset , num_clients)
-        client_testsets , _ = iid_partition(testset , num_clients)
+        datasets, label_split = iid_partition(trainset, num_clients, seed=seed)
+        client_testsets, _ = iid_partition(testset, num_clients, seed=seed)
     else:
-        datasets , label_split =  non_iid(trainset , num_clients , shard_per_user , classes_size)
-        client_testsets , _ = non_iid(testset , num_clients , shard_per_user , classes_size , label_split)
+        datasets, label_split = non_iid(
+            trainset, num_clients, shard_per_user, classes_size
+        )
+        client_testsets, _ = non_iid(
+            testset, num_clients, shard_per_user, classes_size, label_split
+        )
 
-    return datasets, label_split , client_testsets , testset
+        tensor_label_split = []
+        for i in label_split:
+            tensor_label_split.append(torch.Tensor(i))
+        label_split = tensor_label_split
+
+    return datasets, label_split, client_testsets, testset
 
 
-def iid_partition(dataset , num_clients , seed = 42) -> Tuple[List , List]:
-
+def iid_partition(dataset, num_clients, seed=42) -> Tuple[List, List]:
     partition_size = int(len(dataset) / num_clients)
     lengths = [partition_size] * num_clients
 
-    divided_dataset = random_split(dataset, lengths, torch.Generator().manual_seed(seed))
+    divided_dataset = random_split(
+        dataset, lengths, torch.Generator().manual_seed(seed)
+    )
     label_split = []
     for i in range(num_clients):
-        label_split.append(torch.unique(torch.Tensor([target for _ , target in divided_dataset[i]])))
-    
-    return divided_dataset , label_split
+        label_split.append(
+            torch.unique(torch.Tensor([target for _, target in divided_dataset[i]]))
+        )
+
+    return divided_dataset, label_split
 
 
-
-def non_iid(dataset , num_clients , shard_per_user, classes_size , label_split = None , seed = 42 ) -> Tuple[List , List]:
+def non_iid(
+    dataset, num_clients, shard_per_user, classes_size, label_split=None, seed=42
+) -> Tuple[List, List]:
     label = np.array(dataset.targets)
     data_split = {i: [] for i in range(num_clients)}
     label_idx_split = {}
@@ -157,16 +132,22 @@ def non_iid(dataset , num_clients , shard_per_user, classes_size , label_split =
         label_idx = label_idx_split[label_i]
         num_leftover = len(label_idx) % shard_per_class
         leftover = label_idx[-num_leftover:] if num_leftover > 0 else []
-        new_label_idx = np.array(label_idx[:-num_leftover]) if num_leftover > 0 else np.array(label_idx)
+        new_label_idx = (
+            np.array(label_idx[:-num_leftover])
+            if num_leftover > 0
+            else np.array(label_idx)
+        )
         new_label_idx = new_label_idx.reshape((shard_per_class, -1)).tolist()
 
         for i, leftover_label_idx in enumerate(leftover):
             new_label_idx[i] = np.concatenate([new_label_idx[i], [leftover_label_idx]])
         label_idx_split[label_i] = new_label_idx
-        
+
     if label_split is None:
         label_split = list(range(classes_size)) * shard_per_class
-        label_split = torch.tensor(label_split)[torch.randperm(len(label_split))].tolist()
+        label_split = torch.tensor(label_split)[
+            torch.randperm(len(label_split))
+        ].tolist()
         label_split = np.array(label_split).reshape((num_clients, -1)).tolist()
 
         for i in range(len(label_split)):
@@ -174,38 +155,23 @@ def non_iid(dataset , num_clients , shard_per_user, classes_size , label_split =
 
     for i in range(num_clients):
         for label_i in label_split[i]:
-            idx = torch.arange(len(label_idx_split[label_i]))[torch.randperm(len(label_idx_split[label_i]))[0]].item()
+            idx = torch.arange(len(label_idx_split[label_i]))[
+                torch.randperm(len(label_idx_split[label_i]))[0]
+            ].item()
             data_split[i].extend(label_idx_split[label_i].pop(idx))
 
     divided_dataset = [None for i in range(num_clients)]
     for i in range(num_clients):
-        divided_dataset[i] = Subset(dataset , data_split[i])
+        divided_dataset[i] = Subset(dataset, data_split[i])
 
-    return divided_dataset , label_split
 
+    return divided_dataset, label_split
 
 
 def _balance_classes(
     trainset: Dataset,
     seed: Optional[int] = 42,
 ) -> Dataset:
-    """Balance the classes of the trainset.
-
-    Trims the dataset so each class contains as many elements as the
-    class that contained the least elements.
-
-    Parameters
-    ----------
-    trainset : Dataset
-        The training dataset that needs to be balanced.
-    seed : int, optional
-        Used to set a fix seed to replicate experiments, by default 42.
-
-    Returns
-    -------
-    Dataset
-        The balanced training dataset.
-    """
     class_counts = np.bincount(trainset.targets)
     smallest = np.min(class_counts)
     idxs = trainset.targets.argsort()
@@ -228,18 +194,6 @@ def _balance_classes(
 def _sort_by_class(
     trainset: Dataset,
 ) -> Dataset:
-    """Sort dataset by class/label.
-
-    Parameters
-    ----------
-    trainset : Dataset
-        The training dataset that needs to be sorted.
-
-    Returns
-    -------
-    Dataset
-        The sorted training dataset.
-    """
     class_counts = np.bincount(trainset.targets)
     idxs = trainset.targets.argsort()  # sort targets in ascending order
 
@@ -266,33 +220,6 @@ def _power_law_split(
     mean: float = 0.0,
     sigma: float = 2.0,
 ) -> Dataset:
-    """Partitions the dataset following a power-law distribution. It follows
-    the implementation of Li et al 2020: https://arxiv.org/abs/1812.06127 with
-    default values set accordingly.
-
-    Parameters
-    ----------
-    sorted_trainset : Dataset
-        The training dataset sorted by label/class.
-    num_partitions: int
-        Number of partitions to create
-    num_labels_per_partition: int
-        Number of labels to have in each dataset partition. For
-        example if set to two, this means all training examples in
-        a given partition will be long to the same two classes. default 2
-    min_data_per_partition: int
-        Minimum number of datapoints included in each partition, default 10
-    mean: float
-        Mean value for LogNormal distribution to construct power-law, default 0.0
-    sigma: float
-        Sigma value for LogNormal distribution to construct power-law, default 2.0
-
-    Returns
-    -------
-    Dataset
-        The partitioned training dataset.
-    """
-
     targets = sorted_trainset.targets
     full_idx = range(len(targets))
 

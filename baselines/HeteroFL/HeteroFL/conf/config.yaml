@@ -24,6 +24,7 @@ dataset_config:
 model:
   model_name: conv
   hidden_layers: [64 , 128 , 216 , 512]
+  norm: bn
 
 strategy:
   optimizer:

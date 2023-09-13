@@ -3,21 +3,18 @@
 It includes processioning the dataset, instantiate strategy, specify how the global
 model is going to be evaluated, etc. At the end, this script saves the results.
 """
-# these are the basic packages you'll need here
-# feel free to remove some if aren't needed
+import client
+import flwr as fl
 import hydra
-from hydra.utils import instantiate
-from omegaconf import DictConfig, OmegaConf
+import models
 import numpy as np
 import torch
-import flwr as fl
-
-from dataset import load_datasets
-import client
-import models
-from utils import Model_rate_manager , preprocess_input , get_global_model_rate
 from client_manager_HeteroFL import client_manager_HeteroFL
+from dataset import load_datasets
+from hydra.utils import instantiate
+from omegaconf import DictConfig, OmegaConf
 from strategy import HeteroFL
+from utils import Model_rate_manager, get_global_model_rate, preprocess_input
 
 
 @hydra.main(config_path="conf", config_name="config.yaml", version_base=None)
@@ -63,69 +60,70 @@ def main(cfg: DictConfig) -> None:
     # can retrieve the path to that directory with this:
     # save_path = HydraConfig.get().runtime.output_dir
 
-
     # print config structured as YAML
     print(OmegaConf.to_yaml(cfg))
 
-    trainloaders , label_split , valloaders , testloader = load_datasets(
-        config = cfg.dataset_config,
-        num_clients = cfg.num_clients,
-        seed = cfg.seed
+    trainloaders, label_split, valloaders, testloader = load_datasets(
+        config=cfg.dataset_config, num_clients=cfg.num_clients, seed=cfg.seed
     )
 
-    model_config = preprocess_input(cfg.model , cfg.dataset_config)
+    model_config = preprocess_input(cfg.model, cfg.dataset_config)
 
     # send this array(client_model_rate_mapping) as an argument to client_manager and client
-    model_split_rate = {'a' : 1 , 'b' : 0.5 , 'c' : 0.25 , 'd' : 0.125 , 'e' : 0.0625}
+    model_split_rate = {"a": 1, "b": 0.5, "c": 0.25, "d": 0.125, "e": 0.0625}
     model_split_mode = cfg.control.model_split_rate
     model_mode = cfg.control.model_mode
 
-
     client_to_model_rate_mapping = [0 for _ in range(cfg.num_clients)]
-    model_rate_manager = Model_rate_manager(model_split_mode , model_split_rate , model_mode)
-    client_manager = client_manager_HeteroFL(model_rate_manager , client_to_model_rate_mapping)
+    model_rate_manager = Model_rate_manager(
+        model_split_mode, model_split_rate, model_mode
+    )
+    client_manager = client_manager_HeteroFL(
+        model_rate_manager, client_to_model_rate_mapping , client_label_split = label_split
+    )
 
     # # for i in range(cfg.num_clients):
     #     # client_to_model_rate_mapping[i]
 
     # prepare function that will be used to spawn each client
     client_fn = client.gen_client_fn(
-        model = model_config['model_name'],
-        data_shape = model_config['data_shape'], 
-        hidden_layers = model_config['hidden_layers'],
-        classes_size = model_config['classes_size'], 
-        global_model_rate = model_split_rate[get_global_model_rate(model_mode)],
+        model=model_config["model_name"],
+        data_shape=model_config["data_shape"],
+        hidden_layers=model_config["hidden_layers"],
+        classes_size=model_config["classes_size"],
+        norm = model_config["norm"],
+        global_model_rate=model_split_rate[get_global_model_rate(model_mode)],
         num_clients=cfg.num_clients,
-        client_to_model_rate_mapping = client_to_model_rate_mapping,
+        client_to_model_rate_mapping=client_to_model_rate_mapping,
         num_epochs=cfg.num_epochs,
         trainloaders=trainloaders,
-        label_split = label_split,
+        label_split=label_split,
         valloaders=valloaders,
     )
 
-
     strategy = HeteroFL(
-        net = model_config['model_name'](
-            model_rate = model_split_rate[get_global_model_rate(cfg)],#to be modified
-            data_shape = model_config['data_shape'],
-            hidden_layers = model_config['hidden_layers'],
-            classes_size = model_config['classes_size'],
-            # device = 
+        net=model_config["model_name"](
+            model_rate=model_split_rate[get_global_model_rate(model_mode)],  # to be modified
+            data_shape=model_config["data_shape"],
+            hidden_layers=model_config["hidden_layers"],
+            classes_size=model_config["classes_size"],
+            norm = model_config["norm"]
+            # device =
         ),
-        fraction_fit = 0.1,
-        fraction_evaluate = 0.1,
-        min_fit_clients = 10,
-        min_evaluate_clients = 10,
-        min_available_clients = cfg.num_clients,
+        fraction_fit=0.1,
+        fraction_evaluate=0.1,
+        min_fit_clients=10,
+        min_evaluate_clients=10,
+        min_available_clients=cfg.num_clients,
     )
 
-    history = fl.simlation.start_simulation(
-        client_fn = client_fn,
-        num_clients = cfg.num_clients,
-        config=fl.server.ServerConfig(num_rounds = cfg.num_rounds),
+    history = fl.simultion.start_simulation(
+        client_fn=client_fn,
+        num_clients=cfg.num_clients,
+        config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
         # client_resources = client,
-        client_manager = client_manager,
-        strategy = strategy,
+        client_manager=client_manager,
+        strategy=strategy,
     )
 
     # plot grpahs using history and save the results.
@@ -134,8 +132,6 @@ def main(cfg: DictConfig) -> None:
     # fl.simulation.start_simulation
     # fl.server.start_server
 
+
 if __name__ == "__main__":
     main()
-
-
-

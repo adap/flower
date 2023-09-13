@@ -4,10 +4,10 @@ Needed only when the strategy is not yet implemented in Flower or because you wa
 extend or modify the functionality of an existing strategy.
 """
 from collections import OrderedDict
-from typing import Callable, Union , Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple, Union
+
 import flwr as fl
 import torch
-
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -23,8 +23,13 @@ from flwr.common import (
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
-
-from models import param_model_rate_mapping , param_idx_to_local_params , get_state_dict_from_param, get_parameters
+from models import (
+    get_parameters,
+    get_state_dict_from_param,
+    param_idx_to_local_params,
+    param_model_rate_mapping,
+)
+import copy
 
 
 class HeteroFL(fl.server.strategy.Strategy):
@@ -35,9 +40,7 @@ class HeteroFL(fl.server.strategy.Strategy):
         min_fit_clients: int = 2,
         min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
-
-        global_model = None,
-
+        net=None,
     ) -> None:
         super().__init__()
         self.fraction_fit = fraction_fit
@@ -48,8 +51,10 @@ class HeteroFL(fl.server.strategy.Strategy):
         # # created client_to_model_mapping
         # self.client_to_model_rate_mapping: Dict[str, ClientProxy] = {}
 
-        self.global_model = global_model
+        self.net = net
         self.local_param_model_rate = None
+        self.active_cl_mr = None
+        self.active_cl_labels = None
 
     def __repr__(self) -> str:
         return "HeteroFL"
@@ -59,9 +64,14 @@ class HeteroFL(fl.server.strategy.Strategy):
     ) -> Optional[Parameters]:
         """Initialize global model parameters."""
         # self.make_client_to_model_rate_mapping(client_manager)
-        net = self.global_model()
-        ndarrays = get_parameters(net)
-        self.local_param_model_rate = param_model_rate_mapping(net.state_dict() , client_manager.get_all_clients_to_model_mapping())
+        # net = conv(model_rate = 1)
+        ndarrays = get_parameters(self.net)
+        # print(self.net.state_dict())
+        self.local_param_model_rate = param_model_rate_mapping(self.net.state_dict() , client_manager.get_all_clients_to_model_mapping())
+
+        self.active_cl_labels = client_manager.client_label_split.copy()
+        self.optimizer = torch.optim.SGD(self.net.parameters() , lr = 0.01 , momentum = 0.9 , weight_decay = 5.00e-04)
+        self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer , milestones=[100])
         return fl.common.ndarrays_to_parameters(ndarrays)
 
     def configure_fit(
@@ -70,35 +80,40 @@ class HeteroFL(fl.server.strategy.Strategy):
         """Configure the next round of training."""
         print("in configure fit , server round no. = {}".format(server_round))
         # Sample clients
-        #no need to change this
+        # no need to change this
         sample_size, min_num_clients = self.num_fit_clients(
             client_manager.num_available()
         )
 
         # for sampling we pass the criterion to select the required clients
         clients = client_manager.sample(
-            num_clients=sample_size, min_num_clients=min_num_clients,
+            num_clients=sample_size,
+            min_num_clients=min_num_clients,
         )
-
 
         # update client model rate mapping
         client_manager.update(server_round)
 
-
-        global_parameters = get_state_dict_from_param(conv(model_rate = 1) , parameters)
+        global_parameters = get_state_dict_from_param(self.net, parameters)
 
         self.active_cl_mr = OrderedDict()
+
         # Create custom configs
         fit_configurations = []
+        lr = self.optimizer.param_groups[0]["lr"]
+
         for idx, client in enumerate(clients):
             model_rate = client_manager.get_client_to_model_mapping(client.cid)
             client_param_idx = self.local_param_model_rate[model_rate]
-            local_param = param_idx_to_local_params(global_parameters , client_param_idx)
+            local_param = param_idx_to_local_params(global_parameters, client_param_idx)
             self.active_cl_mr[client.cid] = model_rate
             # local param are in the form of state_dict, so converting them only to values of tensors
-            local_param_fitres = [v for v in local_param.values()]
+            local_param_fitres = [v.cpu() for v in local_param.values()]
+            fit_configurations.append(
+                (client, FitIns(ndarrays_to_parameters(local_param_fitres), {"lr": lr}))
+            )
 
-            fit_configurations.append((client, FitIns(ndarrays_to_parameters(local_param_fitres), {})))
+        self.scheduler.step()
         return fit_configurations
 
     def aggregate_fit(
@@ -109,57 +124,74 @@ class HeteroFL(fl.server.strategy.Strategy):
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
 
-        gl = conv(model_rate = 1)
-        gl_model = gl.state_dict()
+        gl_model = self.net.state_dict()
 
         param_idx = []
         for i in range(len(results)):
-            param_idx.append(self.local_param_model_rate[self.active_cl_mr[results[i][0].cid]])
+            param_idx.append(
+                copy.deepcopy(self.local_param_model_rate[self.active_cl_mr[results[i][0].cid]])
+            )
 
-        
-
-        local_parameters = [fit_res.parameters for _ , fit_res in results]
+        local_parameters = [fit_res.parameters for _, fit_res in results]
         for i in range(len(results)):
             local_parameters[i] = parameters_to_ndarrays(local_parameters[i])
             j = 0
             temp_od = OrderedDict()
-            for k , _ in gl.state_dict().items():
+            for k, _ in gl_model.items():
                 temp_od[k] = local_parameters[i][j]
                 j += 1
             local_parameters[i] = temp_od
 
-        
         count = OrderedDict()
-        output_weight_name = [k for k in gl_model.keys() if 'weight' in k][-1]
-        output_bias_name = [k for k in gl_model.keys() if 'bias' in k][-1]
+        output_weight_name = [k for k in gl_model.keys() if "weight" in k][-1]
+        output_bias_name = [k for k in gl_model.keys() if "bias" in k][-1]
         for k, v in gl_model.items():
-            parameter_type = k.split('.')[-1]
+            parameter_type = k.split(".")[-1]
             count[k] = v.new_zeros(v.size(), dtype=torch.float32)
             tmp_v = v.new_zeros(v.size(), dtype=torch.float32)
             for m in range(len(local_parameters)):
-                if 'weight' in parameter_type or 'bias' in parameter_type:
-                    if parameter_type == 'weight':
+                if "weight" in parameter_type or "bias" in parameter_type:
+                    if parameter_type == "weight":
                         if v.dim() > 1:
-                            tmp_v[torch.meshgrid(param_idx[m][k])] += local_parameters[m][k]
-                            count[k][torch.meshgrid(param_idx[m][k])] += 1
+                            if k == output_weight_name:
+                                label_split = self.active_cl_labels[
+                                    int(results[m][0].cid)
+                                ]
+                                label_split = label_split.type(torch.int)
+                                param_idx[m][k] = list(param_idx[m][k])
+                                # print(f'Oohalu gusugusalaade {label_split}')
+                                param_idx[m][k][0] = param_idx[m][k][0][label_split]
+                                tmp_v[
+                                    torch.meshgrid(param_idx[m][k])
+                                ] += local_parameters[m][k][label_split]
+                                count[k][torch.meshgrid(param_idx[m][k])] += 1
+                            else:
+                                tmp_v[
+                                    torch.meshgrid(param_idx[m][k])
+                                ] += local_parameters[m][k]
+                                count[k][torch.meshgrid(param_idx[m][k])] += 1
                         else:
                             tmp_v[param_idx[m][k]] += local_parameters[m][k]
                             count[k][param_idx[m][k]] += 1
                     else:
-                        tmp_v[param_idx[m][k]] += local_parameters[m][k]
-                        count[k][param_idx[m][k]] += 1
+                        if k == output_bias_name:
+                            label_split = self.active_cl_labels[int(results[m][0].cid)]
+                            label_split = label_split.type(torch.int)
+                            param_idx[m][k] = param_idx[m][k][label_split]
+                            tmp_v[param_idx[m][k]] += local_parameters[m][k][
+                                label_split
+                            ]
+                            count[k][param_idx[m][k]] += 1
+                        else:
+                            tmp_v[param_idx[m][k]] += local_parameters[m][k]
+                            count[k][param_idx[m][k]] += 1
                 else:
                     tmp_v += local_parameters[m][k]
                     count[k] += 1
             tmp_v[count[k] > 0] = tmp_v[count[k] > 0].div_(count[k][count[k] > 0])
             v[count[k] > 0] = tmp_v[count[k] > 0].to(v.dtype)
 
-        return ndarrays_to_parameters([ v for k , v in gl_model.items()]), {}
-        # return None , None
-
-
-
-
+        return ndarrays_to_parameters([v for k, v in gl_model.items()]), {}
 
     def configure_evaluate(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -178,8 +210,25 @@ class HeteroFL(fl.server.strategy.Strategy):
             num_clients=sample_size, min_num_clients=min_num_clients
         )
 
-        # Return client/config pairs
-        return [(client, evaluate_ins) for client in clients]
+        global_parameters = get_state_dict_from_param(self.net, parameters)
+
+        self.active_cl_mr = OrderedDict()
+
+        # Create custom configs
+        evaluate_configurations = []
+        for idx, client in enumerate(clients):
+            model_rate = client_manager.get_client_to_model_mapping(client.cid)
+            client_param_idx = self.local_param_model_rate[model_rate]
+            local_param = param_idx_to_local_params(global_parameters, client_param_idx)
+            self.active_cl_mr[client.cid] = model_rate
+            # local param are in the form of state_dict, so converting them only to values of tensors
+            local_param_fitres = [v.cpu() for v in local_param.values()]
+            evaluate_configurations.append(
+                (client, EvaluateIns(ndarrays_to_parameters(local_param_fitres), {}))
+            )
+        return evaluate_configurations
+
+        # return self.configure_fit(server_round , parameters , client_manager)
 
     def aggregate_evaluate(
         self,
@@ -198,7 +247,15 @@ class HeteroFL(fl.server.strategy.Strategy):
                 for _, evaluate_res in results
             ]
         )
-        metrics_aggregated = {}
+
+        accuracy_aggregated = 0
+        for cp, y in results:
+            print(f"{cp.cid}-->{y.metrics['accuracy']}", end=" ")
+            accuracy_aggregated += y.metrics["accuracy"]
+        accuracy_aggregated /= len(results)
+
+        metrics_aggregated = {"accuracy": accuracy_aggregated}
+        print(f"\npaneer lababdar {metrics_aggregated}")
         return loss_aggregated, metrics_aggregated
 
     def evaluate(
