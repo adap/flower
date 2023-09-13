@@ -106,4 +106,4 @@ python -m fedprox.main --config-name fedavg --multirun stragglers_fraction=0.0,0
 
 The above commands would generate results that you can plot and would look like the plot shown below. This plot was generated using the jupyter notebook in the `docs/` directory of this baseline after running the `--multirun` commands above.
 
-![](docs/FedProx_mnist.png)
+![](_static/FedProx_mnist.png)
