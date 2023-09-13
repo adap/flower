@@ -99,7 +99,7 @@ def gen_client_fn(is_cnn: bool = False) -> Callable[[str], fl.client.Client]:
         model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
 
         # Load data partition (divide MNIST into NUM_CLIENTS distinct partitions)
-        (x_train_cid, y_train_cid) = load_dataset(cid)
+        (x_train_cid, y_train_cid) = load_dataset(cid, is_cnn)
 
         # Create and return client
         return FlwrClient(model, x_train_cid, y_train_cid)

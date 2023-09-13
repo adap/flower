@@ -1,4 +1,5 @@
 fmnist/
+cifar10/
 outputs/
 playground.ipynb
 multirun/

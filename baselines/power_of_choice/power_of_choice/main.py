@@ -8,7 +8,7 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 import os
 from typing import Callable, Dict, Optional, Tuple
 from server import PowerOfChoiceCommAndCompVariant
-from models import create_MLP_model
+from models import create_MLP_model, create_CNN_model
 from flwr.common.typing import Scalar
 from utils import plot_metric_from_history, save_results_as_pickle
 from server import PowerOfChoiceServer
@@ -109,9 +109,13 @@ def main(cfg: DictConfig) -> None:
         
         print(f"Current folder is {os.getcwd()}")
 
+        test_folder = "fmnist"
+        if cfg.is_cnn:
+            test_folder = "cifar10"
+
         # Load data and model here to avoid the overhead of doing it in `evaluate` itself
-        x_test = np.load(os.path.join("fmnist", "x_test.npy"))
-        y_test = np.load(os.path.join("fmnist", "y_test.npy"))
+        x_test = np.load(os.path.join(test_folder, "x_test.npy"))
+        y_test = np.load(os.path.join(test_folder, "y_test.npy"))
 
         # The `evaluate` function will be called after every round
         def evaluate(
@@ -125,7 +129,11 @@ def main(cfg: DictConfig) -> None:
 
         return evaluate
     
-    server_model = create_MLP_model()
+    if cfg.is_cnn:
+        server_model = create_CNN_model()
+    else:
+        server_model = create_MLP_model()
+    
     server_model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
 
     is_cpow = False

@@ -10,14 +10,14 @@ local_epochs: 5
 fraction_samples: 1.0
 seed: 42
 alpha: 2
-is_cnn: False
+is_cnn: True
 
 client_resources:
   num_cpus: 1
   num_gpus: 0
 
 dataset:
-  dataset: "fmnist"
+  dataset: "cifar10"
 
 model:
   # model config
