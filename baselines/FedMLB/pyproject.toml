@@ -38,13 +38,9 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = ">=3.8.15, <3.12.0"  # don't change this
-#flwr = {path = "/home/amora/pycharm_projects/flower"}
-# Git dependencies
-#flwr = { git = "https://github.com/adap/flower.git", branch = "main" }
 hydra-core = "1.3.2" # don't change this
 flwr = { extras = ["simulation"], version = "1.5.0" }
 tensorflow = "2.12.0"
-#tensorflow = "2.13.0"
 matplotlib = "3.7.1"
 psutil = "5.9.5" # this is just to log some info about memory usage
 
@@ -52,7 +48,7 @@ psutil = "5.9.5" # this is just to log some info about memory usage
 isort = "==5.11.5"
 black = "==23.1.0"
 docformatter = "==1.5.1"
-mypy = "==0.961"
+mypy = "==1.4.1"
 pylint = "==2.8.2"
 flake8 = "==3.9.2"
 pytest = "==6.2.4"
@@ -88,6 +84,9 @@ plugins = "numpy.typing.mypy_plugin"
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
 good-names = "i,j,k,_,x,y,X,Y"
 signature-mutators="hydra.main.main"
+
+[tool.pylint.typecheck]
+generated-members="numpy.*, torch.*, tensorflow.*"
 
 [[tool.mypy.overrides]]
 module = [
