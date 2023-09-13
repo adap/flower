@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Pushes src/swift to flower-swift repository
         uses: cpina/github-action-push-to-another-repository@0a14457bb28b04dfa1652e0ffdfda866d2845c73
         env:
