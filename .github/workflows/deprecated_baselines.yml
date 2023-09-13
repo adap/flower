@@ -8,6 +8,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   FLWR_TELEMETRY_ENABLED: 0
 
@@ -17,6 +21,7 @@ defaults:
 
 jobs:
   test_deprecated_baselines:
+    name: Test
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3

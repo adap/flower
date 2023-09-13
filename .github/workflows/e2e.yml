@@ -8,6 +8,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   FLWR_TELEMETRY_ENABLED: 0
 
@@ -116,7 +120,7 @@ jobs:
         run: |
           python -m poetry install
       - name: Cache Datasets
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: "~/.keras"
           key: keras-datasets
