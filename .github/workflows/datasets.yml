@@ -37,7 +37,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Bootstrap
-        uses: ./../.github/actions/bootstrap
+        uses: ./.github/actions/bootstrap
         with:
           python-version: ${{ matrix.python }}
       - name: Install dependencies (mandatory only)
