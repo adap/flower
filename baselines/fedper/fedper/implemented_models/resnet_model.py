@@ -98,13 +98,8 @@ class ResNet(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward inputs through the model."""
         print("Forwarding through ResNet model")
-        if self.num_head_layers == 1:
-            return self.head(F.relu(self.body(x)))
-        elif self.num_head_layers == 2:
-            x = self.body(x)
-            return self.head(x)
-        else:
-            raise NotImplementedError("Only 1 or 2 head layers supported")
+        x = self.body(x)
+        return self.head(x)
 
 
 class ResNetModelSplit(ModelSplit):

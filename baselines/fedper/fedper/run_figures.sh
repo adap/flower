@@ -10,6 +10,10 @@
 #    done
 #done
 
+python -m fedper.main --config-path conf/cifar10/mobile --config-name fedavg dataset.num_classes=10 &&
+python -m fedper.main --config-path conf/cifar10/resnet --config-name fedavg dataset.num_classes=10 &&
+python -m fedper.main --config-path conf/cifar10/resnet --config-name fedper model.num_head_layers=1
+
 # CIFAR10 Mobile (n head layers (FIGURE 4a))
 #for num_head_layers in 2 3 4
 #do

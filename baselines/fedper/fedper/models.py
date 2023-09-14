@@ -116,7 +116,6 @@ class ModelSplit(ABC, nn.Module):
     def forward(self, inputs: Any) -> Any:
         """Forward inputs through the body and the head."""
         x = self.body(inputs)
-        x = F.relu(x)
         return self.head(x)
 
 

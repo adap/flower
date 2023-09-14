@@ -15,7 +15,7 @@ client_resources:
 server_device: cuda:0
 
 dataset:
-  name : "cifar100"
+  name : "cifar10"
   split: sample
   num_classes: 10
   seed: 42
