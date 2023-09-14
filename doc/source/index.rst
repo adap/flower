@@ -1,6 +1,10 @@
 Flower Framework Documentation
 ==============================
 
+.. meta::
+   :description lang=en: Check out the documentation of the main Flower Framework enabling easy Python development for Federated Learning.
+   :description lang=fr: Découvrez la documentation du framework principal de Flower permettant de developper des apps de Federated Learning en utilisant Python.
+
 Welcome to Flower's documentation. `Flower <https://flower.dev>`_ is a friendly federated learning framework.
 
 
@@ -32,11 +36,11 @@ A learning-oriented series of federated learning tutorials, the best place to st
    :maxdepth: 1
    :caption: Tutorial
 
-   tutorial-what-is-federated-learning
-   tutorial-get-started-with-flower-pytorch
-   tutorial-use-a-federated-learning-strategy-pytorch
-   tutorial-build-a-strategy-from-scratch-pytorch
-   tutorial-customize-the-client-pytorch
+   tutorial-series-what-is-federated-learning
+   tutorial-series-get-started-with-flower-pytorch
+   tutorial-series-use-a-federated-learning-strategy-pytorch
+   tutorial-series-build-a-strategy-from-scratch-pytorch
+   tutorial-series-customize-the-client-pytorch
 
 .. toctree::
    :maxdepth: 1

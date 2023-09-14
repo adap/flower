@@ -2,9 +2,27 @@
 
 ## Unreleased
 
+- **Support custom** `ClientManager` **in** `start_driver()` ([#2292](https://github.com/adap/flower/pull/2292))
+
+- **Update REST API to support create and delete nodes** ([#2283](https://github.com/adap/flower/pull/2283))
+
 ### What's new?
 
-- **General updates to baselines** ([#2301](https://github.com/adap/flower/pull/2301).[#2305](https://github.com/adap/flower/pull/2305))
+- **Unify client API** ([#2303](https://github.com/adap/flower/pull/2303))
+
+  Using the `client_fn`, Flower clients can interchangeably run as standalone processes (i.e. via `start_client`) or in simulation (i.e. via `start_simulation`) without requiring changes to how the client class is defined and instantiated.
+
+- **Update Flower Baselines**
+
+  - FedProx ([#2286](https://github.com/adap/flower/pull/2286))
+
+- **General updates to baselines** ([#2301](https://github.com/adap/flower/pull/2301).[#2305](https://github.com/adap/flower/pull/2305), [#2307](https://github.com/adap/flower/pull/2307), [#2327](https://github.com/adap/flower/pull/2327))
+
+- **General updates to the simulation engine** ([#2331](https://github.com/adap/flower/pull/2331))
+
+- **General improvements** ([#2309](https://github.com/adap/flower/pull/2309), [#2310](https://github.com/adap/flower/pull/2310), [2313](https://github.com/adap/flower/pull/2313), [#2316](https://github.com/adap/flower/pull/2316), [2317](https://github.com/adap/flower/pull/2317),[#2349](https://github.com/adap/flower/pull/2349), [#2360](https://github.com/adap/flower/pull/2360))
+
+  Flower received many improvements under the hood, too many to list here.
 
 - **Strategies**
 
@@ -12,9 +30,13 @@
 
 ### Incompatible changes
 
-- **Remove support for Python 3.7** ([#2280](https://github.com/adap/flower/pull/2280), [#2299](https://github.com/adap/flower/pull/2299))
+- **Remove support for Python 3.7** ([#2280](https://github.com/adap/flower/pull/2280), [#2299](https://github.com/adap/flower/pull/2299), [#2304](https://github.com/adap/flower/pull/2304), [#2306](https://github.com/adap/flower/pull/2306), [#2355](https://github.com/adap/flower/pull/2355), [#2356](https://github.com/adap/flower/pull/2356))
 
   Python 3.7 support was deprecated in Flower 1.5, and this release removes support. Flower now requires Python 3.8.
+
+- **Remove experimental argument** `rest` **from** `start_client` ([#2324](https://github.com/adap/flower/pull/2324))
+
+  The (still experimental) argument `rest` was removed from `start_client` and `start_numpy_client`. Use `transport="rest"` to opt into the experimental REST API instead.
 
 ## v1.5.0 (2023-08-31)
 
@@ -520,7 +542,7 @@ We would like to give our **special thanks** to all the contributors who made Fl
 
   - New option to keep Ray running if Ray was already initialized in `start_simulation` ([#1177](https://github.com/adap/flower/pull/1177))
   - Add support for custom `ClientManager` as a `start_simulation` parameter ([#1171](https://github.com/adap/flower/pull/1171))
-  - New documentation for [implementing strategies](https://flower.dev/docs/implementing-strategies.html) ([#1097](https://github.com/adap/flower/pull/1097), [#1175](https://github.com/adap/flower/pull/1175))
+  - New documentation for [implementing strategies](https://flower.dev/docs/framework/how-to-implement-strategies.html) ([#1097](https://github.com/adap/flower/pull/1097), [#1175](https://github.com/adap/flower/pull/1175))
   - New mobile-friendly documentation theme ([#1174](https://github.com/adap/flower/pull/1174))
   - Limit version range for (optional) `ray` dependency to include only compatible releases (`>=1.9.2,<1.12.0`) ([#1205](https://github.com/adap/flower/pull/1205))
 
