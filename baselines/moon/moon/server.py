@@ -9,11 +9,10 @@ from typing import Callable, Dict, Optional, Tuple
 
 import torch
 from flwr.common.typing import NDArrays, Scalar
-from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
-from moon.models import test, init_net
+from moon.models import init_net, test
 
 
 def gen_evaluate_fn(
@@ -43,7 +42,6 @@ def gen_evaluate_fn(
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         # pylint: disable=unused-argument
         """Use the entire CIFAR-10 test set for evaluation."""
-
         net = init_net(cfg.dataset.name, cfg.model.name, cfg.model.output_dim)
         params_dict = zip(net.state_dict().keys(), parameters_ndarrays)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})

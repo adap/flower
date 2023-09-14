@@ -6,35 +6,53 @@ config. In this way, swapping your model for  another one can be done without ch
 the python code at all
 """
 
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import math
-import torchvision.models as models
 import torch.optim as optim
+
 from moon.utils import compute_accuracy
 
+
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
-    """3x3 convolution with padding"""
-    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
-                     padding=dilation, groups=groups, bias=False, dilation=dilation)
+    """3x3 convolution with padding."""
+    return nn.Conv2d(
+        in_planes,
+        out_planes,
+        kernel_size=3,
+        stride=stride,
+        padding=dilation,
+        groups=groups,
+        bias=False,
+        dilation=dilation,
+    )
 
 
 def conv1x1(in_planes, out_planes, stride=1):
-    """1x1 convolution"""
+    """1x1 convolution."""
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
 
 
 class BasicBlock(nn.Module):
     expansion = 1
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None, groups=1,
-                 base_width=64, dilation=1, norm_layer=None):
+    def __init__(
+        self,
+        inplanes,
+        planes,
+        stride=1,
+        downsample=None,
+        groups=1,
+        base_width=64,
+        dilation=1,
+        norm_layer=None,
+    ):
         super(BasicBlock, self).__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
         if groups != 1 or base_width != 64:
-            raise ValueError('BasicBlock only supports groups=1 and base_width=64')
+            raise ValueError("BasicBlock only supports groups=1 and base_width=64")
         if dilation > 1:
             raise NotImplementedError("Dilation > 1 not supported in BasicBlock")
         # Both self.conv1 and self.downsample layers downsample the input when stride != 1
@@ -74,12 +92,21 @@ class Bottleneck(nn.Module):
 
     expansion = 4
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None, groups=1,
-                 base_width=64, dilation=1, norm_layer=None):
+    def __init__(
+        self,
+        inplanes,
+        planes,
+        stride=1,
+        downsample=None,
+        groups=1,
+        base_width=64,
+        dilation=1,
+        norm_layer=None,
+    ):
         super(Bottleneck, self).__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
-        width = int(planes * (base_width / 64.)) * groups
+        width = int(planes * (base_width / 64.0)) * groups
         # Both self.conv2 and self.downsample layers downsample the input when stride != 1
         self.conv1 = conv1x1(inplanes, width)
         self.bn1 = norm_layer(width)
@@ -115,10 +142,17 @@ class Bottleneck(nn.Module):
 
 
 class ResNetCifar10(nn.Module):
-
-    def __init__(self, block, layers, num_classes=1000, zero_init_residual=False,
-                 groups=1, width_per_group=64, replace_stride_with_dilation=None,
-                 norm_layer=None):
+    def __init__(
+        self,
+        block,
+        layers,
+        num_classes=1000,
+        zero_init_residual=False,
+        groups=1,
+        width_per_group=64,
+        replace_stride_with_dilation=None,
+        norm_layer=None,
+    ):
         super(ResNetCifar10, self).__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
@@ -131,27 +165,33 @@ class ResNetCifar10(nn.Module):
             # the 2x2 stride with a dilated convolution instead
             replace_stride_with_dilation = [False, False, False]
         if len(replace_stride_with_dilation) != 3:
-            raise ValueError("replace_stride_with_dilation should be None "
-                             "or a 3-element tuple, got {}".format(replace_stride_with_dilation))
+            raise ValueError(
+                "replace_stride_with_dilation should be None "
+                "or a 3-element tuple, got {}".format(replace_stride_with_dilation)
+            )
         self.groups = groups
         self.base_width = width_per_group
-        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=3, stride=1, padding=1,
-                               bias=False)
+        self.conv1 = nn.Conv2d(
+            3, self.inplanes, kernel_size=3, stride=1, padding=1, bias=False
+        )
         self.bn1 = norm_layer(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
         self.layer1 = self._make_layer(block, 64, layers[0])
-        self.layer2 = self._make_layer(block, 128, layers[1], stride=2,
-                                       dilate=replace_stride_with_dilation[0])
-        self.layer3 = self._make_layer(block, 256, layers[2], stride=2,
-                                       dilate=replace_stride_with_dilation[1])
-        self.layer4 = self._make_layer(block, 512, layers[3], stride=2,
-                                       dilate=replace_stride_with_dilation[2])
+        self.layer2 = self._make_layer(
+            block, 128, layers[1], stride=2, dilate=replace_stride_with_dilation[0]
+        )
+        self.layer3 = self._make_layer(
+            block, 256, layers[2], stride=2, dilate=replace_stride_with_dilation[1]
+        )
+        self.layer4 = self._make_layer(
+            block, 512, layers[3], stride=2, dilate=replace_stride_with_dilation[2]
+        )
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512 * block.expansion, num_classes)
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
             elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
@@ -180,13 +220,30 @@ class ResNetCifar10(nn.Module):
             )
 
         layers = []
-        layers.append(block(self.inplanes, planes, stride, downsample, self.groups,
-                            self.base_width, previous_dilation, norm_layer))
+        layers.append(
+            block(
+                self.inplanes,
+                planes,
+                stride,
+                downsample,
+                self.groups,
+                self.base_width,
+                previous_dilation,
+                norm_layer,
+            )
+        )
         self.inplanes = planes * block.expansion
         for _ in range(1, blocks):
-            layers.append(block(self.inplanes, planes, groups=self.groups,
-                                base_width=self.base_width, dilation=self.dilation,
-                                norm_layer=norm_layer))
+            layers.append(
+                block(
+                    self.inplanes,
+                    planes,
+                    groups=self.groups,
+                    base_width=self.base_width,
+                    dilation=self.dilation,
+                    norm_layer=norm_layer,
+                )
+            )
 
         return nn.Sequential(*layers)
 
@@ -210,9 +267,11 @@ class ResNetCifar10(nn.Module):
     def forward(self, x):
         return self._forward_impl(x)
 
+
 def ResNet50_cifar10(**kwargs):
-    r"""ResNet-50 model from
-    `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
+    r"""ResNet-50 model from `"Deep Residual Learning for Image Recognition".
+
+    <https://arxiv.org/pdf/1512.03385.pdf>`_
 
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
@@ -233,10 +292,9 @@ class SimpleCNN_header(nn.Module):
         # i.e. we fix the number of hidden layers i.e. 2 layers
         self.fc1 = nn.Linear(input_dim, hidden_dims[0])
         self.fc2 = nn.Linear(hidden_dims[0], hidden_dims[1])
-        #self.fc3 = nn.Linear(hidden_dims[1], output_dim)
+        # self.fc3 = nn.Linear(hidden_dims[1], output_dim)
 
     def forward(self, x):
-
         x = self.pool(self.relu(self.conv1(x)))
         x = self.pool(self.relu(self.conv2(x)))
         x = x.view(-1, 16 * 5 * 5)
@@ -246,21 +304,28 @@ class SimpleCNN_header(nn.Module):
         # x = self.fc3(x)
         return x
 
-class ModelFedCon(nn.Module):
 
+class ModelFedCon(nn.Module):
     def __init__(self, base_model, out_dim, n_classes):
         super(ModelFedCon, self).__init__()
 
-        if base_model == "resnet50-cifar10" or base_model == "resnet50-cifar100" or base_model == "resnet50-smallkernel" or base_model == "resnet50":
+        if (
+            base_model == "resnet50-cifar10"
+            or base_model == "resnet50-cifar100"
+            or base_model == "resnet50-smallkernel"
+            or base_model == "resnet50"
+        ):
             basemodel = ResNet50_cifar10()
             self.features = nn.Sequential(*list(basemodel.children())[:-1])
             num_ftrs = basemodel.fc.in_features
-        elif base_model == 'simple-cnn':
-            self.features = SimpleCNN_header(input_dim=(16 * 5 * 5), hidden_dims=[120, 84], output_dim=n_classes)
+        elif base_model == "simple-cnn":
+            self.features = SimpleCNN_header(
+                input_dim=(16 * 5 * 5), hidden_dims=[120, 84], output_dim=n_classes
+            )
             num_ftrs = 84
 
-        #summary(self.features.to('cuda:0'), (3,32,32))
-        #print("features:", self.features)
+        # summary(self.features.to('cuda:0'), (3,32,32))
+        # print("features:", self.features)
         # projection MLP
         self.l1 = nn.Linear(num_ftrs, num_ftrs)
         self.l2 = nn.Linear(num_ftrs, out_dim)
@@ -271,17 +336,19 @@ class ModelFedCon(nn.Module):
     def _get_basemodel(self, model_name):
         try:
             model = self.model_dict[model_name]
-            #print("Feature extractor:", model_name)
+            # print("Feature extractor:", model_name)
             return model
         except:
-            raise ("Invalid model name. Check the config file and pass one of: resnet18 or resnet50")
+            raise (
+                "Invalid model name. Check the config file and pass one of: resnet18 or resnet50"
+            )
 
     def forward(self, x):
         h = self.features(x)
-        #print("h before:", h)
-        #print("h size:", h.size())
+        # print("h before:", h)
+        # print("h size:", h.size())
         h = h.squeeze()
-        #print("h after:", h)
+        # print("h after:", h)
         x = self.l1(h)
         x = F.relu(x)
         x = self.l2(x)
@@ -289,14 +356,15 @@ class ModelFedCon(nn.Module):
         y = self.l3(x)
         return h, x, y
 
-def init_net(dataset, model, output_dim, device='cpu'):
-    if dataset == 'cifar10':
+
+def init_net(dataset, model, output_dim, device="cpu"):
+    if dataset == "cifar10":
         n_classes = 10
-    elif dataset == 'cifar100':
+    elif dataset == "cifar100":
         n_classes = 100
 
     net = ModelFedCon(model, output_dim, n_classes)
-    if device == 'cpu':
+    if device == "cpu":
         net.to(device)
     else:
         net = net.cuda()
@@ -304,18 +372,32 @@ def init_net(dataset, model, output_dim, device='cpu'):
     return net
 
 
-def train_moon(net, global_net, previous_net, train_dataloader, epochs, lr, mu, temperature, device="cpu"):
+def train_moon(
+    net,
+    global_net,
+    previous_net,
+    train_dataloader,
+    epochs,
+    lr,
+    mu,
+    temperature,
+    device="cpu",
+):
     net = nn.DataParallel(net)
     net.cuda()
 
-    print('n_training: %d' % len(train_dataloader))
+    print("n_training: %d" % len(train_dataloader))
 
     train_acc, _ = compute_accuracy(net, train_dataloader, device=device)
 
-    print('>> Pre-Training Training accuracy: {}'.format(train_acc))
+    print(">> Pre-Training Training accuracy: {}".format(train_acc))
 
-    optimizer = optim.SGD(filter(lambda p: p.requires_grad, net.parameters()), lr=lr, momentum=0.9,
-                              weight_decay=1e-5)
+    optimizer = optim.SGD(
+        filter(lambda p: p.requires_grad, net.parameters()),
+        lr=lr,
+        momentum=0.9,
+        weight_decay=1e-5,
+    )
 
     criterion = nn.CrossEntropyLoss().cuda()
     # global_net.to(device)
@@ -324,7 +406,7 @@ def train_moon(net, global_net, previous_net, train_dataloader, epochs, lr, mu, 
         previous_net.cuda()
 
     cnt = 0
-    cos=torch.nn.CosineSimilarity(dim=-1)
+    cos = torch.nn.CosineSimilarity(dim=-1)
     # mu = 0.001
 
     for epoch in range(epochs):
@@ -343,21 +425,19 @@ def train_moon(net, global_net, previous_net, train_dataloader, epochs, lr, mu, 
             _, pro2, _ = global_net(x)
 
             posi = cos(pro1, pro2)
-            logits = posi.reshape(-1,1)
+            logits = posi.reshape(-1, 1)
 
-            
             previous_net.cuda()
             _, pro3, _ = previous_net(x)
             nega = cos(pro1, pro3)
-            logits = torch.cat((logits, nega.reshape(-1,1)), dim=1)
+            logits = torch.cat((logits, nega.reshape(-1, 1)), dim=1)
 
-            previous_net.to('cpu')
+            previous_net.to("cpu")
 
             logits /= temperature
             labels = torch.zeros(x.size(0)).cuda().long()
 
             loss2 = mu * criterion(logits, labels)
-
 
             loss1 = criterion(out, target)
             loss = loss1 + loss2
@@ -373,34 +453,43 @@ def train_moon(net, global_net, previous_net, train_dataloader, epochs, lr, mu, 
         epoch_loss = sum(epoch_loss_collector) / len(epoch_loss_collector)
         epoch_loss1 = sum(epoch_loss1_collector) / len(epoch_loss1_collector)
         epoch_loss2 = sum(epoch_loss2_collector) / len(epoch_loss2_collector)
-        print('Epoch: %d Loss: %f Loss1: %f Loss2: %f' % (epoch, epoch_loss, epoch_loss1, epoch_loss2))
+        print(
+            "Epoch: %d Loss: %f Loss1: %f Loss2: %f"
+            % (epoch, epoch_loss, epoch_loss1, epoch_loss2)
+        )
 
-    previous_net.to('cpu')
+    previous_net.to("cpu")
     train_acc, _ = compute_accuracy(net, train_dataloader, device=device)
 
-    print('>> Training accuracy: %f' % train_acc)
-    net.to('cpu')
-    print(' ** Training complete **')
+    print(">> Training accuracy: %f" % train_acc)
+    net.to("cpu")
+    print(" ** Training complete **")
     return net
+
 
 def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu"):
     net = nn.DataParallel(net)
     net.cuda()
 
-    print('n_training: %d' % len(train_dataloader))
+    print("n_training: %d" % len(train_dataloader))
 
     train_acc, _ = compute_accuracy(net, train_dataloader, device=device)
-    
-    print('>> Pre-Training Training accuracy: {}'.format(train_acc))
 
-    optimizer = optim.SGD(filter(lambda p: p.requires_grad, net.parameters()), lr=lr, momentum=0.9, weight_decay=1e-5)
+    print(">> Pre-Training Training accuracy: {}".format(train_acc))
+
+    optimizer = optim.SGD(
+        filter(lambda p: p.requires_grad, net.parameters()),
+        lr=lr,
+        momentum=0.9,
+        weight_decay=1e-5,
+    )
 
     criterion = nn.CrossEntropyLoss().cuda()
 
     cnt = 0
     global_weight_collector = list(global_net.cuda().parameters())
 
-    for epoch in range(epochs):
+    for _epoch in range(epochs):
         epoch_loss_collector = []
         for _, (x, target) in enumerate(train_dataloader):
             x, target = x.cuda(), target.cuda()
@@ -410,14 +499,16 @@ def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu
             target.requires_grad = False
             target = target.long()
 
-            _,_,out = net(x)
+            _, _, out = net(x)
             loss = criterion(out, target)
 
             # for fedprox
             fed_prox_reg = 0.0
             # fed_prox_reg += np.linalg.norm([i - j for i, j in zip(global_weight_collector, get_trainable_parameters(net).tolist())], ord=2)
             for param_index, param in enumerate(net.parameters()):
-                fed_prox_reg += ((mu / 2) * torch.norm((param - global_weight_collector[param_index])) ** 2)
+                fed_prox_reg += (mu / 2) * torch.norm(
+                    (param - global_weight_collector[param_index])
+                ) ** 2
             loss += fed_prox_reg
 
             loss.backward()
@@ -426,15 +517,16 @@ def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu
             cnt += 1
             epoch_loss_collector.append(loss.item())
 
-        epoch_loss = sum(epoch_loss_collector) / len(epoch_loss_collector)
+        sum(epoch_loss_collector) / len(epoch_loss_collector)
 
     train_acc, _ = compute_accuracy(net, train_dataloader, device=device)
 
-    print('>> Training accuracy: %f' % train_acc)
-    net.to('cpu')
-    print(' ** Training complete **')
+    print(">> Training accuracy: %f" % train_acc)
+    net.to("cpu")
+    print(" ** Training complete **")
     return net
 
-def test(net, test_dataloader, device='cpu'):
+
+def test(net, test_dataloader, device="cpu"):
     test_acc, loss = compute_accuracy(net, test_dataloader, device=device)
     return test_acc, loss

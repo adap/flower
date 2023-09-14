@@ -8,10 +8,11 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 import flwr as fl
 import hydra
 from omegaconf import DictConfig, OmegaConf
-# from hydra.utils import instantiate
 
 from moon import client, server
-from moon.dataset_preparation import partition_data, get_dataloader
+from moon.dataset_preparation import get_dataloader, partition_data
+
+# from hydra.utils import instantiate
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -33,27 +34,34 @@ def main(cfg: DictConfig) -> None:
     # (2) tell each client what dataset partitions they should use (e.g. a this could
     # be a location in the file system, a list of dataloader, a list of ids to extract
     # from a dataset, it's up to you)
-    X_train, y_train, X_test, y_test, net_dataidx_map, traindata_cls_counts = partition_data(
-        dataset=cfg.dataset.name, 
-        datadir=cfg.dataset.dir, 
-        parittion=cfg.dataset.partition, 
-        num_clients=cfg.num_clients, 
+    (
+        X_train,
+        y_train,
+        X_test,
+        y_test,
+        net_dataidx_map,
+        traindata_cls_counts,
+    ) = partition_data(
+        dataset=cfg.dataset.name,
+        datadir=cfg.dataset.dir,
+        parittion=cfg.dataset.partition,
+        num_clients=cfg.num_clients,
         beta=cfg.dataset.beta,
     )
-    
-    train_dl_global, test_dl, train_ds_global, test_ds_global = get_dataloader(dataset=cfg.dataset.name,
-                                                                            datadir=cfg.dataset.dir,
-                                                                            train_bs=cfg.batch_size,
-                                                                            test_bs=32)
-    
+
+    train_dl_global, test_dl, train_ds_global, test_ds_global = get_dataloader(
+        dataset=cfg.dataset.name,
+        datadir=cfg.dataset.dir,
+        train_bs=cfg.batch_size,
+        test_bs=32,
+    )
+
     trainloaders = []
     testloaders = []
     for idx in range(cfg.num_clients):
-        train_dl, test_dl, _, _ = get_dataloader(cfg.dataset.name,
-                                                cfg.dataset.dir,
-                                                cfg.batch_size,
-                                                32,
-                                                net_dataidx_map[idx])
+        train_dl, test_dl, _, _ = get_dataloader(
+            cfg.dataset.name, cfg.dataset.dir, cfg.batch_size, 32, net_dataidx_map[idx]
+        )
 
         trainloaders.append(train_dl)
         testloaders.append(test_dl)
@@ -70,7 +78,7 @@ def main(cfg: DictConfig) -> None:
     # get function that will executed by the strategy's evaluate() method
     # Set server's device
     device = cfg.server_device
-    evaluate_fn = server.gen_evaluate_fn(test_dl, device=device, model=cfg.model)
+    server.gen_evaluate_fn(test_dl, device=device, model=cfg.model)
 
     # get a function that will be used to construct the config that the client's
     # fit() method will received
@@ -82,14 +90,13 @@ def main(cfg: DictConfig) -> None:
             return fit_config
 
         return fit_config_fn
-    
+
     # 4. Define your strategy
     # pass all relevant argument (including the global dataset used after aggregation,
     # if needed by your method.)
     # strategy = instantiate(cfg.strategy, <additional arguments if desired>)
     strategy = fl.server.strategy.FedAvg(
-        fraction_fit = cfg.fraction_fit,
-        on_fit_config_fn = get_on_fit_config()
+        fraction_fit=cfg.fraction_fit, on_fit_config_fn=get_on_fit_config()
     )
     # 5. Start Simulation
     # history = fl.simulation.start_simulation(<arguments for simulation>)

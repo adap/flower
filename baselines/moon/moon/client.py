@@ -3,29 +3,23 @@
 Please overwrite `flwr.client.NumPyClient` or `flwr.client.Client` and create a function
 to instantiate your client.
 """
-"""Defines the MNIST Flower Client and a function to instantiate it."""
 
-
+import os
 from collections import OrderedDict
 from typing import Callable, Dict, List, Tuple
 
 import flwr as fl
-import numpy as np
 import torch
 from flwr.common.typing import NDArrays, Scalar
-from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
-import os
+
+from moon.models import init_net, test, train_fedprox, train_moon
 
 
-from moon.models import train_moon, train_fedprox, init_net
-
-
-class FlowerClient(
-    fl.client.NumPyClient
-):  
+class FlowerClient(fl.client.NumPyClient):
     """Standard Flower client for CNN training."""
+
     def __init__(
         self,
         net: torch.nn.Module,
@@ -57,14 +51,13 @@ class FlowerClient(
         self.temperature = temperature
         self.model_dir = model_dir
         self.alg = alg
-        
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
-        """Returns the parameters of the current net."""
+        """Return the parameters of the current net."""
         return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
 
     def set_parameters(self, parameters: NDArrays) -> None:
-        """Changes the parameters of the model using the given ones."""
+        """Change the parameters of the model using the given ones."""
         params_dict = zip(self.net.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         self.net.load_state_dict(state_dict, strict=True)
@@ -72,12 +65,14 @@ class FlowerClient(
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, int, Dict]:
-        """Implements distributed fit function for a given client."""
+        """Implement distributed fit function for a given client."""
         self.set_parameters(parameters)
-        
-        #load previous model from model_dir
+
+        # load previous model from model_dir
         self.prev_net = init_net(self.dataset, self.model, self.output_dim)
-        self.prev_net.load_state_dict(torch.load(os.path.join(self.model_dir, "prev_net.pt")))
+        self.prev_net.load_state_dict(
+            torch.load(os.path.join(self.model_dir, "prev_net.pt"))
+        )
         global_net = init_net(self.dataset, self.model, self.output_dim)
         global_net.load_state_dict(self.net.state_dict())
         if self.alg == "moon":
@@ -90,7 +85,7 @@ class FlowerClient(
                 self.learning_rate,
                 self.mu,
                 self.temperature,
-                self.device
+                self.device,
             )
         elif self.alg == "fedprox":
             train_fedprox(
@@ -100,7 +95,7 @@ class FlowerClient(
                 self.num_epochs,
                 self.learning_rate,
                 self.mu,
-                self.device
+                self.device,
             )
         torch.save(self.net.state_dict(), os.path.join(self.model_dir, "prev_net.pt"))
         return self.get_parameters({}), len(self.trainloader), {"is_straggler": False}
@@ -108,7 +103,7 @@ class FlowerClient(
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[float, int, Dict]:
-        """Implements distributed evaluation for a given client."""
+        """Implement distributed evaluation for a given client."""
         self.set_parameters(parameters)
         loss, accuracy = test(self.net, self.valloader, self.device)
         return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
@@ -121,7 +116,7 @@ def gen_client_fn(
 ) -> Tuple[
     Callable[[str], FlowerClient], DataLoader
 ]:  # pylint: disable=too-many-arguments
-    """Generates the client function that creates the Flower Clients.
+    """Generate the client function that creates the Flower Clients.
 
     Parameters
     ----------
@@ -153,7 +148,6 @@ def gen_client_fn(
 
     def client_fn(cid: str) -> FlowerClient:
         """Create a Flower client representing a single organization."""
-
         # Load model
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         net = init_net(cfg.dataset.name, cfg.model.name, cfg.model.output_dim)
@@ -179,4 +173,5 @@ def gen_client_fn(
             cfg.model.dir,
             cfg.alg,
         )
+
     return client_fn

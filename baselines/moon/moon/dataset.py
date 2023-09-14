@@ -11,32 +11,46 @@ defined here of course.
 
 # https://github.com/QinbinLi/MOON/blob/main/datasets.py
 
-import torch.utils.data as data
-from PIL import Image
+import logging
+
 import numpy as np
-import torchvision
-from torchvision.datasets import CIFAR10, CIFAR100
-import torchvision.transforms as transforms
-from torch.autograd import Variable
 import torch.nn.functional as F
 import torch.utils.data as data
-
-import os
-import os.path
-import logging
+import torchvision
+import torchvision.transforms as transforms
+from PIL import Image
+from torch.autograd import Variable
+from torchvision.datasets import CIFAR10, CIFAR100
 
 logging.basicConfig()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-IMG_EXTENSIONS = ('.jpg', '.jpeg', '.png', '.ppm', '.bmp', '.pgm', '.tif', '.tiff', '.webp')
-
+IMG_EXTENSIONS = (
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".ppm",
+    ".bmp",
+    ".pgm",
+    ".tif",
+    ".tiff",
+    ".webp",
+)
 
 
 class CIFAR10_sub(data.Dataset):
+    """CIFAR-10 dataset with idxs."""
 
-    def __init__(self, root, dataidxs=None, train=True, transform=None, target_transform=None, download=False):
-
+    def __init__(
+        self,
+        root,
+        dataidxs=None,
+        train=True,
+        transform=None,
+        target_transform=None,
+        download=False,
+    ):
         self.root = root
         self.dataidxs = dataidxs
         self.train = train
@@ -47,14 +61,20 @@ class CIFAR10_sub(data.Dataset):
         self.data, self.target = self.__build_sub_dataset__()
 
     def __build_sub_dataset__(self):
+        """Build sub dataset given idxs."""
+        cifar_dataobj = CIFAR10(
+            self.root, self.train, self.transform, self.target_transform, self.download
+        )
 
-        cifar_dataobj = CIFAR10(self.root, self.train, self.transform, self.target_transform, self.download)
-
-        if torchvision.__version__ == '0.2.1':
+        if torchvision.__version__ == "0.2.1":
             if self.train:
-                data, target = cifar_dataobj.train_data, np.array(cifar_dataobj.train_labels)
+                data, target = cifar_dataobj.train_data, np.array(
+                    cifar_dataobj.train_labels
+                )
             else:
-                data, target = cifar_dataobj.test_data, np.array(cifar_dataobj.test_labels)
+                data, target = cifar_dataobj.test_data, np.array(
+                    cifar_dataobj.test_labels
+                )
         else:
             data = cifar_dataobj.data
             target = np.array(cifar_dataobj.targets)
@@ -65,18 +85,14 @@ class CIFAR10_sub(data.Dataset):
 
         return data, target
 
-    def truncate_channel(self, index):
-        for i in range(index.shape[0]):
-            gs_index = index[i]
-            self.data[gs_index, :, :, 1] = 0.0
-            self.data[gs_index, :, :, 2] = 0.0
-
     def __getitem__(self, index):
-        """
-        Args:
-            index (int): Index
+        """Get item by index.
 
-        Returns:
+        Args:
+            index (int): Index.
+
+        Returns
+        -------
             tuple: (image, target) where target is index of the target class.
         """
         img, target = self.data[index], self.target[index]
@@ -90,13 +106,25 @@ class CIFAR10_sub(data.Dataset):
         return img, target
 
     def __len__(self):
+        """Length.
+
+        Returns
+        -------
+            int: length of data
+        """
         return len(self.data)
 
 
 class CIFAR100_sub(data.Dataset):
-
-    def __init__(self, root, dataidxs=None, train=True, transform=None, target_transform=None, download=False):
-
+    def __init__(
+        self,
+        root,
+        dataidxs=None,
+        train=True,
+        transform=None,
+        target_transform=None,
+        download=False,
+    ):
         self.root = root
         self.dataidxs = dataidxs
         self.train = train
@@ -107,14 +135,19 @@ class CIFAR100_sub(data.Dataset):
         self.data, self.target = self.__build_sub_dataset__()
 
     def __build_sub_dataset__(self):
+        cifar_dataobj = CIFAR100(
+            self.root, self.train, self.transform, self.target_transform, self.download
+        )
 
-        cifar_dataobj = CIFAR100(self.root, self.train, self.transform, self.target_transform, self.download)
-
-        if torchvision.__version__ == '0.2.1':
+        if torchvision.__version__ == "0.2.1":
             if self.train:
-                data, target = cifar_dataobj.train_data, np.array(cifar_dataobj.train_labels)
+                data, target = cifar_dataobj.train_data, np.array(
+                    cifar_dataobj.train_labels
+                )
             else:
-                data, target = cifar_dataobj.test_data, np.array(cifar_dataobj.test_labels)
+                data, target = cifar_dataobj.test_data, np.array(
+                    cifar_dataobj.test_labels
+                )
         else:
             data = cifar_dataobj.data
             target = np.array(cifar_dataobj.targets)
@@ -128,9 +161,10 @@ class CIFAR100_sub(data.Dataset):
     def __getitem__(self, index):
         """
         Args:
-            index (int): Index
+            index (int): Index.
 
-        Returns:
+        Returns
+        -------
             tuple: (image, target) where target is index of the target class.
         """
         img, target = self.data[index], self.target[index]
@@ -149,49 +183,65 @@ class CIFAR100_sub(data.Dataset):
 
 
 def get_dataloader(dataset, datadir, train_bs, test_bs, dataidxs=None, noise_level=0):
-    if dataset == 'cifar10':
+    if dataset == "cifar10":
         dl_obj = CIFAR10_sub
-        normalize = transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
-                                            std=[x / 255.0 for x in [63.0, 62.1, 66.7]])
-        transform_train = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Lambda(lambda x: F.pad(
-                Variable(x.unsqueeze(0), requires_grad=False),
-                (4, 4, 4, 4), mode='reflect').data.squeeze()),
-            transforms.ToPILImage(),
-            transforms.ColorJitter(brightness=noise_level),
-            transforms.RandomCrop(32),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            normalize
-        ])
+        normalize = transforms.Normalize(
+            mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
+            std=[x / 255.0 for x in [63.0, 62.1, 66.7]],
+        )
+        transform_train = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                transforms.Lambda(
+                    lambda x: F.pad(
+                        Variable(x.unsqueeze(0), requires_grad=False),
+                        (4, 4, 4, 4),
+                        mode="reflect",
+                    ).data.squeeze()
+                ),
+                transforms.ToPILImage(),
+                transforms.ColorJitter(brightness=noise_level),
+                transforms.RandomCrop(32),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                normalize,
+            ]
+        )
         # data prep for test set
-        transform_test = transforms.Compose([
-            transforms.ToTensor(),
-            normalize])
+        transform_test = transforms.Compose([transforms.ToTensor(), normalize])
 
-    elif dataset == 'cifar100':
+    elif dataset == "cifar100":
         dl_obj = CIFAR100_sub
 
-        normalize = transforms.Normalize(mean=[0.5070751592371323, 0.48654887331495095, 0.4409178433670343],
-                                            std=[0.2673342858792401, 0.2564384629170883, 0.27615047132568404])
+        normalize = transforms.Normalize(
+            mean=[0.5070751592371323, 0.48654887331495095, 0.4409178433670343],
+            std=[0.2673342858792401, 0.2564384629170883, 0.27615047132568404],
+        )
 
-        transform_train = transforms.Compose([
-            transforms.RandomCrop(32, padding=4),
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomRotation(15),
-            transforms.ToTensor(),
-            normalize
-        ])
+        transform_train = transforms.Compose(
+            [
+                transforms.RandomCrop(32, padding=4),
+                transforms.RandomHorizontalFlip(),
+                transforms.RandomRotation(15),
+                transforms.ToTensor(),
+                normalize,
+            ]
+        )
         # data prep for test set
-        transform_test = transforms.Compose([
-            transforms.ToTensor(),
-            normalize])
+        transform_test = transforms.Compose([transforms.ToTensor(), normalize])
 
-        train_ds = dl_obj(datadir, dataidxs=dataidxs, train=True, transform=transform_train, download=True)
+        train_ds = dl_obj(
+            datadir,
+            dataidxs=dataidxs,
+            train=True,
+            transform=transform_train,
+            download=True,
+        )
         test_ds = dl_obj(datadir, train=False, transform=transform_test, download=True)
 
-        train_dl = data.DataLoader(dataset=train_ds, batch_size=train_bs, drop_last=True, shuffle=True)
+        train_dl = data.DataLoader(
+            dataset=train_ds, batch_size=train_bs, drop_last=True, shuffle=True
+        )
         test_dl = data.DataLoader(dataset=test_ds, batch_size=test_bs, shuffle=False)
 
     return train_dl, test_dl, train_ds, test_ds

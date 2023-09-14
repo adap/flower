@@ -41,8 +41,12 @@ from dataset import CIFAR10_truncated, CIFAR100_truncated
 def load_cifar10_data(datadir):
     transform = transforms.Compose([transforms.ToTensor()])
 
-    cifar10_train_ds = CIFAR10_truncated(datadir, train=True, download=True, transform=transform)
-    cifar10_test_ds = CIFAR10_truncated(datadir, train=False, download=True, transform=transform)
+    cifar10_train_ds = CIFAR10_truncated(
+        datadir, train=True, download=True, transform=transform
+    )
+    cifar10_test_ds = CIFAR10_truncated(
+        datadir, train=False, download=True, transform=transform
+    )
 
     X_train, y_train = cifar10_train_ds.data, cifar10_train_ds.target
     X_test, y_test = cifar10_test_ds.data, cifar10_test_ds.target
@@ -53,8 +57,12 @@ def load_cifar10_data(datadir):
 def load_cifar100_data(datadir):
     transform = transforms.Compose([transforms.ToTensor()])
 
-    cifar100_train_ds = CIFAR100_truncated(datadir, train=True, download=True, transform=transform)
-    cifar100_test_ds = CIFAR100_truncated(datadir, train=False, download=True, transform=transform)
+    cifar100_train_ds = CIFAR100_truncated(
+        datadir, train=True, download=True, transform=transform
+    )
+    cifar100_test_ds = CIFAR100_truncated(
+        datadir, train=False, download=True, transform=transform
+    )
 
     X_train, y_train = cifar100_train_ds.data, cifar100_train_ds.target
     X_test, y_test = cifar100_test_ds.data, cifar100_test_ds.target
@@ -63,9 +71,9 @@ def load_cifar100_data(datadir):
 
 
 def partition_data(dataset, datadir, partition, num_clients, beta):
-    if dataset == 'cifar10':
+    if dataset == "cifar10":
         X_train, y_train, X_test, y_test = load_cifar10_data(datadir)
-    elif dataset == 'cifar100':
+    elif dataset == "cifar100":
         X_train, y_train, X_test, y_test = load_cifar100_data(datadir)
 
     n_train = y_train.shape[0]
@@ -75,14 +83,13 @@ def partition_data(dataset, datadir, partition, num_clients, beta):
         batch_idxs = np.array_split(idxs, num_clients)
         net_dataidx_map = {i: batch_idxs[i] for i in range(num_clients)}
 
-
     elif partition == "noniid-labeldir" or partition == "noniid":
         min_size = 0
         min_require_size = 10
         K = 10
-        if dataset == 'cifar100':
+        if dataset == "cifar100":
             K = 100
-        elif dataset == 'tinyimagenet':
+        elif dataset == "tinyimagenet":
             K = 200
 
         N = y_train.shape[0]
@@ -94,10 +101,18 @@ def partition_data(dataset, datadir, partition, num_clients, beta):
                 idx_k = np.where(y_train == k)[0]
                 np.random.shuffle(idx_k)
                 proportions = np.random.dirichlet(np.repeat(beta, num_clients))
-                proportions = np.array([p * (len(idx_j) < N / num_clients) for p, idx_j in zip(proportions, idx_batch)])
+                proportions = np.array(
+                    [
+                        p * (len(idx_j) < N / num_clients)
+                        for p, idx_j in zip(proportions, idx_batch)
+                    ]
+                )
                 proportions = proportions / proportions.sum()
                 proportions = (np.cumsum(proportions) * len(idx_k)).astype(int)[:-1]
-                idx_batch = [idx_j + idx.tolist() for idx_j, idx in zip(idx_batch, np.split(idx_k, proportions))]
+                idx_batch = [
+                    idx_j + idx.tolist()
+                    for idx_j, idx in zip(idx_batch, np.split(idx_k, proportions))
+                ]
                 min_size = min([len(idx_j) for idx_j in idx_batch])
         for j in range(num_clients):
             np.random.shuffle(idx_batch[j])
