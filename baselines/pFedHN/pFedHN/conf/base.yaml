@@ -1,0 +1,19 @@
+---
+dataset:
+  # dataset config
+  data: "cifar10"
+  root: "./data"
+
+model:
+  # model config
+
+strategy:
+  _target_: strategy.pFedHN
+  # strategy config
+
+client:
+  # client config
+  num_rounds: 100
+  num_nodes: 5
+  batch_size: 64
+  num_classes_per_node: 2
