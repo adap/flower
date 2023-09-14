@@ -7,7 +7,6 @@ import numpy as np
 from omegaconf import DictConfig
 from torch import Tensor
 from torch import nn as nn
-from torch.nn import functional as F
 
 
 class ModelSplit(ABC, nn.Module):
