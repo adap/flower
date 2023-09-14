@@ -143,7 +143,7 @@ class SslClient(fl.client.NumPyClient):
         # for completion
         result = 0
        
-        return float(0), int(len(self.test_dataset)), {"accuracy": float(result)}
+        return float(0), int(1), {"accuracy": float(result)} # int(len(self.test_dataset)), 
 
 
 def _temp_get_parameters(model):

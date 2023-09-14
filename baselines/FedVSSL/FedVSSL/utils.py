@@ -12,7 +12,7 @@ import torch.nn as nn
 import torchvision
 from CtP.pyvrl.apis import train_network, get_root_logger, set_random_seed, test_network 
 from CtP.pyvrl.builder import build_model, build_dataset
-from CtP.tools import train_net as  train_model_cl
+
 # from CtP.tools import test_net as test_model_cl
 
 # import _init_paths
@@ -25,6 +25,24 @@ from mmcv import Config
 from mmcv.runner import init_dist
 from mmcv.utils import collect_env
 import pdb
+
+
+def init_p_paths(folder_name):
+    if os.path.basename(os.path.abspath(os.getcwd())) == f"{folder_name}":
+        # if require change the current working directory. The CtP folder is in the FedVSSL/FedVSSL. Therefore the current working directory 
+        # is required to be FedVSSL/FedVSSL
+        path_dir = os.getcwd()
+      
+        os.chdir(path_dir)
+        # if the CtP folder is outside the current working directory, the path could be the defined as below:
+        # os.chdir("..")
+       
+
+    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), f'{path_dir}'))
+    print(root_dir)
+    sys.path.insert(0, os.path.join(root_dir))
+
+
 
 def set_config_mmcv(args, cfg):
     
@@ -111,6 +129,7 @@ def load_test_data(args, cfg):
 
 def train_model_cl(model, train_dataset, args, cfg, distributed, logger):
     # model code
+    from CtP.pyvrl.apis import get_root_logger, set_random_seed, test_network , train_network
     train_network(model,
         train_dataset,
         cfg,
@@ -118,15 +137,5 @@ def train_model_cl(model, train_dataset, args, cfg, distributed, logger):
         logger=logger
     )
     
-# def test_model_cl(model, test_dataset, args, cfg, distributed, logger):
-#     result = test_network(model,
-#         test_dataset,
-#         cfg,
-#         args,
-#         distributed=distributed,
-#         logger=logger
-#     )
-#     return result
-
 
 

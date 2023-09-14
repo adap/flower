@@ -38,7 +38,7 @@ from flwr.common import (
     ndarrays_to_parameters,   # parameters_to_weights,
     parameters_to_ndarrays,   # weights_to_parameters,
 )
-import CtP.tools._init_paths
+# import CtP.tools._init_paths
 from strategy import FedVSSL
 from client import SslClient
 
@@ -50,7 +50,7 @@ def initial_setup(cid, base_work_dir, rounds, light=False):
     cid_plus_one = str(int(cid) + 1)
     args = Namespace(
         cfg='conf/mmcv_conf/r3d_18_ucf101/pretraining.py',
-        checkpoint=None, cid=int(cid), data_dir='/local/scratch/ucf101', gpus=1,
+        checkpoint=None, cid=int(cid), data_dir='/home/data1/data/ucf101', gpus=1,
         launcher='none',
         local_rank=0, progress=False, resume_from=None, rounds=6, seed=7, validate=False,
         work_dir=base_work_dir + '/client' + cid_plus_one)
@@ -58,7 +58,7 @@ def initial_setup(cid, base_work_dir, rounds, light=False):
     print("Starting client", args.cid)
     cfg = Config.fromfile(args.cfg)
     cfg.total_epochs = 1  ### Used for debugging. Comment to let config file set number of epochs
-    cfg.data.train.data_source.ann_file = 'non_iid/client_dist' + cid_plus_one + '.json'
+    cfg.data.train.data_source.ann_file = '/home/data1/data/ucf101/UCF_101_dummy/client_dist' + cid_plus_one + '.json'
 
     distributed, logger = utils.set_config_mmcv(args, cfg)
 
@@ -69,7 +69,8 @@ def initial_setup(cid, base_work_dir, rounds, light=False):
     train_dataset = utils.load_data(args, cfg)
 
     # load the test data
-    test_dataset = utils.load_test_data(args, cfg)
+    # test_dataset = utils.load_test_data(args, cfg)
+    test_dataset = " " 
 
     return args, cfg, distributed, logger, model, train_dataset, test_dataset, utils
 
@@ -82,9 +83,13 @@ def fit_config(rnd: int) -> Dict[str, str]:
 
 
 if __name__ == "__main__":
-    # train_flag = True
-    train_flag = False
+    train_flag = True
+    # train_flag = False
     if train_flag:
+        # first the paths needs to be defined otherwise the program may not be able to locate the files of the ctp
+        from utils import init_p_paths
+        init_p_paths("FedVSSL")
+
         pool_size = 2  # number of dataset partions (= number of total clients)
         client_resources = {"num_cpus": 2, "num_gpus": 1}  # each client will get allocated 1 CPUs
         # timestr = time.strftime("%Y%m%d_%H%M%S")
