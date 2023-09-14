@@ -5,8 +5,8 @@ Quickstart MXNet
 ================
 
 .. meta::
-   :description lang=en: Federated Learning quickstart tutorial for using Flower with MXNet to train a Sequential model on MNIST.
-   :description lang=fr: Tutoriel de Federated Learning pour utiliser Flower avec MXNet pour entrainer un modèle séquentiel sur MNIST.
+   :description lang=en: Check out this Federated Learning quickstart tutorial for using Flower with MXNet to train a Sequential model on MNIST.
+   :description lang=fr: Découvrez ce tutoriel de Federated Learning pour utiliser Flower avec MXNet pour entrainer un modèle séquentiel sur MNIST.
 
 In this tutorial, we will learn how to train a :code:`Sequential` model on MNIST using Flower and MXNet. 
 

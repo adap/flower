@@ -5,8 +5,8 @@ Quickstart JAX
 ==============
 
 .. meta::
-   :description lang=en: Federated Learning quickstart tutorial for using Flower with Jax to train a linear regression model on a scikit-learn dataset.
-   :description lang=fr: Tutoriel de Federated Learning pour utiliser Flower avec Jax pour entrainer un modèle de régression linéaire sur un dataset de scikit-learn.
+   :description lang=en: Check out this Federated Learning quickstart tutorial for using Flower with Jax to train a linear regression model on a scikit-learn dataset.
+   :description lang=fr: Découvrez ce tutoriel de Federated Learning pour utiliser Flower avec Jax pour entrainer un modèle de régression linéaire sur un dataset de scikit-learn.
 
 This tutorial will show you how to use Flower to build a federated version of an existing JAX workload.
 We are using JAX to train a linear regression model on a scikit-learn dataset.

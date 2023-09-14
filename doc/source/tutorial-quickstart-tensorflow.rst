@@ -5,8 +5,8 @@ Quickstart TensorFlow
 =====================
 
 .. meta::
-   :description lang=en: Federated Learning quickstart tutorial for using Flower with TensorFlow to train a MobilNetV2 model on CIFAR-10.
-   :description lang=fr: Tutoriel de Federated Learning pour utiliser Flower avec TensorFlow pour entrainer un MobilNet sur CIFAR-10.
+   :description lang=en: Check out this Federated Learning quickstart tutorial for using Flower with TensorFlow to train a MobilNetV2 model on CIFAR-10.
+   :description lang=fr: Découvrez ce tutoriel de Federated Learning pour utiliser Flower avec TensorFlow pour entrainer un MobilNet sur CIFAR-10.
 
 ..  youtube:: FGTc2TQq7VM
    :width: 100%

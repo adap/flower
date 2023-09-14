@@ -2,8 +2,8 @@ Flower Framework Documentation
 ==============================
 
 .. meta::
-   :description lang=en: Documentation of the main Flower Framework enabling easy Python development for Federated Learning.
-   :description lang=fr: Documentation du framework principal de Flower permettant de developper des apps de Federated Learning en utilisant Python.
+   :description lang=en: Check out the documentation of the main Flower Framework enabling easy Python development for Federated Learning.
+   :description lang=fr: Découvrez la documentation du framework principal de Flower permettant de developper des apps de Federated Learning en utilisant Python.
 
 Welcome to Flower's documentation. `Flower <https://flower.dev>`_ is a friendly federated learning framework.
 

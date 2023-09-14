@@ -5,8 +5,8 @@ Quickstart iOS
 ==============
 
 .. meta::
-   :description lang=en: Federated Learning quickstart tutorial for creating an iOS app using Flower to train a neural network on MNIST.
-   :description lang=fr: Tutoriel de Federated Learning pour créer une app iOS en utilisant Flower pour entrainer un réseau neurones sur MNIST.
+   :description lang=en: Read this Federated Learning quickstart tutorial for creating an iOS app using Flower to train a neural network on MNIST.
+   :description lang=fr: Lisez ce tutoriel de Federated Learning pour créer une app iOS en utilisant Flower pour entrainer un réseau neurones sur MNIST.
 
 In this tutorial we will learn how to train a Neural Network on MNIST using Flower and CoreML on iOS devices. 
 
