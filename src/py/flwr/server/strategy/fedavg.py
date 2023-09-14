@@ -72,7 +72,7 @@ class FedAvg(Strategy):
         initial_parameters: Optional[Parameters] = None,
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
-        inplace: bool = False,
+        inplace: bool = True,
     ) -> None:
         """Federated Averaging strategy.
 
@@ -109,7 +109,8 @@ class FedAvg(Strategy):
         evaluate_metrics_aggregation_fn : Optional[MetricsAggregationFn]
             Metrics aggregation function, optional.
         inplace: bool, optional
-            Whether or not to perform in-place aggregation. Defaults to False.
+            Whether or not to perform in-place aggregation. In-place aggregation
+            is more memory-efficient. Defaults to True.
         """
         super().__init__()
 

@@ -155,15 +155,15 @@ def test_inplace_aggregate_fit_equivalence() -> None:
             FitRes(
                 status=Status(code=Code.OK, message="Success"),
                 parameters=ndarrays_to_parameters([weights1_0, weights1_1]),
-                num_examples=2,
+                num_examples=5,
                 metrics={},
             ),
         ),
     ]
     failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]] = []
 
-    fedavg_reference = FedAvg()
-    fedavg_inplace = FedAvg(inplace=True)
+    fedavg_reference = FedAvg(inplace=False)
+    fedavg_inplace = FedAvg()
 
     # Execute
     reference, _ = fedavg_reference.aggregate_fit(1, results, failures)
@@ -177,4 +177,4 @@ def test_inplace_aggregate_fit_equivalence() -> None:
 
     # Assert
     for ref, inp in zip(reference_np, inplace_np):
-        assert_allclose(ref, inp)  # type: ignore
+        assert_allclose(ref, inp)
