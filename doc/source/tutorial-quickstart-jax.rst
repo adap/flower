@@ -4,6 +4,10 @@
 Quickstart JAX
 ==============
 
+.. meta::
+   :description lang=en: Federated Learning quickstart tutorial for using Flower with Jax to train a linear regression model on a scikit-learn dataset.
+   :description lang=fr: Tutoriel de Federated Learning pour utiliser Flower avec Jax pour entrainer un modèle de régression linéaire sur un dataset de scikit-learn.
+
 This tutorial will show you how to use Flower to build a federated version of an existing JAX workload.
 We are using JAX to train a linear regression model on a scikit-learn dataset.
 We will structure the example similar to our `PyTorch - From Centralized To Federated <https://github.com/adap/flower/blob/main/examples/pytorch-from-centralized-to-federated>`_ walkthrough.
