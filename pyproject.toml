@@ -64,7 +64,6 @@ grpcio = "^1.48.2,!=1.52.0"
 protobuf = "^3.19.0"
 cryptography = "^41.0.2"
 pycryptodome = "^3.18.0"
-importlib-metadata = { version = "^4.0.0", markers = "python_version < '3.8'" }
 iterators = "^0.0.2"
 # Optional dependencies (VCE)
 ray = { version = "==2.6.3", extras = ["default"], optional = true }
