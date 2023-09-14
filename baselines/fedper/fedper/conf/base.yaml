@@ -1,12 +1,12 @@
 ---
-num_clients: 2 # total number of clients
-num_epochs: 1 # number of local epochs
+num_clients: 10 # total number of clients
+num_epochs: 4 # number of local epochs
 batch_size: 128
-num_rounds: 2
+num_rounds: 50
 clients_per_round: 10
 learning_rate: 0.01
-algorithm: fedper
-model_name: resnet
+algorithm: fedavg
+model_name: mobile
 
 client_resources:
   num_cpus: 4
