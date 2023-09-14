@@ -1,18 +1,17 @@
 package dev.flower.android
 
 import android.os.Build
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Serializer
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
-import java.text.SimpleDateFormat
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.util.Date
 import java.util.UUID
 
 @Serializable
@@ -26,20 +25,10 @@ enum class Event {
     START_CLIENT_ENTER, START_CLIENT_LEAVE
 }
 
-@Serializer(forClass = Date::class)
-object DateSerializer : KSerializer<Date> {
-
-    private val df = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-
-    override val descriptor = PrimitiveSerialDescriptor("String", PrimitiveKind.STRING)
-    override fun serialize(encoder: Encoder, value: Date) = encoder.encodeString(df.format(value))
-    override fun deserialize(decoder: Decoder): Date = df.parse(decoder.decodeString())
-}
 @Serializable
 data class Context(val source: String,
                    val cluster: String,
-                   @Serializable(DateSerializer::class)
-                   val date: Date,
+                   val date: String,
                    val flower: Flower,
                    val hw: HW,
                    val platform: Platform)
@@ -68,29 +57,54 @@ data class Platform(val system: String,
                     val architecture: String,
                     val version: String)
 
-fun createEvent(event: Event) {
-   mapOf(
-        "context" to mapOf(
-            "source" to UUID.randomUUID(),
-            "cluster" to UUID.randomUUID().toString(),
-            "date" to LocalDateTime.now(ZoneOffset.UTC).toString(),
-            "flower" to mapOf(
-                "package_name" to "flwr",
-                "package_version" to "1.5.0",
-            ),
-            "hw" to mapOf(
-                "cpu_count" to Runtime.getRuntime().availableProcessors(),
-            ),
-            "platform" to mapOf(
-                "system" to Build.VERSION.CODENAME,
-                "release" to System.getProperty("os.version"),
-                "platform" to System.getProperty("os.name").toLowerCase(),
-                "python_implementation" to System.getProperty("python.version_info.implementation"),
-                "python_version" to System.getProperty("python.version"),
-                "machine" to System.getProperty("os.arch"),
-                "architecture" to System.getProperty("os.arch.data"),
-                "version" to System.getProperty("os.version"),
-            ),
-        ),
+fun getSourceId(homeDir: File): UUID {
+    val flwrFile = File(homeDir, ".flwr")
+    if (flwrFile.exists()) {
+        return UUID.fromString(flwrFile.readText().trim())
+    } else {
+        val uuid = UUID.randomUUID()
+        flwrFile.createNewFile()
+        flwrFile.writeText(uuid.toString())
+        return uuid
+    }
+}
+
+fun createEventContext(homeDir: File): Context {
+    val date = LocalDateTime.now(ZoneOffset.UTC).toString()
+    val version = "0.0.2"
+    val hw = HW(Runtime.getRuntime().availableProcessors().toString())
+    val platform = Platform(
+        "Android",
+        Build.VERSION.RELEASE.toString(),
+        Build.FINGERPRINT.toString(),
+        "",
+        "",
+        Build.VERSION.SDK_INT.toString(),
+        Build.SUPPORTED_ABIS[0].toString(),
+        "",
+        ""
     )
+    val flower = Flower("flwr", version)
+
+    return Context(getSourceId(homeDir).toString(), UUID.randomUUID().toString(), date, flower, hw, platform)
+}
+
+
+fun createEvent(event: Event, eventDetails: Map<String, String>, context: android.content.Context) {
+    val homeDir = context.getExternalFilesDir(null)
+    val JSON = "application/json; charset=utf-8".toMediaType()
+    val payload = homeDir?.let { createEventContext(it) }?.let { Payload(event, eventDetails, it) }
+    val json = Json.encodeToString(payload)
+    val url = "https://telemetry.flower.dev/api/v1/event"
+    val client = OkHttpClient()
+
+    val body = json.toRequestBody(JSON);
+    val request = Request.Builder()
+        .url(url)
+        .post(body)
+        .build();
+
+    client.newCall(request).execute().use { response ->
+        println(response.body?.string())
+    }
 }

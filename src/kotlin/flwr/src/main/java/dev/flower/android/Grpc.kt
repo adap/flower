@@ -1,5 +1,6 @@
 package dev.flower.android
 
+import android.content.Context
 import flwr.proto.FleetGrpc
 import flwr.proto.FleetOuterClass.CreateNodeRequest
 import flwr.proto.FleetOuterClass.CreateNodeResponse
@@ -8,26 +9,27 @@ import flwr.proto.FleetOuterClass.DeleteNodeResponse
 import flwr.proto.FleetOuterClass.PullTaskInsRequest
 import flwr.proto.FleetOuterClass.PullTaskInsResponse
 import flwr.proto.FleetOuterClass.PushTaskResRequest
-import io.grpc.ManagedChannel
-import io.grpc.ManagedChannelBuilder
-import io.grpc.stub.StreamObserver
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import java.util.concurrent.CountDownLatch
 import flwr.proto.FlowerServiceGrpc
 import flwr.proto.NodeOuterClass.Node
 import flwr.proto.TaskOuterClass.TaskIns
 import flwr.proto.TaskOuterClass.TaskRes
 import flwr.proto.Transport.ServerMessage
+import io.grpc.ManagedChannel
+import io.grpc.ManagedChannelBuilder
+import io.grpc.stub.StreamObserver
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.withContext
+import java.util.concurrent.CountDownLatch
 
 internal class FlowerGrpc
 @Throws constructor(
     channel: ManagedChannel,
     private val client: Client,
+    context: Context? = null
 ) {
     private val finishLatch = CountDownLatch(1)
 
@@ -48,6 +50,7 @@ internal class FlowerGrpc
         }
 
         override fun onCompleted() {
+            context?.let { createEvent(Event.START_CLIENT_LEAVE, emptyMap(), it) }
             finishLatch.countDown()
         }
     })!!
@@ -70,8 +73,10 @@ suspend fun startClient(
     serverAddress: String,
     useTls: Boolean,
     client: Client,
+    context: Context? = null
 ) {
-    FlowerGrpc(createChannel(serverAddress, useTls), client)
+    context?.let { createEvent(Event.START_CLIENT_ENTER, emptyMap(), it) }
+    FlowerGrpc(createChannel(serverAddress, useTls), client, context)
 }
 
 internal suspend fun createChannel(address: String, useTLS: Boolean = false): ManagedChannel {
@@ -231,6 +236,8 @@ suspend fun createFlowerRere(
     serverAddress: String,
     useTLS: Boolean,
     client: Client,
+    context: Context? = null
 ) {
+    context?.let { createEvent(Event.START_CLIENT_ENTER, emptyMap(), it) }
     FlwrRere(createChannel(serverAddress, useTLS), client)
 }

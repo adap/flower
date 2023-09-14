@@ -18,6 +18,7 @@ android {
         }
         minSdk = 28
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        version = "0.0.2"
     }
 
     buildTypes {
