@@ -1,5 +1,9 @@
 package dev.flower.android
 
+import android.content.Context.BATTERY_SERVICE
+import android.content.Context.CONNECTIVITY_SERVICE
+import android.net.ConnectivityManager
+import android.os.BatteryManager
 import android.os.Build
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -41,7 +45,11 @@ data class Flower(@SerialName("package_name")
 
 @Serializable
 data class HW(@SerialName("cpu_count")
-              val cpuCount: String)
+              val cpuCount: String,
+              @SerialName("network_connection_type")
+              val networkConnectionType: String,
+              @SerialName("battery_level")
+              val batteryLevel: String)
 
 @Serializable
 data class Platform(val system: String,
@@ -69,10 +77,16 @@ fun getSourceId(homeDir: File): UUID {
     }
 }
 
-fun createEventContext(homeDir: File): Context {
+fun createEventContext(homeDir: File, context: android.content.Context): Context {
     val date = LocalDateTime.now(ZoneOffset.UTC).toString()
     val version = "0.0.2"
-    val hw = HW(Runtime.getRuntime().availableProcessors().toString())
+    val batteryManager = context.getSystemService(BATTERY_SERVICE) as BatteryManager
+    val connectivityManager = context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+
+    val hw = HW(
+        Runtime.getRuntime().availableProcessors().toString(),
+        connectivityManager.activeNetwork.toString(),
+        batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY).toString())
     val platform = Platform(
         "Android",
         Build.VERSION.RELEASE.toString(),
@@ -93,7 +107,7 @@ fun createEventContext(homeDir: File): Context {
 fun createEvent(event: Event, eventDetails: Map<String, String>, context: android.content.Context) {
     val homeDir = context.getExternalFilesDir(null)
     val JSON = "application/json; charset=utf-8".toMediaType()
-    val payload = homeDir?.let { createEventContext(it) }?.let { Payload(event, eventDetails, it) }
+    val payload = homeDir?.let { createEventContext(it, context) }?.let { Payload(event, eventDetails, it) }
     val json = Json.encodeToString(payload)
     val url = "https://telemetry.flower.dev/api/v1/event"
     val client = OkHttpClient()
