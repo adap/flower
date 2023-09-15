@@ -1,15 +1,39 @@
+"""Client Handling."""
+
 from collections import OrderedDict
-from typing import Dict, Tuple
 
 import flwr as fl
 import torch
-from flwr.common import NDArrays, Scalar
 
 from pFedHN.models import CNNTarget
 from pFedHN.trainer import train
 
 
 class FlowerClient(fl.client.NumPyClient):
+    """Flower client for federated learning.
+
+    ---------------------------------------.
+
+    Args:
+        cid (str): The client ID.
+        trainloader (torch.utils.data.DataLoader): DataLoader for training data.
+        testloader (torch.utils.data.DataLoader): DataLoader for test data.
+        cfg (Config): Hydra Configuration.
+
+    Attributes
+    ----------
+        cid (str): The client ID.
+        trainloader (torch.utils.data.DataLoader): DataLoader for training data.
+        testloader (torch.utils.data.DataLoader): DataLoader for test data.
+        device (torch.device): The device to run the model on.
+        epochs (int): Number of training epochs.
+        n_kernels (int): Number of convolutional kernels.
+        lr (float): Learning rate.
+        wd (float): Weight decay.
+        net (CNNTarget): Target neural network model.
+    ---------------------------------------
+    """
+
     def __init__(self, cid, trainloader, testloader, cfg) -> None:
         super().__init__()
 
@@ -28,20 +52,53 @@ class FlowerClient(fl.client.NumPyClient):
         )
 
     def set_parameters(self, parameters):
-        """Setting the target network parameters using the parameters from the
-        server."""
+        """Set the target network parameters using the parameters from the server.
 
+        ----------------------------------------------------------------------.
+
+        Args:
+            parameters (list): List of parameter values.
+
+        Returns
+        -------
+            OrderedDict: The inner_state_dict of the target network.
+        ----------------------------------------------------------------------
+        """
         params_dict = zip(self.net.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         self.net.load_state_dict(state_dict, strict=True)
         return state_dict
 
     def get_parameters(self, config):
-        """Getting the target network parameters and sending them to the server."""
+        """Get the target network parameters and send them to the server.
 
+        ----------------------------------------------------------------------.
+
+        Args:
+            config (Parameter): Delta Theta.
+
+        Returns
+        -------
+            list: List of parameter values.
+        ----------------------------------------------------------------------
+        """
         return [val.cpu().numpy() for _, val in config.items()]
 
     def fit(self, parameters, config):
+        """Perform federated training on the client.
+
+        ----------------------------------------------------------------------.
+
+        Args:
+            parameters (list): List of parameter values.
+            config (dict): Configuration dictionary.
+
+        Returns
+        -------
+            tuple: A tuple containing delta theta (parameter updates),
+                   the number of training samples, and metrics
+        ----------------------------------------------------------------------
+        """
         inner_state = self.set_parameters(parameters)
 
         train(
@@ -66,7 +123,20 @@ class FlowerClient(fl.client.NumPyClient):
 
 
 def generate_client_fn(trainloaders, testloaders, config):
-    """Generate a function which returns a new FlowerClient."""
+    """Generate a function which returns a new FlowerClient.
+
+    -------------------------------------------------------.
+
+    Args:
+        trainloaders (list): List of DataLoader objects for training data.
+        testloaders (list): List of DataLoader objects for test data.
+        config (Config): Hydra Configuration.
+
+    Returns
+    -------
+        function: A function that creates a new FlowerClient instance.
+    -------------------------------------------------------
+    """
 
     def client_fn(cid: str):
         return FlowerClient(cid, trainloaders, testloaders, config)
