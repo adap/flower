@@ -1,13 +1,13 @@
 import unittest
 
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
 from datasets.utils.logging import disable_progress_bar
 from parameterized import parameterized_class, parameterized
-import torch
-import torch.nn.functional as F
 from torch import Tensor
 from torch.utils.data import DataLoader
-import torch.nn as nn
-import torch.optim as optim
 from torchvision.transforms import Compose, ToTensor, Normalize
 
 from flwr_datasets import FederatedDataset
