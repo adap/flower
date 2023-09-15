@@ -19,6 +19,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 from datasets import Dataset
+from flwr_datasets.telemetry import EventType, event
 
 
 class Partitioner(ABC):
@@ -30,6 +31,10 @@ class Partitioner(ABC):
 
     def __init__(self) -> None:
         self._dataset: Optional[Dataset] = None
+        event(
+            EventType.PARTITIONER_CREATE,
+            {"class_name": self.__class__.__name__, "id": id(self)},
+        )
 
     @property
     def dataset(self) -> Dataset:
