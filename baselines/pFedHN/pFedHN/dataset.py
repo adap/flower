@@ -11,11 +11,11 @@ from torchvision.datasets import CIFAR10, CIFAR100, MNIST
 
 
 def get_datasets(data_name, dataroot, normalize=True, val_size=10000):
-    """get_datasets returns train/val/test data splits of MNIST/CIFAR10/100
-    datasets :param data_name: name of dataset, choose from [mnist,cifar10,
-    cifar100] :param dataroot: root to data dir :param normalize: True/False to
-    normalize the data :param val_size: validation split size (in #samples)
-    :return: train_set, val_set, test_set (tuple of pytorch dataset/subset)"""
+    """get_datasets returns train/val/test data splits of MNIST/CIFAR10/100 datasets
+    :param data_name: name of dataset, choose from [mnist,cifar10, cifar100] :param
+    dataroot: root to data dir :param normalize: True/False to normalize the data :param
+    val_size: validation split size (in #samples) :return: train_set, val_set, test_set
+    (tuple of pytorch dataset/subset)"""
 
     if data_name == "cifar10":
         normalization = transforms.Normalize(
@@ -54,9 +54,8 @@ def get_datasets(data_name, dataroot, normalize=True, val_size=10000):
 
 
 def get_num_classes_samples(dataset):
-    """Extracts info about certain dataset :param dataset: pytorch dataset
-    object :return: dataset info number of classes, number of samples, list of
-    labels."""
+    """Extracts info about certain dataset :param dataset: pytorch dataset object
+    :return: dataset info number of classes, number of samples, list of labels."""
     # ---------------#
     # Extract labels #
     # ---------------#
@@ -78,14 +77,14 @@ def get_num_classes_samples(dataset):
 def gen_classes_per_node(
     dataset, num_users, classes_per_user=2, high_prob=0.6, low_prob=0.4
 ):
-    """Creates the data distribution of each client :param dataset: pytorch
-    dataset object :param num_users: number of clients :param classes_per_user:
+    """Creates the data distribution of each client :param dataset: pytorch dataset
+    object :param num_users: number of clients :param classes_per_user:
 
     number of classes assigned to each client
     :param high_prob: highest prob sampled
     :param low_prob: lowest prob sampled
-    :return: dictionary mapping between classes and proportions, each
-        entry refers to other client.
+    :return: dictionary mapping between classes and proportions, each entry refers to
+        other client.
     """
     num_classes, num_samples, _ = get_num_classes_samples(dataset)
 
@@ -152,10 +151,10 @@ def gen_data_split(dataset, num_users, class_partitions):
 
 
 def gen_random_loaders(data_name, data_path, num_users, bz, classes_per_user):
-    """Generates train/val/test loaders of each client :param data_name: name
-    of dataset, choose from [mnsit,cifar10, cifar100] :param data_path: root
-    path for data dir :param num_users: number of clients :param bz: batch size
-    :param classes_per_user: number of classes assigned to each client :return:
+    """Generates train/val/test loaders of each client :param data_name: name of
+    dataset, choose from [mnsit,cifar10, cifar100] :param data_path: root path for data
+    dir :param num_users: number of clients :param bz: batch size :param
+    classes_per_user: number of classes assigned to each client :return:
 
     train/val/test loaders of each client, list of pytorch dataloaders.
     """

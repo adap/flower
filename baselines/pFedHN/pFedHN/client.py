@@ -37,8 +37,7 @@ class FlowerClient(fl.client.NumPyClient):
         return state_dict
 
     def get_parameters(self, config):
-        """Getting the target network parameters and sending them to the
-        server."""
+        """Getting the target network parameters and sending them to the server."""
 
         return [val.cpu().numpy() for _, val in config.items()]
 
