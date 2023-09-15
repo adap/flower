@@ -34,7 +34,7 @@ hyperparams:
 
 strategy:
   _target_: fedexp.strategy.FedExP
-  algorithm: fedexp
+  algorithm: FedExP
   fraction_fit: 0.00001
   fraction_evaluate: 0.0
   min_evaluate_clients: 0

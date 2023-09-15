@@ -46,15 +46,17 @@ class FedExP(FedAvg):
         if not self.accept_failures and failures:
             return None, {}
         # Aggregate results
+        self.epsilon *= self.decay ** 2
         grad_sum = sum([res.metrics["grad_p"] for _, res in results])
-        p_sum = sum([res.metrics["p"] for _, res in results])
+        p_sum = sum([res.metrics["data_ratio"] for _, res in results])
         grad_norm_sum = sum([res.metrics["grad_norm"] for _, res in results])
         clients_per_round = len(results) + len(failures)
         with torch.no_grad():
             grad_avg = grad_sum / p_sum
             grad_avg_norm = torch.linalg.norm(grad_avg) ** 2
             grad_norm_avg = grad_norm_sum / p_sum
-            if self.algorithm == "fedexp":
+
+            if self.algorithm.lower() == "fedexp":
                 eta_g = max(
                     1,
                     (
@@ -63,8 +65,11 @@ class FedExP(FedAvg):
                         / (grad_avg_norm + clients_per_round * self.epsilon).cpu()
                     ).item(),
                 )
-            else:
+            elif self.algorithm.lower() == "fedavg":
                 eta_g = 1
+            else:
+                raise NotImplementedError(f"Algorithm {self.algorithm} not implemented.")
+
             w_vec_prev = self.w_vec_estimate
             self.w_vec_estimate = (
                 parameters_to_vector(self.net_glob.parameters()) + eta_g * grad_avg
@@ -74,6 +79,10 @@ class FedExP(FedAvg):
                 if server_round == 0
                 else (self.w_vec_estimate + w_vec_prev) / 2
             )
-            vector_to_parameters(w_vec_avg, self.net_glob.parameters())
-            self.epsilon *= self.decay**2
+
+            if self.algorithm.lower() == "fedexp":
+                vector_to_parameters(w_vec_avg, self.net_glob.parameters())
+            elif self.algorithm.lower() == "fedavg":
+                vector_to_parameters(self.w_vec_estimate, self.net_glob.parameters())
+
         return ndarrays_to_parameters(get_parameters(self.net_glob)), {"eta_g": eta_g}

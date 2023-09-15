@@ -22,18 +22,18 @@ class FlowerClient(fl.client.NumPyClient):
         self,
         cid: int,
         net: torch.nn.Module,
-        trainloader: DataLoader,
-        device: torch.device,
+        train_loader: DataLoader,
+        device: str,
         num_epochs: int,
-        p,
-    ):
+        data_ratio,
+    ):  # pylint: disable=too-many-arguments
         print(f"Initializing Client {cid}")
         self.cid = cid
         self.net = net
-        self.trainloader = trainloader
-        self.device = device
+        self.train_loader = train_loader
+        self.device = torch.device(device)
         self.num_epochs = num_epochs
-        self.p = p
+        self.data_ratio = data_ratio
 
     def _set_parameters(self, parameters: NDArrays) -> None:
         params_dict = zip(self.net.state_dict().keys(), parameters)
@@ -47,25 +47,28 @@ class FlowerClient(fl.client.NumPyClient):
         self._set_parameters(parameters)
         print(f"Client {self.cid} Training...")
         prev_net = copy.deepcopy(self.net)
+
         train(
             self.net,
-            self.trainloader,
+            self.train_loader,
             self.device,
             epochs=self.num_epochs,
             hyperparams=config,
         )
+
         with torch.no_grad():
             vec_curr = parameters_to_vector(self.net.parameters())
             vec_prev = parameters_to_vector(prev_net.parameters())
             params_delta_vec = vec_curr - vec_prev
             grad = params_delta_vec
-            grad_p = self.p * grad
-            grad_norm = self.p * torch.linalg.norm(grad) ** 2
+            grad_p = self.data_ratio * grad
+            grad_norm = self.data_ratio * torch.linalg.norm(grad) ** 2
+
         return (
             [],
-            len(self.trainloader),
+            len(self.train_loader),
             {
-                "p": self.p,
+                "data_ratio": self.data_ratio,
                 "grad_p": grad_p.to("cpu"),
                 "grad_norm": grad_norm.to("cpu"),
             },
@@ -73,7 +76,7 @@ class FlowerClient(fl.client.NumPyClient):
 
 
 def gen_client_fn(
-    trainloaders: List[DataLoader],
+    train_loaders: List[DataLoader],
     model: DictConfig,
     num_epochs: int,
     args: Dict,
@@ -82,18 +85,14 @@ def gen_client_fn(
 
     def client_fn(cid: str) -> FlowerClient:
         """Create a new FlowerClient for a given cid."""
-        device = args["device"]
-        net = instantiate(model).to(device)
-        trainloader = trainloaders[int(cid)]
-        p = args["p"][int(cid)]
 
         return FlowerClient(
             cid=int(cid),
-            net=net,
-            trainloader=trainloader,
-            device=device,
+            net=instantiate(model).to(args["device"]),
+            train_loader=train_loaders[int(cid)],
+            device=args["device"],
             num_epochs=num_epochs,
-            p=p,
+            data_ratio=args["data_ratio"][int(cid)],
         )
 
     return client_fn

@@ -38,8 +38,8 @@ def gen_evaluate_fn(
     """
 
     def evaluate(
-        server_round: int, parameters_ndarrays: NDArrays, config: Dict[str, Scalar]
-    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+        _, parameters_ndarrays: NDArrays, __
+    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:  # pylint: disable=unused-argument
         """Use the entire CIFAR-10/100 test set for evaluation."""
         net = instantiate(model)
         params_dict = zip(net.state_dict().keys(), parameters_ndarrays)

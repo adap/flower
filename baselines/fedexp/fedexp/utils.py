@@ -9,13 +9,15 @@ import numpy as np
 import torch
 from flwr.common import NDArrays
 from flwr.server import History
+from omegaconf import DictConfig
 from torch.nn import Module
 
 
 def plot_metric_from_history(
     hist: History,
-    save_plot_path: Path,
+    save_plot_path: str,
     suffix: Optional[str] = "",
+    cfg: Optional[DictConfig] = None,
 ) -> None:
     """Plot the metrics from the history of the server.
 
@@ -23,10 +25,12 @@ def plot_metric_from_history(
     ----------
     hist : History
         Object containing evaluation for all rounds.
-    save_plot_path : Path
+    save_plot_path : str
         Folder to save the plot to.
     suffix: Optional[str]
         Optional string to add at the end of the filename for the plot.
+    cfg : Optional[DictConfig]
+        Optional dictionary containing the configuration of the experiment.
     """
     metric_type = "centralized"
     metric_dict = (
@@ -35,11 +39,14 @@ def plot_metric_from_history(
         else hist.metrics_distributed
     )
     rounds, values_accuracy = zip(*metric_dict["accuracy"])
-    fig, ax = plt.subplots()
-    ax.plot(np.asarray(rounds), np.asarray(values_accuracy))
-    ax.set_ylabel("Accuracy")
-    ax.set_xlabel("Rounds")
-    plt.savefig(Path(save_plot_path) / Path(f"{metric_type}_metrics{suffix}.png"))
+    _, axs = plt.subplots()
+    # Set the title
+    axs.set_title(f"{cfg.strategy.alogrithm} | {cfg.dataset_config.name} | Seed {cfg.seed}")
+    axs.plot(np.asarray(rounds), np.asarray(values_accuracy))
+    axs.set_ylabel("Accuracy")
+    axs.set_xlabel("Rounds")
+    fig_name = "_".join([metric_type, "metrics", suffix]) + ".png"
+    plt.savefig(Path(save_plot_path) / Path(fig_name))
     plt.close()
 
 

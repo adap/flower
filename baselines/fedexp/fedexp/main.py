@@ -25,27 +25,27 @@ def main(cfg: DictConfig) -> None:
 
     seed_everything(cfg.seed)
 
-    trainloaders, testloader = load_datasets(
+    train_loaders, test_loader = load_datasets(
         config=cfg.dataset_config,
         num_clients=cfg.num_clients,
         batch_size=cfg.batch_size,
         partition_equal=True,
     )
 
-    p = np.zeros(cfg.num_clients)
+    data_ratios = np.zeros(cfg.num_clients)
     for i in range(cfg.num_clients):
-        p[i] = len(trainloaders[i])
-    p /= np.sum(p)
+        data_ratios[i] = len(train_loaders[i])
+    data_ratios /= np.sum(data_ratios)
 
     client_fn = client.gen_client_fn(
-        trainloaders=trainloaders,
+        train_loaders=train_loaders,
         model=cfg.model,
         num_epochs=cfg.num_epochs,
-        args={"p": p, "device": cfg.client_device},
+        args={"data_ratio": data_ratios, "device": cfg.client_device},
     )
 
     evaluate_fn = server.gen_evaluate_fn(
-        test_loader=testloader, model=cfg.model, device=cfg.server_device
+        test_loader=test_loader, model=cfg.model, device=cfg.server_device
     )
 
     def get_on_fit_config():
@@ -95,7 +95,7 @@ def main(cfg: DictConfig) -> None:
     )
 
     utils.plot_metric_from_history(
-        hist=history, save_plot_path=save_path, suffix=file_suffix
+        hist=history, save_plot_path=save_path, suffix=file_suffix, cfg=cfg
     )
 
 
