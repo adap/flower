@@ -5,8 +5,7 @@ Quickstart scikit-learn
 =======================
 
 .. meta::
-   :description lang=en: Check out this Federated Learning quickstart tutorial for using Flower with scikit-learn to train a linear regression model.
-   :description lang=fr: Découvrez ce tutoriel de Federated Learning pour utiliser Flower avec scikit-learn pour entrainer un modèle de régression linéaire.
+   :description: Check out this Federated Learning quickstart tutorial for using Flower with scikit-learn to train a linear regression model.
 
 In this tutorial, we will learn how to train a :code:`Logistic Regression` model on MNIST using Flower and scikit-learn. 
 

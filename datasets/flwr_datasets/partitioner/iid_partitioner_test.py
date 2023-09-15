@@ -56,8 +56,8 @@ class TestIidPartitioner(unittest.TestCase):
         Only the correct data is tested in this method.
 
         In case the dataset is dividable among `num_partitions` the size of each
-        partition should be the same. This checks if the randomly chosen partition
-        has size as expected.
+        partition should be the same. This checks if the randomly chosen partition has
+        size as expected.
         """
         _, partitioner = _dummy_setup(num_partitions, num_rows)
         partition_size = num_rows // num_partitions
