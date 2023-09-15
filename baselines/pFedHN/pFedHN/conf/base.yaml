@@ -6,6 +6,14 @@ dataset:
 
 model:
   # model config
+  device: "cpu"
+  n_kernels: 16
+  inner_lr: 5e-3
+  wd: 5e-5
+  lr: 1e-2
+  in_channels: 3
+  out_dim: 10
+
 
 strategy:
   _target_: strategy.pFedHN
@@ -13,7 +21,8 @@ strategy:
 
 client:
   # client config
-  num_rounds: 100
-  num_nodes: 5
+  num_epochs: 50
+  num_rounds: 5000
+  num_nodes: 50
   batch_size: 64
   num_classes_per_node: 2
