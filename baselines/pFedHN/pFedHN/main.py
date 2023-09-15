@@ -1,9 +1,10 @@
 import flwr as fl
 import hydra
-from client import generate_client_fn
-from dataset import gen_random_loaders
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
+
+from pFedHN.client import generate_client_fn
+from pFedHN.dataset import gen_random_loaders
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)

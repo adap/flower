@@ -4,8 +4,9 @@ from typing import Dict, Tuple
 import flwr as fl
 import torch
 from flwr.common import NDArrays, Scalar
-from models import CNNTarget
-from trainer import train
+
+from pFedHN.models import CNNTarget
+from pFedHN.trainer import train
 
 
 class FlowerClient(fl.client.NumPyClient):

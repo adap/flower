@@ -17,7 +17,8 @@ from flwr.common import (
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
-from models import CNNHyper
+
+from pFedHN.models import CNNHyper
 
 
 class pFedHN(FedAvg):
