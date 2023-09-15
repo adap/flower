@@ -35,7 +35,7 @@ dataset: [MNIST, CIFAR10, CIFAR100] # list of datasets you include in your basel
 **Dataset:** This baseline includes the MNIST, CIFAR10 , CIFAR100 datasets. By default it will be partitioned into 50 clients following IID distribution. The settings are as follow:
 
 | Dataset | #classes | partitioning method |
-| :------ | :---: | :---: | :---: |
+| :------ | :---: | :---: |
 | MNIST | 10 | IID |
 | CIFAR10 | 10 | IID |
 | CIFAR10 | 100 | IID |
