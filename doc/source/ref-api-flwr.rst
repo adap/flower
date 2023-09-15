@@ -51,6 +51,24 @@ start_simulation
 .. autofunction:: flwr.simulation.start_simulation
 
 
+.. _flwr-client-ClientState-apiref:
+
+ClientState
+~~~~~~~~~~~
+
+.. autoclass:: flwr.client.ClientState
+    :members:
+
+
+.. _flwr-client-WorkloadState-apiref:
+
+WorkloadState
+~~~~~~~~~~~
+
+.. autoclass:: flwr.client.WorkloadState
+    :members:
+
+
 .. _flwr-server-apiref:
 
 server

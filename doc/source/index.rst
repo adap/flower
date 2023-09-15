@@ -81,6 +81,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
 
    how-to-install-flower
    how-to-configure-clients
+   how-to-use-stateful-clients
    how-to-use-strategies
    how-to-implement-strategies
    how-to-aggregate-evaluation-results

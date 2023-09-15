@@ -37,12 +37,13 @@ class WorkloadState:
 class ClientState:
     """Client state."""
 
+    cid: Optional[str] = None
     workload_states: Dict[str, WorkloadState] = field(default_factory=dict)
 
-    def register_workload(self, workload_id: str, cid: Optional[str] = None) -> None:
+    def register_workload(self, workload_id: str) -> None:
         """Register a new WorkloadState for a client if it does not exist."""
         if workload_id not in self.workload_states:
-            self.workload_states[workload_id] = WorkloadState(cid, workload_id)
+            self.workload_states[workload_id] = WorkloadState(self.cid, workload_id)
 
     def __getitem__(self, workload_id: str) -> WorkloadState:
         """Get client's state for a particular workload."""

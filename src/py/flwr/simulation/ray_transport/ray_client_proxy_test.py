@@ -98,8 +98,8 @@ def prep(
         # The VCE still doesn't support multiple workloads, we therefore
         # assign the same `workload_id` (i.e. "sim") to all of them.
         # This identifier is used so this is future-ready.
-        client_states[cid] = ClientState()
-        client_states[cid].register_workload(workload_id=WORKLOAD_ID, cid=cid)
+        client_states[cid] = ClientState(cid=cid)
+        client_states[cid].register_workload(workload_id=WORKLOAD_ID)
 
     # Create actor pool
     ray.init(include_dashboard=False)
