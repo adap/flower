@@ -18,19 +18,26 @@
 import sys
 import threading
 import time
+import timeit
 from logging import INFO
-from typing import Dict, Optional
+from typing import Dict, Optional, List
+from dataclasses import dataclass
 
 from flwr.common import EventType, event
 from flwr.common.address import parse_address
 from flwr.common.logger import log
-from flwr.proto import driver_pb2
-from flwr.server.app import ServerConfig, init_defaults, run_fl
-from flwr.server.client_manager import ClientManager
+from flwr.common.typing import Parameters
+from flwr.proto.driver_pb2 import CreateWorkloadRequest, GetNodesRequest, PushTaskInsRequest, PushTaskInsResponse, PullTaskResRequest, PullTaskResResponse
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
+from flwr.proto.node_pb2 import Node
+from flwr.server.app import ServerConfig, run_fl
+from flwr.server.client_manager import ClientManager, SimpleClientManager
+from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.server import Server
-from flwr.server.strategy import Strategy
+from flwr.server.strategy import FedAvg, Strategy
 
+from .workflow.workflow_factory import FlowerWorkflowFactory, FLWorkflowFactory, WorkflowState
 from .driver import Driver
 from .driver_client_proxy import DriverClientProxy
 
@@ -43,15 +50,26 @@ Call `connect()` on the `Driver` instance before calling any of the other `Drive
 methods.
 """
 
+@dataclass
+class DriverConfig:
+    """Flower driver config.
+
+    All attributes have default values which allows users to configure just the ones
+    they care about.
+    """
+
+    num_rounds: int = 1
+    round_timeout: Optional[float] = None
+
 
 def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     *,
     server_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
-    server: Optional[Server] = None,
-    config: Optional[ServerConfig] = None,
+    config: Optional[DriverConfig] = None,
     strategy: Optional[Strategy] = None,
     client_manager: Optional[ClientManager] = None,
     certificates: Optional[bytes] = None,
+    fl_workflow_factory: Optional[FlowerWorkflowFactory] = None,
 ) -> History:
     """Start a Flower Driver API server.
 
@@ -64,7 +82,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         A server implementation, either `flwr.server.Server` or a subclass
         thereof. If no instance is provided, then `start_driver` will create
         one.
-    config : Optional[ServerConfig] (default: None)
+    config : Optional[DriverConfig] (default: None)
         Currently supported values are `num_rounds` (int, default: 1) and
         `round_timeout` in seconds (float, default: None).
     strategy : Optional[flwr.server.Strategy] (default: None).
@@ -116,17 +134,26 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     driver.connect()
     lock = threading.Lock()
 
-    # Initialize the Driver API server and config
-    initialized_server, initialized_config = init_defaults(
-        server=server,
-        config=config,
+    # Initialization
+    hist = History()
+    if client_manager is None:
+        client_manager = SimpleClientManager()
+    if strategy is None:
+        strategy = FedAvg()
+    if config is None:
+        config = DriverConfig()
+    workflow_state = WorkflowState(
+        num_rounds=config.num_rounds,
+        current_round=0, # This field will be set inside the workflow
         strategy=strategy,
+        parameters=Parameters(), # This field will be set inside the workflow,
         client_manager=client_manager,
+        history=hist,
     )
     log(
         INFO,
-        "Starting Flower server, config: %s",
-        initialized_config,
+        "Starting Flower driver, config: %s",
+        config,
     )
 
     # Start the thread updating nodes
@@ -134,18 +161,15 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         target=update_client_manager,
         args=(
             driver,
-            initialized_server.client_manager(),
+            client_manager,
             lock,
         ),
     )
     thread.start()
 
     # Start training
-    hist = run_fl(
-        server=initialized_server,
-        config=initialized_config,
-    )
-
+    
+    
     # Stop the Driver API server and the thread
     with lock:
         driver.disconnect()
@@ -172,7 +196,7 @@ def update_client_manager(
     `client_manager.unregister()`.
     """
     # Request for workload_id
-    workload_id = driver.create_workload(driver_pb2.CreateWorkloadRequest()).workload_id
+    workload_id = driver.create_workload(CreateWorkloadRequest()).workload_id
 
     # Loop until the driver is disconnected
     registered_nodes: Dict[int, DriverClientProxy] = {}
@@ -182,7 +206,7 @@ def update_client_manager(
             if driver.stub is None:
                 break
             get_nodes_res = driver.get_nodes(
-                req=driver_pb2.GetNodesRequest(workload_id=workload_id)
+                req=GetNodesRequest(workload_id=workload_id)
             )
         all_node_ids = {node.node_id for node in get_nodes_res.nodes}
         dead_nodes = set(registered_nodes).difference(all_node_ids)
@@ -209,3 +233,48 @@ def update_client_manager(
 
         # Sleep for 3 seconds
         time.sleep(3)
+
+  
+def fetch_responses(
+    driver: Driver,
+    instructions: Dict[ClientProxy, Task],
+    timeout: float,
+) -> Dict[ClientProxy, Task]:
+    """."""
+    # Build the list of TaskIns
+    task_ins_list: List[TaskIns] = []
+    driver_node = Node(node_id=0, anonymous=True)
+    for proxy, task in instructions.items():
+        # Set the `consumer` and `producer` fields in Task
+        #
+        # Note that protobuf API `protobuf.message.MergeFrom(other_msg)`
+        # does NOT always overwrite fields that are set in `other_msg`.
+        # Please refer to:
+        # https://googleapis.dev/python/protobuf/latest/google/protobuf/message.html
+        consumer = Node(node_id=proxy.node_id, anonymous=False)
+        task.MergeFrom(Task(producer=driver_node, consumer=consumer))
+        # Create TaskIns and add it to the list
+        task_ins = TaskIns(
+            task_id="",  # Do not set, will be created and set by the DriverAPI
+            group_id="",
+            workload_id=driver.workload_id,
+            task=task,            
+        )
+        task_ins_list.append(task_ins)
+    
+    # Push TaskIns
+    push_res = driver.push_task_ins(PushTaskInsRequest(task_ins_list=task_ins_list))
+    task_ids = [task_id for task_id in push_res.task_ids if task_id != ""]
+    
+    time.sleep(1.0)
+    
+    # Pull TaskRes
+    task_res_list: List[TaskRes] = []
+    start_time = timeit.default_timer()
+    while timeit.default_timer() - start_time < timeout:
+        pull_res = driver.pull_task_res(PullTaskResRequest(node=driver_node, task_ids=task_ids))
+        task_res_list.extend(pull_res.task_res_list)
+        if len(task_res_list) == len(task_ids):
+            
+        
+        time.sleep(1.0)
