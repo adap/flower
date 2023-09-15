@@ -1,12 +1,36 @@
 import unittest
 
 from datasets.utils.logging import disable_progress_bar
-from parameterized import parameterized_class
+from parameterized import parameterized_class, parameterized
+import torch
+import torch.nn.functional as F
 from torch import Tensor
 from torch.utils.data import DataLoader
+import torch.nn as nn
+import torch.optim as optim
 from torchvision.transforms import Compose, ToTensor, Normalize
 
 from flwr_datasets import FederatedDataset
+
+
+class SimpleCNN(nn.Module):
+    def __init__(self):
+        super(SimpleCNN, self).__init__()
+        self.conv1 = nn.Conv2d(3, 6, 5)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.conv2 = nn.Conv2d(6, 16, 5)
+        self.fc1 = nn.Linear(16 * 5 * 5, 120)
+        self.fc2 = nn.Linear(120, 84)
+        self.fc3 = nn.Linear(84, 10)
+
+    def forward(self, x):
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        x = x.view(-1, 16 * 5 * 5)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
 
 
 # Using parameterized testing, two different sets of parameters are specified:
@@ -51,7 +75,7 @@ class FDSToPyTorchCorrectUsage(unittest.TestCase):
         )
         return trainloader
 
-    def test_create_partition_dataloader_with_transforms_shape(self)-> None:
+    def test_create_partition_dataloader_with_transforms_shape(self) -> None:
         """Test if the DataLoader returns batches with the expected shape."""
         batch_size = 16
         trainloader = self._create_trainloader(batch_size)
@@ -60,20 +84,47 @@ class FDSToPyTorchCorrectUsage(unittest.TestCase):
         self.assertEqual(tuple(images.shape),
                          (batch_size, *self.expected_img_shape_after_transform))
 
-    def test_create_partition_dataloader_with_transforms_batch_type(self)-> None:
+    def test_create_partition_dataloader_with_transforms_batch_type(self) -> None:
         """Test if the DataLoader returns batches of type dictionary."""
         batch_size = 16
         trainloader = self._create_trainloader(batch_size)
         batch = next(iter(trainloader))
         self.assertIsInstance(batch, dict)
 
-    def test_create_partition_dataloader_with_transforms_data_type(self)-> None:
+    def test_create_partition_dataloader_with_transforms_data_type(self) -> None:
         """Test to verify if the data in the DataLoader batches are of type Tensor."""
         batch_size = 16
         trainloader = self._create_trainloader(batch_size)
         batch = next(iter(trainloader))
         images = batch["img"]
         self.assertIsInstance(images, Tensor)
+
+    @parameterized.expand([
+        ("not_nan", torch.isnan),
+        ("not_inf", torch.isinf),
+    ])
+    def test_train_model_loss_value(self, name, condition_func):
+        """Test if the model trains and if the loss is a correct number."""
+        trainloader = self._create_trainloader(16)
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+        # Create the model, criterion, and optimizer
+        net = SimpleCNN().to(device)
+        criterion = nn.CrossEntropyLoss()
+        optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+
+        # Training loop for one epoch
+        net.train()
+        loss = None
+        for i, data in enumerate(trainloader, 0):
+            inputs, labels = data['img'].to(device), data['label'].to(device)
+            optimizer.zero_grad()
+            outputs = net(inputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+
+        self.assertFalse(condition_func(loss).item())
 
 
 if __name__ == '__main__':
