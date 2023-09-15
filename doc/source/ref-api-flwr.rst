@@ -63,7 +63,7 @@ ClientState
 .. _flwr-client-WorkloadState-apiref:
 
 WorkloadState
-~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 .. autoclass:: flwr.client.WorkloadState
     :members:
