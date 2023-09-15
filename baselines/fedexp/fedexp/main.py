@@ -78,6 +78,13 @@ def main(cfg: DictConfig) -> None:
             "num_cpus": cfg.client_resources.num_cpus,
             "num_gpus": cfg.client_resources.num_gpus,
         },
+        ray_init_args={
+            "ignore_reinit_error": True,
+            "include_dashboard": False,
+            "num_cpus": 12,
+            "num_gpus": 1,
+            "_memory": 100*1024*1024*1024,
+        },
     )
 
     save_path = HydraConfig.get().runtime.output_dir
