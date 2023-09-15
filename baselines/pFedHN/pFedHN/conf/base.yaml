@@ -16,7 +16,7 @@ model:
 
 
 strategy:
-  _target_: strategy.pFedHN
+  _target_: pFedHN.strategy.pFedHN
   # strategy config
 
 client:
