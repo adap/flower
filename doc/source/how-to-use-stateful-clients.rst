@@ -6,6 +6,7 @@ Flower clients are ephemeral objects that are instantiated to perform a specific
 
 .. TODO: Client lifecycle and state
 
+.. warning:: Built-in support for stateful clients is a new feature of Flower. While we aim to keep the core functionality unchanged, please be aware some API elements will change. Changes will be reflected in future versions of this documentation page. If you'd like to contribute and shape how stateful clients are implemented, reach out to us on Slack or GitHub.
 
 You can interact with your client's state as follow.
 
@@ -102,8 +103,11 @@ Considerations and best practices
 
 Implementing the client's state as a Python dataclass brings a fair amount of versatility to your Flower clients. This sections outlines several best practices and considerations.
 
-* The states of all your clients are kept in-memory. This means that if your clients store large objects (e.g. entire ML models) in their state, you can run into memory issues on your system, specially if you have a large number of clients in your FL setup.
-* Be mindful of appending to a list inside your state, as this will make your client state grow over time. 
-* The client state works in all settings: with non-simulated clients, in single-machine simulation and in multi-node simulation. For the latter, bear in mind that the client state object needs to be transferred to each client from the central node (i.e. where you start the simulation from). This can slow down your simulation if the state of the clients is large.
-* The elements you add to your state need to be serializable objects if you are running simulations. Standard Python types and data structures (e.g. `int`, `List`, `Dict`... ) and the usual ML data containers (e.g. `NumPy` arrays, `PyTorch` models and tensors as well as those from `TensorFlow`) are. For more information about serialization, please refer to the `Ray documentation <https://docs.ray.io/en/latest/ray-core/objects/serialization.html#serialization>`_.
+* **The states of all your clients are kept in-memory.** This means that if your clients store large objects (e.g. entire ML models) in their state, you can run into memory issues on your system, specially if you have a large number of clients in your FL setup.
+* **Be mindful of appending to a list** inside your state, as this will make your client state grow over time. 
+* **The client state works in all settings**: with non-simulated clients, in single-machine simulation and in multi-node simulation.
+* **Communication costs for multi-node settings:** bear in mind that the client state object needs to be transferred to each client from the central node (i.e. where you start the simulation from). This can slow down your simulation if the state of the clients is large.
+* **The elements you add to your state need to be serializable** objects if you are running simulations. Standard Python types and data structures (e.g. `int`, `List`, `Dict`... ) and the usual ML data containers (e.g. `NumPy` arrays, `PyTorch` models and tensors as well as those from `TensorFlow`) are. For more information about serialization, please refer to the `Ray documentation <https://docs.ray.io/en/latest/ray-core/objects/serialization.html#serialization>`_.
+* **Prior to Flower 1.6 non-virtual clients were stateful** but now are ephemeral, just like virtual clients. This was done to support a wider range of workloads and so the same client class you implement can be used in simulation without restrictions. You can achieve the exact same behavior with recent versions of Flower as in Flower 1.5 or earlier, but you'll need to store those elements that should persist in the client's `self.state`.
+
 
