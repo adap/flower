@@ -324,6 +324,8 @@ def get_client_fn_simulation(
         ] = MobileNetModelManager
         if config.model_name.lower() == "resnet":
             manager = ResNetModelManager
+        elif config.model_name.lower() == "mobile":
+            manager = MobileNetModelManager
         else:
             raise NotImplementedError("Model not implemented, check name.")
         client_data_loaders = ClientDataloaders(trainloader, testloader)
