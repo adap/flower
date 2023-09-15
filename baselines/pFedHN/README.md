@@ -87,7 +87,7 @@ python3 -m pFedHN.main # this will run using the default settings in the `conf/c
 python3 -m pFedHN.main dataset.data="mnist" model.n_kernels=7 model
 .in_channels=1 # this will run for the mnist
 
-python3 -m pFedHN.main dataset.data="cifar100" model.out_dim=100 # this will run for the cifar100
+python3 -m pFedHN.main dataset.data="cifar100" model.out_dim=100 client.num_classes_per_node=10 # this will run for the cifar100
 
 ```
 
