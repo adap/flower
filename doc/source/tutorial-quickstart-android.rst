@@ -5,8 +5,7 @@ Quickstart Android
 ==================
 
 .. meta::
-   :description lang=en: Read this Federated Learning quickstart tutorial for creating an Android app using Flower.
-   :description lang=fr: Lisez ce tutoriel de Federated Learning pour créer une app Android en utilisant Flower.
+   :description: Read this Federated Learning quickstart tutorial for creating an Android app using Flower.
 
 Let's build a federated learning system using TFLite and Flower on Android!
 
