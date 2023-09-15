@@ -17,7 +17,7 @@ dataset: [MNIST, CIFAR10, CIFAR100] # list of datasets you include in your basel
 
 ## About this baseline
 
-****What’s implemented:**** :*_"The code in the repository reproduces the paper by implementing the concept of hypernetworks which create weights for that target network thus resolving the problems of dataheterogenity.The hypernetworks lies in the server and the clients have the target model. Initially hypernetwork sends the weights from the server which is loaded into the target net . After the targetnet is trained we pass the delta_theta to the client , which inturn updated the phi_gradients for the hypernetwork and the flow goes on._*
+****What’s implemented:**** :*_"The code in the repository reproduces the paper by implementing the concept of hypernetworks which create weights for that target network thus resolving the problems of dataheterogenity.The hypernetworks lies in the server and the clients have the target model. Initially hypernetwork sends the weights from the server which is loaded into the target net . After the targetnet is trained we pass the delta_theta to the client , which inturn updated the phi_gradients for the hypernetwork and the flow goes on."_*
 
 ****Datasets:**** :*_[MNIST,CIFAR10,CIFAR100]_*
 
@@ -45,7 +45,9 @@ dataset: [MNIST, CIFAR10, CIFAR100] # list of datasets you include in your basel
 ## Running the Experiments
 
 :warning: _Provide instructions on the steps to follow to run all the experiments._
-```bash  
+```bash
+
+python3 pFedHN.main.py ## Run this initially
 # The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
 
 poetry run python -m <baseline-name>.main <no additional arguments> # where <baseline-name> is the name of this directory and that of the only sub-directory in this directory (i.e. where all your source code is)
