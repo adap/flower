@@ -1,11 +1,11 @@
-from collections import OrderedDict, defaultdict
+"""Strategy of the Federated Learning."""
+
+from collections import OrderedDict
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import flwr as fl
 import torch
 from flwr.common import (
-    EvaluateIns,
-    EvaluateRes,
     FitIns,
     FitRes,
     NDArrays,
@@ -22,10 +22,12 @@ from pFedHN.models import CNNHyper
 
 
 class pFedHN(FedAvg):
+    """Federated strategy with pFedHN."""
+
     def __init__(
         self,
         config,
-        fraction_fit: float = 1.0,
+        fraction_fit: float = 0.0,
         fraction_evaluate: float = 1.0,
         min_fit_clients: int = 1,
         min_evaluate_clients: int = 1,
@@ -39,7 +41,7 @@ class pFedHN(FedAvg):
             ]
         ] = None,
     ) -> None:
-        self.fraction_fit = fraction_fit
+        self.fraction_fit = 0.0
         self.fraction_evaluate = fraction_evaluate
         self.min_fit_clients = min_fit_clients
         self.min_evaluate_clients = min_evaluate_clients
@@ -50,14 +52,14 @@ class pFedHN(FedAvg):
         self.evaluate_fn = evaluate_fn
 
     def __repr__(self) -> str:
+        """Return the strategy name."""
         return "pFedHN"
 
     def initialize_parameters(
         self, client_manager: ClientManager
     ) -> Optional[Parameters]:
         """Initialize global model parameters."""
-
-        num_nodes = client_manager.num_available()
+        client_manager.num_available()
 
         # Initialising our hnet model in server
         self.hnet = CNNHyper(
@@ -77,19 +79,16 @@ class pFedHN(FedAvg):
 
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Return sample size and required number of clients."""
-
         return 1, self.min_available_clients
 
     def num_evaluate_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Use a fraction of available clients for evaluation."""
-
-        pass
+        return 1, self.min_available_clients
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
-
         sample_size, min_num_clients = self.num_fit_clients(
             client_manager.num_available()
         )
@@ -101,7 +100,7 @@ class pFedHN(FedAvg):
 
         self.hnet.train()
 
-        ## function to generate weights for each client
+        # function to generate weights for each client
         def weights_to_clients(client_id):
             weights = self.hnet(
                 torch.tensor([client_id], dtype=torch.long).to(torch.device("cpu"))
@@ -109,7 +108,7 @@ class pFedHN(FedAvg):
             return weights
 
         fit_configurations = []
-        for idx, client in enumerate(clients):
+        for _idx, client in enumerate(clients):
             self.weights = weights_to_clients(int(client.cid))
             array = [val.cpu().detach().numpy() for _, val in self.weights.items()]
 
@@ -120,8 +119,7 @@ class pFedHN(FedAvg):
         return fit_configurations
 
     def gradient_upgradation(self, delta_theta_param: Parameters):
-        """Updating the gradients of the hypernetwork."""
-
+        """Update the gradients of the hypernetwork."""
         optim = torch.optim.Adam(params=self.hnet.parameters(), lr=1e-2)
         optim.zero_grad()
 
@@ -154,37 +152,19 @@ class pFedHN(FedAvg):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """Using the delta_theta to update the hypernetwork."""
-
+        """Use the delta_theta to update the hypernetwork."""
         _, fit_res = results[0]
 
         delta_theta = fit_res.parameters
 
         self.gradient_upgradation(delta_theta)
 
-        metrics_aggregated = {}
-        return None, {}
-
-    def configure_evaluate(
-        self, server_round: int, parameters: Parameters, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
-        """Configure the next round of evaluation."""
-
-        return None
-
-    def aggregate_evaluate(
-        self,
-        server_round: int,
-        results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
-    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         return None, {}
 
     def evaluate(
         self, server_round: int, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function."""
-
         if self.evaluate_fn is None:
             # No evaluation function provided
             return None
