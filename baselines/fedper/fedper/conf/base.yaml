@@ -5,8 +5,8 @@ batch_size: 128
 num_rounds: 50
 clients_per_round: 10
 learning_rate: 0.01
-algorithm: fedavg
-model_name: mobile
+algorithm: fedper
+model_name: resnet
 
 client_resources:
   num_cpus: 4

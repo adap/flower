@@ -9,6 +9,63 @@ from torchvision.models.resnet import resnet34
 
 from fedper.models import ModelManager, ModelSplit
 
+def conv3x3(in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, dilation: int = 1) -> nn.Conv2d:
+    """3x3 convolution with padding"""
+    return nn.Conv2d(
+        in_planes,
+        out_planes,
+        kernel_size=3,
+        stride=stride,
+        padding=dilation,
+        groups=groups,
+        bias=False,
+        dilation=dilation,
+    )
+
+
+def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Conv2d:
+    """1x1 convolution"""
+    return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
+
+
+class BasicBlock(nn.Module):
+    expansion: int = 1
+
+    def __init__(
+        self,
+        inplanes: int,
+        planes: int,
+        stride: int = 1,
+        downsample: Optional[nn.Module] = None,
+    ) -> None:
+        super().__init__()
+        norm_layer = nn.BatchNorm2d
+        # Both self.conv1 and self.downsample layers downsample the input when stride != 1
+        self.conv1 = conv3x3(inplanes, planes, stride)
+        self.bn1 = norm_layer(planes)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = conv3x3(planes, planes)
+        self.bn2 = norm_layer(planes)
+        self.downsample = downsample
+        self.stride = stride
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        identity = x
+
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+
+        out = self.conv2(out)
+        out = self.bn2(out)
+
+        if self.downsample is not None:
+            identity = self.downsample(x)
+
+        out += identity
+        out = self.relu(out)
+
+        return out    
 
 class ResNet(nn.Module):
     """ResNet model."""
@@ -26,49 +83,13 @@ class ResNet(nn.Module):
         self.num_head_layers = num_head_layers
         self.body = resnet34()
 
-        def basic_block(in_planes, out_planes, stride_use=1):
-            """Return Basic ResNet block."""
-            return nn.Sequential(
-                nn.Conv2d(
-                    in_planes,
-                    out_planes,
-                    kernel_size=(3, 3),
-                    stride=(stride_use, stride_use),
-                    padding=(1, 1),
-                    bias=False,
-                ),
-                nn.BatchNorm2d(
-                    out_planes,
-                    eps=1e-05,
-                    momentum=0.01,
-                    affine=True,
-                    track_running_stats=True,
-                ),
-                nn.ReLU(inplace=True),
-                nn.Conv2d(
-                    out_planes,
-                    out_planes,
-                    kernel_size=(3, 3),
-                    stride=(stride_use, stride_use),
-                    padding=(1, 1),
-                    bias=False,
-                ),
-                nn.BatchNorm2d(
-                    out_planes,
-                    eps=1e-05,
-                    momentum=0.01,
-                    affine=True,
-                    track_running_stats=True,
-                ),
-            )
-
         # if only one head layer
         if self.num_head_layers == 1:
             self.head = self.body.fc
             self.body.fc = nn.Identity()
         elif self.num_head_layers == 2:
             self.head = nn.Sequential(
-                basic_block(512, 512),
+                BasicBlock(512, 512),
                 nn.AdaptiveAvgPool2d((1, 1)),
                 nn.Flatten(),
                 nn.Linear(512, num_classes),
@@ -80,8 +101,8 @@ class ResNet(nn.Module):
             self.body.layer4 = nn.Sequential(*list(body_layer4.children())[:-1])
         elif self.num_head_layers == 3:
             self.head = nn.Sequential(
-                basic_block(512, 512),
-                basic_block(512, 512),
+                BasicBlock(512, 512),
+                BasicBlock(512, 512),
                 nn.AdaptiveAvgPool2d((1, 1)),
                 nn.Flatten(),
                 nn.Linear(512, num_classes),

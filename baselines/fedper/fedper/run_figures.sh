@@ -11,18 +11,20 @@
 #done  
 
 # CIFAR10 Mobile (n head layers (FIGURE 4a))
-for num_head_layers in 2 3 4
-do
-    python -m fedper.main --config-path conf/cifar10/mobile --config-name fedper model.num_head_layers=${num_head_layers} num_rounds=25 &&
-    python -m fedper.main --config-path conf/cifar10/mobile --config-name fedavg num_rounds=25
-done
+#for num_head_layers in 2 3 4
+#do
+#    python -m fedper.main --config-path conf/cifar10/mobile --config-name fedper model.num_head_layers=${num_head_layers} num_rounds=25 &&
+#    python -m fedper.main --config-path conf/cifar10/mobile --config-name fedavg num_rounds=25
+#done
 
 # CIFAR10 Resnet (n head layers (FIGURE 4b))
-for num_head_layers in 1 2 3
+for num_head_layers in 2 3
 do
     python -m fedper.main --config-path conf/cifar10/resnet --config-name fedper model.num_head_layers=${num_head_layers} num_rounds=25 &&
     python -m fedper.main --config-path conf/cifar10/resnet --config-name fedavg
 done
+
+python -m fedper.main --config-path conf/cifar10/resnet --config-name fedper dataset.num_classes=10 # &&
 
 # FLICKR
 #for model in mobile resnet
