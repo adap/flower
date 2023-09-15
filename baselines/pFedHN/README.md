@@ -9,19 +9,19 @@ dataset: MNIST, CIFAR10, CIFAR100 # list of datasets you include in your baselin
 
 
 
-****Paper:**** :https://arxiv.org/abs/2103.04628
+****Paper:**** https://arxiv.org/abs/2103.04628
 
-****Authors:**** :Aviv Shamsian,Aviv Navon,Ethan Fetaya,Gal Chechik
+****Authors:**** Aviv Shamsian,Aviv Navon,Ethan Fetaya,Gal Chechik
 
-****Abstract:**** :Personalized federated learning is tasked with training machine learning models for multiple clients, each with its own data distribution. The goal is to train personalized models in a collaborative way while accounting for data disparities across clients and reducing communication costs. We propose a novel approach to this problem using hypernetworks, termed pFedHN for personalized Federated HyperNetworks. In this approach, a central hypernetwork model is trained to generate a set of models, one model for each client. This architecture provides effective parameter sharing across clients, while maintaining the capacity to generate unique and diverse personal models. Furthermore, since hypernetwork parameters are never transmitted, this approach decouples the communication cost from the trainable model size. We test pFedHN empirically in several personalized federated learning challenges and find that it outperforms previous methods. Finally, since hypernetworks share information across clients we show that pFedHN can generalize better to new clients whose distributions differ from any client observed during training.
+****Abstract:**** Personalized federated learning is tasked with training machine learning models for multiple clients, each with its own data distribution. The goal is to train personalized models in a collaborative way while accounting for data disparities across clients and reducing communication costs. We propose a novel approach to this problem using hypernetworks, termed pFedHN for personalized Federated HyperNetworks. In this approach, a central hypernetwork model is trained to generate a set of models, one model for each client. This architecture provides effective parameter sharing across clients, while maintaining the capacity to generate unique and diverse personal models. Furthermore, since hypernetwork parameters are never transmitted, this approach decouples the communication cost from the trainable model size. We test pFedHN empirically in several personalized federated learning challenges and find that it outperforms previous methods. Finally, since hypernetworks share information across clients we show that pFedHN can generalize better to new clients whose distributions differ from any client observed during training.
 
 ## About this baseline
 
-****What’s implemented:**** :"The code in the repository reproduces the paper by implementing the concept of hypernetworks which create weights for that target network thus resolving the problems of dataheterogenity.The hypernetworks lies in the server and the clients have the target model. Initially hypernetwork sends the weights from the server which is loaded into the target net . After the targetnet is trained we pass the delta_theta to the client , which inturn updated the phi_gradients for the hypernetwork and the flow goes on."
+****What’s implemented:**** "The code in the repository reproduces the paper by implementing the concept of hypernetworks which create weights for that target network thus resolving the problems of dataheterogenity.The hypernetworks lies in the server and the clients have the target model. Initially hypernetwork sends the weights from the server which is loaded into the target net . After the targetnet is trained we pass the delta_theta to the client , which inturn updated the phi_gradients for the hypernetwork and the flow goes on."
 
-****Datasets:**** :[MNIST,CIFAR10,CIFAR100]
+****Datasets:**** MNIST,CIFAR10,CIFAR100 from torchvision 
 
-****Hardware Setup:**** : Will be updated
+****Hardware Setup:**** Will be updated
 
 ****Contributors:**** :Ram Samarth B B(@achiverram28) , Kishan Gurumurthy(@kishan-droid) , Sachin DN(@sachugowda)
 
@@ -41,7 +41,7 @@ dataset: MNIST, CIFAR10, CIFAR100 # list of datasets you include in your baselin
 | CIFAR10 | 100 | Non-IID | 10 |
 
 
-****Training Hyperparameters:**** : The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python3 main.py` directly)
+****Training Hyperparameters:**** The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python3 main.py` directly)
 
 | Description | Default Value |
 | ----------- | ----- |
@@ -53,7 +53,7 @@ dataset: MNIST, CIFAR10, CIFAR100 # list of datasets you include in your baselin
 | TargetNetwork learning rate | 5e-3 |
 | TargetNetwork weight decay | 5e-5 |
 | TargetNetwork momentum | 0.9 |
-| data partition | IID |
+| data partition | Non - IID |
 | HyperNetwork Optimizer | Adam |
 | TargetNetwork Optimizer | SGD with weight decay |
 **Model variations** : The model is flexible to use for images with 1 channel
@@ -93,4 +93,4 @@ python3 -m pFedHN.main dataset.data="cifar100" model.out_dim=100 client.num_clas
 
 ## Expected Results
 
-:warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
+Will be updated
