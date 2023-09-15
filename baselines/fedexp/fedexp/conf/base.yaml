@@ -17,7 +17,7 @@ client_resources:
 dataset_config:
   name: CIFAR10
   num_classes: 10
-  alpha: 0.5
+  alpha: 0.3
 
 model:
   _target_: fedexp.models.ResNet18

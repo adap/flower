@@ -9,20 +9,21 @@ from torch.utils.data import DataLoader, TensorDataset
 from torchvision import datasets, transforms
 
 
-def _get_dirichlet_data(y, num_clients, alpha, num_c, partition_equal=False):
-    N = len(y)
+def _get_dirichlet_data(y, n, alpha, num_c, partition_equal=False):
+    n_nets = n
     K = num_c
-    n_nets = num_clients
-    label_list_true = y
+    labelList_true = y
+    N = len(labelList_true)
     net_dataidx_map = {}
-    p_client = np.random.dirichlet(np.repeat(alpha, K), size=num_clients)
-
-    idx_batch = [[] for _ in range(num_clients)]
-    m = N // num_clients
+    p_client = np.zeros((n, K))
+    for i in range(n):
+        p_client[i] = np.random.dirichlet(np.repeat(alpha, K))
+    idx_batch = [[] for _ in range(n)]
+    m = int(N / n)
 
     if not partition_equal:
         for k in range(K):
-            idx_k = np.where(label_list_true == k)[0]
+            idx_k = np.where(labelList_true == k)[0]
             np.random.shuffle(idx_k)
             proportions = p_client[:, k]
             proportions /= proportions.sum()
@@ -32,13 +33,13 @@ def _get_dirichlet_data(y, num_clients, alpha, num_c, partition_equal=False):
                 for idx_j, idx in zip(idx_batch, np.split(idx_k, proportions))
             ]
     else:
-        idx_labels = [np.where(label_list_true == k)[0] for k in range(K)]
-        idx_counter = [0 for _ in range(K)]
+        idx_labels = [np.where(labelList_true == k)[0] for k in range(K)]
+        idx_counter = [0 for k in range(K)]
         total_cnt = 0
         p_client_cdf = np.cumsum(p_client, axis=1)
 
-        while total_cnt < m * num_clients:
-            curr_clnt = np.random.randint(num_clients)
+        while total_cnt < m * n:
+            curr_clnt = np.random.randint(n)
             if len(idx_batch[curr_clnt]) >= m:
                 continue
             total_cnt += 1
@@ -56,13 +57,15 @@ def _get_dirichlet_data(y, num_clients, alpha, num_c, partition_equal=False):
     for j in range(n_nets):
         np.random.shuffle(idx_batch[j])
         net_dataidx_map[j] = idx_batch[j]
-
-    net_cls_counts = {
-        net_i: {u: c for u, c in zip(*np.unique(label_list_true[dataidx], return_counts=True))}
-        for net_i, dataidx in net_dataidx_map.items()
-    }
-
-    local_sizes = np.array([len(net_dataidx_map[i]) for i in range(n_nets)])
+    net_cls_counts = {}
+    for net_i, dataidx in net_dataidx_map.items():
+        unq, unq_cnt = np.unique(labelList_true[dataidx], return_counts=True)
+        tmp = {unq[i]: unq_cnt[i] for i in range(len(unq))}
+        net_cls_counts[net_i] = tmp
+    local_sizes = []
+    for i in range(n_nets):
+        local_sizes.append(len(net_dataidx_map[i]))
+    local_sizes = np.array(local_sizes)
     weights = local_sizes / np.sum(local_sizes)
 
     print("Data statistics: %s" % str(net_cls_counts))
@@ -76,15 +79,17 @@ def _split_dataset(
 ):
     print("Preparing dataset...")
     train_loader = DataLoader(train_dataset, batch_size=len(train_dataset))
-    x_train = next(iter(train_loader))[0].numpy()
-    y_train = next(iter(train_loader))[1].numpy()
-    indexes = _get_dirichlet_data(y_train, num_clients, alpha, num_classes, partition_equal=partition_equal)
+    X_train = next(iter(train_loader))[0].numpy()
+    Y_train = next(iter(train_loader))[1].numpy()
+    inds = _get_dirichlet_data(
+        Y_train, num_clients, alpha, num_classes, partition_equal=partition_equal
+    )
     train_datasets = []
-    for i, ind in enumerate(indexes):
+    for i, ind in enumerate(inds):
         n_i = len(ind)
-        x = x_train[ind]
+        x = X_train[ind]
         x_train = torch.Tensor(x[0:n_i])
-        y = y_train[ind]
+        y = Y_train[ind]
         y_train = torch.LongTensor(y[0:n_i])
         print(f"Client {i} : Training examples - {len(x_train)}")
         dataset_train_torch = TensorDataset(x_train, y_train)
