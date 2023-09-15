@@ -10,6 +10,7 @@ import torch.nn as nn
 
 
 def compute_accuracy(model, dataloader, device="cpu", multiloader=False):
+    """Compute accuracy."""
     was_training = False
     if model.training:
         model.eval()
@@ -26,9 +27,7 @@ def compute_accuracy(model, dataloader, device="cpu", multiloader=False):
     if multiloader:
         for loader in dataloader:
             with torch.no_grad():
-                for _batch_idx, (x, target) in enumerate(loader):
-                    # print("x:",x)
-                    # print("target:",target)
+                for _, (x, target) in enumerate(loader):
                     if device != "cpu":
                         x, target = x.cuda(), target.to(dtype=torch.int64).cuda()
                     _, _, out = model(x)
@@ -58,7 +57,7 @@ def compute_accuracy(model, dataloader, device="cpu", multiloader=False):
         avg_loss = sum(loss_collector) / len(loss_collector)
     else:
         with torch.no_grad():
-            for _batch_idx, (x, target) in enumerate(dataloader):
+            for _, (x, target) in enumerate(dataloader):
                 # print("x:",x)
                 if device != "cpu":
                     x, target = x.cuda(), target.to(dtype=torch.int64).cuda()

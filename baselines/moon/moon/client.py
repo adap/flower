@@ -16,7 +16,10 @@ from torch.utils.data import DataLoader
 
 from moon.models import init_net, test, train_fedprox, train_moon
 
+# pylint: disable=E1101
 
+
+# pylint: disable=too-many-instance-attributes
 class FlowerClient(fl.client.NumPyClient):
     """Standard Flower client for CNN training."""
 
@@ -47,10 +50,11 @@ class FlowerClient(fl.client.NumPyClient):
         self.device = device
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
-        self.mu = mu
+        self.mu = mu  # pylint: disable=invalid-name
         self.temperature = temperature
         self.model_dir = model_dir
         self.alg = alg
+        self.prev_net = init_net(self.dataset, self.model, self.output_dim)
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Return the parameters of the current net."""
@@ -69,7 +73,6 @@ class FlowerClient(fl.client.NumPyClient):
         self.set_parameters(parameters)
 
         # load previous model from model_dir
-        self.prev_net = init_net(self.dataset, self.model, self.output_dim)
         self.prev_net.load_state_dict(
             torch.load(os.path.join(self.model_dir, "prev_net.pt"))
         )
@@ -113,38 +116,8 @@ def gen_client_fn(
     trainloaders: List[DataLoader],
     testloaders: List[DataLoader],
     cfg: DictConfig,
-) -> Tuple[
-    Callable[[str], FlowerClient], DataLoader
-]:  # pylint: disable=too-many-arguments
-    """Generate the client function that creates the Flower Clients.
-
-    Parameters
-    ----------
-    num_clients : int
-        The number of clients present in the setup
-    num_rounds: int
-        The number of rounds in the experiment. This is used to construct
-        the scheduling for stragglers
-    num_epochs : int
-        The number of local epochs each client should run the training for before
-        sending it to the server.
-    trainloaders: List[DataLoader]
-        A list of DataLoaders, each pointing to the dataset training partition
-        belonging to a particular client.
-    valloaders: List[DataLoader]
-        A list of DataLoaders, each pointing to the dataset validation partition
-        belonging to a particular client.
-    learning_rate : float
-        The learning rate for the SGD  optimizer of clients.
-    stragglers : float
-        Proportion of stragglers in the clients, between 0 and 1.
-
-    Returns
-    -------
-    Tuple[Callable[[str], FlowerClient], DataLoader]
-        A tuple containing the client function that creates Flower Clients and
-        the DataLoader that will be used for testing
-    """
+) -> Callable[[str], FlowerClient]:
+    """Generate the client function that creates the Flower Clients."""
 
     def client_fn(cid: str) -> FlowerClient:
         """Create a Flower client representing a single organization."""

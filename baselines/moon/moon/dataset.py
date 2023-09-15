@@ -39,7 +39,7 @@ IMG_EXTENSIONS = (
 )
 
 
-class CIFAR10_sub(data.Dataset):
+class CIFAR10Sub(data.Dataset):
     """CIFAR-10 dataset with idxs."""
 
     def __init__(
@@ -68,10 +68,12 @@ class CIFAR10_sub(data.Dataset):
 
         if torchvision.__version__ == "0.2.1":
             if self.train:
+                # pylint: disable=redefined-outer-name
                 data, target = cifar_dataobj.train_data, np.array(
                     cifar_dataobj.train_labels
                 )
             else:
+                # pylint: disable=redefined-outer-name
                 data, target = cifar_dataobj.test_data, np.array(
                     cifar_dataobj.test_labels
                 )
@@ -115,7 +117,9 @@ class CIFAR10_sub(data.Dataset):
         return len(self.data)
 
 
-class CIFAR100_sub(data.Dataset):
+class CIFAR100Sub(data.Dataset):
+    """CIFAR-100 dataset with idxs."""
+
     def __init__(
         self,
         root,
@@ -135,19 +139,21 @@ class CIFAR100_sub(data.Dataset):
         self.data, self.target = self.__build_sub_dataset__()
 
     def __build_sub_dataset__(self):
+        """Build sub dataset given idxs."""
         cifar_dataobj = CIFAR100(
             self.root, self.train, self.transform, self.target_transform, self.download
         )
 
         if torchvision.__version__ == "0.2.1":
             if self.train:
+                # pylint: disable=redefined-outer-name
                 data, target = cifar_dataobj.train_data, np.array(
                     cifar_dataobj.train_labels
                 )
             else:
                 data, target = cifar_dataobj.test_data, np.array(
                     cifar_dataobj.test_labels
-                )
+                )  # pylint: disable=redefined-outer-name
         else:
             data = cifar_dataobj.data
             target = np.array(cifar_dataobj.targets)
@@ -159,7 +165,8 @@ class CIFAR100_sub(data.Dataset):
         return data, target
 
     def __getitem__(self, index):
-        """
+        """Get item by index.
+
         Args:
             index (int): Index.
 
@@ -179,12 +186,19 @@ class CIFAR100_sub(data.Dataset):
         return img, target
 
     def __len__(self):
+        """Length.
+
+        Returns
+        -------
+            int: length of data
+        """
         return len(self.data)
 
 
 def get_dataloader(dataset, datadir, train_bs, test_bs, dataidxs=None, noise_level=0):
+    """Get dataloader for a given dataset."""
     if dataset == "cifar10":
-        dl_obj = CIFAR10_sub
+        dl_obj = CIFAR10Sub
         normalize = transforms.Normalize(
             mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
             std=[x / 255.0 for x in [63.0, 62.1, 66.7]],
@@ -211,7 +225,7 @@ def get_dataloader(dataset, datadir, train_bs, test_bs, dataidxs=None, noise_lev
         transform_test = transforms.Compose([transforms.ToTensor(), normalize])
 
     elif dataset == "cifar100":
-        dl_obj = CIFAR100_sub
+        dl_obj = CIFAR100Sub
 
         normalize = transforms.Normalize(
             mean=[0.5070751592371323, 0.48654887331495095, 0.4409178433670343],

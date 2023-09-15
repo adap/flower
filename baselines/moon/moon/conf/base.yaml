@@ -11,6 +11,7 @@ learning_rate: 0.01
 mu: 1
 temperature: 0.5
 alg: moon
+seed: 0
 
 
 

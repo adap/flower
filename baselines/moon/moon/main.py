@@ -3,16 +3,19 @@
 It includes processioning the dataset, instantiate strategy, specify how the global
 model is going to be evaluated, etc. At the end, this script saves the results.
 """
+import random
+
 # these are the basic packages you'll need here
 # feel free to remove some if aren't needed
 import flwr as fl
 import hydra
+import numpy as np
+import torch
 from omegaconf import DictConfig, OmegaConf
 
 from moon import client, server
-from moon.dataset_preparation import get_dataloader, partition_data
-
-# from hydra.utils import instantiate
+from moon.dataset import get_dataloader
+from moon.dataset_preparation import partition_data
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -34,22 +37,26 @@ def main(cfg: DictConfig) -> None:
     # (2) tell each client what dataset partitions they should use (e.g. a this could
     # be a location in the file system, a list of dataloader, a list of ids to extract
     # from a dataset, it's up to you)
+    np.random.seed(cfg.seed)
+    torch.manual_seed(cfg.seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(cfg.seed)
+    random.seed(cfg.seed)
     (
-        X_train,
-        y_train,
-        X_test,
-        y_test,
+        _,
+        _,
+        _,
+        _,
         net_dataidx_map,
-        traindata_cls_counts,
     ) = partition_data(
         dataset=cfg.dataset.name,
         datadir=cfg.dataset.dir,
-        parittion=cfg.dataset.partition,
+        partition=cfg.dataset.partition,
         num_clients=cfg.num_clients,
         beta=cfg.dataset.beta,
     )
 
-    train_dl_global, test_dl, train_ds_global, test_ds_global = get_dataloader(
+    _, test_dl, _, _ = get_dataloader(
         dataset=cfg.dataset.name,
         datadir=cfg.dataset.dir,
         train_bs=cfg.batch_size,
@@ -72,32 +79,30 @@ def main(cfg: DictConfig) -> None:
     client_fn = client.gen_client_fn(
         trainloaders=trainloaders,
         testloaders=testloaders,
-        config=cfg,
+        cfg=cfg,
     )
 
     # get function that will executed by the strategy's evaluate() method
     # Set server's device
     device = cfg.server_device
-    server.gen_evaluate_fn(test_dl, device=device, model=cfg.model)
+    server.gen_evaluate_fn(test_dl, device=device, cfg=cfg)
 
-    # get a function that will be used to construct the config that the client's
-    # fit() method will received
-    def get_on_fit_config():
-        def fit_config_fn(server_round: int):
-            # resolve and convert to python dict
-            fit_config = OmegaConf.to_container(cfg.fit_config, resolve=True)
-            fit_config["curr_round"] = server_round  # add round info
-            return fit_config
+    # # get a function that will be used to construct the config that the client's
+    # # fit() method will received
+    # def get_on_fit_config():
+    #     def fit_config_fn(server_round: int):
+    #         # resolve and convert to python dict
+    #         fit_config = OmegaConf.to_container(cfg.fit_config, resolve=True)
+    #         fit_config["curr_round"] = server_round  # add round info
+    #         return fit_config
 
-        return fit_config_fn
+    #     return fit_config_fn
 
     # 4. Define your strategy
     # pass all relevant argument (including the global dataset used after aggregation,
     # if needed by your method.)
     # strategy = instantiate(cfg.strategy, <additional arguments if desired>)
-    strategy = fl.server.strategy.FedAvg(
-        fraction_fit=cfg.fraction_fit, on_fit_config_fn=get_on_fit_config()
-    )
+    strategy = fl.server.strategy.FedAvg(fraction_fit=cfg.fraction_fit)
     # 5. Start Simulation
     # history = fl.simulation.start_simulation(<arguments for simulation>)
     history = fl.simulation.start_simulation(

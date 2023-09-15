@@ -35,6 +35,8 @@ def conv1x1(in_planes, out_planes, stride=1):
 
 
 class BasicBlock(nn.Module):
+    """Basic Block for resnet."""
+
     expansion = 1
 
     def __init__(
@@ -48,14 +50,13 @@ class BasicBlock(nn.Module):
         dilation=1,
         norm_layer=None,
     ):
-        super(BasicBlock, self).__init__()
+        super().__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
         if groups != 1 or base_width != 64:
             raise ValueError("BasicBlock only supports groups=1 and base_width=64")
         if dilation > 1:
             raise NotImplementedError("Dilation > 1 not supported in BasicBlock")
-        # Both self.conv1 and self.downsample layers downsample the input when stride != 1
         self.conv1 = conv3x3(inplanes, planes, stride)
         self.bn1 = norm_layer(planes)
         self.relu = nn.ReLU(inplace=True)
@@ -65,6 +66,7 @@ class BasicBlock(nn.Module):
         self.stride = stride
 
     def forward(self, x):
+        """Forward."""
         identity = x
 
         out = self.conv1(x)
@@ -84,11 +86,7 @@ class BasicBlock(nn.Module):
 
 
 class Bottleneck(nn.Module):
-    # Bottleneck in torchvision places the stride for downsampling at 3x3 convolution(self.conv2)
-    # while original implementation places the stride at the first 1x1 convolution(self.conv1)
-    # according to "Deep residual learning for image recognition"https://arxiv.org/abs/1512.03385.
-    # This variant is also known as ResNet V1.5 and improves accuracy according to
-    # https://ngc.nvidia.com/catalog/model-scripts/nvidia:resnet_50_v1_5_for_pytorch.
+    """Bottleneck in torchvision places the stride."""
 
     expansion = 4
 
@@ -103,11 +101,10 @@ class Bottleneck(nn.Module):
         dilation=1,
         norm_layer=None,
     ):
-        super(Bottleneck, self).__init__()
+        super().__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
         width = int(planes * (base_width / 64.0)) * groups
-        # Both self.conv2 and self.downsample layers downsample the input when stride != 1
         self.conv1 = conv1x1(inplanes, width)
         self.bn1 = norm_layer(width)
         self.conv2 = conv3x3(width, width, stride, groups, dilation)
@@ -119,6 +116,7 @@ class Bottleneck(nn.Module):
         self.stride = stride
 
     def forward(self, x):
+        """Forward."""
         identity = x
 
         out = self.conv1(x)
@@ -142,6 +140,8 @@ class Bottleneck(nn.Module):
 
 
 class ResNetCifar10(nn.Module):
+    """ResNet model."""
+
     def __init__(
         self,
         block,
@@ -153,7 +153,7 @@ class ResNetCifar10(nn.Module):
         replace_stride_with_dilation=None,
         norm_layer=None,
     ):
-        super(ResNetCifar10, self).__init__()
+        super().__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
         self._norm_layer = norm_layer
@@ -189,22 +189,21 @@ class ResNetCifar10(nn.Module):
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512 * block.expansion, num_classes)
 
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
-            elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
+        for module in self.modules():
+            if isinstance(module, nn.Conv2d):
+                nn.init.kaiming_normal_(
+                    module.weight, mode="fan_out", nonlinearity="relu"
+                )
+            elif isinstance(module, (nn.BatchNorm2d, nn.GroupNorm)):
+                nn.init.constant_(module.weight, 1)
+                nn.init.constant_(module.bias, 0)
 
-        # Zero-initialize the last BN in each residual branch,
-        # so that the residual branch starts with zeros, and each residual block behaves like an identity.
-        # This improves the model by 0.2~0.3% according to https://arxiv.org/abs/1706.02677
         if zero_init_residual:
-            for m in self.modules():
-                if isinstance(m, Bottleneck):
-                    nn.init.constant_(m.bn3.weight, 0)
-                elif isinstance(m, BasicBlock):
-                    nn.init.constant_(m.bn2.weight, 0)
+            for module in self.modules():
+                if isinstance(module, Bottleneck):
+                    nn.init.constant_(module.bn3.weight, 0)
+                elif isinstance(module, BasicBlock):
+                    nn.init.constant_(module.bn2.weight, 0)
 
     def _make_layer(self, block, planes, blocks, stride=1, dilate=False):
         norm_layer = self._norm_layer
@@ -259,16 +258,17 @@ class ResNetCifar10(nn.Module):
         x = self.layer4(x)
 
         x = self.avgpool(x)
-        x = torch.flatten(x, 1)
+        x = torch.flatten(x, 1)  # pylint: disable=E1101
         x = self.fc(x)
 
         return x
 
     def forward(self, x):
+        """Forward."""
         return self._forward_impl(x)
 
 
-def ResNet50_cifar10(**kwargs):
+def resnet50_cifar10(**kwargs):
     r"""ResNet-50 model from `"Deep Residual Learning for Image Recognition".
 
     <https://arxiv.org/pdf/1512.03385.pdf>`_
@@ -280,21 +280,21 @@ def ResNet50_cifar10(**kwargs):
     return ResNetCifar10(Bottleneck, [3, 4, 6, 3], **kwargs)
 
 
-class SimpleCNN_header(nn.Module):
-    def __init__(self, input_dim, hidden_dims, output_dim=10):
-        super(SimpleCNN_header, self).__init__()
+class SimpleCNNHeader(nn.Module):
+    """Simple CNN model."""
+
+    def __init__(self, input_dim, hidden_dims):
+        super().__init__()
         self.conv1 = nn.Conv2d(3, 6, 5)
         self.relu = nn.ReLU()
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)
 
-        # for now, we hard coded this network
-        # i.e. we fix the number of hidden layers i.e. 2 layers
         self.fc1 = nn.Linear(input_dim, hidden_dims[0])
         self.fc2 = nn.Linear(hidden_dims[0], hidden_dims[1])
-        # self.fc3 = nn.Linear(hidden_dims[1], output_dim)
 
     def forward(self, x):
+        """Forward."""
         x = self.pool(self.relu(self.conv1(x)))
         x = self.pool(self.relu(self.conv2(x)))
         x = x.view(-1, 16 * 5 * 5)
@@ -305,22 +305,24 @@ class SimpleCNN_header(nn.Module):
         return x
 
 
-class ModelFedCon(nn.Module):
-    def __init__(self, base_model, out_dim, n_classes):
-        super(ModelFedCon, self).__init__()
+class ModelMOON(nn.Module):
+    """Model for MOON."""
 
-        if (
-            base_model == "resnet50-cifar10"
-            or base_model == "resnet50-cifar100"
-            or base_model == "resnet50-smallkernel"
-            or base_model == "resnet50"
+    def __init__(self, base_model, out_dim, n_classes):
+        super().__init__()
+
+        if base_model in (
+            "resnet50-cifar10",
+            "resnet50-cifar100",
+            "resnet50-smallkernel",
+            "resnet50",
         ):
-            basemodel = ResNet50_cifar10()
+            basemodel = resnet50_cifar10()
             self.features = nn.Sequential(*list(basemodel.children())[:-1])
             num_ftrs = basemodel.fc.in_features
         elif base_model == "simple-cnn":
-            self.features = SimpleCNN_header(
-                input_dim=(16 * 5 * 5), hidden_dims=[120, 84], output_dim=n_classes
+            self.features = SimpleCNNHeader(
+                input_dim=(16 * 5 * 5), hidden_dims=[120, 84]
             )
             num_ftrs = 84
 
@@ -338,12 +340,11 @@ class ModelFedCon(nn.Module):
             model = self.model_dict[model_name]
             # print("Feature extractor:", model_name)
             return model
-        except:
-            raise (
-                "Invalid model name. Check the config file and pass one of: resnet18 or resnet50"
-            )
+        except KeyError as err:
+            raise ValueError("Invalid model name.") from err
 
     def forward(self, x):
+        """Forward."""
         h = self.features(x)
         # print("h before:", h)
         # print("h size:", h.size())
@@ -358,12 +359,13 @@ class ModelFedCon(nn.Module):
 
 
 def init_net(dataset, model, output_dim, device="cpu"):
+    """Initialize model."""
     if dataset == "cifar10":
         n_classes = 10
     elif dataset == "cifar100":
         n_classes = 100
 
-    net = ModelFedCon(model, output_dim, n_classes)
+    net = ModelMOON(model, output_dim, n_classes)
     if device == "cpu":
         net.to(device)
     else:
@@ -383,6 +385,7 @@ def train_moon(
     temperature,
     device="cpu",
 ):
+    """Training function for MOON."""
     net = nn.DataParallel(net)
     net.cuda()
 
@@ -402,8 +405,7 @@ def train_moon(
     criterion = nn.CrossEntropyLoss().cuda()
     # global_net.to(device)
 
-    for previous_net in previous_nets:
-        previous_net.cuda()
+    previous_net.cuda()
 
     cnt = 0
     cos = torch.nn.CosineSimilarity(dim=-1)
@@ -468,6 +470,7 @@ def train_moon(
 
 
 def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu"):
+    """Training function for FedProx."""
     net = nn.DataParallel(net)
     net.cuda()
 
@@ -502,9 +505,7 @@ def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu
             _, _, out = net(x)
             loss = criterion(out, target)
 
-            # for fedprox
             fed_prox_reg = 0.0
-            # fed_prox_reg += np.linalg.norm([i - j for i, j in zip(global_weight_collector, get_trainable_parameters(net).tolist())], ord=2)
             for param_index, param in enumerate(net.parameters()):
                 fed_prox_reg += (mu / 2) * torch.norm(
                     (param - global_weight_collector[param_index])
@@ -517,8 +518,6 @@ def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu
             cnt += 1
             epoch_loss_collector.append(loss.item())
 
-        sum(epoch_loss_collector) / len(epoch_loss_collector)
-
     train_acc, _ = compute_accuracy(net, train_dataloader, device=device)
 
     print(">> Training accuracy: %f" % train_acc)
@@ -528,5 +527,6 @@ def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu
 
 
 def test(net, test_dataloader, device="cpu"):
+    """Test function."""
     test_acc, loss = compute_accuracy(net, test_dataloader, device=device)
     return test_acc, loss

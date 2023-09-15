@@ -35,16 +35,18 @@ block) that this file should be executed first.
 
 import numpy as np
 import torchvision.transforms as transforms
-from dataset import CIFAR10_truncated, CIFAR100_truncated
+
+from moon.dataset import CIFAR10Sub, CIFAR100Sub
 
 
 def load_cifar10_data(datadir):
+    """Load CIFAR10 dataset."""
     transform = transforms.Compose([transforms.ToTensor()])
 
-    cifar10_train_ds = CIFAR10_truncated(
+    cifar10_train_ds = CIFAR10Sub(
         datadir, train=True, download=True, transform=transform
     )
-    cifar10_test_ds = CIFAR10_truncated(
+    cifar10_test_ds = CIFAR10Sub(
         datadir, train=False, download=True, transform=transform
     )
 
@@ -55,12 +57,13 @@ def load_cifar10_data(datadir):
 
 
 def load_cifar100_data(datadir):
+    """Load CIFAR100 dataset."""
     transform = transforms.Compose([transforms.ToTensor()])
 
-    cifar100_train_ds = CIFAR100_truncated(
+    cifar100_train_ds = CIFAR100Sub(
         datadir, train=True, download=True, transform=transform
     )
-    cifar100_test_ds = CIFAR100_truncated(
+    cifar100_test_ds = CIFAR100Sub(
         datadir, train=False, download=True, transform=transform
     )
 
@@ -70,7 +73,9 @@ def load_cifar100_data(datadir):
     return (X_train, y_train, X_test, y_test)
 
 
+# pylint: disable=too-many-locals
 def partition_data(dataset, datadir, partition, num_clients, beta):
+    """Partition data into train and test sets for IID and non-IID experiments."""
     if dataset == "cifar10":
         X_train, y_train, X_test, y_test = load_cifar10_data(datadir)
     elif dataset == "cifar100":
@@ -78,12 +83,12 @@ def partition_data(dataset, datadir, partition, num_clients, beta):
 
     n_train = y_train.shape[0]
 
-    if partition == "homo" or partition == "iid":
+    if partition in ("homo", "iid"):
         idxs = np.random.permutation(n_train)
         batch_idxs = np.array_split(idxs, num_clients)
         net_dataidx_map = {i: batch_idxs[i] for i in range(num_clients)}
 
-    elif partition == "noniid-labeldir" or partition == "noniid":
+    elif partition in ("noniid-labeldir", "noniid"):
         min_size = 0
         min_require_size = 10
         K = 10
