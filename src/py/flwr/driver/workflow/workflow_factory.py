@@ -15,14 +15,14 @@
 """Default workflow factories."""
 
 
+import timeit
 from dataclasses import dataclass
 from logging import DEBUG, INFO
 from typing import Callable, Dict, Generator, Optional, Tuple
-import timeit
 
 from flwr.common import serde
 from flwr.common.logger import log
-from flwr.common.typing import Parameters, Scalar, GetParametersIns
+from flwr.common.typing import GetParametersIns, Parameters, Scalar
 from flwr.driver.task_utils import wrap_server_message_in_task
 from flwr.proto.task_pb2 import Task
 from flwr.server.client_manager import ClientManager
@@ -80,7 +80,9 @@ class FLWorkflowFactory:
         else:
             log(INFO, "Requesting initial parameters from one random client")
             random_client = state.client_manager.sample(1)[0]
-            yield {random_client: wrap_server_message_in_task(GetParametersIns(config={}))}
+            yield {
+                random_client: wrap_server_message_in_task(GetParametersIns(config={}))
+            }
             node_responses = yield
             get_parameters_res = serde.get_parameters_res_from_proto(
                 node_responses[random_client].legacy_client_message.get_parameters_res
@@ -102,15 +104,17 @@ class FLWorkflowFactory:
         # Run federated learning for num_rounds
         log(INFO, "FL starting")
         start_time = timeit.default_timer()
-        
+
         for current_round in range(1, state.num_rounds + 1):
             state.current_round = current_round
-            
+
             # Fit round
             yield from self.fit_workflow_factory(state)
-            
+
             # Centralized evaluation
-            res_cen = state.strategy.evaluate(current_round, parameters=state.parameters)
+            res_cen = state.strategy.evaluate(
+                current_round, parameters=state.parameters
+            )
             if res_cen is not None:
                 loss_cen, metrics_cen = res_cen
                 log(
@@ -121,26 +125,20 @@ class FLWorkflowFactory:
                     metrics_cen,
                     timeit.default_timer() - start_time,
                 )
-                state.history.add_loss_centralized(server_round=current_round, loss=loss_cen)
+                state.history.add_loss_centralized(
+                    server_round=current_round, loss=loss_cen
+                )
                 state.history.add_metrics_centralized(
                     server_round=current_round, metrics=metrics_cen
                 )
-            
+
             # Evaluate round
             yield from self.evaluate_workflow_factory(state)
-        
+
         # Bookkeeping
         end_time = timeit.default_timer()
         elapsed = end_time - start_time
         log(INFO, "FL finished in %s", elapsed)
-        
-        # # Log history
-        # log(INFO, "app_fit: losses_distributed %s", str(state.history.losses_distributed))
-        # log(INFO, "app_fit: metrics_distributed_fit %s", str(state.history.metrics_distributed_fit))
-        # log(INFO, "app_fit: metrics_distributed %s", str(state.history.metrics_distributed))
-        # log(INFO, "app_fit: losses_centralized %s", str(state.history.losses_centralized))
-        # log(INFO, "app_fit: metrics_centralized %s", str(state.history.metrics_centralized))
-
 
 
 def default_fit_workflow_factory(state: WorkflowState) -> FlowerWorkflow:
@@ -165,7 +163,8 @@ def default_fit_workflow_factory(state: WorkflowState) -> FlowerWorkflow:
 
     # Send instructions to clients
     yield {
-        proxy: wrap_server_message_in_task(fit_ins) for proxy, fit_ins in client_instructions
+        proxy: wrap_server_message_in_task(fit_ins)
+        for proxy, fit_ins in client_instructions
     }
 
     # Collect `fit` results from all clients participating in this round

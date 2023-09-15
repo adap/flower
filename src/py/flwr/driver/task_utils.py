@@ -63,4 +63,3 @@ def wrap_named_values_in_task(named_values: Dict[str, Value]) -> task_pb2.Task:
             named_values=serde.named_values_to_proto(named_values)
         )
     )
-

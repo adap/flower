@@ -19,27 +19,34 @@ import sys
 import threading
 import time
 import timeit
-from logging import INFO
-from typing import Dict, Optional, List
 from dataclasses import dataclass
+from logging import INFO
+from typing import Dict, List, Optional, cast
 
 from flwr.common import EventType, event
 from flwr.common.address import parse_address
 from flwr.common.logger import log
 from flwr.common.typing import Parameters
-from flwr.proto.driver_pb2 import CreateWorkloadRequest, GetNodesRequest, PushTaskInsRequest, PushTaskInsResponse, PullTaskResRequest, PullTaskResResponse
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
+from flwr.proto.driver_pb2 import (
+    CreateWorkloadRequest,
+    GetNodesRequest,
+    PullTaskResRequest,
+    PushTaskInsRequest,
+)
 from flwr.proto.node_pb2 import Node
-from flwr.server.app import ServerConfig, run_fl
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.server.client_manager import ClientManager, SimpleClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
-from flwr.server.server import Server
 from flwr.server.strategy import FedAvg, Strategy
 
-from .workflow.workflow_factory import FlowerWorkflowFactory, FLWorkflowFactory, WorkflowState
 from .driver import Driver
 from .driver_client_proxy import DriverClientProxy
+from .workflow.workflow_factory import (
+    FlowerWorkflowFactory,
+    FLWorkflowFactory,
+    WorkflowState,
+)
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
 
@@ -49,6 +56,7 @@ ERROR_MESSAGE_DRIVER_NOT_CONNECTED = """
 Call `connect()` on the `Driver` instance before calling any of the other `Driver`
 methods.
 """
+
 
 @dataclass
 class DriverConfig:
@@ -142,11 +150,13 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         strategy = FedAvg()
     if config is None:
         config = DriverConfig()
+    if fl_workflow_factory is None:
+        fl_workflow_factory = cast(FlowerWorkflowFactory, FLWorkflowFactory())
     workflow_state = WorkflowState(
         num_rounds=config.num_rounds,
-        current_round=0, # This field will be set inside the workflow
+        current_round=0,  # This field will be set inside the workflow
         strategy=strategy,
-        parameters=Parameters(), # This field will be set inside the workflow,
+        parameters=Parameters(),  # This field will be set inside the workflow,
         client_manager=client_manager,
         history=hist,
     )
@@ -168,12 +178,30 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     thread.start()
 
     # Start training
-    
-    
+    fl_workflow = fl_workflow_factory(workflow_state)
+    node_responses = None
+
+    while True:
+        try:
+            instructions = fl_workflow.send(node_responses)
+            next(fl_workflow)
+        except StopIteration:
+            break
+        node_responses = fetch_responses(driver, instructions, config.round_timeout)
+
+    fl_workflow.close()
+
     # Stop the Driver API server and the thread
     with lock:
         driver.disconnect()
     thread.join()
+
+    # Log history
+    log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
+    log(INFO, "app_fit: metrics_distributed_fit %s", str(hist.metrics_distributed_fit))
+    log(INFO, "app_fit: metrics_distributed %s", str(hist.metrics_distributed))
+    log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))
+    log(INFO, "app_fit: metrics_centralized %s", str(hist.metrics_centralized))
 
     event(EventType.START_SERVER_LEAVE)
 
@@ -234,13 +262,16 @@ def update_client_manager(
         # Sleep for 3 seconds
         time.sleep(3)
 
-  
+
 def fetch_responses(
     driver: Driver,
     instructions: Dict[ClientProxy, Task],
     timeout: float,
 ) -> Dict[ClientProxy, Task]:
-    """."""
+    """Send instructions to clients and return their responses."""
+    # Create mapping from node_id to client_proxy
+    node_id_to_proxy = {proxy.node_id: proxy for proxy in instructions}
+
     # Build the list of TaskIns
     task_ins_list: List[TaskIns] = []
     driver_node = Node(node_id=0, anonymous=True)
@@ -258,23 +289,32 @@ def fetch_responses(
             task_id="",  # Do not set, will be created and set by the DriverAPI
             group_id="",
             workload_id=driver.workload_id,
-            task=task,            
+            task=task,
         )
         task_ins_list.append(task_ins)
-    
+
     # Push TaskIns
     push_res = driver.push_task_ins(PushTaskInsRequest(task_ins_list=task_ins_list))
     task_ids = [task_id for task_id in push_res.task_ids if task_id != ""]
-    
+
     time.sleep(1.0)
-    
+
     # Pull TaskRes
     task_res_list: List[TaskRes] = []
     start_time = timeit.default_timer()
     while timeit.default_timer() - start_time < timeout:
-        pull_res = driver.pull_task_res(PullTaskResRequest(node=driver_node, task_ids=task_ids))
+        pull_res = driver.pull_task_res(
+            PullTaskResRequest(node=driver_node, task_ids=task_ids)
+        )
         task_res_list.extend(pull_res.task_res_list)
         if len(task_res_list) == len(task_ids):
-            
-        
-        time.sleep(1.0)
+            break
+
+        time.sleep(3.0)
+
+    # Build and return response dictionary
+    node_responses: Dict[ClientProxy, Task] = {
+        node_id_to_proxy(task_res.task.producer.node_id): task_res.task
+        for task_res in task_res_list
+    }
+    return node_responses

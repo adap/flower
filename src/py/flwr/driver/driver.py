@@ -85,7 +85,7 @@ class Driver:
 
         # Call Driver API
         res: driver_pb2.CreateWorkloadResponse = self.stub.CreateWorkload(request=req)
-        
+
         # Store and return workload_id
         self.workload_id = res.workload_id
         return res
