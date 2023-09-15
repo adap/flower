@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **Support custom** `ClientManager` **in** `start_driver()` ([#2292](https://github.com/adap/flower/pull/2292))
+
 - **Update REST API to support create and delete nodes** ([#2283](https://github.com/adap/flower/pull/2283))
 
 ### What's new?
@@ -536,7 +538,7 @@ We would like to give our **special thanks** to all the contributors who made Fl
 
   - New option to keep Ray running if Ray was already initialized in `start_simulation` ([#1177](https://github.com/adap/flower/pull/1177))
   - Add support for custom `ClientManager` as a `start_simulation` parameter ([#1171](https://github.com/adap/flower/pull/1171))
-  - New documentation for [implementing strategies](https://flower.dev/docs/implementing-strategies.html) ([#1097](https://github.com/adap/flower/pull/1097), [#1175](https://github.com/adap/flower/pull/1175))
+  - New documentation for [implementing strategies](https://flower.dev/docs/framework/how-to-implement-strategies.html) ([#1097](https://github.com/adap/flower/pull/1097), [#1175](https://github.com/adap/flower/pull/1175))
   - New mobile-friendly documentation theme ([#1174](https://github.com/adap/flower/pull/1174))
   - Limit version range for (optional) `ray` dependency to include only compatible releases (`>=1.9.2,<1.12.0`) ([#1205](https://github.com/adap/flower/pull/1205))
 
