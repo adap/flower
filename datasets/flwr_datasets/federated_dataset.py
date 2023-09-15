@@ -20,6 +20,7 @@ from typing import Dict, Optional
 import datasets
 from datasets import Dataset, DatasetDict
 from flwr_datasets.partitioner import Partitioner
+from flwr_datasets.telemetry import EventType, event
 from flwr_datasets.utils import _check_if_dataset_supported, _instantiate_partitioners
 
 
@@ -61,6 +62,15 @@ class FederatedDataset:
         )
         #  Init (download) lazily on the first call to `load_partition` or `load_full`
         self._dataset: Optional[DatasetDict] = None
+        event(
+            EventType.FEDERATED_DATASET_CREATE,
+            {
+                "dataset_name": self._dataset_name,
+                "partitioners_ids": [
+                    id(partitioner) for partitioner in partitioners.values()
+                ],
+            },
+        )
 
     def load_partition(self, idx: int, split: str) -> Dataset:
         """Load the partition specified by the idx in the selected split.
