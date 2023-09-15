@@ -119,7 +119,7 @@ class pFedHN(FedAvg):
         return fit_configurations
 
     def gradient_upgradation(self, delta_theta_param: Parameters):
-        """Updating the gradients of the hypernetwork"""
+        """Updating the gradients of the hypernetwork."""
 
         optim = torch.optim.Adam(params=self.hnet.parameters(), lr=1e-2)
         optim.zero_grad()
@@ -153,7 +153,7 @@ class pFedHN(FedAvg):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """Using the delta_theta to update the hypernetwork"""
+        """Using the delta_theta to update the hypernetwork."""
 
         _, fit_res = results[0]
 

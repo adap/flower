@@ -9,6 +9,7 @@ from omegaconf import DictConfig, OmegaConf
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig):
     """Run the baseline.
+
     Parameters
     ----------
     cfg : DictConfig

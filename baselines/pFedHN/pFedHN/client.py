@@ -27,7 +27,8 @@ class FlowerClient(fl.client.NumPyClient):
         )
 
     def set_parameters(self, parameters):
-        """Setting the target network parameters using the parameters from the server"""
+        """Setting the target network parameters using the parameters from the
+        server."""
 
         params_dict = zip(self.net.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
@@ -35,7 +36,8 @@ class FlowerClient(fl.client.NumPyClient):
         return state_dict
 
     def get_parameters(self, config):
-        """Getting the target network parameters and sending them to the server"""
+        """Getting the target network parameters and sending them to the
+        server."""
 
         return [val.cpu().numpy() for _, val in config.items()]
 
