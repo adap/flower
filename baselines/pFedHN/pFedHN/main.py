@@ -9,18 +9,28 @@ from client import generate_client_fn
 
 @hydra.main(config_path="conf",config_name="base",version_base=None)
 def main(cfg:DictConfig):
+    """Run the baseline.
+    Parameters
+    ----------
+    cfg : DictConfig
+        An omegaconf object that stores the hydra config.
+    """
 
     # print(OmegaConf.to_yaml(cfg))
 
+    # partition dataset and get dataloaders
     trainloaders, validationloaders, testloaders = gen_random_loaders(cfg.dataset.data,cfg.dataset.root,cfg.client.num_nodes,cfg.client.batch_size,cfg.client.num_classes_per_node)
 
-    
-    client_fn = generate_client_fn(trainloaders,testloaders,cfg.client.num_nodes)
+    # prepare function that will be used to spawn each client
+    client_fn = generate_client_fn(trainloaders,testloaders,cfg)
 
-    
+    # instantiate strategy according to config
     strategy = instantiate(
-        cfg.strategy
+        cfg.strategy,
+        cfg
     )
+
+    # Start simulation
 
     history = fl.simulation.start_simulation(
         client_fn=client_fn,
@@ -30,5 +40,4 @@ def main(cfg:DictConfig):
     )
 
 if __name__ == "__main__":
-
     main()
