@@ -59,19 +59,12 @@ class FlowerClient(fl.client.NumPyClient):
         with torch.no_grad():
             vec_curr = parameters_to_vector(self.net.parameters())
             vec_prev = parameters_to_vector(prev_net.parameters())
-            params_delta_vec = vec_curr - vec_prev
-            grad = params_delta_vec
-            grad_p = self.data_ratio * grad
-            grad_norm = self.data_ratio * torch.linalg.norm(grad) ** 2
+            grad = vec_curr - vec_prev
 
         return (
             [],
             len(self.train_loader),
-            {
-                "data_ratio": self.data_ratio,
-                "grad_p": grad_p.to("cpu"),
-                "grad_norm": grad_norm.to("cpu"),
-            },
+            {"grad": grad.to("cpu")},
         )
 
 

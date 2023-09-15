@@ -47,14 +47,12 @@ class FedExP(FedAvg):
             return None, {}
         # Aggregate results
         self.epsilon *= self.decay ** 2
-        grad_sum = sum([res.metrics["grad_p"] for _, res in results])
-        p_sum = sum([res.metrics["data_ratio"] for _, res in results])
-        grad_norm_sum = sum([res.metrics["grad_norm"] for _, res in results])
-        clients_per_round = len(results) + len(failures)
+        grads = [res.metrics["grad"] for _, res in results]
+        grad_norms = [np.linalg.norm(grad) ** 2 for grad in grads]
         with torch.no_grad():
-            grad_avg = grad_sum / p_sum
+            grad_avg = np.mean(grads)
             grad_avg_norm = torch.linalg.norm(grad_avg) ** 2
-            grad_norm_avg = grad_norm_sum / p_sum
+            grad_norm_avg = np.mean(grad_norms)
 
             if self.algorithm.lower() == "fedexp":
                 eta_g = max(
@@ -62,7 +60,7 @@ class FedExP(FedAvg):
                     (
                         0.5
                         * grad_norm_avg
-                        / (grad_avg_norm + clients_per_round * self.epsilon).cpu()
+                        / (grad_avg_norm + self.epsilon).cpu()
                     ).item(),
                 )
             elif self.algorithm.lower() == "fedavg":
@@ -84,5 +82,7 @@ class FedExP(FedAvg):
                 vector_to_parameters(w_vec_avg, self.net_glob.parameters())
             elif self.algorithm.lower() == "fedavg":
                 vector_to_parameters(self.w_vec_estimate, self.net_glob.parameters())
+
+            self.epsilon *= self.decay
 
         return ndarrays_to_parameters(get_parameters(self.net_glob)), {"eta_g": eta_g}
