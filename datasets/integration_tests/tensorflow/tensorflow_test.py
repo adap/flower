@@ -1,16 +1,28 @@
 import unittest
 
-from datasets.utils.logging import disable_progress_bar
-from parameterized import parameterized_class
+import numpy as np
 import tensorflow as tf
+from datasets.utils.logging import disable_progress_bar
+from parameterized import parameterized_class, parameterized
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+from tensorflow.keras.models import Sequential
 
 from flwr_datasets import FederatedDataset
 
 
-# Using parameterized testing, two different sets of parameters are specified:
-# 1. CIFAR10 dataset with the simple ToTensor transform.
-# 2. CIFAR10 dataset with a composed transform that first converts an image to a tensor
-#    and then normalizes it.
+def SimpleCNN():
+    model = Sequential([
+        Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)),
+        MaxPooling2D(2, 2),
+        Conv2D(64, (3, 3), activation='relu'),
+        MaxPooling2D(2, 2),
+        Flatten(),
+        Dense(64, activation='relu'),
+        Dense(10, activation='softmax')
+    ])
+    return model
+
+
 @parameterized_class(
     [
         {"dataset_name": "cifar10", "test_split": "test"},
@@ -63,6 +75,27 @@ class FDSToPyTorchCorrectUsage(unittest.TestCase):
         batch = next(iter(dataset))
         images = batch[0]
         self.assertIsInstance(images, tf.Tensor)
+
+    @parameterized.expand([
+        ("not_nan", np.isnan),
+        ("not_inf", np.isinf),
+    ])
+    def test_train_model_loss_value(self, name, condition_func):
+        model = SimpleCNN()
+        model.compile(optimizer='adam',
+                      loss='sparse_categorical_crossentropy',
+                      metrics=['accuracy'])
+
+        dataset = self._create_tensorflow_dataset(16)
+
+        # Perform a single epoch of training
+        history = model.fit(dataset, epochs=1, verbose=0)
+
+        # Fetch the last loss from history
+        last_loss = history.history['loss'][-1]
+
+        # Check if the last loss is NaN or Infinity
+        self.assertFalse(condition_func(last_loss))
 
 
 if __name__ == '__main__':
