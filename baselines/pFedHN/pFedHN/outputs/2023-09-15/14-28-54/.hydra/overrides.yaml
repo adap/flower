@@ -1,4 +1,0 @@
-- dataset.data=mnist
-- dataset.root=./data
-- model.n_kernels=7
-- model.in_channels=1
