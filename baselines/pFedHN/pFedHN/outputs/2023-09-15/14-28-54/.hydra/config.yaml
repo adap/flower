@@ -1,0 +1,22 @@
+dataset:
+  data: mnist
+  root: ./data
+model:
+  device: cpu
+  optim: adam
+  n_kernels: 7
+  inner_lr: 0.005
+  wd: 0.001
+  inner_wd: 5.0e-05
+  lr: 0.01
+  in_channels: 1
+  out_dim: 10
+strategy:
+  _target_: strategy.pFedHN
+client:
+  num_steps: 1
+  num_inner_steps: 1
+  num_rounds: 5000
+  num_nodes: 50
+  batch_size: 64
+  num_classes_per_node: 2
