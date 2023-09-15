@@ -5,8 +5,8 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 # Append parent directory to make flwr_tool.init_py_check discoverable
 PARENT_DIR=$(dirname $(pwd))
 echo $PARENT_DIR
-export PATH="${PATH}:${PARENT_DIR}:${PARENT_DIR}/src/py"
-echo $PATH
+#export PATH="${PATH}:${PARENT_DIR}/src/py"
+#echo $PATH
 export PYTHONPATH="${PYTHONPATH}:${PARENT_DIR}/src/py"
 echo $PYTHONPATH
 echo "=== test.sh ==="
