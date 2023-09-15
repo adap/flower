@@ -2,7 +2,7 @@
 title: Personalized Federated Learning using Hypernetworks
 url: https://arxiv.org/abs/2103.04628
 labels: ["data heterogenity", "hypernetworks","personalised federated learning",] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [MNIST, CIFAR10, CIFAR100] # list of datasets you include in your baseline
+dataset: MNIST, CIFAR10, CIFAR100 # list of datasets you include in your baseline
 ---
 
 # *pFedHN*
@@ -23,7 +23,7 @@ dataset: [MNIST, CIFAR10, CIFAR100] # list of datasets you include in your basel
 
 ****Hardware Setup:**** : Will be updated
 
-****Contributors:**** :*_Ram Samarth B B(@achiverram28) , Kishan Gurumurthy(@kishan-droid) , Sachin DN(@sachugowda)_*
+****Contributors:**** :Ram Samarth B B(@achiverram28) , Kishan Gurumurthy(@kishan-droid) , Sachin DN(@sachugowda)
 
 
 ## Experimental Setup
@@ -34,11 +34,11 @@ dataset: [MNIST, CIFAR10, CIFAR100] # list of datasets you include in your basel
 
 **Dataset:** This baseline includes the MNIST, CIFAR10 , CIFAR100 datasets. By default it will be partitioned into 50 clients following IID distribution. The settings are as follow:
 
-| Dataset | #classes | partitioning method |
-| :------ | :---: | :---: |
-| MNIST | 10 | IID |
-| CIFAR10 | 10 | IID |
-| CIFAR10 | 100 | IID |
+| Dataset | #classes | partitioning method | classes per client |
+| :------ | :---: | :---: | :---: |
+| MNIST | 10 | Non-IID | 2 |
+| CIFAR10 | 10 | Non-IID | 2 |
+| CIFAR10 | 100 | Non-IID | 10 |
 
 
 ****Training Hyperparameters:**** : The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python3 main.py` directly)
