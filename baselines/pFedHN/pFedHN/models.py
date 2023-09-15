@@ -1,3 +1,5 @@
+## Have made the models more flexible referencing the original code implementation
+
 from collections import OrderedDict
 
 import torch
@@ -13,7 +15,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 class CNNHyper(nn.Module):
     def __init__(
-            self, n_nodes, embedding_dim, in_channels, n_kernels,out_dim=10, hidden_dim=100,
+            self, n_nodes, embedding_dim, in_channels, n_kernels,out_dim, hidden_dim=100,
             spec_norm=False, n_hidden=1):
         super().__init__()
 
@@ -130,7 +132,7 @@ class CNNHyper(nn.Module):
 
 
 class CNNTarget(nn.Module):
-    def __init__(self, in_channels, n_kernels, out_dim=10):
+    def __init__(self, in_channels, n_kernels, out_dim):
         super(CNNTarget, self).__init__()
 
         self.in_channels = in_channels
