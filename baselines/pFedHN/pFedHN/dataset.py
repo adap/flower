@@ -1,16 +1,19 @@
+## Adding even the support for mnist referencing the original code implementation
+
+
 import random
 from collections import defaultdict
 
 import numpy as np
 import torch.utils.data
 import torchvision.transforms as transforms
-from torchvision.datasets import CIFAR10, CIFAR100
+from torchvision.datasets import CIFAR10, CIFAR100 , MNIST
 
 
 def get_datasets(data_name, dataroot, normalize=True, val_size=10000):
     """
-    get_datasets returns train/val/test data splits of CIFAR10/100 datasets
-    :param data_name: name of dataset, choose from [cifar10, cifar100]
+    get_datasets returns train/val/test data splits of MNIST/CIFAR10/100 datasets
+    :param data_name: name of dataset, choose from [mnist,cifar10, cifar100]
     :param dataroot: root to data dir
     :param normalize: True/False to normalize the data
     :param val_size: validation split size (in #samples)
@@ -20,9 +23,15 @@ def get_datasets(data_name, dataroot, normalize=True, val_size=10000):
     if data_name =='cifar10':
         normalization = transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
         data_obj = CIFAR10
+
     elif data_name == 'cifar100':
         normalization = transforms.Normalize((0.5071, 0.4865, 0.4409), (0.2673, 0.2564, 0.2762))
         data_obj = CIFAR100
+
+    elif data_name == "mnist":
+        normalization = transforms.Normalize((0.1307,), (0.3081,))
+        data_obj = MNIST
+
     else:
         raise ValueError("choose data_name from ['mnist', 'cifar10', 'cifar100']")
 
@@ -155,7 +164,7 @@ def gen_data_split(dataset, num_users, class_partitions):
 def gen_random_loaders(data_name, data_path, num_users, bz, classes_per_user):
     """
     generates train/val/test loaders of each client
-    :param data_name: name of dataset, choose from [cifar10, cifar100]
+    :param data_name: name of dataset, choose from [mnsit,cifar10, cifar100]
     :param data_path: root path for data dir
     :param num_users: number of clients
     :param bz: batch size
