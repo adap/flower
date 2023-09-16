@@ -35,7 +35,11 @@ class WorkloadState:
 
 @dataclass
 class ClientState:
-    """Client state."""
+    """Client state.
+
+    A dataclass that keeps track of a separate state for each workload the client
+    executes.
+    """
 
     cid: Optional[str] = None
     workload_states: Dict[str, WorkloadState] = field(default_factory=dict)
