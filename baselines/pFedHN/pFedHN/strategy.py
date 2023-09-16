@@ -21,9 +21,12 @@ from flwr.server.strategy import FedAvg
 from pFedHN.models import CNNHyper
 
 
+# pylint: disable=invalid-name
+# pylint: disable=too-many-instance-attributes
 class pFedHN(FedAvg):
     """Federated strategy with pFedHN."""
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         config,
@@ -41,7 +44,8 @@ class pFedHN(FedAvg):
             ]
         ] = None,
     ) -> None:
-        self.fraction_fit = 0.0
+        super().__init__()
+        self.fraction_fit = fraction_fit
         self.fraction_evaluate = fraction_evaluate
         self.min_fit_clients = min_fit_clients
         self.min_evaluate_clients = min_evaluate_clients
@@ -50,6 +54,16 @@ class pFedHN(FedAvg):
         self.initial_parameters = initial_parameters
         self.cfg = config
         self.evaluate_fn = evaluate_fn
+        # Initialising our hnet model in server
+        self.hnet = CNNHyper(
+            n_nodes=self.cfg.client.num_nodes,
+            embedding_dim=int(1 + self.cfg.client.num_nodes / 4),
+            in_channels=self.cfg.model.in_channels,
+            n_kernels=self.cfg.model.n_kernels,
+            out_dim=self.cfg.model.out_dim,
+            hidden_dim=100,
+            n_hidden=1,
+        )
 
     def __repr__(self) -> str:
         """Return the strategy name."""
@@ -61,17 +75,7 @@ class pFedHN(FedAvg):
         """Initialize global model parameters."""
         client_manager.num_available()
 
-        # Initialising our hnet model in server
-        self.hnet = CNNHyper(
-            n_nodes=self.cfg.client.num_nodes,
-            embedding_dim=int(1 + self.cfg.client.num_nodes / 4),
-            in_channels=self.cfg.model.in_channels,
-            n_kernels=self.cfg.model.n_kernels,
-            out_dim=self.cfg.model.out_dim,
-            hidden_dim=100,
-            n_hidden=1,
-        )
-        self.hnet.to(torch.device("cpu"))
+        self.hnet.to(torch.device("cpu"))  # pylint : disable=E1101
 
         initial_parameters = self.initial_parameters
         self.initial_parameters = None
@@ -79,11 +83,11 @@ class pFedHN(FedAvg):
 
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Return sample size and required number of clients."""
-        return 1, self.min_available_clients
+        return min(1, num_available_clients), self.min_available_clients
 
     def num_evaluate_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Use a fraction of available clients for evaluation."""
-        return 1, self.min_available_clients
+        return min(1, num_available_clients), self.min_available_clients
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -103,12 +107,15 @@ class pFedHN(FedAvg):
         # function to generate weights for each client
         def weights_to_clients(client_id):
             weights = self.hnet(
-                torch.tensor([client_id], dtype=torch.long).to(torch.device("cpu"))
+                torch.tensor([client_id], dtype=torch.long).to(
+                    torch.device("cpu")
+                )  # pylint : disable=E1101
             )
             return weights
 
         fit_configurations = []
         for _idx, client in enumerate(clients):
+            # pylint: disable=attribute-defined-outside-init
             self.weights = weights_to_clients(int(client.cid))
             array = [val.cpu().detach().numpy() for _, val in self.weights.items()]
 

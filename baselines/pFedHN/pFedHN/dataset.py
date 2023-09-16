@@ -11,7 +11,7 @@ import torchvision.transforms as transforms
 from torchvision.datasets import CIFAR10, CIFAR100, MNIST
 
 
-def get_datasets(data_name, dataroot, normalize=True, val_size=10000):
+def get_datasets(data_name, dataroot, val_size=10000):
     """get_datasets returns train/val/test data splits of MNIST/CIFAR10/100 datasets.
 
     :param data_name: name of dataset, choose from [mnist,cifar10, cifar100] :param
@@ -19,35 +19,36 @@ def get_datasets(data_name, dataroot, normalize=True, val_size=10000):
     val_size: validation split size (in #samples) :return: train_set, val_set, test_set
     (tuple of pytorch dataset/subset).
     """
-    if data_name == "cifar10":
-        normalization = transforms.Normalize(
+    if data_name not in ["mnist", "cifar10", "cifar100"]:
+        raise ValueError("Choose data_name from ['mnist', 'cifar10', 'cifar100']")
+
+    normalization = {
+        "mnist": transforms.Normalize((0.1307,), (0.3081,)),
+        "cifar10": transforms.Normalize(
             (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
-        )
-        data_obj = CIFAR10
-
-    elif data_name == "cifar100":
-        normalization = transforms.Normalize(
+        ),
+        "cifar100": transforms.Normalize(
             (0.5071, 0.4865, 0.4409), (0.2673, 0.2564, 0.2762)
-        )
-        data_obj = CIFAR100
+        ),
+    }[data_name]
 
-    elif data_name == "mnist":
-        normalization = transforms.Normalize((0.1307,), (0.3081,))
-        data_obj = MNIST
+    transform = transforms.Compose([transforms.ToTensor(), normalization])
 
-    else:
-        raise ValueError("choose data_name from ['mnist', 'cifar10', 'cifar100']")
+    dataset = {
+        "mnist": MNIST,
+        "cifar10": CIFAR10,
+        "cifar100": CIFAR100,
+    }[
+        data_name
+    ](dataroot, train=True, download=True, transform=transform)
 
-    trans = [transforms.ToTensor()]
-
-    if normalize:
-        trans.append(normalization)
-
-    transform = transforms.Compose(trans)
-
-    dataset = data_obj(dataroot, train=True, download=True, transform=transform)
-
-    test_set = data_obj(dataroot, train=False, download=True, transform=transform)
+    test_set = {
+        "mnist": MNIST,
+        "cifar10": CIFAR10,
+        "cifar100": CIFAR100,
+    }[
+        data_name
+    ](dataroot, train=False, download=True, transform=transform)
 
     train_size = len(dataset) - val_size
     train_set, val_set = torch.utils.data.random_split(dataset, [train_size, val_size])
@@ -64,15 +65,10 @@ def get_num_classes_samples(dataset):
     # Extract labels #
     # ---------------#
     if isinstance(dataset, torch.utils.data.Subset):
-        if isinstance(dataset.dataset.targets, list):
-            data_labels_list = np.array(dataset.dataset.targets)[dataset.indices]
-        else:
-            data_labels_list = dataset.dataset.targets[dataset.indices]
+        data_labels_list = np.array(dataset.dataset.targets)[list(dataset.indices)]
     else:
-        if isinstance(dataset.targets, list):
-            data_labels_list = np.array(dataset.targets)
-        else:
-            data_labels_list = dataset.targets
+        data_labels_list = np.array(dataset.targets)
+
     classes, num_samples = np.unique(data_labels_list, return_counts=True)
     num_classes = len(classes)
     return num_classes, num_samples, data_labels_list
@@ -92,7 +88,9 @@ def gen_classes_per_node(
     :return: dictionary mapping between classes and proportions, each entry refers to
         other client.
     """
-    num_classes, num_samples, _ = get_num_classes_samples(dataset)
+    num_classes, num_samples, _ = get_num_classes_samples(  # pylint: disable=W0612
+        dataset
+    )  # pylint: disable=W0612
 
     # -------------------------------------------#
     # Divide classes + num samples for each user #
@@ -112,7 +110,7 @@ def gen_classes_per_node(
     # -------------------------------------#
     class_partitions = defaultdict(list)
     for i in range(num_users):
-        c = []
+        c = []  # pylint: disable=C0103
         for _ in range(classes_per_user):
             class_counts = [class_dict[i]["count"] for i in range(num_classes)]
             max_class_counts = np.where(np.array(class_counts) == max(class_counts))[0]
@@ -149,7 +147,7 @@ def gen_data_split(dataset, num_users, class_partitions):
     # ------------------------------ #
     user_data_idx = [[] for i in range(num_users)]
     for usr_i in range(num_users):
-        for c, p in zip(
+        for c, p in zip(  # pylint: disable=C0103
             class_partitions["class"][usr_i], class_partitions["prob"][usr_i]
         ):
             end_idx = int(num_samples[c] * p)
@@ -159,7 +157,9 @@ def gen_data_split(dataset, num_users, class_partitions):
     return user_data_idx
 
 
-def gen_random_loaders(data_name, data_path, num_users, bz, classes_per_user):
+def gen_random_loaders(
+    data_name, data_path, num_users, bz, classes_per_user
+):  # pylint: disable=C0103
     """Generate train/val/test loaders of each client.
 
     :param data_name: name of dataset, choose from [mnsit,cifar10, cifar100]
@@ -177,7 +177,7 @@ def gen_random_loaders(data_name, data_path, num_users, bz, classes_per_user):
     }
     dataloaders = []
     datasets = get_datasets(data_name, data_path, normalize=True)
-    for i, d in enumerate(datasets):
+    for i, d in enumerate(datasets):  # pylint: disable=C0103
         # ensure same partition for train/test/val
         if i == 0:
             cls_partitions = gen_classes_per_node(d, num_users, classes_per_user)

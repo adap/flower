@@ -4,17 +4,27 @@ import torch
 import torch.utils.data
 
 
+# pylint: disable=too-many-arguments
 def train(
-    netw, trainloader, testloader, epochs: int, lr: float, wd: float, device, cid
+    netw,
+    trainloader,
+    testloader,
+    epochs: int,
+    learning_rate: float,
+    weight_decay: float,
+    device,
+    cid,
 ) -> None:
     """Train the network on the training set."""
-    net = netw
-    net = net.to(device)
+    # pylint: disable=too-many-locals
+    net = netw.to(device)
 
     criteria = torch.nn.CrossEntropyLoss()
 
     # init optimizer
-    optim = torch.optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=wd)
+    optim = torch.optim.SGD(
+        net.parameters(), lr=learning_rate, momentum=0.9, weight_decay=weight_decay
+    )
 
     # inner updates -> obtaining theta_tilda
     for _i in range(epochs):

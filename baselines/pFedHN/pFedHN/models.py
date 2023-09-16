@@ -1,7 +1,4 @@
 """Implement the HyperNetwork and TargetNetwork for pFedHN."""
-# Have made the models more flexible referencing the original code implementation
-
-###
 import ssl
 from collections import OrderedDict
 
@@ -9,8 +6,10 @@ import torch.nn.functional as F
 from torch import nn
 from torch.nn.utils import spectral_norm
 
+# Disable protected member warnings for SSL
+# pylint: disable=protected-access
+
 ssl._create_default_https_context = ssl._create_unverified_context
-####
 
 
 class CNNHyper(nn.Module):
@@ -175,7 +174,7 @@ class CNNTarget(nn.Module):
     """Target Network for pFedHN."""
 
     def __init__(self, in_channels, n_kernels, out_dim):
-        super(CNNTarget, self).__init__()
+        super().__init__()
 
         self.in_channels = in_channels
 
@@ -196,7 +195,7 @@ class CNNTarget(nn.Module):
             self.fc2 = nn.Linear(120, 84)
             self.fc3 = nn.Linear(84, out_dim)
 
-    def forward(self, x):
+    def forward(self, x):  # pylint: disable=C0103
         """Forward pass of the target network."""
         if self.in_channels == 3:
             x = self.pool(F.relu(self.conv1(x)))
