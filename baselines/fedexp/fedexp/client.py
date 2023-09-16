@@ -64,7 +64,7 @@ class FlowerClient(fl.client.NumPyClient):
         return (
             [],
             len(self.train_loader),
-            {"grad": grad.to("cpu")},
+            {"grad": grad.to("cpu").numpy()},
         )
 
 

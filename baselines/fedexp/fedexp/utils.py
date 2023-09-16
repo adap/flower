@@ -41,7 +41,7 @@ def plot_metric_from_history(
     rounds, values_accuracy = zip(*metric_dict["accuracy"])
     _, axs = plt.subplots()
     # Set the title
-    axs.set_title(f"{cfg.strategy.alogrithm} | {cfg.dataset_config.name} | Seed {cfg.seed}")
+    axs.set_title(f"{cfg.strategy.algorithm} | {cfg.dataset_config.name} | Seed {cfg.seed}")
     axs.plot(np.asarray(rounds), np.asarray(values_accuracy))
     axs.set_ylabel("Accuracy")
     axs.set_xlabel("Rounds")
