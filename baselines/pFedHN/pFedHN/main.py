@@ -21,7 +21,8 @@ def main(cfg: DictConfig):
     # print(OmegaConf.to_yaml(cfg))
 
     # partition dataset and get dataloaders
-    trainloaders, validationloaders, testloaders = gen_random_loaders(
+    # pylint: disable=unbalanced-tuple-unpacking
+    trainloaders, _, testloaders = gen_random_loaders(
         cfg.dataset.data,
         cfg.dataset.root,
         cfg.client.num_nodes,

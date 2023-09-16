@@ -7,11 +7,11 @@ from collections import defaultdict
 
 import numpy as np
 import torch.utils.data
-import torchvision.transforms as transforms
+from torchvision import transforms
 from torchvision.datasets import CIFAR10, CIFAR100, MNIST
 
 
-def get_datasets(data_name, dataroot, val_size=10000):
+def get_datasets(data_name, dataroot, normalize=True, val_size=10000):
     """get_datasets returns train/val/test data splits of MNIST/CIFAR10/100 datasets.
 
     :param data_name: name of dataset, choose from [mnist,cifar10, cifar100] :param
@@ -32,7 +32,12 @@ def get_datasets(data_name, dataroot, val_size=10000):
         ),
     }[data_name]
 
-    transform = transforms.Compose([transforms.ToTensor(), normalization])
+    trans = [transforms.ToTensor()]
+
+    if normalize:
+        trans.append(normalization)
+
+    transform = transforms.Compose(trans)
 
     dataset = {
         "mnist": MNIST,
@@ -74,6 +79,7 @@ def get_num_classes_samples(dataset):
     return num_classes, num_samples, data_labels_list
 
 
+# pylint: disable=too-many-locals
 def gen_classes_per_node(
     dataset, num_users, classes_per_user=2, high_prob=0.6, low_prob=0.4
 ):
@@ -88,9 +94,7 @@ def gen_classes_per_node(
     :return: dictionary mapping between classes and proportions, each entry refers to
         other client.
     """
-    num_classes, num_samples, _ = get_num_classes_samples(  # pylint: disable=W0612
-        dataset
-    )  # pylint: disable=W0612
+    num_classes, _, _ = get_num_classes_samples(dataset)
 
     # -------------------------------------------#
     # Divide classes + num samples for each user #
@@ -110,14 +114,14 @@ def gen_classes_per_node(
     # -------------------------------------#
     class_partitions = defaultdict(list)
     for i in range(num_users):
-        c = []  # pylint: disable=C0103
+        c_max = []
         for _ in range(classes_per_user):
             class_counts = [class_dict[i]["count"] for i in range(num_classes)]
             max_class_counts = np.where(np.array(class_counts) == max(class_counts))[0]
-            c.append(np.random.choice(max_class_counts))
-            class_dict[c[-1]]["count"] -= 1
-        class_partitions["class"].append(c)
-        class_partitions["prob"].append([class_dict[i]["prob"].pop() for i in c])
+            c_max.append(np.random.choice(max_class_counts))
+            class_dict[c_max[-1]]["count"] -= 1
+        class_partitions["class"].append(c_max)
+        class_partitions["prob"].append([class_dict[i]["prob"].pop() for i in c_max])
     return class_partitions
 
 
@@ -147,19 +151,17 @@ def gen_data_split(dataset, num_users, class_partitions):
     # ------------------------------ #
     user_data_idx = [[] for i in range(num_users)]
     for usr_i in range(num_users):
-        for c, p in zip(  # pylint: disable=C0103
+        for class_usr, prob_usr in zip(
             class_partitions["class"][usr_i], class_partitions["prob"][usr_i]
         ):
-            end_idx = int(num_samples[c] * p)
-            user_data_idx[usr_i].extend(data_class_idx[c][:end_idx])
-            data_class_idx[c] = data_class_idx[c][end_idx:]
+            end_idx = int(num_samples[class_usr] * prob_usr)
+            user_data_idx[usr_i].extend(data_class_idx[class_usr][:end_idx])
+            data_class_idx[class_usr] = data_class_idx[class_usr][end_idx:]
 
     return user_data_idx
 
 
-def gen_random_loaders(
-    data_name, data_path, num_users, bz, classes_per_user
-):  # pylint: disable=C0103
+def gen_random_loaders(data_name, data_path, num_users, batch_size, classes_per_user):
     """Generate train/val/test loaders of each client.
 
     :param data_name: name of dataset, choose from [mnsit,cifar10, cifar100]
@@ -170,21 +172,21 @@ def gen_random_loaders(
     train/val/test loaders of each client, list of pytorch dataloaders.
     """
     loader_params = {
-        "batch_size": bz,
+        "batch_size": batch_size,
         "shuffle": False,
         "pin_memory": True,
         "num_workers": 0,
     }
     dataloaders = []
     datasets = get_datasets(data_name, data_path, normalize=True)
-    for i, d in enumerate(datasets):  # pylint: disable=C0103
+    for i, dataset in enumerate(datasets):
         # ensure same partition for train/test/val
         if i == 0:
-            cls_partitions = gen_classes_per_node(d, num_users, classes_per_user)
+            cls_partitions = gen_classes_per_node(dataset, num_users, classes_per_user)
             loader_params["shuffle"] = True
-        usr_subset_idx = gen_data_split(d, num_users, cls_partitions)
+        usr_subset_idx = gen_data_split(dataset, num_users, cls_partitions)
         # create subsets for each client
-        subsets = [torch.utils.data.Subset(d, x) for x in usr_subset_idx]
+        subsets = [torch.utils.data.Subset(dataset, x) for x in usr_subset_idx]
         # create dataloaders from subsets
         dataloaders.append(
             [torch.utils.data.DataLoader(x, **loader_params) for x in subsets]

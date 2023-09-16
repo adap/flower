@@ -75,7 +75,7 @@ class pFedHN(FedAvg):
         """Initialize global model parameters."""
         client_manager.num_available()
 
-        self.hnet.to(torch.device("cpu")) # pylint : disable=E1101
+        self.hnet.to(torch.device("cpu"))
 
         initial_parameters = self.initial_parameters
         self.initial_parameters = None
@@ -107,7 +107,7 @@ class pFedHN(FedAvg):
         # function to generate weights for each client
         def weights_to_clients(client_id):
             weights = self.hnet(
-                torch.tensor([client_id], dtype=torch.long).to(torch.device("cpu")) 
+                torch.tensor([client_id], dtype=torch.long).to(torch.device("cpu"))
             )
             return weights
 

@@ -12,9 +12,12 @@ from torch.nn.utils import spectral_norm
 ssl._create_default_https_context = ssl._create_unverified_context
 
 
+# pylint: disable=too-many-instance-attributes
 class CNNHyper(nn.Module):
     """HyperNetwork for pFedHN."""
 
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-statements
     def __init__(
         self,
         n_nodes,
@@ -170,9 +173,11 @@ class CNNHyper(nn.Module):
         return weights
 
 
+# pylint: disable=too-many-instance-attributes
 class CNNTarget(nn.Module):
     """Target Network for pFedHN."""
 
+    # pylint: disable=too-many-arguments
     def __init__(self, in_channels, n_kernels, out_dim):
         super().__init__()
 
@@ -195,7 +200,7 @@ class CNNTarget(nn.Module):
             self.fc2 = nn.Linear(120, 84)
             self.fc3 = nn.Linear(84, out_dim)
 
-    def forward(self, x):  # pylint: disable=C0103
+    def forward(self, x):
         """Forward pass of the target network."""
         if self.in_channels == 3:
             x = self.pool(F.relu(self.conv1(x)))

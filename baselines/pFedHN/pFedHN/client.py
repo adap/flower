@@ -9,6 +9,7 @@ from pFedHN.models import CNNTarget
 from pFedHN.trainer import train
 
 
+# pylint: disable=too-many-instance-attributes
 class FlowerClient(fl.client.NumPyClient):
     """Flower client for federated learning.
 
@@ -108,7 +109,7 @@ class FlowerClient(fl.client.NumPyClient):
 
         # Calculating delta theta
         delta_theta = OrderedDict(
-            {k: inner_state[k] - final_state[k] for k in inner_state.keys()}
+            {k: v - final_state[k] for k, v in inner_state.items()}
         )
 
         return self.get_parameters(delta_theta), len(self.trainloader), {}
