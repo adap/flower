@@ -51,18 +51,11 @@ class FedExP(FedAvg):
         grad_norms = [np.linalg.norm(grad) ** 2 for grad in grads]
         with torch.no_grad():
             grad_avg = np.mean(grads)
-            grad_avg_norm = torch.linalg.norm(grad_avg) ** 2
+            grad_avg_norm = np.linalg.norm(grad_avg) ** 2
             grad_norm_avg = np.mean(grad_norms)
 
             if self.algorithm.lower() == "fedexp":
-                eta_g = max(
-                    1,
-                    (
-                        0.5
-                        * grad_norm_avg
-                        / (grad_avg_norm + self.epsilon).cpu()
-                    ).item(),
-                )
+                eta_g = max(1, (0.5 * grad_norm_avg / (grad_avg_norm + self.epsilon)).item())
             elif self.algorithm.lower() == "fedavg":
                 eta_g = 1
             else:
