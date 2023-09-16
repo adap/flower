@@ -1,0 +1,3 @@
+- dataset.data=mnist
+- model.n_kernels=7
+- model.in_channels=1
