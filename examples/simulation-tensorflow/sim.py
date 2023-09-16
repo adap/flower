@@ -9,6 +9,8 @@ import flwr as fl
 from flwr.common import Metrics
 from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
 
+from datasets import Dataset
+from flwr_datasets import FederatedDataset
 
 # Make TensorFlow logs less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
@@ -34,11 +36,11 @@ VERBOSE = 0
 
 
 class FlowerClient(fl.client.NumPyClient):
-    def __init__(self, x_train, y_train, x_val, y_val) -> None:
+    def __init__(self, trainset, valset) -> None:
         # Create model
         self.model = get_model()
-        self.x_train, self.y_train = x_train, y_train
-        self.x_val, self.y_val = x_val, y_val
+        self.x_train, self.y_train = trainset["image"], trainset["label"]
+        self.x_val, self.y_val = valset["image"], valset["label"]
 
     def get_parameters(self, config):
         return self.model.get_weights()
@@ -72,10 +74,10 @@ def get_model():
     return model
 
 
-def get_client_fn(dataset_partitions):
-    """Return a function to construc a client.
+def get_client_fn(dataset: FederatedDataset):
+    """Return a function to construct a client.
 
-    The VirtualClientEngine will exectue this function whenever a client is sampled by
+    The VirtualClientEngine will execute this function whenever a client is sampled by
     the strategy to participate.
     """
 
@@ -83,17 +85,17 @@ def get_client_fn(dataset_partitions):
         """Construct a FlowerClient with its own dataset partition."""
 
         # Extract partition for client with id = cid
-        x_train, y_train = dataset_partitions[int(cid)]
-        # Use 10% of the client's training data for validation
-        split_idx = math.floor(len(x_train) * 0.9)
-        x_train_cid, y_train_cid = (
-            x_train[:split_idx],
-            y_train[:split_idx],
-        )
-        x_val_cid, y_val_cid = x_train[split_idx:], y_train[split_idx:]
+        client_dataset = dataset.load_partition(int(cid), "train")
+
+        # Now let's split it into train (90%) and validation (10%)
+        client_dataset_splits = client_dataset.train_test_split(test_size=0.1)
+
+        trainset = client_dataset_splits["train"].with_format("tf")
+        valset = client_dataset_splits["test"].with_format("tf")
+    
 
         # Create and return client
-        return FlowerClient(x_train_cid, y_train_cid, x_val_cid, y_val_cid)
+        return FlowerClient(trainset, valset)
 
     return client_fn
 
@@ -124,9 +126,8 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     return {"accuracy": sum(accuracies) / sum(examples)}
 
 
-def get_evaluate_fn(testset):
+def get_evaluate_fn(testset: Dataset):
     """Return an evaluation function for server-side (i.e. centralised) evaluation."""
-    x_test, y_test = testset
 
     # The `evaluate` function will be called after every round by the strategy
     def evaluate(
@@ -136,7 +137,7 @@ def get_evaluate_fn(testset):
     ):
         model = get_model()  # Construct the model
         model.set_weights(parameters)  # Update model with the latest parameters
-        loss, accuracy = model.evaluate(x_test, y_test, verbose=VERBOSE)
+        loss, accuracy = model.evaluate(testset["image"], testset["label"], verbose=VERBOSE)
         return loss, {"accuracy": accuracy}
 
     return evaluate
@@ -146,8 +147,9 @@ def main() -> None:
     # Parse input arguments
     args = parser.parse_args()
 
-    # Create dataset partitions (needed if your dataset is not pre-partitioned)
-    partitions, testset = partition_mnist()
+    # Download MNIST dataset and partition it
+    mnist_fds = FederatedDataset(dataset="mnist", partitioners={"train": NUM_CLIENTS})
+    centralized_testset = mnist_fds.load_full("test").with_format("tf")
 
     # Create FedAvg strategy
     strategy = fl.server.strategy.FedAvg(
@@ -159,7 +161,7 @@ def main() -> None:
             NUM_CLIENTS * 0.75
         ),  # Wait until at least 75 clients are available
         evaluate_metrics_aggregation_fn=weighted_average,  # aggregates federated metrics
-        evaluate_fn=get_evaluate_fn(testset),  # global evaluation function
+        evaluate_fn=get_evaluate_fn(centralized_testset),  # global evaluation function
     )
 
     # With a dictionary, you tell Flower's VirtualClientEngine that each
@@ -171,7 +173,7 @@ def main() -> None:
 
     # Start simulation
     fl.simulation.start_simulation(
-        client_fn=get_client_fn(partitions),
+        client_fn=get_client_fn(mnist_fds),
         num_clients=NUM_CLIENTS,
         config=fl.server.ServerConfig(num_rounds=args.num_rounds),
         strategy=strategy,

@@ -11,5 +11,6 @@ authors = ["The Flower Authors <hello@flower.dev>"]
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
 flwr = { extras = ["simulation"], version = ">=1.0,<2.0" }
+flwr_datasets = { extras = ["vision"], version = "0.0.1" }
 tensorflow = {version = "^2.9.1, !=2.11.1", markers="platform_machine == 'x86_64'"}
 tensorflow-macos = {version = "^2.9.1, !=2.11.1", markers="sys_platform == 'darwin' and platform_machine == 'arm64'"}

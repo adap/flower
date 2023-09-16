@@ -83,7 +83,7 @@ class FlowerClient(fl.client.NumPyClient):
 def get_client_fn(dataset: FederatedDataset):
     """Return a function to construct a client.
 
-    The VirtualClientEngine will exectue this function whenever a client is sampled by
+    The VirtualClientEngine will execue this function whenever a client is sampled by
     the strategy to participate.
     """
 
