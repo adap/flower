@@ -1,7 +1,9 @@
+"""Main script for pFedHN."""
+
 import flwr as fl
 import hydra
 from hydra.utils import instantiate
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig
 
 from pFedHN.client import generate_client_fn
 from pFedHN.dataset import gen_random_loaders
@@ -16,11 +18,11 @@ def main(cfg: DictConfig):
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
-
     # print(OmegaConf.to_yaml(cfg))
 
     # partition dataset and get dataloaders
-    trainloaders, validationloaders, testloaders = gen_random_loaders(
+    # pylint: disable=unbalanced-tuple-unpacking
+    trainloaders, _, testloaders = gen_random_loaders(
         cfg.dataset.data,
         cfg.dataset.root,
         cfg.client.num_nodes,
@@ -36,7 +38,7 @@ def main(cfg: DictConfig):
 
     # Start simulation
 
-    history = fl.simulation.start_simulation(
+    fl.simulation.start_simulation(
         client_fn=client_fn,
         num_clients=cfg.client.num_nodes,
         config=fl.server.ServerConfig(num_rounds=cfg.client.num_rounds),
