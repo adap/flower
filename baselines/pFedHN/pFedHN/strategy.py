@@ -6,6 +6,8 @@ from typing import Callable, Dict, List, Optional, Tuple, Union
 import flwr as fl
 import torch
 from flwr.common import (
+    EvaluateIns,
+    EvaluateRes,
     FitIns,
     FitRes,
     NDArrays,
@@ -16,14 +18,13 @@ from flwr.common import (
 )
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
-from flwr.server.strategy import FedAvg
 
 from pFedHN.models import CNNHyper
 
 
 # pylint: disable=invalid-name
 # pylint: disable=too-many-instance-attributes
-class pFedHN(FedAvg):
+class pFedHN(fl.server.strategy.Strategy):
     """Federated strategy with pFedHN."""
 
     # pylint: disable=too-many-arguments
@@ -87,7 +88,7 @@ class pFedHN(FedAvg):
 
     def num_evaluate_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Use a fraction of available clients for evaluation."""
-        return min(1, num_available_clients), self.min_available_clients
+        return min(0, num_available_clients), self.min_available_clients
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -164,6 +165,35 @@ class pFedHN(FedAvg):
 
         self.gradient_upgradation(delta_theta)
 
+        return None, {}
+
+    def configure_evaluate(
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
+        """Configure the next round of evaluation."""
+        sample_size, min_num_clients = self.num_evaluate_clients(
+            client_manager.num_available()
+        )
+        clients = client_manager.sample(
+            num_clients=sample_size, min_num_clients=min_num_clients
+        )
+        eval_configurations = []
+        for _idx, client in enumerate(clients):
+            eval_configurations.append(
+                (client, EvaluateIns(parameters, {"server_round": server_round}))
+            )
+
+        return eval_configurations
+
+    def aggregate_evaluate(
+        self,
+        server_round: int,
+        results: List[Tuple[ClientProxy, EvaluateRes]],
+        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
+    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
+        """Aggregate evaluation metrics."""
+        if not results:
+            return None, {}
         return None, {}
 
     def evaluate(
