@@ -8,8 +8,8 @@ This example will show you how Flower makes it very easy to run Federated Learni
 
 This is a list of components that you'll need:
 
-- For server: A machine running Linux/macOS.
-- For clients (for FL you'll need at least any two):
+- For Flower server: A machine running Linux/macOS.
+- For Flower clients (any two):
    * Raspberry Pi 4
    * Raspberry Pi Zero 2
    * NVIDIA Jetson Xavier-NX
@@ -150,6 +150,7 @@ pip install -r requierments_pytorch.txt # to install Flower and PyTorch
    # On your Jetson's terminal run
    ./build_flower_client.sh --pytorch # or --tensorflow
    # Bear in mind this might take a few minutes since the base images need to be donwloaded (~7GB) and decompressed.
+   # To the above script pass the additional flag `--no-cache` to re-build the image.
    ```
 
    Once your script is finished, verify your `flower_client` Docker image is present. If you type `docker images` you'll see something like the following:
@@ -181,8 +182,10 @@ You can run this example using MNIST and a smaller CNN model by passing flag `--
 On your development machine, launch the server:
 
 ```bash
-# launch your server. It will be waiting until two clients connects
-python server.py --rounds 3 --min_num_clients 2 --min_sample_size 2
+# Launch your server. It will be waiting until two clients connects
+# Will wait for at least 2 clients to be connected, then will train for 3 FL rounds
+# The command below will sample all clients connected (since sample_fraction=1.0)
+python server.py --rounds 3 --min_num_clients 2 --sample_fraction 1.0 # append `--mnist` if you want to use that dataset/model setting
 ```
 
 > If you are on macOS with Apple Silicon (i.e. M1, M2 chips), you might encounter a `grpcio`-related issue when launching your server. If you are in a conda environment you can solve this easily by doing: `pip uninstall grpcio` and then `conda install grpcio`.
@@ -201,4 +204,4 @@ python3 client_<FRAMEWORK>.py --cid=<CLIENT_ID> --server_address=<SERVER_ADDRESS
 python3 client_<FRAMEWORK>.py --cid=<CLIENT_ID> --server_address=<SERVER_ADDRESS> --mnist
 ```
 
-Repeat the above for as many devices as you have. Pass a different `CLIENT_ID` to each device. You can naturally run this example using different types of devices at the same time as long as they are training the same model. 
+Repeat the above for as many devices as you have. Pass a different `CLIENT_ID` to each device. You can naturally run this example using different types of devices (e.g. RPi, RPi Zero, Jetson) at the same time as long as they are training the same model. 

@@ -13,6 +13,7 @@ fi
 
 BASE_PYTORCH=nvcr.io/nvidia/l4t-pytorch:r35.1.0-pth1.13-py3
 BASE_TF=nvcr.io/nvidia/l4t-tensorflow:r35.3.1-tf2.11-py3
+EXTRA=""
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -24,6 +25,10 @@ while [[ $# -gt 0 ]]; do
       BASE_IMAGE=$BASE_TF
       shift
       ;;
+    -r|--no-cache)
+      EXTRA="--no-cache"
+      shift
+      ;;
     -*|--*)
       echo "Unknown option $1 (pass either --pytorch or --tensorflow)"
       exit 1
@@ -31,7 +36,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-DOCKER_BUILDKIT=${BUILDKIT} docker build \
+DOCKER_BUILDKIT=${BUILDKIT} docker build $EXTRA \
                                         --build-arg BASE_IMAGE=$BASE_IMAGE \
                                         . \
                                         -t flower_client:latest
