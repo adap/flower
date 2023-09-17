@@ -19,11 +19,9 @@ This is a list of components that you'll need:
    - For Raspberry Pi we recommend the [Raspberry Pi Imager](https://www.raspberrypi.com/software/)
    - For other devices [balenaEtcher](https://www.balena.io/etcher/) it's a great option.
 
-What follows is a step-by-step guide on how to setup your client/s and the server. The following diagram illustrates the setup for this demo:
+What follows is a step-by-step guide on how to setup your client/s and the server. 
 
-<!-- jetson xavier-nx image borrowed from: https://developer.nvidia.com/embedded/jetson-xavier-nx-devkit -->
-
-![alt text](_static/diagram.png)
+> TODO: can we add 3 diagrams?: 2RPi + laptop; 2Jetson + laptop; 1RPi + 1Jetson + laptop
 
 ## Clone this repo
 
@@ -72,7 +70,7 @@ pip install -r requierments_pytorch.txt # to install Flower and PyTorch
       * If you want your clients to use TensorFlow: `pip3 install -r requirements_tf.txt`
 
 
-   > While preparing this example I noticed that installing Tensorflow on the **Raspberry pi Zero** would fail due to lack of RAM. A workaround is to create a `swap` disk partition (non-existant by default) so the OS can offload some elements to disk. I followed the steps described [in this blogpost](https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu-20-04) that I copy below:
+   > While preparing this example I noticed that installing TensorFlow on the **Raspberry pi Zero** would fail due to lack of RAM (it only has 512MB). A workaround is to create a `swap` disk partition (non-existant by default) so the OS can offload some elements to disk. I followed the steps described [in this blogpost](https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu-20-04) that I copy below. You can follow these steps if you often see your RPi Zero running out of memory:
    ```bash
    # Let's create a 1GB swap partition
    sudo fallocate -l 1G /swapfile
@@ -85,6 +83,8 @@ pip install -r requierments_pytorch.txt # to install Flower and PyTorch
    echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
    ```
    Please note using swap as if it was RAM comes with a large penalty in terms of data movement.
+
+4. Run your Flower experiments following the steps in the [Running FL with Flower](https://github.com/adap/flower/tree/main/examples/embedded-devices#running-fl-training-with-flower) section.
 
 ## Setting up a Jetson Xavier-NX
 
@@ -167,9 +167,9 @@ pip install -r requierments_pytorch.txt # to install Flower and PyTorch
    # this will take you to a shell that looks something like this:
    root@6e6ce826b8bb:/client# <here you can run python commands or any command as usual>
    ```
+8. **Run your FL experiments with Flower**. Follow the steps in the section below.
 
-
-## Running FL training with Flower
+## Running FL with Flower
 
 For this demo, we'll be using [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html), a popular dataset for image classification comprised of 10 classes (e.g. car, bird, airplane) and a total of 60K `32x32` RGB images. The training set contains 50K images. The server will automatically download the dataset should it not be found in `./data`. The clients do the same. The dataset is by default split into 50 partitions (each to be assigned to a different client). This can be controlled with the `NUM_CLIENTS` global variable in the client scripts. In this example, each device will play the role of a specific user (specified by the command line -- we'll show this later) and therefore only do local training with that portion of the data. For CIFAR-10, clients will be training a MobileNet-v2/3 model.
 
