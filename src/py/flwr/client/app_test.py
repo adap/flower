@@ -17,6 +17,7 @@
 
 from typing import Dict, Tuple
 
+from flwr.client import ClientLike, to_client
 from flwr.common import (
     Config,
     EvaluateIns,
@@ -31,7 +32,7 @@ from flwr.common import (
     Scalar,
 )
 
-from .app import ClientLike, start_client, start_numpy_client, to_client
+from .app import start_client, start_numpy_client
 from .client import Client
 from .numpy_client import NumPyClient
 
