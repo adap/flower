@@ -8,6 +8,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   FLWR_TELEMETRY_ENABLED: 0
 
@@ -105,7 +109,7 @@ jobs:
         working-directory: e2e/${{ matrix.directory }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
         with:
@@ -140,7 +144,7 @@ jobs:
         working-directory: e2e/strategies
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Install dependencies
@@ -150,7 +154,7 @@ jobs:
         run: |
           python -m pip install https://artifact.flower.dev/py/${{ github.event.number }}/${{ github.sha }}/${{ needs.wheel.outputs.whl_path }}
       - name: Cache Datasets
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: "~/.keras"
           key: keras-datasets

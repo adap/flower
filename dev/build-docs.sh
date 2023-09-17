@@ -9,9 +9,11 @@ cd doc
 
 cd $ROOT
 cd baselines/doc
-make html
+make docs
 
 cd $ROOT
 ./dev/update-examples.sh
 cd examples/doc
-make html
+make docs
+
+cd $ROOT

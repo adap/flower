@@ -4,6 +4,9 @@
 Quickstart PyTorch
 ==================
 
+.. meta::
+   :description: Check out this Federated Learning quickstart tutorial for using Flower with PyTorch to train a CNN model on MNIST.
+
 ..  youtube:: jOmmuzMIQ4c
    :width: 100%
 
