@@ -37,13 +37,15 @@ NUM_CLIENTS = 50
 
 # a config for mobilenetv2 that works for
 # small input sizes (i.e. 32x32 as in CIFAR)
-mb2_cfg = [(1,  16, 1, 1),
-        (6,  24, 2, 1),
-        (6,  32, 3, 2),
-        (6,  64, 4, 2),
-        (6,  96, 3, 1),
-        (6, 160, 3, 2),
-        (6, 320, 1, 1)]
+mb2_cfg = [
+    (1, 16, 1, 1),
+    (6, 24, 2, 1),
+    (6, 32, 3, 2),
+    (6, 64, 4, 2),
+    (6, 96, 3, 1),
+    (6, 160, 3, 2),
+    (6, 320, 1, 1),
+]
 
 
 class Net(nn.Module):
@@ -144,7 +146,7 @@ class FlowerClient(fl.client.NumPyClient):
         else:
             self.model = mobilenet_v3_small(num_classes=10)
             # let's not reduce spatial resolution too early
-            self.model.features[0][0].stride=(1,1)
+            self.model.features[0][0].stride = (1, 1)
         # Determine device
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.model.to(self.device)  # send model to device
@@ -152,7 +154,12 @@ class FlowerClient(fl.client.NumPyClient):
     def set_parameters(self, params):
         """Set model weights from a list of NumPy ndarrays."""
         params_dict = zip(self.model.state_dict().keys(), params)
-        state_dict = OrderedDict({k: torch.Tensor(v) if v.shape != torch.Size([]) else torch.Tensor([0]) for k, v in params_dict})
+        state_dict = OrderedDict(
+            {
+                k: torch.Tensor(v) if v.shape != torch.Size([]) else torch.Tensor([0])
+                for k, v in params_dict
+            }
+        )
         self.model.load_state_dict(state_dict, strict=True)
 
     def get_parameters(self, config):
