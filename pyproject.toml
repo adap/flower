@@ -30,7 +30,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -58,14 +57,13 @@ flower-server = "flwr.server:run_server"
 flower-client = "flwr.client:run_client"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 # Mandatory dependencies
 numpy = "^1.21.0"
 grpcio = "^1.48.2,!=1.52.0"
 protobuf = "^3.19.0"
 cryptography = "^41.0.2"
 pycryptodome = "^3.18.0"
-importlib-metadata = { version = "^4.0.0", markers = "python_version < '3.8'" }
 iterators = "^0.0.2"
 # Optional dependencies (VCE)
 ray = { version = "==2.6.3", extras = ["default"], optional = true }
@@ -132,7 +130,7 @@ known_first_party = ["flwr", "flwr_experimental", "flwr_tool"]
 
 [tool.black]
 line-length = 88
-target-version = ["py37", "py38", "py39", "py310", "py311"]
+target-version = ["py38", "py39", "py310", "py311"]
 
 [tool.pylint."MESSAGES CONTROL"]
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
@@ -178,7 +176,7 @@ wrap-summaries = 88
 wrap-descriptions = 88
 
 [tool.ruff]
-target-version = "py37"
+target-version = "py38"
 line-length = 88
 select = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
 fixable = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]

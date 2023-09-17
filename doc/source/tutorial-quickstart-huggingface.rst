@@ -4,6 +4,9 @@
 Quickstart 🤗 Transformers
 ==========================
 
+.. meta::
+   :description: Check out this Federating Learning quickstart tutorial for using Flower with HuggingFace Transformers in order to fine-tune an LLM.
+
 Let's build a federated learning system using Hugging Face Transformers and Flower!
 
 We will leverage Hugging Face to federate the training of language models over multiple clients using Flower. 

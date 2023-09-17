@@ -26,7 +26,7 @@ from flwr.common.typing import NDArrays
 def _get_update_norm(update: NDArrays) -> float:
     flattened_update = update[0]
     for i in range(1, len(update)):
-        flattened_update = np.append(flattened_update, update[i])  # type: ignore
+        flattened_update = np.append(flattened_update, update[i])
     return float(np.sqrt(np.sum(np.square(flattened_update))))
 
 
