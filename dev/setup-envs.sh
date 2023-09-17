@@ -7,7 +7,7 @@ SHELL_BIN=$(basename "$SHELL")
 case "$SHELL_BIN" in
   *"bash"*) CONFIG_FILE="$HOME/.bash_profile"
   ;;
-  *"zsh"*) CONFIG_FILE="$HOME/.zshrc"
+  *"zsh"*) CONFIG_FILE="$HOME/.zshenv"
   ;;
   *"ksh"*) CONFIG_FILE="$HOME/.kshrc"
   ;;
