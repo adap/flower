@@ -6,7 +6,7 @@ if [ "$#" -ne 1 ]; then
     exit 1
 fi
 baseline_dir=$1
-baseline_path=$(pwd)/$1
+baseline_path=$(cd .. && pwd)/$1
 echo "Testing baseline under the path: $baseline_path"
 
 # Specify the exceptions to the structure requirement
