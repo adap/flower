@@ -8,7 +8,7 @@ env:
   FLWR_TELEMETRY_ENABLED: 0
 
 jobs:
-  nightly_release:
+  release_nightly:
     runs-on: ubuntu-22.04
     name: Nightly
     steps:
