@@ -188,14 +188,14 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
 
     # Start training
     fl_workflow = fl_workflow_factory(workflow_state)
-    node_responses: Dict[ClientProxy, Task] = {}
 
+    instructions = next(fl_workflow)
     while True:
+        node_responses = fetch_responses(driver, instructions, config.round_timeout)
         try:
             instructions = fl_workflow.send(node_responses)
         except StopIteration:
             break
-        node_responses = fetch_responses(driver, instructions, config.round_timeout)
 
     fl_workflow.close()
 
