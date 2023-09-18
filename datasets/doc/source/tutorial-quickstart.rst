@@ -21,8 +21,9 @@ PyTorch::
 
 Choose the dataset
 ------------------
-Choose the dataset by going to Hugging Face `Datasets Hub <https://huggingface.co/datasets>`_ and choose the dataset.
-Copy the name of the dataset and pass it as the `dataset` parameter to `FederatedDataset`.
+Choose the dataset by going to Hugging Face `Datasets Hub <https://huggingface.co/datasets>`_ and searching for your
+dataset by name. Note that the name is case sensitive, so make sure to pass the correct name as the `dataset` parameter
+to `FederatedDataset`.
 
 Partition the dataset
 ---------------------
