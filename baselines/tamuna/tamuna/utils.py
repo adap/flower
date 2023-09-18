@@ -88,7 +88,7 @@ def compare_communication_complexity(
         tamuna_histories,
         cfg,
         dim,
-        np.ceil((cfg.server.sparsity * dim) / cfg.server.clients_per_round),
+        np.ceil((cfg.server.s * dim) / cfg.server.clients_per_round),
         "Tamuna",
     )
     plot_histories(fedavg_histories, cfg, dim, dim, "FedAvg")
