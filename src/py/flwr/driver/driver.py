@@ -47,7 +47,7 @@ class Driver:
         self.certificates = certificates
         self.channel: Optional[grpc.Channel] = None
         self.stub: Optional[driver_pb2_grpc.DriverStub] = None
-        self.workload_id: Optional[str] = None
+        self.workload_id: str = ""
 
     def connect(self) -> None:
         """Connect to the Driver API."""

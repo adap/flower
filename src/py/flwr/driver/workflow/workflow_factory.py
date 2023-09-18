@@ -52,8 +52,8 @@ class FLWorkflowFactory:
 
     def __init__(
         self,
-        fit_workflow_factory: Optional[FlowerWorkflowFactory],
-        evaluate_workflow_factory: Optional[FlowerWorkflowFactory],
+        fit_workflow_factory: Optional[FlowerWorkflowFactory] = None,
+        evaluate_workflow_factory: Optional[FlowerWorkflowFactory] = None,
     ):
         self.fit_workflow_factory = (
             fit_workflow_factory
@@ -62,11 +62,13 @@ class FLWorkflowFactory:
         )
         self.evaluate_workflow_factory = (
             evaluate_workflow_factory
-            if fit_workflow_factory is not None
+            if evaluate_workflow_factory is not None
             else default_evaluate_workflow_factory
         )
 
-    def __call__(self, state: WorkflowState) -> FlowerWorkflow:
+    def __call__(
+        self, state: WorkflowState
+    ) -> Generator[Dict[ClientProxy, Task], Dict[ClientProxy, Task], None]:
         """Create the workflow."""
         # Initialize parameters
         log(INFO, "Initializing global parameters")
@@ -80,10 +82,10 @@ class FLWorkflowFactory:
         else:
             log(INFO, "Requesting initial parameters from one random client")
             random_client = state.client_manager.sample(1)[0]
-            yield {
+            # Send GetParametersIns and get the response
+            node_responses: Dict[ClientProxy, Task] = yield {
                 random_client: wrap_server_message_in_task(GetParametersIns(config={}))
             }
-            node_responses = yield
             get_parameters_res = serde.get_parameters_res_from_proto(
                 node_responses[random_client].legacy_client_message.get_parameters_res
             )
@@ -152,7 +154,7 @@ def default_fit_workflow_factory(state: WorkflowState) -> FlowerWorkflow:
 
     if not client_instructions:
         log(INFO, "fit_round %s: no clients selected, cancel", state.current_round)
-        return None
+        return
     log(
         DEBUG,
         "fit_round %s: strategy sampled %s clients (out of %s)",
@@ -161,14 +163,13 @@ def default_fit_workflow_factory(state: WorkflowState) -> FlowerWorkflow:
         state.client_manager.num_available(),
     )
 
-    # Send instructions to clients
-    yield {
+    # Send instructions to clients and
+    # collect `fit` results from all clients participating in this round
+    node_responses = yield {
         proxy: wrap_server_message_in_task(fit_ins)
         for proxy, fit_ins in client_instructions
     }
 
-    # Collect `fit` results from all clients participating in this round
-    node_responses = yield
     # No exception/failure handling currently
     log(
         DEBUG,
@@ -195,6 +196,7 @@ def default_fit_workflow_factory(state: WorkflowState) -> FlowerWorkflow:
     state.history.add_metrics_distributed_fit(
         server_round=state.current_round, metrics=metrics_aggregated
     )
+    return
 
 
 def default_evaluate_workflow_factory(state: WorkflowState) -> FlowerWorkflow:
@@ -207,7 +209,7 @@ def default_evaluate_workflow_factory(state: WorkflowState) -> FlowerWorkflow:
     )
     if not client_instructions:
         log(INFO, "evaluate_round %s: no clients selected, cancel", state.current_round)
-        return None
+        return
     log(
         DEBUG,
         "evaluate_round %s: strategy sampled %s clients (out of %s)",
@@ -216,14 +218,12 @@ def default_evaluate_workflow_factory(state: WorkflowState) -> FlowerWorkflow:
         state.client_manager.num_available(),
     )
 
-    # Send instructions to clients
-    yield {
+    # Send instructions to clients and
+    # collect `evaluate` results from all clients participating in this round
+    node_responses = yield {
         proxy: wrap_server_message_in_task(evaluate_ins)
         for proxy, evaluate_ins in client_instructions
     }
-
-    # Collect `evaluate` results from all clients participating in this round
-    node_responses = yield
     # No exception/failure handling currently
     log(
         DEBUG,
@@ -253,3 +253,4 @@ def default_evaluate_workflow_factory(state: WorkflowState) -> FlowerWorkflow:
         state.history.add_metrics_distributed(
             server_round=state.current_round, metrics=metrics_aggregated
         )
+    return

@@ -156,7 +156,9 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         num_rounds=config.num_rounds,
         current_round=0,  # This field will be set inside the workflow
         strategy=strategy,
-        parameters=Parameters(),  # This field will be set inside the workflow,
+        parameters=Parameters(
+            tensors=[], tensor_type=""
+        ),  # This field will be set inside the workflow,
         client_manager=client_manager,
         history=hist,
     )
@@ -179,12 +181,11 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
 
     # Start training
     fl_workflow = fl_workflow_factory(workflow_state)
-    node_responses = None
+    node_responses: Dict[ClientProxy, Task] = {}
 
     while True:
         try:
             instructions = fl_workflow.send(node_responses)
-            next(fl_workflow)
         except StopIteration:
             break
         node_responses = fetch_responses(driver, instructions, config.round_timeout)
@@ -263,10 +264,11 @@ def update_client_manager(
         time.sleep(3)
 
 
+# pylint: disable-next=too-many-locals
 def fetch_responses(
     driver: Driver,
     instructions: Dict[ClientProxy, Task],
-    timeout: float,
+    timeout: Optional[float],
 ) -> Dict[ClientProxy, Task]:
     """Send instructions to clients and return their responses."""
     # Create mapping from node_id to client_proxy
@@ -301,8 +303,9 @@ def fetch_responses(
 
     # Pull TaskRes
     task_res_list: List[TaskRes] = []
-    start_time = timeit.default_timer()
-    while timeit.default_timer() - start_time < timeout:
+    if timeout:
+        start_time = timeit.default_timer()
+    while timeout is None or timeit.default_timer() - start_time < timeout:
         pull_res = driver.pull_task_res(
             PullTaskResRequest(node=driver_node, task_ids=task_ids)
         )
@@ -314,7 +317,7 @@ def fetch_responses(
 
     # Build and return response dictionary
     node_responses: Dict[ClientProxy, Task] = {
-        node_id_to_proxy(task_res.task.producer.node_id): task_res.task
+        node_id_to_proxy[task_res.task.producer.node_id]: task_res.task
         for task_res in task_res_list
     }
     return node_responses
