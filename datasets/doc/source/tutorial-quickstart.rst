@@ -17,7 +17,7 @@ TensorFlow::
 
 PyTorch::
 
-  pip install torch, torchvision
+  pip install torch torchvision
 
 Choose the dataset
 -----------------------
