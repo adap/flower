@@ -1,8 +1,8 @@
 name: Release
 
 on:
-  schedule:
-    - cron: "0 23 * * *"
+  release:
+    types: [published, unpublished]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
@@ -12,15 +12,21 @@ env:
   FLWR_TELEMETRY_ENABLED: 0
 
 jobs:
-  nightly_release:
-    runs-on: ubuntu-22.04
-    name: Nightly
+  build_and_push_server_imgage:
+    name: Build and push server image
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        flwr_version: [1.4.0, 1.5.0]
     steps:
-      - uses: actions/checkout@v4
-      - name: Bootstrap
-        uses: ./.github/actions/bootstrap
-      - name: Release nightly
-        env:
-          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-        run: |
-          ./dev/publish-nightly.sh
+    - uses: actions/checkout@v3
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Build the server image
+      env:
+          BUILD_TARGET: server
+          FLWR_VERSION: ${{ matrix.flwr_version }}
+      run: ./build.sh

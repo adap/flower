@@ -28,7 +28,8 @@ jobs:
     - name: Run server tests
       env:
           BUILD_TARGET: server
-      run: FLWR_VERSION=${{ matrix.flwr_version }} ./test.sh
+          FLWR_VERSION: ${{ matrix.flwr_version }}
+      run: ./test.sh
 
   build:
     name: Build Image
@@ -46,4 +47,5 @@ jobs:
     - name: Build the server image
       env:
           BUILD_TARGET: server
-      run: FLWR_VERSION=${{ matrix.flwr_version }} ./build.sh
+          FLWR_VERSION: ${{ matrix.flwr_version }}
+      run: ./build.sh
