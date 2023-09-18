@@ -29,6 +29,7 @@ from flwr.client.client import (
     maybe_call_get_parameters,
     maybe_call_get_properties,
 )
+from flwr.client.client_protocol import ClientProtocol
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 from flwr.simulation.ray_transport.ray_actor import (
@@ -273,6 +274,14 @@ def launch_and_evaluate(
     )
 
 
+def _convert_to_client(client: ClientProtocol) -> Client:
+    """Convert any client type to Client."""
+    return client.to_client()
+
+
 def _create_client(client_fn: ClientFn, cid: str) -> Client:
     """Create a client instance."""
-    return client_fn(cid).to_client()
+    # Materialize client
+    client = client_fn(cid)
+    # Convert to type Client
+    return _convert_to_client(client)

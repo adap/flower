@@ -18,6 +18,7 @@
 from .app import start_client as start_client
 from .app import start_numpy_client as start_numpy_client
 from .client import Client as Client
+from .client_protocol import ClientProtocol as ClientProtocol
 from .numpy_client import NumPyClient as NumPyClient
 from .run import run_client as run_client
 from .typing import ClientFn as ClientFn
@@ -27,6 +28,7 @@ __all__ = [
     "Client",
     "ClientFn",
     "ClientLike",
+    "ClientProtocol",
     "NumPyClient",
     "run_client",
     "start_client",

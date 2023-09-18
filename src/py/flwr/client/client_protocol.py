@@ -16,7 +16,7 @@
 
 from typing import Protocol
 
-from flwr.client import Client
+from flwr.client.client import Client
 
 
 class ClientProtocol(Protocol):
