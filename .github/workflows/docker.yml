@@ -2,13 +2,19 @@ name: Docker Images
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+    paths:
+      -  src/docker/**
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
+    paths:
+      -  src/docker/**
 
-defaults:
-  run:
-    
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 env:
   FLWR_VERSION: 1.5.0
