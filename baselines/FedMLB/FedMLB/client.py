@@ -9,15 +9,18 @@ from typing import Dict, Tuple
 from flwr.common import NDArrays, Scalar
 import tensorflow as tf
 
+
 class TFClient(fl.client.NumPyClient):
+    """Tensorflow Client implementation"""
+
     def __init__(
-        self,
-        # train_ds is a tf.data.Dataset
-        train_ds: tf.data.Dataset,
-        # model is a tf.keras.Model
-        model: tf.keras.Model,
-        num_examples_train: int,
-        algorithm: str,
+            self,
+            # train_ds is a tf.data.Dataset
+            train_ds: tf.data.Dataset,
+            # model is a tf.keras.Model
+            model: tf.keras.Model,
+            num_examples_train: int,
+            algorithm: str,
     ):
         self.model = model
         self.train_ds = train_ds
@@ -25,6 +28,7 @@ class TFClient(fl.client.NumPyClient):
         self.algorithm = algorithm
 
     def get_parameters(self, config: Dict[str, Scalar]):
+        """Get the local model parameters."""
         return self.model.get_weights()
 
     def fit(self, parameters, config):
@@ -35,7 +39,7 @@ class TFClient(fl.client.NumPyClient):
         exp_decay: int = config["exp_decay"]
         lr_client_initial: int = config["lr_client_initial"]
         if current_round > 1:
-            lr_client = lr_client_initial * (exp_decay ** (current_round-1))
+            lr_client = lr_client_initial * (exp_decay ** (current_round - 1))
             # During training, update the learning rate as needed
             tf.keras.backend.set_value(self.model.optimizer.lr, lr_client)
 

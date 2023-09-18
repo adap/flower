@@ -332,11 +332,12 @@ the accuracy at the target round is based on the exponential moving average with
 All the results reported in this repository can be also browsed 
 on this [tesnsorboard.dev online dashboard](https://tensorboard.dev/experiment/n5QWJWP8QWagUxcWuOtAUA/#scalars).
 
-### Table 1a
+### Table 1a and Table 2
 
 The results of Table 1a in the paper (for FedAvg and FedMLB) refers
 to CIFAR-100 (Figure 3) and Tiny-ImageNet (Figure 7a) with 
-the setting (1.) Moderate-scale with Dir(0.3), 100 clients, 5% participation rate.
+the setting (1.) Moderate-scale with Dir(0.3), 100 clients, 5% participation rate. 
+Results for FedAvg+KD are from Table 2 in the paper.
 
 To reproduce the results run the following:
 
@@ -418,7 +419,7 @@ python -m FedMLB.main --multirun dataset_config.dataset="cifar100","tiny-imagene
 ![tiny imagenet, 100 clients, 5% participation rate, alpha = 0.3](_static/accuracy_comparison_tiny-imagenet_dirichlet_0.3_100_.png)
 
 
-### Table 1b
+### Table 1b and Table 2
 
 The results of Table 1a in the paper (for FedAvg and FedMLB) refers
 to CIFAR-100 (Figure 3) and Tiny-ImageNet (Figure 7b) with 

@@ -1,7 +1,4 @@
-"""Create global evaluation function.
-
-Optionally, also define a new Server class (please note this is not needed in most
-settings).
+"""Defines a custom Server.
 """
 
 import timeit
@@ -39,6 +36,7 @@ class MyServer(Server):
     # overwriting
     def fit(self, num_rounds: int, timeout: Optional[float]) -> History:
         """Run federated averaging for a number of rounds."""
+
         history = History()
 
         # Initialize parameters

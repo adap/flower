@@ -26,7 +26,23 @@ np.set_printoptions(threshold=sys.maxsize)
 IMAGENET_BASE_PATH = "./tiny-imagenet-200/"
 
 
-def read_fedmlb_distribution(dataset, total_clients, alpha, data_folder="client_data"):
+def read_fedmlb_distribution(dataset: str,
+                             total_clients: int,
+                             alpha: float,
+                             data_folder="client_data"):
+    """Reads the per-client distribution of labels from file.
+
+    Parameters
+    ----------
+    dataset : str
+        Dataset as string.
+    total_clients : int
+        Total clients of the simulation.
+    alpha: float
+        Concentration parameter of Dirichlet distribution for label skew.
+    data_folder: str
+        Name of the folder that contains the files to be read."""
+
     if dataset in ["tiny-imagenet"]:
         dataset = "Tiny-ImageNet"
 
@@ -105,13 +121,17 @@ class TinyImageNetPaths:
                     self.paths['train'].append((fname, label_id, nid, bbox))
 
 
-def pil_loader(path):
+def pil_loader(path: str):
+    """Converts to an RGB image."""
+
     with open(path, 'rb') as f:
         with Image.open(f) as img:
             return img.convert('RGB')
 
 
 def load_test_dataset_tiny_imagenet():
+    """Loads test dataset for Tiny-imagenet."""
+
     path_obj = TinyImageNetPaths()
     samples = path_obj.paths['val']
     data = np.array([i[0] for i in samples])
@@ -131,9 +151,6 @@ def load_test_dataset_tiny_imagenet():
     y_test = np.stack(labels, axis=0)
     test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test))
     return test_ds
-
-
-# def download_and_preprocess(dataset="cifar100", alpha=0.3, total_clients=100):
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -162,9 +179,6 @@ def download_and_preprocess(cfg: DictConfig) -> None:
     # if the folder exist it is deleted and the ds partitions are re-created
     # if the folder does not exist, firstly the folder is created
     # and then the ds partitions are generated
-    # exist = os.path.exists(folder)
-    # if not exist:
-    #     os.makedirs(folder)
     folder_path = os.path.join(folder, str(total_clients), str(round(alpha, 2)))
     exist = os.path.exists(folder_path)
     if not exist:

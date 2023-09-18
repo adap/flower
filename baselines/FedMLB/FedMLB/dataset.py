@@ -1,16 +1,9 @@
-"""Handle basic dataset creation.
-
-In case of PyTorch it should return dataloaders for your dataset (for both the clients
-and the server). If you are using a custom dataset class, this module is the place to
-define it. If your dataset requires to be downloaded (and this is not done
-automatically -- e.g. as it is the case for many dataset in TorchVision) and
-partitioned, please include all those functions and logic in the
-`dataset_preparation.py` module. You can use all those functions from functions/methods
-defined here of course.
+"""Handle dataset loading and preprocessing utility.
 """
 import os
 import numpy as np
 import tensorflow as tf
+
 
 def load_selected_client_statistics(selected_client, alpha, dataset, total_clients):
     """Returns the amount of local examples for the selected client (referenced with a client_id)
@@ -18,7 +11,7 @@ def load_selected_client_statistics(selected_client, alpha, dataset, total_clien
     This could be done directly by doing len(ds.to_list()) but it's more expensive at run time."""
 
     path = os.path.join(dataset + "_mlb_dirichlet_train", str(total_clients), str(round(alpha, 2)),
-                            "distribution_train.npy")
+                        "distribution_train.npy")
 
     # path = os.path.join(dataset+"_mlb_dirichlet_train_and_test", str(round(alpha, 2)), "distribution_train.npy")
     smpls_loaded = np.load(path)
@@ -76,7 +69,8 @@ class PaddedCenterCropCustom(tf.keras.layers.Layer):
         )
 
 
-def load_client_datasets_from_files(dataset, sampled_client, batch_size, total_clients=100, alpha=0.3, split="train", seed=None):
+def load_client_datasets_from_files(dataset, sampled_client, batch_size, total_clients=100, alpha=0.3, split="train",
+                                    seed=None):
     """Loads the partition of the dataset for the sampled client (sampled client represents its client_id).
         Examples are preprocessed via normalization layer.
         Returns a batched dataset."""
@@ -97,12 +91,12 @@ def load_client_datasets_from_files(dataset, sampled_client, batch_size, total_c
 
     # transform images
     # rotate = tf.keras.layers.RandomRotation(0.06, seed=seed)
-    rotate = tf.keras.layers.RandomRotation(0.028, seed=seed) # transforms.RandomRotation(10)
+    rotate = tf.keras.layers.RandomRotation(0.028, seed=seed)  # transforms.RandomRotation(10)
     flip = tf.keras.layers.RandomFlip(mode="horizontal", seed=seed)
 
     if dataset in ["cifar100"]:
         crop = PaddedRandomCropCustom(seed=seed)
-    else: #tiny-imagenet
+    else:  # tiny-imagenet
         crop = PaddedRandomCropCustom(seed=seed, height=64, width=64)
 
     rotate_flip_crop = tf.keras.Sequential([
@@ -129,9 +123,9 @@ def load_client_datasets_from_files(dataset, sampled_client, batch_size, total_c
         if split == "test":
             return loaded_ds.map(element_fn_norm_cifar100).batch(
                 batch_size, drop_remainder=False)
-        loaded_ds = loaded_ds.shuffle(buffer_size=1024, seed=seed)\
-            .map(element_fn_norm_cifar100)\
-            .map(transform_data)\
+        loaded_ds = loaded_ds.shuffle(buffer_size=1024, seed=seed) \
+            .map(element_fn_norm_cifar100) \
+            .map(transform_data) \
             .batch(batch_size, drop_remainder=False)
         loaded_ds = loaded_ds.prefetch(tf.data.AUTOTUNE)
         return loaded_ds

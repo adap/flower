@@ -1,4 +1,4 @@
-"""Contains utility functions for CNN FL on MNIST."""
+"""Contains utility functions."""
 
 import pickle
 from pathlib import Path
@@ -14,12 +14,28 @@ import os
 import psutil
 
 
-def dic_save(dictionary, filename):
+def dic_save(dictionary: Dict, filename: str):
+    """Function to save a dictionary to file.
+
+    Parameters
+    ----------
+    dictionary :
+        Dictionary to be saves.
+    filename : str
+        Path to save the dictionary to.
+    """
     with open(filename + '.pickle', 'wb') as f:
         pickle.dump(dictionary, f, pickle.HIGHEST_PROTOCOL)
 
 
-def dic_load(filename):
+def dic_load(filename: str):
+    """Function to load a dictionary from file.
+
+    Parameters
+    ----------
+    filename : str
+        Path to load the dictionary from.
+    """
     try:
         with open(filename, 'rb') as fp:
             return pickle.load(fp)
@@ -28,9 +44,9 @@ def dic_load(filename):
 
 
 def plot_metric_from_history(
-    hist: History,
-    save_plot_path: Path,
-    suffix: Optional[str] = "",
+        hist: History,
+        save_plot_path: Path,
+        suffix: Optional[str] = "",
 ) -> None:
     """Function to plot from Flower server History.
 
@@ -70,10 +86,10 @@ def plot_metric_from_history(
 
 
 def save_results_as_pickle(
-    history: History,
-    file_path: Union[str, Path],
-    extra_results: Optional[Dict] = {},
-    default_filename: Optional[str] = "results.pkl",
+        history: History,
+        file_path: Union[str, Path],
+        extra_results: Optional[Dict] = {},
+        default_filename: Optional[str] = "results.pkl",
 ) -> None:
     """Saves results from simulation to pickle.
 
@@ -129,22 +145,25 @@ def save_results_as_pickle(
         pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-
 def get_gpu_memory():
+    """Returns the gpu free memory"""
+
     command = "nvidia-smi --query-gpu=memory.free --format=csv"
     memory_free_info = sp.check_output(command.split()).decode('ascii').split('\n')[:-1][1:]
     memory_free_values = [int(x.split()[0]) for i, x in enumerate(memory_free_info)][0]
-    memory_percent = (memory_free_values / 24564) *100
+    memory_percent = (memory_free_values / 24564) * 100
     print(f"[Memory monitoring] Free memory GPU {memory_free_values} MB, {memory_percent} %.")
     return memory_free_values
 
 
 def get_cpu_memory():
+    """Returns the cpu free memory"""
+
     # you can convert that object to a dictionary
     memory_info = psutil.virtual_memory()
     # you can have the percentage of used RAM
-    memory_percent = 100.0-memory_info.percent
-    memory_free_values = memory_info.available / (1024 * 1024) # in MB
+    memory_percent = 100.0 - memory_info.percent
+    memory_free_values = memory_info.available / (1024 * 1024)  # in MB
 
     print(f"[Memory monitoring] Free memory CPU {memory_free_values} MB, {memory_percent} %.")
     # you can calculate percentage of available memory
