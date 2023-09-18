@@ -20,12 +20,12 @@ PyTorch::
   pip install torch torchvision
 
 Choose the dataset
------------------------
+------------------
 Choose the dataset by going to Hugging Face `Datasets Hub <https://huggingface.co/datasets>`_ and choose the dataset.
 Copy the name of the dataset and pass it as the `dataset` parameter to `FederatedDataset`.
 
 Partition the dataset
------------------------
+---------------------
 ::
 
   from flwr_datasets import FederatedDataset
@@ -33,11 +33,12 @@ Partition the dataset
   partition = fds.load_partition(0, "train")
   centralized_dataset = fds.load_full("test")
 
-Now you're ready to go. You have ten partitions created from the train split of the MNIST dataset and the test split for the centralized evaluation.
-We will convert the type of the dataset from Hugging Face's Dataset type to the one supported by your framework.
+Now you're ready to go. You have ten partitions created from the train split of the MNIST dataset and the test split
+for the centralized evaluation. We will convert the type of the dataset from Hugging Face's Dataset type to the one
+supported by your framework.
 
 Conversion
------------
+----------
 For more detailed instructions, go to :doc:`how-to`.
 
 PyTorch DataLoader
@@ -54,7 +55,7 @@ Transform the Dataset directly into the DataLoader::
   dataloader = DataLoader(partition_torch, batch_size=64)
 
 NumPy
-^^^^^^^
+^^^^^
 NumPy can be used as input to the TensorFlow model and is very straightforward::
 
    partition_np = partition.with_format("numpy")
@@ -66,3 +67,4 @@ Transformation to TensorFlow Dataset is a one-liner::
 
   tf_dataset = partition.to_tf_dataset(columns="img", label_cols="label", batch_size=64,
                                      shuffle=True)
+
