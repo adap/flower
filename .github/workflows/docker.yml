@@ -22,11 +22,11 @@ defaults:
 
 jobs:
   test:
-    name: Test Image
     runs-on: ubuntu-latest
     strategy:
       matrix:
         flwr_version: [1.4.0, 1.5.0]
+    name: Test server / ${{matrix.flwr_version}}
     steps:
     - uses: actions/checkout@v3
     - name: Run server tests
@@ -36,11 +36,11 @@ jobs:
       run: ./test.sh
 
   build:
-    name: Build Image
     runs-on: ubuntu-latest
     strategy:
       matrix:
         flwr_version: [1.4.0, 1.5.0]
+    name: Build server / ${{matrix.flwr_version}}
     steps:
     - uses: actions/checkout@v3
     - name: Build the server image
