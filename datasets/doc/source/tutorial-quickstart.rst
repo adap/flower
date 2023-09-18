@@ -53,9 +53,9 @@ Transform the Dataset directly into the DataLoader::
     ).with_format("torch")
   dataloader = DataLoader(partition_torch, batch_size=64)
 
-Numpy
+NumPy
 ^^^^^^^
-Numpy can be used as input to the TensorFlow model and is very straightforward::
+NumPy can be used as input to the TensorFlow model and is very straightforward::
 
    partition_np = partition.with_format("numpy")
    X_train, y_train = partition_np["img"], partition_np["label"]
