@@ -70,9 +70,9 @@ This requires `pyenv` and `poetry` already installed.
 
 ```bash
 # set local python version via pyenv
-pyenv local 3.9.17
+pyenv local 3.10.6
 # then fix that for poetry
-poetry env use 3.9.17
+poetry env use 3.10.6
 # then install poetry env
 poetry install
 ```
