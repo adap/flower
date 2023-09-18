@@ -17,13 +17,14 @@
 
 import sys
 import threading
+import traceback
 from logging import ERROR, INFO
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Type, Union
 
 import ray
 from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 
-from flwr.client import ClientLike
+from flwr.client import ClientFn
 from flwr.common import EventType, event
 from flwr.common.logger import log
 from flwr.server import Server
@@ -46,7 +47,7 @@ Invalid Arguments in method:
 
 `start_simulation(
     *,
-    client_fn: Callable[[str], ClientLike],
+    client_fn: ClientFn,
     num_clients: Optional[int] = None,
     clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, float]] = None,
@@ -69,7 +70,7 @@ REASON:
 
 def start_simulation(  # pylint: disable=too-many-arguments
     *,
-    client_fn: Callable[[str], ClientLike],
+    client_fn: ClientFn,
     num_clients: Optional[int] = None,
     clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, float]] = None,
@@ -87,7 +88,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     Parameters
     ----------
-    client_fn : Callable[[str], ClientLike]
+    client_fn : ClientFn
         A function creating client instances. The function must take a single
         `str` argument called `cid`. It should return a single client instance
         of type ClientLike. Note that the created client instances are ephemeral
@@ -292,6 +293,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
         )
     except Exception as ex:
         log(ERROR, ex)
+        log(ERROR, traceback.format_exc())
         log(
             ERROR,
             "Your simulation crashed :(. This could be because of several reasons."

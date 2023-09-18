@@ -242,5 +242,5 @@ class FedAvgAndroid(Strategy):
     # pylint: disable=R0201
     def bytes_to_ndarray(self, tensor: bytes) -> NDArray:
         """Deserialize NumPy array from bytes."""
-        ndarray_deserialized = np.frombuffer(tensor, dtype=np.float32)  # type: ignore
+        ndarray_deserialized = np.frombuffer(tensor, dtype=np.float32)
         return cast(NDArray, ndarray_deserialized)
