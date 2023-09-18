@@ -12,7 +12,7 @@
 
   Using the `client_fn`, Flower clients can interchangeably run as standalone processes (i.e. via `start_client`) or in simulation (i.e. via `start_simulation`) without requiring changes to how the client class is defined and instantiated.
 
-- **Make clients stateful** ([#2341](https://github.com/adap/flower/pull/2303))
+- **Make clients stateful** ([#2341](https://github.com/adap/flower/pull/2341))
 
   Flower clients are now stateful by default (wether you launch them via `start_client` or via `start_simulation`). A `ClientState` is implemented as a Python dataclass, making it flexible to adjust a wide range of use-cases. The state is injected upon client instantiation and stored in-memory before objects are destroyed. Next time the same client is spawned, its previous state will be set transparently before executing its task (e.g. `fit()`, `evaluate()`). A new [documentation page](https://flower.dev/docs/framework/how-to-use-stateful-clients.html) describes how to use stateful clients
 
