@@ -15,10 +15,11 @@
 """Flower driver SDK."""
 
 
-from .app import start_driver
+from .app import DriverConfig, start_driver
 from .driver import Driver
 
 __all__ = [
+    "DriverConfig",
     "start_driver",
     "Driver",
 ]

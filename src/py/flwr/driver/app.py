@@ -21,7 +21,7 @@ import time
 import timeit
 from dataclasses import dataclass
 from logging import INFO
-from typing import Dict, List, Optional, cast
+from typing import Dict, List, Optional, Union, cast
 
 from flwr.common import EventType, event
 from flwr.common.address import parse_address
@@ -35,6 +35,7 @@ from flwr.proto.driver_pb2 import (
 )
 from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
+from flwr.server import ServerConfig
 from flwr.server.client_manager import ClientManager, SimpleClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
@@ -73,7 +74,7 @@ class DriverConfig:
 def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     *,
     server_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
-    config: Optional[DriverConfig] = None,
+    config: Optional[Union[DriverConfig, ServerConfig]] = None,
     strategy: Optional[Strategy] = None,
     client_manager: Optional[ClientManager] = None,
     certificates: Optional[bytes] = None,
@@ -129,6 +130,12 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     >>> )
     """
     event(EventType.START_DRIVER_ENTER)
+
+    # Backward compatibility
+    if isinstance(config, ServerConfig):
+        config = DriverConfig(
+            num_rounds=config.num_rounds, round_timeout=config.round_timeout
+        )
 
     # Parse IP address
     parsed_address = parse_address(server_address)
