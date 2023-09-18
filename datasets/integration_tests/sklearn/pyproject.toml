@@ -1,0 +1,15 @@
+[build-system]
+requires = ["poetry-core>=1.4.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "fds-integration-sklearn"
+version = "0.1.0"
+description = "Flower Datasets with PyTorch"
+authors = ["The Flower Authors <hello@flower.dev>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+scikit-learn = "^1.2.0"
+flwr_datasets = { path = "./../../", develop = true, extras = ["vision"] }
+parameterized = "==0.9.0"
