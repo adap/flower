@@ -16,7 +16,9 @@
 
 
 from abc import ABC
+from typing import Optional
 
+from flwr.client.client_state import WorkloadState
 from flwr.common import (
     Code,
     EvaluateIns,
@@ -34,6 +36,8 @@ from flwr.common import (
 
 class Client(ABC):
     """Abstract base class for Flower clients."""
+
+    state: Optional[WorkloadState] = None
 
     def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
         """Return set of client's properties.

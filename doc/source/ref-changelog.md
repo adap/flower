@@ -12,6 +12,8 @@
 
   Using the `client_fn`, Flower clients can interchangeably run as standalone processes (i.e. via `start_client`) or in simulation (i.e. via `start_simulation`) without requiring changes to how the client class is defined and instantiated.
 
+- **Make clients stateful** ([#2389](https://github.com/adap/flower/pull/2389))
+
 - **Update Flower Baselines**
 
   - FedProx ([#2286](https://github.com/adap/flower/pull/2286))
