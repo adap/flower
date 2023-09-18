@@ -16,10 +16,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-defaults:
-  run:
-    working-directory: src/docker
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -30,6 +26,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Run server tests
+      working-directory: src/docker/server
       env:
           BUILD_TARGET: server
           FLWR_VERSION: ${{ matrix.flwr_version }}
@@ -44,6 +41,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the server image
+      working-directory: src/docker/server
       env:
           BUILD_TARGET: server
           FLWR_VERSION: ${{ matrix.flwr_version }}
