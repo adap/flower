@@ -268,7 +268,7 @@ def _evaluate(self: Client, ins: EvaluateIns) -> EvaluateRes:
 
 
 def _wrap_numpy_client(client: NumPyClient) -> Client:
-    member_dict: dict[str, Callable] = {  # type: ignore
+    member_dict: Dict[str, Callable] = {  # type: ignore
         "__init__": _constructor,
     }
 
