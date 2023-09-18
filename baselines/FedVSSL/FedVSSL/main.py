@@ -65,11 +65,9 @@ def initial_setup(cid, base_work_dir, rounds, light=False):
     # load the model
     model = utils.load_model(args, cfg)
     # load the training data
-
     train_dataset = utils.load_data(args, cfg)
 
-    # load the test data
-    # test_dataset = utils.load_test_data(args, cfg)
+    # since pretraining during FedVSSL we don't need any testing data, we can left it empty.
     test_dataset = " " 
 
     return args, cfg, distributed, logger, model, train_dataset, test_dataset, utils
@@ -83,9 +81,13 @@ def fit_config(rnd: int) -> Dict[str, str]:
 
 
 if __name__ == "__main__":
+    
+    # This flag can be set manually
+
     train_flag = True
     # train_flag = False
     if train_flag:
+        
         # first the paths needs to be defined otherwise the program may not be able to locate the files of the ctp
         from utils import init_p_paths
         init_p_paths("FedVSSL")

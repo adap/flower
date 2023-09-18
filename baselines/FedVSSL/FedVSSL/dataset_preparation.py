@@ -43,11 +43,22 @@ import CtP
 
 # We use the the json files for the annotations. # One can convert the the train_split_1.txt to train_split_1.json by using the following script file.
 # python CtP/scripts/cvt_txt_to_json.py
-# Note that before running this script file you need to give the correct path to the annotations file
+
+# Note that before running the above script file you need to give the correct path to the annotations file
 # For example: After the dataset preparation if your annotation files are in  data/ucf101/, you need to modify the following lines 
 # in the CtP/scripts/cvt_txt_to_json.py to convert the .txt annotation file to .josn annotation file
 # ann_path = '/data/ucf101/annotations/train_split_1.txt'
 # out_path = '/data/ucf101/annotations/train_split_1.json'
+
+
+
+# Data partitioning 
+# We provide two files for performing data partitioning:
+# data_partitioning_ucf.py for generating the non-iid data distribution from UCF-101 dataset
+# data_partitioning_k400.py for generating the non-iid data distribution from K400 dataset
+# Both of the above scripts will generate the client_x.json file where "x" denotes the client number.
+
+
 
 # optional 
 # rm data/ucf101/UCF101.rar
