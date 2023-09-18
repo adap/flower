@@ -33,8 +33,8 @@ def main(cfg: DictConfig) -> None:
     # Hydra automatically creates an output directory
     # Let's retrieve it and save some results there
     save_path = HydraConfig.get().runtime.output_dir
-    with open(f"{save_path}/config.yaml", "wt") as f:
-        OmegaConf.save(cfg, f)
+    with open(f"{save_path}/config.yaml", "wt") as handle:
+        OmegaConf.save(cfg, handle)
 
     # partition dataset and get dataloaders
     trainloaders, testloader = load_datasets(
@@ -44,8 +44,8 @@ def main(cfg: DictConfig) -> None:
     tamuna_histories = run_tamuna(cfg, save_path, testloader, trainloaders)
     fedavg_histories = run_fedavg(cfg, save_path, testloader, trainloaders)
 
-    with open("model_dim.txt", "rt") as f:
-        dim = int(f.readline())
+    with open("model_dim.txt", "rt") as handle:
+        dim = int(handle.readline())
 
     compare_histories(tamuna_histories, fedavg_histories, dim, save_path, cfg)
 
@@ -185,7 +185,7 @@ def run_tamuna(
                 clients_per_round=cfg.server.clients_per_round,
                 epochs_per_round=epochs_per_round,
                 eta=cfg.client.eta,
-                s=cfg.server.s,
+                sparsity=cfg.server.s,
                 evaluate_fn=evaluate_fn,
             ),
         )

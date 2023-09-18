@@ -142,7 +142,7 @@ def power_law_split(
     labels_cs = np.cumsum(class_counts)
     labels_cs = [0] + labels_cs[:-1].tolist()
 
-    partitions_idx = []
+    partitions_idx: List[List[int]] = []
     num_classes = len(np.bincount(targets))
     hist = np.zeros(num_classes, dtype=np.int32)
 
@@ -186,9 +186,11 @@ def power_law_split(
             count = int(probs[cls, u_id // num_classes, cls_idx])
 
             # add count of specific class to partition
-            indices = full_idx[
-                labels_cs[cls] + hist[cls] : labels_cs[cls] + hist[cls] + count
-            ]
+            indices = list(
+                full_idx[
+                    labels_cs[cls] + hist[cls] : labels_cs[cls] + hist[cls] + count
+                ]
+            )
             partitions_idx[u_id].extend(indices)
             hist[cls] += count
 

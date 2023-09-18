@@ -4,7 +4,6 @@ from collections import OrderedDict
 from typing import Callable, Dict, Tuple
 
 import torch
-from flwr.common import parameters_to_ndarrays
 from flwr.common.typing import NDArrays, Scalar
 from hydra.utils import instantiate
 from omegaconf import DictConfig
@@ -35,10 +34,10 @@ def gen_evaluate_fn(
         The centralized evaluation function.
     """
 
-    def evaluate(parameters: NDArrays) -> Tuple[float, Dict[str, Scalar]]:
+    def evaluate(parameters_ndarrays: NDArrays) -> Tuple[float, Dict[str, Scalar]]:
         """Use the entire MNIST test set for evaluation."""
         net = instantiate(model)
-        params_dict = zip(net.state_dict().keys(), parameters_to_ndarrays(parameters))
+        params_dict = zip(net.state_dict().keys(), parameters_ndarrays)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         net.load_state_dict(state_dict, strict=True)
         net.to(device)

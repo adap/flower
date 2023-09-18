@@ -11,37 +11,37 @@ from flwr.server.strategy import Strategy
 from tamuna.models import Net
 
 
-def aggregate(weights: List[NDArrays], s: float) -> NDArrays:
+def aggregate(weights: List[NDArrays], sparsity: float) -> NDArrays:
     """Compute average of the clients' weights."""
     averaged_weights = [
-        np.sum(layer_updates, axis=0) / s for layer_updates in zip(*weights)
+        np.sum(layer_updates, axis=0) / sparsity for layer_updates in zip(*weights)
     ]
     return averaged_weights
 
 
 def create_pattern(dim: int, cohort_size: int, sparsity: int):
     """Create compression pattern."""
-    q = torch.zeros(size=(dim, cohort_size))
+    pattern = torch.zeros(size=(dim, cohort_size))
     if dim >= cohort_size / sparsity:
         k = 0
         for i in range(dim):
-            for _j in range(sparsity):
-                q[i, k] = 1
+            for _ in range(sparsity):
+                pattern[i, k] = 1
                 k = (k + 1) % cohort_size
     else:
         k = 0
-        for _j in range(sparsity):
+        for _ in range(sparsity):
             for i in range(dim):
-                q[i, k] = 1
+                pattern[i, k] = 1
                 k += 1
 
-    return q
+    return pattern
 
 
-def shuffle_columns(q: torch.Tensor):
+def shuffle_columns(pattern: torch.Tensor):
     """Shuffle the columns of the compression pattern."""
-    q = q[:, torch.randperm(q.size()[1])]
-    return q
+    pattern = pattern[:, torch.randperm(pattern.size()[1])]
+    return pattern
 
 
 class TamunaStrategy(Strategy):
@@ -52,28 +52,28 @@ class TamunaStrategy(Strategy):
         clients_per_round: int,
         epochs_per_round: List[int],
         eta: float,
-        s: int,
+        sparsity: int,
         evaluate_fn: Callable,
     ) -> None:
         self.clients_per_round = clients_per_round
         self.epochs_per_round = epochs_per_round
         self.evaluate_fn = evaluate_fn
         self.eta = eta
-        self.s = s
+        self.sparsity = sparsity
         self.dim = None
         self.server_model = None
-        self.compression_pattern = None
+        self.compression_pattern = torch.zeros(size=(0, 0))
 
     def initialize_parameters(self, client_manager):
         """Initialize the server model."""
         self.server_model = Net()
         self.dim = sum(p.numel() for p in self.server_model.parameters())
 
-        with open("model_dim.txt", "wt") as f:
-            f.write(str(self.dim))
+        with open("model_dim.txt", "wt") as handle:
+            handle.write(str(self.dim))
 
         self.compression_pattern = create_pattern(
-            self.dim, self.clients_per_round, self.s
+            self.dim, self.clients_per_round, self.sparsity
         )  # dim x cohort_size
 
         ndarrays = [
@@ -101,7 +101,9 @@ class TamunaStrategy(Strategy):
     def aggregate_fit(self, server_round, results, failures):
         """Average the clients' weights."""
         weights = [parameters_to_ndarrays(fit_res.parameters) for _, fit_res in results]
-        parameters_aggregated = ndarrays_to_parameters(aggregate(weights, self.s))
+        parameters_aggregated = ndarrays_to_parameters(
+            aggregate(weights, self.sparsity)
+        )
         return parameters_aggregated, {}
 
     def configure_evaluate(self, server_round, parameters, client_manager):
@@ -114,7 +116,7 @@ class TamunaStrategy(Strategy):
 
     def evaluate(self, server_round: int, parameters):
         """Centralized evaluation."""
-        return self.evaluate_fn(parameters)
+        return self.evaluate_fn(parameters_to_ndarrays(parameters))
 
 
 class CentralizedFedAvgStrategy(Strategy):
@@ -167,4 +169,4 @@ class CentralizedFedAvgStrategy(Strategy):
 
     def evaluate(self, server_round: int, parameters):
         """Centralized evaluation."""
-        return self.evaluate_fn(parameters)
+        return self.evaluate_fn(parameters_to_ndarrays(parameters))

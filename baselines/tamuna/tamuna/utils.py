@@ -58,8 +58,8 @@ def save_results_as_pickle(
     data = {"history": history}
 
     # save results to pickle
-    with open(file_path, "wb") as f:
-        pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
+    with open(file_path, "wb") as handle:
+        pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 def compare_histories(
@@ -84,45 +84,14 @@ def compare_communication_complexity(
     cfg: DictConfig,
 ):
     """Compare Tamuna with FedAvg based on communication complexity."""
-    up_complexities = [
-        np.ceil((cfg.server.s * dim) / cfg.server.clients_per_round),
+    plot_histories(
+        tamuna_histories,
+        cfg,
         dim,
-    ]
-    down_complexities = [dim, dim]
-    labels = ["Tamuna", "FedAvg"]
-
-    for j, hist in enumerate([tamuna_histories, fedavg_histories]):
-        accuracies_across_runs = []
-        losses_across_runs = []
-        rounds = [0]
-
-        for i in range(len(hist)):
-            rounds, accuracy_values = zip(*hist[i].metrics_centralized["accuracy"])
-            _, loss_values = zip(*hist[i].losses_centralized)
-            accuracies_across_runs.append(accuracy_values)
-            losses_across_runs.append(loss_values)
-
-        x_axis = np.arange(len(rounds)) * (
-            cfg.server.uplink_factor * up_complexities[j]
-            + cfg.server.downlink_factor * down_complexities[j]
-        )
-
-        lowest_loss_across_runs = np.min(losses_across_runs, axis=0)
-        hishest_loss_across_runs = np.max(losses_across_runs, axis=0)
-
-        avg_loss_across_runs = (
-            np.add(lowest_loss_across_runs, hishest_loss_across_runs) / 2
-        )
-
-        plt.fill_between(
-            x_axis,
-            hishest_loss_across_runs,
-            lowest_loss_across_runs,
-            alpha=0.4,
-            label=labels[j],
-        )
-
-        plt.plot(x_axis, avg_loss_across_runs, linewidth=2)
+        np.ceil((cfg.server.sparsity * dim) / cfg.server.clients_per_round),
+        "Tamuna",
+    )
+    plot_histories(fedavg_histories, cfg, dim, dim, "FedAvg")
 
     plt.ylabel("Loss")
     plt.yscale("log")
@@ -136,55 +105,46 @@ def compare_communication_complexity(
     plt.close()
 
 
+def plot_histories(
+    histories: List[History],
+    cfg: DictConfig,
+    down_complexity: int,
+    up_complexity: int,
+    label: str,
+):
+    """Plot multiple runs."""
+    losses_across_runs = []
+
+    for run in histories:
+        history_losses = run.losses_centralized
+        rounds, loss_values = zip(*history_losses)
+        losses_across_runs.append(loss_values)
+
+    x_axis = np.arange(len(rounds)) * (
+        cfg.server.uplink_factor * up_complexity
+        + cfg.server.downlink_factor * down_complexity
+    )
+    lowest_loss_across_runs = np.min(losses_across_runs, axis=0)
+    highest_loss_across_runs = np.max(losses_across_runs, axis=0)
+    avg_loss_across_runs = np.add(lowest_loss_across_runs, highest_loss_across_runs) / 2
+    plt.fill_between(
+        x_axis,
+        highest_loss_across_runs,
+        lowest_loss_across_runs,
+        alpha=0.4,
+        label=label,
+    )
+    plt.plot(x_axis, avg_loss_across_runs, linewidth=2)
+
+
 def compare_loss_and_accuracy(
     fedavg_histories: List[History], tamuna_histories: List[History], save_path: str
 ):
     """Compare Tamuna with FedAvg based on loss and accuracy."""
-    fig, axs = plt.subplots(nrows=2, ncols=1, sharex="row")
-    labels = ["Tamuna", "FedAvg"]
+    _, axs = plt.subplots(nrows=2, ncols=1, sharex="row")
 
-    for j, hist in enumerate([tamuna_histories, fedavg_histories]):
-        accuracies_across_runs = []
-        losses_across_runs = []
-        rounds = [0]
-
-        for i in range(len(hist)):
-            rounds, accuracy_values = zip(*hist[i].metrics_centralized["accuracy"])
-            _, loss_values = zip(*hist[i].losses_centralized)
-            accuracies_across_runs.append(accuracy_values)
-            losses_across_runs.append(loss_values)
-
-        x_axis = list(rounds)
-
-        lowest_loss_across_runs = np.min(losses_across_runs, axis=0)
-        highest_loss_across_runs = np.max(losses_across_runs, axis=0)
-        lowest_accuracy_across_runs = np.min(accuracies_across_runs, axis=0)
-        highest_accuracy_across_runs = np.max(accuracies_across_runs, axis=0)
-
-        avg_loss_across_runs = (
-            np.add(lowest_loss_across_runs, highest_loss_across_runs) / 2
-        )
-        avg_accuracy_across_runs = (
-            np.add(lowest_accuracy_across_runs, highest_accuracy_across_runs) / 2
-        )
-
-        axs[0].fill_between(
-            x_axis,
-            highest_loss_across_runs,
-            lowest_loss_across_runs,
-            alpha=0.4,
-            label=labels[j],
-        )
-        axs[0].plot(x_axis, avg_loss_across_runs, linewidth=2)
-
-        axs[1].fill_between(
-            x_axis,
-            highest_accuracy_across_runs,
-            lowest_accuracy_across_runs,
-            alpha=0.4,
-            label=labels[j],
-        )
-        axs[1].plot(x_axis, avg_accuracy_across_runs, linewidth=2)
+    plot_histories_with_accuracy(axs, tamuna_histories, label="Tamuna")
+    plot_histories_with_accuracy(axs, fedavg_histories, label="FedAvg")
 
     axs[0].set_title("MNIST Test Loss")
     axs[0].set_ylabel("Loss")
@@ -205,3 +165,53 @@ def compare_loss_and_accuracy(
     plt.tight_layout()
     plt.savefig(Path(save_path) / Path("loss_accuracy.png"), dpi=300)
     plt.close()
+
+
+def plot_histories_with_accuracy(axs, histories, label):
+    """Plot histories' accuracy and loss."""
+    accuracies_across_runs = []
+    losses_across_runs = []
+
+    for run in histories:
+        history_metrics = run.metrics_centralized["accuracy"]
+        history_losses = run.losses_centralized
+
+        rounds, accuracy_values = zip(*history_metrics)
+        _, loss_values = zip(*history_losses)
+        accuracies_across_runs.append(accuracy_values)
+        losses_across_runs.append(loss_values)
+
+    plot_accuracy_and_loss(
+        axs, accuracies_across_runs, losses_across_runs, rounds, label
+    )
+
+
+def plot_accuracy_and_loss(
+    axs, accuracies_across_runs, losses_across_runs, rounds, label
+):
+    """Plot histories' accuracy and loss."""
+    x_axis = list(rounds)
+    lowest_loss_across_runs = np.min(losses_across_runs, axis=0)
+    highest_loss_across_runs = np.max(losses_across_runs, axis=0)
+    lowest_accuracy_across_runs = np.min(accuracies_across_runs, axis=0)
+    highest_accuracy_across_runs = np.max(accuracies_across_runs, axis=0)
+    avg_loss_across_runs = np.add(lowest_loss_across_runs, highest_loss_across_runs) / 2
+    avg_accuracy_across_runs = (
+        np.add(lowest_accuracy_across_runs, highest_accuracy_across_runs) / 2
+    )
+    axs[0].fill_between(
+        x_axis,
+        highest_loss_across_runs,
+        lowest_loss_across_runs,
+        alpha=0.4,
+        label=label,
+    )
+    axs[0].plot(x_axis, avg_loss_across_runs, linewidth=2)
+    axs[1].fill_between(
+        x_axis,
+        highest_accuracy_across_runs,
+        lowest_accuracy_across_runs,
+        alpha=0.4,
+        label=label,
+    )
+    axs[1].plot(x_axis, avg_accuracy_across_runs, linewidth=2)

@@ -44,13 +44,13 @@ class TamunaClient(fl.client.NumPyClient):
     def __create_state(self):
         """Create client state."""
         if not os.path.exists(self.state_file_name):
-            with open(self.state_file_name, "wb") as f:
+            with open(self.state_file_name, "wb") as handle:
                 state = (
                     self.control_variate,
                     self.old_compression_mask,
                     self.old_compressed_net,
                 )
-                pickle.dump(state, f, protocol=pickle.HIGHEST_PROTOCOL)
+                pickle.dump(state, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Return the parameters of the current net."""
@@ -64,12 +64,15 @@ class TamunaClient(fl.client.NumPyClient):
 
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
-    ) -> Tuple[NDArrays, int, Dict[str, int]]:
+    ) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
         """Distributed fit function for a given client."""
         self.set_parameters(parameters)
 
         mask = config["mask"]
-        mask = mask.to(self.device)
+        if isinstance(mask, torch.Tensor):
+            mask = mask.to(self.device)
+        else:
+            raise TypeError("Mask must be a Tensor.")
 
         self.__load_state()
 
@@ -94,18 +97,18 @@ class TamunaClient(fl.client.NumPyClient):
 
     def __save_state(self, mask):
         """Save client state."""
-        with open(self.state_file_name, "wb") as f:
+        with open(self.state_file_name, "wb") as handle:
             state = (
                 self.control_variate,
                 mask,
                 self.net,
             )
-            pickle.dump(state, f, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(state, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     def __load_state(self):
         """Load client state."""
-        with open(self.state_file_name, "rb") as f:
-            state = pickle.load(f)
+        with open(self.state_file_name, "rb") as handle:
+            state = pickle.load(handle)
             (
                 self.control_variate,
                 self.old_compression_mask,
