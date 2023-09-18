@@ -1,4 +1,4 @@
-"""CNN model architecutre, training, and testing functions for MNIST."""
+"""CNN model architecture, training, and testing functions for MNIST."""
 
 
 from typing import List, Tuple
@@ -61,7 +61,7 @@ class LogisticRegression(nn.Module):
 
     def __init__(self, num_classes: int) -> None:
         super().__init__()
-        self.fc = nn.Linear(28 * 28, num_classes)
+        self.linear = nn.Linear(28 * 28, num_classes)
 
     def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
         """Forward pass.
@@ -76,7 +76,7 @@ class LogisticRegression(nn.Module):
         torch.Tensor
             The resulting Tensor after it has passed through the network
         """
-        output_tensor = self.fc(torch.flatten(input_tensor, 1))
+        output_tensor = self.linear(torch.flatten(input_tensor, 1))
         return output_tensor
 
 

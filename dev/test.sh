@@ -51,7 +51,7 @@ echo "- All Python checks passed"
 echo "- Start Markdown checks"
 
 echo "- mdformat: start"
-python -m mdformat --check --number doc/source/tutorial examples
+python -m mdformat --check --number doc/source examples
 echo "- mdformat: done"
 
 echo "- All Markdown checks passed"

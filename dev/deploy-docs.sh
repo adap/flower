@@ -22,16 +22,16 @@ ROOT=`pwd`
 
 # Build and deploy Flower Framework docs
 cd doc
-make docs
+./build-versioned-docs.sh
 cd build/html
-aws s3 sync --delete --exclude ".*" --exclude "v/*" --acl public-read --cache-control "no-cache" ./ s3://flower.dev/docs/framework
+aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./ s3://flower.dev/docs/framework
 
 # Build and deploy Flower Baselines docs
 cd $ROOT
 cd baselines/doc
 make docs
 cd build/html
-aws s3 sync --delete --exclude ".*" --exclude "v/*" --acl public-read --cache-control "no-cache" ./ s3://flower.dev/docs/baselines
+aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./ s3://flower.dev/docs/baselines
 
 # Build and deploy Flower Examples docs
 cd $ROOT
@@ -39,4 +39,4 @@ cd $ROOT
 cd examples/doc
 make docs
 cd build/html
-aws s3 sync --delete --exclude ".*" --exclude "v/*" --acl public-read --cache-control "no-cache" ./ s3://flower.dev/docs/examples
+aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./ s3://flower.dev/docs/examples

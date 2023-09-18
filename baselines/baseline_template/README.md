@@ -55,19 +55,19 @@ dataset: [dataset1, dataset2] # list of datasets you include in your baseline
 ```bash  
 # The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
 
-poetry run -m <baseline-name>.main <no additional arguments> # where <baseline-name> is the name of this directory and that of the only sub-directory in this directory (i.e. where all your source code is)
+poetry run python -m <baseline-name>.main <no additional arguments> # where <baseline-name> is the name of this directory and that of the only sub-directory in this directory (i.e. where all your source code is)
 
 # If you are using a dataset that requires a complicated download (i.e. not using one natively supported by TF/PyTorch) + preprocessing logic, you might want to tell people to run one script first that will do all that. Please ensure the download + preprocessing can be configured to suit (at least!) a different download directory (and use as default the current directory). The expected command to run to do this is:
 
-poetry run -m <baseline-name>.dataset_preparation <optional arguments, but default should always run>
+poetry run python -m <baseline-name>.dataset_preparation <optional arguments, but default should always run>
 
 # It is expected that you baseline supports more than one dataset and different FL settings (e.g. different number of clients, dataset partitioning methods, etc). Please provide a list of commands showing how these experiments are run. Include also a short explanation of what each one does. Here it is expected you'll be using the Hydra syntax to override the default config.
 
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
+poetry run python -m <baseline-name>.main  <override_some_hyperparameters>
 .
 .
 .
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
+poetry run python -m <baseline-name>.main  <override_some_hyperparameters>
 ```
 
 
@@ -78,7 +78,7 @@ poetry run -m <baseline-name>.main  <override_some_hyperparameters>
 ```bash
 # it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameteres
 
-poetry run -m <baseline-name>.main --multirun num_client_per_round=5,10,50 dataset=femnist,cifar10
+poetry run python -m <baseline-name>.main --multirun num_client_per_round=5,10,50 dataset=femnist,cifar10
 # the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
 
 [Now show a figure/table displaying the results of the above command]
