@@ -67,7 +67,7 @@ for server_round in range(num_rounds):
     print(f"Commencing server round {server_round + 1}")
 
     # List of sampled node IDs in this round
-    sampled_node_ids: List[int] = []
+    sampled_nodes: List[node_pb2.Node] = []
 
     # Sample node ids
     if anonymous_client_nodes:
@@ -78,7 +78,11 @@ for server_round in range(num_rounds):
         # To schedule a TaskIns for an anonymous client node, we set the node_id to 0
         # (and `anonymous` to True)
         # Here, we create an array with only zeros in it:
-        sampled_node_ids = [0] * num_client_nodes_per_round
+        sampled_node_ids: List[int] = [0] * num_client_nodes_per_round
+        sampled_nodes = [
+            node_pb2.Node(node_id=node_id, anonymous=False)
+            for node_id in sampled_node_ids
+        ]
     else:
         # If our client nodes have identiy (i.e., they are not anonymous), we can get
         # those IDs from the Driver API using `get_nodes`. If enough clients are
@@ -97,20 +101,18 @@ for server_round in range(num_rounds):
             )
             # ---------------------------------------------------------------------- Driver SDK
 
-            all_node_ids: List[int] = get_nodes_res.node_ids
-            print(f"Got {len(all_node_ids)} node IDs")
+            all_nodes: List[node_pb2.Node] = get_nodes_res.nodes
+            print(f"Got {len(all_nodes)} client nodes")
 
-            if len(all_node_ids) >= num_client_nodes_per_round:
+            if len(all_nodes) >= num_client_nodes_per_round:
                 # Sample client nodes
-                sampled_node_ids = random.sample(
-                    all_node_ids, num_client_nodes_per_round
-                )
+                sampled_nodes = random.sample(all_nodes, num_client_nodes_per_round)
                 break
 
             time.sleep(3)
 
     # Log sampled node IDs
-    print(f"Sampled {len(sampled_node_ids)} node IDs: {sampled_node_ids}")
+    print(f"Sampled {len(sampled_nodes)} node IDs: {sampled_nodes}")
     time.sleep(sleep_time)
 
     # Schedule a task for all sampled nodes
@@ -119,7 +121,7 @@ for server_round in range(num_rounds):
         server_message=ServerMessage(fit_ins=fit_ins)
     )
     task_ins_list: List[task_pb2.TaskIns] = []
-    for sampled_node_id in sampled_node_ids:
+    for sampled_node in sampled_nodes:
         new_task_ins = task_pb2.TaskIns(
             task_id="",  # Do not set, will be created and set by the DriverAPI
             group_id="",
@@ -129,11 +131,7 @@ for server_round in range(num_rounds):
                     node_id=0,
                     anonymous=True,
                 ),
-                consumer=node_pb2.Node(
-                    node_id=sampled_node_id,
-                    anonymous=anonymous_client_nodes,
-                    # Must be True if we're working with anonymous clients
-                ),
+                consumer=sampled_node,
                 legacy_server_message=server_message_proto,
             ),
         )

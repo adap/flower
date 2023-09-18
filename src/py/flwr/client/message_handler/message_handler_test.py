@@ -18,6 +18,7 @@
 import uuid
 
 from flwr.client import Client
+from flwr.client.typing import ClientFn
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -103,6 +104,13 @@ class ClientWithProps(Client):
         )
 
 
+def _get_client_fn(client: Client) -> ClientFn:
+    def client_fn(cid: str) -> Client:  # pylint: disable=unused-argument
+        return client
+
+    return client_fn
+
+
 def test_client_without_get_properties() -> None:
     """Test client implementing get_properties."""
     # Prepare
@@ -123,7 +131,7 @@ def test_client_without_get_properties() -> None:
 
     # Execute
     task_res, actual_sleep_duration, actual_keep_going = handle(
-        client=client, task_ins=task_ins
+        client_fn=_get_client_fn(client), task_ins=task_ins
     )
 
     if not task_res.HasField("task"):
@@ -186,7 +194,7 @@ def test_client_with_get_properties() -> None:
 
     # Execute
     task_res, actual_sleep_duration, actual_keep_going = handle(
-        client=client, task_ins=task_ins
+        client_fn=_get_client_fn(client), task_ins=task_ins
     )
 
     if not task_res.HasField("task"):
