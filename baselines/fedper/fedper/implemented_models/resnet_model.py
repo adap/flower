@@ -9,8 +9,11 @@ from torchvision.models.resnet import resnet34
 
 from fedper.models import ModelManager, ModelSplit
 
-def conv3x3(in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, dilation: int = 1) -> nn.Conv2d:
-    """3x3 convolution with padding"""
+
+def conv3x3(
+    in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, dilation: int = 1
+) -> nn.Conv2d:
+    """3x3 convolution with padding."""
     return nn.Conv2d(
         in_planes,
         out_planes,
@@ -24,11 +27,13 @@ def conv3x3(in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, d
 
 
 def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Conv2d:
-    """1x1 convolution"""
+    """1x1 convolution."""
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
 
 
 class BasicBlock(nn.Module):
+    """Basic block for ResNet."""
+
     expansion: int = 1
 
     def __init__(
@@ -40,7 +45,7 @@ class BasicBlock(nn.Module):
     ) -> None:
         super().__init__()
         norm_layer = nn.BatchNorm2d
-        # Both self.conv1 and self.downsample layers downsample the input when stride != 1
+        # Both self.conv1 and self.downsample layers downsample input when stride != 1
         self.conv1 = conv3x3(inplanes, planes, stride)
         self.bn1 = norm_layer(planes)
         self.relu = nn.ReLU(inplace=True)
@@ -50,6 +55,7 @@ class BasicBlock(nn.Module):
         self.stride = stride
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward inputs through the block."""
         identity = x
 
         out = self.conv1(x)
@@ -65,7 +71,8 @@ class BasicBlock(nn.Module):
         out += identity
         out = self.relu(out)
 
-        return out    
+        return out
+
 
 class ResNet(nn.Module):
     """ResNet model."""
