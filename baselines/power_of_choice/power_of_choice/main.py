@@ -6,7 +6,8 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 # these are the basic packages you'll need here
 # feel free to remove some if aren't needed
 import os
-from typing import Callable, Dict, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
+from flwr.common.typing import Metrics
 from server import PowerOfChoiceCommAndCompVariant
 from models import create_MLP_model, create_CNN_model
 from flwr.common.typing import Scalar
@@ -84,6 +85,31 @@ def main(cfg: DictConfig) -> None:
             return config
         
         return fit_config
+    
+    def get_fit_metrics_aggregation_fn():
+        def fit_metrics_aggregation_fn(results: List[Tuple[int, Metrics]]) -> Metrics:
+            # Initialize lists to store training losses
+            training_losses = []
+
+            # Extract training losses and client counts from results
+            for _, metrics in results:
+                if 'training_loss' in metrics:
+                    training_loss = metrics['training_loss']
+                    training_losses.append(training_loss)
+
+            # Calculate the variance and average of training loss
+            variance_training_loss = np.var(training_losses)
+            average_training_loss = np.mean(training_losses)
+
+            # Create the aggregated metrics dictionary
+            aggregated_metrics = {
+                'variance_training_loss': variance_training_loss,
+                'average_training_loss': average_training_loss
+            }
+
+            return aggregated_metrics
+        
+        return fit_metrics_aggregation_fn
     
     def get_on_evaluate_config(is_cpow: bool, b: Optional[int] = None):
         def evaluate_config(server_round: int):
@@ -168,6 +194,7 @@ def main(cfg: DictConfig) -> None:
             on_fit_config_fn=get_on_fit_config(),
             evaluate_fn=get_evaluate_fn(server_model),
             on_evaluate_config_fn=get_on_evaluate_config(is_cpow, cfg.b),
+            fit_metrics_aggregation_fn=get_fit_metrics_aggregation_fn()
         )
 
     client_manager = SimpleClientManager()

@@ -9,7 +9,7 @@ results, plotting.
 from pathlib import Path
 import pickle
 from secrets import token_hex
-from typing import Dict, Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
 from flwr.server.history import History
 import matplotlib.pyplot as plt
 
@@ -125,11 +125,11 @@ def plot_metric_from_history(
         Optional string to add at the end of the filename for the plot.
     """
     # Extract required metrics
-    losses_distributed = hist.losses_distributed
+    training_losses_distributed = hist.metrics_distributed_fit["average_training_loss"]
     accuracy_centralized = hist.metrics_centralized["accuracy"]
 
     # Unpack rounds and loss values
-    rounds_distributed, loss_values_distributed = zip(*losses_distributed)
+    rounds_distributed, loss_values_distributed = zip(*training_losses_distributed)
     rounds_centralized, accuracy_values_centralized = zip(*accuracy_centralized)
 
     # Create a figure with two subplots
@@ -151,4 +151,123 @@ def plot_metric_from_history(
     plt.tight_layout()
 
     plt.savefig(Path(save_plot_path) / Path(f"Plot_metrics{suffix}.png"))
+    plt.close()
+
+def plot_variance_training_loss_from_history(
+    hist: History,
+    save_plot_path: Path,
+    suffix: Optional[str] = "",
+) -> None:
+    """Function to plot from Flower server History.
+
+    Parameters
+    ----------
+    hist : History
+        Object containing evaluation for all rounds.
+    save_plot_path : Path
+        Folder to save the plot to.
+    suffix: Optional[str]
+        Optional string to add at the end of the filename for the plot.
+    """
+    # Extract required metrics
+    variance_training_losses_distributed = hist.metrics_distributed_fit["variance_training_loss"]
+
+    # Unpack rounds and loss values
+    rounds_distributed, variance_training_loss_values_distributed = zip(*variance_training_losses_distributed)
+
+    # Create a figure
+    plt.figure()
+
+    # Plot losses_distributed
+    plt.plot(rounds_distributed, variance_training_loss_values_distributed, label="Distributed Loss Variance")
+    plt.xlabel("Communication round")
+    plt.ylabel("Training loss variance")
+    plt.legend()
+
+    plt.savefig(Path(save_plot_path) / Path(f"Plot_loss_variance{suffix}.png"))
+    plt.close()
+
+def plot_metrics_from_histories(
+    title_and_histories: List[Tuple[str, History]],
+    save_plot_path: Path,
+    suffix: Optional[str] = "",
+) -> None:
+    """Function to plot metrics from Flower server Histories.
+
+    Parameters
+    ----------
+    title_and_histories : List[Tuple[str, History]]
+        List of tuples where each tuple contains a title and a History object.
+    save_plot_path : Path
+        Folder to save the plot to.
+    suffix: Optional[str]
+        Optional string to add at the end of the filename for the plot.
+    """
+    # Create a figure with two subplots
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+
+    for title, hist in title_and_histories:
+        # Extract required metrics
+        training_losses_distributed = hist.metrics_distributed_fit["average_training_loss"]
+        accuracy_centralized = hist.metrics_centralized["accuracy"]
+
+        # Unpack rounds and loss values
+        rounds_distributed, loss_values_distributed = zip(*training_losses_distributed)
+        rounds_centralized, accuracy_values_centralized = zip(*accuracy_centralized)
+
+        # Plot accuracy_centralized in the left subplot
+        ax1.plot(rounds_centralized, accuracy_values_centralized, label=f"{title}")
+
+        # Plot losses_distributed in the right subplot
+        ax2.plot(rounds_distributed, loss_values_distributed, label=f"{title}")
+
+    ax1.set_xlabel("Communication round")
+    ax1.set_ylabel("Test accuracy")
+    ax1.legend()
+
+    ax2.set_xlabel("Communication round")
+    ax2.set_ylabel("Training loss")
+    ax2.legend()
+
+    # Adjust layout to avoid overlapping labels and titles
+    plt.tight_layout()
+
+    plt.savefig(Path(save_plot_path) / Path(f"Plot_metrics{suffix}.png"))
+    plt.close()
+
+def plot_variances_training_loss_from_history(
+    title_and_histories: List[Tuple[str, History]],
+    save_plot_path: Path,
+    suffix: Optional[str] = "",
+) -> None:
+    """Function to plot variances from Flower server History.
+
+    Parameters
+    ----------
+    hist : History
+        List containing histories and corresponding titles.
+    save_plot_path : Path
+        Folder to save the plot to.
+    suffix: Optional[str]
+        Optional string to add at the end of the filename for the plot.
+    """
+
+    # Create a figure
+    plt.figure()
+
+    for title, hist in title_and_histories:
+        # Extract required metrics
+        variance_training_losses_distributed = hist.metrics_distributed_fit["variance_training_loss"]
+
+        # Unpack rounds and loss values
+        rounds_distributed, variance_training_loss_values_distributed = zip(*variance_training_losses_distributed)
+
+        # Plot losses_distributed
+        plt.plot(rounds_distributed, variance_training_loss_values_distributed, label=f"{title}")
+    
+    plt.xlabel("Communication round")
+    plt.ylabel("Training loss variance")
+    plt.legend()
+
+    plt.savefig(Path(save_plot_path) / Path(f"Plot_loss_variance{suffix}.png"))
     plt.close()

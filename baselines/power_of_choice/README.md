@@ -9,12 +9,6 @@ dataset: [FMNIST, CIFAR10] # list of datasets you include in your baseline
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
-> :warning: This is the template to follow when creating a new Flower Baseline. Please follow the instructions in `EXTENDED_README.md`
-
-> :warning: Please follow the instructions carefully. You can see the [FedProx-MNIST baseline](https://github.com/adap/flower/tree/main/baselines/fedprox) as an example of a baseline that followed this guide.
-
-> :warning: Please complete the metadata section at the very top of this README. This generates a table at the top of the file that will facilitate indexing baselines.
-
 **Paper:** https://proceedings.mlr.press/v151/jee-cho22a.html
 
 **Authors:** Yae Jee Cho, Jianyu Wang, Gauri Joshi
@@ -42,9 +36,26 @@ dataset: [FMNIST, CIFAR10] # list of datasets you include in your baseline
 This is the model used by default.
 * A CNN used in the paper on CIFAR10 dataset. To use this model you have to set is_cnn=True in the configuration file base.yaml.
 
-****Dataset:**** :warning: *_Earlier you listed already the datasets that your baseline uses. Now you should include a breakdown of the details about each of them. Please include information about: how the dataset is partitioned (e.g. LDA with alpha 0.1 as default and all clients have the same number of training examples; or each client gets assigned a different number of samples following a power-law distribution with each client only instances of 2 classes)? if  your dataset is naturally partitioned just state “naturally partitioned”; how many partitions there are (i.e. how many clients)? Please include this an all information relevant about the dataset and its partitioning into a table._*
+****Dataset:**** This baseline includes two datasets: FMINST and CIFAR10. Both are partitioned by default among 100 clients, creating imbalanced non-iid partitions using Latent Dirichlet Allocation (LDA) without resampling. All the clients have the same number of samples. Parameter `alpha` of the LDA can be set in the `base.yaml` or passed as argument, by default it is set to 2.
 
-****Training Hyperparameters:**** :warning: *_Include a table with all the main hyperparameters in your baseline. Please show them with their default value._*
+| Dataset | #classes | #partitions | partitioning method | partition settings |
+| :------ | :---: | :---: | :---: | :---: |
+| FMNIST | 10 | 100 | Latent Dirichlet Allocation | All clients with same number of samples |
+| CIFAR10 | 10 | 100 | Latent Dirichlet Allocation | All clients with same number of samples |
+
+
+:warning: *_Earlier you listed already the datasets that your baseline uses. Now you should include a breakdown of the details about each of them. Please include information about: how the dataset is partitioned (e.g. LDA with alpha 0.1 as default and all clients have the same number of training examples; or each client gets assigned a different number of samples following a power-law distribution with each client only instances of 2 classes)? if  your dataset is naturally partitioned just state “naturally partitioned”; how many partitions there are (i.e. how many clients)? Please include this an all information relevant about the dataset and its partitioning into a table._*
+
+****Training Hyperparameters:**** 
+| Hyperparameter | Description | Default Value |
+| ---- | ----------- | ----- |
+| `num_clients` | Number of total clients | 100 |
+| `batch_size` | Batch size | 32 |
+| `local_epochs` | Number of epochs during training | 5 |
+| `fraction_samples` | Fraction of local samples to be used by clients | 1.0|
+| `b` | Number of samples in the mini-batch of *rpow* | 64 |
+| `d` | Number of clients selected in the *first phase* | 6 |
+| `ck` | Number of clients selected at each round | 3 |
 
 
 ## Environment Setup

@@ -196,7 +196,7 @@ class PowerOfChoice(FedAvg):
 
         if first_phase:
             # Sample d clients from the available clients
-            self.sample_clients(client_manager)
+            sample_size = self.sample_clients(client_manager)
 
             criterion = SimpleCriterion(self.candidate_set_clients)
 
@@ -229,8 +229,8 @@ class PowerOfChoice(FedAvg):
     def set_res_first_phase(self, res_first_phase):
         self.res_first_phase = res_first_phase
 
-    def sample_clients(self, client_manager: ClientManager) -> None:
-        """Sample d clients from the client manager."""
+    def sample_clients(self, client_manager: ClientManager) -> int:
+        """Sample d clients from the client manager, returns the number of clients sampled."""
         num_available_clients = client_manager.num_available()
         sample_size = min(self.d, num_available_clients)
 
@@ -258,6 +258,8 @@ class PowerOfChoice(FedAvg):
             replace=False,
             p=client_probabilities_normalized,
         )
+
+        return sample_size
 
     def update_atmp(self, res_eval):
         """Update the atmp dictionary with the loss of the clients in res_eval"""

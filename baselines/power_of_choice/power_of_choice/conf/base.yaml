@@ -4,31 +4,31 @@
 # a similar configuration structure and hence be easy to customise)
 
 num_clients: 100
-num_rounds: 10
+num_rounds: 200
 batch_size: 32
 local_epochs: 5
 fraction_samples: 1.0
 seed: 42
 alpha: 2
-is_cnn: True
+is_cnn: False
 
 client_resources:
   num_cpus: 1
   num_gpus: 0
 
 dataset:
-  dataset: "cifar10"
+  dataset: "fmnist"
 
 model:
   # model config
 
 # variant of the strategy: "base", "cpow" for cpow, "rpow" for rpow
-variant: "rpow"
+variant: "base"
 b: 64
 
 strategy:
   _target_: strategy.PowerOfChoice
-  d: 15
+  d: 6
   ck: 3
 
 client:

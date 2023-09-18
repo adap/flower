@@ -513,6 +513,10 @@ def download_and_preprocess(cfg: DictConfig) -> None:
     elif dataset in ["cifar10"]:
         # Load the CIFAR10 dataset
         (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+
+    # Normalize pixel values to [0, 1]
+    x_train = x_train.astype('float32') / 255.0
+    x_test = x_test.astype('float32') / 255.0  
     
     num_partitions = total_clients
     concentration = cfg.alpha
