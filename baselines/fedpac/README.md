@@ -1,87 +1,97 @@
 ---
-title: title of the paper
-url: URL to the paper page (not the pdf)
+title: Personalized Federated Learning with Feature Alignment and Classifier Collaboration
+url: https://openreview.net/forum?id=SXZr8aDKia
 labels: [label1, label2] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
 dataset: [dataset1, dataset2] # list of datasets you include in your baseline
 ---
 
-# :warning:*_Title of your baseline_*
+# Personalized Federated Learning with Feature Alignment and Classifier Collaboration
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
-> :warning: This is the template to follow when creating a new Flower Baseline. Please follow the instructions in `EXTENDED_README.md`
+**Paper:** https://openreview.net/forum?id=SXZr8aDKia
 
-> :warning: Please follow the instructions carefully. You can see the [FedProx-MNIST baseline](https://github.com/adap/flower/tree/main/baselines/fedprox) as an example of a baseline that followed this guide.
+****Authors:**** Jian Xu, Xinyi Tong, Shao-Lun Huang
 
-> :warning: Please complete the metadata section at the very top of this README. This generates a table at the top of the file that will facilitate indexing baselines.
-
-****Paper:**** :warning: *_add the URL of the paper page (not to the .pdf). For instance if you link a paper on ArXiv, add here the URL to the abstract page (e.g. https://arxiv.org/abs/1512.03385). If your paper is in from a journal or conference proceedings, please follow the same logic._*
-
-****Authors:**** :warning: *_list authors of the paper_*
-
-****Abstract:**** :warning: *_add here the abstract of the paper you are implementing_*
+****Abstract:**** Data heterogeneity is one of the most challenging issues in federated learning, which motivates a variety of approaches to learn personalized models for participating clients. One such approach in deep neural networks based tasks is employing a shared feature representation and learning a customized classifier head for each client. However, previous works do not utilize the global knowledge during local representation learning and also neglect the fine-grained collaboration between local classifier heads, which limits the model generalization ability. In this work, we conduct explicit local-global feature alignment by leveraging global semantic knowledge for learning a better representation. Moreover, we quantify the benefit of classifier combination for each client as a function of the combining weights and derive an optimization problem for estimating optimal weights. Finally, extensive evaluation results on benchmark datasets with various heterogeneous data scenarios demonstrate the effectiveness of our proposed method.
 
 
 ## About this baseline
 
-****What’s implemented:**** :warning: *_Concisely describe what experiment(s) in the publication can be replicated by running the code. Please only use a few sentences. Start with: “The code in this directory …”_*
+****What’s implemented:**** The code in this directory replicates the experiments in *Personalized Federated Learning with Feature Alignment and Classifier Collaboration* (Xu et al., 2023) for EMNIST and CIFAR10, which proposed the FedPAC algorithm. Concretely, it replicates the results for EMNIST and CIFAR10 in Table 1.
 
-****Datasets:**** :warning: *_List the datasets you used (if you used a medium to large dataset, >10GB please also include the sizes of the dataset)._*
+****Datasets:**** EMNIST and CIFAR10 from PyTorch's Torchvision
 
-****Hardware Setup:**** :warning: *_Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Someone out there might not have access to the same resources you have so, could list the absolute minimum hardware needed to run the experiment in a reasonable amount of time ? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?_*
+****Hardware Setup:**** These experiments were run on a desktop machine with 24 CPU threads. Any machine with 4 CPU cores or more would be able to run it in a reasonable amount of time. Note: we install PyTorch with GPU support but by default, the entire experiment runs on CPU-only mode.
 
-****Contributors:**** :warning: *_let the world know who contributed to this baseline. This could be either your name, your name and affiliation at the time, or your GitHub profile name if you prefer. If multiple contributors signed up for this baseline, please list yourself and your colleagues_*
+****Contributors:**** Apsal S Kalathukunnel
 
 
 ## Experimental Setup
 
-****Task:**** :warning: *_what’s the primary task that is being federated? (e.g. image classification, next-word prediction). If you have experiments for several, please list them_*
+****Task:**** Image classification
 
-****Model:**** :warning: *_provide details about the model you used in your experiments (if more than use a list). If your model is small, describing it as a table would be :100:. Some FL methods do not use an off-the-shelve model (e.g. ResNet18) instead they create your own. If this is your case, please provide a summary here and give pointers to where in the paper (e.g. Appendix B.4) is detailed._*
+****Model:**** This directory implements twp different CNN models
+for EMNIST/Fashion-MNIST and CIFAR-10/CINIC-10, respectively. The first CNN model is constructed by two convolution layers with 16 and 32 channels respectively, each followed by a max pooling layer, and two fully-connected layers with 128 and 10 units before softmax output. LeakyReLU is used as the activation function. The second CNN model is similar to the first one but has one more convolution layer with 64 channels.
 
-****Dataset:**** :warning: *_Earlier you listed already the datasets that your baseline uses. Now you should include a breakdown of the details about each of them. Please include information about: how the dataset is partitioned (e.g. LDA with alpha 0.1 as default and all clients have the same number of training examples; or each client gets assigned a different number of samples following a power-law distribution with each client only instances of 2 classes)? if  your dataset is naturally partitioned just state “naturally partitioned”; how many partitions there are (i.e. how many clients)? Please include this an all information relevant about the dataset and its partitioning into a table._*
+****Dataset:**** Two datasets used for experiments are EMNIST and CIFAR10. EMNIST (Extended MNIST) is a 62-class image classification dataset, extending the classic MNIST dataset. It contains 62 categories of handwritten characters, including 10 digits, 26
+uppercase letters and 26 lowercase letters. CIFAR-10 with 10 categories of color images. In the experiments, all clients have the same data size, in which s% of data (20% by default) are uniformly sampled from all classes, and the remaining (100 - s)% from a set of dominant classes for each client. Clients are explicitly divided into multiple groups where clients in each group share the same dominant
+classes, and we also intentionally keep the size of local training data small to pose the need for FL. The testing data on each client has the same distribution as the training data.
 
-****Training Hyperparameters:**** :warning: *_Include a table with all the main hyperparameters in your baseline. Please show them with their default value._*
+
+
+****Training Hyperparameters:**** The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python main.py` directly)
+
+| Description | Default Value |
+| ----------- | ----- |
+| total clients | 100 |
+| number of rounds | 200 |
+| client resources | {'num_cpus': 2.0, 'num_gpus': 0.0 }|
+| optimizer | SGD|
+
 
 
 ## Environment Setup
 
-:warning: _The Python environment for all baselines should follow these guidelines in the `EXTENDED_README`. Specify the steps to create and activate your environment. If there are any external system-wide requirements, please include instructions for them too. These instructions should be comprehensive enough so anyone can run them (if non standard, describe them step-by-step)._
+To construct the Python environment follow these steps:
+
+```bash
+# install the base Poetry environment
+poetry install
+
+# activate the environment
+poetry shell
+
+# install PyTorch with GPU support. Please note this baseline is very lightweight so it can run fine on a CPU.
+pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116
+```
 
 
 ## Running the Experiments
 
-:warning: _Provide instructions on the steps to follow to run all the experiments._
-```bash  
-# The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
+To run this FedPAC baseline, first ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
 
-poetry run -m <baseline-name>.main <no additional arguments> # where <baseline-name> is the name of this directory and that of the only sub-directory in this directory (i.e. where all your source code is)
+```bash
+python -m fedpac.main # this will run using the default settings in the `conf/config.yaml`
 
-# If you are using a dataset that requires a complicated download (i.e. not using one natively supported by TF/PyTorch) + preprocessing logic, you might want to tell people to run one script first that will do all that. Please ensure the download + preprocessing can be configured to suit (at least!) a different download directory (and use as default the current directory). The expected command to run to do this is:
+# you can override settings directly from the command line
+python -m fedpac.main num_rounds=200 
 
-poetry run -m <baseline-name>.dataset_preparation <optional arguments, but default should always run>
-
-# It is expected that you baseline supports more than one dataset and different FL settings (e.g. different number of clients, dataset partitioning methods, etc). Please provide a list of commands showing how these experiments are run. Include also a short explanation of what each one does. Here it is expected you'll be using the Hydra syntax to override the default config.
-
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
-.
-.
-.
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
+# if you run this baseline with a larger model, you might want to use the GPU (not used by default).
+# you can enable this by overriding the `server_device` and `client_resources` config. For example
+# the below will run the server model on the GPU and 4 clients will be allowed to run concurrently on a GPU (assuming you also meet the CPU criteria for clients)
+python -m fedpac.main server_device=cuda client_resources.num_gpus=0.25
 ```
 
+To run using FedAvg:
+```bash
+# this will use a variation of FedAvg that drops the clients that were flagged as stragglers
+# This is done so to match the experimental setup in the FedProx paper
+python -m fedpac.main --config-name fedavg
+
+# this config can also be overriden from the CLI
+```
 
 ## Expected Results
 
-:warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
 
-```bash
-# it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameteres
-
-poetry run -m <baseline-name>.main --multirun num_client_per_round=5,10,50 dataset=femnist,cifar10
-# the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
-
-[Now show a figure/table displaying the results of the above command]
-
-# add more commands + plots for additional experiments.
-```

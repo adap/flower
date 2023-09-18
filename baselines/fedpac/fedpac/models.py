@@ -1,7 +1,276 @@
-"""Define our models, and training and eval functions.
+"""Implementation of the model used for the EMNIST and CIFAR10 experiments."""
 
-If your model is 100% off-the-shelf (e.g. directly from torchvision without requiring
-modifications) you might be better off instantiating your  model directly from the Hydra
-config. In this way, swapping your model for  another one can be done without changing
-the python code at all
-"""
+
+from logging import INFO
+from typing import Optional, Tuple, List
+
+import torch
+import torch.nn as nn
+from flwr.common.logger import log
+from torch import Tensor
+from torch.utils.data import DataLoader
+
+
+class EMNISTNet(nn.Module):
+    """Implementation of the model used in the FedPAC paper for training on
+    EMNIST data."""
+
+    # pylint: disable=too-many-instance-attributes
+    def __init__(self, num_classes: int) -> None:
+        super().__init__()
+        self.conv1 = nn.Conv2d(1, 16, kernel_size=3, padding=0)
+        self.relu1 = nn.LeakyReLU()
+        self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.conv2 = nn.Conv2d(16, 32, kernel_size=3, padding=0)
+        self.relu2 = nn.LeakyReLU()
+        self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.fc1 = nn.Linear(5 * 5 * 32, 128)
+        self.relu3 = nn.LeakyReLU()
+        self.fc2 = nn.Linear(128, num_classes)
+        self.num_classes = num_classes
+        self.feature_layers  = ['conv1.weight', 'conv1.bias',
+                                'conv2.weight', 'conv2.bias',
+                                'fc1.weight', 'fc1.bias']
+        self.classifier_layers = ['fc2.weight', 'fc2.bias']
+
+
+    def forward(self, x: Tensor) -> Tensor:
+        """Forward step in training."""
+        x = self.conv1(x)
+        x = self.relu1(x)
+        x = self.pool1(x)
+        x = self.conv2(x)
+        x = self.relu2(x)
+        x = self.pool2(x)
+        x = x.view(-1, 5 * 5 * 32)
+        x = self.fc1(x)
+        x = self.relu3(x)
+        y = self.fc2(x)
+        return x, y
+
+class CIFARNet(nn.Module):
+    """Implementation of the model used in the FedPAC paper for training on
+    CIFAR10 data."""
+
+    # pylint: disable=too-many-instance-attributes
+    def __init__(self, num_classes: int) -> None:
+        super().__init__()
+        self.conv1 = nn.Conv2d(3, 16, kernel_size=5, padding=0)
+        self.relu1 = nn.LeakyReLU()
+        self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.conv2 = nn.Conv2d(16, 32, kernel_size=5, padding=1)
+        self.relu2 = nn.LeakyReLU()
+        self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.conv3 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
+        self.relu3 = nn.LeakyReLU()
+        self.pool3 = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.fc1 = nn.Linear(3 * 3 * 64, 128)
+        self.relu3 = nn.LeakyReLU()
+        self.fc2 = nn.Linear(128, num_classes)
+        self.num_classes = num_classes
+        self.feature_layers  = ['conv1.weight', 'conv1.bias',
+                                'conv2.weight', 'conv2.bias',
+                                'conv3.weight', 'conv3.bias',
+                                'fc1.weight', 'fc1.bias']
+        self.classifier_layers = ['fc2.weight', 'fc2.bias']
+
+    def forward(self, x: Tensor) -> Tensor:
+        """Forward step in training."""
+        x = self.conv1(x)
+        x = self.relu1(x)
+        x = self.pool1(x)
+        x = self.conv2(x)
+        x = self.relu2(x)
+        x = self.pool2(x)
+        x = self.conv3(x)
+        x = self.relu3(x)
+        x = self.pool3(x)
+        x = x.view(-1, 3 * 3 * 64)
+        x = self.fc1(x)
+        x = self.relu3(x)
+        y = self.fc2(x)
+        return x, y
+
+# pylint: disable=too-many-arguments, too-many-locals, too-many-branches
+def train(  
+    net: nn.Module,
+    trainloader: DataLoader,
+    valloader: DataLoader,
+    epochs: int,
+    learning_rate: float,
+    device: torch.device,
+    global_centroid,
+    feature_centroid,
+    lamda
+) -> None:
+    """Train the network on the training set.
+
+    Parameters
+    ----------
+    net : nn.Module
+        The neural network to train.
+    trainloader : DataLoader
+        The DataLoader containing the data to train the network on.
+    device : torch.device
+        The device on which the model should be trained, either 'cpu' or 'cuda'.
+    epochs : int
+        The number of epochs the model should be trained for.
+    learning_rate : float
+        The learning rate for the SGD optimizer.
+    feature_centroid: 
+
+    """
+    net.train()
+    criterion = torch.nn.CrossEntropyLoss()
+
+    for name, param in net.named_parameters():
+        if name in net.feature_layers:
+            param.requires_grad = False
+        else:
+            param.requires_grad = True
+
+    params = filter(lambda p: p.requires_grad, net.parameters())
+    optimizer = torch.optim.SGD(params, lr=learning_rate, weight_decay=0.001)   
+    net = train_classifier_epoch(net, trainloader, device, criterion, optimizer)
+
+    for name, param in net.named_parameters():
+        if name in net.feature_layers:
+            param.requires_grad = True
+        else:
+            param.requires_grad = False
+
+    params = filter(lambda p: p.requires_grad, net.parameters())
+    optimizer = torch.optim.SGD(params, lr=learning_rate, weight_decay=0.001)   
+    for _ in range(epochs):
+        net = train_features_epoch(
+            net, trainloader, device, criterion, optimizer, global_centroid, feature_centroid, lamda
+        )
+
+def train_classifier_epoch(
+    net: nn.Module,
+    trainloader: DataLoader,
+    device: torch.device,
+    criterion: torch.nn.CrossEntropyLoss,
+    optimizer: torch.optim.Adam,
+) -> nn.Module:
+    """Train for one epoch.
+
+    Parameters
+    ----------
+    net : nn.Module
+        The neural network to train.
+    global_params : List[Parameter]
+        The parameters of the global model (from the server).
+    trainloader : DataLoader
+        The DataLoader containing the data to train the network on.
+    device : torch.device
+        The device on which the model should be trained, either 'cpu' or 'cuda'.
+    criterion : torch.nn.CrossEntropyLoss
+        The loss function to use for training
+    optimizer : torch.optim.Adam
+        The optimizer to use for training
+
+
+    Returns
+    -------
+    nn.Module
+        The model that has been trained for one epoch.
+    """
+    for images, labels in trainloader:
+        images, labels = images.to(device), labels.to(device)
+        optimizer.zero_grad()
+        _, out = net(images)
+        loss = criterion(out, labels)
+        loss.backward()
+        optimizer.step()
+    return net
+
+
+def train_features_epoch(
+    net: nn.Module,
+    trainloader: DataLoader,
+    device: torch.device,
+    criterion: torch.nn.CrossEntropyLoss,
+    optimizer: torch.optim.Adam,
+    global_centroid,
+    feature_centroid,
+    lamda
+) -> nn.Module:
+    """Train for one epoch.
+
+    Parameters
+    ----------
+    net : nn.Module
+        The neural network to train.
+    global_params : List[Parameter]
+        The parameters of the global model (from the server).
+    trainloader : DataLoader
+        The DataLoader containing the data to train the network on.
+    device : torch.device
+        The device on which the model should be trained, either 'cpu' or 'cuda'.
+    criterion : torch.nn.CrossEntropyLoss
+        The loss function to use for training
+    optimizer : torch.optim.Adam
+        The optimizer to use for training
+
+
+    Returns
+    -------
+    nn.Module
+        The model that has been trained for one epoch.
+    """
+    for images, labels in trainloader:
+        images, labels = images.to(device), labels.to(device)
+        optimizer.zero_grad()
+        feat, out = net(images)
+        feat_new = feat.clone().detach()
+        loss0 = criterion(out, labels)
+        for i in range(len(labels)):
+            if labels[i].item() in global_centroid.keys():
+                feat[i] = global_centroid[labels[i].item()].detach()
+            else:
+                feat[i] = feature_centroid[labels[i].item()].detach()
+        loss_fn=nn.MSELoss()
+        loss1 = loss_fn(feat_new, feat)
+        loss = loss0 + lamda*loss1
+        loss.backward()
+        optimizer.step()
+    return net
+
+
+
+def test(
+    net: nn.Module, testloader: DataLoader, device: torch.device
+) -> Tuple[float, float]:
+    """Evaluate the network on the entire test set.
+
+    Parameters
+    ----------
+    net : nn.Module
+        The neural network to test.
+    testloader : DataLoader
+        The DataLoader containing the data to test the network on.
+    device : torch.device
+        The device on which the model should be tested, either 'cpu' or 'cuda'.
+
+    Returns
+    -------
+    Tuple[float, float]
+        The loss and the accuracy of the input model on the given data.
+    """
+    criterion = torch.nn.CrossEntropyLoss()
+    correct, total, loss = 0, 0, 0.0
+    net.eval()
+    with torch.no_grad():
+        for images, labels in testloader:
+            images, labels = images.to(device), labels.to(device)
+            _, outputs = net(images)
+            loss += criterion(outputs, labels).item()
+            _, predicted = torch.max(outputs.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+    if len(testloader.dataset) == 0:
+        raise ValueError("Testloader can't be 0, exiting...")
+    loss /= len(testloader.dataset)
+    accuracy = correct / total
+    return loss, accuracy

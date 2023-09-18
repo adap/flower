@@ -1,53 +1,114 @@
-"""Create and connect the building blocks for your experiments; start the simulation.
-
-It includes processioning the dataset, instantiate strategy, specify how the global
-model is going to be evaluated, etc. At the end, this script saves the results.
-"""
-# these are the basic packages you'll need here
-# feel free to remove some if aren't needed
+import flwr as fl
 import hydra
+from hydra.core.hydra_config import HydraConfig
+from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
+from fedpac import client, server, utils
+from fedpac.dataset import load_datasets
+from fedpac.utils import save_results_as_pickle
 
-@hydra.main(config_path="conf", config_name="base", version_base=None)
+@hydra.main(config_path="conf", config_name="config", version_base=None)
 def main(cfg: DictConfig) -> None:
-    """Run the baseline.
+    """Main function to run federated learning rounds.
 
     Parameters
     ----------
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
-    # 1. Print parsed config
+
+    # print config structured as YAML
     print(OmegaConf.to_yaml(cfg))
 
-    # 2. Prepare your dataset
-    # here you should call a function in datasets.py that returns whatever is needed to:
-    # (1) ensure the server can access the dataset used to evaluate your model after
-    # aggregation
-    # (2) tell each client what dataset partitions they should use (e.g. a this could
-    # be a location in the file system, a list of dataloader, a list of ids to extract
-    # from a dataset, it's up to you)
+    # partition dataset and get dataloaders
+    trainloaders, valloaders, testloader = load_datasets(
+        config=cfg.dataset_config,
+        num_clients=cfg.num_clients,
+        batch_size=cfg.batch_size,
+    )
+    # prepare function that will be used to spawn each client
+    client_fn = client.gen_client_fn(
+        num_clients=cfg.num_clients,
+        num_epochs=cfg.num_epochs,
+        trainloaders=trainloaders,
+        valloaders=valloaders,
+        num_rounds=cfg.num_rounds,
+        learning_rate=cfg.learning_rate,
+        model=cfg.model,
+        lamda=cfg.lamda
+    )
 
-    # 3. Define your clients
-    # Define a function that returns another function that will be used during
-    # simulation to instantiate each individual client
-    # client_fn = client.<my_function_that_returns_a_function>()
+    # get function that will executed by the strategy's evaluate() method
+    # Set server's device
+    device = cfg.server_device
+    evaluate_fn = server.gen_evaluate_fn(testloader, device=device, model=cfg.model)
 
-    # 4. Define your strategy
-    # pass all relevant argument (including the global dataset used after aggregation,
-    # if needed by your method.)
-    # strategy = instantiate(cfg.strategy, <additional arguments if desired>)
+    # get a function that will be used to construct the config that the client's
+    # fit() method will received
+    def get_on_fit_config():
+        def fit_config_fn(server_round: int, global_centroid):
+            # resolve and convert to python dict
+            fit_config = OmegaConf.to_container(cfg.fit_config, resolve=True)
+            fit_config["curr_round"] = server_round
+            fit_config.update({"global_centroid":global_centroid}) # add round info
+            return fit_config
 
-    # 5. Start Simulation
-    # history = fl.simulation.start_simulation(<arguments for simulation>)
+        return fit_config_fn
 
-    # 6. Save your results
-    # Here you can save the `history` returned by the simulation and include
-    # also other buffers, statistics, info needed to be saved in order to later
-    # on generate the plots you provide in the README.md. You can for instance
-    # access elements that belong to the strategy for example:
-    # data = strategy.get_my_custom_data() -- assuming you have such method defined.
-    # Hydra will generate for you a directory each time you run the code. You
-    # can retrieve the path to that directory with this:
-    # save_path = HydraConfig.get().runtime.output_dir
+    # instantiate strategy according to config. Here we pass other arguments
+    # that are only defined at run time.
+    strategy = instantiate(
+        cfg.strategy,
+        evaluate_fn=evaluate_fn,
+        on_fit_config_fn=get_on_fit_config(),
+    )
+
+    # Start simulation
+    history = fl.simulation.start_simulation(
+        client_fn=client_fn,
+        num_clients=cfg.num_clients,
+        config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
+        client_resources={
+            "num_cpus": cfg.client_resources.num_cpus,
+            "num_gpus": cfg.client_resources.num_gpus,
+        },
+        strategy=strategy,
+    )
+
+    # Experiment completed. Now we save the results and
+    # generate plots using the `history`
+    print("................")
+    print(history)
+
+    # Hydra automatically creates an output directory
+    # Let's retrieve it and save some results there
+    save_path = HydraConfig.get().runtime.output_dir
+
+    # save results as a Python pickle using a file_path
+    # the directory created by Hydra for each run
+    save_results_as_pickle(history, file_path=save_path, extra_results={})
+
+    # plot results and include them in the readme
+    strategy_name = strategy.__class__.__name__
+    file_suffix: str = (
+        f"_{strategy_name}"
+        f"{'_iid' if cfg.dataset_config.iid else ''}"
+        f"{'_balanced' if cfg.dataset_config.balance else ''}"
+        f"{'_powerlaw' if cfg.dataset_config.power_law else ''}"
+        f"_C={cfg.num_clients}"
+        f"_B={cfg.batch_size}"
+        f"_E={cfg.num_epochs}"
+        f"_R={cfg.num_rounds}"
+        f"_lam={cfg.lamda}"
+    )
+
+    utils.plot_metric_from_history(
+        history,
+        save_path,
+        (file_suffix),
+    )
+
+
+if __name__ == "__main__":
+    main()
