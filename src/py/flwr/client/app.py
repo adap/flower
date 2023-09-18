@@ -17,6 +17,7 @@
 
 import sys
 import time
+import warnings
 from logging import INFO
 from typing import Callable, Optional, Union
 
@@ -36,7 +37,6 @@ from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle
 from .numpy_client import NumPyClient
-from .numpy_client_wrapper import _wrap_numpy_client
 
 
 def _check_actionable_client(
@@ -268,14 +268,20 @@ def start_numpy_client(
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
+    warnings.warn(
+        "flwr.client.start_numpy_client() is deprecated and will"
+        "be removed in a future version of Flower.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+
     # Start
     _check_actionable_client(client, client_fn)
 
-    wrp_client = _wrap_numpy_client(client=client) if client else None
     start_client(
         server_address=server_address,
         client_fn=client_fn,
-        client=wrp_client,
+        client=client,
         grpc_max_message_length=grpc_max_message_length,
         root_certificates=root_certificates,
         transport=transport,
