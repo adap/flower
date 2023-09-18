@@ -18,6 +18,9 @@ jobs:
     strategy:
       matrix:
         flwr_version: [1.4.0, 1.5.0]
+    defaults:
+      run:
+        working-directory: src/docker
     steps:
     - uses: actions/checkout@v3
     - name: Login to Docker Hub
