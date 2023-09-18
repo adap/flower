@@ -16,28 +16,26 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-env:
-  FLWR_VERSION: 1.5.0
-
 jobs:
   test:
     name: Test Image
     runs-on: ubuntu-latest
-    
+    strategy:
+      matrix:
+        flwr_version: [1.4.0, 1.5.0]
     steps:
     - uses: actions/checkout@v3
-    - name: Run base tests
-      env:
-        BUILD_TARGET: base
-      run: ./test.sh
     - name: Run server tests
       env:
           BUILD_TARGET: server
-      run: ./test.sh
+      run: FLWR_VERSION=${{ matrix.flwr_version }} ./test.sh
 
   build:
     name: Build Image
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        flwr_version: [1.4.0, 1.5.0]
     steps:
     - uses: actions/checkout@v3
     - name: Login to Docker Hub
@@ -48,4 +46,4 @@ jobs:
     - name: Build the server image
       env:
           BUILD_TARGET: server
-      run: ./build.sh
+      run: FLWR_VERSION=${{ matrix.flwr_version }} ./build.sh
