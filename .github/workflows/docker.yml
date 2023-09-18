@@ -4,13 +4,13 @@ on:
   push:
     branches:
       - main
-    paths:
-      -  src/docker/**
+    # paths:
+    #   -  src/docker/**
   pull_request:
     branches:
       - main
-    paths:
-      -  src/docker/**
+    # paths:
+    #   -  src/docker/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
