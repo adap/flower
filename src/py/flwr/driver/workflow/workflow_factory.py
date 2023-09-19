@@ -66,9 +66,7 @@ class FLWorkflowFactory:
             else default_evaluate_workflow_factory
         )
 
-    def __call__(
-        self, state: WorkflowState
-    ) -> Generator[Dict[ClientProxy, Task], Dict[ClientProxy, Task], None]:
+    def __call__(self, state: WorkflowState) -> FlowerWorkflow:
         """Create the workflow."""
         # Initialize parameters
         log(INFO, "Initializing global parameters")
