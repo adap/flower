@@ -91,21 +91,23 @@ func createEventContext() -> Context {
 }
 
 @available(iOS 15.0, *)
-func createEvent(event: Event, eventDetails: [String: String]) async {
+func createEvent(event: Event, eventDetails: [String: String]) {
     let urlString = "https://telemetry.flower.dev/api/v1/event"
     guard let url = URL(string: urlString) else {
         return
     }
-    var request = URLRequest(url: url)
-    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-    request.httpMethod = "POST"
-    
-    let payload = Payload(eventType: event.rawValue, eventDetails: eventDetails, context: createEventContext())
-    let encoder = JSONEncoder()
-    encoder.keyEncodingStrategy = .convertToSnakeCase
-    
-    if let data = try? encoder.encode(payload) {
-        request.httpBody = data
-        _ = try? await URLSession.shared.data(for: request)
+    Task {
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpMethod = "POST"
+        
+        let payload = Payload(eventType: event.rawValue, eventDetails: eventDetails, context: createEventContext())
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .convertToSnakeCase
+        
+        if let data = try? encoder.encode(payload) {
+            request.httpBody = data
+            _ = try? await URLSession.shared.data(for: request)
+        }
     }
 }
