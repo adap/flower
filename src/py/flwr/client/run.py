@@ -16,8 +16,12 @@
 
 
 import argparse
+import sys
 from logging import INFO
 
+from uvicorn.importer import import_from_string
+
+from flwr.client import start_client
 from flwr.common.logger import log
 
 
@@ -28,6 +32,24 @@ def run_client() -> None:
     args = _parse_args_client().parse_args()
 
     print(args.server)
+    print(args.app_dir)
+    print(args.app)
+
+    app_dir = args.app_dir
+    if app_dir is not None:
+        sys.path.insert(0, app_dir)
+
+    def app_client_fn(cid: str):
+        """."""
+        app = import_from_string(args.app)
+        client = app.client_fn(cid=cid)
+        return client
+
+    return start_client(
+        server_address=args.server,
+        client_fn=app_client_fn,
+        transport="grpc-rere",  # Only
+    )
 
 
 def _parse_args_client() -> argparse.ArgumentParser:
@@ -38,8 +60,20 @@ def _parse_args_client() -> argparse.ArgumentParser:
 
     parser.add_argument(
         "--server",
-        help="Server address",
         default="0.0.0.0:9092",
+        help="Server address",
+    )
+
+    parser.add_argument(
+        "--app-dir",
+        default="",
+        help="Look for APP in the specified directory, by adding this to the PYTHONPATH."
+        " Defaults to the current working directory.",
+    )
+
+    parser.add_argument(
+        "--app",
+        help="",
     )
 
     return parser
