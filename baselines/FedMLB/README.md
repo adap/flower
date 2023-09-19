@@ -506,6 +506,35 @@ paper, instead of K=50), run the following:
 python -m FedMLB.main --multirun algorithm="FedMLB","FedAvg","FedAvg+KD" local_updates=100 # or local_updates=200 
 ```
 
+<table>
+  <tr>
+    <td></td>
+    <td colspan="2">Accuracy @500R</td>
+    <td colspan="2">Accuracy @1000R</td>
+  </tr>
+  <tr> 
+    <td>Method</td>
+    <td>Paper</td>
+    <td>This repo</td>
+    <td>Paper</td>
+    <td>This repo</td>
+  </tr>
+  <tr>
+    <td>FedAvg</td>
+    <td>41.92</td>
+    <td>44.02</td>
+    <td>48.15</td>
+    <td>49.05</td>
+  </tr>
+  <tr>
+    <td>FedMLB</td> 
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+</table>
+
 ## Results logging via Tensorboard
 Beside storing results in plain text in the `output` folder, the results are also stored via 
 tensorboard logs.
