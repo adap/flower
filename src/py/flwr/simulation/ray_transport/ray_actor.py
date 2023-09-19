@@ -66,7 +66,7 @@ class VirtualClientEngineActor(ABC):
         # from the pool are correctly assigned to each ClientProxy
         try:
             # Instantiate client
-            client = client_fn(cid).to_client()
+            client = client_fn(cid)
             # Run client job
             job_results = job_fn(client)
         except Exception as ex:

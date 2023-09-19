@@ -63,7 +63,7 @@ def handle(client_fn: ClientFn, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
     server_msg = get_server_message_from_task_ins(task_ins, exclude_reconnect_ins=False)
     if server_msg is None:
         # Instantiate the client
-        client = client_fn("-1").to_client()
+        client = client_fn("-1")
         # Secure Aggregation
         if task_ins.task.HasField("sa") and isinstance(
             client, SecureAggregationHandler
@@ -118,7 +118,7 @@ def handle_legacy_message(
         return disconnect_msg, sleep_duration, False
 
     # Instantiate the client
-    client = client_fn("-1").to_client()
+    client = client_fn("-1")
     # Execute task
     if field == "get_properties_ins":
         return _get_properties(client, server_msg.get_properties_ins), 0, True

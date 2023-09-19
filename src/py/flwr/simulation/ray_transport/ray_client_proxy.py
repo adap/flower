@@ -276,4 +276,4 @@ def launch_and_evaluate(
 def _create_client(client_fn: ClientFn, cid: str) -> Client:
     """Create a client instance."""
     # Materialize and convert client
-    return client_fn(cid).to_client()
+    return client_fn(cid)
