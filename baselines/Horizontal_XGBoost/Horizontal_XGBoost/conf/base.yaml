@@ -1,12 +1,14 @@
 ---
 
-defaults: 
-  - dataset: cpumall
 centralized: False
 client_num: 5
 device: "cpu"
 n_estimators_client: 100
 task_type: "REG"
+
+defaults: 
+  - dataset: cpumall
+
 XGBoost:
   _target_:  ${dataset.xgb._target_}
   objective: ${dataset.xgb.objective}
@@ -25,10 +27,6 @@ XGBoost:
 
 model:
   # model config
-class Config:
-    _target_: str = "__main__.t"  # dotpath describing location of callable
-
-
 
 strategy:
   _target_: flwr.server.strategy.FedXgbNnAvg 
@@ -42,8 +40,9 @@ strategy:
 
 client:
   # client config
+
 run_experiment:
-  num_rounds: 1
+  num_rounds: 30
   batch_size: 64
   fraction_fit: 1.0
   min_fit_clients: 1

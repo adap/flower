@@ -285,7 +285,7 @@ def serverside_eval(
         testloader, batch_size, trees_aggregated, cfg.dataset.n_estimators_client,cfg.client_num
     )
     loss, result, _ = test(
-        cfg.dataset.task_type, model, testloader, device=device, log_progress=False
+        cfg, model, testloader, device=device, log_progress=False
     )
 
     print(f"Evaluation on the server: test_loss={loss:.4f}, test_,{metric_name},={result:.4f}")

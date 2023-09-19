@@ -35,26 +35,6 @@ from torch.utils.data import TensorDataset
 from .utils import get_dataloader,single_tree_preds_from_each_client
 from .models import fit_XGBoost,CNN
 
-"""def tree_encoding_loader(
-    dataloader: DataLoader,
-    batch_size: int,
-    client_trees: Union[
-        Tuple[XGBClassifier, int],
-        Tuple[XGBRegressor, int],
-        List[Union[Tuple[XGBClassifier, int], Tuple[XGBRegressor, int]]],
-    ],
-    client_tree_num: int,
-    client_num: int,
-) -> DataLoader:
-    encoding = tree_encoding(dataloader, client_trees, client_tree_num, client_num)
-    if encoding is None:
-        return None
-    data, labels = encoding
-    tree_dataset = TensorDataset(torch.from_numpy(data), torch.from_numpy (labels))#TreeDataset(data, labels)
-    return get_dataloader(tree_dataset, "tree", batch_size)
-
-"""
-
 class FL_Client(fl.client.Client):
     def __init__(
         self,
@@ -103,22 +83,7 @@ class FL_Client(fl.client.Client):
             raise Exception(
                     "choose a valid task type, BINARY or REG"
                 )
-        self.optimizer = torch.optim.Adam(self.net.parameters(), lr=0.00001, betas=(0.9, 0.999))
-    """def single_tree_prediction(
-            self,
-            xgboost_tree_ensemble: Union[XGBClassifier, XGBRegressor],
-            tree_index: int, dataset: NDArray
-    ) -> Optional[NDArray]:
-        num_t = len(xgboost_tree_ensemble.get_booster().get_dump())
-        if tree_index > num_t:
-            raise Exception(
-                        "The tree index to be extracted is larger than"
-                        "the total number of trees."
-                        )
-
-        return xgboost_tree_ensemble.predict(  # type: ignore
-            dataset, iteration_range=(tree_index, tree_index + 1), output_margin=True
-        )"""
+        self.optimizer = torch.optim.Adam(self.net.parameters(), lr=0.0001, betas=(0.9, 0.999))
 
     def train_one_loop(self,data):
                 tree_outputs, labels = data[0].to(self.device), data[1].to(self.device)

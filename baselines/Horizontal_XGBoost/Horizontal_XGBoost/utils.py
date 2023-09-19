@@ -175,31 +175,29 @@ def single_tree_preds_from_each_client(
         tree_dataset = TensorDataset(preds_from_all_trees_from_all_clients,y_train)
         return get_dataloader(tree_dataset, "tree", batch_size)
 
+from hydra.utils import instantiate
+
 def test(
-    task_type: str,
+    cfg,
+    #task_type: str,
     net: CNN,
     testloader: DataLoader,
     device: torch.device,
     log_progress: bool = True,
 ) -> Tuple[float, float, int]:
-    print("task_type",task_type)
-    if task_type == "BINARY":
-        criterion = nn.BCELoss()
-        metric_fn=Accuracy(task="binary")
-    elif task_type == "REG":
-        criterion = nn.MSELoss()
-        metric_fn=MeanSquaredError()
+
+    criterion = instantiate(cfg.dataset.criterion)
+    metric_fn= instantiate(cfg.dataset.metric.fn)
 
     total_loss, total_result, n_samples = 0.0, 0.0, 0
     net.eval()
     with torch.no_grad():
+
         progress_bar = tqdm(testloader, desc="TEST") if log_progress else testloader
         for data in progress_bar:
             tree_outputs, labels = data[0].to(device), data[1].to(device)
             outputs = net(tree_outputs)
-
-            # Collected testing loss and accuracy statistics
-            total_loss += criterion(outputs, labels).item()
+            total_loss +=criterion(outputs, labels).item()
             n_samples += labels.size(0)
             metric_val = metric_fn(outputs.cpu(), labels.type(torch.int).cpu())
             total_result += metric_val * labels.size(0)

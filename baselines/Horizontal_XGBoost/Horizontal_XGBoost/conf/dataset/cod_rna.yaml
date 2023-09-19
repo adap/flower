@@ -1,17 +1,17 @@
-dataset_name: "cpusmall"
+dataset_name: "cod-rna"
 train_ratio: .75
-task_type: "REG"
+task_type: "BINARY"
 n_estimators_client: 100
 num_rounds: 30
 
 metric:
-  name: "mse"
+  name: "Accuracy"
   fn:
-    _target_: torchmetrics.MeanSquaredError
+    _target_: torchmetrics.Accuracy
+    task: "binary"
 
 criterion:
-  _target_: torch.nn.MSELoss
-
+  _target_: torch.nn.BCELoss
 
 xgb:
   _target_:  xgboost.XGBRegressor
