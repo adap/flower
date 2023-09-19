@@ -40,10 +40,12 @@ DIR = '1E_up_theta_b_only_FedAvg+SWA_wo_moment'
 
 
 class FedVSSL(fl.server.strategy.FedAvg):
-    def __init__(self, num_rounds: int=1, mix_coeff:float=0.2,  *args, **kwargs):
+    def __init__(self, num_rounds: int=1, mix_coeff:float=0.2, swbeta:int=0,  *args, **kwargs):
 
+        assert isinstance(swbeta, int) and swbeta >= 0 and swbeta <= 1,  "the value must be an integer and either 0 or 1 "
         self.num_rounds = num_rounds,
-        self.mix_coeff: mix_coeff
+        self.mix_coeff = mix_coeff # coefficient for mixing the loss and fedavg aggregation methods
+        self.swbeta = swbeta    # 0: SWA off; 1:SWA on 
         super().__init__(*args, **kwargs)
 
     def aggregate_fit(
@@ -62,22 +64,38 @@ class FedVSSL(fl.server.strategy.FedAvg):
         # Divide the weights based on the backbone and classification head
         ######################################################################################################3
 
-        # aggregate all the results
+        # Aggregate all the weights and the number of examples 
         weight_results = [
             (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for client, fit_res in results
         ]
 
-        # aggregate the weights of the backbone
-        weights = aggregate(weight_results) # loss-based
+        # Aggregate all the weights and the loss
+        loss_results = [
+            (parameters_to_ndarrays(fit_res.parameters), fit_res.metrics['loss'])
+            for client, fit_res in results
+        ]
+
+
+         # aggregate the weights of the backbone 
+        weights_loss = aggregate(loss_results) # loss-based
+        weights_avg = aggregate(weight_results) # Fedavg
+
+        
+        weights: NDArrays = [v * self.mix_coeff for v in weights_avg] + [(1 - self.mix_coeff) * v for v in weights_loss] # Equation 3 in FedVSSL paper
+        
+        # # aggregate the weights of the backbone
+        # weights = aggregate(weight_results) # loss-based
 
         # create a directory to save the global checkpoints
         glb_dir = 'ucf_' + DIR
         mmcv.mkdir_or_exist(os.path.abspath(glb_dir))
 
+        
 
         # load the previous weights if there are any
-        if server_round > 1:
+
+        if server_round > 1 and self.swbeta == 1:
             chk_name_list = [fn for fn in os.listdir(glb_dir) if fn.endswith('.npz')]
             chk_epoch_list = [int(re.findall(r'\d+', fn)[0]) for fn in chk_name_list if fn.startswith('round')]
             if chk_epoch_list:
@@ -90,9 +108,10 @@ class FedVSSL(fl.server.strategy.FedAvg):
                 params = params['arr_0'].item()
                 print("The weights has been loaded")
                 params = parameters_to_ndarrays(params) # return a list
-                weights_avg = [np.asarray((mix_coeff*B + (1-mix_coeff)*A)) for A, B in zip(weights, params)]
+                weights_avg = [np.asarray((0.5 * B + 0.5 * A)) for A, B in zip(weights, params)] # perform SWA
                 weights_avg = ndarrays_to_parameters(weights_avg)
         else:
+            print("The results are saved without performing SWA")
             weights_avg = ndarrays_to_parameters(weights)
 
         if weights_avg is not None:

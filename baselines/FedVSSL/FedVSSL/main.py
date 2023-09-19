@@ -87,7 +87,7 @@ if __name__ == "__main__":
     train_flag = True
     # train_flag = False
     if train_flag:
-        
+
         # first the paths needs to be defined otherwise the program may not be able to locate the files of the ctp
         from utils import init_p_paths
         init_p_paths("FedVSSL")
@@ -96,7 +96,7 @@ if __name__ == "__main__":
         client_resources = {"num_cpus": 2, "num_gpus": 1}  # each client will get allocated 1 CPUs
         # timestr = time.strftime("%Y%m%d_%H%M%S")
         base_work_dir = 'ucf_' + DIR
-        rounds = 1
+        rounds = 2
 
         def main(cid: str):
             # Parse command line argument `cid` (client ID)
@@ -106,6 +106,8 @@ if __name__ == "__main__":
 
         # configure the strategy
         strategy = FedVSSL(
+            mix_coeff = 0.5,
+            swbeta = 1,
             fraction_fit=1,
             # fraction_eval=0,
             min_fit_clients=2,
