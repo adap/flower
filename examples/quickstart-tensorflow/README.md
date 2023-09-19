@@ -70,4 +70,4 @@ poetry run python3 client.py &
 poetry run python3 client.py
 ```
 
-You will see that Keras is starting a federated training. Have a look to the [Flower Quickstarter documentation](https://flower.dev/docs/quickstart-tensorflow.html) for a detailed explanation. You can add `steps_per_epoch=3` to `model.fit()` if you just want to evaluate that everything works without having to wait for the client-side training to finish (this will save you a lot of time during development).
+You will see that Keras is starting a federated training. Have a look at the [code](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow) for a detailed explanation. You can add `steps_per_epoch=3` to `model.fit()` if you just want to evaluate that everything works without having to wait for the client-side training to finish (this will save you a lot of time during development).
