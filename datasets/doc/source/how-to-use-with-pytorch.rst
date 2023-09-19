@@ -5,9 +5,9 @@ Let's integrate ``flwr-datasets`` with PyTorch DataLoaders and keep your PyTorch
 Standard setup - download the dataset, choose the partitioning::
 
   from flwr_datasets import FederatedDataset
-  mnist_fds = FederatedDataset(dataset="mnist", partitioners={"train": 10})
-  partition = mnist_fds.load_partition(0, "train")
-  centralized_dataset = mnist_fds.load_full("test")
+  fds = FederatedDataset(dataset="cifar10", partitioners={"train": 10})
+  partition = fds.load_partition(0, "train")
+  centralized_dataset = fds.load_full("test")
 
 Apply Transforms, Create DataLoader. We will use the `map() <https://huggingface.co/docs/datasets/v2.14.5/en/package_reference/main_classes#datasets.Dataset.map>`_
 function. Please note that the map will modify the existing dataset if the key in the dictionary you return is already present
