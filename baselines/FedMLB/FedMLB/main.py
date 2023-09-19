@@ -146,6 +146,11 @@ def main(cfg: DictConfig) -> None:
     restart_from_checkpoint = cfg.restart_from_checkpoint
     batch_size = cfg.batch_size
 
+    # if cfg.batch_size is set to null,
+    # local_batch_size = round(local_examples * local_epochs / local_updates)
+    # if cfg.batch_size is set to a value, it will be used as local_batch_size
+    local_batch_size_or_k_defined = "K_" + str(local_updates) if batch_size is None else "batch_size_" + str(batch_size)
+
     if dataset in ["cifar100"]:
         num_classes = 100
         input_shape = (None, 32, 32, 3)
@@ -232,10 +237,12 @@ def main(cfg: DictConfig) -> None:
     )
 
     save_path_logging = os.path.join("FedMLB", "tb_logging", dataset, "resnet18", algorithm,
+                                     local_batch_size_or_k_defined,
                                      str(total_clients) + "_clients",
                                      "dir_" + str(round(alpha_dirichlet, 1)), "seed_" + str(random_seed))
 
     save_path_checkpoints = os.path.join("FedMLB", "model_checkpoints", dataset, "resnet18", algorithm,
+                                         local_batch_size_or_k_defined,
                                          str(total_clients) + "_clients",
                                          "dir_" + str(round(alpha_dirichlet, 1)), "seed_" + str(random_seed))
 
@@ -273,7 +280,6 @@ def main(cfg: DictConfig) -> None:
     # Start Flower simulation
     history = flwr.simulation.start_simulation(
         client_fn=client_fn,
-        clients_ids=range(0, cfg.total_clients),
         num_clients=cfg.total_clients,
         client_resources={"num_cpus": cfg.client_resources.num_cpus, "num_gpus": cfg.client_resources.num_gpus},
         server=my_server,
