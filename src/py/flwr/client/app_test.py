@@ -17,7 +17,6 @@
 
 from typing import Dict, Tuple
 
-from flwr.client.client_protocol import ClientProtocol
 from flwr.common import (
     Config,
     EvaluateIns,
@@ -81,18 +80,9 @@ class NeedsWrappingClient(NumPyClient):
         raise Exception()
 
 
-def convert_to_client(client: ClientProtocol) -> Client:
-    """Convert any client type to Client."""
-    return client.to_client()
-
-
 def test_to_client_with_client() -> None:
     """Test to_client."""
-    # Prepare
-    client_ = PlainClient()
-
-    # Execute
-    client = convert_to_client(client_)
+    client = PlainClient().to_client()
 
     # Assert
     assert isinstance(client, Client)
@@ -100,11 +90,7 @@ def test_to_client_with_client() -> None:
 
 def test_to_client_with_numpyclient() -> None:
     """Test fit_clients."""
-    # Prepare
-    client_ = NeedsWrappingClient()
-
-    # Execute
-    client = convert_to_client(client_)
+    client = NeedsWrappingClient().to_client()
 
     # Assert
     assert isinstance(client, Client)

@@ -24,7 +24,6 @@ from flwr.client.client import (
     maybe_call_get_parameters,
     maybe_call_get_properties,
 )
-from flwr.client.client_protocol import ClientProtocol
 from flwr.client.message_handler.task_handler import (
     get_server_message_from_task_ins,
     wrap_client_message_in_task_res,
@@ -38,11 +37,6 @@ from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 
 class UnknownServerMessage(Exception):
     """Exception indicating that the received message is unknown."""
-
-
-def convert_to_client(client: ClientProtocol) -> Client:
-    """Convert any client type to Client."""
-    return client.to_client()
 
 
 def handle(client_fn: ClientFn, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
@@ -69,7 +63,7 @@ def handle(client_fn: ClientFn, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
     server_msg = get_server_message_from_task_ins(task_ins, exclude_reconnect_ins=False)
     if server_msg is None:
         # Instantiate the client
-        client = convert_to_client(client_fn("-1"))
+        client = client_fn("-1").to_client()
         # Secure Aggregation
         if task_ins.task.HasField("sa") and isinstance(
             client, SecureAggregationHandler
@@ -124,7 +118,7 @@ def handle_legacy_message(
         return disconnect_msg, sleep_duration, False
 
     # Instantiate the client
-    client = convert_to_client(client_fn("-1"))
+    client = client_fn("-1").to_client()
     # Execute task
     if field == "get_properties_ins":
         return _get_properties(client, server_msg.get_properties_ins), 0, True

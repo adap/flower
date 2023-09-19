@@ -40,9 +40,9 @@ class DummyClient(NumPyClient):
         self.cid = int(cid)
 
 
-def get_dummy_client(cid: str) -> DummyClient:
+def get_dummy_client(cid: str) -> Client:
     """Return a DummyClient."""
-    return DummyClient(cid)
+    return DummyClient(cid).to_client()
 
 
 # A dummy workload
