@@ -12,6 +12,10 @@ on:
     paths:
       - "src/py/flwr_tool/**"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   FLWR_TELEMETRY_ENABLED: 0
 
@@ -20,7 +24,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Test
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Install dependencies (mandatory + optional)
