@@ -42,7 +42,7 @@ class FedExP(FedAvg):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """Aggregate fit results using FedProx."""
+        """Aggregate fit results using FedExP."""
         if not self.accept_failures and failures:
             return None, {}
         # Aggregate results
