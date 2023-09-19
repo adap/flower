@@ -133,9 +133,13 @@ class AggregateFullStrategy(ServerInitializationStrategy):
 
         # Sample clients
         if server_round >= 0:
+            # Sample clients
+            sample_size, min_num_clients = self.num_evaluation_clients(
+                client_manager.num_available()
+            )
             clients = client_manager.sample(
-                num_clients=self.min_available_clients,
-                min_num_clients=self.min_evaluate_clients,
+                num_clients=sample_size,
+                min_num_clients=min_num_clients,
             )
         else:
             clients = list(client_manager.all().values())
@@ -328,9 +332,13 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
 
         # Sample clients
         if server_round >= 0:
+            # Sample clients
+            sample_size, min_num_clients = self.num_evaluation_clients(
+                client_manager.num_available()
+            )
             clients = client_manager.sample(
-                num_clients=self.min_available_clients,
-                min_num_clients=self.min_evaluate_clients,
+                num_clients=sample_size,
+                min_num_clients=min_num_clients,
             )
         else:
             clients = list(client_manager.all().values())
