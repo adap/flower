@@ -75,7 +75,7 @@ func createEventContext() -> Context {
     let pathMonitor = NWPathMonitor()
     
     let hw = HW(cpuCount: ProcessInfo.processInfo.processorCount.description,
-                networkConnectionType: "",
+                networkConnectionType: pathMonitor.currentPath.availableInterfaces[0].type.toString(),
                 batteryLevel: UIDevice.current.batteryLevel.formatted())
     let platform = Platform(system: "iOS",
                             release: UIDevice.current.systemVersion,
@@ -108,6 +108,25 @@ func createEvent(event: Event, eventDetails: [String: String]) {
         if let data = try? encoder.encode(payload) {
             request.httpBody = data
             _ = try? await URLSession.shared.data(for: request)
+        }
+    }
+}
+
+extension NWInterface.InterfaceType {
+    public func toString() -> String {
+        switch self {
+        case .other:
+            return "Other"
+        case .wifi:
+            return "Wifi"
+        case .cellular:
+            return "Cellular"
+        case .wiredEthernet:
+            return "WiredEthernet"
+        case .loopback:
+            return "Loopback"
+        @unknown default:
+            return "Unknown"
         }
     }
 }
