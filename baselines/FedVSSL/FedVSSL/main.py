@@ -43,22 +43,19 @@ from strategy import FedVSSL
 from client import SslClient
 
 
-DIR = '1E_up_theta_b_only_FedAvg+SWA_wo_moment'
-
-def initial_setup(cid, base_work_dir, rounds, light=False):
+def initial_setup(cid, base_work_dir, rounds, data_dir, num_gpus, partition_dir):
     import utils
     cid_plus_one = str(int(cid) + 1)
     args = Namespace(
         cfg='conf/mmcv_conf/r3d_18_ucf101/pretraining.py',
-        checkpoint=None, cid=int(cid), data_dir='/home/data1/data/ucf101', gpus=1,
+        checkpoint=None, cid=int(cid), data_dir=data_dir, gpus=num_gpus,
         launcher='none',
-        local_rank=0, progress=False, resume_from=None, rounds=6, seed=7, validate=False,
+        local_rank=0, progress=False, resume_from=None, rounds=rounds, seed=7, validate=False,
         work_dir=base_work_dir + '/client' + cid_plus_one)
 
     print("Starting client", args.cid)
     cfg = Config.fromfile(args.cfg)
-    cfg.total_epochs = 1  ### Used for debugging. Comment to let config file set number of epochs
-    cfg.data.train.data_source.ann_file = '/home/data1/data/ucf101/UCF_101_dummy/client_dist' + cid_plus_one + '.json'
+    cfg.data.train.data_source.ann_file = partition_dir + '/client_dist' + cid_plus_one + '.json'
 
     distributed, logger = utils.set_config_mmcv(args, cfg)
 
@@ -73,57 +70,89 @@ def initial_setup(cid, base_work_dir, rounds, light=False):
     return args, cfg, distributed, logger, model, train_dataset, test_dataset, utils
 
 def fit_config(rnd: int) -> Dict[str, str]:
-    """Return a configuration with static batch size and (local) epochs."""
+    """Return a configuration with global epochs."""
     config = {
         "epoch_global": str(rnd),
     }
     return config
 
+def parse_args():
+    parser = argparse.ArgumentParser(description='Running FedVSSL and downstream fine-tuning.')
+    parser.add_argument('--pre_train', default=True, type=bool,
+                        help='set true for FL pre-training, else for downstream fine-tuning.')
+
+    ### hyper-parameters for FL pre-training ###
+    parser.add_argument('--exp_name', default='FedVSSL', type=str, help='experimental name used for this run.')
+    parser.add_argument('--data_dir', default='/local/scratch/ucf101', type=str, help='dataset directory.')
+    parser.add_argument('--partition_dir', default='/local/scratch/ucf101/UCF_101_dummy', type=str,
+                        help='directory for FL partition .json files.')
+
+    # FL settings
+    parser.add_argument('--pool_size', default=10, type=int, help='number of dataset partitions (= number of total clients).')
+    parser.add_argument('--rounds', default=20, type=int, help='number of FL rounds.')
+    parser.add_argument('--num_clients_per_round', default=10, type=int, help='number of clients participating in the training.')
+
+    # ray config
+    parser.add_argument('--cpus_per_client', default=2, type=int, help='number of CPUs used for each client.')
+    parser.add_argument('--gpus_per_client', default=1, type=int, help='number of GPUs used for each client.')
+    parser.add_argument('--include_dashboard', default=False, type=bool, help='number of GPUs used for each client.')
+
+    # FedVSSL
+    parser.add_argument('--mix_coeff', default=0.2, type=float, help='hyper-parameter alpha in the paper.')
+    parser.add_argument('--swbeta', default=1, type=int, help='hyper-parameter beta in the paper.')
+
+    ### hyper-parameters for downstream fine-tuning ###
+    parser.add_argument('--pretrained_model_path', default='/home/data1/round-540-weights.array.npz', type=str,
+                        help='FL pre-trained SSL model used for downstream fine-tuning.')
+
+    args = parser.parse_args()
+
+    return args
+
 
 if __name__ == "__main__":
-    
-    # This flag can be set manually
+    args = parse_args()
 
-    train_flag = True
-    # train_flag = False
-    if train_flag:
+    if args.pre_train:
 
         # first the paths needs to be defined otherwise the program may not be able to locate the files of the ctp
         from utils import init_p_paths
         init_p_paths("FedVSSL")
 
-        pool_size = 2  # number of dataset partions (= number of total clients)
-        client_resources = {"num_cpus": 2, "num_gpus": 1}  # each client will get allocated 1 CPUs
-        # timestr = time.strftime("%Y%m%d_%H%M%S")
-        base_work_dir = 'ucf_' + DIR
-        rounds = 2
+        client_resources = {"num_cpus": args.cpus_per_client, "num_gpus": args.gpus_per_client}
+        base_work_dir = 'ucf_' + args.exp_name
+        rounds = args.rounds
+        data_dir = args.data_dir
+        partition_dir = args.partition_dir
+        num_gpus = args.gpus_per_client
 
-        def main(cid: str):
-            # Parse command line argument `cid` (client ID)
-            #        os.environ["CUDA_VISIBLE_DEVICES"] = cid
-            args, cfg, distributed, logger, model, train_dataset, test_dataset, videossl = initial_setup(cid, base_work_dir, rounds)
+        def client_fn(cid: str):
+            args, cfg, distributed, logger, model, train_dataset, test_dataset, videossl = initial_setup(cid,
+                                                                                                         base_work_dir,
+                                                                                                         rounds,
+                                                                                                         data_dir,
+                                                                                                         num_gpus,
+                                                                                                         partition_dir)
             return SslClient(model, train_dataset, test_dataset, cfg, args, distributed, logger, videossl)
 
         # configure the strategy
         strategy = FedVSSL(
-            mix_coeff = 0.5,
-            swbeta = 1,
-            fraction_fit=1,
-            # fraction_eval=0,
-            min_fit_clients=2,
-            # min_eval_clients=0,
-            min_available_clients=pool_size,
+            mix_coeff=args.mix_coeff,
+            swbeta=args.swbeta,
+            fraction_fit=(float(args.num_clients_per_round) / args.pool_size),
+            min_fit_clients=args.num_clients_per_round,
+            min_available_clients=args.pool_size,
             on_fit_config_fn=fit_config,
         )
          # (optional) specify ray config
-        ray_config = {"include_dashboard": False}
+        ray_config = {"include_dashboard": args.include_dashboard}
 
         # start simulation
         hist = fl.simulation.start_simulation(
-            client_fn=main,
-            num_clients=pool_size,
+            client_fn=client_fn,
+            num_clients=args.pool_size,
             client_resources=client_resources,
-            config=fl.server.ServerConfig(num_rounds=rounds),
+            config=fl.server.ServerConfig(num_rounds=args.rounds),
             strategy=strategy,
             ray_init_args=ray_config,
         )
@@ -148,10 +177,10 @@ if __name__ == "__main__":
 
         # path to the pretrained model. We provide certain federated pretrained model that can be easily downloaded 
         # from the following link: https://github.com/yasar-rehman/FEDVSSL
-        # here we gave an exampe with FedVSSL (alpha=0, beta=0) checkpoint file
+        # here we gave an example with FedVSSL (alpha=0, beta=0) checkpoint file
         # The files after federated pretraining are usually saved in .npz format. 
         
-        pretrained = "/home/data1/round-540-weights.array.npz"
+        pretrained = args.pretrained_model_path
         
         # conversion of the .npz files to the .pth format. If the files are saved in .npz format
         if pretrained.endswith('.npz'):
