@@ -9,6 +9,19 @@ Standard setup - download the dataset, choose the partitioning::
   partition = fds.load_partition(0, "train")
   centralized_dataset = fds.load_full("test")
 
+Determine the names of our features (you can alternatively do that directly on the Hugging Face website). The name can
+vary e.g. "img" or "image", "label" or "labels"::
+
+  partition.features
+
+In case of CIFAR10, you should see the following output
+
+.. code-block:: none
+
+  {'img': Image(decode=True, id=None),
+  'label': ClassLabel(names=['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog',
+  'frog', 'horse', 'ship', 'truck'], id=None)}
+
 Apply Transforms, Create DataLoader. We will use the `map() <https://huggingface.co/docs/datasets/v2.14.5/en/package_reference/main_classes#datasets.Dataset.map>`_
 function. Please note that the map will modify the existing dataset if the key in the dictionary you return is already present
 and append a new feature if it did not exist before. Below, we modify the "img" feature of our dataset.::
@@ -21,7 +34,6 @@ and append a new feature if it did not exist before. Below, we modify the "img" 
         lambda img: {"img": transforms(img)}, input_columns="img"
     ).with_format("torch")
   dataloader = DataLoader(partition_torch, batch_size=64)
-
 
 We advise you to keep the
 `ToTensor() <https://pytorch.org/vision/stable/generated/torchvision.transforms.ToTensor.html>`_ transform (especially if
