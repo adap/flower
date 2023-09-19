@@ -1,0 +1,14 @@
+dataset_name: "cpusmall"
+train_ratio: .75
+task_type: "REG"
+n_estimators_client: 100
+
+metric:
+  name: "mse"
+
+xgb:
+  _target_:  xgboost.XGBRegressor
+  objective: "reg:squarederror"
+  max_depth: 8
+CNN:
+  lr: .0001

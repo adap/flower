@@ -1,64 +1,55 @@
 ---
-# this is the config that will be loaded as default by main.py
-# Please follow the provided structure (this will ensuring all baseline follow
-# a similar configuration structure and hence be easy to customise)
+
+defaults: 
+  - dataset: cpumall
 centralized: False
-client_num: 2
-
-learning_rate: 0.1
-max_depth: 8
-n_estimators: 500
-subsample: 0.8
-colsample_bylevel: 1
-colsample_bynode: 1
-colsample_bytree: 1
-alpha: 5
-gamma: 5
-num_parallel_tree: 1
-min_child_weight: 1
-
-dataset:
-  dataset_name: "all"
-  train_ratio: .75
-
+client_num: 5
+device: "cpu"
+n_estimators_client: 100
+task_type: "REG"
 XGBoost:
-  classifier:
-    _target_:  xgboost.XGBClassifier
-    objective: "binary:logistic"
-    learning_rate: ${learning_rate}
-    max_depth: ${max_depth}
-    n_estimators: ${n_estimators}
-    subsample: ${subsample}
-    colsample_bylevel: ${colsample_bylevel}
-    colsample_bynode: ${colsample_bynode}
-    colsample_bytree: ${colsample_bytree}
-    alpha: ${alpha}
-    gamma: ${gamma}
-    num_parallel_tree: ${num_parallel_tree}
-    min_child_weight: ${min_child_weight}
-  regressor: 
-    _target_:  xgboost.XGBRegressor
-    objective: "reg:squarederror"
-    learning_rate: ${learning_rate}
-    max_depth: ${max_depth}
-    n_estimators: ${n_estimators}
-    subsample: ${subsample}
-    colsample_bylevel: ${colsample_bylevel}
-    colsample_bynode: ${colsample_bynode}
-    colsample_bytree: ${colsample_bytree}
-    alpha: ${alpha}
-    gamma: ${gamma}
-    num_parallel_tree: ${num_parallel_tree}
-    min_child_weight: ${min_child_weight}
-
+  _target_:  ${dataset.xgb._target_}
+  objective: ${dataset.xgb.objective}
+  learning_rate: .1
+  max_depth: ${dataset.xgb.max_depth}
+  n_estimators: ${dataset.n_estimators_client}
+  subsample: 0.8
+  colsample_bylevel: 1
+  colsample_bynode: 1
+  colsample_bytree: 1
+  alpha: 5
+  gamma: 5
+  num_parallel_tree: 1
+  min_child_weight: 1
 
 
 model:
   # model config
+class Config:
+    _target_: str = "__main__.t"  # dotpath describing location of callable
+
+
 
 strategy:
-  _target_: # points to your strategy (either custom or exiting in Flower)
-  # rest of strategy config
+  _target_: flwr.server.strategy.FedXgbNnAvg 
+  _recursive_: true #everything to be instantiated
+  fraction_fit: 1.0 
+  fraction_evaluate: 0.0 # no clients will be sampled for federated evaluation (we will still perform global evaluation)
+  min_fit_clients: 1
+  min_evaluate_clients: 1
+  min_available_clients: ${client_num}
+  accept_failures: False
 
 client:
   # client config
+run_experiment:
+  num_rounds: 1
+  batch_size: 64
+  fraction_fit: 1.0
+  min_fit_clients: 1
+  num_cpus_per_client: 1
+  fit_config:
+    num_iterations: 100
+
+val_ratio: 0.0
+batch_size: "whole"

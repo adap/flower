@@ -165,20 +165,16 @@ def datafiles_fusion(data_paths):
     """
     Merge (if necessary) the data files and returns the features and labels sperated in
     numpy arrays.
-
-    Parameters
-    ----------
-    data_paths: List[Dataset Pathes]
-        The pathes for the data that will be used in train and test, with train of full dataset
-        in index 0    
-    Returns
-    -------
-    X: Numpy array
-        The full features of the dataset.
-    y: Numpy array
-        The full labels of the dataset.
+    Args:
+        data_paths: List[Dataset Pathes]
+            - The pathes for the data that will be used in train and test, with train of full 
+            dataset in index 0    
+    Returns:
+        X: Numpy array
+            - The full features of the dataset.
+        y: Numpy array
+            - The full labels of the dataset.
     """
-    
     data=load_svmlight_file(data_paths[0], zero_based=False)
     X=data[0].toarray()
     Y=data[1]

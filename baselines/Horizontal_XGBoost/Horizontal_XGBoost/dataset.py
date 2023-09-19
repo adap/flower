@@ -9,7 +9,6 @@ partitioned, please include all those functions and logic in the
 defined here of course.
 """
 from .dataset_preparation import download_data,datafiles_fusion,train_test_split,modify_labels
-from flwr.common import NDArray, NDArrays
 from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 
