@@ -9,7 +9,9 @@ Standard setup - download the dataset, choose the partitioning::
   partition = mnist_fds.load_partition(0, "train")
   centralized_dataset = mnist_fds.load_full("test")
 
-Apply Transforms, Create DataLoader::
+Apply Transforms, Create DataLoader. We will use the `map() <https://huggingface.co/docs/datasets/v2.14.5/en/package_reference/main_classes#datasets.Dataset.map>`_
+function. Please note that the map will modify the existing dataset if the key in the dictionary you return is already present
+and append a new feature if it did not exist before. Below, we modify the "img" feature of our dataset.::
 
   from torch.utils.data import DataLoader
   from torchvision.transforms import ToTensor
@@ -49,3 +51,4 @@ With this dataset, you get a dictionary, and you access the data a little bit di
 
   for batch in dataloader:
     images, labels = batch["img"], batch["label"]
+
