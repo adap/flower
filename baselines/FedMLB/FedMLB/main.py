@@ -285,7 +285,6 @@ def main(cfg: DictConfig) -> None:
         server=my_server,
         config=flwr.server.ServerConfig(num_rounds=cfg.num_rounds),
         ray_init_args=ray_init_args,
-        # strategy=strategy,
         actor_kwargs={
             "on_actor_init_fn": enable_tf_gpu_growth  # Enable GPU growth upon actor init
             # does nothing if `num_gpus` in client_resources is 0.0
