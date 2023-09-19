@@ -505,7 +505,7 @@ paper, instead of K=50), run the following:
 ```bash
 python -m FedMLB.main --multirun algorithm="FedMLB","FedAvg","FedAvg+KD" local_updates=100 # or local_updates=200 
 ```
-
+#### K = 100
 <table>
   <tr>
     <td></td>
