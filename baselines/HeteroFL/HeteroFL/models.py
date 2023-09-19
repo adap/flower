@@ -14,6 +14,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from flwr.common import parameters_to_ndarrays
+from utils import make_optimizer
 
 
 class Conv(nn.Module):
@@ -26,12 +27,13 @@ class Conv(nn.Module):
         track=False,
         norm="bn",
         scale=1,
-        device="cpu",
+        mask = 1,
     ):
         super().__init__()
+        self.classes_size = classes_size
         norm_model = norm
         scale_model = scale
-        self.device = device
+        self.mask = mask
 
         if norm_model == "bn":
             norm = nn.BatchNorm2d(
@@ -97,11 +99,11 @@ class Conv(nn.Module):
         self.blocks = nn.Sequential(*blocks)
 
     def forward(self, input):
-        output = {"loss": torch.tensor(0, device=self.device, dtype=torch.float32)}
-        # x = input["img"]
+        # output = {"loss": torch.tensor(0, device=self.device, dtype=torch.float32)}
+        output = {}
         out = self.blocks(input["img"])
-        if "label_split" in input:
-            label_mask = torch.zeros(10, device=out.device)
+        if "label_split" in input and self.mask:
+            label_mask = torch.zeros(self.classes_size, device=out.device)
             label_mask[input["label_split"]] = 1
             out = out.masked_fill(label_mask == 0, 0)
         output["score"] = out
@@ -116,13 +118,162 @@ def conv(
     classes_size,
     norm,
     global_model_rate=1,
+    device = 'cpu',
     track=False,
 ):
     hidden_size = [int(np.ceil(model_rate * x)) for x in hidden_layers]
     scaler_rate = model_rate / global_model_rate
     model = Conv(data_shape, hidden_size, classes_size, scaler_rate, track , norm)
     model.apply(init_param)
-    return model
+    return model.to(device)
+
+
+
+
+class Block(nn.Module):
+    expansion = 1
+
+    def __init__(self, in_planes, planes, stride, rate, norm , scale = 1, track = False):
+        super(Block, self).__init__()
+        if norm == 'bn':
+            n1 = nn.BatchNorm2d(in_planes, momentum=None, track_running_stats=track)
+            n2 = nn.BatchNorm2d(planes, momentum=None, track_running_stats=track)
+        elif norm == 'in':
+            n1 = nn.GroupNorm(in_planes, in_planes)
+            n2 = nn.GroupNorm(planes, planes)
+        elif norm == 'ln':
+            n1 = nn.GroupNorm(1, in_planes)
+            n2 = nn.GroupNorm(1, planes)
+        elif norm == 'gn':
+            n1 = nn.GroupNorm(4, in_planes)
+            n2 = nn.GroupNorm(4, planes)
+        elif norm == 'none':
+            n1 = nn.Identity()
+            n2 = nn.Identity()
+        else:
+            raise ValueError('Not valid norm')
+        self.n1 = n1
+        self.conv1 = nn.Conv2d(in_planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
+        self.n2 = n2
+        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=1, padding=1, bias=False)
+        if scale:
+            self.scaler = Scaler(rate)
+        else:
+            self.scaler = nn.Identity()
+
+        if stride != 1 or in_planes != self.expansion * planes:
+            self.shortcut = nn.Conv2d(in_planes, self.expansion * planes, kernel_size=1, stride=stride, bias=False)
+
+    def forward(self, x):
+        out = F.relu(self.n1(self.scaler(x)))
+        shortcut = self.shortcut(out) if hasattr(self, 'shortcut') else x
+        out = self.conv1(out)
+        out = self.conv2(F.relu(self.n2(self.scaler(out))))
+        out += shortcut
+        return out
+
+
+class ResNet(nn.Module):
+    def __init__(self, data_shape, hidden_size, block, num_blocks, num_classes, rate, track = False, norm = 'bn', scale = 1, mask = 1):
+        super(ResNet, self).__init__()
+        self.in_planes = hidden_size[0]
+        self.conv1 = nn.Conv2d(data_shape[0], hidden_size[0], kernel_size=3, stride=1, padding=1, bias=False)
+        self.layer1 = self._make_layer(block, hidden_size[0], num_blocks[0], stride=1, rate=rate, norm = norm , track=track)
+        self.layer2 = self._make_layer(block, hidden_size[1], num_blocks[1], stride=2, rate=rate, norm = norm , track=track)
+        self.layer3 = self._make_layer(block, hidden_size[2], num_blocks[2], stride=2, rate=rate, norm = norm , track=track)
+        self.layer4 = self._make_layer(block, hidden_size[3], num_blocks[3], stride=2, rate=rate, norm = norm , track=track)
+
+        self.classes_size = num_classes
+        self.mask = mask
+
+        if norm == 'bn':
+            n4 = nn.BatchNorm2d(hidden_size[3] * block.expansion, momentum=None, track_running_stats=track)
+        elif norm == 'in':
+            n4 = nn.GroupNorm(hidden_size[3] * block.expansion, hidden_size[3] * block.expansion)
+        elif norm == 'ln':
+            n4 = nn.GroupNorm(1, hidden_size[3] * block.expansion)
+        elif norm == 'gn':
+            n4 = nn.GroupNorm(4, hidden_size[3] * block.expansion)
+        elif norm == 'none':
+            n4 = nn.Identity()
+        else:
+            raise ValueError('Not valid norm')
+        self.n4 = n4
+        if scale:
+            self.scaler = Scaler(rate)
+        else:
+            self.scaler = nn.Identity()
+        self.linear = nn.Linear(hidden_size[3] * block.expansion, num_classes)
+
+    def _make_layer(self, block, planes, num_blocks, stride, rate, norm , track):
+        strides = [stride] + [1] * (num_blocks - 1)
+        layers = []
+        for stride in strides:
+            layers.append(block(self.in_planes, planes, stride, rate, norm , track))
+            self.in_planes = planes * block.expansion
+        return nn.Sequential(*layers)
+
+    def forward(self, input):
+        output = {}
+        x = input['img']
+        out = self.conv1(x)
+        out = self.layer1(out)
+        out = self.layer2(out)
+        out = self.layer3(out)
+        out = self.layer4(out)
+        out = F.relu(self.n4(self.scaler(out)))
+        out = F.adaptive_avg_pool2d(out, 1)
+        out = out.view(out.size(0), -1)
+        out = self.linear(out)
+        if 'label_split' in input and self.mask:
+            label_mask = torch.zeros(self.classes_size, device=out.device)
+            label_mask[input['label_split']] = 1
+            out = out.masked_fill(label_mask == 0, 0)
+        output['score'] = out
+        output['loss'] = F.cross_entropy(output['score'], input['label'])
+        return output
+
+
+def resnet18(
+    model_rate,
+    data_shape,
+    hidden_layers,
+    classes_size,
+    norm,
+    global_model_rate=1,
+    device='cpu',
+    track=False,
+):
+    data_shape = data_shape
+    classes_size = classes_size
+    hidden_size = [int(np.ceil(model_rate * x)) for x in hidden_layers]
+    scaler_rate = model_rate / global_model_rate
+    model = ResNet(data_shape, hidden_size, Block, [2, 2, 2, 2], classes_size, scaler_rate, track , norm)
+    model.apply(init_param)
+    return model.to(device)
+
+
+def create_model(model_config, model_rate, device = 'cpu'):
+    if(model_config["model"] == 'conv'):
+        return conv(model_rate = model_rate,
+                    data_shape = model_config["data_shape"],
+                    hidden_layers = model_config["hidden_layers"],
+                    classes_size = model_config["classes_size"],
+                    norm = model_config["norm"],
+                    global_model_rate = model_config["global_model_rate"],
+                    device = device)
+    elif (model_config["model"] == "resnet18"):
+        return resnet18(model_rate = model_rate,
+                        data_shape = model_config["data_shape"],
+                        hidden_layers = model_config["hidden_layers"],
+                        classes_size = model_config["classes_size"],
+                        norm = model_config["norm"],
+                        global_model_rate = model_config["global_model_rate"],
+                        device = device)
+
+
+
+
 
 
 def init_param(m):
@@ -154,20 +305,20 @@ def set_parameters(net, parameters: List[np.ndarray]):
     net.load_state_dict(state_dict, strict=True)
 
 
-def train(model, train_loader, label_split, epochs, lr=0.01, momentum = 0.9 , weight_decay = 5.00e-04 ,device="cpu"):
+def train(model, train_loader, label_split, settings):
     # criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(
-        model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay
+    optimizer = make_optimizer(
+        settings["optimizer"] , model.parameters(), lr=settings["lr"], momentum=settings["momentum"], weight_decay=settings["weight_decay"]
     )
 
     model.train()
-    for local_epoch in range(epochs):
+    for local_epoch in range(settings["epochs"]):
         for i, input in enumerate(train_loader):
             input_dict = {}
-            input_dict["img"] = input[0].to(device)
-            input_dict["label"] = input[1].to(device)
+            input_dict["img"] = input[0].to(settings["device"])
+            input_dict["label"] = input[1].to(settings["device"])
             input_dict["label_split"] = torch.tensor(
-                label_split, dtype=torch.int, device=device
+                label_split, dtype=torch.int, device=settings["device"]
             )
             optimizer.zero_grad()
             output = model(input_dict)

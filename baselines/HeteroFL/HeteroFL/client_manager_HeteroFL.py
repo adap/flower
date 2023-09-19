@@ -142,11 +142,11 @@ class client_manager_HeteroFL(fl.server.ClientManager):
 
     def update(self, server_round):
         if self.is_simulation == True:
-            if (server_round == 1 and self.model_rate_manager.model_mode == "fix") or (
-                self.model_rate_manager.model_mode == "dynamic"
+            if (server_round == 1 and self.model_rate_manager.model_split_mode == "fix") or (
+                self.model_rate_manager.model_split_mode == "dynamic"
             ):
                 ans = self.model_rate_manager.create_model_rate_mapping(
-                    self.num_available
+                    self.num_available()
                 )
                 # copy self.clients_to_model_rate_mapping , ans
                 for i in range(len(ans)):

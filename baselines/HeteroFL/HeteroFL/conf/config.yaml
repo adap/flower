@@ -3,6 +3,8 @@ num_clients: 100
 num_epochs: 16
 num_rounds: 200
 seed: 42
+client_device: 'cpu'
+device: 'cpu'
 
 control:
   model_split_rate: 'fix'
@@ -10,12 +12,12 @@ control:
 
 dataset_config:
   dataset_name: 'MNIST'
-  iid: false
+  iid: True
   shard_per_user : 2 # only used in case of non-iid (i.e. iid = false)
   balance: false
   batch_size:
-    train: 128
-    test: 128
+    train: 10
+    test: 50
   shuffle:
     train: true
     test: false
@@ -27,9 +29,9 @@ model:
   norm: bn
 
 strategy:
-  optimizer:
-  lr:
-  momentum:
-  weight_decay:
-  scheduler:
-  milestones:
+  optimizer: SGD
+  lr: 0.01
+  momentum: 0.9
+  weight_decay: 5.00e-04
+  scheduler: MultiStepLR
+  milestones: [100]

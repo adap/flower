@@ -28,11 +28,12 @@ from flwr.common import (
 from flwr.common.typing import NDArrays, Scalar
 from models import get_parameters, set_parameters, test, train
 from torch.utils.data import DataLoader
+from models import create_model
 
 
 class FlowerNumPyClient(fl.client.NumPyClient):
     def __init__(
-        self, cid, net, trainloader, label_split, valloader, epochs, model_rate, device = "cpu"
+        self, cid, net, trainloader, label_split, valloader, model_rate, client_train_settings
     ):
         self.cid = cid
         # self.net = conv(model_rate = model_rate)
@@ -40,9 +41,8 @@ class FlowerNumPyClient(fl.client.NumPyClient):
         self.trainloader = trainloader
         self.label_split = label_split
         self.valloader = valloader
-        self.epochs = epochs
         self.model_rate = model_rate
-        self.device = device
+        self.client_train_settings = client_train_settings
         print(
             "Client_with model rate = {} , cid of client = {}".format(
                 self.model_rate, self.cid
@@ -60,29 +60,21 @@ class FlowerNumPyClient(fl.client.NumPyClient):
             self.net,
             self.trainloader,
             self.label_split,
-            epochs=self.epochs,
-            lr=config["lr"],
-            device=self.device,
+            self.client_train_settings,
         )
         return get_parameters(self.net), len(self.trainloader), {}
 
     def evaluate(self, parameters, config):
         # print(f"[Client {self.cid}] evaluate, config: {config}")
         set_parameters(self.net, parameters)
-        loss, accuracy = test(self.net, self.valloader, device=self.device)
+        loss, accuracy = test(self.net, self.valloader, device=self.client_train_settings["device"])
         return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
 
 
 def gen_client_fn(
-    model,
-    data_shape,
-    hidden_layers,
-    classes_size,
-    norm,
-    global_model_rate,
-    num_clients,
+    model_config,
     client_to_model_rate_mapping,
-    num_epochs,
+    client_train_settings,
     trainloaders,
     label_split,
     valloaders,
@@ -135,19 +127,16 @@ def gen_client_fn(
 
         return FlowerNumPyClient(
             cid=cid,
-            net=model(
+            net=create_model(
+                model_config,
                 model_rate=model_rate,
-                data_shape=data_shape,
-                hidden_layers=hidden_layers,
-                classes_size=classes_size,
-                norm = norm,
-                global_model_rate=global_model_rate,
-            ).to(device),
+                device = device,
+            ),
             trainloader=trainloader,
             label_split=label_split[int(cid)],
             valloader=valloader,
-            epochs=num_epochs,
             model_rate=model_rate,
+            client_train_settings=client_train_settings,
         )
 
     return client_fn

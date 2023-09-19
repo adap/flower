@@ -40,7 +40,7 @@ def load_datasets(  # pylint: disable=too-many-arguments
         The DataLoader for training, the DataLoader for validation, the DataLoader for testing.
     """
     print(f"Dataset partitioning config: {config}")
-    datasets, label_split, client_testsets, testset = _partition_data(
+    trainset , datasets, label_split, client_testsets, testset = _partition_data(
         num_clients,
         dataset_name=config.dataset_name,
         iid=config.iid,
@@ -48,6 +48,8 @@ def load_datasets(  # pylint: disable=too-many-arguments
         seed=seed,
     )
     # Split each partition into train/val and create DataLoader
+    entire_trainloader = DataLoader(trainset, batch_size = config.batch_size.train , shuffle =config.shuffle.train)
+    
     trainloaders = []
     valloaders = []
     for dataset in datasets:
@@ -69,6 +71,7 @@ def load_datasets(  # pylint: disable=too-many-arguments
         )
 
     return (
+        entire_trainloader , 
         trainloaders,
         label_split,
         valloaders,

@@ -30,6 +30,7 @@ from models import (
     param_model_rate_mapping,
 )
 import copy
+from utils import make_optimizer, make_scheduler
 
 
 class HeteroFL(fl.server.strategy.Strategy):
@@ -41,6 +42,8 @@ class HeteroFL(fl.server.strategy.Strategy):
         min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
         net=None,
+        optim_scheduler_settings = None,
+        evaluate_fn = None
     ) -> None:
         super().__init__()
         self.fraction_fit = fraction_fit
@@ -48,13 +51,18 @@ class HeteroFL(fl.server.strategy.Strategy):
         self.min_fit_clients = min_fit_clients
         self.min_evaluate_clients = min_evaluate_clients
         self.min_available_clients = min_available_clients
+        self.evaluate_fn = evaluate_fn
         # # created client_to_model_mapping
         # self.client_to_model_rate_mapping: Dict[str, ClientProxy] = {}
 
         self.net = net
+        self.optim_scheduler_settings = optim_scheduler_settings
         self.local_param_model_rate = None
         self.active_cl_mr = None
         self.active_cl_labels = None
+        # required for scheduling the lr
+        self.optimizer = None,
+        self.scheduler = None
 
     def __repr__(self) -> str:
         return "HeteroFL"
@@ -70,8 +78,8 @@ class HeteroFL(fl.server.strategy.Strategy):
         self.local_param_model_rate = param_model_rate_mapping(self.net.state_dict() , client_manager.get_all_clients_to_model_mapping())
 
         self.active_cl_labels = client_manager.client_label_split.copy()
-        self.optimizer = torch.optim.SGD(self.net.parameters() , lr = 0.01 , momentum = 0.9 , weight_decay = 5.00e-04)
-        self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer , milestones=[100])
+        self.optimizer = make_optimizer( self.optim_scheduler_settings["optimizer"], self.net.parameters() , lr=self.optim_scheduler_settings["lr"], momentum=self.optim_scheduler_settings["momentum"], weight_decay=self.optim_scheduler_settings["weight_decay"])
+        self.scheduler = make_scheduler(self.optim_scheduler_settings["scheduler"], self.optimizer , milestones=self.optim_scheduler_settings["milestones"])
         return fl.common.ndarrays_to_parameters(ndarrays)
 
     def configure_fit(
@@ -101,7 +109,7 @@ class HeteroFL(fl.server.strategy.Strategy):
         # Create custom configs
         fit_configurations = []
         lr = self.optimizer.param_groups[0]["lr"]
-
+        print(f'lr = {lr}')
         for idx, client in enumerate(clients):
             model_rate = client_manager.get_client_to_model_mapping(client.cid)
             client_param_idx = self.local_param_model_rate[model_rate]
@@ -124,6 +132,7 @@ class HeteroFL(fl.server.strategy.Strategy):
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
 
+        print('in aggregate fit')
         gl_model = self.net.state_dict()
 
         param_idx = []
@@ -258,14 +267,21 @@ class HeteroFL(fl.server.strategy.Strategy):
         print(f"\npaneer lababdar {metrics_aggregated}")
         return loss_aggregated, metrics_aggregated
 
+    
     def evaluate(
         self, server_round: int, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
-        """Evaluate global model parameters using an evaluation function."""
-
-        # Let's assume we won't perform the global model evaluation on the server side.
-        return None
-
+        """Evaluate model parameters using an evaluation function."""
+        if self.evaluate_fn is None:
+            # No evaluation function provided
+            return None
+        parameters_ndarrays = parameters_to_ndarrays(parameters)
+        eval_res = self.evaluate_fn(server_round, parameters_ndarrays, {})
+        if eval_res is None:
+            return None
+        loss, metrics = eval_res
+        return loss, metrics
+    
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Return sample size and required number of clients."""
         num_clients = int(num_available_clients * self.fraction_fit)

@@ -94,7 +94,7 @@ def _partition_data(
             tensor_label_split.append(torch.Tensor(i))
         label_split = tensor_label_split
 
-    return datasets, label_split, client_testsets, testset
+    return trainset, datasets, label_split, client_testsets, testset
 
 
 def iid_partition(dataset, num_clients, seed=42) -> Tuple[List, List]:

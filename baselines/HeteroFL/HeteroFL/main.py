@@ -15,9 +15,14 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 from strategy import HeteroFL
 from utils import Model_rate_manager, get_global_model_rate, preprocess_input
+import server
+
+import pickle
+from pathlib import Path
+from hydra.core.hydra_config import HydraConfig
 
 
-@hydra.main(config_path="conf", config_name="config.yaml", version_base=None)
+@hydra.main(config_path="conf", config_name="base.yaml", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.
 
@@ -63,11 +68,15 @@ def main(cfg: DictConfig) -> None:
     # print config structured as YAML
     print(OmegaConf.to_yaml(cfg))
 
-    trainloaders, label_split, valloaders, testloader = load_datasets(
+    # get entire_trainloader
+    entire_trainloader , trainloaders, label_split, valloaders, testloader = load_datasets(
         config=cfg.dataset_config, num_clients=cfg.num_clients, seed=cfg.seed
     )
 
     model_config = preprocess_input(cfg.model, cfg.dataset_config)
+
+    print('len of trainloader = ' , len(trainloaders))
+    print(next(iter(trainloaders[0])))
 
     # send this array(client_model_rate_mapping) as an argument to client_manager and client
     model_split_rate = {"a": 1, "b": 0.5, "c": 0.25, "d": 0.125, "e": 0.0625}
@@ -82,34 +91,53 @@ def main(cfg: DictConfig) -> None:
         model_rate_manager, client_to_model_rate_mapping , client_label_split = label_split
     )
 
+    model_config["global_model_rate"] = model_split_rate[get_global_model_rate(model_mode)]
+    test_model = models.create_model(model_config , model_rate = model_split_rate[get_global_model_rate(model_mode)] , device = cfg.device)
+
     # # for i in range(cfg.num_clients):
     #     # client_to_model_rate_mapping[i]
 
     # prepare function that will be used to spawn each client
+    client_train_settings = {'epochs': cfg.num_epochs ,
+                             'optimizer' : cfg.strategy.optimizer , 
+                             'lr' : cfg.strategy.lr , 
+                             'momentum' : cfg.strategy.momentum , 
+                             'weight_decay': cfg.strategy.weight_decay, 
+                             'scheduler' : cfg.strategy.scheduler , 
+                             'milestones' : cfg.strategy.milestones , 
+                             'device': cfg.client_device}
+    
+    optim_scheduler_settings = {'optimizer' : cfg.strategy.optimizer , 
+                             'lr' : cfg.strategy.lr , 
+                             'momentum' : cfg.strategy.momentum , 
+                             'weight_decay': cfg.strategy.weight_decay, 
+                             'scheduler' : cfg.strategy.scheduler , 
+                             'milestones' : cfg.strategy.milestones }
+
     client_fn = client.gen_client_fn(
-        model=model_config["model_name"],
-        data_shape=model_config["data_shape"],
-        hidden_layers=model_config["hidden_layers"],
-        classes_size=model_config["classes_size"],
-        norm = model_config["norm"],
-        global_model_rate=model_split_rate[get_global_model_rate(model_mode)],
-        num_clients=cfg.num_clients,
+        model_config = model_config,
         client_to_model_rate_mapping=client_to_model_rate_mapping,
-        num_epochs=cfg.num_epochs,
+        client_train_settings=client_train_settings,
         trainloaders=trainloaders,
         label_split=label_split,
         valloaders=valloaders,
+        device=cfg.client_device,
     )
 
+
+    # net=model_config["model"](
+    #         model_rate=model_split_rate[get_global_model_rate(model_mode)],  # to be modified
+    #         data_shape=model_config["data_shape"],
+    #         hidden_layers=model_config["hidden_layers"],
+    #         classes_size=model_config["classes_size"],
+    #         norm = model_config["norm"]
+    #         # device =
+    #     )
+
     strategy = HeteroFL(
-        net=model_config["model_name"](
-            model_rate=model_split_rate[get_global_model_rate(model_mode)],  # to be modified
-            data_shape=model_config["data_shape"],
-            hidden_layers=model_config["hidden_layers"],
-            classes_size=model_config["classes_size"],
-            norm = model_config["norm"]
-            # device =
-        ),
+        net = models.create_model(model_config , model_rate = model_split_rate[get_global_model_rate(model_mode)], device = cfg.device),
+        optim_scheduler_settings=optim_scheduler_settings,
+        evaluate_fn=server.gen_evaluate_fn(entire_trainloader , testloader , 'cuda' , test_model),
         fraction_fit=0.1,
         fraction_evaluate=0.1,
         min_fit_clients=10,
@@ -117,15 +145,23 @@ def main(cfg: DictConfig) -> None:
         min_available_clients=cfg.num_clients,
     )
 
-    history = fl.simultion.start_simulation(
+    history = fl.simulation.start_simulation(
         client_fn=client_fn,
         num_clients=cfg.num_clients,
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
-        # client_resources = client,
+        client_resources = {"num_cpus" : 1.0 , "num_gpus" : 0},
         client_manager=client_manager,
         strategy=strategy,
     )
 
+    # save the results
+    save_path = HydraConfig.get().runtime.output_dir
+    results_path = Path(save_path) / "results.pkl"
+    results = {"history": history}
+
+    # save the results as a python pickle
+    with open(str(results_path), "wb") as h:
+        pickle.dump(results, h, protocol=pickle.HIGHEST_PROTOCOL)
     # plot grpahs using history and save the results.
 
     # fl.server.strategy.fedavg
