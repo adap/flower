@@ -14,7 +14,7 @@ Stable releases are available on `PyPI <https://pypi.org/project/flwr_datasets/>
 
   python -m pip install flwr-datasets
 
-For Image Datasets (e.g. MNIST, CIFAR10) ``flwr_datasets`` should be installed with the ``image`` extra::
+For vision datasets (e.g. MNIST, CIFAR10) ``flwr_datasets`` should be installed with the ``vision`` extra::
 
   python -m pip install flwr_datasets[vision]
 
