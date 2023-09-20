@@ -17,7 +17,7 @@ from flwr_datasets import FederatedDataset
         {"dataset_name": "mnist", "preprocessing": StandardScaler()},
     ]
 )
-class FDSWithSKLearn(unittest.TestCase):
+class FdsWithSKLearn(unittest.TestCase):
     """Test Flower Datasets with Scikit-learn's Logistic Regression."""
 
     dataset_name = ""
