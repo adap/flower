@@ -9,7 +9,7 @@ dataset: [CIFAR100] # list of datasets you include in your baseline
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
-****Paper:**** : https://openreview.net/forum?id=pf8RIZTMU58
+****Paper:**** : [openreview.net/forum?id=pf8RIZTMU58](https://openreview.net/forum?id=pf8RIZTMU58)
 
 ****Authors:**** : Minjae Kim, Sangyoon Yu, Suhyun Kim, Soo-Mook Moon
 
