@@ -35,8 +35,8 @@ from flwr.common import (
     Parameters,
     Scalar,
     NDArrays,
-    ndarrays_to_parameters,   # parameters_to_weights,
-    parameters_to_ndarrays,   # weights_to_parameters,
+    ndarrays_to_parameters,   # parameters_to_weight in the original FedVSSL repository
+    parameters_to_ndarrays,   # weights_to_parameters in the original FedVSSL repository
 )
 # import CtP.tools._init_paths
 from strategy import FedVSSL
@@ -47,15 +47,17 @@ def initial_setup(cid, base_work_dir, rounds, data_dir, num_gpus, partition_dir)
     import utils
     cid_plus_one = str(int(cid) + 1)
     args = Namespace(
-        cfg='conf/mmcv_conf/r3d_18_ucf101/pretraining.py',
+        cfg='conf/mmcv_conf/r3d_18_ucf101/pretraining.py', # Path to the pretraining configuration file
         checkpoint=None, cid=int(cid), data_dir=data_dir, gpus=num_gpus,
         launcher='none',
         local_rank=0, progress=False, resume_from=None, rounds=rounds, seed=7, validate=False,
         work_dir=base_work_dir + '/client' + cid_plus_one)
 
     print("Starting client", args.cid)
-    cfg = Config.fromfile(args.cfg)
-    cfg.data.train.data_source.ann_file = partition_dir + '/client_dist' + cid_plus_one + '.json'
+    # fetch the configuration file
+    cfg = Config.fromfile(args.cfg) 
+    # define the client data files; usually contains paths to the samples and annotations
+    cfg.data.train.data_source.ann_file = partition_dir + '/client_dist' + cid_plus_one + '.json' 
 
     distributed, logger = utils.set_config_mmcv(args, cfg)
 
@@ -64,7 +66,7 @@ def initial_setup(cid, base_work_dir, rounds, data_dir, num_gpus, partition_dir)
     # load the training data
     train_dataset = utils.load_data(args, cfg)
 
-    # since pretraining during FedVSSL we don't need any testing data, we can left it empty.
+    # since during pretraining of FedVSSL we don't need any testing data, we can left it empty.
     test_dataset = " " 
 
     return args, cfg, distributed, logger, model, train_dataset, test_dataset, utils
@@ -206,7 +208,7 @@ if __name__ == "__main__":
         work_dir = './output/ctp/r3d_18_kinetics/finetune_ucf101/'
         model = dict(
             backbone=dict(
-                pretrained='./model_pretrained.pth',
+                pretrained='./model_pretrained.pth', 
             ),
         )
        ''').strip("\n")
@@ -223,8 +225,8 @@ if __name__ == "__main__":
                  
     #-----------------------------------------------------------------------------------------------------------------------
     # The cfg_path need to be updated with the following updated configuration contents to be able to load the pretrained model.
-    # Instead of executing the blow mentioned code, one can also directly modify the "pretrained" variable by opening the path represented
-    # by the config_path variable
+    # Instead of executing the blow mentioned code, one can also directly modify the "pretrained" variable by opening the file represented
+    # by the cfg_path_test variable
     #
         config_content_test = textwrap.dedent('''\
         _base_ = ['../../recognizers/_base_/model_r3d18.py',
@@ -249,50 +251,3 @@ if __name__ == "__main__":
         f"--progress"])
 
 
-
-# import hydra
-# from omegaconf import DictConfig, OmegaConf
-
-
-# @hydra.main(config_path="conf", config_name="base", version_base=None)
-# def main(cfg: DictConfig) -> None:
-#     """Run the baseline.
-
-#     Parameters
-#     ----------
-#     cfg : DictConfig
-#         An omegaconf object that stores the hydra config.
-#     """
-#     # 1. Print parsed config
-#     print(OmegaConf.to_yaml(cfg))
-
-    # 2. Prepare your dataset
-    # here you should call a function in datasets.py that returns whatever is needed to:
-    # (1) ensure the server can access the dataset used to evaluate your model after
-    # aggregation
-    # (2) tell each client what dataset partitions they should use (e.g. a this could
-    # be a location in the file system, a list of dataloader, a list of ids to extract
-    # from a dataset, it's up to you)
-
-    # 3. Define your clients
-    # Define a function that returns another function that will be used during
-    # simulation to instantiate each individual client
-    # client_fn = client.<my_function_that_returns_a_function>()
-
-    # 4. Define your strategy
-    # pass all relevant argument (including the global dataset used after aggregation,
-    # if needed by your method.)
-    # strategy = instantiate(cfg.strategy, <additional arguments if desired>)
-
-    # 5. Start Simulation
-    # history = fl.simulation.start_simulation(<arguments for simulation>)
-
-    # 6. Save your results
-    # Here you can save the `history` returned by the simulation and include
-    # also other buffers, statistics, info needed to be saved in order to later
-    # on generate the plots you provide in the README.md. You can for instance
-    # access elements that belong to the strategy for example:
-    # data = strategy.get_my_custom_data() -- assuming you have such method defined.
-    # Hydra will generate for you a directory each time you run the code. You
-    # can retrieve the path to that directory with this:
-#

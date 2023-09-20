@@ -1,7 +1,7 @@
 import json
 import random
 import os
-
+import argparse
 
 # Use this script file to create data partitions on UCF101 dataset for federated learning from .json files.
 def parse_args():
@@ -30,10 +30,10 @@ def main():
 
     # load .json files and concatenate
     data_list = []
-    for i in range(1, 4):
-        with open(json_path + f"/train_split_{i}.json", 'r') as f:
-            json_object = json.load(f)
-            data_list += json_object
+    # for i in range(1, 4):
+    with open(json_path + f"/train_split_1.json", 'r') as f:
+        json_object = json.load(f)
+        data_list += json_object
 
     # data splitting to each client
     random.shuffle(data_list)
