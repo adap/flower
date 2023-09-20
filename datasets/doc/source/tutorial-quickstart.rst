@@ -1,7 +1,7 @@
 Quickstart
 ==========
 
-Run the Flower Datasets as fast as possible by learning only the essentials.
+Run Flower Datasets as fast as possible by learning only the essentials.
 
 Install Federated Datasets
 --------------------------
