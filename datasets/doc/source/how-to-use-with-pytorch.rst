@@ -53,7 +53,7 @@ Or you can simply calculate the indices yourself::
   partition_train = partition[:int(0.8 * partition_len)]
   partition_test = partition[int(0.8 * partition_len):]
 
-And during the training loop, you need to apply one change. With a typical dataloader you get a list returned for each iteration::
+And during the training loop, you need to apply one change. With a typical dataloader, you get a list returned for each iteration::
 
   for batch in all_from_pytorch_dataloader:
     images, labels = batch
