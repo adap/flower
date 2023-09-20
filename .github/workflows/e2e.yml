@@ -38,7 +38,8 @@ jobs:
         run: |
           cd ./dist
           echo "WHL_PATH=$(ls *.whl)" >> "$GITHUB_OUTPUT"
-          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./ s3://artifact.flower.dev/py/${{ github.event.number }}/${{ github.sha }} --recursive
+          sha_short=$(git rev-parse --short HEAD)
+          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./ s3://artifact.flower.dev/py/${{ github.ref }}/$sha_short --recursive
     outputs:
       whl_path: ${{ steps.upload.outputs.WHL_PATH }}
 
