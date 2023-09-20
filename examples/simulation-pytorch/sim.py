@@ -10,10 +10,10 @@ from flwr.common import Metrics
 from flwr.common.typing import Scalar
 
 from datasets import Dataset
+from datasets.utils.logging import disable_progress_bar
 from flwr_datasets import FederatedDataset
 
-from utils import Net, train, test, get_mnist_transforms
-
+from utils import Net, train, test, mnist_transforms
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
@@ -101,11 +101,12 @@ def get_client_fn(dataset: FederatedDataset):
 
         # Now we apply the transform to each batch.
         trainset = trainset.map(
-            lambda img: {"img": get_mnist_transforms()(img)}, input_columns="image"
+            lambda img: {"image": mnist_transforms(img)},
+            input_columns="image",
         ).with_format("torch")
 
         valset = valset.map(
-            lambda img: {"img": get_mnist_transforms()(img)}, input_columns="image"
+            lambda img: {"image": mnist_transforms(img)}, input_columns="image"
         ).with_format("torch")
 
         # Create and return client
@@ -160,8 +161,11 @@ def get_evaluate_fn(
 
         # Apply transform to dataset
         testset = centralized_testset.map(
-            lambda img: {"img": get_mnist_transforms()(img)}, input_columns="image"
+            lambda img: {"image": mnist_transforms(img)}, input_columns="image"
         ).with_format("torch")
+
+        # Disable tqdm for dataset preprocessing
+        disable_progress_bar()
 
         testloader = DataLoader(testset, batch_size=50)
         loss, accuracy = test(model, testloader, device=device)
@@ -206,6 +210,9 @@ def main():
         client_resources=client_resources,
         config=fl.server.ServerConfig(num_rounds=args.num_rounds),
         strategy=strategy,
+        actor_kwargs={
+            "on_actor_init_fn": disable_progress_bar  # disable tqdm on each actor/process spawning virtual clients
+        },
     )
 
 

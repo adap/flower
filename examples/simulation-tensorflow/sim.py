@@ -92,7 +92,6 @@ def get_client_fn(dataset: FederatedDataset):
 
         trainset = client_dataset_splits["train"].with_format("tf")
         valset = client_dataset_splits["test"].with_format("tf")
-    
 
         # Create and return client
         return FlowerClient(trainset, valset)
@@ -137,7 +136,9 @@ def get_evaluate_fn(testset: Dataset):
     ):
         model = get_model()  # Construct the model
         model.set_weights(parameters)  # Update model with the latest parameters
-        loss, accuracy = model.evaluate(testset["image"], testset["label"], verbose=VERBOSE)
+        loss, accuracy = model.evaluate(
+            testset["image"], testset["label"], verbose=VERBOSE
+        )
         return loss, {"accuracy": accuracy}
 
     return evaluate

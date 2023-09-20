@@ -5,6 +5,10 @@ import torch.nn.functional as F
 from torchvision.transforms import ToTensor, Normalize, Compose
 
 
+# transformation to convert images to tensors and apply normalization
+mnist_transforms = Compose([ToTensor(), Normalize((0.1307,), (0.3081,))])
+
+
 # Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')
 class Net(nn.Module):
     def __init__(self, num_classes: int = 10) -> None:
@@ -33,7 +37,7 @@ def train(net, trainloader, optim, epochs, device: str):
     net.train()
     for _ in range(epochs):
         for batch in trainloader:
-            images, labels = batch["img"].to(device), batch["label"].to(device)
+            images, labels = batch["image"].to(device), batch["label"].to(device)
             optim.zero_grad()
             loss = criterion(net(images), labels)
             loss.backward()
@@ -48,19 +52,10 @@ def test(net, testloader, device: str):
     net.eval()
     with torch.no_grad():
         for data in testloader:
-            images, labels = data["img"].to(device), data["label"].to(device)
+            images, labels = data["image"].to(device), data["label"].to(device)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
             _, predicted = torch.max(outputs.data, 1)
             correct += (predicted == labels).sum().item()
     accuracy = correct / len(testloader.dataset)
     return loss, accuracy
-
-
-def get_mnist_transforms():
-    """Get transformation for MNIST dataset."""
-
-    # transformation to convert images to tensors and apply normalization
-    tr = Compose([ToTensor(), Normalize((0.1307,), (0.3081,))])
-
-    return tr
