@@ -10,8 +10,7 @@ authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-flwr = "^1.5"
+flwr-datasets = { path = "./../../", develop = true, extras = ["vision"] }
 torch = "^1.12.0"
 torchvision = "^0.14.1"
-flwr_datasets = { path = "./../../", develop = true, extras = ["vision"] }
 parameterized = "==0.9.0"
