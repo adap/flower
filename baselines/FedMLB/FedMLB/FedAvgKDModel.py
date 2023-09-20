@@ -2,6 +2,12 @@ import tensorflow as tf
 
 
 class FedAvgKDModel(tf.keras.Model):
+    """ FedAvg+KD implementation from the paper https://arxiv.org/abs/2207.06936
+    Based on the original implementation at https://github.com/jinkyu032/FedMLB.
+    In practice, this is applying regular knowledge distillation (KD)
+    -- [Hinton et al.] https://arxiv.org/abs/1503.02531 --
+    at client-side, with the global model of that round working as teacher
+    on local data, providing regularization for the student model (i.e., client model)."""
 
     def __init__(self, model, h_model):
         super(FedAvgKDModel, self).__init__()
