@@ -20,7 +20,6 @@ table_body="\\
    * - Method\\
      - Dataset\\
      - Tags\\
-     \\
    .. baselines_table_entry\\
   "
 
@@ -46,6 +45,8 @@ function add_table_entry ()
    * - $1\\
      - $dataset\\
      - $labels\\
+    \\
+.. baselines_table_entry\
   "
 }
 
