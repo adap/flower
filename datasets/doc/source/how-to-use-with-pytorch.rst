@@ -56,8 +56,8 @@ And during the training loop, you need to apply one change. With a typical datal
 
   for batch in all_from_pytorch_dataloader:
     images, labels = batch
-    # Equivalently
-    images, labels = batch[0], batch[1]
+    # Or alternatively:
+    # images, labels = batch[0], batch[1]
 
 With this dataset, you get a dictionary, and you access the data a little bit differently (via keys not by index)::
 
