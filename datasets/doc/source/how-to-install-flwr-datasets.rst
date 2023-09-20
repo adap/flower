@@ -12,7 +12,7 @@ Install stable release (pip)
 
 Stable releases are available on `PyPI <https://pypi.org/project/flwr_datasets/>`_::
 
-  python -m pip install flwr_datasets
+  python -m pip install flwr-datasets
 
 For Image Datasets (e.g. MNIST, CIFAR10) ``flwr_datasets`` should be installed with the ``image`` extra::
 
