@@ -10,15 +10,21 @@ Flower Datasets requires `Python 3.8 <https://docs.python.org/3.8/>`_ or above.
 Install stable release (pip)
 ----------------------------
 
-Stable releases are available on `PyPI <https://pypi.org/project/flwr_datasets/>`_::
+Stable releases are available on `PyPI <https://pypi.org/project/flwr_datasets/>`_
+
+.. code-block:: bash
 
   python -m pip install flwr-datasets
 
-For vision datasets (e.g. MNIST, CIFAR10) ``flwr_datasets`` should be installed with the ``vision`` extra::
+For vision datasets (e.g. MNIST, CIFAR10) ``flwr-datasets`` should be installed with the ``vision`` extra
+
+.. code-block:: bash
 
   python -m pip install flwr_datasets[vision]
 
-For audio datasets (e.g. Speech Command) ``flwr_datasets`` should be installed with the ``audio`` extra::
+For audio datasets (e.g. Speech Command) ``flwr-datasets`` should be installed with the ``audio`` extra
+
+.. code-block:: bash
 
   python -m pip install flwr_datasets[audio]
 
