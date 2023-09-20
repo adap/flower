@@ -210,7 +210,7 @@ def start_client(
 def start_numpy_client(
     *,
     server_address: str,
-    client_fn: Optional[Callable[[str], Client]] = None,
+    client_fn: Optional[Callable[[str], NumPyClient]] = None,
     client: Optional[NumPyClient] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
@@ -224,8 +224,8 @@ def start_numpy_client(
         The IPv4 or IPv6 address of the server. If the Flower server runs on
         the same machine on port 8080, then `server_address` would be
         `"[::]:8080"`.
-    client_fn : Optional[Callable[[str], Client]]
-        A callable that returns a client of type Client. (default: None)
+    client_fn : Optional[Callable[[str], NumPyClient]]
+        A callable that returns a client of type NumPyClient. (default: None)
     client : Optional[flwr.client.NumPyClient]
         An implementation of the abstract base class `flwr.client.NumPyClient`.
     grpc_max_message_length : int (default: 536_870_912, this equals 512MB)
@@ -276,14 +276,29 @@ def start_numpy_client(
         stacklevel=2,
     )
 
+    # Calling this function is deprecated. A warning is thrown.
+    # We first need to convert either the supplied client or
+    # client function to a standard `Client`.
+
+    plain_client = None
+    plain_clientfn = None
+
     # Start
     if client:
         plain_client = client.to_client()
-    _check_actionable_client(plain_client, client_fn)
+    if client_fn:
+
+        def convert(cid: str) -> Client:
+            """Convert NumPy client to Client upon instantiation."""
+            return client_fn(cid).to_client()
+
+        plain_clientfn = convert
+
+    _check_actionable_client(plain_client, plain_clientfn)
 
     start_client(
         server_address=server_address,
-        client_fn=client_fn,
+        client_fn=plain_clientfn,
         client=plain_client,
         grpc_max_message_length=grpc_max_message_length,
         root_certificates=root_certificates,
