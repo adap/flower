@@ -57,5 +57,5 @@ Here's a quick example of how you can use that data with a simple CNN model::
 
 You should see about 98% accuracy on the training data at the end of the training.
 
-Note that I used ``"sparse_categorical_crossentropy"``. Make sure to keep it that way if you don't want to one-hot-encode
+Note that we used ``"sparse_categorical_crossentropy"``. Make sure to keep it that way if you don't want to one-hot-encode
 the labels.
