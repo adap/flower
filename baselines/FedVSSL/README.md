@@ -1,9 +1,49 @@
 ---
 title: Federated Self-supervised Learning for Video Understanding
 url: https://arxiv.org/abs/2207.01975
-labels: [label1, label2] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [dataset1, dataset2] # list of datasets you include in your baseline
+labels: [cross-device, videossl] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
+dataset: [UCF-101] # list of datasets you include in your baseline
 ---
+
+# : Federated Self-supervised Learning for Video Understanding
+> Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
+
+
+**paper:** [https://arxiv.org/abs/2207.01975](https://arxiv.org/abs/2207.01975)
+
+
+**Authors:** Yasar Abbas Ur Rehman, Yan Gao, Jiajun Shen, Pedro Porto Buarque de Gusmao, Nicholas Lane
+
+
+**Abstract:** The ubiquity of camera-enabled mobile devices has lead to large amounts of unlabelled video data being produced at the edge. Although various self-supervised learning (SSL) methods have been proposed to harvest their latent spatio-temporal representations for task-specific training, practical challenges including privacy concerns and communication costs prevent SSL from being deployed at large scales. To mitigate these issues, we propose the use of Federated Learning (FL) to the task of video SSL. In this work, we evaluate the performance of current state-of-the-art (SOTA) video-SSL techniques and identify their shortcomings when integrated into the large-scale FL setting simulated with kinetics-400 dataset. We follow by proposing a novel federated SSL framework for video, dubbed FedVSSL, that integrates different aggregation strategies and partial weight updating. Extensive experiments demonstrate the effectiveness and significance of FedVSSL as it outperforms the centralized SOTA for the downstream retrieval task by 6.66% on UCF-101 and 5.13% on HMDB-51. 
+
+
+## About this baseline
+
+**Whats's implemented:** The code in this directory replicates the experiments in * Federated Self-supervised Learning for Video Understanding* (Rehman et al., 2022) for UCF-101, which proposed the FedVSSL algorithm. Specifically, it replicates the results for UCF-101 in Table 4 in the paper.
+
+**Dataset:** UCF-101
+
+**Hardware Setup:** These experiments were on a server with 6 GTX-3090 GPU and 128 CPU threads. 
+
+**Contributers:** Yasar Abbas Ur Rehman and Yan Gao
+
+## Experimental Setup
+
+**Task:** Action Recognition
+
+**Model:** 
+* This directory first pretrain Catch-the-Patch (CtP) model from the CtP (see `CtP/pyvrl/models/pretraining/ctp`) repository during FL pretrainin stage The backbone model is R3D-18 (see `/CtP/pyvrl/models/backbones/r3d.py`). 
+* After pretraining it finetunes the R3D-18 model on UCF-101 dataset
+
+**Dataset:** This baseline only include pretraining and fine-tuning with UCF-101 dataset. However, we also provide the script files to generate the partitions for Kinetics-400 datasets. 
+For UCF-101 dataset, one can simply run the `dataset_preparation.py` file to download and generate the iid splits for UCF-101 datasets.
+
+| Dataset | #classes | #partitions | partitioning method | partition settings |
+| :------ | :---: | :---: | :---: | :---: |
+| UCF101 | 10 | 10 | randomly partitioned | uniform |
+
+
 
 # :warning:*_Title of your baseline_*
 
