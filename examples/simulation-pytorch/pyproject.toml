@@ -11,6 +11,6 @@ authors = ["The Flower Authors <hello@flower.dev>"]
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
 flwr = { extras = ["simulation"], version = ">=1.0,<2.0" }
-flwr_datasets = { extras = ["vision"], version = "0.0.1" }
+flwr-datasets = { extras = ["vision"], version = "0.0.1" }
 torch = "1.13.1"
 torchvision = "0.14.1"
