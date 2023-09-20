@@ -40,7 +40,7 @@ def create_node(
 ) -> CreateNodeResponse:
     """."""
     # Register node
-    node_id = state.register_node()
+    node_id = state.create_node()
     return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))
 
 
@@ -51,7 +51,7 @@ def delete_node(request: DeleteNodeRequest, state: State) -> DeleteNodeResponse:
         return DeleteNodeResponse()
 
     # Update state
-    state.unregister_node(node_id=request.node.node_id)
+    state.delete_node(node_id=request.node.node_id)
     return DeleteNodeResponse()
 
 

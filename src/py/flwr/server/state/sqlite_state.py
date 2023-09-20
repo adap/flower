@@ -471,7 +471,7 @@ class SqliteState(State):
 
         return None
 
-    def register_node(self) -> int:
+    def create_node(self) -> int:
         """Create, store in state, and return `node_id`."""
         # Sample a random 64-bit unsigned integer as node_id
         node_id = random.getrandbits(64)
@@ -489,7 +489,7 @@ class SqliteState(State):
         log(ERROR, "Unexpected node registration failure.")
         return 0
 
-    def unregister_node(self, node_id: int) -> None:
+    def delete_node(self, node_id: int) -> None:
         """Remove `node_id` from state."""
         sql_node_id = uint64_to_int64(node_id)
         query = "DELETE FROM node WHERE node_id = :node_id;"

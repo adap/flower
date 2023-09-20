@@ -335,7 +335,7 @@ class StateTest(unittest.TestCase):
 
         # Execute
         for _ in range(10):
-            node_ids.append(state.register_node())
+            node_ids.append(state.create_node())
         retrieved_node_ids = state.get_nodes(workload_id)
 
         # Assert
@@ -347,10 +347,10 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: State = self.state_factory()
         workload_id = state.create_workload()
-        node_id = state.register_node()
+        node_id = state.create_node()
 
         # Execute
-        state.unregister_node(node_id)
+        state.delete_node(node_id)
         retrieved_node_ids = state.get_nodes(workload_id)
 
         # Assert
@@ -362,7 +362,7 @@ class StateTest(unittest.TestCase):
         state: State = self.state_factory()
         state.create_workload()
         invalid_workload_id = 61016
-        state.register_node()
+        state.create_node()
 
         # Execute
         retrieved_node_ids = state.get_nodes(invalid_workload_id)

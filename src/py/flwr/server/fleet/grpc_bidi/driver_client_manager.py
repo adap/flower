@@ -72,7 +72,7 @@ class DriverClientManager(ClientManager):
 
         # Register node in with State
         state: State = self.state_factory.state()
-        client.node_id = state.register_node()
+        client.node_id = state.create_node()
 
         # Create and start the instruction scheduler
         ins_scheduler = InsScheduler(
@@ -105,7 +105,7 @@ class DriverClientManager(ClientManager):
 
             # Unregister node_id in with State
             state: State = self.state_factory.state()
-            state.unregister_node(node_id=node_id)
+            state.delete_node(node_id=node_id)
 
             with self._cv:
                 self._cv.notify_all()
