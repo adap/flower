@@ -2,6 +2,10 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
+# Append path to PYTHONPATH that makes flwr_tool.init_py_check discoverable
+PARENT_DIR=$(dirname "$(pwd)") # Go one dir up from flower/datasets
+export PYTHONPATH="${PYTHONPATH}:${PARENT_DIR}/src/py"
+
 echo "=== test.sh ==="
 
 echo "- Start Python checks"
