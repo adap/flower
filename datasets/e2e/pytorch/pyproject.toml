@@ -3,7 +3,7 @@ requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "fds-integration-pytorch"
+name = "fds-e2e-pytorch"
 version = "0.1.0"
 description = "Flower Datasets with PyTorch"
 authors = ["The Flower Authors <hello@flower.dev>"]
