@@ -35,7 +35,7 @@ def load_datasets(  # pylint: disable=too-many-arguments
     Returns
     -------
     Tuple[DataLoader, DataLoader, DataLoader]
-        The DataLoader for training, the DataLoader for validation, the DataLoader for testing.
+        The DataLoader for training, validation, and testing.
     """
     print(f"Dataset partitioning config: {config}")
     datasets, testset = _partition_data(

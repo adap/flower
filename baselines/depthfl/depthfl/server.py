@@ -6,7 +6,7 @@ from typing import Callable, Dict, List, Optional, Tuple, Union
 import torch
 from flwr.common import FitRes, Parameters, Scalar, parameters_to_ndarrays
 from flwr.common.logger import log
-from flwr.common.typing import NDArrays, Scalar
+from flwr.common.typing import NDArrays
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.server import Server, fit_clients
 from hydra.utils import instantiate

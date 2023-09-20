@@ -109,7 +109,7 @@ class HeteroFL(FedAvg):
                 v[count > 0] = tmp_v[count > 0]
 
             else:
-                for weights, cid in results:
+                for weights, _ in results:
                     tmp_v += weights[i]
                     count += 1
                 tmp_v = np.divide(tmp_v, count)
