@@ -250,15 +250,17 @@ class SqliteState(State):
 
         if node_id is None:
             # Retrieve all anonymous Tasks
-            query = """
+            sql_anon_node_id = uint64_to_int64(0)
+            query = f"""
                 SELECT task_id
                 FROM task_ins
                 WHERE consumer_anonymous == 1
-                AND   consumer_node_id == 0
+                AND   consumer_node_id == {sql_anon_node_id}
                 AND   delivered_at = ""
             """
         else:
             # Retrieve all TaskIns for node_id
+            sql_node_id = uint64_to_int64(node_id)
             query = """
                 SELECT task_id
                 FROM task_ins
@@ -266,7 +268,7 @@ class SqliteState(State):
                 AND   consumer_node_id == :node_id
                 AND   delivered_at = ""
             """
-            data["node_id"] = node_id
+            data["node_id"] = sql_node_id
 
         if limit is not None:
             query += " LIMIT :limit"
@@ -469,15 +471,29 @@ class SqliteState(State):
 
         return None
 
-    def register_node(self, node_id: int) -> None:
-        """Store `node_id` in state."""
-        query = "INSERT INTO node VALUES(:node_id);"
-        self.query(query, {"node_id": node_id})
+    def register_node(self) -> int:
+        """Create, store in state, and return `node_id`."""
+        # Sample a random 64-bit unsigned integer as node_id
+        node_id = random.getrandbits(64)
+
+        # Convert the node_id to int64
+        sql_node_id = uint64_to_int64(node_id)
+
+        # Check conflicts
+        query = "SELECT COUNT(*) FROM node WHERE node_id = ?;"
+        # If node_id does not exist
+        if self.query(query, (sql_node_id,))[0]["COUNT(*)"] == 0:
+            query = "INSERT INTO node VALUES(:node_id);"
+            self.query(query, {"node_id": sql_node_id})
+            return node_id
+        log(ERROR, "Unexpected node registration failure.")
+        return 0
 
     def unregister_node(self, node_id: int) -> None:
         """Remove `node_id` from state."""
+        sql_node_id = uint64_to_int64(node_id)
         query = "DELETE FROM node WHERE node_id = :node_id;"
-        self.query(query, {"node_id": node_id})
+        self.query(query, {"node_id": sql_node_id})
 
     def get_nodes(self, workload_id: int) -> Set[int]:
         """Retrieve all currently stored node IDs as a set.
@@ -488,7 +504,7 @@ class SqliteState(State):
         an empty `Set` MUST be returned.
         """
         # Covnert uint64 workload_id to int64
-        sql_workload_id = workload_id_to_sql(workload_id)
+        sql_workload_id = uint64_to_int64(workload_id)
 
         # Validate workload ID
         query = "SELECT COUNT(*) FROM workload WHERE workload_id = ?;"
@@ -498,7 +514,7 @@ class SqliteState(State):
         # Get nodes
         query = "SELECT * FROM node;"
         rows = self.query(query)
-        result: Set[int] = {row["node_id"] for row in rows}
+        result: Set[int] = {int64_to_uint64(row["node_id"]) for row in rows}
         return result
 
     def create_workload(self) -> int:
@@ -507,7 +523,7 @@ class SqliteState(State):
         workload_id: int = random.getrandbits(64)
 
         # Convert the workload_id to int64
-        sql_workload_id = workload_id_to_sql(workload_id)
+        sql_workload_id = uint64_to_int64(workload_id)
 
         # Check conflicts
         query = "SELECT COUNT(*) FROM workload WHERE workload_id = ?;"
@@ -537,11 +553,11 @@ def task_ins_to_dict(task_msg: TaskIns) -> Dict[str, Any]:
     result = {
         "task_id": task_msg.task_id,
         "group_id": task_msg.group_id,
-        "workload_id": workload_id_to_sql(task_msg.workload_id),
+        "workload_id": uint64_to_int64(task_msg.workload_id),
         "producer_anonymous": task_msg.task.producer.anonymous,
-        "producer_node_id": task_msg.task.producer.node_id,
+        "producer_node_id": uint64_to_int64(task_msg.task.producer.node_id),
         "consumer_anonymous": task_msg.task.consumer.anonymous,
-        "consumer_node_id": task_msg.task.consumer.node_id,
+        "consumer_node_id": uint64_to_int64(task_msg.task.consumer.node_id),
         "created_at": task_msg.task.created_at,
         "delivered_at": task_msg.task.delivered_at,
         "ttl": task_msg.task.ttl,
@@ -559,11 +575,11 @@ def task_res_to_dict(task_msg: TaskRes) -> Dict[str, Any]:
     result = {
         "task_id": task_msg.task_id,
         "group_id": task_msg.group_id,
-        "workload_id": workload_id_to_sql(task_msg.workload_id),
+        "workload_id": uint64_to_int64(task_msg.workload_id),
         "producer_anonymous": task_msg.task.producer.anonymous,
-        "producer_node_id": task_msg.task.producer.node_id,
+        "producer_node_id": uint64_to_int64(task_msg.task.producer.node_id),
         "consumer_anonymous": task_msg.task.consumer.anonymous,
-        "consumer_node_id": task_msg.task.consumer.node_id,
+        "consumer_node_id": uint64_to_int64(task_msg.task.consumer.node_id),
         "created_at": task_msg.task.created_at,
         "delivered_at": task_msg.task.delivered_at,
         "ttl": task_msg.task.ttl,
@@ -584,14 +600,14 @@ def dict_to_task_ins(task_dict: Dict[str, Any]) -> TaskIns:
     result = TaskIns(
         task_id=task_dict["task_id"],
         group_id=task_dict["group_id"],
-        workload_id=workload_id_from_sql(task_dict["workload_id"]),
+        workload_id=int64_to_uint64(task_dict["workload_id"]),
         task=Task(
             producer=Node(
-                node_id=task_dict["producer_node_id"],
+                node_id=int64_to_uint64(task_dict["producer_node_id"]),
                 anonymous=task_dict["producer_anonymous"],
             ),
             consumer=Node(
-                node_id=task_dict["consumer_node_id"],
+                node_id=int64_to_uint64(task_dict["consumer_node_id"]),
                 anonymous=task_dict["consumer_anonymous"],
             ),
             created_at=task_dict["created_at"],
@@ -612,14 +628,14 @@ def dict_to_task_res(task_dict: Dict[str, Any]) -> TaskRes:
     result = TaskRes(
         task_id=task_dict["task_id"],
         group_id=task_dict["group_id"],
-        workload_id=workload_id_from_sql(task_dict["workload_id"]),
+        workload_id=int64_to_uint64(task_dict["workload_id"]),
         task=Task(
             producer=Node(
-                node_id=task_dict["producer_node_id"],
+                node_id=int64_to_uint64(task_dict["producer_node_id"]),
                 anonymous=task_dict["producer_anonymous"],
             ),
             consumer=Node(
-                node_id=task_dict["consumer_node_id"],
+                node_id=int64_to_uint64(task_dict["consumer_node_id"]),
                 anonymous=task_dict["consumer_anonymous"],
             ),
             created_at=task_dict["created_at"],
@@ -632,13 +648,13 @@ def dict_to_task_res(task_dict: Dict[str, Any]) -> TaskRes:
     return result
 
 
-def workload_id_to_sql(workload_id: int) -> int:
-    """Convert a uint64 workload_id to int64 in order to be stored in SQL."""
+def uint64_to_int64(value: int) -> int:
+    """Convert a uint64 value to int64 in order to be stored in SQL."""
     # Return uint64 value - 2^63 as int64
-    return workload_id - 0x8000000000000000
+    return value - 0x8000000000000000
 
 
-def workload_id_from_sql(sql_workload_id: int) -> int:
-    """Convert a int64 sql_workload_id from SQL to uint64."""
+def int64_to_uint64(value: int) -> int:
+    """Convert a int64 value from SQL to uint64."""
     # Return int64 value + 2^63 as uint64
-    return sql_workload_id + 0x8000000000000000
+    return value + 0x8000000000000000

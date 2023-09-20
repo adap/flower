@@ -15,7 +15,6 @@
 """Fleet API message handlers."""
 
 
-import random
 from typing import List, Optional
 from uuid import UUID
 
@@ -40,12 +39,9 @@ def create_node(
     state: State,
 ) -> CreateNodeResponse:
     """."""
-    # Generate random node_id
-    random_node_id: int = random.randrange(9223372036854775808)
-
-    # Update state
-    state.register_node(node_id=random_node_id)
-    return CreateNodeResponse(node=Node(node_id=random_node_id, anonymous=False))
+    # Register node
+    node_id = state.register_node()
+    return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))
 
 
 def delete_node(request: DeleteNodeRequest, state: State) -> DeleteNodeResponse:

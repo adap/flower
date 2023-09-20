@@ -132,8 +132,8 @@ class State(abc.ABC):
         """Delete all delivered TaskIns/TaskRes pairs."""
 
     @abc.abstractmethod
-    def register_node(self, node_id: int) -> None:
-        """Store `node_id` in state."""
+    def register_node(self) -> int:
+        """Create, store in state, and return `node_id`."""
 
     @abc.abstractmethod
     def unregister_node(self, node_id: int) -> None:
