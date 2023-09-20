@@ -63,6 +63,7 @@ To construct the Python environment follow these steps:
 
 ```bash
 # Set python version
+pyenv install 3.10.6
 pyenv local 3.10.6
 
 # Tell poetry to use python 3.10
