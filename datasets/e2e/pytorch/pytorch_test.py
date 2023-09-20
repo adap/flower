@@ -45,7 +45,7 @@ class SimpleCNN(nn.Module):
         )},
     ]
 )
-class FDSToPyTorchCorrectUsage(unittest.TestCase):
+class FdsToPyTorch(unittest.TestCase):
     """Test the conversion from FDS to PyTorch Dataset and Dataloader."""
 
     dataset_name = ""
