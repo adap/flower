@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS node(
 
 SQL_CREATE_TABLE_WORKLOAD = """
 CREATE TABLE IF NOT EXISTS workload(
-    workload_id TEXT UNIQUE
+    workload_id INTEGER UNIQUE
 );
 """
 
@@ -47,7 +47,7 @@ SQL_CREATE_TABLE_TASK_INS = """
 CREATE TABLE IF NOT EXISTS task_ins(
     task_id                 TEXT UNIQUE,
     group_id                TEXT,
-    workload_id             TEXT,
+    workload_id             INTEGER,
     producer_anonymous      BOOLEAN,
     producer_node_id        INTEGER,
     consumer_anonymous      BOOLEAN,
@@ -67,7 +67,7 @@ SQL_CREATE_TABLE_TASK_RES = """
 CREATE TABLE IF NOT EXISTS task_res(
     task_id                 TEXT UNIQUE,
     group_id                TEXT,
-    workload_id             TEXT,
+    workload_id             INTEGER,
     producer_anonymous      BOOLEAN,
     producer_node_id        INTEGER,
     consumer_anonymous      BOOLEAN,
@@ -479,7 +479,7 @@ class SqliteState(State):
         query = "DELETE FROM node WHERE node_id = :node_id;"
         self.query(query, {"node_id": node_id})
 
-    def get_nodes(self, workload_id: str) -> Set[int]:
+    def get_nodes(self, workload_id: int) -> Set[int]:
         """Retrieve all currently stored node IDs as a set.
 
         Constraints
@@ -487,9 +487,12 @@ class SqliteState(State):
         If the provided `workload_id` does not exist or has no matching nodes,
         an empty `Set` MUST be returned.
         """
+        # Covnert uint64 workload_id to int64
+        sql_workload_id = workload_id_to_sql(workload_id)
+
         # Validate workload ID
         query = "SELECT COUNT(*) FROM workload WHERE workload_id = ?;"
-        if self.query(query, (workload_id,))[0]["COUNT(*)"] == 0:
+        if self.query(query, (sql_workload_id,))[0]["COUNT(*)"] == 0:
             return set()
 
         # Get nodes
@@ -498,21 +501,23 @@ class SqliteState(State):
         result: Set[int] = {row["node_id"] for row in rows}
         return result
 
-    def create_workload(self) -> str:
+    def create_workload(self) -> int:
         """Create one workload and store it in state."""
-        # String representation of random integer from 0 to 9223372036854775807
-        random_workload_id: int = random.randrange(9223372036854775808)
-        workload_id = str(random_workload_id)
+        # Sample a random 64-bit unsigned integer as workload_id
+        workload_id: int = random.getrandbits(64)
+
+        # Convert the workload_id to int64
+        sql_workload_id = workload_id_to_sql(workload_id)
 
         # Check conflicts
         query = "SELECT COUNT(*) FROM workload WHERE workload_id = ?;"
         # If workload_id does not exist
-        if self.query(query, (workload_id,))[0]["COUNT(*)"] == 0:
+        if self.query(query, (sql_workload_id,))[0]["COUNT(*)"] == 0:
             query = "INSERT INTO workload VALUES(:workload_id);"
-            self.query(query, {"workload_id": workload_id})
+            self.query(query, {"workload_id": sql_workload_id})
             return workload_id
         log(ERROR, "Unexpected workload creation failure.")
-        return ""
+        return 0
 
 
 def dict_factory(
@@ -532,7 +537,7 @@ def task_ins_to_dict(task_msg: TaskIns) -> Dict[str, Any]:
     result = {
         "task_id": task_msg.task_id,
         "group_id": task_msg.group_id,
-        "workload_id": task_msg.workload_id,
+        "workload_id": workload_id_to_sql(task_msg.workload_id),
         "producer_anonymous": task_msg.task.producer.anonymous,
         "producer_node_id": task_msg.task.producer.node_id,
         "consumer_anonymous": task_msg.task.consumer.anonymous,
@@ -554,7 +559,7 @@ def task_res_to_dict(task_msg: TaskRes) -> Dict[str, Any]:
     result = {
         "task_id": task_msg.task_id,
         "group_id": task_msg.group_id,
-        "workload_id": task_msg.workload_id,
+        "workload_id": workload_id_to_sql(task_msg.workload_id),
         "producer_anonymous": task_msg.task.producer.anonymous,
         "producer_node_id": task_msg.task.producer.node_id,
         "consumer_anonymous": task_msg.task.consumer.anonymous,
@@ -579,7 +584,7 @@ def dict_to_task_ins(task_dict: Dict[str, Any]) -> TaskIns:
     result = TaskIns(
         task_id=task_dict["task_id"],
         group_id=task_dict["group_id"],
-        workload_id=task_dict["workload_id"],
+        workload_id=workload_id_from_sql(task_dict["workload_id"]),
         task=Task(
             producer=Node(
                 node_id=task_dict["producer_node_id"],
@@ -607,7 +612,7 @@ def dict_to_task_res(task_dict: Dict[str, Any]) -> TaskRes:
     result = TaskRes(
         task_id=task_dict["task_id"],
         group_id=task_dict["group_id"],
-        workload_id=task_dict["workload_id"],
+        workload_id=workload_id_from_sql(task_dict["workload_id"]),
         task=Task(
             producer=Node(
                 node_id=task_dict["producer_node_id"],
@@ -625,3 +630,15 @@ def dict_to_task_res(task_dict: Dict[str, Any]) -> TaskRes:
         ),
     )
     return result
+
+
+def workload_id_to_sql(workload_id: int) -> int:
+    """Convert a uint64 workload_id to int64 in order to be stored in SQL."""
+    # Return uint64 value - 2^63 as int64
+    return workload_id - 0x8000000000000000
+
+
+def workload_id_from_sql(sql_workload_id: int) -> int:
+    """Convert a int64 sql_workload_id from SQL to uint64."""
+    # Return int64 value + 2^63 as uint64
+    return sql_workload_id + 0x8000000000000000
