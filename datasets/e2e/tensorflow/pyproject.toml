@@ -3,9 +3,9 @@ requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "fds-integration-pytorch"
+name = "fds-e2-tensorflow"
 version = "0.1.0"
-description = "Flower Datasets with PyTorch"
+description = "Flower Datasets with TensorFlow"
 authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
