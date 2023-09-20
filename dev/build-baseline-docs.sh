@@ -12,6 +12,47 @@ initial_text=$(cat <<-END
 END
 )
 
+table_body="\\
+.. list-table:: \\
+   :widths: 15 15 50\\
+   :header-rows: 1\\
+  \\
+   * - Method\\
+     - Dataset\\
+     - Tags\\
+     \\
+   .. baselines_table_entry\\
+  "
+
+
+function add_table_entry ()
+{
+  # extract lines from markdown file between --- and ---, preserving newlines and store in variable called metadata
+  metadata=$(awk '/^---$/{flag=1; next} flag; /^---$/{exit}' $1/README.md)
+
+  # get text after "title:" in metadata using sed
+  title=$(echo "$metadata" | sed -n 's/title: //p')
+
+  # get text after "url:" in metadata using sed
+  url=$(echo "$metadata" | sed -n 's/url: //p')
+
+  # get text after "labels:" in metadata using sed
+  labels=$(echo "$metadata" | sed -n 's/labels: //p')
+
+  # get text after "dataset:" in metadata using sed
+  dataset=$(echo "$metadata" | sed -n 's/dataset: //p')
+
+  table_entry="\\
+   * - $1\\
+     - $dataset\\
+     - $labels\\
+  "
+}
+
+
+# Create Sphinx table block and header
+! sed -i '' -e "s/.. baselines_table_anchor/$table_body/" $INDEX
+
 ! grep ":caption: References" $INDEX && echo "$initial_text" >> $INDEX && echo "" >> $INDEX
 
 rm -f "baselines/doc/source/*.md"
@@ -42,6 +83,10 @@ for d in $(printf '%s\n' */ | sort -V); do
 
       # For each baseline, insert the name of the baseline into the index file
       echo "  $baseline" >> $INDEX
+
+      # Add entry to the table
+      add_table_entry $baseline
+      ! sed -i '' -e "s/.. baselines_table_entry/$table_entry/" $INDEX
 
     fi
   fi
