@@ -19,6 +19,7 @@ Work with ``TensorFlow Dataset`` abstraction.
 Standard setup::
 
   from flwr_datasets import FederatedDataset
+
   fds = FederatedDataset(dataset="cifar10", partitioners={"train": 10})
   partition = fds.load_partition(0, "train")
   centralized_dataset = fds.load_full("test")
