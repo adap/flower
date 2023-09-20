@@ -44,7 +44,7 @@ def cnn(input_shape, num_classes):
             keras.layers.Dense(num_classes, activation="softmax"),
         ]
     )
-    optimizer = SGD(learning_rate=0.1)
+    optimizer = SGD(learning_rate=0.01)
     model.compile(
         loss="categorical_crossentropy", optimizer=optimizer, metrics=["accuracy"]
     )
@@ -108,7 +108,7 @@ def tf_example(input_shape, num_classes):
             keras.layers.Dense(num_classes, activation="softmax"),
         ]
     )
-    optimizer = SGD(learning_rate=0.1)
+    optimizer = SGD(learning_rate=0.01)
     model.compile(
         loss="categorical_crossentropy", optimizer=optimizer, metrics=["accuracy"]
     )

@@ -133,15 +133,13 @@ poetry run python -m fedavgm.main server.reporting_fraction=0.2 client.local_epo
 :warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
 
 ```bash
-# it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameteres
-
-poetry run python -m fedavgm.main --multirun client.local_epochs=1,5 noniid.concentration=100,10,1,0.5,0.2,0.1,0.05,0 strategy=fedavgm,fedavg server.reporting_fraction=0.05,0.1,0.4 num_rounds=10000 num_clients=100
+poetry run python -m fedavgm.main --multirun client.local_epochs=1 noniid.concentration=10,1,0.1,0.01 strategy=fedavgm,fedavg server.reporting_fraction=0.05,0.4 num_rounds=1000 num_clients=100 dataset=fmnist
 
 # the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
 
 [Now show a figure/table displaying the results of the above command]
 
-poetry run python -m fedavgm.main --multirun client.local_epochs=1,5 noniid.concentration=100,10,1,0.5,0.2,0.1,0.05,0 strategy=fedavgm,fedavg server.reporting_fraction=0.05,0.1,0.4 num_rounds=10000 dataset=fmnist num_clients=100
+poetry run python -m fedavgm.main --multirun client.local_epochs=1 noniid.concentration=10,1,0.1 strategy=fedavgm,fedavg server.reporting_fraction=0.05,0.4 num_rounds=10000 num_clients=100 dataset=cifar10
 
 # add more commands + plots for additional experiments.
 ```

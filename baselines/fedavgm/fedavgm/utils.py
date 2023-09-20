@@ -21,7 +21,7 @@ def plot_concentrations_cifar10():
     num_clients = 30
 
     # Simulated different concentrations for partitioning
-    concentration_values = [np.inf, 100, 1, 1e-12]
+    concentration_values = [np.inf, 100, 1, 0.1, 0.01, 1e-12]
     color = plt.get_cmap("RdYlGn")(np.linspace(0.15, 0.85, num_classes))
     num_plots = len(concentration_values)
     fig, axs = plt.subplots(1, num_plots, figsize=(15, 5), sharey=True)
@@ -53,7 +53,7 @@ def plot_concentrations_cifar10():
 
     fig.text(0, 0.5, "Client", va="center", rotation="vertical")
     plt.tight_layout()
-    plt.savefig("../docs/concentration_cifar10.png")
+    plt.savefig("../docs/concentration_cifar10_v2.png")
     print(">>> Concentration plot created")
     return None
 
