@@ -33,7 +33,7 @@ rescale the data to [0, 1] range::
   X_train = (X_train - X_train.mean()) / X_train.std() # Global normalization
 
 
-CNN Keras Model
+CNN Keras model
 ---------------
 Here's a quick example of how you can use that data with a simple CNN model::
 
