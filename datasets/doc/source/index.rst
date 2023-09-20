@@ -35,7 +35,7 @@ Install
 
 The simplest install is::
 
-  python -m pip install flwr_datasets
+  python -m pip install flwr-datasets
 
 Or, if you plan to use the image datasets::
 
