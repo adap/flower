@@ -18,7 +18,7 @@ For vision datasets (e.g. MNIST, CIFAR10) ``flwr_datasets`` should be installed 
 
   python -m pip install flwr_datasets[vision]
 
-For Audio Datasets (e.g. Speech Command) ``flwr_datasets`` should be installed with the ``audio`` extra::
+For audio datasets (e.g. Speech Command) ``flwr_datasets`` should be installed with the ``audio`` extra::
 
   python -m pip install flwr_datasets[audio]
 
