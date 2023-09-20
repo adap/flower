@@ -486,7 +486,7 @@ class SqliteState(State):
             query = "INSERT INTO node VALUES(:node_id);"
             self.query(query, {"node_id": sql_node_id})
             return node_id
-        log(ERROR, "Unexpected node registration failure.")
+        log(ERROR, "Unexpected node creation failure.")
         return 0
 
     def delete_node(self, node_id: int) -> None:

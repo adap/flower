@@ -194,9 +194,9 @@ class InMemoryState(State):
         return 0
 
     def delete_node(self, node_id: int) -> None:
-        """Unregister a client node."""
+        """Delete a client node."""
         if node_id not in self.node_ids:
-            raise ValueError(f"Node {node_id} is not registered")
+            raise ValueError(f"Node {node_id} not found")
         self.node_ids.remove(node_id)
 
     def get_nodes(self, workload_id: int) -> Set[int]:

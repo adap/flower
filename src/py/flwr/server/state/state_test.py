@@ -326,8 +326,8 @@ class StateTest(unittest.TestCase):
         # Assert
         assert len(retrieved_node_ids) == 0
 
-    def test_register_node_and_get_nodes(self) -> None:
-        """Test registering a client node."""
+    def test_create_node_and_get_nodes(self) -> None:
+        """Test creating a client node."""
         # Prepare
         state: State = self.state_factory()
         workload_id = state.create_workload()
@@ -342,8 +342,8 @@ class StateTest(unittest.TestCase):
         for i in retrieved_node_ids:
             assert i in node_ids
 
-    def test_unregister_node(self) -> None:
-        """Test unregistering a client node."""
+    def test_delete_node(self) -> None:
+        """Test deleting a client node."""
         # Prepare
         state: State = self.state_factory()
         workload_id = state.create_workload()
