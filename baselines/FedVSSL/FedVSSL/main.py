@@ -100,7 +100,7 @@ def parse_args():
     parser.add_argument('--include_dashboard', default=False, type=bool, help='number of GPUs used for each client.')
 
     # FedVSSL
-    parser.add_argument('--mix_coeff', default=0.2, type=float, help='hyper-parameter alpha in the paper.')
+    parser.add_argument('--mix_coeff', default=0.9, type=float, help='hyper-parameter alpha in the paper.')
     parser.add_argument('--swbeta', default=1, type=int, help='hyper-parameter beta in the paper.')
 
     ### hyper-parameters for downstream fine-tuning ###
