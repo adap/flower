@@ -326,8 +326,6 @@ class ModelMOON(nn.Module):
             )
             num_ftrs = 84
 
-        # summary(self.features.to('cuda:0'), (3,32,32))
-        # print("features:", self.features)
         # projection MLP
         self.l1 = nn.Linear(num_ftrs, num_ftrs)
         self.l2 = nn.Linear(num_ftrs, out_dim)
@@ -338,7 +336,6 @@ class ModelMOON(nn.Module):
     def _get_basemodel(self, model_name):
         try:
             model = self.model_dict[model_name]
-            # print("Feature extractor:", model_name)
             return model
         except KeyError as err:
             raise ValueError("Invalid model name.") from err
@@ -386,8 +383,12 @@ def train_moon(
     device="cpu",
 ):
     """Training function for MOON."""
-    net = nn.DataParallel(net)
-    net.cuda()
+    # net = nn.DataParallel(net)
+    # net.cuda()
+    print("device:", device)
+    net.to(device)
+    global_net.to(device)
+    previous_net.to(device)
 
     print("n_training: %d" % len(train_dataloader))
 
@@ -405,10 +406,13 @@ def train_moon(
     criterion = nn.CrossEntropyLoss().cuda()
     # global_net.to(device)
 
+    previous_net.eval()
+    for param in previous_net.parameters():
+        param.requires_grad = False
     previous_net.cuda()
 
     cnt = 0
-    cos = torch.nn.CosineSimilarity(dim=-1)
+    cos = torch.nn.CosineSimilarity(dim=-1).to(device)
     # mu = 0.001
 
     for epoch in range(epochs):
@@ -416,7 +420,7 @@ def train_moon(
         epoch_loss1_collector = []
         epoch_loss2_collector = []
         for _, (x, target) in enumerate(train_dataloader):
-            x, target = x.cuda(), target.cuda()
+            x, target = x.to(device), target.to(device)
 
             optimizer.zero_grad()
             x.requires_grad = False
@@ -429,7 +433,7 @@ def train_moon(
             posi = cos(pro1, pro2)
             logits = posi.reshape(-1, 1)
 
-            previous_net.cuda()
+            previous_net.to(device)
             _, pro3, _ = previous_net(x)
             nega = cos(pro1, pro3)
             logits = torch.cat((logits, nega.reshape(-1, 1)), dim=1)
@@ -465,6 +469,7 @@ def train_moon(
 
     print(">> Training accuracy: %f" % train_acc)
     net.to("cpu")
+    global_net.to("cpu")
     print(" ** Training complete **")
     return net
 
@@ -528,5 +533,8 @@ def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu
 
 def test(net, test_dataloader, device="cpu"):
     """Test function."""
+    net.to(device)
     test_acc, loss = compute_accuracy(net, test_dataloader, device=device)
+    print("test acc:", test_acc)
+    net.to("cpu")
     return test_acc, loss

@@ -122,5 +122,7 @@ def partition_data(dataset, datadir, partition, num_clients, beta):
         for j in range(num_clients):
             np.random.shuffle(idx_batch[j])
             net_dataidx_map[j] = idx_batch[j]
+            
+    # print("net_dataidx_map", net_dataidx_map)
 
     return (X_train, y_train, X_test, y_test, net_dataidx_map)

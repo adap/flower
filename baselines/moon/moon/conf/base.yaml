@@ -8,12 +8,16 @@ num_epochs: 10
 fraction_fit: 1.0
 batch_size: 32
 learning_rate: 0.01
-mu: 1
+mu: 5
 temperature: 0.5
 alg: moon
 seed: 0
+server_device: cpu
+num_rounds: 100
 
-
+client_resources:
+  num_cpus: 2
+  num_gpus: 1
 
 dataset:
   # dataset config
@@ -27,10 +31,3 @@ model:
   name: simple-cnn
   output_dim: 256
   dir: ./models/moon/
-
-strategy:
-  _target_: # points to your strategy (either custom or exiting in Flower)
-  # rest of strategy config
-
-client:
-  # client config

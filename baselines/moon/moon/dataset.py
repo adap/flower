@@ -21,6 +21,7 @@ import torchvision.transforms as transforms
 from PIL import Image
 from torch.autograd import Variable
 from torchvision.datasets import CIFAR10, CIFAR100
+import os
 
 logging.basicConfig()
 logger = logging.getLogger()
@@ -243,19 +244,24 @@ def get_dataloader(dataset, datadir, train_bs, test_bs, dataidxs=None, noise_lev
         )
         # data prep for test set
         transform_test = transforms.Compose([transforms.ToTensor(), normalize])
+    if dataset == "cifar10" and os.path.isdir(os.path.join(datadir, "cifar-10-batches-py")):
+        download=False
+    elif dataset == "cifar100" and os.path.isdir(os.path.join(datadir, "cifar-100-python")):
+        download=False
+    else:
+        download=True
+    train_ds = dl_obj(
+        datadir,
+        dataidxs=dataidxs,
+        train=True,
+        transform=transform_train,
+        download=download,
+    )
+    test_ds = dl_obj(datadir, train=False, transform=transform_test, download=download)
 
-        train_ds = dl_obj(
-            datadir,
-            dataidxs=dataidxs,
-            train=True,
-            transform=transform_train,
-            download=True,
-        )
-        test_ds = dl_obj(datadir, train=False, transform=transform_test, download=True)
-
-        train_dl = data.DataLoader(
-            dataset=train_ds, batch_size=train_bs, drop_last=True, shuffle=True
-        )
-        test_dl = data.DataLoader(dataset=test_ds, batch_size=test_bs, shuffle=False)
+    train_dl = data.DataLoader(
+        dataset=train_ds, batch_size=train_bs, drop_last=True, shuffle=True
+    )
+    test_dl = data.DataLoader(dataset=test_ds, batch_size=test_bs, shuffle=False)
 
     return train_dl, test_dl, train_ds, test_ds

@@ -12,6 +12,7 @@ import hydra
 import numpy as np
 import torch
 from omegaconf import DictConfig, OmegaConf
+import os
 
 from moon import client, server
 from moon.dataset import get_dataloader
@@ -29,7 +30,6 @@ def main(cfg: DictConfig) -> None:
     """
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
-
     # 2. Prepare your dataset
     # here you should call a function in datasets.py that returns whatever is needed to:
     # (1) ensure the server can access the dataset used to evaluate your model after
@@ -56,7 +56,7 @@ def main(cfg: DictConfig) -> None:
         beta=cfg.dataset.beta,
     )
 
-    _, test_dl, _, _ = get_dataloader(
+    _, test_global_dl, _, _ = get_dataloader(
         dataset=cfg.dataset.name,
         datadir=cfg.dataset.dir,
         train_bs=cfg.batch_size,
@@ -85,7 +85,7 @@ def main(cfg: DictConfig) -> None:
     # get function that will executed by the strategy's evaluate() method
     # Set server's device
     device = cfg.server_device
-    server.gen_evaluate_fn(test_dl, device=device, cfg=cfg)
+    evaluate_fn = server.gen_evaluate_fn(test_global_dl, device=device, cfg=cfg)
 
     # # get a function that will be used to construct the config that the client's
     # # fit() method will received
@@ -102,7 +102,7 @@ def main(cfg: DictConfig) -> None:
     # pass all relevant argument (including the global dataset used after aggregation,
     # if needed by your method.)
     # strategy = instantiate(cfg.strategy, <additional arguments if desired>)
-    strategy = fl.server.strategy.FedAvg(fraction_fit=cfg.fraction_fit)
+    strategy = fl.server.strategy.FedAvg(fraction_fit=cfg.fraction_fit, evaluate_fn = evaluate_fn)
     # 5. Start Simulation
     # history = fl.simulation.start_simulation(<arguments for simulation>)
     history = fl.simulation.start_simulation(
@@ -115,7 +115,9 @@ def main(cfg: DictConfig) -> None:
         },
         strategy=strategy,
     )
-
+    # remove saved models
+    if cfg.alg == "moon":
+        os.rmdir(cfg.model.dir)
     # 6. Save your results
     # Here you can save the `history` returned by the simulation and include
     # also other buffers, statistics, info needed to be saved in order to later
@@ -153,3 +155,7 @@ def main(cfg: DictConfig) -> None:
     #     f"_mu={cfg.mu}"
     #     f"_strag={cfg.stragglers_fraction}"
     # )
+
+
+if __name__ == "__main__":
+    main()

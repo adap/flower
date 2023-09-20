@@ -6,6 +6,7 @@ to instantiate your client.
 
 import os
 from collections import OrderedDict
+import copy
 from typing import Callable, Dict, List, Tuple
 
 import flwr as fl
@@ -25,7 +26,7 @@ class FlowerClient(fl.client.NumPyClient):
 
     def __init__(
         self,
-        net: torch.nn.Module,
+        # net: torch.nn.Module,
         net_id: int,
         dataset: str,
         model: str,
@@ -40,7 +41,7 @@ class FlowerClient(fl.client.NumPyClient):
         model_dir: str,
         alg: str,
     ):  # pylint: disable=too-many-arguments
-        self.net = net
+        self.net = init_net(dataset, model, output_dim)
         self.net_id = net_id
         self.dataset = dataset
         self.model = model
@@ -54,28 +55,49 @@ class FlowerClient(fl.client.NumPyClient):
         self.temperature = temperature
         self.model_dir = model_dir
         self.alg = alg
-        self.prev_net = init_net(self.dataset, self.model, self.output_dim)
+        # self.prev_net = init_net(self.dataset, self.model, self.output_dim)
+        self.prev_net = None
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Return the parameters of the current net."""
+        # print("self.net:", self.net.state_dict())
+        self.net.eval()
+        for param in self.net.parameters():
+            param.requires_grad = False
         return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
 
     def set_parameters(self, parameters: NDArrays) -> None:
         """Change the parameters of the model using the given ones."""
         params_dict = zip(self.net.state_dict().keys(), parameters)
-        state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+        # print("params_dict:", params_dict)
+        # state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+        state_dict = OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
+        # print("state_dict:", state_dict)
+        # try:
         self.net.load_state_dict(state_dict, strict=True)
+        # except:
+        #     print("error in loading")
+        #     print("params_dict:", params_dict)
+        #     print("state_dict:", state_dict)
+        #     exit(0)
+        # self.net.load_state_dict(state_dict)
 
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, int, Dict]:
         """Implement distributed fit function for a given client."""
         self.set_parameters(parameters)
-
-        # load previous model from model_dir
-        self.prev_net.load_state_dict(
-            torch.load(os.path.join(self.model_dir, "prev_net.pt"))
-        )
+        if self.prev_net is None:
+            self.prev_net = init_net(self.dataset, self.model, self.output_dim)
+            self.prev_net = copy.deepcopy(self.net)
+        else:
+        # if os.path.exists(os.path.join(self.model_dir, str(self.net_id), "prev_net.pt")):
+            # load previous model from model_dir
+            self.prev_net.load_state_dict(
+                torch.load(os.path.join(self.model_dir, str(self.net_id), "prev_net.pt"))
+            )
+        # else:
+            # self.prev_net = copy.deepcopy(self.net)
         global_net = init_net(self.dataset, self.model, self.output_dim)
         global_net.load_state_dict(self.net.state_dict())
         if self.alg == "moon":
@@ -100,7 +122,9 @@ class FlowerClient(fl.client.NumPyClient):
                 self.mu,
                 self.device,
             )
-        torch.save(self.net.state_dict(), os.path.join(self.model_dir, "prev_net.pt"))
+        if not os.path.exists(os.path.join(self.model_dir, str(self.net_id))):
+            os.makedirs(os.path.join(self.model_dir, str(self.net_id)))
+        torch.save(self.net.state_dict(), os.path.join(self.model_dir, str(self.net_id), "prev_net.pt"))
         return self.get_parameters({}), len(self.trainloader), {"is_straggler": False}
 
     def evaluate(
@@ -108,7 +132,10 @@ class FlowerClient(fl.client.NumPyClient):
     ) -> Tuple[float, int, Dict]:
         """Implement distributed evaluation for a given client."""
         self.set_parameters(parameters)
-        loss, accuracy = test(self.net, self.valloader, self.device)
+        # loss, accuracy = test(self.net, self.valloader, self.device)
+        # skip evaluation in the client-side
+        loss = 0.0
+        accuracy = 0.0
         return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
 
 
@@ -123,7 +150,8 @@ def gen_client_fn(
         """Create a Flower client representing a single organization."""
         # Load model
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        net = init_net(cfg.dataset.name, cfg.model.name, cfg.model.output_dim)
+        print("device:", device)
+        # net = init_net(cfg.dataset.name, cfg.model.name, cfg.model.output_dim)
 
         # Note: each client gets a different trainloader/valloader, so each client
         # will train and evaluate on their own unique data
@@ -131,7 +159,6 @@ def gen_client_fn(
         testloader = testloaders[int(cid)]
 
         return FlowerClient(
-            net,
             int(cid),
             cfg.dataset.name,
             cfg.model.name,
