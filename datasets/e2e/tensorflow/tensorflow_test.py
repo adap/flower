@@ -29,7 +29,7 @@ def SimpleCNN():
         {"dataset_name": "cifar10", "test_split": "test"},
     ]
 )
-class FDSToPyTorchCorrectUsage(unittest.TestCase):
+class FdsToTensorFlow(unittest.TestCase):
     """Test the conversion from FDS to PyTorch Dataset and Dataloader."""
 
     dataset_name = ""
