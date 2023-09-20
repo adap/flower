@@ -14,7 +14,6 @@
 # ==============================================================================
 """Ray-based Flower Actor and ActorPool implementation."""
 
-
 import threading
 import traceback
 from abc import ABC
@@ -49,10 +48,31 @@ class ClientException(Exception):
 class VirtualClientEngineActor(ABC):
     """Abstract base class for VirtualClientEngine Actors."""
 
+    warned = False
+
     def terminate(self) -> None:
         """Manually terminate Actor object."""
         log(WARNING, "Manually terminating %s}", self.__class__.__name__)
         ray.actor.exit_actor()
+
+    def check_clientfn_returns_client(self, client: Client) -> Client:
+        """Warn once that clients should be of type Client.
+
+        This is here for backwards compatibility. If a ClientFn is provided returning
+        a different type of client (e.g. NumPyClient) we'll warn the user but convert
+        the client internally to `Client` by calling `.to_client()`.
+        """
+        if not isinstance(client, Client):
+            if not self.warned:
+                log(
+                    WARNING,
+                    "Ensure your client is of type `Client`. Please convert it"
+                    " to `Client` using the `.to_client()` method before returning it"
+                    " in your `client_fn` you pass to `start_simulation`}",
+                )
+                self.warned = True
+            client = client.to_client()
+        return client
 
     def run(
         self,
@@ -66,7 +86,7 @@ class VirtualClientEngineActor(ABC):
         # from the pool are correctly assigned to each ClientProxy
         try:
             # Instantiate client
-            client = client_fn(cid)
+            client = self.check_clientfn_returns_client(client_fn(cid))
             # Run client job
             job_results = job_fn(client)
         except Exception as ex:
