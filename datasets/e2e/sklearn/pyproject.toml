@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry]
 name = "fds-e2e-sklearn"
 version = "0.1.0"
-description = "Flower Datasets with PyTorch"
+description = "Flower Datasets with scikit-learn"
 authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
