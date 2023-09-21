@@ -41,7 +41,7 @@ supported by your framework.
 
 Conversion
 ----------
-For more detailed instructions, go to :doc:`how-to`.
+For more detailed instructions, go to :doc:`how-to-use-with-pytorch`.
 
 PyTorch DataLoader
 ^^^^^^^^^^^^^^^^^^

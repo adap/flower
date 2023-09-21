@@ -15,6 +15,7 @@ A learning-oriented series of tutorials is the best place to start.
 .. toctree::
    :maxdepth: 1
    :caption: Tutorial
+
    tutorial-quickstart
 
 How-to guides
@@ -25,6 +26,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
 .. toctree::
    :maxdepth: 1
    :caption: How-to guides
+
    how-to-install-flwr-datasets
    how-to-use-with-pytorch
    how-to-use-with-tensorflow
@@ -39,6 +41,7 @@ Information-oriented API reference and other reference material.
 .. toctree::
    :maxdepth: 2
    :caption: API reference
+
    ref-api-flwr-datasets
 
 Main features
@@ -80,11 +83,11 @@ If you plan to use the audio datasets::
 
   python -m pip install flwr-datasets[audio]
 
-Check out the full details on the download in :doc:`get-started-installation`.
+Check out the full details on the download in :doc:`how-to-install-flwr-datasets`.
 
 How To Use the library
 ----------------------
-Learn how to use the ``flwr-datasets`` library from the :doc:`get-started-quickstart` examples .
+Learn how to use the ``flwr-datasets`` library from the :doc:`tutorial-quickstart` examples .
 
 Join the Flower Community
 -------------------------
