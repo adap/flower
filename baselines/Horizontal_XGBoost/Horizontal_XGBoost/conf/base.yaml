@@ -1,13 +1,14 @@
 ---
 defaults: 
   - dataset: a9a
+  - clients: a9a_10_clients
 
 centralized: False
 device: "cpu"
 
-n_estimators_client: ${dataset.clients.n_estimators_client}
+n_estimators_client: ${clients.n_estimators_client}
 task_type: ${dataset.task_type}
-client_num: ${dataset.clients.client_num}
+client_num: ${clients.client_num}
 
 
 
@@ -15,8 +16,8 @@ XGBoost:
   _target_:  ${dataset.xgb._target_}
   objective: ${dataset.xgb.objective}
   learning_rate: .1
-  max_depth: ${dataset.clients.xgb.max_depth}
-  n_estimators: ${dataset.clients.n_estimators_client}
+  max_depth: ${clients.xgb.max_depth}
+  n_estimators: ${clients.n_estimators_client}
   subsample: 0.8
   colsample_bylevel: 1
   colsample_bynode: 1
@@ -44,7 +45,7 @@ client:
   # client config
 
 run_experiment:
-  num_rounds: ${dataset.clients.num_rounds}
+  num_rounds: ${clients.num_rounds}
   batch_size: 64
   fraction_fit: 1.0
   min_fit_clients: 1
