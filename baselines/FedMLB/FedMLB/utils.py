@@ -1,10 +1,10 @@
 """Contain utility functions."""
 
+import os
 import pickle
 import subprocess as sp
-from pathlib import Path
 from secrets import token_hex
-from typing import Dict, Optional, Union
+from typing import Dict, Optional
 
 import psutil
 from flwr.server.history import History
@@ -41,9 +41,7 @@ def dic_load(filename: str):
 
 def save_results_as_pickle(
     history: History,
-    file_path: Union[str, Path],
-    extra_results=None,
-    default_filename: Optional[str] = "results.pkl",
+    file_path: Optional[str],
 ) -> None:
     """Save results from simulation to pickle.
 
@@ -52,50 +50,28 @@ def save_results_as_pickle(
     history: History
         History returned by start_simulation.
     file_path: Union[str, Path]
-        Path to file to create and store both history and extra_results.
-        If path is a directory, the default_filename will be used.
-        path doesn't exist, it will be created. If file exists, a
-        randomly generated suffix will be added to the file name. This
-        is done to avoid overwritting results.
-    extra_results : Optional[Dict]
-        A dictionary containing additional results you would like
-        to be saved to disk. Default: {} (an empty dictionary)
-    default_filename: Optional[str]
-        File used by default if file_path points to a directory instead
-        to a file. Default: "results.pkl"
+        Path to file to create and store history.
     """
-    if extra_results is None:
-        extra_results = {}
-    path = Path(file_path)
 
-    # ensure path exists
-    path.mkdir(exist_ok=True, parents=True)
-
-    def _add_random_suffix(path_: Path):
+    def _add_random_suffix(file_name: str):
         """Add a randomly generated suffix to the file name."""
-        print(f"File `{path_}` exists! ")
         suffix = token_hex(4)
         print(f"New results to be saved with suffix: {suffix}")
-        return path_.parent / (path_.stem + "_" + suffix + ".pkl")
+        return file_name + "_" + suffix + ".pkl"
 
-    def _complete_path_with_default_name(path_: Path):
-        """Append the default file name to the path."""
-        print("Using default filename")
-        return path_ / default_filename
+    filename = "results.pkl"
+    file_path = os.path.join(file_path, filename)
 
-    if path.is_dir():
-        path = _complete_path_with_default_name(path)
+    if os.path.isfile(file_path):
+        filename = _add_random_suffix("results")
+        file_path = os.path.join(file_path, filename)
 
-    if path.is_file():
-        # file exists already
-        path = _add_random_suffix(path)
+    print(f"Results will be saved into: {file_path}")
 
-    print(f"Results will be saved into: {path}")
-
-    data = {"history": history, **extra_results}
+    data = {"history": history}
 
     # save results to pickle
-    with open(str(path), "wb") as handle:
+    with open(file_path, "wb") as handle:
         pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
