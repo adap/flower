@@ -80,7 +80,7 @@ def fit_config(rnd: int) -> Dict[str, str]:
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Running FedVSSL and downstream fine-tuning.')
-    parser.add_argument('--pre_train', default=True, type=bool,
+    parser.add_argument('--pre_train', type=bool,
                         help='set true for FL pre-training, else for downstream fine-tuning.')
 
     ### hyper-parameters for FL pre-training ###
