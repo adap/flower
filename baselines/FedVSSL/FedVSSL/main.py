@@ -104,7 +104,7 @@ def parse_args():
     parser.add_argument('--swbeta', default=1, type=int, help='hyper-parameter beta in the paper.')
 
     ### hyper-parameters for downstream fine-tuning ###
-    parser.add_argument('--pretrained_model_path', default='FedVSSL/round-20-weights.array.npz', type=str,
+    parser.add_argument('--pretrained_model_path', default='ucf_FedVSSL/round-20-weights.array.npz', type=str,
                         help='FL pre-trained SSL model used for downstream fine-tuning.')
 
     args = parser.parse_args()
@@ -141,6 +141,7 @@ if __name__ == "__main__":
         strategy = FedVSSL(
             mix_coeff=args.mix_coeff,
             swbeta=args.swbeta,
+            base_work_dir=base_work_dir,
             fraction_fit=(float(args.num_clients_per_round) / args.pool_size),
             min_fit_clients=args.num_clients_per_round,
             min_available_clients=args.pool_size,

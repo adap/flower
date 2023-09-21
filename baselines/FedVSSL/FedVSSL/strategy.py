@@ -36,16 +36,15 @@ from flwr.common import (
     parameters_to_ndarrays,   # weights_to_parameters,
 )
 
-DIR = '1E_up_theta_b_only_FedAvg+SWA_wo_moment'
-
 
 class FedVSSL(fl.server.strategy.FedAvg):
-    def __init__(self, num_rounds: int=1, mix_coeff:float=0.2, swbeta:int=0,  *args, **kwargs):
+    def __init__(self, num_rounds: int=1, mix_coeff:float=0.2, swbeta:int=0, base_work_dir:str="ucf_FedVSSL", *args, **kwargs):
 
         assert isinstance(swbeta, int) and swbeta >= 0 and swbeta <= 1,  "the value must be an integer and either 0 or 1 "
         self.num_rounds = num_rounds,
         self.mix_coeff = mix_coeff # coefficient for mixing the loss and fedavg aggregation methods
-        self.swbeta = swbeta    # 0: SWA off; 1:SWA on 
+        self.swbeta = swbeta    # 0: SWA off; 1:SWA on
+        self.base_work_dir =base_work_dir
         super().__init__(*args, **kwargs)
 
     def aggregate_fit(
@@ -88,7 +87,7 @@ class FedVSSL(fl.server.strategy.FedAvg):
         # weights = aggregate(weight_results) # loss-based
 
         # create a directory to save the global checkpoints
-        glb_dir = 'ucf_' + DIR
+        glb_dir = self.base_work_dir
         mmcv.mkdir_or_exist(os.path.abspath(glb_dir))
 
         
