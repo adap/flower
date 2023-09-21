@@ -37,7 +37,6 @@ from flwr.common import (
 # DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # pylint: enable=no-member
 
-DIR = '1E_up_theta_b_only_FedAvg+SWA_wo_moment'
 
 # order classes by number of samples
 def takeSecond(elem):

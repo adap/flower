@@ -39,15 +39,15 @@ from flwr.common import (
     parameters_to_ndarrays,   # weights_to_parameters in the original FedVSSL repository
 )
 # import CtP.tools._init_paths
-from strategy import FedVSSL
-from client import SslClient
+from FedVSSL.strategy import FedVSSL
+from FedVSSL.client import SslClient
 
 
 def initial_setup(cid, base_work_dir, rounds, data_dir, num_gpus, partition_dir):
-    import utils
+    import FedVSSL.utils as utils
     cid_plus_one = str(int(cid) + 1)
     args = Namespace(
-        cfg='conf/mmcv_conf/r3d_18_ucf101/pretraining.py', # Path to the pretraining configuration file
+        cfg='FedVSSL/conf/mmcv_conf/r3d_18_ucf101/pretraining.py', # Path to the pretraining configuration file
         checkpoint=None, cid=int(cid), data_dir=data_dir, gpus=num_gpus,
         launcher='none',
         local_rank=0, progress=False, resume_from=None, rounds=rounds, seed=7, validate=False,
@@ -120,12 +120,6 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
-    print('#######', args.pre_training)
-    print('#######', args.exp_name)
-    print('#######', args.fedavg)
-    import sys
-    sys.exit(0)
-
     if args.pre_training:
 
         # first the paths needs to be defined otherwise the program may not be able to locate the files of the ctp
@@ -178,12 +172,12 @@ if __name__ == "__main__":
         from mmcv.runner import load_state_dict
         import textwrap
         from mmcv.runner import load_state_dict
-        # import CtP
-        # from CtP.configs.ctp.r3d_18_kinetics import finetune_ucf101
-        from CtP.pyvrl.builder import build_model, build_dataset
+        # import FedVSSL.CtP
+        # from FedVSSL.CtP.configs.ctp.r3d_18_kinetics import finetune_ucf101
+        from FedVSSL.CtP.pyvrl.builder import build_model, build_dataset
 
         # we give an example on how one can perform fine-tuning uisng UCF-101 dataset.
-        cfg_path = "CtP/configs/ctp/r3d_18_kinetics/finetune_ucf101.py"
+        cfg_path = "FedVSSL/CtP/configs/ctp/r3d_18_kinetics/finetune_ucf101.py"
         cfg = Config.fromfile(cfg_path)
         cfg.model.backbone['pretrained'] = None
 
@@ -230,7 +224,7 @@ if __name__ == "__main__":
             f.write(config_content)
 
 
-        process_obj = subprocess.run(["bash", "CtP/tools/dist_train.sh",\
+        process_obj = subprocess.run(["bash", "FedVSSL/CtP/tools/dist_train.sh",\
         f"{cfg_path}", "4",\
         f"--work_dir {args.exp_name_finetune}",
         f"--data_dir {args.data_dir}"])
@@ -252,12 +246,12 @@ if __name__ == "__main__":
         )
        ''').strip("\n")
 
-        cfg_path_test= "CtP/configs/ctp/r3d_18_ucf101/finetune_ucf101.py"
+        cfg_path_test= "FedVSSL/CtP/configs/ctp/r3d_18_ucf101/finetune_ucf101.py"
         with open(cfg_path_test, 'w') as f:
             f.write(config_content_test)
 
         # Evaluating the finetuned model
-        process_obj = subprocess.run(["bash", "CtP/tools/dist_test.sh",\
+        process_obj = subprocess.run(["bash", "FedVSSL/CtP/tools/dist_test.sh",\
         f"{cfg_path_test}", "4",\
         f"--work_dir {args.exp_name_finetune}",
         f"--data_dir {args.data_dir}",\
