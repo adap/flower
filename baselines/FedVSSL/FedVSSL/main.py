@@ -122,6 +122,7 @@ if __name__ == "__main__":
 
     print('#######', args.pre_train)
     print('#######', args.exp_name)
+    print('#######', args.fedavg)
     import sys
     sys.exit(0)
 
