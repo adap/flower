@@ -39,8 +39,8 @@ from flwr.common import (
     parameters_to_ndarrays,   # weights_to_parameters in the original FedVSSL repository
 )
 # import CtP.tools._init_paths
-from strategy import FedVSSL
-from client import SslClient
+from FedVSSL.strategy import FedVSSL
+from FedVSSL.client import SslClient
 
 
 def initial_setup(cid, base_work_dir, rounds, data_dir, num_gpus, partition_dir):
@@ -103,6 +103,9 @@ def parse_args():
     parser.add_argument('--mix_coeff', default=0.9, type=float, help='hyper-parameter alpha in the paper.')
     parser.add_argument('--swbeta', default=1, type=int, help='hyper-parameter beta in the paper.')
 
+    # FedAvg baseline
+    parser.add_argument('--fedavg', default=False, type=bool, help='run FedAvg baseline')
+
     ### hyper-parameters for downstream fine-tuning ###
     parser.add_argument('--pretrained_model_path', default='ucf_FedVSSL/round-20-weights.array.npz', type=str,
                         help='FL pre-trained SSL model used for downstream fine-tuning.')
@@ -146,6 +149,7 @@ if __name__ == "__main__":
             min_fit_clients=args.num_clients_per_round,
             min_available_clients=args.pool_size,
             on_fit_config_fn=fit_config,
+            fedavg=args.fedavg,
         )
          # (optional) specify ray config
         ray_config = {"include_dashboard": args.include_dashboard}

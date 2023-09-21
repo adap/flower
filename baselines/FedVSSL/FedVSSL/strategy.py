@@ -38,13 +38,15 @@ from flwr.common import (
 
 
 class FedVSSL(fl.server.strategy.FedAvg):
-    def __init__(self, num_rounds: int=1, mix_coeff:float=0.2, swbeta:int=0, base_work_dir:str="ucf_FedVSSL", *args, **kwargs):
+    def __init__(self, num_rounds: int = 1, mix_coeff: float = 0.2, swbeta: int = 0, base_work_dir: str = "ucf_FedVSSL",
+                 fedavg: bool = False, *args, **kwargs):
 
         assert isinstance(swbeta, int) and swbeta >= 0 and swbeta <= 1,  "the value must be an integer and either 0 or 1 "
         self.num_rounds = num_rounds,
         self.mix_coeff = mix_coeff # coefficient for mixing the loss and fedavg aggregation methods
         self.swbeta = swbeta    # 0: SWA off; 1:SWA on
         self.base_work_dir =base_work_dir
+        self.fedavg = fedavg
         super().__init__(*args, **kwargs)
 
     def aggregate_fit(
@@ -69,49 +71,51 @@ class FedVSSL(fl.server.strategy.FedAvg):
             for client, fit_res in results
         ]
 
-        # Aggregate all the weights and the loss
-        loss_results = [
-            (parameters_to_ndarrays(fit_res.parameters), fit_res.metrics['loss'])
-            for client, fit_res in results
-        ]
+        # aggregate the weights of the backbone
+        weights_avg = aggregate(weight_results)  # Fedavg
 
-
-         # aggregate the weights of the backbone 
-        weights_loss = aggregate(loss_results) # loss-based
-        weights_avg = aggregate(weight_results) # Fedavg
-
-        
-        weights: NDArrays = [v * self.mix_coeff for v in weights_avg] + [(1 - self.mix_coeff) * v for v in weights_loss] # Equation 3 in FedVSSL paper
-        
-        # # aggregate the weights of the backbone
-        # weights = aggregate(weight_results) # loss-based
-
-        # create a directory to save the global checkpoints
-        glb_dir = self.base_work_dir
-        mmcv.mkdir_or_exist(os.path.abspath(glb_dir))
-
-        
-
-        # load the previous weights if there are any
-
-        if server_round > 1 and self.swbeta == 1:
-            chk_name_list = [fn for fn in os.listdir(glb_dir) if fn.endswith('.npz')]
-            chk_epoch_list = [int(re.findall(r'\d+', fn)[0]) for fn in chk_name_list if fn.startswith('round')]
-            if chk_epoch_list:
-                chk_epoch_list.sort()
-                print(chk_epoch_list)
-                # select the most recent epoch
-                checkpoint = os.path.join(glb_dir, f'round-{chk_epoch_list[-1]}-weights.array.npz')
-                # load the previous model weights
-                params = np.load(checkpoint, allow_pickle=True)
-                params = params['arr_0'].item()
-                print("The weights has been loaded")
-                params = parameters_to_ndarrays(params) # return a list
-                weights_avg = [np.asarray((0.5 * B + 0.5 * A)) for A, B in zip(weights, params)] # perform SWA
-                weights_avg = ndarrays_to_parameters(weights_avg)
+        if self.fedavg:
+            weights_avg = ndarrays_to_parameters(weights_avg)
         else:
-            print("The results are saved without performing SWA")
-            weights_avg = ndarrays_to_parameters(weights)
+            # Aggregate all the weights and the loss
+            loss_results = [
+                (parameters_to_ndarrays(fit_res.parameters), fit_res.metrics['loss'])
+                for client, fit_res in results
+            ]
+
+             # aggregate the weights of the backbone
+            weights_loss = aggregate(loss_results) # loss-based
+
+            weights: NDArrays = [v * self.mix_coeff for v in weights_avg] + [(1 - self.mix_coeff) * v for v in weights_loss] # Equation 3 in FedVSSL paper
+
+            # # aggregate the weights of the backbone
+            # weights = aggregate(weight_results) # loss-based
+
+            # create a directory to save the global checkpoints
+            glb_dir = self.base_work_dir
+            mmcv.mkdir_or_exist(os.path.abspath(glb_dir))
+
+
+            # load the previous weights if there are any
+
+            if server_round > 1 and self.swbeta == 1:
+                chk_name_list = [fn for fn in os.listdir(glb_dir) if fn.endswith('.npz')]
+                chk_epoch_list = [int(re.findall(r'\d+', fn)[0]) for fn in chk_name_list if fn.startswith('round')]
+                if chk_epoch_list:
+                    chk_epoch_list.sort()
+                    print(chk_epoch_list)
+                    # select the most recent epoch
+                    checkpoint = os.path.join(glb_dir, f'round-{chk_epoch_list[-1]}-weights.array.npz')
+                    # load the previous model weights
+                    params = np.load(checkpoint, allow_pickle=True)
+                    params = params['arr_0'].item()
+                    print("The weights has been loaded")
+                    params = parameters_to_ndarrays(params) # return a list
+                    weights_avg = [np.asarray((0.5 * B + 0.5 * A)) for A, B in zip(weights, params)] # perform SWA
+                    weights_avg = ndarrays_to_parameters(weights_avg)
+            else:
+                print("The results are saved without performing SWA")
+                weights_avg = ndarrays_to_parameters(weights)
 
         if weights_avg is not None:
             # save weights

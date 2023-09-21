@@ -83,7 +83,7 @@ To run this FedVSSL with UCF-101 baseline, first ensure you have activated your 
 python -m FedVSSL.main --pre_train=True # this will run using the default settings.
 
 # you can override settings directly from the command line
-python -m fedprox.main mu=1 num_rounds=200 # will set proximal mu to 1 and the number of rounds to 200
+python -m FedVSSL.main --mix_coeff=1 --rounds=100 # will set hyper-parameter alpha to 1 and the number of rounds to 100
 
 # run downstream fine-tuning with pre-trained SSL model
 python -m FedVSSL.main --pre_train=False # this will run using the default settings.
