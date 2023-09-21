@@ -121,6 +121,7 @@ if __name__ == "__main__":
     args = parse_args()
 
     print('#######', args.pre_train)
+    print('#######', args.exp_name)
     import sys
     sys.exit(0)
 
