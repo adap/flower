@@ -44,7 +44,7 @@ from FedVSSL.client import SslClient
 
 
 def initial_setup(cid, base_work_dir, rounds, data_dir, num_gpus, partition_dir):
-    import utils
+    import FedVSSL.utils as utils
     cid_plus_one = str(int(cid) + 1)
     args = Namespace(
         cfg='conf/mmcv_conf/r3d_18_ucf101/pretraining.py', # Path to the pretraining configuration file
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     if args.pre_train:
 
         # first the paths needs to be defined otherwise the program may not be able to locate the files of the ctp
-        from utils import init_p_paths
+        from FedVSSL.utils import init_p_paths
         init_p_paths("FedVSSL")
 
         client_resources = {"num_cpus": args.cpus_per_client, "num_gpus": args.gpus_per_client}
