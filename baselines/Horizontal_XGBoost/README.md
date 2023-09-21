@@ -1,11 +1,11 @@
 ---
-title: title of the paper
-url: URL to the paper page (not the pdf)
-labels: [label1, label2] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [dataset1, dataset2] # list of datasets you include in your baseline
+title: Gradient-less Federated Gradient Boosting Trees with Learnable Learning Rates
+url: https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwjkh6ylsbyBAxVLVaQEHTY9ABYQFnoECA4QAw&url=https%3A%2F%2Farxiv.org%2Fabs%2F2304.07537&usg=AOvVaw1mOMaiFM2Y8DyaD3zdQ10r&opi=89978449
+labels: ["cross-silo", "tree-based", "XGBoost", "Horizontal federated XGBoost", "Classification", "Regression", "Tabular Datasets"] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
+dataset: [a9a, cod-rna, ijcnn1, abalone, cpusmall, space_ga] # list of datasets you include in your baseline
 ---
 
-# :warning:*_Title of your baseline_*
+# *Horizontal XGBoost*
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
