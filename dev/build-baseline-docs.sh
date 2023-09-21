@@ -52,7 +52,7 @@ function add_table_entry ()
 
 
 # Create Sphinx table block and header
-sed -i '' -e "s/.. <BASELINES_TABLE_ANCHOR>/$table_body/" $INDEX
+sed -i '' -e "s/.. \<BASELINES_TABLE_ANCHOR\>/$table_body/" $INDEX
 
 ! grep ":caption: References" $INDEX && echo "$initial_text" >> $INDEX && echo "" >> $INDEX
 
@@ -87,7 +87,7 @@ for d in $(printf '%s\n' */ | sort -V); do
 
       # Add entry to the table
       add_table_entry $baseline
-      sed -i '' -e "s/.. <BASELINES_TABLE_ENTRY>/$table_entry/" $INDEX
+      sed -i '' -e "s/.. \<BASELINES_TABLE_ENTRY\>/$table_entry/" $INDEX
 
     fi
   fi
