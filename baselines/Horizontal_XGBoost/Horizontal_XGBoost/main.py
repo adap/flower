@@ -36,14 +36,7 @@ def main(cfg: DictConfig) -> None:
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
-    dataset_tasks={
-        "a9a":"BINARY",
-        "cod-rna":"BINARY",
-        "ijcnn1":"BINARY",
-        "abalone":"REG",
-        "cpusmall":"REG",
-        "space_ga":"REG"
-    }
+
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
     if cfg.centralized:
@@ -66,12 +59,7 @@ def main(cfg: DictConfig) -> None:
         f" and {cfg.val_ratio} of local dataset reserved for validation."
         )
         #clients_preformance_on_local_data(cfg,trainloaders,X_test,y_test,task_type)
-        """   run_experiment(
-            cfg=cfg,
-            trainloaders=trainloaders,  
-            valloaders=valloaders,
-            testloader=testloader,
-        )"""
+
         num_rounds=cfg.run_experiment.num_rounds
         client_pool_size=cfg.client_num
         batch_size=cfg.run_experiment.batch_size
