@@ -15,12 +15,14 @@
 """Utils for FederatedDataset."""
 
 
-from typing import Dict
+from typing import Dict, Union, cast
 
 from flwr_datasets.partitioner import IidPartitioner, Partitioner
 
 
-def _instantiate_partitioners(partitioners: Dict[str, int]) -> Dict[str, Partitioner]:
+def _instantiate_partitioners(
+    partitioners: Union[int, Partitioner, Dict[str, int], Dict[str, Partitioner]]
+) -> Dict[str, Partitioner]:
     """Transform the partitioners from the initial format to instantiated objects.
 
     Parameters
@@ -34,10 +36,27 @@ def _instantiate_partitioners(partitioners: Dict[str, int]) -> Dict[str, Partiti
         Partitioners specified as split to Partitioner object.
     """
     instantiated_partitioners: Dict[str, Partitioner] = {}
-    for split_name, num_partitions in partitioners.items():
-        instantiated_partitioners[split_name] = IidPartitioner(
-            num_partitions=num_partitions
-        )
+    if isinstance(partitioners, int):
+        # We assume that the int regards IidPartitioner specified for the train set
+        instantiated_partitioners["train"] = IidPartitioner(num_partitions=partitioners)
+    elif isinstance(partitioners, Partitioner):
+        # We assume that the Partitioner was specified for the train set
+        instantiated_partitioners["train"] = partitioners
+    elif isinstance(partitioners, Dict):
+        # dict_first_value = list(partitioners.values())[0]
+        # Dict[str, Partitioner]
+        if all(isinstance(val, Partitioner) for val in partitioners.values()):
+            # No need to do anything
+            instantiated_partitioners = cast(Dict[str, Partitioner], partitioners)
+        # Dict[str, int]
+        elif all(isinstance(val, int) for val in partitioners.values()):
+            for split_name, num_partitions in partitioners.items():
+                assert isinstance(num_partitions, int)
+                instantiated_partitioners[split_name] = IidPartitioner(
+                    num_partitions=num_partitions
+                )
+        else:
+            raise ValueError("Incorrect type of the 'partitioners' encountered.")
     return instantiated_partitioners
 
 

@@ -15,7 +15,7 @@
 """FederatedDataset."""
 
 
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 import datasets
 from datasets import Dataset, DatasetDict
@@ -53,7 +53,12 @@ class FederatedDataset:
     >>> centralized = mnist_fds.load_full("test")
     """
 
-    def __init__(self, *, dataset: str, partitioners: Dict[str, int]) -> None:
+    def __init__(
+        self,
+        *,
+        dataset: str,
+        partitioners: Union[int, Partitioner, Dict[str, int], Dict[str, Partitioner]],
+    ) -> None:
         _check_if_dataset_supported(dataset)
         self._dataset_name: str = dataset
         self._partitioners: Dict[str, Partitioner] = _instantiate_partitioners(

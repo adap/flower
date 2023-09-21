@@ -13,15 +13,18 @@
 # limitations under the License.
 # ==============================================================================
 """Federated Dataset tests."""
+# pylint: disable=W0212, C0103
 
 
 import unittest
+from typing import Dict
 
 import pytest
 from parameterized import parameterized, parameterized_class
 
 import datasets
 from flwr_datasets.federated_dataset import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner, Partitioner
 
 
 @parameterized_class(
@@ -88,6 +91,93 @@ class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
         self.assertEqual(
             len(dataset_test_partition0),
             len(dataset[self.test_split]) // num_test_partitions,
+        )
+
+
+class PartitionersSpecificationForFederatedDatasets(unittest.TestCase):
+    """Test the specifications of partitioners for FederatedDatasets."""
+
+    dataset_name = "cifar10"
+    test_split = "test"
+
+    def test_partitioner_as_int_produces_dict_of_partitioners(self) -> None:
+        """Test specifying partitioner as an integer creates a dictionary."""
+        num_train_partitions = 100
+        fds = FederatedDataset(
+            dataset=self.dataset_name,
+            partitioners=num_train_partitions,
+        )
+        self.assertIsInstance(fds._partitioners, dict)
+
+    def test_partitioner_as_int_produces_single_partitioner_for_train_data(
+        self,
+    ) -> None:
+        """Test if int partitioner creates a single partitioner for the train set."""
+        num_train_partitions = 100
+        fds = FederatedDataset(
+            dataset=self.dataset_name,
+            partitioners=num_train_partitions,
+        )
+        self.assertTrue(len(fds._partitioners) == 1 and "train" in fds._partitioners)
+
+    def test_partitioner_as_int_produces_IidPartitioner(self) -> None:
+        """Test if int partitioner creates IidPartitioner for the training set."""
+        num_train_partitions = 100
+        fds = FederatedDataset(
+            dataset=self.dataset_name,
+            partitioners=num_train_partitions,
+        )
+        self.assertIsInstance(fds._partitioners["train"], IidPartitioner)
+
+    def test_single_partitioner_gets_assigned_to_train_set(self) -> None:
+        """Test if IidPartitioner gets assigned to the train data set."""
+        num_train_partitions = 100
+        iid_partitioner = IidPartitioner(num_partitions=num_train_partitions)
+        fds = FederatedDataset(
+            dataset=self.dataset_name,
+            partitioners=iid_partitioner,
+        )
+        self.assertTrue(len(fds._partitioners) == 1 and "train" in fds._partitioners)
+
+    def test_single_partitioner_given_is_the_same_object(self) -> None:
+        """Test if single partitioner is passed directly."""
+        num_train_partitions = 100
+        iid_partitioner = IidPartitioner(num_partitions=num_train_partitions)
+        fds = FederatedDataset(
+            dataset=self.dataset_name,
+            partitioners=iid_partitioner,
+        )
+        self.assertIs(fds._partitioners["train"], iid_partitioner)
+
+    def test_dict_of_partitioners_given_is_the_same_in_FederatedDataset(self) -> None:
+        """Test if a dictionary of partitioners is passed directly."""
+        num_train_partitions = 100
+        num_test_partitions = 100
+        partitioners: Dict[str, Partitioner] = {
+            "train": IidPartitioner(num_partitions=num_train_partitions),
+            "test": IidPartitioner(num_partitions=num_test_partitions),
+        }
+        fds = FederatedDataset(
+            dataset=self.dataset_name,
+            partitioners=partitioners,
+        )
+        self.assertIs(fds._partitioners, partitioners)
+
+    def test_dict_str_int_produces_correct_partitioners(self) -> None:
+        """Test if dict partitioners have the same keys."""
+        num_train_partitions = 100
+        num_test_partitions = 100
+        fds = FederatedDataset(
+            dataset=self.dataset_name,
+            partitioners={
+                "train": num_train_partitions,
+                "test": num_test_partitions,
+            },
+        )
+        self.assertTrue(
+            len(fds._partitioners) == 2
+            and "train" in fds._partitioners
+            and "test" in fds._partitioners
         )
 
 
