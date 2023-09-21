@@ -120,6 +120,10 @@ def parse_args():
 #if __name__ == "__main__":
 args = parse_args()
 
+print('#######', args.pre_train)
+import sys
+sys.exit(0)
+
 if args.pre_train:
 
     # first the paths needs to be defined otherwise the program may not be able to locate the files of the ctp
