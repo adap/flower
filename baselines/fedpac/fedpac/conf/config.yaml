@@ -6,7 +6,7 @@
 num_clients: 2 # total number of clients
 num_epochs: 1 # number of local epochs
 batch_size: 4
-num_rounds: 2
+num_rounds: 3
 clients_per_round: 2
 learning_rate: 0.03
 lamda: 1.0 # it can be >= 0
@@ -40,9 +40,8 @@ strategy:
   min_fit_clients: ${clients_per_round}
   min_available_clients: ${clients_per_round}
   min_evaluate_clients: 0
-  fit_metrics_aggregation_fn: fedpac.strategy.
   evaluate_metrics_aggregation_fn:
-    _target_: fedpac.strategy.weighted_average
+    _target_: fedpac.strategy.metrics_average
     _partial_: true # we dont' want this function to be evaluated when instantiating the strategy, we treat it as a partial and evaluate it when the strategy actuallly calls the function (in aggregate_evaluate())
 
 

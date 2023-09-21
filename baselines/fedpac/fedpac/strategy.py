@@ -23,7 +23,7 @@ from flwr.common import (
     Metrics
 )
 
-def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
+def metrics_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     """Aggregation function for weighted average during evaluation.
 
     Parameters
@@ -36,14 +36,16 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     Metrics
         The weighted average metric.
     """
-    # Multiply accuracy of each client by number of examples used
-    accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
-    examples = [num_examples for num_examples, _ in metrics]
-
-    # Aggregate and return custom metric (weighted average)
+    accuracies = [m['accuracy'] for _, m in metrics]
+    # examples = [num_examples for num_examples, _ in metrics]
+    # Aggregate and return custom metric (average)
     print("here and nothing is breaking!!!")
-    return {"accuracy": int(sum(accuracies)) / int(sum(examples))}
+    return {"accuracy": int(sum(accuracies)) / len(accuracies)}
 
+
+def loss_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
+    losses = [m for _, m in metrics]
+    return {"loss": int(sum(losses)) / len(losses)}
 
 class FedPAC(FedAvg):
     """FedPAC strategy"""
@@ -68,9 +70,11 @@ class FedPAC(FedAvg):
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
     ) -> None:
+
         super().__init__()
-        self.global_centroid={}
-        self.on_fit_config_fn=on_fit_config_fn
+        self.global_centroid = {}
+        self.on_fit_config_fn = on_fit_config_fn
+        self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
 
 
     def configure_fit(
@@ -130,3 +134,35 @@ class FedPAC(FedAvg):
             log(WARNING, "No fit_metrics_aggregation_fn provided")
 
         return parameters_aggregated, metrics_aggregated
+    
+    
+    def aggregate_evaluate(
+        self,
+        server_round: int,
+        results: List[Tuple[ClientProxy, EvaluateRes]],
+        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
+    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
+        """Aggregate evaluation losses using weighted average."""
+        if not results:
+            return None, {}
+        # Do not aggregate if there are failures and failures are not accepted
+        if not self.accept_failures and failures:
+            return None, {}
+
+        # Aggregate loss
+        loss_aggregated = loss_average(
+            [
+                (evaluate_res.num_examples, evaluate_res.loss)
+                for _, evaluate_res in results
+            ]
+        )
+
+        # Aggregate custom metrics if aggregation fn was provided
+        metrics_aggregated = {}
+        if self.evaluate_metrics_aggregation_fn:
+            eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
+            metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
+        elif server_round == 1:  # Only log this warning once
+            log(WARNING, "No evaluate_metrics_aggregation_fn provided")
+
+        return loss_aggregated, metrics_aggregated

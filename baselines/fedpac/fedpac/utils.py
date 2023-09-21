@@ -32,7 +32,7 @@ def plot_metric_from_history(
     suffix: Optional[str]
         Optional string to add at the end of the filename for the plot.
     """
-    metric_type = "centralized"
+    metric_type = "distributed"
     metric_dict = (
         hist.metrics_centralized
         if metric_type == "centralized"
@@ -40,12 +40,11 @@ def plot_metric_from_history(
     )
     rounds, values = zip(*metric_dict["accuracy"])
 
-    # let's extract centralised loss (main metric reported in FedProx paper)
-    rounds_loss, values_loss = zip(*hist.losses_centralized)
-
+    rounds_loss, values_loss = zip(*hist.losses_distributed)
+    print(rounds_loss, values_loss)
     fig, axs = plt.subplots(nrows=2, ncols=1, sharex="row")
-    axs[0].plot(np.asarray(rounds_loss), np.asarray(values_loss))
-    axs[1].plot(np.asarray(rounds_loss), np.asarray(values))
+    # axs[0].plot(np.asarray(rounds_loss), np.asarray(values_loss[0]['loss']))
+    axs[1].plot(np.asarray(rounds), np.asarray(values))
 
     axs[0].set_ylabel("Loss")
     axs[1].set_ylabel("Accuracy")
@@ -169,5 +168,4 @@ def aggregate_centroids(centroids_list, class_sizes):
 
     return aggregated_centroids_list
     
-
 

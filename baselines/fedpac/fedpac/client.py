@@ -40,6 +40,12 @@ class FlowerClient(fl.client.NumPyClient):
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
         self.lamda = lamda
+        self.num_classes = self.net.num_classes
+        self.feature_extractor = self.get_feature_extractor()
+        self.feature_centroid = get_centroid(self.feature_extractor)
+        self.class_sizes = self.get_class_sizes()
+        self.class_fractions = self.get_class_fractions()
+        self.v, self.h_ref = self.get_statistics()
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
@@ -52,35 +58,62 @@ class FlowerClient(fl.client.NumPyClient):
         self.net.load_state_dict(state_dict, strict=True)
 
 
-    def get_class_sizes(self, num_classes):
+    def get_class_sizes(self):
         dataloader = self.trainloader
         sizes = torch.zeros(len(dataloader))
         for images, labels  in dataloader:
-            for i in range(num_classes):
+            for i in range(self.num_classes):
                 sizes[i] = sizes[i] + (i == labels).sum()
         return sizes
 
 
-    def get_feature_centroid(self):
-        """function to extract feature extractor layers and get average of them"""
+    def get_class_fractions(self):
+        total = len(self.trainloader)
+        return self.class_sizes / total
+
+
+    def get_statistics(self):
+        dim = self.net.state_dict()[self.net.classifier_layers[0]][0].shape[0] 
+        feat_dict = self.feature_extractor
+        for k in feat_dict.keys():
+            feat_dict[k] = torch.stack(feat_dict[k])
+        
+        py = self.get_class_fractions()
+        py2 = torch.square(py)
+        v = 0
+        h_ref = torch.zeros((self.num_classes, dim), device=self.device)
+        datasize = torch.tensor(len(self.trainloader)).to(self.device)
+        for k in feat_dict.keys():
+            feat_k = feat_dict[k]
+            num_k = feat_k.shape[0]
+            feat_k_mu = feat_k.mean(dim=0)
+            h_ref[k] = py[k]*feat_k_mu
+            v += (py[k]*torch.trace((torch.mm(torch.t(feat_k), feat_k)/num_k))).item()
+            v -= (py2[k]*(torch.mul(feat_k_mu, feat_k_mu))).sum().item()
+        v = v/datasize.item()
+        
+        return v, h_ref
+
+        
+    
+    def get_feature_extractor(self):
+        """function to extract feature extractor layers"""
         feature_extractors = {}
         model=self.net
         train_data= self.trainloader
+        with torch.no_grad():
+            for inputs, labels in train_data:
+                inputs, labels = inputs.to(self.device), labels.to(self.device)
+                features, outputs = model(inputs)
+                feature_extractor = features.clone().detach()
+                for i in range(len(labels)):
+                    if labels[i].item() not in feature_extractors.keys():
+                        feature_extractors[labels[i].item()]=[]
+                        feature_extractors[labels[i].item()].append(feature_extractor[i,:])
+                    else:
+                        feature_extractors[labels[i].item()] = [feature_extractor[i,:]]
 
-        for inputs, labels in train_data:
-            inputs, labels = inputs.to(self.device), labels.to(self.device)
-            features, outputs = model(inputs)
-            feature_extractor = features.clone().detach()
-            for i in range(len(labels)):
-                if labels[i].item() not in feature_extractors.keys():
-                    feature_extractors[labels[i].item()]=[]
-                    feature_extractors[labels[i].item()].append(feature_extractor[i,:])
-                else:
-                    feature_extractors[labels[i].item()] = [feature_extractor[i,:]]
-
-            feature_centroid = get_centroid(feature_extractors)
-
-        return feature_centroid
+        return feature_extractors
 
 
     def fit(
@@ -88,9 +121,8 @@ class FlowerClient(fl.client.NumPyClient):
     ) -> Tuple[NDArrays, int, Dict]:
         """Implements distributed fit function for a given client."""
         self.set_parameters(parameters)
-        self.feature_centroid = self.get_feature_centroid()
-        self.class_sizes = self.get_class_sizes(self.net.num_classes)
-        global_centroid = config["global_centroid"]
+        self.global_centroid = config["global_centroid"]
+
         feature_centroid = train(
             self.net,
             self.trainloader,
@@ -98,11 +130,15 @@ class FlowerClient(fl.client.NumPyClient):
             self.num_epochs,
             self.learning_rate,
             self.device,
-            global_centroid,
+            self.global_centroid,
             self.feature_centroid,
             self.lamda
           )
-        return self.get_parameters({}), len(self.trainloader), {'centroid': self.feature_centroid, 'class_sizes': self.class_sizes}
+        return self.get_parameters({}), len(self.trainloader), {'centroid': self.feature_centroid, 
+                                                                'class_sizes': self.class_sizes,
+                                                                'v':self.v,
+                                                                'h_ref': self.h_ref
+                                                            }
 
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]

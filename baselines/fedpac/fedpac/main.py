@@ -61,7 +61,7 @@ def main(cfg: DictConfig) -> None:
     strategy = instantiate(
         cfg.strategy,
         evaluate_fn=evaluate_fn,
-        on_fit_config_fn=get_on_fit_config(),
+        on_fit_config_fn=get_on_fit_config()
     )
 
     # Start simulation
@@ -80,7 +80,6 @@ def main(cfg: DictConfig) -> None:
     # generate plots using the `history`
     print("................")
     print(history)
-
     # Hydra automatically creates an output directory
     # Let's retrieve it and save some results there
     save_path = HydraConfig.get().runtime.output_dir
@@ -102,7 +101,6 @@ def main(cfg: DictConfig) -> None:
         f"_R={cfg.num_rounds}"
         f"_lam={cfg.lamda}"
     )
-
     utils.plot_metric_from_history(
         history,
         save_path,
