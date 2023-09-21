@@ -77,7 +77,7 @@ If you plan to use the image datasets
 
   python -m pip install flwr-datasets[vision]
 
-If you plan to use the audio datasets::
+If you plan to use the audio datasets
 
 .. code-block:: bash
 
