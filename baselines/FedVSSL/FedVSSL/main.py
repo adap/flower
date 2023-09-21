@@ -47,7 +47,7 @@ def initial_setup(cid, base_work_dir, rounds, data_dir, num_gpus, partition_dir)
     import FedVSSL.utils as utils
     cid_plus_one = str(int(cid) + 1)
     args = Namespace(
-        cfg='conf/mmcv_conf/r3d_18_ucf101/pretraining.py', # Path to the pretraining configuration file
+        cfg='FedVSSL/conf/mmcv_conf/r3d_18_ucf101/pretraining.py', # Path to the pretraining configuration file
         checkpoint=None, cid=int(cid), data_dir=data_dir, gpus=num_gpus,
         launcher='none',
         local_rank=0, progress=False, resume_from=None, rounds=rounds, seed=7, validate=False,
@@ -84,7 +84,7 @@ def parse_args():
                         help='set true for FL pre-training, else for downstream fine-tuning.')
 
     ### hyper-parameters for FL pre-training ###
-    parser.add_argument('--exp_name', default='FedVSSL', type=str, help='experimental name used for this run.')
+    parser.add_argument('--exp_name', default='FedVSSL_results', type=str, help='experimental name used for this run.')
     parser.add_argument('--data_dir', default='/local/scratch/ucf101', type=str, help='dataset directory.')
     parser.add_argument('--partition_dir', default='/local/scratch/ucf101/UCF_101_dummy', type=str,
                         help='directory for FL partition .json files.')
@@ -107,7 +107,7 @@ def parse_args():
     parser.add_argument('--fedavg', default=False, type=bool, help='run FedAvg baseline')
 
     ### hyper-parameters for downstream fine-tuning ###
-    parser.add_argument('--pretrained_model_path', default='ucf_FedVSSL/round-20-weights.array.npz', type=str,
+    parser.add_argument('--pretrained_model_path', default='ucf_FedVSSL_results/round-20-weights.array.npz', type=str,
                         help='FL pre-trained SSL model used for downstream fine-tuning.')
 
     args = parser.parse_args()
