@@ -80,8 +80,8 @@ def fit_config(rnd: int) -> Dict[str, str]:
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Running FedVSSL and downstream fine-tuning.')
-    parser.add_argument('--pre_train', type=bool,
-                        help='set true for FL pre-training, else for downstream fine-tuning.')
+
+    parser.add_argument('--pre_training', default=False, type=bool, help='set true for FL pre-training, else for downstream fine-tuning.')
 
     ### hyper-parameters for FL pre-training ###
     parser.add_argument('--exp_name', default='FedVSSL_results', type=str, help='experimental name used for SSL pre-training.')
@@ -120,13 +120,13 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
-    print('#######', args.pre_train)
+    print('#######', args.pre_training)
     print('#######', args.exp_name)
     print('#######', args.fedavg)
     import sys
     sys.exit(0)
 
-    if args.pre_train:
+    if args.pre_training:
 
         # first the paths needs to be defined otherwise the program may not be able to locate the files of the ctp
         from utils import init_p_paths
