@@ -175,7 +175,7 @@ if __name__ == "__main__":
         from CtP.pyvrl.builder import build_model, build_dataset
         
         # we give an example on how one can perform fine-tuning uisng UCF-101 dataset. 
-        cfg_path = "CtP/configs/ctp/r3d_18_kinetics/finetune_ucf101.py" 
+        cfg_path = "FedVSSL/CtP/configs/ctp/r3d_18_kinetics/finetune_ucf101.py"
         cfg = Config.fromfile(cfg_path)
         cfg.model.backbone['pretrained'] = None
         
@@ -244,12 +244,12 @@ if __name__ == "__main__":
         )
        ''').strip("\n")
 
-        cfg_path_test= "CtP/configs/ctp/r3d_18_ucf101/finetune_ucf101.py"
+        cfg_path_test= "FedVSSL/CtP/configs/ctp/r3d_18_ucf101/finetune_ucf101.py"
         with open(cfg_path_test, 'w') as f:
             f.write(config_content_test)
 
         # Evaluating the finetuned model 
-        process_obj = subprocess.run(["bash", "CtP/tools/dist_test.sh",\
+        process_obj = subprocess.run(["bash", "FedVSSL/CtP/tools/dist_test.sh",\
         f"{cfg_path_test}", "4",\
         f"--work_dir /finetune/ucf101/",
         f"--data_dir /home/data1/data",\
