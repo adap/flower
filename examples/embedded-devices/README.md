@@ -42,6 +42,8 @@ pip install -r requierments_pytorch.txt # to install Flower and PyTorch
 # pip install -r requirements_tensorflow.txt
 ```
 
+If you are working on this tutorial on your laptop or desktop, they can host the Flower server that will orchestrate the entire FL process. You could also use an embedded device (e.g. a Raspberry Pi) as the Flower server. In order to do that, you just need to follow the same setup steps as outlined below.
+
 ## Setting up a Raspberry Pi
 
 ![alt text](_static/rpi_imager.png)
@@ -186,7 +188,7 @@ You can run this example using MNIST and a smaller CNN model by passing flag `--
 
 ### Start your Flower Server
 
-On your development machine, launch the server:
+On the machine of your choice, launch the server:
 
 ```bash
 # Launch your server. It will be waiting until two clients connects
@@ -199,9 +201,11 @@ python server.py --rounds 3 --min_num_clients 2 --sample_fraction 1.0 # append `
 
 ### Start the Flower Clients
 
-It's time to launch your clients!!! The first time you run this, the dataset will be downloaded. From the commands below, replace `<FRAMEWORK>` with either `pytorch` or `tf` to run the corresponding client Python file. In a FL setting, each client has its unique dataset. In this example you can simulate this by manually assigning an ID to a client (`cid)`) which should be an integer `[0, NUM_CLIENTS]`, where `NUM_CLIENTS` is the total number of partitions or clients that could participate at any point. This is defined at the top of the client files and defaults to 50. You can change this value to make each partition larger or smaller.
+It's time to launch your clients! Ensure you have followed the setup stages outline above for the devices at your disposal.
 
-Launch your Flower clients as follows. Remember that if you are using a Jetson device, you need first to run your Docker container.
+The first time you run this, the dataset will be downloaded. From the commands below, replace `<FRAMEWORK>` with either `pytorch` or `tf` to run the corresponding client Python file. In a FL setting, each client has its unique dataset. In this example you can simulate this by manually assigning an ID to a client (`cid)`) which should be an integer `[0, NUM_CLIENTS]`, where `NUM_CLIENTS` is the total number of partitions or clients that could participate at any point. This is defined at the top of the client files and defaults to 50. You can change this value to make each partition larger or smaller.
+
+Launch your Flower clients as follows. Remember that if you are using a Jetson device, you need first to run your Docker container. If you are using Raspberry Pi Zero devices, it is normal if starting the clients take a few seconds.
 
 ```bash
 # Run the default example (CIFAR-10)
