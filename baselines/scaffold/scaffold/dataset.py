@@ -21,7 +21,6 @@ def load_datasets(
     config: DictConfig,
     num_clients: int,
     val_ratio: float = 0.1,
-    batch_size_ratio: Optional[int] = 0.2,
     seed: Optional[int] = 42,
 ) -> Tuple[List[DataLoader], List[DataLoader], DataLoader]:
     """Creates the dataloaders to be fed into the model.
@@ -32,13 +31,9 @@ def load_datasets(
         Parameterises the dataset partitioning process
     num_clients : int
         The number of clients that hold a part of the data
-    similarity: float
-        Parameter to sample similar data
     val_ratio : float, optional
         The ratio of training data that will be used for validation (between 0 and 1),
         by default 0.1
-    batch_size : int, optional
-        The size of the batches to be fed into the model, by default 32
     seed : int, optional
         Used to set a fix seed to replicate experiments, by default 42
 
@@ -53,17 +48,27 @@ def load_datasets(
         num_clients,
         similarity=config.similarity,
         seed=seed,
+        dataset_name=config._name,
     )
+    batch_size = -1
+    if "batch_size" in config:
+        batch_size = config.batch_size
+    elif "batch_size_ratio" in config:
+        batch_size_ratio = config.batch_size_ratio
+    else:
+        raise ValueError
+
     # split each partition into train/val and create DataLoader
     trainloaders = []
     valloaders = []
     for dataset in datasets:
-        len_val = int(len(dataset) / (1 / val_ratio))
+        len_val = int(len(dataset) / (1 / val_ratio)) if val_ratio > 0 else 0
         lengths = [len(dataset) - len_val, len_val]
         ds_train, ds_val = random_split(
             dataset, lengths, torch.Generator().manual_seed(seed)
         )
-        batch_size = int(len(ds_train) * batch_size_ratio)
+        if batch_size == -1:
+            batch_size = int(len(ds_train) * batch_size_ratio)
         trainloaders.append(DataLoader(ds_train, batch_size=batch_size, shuffle=True))
         valloaders.append(DataLoader(ds_val, batch_size=batch_size))
     return trainloaders, valloaders, DataLoader(testset, batch_size=len(testset))

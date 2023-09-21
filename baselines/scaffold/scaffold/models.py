@@ -7,6 +7,7 @@ the python code at all
 """
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from typing import Tuple
 
@@ -20,22 +21,45 @@ class LogisticRegression(nn.Module):
     def forward(self, x):
         return self.linear(x)
 
+# SimpleCNN(input_dim=(16 * 5 * 5), hidden_dims=[120, 84], output_dim=10)
+class CNN(nn.Module):
+    def __init__(self, input_dim, hidden_dims, num_classes):
+        super().__init__()
+        self.conv1 = nn.Conv2d(3, 6, 5)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.conv2 = nn.Conv2d(6, 16, 5)
 
-from torch.optim import Optimizer
+        self.fc1 = nn.Linear(input_dim, hidden_dims[0])
+        self.fc2 = nn.Linear(hidden_dims[0], hidden_dims[1])
+        self.fc3 = nn.Linear(hidden_dims[1], num_classes)
 
-class ScaffoldOptimizer(Optimizer):
+    def forward(self, x):
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        x = x.view(-1, 16*5*5)
+
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
+
+
+from torch.optim import SGD
+
+class ScaffoldOptimizer(SGD):
     """
-    Implements optimizer step function as defined in the SCAFFOLD paper
+    Implements SGD optimizer step function as defined in the SCAFFOLD paper
     """
 
-    def __init__(self, grads, step_size):
-        super().__init__(grads, {"lr":step_size})
+    def __init__(self, grads, step_size, momentum):
+        super().__init__(grads, lr=step_size, momentum=momentum, weight_decay=1e-5)
     
-    def step(self, server_cv, client_cv):
-        # y_i = y+i - eta * (g_i + c - c_i)
+    def step_custom(self, server_cv, client_cv):
+        # y_i = y_i - \eta * (g_i + c - c_i)  --> y_i = y_i - \eta*(g_i + \mu*b_{t}) - \eta*(c - c_i) 
+        self.step()
         for group in self.param_groups:
             for p, s, c in zip(group["params"], server_cv, client_cv):
-                p.data.add_(p.grad.data + s - c, alpha=-group["lr"])
+                p.data.add_(s - c, alpha=-group["lr"])
 
 def train(
     net: nn.Module,
@@ -43,11 +67,12 @@ def train(
     device: torch.device,
     epochs: int,
     learning_rate: float,
+    momentum: float,
     server_cv: torch.Tensor,
     client_cv: torch.Tensor,
 ) -> None:
     """Train the network on the training set.
-    
+
     Parameters
     ----------
     net : nn.Module
@@ -60,13 +85,15 @@ def train(
         The number of epochs to train the network.
     learning_rate : float
         The learning rate.
+    momentum : float
+        The momentum for SGD optimizer.
     server_cv : torch.Tensor
         The server's control variate.
     client_cv : torch.Tensor
         The client's control variate.
     """
     criterion = nn.CrossEntropyLoss()
-    optimizer = ScaffoldOptimizer(net.parameters(), learning_rate)
+    optimizer = ScaffoldOptimizer(net.parameters(), learning_rate, momentum)
     net.train()
     for _ in range(epochs):
         net = _train_one_epoch(
@@ -89,7 +116,7 @@ def _train_one_epoch(
         output = net(data)
         loss = criterion(output, target)
         loss.backward()
-        optimizer.step(server_cv, client_cv) # type: ignore
+        optimizer.step_custom(server_cv, client_cv) # type: ignore
     return net
 
 def test(
@@ -112,7 +139,7 @@ def test(
         The loss and accuracy of the network on the test set.
     """
 
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss(reduction="sum")
     net.eval()
     correct, total, loss = 0, 0, 0.0
     with torch.no_grad():

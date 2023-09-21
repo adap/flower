@@ -13,6 +13,7 @@ from omegaconf import DictConfig
 from hydra.utils import instantiate
 from flwr.common.logger import log
 from logging import DEBUG, INFO
+import numpy as np
 
 from scaffold.models import train, test
 
@@ -30,6 +31,7 @@ class FlowerClientScaffold(
         device: torch.device,
         num_epochs: int,
         learning_rate: float,
+        momentum: float,
     ) -> None:
         self.net = net
         self.trainloader = trainloader
@@ -37,6 +39,7 @@ class FlowerClientScaffold(
         self.device = device
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
+        self.momentum = momentum
         # initialize client control variate with 0 and shape of the network parameters
         self.client_cv = []
         for param in self.net.parameters():
@@ -63,10 +66,12 @@ class FlowerClientScaffold(
             self.device,
             self.num_epochs,
             self.learning_rate,
+            self.momentum,
             server_cv,
             self.client_cv,
         )
-        return self.get_parameters({}), len(self.trainloader), {}
+        final_p_np = self.get_parameters({})
+        return final_p_np, len(self.trainloader), {}
     
     def evaluate(self, parameters, config: Dict[str, Scalar]):
         """Evaluate using given parameters."""
@@ -80,6 +85,7 @@ def gen_client_fn(
     num_epochs: int,
     learning_rate: float,
     model: DictConfig,
+    momentum: float=0.9,
 ) -> Tuple[
     Callable[[str], FlowerClientScaffold], DataLoader
 ]:  # pylint: disable=too-many-arguments
@@ -98,6 +104,8 @@ def gen_client_fn(
         sending it to the server.
     learning_rate : float
         The learning rate for the SGD  optimizer of clients.
+    momentum : float
+        The momentum for SGD optimizer of clients
 
     Returns
     -------
@@ -125,6 +133,7 @@ def gen_client_fn(
             device,
             num_epochs,
             learning_rate,
+            momentum,
         )
 
     return client_fn

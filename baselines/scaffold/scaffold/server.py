@@ -20,6 +20,7 @@ from typing import OrderedDict
 import torch
 import concurrent.futures
 from hydra.utils import instantiate
+from flwr.common.typing import GetParametersIns
 
 class ScaffoldServer(Server):
     """Flower server implementing the communication for scaffold."""
@@ -32,14 +33,34 @@ class ScaffoldServer(Server):
         if client_manager is None:
             client_manager = SimpleClientManager()
         super().__init__(client_manager=client_manager, strategy=strategy)
-        self.server_cv = self._init_control_variates(model)
         self.model_params = instantiate(model)
+        self.server_cv = None
     
+    def _get_initial_parameters(self, timeout: Optional[float]) -> Parameters:
+        """Get initial parameters from one of the available clients."""
+
+        # Server-side parameter initialization
+        parameters: Optional[Parameters] = self.strategy.initialize_parameters(
+            client_manager=self._client_manager
+        )
+        if parameters is not None:
+            log(INFO, "Using initial parameters provided by strategy")
+            return parameters
+
+        # Get initial parameters from one of the clients
+        log(INFO, "Requesting initial parameters from one random client")
+        random_client = self._client_manager.sample(1)[0]
+        ins = GetParametersIns(config={})
+        get_parameters_res = random_client.get_parameters(ins=ins, timeout=timeout)
+        log(INFO, "Received initial parameters from one random client")
+        self.server_cv = [torch.from_numpy(t) for t in parameters_to_ndarrays(get_parameters_res.parameters)]
+        return get_parameters_res.parameters
+
     def _init_control_variates(self, model:DictConfig):
-        net = instantiate(model)
         server_cv = []
-        for param in net.parameters():
-            server_cv.append(torch.zeros(param.shape))
+        for param in self.model_params.parameters():
+            # server_cv.append(torch.zeros(param.shape))
+            server_cv.append(param.clone().detach())
         return server_cv
 
     def fit_round(
@@ -50,7 +71,7 @@ class ScaffoldServer(Server):
         Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
     ]:
         """Perform a single round of federated averaging."""
-        # Get clients and their respective instructions from strategy
+        # Get clients and their respective instructions from strateg
         client_instructions = self.strategy.configure_fit(
             server_round=server_round,
             parameters=self.parameters,
@@ -203,10 +224,10 @@ def gen_evaluate_fn(
         net.to(device)
 
         loss, accuracy = test(net, testloader, device=device)
-        if accuracy > 0.5:
-            log(INFO, f"Reached accuracy > 0.5 at round {server_round}")
-            import sys
-            sys.exit(0)
+        # if accuracy > 0.5:
+        #     log(INFO, f"Reached accuracy > 0.5 at round {server_round}")
+        #     import sys
+        #     sys.exit(0)
         # return statistics
         return loss, {"accuracy": accuracy}
 

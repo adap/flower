@@ -16,6 +16,8 @@ from logging import DEBUG, INFO
 
 from scaffold.models import train, test
 from scaffold.strategy import FitRes
+import numpy as np
+import os
 
 
 class FlowerClientScaffold(
@@ -25,23 +27,34 @@ class FlowerClientScaffold(
 
     def __init__(
         self,
+        id: int,
         net: torch.nn.Module,
         trainloader: DataLoader,
         valloader: DataLoader,
         device: torch.device,
         num_epochs: int,
         learning_rate: float,
+        momentum: float,
+        dir: str="",
     ) -> None:
+        self.id = id
         self.net = net
         self.trainloader = trainloader
         self.valloader = valloader
         self.device = device
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
+        self.momentum = momentum
         # initialize client control variate with 0 and shape of the network parameters
         self.client_cv = []
         for param in self.net.parameters():
             self.client_cv.append(torch.zeros(param.shape))
+        # save cv to directory
+        if dir == "":
+            dir = "client_cvs"
+        self.dir = dir
+        if not os.path.exists(self.dir):
+            os.makedirs(self.dir)
     
     def get_parameters(self, config: Dict[str, Scalar]):
         """Return the current local model parameters."""
@@ -52,10 +65,16 @@ class FlowerClientScaffold(
         params_dict = zip(self.net.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         self.net.load_state_dict(state_dict, strict=True)
-    
+   
     def fit(self, parameters, config: Dict[str, Union[Scalar, List[torch.Tensor]]]):
         """Implements distributed fit function for a given client using Scaffold Strategy."""
         self.set_parameters(parameters)
+        self.client_cv = []
+        for param in self.net.parameters():
+            self.client_cv.append(param.clone().detach())
+        # load client control variate
+        if os.path.exists(f"{self.dir}/client_cv_{self.id}.pt"):
+            self.client_cv = torch.load(f"{self.dir}/client_cv_{self.id}.pt")
         # convert the server control variate to a list of tensors
         server_cv = config["server_cv"]
         server_cv = parameters_to_ndarrays(server_cv)
@@ -66,6 +85,7 @@ class FlowerClientScaffold(
             self.device,
             self.num_epochs,
             self.learning_rate,
+            self.momentum,
             server_cv,
             self.client_cv,
         )
@@ -76,11 +96,12 @@ class FlowerClientScaffold(
         server_update_c = []
         # update client control variate c_i_1 = c_i - c + 1/eta*K (x - y_i)
         for c_i_j, c_j, x_j, y_i_j in zip(self.client_cv, server_cv, x, y_i):
-            c_i_n.append(c_i_j - c_j + (1.0/(self.learning_rate*self.num_epochs))*(x_j - y_i_j))
+            c_i_n.append(c_i_j - c_j + (1.0/(self.learning_rate*self.num_epochs*len(self.trainloader)))*(x_j - y_i_j))
             # y_i - x, c_i_n - c_i for the server
             server_update_x.append((y_i_j - x_j))
             server_update_c.append((c_i_n[-1] - c_i_j).cpu().numpy())
         self.client_cv = c_i_n
+        torch.save(self.client_cv, f"{self.dir}/client_cv_{self.id}.pt")
         return (server_update_x, len(self.trainloader.dataset), {"server_update_c": ndarrays_to_parameters(server_update_c)})
     
     def evaluate(self, parameters, config: Dict[str, Scalar]):
@@ -95,6 +116,7 @@ def gen_client_fn(
     num_epochs: int,
     learning_rate: float,
     model: DictConfig,
+    momentum: float=0.9,
 ) -> Tuple[
     Callable[[str], FlowerClientScaffold], DataLoader
 ]:  # pylint: disable=too-many-arguments
@@ -113,6 +135,8 @@ def gen_client_fn(
         sending it to the server.
     learning_rate : float
         The learning rate for the SGD  optimizer of clients.
+    momentum : float
+        The momentum for SGD optimizer of clients
 
     Returns
     -------
@@ -134,12 +158,14 @@ def gen_client_fn(
         valloader = valloaders[int(cid)]
 
         return FlowerClientScaffold(
+            cid,
             net,
             trainloader,
             valloader,
             device,
             num_epochs,
             learning_rate,
+            momentum,
         )
 
     return client_fn

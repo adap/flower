@@ -15,7 +15,7 @@ from scaffold.dataset import load_datasets
 from scaffold.client import gen_client_fn
 import scaffold.server as server
 
-@hydra.main(config_path="conf", config_name="base", version_base=None)
+@hydra.main(config_path="conf", config_name="scaffold_base_cifar10", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.
 
@@ -37,7 +37,8 @@ def main(cfg: DictConfig) -> None:
     trainloaders, valloaders, testloader = load_datasets(
         config=cfg.dataset,
         num_clients=cfg.num_clients,
-        batch_size_ratio=cfg.batch_size_ratio,
+        val_ratio=cfg.dataset.val_split,
+        seed=cfg.dataset.seed,
     )
 
     # 3. Define your clients

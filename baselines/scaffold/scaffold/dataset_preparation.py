@@ -36,39 +36,75 @@ block) that this file should be executed first.
 from typing import List, Tuple, Dict
 from collections import Counter
 from torch.utils.data import Dataset, Subset, ConcatDataset
-from torchvision.datasets import EMNIST
+from torchvision.datasets import EMNIST, CIFAR10
+from torch.autograd import Variable
+import torch.nn.functional as F
 import numpy as np
 import torchvision.transforms as transforms
 
-def _download_data() -> Tuple[Dataset, Dataset]:
-    """Downloads the EMNIST dataset.
+def _download_data(dataset_name = "emnist") -> Tuple[Dataset, Dataset]:
+    """Downloads the requested dataset. Currently supports emnist and cifar10
 
     Returns
     -------
     Tuple[Dataset, Dataset]
         The training dataset, the test dataset.
     """
-    # unsqueeze, flatten
-    transform = transforms.Compose(
-        [
-            transforms.ToTensor(),
-            transforms.Lambda(lambda x: x.view(-1)),
-        ]
-    )
-    trainset = EMNIST(
-        root="data",
-        split="byclass",
-        train=True,
-        download=True,
-        transform=transform,
-    )
-    testset = EMNIST(
-        root="data",
-        split="byclass",
-        train=False,
-        download=True,
-        transform=transform,
-    )
+    trainset, testset = None, None
+    if dataset_name == "emnist":
+        # unsqueeze, flatten
+        transform = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                transforms.Lambda(lambda x: x.view(-1)),
+            ]
+        )
+        trainset = EMNIST(
+            root="data",
+            split="byclass",
+            train=True,
+            download=True,
+            transform=transform,
+        )
+        testset = EMNIST(
+            root="data",
+            split="byclass",
+            train=False,
+            download=True,
+            transform=transform,
+        )
+    elif dataset_name == "cifar10":
+        transform_train = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                transforms.Lambda(lambda x: F.pad(
+                    Variable(x.unsqueeze(0), requires_grad=False),
+                    (4, 4, 4, 4), mode='reflect').data.squeeze()),
+                transforms.ToPILImage(),
+                transforms.RandomCrop(32),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+            ]
+        )
+        transform_test = transforms.Compose(
+            [
+                transforms.ToTensor(),
+            ]
+        )
+        trainset = CIFAR10(
+            root="data",
+            train=True,
+            download=True,
+            transform=transform_train,
+        )
+        testset = CIFAR10(
+            root="data",
+            train=False,
+            download=True,
+            transform=transform_test,
+        )
+    else:
+        raise NotImplementedError
 
     return trainset, testset
 
@@ -89,7 +125,10 @@ def _sort_by_class(
     """
 
     # get the targets
-    targets = trainset.dataset.targets[trainset.indices]
+    t = trainset.dataset.targets
+    if isinstance(t, list):
+        t = np.array(t)
+    targets = t[trainset.indices]
     # get the trainset.indices in the sorted order of the targets
     sorted_idxs = np.argsort(targets)
     # sort the trainset.indices
@@ -103,6 +142,7 @@ def _partition_data(
     num_clients,
     similarity=1.0,
     seed=42,
+    dataset_name = "emnist"
 ) -> Tuple[List[Dataset], Dataset]:
     """Partitions the dataset into subsets for each client.
 
@@ -120,7 +160,7 @@ def _partition_data(
     Tuple[List[Subset], Dataset]
         The list of datasets for each client, the test dataset.
     """
-    trainset, testset = _download_data()
+    trainset, testset = _download_data(dataset_name)
     trainsets_per_client = []
     # for s% similarity sample iid data per client
     s_fraction = int(similarity * len(trainset))
@@ -128,21 +168,14 @@ def _partition_data(
     idxs = np.random.choice(len(trainset), s_fraction, replace=False)
     iid_trainset = Subset(trainset, idxs)
     rem_trainset = Subset(trainset, np.setdiff1d(np.arange(len(trainset)), idxs))
-    # sample iid data per client from iid_trainset
-    iid_samples_per_client = [len(iid_trainset) // num_clients] * num_clients
-    for i in range(len(iid_samples_per_client)):
-        if sum(iid_samples_per_client) < len(iid_trainset):
-            iid_samples_per_client[i] += 1
 
+    # sample iid data per client from iid_trainset
     all_ids = np.arange(len(iid_trainset))
+    splits = np.array_split(all_ids, num_clients)
     for i in range(num_clients):
-        c_ids = np.random.choice(
-            all_ids, iid_samples_per_client[i], replace=False
-        )
+        c_ids = splits[i]
         d_ids = iid_trainset.indices[c_ids]
         trainsets_per_client.append(Subset(iid_trainset.dataset, d_ids))
-        # remove the sampled data from iid_trainset
-        all_ids = np.setdiff1d(all_ids, c_ids)
 
     sorted_trainset = _sort_by_class(rem_trainset)
     # sample non-iid data per client from rem_trainset by sort method 

@@ -16,7 +16,7 @@ from scaffold.client_fedavg import gen_client_fn
 from flwr.server import Server
 from scaffold.server import gen_evaluate_fn
 
-@hydra.main(config_path="conf", config_name="fedavg_base", version_base=None)
+@hydra.main(config_path="conf", config_name="fedavg_base_cifar10", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.
 
@@ -38,7 +38,7 @@ def main(cfg: DictConfig) -> None:
     trainloaders, valloaders, testloader = load_datasets(
         config=cfg.dataset,
         num_clients=cfg.num_clients,
-        batch_size_ratio=cfg.batch_size_ratio,
+        val_ratio=cfg.dataset.val_split,
     )
 
     # 3. Define your clients
