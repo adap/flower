@@ -84,7 +84,8 @@ def parse_args():
                         help='set true for FL pre-training, else for downstream fine-tuning.')
 
     ### hyper-parameters for FL pre-training ###
-    parser.add_argument('--exp_name', default='FedVSSL_results', type=str, help='experimental name used for this run.')
+    parser.add_argument('--exp_name', default='FedVSSL_results', type=str, help='experimental name used for SSL pre-training.')
+    parser.add_argument('--exp_name_finetune', default='finetune_results', type=str, help='experimental name used for downstream fine-tuning.')
     parser.add_argument('--data_dir', default='/local/scratch/ucf101', type=str, help='dataset directory.')
     parser.add_argument('--partition_dir', default='/local/scratch/ucf101/UCF_101_dummy', type=str,
                         help='directory for FL partition .json files.')
@@ -172,7 +173,7 @@ if __name__ == "__main__":
         from mmcv.runner import load_state_dict
         import CtP
         from CtP.configs.ctp.r3d_18_kinetics import finetune_ucf101
-        from CtP.pyvrl.builder import build_model, build_dataset
+        from FedVSSL.CtP.pyvrl.builder import build_model, build_dataset
         
         # we give an example on how one can perform fine-tuning uisng UCF-101 dataset. 
         cfg_path = "FedVSSL/CtP/configs/ctp/r3d_18_kinetics/finetune_ucf101.py"
@@ -222,10 +223,10 @@ if __name__ == "__main__":
             f.write(config_content)
 
         
-        process_obj = subprocess.run(["bash", "CtP/tools/dist_train.sh",\
+        process_obj = subprocess.run(["bash", "FedVSSL/CtP/tools/dist_train.sh",\
         f"{cfg_path}", "4",\
-        f"--work_dir /finetune/ucf101/",
-        f"--data_dir /home/data1/data/"])
+        f"--work_dir {args.exp_name_finetune}",
+        f"--data_dir {args.data_dir}"])
 
                  
     #-----------------------------------------------------------------------------------------------------------------------
@@ -251,8 +252,8 @@ if __name__ == "__main__":
         # Evaluating the finetuned model 
         process_obj = subprocess.run(["bash", "FedVSSL/CtP/tools/dist_test.sh",\
         f"{cfg_path_test}", "4",\
-        f"--work_dir /finetune/ucf101/",
-        f"--data_dir /home/data1/data",\
+        f"--work_dir {args.exp_name_finetune}",
+        f"--data_dir {args.data_dir}",\
         f"--progress"])
 
 
