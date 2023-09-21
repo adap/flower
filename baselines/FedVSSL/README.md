@@ -69,21 +69,35 @@ poetry install
 poetry shell
 
 # install PyTorch with GPU support.
-pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116
+pip install torch==1.7.1+cu110 torchvision==0.8.2+cu110 torchaudio==0.7.2 -f https://download.pytorch.org/whl/torch_stable.html
 
 # install mmcv package
-pip install mmcv==1.3.9
+pip install mmcv==1.2.4
 ```
 
 ## Running the Experiments
-To run this FedProx with MNIST baseline, first ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
+To run this FedVSSL with UCF-101 baseline, first ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
 
 ```bash
-python -m FedVSSL.main # this will run using the default settings.
+# run federated SSL training with FedVSSL
+python -m FedVSSL.main --pre_train=True # this will run using the default settings.
 
+# you can override settings directly from the command line
+python -m fedprox.main mu=1 num_rounds=200 # will set proximal mu to 1 and the number of rounds to 200
+
+# run downstream fine-tuning with pre-trained SSL model
+python -m FedVSSL.main --pre_train=False # this will run using the default settings.
 
 ```
 
+To run using FedAvg:
+```bash
+# this will use a variation of FedAvg that drops the clients that were flagged as stragglers
+# This is done so to match the experimental setup in the FedProx paper
+python -m FedVSSL.main --config-name fedavg
+
+# this config can also be overriden from the CLI
+```
 
 
 

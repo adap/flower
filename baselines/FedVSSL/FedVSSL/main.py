@@ -104,7 +104,7 @@ def parse_args():
     parser.add_argument('--swbeta', default=1, type=int, help='hyper-parameter beta in the paper.')
 
     ### hyper-parameters for downstream fine-tuning ###
-    parser.add_argument('--pretrained_model_path', default='/home/data1/round-540-weights.array.npz', type=str,
+    parser.add_argument('--pretrained_model_path', default='FedVSSL/round-20-weights.array.npz', type=str,
                         help='FL pre-trained SSL model used for downstream fine-tuning.')
 
     args = parser.parse_args()
