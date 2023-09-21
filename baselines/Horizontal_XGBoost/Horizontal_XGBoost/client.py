@@ -39,10 +39,8 @@ class FL_Client(fl.client.Client):
     def __init__(
         self,
         cfg,
-        #task_type: str,
         trainloader: DataLoader,
         valloader: DataLoader,
-        #n_estimators_client: int,
         client_num: int,
         cid: str,
         log_progress: bool = False,
@@ -55,7 +53,7 @@ class FL_Client(fl.client.Client):
         self.config=cfg
         for dataset in trainloader:
             data, label = dataset[0], dataset[1]
-        self.tree = fit_XGBoost(cfg,self.task_type,data, label,100)#construct_tree_from_loader(trainloader, n_estimators_client, task_type)
+        self.tree = fit_XGBoost(cfg,self.task_type,data, label,100)
 
         self.trainloader_original = trainloader
         self.valloader_original = valloader
@@ -83,7 +81,7 @@ class FL_Client(fl.client.Client):
             raise Exception(
                     "choose a valid task type, BINARY or REG"
                 )
-        self.optimizer = torch.optim.Adam(self.net.parameters(), lr=0.0001, betas=(0.9, 0.999))
+        self.optimizer = torch.optim.Adam(self.net.parameters(), lr=cfg.dataset.CNN.lr, betas=(0.9, 0.999))
 
     def train_one_loop(self,data):
                 tree_outputs, labels = data[0].to(self.device), data[1].to(self.device)
@@ -104,10 +102,8 @@ class FL_Client(fl.client.Client):
                 return loss.item(), metric_val * n_samples, n_samples
     def train(
             self,
-            #task_type: str,
             net: CNN,
             trainloader: DataLoader,
-            #device: str,
             num_iterations: int,
             log_progress: bool = True,
         ) -> Tuple[float, float, int]:
@@ -220,7 +216,6 @@ class FL_Client(fl.client.Client):
             self.n_estimators_client,
             self.client_num,
         )
-
         # num_iterations = None special behaviour: train(...) runs for a single epoch, however many updates it may be
         num_iterations = num_iterations or len(self.trainloader)
 
@@ -228,10 +223,8 @@ class FL_Client(fl.client.Client):
         print(f"Client {self.cid}: training for {num_iterations} iterations/updates")
         self.net.to(self.device)
         train_loss, train_result, num_examples = self.train(
-            #self.task_type,
             self.net,
             self.trainloader,
-            #device=self.device,
             num_iterations=num_iterations,
             log_progress=self.log_progress,
         )
