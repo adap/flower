@@ -97,6 +97,7 @@ cd $ROOT/baselines/doc
 make html
 
 # Restore everything back to the initial state
+cat $INDEX
 git restore source/
 rm source/*.md
 for image in "${images_arr[@]}"; do
