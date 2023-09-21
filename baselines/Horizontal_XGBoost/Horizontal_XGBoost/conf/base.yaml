@@ -7,7 +7,7 @@ n_estimators_client: 100
 task_type: "REG"
 
 defaults: 
-  - dataset: cpumall
+  - dataset: a9a
 
 XGBoost:
   _target_:  ${dataset.xgb._target_}
