@@ -15,17 +15,31 @@
 """Flower driver service client."""
 
 
+import time
 from logging import ERROR, INFO, WARNING
-from typing import Optional
+from typing import Callable, Optional, Union, cast
 
 import grpc
 
 from flwr.common import EventType, event
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from flwr.proto import driver_pb2, driver_pb2_grpc
+from flwr.proto.driver_pb2 import (
+    CreateWorkloadRequest,
+    CreateWorkloadResponse,
+    GetNodesRequest,
+    GetNodesResponse,
+    PullTaskResRequest,
+    PullTaskResResponse,
+    PushTaskInsRequest,
+    PushTaskInsResponse,
+)
+from flwr.proto.driver_pb2_grpc import DriverStub
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
+
+INITIAL_RETRY_INTERVAL = 1.0
+RETRY_TIMES = 3
 
 ERROR_MESSAGE_DRIVER_NOT_CONNECTED = """
 [Driver] Error: Not connected.
@@ -33,6 +47,23 @@ ERROR_MESSAGE_DRIVER_NOT_CONNECTED = """
 Call `connect()` on the `Driver` instance before calling any of the other `Driver`
 methods.
 """
+
+WARNING_MESSAGE_SERVICE_UNAVAILABLE = (
+    f"[Driver] Service unavailable, retrying %s/{RETRY_TIMES} after %s seconds..."
+)
+
+DriverRequest = Union[
+    CreateWorkloadRequest,
+    GetNodesRequest,
+    PushTaskInsRequest,
+    PullTaskResRequest,
+]
+DriverResponse = Union[
+    CreateWorkloadResponse,
+    GetNodesResponse,
+    PushTaskInsResponse,
+    PullTaskResResponse,
+]
 
 
 class Driver:
@@ -46,7 +77,7 @@ class Driver:
         self.driver_service_address = driver_service_address
         self.certificates = certificates
         self.channel: Optional[grpc.Channel] = None
-        self.stub: Optional[driver_pb2_grpc.DriverStub] = None
+        self.stub: Optional[DriverStub] = None
 
     def connect(self) -> None:
         """Connect to the Driver API."""
@@ -58,7 +89,7 @@ class Driver:
             server_address=self.driver_service_address,
             root_certificates=self.certificates,
         )
-        self.stub = driver_pb2_grpc.DriverStub(self.channel)
+        self.stub = DriverStub(self.channel)
         log(INFO, "[Driver] Connected to %s", self.driver_service_address)
 
     def disconnect(self) -> None:
@@ -73,52 +104,68 @@ class Driver:
         channel.close()
         log(INFO, "[Driver] Disconnected")
 
-    def create_workload(
-        self, req: driver_pb2.CreateWorkloadRequest
-    ) -> driver_pb2.CreateWorkloadResponse:
+    def create_workload(self, req: CreateWorkloadRequest) -> CreateWorkloadResponse:
         """Request for workload ID."""
-        # Check if channel is open
-        if self.stub is None:
-            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
-            raise Exception("`Driver` instance not connected")
-
-        # Call Driver API
-        res: driver_pb2.CreateWorkloadResponse = self.stub.CreateWorkload(request=req)
+        res = cast(
+            CreateWorkloadResponse,
+            self._try_call_api("CreateWorkload", req),
+        )
         return res
 
-    def get_nodes(self, req: driver_pb2.GetNodesRequest) -> driver_pb2.GetNodesResponse:
+    def get_nodes(self, req: GetNodesRequest) -> GetNodesResponse:
         """Get client IDs."""
-        # Check if channel is open
-        if self.stub is None:
-            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
-            raise Exception("`Driver` instance not connected")
-
-        # Call Driver API
-        res: driver_pb2.GetNodesResponse = self.stub.GetNodes(request=req)
+        res = cast(GetNodesResponse, self._try_call_api("GetNodes", req))
         return res
 
-    def push_task_ins(
-        self, req: driver_pb2.PushTaskInsRequest
-    ) -> driver_pb2.PushTaskInsResponse:
+    def push_task_ins(self, req: PushTaskInsRequest) -> PushTaskInsResponse:
         """Schedule tasks."""
-        # Check if channel is open
-        if self.stub is None:
-            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
-            raise Exception("`Driver` instance not connected")
-
-        # Call Driver API
-        res: driver_pb2.PushTaskInsResponse = self.stub.PushTaskIns(request=req)
+        res = cast(
+            PushTaskInsResponse,
+            self._try_call_api("PushTaskIns", req),
+        )
         return res
 
-    def pull_task_res(
-        self, req: driver_pb2.PullTaskResRequest
-    ) -> driver_pb2.PullTaskResResponse:
+    def pull_task_res(self, req: PullTaskResRequest) -> PullTaskResResponse:
         """Get task results."""
+        res = cast(
+            PullTaskResResponse,
+            self._try_call_api("PullTaskRes", req),
+        )
+        return res
+
+    def _try_call_api(
+        self,
+        api_name: str,
+        request: DriverRequest,
+    ) -> DriverResponse:
         # Check if channel is open
         if self.stub is None:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
             raise Exception("`Driver` instance not connected")
 
         # Call Driver API
-        res: driver_pb2.PullTaskResResponse = self.stub.PullTaskRes(request=req)
-        return res
+        api = cast(
+            Callable[[DriverRequest], DriverResponse], getattr(self.stub, api_name)
+        )
+        retry_interval = INITIAL_RETRY_INTERVAL
+
+        for retry_count in range(RETRY_TIMES + 1):
+            try:
+                return api(request)
+            except grpc.RpcError as err:
+                if retry_count < RETRY_TIMES:
+                    # pylint: disable-next=no-member
+                    if err.code() == grpc.StatusCode.UNAVAILABLE:
+                        log(
+                            WARNING,
+                            WARNING_MESSAGE_SERVICE_UNAVAILABLE,
+                            retry_count + 1,
+                            retry_interval,
+                        )
+
+                    time.sleep(retry_interval)
+                    # Double the retry interval for exponential backoff
+                    retry_interval *= 2
+                else:
+                    raise
+        raise RuntimeError()
