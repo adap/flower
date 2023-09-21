@@ -1,26 +1,23 @@
-"""Define your client class and a function to construct such clients.
+"""Define TensorFlow client class by subclassing `flwr.client.NumPyClient`."""
 
-Please overwrite `flwr.client.NumPyClient` or `flwr.client.Client` and create a function
-to instantiate your client.
-"""
+from typing import Dict
 
 import flwr as fl
-from typing import Dict, Tuple
-from flwr.common import NDArrays, Scalar
 import tensorflow as tf
+from flwr.common import Scalar
 
 
 class TFClient(fl.client.NumPyClient):
-    """Tensorflow Client implementation"""
+    """Tensorflow Client implementation."""
 
     def __init__(
-            self,
-            # train_ds is a tf.data.Dataset
-            train_ds: tf.data.Dataset,
-            # model is a tf.keras.Model
-            model: tf.keras.Model,
-            num_examples_train: int,
-            algorithm: str,
+        self,
+        # train_ds is a tf.data.Dataset
+        train_ds: tf.data.Dataset,
+        # model is a tf.keras.Model
+        model: tf.keras.Model,
+        num_examples_train: int,
+        algorithm: str,
     ):
         self.model = model
         self.train_ds = train_ds
@@ -33,7 +30,6 @@ class TFClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         """Train parameters on the locally held training set."""
-
         epochs: int = config["local_epochs"]
         current_round: int = config["current_round"]
         exp_decay: int = config["exp_decay"]
@@ -52,7 +48,8 @@ class TFClient(fl.client.NumPyClient):
 
         # Get hyperparameters for this round
         # batch_size: int = config["batch_size"]
-        # the dataset is already batched, so there is no need to retrieve the batch size
+        # the dataset is already batched,
+        # so there is no need to retrieve the batch size
 
         # in model.fit it is not mandatory to specify
         # batch_size if the dataset is already batched
@@ -65,8 +62,10 @@ class TFClient(fl.client.NumPyClient):
         # print(type(results.history))
         return parameters_prime, int(num_examples_train), results.history
 
+
 # if __name__ == "__main__":
 #     """Test that flower client is instantiated and correctly runs."""
 #     client = client_fn(2)
-#     model = fedmlb_models.create_resnet18(num_classes=100, input_shape=(None, 32, 32, 3), norm="group")
+#     model = fedmlb_models.create_resnet18(num_classes=100,
+#     input_shape=(None, 32, 32, 3), norm="group")
 #     client.fit(model.get_weights(), {})

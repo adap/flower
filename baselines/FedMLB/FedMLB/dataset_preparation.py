@@ -1,36 +1,32 @@
-"""Handle the dataset partitioning and (optionally) complex downloads.
+"""Handle the dataset partitioning of the datasets being used in simulations.
 
-Please add here all the necessary logic to either download, uncompress, pre/post-process
-your dataset (or all of the above). If the desired way of running your baseline is to
-first download the dataset and partition it and then run the experiments, please
-uncomment the lines below and tell us in the README.md (see the "Running the Experiment"
-block) that this file should be executed first.
+Datasets: CIFAR-100 and TinyImagenet.
 """
-import hydra
-from hydra.core.hydra_config import HydraConfig
-from hydra.utils import call, instantiate
-from omegaconf import DictConfig, OmegaConf
-import os
-from collections import defaultdict
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-import tensorflow as tf
-import numpy as np
+import ast
+import os
 import shutil
 import sys
-import ast
-from PIL import Image
+
+import hydra
+import numpy as np
+
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"  # noqa: E402
+from collections import defaultdict  # noqa: E402
+
+import tensorflow as tf  # noqa: E402
+from omegaconf import DictConfig, OmegaConf  # noqa: E402
+from PIL import Image  # noqa: E402
 
 np.set_printoptions(threshold=sys.maxsize)
 
 IMAGENET_BASE_PATH = "./tiny-imagenet-200/"
 
 
-def read_fedmlb_distribution(dataset: str,
-                             total_clients: int,
-                             alpha: float,
-                             data_folder="client_data"):
-    """Reads the per-client distribution of labels from file.
+def read_fedmlb_distribution(
+    dataset: str, total_clients: int, alpha: float, data_folder="client_data"
+):
+    """Read the per-client distribution of labels from file.
 
     Parameters
     ----------
@@ -41,13 +37,18 @@ def read_fedmlb_distribution(dataset: str,
     alpha: float
         Concentration parameter of Dirichlet distribution for label skew.
     data_folder: str
-        Name of the folder that contains the files to be read."""
-
+        Name of the folder that contains the files to be read.
+    """
     if dataset in ["tiny-imagenet"]:
         dataset = "Tiny-ImageNet"
 
-    file_path = os.path.join("FedMLB", data_folder, dataset, "balanced",
-                             "dirichlet" + str(round(alpha, 1)) + "_clients" + str(total_clients) + ".txt")
+    file_path = os.path.join(
+        "FedMLB",
+        data_folder,
+        dataset,
+        "balanced",
+        "dirichlet" + str(round(alpha, 1)) + "_clients" + str(total_clients) + ".txt",
+    )
 
     # reading the data from the file
     with open(file_path) as f:
@@ -60,80 +61,78 @@ def read_fedmlb_distribution(dataset: str,
 
 
 class TinyImageNetPaths:
-    """
-    Adapted from FedMLB github: https://github.com/jinkyu032/FedMLB/blob/main/datasets/tiny_imagenet.py
+    """Reader for tiny-imagenet dataset on disk.
+
+    Adapted from:
+    https://github.com/jinkyu032/FedMLB/blob/main/datasets/tiny_imagenet.py
     """
 
     def __init__(self):
         root_dir = IMAGENET_BASE_PATH
-        train_path = os.path.join(root_dir, 'train')
-        val_path = os.path.join(root_dir, 'val')
-        test_path = os.path.join(root_dir, 'test')
+        train_path = os.path.join(root_dir, "train")
+        val_path = os.path.join(root_dir, "val")
+        test_path = os.path.join(root_dir, "test")
 
-        wnids_path = os.path.join(root_dir, 'wnids.txt')
-        words_path = os.path.join(root_dir, 'words.txt')
+        wnids_path = os.path.join(root_dir, "wnids.txt")
+        words_path = os.path.join(root_dir, "words.txt")
 
-        self._make_paths(train_path, val_path, test_path,
-                         wnids_path, words_path)
+        self._make_paths(train_path, val_path, test_path, wnids_path, words_path)
 
-    def _make_paths(self, train_path, val_path, test_path,
-                    wnids_path, words_path):
+    def _make_paths(self, train_path, val_path, test_path, wnids_path, words_path):
         self.ids = []
-        with open(wnids_path, 'r') as idf:
+        with open(wnids_path, "r") as idf:
             for nid in idf:
                 nid = nid.strip()
                 self.ids.append(nid)
         self.nid_to_words = defaultdict(list)
-        with open(words_path, 'r') as wf:
+        with open(words_path, "r") as wf:
             for line in wf:
-                nid, labels = line.split('\t')
-                labels = list(map(lambda x: x.strip(), labels.split(',')))
+                nid, labels = line.split("\t")
+                labels = [x.strip() for x in labels.split(",")]
                 self.nid_to_words[nid].extend(labels)
 
-        self.paths = {'train': [],  # [img_path, id, nid, box]
-                      'val': [],  # [img_path, id, nid, box]
-                      'test': []  # img_path
-                      }
+        self.paths = {
+            "train": [],  # [img_path, id, nid, box]
+            "val": [],  # [img_path, id, nid, box]
+            "test": [],  # img_path
+        }
 
         # Get the test paths
-        self.paths['test'] = list(map(lambda x: os.path.join(test_path, x),
-                                      os.listdir(test_path)))
+        self.paths["test"] = [os.path.join(test_path, x) for x in os.listdir(test_path)]
         # Get the validation paths and labels
-        with open(os.path.join(val_path, 'val_annotations.txt')) as valf:
+        with open(os.path.join(val_path, "val_annotations.txt")) as valf:
             for line in valf:
                 fname, nid, x0, y0, x1, y1 = line.split()
-                fname = os.path.join(val_path, 'images', fname)
+                fname = os.path.join(val_path, "images", fname)
                 bbox = int(x0), int(y0), int(x1), int(y1)
                 label_id = self.ids.index(nid)
-                self.paths['val'].append((fname, label_id, nid, bbox))
+                self.paths["val"].append((fname, label_id, nid, bbox))
 
         # Get the training paths
         train_nids = os.listdir(train_path)
         for nid in train_nids:
-            anno_path = os.path.join(train_path, nid, nid + '_boxes.txt')
-            imgs_path = os.path.join(train_path, nid, 'images')
+            anno_path = os.path.join(train_path, nid, nid + "_boxes.txt")
+            imgs_path = os.path.join(train_path, nid, "images")
             label_id = self.ids.index(nid)
-            with open(anno_path, 'r') as annof:
+            with open(anno_path, "r") as annof:
                 for line in annof:
                     fname, x0, y0, x1, y1 = line.split()
                     fname = os.path.join(imgs_path, fname)
                     bbox = int(x0), int(y0), int(x1), int(y1)
-                    self.paths['train'].append((fname, label_id, nid, bbox))
+                    self.paths["train"].append((fname, label_id, nid, bbox))
 
 
 def pil_loader(path: str):
-    """Converts to an RGB image."""
-
-    with open(path, 'rb') as f:
+    """Convert to an RGB image."""
+    with open(path, "rb") as f:
         with Image.open(f) as img:
-            return img.convert('RGB')
+            return img.convert("RGB")
 
 
 def load_test_dataset_tiny_imagenet():
-    """Loads test dataset for Tiny-imagenet."""
-
+    """Load test dataset for Tiny-imagenet."""
     path_obj = TinyImageNetPaths()
-    samples = path_obj.paths['val']
+    samples = path_obj.paths["val"]
     data = np.array([i[0] for i in samples])
     # print(data[1])
     targets = np.array([i[1] for i in samples])
@@ -155,14 +154,13 @@ def load_test_dataset_tiny_imagenet():
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def download_and_preprocess(cfg: DictConfig) -> None:
-    """Does everything needed to get the dataset.
+    """Do everything needed to get the dataset.
 
     Parameters
     ----------
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
-
     ## print parsed config
     print(OmegaConf.to_yaml(cfg))
 
@@ -189,7 +187,7 @@ def download_and_preprocess(cfg: DictConfig) -> None:
     if dataset in ["tiny-imagenet"]:
         path_obj = TinyImageNetPaths()
 
-        samples = path_obj.paths['train']
+        samples = path_obj.paths["train"]
         data = np.array([i[0] for i in samples])
         targets = np.array([i[1] for i in samples])
 
@@ -211,7 +209,9 @@ def download_and_preprocess(cfg: DictConfig) -> None:
 
     # read the distribution of per-label examples for each client
     # from txt file
-    data_mlb = read_fedmlb_distribution(dataset, total_clients=total_clients, alpha=alpha)
+    data_mlb = read_fedmlb_distribution(
+        dataset, total_clients=total_clients, alpha=alpha
+    )
 
     for client in data_mlb:
         list_extracted_all_labels = data_mlb[client]
@@ -228,7 +228,10 @@ def download_and_preprocess(cfg: DictConfig) -> None:
     list_of_narrays = []
     for sampled_client in range(0, total_clients):
         loaded_ds = tf.data.Dataset.load(
-            path=os.path.join(path, str(sampled_client)), element_spec=None, compression=None, reader_func=None
+            path=os.path.join(path, str(sampled_client)),
+            element_spec=None,
+            compression=None,
+            reader_func=None,
         )
 
         print("[Client " + str(sampled_client) + "]")
@@ -241,13 +244,13 @@ def download_and_preprocess(cfg: DictConfig) -> None:
                 counts[i] += tf.reduce_sum(cc)
             return counts
 
-        initial_state = dict((i, 0) for i in range(num_classes))
+        initial_state = {i: 0 for i in range(num_classes)}
         counts = loaded_ds.reduce(initial_state=initial_state, reduce_func=count_class)
 
         # print([(k, v.numpy()) for k, v in counts.items()])
         new_dict = {k: v.numpy() for k, v in counts.items()}
         # print(new_dict)
-        res = np.array([item for item in new_dict.values()])
+        res = np.array(list(new_dict.values()))
         # print(res)
         list_of_narrays.append(res)
 

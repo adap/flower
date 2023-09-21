@@ -1,5 +1,4 @@
-"""Defines a custom Server.
-"""
+"""Defines a custom Server."""
 
 import timeit
 from logging import INFO
@@ -7,28 +6,28 @@ from typing import Optional
 
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager, SimpleClientManager
-
 from flwr.server.history import History
-from flwr.server.strategy import Strategy
 from flwr.server.server import Server
+from flwr.server.strategy import Strategy
 
 
 class MyServer(Server):
-    """Flower server.
+    """Custom Flower server.
+
     This customization of the server has the only scope to allow to start the training
     from a starting round different from 1. This is useful when you want to stop and
-    restart the training (saving and loading the state obviously)."""
+    restart the training (saving and loading the state obviously).
+    """
 
     def __init__(
-            self,
-            *,
-            client_manager: ClientManager = SimpleClientManager(),
-            strategy: Optional[Strategy] = None,
-            starting_round: int = 1
+        self,
+        *,
+        client_manager: ClientManager = None,
+        strategy: Optional[Strategy] = None,
+        starting_round: int = 1,
     ) -> None:
-
-        # if client_manager is None:
-        #     client_manager = SimpleClientManager()
+        if client_manager is None:
+            client_manager = SimpleClientManager()
         super(MyServer, self).__init__(client_manager=client_manager, strategy=strategy)
         print(self.client_manager)
         self.starting_round = starting_round
@@ -36,7 +35,6 @@ class MyServer(Server):
     # overwriting
     def fit(self, num_rounds: int, timeout: Optional[float]) -> History:
         """Run federated averaging for a number of rounds."""
-
         history = History()
 
         # Initialize parameters
@@ -44,7 +42,9 @@ class MyServer(Server):
         self.parameters = self._get_initial_parameters(timeout=timeout)
         if self.starting_round == 1:
             log(INFO, "Evaluating initial parameters")
-            res = self.strategy.evaluate(self.starting_round - 1, parameters=self.parameters)
+            res = self.strategy.evaluate(
+                self.starting_round - 1, parameters=self.parameters
+            )
             if res is not None:
                 log(
                     INFO,
@@ -52,8 +52,12 @@ class MyServer(Server):
                     res[0],
                     res[1],
                 )
-                history.add_loss_centralized(server_round=self.starting_round - 1, loss=res[0])
-                history.add_metrics_centralized(server_round=self.starting_round - 1, metrics=res[1])
+                history.add_loss_centralized(
+                    server_round=self.starting_round - 1, loss=res[0]
+                )
+                history.add_metrics_centralized(
+                    server_round=self.starting_round - 1, metrics=res[1]
+                )
 
         # Run federated learning for num_rounds
         log(INFO, "FL starting")
@@ -61,7 +65,9 @@ class MyServer(Server):
 
         # changed this
         # for current_round in range(1, num_rounds + 1):
-        for current_round in range(self.starting_round, self.starting_round + num_rounds):
+        for current_round in range(
+            self.starting_round, self.starting_round + num_rounds
+        ):
             # Train model and replace previous global model
             res_fit = self.fit_round(
                 server_round=current_round,
