@@ -36,13 +36,13 @@ function add_table_entry ()
   url=$(echo "$metadata" | sed -n 's/url: //p')
 
   # get text after "labels:" in metadata using sed
-  labels=$(echo "$metadata" | sed -n 's/labels: //p')
+  labels=$(echo "$metadata" | sed -n 's/labels: //p' | sed 's/\[//g; s/\]//g')
 
   # get text after "dataset:" in metadata using sed
-  dataset=$(echo "$metadata" | sed -n 's/dataset: //p')
+  dataset=$(echo "$metadata" | sed -n 's/dataset: //p' | sed 's/\[//g; s/\]//g')
 
   table_entry="\\
-   * - $1\\
+   * - \`$1 <$1.html>\`_\\
      - $dataset\\
      - $labels\\
     \\
