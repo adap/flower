@@ -3,8 +3,8 @@
 Optionally, also define a new Server class (please note this is not needed in most
 settings).
 """
-client_num=5
-task_type="REG"
+#client_num=5
+#task_type="REG"
 
 # Flower server
 import functools
@@ -81,7 +81,6 @@ class FL_Server(fl.server.Server):
         # Run federated learning for num_rounds
         log(INFO, "FL starting")
         start_time = timeit.default_timer()
-        best_res=-99999999999999
         for current_round in range(1, num_rounds + 1):
             # Train model and replace previous global model
             res_fit = self.fit_round(server_round=current_round, timeout=timeout)
@@ -282,7 +281,7 @@ def serverside_eval(
 
     trees_aggregated = parameters[1]
     testloader = single_tree_preds_from_each_client(
-        testloader, batch_size, trees_aggregated, cfg.dataset.n_estimators_client,cfg.client_num
+        testloader, batch_size, trees_aggregated, cfg.dataset.n_estimators_client,cfg.dataset.client_num
     )
     loss, result, _ = test(
         cfg, model, testloader, device=device, log_progress=False
@@ -290,5 +289,3 @@ def serverside_eval(
 
     print(f"Evaluation on the server: test_loss={loss:.4f}, test_,{metric_name},={result:.4f}")
     return loss, {metric_name: result}
-
-

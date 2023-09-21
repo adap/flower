@@ -3,6 +3,8 @@ train_ratio: .75
 task_type: "REG"
 n_estimators_client: 100
 num_rounds: 30
+client_num: 5
+
 
 metric:
   name: "mse"
