@@ -32,13 +32,13 @@ def fit_XGBoost(
     tree.fit(X_train, y_train)
     return tree
 
-n_estimators_client=100
-client_num=5
 class CNN(nn.Module):
     def __init__(self,cfg, n_channel: int = 64) -> None:
         super(CNN, self).__init__()
         n_out = 1
         self.task_type = cfg.dataset.task_type
+        n_estimators_client=cfg.n_estimators_client
+        client_num=cfg.client_num
         self.conv1d = nn.Conv1d(
             1, n_channel, kernel_size=n_estimators_client, stride=n_estimators_client, padding=0
         )

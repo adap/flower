@@ -3,13 +3,8 @@
 Optionally, also define a new Server class (please note this is not needed in most
 settings).
 """
-#client_num=5
-#task_type="REG"
 
 # Flower server
-import functools
-from flwr.server.strategy import FedXgbNnAvg
-from flwr.server.app import ServerConfig
 
 import timeit
 from logging import DEBUG, INFO
@@ -27,12 +22,10 @@ from torch.utils.data import DataLoader
 from xgboost import XGBClassifier, XGBRegressor
 from .models import CNN
 from .utils import single_tree_preds_from_each_client,test
-from .client import FL_Client
 from flwr.server.server import (
     fit_clients,
     evaluate_clients,
 )
-from hydra.utils import instantiate
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
@@ -281,7 +274,7 @@ def serverside_eval(
 
     trees_aggregated = parameters[1]
     testloader = single_tree_preds_from_each_client(
-        testloader, batch_size, trees_aggregated, cfg.dataset.n_estimators_client,cfg.dataset.client_num
+        testloader, batch_size, trees_aggregated, cfg.n_estimators_client,cfg.client_num
     )
     loss, result, _ = test(
         cfg, model, testloader, device=device, log_progress=False

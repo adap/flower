@@ -59,7 +59,7 @@ class FL_Client(fl.client.Client):
         self.valloader_original = valloader
         self.trainloader = None
         self.valloader = None
-        self.n_estimators_client = cfg.dataset.n_estimators_client#100#cfg.dataset.n_estimators_client
+        self.n_estimators_client = cfg.n_estimators_client#100#cfg.dataset.n_estimators_client
         self.client_num = client_num
         self.properties = {"tensor_type": "numpy.ndarray"}
         self.log_progress = log_progress
@@ -81,7 +81,7 @@ class FL_Client(fl.client.Client):
             raise Exception(
                     "choose a valid task type, BINARY or REG"
                 )
-        self.optimizer = torch.optim.Adam(self.net.parameters(), lr=cfg.dataset.CNN.lr, betas=(0.9, 0.999))
+        self.optimizer = torch.optim.Adam(self.net.parameters(), lr=cfg.dataset.clients.CNN.lr, betas=(0.9, 0.999))
 
     def train_one_loop(self,data):
                 tree_outputs, labels = data[0].to(self.device), data[1].to(self.device)

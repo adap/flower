@@ -1,9 +1,10 @@
+defaults: 
+  - clients: 10_clients_a9a
+
 dataset_name: "a9a"
 train_ratio: .75
 task_type: "BINARY"
-n_estimators_client: 100
-num_rounds: 30
-client_num: 5
+
 
 metric:
   name: "Accuracy"
@@ -19,4 +20,4 @@ xgb:
   objective: "binary:logistic"
   max_depth: 8
 CNN:
-  lr: .0005
+  lr: ${clients.k}
