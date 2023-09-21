@@ -56,6 +56,25 @@ dataset: [a9a, cod-rna, ijcnn1, abalone, cpusmall, space_ga] # list of datasets 
 #to run all the experiments for the centralized model
 python -m Horizontal_XGBoost.main --config-name "Centralized Baseline"
 
+#to run the federated version for a9a dataset with 2 clients
+python -m Horizontal_XGBoost.main dataset="a9a" clients="a9a_2_clients"
+
+#to run the federated version for a9a dataset with 5 clients
+python -m Horizontal_XGBoost.main dataset="a9a" clients="a9a_5_clients"
+
+#to run the federated version for a9a dataset with 10 clients
+python -m Horizontal_XGBoost.main dataset="a9a" clients="a9a_10_clients"
+
+#to run the federated version for cod-rna dataset with 2 clients
+python -m Horizontal_XGBoost.main dataset="cod_rna" clients="cod_rna_2_clients"
+
+#to run the federated version for cod-rna dataset with 5 clients
+python -m Horizontal_XGBoost.main dataset="cod_rna" clients="cod_rna_5_clients"
+
+#to run the federated version for cod-rna dataset with 10 clients
+python -m Horizontal_XGBoost.main dataset="cod_rna" clients="cod_rna_10_clients"
+
+
 # The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
 
 poetry run -m <baseline-name>.main <no additional arguments> # where <baseline-name> is the name of this directory and that of the only sub-directory in this directory (i.e. where all your source code is)
