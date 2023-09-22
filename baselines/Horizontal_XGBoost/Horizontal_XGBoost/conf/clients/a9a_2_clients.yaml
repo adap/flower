@@ -1,5 +1,5 @@
 n_estimators_client: 250
-num_rounds: 40
+num_rounds: 30
 client_num: 2
 
 xgb:
