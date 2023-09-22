@@ -50,8 +50,8 @@ For UCF-101 dataset, one can simply run the `dataset_preparation.py` file to dow
 
 | Description        |            Default Value            |
 |:-------------------|:-----------------------------------:|
-| total clients      |                 10                  |
-| clients per round  |                 10                  | 
+| total clients      |                 2                  |
+| clients per round  |                 2                  | 
 | number of rounds	  |                 20                  | 
 | client resources	  | {'num_cpus': 2.0, 'num_gpus': 1.0 } | 
 | optimizer	  |                 SGD                  | 
