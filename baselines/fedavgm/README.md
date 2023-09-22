@@ -22,7 +22,7 @@ dataset: [CIFAR-10, FMNIST] # list of datasets you include in your baseline
 
 **Datasets:** CIFAR-10, and FMNIST
 
-**Hardware Setup:** :warning: *_Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Someone out there might not have access to the same resources you have so, could list the absolute minimum hardware needed to run the experiment in a reasonable amount of time ? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?_*
+**Hardware Setup:** This baseline was evaluated in a regular PC without GPU (Intel i7-10710U CPU, and 32 Gb RAM). The major constraint is to run a huge number of rounds such as the reference paper that reports 10.000 round for each case evaluated. As a reference, all the cases for the reported expected results with 1.000 round per case took 2 days.
 
 **Contributors:** Gustavo de Carvalho Bertoli (@gubertoli)
 
@@ -130,16 +130,12 @@ poetry run python -m fedavgm.main server.reporting_fraction=0.2 client.local_epo
 
 ## Expected Results
 
-:warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
 
 ```bash
-poetry run python -m fedavgm.main --multirun client.local_epochs=1 noniid.concentration=10,1,0.1,0.01 strategy=fedavgm,fedavg server.reporting_fraction=0.05,0.4 num_rounds=1000 num_clients=100 dataset=fmnist
-
-# the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
-
-[Now show a figure/table displaying the results of the above command]
-
-poetry run python -m fedavgm.main --multirun client.local_epochs=1 noniid.concentration=10,1,0.1 strategy=fedavgm,fedavg server.reporting_fraction=0.05,0.4 num_rounds=10000 num_clients=100 dataset=cifar10
-
-# add more commands + plots for additional experiments.
+poetry run python -m fedavgm.main --multirun client.local_epochs=1 noniid.concentration=10,1,0.1,0.01 strategy=fedavgm,fedavg server.reporting_fraction=0.05 num_rounds=1000 num_clients=100 dataset=cifar10,fmnist
 ```
+
+The above command will evaluate FedAvgM versus FedAvg on both CIFAR-10 and FMNIST datasets. It uses 100 clients with a reporting fraction of 5% during 1000 rounds. To evaluate the non-iid aspects, this exececution exercises concentration of [10, 1, 0.1, 0.01].
+
+![](docs/fedavgm_vs_fedavg_rounds=1000_cifar_and_fmnist.png)
+
