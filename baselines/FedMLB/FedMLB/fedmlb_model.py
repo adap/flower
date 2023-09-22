@@ -9,7 +9,9 @@ class FedMLBModel(tf.keras.Model):
     Based on the original implementation at https://github.com/jinkyu032/FedMLB.
     """
 
-    def __init__(self, local_model_mlb, global_model_mlb, kd_loss, lambda_1, lambda_2): # pylint: disable=too-many-arguments
+    def __init__(
+        self, local_model_mlb, global_model_mlb, kd_loss, lambda_1, lambda_2
+    ):  # pylint: disable=too-many-arguments
         super().__init__()
         # both local_model mlb_model are instance of custom mlb model
         self.local_model = local_model_mlb

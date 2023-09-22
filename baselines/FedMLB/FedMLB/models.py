@@ -28,7 +28,7 @@ def get_norm_layer(norm, channel_axis):
 class ResBlock(tf.keras.Model):
     """Implement a ResBlock."""
 
-    def __init__( # pylint: disable=too-many-arguments
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         filters,
         downsample,

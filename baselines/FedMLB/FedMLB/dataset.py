@@ -73,7 +73,7 @@ class PaddedCenterCropCustom(tf.keras.layers.Layer):
         )
 
 
-def load_client_datasets_from_files( # pylint: disable=too-many-arguments
+def load_client_datasets_from_files(  # pylint: disable=too-many-arguments
     dataset,
     sampled_client,
     batch_size,
