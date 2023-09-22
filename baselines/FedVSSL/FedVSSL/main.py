@@ -39,15 +39,23 @@ from flwr.common import (
     parameters_to_ndarrays,   # weights_to_parameters in the original FedVSSL repository
 )
 # import CtP.tools._init_paths
-from FedVSSL.strategy import FedVSSL
-from FedVSSL.client import SslClient
+from strategy import FedVSSL
+from client import SslClient
 
+def t_f(arg):
+    ua = str(arg).upper()
+    if 'TRUE'.startswith(ua):
+       return True
+    elif 'FALSE'.startswith(ua):
+       return False
+    else:
+       pass  #error condition mayb
 
 def initial_setup(cid, base_work_dir, rounds, data_dir, num_gpus, partition_dir):
-    import FedVSSL.utils as utils
+    import utils as utils
     cid_plus_one = str(int(cid) + 1)
     args = Namespace(
-        cfg='FedVSSL/conf/mmcv_conf/r3d_18_ucf101/pretraining.py', # Path to the pretraining configuration file
+        cfg='conf/mmcv_conf/r3d_18_ucf101/pretraining.py', # Path to the pretraining configuration file
         checkpoint=None, cid=int(cid), data_dir=data_dir, gpus=num_gpus,
         launcher='none',
         local_rank=0, progress=False, resume_from=None, rounds=rounds, seed=7, validate=False,
@@ -60,6 +68,10 @@ def initial_setup(cid, base_work_dir, rounds, data_dir, num_gpus, partition_dir)
     cfg.data.train.data_source.ann_file = partition_dir + '/client_dist' + cid_plus_one + '.json' 
 
     distributed, logger = utils.set_config_mmcv(args, cfg)
+    # These two arguments needs to be false during federated pretraining otherwise the client will load the previously saved checkpoint
+
+    cfg.resume_from = False
+    cfg.load_from = False
 
     # load the model
     model = utils.load_model(args, cfg)
@@ -81,7 +93,7 @@ def fit_config(rnd: int) -> Dict[str, str]:
 def parse_args():
     parser = argparse.ArgumentParser(description='Running FedVSSL and downstream fine-tuning.')
 
-    parser.add_argument('--pre_training', default=False, type=bool, help='set true for FL pre-training, else for downstream fine-tuning.')
+    parser.add_argument('--pre_training', default=False, type=t_f, help='set true for FL pre-training, else for downstream fine-tuning.')
 
     ### hyper-parameters for FL pre-training ###
     parser.add_argument('--exp_name', default='FedVSSL_results', type=str, help='experimental name used for SSL pre-training.')
@@ -90,9 +102,9 @@ def parse_args():
                         help='directory for FL partition .json files.')
 
     # FL settings
-    parser.add_argument('--pool_size', default=10, type=int, help='number of dataset partitions (= number of total clients).')
+    parser.add_argument('--pool_size', default=2, type=int, help='number of dataset partitions (= number of total clients).')
     parser.add_argument('--rounds', default=20, type=int, help='number of FL rounds.')
-    parser.add_argument('--num_clients_per_round', default=10, type=int, help='number of clients participating in the training.')
+    parser.add_argument('--num_clients_per_round', default=2, type=int, help='number of clients participating in the training.')
 
     # ray config
     parser.add_argument('--cpus_per_client', default=2, type=int, help='number of CPUs used for each client.')
@@ -104,7 +116,7 @@ def parse_args():
     parser.add_argument('--swbeta', default=1, type=int, help='hyper-parameter beta in the paper.')
 
     # FedAvg baseline
-    parser.add_argument('--fedavg', default=False, type=bool, help='run FedAvg baseline')
+    parser.add_argument('--fedavg', default=False, type=t_f, help='run FedAvg baseline')
 
     ### hyper-parameters for downstream fine-tuning ###
     parser.add_argument('--exp_name_finetune', default='finetune_results', type=str,
@@ -120,7 +132,8 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
-    if args.pre_training:
+    if args.pre_training == True:
+        
 
         # first the paths needs to be defined otherwise the program may not be able to locate the files of the ctp
         from utils import init_p_paths
@@ -174,10 +187,10 @@ if __name__ == "__main__":
         from mmcv.runner import load_state_dict
         # import FedVSSL.CtP
         # from FedVSSL.CtP.configs.ctp.r3d_18_kinetics import finetune_ucf101
-        from FedVSSL.CtP.pyvrl.builder import build_model, build_dataset
+        from CtP.pyvrl.builder import build_model, build_dataset
 
         # we give an example on how one can perform fine-tuning uisng UCF-101 dataset.
-        cfg_path = "FedVSSL/CtP/configs/ctp/r3d_18_kinetics/finetune_ucf101.py"
+        cfg_path = "CtP/configs/ctp/r3d_18_kinetics/finetune_ucf101.py"
         cfg = Config.fromfile(cfg_path)
         cfg.model.backbone['pretrained'] = None
 
@@ -224,7 +237,7 @@ if __name__ == "__main__":
             f.write(config_content)
 
 
-        process_obj = subprocess.run(["bash", "FedVSSL/CtP/tools/dist_train.sh",\
+        process_obj = subprocess.run(["bash", "CtP/tools/dist_train.sh",\
         f"{cfg_path}", "4",\
         f"--work_dir {args.exp_name_finetune}",
         f"--data_dir {args.data_dir}"])
@@ -246,12 +259,12 @@ if __name__ == "__main__":
         )
        ''').strip("\n")
 
-        cfg_path_test= "FedVSSL/CtP/configs/ctp/r3d_18_ucf101/finetune_ucf101.py"
+        cfg_path_test= "CtP/configs/ctp/r3d_18_ucf101/finetune_ucf101.py"
         with open(cfg_path_test, 'w') as f:
             f.write(config_content_test)
 
         # Evaluating the finetuned model
-        process_obj = subprocess.run(["bash", "FedVSSL/CtP/tools/dist_test.sh",\
+        process_obj = subprocess.run(["bash", "CtP/tools/dist_test.sh",\
         f"{cfg_path_test}", "4",\
         f"--work_dir {args.exp_name_finetune}",
         f"--data_dir {args.data_dir}",\

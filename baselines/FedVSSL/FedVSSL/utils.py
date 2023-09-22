@@ -10,8 +10,8 @@ from typing import Tuple
 import torch
 import torch.nn as nn
 import torchvision
-from FedVSSL.CtP.pyvrl.apis import train_network, get_root_logger, set_random_seed, test_network
-from FedVSSL.CtP.pyvrl.builder import build_model, build_dataset
+from CtP.pyvrl.apis import train_network, get_root_logger, set_random_seed, test_network
+from CtP.pyvrl.builder import build_model, build_dataset
 
 # from CtP.tools import test_net as test_model_cl
 
@@ -129,7 +129,7 @@ def load_test_data(args, cfg):
 
 def train_model_cl(model, train_dataset, args, cfg, distributed, logger):
     # model code
-    from FedVSSL.CtP.pyvrl.apis import get_root_logger, set_random_seed, test_network , train_network
+    from CtP.pyvrl.apis import get_root_logger, set_random_seed, test_network , train_network
     train_network(model,
         train_dataset,
         cfg,
