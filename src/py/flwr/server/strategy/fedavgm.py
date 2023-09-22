@@ -59,7 +59,7 @@ class FedAvgM(FedAvg):
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
-        initial_parameters: Optional[Parameters] = None,
+        initial_parameters: Parameters,
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         server_learning_rate: float = 1.0,
@@ -89,13 +89,17 @@ class FedAvgM(FedAvg):
             Function used to configure validation. Defaults to None.
         accept_failures : bool, optional
             Whether or not accept rounds containing failures. Defaults to True.
-        initial_parameters : Parameters, optional
+        initial_parameters : Parameters
             Initial global model parameters.
         server_learning_rate: float
             Server-side learning rate used in server-side optimization.
-            Defaults to 1.0.
+            If either `server_learning_rate` != 1.0 or `server_momentum` !=
+            0.0, enables server-side optimization. Defaults
+            to 1.0.
         server_momentum: float
-            Server-side momentum factor used for FedAvgM. Defaults to 0.0.
+            Server-side momentum factor used in server-side optimization. If
+            either `server_learning_rate` != 1.0 or `server_momentum` != 0.0,
+            enables server-side optimization. Defaults to 0.0.
         """
         super().__init__(
             fraction_fit=fraction_fit,
