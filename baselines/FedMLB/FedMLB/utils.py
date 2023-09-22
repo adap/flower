@@ -3,8 +3,9 @@
 import os
 import pickle
 import subprocess as sp
+from os import PathLike
 from secrets import token_hex
-from typing import Dict, Optional
+from typing import Dict, Union
 
 import psutil
 from flwr.server.history import History
@@ -20,8 +21,8 @@ def dic_save(dictionary: Dict, filename: str):
     filename : str
         Path to save the dictionary to.
     """
-    with open(filename + ".pickle", "wb") as f:
-        pickle.dump(dictionary, f, pickle.HIGHEST_PROTOCOL)
+    with open(filename + ".pickle", "wb") as dictionary_file:
+        pickle.dump(dictionary, dictionary_file, pickle.HIGHEST_PROTOCOL)
 
 
 def dic_load(filename: str):
@@ -33,15 +34,15 @@ def dic_load(filename: str):
         Path to load the dictionary from.
     """
     try:
-        with open(filename, "rb") as fp:
-            return pickle.load(fp)
+        with open(filename, "rb") as dictionary_file:
+            return pickle.load(dictionary_file)
     except IOError:
         return {"checkpoint_round": 0}
 
 
 def save_results_as_pickle(
     history: History,
-    file_path: Optional[str],
+    file_path: Union[str, PathLike],
 ) -> None:
     """Save results from simulation to pickle.
 

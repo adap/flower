@@ -24,8 +24,8 @@ import FedMLB.dataset as fedmlb_datasets
 import FedMLB.dataset_preparation as fedmlb_ds_preparation
 import FedMLB.models as fedmlb_models
 from FedMLB.client import TFClient
-from FedMLB.FedAvgKDModel import FedAvgKDModel
-from FedMLB.FedMLBModel import FedMLBModel
+from FedMLB.fedavg_kd_model import FedAvgKDModel
+from FedMLB.fedmlb_model import FedMLBModel
 from FedMLB.models import create_resnet18
 from FedMLB.server import MyServer
 from FedMLB.utils import (
@@ -91,8 +91,8 @@ def main(cfg: DictConfig) -> None:
             test_ds = fedmlb_ds_preparation.load_test_dataset_tiny_imagenet()
             test_ds = (
                 test_ds.map(element_fn_norm_tiny_imagenet)
-                .map(center_crop_data)
-                .batch(TEST_BATCH_SIZE)
+                    .map(center_crop_data)
+                    .batch(TEST_BATCH_SIZE)
             )
 
         # creating a tensorboard writer to log results
@@ -103,7 +103,7 @@ def main(cfg: DictConfig) -> None:
 
         # The `evaluate` function will be called after every round
         def evaluate(
-            server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
+                server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
         ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
             model.set_weights(parameters)  # Update model with the latest parameters
             loss, accuracy = model.evaluate(test_ds)
@@ -125,7 +125,7 @@ def main(cfg: DictConfig) -> None:
 
             # saving the checkpoint before the end of simulation
             if cfg.save_checkpoint and server_round == (
-                cfg.num_rounds + starting_round - 1
+                    cfg.num_rounds + starting_round - 1
             ):
                 path = os.path.join(
                     save_path_checkpoints,
@@ -243,7 +243,12 @@ def main(cfg: DictConfig) -> None:
                 norm="group",
                 seed=random_seed,
             )
-            client_model = FedMLBModel(local_model, global_model)
+            kd_loss = tf.keras.losses.KLDivergence(
+                reduction=tf.keras.losses.Reduction.SUM_OVER_BATCH_SIZE
+            )
+
+            client_model = FedMLBModel(local_model, global_model,
+                                       kd_loss, lambda_1, lambda_2)
             client_model.compile(
                 optimizer=tf.keras.optimizers.SGD(
                     learning_rate=lr_client,
@@ -255,14 +260,9 @@ def main(cfg: DictConfig) -> None:
                     reduction=tf.keras.losses.Reduction.SUM_OVER_BATCH_SIZE,
                 ),
                 metrics=[tf.keras.metrics.SparseCategoricalAccuracy(name="accuracy")],
-                kd_loss=tf.keras.losses.KLDivergence(
-                    reduction=tf.keras.losses.Reduction.SUM_OVER_BATCH_SIZE
-                ),
-                lambda_1=lambda_1,
-                lambda_2=lambda_2,
             )
 
-        elif algorithm in ["FedAvg+KD"]:
+        else:  # algorithm in ["FedAvg+KD"]:
             local_model = fedmlb_models.create_resnet18(
                 num_classes=num_classes,
                 input_shape=input_shape,
@@ -275,7 +275,11 @@ def main(cfg: DictConfig) -> None:
                 norm="group",
                 seed=random_seed,
             )
-            client_model = FedAvgKDModel(local_model, global_model)
+            kd_loss = tf.keras.losses.KLDivergence(
+                reduction=tf.keras.losses.Reduction.SUM_OVER_BATCH_SIZE
+            )
+            client_model = FedAvgKDModel(local_model, global_model, kd_loss, gamma=0.2)
+
             client_model.compile(
                 optimizer=tf.keras.optimizers.SGD(
                     learning_rate=lr_client,
@@ -287,10 +291,6 @@ def main(cfg: DictConfig) -> None:
                     reduction=tf.keras.losses.Reduction.SUM_OVER_BATCH_SIZE,
                 ),
                 metrics=[tf.keras.metrics.SparseCategoricalAccuracy(name="accuracy")],
-                kd_loss=tf.keras.losses.KLDivergence(
-                    reduction=tf.keras.losses.Reduction.SUM_OVER_BATCH_SIZE
-                ),
-                gamma=0.2,
             )
 
         client = TFClient(training_dataset, client_model, local_examples, algorithm)
@@ -399,7 +399,7 @@ def main(cfg: DictConfig) -> None:
 
     # save results as a Python pickle using a file_path
     # the directory created by Hydra for each run
-    save_results_as_pickle(history, file_path=save_path, extra_results={})
+    save_results_as_pickle(history, file_path=save_path)
 
 
 if __name__ == "__main__":

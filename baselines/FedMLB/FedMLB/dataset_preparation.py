@@ -7,16 +7,13 @@ import ast
 import os
 import shutil
 import sys
+from collections import defaultdict
 
 import hydra
 import numpy as np
-
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"  # noqa: E402
-from collections import defaultdict  # noqa: E402
-
-import tensorflow as tf  # noqa: E402
-from omegaconf import DictConfig, OmegaConf  # noqa: E402
-from PIL import Image  # noqa: E402
+import tensorflow as tf
+from omegaconf import DictConfig, OmegaConf
+from PIL import Image
 
 np.set_printoptions(threshold=sys.maxsize)
 
@@ -51,8 +48,8 @@ def read_fedmlb_distribution(
     )
 
     # reading the data from the file
-    with open(file_path) as f:
-        data = f.read()
+    with open(file_path) as distribution_file:
+        data = distribution_file.read()
 
     # reconstructing the data as a dictionary
     data_mlb = ast.literal_eval(data)
@@ -78,15 +75,17 @@ class TinyImageNetPaths:
 
         self._make_paths(train_path, val_path, test_path, wnids_path, words_path)
 
-    def _make_paths(self, train_path, val_path, test_path, wnids_path, words_path):
+    def _make_paths(
+        self, train_path, val_path, test_path, wnids_path, words_path
+    ):  # pylint: disable=too-many-arguments
         self.ids = []
         with open(wnids_path, "r") as idf:
             for nid in idf:
                 nid = nid.strip()
                 self.ids.append(nid)
         self.nid_to_words = defaultdict(list)
-        with open(words_path, "r") as wf:
-            for line in wf:
+        with open(words_path, "r") as words_file:
+            for line in words_file:
                 nid, labels = line.split("\t")
                 labels = [x.strip() for x in labels.split(",")]
                 self.nid_to_words[nid].extend(labels)
@@ -102,11 +101,11 @@ class TinyImageNetPaths:
         # Get the validation paths and labels
         with open(os.path.join(val_path, "val_annotations.txt")) as valf:
             for line in valf:
-                fname, nid, x0, y0, x1, y1 = line.split()
-                fname = os.path.join(val_path, "images", fname)
-                bbox = int(x0), int(y0), int(x1), int(y1)
+                file_name, nid, x_0, y_0, x_1, y_1 = line.split()
+                file_name = os.path.join(val_path, "images", file_name)
+                bbox = int(x_0), int(y_0), int(x_1), int(y_1)
                 label_id = self.ids.index(nid)
-                self.paths["val"].append((fname, label_id, nid, bbox))
+                self.paths["val"].append((file_name, label_id, nid, bbox))
 
         # Get the training paths
         train_nids = os.listdir(train_path)
@@ -114,18 +113,18 @@ class TinyImageNetPaths:
             anno_path = os.path.join(train_path, nid, nid + "_boxes.txt")
             imgs_path = os.path.join(train_path, nid, "images")
             label_id = self.ids.index(nid)
-            with open(anno_path, "r") as annof:
-                for line in annof:
-                    fname, x0, y0, x1, y1 = line.split()
+            with open(anno_path, "r") as anno_file:
+                for line in anno_file:
+                    fname, x_0, y_0, x_1, y_1 = line.split()
                     fname = os.path.join(imgs_path, fname)
-                    bbox = int(x0), int(y0), int(x1), int(y1)
+                    bbox = int(x_0), int(y_0), int(x_1), int(y_1)
                     self.paths["train"].append((fname, label_id, nid, bbox))
 
 
 def pil_loader(path: str):
     """Convert to an RGB image."""
-    with open(path, "rb") as f:
-        with Image.open(f) as img:
+    with open(path, "rb") as image_file:
+        with Image.open(image_file) as img:
             return img.convert("RGB")
 
 
@@ -134,17 +133,17 @@ def load_test_dataset_tiny_imagenet():
     path_obj = TinyImageNetPaths()
     samples = path_obj.paths["val"]
     data = np.array([i[0] for i in samples])
-    # print(data[1])
+
     targets = np.array([i[1] for i in samples])
     labels = []
     images = []
-    for d in data:
-        img = pil_loader(d)
+    for current_image in data:
+        img = pil_loader(current_image)
         img_np = np.asarray(img)
         images.append(img_np)
 
-    for t in targets:
-        labels.append(t)
+    for target in targets:
+        labels.append(target)
 
     x_test = np.stack(images, axis=0)
     y_test = np.stack(labels, axis=0)
@@ -193,13 +192,13 @@ def download_and_preprocess(cfg: DictConfig) -> None:
 
         labels = []
         images = []
-        for d in data:
-            img = pil_loader(d)
+        for current_image in data:
+            img = pil_loader(current_image)
             img_np = np.asarray(img)
             images.append(img_np)
 
-        for t in targets:
-            labels.append(t)
+        for target in targets:
+            labels.append(target)
 
         x_train = np.stack(images, axis=0)
         y_train = np.stack(labels, axis=0)
@@ -218,10 +217,14 @@ def download_and_preprocess(cfg: DictConfig) -> None:
         numpy_dataset_y = y_train[list_extracted_all_labels]
         numpy_dataset_x = x_train[list_extracted_all_labels]
 
-        ds = tf.data.Dataset.from_tensor_slices((numpy_dataset_x, numpy_dataset_y))
-        ds = ds.shuffle(buffer_size=4096)
+        tf_dataset = tf.data.Dataset.from_tensor_slices(
+            (numpy_dataset_x, numpy_dataset_y)
+        )
+        tf_dataset = tf_dataset.shuffle(buffer_size=4096)
 
-        tf.data.Dataset.save(ds, path=os.path.join(folder_path, "train", str(client)))
+        tf.data.Dataset.save(
+            tf_dataset, path=os.path.join(folder_path, "train", str(client))
+        )
 
     path = os.path.join(os.path.join(folder_path, "train"))
 
@@ -240,8 +243,8 @@ def download_and_preprocess(cfg: DictConfig) -> None:
         def count_class(counts, batch, num_classes=num_classes):
             _, labels = batch
             for i in range(num_classes):
-                cc = tf.cast(labels == i, tf.int32)
-                counts[i] += tf.reduce_sum(cc)
+                accumulator = tf.cast(labels == i, tf.int32)
+                counts[i] += tf.reduce_sum(accumulator)
             return counts
 
         initial_state = {i: 0 for i in range(num_classes)}

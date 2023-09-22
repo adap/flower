@@ -22,13 +22,13 @@ class MyServer(Server):
     def __init__(
         self,
         *,
-        client_manager: ClientManager = None,
+        client_manager: Optional[ClientManager] = None,
         strategy: Optional[Strategy] = None,
         starting_round: int = 1,
     ) -> None:
         if client_manager is None:
             client_manager = SimpleClientManager()
-        super(MyServer, self).__init__(client_manager=client_manager, strategy=strategy)
+        super().__init__(client_manager=client_manager, strategy=strategy)
         print(self.client_manager)
         self.starting_round = starting_round
 

@@ -28,12 +28,11 @@ def get_norm_layer(norm, channel_axis):
 class ResBlock(tf.keras.Model):
     """Implement a ResBlock."""
 
-    def __init__(
+    def __init__( # pylint: disable=too-many-arguments
         self,
         filters,
         downsample,
         norm="group",
-        is_first_layer=False,
         l2_weight_decay=1e-3,
         stride=1,
         seed: Optional[int] = None,
@@ -86,19 +85,19 @@ class ResBlock(tf.keras.Model):
         )
         self.gn2 = get_norm_layer(norm, channel_axis=channel_axis)
 
-    def call(self, input):
+    def call(self, x):
         """Call the model on new inputs and returns the outputs as tensors."""
-        shortcut = self.shortcut(input)
+        shortcut = self.shortcut(x)
 
-        input = self.conv1(input)
-        input = self.gn1(input)
-        input = tf.keras.layers.ReLU()(input)
+        x = self.conv1(x)
+        x = self.gn1(x)
+        x = tf.keras.layers.ReLU()(x)
 
-        input = self.conv2(input)
-        input = self.gn2(input)
+        x = self.conv2(x)
+        x = self.gn2(x)
 
-        input = input + shortcut
-        return tf.keras.layers.ReLU()(input)
+        x = x + shortcut
+        return tf.keras.layers.ReLU()(x)
 
 
 class ResNet18(tf.keras.Model):
@@ -215,7 +214,7 @@ class ResNet18(tf.keras.Model):
         self.gap = tf.keras.Sequential(
             [tf.keras.layers.GlobalAveragePooling2D()], name="gn_relu_gap"
         )
-        self.fc = tf.keras.layers.Dense(
+        self.fully_connected = tf.keras.layers.Dense(
             outputs,
             kernel_initializer=tf.keras.initializers.RandomNormal(
                 stddev=0.01, seed=seed
@@ -224,17 +223,17 @@ class ResNet18(tf.keras.Model):
             bias_regularizer=tf.keras.regularizers.l2(l2_weight_decay),
         )
 
-    def call(self, input):
+    def call(self, x):
         """Call the model on new inputs and returns the outputs as tensors."""
-        input = self.layer0(input)
-        input = self.layer1(input)
-        input = self.layer2(input)
-        input = self.layer3(input)
-        input = self.layer4(input)
-        input = self.gap(input)
-        input = self.fc(input)
+        x = self.layer0(x)
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+        x = self.gap(x)
+        x = self.fully_connected(x)
 
-        return input
+        return x
 
 
 class ResNet18MLB(tf.keras.Model):
@@ -351,7 +350,7 @@ class ResNet18MLB(tf.keras.Model):
         self.gap = tf.keras.Sequential(
             [tf.keras.layers.GlobalAveragePooling2D()], name="gn_relu_gap"
         )
-        self.fc = tf.keras.layers.Dense(
+        self.fully_connected = tf.keras.layers.Dense(
             outputs,
             kernel_initializer=tf.keras.initializers.RandomNormal(
                 stddev=0.01, seed=seed
@@ -384,12 +383,11 @@ class ResNet18MLB(tf.keras.Model):
         else:
             out4 = out3
 
-        logit = self.fc(out4)
+        logit = self.fully_connected(out4)
 
         if return_feature:
             return out0, out1, out2, out3, out4, logit
-        else:
-            return logit
+        return logit
 
 
 def create_resnet18(

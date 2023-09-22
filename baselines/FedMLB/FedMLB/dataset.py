@@ -26,27 +26,26 @@ def load_selected_client_statistics(selected_client, alpha, dataset, total_clien
 class PaddedRandomCropCustom(tf.keras.layers.Layer):
     """Custom keras layer to random crop the input image, same as FedMLB paper."""
 
-    def __init__(self, seed=None, height=32, width=32):
-        super(PaddedRandomCropCustom, self).__init__()
+    def __init__(self, seed=None, height=32, width=32, **kwargs):
+        super().__init__(**kwargs)
         self.seed = seed
         self.height = height
         self.width = width
 
-    def call(self, input_tensor, training=True):
+    def call(self, inputs, training=True):
         """Call the layer on new inputs and returns the outputs as tensors."""
         if training:
-            input_tensor = tf.image.resize_with_crop_or_pad(
-                image=input_tensor,
+            inputs = tf.image.resize_with_crop_or_pad(
+                image=inputs,
                 target_height=self.height + 4,
                 target_width=self.width + 4,
             )
-            input_tensor = tf.image.random_crop(
-                value=input_tensor, size=[self.height, self.width, 3], seed=self.seed
+            inputs = tf.image.random_crop(
+                value=inputs, size=[self.height, self.width, 3], seed=self.seed
             )
 
-            return input_tensor
-        else:
-            return input_tensor
+            return inputs
+        return inputs
 
 
 class PaddedCenterCropCustom(tf.keras.layers.Layer):
@@ -57,13 +56,13 @@ class PaddedCenterCropCustom(tf.keras.layers.Layer):
         self.height = height
         self.width = width
 
-    def call(self, input_tensor):
+    def call(self, inputs):
         """Call the layer on new inputs and returns the outputs as tensors."""
         input_tensor = tf.image.resize_with_crop_or_pad(
-            image=input_tensor, target_height=self.height, target_width=self.width
+            image=inputs, target_height=self.height, target_width=self.width
         )
 
-        input_shape = tf.shape(input_tensor)
+        input_shape = tf.shape(inputs)
         h_diff = input_shape[0] - self.height
         w_diff = input_shape[1] - self.width
 
@@ -74,7 +73,7 @@ class PaddedCenterCropCustom(tf.keras.layers.Layer):
         )
 
 
-def load_client_datasets_from_files(
+def load_client_datasets_from_files( # pylint: disable=too-many-arguments
     dataset,
     sampled_client,
     batch_size,
@@ -161,20 +160,18 @@ def load_client_datasets_from_files(
         )
         loaded_ds = loaded_ds.prefetch(tf.data.AUTOTUNE)
         return loaded_ds
-    else:
-        # dataset in ["tiny_imagenet"]
-        if split == "test":
-            return (
-                loaded_ds.map(element_fn_norm_tiny_imagenet)
-                .map(center_crop_data)
-                .batch(batch_size, drop_remainder=False)
-            )
-        loaded_ds = (
-            loaded_ds.shuffle(buffer_size=1024, seed=seed)
-            .map(element_fn_norm_tiny_imagenet)
-            .map(transform_data)
+    # dataset in ["tiny_imagenet"]
+    if split == "test":
+        return (
+            loaded_ds.map(element_fn_norm_tiny_imagenet)
+            .map(center_crop_data)
             .batch(batch_size, drop_remainder=False)
         )
-        # batch_size, drop_remainder=False).map(element_fn_norm_tiny_imagenet)
-        loaded_ds = loaded_ds.prefetch(tf.data.AUTOTUNE)
-        return loaded_ds
+    loaded_ds = (
+        loaded_ds.shuffle(buffer_size=1024, seed=seed)
+        .map(element_fn_norm_tiny_imagenet)
+        .map(transform_data)
+        .batch(batch_size, drop_remainder=False)
+    )
+    loaded_ds = loaded_ds.prefetch(tf.data.AUTOTUNE)
+    return loaded_ds

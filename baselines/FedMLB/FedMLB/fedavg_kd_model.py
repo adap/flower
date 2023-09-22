@@ -14,27 +14,10 @@ class FedAvgKDModel(tf.keras.Model):
     (i.e., client model).
     """
 
-    def __init__(self, model, h_model):
-        super(FedAvgKDModel, self).__init__()
+    def __init__(self, model, h_model, kd_loss, gamma=0.2):
+        super().__init__()
         self.local_model = model
         self.global_model = h_model
-
-    def compile(self, optimizer, loss, metrics, kd_loss, gamma=0.2):
-        """Configure the model for training.
-
-        Parameters ---------- optimizer : string (name of optimizer) or optimizer
-        instance. See tf.keras.optimizers. loss: Loss function. May be a string (name
-        of loss function), or a tf.keras.losses.Loss instance. See tf.keras.losses.
-        metrics: List of metrics to be evaluated by the model during training and
-        testing. Each of this can be a string (name of a built-in function), function
-        or a tf.keras.metrics.Metric instance. See tf.keras.metrics. kd_loss :
-        tf.keras.losses.Loss Loss function, a tf.keras.losses.Loss instance. gamma :
-        float Weight of the KD-based term in regularization [0, 1). With gamma == 0,
-        this is equivalent to FedAvg.
-        """
-        super(FedAvgKDModel, self).compile(
-            optimizer=optimizer, loss=loss, metrics=metrics
-        )
         self.kd_loss = kd_loss
         self.gamma = gamma
 
