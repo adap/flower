@@ -315,7 +315,7 @@ def main(cfg: DictConfig) -> None:  # pylint: disable=too-many-local-variables
     )
 
     save_path_logging = os.path.join(
-        "FedMLB",
+        "fedmlb",
         "tb_logging",
         dataset,
         "resnet18",
@@ -327,7 +327,7 @@ def main(cfg: DictConfig) -> None:  # pylint: disable=too-many-local-variables
     )
 
     save_path_checkpoints = os.path.join(
-        "FedMLB",
+        "fedmlb",
         "model_checkpoints",
         dataset,
         "resnet18",
