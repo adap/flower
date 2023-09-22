@@ -81,13 +81,13 @@ Then, ensure you have activated your Poetry environment (execute `poetry shell` 
 
 ```bash
 # run federated SSL training with FedVSSL
-python -m FedVSSL.main --pre_train=True # this will run using the default settings.
+python -m main --pre_train=True # this will run using the default settings.
 
 # you can override settings directly from the command line
-python -m FedVSSL.main --mix_coeff=1 --rounds=100 # will set hyper-parameter alpha to 1 and the number of rounds to 100
+python -m main --mix_coeff=1 --rounds=100 # will set hyper-parameter alpha to 1 and the number of rounds to 100
 
 # run downstream fine-tuning with pre-trained SSL model
-python -m FedVSSL.main --pre_train=False # this will run using the default settings.
+python -m main --pre_train=False # this will run using the default settings.
 
 ```
 
