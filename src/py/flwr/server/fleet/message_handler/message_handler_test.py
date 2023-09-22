@@ -109,7 +109,7 @@ def test_push_task_res() -> None:
             TaskRes(
                 task_id="",
                 group_id="",
-                workload_id="",
+                workload_id=0,
                 task=Task(),
             ),
         ],

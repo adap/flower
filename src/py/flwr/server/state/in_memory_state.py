@@ -32,7 +32,7 @@ class InMemoryState(State):
 
     def __init__(self) -> None:
         self.node_ids: Set[int] = set()
-        self.workload_ids: Set[str] = set()
+        self.workload_ids: Set[int] = set()
         self.task_ins_store: Dict[UUID, TaskIns] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
 
@@ -194,7 +194,7 @@ class InMemoryState(State):
             raise ValueError(f"Node {node_id} is not registered")
         self.node_ids.remove(node_id)
 
-    def get_nodes(self, workload_id: str) -> Set[int]:
+    def get_nodes(self, workload_id: int) -> Set[int]:
         """Return all available client nodes.
 
         Constraints
@@ -206,14 +206,13 @@ class InMemoryState(State):
             return set()
         return self.node_ids
 
-    def create_workload(self) -> str:
+    def create_workload(self) -> int:
         """Create one workload."""
         # String representation of random integer from 0 to 9223372036854775807
-        random_workload_id: int = random.randrange(9223372036854775808)
-        workload_id = str(random_workload_id)
+        workload_id: int = random.randrange(9223372036854775808)
 
         if workload_id not in self.workload_ids:
             self.workload_ids.add(workload_id)
             return workload_id
         log(ERROR, "Unexpected workload creation failure.")
-        return ""
+        return 0
