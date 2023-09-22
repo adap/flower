@@ -2,7 +2,7 @@ name: Release
 
 on:
   release:
-    types: [published, unpublished]
+    types: [published, unpublished, created]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
