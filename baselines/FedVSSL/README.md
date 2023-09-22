@@ -80,22 +80,24 @@ To run FedVSSL with UCF-101 baseline, first follow the instruction in `dataset_p
 Then, ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
 
 ```bash
+# direct to FedVSSL code directory
+cd FedVSSL
+
 # run federated SSL training with FedVSSL
-python -m FedVSSL.main --pre_training=True # this will run using the default settings.
+python -m main --pre_training=True # this will run using the default settings.
 
 # you can override settings directly from the command line
-python -m FedVSSL.main --pre_training=True --mix_coeff=1 --rounds=100 # will set hyper-parameter alpha to 1 and the number of rounds to 100
+python -m main --pre_training=True --mix_coeff=1 --rounds=100 # will set hyper-parameter alpha to 1 and the number of rounds to 100
 
 # run downstream fine-tuning with pre-trained SSL model
-python -m FedVSSL.main --pre_training=False # this will run using the default settings.
-
+python -m main --pre_training=False # this will run using the default settings.
 ```
 
 To run using FedAvg:
 ```bash
 # this will run FedAvg baseline
 # This is done so to match the experimental setup in the paper
-python -m FedVSSL.main --fedavg=True
+python -m main --fedavg=True
 
 # this config can also be overriden.
 ```
