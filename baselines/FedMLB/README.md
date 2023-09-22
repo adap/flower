@@ -136,16 +136,16 @@ use the following commands:
 ```bash
 # this will run using the default settings in the `conf/base.yaml`
 # and will generate the setting for 1. (see above)
-python -m FedMLB.dataset_preparation 
+python -m fedmlb.dataset_preparation 
 
 # this will generate the setting for 2. (see above)
-python -m FedMLB.dataset_preparation dataset_config.alpha_dirichlet=0.3 total_clients=500
+python -m fedmlb.dataset_preparation dataset_config.alpha_dirichlet=0.3 total_clients=500
 
 # this will generate the setting for 3. (see above)
-python -m FedMLB.dataset_preparation dataset_config.alpha_dirichlet=0.6 
+python -m fedmlb.dataset_preparation dataset_config.alpha_dirichlet=0.6 
 
 # this will generate the setting for 4. (see above)
-python -m FedMLB.dataset_preparation dataset_config.alpha_dirichlet=0.6 total_clients=500
+python -m fedmlb.dataset_preparation dataset_config.alpha_dirichlet=0.6 total_clients=500
 ```
 Note that, to reproduce those settings, we leverage the `.txt` files
 contained in the`client_data` folder in this project. Such files store
@@ -167,16 +167,16 @@ use the following commands:
 ```bash
 # commands to generate clients' dataset partitions with Tiny-imagenet
 # this will generate the setting for 1. (see above)
-python -m FedMLB.dataset_preparation dataset_config.dataset="tiny-imagenet" 
+python -m fedmlb.dataset_preparation dataset_config.dataset="tiny-imagenet" 
 
 # this will generate the setting for 2. (see above)
-python -m FedMLB.dataset_preparation dataset_config.dataset="tiny-imagenet" total_clients=500
+python -m fedmlb.dataset_preparation dataset_config.dataset="tiny-imagenet" total_clients=500
 
 # this will generate the setting for 3. (see above)
-python -m FedMLB.dataset_preparation dataset_config.dataset="tiny-imagenet" dataset_config.alpha_dirichlet=0.6 
+python -m fedmlb.dataset_preparation dataset_config.dataset="tiny-imagenet" dataset_config.alpha_dirichlet=0.6 
 
 # this will generate the setting for 4. (see above)
-python -m FedMLB.dataset_preparation dataset_config.dataset="tiny-imagenet" dataset_config.alpha_dirichlet=0.6 total_clients=500
+python -m fedmlb.dataset_preparation dataset_config.dataset="tiny-imagenet" dataset_config.alpha_dirichlet=0.6 total_clients=500
 ```
 > Note: To generate the clients' dataset for the Tiny-Imagenet, the original dataset should be downloaded in advance.\
 > It can be downloaded at http://cs231n.stanford.edu/tiny-imagenet-200.zip. Unzip the folder. \
@@ -192,7 +192,7 @@ To make the simulations run on GPUs use the option `client_resources.num_cpus={P
 The default is `num_gpus=0.0`. 
 For example, the following command will run on CPU only. 
 ```bash
-python -m FedMLB.main # `client_resources.num_gpus=0.0` default
+python -m fedmlb.main # `client_resources.num_gpus=0.0` default
 ```
 
 > :warning:
@@ -214,38 +214,38 @@ After having generated the setting, simulations can be run.
 The default configuration for `FedMLB.main` uses (1.) for CIFAR-100, and can be run with the following:
 
 ```bash
-python -m FedMLB.main # this will run using the default settings in the `conf/base.yaml`
+python -m fedmlb.main # this will run using the default settings in the `conf/base.yaml`
 ```
 
 You can override settings directly from the command line in this way:
 
 ```bash
-python -m FedMLB.main clients_per_round=10 # this will run using 10 clients per round instead of 5 clients as the default config 
+python -m fedmlb.main clients_per_round=10 # this will run using 10 clients per round instead of 5 clients as the default config 
 
 # this will select the dataset partitioned with 0.6 concentration paramater instead of 0.3 as the default config
-python -m FedMLB.main dataset_config.alpha_dirichlet=0.6
+python -m fedmlb.main dataset_config.alpha_dirichlet=0.6
 ```
 
 To run using FedAvg:
 ```bash
 # this will use the regular FedAvg local training
-python -m FedMLB.main algorithm="FedAvg"
+python -m fedmlb.main algorithm="FedAvg"
 ```
 
 To run experiments with all the configurations of CIFAR-100, use the followings:
 
 ```bash
 # this will use the setting for 1. (default)
-python -m FedMLB.main
+python -m fedmlb.main
  
 # this will use the setting for 2. (see above)
-python -m FedMLB.main total_clients=500 clients_per_round=10 
+python -m fedmlb.main total_clients=500 clients_per_round=10 
 
 # this will use the setting for 3. (see above)
-python -m FedMLB.main dataset_config.alpha_dirichlet=0.6  
+python -m fedmlb.main dataset_config.alpha_dirichlet=0.6  
 
 # this will use the setting for 4. (see above)
-python -m FedMLB.main dataset_config.alpha_dirichlet=0.6 total_clients=500 clients_per_round=10
+python -m fedmlb.main dataset_config.alpha_dirichlet=0.6 total_clients=500 clients_per_round=10
 ```
 
 #### Tiny-Imagenet
@@ -260,16 +260,16 @@ To run experiments with all the configurations of Tiny-ImageNet, use the followi
 
 ```bash
 # this will use the setting for 1. (see above)
-python -m FedMLB.main dataset_config.dataset="tiny-imagenet" 
+python -m fedmlb.main dataset_config.dataset="tiny-imagenet" 
 
 # this will use the setting for 2. (see above)
-python -m FedMLB.main dataset_config.dataset="tiny-imagenet" total_clients=500 clients_per_round=10
+python -m fedmlb.main dataset_config.dataset="tiny-imagenet" total_clients=500 clients_per_round=10
 
 # this will use the setting for 3. (see above)
-python -m FedMLB.main dataset_config.dataset="tiny-imagenet" dataset_config.alpha_dirichlet=0.6  
+python -m fedmlb.main dataset_config.dataset="tiny-imagenet" dataset_config.alpha_dirichlet=0.6  
 
 # this will use the setting for 4. (see above)
-python -m FedMLB.main dataset_config.dataset="tiny-imagenet" dataset_config.alpha_dirichlet=0.6 total_clients=500 clients_per_round=10
+python -m fedmlb.main dataset_config.dataset="tiny-imagenet" dataset_config.alpha_dirichlet=0.6 total_clients=500 clients_per_round=10
 ```
 
 #### Setting a custom local batch size value
@@ -343,7 +343,7 @@ To reproduce the results run the following:
 
 ```bash
 # this will produce six consecutive runs
-python -m FedMLB.main --multirun dataset_config.dataset="cifar100","tiny-imagenet" algorithm="FedMLB","FedAvg","FedAvg+KD" 
+python -m fedmlb.main --multirun dataset_config.dataset="cifar100","tiny-imagenet" algorithm="FedMLB","FedAvg","FedAvg+KD" 
 ```
 #### CIFAR-100, Dir(0.3), 100 clients, 5% participation.
 
@@ -428,7 +428,7 @@ the setting (2.) Large-scale experiments with Dir(0.3), 500 clients,
 
 To reproduce the results run the following:
 ```bash
-python -m FedMLB.main --multirun dataset_config.dataset="cifar100","tiny-imagenet" algorithm="FedMLB","FedAvg","FedAvg+KD" total_clients=500 clients_per_round=10
+python -m fedmlb.main --multirun dataset_config.dataset="cifar100","tiny-imagenet" algorithm="FedMLB","FedAvg","FedAvg+KD" total_clients=500 clients_per_round=10
 ```
 #### CIFAR-100, Dir(0.3), 500 clients, 2% participation.
 
@@ -503,7 +503,7 @@ To reproduce results reported in Table 3 of the paper,
 resulting from _more local iterations_ (K=100 or K=200 in the
 paper, instead of K=50), run the following:
 ```bash
-python -m FedMLB.main --multirun algorithm="FedMLB","FedAvg","FedAvg+KD" local_updates=100 # or local_updates=200 
+python -m fedmlb.main --multirun algorithm="FedMLB","FedAvg","FedAvg+KD" local_updates=100 # or local_updates=200 
 ```
 #### K = 100 (local updates)
 <table>
@@ -542,17 +542,17 @@ tensorboard logs.
 To launch the tensorboard to monitor results use the following command
 in your activated python environment:
 ```bash
-tensorboard --logdir /{YOUR_LOCAL_PATH_TO_THE_BASELINE}/FedMLB/FedMLB/tb_logging/
+tensorboard --logdir /{YOUR_LOCAL_PATH_TO_THE_BASELINE}/FedMLB/fedmlb/tb_logging/
 ```
 The command will output an address for localhost,
 and results can be navigated and visualized via tensorboard GUI 
 by using a browser at that address. 
 
 Tensorboard logs in this baselines are stored in a folder with the following path structure: 
-`FedMLB/FedMLB/tb_logging/{DATASET}/{MODEL}/{METHOD}/K_{LOCAL_UPDATES}/{TOTAL_CLIENTS}_clients/dir_{ALPHA_DIRICHLET}/seed_{RANDOM_SEED}`
+`FedMLB/fedmlb/tb_logging/{DATASET}/{MODEL}/{METHOD}/K_{LOCAL_UPDATES}/{TOTAL_CLIENTS}_clients/dir_{ALPHA_DIRICHLET}/seed_{RANDOM_SEED}`
 
 For example, for default results with FedAvg, logs will be stored at:
-`FedMLB/FedMLB/tb_logging/cifar100/resnet18/FedAvg/K_50/100_clients/dir_0.3/seed_3`
+`FedMLB/fedmlb/tb_logging/cifar100/resnet18/FedAvg/K_50/100_clients/dir_0.3/seed_3`
  
 ## Additional Detail About This Implementation
 The `models.py` file contains the implementation of the models used in this baseline. A regular ResNet18 is
@@ -596,7 +596,7 @@ otherwise initializes a new model.
 - `save_checkpoint: True`
 If True, saves a checkpoint server model at the end of the training. Checkpoints 
 will be saved at the local path:
-`FedMLB/FedMLB/model_checkpoints/{DATASET}/{MODEL}/{METHOD}/{TOTAL_CLIENTS}_clients/dir_{ALPHA_DIRICHLET}/seed_{RANDOM_SEED}/checkpoint_R{CURRENT_ROUND}`.
+`FedMLB/fedmlb/model_checkpoints/{DATASET}/{MODEL}/{METHOD}/{TOTAL_CLIENTS}_clients/dir_{ALPHA_DIRICHLET}/seed_{RANDOM_SEED}/checkpoint_R{CURRENT_ROUND}`.
 
 - `logging_memory_usage: False`
 If True, logs memory and GPU's memory usage (need for psutil and nvidia-smi 
