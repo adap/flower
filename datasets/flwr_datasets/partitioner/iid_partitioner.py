@@ -48,5 +48,5 @@ class IidPartitioner(Partitioner):
             single dataset partition
         """
         return self.dataset.shard(
-            num_shards=self._num_partitions, index=idx, contiguous=True
+            num_shards=self._num_partitions, index=idx, contiguous=False
         )
