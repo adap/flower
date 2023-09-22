@@ -285,7 +285,7 @@ be valid), use the following argument when launching the simulation.
 
 ```
 # this will set the local batch size to 64
-python -m FedMLB.main batch_size=64
+python -m fedmlb.main batch_size=64
 ```
 
 Alternatively, it can be done by directly modifying the `base.yaml` config file by changing the value
