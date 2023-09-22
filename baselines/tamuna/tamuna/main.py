@@ -77,7 +77,7 @@ def run_fedavg(
     # prepare function that will be used to spawn each client
     client_fn = client.gen_fedavg_client_fn(
         trainloaders=trainloaders,
-        lr=cfg.client.learning_rate,
+        learning_rate=cfg.client.learning_rate,
         model=cfg.model,
         client_device=cfg.client.client_device,
     )

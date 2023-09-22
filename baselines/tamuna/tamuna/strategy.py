@@ -5,7 +5,13 @@ from typing import Callable, List
 import flwr.common
 import numpy as np
 import torch
-from flwr.common import FitIns, NDArrays, ndarrays_to_parameters, parameters_to_ndarrays
+from flwr.common import (
+    FitIns,
+    NDArrays,
+    Scalar,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
+)
 from flwr.server.strategy import Strategy
 
 from tamuna.models import Net
@@ -47,6 +53,7 @@ def shuffle_columns(pattern: torch.Tensor):
 class TamunaStrategy(Strategy):
     """Tamuna Strategy with control variates and compression."""
 
+    # pylint: disable=too-many-instance-attributes,too-many-arguments
     def __init__(
         self,
         clients_per_round: int,
@@ -148,7 +155,8 @@ class CentralizedFedAvgStrategy(Strategy):
     def configure_fit(self, server_round: int, parameters, client_manager):
         """Sample clients and create compression pattern for each of them."""
         sampled_clients = client_manager.sample(self.clients_per_round)
-        config = {"epochs": self.epochs_per_round}
+        local_epochs: Scalar = self.epochs_per_round
+        config = {"epochs": local_epochs}
         return [(client, FitIns(parameters, config)) for client in sampled_clients]
 
     def aggregate_fit(self, server_round, results, failures):

@@ -1,5 +1,5 @@
 """CNN model architecture, training, and testing functions for MNIST."""
-
+# pylint: disable=too-many-arguments
 
 import copy
 from collections import OrderedDict
@@ -74,7 +74,7 @@ def tamuna_train(
     trainloader: DataLoader,
     device: torch.device,
     epochs: int,
-    lr: float,
+    learning_rate: float,
     eta: float,
     server_net: nn.Module,
     control_variate: nn.Module,
@@ -93,7 +93,7 @@ def tamuna_train(
         The device on which the model should be trained, either 'cpu' or 'cuda'.
     epochs : int
         The number of epochs the model should be trained for.
-    lr: float
+    learning_rate: float
         Learning rate to be used.
     eta: float
         TAMUNA hyperparameter used during training.
@@ -116,7 +116,7 @@ def tamuna_train(
             __update_control_variate(
                 control_variate,
                 eta,
-                lr,
+                learning_rate,
                 old_compressed_net,
                 old_compression_mask,
                 server_net,
@@ -130,7 +130,7 @@ def tamuna_train(
             trainloader,
             device,
             criterion,
-            lr,
+            learning_rate,
             control_variate,
         )
 
@@ -141,7 +141,7 @@ def fedavg_train(
     net: torch.nn.Module,
     trainloader: DataLoader,
     epochs: int,
-    lr: float,
+    learning_rate: float,
     device: torch.device,
 ):
     """Train the network on the training set.
@@ -154,13 +154,13 @@ def fedavg_train(
         The DataLoader containing the data to train the network on.
     epochs : int
         The number of epochs the model should be trained for.
-    lr: float
+    learning_rate: float
         Learning rate to be used.
     device : torch.device
         The device on which the model should be trained, either 'cpu' or 'cuda'.
     """
     criterion = torch.nn.CrossEntropyLoss()
-    optim = torch.optim.SGD(net.parameters(), lr=lr)
+    optim = torch.optim.SGD(net.parameters(), lr=learning_rate)
     for _ in range(epochs):
         for images, labels in trainloader:
             images, labels = images.to(device), labels.to(device)
@@ -174,7 +174,7 @@ def fedavg_train(
 def __update_control_variate(
     control_variate: nn.Module,
     eta: float,
-    lr: float,
+    learning_rate: float,
     old_compressed_net: nn.Module,
     old_compression_mask: torch.tensor,
     server_net: nn.Module,
@@ -187,7 +187,7 @@ def __update_control_variate(
         Current control variate for this client.
     eta: float
         TAMUNA hyperparameter used during training.
-    lr: float
+    learning_rate: float
         Learning rate to be used.
     old_compressed_net: nn.Module
         Compressed model that was sent to the server from this client
@@ -216,12 +216,12 @@ def __update_control_variate(
     for i, module in enumerate(control_variate_modules):
         module.weight.copy_(
             module.weight.data
-            + (eta / lr)
+            + (eta / learning_rate)
             * (server_modules[i].weight.data - old_compressed_modules[i].weight.data)
         )
         module.bias.copy_(
             module.bias.data
-            + (eta / lr)
+            + (eta / learning_rate)
             * (server_modules[i].bias.data - old_compressed_modules[i].bias.data)
         )
 
@@ -231,7 +231,7 @@ def __tamuna_train_one_epoch(
     trainloader: DataLoader,
     device: torch.device,
     criterion: torch.nn.CrossEntropyLoss,
-    lr: float,
+    learning_rate: float,
     control_variate: nn.Module,
 ) -> nn.Module:
     """Train for one epoch.
@@ -246,7 +246,7 @@ def __tamuna_train_one_epoch(
         The device on which the model should be trained, either 'cpu' or 'cuda'.
     criterion : torch.nn.CrossEntropyLoss
         The loss function to use for training
-    lr : float
+    learning_rate : float
         Learning rate to be used.
     control_variate: nn.Module
         Control variate for this client.
@@ -280,12 +280,12 @@ def __tamuna_train_one_epoch(
             for i, module in enumerate(modules):
                 module.weight.copy_(
                     module.weight.data
-                    - lr
+                    - learning_rate
                     * (module.weight.grad.data - control_variate_modules[i].weight.data)
                 )
                 module.bias.copy_(
                     module.bias.data
-                    - lr
+                    - learning_rate
                     * (module.bias.grad.data - control_variate_modules[i].bias.data)
                 )
     return net

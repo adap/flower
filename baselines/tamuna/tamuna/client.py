@@ -1,4 +1,5 @@
 """Defines the MNIST Flower Client and a function to instantiate it."""
+# pylint: disable=too-many-instance-attributes,too-many-arguments
 import copy
 import os
 import pickle
@@ -86,7 +87,7 @@ class TamunaClient(fl.client.NumPyClient):
             old_compression_mask=self.old_compression_mask,
             old_compressed_net=self.old_compressed_net,
             server_net=copy.deepcopy(self.net),
-            lr=self.learning_rate,
+            learning_rate=self.learning_rate,
         )
 
         self.net = apply_nn_compression(self.net, mask)
@@ -124,13 +125,13 @@ class FedAvgClient(fl.client.NumPyClient):
         net: torch.nn.Module,
         trainloader: DataLoader,
         device: torch.device,
-        lr: float,
+        learning_rate: float,
         cid: int,
     ) -> None:
         super().__init__()
         self.trainloader = trainloader
         self.device = device
-        self.lr = lr
+        self.learning_rate = learning_rate
         self.cid = cid
         self.net = net
 
@@ -151,7 +152,7 @@ class FedAvgClient(fl.client.NumPyClient):
             self.net,
             self.trainloader,
             epochs=config["epochs"],
-            lr=self.lr,
+            learning_rate=self.learning_rate,
             device=self.device,
         )
         return self.get_parameters({}), len(self.trainloader), {}
@@ -200,7 +201,7 @@ def gen_tamuna_client_fn(
 
 def gen_fedavg_client_fn(
     trainloaders: List[DataLoader],
-    lr: float,
+    learning_rate: float,
     model: DictConfig,
     client_device: str,
 ) -> Callable[[str], FedAvgClient]:
@@ -211,7 +212,7 @@ def gen_fedavg_client_fn(
     trainloaders: List[DataLoader]
         A list of DataLoaders, each pointing to the dataset training partition
         belonging to a particular client.
-    lr : float
+    learning_rate : float
         The learning rate for the SGD optimizer for clients.
     model: DictConfig
         Architecture of the model being instantiated
@@ -234,6 +235,8 @@ def gen_fedavg_client_fn(
         # will train on their own unique data
         trainloader = trainloaders[int(cid)]
 
-        return FedAvgClient(net, trainloader, device, lr=lr, cid=int(cid))
+        return FedAvgClient(
+            net, trainloader, device, learning_rate=learning_rate, cid=int(cid)
+        )
 
     return fedavg_client_fn

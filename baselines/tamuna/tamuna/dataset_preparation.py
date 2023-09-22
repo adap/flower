@@ -100,6 +100,7 @@ def partition_data(
     return datasets, testset
 
 
+# pylint: disable=too-many-arguments,too-many-locals
 def power_law_split(
     sorted_trainset: Dataset,
     num_partitions: int,
@@ -175,7 +176,7 @@ def power_law_split(
     # obtain how many samples each partition should be assigned for each of
     # the labels it contains
     probs = (
-        remaining_per_class.reshape(-1, 1, 1)
+        remaining_per_class.reshape((-1, 1, 1))
         * probs
         / np.sum(probs, (1, 2), keepdims=True)
     )
