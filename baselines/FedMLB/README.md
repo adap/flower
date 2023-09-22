@@ -505,7 +505,7 @@ paper, instead of K=50), run the following:
 ```bash
 python -m FedMLB.main --multirun algorithm="FedMLB","FedAvg","FedAvg+KD" local_updates=100 # or local_updates=200 
 ```
-#### K = 100
+#### K = 100 (local updates)
 <table>
   <tr>
     <td></td>
@@ -528,10 +528,10 @@ python -m FedMLB.main --multirun algorithm="FedMLB","FedAvg","FedAvg+KD" local_u
   </tr>
   <tr>
     <td>FedMLB</td> 
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
+    <td>52.53</td>
+    <td>52.38</td>
+    <td>58.52</td>
+    <td>57.69</td>
   </tr>
 </table>
 
@@ -549,10 +549,10 @@ and results can be navigated and visualized via tensorboard GUI
 by using a browser at that address. 
 
 Tensorboard logs in this baselines are stored in a folder with the following path structure: 
-`FedMLB/FedMLB/tb_logging/{DATASET}/{MODEL}/{METHOD}/{TOTAL_CLIENTS}_clients/dir_{ALPHA_DIRICHLET}/seed_{RANDOM_SEED}`
+`FedMLB/FedMLB/tb_logging/{DATASET}/{MODEL}/{METHOD}/K_{LOCAL_UPDATES}/{TOTAL_CLIENTS}_clients/dir_{ALPHA_DIRICHLET}/seed_{RANDOM_SEED}`
 
 For example, for default results with FedAvg, logs will be stored at:
-`FedMLB/FedMLB/tb_logging/cifar100/resnet18/FedAvg/100_clients/dir_0.3/seed_3`
+`FedMLB/FedMLB/tb_logging/cifar100/resnet18/FedAvg/K_50/100_clients/dir_0.3/seed_3`
  
 ## Additional Detail About This Implementation
 The `models.py` file contains the implementation of the models used in this baseline. A regular ResNet18 is
