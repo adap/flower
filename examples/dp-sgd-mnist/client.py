@@ -51,7 +51,7 @@ class MnistClient(fl.client.NumPyClient):
         # Compile model with Keras
         model.compile(optimizer=optimizer, loss=loss, metrics=["accuracy"])
 
-    def get_parameters(self):
+    def get_parameters(self, config):
         """Get parameters of the local model."""
         raise Exception("Not implemented (server-side parameter initialization)")
 

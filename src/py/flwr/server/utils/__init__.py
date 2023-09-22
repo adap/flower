@@ -12,10 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Contains server side utilities to be used in combination with various
-components."""
+"""Server-side utilities."""
 
 
 from .tensorboard import tensorboard as tensorboard
+from .validator import validate_task_ins_or_res as validate_task_ins_or_res
 
-__all__ = ["tensorboard"]
+__all__ = [
+    "tensorboard",
+    "validate_task_ins_or_res",
+]

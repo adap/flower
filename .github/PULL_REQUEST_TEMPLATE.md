@@ -1,34 +1,55 @@
 <!--
-Thanks for contributing a pull request! Please ensure you have taken a look at
-the contribution guidelines: https://github.com/adap/flower/blob/main/CONTRIBUTING.md
+Thank you for opening a pull request (PR)!
 
-Does the changelog need to be updated?
-See: https://github.com/adap/flower/blob/main/doc/source/changelog.rst
+Contribution guidelines: https://github.com/adap/flower/blob/main/CONTRIBUTING.md
 -->
 
-#### Reference Issues/PRs
+## Issue
+
+### Description
 
 <!--
-Example: Fixes #1234. See also #3456.
-Please use keywords (e.g., Fixes) to create a link to the issues or pull requests
-you resolved.
+Describe the problem addressed by this PR.
+
+Example: The variable name `rnd` could be misinterpreted as an abbreviation of *random*, but it refers to the current server round.
 -->
 
-#### What does this implement/fix? Explain your changes.
+### Related issues/PRs
 
 <!--
-Explain why this PR is needed and what kind of changes have you done.
-Example: the variable `rnd` could be interpreted as an abbreviation of *random*, to improve clarity it was renamed to `server_round`. 
+Link issues and/or PRs that are related to this PR.
+
+Example: Fixes #123. See also #456 and #789.
 -->
 
-#### Any other comments?
+## Proposal
 
+### Explanation
 
 <!--
-Please be aware that it may take some time until we can check this PR. 
-If you have an urgent request or question please use the Flower Slack channel.
-The Slack channel is really active and contributors respond pretty fast. 
+Explain the changes and how they improve the issue described above.
 
-We value your contribution and are aware of the time you put into this PR.
-Therefore, thank you for your contribution. 
+Example: The variable `rnd` was renamed to `server_round` to improve readability.
+-->
+
+### Checklist
+
+- [ ] Implement proposed change
+- [ ] Write tests
+- [ ] Update [documentation](https://flower.dev/docs/writing-documentation.html)
+- [ ] Update [changelog](https://github.com/adap/flower/blob/main/doc/source/changelog.rst)
+- [ ] Make CI checks pass
+- [ ] Ping maintainers on [Slack](https://flower.dev/join-slack/) (channel `#contributions`)
+
+### Any other comments?
+
+<!--
+Please be aware that it may take some time until the maintainers can review the PR.
+Smaller PRs with good descriptions can be considered much more easily.
+
+If you have an urgent request or question, please use the Flower Slack:
+
+    https://flower.dev/join-slack/ (channel: #contributions)
+
+Thank you for contributing to Flower!
 -->

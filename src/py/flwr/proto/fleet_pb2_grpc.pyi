@@ -8,32 +8,64 @@ import grpc
 
 class FleetStub:
     def __init__(self, channel: grpc.Channel) -> None: ...
-    GetTasks: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.fleet_pb2.GetTasksRequest,
-        flwr.proto.fleet_pb2.GetTasksResponse]
-    """Get tasks"""
+    CreateNode: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.fleet_pb2.CreateNodeRequest,
+        flwr.proto.fleet_pb2.CreateNodeResponse]
 
-    CreateResults: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.fleet_pb2.CreateResultsRequest,
-        flwr.proto.fleet_pb2.CreateResultsResponse]
-    """Get results"""
+    DeleteNode: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.fleet_pb2.DeleteNodeRequest,
+        flwr.proto.fleet_pb2.DeleteNodeResponse]
+
+    PullTaskIns: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.fleet_pb2.PullTaskInsRequest,
+        flwr.proto.fleet_pb2.PullTaskInsResponse]
+    """Retrieve one or more tasks, if possible
+
+    HTTP API path: /api/v1/fleet/pull-task-ins
+    """
+
+    PushTaskRes: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.fleet_pb2.PushTaskResRequest,
+        flwr.proto.fleet_pb2.PushTaskResResponse]
+    """Complete one or more tasks, if possible
+
+    HTTP API path: /api/v1/fleet/push-task-res
+    """
 
 
 class FleetServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def GetTasks(self,
-        request: flwr.proto.fleet_pb2.GetTasksRequest,
+    def CreateNode(self,
+        request: flwr.proto.fleet_pb2.CreateNodeRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.fleet_pb2.GetTasksResponse:
-        """Get tasks"""
+    ) -> flwr.proto.fleet_pb2.CreateNodeResponse: ...
+
+    @abc.abstractmethod
+    def DeleteNode(self,
+        request: flwr.proto.fleet_pb2.DeleteNodeRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.fleet_pb2.DeleteNodeResponse: ...
+
+    @abc.abstractmethod
+    def PullTaskIns(self,
+        request: flwr.proto.fleet_pb2.PullTaskInsRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.fleet_pb2.PullTaskInsResponse:
+        """Retrieve one or more tasks, if possible
+
+        HTTP API path: /api/v1/fleet/pull-task-ins
+        """
         pass
 
     @abc.abstractmethod
-    def CreateResults(self,
-        request: flwr.proto.fleet_pb2.CreateResultsRequest,
+    def PushTaskRes(self,
+        request: flwr.proto.fleet_pb2.PushTaskResRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.fleet_pb2.CreateResultsResponse:
-        """Get results"""
+    ) -> flwr.proto.fleet_pb2.PushTaskResResponse:
+        """Complete one or more tasks, if possible
+
+        HTTP API path: /api/v1/fleet/push-task-res
+        """
         pass
 
 

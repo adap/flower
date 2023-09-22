@@ -45,14 +45,12 @@ def client_fn(cid: str) -> fl.client.Client:
     client_trainloader = DataLoader(client_trainset, PARAMS["batch_size"])
     client_testloader = DataLoader(client_testset, PARAMS["batch_size"])
 
-    sample_rate = PARAMS["batch_size"] / len(client_trainset)
-
-    return DPCifarClient(model, client_trainloader, client_testloader, sample_rate)
+    return DPCifarClient(model, client_trainloader, client_testloader)
 
 
 # Define an evaluation function for centralized evaluation (using whole CIFAR10 testset).
-def get_evaluate_fn() -> Callable[[fl.common.Weights], Optional[Tuple[float, float]]]:
-    def evaluate(weights: fl.common.Weights) -> Optional[Tuple[float, float]]:
+def get_evaluate_fn() -> Callable[[fl.common.NDArrays], Optional[Tuple[float, float]]]:
+    def evaluate(weights: fl.common.NDArrays) -> Optional[Tuple[float, float]]:
         transform = transforms.Compose(
             [
                 transforms.ToTensor(),

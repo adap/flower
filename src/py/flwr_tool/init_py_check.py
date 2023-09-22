@@ -1,10 +1,10 @@
 # Copyright 2020 Adap GmbH. All Rights Reserved.
-
 """Check provided directory and sub-directories for missing __init__.py files.
 
 Example:
     python -m flwr_tool.init_py_check src/py/flwr
 """
+
 
 import os
 import re

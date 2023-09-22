@@ -56,7 +56,10 @@ class Server:
     """Flower server."""
 
     def __init__(
-        self, *, client_manager: ClientManager, strategy: Optional[Strategy] = None
+        self,
+        *,
+        client_manager: ClientManager,
+        strategy: Optional[Strategy] = None,
     ) -> None:
         self._client_manager: ClientManager = client_manager
         self.parameters: Parameters = Parameters(
@@ -103,11 +106,17 @@ class Server:
 
         for current_round in range(1, num_rounds + 1):
             # Train model and replace previous global model
-            res_fit = self.fit_round(server_round=current_round, timeout=timeout)
-            if res_fit:
-                parameters_prime, _, _ = res_fit  # fit_metrics_aggregated
+            res_fit = self.fit_round(
+                server_round=current_round,
+                timeout=timeout,
+            )
+            if res_fit is not None:
+                parameters_prime, fit_metrics, _ = res_fit  # fit_metrics_aggregated
                 if parameters_prime:
                     self.parameters = parameters_prime
+                history.add_metrics_distributed_fit(
+                    server_round=current_round, metrics=fit_metrics
+                )
 
             # Evaluate model using strategy implementation
             res_cen = self.strategy.evaluate(current_round, parameters=self.parameters)
@@ -128,9 +137,9 @@ class Server:
 
             # Evaluate model on a sample of available clients
             res_fed = self.evaluate_round(server_round=current_round, timeout=timeout)
-            if res_fed:
+            if res_fed is not None:
                 loss_fed, evaluate_metrics_fed, _ = res_fed
-                if loss_fed:
+                if loss_fed is not None:
                     history.add_loss_distributed(
                         server_round=current_round, loss=loss_fed
                     )
@@ -152,7 +161,6 @@ class Server:
         Tuple[Optional[float], Dict[str, Scalar], EvaluateResultsAndFailures]
     ]:
         """Validate current global model on a number of clients."""
-
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_evaluate(
             server_round=server_round,
@@ -201,7 +209,6 @@ class Server:
         Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
     ]:
         """Perform a single round of federated averaging."""
-
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_fit(
             server_round=server_round,
@@ -257,7 +264,6 @@ class Server:
 
     def _get_initial_parameters(self, timeout: Optional[float]) -> Parameters:
         """Get initial parameters from one of the available clients."""
-
         # Server-side parameter initialization
         parameters: Optional[Parameters] = self.strategy.initialize_parameters(
             client_manager=self._client_manager
@@ -357,7 +363,6 @@ def _handle_finished_future_after_fit(
     failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
 ) -> None:
     """Convert finished future into either a result or a failure."""
-
     # Check if there was an exception
     failure = future.exception()
     if failure is not None:
@@ -419,7 +424,6 @@ def _handle_finished_future_after_evaluate(
     failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
 ) -> None:
     """Convert finished future into either a result or a failure."""
-
     # Check if there was an exception
     failure = future.exception()
     if failure is not None:

@@ -3,6 +3,7 @@
 # source: flwr/proto/fleet.proto
 """Generated protocol buffer code."""
 from google.protobuf import descriptor as _descriptor
+from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
@@ -11,284 +12,121 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
+from flwr.proto import node_pb2 as flwr_dot_proto_dot_node__pb2
+from flwr.proto import task_pb2 as flwr_dot_proto_dot_task__pb2
 
 
-DESCRIPTOR = _descriptor.FileDescriptor(
-  name='flwr/proto/fleet.proto',
-  package='flwr.server.fleet.proto',
-  syntax='proto3',
-  serialized_options=None,
-  create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x16\x66lwr/proto/fleet.proto\x12\x17\x66lwr.server.fleet.proto\"\x12\n\x04Task\x12\n\n\x02id\x18\x01 \x01(\t\"\x11\n\x0fGetTasksRequest\"?\n\x10GetTasksResponse\x12+\n\x04task\x18\x01 \x03(\x0b\x32\x1d.flwr.server.fleet.proto.Task\"\x19\n\x06Result\x12\x0f\n\x07task_id\x18\x01 \x01(\t\"H\n\x14\x43reateResultsRequest\x12\x30\n\x07results\x18\x01 \x03(\x0b\x32\x1f.flwr.server.fleet.proto.Result\"\x17\n\x15\x43reateResultsResponse2\xdc\x01\n\x05\x46leet\x12\x61\n\x08GetTasks\x12(.flwr.server.fleet.proto.GetTasksRequest\x1a).flwr.server.fleet.proto.GetTasksResponse\"\x00\x12p\n\rCreateResults\x12-.flwr.server.fleet.proto.CreateResultsRequest\x1a..flwr.server.fleet.proto.CreateResultsResponse\"\x00\x62\x06proto3'
-)
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16\x66lwr/proto/fleet.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/node.proto\x1a\x15\x66lwr/proto/task.proto\"\x13\n\x11\x43reateNodeRequest\"4\n\x12\x43reateNodeResponse\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\"3\n\x11\x44\x65leteNodeRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\"\x14\n\x12\x44\x65leteNodeResponse\"F\n\x12PullTaskInsRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\x12\x10\n\x08task_ids\x18\x02 \x03(\t\"k\n\x13PullTaskInsResponse\x12(\n\treconnect\x18\x01 \x01(\x0b\x32\x15.flwr.proto.Reconnect\x12*\n\rtask_ins_list\x18\x02 \x03(\x0b\x32\x13.flwr.proto.TaskIns\"@\n\x12PushTaskResRequest\x12*\n\rtask_res_list\x18\x01 \x03(\x0b\x32\x13.flwr.proto.TaskRes\"\xae\x01\n\x13PushTaskResResponse\x12(\n\treconnect\x18\x01 \x01(\x0b\x32\x15.flwr.proto.Reconnect\x12=\n\x07results\x18\x02 \x03(\x0b\x32,.flwr.proto.PushTaskResResponse.ResultsEntry\x1a.\n\x0cResultsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\r:\x02\x38\x01\"\x1e\n\tReconnect\x12\x11\n\treconnect\x18\x01 \x01(\x04\x32\xc9\x02\n\x05\x46leet\x12M\n\nCreateNode\x12\x1d.flwr.proto.CreateNodeRequest\x1a\x1e.flwr.proto.CreateNodeResponse\"\x00\x12M\n\nDeleteNode\x12\x1d.flwr.proto.DeleteNodeRequest\x1a\x1e.flwr.proto.DeleteNodeResponse\"\x00\x12P\n\x0bPullTaskIns\x12\x1e.flwr.proto.PullTaskInsRequest\x1a\x1f.flwr.proto.PullTaskInsResponse\"\x00\x12P\n\x0bPushTaskRes\x12\x1e.flwr.proto.PushTaskResRequest\x1a\x1f.flwr.proto.PushTaskResResponse\"\x00\x62\x06proto3')
 
 
 
-
-_TASK = _descriptor.Descriptor(
-  name='Task',
-  full_name='flwr.server.fleet.proto.Task',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='id', full_name='flwr.server.fleet.proto.Task.id', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=51,
-  serialized_end=69,
-)
-
-
-_GETTASKSREQUEST = _descriptor.Descriptor(
-  name='GetTasksRequest',
-  full_name='flwr.server.fleet.proto.GetTasksRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=71,
-  serialized_end=88,
-)
-
-
-_GETTASKSRESPONSE = _descriptor.Descriptor(
-  name='GetTasksResponse',
-  full_name='flwr.server.fleet.proto.GetTasksResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='task', full_name='flwr.server.fleet.proto.GetTasksResponse.task', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=90,
-  serialized_end=153,
-)
-
-
-_RESULT = _descriptor.Descriptor(
-  name='Result',
-  full_name='flwr.server.fleet.proto.Result',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='task_id', full_name='flwr.server.fleet.proto.Result.task_id', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=155,
-  serialized_end=180,
-)
-
-
-_CREATERESULTSREQUEST = _descriptor.Descriptor(
-  name='CreateResultsRequest',
-  full_name='flwr.server.fleet.proto.CreateResultsRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='results', full_name='flwr.server.fleet.proto.CreateResultsRequest.results', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=182,
-  serialized_end=254,
-)
-
-
-_CREATERESULTSRESPONSE = _descriptor.Descriptor(
-  name='CreateResultsResponse',
-  full_name='flwr.server.fleet.proto.CreateResultsResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=256,
-  serialized_end=279,
-)
-
-_GETTASKSRESPONSE.fields_by_name['task'].message_type = _TASK
-_CREATERESULTSREQUEST.fields_by_name['results'].message_type = _RESULT
-DESCRIPTOR.message_types_by_name['Task'] = _TASK
-DESCRIPTOR.message_types_by_name['GetTasksRequest'] = _GETTASKSREQUEST
-DESCRIPTOR.message_types_by_name['GetTasksResponse'] = _GETTASKSRESPONSE
-DESCRIPTOR.message_types_by_name['Result'] = _RESULT
-DESCRIPTOR.message_types_by_name['CreateResultsRequest'] = _CREATERESULTSREQUEST
-DESCRIPTOR.message_types_by_name['CreateResultsResponse'] = _CREATERESULTSRESPONSE
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
-
-Task = _reflection.GeneratedProtocolMessageType('Task', (_message.Message,), {
-  'DESCRIPTOR' : _TASK,
+_CREATENODEREQUEST = DESCRIPTOR.message_types_by_name['CreateNodeRequest']
+_CREATENODERESPONSE = DESCRIPTOR.message_types_by_name['CreateNodeResponse']
+_DELETENODEREQUEST = DESCRIPTOR.message_types_by_name['DeleteNodeRequest']
+_DELETENODERESPONSE = DESCRIPTOR.message_types_by_name['DeleteNodeResponse']
+_PULLTASKINSREQUEST = DESCRIPTOR.message_types_by_name['PullTaskInsRequest']
+_PULLTASKINSRESPONSE = DESCRIPTOR.message_types_by_name['PullTaskInsResponse']
+_PUSHTASKRESREQUEST = DESCRIPTOR.message_types_by_name['PushTaskResRequest']
+_PUSHTASKRESRESPONSE = DESCRIPTOR.message_types_by_name['PushTaskResResponse']
+_PUSHTASKRESRESPONSE_RESULTSENTRY = _PUSHTASKRESRESPONSE.nested_types_by_name['ResultsEntry']
+_RECONNECT = DESCRIPTOR.message_types_by_name['Reconnect']
+CreateNodeRequest = _reflection.GeneratedProtocolMessageType('CreateNodeRequest', (_message.Message,), {
+  'DESCRIPTOR' : _CREATENODEREQUEST,
   '__module__' : 'flwr.proto.fleet_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.server.fleet.proto.Task)
+  # @@protoc_insertion_point(class_scope:flwr.proto.CreateNodeRequest)
   })
-_sym_db.RegisterMessage(Task)
+_sym_db.RegisterMessage(CreateNodeRequest)
 
-GetTasksRequest = _reflection.GeneratedProtocolMessageType('GetTasksRequest', (_message.Message,), {
-  'DESCRIPTOR' : _GETTASKSREQUEST,
+CreateNodeResponse = _reflection.GeneratedProtocolMessageType('CreateNodeResponse', (_message.Message,), {
+  'DESCRIPTOR' : _CREATENODERESPONSE,
   '__module__' : 'flwr.proto.fleet_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.server.fleet.proto.GetTasksRequest)
+  # @@protoc_insertion_point(class_scope:flwr.proto.CreateNodeResponse)
   })
-_sym_db.RegisterMessage(GetTasksRequest)
+_sym_db.RegisterMessage(CreateNodeResponse)
 
-GetTasksResponse = _reflection.GeneratedProtocolMessageType('GetTasksResponse', (_message.Message,), {
-  'DESCRIPTOR' : _GETTASKSRESPONSE,
+DeleteNodeRequest = _reflection.GeneratedProtocolMessageType('DeleteNodeRequest', (_message.Message,), {
+  'DESCRIPTOR' : _DELETENODEREQUEST,
   '__module__' : 'flwr.proto.fleet_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.server.fleet.proto.GetTasksResponse)
+  # @@protoc_insertion_point(class_scope:flwr.proto.DeleteNodeRequest)
   })
-_sym_db.RegisterMessage(GetTasksResponse)
+_sym_db.RegisterMessage(DeleteNodeRequest)
 
-Result = _reflection.GeneratedProtocolMessageType('Result', (_message.Message,), {
-  'DESCRIPTOR' : _RESULT,
+DeleteNodeResponse = _reflection.GeneratedProtocolMessageType('DeleteNodeResponse', (_message.Message,), {
+  'DESCRIPTOR' : _DELETENODERESPONSE,
   '__module__' : 'flwr.proto.fleet_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.server.fleet.proto.Result)
+  # @@protoc_insertion_point(class_scope:flwr.proto.DeleteNodeResponse)
   })
-_sym_db.RegisterMessage(Result)
+_sym_db.RegisterMessage(DeleteNodeResponse)
 
-CreateResultsRequest = _reflection.GeneratedProtocolMessageType('CreateResultsRequest', (_message.Message,), {
-  'DESCRIPTOR' : _CREATERESULTSREQUEST,
+PullTaskInsRequest = _reflection.GeneratedProtocolMessageType('PullTaskInsRequest', (_message.Message,), {
+  'DESCRIPTOR' : _PULLTASKINSREQUEST,
   '__module__' : 'flwr.proto.fleet_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.server.fleet.proto.CreateResultsRequest)
+  # @@protoc_insertion_point(class_scope:flwr.proto.PullTaskInsRequest)
   })
-_sym_db.RegisterMessage(CreateResultsRequest)
+_sym_db.RegisterMessage(PullTaskInsRequest)
 
-CreateResultsResponse = _reflection.GeneratedProtocolMessageType('CreateResultsResponse', (_message.Message,), {
-  'DESCRIPTOR' : _CREATERESULTSRESPONSE,
+PullTaskInsResponse = _reflection.GeneratedProtocolMessageType('PullTaskInsResponse', (_message.Message,), {
+  'DESCRIPTOR' : _PULLTASKINSRESPONSE,
   '__module__' : 'flwr.proto.fleet_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.server.fleet.proto.CreateResultsResponse)
+  # @@protoc_insertion_point(class_scope:flwr.proto.PullTaskInsResponse)
   })
-_sym_db.RegisterMessage(CreateResultsResponse)
+_sym_db.RegisterMessage(PullTaskInsResponse)
 
+PushTaskResRequest = _reflection.GeneratedProtocolMessageType('PushTaskResRequest', (_message.Message,), {
+  'DESCRIPTOR' : _PUSHTASKRESREQUEST,
+  '__module__' : 'flwr.proto.fleet_pb2'
+  # @@protoc_insertion_point(class_scope:flwr.proto.PushTaskResRequest)
+  })
+_sym_db.RegisterMessage(PushTaskResRequest)
 
+PushTaskResResponse = _reflection.GeneratedProtocolMessageType('PushTaskResResponse', (_message.Message,), {
 
-_FLEET = _descriptor.ServiceDescriptor(
-  name='Fleet',
-  full_name='flwr.server.fleet.proto.Fleet',
-  file=DESCRIPTOR,
-  index=0,
-  serialized_options=None,
-  create_key=_descriptor._internal_create_key,
-  serialized_start=282,
-  serialized_end=502,
-  methods=[
-  _descriptor.MethodDescriptor(
-    name='GetTasks',
-    full_name='flwr.server.fleet.proto.Fleet.GetTasks',
-    index=0,
-    containing_service=None,
-    input_type=_GETTASKSREQUEST,
-    output_type=_GETTASKSRESPONSE,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='CreateResults',
-    full_name='flwr.server.fleet.proto.Fleet.CreateResults',
-    index=1,
-    containing_service=None,
-    input_type=_CREATERESULTSREQUEST,
-    output_type=_CREATERESULTSRESPONSE,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-])
-_sym_db.RegisterServiceDescriptor(_FLEET)
+  'ResultsEntry' : _reflection.GeneratedProtocolMessageType('ResultsEntry', (_message.Message,), {
+    'DESCRIPTOR' : _PUSHTASKRESRESPONSE_RESULTSENTRY,
+    '__module__' : 'flwr.proto.fleet_pb2'
+    # @@protoc_insertion_point(class_scope:flwr.proto.PushTaskResResponse.ResultsEntry)
+    })
+  ,
+  'DESCRIPTOR' : _PUSHTASKRESRESPONSE,
+  '__module__' : 'flwr.proto.fleet_pb2'
+  # @@protoc_insertion_point(class_scope:flwr.proto.PushTaskResResponse)
+  })
+_sym_db.RegisterMessage(PushTaskResResponse)
+_sym_db.RegisterMessage(PushTaskResResponse.ResultsEntry)
 
-DESCRIPTOR.services_by_name['Fleet'] = _FLEET
+Reconnect = _reflection.GeneratedProtocolMessageType('Reconnect', (_message.Message,), {
+  'DESCRIPTOR' : _RECONNECT,
+  '__module__' : 'flwr.proto.fleet_pb2'
+  # @@protoc_insertion_point(class_scope:flwr.proto.Reconnect)
+  })
+_sym_db.RegisterMessage(Reconnect)
 
+_FLEET = DESCRIPTOR.services_by_name['Fleet']
+if _descriptor._USE_C_DESCRIPTORS == False:
+
+  DESCRIPTOR._options = None
+  _PUSHTASKRESRESPONSE_RESULTSENTRY._options = None
+  _PUSHTASKRESRESPONSE_RESULTSENTRY._serialized_options = b'8\001'
+  _CREATENODEREQUEST._serialized_start=84
+  _CREATENODEREQUEST._serialized_end=103
+  _CREATENODERESPONSE._serialized_start=105
+  _CREATENODERESPONSE._serialized_end=157
+  _DELETENODEREQUEST._serialized_start=159
+  _DELETENODEREQUEST._serialized_end=210
+  _DELETENODERESPONSE._serialized_start=212
+  _DELETENODERESPONSE._serialized_end=232
+  _PULLTASKINSREQUEST._serialized_start=234
+  _PULLTASKINSREQUEST._serialized_end=304
+  _PULLTASKINSRESPONSE._serialized_start=306
+  _PULLTASKINSRESPONSE._serialized_end=413
+  _PUSHTASKRESREQUEST._serialized_start=415
+  _PUSHTASKRESREQUEST._serialized_end=479
+  _PUSHTASKRESRESPONSE._serialized_start=482
+  _PUSHTASKRESRESPONSE._serialized_end=656
+  _PUSHTASKRESRESPONSE_RESULTSENTRY._serialized_start=610
+  _PUSHTASKRESRESPONSE_RESULTSENTRY._serialized_end=656
+  _RECONNECT._serialized_start=658
+  _RECONNECT._serialized_end=688
+  _FLEET._serialized_start=691
+  _FLEET._serialized_end=1020
 # @@protoc_insertion_point(module_scope)

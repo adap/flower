@@ -46,10 +46,8 @@ class Net(nn.Module):
         return x
 
 
-def train(net, trainloader, privacy_engine, epochs):
+def train(net, trainloader, privacy_engine, optimizer, epochs):
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
-    privacy_engine.attach(optimizer)
     for _ in range(epochs):
         for images, labels in trainloader:
             images, labels = images.to(DEVICE), labels.to(DEVICE)
@@ -57,44 +55,41 @@ def train(net, trainloader, privacy_engine, epochs):
             loss = criterion(net(images), labels)
             loss.backward()
             optimizer.step()
-    epsilon, _ = optimizer.privacy_engine.get_privacy_spent(
-        PRIVACY_PARAMS["target_delta"]
-    )
+    epsilon = privacy_engine.get_epsilon(delta=PRIVACY_PARAMS["target_delta"])
     return epsilon
 
 
 def test(net, testloader):
     criterion = torch.nn.CrossEntropyLoss()
-    correct, total, loss = 0, 0, 0.0
+    correct, loss = 0, 0.0
     with torch.no_grad():
         for data in testloader:
             images, labels = data[0].to(DEVICE), data[1].to(DEVICE)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
             _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
             correct += (predicted == labels).sum().item()
-    accuracy = correct / total
+    accuracy = correct / len(testloader.dataset)
     return loss, accuracy
 
 
 # Define Flower client.
 class DPCifarClient(fl.client.NumPyClient):
-    def __init__(self, model, trainloader, testloader, sample_rate) -> None:
+    def __init__(self, model, trainloader, testloader) -> None:
         super().__init__()
-        self.model = model
-        self.trainloader = trainloader
+        optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
         self.testloader = testloader
         # Create a privacy engine which will add DP and keep track of the privacy budget.
-        self.privacy_engine = PrivacyEngine(
-            self.model,
-            sample_rate=sample_rate,
-            target_delta=PRIVACY_PARAMS["target_delta"],
+        self.privacy_engine = PrivacyEngine()
+        self.model, self.optimizer, self.trainloader = self.privacy_engine.make_private(
+            module=model,
+            optimizer=optimizer,
+            data_loader=trainloader,
             max_grad_norm=PRIVACY_PARAMS["max_grad_norm"],
             noise_multiplier=PRIVACY_PARAMS["noise_multiplier"],
         )
 
-    def get_parameters(self):
+    def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
     def set_parameters(self, parameters):
@@ -105,10 +100,18 @@ class DPCifarClient(fl.client.NumPyClient):
     def fit(self, parameters, config):
         self.set_parameters(parameters)
         epsilon = train(
-            self.model, self.trainloader, self.privacy_engine, PARAMS["local_epochs"]
+            self.model,
+            self.trainloader,
+            self.privacy_engine,
+            self.optimizer,
+            PARAMS["local_epochs"],
         )
         print(f"epsilon = {epsilon:.2f}")
-        return self.get_parameters(), len(self.trainloader), {"epsilon": epsilon}
+        return (
+            self.get_parameters(config={}),
+            len(self.trainloader),
+            {"epsilon": epsilon},
+        )
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)

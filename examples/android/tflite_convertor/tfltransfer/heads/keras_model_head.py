@@ -13,6 +13,7 @@
 # limitations under the License.
 """Head model configuration for Keras models."""
 
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -31,10 +32,10 @@ from tfltransfer import utils
 class KerasModelHead(object):
     """Head model configuration for arbitrary Keras models.
 
-    This configuration uses Keras-specific signatures to generate the
-    transfer learning head model. Keras loss function that the model was
-    compiled with is what the gradients will be computed on. Note that
-    the optimizer used in Keras is not taken into account.
+    This configuration uses Keras-specific signatures to generate the transfer learning
+    head model. Keras loss function that the model was compiled with is what the
+    gradients will be computed on. Note that the optimizer used in Keras is not taken
+    into account.
     """
 
     def __init__(self, keras_model):

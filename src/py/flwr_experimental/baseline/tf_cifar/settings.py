@@ -14,6 +14,7 @@
 # ==============================================================================
 """Provides a variaty of baseline settings for CIFAR."""
 
+
 from typing import List
 
 from flwr_experimental.baseline.config import (

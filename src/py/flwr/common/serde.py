@@ -15,8 +15,9 @@
 """ProtoBuf serialization and deserialization."""
 
 
-from typing import Any, List, cast
+from typing import Any, Dict, List, MutableMapping, cast
 
+from flwr.proto.task_pb2 import Value
 from flwr.proto.transport_pb2 import (
     ClientMessage,
     Code,
@@ -29,16 +30,148 @@ from flwr.proto.transport_pb2 import (
 
 from . import typing
 
-# pylint: disable=missing-function-docstring
+#  === ServerMessage message ===
+
+
+def server_message_to_proto(server_message: typing.ServerMessage) -> ServerMessage:
+    """Serialize `ServerMessage` to ProtoBuf."""
+    if server_message.get_properties_ins is not None:
+        return ServerMessage(
+            get_properties_ins=get_properties_ins_to_proto(
+                server_message.get_properties_ins,
+            )
+        )
+    if server_message.get_parameters_ins is not None:
+        return ServerMessage(
+            get_parameters_ins=get_parameters_ins_to_proto(
+                server_message.get_parameters_ins,
+            )
+        )
+    if server_message.fit_ins is not None:
+        return ServerMessage(
+            fit_ins=fit_ins_to_proto(
+                server_message.fit_ins,
+            )
+        )
+    if server_message.evaluate_ins is not None:
+        return ServerMessage(
+            evaluate_ins=evaluate_ins_to_proto(
+                server_message.evaluate_ins,
+            )
+        )
+    raise Exception("No instruction set in ServerMessage, cannot serialize to ProtoBuf")
+
+
+def server_message_from_proto(
+    server_message_proto: ServerMessage,
+) -> typing.ServerMessage:
+    """Deserialize `ServerMessage` from ProtoBuf."""
+    field = server_message_proto.WhichOneof("msg")
+    if field == "get_properties_ins":
+        return typing.ServerMessage(
+            get_properties_ins=get_properties_ins_from_proto(
+                server_message_proto.get_properties_ins,
+            )
+        )
+    if field == "get_parameters_ins":
+        return typing.ServerMessage(
+            get_parameters_ins=get_parameters_ins_from_proto(
+                server_message_proto.get_parameters_ins,
+            )
+        )
+    if field == "fit_ins":
+        return typing.ServerMessage(
+            fit_ins=fit_ins_from_proto(
+                server_message_proto.fit_ins,
+            )
+        )
+    if field == "evaluate_ins":
+        return typing.ServerMessage(
+            evaluate_ins=evaluate_ins_from_proto(
+                server_message_proto.evaluate_ins,
+            )
+        )
+    raise Exception(
+        "Unsupported instruction in ServerMessage, cannot deserialize from ProtoBuf"
+    )
+
+
+#  === ClientMessage message ===
+
+
+def client_message_to_proto(client_message: typing.ClientMessage) -> ClientMessage:
+    """Serialize `ClientMessage` to ProtoBuf."""
+    if client_message.get_properties_res is not None:
+        return ClientMessage(
+            get_properties_res=get_properties_res_to_proto(
+                client_message.get_properties_res,
+            )
+        )
+    if client_message.get_parameters_res is not None:
+        return ClientMessage(
+            get_parameters_res=get_parameters_res_to_proto(
+                client_message.get_parameters_res,
+            )
+        )
+    if client_message.fit_res is not None:
+        return ClientMessage(
+            fit_res=fit_res_to_proto(
+                client_message.fit_res,
+            )
+        )
+    if client_message.evaluate_res is not None:
+        return ClientMessage(
+            evaluate_res=evaluate_res_to_proto(
+                client_message.evaluate_res,
+            )
+        )
+    raise Exception("No instruction set in ClientMessage, cannot serialize to ProtoBuf")
+
+
+def client_message_from_proto(
+    client_message_proto: ClientMessage,
+) -> typing.ClientMessage:
+    """Deserialize `ClientMessage` from ProtoBuf."""
+    field = client_message_proto.WhichOneof("msg")
+    if field == "get_properties_res":
+        return typing.ClientMessage(
+            get_properties_res=get_properties_res_from_proto(
+                client_message_proto.get_properties_res,
+            )
+        )
+    if field == "get_parameters_res":
+        return typing.ClientMessage(
+            get_parameters_res=get_parameters_res_from_proto(
+                client_message_proto.get_parameters_res,
+            )
+        )
+    if field == "fit_res":
+        return typing.ClientMessage(
+            fit_res=fit_res_from_proto(
+                client_message_proto.fit_res,
+            )
+        )
+    if field == "evaluate_res":
+        return typing.ClientMessage(
+            evaluate_res=evaluate_res_from_proto(
+                client_message_proto.evaluate_res,
+            )
+        )
+    raise Exception(
+        "Unsupported instruction in ClientMessage, cannot deserialize from ProtoBuf"
+    )
+
+
+#  === Parameters message ===
 
 
 def parameters_to_proto(parameters: typing.Parameters) -> Parameters:
-    """."""
+    """Serialize `Parameters` to ProtoBuf."""
     return Parameters(tensors=parameters.tensors, tensor_type=parameters.tensor_type)
 
 
 def parameters_from_proto(msg: Parameters) -> typing.Parameters:
-    """."""
+    """Deserialize `Parameters` from ProtoBuf."""
     tensors: List[bytes] = list(msg.tensors)
     return typing.Parameters(tensors=tensors, tensor_type=msg.tensor_type)
 
@@ -47,14 +180,14 @@ def parameters_from_proto(msg: Parameters) -> typing.Parameters:
 
 
 def reconnect_ins_to_proto(ins: typing.ReconnectIns) -> ServerMessage.ReconnectIns:
-    """Serialize ReconnectIns to ProtoBuf message."""
+    """Serialize `ReconnectIns` to ProtoBuf."""
     if ins.seconds is not None:
         return ServerMessage.ReconnectIns(seconds=ins.seconds)
     return ServerMessage.ReconnectIns()
 
 
 def reconnect_ins_from_proto(msg: ServerMessage.ReconnectIns) -> typing.ReconnectIns:
-    """Deserialize ReconnectIns from ProtoBuf message."""
+    """Deserialize `ReconnectIns` from ProtoBuf."""
     return typing.ReconnectIns(seconds=msg.seconds)
 
 
@@ -62,7 +195,7 @@ def reconnect_ins_from_proto(msg: ServerMessage.ReconnectIns) -> typing.Reconnec
 
 
 def disconnect_res_to_proto(res: typing.DisconnectRes) -> ClientMessage.DisconnectRes:
-    """Serialize DisconnectRes to ProtoBuf message."""
+    """Serialize `DisconnectRes` to ProtoBuf."""
     reason_proto = Reason.UNKNOWN
     if res.reason == "RECONNECT":
         reason_proto = Reason.RECONNECT
@@ -74,7 +207,7 @@ def disconnect_res_to_proto(res: typing.DisconnectRes) -> ClientMessage.Disconne
 
 
 def disconnect_res_from_proto(msg: ClientMessage.DisconnectRes) -> typing.DisconnectRes:
-    """Deserialize DisconnectRes from ProtoBuf message."""
+    """Deserialize `DisconnectRes` from ProtoBuf."""
     if msg.reason == Reason.RECONNECT:
         return typing.DisconnectRes(reason="RECONNECT")
     if msg.reason == Reason.POWER_DISCONNECTED:
@@ -90,7 +223,7 @@ def disconnect_res_from_proto(msg: ClientMessage.DisconnectRes) -> typing.Discon
 def get_parameters_ins_to_proto(
     ins: typing.GetParametersIns,
 ) -> ServerMessage.GetParametersIns:
-    """Serialize GetParametersIns to ProtoBuf message."""
+    """Serialize `GetParametersIns` to ProtoBuf."""
     config = properties_to_proto(ins.config)
     return ServerMessage.GetParametersIns(config=config)
 
@@ -98,7 +231,7 @@ def get_parameters_ins_to_proto(
 def get_parameters_ins_from_proto(
     msg: ServerMessage.GetParametersIns,
 ) -> typing.GetParametersIns:
-    """Deserialize GetParametersIns from ProtoBuf message."""
+    """Deserialize `GetParametersIns` from ProtoBuf."""
     config = properties_from_proto(msg.config)
     return typing.GetParametersIns(config=config)
 
@@ -106,7 +239,7 @@ def get_parameters_ins_from_proto(
 def get_parameters_res_to_proto(
     res: typing.GetParametersRes,
 ) -> ClientMessage.GetParametersRes:
-    """."""
+    """Serialize `GetParametersRes` to ProtoBuf."""
     status_msg = status_to_proto(res.status)
     if res.status.code == typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED:
         return ClientMessage.GetParametersRes(status=status_msg)
@@ -119,7 +252,7 @@ def get_parameters_res_to_proto(
 def get_parameters_res_from_proto(
     msg: ClientMessage.GetParametersRes,
 ) -> typing.GetParametersRes:
-    """."""
+    """Deserialize `GetParametersRes` from ProtoBuf."""
     status = status_from_proto(msg=msg.status)
     parameters = parameters_from_proto(msg.parameters)
     return typing.GetParametersRes(status=status, parameters=parameters)
@@ -129,21 +262,21 @@ def get_parameters_res_from_proto(
 
 
 def fit_ins_to_proto(ins: typing.FitIns) -> ServerMessage.FitIns:
-    """Serialize FitIns to ProtoBuf message."""
+    """Serialize `FitIns` to ProtoBuf."""
     parameters_proto = parameters_to_proto(ins.parameters)
     config_msg = metrics_to_proto(ins.config)
     return ServerMessage.FitIns(parameters=parameters_proto, config=config_msg)
 
 
 def fit_ins_from_proto(msg: ServerMessage.FitIns) -> typing.FitIns:
-    """Deserialize FitIns from ProtoBuf message."""
+    """Deserialize `FitIns` from ProtoBuf."""
     parameters = parameters_from_proto(msg.parameters)
     config = metrics_from_proto(msg.config)
     return typing.FitIns(parameters=parameters, config=config)
 
 
 def fit_res_to_proto(res: typing.FitRes) -> ClientMessage.FitRes:
-    """Serialize FitIns to ProtoBuf message."""
+    """Serialize `FitIns` to ProtoBuf."""
     status_msg = status_to_proto(res.status)
     if res.status.code == typing.Code.FIT_NOT_IMPLEMENTED:
         return ClientMessage.FitRes(status=status_msg)
@@ -158,7 +291,7 @@ def fit_res_to_proto(res: typing.FitRes) -> ClientMessage.FitRes:
 
 
 def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
-    """Deserialize FitRes from ProtoBuf message."""
+    """Deserialize `FitRes` from ProtoBuf."""
     status = status_from_proto(msg=msg.status)
     parameters = parameters_from_proto(msg.parameters)
     metrics = None if msg.metrics is None else metrics_from_proto(msg.metrics)
@@ -170,13 +303,13 @@ def fit_res_from_proto(msg: ClientMessage.FitRes) -> typing.FitRes:
     )
 
 
-# === Properties messages ===
+# === GetProperties messages ===
 
 
 def get_properties_ins_to_proto(
     ins: typing.GetPropertiesIns,
 ) -> ServerMessage.GetPropertiesIns:
-    """Serialize GetPropertiesIns to ProtoBuf message."""
+    """Serialize `GetPropertiesIns` to ProtoBuf."""
     config = properties_to_proto(ins.config)
     return ServerMessage.GetPropertiesIns(config=config)
 
@@ -184,7 +317,7 @@ def get_properties_ins_to_proto(
 def get_properties_ins_from_proto(
     msg: ServerMessage.GetPropertiesIns,
 ) -> typing.GetPropertiesIns:
-    """Deserialize GetPropertiesIns from ProtoBuf message."""
+    """Deserialize `GetPropertiesIns` from ProtoBuf."""
     config = properties_from_proto(msg.config)
     return typing.GetPropertiesIns(config=config)
 
@@ -192,7 +325,7 @@ def get_properties_ins_from_proto(
 def get_properties_res_to_proto(
     res: typing.GetPropertiesRes,
 ) -> ClientMessage.GetPropertiesRes:
-    """Serialize GetPropertiesIns to ProtoBuf message."""
+    """Serialize `GetPropertiesIns` to ProtoBuf."""
     status_msg = status_to_proto(res.status)
     if res.status.code == typing.Code.GET_PROPERTIES_NOT_IMPLEMENTED:
         return ClientMessage.GetPropertiesRes(status=status_msg)
@@ -203,59 +336,31 @@ def get_properties_res_to_proto(
 def get_properties_res_from_proto(
     msg: ClientMessage.GetPropertiesRes,
 ) -> typing.GetPropertiesRes:
-    """Deserialize GetPropertiesRes from ProtoBuf message."""
+    """Deserialize `GetPropertiesRes` from ProtoBuf."""
     status = status_from_proto(msg=msg.status)
     properties = properties_from_proto(msg.properties)
     return typing.GetPropertiesRes(status=status, properties=properties)
-
-
-def status_to_proto(status: typing.Status) -> Status:
-    """Serialize Code to ProtoBuf message."""
-    code = Code.OK
-    if status.code == typing.Code.GET_PROPERTIES_NOT_IMPLEMENTED:
-        code = Code.GET_PROPERTIES_NOT_IMPLEMENTED
-    if status.code == typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED:
-        code = Code.GET_PARAMETERS_NOT_IMPLEMENTED
-    if status.code == typing.Code.FIT_NOT_IMPLEMENTED:
-        code = Code.FIT_NOT_IMPLEMENTED
-    if status.code == typing.Code.EVALUATE_NOT_IMPLEMENTED:
-        code = Code.EVALUATE_NOT_IMPLEMENTED
-    return Status(code=code, message=status.message)
-
-
-def status_from_proto(msg: Status) -> typing.Status:
-    """Deserialize Code from ProtoBuf message."""
-    code = typing.Code.OK
-    if msg.code == Code.GET_PROPERTIES_NOT_IMPLEMENTED:
-        code = typing.Code.GET_PROPERTIES_NOT_IMPLEMENTED
-    if msg.code == Code.GET_PARAMETERS_NOT_IMPLEMENTED:
-        code = typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED
-    if msg.code == Code.FIT_NOT_IMPLEMENTED:
-        code = typing.Code.FIT_NOT_IMPLEMENTED
-    if msg.code == Code.EVALUATE_NOT_IMPLEMENTED:
-        code = typing.Code.EVALUATE_NOT_IMPLEMENTED
-    return typing.Status(code=code, message=msg.message)
 
 
 # === Evaluate messages ===
 
 
 def evaluate_ins_to_proto(ins: typing.EvaluateIns) -> ServerMessage.EvaluateIns:
-    """Serialize EvaluateIns to ProtoBuf message."""
+    """Serialize `EvaluateIns` to ProtoBuf."""
     parameters_proto = parameters_to_proto(ins.parameters)
     config_msg = metrics_to_proto(ins.config)
     return ServerMessage.EvaluateIns(parameters=parameters_proto, config=config_msg)
 
 
 def evaluate_ins_from_proto(msg: ServerMessage.EvaluateIns) -> typing.EvaluateIns:
-    """Deserialize EvaluateIns from ProtoBuf message."""
+    """Deserialize `EvaluateIns` from ProtoBuf."""
     parameters = parameters_from_proto(msg.parameters)
     config = metrics_from_proto(msg.config)
     return typing.EvaluateIns(parameters=parameters, config=config)
 
 
 def evaluate_res_to_proto(res: typing.EvaluateRes) -> ClientMessage.EvaluateRes:
-    """Serialize EvaluateIns to ProtoBuf message."""
+    """Serialize `EvaluateIns` to ProtoBuf."""
     status_msg = status_to_proto(res.status)
     if res.status.code == typing.Code.EVALUATE_NOT_IMPLEMENTED:
         return ClientMessage.EvaluateRes(status=status_msg)
@@ -269,7 +374,7 @@ def evaluate_res_to_proto(res: typing.EvaluateRes) -> ClientMessage.EvaluateRes:
 
 
 def evaluate_res_from_proto(msg: ClientMessage.EvaluateRes) -> typing.EvaluateRes:
-    """Deserialize EvaluateRes from ProtoBuf message."""
+    """Deserialize `EvaluateRes` from ProtoBuf."""
     status = status_from_proto(msg=msg.status)
     metrics = None if msg.metrics is None else metrics_from_proto(msg.metrics)
     return typing.EvaluateRes(
@@ -280,11 +385,42 @@ def evaluate_res_from_proto(msg: ClientMessage.EvaluateRes) -> typing.EvaluateRe
     )
 
 
+# === Status messages ===
+
+
+def status_to_proto(status: typing.Status) -> Status:
+    """Serialize `Status` to ProtoBuf."""
+    code = Code.OK
+    if status.code == typing.Code.GET_PROPERTIES_NOT_IMPLEMENTED:
+        code = Code.GET_PROPERTIES_NOT_IMPLEMENTED
+    if status.code == typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED:
+        code = Code.GET_PARAMETERS_NOT_IMPLEMENTED
+    if status.code == typing.Code.FIT_NOT_IMPLEMENTED:
+        code = Code.FIT_NOT_IMPLEMENTED
+    if status.code == typing.Code.EVALUATE_NOT_IMPLEMENTED:
+        code = Code.EVALUATE_NOT_IMPLEMENTED
+    return Status(code=code, message=status.message)
+
+
+def status_from_proto(msg: Status) -> typing.Status:
+    """Deserialize `Status` from ProtoBuf."""
+    code = typing.Code.OK
+    if msg.code == Code.GET_PROPERTIES_NOT_IMPLEMENTED:
+        code = typing.Code.GET_PROPERTIES_NOT_IMPLEMENTED
+    if msg.code == Code.GET_PARAMETERS_NOT_IMPLEMENTED:
+        code = typing.Code.GET_PARAMETERS_NOT_IMPLEMENTED
+    if msg.code == Code.FIT_NOT_IMPLEMENTED:
+        code = typing.Code.FIT_NOT_IMPLEMENTED
+    if msg.code == Code.EVALUATE_NOT_IMPLEMENTED:
+        code = typing.Code.EVALUATE_NOT_IMPLEMENTED
+    return typing.Status(code=code, message=msg.message)
+
+
 # === Properties messages ===
 
 
 def properties_to_proto(properties: typing.Properties) -> Any:
-    """Serialize... ."""
+    """Serialize `Properties` to ProtoBuf."""
     proto = {}
     for key in properties:
         proto[key] = scalar_to_proto(properties[key])
@@ -292,7 +428,7 @@ def properties_to_proto(properties: typing.Properties) -> Any:
 
 
 def properties_from_proto(proto: Any) -> typing.Properties:
-    """Deserialize... ."""
+    """Deserialize `Properties` from ProtoBuf."""
     properties = {}
     for k in proto:
         properties[k] = scalar_from_proto(proto[k])
@@ -303,7 +439,7 @@ def properties_from_proto(proto: Any) -> typing.Properties:
 
 
 def metrics_to_proto(metrics: typing.Metrics) -> Any:
-    """Serialize... ."""
+    """Serialize `Metrics` to ProtoBuf."""
     proto = {}
     for key in metrics:
         proto[key] = scalar_to_proto(metrics[key])
@@ -311,7 +447,7 @@ def metrics_to_proto(metrics: typing.Metrics) -> Any:
 
 
 def metrics_from_proto(proto: Any) -> typing.Metrics:
-    """Deserialize... ."""
+    """Deserialize `Metrics` from ProtoBuf."""
     metrics = {}
     for k in proto:
         metrics[k] = scalar_from_proto(proto[k])
@@ -322,8 +458,7 @@ def metrics_from_proto(proto: Any) -> typing.Metrics:
 
 
 def scalar_to_proto(scalar: typing.Scalar) -> Scalar:
-    """Serialize... ."""
-
+    """Serialize `Scalar` to ProtoBuf."""
     if isinstance(scalar, bool):
         return Scalar(bool=scalar)
 
@@ -345,7 +480,92 @@ def scalar_to_proto(scalar: typing.Scalar) -> Scalar:
 
 
 def scalar_from_proto(scalar_msg: Scalar) -> typing.Scalar:
-    """Deserialize... ."""
+    """Deserialize `Scalar` from ProtoBuf."""
     scalar_field = scalar_msg.WhichOneof("scalar")
     scalar = getattr(scalar_msg, cast(str, scalar_field))
     return cast(typing.Scalar, scalar)
+
+
+# === Value messages ===
+
+
+_python_type_to_field_name = {
+    float: "double",
+    int: "sint64",
+    bool: "bool",
+    str: "string",
+    bytes: "bytes",
+}
+
+
+_python_list_type_to_message_and_field_name = {
+    float: (Value.DoubleList, "double_list"),
+    int: (Value.Sint64List, "sint64_list"),
+    bool: (Value.BoolList, "bool_list"),
+    str: (Value.StringList, "string_list"),
+    bytes: (Value.BytesList, "bytes_list"),
+}
+
+
+def _check_value(value: typing.Value) -> None:
+    if isinstance(value, tuple(_python_type_to_field_name.keys())):
+        return
+    if isinstance(value, list):
+        if len(value) > 0 and isinstance(
+            value[0], tuple(_python_type_to_field_name.keys())
+        ):
+            data_type = type(value[0])
+            for element in value:
+                if isinstance(element, data_type):
+                    continue
+                raise Exception(
+                    f"Inconsistent type: the types of elements in the list must "
+                    f"be the same (expected {data_type}, but got {type(element)})."
+                )
+    else:
+        raise TypeError(
+            f"Accepted types: {bool, bytes, float, int, str} or "
+            f"list of these types."
+        )
+
+
+def value_to_proto(value: typing.Value) -> Value:
+    """Serialize `Value` to ProtoBuf."""
+    _check_value(value)
+
+    arg = {}
+    if isinstance(value, list):
+        msg_class, field_name = _python_list_type_to_message_and_field_name[
+            type(value[0]) if len(value) > 0 else int
+        ]
+        arg[field_name] = msg_class(vals=value)
+    else:
+        arg[_python_type_to_field_name[type(value)]] = value
+    return Value(**arg)
+
+
+def value_from_proto(value_msg: Value) -> typing.Value:
+    """Deserialize `Value` from ProtoBuf."""
+    value_field = cast(str, value_msg.WhichOneof("value"))
+    if value_field.endswith("list"):
+        value = list(getattr(value_msg, value_field).vals)
+    else:
+        value = getattr(value_msg, value_field)
+    return cast(typing.Value, value)
+
+
+# === Named Values ===
+
+
+def named_values_to_proto(
+    named_values: Dict[str, typing.Value],
+) -> Dict[str, Value]:
+    """Serialize named values to ProtoBuf."""
+    return {name: value_to_proto(value) for name, value in named_values.items()}
+
+
+def named_values_from_proto(
+    named_values_proto: MutableMapping[str, Value]
+) -> Dict[str, typing.Value]:
+    """Deserialize named values from ProtoBuf."""
+    return {name: value_from_proto(value) for name, value in named_values_proto.items()}

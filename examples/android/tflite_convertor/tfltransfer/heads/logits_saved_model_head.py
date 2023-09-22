@@ -13,6 +13,7 @@
 # limitations under the License.
 """Head model configuration for classifier SavedModels."""
 
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -31,9 +32,9 @@ from tfltransfer import utils
 class LogitsSavedModelHead(object):
     """Head model configuration for classifier SavedModels.
 
-    This configuration supports input models that produce a logits
-    tensor. Such models are to be trained on-device using cross-entropy
-    loss applied to a softmax layer that is appended to logits.
+    This configuration supports input models that produce a logits tensor. Such models
+    are to be trained on-device using cross-entropy loss applied to a softmax layer that
+    is appended to logits.
     """
 
     def __init__(

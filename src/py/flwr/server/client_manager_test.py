@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for Flower ClientManager."""
+"""Tests for ClientManager."""
+
 
 from unittest.mock import MagicMock
 
 from flwr.server.client_manager import SimpleClientManager
-from flwr.server.grpc_server.grpc_client_proxy import GrpcClientProxy
+from flwr.server.fleet.grpc_bidi.grpc_client_proxy import GrpcClientProxy
 
 
 def test_simple_client_manager_register() -> None:

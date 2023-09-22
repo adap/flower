@@ -3,11 +3,11 @@ Example: MXNet - Run MXNet Federated
 
 This tutorial will show you how to use Flower to build a federated version of an existing MXNet workload.
 We are using MXNet to train a Sequential model on the MNIST dataset.
-We will structure the example similar to our `PyTorch - From Centralized To Federated <https://github.com/adap/flower/blob/main/examples/pytorch_from_centralized_to_federated>`_ walkthrough. MXNet and PyTorch are very similar and a very good comparison between MXNet and PyTorch is given `here <https://mxnet.apache.org/versions/1.7.0/api/python/docs/tutorials/getting-started/to-mxnet/pytorch.html>`_.
+We will structure the example similar to our `PyTorch - From Centralized To Federated <https://github.com/adap/flower/blob/main/examples/pytorch-from-centralized-to-federated>`_ walkthrough. MXNet and PyTorch are very similar and a very good comparison between MXNet and PyTorch is given `here <https://mxnet.apache.org/versions/1.7.0/api/python/docs/tutorials/getting-started/to-mxnet/pytorch.html>`_.
 First, we build a centralized training approach based on the `Handwritten Digit Recognition <https://mxnet.apache.org/versions/1.7.0/api/python/docs/tutorials/packages/gluon/image/mnist.html>`_ tutorial.
 Then, we build upon the centralized training code to run the training in a federated fashion.
 
-Before we start setting up our MXNet example we install the :code:`mxnet` and :code:`flwr` packages:
+Before we start setting up our MXNet example, we install the :code:`mxnet` and :code:`flwr` packages:
 
 .. code-block:: shell
 
@@ -209,7 +209,7 @@ Next, we use the :code:`start_server` function to start a server and tell it to 
     import flwr as fl
 
     if __name__ == "__main__":
-        fl.server.start_server("0.0.0.0:8080", config=fl.server.ServerConfig(num_rounds=3))
+        fl.server.start_server(server_address="0.0.0.0:8080", config=fl.server.ServerConfig(num_rounds=3))
 
 We can already start the *server*:
 
@@ -275,7 +275,7 @@ We included type annotations to give you a better understanding of the data type
             self.val_data = val_data
             self.device = device
 
-        def get_parameters(self) -> List[np.ndarray]:
+        def get_parameters(self, config) -> List[np.ndarray]:
             # Return model parameters as a list of NumPy Arrays
             param = []
             for val in self.model.collect_params(".*weight").values():
@@ -299,7 +299,7 @@ We included type annotations to give you a better understanding of the data type
             self.model, self.train_data, epoch=2, device=self.device
             )
             results = {"accuracy": accuracy[1], "loss": loss[1]}
-            return self.get_parameters(), num_examples, results
+            return self.get_parameters(config={}), num_examples, results
 
         def evaluate(
             self, parameters: List[np.ndarray], config: Dict[str, str]
@@ -338,7 +338,7 @@ Having defined data loading, model architecture, training, and evaluation we can
 
         # Start Flower client
         client = MNISTClient(model, train_data, val_data, DEVICE)
-        fl.client.start_numpy_client("0.0.0.0:8080", client)
+        fl.client.start_numpy_client(server_address="0.0.0.0:8080", client)
 
 
     if __name__ == "__main__":
@@ -355,6 +355,6 @@ in each window (make sure that the server is still running before you do so) and
 Next Steps
 ----------
 
-The full source code for this example: `MXNet: From Centralized To Federated (Code) <https://github.com/adap/flower/blob/main/examples/mxnet_from_centralized_to_federated>`_.
+The full source code for this example: `MXNet: From Centralized To Federated (Code) <https://github.com/adap/flower/blob/main/examples/mxnet-from-centralized-to-federated>`_.
 Our example is of course somewhat over-simplified because both clients load the exact same dataset, which isn't realistic.
 You're now prepared to explore this topic further. How about using a CNN or using a different dataset? How about adding more clients?

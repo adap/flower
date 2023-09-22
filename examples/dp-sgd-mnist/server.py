@@ -22,7 +22,7 @@ def get_evaluate_fn(model):
     test_data, test_labels = common.preprocess(test_data, test_labels)
 
     # The `evaluate` function will be called after every round
-    def evaluate(weights: fl.common.Weights):
+    def evaluate(weights: fl.common.NDArrays):
         model.set_weights(weights)  # Update model with the latest parameters
         loss, accuracy = model.evaluate(test_data, test_labels)
         return loss, {"accuracy": accuracy}
@@ -38,12 +38,12 @@ def main(args) -> None:
         fraction_fit=args.fraction_fit,
         min_available_clients=args.num_clients,
         evaluate_fn=get_evaluate_fn(model),
-        initial_parameters=fl.common.weights_to_parameters(model.get_weights()),
+        initial_parameters=fl.common.ndarrays_to_parameters(model.get_weights()),
     )
     fl.server.start_server(
         server_address="0.0.0.0:8080",
         strategy=strategy,
-        config={"num_rounds": args.num_rounds},
+        config=fl.server.ServerConfig(num_rounds=args.num_rounds),
     )
 
 

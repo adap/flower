@@ -1,0 +1,8 @@
+dataset: FeMNIST
+dataset_fraction: 0.05
+distribution_type: "niid"
+batch_size: 10
+train_fraction: 0.6
+validation_fraction: 0.2
+test_fraction: 0.2
+num_classes: 62

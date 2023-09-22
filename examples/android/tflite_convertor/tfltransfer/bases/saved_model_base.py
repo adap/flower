@@ -13,6 +13,7 @@
 # limitations under the License.
 """Base model configuration that reads a specified SavedModel."""
 
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -28,9 +29,8 @@ from tfltransfer.bases import quantizable_base
 class SavedModelBase(quantizable_base.QuantizableBase):
     """Base model configuration that reads a specified SavedModel.
 
-    The SavedModel should contain a signature that converts samples to
-    bottlenecks. This is assumed by default to be the main serving
-    signature, but this can be configured.
+    The SavedModel should contain a signature that converts samples to bottlenecks. This
+    is assumed by default to be the main serving signature, but this can be configured.
     """
 
     def __init__(

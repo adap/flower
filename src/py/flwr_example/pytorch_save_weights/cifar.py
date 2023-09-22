@@ -39,6 +39,7 @@ import flwr as fl
 
 DATA_ROOT = "~/.flower/data/cifar-10"
 
+
 # pylint: disable=unsubscriptable-object
 class Net(nn.Module):
     """Simple CNN adapted from 'PyTorch: A 60 Minute Blitz'."""
@@ -63,11 +64,11 @@ class Net(nn.Module):
         x = self.fc3(x)
         return x
 
-    def get_weights(self) -> fl.common.Weights:
+    def get_weights(self) -> fl.common.NDArrays:
         """Get model weights as a list of NumPy ndarrays."""
         return [val.cpu().numpy() for _, val in self.state_dict().items()]
 
-    def set_weights(self, weights: fl.common.Weights) -> None:
+    def set_weights(self, weights: fl.common.NDArrays) -> None:
         """Set model weights from a list of NumPy ndarrays."""
         state_dict = OrderedDict(
             {k: torch.tensor(v) for k, v in zip(self.state_dict().keys(), weights)}

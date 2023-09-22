@@ -2,4 +2,6 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
-pyenv uninstall -f flower-3.7.12
+version=${1:-3.8.17}
+
+pyenv uninstall -f flower-$version

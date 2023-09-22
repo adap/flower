@@ -14,6 +14,7 @@
 # ==============================================================================
 """This module contains functions related to proto compilation."""
 
+
 import glob
 from os import path
 
@@ -31,9 +32,8 @@ PROTO_FILES = glob.glob(f"{IN_PATH}/flwr/**/*.proto")
 def compile_all() -> None:
     """Compile all protos in the `src/proto` directory.
 
-    The directory structure of the `src/proto` directory will be
-    mirrored in `src/py`. This is needed as otherwise
-    `grpc_tools.protoc` will have broken imports.
+    The directory structure of the `src/proto` directory will be mirrored in `src/py`.
+    This is needed as otherwise `grpc_tools.protoc` will have broken imports.
     """
     command = [
         "grpc_tools.protoc",

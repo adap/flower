@@ -13,6 +13,7 @@
 # limitations under the License.
 """Shortcuts for head model configurations."""
 
+
 from .keras_model_head import KerasModelHead
 from .logits_saved_model_head import LogitsSavedModelHead
 from .softmax_classifier_head import SoftmaxClassifierHead

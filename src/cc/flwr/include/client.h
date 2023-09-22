@@ -15,7 +15,7 @@
 #pragma once
 #include "typing.h"
 
-namespace flwr {
+namespace flwr_local {
 /**
  *
  * Abstract base class for C++ Flower clients
@@ -60,4 +60,4 @@ class Client {
    */
   virtual EvaluateRes evaluate(EvaluateIns ins) = 0;
 };
-}  // namespace flwr
+}  // namespace flwr_local

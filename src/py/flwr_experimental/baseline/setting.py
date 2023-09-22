@@ -14,6 +14,7 @@
 # ==============================================================================
 """Provides a variaty of baseline settings base classes."""
 
+
 from dataclasses import dataclass
 from typing import List, Optional
 

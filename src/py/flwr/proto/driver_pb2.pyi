@@ -3,6 +3,8 @@
 isort:skip_file
 """
 import builtins
+import flwr.proto.node_pb2
+import flwr.proto.task_pb2
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
 import google.protobuf.message
@@ -11,44 +13,62 @@ import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-class GetClientsRequest(google.protobuf.message.Message):
-    """GetClients messages"""
+class CreateWorkloadRequest(google.protobuf.message.Message):
+    """CreateWorkload"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     def __init__(self,
         ) -> None: ...
-global___GetClientsRequest = GetClientsRequest
+global___CreateWorkloadRequest = CreateWorkloadRequest
 
-class GetClientsResponse(google.protobuf.message.Message):
+class CreateWorkloadResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    def __init__(self,
-        ) -> None: ...
-global___GetClientsResponse = GetClientsResponse
-
-class Task(google.protobuf.message.Message):
-    """CreateTasks messages"""
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    ID_FIELD_NUMBER: builtins.int
-    id: typing.Text
+    WORKLOAD_ID_FIELD_NUMBER: builtins.int
+    workload_id: typing.Text
     def __init__(self,
         *,
-        id: typing.Text = ...,
+        workload_id: typing.Text = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["id",b"id"]) -> None: ...
-global___Task = Task
+    def ClearField(self, field_name: typing_extensions.Literal["workload_id",b"workload_id"]) -> None: ...
+global___CreateWorkloadResponse = CreateWorkloadResponse
 
-class CreateTasksRequest(google.protobuf.message.Message):
+class GetNodesRequest(google.protobuf.message.Message):
+    """GetNodes messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    TASK_FIELD_NUMBER: builtins.int
+    WORKLOAD_ID_FIELD_NUMBER: builtins.int
+    workload_id: typing.Text
+    def __init__(self,
+        *,
+        workload_id: typing.Text = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["workload_id",b"workload_id"]) -> None: ...
+global___GetNodesRequest = GetNodesRequest
+
+class GetNodesResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    NODES_FIELD_NUMBER: builtins.int
     @property
-    def task(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Task]: ...
+    def nodes(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.node_pb2.Node]: ...
     def __init__(self,
         *,
-        task: typing.Optional[typing.Iterable[global___Task]] = ...,
+        nodes: typing.Optional[typing.Iterable[flwr.proto.node_pb2.Node]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["task",b"task"]) -> None: ...
-global___CreateTasksRequest = CreateTasksRequest
+    def ClearField(self, field_name: typing_extensions.Literal["nodes",b"nodes"]) -> None: ...
+global___GetNodesResponse = GetNodesResponse
 
-class CreateTasksResponse(google.protobuf.message.Message):
+class PushTaskInsRequest(google.protobuf.message.Message):
+    """PushTaskIns messages"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    TASK_INS_LIST_FIELD_NUMBER: builtins.int
+    @property
+    def task_ins_list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.task_pb2.TaskIns]: ...
+    def __init__(self,
+        *,
+        task_ins_list: typing.Optional[typing.Iterable[flwr.proto.task_pb2.TaskIns]] = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["task_ins_list",b"task_ins_list"]) -> None: ...
+global___PushTaskInsRequest = PushTaskInsRequest
+
+class PushTaskInsResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     TASK_IDS_FIELD_NUMBER: builtins.int
     @property
@@ -58,40 +78,34 @@ class CreateTasksResponse(google.protobuf.message.Message):
         task_ids: typing.Optional[typing.Iterable[typing.Text]] = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["task_ids",b"task_ids"]) -> None: ...
-global___CreateTasksResponse = CreateTasksResponse
+global___PushTaskInsResponse = PushTaskInsResponse
 
-class Result(google.protobuf.message.Message):
-    """GetResults messages"""
+class PullTaskResRequest(google.protobuf.message.Message):
+    """PullTaskRes messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    TASK_ID_FIELD_NUMBER: builtins.int
-    task_id: typing.Text
-    def __init__(self,
-        *,
-        task_id: typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["task_id",b"task_id"]) -> None: ...
-global___Result = Result
-
-class GetResultsRequest(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    NODE_FIELD_NUMBER: builtins.int
     TASK_IDS_FIELD_NUMBER: builtins.int
     @property
-    def task_ids(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Result]: ...
-    def __init__(self,
-        *,
-        task_ids: typing.Optional[typing.Iterable[global___Result]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["task_ids",b"task_ids"]) -> None: ...
-global___GetResultsRequest = GetResultsRequest
-
-class GetResultsResponse(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    RESULTS_FIELD_NUMBER: builtins.int
+    def node(self) -> flwr.proto.node_pb2.Node: ...
     @property
-    def results(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Result]: ...
+    def task_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
     def __init__(self,
         *,
-        results: typing.Optional[typing.Iterable[global___Result]] = ...,
+        node: typing.Optional[flwr.proto.node_pb2.Node] = ...,
+        task_ids: typing.Optional[typing.Iterable[typing.Text]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["results",b"results"]) -> None: ...
-global___GetResultsResponse = GetResultsResponse
+    def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["node",b"node","task_ids",b"task_ids"]) -> None: ...
+global___PullTaskResRequest = PullTaskResRequest
+
+class PullTaskResResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    TASK_RES_LIST_FIELD_NUMBER: builtins.int
+    @property
+    def task_res_list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.task_pb2.TaskRes]: ...
+    def __init__(self,
+        *,
+        task_res_list: typing.Optional[typing.Iterable[flwr.proto.task_pb2.TaskRes]] = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["task_res_list",b"task_res_list"]) -> None: ...
+global___PullTaskResResponse = PullTaskResResponse

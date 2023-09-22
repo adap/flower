@@ -14,6 +14,7 @@
 # ==============================================================================
 """Training history."""
 
+
 from functools import reduce
 from typing import Dict, List, Tuple
 
@@ -26,6 +27,7 @@ class History:
     def __init__(self) -> None:
         self.losses_distributed: List[Tuple[int, float]] = []
         self.losses_centralized: List[Tuple[int, float]] = []
+        self.metrics_distributed_fit: Dict[str, List[Tuple[int, Scalar]]] = {}
         self.metrics_distributed: Dict[str, List[Tuple[int, Scalar]]] = {}
         self.metrics_centralized: Dict[str, List[Tuple[int, Scalar]]] = {}
 
@@ -36,6 +38,17 @@ class History:
     def add_loss_centralized(self, server_round: int, loss: float) -> None:
         """Add one loss entry (from centralized evaluation)."""
         self.losses_centralized.append((server_round, loss))
+
+    def add_metrics_distributed_fit(
+        self, server_round: int, metrics: Dict[str, Scalar]
+    ) -> None:
+        """Add metrics entries (from distributed fit)."""
+        for key in metrics:
+            # if not (isinstance(metrics[key], float) or isinstance(metrics[key], int)):
+            #     continue  # ignore non-numeric key/value pairs
+            if key not in self.metrics_distributed_fit:
+                self.metrics_distributed_fit[key] = []
+            self.metrics_distributed_fit[key].append((server_round, metrics[key]))
 
     def add_metrics_distributed(
         self, server_round: int, metrics: Dict[str, Scalar]
@@ -60,6 +73,21 @@ class History:
             self.metrics_centralized[key].append((server_round, metrics[key]))
 
     def __repr__(self) -> str:
+        """Create a representation of History.
+
+        The representation consists of the following data (for each round) if present:
+
+        * distributed loss.
+        * centralized loss.
+        * distributed training metrics.
+        * distributed evaluation metrics.
+        * centralized metrics.
+
+        Returns
+        -------
+        representation : str
+            The string representation of the history object.
+        """
         rep = ""
         if self.losses_distributed:
             rep += "History (loss, distributed):\n" + reduce(
@@ -77,8 +105,14 @@ class History:
                     for server_round, loss in self.losses_centralized
                 ],
             )
+        if self.metrics_distributed_fit:
+            rep += "History (metrics, distributed, fit):\n" + str(
+                self.metrics_distributed_fit
+            )
         if self.metrics_distributed:
-            rep += "History (metrics, distributed):\n" + str(self.metrics_distributed)
+            rep += "History (metrics, distributed, evaluate):\n" + str(
+                self.metrics_distributed
+            )
         if self.metrics_centralized:
             rep += "History (metrics, centralized):\n" + str(self.metrics_centralized)
         return rep

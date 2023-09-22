@@ -6,6 +6,9 @@ doc/source/_build
 flwr_logs
 .cache
 
+# Node.js
+node_modules
+
 # Flower Examples
 examples/**/dataset/**
 examples/**/dev/*.sh
@@ -47,6 +50,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+.srl
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -157,3 +161,24 @@ dmypy.json
 # Poetry
 poetry.lock
 *.pkl
+
+# iOS
+xcuserdata/
+
+# Android
+.gradle
+.idea
+local.properties
+app/src/main/assets
+/build
+*.iml
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/captures
+.externalNativeBuild
+.cxx

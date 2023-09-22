@@ -18,7 +18,7 @@
 #include <optional>
 #include <string>
 
-namespace flwr {
+namespace flwr_local {
 /**
  * This class contains C++ types corresponding to ProtoBuf types that
  * ProtoBuf considers to be "Scalar Value Types", even though some of them
@@ -53,7 +53,7 @@ class Scalar {
   std::optional<std::string> string = std::nullopt;
 };
 
-typedef std::map<std::string, flwr::Scalar> Metrics;
+typedef std::map<std::string, flwr_local::Scalar> Metrics;
 
 /**
  * Model parameters
@@ -98,7 +98,7 @@ class ParametersRes {
  */
 class FitIns {
  public:
-  FitIns(Parameters parameters, std::map<std::string, flwr::Scalar> config)
+  FitIns(Parameters parameters, std::map<std::string, flwr_local::Scalar> config)
       : parameters(parameters), config(config) {}
 
   // Getters
@@ -150,7 +150,7 @@ class FitRes {
           num_examples_ceil = n;
   }*/
   void setFit_duration(float f) { fit_duration = f; }
-  void setMetrics(flwr::Metrics m) { metrics = m; }
+  void setMetrics(flwr_local::Metrics m) { metrics = m; }
 
  private:
   Parameters parameters;
@@ -208,15 +208,15 @@ class EvaluateRes {
   std::optional<Metrics> metrics = std::nullopt;
 };
 
-typedef std::map<std::string, flwr::Scalar> Config;
-typedef std::map<std::string, flwr::Scalar> Properties;
+typedef std::map<std::string, flwr_local::Scalar> Config;
+typedef std::map<std::string, flwr_local::Scalar> Properties;
 
 class PropertiesIns {
  public:
   PropertiesIns() {}
 
-  std::map<std::string, flwr::Scalar> getPropertiesIns() {
-    return static_cast<std::map<std::string, flwr::Scalar>>(config);
+  std::map<std::string, flwr_local::Scalar> getPropertiesIns() {
+    return static_cast<std::map<std::string, flwr_local::Scalar>>(config);
   }
 
   void setPropertiesIns(Config c) { config = c; }
@@ -237,4 +237,4 @@ class PropertiesRes {
   Properties properties;
 };
 
-}  // namespace flwr
+}  // namespace flwr_local

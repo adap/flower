@@ -38,7 +38,7 @@ class SaveModelStrategy(fl.server.strategy.FedAvg):
                 BaseException,
             ]
         ],
-    ) -> Optional[fl.common.Weights]:
+    ) -> Optional[fl.common.NDArrays]:
         weights = super().aggregate_fit(server_round, results, failures)
         if weights is not None:
             # Save weights
@@ -80,14 +80,14 @@ def fit_config(server_round: int) -> Dict[str, fl.common.Scalar]:
 
 def get_evaluate_fn(
     testloader: torch.utils.data.DataLoader,
-) -> Callable[[fl.common.Weights], Optional[Tuple[float, float]]]:
+) -> Callable[[fl.common.NDArrays], Optional[Tuple[float, float]]]:
     """Return an evaluation function for centralized evaluation."""
 
     # pylint: disable=no-member
     DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     # pylint: enable=no-member
 
-    def evaluate(weights: fl.common.Weights) -> Optional[Tuple[float, float]]:
+    def evaluate(weights: fl.common.NDArrays) -> Optional[Tuple[float, float]]:
         """Use the entire CIFAR-10 test set for evaluation."""
         model = cifar.Net()
         model.set_weights(weights)

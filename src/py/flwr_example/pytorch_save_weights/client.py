@@ -24,12 +24,21 @@ import torch
 import torchvision
 
 import flwr as fl
-from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, Weights
+from flwr.common import (
+    EvaluateIns,
+    EvaluateRes,
+    FitIns,
+    FitRes,
+    NDArrays,
+    ParametersRes,
+)
 
 from . import cifar
 
 # pylint: disable=no-member
 DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+
 # Flower Client
 class CifarClient(fl.client.NumPyClient):
     """Flower client implementing CIFAR-10 image classification using PyTorch."""

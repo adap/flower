@@ -14,6 +14,7 @@
 # ==============================================================================
 """Implments compute classes for EC2."""
 
+
 import os
 import unittest
 import warnings

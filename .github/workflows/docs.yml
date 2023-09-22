@@ -8,51 +8,34 @@ on:
     branches:
       - main
 
-jobs:
-  build_docs:
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-      - name: Build docs
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.7.12
-      - name: Install build tools
-        run: |
-          python -m pip install -U pip==22.2
-          python -m pip install -U setuptools==63.2.0
-          python -m pip install -U poetry==1.1.14
-          poetry config virtualenvs.create false
-      - name: Install dependencies (mandatory only)
-        run: python -m poetry install --extras "simulation"
-      - name: Build and deploy docs
-        env:
-          AWS_DEFAULT_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
-        run: ./dev/build-docs.sh
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
-  deploy_docs:
-    needs: build_docs
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-20.04
+env:
+  FLWR_TELEMETRY_ENABLED: 0
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-22.04
+    name: Build and deploy
     steps:
-      - uses: actions/checkout@v3
-      - name: Deploy docs
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.7.12
-      - name: Install build tools
-        run: |
-          python -m pip install -U pip==22.2
-          python -m pip install -U setuptools==63.2.0
-          python -m pip install -U poetry==1.1.14
-          poetry config virtualenvs.create false
+      - uses: actions/checkout@v4
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Install pandoc
+        run: sudo apt install pandoc
       - name: Install dependencies (mandatory only)
         run: python -m poetry install --extras "simulation"
-      - name: Build and deploy docs
+      - name: Build docs
+        run: ./dev/build-docs.sh
+      - name: Deploy docs
+        if: github.ref == 'refs/heads/main'
         env:
           AWS_DEFAULT_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
-        run: ./dev/deploy-docs.sh
+        run: |
+          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./doc/build/html/ s3://flower.dev/docs/framework
+          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./baselines/doc/build/html/ s3://flower.dev/docs/baselines
+          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./examples/doc/build/html/ s3://flower.dev/docs/examples

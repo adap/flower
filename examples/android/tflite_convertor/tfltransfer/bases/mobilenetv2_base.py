@@ -13,6 +13,7 @@
 # limitations under the License.
 """Base model configuration for MobileNetV2."""
 
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -28,10 +29,9 @@ from tfltransfer.bases import quantizable_base
 class MobileNetV2Base(quantizable_base.QuantizableBase):
     """Base model configuration that downloads a pretrained MobileNetV2.
 
-    The model is downloaded with weights pre-trained for ImageNet. The
-    last few layers following the final DepthwiseConv are stripped off,
-    and the feature vector with shape (7, 7, 1280) is used as the
-    output.
+    The model is downloaded with weights pre-trained for ImageNet. The last few layers
+    following the final DepthwiseConv are stripped off, and the feature vector with
+    shape (7, 7, 1280) is used as the output.
     """
 
     def __init__(

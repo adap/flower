@@ -14,48 +14,48 @@ std::tuple<ClientMessage, int> _reconnect(
   ClientMessage_Disconnect disconnect;
   disconnect.set_reason(reason);
   ClientMessage cm;
-  *cm.mutable_disconnect() = disconnect;
+  *cm.mutable_disconnect_res() = disconnect;
 
   return std::make_tuple(cm, sleep_duration);
 }
 
-ClientMessage _get_parameters(flwr::Client* client) {
+ClientMessage _get_parameters(flwr_local::Client* client) {
   ClientMessage cm;
-  *(cm.mutable_parameters_res()) =
+  *(cm.mutable_get_parameters_res()) =
       parameters_res_to_proto(client->get_parameters());
   return cm;
 }
 
-ClientMessage _fit(flwr::Client* client, ServerMessage_FitIns fit_msg) {
+ClientMessage _fit(flwr_local::Client* client, ServerMessage_FitIns fit_msg) {
   // Deserialize fit instruction
-  flwr::FitIns fit_ins = fit_ins_from_proto(fit_msg);
+  flwr_local::FitIns fit_ins = fit_ins_from_proto(fit_msg);
   // Perform fit
-  flwr::FitRes fit_res = client->fit(fit_ins);
+  flwr_local::FitRes fit_res = client->fit(fit_ins);
   // Serialize fit result
   ClientMessage cm;
   *cm.mutable_fit_res() = fit_res_to_proto(fit_res);
   return cm;
 }
 
-ClientMessage _evaluate(flwr::Client* client,
+ClientMessage _evaluate(flwr_local::Client* client,
                         ServerMessage_EvaluateIns evaluate_msg) {
   // Deserialize evaluate instruction
-  flwr::EvaluateIns evaluate_ins = evaluate_ins_from_proto(evaluate_msg);
+  flwr_local::EvaluateIns evaluate_ins = evaluate_ins_from_proto(evaluate_msg);
   // Perform evaluation
-  flwr::EvaluateRes evaluate_res = client->evaluate(evaluate_ins);
+  flwr_local::EvaluateRes evaluate_res = client->evaluate(evaluate_ins);
   // Serialize evaluate result
   ClientMessage cm;
   *cm.mutable_evaluate_res() = evaluate_res_to_proto(evaluate_res);
   return cm;
 }
 
-std::tuple<ClientMessage, int, bool> handle(flwr::Client* client,
+std::tuple<ClientMessage, int, bool> handle(flwr_local::Client* client,
                                             ServerMessage server_msg) {
-  if (server_msg.has_reconnect()) {
-    std::tuple<ClientMessage, int> rec = _reconnect(server_msg.reconnect());
+  if (server_msg.has_reconnect_ins()) {
+    std::tuple<ClientMessage, int> rec = _reconnect(server_msg.reconnect_ins());
     return std::make_tuple(std::get<0>(rec), std::get<1>(rec), false);
   }
-  if (server_msg.has_get_parameters()) {
+  if (server_msg.has_get_parameters_ins()) {
     return std::make_tuple(_get_parameters(client), 0, true);
   }
   if (server_msg.has_fit_ins()) {

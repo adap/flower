@@ -24,7 +24,6 @@ from .aggregate import aggregate, weighted_loss_avg
 
 def test_aggregate() -> None:
     """Test aggregate function."""
-
     # Prepare
     weights0_0 = np.array([[1, 2, 3], [4, 5, 6]])
     weights0_1 = np.array([7, 8, 9, 10])
@@ -38,7 +37,7 @@ def test_aggregate() -> None:
     actual = aggregate(results)
 
     # Assert
-    np.testing.assert_equal(expected, actual)  # type: ignore
+    np.testing.assert_equal(expected, actual)
 
 
 def test_weighted_loss_avg_single_value() -> None:

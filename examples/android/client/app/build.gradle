@@ -2,14 +2,13 @@ apply plugin: 'com.google.protobuf'
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.0"
+    compileSdkVersion 33
 
     defaultConfig {
         applicationId "flwr.android_client"
         // API level 14+ is required for TLS since Google Play Services v10.2
         minSdkVersion 24
-        targetSdkVersion 29
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
     }
@@ -30,21 +29,24 @@ android {
         enabled = true
     }
 
-    aaptOptions {
-        noCompress "tflite"
-    }
 
-    lintOptions {
+    namespace 'flwr.android_client'
+    androidResources {
+        noCompress 'tflite'
+    }
+    lint {
         disable 'GoogleAppIndexingWarning', 'HardcodedText', 'InvalidPackage'
+        textOutput file('stdout')
         textReport true
-        textOutput "stdout"
     }
 }
+
+def grpc_version = '1.43.0'
 
 protobuf {
     protoc { artifact = 'com.google.protobuf:protoc:3.11.0' }
     plugins {
-        grpc { artifact = 'io.grpc:protoc-gen-grpc-java:1.27.2' // CURRENT_GRPC_VERSION
+        grpc { artifact = "io.grpc:protoc-gen-grpc-java:$grpc_version"
         }
     }
     generateProtoTasks {
@@ -61,28 +63,28 @@ protobuf {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.6.0'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.2.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test:runner:1.5.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     implementation project(path: ':transfer_api')
 
     implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly-SNAPSHOT'
     // This dependency adds the necessary TF op support.
     implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:0.0.0-nightly-SNAPSHOT'
 
-    implementation 'io.grpc:grpc-okhttp:1.27.2' // CURRENT_GRPC_VERSION
-    implementation 'io.grpc:grpc-protobuf-lite:1.27.2' // CURRENT_GRPC_VERSION
-    implementation 'io.grpc:grpc-stub:1.27.2' // CURRENT_GRPC_VERSION
-    implementation 'javax.annotation:javax.annotation-api:1.2'
+    implementation "io.grpc:grpc-okhttp:$grpc_version"
+    implementation "io.grpc:grpc-protobuf-lite:$grpc_version"
+    implementation "io.grpc:grpc-stub:$grpc_version"
+    implementation 'javax.annotation:javax.annotation-api:1.3.2'
 
-    def lifecycle_version = '2.1.0-rc01'
+    def lifecycle_version = '2.2.0'
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
 
-    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'com.google.android.material:material:1.7.0'
 
 }
 

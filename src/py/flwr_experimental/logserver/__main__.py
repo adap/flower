@@ -13,6 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 """Start log server."""
+
+
 from flwr_experimental.logserver.server import main
 
 if __name__ == "__main__":

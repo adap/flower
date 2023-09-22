@@ -1,0 +1,7 @@
+defaults:
+  - _self_
+  - dataset: partial_FeMNIST_table2_flwr_baseline
+  - training: table2_flwr_baseline
+
+random_seed: 42
+device: cpu

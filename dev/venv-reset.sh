@@ -2,11 +2,13 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
+version=${1:-3.8.17}
+
 # Delete caches, venv, and lock file
 ./dev/rm-caches.sh
-./dev/venv-delete.sh
+./dev/venv-delete.sh $version
 [ ! -e poetry.lock ] || rm poetry.lock
 
 # Recreate
-./dev/venv-create.sh
+./dev/venv-create.sh $version
 ./dev/bootstrap.sh

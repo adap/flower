@@ -1,7 +1,7 @@
 #include "start.h"
 
 void start::start_client(std::string server_address,
-                         flwr::Client* client,
+                         flwr_local::Client* client,
                          int grpc_max_message_length) {
   while (true) {
     int sleep_duration = 0;

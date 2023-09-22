@@ -13,6 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 """Tests EC2Adapter."""
+
+
 import os
 import unittest
 import warnings

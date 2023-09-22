@@ -14,6 +14,7 @@
 # ==============================================================================
 """This module contains functions related to proto compilation."""
 
+
 from os import path
 
 from .protoc import IN_PATH, OUT_PATH, PROTO_FILES
@@ -27,4 +28,4 @@ def test_directories() -> None:
 
 def test_proto_file_count() -> None:
     """Test if the correct number of proto files were captured by the glob."""
-    assert len(PROTO_FILES) == 3
+    assert len(PROTO_FILES) == 5

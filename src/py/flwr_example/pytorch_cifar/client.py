@@ -22,7 +22,14 @@ import torch
 import torchvision
 
 import flwr as fl
-from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, ParametersRes, Weights
+from flwr.common import (
+    EvaluateIns,
+    EvaluateRes,
+    FitIns,
+    FitRes,
+    NDArrays,
+    ParametersRes,
+)
 
 from . import DEFAULT_SERVER_ADDRESS, cifar
 
@@ -49,14 +56,14 @@ class CifarClient(fl.client.Client):
     def get_parameters(self) -> ParametersRes:
         print(f"Client {self.cid}: get_parameters")
 
-        weights: Weights = self.model.get_weights()
+        weights: NDArrays = self.model.get_weights()
         parameters = fl.common.ndarrays_to_parameters(weights)
         return ParametersRes(parameters=parameters)
 
     def fit(self, ins: FitIns) -> FitRes:
         print(f"Client {self.cid}: fit")
 
-        weights: Weights = fl.common.parameters_to_ndarrays(ins.parameters)
+        weights: NDArrays = fl.common.parameters_to_ndarrays(ins.parameters)
         config = ins.config
         fit_begin = timeit.default_timer()
 
@@ -74,7 +81,7 @@ class CifarClient(fl.client.Client):
         cifar.train(self.model, trainloader, epochs=epochs, device=DEVICE)
 
         # Return the refined weights and the number of examples used for training
-        weights_prime: Weights = self.model.get_weights()
+        weights_prime: NDArrays = self.model.get_weights()
         params_prime = fl.common.ndarrays_to_parameters(weights_prime)
         num_examples_train = len(self.trainset)
         fit_duration = timeit.default_timer() - fit_begin

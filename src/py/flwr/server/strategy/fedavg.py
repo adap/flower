@@ -14,7 +14,7 @@
 # ==============================================================================
 """Federated Averaging (FedAvg) [McMahan et al., 2016] strategy.
 
-Paper: https://arxiv.org/abs/1602.05629
+Paper: arxiv.org/abs/1602.05629
 """
 
 
@@ -51,7 +51,7 @@ than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
 class FedAvg(Strategy):
     """Configurable FedAvg strategy implementation."""
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes
+    # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
     def __init__(
         self,
         *,
@@ -80,21 +80,20 @@ class FedAvg(Strategy):
         Parameters
         ----------
         fraction_fit : float, optional
-            Fraction of clients used during training. Defaults to 0.1.
+            Fraction of clients used during training. In case `min_fit_clients`
+            is larger than `fraction_fit * available_clients`, `min_fit_clients`
+            will still be sampled. Defaults to 1.0.
         fraction_evaluate : float, optional
-            Fraction of clients used during validation. Defaults to 0.1.
+            Fraction of clients used during validation. In case `min_evaluate_clients`
+            is larger than `fraction_evaluate * available_clients`,
+            `min_evaluate_clients` will still be sampled. Defaults to 1.0.
         min_fit_clients : int, optional
             Minimum number of clients used during training. Defaults to 2.
         min_evaluate_clients : int, optional
             Minimum number of clients used during validation. Defaults to 2.
         min_available_clients : int, optional
             Minimum number of total clients in the system. Defaults to 2.
-        evaluate_fn : Optional[
-            Callable[
-                [int, NDArrays, Dict[str, Scalar]],
-                Optional[Tuple[float, Dict[str, Scalar]]]
-            ]
-        ]
+        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
             Optional function used for validation. Defaults to None.
         on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
             Function used to configure training. Defaults to None.
@@ -104,9 +103,9 @@ class FedAvg(Strategy):
             Whether or not accept rounds containing failures. Defaults to True.
         initial_parameters : Parameters, optional
             Initial global model parameters.
-        fit_metrics_aggregation_fn: Optional[MetricsAggregationFn]
+        fit_metrics_aggregation_fn : Optional[MetricsAggregationFn]
             Metrics aggregation function, optional.
-        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn]
+        evaluate_metrics_aggregation_fn : Optional[MetricsAggregationFn]
             Metrics aggregation function, optional.
         """
         super().__init__()
@@ -131,12 +130,12 @@ class FedAvg(Strategy):
         self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"FedAvg(accept_failures={self.accept_failures})"
         return rep
 
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Return the sample size and the required number of available
-        clients."""
+        """Return the sample size and the required number of available clients."""
         num_clients = int(num_available_clients * self.fraction_fit)
         return max(num_clients, self.min_fit_clients), self.min_available_clients
 

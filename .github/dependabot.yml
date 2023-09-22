@@ -1,0 +1,84 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    allow:
+      # Allow only updates for dev dependencies
+      - dependency-type: "development"
+    ignore:
+      # Ignore updates from certain packages
+      - dependency-name: "grpcio-tools"
+      - dependency-name: "mypy-protobuf"
+      - dependency-name: "types-protobuf"
+    open-pull-requests-limit: 3
+
+  - package-ecosystem: "pip"
+    directory: "/e2e/pytorch"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "pip"
+    directory: "/e2e/tensorflow"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "pip"
+    directory: "/e2e/mxnet"
+    schedule:
+      interval: "daily"
+    ignore:
+      # Ignore updates from certain packages
+      - dependency-name: "numpy"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "pip"
+    directory: "/e2e/jax"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "pip"
+    directory: "/e2e/pandas"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "pip"
+    directory: "/e2e/scikit-learn"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 2
+  
+  - package-ecosystem: "pip"
+    directory: "/e2e/opacus"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "pip"
+    directory: "/e2e/fastai"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "pip"
+    directory: "/e2e/tabnet"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "pip"
+    directory: "/e2e/pytorch-lightning"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      # Check for updates to GitHub Actions every week
+      interval: "weekly"

@@ -13,6 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 """Tests DockerAdapter."""
+
+
 import os
 import time
 import unittest

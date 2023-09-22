@@ -19,9 +19,9 @@
 #include <grpcpp/grpcpp.h>
 #include "client.h"
 #include "message_handler.h"
-using flower::transport::ClientMessage;
-using flower::transport::FlowerService;
-using flower::transport::ServerMessage;
+using flwr::proto::ClientMessage;
+using flwr::proto::FlowerService;
+using flwr::proto::ServerMessage;
 using grpc::Channel;
 using grpc::ClientContext;
 using grpc::ClientReaderWriter;
@@ -54,7 +54,7 @@ using grpc::Status;
 class start {
  public:
   static void start_client(std::string server_address,
-                    flwr::Client* client,
+                    flwr_local::Client* client,
                     int grpc_max_message_length = GRPC_MAX_MESSAGE_LENGTH);
 };
 #endif
