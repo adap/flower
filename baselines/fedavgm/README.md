@@ -53,7 +53,7 @@ Important to highlight the rationale with this CNN model stated on FedAvgM paper
 
 **Data distribution:** The following figure illustrates the use of multiple `concentration` values to generate the data distribution over 30 clients for CIFAR-10 (10 classes) - [source code](fedavgm/utils.py):
 
-![](docs/concentration_cifar10.png)
+![](docs/concentration_cifar10_v2.png)
 
 **Training Hyperparameters:**
 The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python main.py` directly)
