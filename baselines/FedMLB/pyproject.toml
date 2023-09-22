@@ -3,7 +3,7 @@ requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
-name = "FedMLB" # <----- Ensure it matches the name of your baseline directory containing all the source code
+name = "fedmlb" # <----- Ensure it matches the name of your baseline directory containing all the source code
 version = "1.0.0"
 description = "Flower Baselines"
 license = "Apache-2.0"

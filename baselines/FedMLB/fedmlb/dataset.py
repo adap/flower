@@ -1,12 +1,14 @@
 """Handle dataset loading and preprocessing utility."""
 import os
+from typing import Union
 
 import numpy as np
 import tensorflow as tf
 
 
-def load_selected_client_statistics(selected_client: int, alpha: float,
-                                    dataset: str, total_clients: int):
+def load_selected_client_statistics(
+    selected_client: int, alpha: float, dataset: str, total_clients: int
+):
     """Return the amount of local examples for the selected client.
 
     Clients are referenced with a client_id. Loads a numpy array saved on disk. This
@@ -27,7 +29,9 @@ def load_selected_client_statistics(selected_client: int, alpha: float,
 class PaddedRandomCropCustom(tf.keras.layers.Layer):
     """Custom keras layer to random crop the input image, same as FedMLB paper."""
 
-    def __init__(self, seed: int = None, height: int = 32, width: int = 32, **kwargs):
+    def __init__(
+        self, seed: Union[int, None] = None, height: int = 32, width: int = 32, **kwargs
+    ):
         super().__init__(**kwargs)
         self.seed = seed
         self.height = height
@@ -74,15 +78,14 @@ class PaddedCenterCropCustom(tf.keras.layers.Layer):
         )
 
 
-def load_client_datasets_from_files(
-    # pylint: disable=too-many-arguments, disable=too-many-local-variables
+def load_client_datasets_from_files(  # pylint: disable=too-many-arguments
     dataset: str,
     sampled_client: int,
     batch_size: int,
     total_clients: int = 100,
     alpha: float = 0.3,
     split: str = "train",
-    seed: int = None,
+    seed: Union[int, None] = None,
 ):
     """Load the partition of the dataset for the sampled client.
 

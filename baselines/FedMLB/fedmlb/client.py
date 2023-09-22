@@ -26,13 +26,14 @@ class TFClient(fl.client.NumPyClient):
         """Get the local model parameters."""
         return self.model.get_weights()
 
-    def fit(self, parameters: NDArrays, config: Dict[str, Scalar]) \
-            -> Tuple[NDArrays, int, Dict]:
+    def fit(
+        self, parameters: NDArrays, config: Dict[str, Scalar]
+    ) -> Tuple[NDArrays, int, Dict]:
         """Train parameters on the locally held training set."""
-        epochs: int = config["local_epochs"]
-        current_round: int = config["current_round"]
-        exp_decay: int = config["exp_decay"]
-        lr_client_initial: int = config["lr_client_initial"]
+        epochs: int = int(config["local_epochs"])
+        current_round: int = int(config["current_round"])
+        exp_decay: float = float(config["exp_decay"])
+        lr_client_initial: float = float(config["lr_client_initial"])
         if current_round > 1:
             lr_client = lr_client_initial * (exp_decay ** (current_round - 1))
             # During training, update the learning rate as needed
@@ -59,4 +60,3 @@ class TFClient(fl.client.NumPyClient):
         num_examples_train = self.num_examples_train
 
         return parameters_prime, int(num_examples_train), results.history
-

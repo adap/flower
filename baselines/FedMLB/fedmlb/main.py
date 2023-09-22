@@ -20,15 +20,15 @@ from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
-import FedMLB.dataset as fedmlb_datasets
-import FedMLB.dataset_preparation as fedmlb_ds_preparation
-import FedMLB.models as fedmlb_models
-from FedMLB.client import TFClient
-from FedMLB.fedavg_kd_model import FedAvgKDModel
-from FedMLB.fedmlb_model import FedMLBModel
-from FedMLB.models import create_resnet18
-from FedMLB.server import MyServer
-from FedMLB.utils import (
+import fedmlb.dataset as fedmlb_datasets
+import fedmlb.dataset_preparation as fedmlb_ds_preparation
+import fedmlb.models as fedmlb_models
+from fedmlb.client import TFClient
+from fedmlb.fedavg_kd_model import FedAvgKDModel
+from fedmlb.fedmlb_model import FedMLBModel
+from fedmlb.models import create_resnet18
+from fedmlb.server import MyServer
+from fedmlb.utils import (
     dic_load,
     dic_save,
     get_cpu_memory,
@@ -46,7 +46,7 @@ TEST_BATCH_SIZE = 256
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
-def main(cfg: DictConfig) -> None:
+def main(cfg: DictConfig) -> None:  # pylint: disable=too-many-local-variables
     """Run the baseline.
 
     Parameters
@@ -75,9 +75,11 @@ def main(cfg: DictConfig) -> None:
             label, axis=-1
         )
 
-    def get_evaluate_fn(model: tf.keras.Model, save_path: str, dataset: str, starting_round: int) -> Callable[
-    [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]
-]:
+    def get_evaluate_fn(
+        model: tf.keras.Model, save_path: str, dataset: str, starting_round: int
+    ) -> Callable[
+        [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]
+    ]:
         """Return an evaluation function for server-side evaluation."""
         if dataset in ["cifar100"]:
             (_, _), (x_test, y_test) = tf.keras.datasets.cifar100.load_data()
@@ -93,8 +95,8 @@ def main(cfg: DictConfig) -> None:
             test_ds = fedmlb_ds_preparation.load_test_dataset_tiny_imagenet()
             test_ds = (
                 test_ds.map(element_fn_norm_tiny_imagenet)
-                    .map(center_crop_data)
-                    .batch(TEST_BATCH_SIZE)
+                .map(center_crop_data)
+                .batch(TEST_BATCH_SIZE)
             )
 
         # creating a tensorboard writer to log results
@@ -105,7 +107,7 @@ def main(cfg: DictConfig) -> None:
 
         # The `evaluate` function will be called after every round
         def evaluate(
-                server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
+            server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
         ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
             model.set_weights(parameters)  # Update model with the latest parameters
             loss, accuracy = model.evaluate(test_ds)
@@ -127,7 +129,7 @@ def main(cfg: DictConfig) -> None:
 
             # saving the checkpoint before the end of simulation
             if cfg.save_checkpoint and server_round == (
-                    cfg.num_rounds + starting_round - 1
+                cfg.num_rounds + starting_round - 1
             ):
                 path = os.path.join(
                     save_path_checkpoints,
@@ -249,8 +251,9 @@ def main(cfg: DictConfig) -> None:
                 reduction=tf.keras.losses.Reduction.SUM_OVER_BATCH_SIZE
             )
 
-            client_model = FedMLBModel(local_model, global_model,
-                                       kd_loss, lambda_1, lambda_2)
+            client_model = FedMLBModel(
+                local_model, global_model, kd_loss, lambda_1, lambda_2
+            )
             client_model.compile(
                 optimizer=tf.keras.optimizers.SGD(
                     learning_rate=lr_client,

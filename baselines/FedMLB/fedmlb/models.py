@@ -1,6 +1,6 @@
 """Define custom models being used."""
 
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 import tensorflow as tf
 
@@ -33,9 +33,9 @@ class ResBlock(tf.keras.Model):
         filters: int,
         downsample: bool,
         norm: str = "group",
-        l2_weight_decay: float =1e-3,
+        l2_weight_decay: float = 1e-3,
         stride: int = 1,
-        seed: Optional[int] = None,
+        seed: Optional[Union[int, None]] = None,
     ):
         super().__init__()
 
@@ -107,8 +107,8 @@ class ResNet18(tf.keras.Model):
         self,
         outputs: int = 10,
         l2_weight_decay: float = 1e-3,
-        seed: Optional[int] = None,
-        norm: Optional[str] = ""
+        norm: str = "",
+        seed: Optional[Union[int, None]] = None,
     ):
         super().__init__()
         if seed is not None:
@@ -247,8 +247,8 @@ class ResNet18MLB(tf.keras.Model):
         self,
         outputs: int = 10,
         l2_weight_decay: float = 1e-3,
-        seed: Optional[int] = None,
-        norm: Optional[str] = ""
+        norm: str = "",
+        seed: Optional[Union[int, None]] = None,
     ):
         super().__init__()
         if seed is not None:
@@ -403,7 +403,7 @@ def create_resnet18(
     input_shape: Tuple = (None, 32, 32, 3),
     norm: str = "group",
     l2_weight_decay: float = 0.0,
-    seed: Optional[int] = None,
+    seed: Optional[Union[int, None]] = None,
 ) -> tf.keras.Model:
     """Return a built ResNet model."""
     resnet18 = ResNet18(
@@ -414,11 +414,11 @@ def create_resnet18(
 
 
 def create_resnet18_mlb(
-    num_classes=100,
-    input_shape=(None, 32, 32, 3),
-    norm="group",
-    l2_weight_decay=0.0,
-    seed: Optional[int] = None,
+    num_classes: int = 100,
+    input_shape: Tuple = (None, 32, 32, 3),
+    norm: str = "group",
+    l2_weight_decay: float = 0.0,
+    seed: Optional[Union[int, None]] = None,
 ) -> tf.keras.Model:
     """Return a built ResNetMLB model."""
     resnet18 = ResNet18MLB(

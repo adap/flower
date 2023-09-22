@@ -75,9 +75,9 @@ class TinyImageNetPaths:
 
         self._make_paths(train_path, val_path, test_path, wnids_path, words_path)
 
-    def _make_paths(
+    def _make_paths(  # pylint: disable=too-many-arguments
         self, train_path, val_path, test_path, wnids_path, words_path
-    ):  # pylint: disable=too-many-arguments, disable=too-many-local-variables
+    ):
         self.ids = []
         with open(wnids_path, "r") as idf:
             for nid in idf:
@@ -160,7 +160,6 @@ def download_and_preprocess(cfg: DictConfig) -> None:
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
-    ## print parsed config
     print(OmegaConf.to_yaml(cfg))
 
     dataset = cfg.dataset_config.dataset

@@ -10,8 +10,12 @@ class FedMLBModel(tf.keras.Model):
     """
 
     def __init__(
-        self, local_model_mlb: tf.keras.Model, global_model_mlb: tf.keras.Model,
-            kd_loss: tf.keras.losses.Loss, lambda_1: float, lambda_2: float
+        self,
+        local_model_mlb: tf.keras.Model,
+        global_model_mlb: tf.keras.Model,
+        kd_loss: tf.keras.losses.Loss,
+        lambda_1: float,
+        lambda_2: float,
     ):  # pylint: disable=too-many-arguments
         super().__init__()
         # both local_model mlb_model are instance of custom mlb model
@@ -24,7 +28,7 @@ class FedMLBModel(tf.keras.Model):
             from_logits=True, reduction=tf.keras.losses.Reduction.SUM_OVER_BATCH_SIZE
         )
 
-    def train_step(self, data):
+    def train_step(self, data):  # pylint: disable=too-many-local-variables
         """Implement logic for one training step.
 
         This method can be overridden to support custom training logic.
@@ -46,7 +50,7 @@ class FedMLBModel(tf.keras.Model):
                 y, logits, regularization_losses=self.local_model.losses
             )
 
-            ## Compute loss from hybrid branches
+            # Compute loss from hybrid branches
             for branch in range(num_branch):
                 this_logits = self.global_model(
                     local_features[branch], level=branch + 1
