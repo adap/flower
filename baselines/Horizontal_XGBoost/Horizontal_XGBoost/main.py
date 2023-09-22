@@ -119,12 +119,12 @@ def main(cfg: DictConfig) -> None:
             strategy=strategy,
         )
 
-        print(type(history.metrics_centralized),history.metrics_centralized)
+        #print(type(history.metrics_centralized),history.metrics_centralized)
         print(history)
         writer=results_writer(cfg)
         best_res,best_res_round=writer.extract_best_res(history)
         print("Best Result",best_res,"best_res_round",best_res_round)
-        writer.create_res_csv("results.csv")
+        #writer.create_res_csv("results.csv")
         writer.write_res("results.csv")
         #return history
 
