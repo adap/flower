@@ -10,7 +10,8 @@ class FedMLBModel(tf.keras.Model):
     """
 
     def __init__(
-        self, local_model_mlb, global_model_mlb, kd_loss, lambda_1, lambda_2
+        self, local_model_mlb: tf.keras.Model, global_model_mlb: tf.keras.Model,
+            kd_loss: tf.keras.losses.Loss, lambda_1: float, lambda_2: float
     ):  # pylint: disable=too-many-arguments
         super().__init__()
         # both local_model mlb_model are instance of custom mlb model

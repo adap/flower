@@ -6,7 +6,7 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 
 import os
 import shutil
-from typing import Dict, Optional, Tuple
+from typing import Callable, Dict, Optional, Tuple
 
 # these are the basic packages you'll need here
 # feel free to remove some if aren't needed
@@ -75,7 +75,9 @@ def main(cfg: DictConfig) -> None:
             label, axis=-1
         )
 
-    def get_evaluate_fn(model, save_path, dataset, starting_round):
+    def get_evaluate_fn(model: tf.keras.Model, save_path: str, dataset: str, starting_round: int) -> Callable[
+    [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]
+]:
         """Return an evaluation function for server-side evaluation."""
         if dataset in ["cifar100"]:
             (_, _), (x_test, y_test) = tf.keras.datasets.cifar100.load_data()
@@ -141,7 +143,7 @@ def main(cfg: DictConfig) -> None:
 
         return evaluate
 
-    def fit_config(server_round: int):
+    def fit_config(server_round: int) -> Dict[str, Scalar]:
         """Return training configuration dict for each round."""
         config = {
             "current_round": server_round,
@@ -184,7 +186,7 @@ def main(cfg: DictConfig) -> None:
         num_classes = 200
         input_shape = (None, 64, 64, 3)
 
-    def client_fn(cid) -> TFClient:
+    def client_fn(cid: str) -> TFClient:
         """Instantiate TF Client."""
         local_examples = fedmlb_datasets.load_selected_client_statistics(
             int(cid),
@@ -340,7 +342,6 @@ def main(cfg: DictConfig) -> None:
         # i.e., the one indicated in a dictionary named dict_info
         path = os.path.join(save_path_checkpoints, "dict_info.pickle")
         last_checkpoint = dic_load(path)["checkpoint_round"]
-        print("---- last check ", last_checkpoint)
         if last_checkpoint:
             print(f"Loading saved checkpoint round {last_checkpoint}")
             path = os.path.join(

@@ -1,10 +1,10 @@
 """Define TensorFlow client class by subclassing `flwr.client.NumPyClient`."""
 
-from typing import Dict
+from typing import Dict, Tuple
 
 import flwr as fl
 import tensorflow as tf
-from flwr.common import Scalar
+from flwr.common import NDArrays, Scalar
 
 
 class TFClient(fl.client.NumPyClient):
@@ -12,9 +12,7 @@ class TFClient(fl.client.NumPyClient):
 
     def __init__(
         self,
-        # train_ds is a tf.data.Dataset
         train_ds: tf.data.Dataset,
-        # model is a tf.keras.Model
         model: tf.keras.Model,
         num_examples_train: int,
         algorithm: str,
@@ -24,11 +22,12 @@ class TFClient(fl.client.NumPyClient):
         self.num_examples_train = num_examples_train
         self.algorithm = algorithm
 
-    def get_parameters(self, config: Dict[str, Scalar]):
+    def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Get the local model parameters."""
         return self.model.get_weights()
 
-    def fit(self, parameters, config):
+    def fit(self, parameters: NDArrays, config: Dict[str, Scalar]) \
+            -> Tuple[NDArrays, int, Dict]:
         """Train parameters on the locally held training set."""
         epochs: int = config["local_epochs"]
         current_round: int = config["current_round"]
@@ -58,14 +57,6 @@ class TFClient(fl.client.NumPyClient):
 
         parameters_prime = self.model.get_weights()
         num_examples_train = self.num_examples_train
-        # print(type(parameters_prime))
-        # print(type(results.history))
+
         return parameters_prime, int(num_examples_train), results.history
 
-
-# if __name__ == "__main__":
-#     """Test that flower client is instantiated and correctly runs."""
-#     client = client_fn(2)
-#     model = fedmlb_models.create_resnet18(num_classes=100,
-#     input_shape=(None, 32, 32, 3), norm="group")
-#     client.fit(model.get_weights(), {})

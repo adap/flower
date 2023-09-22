@@ -21,7 +21,7 @@ IMAGENET_BASE_PATH = "./tiny-imagenet-200/"
 
 
 def read_fedmlb_distribution(
-    dataset: str, total_clients: int, alpha: float, data_folder="client_data"
+    dataset: str, total_clients: int, alpha: float, data_folder: str = "client_data"
 ):
     """Read the per-client distribution of labels from file.
 
@@ -77,7 +77,7 @@ class TinyImageNetPaths:
 
     def _make_paths(
         self, train_path, val_path, test_path, wnids_path, words_path
-    ):  # pylint: disable=too-many-arguments
+    ):  # pylint: disable=too-many-arguments, disable=too-many-local-variables
         self.ids = []
         with open(wnids_path, "r") as idf:
             for nid in idf:

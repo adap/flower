@@ -5,7 +5,8 @@ import numpy as np
 import tensorflow as tf
 
 
-def load_selected_client_statistics(selected_client, alpha, dataset, total_clients):
+def load_selected_client_statistics(selected_client: int, alpha: float,
+                                    dataset: str, total_clients: int):
     """Return the amount of local examples for the selected client.
 
     Clients are referenced with a client_id. Loads a numpy array saved on disk. This
@@ -26,13 +27,13 @@ def load_selected_client_statistics(selected_client, alpha, dataset, total_clien
 class PaddedRandomCropCustom(tf.keras.layers.Layer):
     """Custom keras layer to random crop the input image, same as FedMLB paper."""
 
-    def __init__(self, seed=None, height=32, width=32, **kwargs):
+    def __init__(self, seed: int = None, height: int = 32, width: int = 32, **kwargs):
         super().__init__(**kwargs)
         self.seed = seed
         self.height = height
         self.width = width
 
-    def call(self, inputs, training=True):
+    def call(self, inputs: tf.Tensor, training: bool = True):
         """Call the layer on new inputs and returns the outputs as tensors."""
         if training:
             inputs = tf.image.resize_with_crop_or_pad(
@@ -51,12 +52,12 @@ class PaddedRandomCropCustom(tf.keras.layers.Layer):
 class PaddedCenterCropCustom(tf.keras.layers.Layer):
     """Custom keras layer to center crop the input image, same as FedMLB paper."""
 
-    def __init__(self, height=64, width=64, **kwargs):
+    def __init__(self, height: int = 64, width: int = 64, **kwargs):
         super().__init__(**kwargs)
         self.height = height
         self.width = width
 
-    def call(self, inputs):
+    def call(self, inputs: tf.Tensor):
         """Call the layer on new inputs and returns the outputs as tensors."""
         input_tensor = tf.image.resize_with_crop_or_pad(
             image=inputs, target_height=self.height, target_width=self.width
@@ -73,14 +74,15 @@ class PaddedCenterCropCustom(tf.keras.layers.Layer):
         )
 
 
-def load_client_datasets_from_files(  # pylint: disable=too-many-arguments
-    dataset,
-    sampled_client,
-    batch_size,
-    total_clients=100,
-    alpha=0.3,
-    split="train",
-    seed=None,
+def load_client_datasets_from_files(
+    # pylint: disable=too-many-arguments, disable=too-many-local-variables
+    dataset: str,
+    sampled_client: int,
+    batch_size: int,
+    total_clients: int = 100,
+    alpha: float = 0.3,
+    split: str = "train",
+    seed: int = None,
 ):
     """Load the partition of the dataset for the sampled client.
 

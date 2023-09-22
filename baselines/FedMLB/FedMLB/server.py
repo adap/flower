@@ -34,6 +34,7 @@ class MyServer(Server):
 
     # overwriting
     def fit(self, num_rounds: int, timeout: Optional[float]) -> History:
+        # pylint: disable=too-many-local-variables
         """Run federated averaging for a number of rounds."""
         history = History()
 

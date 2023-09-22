@@ -14,7 +14,8 @@ class FedAvgKDModel(tf.keras.Model):
     (i.e., client model).
     """
 
-    def __init__(self, model, h_model, kd_loss, gamma=0.2):
+    def __init__(self, model: tf.keras.Model, h_model: tf.keras.Model,
+                 kd_loss: tf.keras.losses.Loss, gamma: float = 0.2):
         super().__init__()
         self.local_model = model
         self.global_model = h_model

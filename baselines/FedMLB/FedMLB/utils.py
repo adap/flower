@@ -11,7 +11,7 @@ import psutil
 from flwr.server.history import History
 
 
-def dic_save(dictionary: Dict, filename: str):
+def dic_save(dictionary: Dict[str, int], filename: str):
     """Save a dictionary to file.
 
     Parameters
@@ -25,7 +25,7 @@ def dic_save(dictionary: Dict, filename: str):
         pickle.dump(dictionary, dictionary_file, pickle.HIGHEST_PROTOCOL)
 
 
-def dic_load(filename: str):
+def dic_load(filename: str) -> Dict[str, int]:
     """Load a dictionary from file.
 
     Parameters
@@ -76,7 +76,7 @@ def save_results_as_pickle(
         pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def get_gpu_memory():
+def get_gpu_memory() -> float:
     """Return gpu free memory."""
     command = "nvidia-smi --query-gpu=memory.free --format=csv"
     memory_free_info = (
@@ -91,7 +91,7 @@ def get_gpu_memory():
     return memory_free_values
 
 
-def get_cpu_memory():
+def get_cpu_memory() -> float:
     """Return cpu free memory."""
     # you can convert that object to a dictionary
     memory_info = psutil.virtual_memory()
