@@ -16,9 +16,10 @@
 
 
 import concurrent.futures
+import secrets
 import sys
 from logging import ERROR
-from typing import Any, Callable, Optional, Tuple, Union
+from typing import Any, Callable, List, Optional, Tuple, Union
 
 import grpc
 
@@ -60,6 +61,7 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     keepalive_time_ms: int = 210000,
     certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
+    interceptors: Optional[List[grpc.ServerInterceptor]] = None,
 ) -> grpc.Server:
     """Create and start a gRPC server running FlowerServiceServicer.
 
@@ -111,6 +113,9 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
             * CA certificate.
             * server certificate.
             * server private key.
+    interceptors: List[grpc.ServerInterceptor] (default: None)
+        Tuple containing gRPC server interceptors. The tuple is expected to have
+        one or more grpc.ServerInterceptor elements.
 
     Returns
     -------
@@ -142,6 +147,7 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
         max_message_length=max_message_length,
         keepalive_time_ms=keepalive_time_ms,
         certificates=certificates,
+        interceptors=interceptors,
     )
 
     server.start()
@@ -160,6 +166,7 @@ def generic_create_grpc_server(  # pylint: disable=too-many-arguments
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     keepalive_time_ms: int = 210000,
     certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
+    interceptors: Optional[List[grpc.ServerInterceptor]] = None,
 ) -> grpc.Server:
     """Create a gRPC server with a single servicer.
 
@@ -247,6 +254,7 @@ def generic_create_grpc_server(  # pylint: disable=too-many-arguments
         # returning RESOURCE_EXHAUSTED status, or None to indicate no limit.
         maximum_concurrent_rpcs=max_concurrent_workers,
         options=options,
+        interceptors=interceptors,
     )
     add_servicer_to_server_fn(servicer, server)
 

@@ -180,6 +180,7 @@ def start_client(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
+    call_credentials: Optional[object] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -213,6 +214,10 @@ def start_client(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    call_credentials : Optional[object] (default: None)
+        CallCredentials constructed using the grpc.metadata_call_credentials
+        method from an AuthMetadataPlugin in order to authenticate the client
+        calls.
 
     Examples
     --------
@@ -254,6 +259,7 @@ def start_client(
         root_certificates=root_certificates,
         insecure=insecure,
         transport=transport,
+        call_credentials=call_credentials,
     )
     event(EventType.START_CLIENT_LEAVE)
 
@@ -272,6 +278,7 @@ def _start_client_internal(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
+    call_credentials: Optional[object] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -307,6 +314,11 @@ def _start_client_internal(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    call_credentials : Optional[object] (default: None)
+        CallCredentials constructed using the grpc.metadata_call_credentials
+        method from an AuthMetadataPlugin in order to authenticate the client
+        calls.
+
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -349,6 +361,7 @@ def _start_client_internal(
             insecure,
             grpc_max_message_length,
             root_certificates,
+            call_credentials=call_credentials,
         ) as conn:
             receive, send, create_node, delete_node = conn
 
@@ -414,6 +427,7 @@ def start_numpy_client(
     root_certificates: Optional[bytes] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
+    call_credentials: Optional[object] = None,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
@@ -450,6 +464,10 @@ def start_numpy_client(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    call_credentials : Optional[object] (default: None)
+        CallCredentials constructed using the grpc.metadata_call_credentials
+        method from an AuthMetadataPlugin in order to authenticate the client
+        calls.
 
     Examples
     --------
@@ -504,6 +522,7 @@ def start_numpy_client(
         root_certificates=root_certificates,
         insecure=insecure,
         transport=transport,
+        call_credentials=call_credentials,
     )
 
 

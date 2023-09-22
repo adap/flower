@@ -30,6 +30,7 @@ def create_channel(
     insecure: bool,
     root_certificates: Optional[bytes] = None,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+    call_credentials: Optional[grpc.ChannelCredentials] = None,
 ) -> grpc.Channel:
     """Create a gRPC channel, either secure or insecure."""
     # Check for conflicting parameters
@@ -52,8 +53,15 @@ def create_channel(
         log(INFO, "Opened insecure gRPC connection (no certificates were passed)")
     else:
         ssl_channel_credentials = grpc.ssl_channel_credentials(root_certificates)
+        if call_credentials:
+            composite_credentials = grpc.composite_channel_credentials(
+                ssl_channel_credentials, call_credentials
+            )
+        else:
+            composite_credentials = ssl_channel_credentials
+
         channel = grpc.secure_channel(
-            server_address, ssl_channel_credentials, options=channel_options
+            server_address, composite_credentials, options=channel_options
         )
         log(INFO, "Opened secure gRPC connection using certificates")
 

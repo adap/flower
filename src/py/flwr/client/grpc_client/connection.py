@@ -61,6 +61,7 @@ def grpc_connection(  # pylint: disable=R0915
     insecure: bool,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
+    call_credentials: Optional[object] = None,
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[Message]],
@@ -89,6 +90,10 @@ def grpc_connection(  # pylint: disable=R0915
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
+    call_credentials: Optional[object] (default: None)
+        Call credentials to be used when connecting to the server. If provided,
+        a secure connection using the credentials will be established to an
+        SSL-enabled Flower server.
 
     Returns
     -------
@@ -117,6 +122,7 @@ def grpc_connection(  # pylint: disable=R0915
         insecure=insecure,
         root_certificates=root_certificates,
         max_message_length=max_message_length,
+        call_credentials=call_credentials
     )
     channel.subscribe(on_channel_state_change)
 
