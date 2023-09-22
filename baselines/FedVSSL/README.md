@@ -95,7 +95,7 @@ To run using FedAvg:
 ```bash
 # this will run FedAvg baseline
 # This is done so to match the experimental setup in the paper
-python -m FedVSSL.main --fedavg=True
+python -m main --fedavg=True
 
 # this config can also be overriden.
 ```
