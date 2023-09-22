@@ -107,7 +107,7 @@ The pre-training in the paper was conducted on Kinectics-400, which would take t
 As a result, we provide the following command with pre-training on UCF-101, in order to validate FedVSSL.
 
 ```bash
-python -m FedVSSL.main --pre_train=True # this will run using the default settings.
+python -m main --pre_training=True # this will run using the default settings.
 ```
 
 To check the results, please direct to `ucf_FedVSSL_results/clientN/*.log.json` files in default, and check the loss changes during training.
@@ -119,7 +119,7 @@ We provide the checkpoints of the pre-trained SSL models on Kinectics-400.
 With them as starting points, we can run downstream fine-tuning on UCF-101 to obtain the expected results in the paper.
 
 ```bash
-python -m FedVSSL.main --pre_train=False --pretrained_model_path=/path/to/checkpoints
+python -m main --pre_training=False --pretrained_model_path=/path/to/checkpoints
 
 # following the table below to change the checkpoints path.
 ```

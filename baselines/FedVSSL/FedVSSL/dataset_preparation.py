@@ -19,7 +19,7 @@ import json
 # ----------------------------------
 
 # first download the raw videos from the official website
-"""
+
 subprocess.run(["mkdir -p data/ucf101/"], shell=True)
 subprocess.run(["wget https://www.crcv.ucf.edu/data/UCF101/UCF101.rar -O data/ucf101/UCF101.rar --no-check-certificate && \
 unrar e data/ucf101/UCF101.rar data/ucf101/UCF101_raw/"], shell=True)
@@ -37,7 +37,7 @@ subprocess.run(["unzip data/ucf101/UCF101TrainTestSplits-RecognitionTask.zip -d 
 subprocess.run(["python CtP/scripts/process_ucf101.py --raw_dir data/ucf101/UCF101_raw/ \
 --ann_dir data/ucf101/ucfTrainTestlist/ --out_dir data/ucf101/"], shell=True)
 
-"""
+
 
 
 # We use the the .json files for the annotations. One can convert the the train_split_1.txt to train_split_1.json by using the following script file.
