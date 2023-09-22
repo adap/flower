@@ -126,14 +126,14 @@ python -m main --pre_training=False --pretrained_model_path=/path/to/checkpoints
 # following the table below to change the checkpoints path.
 ```
 
-| Method  | Checkpoint file                                                                                     | UCF R@1 |
-|---------|-----------------------------------------------------------------------------------------------------|---------|
-|FedVSSL$(\alpha=0, \beta=0)$ | [round-540.npz](https://drive.google.com/file/d/15EEIQay5FRBMloEzt1SQ8l8VjZFzpVNt/view?usp=sharing) | 34.34 |
-|FedVSSL$(\alpha=1, \beta=0)$ | [round-540.npz](https://drive.google.com/file/d/1OUj8kb0ahJSKAZEB-ES94pOG5-fB-28-/view?usp=sharing) | 34.23 |
-|FedVSSL$(\alpha=0, \beta=1)$ | [round-540.npz](https://drive.google.com/file/d/1N62kXPcLQ_tM45yd2kBYjNOskdHclwLM/view?usp=sharing) | 35.61 |
-|FedVSSL$(\alpha=1, \beta=1)$ | [round-540.npz](https://drive.google.com/file/d/1SKb5aXjpVAeWbzTKMFN9rjHW_LQsmUXj/view?usp=sharing) | 35.66 |
-|FedVSSL$(\alpha=0.9, \beta=0)$| [round-540.npz](https://drive.google.com/file/d/1W1oCnLXX0UJhQ4MlmRw-r7z5DTCeO75b/view?usp=sharing) |35.50|
-|FedVSSL$(\alpha=0.9, \beta=1)$| [round-540.npz](https://drive.google.com/file/d/1BK-bbyunxTWNqs-QyOYiohaNv-t3-hYe/view?usp=sharing) |35.34|
+| Method  | Checkpoint file                                                                                     | UCF Top-1 |
+|---------|-----------------------------------------------------------------------------------------------------|-----------|
+|FedVSSL$(\alpha=0, \beta=0)$ | [round-540.npz](https://drive.google.com/file/d/15EEIQay5FRBMloEzt1SQ8l8VjZFzpVNt/view?usp=sharing) | 79.91     |
+|FedVSSL$(\alpha=1, \beta=0)$ | [round-540.npz](https://drive.google.com/file/d/1OUj8kb0ahJSKAZEB-ES94pOG5-fB-28-/view?usp=sharing) | 79.14     |
+|FedVSSL$(\alpha=0, \beta=1)$ | [round-540.npz](https://drive.google.com/file/d/1N62kXPcLQ_tM45yd2kBYjNOskdHclwLM/view?usp=sharing) | 79.43     |
+|FedVSSL$(\alpha=1, \beta=1)$ | [round-540.npz](https://drive.google.com/file/d/1SKb5aXjpVAeWbzTKMFN9rjHW_LQsmUXj/view?usp=sharing) | 78.99     |
+|FedVSSL$(\alpha=0.9, \beta=0)$| [round-540.npz](https://drive.google.com/file/d/1W1oCnLXX0UJhQ4MlmRw-r7z5DTCeO75b/view?usp=sharing) | 80.62     |
+|FedVSSL$(\alpha=0.9, \beta=1)$| [round-540.npz](https://drive.google.com/file/d/1BK-bbyunxTWNqs-QyOYiohaNv-t3-hYe/view?usp=sharing) | 79.41     |
 
 
 
