@@ -13,24 +13,19 @@
 # limitations under the License.
 # ==============================================================================
 """Utils for FederatedDataset."""
+
+
 import warnings
 from typing import Dict
 
 from flwr_datasets.partitioner import IidPartitioner, Partitioner
 
-tested_vision_image_classification_datasets = [
+tested_datasets = [
     "mnist",
     "cifar10",
     "fashion_mnist",
     "sasha/dog-food",
     "zh-plus/tiny-imagenet",
-]
-tested_tabular_classification_datasets = ["hitorilabs/iris"]
-tested_uncategorized_datasets = ["scikit-learn/iris"]
-tested_datasets = [
-    *tested_vision_image_classification_datasets,
-    *tested_tabular_classification_datasets,
-    *tested_uncategorized_datasets,
 ]
 
 
@@ -59,7 +54,6 @@ def _check_if_dataset_tested(dataset: str) -> None:
     """Check if the dataset is in the narrowed down list of the tested datasets."""
     if dataset not in tested_datasets:
         warnings.warn(
-            f"The currently tested dataset are {tested_datasets}. Given: {dataset}. "
-            f"Note that unsupported datasets might cause errors.",
+            f"The currently tested dataset are {tested_datasets}. Given: {dataset}.",
             stacklevel=1,
         )
