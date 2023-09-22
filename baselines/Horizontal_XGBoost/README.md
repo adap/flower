@@ -46,7 +46,6 @@ dataset: [a9a, cod-rna, ijcnn1, abalone, cpusmall, space_ga] # list of datasets 
 
 ## Environment Setup
 
-:warning: _The Python environment for all baselines should follow these guidelines in the `EXTENDED_README`. Specify the steps to create and activate your environment. If there are any external system-wide requirements, please include instructions for them too. These instructions should be comprehensive enough so anyone can run them (if non-standard, describe them step-by-step)._
 #### Steps to set up env:
 1- Install **pyenv**, follow the instructions from this: https://github.com/pyenv/pyenv-installer 
 Note: if you faced the following warning: warning: seems you still have not added 'pyenv' to the load path. and you're not capable of using pyenv in the terminal, you might need to check out this issue: https://github.com/pyenv/pyenv-installer/issues/112
@@ -57,7 +56,9 @@ eval "$(pyenv init --path)"
 eval "$(pyenv virtualenv-init -)"
 ```
 2- Install **poetry** at the system level: https://python-poetry.org/docs/ --> running curl -sSL https://install.python-poetry.org | python3 -(dont' forget to add to your .bashrc or equivalent)
+
 3- Then install a version of Python of your choice via pyenv, eg: pyenv install 3.10.6
+
 4- In the Horizontal_XGBoost directory where you can see pyproject.toml, write the following commands in your terminal:
 ```
 pyenv local 3.10.6
