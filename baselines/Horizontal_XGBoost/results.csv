@@ -1,0 +1,2 @@
+dataset_name,client_num,n_estimators_client,num_rounds,xgb_max_depth,CNN_lr,best_res,best_res_round_num
+a9a,2,250,1,8,0.0001,0.7641471028327942,1

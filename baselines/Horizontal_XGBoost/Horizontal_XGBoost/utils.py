@@ -60,7 +60,7 @@ def run_single_exp(config,dataset_name,task_type,n_estimators):
 
 def run_centralized(config: DictConfig,
                     dataset_name:str ="all",
-                    task_type:str =None):
+                    task_type:str =None)-> None:
     if dataset_name=="all":
         for dataset in dataset_tasks:
             result_train,result_test=run_single_exp(config,dataset,dataset_tasks[dataset],config.n_estimators)
@@ -86,7 +86,7 @@ def clients_preformance_on_local_data(config: DictConfig,
                                       trainloaders,
                                       X_test,
                                       y_test,
-                                      task_type:str):
+                                      task_type:str)-> None:
     n_estimators_client=500//config.client_num
     for i, trainloader in enumerate(trainloaders):
         for local_dataset in trainloader:
@@ -231,3 +231,58 @@ class Early_Stop:
             if self.counter >= self.num_waiting_rounds:
                 return self.best_res
         return None
+
+#results 
+import csv
+class results_writer:
+    def __init__(self,cfg) -> None:
+        self.dataset_name=cfg.dataset.dataset_name
+        #self.task_type=cfg.dataset.task_type
+        self.n_estimators_client=cfg.n_estimators_client
+        self.num_rounds=cfg.run_experiment.num_rounds
+        self.client_num=cfg.client_num
+        self.xgb_max_depth=cfg.clients.xgb.max_depth
+        self.CNN_lr=cfg.clients.CNN.lr
+        self.tas_type=cfg.dataset.task_type
+        if self.tas_type=="REG":
+            self.best_res=999999999.999
+            self.compare_fn=min
+        if self.tas_type=="BINARY":
+            self.best_res=-999999999.999
+            self.compare_fn=max
+        self.best_res_round_num=0
+    def extract_best_res(self,history) -> Tuple[float,int]:
+        for t in history.metrics_centralized.keys():
+            l=list()
+            print("history.metrics_centralized[t]",history.metrics_centralized[t])
+            for i in history.metrics_centralized[t]:
+                if self.compare_fn(i[1],self.best_res)==i[1]:
+                    self.best_res =i[1]
+                    self.best_res_round_num=i[0]
+        return (self.best_res,self.best_res_round_num)
+    def create_res_csv(self,filename)-> None:
+        #call that only once :)
+        fields = ['dataset_name', 'client_num' ,'n_estimators_client',
+                   'num_rounds', 'xgb_max_depth', 'CNN_lr',
+                   'best_res','best_res_round_num'] 
+        with open(filename, 'w') as csvfile: 
+            # creating a csv writer object 
+            csvwriter = csv.writer(csvfile) 
+            # writing the fields 
+            csvwriter.writerow(fields) 
+
+    def write_res(self,filename) -> None:
+        row=[str(self.dataset_name),
+             str(self.client_num),
+             str(self.n_estimators_client),
+             str(self.num_rounds),
+             str(self.xgb_max_depth),
+             str(self.CNN_lr),
+             str(self.best_res.item()),
+             str(self.best_res_round_num)]
+        with open(filename, 'a') as csvfile: 
+            csvwriter = csv.writer(csvfile)
+            csvwriter.writerow(row)
+
+    
+

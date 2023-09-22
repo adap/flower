@@ -26,6 +26,7 @@ from flwr.common import  Parameters, Scalar
 from .client import FL_Client
 from flwr.server.client_manager import  SimpleClientManager
 from hydra.utils import instantiate
+from .utils import results_writer
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig) -> None:
@@ -44,7 +45,6 @@ def main(cfg: DictConfig) -> None:
     else:
         dataset_name=cfg.dataset.dataset_name
         task_type=cfg.dataset.task_type
-        print("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm",dataset_name,task_type)
         X_train,y_train,X_test,y_test=load_single_dataset(task_type,dataset_name,train_ratio=cfg.dataset.train_ratio)
         trainset=TensorDataset(torch.from_numpy(X_train), torch.from_numpy (y_train))
         testset = TensorDataset(torch.from_numpy(X_test), torch.from_numpy (y_test))
@@ -119,8 +119,13 @@ def main(cfg: DictConfig) -> None:
             strategy=strategy,
         )
 
+        print(type(history.metrics_centralized),history.metrics_centralized)
         print(history)
-
+        writer=results_writer(cfg)
+        best_res,best_res_round=writer.extract_best_res(history)
+        print("Best Result",best_res,"best_res_round",best_res_round)
+        writer.create_res_csv("results.csv")
+        writer.write_res("results.csv")
         #return history
 
 if __name__ == "__main__":
