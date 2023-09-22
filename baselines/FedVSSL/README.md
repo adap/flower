@@ -83,6 +83,9 @@ Then, ensure you have activated your Poetry environment (execute `poetry shell` 
 # direct to FedVSSL code directory
 cd FedVSSL
 
+# clone CtP repo
+git clone https://github.com/yan-gao-GY/CtP.git
+
 # run federated SSL training with FedVSSL
 python -m main --pre_training=True # this will run using the default settings.
 
