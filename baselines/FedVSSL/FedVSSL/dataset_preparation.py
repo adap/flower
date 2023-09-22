@@ -14,6 +14,7 @@ import CtP
 import json
 
 
+
 # Data downloading and preprocessing
 # ----------------------------------
 
@@ -56,8 +57,8 @@ subprocess.run(["python CtP/scripts/process_ucf101.py --raw_dir data/ucf101/UCF1
 # For example: After the dataset preparation if your annotation files are in  data/ucf101/, you need to modify the following lines in ann_path and out_path
 
 
-ann_path = ['/home/data1/data/ucf101/annotations/train_split_1.txt', '/home/data1/data/ucf101/annotations/test_split_1.txt']
-out_path = ['/home/data1/data/ucf101/annotations/train_split_1.json', '/home/data1/data/ucf101/annotations/test_split_1.json']
+ann_path = ['/data/ucf101/annotations/train_split_1.txt', '/data/ucf101/annotations/test_split_1.txt']
+out_path = ['/data/ucf101/annotations/train_split_1.json', '/data/ucf101/annotations/test_split_1.json']
 
 assert len(ann_path) == len(out_path)
 
@@ -90,8 +91,8 @@ for i in range(len(ann_path)):
 # data_partitioning_k400.py for generating the non-iid data distribution from K400 dataset
 # Both of the above scripts will generate the client_x.json file where "x" denotes the client number. 
 
-subprocess.run(["python data_partitioning_ucf.py --json_path /home/data1/data/ucf101/annotations \
---output_path /home/data1/data/ucf101/annotations/client_distribution/ \
+subprocess.run(["python data_partitioning_ucf.py --json_path /data/ucf101/annotations \
+--output_path /data/ucf101/annotations/client_distribution/ \
 --num_clients 10"], shell=True)
 
 
