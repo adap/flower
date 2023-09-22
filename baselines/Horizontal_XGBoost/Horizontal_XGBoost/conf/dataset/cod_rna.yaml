@@ -1,8 +1,6 @@
 dataset_name: "cod-rna"
 train_ratio: .75
 task_type: "BINARY"
-n_estimators_client: 100
-num_rounds: 30
 
 metric:
   name: "Accuracy"
@@ -14,8 +12,5 @@ criterion:
   _target_: torch.nn.BCELoss
 
 xgb:
-  _target_:  xgboost.XGBRegressor
-  objective: "reg:squarederror"
-  max_depth: 8
-CNN:
-  lr: .0001
+  _target_:  xgboost.XGBClassifier
+  objective: "binary:logistic"

@@ -44,6 +44,7 @@ def main(cfg: DictConfig) -> None:
     else:
         dataset_name=cfg.dataset.dataset_name
         task_type=cfg.dataset.task_type
+        print("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm",dataset_name,task_type)
         X_train,y_train,X_test,y_test=load_single_dataset(task_type,dataset_name,train_ratio=cfg.dataset.train_ratio)
         trainset=TensorDataset(torch.from_numpy(X_train), torch.from_numpy (y_train))
         testset = TensorDataset(torch.from_numpy(X_test), torch.from_numpy (y_test))
