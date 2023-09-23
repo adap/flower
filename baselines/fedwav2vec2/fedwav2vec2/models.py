@@ -23,6 +23,7 @@ from fedwav2vec2.sb_recipe import ASR, get_weights
 def int_model(  # pylint: disable=too-many-arguments,too-many-locals
     cid,
     config: DictConfig,
+    save_path,
     evaluate=False,
 ):
     """Setting up the experiment.
@@ -31,7 +32,7 @@ def int_model(  # pylint: disable=too-many-arguments,too-many-locals
     the correct path for the corresponding clients, and creating the model.
     """
     # Load hyperparameters file with command-line overrides
-    save_path = save_path + "client_" + str(cid)
+    save_path = save_path + "/client_" + str(cid)
     # Override with FLOWER PARAMS
     if evaluate:
         overrides = {
@@ -48,12 +49,12 @@ def int_model(  # pylint: disable=too-many-arguments,too-many-locals
     if label_path_ is None:
         label_path_ = os.path.join(save_path, "label_encoder.txt")
 
-    _, run_opts, _ = sb.parse_arguments(config.config_path)
+    _, run_opts, _ = sb.parse_arguments(config.sb_config)
     run_opts["device"] = config.device
     run_opts["data_parallel_backend"] = config.parallel_backend
     run_opts["noprogressbar"] = True  # disable tqdm progress bar
 
-    with open(config.config_path) as fin:
+    with open(config.sb_config) as fin:
         params = load_hyperpyyaml(fin, overrides)
 
     # This logic follow the data_path is a path to csv folder file
@@ -77,7 +78,7 @@ def int_model(  # pylint: disable=too-many-arguments,too-many-locals
     # Create experiment directory
     sb.create_experiment_directory(
         experiment_directory=params["output_folder"],
-        hyperparams_to_save=config.config_path,
+        hyperparams_to_save=config.sb_config,
         overrides=overrides,
     )
 

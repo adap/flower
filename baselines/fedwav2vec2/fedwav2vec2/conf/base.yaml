@@ -5,8 +5,8 @@
 
 pre_train_model_path: null
 # Path for label encoder file if want to ensure the same encode for every client
-label_path: ./docs/material/label_encoder.txt
-sb_config: ./conf/sb_config/w2v2.yaml # config with SpeechBrain recipe for Wav2Vec 2.0
+label_path: docs/label_encoder.txt
+sb_config: fedwav2vec2/conf/sb_config/w2v2.yaml # config with SpeechBrain recipe for Wav2Vec 2.0
 data_path: data
 rounds: 30 # global FL rounds
 local_epochs: 5 # local epochs for each client

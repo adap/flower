@@ -27,7 +27,7 @@ def get_on_fit_config_fn(local_epochs: int) -> Callable[[int], Dict[str, str]]:
     return fit_config
 
 
-def get_evaluate_fn(config: DictConfig):
+def get_evaluate_fn(config: DictConfig, save_path: str):
     config_ = config
 
     def evaluate_fn(
@@ -38,7 +38,8 @@ def get_evaluate_fn(config: DictConfig):
         # int model
         asr_brain, dataset = int_model(
             config_.server_cid,
-            config,
+            config_,
+            save_path,
             evaluate=True,
         )
 

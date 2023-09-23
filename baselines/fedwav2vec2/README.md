@@ -46,7 +46,25 @@ dataset: [dataset1, dataset2] # list of datasets you include in your baseline
 
 ## Environment Setup
 
-:warning: _The Python environment for all baselines should follow these guidelines in the `EXTENDED_README`. Specify the steps to create and activate your environment. If there are any external system-wide requirements, please include instructions for them too. These instructions should be comprehensive enough so anyone can run them (if non standard, describe them step-by-step)._
+```bash
+
+pyenv local 3.10.6
+poetry env use 3.10.6
+poetry install
+
+# Then create a directory using the same name as you'll use for `dada_dir` in your config (see conf/base.yaml)
+mkdir data
+
+# Clone client mapping (note content will be moved to your data dir)
+git clone https://github.com/tuanct1997/Federated-Learning-ASR-based-on-wav2vec-2.0.git _temp && mv _temp/data/* data/ && rm -rf _temp
+
+# Activate your environment
+poetry shell
+
+# Download dataset
+python -m fedwav2vec2.dataset_preparation
+
+```
 
 
 ## Running the Experiments

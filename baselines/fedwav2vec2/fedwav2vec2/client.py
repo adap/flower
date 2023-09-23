@@ -172,10 +172,10 @@ class SpeechBrainClient(fl.client.Client):
         return (params_list, count_sample, avg_loss, avg_wer)
 
 
-def get_client_fn(config: DictConfig):
+def get_client_fn(config: DictConfig, save_path: str):
     def client_fn(cid: str) -> fl.client.Client:
         """Function to generate the simulated clients."""
-        asr_brain, dataset = int_model(cid, config)
+        asr_brain, dataset = int_model(cid, config, save_path)
         return SpeechBrainClient(cid, asr_brain, dataset)
 
     return client_fn

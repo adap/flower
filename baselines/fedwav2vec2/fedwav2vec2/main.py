@@ -50,13 +50,13 @@ def main(cfg: DictConfig) -> None:
         pretrained = None
 
     strategy = instantiate(
-        cfg.strategy, initial_parameters=pretrained, evaluate_fn=get_evaluate_fn(cfg)
+        cfg.strategy, initial_parameters=pretrained, evaluate_fn=get_evaluate_fn(cfg, save_path=save_path)
     )
 
     fl.simulation.start_simulation(
-        client_fn=get_client_fn(cfg),
+        client_fn=get_client_fn(cfg, save_path),
         num_clients=cfg.total_clients,
-        client_resources=cfg.client.client_resources,
+        client_resources=cfg.client_resources,
         config=fl.server.ServerConfig(num_rounds=cfg.rounds),
         strategy=strategy,
         ray_init_args={"include_dashboard": False},

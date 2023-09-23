@@ -137,7 +137,7 @@ def download_and_extract(cfg: DictConfig) -> None:
         finally:
             _delete_file(FILENAME)
 
-    _csv_path_audio()
+    _csv_path_audio(cfg.data_path, EXTRACT_PATH)
 
     # remove output dir. No need to keep it around
     save_path = HydraConfig.get().runtime.output_dir
