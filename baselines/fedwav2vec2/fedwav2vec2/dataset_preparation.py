@@ -13,7 +13,9 @@ import ssl
 import tarfile
 import urllib.request
 
+import hydra
 import pandas as pd
+from omegaconf import DictConfig, OmegaConf
 
 
 def _download_file(url, filename):
@@ -73,27 +75,27 @@ def _delete_file(filename):
     print(f"Deleted {filename}.")
 
 
-def _csv_path_audio():
+def _csv_path_audio(data_path: str, extract_path: str):
     """Change the path corespond to your actual path."""
     df_concat_train = None
     df_concat_dev = None
     df_concat_test = None
     for i in range(1983):
-        df_train = pd.read_csv(f"./data/client_{i}/ted_train.csv")
-        df_dev = pd.read_csv(f"./data/client_{i}/ted_dev.csv")
-        df_test = pd.read_csv(f"./data/client_{i}/ted_test.csv")
+        df_train = pd.read_csv(f"{data_path}/client_{i}/ted_train.csv")
+        df_dev = pd.read_csv(f"{data_path}/client_{i}/ted_dev.csv")
+        df_test = pd.read_csv(f"{data_path}/client_{i}/ted_test.csv")
         df_train["wav"] = df_train["wav"].str.replace(
-            "path", "./data/audio/TEDLIUM_release-3/legacy/train/sph/"
+            "path", f"{extract_path}/TEDLIUM_release-3/legacy/train/sph/"
         )
         df_dev["wav"] = df_dev["wav"].str.replace(
-            "path", "./data/audio/TEDLIUM_release-3/legacy/train/sph/"
+            "path", f"{extract_path}/TEDLIUM_release-3/legacy/train/sph/"
         )
         df_test["wav"] = df_test["wav"].str.replace(
-            "path", "./data/audio/TEDLIUM_release-3/legacy/train/sph/"
+            "path", f"{extract_path}/TEDLIUM_release-3/legacy/train/sph/"
         )
-        df_train.to_csv(f"./data/client_{i}/ted_train.csv", index=False)
-        df_dev.to_csv(f"./data/client_{i}/ted_dev.csv", index=False)
-        df_test.to_csv(f"./data/client_{i}/ted_test.csv", index=False)
+        df_train.to_csv(f"{data_path}/client_{i}/ted_train.csv", index=False)
+        df_dev.to_csv(f"{data_path}/client_{i}/ted_dev.csv", index=False)
+        df_test.to_csv(f"{data_path}/client_{i}/ted_test.csv", index=False)
         if df_concat_train is None:
             df_concat_train = df_train
         else:
@@ -107,18 +109,22 @@ def _csv_path_audio():
         else:
             df_concat_test = pd.concat([df_concat_test, df_test], ignore_index=True)
 
-    df_concat_train.to_csv("./data/ted_train.csv", index=False)
-    df_concat_dev.to_csv("./data/ted_dev.csv", index=False)
-    df_concat_test.to_csv("./data/ted_test.csv", index=False)
+    df_concat_train.to_csv(f"{data_path}/ted_train.csv", index=False)
+    df_concat_dev.to_csv(f"{data_path}/ted_dev.csv", index=False)
+    df_concat_test.to_csv(f"{data_path}/ted_test.csv", index=False)
 
 
-if __name__ == "__main__":
+@hydra.main(config_path="conf", config_name="base", version_base="1.2")
+def main(cfg: DictConfig) -> None:
+    print("here")
+    print(OmegaConf.to_yaml(cfg))
     URL = (
         "https://projets-lium.univ-lemans.fr"
         "/wp-content/uploads/corpus/TED-LIUM/TEDLIUM_release-3.tgz"
     )
-    FILENAME = "data/TEDLIUM_release-3.tgz"
-    EXTRACT_PATH = "data/audio"
+    FILENAME = f"{cfg.data_path}/{cfg.download_filename}"
+    EXTRACT_PATH = f"{cfg.data_path}/{cfg.extract_subdirectory}"
+
 
     if not os.path.exists(EXTRACT_PATH):
         try:

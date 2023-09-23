@@ -13,16 +13,16 @@ data_path: ./data
 rounds: 30 # global FL rounds
 local_epochs: 5 # local epochs for each client
 total_clients: 10
+server_cid: 19999
 
 # Device setup
 device: cpu
 parallel_backend: false # If using multi-gpus per client (disable if using CPU)
 
 dataset:
-  # dataset config
+  download_filename: TEDLIUM_release-3.tgz
+  extract_subdirectory: audio
 
-model:
-  # model config
 
 strategy:
   _target_: fedwav2vec2.strategy.CustomFedAvg
