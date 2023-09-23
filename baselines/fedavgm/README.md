@@ -132,9 +132,9 @@ poetry run python -m fedavgm.main server.reporting_fraction=0.2 client.local_epo
 
 
 ```bash
-poetry run python -m fedavgm.main --multirun client.local_epochs=1 
-noniid.concentration=10,1,0.1,0.01 strategy=fedavgm,fedavg 
-server.reporting_fraction=0.05 num_rounds=1000 
+poetry run python -m fedavgm.main --multirun client.local_epochs=1 \
+noniid.concentration=10,1,0.1,0.01 strategy=fedavgm,fedavg \
+server.reporting_fraction=0.05 num_rounds=1000 \
 num_clients=100 dataset=cifar10,fmnist
 ```
 
@@ -145,7 +145,8 @@ The above command will evaluate FedAvgM versus FedAvg on both CIFAR-10 and FMNIS
 _For the CIFAR-10 case, the FedAvgM accuracy @ concentration equal 10 comes from the round 995 instead of round 1000. Round 995 was the latest round with an accuracy without instability (e.g, exploding gradients) during centralized evaluation of the global model. This behavior can be evidenced by the following execution:_
 
 ```bash
-poetry run python -m fedavgm.main client.local_epochs=1 noniid.concentration=10 strategy=fedavgm server.reporting_fraction=0.05 num_rounds=1000 num_clients=100 dataset=cifar10
+poetry run python -m fedavgm.main client.local_epochs=1 noniid.concentration=10 strategy=fedavgm \
+server.reporting_fraction=0.05 num_rounds=1000 num_clients=100 dataset=cifar10
 ```
 
 ```bash
