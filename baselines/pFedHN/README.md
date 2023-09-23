@@ -1,15 +1,15 @@
 ---
-title: Personalized Federated Learning using Hypernetworks
-url: https://arxiv.org/abs/2103.04628
-labels: ["data heterogenity", "hypernetworks","personalised federated learning",] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: MNIST, CIFAR10, CIFAR100 # list of datasets you include in your baseline
+Title: Personalized Federated Learning using Hypernetworks
+Url: https://arxiv.org/abs/2103.04628
+Labels: ["data heterogenity", "hypernetworks","personalised federated learning",] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
+Dataset: MNIST, CIFAR10, CIFAR100 # list of datasets you include in your baseline
 ---
 
 # *pFedHN*
 
 
 
-****Paper:**** https://arxiv.org/abs/2103.04628
+****Paper:**** [arxiv.org/abs/2103.04628](https://arxiv.org/abs/2103.04628)
 
 ****Authors:**** Aviv Shamsian,Aviv Navon,Ethan Fetaya,Gal Chechik
 
@@ -23,8 +23,14 @@ dataset: MNIST, CIFAR10, CIFAR100 # list of datasets you include in your baselin
 
 ****Hardware Setup:**** Will be updated
 
-****Contributors:**** :Ram Samarth B B(@achiverram28) , Kishan Gurumurthy(@kishan-droid) , Sachin DN(@sachugowda)
-
+****Contributors:**** 
+---
+| Names     | Profiles |
+| ----------- | ----------- |
+| Ram Samarth B B      | [achiverram28](https://github.com/achiverram28)      |
+| Kishan Gurumurthy   | [kishan-droid](https://github.com/kishan-droid)      |
+| Sachin DN | [sachugowda](https://github.com/sachugowda) |
+---
 
 ## Experimental Setup
 
@@ -84,8 +90,7 @@ To run this pFedHN, first ensure you have activated your Poetry environment (exe
 ```bash
 python3 -m pFedHN.main # this will run using the default settings in the `conf/config.yaml` that is for the cifar10
 
-python3 -m pFedHN.main dataset.data="mnist" model.n_kernels=7 model
-.in_channels=1 # this will run for the mnist
+python3 -m pFedHN.main dataset.data="mnist" model.n_kernels=7 model.in_channels=1 # this will run for the mnist
 
 python3 -m pFedHN.main dataset.data="cifar100" model.out_dim=100 client.num_classes_per_node=10 # this will run for the cifar100
 
