@@ -36,19 +36,23 @@ class CNN(nn.Module):
     def __init__(self,cfg, n_channel: int = 64) -> None:
         super(CNN, self).__init__()
         n_out = 1
-        self.task_type = cfg.dataset.task_type
+        self.task_type = cfg.dataset.task.task_type
         n_estimators_client=cfg.n_estimators_client
         client_num=cfg.client_num
+
         self.conv1d = nn.Conv1d(
             1, n_channel, kernel_size=n_estimators_client, stride=n_estimators_client, padding=0
         )
+
         self.layer_direct = nn.Linear(n_channel * client_num, n_out)
+
         self.ReLU = nn.ReLU()
 
         if self.task_type == "BINARY":
            self.final_layer  = nn.Sigmoid()
         elif self.task_type == "REG":
            self.final_layer  = nn.Identity()
+           
         # Add weight initialization
         for layer in self.modules():
             if isinstance(layer, nn.Linear):

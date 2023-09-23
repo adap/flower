@@ -1,16 +1,4 @@
+defaults: 
+  - task: Binary_Classification
 dataset_name: "cod-rna"
 train_ratio: .75
-task_type: "BINARY"
-
-metric:
-  name: "Accuracy"
-  fn:
-    _target_: torchmetrics.Accuracy
-    task: "binary"
-
-criterion:
-  _target_: torch.nn.BCELoss
-
-xgb:
-  _target_:  xgboost.XGBClassifier
-  objective: "binary:logistic"

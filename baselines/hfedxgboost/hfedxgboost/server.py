@@ -265,7 +265,7 @@ def serverside_eval(
 ) -> Tuple[float, Dict[str, float]]:
     """An evaluation function for centralized/serverside evaluation over the entire test set."""
     # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    metric_name=cfg.dataset.metric.name
+    metric_name=cfg.dataset.task.metric.name
     
     device = cfg.device
     model = CNN(cfg)

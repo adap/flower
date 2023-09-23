@@ -48,7 +48,7 @@ class FL_Client(fl.client.Client):
         """
         Creates a client for training `network.Net` on tabular dataset.
         """
-        self.task_type = cfg.dataset.task_type
+        self.task_type = cfg.dataset.task.task_type
         self.cid = cid
         self.config=cfg
         for dataset in trainloader:

@@ -186,8 +186,8 @@ def test(
     log_progress: bool = True,
 ) -> Tuple[float, float, int]:
 
-    criterion = instantiate(cfg.dataset.criterion)
-    metric_fn= instantiate(cfg.dataset.metric.fn)
+    criterion = instantiate(cfg.dataset.task.criterion)
+    metric_fn= instantiate(cfg.dataset.task.metric.fn)
 
     total_loss, total_result, n_samples = 0.0, 0.0, 0
     net.eval()
@@ -243,7 +243,7 @@ class results_writer:
         self.client_num=cfg.client_num
         self.xgb_max_depth=cfg.clients.xgb.max_depth
         self.CNN_lr=cfg.clients.CNN.lr
-        self.tas_type=cfg.dataset.task_type
+        self.tas_type=cfg.dataset.task.task_type
         if self.tas_type=="REG":
             self.best_res=999999999.999
             self.compare_fn=min
