@@ -15,7 +15,7 @@ examples/**/dev/*.sh
 
 # Flower Baselines
 baselines/datasets/leaf
-
+baselines/hfedxgboost/dataset
 outputs
 
 # macOS
