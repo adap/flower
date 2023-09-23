@@ -181,6 +181,12 @@ def train_test_split(X,y,train_ratio=.75):
         y_test: Numpy array
             The labels of the testing dataset.
     """
+    np.random.seed(2023)
+    y=np.expand_dims(y, axis=1)
+    full=np.concatenate((X, y),axis=1)
+    np.random.shuffle(full)
+    y=full[:, -1] # for last column
+    X = full[:, :-1] # for all but last column
     q=int(X.shape[0]*train_ratio)
 
     X_train = X[0:q]

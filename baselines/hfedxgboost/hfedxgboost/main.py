@@ -50,8 +50,10 @@ def main(cfg: DictConfig) -> None:
         print("Size of the trainset:", X_train.shape[0])
         print("Size of the testset:", X_test.shape[0])
         if task_type=="BINARY":
-            print("First class ratio",y_train[y_train==0.0].size/X_train.shape[0])
-            print("Second class ratio",y_train[y_train!=.0].size/X_train.shape[0])
+            print("First class ratio in train data",y_train[y_train==0.0].size/X_train.shape[0])
+            print("Second class ratio in train data",y_train[y_train!=.0].size/X_train.shape[0])
+            print("First class ratio in test data",y_test[y_test==0.0].size/X_test.shape[0])
+            print("Second class ratio in test data",y_test[y_test!=.0].size/X_test.shape[0])
         trainset=TensorDataset(torch.from_numpy(X_train), torch.from_numpy (y_train))
         testset = TensorDataset(torch.from_numpy(X_test), torch.from_numpy (y_test))
 
