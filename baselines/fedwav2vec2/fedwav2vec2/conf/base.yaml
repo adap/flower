@@ -1,0 +1,39 @@
+---
+# this is the config that will be loaded as default by main.py
+# Please follow the provided structure (this will ensuring all baseline follow
+# a similar configuration structure and hence be easy to customise)
+
+defaults:
+  - sb_config: w2v2
+
+pre_train_model_path: null
+# Path for label encoder file if want to ensure the same encode for every client
+label_path: ./docs/material/label_encoder.txt
+data_path: ./data
+rounds: 30 # global FL rounds
+local_epochs: 5 # local epochs for each client
+total_clients: 10
+
+# Device setup
+device: cpu
+parallel_backend: false # If using multi-gpus per client (disable if using CPU)
+
+dataset:
+  # dataset config
+
+model:
+  # model config
+
+strategy:
+  _target_: fedwav2vec2.strategy.CustomFedAvg
+  min_fit_clients: 10
+  fraction_fit: 0.01
+  min_available_clients: ${total_clients}
+  weight_strategy: num # strategy of weighting clients in: [num, loss, wer]
+  on_fit_config_fn:
+    _target_: fedwav2vec2.server.get_on_fit_config_fn
+    local_epochs: ${local_epochs}
+
+client_resources:
+  num_cpus: 8
+  num_gpus: 1
