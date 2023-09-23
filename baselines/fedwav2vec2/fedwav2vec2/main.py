@@ -61,3 +61,7 @@ def main(cfg: DictConfig) -> None:
         strategy=strategy,
         ray_init_args={"include_dashboard": False},
     )
+
+
+if __name__ == "__main__":
+    main()

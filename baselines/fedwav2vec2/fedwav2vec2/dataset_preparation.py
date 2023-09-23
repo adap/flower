@@ -12,9 +12,11 @@ import os
 import ssl
 import tarfile
 import urllib.request
+from shutil import rmtree
 
 import hydra
 import pandas as pd
+from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
 
@@ -114,17 +116,19 @@ def _csv_path_audio(data_path: str, extract_path: str):
     df_concat_test.to_csv(f"{data_path}/ted_test.csv", index=False)
 
 
-@hydra.main(config_path="conf", config_name="base", version_base="1.2")
-def main(cfg: DictConfig) -> None:
-    print("here")
+@hydra.main(config_path="./conf", config_name="base", version_base=None)
+def download_and_extract(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
-    URL = (
-        "https://projets-lium.univ-lemans.fr"
-        "/wp-content/uploads/corpus/TED-LIUM/TEDLIUM_release-3.tgz"
-    )
-    FILENAME = f"{cfg.data_path}/{cfg.download_filename}"
-    EXTRACT_PATH = f"{cfg.data_path}/{cfg.extract_subdirectory}"
+    # URL = (
+    #     "https://projets-lium.univ-lemans.fr"
+    #     "/wp-content/uploads/corpus/TED-LIUM/TEDLIUM_release-3.tgz"
+    # )
+    URL = "https://www.openslr.org/resources/51/TEDLIUM_release-3.tgz"
+    FILENAME = f"{cfg.data_path}/{cfg.dataset.download_filename}"
+    EXTRACT_PATH = f"{cfg.data_path}/{cfg.dataset.extract_subdirectory}"
 
+    print(f"{EXTRACT_PATH = }")
+    print(f"{FILENAME = }")
 
     if not os.path.exists(EXTRACT_PATH):
         try:
@@ -134,3 +138,11 @@ def main(cfg: DictConfig) -> None:
             _delete_file(FILENAME)
 
     _csv_path_audio()
+
+    # remove output dir. No need to keep it around
+    save_path = HydraConfig.get().runtime.output_dir
+    rmtree(save_path)
+
+
+if __name__ == "__main__":
+    download_and_extract()
