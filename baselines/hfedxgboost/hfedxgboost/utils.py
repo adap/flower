@@ -256,7 +256,7 @@ class results_writer:
             l=list()
             print("history.metrics_centralized[t]",history.metrics_centralized[t])
             for i in history.metrics_centralized[t]:
-                if self.compare_fn(i[1],self.best_res)==i[1]:
+                if self.compare_fn(i[1],self.best_res)==i[1] and i[1]!=self.best_res:
                     self.best_res =i[1]
                     self.best_res_round_num=i[0]
         return (self.best_res,self.best_res_round_num)
