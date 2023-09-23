@@ -10,24 +10,35 @@ clients_per_round: 10
 learning_rate: 0.01
 num_rounds: 50
 mu: 0.0
+partitioning: "dirichlet"
+dataset_name: "cifar10"
+strategy_t: scaffold.strategy.ScaffoldStrategy
+model_t: scaffold.models.CNN
+dataset_seed: 42
+alpha: 0.5
+labels_per_client: 2 # only used when partitioning is label quantity
+momentum: 0.9
+weight_decay: 0.00001
 
 dataset:
   # dataset config
-  _name: cifar10
-  similarity: 1.0 # similarity for sampling data
+  _name: ${dataset_name}
+  _partitioning: ${partitioning}
   batch_size: ${batch_size} # batch_size = batch_size_ratio * total_local_data_size
   val_split: 0.0
-  seed: 4567
+  seed: ${dataset_seed}
+  alpha: ${alpha}
+  labels_per_client: ${labels_per_client}
 
 model:
   # model config
-  _target_: scaffold.models.CNN
+  _target_: ${model_t}
   input_dim: 400
   hidden_dims: [120, 84]
   num_classes: 10
 
 strategy:
-  _target_: scaffold.strategy.ScaffoldStrategy # points to your strategy (either custom or exiting in Flower)
+  _target_: ${strategy_t} # points to your strategy (either custom or exiting in Flower)
   # rest of strategy config
   fraction_fit: 0.00001 # because we want the number of clients to sample on each round to be solely defined by min_fit_clients
   fraction_evaluate: 0.0

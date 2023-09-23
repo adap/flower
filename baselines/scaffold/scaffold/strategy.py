@@ -15,6 +15,7 @@ import torch
 from flwr.server.strategy.aggregate import aggregate
 from flwr.common import Scalar, Status, parameters_to_ndarrays, ndarrays_to_parameters
 from dataclasses import dataclass
+import numpy as np
 
 @dataclass
 class FitIns:
@@ -81,6 +82,7 @@ class ScaffoldStrategy(FedAvg):
             (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for _, fit_res in results
         ]
+        # Aggregate parameters
         parameters_aggregated = aggregate(weights_results)
 
         # Convert client cvs to ndarrays

@@ -32,6 +32,7 @@ class FlowerClientScaffold(
         num_epochs: int,
         learning_rate: float,
         momentum: float,
+        weight_decay: float,
     ) -> None:
         self.net = net
         self.trainloader = trainloader
@@ -40,6 +41,7 @@ class FlowerClientScaffold(
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
         self.momentum = momentum
+        self.weight_decay = weight_decay
         # initialize client control variate with 0 and shape of the network parameters
         self.client_cv = []
         for param in self.net.parameters():
@@ -67,6 +69,7 @@ class FlowerClientScaffold(
             self.num_epochs,
             self.learning_rate,
             self.momentum,
+            self.weight_decay,
             server_cv,
             self.client_cv,
         )
@@ -86,6 +89,7 @@ def gen_client_fn(
     learning_rate: float,
     model: DictConfig,
     momentum: float=0.9,
+    weight_decay: float=1e-5,
 ) -> Tuple[
     Callable[[str], FlowerClientScaffold], DataLoader
 ]:  # pylint: disable=too-many-arguments
@@ -106,6 +110,8 @@ def gen_client_fn(
         The learning rate for the SGD  optimizer of clients.
     momentum : float
         The momentum for SGD optimizer of clients
+    weight_decay : float
+        The weight decay for SGD optimizer of clients
 
     Returns
     -------
@@ -134,6 +140,7 @@ def gen_client_fn(
             num_epochs,
             learning_rate,
             momentum,
+            weight_decay,
         )
 
     return client_fn

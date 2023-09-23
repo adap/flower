@@ -51,8 +51,8 @@ class ScaffoldOptimizer(SGD):
     Implements SGD optimizer step function as defined in the SCAFFOLD paper
     """
 
-    def __init__(self, grads, step_size, momentum):
-        super().__init__(grads, lr=step_size, momentum=momentum, weight_decay=1e-5)
+    def __init__(self, grads, step_size, momentum, weight_decay):
+        super().__init__(grads, lr=step_size, momentum=momentum, weight_decay=weight_decay)
     
     def step_custom(self, server_cv, client_cv):
         # y_i = y_i - \eta * (g_i + c - c_i)  --> y_i = y_i - \eta*(g_i + \mu*b_{t}) - \eta*(c - c_i) 
@@ -68,6 +68,7 @@ def train(
     epochs: int,
     learning_rate: float,
     momentum: float,
+    weight_decay: float,
     server_cv: torch.Tensor,
     client_cv: torch.Tensor,
 ) -> None:
@@ -87,13 +88,15 @@ def train(
         The learning rate.
     momentum : float
         The momentum for SGD optimizer.
+    weight_decay : float
+        The weight decay for SGD optimizer.
     server_cv : torch.Tensor
         The server's control variate.
     client_cv : torch.Tensor
         The client's control variate.
     """
     criterion = nn.CrossEntropyLoss()
-    optimizer = ScaffoldOptimizer(net.parameters(), learning_rate, momentum)
+    optimizer = ScaffoldOptimizer(net.parameters(), learning_rate, momentum, weight_decay)
     net.train()
     for _ in range(epochs):
         net = _train_one_epoch(

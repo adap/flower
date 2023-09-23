@@ -7,20 +7,28 @@ num_clients: 100
 num_epochs: 10
 batch_size_ratio: 0.2
 clients_per_round: 20
-learning_rate: 0.05
+learning_rate: 0.01
 num_rounds: 1000
 mu: 0.0
+momentum: 0.0
+weight_decay: 0.0
+partitioning: "iid_noniid"
+dataset_seed: 42
+dataset_name: "emnist"
 
 dataset:
   # dataset config
-  similarity: 0.0 # similarity for sampling data
+  _name: ${dataset_name}
+  _partitioning: ${partitioning}
+  seed: ${dataset_seed}
+  similarity: 0.1 # similarity for sampling data
   batch_size_ratio: ${batch_size_ratio} # batch_size = batch_size_ratio * total_local_data_size
   val_split: 0.0
 
 model:
   # model config
   _target_: scaffold.models.LogisticRegression
-  num_classes: 62
+  num_classes: 47
 
 strategy:
   _target_: flwr.server.strategy.FedAvg # points to your strategy (either custom or exiting in Flower)

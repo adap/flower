@@ -7,12 +7,20 @@ num_clients: 100
 num_epochs: 1
 batch_size_ratio: 0.2
 clients_per_round: 20
-learning_rate: 0.2
+learning_rate: 0.01
 num_rounds: 1000
 mu: 0.0
+momentum: 0.0
+weight_decay: 0.0
+partitioning: "iid_noniid"
+dataset_seed: 42
+dataset_name: "emnist"
 
 dataset:
   # dataset config
+  _name: ${dataset_name}
+  _partitioning: ${partitioning}
+  seed: ${dataset_seed}
   similarity: 1.0 # similarity for sampling data
   batch_size_ratio: ${batch_size_ratio} # batch_size = batch_size_ratio * total_local_data_size
   val_split: 0.0

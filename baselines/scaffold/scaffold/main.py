@@ -14,8 +14,48 @@ from omegaconf import DictConfig, OmegaConf
 from scaffold.dataset import load_datasets
 from scaffold.client import gen_client_fn
 import scaffold.server as server
+import os
 
-@hydra.main(config_path="conf", config_name="scaffold_base_cifar10", version_base=None)
+# def parse_args():
+#     import argparse
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument('--merge_with_hydra', action='store_true', help='merge the arguments from the command line with the hydra config')
+#     parser.add_argument('--strategy_name', type=str, default='scaffold', help='strategy to use [fedavg | scaffold]')
+#     parser.add_argument('--num_clients', type=int, default=10, help='number of clients')
+#     parser.add_argument('--num_rounds', type=int, default=50, help='number of rounds')
+#     parser.add_argument('--num_epochs', type=int, default=10, help='number of local epochs')
+#     parser.add_argument('--dataset_name', type=str, default='cifar10', help='dataset to use [cifar10 | emnist]')
+#     parser.add_argument('--partitioning', type=str, default='iid', help='partitioning strategy to use [iid | dirichlet | label_quantity]')
+#     parser.add_argument('--dataset_seed', type=int, default=42, help='seed for dataset partitioning')
+#     parser.add_argument('--labels_per_client', type=int, default=2, help='number of labels per client for label_quantity partitioning')
+#     parser.add_argument('--learning_rate', type=float, default=0.01, help='learning rate')
+#     parser.add_argument('--alpha', type=float, default=0.5, help='alpha parameter for dirichlet partitioning')
+#     parser.add_argument('--clients_per_round', type=int, default=10, help='number of clients per round')
+#     parser.add_argument('--batch_size', type=int, default=64, help='batch size')
+#     args = parser.parse_args()
+#     return args
+
+# def merge_args_with_hydra(args, cfg):
+#     if args.strategy == 'scaffold':
+#         cfg.strategy_t = "scaffold.strategy.ScaffoldStrategy"
+#     elif args.strategy == 'fedavg':
+#         cfg.strategy_t = "flwr.server.strategy.FedAvg"
+#     if args.model == 'cnn':
+#         cfg.model_t = "scaffold.models.CNN"
+#     elif args.model == 'logistic_regression':
+#         cfg.model_t = "scaffold.models.LogisticRegression"
+#     cfg.num_clients = args.num_clients
+#     cfg.num_rounds = args.num_rounds
+#     cfg.num_epochs = args.num_epochs
+#     cfg.dataset_name = args.dataset_name
+#     cfg.partitioning = args.partitioning
+#     cfg.dataset_seed = args.dataset_seed
+#     cfg.learning_rate = args.learning_rate
+#     cfg.alpha = args.alpha
+#     cfg.clients_per_round = args.clients_per_round
+#     cfg.batch_size = args.batch_size
+
+@hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.
 
@@ -41,6 +81,10 @@ def main(cfg: DictConfig) -> None:
         seed=cfg.dataset.seed,
     )
 
+    save_path = HydraConfig.get().runtime.output_dir
+    print("Outputs and Client cvs for scaffold saved to: ",  save_path)
+
+    client_cv_dir = os.path.join(save_path, "client_cvs")
     # 3. Define your clients
     # Define a function that returns another function that will be used during
     # simulation to instantiate each individual client
@@ -51,6 +95,9 @@ def main(cfg: DictConfig) -> None:
         num_epochs=cfg.num_epochs,
         learning_rate=cfg.learning_rate,
         model=cfg.model,
+        momentum=cfg.momentum,
+        weight_decay=cfg.weight_decay,
+        client_cv_dir=client_cv_dir,
     )
 
     device = cfg.server_device
@@ -80,9 +127,8 @@ def main(cfg: DictConfig) -> None:
     )
 
     print(history)
-
-    save_path = HydraConfig.get().runtime.output_dir
-    print(save_path)
+    print("Outputs and Client cvs for scaffold saved to: ",  save_path)
+    
 
     # 6. Save your results
     # Here you can save the `history` returned by the simulation and include

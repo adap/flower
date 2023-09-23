@@ -15,7 +15,7 @@ import torch
 from torch.utils.data import DataLoader, random_split
 from torchvision import datasets
 
-from scaffold.dataset_preparation import _partition_data
+from scaffold.dataset_preparation import _partition_data, _partition_data_dirichlet, _partition_data_label_quantity
 
 def load_datasets(
     config: DictConfig,
@@ -43,13 +43,48 @@ def load_datasets(
         The DataLoader for training, the DataLoader for validation, the DataLoader for testing.
     """
     print(f"Dataset partitioning config: {config}")
+    partitioning = ""
+    if "_partitioning" in config:
+        partitioning = config._partitioning
+    # partition the data
+    if partitioning == "dirichlet":
+        alpha = 0.5
+        if "alpha" in config:
+            alpha = config.alpha
+        datasets, testset = _partition_data_dirichlet(
+            num_clients,
+            alpha=alpha,
+            seed=seed,
+            dataset_name=config._name,
+        )
+    elif partitioning == "label_quantity":
+        labels_per_client = 2
+        if "labels_per_client" in config:
+            labels_per_client = config.labels_per_client
+        datasets, testset = _partition_data_label_quantity(
+            num_clients,
+            labels_per_client=labels_per_client,
+            seed=seed,
+            dataset_name=config._name,
+        )
+    elif partitioning == "iid":
+        datasets, testset = _partition_data(
+            num_clients,
+            similarity=1.0,
+            seed=seed,
+            dataset_name=config._name,
+        )
+    elif partitioning == "iid_noniid":
+        similarity = 0.5
+        if "similarity" in config:
+            similarity = config.similarity
+        datasets, testset = _partition_data(
+            num_clients,
+            similarity=similarity,
+            seed=seed,
+            dataset_name=config._name,
+        )
 
-    datasets, testset = _partition_data(
-        num_clients,
-        similarity=config.similarity,
-        seed=seed,
-        dataset_name=config._name,
-    )
     batch_size = -1
     if "batch_size" in config:
         batch_size = config.batch_size
