@@ -4,9 +4,9 @@ Please overwrite `flwr.client.NumPyClient` or `flwr.client.Client` and create a 
 to instantiate your client.
 """
 
+import copy
 import os
 from collections import OrderedDict
-import copy
 from typing import Callable, Dict, List, Tuple
 
 import flwr as fl
@@ -15,7 +15,7 @@ from flwr.common.typing import NDArrays, Scalar
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
-from moon.models import init_net, test, train_fedprox, train_moon
+from moon.models import init_net, train_fedprox, train_moon
 
 # pylint: disable=E1101
 
@@ -60,27 +60,13 @@ class FlowerClient(fl.client.NumPyClient):
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Return the parameters of the current net."""
-        # print("self.net:", self.net.state_dict())
-        self.net.eval()
-        for param in self.net.parameters():
-            param.requires_grad = False
         return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
 
     def set_parameters(self, parameters: NDArrays) -> None:
         """Change the parameters of the model using the given ones."""
         params_dict = zip(self.net.state_dict().keys(), parameters)
-        # print("params_dict:", params_dict)
-        # state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         state_dict = OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
-        # print("state_dict:", state_dict)
-        # try:
         self.net.load_state_dict(state_dict, strict=True)
-        # except:
-        #     print("error in loading")
-        #     print("params_dict:", params_dict)
-        #     print("state_dict:", state_dict)
-        #     exit(0)
-        # self.net.load_state_dict(state_dict)
 
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
@@ -91,13 +77,14 @@ class FlowerClient(fl.client.NumPyClient):
             self.prev_net = init_net(self.dataset, self.model, self.output_dim)
             self.prev_net = copy.deepcopy(self.net)
         else:
-        # if os.path.exists(os.path.join(self.model_dir, str(self.net_id), "prev_net.pt")):
             # load previous model from model_dir
             self.prev_net.load_state_dict(
-                torch.load(os.path.join(self.model_dir, str(self.net_id), "prev_net.pt"))
+                torch.load(
+                    os.path.join(self.model_dir, str(self.net_id), "prev_net.pt")
+                )
             )
         # else:
-            # self.prev_net = copy.deepcopy(self.net)
+        # self.prev_net = copy.deepcopy(self.net)
         global_net = init_net(self.dataset, self.model, self.output_dim)
         global_net.load_state_dict(self.net.state_dict())
         if self.alg == "moon":
@@ -124,7 +111,10 @@ class FlowerClient(fl.client.NumPyClient):
             )
         if not os.path.exists(os.path.join(self.model_dir, str(self.net_id))):
             os.makedirs(os.path.join(self.model_dir, str(self.net_id)))
-        torch.save(self.net.state_dict(), os.path.join(self.model_dir, str(self.net_id), "prev_net.pt"))
+        torch.save(
+            self.net.state_dict(),
+            os.path.join(self.model_dir, str(self.net_id), "prev_net.pt"),
+        )
         return self.get_parameters({}), len(self.trainloader), {"is_straggler": False}
 
     def evaluate(
@@ -132,7 +122,6 @@ class FlowerClient(fl.client.NumPyClient):
     ) -> Tuple[float, int, Dict]:
         """Implement distributed evaluation for a given client."""
         self.set_parameters(parameters)
-        # loss, accuracy = test(self.net, self.valloader, self.device)
         # skip evaluation in the client-side
         loss = 0.0
         accuracy = 0.0
@@ -150,7 +139,6 @@ def gen_client_fn(
         """Create a Flower client representing a single organization."""
         # Load model
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        print("device:", device)
         # net = init_net(cfg.dataset.name, cfg.model.name, cfg.model.output_dim)
 
         # Note: each client gets a different trainloader/valloader, so each client

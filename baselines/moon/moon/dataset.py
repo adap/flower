@@ -12,6 +12,7 @@ defined here of course.
 # https://github.com/QinbinLi/MOON/blob/main/datasets.py
 
 import logging
+import os
 
 import numpy as np
 import torch.nn.functional as F
@@ -21,7 +22,6 @@ import torchvision.transforms as transforms
 from PIL import Image
 from torch.autograd import Variable
 from torchvision.datasets import CIFAR10, CIFAR100
-import os
 
 logging.basicConfig()
 logger = logging.getLogger()
@@ -244,12 +244,16 @@ def get_dataloader(dataset, datadir, train_bs, test_bs, dataidxs=None, noise_lev
         )
         # data prep for test set
         transform_test = transforms.Compose([transforms.ToTensor(), normalize])
-    if dataset == "cifar10" and os.path.isdir(os.path.join(datadir, "cifar-10-batches-py")):
-        download=False
-    elif dataset == "cifar100" and os.path.isdir(os.path.join(datadir, "cifar-100-python")):
-        download=False
+    if dataset == "cifar10" and os.path.isdir(
+        os.path.join(datadir, "cifar-10-batches-py")
+    ):
+        download = False
+    elif dataset == "cifar100" and os.path.isdir(
+        os.path.join(datadir, "cifar-100-python")
+    ):
+        download = False
     else:
-        download=True
+        download = True
     train_ds = dl_obj(
         datadir,
         dataidxs=dataidxs,

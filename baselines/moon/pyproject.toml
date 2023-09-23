@@ -41,6 +41,7 @@ python = ">=3.8.15, <3.12.0"  # don't change this
 flwr = { extras = ["simulation"], version = "1.5.0" }
 hydra-core = "1.3.2" # don't change this
 scikit-learn = "1.3.0"
+matplotlib = "3.8.0"
 
 [tool.poetry.dev-dependencies]
 isort = "==5.11.5"
@@ -83,7 +84,7 @@ disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import
 good-names = "i,j,k,_,x,y,X,Y,K,N,X_train,X_test,fc,l1,l2,l3,h,lr,mu"
 max-args = 10
 max-attributes = 15
-max-locals = 35
+max-locals = 36
 max-branches = 20
 max-statements = 55
 signature-mutators="hydra.main.main"

@@ -4,6 +4,8 @@ It includes processioning the dataset, instantiate strategy, specify how the glo
 model is going to be evaluated, etc. At the end, this script saves the results.
 """
 import random
+import shutil
+from pathlib import Path
 
 # these are the basic packages you'll need here
 # feel free to remove some if aren't needed
@@ -11,12 +13,13 @@ import flwr as fl
 import hydra
 import numpy as np
 import torch
+from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
-import os
 
 from moon import client, server
 from moon.dataset import get_dataloader
 from moon.dataset_preparation import partition_data
+from moon.utils import plot_metric_from_history
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -102,7 +105,9 @@ def main(cfg: DictConfig) -> None:
     # pass all relevant argument (including the global dataset used after aggregation,
     # if needed by your method.)
     # strategy = instantiate(cfg.strategy, <additional arguments if desired>)
-    strategy = fl.server.strategy.FedAvg(fraction_fit=cfg.fraction_fit, evaluate_fn = evaluate_fn)
+    strategy = fl.server.strategy.FedAvg(
+        fraction_fit=cfg.fraction_fit, evaluate_fn=evaluate_fn
+    )
     # 5. Start Simulation
     # history = fl.simulation.start_simulation(<arguments for simulation>)
     history = fl.simulation.start_simulation(
@@ -117,7 +122,8 @@ def main(cfg: DictConfig) -> None:
     )
     # remove saved models
     if cfg.alg == "moon":
-        os.rmdir(cfg.model.dir)
+        # os.rmdir(cfg.model.dir)
+        shutil.rmtree(cfg.model.dir)
     # 6. Save your results
     # Here you can save the `history` returned by the simulation and include
     # also other buffers, statistics, info needed to be saved in order to later
@@ -135,26 +141,28 @@ def main(cfg: DictConfig) -> None:
 
     # Hydra automatically creates an output directory
     # Let's retrieve it and save some results there
-    # save_path = HydraConfig.get().runtime.output_dir
+    save_path = HydraConfig.get().runtime.output_dir
 
-    # # save results as a Python pickle using a file_path
-    # # the directory created by Hydra for each run
-    # save_results_as_pickle(history, file_path=save_path, extra_results={})
+    # plot results and include them in the readme
+    strategy_name = strategy.__class__.__name__
+    file_suffix: str = (
+        f"_{strategy_name}"
+        f"{'_iid' if cfg.dataset_config.iid else ''}"
+        f"{'_balanced' if cfg.dataset_config.balance else ''}"
+        f"{'_powerlaw' if cfg.dataset_config.power_law else ''}"
+        f"_C={cfg.num_clients}"
+        f"_B={cfg.batch_size}"
+        f"_E={cfg.num_epochs}"
+        f"_R={cfg.num_rounds}"
+        f"_mu={cfg.mu}"
+        f"_strag={cfg.stragglers_fraction}"
+    )
 
-    # # plot results and include them in the readme
-    # strategy_name = strategy.__class__.__name__
-    # file_suffix: str = (
-    #     f"_{strategy_name}"
-    #     f"{'_iid' if cfg.dataset_config.iid else ''}"
-    #     f"{'_balanced' if cfg.dataset_config.balance else ''}"
-    #     f"{'_powerlaw' if cfg.dataset_config.power_law else ''}"
-    #     f"_C={cfg.num_clients}"
-    #     f"_B={cfg.batch_size}"
-    #     f"_E={cfg.num_epochs}"
-    #     f"_R={cfg.num_rounds}"
-    #     f"_mu={cfg.mu}"
-    #     f"_strag={cfg.stragglers_fraction}"
-    # )
+    plot_metric_from_history(
+        history,
+        Path(save_path),
+        (file_suffix),
+    )
 
 
 if __name__ == "__main__":

@@ -343,10 +343,7 @@ class ModelMOON(nn.Module):
     def forward(self, x):
         """Forward."""
         h = self.features(x)
-        # print("h before:", h)
-        # print("h size:", h.size())
         h = h.squeeze()
-        # print("h after:", h)
         x = self.l1(h)
         x = F.relu(x)
         x = self.l2(x)
@@ -385,17 +382,10 @@ def train_moon(
     """Training function for MOON."""
     # net = nn.DataParallel(net)
     # net.cuda()
-    print("device:", device)
     net.to(device)
     global_net.to(device)
     previous_net.to(device)
-
-    print("n_training: %d" % len(train_dataloader))
-
     train_acc, _ = compute_accuracy(net, train_dataloader, device=device)
-
-    print(">> Pre-Training Training accuracy: {}".format(train_acc))
-
     optimizer = optim.SGD(
         filter(lambda p: p.requires_grad, net.parameters()),
         lr=lr,
@@ -404,7 +394,6 @@ def train_moon(
     )
 
     criterion = nn.CrossEntropyLoss().cuda()
-    # global_net.to(device)
 
     previous_net.eval()
     for param in previous_net.parameters():
@@ -412,8 +401,7 @@ def train_moon(
     previous_net.cuda()
 
     cnt = 0
-    cos = torch.nn.CosineSimilarity(dim=-1).to(device)
-    # mu = 0.001
+    cos = torch.nn.CosineSimilarity(dim=-1)
 
     for epoch in range(epochs):
         epoch_loss_collector = []
@@ -479,8 +467,6 @@ def train_fedprox(net, global_net, train_dataloader, epochs, lr, mu, device="cpu
     net = nn.DataParallel(net)
     net.cuda()
 
-    print("n_training: %d" % len(train_dataloader))
-
     train_acc, _ = compute_accuracy(net, train_dataloader, device=device)
 
     print(">> Pre-Training Training accuracy: {}".format(train_acc))
@@ -535,6 +521,6 @@ def test(net, test_dataloader, device="cpu"):
     """Test function."""
     net.to(device)
     test_acc, loss = compute_accuracy(net, test_dataloader, device=device)
-    print("test acc:", test_acc)
+    print(">> Test accuracy: %f" % test_acc)
     net.to("cpu")
     return test_acc, loss
