@@ -72,25 +72,25 @@ Run `Poetry shell` in your terminal to activate the environment.
 :warning: _Provide instructions on the steps to follow to run all the experiments._
 ```bash
 #to run all the experiments for the centralized model
-python -m Horizontal_XGBoost.main --config-name "Centralized Baseline"
+python -m hfedxgboost.main --config-name "Centralized_Baseline"
 
 #to run the federated version for a9a dataset with 2 clients
-python -m Horizontal_XGBoost.main dataset="a9a" clients="a9a_2_clients"
+python -m hfedxgboost.main dataset="a9a" clients="a9a_2_clients"
 
 #to run the federated version for a9a dataset with 5 clients
-python -m Horizontal_XGBoost.main dataset="a9a" clients="a9a_5_clients"
+python -m hfedxgboost.main dataset="a9a" clients="a9a_5_clients"
 
 #to run the federated version for a9a dataset with 10 clients
-python -m Horizontal_XGBoost.main dataset="a9a" clients="a9a_10_clients"
+python -m hfedxgboost.main dataset="a9a" clients="a9a_10_clients"
 
 #to run the federated version for cod-rna dataset with 2 clients
-python -m Horizontal_XGBoost.main dataset="cod_rna" clients="cod_rna_2_clients"
+python -m hfedxgboost.main dataset="cod_rna" clients="cod_rna_2_clients"
 
 #to run the federated version for cod-rna dataset with 5 clients
-python -m Horizontal_XGBoost.main dataset="cod_rna" clients="cod_rna_5_clients"
+python -m hfedxgboost.main dataset="cod_rna" clients="cod_rna_5_clients"
 
 #to run the federated version for cod-rna dataset with 10 clients
-python -m Horizontal_XGBoost.main dataset="cod_rna" clients="cod_rna_10_clients"
+python -m hfedxgboost.main dataset="cod_rna" clients="cod_rna_10_clients"
 
 
 # The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
