@@ -32,8 +32,8 @@ from collections import OrderedDict
 from typing import Any, Dict, List, Optional, Tuple, Union
 from flwr.common import NDArray, NDArrays
 from torch.utils.data import TensorDataset
-from .utils import get_dataloader,single_tree_preds_from_each_client
-from .models import fit_XGBoost,CNN
+from hfedxgboost.utils import single_tree_preds_from_each_client
+from hfedxgboost.models import fit_XGBoost,CNN
 
 class FL_Client(fl.client.Client):
     def __init__(

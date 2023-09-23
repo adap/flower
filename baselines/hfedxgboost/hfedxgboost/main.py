@@ -9,24 +9,24 @@ import hydra
 from omegaconf import DictConfig, OmegaConf
 from torch.utils.data import TensorDataset
 import torch
-from .dataset import load_single_dataset
+from hfedxgboost.dataset import load_single_dataset
 
-from .utils import run_centralized
-from .dataset import do_fl_partitioning
+from hfedxgboost.utils import run_centralized
+from hfedxgboost.dataset import do_fl_partitioning
 from flwr.server.strategy import FedXgbNnAvg
 from flwr.server.app import ServerConfig
 from typing import Dict, List, Optional, Tuple, Union
 from flwr.common import  Parameters, Scalar, EvaluateRes,FitRes,parameters_to_ndarrays
 from torch.utils.data import DataLoader, Dataset, TensorDataset
 from xgboost import XGBClassifier, XGBRegressor
-from .server import serverside_eval,FL_Server
+from hfedxgboost.server import serverside_eval,FL_Server
 import functools
 import flwr as fl
 from flwr.common import  Parameters, Scalar
-from .client import FL_Client
+from hfedxgboost.client import FL_Client
 from flwr.server.client_manager import  SimpleClientManager
 from hydra.utils import instantiate
-from .utils import results_writer
+from hfedxgboost.utils import results_writer
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig) -> None:
@@ -46,6 +46,9 @@ def main(cfg: DictConfig) -> None:
         dataset_name=cfg.dataset.dataset_name
         task_type=cfg.dataset.task_type
         X_train,y_train,X_test,y_test=load_single_dataset(task_type,dataset_name,train_ratio=cfg.dataset.train_ratio)
+        print("Feature dimension of the dataset:", X_train.shape[1])
+        print("Size of the trainset:", X_train.shape[0])
+        print("Size of the testset:", X_test.shape[0])
         trainset=TensorDataset(torch.from_numpy(X_train), torch.from_numpy (y_train))
         testset = TensorDataset(torch.from_numpy(X_test), torch.from_numpy (y_test))
 

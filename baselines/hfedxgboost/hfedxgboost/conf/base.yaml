@@ -1,7 +1,7 @@
 ---
 defaults: 
-  - dataset: a9a
-  - clients: a9a_2_clients
+  - dataset: ijcnn1
+  - clients: ijcnn1_2_clients
 
 centralized: False
 device: "cpu"

@@ -20,8 +20,8 @@ from flwr.server.history import History
 from flwr.server.strategy import Strategy
 from torch.utils.data import DataLoader
 from xgboost import XGBClassifier, XGBRegressor
-from .models import CNN
-from .utils import single_tree_preds_from_each_client,test
+from hfedxgboost.models import CNN
+from hfedxgboost.utils import single_tree_preds_from_each_client,test
 from flwr.server.server import (
     fit_clients,
     evaluate_clients,

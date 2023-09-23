@@ -8,12 +8,12 @@ from sklearn.metrics import mean_squared_error, accuracy_score
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 
-from .dataset import load_single_dataset
+from hfedxgboost.dataset import load_single_dataset
 
 from typing import List, Optional, Tuple, Union
 from flwr.common import NDArray
 
-from .models import fit_XGBoost,CNN
+from hfedxgboost.models import fit_XGBoost,CNN
 from torch.utils.data import DataLoader, Dataset, TensorDataset
 
 from xgboost import XGBClassifier, XGBRegressor
@@ -248,7 +248,7 @@ class results_writer:
             self.best_res=999999999.999
             self.compare_fn=min
         if self.tas_type=="BINARY":
-            self.best_res=-999999999.999
+            self.best_res=-1
             self.compare_fn=max
         self.best_res_round_num=0
     def extract_best_res(self,history) -> Tuple[float,int]:
