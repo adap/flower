@@ -134,39 +134,42 @@ class CustomFedAvgM(FedAvg):
         ]
 
         fedavg_result = aggregate(weights_results)  # parameters_aggregated from FedAvg
-
+        
         # remember that updates are the opposite of gradients
-        # pseudo_gradient: NDArrays = [
-        #     x - y
-        #     for x, y in zip(
-        #         parameters_to_ndarrays(self.initial_parameters), fedavg_result
-        #     )
-        # ]
+        pseudo_gradient: NDArrays = [
+            x - y
+            for x, y in zip(
+                parameters_to_ndarrays(self.initial_parameters), fedavg_result
+            )
+        ]
 
         if server_round > 1:
             assert (
                 self.momentum_vector
             ), "Momentum should have been created on round 1."
 
-            # momentum_vector referred as v in the paper
             self.momentum_vector = [
                 self.server_momentum * v + w
-                for w, v in zip(fedavg_result, self.momentum_vector)
+                for w, v in zip(pseudo_gradient, self.momentum_vector)
             ]
         else:   # Round 1
             # Initialize server-side model
             assert (
                 self.initial_parameters is not None
             ), "When using server-side optimization, model needs to be initialized."
-            initial_weights = parameters_to_ndarrays(self.initial_parameters)
             # Initialize momentum vector
-            self.momentum_vector = initial_weights
+            self.momentum_vector = pseudo_gradient
 
+        # Applying Nesterov
+        pseudo_gradient = [
+            g + self.server_momentum * v 
+            for g, v in zip(pseudo_gradient, self.momentum_vector)
+        ]
 
         # Federated Averaging with Server Momentum
         fedavgm_result = [
-            w - v
-            for w, v in zip(parameters_to_ndarrays(self.initial_parameters), self.momentum_vector)
+            w - self.server_learning_rate * v
+            for w, v in zip(parameters_to_ndarrays(self.initial_parameters), pseudo_gradient)
         ]
             
         # Update current weights
