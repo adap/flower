@@ -111,6 +111,13 @@ poetry install
 # activate the environment
 poetry shell
 ```
+### Google Colab
+If you want to setup the environemnt on Google Colab, please executed the script `conf-colab.sh`, just use the Colab terminal and the following:
+
+```bash
+chmod +x conf-colab.sh
+./conf-colab.sh
+```
 
 ## Running the Experiments
 

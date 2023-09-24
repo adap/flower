@@ -12,8 +12,8 @@ command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"
 
 # this version is specific to the FedAvgM baseline
-pyenv install 3.9.16
-pyenv global 3.9.16
+pyenv install 3.10.6
+pyenv global 3.10.6
 
 # install Poetry
 curl -sSL https://install.python-poetry.org | python3 -
