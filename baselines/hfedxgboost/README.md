@@ -92,6 +92,15 @@ python -m hfedxgboost.main dataset="cod_rna" clients="cod_rna_5_clients"
 #to run the federated version for cod-rna dataset with 10 clients
 python -m hfedxgboost.main dataset="cod_rna" clients="cod_rna_10_clients"
 
+#to run the federated version for space_ga dataset with 2 clients
+python -m hfedxgboost.main dataset="space_ga" clients="space_ga_2_clients"
+
+
+#to run the federated version for space_ga dataset with 5 clients
+python -m hfedxgboost.main dataset="space_ga" clients="space_ga_5_clients"
+
+#to run the federated version for space_ga dataset with 10 clients
+python -m hfedxgboost.main dataset="space_ga" clients="space_ga_10_clients"
 
 # The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
 
