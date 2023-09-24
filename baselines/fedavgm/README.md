@@ -9,7 +9,7 @@ dataset: [CIFAR-10, FMNIST] # list of datasets you include in your baseline
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
-**Paper:** https://arxiv.org/abs/1909.06335
+**Paper:** [arxiv.org/abs/1909.06335](https://arxiv.org/abs/1909.06335)
 
 **Authors:** Tzu-Ming Harry Hsu, Hang Qi, Matthew Brown
 
