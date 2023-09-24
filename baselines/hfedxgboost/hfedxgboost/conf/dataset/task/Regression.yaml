@@ -1,5 +1,3 @@
-dataset_name: "cpusmall"
-train_ratio: .75
 task_type: "REG"
 
 metric:

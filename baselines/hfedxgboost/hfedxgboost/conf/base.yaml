@@ -1,7 +1,7 @@
 ---
 defaults: 
-  - dataset: cod_rna
-  - clients: cod_rna_2_clients
+  - dataset: cpusmall
+  - clients: cpusmall_2_clients
 
 centralized: False
 device: "cpu"
@@ -46,12 +46,12 @@ client:
 
 run_experiment:
   num_rounds: ${clients.num_rounds}
-  batch_size: 64
+  batch_size: 32
   fraction_fit: 1.0
   min_fit_clients: 1
   num_cpus_per_client: 1
   fit_config:
-    num_iterations: 100
+    num_iterations: 500
 
 val_ratio: 0.0
 batch_size: "whole"

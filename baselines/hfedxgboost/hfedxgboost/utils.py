@@ -244,6 +244,7 @@ class results_writer:
         self.xgb_max_depth=cfg.clients.xgb.max_depth
         self.CNN_lr=cfg.clients.CNN.lr
         self.tas_type=cfg.dataset.task.task_type
+        self.num_iterations=cfg.run_experiment.fit_config.num_iterations
         if self.tas_type=="REG":
             self.best_res=999999999.999
             self.compare_fn=min
@@ -256,15 +257,15 @@ class results_writer:
             l=list()
             print("history.metrics_centralized[t]",history.metrics_centralized[t])
             for i in history.metrics_centralized[t]:
-                if self.compare_fn(i[1],self.best_res)==i[1] and i[1]!=self.best_res:
-                    self.best_res =i[1]
+                if self.compare_fn(i[1].item(),self.best_res)==i[1] and i[1].item()!=self.best_res:
+                    self.best_res =i[1].item()
                     self.best_res_round_num=i[0]
         return (self.best_res,self.best_res_round_num)
     def create_res_csv(self,filename)-> None:
         #call that only once :)
         fields = ['dataset_name', 'client_num' ,'n_estimators_client',
                    'num_rounds', 'xgb_max_depth', 'CNN_lr',
-                   'best_res','best_res_round_num'] 
+                   'best_res','best_res_round_num','num_iterations'] 
         with open(filename, 'w') as csvfile: 
             # creating a csv writer object 
             csvwriter = csv.writer(csvfile) 
@@ -278,8 +279,9 @@ class results_writer:
              str(self.num_rounds),
              str(self.xgb_max_depth),
              str(self.CNN_lr),
-             str(self.best_res.item()),
-             str(self.best_res_round_num)]
+             str(self.best_res),
+             str(self.best_res_round_num),
+             str(self.num_iterations)]
         with open(filename, 'a') as csvfile: 
             csvwriter = csv.writer(csvfile)
             csvwriter.writerow(row)
