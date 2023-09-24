@@ -166,7 +166,7 @@ class CustomFedAvgM(FedAvg):
         # Federated Averaging with Server Momentum
         fedavgm_result = [
             w - v
-            for w, v in zip(fedavg_result, self.momentum_vector)
+            for w, v in zip(parameters_to_ndarrays(self.initial_parameters), self.momentum_vector)
         ]
             
         # Update current weights
