@@ -1,75 +1,104 @@
 ---
-title: title of the paper
-url: URL to the paper page (not the pdf)
-labels: [label1, label2] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [dataset1, dataset2] # list of datasets you include in your baseline
+title: Model-Contrastive Federated Learning
+url: https://arxiv.org/abs/2103.16257
+labels: [data heterogeneity, image classification]
+dataset: [CIFAR-10, CIFAR-100] # list of datasets you include in your baseline
 ---
 
 # :warning:*_Title of your baseline_*
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
-> :warning: This is the template to follow when creating a new Flower Baseline. Please follow the instructions in `EXTENDED_README.md`
 
-> :warning: Please follow the instructions carefully. You can see the [FedProx-MNIST baseline](https://github.com/adap/flower/tree/main/baselines/fedprox) as an example of a baseline that followed this guide.
+****Paper:**** :https://arxiv.org/abs/2103.16257
+****Authors:**** :Qinbin Li, Bingsheng He, Dawn Song
 
-> :warning: Please complete the metadata section at the very top of this README. This generates a table at the top of the file that will facilitate indexing baselines.
+****Abstract:**** :Federated learning enables multiple parties to collaboratively train a machine learning model without communicating their local data. A key challenge in federated learning is to handle the heterogeneity of local data distribution across parties. Although many studies have been proposed to address this challenge, we find that they fail to achieve high performance in image datasets with deep learning models. In this paper, we propose MOON: modelcontrastive federated learning. MOON is a simple and effective federated learning framework. The key idea of MOON is to utilize the similarity between model representations to correct the local training of individual parties, i.e., conducting contrastive learning in model-level. Our extensive experiments show that MOON significantly outperforms the other state-of-the-art federated learning algorithms on various image classification tasks.
 
-****Paper:**** :warning: *_add the URL of the paper page (not to the .pdf). For instance if you link a paper on ArXiv, add here the URL to the abstract page (e.g. https://arxiv.org/abs/1512.03385). If your paper is in from a journal or conference proceedings, please follow the same logic._*
-
-****Authors:**** :warning: *_list authors of the paper_*
-
-****Abstract:**** :warning: *_add here the abstract of the paper you are implementing_*
 
 
 ## About this baseline
 
-****What’s implemented:**** :warning: *_Concisely describe what experiment(s) in the publication can be replicated by running the code. Please only use a few sentences. Start with: “The code in this directory …”_*
+****What’s implemented:**** : The code in this directory replicates the experiments in *Model-Contrastive Federated Learning* (Li et al., 2021), which proposed the MOON algorithm. Concretely ,it replicates the results of MOON for CIFAR-10 and CIFAR-100 in Table 1 and Figure 8.
 
-****Datasets:**** :warning: *_List the datasets you used (if you used a medium to large dataset, >10GB please also include the sizes of the dataset)._*
+****Datasets:**** : CIFAR-10 and CIFAR-100
 
-****Hardware Setup:**** :warning: *_Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Someone out there might not have access to the same resources you have so, could list the absolute minimum hardware needed to run the experiment in a reasonable amount of time ? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?_*
+****Hardware Setup:**** :The experiments are run on a server with 4x Intel Xeon Gold 6226R and 8x Nvidia GeForce RTX 3090. A machine with at least 1x 16GB GPU should be able to run the experiments in a reasonable time.
 
-****Contributors:**** :warning: *_let the world know who contributed to this baseline. This could be either your name, your name and affiliation at the time, or your GitHub profile name if you prefer. If multiple contributors signed up for this baseline, please list yourself and your colleagues_*
-
+****Contributors:**** : Qinbin Li
 
 ## Experimental Setup
 
-****Task:**** :warning: *_what’s the primary task that is being federated? (e.g. image classification, next-word prediction). If you have experiments for several, please list them_*
+****Task:**** : Image classification.
 
-****Model:**** :warning: *_provide details about the model you used in your experiments (if more than use a list). If your model is small, describing it as a table would be :100:. Some FL methods do not use an off-the-shelve model (e.g. ResNet18) instead they create your own. If this is your case, please provide a summary here and give pointers to where in the paper (e.g. Appendix B.4) is detailed._*
+****Model:**** : This directory implements two models as same as the paper:
+* A simple-CNN with a projection head for CIFAR-10
+* A ResNet-50 with a projection head for CIFAR-100.
+  
+****Dataset:**** : This directory includes CIFAR-10 and CIFAR-100. They are partitioned in the same way as the paper. The settings are as follow:
 
-****Dataset:**** :warning: *_Earlier you listed already the datasets that your baseline uses. Now you should include a breakdown of the details about each of them. Please include information about: how the dataset is partitioned (e.g. LDA with alpha 0.1 as default and all clients have the same number of training examples; or each client gets assigned a different number of samples following a power-law distribution with each client only instances of 2 classes)? if  your dataset is naturally partitioned just state “naturally partitioned”; how many partitions there are (i.e. how many clients)? Please include this an all information relevant about the dataset and its partitioning into a table._*
+| Dataset | partitioning method |
+| :------ | :---: |
+| CIFAR-10  | Dirichlet with beta 0.5 |
+| CIFAR-100 | Dirichlet with beta 0.5 |
 
-****Training Hyperparameters:**** :warning: *_Include a table with all the main hyperparameters in your baseline. Please show them with their default value._*
 
+****Training Hyperparameters:**** :
+
+warning: The following tables show the default hyperparameters.
+
+| Description | Default Value |
+| ----------- | ----- |
+| number of clients | 10 |
+| number of local epochs | 10 |
+| fraction fit | 1.0 |
+| batch size | 64 |
+| learning rate | 0.01 |
+| mu | 1 |
+| temperature | 0.5 |
+| alg | moon |
+| seed | 0 |
+| service_device | cpu |
+| number of rounds | 100 |
+| client resources | {'num_cpus': 2.0, 'num_gpus': 0.0 }|
 
 ## Environment Setup
 
-:warning: _The Python environment for all baselines should follow these guidelines in the `EXTENDED_README`. Specify the steps to create and activate your environment. If there are any external system-wide requirements, please include instructions for them too. These instructions should be comprehensive enough so anyone can run them (if non standard, describe them step-by-step)._
+To construct the Python environment follow these steps:
+
+```bash
+# install the base Poetry environment
+poetry install
+
+# activate the environment
+poetry shell
+
+# install PyTorch with GPU support.
+pip install torch==1.12.0+cu116 torchvision==0.13.0+cu116 torchaudio==0.12.0 --extra-index-url https://download.pytorch.org/whl/cu116
+```
 
 
 ## Running the Experiments
 
-:warning: _Provide instructions on the steps to follow to run all the experiments._
+First ensure you have activated your Poetry environment (execute `poetry shell` from this directory). To run MOON on CIFAR-10 (Table 1 of the paper), you should run:
 ```bash  
-# The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
-
-poetry run python -m <baseline-name>.main <no additional arguments> # where <baseline-name> is the name of this directory and that of the only sub-directory in this directory (i.e. where all your source code is)
-
-# If you are using a dataset that requires a complicated download (i.e. not using one natively supported by TF/PyTorch) + preprocessing logic, you might want to tell people to run one script first that will do all that. Please ensure the download + preprocessing can be configured to suit (at least!) a different download directory (and use as default the current directory). The expected command to run to do this is:
-
-poetry run python -m <baseline-name>.dataset_preparation <optional arguments, but default should always run>
-
-# It is expected that you baseline supports more than one dataset and different FL settings (e.g. different number of clients, dataset partitioning methods, etc). Please provide a list of commands showing how these experiments are run. Include also a short explanation of what each one does. Here it is expected you'll be using the Hydra syntax to override the default config.
-
-poetry run python -m <baseline-name>.main  <override_some_hyperparameters>
-.
-.
-.
-poetry run python -m <baseline-name>.main  <override_some_hyperparameters>
+poetry run python -m moon.main cifar10 
 ```
 
+To run MOON on CIFAR-100 (Table 1 of the paper), you should run:
+```bash
+poetry run python -m moon.main cifar100
+```
+
+To run MOON on CIFAR-100 with 50 clients (Figure 8(a) of the paper), you should run:
+```bash
+poetry run python -m moon.main cifar100_50clients
+```
+
+To run MOON on CIFAR-100 with 100 clients (Figure 8(b) of the paper), you should run:
+```bash
+poetry run python -m moon.main cifar100_100clients
+```
 
 ## Expected Results
 
