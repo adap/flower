@@ -19,9 +19,12 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
+import numpy as np
 import numpy.typing as npt
 
 NDArray = npt.NDArray[Any]
+NDArrayInt = npt.NDArray[np.int_]
+NDArrayFloat = npt.NDArray[np.float_]
 NDArrays = List[NDArray]
 
 # The following union type contains Python types corresponding to ProtoBuf types that

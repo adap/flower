@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "1.5.0"
+version = "1.6.0"
 description = "Flower: A Friendly Federated Learning Framework"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.dev>"]
@@ -30,7 +30,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -58,22 +57,21 @@ flower-server = "flwr.server:run_server"
 flower-client = "flwr.client:run_client"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 # Mandatory dependencies
 numpy = "^1.21.0"
 grpcio = "^1.48.2,!=1.52.0"
 protobuf = "^3.19.0"
 cryptography = "^41.0.2"
 pycryptodome = "^3.18.0"
-importlib-metadata = { version = "^4.0.0", markers = "python_version < '3.8'" }
 iterators = "^0.0.2"
 # Optional dependencies (VCE)
-ray = { version = "==2.5.1", extras = ["default"], optional = true }
+ray = { version = "==2.6.3", extras = ["default"], optional = true }
 pydantic = { version = "<2.0.0", optional = true }
 # Optional dependencies (REST transport layer)
 requests = { version = "^2.31.0", optional = true }
-starlette = { version = "^0.29.0", optional = true }
-uvicorn = { version = "^0.22.0", extras = ["standard"], optional = true }
+starlette = { version = "^0.31.0", optional = true }
+uvicorn = { version = "^0.23.0", extras = ["standard"], optional = true }
 
 [tool.poetry.extras]
 simulation = ["ray", "pydantic"]
@@ -84,14 +82,14 @@ types-dataclasses = "==0.6.6"
 types-protobuf = "==3.19.18"
 types-requests = "==2.31.0.2"
 types-setuptools = "==68.0.0.3"
-clang-format = "==16.0.3"
+clang-format = "==16.0.6"
 isort = "==5.11.5"
 black = { version = "==23.3.0", extras = ["jupyter"] }
 docformatter = "==1.7.5"
-mypy = "==1.4.0"
+mypy = "==1.4.1"
 pylint = "==2.13.9"
 flake8 = "==3.9.2"
-pytest = "==7.1.2"
+pytest = "==7.4.0"
 pytest-cov = "==3.0.0"
 pytest-watch = "==4.2.0"
 grpcio-tools = "==1.48.2"
@@ -100,6 +98,7 @@ jupyterlab = "==3.6.5"
 rope = "==1.9.0"
 semver = "==2.13.0"
 sphinx = "==5.3.0"
+sphinx-intl = "==2.1.0"
 myst-parser = "==1.0.0"
 sphinx-design = "==0.4.1"
 sphinx-copybutton = "==0.5.2"
@@ -118,6 +117,7 @@ mdformat-beautysh = "==0.1.1"
 mdformat-myst = "==0.1.5"
 twine = "==4.0.2"
 pyroma = "==4.2"
+GitPython = "==3.1.32"
 
 [tool.isort]
 line_length = 88
@@ -130,7 +130,7 @@ known_first_party = ["flwr", "flwr_experimental", "flwr_tool"]
 
 [tool.black]
 line-length = 88
-target-version = ["py37", "py38", "py39", "py310", "py311"]
+target-version = ["py38", "py39", "py310", "py311"]
 
 [tool.pylint."MESSAGES CONTROL"]
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
@@ -176,7 +176,7 @@ wrap-summaries = 88
 wrap-descriptions = 88
 
 [tool.ruff]
-target-version = "py37"
+target-version = "py38"
 line-length = 88
 select = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
 fixable = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
