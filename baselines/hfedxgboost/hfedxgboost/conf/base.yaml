@@ -1,7 +1,7 @@
 ---
 defaults: 
-  - dataset: cpusmall
-  - clients: cpusmall_5_clients
+  - dataset: space_ga
+  - clients: space_ga_10_clients
 
 centralized: False
 device: "cpu"
@@ -51,7 +51,7 @@ run_experiment:
   min_fit_clients: 1
   num_cpus_per_client: 1
   fit_config:
-    num_iterations: 500
+    num_iterations: 100
 
 val_ratio: 0.0
 batch_size: "whole"

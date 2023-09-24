@@ -1,4 +1,4 @@
-n_estimators_client: 50
+n_estimators_client: 100
 num_rounds: 50
 client_num: 10
 
