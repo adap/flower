@@ -63,29 +63,186 @@ This is the model used by default.
 :warning: _The Python environment for all baselines should follow these guidelines in the `EXTENDED_README`. Specify the steps to create and activate your environment. If there are any external system-wide requirements, please include instructions for them too. These instructions should be comprehensive enough so anyone can run them (if non standard, describe them step-by-step)._
 
 
-## Running the Experiments
+## Environment Setup
+By default, Poetry will use the Python version in your system. 
+In some settings, you might want to specify a particular version of Python 
+to use inside your Poetry environment. You can do so with `pyenv`. 
+Check the documentation for the different ways of installing `pyenv`,
+but one easy way is using the automatic installer:
 
-:warning: _Provide instructions on the steps to follow to run all the experiments._
-```bash  
-# The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
+```bash
+curl https://pyenv.run | bash
+```
+You can then install any Python version with `pyenv install <python-version>`
+(e.g. `pyenv install 3.9.0`) and set that version as the one to be used. 
+```bash
+# cd to your power_of_choice directory (i.e. where the `pyproject.toml` is)
+pyenv install 3.9.0
 
-poetry run -m <baseline-name>.main <no additional arguments> # where <baseline-name> is the name of this directory and that of the only sub-directory in this directory (i.e. where all your source code is)
+pyenv local 3.9.0
 
-# If you are using a dataset that requires a complicated download (i.e. not using one natively supported by TF/PyTorch) + preprocessing logic, you might want to tell people to run one script first that will do all that. Please ensure the download + preprocessing can be configured to suit (at least!) a different download directory (and use as default the current directory). The expected command to run to do this is:
+# set that version for poetry
+poetry env use 3.9.0
+```
+To build the Python environment as specified in the `pyproject.toml`, use the following commands:
+```bash
+# cd to your power_of_choice directory (i.e. where the `pyproject.toml` is)
 
-poetry run -m <baseline-name>.dataset_preparation <optional arguments, but default should always run>
+# install the base Poetry environment
+poetry install
 
-# It is expected that you baseline supports more than one dataset and different FL settings (e.g. different number of clients, dataset partitioning methods, etc). Please provide a list of commands showing how these experiments are run. Include also a short explanation of what each one does. Here it is expected you'll be using the Hydra syntax to override the default config.
-
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
-.
-.
-.
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
+# activate the environment
+poetry shell
 ```
 
+## Running the Experiments
+
+First ensure you have activated your Poetry environment (execute `poetry shell` from this directory).
+
+### Generate Clients' Dataset
+First (and just the first time), the data partitions of clients must be generated.
+
+To generate the partitions for the FMNIST dataset (used in Figure 4 of the paper), run the following command:
+
+```bash
+# this will generate the datasets using the default settings in the `conf/base.yaml`
+python3 power_of_choice/dataset_preparation.py
+```
+
+The generated datasets will be saved in the `fmnist` folder.
+
+If you want to modify the `alpha` parameter used to create the LDA partitions, you can override the parameter:
+
+```bash
+python3 power_of_choice/dataset_preparation.py alpha=<alpha>
+```
+
+To generate partitions of the CIFAR10 dataset (used in Figure 6 of the paper), you can override the parameter:
+
+```bash
+python3 power_of_choice/dataset_preparation.py dataset.dataset="cifar10"
+```
+
+In this case the generated datasets will be saved in the `cifar10` folder.
+
+### Running simulations and reproducing results
+If you have not done it yet, [generate the clients' dataset](#generate-clients-dataset).
+
+
+#### MLP on FMNIST 
+
+The default configuration for `power_of_choice.main` uses the base version Power of Choice strategy with MLP on FMNIST dataset. It can be run with the following:
+
+```bash
+python3 power_of_choice/main.py # this will run using the default settings in the `conf/config.yaml`
+```
+
+You can override settings directly from the command line in this way:
+
+```bash
+python3 power_of_choice/main.py num_rounds=100 # will set the number of rounds to 100
+```
+
+To run using FedAvg:
+```bash
+# This will use FedAvg as strategy
+python3 power_of_choice/main.py variant="rand" 
+```
+
+To run all the experiments in Figure 4 of the paper, use the following commands:
+```bash
+# This will use FedAvg as strategy
+python3 power_of_choice/main.py variant="rand" 
+
+# This will use base version of Power of Choice with d=6
+python3 power_of_choice/main.py strategy.d=6
+
+# This will use base version of Power of Choice with d=9
+python3 power_of_choice/main.py strategy.d=9
+
+# This will use base version of Power of Choice with d=12
+python3 power_of_choice/main.py strategy.d=12
+```
+
+To run all the experiments in Figure 6 of the paper, use the following commands:
+```bash
+# This will use FedAvg as strategy
+python3 power_of_choice/main.py variant="rand" 
+
+# This will use base version of Power of Choice with d=6
+python3 power_of_choice/main.py strategy.d=6
+
+# This will use base version of Power of Choice with d=9
+python3 power_of_choice/main.py strategy.d=9
+
+# This will use base version of Power of Choice with d=12
+python3 power_of_choice/main.py strategy.d=12
+```
 
 ## Expected Results
+
+This repository can reproduce the results for 4 baselines used in the experimental part of the original paper: FedAvg, pow-d, cpow-d, rpow-d.
+The following tables compare the results obtained with the code in this repository with the results reported in the paper. Results from the paper are reported in brackets.
+
+### Figure 4a and 4b
+The results in Figure 4a and 4b in the paper refer to FMNIST dataset partitioned using LDA with `alpha=2` and `alpha=0.3`, respectively. 
+
+To reproduce the results in Figure 4a, [generate the clients' dataset](#generate-clients-dataset) with `alpha=2`.
+
+To reproduce the results in Figure 4b, [generate the clients' dataset](#generate-clients-dataset) with `alpha=0.3`.
+
+In both cases, then run:
+
+```bash
+# This will run the experiment using FedAvg strategy
+python3 power_of_choice/main.py variant="rand"
+```
+
+and
+
+```bash
+# This will produce 3 consecutive runs, using pow-d strategy with d=6,9,15, respectively
+python3 power_of_choice/main.py --multirun strategy.d=6,9,15
+```
+
+### Figure 6a and 6b
+The results in Figure 6a and 6b in the paper refer to CIFAR10 dataset partitioned using LDA with `alpha=2` and `alpha=0.3`, respectively. 
+
+To reproduce the results in Figure 6a, [generate the clients' dataset](#generate-clients-dataset) with parameters `dataset.dataset="cifar10"` and  `alpha=2`.
+
+Then run:
+
+```bash
+# This will run the experiment using FedAvg strategy
+python3 power_of_choice/main.py dataset.dataset="cifar10" variant="rand" is_cnn=True
+
+# This will run the experiment using pow-d with d=20 and CK=9
+python3 power_of_choice/main.py dataset.dataset="cifar10" variant="base" is_cnn=True strategy.d=20 strategy.ck=9
+
+# This will run the experiment using cpow-d with d=20 and CK=9
+python3 power_of_choice/main.py dataset.dataset="cifar10" variant="cpow" is_cnn=True strategy.d=20 strategy.ck=9
+
+# This will run the experiment using rpow-d with d=60 and CK=9
+python3 power_of_choice/main.py dataset.dataset="cifar10" variant="rpow" is_cnn=True strategy.d=60 strategy.ck=9
+```
+
+To reproduce the results in Figure 6b, [generate the clients' dataset](#generate-clients-dataset) with parameters `dataset.dataset="cifar10"` and  `alpha=0.3`.
+
+Then run:
+
+```bash
+# This will run the experiment using FedAvg strategy
+python3 power_of_choice/main.py variant="rand" is_cnn=True
+
+# This will run the experiment using pow-d with d=12 and CK=9
+python3 power_of_choice/main.py variant="base" is_cnn=True strategy.d=12 strategy.ck=9
+
+# This will run the experiment using cpow-d with d=12 and CK=9
+python3 power_of_choice/main.py variant="cpow" is_cnn=True strategy.d=12 strategy.ck=9
+
+# This will run the experiment using rpow-d with d=60 and CK=9
+python3 power_of_choice/main.py variant="rpow" is_cnn=True strategy.d=60 strategy.ck=9
+```
 
 :warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
 

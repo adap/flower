@@ -216,12 +216,6 @@ class PowerOfChoiceCommAndCompVariant(Server):
                 # Update the Atmp list with the losses returned by the clients
                 if results is not None:
                     self.strategy.update_atmp(results)
-                    log(
-                        INFO,
-                        "Atmp updated: %s \n with results \n %s",
-                        self.strategy.atmp,
-                        results,
-                    )
                     
 
         # Bookkeeping

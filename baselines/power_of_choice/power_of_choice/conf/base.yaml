@@ -22,7 +22,7 @@ dataset:
 model:
   # model config
 
-# variant of the strategy: "base", "cpow" for cpow, "rpow" for rpow
+# variant of the strategy: "rand" for FedAvg strategy ,"base", "cpow" for cpow, "rpow" for rpow
 variant: "base"
 b: 64
 
@@ -33,3 +33,7 @@ strategy:
 
 client:
   # client config
+
+hydra:
+  run:
+    dir: outputs/${now:%Y-%m-%d}/${dataset.dataset}_${variant}_d${strategy.d}_CK${strategy.ck}
