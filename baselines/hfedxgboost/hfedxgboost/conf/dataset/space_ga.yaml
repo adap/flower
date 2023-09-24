@@ -1,0 +1,4 @@
+defaults: 
+  - task: Regression
+dataset_name: "space_ga"
+train_ratio: .75
