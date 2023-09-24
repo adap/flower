@@ -28,6 +28,6 @@ dataset:
 
 model:
   # model config
-  name: simple-cnn
+  name: resnet50
   output_dim: 256
   dir: ./models/moon/cifar100_50clients/

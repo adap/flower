@@ -6,9 +6,9 @@
 num_clients: 10
 num_epochs: 10
 fraction_fit: 1.0
-batch_size: 32
+batch_size: 64
 learning_rate: 0.01
-mu: 5
+mu: 1
 temperature: 0.5
 alg: moon
 seed: 0
