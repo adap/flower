@@ -1,8 +1,8 @@
 ---
 title: Measuring the effects of non-identical data distribution for federated visual classification
 url: https://arxiv.org/abs/1909.06335
-labels: [non-iid, image classification] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [CIFAR-10, FMNIST] # list of datasets you include in your baseline
+labels: [non-iid, image classification]
+dataset: [CIFAR-10, FMNIST]
 ---
 
 # Measuring the effects of non-identical data distribution for federated visual classification
