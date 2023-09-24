@@ -30,7 +30,6 @@ def get_evaluate_fn(model, x_test, y_test, num_rounds, num_classes):
 
     def evaluate_fn(server_round: int, parameters, config):
         if server_round == num_rounds:  # evaluates global model just on the last round
-
             # instantiate the model
             model.set_weights(parameters)
 
@@ -38,7 +37,7 @@ def get_evaluate_fn(model, x_test, y_test, num_rounds, num_classes):
             loss, accuracy = model.evaluate(x_test, y_test_cat, verbose=False)
 
             return loss, {"accuracy": accuracy}
-        
+
         return None
 
     return evaluate_fn

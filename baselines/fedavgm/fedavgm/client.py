@@ -33,7 +33,7 @@ class FlowerClient(fl.client.NumPyClient):
             self.y_train,
             epochs=config["local_epochs"],
             batch_size=config["batch_size"],
-            verbose=False
+            verbose=False,
         )
         return self.model.get_weights(), len(self.x_train), {}
 

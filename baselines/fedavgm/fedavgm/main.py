@@ -79,7 +79,7 @@ def main(cfg: DictConfig) -> None:
         f"_alpha={cfg.noniid.concentration}"
         f"_acc={final_acc:.4f}"
     )
-    
+
     filename = "results" + file_suffix + ".pkl"
 
     print(f">>> Saving {filename}...")
