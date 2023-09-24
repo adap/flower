@@ -32,7 +32,7 @@ block) that this file should be executed first.
 # if __name__ == "__main__":
 
 #     download_and_preprocess()
-
+import torch
 from typing import List, Tuple, Dict
 from collections import Counter
 from torch.utils.data import Dataset, Subset, ConcatDataset
@@ -198,8 +198,9 @@ def _partition_data(
     t = rem_trainset.dataset.targets
     if isinstance(t, list):
         t = np.array(t)
+    if isinstance(t, torch.Tensor):
+        t = t.numpy()
     targets = t[rem_trainset.indices]
-    print(targets, set(targets))
     num_remaining_classes = len(set(targets))
     remaining_classes = list(set(targets))
     client_classes = [[] for _ in range(num_clients)]
@@ -227,13 +228,12 @@ def _partition_data(
         ids = 0
         for j in range(num_clients):
             if class_t in client_classes[j]:
-                print(len(idx_k_split))
                 act_idx = rem_trainset.indices[idx_k_split[ids]]
                 rem_trainsets_per_client[j].append(Subset(rem_trainset.dataset, act_idx))
                 ids += 1
 
     for i in range(num_clients):
-        trainsets_per_client[i] = ConcatDataset(trainsets_per_client[i] + rem_trainsets_per_client[i])
+        trainsets_per_client[i] = ConcatDataset([trainsets_per_client[i]] + rem_trainsets_per_client[i])
 
     return trainsets_per_client, testset
 
