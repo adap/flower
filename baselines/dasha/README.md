@@ -102,7 +102,6 @@ python -m dasha.plot --input_paths multirun/2023-09-16/10-39-30/1 multirun/2023-
 python -m dasha.plot --input_paths multirun/2023-09-16/10-39-30 --output_path plot.png --metric squared_gradient_norm
 ```
 
-<!---/home/tyurina/rsync_watch/flower/baselines/multirun/2023-09-21/21-36-57--->
 
 The above commands would generate results that you can plot and would look like:
 
@@ -123,8 +122,6 @@ python -m dasha.main method=stochastic_marina method.strategy.step_size=0.01 num
 # Plot results
 python -m dasha.plot --input_paths PATH_DASHA PATH_MARINA --output_path plot_nn.png --smooth-plot 100
 ```
-
-<!---/home/tyurina/hydra_outputs/2023-08-28/21-54-53 /home/tyurina/hydra_outputs/2023-08-29/09-24-27--->
 
 | *Large-Scale Experiments: Comparison of DASHA and MARINA* |
 |:--:| 
