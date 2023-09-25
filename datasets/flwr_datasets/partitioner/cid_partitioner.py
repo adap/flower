@@ -36,7 +36,7 @@ class CidPartitioner(Partitioner):
 
         Client ids come from the columns specified in `partition_by`.
         """
-        unique_cid = self._dataset.unique(self._partition_by)
+        unique_cid = self.dataset.unique(self._partition_by)
         self._index_to_cid = dict(zip(range(len(unique_cid)), unique_cid))
 
     def _save_partition_indexing(self, idx: int, rows: List[int]) -> None:
@@ -64,7 +64,7 @@ class CidPartitioner(Partitioner):
         if len(self._index_to_cid) == 0:
             self._create_int_idx_to_cid()
 
-        return self._dataset.filter(
+        return self.dataset.filter(
             lambda row: row[self._partition_by] == self._index_to_cid[idx]
         )
 
@@ -73,6 +73,7 @@ class CidPartitioner(Partitioner):
         """Index to corresponding cid from the dataset property."""
         return self._index_to_cid
 
+    # pylint: disable=R0201
     @index_to_cid.setter
     def index_to_cid(self, value: Dict[int, str]) -> None:
         raise AttributeError("Setting the index_to_cid dictionary is not allowed.")

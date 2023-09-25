@@ -100,13 +100,13 @@ class TestCidPartitioner(unittest.TestCase):
         self, num_rows: int, num_unique_cid: int
     ) -> None:
         """Test if the # of available partitions is equal to # of unique clients."""
-        dataset, partitioner = _dummy_setup(num_rows, num_unique_cid)
+        _, partitioner = _dummy_setup(num_rows, num_unique_cid)
         _ = partitioner.load_partition(idx=0)
         self.assertEqual(len(partitioner.index_to_cid), num_unique_cid)
 
     def test_cannot_set_index_to_cid(self) -> None:
         """Test the lack of ability to set index_to_cid."""
-        dataset, partitioner = _dummy_setup(num_rows=10, n_unique_cids=2)
+        _, partitioner = _dummy_setup(num_rows=10, n_unique_cids=2)
         with self.assertRaises(AttributeError):
             partitioner.index_to_cid = {0: "0"}
 
