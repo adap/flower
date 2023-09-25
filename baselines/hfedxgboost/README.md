@@ -137,7 +137,7 @@ poetry run -m <baseline-name>.main --multirun num_client_per_round=5,10,50 datas
 
 # add more commands + plots for additional experiments.
 ```
-## How to use add a new dataset
+## How to add a new dataset
 
 This code doesn't cover all the datasets from the paper yet, so if you wish to add a new dataset, here are the steps:
 
