@@ -18,16 +18,14 @@ from flwr.server.app import ServerConfig
 from typing import Dict, List, Optional, Tuple, Union
 from flwr.common import  Parameters, Scalar, EvaluateRes,FitRes,parameters_to_ndarrays
 from torch.utils.data import DataLoader, Dataset, TensorDataset
-from xgboost import XGBClassifier, XGBRegressor
 from hfedxgboost.server import serverside_eval,FL_Server
 import functools
 import flwr as fl
-from flwr.common import  Parameters, Scalar
+from flwr.common import  Scalar
 from hfedxgboost.client import FL_Client
 from flwr.server.client_manager import  SimpleClientManager
 from hydra.utils import instantiate
-from hfedxgboost.utils import results_writer
-import numpy as np
+from hfedxgboost.utils import results_writer,results_writer_centralized
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.
@@ -41,7 +39,13 @@ def main(cfg: DictConfig) -> None:
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
     if cfg.centralized:
-        run_centralized(cfg,dataset_name=cfg.dataset.dataset_name)
+        if cfg.dataset.dataset_name == "all":
+            run_centralized(cfg,dataset_name=cfg.dataset.dataset_name)
+        if cfg.dataset.dataset_name != "all":
+            result_train, result_test=run_centralized(cfg,dataset_name=cfg.dataset.dataset_name)
+            writer=results_writer_centralized(cfg)
+            #writer.create_res_csv("results_centralized.csv")
+            writer.write_res("results_centralized.csv",result_train, result_test)
     else:
         dataset_name=cfg.dataset.dataset_name
         task_type=cfg.dataset.task.task_type

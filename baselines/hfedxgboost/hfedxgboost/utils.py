@@ -24,6 +24,7 @@ from torchmetrics import Accuracy, MeanSquaredError
 from tqdm import tqdm
 
 dataset_tasks={
+        "YearPredictionMSD":"REG",
         "a9a":"BINARY",
         "cod-rna":"BINARY",
         "ijcnn1":"BINARY",
@@ -67,12 +68,14 @@ def run_centralized(config: DictConfig,
             print("Results for",dataset,", Task:",dataset_tasks[dataset],", Train:",result_train,", Test:",result_test)
     else:
         if task_type:
-            result_train,result_test=run_single_exp(config,dataset,task_type,config.n_estimators)
-            print("Results for",dataset,", Task:",task_type,", Train:",result_train,", Test:",result_test)
+            result_train,result_test=run_single_exp(config,dataset_name,task_type,config.xgboost_params_centralized.n_estimators)
+            print("Results for",dataset_name,", Task:",task_type,", Train:",result_train,", Test:",result_test)
+            return result_train, result_test
         else:
             if dataset_name in dataset_tasks.keys():
-                result_train,result_test=run_single_exp(config,dataset,dataset_tasks[dataset],config.n_estimators)
-                print("Results for",dataset,", Task:",dataset_tasks[dataset],", Train:",result_train,", Test:",result_test)
+                result_train,result_test=run_single_exp(config,dataset_name,dataset_tasks[dataset_name],config.xgboost_params_centralized.n_estimators)
+                print("Results for",dataset_name,", Task:",dataset_tasks[dataset_name],", Train:",result_train,", Test:",result_test)
+                return result_train, result_test
             else:
                 raise Exception(
                     "task_type should be assigned to be BINARY for binary classification tasks" 
@@ -246,7 +249,7 @@ class results_writer:
         self.tas_type=cfg.dataset.task.task_type
         self.num_iterations=cfg.run_experiment.fit_config.num_iterations
         if self.tas_type=="REG":
-            self.best_res=999999999.999
+            self.best_res=99999999999.999
             self.compare_fn=min
         if self.tas_type=="BINARY":
             self.best_res=-1
@@ -282,6 +285,63 @@ class results_writer:
              str(self.best_res),
              str(self.best_res_round_num),
              str(self.num_iterations)]
+        with open(filename, 'a') as csvfile: 
+            csvwriter = csv.writer(csvfile)
+            csvwriter.writerow(row)
+class results_writer_centralized:
+    def __init__(self,cfg) -> None:
+        self.dataset_name=cfg.dataset.dataset_name
+        #self.task_type=cfg.dataset.task_type
+        self.n_estimators_client=cfg.xgboost_params_centralized.n_estimators
+        self.xgb_max_depth=cfg.xgboost_params_centralized.max_depth
+        self.tas_type=cfg.dataset.task.task_type
+        self.subsample=cfg.xgboost_params_centralized.subsample
+        self.learning_rate=cfg.xgboost_params_centralized.learning_rate
+        self.colsample_bylevel=cfg.xgboost_params_centralized.colsample_bylevel
+        self.colsample_bynode=cfg.xgboost_params_centralized.colsample_bynode
+        self.colsample_bytree=cfg.xgboost_params_centralized.colsample_bytree
+        self.alpha=cfg.xgboost_params_centralized.alpha
+        self.gamma=cfg.xgboost_params_centralized.gamma
+        self.num_parallel_tree=cfg.xgboost_params_centralized.num_parallel_tree
+        self.min_child_weight=cfg.xgboost_params_centralized.min_child_weight
+
+    def create_res_csv(self,filename)-> None:
+        #call that only once :)
+        fields = [  "dataset_name",
+                    "n_estimators_client",
+                    "xgb_max_depth",
+                    "subsample",
+                    "learning_rate",
+                    "colsample_bylevel",
+                    "colsample_bynode",
+                    "colsample_bytree",
+                    "alpha",
+                    "gamma",
+                    "num_parallel_tree",
+                    "min_child_weight",
+                    "result_train",
+                    "result_test"] 
+        with open(filename, 'w') as csvfile: 
+            # creating a csv writer object 
+            csvwriter = csv.writer(csvfile) 
+            # writing the fields 
+            csvwriter.writerow(fields) 
+
+    def write_res(self,filename, result_train, result_test) -> None:
+        row=[str(self.dataset_name),
+            str(self.n_estimators_client),
+            str(self.xgb_max_depth),
+            str(self.subsample),
+            str(self.learning_rate),
+            str(self.colsample_bylevel),
+            str(self.colsample_bynode),
+            str(self.colsample_bytree),
+            str(self.alpha),
+            str(self.gamma),
+            str(self.num_parallel_tree),
+            str(self.min_child_weight),
+            str(result_train),
+            str(result_test)]
         with open(filename, 'a') as csvfile: 
             csvwriter = csv.writer(csvfile)
             csvwriter.writerow(row)
