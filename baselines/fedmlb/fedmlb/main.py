@@ -110,7 +110,7 @@ def main(cfg: DictConfig) -> None:  # pylint: disable=too-many-locals
         def evaluate(
             server_round: int,
             parameters: NDArrays,
-            config: Dict[str, Scalar],
+            config: Dict[str, Scalar],   # pylint: disable=unused-argument
         ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
             model.set_weights(parameters)  # Update model with the latest parameters
             loss, accuracy = model.evaluate(
