@@ -103,6 +103,29 @@ def _download_data(dataset_name = "emnist") -> Tuple[Dataset, Dataset]:
             download=True,
             transform=transform_test,
         )
+    elif dataset_name == "mnist" or dataset_name == "fashionmnist":
+        transform_train = transforms.Compose(
+            [
+                transforms=transforms.ToTensor(),
+            ]
+        )
+        transform_test = transforms.Compose(
+            [
+                transforms=transforms.ToTensor(),
+            ]
+        )
+        trainset = MNIST(
+            root="data",
+            train=True,
+            download=True,
+            transform=transform_train,
+        )
+        testset = MNIST(
+            root="data",
+            train=False,
+            download=True,
+            transform=transform_test,
+        )
     else:
         raise NotImplementedError
 
