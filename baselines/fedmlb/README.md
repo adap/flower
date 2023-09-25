@@ -551,7 +551,7 @@ tensorboard logs.
 To launch the tensorboard to monitor results use the following command
 in your activated python environment:
 ```bash
-tensorboard --logdir /{YOUR_LOCAL_PATH_TO_THE_BASELINE}/FedMLB/fedmlb/tb_logging/
+tensorboard --logdir /{YOUR_LOCAL_PATH_TO_THE_BASELINE}/fedmlb/fedmlb/tb_logging/
 ```
 The command will output an address for localhost,
 and results can be navigated and visualized via tensorboard GUI 
