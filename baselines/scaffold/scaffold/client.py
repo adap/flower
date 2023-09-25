@@ -14,7 +14,7 @@ from hydra.utils import instantiate
 from flwr.common.logger import log
 from logging import DEBUG, INFO
 
-from scaffold.models import train, test
+from scaffold.models import train_scaffold, test
 from scaffold.strategy import FitRes
 import numpy as np
 import os
@@ -81,7 +81,7 @@ class FlowerClientScaffold(
         server_cv = config["server_cv"]
         server_cv = parameters_to_ndarrays(server_cv)
         server_cv = [torch.Tensor(cv) for cv in server_cv]
-        train(
+        train_scaffold(
             self.net,
             self.trainloader,
             self.device,

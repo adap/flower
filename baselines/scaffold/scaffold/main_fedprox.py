@@ -12,11 +12,11 @@ from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
 from scaffold.dataset import load_datasets
-from scaffold.client import gen_client_fn
-import scaffold.server as server
-import os
+from scaffold.client_fedprox import gen_client_fn
+from flwr.server import Server
+from scaffold.server import gen_evaluate_fn
 
-@hydra.main(config_path="conf", config_name="base", version_base=None)
+@hydra.main(config_path="conf", config_name="fedprox_base_cifar10", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.
 
@@ -39,13 +39,8 @@ def main(cfg: DictConfig) -> None:
         config=cfg.dataset,
         num_clients=cfg.num_clients,
         val_ratio=cfg.dataset.val_split,
-        seed=cfg.dataset.seed,
     )
 
-    save_path = HydraConfig.get().runtime.output_dir
-    print("Outputs and Client cvs for scaffold saved to: ",  save_path)
-
-    client_cv_dir = os.path.join(save_path, "client_cvs")
     # 3. Define your clients
     # Define a function that returns another function that will be used during
     # simulation to instantiate each individual client
@@ -56,13 +51,13 @@ def main(cfg: DictConfig) -> None:
         num_epochs=cfg.num_epochs,
         learning_rate=cfg.learning_rate,
         model=cfg.model,
+        mu=cfg.mu,
         momentum=cfg.momentum,
         weight_decay=cfg.weight_decay,
-        client_cv_dir=client_cv_dir,
     )
 
     device = cfg.server_device
-    evaluate_fn = server.gen_evaluate_fn(testloader, device=device, model=cfg.model)
+    evaluate_fn = gen_evaluate_fn(testloader, device=device, model=cfg.model)
 
     # 4. Define your strategy
     # pass all relevant argument (including the global dataset used after aggregation,
@@ -76,7 +71,6 @@ def main(cfg: DictConfig) -> None:
     # 5. Start Simulation
     # history = fl.simulation.start_simulation(<arguments for simulation>)
     history = fl.simulation.start_simulation(
-        server=server.ScaffoldServer(strategy=strategy, model=cfg.model),
         client_fn=client_fn,
         num_clients=cfg.num_clients,
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
@@ -88,8 +82,9 @@ def main(cfg: DictConfig) -> None:
     )
 
     print(history)
-    print("Outputs and Client cvs for scaffold saved to: ",  save_path)
-    
+
+    save_path = HydraConfig.get().runtime.output_dir
+    print(save_path)
 
     # 6. Save your results
     # Here you can save the `history` returned by the simulation and include

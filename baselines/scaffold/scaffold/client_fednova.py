@@ -15,13 +15,13 @@ from flwr.common.logger import log
 from logging import DEBUG, INFO
 import numpy as np
 
-from scaffold.models import train_fedavg, test
+from scaffold.models import train_fednova, test
 
 
-class FlowerClientFedAvg(
+class FlowerClientFedNova(
     fl.client.NumPyClient
 ):
-    """Flower client implementing FedAvg."""
+    """Flower client implementing FedNova."""
 
     def __init__(
         self,
@@ -54,19 +54,19 @@ class FlowerClientFedAvg(
         self.net.load_state_dict(state_dict, strict=True)
     
     def fit(self, parameters, config: Dict[str, Union[Scalar, List[torch.Tensor]]]):
-        """Implements distributed fit function for a given client using FedAvg Strategy."""
+        """Implements distributed fit function for a given client using FedNova Strategy."""
         self.set_parameters(parameters)
-        train_fedavg(
-            self.net,
-            self.trainloader,
-            self.device,
-            self.num_epochs,
-            self.learning_rate,
-            self.momentum,
-            self.weight_decay,
-        )
+        t_i = train_fednova(
+                self.net,
+                self.trainloader,
+                self.device,
+                self.num_epochs,
+                self.learning_rate,
+                self.momentum,
+                self.weight_decay,
+            )
         final_p_np = self.get_parameters({})
-        return final_p_np, len(self.trainloader.dataset), {}
+        return final_p_np, len(self.trainloader.dataset), {"t_i": t_i}
     
     def evaluate(self, parameters, config: Dict[str, Scalar]):
         """Evaluate using given parameters."""
@@ -83,9 +83,9 @@ def gen_client_fn(
     momentum: float=0.9,
     weight_decay: float=1e-5,
 ) -> Tuple[
-    Callable[[str], FlowerClientFedAvg], DataLoader
+    Callable[[str], FlowerClientFedNova], DataLoader
 ]:  # pylint: disable=too-many-arguments
-    """Generates the client function that creates the FedAvg flower clients.
+    """Generates the client function that creates the FedNova flower clients.
 
     Parameters
     ----------
@@ -100,6 +100,8 @@ def gen_client_fn(
         sending it to the server.
     learning_rate : float
         The learning rate for the SGD  optimizer of clients.
+    model : DictConfig
+        The model configuration.
     momentum : float
         The momentum for SGD optimizer of clients
     weight_decay : float
@@ -107,12 +109,12 @@ def gen_client_fn(
 
     Returns
     -------
-    Tuple[Callable[[str], FlowerClientFedAvg], DataLoader]
-        A tuple containing the client function that creates the FedAvg flower clients and
+    Tuple[Callable[[str], FlowerClientFedNova], DataLoader]
+        A tuple containing the client function that creates the FedNova flower clients and
         the DataLoader that will be used for testing
     """
 
-    def client_fn(cid: str) -> FlowerClientFedAvg:
+    def client_fn(cid: str) -> FlowerClientFedNova:
         """Create a Flower client representing a single organization."""
 
         # Load model
@@ -124,7 +126,7 @@ def gen_client_fn(
         trainloader = trainloaders[int(cid)]
         valloader = valloaders[int(cid)]
 
-        return FlowerClientFedAvg(
+        return FlowerClientFedNova(
             net,
             trainloader,
             valloader,

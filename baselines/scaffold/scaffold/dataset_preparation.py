@@ -36,7 +36,7 @@ import torch
 from typing import List, Tuple, Dict
 from collections import Counter
 from torch.utils.data import Dataset, Subset, ConcatDataset
-from torchvision.datasets import EMNIST, CIFAR10
+from torchvision.datasets import EMNIST, CIFAR10, MNIST, FashionMNIST
 from torch.autograd import Variable
 import torch.nn.functional as F
 import numpy as np
