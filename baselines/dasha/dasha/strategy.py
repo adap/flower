@@ -61,8 +61,10 @@ class _CompressionAggregator(Strategy):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """Implement the server's logic from Algorithm 1 in the DASHA paper (almost the
-        same logic is in the MARINA paper)."""
+        """Implement the server's logic from Algorithm 1 in the DASHA paper.
+
+        (almost the same logic is in the MARINA paper).
+        """
         assert len(failures) == 0, failures
         if len(results) != self._num_clients:
             log(WARNING, "not all clients have sent results. Waiting and repeating...")

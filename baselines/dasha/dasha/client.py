@@ -101,8 +101,7 @@ class _GradientCompressionClient(CompressionClient):
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, int, Dict]:
-        """Send either compressed or uncompressed vector based on the config info from
-        the server."""
+        """Send either compressed or noncompressed vector based on the config info."""
         if config[self.SEND_FULL_GRADIENT]:
             compressed_gradient = self._gradient_step(parameters)
         else:
@@ -161,8 +160,7 @@ class DashaClient(_GradientCompressionClient, _BaseDashaClient):
     """Standard Flower client."""
 
     def _gradient_step(self, parameters: NDArrays):
-        """Initialize g_i with the gradients using the input parameters (Line 2 from
-        Algorithm 1 in the DASHA paper)."""
+        """Initialize g_i with the grad (Line 2 from Alg 1 in the DASHA paper)."""
         gradients = self._calculate_gradient(parameters)
         self._gradient_estimator = gradients
         self._local_gradient_estimator = gradients
@@ -246,8 +244,7 @@ class _StochasticGradientCompressionClient(CompressionClient):
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, int, Dict]:
-        """Send either compressed or uncompressed vector based on the config info from
-        the server."""
+        """Send either compressed or uncompressed vector based on the config info."""
         if config[self.SEND_FULL_GRADIENT]:
             compressed_gradient = self._stochastic_gradient_step(parameters)
         else:
@@ -291,8 +288,7 @@ class _StochasticGradientCompressionClient(CompressionClient):
     def _calculate_stochastic_gradient_in_current_and_previous_parameters(
         self, parameters: NDArrays
     ):
-        """Calculate the stochastic gradient of the PyTorch model at two points using
-        the same samples from the dataset."""
+        """Calculate the stoch gradient of the PyTorch model at two points."""
         features, targets = next(self._batch_sampler)
         features = features.to(self._device)
         targets = targets.to(self._device)
@@ -332,8 +328,7 @@ class StochasticDashaClient(_StochasticGradientCompressionClient, _BaseDashaClie
         self._stochastic_momentum = stochastic_momentum
 
     def _stochastic_gradient_step(self, parameters: NDArrays):
-        """Initialize g_i with the stochastic gradients (Line 2 from Algorithm 1 in the
-        DASHA paper)."""
+        """Init g_i with the stoch gradients (Line 2 from Alg 1 in the DASHA paper)."""
         gradients = self._calculate_mega_stochastic_gradient(parameters)
         self._gradient_estimator = gradients
         self._local_gradient_estimator = gradients
