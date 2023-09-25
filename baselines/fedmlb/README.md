@@ -330,7 +330,7 @@ the accuracy at the target round is based on the exponential moving average with
 0.9. Tensorboard allows to easily visualize/calculate the moving average of a run.
 
 All the results reported in this repository can be also browsed 
-on this [tesnsorboard.dev online dashboard](https://tensorboard.dev/experiment/n5QWJWP8QWagUxcWuOtAUA/#scalars).
+on this [tesnsorboard.dev online dashboard](https://tensorboard.dev/experiment/xOk73qh0TMK1nskkoNlBVA/#scalars).
 
 ### Table 1a and Table 2
 
@@ -383,7 +383,7 @@ python -m fedmlb.main --multirun dataset_config.dataset="cifar100","tiny-imagene
   </tr>
 </table>
 
-![cifar100, 100 clients, 5% participation rate, alpha = 0.3](_static/accuracy_comparison_cifar100_dirichlet_0.3_100_.png)
+![cifar100, 100 clients, 5% participation rate, alpha = 0.3](_static/accuracy_comparison_cifar100_dirichlet_0.3_clients100.png)
 
 #### Tiny-ImageNet, Dir(0.3), 100 clients, 5% participation.
 
@@ -416,7 +416,7 @@ python -m fedmlb.main --multirun dataset_config.dataset="cifar100","tiny-imagene
   </tr>
 </table>
 
-![tiny imagenet, 100 clients, 5% participation rate, alpha = 0.3](_static/accuracy_comparison_tiny-imagenet_dirichlet_0.3_100_.png)
+![tiny imagenet, 100 clients, 5% participation rate, alpha = 0.3](_static/accuracy_comparison_tiny-imagenet_dirichlet_0.3_clients100.png)
 
 
 ### Table 1b and Table 2
@@ -461,7 +461,7 @@ python -m fedmlb.main --multirun dataset_config.dataset="cifar100","tiny-imagene
   </tr>
 </table>
 
-![cifar100, 500 clients, 2% participation rate, alpha = 0.3](_static/accuracy_comparison_cifar100_dirichlet_0.3_500_.png)
+![cifar100, 500 clients, 2% participation rate, alpha = 0.3](_static/accuracy_comparison_cifar100_dirichlet_0.3_clients500.png)
 
 #### Tiny-ImageNet, Dir(0.3), 500 clients, 2% participation.
 
@@ -495,7 +495,7 @@ python -m fedmlb.main --multirun dataset_config.dataset="cifar100","tiny-imagene
   </tr>
 </table>
 
-![tiny imagenet, 500 clients, 2% participation rate, alpha = 0.3](_static/accuracy_comparison_tiny-imagenet_dirichlet_0.3_500_.png)
+![tiny imagenet, 500 clients, 2% participation rate, alpha = 0.3](_static/accuracy_comparison_tiny-imagenet_dirichlet_0.3_clients500.png)
 
 ### Table 3
 
@@ -541,6 +541,8 @@ python -m fedmlb.main --multirun algorithm="FedMLB","FedAvg","FedAvg+KD" local_u
     <td>57.69</td>
   </tr>
 </table>
+
+![cifar100, 100 clients, 5% participation rate, alpha = 0.3, K=100](_static/accuracy_comparison_cifar100_dirichlet_0.3_clients100_K100.png)
 
 ## Results logging via Tensorboard
 Beside storing results in plain text in the `output` folder, the results are also stored via 
