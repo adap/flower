@@ -1,12 +1,14 @@
 """Run CNN federated learning for MNIST dataset."""
 import os
-from typing import List
+from typing import Dict, List
 
 import flwr as fl
 import hydra
 import numpy as np
 import torch.random
+from flwr.common import Scalar
 from flwr.server.history import History
+from flwr.server.strategy import FedAvg
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 from torch.utils.data import DataLoader
@@ -14,7 +16,7 @@ from torch.utils.data import DataLoader
 import tamuna.client as client
 import tamuna.server as server
 from tamuna.dataset import load_datasets
-from tamuna.strategy import CentralizedFedAvgStrategy, TamunaStrategy
+from tamuna.strategy import TamunaStrategy
 from tamuna.utils import compare_histories, save_results_as_pickle
 
 
@@ -82,6 +84,12 @@ def run_fedavg(
         client_device=cfg.client.client_device,
     )
 
+    # pylint: disable=unused-argument
+    def configure_fit_fn(server_round: int) -> Dict[str, Scalar]:
+        local_epochs: Scalar = int(1 / cfg.server.p)
+        config = {"epochs": local_epochs}
+        return config
+
     # using only central evaluation
     evaluate_fn = server.gen_evaluate_fn(
         testloader, device=cfg.server.server_device, model=cfg.model
@@ -101,9 +109,11 @@ def run_fedavg(
                 "num_cpus": cfg.client.client_resources.num_cpus,
                 "num_gpus": cfg.client.client_resources.num_gpus,
             },
-            strategy=CentralizedFedAvgStrategy(
-                clients_per_round=cfg.server.clients_per_round,
-                epochs_per_round=int(1 / cfg.server.p),
+            strategy=FedAvg(
+                fraction_fit=cfg.server.clients_per_round / cfg.server.num_clients,
+                fraction_evaluate=0,
+                min_evaluate_clients=0,
+                on_fit_config_fn=configure_fit_fn,
                 evaluate_fn=evaluate_fn,
             ),
         )

@@ -94,5 +94,4 @@ while the CPU-only version, which can be found in `conf/base-cpu.yaml`, takes ar
 
 The resulting directory in `./outputs/` should contain (among other things) `communication_complexity.png` and `loss_accuracy.png`.
 
-![Communication complexity](_static/communication_complexity.png)
-![Loss and accuracy](_static/loss_accuracy.png)
+<img src="_static/communication_complexity.png" width="500"/> <img src="_static/loss_accuracy.png" width="500"/>
