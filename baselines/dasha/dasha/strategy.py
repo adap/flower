@@ -61,6 +61,7 @@ class _CompressionAggregator(Strategy):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+        """Implement the server's logic from Algorithm 1 in the DASHA paper (almost the same logic is in the MARINA paper)."""
         assert len(failures) == 0, failures
         if len(results) != self._num_clients:
             log(WARNING, "not all clients have sent results. Waiting and repeating...")
@@ -97,6 +98,7 @@ class _CompressionAggregator(Strategy):
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
+        """Calculate metrics."""
         assert len(failures) == 0
         loss_aggregated = weighted_loss_avg(
             [(1, evaluate_res.loss) for _, evaluate_res in results]
@@ -133,6 +135,7 @@ class _CompressionAggregator(Strategy):
     def evaluate(  # pylint: disable=useless-return
         self, server_round: int, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+        """Initialize the parameters on the server using parameters from a node."""
         if server_round == 0:
             ndarrays = parameters_to_ndarrays(parameters)
             assert len(ndarrays) == 1
@@ -166,7 +169,7 @@ class MarinaAggregator(_CompressionAggregator):
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
-        """Run configure_fit logic."""
+        """MARINA asks the nodes to send noncompressed vectors some probability."""
         if self._gradient_estimator is not None:
             prob = self._get_prob()
             if self._bernoulli_sample(self._generator, prob):
@@ -198,6 +201,7 @@ class MarinaAggregator(_CompressionAggregator):
         return loss_aggregated, metrics
 
     def _get_prob(self):
+        """Find the probability of sending noncompressed vectors."""
         if self._prob is not None:
             return self._prob
         self._prob = self._size_of_compressed_vectors / len(self._parameters)

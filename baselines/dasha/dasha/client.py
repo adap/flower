@@ -57,6 +57,7 @@ class CompressionClient(
         return [np.concatenate(parameters)]
 
     def _set_parameters(self, parameters_input: NDArrays) -> None:
+        """Set the parameters."""
         assert len(parameters_input) == 1
         parameters = parameters_input[0]
         self._compressor.set_dim(len(parameters))
@@ -75,12 +76,14 @@ class CompressionClient(
             assert len(missing_keys) == 0
 
     def _get_current_gradients(self):
+        """Get current gradients stored in the PyTorch model."""
         return np.concatenate(
             [val.grad.cpu().numpy().flatten() for val in self._function.parameters()]
         )
 
 
 def _prepare_full_dataset(dataset, device):
+    """Convert PyTorch dataset to a tensor."""
     features, targets = dataset[:]
     features = features.to(device)
     targets = targets.to(device)
@@ -98,6 +101,7 @@ class _GradientCompressionClient(CompressionClient):
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, int, Dict]:
+        """Send either compressed or uncompressed vector based on the config info from the server."""
         if config[self.SEND_FULL_GRADIENT]:
             compressed_gradient = self._gradient_step(parameters)
         else:
@@ -114,6 +118,7 @@ class _GradientCompressionClient(CompressionClient):
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[float, int, Dict]:
+        """Calculate metrics."""
         self._set_parameters(parameters)
         loss = self._function(self._features, self._targets)
         metrics = {}
@@ -127,6 +132,7 @@ class _GradientCompressionClient(CompressionClient):
         return float(loss), len(self._targets), metrics
 
     def _calculate_gradient(self, parameters: NDArrays):
+        """Calculate the gradient of the PyTorch model."""
         self._set_parameters(parameters)
         self._function.zero_grad()
         loss = self._function(self._features, self._targets)
@@ -143,6 +149,7 @@ class _GradientCompressionClient(CompressionClient):
 
 class _BaseDashaClient(CompressionClient):
     def _get_momentum(self):
+        """Calculate omega from Theorem 6.1 in the DASHA paper."""
         if self._momentum is not None:
             return self._momentum
         self._momentum = 1 / (1 + 2 * self._compressor.omega())
@@ -153,6 +160,7 @@ class DashaClient(_GradientCompressionClient, _BaseDashaClient):
     """Standard Flower client."""
 
     def _gradient_step(self, parameters: NDArrays):
+        """Initialize g_i with the gradients using the input parameters (Line 2 from Algorithm 1 in the DASHA paper)."""
         gradients = self._calculate_gradient(parameters)
         self._gradient_estimator = gradients
         self._local_gradient_estimator = gradients
@@ -162,6 +170,7 @@ class DashaClient(_GradientCompressionClient, _BaseDashaClient):
         return compressed_gradient
 
     def _compression_step(self, parameters: NDArrays):
+        """Implement Lines 8 and 9 from Algorithm 1 in the DASHA paper."""
         gradients = self._calculate_gradient(parameters)
         momentum = self._get_momentum()
         assert self._local_gradient_estimator is not None
@@ -180,6 +189,7 @@ class MarinaClient(_GradientCompressionClient):
     """Standard Flower client."""
 
     def _gradient_step(self, parameters: NDArrays):
+        """Implement Line 8 from Algorithm 1 in the MARINA paper if c_k = 1."""
         gradients = self._calculate_gradient(parameters)
         assert self._gradient_estimator is None
         self._local_gradient_estimator = gradients
@@ -187,6 +197,7 @@ class MarinaClient(_GradientCompressionClient):
         return compressed_gradient
 
     def _compression_step(self, parameters: NDArrays):
+        """Implement Line 8 from Algorithm 1 in the MARINA paper if c_k = 0."""
         gradients = self._calculate_gradient(parameters)
         assert self._gradient_estimator is None
         compressed_gradient = self._compressor.compress(
@@ -233,6 +244,7 @@ class _StochasticGradientCompressionClient(CompressionClient):
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, int, Dict]:
+        """Send either compressed or uncompressed vector based on the config info from the server."""
         if config[self.SEND_FULL_GRADIENT]:
             compressed_gradient = self._stochastic_gradient_step(parameters)
         else:
@@ -249,6 +261,7 @@ class _StochasticGradientCompressionClient(CompressionClient):
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[float, int, Dict]:
+        """Calculate metrics."""
         self._set_parameters(parameters)
         if not self._evaluate_full_dataset:
             features, targets = next(self._batch_sampler)
@@ -264,6 +277,7 @@ class _StochasticGradientCompressionClient(CompressionClient):
         return float(loss), len(targets), metrics
 
     def _calculate_gradients(self, parameters, features, targets):
+        """Calculate the gradient of the PyTorch model."""
         self._set_parameters(parameters)
         self._function.zero_grad()
         loss = self._function(features, targets)
@@ -274,6 +288,7 @@ class _StochasticGradientCompressionClient(CompressionClient):
     def _calculate_stochastic_gradient_in_current_and_previous_parameters(
         self, parameters: NDArrays
     ):
+        """Calculate the stochastic gradient of the PyTorch model at two points using the same samples from the dataset."""
         features, targets = next(self._batch_sampler)
         features = features.to(self._device)
         targets = targets.to(self._device)
@@ -285,6 +300,7 @@ class _StochasticGradientCompressionClient(CompressionClient):
         return previous_gradients, gradients
 
     def _calculate_mega_stochastic_gradient(self, parameters: NDArrays):
+        """Calculate the stochastic gradient with large/mega batch size."""
         aggregated_gradients = 0
         for _ in range(self._mega_batch_size):
             features, targets = next(self._batch_sampler)
@@ -312,6 +328,7 @@ class StochasticDashaClient(_StochasticGradientCompressionClient, _BaseDashaClie
         self._stochastic_momentum = stochastic_momentum
 
     def _stochastic_gradient_step(self, parameters: NDArrays):
+        """Initialize g_i with the stochastic gradients (Line 2 from Algorithm 1 in the DASHA paper)."""
         gradients = self._calculate_mega_stochastic_gradient(parameters)
         self._gradient_estimator = gradients
         self._local_gradient_estimator = gradients
@@ -321,6 +338,7 @@ class StochasticDashaClient(_StochasticGradientCompressionClient, _BaseDashaClie
         return compressed_gradient
 
     def _stochastic_compression_step(self, parameters: NDArrays):
+        """Implement Lines 8 and 9 from Algorithm 1 in the DASHA paper."""
         (
             previous_gradients,
             gradients,
@@ -347,12 +365,14 @@ class StochasticMarinaClient(_StochasticGradientCompressionClient):
     """Standard Flower client."""
 
     def _stochastic_gradient_step(self, parameters: NDArrays):
+        """Implement Line 8 in Algorithm 3 from the MARINA paper if c_k = 1."""
         gradients = self._calculate_mega_stochastic_gradient(parameters)
         assert self._gradient_estimator is None
         compressed_gradient = IdentityUnbiasedCompressor().compress(gradients)
         return compressed_gradient
 
     def _stochastic_compression_step(self, parameters: NDArrays):
+        """Implement Line 8 in Algorithm 3 from the MARINA paper if c_k = 0."""
         (
             previous_gradients,
             gradients,
