@@ -53,8 +53,9 @@ class TestCidPartitioner(unittest.TestCase):
         # num_rows, num_unique_cids
         list(itertools.product([10, 30, 100, 1000], [2, 3, 4, 5]))
     )
-    def test_load_partition_num_partitions(self, num_rows: int,
-                                           num_unique_cid: int) -> None:
+    def test_load_partition_num_partitions(
+        self, num_rows: int, num_unique_cid: int
+    ) -> None:
         """Test if the number of partitions match the number of unique cids.
 
         Only the correct data is tested in this method.
@@ -68,8 +69,9 @@ class TestCidPartitioner(unittest.TestCase):
         # num_rows, num_unique_cids
         list(itertools.product([10, 30, 100, 1000], [2, 3, 4, 5]))
     )
-    def test_load_partition_max_partition_size(self, num_rows: int,
-                                           num_unique_cid: int) -> None:
+    def test_load_partition_max_partition_size(
+        self, num_rows: int, num_unique_cid: int
+    ) -> None:
         """Test if the number of partitions match the number of unique cids.
 
         Only the correct data is tested in this method.
@@ -77,12 +79,12 @@ class TestCidPartitioner(unittest.TestCase):
         print(num_rows)
         print(num_unique_cid)
         _, partitioner = _dummy_setup(num_rows, num_unique_cid)
-        max_size = max([len(partitioner.load_partition(i)) for i in range(num_unique_cid)])
+        max_size = max(
+            [len(partitioner.load_partition(i)) for i in range(num_unique_cid)]
+        )
         self.assertEqual(max_size, math.ceil(num_rows / num_unique_cid))
 
-    def test_partitioner_with_non_existing_column_partition_by(
-            self
-    ) -> None:
+    def test_partitioner_with_non_existing_column_partition_by(self) -> None:
         """Test error when the partition_by columns does not exist."""
         dataset = _create_dataset(10, 2)
         partitioner = CidPartitioner(partition_by="not-cid")
