@@ -92,69 +92,22 @@ class TestCidPartitioner(unittest.TestCase):
         with self.assertRaises(ValueError):
             partitioner.load_partition(0)
 
-    # @parameterized.expand(  # type: ignore
-    #     [
-    #         # num_partitions, num_rows, partition_index
-    #         (10, 10, 10),
-    #         (10, 10, -1),
-    #         (10, 10, 11),
-    #         (10, 100, 1000),
-    #         (5, 50, 60),
-    #         (20, 200, 210),
-    #     ]
-    # )
-    # def test_load_invalid_partition_index(
-    #         self, num_partitions: int, num_rows: int, partition_index: int
-    # ) -> None:
-    #     """Test loading a partition with an index out of range."""
-    #     _, partitioner = _dummy_setup(num_partitions, num_rows)
-    #     with self.assertRaises(ValueError):
-    #         partitioner.load_partition(partition_index)
-    #
-    # def test_is_dataset_assigned_false(self) -> None:
-    #     """Test if the is_dataset_assigned method works correctly if not assigned."""
-    #     partitioner = IidPartitioner(num_partitions=10)
-    #
-    #     # Initially, the dataset should not be assigned
-    #     self.assertFalse(partitioner.is_dataset_assigned())
-    #
-    # def test_is_dataset_assigned_true(self) -> None:
-    #     """Test if the is_dataset_assigned method works correctly if assigned."""
-    #     num_partitions = 10
-    #     num_rows = 100
-    #     _, partitioner = _dummy_setup(num_partitions, num_rows)
-    #     self.assertTrue(partitioner.is_dataset_assigned())
-    #
-    # def test_dataset_setter(self) -> None:
-    #     """Test the dataset.setter method."""
-    #     num_partitions = 10
-    #     num_rows = 100
-    #     dataset, partitioner = _dummy_setup(num_partitions, num_rows)
-    #
-    #     # It should not allow setting the dataset a second time
-    #     with self.assertRaises(Exception) as context:
-    #         partitioner.dataset = dataset
-    #     self.assertIn(
-    #         "The dataset should be assigned only once", str(context.exception)
-    #     )
-    #
-    # def test_dataset_getter_raises(self) -> None:
-    #     """Test the dataset getter method."""
-    #     num_partitions = 10
-    #     partitioner = IidPartitioner(num_partitions=num_partitions)
-    #     with self.assertRaises(AttributeError) as context:
-    #         _ = partitioner.dataset
-    #     self.assertIn(
-    #         "The dataset field should be set before using it", str(context.exception)
-    #     )
-    #
-    # def test_dataset_getter_used_correctly(self) -> None:
-    #     """Test the dataset getter method."""
-    #     num_partitions = 10
-    #     num_rows = 100
-    #     dataset, partitioner = _dummy_setup(num_partitions, num_rows)
-    #     # After setting, it should return the dataset
-    #     self.assertEqual(partitioner.dataset, dataset)
+    @parameterized.expand(  # type: ignore
+        # num_rows, num_unique_cids
+        list(itertools.product([10, 30, 100, 1000], [2, 3, 4, 5]))
+    )
+    def test_correct_number_of_partitions(
+        self, num_rows: int, num_unique_cid: int
+    ) -> None:
+        """Test if the # of available partitions is equal to # of unique clients."""
+        dataset, partitioner = _dummy_setup(num_rows, num_unique_cid)
+        _ = partitioner.load_partition(idx=0)
+        self.assertEqual(len(partitioner.index_to_cid), num_unique_cid)
+
+    def test_cannot_set_index_to_cid(self):
+        dataset, partitioner = _dummy_setup(num_rows=10, n_unique_cids=2)
+        with self.assertRaises(AttributeError):
+            partitioner.index_to_cid = {0: "0"}
 
 
 if __name__ == "__main__":
