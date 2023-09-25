@@ -20,7 +20,7 @@ from flwr_datasets.partitioner.partitioner import Partitioner
 
 
 class CidPartitioner(Partitioner):
-    """Partitioner for dataset that can be divided by reference to clients."""
+    """Partitioner for dataset that can be divided by a reference to clients."""
 
     def __init__(
         self,
@@ -31,7 +31,7 @@ class CidPartitioner(Partitioner):
         self._partition_by = partition_by
         self._idx_to_rows: Dict[int, List[int]] = {}
 
-    def _create_int_idx_to_cid(self):
+    def _create_int_idx_to_cid(self) -> None:
         """Create a mapping from int indices to unique client ids.
 
         Client ids come from the columns specified in `partition_by`.
@@ -39,7 +39,7 @@ class CidPartitioner(Partitioner):
         unique_cid = self._dataset.unique(self._partition_by)
         self._index_to_cid = dict(zip(range(len(unique_cid)), unique_cid))
 
-    def _save_partition_indexing(self, idx: int, rows: List[int]):
+    def _save_partition_indexing(self, idx: int, rows: List[int]) -> None:
         """Store the rows corresponding to the partition of idx.
 
         It should be used only after the `load_partition` is used.

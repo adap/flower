@@ -35,7 +35,7 @@ def _dummy_setup(num_rows: int, n_unique_cids: int) -> Tuple[Dataset, CidPartiti
     return dataset, partitioner
 
 
-def _create_dataset(num_rows: int, n_unique_cids: int):
+def _create_dataset(num_rows: int, n_unique_cids: int) -> Dataset:
     """Create dataset based on the number of rows and unique cids."""
     data = {
         "features": list(range(num_rows)),
@@ -104,7 +104,7 @@ class TestCidPartitioner(unittest.TestCase):
         _ = partitioner.load_partition(idx=0)
         self.assertEqual(len(partitioner.index_to_cid), num_unique_cid)
 
-    def test_cannot_set_index_to_cid(self):
+    def test_cannot_set_index_to_cid(self) -> None:
         """Test the lack of ability to set index_to_cid."""
         dataset, partitioner = _dummy_setup(num_rows=10, n_unique_cids=2)
         with self.assertRaises(AttributeError):
