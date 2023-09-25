@@ -82,35 +82,37 @@ pip install torch==1.12.0+cu116 torchvision==0.13.0+cu116 torchaudio==0.12.0 --e
 
 First ensure you have activated your Poetry environment (execute `poetry shell` from this directory). To run MOON on CIFAR-10 (Table 1 of the paper), you should run:
 ```bash  
-poetry run python -m moon.main cifar10 
+python -m moon.main cifar10 
 ```
 
 To run MOON on CIFAR-100 (Table 1 of the paper), you should run:
 ```bash
-poetry run python -m moon.main cifar100
+python -m moon.main cifar100
 ```
 
 To run MOON on CIFAR-100 with 50 clients (Figure 8(a) of the paper), you should run:
 ```bash
-poetry run python -m moon.main cifar100_50clients
+python -m moon.main cifar100_50clients
 ```
 
 To run MOON on CIFAR-100 with 100 clients (Figure 8(b) of the paper), you should run:
 ```bash
-poetry run python -m moon.main cifar100_100clients
+python -m moon.main cifar100_100clients
+```
+
+You can also run FedProx on CIFAR-10:
+```base
+python -m moon.main cifar10_fedprox.yaml
+```
+
+To run FedProx on CIFAR-100:
+```base
+python -m moon.main cifar100_fedprox.yaml.
 ```
 
 ## Expected Results
 
-:warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
+You can find the output log in `results` directory. After running the above commands, you can see the accuracy list at the end of the ouput, which is the test accuracy of the global model. For example, in one running, for CIFAR10 with MOON, the accuracy after running 100 rounds is 0.7107 (see `results/cifar10.log`). You can find the curve below.
 
-```bash
-# it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameteres
+![](results/cifar10_moon.png)
 
-poetry run python -m <baseline-name>.main --multirun num_client_per_round=5,10,50 dataset=femnist,cifar10
-# the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
-
-[Now show a figure/table displaying the results of the above command]
-
-# add more commands + plots for additional experiments.
-```
