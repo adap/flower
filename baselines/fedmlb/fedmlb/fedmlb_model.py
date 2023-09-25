@@ -3,6 +3,7 @@
 import tensorflow as tf
 
 
+# pylint: disable=W0223
 class FedMLBModel(tf.keras.Model):
     """FedMLB implementation from the paper https://arxiv.org/abs/2207.06936.
 
