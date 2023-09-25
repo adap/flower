@@ -19,7 +19,7 @@ Contributing to existing languages
 
 The first thing you will need to do in order to contribute is to create a
 Weblate account on this `page
-<https://docs.weblate.org/en/latest/user/profile.html>`_. More information
+<https://hosted.weblate.org/accounts/register/>`_. More information
 about profile settings can be found `here
 <https://docs.weblate.org/en/latest/user/profile.html>`_.
 
@@ -57,8 +57,13 @@ On the right, under the ``String information`` section, you can also click the
 link under ``Source string location`` in order to view the source of the doc
 file containing the string.
 
+For more information about translating using Weblate, you can check out this
+`in-depth guide <https://docs.weblate.org/en/latest/user/translating.html>`_.
+
 Adding new languages
 --------------------
 
-If you want to add a new language, you will first have to contact us, either on `Slack <https://flower.dev/join-slack>`_, or by opening an issue on our `GitHub repo <https://github.com/adap/flower>`_.
+If you want to add a new language, you will first have to contact us, either on
+`Slack <https://flower.dev/join-slack>`_, or by opening an issue on our `GitHub
+repo <https://github.com/adap/flower>`_.
 
