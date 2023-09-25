@@ -53,6 +53,7 @@ class PaddedRandomCropCustom(tf.keras.layers.Layer):
         return inputs
 
 
+# pylint: disable=W0221
 class PaddedCenterCropCustom(tf.keras.layers.Layer):
     """Custom keras layer to center crop the input image, same as FedMLB paper."""
 
