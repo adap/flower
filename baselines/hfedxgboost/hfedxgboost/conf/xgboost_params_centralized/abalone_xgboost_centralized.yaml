@@ -1,0 +1,11 @@
+n_estimators: 200
+max_depth: 3
+subsample: .4
+learning_rate: .05
+colsample_bylevel: 1
+colsample_bynode: 1
+colsample_bytree: 1
+alpha: 5
+gamma: 10
+num_parallel_tree: 1
+min_child_weight: 5

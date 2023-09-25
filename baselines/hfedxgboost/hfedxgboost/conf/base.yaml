@@ -1,7 +1,7 @@
 ---
 defaults: 
-  - dataset: space_ga
-  - clients: space_ga_10_clients
+  - dataset: cpusmall
+  - clients: cpusmall_10_clients
 
 centralized: False
 device: "cpu"
@@ -9,8 +9,6 @@ device: "cpu"
 n_estimators_client: ${clients.n_estimators_client}
 task_type: ${dataset.task.task_type}
 client_num: ${clients.client_num}
-
-
 
 XGBoost:
   _target_:  ${dataset.task.xgb._target_}
@@ -28,9 +26,6 @@ XGBoost:
   min_child_weight: 1
 
 
-model:
-  # model config
-
 strategy:
   _target_: flwr.server.strategy.FedXgbNnAvg 
   _recursive_: true #everything to be instantiated
@@ -41,9 +36,6 @@ strategy:
   min_available_clients: ${client_num}
   accept_failures: False
 
-client:
-  # client config
-
 run_experiment:
   num_rounds: ${clients.num_rounds}
   batch_size: 32
@@ -51,7 +43,7 @@ run_experiment:
   min_fit_clients: 1
   num_cpus_per_client: 1
   fit_config:
-    num_iterations: 100
+    num_iterations: ${clients.num_iterations}
 
 val_ratio: 0.0
 batch_size: "whole"
