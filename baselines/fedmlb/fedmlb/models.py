@@ -25,6 +25,7 @@ def get_norm_layer(norm: str, channel_axis: int) -> tf.keras.layers.Layer:
     return tf.keras.layers.GroupNormalization(groups=2, epsilon=GROUP_NORM_EPSILON)
 
 
+# pylint: disable=W0221
 class ResBlock(tf.keras.Model):
     """Implement a ResBlock."""
 
