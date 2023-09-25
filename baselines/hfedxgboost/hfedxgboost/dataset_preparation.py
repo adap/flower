@@ -45,7 +45,7 @@ def download_data(
                 "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/a9a.t",
                 f"{os.path.join(DATASET_PATH, 'a9a.t')}",
             )
-        #trainig then test ✅
+        #training then test ✅
         return [os.path.join(DATASET_PATH, 'a9a'),os.path.join(DATASET_PATH, 'a9a.t')]    
     if dataset_name=="cod-rna":
         DATASET_PATH=os.path.join(ALL_DATASETS_PATH, "cod-rna")
@@ -63,7 +63,7 @@ def download_data(
                 "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/cod-rna.r",
                 f"{os.path.join(DATASET_PATH, 'cod-rna.r')}",
             )
-        #trainig then test ✅
+        #training then test ✅
         return [os.path.join(DATASET_PATH, 'cod-rna.t'),os.path.join(DATASET_PATH, 'cod-rna.r')]
 
     if dataset_name=="ijcnn1":
@@ -92,7 +92,7 @@ def download_data(
                 abs_filepath = os.path.join(DATASET_PATH, filepath)
                 with bz2.BZ2File(abs_filepath) as fr, open(abs_filepath[:-4], "wb") as fw:
                     shutil.copyfileobj(fr, fw)
-        #trainig then test ✅
+        #training then test ✅
         return [os.path.join(DATASET_PATH, 'ijcnn1.t'),os.path.join(DATASET_PATH, 'ijcnn1.tr')]
 
     if dataset_name=="space_ga":
@@ -134,7 +134,29 @@ def download_data(
                 f"{os.path.join(DATASET_PATH, 'cpusmall_scale')}",
             )
         return [os.path.join(DATASET_PATH, 'cpusmall_scale')]
-    
+    if dataset_name=="YearPredictionMSD":
+        DATASET_PATH=os.path.join(ALL_DATASETS_PATH, "YearPredictionMSD")
+        if not os.path.exists(DATASET_PATH):
+            print("long dowenload coming, it will be better if you dowenloaded", 
+                   "those 2 files manually with a faster dowenload manger program or",
+                   "something and just place them in the rigte folder then get",
+                   "the for loop out of the if condition to alter thier format")
+            os.makedirs(DATASET_PATH)    
+            urllib.request.urlretrieve(
+            "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression/YearPredictionMSD.bz2",
+            f"{os.path.join(DATASET_PATH, 'YearPredictionMSD.bz2')}",
+                )
+            urllib.request.urlretrieve(
+                    "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression/YearPredictionMSD.t.bz2",
+                    f"{os.path.join(DATASET_PATH, 'YearPredictionMSD.t.bz2')}",
+                )
+            for filepath in os.listdir(DATASET_PATH):
+                    print("it will take sometime")
+                    abs_filepath = os.path.join(DATASET_PATH, filepath)
+                    with bz2.BZ2File(abs_filepath) as fr, open(abs_filepath[:-4], "wb") as fw:
+                        shutil.copyfileobj(fr, fw)
+        return[os.path.join(DATASET_PATH, 'YearPredictionMSD'),os.path.join(DATASET_PATH, 'YearPredictionMSD.t')]
+        
 def datafiles_fusion(data_paths):
     """
     Merge (if necessary) the data files and returns the features and labels sperated in

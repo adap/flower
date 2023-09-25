@@ -22,7 +22,7 @@ import torch.nn as nn
 def fit_XGBoost(
     config: DictConfig, task_type:str, X_train: NDArray,y_train: NDArray, n_estimators: int
 ) -> Union[XGBClassifier, XGBRegressor]:
-    if config.centralized:
+    if config.dataset.dataset_name == "all":
         if task_type.upper() == "REG":
             tree = instantiate(config.XGBoost.regressor,n_estimators=n_estimators)
         elif task_type.upper() == "BINARY":
