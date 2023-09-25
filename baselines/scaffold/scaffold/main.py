@@ -16,7 +16,7 @@ from scaffold.client import gen_client_fn
 import scaffold.server as server
 import os
 
-@hydra.main(config_path="conf", config_name="base", version_base=None)
+@hydra.main(config_path="conf", config_name="scaffold_base_cifar10", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.
 

@@ -16,7 +16,7 @@ from scaffold.client_fedavg import gen_client_fn
 from flwr.server import Server
 from scaffold.server import gen_evaluate_fn
 
-@hydra.main(config_path="conf", config_name="fedavg_base", version_base=None)
+@hydra.main(config_path="conf", config_name="fedavg_base_cifar10", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.
 

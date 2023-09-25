@@ -103,7 +103,7 @@ def _download_data(dataset_name = "emnist") -> Tuple[Dataset, Dataset]:
             download=True,
             transform=transform_test,
         )
-    elif dataset_name == "mnist" or dataset_name == "fashionmnist":
+    elif dataset_name == "mnist":
         transform_train = transforms.Compose(
             [
                 transforms.ToTensor(),
@@ -121,6 +121,29 @@ def _download_data(dataset_name = "emnist") -> Tuple[Dataset, Dataset]:
             transform=transform_train,
         )
         testset = MNIST(
+            root="data",
+            train=False,
+            download=True,
+            transform=transform_test,
+        )
+    elif dataset_name == "fmnist":
+        transform_train = transforms.Compose(
+            [
+                transforms.ToTensor(),
+            ]
+        )
+        transform_test = transforms.Compose(
+            [
+                transforms.ToTensor(),
+            ]
+        )
+        trainset = FashionMNIST(
+            root="data",
+            train=True,
+            download=True,
+            transform=transform_train,
+        )
+        testset = FashionMNIST(
             root="data",
             train=False,
             download=True,
