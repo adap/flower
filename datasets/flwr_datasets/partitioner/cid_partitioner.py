@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Cid partitioner class that works with Hugging Face Datasets."""
-from typing import Dict, List
+from typing import Dict
 
 import datasets
 from flwr_datasets.partitioner.partitioner import Partitioner
@@ -29,7 +29,6 @@ class CidPartitioner(Partitioner):
         super().__init__()
         self._index_to_cid: Dict[int, str] = {}
         self._partition_by = partition_by
-        self._idx_to_rows: Dict[int, List[int]] = {}
 
     def _create_int_idx_to_cid(self) -> None:
         """Create a mapping from int indices to unique client ids.
@@ -38,13 +37,6 @@ class CidPartitioner(Partitioner):
         """
         unique_cid = self.dataset.unique(self._partition_by)
         self._index_to_cid = dict(zip(range(len(unique_cid)), unique_cid))
-
-    def _save_partition_indexing(self, idx: int, rows: List[int]) -> None:
-        """Store the rows corresponding to the partition of idx.
-
-        It should be used only after the `load_partition` is used.
-        """
-        self._idx_to_rows[idx] = rows
 
     def load_partition(self, idx: int) -> datasets.Dataset:
         """Load a single partition corresponding to a single CID.
