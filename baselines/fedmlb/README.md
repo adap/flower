@@ -527,6 +527,13 @@ python -m fedmlb.main --multirun algorithm="FedMLB","FedAvg","FedAvg+KD" local_u
     <td>49.05</td>
   </tr>
   <tr>
+    <td>FedAvg+KD</td> 
+    <td>42.58</td>
+    <td>45.49</td>
+    <td>49.15</td>
+    <td>50.58</td>
+  </tr>
+  <tr>
     <td>FedMLB</td> 
     <td>52.53</td>
     <td>52.38</td>
