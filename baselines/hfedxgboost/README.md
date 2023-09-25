@@ -137,3 +137,68 @@ poetry run -m <baseline-name>.main --multirun num_client_per_round=5,10,50 datas
 
 # add more commands + plots for additional experiments.
 ```
+## How to use add a new dataset
+
+This code doesn't cover all the datasets from the paper yet, so if you wish to add a new dataset, here are the steps:
+
+**1- you need to download the dataset from its source:**
+- In the `dataset_preparation.py` file, specifically in the `download_data` function add the code to download your dataset -or if you already downloaded it manually add the code to return its file path- it could look something like the following example:
+```
+if dataset_name=="<the name of your dataset>":
+        DATASET_PATH=os.path.join(ALL_DATASETS_PATH, "<the name of your dataset>")
+        if not os.path.exists(DATASET_PATH):
+            os.makedirs(DATASET_PATH)
+            urllib.request.urlretrieve(
+                "<the URL which from the first file of your dataset will be downloaded>",
+                f"{os.path.join(DATASET_PATH, '<the name of your dataset's first file>')}",
+            )
+            urllib.request.urlretrieve(
+                "<the URL which from the second file of your dataset will be downloaded>",
+                f"{os.path.join(DATASET_PATH, '<the name of your dataset's second file>')}",
+            )
+        # if the 2 files of your dataset are divided into training and test file put the training then test ✅
+        return [os.path.join(DATASET_PATH, '<the name of your dataset's first file>'),os.path.join(DATASET_PATH, '<the name of your dataset's second file>')]  
+```
+that function will be called in the `dataset.py` file in the `load_single_dataset` function and the different files of your dataset will be concatenated -if your dataset is one file then nothing will happen it will just be loaded- using the `datafiles_fusion` function from the `dataset_preparation.py` file. 
+
+:warning: if any of your dataset's files end with `.bz2` you have to add the following piece of code before the return line and inside the `if` condition
+```
+for filepath in os.listdir(DATASET_PATH):
+                abs_filepath = os.path.join(DATASET_PATH, filepath)
+                with bz2.BZ2File(abs_filepath) as fr, open(abs_filepath[:-4], "wb") as fw:
+                    shutil.copyfileobj(fr, fw)
+```
+
+:warning: `datafiles_fusion` function uses `sklearn.datasets.load_svmlight_file` to load the dataset, if your dataset is `csv` or something that function won't work on it and you will have to alter the `datafiles_fusion` function to work with you dataset files format.
+
+**2-Add config files for your dataset:**
+
+**a- config files for the centralized baseline:**
+
+- To run the centralized model on your dataset with the original hyper-parameters from the paper alongside all the other datasets added before just do the following step:
+   - in the dictionary called `dataset_tasks` in the `utils.py` file add your dataset name as a key -the same name that you put in the `download_data` function  in the step before- and add its task type, this code perform for 2 tasks: `BINARY` which is binary classification or `REG` which is regression.
+    
+- To run the centralized model on your dataset you need to create a config file `<your dataset>.yaml` in the `xgboost_params_centralized` folder and another .yaml file in the `dataset` folder -you will find that one of course inside the `conf` folder :) - and you need to specify the hyper-parameters of your choice for the xgboost model
+
+  - the .yaml file in the `dataset` folder should look something like this:
+    ```
+    defaults:
+       - task: <config file name with your task type, "Regression" or "Binary_Classification">
+    dataset_name: "<your dataset name, must be the same name used in the download_data function>"
+    train_ratio: <percentage of the training data of the whole dataset>
+    ```
+  - the .yaml file in the `xgboost_params_centralized` folder should contain the values for all the hyper-parameters of your choice for the xgboost model
+
+**b- config files for the federated baseline:**
+
+To run the federated baseline with your dataset, you need to first create the .yaml file in the `dataset` folder that was mentioned before and you need to create config files that contain the no.of the clients and it should look something like this:
+```
+n_estimators_client: <int used in xgboost and CNN model>
+num_rounds: <int to indicate the round of communications between the server and the clients>
+client_num: <int to indicate the number of clients>
+num_iterations: <int to set the no.of iteration for the CNN model>
+xgb:
+  max_depth: <int>
+CNN:
+  lr: <float>
+```
