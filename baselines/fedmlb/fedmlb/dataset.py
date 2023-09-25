@@ -26,6 +26,7 @@ def load_selected_client_statistics(
     return local_examples_all_clients[selected_client]
 
 
+# pylint: disable=W0221
 class PaddedRandomCropCustom(tf.keras.layers.Layer):
     """Custom keras layer to random crop the input image, same as FedMLB paper."""
 
