@@ -2,18 +2,19 @@
 
 import pickle
 import torch
-import numpy as np
 
 from pathlib import Path
 from secrets import token_hex
 from functools import reduce
-
-from typing import Dict, Optional, Union, List, Tuple
-
-import matplotlib.pyplot as plt
+from itertools import pairwise
 import numpy as np
+import cvxpy as cvx
+import matplotlib.pyplot as plt
+
 from flwr.server.history import History
 from flwr.common import NDArray, NDArrays
+
+from typing import Dict, Optional, Union, List, Tuple
 
 
 def plot_metric_from_history(
@@ -168,4 +169,63 @@ def aggregate_centroids(centroids_list, class_sizes):
 
     return aggregated_centroids_list
     
+
+def aggregate_heads(stats, device):
+    var = [s[0] for s in stats]
+    bias = [s[1] for s in stats]
+
+    num_clients = len(var)
+    num_class = bias[0].shape[0]
+    d = bias[0].shape[1]
+    agg_head = []
+    bias = torch.stack(bias).to(device)
+
+
+    for i in range(num_clients):
+        v = torch.tensor(var, device=device)
+        href = bias[i]
+        dist = torch.zeros((num_clients, num_clients), device=device)
+
+        for j, k in pairwise(tuple(range(num_clients))):
+            hj = bias[j]
+            hk = bias[k]
+            h = torch.zeros((d, d), device=device)
+            for m in range(num_class):
+                h+=torch.mm((href[m]-hj[m]).reshape(d, 1), (href[m]-hk[m]).reshape(1, d))
+            
+            d_jk = torch.trace(h)
+            dist[j][k] = d_jk
+            dist[k][j] = d_jk
+
+        p_matrix = torch.diag(v) + dist
+        evals, evecs = torch.linalg.eig(p_matrix)
+
+        p_matrix = p_matrix.cpu().numpy()  # coefficient for QP problem
+
+        p_matrix_new = 0
+        for x in range(num_clients):
+            if evals.real[x] >= 0.01:
+                p_matrix_new += evals[x]*torch.mm(evecs[:,x].reshape(num_clients, 1), evecs[:,x].reshape(1, num_clients))
+                p_matrix = p_matrix_new.cpu().numpy() if not np.all(np.linalg.eigvals(p_matrix)>=0.0) else p_matrix
+
+        alpha = 0
+        eps = 1e-3
+
+        if np.all(np.linalg.eigvals(p_matrix)>=0):
+            alphav = cvx.Variable(num_clients)
+            obj = cvx.Minimize(cvx.quad_form(alphav, p_matrix))
+            prob = cvx.Problem(obj, [cvx.sum(alphav) == 1.0, alphav >= 0])
+            prob.solve()
+            alpha = alphav.value
+            alpha = [(a)*(a>eps) for a in alpha] # zero-out small weights (<eps)
+
+        else:
+            alpha = None
+        
+        agg_head.append(alpha)
+
+    return agg_head
+
+
+
 

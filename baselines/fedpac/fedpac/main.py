@@ -50,8 +50,10 @@ def main(cfg: DictConfig) -> None:
         def fit_config_fn(server_round: int, global_centroid):
             # resolve and convert to python dict
             fit_config = OmegaConf.to_container(cfg.fit_config, resolve=True)
-            fit_config["curr_round"] = server_round
-            fit_config.update({"global_centroid":global_centroid}) # add round info
+            fit_config["curr_round"] = server_round             # add round info
+            fit_config.update({"global_centroid":global_centroid, 
+                                "classifier_head": None
+                            }) 
             return fit_config
 
         return fit_config_fn

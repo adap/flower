@@ -45,7 +45,6 @@ class FlowerClient(fl.client.NumPyClient):
         self.feature_centroid = get_centroid(self.feature_extractor)
         self.class_sizes = self.get_class_sizes()
         self.class_fractions = self.get_class_fractions()
-        self.v, self.h_ref = self.get_statistics()
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
@@ -91,8 +90,7 @@ class FlowerClient(fl.client.NumPyClient):
             v += (py[k]*torch.trace((torch.mm(torch.t(feat_k), feat_k)/num_k))).item()
             v -= (py2[k]*(torch.mul(feat_k_mu, feat_k_mu))).sum().item()
         v = v/datasize.item()
-        
-        return v, h_ref
+        return (v, h_ref)
 
         
     
@@ -116,14 +114,45 @@ class FlowerClient(fl.client.NumPyClient):
         return feature_extractors
 
 
+    def get_classifier_head(self):
+        w = copy.deepcopy(self.net)
+        keys = self.net.classifier_layers
+        for k in keys:
+            w[k] = torch.zeros_like(w[k])
+        
+        w0 = 0
+        for i in range(len(w)):
+            w0+=self.avg_head[i]
+            for k in keys:
+                w[k] += self.avg_head[i]*self.avg_head[i][k] 
+        
+        for k in keys:
+            w[k] = torch.div(w[k], w0)
+
+        return w
+
+    def update_classifier(self, classifier):
+        local_weight = self.net.state_dict()
+        classifier_keys = self.classifier_layers
+        for k in local_weight.keys():
+            if k in classifier_keys:
+                local_weight[k] = classifier[k]
+        self.net.load_state_dict(local_weight)       
+
+
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, int, Dict]:
         """Implements distributed fit function for a given client."""
         self.set_parameters(parameters)
+        self.stats = self.get_statistics()
         self.global_centroid = config["global_centroid"]
+        self.avg_head = config['classifier_head']
+        if self.avg_head != None:
+            classifier_head = get_classifier_head(self.stats)
+            update_classifier(classifier_head)
 
-        feature_centroid = train(
+        train(
             self.net,
             self.trainloader,
             self.valloader,
@@ -136,8 +165,7 @@ class FlowerClient(fl.client.NumPyClient):
           )
         return self.get_parameters({}), len(self.trainloader), {'centroid': self.feature_centroid, 
                                                                 'class_sizes': self.class_sizes,
-                                                                'v':self.v,
-                                                                'h_ref': self.h_ref
+                                                                'stats':(self.stats)
                                                             }
 
     def evaluate(

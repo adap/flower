@@ -6,7 +6,7 @@ from logging import WARNING
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
-from fedpac.utils import aggregate_weights, aggregate_centroids
+from fedpac.utils import aggregate_weights, aggregate_centroids, aggregate_heads
 from flwr.common.logger import log
 
 from flwr.common import (
@@ -47,6 +47,7 @@ def loss_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     losses = [m for _, m in metrics]
     return {"loss": int(sum(losses)) / len(losses)}
 
+
 class FedPAC(FedAvg):
     """FedPAC strategy"""
     def __init__(
@@ -82,23 +83,27 @@ class FedPAC(FedAvg):
     ):
         """Configure the next round of training."""
         config = {}
+
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
             config = self.on_fit_config_fn(server_round, self.global_centroid)
-
-        fit_ins = FitIns(parameters, config)
 
         # Sample clients
         sample_size, min_num_clients = self.num_fit_clients(
             client_manager.num_available()
         )
+        self.avg_heads = [None]*sample_size
         clients = client_manager.sample(
             num_clients=sample_size, min_num_clients=min_num_clients
         )
 
-        # Return client/config pairs
-        return [(client, fit_ins) for client in clients]
+        fit_configurations = []
+        for idx, client in enumerate(clients):
+            config['classifier_head'] = self.avg_heads[idx]
+            fit_configurations.append((client, FitIns(parameters, config)))
 
+        # Return client/config pairs
+        return fit_configurations
 
 
     def aggregate_fit(
@@ -121,9 +126,10 @@ class FedPAC(FedAvg):
         ]
         class_sizes = [fit_res.metrics["class_sizes"] for _, fit_res in results]
         centroids = [fit_res.metrics["centroid"] for _, fit_res in results]
-
+        stats = [fit_res.metrics["stats"] for _, fit_res in results]
         self.global_centroid = aggregate_centroids(centroids, class_sizes)
         parameters_aggregated = ndarrays_to_parameters(aggregate_weights(weights_results))
+        self.classifier_heads = aggregate_heads(stats, 'cuda')
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
