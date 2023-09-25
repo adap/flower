@@ -137,12 +137,8 @@ def gen_client_fn(
 
     def client_fn(cid: str) -> FlowerClient:
         """Create a Flower client representing a single organization."""
-        # Load model
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        # net = init_net(cfg.dataset.name, cfg.model.name, cfg.model.output_dim)
 
-        # Note: each client gets a different trainloader/valloader, so each client
-        # will train and evaluate on their own unique data
         trainloader = trainloaders[int(cid)]
         testloader = testloaders[int(cid)]
 

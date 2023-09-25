@@ -78,7 +78,6 @@ def main(cfg: DictConfig) -> None:
     # 3. Define your clients
     # Define a function that returns another function that will be used during
     # simulation to instantiate each individual client
-    # client_fn = client.<my_function_that_returns_a_function>()
     client_fn = client.gen_client_fn(
         trainloaders=trainloaders,
         testloaders=testloaders,
@@ -89,17 +88,6 @@ def main(cfg: DictConfig) -> None:
     # Set server's device
     device = cfg.server_device
     evaluate_fn = server.gen_evaluate_fn(test_global_dl, device=device, cfg=cfg)
-
-    # # get a function that will be used to construct the config that the client's
-    # # fit() method will received
-    # def get_on_fit_config():
-    #     def fit_config_fn(server_round: int):
-    #         # resolve and convert to python dict
-    #         fit_config = OmegaConf.to_container(cfg.fit_config, resolve=True)
-    #         fit_config["curr_round"] = server_round  # add round info
-    #         return fit_config
-
-    #     return fit_config_fn
 
     # 4. Define your strategy
     # pass all relevant argument (including the global dataset used after aggregation,
@@ -147,15 +135,12 @@ def main(cfg: DictConfig) -> None:
     strategy_name = strategy.__class__.__name__
     file_suffix: str = (
         f"_{strategy_name}"
-        f"{'_iid' if cfg.dataset_config.iid else ''}"
-        f"{'_balanced' if cfg.dataset_config.balance else ''}"
-        f"{'_powerlaw' if cfg.dataset_config.power_law else ''}"
+        f"{'_dataset' if cfg.dataset.name else ''}"
         f"_C={cfg.num_clients}"
         f"_B={cfg.batch_size}"
         f"_E={cfg.num_epochs}"
         f"_R={cfg.num_rounds}"
         f"_mu={cfg.mu}"
-        f"_strag={cfg.stragglers_fraction}"
     )
 
     plot_metric_from_history(
