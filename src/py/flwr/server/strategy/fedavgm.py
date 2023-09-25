@@ -31,6 +31,7 @@ from flwr.common import (
     parameters_to_ndarrays,
 )
 from flwr.common.logger import log
+from flwr.common.typing import FitIns
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
@@ -59,7 +60,7 @@ class FedAvgM(FedAvg):
         on_fit_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         on_evaluate_config_fn: Optional[Callable[[int], Dict[str, Scalar]]] = None,
         accept_failures: bool = True,
-        initial_parameters: Parameters,
+        initial_parameters: Optional[Parameters],
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         server_learning_rate: float = 1.0,
@@ -89,7 +90,7 @@ class FedAvgM(FedAvg):
             Function used to configure validation. Defaults to None.
         accept_failures : bool, optional
             Whether or not accept rounds containing failures. Defaults to True.
-        initial_parameters : Parameters
+        initial_parameters : Parameters, optional
             Initial global model parameters.
         server_learning_rate: float
             Server-side learning rate used in server-side optimization.
@@ -132,6 +133,15 @@ class FedAvgM(FedAvg):
     ) -> Optional[Parameters]:
         """Initialize global model parameters."""
         return self.initial_parameters
+
+    def configure_fit(
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+    ) -> List[Tuple[ClientProxy, FitIns]]:
+        """Configure the next round of training."""
+        if server_round == 1 and self.initial_parameters is None:
+            # Ensures initial_parameters are set before first fit round
+            self.initial_parameters = parameters
+        return super().configure_fit(server_round, parameters, client_manager)
 
     def aggregate_fit(
         self,
