@@ -121,7 +121,7 @@ jobs:
         run: python -m poetry install
       - name: Install Flower wheel from artifact store
         run: |
-          python -m pip install https://artifact.flower.dev/py/${{ github.ref }}/${{ github.sha }}/${{ needs.wheel.outputs.whl_path }}
+          python -m pip install https://artifact.flower.dev/py/${{ github.ref }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
       - name: Download dataset
         if: ${{ matrix.dataset }}
         run: python -c "${{ matrix.dataset }}"
@@ -155,7 +155,7 @@ jobs:
           python -m poetry install
       - name: Install Flower wheel from artifact store
         run: |
-          python -m pip install https://artifact.flower.dev/py/${{ github.ref }}/${{ github.sha }}/${{ needs.wheel.outputs.whl_path }}
+          python -m pip install https://artifact.flower.dev/py/${{ github.ref }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
       - name: Cache Datasets
         uses: actions/cache@v3
         with:
