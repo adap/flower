@@ -71,6 +71,9 @@ Run `Poetry shell` in your terminal to activate the environment.
 
 :warning: _Provide instructions on the steps to follow to run all the experiments._
 ```bash
+#to run all the experiments for the centralized model with the original paper config for all the datasets
+python -m hfedxgboost.main --config-name "centralized_basline_all_datasets_paper_config"
+
 #to run all the experiments for the centralized model
 python -m hfedxgboost.main --config-name "Centralized_Baseline"
 
