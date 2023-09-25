@@ -105,6 +105,7 @@ class TestCidPartitioner(unittest.TestCase):
         self.assertEqual(len(partitioner.index_to_cid), num_unique_cid)
 
     def test_cannot_set_index_to_cid(self):
+        """Test the lack of ability to set index_to_cid."""
         dataset, partitioner = _dummy_setup(num_rows=10, n_unique_cids=2)
         with self.assertRaises(AttributeError):
             partitioner.index_to_cid = {0: "0"}
