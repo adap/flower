@@ -245,6 +245,7 @@ class ResNet18(tf.keras.Model):
         return x
 
 
+# pylint: disable=W0221
 class ResNet18MLB(tf.keras.Model):
     """Implement a custom ResNet18 architecture as in FedMLB paper."""
 
