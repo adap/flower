@@ -49,8 +49,8 @@ class NonConvexLoss(nn.Module):
     """A nonconvex loss from Tyurin A. et al., 2023 paper.
 
     [DASHA: Distributed Nonconvex Optimization with Communication Compression and
-    Optimal Oracle Complexity]
-    (https://openreview.net/forum?id=VA1YpcNr7ul)
+    Optimal Oracle Complexity] (
+    https://openreview.net/forum?id=VA1YpcNr7ul)
     """
 
     def forward(self, input_tensor: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
