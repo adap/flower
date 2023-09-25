@@ -104,6 +104,7 @@ class ResBlock(tf.keras.Model):
         return tf.keras.layers.ReLU()(x)
 
 
+# pylint: disable=W0221
 class ResNet18(tf.keras.Model):
     """Implement a ResNet18 architecture as in FedMLB paper."""
 
