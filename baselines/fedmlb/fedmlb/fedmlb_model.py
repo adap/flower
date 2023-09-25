@@ -28,7 +28,7 @@ class FedMLBModel(tf.keras.Model):
             from_logits=True, reduction=tf.keras.losses.Reduction.SUM_OVER_BATCH_SIZE
         )
 
-    def train_step(self, data):  # pylint: disable=too-many-local-variables
+    def train_step(self, data):  # pylint: disable=too-many-locals
         """Implement logic for one training step.
 
         This method can be overridden to support custom training logic.

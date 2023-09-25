@@ -1,3 +1,1 @@
-"""Optionally define a custom strategy.
-
-"""
+"""Optionally define a custom strategy."""

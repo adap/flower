@@ -75,7 +75,7 @@ class TinyImageNetPaths:
 
         self._make_paths(train_path, val_path, test_path, wnids_path, words_path)
 
-    def _make_paths(  # pylint: disable=too-many-arguments
+    def _make_paths(  # pylint: disable=too-many-arguments, disable=too-many-locals
         self, train_path, val_path, test_path, wnids_path, words_path
     ):
         self.ids = []
@@ -152,7 +152,8 @@ def load_test_dataset_tiny_imagenet():
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
-def download_and_preprocess(cfg: DictConfig) -> None:
+def download_and_preprocess(cfg: DictConfig) -> None:  # pylint: disable=too-many-locals
+    # pylint: disable=too-many-statements
     """Do everything needed to get the dataset.
 
     Parameters

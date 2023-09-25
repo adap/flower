@@ -85,7 +85,10 @@ class ResBlock(tf.keras.Model):
         )
         self.gn2 = get_norm_layer(norm, channel_axis=channel_axis)
 
-    def call(self, x: tf.Tensor):
+    def call(
+        self,
+        x: tf.Tensor,
+    ):
         """Call the model on new inputs and returns the outputs as tensors."""
         shortcut = self.shortcut(x)
 

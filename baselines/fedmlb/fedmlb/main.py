@@ -46,7 +46,8 @@ TEST_BATCH_SIZE = 256
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
-def main(cfg: DictConfig) -> None:  # pylint: disable=too-many-local-variables
+def main(cfg: DictConfig) -> None:  # pylint: disable=too-many-locals
+    # pylint: disable=too-many-statements
     """Run the baseline.
 
     Parameters
@@ -107,10 +108,14 @@ def main(cfg: DictConfig) -> None:  # pylint: disable=too-many-local-variables
 
         # The `evaluate` function will be called after every round
         def evaluate(
-            server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
+            server_round: int,
+            parameters: NDArrays,
+            config: Dict[str, Scalar],
         ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
             model.set_weights(parameters)  # Update model with the latest parameters
-            loss, accuracy = model.evaluate(test_ds)
+            loss, accuracy = model.evaluate(
+                test_ds,
+            )
 
             with global_summary_writer.as_default():
                 tf.summary.scalar("loss", loss, step=server_round)
