@@ -558,10 +558,10 @@ and results can be navigated and visualized via tensorboard GUI
 by using a browser at that address. 
 
 Tensorboard logs in this baselines are stored in a folder with the following path structure: 
-`FedMLB/fedmlb/tb_logging/{DATASET}/{MODEL}/{METHOD}/K_{LOCAL_UPDATES}/{TOTAL_CLIENTS}_clients/dir_{ALPHA_DIRICHLET}/seed_{RANDOM_SEED}`
+`fedmlb/fedmlb/tb_logging/{DATASET}/{MODEL}/{METHOD}/K_{LOCAL_UPDATES}/{TOTAL_CLIENTS}_clients/dir_{ALPHA_DIRICHLET}/seed_{RANDOM_SEED}`
 
 For example, for default results with FedAvg, logs will be stored at:
-`FedMLB/fedmlb/tb_logging/cifar100/resnet18/FedAvg/K_50/100_clients/dir_0.3/seed_3`
+`fedmlb/fedmlb/tb_logging/cifar100/resnet18/FedAvg/K_50/100_clients/dir_0.3/seed_3`
  
 ## Additional Detail About This Implementation
 The `models.py` file contains the implementation of the models used in this baseline. A regular ResNet18 is
@@ -605,7 +605,7 @@ otherwise initializes a new model.
 - `save_checkpoint: True`
 If True, saves a checkpoint server model at the end of the training. Checkpoints 
 will be saved at the local path:
-`FedMLB/fedmlb/model_checkpoints/{DATASET}/{MODEL}/{METHOD}/{TOTAL_CLIENTS}_clients/dir_{ALPHA_DIRICHLET}/seed_{RANDOM_SEED}/checkpoint_R{CURRENT_ROUND}`.
+`fedmlb/fedmlb/model_checkpoints/{DATASET}/{MODEL}/{METHOD}/K_{LOCAL_UPDATES}/{TOTAL_CLIENTS}_clients/dir_{ALPHA_DIRICHLET}/seed_{RANDOM_SEED}/checkpoint_R{CURRENT_ROUND}`.
 
 - `logging_memory_usage: False`
 If True, logs memory and GPU's memory usage (need for psutil and nvidia-smi 
