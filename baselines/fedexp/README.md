@@ -82,7 +82,6 @@ poetry shell
 
 #install required libs
 # install PyTorch with GPU support. Please note this baseline is very lightweight so it can run fine on a CPU.
-pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 --extra-index-url https://download.pytorch.org/whl/cu116
 
 ```
 
