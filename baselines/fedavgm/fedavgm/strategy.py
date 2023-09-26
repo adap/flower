@@ -134,6 +134,9 @@ class CustomFedAvgM(FedAvg):
         ]
 
         fedavg_result = aggregate(weights_results)  # parameters_aggregated from FedAvg
+
+        # original implementation follows convention described in
+        # https://pytorch.org/docs/stable/generated/torch.optim.SGD.html
         
         # remember that updates are the opposite of gradients
         pseudo_gradient: NDArrays = [
