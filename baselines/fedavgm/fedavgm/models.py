@@ -7,11 +7,12 @@ from tensorflow import keras
 from tensorflow.nn import local_response_normalization
 
 
-def cnn(input_shape, num_classes):
+def cnn(input_shape, num_classes, lr):
     """CNN Model from (McMahan et. al., 2017).
 
     Communication-efficient learning of deep networks from decentralized data
     """
+    
     input_shape = tuple(input_shape)
 
     weight_decay = 0.004
@@ -44,7 +45,7 @@ def cnn(input_shape, num_classes):
             keras.layers.Dense(num_classes, activation="softmax"),
         ]
     )
-    optimizer = SGD(learning_rate=0.01)
+    optimizer = SGD(learning_rate=lr)
     model.compile(
         loss="categorical_crossentropy", optimizer=optimizer, metrics=["accuracy"]
     )
@@ -52,7 +53,7 @@ def cnn(input_shape, num_classes):
     return model
 
 
-def tf_example(input_shape, num_classes):
+def tf_example(input_shape, num_classes, lr):
     """CNN Model from TensorFlow v1.x example.
 
     This is the model referenced on the FedAvg paper.
@@ -108,7 +109,7 @@ def tf_example(input_shape, num_classes):
             keras.layers.Dense(num_classes, activation="softmax"),
         ]
     )
-    optimizer = SGD(learning_rate=0.01)
+    optimizer = SGD(learning_rate=lr)
     model.compile(
         loss="categorical_crossentropy", optimizer=optimizer, metrics=["accuracy"]
     )

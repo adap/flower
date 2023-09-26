@@ -16,8 +16,9 @@ server:
 client:
   local_epochs: 1   # in the paper it is used 1 or 5
   batch_size: 64    # in the paper fixed at 64
+  lr: 0.01          # client learning rate
 
 defaults:
-  - strategy: fedavgm
+  - strategy: custom-fedavgm
   - model: cnn
   - dataset: cifar10

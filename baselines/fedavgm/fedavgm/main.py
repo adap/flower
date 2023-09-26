@@ -77,6 +77,8 @@ def main(cfg: DictConfig) -> None:
         f"_C={cfg.server.reporting_fraction}"
         f"_E={cfg.client.local_epochs}"
         f"_alpha={cfg.noniid.concentration}"
+        f"_server-momentum={cfg.server.momentum}"
+        f"_client-lr={cfg.client.lr}"
         f"_acc={final_acc:.4f}"
     )
 
