@@ -21,6 +21,7 @@ import pytest
 from parameterized import parameterized, parameterized_class
 
 import datasets
+from datasets import Dataset
 from flwr_datasets.federated_dataset import FederatedDataset
 
 
@@ -90,6 +91,18 @@ class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
             len(dataset[self.test_split]) // num_test_partitions,
         )
 
+    def test_no_need_for_split_keyword_if_one_partitioner(self) -> None:
+        """Test if partitions got with and without split args are the same."""
+        fds = FederatedDataset(dataset="mnist", partitioners={"train": 10})
+        partition_loaded_with_no_split_arg = fds.load_partition(0)
+        partition_loaded_with_verbose_split_arg = fds.load_partition(0, "train")
+        self.assertTrue(
+            datasets_are_equal(
+                partition_loaded_with_no_split_arg,
+                partition_loaded_with_verbose_split_arg,
+            )
+        )
+
 
 class IncorrectUsageFederatedDatasets(unittest.TestCase):
     """Test incorrect usages in FederatedDatasets."""
@@ -114,6 +127,20 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
         """Test creating FederatedDataset for unsupported dataset."""
         with pytest.raises(ValueError):
             FederatedDataset(dataset="food101", partitioners={"train": 100})
+
+
+def datasets_are_equal(ds1: Dataset, ds2: Dataset) -> bool:
+    """Check if two Datasets have the same values."""
+    # Check if both datasets have the same length
+    if len(ds1) != len(ds2):
+        return False
+
+    # Iterate over each row and check for equality
+    for row1, row2 in zip(ds1, ds2):
+        if row1 != row2:
+            return False
+
+    return True
 
 
 if __name__ == "__main__":

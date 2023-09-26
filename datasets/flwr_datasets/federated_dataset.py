@@ -62,7 +62,7 @@ class FederatedDataset:
         #  Init (download) lazily on the first call to `load_partition` or `load_full`
         self._dataset: Optional[DatasetDict] = None
 
-    def load_partition(self, idx: int, split: str) -> Dataset:
+    def load_partition(self, idx: int, split: Optional[str] = None) -> Dataset:
         """Load the partition specified by the idx in the selected split.
 
         The dataset is downloaded only when the first call to `load_partition` or
@@ -72,8 +72,12 @@ class FederatedDataset:
         ----------
         idx: int
             Partition index for the selected split, idx in {0, ..., num_partitions - 1}.
-        split: str
-            Name of the (partitioned) split (e.g. "train", "test").
+        split: Optional[str]
+            Name of the (partitioned) split (e.g. "train", "test"). You can skip this
+            parameter if there is only one partitioner for the dataset. The name will be
+             inferred automatically. (e.g. if partitioners={"train": 10} you do not need
+              to give this parameter, but if partitioners={"train": 10, "test": 100} you
+              need to give it, to differentiate which partitioner should be used.
 
         Returns
         -------
@@ -83,6 +87,9 @@ class FederatedDataset:
         self._download_dataset_if_none()
         if self._dataset is None:
             raise ValueError("Dataset is not loaded yet.")
+        if split is None:
+            self._check_if_no_split_keyword_possible()
+            split = list(self._partitioners.keys())[0]
         self._check_if_split_present(split)
         self._check_if_split_possible_to_federate(split)
         partitioner: Partitioner = self._partitioners[split]
@@ -146,3 +153,10 @@ class FederatedDataset:
             raise ValueError("Dataset is not loaded yet.")
         if not self._partitioners[split].is_dataset_assigned():
             self._partitioners[split].dataset = self._dataset[split]
+
+    def _check_if_no_split_keyword_possible(self) -> None:
+        if len(self._partitioners) != 1:
+            raise ValueError(
+                "Please give the split argument. You can omit the split keyword only if"
+                " there is a single partitioner specified."
+            )
