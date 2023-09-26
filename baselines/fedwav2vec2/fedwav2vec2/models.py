@@ -69,6 +69,7 @@ def int_model(  # pylint: disable=too-many-arguments,too-many-locals
     else:
         params["data_folder"] = os.path.join(config.data_path, "server")
 
+    print(f'{params["data_folder"] = }')
     params["train_csv"] = params["data_folder"] + "/ted_train.csv"
     params["valid_csv"] = params["data_folder"] + "/ted_dev.csv"
     params["test_csv"] = params["data_folder"] + "/ted_test.csv"
