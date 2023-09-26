@@ -52,25 +52,21 @@ pip install tqdm
 
 
 ## Running the Experiments
+You can run four algorithms fedavg, scaffold, fedprox, and fednova. To run any of them, use any of the corresponding main files. For instance, the following command will run with the default config provided in the corresponding configuration files.
 
-:warning: _Provide instructions on the steps to follow to run all the experiments._
-```bash  
-# The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
-
-poetry run -m <baseline-name>.main <no additional arguments> # where <baseline-name> is the name of this directory and that of the only sub-directory in this directory (i.e. where all your source code is)
-
-# If you are using a dataset that requires a complicated download (i.e. not using one natively supported by TF/PyTorch) + preprocessing logic, you might want to tell people to run one script first that will do all that. Please ensure the download + preprocessing can be configured to suit (at least!) a different download directory (and use as default the current directory). The expected command to run to do this is:
-
-poetry run -m <baseline-name>.dataset_preparation <optional arguments, but default should always run>
-
-# It is expected that you baseline supports more than one dataset and different FL settings (e.g. different number of clients, dataset partitioning methods, etc). Please provide a list of commands showing how these experiments are run. Include also a short explanation of what each one does. Here it is expected you'll be using the Hydra syntax to override the default config.
-
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
-.
-.
-.
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
+```bash
+python -m niid_bench.main_fedprox
 ```
+
+To change the configuration such as dataset or hyperparameters, specify them as part of the command line arguments.
+
+```bash
+python -m niid_bench.main_fedprox dataset_name=mnist partitioning=iid model_t=niid_bench.models.CNNMnist model.input_dim=256
+```
+
+The full list of possible arguments and their values are as follows.
+
+
 
 
 ## Expected Results
