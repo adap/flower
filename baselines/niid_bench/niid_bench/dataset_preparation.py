@@ -238,6 +238,8 @@ def partition_data_dirichlet(
     t = trainset.targets
     if isinstance(t, list):
         t = np.array(t)
+    if isinstance(t, torch.Tensor):
+        t = t.numpy()
     num_classes = len(set(t))
     total_samples = len(t)
     while min_samples < min_required_samples_per_client:
@@ -288,6 +290,8 @@ def partition_data_label_quantity(
     targets = trainset.targets
     if isinstance(targets, list):
         targets = np.array(targets)
+    if isinstance(targets, torch.Tensor):
+        targets = targets.numpy()
     num_classes = len(set(targets))
     times = [0 for _ in range(num_classes)]
     contains = []
