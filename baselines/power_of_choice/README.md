@@ -1,15 +1,15 @@
 ---
 title: Towards Understanding Biased Client Selection in Federated Learning
 url: https://proceedings.mlr.press/v151/jee-cho22a.html
-labels: [client selection, dynamic selection, heterogeneous clients] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [FMNIST, CIFAR10] # list of datasets you include in your baseline
+labels: [client selection, dynamic selection, heterogeneous clients]
+dataset: [FMNIST, CIFAR10]
 ---
 
 # Power of Choice
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
-**Paper:** https://proceedings.mlr.press/v151/jee-cho22a.html
+**Paper:** [proceedings.mlr.press/v151/jee-cho22a.html](https://proceedings.mlr.press/v151/jee-cho22a.html)
 
 **Authors:** Yae Jee Cho, Jianyu Wang, Gauri Joshi
 
