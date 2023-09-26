@@ -23,7 +23,6 @@ class FlowerClient(fl.client.NumPyClient):
         cid: int,
         net: torch.nn.Module,
         train_loader: DataLoader,
-        device: str,
         num_epochs: int,
         data_ratio,
     ):  # pylint: disable=too-many-arguments
@@ -31,7 +30,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.cid = cid
         self.net = net
         self.train_loader = train_loader
-        self.device = torch.device(device)
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.num_epochs = num_epochs
         self.data_ratio = data_ratio
 
