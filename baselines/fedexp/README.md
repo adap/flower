@@ -26,7 +26,7 @@ FedExP consistently converges faster than FedAvg and competing baselines on a ra
 
 ****Hardware Setup:**** :warning: *_Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Someone out there might not have access to the same resources you have so, could list the absolute minimum hardware needed to run the experiment in a reasonable amount of time ? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?_*
 
-****Contributors:**** : Omar Mokhtar and Roeia Amr
+****Contributors:**** : Omar Mokhtar, Roeia Amr and Yehia Salah
 
 
 ## Experimental Setup
@@ -74,7 +74,13 @@ Choice of alpha parameter for the Dirichlet distribution used to create heteroge
 To construct the Python environment follow these steps:
 
 ```bash
-# install the base Poetry environment
+# set local python version via pyenv
+pyenv local 3.10.6
+
+# then fix that for poetry
+poetry env use 3.10.6
+
+# then install poetry env
 poetry install
 
 # activate the environment
@@ -87,37 +93,47 @@ poetry shell
 
 ## Running the Experiments
 
-:warning: _Provide instructions on the steps to follow to run all the experiments._
+To run this FedExP with CIFAR10 baseline, first ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
 ```bash  
-# The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
+python -m fedexp.main # this will run using the default settings in the `conf/config.yaml`
 
-poetry run -m <baseline-name>.main <no additional arguments> # where <baseline-name> is the name of this directory and that of the only sub-directory in this directory (i.e. where all your source code is)
+# you can override settings directly from the command line
+python -m fedexp.main seed=33 num_rounds=200 # will set seed to 33 and the number of rounds to 200
 
-# If you are using a dataset that requires a complicated download (i.e. not using one natively supported by TF/PyTorch) + preprocessing logic, you might want to tell people to run one script first that will do all that. Please ensure the download + preprocessing can be configured to suit (at least!) a different download directory (and use as default the current directory). The expected command to run to do this is:
+# if you run this baseline with a larger model, you might want to use the GPU (not used by default).
+# you can enable this by overriding the `server_device` and `client_resources` config. For example
+# the below will run the server model on the GPU and 20 clients will be allowed to run concurrently on a GPU (assuming you also meet the CPU criteria for clients)
+python -m fedprox.main server_device=cuda client_resources.num_gpus=0.01
+```
 
-poetry run -m <baseline-name>.dataset_preparation <optional arguments, but default should always run>
+To run using CIFAR100:
 
-# It is expected that you baseline supports more than one dataset and different FL settings (e.g. different number of clients, dataset partitioning methods, etc). Please provide a list of commands showing how these experiments are run. Include also a short explanation of what each one does. Here it is expected you'll be using the Hydra syntax to override the default config.
+```bash
+poetry run -m fedexp.main --config-name cifar100
+```
 
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
-.
-.
-.
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
+To run using FedAvg:
+
+```bash
+poetry run -m fedexp.main strategy.algorithm=fedavg
 ```
 
 
 ## Expected Results
 
-:warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
+```bash
+poetry run -m fedexp.main --multirun seed=5 strategy.alogrithm=[fedexp,fedavg]
+```
+| FedExP | FedAvg |
+|:----:|:----:|
+|![FedExP CIFAR10](_static/FedExp_Cifar10_S5.png) | ![FedAvg CIFAR10](_static/FedAvg_Cifar10_S5.png) |
+
+
+
 
 ```bash
-# it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameteres
-
-poetry run -m <baseline-name>.main --multirun num_client_per_round=5,10,50 dataset=femnist,cifar10
-# the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
-
-[Now show a figure/table displaying the results of the above command]
-
-# add more commands + plots for additional experiments.
+poetry run -m fedexp.main --config-name cifar100 --multirun seed=5 strategy.alogrithm=[fedexp,fedavg]
 ```
+| FedExP | FedAvg |
+|:----:|:----:|
+| ![FedExP CIFAR100](_static/FedExP_Cifar100_S5.png) | ![FedAvg CIFAR100](_static/FedAvg_Cifar100_S.png) |
