@@ -9,15 +9,32 @@ partitioned, please include all those functions and logic in the
 defined here of course.
 """
 
-import numpy as np
 from torch.utils.data import DataLoader, Dataset
 from omegaconf import DictConfig
 from typing import Optional, Tuple
 from dataset_preparation import _partition_data, split_train_validation_test_clients
 import numpy as np
-from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
+from utils import word_to_indices, letter_to_vec
+import torch
 
+
+class ShakespeareDataset(Dataset):
+    def __init__(self, data):
+        # self.x = x
+        # self.y = y
+        sentence, label = data['x'], data['y']
+        sentences_to_indices = [word_to_indices(word) for word in sentence]
+        sentences_to_indices = np.array(sentences_to_indices)
+        self.sentences_to_indices = np.array(sentences_to_indices, dtype=np.int64)
+        self.labels = np.array([letter_to_vec(letter) for letter in label], dtype=np.int64)
+
+    def __len__(self):
+        return len(self.labels)
+
+    def __getitem__(self, index):
+        data, target = self.sentences_to_indices[index], self.labels[index]
+        return torch.tensor(data), torch.tensor(target)
 
 
 class FemnistDataset(Dataset):
@@ -40,7 +57,6 @@ class FemnistDataset(Dataset):
 def load_datasets(  # pylint: disable=too-many-arguments
     config: DictConfig,
 ) -> Tuple[DataLoader, DataLoader, DataLoader]:
-    print(f"Dataset partitioning config: {config}")
 
     dataset = _partition_data(
         dir_path=config.path,
@@ -51,20 +67,48 @@ def load_datasets(  # pylint: disable=too-many-arguments
         dataset[0]['users']
     )
 
+
     trainloaders = {'sup': [], 'qry': []}
     valloaders = {'sup': [], 'qry': []}
     testloaders = {'sup': [], 'qry': []}
 
-    transform = transforms.Compose([transforms.ToTensor()])
-    for user in clients_list[0]:
-        trainloaders['sup'].append(DataLoader(FemnistDataset(dataset[0]['user_data'][user], transform), batch_size=10, shuffle=True))
-        trainloaders['qry'].append(DataLoader(FemnistDataset(dataset[1]['user_data'][user], transform), batch_size=10))
-    for user in clients_list[2]:
-        valloaders['sup'].append(DataLoader(FemnistDataset(dataset[0]['user_data'][user], transform), batch_size=10, shuffle=True))
-        valloaders['qry'].append(DataLoader(FemnistDataset(dataset[1]['user_data'][user], transform), batch_size=10))
-    for user in clients_list[1]:
-        testloaders['sup'].append(DataLoader(FemnistDataset(dataset[0]['user_data'][user], transform), batch_size=10, shuffle=True))
-        testloaders['qry'].append(DataLoader(FemnistDataset(dataset[1]['user_data'][user], transform), batch_size=10))
+    data_type = 'shakespeare'
+    if data_type == 'shakespeare':
+        for user in clients_list[0]:
+            if len(dataset[0]['user_data'][user]['x']) > 10000:
+                print(f"over 1000 : {user}")
+                continue
+            trainloaders['sup'].append(
+                DataLoader(ShakespeareDataset(dataset[0]['user_data'][user]), batch_size=10, shuffle=True))
+            trainloaders['qry'].append(
+                DataLoader(ShakespeareDataset(dataset[1]['user_data'][user]), batch_size=10))
+        for user in clients_list[1]:
+            if len(dataset[0]['user_data'][user]['x']) > 10000:
+                print(f"over 1000 : {user}")
+                continue
+            valloaders['sup'].append(DataLoader(ShakespeareDataset(dataset[0]['user_data'][user]), batch_size=10, shuffle=True))
+            valloaders['qry'].append(DataLoader(ShakespeareDataset(dataset[1]['user_data'][user]), batch_size=10))
+        for user in clients_list[2]:
+            if len(dataset[0]['user_data'][user]['x']) > 10000:
+                print(f"over 1000 : {user}")
+                continue
+            testloaders['sup'].append(
+                DataLoader(ShakespeareDataset(dataset[0]['user_data'][user]), batch_size=10, shuffle=True))
+            testloaders['qry'].append(
+                DataLoader(ShakespeareDataset(dataset[1]['user_data'][user]), batch_size=10))
+
+    else:
+        transform = transforms.Compose([transforms.ToTensor()])
+
+        for user in clients_list[0]:
+            trainloaders['sup'].append(DataLoader(FemnistDataset(dataset[0]['user_data'][user], transform), batch_size=10, shuffle=True))
+            trainloaders['qry'].append(DataLoader(FemnistDataset(dataset[1]['user_data'][user], transform), batch_size=10))
+        for user in clients_list[1]:
+            valloaders['sup'].append(DataLoader(FemnistDataset(dataset[0]['user_data'][user], transform), batch_size=10))
+            valloaders['qry'].append(DataLoader(FemnistDataset(dataset[1]['user_data'][user], transform), batch_size=10))
+        for user in clients_list[2]:
+            testloaders['sup'].append(DataLoader(FemnistDataset(dataset[0]['user_data'][user], transform), batch_size=10))
+            testloaders['qry'].append(DataLoader(FemnistDataset(dataset[1]['user_data'][user], transform), batch_size=10))
 
     return trainloaders, valloaders, testloaders
 
