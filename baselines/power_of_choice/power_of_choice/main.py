@@ -13,12 +13,11 @@ from flwr.common.logger import log
 from flwr.common.typing import Metrics
 from flwr.server.server import Server
 from flwr.server.strategy.fedavg import FedAvg
-from server import PowerOfChoiceCommAndCompVariant
-from models import create_MLP_model, create_CNN_model
-from flwr.common.typing import Scalar
-from utils import plot_metric_from_history, save_results_as_pickle
-from server import PowerOfChoiceServer
-from client import gen_client_fn
+from power_of_choice.server import PowerOfChoiceCommAndCompVariant
+from power_of_choice.models import create_MLP_model, create_CNN_model
+from power_of_choice.utils import save_results_as_pickle
+from power_of_choice.server import PowerOfChoiceServer
+from power_of_choice.client import gen_client_fn
 from flwr.server.client_manager import SimpleClientManager
 import hydra
 import flwr as fl

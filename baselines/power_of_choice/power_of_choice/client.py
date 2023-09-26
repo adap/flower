@@ -5,11 +5,10 @@ to instantiate your client.
 """
 
 from typing import Callable, Dict
-from models import create_CNN_model
-from models import create_MLP_model
-from dataset import load_dataset
+from power_of_choice.models import create_CNN_model
+from power_of_choice.models import create_MLP_model
+from power_of_choice.dataset import load_dataset
 from flwr.common import Config, Scalar
-from omegaconf import DictConfig
 import tensorflow as tf
 import flwr as fl
 import numpy as np

@@ -19,20 +19,14 @@ client_resources:
 dataset:
   dataset: "fmnist"
 
-model:
-  # model config
-
 # variant of the strategy: "rand" for FedAvg strategy ,"base", "cpow" for cpow, "rpow" for rpow
 variant: "base"
 b: 64
 
 strategy:
-  _target_: strategy.PowerOfChoice
+  _target_: power_of_choice.strategy.PowerOfChoice
   d: 6
   ck: 3
-
-client:
-  # client config
 
 hydra:
   run:

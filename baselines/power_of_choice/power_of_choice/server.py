@@ -7,14 +7,11 @@ settings).
 from logging import DEBUG, INFO
 from flwr.common.logger import log
 import timeit
-from typing import Dict, List, Optional, Tuple, Union
-from flwr.server.client_manager import ClientManager
-from flwr.server.server import Server, _handle_finished_future_after_evaluate, evaluate_client, evaluate_clients
-from flwr.common.typing import Code, EvaluateIns, EvaluateRes, Scalar
+from typing import List, Optional, Tuple
+from flwr.server.server import Server, evaluate_clients
+from flwr.common.typing import EvaluateRes
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
-from flwr.server.server import EvaluateResultsAndFailures
-from flwr.server.strategy import Strategy
 
 
 class PowerOfChoiceServer(Server):

@@ -36,11 +36,11 @@ dataset: [FMNIST, CIFAR10] # list of datasets you include in your baseline
 This is the model used by default.
 * A CNN used in the paper on CIFAR10 dataset. To use this model you have to set is_cnn=True in the configuration file base.yaml.
 
-****Dataset:**** This baseline includes two datasets: FMINST and CIFAR10. Both are partitioned by default among 100 clients, creating imbalanced non-iid partitions using Latent Dirichlet Allocation (LDA) without resampling. All the clients have the same number of samples. Parameter `alpha` of the LDA can be set in the `base.yaml` or passed as argument, by default it is set to 2.
+****Dataset:**** This baseline includes two datasets: FMINST (Fashion MNIST) and CIFAR10. Both are partitioned by default among 100 clients, creating imbalanced non-iid partitions using Latent Dirichlet Allocation (LDA) without resampling. All the clients have the same number of samples. Parameter `alpha` of the LDA can be set in the `base.yaml` or passed as argument, by default it is set to 2.
 
 | Dataset | #classes | #partitions | partitioning method | partition settings |
 | :------ | :---: | :---: | :---: | :---: |
-| FMNIST | 10 | 100 | Latent Dirichlet Allocation | All clients with same number of samples |
+| Fashion MNIST | 10 | 100 | Latent Dirichlet Allocation | All clients with same number of samples |
 | CIFAR10 | 10 | 100 | Latent Dirichlet Allocation | All clients with same number of samples |
 
 

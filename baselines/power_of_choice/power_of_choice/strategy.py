@@ -6,14 +6,12 @@ extend or modify the functionality of an existing strategy.
 
 from logging import INFO, WARNING
 from typing import Callable, Dict, List, Optional, Tuple
-from flwr.common.parameter import parameters_to_ndarrays
 from flwr.common.typing import EvaluateIns, FitIns, GetPropertiesIns, MetricsAggregationFn, NDArrays, Parameters, Scalar
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.criterion import Criterion
 from flwr.server.strategy.fedavg import WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW, FedAvg
 from flwr.common.logger import log
-import math
 import numpy as np
 
 class SimpleCriterion(Criterion):

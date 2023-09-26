@@ -3,7 +3,7 @@ from logging import INFO
 import os
 import pickle
 from flwr.common.logger import log
-from utils import plot_metrics_from_histories, plot_variances_training_loss_from_history
+from power_of_choice.utils import plot_metrics_from_histories, plot_variances_training_loss_from_history
 
 def plot_multiplot(metrics_type, paths):
     num_plots = len(paths)
