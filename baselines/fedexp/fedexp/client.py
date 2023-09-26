@@ -28,9 +28,9 @@ class FlowerClient(fl.client.NumPyClient):
     ):  # pylint: disable=too-many-arguments
         print(f"Initializing Client {cid}")
         self.cid = cid
-        self.net = net
         self.train_loader = train_loader
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.net = net.to(self.device)
         self.num_epochs = num_epochs
         self.data_ratio = data_ratio
 
@@ -87,9 +87,8 @@ def gen_client_fn(
 
         return FlowerClient(
             cid=int(cid),
-            net=instantiate(model).to(args["device"]),
+            net=instantiate(model),
             train_loader=train_loaders[int(cid)],
-            device=args["device"],
             num_epochs=num_epochs,
             data_ratio=args["data_ratio"][int(cid)],
         )

@@ -41,7 +41,7 @@ def main(cfg: DictConfig) -> None:
         train_loaders=train_loaders,
         model=cfg.model,
         num_epochs=cfg.num_epochs,
-        args={"data_ratio": data_ratios, "device": cfg.client_device},
+        args={"data_ratio": data_ratios},
     )
 
     evaluate_fn = server.gen_evaluate_fn(
