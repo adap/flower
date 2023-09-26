@@ -9,7 +9,7 @@ dataset: [CIFAR-10, CIFAR-100]
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
-****Paper:**** https://openreview.net/forum?id=IPrzNbddXV
+****Paper:**** [openreview.net/forum?id=IPrzNbddXV](https://openreview.net/forum?id=IPrzNbddXV)
 
 ****Authors:**** : Divyansh Jhunjhunwala, Shiqiang Wang, Gauri Joshi
 
