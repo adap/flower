@@ -17,7 +17,3 @@ cd examples/doc
 make docs
 
 cd $ROOT
-cd datasets/doc
-make docs
-
-cd $ROOT
