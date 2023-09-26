@@ -18,7 +18,7 @@ dataset: [CIFAR-10, Fashion-MNIST]
 
 ## About this baseline
 
-**What’s implemented:** The code in this directory evaluates the effects of non-identical data distribution for visual classification task based on paper _Measuring the effects of non-identical data distribution for federated visual classification_ (Hsu et al., 2019). It reproduces the FedAvgM and FedAvg performance curves for different non-identical-ness of the dataset (CIFAR-10 and FEMNIST). _Figure 5 in the paper, section 4.2._
+**What’s implemented:** The code in this directory evaluates the effects of non-identical data distribution for visual classification task based on paper _Measuring the effects of non-identical data distribution for federated visual classification_ (Hsu et al., 2019). It reproduces the FedAvgM and FedAvg performance curves for different non-identical-ness of the dataset (CIFAR-10 and Fashion-MNIST). _Figure 5 in the paper, section 4.2._
 
 **Datasets:** CIFAR-10, and Fashion-MNIST
 
@@ -63,7 +63,7 @@ The following table shows the main hyperparameters for this baseline with their 
 | total clients | 10 |
 | number of rounds | 5 |
 | model | CNN |
-| strategy | FedAvgM |
+| strategy | Custom FedAvgM |
 | dataset | CIFAR-10 |
 | concentration | 0.1 |
 | fraction evaluate | 0 |
@@ -74,6 +74,10 @@ The following table shows the main hyperparameters for this baseline with their 
 | server reporting fraction | 0.05 |
 | client local epochs | 1 |
 | client batch size | 64 |
+| client learning rate | 0.01 |
+
+### Custom FedAvgM
+In contrast with the original implmentation from Flower v1.5.0, in this baseline we introduce the Nesterov accelerated gradient as part of the momentum applied in the server mode. To use the original Flower implementation, use the argument `strategy=fedavgm`. By default, the custom implementation is used. But, you can also refer to it on the command line as `strategy=custom-fedavgm`.
 
 ## Specifying the Python Version
 This baseline was tested with Python 3.10.6.
