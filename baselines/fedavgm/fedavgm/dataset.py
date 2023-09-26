@@ -50,7 +50,8 @@ def partition(x_train, y_train, num_clients, concentration, num_classes):
     partitions, _ = create_lda_partitions(
         dataset,
         num_partitions=num_clients,
-        concentration=concentration * num_classes,
+        # concentration=concentration * num_classes,
+        concentration=concentration,
         seed=1234,
     )
     return partitions

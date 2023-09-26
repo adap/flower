@@ -1,0 +1,35 @@
+strategy:
+  _target_: flwr.server.strategy.FedAvg
+  min_available_clients: ${num_clients}
+  fraction_fit: ${server.reporting_fraction}
+  fraction_evaluate: ${fraction_evaluate}
+  on_fit_config_fn:
+    _target_: fedavgm.server.get_on_fit_config
+    config: ${client}
+model:
+  _target_: fedavgm.models.cnn
+  input_shape: ${dataset.input_shape}
+  num_classes: ${dataset.num_classes}
+  lr: ${client.lr}
+dataset:
+  _target_: fedavgm.dataset.cifar10
+  num_classes: 10
+  input_shape:
+  - 32
+  - 32
+  - 3
+num_clients: 100
+num_rounds: 100
+fraction_evaluate: 0
+num_cpus: 1
+num_gpus: 0
+noniid:
+  concentration: 10
+server:
+  momentum: 0.9
+  learning_rate: 1.0
+  reporting_fraction: 0.05
+client:
+  local_epochs: 1
+  batch_size: 64
+  lr: 0.01

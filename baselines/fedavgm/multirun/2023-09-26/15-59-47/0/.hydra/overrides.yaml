@@ -1,0 +1,7 @@
+- client.local_epochs=1
+- noniid.concentration=100
+- strategy=fedavg
+- server.reporting_fraction=0.05
+- num_rounds=100
+- num_clients=100
+- dataset=cifar10
