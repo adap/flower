@@ -1,25 +1,17 @@
 ---
-title: title of the paper
-url: URL to the paper page (not the pdf)
-labels: [label1, label2] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [dataset1, dataset2] # list of datasets you include in your baseline
+title: "Federated Learning on Non-IID Data Silos: An Experimental Study"
+url: https://arxiv.org/abs/2102.02079
+labels: [data heterogeneity, image classification, benchmark]
+dataset: [cifar10, mnist, fashion-mnist]
 ---
 
-# :warning:*_Title of your baseline_*
+# Federated Learning on Non-IID Data Silos: An Experimental Study
 
-> Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
+****Paper:**** : [https://arxiv.org/abs/2102.02079](https://arxiv.org/abs/2102.02079)
 
-> :warning: This is the template to follow when creating a new Flower Baseline. Please follow the instructions in `EXTENDED_README.md`
+****Authors:**** : Qinbin Li, Yiqun Diao, Quan Chen, Bingsheng He
 
-> :warning: Please follow the instructions carefully. You can see the [FedProx-MNIST baseline](https://github.com/adap/flower/tree/main/baselines/fedprox) as an example of a baseline that followed this guide.
-
-> :warning: Please complete the metadata section at the very top of this README. This generates a table at the top of the file that will facilitate indexing baselines.
-
-****Paper:**** :warning: *_add the URL of the paper page (not to the .pdf). For instance if you link a paper on ArXiv, add here the URL to the abstract page (e.g. https://arxiv.org/abs/1512.03385). If your paper is in from a journal or conference proceedings, please follow the same logic._*
-
-****Authors:**** :warning: *_list authors of the paper_*
-
-****Abstract:**** :warning: *_add here the abstract of the paper you are implementing_*
+****Abstract:**** : Due to the increasing privacy concerns and data regulations, training data have been increasingly fragmented, forming distributed databases of multiple "data silos" (e.g., within different organizations and countries). To develop effective machine learning services, there is a must to exploit data from such distributed databases without exchanging the raw data. Recently, federated learning (FL) has been a solution with growing interests, which enables multiple parties to collaboratively train a machine learning model without exchanging their local data. A key and common challenge on distributed databases is the heterogeneity of the data distribution among the parties. The data of different parties are usually non-independently and identically distributed (i.e., non-IID). There have been many FL algorithms to address the learning effectiveness under non-IID data settings. However, there lacks an experimental study on systematically understanding their advantages and disadvantages, as previous studies have very rigid data partitioning strategies among parties, which are hardly representative and thorough. In this paper, to help researchers better understand and study the non-IID data setting in federated learning, we propose comprehensive data partitioning strategies to cover the typical non-IID data cases. Moreover, we conduct extensive experiments to evaluate state-of-the-art FL algorithms. We find that non-IID does bring significant challenges in learning accuracy of FL algorithms, and none of the existing state-of-the-art FL algorithms outperforms others in all cases. Our experiments provide insights for future studies of addressing the challenges in "data silos".
 
 
 ## About this baseline
@@ -47,7 +39,7 @@ dataset: [dataset1, dataset2] # list of datasets you include in your baseline
 ## Environment Setup
 
 ```bash
-# Setup the base poetry enviroment from the scaffold directory
+# Setup the base poetry enviroment from the niid_bench directory
 poetry install
 
 # Start the shell
