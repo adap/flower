@@ -46,7 +46,17 @@ dataset: [dataset1, dataset2] # list of datasets you include in your baseline
 
 ## Environment Setup
 
-:warning: _The Python environment for all baselines should follow these guidelines in the `EXTENDED_README`. Specify the steps to create and activate your environment. If there are any external system-wide requirements, please include instructions for them too. These instructions should be comprehensive enough so anyone can run them (if non standard, describe them step-by-step)._
+```bash
+# Setup the base poetry enviroment from the scaffold directory
+poetry install
+
+# Start the shell
+poetry shell
+
+#  Install tqdm, torch, and torchvision using pip
+pip install torch==1.12.1+cu113 torchvision==0.13.1+cu113 --extra-index-url https://download.pytorch.org/whl/cu113
+pip install tqdm
+```
 
 
 ## Running the Experiments
