@@ -67,10 +67,10 @@ def int_model(  # pylint: disable=too-many-arguments,too-many-locals
     if int(cid) != config.server_cid:
         params["data_folder"] = os.path.join(config.data_path, "client_" + str(cid))
     else:
-        params["data_folder"] = os.path.join(config.data_path, "client_" + str(1300))
+        params["data_folder"] = os.path.join(config.data_path, "server")
 
-    params["train_csv"] = params["data_folder"] + "/ted_test.csv"
-    params["valid_csv"] = params["data_folder"] + "/ted_test.csv"
+    params["train_csv"] = params["data_folder"] + "/ted_train.csv"
+    params["valid_csv"] = params["data_folder"] + "/ted_dev.csv"
     params["test_csv"] = params["data_folder"] + "/ted_test.csv"
 
     params["label_encoder"] = label_path_

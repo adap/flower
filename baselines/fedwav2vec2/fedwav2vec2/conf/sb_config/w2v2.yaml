@@ -11,10 +11,11 @@ output_folder: !ref docs/results/fl_wav2vec2/<seed>
 wer_file: !ref <output_folder>/wer.txt
 save_folder: !ref <output_folder>/save
 train_log: !ref <output_folder>/train_log.txt
+label_encode: docs/label_encoder.txt
 
 # URL for the biggest huggingface english wav2vec2 model.
 
-wav2vec2_hub: "facebook/wav2vec2-large-960h-lv60-self"
+wav2vec2_hub: "facebook/wav2vec2-large-lv60"
 # Data files
 data_folder:  data/audio/TEDLIUM_release-3/data
 

@@ -70,7 +70,7 @@ python -m fedwav2vec2.dataset_preparation
 ## Running the Experiments
 
 ```bash  
-python main -m fedwav2vec2.main
+python -m fedwav2vec2.main
 ```
 
 
