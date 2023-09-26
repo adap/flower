@@ -83,8 +83,6 @@ class FlowerClient(fl.client.NumPyClient):
                     os.path.join(self.model_dir, str(self.net_id), "prev_net.pt")
                 )
             )
-        # else:
-        # self.prev_net = copy.deepcopy(self.net)
         global_net = init_net(self.dataset, self.model, self.output_dim)
         global_net.load_state_dict(self.net.state_dict())
         if self.alg == "moon":
