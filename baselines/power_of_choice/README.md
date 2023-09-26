@@ -9,7 +9,7 @@ dataset: [FMNIST, CIFAR10]
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
-**Paper:** https://proceedings.mlr.press/v151/jee-cho22a.html
+**Paper:** [proceedings.mlr.press/v151/jee-cho22a.html](https://proceedings.mlr.press/v151/jee-cho22a.html)
 
 **Authors:** Yae Jee Cho, Jianyu Wang, Gauri Joshi
 
