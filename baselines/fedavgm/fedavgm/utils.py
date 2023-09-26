@@ -53,7 +53,7 @@ def plot_concentrations_cifar10():
 
     fig.text(0, 0.5, "Client", va="center", rotation="vertical")
     plt.tight_layout()
-    plt.savefig("../docs/concentration_cifar10_v2.png")
+    plt.savefig("../_static/concentration_cifar10_v2.png")
     print(">>> Concentration plot created")
     return None
 
