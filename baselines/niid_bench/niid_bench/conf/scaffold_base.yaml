@@ -12,7 +12,7 @@ num_rounds: 50
 mu: 0.0
 partitioning: "dirichlet"
 dataset_name: "cifar10"
-strategy_t: niid_bench.strategy.ScaffoldStrategy
+strategy_t: niid_bench.strategy_scaffold.ScaffoldStrategy
 model_t: niid_bench.models.CNN
 dataset_seed: 42
 alpha: 0.5
