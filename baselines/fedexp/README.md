@@ -1,8 +1,8 @@
 ---
 title: FedExP Speeding Up Federated Averaging via Extrapolation
 url: https://openreview.net/forum?id=IPrzNbddXV
-labels: [image classification, Optimization,  Step Size] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [Cifar10, Cifar100] # list of datasets you include in your baseline
+labels: [image classification, Optimization,  Step Size]
+dataset: [CIFAR-10, CIFAR-100]
 ---
 
 # FedExP : Speeding Up Federated Averaging via Exptrapolation
