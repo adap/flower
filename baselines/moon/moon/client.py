@@ -55,8 +55,6 @@ class FlowerClient(fl.client.NumPyClient):
         self.temperature = temperature
         self.model_dir = model_dir
         self.alg = alg
-        # self.prev_net = init_net(self.dataset, self.model, self.output_dim)
-        self.prev_net = None
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Return the parameters of the current net."""
@@ -73,25 +71,24 @@ class FlowerClient(fl.client.NumPyClient):
     ) -> Tuple[NDArrays, int, Dict]:
         """Implement distributed fit function for a given client."""
         self.set_parameters(parameters)
-        if self.prev_net is None:
-            self.prev_net = init_net(self.dataset, self.model, self.output_dim)
-            self.prev_net = copy.deepcopy(self.net)
+        # if self.prev_net is None:
+        prev_net = init_net(self.dataset, self.model, self.output_dim)
+        if not os.path.exists(os.path.join(self.model_dir, str(self.net_id))):
+            prev_net = copy.deepcopy(self.net)
         else:
             # load previous model from model_dir
-            self.prev_net.load_state_dict(
+            prev_net.load_state_dict(
                 torch.load(
                     os.path.join(self.model_dir, str(self.net_id), "prev_net.pt")
                 )
             )
-        # else:
-        # self.prev_net = copy.deepcopy(self.net)
         global_net = init_net(self.dataset, self.model, self.output_dim)
         global_net.load_state_dict(self.net.state_dict())
         if self.alg == "moon":
             train_moon(
                 self.net,
                 global_net,
-                self.prev_net,
+                prev_net,
                 self.trainloader,
                 self.num_epochs,
                 self.learning_rate,
