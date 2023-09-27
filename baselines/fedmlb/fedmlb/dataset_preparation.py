@@ -40,7 +40,7 @@ def read_fedmlb_distribution(
         dataset = "Tiny-ImageNet"
 
     file_path = os.path.join(
-        "FedMLB",
+        "fedmlb",
         data_folder,
         dataset,
         "balanced",
