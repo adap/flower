@@ -27,6 +27,8 @@ dataset: [CIFAR-10, CIFAR-100] # list of datasets you include in your baseline
 
 ****Contributors:**** : Qinbin Li
 
+****Description:****: MOON requires to compute the model-contrastive loss in local training, which requires access to the local model of the previous round (Lines 14-17 of Algorithm 1 of the paper). Since `FlowerClient` does not preserve the states when starting a new round, we store the local models into the specified `model_dir` in local training indexed by the client ID, which will be loaded to the corresponding client in the next round.
+
 ## Experimental Setup
 
 ****Task:**** : Image classification.
@@ -67,7 +69,11 @@ warning: The following tables show the default hyperparameters.
 To construct the Python environment follow these steps:
 
 ```bash
-# install the base Poetry environment
+# set local python version via pyenv
+pyenv local 3.10.6
+# then fix that for poetry
+poetry env use 3.10.6
+# then install poetry env
 poetry install
 
 # activate the environment
@@ -82,23 +88,23 @@ pip install torch==1.12.0+cu116 torchvision==0.13.0+cu116 torchaudio==0.12.0 --e
 
 First ensure you have activated your Poetry environment (execute `poetry shell` from this directory). To run MOON on CIFAR-10 (Table 1 of the paper), you should run:
 ```bash  
-python -m moon.main cifar10 
+python -m moon.main --config-name cifar10 
 ```
 
 To run MOON on CIFAR-100 (Table 1 of the paper), you should run:
 ```bash
-python -m moon.main cifar100
+python -m moon.main --config-name cifar100
 ```
 
 
 You can also run FedProx on CIFAR-10:
 ```base
-python -m moon.main cifar10_fedprox.yaml
+python -m moon.main --config-name cifar10_fedprox
 ```
 
 To run FedProx on CIFAR-100:
 ```base
-python -m moon.main cifar100_fedprox.yaml.
+python -m moon.main --config-name cifar100_fedprox
 ```
 
 ## Expected Results
