@@ -15,11 +15,12 @@
 """FederatedDataset."""
 
 
-from typing import Dict, Optional
+from typing import Callable, Dict, Optional, Union
 
 import datasets
 from datasets import Dataset, DatasetDict
 from flwr_datasets.partitioner import Partitioner
+from flwr_datasets.resplitter import ResplitStrategy, Resplitter
 from flwr_datasets.utils import _check_if_dataset_supported, _instantiate_partitioners
 
 
@@ -35,6 +36,8 @@ class FederatedDataset:
     ----------
     dataset: str
         The name of the dataset in the Hugging Face Hub.
+    resplitter: Union[ResplitStrategy, Callable[[DatasetDict], DatasetDict]],
+        Resplit strategy or custom Callable that transforms the dataset.
     partitioners: Dict[str, int]
         Dataset split to the number of IID partitions.
 
@@ -53,14 +56,24 @@ class FederatedDataset:
     >>> centralized = mnist_fds.load_full("test")
     """
 
-    def __init__(self, *, dataset: str, partitioners: Dict[str, int]) -> None:
+    def __init__(
+        self,
+        *,
+        dataset: str,
+        resplitter: Optional[
+            Union[ResplitStrategy, Callable[[DatasetDict], DatasetDict]]
+        ] = None,
+        partitioners: Dict[str, int],
+    ) -> None:
         _check_if_dataset_supported(dataset)
         self._dataset_name: str = dataset
+        self._resplitter = resplitter
         self._partitioners: Dict[str, Partitioner] = _instantiate_partitioners(
             partitioners
         )
         #  Init (download) lazily on the first call to `load_partition` or `load_full`
         self._dataset: Optional[DatasetDict] = None
+        self._resplit: bool = False  # Indicate if the resplit happened
 
     def load_partition(self, idx: int, split: str) -> Dataset:
         """Load the partition specified by the idx in the selected split.
@@ -81,6 +94,7 @@ class FederatedDataset:
             Single partition from the dataset split.
         """
         self._download_dataset_if_none()
+        self._resplit_dataset_if_needed()
         if self._dataset is None:
             raise ValueError("Dataset is not loaded yet.")
         self._check_if_split_present(split)
@@ -106,6 +120,7 @@ class FederatedDataset:
             Part of the dataset identified by its split name.
         """
         self._download_dataset_if_none()
+        self._resplit_dataset_if_needed()
         if self._dataset is None:
             raise ValueError("Dataset is not loaded yet.")
         self._check_if_split_present(split)
@@ -146,3 +161,22 @@ class FederatedDataset:
             raise ValueError("Dataset is not loaded yet.")
         if not self._partitioners[split].is_dataset_assigned():
             self._partitioners[split].dataset = self._dataset[split]
+
+    def _resplit_dataset_if_needed(self) -> None:
+        # this can't be called many times
+        # either a new attribute is needed e.g. resplit_dataset
+        # or a bool flag that the resplit happened
+
+        # Resplit only once
+        if self._resplit:
+            return
+        if self._dataset is None:
+            raise ValueError("The dataset resplit should happen after the download.")
+        if self._resplitter:
+            resplitter: Union[Resplitter, Callable[[DatasetDict], DatasetDict]]
+            if isinstance(self._resplitter, Dict):
+                resplitter = Resplitter(resplit_strategy=self._resplitter)
+            else:
+                resplitter = self._resplitter
+            self._dataset = resplitter(self._dataset)
+        self._resplit = True
