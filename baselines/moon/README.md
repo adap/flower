@@ -1,7 +1,7 @@
 ---
 title: Model-Contrastive Federated Learning
 url: https://arxiv.org/abs/2103.16257
-labels: [data heterogeneity, image classification]
+labels: [data heterogeneity, image classification, cross-silo, constrastive-learning]
 dataset: [CIFAR-10, CIFAR-100] # list of datasets you include in your baseline
 ---
 
@@ -10,7 +10,8 @@ dataset: [CIFAR-10, CIFAR-100] # list of datasets you include in your baseline
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
 
-****Paper:**** :https://arxiv.org/abs/2103.16257
+****Paper:**** : [arxiv.org/abs/2103.16257](https://arxiv.org/abs/2103.16257)
+
 ****Authors:**** :Qinbin Li, Bingsheng He, Dawn Song
 
 ****Abstract:**** :Federated learning enables multiple parties to collaboratively train a machine learning model without communicating their local data. A key challenge in federated learning is to handle the heterogeneity of local data distribution across parties. Although many studies have been proposed to address this challenge, we find that they fail to achieve high performance in image datasets with deep learning models. In this paper, we propose MOON: modelcontrastive federated learning. MOON is a simple and effective federated learning framework. The key idea of MOON is to utilize the similarity between model representations to correct the local training of individual parties, i.e., conducting contrastive learning in model-level. Our extensive experiments show that MOON significantly outperforms the other state-of-the-art federated learning algorithms on various image classification tasks.
