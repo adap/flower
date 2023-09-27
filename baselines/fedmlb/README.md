@@ -193,6 +193,9 @@ The default is `num_gpus=0.0`.
 For example, the following command will run on CPU only. 
 ```bash
 python -m fedmlb.main # `client_resources.num_gpus=0.0` default
+
+# If for instance you want to allow for two clients running on the same GPU
+python -m fedmlb.main client_resources.num_gpus=0.5
 ```
 
 > :warning:
