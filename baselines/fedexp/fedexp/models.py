@@ -149,47 +149,7 @@ def train(  # pylint: disable=too-many-arguments
         weight_decay=hyperparams["weight_decay"],
     )
     net.train()
-    for _ in tqdm(range(epochs), desc="Local Training ..."):
-        net = _train_one_epoch(
-            net=net,
-            trainloader=trainloader,
-            device=device,
-            criterion=criterion,
-            optimizer=optimizer,
-            hyperparams=hyperparams,
-        )
-
-
-def _train_one_epoch(  # pylint: disable=too-many-arguments
-        net: nn.Module,
-        trainloader: DataLoader,
-        device: torch.device,
-        criterion,
-        optimizer,
-        hyperparams: Dict[str, Scalar],
-) -> nn.Module:
-    """Train for one epoch.
-
-    Parameters
-    ----------
-    net : nn.Module
-        The neural network to train.
-    trainloader : DataLoader
-        The DataLoader containing the data to train the network on.
-    device : torch.device
-        The device on which the model should be trained, either 'cpu' or 'cuda'.
-    criterion :
-        The loss function to use for training
-    optimizer :
-        The optimizer to use for training
-    hyperparams : Dict[str, Scalar]
-        The hyperparameters to use for training.
-
-    Returns
-    -------
-    nn.Module
-        The model that has been trained for one epoch.
-    """
+    counter = 0
     for images, labels in trainloader:
         images, labels = images.to(device), labels.to(device)
         if hyperparams["use_data_augmentation"]:
@@ -209,7 +169,9 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
                 parameters=net.parameters(), max_norm=hyperparams["max_norm"]
             )
         optimizer.step()
-    return net
+        counter += 1
+        if counter >= epochs:
+            break
 
 
 if __name__ == "__main__":
