@@ -430,16 +430,27 @@ To reproduce the results run the following:
 ```bash
 python -m fedmlb.main --multirun dataset_config.dataset="cifar100","tiny-imagenet" algorithm="FedMLB","FedAvg","FedAvg+KD" total_clients=500 clients_per_round=10
 ```
-#### CIFAR-100, Dir(0.3), 500 clients, 2% participation.
+#### CIFAR-100 and Tiny-ImageNet, Dir(0.3), 500 clients, 2% participation.
 
 <table>
   <tr>
     <td></td>
+    <td style="text-align: center", colspan="4">CIFAR-100</td>
+    <td style="text-align: center", colspan="4">Tiny-ImageNet</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td colspan="2">Accuracy @500R</td>
+    <td colspan="2">Accuracy @1000R</td>
     <td colspan="2">Accuracy @500R</td>
     <td colspan="2">Accuracy @1000R</td>
   </tr>
   <tr>
     <td>Method</td>
+    <td>Paper</td>
+    <td>This repo</td>
+    <td>Paper</td>
+    <td>This repo</td>
     <td>Paper</td>
     <td>This repo</td>
     <td>Paper</td>
@@ -451,36 +462,6 @@ python -m fedmlb.main --multirun dataset_config.dataset="cifar100","tiny-imagene
     <td>32.54</td>
     <td>37.48</td>
     <td>38.75</td>
-  </tr>
-  <tr>
-    <td>FedMLB</td>
-    <td>32.03</td>
-    <td>36.63</td>
-    <td>42.61</td>
-    <td>46.65</td>
-  </tr>
-</table>
-
-![cifar100, 500 clients, 2% participation rate, alpha = 0.3](_static/accuracy_comparison_cifar100_dirichlet_0.3_clients500.png)
-
-#### Tiny-ImageNet, Dir(0.3), 500 clients, 2% participation.
-
-
-<table>
-  <tr>
-    <td></td>
-    <td colspan="2">Accuracy @500R</td>
-    <td colspan="2">Accuracy @1000R</td>
-  </tr>
-  <tr>
-    <td>Method</td>
-    <td>Paper</td>
-    <td>This repo</td>
-    <td>Paper</td>
-    <td>This repo</td>
-  </tr>
-  <tr>
-    <td>FedAvg</td>
     <td>23.63</td>
     <td>22.62</td>
     <td>29.48</td>
@@ -488,6 +469,10 @@ python -m fedmlb.main --multirun dataset_config.dataset="cifar100","tiny-imagene
   </tr>
   <tr>
     <td>FedMLB</td>
+    <td>32.03</td>
+    <td>36.63</td>
+    <td>42.61</td>
+    <td>46.65</td>
     <td>28.39</td>
     <td>26.84</td>
     <td>33.67</td>
@@ -495,7 +480,8 @@ python -m fedmlb.main --multirun dataset_config.dataset="cifar100","tiny-imagene
   </tr>
 </table>
 
-![tiny imagenet, 500 clients, 2% participation rate, alpha = 0.3](_static/accuracy_comparison_tiny-imagenet_dirichlet_0.3_clients500.png)
+<img src="_static/accuracy_comparison_cifar100_dirichlet_0.3_clients500.png" width="400"/> <img src="_static/accuracy_comparison_tiny-imagenet_dirichlet_0.3_clients500.png" width="400"/>
+
 
 ### Table 3
 
