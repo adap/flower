@@ -148,7 +148,7 @@ python -m fedmlb.dataset_preparation dataset_config.alpha_dirichlet=0.6
 python -m fedmlb.dataset_preparation dataset_config.alpha_dirichlet=0.6 total_clients=500
 ```
 Note that, to reproduce those settings, we leverage the `.txt` files
-contained in the`client_data` folder in this project. Such files store
+contained in the `client_data` folder in this project. Such files store
 the specific id of examples in the dataset that are associated with a specific client. 
 For example, the file `client_data/cifar100/balanced/dirichlet0.3_clients100.txt` contains the
 examples for the default setting of this repository. 
