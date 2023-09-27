@@ -95,7 +95,7 @@ python -m niid_bench.main_fedprox
 To change the configuration such as dataset or hyperparameters, specify them as part of the command line arguments.
 
 ```bash
-python -m niid_bench.main_fedprox dataset_name=mnist partitioning=iid model_t=niid_bench.models.CNNMnist model.input_dim=256
+python -m niid_bench.main_fedprox dataset_name=mnist partitioning=iid
 ```
 
 
