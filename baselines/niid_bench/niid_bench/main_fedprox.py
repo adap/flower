@@ -43,7 +43,10 @@ def main(cfg: DictConfig) -> None:
     # 3. Define your clients
     # Define a function that returns another function that will be used during
     # simulation to instantiate each individual client
-    
+    if "mnist" in cfg.dataset_name:
+        cfg.model.input_dim = 256
+        cfg.model_t = 'niid_bench.models.CNNMnist'
+
     client_fn = gen_client_fn(
         trainloaders,
         valloaders,
