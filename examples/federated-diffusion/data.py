@@ -3,7 +3,6 @@ from collections import Counter
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import Subset, random_split
 from torchvision.datasets import CIFAR10
@@ -32,40 +31,6 @@ def load_iid_data():
     )
 
     dataset = CIFAR10("./dataset", train=True, download=True, transform=transform)
-    dataloader = torch.utils.data.DataLoader(
-        dataset, batch_size=train_batch_size, shuffle=True
-    )
-
-    classes = (
-        "plane",
-        "car",
-        "bird",
-        "cat",
-        "deer",
-        "dog",
-        "frog",
-        "horse",
-        "ship",
-        "truck",
-    )
-
-    # functions to show an image
-    def imshow(img):
-        img = img / 2 + 0.5  # unnormalize
-        npimg = img.numpy()
-        plt.figure(figsize=(5, 2))
-        plt.imshow(np.transpose(npimg, (1, 2, 0)))
-
-    # get some random training images
-    dataiter = iter(dataloader)
-    images, labels = next(dataiter)
-
-    # show images
-    imshow(torchvision.utils.make_grid(images))
-    # print labels
-    print(" ".join(f"{classes[labels[j]]:5s}" for j in range(train_batch_size)))
-
-    # ----------------------------------
 
     # Split training set into N partitions to simulate the individual dataset
     partition_size = len(dataset) // PARAMS.num_clients
@@ -102,9 +67,10 @@ def get_dataset_cifar10_noniid(num_users, n_class, nsamples, rate_unbalance):
 def cifar_extr_noniid(train_dataset, num_users, n_class, num_samples, rate_unbalance):
     num_shards_train, num_imgs_train = int(50000 / num_samples), num_samples
     num_classes = 10
-    print(num_shards_train, num_imgs_train)
+
     assert n_class * num_users <= num_shards_train
     assert n_class <= num_classes
+
     idx_shard = [i for i in range(num_shards_train)]
     dict_users_train = {i: np.array([]) for i in range(num_users)}
     idxs = np.arange(num_shards_train * num_imgs_train)
@@ -174,8 +140,6 @@ def load_noniid_data(train_dataset_cifar, user_groups_train_cifar):
 
         for idx in array:
             class_no.append(train_dataset_cifar[int(idx)][1])
-        counts = Counter(class_no)
-        print(client_no, counts)
 
     # combine all index list into one nested list
     indices = [val for d in [user_groups_train_cifar] for val in d.values()]

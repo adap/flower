@@ -2,9 +2,9 @@ import json
 import pickle
 from collections import OrderedDict
 
+import flwr as fl
 import torch
 
-import flwr as fl
 from centralized import get_model, train, validate
 from data import load_datasets
 from config import PARAMS
@@ -36,8 +36,6 @@ def save_personalization_weight(cid, model, personalization_layers):
 
 
 def load_personalization_weight(cid, model, personalization_layers):
-    import pickle
-
     weights = get_parameters(model)
     with open(f"Per_{cid}.pickle", "rb") as file_weight:
         personalized_weight = pickle.load(file_weight)
@@ -70,8 +68,6 @@ class FlowerClient(fl.client.NumPyClient):
         # Read values from config
         server_round = config["server_round"]
 
-        print("Personalized_layers: ", self.personalization_layers)
-
         cpu = False
         if PARAMS.device == "cpu":
             cpu = True
@@ -102,8 +98,8 @@ class FlowerClient(fl.client.NumPyClient):
 
         server_round = config["server_round"]
 
-        precision, recall = validate(
-            self.model, self.cid, server_round, self.timesteps, self.device
+        precision, recall, num_examples = validate(
+            self.model, self.cid, self.timesteps, self.device
         )
         results = {
             "precision": precision,
@@ -113,11 +109,9 @@ class FlowerClient(fl.client.NumPyClient):
         }
         json.dump(results, open("logs.json", "a"))
 
-        loss = 1.0
-        num_examples_test = 100
         return (
-            loss,
-            num_examples_test,
+            1.0,
+            num_examples,
             {"precision": precision, "recall": recall, "cid": self.cid},
         )
 

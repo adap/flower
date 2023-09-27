@@ -1,0 +1,9 @@
+accelerate==0.23.0
+diffusers==0.21.2
+flwr>=1.0, <2.0
+matplotlib==3.8.0
+numpy==1.26.0
+torch==1.13.1
+torchvision==0.14.1
+tqdm==4.65.0
+wandb==0.15.11

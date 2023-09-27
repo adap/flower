@@ -3,13 +3,13 @@ import time
 import torch
 import torch.nn.functional as F
 import torchvision.transforms as transforms
+import wandb
 from accelerate import Accelerator
 from diffusers import DDPMPipeline, DDPMScheduler, UNet2DModel
 from diffusers.optimization import get_cosine_schedule_with_warmup
 from torchvision.datasets import CIFAR10
 from tqdm import tqdm
 
-import wandb
 from config import PARAMS
 from utils import IPR, make_grid, prepare_tensors
 
@@ -169,9 +169,7 @@ def train(model, train_dataloader, cid, server_round, epochs, timesteps, cpu):
                     print("Could not save images in wandb")
 
 
-def validate(model, cid, server_round, timesteps, device):
-    print(f"Evaluating cid: {cid}, Server round: {server_round}")
-
+def validate(model, cid, timesteps, device):
     mixed_precision = "fp16"
     gradient_accumulation_steps = 1
 
@@ -202,7 +200,6 @@ def validate(model, cid, server_round, timesteps, device):
     cifar10_1k_val_dataloader = torch.utils.data.DataLoader(
         val_dataset, batch_size=4, shuffle=True
     )
-    print(len(cifar10_1k_val_dataloader))
 
     eval_batch_size = 100  # 100
     all_images = []
@@ -214,12 +211,10 @@ def validate(model, cid, server_round, timesteps, device):
         ).images
         all_images.append(images)
     gen_images = [item for sublist in all_images for item in sublist]
-    print("no. of gen_images:", len(gen_images))
     # Make a grid out of the images
-    orig_tensor, gen_tensor, target = prepare_tensors(
+    orig_tensor, gen_tensor, _ = prepare_tensors(
         cifar10_1k_val_dataloader, gen_images, num=1000
     )
-    print("shape of test tensors:", orig_tensor.shape, gen_tensor.shape)
 
     ipr = IPR(4, 3, 1000)  # args.batch_size, args.k, args.num_samples
     if device == "cuda":
@@ -235,7 +230,4 @@ def validate(model, cid, server_round, timesteps, device):
     print("precision =", metric.precision, " Cid: ", cid)
     print("recall =", metric.recall, " Cid: ", cid)
 
-    # metric.precision = round(random.uniform(0, 1), 1)
-    # metric.precision = round(random.uniform(0, 1), 1)
-
-    return metric.precision, metric.recall
+    return metric.precision, metric.recall, subset_size

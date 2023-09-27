@@ -2,11 +2,11 @@ import json
 import os
 from collections import OrderedDict
 
-import torch
-
 import flwr as fl
-from centralized import get_model
+import torch
 from flwr.server import History
+
+from centralized import get_model
 
 
 def trainconfig(server_round):
@@ -34,7 +34,6 @@ class ClientManager(fl.server.SimpleClientManager):
         # First round and odd rounds
         if server_round >= 1 and num_clients <= 20:
             available_cids_sorted = sorted(available_cids, key=int)
-            num_sections = (len(available_cids_sorted) + 3) // 4  # hardware constraint
             section = []
             for j in range(4):
                 index = ((server_round - 1) * 4 + j) % len(available_cids_sorted)
@@ -121,7 +120,7 @@ class SaveModelAndMetricsStrategy(fl.server.strategy.FedAvg):
         results,
         failures,
     ):
-        aggregated_loss = "no agg loss"
+        aggregated_loss = 1.0
         
         if server_round > 5:
             cid_list = [r.metrics["cid"] for _, r in results]
