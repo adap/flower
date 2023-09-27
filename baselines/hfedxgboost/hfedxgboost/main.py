@@ -25,7 +25,7 @@ from flwr.common import  Scalar
 from hfedxgboost.client import FL_Client
 from flwr.server.client_manager import  SimpleClientManager
 from hydra.utils import instantiate
-from hfedxgboost.utils import results_writer,results_writer_centralized
+from hfedxgboost.utils import results_writer,results_writer_centralized, Early_Stop
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.
@@ -49,6 +49,7 @@ def main(cfg: DictConfig) -> None:
     else:
         dataset_name=cfg.dataset.dataset_name
         task_type=cfg.dataset.task.task_type
+        early_stopper=Early_Stop(cfg)
         X_train,y_train,X_test,y_test=load_single_dataset(task_type,dataset_name,train_ratio=cfg.dataset.train_ratio)
         print("Feature dimension of the dataset:", X_train.shape[1])
         print("Size of the trainset:", X_train.shape[0])
@@ -124,7 +125,8 @@ def main(cfg: DictConfig) -> None:
         # Start the simulation
         history = fl.simulation.start_simulation(
             client_fn=client_fn,
-            server=FL_Server(client_manager=SimpleClientManager(), strategy=strategy),
+            server=FL_Server(client_manager=SimpleClientManager(),early_stopper=early_stopper,
+                              strategy=strategy),
             num_clients=client_pool_size,
             client_resources={"num_cpus": cfg.run_experiment.num_cpus_per_client},
             config=ServerConfig(num_rounds=num_rounds),

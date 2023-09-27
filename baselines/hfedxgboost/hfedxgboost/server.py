@@ -21,7 +21,7 @@ from flwr.server.strategy import Strategy
 from torch.utils.data import DataLoader
 from xgboost import XGBClassifier, XGBRegressor
 from hfedxgboost.models import CNN
-from hfedxgboost.utils import single_tree_preds_from_each_client,test
+from hfedxgboost.utils import single_tree_preds_from_each_client,test,Early_Stop
 from flwr.server.server import (
     fit_clients,
     evaluate_clients,
@@ -41,7 +41,9 @@ class FL_Server(fl.server.Server):
     """Flower server."""
 
     def __init__(
-        self,*, client_manager: ClientManager, strategy: Optional[Strategy] = None
+        self,*, client_manager: ClientManager, 
+        early_stopper: Early_Stop,
+        strategy: Optional[Strategy] = None
     ) -> None:
         self._client_manager = client_manager
         self.parameters = Parameters(
@@ -49,6 +51,7 @@ class FL_Server(fl.server.Server):
         )
         self.strategy = strategy
         self.max_workers = None
+        self.early_stopper=early_stopper
 
     # pylint: disable=too-many-locals
     def fit(self, num_rounds: int, timeout: Optional[float]) -> History:
@@ -96,7 +99,8 @@ class FL_Server(fl.server.Server):
                 history.add_metrics_centralized(
                     server_round=current_round, metrics=metrics_cen
                 )
-
+            if self.early_stopper.early_stop(res_cen):
+                break
             # Evaluate model on a sample of available clients
             res_fed = self.evaluate_round(server_round=current_round, timeout=timeout)
             if res_fed:

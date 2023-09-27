@@ -19,9 +19,9 @@ from torch.utils.data import DataLoader, Dataset, TensorDataset
 from xgboost import XGBClassifier, XGBRegressor
 import numpy as np
 import torch
-import torch, torch.nn as nn
-from torchmetrics import Accuracy, MeanSquaredError
 from tqdm import tqdm
+from hydra.utils import instantiate
+import csv
 
 dataset_tasks={
         "YearPredictionMSD":"REG",
@@ -109,6 +109,17 @@ def clients_preformance_on_local_data(config: DictConfig,
 def single_tree_prediction(
     tree: Union[XGBClassifier, XGBRegressor], n_tree: int, dataset: NDArray
 ) -> Optional[NDArray]:
+    """ 
+    This function performs a single tree prediction using the provided tree object on the given dataset. The function accepts the following parameters:
+
+        tree (either XGBClassifier or XGBRegressor): The tree object used for prediction.
+        n_tree (int): The index of the tree to be used for prediction.
+        dataset (NDArray): The dataset for which the prediction is to be made.
+
+    The function returns an optional NDArray object representing the prediction result. 
+    If the provided n_tree is larger than the total number of trees in the tree object, 
+    a warning message is printed and None is returned. """
+
     num_t = len(tree.get_booster().get_dump())
     if n_tree > num_t:
         print(
@@ -178,11 +189,9 @@ def single_tree_preds_from_each_client(
         tree_dataset = TensorDataset(preds_from_all_trees_from_all_clients,y_train)
         return get_dataloader(tree_dataset, "tree", batch_size)
 
-from hydra.utils import instantiate
 
 def test(
     cfg,
-    #task_type: str,
     net: CNN,
     testloader: DataLoader,
     device: torch.device,
@@ -210,33 +219,43 @@ def test(
 
     return total_loss / n_samples, total_result / n_samples, n_samples 
 
-#still don't know where to put it
+
 class Early_Stop:
-    def __init__(self,task_type, num_waiting_rounds=5):
-        self.num_waiting_rounds = num_waiting_rounds
+    def __init__(self,cfg):
+        self.num_waiting_rounds = cfg.dataset.early_stop_patience_rounds
         self.counter = 0
         self.min_loss = float('inf')
-        if task_type=="REG":
-            self.best_res=float('inf') #mse
-            self.compare_fn=min
-        if task_type =="BINARY":
-            self.best_res=float('inf') #accuracy
-            self.compare_fn=max
+        self.metric_value=None
 
-    def early_stop(self, loss, res):
-        if self.compare_fn(res,self.best_res) != self.best_res:
-            self.best_res=res
+    def early_stop(self, res) -> Optional[Tuple[float,float]]:
+        """
+        check if the model made any progress in <int> number of rounds, if it didn't it will
+        return the best result and the server will stop runing the fit function, if it did
+        it will return None, and won't stop the server.
+        Parameters:
+            res: tuple of 2 elements, res[0] is a float that indicate the loss,
+            res[1] is actually a 1 element dictionary that looks like this 
+            {'Accuracy': tensor(0.8405)}
+        Returns:
+            Optional[Tuple[float,float]]: (best loss the model achieved,
+            best metric value associated with that loss) 
+        """
+        loss=res[0] 
+        metric_val=list(res[1].values())[0].item()
         if loss < self.min_loss:
             self.min_loss = loss
+            self.metric_value=metric_val
             self.counter = 0
         elif loss > (self.min_loss):
             self.counter += 1
             if self.counter >= self.num_waiting_rounds:
-                return self.best_res
+                print("That training is been stopped as the model achieve no progress with",
+                      "loss =",self.min_loss,
+                      "result =",self.metric_value)
+                return (self.metric_value,self.min_loss )
         return None
 
 #results 
-import csv
 class results_writer:
     def __init__(self,cfg) -> None:
         self.dataset_name=cfg.dataset.dataset_name
@@ -256,6 +275,15 @@ class results_writer:
             self.compare_fn=max
         self.best_res_round_num=0
     def extract_best_res(self,history) -> Tuple[float,int]:
+        """
+        This function takes in a history object and returns the best result and 
+        its corresponding round number.
+        Parameters:
+            history: a history object that contains metrics_centralized keys
+        Returns:
+            Tuple[float, int]: a tuple containing the best result (float) and 
+            its corresponding round number (int)
+        """
         for t in history.metrics_centralized.keys():
             l=list()
             print("history.metrics_centralized[t]",history.metrics_centralized[t])
@@ -265,17 +293,25 @@ class results_writer:
                     self.best_res_round_num=i[0]
         return (self.best_res,self.best_res_round_num)
     def create_res_csv(self,filename)-> None:
-        #call that only once :)
         fields = ['dataset_name', 'client_num' ,'n_estimators_client',
                    'num_rounds', 'xgb_max_depth', 'CNN_lr',
                    'best_res','best_res_round_num','num_iterations'] 
         with open(filename, 'w') as csvfile: 
-            # creating a csv writer object 
             csvwriter = csv.writer(csvfile) 
-            # writing the fields 
             csvwriter.writerow(fields) 
 
     def write_res(self,filename) -> None:
+        """
+        Th function is responsible for writing the results of the 
+        federated model to a CSV file. 
+
+        The function opens the specified file in 'a' (append) mode and creates a 
+        csvwriter object and add the dataset name, xgboost model's and CNN model's
+        hyper-parameters used, and the result.
+         
+        Parameters: 
+            filename: string that indicates the CSV file that will be written in.
+        """
         row=[str(self.dataset_name),
              str(self.client_num),
              str(self.n_estimators_client),
@@ -288,25 +324,25 @@ class results_writer:
         with open(filename, 'a') as csvfile: 
             csvwriter = csv.writer(csvfile)
             csvwriter.writerow(row)
+
+
 class results_writer_centralized:
     def __init__(self,cfg) -> None:
-        self.dataset_name=cfg.dataset.dataset_name
-        #self.task_type=cfg.dataset.task_type
-        self.n_estimators_client=cfg.xgboost_params_centralized.n_estimators
-        self.xgb_max_depth=cfg.xgboost_params_centralized.max_depth
-        self.tas_type=cfg.dataset.task.task_type
-        self.subsample=cfg.xgboost_params_centralized.subsample
-        self.learning_rate=cfg.xgboost_params_centralized.learning_rate
-        self.colsample_bylevel=cfg.xgboost_params_centralized.colsample_bylevel
-        self.colsample_bynode=cfg.xgboost_params_centralized.colsample_bynode
-        self.colsample_bytree=cfg.xgboost_params_centralized.colsample_bytree
-        self.alpha=cfg.xgboost_params_centralized.alpha
-        self.gamma=cfg.xgboost_params_centralized.gamma
-        self.num_parallel_tree=cfg.xgboost_params_centralized.num_parallel_tree
-        self.min_child_weight=cfg.xgboost_params_centralized.min_child_weight
+        self.dataset_name = cfg.dataset.dataset_name
+        self.n_estimators_client = cfg.xgboost_params_centralized.n_estimators
+        self.xgb_max_depth = cfg.xgboost_params_centralized.max_depth
+        self.tas_type = cfg.dataset.task.task_type
+        self.subsample = cfg.xgboost_params_centralized.subsample
+        self.learning_rate = cfg.xgboost_params_centralized.learning_rate
+        self.colsample_bylevel = cfg.xgboost_params_centralized.colsample_bylevel
+        self.colsample_bynode = cfg.xgboost_params_centralized.colsample_bynode
+        self.colsample_bytree = cfg.xgboost_params_centralized.colsample_bytree
+        self.alpha = cfg.xgboost_params_centralized.alpha
+        self.gamma = cfg.xgboost_params_centralized.gamma
+        self.num_parallel_tree = cfg.xgboost_params_centralized.num_parallel_tree
+        self.min_child_weight = cfg.xgboost_params_centralized.min_child_weight
 
     def create_res_csv(self,filename)-> None:
-        #call that only once :)
         fields = [  "dataset_name",
                     "n_estimators_client",
                     "xgb_max_depth",
@@ -328,6 +364,17 @@ class results_writer_centralized:
             csvwriter.writerow(fields) 
 
     def write_res(self,filename, result_train, result_test) -> None:
+        """
+        Th function is responsible for writing the results of the 
+        centralized model to a CSV file. 
+
+        The function opens the specified file in 'a' (append) mode and creates a 
+        csvwriter object and add the dataset name, xgboost's 
+        hyper-parameters used, and the result.
+         
+        Parameters: 
+            filename: string that indicates the CSV file that will be written in.
+        """
         row=[str(self.dataset_name),
             str(self.n_estimators_client),
             str(self.xgb_max_depth),
