@@ -4,17 +4,19 @@ Optionally, also define a new Server class (please note this is not needed in mo
 settings).
 """
 
-from logging import DEBUG, INFO
-from flwr.common.logger import log
 import timeit
+from logging import DEBUG, INFO
 from typing import List, Optional, Tuple
-from flwr.server.server import Server, evaluate_clients
+
+from flwr.common.logger import log
 from flwr.common.typing import EvaluateRes
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
+from flwr.server.server import Server, evaluate_clients
 
 
 class PowerOfChoiceServer(Server):
+    """Class that implements power of choice server."""
 
     # pylint: disable=too-many-locals
     def fit(self, num_rounds: int, timeout: Optional[float]) -> History:
@@ -52,7 +54,7 @@ class PowerOfChoiceServer(Server):
                 server_round=current_round,
                 timeout=timeout,
             )
-            
+
             if res_fit is not None:
                 parameters_prime, fit_metrics, _ = res_fit  # fit_metrics_aggregated
                 if parameters_prime:
@@ -95,13 +97,12 @@ class PowerOfChoiceServer(Server):
         elapsed = end_time - start_time
         log(INFO, "FL finished in %s", elapsed)
         return history
-    
+
     def evaluate_first_phase(
         self,
         server_round: int,
         timeout: Optional[float],
-    ) -> Optional[List[Tuple[ClientProxy, EvaluateRes]]
-    ]:
+    ) -> Optional[List[Tuple[ClientProxy, EvaluateRes]]]:
         """Estimate local losses on a number of clients."""
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_evaluate(
@@ -111,7 +112,11 @@ class PowerOfChoiceServer(Server):
             first_phase=True,
         )
         if not client_instructions:
-            log(INFO, "evaluate_first_phase %s: no clients selected, cancel", server_round)
+            log(
+                INFO,
+                "evaluate_first_phase %s: no clients selected, cancel",
+                server_round,
+            )
             return None
         log(
             DEBUG,
@@ -138,7 +143,9 @@ class PowerOfChoiceServer(Server):
         # Return results with client and losses
         return results
 
+
 class PowerOfChoiceCommAndCompVariant(Server):
+    """Class that implements power of choice server in its rpow variant."""
 
     # pylint: disable=too-many-locals
     def fit(self, num_rounds: int, timeout: Optional[float]) -> History:
@@ -173,7 +180,7 @@ class PowerOfChoiceCommAndCompVariant(Server):
                 server_round=current_round,
                 timeout=timeout,
             )
-            
+
             if res_fit is not None:
                 parameters_prime, fit_metrics, _ = res_fit  # fit_metrics_aggregated
                 if parameters_prime:
@@ -213,7 +220,6 @@ class PowerOfChoiceCommAndCompVariant(Server):
                 # Update the Atmp list with the losses returned by the clients
                 if results is not None:
                     self.strategy.update_atmp(results)
-                    
 
         # Bookkeeping
         end_time = timeit.default_timer()

@@ -1,11 +1,20 @@
+"""Plot a pickle file containing history of simulation."""
+
 import argparse
-from logging import INFO
 import os
 import pickle
+from logging import INFO
+
 from flwr.common.logger import log
-from power_of_choice.utils import plot_metrics_from_histories, plot_variances_training_loss_from_history
+
+from power_of_choice.utils import (
+    plot_metrics_from_histories,
+    plot_variances_training_loss_from_history,
+)
+
 
 def plot_multiplot(metrics_type, paths):
+    """Plot a group of metrics in one figure."""
     num_plots = len(paths)
     titles = []
     histories = []
@@ -14,7 +23,7 @@ def plot_multiplot(metrics_type, paths):
         title = input(f"Enter title for plot {i + 1}/{num_plots}: ")
         titles.append(title)
 
-    for i, (path, title) in enumerate(zip(paths, titles)):
+    for path, title in enumerate(zip(paths, titles)):
         with open(path, "rb") as pkl_file:
             history_data = pickle.load(pkl_file)
 
@@ -36,15 +45,26 @@ def plot_multiplot(metrics_type, paths):
     else:
         plot_variances_training_loss_from_history(histories, save_plot_path)
 
-    
 
 def main():
+    """Plot a group of metrics in one figure."""
     parser = argparse.ArgumentParser(description="Plot Distributed Losses from History")
-    parser.add_argument("--metrics-type", type=str, choices=["paper_metrics", "variance"], help="Type of metrics to plot")
-    parser.add_argument("paths", type=str, nargs='+', help="Paths to the pickle files containing history data")
+    parser.add_argument(
+        "--metrics-type",
+        type=str,
+        choices=["paper_metrics", "variance"],
+        help="Type of metrics to plot",
+    )
+    parser.add_argument(
+        "paths",
+        type=str,
+        nargs="+",
+        help="Paths to the pickle files containing history data",
+    )
     args = parser.parse_args()
 
     plot_multiplot(args.metrics_type, args.paths)
+
 
 if __name__ == "__main__":
     main()

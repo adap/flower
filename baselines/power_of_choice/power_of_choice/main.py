@@ -3,28 +3,32 @@
 It includes processioning the dataset, instantiate strategy, specify how the global
 model is going to be evaluated, etc. At the end, this script saves the results.
 """
+import os
+
 # these are the basic packages you'll need here
 # feel free to remove some if aren't needed
 from logging import INFO
-from math import floor
-import os
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
+
+import flwr as fl
+import hydra
+import numpy as np
 from flwr.common.logger import log
 from flwr.common.typing import Metrics
+from flwr.server.client_manager import SimpleClientManager
 from flwr.server.server import Server
 from flwr.server.strategy.fedavg import FedAvg
-from power_of_choice.server import PowerOfChoiceCommAndCompVariant
-from power_of_choice.models import create_MLP_model, create_CNN_model
-from power_of_choice.utils import save_results_as_pickle
-from power_of_choice.server import PowerOfChoiceServer
-from power_of_choice.client import gen_client_fn
-from flwr.server.client_manager import SimpleClientManager
-import hydra
-import flwr as fl
-import numpy as np
+from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
+
+from power_of_choice.client import gen_client_fn
+from power_of_choice.models import create_CNN_model, create_MLP_model
+from power_of_choice.server import PowerOfChoiceCommAndCompVariant, PowerOfChoiceServer
+from power_of_choice.utils import save_results_as_pickle
+
+enable_tf_gpu_growth()
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -63,7 +67,7 @@ def main(cfg: DictConfig) -> None:
         "include_dashboard": False,
     }
 
-    # get a function that 
+    # get a function that
 
     # get a function that will be used to construct the config that the client's
     # fit() method will received
@@ -73,9 +77,9 @@ def main(cfg: DictConfig) -> None:
         def fit_config(server_round: int):
             """Return training configuration dict for each round.
 
-            Take batch size, local epochs and number of samples of each client from the server config
+            Take batch size, local epochs and number of samples of each client from the
+            server config
             """
-
             # learning_rate should be decayed by half every 150 rounds
             exp = server_round // 150
             learning_rate = initial_learning_rate / pow(2, exp)
@@ -84,19 +88,24 @@ def main(cfg: DictConfig) -> None:
                 "batch_size": 32,
                 "local_epochs": 1 if server_round < 2 else 2,
                 "fraction_samples": None,
-                "learning_rate": learning_rate
+                "learning_rate": learning_rate,
             }
 
             config["batch_size"] = cfg.batch_size
             config["local_epochs"] = cfg.local_epochs
             config["fraction_samples"] = cfg.fraction_samples
 
-            print(f"Round {server_round} training config: batch_size={config['batch_size']}, local_epochs={config['local_epochs']}, learning_rate={config['learning_rate']}")
+            print(
+                f"""Round {server_round} training config:
+                batch_size={config['batch_size']},
+                local_epochs={config['local_epochs']},
+                learning_rate={config['learning_rate']}"""
+            )
 
             return config
-        
+
         return fit_config
-    
+
     def get_fit_metrics_aggregation_fn():
         def fit_metrics_aggregation_fn(results: List[Tuple[int, Metrics]]) -> Metrics:
             # Initialize lists to store training losses
@@ -104,8 +113,8 @@ def main(cfg: DictConfig) -> None:
 
             # Extract training losses and client counts from results
             for _, metrics in results:
-                if 'training_loss' in metrics:
-                    training_loss = metrics['training_loss']
+                if "training_loss" in metrics:
+                    training_loss = metrics["training_loss"]
                     training_losses.append(training_loss)
 
             # Calculate the variance and average of training loss
@@ -114,21 +123,21 @@ def main(cfg: DictConfig) -> None:
 
             # Create the aggregated metrics dictionary
             aggregated_metrics = {
-                'variance_training_loss': variance_training_loss,
-                'average_training_loss': average_training_loss
+                "variance_training_loss": variance_training_loss,
+                "average_training_loss": average_training_loss,
             }
 
             return aggregated_metrics
-        
+
         return fit_metrics_aggregation_fn
-    
+
     def get_on_evaluate_config(is_cpow: bool, b: Optional[int] = None):
         def evaluate_config(server_round: int):
             """Return evaluation configuration dict for each round.
 
-            In case we are using cpow variant, we set b to the value specified in the configuration file.
+            In case we are using cpow variant, we set b to the value specified in the
+            configuration file.
             """
-
             config = {
                 "is_cpow": False,
             }
@@ -138,19 +147,18 @@ def main(cfg: DictConfig) -> None:
                 config["b"] = b
 
             return config
-        
+
         return evaluate_config
-    
+
     def get_evaluate_fn(model):
         """Return an evaluation function for server-side evaluation."""
-        
         print(f"Current folder is {os.getcwd()}")
 
         test_folder = "fmnist"
         if cfg.is_cnn:
             test_folder = "cifar10"
 
-        # Load data and model here to avoid the overhead of doing it in `evaluate` itself
+        # Load data and model here to avoid the overhead of doing it in `evaluate`
         x_test = np.load(os.path.join(test_folder, "x_test.npy"))
         y_test = np.load(os.path.join(test_folder, "y_test.npy"))
 
@@ -165,13 +173,15 @@ def main(cfg: DictConfig) -> None:
             return loss, {"accuracy": accuracy}
 
         return evaluate
-    
+
     if cfg.is_cnn:
         server_model = create_CNN_model()
     else:
         server_model = create_MLP_model()
-    
-    server_model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+
+    server_model.compile(
+        "adam", "sparse_categorical_crossentropy", metrics=["accuracy"]
+    )
 
     is_cpow = False
     is_rpow = False
@@ -183,15 +193,15 @@ def main(cfg: DictConfig) -> None:
     elif cfg.variant == "rand":
         is_rand = True
 
-    
     # instantiate strategy according to config. Here we pass other arguments
     # that are only defined at run time.
     if is_rpow:
-        # Build Atmp dictionary with number of clients items with key = client id and value = inf
+        # Build Atmp dictionary with num_of_clients items
+        # with key=client_id and value=inf
         atmp = {}
         for i in range(cfg.num_clients):
             atmp[str(i)] = float("inf")
-        
+
         # Instantiate strategy
         strategy = instantiate(
             cfg.strategy,
@@ -211,7 +221,7 @@ def main(cfg: DictConfig) -> None:
             on_fit_config_fn=get_on_fit_config(),
             evaluate_fn=get_evaluate_fn(server_model),
             on_evaluate_config_fn=get_on_evaluate_config(is_cpow, cfg.b),
-            fit_metrics_aggregation_fn=get_fit_metrics_aggregation_fn()
+            fit_metrics_aggregation_fn=get_fit_metrics_aggregation_fn(),
         )
     else:
         # Instantiate strategy with base config
@@ -220,14 +230,16 @@ def main(cfg: DictConfig) -> None:
             on_fit_config_fn=get_on_fit_config(),
             evaluate_fn=get_evaluate_fn(server_model),
             on_evaluate_config_fn=get_on_evaluate_config(is_cpow, cfg.b),
-            fit_metrics_aggregation_fn=get_fit_metrics_aggregation_fn()
+            fit_metrics_aggregation_fn=get_fit_metrics_aggregation_fn(),
         )
 
     client_manager = SimpleClientManager()
 
     if is_rpow:
         # Instantiate rpow server with strategy and client manager
-        server = PowerOfChoiceCommAndCompVariant(strategy=strategy, client_manager=client_manager)
+        server = PowerOfChoiceCommAndCompVariant(
+            strategy=strategy, client_manager=client_manager
+        )
     elif is_rand:
         log(INFO, "Using FedAvg strategy")
         server = Server(strategy=strategy, client_manager=client_manager)
@@ -248,8 +260,13 @@ def main(cfg: DictConfig) -> None:
             "num_cpus": cfg.client_resources.num_cpus,
             "num_gpus": cfg.client_resources.num_gpus,
         },
-        server = server,
+        server=server,
         ray_init_args=ray_init_args,
+        actor_kwargs={
+            "on_actor_init_fn": enable_tf_gpu_growth
+            # Enable GPU growth upon actor init
+            # does nothing if `num_gpus` in client_resources is 0.0
+        },
     )
 
     # 6. Save your results
@@ -283,5 +300,7 @@ def main(cfg: DictConfig) -> None:
     #     save_path,
     #     (file_suffix),
     # )
+
+
 if __name__ == "__main__":
     main()
