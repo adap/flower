@@ -73,9 +73,9 @@ poetry install
 Run `Poetry shell` in your terminal to activate the environment. 
 ## Running the Experiments
 
-:warning: _Provide instructions on the steps to follow to run all the experiments._
 ```bash
 #to run all the experiments for the centralized model with the original paper config for all the datasets
+#gives the ouput shown in table 1
 python -m hfedxgboost.main --config-name "centralized_basline_all_datasets_paper_config"
 
 #to run all the experiments for the centralized model
@@ -132,15 +132,36 @@ poetry run -m <baseline-name>.main  <override_some_hyperparameters>
 :warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
 
 ```bash
-# it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameteres
+# it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameters
 
-poetry run -m <baseline-name>.main --multirun num_client_per_round=5,10,50 dataset=femnist,cifar10
+python -m hfedxgboost.main --multirun clients="cod_rna_2_clients","cod_rna_5_clients","cod_rna_2_clients" dataset=cod_rna
 # the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
 
 [Now show a figure/table displaying the results of the above command]
 
 # add more commands + plots for additional experiments.
 ```
+### Table 1
+
+| Dataset | task type | test result | 
+| :---: | :---: | :---: |
+| a9a | Binary classification | .84 |
+| cod-rna | Binary classification | .97 |
+| ijcnn1 | Binary classification | .98 |
+| abalone | Regression | 4.6 |
+| cpusmall | Regression | 9 |
+| space_ga | Regression | .032 |
+| YearPredictionMSD | Regression | 76.41 |
+
+### Table 2 a9a dataset
+Those results don't come from following the original paper hyper-parameters, the new hyper-parameters are specified in the config files at the clients folder
+|  no.of clients | server-side test result 
+| :---: | :---: |
+| 2 | .84
+| 5 | .84
+| 10 | .83
+
+
 ## How to add a new dataset
 
 This code doesn't cover all the datasets from the paper yet, so if you wish to add a new dataset, here are the steps:
