@@ -1,7 +1,7 @@
 ---
 title: Model-Contrastive Federated Learning
 url: https://arxiv.org/abs/2103.16257
-labels: [data heterogeneity, image classification]
+labels: [data heterogeneity, image classification, cross-silo, constrastive-learning]
 dataset: [CIFAR-10, CIFAR-100] # list of datasets you include in your baseline
 ---
 
