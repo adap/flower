@@ -16,20 +16,23 @@ dataset: [Femnist, Shakespeare] # list of datasets you include in your baseline
 
 ## About this baseline
 
-****What’s implemented:**** : I implement ~~
+****What’s implemented:**** : **We reimplemented the experiments from the paper 'FedMeta: Federated Meta-Learning with Fast Convergence and Efficient Communication' by Fei Chen (2018). which proposed the FedMeta(MAML & Meta-SGD) algorithm. Specifically, we replicate the results from Table 2 and Figure 2 of the paper.**
 
-****Datasets:**** : Dataset~
+****Datasets:**** : **Femnist and Shakespeare from Leaf Federated Learning Dataset**
 
-****Hardware Setup:**** : Hardware Setup ~
+****Hardware Setup:**** : **These experiments were run on a machine with 16 CPU threads and 1 GPU(GeForce RTX 2080 Ti). However, the FedMeta experiment using the Shakespeare dataset required more computing power (more than 4 GPUs).**
 
-****Contributors:**** : Jinsoo Kim and Kangyoon Lee
+****Contributors:**** : **Jinsoo Kim and Kangyoon Lee**
 
 
 ## Experimental Setup
 
-****Task:**** :warning: *_what’s the primary task that is being federated? (e.g. image classification, next-word prediction). If you have experiments for several, please list them_*
+****Task:**** : **A comparison task of four algorithms(FedAvg, FedAvg(Meta), FedMeta(MAML), FedMeta(Meta-SGD)) in the categories of Image Classification and next-word prediction.**
 
-****Model:**** :warning: *_provide details about the model you used in your experiments (if more than use a list). If your model is small, describing it as a table would be :100:. Some FL methods do not use an off-the-shelve model (e.g. ResNet18) instead they create your own. If this is your case, please provide a summary here and give pointers to where in the paper (e.g. Appendix B.4) is detailed._*
+****Model:**** :This directory implements two models:
+* A two-layer CNN network as used in the FedMeta paper (see `models/Femnist_`). This is the model used by default.
+* A StackedLSTM model used in the FedMeta paper for Shakespeare (see `models/StackedLSTM`).
+**You can see more detail model at Apendix.A in paper**
 
 ****Dataset:**** :warning: *_Earlier you listed already the datasets that your baseline uses. Now you should include a breakdown of the details about each of them. Please include information about: how the dataset is partitioned (e.g. LDA with alpha 0.1 as default and all clients have the same number of training examples; or each client gets assigned a different number of samples following a power-law distribution with each client only instances of 2 classes)? if  your dataset is naturally partitioned just state “naturally partitioned”; how many partitions there are (i.e. how many clients)? Please include this an all information relevant about the dataset and its partitioning into a table._*
 
