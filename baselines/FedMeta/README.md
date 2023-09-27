@@ -16,18 +16,18 @@ dataset: [Femnist, Shakespeare] # list of datasets you include in your baseline
 
 ## About this baseline
 
-****What’s implemented:**** : **We reimplemented the experiments from the paper 'FedMeta: Federated Meta-Learning with Fast Convergence and Efficient Communication' by Fei Chen (2018). which proposed the FedMeta(MAML & Meta-SGD) algorithm. Specifically, we replicate the results from Table 2 and Figure 2 of the paper.**
+****What’s implemented:**** : We reimplemented the experiments from the paper 'FedMeta: Federated Meta-Learning with Fast Convergence and Efficient Communication' by Fei Chen (2018). which proposed the FedMeta(MAML & Meta-SGD) algorithm. Specifically, we replicate the results from Table 2 and Figure 2 of the paper.
 
-****Datasets:**** : **Femnist and Shakespeare from Leaf Federated Learning Dataset**
+****Datasets:**** : Femnist and Shakespeare from Leaf Federated Learning Dataset
 
-****Hardware Setup:**** : **These experiments were run on a machine with 16 CPU threads and 1 GPU(GeForce RTX 2080 Ti). However, the FedMeta experiment using the Shakespeare dataset required more computing power (more than 4 GPUs).**
+****Hardware Setup:**** : These experiments were run on a machine with 16 CPU threads and 1 GPU(GeForce RTX 2080 Ti). However, the FedMeta experiment using the Shakespeare dataset required more computing power (more than 4 GPUs).
 
-****Contributors:**** : **Jinsoo Kim and Kangyoon Lee**
+****Contributors:**** : Jinsoo Kim and Kangyoon Lee
 
 
 ## Experimental Setup
 
-****Task:**** : **A comparison task of four algorithms(FedAvg, FedAvg(Meta), FedMeta(MAML), FedMeta(Meta-SGD)) in the categories of Image Classification and next-word prediction.**
+****Task:**** : A comparison task of four algorithms(FedAvg, FedAvg(Meta), FedMeta(MAML), FedMeta(Meta-SGD)) in the categories of Image Classification and next-word prediction.
 
 ****Model:**** :This directory implements two models:
 * A two-layer CNN network as used in the FedMeta paper (see `models/Femnist_`). This is the model used by default.
