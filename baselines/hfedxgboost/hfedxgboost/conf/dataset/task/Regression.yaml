@@ -11,4 +11,4 @@ criterion:
 
 xgb:
   _target_:  xgboost.XGBRegressor
-  objective: "reg:squarederror"
+  objective: "reg:linear"

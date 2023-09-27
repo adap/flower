@@ -1,7 +1,7 @@
 ---
 defaults: 
   - dataset: cpusmall
-  - clients: cpusmall_10_clients
+  - clients: cpusmall_2_clients
 
 centralized: False
 device: "cpu"

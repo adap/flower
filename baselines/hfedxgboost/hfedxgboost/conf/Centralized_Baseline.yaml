@@ -1,7 +1,7 @@
 centralized: True
 defaults: 
-  - dataset: abalone
-  - xgboost_params_centralized: abalone_xgboost_centralized
+  - dataset: YearPredictionMSD
+  - xgboost_params_centralized: YearPredictionMSD_xgboost_centralized
 
 n_estimators_client: ${xgboost_params_centralized.n_estimators}
 task_type: ${dataset.task.task_type}
