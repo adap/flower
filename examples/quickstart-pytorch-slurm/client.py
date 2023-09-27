@@ -137,6 +137,6 @@ sleep(args.wait_for_server)
 
 # Start Flower client
 fl.client.start_numpy_client(
-    server_address=f"{args.server_address}:{args.port}",
+    server_address=f"{args.server_address}:{args.server_port}",
     client=FlowerClient(),
 )

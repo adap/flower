@@ -36,7 +36,7 @@ print(args)
 
 # Start Flower server
 fl.server.start_server(
-    server_address=f"{args.server_address}:{args.port}",
+    server_address=f"{args.server_address}:{args.server_port}",
     config=fl.server.ServerConfig(num_rounds=3),
     strategy=strategy,
 )
