@@ -129,17 +129,26 @@ poetry run -m <baseline-name>.main  <override_some_hyperparameters>
 
 ## Expected Results
 
-:warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
 
 ```bash
-# it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameters
+#results in table 2
+python -m hfedxgboost.main --multirun clients="a9a_2_clients","a9a_5_clients","a9a_10_clients" dataset=a9a
 
-python -m hfedxgboost.main --multirun clients="cod_rna_2_clients","cod_rna_5_clients","cod_rna_2_clients" dataset=cod_rna
-# the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
+#results in table 3
+python -m hfedxgboost.main --multirun clients="cod_rna_2_clients","cod_rna_5_clients","cod_rna_10_clients" dataset=cod_rna
 
-[Now show a figure/table displaying the results of the above command]
+#results in table 4
+python -m hfedxgboost.main --multirun clients="ijcnn1_2_clients","ijcnn1_5_clients","ijcnn1_10_clients" dataset=ijcnn1
 
-# add more commands + plots for additional experiments.
+#results in table 5
+python -m hfedxgboost.main --multirun clients="space_ga_2_clients","space_ga_5_clients","space_ga_10_clients" dataset=space_ga
+
+#results in table 6
+python -m hfedxgboost.main --multirun clients="abalone_2_clients","abalone_5_clients","abalone_10_clients" dataset=abalone
+
+#results in table 7
+python -m hfedxgboost.main --multirun clients="cpusmall_2_clients","cpusmall_5_clients","cpusmall_10_clients" dataset=cpusmall
+
 ```
 ### Table 1
 
@@ -153,13 +162,32 @@ python -m hfedxgboost.main --multirun clients="cod_rna_2_clients","cod_rna_5_cli
 | space_ga | Regression | .032 |
 | YearPredictionMSD | Regression | 76.41 |
 
+### Those results don't come from following the original paper hyper-parameters, the new hyper-parameters are specified in the config files in the `clients` folder
+
 ### Table 2 a9a dataset
-Those results don't come from following the original paper hyper-parameters, the new hyper-parameters are specified in the config files at the clients folder
 |  no.of clients | server-side test result 
 | :---: | :---: |
 | 2 | .84
 | 5 | .84
 | 10 | .83
+### Table 3 cod_rna dataset
+|  no.of clients | server-side test result 
+| :---: | :---: |
+| 2 | .96
+| 5 | .96
+| 10 | .95
+### Table 4 ijcnn1 dataset
+|  no.of clients | server-side test result 
+| :---: | :---: |
+| 2 | .98
+| 5 | .97
+| 10 | .96
+### Table 5 space_ga dataset
+|  no.of clients | server-side test result 
+| :---: | :---: |
+| 2 | .024
+| 5 | .033
+| 10 | .034
 
 
 ## How to add a new dataset
