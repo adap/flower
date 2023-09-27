@@ -106,7 +106,7 @@ To generate the partitions for the FMNIST dataset (used in Figure 4 of the paper
 
 ```bash
 # this will generate the datasets using the default settings in the `conf/base.yaml`
-python3 power_of_choice/dataset_preparation.py
+python -m power_of_choice.dataset_preparation
 ```
 
 The generated datasets will be saved in the `fmnist` folder.
@@ -114,13 +114,13 @@ The generated datasets will be saved in the `fmnist` folder.
 If you want to modify the `alpha` parameter used to create the LDA partitions, you can override the parameter:
 
 ```bash
-python3 power_of_choice/dataset_preparation.py alpha=<alpha>
+python -m power_of_choice.dataset_preparation alpha=<alpha>
 ```
 
 To generate partitions of the CIFAR10 dataset (used in Figure 6 of the paper), you can override the parameter:
 
 ```bash
-python3 power_of_choice/dataset_preparation.py dataset.dataset="cifar10"
+python -m power_of_choice.dataset_preparation dataset.dataset="cifar10"
 ```
 
 In this case the generated datasets will be saved in the `cifar10` folder.
@@ -134,49 +134,49 @@ If you have not done it yet, [generate the clients' dataset](#generate-clients-d
 The default configuration for `power_of_choice.main` uses the base version Power of Choice strategy with MLP on FMNIST dataset. It can be run with the following:
 
 ```bash
-python3 power_of_choice/main.py # this will run using the default settings in the `conf/config.yaml`
+python -m power_of_choice.main # this will run using the default settings in the `conf/config.yaml`
 ```
 
 You can override settings directly from the command line in this way:
 
 ```bash
-python3 power_of_choice/main.py num_rounds=100 # will set the number of rounds to 100
+python -m power_of_choice.main num_rounds=100 # will set the number of rounds to 100
 ```
 
 To run using FedAvg:
 ```bash
 # This will use FedAvg as strategy
-python3 power_of_choice/main.py variant="rand" 
+python -m power_of_choice.main variant="rand" 
 ```
 
 To run all the experiments in Figure 4 of the paper, use the following commands:
 ```bash
 # This will use FedAvg as strategy
-python3 power_of_choice/main.py variant="rand" 
+python -m power_of_choice.main variant="rand" 
 
 # This will use base version of Power of Choice with d=6
-python3 power_of_choice/main.py strategy.d=6
+python -m power_of_choice.main strategy.d=6
 
 # This will use base version of Power of Choice with d=9
-python3 power_of_choice/main.py strategy.d=9
+python -m power_of_choice.main strategy.d=9
 
 # This will use base version of Power of Choice with d=12
-python3 power_of_choice/main.py strategy.d=12
+python -m power_of_choice.main strategy.d=12
 ```
 
 To run all the experiments in Figure 6 of the paper, use the following commands:
 ```bash
 # This will use FedAvg as strategy
-python3 power_of_choice/main.py variant="rand" 
+python -m power_of_choice.main variant="rand" 
 
 # This will use base version of Power of Choice with d=6
-python3 power_of_choice/main.py strategy.d=6
+python -m power_of_choice.main strategy.d=6
 
 # This will use base version of Power of Choice with d=9
-python3 power_of_choice/main.py strategy.d=9
+python -m power_of_choice.main strategy.d=9
 
 # This will use base version of Power of Choice with d=12
-python3 power_of_choice/main.py strategy.d=12
+python -m power_of_choice.main strategy.d=12
 ```
 
 ## Expected Results
@@ -195,14 +195,14 @@ In both cases, then run:
 
 ```bash
 # This will run the experiment using FedAvg strategy
-python3 power_of_choice/main.py variant="rand"
+python -m power_of_choice.main variant="rand"
 ```
 
 and
 
 ```bash
 # This will produce 3 consecutive runs, using pow-d strategy with d=6,9,15, respectively
-python3 power_of_choice/main.py --multirun strategy.d=6,9,15
+python -m power_of_choice.main --multirun strategy.d=6,9,15
 ```
 
 ### Figure 6a and 6b
@@ -214,16 +214,16 @@ Then run:
 
 ```bash
 # This will run the experiment using FedAvg strategy
-python3 power_of_choice/main.py dataset.dataset="cifar10" variant="rand" is_cnn=True
+python -m power_of_choice.main dataset.dataset="cifar10" variant="rand" is_cnn=True
 
 # This will run the experiment using pow-d with d=20 and CK=9
-python3 power_of_choice/main.py dataset.dataset="cifar10" variant="base" is_cnn=True strategy.d=20 strategy.ck=9
+python -m power_of_choice.main dataset.dataset="cifar10" variant="base" is_cnn=True strategy.d=20 strategy.ck=9
 
 # This will run the experiment using cpow-d with d=20 and CK=9
-python3 power_of_choice/main.py dataset.dataset="cifar10" variant="cpow" is_cnn=True strategy.d=20 strategy.ck=9
+python -m power_of_choice.main dataset.dataset="cifar10" variant="cpow" is_cnn=True strategy.d=20 strategy.ck=9
 
 # This will run the experiment using rpow-d with d=60 and CK=9
-python3 power_of_choice/main.py dataset.dataset="cifar10" variant="rpow" is_cnn=True strategy.d=60 strategy.ck=9
+python -m power_of_choice.main dataset.dataset="cifar10" variant="rpow" is_cnn=True strategy.d=60 strategy.ck=9
 ```
 
 To reproduce the results in Figure 6b, [generate the clients' dataset](#generate-clients-dataset) with parameters `dataset.dataset="cifar10"` and  `alpha=0.3`.
@@ -232,16 +232,16 @@ Then run:
 
 ```bash
 # This will run the experiment using FedAvg strategy
-python3 power_of_choice/main.py variant="rand" is_cnn=True
+python -m power_of_choice.main variant="rand" is_cnn=True
 
 # This will run the experiment using pow-d with d=12 and CK=9
-python3 power_of_choice/main.py variant="base" is_cnn=True strategy.d=12 strategy.ck=9
+python -m power_of_choice.main variant="base" is_cnn=True strategy.d=12 strategy.ck=9
 
 # This will run the experiment using cpow-d with d=12 and CK=9
-python3 power_of_choice/main.py variant="cpow" is_cnn=True strategy.d=12 strategy.ck=9
+python -m power_of_choice.main variant="cpow" is_cnn=True strategy.d=12 strategy.ck=9
 
 # This will run the experiment using rpow-d with d=60 and CK=9
-python3 power_of_choice/main.py variant="rpow" is_cnn=True strategy.d=60 strategy.ck=9
+python -m power_of_choice.main variant="rpow" is_cnn=True strategy.d=60 strategy.ck=9
 ```
 
 :warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
