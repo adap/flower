@@ -6,23 +6,23 @@ This example demonstrate how to implement federated learning for training diffus
 
 This example requires the following dependencies:
 
-    * accelerate
+- accelerate
 
-    * diffusers
+- diffusers
 
-    * flwr
+- flwr
 
-    * matplotlib
+- matplotlib
 
-    * numpy
+- numpy
 
-    * torch
+- torch
 
-    * torchvision
+- torchvision
 
-    * tqdm
+- tqdm
 
-    * wandb
+- wandb
 
 Which can be installed using `poetry install` if you are using `poetry` or `pip install -r requirements.txt`.
 
