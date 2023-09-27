@@ -182,10 +182,6 @@ python -m fedmlb.dataset_preparation dataset_config.dataset="tiny-imagenet" data
 > It can be downloaded at http://cs231n.stanford.edu/tiny-imagenet-200.zip. Unzip the folder. \
 > Note: This code supposes to find the folder at the path `/{YOUR_LOCAL_PATH_TO_THE_BASELINE}/FedMLB/tiny-imagenet-200`.
 
-> :warning:
-For Tiny-ImageNet, ensure that the unzipped folder is correctly located at `/{YOUR_LOCAL_PATH_TO_THE_BASELINE}/FedMLB/tiny-imagenet-200`.
-The `tiny-imagenet-200` folder contains three folders (`train`, `val`, `test`) and two `.txt` files.
-
 ### Using GPUs
 The code in this repository relies on TF library.
 To make the simulations run on GPUs use the option `client_resources.num_cpus={PER_CLIENT_FRACTION_OF_GPU_MEMORY}`.
