@@ -29,11 +29,11 @@ efficiency by lowering both communication rounds and communication overhead by f
 
 ## About this baseline
 
-****What’s implemented:**** :warning: *_Concisely describe what experiment(s) in the publication can be replicated by running the code. Please only use a few sentences. Start with: “The code in this directory …”_*
+****What’s implemented:**** The code in this directory replicates the experiments in "Gradient-less Federated Gradient Boosting Trees with Learnable Learning Rates" (Ma et al., 2023) for a9a, cod-rna, ijcnn1, space_ga datasets, which proposed the FedXGBllr algorithm. Concretely, it replicates the results for a9a, cod-rna, ijcnn1, space_ga datasets in Table 2.
 
 ****Datasets:**** a9a, cod-rna, ijcnn1, space_ga
 
-****Hardware Setup:**** :warning: *_Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Someone out there might not have access to the same resources you have so, could list the absolute minimum hardware needed to run the experiment in a reasonable amount of time ? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?_*
+****Hardware Setup:**** 
 
 ****Contributors:**** [Aml Hassan Esmil](https://github.com/Aml-Hassan-Abd-El-hamid)
 
