@@ -136,4 +136,4 @@ poetry run -m fedexp.main --config-name cifar100 --multirun seed=5 strategy.alog
 ```
 | FedExP | FedAvg |
 |:----:|:----:|
-| ![FedExP CIFAR100](_static/FedExP_Cifar100_S5.png) | ![FedAvg CIFAR100](_static/FedAvg_Cifar100_S.png) |
+| ![FedExP CIFAR100](_static/FedExP_Cifar100_S0.png) | ![FedAvg CIFAR100](_static/FedAvg_Cifar100_S.png) |
