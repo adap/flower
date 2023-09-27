@@ -2,7 +2,7 @@
 title: Federated Meta-Learning with Fast Convergence and Efficient Communication
 url: https://arxiv.org/abs/1802.07876
 labels: [meta learning, maml, meta-sgd, personalization] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [Femnist, Shakespeare] # list of datasets you include in your baseline
+dataset: [FEMNIST, SHAKESPEARE] # list of datasets you include in your baseline
 ---
 
 # FedMeta: Federated Meta-Learning with Fast Convergence and Efficient Communication
@@ -14,11 +14,11 @@ dataset: [Femnist, Shakespeare] # list of datasets you include in your baseline
 ****Abstract:**** :Statistical and systematic challenges in collaboratively training machine learning models across distributed networks of mobile devices have been the bottlenecks in the real-world application of federated learning. In this work, we show that meta-learning is a natural choice to handle these issues, and propose a federated meta-learning framework FedMeta, where a parameterized algorithm (or meta-learner) is shared, instead of a global model in previous approaches. We conduct an extensive empirical evaluation on LEAF datasets and a real-world production dataset, and demonstrate that FedMeta achieves a reduction in required communication cost by 2.82-4.33 times with faster convergence, and an increase in accuracy by 3.23%-14.84% as compared to Federated Averaging (FedAvg) which is a leading optimization algorithm in federated learning. Moreover, FedMeta preserves user privacy since only the parameterized algorithm is transmitted between mobile devices and central servers, and no raw data is collected onto the servers.
 
 
-## About this baseline
+## About this baseline 
 
 ****What’s implemented:**** : We reimplemented the experiments from the paper 'FedMeta: Federated Meta-Learning with Fast Convergence and Efficient Communication' by Fei Chen (2018). which proposed the FedMeta(MAML & Meta-SGD) algorithm. Specifically, we replicate the results from Table 2 and Figure 2 of the paper.
 
-****Datasets:**** : Femnist and Shakespeare from Leaf Federated Learning Dataset
+****Datasets:**** : FEMNIST and SHAKESPEARE from Leaf Federated Learning Dataset
 
 ****Hardware Setup:**** : These experiments were run on a machine with 16 CPU threads and 1 GPU(GeForce RTX 2080 Ti). However, the FedMeta experiment using the Shakespeare dataset required more computing power (more than 4 GPUs).
 
@@ -30,11 +30,17 @@ dataset: [Femnist, Shakespeare] # list of datasets you include in your baseline
 ****Task:**** : A comparison task of four algorithms(FedAvg, FedAvg(Meta), FedMeta(MAML), FedMeta(Meta-SGD)) in the categories of Image Classification and next-word prediction.
 
 ****Model:**** :This directory implements two models:
-* A two-layer CNN network as used in the FedMeta paper (see `models/Femnist_`). This is the model used by default.
+* A two-layer CNN network as used in the FedMeta paper (see `models/CNN_Network`). This is the model used by default.
 * A StackedLSTM model used in the FedMeta paper for Shakespeare (see `models/StackedLSTM`).
+
 **You can see more detail model at Apendix.A in paper**
 
-****Dataset:**** :warning: *_Earlier you listed already the datasets that your baseline uses. Now you should include a breakdown of the details about each of them. Please include information about: how the dataset is partitioned (e.g. LDA with alpha 0.1 as default and all clients have the same number of training examples; or each client gets assigned a different number of samples following a power-law distribution with each client only instances of 2 classes)? if  your dataset is naturally partitioned just state “naturally partitioned”; how many partitions there are (i.e. how many clients)? Please include this an all information relevant about the dataset and its partitioning into a table._*
+****Dataset:**** : This baseline includes the FEMNIST dataset and SHAKESPEARE. Now you should include a breakdown of the details about each of them. Please include information about: how the dataset is partitioned (e.g. LDA with alpha 0.1 as default and all clients have the same number of training examples; or each client gets assigned a different number of samples following a power-law distribution with each client only instances of 2 classes)? if  your dataset is naturally partitioned just state “naturally partitioned”; how many partitions there are (i.e. how many clients)? Please include this an all information relevant about the dataset and its partitioning into a table.
+
+|   Dataset   | #Clients | #Samples | #Classes |              partition settings               |
+|:-----------:|:--------:| :---: |:--------:|:---------------------------------------------:|
+|   FEMNIST   |  1,068   | 235,683 |    62    |      Support set : 0.2, Query set : 0.8       |
+| SHAKESPEARE |    110     | 625,127 |    80    |            Support set : 0.2, Query set : 0.8 |
 
 ****Training Hyperparameters:**** :warning: *_Include a table with all the main hyperparameters in your baseline. Please show them with their default value._*
 
