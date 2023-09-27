@@ -54,9 +54,14 @@ def gradient_descent(step_size, num_rounds):
     return results
 
 
+def _test_level_is_low():
+    return int(os.getenv("TEST_DASHA_LEVEL", 0)) < 1
+
+
 class TestDashaBaseline(unittest.TestCase):
     """Test."""
 
+    @unittest.skipIf(_test_level_is_low(), "Flaky due to parallelism")
     def testBaseline(self) -> None:
         """Test."""
         _config_env()
@@ -105,6 +110,7 @@ class TestDashaBaseline(unittest.TestCase):
 class TestDashaBaselineWithRandK(unittest.TestCase):
     """Test."""
 
+    @unittest.skipIf(_test_level_is_low(), "Flaky due to parallelism")
     def testBaseline(self) -> None:
         """Test."""
         _config_env()
@@ -157,6 +163,7 @@ class ClassificationDummyNet(ClassificationModel):
 class TestMomentumHelpsInStochasticDashaBaselineWithRandK(unittest.TestCase):
     """Test."""
 
+    @unittest.skipIf(_test_level_is_low(), "Flaky due to parallelism")
     def testBaseline(self) -> None:
         """Test."""
         _config_env()
@@ -206,6 +213,7 @@ class TestMomentumHelpsInStochasticDashaBaselineWithRandK(unittest.TestCase):
 class TestMegaBatchHelpsInStochasticMarinaBaselineWithRandK(unittest.TestCase):
     """Test."""
 
+    @unittest.skipIf(_test_level_is_low(), "Flaky due to parallelism")
     def testBaseline(self) -> None:
         """Test."""
         _config_env()
@@ -253,6 +261,7 @@ class TestMegaBatchHelpsInStochasticMarinaBaselineWithRandK(unittest.TestCase):
 class TestMarinaBaselineWithRandK(unittest.TestCase):
     """Test."""
 
+    @unittest.skipIf(_test_level_is_low(), "Flaky due to parallelism")
     def testBaseline(self) -> None:
         """Test."""
         _config_env()

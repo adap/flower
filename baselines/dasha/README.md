@@ -126,3 +126,14 @@ python -m dasha.plot --input_paths PATH_DASHA PATH_MARINA --output_path plot_nn.
 | *Large-Scale Experiments: Comparison of DASHA and MARINA* |
 |:--:| 
 | ![plot.png](_static/plot_nn.png) | 
+
+### Running Tests
+
+One can run the tests with the commands
+
+```bash
+# Run unit tests
+pytest ./dasha/tests/
+# Run unit and integration tests. Some long integration tests are turned off be default.
+TEST_DASHA_LEVEL=1 pytest ./dasha/tests/
+```
