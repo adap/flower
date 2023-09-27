@@ -100,12 +100,12 @@ You can then install any Python version with `pyenv install <python-version>`
 (e.g. `pyenv install 3.9.17`) and set that version as the one to be used. 
 ```bash
 # cd to your FedMLB directory (i.e. where the `pyproject.toml` is)
-pyenv install 3.9.0
+pyenv install 3.10.6
 
-pyenv local 3.9.0
+pyenv local 3.10.6
 
 # set that version for poetry
-poetry env use 3.9.0
+poetry env use 3.10.6
 ```
 To build the Python environment as specified in the `pyproject.toml`, use the following commands:
 ```bash
