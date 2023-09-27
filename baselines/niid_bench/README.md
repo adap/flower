@@ -112,18 +112,18 @@ The above command generates results that can be parsed to get the accuracies for
 | Dataset | partitioning method | FedAvg | SCAFFOLD | FedProx | FedNova |
 | :------ | :------ | :---: | :---: | :---: | :---: |
 | MNIST | IID | | | | |
-| MNIST | Dir | | | | |
-| MNIST | SP (1) | | | | |
-| MNIST | SP (2) | | | | |
-| MNIST | SP (3) | | | | |
+| MNIST | Dirichlet (0.5) | | | | |
+| MNIST | Sort and Partition (1) | | | | |
+| MNIST | Sort and Partition (2) | | | | |
+| MNIST | Sort and Partition (3) | | | | |
 | FMNIST | IID | | | | |
-| FMNIST | Dir | | | | |
-| FMNIST | SP (1) | | | | |
-| FMNIST | SP (2) | | | | |
-| FMNIST | SP (3) | | | | |
+| FMNIST | Dirichlet (0.5) | | | | |
+| FMNIST | Sort and Partition (1) | | | | |
+| FMNIST | Sort and Partition (2) | | | | |
+| FMNIST | Sort and Partition (3) | | | | |
 | CIFAR10 | IID | | | | |
-| CIFAR10 | Dir | | | | |
-| CIFAR10 | SP (1) | | | | |
-| CIFAR10 | SP (2) | | | | |
-| CIFAR10 | SP (3) | | | | |
+| CIFAR10 | Dirichlet (0.5) | | | | |
+| CIFAR10 | Sort and Partition (1) | | | | |
+| CIFAR10 | Sort and Partition (2) | | | | |
+| CIFAR10 | Sort and Partition (3) | | | | |
 
