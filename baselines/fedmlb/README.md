@@ -407,18 +407,18 @@ python -m fedmlb.main --multirun dataset_config.dataset="cifar100","tiny-imagene
   </tr>
 </table>
 
-<img src="_static/accuracy_comparison_cifar100_dirichlet_0.3_clients100.png" width="400"/> <img src="_static/accuracy_comparison_tiny-imagenet_dirichlet_0.3_clients100.png" width="400"/>
+<img alt="cifar100, 100 clients, 5% participation rate, alpha = 0.3" src="_static/accuracy_comparison_cifar100_dirichlet_0.3_clients100.png" width="400"/> <img alt="tiny-imagenet, 100 clients, 5% participation rate, alpha = 0.3" src="_static/accuracy_comparison_tiny-imagenet_dirichlet_0.3_clients100.png" width="400"/>
 
 ### Table 1b and Table 2
 
-The results of Table 1a in the paper (for FedAvg and FedMLB) refers
+The results of Table 1b in the paper (for FedAvg and FedMLB) refers
 to CIFAR-100 (Figure 3) and Tiny-ImageNet (Figure 7b) with 
 the setting (2.) Large-scale experiments with Dir(0.3), 500 clients, 
 2% participation rate.
 
 To reproduce the results run the following:
 ```bash
-python -m fedmlb.main --multirun dataset_config.dataset="cifar100","tiny-imagenet" algorithm="FedMLB","FedAvg","FedAvg+KD" total_clients=500 clients_per_round=10
+python -m fedmlb.main --multirun dataset_config.dataset="cifar100","tiny-imagenet" algorithm="FedMLB","FedAvg" total_clients=500 clients_per_round=10
 ```
 #### CIFAR-100 and Tiny-ImageNet, Dir(0.3), 500 clients, 2% participation.
 
@@ -470,8 +470,7 @@ python -m fedmlb.main --multirun dataset_config.dataset="cifar100","tiny-imagene
   </tr>
 </table>
 
-<img src="_static/accuracy_comparison_cifar100_dirichlet_0.3_clients500.png" width="400"/> <img src="_static/accuracy_comparison_tiny-imagenet_dirichlet_0.3_clients500.png" width="400"/>
-
+<img alt="cifar100, 500 clients, 2% participation rate, alpha = 0.3" src="_static/accuracy_comparison_cifar100_dirichlet_0.3_clients500.png" width="400"/> <img alt="tiny-imagenet, 500 clients, 2% participation rate, alpha = 0.3" src="_static/accuracy_comparison_tiny-imagenet_dirichlet_0.3_clients500.png" width="400"/>
 
 ### Table 3
 
@@ -518,7 +517,7 @@ python -m fedmlb.main --multirun algorithm="FedMLB","FedAvg","FedAvg+KD" local_u
   </tr>
 </table>
 
-![cifar100, 100 clients, 5% participation rate, alpha = 0.3, K=100](_static/accuracy_comparison_cifar100_dirichlet_0.3_clients100_K100.png)
+<img alt="cifar100, 100 clients, 5% participation rate, alpha = 0.3, K=100" src="_static/accuracy_comparison_cifar100_dirichlet_0.3_clients100_K100.png" width="400"/> 
 
 ## Results logging via Tensorboard
 Beside storing results in plain text in the `output` folder, the results are also stored via 
