@@ -30,4 +30,4 @@ model:
   # model config
   name: resnet50
   output_dim: 256
-  dir: ./models/moon/cifar100_fedprox/
+  dir: ./client_states/moon/cifar100_fedprox/

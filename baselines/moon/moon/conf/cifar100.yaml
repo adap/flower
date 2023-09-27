@@ -8,7 +8,7 @@ num_epochs: 10
 fraction_fit: 1.0
 batch_size: 64
 learning_rate: 0.01
-mu: 5
+mu: 1
 temperature: 0.5
 alg: moon
 seed: 0
@@ -30,4 +30,4 @@ model:
   # model config
   name: resnet50
   output_dim: 256
-  dir: ./models/moon/cifar100/
+  dir: ./client_states/moon/cifar100/

@@ -30,4 +30,4 @@ model:
   # model config
   name: simple-cnn
   output_dim: 256
-  dir: ./models/moon/cifar10_fedprox/
+  dir: ./client_states/moon/cifar10_fedprox/
