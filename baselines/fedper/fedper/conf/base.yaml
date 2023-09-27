@@ -23,7 +23,7 @@ dataset:
   fraction: 0.83
 
 model:
-  _target_: fedPer.implemented_models.mobile_model.MobileNet
+  _target_: null
   num_head_layers: 2
   num_classes: 10
 

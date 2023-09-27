@@ -40,7 +40,7 @@ It's worth mentioning that GPU memory for each client is ~7.5GB. When training o
 
 > NOTE: One experiment carried out using 1 GPU (RTX 4090) takes somehwere between 1-3h depending on dataset and model. Running ResNet34 compared to MobileNet-v1 takes approximately 10-15% longer.  
 
-**Contributors:** William Lindskog
+**Contributors:** [William Lindskog](https://github.com/WilliamLindskog)
 
 
 ## Experimental Setup
@@ -100,10 +100,10 @@ python -m fedper.main # this will run using the default settings in the `conf/ba
 
 To reproduce figures:
 ```bash
-# make fedper/run_scripts.sh executable
-chmod u+x fedper/run_scripts.sh
+# make fedper/run_figures.sh executable
+chmod u+x fedper/run_figures.sh
 # uncomment lines in script that you want to run, then  
-bash fedper/run_scripts.sh
+bash fedper/run_figures.sh
 
 # this config can also be overriden from the CLI
 ```
@@ -115,44 +115,31 @@ server_device: 'cuda:0', 'cpu'
 dataset.name: 'cifar10', 'flickr'
 num_classes: 10, 100, 5 # respectively 
 dataset.num_classes: 4, 8, 10 #for non-iid split assigning n num_classes to each client (these numbers for CIFAR10 experiments)
-model.name: mobile, resnet
+model_name: mobile, resnet
 ```
 
 To run multiple runs, one can also reside to `HYDRA`'s multirun option. 
 ```bash
 # for CIFAR10
-python -m fedper.main --multirun dataset.num_classes=4,8,10 model.name=resnet,mobile algorithm=fedper,fedavg model.num_head_layers=2,3
+python -m fedper.main --multirun --config_name cifar10 dataset.num_classes=4,8,10 model_name=resnet,mobile algorithm=fedper,fedavg model.num_head_layers=2,3
 
 # to repeat each run 5 times, one can also add
-python -m fedper.main --multirun dataset.num_classes=4,8,10 model.name=resnet,mobile algorithm=fedper,fedavg model.num_head_layers=2,3 '+repeat_num=range(5)'
+python -m fedper.main --multirun --config_name cifar10 dataset.num_classes=4,8,10 model_name=resnet,mobile algorithm=fedper,fedavg model.num_head_layers=2,3 '+repeat_num=range(5)'
 ```
 
 
 ## Expected Results
 
-Having run the `run_script.sh`, the expected results should look something like this: 
+Having run the `run_figures.sh`, the expected results should look something like this: 
 
-**MobileNet-v1 on CIFAR10**
+**MobileNet-v1 and ResNet-34 on CIFAR10**
 
-![](_static/mobile_plot_figure_2.png)
+<img src="_static/mobile_plot_figure_2.png" width="500"/> <img src="_static/resnet_plot_figure_2.png" width="500"/>
 
-**ResNet on CIFAR10**
+**MobileNet-v1 and ResNet-34 on CIFAR10 using varying size of head**
 
-![](_static/resnet_plot_figure_2.png)
+<img src="_static/mobile_plot_figure_num_head.png" width="500"/> <img src="_static/resnet_plot_figure_num_head.png" width="500"/>
 
-**MobileNet-v1 on CIFAR10 using varying size of head**
+**MobileNet-v1 and ResNet-34 on FLICKR-AES**
 
-![](_static/mobile_plot_figure_num_head.png)
-
-
-**ResNet on CIFAR10 using varying size of head**
-
-![](_static/resnet_plot_figure_num_head.png)
-
-**MobileNet-v1 on FLICKR-AES**
-
-![](_static/mobile_plot_figure_flickr.png)
-
-**ResNet on FLICKR-AES**
-
-![](_static/resnet_plot_figure_flickr.png)
+<img src="_static/mobile_plot_figure_flickr.png" width="500"/> <img src="_static/resnet_plot_figure_flickr.png" width="500"/>
