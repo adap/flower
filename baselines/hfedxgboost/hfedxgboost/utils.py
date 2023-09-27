@@ -24,13 +24,13 @@ from hydra.utils import instantiate
 import csv
 
 dataset_tasks={
-        "YearPredictionMSD":"REG",
         "a9a":"BINARY",
         "cod-rna":"BINARY",
         "ijcnn1":"BINARY",
         "abalone":"REG",
         "cpusmall":"REG",
-        "space_ga":"REG"
+        "space_ga":"REG",
+        "YearPredictionMSD":"REG"
     }
 
 def get_dataloader(
@@ -246,6 +246,7 @@ class Early_Stop:
             self.min_loss = loss
             self.metric_value=metric_val
             self.counter = 0
+            print("new best loss value achieved")
         elif loss > (self.min_loss):
             self.counter += 1
             if self.counter >= self.num_waiting_rounds:
