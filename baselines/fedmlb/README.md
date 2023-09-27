@@ -345,16 +345,28 @@ To reproduce the results run the following:
 # this will produce six consecutive runs
 python -m fedmlb.main --multirun dataset_config.dataset="cifar100","tiny-imagenet" algorithm="FedMLB","FedAvg","FedAvg+KD" 
 ```
-#### CIFAR-100, Dir(0.3), 100 clients, 5% participation.
+
+#### CIFAR-100 and Tiny-ImageNet, Dir(0.3), 100 clients, 5% participation.
 
 <table>
   <tr>
     <td></td>
+    <td style="text-align: center", colspan="4">CIFAR-100</td>
+    <td style="text-align: center", colspan="4">Tiny-ImageNet</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td colspan="2">Accuracy @500R</td>
+    <td colspan="2">Accuracy @1000R</td>
     <td colspan="2">Accuracy @500R</td>
     <td colspan="2">Accuracy @1000R</td>
   </tr>
-  <tr> 
+  <tr>
     <td>Method</td>
+    <td>Paper</td>
+    <td>This repo</td>
+    <td>Paper</td>
+    <td>This repo</td>
     <td>Paper</td>
     <td>This repo</td>
     <td>Paper</td>
@@ -366,6 +378,10 @@ python -m fedmlb.main --multirun dataset_config.dataset="cifar100","tiny-imagene
     <td>44.52</td>
     <td>47.83</td>
     <td>49.15</td>
+    <td>33.94</td>
+    <td>33.39</td>
+    <td>35.42</td>
+    <td>35.78</td>
   </tr>
   <tr>
     <td>FedAvg+KD</td>
@@ -373,42 +389,17 @@ python -m fedmlb.main --multirun dataset_config.dataset="cifar100","tiny-imagene
     <td>46.03</td>
     <td>49.17</td>
     <td>50.54</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
   </tr>
   <tr>
-    <td>FedMLB</td> 
+    <td>FedMLB</td>
     <td>47.39</td>
     <td>51.11</td>
     <td>54.58</td>
     <td>57.33</td>
-  </tr>
-</table>
-
-![cifar100, 100 clients, 5% participation rate, alpha = 0.3](_static/accuracy_comparison_cifar100_dirichlet_0.3_clients100.png)
-
-#### Tiny-ImageNet, Dir(0.3), 100 clients, 5% participation.
-
-<table>
-  <tr>
-    <td></td>
-    <td colspan="2">Accuracy @500R</td>
-    <td colspan="2">Accuracy @1000R</td>
-  </tr>
-  <tr>
-    <td>Method</td>
-    <td>Paper</td>
-    <td>This repo</td>
-    <td>Paper</td>
-    <td>This repo</td>
-  </tr>
-  <tr>
-    <td>FedAvg</td>
-    <td>33.94</td>
-    <td>33.39</td>
-    <td>35.42</td>
-    <td>35.78</td>
-  </tr>
-  <tr>
-    <td>FedMLB</td>
     <td>37.20</td>
     <td>35.42</td>
     <td>40.16</td>
@@ -416,8 +407,7 @@ python -m fedmlb.main --multirun dataset_config.dataset="cifar100","tiny-imagene
   </tr>
 </table>
 
-![tiny imagenet, 100 clients, 5% participation rate, alpha = 0.3](_static/accuracy_comparison_tiny-imagenet_dirichlet_0.3_clients100.png)
-
+<img src="_static/accuracy_comparison_cifar100_dirichlet_0.3_clients100.png" width="400"/> <img src="_static/accuracy_comparison_tiny-imagenet_dirichlet_0.3_clients100.png" width="400"/>
 
 ### Table 1b and Table 2
 
