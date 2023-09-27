@@ -7,6 +7,8 @@ from omegaconf import DictConfig, OmegaConf
 from niid_bench.dataset import load_datasets
 from niid_bench.client_fednova import gen_client_fn
 from niid_bench.server_scaffold import gen_evaluate_fn
+import niid_bench.server_fednova as server
+from flwr.server.client_manager import SimpleClientManager
 
 @hydra.main(config_path="conf", config_name="fednova_base", version_base=None)
 def main(cfg: DictConfig) -> None:
@@ -62,6 +64,7 @@ def main(cfg: DictConfig) -> None:
     # 5. Start Simulation
     # history = fl.simulation.start_simulation(<arguments for simulation>)
     history = fl.simulation.start_simulation(
+        server=server.FedNovaServer(strategy=strategy, client_manager=SimpleClientManager()),
         client_fn=client_fn,
         num_clients=cfg.num_clients,
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),

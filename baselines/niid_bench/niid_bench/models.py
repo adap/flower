@@ -289,11 +289,18 @@ def train_fednova(
     optimizer = SGD(net.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
     net.train()
     local_steps = 0
+    # clone all the parameters
+    prev_net = [param.detach().clone() for param in net.parameters()]
     for _ in range(epochs):
         net, local_steps = _train_one_epoch_fednova(
             net, trainloader, device, criterion, optimizer, local_steps
         )
-    return local_steps
+    # compute ||a_i||_1
+    a_i = (local_steps - (momentum*(1 - momentum**local_steps)/(1 - momentum)))/(1 - momentum)
+    # compute g_i
+    g_i = [torch.div(prev_param - param.detach(), a_i) for prev_param, param in zip(prev_net, net.parameters())]
+    
+    return a_i, g_i
 
 def _train_one_epoch_fednova(
     net: nn.Module,

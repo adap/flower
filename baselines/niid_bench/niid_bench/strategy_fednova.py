@@ -15,6 +15,7 @@ class FedNovaStrategy(FedAvg):
     def aggregate_fit(
         self,
         server_round: int,
+        server_params: NDArrays,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
@@ -31,11 +32,18 @@ class FedNovaStrategy(FedAvg):
             for _, fit_res in results
         ]
         total_samples = sum([fit_res.num_examples for _, fit_res in results])
-        c = sum([fit_res.num_examples*fit_res.metrics["t_i"] / total_samples for _, fit_res in results])
-        new_weights_results = [(result[0], c*(result[1] / (total_samples*fit_res.metrics["t_i"]))) for result, (_, fit_res) in zip(weights_results, results)]
+        c = sum([fit_res.metrics["a_i"]*fit_res.num_examples / total_samples for _, fit_res in results])
+        new_weights_results = [(result[0], c*(fit_res.num_examples/total_samples)) for result, (_, fit_res) in zip(weights_results, results)]
 
-        # Aggregate parameters
-        parameters_aggregated = ndarrays_to_parameters(aggregate(new_weights_results))
+        # Aggregate grad updates, t_eff*(sum_i(p_i*\eta*d_i))
+        grad_updates_aggregated = aggregate(new_weights_results)
+        # Final parameters = server_params - grad_updates_aggregated
+        parameters_aggregated = [
+            server_param - grad_update
+            for server_param, grad_update in zip(server_params, grad_updates_aggregated)
+        ]
+
+        parameters_aggregated = ndarrays_to_parameters(parameters_aggregated)
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
         if self.fit_metrics_aggregation_fn:

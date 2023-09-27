@@ -47,7 +47,7 @@ class FlowerClientFedNova(
     def fit(self, parameters, config: Dict[str, Union[Scalar, List[torch.Tensor]]]):
         """Implements distributed fit function for a given client using FedNova Strategy."""
         self.set_parameters(parameters)
-        t_i = train_fednova(
+        a_i, g_i = train_fednova(
                 self.net,
                 self.trainloader,
                 self.device,
@@ -56,8 +56,9 @@ class FlowerClientFedNova(
                 self.momentum,
                 self.weight_decay,
             )
-        final_p_np = self.get_parameters({})
-        return final_p_np, len(self.trainloader.dataset), {"t_i": t_i}
+        # final_p_np = self.get_parameters({})
+        g_i_np = [param.cpu().numpy() for param in g_i]
+        return g_i_np, len(self.trainloader.dataset), {"a_i": a_i}
     
     def evaluate(self, parameters, config: Dict[str, Scalar]):
         """Evaluate using given parameters."""
