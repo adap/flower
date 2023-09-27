@@ -122,17 +122,17 @@ poetry run -m fedexp.main strategy.algorithm=fedavg
 ## Expected Results
 
 ```bash
-poetry run -m fedexp.main --multirun seed=5 strategy.alogrithm=[fedexp,fedavg]
+poetry run -m fedexp.main --multirun strategy.alogrithm=[fedexp,fedavg]
 ```
 | FedExP | FedAvg |
 |:----:|:----:|
-|![FedExP CIFAR10](_static/FedExp_Cifar10_S5.png) | ![FedAvg CIFAR10](_static/FedAvg_Cifar10_S5.png) |
+|![FedExP CIFAR10](_static/FedExP_Cifar10_S0.png) | ![FedAvg CIFAR10](_static/FedAvg_Cifar10_S5.png) |
 
 
 
 
 ```bash
-poetry run -m fedexp.main --config-name cifar100 --multirun seed=5 strategy.alogrithm=[fedexp,fedavg]
+poetry run -m fedexp.main --config-name cifar100 --multirun strategy.alogrithm=[fedexp,fedavg]
 ```
 | FedExP | FedAvg |
 |:----:|:----:|
