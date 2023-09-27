@@ -63,7 +63,11 @@ class TestDataset(unittest.TestCase):
         train_fraction = 0.5
         validation_fraction = 0.0
         test_fraction = 0.5
-        (partitioned_train, _, _,) = train_valid_test_partition(
+        (
+            partitioned_train,
+            _,
+            _,
+        ) = train_valid_test_partition(
             partitioned_datasets,
             random_seed=42,
             train_split=train_fraction,
