@@ -1,6 +1,8 @@
 # Flower x Diffusers, Federated Diffusion model training
 
-This example demonstrate how to implement federated learning for training diffusion models using `Flower` and `Diffusers`.
+This example demonstrate how to implement federated learning for training
+diffusion models using `Flower` and `Diffusers`. The example can be run on CPU
+but it will be very slow, it is recommended to run it on a CUDA GPU.
 
 ## Dependencies
 
@@ -24,7 +26,8 @@ This example requires the following dependencies:
 
 - wandb
 
-Which can be installed using `poetry install` if you are using `poetry` or `pip install -r requirements.txt`.
+Which can be installed using `poetry install` if you are using `poetry` or `pip
+install -r requirements.txt`.
 
 ## Centralized Diffusion model
 
@@ -32,7 +35,9 @@ First, we will consider the centralized setting for training a diffusion model.
 
 ### Data
 
-In the centralized setting, we don't have to worry about the partioning, so we will just use the `CIFAR10` function from `torchvision.datasets` and return the `DataLoader`:
+In the centralized setting, we don't have to worry about the partioning, so we
+will just use the `CIFAR10` function from `torchvision.datasets` and return the
+`DataLoader`:
 
 ```python
 def load_data():
@@ -51,9 +56,11 @@ def load_data():
 
 ### Model
 
-Note that most of the code is inspired by this [tutorial](https://huggingface.co/docs/diffusers/tutorials/basic_training).
+Note that most of the code is inspired by this
+[tutorial](https://huggingface.co/docs/diffusers/tutorials/basic_training).
 
-We first need to define the architecture of our model, to do that we use the `UNet2DModel` class from `diffusers`:
+We first need to define the architecture of our model, to do that we use the
+`UNet2DModel` class from `diffusers`:
 
 ```python
 def get_model():
@@ -182,13 +189,20 @@ def train(model, train_dataloader, cid, server_round, epochs, timesteps, cpu):
                 # the code.
 ```
 
-Where we first create our scheduler with `DDPMScheduler` and then instantiate our `AdamW` optimizer. In this training function, we will use the HuggingFace `accelerate` library, in order to make the training simple and efficient on any configuration.
+Where we first create our scheduler with `DDPMScheduler` and then instantiate
+our `AdamW` optimizer. In this training function, we will use the HuggingFace
+`accelerate` library, in order to make the training simple and efficient on any
+configuration.
 
-During the training loop itself, we add noise to the images, pass the noisy images through the model, and compute the loss between the predicted noise residual and the actual noise.
+During the training loop itself, we add noise to the images, pass the noisy
+images through the model, and compute the loss between the predicted noise
+residual and the actual noise.
 
-Finally we use `acclerate`'s `is_main_process` to run the generation of images with the trained model only once over the clients.
+Finally we use `acclerate`'s `is_main_process` to run the generation of images
+with the trained model only once over the clients.
 
-The `validate` function will only focus on the generation of new images and comparing the generated images with the ground truth from the same label:
+The `validate` function will only focus on the generation of new images and
+comparing the generated images with the ground truth from the same label:
 
 ```python
 def validate(model, cid, timesteps, device):
@@ -255,9 +269,12 @@ def validate(model, cid, timesteps, device):
     return metric.precision, metric.recall, subset_size
 ```
 
-Note that we use functions defined in `utils.py` to compute the precision and recall from the images. The `IPR` class is from this [GitHub repo](https://github.com/youngjung/improved-precision-and-recall-metric-pytorch).
+Note that we use functions defined in `utils.py` to compute the precision and
+recall from the images. The `IPR` class is from this [GitHub
+repo](https://github.com/youngjung/improved-precision-and-recall-metric-pytorch).
 
-With those elements we could run a centralized ML pipeline to train our model as such:
+With those elements we could run a centralized ML pipeline to train our model
+as such:
 
 ```python
 trainloader = get_data()
@@ -272,9 +289,15 @@ But instead, let's federate it!
 
 ### Data partioning
 
-In order to federate our example, we first need to write a way to paration our dataset, so each client in our simulated environment can have different subset of the data.
+In order to federate our example, we first need to write a way to paration our
+dataset, so each client in our simulated environment can have different subset
+of the data.
 
-We will write 2 functions, one for an IID partitioning, where all clients get a completely random subset of the data, and the other for a non-IID partitioning, where clients get subsets of data containing only a few distinct classes (so for instance, the first client will only have images of planes and horses while the second client will only have images of dogs and cats).
+We will write 2 functions, one for an IID partitioning, where all clients get a
+completely random subset of the data, and the other for a non-IID partitioning,
+where clients get subsets of data containing only a few distinct classes (so
+for instance, the first client will only have images of planes and horses while
+the second client will only have images of dogs and cats).
 
 For IID partitioning:
 
@@ -302,7 +325,9 @@ def load_iid_data():
     return trainloaders
 ```
 
-For non-IID partitioning, it is a bit more involved, we will first write a function that generates a dictionnary that assignes subset of classes to clients:
+For non-IID partitioning, it is a bit more involved, we will first write a
+function that generates a dictionnary that assignes subset of classes to
+clients:
 
 ```python
 def cifar_extr_noniid(train_dataset, num_users, n_class, num_samples, rate_unbalance):
@@ -419,9 +444,12 @@ def load_datasets(iid=True):
 
 ### Writing the client
 
-We can now start writing our `FlowerClient`, which is the actual part of the code necessary for Federated Learning.
+We can now start writing our `FlowerClient`, which is the actual part of the
+code necessary for Federated Learning.
 
-It will be quite straight forward, as we will only need to write 3 main methods: `get_parameters`, `fit`, and `evaluate`. We will also write a few helper functions to make the code more readable.
+It will be quite straight forward, as we will only need to write 3 main
+methods: `get_parameters`, `fit`, and `evaluate`. We will also write a few
+helper functions to make the code more readable.
 
 The helper functions will be:
 
@@ -436,7 +464,9 @@ def set_parameters(net, parameters):
     net.load_state_dict(state_dict, strict=True)
 ```
 
-Those functions will respectively allow us to get the parameters as a list of NumPy arrays from our model, and to update the parameters of our model by providing a new list of NumPy arrays.
+Those functions will respectively allow us to get the parameters as a list of
+NumPy arrays from our model, and to update the parameters of our model by
+providing a new list of NumPy arrays.
 
 The `FlowerClient` itself will be:
 
@@ -511,7 +541,11 @@ class FlowerClient(fl.client.NumPyClient):
         )
 ```
 
-Note that in the above `FlowerClient` we also added personalization. This will allow each client's model to keep a locally trained subset of parameters that won't be affected by the global aggregation. This can be easily disabled by setting `personalized` to `False` inside `conf.py`. For this personalization to work we also added 2 utility functions:
+Note that in the above `FlowerClient` we also added personalization. This will
+allow each client's model to keep a locally trained subset of parameters that
+won't be affected by the global aggregation. This can be easily disabled by
+setting `personalized` to `False` inside `conf.py`. For this personalization to
+work we also added 2 utility functions:
 
 ```python
 def save_personalization_weight(cid, model, personalization_layers):
@@ -534,7 +568,9 @@ def load_personalization_weight(cid, model, personalization_layers):
     set_parameters(model, weights)
 ```
 
-The first one saves given weights from a subset of the layers of a model to a file while the second one update given layers of a model with the weights from the same file.
+The first one saves given weights from a subset of the layers of a model to a
+file while the second one update given layers of a model with the weights from
+the same file.
 
 Finally, in order to instantiate our clients, we write our `client_fn`:
 
@@ -570,7 +606,15 @@ Now, we should be all set on the client-side.
 
 ### Writing the strategy
 
-On the server-side, we need to define our strategy. This strategy will be a subclass of `flwr.server.strategy.FedAvg` where we add a new `client_manager` parameter and redefine `aggregate_fit` and `aggregate_evaluate`. The only change made to `aggregate_fit` is to save the model every round. `aggregate_evaluate`, on the other hand, is quite different: first of all, we don't compute any loss, so the aggregated_loss will always be 1.0, then, after the 5th round, if a `client_manager` has been supplied to the strategy, we disconnect clients with the lowest precision, we also dump the results inside a log file. This is how everything looks like together:
+On the server-side, we need to define our strategy. This strategy will be a
+subclass of `flwr.server.strategy.FedAvg` where we add a new `client_manager`
+parameter and redefine `aggregate_fit` and `aggregate_evaluate`. The only
+change made to `aggregate_fit` is to save the model every round.
+`aggregate_evaluate`, on the other hand, is quite different: first of all, we
+don't compute any loss, so the aggregated_loss will always be 1.0, then, after
+the 5th round, if a `client_manager` has been supplied to the strategy, we
+disconnect clients with the lowest precision, we also dump the results inside a
+log file. This is how everything looks like together:
 
 ```python
 class SaveModelAndMetricsStrategy(fl.server.strategy.FedAvg):
@@ -679,19 +723,21 @@ class SaveModelAndMetricsStrategy(fl.server.strategy.FedAvg):
             else:
                 print("client_to_disconnect:", lowest_precision_cid, client_to_disconnect)
                 print("====done with agg evaluate======")
-                
-                data = {"cid_list": cid_list, "precision_list": precision_list, 
-                                         "recall_list": recall_list , "lowest_precision_cid": lowest_precision_cid, 
-                                         "server_round": server_round, "client_to_disconnect": client_to_disconnect,
-                                         "warning_client": 0}
+                data = {
+                    "cid_list": cid_list, 
+                    "precision_list": precision_list, 
+                    "recall_list": recall_list,
+                    "lowest_precision_cid": lowest_precision_cid, 
+                    "server_round": server_round,
+                    "client_to_disconnect": client_to_disconnect,
+                    "warning_client": 0
+                }
                 print(data)
+
                 # Serialize data into file:
                 json.dump(data, open("logs.json", 'a' ))
 
-                loss_aggregated, metrics_aggregated = aggregated_loss, {"cid_list": cid_list, "precision_list": precision_list, 
-                                         "recall_list": recall_list , "lowest_precision_cid": lowest_precision_cid, 
-                                         "server_round": server_round, "client_to_disconnect": client_to_disconnect,
-                                         "warning_client": 0}
+                loss_aggregated, metrics_aggregated = aggregated_loss, data
         else:
             loss_aggregated, metrics_aggregated = aggregated_loss, {"client_to_disconnect": None, "server_round": server_round}
 
@@ -740,7 +786,9 @@ class SaveModelAndMetricsStrategy(fl.server.strategy.FedAvg):
         return loss_aggregated, metrics_aggregate
 ```
 
-Note that the Federated Learning for diffusion model can be implemented with a standard `FedAvg` strategy, this custom strategy is only here to bring extra features (like threshold filtering).
+Note that the Federated Learning for diffusion model can be implemented with a
+standard `FedAvg` strategy, this custom strategy is only here to bring extra
+features (like threshold filtering).
 
 ### Starting the simulation
 
@@ -831,3 +879,4 @@ poetry run python main.py
 ```
 
 You can change the default parameters by modifing the values in `conf.py`.
+
