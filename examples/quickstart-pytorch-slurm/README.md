@@ -10,7 +10,7 @@ Running this example in itself is quite easy.
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/jafemarq/flower.git && mv flower/examples/quickstart-pytorch-slurm . && rm -rf flower && cd quickstart-pytorch-slurm
+git clone --depth=1 https://github.com/jafermarq/flower.git && mv flower/examples/quickstart-pytorch-slurm . && rm -rf flower && cd quickstart-pytorch-slurm
 ```
 
 This will create a new directory called `quickstart-pytorch-slurm` containing the following files:
