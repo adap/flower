@@ -26,8 +26,7 @@ This example requires the following dependencies:
 
 - wandb
 
-Which can be installed using `poetry install` if you are using `poetry` or `pip
-install -r requirements.txt`.
+Which can be installed using `poetry install` if you are using `poetry` or `pip install -r requirements.txt`.
 
 ## Centralized Diffusion model
 
@@ -879,4 +878,3 @@ poetry run python main.py
 ```
 
 You can change the default parameters by modifing the values in `conf.py`.
-
