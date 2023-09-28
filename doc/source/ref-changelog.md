@@ -6,6 +6,11 @@
 
 - **Update REST API to support create and delete nodes** ([#2283](https://github.com/adap/flower/pull/2283))
 
+- **Add new Diffusion model Federated Learning example using Diffusers and Flower** ([#2411](https://github.com/adap/flower/pull/2411))
+
+    Thanks to an initial contribution made by [Fiona Victoria](https://github.com/fionavictoria), Flower now offers an example of Federated
+Learning applied to Diffusion models.
+
 ### What's new?
 
 - **Unify client API** ([#2303](https://github.com/adap/flower/pull/2303))
