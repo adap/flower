@@ -17,6 +17,7 @@ examples/**/dev/*.sh
 baselines/datasets/leaf
 baselines/hfedxgboost/hfedxgboost/dataset
 baselines/hfedxgboost/dataset
+baselines/hfedxgboost/multirun
 outputs
 
 # macOS
