@@ -99,7 +99,7 @@ The above command generates results that can be parsed to get the accuracies for
 
 | Dataset | partitioning method | FedAvg | SCAFFOLD | FedProx | FedNova |
 | :------ | :------ | :---: | :---: | :---: | :---: |
-| MNIST | IID<br>Dirichlet (0.5)<br>Sort and Partition (1)<br>Sort and Partition (2)<br>Sort and Partition (3) | | | | |
-| FMNIST | IID<br>Dirichlet (0.5)<br>Sort and Partition (1)<br>Sort and Partition (2)<br>Sort and Partition (3) | | | | |
-| CIFAR10 | IID<br>Dirichlet (0.5)<br>Sort and Partition (1)<br>Sort and Partition (2)<br>Sort and Partition (3) | | | | |
+| MNIST | IID<br>Dirichlet (0.5)<br>Sort and Partition (1)<br>Sort and Partition (2)<br>Sort and Partition (3) | 99.1<br>98.9<br>10.0<br>96.6<br>98.2 | 99.2<br>99.0<br>10.0<br>96.6<br>97.8 | 99.2<br>99.0<br>81.3<br>96.7<br>97.8 | 99.0<br>98.8<br>55.1<br>96.5<br>97.7 |
+| FMNIST | IID<br>Dirichlet (0.5)<br>Sort and Partition (1)<br>Sort and Partition (2)<br>Sort and Partition (3) | 89.0<br>88.4<br>10.0<br>81.0<br>83.2 | 89.5<br>88.4<br>10.0<br>10.0<br>84.2 | 89.5<br>88.6<br>38.0<br>78.8<br>82.5 | 89.3<br>88.1<br>11.1<br>70.5<br>83.2 |
+| CIFAR10 | IID<br>Dirichlet (0.5)<br>Sort and Partition (1)<br>Sort and Partition (2)<br>Sort and Partition (3) | 71.7<br>63.4<br>10.0<br>49.9<br>58.1 | 70.7<br>68.0<br>10.0<br>48.9<br>60.0 | 70.6<br>65.6<br>11.6<br>50.0<br>60.0 | 71.1<br>65.0<br>10.0<br>46.4<br>57.7 |
 
