@@ -4,9 +4,7 @@ from flwr.common.logger import log
 from logging import WARNING
 from flwr.server.client_proxy import ClientProxy
 from flwr.common import Parameters
-from flwr.server.client_manager import ClientManager
-from flwr.common import Scalar, Status, parameters_to_ndarrays, ndarrays_to_parameters, FitIns, FitRes, NDArrays
-from dataclasses import dataclass
+from flwr.common import Scalar, parameters_to_ndarrays, ndarrays_to_parameters, FitRes, NDArrays
 import numpy as np
 from functools import reduce
 

@@ -33,7 +33,7 @@ class FlowerClientFedNova(
         self.learning_rate = learning_rate
         self.momentum = momentum
         self.weight_decay = weight_decay
-    
+
     def get_parameters(self, config: Dict[str, Scalar]):
         """Return the current local model parameters."""
         return [val.cpu().numpy() for _, val in self.net.state_dict().items()]

@@ -1,8 +1,7 @@
 import torch
-from typing import List, Tuple, Dict
-from collections import Counter
+from typing import List, Tuple
 from torch.utils.data import Dataset, Subset, ConcatDataset
-from torchvision.datasets import EMNIST, CIFAR10, MNIST, FashionMNIST
+from torchvision.datasets import CIFAR10, MNIST, FashionMNIST
 from torch.autograd import Variable
 import torch.nn.functional as F
 import numpy as np
@@ -17,29 +16,7 @@ def _download_data(dataset_name = "emnist") -> Tuple[Dataset, Dataset]:
         The training dataset, the test dataset.
     """
     trainset, testset = None, None
-    if dataset_name == "emnist":
-        # unsqueeze, flatten
-        transform = transforms.Compose(
-            [
-                transforms.ToTensor(),
-                transforms.Lambda(lambda x: x.view(-1)),
-            ]
-        )
-        trainset = EMNIST(
-            root="data",
-            split="balanced",
-            train=True,
-            download=True,
-            transform=transform,
-        )
-        testset = EMNIST(
-            root="data",
-            split="balanced",
-            train=False,
-            download=True,
-            transform=transform,
-        )
-    elif dataset_name == "cifar10":
+    if dataset_name == "cifar10":
         transform_train = transforms.Compose(
             [
                 transforms.ToTensor(),
@@ -184,7 +161,7 @@ def partition_data(
                 client_classes[i].append(class_t)
                 times[index] += 1
                 j += 1
-    
+
     rem_trainsets_per_client = [[] for _ in range(num_clients)]
 
     for i in range(num_remaining_classes):
@@ -223,7 +200,7 @@ def partition_data_dirichlet(
         Used to set a fix seed to replicate experiments, by default 42
     dataset_name : str
         Name of the dataset to be used
-    
+
     Returns
     -------
     Tuple[List[Subset], Dataset]
@@ -254,7 +231,7 @@ def partition_data_dirichlet(
             idx_k_split = np.split(idx_k, proportions)
             idx_clients = [idx_j + idx.tolist() for idx_j, idx in zip(idx_clients, idx_k_split)]
             min_samples = min([len(idx_j) for idx_j in idx_clients])
-        
+
     trainsets_per_client = [Subset(trainset, idxs) for idxs in idx_clients]
     return trainsets_per_client, testset
 
@@ -278,7 +255,7 @@ def partition_data_label_quantity(
         Used to set a fix seed to replicate experiments, by default 42
     dataset_name : str
         Name of the dataset to be used
-    
+
     Returns
     -------
     Tuple[List[Subset], Dataset]

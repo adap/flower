@@ -58,7 +58,7 @@ class FlowerClientFedAvg(
         )
         final_p_np = self.get_parameters({})
         return final_p_np, len(self.trainloader.dataset), {}
-    
+
     def evaluate(self, parameters, config: Dict[str, Scalar]):
         """Evaluate using given parameters."""
         self.set_parameters(parameters)

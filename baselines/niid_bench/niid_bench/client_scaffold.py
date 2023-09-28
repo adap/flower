@@ -1,6 +1,5 @@
 import flwr as fl
-from flwr.common import Scalar, Status, Code, ndarrays_to_parameters, parameters_to_ndarrays
-from flwr.common.typing import Parameters
+from flwr.common import Scalar, ndarrays_to_parameters, parameters_to_ndarrays
 from typing import Dict, OrderedDict, Union, List, Tuple, Callable
 import torch
 from torch.utils.data import DataLoader
@@ -10,8 +9,6 @@ from flwr.common.logger import log
 from logging import DEBUG, INFO
 
 from niid_bench.models import train_scaffold, test
-from niid_bench.strategy_scaffold import FitRes
-import numpy as np
 import os
 
 
@@ -52,7 +49,7 @@ class FlowerClientScaffold(
         self.dir = dir
         if not os.path.exists(self.dir):
             os.makedirs(self.dir)
-    
+
     def get_parameters(self, config: Dict[str, Scalar]):
         """Return the current local model parameters."""
         return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
@@ -62,7 +59,7 @@ class FlowerClientScaffold(
         params_dict = zip(self.net.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         self.net.load_state_dict(state_dict, strict=True)
-   
+
     def fit(self, parameters, config: Dict[str, Union[Scalar, List[torch.Tensor]]]):
         """Implements distributed fit function for a given client using Scaffold Strategy."""
         self.set_parameters(parameters)
@@ -101,7 +98,7 @@ class FlowerClientScaffold(
         self.client_cv = c_i_n
         torch.save(self.client_cv, f"{self.dir}/client_cv_{self.id}.pt")
         return (server_update_x, len(self.trainloader.dataset), {"server_update_c": ndarrays_to_parameters(server_update_c)})
-    
+
     def evaluate(self, parameters, config: Dict[str, Scalar]):
         """Evaluate using given parameters."""
         self.set_parameters(parameters)

@@ -56,7 +56,7 @@ class ScaffoldOptimizer(SGD):
 
     def __init__(self, grads, step_size, momentum, weight_decay):
         super().__init__(grads, lr=step_size, momentum=momentum, weight_decay=weight_decay)
-    
+
     def step_custom(self, server_cv, client_cv):
         # y_i = y_i - \eta * (g_i + c - c_i)  --> y_i = y_i - \eta*(g_i + \mu*b_{t}) - \eta*(c - c_i) 
         self.step()
@@ -195,7 +195,7 @@ def train_fedprox(
 ) -> None:
     """
     Train the network on the training set using FedAvg.
-    
+
     Parameters
     ----------
     net : nn.Module
@@ -279,7 +279,7 @@ def train_fednova(
         The momentum for SGD optimizer.
     weight_decay : float
         The weight decay for SGD optimizer.
-    
+
     Returns
     -------
     int
@@ -299,7 +299,7 @@ def train_fednova(
     a_i = (local_steps - (momentum*(1 - momentum**local_steps)/(1 - momentum)))/(1 - momentum)
     # compute g_i
     g_i = [torch.div(prev_param - param.detach(), a_i) for prev_param, param in zip(prev_net, net.parameters())]
-    
+
     return a_i, g_i
 
 def _train_one_epoch_fednova(
@@ -334,7 +334,7 @@ def test(
         The test set dataloader object.
     device : torch.device
         The device on which to evaluate the network.
-    
+
     Returns
     -------
     Tuple[float, float]

@@ -29,7 +29,7 @@ class ScaffoldServer(Server):
         super().__init__(client_manager=client_manager, strategy=strategy)
         self.model_params = instantiate(model)
         self.server_cv = None
-    
+
     def _get_initial_parameters(self, timeout: Optional[float]) -> Parameters:
         """Get initial parameters from one of the available clients."""
 
@@ -118,7 +118,7 @@ class ScaffoldServer(Server):
         updated_params = [x + aggregated_result[0][i] for i, x in enumerate(curr_params)]
         parameters_aggregated = ndarrays_to_parameters(updated_params)
         # self.parameters = parameters_aggregated
-        
+
         # metrics
         metrics_aggregated = aggregated_result[1]
         return parameters_aggregated, metrics_aggregated, (results, failures)

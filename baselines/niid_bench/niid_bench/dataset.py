@@ -2,8 +2,6 @@ from typing import Optional, Tuple, List
 from omegaconf import DictConfig
 import torch
 from torch.utils.data import DataLoader, random_split
-from torchvision import datasets
-
 from niid_bench.dataset_preparation import partition_data, partition_data_dirichlet, partition_data_label_quantity
 
 def load_datasets(

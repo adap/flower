@@ -34,7 +34,7 @@ class FlowerClientFedProx(
         self.learning_rate = learning_rate
         self.momentum = momentum
         self.weight_decay = weight_decay
-    
+
     def get_parameters(self, config: Dict[str, Scalar]):
         """Return the current local model parameters."""
         return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
@@ -44,7 +44,7 @@ class FlowerClientFedProx(
         params_dict = zip(self.net.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         self.net.load_state_dict(state_dict, strict=True)
-    
+
     def fit(self, parameters, config: Dict[str, Union[Scalar, List[torch.Tensor]]]):
         """Implements distributed fit function for a given client using FedProx Strategy."""
         self.set_parameters(parameters)
@@ -60,7 +60,7 @@ class FlowerClientFedProx(
         )
         final_p_np = self.get_parameters({})
         return final_p_np, len(self.trainloader.dataset), {}
-    
+
     def evaluate(self, parameters, config: Dict[str, Scalar]):
         """Evaluate using given parameters."""
         self.set_parameters(parameters)
