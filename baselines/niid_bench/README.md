@@ -68,8 +68,6 @@ poetry env use 3.10.6
 poetry install
 # Start the shell
 poetry shell
-
-#  Install tqdm, torch, and torchvision using pip
 ```
 
 
