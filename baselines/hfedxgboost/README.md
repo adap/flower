@@ -2,7 +2,7 @@
 title: Gradient-less Federated Gradient Boosting Trees with Learnable Learning Rates
 URL:  https://arxiv.org/abs/2304.07537
 labels: ["cross-silo", "tree-based", "XGBoost", "Horizontal federated XGBoost", "Classification", "Regression", "Tabular Datasets"] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [a9a, cod-rna, ijcnn1, abalone, cpusmall, space_ga] # list of datasets you include in your baseline
+dataset: [a9a, cod-rna, ijcnn1, space_ga] # list of datasets you include in your baseline
 ---
 
 # HFedXgboost: Gradient-less Federated Gradient Boosting Trees with Learnable Learning Rates
@@ -39,13 +39,28 @@ efficiency by lowering both communication rounds and communication overhead by f
 
 ## Experimental Setup
 
-****Task:**** :warning: *_what’s the primary task that is being federated? (e.g. image classification, next-word prediction). If you have experiments for several, please list them_*
+****Task:**** Tabular classification and regression
 
-****Model:**** :warning: *_provide details about the model you used in your experiments (if more than use a list). If your model is small, describing it as a table would be :100:. Some FL methods do not use an off-the-shelve model (e.g. ResNet18) instead they create your own. If this is your case, please provide a summary here and give pointers to where in the paper (e.g. Appendix B.4) is detailed._*
+****Model:****: XGBoost model combined with 1-layer CNN
 
-****Dataset:**** :warning: *_Earlier you listed already the datasets that your baseline uses. Now you should include a breakdown of the details about each of them. Please include information about: how the dataset is partitioned (e.g. LDA with alpha 0.1 as default and all clients have the same number of training examples; or each client gets assigned a different number of samples following a power-law distribution with each client only instances of 2 classes)? if  your dataset is naturally partitioned just state “naturally partitioned”; how many partitions there are (i.e. how many clients)? Please include this an all information relevant about the dataset and its partitioning into a table._*
+****Dataset:**** 
+This baseline only includes 7 datasets with a focus on 4 of them (a9a, cod-rna, ijcnn1, space_ga).
 
-****Training Hyperparameters:**** :warning: *_Include a table with all the main hyperparameters in your baseline. Please show them with their default value._*
+Each dataset can be partitioned across 2, 5 or 10 clients in an IID distribution.
+
+| Dataset | task type | no.of features | no.of samples | 
+| :---: | :---: | :---: | :---: |
+| a9a | Binary classification | 123 | 32,561 |
+| cod-rna | Binary classification | 8 | 59,5358 |
+| ijcnn1 | Binary classification | 22 | 49,990 |
+| abalone | regression | 8 | 4,177 |
+| a9a | regression | 123 | 32,561 |
+| cpusmall | regression | 12 | 8,192 |
+| space_ga | regression | 6 | 3,167 |
+| YearPredictionMSD | regression | 90 | 515,345 |
+
+
+****Training Hyperparameters:**** 
 
 
 ## Environment Setup
@@ -53,7 +68,7 @@ efficiency by lowering both communication rounds and communication overhead by f
 #### Steps to set up env:
 1- Install **pyenv**, follow the instructions from this: https://github.com/pyenv/pyenv-installer 
 Note: if you faced the following warning: warning: seems you still have not added 'pyenv' to the load path. and you're not capable of using pyenv in the terminal, you might need to check out this issue: https://github.com/pyenv/pyenv-installer/issues/112
-specifically try the following script:
+specifically, try the following script:
 ```
 export PATH="$HOME/.pyenv/bin:$PATH"
 eval "$(pyenv init --path)"
@@ -75,7 +90,7 @@ Run `Poetry shell` in your terminal to activate the environment.
 
 ```bash
 #to run all the experiments for the centralized model with the original paper config for all the datasets
-#gives the ouput shown in table 1
+#gives the output shown in Table 1
 python -m hfedxgboost.main --config-name "centralized_basline_all_datasets_paper_config"
 
 #to run all the experiments for the centralized model
@@ -109,7 +124,7 @@ python -m hfedxgboost.main dataset="space_ga" clients="space_ga_5_clients"
 #to run the federated version for space_ga dataset with 10 clients
 python -m hfedxgboost.main dataset="space_ga" clients="space_ga_10_clients"
 
-# The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
+# The main experiment implemented in your baseline using default hyperparameters (that should be set in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
 
 poetry run -m <baseline-name>.main <no additional arguments> # where <baseline-name> is the name of this directory and that of the only sub-directory in this directory (i.e. where all your source code is)
 
