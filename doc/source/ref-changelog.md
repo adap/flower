@@ -8,8 +8,7 @@
 
 - **Add new Diffusion model Federated Learning example using Diffusers and Flower** ([#2411](https://github.com/adap/flower/pull/2411))
 
-    Thanks to an initial contribution made by [Fiona Victoria](https://github.com/fionavictoria), Flower now offers an example of Federated
-Learning applied to Diffusion models.
+  Thanks to an initial contribution made by [Fiona Victoria](https://github.com/fionavictoria), Flower now offers an example of Federated Learning applied to Diffusion models.
 
 ### What's new?
 
