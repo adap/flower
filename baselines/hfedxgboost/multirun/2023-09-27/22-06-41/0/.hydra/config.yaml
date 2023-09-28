@@ -1,0 +1,63 @@
+dataset:
+  task:
+    task_type: BINARY
+    metric:
+      name: Accuracy
+      fn:
+        _target_: torchmetrics.Accuracy
+        task: binary
+    criterion:
+      _target_: torch.nn.BCELoss
+    xgb:
+      _target_: xgboost.XGBClassifier
+      objective: binary:logistic
+  dataset_name: cod-rna
+  train_ratio: 0.75
+  early_stop_patience_rounds: 10
+clients:
+  n_estimators_client: 250
+  num_rounds: 30
+  client_num: 2
+  num_iterations: 500
+  xgb:
+    max_depth: 8
+  CNN:
+    lr: 0.0001
+centralized: false
+device: cpu
+n_estimators_client: ${clients.n_estimators_client}
+task_type: ${dataset.task.task_type}
+client_num: ${clients.client_num}
+XGBoost:
+  _target_: ${dataset.task.xgb._target_}
+  objective: ${dataset.task.xgb.objective}
+  learning_rate: 0.1
+  max_depth: ${clients.xgb.max_depth}
+  n_estimators: ${clients.n_estimators_client}
+  subsample: 0.8
+  colsample_bylevel: 1
+  colsample_bynode: 1
+  colsample_bytree: 1
+  alpha: 5
+  gamma: 5
+  num_parallel_tree: 1
+  min_child_weight: 1
+strategy:
+  _target_: flwr.server.strategy.FedXgbNnAvg
+  _recursive_: true
+  fraction_fit: 1.0
+  fraction_evaluate: 0.0
+  min_fit_clients: 1
+  min_evaluate_clients: 1
+  min_available_clients: ${client_num}
+  accept_failures: false
+run_experiment:
+  num_rounds: ${clients.num_rounds}
+  batch_size: 32
+  fraction_fit: 1.0
+  min_fit_clients: 1
+  num_cpus_per_client: 1
+  fit_config:
+    num_iterations: ${clients.num_iterations}
+val_ratio: 0.0
+batch_size: whole
