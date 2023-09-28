@@ -5,6 +5,8 @@ example, you may define here things like: loading a model from a checkpoint, sav
 results, plotting.
 """
 import csv
+import os
+import os.path
 from typing import List, Optional, Tuple, Union
 
 import numpy as np
@@ -461,20 +463,21 @@ class results_writer:
 
     def create_res_csv(self, filename) -> None:
         """Create a CSV file with the provided file name."""
-        fields = [
-            "dataset_name",
-            "client_num",
-            "n_estimators_client",
-            "num_rounds",
-            "xgb_max_depth",
-            "CNN_lr",
-            "best_res",
-            "best_res_round_num",
-            "num_iterations",
-        ]
-        with open(filename, "w") as csvfile:
-            csvwriter = csv.writer(csvfile)
-            csvwriter.writerow(fields)
+        if not (os.path.isfile(filename)):
+            fields = [
+                "dataset_name",
+                "client_num",
+                "n_estimators_client",
+                "num_rounds",
+                "xgb_max_depth",
+                "CNN_lr",
+                "best_res",
+                "best_res_round_num",
+                "num_iterations",
+            ]
+            with open(filename, "w") as csvfile:
+                csvwriter = csv.writer(csvfile)
+                csvwriter.writerow(fields)
 
     def write_res(self, filename) -> None:
         """Write the results of the federated model to a CSV file.
@@ -523,27 +526,28 @@ class results_writer_centralized:
 
     def create_res_csv(self, filename) -> None:
         """Create a CSV file with the provided file name."""
-        fields = [
-            "dataset_name",
-            "n_estimators_client",
-            "xgb_max_depth",
-            "subsample",
-            "learning_rate",
-            "colsample_bylevel",
-            "colsample_bynode",
-            "colsample_bytree",
-            "alpha",
-            "gamma",
-            "num_parallel_tree",
-            "min_child_weight",
-            "result_train",
-            "result_test",
-        ]
-        with open(filename, "w") as csvfile:
-            # creating a csv writer object
-            csvwriter = csv.writer(csvfile)
-            # writing the fields
-            csvwriter.writerow(fields)
+        if not (os.path.isfile(filename)):
+            fields = [
+                "dataset_name",
+                "n_estimators_client",
+                "xgb_max_depth",
+                "subsample",
+                "learning_rate",
+                "colsample_bylevel",
+                "colsample_bynode",
+                "colsample_bytree",
+                "alpha",
+                "gamma",
+                "num_parallel_tree",
+                "min_child_weight",
+                "result_train",
+                "result_test",
+            ]
+            with open(filename, "w") as csvfile:
+                # creating a csv writer object
+                csvwriter = csv.writer(csvfile)
+                # writing the fields
+                csvwriter.writerow(fields)
 
     def write_res(self, filename, result_train, result_test) -> None:
         """Write the results of the centralized model to a CSV file.
