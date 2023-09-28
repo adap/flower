@@ -2,10 +2,13 @@
 
 seed: 42
 device: cuda
-num_gpus: 1
 num_clients: 60
 clients_per_round: 15
 num_rounds: 500
+
+client_resources:
+  num_cpus: 4
+  num_gpus: 0.25
 
 dataset:
   name: cifar10

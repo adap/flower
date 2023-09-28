@@ -67,27 +67,91 @@ def _partition_trainset(
     return client_datasets
 
 
+def _partition_trainset_new(
+    trainset, num_classes, num_clients, num_classes_per_client, seed
+):
+    """..."""
+    labels = set(range(num_classes))
+
+    assert (
+        0 < num_classes_per_client <= num_classes
+    ), "class_per_client must be > 0 and <= #classes"
+    assert num_classes_per_client * num_clients >= len(
+        labels
+    ), "class_per_client * n must be >= #classes"
+
+    nlbl = [
+        np.random.choice(len(labels), num_classes_per_client, replace=False)
+        for u in range(num_clients)
+    ]
+    check = set().union(*[set(a) for a in nlbl])
+
+    while len(check) < len(labels):
+        missing = labels - check
+        for m in missing:
+            nlbl[np.random.randint(0, num_clients)][
+                np.random.randint(0, num_classes_per_client)
+            ] = m
+        check = set().union(*[set(a) for a in nlbl])
+
+    class_map = {c: [u for u, lbl in enumerate(nlbl) if c in lbl] for c in labels}
+    assignment = np.zeros(len(trainset))
+    targets = np.array(trainset.targets)
+
+    for lbl, users in class_map.items():
+        ids = np.where(targets == lbl)[0]
+        assignment[ids] = np.random.choice(users, len(ids))
+
+    dataset_indices = [np.where(assignment == i)[0] for i in range(num_clients)]
+
+    return [Subset(trainset, ind) for ind in dataset_indices]
+
+
 def _mash_data(client_datasets, mash_batch_size, num_classes):
     """..."""
     mashed_data = []
     for client_dataset in client_datasets:
         mashed_image, mashed_label = [], []
+
         for i, (image, label) in enumerate(client_dataset):
             mashed_image.append(image)
             mashed_label.append(torch.tensor([label]))
-            if (i + 1) % mash_batch_size == 0:
+
+            if (not mash_batch_size == "all") and (i + 1) % mash_batch_size == 0:
                 mashed_data.append(
                     (
-                        torch.mean(torch.stack(mashed_image), dim=0),
+                        torch.squeeze(
+                            torch.mean(
+                                torch.stack(mashed_image[-mash_batch_size:]), dim=0
+                            )
+                        ),
                         torch.mean(
                             F.one_hot(
-                                torch.squeeze(torch.stack(mashed_label)), num_classes
+                                torch.squeeze(
+                                    torch.stack(mashed_label[-mash_batch_size:])
+                                ),
+                                num_classes,
                             ).to(dtype=torch.float32),
                             dim=0,
                         ),
                     )
                 )
-                # print(mashed_data[0][1])
-                mashed_image, mashed_label = [], []
+
+        if mash_batch_size == "all":
+            mashed_data.append(
+                (
+                    torch.squeeze(torch.mean(torch.stack(mashed_image), dim=0)),
+                    torch.mean(
+                        F.one_hot(
+                            torch.squeeze(torch.stack(mashed_label)), num_classes
+                        ).to(dtype=torch.float32),
+                        dim=0,
+                    ),
+                )
+            )
+
+        mashed_image, mashed_label = [], []
+
+    print("length of mashed data:", len(mashed_data))
 
     return mashed_data

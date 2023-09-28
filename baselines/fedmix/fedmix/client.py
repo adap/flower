@@ -10,6 +10,120 @@ from flwr.client import NumPyClient
 from hydra.utils import instantiate
 
 
+class FedAvgClient(NumPyClient):
+    """..."""
+
+    def __init__(self, net, trainloader, device, num_epochs, learning_rate):
+        """..."""
+        self.net = net
+        self.trainloader = trainloader
+        self.device = device
+        self.num_epochs = num_epochs
+        self.learning_rate = learning_rate
+
+    def get_parameters(self, config):
+        """..."""
+        return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
+
+    def set_parameters(self, parameters):
+        """..."""
+        params_dict = zip(self.net.state_dict().keys(), parameters)
+        state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+        self.net.load_state_dict(state_dict, strict=True)
+
+    def fit(self, parameters, config):
+        """..."""
+        self.set_parameters(parameters)
+        self.lr_decay_accumulated = config["lr_decay_accumulated"]
+        self.local_update()
+        return self.get_parameters({}), len(self.trainloader), {}
+
+    def local_update(self):
+        """..."""
+        criterion = torch.nn.CrossEntropyLoss()
+        optimizer = torch.optim.SGD(
+            self.net.parameters(), lr=self.learning_rate * self.lr_decay_accumulated
+        )
+        self.net.train()
+        for _ in range(self.num_epochs):
+            self.training_loop(criterion, optimizer)
+
+    def training_loop(self, criterion, optimizer):
+        """..."""
+        for images, labels in self.trainloader:
+            images, labels = images.to(self.device), labels.to(self.device)
+            optimizer.zero_grad()
+            loss = criterion(self.net(images), labels)
+            loss.backward()
+            optimizer.step()
+
+
+class NaiveMixClient(NumPyClient):
+    """..."""
+
+    def __init__(self, net, trainloader, device, num_epochs, learning_rate):
+        """..."""
+        self.net = net
+        self.trainloader = trainloader
+        self.device = device
+        self.num_epochs = num_epochs
+        self.learning_rate = learning_rate
+
+    def get_parameters(self, config):
+        """..."""
+        return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
+
+    def set_parameters(self, parameters):
+        """..."""
+        params_dict = zip(self.net.state_dict().keys(), parameters)
+        state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+        self.net.load_state_dict(state_dict, strict=True)
+
+    def fit(self, parameters, config):
+        """..."""
+        self.set_parameters(parameters)
+        self.mashed_data = config["mashed_data"]
+        self.mixup_ratio = config["mixup_ratio"]
+        self.lr_decay_accumulated = config["lr_decay_accumulated"]
+        self.local_update()
+        return self.get_parameters({}), len(self.trainloader), {}
+
+    def local_update(self):
+        """..."""
+        criterion = torch.nn.CrossEntropyLoss()
+        optimizer = torch.optim.SGD(
+            self.net.parameters(), lr=self.learning_rate * self.lr_decay_accumulated
+        )
+        self.net.train()
+        for _ in range(self.num_epochs):
+            self.training_loop(criterion, optimizer)
+
+    def training_loop(self, criterion, optimizer):
+        """..."""
+        for images, labels in self.trainloader:
+            mashed_image, mashed_label = random.choice(self.mashed_data)
+            images, labels = images.to(self.device), labels.to(self.device)
+
+            mashed_image, mashed_label = mashed_image[None, :].to(
+                self.device
+            ), mashed_label[None, :].to(self.device)
+
+            num_classes = len(mashed_label[0])
+            mashed_labels = mashed_label.expand_as(F.one_hot(labels, num_classes))
+
+            optimizer.zero_grad()
+
+            mixup_outputs = self.net(
+                (1 - self.mixup_ratio) * images + self.mixup_ratio * mashed_image
+            )
+            loss = (1 - self.mixup_ratio) * criterion(
+                mixup_outputs, labels
+            ) + self.mixup_ratio * criterion(mixup_outputs, mashed_labels)
+
+            loss.backward()
+            optimizer.step()
+
+
 class FedMixClient(NumPyClient):
     """..."""
 
@@ -55,9 +169,9 @@ class FedMixClient(NumPyClient):
         for images, labels in self.trainloader:
             mashed_image, mashed_label = random.choice(self.mashed_data)
             images, labels = images.to(self.device), labels.to(self.device)
-            mashed_image, mashed_label = mashed_image[None, :].to(
-                self.device
-            ), mashed_label[None, :].to(self.device)
+
+            mashed_image = mashed_image[None, :].to(self.device)
+            mashed_label = mashed_label[None, :].to(self.device)
 
             num_classes = len(mashed_label[0])
             mashed_labels = mashed_label.expand_as(F.one_hot(labels, num_classes))
