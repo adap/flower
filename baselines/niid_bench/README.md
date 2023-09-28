@@ -60,8 +60,12 @@ For FedProx algorithm the proximal parameter is tuned from values {0.001, 0.01, 
 
 ```bash
 # Setup the base poetry enviroment from the niid_bench directory
+# Set python version
+pyenv local 3.10.6
+# Tell poetry to use python 3.10
+poetry env use 3.10.6
+# Now install the environment
 poetry install
-
 # Start the shell
 poetry shell
 
