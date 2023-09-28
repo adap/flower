@@ -37,25 +37,25 @@ dataset: [FEMNIST, SHAKESPEARE] # list of datasets you include in your baseline
 
 ****Dataset:**** : This baseline includes the FEMNIST dataset and SHAKESPEARE. For data partitioning and sampling per client, we use the Leaf GitHub([LEAF: A Benchmark for Federated Settings](https://github.com/TalwalkarLab/leaf)). The data and client specifications used in this experiment are listed in the table below (Table 1 in the paper). 
 
-|   Dataset   | #Clients | #Samples | #Classes |                      #Partition Clients                      | #Partition Dataset                |
-|:-----------:|:--------:| :---: |:--------:|:------------------------------------------------------------:|-----------------------------------|
-|   FEMNIST   |  1,068   | 235,683 |    62    | Train Clients : 0.8, Valid Clients : 0.1, Test Clients : 0.1 | Support set : 0.8, Query set : 0.2 |
-| SHAKESPEARE |    110     | 625,127 |    80    | Train Clients : 0.8, Valid Clients : 0.1, Test Clients : 0.1 | Support set : 0.8, Query set : 0.2|
+|   Dataset   | #Clients | #Samples | #Classes |                      #Partition Clients                      | #Partition Dataset          |
+|:-----------:|:--------:| :---: |:--------:|:------------------------------------------------------------:|-----------------------------|
+|   FEMNIST   |  1,068   | 235,683 |    62    | Train Clients : 0.8, Valid Clients : 0.1, Test Clients : 0.1 | Support set(fraction) : 0.2 |
+| SHAKESPEARE |    110     | 625,127 |    80    | Train Clients : 0.8, Valid Clients : 0.1, Test Clients : 0.1 | Support set(fraction) : 0.2 |
 
 **The original specifications of the Leaf dataset can be found in the Leaf paper(_"LEAF: A Benchmark for Federated Settings"_).**
 
 ****Training Hyperparameters:**** :warning: *_Include a table with all the main hyperparameters in your baseline. Please show them with their default value._*
 
-|     Algorithm     |    Dataset     |  clients per round  |  number of rounds  | batch size  | optimizer | Learning Rate(α, β) | client resources                     |
-|:-----------------:|:--------------:|:-------------------:|:------------------:|:-----------:|:---------:|:-------------------:|--------------------------------------|
-|      FedAvg       |     FEMNST     | 4(Defalut), 40, 50  |        2000        |     10      |   Adam    |       0.0001        | {'num_cpus': 4.0, 'num_gpus': 0.25 } |
-|      FedAVg       |  SHAKESPEARE   | 4(Defalut), 40, 50  |        400         |     10      |    Adam       |        0.001        | {'num_cpus': 4.0, 'num_gpus': 0.25 } |
-|   FedAvg(Meta)    |     FEMNST     | 4(Defalut), 40, 50  |        2000        |     10      |     Adam      |       0.0001        | {'num_cpus': 4.0, 'num_gpus': 0.25 } |
-|   FedAvg(Meta)    |  SHAKESPEARE   | 4(Defalut), 40, 50  |        400         |     10      |    Adam       |        0.001        | {'num_cpus': 4.0, 'num_gpus': 0.25 } |
-|   FedMeta(MAML)   |     FEMNST     | 4(Defalut), 40, 50  |        2000        |     10      |     Adam      |   (0.001,0.0001)    | {'num_cpus': 4.0, 'num_gpus': 0.25 } |
-|   FedMeta(MAML)   |  SHAKESPEARE   | 4(Defalut), 40, 50  |        400         |     10      |     Adam      |     (0.1,0.01)      | {'num_cpus': 4.0, 'num_gpus': 1.0 }  |
-| FedMeta(Meta-SGD  |     FEMNST     | 4(Defalut), 40, 50  |        2000        |     10      |     Adam      |   (0.001,0.0001)    | {'num_cpus': 4.0, 'num_gpus': 0.25 } |
-| FedMeta(Meta-SGD  |  SHAKESPEARE   | 4(Defalut), 40, 50  |        400         |     10      |    Adam       |     (0.1,0.01)      | {'num_cpus': 4.0, 'num_gpus': 1.0 }  |
+|     Algorithm     |    Dataset     | Clients per Round | Number of Rounds | Batch Size | Optimizer | Learning Rate(α, β) | Client Resources                     | Gradient Step |
+|:-----------------:|:--------------:|:-----------------:|:----------------:|:----------:|:---------:|:-------------------:|--------------------------------------|:-------------:|
+|      FedAvg       |     FEMNST     |         4         |       2000       |     10     |   Adam    |       0.0001        | {'num_cpus': 4.0, 'num_gpus': 0.25 } |       -       |
+|      FedAVg       |  SHAKESPEARE   |         4         |       400        |     10     |   Adam    |        0.001        | {'num_cpus': 4.0, 'num_gpus': 0.25 } |       -       |
+|   FedAvg(Meta)    |     FEMNST     |         4         |       2000       |     10     |   Adam    |       0.0001        | {'num_cpus': 4.0, 'num_gpus': 0.25 } |       -       |
+|   FedAvg(Meta)    |  SHAKESPEARE   |         4         |       400        |     10     |   Adam    |        0.001        | {'num_cpus': 4.0, 'num_gpus': 0.25 } |       -       |
+|   FedMeta(MAML)   |     FEMNST     |         4         |       2000       |     10     |   Adam    |   (0.001, 0.0001)   | {'num_cpus': 4.0, 'num_gpus': 0.25 } |       5       |
+|   FedMeta(MAML)   |  SHAKESPEARE   |         4         |       400        |     10     |   Adam    |     (0.1, 0.01)     | {'num_cpus': 4.0, 'num_gpus': 1.0 }  |       1       |
+| FedMeta(Meta-SGD  |     FEMNST     |         4         |       2000       |     10     |   Adam    |   (0.001, 0.0001)   | {'num_cpus': 4.0, 'num_gpus': 0.25 } |       5       |
+| FedMeta(Meta-SGD  |  SHAKESPEARE   |         4         |       400        |     10     |   Adam    |     (0.1, 0.01)     | {'num_cpus': 4.0, 'num_gpus': 1.0 }  |       1       |
 
 
 ## Environment Setup
