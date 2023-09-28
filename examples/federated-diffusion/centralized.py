@@ -67,7 +67,6 @@ def train(model, train_dataloader, cid, server_round, epochs, timesteps, cpu):
             "Dataset": "CIFAR-10",
             "Epochs": PARAMS.num_epochs,
         },
-        dir="./wandb_logs",
     )
 
     wandb.run.name = "Client-" + cid
