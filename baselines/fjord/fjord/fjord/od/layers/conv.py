@@ -1,0 +1,90 @@
+from typing import Union, Tuple
+
+import numpy as np
+from torch import nn
+from torch.nn import Module
+from torch import Tensor
+
+from .utils import check_layer
+
+__all__ = ["ODConv1d", "ODConv2d", "ODConv3d"]
+
+
+def od_conv_forward(layer: Module, x: Tensor,
+                    p: Union[Tuple[Module, float], float] = None
+                    ) -> Tensor:
+    p = check_layer(layer, p)
+    if not layer.is_od and p is not None:
+        raise ValueError("p must be None if is_od is False")
+    in_dim = x.size(1)  # second dimension is input dimension
+    layer.last_input_dim = in_dim
+    if not p:  # i.e., don't apply OD
+        out_dim = layer.width
+    else:
+        out_dim = int(np.ceil(layer.width * p))
+    layer.last_output_dim = out_dim
+    # subsampled weights and bias
+    weights_red = layer.weight[:out_dim, :in_dim]
+    bias_red = layer.bias[:out_dim] if layer.bias is not None else None
+    return layer._conv_forward(x, weights_red, bias_red)
+
+
+def get_slice(layer: Module, in_dim: int, out_dim: int
+              ) -> Tuple[Tensor, Tensor]:
+    weight_slice = layer.weight[:in_dim, :out_dim]
+    bias_slice = layer.bias[:out_dim] if layer.bias is not None else None
+    return weight_slice, bias_slice
+
+
+class ODConv1d(nn.Conv1d):
+    def __init__(self, is_od: bool = True, *args, **kwargs
+                 ) -> None:
+        self.is_od = is_od
+        super(ODConv1d, self).__init__(*args, **kwargs)
+        self.width = self.out_channels
+        self.last_input_dim = None
+        self.last_output_dim = None
+
+    def forward(
+            self, x: Tensor, p: Union[Tuple[Module, float], float] = None
+            ) -> Tensor:
+        return od_conv_forward(self, x, p)
+
+    def get_slice(self, *args, **kwargs) -> Tuple[Tensor, Tensor]:
+        get_slice(self, *args, **kwargs)
+
+
+class ODConv2d(nn.Conv2d):
+    def __init__(self, is_od: bool = True, *args, **kwargs
+                 ) -> None:
+        self.is_od = is_od
+        super(ODConv2d, self).__init__(*args, **kwargs)
+        self.width = self.out_channels
+        self.last_input_dim = None
+        self.last_output_dim = None
+
+    def forward(
+            self, x: Tensor, p: Union[Tuple[Module, float], float] = None
+            ) -> Tensor:
+        return od_conv_forward(self, x, p)
+
+    def get_slice(self, *args, **kwargs) -> Tuple[Tensor, Tensor]:
+        get_slice(self, *args, **kwargs)
+
+
+class ODConv3d(nn.Conv3d):
+    def __init__(self, is_od: bool = True, *args, **kwargs
+                 ) -> None:
+        self.is_od = is_od
+        super(ODConv3d, self).__init__(*args, **kwargs)
+        self.width = self.out_channels
+        self.last_input_dim = None
+        self.last_output_dim = None
+
+    def forward(
+            self, x: Tensor, p: Union[Tuple[Module, float], float] = None
+            ) -> Tensor:
+        return od_conv_forward(self, x, p)
+
+    def get_slice(self, *args, **kwargs) -> Tuple[Tensor, Tensor]:
+        get_slice(self, *args, **kwargs)
