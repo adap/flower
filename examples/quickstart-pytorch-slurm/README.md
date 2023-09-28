@@ -1,6 +1,6 @@
 # Flower Example using PyTorch (SLURM)
 
-> This example borrows most of its content from the [`quickstart-pytorch`](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch) example. The main difference here is in regards with the python environment setup (using conda) and the deployment infrastructure (SLURM). This that the Flower FL pipeline is the same as in the aforementioned example.
+> This example borrows most of its content from the [`quickstart-pytorch`](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch) example. The main difference here is in regards with the python environment setup (using conda) and the deployment infrastructure (SLURM). This Flower FL pipeline is the same as in the aforementioned example.
 
 This introductory example to Flower uses PyTorch, but deep knowledge of PyTorch is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case.
 Running this example in itself is quite easy.
@@ -41,7 +41,7 @@ pip install -r requirements.txt
 
 ## Run Federated Learning with PyTorch and Flower (in SLURM)
 
-If you have run other examples of Flower without using the [VirtualClientEngine](), you already know the drill, you need to manually launch the `server` and then connect to it as many `clients` as you wish. This can be done easily by ssh-ing into each device if you have access to it, or if you want to test things on your development machine you could simply open different terminal shells (maybe via [tmux]()). In order to do the same under SLURM, we need a bit more work.
+If you have run other examples of Flower without using the [VirtualClientEngine](https://flower.dev/docs/framework/how-to-run-simulations.html), you already know the drill, you need to manually launch the `server` and then connect to it as many `clients` as you wish. This can be done easily by ssh-ing into each device if you have access to it, or if you want to test things on your development machine you could simply open different terminal shells (maybe via [tmux](https://github.com/tmux/tmux/wiki#welcome-to-tmux)). In order to do the same under SLURM, we need a bit more work.
 
 The best is to define a standard SLURM script that we can executed via `sbatch` command. The basic idea is as follows: We want to submit to the SLURM scheduler N nodes (1 for the server, and N-1 for clients). But how to do this from a single script? See below the content of `slurm.sh`:
 
