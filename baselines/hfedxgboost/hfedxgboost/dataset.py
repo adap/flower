@@ -8,25 +8,64 @@ partitioned, please include all those functions and logic in the
 `dataset_preparation.py` module. You can use all those functions from functions/methods
 defined here of course.
 """
-from hfedxgboost.dataset_preparation import download_data,datafiles_fusion,train_test_split,modify_labels
-from typing import Any, Dict, List, Optional, Tuple, Union
-import numpy as np
+from typing import Optional, Tuple, Union
 
 import torch
+from flwr.common import NDArray
 from torch.utils.data import DataLoader, Dataset, random_split
 
-def load_single_dataset(task_type,dataset_name,train_ratio=.75):
-    datafiles_paths=download_data(dataset_name)
-    X,Y=datafiles_fusion(datafiles_paths)
-    X_train,y_train,X_test,y_test=train_test_split(X,Y,train_ratio=train_ratio)
-    if task_type.upper()=="BINARY":
-        y_train,y_test=modify_labels(y_train,y_test)
-    return X_train,y_train,X_test,y_test
+from hfedxgboost.dataset_preparation import (
+    datafiles_fusion,
+    download_data,
+    modify_labels,
+    train_test_split,
+)
+
+
+def load_single_dataset(
+    task_type: str, dataset_name: str, train_ratio: Optional[float] = 0.75
+) -> Tuple[NDArray, NDArray, NDArray]:
+    """Load a single dataset.
+
+    Parameters
+    ----------
+        task_type (str): The type of task, either "BINARY" or "REG".
+        dataset_name (str): The name of the dataset to load.
+        train_ratio (float, optional): The ratio of training data to the total dataset.
+        Default is 0.75.
+
+    Returns
+    -------
+            X_train (numpy array): The training data features.
+            y_train (numpy array): The training data labels.
+            X_test (numpy array): The testing data features.
+            y_test (numpy array): The testing data labels.
+    """
+    datafiles_paths = download_data(dataset_name)
+    X, Y = datafiles_fusion(datafiles_paths)
+    X_train, y_train, X_test, y_test = train_test_split(X, Y, train_ratio=train_ratio)
+    if task_type.upper() == "BINARY":
+        y_train, y_test = modify_labels(y_train, y_test)
+    return X_train, y_train, X_test, y_test
 
 
 def get_dataloader(
     dataset: Dataset, partition: str, batch_size: Union[int, str]
 ) -> DataLoader:
+    """Return a DataLoader object.
+
+    Parameters
+    ----------
+        dataset (Dataset): The dataset object that contains the data.
+        partition (str): The partition string that specifies the subset of data to use.
+        batch_size (Union[int, str]): The batch size to use for loading data.
+        It can be either an integer value or the string "whole".
+        If "whole" is provided, the batch size will be set to the length of the dataset.
+
+    Returns
+    -------
+        DataLoader: A DataLoader object that loads data from the dataset in batches.
+    """
     if batch_size == "whole":
         batch_size = len(dataset)
     return DataLoader(
@@ -34,15 +73,31 @@ def get_dataloader(
     )
 
 
-def do_fl_partitioning(
+def divide_dataset_between_clients(
     trainset: Dataset,
     testset: Dataset,
     pool_size: int,
     batch_size: Union[int, str],
     val_ratio: float = 0.0,
 ) -> Tuple[DataLoader, DataLoader, DataLoader]:
-    # Split training set into `num_clients` partitions to simulate different local datasets
-    trainset_length=len(trainset)
+    """Divide the data between clients with IID distribution.
+
+    Parameters
+    ----------
+        trainset (Dataset): The  full training dataset.
+        testset (Dataset): The full test dataset.
+        pool_size (int): The number of partitions to create.
+        batch_size (Union[int, str]): The size of the batches.
+        val_ratio (float, optional): The ratio of validation data. Defaults to 0.0.
+
+    Returns
+    -------
+        Tuple[DataLoader, DataLoader, DataLoader]: A tuple containing
+        the training loaders, validation loaders (or None), and test loader.
+    """
+    # Split training set into `num_clients` partitions to simulate
+    # different local datasets
+    trainset_length = len(trainset)
     partition_size = trainset_length // pool_size
     lengths = [partition_size] * pool_size
     if sum(lengths) != trainset_length:
