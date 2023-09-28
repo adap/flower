@@ -2,7 +2,9 @@
 
 This example demonstrate how to implement federated learning for training
 diffusion models using `Flower` and `Diffusers`. The example can be run on CPU
-but it will be very slow, it is recommended to run it on a CUDA GPU.
+but it will be very slow, it is recommended to run it on a CUDA GPU (note that
+by default, it will still run on CPU, you need to modify `config.py` in order
+to set the device to `cuda`).
 
 ## Dependencies
 
