@@ -880,3 +880,9 @@ poetry run python main.py
 ```
 
 You can change the default parameters by modifing the values in `conf.py`.
+
+## Experiment tracking
+
+This example using Weights and Biases in order to track the progress of the experiment, when you first run it,
+it will prompt you for your account's API key. Then, on the web interface, you should be able to see a few tracked
+metrics, as well as the images that are generated each round.
