@@ -66,8 +66,6 @@ poetry install
 poetry shell
 
 #  Install tqdm, torch, and torchvision using pip
-pip install torch==1.12.1+cu113 torchvision==0.13.1+cu113 --extra-index-url https://download.pytorch.org/whl/cu113
-pip install tqdm
 ```
 
 
