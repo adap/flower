@@ -2,11 +2,11 @@ import json
 import os
 from collections import OrderedDict
 
-import flwr as fl
 import torch
-from flwr.server import History
-
 from centralized import get_model
+
+import flwr as fl
+from flwr.server import History
 
 
 def trainconfig(server_round):
@@ -121,14 +121,14 @@ class SaveModelAndMetricsStrategy(fl.server.strategy.FedAvg):
         failures,
     ):
         aggregated_loss = 1.0
-        
+
         if server_round > 5:
             cid_list = [r.metrics["cid"] for _, r in results]
             precision_list = [r.metrics["precision"] for _, r in results]
             recall_list = [r.metrics["recall"] for _, r in results]
             print(cid_list, precision_list, recall_list, server_round)
 
-            lowest_precision = float('inf')
+            lowest_precision = float("inf")
             lowest_precision_cid = None
             lowest_precision_count = 0
             for i, precision in enumerate(precision_list):
@@ -141,34 +141,43 @@ class SaveModelAndMetricsStrategy(fl.server.strategy.FedAvg):
 
             if lowest_precision_count > 1:
                 lowest_precision_cid = None
-    
+
             lowest_precision_cid = str(lowest_precision_cid)
-            
+
             client_to_disconnect = None
             for client, evaluate_res in results:
-                if evaluate_res.metrics.get('cid') == lowest_precision_cid:
+                if evaluate_res.metrics.get("cid") == lowest_precision_cid:
                     client_to_disconnect = client
-            
+
             if lowest_precision_cid == None:
-                loss_aggregated, metrics_aggregated = aggregated_loss, {"server_round": server_round}
+                loss_aggregated, metrics_aggregated = aggregated_loss, {
+                    "server_round": server_round
+                }
             else:
-                print("client_to_disconnect:", lowest_precision_cid, client_to_disconnect)
+                print(
+                    "client_to_disconnect:", lowest_precision_cid, client_to_disconnect
+                )
                 print("====done with agg evaluate======")
-                
-                data = {"cid_list": cid_list, "precision_list": precision_list, 
-                                         "recall_list": recall_list , "lowest_precision_cid": lowest_precision_cid, 
-                                         "server_round": server_round, "client_to_disconnect": client_to_disconnect,
-                                         "warning_client": 0}
+
+                data = {
+                    "cid_list": cid_list,
+                    "precision_list": precision_list,
+                    "recall_list": recall_list,
+                    "lowest_precision_cid": lowest_precision_cid,
+                    "server_round": server_round,
+                    "client_to_disconnect": client_to_disconnect,
+                    "warning_client": 0,
+                }
                 print(data)
                 # Serialize data into file:
-                json.dump(data, open("logs.json", 'a' ))
+                json.dump(data, open("logs.json", "a"))
 
-                loss_aggregated, metrics_aggregated = aggregated_loss, {"cid_list": cid_list, "precision_list": precision_list, 
-                                         "recall_list": recall_list , "lowest_precision_cid": lowest_precision_cid, 
-                                         "server_round": server_round, "client_to_disconnect": client_to_disconnect,
-                                         "warning_client": 0}
+                loss_aggregated, metrics_aggregated = aggregated_loss, data
         else:
-            loss_aggregated, metrics_aggregated = aggregated_loss, {"client_to_disconnect": None, "server_round": server_round}
+            loss_aggregated, metrics_aggregated = aggregated_loss, {
+                "client_to_disconnect": None,
+                "server_round": server_round,
+            }
 
         if self.client_manager:
             print("For Personalization and Threshold Filtering Strategy")

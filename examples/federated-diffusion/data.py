@@ -4,10 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torchvision.transforms as transforms
+from config import PARAMS
 from torch.utils.data import Subset, random_split
 from torchvision.datasets import CIFAR10
-
-from config import PARAMS
 
 
 def load_datasets(iid=True):

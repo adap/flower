@@ -5,12 +5,11 @@ import torch.nn.functional as F
 import torchvision.transforms as transforms
 import wandb
 from accelerate import Accelerator
+from config import PARAMS
 from diffusers import DDPMPipeline, DDPMScheduler, UNet2DModel
 from diffusers.optimization import get_cosine_schedule_with_warmup
 from torchvision.datasets import CIFAR10
 from tqdm import tqdm
-
-from config import PARAMS
 from utils import IPR, make_grid, prepare_tensors
 
 
@@ -68,6 +67,7 @@ def train(model, train_dataloader, cid, server_round, epochs, timesteps, cpu):
             "Dataset": "CIFAR-10",
             "Epochs": PARAMS.num_epochs,
         },
+        dir="./wandb_logs",
     )
 
     wandb.run.name = "Client-" + cid

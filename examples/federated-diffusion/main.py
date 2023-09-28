@@ -1,9 +1,8 @@
-import flwr as fl
-
 from client import client_fn
 from config import PARAMS
 from strategy import ClientManager, SaveModelAndMetricsStrategy, trainconfig
 
+import flwr as fl
 
 client_manager = ClientManager()
 

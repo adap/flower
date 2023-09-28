@@ -2,12 +2,12 @@ import json
 import pickle
 from collections import OrderedDict
 
-import flwr as fl
 import torch
-
 from centralized import get_model, train, validate
-from data import load_datasets
 from config import PARAMS
+from data import load_datasets
+
+import flwr as fl
 
 DEVICE = torch.device(PARAMS.device)  # Try "cuda" to train on GPU
 print(
@@ -88,7 +88,9 @@ class FlowerClient(fl.client.NumPyClient):
             cpu,
         )
         if PARAMS.personalized:
-            save_personalization_weight(self.cid, self.model, self.personalization_layers)
+            save_personalization_weight(
+                self.cid, self.model, self.personalization_layers
+            )
 
         return get_parameters(self.model), len(self.trainloader), {}
 
@@ -108,11 +110,12 @@ class FlowerClient(fl.client.NumPyClient):
             "server_round": server_round,
         }
         json.dump(results, open("logs.json", "a"))
+        results.pop("server_round")
 
         return (
             1.0,
             num_examples,
-            {"precision": precision, "recall": recall, "cid": self.cid},
+            results,
         )
 
 
