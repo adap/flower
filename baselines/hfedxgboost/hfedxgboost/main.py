@@ -49,7 +49,7 @@ def main(cfg: DictConfig) -> None:
                 cfg, dataset_name=cfg.dataset.dataset_name
             )
             writer = results_writer_centralized(cfg)
-            # writer.create_res_csv("results_centralized.csv")
+            writer.create_res_csv("results_centralized.csv")
             writer.write_res("results_centralized.csv", result_train, result_test)
     else:
         dataset_name = cfg.dataset.dataset_name
@@ -165,8 +165,7 @@ def main(cfg: DictConfig) -> None:
         writer = results_writer(cfg)
         best_res, best_res_round = writer.extract_best_res(history)
         print("Best Result", best_res, "best_res_round", best_res_round)
-        # activate the line to create results file from scratch
-        # writer.create_res_csv("results.csv")
+        writer.create_res_csv("results.csv")
         writer.write_res("results.csv")
         # return history
 

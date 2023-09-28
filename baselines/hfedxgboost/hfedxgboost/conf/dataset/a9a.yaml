@@ -2,4 +2,4 @@ defaults:
   - task: Binary_Classification
 dataset_name: "a9a"
 train_ratio: .75
-early_stop_patience_rounds: 5
+early_stop_patience_rounds: 10
