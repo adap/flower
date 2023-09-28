@@ -34,23 +34,9 @@ algorithms: [fedavg, scaffold, fedprox, fednova]
 
 ****Dataset:**** This directory has three image classification datasets that are used in the baseline, MNIST, CIFAR10, and Fashion-mnist. Further, five different data-splitting strategies are used including iid and four non-iid strategies based on label skewness. In the first non-iid strategy, for each label the data is split based on proportions sampled from a dirichlet distribution (with parameter 0.5). In the three remaining strategies, each client gets data from randomly chosen #C labels where #C is 1, 2, or 3. For the clients that are supposed to receive data from the same label the data is equally split between them. The baseline considers 10 clients. The following table shows all dataset and data splitting configurations.
 
-| Dataset | #classes | #partitions | partitioning method | partition settings |
+| Datasets | #classes | #partitions | partitioning method | partition settings |
 | :------ | :---: | :---: | :---: | :---: |
-| CIFAR10 | 10 | 10 | IID | NA |
-| CIFAR10 | 10 | 10 | dirichlet | distribution parameter 0.5 |
-| CIFAR10 | 10 | 10 | sort and partition | 1 label per client |
-| CIFAR10 | 10 | 10 | sort and partition | 2 labels per client |
-| CIFAR10 | 10 | 10 | sort and partition | 3 labels per client |
-| MNIST | 10 | 10 | IID | NA |
-| MNIST | 10 | 10 | dirichlet | distribution parameter 0.5 |
-| MNIST | 10 | 10 | sort and partition | 1 label per client |
-| MNIST | 10 | 10 | sort and partition | 2 labels per client |
-| MNIST | 10 | 10 | sort and partition | 3 labels per client |
-| FMNIST | 10 | 10 | IID | NA |
-| FMNIST | 10 | 10 | dirichlet | distribution parameter 0.5 |
-| FMNIST | 10 | 10 | sort and partition | 1 label per client |
-| FMNIST | 10 | 10 | sort and partition | 2 labels per client |
-| FMNIST | 10 | 10 | sort and partition | 3 labels per client |
+| CIFAR10, MNIST, Fashion-mnist | 10 | 10 | IID<br>dirichlet<br>sort and partition<br>sort and partition<br>sort and partition | NA<br>distribution parameter 0.5<br>1 label per client<br>2 labels per client<br>3 labels per client |
 
 
 ****Training Hyperparameters:**** There are four FL algorithms and they have many common hyperparameters and few different ones. The following table shows the common hyperparameters and their default values.
