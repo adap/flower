@@ -80,8 +80,6 @@ poetry install
 # activate the environment
 poetry shell
 
-# install PyTorch with GPU support.
-pip install torch==1.12.0+cu116 torchvision==0.13.0+cu116 torchaudio==0.12.0 --extra-index-url https://download.pytorch.org/whl/cu116
 ```
 
 
@@ -99,28 +97,30 @@ python -m moon.main --config-name cifar100
 
 
 You can also run FedProx on CIFAR-10:
-```base
+```bash
 python -m moon.main --config-name cifar10_fedprox
 ```
 
 To run FedProx on CIFAR-100:
-```base
+```bash
 python -m moon.main --config-name cifar100_fedprox
 ```
 
 ## Expected Results
 
-You can find the output log in `results` directory. After running the above commands, you can see the accuracy list at the end of the ouput, which is the test accuracy of the global model. For example, in one running, for CIFAR-10 with MOON, the accuracy after running 100 rounds is 0.7107 (see `results/cifar10_moon.log`). You can find the curve below.
+You can find the output log in `_static` directory. After running the above commands, you can see the accuracy list at the end of the ouput, which is the test accuracy of the global model. For example, in one running, for CIFAR-10 with MOON, the accuracy after running 100 rounds is 0.7071 (see `_static/cifar10_moon.log`). 
 
-![](results/cifar10_moon.png)
-
-For CIFAR-10 with FedProx, the accuracy after running 100 rounds is 0.6852 (see `results/cifar10_fedprox.log`). For CIFAR100 with MOON, the accuracy after running 100 rounds is 0.6799 (see`results/cifar100_moon.log`). For CIFAR100 with FedProx, the accuracy after running 100 rounds is 0.6494. The results are summarized below:
+For CIFAR-10 with FedProx, the accuracy after running 100 rounds is 0.6852 (see `_static/cifar10_fedprox.log`). For CIFAR100 with MOON, the accuracy after running 100 rounds is 0.6799 (see`_static/cifar100_moon.log`). For CIFAR100 with FedProx, the accuracy after running 100 rounds is 0.6494. The results are summarized below:
 
 
 |  | CIFAR-10 | CIFAR-100 |
 | ----------- | ----- | ----- |
 | MOON | 0.7107 | 0.6799 |
 | FedProx| 0.6852 | 0.6494 |
+
+You can find the curve comparing MOON and FedProx on CIFAR-10 below.
+
+![](_static/cifar10_moon_fedprox.png)
 
 
 You can tune the hyperparameter `mu` for both MOON and FedProx by changing the configuration file in `conf`.
