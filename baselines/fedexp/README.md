@@ -5,7 +5,7 @@ labels: [image classification, Optimization,  Step Size]
 dataset: [CIFAR-10, CIFAR-100]
 ---
 
-# FedExP : Speeding Up Federated Averaging via Exptrapolation
+# FedExP: Speeding Up Federated Averaging via Extrapolation
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
@@ -14,19 +14,18 @@ dataset: [CIFAR-10, CIFAR-100]
 ****Authors:**** : Divyansh Jhunjhunwala, Shiqiang Wang, Gauri Joshi
 
 ****Abstract:**** : Federated Averaging (FedAvg) remains the most popular algorithm for Federated Learning (FL) optimization due to its simple implementation, stateless nature, and privacy guarantees combined with secure aggregation. Recent work has sought to generalize the vanilla averaging in FedAvg to a generalized gradient descent step by treating client updates as pseudo-gradients and using a server step size. While
-the use of a server step size has been shown to provide performance improvement theoretically, the practical benefit of the server step size has not been seen in most existing works. In this work, we present FedExP, a method to adaptively determine the server step size in FL based on dynamically varying pseudo-gradients throughout the FL process. We begin by considering the overparameterized convex regime, where we reveal an interesting similarity between FedAvg and the Projection Onto Convex Sets (POCS) algorithm. We then show how FedExP can be motivated as a novel extension to the extrapolation mechanism that is used to speed up POCS. Our theoretical analysis later also discusses the implications of FedExP in underparameterized and non-convex settings. Experimental results show that
+the use of a server step size has been shown to provide performance improvement theoretically, the practical benefit of the server step size has not been seen in most existing works. In this work, we present FedExP, a method to adaptively determine the server step size in FL based on dynamically varying pseudo-gradients throughout the FL process. We begin by considering the overparameterized convex regime, where we reveal an interesting similarity between FedAvg and the Projection Onto Convex Sets (POCS) algorithm. We then show how FedExP can be motivated as a novel extension to the extrapolation mechanism that is used to speed up POCS. Our theoretical analysis later also discusses the implications of FedExP in under-parameterized and non-convex settings. Experimental results show that
 FedExP consistently converges faster than FedAvg and competing baselines on a range of realistic FL datasets.
 
 
 ## About this baseline
 
-****What’s implemented:**** : The code in this directory replicates the experiments in the paper(FedExP : Speeding Up Federated Averaging via Exptrapolation), which proposed the FedExP strategy. Specifically, it replicates the results for For Cifar10 and Cifar100 in Figure 3.
+****What’s implemented:**** : The code in this directory replicates the experiments in the paper(FedExP: Speeding Up Federated Averaging via Extrapolation), which proposed the FedExP strategy. Specifically, it replicates the results for Cifar10 and Cifar100 in Figure 3.
 
 ****Datasets:**** : Cifar10 and Cifar100 from PyTorch's Torchvision
 
-****Hardware Setup:**** :warning: *_Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Someone out there might not have access to the same resources you have so, could list the absolute minimum hardware needed to run the experiment in a reasonable amount of time ? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?_*
-
-****Contributors:**** : Omar Mokhtar, Roeia Amr and Yehia Salah
+****Hardware Setup:**** : The experiment has been conducted on our server with the following specs: GPU: 1 Tesla V100 GPU 32GB VRAM, CPU: 1x24 cores Intel Xeon(R) Gold 6248R,RAM: 150 GB 
+****Contributors:**** : Omar Mokhtar, Roeia Amr and Yahia Salaheldin Shaaban
 
 
 ## Experimental Setup
@@ -46,16 +45,16 @@ The baseline utilizes both CIFAR-10 and CIFAR-100 datasets, which will be distri
 
 
 ****Training Hyperparameters:**** :
-The following tables shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python main.py` directly)
+The following tables show the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python main.py` directly)
 
 | Description                 | Default Value                       |
 |-----------------------------|-------------------------------------|
 | total clients               | 100                                 |
 | clients per round           | 20                                  |
 | number of rounds            | 500                                 |
-| number of local rounds      | 20                                  |
+| number of local rounds      | 2                                   |
 | batch_size                  | 50                                  |
-| client resources            | {'num_cpus': 2.0, 'num_gpus': 0.2 } |
+| client resources            | {'num_cpus': 2.0, 'num_gpus': 0.05 }|
 | eta_l (local learning rate) | 0.01                                |
 | epsilon                     | 0.001                               |
 | decay                       | 0.998                               |
@@ -67,7 +66,7 @@ Choice of alpha parameter for the Dirichlet distribution used to create heteroge
 
 | Description | Default Value |
 |-------------|---------------|
-| alpha       | 0.5           |
+| alpha       | 0.3           |
 
 ## Environment Setup
 
