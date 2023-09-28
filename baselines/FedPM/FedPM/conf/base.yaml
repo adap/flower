@@ -4,14 +4,48 @@
 # a similar configuration structure and hence be easy to customise)
 
 dataset:
-  # dataset config
+  name: 'mnist' # [cifar10, mnist]
+  split: 'iid' # {iid, non-iid}
+  classes_pc: 4
+  minibatch_size: 64 #32
 
 model:
-  # model config
+  name: 'LeNet' # [Conv8/6/4, LeNet, Mask, Conv6]
+  mode: 'dense' # [mask, dense]
+  local_epochs: 3
+  activation: 'relu'
+  agg_steps: 5
 
 strategy:
   _target_: # points to your strategy (either custom or exiting in Flower)
-  # rest of strategy config
+  fedpm:
+    local_epochs: 3
+    local_lr: 0.1
+
+  fedavg: # When compress==False
+    local_lr: 0.0003
+    server_lr: 0.1
+
+  dense:
+    local_epochs: 3
+
+  sign_sgd:
+    local_lr: 0.01
+    server_lr: 0.0002
 
 client:
-  # client config
+  local_epochs: 3
+  local_lr: 0.1
+
+simulation:
+  tot_sims: 1
+  fraction_fit: 1.0
+  fraction_evaluate: 0
+  n_clients: 10
+  n_rounds: 400
+  verbose: 0
+  store_output: True
+  strategy: 'fedpm' # [fedpm, dense]
+
+path:
+  path: 'params.yaml'

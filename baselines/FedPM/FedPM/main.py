@@ -5,8 +5,17 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 """
 # these are the basic packages you'll need here
 # feel free to remove some if aren't needed
+
 import hydra
+import torch
+import sys
+import os
 from omegaconf import DictConfig, OmegaConf
+sys.path.append(os.getcwd())
+
+# DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+cfg = OmegaConf.load('conf/base.yaml')
+a = 5
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
