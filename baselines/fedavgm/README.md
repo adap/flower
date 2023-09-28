@@ -140,7 +140,17 @@ python -m fedavgm.main server.reporting_fraction=0.2 client.local_epochs=5 # wil
 ```
 
 ## Expected Results
+```bash
+python -m fedavgm.main --multirun client.local_epochs=1 noniid.concentration=1 \
+strategy=custom-fedavgm server.reporting_fraction=0.05 num_rounds=100 num_clients=100 \
+dataset=cifar10 client.lr=0.0001,0.0003,0.001,0.003,0.01,0.03,0.1,0.3 \
+server.momentum=0.7,0.9,0.97,0.99,0.997
+```
+The above command reproduces Figure 6 from FedAvgM paper for the case of Local Epoch E=1, Reporting Fraction C=0.05, and concentration (α) = 1. In this example, it runs just 1.000 rounds:
 
+![](_static/Figure6_cifar10_num-rounds=1000_concentration=1.png)
+
+---
 
 ```bash
 python -m fedavgm.main --multirun client.local_epochs=1 \
