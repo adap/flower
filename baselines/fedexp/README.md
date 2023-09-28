@@ -24,7 +24,11 @@ FedExP consistently converges faster than FedAvg and competing baselines on a ra
 
 ****Datasets:**** : Cifar10 and Cifar100 from PyTorch's Torchvision
 
-****Hardware Setup:**** : The experiment has been conducted on our server with the following specs: GPU: 1 Tesla V100 GPU 32GB VRAM, CPU: 1x24 cores Intel Xeon(R) Gold 6248R,RAM: 150 GB 
+****Hardware Setup:**** : The experiment has been conducted on our server with the following specs: 
+- **GPU:** 1 Tesla V100 GPU 32GB VRAM
+- **CPU:** 1x24 cores Intel Xeon(R) 6248R
+- **RAM:** 150 GB
+
 ****Contributors:**** : Omar Mokhtar, Roeia Amr and Yahia Salaheldin Shaaban
 
 
