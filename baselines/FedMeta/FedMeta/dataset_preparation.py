@@ -47,7 +47,9 @@ def support_query_split(
         label: List,
         support_ratio: float,
 ):
+
     x_train, x_test, y_train, y_test = train_test_split(data, label, train_size=support_ratio, stratify=label, random_state=42)
+
     return x_train, x_test, y_train, y_test
 
 
@@ -56,6 +58,7 @@ def split_train_validation_test_clients(
         train_rate: Optional[float] = 0.8,
         val_rate: Optional[float] = 0.1,
 ) -> Tuple[List[str], List[str], List[str]]:
+
     np.random.seed(42)
     train_rate = int(train_rate * len(clients))
     val_rate = int(val_rate * len(clients))
@@ -71,16 +74,13 @@ def split_train_validation_test_clients(
 
 
 def _partition_data(
+        data_type: str,
         dir_path: str,
-        support_ratio: Optional[float] = None,
+        support_ratio: float,
 ) -> Tuple[Dict, Dict]:
 
-    data_type = 'shakespeare'
-    print("_partiton_data")
-    # train_path = f'{dir_path}/train'
-    train_path = f'{dir_path}/train_0.16'
-    # test_path = f'{dir_path}/test'
-    test_path = f'{dir_path}/test_0.16'
+    train_path = f'{dir_path}/train'
+    test_path = f'{dir_path}/test'
 
     train_users, train_data, train_num = _read_dataset(train_path)
     test_users, test_data, test_num = _read_dataset(test_path)
@@ -109,10 +109,10 @@ def _partition_data(
             try:
                 sup_x, qry_x, sup_y, qry_y = support_query_split(all_x, all_y, support_ratio)
             except Exception as e:
-                print(f"Error occurred at iteration {user}: {e}")
+                # print(f"Error occurred at iteration {user}: {e}")
                 continue
 
-        else:
+        elif data_type == 'shakespeare':
             sup_x, qry_x, sup_y, qry_y = train_test_split(all_x, all_y, train_size=support_ratio, random_state=42)
 
         all_dataset['users'].append(user)

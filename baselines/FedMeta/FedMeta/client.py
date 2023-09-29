@@ -26,7 +26,8 @@ class FlowerClient(
             cid: str,
             device: torch.device,
             num_epochs: int,
-            learning_rate: float
+            learning_rate: float,
+            gradient_step: int
     ) -> object:
         self.net = net
         self.trainloaders = trainloaders
@@ -35,10 +36,10 @@ class FlowerClient(
         self.device = device
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
+        self.gradient_step = gradient_step
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
-        # return [val.cpu().numpy() for name, val in self.net.state_dict().items() if 'lr' not in name]
         return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
 
     def set_parameters(self, parameters: NDArrays) -> None:
@@ -47,72 +48,65 @@ class FlowerClient(
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         self.net.load_state_dict(state_dict, strict=True)
 
-    # def fit(
-    #         self, parameters: NDArrays, config: Dict[str, Scalar]
-    # ) -> Tuple[NDArrays, int, Dict]:
-    #     """Implements distributed fit function for a given client."""
-    #     self.set_parameters(parameters)
-    #     loss = train(
-    #         self.net, self.trainloaders['sup'][self.cid],
-    #         self.device,
-    #         epochs=self.num_epochs,
-    #         learning_rate=self.learning_rate
-    #     )
-    #     total_len = len(self.trainloaders['qry'][self.cid].dataset) + len(self.trainloaders['sup'][self.cid].dataset)
-    #
-    #     # return self.get_parameters({}), len(self.trainloaders['sup'][self.cid].dataset), {"loss" : loss}
-    #     return self.get_parameters({}), total_len, {"loss" : loss}
-    #
-    # def evaluate(
-    #         self, parameters: NDArrays, config: Dict[str, Scalar]
-    # ) -> Tuple[float, int, Dict]:
-    #     """Implements distributed evaluation for a given client."""
-    #     self.set_parameters(parameters)
-    #     loss, accuracy, total = test(
-    #         self.net,
-    #         self.valloaders['sup'][self.cid],
-    #         self.valloaders['qry'][self.cid],
-    #         self.device,
-    #         learning_rate=self.learning_rate
-    #     )
-    #     total_len = len(self.valloaders['qry'][self.cid].dataset) + len(self.valloaders['sup'][self.cid].dataset)
-    #
-    #     return float(loss), total_len, {"correct": accuracy, "loss": loss}
-
     def fit(
             self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, int, Dict]:
         """Implements distributed fit function for a given client."""
         self.set_parameters(parameters)
-        alpha = config["alpha"]
-        loss, grads = train_meta(
-            self.net,
-            self.trainloaders['sup'][self.cid],
-            self.trainloaders['qry'][self.cid],
-            alpha,
-            self.device,
-            learning_rate=self.learning_rate
-        )
+        algo = config["algo"]
         total_len = len(self.trainloaders['qry'][self.cid].dataset) + len(self.trainloaders['sup'][self.cid].dataset)
-        return self.get_parameters({}), total_len, {"loss": loss, "grads": grads}
+        if algo == 'fedavg' or algo == 'fedavg(meta)':
+            loss = train(
+                self.net,
+                self.trainloaders['sup'][self.cid],
+                self.trainloaders['qry'][self.cid],
+                self.device,
+                epochs=self.num_epochs,
+                learning_rate=self.learning_rate
+            )
+            return self.get_parameters({}), total_len, {"loss" : loss}
 
+        elif algo == 'fedmeta(maml)' or algo == 'fedmeta(meta-sgd)':
+            alpha = config["alpha"]
+            loss, grads = train_meta(
+                self.net,
+                self.trainloaders['sup'][self.cid],
+                self.trainloaders['qry'][self.cid],
+                alpha,
+                self.device,
+                self.gradient_step,
+            )
+            return self.get_parameters({}), total_len, {"loss": loss, "grads": grads}
 
     def evaluate(
             self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[float, int, Dict]:
         """Implements distributed evaluation for a given client."""
         self.set_parameters(parameters)
-        alpha = config["alpha"]
-        loss, accuracy, total = test_meta(
-            self.net,
-            self.valloaders['sup'][self.cid],
-            self.valloaders['qry'][self.cid],
-            alpha,
-            self.device,
-            learning_rate = self.learning_rate
-        )
         total_len = len(self.valloaders['qry'][self.cid].dataset) + len(self.valloaders['sup'][self.cid].dataset)
-        return float(loss), total_len, {"correct": float(accuracy), "loss": loss}
+        if config["algo"] == 'fedavg' or config["algo"] == 'fedavg(meta)':
+            loss, accuracy, total = test(
+                    self.net,
+                    self.valloaders['sup'][self.cid],
+                    self.valloaders['qry'][self.cid],
+                    self.device,
+                    config["algo"],
+                    config["data"],
+                    learning_rate=self.learning_rate,
+            )
+            return float(loss), total_len, {"correct": accuracy, "loss": loss}
+
+        elif config["algo"] == 'fedmeta(maml)' or config["algo"] == 'fedmeta(meta-sgd)':
+            alpha = config["alpha"]
+            loss, accuracy, total = test_meta(
+                self.net,
+                self.valloaders['sup'][self.cid],
+                self.valloaders['qry'][self.cid],
+                alpha,
+                self.device,
+                self.gradient_step,
+            )
+            return float(loss), total_len, {"correct": float(accuracy), "loss": loss}
 
 
 def gen_client_fn(
@@ -121,6 +115,7 @@ def gen_client_fn(
         valloaders: List[DataLoader],
         learning_rate: float,
         model: DictConfig,
+        gradient_step: int,
 ) -> Callable[[str], FlowerClient]:  # pylint: disable=too-many-arguments
 
     """Generates the client function that creates the Flower Clients.
@@ -157,9 +152,6 @@ def gen_client_fn(
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         net = instantiate(model).to(device)
 
-        # Note: each client gets a different trainloader/valloader, so each client
-        # will train and evaluate on their own unique data
-
         return FlowerClient(
             net,
             trainloaders,
@@ -168,6 +160,7 @@ def gen_client_fn(
             device,
             num_epochs,
             learning_rate,
+            gradient_step
         )
 
     return client_fn

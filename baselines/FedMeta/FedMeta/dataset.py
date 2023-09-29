@@ -21,8 +21,6 @@ import torch
 
 class ShakespeareDataset(Dataset):
     def __init__(self, data):
-        # self.x = x
-        # self.y = y
         sentence, label = data['x'], data['y']
         sentences_to_indices = [word_to_indices(word) for word in sentence]
         sentences_to_indices = np.array(sentences_to_indices)
@@ -48,7 +46,7 @@ class FemnistDataset(Dataset):
         if self.transform:
             input_data = self.transform(input_data)
         target_data = self.y[index]
-        return input_data, target_data
+        return input_data.to(torch.float32), target_data
 
     def __len__(self):
         return len(self.y)
@@ -56,10 +54,12 @@ class FemnistDataset(Dataset):
 
 def load_datasets(  # pylint: disable=too-many-arguments
     config: DictConfig,
+    path: str,
 ) -> Tuple[DataLoader, DataLoader, DataLoader]:
 
     dataset = _partition_data(
-        dir_path=config.path,
+        data_type=config.data,
+        dir_path=path,
         support_ratio=config.support_ratio
     )
 
@@ -67,48 +67,45 @@ def load_datasets(  # pylint: disable=too-many-arguments
         dataset[0]['users']
     )
 
-
     trainloaders = {'sup': [], 'qry': []}
     valloaders = {'sup': [], 'qry': []}
     testloaders = {'sup': [], 'qry': []}
 
-    data_type = 'shakespeare'
-    if data_type == 'shakespeare':
-        for user in clients_list[0]:
-            if len(dataset[0]['user_data'][user]['x']) > 10000:
-                print(f"over 1000 : {user}")
-                continue
-            trainloaders['sup'].append(
-                DataLoader(ShakespeareDataset(dataset[0]['user_data'][user]), batch_size=10, shuffle=True))
-            trainloaders['qry'].append(
-                DataLoader(ShakespeareDataset(dataset[1]['user_data'][user]), batch_size=10))
-        for user in clients_list[1]:
-            if len(dataset[0]['user_data'][user]['x']) > 10000:
-                print(f"over 1000 : {user}")
-                continue
-            valloaders['sup'].append(DataLoader(ShakespeareDataset(dataset[0]['user_data'][user]), batch_size=10, shuffle=True))
-            valloaders['qry'].append(DataLoader(ShakespeareDataset(dataset[1]['user_data'][user]), batch_size=10))
-        for user in clients_list[2]:
-            if len(dataset[0]['user_data'][user]['x']) > 10000:
-                print(f"over 1000 : {user}")
-                continue
-            testloaders['sup'].append(
-                DataLoader(ShakespeareDataset(dataset[0]['user_data'][user]), batch_size=10, shuffle=True))
-            testloaders['qry'].append(
-                DataLoader(ShakespeareDataset(dataset[1]['user_data'][user]), batch_size=10))
-
-    else:
+    data_type = config.data
+    if data_type == 'femnist':
         transform = transforms.Compose([transforms.ToTensor()])
-
         for user in clients_list[0]:
-            trainloaders['sup'].append(DataLoader(FemnistDataset(dataset[0]['user_data'][user], transform), batch_size=10, shuffle=True))
-            trainloaders['qry'].append(DataLoader(FemnistDataset(dataset[1]['user_data'][user], transform), batch_size=10))
+            trainloaders['sup'].append(
+                DataLoader(FemnistDataset(dataset[0]['user_data'][user], transform), batch_size=config.batch_size, shuffle=True))
+            trainloaders['qry'].append(
+                DataLoader(FemnistDataset(dataset[1]['user_data'][user], transform), batch_size=config.batch_size))
         for user in clients_list[1]:
-            valloaders['sup'].append(DataLoader(FemnistDataset(dataset[0]['user_data'][user], transform), batch_size=10))
-            valloaders['qry'].append(DataLoader(FemnistDataset(dataset[1]['user_data'][user], transform), batch_size=10))
+            valloaders['sup'].append(
+                DataLoader(FemnistDataset(dataset[0]['user_data'][user], transform), batch_size=config.batch_size))
+            valloaders['qry'].append(
+                DataLoader(FemnistDataset(dataset[1]['user_data'][user], transform), batch_size=config.batch_size))
         for user in clients_list[2]:
-            testloaders['sup'].append(DataLoader(FemnistDataset(dataset[0]['user_data'][user], transform), batch_size=10))
-            testloaders['qry'].append(DataLoader(FemnistDataset(dataset[1]['user_data'][user], transform), batch_size=10))
+            testloaders['sup'].append(
+                DataLoader(FemnistDataset(dataset[0]['user_data'][user], transform), batch_size=config.batch_size))
+            testloaders['qry'].append(
+                DataLoader(FemnistDataset(dataset[1]['user_data'][user], transform), batch_size=config.batch_size))
+
+    elif data_type == 'shakespeare':
+        for user in clients_list[0]:
+            trainloaders['sup'].append(
+                DataLoader(ShakespeareDataset(dataset[0]['user_data'][user]), batch_size=config.batch_size, shuffle=True))
+            trainloaders['qry'].append(
+                DataLoader(ShakespeareDataset(dataset[1]['user_data'][user]), batch_size=config.batch_size))
+        for user in clients_list[1]:
+            valloaders['sup'].append(
+                DataLoader(ShakespeareDataset(dataset[0]['user_data'][user]), batch_size=config.batch_size, shuffle=True))
+            valloaders['qry'].append(
+                DataLoader(ShakespeareDataset(dataset[1]['user_data'][user]), batch_size=config.batch_size))
+        for user in clients_list[2]:
+            testloaders['sup'].append(
+                DataLoader(ShakespeareDataset(dataset[0]['user_data'][user]), batch_size=config.batch_size, shuffle=True))
+            testloaders['qry'].append(
+                DataLoader(ShakespeareDataset(dataset[1]['user_data'][user]), batch_size=config.batch_size))
 
     return trainloaders, valloaders, testloaders
 

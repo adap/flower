@@ -29,31 +29,36 @@ def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
 
     # partition dataset and get dataloaders
-    trainloaders, valloaders, testloaders= load_datasets(config=cfg.dataset)
+    trainloaders, valloaders, testloaders= load_datasets(config=cfg.data, path=cfg.path)
 
     # prepare function that will be used to spawn each client
     client_fn = client.gen_client_fn(
         num_epochs=cfg.num_epochs,
         trainloaders=trainloaders,
         valloaders=valloaders,
-        learning_rate=cfg.learning_rate,
-        model=cfg.model,
+        learning_rate=cfg.algo[cfg.data.data].alpha,
+        model=cfg.data.model,
+        gradient_step=cfg.data.gradient_step,
     )
 
-
+    # prepare strategy function
     strategy = instantiate(
         cfg.strategy,
         evaluate_metrics_aggregation_fn=weighted_average,
+        alpha=cfg.algo[cfg.data.data].alpha,
+        beta=cfg.algo[cfg.data.data].beta,
+        data=cfg.data.data,
+        algo=cfg.algo.algo,
     )
 
-    # 5. Start Simulation
+    # Start Simulation
     history = fl.simulation.start_simulation(
         client_fn=client_fn,
         num_clients=len(trainloaders['sup']),
-        config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
+        config=fl.server.ServerConfig(num_rounds=cfg.data.num_rounds),
         client_resources={
-            "num_cpus": cfg.client_resources.num_cpus,
-            "num_gpus": cfg.client_resources.num_gpus,
+            "num_cpus": cfg.data.client_resources.num_cpus,
+            "num_gpus": cfg.data.client_resources.num_gpus,
         },
         client_manager=Fedmeta_client_manager(valid_client=len(valloaders['qry'])),
         strategy=strategy,

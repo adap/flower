@@ -30,7 +30,7 @@ class StackedLSTM(nn.Module):
         return final_output
 
 
-class Femnist_network(nn.Module):
+class CNN_network(nn.Module):
     """Convolutional Neural Network architecture.
 
     As described in McMahan 2017 paper :
@@ -40,7 +40,7 @@ class Femnist_network(nn.Module):
     """
 
     def __init__(self) -> None:
-        super(Femnist_network, self).__init__()
+        super(CNN_network, self).__init__()
         self.conv1 = nn.Conv2d(in_channels=1, out_channels=32, kernel_size=5, padding=2)
         self.maxpool1 = nn.MaxPool2d(kernel_size=(2, 2))
         self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=5, padding=2)
@@ -76,6 +76,7 @@ class Femnist_network(nn.Module):
 def train(  # pylint: disable=too-many-arguments
         net: nn.Module,
         trainloader: DataLoader,
+        testloader: DataLoader,
         device: torch.device,
         epochs: int,
         learning_rate: float,
@@ -97,7 +98,6 @@ def train(  # pylint: disable=too-many-arguments
     """
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate, weight_decay=0.001)
-    # optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate)
     net.train()
     for _ in range(epochs):
         net, loss = _train_one_epoch(
@@ -138,7 +138,6 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
     for images, labels in trainloader:
         images, labels = images.to(device), labels.to(device)
         optimizer.zero_grad()
-        # loss = criterion(net(images.to(torch.float32)), labels)
         loss = criterion(net(images), labels)
         total_loss += loss.item() * labels.size(0)
         loss.backward()
@@ -152,7 +151,9 @@ def test(
         trainloader: DataLoader,
         testloader: DataLoader,
         device: torch.device,
-        learning_rate: float
+        algo: str,
+        data: str,
+    learning_rate: float,
 ) -> Tuple[float, float]:
     """Evaluate the network on the entire test set.
 
@@ -170,29 +171,35 @@ def test(
     Tuple[float, float]
         The loss and the accuracy of the input model on the given data.
     """
-    total_loss = 0.0
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate, weight_decay=0.001)
-    net.train()
-    for images, labels in trainloader:
-        images, labels = images.to(device), labels.to(device)
-        # loss = criterion(net(images.to(torch.float32)), labels)
-        loss = criterion(net(images), labels)
-        total_loss += loss * labels.size(0)
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-    # total_loss = total_loss / len(trainloader.dataset)
-    # optimizer.zero_grad()
-    # total_loss.backward()
-    # optimizer.step()
+
+    if algo == 'fedavg(meta)':
+        total_loss = 0.0
+        optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate, weight_decay=0.001)
+        net.train()
+        if data == 'femnist':
+            for images, labels in trainloader:
+                images, labels = images.to(device), labels.to(device)
+                loss = criterion(net(images), labels)
+                total_loss += loss * labels.size(0)
+            total_loss = total_loss / len(trainloader.dataset)
+            optimizer.zero_grad()
+            total_loss.backward()
+            optimizer.step()
+
+        elif data == 'shakespeare':
+            for images, labels in trainloader:
+                images, labels = images.to(device), labels.to(device)
+                loss = criterion(net(images), labels)
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
 
     correct, total, loss = 0, 0, 0.0
     net.eval()
     with torch.no_grad():
         for images, labels in testloader:
             images, labels = images.to(device), labels.to(device)
-            # outputs = net(images.to(torch.float32))
             outputs = net(images)
             loss += criterion(outputs, labels).item() * labels.size(0)
             _, predicted = torch.max(outputs.data, 1)
@@ -211,7 +218,7 @@ def train_meta(  # pylint: disable=too-many-arguments
         queryloader: DataLoader,
         alpha,
         device: torch.device,
-        learning_rate: float,
+        gradient_step: int
 ) -> Tuple[float]:
     """Train the network on the training set.
 
@@ -231,7 +238,7 @@ def train_meta(  # pylint: disable=too-many-arguments
     criterion = torch.nn.CrossEntropyLoss()
     for _ in range(1):
         loss, grads = _train_meta_one_epoch(
-            net, supportloader, queryloader, alpha, criterion, learning_rate, device
+            net, supportloader, queryloader, alpha, criterion, device, gradient_step
         )
     return loss, grads
 
@@ -242,8 +249,8 @@ def _train_meta_one_epoch(  # pylint: disable=too-many-arguments
         queryloader: DataLoader,
         alpha,
         criterion: torch.nn.CrossEntropyLoss,
-        learning_rate: float,
         device: torch.device,
+        gradient_step: int,
 ) -> nn.Module:
     """Train for one epoch.
 
@@ -265,43 +272,33 @@ def _train_meta_one_epoch(  # pylint: disable=too-many-arguments
     nn.Module
         The model that has been trained for one epoch.
     """
-    num_adaptation_steps = 1
-    all_adaptation_losses = []
+    num_adaptation_steps = gradient_step
     train_net = deepcopy(net)
-    # alpha = [alpha.to(device) for alpha in alpha]
-    for step in range(num_adaptation_steps):
+    alpha = [alpha.to(device) for alpha in alpha]
+    for _ in range(num_adaptation_steps):
         loss_sum = 0.0
         sup_num_sample = []
         sup_total_loss = []
         for images, labels in supportloader:
             images, labels = images.to(device), labels.to(device)
-            # loss = criterion(train_net(images.to(torch.float32)), labels)
             loss = criterion(train_net(images), labels)
             loss_sum += loss * labels.size(0)
             sup_num_sample.append(labels.size(0))
             sup_total_loss.append(loss * labels.size(0))
             grads = torch.autograd.grad(loss, list(train_net.parameters()), create_graph=True, retain_graph=True)
 
-            for p, g in zip(train_net.parameters(), grads):
-                p.data.add_(g.data, alpha=-learning_rate)
+            for p, g, a in zip(train_net.parameters(), grads, alpha):
+                p.data = p.data - a * g
 
             for p in train_net.parameters():
                 if p.grad is not None:
                     p.grad.zero_()
-
-            # for p, g, a in zip(train_net.parameters(), grads, alpha):
-            #     p.data = p.data - a * g
-            #
-            # for p in train_net.parameters():
-            #     if p.grad is not None:
-            #         p.grad.zero_()
 
     qry_total_loss = []
     qry_num_sample = []
     loss_sum = 0.0
     for images, labels in queryloader:
         images, labels = images.to(device), labels.to(device)
-        # loss = criterion(train_net(images.to(torch.float32)), labels)
         loss = criterion(train_net(images), labels)
         loss_sum += loss * labels.size(0)
         qry_num_sample.append(labels.size(0))
@@ -316,15 +313,15 @@ def _train_meta_one_epoch(  # pylint: disable=too-many-arguments
     grads = [g.cpu().numpy() for g in grads]
     average_adaptation_loss = sum(sup_total_loss) / sum(sup_num_sample)
     return average_adaptation_loss, grads
-
-
+#
+#
 def test_meta(
         net: nn.Module,
         supportloader: DataLoader,
         queryloader: DataLoader,
         alpha,
         device: torch.device,
-        learning_rate: float,
+        gradient_step: int,
 ) -> Tuple[float, float]:
     """Evaluate the network on the entire test set.
 
@@ -344,41 +341,32 @@ def test_meta(
     """
     criterion = torch.nn.CrossEntropyLoss()
     test_net = deepcopy(net)
-    num_adaptation_steps = 1
+    num_adaptation_steps = gradient_step
     alpha = [alpha_tensor.to(device) for alpha_tensor in alpha]
     test_net.train()
-    for step in range(num_adaptation_steps):
+    for _ in range(num_adaptation_steps):
         loss_sum = 0.0
         sup_num_sample = []
         sup_total_loss = []
         for images, labels in supportloader:
             images, labels = images.to(device), labels.to(device)
-            # loss = criterion(test_net(images.to(torch.float32)), labels)
             loss = criterion(test_net(images), labels)
             loss_sum += loss * labels.size(0)
             sup_num_sample.append(labels.size(0))
             sup_total_loss.append(loss)
             grads = torch.autograd.grad(loss, list(test_net.parameters()), create_graph=True, retain_graph=True)
 
-            for p, g in zip(test_net.parameters(), grads):
-                p.data.add_(g.data, alpha=-learning_rate)
+            for p, g, a in zip(test_net.parameters(), grads, alpha):
+                p.data -= a * g
 
             for p in test_net.parameters():
                 if p.grad is not None:
                     p.grad.zero_()
 
-            # for p, g, a in zip(test_net.parameters(), grads, alpha):
-            #     p.data -= a * g
-            #
-            # for p in test_net.parameters():
-            #     if p.grad is not None:
-            #         p.grad.zero_()
-
     test_net.eval()
     correct, total, loss = 0, 0, 0.0
     for images, labels in queryloader:
         images, labels = images.to(device), labels.to(device)
-        # outputs = test_net(images.to(torch.float32))
         outputs = test_net(images)
         loss += criterion(outputs, labels).item() * labels.size(0)
         _, predicted = torch.max(outputs.data, 1)
@@ -389,6 +377,5 @@ def test_meta(
     loss = loss / total
     accuracy = correct / total
     return loss, accuracy, total
-
 
 
