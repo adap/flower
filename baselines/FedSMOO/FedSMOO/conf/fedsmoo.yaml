@@ -1,0 +1,53 @@
+---
+# ----------------------------------------------------------------------------
+## Hyperparams
+
+# lr_decay=0.998: SGD lr decay
+# beta: 10  # penalized coeff (select 10 for CIFAR-10 and 100 for CIFAR-100)
+# not used for some reason
+
+# ------------------------------------------------------------------------------
+
+num_rounds: 800    # number of rounds of communications (t in the paper)
+local_epochs: 5     # local inverval k in algorithm (CIFAR-10 -> 5, CIFAR-100 -> 2)
+batch_size: 50              # ( CIFAR-10 -> 50, CIFAR-100 -> 20)
+num_clients: 100           # 100 clients with 10% participation, 200 clients with 5% participation
+sam_lr: 0.1
+method: FedSMOO
+
+dataset:
+  # dataset config (partitioning)
+  dataset_name: CIFAR10       # CIFAR 10/ CIFAR 100
+  dirichlet: true             # if not dirichlet then pathological
+  dirichlet_coeff: 0.1        # choose between 0.1, 0.6 
+  n_active_categories: 3      # 3,6 (cifar10), 20,10 (cifar100) # pathological
+
+model:
+  # model config
+  _target_: FedSMOO.models.ResNet18GN
+  num_classes: 10
+
+strategy:
+  _target_: FedSMOO.strategy.FedSMOOStrategy
+  fraction_fit: 0.1       # 0.1, 0.05
+  fraction_evaluate: 0.2   # 0.1-0.2?
+  min_fit_clients: 2
+  min_evaluate_clients: 2
+  min_available_clients: 2
+
+client:
+  # client config
+  local_epochs: 5
+  learning_rate: 0.1 # local learning rate
+  weight_decay: 0.001
+  sch_step: 1
+  sch_gamma: 1.0
+  alpha: 0.1
+  lr_decay: 0.998     # 0.9995 in demo code
+
+client_resources:
+  num_cpus: 4
+  num_gpus: 1
+
+server:
+  _target_: FedSMOO.server.FedSMOOServer
