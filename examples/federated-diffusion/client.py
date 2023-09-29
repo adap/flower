@@ -64,7 +64,7 @@ class FlowerClient(fl.client.NumPyClient):
         server_round = config["server_round"]
 
         cpu = False
-        if PARAMS.device == "cpu":
+        if str(self.device) == "cpu":
             cpu = True
 
         # Update local model parameters
