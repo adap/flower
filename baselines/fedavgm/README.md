@@ -168,14 +168,14 @@ For FedAvgM evaluation, it was performed a hyperparameter search of server momen
 
 - Concentration = 0.01
 ```bash
-python -m fedavgm.main client.local_epochs=1 noniid.concentration=1 strategy=custom-fedavgm \
+python -m fedavgm.main client.local_epochs=1 noniid.concentration=0.01 strategy=custom-fedavgm \
 server.reporting_fraction=0.05 num_rounds=10000 num_clients=100 \
 dataset=cifar10 client.lr=0.003 server.momentum=0.97
 ```
 
 - Concentration = 0.1
 ```bash
-python -m fedavgm.main client.local_epochs=1 noniid.concentration=1 strategy=custom-fedavgm \
+python -m fedavgm.main client.local_epochs=1 noniid.concentration=0.1 strategy=custom-fedavgm \
 server.reporting_fraction=0.05 num_rounds=10000 num_clients=100 \
 dataset=cifar10 client.lr=TBD server.momentum=TBD
 ```
