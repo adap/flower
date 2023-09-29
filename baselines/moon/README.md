@@ -28,7 +28,7 @@ dataset: [CIFAR-10, CIFAR-100]
 
 ****Contributors:**** : Qinbin Li
 
-****Description:****: MOON requires to compute the model-contrastive loss in local training, which requires access to the local model of the previous round (Lines 14-17 of Algorithm 1 of the paper). Since `FlowerClient` does not preserve the states when starting a new round, we store the local models into the specified `model_dir` in local training indexed by the client ID, which will be loaded to the corresponding client in the next round.
+****Description:****: MOON requires to compute the model-contrastive loss in local training, which requires access to the local model of the previous round (Lines 14-17 of Algorithm 1 of the paper). Since currently `FlowerClient` does not preserve the states when starting a new round, we store the local models into the specified `model.dir` in local training indexed by the client ID, which will be loaded to the corresponding client in the next round.
 
 ## Experimental Setup
 
