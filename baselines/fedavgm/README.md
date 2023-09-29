@@ -211,5 +211,5 @@ The above command will evaluate the custom FedAvgM versus FedAvg on Fashion-MNIS
 
 **PLOT TO BE UPDATED**
 
-![](_static/fedavgm_vs_fedavg_rounds=1000_cifar_and_fmnist.png)
+![](_static/fedavgm_vs_fedavg_rounds=1000_fmnist.png)
 
