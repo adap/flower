@@ -5,7 +5,7 @@ labels: [data heterogeneity, image classification, cross-silo, constrastive-lear
 dataset: [CIFAR-10, CIFAR-100] # list of datasets you include in your baseline
 ---
 
-# :warning:*_Title of your baseline_*
+# Model-Contrastive Federated Learning
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
