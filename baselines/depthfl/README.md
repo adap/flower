@@ -116,11 +116,14 @@ python -m depthfl.main exclusive_learning=true model_size=3
 python -m depthfl.main exclusive_learning=true model_size=4
 
 # table 2 & 3
+
+# HeteroFL & corresponding excluive learning
 python -m depthfl.main --config-name="heterofl" 
 python -m depthfl.main --config-name="heterofl" exclusive_learning=true model_size=1 model.scale=false
 python -m depthfl.main --config-name="heterofl" exclusive_learning=true model_size=2 model.scale=false
 python -m depthfl.main --config-name="heterofl" exclusive_learning=true model_size=3 model.scale=false
 python -m depthfl.main --config-name="heterofl" exclusive_learning=true model_size=4 model.scale=false
+# DepthFL (FedAvg) & corresponding exclusive learning
 python -m depthfl.main fit_config.feddyn=false fit_config.kd=false  
 python -m depthfl.main fit_config.feddyn=false fit_config.kd=false  exclusive_learning=true model_size=1
 python -m depthfl.main fit_config.feddyn=false fit_config.kd=false  exclusive_learning=true model_size=2
@@ -142,7 +145,7 @@ The above commands would generate results in DepthFL paper. The numbers below ar
 
 | Scaling Method | Dataset | Global Model | 100% (a) | 75% (b) | 50% (c) | 25% (d) | 
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | 
-| HeteroFL<br>DepthF (FedAvg)<br>DepthFL | CIFAR100 | 57.61<br>72.67<br>76.06 | 64.39<br>67.08<br>69.68 | 66.08<br>70.78<br>73.21 | 62.03<br>68.41<br>70.29 | 51.99<br>59.17<br>60.32 |
+| HeteroFL<br>DepthFL (FedAvg)<br>DepthFL | CIFAR100 | 57.61<br>72.67<br>76.06 | 64.39<br>67.08<br>69.68 | 66.08<br>70.78<br>73.21 | 62.03<br>68.41<br>70.29 | 51.99<br>59.17<br>60.32 |
 
 **Table 3** 
 
