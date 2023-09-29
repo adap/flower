@@ -39,14 +39,14 @@ dataset: [FEMNIST, SHAKESPEARE] # list of datasets you include in your baseline
 
 **Shakespeare Dataset Issue** : In the FedMeta paper experiment, the Shakespeare dataset had 1126 users. However, due to a current bug, the number of users has decreased to 660 users. Therefore, we have only maintained the total number of data.
 
-|   Dataset   |  #Clients   | #Samples | #Classes |                      #Partition Clients                      | #Partition Dataset   |
-|:-----------:|:-----------:| :---: |:--------:|:------------------------------------------------------------:|----------------------|
-|   FEMNIST   |    1,068    | 235,683 |    62    | Train Clients : 0.8, Valid Clients : 0.1, Test Clients : 0.1 | Sup : 0.2, Qry : 0.8 |
-| SHAKESPEARE | 550 --> 110 | 625,127 |    80    | Train Clients : 0.8, Valid Clients : 0.1, Test Clients : 0.1 | Sup : 0.2, Qry : 0.8 |
+|   Dataset   |  #Clients  | #Samples | #Classes |                      #Partition Clients                      | #Partition Dataset   |
+|:-----------:|:----------:| :---: |:--------:|:------------------------------------------------------------:|----------------------|
+|   FEMNIST   |   1,068    | 235,683 |    62    | Train Clients : 0.8, Valid Clients : 0.1, Test Clients : 0.1 | Sup : 0.2, Qry : 0.8 |
+| SHAKESPEARE | 550 -> 110 | 625,127 |    80    | Train Clients : 0.8, Valid Clients : 0.1, Test Clients : 0.1 | Sup : 0.2, Qry : 0.8 |
 
 **The original specifications of the Leaf dataset can be found in the Leaf paper(_"LEAF: A Benchmark for Federated Settings"_).**
 
-****Training Hyperparameters:**** : The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python main.py` directly)
+****Training Hyperparameters:**** : The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python main.py algo=? data=?` directly)
 
 |     Algorithm     |    Dataset     | Clients per Round | Number of Rounds | Batch Size | Optimizer | Learning Rate(α, β) | Client Resources                     | Gradient Step |
 |:-----------------:|:--------------:|:-----------------:|:----------------:|:----------:|:---------:|:-------------------:|--------------------------------------|:-------------:|
@@ -67,7 +67,7 @@ dataset: [FEMNIST, SHAKESPEARE] # list of datasets you include in your baseline
 
 ## Running the Experiments
 
-****Download Dataset**** : . Go [LEAF: A Benchmark for Federated Settings](https://github.com/TalwalkarLab/leaf) and Use the command below!. You can download dataset (FEMNIST and SHAKESPEARE). 
+****Download Dataset**** : Go [LEAF: A Benchmark for Federated Settings](https://github.com/TalwalkarLab/leaf) and Use the command below! You can download dataset (FEMNIST and SHAKESPEARE). 
 ```bash
 #FEMNIST dataset Download command for these experiments
 ./preprocess.sh -s niid --iu 1068 --sf 0.3 -k 0 -t sample
