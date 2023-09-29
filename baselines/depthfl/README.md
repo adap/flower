@@ -142,9 +142,7 @@ The above commands would generate results in DepthFL paper. The numbers below ar
 
 | Scaling Method | Dataset | Global Model | 100% (a) | 75% (b) | 50% (c) | 25% (d) | 
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | 
-| HeteroFL | CIFAR100 | 57.61 | 64.39 | 66.08 | 62.03 | 51.99 |
-| DepthFL (FedAvg) | CIFAR100 | 72.67 | 67.08 | 70.78 | 68.41 | 59.17 |
-| DepthFL | CIFAR100 | 76.06 | 69.68 | 73.21 | 70.29 | 60.32 |
+| HeteroFL<br>DepthF (FedAvg)<br>DepthFL | CIFAR100 | 57.61<br>72.67<br>76.06 | 64.39<br>67.08<br>69.68 | 66.08<br>70.78<br>73.21 | 62.03<br>68.41<br>70.29 | 51.99<br>59.17<br>60.32 |
 
 **Table 3** 
 
@@ -152,14 +150,11 @@ Accuracy of global sub-models compared to exclusive learning on CIFAR-100.
 
 | Method | Algorithm | Classifier 1/4 | Classifier 2/4 | Classifier 3/4 | Classifier 4/4 |
 | :---: | :---: | :---: | :---: | :---: | :---: |
-| Width Scaling | Exclusive Learning | 64.39 | 66.08 | 62.03 | 51.99 |
-| Width Scaling | HeteroFL | 51.08 | 55.89 | 58.29 | 57.61 |
+| Width Scaling | Exclusive Learning<br>HeteroFL| 64.39<br>51.08 | 66.08<br>55.89 | 62.03<br>58.29 | 51.99<br>57.61 |
 
 | Method | Algorithm | Classifier 1/4 | Classifier 2/4 | Classifier 3/4 | Classifier 4/4 |
 | :---: | :---: | :---: | :---: | :---: | :---: |
-| Depth Scaling | Exclusive Learning | 67.08 | 68.00 | 66.19 | 56.78 |
-| Depth Scaling | InclusiveFL | 47.61 | 53.88 | 59.48 | 60.46 |
-| Depth Scaling | DepthFL (FedAvg)| 66.18 | 67.56 | 67.97 | 68.01 |
+| Depth Scaling | Exclusive Learning<br>InclusiveFL<br>DepthFL (FedAvg) | 67.08<br>47.61<br>66.18 | 68.00<br>53.88<br>67.56 | 66.19<br>59.48<br>67.97 | 56.78<br>60.46<br>68.01 |
 
 **Table 4** 
 
@@ -167,7 +162,5 @@ Accuracy of the global model with/without self distillation on CIFAR-100.
 
 | Distribution | Dataset | KD | Classifier 1/4 | Classifier 2/4 | Classifier 3/4 | Classifier 4/4 | Ensemble | 
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| IID | CIFAR-100 | &cross; | 70.13 | 69.63 | 68.92 | 68.92 | 74.48 | 
-| IID | CIFAR-100 | &check; | 71.74 | 73.35 | 73.57 | 73.55 | 76.06 | 
-
+| IID | CIFAR-100 | &cross;<br>&check; | 70.13<br>71.74 | 69.63<br>73.35 | 68.92<br>73.57 | 68.92<br>73.55 | 74.48<br>76.06 | 
 
