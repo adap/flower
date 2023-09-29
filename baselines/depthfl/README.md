@@ -100,7 +100,7 @@ python -m fedprox.main --config-name="heterofl" exclusive_learning=true model_si
 
 ### Stateful clients comment
 
-To implement feddyn, stateful clients that store prev_grads information are needed. Since flwr does not yet officially support stateful clients, it was implemented as a temporary measure by loading prev_grads from disk when creating a client, and then storing it again on disk after learning. Specifically, there are files that store the state of each client in the prev_grads folder.
+To implement `feddyn`, stateful clients that store prev_grads information are needed. Since flwr does not yet officially support stateful clients, it was implemented as a temporary measure by loading `prev_grads` from disk when creating a client, and then storing it again on disk after learning. Specifically, there are files that store the state of each client in the `prev_grads` folder.
 
 
 ## Expected Results
