@@ -20,7 +20,7 @@ dataset: [CIFAR-10, CIFAR-100]
 
 ## About this baseline
 
-****What’s implemented:**** : The code in this directory replicates the experiments in *Model-Contrastive Federated Learning* (Li et al., 2021), which proposed the MOON algorithm. Concretely ,it replicates the results of MOON for CIFAR-10 and CIFAR-100 in Table 1.
+****What’s implemented:**** The code in this directory replicates the experiments in *Model-Contrastive Federated Learning* (Li et al., 2021), which proposed the MOON algorithm. Concretely ,it replicates the results of MOON for CIFAR-10 and CIFAR-100 in Table 1.
 
 ****Datasets:**** : CIFAR-10 and CIFAR-100
 
