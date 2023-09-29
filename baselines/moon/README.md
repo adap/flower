@@ -22,23 +22,23 @@ dataset: [CIFAR-10, CIFAR-100]
 
 ****What’s implemented:**** The code in this directory replicates the experiments in *Model-Contrastive Federated Learning* (Li et al., 2021), which proposed the MOON algorithm. Concretely ,it replicates the results of MOON for CIFAR-10 and CIFAR-100 in Table 1.
 
-****Datasets:**** : CIFAR-10 and CIFAR-100
+****Datasets:**** CIFAR-10 and CIFAR-100
 
-****Hardware Setup:**** :The experiments are run on a server with 4x Intel Xeon Gold 6226R and 8x Nvidia GeForce RTX 3090. A machine with at least 1x 16GB GPU should be able to run the experiments in a reasonable time.
+****Hardware Setup:**** The experiments are run on a server with 4x Intel Xeon Gold 6226R and 8x Nvidia GeForce RTX 3090. A machine with at least 1x 16GB GPU should be able to run the experiments in a reasonable time.
 
-****Contributors:**** : Qinbin Li
+****Contributors:**** Qinbin Li
 
-****Description:****: MOON requires to compute the model-contrastive loss in local training, which requires access to the local model of the previous round (Lines 14-17 of Algorithm 1 of the paper). Since currently `FlowerClient` does not preserve the states when starting a new round, we store the local models into the specified `model.dir` in local training indexed by the client ID, which will be loaded to the corresponding client in the next round.
+****Description:**** MOON requires to compute the model-contrastive loss in local training, which requires access to the local model of the previous round (Lines 14-17 of Algorithm 1 of the paper). Since currently `FlowerClient` does not preserve the states when starting a new round, we store the local models into the specified `model.dir` in local training indexed by the client ID, which will be loaded to the corresponding client in the next round.
 
 ## Experimental Setup
 
-****Task:**** : Image classification.
+****Task:**** Image classification.
 
-****Model:**** : This directory implements two models as same as the paper:
+****Model:**** This directory implements two models as same as the paper:
 * A simple-CNN with a projection head for CIFAR-10
 * A ResNet-50 with a projection head for CIFAR-100.
   
-****Dataset:**** : This directory includes CIFAR-10 and CIFAR-100. They are partitioned in the same way as the paper. The settings are as follow:
+****Dataset:**** This directory includes CIFAR-10 and CIFAR-100. They are partitioned in the same way as the paper. The settings are as follow:
 
 | Dataset | partitioning method |
 | :------ | :---: |
@@ -46,9 +46,7 @@ dataset: [CIFAR-10, CIFAR-100]
 | CIFAR-100 | Dirichlet with beta 0.5 |
 
 
-****Training Hyperparameters:**** :
-
-warning: The following tables show the default hyperparameters.
+****Training Hyperparameters:****
 
 | Description | Default Value |
 | ----------- | ----- |
@@ -110,17 +108,19 @@ python -m moon.main --config-name cifar100_fedprox
 
 You can find the output log in `_static` directory. After running the above commands, you can see the accuracy list at the end of the ouput, which is the test accuracy of the global model. For example, in one running, for CIFAR-10 with MOON, the accuracy after running 100 rounds is 0.7071 (see `_static/cifar10_moon.log`). 
 
-For CIFAR-10 with FedProx, the accuracy after running 100 rounds is 0.6852 (see `_static/cifar10_fedprox.log`). For CIFAR100 with MOON, the accuracy after running 100 rounds is 0.6799 (see`_static/cifar100_moon.log`). For CIFAR100 with FedProx, the accuracy after running 100 rounds is 0.6494. The results are summarized below:
+For CIFAR-10 with FedProx, the accuracy after running 100 rounds is 0.6852 (see `_static/cifar10_fedprox.log`). For CIFAR100 with MOON, the accuracy after running 100 rounds is 0.6636 (see`_static/cifar100_moon.log`). For CIFAR100 with FedProx, the accuracy after running 100 rounds is 0.6494. The results are summarized below:
 
 
 |  | CIFAR-10 | CIFAR-100 |
 | ----------- | ----- | ----- |
-| MOON | 0.7107 | 0.6799 |
+| MOON | 0.7071 | 0.6636 |
 | FedProx| 0.6852 | 0.6494 |
 
-You can find the curve comparing MOON and FedProx on CIFAR-10 below.
+### Figure 6
+You can find the curve comparing MOON and FedProx on CIFAR-10 and CIFAR-100 below.
 
-![](_static/cifar10_moon_fedprox.png)
+
+<img alt="CIFAR-10" src="_static/cifar10_moon_fedprox.png" width="400"/> <img alt="CIFAR-100" src="_static/cifar100_moon_fedprox.png" width="400"/>
 
 
 You can tune the hyperparameter `mu` for both MOON and FedProx by changing the configuration file in `conf`.
