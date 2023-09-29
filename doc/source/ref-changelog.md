@@ -8,6 +8,10 @@
 
 ### What's new?
 
+- **Fix the incorrect return types of Strategy** ([#2432](https://github.com/adap/flower/pull/2432/files))
+
+  The types of the return values in the docstrings in two methods: aggregate_fit and aggregate_evaluate now match the hint types in the code.
+
 - **Unify client API** ([#2303](https://github.com/adap/flower/pull/2303))
 
   Using the `client_fn`, Flower clients can interchangeably run as standalone processes (i.e. via `start_client`) or in simulation (i.e. via `start_simulation`) without requiring changes to how the client class is defined and instantiated.
