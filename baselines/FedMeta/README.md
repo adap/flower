@@ -20,9 +20,9 @@ dataset: [FEMNIST, SHAKESPEARE] # list of datasets you include in your baseline
 
 ****Datasets:**** : FEMNIST and SHAKESPEARE from Leaf Federated Learning Dataset
 
-****Hardware Setup:**** : These experiments were run on a machine with 16 CPU threads and 1 GPU(GeForce RTX 2080 Ti). However, the FedMeta experiment using the Shakespeare dataset required more computing power (more than 4 GPUs).
+****Hardware Setup:**** : These experiments were run on a machine with 16 CPU threads and 1 GPU(GeForce RTX 2080 Ti). **However, the FedMeta experiment using the Shakespeare dataset required more computing power (more than 4 GPUs).** Out of Memory errors may occur with some clients, but federated learning can continue to operate.
 
-****Contributors:**** : Jinsoo Kim and Kangyoon Lee
+****Contributors:**** : **Jinsoo Kim and Kangyoon Lee**
 
 
 ## Experimental Setup
@@ -33,18 +33,20 @@ dataset: [FEMNIST, SHAKESPEARE] # list of datasets you include in your baseline
 * A two-layer CNN network as used in the FedMeta paper (see `models/CNN_Network`). This is the model used by default.
 * A StackedLSTM model used in the FedMeta paper for Shakespeare (see `models/StackedLSTM`).
 
-**You can see more detail at Apendix.A in paper**
+**You can see more detail in Apendix.A of the  paper**
 
-****Dataset:**** : This baseline includes the FEMNIST dataset and SHAKESPEARE. For data partitioning and sampling per client, we use the Leaf GitHub([LEAF: A Benchmark for Federated Settings](https://github.com/TalwalkarLab/leaf)). The data and client specifications used in this experiment are listed in the table below (Table 1 in the paper). 
+****Dataset:**** : This baseline includes the FEMNIST dataset and SHAKESPEARE. For data partitioning and sampling per client, we use the Leaf GitHub([LEAF: A Benchmark for Federated Settings](https://github.com/TalwalkarLab/leaf)). The data and client specifications used in this experiment are listed in the table below (Table 1 in the paper).
 
-|   Dataset   | #Clients | #Samples | #Classes |                      #Partition Clients                      | #Partition Dataset          |
-|:-----------:|:--------:| :---: |:--------:|:------------------------------------------------------------:|-----------------------------|
-|   FEMNIST   |  1,068   | 235,683 |    62    | Train Clients : 0.8, Valid Clients : 0.1, Test Clients : 0.1 | Support set(fraction) : 0.2 |
-| SHAKESPEARE |    110     | 625,127 |    80    | Train Clients : 0.8, Valid Clients : 0.1, Test Clients : 0.1 | Support set(fraction) : 0.2 |
+**Shakespeare Dataset Issue** : In the FedMeta paper experiment, the Shakespeare dataset had 1126 users. However, due to a current bug, the number of users has decreased to 660 users. Therefore, we have only maintained the total number of data.
+
+|   Dataset   |  #Clients   | #Samples | #Classes |                      #Partition Clients                      | #Partition Dataset   |
+|:-----------:|:-----------:| :---: |:--------:|:------------------------------------------------------------:|----------------------|
+|   FEMNIST   |    1,068    | 235,683 |    62    | Train Clients : 0.8, Valid Clients : 0.1, Test Clients : 0.1 | Sup : 0.2, Qry : 0.8 |
+| SHAKESPEARE | 550 --> 110 | 625,127 |    80    | Train Clients : 0.8, Valid Clients : 0.1, Test Clients : 0.1 | Sup : 0.2, Qry : 0.8 |
 
 **The original specifications of the Leaf dataset can be found in the Leaf paper(_"LEAF: A Benchmark for Federated Settings"_).**
 
-****Training Hyperparameters:**** :warning: *_Include a table with all the main hyperparameters in your baseline. Please show them with their default value._*
+****Training Hyperparameters:**** : The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python main.py` directly)
 
 |     Algorithm     |    Dataset     | Clients per Round | Number of Rounds | Batch Size | Optimizer | Learning Rate(α, β) | Client Resources                     | Gradient Step |
 |:-----------------:|:--------------:|:-----------------:|:----------------:|:----------:|:---------:|:-------------------:|--------------------------------------|:-------------:|
@@ -52,9 +54,9 @@ dataset: [FEMNIST, SHAKESPEARE] # list of datasets you include in your baseline
 |      FedAVg       |  SHAKESPEARE   |         4         |       400        |     10     |   Adam    |        0.001        | {'num_cpus': 4.0, 'num_gpus': 0.25 } |       -       |
 |   FedAvg(Meta)    |     FEMNST     |         4         |       2000       |     10     |   Adam    |       0.0001        | {'num_cpus': 4.0, 'num_gpus': 0.25 } |       -       |
 |   FedAvg(Meta)    |  SHAKESPEARE   |         4         |       400        |     10     |   Adam    |        0.001        | {'num_cpus': 4.0, 'num_gpus': 0.25 } |       -       |
-|   FedMeta(MAML)   |     FEMNST     |         4         |       2000       |     10     |   Adam    |   (0.001, 0.0001)   | {'num_cpus': 4.0, 'num_gpus': 0.25 } |       5       |
+|   FedMeta(MAML)   |     FEMNST     |         4         |       2000       |     10     |   Adam    |   (0.001, 0.0001)   | {'num_cpus': 4.0, 'num_gpus': 1.0 }  |       5       |
 |   FedMeta(MAML)   |  SHAKESPEARE   |         4         |       400        |     10     |   Adam    |     (0.1, 0.01)     | {'num_cpus': 4.0, 'num_gpus': 1.0 }  |       1       |
-| FedMeta(Meta-SGD  |     FEMNST     |         4         |       2000       |     10     |   Adam    |   (0.001, 0.0001)   | {'num_cpus': 4.0, 'num_gpus': 0.25 } |       5       |
+| FedMeta(Meta-SGD  |     FEMNST     |         4         |       2000       |     10     |   Adam    |   (0.001, 0.0001)   | {'num_cpus': 4.0, 'num_gpus': 1.0 }  |       5       |
 | FedMeta(Meta-SGD  |  SHAKESPEARE   |         4         |       400        |     10     |   Adam    |     (0.1, 0.01)     | {'num_cpus': 4.0, 'num_gpus': 1.0 }  |       1       |
 
 
@@ -65,7 +67,15 @@ dataset: [FEMNIST, SHAKESPEARE] # list of datasets you include in your baseline
 
 ## Running the Experiments
 
-:warning: _Provide instructions on the steps to follow to run all the experiments._
+****Download Dataset**** : . Go [LEAF: A Benchmark for Federated Settings](https://github.com/TalwalkarLab/leaf) and Use the command below!. You can download dataset (FEMNIST and SHAKESPEARE). 
+```bash
+#FEMNIST dataset Download command for these experiments
+./preprocess.sh -s niid --iu 1068 --sf 0.3 -k 0 -t sample
+
+#SHAKESEPEARE dataset Download command for these experiments
+./preprocess.sh -s niid --iu 1068 --sf 0.3 -k 0 -t sample
+````
+
 ```bash  
 # The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
 
