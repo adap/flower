@@ -209,7 +209,5 @@ num_clients=100 dataset=fmnist server.momentum=0.97 client.lr=0.003
 ```
 The above command will evaluate the custom FedAvgM versus FedAvg on Fashion-MNIST datasets. It uses 100 clients with a reporting fraction of 5% during 1000 rounds. To evaluate the non-iid aspects, this exececution exercises concentration of [100, 10, 1, 0.1, 0.01, 0.001]:
 
-**PLOT TO BE UPDATED**
-
 ![](_static/fedavgm_vs_fedavg_rounds=1000_fmnist.png)
 
