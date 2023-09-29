@@ -22,9 +22,9 @@ dataset: [CIFAR-10, Fashion-MNIST]
 
 **Datasets:** CIFAR-10, and Fashion-MNIST
 
-**Hardware Setup:** This baseline was evaluated in a regular PC without GPU (Intel i7-10710U CPU, and 32 Gb RAM). The major constraint is to run a huge number of rounds such as the reference paper that reports 10.000 round for each case evaluated. As a reference, all the cases for the reported expected results with 1.000 round per case took 2 days.
+**Hardware Setup:** This baseline was evaluated in a regular PC without GPU (Intel i7-10710U CPU, and 32 Gb RAM). The major constraint is to run a huge number of rounds such as the reference paper that reports 10.000 round for each case evaluated. 
 
-**Contributors:** Gustavo de Carvalho Bertoli
+**Contributors:** Gustavo de Carvalho Bertoli [(@gubertoli)](https://github.com/gubertoli)
 
 ## Experimental Setup
 
@@ -79,7 +79,7 @@ The following table shows the main hyperparameters for this baseline with their 
 | client learning rate | 0.01 |
 
 ### Custom FedAvgM
-In contrast with the original implmentation from Flower v1.5.0, in this baseline we introduce the Nesterov accelerated gradient as part of the momentum applied in the server mode. To use the original Flower implementation, use the argument `strategy=fedavgm`. By default, the custom implementation is used. But, you can also refer to it on the command line as `strategy=custom-fedavgm`.
+In contrast with the original implementation from Flower v1.5.0, in this baseline we introduce the Nesterov accelerated gradient as part of the momentum applied in the server model. To use the original Flower implementation, use the argument `strategy=fedavgm`. By default, the custom implementation is used. But, you can also refer to it on the command line as `strategy=custom-fedavgm`.
 
 ## Specifying the Python Version
 This baseline was tested with Python 3.10.6.
@@ -205,7 +205,7 @@ Summarizing all the results:
 python -m fedavgm.main --multirun client.local_epochs=1 \
 noniid.concentration=0.01,0.1,1,10 strategy=custom-fedavgm,fedavg \
 server.reporting_fraction=0.05 num_rounds=1000 \
-num_clients=100 dataset=cifar10,fmnist server.momentum=0.97 client.lr=0.003
+num_clients=100 dataset=fmnist server.momentum=0.97 client.lr=0.003
 ```
 
 The above command will evaluate the custom FedAvgM versus FedAvg on Fashion-MNIST datasets. It uses 100 clients with a reporting fraction of 5% during 1000 rounds. To evaluate the non-iid aspects, this exececution exercises concentration of [10, 1, 0.1, 0.01].
