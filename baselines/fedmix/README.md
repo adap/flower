@@ -1,87 +1,89 @@
 ---
-title: title of the paper
-url: URL to the paper page (not the pdf)
-labels: [label1, label2] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [dataset1, dataset2] # list of datasets you include in your baseline
+title: FedMix Approximation of Mixup under Mean Augmented Federated Learning
+url: https://arxiv.org/abs/2107.00233
+labels: ["data heterogeneity", "mixup", "non-iid"]
+dataset: ["cifar10", "femnist"]
 ---
 
-# :warning:*_Title of your baseline_*
+# FedMix: Approximation of Mixup under Mean Augmented Federated Learning
 
-> Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
+****Paper:**** https://arxiv.org/abs/2107.00233
 
-> :warning: This is the template to follow when creating a new Flower Baseline. Please follow the instructions in `EXTENDED_README.md`
+****Authors:**** Tehrim Yoon, Sumin Shin, Sung Ju Hwang, Eunho Yang
 
-> :warning: Please follow the instructions carefully. You can see the [FedProx-MNIST baseline](https://github.com/adap/flower/tree/main/baselines/fedprox) as an example of a baseline that followed this guide.
-
-> :warning: Please complete the metadata section at the very top of this README. This generates a table at the top of the file that will facilitate indexing baselines.
-
-****Paper:**** :warning: *_add the URL of the paper page (not to the .pdf). For instance if you link a paper on ArXiv, add here the URL to the abstract page (e.g. https://arxiv.org/abs/1512.03385). If your paper is in from a journal or conference proceedings, please follow the same logic._*
-
-****Authors:**** :warning: *_list authors of the paper_*
-
-****Abstract:**** :warning: *_add here the abstract of the paper you are implementing_*
+****Abstract:**** Federated learning (FL) allows edge devices to collectively learn a model without directly sharing data within each device, thus preserving privacy and eliminating the need to store data globally. While there are promising results under the assumption of independent and identically distributed (iid) local data, current state-of-the-art algorithms suffer from performance degradation as the heterogeneity of local data across clients increases. To resolve this issue, we propose a simple framework, Mean Augmented Federated Learning (MAFL), where clients send and receive averaged local data, subject to the privacy requirements of target applications. Under our framework, we propose a new augmentation algorithm, named FedMix, which is inspired by a phenomenal yet simple data augmentation method, Mixup, but does not require local raw data to be directly shared among devices. Our method shows greatly improved performance in the standard benchmark datasets of FL, under highly non-iid federated settings, compared to conventional algorithms.
 
 
 ## About this baseline
 
-****What’s implemented:**** :warning: *_Concisely describe what experiment(s) in the publication can be replicated by running the code. Please only use a few sentences. Start with: “The code in this directory …”_*
+****What’s implemented:**** The code in this directory implements two of the Federated Strategies mentioned in the paper: NaiveMix and FedMix
 
-****Datasets:**** :warning: *_List the datasets you used (if you used a medium to large dataset, >10GB please also include the sizes of the dataset)._*
+****Datasets:**** CIFAR10, FEMNIST
 
-****Hardware Setup:**** :warning: *_Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Someone out there might not have access to the same resources you have so, could list the absolute minimum hardware needed to run the experiment in a reasonable amount of time ? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?_*
+****Hardware Setup:**** Experiments in this baseline were run on 2x Nvidia Tesla V100 16GB.
 
-****Contributors:**** :warning: *_let the world know who contributed to this baseline. This could be either your name, your name and affiliation at the time, or your GitHub profile name if you prefer. If multiple contributors signed up for this baseline, please list yourself and your colleagues_*
+****Contributors:**** [DevPranjal](https://github.com/DevPranjal)
 
 
 ## Experimental Setup
 
-****Task:**** :warning: *_what’s the primary task that is being federated? (e.g. image classification, next-word prediction). If you have experiments for several, please list them_*
+****Task:**** Image Classification
 
-****Model:**** :warning: *_provide details about the model you used in your experiments (if more than use a list). If your model is small, describing it as a table would be :100:. Some FL methods do not use an off-the-shelve model (e.g. ResNet18) instead they create your own. If this is your case, please provide a summary here and give pointers to where in the paper (e.g. Appendix B.4) is detailed._*
+****Model:**** Models used are modified versions of existing known models and are descirbed in Appendix B (Experimental Details). For the CIFAR10 dataset, the authors use a modified version of VGG, while LeNet-5 is used for the FEMNIST dataset.
 
-****Dataset:**** :warning: *_Earlier you listed already the datasets that your baseline uses. Now you should include a breakdown of the details about each of them. Please include information about: how the dataset is partitioned (e.g. LDA with alpha 0.1 as default and all clients have the same number of training examples; or each client gets assigned a different number of samples following a power-law distribution with each client only instances of 2 classes)? if  your dataset is naturally partitioned just state “naturally partitioned”; how many partitions there are (i.e. how many clients)? Please include this an all information relevant about the dataset and its partitioning into a table._*
+****Dataset:**** Both the datasets used (CIFAR10 and FEMNIST) incorporate data heterogenity in diferent ways to simulate a non-iid setting. For the CIFAR10 experiment, data is allocated such that each client has data from only a selected number of randomly chosen classes. For the FEMNIST experiment, data is allocated such that each client has data from only one writer, resulting in 200-300 samples per client on average.
 
-****Training Hyperparameters:**** :warning: *_Include a table with all the main hyperparameters in your baseline. Please show them with their default value._*
+| Property | CIFAR10 Partioning | FEMNIST Partitioning |
+| -- | -- | -- |
+| num classes | 10 | 62 |
+| num clients | 60 | 100 |
+| num classes per client | 2 | |
+| non-iidness type | data from selected classes | data from single writer |
+
+
+****Training Hyperparameters:****
+
+| Hyperparameter | CIFAR10 Experiments | FEMNIST Experiments |
+| -- | -- | -- |
+| local epochs | 2 | 10 |
+| local learning rate | 0.01 | 0.01|
+| local lr decay after round | 0.999 | 0.999 |
+| local batch size | 10 | 10 |
+| num classes per client | 2 | |
+| total number of clients | 60 | 100 |
+| clients per round | 15 | 10 |
+| mash batch size | full local data (`all`) | full local data (`all`)|
+| mixup ratio | 0.05 | 0.2 |
+| num rounds | 500 | 200 |
 
 
 ## Environment Setup
 
-:warning: _The Python environment for all baselines should follow these guidelines in the `EXTENDED_README`. Specify the steps to create and activate your environment. If there are any external system-wide requirements, please include instructions for them too. These instructions should be comprehensive enough so anyone can run them (if non standard, describe them step-by-step)._
+```
+# set local python version via pyenv
+pyenv local 3.10.6
 
+# then fix that for poetry
+poetry env use 3.10.6
+
+# then install poetry env
+poetry install
+
+# activate the environment
+poetry shell
+```
 
 ## Running the Experiments
 
-:warning: _Provide instructions on the steps to follow to run all the experiments._
-```bash  
-# The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
+To run an experiment with default hyperparameters (as mentioned in the paper), execute:
 
-poetry run -m <baseline-name>.main <no additional arguments> # where <baseline-name> is the name of this directory and that of the only sub-directory in this directory (i.e. where all your source code is)
-
-# If you are using a dataset that requires a complicated download (i.e. not using one natively supported by TF/PyTorch) + preprocessing logic, you might want to tell people to run one script first that will do all that. Please ensure the download + preprocessing can be configured to suit (at least!) a different download directory (and use as default the current directory). The expected command to run to do this is:
-
-poetry run -m <baseline-name>.dataset_preparation <optional arguments, but default should always run>
-
-# It is expected that you baseline supports more than one dataset and different FL settings (e.g. different number of clients, dataset partitioning methods, etc). Please provide a list of commands showing how these experiments are run. Include also a short explanation of what each one does. Here it is expected you'll be using the Hydra syntax to override the default config.
-
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
-.
-.
-.
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
+```
+python -m fedmix.main +experiment={dataset}_{strategy}
+# dataset can be: cifar10, femnist
+# strategy can be: fedavg, naivemix, fedmix
 ```
 
+To run custom experiments: create a new `.yaml` file in `conf/experiment` and override the default hyperparameters.
 
 ## Expected Results
 
-:warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
-
-```bash
-# it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameteres
-
-poetry run -m <baseline-name>.main --multirun num_client_per_round=5,10,50 dataset=femnist,cifar10
-# the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
-
-[Now show a figure/table displaying the results of the above command]
-
-# add more commands + plots for additional experiments.
-```

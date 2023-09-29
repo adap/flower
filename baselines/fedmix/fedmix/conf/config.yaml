@@ -1,0 +1,15 @@
+defaults:
+  - dataset: cifar10
+  - strategy: fedmix
+  - client: ${strategy}
+  - model: vgg
+
+seed: 42
+server_device: cuda
+num_clients: 60
+clients_per_round: 15
+num_rounds: 500
+
+client_resources:
+  num_cpus: 4
+  num_gpus: 0.25

@@ -1,0 +1,3 @@
+_target_: fedmix.client.FedAvgClient
+num_epochs: 2
+learning_rate: 0.01
