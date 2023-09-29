@@ -32,15 +32,6 @@ from flwr.common import (
     NDArrays,
 )
 
-import wandb
-
-# start a new wandb run to track this script
-# wandb.init(
-#     # set the wandb project where this run will be logged
-#     project="SoR",
-#
-# )
-
 
 def fedmeta_update_meta_sgd(net, alpha, beta, weights_results, gradients_aggregated):
     params_dict = zip(net.state_dict().keys(), weights_results)
@@ -69,6 +60,7 @@ def fedmeta_update_maml(net, beta, weights_results, gradients_aggregated):
     weights_prime = [val.cpu().numpy() for _, val in net.state_dict().items()]
 
     return weights_prime
+
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     """Aggregation function for weighted average during evaluation.
@@ -127,7 +119,6 @@ class FedMeta(FedAvg):
             self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
-        # alpha_list = [param.data for param in self.alpha]
         config = {"alpha" : self.alpha, "algo": self.algo, "data": self.data}
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
@@ -249,16 +240,14 @@ class FedMeta(FedAvg):
 
         weight_loss = sum([evaluate_res.metrics['loss'] * evaluate_res.num_examples for _, evaluate_res in results]) / sum(
             [evaluate_res.num_examples for _, evaluate_res in results])
-        # wandb.log({"Training Loss": weight_loss}, step=server_round)
-        log(INFO, f'Training Loss : {weight_loss}')
+        log(INFO, f'Loss : {weight_loss}')
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
         if self.evaluate_metrics_aggregation_fn:
             eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
-            # wandb.log({"Test_Accuracy ": round(metrics_aggregated['accuracy'] * 100, 3)}, step=server_round)
-            log(INFO, f'Test Accuracy : {round(metrics_aggregated["accuracy"] * 100, 3)}')
+            log(INFO, f'Accuracy : {round(metrics_aggregated["accuracy"] * 100, 3)}')
 
         elif server_round == 1:  # Only log this warning once
             log(WARNING, "No evaluate_metrics_aggregation_fn provided")

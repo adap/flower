@@ -11,7 +11,7 @@ defined here of course.
 
 from torch.utils.data import DataLoader, Dataset
 from omegaconf import DictConfig
-from typing import Optional, Tuple
+from typing import Tuple
 from dataset_preparation import _partition_data, split_train_validation_test_clients
 import numpy as np
 import torchvision.transforms as transforms

@@ -73,25 +73,35 @@ dataset: [FEMNIST, SHAKESPEARE] # list of datasets you include in your baseline
 ./preprocess.sh -s niid --iu 1068 --sf 0.3 -k 0 -t sample
 
 #SHAKESEPEARE dataset Download command for these experiments
-./preprocess.sh -s niid --iu 1068 --sf 0.3 -k 0 -t sample
+./preprocess.sh -s niid --sf 0.16 -k 0 -t sample
 ````
-
+****Start experiments**** : 
 ```bash  
-# The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
+# FedAvg + Femnist Dataset
+python main.py algo=fedavg data=femnist path=(your leaf dataset path)/leaf/data/shakespeare/data
 
-poetry run -m <baseline-name>.main <no additional arguments> # where <baseline-name> is the name of this directory and that of the only sub-directory in this directory (i.e. where all your source code is)
+# FedAvg(Meta) + Femnist Dataset
+python main.py algo=fedavg_meta data=femnist path=(your leaf dataset path)/leaf/data/shakespeare/data
 
-# If you are using a dataset that requires a complicated download (i.e. not using one natively supported by TF/PyTorch) + preprocessing logic, you might want to tell people to run one script first that will do all that. Please ensure the download + preprocessing can be configured to suit (at least!) a different download directory (and use as default the current directory). The expected command to run to do this is:
+# FedMeta(MAML) + Femnist Dataset
+python main.py algo=fedmeta_maml data=femnist path=(your leaf dataset path)/leaf/data/shakespeare/data
 
-poetry run -m <baseline-name>.dataset_preparation <optional arguments, but default should always run>
+# FedMeta(Meta-SGD) + Femnist Dataset
+python main.py algo=fedmeta_meta_sgd data=femnist path=(your leaf dataset path)/leaf/data/shakespeare/data
 
-# It is expected that you baseline supports more than one dataset and different FL settings (e.g. different number of clients, dataset partitioning methods, etc). Please provide a list of commands showing how these experiments are run. Include also a short explanation of what each one does. Here it is expected you'll be using the Hydra syntax to override the default config.
 
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
-.
-.
-.
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
+
+#FedAvg + Shakespeare Dataset
+python main.py algo=fedavg data=shakespeare path=(your leaf dataset path)/leaf/data/shakespeare/data
+
+#FedAvg(Meta) + Shakespeare Dataset
+python main.py algo=fedavg_meta data=shakespeare path=(your leaf dataset path)/leaf/data/shakespeare/data
+
+#FedMeta(MAML) + Shakespeare Dataset
+python main.py algo=fedmeta_maml data=shakespeare path=(your leaf dataset path)/leaf/data/shakespeare/data
+
+#FedMeta(Meta-SGD) + Shakespeare Dataset
+python main.py algo=fedmeta_meta_sgd data=shakespeare path=(your leaf dataset path)/leaf/data/shakespeare/data
 ```
 
 

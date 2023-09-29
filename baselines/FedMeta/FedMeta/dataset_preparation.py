@@ -14,7 +14,6 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 
 
-# def _read_dataset() -> Dict[List, Dict, List]:
 def _read_dataset(
         path: str
 ) -> Tuple[List, DefaultDict]:
@@ -109,7 +108,6 @@ def _partition_data(
             try:
                 sup_x, qry_x, sup_y, qry_y = support_query_split(all_x, all_y, support_ratio)
             except Exception as e:
-                # print(f"Error occurred at iteration {user}: {e}")
                 continue
 
         elif data_type == 'shakespeare':
