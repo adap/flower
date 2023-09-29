@@ -7,12 +7,15 @@ to instantiate your client.
 import flwr
 
 from torch.utils.data import DataLoader
-from typing import Dict, List, Optional, Union
+from typing import Dict, List
 import numpy as np
 import torch
 from scipy.stats import bernoulli
-from logging import DEBUG, INFO
-from .utils import sigmoid, load_model
+from logging import INFO
+from models import sigmoid, load_model
+
+import torch.nn as nn
+
 
 from flwr.common.logger import log
 
@@ -29,6 +32,7 @@ from flwr.common import (
     EvaluateIns,
     EvaluateRes
 )
+
 
 class FedPMClient(flwr.client.Client):
     def __init__(
@@ -49,14 +53,12 @@ class FedPMClient(flwr.client.Client):
             device=device,
             compressor=compressor
         )
-        self.cfg = cfg
+        self.params = cfg
         self.client_id = client_id
         self.train_data_loader = train_data_loader
         self.test_data_loader = test_data_loader
         self.device = device
-        self.local_model = load_model(self.cfg).to(self.device)
-        self.compressor = compressor
-        self.compression = True if self.compressor is not None else False
+        self.local_model = load_model(self.params).to(self.device)
         self.epsilon = 0.01
 
     def sample_mask(self, mask_probs: Dict) -> List[np.ndarray]:
@@ -84,11 +86,9 @@ class FedPMClient(flwr.client.Client):
             model=self.local_model,
             trainloader=self.train_data_loader,
             iter_num=fitins.config.get('iter_num'),
-            device=self.device,
-            params=self.cfg,
+            params=self.params,
         )
         sampled_mask = None
-        round_kl = []
         round_rate = []
         round_block_sizes = []
         rhos_round = []
@@ -109,7 +109,7 @@ class FedPMClient(flwr.client.Client):
             sampled_params, block_sizes, bits, rhos, ids = self.compressor.compress(
                 posterior_update=np.float64(posterior_params),
                 prior=np.float64(prior_params),
-                compress_config=self.cfg.get('compressor').get('rec'),
+                compress_config=self.params.get('compressor').get('rec'),
                 old_ids=fitins.config.get('old_ids')
             )
             # sampled_mask.append(sampled_params)
@@ -121,14 +121,9 @@ class FedPMClient(flwr.client.Client):
                     j_start += torch.numel(param)
                 else:
                     sampled_mask.append(param.cpu().numpy())
-            round_kl.append(
-                np.mean(
-                    posterior_params * np.log2(posterior_params / prior_params) +
-                    (1 - posterior_params) * np.log2((1 - posterior_params) / (1 - prior_params))
-                ))
             round_block_sizes.append(np.mean(block_sizes))
             if fitins.config.get('old_ids') is None and \
-                    self.cfg.get('compressor').get('rec').get('adaptive'):
+                    self.params.get('compressor').get('rec').get('adaptive'):
                 round_rate.append(np.mean((np.asarray(bits) + np.log2(256)) / np.asarray(block_sizes)))
             else:
                 round_rate.append(np.mean(np.asarray(bits) / np.asarray(block_sizes)))
@@ -136,26 +131,12 @@ class FedPMClient(flwr.client.Client):
 
         parameters = ndarrays_to_parameters(sampled_mask)
         status = Status(code=Code.OK, message="Success")
-        rhos_round = np.asarray(rhos_round)
-        rhos_round[rhos_round > 100] = 100
-        rhos_round = list(rhos_round)
-        metrics = {
-            "KL Divergence": np.mean(round_kl),
-            "Block Size": np.mean(round_block_sizes),
-            "Rate": np.mean(round_rate)
-        }
-        if 'rec' in self.cfg.get('compressor').get('type'):
-            metrics.update({
-                "Ids": ids,
-                "Rho Mean": np.mean(rhos_round),
-                "Rho Std": np.std(rhos_round)
-            })
-        # metrics.update(entropy_dict)
+
         return FitRes(
             status=status,
             parameters=parameters,
             num_examples=len(self.train_data_loader),
-            metrics=metrics
+            metrics={}
         )
 
     def evaluate(
@@ -196,9 +177,8 @@ class FedPMClient(flwr.client.Client):
     def train_fedpm(
             self,
             model: nn.Module,
-            trainloader: dataset,
+            trainloader: DataLoader,
             iter_num: int,
-            device: torch.device,
             params: Dict,
             loss_fn=nn.CrossEntropyLoss(reduction='mean'),
             optimizer: torch.optim.Optimizer = None
@@ -206,7 +186,7 @@ class FedPMClient(flwr.client.Client):
         """
             Compute local epochs, the training strategies depends on the adopted model.
         """
-        loss = None
+
         if optimizer is None:
             optimizer = torch.optim.Adam(model.parameters(), lr=params.get('fedpm').get('local_lr'))
 
@@ -215,7 +195,7 @@ class FedPMClient(flwr.client.Client):
             total = 0
             correct = 0
             for batch_idx, (train_x, train_y) in enumerate(trainloader):
-                train_x, train_y = train_x.to(device), train_y.to(device)
+                train_x, train_y = train_x.to(self.device), train_y.to(self.device)
                 total += train_x.size(0)
                 optimizer.zero_grad()
                 y_pred = model(train_x)
@@ -227,25 +207,3 @@ class FedPMClient(flwr.client.Client):
                 optimizer.step()
             # print("Epoch {}: train loss {}  -  Accuracy {}".format(epoch + 1, loss, correct/total))
         return model.state_dict()
-get_client = {
-    'fedpm': FedPMClient
-}
-
-def client_fn(cid) -> flwr.client.Client:
-    trainloader = trainloaders[int(cid)]
-    valloader = valloaders[int(cid)]
-
-    if params.get('compressor').get('compress'):
-        compressor = get_compressor(
-            compressor_type=params.get('compressor').get('type'),
-            params=params,
-            device=DEVICE
-        )
-    return get_client[params.get('simulation').get('strategy')](
-        params=params,
-        client_id=cid,
-        train_data_loader=trainloader,
-        test_data_loader=valloader,
-        device=DEVICE,
-        compressor=compressor
-    )

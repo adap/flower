@@ -4,11 +4,9 @@ Needed only when the strategy is not yet implemented in Flower or because you wa
 extend or modify the functionality of an existing strategy.
 """
 
-import math
-from typing import Dict, List, Optional, Tuple, Union, Callable
+from typing import Dict, List, Optional, Tuple, Union
 import torch
 import numpy as np
-from collections import OrderedDict
 
 import flwr
 from flwr.common import (
@@ -16,8 +14,6 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
-    MetricsAggregationFn,
-    NDArrays,
     Parameters,
     Scalar,
     ndarrays_to_parameters,
@@ -26,10 +22,9 @@ from flwr.common import (
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
-from flwr.common.logger import log
 
-from ..utils.load_model import load_model
-from ..utils.models import get_parameters, set_parameters
+from models import load_model
+from models import get_parameters, set_parameters
 
 from torch.utils.data import DataLoader
 
@@ -99,28 +94,12 @@ class FedPMStrategy(flwr.server.strategy.Strategy):
         )
 
         fit_configurations = []
-        update_ids = None
-        if 'rec' in self.params.get('compressor').get('type'):
-            update_ids = self.update_ids()
+
         for idx, client in enumerate(clients):
             fit_configurations.append(
-                    (client, FitIns(parameters, {'iter_num': server_round,
-                                                 'old_ids': update_ids}))
+                    (client, FitIns(parameters, {'iter_num': server_round}))
                 )
         return fit_configurations
-
-    def update_ids(self):
-        if self.rho_mean is None:
-            return None
-        else:
-            idx_rate = np.log2(256) / self.avg_block_size
-            # if idx_rate <= self.cfg.get('compressor').get('rec').get('kl_rate') - self.avg_kl * self.avg_block_size:
-            if self.rho_mean > 3:
-                print('Update Indices...')
-                return None
-            else:
-                print('Keep Indices...')
-                return self.ids
 
     def aggregate_fit(
             self,
@@ -135,25 +114,6 @@ class FedPMStrategy(flwr.server.strategy.Strategy):
             (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for _, fit_res in results
         ]
-
-        log_metrics = {}
-        for c in results:
-            for k, v in c[1].metrics.items():
-                if 'Ids' not in k:
-                    if log_metrics.get(k) is None:
-                        log_metrics[k] = v
-                    else:
-                        log_metrics[k] += v
-        for k in log_metrics.keys():
-            if 'Ids' not in k:
-                log_metrics[k] /= len(results)
-
-        if 'Rho Mean' in set(log_metrics.keys()):
-            self.rho_mean = log_metrics.get('Rho Mean')
-            self.rho_std = log_metrics.get('Rho Std')
-            self.ids = self.aggregate_ids(results)
-            self.avg_block_size = log_metrics.get('Block Size')
-            self.avg_kl = log_metrics.get('KL Divergence')
 
         sampled_clients = len(weights_results)
         parameters_aggregated = aggregate(weights_results)
@@ -174,31 +134,8 @@ class FedPMStrategy(flwr.server.strategy.Strategy):
                 )
             else:
                 updated_params.append(parameters_aggregated[layer_id])
-        if self.sim_folder:
-            self.wandb_runner.log(log_metrics)
-        return ndarrays_to_parameters(updated_params), {}
 
-    def aggregate_ids(self, results):
-        ids_s = []
-        sizes = []
-        for r in results:
-            ids_s.append(r[1].metrics.get('Ids'))
-            sizes.append(len(r[1].metrics.get('Ids')))
-        new_ids = []
-        for i in range(max(sizes)):
-            l = 0
-            idx = 0
-            for e in ids_s:
-                if len(e) > i:
-                    idx += e[i]
-                    l += 1
-            idx = math.ceil(idx/l)
-            if len(new_ids) > 0:
-                if idx > new_ids[-1]:
-                    new_ids.append(idx)
-            else:
-                new_ids.append(idx)
-        return new_ids
+        return ndarrays_to_parameters(updated_params), {}
 
     def configure_evaluate(
             self,
@@ -247,7 +184,6 @@ class FedPMStrategy(flwr.server.strategy.Strategy):
         correct = 0
         total = 0
         set_parameters(self.global_model, parameters_to_ndarrays(parameters))
-        # self.set_parameters(parameters)
         with torch.no_grad():
             inputs, labels = next(iter(self.global_dataset))
             self.global_model.zero_grad()

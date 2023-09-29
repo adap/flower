@@ -10,12 +10,17 @@ import hydra
 import torch
 import sys
 import os
+import flwr
 from omegaconf import DictConfig, OmegaConf
-sys.path.append(os.getcwd())
+from client import FedPMClient
 
-# DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-cfg = OmegaConf.load('conf/base.yaml')
-a = 5
+from dataset import get_data_loaders
+from strategy import FedPMStrategy
+
+
+get_client = {
+    'fedpm': FedPMClient
+}
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -38,18 +43,57 @@ def main(cfg: DictConfig) -> None:
     # be a location in the file system, a list of dataloader, a list of ids to extract
     # from a dataset, it's up to you)
 
+    trainloaders, valloaders, testloader = get_data_loaders(
+        dataset=cfg.get('dataset').get('name'),
+        nclients=NUM_CLIENTS,
+        batch_size=cfg.get('dataset').get('minibatch_size'),
+        classes_pc=cfg.get('dataset').get('classes_pc'),
+        split=cfg.get('dataset').get('split')
+    )
+
     # 3. Define your clients
     # Define a function that returns another function that will be used during
     # simulation to instantiate each individual client
-    # client_fn = client.<my_function_that_returns_a_function>()
+
+    def client_fn(cid) -> flwr.client.Client:
+        trainloader = trainloaders[int(cid)]
+        valloader = valloaders[int(cid)]
+
+        return get_client[cfg.get('simulation').get('strategy')](
+            params=cfg,
+            client_id=cid,
+            train_data_loader=trainloader,
+            test_data_loader=valloader,
+            device=DEVICE,
+        )
 
     # 4. Define your strategy
     # pass all relevant argument (including the global dataset used after aggregation,
     # if needed by your method.)
-    # strategy = instantiate(cfg.strategy, <additional arguments if desired>)
+    strategy = get_strategy[cfg.get('simulation').get('strategy')](
+        params=cfg,
+        global_data_loader=testloader,
+        fraction_fit=cfg.get('simulation').get('fraction_fit'),
+        fraction_evaluate=cfg.get('simulation').get('fraction_evaluate'),
+        min_fit_clients=0,
+        min_evaluate_clients=0,
+        min_available_clients=0,
+    )
 
     # 5. Start Simulation
-    # history = fl.simulation.start_simulation(<arguments for simulation>)
+    history = flwr.simulation.start_simulation(
+        client_fn=client_fn,
+        num_clients=NUM_CLIENTS,
+        config=flwr.server.ServerConfig(num_rounds=cfg.get('simulation').get('n_rounds')),
+        strategy=strategy,
+        ray_init_args={
+            "ignore_reinit_error": cfg.get('ray_init_args').get('ignore_reinit_error'),
+            "include_dashboard": cfg.get('ray_init_args').get('include_dashboard'),
+            "num_cpus": cfg.get('ray_init_args').get('num_cpus'),
+            "num_gpus": cfg.get('ray_init_args').get('num_gpus'),
+            "local_mode": cfg.get('ray_init_args').get('local_mode')
+        }
+    )
 
     # 6. Save your results
     # Here you can save the `history` returned by the simulation and include
@@ -60,3 +104,18 @@ def main(cfg: DictConfig) -> None:
     # Hydra will generate for you a directory each time you run the code. You
     # can retrieve the path to that directory with this:
     # save_path = HydraConfig.get().runtime.output_dir
+
+
+sys.path.append(os.getcwd())
+
+
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+cfg = OmegaConf.load('conf/base.yaml')
+NUM_CLIENTS = cfg.get('simulation').get('n_clients')
+
+get_strategy = {
+    'fedpm': FedPMStrategy
+}
+
+main()
+

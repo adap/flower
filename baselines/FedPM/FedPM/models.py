@@ -7,13 +7,63 @@ the python code at all
 """
 
 import torch.nn as nn
-from .utils import Bern
 import torch.nn.functional as F
 import torch
 import numpy as np
+from collections import OrderedDict
+
+from resnet import resnet20
 
 activation_dict = {'relu': F.relu,
                    'sigmoid': F.sigmoid}
+
+
+class Bern(torch.autograd.Function):
+    """
+    Custom Bernouli function that supports gradients.
+    The original Pytorch implementation of Bernouli function,
+    does not support gradients.
+
+    First-Order gradient of bernouli function with prbabilty p, is p.
+
+    Inputs: Tensor of arbitrary shapes with bounded values in [0,1] interval
+    Outputs: Randomly generated Tensor of only {0,1}, given Inputs as distributions.
+    """
+    @staticmethod
+    def forward(ctx, input):
+        ctx.save_for_backward(input)
+        return torch.bernoulli(input)
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        pvals = ctx.saved_tensors
+        return pvals[0] * grad_output
+
+
+def sigmoid(x):
+    return 1/(1 + np.exp(-x))
+
+
+def load_model(params):
+
+    if params.get('model').get('name') == 'LeNet':
+        return LeNet5()
+    elif params.get('model').get('name') == 'ResNet':
+        return resnet20(params)
+    elif params.get('model').get('name') == 'Conv8':
+        if params.get('model').get('mode') == 'mask':
+            return Mask8CNN()
+    elif params.get('model').get('name') == 'Conv6':
+        if params.get('model').get('mode') == 'mask':
+            return Mask6CNN()
+        elif params.get('model').get('mode') == 'dense':
+            return Dense6CNN()
+    elif params.get('model').get('name') == 'Conv4':
+        if params.get('model').get('mode') == 'mask':
+            return Mask4CNN()
+        elif params.get('model').get('mode') == 'dense':
+            return Dense4CNN()
+
 
 class Dense4CNN(nn.Module):
     expansion = 1
@@ -109,8 +159,6 @@ class Dense10CNN(nn.Module):
         x = F.relu(self.dense2(x))
         x = self.dense3(x)
         return x
-
-import torch.nn as nn
 
 
 class LeNet5(nn.Module):
@@ -439,3 +487,12 @@ class Mask8CNN(nn.Module):
         return [self.conv1, self.conv2, self.conv3, self.conv4, self.conv5, self.conv6,
                 self.dense1, self.dense2, self.dense3]
 
+
+def get_parameters(model):
+    return [val.cpu().numpy() for _, val in model.state_dict().items()]
+
+
+def set_parameters(model, parameters):
+    params_dict = zip(model.state_dict().keys(), parameters)
+    state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+    model.load_state_dict(state_dict, strict=True)

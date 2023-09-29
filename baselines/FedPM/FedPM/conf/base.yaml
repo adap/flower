@@ -22,7 +22,7 @@ strategy:
     local_epochs: 3
     local_lr: 0.1
 
-  fedavg: # When compress==False
+  fedavg:
     local_lr: 0.0003
     server_lr: 0.1
 
@@ -38,14 +38,17 @@ client:
   local_lr: 0.1
 
 simulation:
-  tot_sims: 1
   fraction_fit: 1.0
   fraction_evaluate: 0
   n_clients: 10
-  n_rounds: 400
+  n_rounds: 200
   verbose: 0
   store_output: True
   strategy: 'fedpm' # [fedpm, dense]
 
-path:
-  path: 'params.yaml'
+ray_init_args:
+  ignore_reinit_error: True
+  include_dashboard: True
+  num_cpus: 6
+  num_gpus: 1
+  local_mode: False
