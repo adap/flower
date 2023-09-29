@@ -108,12 +108,12 @@ class FlowerClientScaffold(
 def gen_client_fn(
     trainloaders: List[DataLoader],
     valloaders: List[DataLoader],
+    client_cv_dir: str,
     num_epochs: int,
     learning_rate: float,
     model: DictConfig,
     momentum: float=0.9,
     weight_decay: float=0.0,
-    client_cv_dir: str="",
 ) -> Tuple[
     Callable[[str], FlowerClientScaffold], DataLoader
 ]:  # pylint: disable=too-many-arguments
@@ -127,6 +127,8 @@ def gen_client_fn(
     valloaders: List[DataLoader]
         A list of DataLoaders, each pointing to the dataset validation partition
         belonging to a particular client.
+    client_cv_dir : str
+        The directory where the client control variates are stored (persistent storage)
     num_epochs : int
         The number of local epochs each client should run the training for before
         sending it to the server.
@@ -136,8 +138,6 @@ def gen_client_fn(
         The momentum for SGD optimizer of clients
     weight_decay : float
         The weight decay for SGD optimizer of clients
-    client_cv_dir : str
-        The directory where the client control variates are stored (persistent storage)
 
     Returns
     -------

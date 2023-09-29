@@ -1,15 +1,27 @@
+"""Create and connect the building blocks for your experiments; start the simulation.
+
+It includes processioning the dataset, instantiate strategy, specify how the global
+model is going to be evaluated, etc. At the end, this script saves the results.
+"""
+# these are the basic packages you'll need here
+# feel free to remove some if aren't needed
 import flwr as fl
 import hydra
-from hydra.utils import instantiate
+from hydra.utils import instantiate, call
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
 from niid_bench.dataset import load_datasets
-from niid_bench.client_scaffold import gen_client_fn
-import niid_bench.server_scaffold as server
+from niid_bench.server_scaffold import gen_evaluate_fn
+from niid_bench.strategy_fednova import FedNovaStrategy
+from niid_bench.strategy_scaffold import ScaffoldStrategy
+from flwr.server.client_manager import SimpleClientManager
+from flwr.server.server import Server
+from niid_bench.server_scaffold import ScaffoldServer
+from niid_bench.server_fednova import FedNovaServer
 import os
 
-@hydra.main(config_path="conf", config_name="scaffold_base", version_base=None)
+@hydra.main(config_path="conf", config_name="fedavg_base", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.
 
@@ -35,29 +47,31 @@ def main(cfg: DictConfig) -> None:
         config=cfg.dataset,
         num_clients=cfg.num_clients,
         val_ratio=cfg.dataset.val_split,
-        seed=cfg.dataset.seed,
     )
 
-    save_path = HydraConfig.get().runtime.output_dir
-    print("Outputs and Client cvs for scaffold saved to: ",  save_path)
-
-    client_cv_dir = os.path.join(save_path, "client_cvs")
     # 3. Define your clients
     # Define a function that returns another function that will be used during
     # simulation to instantiate each individual client
-    client_fn = gen_client_fn(
-        trainloaders,
-        valloaders,
-        client_cv_dir=client_cv_dir,
-        num_epochs=cfg.num_epochs,
-        learning_rate=cfg.learning_rate,
-        model=cfg.model,
-        momentum=cfg.momentum,
-        weight_decay=cfg.weight_decay,
-    )
+    client_fn = None
+    if cfg.client_fn._target_ == "niid_bench.client_scaffold.gen_client_fn":
+        save_path = HydraConfig.get().runtime.output_dir
+        client_cv_dir = os.path.join(save_path, "client_cvs")
+        print("Local cvs for scaffold clients are saved to: ",  client_cv_dir)
+        client_fn = call(cfg.client_fn,
+            trainloaders,
+            valloaders,
+            model=cfg.model,
+            client_cv_dir=client_cv_dir,
+        )
+    else:
+        client_fn = call(cfg.client_fn, 
+            trainloaders,
+            valloaders,
+            model=cfg.model,
+        )
 
     device = cfg.server_device
-    evaluate_fn = server.gen_evaluate_fn(testloader, device=device, model=cfg.model)
+    evaluate_fn = gen_evaluate_fn(testloader, device=device, model=cfg.model)
 
     # 4. Define your strategy
     # pass all relevant argument (including the global dataset used after aggregation,
@@ -68,10 +82,17 @@ def main(cfg: DictConfig) -> None:
         evaluate_fn=evaluate_fn,
     )
 
-    # 5. Start Simulation
+    # 5. Define your server
+    server = Server(strategy=strategy, client_manager=SimpleClientManager())
+    if isinstance(strategy,FedNovaStrategy):
+        server = FedNovaServer(strategy=strategy, client_manager=SimpleClientManager())
+    elif isinstance(strategy,ScaffoldStrategy):
+        server = ScaffoldServer(strategy=strategy, model=cfg.model, client_manager=SimpleClientManager())
+
+    # 6. Start Simulation
     # history = fl.simulation.start_simulation(<arguments for simulation>)
     history = fl.simulation.start_simulation(
-        server=server.ScaffoldServer(strategy=strategy, model=cfg.model),
+        server=server,
         client_fn=client_fn,
         num_clients=cfg.num_clients,
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
@@ -83,10 +104,11 @@ def main(cfg: DictConfig) -> None:
     )
 
     print(history)
-    print("Outputs and Client cvs for scaffold saved to: ",  save_path)
-    
 
-    # 6. Save your results
+    save_path = HydraConfig.get().runtime.output_dir
+    print(save_path)
+
+    # 7. Save your results
     # Here you can save the `history` returned by the simulation and include
     # also other buffers, statistics, info needed to be saved in order to later
     # on generate the plots you provide in the README.md. You can for instance
