@@ -48,16 +48,10 @@ This baseline only includes 7 datasets with a focus on 4 of them (a9a, cod-rna, 
 
 Each dataset can be partitioned across 2, 5 or 10 clients in an IID distribution.
 
-| Dataset | task type | no.of features | no.of samples | 
+| task type  | Dataset | no.of features | no.of samples | 
 | :---: | :---: | :---: | :---: |
-| a9a | Binary classification | 123 | 32,561 |
-| cod-rna | Binary classification | 8 | 59,5358 |
-| ijcnn1 | Binary classification | 22 | 49,990 |
-| abalone | regression | 8 | 4,177 |
-| a9a | regression | 123 | 32,561 |
-| cpusmall | regression | 12 | 8,192 |
-| space_ga | regression | 6 | 3,167 |
-| YearPredictionMSD | regression | 90 | 515,345 |
+| Binary classification | a9a<br>cod-rna<br>ijcnn1  | 123<br>8<br>22 | 32,561<br>59,5358<br>49,990 |
+| Regression | abalone<br>a9a<br>cpusmall<br>space_ga<br>YearPredictionMSD | 8<br>123<br>12<br>6<br>90 | 4,177<br>32,561<br>8,192<br>3,167<br>515,345 |
 
 
 ****Training Hyperparameters:**** 
