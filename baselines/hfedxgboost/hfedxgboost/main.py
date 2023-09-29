@@ -44,7 +44,7 @@ def main(cfg: DictConfig) -> None:
     if cfg.centralized:
         if cfg.dataset.dataset_name == "all":
             run_centralized(cfg, dataset_name=cfg.dataset.dataset_name)
-        if cfg.dataset.dataset_name != "all":
+        else:
             result_train, result_test = run_centralized(
                 cfg, dataset_name=cfg.dataset.dataset_name
             )
