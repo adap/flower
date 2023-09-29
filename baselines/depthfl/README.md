@@ -1,8 +1,8 @@
 ---
 title: DepthFL:Depthwise Federated Learning for Heterogeneous Clients
 url: https://openreview.net/forum?id=pf8RIZTMU58
-labels: [image classification, system heterogeneity] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [CIFAR100] # list of datasets you include in your baseline
+labels: [image classification, system heterogeneity, cross-device]
+dataset: [CIFAR100]
 ---
 
 # DepthFL: Depthwise Federated Learning for Heterogeneous Clients
