@@ -22,7 +22,6 @@ fl.simulation.start_simulation(
     client_fn=client_fn,
     num_clients=PARAMS.num_clients,
     # client_resources={"num_cpus": 10, "num_gpus":1},
-    # client_resources={"num_gpus":1},
     config=fl.server.ServerConfig(num_rounds=PARAMS.num_rounds),
     strategy=strategy,
 )
