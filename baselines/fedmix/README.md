@@ -7,7 +7,7 @@ dataset: ["cifar10", "femnist"]
 
 # FedMix: Approximation of Mixup under Mean Augmented Federated Learning
 
-****Paper:**** https://arxiv.org/abs/2107.00233
+****Paper:**** [arxiv.org/abs/2107.00233](https://arxiv.org/abs/2107.00233)
 
 ****Authors:**** Tehrim Yoon, Sumin Shin, Sung Ju Hwang, Eunho Yang
 

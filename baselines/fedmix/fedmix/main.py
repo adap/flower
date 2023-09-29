@@ -17,8 +17,7 @@ def main(cfg):
 
     seed = cfg.seed
     server_device = cfg.server_device
-    num_cpus = cfg.client_resources.num_cpus
-    num_gpus = cfg.client_resources.num_gpus
+    client_resources = cfg.client_resources
     num_clients = cfg.num_clients
     num_rounds = cfg.num_rounds
 
@@ -42,7 +41,7 @@ def main(cfg):
         client_fn=client_fn,
         num_clients=num_clients,
         config=fl.server.ServerConfig(num_rounds=num_rounds),
-        client_resources={"num_cpus": num_cpus, "num_gpus": num_gpus},
+        client_resources=client_resources,
         strategy=strategy,
     )
 
