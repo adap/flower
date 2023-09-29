@@ -2,9 +2,29 @@
 
 This example demonstrate how to implement federated learning for training
 diffusion models using `Flower` and `Diffusers`. The example can be run on CPU
-but it will be very slow, it is recommended to run it on a CUDA GPU (note that
-by default, it will still run on CPU, you need to modify `config.py` in order
-to set the device to `cuda`).
+but it will be very slow, it is recommended to run it on a CUDA GPU.
+
+## Project Setup
+
+Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+
+```shell
+git clone --depth=1 https://github.com/adap/flower.git _tmp && mv _tmp/examples/federated-diffusion . && rm -rf _tmp && cd federated-diffusion
+```
+
+This will create a new directory called `federated-diffusion` containing the following files:
+
+```shell
+-- pyproject.toml
+-- requirements.txt
+-- client.py
+-- config.py
+-- data.py
+-- main.py
+-- strategy.py
+-- utils.py
+-- README.md
+```
 
 ## Dependencies
 
@@ -30,7 +50,29 @@ This example requires the following dependencies:
 
 Which can be installed using `poetry install` if you are using `poetry` or `pip install -r requirements.txt`.
 
-## Centralized Diffusion model
+## Usage
+
+In order to run the training, you can just run (with the dependencies installed):
+
+```bash
+python main.py
+```
+
+Or, if you are using `poetry`:
+
+```bash
+poetry run python main.py
+```
+
+You can change the default parameters by modifing the values in `conf.py`.
+
+## Experiment tracking
+
+This example using Weights and Biases in order to track the progress of the experiment, when you first run it,
+it will prompt you for your account's API key. Then, on the web interface, you should be able to see a few tracked
+metrics, as well as the images that are generated each round.
+
+## Centralized Diffusion model tutorial
 
 First, we will consider the centralized setting for training a diffusion model.
 
@@ -863,26 +905,4 @@ fl.simulation.start_simulation(
 )
 ```
 
-We commented out the `client_resources` parameters as it will depend on each person's setup.
-
-## Usage
-
-In order to run the training, you can just run (with the dependencies installed):
-
-```bash
-python main.py
-```
-
-Or, if you are using `poetry`:
-
-```bash
-poetry run python main.py
-```
-
-You can change the default parameters by modifing the values in `conf.py`.
-
-## Experiment tracking
-
-This example using Weights and Biases in order to track the progress of the experiment, when you first run it,
-it will prompt you for your account's API key. Then, on the web interface, you should be able to see a few tracked
-metrics, as well as the images that are generated each round.
+We commented out the `client_resources` parameters as it will depend on each person's setup. Read more about how to set these up in the [Documentation](https://flower.dev/docs/framework/how-to-run-simulations.html#virtualclientengine-resources).

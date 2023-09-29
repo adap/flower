@@ -10,12 +10,12 @@ authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
-flwr = ">=1.0,<2.0"
+flwr = { extras= ["simulation"], version = ">=1.0,<2.0"]}
 torch = "1.13.1"
 torchvision = "0.14.1"
 tqdm = "4.65.0"
 accelerate = "0.23.0"
 diffusers = "0.21.2"
 wandb = "0.15.11"
-numpy = "1.26.0"
-matplotlib = "3.8.0"
+numpy = "1.24.0"
+matplotlib = "3.7.0"

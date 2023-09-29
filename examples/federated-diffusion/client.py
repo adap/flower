@@ -9,12 +9,7 @@ from data import load_datasets
 
 import flwr as fl
 
-DEVICE = torch.device(PARAMS.device)  # Try "cuda" to train on GPU
-print(
-    f"Training on {DEVICE} using PyTorch {torch.__version__} and Flower {fl.__version__}"
-)
 TRAINLOADERS = load_datasets(PARAMS.iid)
-
 
 def get_parameters(net):
     return [val.cpu().numpy() for _, val in net.state_dict().items()]
@@ -125,8 +120,10 @@ def client_fn(cid):
     timesteps = PARAMS.num_inference_steps  # diffusion model decay steps
     epochs = PARAMS.num_epochs  # training epochs
 
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
     # Load model
-    model = get_model().to(DEVICE)
+    model = get_model().to(device)
     personalization_layers = 4
 
     # Load data (CIFAR-10)
@@ -141,6 +138,6 @@ def client_fn(cid):
         cid,
         timesteps,
         epochs,
-        PARAMS.device,
+        device,
         personalization_layers,
     )
