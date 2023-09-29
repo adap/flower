@@ -203,12 +203,11 @@ Summarizing all the results:
 
 ```bash
 python -m fedavgm.main --multirun client.local_epochs=1 \
-noniid.concentration=0.01,0.1,1,10 strategy=custom-fedavgm,fedavg \
+noniid.concentration=0.001,0.01,0.1,1,10,100 strategy=custom-fedavgm,fedavg \
 server.reporting_fraction=0.05 num_rounds=1000 \
 num_clients=100 dataset=fmnist server.momentum=0.97 client.lr=0.003
 ```
-
-The above command will evaluate the custom FedAvgM versus FedAvg on Fashion-MNIST datasets. It uses 100 clients with a reporting fraction of 5% during 1000 rounds. To evaluate the non-iid aspects, this exececution exercises concentration of [10, 1, 0.1, 0.01].
+The above command will evaluate the custom FedAvgM versus FedAvg on Fashion-MNIST datasets. It uses 100 clients with a reporting fraction of 5% during 1000 rounds. To evaluate the non-iid aspects, this exececution exercises concentration of [100, 10, 1, 0.1, 0.01, 0.001]:
 
 **PLOT TO BE UPDATED**
 
