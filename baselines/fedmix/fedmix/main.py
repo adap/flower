@@ -10,13 +10,13 @@ from fedmix.dataset import load_datasets
 from fedmix.utils import save_results_as_pickle
 
 
-@hydra.main(config_path="conf", config_name="cifar10", version_base=None)
+@hydra.main(config_path="conf", config_name="config", version_base=None)
 def main(cfg):
     """..."""
     print(OmegaConf.to_yaml(cfg))
 
     seed = cfg.seed
-    device = cfg.device
+    server_device = cfg.server_device
     num_cpus = cfg.client_resources.num_cpus
     num_gpus = cfg.client_resources.num_gpus
     num_clients = cfg.num_clients
@@ -32,7 +32,7 @@ def main(cfg):
     )
 
     client_fn = client.gen_client_fn(client_config, trainloaders, model_config)
-    evaluate_fn = server.gen_evaluate_fn(testloader, device, model_config)
+    evaluate_fn = server.gen_evaluate_fn(testloader, server_device, model_config)
 
     strategy = instantiate(
         strategy_config, mashed_data=mashed_data, evaluate_fn=evaluate_fn

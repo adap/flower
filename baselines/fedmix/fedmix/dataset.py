@@ -6,8 +6,10 @@ from torch.utils.data import DataLoader
 from fedmix.dataset_preparation import (
     _download_cifar10,
     _download_cifar100,
+    _download_femnist,
     _mash_data,
-    _partition_trainset,
+    _partition_cifar,
+    _partition_femnist
 )
 
 
@@ -24,12 +26,18 @@ def load_datasets(config, num_clients, seed):
     elif dataset_name == "cifar100":
         trainset, testset = _download_cifar100()
         num_classes = 100
+    elif dataset_name == 'femnist':
+        _download_femnist(num_clients)
+        num_classes = 62
     else:
-        raise Exception('dataset_name must be one of ["cifar10", "cifar100"]')
+        raise Exception('dataset_name must be one of ["cifar10", "cifar100", "femnist"]')
 
-    client_datasets = _partition_trainset(
-        trainset, num_classes, num_clients, config.num_classes_per_client, seed
-    )
+    if dataset_name in ['cifar10', 'cifar100']:
+        client_datasets = _partition_cifar(
+            trainset, num_classes, num_clients, config.num_classes_per_client, seed)
+    else:
+        client_datasets, testset = _partition_femnist()
+        client_datasets = client_datasets[:num_clients]
 
     mashed_data = _mash_data(client_datasets, config.mash_batch_size, num_classes)
 

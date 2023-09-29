@@ -227,15 +227,15 @@ class FedMixClient(NumPyClient):
 
 def gen_client_fn(config, trainloaders, model):
     """..."""
-
     def client_fn(cid):
         """..."""
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        device = torch.device('cuda' if torch.cuda.is_available() else "cpu")
         net = instantiate(model).to(device)
         trainloader = trainloaders[int(cid)]
 
-        return FedMixClient(
-            net, trainloader, device, config.num_local_epochs, config.lr
-        )
+        client = instantiate(
+            config, net=net, trainloader=trainloader, device=device)
+
+        return client
 
     return client_fn
