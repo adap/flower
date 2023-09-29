@@ -1,5 +1,5 @@
 n_estimators_client: 250
-num_rounds: 20
+num_rounds: 200
 client_num: 2
 num_iterations: 100
 
