@@ -94,8 +94,8 @@ python -m depthfl.main fit_config.feddyn=false fit_config.kd=false fit_config.ex
 To run using HeteroFL:
 ```bash
 # since sbn takes too long, we test global model every 50 rounds. 
-python -m fedprox.main --config-name="heterofl" # HeteroFL
-python -m fedprox.main --config-name="heterofl" exclusive_learning=true model_size=1 # exclusive learning - 100% (a)
+python -m depthfl.main --config-name="heterofl" # HeteroFL
+python -m depthfl.main --config-name="heterofl" exclusive_learning=true model_size=1 # exclusive learning - 100% (a)
 ```
 
 ### Stateful clients comment
