@@ -25,6 +25,9 @@ XGBoost:
   num_parallel_tree: 1
   min_child_weight: 1
 
+client_resources:
+    num_cpus: 1
+    num_gpus: 0.0
 
 strategy:
   _target_: flwr.server.strategy.FedXgbNnAvg 
