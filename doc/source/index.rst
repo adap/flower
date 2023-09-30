@@ -61,17 +61,12 @@ A learning-oriented series of federated learning tutorials, the best place to st
 
 QUICKSTART TUTORIALS: :doc:`PyTorch <tutorial-quickstart-pytorch>` | :doc:`TensorFlow <tutorial-quickstart-tensorflow>` | :doc:`🤗 Transformers <tutorial-quickstart-huggingface>` | :doc:`JAX <tutorial-quickstart-jax>` | :doc:`Pandas <tutorial-quickstart-pandas>` | :doc:`fastai <tutorial-quickstart-fastai>` | :doc:`PyTorch Lightning <tutorial-quickstart-pytorch-lightning>` | :doc:`MXNet <tutorial-quickstart-mxnet>` | :doc:`scikit-learn <tutorial-quickstart-scikitlearn>` | :doc:`XGBoost <tutorial-quickstart-xgboost>` | :doc:`Android <tutorial-quickstart-android>` | :doc:`iOS <tutorial-quickstart-ios>`
 
-.. grid:: 2
 
-  .. grid-item-card::  PyTorch
+..  youtube:: jOmmuzMIQ4c
+   :width: 100%
 
-    ..  youtube:: jOmmuzMIQ4c
-       :width: 100%
-
-  .. grid-item-card::  TensorFlow
-
-    ..  youtube:: FGTc2TQq7VM
-       :width: 100%
+..  youtube:: FGTc2TQq7VM
+   :width: 100%
 
 How-to guides
 ~~~~~~~~~~~~~
