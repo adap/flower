@@ -142,17 +142,7 @@ python -m fedavgm.main server.reporting_fraction=0.2 client.local_epochs=5 # wil
 ```
 
 ## Expected Results
-```bash
-python -m fedavgm.main --multirun client.local_epochs=1 noniid.concentration=1 \
-strategy=custom-fedavgm server.reporting_fraction=0.05 num_rounds=100 num_clients=100 \
-dataset=cifar10 client.lr=0.0001,0.0003,0.001,0.003,0.01,0.03,0.1,0.3 \
-server.momentum=0.7,0.9,0.97,0.99,0.997
-```
-The above command reproduces the same behavior of Figure 6 from FedAvgM paper for the case of Local Epoch E=1, Reporting Fraction C=0.05, and concentration (α) = 1. In this example, it runs just 1.000 rounds:
 
-![](_static/Figure6_cifar10_num-rounds=1000_concentration=1.png)
-
----
 ### CIFAR-10
 Similar to FedAvgM paper as reference, the CIFAR-10 evaluation runs 10.000 rounds.
 
@@ -197,6 +187,18 @@ dataset=cifar10 client.lr=0.003 server.momentum=0.9
 Summarizing all the results:
 
 **PLOT TO BE HERE**
+
+The following command reproduces the same behavior of Figure 6 from FedAvgM paper for the case of Local Epoch E=1, Reporting Fraction C=0.05, and concentration (α) = 1. In this example, it runs just 1.000 rounds:
+
+```bash
+python -m fedavgm.main --multirun client.local_epochs=1 noniid.concentration=1 \
+strategy=custom-fedavgm server.reporting_fraction=0.05 num_rounds=100 num_clients=100 \
+dataset=cifar10 client.lr=0.0001,0.0003,0.001,0.003,0.01,0.03,0.1,0.3 \
+server.momentum=0.7,0.9,0.97,0.99,0.997
+```
+
+![](_static/Figure6_cifar10_num-rounds=1000_concentration=1.png)
+
 
 ---
 ### Fashion-MNIST
