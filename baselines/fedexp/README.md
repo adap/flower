@@ -55,7 +55,7 @@ The following tables shows the main hyperparameters for this baseline with their
 | number of rounds            | 500                                 |
 | number of local rounds      | 20                                  |
 | batch_size                  | 50                                  |
-| client resources            | {'num_cpus': 2.0, 'num_gpus': 0.2 } |
+| client resources            | {'num_cpus': 2.0, 'num_gpus': 0.1 } |
 | eta_l (local learning rate) | 0.01                                |
 | epsilon                     | 0.001                               |
 | decay                       | 0.998                               |
@@ -67,7 +67,7 @@ Choice of alpha parameter for the Dirichlet distribution used to create heteroge
 
 | Description | Default Value |
 |-------------|---------------|
-| alpha       | 0.5           |
+| alpha       | 0.3           |
 
 ## Environment Setup
 
