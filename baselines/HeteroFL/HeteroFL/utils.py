@@ -1,17 +1,14 @@
-"""Define any utility function.
+from pathlib import Path
 
-They are not directly relevant to  the other (more FL specific) python modules. For
-example, you may define here things like: loading a model from a checkpoint, saving
-results, plotting.
-"""
 import numpy as np
 import torch
+from hydra.core.hydra_config import HydraConfig
 
 
 def preprocess_input(cfg_model, cfg_data):
     model_config = {}
     # if cfg_model.model_name == "conv":
-    #     model_config["model_name"] = 
+    #     model_config["model_name"] =
     # elif for others...
     model_config["model"] = cfg_model.model_name
     if cfg_data.dataset_name == "MNIST":
@@ -26,19 +23,24 @@ def preprocess_input(cfg_model, cfg_data):
 
     return model_config
 
-def make_optimizer(optimizer_name, parameters, lr, weight_decay, momentum):
-    if optimizer_name == 'SGD':
-        return torch.optim.SGD(parameters, lr = lr, momentum = momentum, weight_decay=weight_decay)
 
-def make_scheduler(scheduler_name, optimizer , milestones):
-    if scheduler_name == 'MultiStepLR':
-        return torch.optim.lr_scheduler.MultiStepLR(optimizer , milestones=milestones)
+def make_optimizer(optimizer_name, parameters, lr, weight_decay, momentum):
+    if optimizer_name == "SGD":
+        return torch.optim.SGD(
+            parameters, lr=lr, momentum=momentum, weight_decay=weight_decay
+        )
+
+
+def make_scheduler(scheduler_name, optimizer, milestones):
+    if scheduler_name == "MultiStepLR":
+        return torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=milestones)
 
 
 def get_global_model_rate(model_mode):
     model_mode = "" + model_mode
     model_mode = model_mode.split("-")[0][0]
     return model_mode
+
 
 class Model_rate_manager:
     def __init__(self, model_split_mode, model_split_rate, model_mode):
@@ -95,3 +97,10 @@ class Model_rate_manager:
 
         else:
             return None
+
+
+def save_model(model, path):
+    # print('in save model')
+    current_path = HydraConfig.get().runtime.output_dir
+    model_save_path = Path(current_path) / path
+    torch.save(model.state_dict(), model_save_path)

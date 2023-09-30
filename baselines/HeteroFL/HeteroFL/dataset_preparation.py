@@ -1,3 +1,5 @@
+"""Functions for dataset download and processing."""
+
 from typing import List, Optional, Tuple
 
 import numpy as np
@@ -34,7 +36,7 @@ from torchvision.datasets import CIFAR10, MNIST
 #     download_and_preprocess()
 
 
-def _download_data(dataset_name) -> Tuple[Dataset, Dataset]:
+def _download_data(dataset_name: str) -> Tuple[Dataset, Dataset]:
     if dataset_name == "MNIST":
         transform = transforms.Compose(
             [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
@@ -61,13 +63,13 @@ def _download_data(dataset_name) -> Tuple[Dataset, Dataset]:
 
 
 def _partition_data(
-    num_clients,
-    dataset_name,
+    num_clients: int,
+    dataset_name: str,
     iid: Optional[bool] = False,
-    shard_per_user=2,  # only in case of non-iid
+    shard_per_user: Optional[int] = 2,  # only in case of non-iid
     balance: Optional[bool] = False,
     seed: Optional[int] = 42,
-) -> Tuple[List[Dataset], Dataset]:
+) -> Tuple[Dataset, List[Dataset], List[torch.tensor], List[Dataset], Dataset]:
     trainset, testset = _download_data(dataset_name)
 
     if dataset_name == "MNIST" or dataset_name == "CIFAR10":
@@ -97,7 +99,9 @@ def _partition_data(
     return trainset, datasets, label_split, client_testsets, testset
 
 
-def iid_partition(dataset, num_clients, seed=42) -> Tuple[List, List]:
+def iid_partition(
+    dataset: Dataset, num_clients: int, seed: Optional[int] = 42
+) -> Tuple[List[Dataset], List[torch.tensor]]:
     partition_size = int(len(dataset) / num_clients)
     lengths = [partition_size] * num_clients
 
@@ -114,8 +118,13 @@ def iid_partition(dataset, num_clients, seed=42) -> Tuple[List, List]:
 
 
 def non_iid(
-    dataset, num_clients, shard_per_user, classes_size, label_split=None, seed=42
-) -> Tuple[List, List]:
+    dataset: Dataset,
+    num_clients: int,
+    shard_per_user: int,
+    classes_size: int,
+    label_split: List = None,
+    seed=42,
+) -> Tuple[List[Dataset], List]:
     label = np.array(dataset.targets)
     data_split = {i: [] for i in range(num_clients)}
     label_idx_split = {}
@@ -146,7 +155,9 @@ def non_iid(
     if label_split is None:
         label_split = list(range(classes_size)) * shard_per_class
         label_split = torch.tensor(label_split)[
-            torch.randperm(len(label_split))
+            torch.randperm(
+                len(label_split), generator=torch.Generator().manual_seed(seed)
+            )
         ].tolist()
         label_split = np.array(label_split).reshape((num_clients, -1)).tolist()
 
@@ -156,14 +167,16 @@ def non_iid(
     for i in range(num_clients):
         for label_i in label_split[i]:
             idx = torch.arange(len(label_idx_split[label_i]))[
-                torch.randperm(len(label_idx_split[label_i]))[0]
+                torch.randperm(
+                    len(label_idx_split[label_i]),
+                    generator=torch.Generator().manual_seed(seed),
+                )[0]
             ].item()
             data_split[i].extend(label_idx_split[label_i].pop(idx))
 
     divided_dataset = [None for i in range(num_clients)]
     for i in range(num_clients):
         divided_dataset[i] = Subset(dataset, data_split[i])
-
 
     return divided_dataset, label_split
 
@@ -257,7 +270,8 @@ def _power_law_split(
         (num_classes, int(num_partitions / num_classes), num_labels_per_partition),
     )
     remaining_per_class = class_counts - hist
-    # obtain how many samples each partition should be assigned for each of the labels it contains
+    # obtain how many samples each partition should be assigned
+    # for each of the labels it contains
     probs = (
         remaining_per_class.reshape(-1, 1, 1)
         * probs

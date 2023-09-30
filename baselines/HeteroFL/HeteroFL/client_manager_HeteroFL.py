@@ -1,14 +1,16 @@
+"""HeteroFL ClientManager."""
+
 import random
 import threading
 from logging import INFO
 from typing import Dict, List, Optional
 
 import flwr as fl
+import torch
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.criterion import Criterion
 from utils import Model_rate_manager
-import torch
 
 
 class client_manager_HeteroFL(fl.server.ClientManager):
@@ -17,20 +19,20 @@ class client_manager_HeteroFL(fl.server.ClientManager):
     def __init__(
         self,
         model_rate_manager: Model_rate_manager = None,
-        clients_to_model_rate_mapping=None,
-        client_label_split=None,
+        clients_to_model_rate_mapping: List[float] = None,
+        client_label_split: torch.tensor = None,
         seed=42,
     ) -> None:
         self.clients: Dict[str, ClientProxy] = {}
 
         self.is_simulation = False
-        if model_rate_manager != None:
+        if model_rate_manager is not None:
             self.is_simulation = True
 
         self.model_rate_manager = model_rate_manager
 
         # have a common array in simulation to access in the client_fn and server side
-        if clients_to_model_rate_mapping != None:
+        if clients_to_model_rate_mapping is not None:
             self.clients_to_model_rate_mapping = clients_to_model_rate_mapping
             ans = self.model_rate_manager.create_model_rate_mapping(
                 len(clients_to_model_rate_mapping)
@@ -48,6 +50,13 @@ class client_manager_HeteroFL(fl.server.ClientManager):
         self._cv = threading.Condition()
 
     def __len__(self) -> int:
+        """Return the length of clients Dict.
+
+        Returns
+        -------
+        len : int
+            Length of Dict (self.clients).
+        """
         return len(self.clients)
 
     def num_available(self) -> int:
@@ -100,8 +109,7 @@ class client_manager_HeteroFL(fl.server.ClientManager):
 
         self.clients[client.cid] = client
 
-        # shall look into this, as this might not work as intended
-        if self.is_simulation == False:
+        if self.is_simulation is False:
             prop = client.get_properties(None, timeout=86400)
             self.clients_to_model_rate_mapping[int(client.cid)] = prop["model_rate"]
             self.client_label_split[int(client.cid)] = prop["label_split"]
@@ -133,18 +141,19 @@ class client_manager_HeteroFL(fl.server.ClientManager):
         return self.clients
 
     def get_client_to_model_mapping(self, cid) -> float:
-        """Return all available clients to model rate mapping."""
+        """Return model rate of client with cid."""
         return self.clients_to_model_rate_mapping[int(cid)]
 
-    def get_all_clients_to_model_mapping(self):
+    def get_all_clients_to_model_mapping(self) -> List[float]:
         """Return all available clients to model rate mapping."""
         return self.clients_to_model_rate_mapping.copy()
 
-    def update(self, server_round):
-        if self.is_simulation == True:
-            if (server_round == 1 and self.model_rate_manager.model_split_mode == "fix") or (
-                self.model_rate_manager.model_split_mode == "dynamic"
-            ):
+    def update(self, server_round) -> None:
+        """Update the client to model rate mapping."""
+        if self.is_simulation is True:
+            if (
+                server_round == 1 and self.model_rate_manager.model_split_mode == "fix"
+            ) or (self.model_rate_manager.model_split_mode == "dynamic"):
                 ans = self.model_rate_manager.create_model_rate_mapping(
                     self.num_available()
                 )
@@ -153,10 +162,13 @@ class client_manager_HeteroFL(fl.server.ClientManager):
                     self.clients_to_model_rate_mapping[i] = ans[i]
             return
 
-        # to be handled in case of not simulation, i.e. to get the properties again from the clients as they can change the model_rate
+        # to be handled in case of not a simulation, i.e. to get the properties
+        # again from the clients as they can change the model_rate
         # for i in range(self.num_available):
-        #     # need to test this , accumilates the changing model rate of the client
-        #     self.clients_to_model_rate_mapping[i] = self.clients[str(i)].get_properties['model_rate']
+        #     # need to test this , accumilates the
+        #     # changing model rate of the client
+        #     self.clients_to_model_rate_mapping[i] =
+        #     self.clients[str(i)].get_properties['model_rate']
         # return
 
     def sample(

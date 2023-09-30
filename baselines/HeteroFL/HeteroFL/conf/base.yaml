@@ -17,41 +17,40 @@
 #   # client config
 
 
-
-
 # dataset_config
 num_clients: 100
-num_epochs: 16
-num_rounds: 200
-seed: 42
+num_epochs: 5
+num_rounds: 400
+seed: 0
+client_device: 'cpu'
+device: 'cpu'
 
 control:
   model_split_rate: 'fix'
   model_mode: 'a2-b8'
 
 dataset_config:
-  dataset_name: 'MNIST'
-  iid: false
+  dataset_name: 'CIFAR10'
+  iid: True
   shard_per_user : 2 # only used in case of non-iid (i.e. iid = false)
   balance: false
   batch_size:
-    train: 128
-    test: 128
+    train: 10
+    test: 50
   shuffle:
     train: true
     test: false
 
 
 model:
-  model_name: conv
-  hidden_layers: [64 , 128 , 216 , 512]
+  model_name: resnet18
+  hidden_layers: [64 , 128 , 256 , 512]
   norm: bn
 
 strategy:
-  optimizer:
-  lr:
-  momentum:
-  weight_decay:
-  scheduler:
-  milestones:
-
+  optimizer: SGD
+  lr: 0.1
+  momentum: 0.9
+  weight_decay: 5.00e-04
+  scheduler: MultiStepLR
+  milestones: [150 , 250]
