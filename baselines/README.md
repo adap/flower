@@ -49,7 +49,7 @@ Do you have a new federated learning paper and want to add a new baseline to Flo
 The steps to follow are:
 
 1. Fork the Flower repo and clone it into your machine.
-2. Navigate to the `baselines/` directory and from there run:
+2. Navigate to the `baselines/` directory, choos a single-word (and **lowercase**) name for your baseline, and from there run:
 
     ```bash
     # This will create a new directory with the same structure as `baseline_template`.
