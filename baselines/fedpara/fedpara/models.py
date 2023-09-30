@@ -118,7 +118,7 @@ class VGG16GN(nn.Module):
         # Extract the features and classifier from the pre-trained VGG16
         self.features = vgg16.features
         self.classifier = nn.Sequential(
-            nn.Linear(512, 512),
+            nn.Linear(512*7*7, 512),
             nn.ReLU(inplace=True),
             nn.Dropout(),
             nn.Linear(512, 512),

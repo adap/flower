@@ -116,18 +116,17 @@ def load_datasets(
 
     data_directory = f"./data/{config.name.lower()}/"
     ds_path = f"{data_directory}train_{num_clients}_{config.alpha:.2f}.pkl"
-    trans_cifar = transforms.Compose(
-        [
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.491, 0.482, 0.447], std=[0.247, 0.243, 0.262]),
-        ]
-    )
+    tranform_train = transforms.Compose([transforms.Resize((224,224)), transforms.RandomHorizontalFlip(p=0.7),
+                                         transforms.ToTensor(),
+                                         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
+    tranform_test = transforms.Compose([transforms.Resize((224, 224)), transforms.ToTensor(),
+                                        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
     try:
         with open(ds_path, "rb") as file:
             train_datasets = pickle.load(file)
     except FileNotFoundError:
         dataset_train = Dataset(
-            data_directory, train=True, download=True, transform=trans_cifar
+            data_directory, train=True, download=True, transform=tranform_train
         )
         train_datasets = _split_dataset(
             dataset_train,
@@ -139,7 +138,7 @@ def load_datasets(
         )
 
     dataset_test = Dataset(
-        data_directory, train=False, download=True, transform=trans_cifar
+        data_directory, train=False, download=True, transform=tranform_test
     )
     test_loader = DataLoader(dataset_test, batch_size=batch_size, num_workers=1)
     train_loaders = [
