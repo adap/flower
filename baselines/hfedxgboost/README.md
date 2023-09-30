@@ -173,26 +173,16 @@ python -m hfedxgboost.main --multirun clients="cpusmall_2_clients","cpusmall_5_c
 
 ### Those results don't come from following the original paper hyper-parameters, the new hyper-parameters are specified in the config files in the `clients` folder
 
-### Binary Classification Datasets
+### Table 2
 
-| Dataset |  no. of clients | server-side test Accuracy |
-| :---: | :---: | :---: |
-| a9a | 2<br>5<br>10 | 0.84<br>0.84<br>0.83 |
-| cod_rna | 2<br>5<br>10 | 0.96<br>0.96<br>0.95 | 
-| ijcnn1 | 2<br>5<br>10 | 0.98<br>0.97<br>0.96 |
-
-### Table 5 space_ga dataset
-|  no.of clients | server-side test MSE 
-| :---: | :---: |
-| 2 | .024
-| 5 | .033
-| 10 | .034
-### Table 6 abalone dataset
-|  no.of clients | server-side test MSE 
-| :---: | :---: |
-| 2 | 10
-| 5 | 10
-| 10 | 10
+| Dataset | task type |no. of clients | server-side test MSE |
+| :---: | :---: | :---: | :---: |
+| a9a | Binary Classification | 2<br>5<br>10 | 0.84<br>0.84<br>0.83 |
+| cod_rna | Binary Classification | 2<br>5<br>10 | 0.96<br>0.96<br>0.95 | 
+| ijcnn1 | Binary Classification |2<br>5<br>10 | 0.98<br>0.97<br>0.96 |
+| space_ga | Regression | 2<br>5<br>10 | 0.024<br>0.033<br>0.034 |
+| abalone | Regression | 2<br>5<br>10 | 10<br>10<br>10 | 
+| YearPredictionMSD | Regression | 2<br>5<br>10 | 119<br>118<br>118 | 
 
 
 ## How to add a new dataset
