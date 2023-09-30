@@ -58,7 +58,7 @@ The following tables show the main hyperparameters for this baseline with their 
 | number of rounds            | 500                                 |
 | number of local rounds      | 2                                   |
 | batch_size                  | 50                                  |
-| client resources            | {'num_cpus': 2.0, 'num_gpus': 0.05 }|
+| client resources            | {'num_cpus': 2.0, 'num_gpus': 0.1 } |
 | eta_l (local learning rate) | 0.01                                |
 | epsilon                     | 0.001                               |
 | decay                       | 0.998                               |
@@ -88,9 +88,6 @@ poetry install
 
 # activate the environment
 poetry shell
-
-#install required libs
-# install PyTorch with GPU support. Please note this baseline is very lightweight so it can run fine on a CPU.
 
 ```
 

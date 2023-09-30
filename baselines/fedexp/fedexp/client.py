@@ -11,8 +11,7 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.nn.utils import parameters_to_vector
 from torch.utils.data import DataLoader
-
-from fedexp.models import train
+from torchvision.transforms import transforms
 
 
 class FlowerClient(fl.client.NumPyClient):
@@ -46,30 +45,55 @@ class FlowerClient(fl.client.NumPyClient):
         self._set_parameters(parameters)
         print(f"Client {self.cid} Training...")
         prev_net = copy.deepcopy(self.net)
-
-        train(
-            self.net,
-            self.train_loader,
-            self.device,
-            epochs=self.num_epochs,
-            hyperparams=config,
+        criterion = torch.nn.CrossEntropyLoss()
+        optimizer = torch.optim.SGD(
+            self.net.parameters(),
+            lr=config["eta_l"],
+            momentum=0,
+            weight_decay=config["weight_decay"],
         )
+
+        self.net.train()
+        counter = 0
+        while True:
+            for batch_idx, (images, labels) in enumerate(self.train_loader):
+                images, labels = images.to(self.device), labels.to(self.device)
+                if config["use_data_augmentation"]:
+                    transform_train = transforms.Compose(
+                        [
+                            transforms.RandomCrop(32, padding=4),
+                            transforms.RandomHorizontalFlip(),
+                        ]
+                    )
+                    images = transform_train(images)
+                self.net.zero_grad()
+                log_probs = self.net(images)
+                loss = criterion(log_probs, labels)
+                loss.backward()
+
+                if config["use_gradient_clipping"]:
+                    torch.nn.utils.clip_grad_norm_(
+                        parameters=self.net.parameters(), max_norm=config["max_norm"]
+                    )
+                optimizer.step()
+                counter += 1
+                if counter >= self.num_epochs:
+                    break
+            if counter >= self.num_epochs:
+                break
 
         with torch.no_grad():
             vec_curr = parameters_to_vector(self.net.parameters())
             vec_prev = parameters_to_vector(prev_net.parameters())
             params_delta_vec = vec_curr - vec_prev
             grad = params_delta_vec
-            grad_p = self.data_ratio * grad
-            grad_norm = self.data_ratio * torch.linalg.norm(grad) ** 2
 
         return (
             [],
             len(self.train_loader),
             {
                 "data_ratio": self.data_ratio,
-                "grad_p": grad_p.to("cpu"),
-                "grad_norm": grad_norm.to("cpu"),
+                "grad": grad.to("cpu"),
             },
         )
 

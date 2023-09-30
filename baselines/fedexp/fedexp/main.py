@@ -1,4 +1,7 @@
-"""Main script for running FedExp."""
+"""Main script for running FedExp.
+the code is inspired by the authors' code.
+https://github.com/Divyansh03/FedExP/
+"""
 
 import flwr as fl
 import hydra
