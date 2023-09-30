@@ -46,15 +46,19 @@ class FedExP(FedAvg):
         if not self.accept_failures and failures:
             return None, {}
         # Aggregate results
+        clients_per_round = len(results)
         self.epsilon *= self.decay ** 2
-        grad_sum = sum([res.metrics["grad_p"] for _, res in results])
         p_sum = sum([res.metrics["data_ratio"] for _, res in results])
-        grad_norm_sum = sum([res.metrics["grad_norm"] for _, res in results])
-        clients_per_round = len(results) + len(failures)
+        d = parameters_to_vector(self.net_glob.parameters()).numel()
+        grad_avg = torch.zeros(d)
+        grad_norm_sum = 0
+        for _, res in results:
+            grad_norm_sum += res.metrics["data_ratio"] * torch.linalg.norm(res.metrics["grad"]) ** 2
+            grad_avg += res.metrics["data_ratio"] * res.metrics["grad"]
         with torch.no_grad():
-            grad_avg = grad_sum / p_sum
-            grad_avg_norm = torch.linalg.norm(grad_avg) ** 2
+            grad_avg /= p_sum
             grad_norm_avg = grad_norm_sum / p_sum
+            grad_avg_norm = torch.linalg.norm(grad_avg) ** 2
 
             if self.algorithm.lower() == "fedexp":
                 eta_g = max(
