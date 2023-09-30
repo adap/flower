@@ -63,9 +63,22 @@ def fjord_average(
         num_examples: List[int], p_max_s: List[float],
         p_s: List[float], fjord_config: FJORD_CONFIG_TYPE,
         original_parameters: List[np.ndarray]) -> np.ndarray:
+    """
+    Compute average per layer for given updates.
+    :param i: index of the layer
+    :param layer_updates: list of layer updates from clients
+    :param num_examples: list of number of examples from clients
+    :param p_max_s: list of p_max values from clients
+    :param p_s: list of p values
+    :param fjord_config: fjord config
+    :param original_parameters: original model parameters
+    :return: average of layer
+    """
+
     # if no client updated the given part of the model,
     # reuse previous parameters
     update = deepcopy(original_parameters[i])
+
     # BatchNorm2d layers, only average over the p_max_s
     # that are greater than corresponding p of the layer
     # i.e., only update the layers that were updated
@@ -111,7 +124,12 @@ def fjord_average(
 
 def aggregate(results: List[Tuple[NDArrays, int, float, FJORD_CONFIG_TYPE]],
               original_parameters) -> NDArrays:
-    """Compute weighted average."""
+    """
+    Compute weighted average.
+    :param results: list of tuples (layer_updates, num_examples, p_max, p_s)
+    :param original_parameters: original model parameters
+    :return: weighted average of layer updates
+    """
 
     # Create a list of weights, each multiplied
     # by the related number of examples
@@ -136,6 +154,9 @@ def aggregate(results: List[Tuple[NDArrays, int, float, FJORD_CONFIG_TYPE]],
 
 
 class FjORDFedAVG(FedAvg):
+    """
+    FedAvg strategy with FjORD aggregation.
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
