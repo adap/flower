@@ -173,24 +173,14 @@ python -m hfedxgboost.main --multirun clients="cpusmall_2_clients","cpusmall_5_c
 
 ### Those results don't come from following the original paper hyper-parameters, the new hyper-parameters are specified in the config files in the `clients` folder
 
-### Table 2 a9a dataset
-|  no.of clients | server-side test Accuracy 
-| :---: | :---: |
-| 2 | .84
-| 5 | .84
-| 10 | .83
-### Table 3 cod_rna dataset
-|  no.of clients | server-side test Accuracy 
-| :---: | :---: |
-| 2 | .96
-| 5 | .96
-| 10 | .95
-### Table 4 ijcnn1 dataset
-|  no.of clients | server-side test Accuracy 
-| :---: | :---: |
-| 2 | .98
-| 5 | .97
-| 10 | .96
+### Binary Classification Datasets
+
+| Dataset |  no. of clients | server-side test Accuracy |
+| :---: | :---: | :---: |
+| a9a | 2<br>5<br>10 | 0.84<br>0.84<br>0.83 |
+| cod_rna | 2<br>5<br>10 | 0.96<br>0.96<br>0.95 | 
+| ijcnn1 | 2<br>5<br>10 | 0.98<br>0.97<br>0.96 |
+
 ### Table 5 space_ga dataset
 |  no.of clients | server-side test MSE 
 | :---: | :---: |
