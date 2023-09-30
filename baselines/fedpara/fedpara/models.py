@@ -10,76 +10,151 @@ from torch.nn.utils import parameters_to_vector
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from tqdm import tqdm
+import torchvision.models as models
+import numpy as np
 
 
-class _BasicBlock(nn.Module):
-    expansion = 1
-
-    def __init__(self, in_planes, planes, stride=1):
+class LowRank(nn.Module):
+    def __init__(self,
+                 in_channels: int,
+                 out_channels: int,
+                 low_rank: int,
+                 kernel_size: int):
         super().__init__()
-        self.conv1 = nn.Conv2d(
-            in_planes, planes, kernel_size=3, stride=stride, padding=1, bias=False
+        self.T = nn.Parameter(
+            torch.empty(size=(low_rank, low_rank, kernel_size, kernel_size)),
+            requires_grad=True
         )
-        self.bn1 = nn.GroupNorm(2, planes)
-        self.conv2 = nn.Conv2d(
-            planes, planes, kernel_size=3, stride=1, padding=1, bias=False
+        self.O = nn.Parameter(
+            torch.empty(size=(low_rank, out_channels)),
+            requires_grad=True
         )
-        self.bn2 = nn.GroupNorm(2, planes)
-        self.shortcut = nn.Sequential()
-        if stride != 1 or in_planes != self.expansion * planes:
-            self.shortcut = nn.Sequential(
-                nn.Conv2d(
-                    in_planes,
-                    self.expansion * planes,
-                    kernel_size=1,
-                    stride=stride,
-                    bias=False,
-                ),
-                nn.GroupNorm(2, self.expansion * planes),
-            )
+        self.I = nn.Parameter(
+            torch.empty(size=(low_rank, in_channels)),
+            requires_grad=True
+        )
+        self._init_parameters()
+
+    def _init_parameters(self):
+        # Initialization affects the convergence stability for our parameterization
+        fan = nn.init._calculate_correct_fan(self.T, mode='fan_in')
+        gain = nn.init.calculate_gain('relu', 0)
+        std_t = gain / np.sqrt(fan)
+
+        fan = nn.init._calculate_correct_fan(self.O, mode='fan_in')
+        std_o = gain / np.sqrt(fan)
+
+        fan = nn.init._calculate_correct_fan(self.I, mode='fan_in')
+        std_i = gain / np.sqrt(fan)
+
+        nn.init.normal_(self.T, 0, std_t)
+        nn.init.normal_(self.O, 0, std_o)
+        nn.init.normal_(self.I, 0, std_i)
+
+    def forward(self):
+        # torch.einsum simplify the tensor produce (matrix multiplication)
+        return torch.einsum("xyzw,xo,yi->oizw", self.T, self.O, self.I)
+
+
+class Conv2d(nn.Module):
+    def __init__(self,
+                 in_channels: int,
+                 out_channels: int,
+                 kernel_size: int = 3,
+                 stride: int = 1,
+                 padding: int = 0,
+                 bias: bool = False,
+                 ratio: float = 0.0,
+                 add_nonlinear: bool = False,
+                 jacobian_corr: bool = False):
+        super().__init__()
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.padding = padding
+        self.bias = bias
+        self.ratio = ratio
+        self.low_rank = self._calc_from_ratio()
+        self.add_nonlinear = add_nonlinear
+        self.jacobian_corr = jacobian_corr
+        self.W1 = LowRank(in_channels, out_channels, self.low_rank, kernel_size)
+        self.W2 = LowRank(in_channels, out_channels, self.low_rank, kernel_size)
+        self.bias = nn.Parameter(torch.zeros(out_channels)) if bias else None
+        self.tanh = nn.Tanh()
+
+    def _calc_from_ratio(self):
+        # Return the low-rank of sub-matrices given the compression ratio
+        r1 = int(np.ceil(np.sqrt(self.out_channels)))
+        r2 = int(np.ceil(np.sqrt(self.in_channels)))
+        r = np.max((r1, r2))
+
+        num_target_params = self.out_channels * self.in_channels * \
+                            (self.kernel_size ** 2) * self.ratio
+        r3 = np.sqrt(
+            ((self.out_channels + self.in_channels) ** 2) / (4 * (self.kernel_size ** 4)) + \
+            num_target_params / (2 * (self.kernel_size ** 2))
+        ) - (self.out_channels + self.in_channels) / (2 * (self.kernel_size ** 2))
+        r3 = int(np.ceil(r3))
+        r = np.max((r, r3))
+
+        return r
 
     def forward(self, x):
-        """Forward pass through the block."""
-        out = F.relu(self.bn1(self.conv1(x)))
-        out = self.bn2(self.conv2(out))
-        out += self.shortcut(x)
-        out = F.relu(out)
+        # Hadamard product of two submatrices
+        if self.add_nonlinear:
+            W = self.tanh(self.W1()) * self.tanh(self.W2())
+        else:
+            W = self.W1() * self.W2()
+        out = F.conv2d(input=x, weight=W, bias=self.bias,
+                       stride=self.stride, padding=self.padding)
         return out
 
 
-class _ResNet(nn.Module):
-    def __init__(self, num_classes, num_blocks, block=_BasicBlock):
-        super().__init__()
-        self.in_planes = 64
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
-        self.bn1 = nn.GroupNorm(2, 64)
-        self.layers = nn.ModuleList()
-        for planes, num_block, stride in zip([64, 128, 256, 512], num_blocks, [1, 2, 2, 2]):
-            strides = [stride] + [1] * (num_block - 1)
-            block_layers = []
-            for i_stride in strides:
-                block_layers.append(block(self.in_planes, planes, i_stride))
-                self.in_planes = planes * block.expansion
-            self.layers.extend(block_layers)
-        self.linear = nn.Linear(512 * block.expansion, num_classes)
+class VGG16GN(nn.Module):
+    def __init__(self, num_classes=10, num_groups=2, ratio=0.1, add_nonlinear=False, jacobian_corr=False):
+        super(VGG16GN, self).__init__()
+        vgg16 = models.vgg16_bn()
+        # Extract the features and classifier from the pre-trained VGG16
+        self.features = vgg16.features
+        self.classifier = nn.Sequential(
+            nn.Linear(512, 512),
+            nn.ReLU(inplace=True),
+            nn.Dropout(),
+            nn.Linear(512, 512),
+            nn.ReLU(inplace=True),
+            nn.Dropout(),
+            nn.Linear(512, num_classes)
+        )
+        # Replace Conv2d layers with custom Conv2d
+        for name, module in self.features.named_children():
+            module = getattr(self.features, name)
+            if isinstance(module, nn.Conv2d):
+                num_channels = module.in_channels
+                setattr(self.features, name, Conv2d(
+                    num_channels,
+                    module.out_channels,
+                    module.kernel_size[0],
+                    module.stride[0],
+                    module.padding[0],
+                    module.bias is not None,
+                    ratio=ratio,
+                    add_nonlinear=add_nonlinear,
+                    jacobian_corr=jacobian_corr
+                ))
+
+            if isinstance(module, nn.BatchNorm2d):
+                num_channels = module.num_features
+                setattr(self.features, name, nn.GroupNorm(num_groups, num_channels))
 
     def forward(self, x):
-        """Forward pass through the network."""
-        out = F.relu(self.bn1(self.conv1(x)))
-        for layer in self.layers:
-            out = layer(out)
-        out = F.avg_pool2d(out, 3)
-        out = out.view(out.size(0), -1)
-        out = self.linear(out)
-        return out
+        x = self.features(x)
+        x = torch.flatten(x, 1)  # Flatten the tensor
+        x = self.classifier(x)
+        return x
 
 
-class ResNet18(_ResNet):
-    """ResNet18 model."""
-
-    def __init__(self, num_classes=10):
-        super().__init__(num_classes=num_classes, num_blocks=[2, 2, 2, 2])
-
+# Create an instance of the VGG16GN model with Group Normalization, custom Conv2d, and modified classifier
 
 def test(
         net: nn.Module, test_loader: DataLoader, device: torch.device
@@ -192,31 +267,18 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
     """
     for images, labels in trainloader:
         images, labels = images.to(device), labels.to(device)
-        if hyperparams["use_data_augmentation"]:
-            transform_train = transforms.Compose(
-                [
-                    transforms.RandomCrop(32, padding=4),
-                    transforms.RandomHorizontalFlip(),
-                ]
-            )
-            images = transform_train(images)
         net.zero_grad()
         log_probs = net(images)
         loss = criterion(log_probs, labels)
         loss.backward()
-        if hyperparams["use_gradient_clipping"]:
-            torch.nn.utils.clip_grad_norm_(
-                parameters=net.parameters(), max_norm=hyperparams["max_norm"]
-            )
         optimizer.step()
     return net
 
 
 if __name__ == "__main__":
-    model1 = ResNet18()
-    m1_params = model1.parameters()
-    m1_vec = parameters_to_vector(m1_params)
-    model2 = ResNet18()
-    m2_params = model2.parameters()
-    m2_vec = parameters_to_vector(m2_params)
-    print("Testing")
+    model = VGG16GN(num_classes=10, num_groups=2)
+    model = torch.nn.Sequential(*list(model.features.children()))
+    # Print the modified VGG16GN model architecture
+    print(model)
+    total_trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f"Total number of parameters: {total_trainable_params / 1e6}")

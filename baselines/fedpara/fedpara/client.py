@@ -19,12 +19,12 @@ class FlowerClient(fl.client.NumPyClient):
     """Standard Flower client for CNN training."""
 
     def __init__(
-        self,
-        cid: int,
-        net: torch.nn.Module,
-        train_loader: DataLoader,
-        device: str,
-        num_epochs: int,
+            self,
+            cid: int,
+            net: torch.nn.Module,
+            train_loader: DataLoader,
+            device: str,
+            num_epochs: int,
     ):  # pylint: disable=too-many-arguments
         print(f"Initializing Client {cid}")
         self.cid = cid
@@ -32,7 +32,6 @@ class FlowerClient(fl.client.NumPyClient):
         self.train_loader = train_loader
         self.device = torch.device(device)
         self.num_epochs = num_epochs
-
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
@@ -44,7 +43,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.net.load_state_dict(state_dict, strict=True)
 
     def fit(
-        self, parameters: NDArrays, config: Dict[str, Scalar]
+            self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, int, Dict]:
         """Train the network on the training set."""
         self._set_parameters(parameters)
@@ -59,17 +58,17 @@ class FlowerClient(fl.client.NumPyClient):
         )
 
         return (
-            [],
+            self.get_parameters({}),
             len(self.train_loader),
             {},
         )
 
 
 def gen_client_fn(
-    train_loaders: List[DataLoader],
-    model: DictConfig,
-    num_epochs: int,
-    args: Dict,
+        train_loaders: List[DataLoader],
+        model: DictConfig,
+        num_epochs: int,
+        args: Dict,
 ) -> Callable[[str], FlowerClient]:
     """Return a function which creates a new FlowerClient for a given cid."""
 
@@ -85,4 +84,3 @@ def gen_client_fn(
         )
 
     return client_fn
-

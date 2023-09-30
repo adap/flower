@@ -2,28 +2,30 @@
 seed: 0
 
 num_clients: 100
-num_rounds: 500
-clients_per_round: 20
-num_epochs: 20
-batch_size: 50
+num_rounds: 200
+clients_per_round: 16
+num_epochs: 10
+batch_size: 64
 
 server_device: cuda
 client_device: cuda
 
 client_resources:
   num_cpus: 1
-  num_gpus: 0.05
+  num_gpus: 0.0625
 
 dataset_config:
   name: CIFAR10
   num_classes: 10
-  alpha: 0.3
+  alpha: 0.5
 
 model:
-  _target_: fedpara.models.ResNet18
+  _target_: fedpara.models.VGG16GN
   num_classes: ${dataset_config.num_classes}
 
 hyperparams:
+  eta_l: 0.1
+  weight_decay: 0.992
 
 
 strategy:

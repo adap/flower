@@ -36,14 +36,16 @@ def main(cfg: DictConfig) -> None:
 
     # 3. Define clients
     client_fn = client.gen_client_fn(
-    train_loaders=train_loaders,
-    model=cfg.model,
-    num_epochs=cfg.num_epochs,
-    args={"device": cfg.client_device},
+        train_loaders=train_loaders,
+        model=cfg.model,
+        num_epochs=cfg.num_epochs,
+        args={"device": cfg.client_device},
     )
 
     evaluate_fn = server.gen_evaluate_fn(
-        test_loader=test_loader, model=cfg.model, device=cfg.server_device
+        test_loader=test_loader,
+        model=cfg.model,
+        device=cfg.server_device
     )
 
     def get_on_fit_config():
@@ -55,7 +57,6 @@ def main(cfg: DictConfig) -> None:
         return fit_config_fn
 
     net_glob = instantiate(cfg.model)
-
 
     # 4. Define strategy
     strategy = instantiate(
@@ -75,16 +76,8 @@ def main(cfg: DictConfig) -> None:
         client_resources={
             "num_cpus": cfg.client_resources.num_cpus,
             "num_gpus": cfg.client_resources.num_gpus,
-        },
-        ray_init_args={
-            "ignore_reinit_error": True,
-            "include_dashboard": False,
-            "num_cpus": 12,
-            "num_gpus": 1,
-            "_memory": 100*1024*1024*1024,
-        },
+        }
     )
-
 
     # 6. Save results
     save_path = HydraConfig.get().runtime.output_dir
