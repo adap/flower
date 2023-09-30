@@ -9,7 +9,7 @@ dataset: [a9a, cod-rna, ijcnn1, space_ga] # list of datasets you include in your
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
-****Paper:**** https://arxiv.org/abs/2304.07537
+****Paper:**** [arxiv.org/abs/2304.07537](https://arxiv.org/abs/2304.07537)
 ****Authors:**** Chenyang Ma, Xinchi Qiu, Daniel J. Beutel, Nicholas D. Lane
 
 ****Abstract:**** The privacy-sensitive nature of decentralized datasets and
