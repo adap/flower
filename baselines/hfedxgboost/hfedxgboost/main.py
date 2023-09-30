@@ -155,7 +155,7 @@ def main(cfg: DictConfig) -> None:
                 strategy=strategy,
             ),
             num_clients=client_pool_size,
-            client_resources={"num_cpus": cfg.run_experiment.num_cpus_per_client},
+            client_resources={"num_cpus": cfg.client_resources.num_cpus},
             config=ServerConfig(num_rounds=num_rounds),
             strategy=strategy,
         )

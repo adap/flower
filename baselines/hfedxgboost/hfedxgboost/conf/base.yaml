@@ -44,7 +44,6 @@ run_experiment:
   batch_size: 32
   fraction_fit: 1.0
   min_fit_clients: 1
-  num_cpus_per_client: 1
   fit_config:
     num_iterations: ${clients.num_iterations}
 
