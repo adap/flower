@@ -4,7 +4,7 @@ defaults:
   - clients: cpusmall_2_clients
 
 centralized: False
-device: "cpu"
+server_device: "cpu"
 
 n_estimators_client: ${clients.n_estimators_client}
 task_type: ${dataset.task.task_type}
