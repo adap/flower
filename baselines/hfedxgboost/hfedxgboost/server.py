@@ -357,7 +357,7 @@ def serverside_eval(
     # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     metric_name = cfg.dataset.task.metric.name
 
-    device = cfg.device
+    device = cfg. server_device
     model = CNN(cfg)
     model.set_weights(parameters_to_ndarrays(parameters[0]))
     model.to(device)
