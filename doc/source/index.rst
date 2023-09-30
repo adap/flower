@@ -63,10 +63,10 @@ QUICKSTART TUTORIALS: :doc:`PyTorch <tutorial-quickstart-pytorch>` | :doc:`Tenso
 
 
 ..  youtube:: jOmmuzMIQ4c
-   :width: 100%
+   :width: 40%
 
 ..  youtube:: FGTc2TQq7VM
-   :width: 100%
+   :width: 40%
 
 How-to guides
 ~~~~~~~~~~~~~
