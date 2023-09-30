@@ -1,8 +1,10 @@
+"""Flower Server."""
 import time
 from collections import OrderedDict
-from typing import Callable, Dict, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 import torch
+import torch.nn as nn
 from flwr.common.typing import NDArrays, Scalar
 from models import test
 from torch.utils.data import DataLoader
@@ -12,14 +14,14 @@ from utils import save_model
 def gen_evaluate_fn(
     trainloader: DataLoader,
     testloader: DataLoader,
-    clients_testloaders,
-    label_split,
+    clients_testloaders: List[DataLoader],
+    label_split: List[torch.tensor],
     device: torch.device,
-    model,
+    model: nn.Module,
 ) -> Callable[
     [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]
 ]:
-    """Generates the function for centralized evaluation.
+    """Generate the function for centralized evaluation.
 
     Parameters
     ----------
@@ -27,6 +29,10 @@ def gen_evaluate_fn(
         The Dataloader that was used for training the main model
     testloader : DataLoader
         The dataloader to test the model with.
+    clients_testloader : List[DataLoader]
+        The client's test dataloader to test the model with for local results.
+    label_split : List[torch.tensor]
+        The list of labels that clients were distributed with.
     device : torch.device
         The device to test the model on.
 
@@ -54,7 +60,7 @@ def gen_evaluate_fn(
         if server_round % 100 == 0:
             save_model(net, "model_after_round_{}.pth".format(server_round))
 
-        print("in stat")
+        print("start of testing")
         start_time = time.time()
         with torch.no_grad():
             net.train(True)
@@ -81,7 +87,7 @@ def gen_evaluate_fn(
         global_loss, global_accuracy = test(net, testloader, device=device)
 
         # return statistics
-        print(f"schezwan computed accuracy = {global_accuracy}")
+        print(f"global accuracy = {global_accuracy}")
         print(f"local_loss = {local_loss}, local_accuracy = {local_accuracy}")
         return global_loss, {
             "global_accuracy": global_accuracy,

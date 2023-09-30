@@ -66,7 +66,7 @@ def _partition_data(
     num_clients: int,
     dataset_name: str,
     iid: Optional[bool] = False,
-    shard_per_user: Optional[int] = 2,  # only in case of non-iid
+    shard_per_user: int = 2,  # only in case of non-iid
     balance: Optional[bool] = False,
     seed: Optional[int] = 42,
 ) -> Tuple[Dataset, List[Dataset], List[torch.tensor], List[Dataset], Dataset]:
@@ -102,6 +102,7 @@ def _partition_data(
 def iid_partition(
     dataset: Dataset, num_clients: int, seed: Optional[int] = 42
 ) -> Tuple[List[Dataset], List[torch.tensor]]:
+    """IID partition of dataset among clients."""
     partition_size = int(len(dataset) / num_clients)
     lengths = [partition_size] * num_clients
 
@@ -125,6 +126,7 @@ def non_iid(
     label_split: List = None,
     seed=42,
 ) -> Tuple[List[Dataset], List]:
+    """Non-IID partition of dataset among clients."""
     label = np.array(dataset.targets)
     data_split = {i: [] for i in range(num_clients)}
     label_idx_split = {}

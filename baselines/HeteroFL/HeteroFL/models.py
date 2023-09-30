@@ -1,3 +1,4 @@
+"""Conv & resnet17 model architecture, training, testing functions."""
 import copy
 from typing import List, OrderedDict
 
@@ -10,6 +11,8 @@ from utils import make_optimizer
 
 
 class Conv(nn.Module):
+    """Convolutional Neural Network architecture with sBN."""
+
     def __init__(
         self,
         data_shape,
@@ -42,7 +45,7 @@ class Conv(nn.Module):
         else:
             raise ValueError("Not valid norm")
         if scale_model:
-            scaler = Scaler(rate)
+            scaler = _Scaler(rate)
         else:
             scaler = nn.Identity()
         blocks = [
@@ -68,7 +71,7 @@ class Conv(nn.Module):
             else:
                 raise ValueError("Not valid norm")
             if scale_model:
-                scaler = Scaler(rate)
+                scaler = _Scaler(rate)
             else:
                 scaler = nn.Identity()
             blocks.extend(
@@ -91,6 +94,20 @@ class Conv(nn.Module):
         self.blocks = nn.Sequential(*blocks)
 
     def forward(self, input):
+        """Forward pass of the Conv.
+
+        Parameters
+        ----------
+        input : Dict
+            Conatins input Tensor that will pass through the network.
+            label of that input to calculate loss.
+            label_split if masking is required.
+
+        Returns
+        -------
+        Dict
+            The resulting Tensor after it has passed through the network and the loss.
+        """
         # output = {"loss": torch.tensor(0, device=self.device, dtype=torch.float32)}
         output = {}
         out = self.blocks(input["img"])
@@ -113,14 +130,17 @@ def conv(
     track=False,
     device="cpu",
 ):
+    """Create the Conv model."""
     hidden_size = [int(np.ceil(model_rate * x)) for x in hidden_layers]
     scaler_rate = model_rate / global_model_rate
     model = Conv(data_shape, hidden_size, classes_size, scaler_rate, track, norm)
-    model.apply(init_param)
+    model.apply(_init_param)
     return model.to(device)
 
 
 class Block(nn.Module):
+    """Block."""
+
     expansion = 1
 
     def __init__(self, in_planes, planes, stride, rate, norm, scale=1, track=False):
@@ -151,7 +171,7 @@ class Block(nn.Module):
             planes, planes, kernel_size=3, stride=1, padding=1, bias=False
         )
         if scale:
-            self.scaler = Scaler(rate)
+            self.scaler = _Scaler(rate)
         else:
             self.scaler = nn.Identity()
 
@@ -165,6 +185,20 @@ class Block(nn.Module):
             )
 
     def forward(self, x):
+        """Forward pass of the Block.
+
+        Parameters
+        ----------
+        x : Dict
+            Dict that contains Input Tensor that will pass through the network.
+            label of that input to calculate loss.
+            label_split if masking is required.
+
+        Returns
+        -------
+        Dict
+            The resulting Tensor after it has passed through the network and the loss.
+        """
         out = F.relu(self.n1(self.scaler(x)))
         shortcut = self.shortcut(out) if hasattr(self, "shortcut") else x
         out = self.conv1(out)
@@ -174,6 +208,8 @@ class Block(nn.Module):
 
 
 class ResNet(nn.Module):
+    """Implementation of a Residual Neural Network (ResNet) model with sBN."""
+
     def __init__(
         self,
         data_shape,
@@ -257,7 +293,7 @@ class ResNet(nn.Module):
             raise ValueError("Not valid norm")
         self.n4 = n4
         if scale:
-            self.scaler = Scaler(rate)
+            self.scaler = _Scaler(rate)
         else:
             self.scaler = nn.Identity()
         self.linear = nn.Linear(hidden_size[3] * block.expansion, num_classes)
@@ -271,6 +307,20 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, input):
+        """Forward pass of the ResNet.
+
+        Parameters
+        ----------
+        input : Dict
+            Dict that contains Input Tensor that will pass through the network.
+            label of that input to calculate loss.
+            label_split if masking is required.
+
+        Returns
+        -------
+        Dict
+            The resulting Tensor after it has passed through the network and the loss.
+        """
         output = {}
         x = input["img"]
         out = self.conv1(x)
@@ -301,6 +351,7 @@ def resnet18(
     track=False,
     device="cpu",
 ):
+    """Create the ResNet18 model."""
     data_shape = data_shape
     classes_size = classes_size
     hidden_size = [int(np.ceil(model_rate * x)) for x in hidden_layers]
@@ -315,11 +366,12 @@ def resnet18(
         track,
         norm,
     )
-    model.apply(init_param)
+    model.apply(_init_param)
     return model.to(device)
 
 
 def create_model(model_config, model_rate, track=False, device="cpu"):
+    """Create the model based on the configuration given in hydra."""
     if model_config["model"] == "conv":
         return conv(
             model_rate=model_rate,
@@ -344,7 +396,7 @@ def create_model(model_config, model_rate, track=False, device="cpu"):
         )
 
 
-def init_param(m):
+def _init_param(m):
     if isinstance(m, (nn.BatchNorm2d, nn.InstanceNorm2d)):
         m.weight.data.fill_(1)
         m.bias.data.zero_()
@@ -353,7 +405,7 @@ def init_param(m):
     return m
 
 
-class Scaler(nn.Module):
+class _Scaler(nn.Module):
     def __init__(self, rate):
         super().__init__()
         self.rate = rate
@@ -364,16 +416,32 @@ class Scaler(nn.Module):
 
 
 def get_parameters(net) -> List[np.ndarray]:
+    """Return the parameters of model as numpy.NDArrays."""
     return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
 
 def set_parameters(net, parameters: List[np.ndarray]):
+    """Set the model parameters with given parameters."""
     params_dict = zip(net.state_dict().keys(), parameters)
     state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
     net.load_state_dict(state_dict, strict=True)
 
 
 def train(model, train_loader, label_split, settings):
+    """Train a model with given settings.
+
+    Parameters
+    ----------
+    model : nn.Module
+        The neural network to train.
+    train_loader : DataLoader
+        The DataLoader containing the data to train the network on.
+    label_split : torch.tensor
+        Tensor containing the labels of the data.
+    settings: Dict
+        Dictionary conatining the information about eopchs, optimizer,
+        lr, momentum, weight_decay, device to train on.
+    """
     # criterion = torch.nn.CrossEntropyLoss()
     optimizer = make_optimizer(
         settings["optimizer"],
@@ -401,6 +469,22 @@ def train(model, train_loader, label_split, settings):
 
 
 def test(model, test_loader, label_split=None, device="cpu"):
+    """Evaluate the network on the test set.
+
+    Parameters
+    ----------
+    model : nn.Module
+        The neural network to test.
+    test_loader : DataLoader
+        The DataLoader containing the data to test the network on.
+    device : torch.device
+        The device on which the model should be tested, either 'cpu' or 'cuda'.
+
+    Returns
+    -------
+    Tuple[float, float]
+        The loss and the accuracy of the input model on the given data.
+    """
     model.eval()
     size = len(test_loader.dataset)
     num_batches = len(test_loader)
@@ -431,6 +515,24 @@ def test(model, test_loader, label_split=None, device="cpu"):
 def param_model_rate_mapping(
     model_name, parameters, clients_model_rate, global_model_rate=1
 ):
+    """Map the model rate to subset of global parameters(as list of indices).
+
+    Parameters
+    ----------
+    model_name : str
+        The name of the neural network of global model.
+    parameters : Dict
+        state_dict of the global model.
+    client_model_rate : List[float]
+        List of model rates of active clients.
+    global_model_rate: float
+        Model rate of the global model.
+
+    Returns
+    -------
+    Dict
+        model rate to parameters indices relative to global model mapping.
+    """
     unique_client_model_rate = list(set(clients_model_rate))
     print(unique_client_model_rate)
 
@@ -542,6 +644,20 @@ def param_model_rate_mapping(
 
 
 def param_idx_to_local_params(global_parameters, client_param_idx):
+    """Get the local parameters from the list of param indices.
+
+    Parameters
+    ----------
+    global_parameters : Dict
+        The state_dict of global model.
+    client_param_idx : List
+        Local parameters indices with respect to global model.
+
+    Returns
+    -------
+    Dict
+        state dict of local model.
+    """
     local_parameters = OrderedDict()
     for k, v in global_parameters.items():
         parameter_type = k.split(".")[-1]
@@ -561,6 +677,20 @@ def param_idx_to_local_params(global_parameters, client_param_idx):
 
 
 def get_state_dict_from_param(model, parameters):
+    """Get the state dict from model & parameters as np.NDarrays.
+
+    Parameters
+    ----------
+    model : nn.Module
+        The neural network.
+    parameters : np.NDarray
+        Parameters of the model as np.NDarrays.
+
+    Returns
+    -------
+    Dict
+        state dict of model.
+    """
     # Load the parameters into the model
     for param_tensor, param_ndarray in zip(
         model.state_dict(), parameters_to_ndarrays(parameters)

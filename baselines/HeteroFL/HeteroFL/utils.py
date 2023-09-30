@@ -1,3 +1,4 @@
+"""Contains utility functions."""
 from pathlib import Path
 
 import numpy as np
@@ -6,6 +7,20 @@ from hydra.core.hydra_config import HydraConfig
 
 
 def preprocess_input(cfg_model, cfg_data):
+    """Preprocess the input to get input shape, other derivables.
+
+    Parameters
+    ----------
+    cfg_model : DictConfig
+        Retrieve model-related information from the base.yaml configuration in Hydra.
+    cfg_data : DictConfig
+        Retrieve data-related information required to construct the model.
+
+    Returns
+    -------
+    Dict
+        Dictionary contained derived information from config.
+    """
     model_config = {}
     # if cfg_model.model_name == "conv":
     #     model_config["model_name"] =
@@ -25,6 +40,24 @@ def preprocess_input(cfg_model, cfg_data):
 
 
 def make_optimizer(optimizer_name, parameters, lr, weight_decay, momentum):
+    """Make the optimizer with given config.
+
+    Parameters
+    ----------
+    optimizer_name : str
+        Name of the optimizer.
+    parameters : Dict
+        Parameters of the model.
+    lr: float
+        Learning rate of the optimizer.
+    weight_decay: float
+        weight_decay of the optimizer.
+
+    Returns
+    -------
+    torch.optim.Optimizer
+        Optimizer.
+    """
     if optimizer_name == "SGD":
         return torch.optim.SGD(
             parameters, lr=lr, momentum=momentum, weight_decay=weight_decay
@@ -32,17 +65,47 @@ def make_optimizer(optimizer_name, parameters, lr, weight_decay, momentum):
 
 
 def make_scheduler(scheduler_name, optimizer, milestones):
+    """Make the scheduler with given config.
+
+    Parameters
+    ----------
+    scheduler_name : str
+        Name of the scheduler.
+    optimizer : torch.optim.Optimizer
+        Parameters of the model.
+    milestones: List[int]
+        List of epoch indices. Must be increasing.
+
+    Returns
+    -------
+    torch.optim.lr_scheduler.Scheduler
+        scheduler.
+    """
     if scheduler_name == "MultiStepLR":
         return torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=milestones)
 
 
 def get_global_model_rate(model_mode):
+    """Give the global model rate from string(cfg.control.model_mode) .
+
+    Parameters
+    ----------
+    model_mode : str
+        Contains the division of computational complexties among clients.
+
+    Returns
+    -------
+    str
+        global model computational complexity.
+    """
     model_mode = "" + model_mode
     model_mode = model_mode.split("-")[0][0]
     return model_mode
 
 
 class Model_rate_manager:
+    """Control the model rate of clients in case of simulation."""
+
     def __init__(self, model_split_mode, model_split_rate, model_mode):
         self.model_split_mode = model_split_mode
         self.model_split_rate = model_split_rate
@@ -50,6 +113,7 @@ class Model_rate_manager:
         self.model_mode = self.model_mode.split("-")
 
     def create_model_rate_mapping(self, num_users):
+        """Change the client to model rate mapping accordingly."""
         client_model_rate = []
 
         if self.model_split_mode == "fix":
@@ -57,23 +121,11 @@ class Model_rate_manager:
             for m in self.model_mode:
                 mode_rate.append(self.model_split_rate[m[0]])
                 proportion.append(int(m[1:]))
-            # print("King of Kothaaaaa", len(mode_rate))
             num_users_proportion = num_users // sum(proportion)
-            # print("num_of_users_proportion = ", num_users_proportion)
-            # print("num_users = ", num_users, "sum(prportion = )", sum(proportion))
             for i in range(len(mode_rate)):
                 client_model_rate += np.repeat(
                     mode_rate[i], num_users_proportion * proportion[i]
                 ).tolist()
-
-            # print(
-            #     "that minus = ",
-            #     num_users - len(client_model_rate),
-            #     "len of client model_rate = ",
-            #     len(client_model_rate),
-            # )
-            # for i in range(num_users - len(client_model_rate)):
-            #     print(client_model_rate[-1])
             client_model_rate = client_model_rate + [
                 client_model_rate[-1] for _ in range(num_users - len(client_model_rate))
             ]
@@ -100,6 +152,7 @@ class Model_rate_manager:
 
 
 def save_model(model, path):
+    """To save the model in the given path."""
     # print('in save model')
     current_path = HydraConfig.get().runtime.output_dir
     model_save_path = Path(current_path) / path

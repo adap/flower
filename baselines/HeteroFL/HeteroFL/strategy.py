@@ -1,3 +1,4 @@
+"""Flower strategy for HeteroFL."""
 import copy
 from collections import OrderedDict
 from typing import Dict, List, Optional, Tuple, Union
@@ -26,6 +27,13 @@ from utils import make_optimizer, make_scheduler
 
 
 class HeteroFL(fl.server.strategy.Strategy):
+    """HeteroFL strategy.
+
+    Distribute subsets of a global model to clients according to their
+
+    computational complexity and aggregate received models from clients.
+    """
+
     def __init__(
         self,
         fraction_fit: float = 1.0,
@@ -61,6 +69,7 @@ class HeteroFL(fl.server.strategy.Strategy):
         self.scheduler = None
 
     def __repr__(self) -> str:
+        """Return a string representation of the HeteroFL object."""
         return "HeteroFL"
 
     def initialize_parameters(
