@@ -20,11 +20,11 @@ FedExP consistently converges faster than FedAvg and competing baselines on a ra
 
 ## About this baseline
 
-****What’s implemented:**** : The code in this directory replicates the experiments in the paper(FedExP : Speeding Up Federated Averaging via Exptrapolation), which proposed the FedExP strategy. Specifically, it replicates the results for For Cifar10 and Cifar100 in Figure 3.
+****What’s implemented:**** : The code in this directory replicates the experiments in the paper(FedExP : Speeding Up Federated Averaging via Extrapolation), which proposed the FedExP strategy. Specifically, it replicates the results for Cifar10 and Cifar100 in Figure 3. The Code is inspired by the original authors' code : [github.com/Divyansh03/FedExP/](https://github.com/Divyansh03/FedExP/)
 
 ****Datasets:**** : Cifar10 and Cifar100 from PyTorch's Torchvision
 
-****Hardware Setup:**** :warning: *_Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Someone out there might not have access to the same resources you have so, could list the absolute minimum hardware needed to run the experiment in a reasonable amount of time ? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?_*
+****Hardware Setup:**** :warning: *_Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Someone out there might not have access to the same resources you have so, could list the absolute minimum hardware needed to run the experiment in a reasonable amount of time? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?_*
 
 ****Contributors:**** : Omar Mokhtar, Roeia Amr and Yehia Salah
 
@@ -85,9 +85,6 @@ poetry install
 
 # activate the environment
 poetry shell
-
-#install required libs
-# install PyTorch with GPU support. Please note this baseline is very lightweight so it can run fine on a CPU.
 
 ```
 
