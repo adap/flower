@@ -1,8 +1,8 @@
 ---
 title: Gradient-less Federated Gradient Boosting Trees with Learnable Learning Rates
 URL:  https://arxiv.org/abs/2304.07537
-labels: ["cross-silo", "tree-based", "XGBoost", "Horizontal federated XGBoost", "Classification", "Regression", "Tabular Datasets"] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [a9a, cod-rna, ijcnn1, space_ga] # list of datasets you include in your baseline
+labels: ["cross-silo", "tree-based", "XGBoost", "Horizontal federated XGBoost", "Classification", "Regression", "Tabular Datasets"] 
+dataset: [a9a, cod-rna, ijcnn1, space_ga, cpusmall, YearPredictionMSD] 
 ---
 
 # HFedXgboost: Gradient-less Federated Gradient Boosting Trees with Learnable Learning Rates
