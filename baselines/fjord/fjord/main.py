@@ -11,21 +11,25 @@ import torch
 from torch.utils.data import DataLoader
 import flwr as fl
 
-from fjord.utils.logger import Logger
-from fjord.flower.client import (
+from dataset import (
     load_data,
-    FlowerClient,
-    test,
+)
+from client import (
+    FjORDClient,
     get_agg_config
 )
-from fjord.flower.server import (
-    get_parameters,
-    set_parameters,
+from models import (
+    test,
+    get_net,
+)
+from strategy import (
     FjORDFedAVG
 )
-# get_parameters
+
+from fjord.utils.logger import Logger
 from fjord.utils.utils import (
-    get_net,
+    get_parameters,
+    set_parameters,
     save_model
 )
 
@@ -87,7 +91,7 @@ def get_eval_fn(args: Any, model_path: str, testloader: DataLoader,
 def get_client_fn(args: Any, model_path: str, cid_to_max_p: Dict[int, float],
                   config: Dict[str, fl.common.Scalar],
                   train_config: Dict[str, fl.common.Scalar],
-                  device: torch.device) -> Callable[[int], FlowerClient]:
+                  device: torch.device) -> Callable[[int], FjORDClient]:
     """
     Get client function that creates Flower client.
     :param args: CLI/Config Arguments
@@ -98,13 +102,13 @@ def get_client_fn(args: Any, model_path: str, cid_to_max_p: Dict[int, float],
     :param device: Device to be used
     :return: Client function that returns Flower client
     """
-    def client_fn(cid) -> FlowerClient:
+    def client_fn(cid) -> FjORDClient:
         max_p = cid_to_max_p[int(cid)]
         log_config = {
             "loglevel": args.loglevel,
             "logfile": args.logfile,
         }
-        return FlowerClient(
+        return FjORDClient(
             cid=cid,
             model_name=args.model,
             data_path=args.data_path,
@@ -184,7 +188,6 @@ class FjORDBalancedClientManager(fl.server.SimpleClientManager):
 
 
 def main(args: Any) -> None:
-
     torch.manual_seed(args.manual_seed)
     torch.use_deterministic_algorithms(True)
     np.random.seed(args.manual_seed)

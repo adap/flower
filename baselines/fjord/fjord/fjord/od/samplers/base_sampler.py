@@ -4,7 +4,7 @@ from torch.nn import Module
 
 class BaseSampler:
     """
-    Base class implenting p-value sampleing per layer.
+    Base class implementing p-value sampling per layer.
     """
 
     def __init__(self, model: Module, with_layer: bool = False

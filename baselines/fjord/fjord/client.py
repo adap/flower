@@ -1,6 +1,6 @@
-import random
+from typing import List, Dict, Union, Any, Tuple
 from collections import OrderedDict
-from typing import List, Dict, Optional, Union, Any, Tuple
+from copy import deepcopy
 
 import numpy as np
 import flwr as fl
@@ -8,200 +8,21 @@ import torch
 from torch.utils.data import DataLoader
 from torch.nn import Module
 from torch import Tensor
-from torch.optim.lr_scheduler import MultiStepLR
-from torch.optim import Optimizer
-import torchvision
-from torchvision import transforms
-from tqdm import tqdm
-from copy import deepcopy
 
-from fjord.data.fl_cifar10 import FLCifar10, FLCifar10Client
+from models import (
+    train,
+    test,
+    get_net
+)
+from dataset import load_data
+
 from fjord.od.samplers import ODSampler
 from fjord.od.layers import ODConv2d, ODLinear, ODBatchNorm2d
-from fjord.utils.utils import get_net, save_model
+from fjord.utils.utils import save_model
 from fjord.utils.logger import Logger
 
 
-CIFAR_NORMALIZATION = ((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
 FJORD_CONFIG_TYPE = Dict[Union[str, float], List[Union[Dict[str, int], str]]]
-
-
-def get_lr_scheduler(optimiser: Optimizer,
-                     total_epochs: int,
-                     method: Optional[str] = 'static',
-                     ) -> torch.optim.lr_scheduler._LRScheduler:
-    """
-    Get the learning rate scheduler.
-    :param optimiser: The optimiser for which to get the scheduler.
-    :param total_epochs: The total number of epochs.
-    :param method: The method to use for the scheduler.
-        Supports static and cifar10.
-    :return: The learning rate scheduler.
-    """
-    if method == 'static':
-        return MultiStepLR(optimiser, [total_epochs + 1])
-    elif method == 'cifar10':
-        return MultiStepLR(optimiser,
-                           [int(0.5 * total_epochs), int(0.75 * total_epochs)],
-                           gamma=0.1)
-    raise ValueError(f"{method} scheduler not currently supported.")
-
-
-def train(net: Module, trainloader: DataLoader, know_distill: bool,
-          max_p: float, current_round: int, total_rounds: int,
-          p_s: List[float], epochs: int,
-          train_config: Dict[str, fl.common.Scalar]) -> float:
-    """Train the model on the training set.
-    :param net: The model to train.
-    :param trainloader: The training set.
-    :param know_distill: Whether the model being trained
-        uses knowledge distillation.
-    :param max_p: The maximum p value.
-    :param current_round: The current round of training.
-    :param total_rounds: The total number of rounds of training.
-    :param p_s: The p values to use for training.
-    :param epochs: The number of epochs to train for.
-    :param train_config: The training configuration.
-    :return: The loss on the training set.
-    """
-    device = next(net.parameters()).device
-    criterion = torch.nn.CrossEntropyLoss()
-    net.train()
-    if train_config.optimiser == 'sgd':
-        optimizer = torch.optim.SGD(net.parameters(),
-                                    lr=train_config.lr,
-                                    momentum=train_config.momentum,
-                                    nesterov=train_config.nesterov,
-                                    weight_decay=train_config.weight_decay,)
-    else:
-        raise ValueError(f"Optimiser {train_config.optimiser} not supported")
-    lr_scheduler = get_lr_scheduler(optimizer, total_rounds,
-                                    method=train_config.lr_scheduler)
-    for _ in range(current_round):
-        lr_scheduler.step()
-
-    sampler = ODSampler(
-        p_s=p_s,
-        max_p=max_p,
-        model=net,)
-    max_sampler = ODSampler(
-        p_s=[max_p],
-        max_p=max_p,
-        model=net,)
-
-    loss = 0.0
-    samples = 0
-    for _ in range(epochs):
-        for images, labels in tqdm(trainloader):
-            optimizer.zero_grad()
-            target = labels.to(device)
-            images = images.to(device)
-            batch_size = images.shape[0]
-            if know_distill:
-                full_output = net(
-                    images.to(device), sampler=max_sampler)
-                full_loss = criterion(full_output, target)
-                full_loss.backward()
-                target = full_output.detach().softmax(dim=1)
-            partial_loss = criterion(
-                net(images, sampler=sampler), target)
-            partial_loss.backward()
-            optimizer.step()
-            loss += partial_loss.item() * batch_size
-            samples += batch_size
-
-    return loss / samples
-
-
-def test(net: Module, testloader: DataLoader, p_s: List[float]
-         ) -> Tuple[List[float], List[float]]:
-    """Validate the model on the test set.
-    :param net: The model to validate.
-    :param testloader: The test set.
-    :param p_s: The p values to use for validation.
-    :return: The loss and accuracy on the test set."""
-    device = next(net.parameters()).device
-    criterion = torch.nn.CrossEntropyLoss()
-    losses = []
-    accuracies = []
-    net.eval()
-
-    for p in p_s:
-        correct, loss = 0, 0.0
-        p_sampler = ODSampler(
-            p_s=[p],
-            max_p=p,
-            model=net,)
-
-        with torch.no_grad():
-            for images, labels in tqdm(testloader):
-                outputs = net(images.to(device), sampler=p_sampler)
-                labels = labels.to(device)
-                loss += criterion(outputs, labels).item() * images.shape[0]
-                correct += (torch.max(
-                    outputs.data, 1)[1] == labels).sum().item()
-        accuracy = correct / len(testloader.dataset)
-        losses.append(loss / len(testloader.dataset))
-        accuracies.append(accuracy)
-
-    return losses, accuracies
-
-
-def get_transforms() -> Tuple[transforms.Compose, transforms.Compose]:
-    """
-    Get the transforms for the CIFAR10 dataset.
-    :return: The transforms for the CIFAR10 dataset.
-    """
-    transform_train = transforms.Compose([
-            transforms.RandomCrop(32, padding=4),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            transforms.Normalize(*CIFAR_NORMALIZATION),
-        ])
-
-    transform_test = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize(*CIFAR_NORMALIZATION),
-        ])
-
-    return transform_train, transform_test
-
-
-def load_data(path: str, cid: int, train_bs: int,
-              seed: int, eval_bs: int = 1024
-              ) -> Tuple[DataLoader, DataLoader]:
-    """
-    Load the CIFAR10 dataset.
-    :param path: The path to the dataset.
-    :param cid: The client ID.
-    :param train_bs: The batch size for training.
-    :param seed: The seed to use for the random number generator.
-    :param eval_bs: The batch size for evaluation.
-    :return: The training and test sets.
-    """
-    def seed_worker(worker_id):
-        worker_seed = torch.initial_seed() % 2**32
-        np.random.seed(worker_seed)
-        random.seed(worker_seed)
-
-    g = torch.Generator()
-    g.manual_seed(seed)
-    transform_train, transform_test = get_transforms()
-
-    fl_dataset = FLCifar10(
-        root=path, train=True, download=True,
-        transform=transform_train)
-
-    trainset = FLCifar10Client(fl_dataset, client_id=cid)
-    testset = torchvision.datasets.CIFAR10(
-        root=path, train=False, download=True,
-        transform=transform_test)
-
-    train_loader = DataLoader(trainset, batch_size=train_bs, shuffle=True,)
-    #  worker_init_fn=seed_worker, generator=g)  # BUG
-    test_loader = DataLoader(testset, batch_size=eval_bs)
-
-    return train_loader, test_loader
 
 
 def get_layer_from_state_dict(model: Module, state_dict_key: str
@@ -214,7 +35,7 @@ def get_layer_from_state_dict(model: Module, state_dict_key: str
     """
     keys = state_dict_key.split('.')
     module = model
-    # The last keycorresponds to the parameter name
+    # The last keyc orresponds to the parameter name
     # (e.g., weight or bias)
     for key in keys[:-1]:
         module = getattr(module, key)
@@ -227,7 +48,7 @@ def net_to_state_dict_layers(net: Module) -> List[Module]:
     :param net: The model.
     :return: The state_dict of the model."""
     layers = []
-    for key, val in net.state_dict().items():
+    for key, _ in net.state_dict().items():
         layer = get_layer_from_state_dict(net, key)
         layers.append(layer)
     return layers
@@ -282,7 +103,7 @@ def get_agg_config(net: Module, trainloader: DataLoader, p_s: List[float]
 
 
 # Define Flower client
-class FlowerClient(fl.client.NumPyClient):
+class FjORDClient(fl.client.NumPyClient):
     """
     Flower client training on CIFAR-10.
     """

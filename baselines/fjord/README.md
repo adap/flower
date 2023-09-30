@@ -84,18 +84,18 @@ poetry install
 
 ```bash
 cd fjord
-python simulation.py  # without knowledge distillation
+python main.py  # without knowledge distillation
 # or
-python simulation.py +train_mode=fjord_kd  # with knowledge distillation
+python main.py +train_mode=fjord_kd  # with knowledge distillation
 ```
 
 ### Through poetry
 
 ```bash
 cd fjord
-poetry run python simulation.py  # without knowledge distillation
+poetry run python main.py  # without knowledge distillation
 # or
-poetry run python simulation.py +train_mode=fjord_kd  # with knowledge distillation
+poetry run python main.py +train_mode=fjord_kd  # with knowledge distillation
 ```
 
 ## Expected Results

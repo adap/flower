@@ -1,28 +1,31 @@
-from typing import List
-
+from typing import List, OrderedDict
 import os
-import torch
 
-from fjord.od.models import ResNet18
+import numpy as np
+import torch
+from torch.nn import Module
+
 from fjord.utils.logger import Logger
 
 
-def get_net(model_name: str, p_s: List[float],
-            device: torch.device,
-            ) -> torch.nn.Module:
+def get_parameters(net: Module) -> List[np.ndarray]:
     """
-    Initialise model.
-    :param model_name: name of the model
-    :param p_s: list of p-values
-    :param device: device to be used
-    :return: initialised model"""
-    if model_name == 'resnet18':
-        net = ResNet18(
-            od=True, p_s=p_s).to(device)
-    else:
-        raise ValueError(f"Model {model_name} is not supported")
+    Get statedict parameters as a list of numpy arrays.
+    :param net: PyTorch model
+    :return: List of numpy arrays
+    """
+    return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
-    return net
+
+def set_parameters(net: Module, parameters: List[np.ndarray]) -> None:
+    """
+    Load parameters into PyTorch model.
+    :param net: PyTorch model
+    :param parameters: List of numpy arrays
+    """
+    params_dict = zip(net.state_dict().keys(), parameters)
+    state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+    net.load_state_dict(state_dict, strict=True)
 
 
 def save_model(model: torch.nn.Module, model_path: str,

@@ -51,7 +51,8 @@ class Logger(object):
         :param logger_name: name of the logger
         """
         if logger_name in self.registered_loggers:
-            raise ValueError(f"Logger {logger_name} already exists. Call with Logger.get(\"{logger_name}\")")
+            raise ValueError(
+                f"Logger {logger_name} already exists. Call with Logger.get(\"{logger_name}\")")
         else:
             self.name = logger_name
             self.logger = logging.getLogger(self.name)
