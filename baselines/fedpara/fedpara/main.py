@@ -64,7 +64,6 @@ def main(cfg: DictConfig) -> None:
         evaluate_fn=evaluate_fn,
         on_fit_config_fn=get_on_fit_config(),
         initial_parameters=fl.common.ndarrays_to_parameters(get_parameters(net_glob)),
-        net_glob=net_glob,
     )
 
     # 5. Start Simulation
