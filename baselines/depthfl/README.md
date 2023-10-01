@@ -22,7 +22,7 @@ dataset: [CIFAR100]
 
 ****Datasets:**** CIFAR100 from PyTorch's Torchvision
 
-****Hardware Setup:**** These experiments were run on a server with Nvidia 3090 GPUs. Any machine with 1x 8GB GPU or more would be able to run it in a reasonable amount of time. 
+****Hardware Setup:**** These experiments were run on a server with Nvidia 3090 GPUs. Any machine with 1x 8GB GPU or more would be able to run it in a reasonable amount of time. With the default settings, clients make use of 1.3GB of VRAM. Lower `num_gpus` in `client_resources` to train more clients in parallel on your GPU(s). 
 
 ****Contributors:**** Minjae Kim
 
