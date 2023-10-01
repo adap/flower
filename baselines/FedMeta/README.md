@@ -114,5 +114,5 @@ python
 [Now show a figure/table displaying the results of the above command]
 
 # add more commands + plots for additional experiments.
-![](shakespeare/graph_params/result_graph.png)
+![](docs/result_graph.png)
 ```
