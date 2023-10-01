@@ -96,45 +96,29 @@ poetry env use 3.10.6
 poetry install 
 ```
 
-Run `Poetry shell` in your terminal to activate the environment. 
+Run `Poetry shell` in your terminal to activate the environment.
+
 ## Running the Experiments
 
 ```bash
-#to run all the experiments for the centralized model with the original paper config for all the datasets
-#gives the output shown in Table 1
-python -m hfedxgboost.main --config-name "centralized_basline_all_datasets_paper_config"
 
-#to run the experiments for the centralized model  
-python -m hfedxgboost.main --config-name "Centralized_Baseline"
+#to run the experiments for the centralized model  with customized hyperparameters
+#write a command that looks like that in your terminal
+python -m hfedxgboost.main --config-name Centralized_Baseline dataset=<name of the config file that contain the dataset name, task,...> xgboost_params_centralized=<name of the config file containing the xgboot customized hyperparameters>
+#e.g
+#to run the centralized model with customized hyperparameters for cpusmall dataset, it should give 7 test MSE which is better than the 9 MSE that #the default centralized model hyperparameters give.
+python -m hfedxgboost.main --config-name Centralized_Baseline dataset=cpusmall xgboost_params_centralized=cpusmall_xgboost_centralized
 
-#to run the federated version for a9a dataset with 2 clients
-python -m hfedxgboost.main dataset="a9a" clients="a9a_2_clients"
-
+#to run the federated version for any dataset with no.of clients
+python -m hfedxgboost.main dataset=<name of the config file that contain the dataset name, task,...> clients=<name of the config file containing the customized hyperparameters and the no.of clients>
+#e.g
 #to run the federated version for a9a dataset with 5 clients
-python -m hfedxgboost.main dataset="a9a" clients="a9a_5_clients"
+python -m hfedxgboost.main dataset=a9a clients=a9a_5_clients
 
-#to run the federated version for a9a dataset with 10 clients
-python -m hfedxgboost.main dataset="a9a" clients="a9a_10_clients"
-
-#to run the federated version for cod-rna dataset with 2 clients
-python -m hfedxgboost.main dataset="cod_rna" clients="cod_rna_2_clients"
-
-#to run the federated version for cod-rna dataset with 5 clients
-python -m hfedxgboost.main dataset="cod_rna" clients="cod_rna_5_clients"
-
-#to run the federated version for cod-rna dataset with 10 clients
-python -m hfedxgboost.main dataset="cod_rna" clients="cod_rna_10_clients"
-
-#to run the federated version for space_ga dataset with 2 clients
-python -m hfedxgboost.main dataset="space_ga" clients="space_ga_2_clients"
-
-
-#to run the federated version for space_ga dataset with 5 clients
-python -m hfedxgboost.main dataset="space_ga" clients="space_ga_5_clients"
-
-#to run the federated version for space_ga dataset with 10 clients
-python -m hfedxgboost.main dataset="space_ga" clients="space_ga_10_clients"
-
+#if you wish to change any parameters from any config file from the terminal, then you should follow this formula
+python -m hfedxgboost.main folder=config_file_name folder.parameter_name=its new value
+#e.g:
+python -m hfedxgboost.main --config-name Centralized_Baseline dataset=abalone xgboost_params_centralized=abalone_xgboost_centralized xgboost_params_centralized.max_depth=8 dataset.train_ratio=.80
 ```
 
 
@@ -142,6 +126,10 @@ python -m hfedxgboost.main dataset="space_ga" clients="space_ga_10_clients"
 
 
 ```bash
+#to run all the experiments for the centralized model with the original paper config for all the datasets
+#gives the output shown in Table 1
+python -m hfedxgboost.main --config-name "centralized_basline_all_datasets_paper_config"
+
 #results for a9a dataset in table 2 
 python -m hfedxgboost.main --multirun clients="a9a_2_clients","a9a_5_clients","a9a_10_clients" dataset=a9a
 
