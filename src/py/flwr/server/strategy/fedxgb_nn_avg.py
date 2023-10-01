@@ -17,7 +17,7 @@
 Strategy in the horizontal setting based on building Neural Network and averaging on
 prediction outcomes.
 
-Paper: Coming
+Paper: arxiv.org/abs/2304.07537
 """
 
 
@@ -34,6 +34,11 @@ from .fedavg import FedAvg
 
 class FedXgbNnAvg(FedAvg):
     """Configurable FedXgbNnAvg strategy implementation."""
+    def __init__(self, *args, **kwargs):
+        """Federated XGBoost [Ma et al., 2023] strategy
+            Implementation based on https://arxiv.org/abs/2304.07537 
+        """ 
+        super().__init__(*args, **kwargs)
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
