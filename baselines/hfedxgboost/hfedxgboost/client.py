@@ -63,9 +63,7 @@ class FL_Client(fl.client.Client):
         self.net = CNN(cfg)
 
         # determine device
-        self.device = (
-            "cpu"  # torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        )
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         if self.task_type == "BINARY":
             self.metric_fn = Accuracy(task="binary")
             self.metric_name = "accuracy"
