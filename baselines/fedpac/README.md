@@ -9,7 +9,7 @@ dataset: [dataset1, dataset2] # list of datasets you include in your baseline
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
-**Paper:** https://openreview.net/forum?id=SXZr8aDKia
+**Paper:** [openreview.net/forum?id=SXZr8aDKia](https://openreview.net/forum?id=SXZr8aDKia)
 
 ****Authors:**** Jian Xu, Xinyi Tong, Shao-Lun Huang
 
