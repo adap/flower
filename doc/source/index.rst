@@ -1,6 +1,9 @@
 Flower Framework Documentation
 ==============================
 
+.. meta::
+   :description: Check out the documentation of the main Flower Framework enabling easy Python development for Federated Learning.
+
 Welcome to Flower's documentation. `Flower <https://flower.dev>`_ is a friendly federated learning framework.
 
 
@@ -32,11 +35,11 @@ A learning-oriented series of federated learning tutorials, the best place to st
    :maxdepth: 1
    :caption: Tutorial
 
-   tutorial-what-is-federated-learning
-   tutorial-get-started-with-flower-pytorch
-   tutorial-use-a-federated-learning-strategy-pytorch
-   tutorial-build-a-strategy-from-scratch-pytorch
-   tutorial-customize-the-client-pytorch
+   tutorial-series-what-is-federated-learning
+   tutorial-series-get-started-with-flower-pytorch
+   tutorial-series-use-a-federated-learning-strategy-pytorch
+   tutorial-series-build-a-strategy-from-scratch-pytorch
+   tutorial-series-customize-the-client-pytorch
 
 .. toctree::
    :maxdepth: 1
@@ -58,17 +61,15 @@ A learning-oriented series of federated learning tutorials, the best place to st
 
 QUICKSTART TUTORIALS: :doc:`PyTorch <tutorial-quickstart-pytorch>` | :doc:`TensorFlow <tutorial-quickstart-tensorflow>` | :doc:`🤗 Transformers <tutorial-quickstart-huggingface>` | :doc:`JAX <tutorial-quickstart-jax>` | :doc:`Pandas <tutorial-quickstart-pandas>` | :doc:`fastai <tutorial-quickstart-fastai>` | :doc:`PyTorch Lightning <tutorial-quickstart-pytorch-lightning>` | :doc:`MXNet <tutorial-quickstart-mxnet>` | :doc:`scikit-learn <tutorial-quickstart-scikitlearn>` | :doc:`XGBoost <tutorial-quickstart-xgboost>` | :doc:`Android <tutorial-quickstart-android>` | :doc:`iOS <tutorial-quickstart-ios>`
 
-.. grid:: 2
+We also made video tutorials for PyTorch:
 
-  .. grid-item-card::  PyTorch
+..  youtube:: jOmmuzMIQ4c
+   :width: 80%
 
-    ..  youtube:: jOmmuzMIQ4c
-       :width: 100%
+And TensorFlow:
 
-  .. grid-item-card::  TensorFlow
-
-    ..  youtube:: FGTc2TQq7VM
-       :width: 100%
+..  youtube:: FGTc2TQq7VM
+   :width: 80%
 
 How-to guides
 ~~~~~~~~~~~~~
