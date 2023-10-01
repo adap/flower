@@ -61,7 +61,14 @@ dataset: [FEMNIST, SHAKESPEARE] # list of datasets you include in your baseline
 
 
 ## Environment Setup
-We will update after testing.
+```bash
+#Environment Setup
+Poetry install
+Poetry shell
+Pip install torch torch vision
+Pip install matplotlib
+pip install scikit-learn
+```
 
 ## Running the Experiments
 
@@ -72,7 +79,7 @@ We will update after testing.
 
 #SHAKESEPEARE dataset Download command for these experiments
 ./preprocess.sh -s niid --sf 0.16 -k 0 -t sample
-````
+```
 
 ****Start experiments**** : 
 ```bash  
