@@ -42,7 +42,7 @@ class FlowerNumPyClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config) -> Tuple[NDArrays, int, Dict]:
         """Implement distributed fit function for a given client."""
-        print("cid = {}".format(self.cid))
+        print(f"cid = {self.cid}")
         set_parameters(self.net, parameters)
         self.client_train_settings["lr"] = config["lr"]
         train(

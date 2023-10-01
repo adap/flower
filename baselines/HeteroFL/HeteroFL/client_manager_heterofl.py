@@ -10,19 +10,19 @@ import torch
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.criterion import Criterion
-from utils import Model_rate_manager
+from utils import ModelRateManager
 
 
-class client_manager_HeteroFL(fl.server.ClientManager):
+class ClientManagerHeteroFL(fl.server.ClientManager):
     """Provides a pool of available clients."""
 
     def __init__(
         self,
-        model_rate_manager: Model_rate_manager = None,
-        clients_to_model_rate_mapping: List[float] = None,
-        client_label_split: torch.tensor = None,
-        seed=42,
+        model_rate_manager: ModelRateManager = None,
+        clients_to_model_rate_mapping: Optional[list[float]] = None,
+        client_label_split: Optional[list[torch.tensor]] = None,
     ) -> None:
+        super().__init__()
         self.clients: Dict[str, ClientProxy] = {}
 
         self.is_simulation = False
@@ -38,14 +38,11 @@ class client_manager_HeteroFL(fl.server.ClientManager):
                 len(clients_to_model_rate_mapping)
             )
             # copy self.clients_to_model_rate_mapping , ans
-            for i in range(len(ans)):
-                self.clients_to_model_rate_mapping[i] = ans[i]
+            for i, model_rate in enumerate(ans):
+                self.clients_to_model_rate_mapping[i] = model_rate
 
         # shall handle in case of not_simulation...
         self.client_label_split = client_label_split
-
-        # control the randomness of sampling the clients
-        # random.seed(seed)
 
         self._cv = threading.Condition()
 
@@ -109,10 +106,11 @@ class client_manager_HeteroFL(fl.server.ClientManager):
 
         self.clients[client.cid] = client
 
-        if self.is_simulation is False:
-            prop = client.get_properties(None, timeout=86400)
-            self.clients_to_model_rate_mapping[int(client.cid)] = prop["model_rate"]
-            self.client_label_split[int(client.cid)] = prop["label_split"]
+        # in case of not a simulation, this type of method can be used
+        # if self.is_simulation is False:
+        #     prop = client.get_properties(None, timeout=86400)
+        #     self.clients_to_model_rate_mapping[int(client.cid)] = prop["model_rate"]
+        #     self.client_label_split[int(client.cid)] = prop["label_split"]
 
         with self._cv:
             self._cv.notify_all()
@@ -130,8 +128,6 @@ class client_manager_HeteroFL(fl.server.ClientManager):
         """
         if client.cid in self.clients:
             del self.clients[client.cid]
-            del self.clients_to_model_rate_mapping[int(client.cid)]
-            del self.client_label_split[int(client.cid)]
 
             with self._cv:
                 self._cv.notify_all()
@@ -158,8 +154,8 @@ class client_manager_HeteroFL(fl.server.ClientManager):
                     self.num_available()
                 )
                 # copy self.clients_to_model_rate_mapping , ans
-                for i in range(len(ans)):
-                    self.clients_to_model_rate_mapping[i] = ans[i]
+                for i, model_rate in enumerate(ans):
+                    self.clients_to_model_rate_mapping[i] = model_rate
             return
 
         # to be handled in case of not a simulation, i.e. to get the properties

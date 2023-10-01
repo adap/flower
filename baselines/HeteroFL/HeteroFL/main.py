@@ -8,12 +8,12 @@ import hydra
 import models
 import server
 import torch
-from client_manager_HeteroFL import client_manager_HeteroFL
+from client_manager_heterofl import ClientManagerHeteroFL
 from dataset import load_datasets
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 from strategy import HeteroFL
-from utils import Model_rate_manager, get_global_model_rate, preprocess_input
+from utils import ModelRateManager, get_global_model_rate, preprocess_input
 
 
 @hydra.main(config_path="conf", config_name="base.yaml", version_base=None)
@@ -49,10 +49,10 @@ def main(cfg: DictConfig) -> None:
     model_mode = cfg.control.model_mode
 
     client_to_model_rate_mapping = [0 for _ in range(cfg.num_clients)]
-    model_rate_manager = Model_rate_manager(
+    model_rate_manager = ModelRateManager(
         model_split_mode, model_split_rate, model_mode
     )
-    client_manager = client_manager_HeteroFL(
+    client_manager = ClientManagerHeteroFL(
         model_rate_manager, client_to_model_rate_mapping, client_label_split=label_split
     )
 

@@ -1,11 +1,11 @@
 """Functions for dataset download and processing."""
 
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
-import torchvision.transforms as transforms
 from torch.utils.data import ConcatDataset, Dataset, Subset, random_split
+from torchvision import transforms
 from torchvision.datasets import CIFAR10, MNIST
 
 # import hydra
@@ -72,7 +72,7 @@ def _partition_data(
 ) -> Tuple[Dataset, List[Dataset], List[torch.tensor], List[Dataset], Dataset]:
     trainset, testset = _download_data(dataset_name)
 
-    if dataset_name == "MNIST" or dataset_name == "CIFAR10":
+    if dataset_name in ("MNIST", "CIFAR10"):
         classes_size = 10
     # else:
     # dataset_classes_size needs to be calculated
@@ -123,15 +123,15 @@ def non_iid(
     num_clients: int,
     shard_per_user: int,
     classes_size: int,
-    label_split: List = None,
+    label_split=None,
     seed=42,
 ) -> Tuple[List[Dataset], List]:
     """Non-IID partition of dataset among clients."""
     label = np.array(dataset.targets)
-    data_split = {i: [] for i in range(num_clients)}
-    label_idx_split = {}
+    data_split: Dict[int, List] = {i: [] for i in range(num_clients)}
+    label_idx_split: Dict = {}
 
-    for i in range(len(label)):
+    for i, _ in enumerate(label):
         label_i = label[i].item()
         if label_i not in label_idx_split:
             label_idx_split[label_i] = []
@@ -163,7 +163,7 @@ def non_iid(
         ].tolist()
         label_split = np.array(label_split).reshape((num_clients, -1)).tolist()
 
-        for i in range(len(label_split)):
+        for i, _ in enumerate(label_split):
             label_split[i] = np.unique(label_split[i]).tolist()
 
     for i in range(num_clients):
@@ -227,6 +227,7 @@ def _sort_by_class(
     return sorted_dataset
 
 
+# pylint: disable=too-many-locals, too-many-arguments
 def _power_law_split(
     sorted_trainset: Dataset,
     num_partitions: int,
@@ -235,14 +236,41 @@ def _power_law_split(
     mean: float = 0.0,
     sigma: float = 2.0,
 ) -> Dataset:
+    """Partition the dataset following a power-law distribution. It follows the.
+
+    implementation of Li et al 2020: https://arxiv.org/abs/1812.06127 with default
+    values set accordingly.
+
+    Parameters
+    ----------
+    sorted_trainset : Dataset
+        The training dataset sorted by label/class.
+    num_partitions: int
+        Number of partitions to create
+    num_labels_per_partition: int
+        Number of labels to have in each dataset partition. For
+        example if set to two, this means all training examples in
+        a given partition will be long to the same two classes. default 2
+    min_data_per_partition: int
+        Minimum number of datapoints included in each partition, default 10
+    mean: float
+        Mean value for LogNormal distribution to construct power-law, default 0.0
+    sigma: float
+        Sigma value for LogNormal distribution to construct power-law, default 2.0
+
+    Returns
+    -------
+    Dataset
+        The partitioned training dataset.
+    """
     targets = sorted_trainset.targets
-    full_idx = range(len(targets))
+    full_idx = list(range(len(targets)))
 
     class_counts = np.bincount(sorted_trainset.targets)
     labels_cs = np.cumsum(class_counts)
     labels_cs = [0] + labels_cs[:-1].tolist()
 
-    partitions_idx = []
+    partitions_idx: List[List[int]] = []
     num_classes = len(np.bincount(targets))
     hist = np.zeros(num_classes, dtype=np.int32)
 
@@ -272,8 +300,9 @@ def _power_law_split(
         (num_classes, int(num_partitions / num_classes), num_labels_per_partition),
     )
     remaining_per_class = class_counts - hist
-    # obtain how many samples each partition should be assigned
-    # for each of the labels it contains
+    # obtain how many samples each partition should be assigned for each of the
+    # labels it contains
+    # pylint: disable=too-many-function-args
     probs = (
         remaining_per_class.reshape(-1, 1, 1)
         * probs

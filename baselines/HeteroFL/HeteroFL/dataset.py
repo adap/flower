@@ -1,7 +1,8 @@
 """Utilities for creation of DataLoaders for clients and server."""
 
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
+import torch
 from dataset_preparation import _partition_data
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
@@ -11,7 +12,9 @@ def load_datasets(  # pylint: disable=too-many-arguments
     config: DictConfig,
     num_clients: int,
     seed: Optional[int] = 42,
-) -> Tuple[DataLoader, DataLoader, DataLoader, DataLoader]:
+) -> Tuple[
+    DataLoader, List[DataLoader], List[torch.tensor], List[DataLoader], DataLoader
+]:
     """Create the dataloaders to be fed into the model.
 
     Parameters

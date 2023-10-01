@@ -5,6 +5,8 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import flwr as fl
 import torch
+import torch.nn as nn
+from client_manager_heterofl import ClientManagerHeteroFL
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -36,16 +38,16 @@ class HeteroFL(fl.server.strategy.Strategy):
 
     def __init__(
         self,
+        model_name: str,
+        net: nn.Module,
+        optim_scheduler_settings: Dict,
+        global_model_rate: float,
+        evaluate_fn=None,
         fraction_fit: float = 1.0,
         fraction_evaluate: float = 1.0,
         min_fit_clients: int = 2,
         min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
-        model_name=None,
-        net=None,
-        optim_scheduler_settings=None,
-        global_model_rate=None,
-        evaluate_fn=None,
     ) -> None:
         super().__init__()
         self.fraction_fit = fraction_fit
@@ -60,13 +62,13 @@ class HeteroFL(fl.server.strategy.Strategy):
         self.model_name = model_name
         self.net = net
         self.optim_scheduler_settings = optim_scheduler_settings
-        self.local_param_model_rate = None
         self.global_model_rate = global_model_rate
-        self.active_cl_mr = None
-        self.active_cl_labels = None
+        # self.local_param_model_rate = None
+        # self.active_cl_mr = None
+        # self.active_cl_labels = []
         # required for scheduling the lr
-        self.optimizer = (None,)
-        self.scheduler = None
+        # self.optimizer = (None,)
+        # self.scheduler = None
 
     def __repr__(self) -> str:
         """Return a string representation of the HeteroFL object."""
@@ -78,20 +80,20 @@ class HeteroFL(fl.server.strategy.Strategy):
         """Initialize global model parameters."""
         # self.make_client_to_model_rate_mapping(client_manager)
         # net = conv(model_rate = 1)
+        clnt_mngr_heterofl: ClientManagerHeteroFL = client_manager
         ndarrays = get_parameters(self.net)
-        # print(self.net.state_dict())
         self.local_param_model_rate = param_model_rate_mapping(
             self.model_name,
             self.net.state_dict(),
-            client_manager.get_all_clients_to_model_mapping(),
+            clnt_mngr_heterofl.get_all_clients_to_model_mapping(),
             self.global_model_rate,
         )
 
-        self.active_cl_labels = client_manager.client_label_split.copy()
+        self.active_cl_labels = clnt_mngr_heterofl.client_label_split.copy()
         self.optimizer = make_optimizer(
             self.optim_scheduler_settings["optimizer"],
             self.net.parameters(),
-            lr=self.optim_scheduler_settings["lr"],
+            learning_rate=self.optim_scheduler_settings["lr"],
             momentum=self.optim_scheduler_settings["momentum"],
             weight_decay=self.optim_scheduler_settings["weight_decay"],
         )
@@ -106,21 +108,22 @@ class HeteroFL(fl.server.strategy.Strategy):
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
+        clnt_mngr_heterofl: ClientManagerHeteroFL = client_manager
         print("in configure fit , server round no. = {}".format(server_round))
         # Sample clients
         # no need to change this
         sample_size, min_num_clients = self.num_fit_clients(
-            client_manager.num_available()
+            clnt_mngr_heterofl.num_available()
         )
 
         # for sampling we pass the criterion to select the required clients
-        clients = client_manager.sample(
+        clients = clnt_mngr_heterofl.sample(
             num_clients=sample_size,
             min_num_clients=min_num_clients,
         )
 
         # update client model rate mapping
-        client_manager.update(server_round)
+        clnt_mngr_heterofl.update(server_round)
 
         global_parameters = get_state_dict_from_param(self.net, parameters)
 
@@ -131,7 +134,7 @@ class HeteroFL(fl.server.strategy.Strategy):
         lr = self.optimizer.param_groups[0]["lr"]
         print(f"lr = {lr}")
         for client in clients:
-            model_rate = client_manager.get_client_to_model_mapping(client.cid)
+            model_rate = clnt_mngr_heterofl.get_client_to_model_mapping(client.cid)
             client_param_idx = self.local_param_model_rate[model_rate]
             local_param = param_idx_to_local_params(global_parameters, client_param_idx)
             self.active_cl_mr[client.cid] = model_rate
@@ -163,15 +166,24 @@ class HeteroFL(fl.server.strategy.Strategy):
                 )
             )
 
-        local_parameters = [fit_res.parameters for _, fit_res in results]
+        local_parameters_Param = [fit_res.parameters for _, fit_res in results]
+        local_parameters_ndarrays = [
+            parameters_to_ndarrays(local_parameters_Param[i])
+            for i in range(len(local_parameters_Param))
+        ]
+        local_parameters: List[OrderedDict] = [
+            OrderedDict() for _ in range(len(local_parameters_Param))
+        ]
         for i in range(len(results)):
-            local_parameters[i] = parameters_to_ndarrays(local_parameters[i])
+            # local_parameters_ndarrays[i] = parameters_to_ndarrays(
+            #     local_parameters_Param[i]
+            # )
             j = 0
-            temp_od = OrderedDict()
+            # temp_od = OrderedDict()
             for k, _ in gl_model.items():
-                temp_od[k] = local_parameters[i][j]
+                local_parameters[i][k] = local_parameters_ndarrays[i][j]
                 j += 1
-            local_parameters[i] = temp_od
+            # local_parameters[i] = temp_od
 
         count = OrderedDict()
         if "conv" in self.model_name:
@@ -313,7 +325,7 @@ class HeteroFL(fl.server.strategy.Strategy):
         #     )
         # return evaluate_configurations
 
-        return None
+        return []
 
         # return self.configure_fit(server_round , parameters , client_manager)
 
@@ -344,7 +356,7 @@ class HeteroFL(fl.server.strategy.Strategy):
         # print(f"\npaneer lababdar {metrics_aggregated}")
         # return loss_aggregated, metrics_aggregated
 
-        return None
+        return None, {}
 
     def evaluate(
         self, server_round: int, parameters: Parameters

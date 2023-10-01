@@ -39,7 +39,7 @@ def preprocess_input(cfg_model, cfg_data):
     return model_config
 
 
-def make_optimizer(optimizer_name, parameters, lr, weight_decay, momentum):
+def make_optimizer(optimizer_name, parameters, learning_rate, weight_decay, momentum):
     """Make the optimizer with given config.
 
     Parameters
@@ -48,7 +48,7 @@ def make_optimizer(optimizer_name, parameters, lr, weight_decay, momentum):
         Name of the optimizer.
     parameters : Dict
         Parameters of the model.
-    lr: float
+    learning_rate: float
         Learning rate of the optimizer.
     weight_decay: float
         weight_decay of the optimizer.
@@ -58,10 +58,12 @@ def make_optimizer(optimizer_name, parameters, lr, weight_decay, momentum):
     torch.optim.Optimizer
         Optimizer.
     """
+    optimizer = None
     if optimizer_name == "SGD":
-        return torch.optim.SGD(
-            parameters, lr=lr, momentum=momentum, weight_decay=weight_decay
+        optimizer = torch.optim.SGD(
+            parameters, lr=learning_rate, momentum=momentum, weight_decay=weight_decay
         )
+    return optimizer
 
 
 def make_scheduler(scheduler_name, optimizer, milestones):
@@ -81,8 +83,12 @@ def make_scheduler(scheduler_name, optimizer, milestones):
     torch.optim.lr_scheduler.Scheduler
         scheduler.
     """
+    scheduler = None
     if scheduler_name == "MultiStepLR":
-        return torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=milestones)
+        scheduler = torch.optim.lr_scheduler.MultiStepLR(
+            optimizer, milestones=milestones
+        )
+    return scheduler
 
 
 def get_global_model_rate(model_mode):
@@ -103,7 +109,7 @@ def get_global_model_rate(model_mode):
     return model_mode
 
 
-class Model_rate_manager:
+class ModelRateManager:
     """Control the model rate of clients in case of simulation."""
 
     def __init__(self, model_split_mode, model_split_rate, model_mode):
@@ -118,25 +124,25 @@ class Model_rate_manager:
 
         if self.model_split_mode == "fix":
             mode_rate, proportion = [], []
-            for m in self.model_mode:
-                mode_rate.append(self.model_split_rate[m[0]])
-                proportion.append(int(m[1:]))
+            for comp_level_prop in self.model_mode:
+                mode_rate.append(self.model_split_rate[comp_level_prop[0]])
+                proportion.append(int(comp_level_prop[1:]))
             num_users_proportion = num_users // sum(proportion)
-            for i in range(len(mode_rate)):
+            for i, comp_level in enumerate(mode_rate):
                 client_model_rate += np.repeat(
-                    mode_rate[i], num_users_proportion * proportion[i]
+                    comp_level, num_users_proportion * proportion[i]
                 ).tolist()
             client_model_rate = client_model_rate + [
                 client_model_rate[-1] for _ in range(num_users - len(client_model_rate))
             ]
-            return client_model_rate
+            # return client_model_rate
 
         elif self.model_split_mode == "dynamic":
             mode_rate, proportion = [], []
 
-            for m in self.model_mode:
-                mode_rate.append(self.model_split_rate[m[0]])
-                proportion.append(int(m[1:]))
+            for comp_level_prop in self.model_mode:
+                mode_rate.append(self.model_split_rate[comp_level_prop[0]])
+                proportion.append(int(comp_level_prop[1:]))
 
             proportion = (np.array(proportion) / sum(proportion)).tolist()
 
@@ -145,10 +151,12 @@ class Model_rate_manager:
             ).tolist()
             client_model_rate = np.array(mode_rate)[rate_idx]
 
-            return client_model_rate
+            # return client_model_rate
 
         else:
-            return None
+            raise ValueError("Not valid model split mode")
+
+        return client_model_rate
 
 
 def save_model(model, path):

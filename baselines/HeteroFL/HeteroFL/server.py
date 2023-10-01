@@ -4,9 +4,9 @@ from collections import OrderedDict
 from typing import Callable, Dict, List, Optional, Tuple
 
 import torch
-import torch.nn as nn
 from flwr.common.typing import NDArrays, Scalar
 from models import test
+from torch import nn
 from torch.utils.data import DataLoader
 from utils import save_model
 
@@ -58,41 +58,44 @@ def gen_evaluate_fn(
         net.to(device)
 
         if server_round % 100 == 0:
-            save_model(net, "model_after_round_{}.pth".format(server_round))
+            save_model(net, f"model_after_round_{server_round}.pth")
 
         print("start of testing")
         start_time = time.time()
         with torch.no_grad():
             net.train(True)
-            for input in trainloader:
+            for images, labels in trainloader:
                 input_dict = {}
-                input_dict["img"] = input[0].to(device)
-                input_dict["label"] = input[1].to(device)
+                input_dict["img"] = images.to(device)
+                input_dict["label"] = labels.to(device)
                 net(input_dict)
-        end_time = time.time()
-        print(f"end of stat, time taken = {start_time - end_time}")
+        print(f"end of stat, time taken = {time.time() - start_time}")
 
-        local_loss = 0
-        local_accuracy = 0
-        for i in range(len(clients_testloaders)):
-            client_loss, client_accuracy = test(
+        local_metrics = {}
+        local_metrics["loss"] = 0
+        local_metrics["accuracy"] = 0
+        for i, clnt_tstldr in enumerate(clients_testloaders):
+            client_test_res = test(
                 net,
-                clients_testloaders[i],
+                clnt_tstldr,
                 label_split[i].type(torch.int),
                 device=device,
             )
-            local_loss += client_loss
-            local_accuracy += client_accuracy
+            local_metrics["loss"] += client_test_res[0]
+            local_metrics["accuracy"] += client_test_res[1]
 
-        global_loss, global_accuracy = test(net, testloader, device=device)
+        global_metrics = {}
+        global_metrics["loss"], global_metrics["accuracy"] = test(
+            net, testloader, device=device
+        )
 
         # return statistics
-        print(f"global accuracy = {global_accuracy}")
-        print(f"local_loss = {local_loss}, local_accuracy = {local_accuracy}")
-        return global_loss, {
-            "global_accuracy": global_accuracy,
-            "local_loss": local_loss,
-            "local_accuracy": local_accuracy,
+        print(f"global accuracy = {global_metrics['accuracy']}")
+        print(f"local_accuracy = {local_metrics['accuracy']}")
+        return global_metrics["loss"], {
+            "global_accuracy": global_metrics["accuracy"],
+            "local_loss": local_metrics["loss"],
+            "local_accuracy": local_metrics["accuracy"],
         }
 
     return evaluate
