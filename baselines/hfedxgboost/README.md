@@ -74,6 +74,8 @@ For the centralized model, I mostly used the paper's hyperparameters as they giv
 | num_parallel_tree | 1 |
 | min_child_weight | 1 |
 
+To help with the fine-tuning of the hyperparameters process, there are 2 classes in the utils.py that write down the used hyperparameters in the experiments and the results for that experiment in 2 separate CSV files, some of the hyperparameters used in the experiments done during building this baseline can be found in results.csv and results_centralized.csv files.
+
 ## Environment Setup
 
 #### Steps to set up env:
