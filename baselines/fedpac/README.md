@@ -21,8 +21,8 @@ dataset: [dataset1, dataset2] # list of datasets you include in your baseline
 ****What’s implemented:**** The code in this directory replicates the experiments in *Personalized Federated Learning with Feature Alignment and Classifier Collaboration* (Xu et al., 2023) for EMNIST and CIFAR10, which proposed the FedPAC algorithm. Concretely, it replicates the results for EMNIST and CIFAR10 in Table 1.
 
 ****Datasets:**** EMNIST and CIFAR10 from PyTorch's Torchvision
-
-****Hardware Setup:**** These experiments were run on a desktop machine with 24 CPU threads. Any machine with 4 CPU cores or more would be able to run it in a reasonable amount of time. Note: we install PyTorch with GPU support but by default, the entire experiment runs on CPU-only mode.
+<!-- 
+****Hardware Setup:**** These experiments were run on a desktop machine with 24 CPU threads. Any machine with 4 CPU cores or more would be able to run it in a reasonable amount of time. Note: we install PyTorch with GPU support but by default, the entire experiment runs on CPU-only mode. -->
 
 ****Contributors:**** Apsal S Kalathukunnel
 
@@ -62,8 +62,6 @@ poetry install
 # activate the environment
 poetry shell
 
-# install PyTorch with GPU support. Please note this baseline is very lightweight so it can run fine on a CPU.
-pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116
 ```
 
 
