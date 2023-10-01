@@ -14,7 +14,6 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
-from fedpac.dataset import load_datasets
 from fedpac.models import test, train
 from fedpac.utils import get_centroid
 
@@ -58,19 +57,12 @@ class FlowerClient(fl.client.NumPyClient):
         self.net.load_state_dict(state_dict, strict=True)
 
 
-    # def get_class_sizes(self):
-    #     dataloader = self.trainloader
-    #     sizes = torch.zeros(self.num_classes)
-    #     for images, labels  in dataloader:
-    #         for i in range(self.num_classes):
-    #             sizes[i] = sizes[i] + (i == labels).sum()
-    #     return sizes
     def get_class_sizes(self):
         dataloader = self.trainloader
         sizes = torch.zeros(self.num_classes)
         for images, labels  in dataloader:
-            for label in labels:
-                sizes[label]+= 1
+            for i in range(self.num_classes):
+                sizes[i] = sizes[i] + (i == labels).sum()
         return sizes
 
     def get_class_fractions(self):

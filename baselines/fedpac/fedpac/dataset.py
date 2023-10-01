@@ -4,7 +4,7 @@ import torch
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader, random_split
 
-from fedpac.dataset_preparation import partition_cifar_data
+from fedpac.dataset_preparation import partition_cifar_data, partition_emnist_data
 from collections import defaultdict
 
 
@@ -39,13 +39,22 @@ def load_datasets(  # pylint: disable=too-many-arguments
     """
     print(f"Dataset partitioning config: {config}")
     dataset = config.name
-    datasets, testset = partition_cifar_data(
-        dataset,
-        num_clients,
-        iid=config.iid,
-        s = config.s,
-        seed=seed,
-    )
+    if dataset=='cifar10':
+        datasets, testset = partition_cifar_data(
+            dataset,
+            num_clients,
+            iid=config.iid,
+            s = config.s,
+            seed=seed,
+        )
+    elif dataset=='emnist':
+        datasets, testset = partition_emnist_data(
+            dataset,
+            num_clients,
+            iid=config.iid,
+            s = config.s,
+            seed=seed,
+        )        
     # Split each partition into train/val and create DataLoader
     trainloaders = []
     valloaders = []
