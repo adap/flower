@@ -96,5 +96,6 @@ def main(cfg: DictConfig) -> None:
     plot_from_pkl(directory=f"./{cfg.data.data}/graph_params")
     print("................")
 
+
 if __name__ == "__main__":
     main()

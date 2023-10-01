@@ -156,7 +156,3 @@ def plot_from_pkl(directory="."):
     plt.savefig(save_path)
 
     plt.show()
-
-
-if __name__ == '__main__':
-    plot_from_pkl('./femnist/graph_params')
