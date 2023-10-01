@@ -6,7 +6,7 @@ config. In this way, swapping your model for  another one can be done without ch
 the python code at all
 """
 
-from typing import Tuple
+from typing import Tuple, List
 
 import torch
 import torch.nn as nn
@@ -15,6 +15,15 @@ from copy import deepcopy
 
 
 class StackedLSTM(nn.Module):
+    """
+    StackedLSTM architecture.
+
+  As described in Fei Chen 2018 paper :
+
+  [FedMeta: Federated Meta-Learning with Fast Convergence and Efficient Communication]
+  (https://arxiv.org/abs/1802.07876)
+
+  """
     def __init__(self):
         super(StackedLSTM, self).__init__()
 
@@ -23,6 +32,20 @@ class StackedLSTM(nn.Module):
         self.fc = nn.Linear(256, 80)
 
     def forward(self, text):
+        """
+        Forward pass of the StackedLSTM.
+
+        Parameters
+        ----------
+        text : torch.Tensor
+            Input Tensor that will pass through the network
+
+        Returns
+        -------
+        torch.Tensor
+            The resulting Tensor after it has passed through the network
+
+        """
         embedded = self.embedding(text)
         self.lstm.flatten_parameters()
         lstm_out, _ = self.lstm(embedded)
@@ -31,12 +54,14 @@ class StackedLSTM(nn.Module):
 
 
 class CNN_network(nn.Module):
-    """Convolutional Neural Network architecture.
+    """
+    Convolutional Neural Network architecture.
 
-    As described in McMahan 2017 paper :
+    As described in Fei Chen 2018 paper :
 
-    [Communication-Efficient Learning of Deep Networks from
-    Decentralized Data] (https://arxiv.org/pdf/1602.05629.pdf)
+    [FedMeta: Federated Meta-Learning with Fast Convergence and Efficient Communication]
+    (https://arxiv.org/abs/1802.07876)
+
     """
 
     def __init__(self) -> None:
@@ -48,20 +73,19 @@ class CNN_network(nn.Module):
         self.linear1 = nn.Linear(7 * 7 * 64, 2048)
         self.linear2 = nn.Linear(2048, 62)
 
-
-
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass of the CNN.
 
         Parameters
         ----------
-        input_tensor : torch.Tensor
+        x : torch.Tensor
             Input Tensor that will pass through the network
 
         Returns
         -------
         torch.Tensor
             The resulting Tensor after it has passed through the network
+
         """
         x = torch.relu(self.conv1(x))
         x = self.maxpool1(x)
@@ -73,7 +97,7 @@ class CNN_network(nn.Module):
         return x
 
 
-def train(  # pylint: disable=too-many-arguments
+def train(
         net: nn.Module,
         trainloader: DataLoader,
         testloader: DataLoader,
@@ -81,7 +105,8 @@ def train(  # pylint: disable=too-many-arguments
         epochs: int,
         learning_rate: float,
 ) -> Tuple[float]:
-    """Train the network on the training set.
+    """
+    Train the network on the training set.
 
     Parameters
     ----------
@@ -89,12 +114,21 @@ def train(  # pylint: disable=too-many-arguments
         The neural network to train.
     trainloader : DataLoader
         The DataLoader containing the data to train the network on.
+    testloader : DataLoader
+        The DataLoader containing the data to test the network on.
     device : torch.device
         The device on which the model should be trained, either 'cpu' or 'cuda'.
     epochs : int
         The number of epochs the model should be trained for.
     learning_rate : float
-        The learning rate for the SGD optimizer.
+        The learning rate for the optimizer.
+
+    Returns
+    -------
+    nn.Module
+        The model that has been trained for one epoch.
+    loss
+        The Loss that bas been trained for one epoch
     """
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate, weight_decay=0.001)
@@ -106,7 +140,7 @@ def train(  # pylint: disable=too-many-arguments
     return loss
 
 
-def _train_one_epoch(  # pylint: disable=too-many-arguments
+def _train_one_epoch(
         net: nn.Module,
         trainloader: DataLoader,
         device: torch.device,
@@ -132,6 +166,9 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
     -------
     nn.Module
         The model that has been trained for one epoch.
+    total_loss
+        The Loss that has been trained for one epoch.
+
     """
     total_loss = 0.0
 
@@ -153,27 +190,37 @@ def test(
         device: torch.device,
         algo: str,
         data: str,
-    learning_rate: float,
+        learning_rate: float,
 ) -> Tuple[float, float]:
-    """Evaluate the network on the entire test set.
+    """
+    Evaluate the network on the entire test set.
 
     Parameters
     ----------
     net : nn.Module
         The neural network to test.
+    trainloader: DataLoader,
+        The DataLoader containing the data to train the network on.
     testloader : DataLoader
         The DataLoader containing the data to test the network on.
     device : torch.device
         The device on which the model should be tested, either 'cpu' or 'cuda'.
+    algo: str
+        The Algorithm of Federated Learning
+    data: str
+        The training data type of Federated Learning
+    learning_rate: float
+        The learning rate for the optimizer.
 
     Returns
     -------
     Tuple[float, float]
         The loss and the accuracy of the input model on the given data.
+
     """
     criterion = torch.nn.CrossEntropyLoss()
 
-    if algo == 'fedavg(meta)':
+    if algo == 'fedavg_meta':
         total_loss = 0.0
         optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate, weight_decay=0.001)
         net.train()
@@ -209,31 +256,43 @@ def test(
         raise ValueError("Testloader can't be 0, exiting...")
     loss /= len(testloader.dataset)
     accuracy = correct / total
-    return loss, accuracy, total
-#
-#
-def train_meta(  # pylint: disable=too-many-arguments
+    return loss, accuracy
+
+
+def train_meta(
         net: nn.Module,
         supportloader: DataLoader,
         queryloader: DataLoader,
         alpha,
         device: torch.device,
-        gradient_step: int
-) -> Tuple[float]:
+        gradient_step: int,
+) -> Tuple[float, List]:
     """Train the network on the training set.
 
     Parameters
     ----------
     net : nn.Module
         The neural network to train.
-    trainloader : DataLoader
-        The DataLoader containing the data to train the network on.
+    supportloader : DataLoader
+        The DataLoader containing the data to inner loop train the network on.
+    queryloader : DataLoader
+        The DataLoader containing the data to outer loop train the network on.
+   alpha : int
+        The learning rate for the optimizer.
     device : torch.device
         The device on which the model should be trained, either 'cpu' or 'cuda'.
-    epochs : int
-        The number of epochs the model should be trained for.
-    learning_rate : float
-        The learning rate for the SGD optimizer.
+    gradient_step : int
+        The number of inner loop learning
+
+    Returns
+    -------
+    nn.Module
+        The model that has been trained for one meta epoch.
+    total_loss
+        The Loss that has been trained for one epoch.
+    grads
+        The gradients that has been trained for one epoch.
+
     """
     criterion = torch.nn.CrossEntropyLoss()
     for _ in range(1):
@@ -243,34 +302,44 @@ def train_meta(  # pylint: disable=too-many-arguments
     return loss, grads
 
 
-def _train_meta_one_epoch(  # pylint: disable=too-many-arguments
+def _train_meta_one_epoch(
         net: nn.Module,
         supportloader: DataLoader,
         queryloader: DataLoader,
-        alpha,
+        alpha: torch.nn.ParameterList,
         criterion: torch.nn.CrossEntropyLoss,
         device: torch.device,
         gradient_step: int,
 ) -> nn.Module:
-    """Train for one epoch.
+    """
+    Train for one epoch.
 
     Parameters
     ----------
     net : nn.Module
         The neural network to train.
-    trainloader : DataLoader
-        The DataLoader containing the data to train the network on.
-    device : torch.device
-        The device on which the model should be trained, either 'cpu' or 'cuda'.
+    supportloader : DataLoader
+        The DataLoader containing the data to inner loop train the network on.
+    queryloader : DataLoader
+        The DataLoader containing the data to outer loop train the network on.
+   alpha : torch.nn.ParameterList
+        The learning rate for the optimizer.
     criterion : torch.nn.CrossEntropyLoss
         The loss function to use for training
-    optimizer : torch.optim.Adam
-        The optimizer to use for training
+    device : torch.device
+        The device on which the model should be trained, either 'cpu' or 'cuda'.
+    gradient_step : int
+        The number of inner loop learning
 
     Returns
     -------
     nn.Module
-        The model that has been trained for one epoch.
+        The model that has been trained for one meta epoch.
+    total_loss
+        The Loss that has been trained for one epoch.
+    grads
+        The gradients that has been trained for one epoch.
+
     """
     num_adaptation_steps = gradient_step
     train_net = deepcopy(net)
@@ -311,28 +380,35 @@ def _train_meta_one_epoch(  # pylint: disable=too-many-arguments
             p.grad.zero_()
 
     grads = [g.cpu().numpy() for g in grads]
-    average_adaptation_loss = sum(sup_total_loss) / sum(sup_num_sample)
-    return average_adaptation_loss, grads
-#
-#
+    loss = sum(sup_total_loss) / sum(sup_num_sample)
+    return loss, grads
+
+
 def test_meta(
         net: nn.Module,
         supportloader: DataLoader,
         queryloader: DataLoader,
-        alpha,
+        alpha: torch.nn.ParameterList,
         device: torch.device,
         gradient_step: int,
 ) -> Tuple[float, float]:
-    """Evaluate the network on the entire test set.
+    """
+    Evaluate the network on the entire test set.
 
     Parameters
     ----------
     net : nn.Module
         The neural network to test.
-    testloader : DataLoader
+    supportloader : DataLoader
         The DataLoader containing the data to test the network on.
+    queryloader : DataLoader
+        The DataLoader containing the data to test the network on.
+    alpha : torch.nn.ParameterList
+        The learning rate for the optimizer.
     device : torch.device
         The device on which the model should be tested, either 'cpu' or 'cuda'.
+    gradient_step : int
+        The number of inner loop learning
 
     Returns
     -------
@@ -376,6 +452,6 @@ def test_meta(
         raise ValueError("Testloader can't be 0, exiting...")
     loss = loss / total
     accuracy = correct / total
-    return loss, accuracy, total
+    return loss, accuracy
 
 

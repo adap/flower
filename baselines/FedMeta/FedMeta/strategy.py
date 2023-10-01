@@ -12,10 +12,9 @@ from flwr.server.strategy import FedAvg
 from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
 from flwr.server.client_manager import ClientManager
 from Fedmeta_client_manager import evaluate_client_Criterion
-import numpy as np
 import torch
-from functools import reduce
 from models import CNN_network, StackedLSTM
+from utils import update_ema
 
 
 from flwr.common.logger import log
@@ -31,13 +30,53 @@ from flwr.common import (
     EvaluateIns,
     NDArrays,
 )
+import wandb
+
+wandb.init(
+    # set the wandb project where this run will be logged
+    project="SoR",
+
+)
 
 
-def fedmeta_update_meta_sgd(net, alpha, beta, weights_results, gradients_aggregated):
+def fedmeta_update_meta_sgd(
+        net : torch.nn.Module,
+        alpha : torch.nn.ParameterList,
+        beta : float,
+        weights_results : List[Tuple[NDArrays, int]],
+        gradients_aggregated : List[Tuple[NDArrays, int]],
+        WD : float,
+) -> Tuple[List[Tuple[NDArrays, int]], torch.nn.ParameterList]:
+    """
+    Update model parameters for FedMeta(Meta-SGD).
+
+    Parameters
+    ----------
+    net : torch.nn.Module
+        The list of metrics to aggregate.
+    alpha : torch.nn.ParameterList
+        alpha is the learning rate. it is updated with parameters in FedMeta (Meta-SGD).
+    beta : float
+        beta is the learning rate for updating parameters and alpha on the server.
+    weights_results : List[Tuple[NDArrays, int]]
+        These are the global model parameters for the current round.
+    gradients_aggregated : List[Tuple[NDArrays, int]]
+        Weighted average of the gradient in the current round.
+    WD : float
+        The weight decay for Adam optimizer
+
+    Returns
+    -------
+    weights_prime : List[Tuple[NDArrays, int]]
+        These are updated parameters.
+    alpha : torch.nn.ParameterLis
+        These are updated alpha.
+
+    """
     params_dict = zip(net.state_dict().keys(), weights_results)
     state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
     net.load_state_dict(state_dict, strict=True)
-    optimizer = torch.optim.Adam(list(net.parameters()) + list(alpha), lr=beta, weight_decay=0.0001)
+    optimizer = torch.optim.Adam(list(net.parameters()) + list(alpha), lr=beta, weight_decay=WD)
     for params, grad_ins, alphas in zip(net.parameters(), gradients_aggregated, alpha):
         params.grad = torch.tensor(grad_ins).to(params.dtype)
         alphas.grad = torch.tensor(grad_ins).to(params.dtype)
@@ -48,11 +87,39 @@ def fedmeta_update_meta_sgd(net, alpha, beta, weights_results, gradients_aggrega
     return weights_prime, alpha
 
 
-def fedmeta_update_maml(net, beta, weights_results, gradients_aggregated):
+def fedmeta_update_maml(
+        net : torch.nn.Module,
+        beta : float,
+        weights_results : List[Tuple[NDArrays, int]],
+        gradients_aggregated : List[Tuple[NDArrays, int]],
+        WD : float
+) -> List[Tuple[NDArrays, int]]:
+    """
+    Update model parameters for FedMeta(Meta-SGD).
+
+    Parameters
+    ----------
+    net : torch.nn.Module
+        The list of metrics to aggregate.
+    beta : float
+        beta is the learning rate for updating parameters on the server.
+    weights_results : List[Tuple[NDArrays, int]]
+        These are the global model parameters for the current round.
+    gradients_aggregated : List[Tuple[NDArrays, int]]
+        Weighted average of the gradient in the current round.
+    WD : float
+        The weight decay for Adam optimizer
+
+    Returns
+    -------
+    weights_prime : List[Tuple[NDArrays, int]]
+        These are updated parameters.
+
+    """
     params_dict = zip(net.state_dict().keys(), weights_results)
     state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
     net.load_state_dict(state_dict, strict=True)
-    optimizer = torch.optim.Adam(list(net.parameters()), lr=beta, weight_decay=0.0001)
+    optimizer = torch.optim.Adam(list(net.parameters()), lr=beta, weight_decay=WD)
     for params, grad_ins in zip(net.parameters(), gradients_aggregated):
         params.grad = torch.tensor(grad_ins).to(params.dtype)
     optimizer.step()
@@ -77,43 +144,32 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     """
     # Multiply accuracy of each client by number of examples used
     correct = [num_examples * m["correct"] for num_examples, m in metrics]
-    # correct = [m["correct"] for _, m in metrics]
     examples = [num_examples for num_examples, _ in metrics]
 
     # Aggregate and return custom metric (weighted average)
     return {"accuracy": sum(correct) / sum(examples)}
 
 
-def aggregate_grad(results: List[Tuple[NDArrays, int]]) -> NDArrays:
-    """Compute gradients average."""
-    # Calculate the total number of examples used during training
-    num_examples_total = sum([num_examples for _, num_examples in results])
-
-    # Create a list of weights, each multiplied by the related number of examples
-    weighted_gradients = [
-        [layer * num_examples for layer in gradients] for gradients, num_examples in results
-    ]
-
-    # Compute average weights of each layer
-    grdients_prime: NDArrays = [
-        reduce(np.add, layer_updates) / num_examples_total
-        for layer_updates in zip(*weighted_gradients)
-    ]
-
-    return grdients_prime
-
-
 class FedMeta(FedAvg):
+    """
+    FedMeta
+        The average of the gradient and the parameter update on the server through it.
+    """
+
     def __init__(self, alpha, beta, data, algo, **kwargs):
         super().__init__(**kwargs)
         self.algo = algo
         self.data = data
+        self.beta = beta
+        self.ema_loss = None
+        self.ema_acc = None
+
         if self.data == 'femnist':
             self.net = CNN_network()
         elif self.data == 'shakespeare':
             self.net = StackedLSTM()
+
         self.alpha = torch.nn.ParameterList([torch.nn.Parameter(torch.full_like(p, alpha)) for p in self.net.parameters()])
-        self.beta = beta
 
     def configure_fit(
             self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -187,23 +243,29 @@ class FedMeta(FedAvg):
         ]
 
         parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
+        if self.data == 'femnist':
+            WD = 0.001
+        else:
+            WD = 0.0001
 
-        if self.algo == 'fedmeta(maml)':
+        # Gradient Average and Update Parameter for FedMeta(MAML)
+        if self.algo == 'fedmeta_maml':
             grads_results = [
                 (fit_res.metrics['grads'], fit_res.num_examples)
                 for _, fit_res in results
             ]
-            gradients_aggregated = aggregate_grad(grads_results)
-            weights_prime = fedmeta_update_maml(self.net, self.beta, weights_results[0][0], gradients_aggregated)
+            gradients_aggregated = aggregate(grads_results)
+            weights_prime = fedmeta_update_maml(self.net, self.beta, weights_results[0][0], gradients_aggregated, WD)
             parameters_aggregated = ndarrays_to_parameters(weights_prime)
 
-        elif self.algo == 'fedmeta(meta-sgd)':
+        # Gradient Average and Update Parameter for FedMeta(Meta-SGD)
+        elif self.algo == 'fedmeta_meta_sgd':
             grads_results = [
                 (fit_res.metrics['grads'], fit_res.num_examples)
                 for _, fit_res in results
             ]
-            gradients_aggregated = aggregate_grad(grads_results)
-            weights_prime, update_alpha = fedmeta_update_meta_sgd(self.net, self.alpha, self.beta, weights_results[0][0], gradients_aggregated)
+            gradients_aggregated = aggregate(grads_results)
+            weights_prime, update_alpha = fedmeta_update_meta_sgd(self.net, self.alpha, self.beta, weights_results[0][0], gradients_aggregated, WD)
             self.alpha = update_alpha
             parameters_aggregated = ndarrays_to_parameters(weights_prime)
 
@@ -238,16 +300,22 @@ class FedMeta(FedAvg):
             ]
         )
 
-        weight_loss = sum([evaluate_res.metrics['loss'] * evaluate_res.num_examples for _, evaluate_res in results]) / sum(
-            [evaluate_res.num_examples for _, evaluate_res in results])
-        log(INFO, f'Loss : {weight_loss}')
+        if self.data == 'femnist':
+            smoothing_weight = 0.9
+        else:
+            smoothing_weight = 0.7
+        self.ema_loss = update_ema(self.ema_loss, loss_aggregated, smoothing_weight)
+        wandb.log({"Training Loss": self.ema_loss}, step=server_round)
+        loss_aggregated = self.ema_loss
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
         if self.evaluate_metrics_aggregation_fn:
             eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
-            log(INFO, f'Accuracy : {round(metrics_aggregated["accuracy"] * 100, 3)}')
+            self.ema_acc = update_ema(self.ema_acc, round(metrics_aggregated['accuracy'] * 100, 3), smoothing_weight)
+            wandb.log({"Test_Accuracy ": self.ema_acc}, step=server_round)
+            metrics_aggregated['accuracy'] = self.ema_acc
 
         elif server_round == 1:  # Only log this warning once
             log(WARNING, "No evaluate_metrics_aggregation_fn provided")

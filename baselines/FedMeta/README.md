@@ -30,7 +30,7 @@ dataset: [FEMNIST, SHAKESPEARE] # list of datasets you include in your baseline
 ****Task:**** : A comparison task of four algorithms(FedAvg, FedAvg(Meta), FedMeta(MAML), FedMeta(Meta-SGD)) in the categories of Image Classification and next-word prediction.
 
 ****Model:**** :This directory implements two models:
-* A two-layer CNN network as used in the FedMeta paper (see `models/CNN_Network`). This is the model used by default.
+* A two-layer CNN network as used in the FedMeta paper for Femnist (see `models/CNN_Network`).
 * A StackedLSTM model used in the FedMeta paper for Shakespeare (see `models/StackedLSTM`).
 
 **You can see more detail in Apendix.A of the  paper**
@@ -102,20 +102,17 @@ python main.py algo=fedmeta_maml data=shakespeare path=(your leaf dataset path)/
 
 #FedMeta(Meta-SGD) + Shakespeare Dataset
 python main.py algo=fedmeta_meta_sgd data=shakespeare path=(your leaf dataset path)/leaf/data/shakespeare/data
+
 ```
 
 
 ## Expected Results
-
-:warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
-
+If you proceed with all of the above experiments, You can get a graph of your experiment results as shown below along that `./femnist or shakespeare/graph_params/result_graph.png`.
 ```bash
-# it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameteres
-
-poetry run -m <baseline-name>.main --multirun num_client_per_round=5,10,50 dataset=femnist,cifar10
-# the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
-
+#If you want to see the graph, use the command below.
+python 
 [Now show a figure/table displaying the results of the above command]
 
 # add more commands + plots for additional experiments.
+![](shakespeare/graph_params/result_graph.png)
 ```

@@ -21,6 +21,16 @@ import torch
 
 class ShakespeareDataset(Dataset):
     def __init__(self, data):
+        """
+        [LEAF: A Benchmark for Federated Settings](https://github.com/TalwalkarLab/leaf)
+
+        We imported the preprocessing method for the Shakespeare dataset from GitHub.
+
+        word_to_indices : returns a list of character indices
+        sentences_to_indices : returns one-hot vector with given size and value 1 at given index
+        letter_to_vec : returns one-hot representation of given letter
+
+        """
         sentence, label = data['x'], data['y']
         sentences_to_indices = [word_to_indices(word) for word in sentence]
         sentences_to_indices = np.array(sentences_to_indices)
@@ -37,6 +47,10 @@ class ShakespeareDataset(Dataset):
 
 class FemnistDataset(Dataset):
     def __init__(self, dataset, transform):
+        """
+        Using FemnistDataset for CNN_network()
+
+        """
         self.x = dataset['x']
         self.y = dataset['y']
         self.transform = transform
@@ -52,10 +66,32 @@ class FemnistDataset(Dataset):
         return len(self.y)
 
 
-def load_datasets(  # pylint: disable=too-many-arguments
-    config: DictConfig,
-    path: str,
+def load_datasets(
+        config: DictConfig,
+        path: str,
 ) -> Tuple[DataLoader, DataLoader, DataLoader]:
+    """
+    Creates the dataloaders to be fed into the model.
+
+        Parameters
+        ----------
+        config: DictConfig
+            Parameterises the dataset partitioning process
+            batch_size : int
+                The size of the batches to be fed into the model,
+                by default 10
+            support_ratio : float
+                The ratio of Support set for each client.(between 0 and 1)
+                by default 0.2
+        path : str
+            The path where the leaf dataset was downloaded
+
+        Returns
+        -------
+        Tuple[DataLoader, DataLoader, DataLoader]
+            The DataLoader for training, the DataLoader for validation, the DataLoader for testing.
+
+        """
 
     dataset = _partition_data(
         data_type=config.data,
@@ -63,6 +99,7 @@ def load_datasets(  # pylint: disable=too-many-arguments
         support_ratio=config.support_ratio
     )
 
+    # Client list : 0.8, 0.1, 0.1
     clients_list = split_train_validation_test_clients(
         dataset[0]['users']
     )
@@ -76,7 +113,8 @@ def load_datasets(  # pylint: disable=too-many-arguments
         transform = transforms.Compose([transforms.ToTensor()])
         for user in clients_list[0]:
             trainloaders['sup'].append(
-                DataLoader(FemnistDataset(dataset[0]['user_data'][user], transform), batch_size=config.batch_size, shuffle=True))
+                DataLoader(FemnistDataset(dataset[0]['user_data'][user], transform), batch_size=config.batch_size,
+                           shuffle=True))
             trainloaders['qry'].append(
                 DataLoader(FemnistDataset(dataset[1]['user_data'][user], transform), batch_size=config.batch_size))
         for user in clients_list[1]:
@@ -93,21 +131,21 @@ def load_datasets(  # pylint: disable=too-many-arguments
     elif data_type == 'shakespeare':
         for user in clients_list[0]:
             trainloaders['sup'].append(
-                DataLoader(ShakespeareDataset(dataset[0]['user_data'][user]), batch_size=config.batch_size, shuffle=True))
+                DataLoader(ShakespeareDataset(dataset[0]['user_data'][user]), batch_size=config.batch_size,
+                           shuffle=True))
             trainloaders['qry'].append(
                 DataLoader(ShakespeareDataset(dataset[1]['user_data'][user]), batch_size=config.batch_size))
         for user in clients_list[1]:
             valloaders['sup'].append(
-                DataLoader(ShakespeareDataset(dataset[0]['user_data'][user]), batch_size=config.batch_size, shuffle=True))
+                DataLoader(ShakespeareDataset(dataset[0]['user_data'][user]), batch_size=config.batch_size,
+                           shuffle=True))
             valloaders['qry'].append(
                 DataLoader(ShakespeareDataset(dataset[1]['user_data'][user]), batch_size=config.batch_size))
         for user in clients_list[2]:
             testloaders['sup'].append(
-                DataLoader(ShakespeareDataset(dataset[0]['user_data'][user]), batch_size=config.batch_size, shuffle=True))
+                DataLoader(ShakespeareDataset(dataset[0]['user_data'][user]), batch_size=config.batch_size,
+                           shuffle=True))
             testloaders['qry'].append(
                 DataLoader(ShakespeareDataset(dataset[1]['user_data'][user]), batch_size=config.batch_size))
 
     return trainloaders, valloaders, testloaders
-
-
-

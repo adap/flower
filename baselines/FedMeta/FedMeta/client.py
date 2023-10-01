@@ -15,6 +15,7 @@ from torch.utils.data import DataLoader
 
 from models import train, test, train_meta, test_meta
 
+
 class FlowerClient(
     fl.client.NumPyClient
 ):
@@ -54,8 +55,12 @@ class FlowerClient(
         """Implements distributed fit function for a given client."""
         self.set_parameters(parameters)
         algo = config["algo"]
+
+        # Total number of data for Weighted Avg and Grad
         total_len = len(self.trainloaders['qry'][self.cid].dataset) + len(self.trainloaders['sup'][self.cid].dataset)
-        if algo == 'fedavg' or algo == 'fedavg(meta)':
+
+        # FedAvg & FedAvg(Meta) train  basic Learning
+        if algo == 'fedavg' or algo == 'fedavg_meta':
             loss = train(
                 self.net,
                 self.trainloaders['sup'][self.cid],
@@ -64,9 +69,10 @@ class FlowerClient(
                 epochs=self.num_epochs,
                 learning_rate=self.learning_rate
             )
-            return self.get_parameters({}), total_len, {"loss" : loss}
+            return self.get_parameters({}), total_len, {"loss": loss}
 
-        elif algo == 'fedmeta(maml)' or algo == 'fedmeta(meta-sgd)':
+        # FedMeta(MAML) & FedMeta(Meta-SGD) train inner and outer loop
+        elif algo == 'fedmeta_maml' or algo == 'fedmeta_meta_sgd':
             alpha = config["alpha"]
             loss, grads = train_meta(
                 self.net,
@@ -83,22 +89,27 @@ class FlowerClient(
     ) -> Tuple[float, int, Dict]:
         """Implements distributed evaluation for a given client."""
         self.set_parameters(parameters)
+
+        # Total number of data for Weighted Avg and Grad
         total_len = len(self.valloaders['qry'][self.cid].dataset) + len(self.valloaders['sup'][self.cid].dataset)
-        if config["algo"] == 'fedavg' or config["algo"] == 'fedavg(meta)':
-            loss, accuracy, total = test(
-                    self.net,
-                    self.valloaders['sup'][self.cid],
-                    self.valloaders['qry'][self.cid],
-                    self.device,
-                    config["algo"],
-                    config["data"],
-                    learning_rate=self.learning_rate,
+
+        # FedAvg & FedAvg(Meta) train  basic Learning
+        if config["algo"] == 'fedavg' or config["algo"] == 'fedavg_meta':
+            loss, accuracy = test(
+                self.net,
+                self.valloaders['sup'][self.cid],
+                self.valloaders['qry'][self.cid],
+                self.device,
+                config["algo"],
+                config["data"],
+                learning_rate=self.learning_rate,
             )
             return float(loss), total_len, {"correct": accuracy, "loss": loss}
 
-        elif config["algo"] == 'fedmeta(maml)' or config["algo"] == 'fedmeta(meta-sgd)':
+        # FedMeta(MAML) & FedMeta(Meta-SGD) train inner and outer loop
+        elif config["algo"] == 'fedmeta_maml' or config["algo"] == 'fedmeta_meta_sgd':
             alpha = config["alpha"]
-            loss, accuracy, total = test_meta(
+            loss, accuracy = test_meta(
                 self.net,
                 self.valloaders['sup'][self.cid],
                 self.valloaders['qry'][self.cid],
@@ -116,7 +127,7 @@ def gen_client_fn(
         learning_rate: float,
         model: DictConfig,
         gradient_step: int,
-) -> Callable[[str], FlowerClient]:  # pylint: disable=too-many-arguments
+) -> Callable[[str], FlowerClient]:
 
     """Generates the client function that creates the Flower Clients.
 
@@ -131,8 +142,13 @@ def gen_client_fn(
     valloaders: List[DataLoader]
         A list of DataLoaders, each pointing to the dataset validation partition
         belonging to a particular client.
+    model: DictConfig
+        The global Model for Federated Learning.
     learning_rate : float
         The learning rate for the SGD  optimizer of clients.
+    gradient_step : int
+        The gradient step for Meta Learning of clients.
+        FedAvg and FedAvg(Meta) is None
 
     Returns
     -------

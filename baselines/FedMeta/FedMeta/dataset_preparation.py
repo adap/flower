@@ -16,13 +16,20 @@ from sklearn.model_selection import train_test_split
 
 def _read_dataset(
         path: str
-) -> Tuple[List, DefaultDict]:
-    """Read (if necessary) and returns the leaf dataset.
+) -> Tuple[List, DefaultDict, List]:
+    """
+    Read (if necessary) and returns the leaf dataset.
+
+    Parameters
+        ----------
+        path : str
+            The path where the leaf dataset was downloaded
 
     Returns
     -------
-    Tuple[user, data[x,y]]
-        The dataset for training and the dataset for testing Femnist.
+    Tuple[user, data[x,y], num_total_data]
+        The dataset for training and the dataset for testing.
+
     """
     users = []
     data = defaultdict(lambda: None)
@@ -45,7 +52,26 @@ def support_query_split(
         data: DefaultDict,
         label: List,
         support_ratio: float,
-):
+) -> Tuple[List, List, List, List]:
+    """
+    Separate support set and query set
+
+    Parameters
+        ----------
+        data: DefaultDict,
+            Raw all Datasets
+        label: List,
+            Raw all Labels
+        support_ratio : float
+            The ratio of Support set for each client.(between 0 and 1)
+            by default 0.2
+
+    Returns
+    -------
+    Tuple[List, List, List, List]
+        Support set and query set classification of data and labels
+
+    """
 
     x_train, x_test, y_train, y_test = train_test_split(data, label, train_size=support_ratio, stratify=label, random_state=42)
 
@@ -57,7 +83,26 @@ def split_train_validation_test_clients(
         train_rate: Optional[float] = 0.8,
         val_rate: Optional[float] = 0.1,
 ) -> Tuple[List[str], List[str], List[str]]:
+    """
+    Classification of all clients into train clients, valid clients, and test clients
 
+    Parameters
+        ----------
+        clients: List,
+            Full list of clients for the sampled leaf dataset.
+        train_rate: float,  optional
+            The ratio of training clients to total clients
+            by default 0.8
+        val_rate: float,  optional
+            The ratio of validation clients to total clients
+            by default 0.1
+
+    Returns
+    -------
+    Tuple[List, List, List]
+        List of each train client, valid client, and test client
+
+    """
     np.random.seed(42)
     train_rate = int(train_rate * len(clients))
     val_rate = int(val_rate * len(clients))
@@ -77,7 +122,25 @@ def _partition_data(
         dir_path: str,
         support_ratio: float,
 ) -> Tuple[Dict, Dict]:
+    """
+    Classification of support sets and query sets by client
 
+    Parameters
+        ----------
+        data_type: str,
+            The type of femnist for classification or shakespeare for regression
+        dir_path: str,
+            The path where the leaf dataset was downloaded
+        support_ratio: float,
+            The ratio of Support set for each client.(between 0 and 1)
+            by default 0.2
+
+    Returns
+    -------
+    Tuple[Dict, Dict]
+        Return support set and query set for total data
+
+    """
     train_path = f'{dir_path}/train'
     test_path = f'{dir_path}/test'
 
@@ -105,6 +168,7 @@ def _partition_data(
             all_x = all_x[mask]
             all_y = all_y[mask]
 
+            # Client filtering for support set and query set classification
             try:
                 sup_x, qry_x, sup_y, qry_y = support_query_split(all_x, all_y, support_ratio)
             except Exception as e:
