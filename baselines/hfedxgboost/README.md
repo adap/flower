@@ -51,11 +51,28 @@ Each dataset can be partitioned across 2, 5 or 10 clients in an IID distribution
 | task type  | Dataset | no.of features | no.of samples | 
 | :---: | :---: | :---: | :---: |
 | Binary classification | a9a<br>cod-rna<br>ijcnn1  | 123<br>8<br>22 | 32,561<br>59,5358<br>49,990 |
-| Regression | abalone<br>a9a<br>cpusmall<br>space_ga<br>YearPredictionMSD | 8<br>123<br>12<br>6<br>90 | 4,177<br>32,561<br>8,192<br>3,167<br>515,345 |
+| Regression | abalone<br>cpusmall<br>space_ga<br>YearPredictionMSD | 8<br>12<br>6<br>90 | 4,177<br>8,192<br>3,167<br>515,345 |
 
 
 ****Training Hyperparameters:**** 
 
+Using the original hyperparameters didn't give the best performance sometimes, It's kinda normal as the paper used the same hyperparameters for all the datasets while some of them were small with few no.of features while some were big datasets with bigger no.of features, e.g: YearPredictionMSD had 515,345 rows and 90 features while space_ga got 3,167 rows and 6 features.<br>
+There are different hyperparameters used for each client setting in the federated system.<br>
+For the centralized model, I mostly used the paper's hyperparameters as they give very good results -except for abalone and cpusmall-, here are the used hyperparameters:
+
+| Hyperparameter name | value |
+| -- | -- |
+| n_estimators | 500 |
+| max_depth | 8 |
+| subsample | 0.8 |
+| learning_rate | .1 |
+| colsample_bylevel | 1 |
+| colsample_bynode | 1 |
+| colsample_bytree | 1 |
+| alpha | 5 |
+| gamma | 5 |
+| num_parallel_tree | 1 |
+| min_child_weight | 1 |
 
 ## Environment Setup
 
@@ -134,16 +151,16 @@ python -m hfedxgboost.main --multirun clients="cod_rna_2_clients","cod_rna_5_cli
 #results for ijcnn1 dataset in table 2
 python -m hfedxgboost.main --multirun clients="ijcnn1_2_clients","ijcnn1_5_clients","ijcnn1_10_clients" dataset=ijcnn1
 
-#results for space_ga dataset in table 2
+#results for space_ga dataset in table 3
 python -m hfedxgboost.main --multirun clients="space_ga_2_clients","space_ga_5_clients","space_ga_10_clients" dataset=space_ga
 
-#results for abalone dataset in table 2
+#results for abalone dataset in table 3
 python -m hfedxgboost.main --multirun clients="abalone_2_clients","abalone_5_clients","abalone_10_clients" dataset=abalone
 
-#results for cpusmall dataset in table 2
+#results for cpusmall dataset in table 3
 python -m hfedxgboost.main --multirun clients="cpusmall_2_clients","cpusmall_5_clients","cpusmall_10_clients" dataset=cpusmall
 
-#results for YearPredictionMSD_2 dataset in table 2
+#results for YearPredictionMSD_2 dataset in table 3
 python -m hfedxgboost.main --multirun clients=YearPredictionMSD_2_clients,YearPredictionMSD_5_clients,YearPredictionMSD_10_clients dataset=YearPredictionMSD
 ```
 ### Table 1
@@ -162,11 +179,16 @@ python -m hfedxgboost.main --multirun clients=YearPredictionMSD_2_clients,YearPr
 
 ### Table 2
 
-| Dataset | task type |no. of clients | server-side test MSE |
+| Dataset | task type |no. of clients | server-side test Accuracy |
 | :---: | :---: | :---: | :---: |
 | a9a | Binary Classification | 2<br>5<br>10 | 0.84<br>0.84<br>0.83 |
 | cod_rna | Binary Classification | 2<br>5<br>10 | 0.96<br>0.96<br>0.95 | 
 | ijcnn1 | Binary Classification |2<br>5<br>10 | 0.98<br>0.97<br>0.96 |
+
+### Table 3
+
+| Dataset | task type |no. of clients | server-side test MSE |
+| :---: | :---: | :---: | :---: |
 | space_ga | Regression | 2<br>5<br>10 | 0.024<br>0.033<br>0.034 |
 | abalone | Regression | 2<br>5<br>10 | 10<br>10<br>10 | 
 | YearPredictionMSD | Regression | 2<br>5<br>10 | 119<br>118<br>118 | 
