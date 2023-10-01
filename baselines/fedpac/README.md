@@ -73,7 +73,7 @@ pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --e
 
 ## Running the Experiments
 
-To run this FedPAC baseline, first ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
+To run this `FedPAC` baseline, first ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
 
 ```bash
 python -m fedpac.main # this will run using the default settings in the `conf/config.yaml`
