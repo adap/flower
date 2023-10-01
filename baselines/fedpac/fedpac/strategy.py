@@ -78,6 +78,23 @@ class FedPAC(FedAvg):
         self.on_fit_config_fn = on_fit_config_fn
         self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
         self.device=device
+        self.evaluate_fn = evaluate_fn
+
+
+    def evaluate(
+        self, server_round: int, parameters: Parameters
+    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+        """Evaluate model parameters using an evaluation function."""
+        if self.evaluate_fn is None:
+            # No evaluation function provided
+            return None
+        parameters_ndarrays = parameters_to_ndarrays(parameters)
+        eval_res = self.evaluate_fn(server_round, parameters_ndarrays, {})
+        if eval_res is None:
+            return None
+        loss, metrics = eval_res
+        return loss, metrics
+    
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
