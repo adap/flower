@@ -1,6 +1,4 @@
 # Flower Datasets
-<<<<<<< HEAD
-=======
 
 [![GitHub license](https://img.shields.io/github/license/adap/flower)](https://github.com/adap/flower/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/adap/flower/blob/main/CONTRIBUTING.md)
@@ -90,4 +88,3 @@ Here are a few of the things that we will work on in future releases:
 * Simplification of the dataset transformation to the popular frameworks/types.
 * Creation of the synthetic data,
 * Support for Vertical FL.
->>>>>>> ab7f77584b7caf37e98752016249b0cbfc6abd79

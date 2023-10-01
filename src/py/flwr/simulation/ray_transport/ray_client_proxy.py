@@ -17,11 +17,7 @@
 
 import traceback
 from logging import ERROR
-<<<<<<< HEAD
 from typing import Callable, Dict, Optional, Union, cast
-=======
-from typing import Dict, Optional, cast
->>>>>>> ab7f77584b7caf37e98752016249b0cbfc6abd79
 
 import ray
 
@@ -40,13 +36,10 @@ from flwr.simulation.ray_transport.ray_actor import (
     JobFn,
     VirtualClientEngineActorPool,
 )
-<<<<<<< HEAD
 ClientFn = Callable[[str], ClientLike]
 ClientRes = Union[
     common.GetPropertiesRes, common.GetParametersRes, common.FitRes, common.EvaluateRes
 ]
-=======
->>>>>>> ab7f77584b7caf37e98752016249b0cbfc6abd79
 
 
 class RayClientProxy(ClientProxy):

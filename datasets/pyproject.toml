@@ -54,13 +54,10 @@ exclude = [
 [tool.poetry.dependencies]
 python = "^3.8"
 numpy = "^1.21.0"
-<<<<<<< HEAD
-=======
 datasets = "^2.14.3"
 pillow = { version = ">=6.2.1", optional = true }
 soundfile = {version = ">=0.12.1", optional = true}
 librosa = { version = ">=0.10.0.post2", optional = true }
->>>>>>> ab7f77584b7caf37e98752016249b0cbfc6abd79
 
 [tool.poetry.dev-dependencies]
 isort = "==5.11.5"
