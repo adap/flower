@@ -55,7 +55,7 @@ def main(cfg: DictConfig) -> None:
 
     # get function that will executed by the strategy's evaluate() method
     # Set server's device
-    device = cfg.server_device
+    device = cfg.strategy.device
     evaluate_fn = server.gen_evaluate_fn(testloader, device=device, model=cfg.model)
 
     # get a function that will be used to construct the config that the client's

@@ -70,13 +70,14 @@ class FedPAC(FedAvg):
         initial_parameters: Optional[Parameters] = None,
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        device
     ) -> None:
 
         super().__init__()
         self.global_centroid = {}
         self.on_fit_config_fn = on_fit_config_fn
         self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
-
+        self.device=device
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -129,7 +130,7 @@ class FedPAC(FedAvg):
         stats = [fit_res.metrics["stats"] for _, fit_res in results]
         self.global_centroid = aggregate_centroids(centroids, class_sizes)
         parameters_aggregated = ndarrays_to_parameters(aggregate_weights(weights_results))
-        self.avg_heads = aggregate_heads(stats, 'cuda')
+        self.avg_heads = aggregate_heads(stats, self.device)
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}

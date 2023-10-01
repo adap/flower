@@ -32,7 +32,7 @@ model:
   num_classes: 10
 
 strategy:
-  _target_: fedpac.strategy.FedPAC
+  _target_: flwr.server.strategy.FedAvg
   device: cpu
   fraction_fit: 0.00001 # because we want the number of clients to sample on each roudn to be solely defined by min_fit_clients
   fraction_evaluate: 0.0
