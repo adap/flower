@@ -62,8 +62,6 @@ dataset: [FEMNIST, SHAKESPEARE] # list of datasets you include in your baseline
 
 ## Environment Setup
 
-:warning: _The Python environment for all baselines should follow these guidelines in the `EXTENDED_README`. Specify the steps to create and activate your environment. If there are any external system-wide requirements, please include instructions for them too. These instructions should be comprehensive enough so anyone can run them (if non standard, describe them step-by-step)._
-
 
 ## Running the Experiments
 
