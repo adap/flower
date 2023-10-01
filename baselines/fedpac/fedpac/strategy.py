@@ -129,7 +129,7 @@ class FedPAC(FedAvg):
         stats = [fit_res.metrics["stats"] for _, fit_res in results]
         self.global_centroid = aggregate_centroids(centroids, class_sizes)
         parameters_aggregated = ndarrays_to_parameters(aggregate_weights(weights_results))
-        self.classifier_heads = aggregate_heads(stats, 'cuda')
+        self.avg_heads = aggregate_heads(stats, 'cuda')
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}

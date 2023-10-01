@@ -7,6 +7,16 @@ from torch.utils.data import ConcatDataset, Dataset, Subset, random_split
 from torchvision.datasets import EMNIST, CIFAR10
 
 
+def get_label_dist(dataset):
+    label_counter = {}
+    for feature, label  in dataset:
+        if int(label) not in label_counter.keys():
+            label_counter[int(label)]=1
+        else:
+            label_counter[int(label)] += 1
+    return label_counter
+
+
 def _download_data(dataset: str) -> Tuple[Dataset, Dataset]:
     """Downloads (if necessary) and returns the MNIST dataset.
 
@@ -18,6 +28,7 @@ def _download_data(dataset: str) -> Tuple[Dataset, Dataset]:
     transform = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
     )
+
     if dataset == 'emnist':
         trainset = EMNIST("./dataset", split='byclass', train=True, download=True, transform=transform)
         testset = EMNIST("./dataset", split='byclass', train=False, download=True, transform=transform)
@@ -29,12 +40,12 @@ def _download_data(dataset: str) -> Tuple[Dataset, Dataset]:
     return trainset, testset
 
 
-def _partition_data(
+def partition_cifar_data(
     dataset,
     num_clients,
     iid: Optional[bool] = False,
-    power_law: Optional[bool] = True,
-    balance: Optional[bool] = False,
+    balance: Optional[bool] = True,
+    s: Optional[float] = 0.2,
     seed: Optional[int] = 42,
 ) -> Tuple[List[Dataset], Dataset]:
     """Split training set into iid or non iid partitions to simulate the
@@ -48,12 +59,8 @@ def _partition_data(
         Whether the data should be independent and identically distributed between
         the clients or if the data should first be sorted by labels and distributed by chunks
         to each client (used to test the convergence in a worst case scenario), by default False
-    power_law: bool, optional
-        Whether to follow a power-law distribution when assigning number of samples
-        for each client, defaults to True
-    balance : bool, optional
-        Whether the dataset should contain an equal number of samples in each class,
-        by default False
+    s : float, optional
+        fraction of iid data for each client. 0.2 by default from paper.
     seed : int, optional
         Used to set a fix seed to replicate experiments, by default 42
 
@@ -63,50 +70,70 @@ def _partition_data(
         A list of dataset for each client and a single dataset to be use for testing the model.
     """
     trainset, testset = _download_data(dataset)
-
     if balance:
         trainset = _balance_classes(trainset, seed)
-        
-    partition_size = int(len(trainset) / num_clients)
+
+    # label_counter = {}
+    # for label  in trainset.targets:
+    #     if int(label) not in label_counter.keys():
+    #         label_counter[int(label)]=1
+    #     else:
+    #         label_counter[int(label)] += 1
+    # print(label_counter)
+
+
+    partition_size = int(len(trainset) / num_clients) 
     lengths = [partition_size] * num_clients
+    labels = np.unique(trainset.targets)
+    num_classes = len(labels)
 
     if iid:
         datasets = random_split(trainset, lengths, torch.Generator().manual_seed(seed))
+        return datasets, testset
     else:
-        if power_law:
-            trainset_sorted = _sort_by_class(trainset)
-            datasets = _power_law_split(
-                trainset_sorted,
-                num_partitions=num_clients,
-                num_labels_per_partition=2,
-                min_data_per_partition=10,
-                mean=0.0,
-                sigma=2.0,
-            )
-        else:
-            shard_size = int(partition_size / 2)
-            if isinstance(trainset.targets, list):
-                targets = torch.tensor(trainset.targets)
-            else:
-                targets = trainset.targets
+        noniid_labels_list = [[0,1,2], [2,3,4], [4,5,6], [6,7,8], [8,9,0]]
+        iid_partition_size = int(partition_size * s)
+        noniid_partition_size = partition_size - iid_partition_size
+        idxs = trainset.targets.argsort()
+        num_idxs_per_class = int(len(idxs)/num_classes)
+        iid_shard_size = int(iid_partition_size/num_classes)
+        noniid_shard_size = int(noniid_partition_size/(len(noniid_labels_list)-1))
+        sorted_data = Subset(trainset, idxs)
+        label_index = {}
+        for i in labels:
+            label_index[int(i)] = int(i)*num_idxs_per_class
 
-            idxs = targets.argsort()
-            sorted_data = Subset(trainset, idxs)
-            tmp = []
-            for idx in range(num_clients * 2):
+        tmp = []
+        # print(label_index)
+        for idx in range(num_clients):
+            for i in labels:
                 tmp.append(
                     Subset(
-                        sorted_data, np.arange(shard_size * idx, shard_size * (idx + 1))
+                        sorted_data, np.arange(label_index[int(i)], label_index[int(i)]+iid_shard_size)
                     )
                 )
-            idxs_list = torch.randperm(
-                num_clients * 2, generator=torch.Generator().manual_seed(seed)
-            )
-            datasets = [
-                ConcatDataset((tmp[idxs_list[2 * i]], tmp[idxs_list[2 * i + 1]]))
-                for i in range(num_clients)
-            ]
 
+                label_index[int(i)] += iid_shard_size
+            noniid_labels = noniid_labels_list[idx%5]
+            for ni in noniid_labels:
+                tmp.append(
+                Subset(
+                    sorted_data, np.arange(label_index[int(ni)], label_index[int(ni)]+noniid_shard_size)
+                )
+            )   
+                label_index[int(ni)] += noniid_shard_size
+
+
+        m = int(len(tmp)/num_clients)
+        datasets = [
+            ConcatDataset(tmp[m*c : m*(c+1)])
+            for c in range(num_clients)
+        ]
+
+        # for i in datasets:
+        #     # d = tmp[i]
+        #     dist = get_label_dist(i)
+        #     print(dist)
     return datasets, testset
 
 
@@ -133,6 +160,8 @@ def _balance_classes(
     """
     class_counts = np.bincount(trainset.targets)
     smallest = np.min(class_counts)
+    if isinstance(trainset.targets, list):
+        trainset.targets = torch.tensor(trainset.targets)
     idxs = trainset.targets.argsort()
     tmp = [Subset(trainset, idxs[: int(smallest)])]
     tmp_targets = [trainset.targets[idxs[: int(smallest)]]]

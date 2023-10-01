@@ -8,6 +8,7 @@ from typing import Callable, Dict, List, Tuple
 import flwr as fl
 import numpy as np
 import torch
+import copy
 from flwr.common.typing import NDArrays, Scalar
 from hydra.utils import instantiate
 from omegaconf import DictConfig
@@ -57,14 +58,20 @@ class FlowerClient(fl.client.NumPyClient):
         self.net.load_state_dict(state_dict, strict=True)
 
 
+    # def get_class_sizes(self):
+    #     dataloader = self.trainloader
+    #     sizes = torch.zeros(self.num_classes)
+    #     for images, labels  in dataloader:
+    #         for i in range(self.num_classes):
+    #             sizes[i] = sizes[i] + (i == labels).sum()
+    #     return sizes
     def get_class_sizes(self):
         dataloader = self.trainloader
-        sizes = torch.zeros(len(dataloader))
+        sizes = torch.zeros(self.num_classes)
         for images, labels  in dataloader:
-            for i in range(self.num_classes):
-                sizes[i] = sizes[i] + (i == labels).sum()
+            for label in labels:
+                sizes[label]+= 1
         return sizes
-
 
     def get_class_fractions(self):
         total = len(self.trainloader)
@@ -149,8 +156,8 @@ class FlowerClient(fl.client.NumPyClient):
         self.global_centroid = config["global_centroid"]
         self.avg_head = config['classifier_head']
         if self.avg_head != None:
-            classifier_head = get_classifier_head(self.stats)
-            update_classifier(classifier_head)
+            classifier_head = self.get_classifier_head(self.stats)
+            self.update_classifier(classifier_head)
 
         train(
             self.net,

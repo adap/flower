@@ -4,10 +4,10 @@
 # a similar configuration structure and hence be easy to customise)
 
 num_clients: 10 # total number of clients
-num_epochs: 1 # number of local epochs
-batch_size: 4
-num_rounds: 3
-clients_per_round: 10
+num_epochs: 5 # number of local epochs
+batch_size: 8
+num_rounds: 10
+clients_per_round: 100
 learning_rate: 0.03
 lamda: 1.0 # it can be >= 0
 
@@ -26,8 +26,9 @@ fit_config:
 dataset_config:
   name: "cifar10"
   iid: false
-  balance: false
+  balance: true
   power_law: false
+  s: 0.2
 
 model:
   _target_: fedpac.models.CIFARNet

@@ -27,6 +27,20 @@ def main(cfg: DictConfig) -> None:
         num_clients=cfg.num_clients,
         batch_size=cfg.batch_size,
     )
+
+    # clients = {}
+    # for i, dataloader in enumerate(trainloaders):
+    #     label_counter = {}
+    #     for images, labels  in dataloader:
+    #         for label in labels:
+    #             if int(label) not in label_counter.keys():
+    #                 label_counter[int(label)]=1
+    #             else:
+    #                 label_counter[int(label)] += 1
+    #     clients[i] = label_counter
+
+    # print(clients)
+
     # prepare function that will be used to spawn each client
     client_fn = client.gen_client_fn(
         num_clients=cfg.num_clients,
