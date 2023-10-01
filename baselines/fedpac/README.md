@@ -9,7 +9,7 @@ dataset: [dataset1, dataset2] # list of datasets you include in your baseline
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
-**Paper:** https://openreview.net/forum?id=SXZr8aDKia
+**Paper:** [openreview.net/forum?id=SXZr8aDKia](https://openreview.net/forum?id=SXZr8aDKia)
 
 ****Authors:**** Jian Xu, Xinyi Tong, Shao-Lun Huang
 
@@ -56,6 +56,10 @@ classes, and we also intentionally keep the size of local training data small to
 To construct the Python environment follow these steps:
 
 ```bash
+# Set Python 3.10
+pyenv local 3.10.6
+# Tell poetry to use python 3.10
+poetry env use 3.10.6
 # install the base Poetry environment
 poetry install
 
@@ -67,7 +71,7 @@ poetry shell
 
 ## Running the Experiments
 
-To run this FedPAC baseline, first ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
+To run this `FedPAC` baseline, first ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
 
 ```bash
 python -m fedpac.main # this will run using the default settings in the `conf/config.yaml`
