@@ -61,7 +61,7 @@ dataset: [FEMNIST, SHAKESPEARE] # list of datasets you include in your baseline
 
 
 ## Environment Setup
-
+We will update after testing.
 
 ## Running the Experiments
 
