@@ -30,13 +30,6 @@ from flwr.common import (
     EvaluateIns,
     NDArrays,
 )
-import wandb
-
-wandb.init(
-    # set the wandb project where this run will be logged
-    project="SoR",
-
-)
 
 
 def fedmeta_update_meta_sgd(
@@ -305,7 +298,6 @@ class FedMeta(FedAvg):
         else:
             smoothing_weight = 0.7
         self.ema_loss = update_ema(self.ema_loss, loss_aggregated, smoothing_weight)
-        wandb.log({"Training Loss": self.ema_loss}, step=server_round)
         loss_aggregated = self.ema_loss
 
         # Aggregate custom metrics if aggregation fn was provided
@@ -314,7 +306,6 @@ class FedMeta(FedAvg):
             eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
             self.ema_acc = update_ema(self.ema_acc, round(metrics_aggregated['accuracy'] * 100, 3), smoothing_weight)
-            wandb.log({"Test_Accuracy ": self.ema_acc}, step=server_round)
             metrics_aggregated['accuracy'] = self.ema_acc
 
         elif server_round == 1:  # Only log this warning once
