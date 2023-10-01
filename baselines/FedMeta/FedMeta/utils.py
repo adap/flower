@@ -121,6 +121,7 @@ def plot_from_pkl(directory="."):
         "fedavg_meta.pkl": "blue",
         "fedmeta_maml.pkl": "orange",
         "fedmeta_meta_sgd.pkl": "red",
+        # ... 여기에 추가 파일 이름과 색상을 매핑 ...
     }
 
     pkl_files = [f for f in os.listdir(directory) if f.endswith('.pkl')]
@@ -138,7 +139,8 @@ def plot_from_pkl(directory="."):
     plt.subplot(1, 2, 1)
     for file, data in all_data.items():
         accuracies = [acc for _, acc in data["accuracy"]['accuracy']]
-        plt.plot(accuracies, label=file, color=color_mapping.get(file, "black"))
+        legend_ = file[:-4] if file.endswith('.pkl') else file
+        plt.plot(accuracies, label=legend_, color=color_mapping.get(file, "black"))
     plt.title("Accuracy")
     plt.legend()
 
@@ -146,7 +148,8 @@ def plot_from_pkl(directory="."):
     plt.subplot(1, 2, 2)
     for file, data in all_data.items():
         loss = [loss for _, loss in data["loss"]]
-        plt.plot(loss, label=file, color=color_mapping.get(file, "black"))
+        legend_ = file[:-4] if file.endswith('.pkl') else file
+        plt.plot(loss, label=legend_, color=color_mapping.get(file, "black"))
     plt.title("Loss")
     plt.legend()
 
