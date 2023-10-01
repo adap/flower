@@ -75,33 +75,34 @@ dataset: [FEMNIST, SHAKESPEARE] # list of datasets you include in your baseline
 #SHAKESEPEARE dataset Download command for these experiments
 ./preprocess.sh -s niid --sf 0.16 -k 0 -t sample
 ````
+
 ****Start experiments**** : 
 ```bash  
 # FedAvg + Femnist Dataset
 python main.py algo=fedavg data=femnist path=(your leaf dataset path)/leaf/data/shakespeare/data
 
 # FedAvg(Meta) + Femnist Dataset
-python main.py algo=fedavg_meta data=femnist path=(your leaf dataset path)/leaf/data/shakespeare/data
+python main.py algo=fedavg_meta data=femnist path=../leaf/data/shakespeare/data
 
 # FedMeta(MAML) + Femnist Dataset
-python main.py algo=fedmeta_maml data=femnist path=(your leaf dataset path)/leaf/data/shakespeare/data
+python main.py algo=fedmeta_maml data=femnist path=../leaf/data/shakespeare/data
 
 # FedMeta(Meta-SGD) + Femnist Dataset
-python main.py algo=fedmeta_meta_sgd data=femnist path=(your leaf dataset path)/leaf/data/shakespeare/data
+python main.py algo=fedmeta_meta_sgd data=femnist path=../leaf/data/shakespeare/data
 
 
 
 #FedAvg + Shakespeare Dataset
-python main.py algo=fedavg data=shakespeare path=(your leaf dataset path)/leaf/data/shakespeare/data
+python main.py algo=fedavg data=shakespeare path=../leaf/data/shakespeare/data
 
 #FedAvg(Meta) + Shakespeare Dataset
-python main.py algo=fedavg_meta data=shakespeare path=(your leaf dataset path)/leaf/data/shakespeare/data
+python main.py algo=fedavg_meta data=shakespeare path=../leaf/data/shakespeare/data
 
 #FedMeta(MAML) + Shakespeare Dataset
-python main.py algo=fedmeta_maml data=shakespeare path=(your leaf dataset path)/leaf/data/shakespeare/data
+python main.py algo=fedmeta_maml data=shakespeare path=../leaf/data/shakespeare/data
 
 #FedMeta(Meta-SGD) + Shakespeare Dataset
-python main.py algo=fedmeta_meta_sgd data=shakespeare path=(your leaf dataset path)/leaf/data/shakespeare/data
+python main.py algo=fedmeta_meta_sgd data=shakespeare path=../leaf/data/shakespeare/data
 
 ```
 
@@ -109,10 +110,11 @@ python main.py algo=fedmeta_meta_sgd data=shakespeare path=(your leaf dataset pa
 ## Expected Results
 If you proceed with all of the above experiments, You can get a graph of your experiment results as shown below along that `./femnist or shakespeare/graph_params/result_graph.png`.
 ```bash
-#If you want to see the graph, use the command below.
+#You can check the graph using the command below.
 python 
-[Now show a figure/table displaying the results of the above command]
 
-# add more commands + plots for additional experiments.
 ```
-![](docs/result_graph.png)
+**Femnist dataset experiment results**
+
+**Shakespeare dataset experiment results**
+![](docs/shakespeare_result_graph.png)

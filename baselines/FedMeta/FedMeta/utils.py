@@ -121,7 +121,6 @@ def plot_from_pkl(directory="."):
         "fedavg_meta.pkl": "blue",
         "fedmeta_maml.pkl": "orange",
         "fedmeta_meta_sgd.pkl": "red",
-        # ... 여기에 추가 파일 이름과 색상을 매핑 ...
     }
 
     pkl_files = [f for f in os.listdir(directory) if f.endswith('.pkl')]
@@ -158,5 +157,6 @@ def plot_from_pkl(directory="."):
 
     plt.show()
 
+
 if __name__ == '__main__':
-    plot_from_pkl()
+    plot_from_pkl('./femnist/graph_params')
