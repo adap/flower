@@ -87,7 +87,7 @@ Run `Poetry shell` in your terminal to activate the environment.
 #gives the output shown in Table 1
 python -m hfedxgboost.main --config-name "centralized_basline_all_datasets_paper_config"
 
-#to run all the experiments for the centralized model
+#to run the experiments for the centralized model  
 python -m hfedxgboost.main --config-name "Centralized_Baseline"
 
 #to run the federated version for a9a dataset with 2 clients
@@ -118,21 +118,6 @@ python -m hfedxgboost.main dataset="space_ga" clients="space_ga_5_clients"
 #to run the federated version for space_ga dataset with 10 clients
 python -m hfedxgboost.main dataset="space_ga" clients="space_ga_10_clients"
 
-# The main experiment implemented in your baseline using default hyperparameters (that should be set in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
-
-poetry run -m <baseline-name>.main <no additional arguments> # where <baseline-name> is the name of this directory and that of the only sub-directory in this directory (i.e. where all your source code is)
-
-# If you are using a dataset that requires a complicated download (i.e. not using one natively supported by TF/PyTorch) + preprocessing logic, you might want to tell people to run one script first that will do all that. Please ensure the download + preprocessing can be configured to suit (at least!) a different download directory (and use as default the current directory). The expected command to run to do this is:
-
-poetry run -m <baseline-name>.dataset_preparation <optional arguments, but default should always run>
-
-# It is expected that you baseline supports more than one dataset and different FL settings (e.g. different number of clients, dataset partitioning methods, etc). Please provide a list of commands showing how these experiments are run. Include also a short explanation of what each one does. Here it is expected you'll be using the Hydra syntax to override the default config.
-
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
-.
-.
-.
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
 ```
 
 
@@ -140,24 +125,26 @@ poetry run -m <baseline-name>.main  <override_some_hyperparameters>
 
 
 ```bash
-#results in table 2
+#results for a9a dataset in table 2 
 python -m hfedxgboost.main --multirun clients="a9a_2_clients","a9a_5_clients","a9a_10_clients" dataset=a9a
 
-#results in table 3
+#results for cod_rna dataset in table 2
 python -m hfedxgboost.main --multirun clients="cod_rna_2_clients","cod_rna_5_clients","cod_rna_10_clients" dataset=cod_rna
 
-#results in table 4
+#results for ijcnn1 dataset in table 2
 python -m hfedxgboost.main --multirun clients="ijcnn1_2_clients","ijcnn1_5_clients","ijcnn1_10_clients" dataset=ijcnn1
 
-#results in table 5
+#results for space_ga dataset in table 2
 python -m hfedxgboost.main --multirun clients="space_ga_2_clients","space_ga_5_clients","space_ga_10_clients" dataset=space_ga
 
-#results in table 6
+#results for abalone dataset in table 2
 python -m hfedxgboost.main --multirun clients="abalone_2_clients","abalone_5_clients","abalone_10_clients" dataset=abalone
 
-#results in table 7
+#results for cpusmall dataset in table 2
 python -m hfedxgboost.main --multirun clients="cpusmall_2_clients","cpusmall_5_clients","cpusmall_10_clients" dataset=cpusmall
 
+#results for YearPredictionMSD_2 dataset in table 2
+python -m hfedxgboost.main --multirun clients=YearPredictionMSD_2_clients,YearPredictionMSD_5_clients,YearPredictionMSD_10_clients dataset=YearPredictionMSD
 ```
 ### Table 1
 
@@ -170,8 +157,8 @@ python -m hfedxgboost.main --multirun clients="cpusmall_2_clients","cpusmall_5_c
 | cpusmall | Regression | 9 |
 | space_ga | Regression | .032 |
 | YearPredictionMSD | Regression | 76.41 |
-
-### Those results don't come from following the original paper hyper-parameters, the new hyper-parameters are specified in the config files in the `clients` folder
+ 
+**Those results don't come from following the original paper hyper-parameters, the new hyper-parameters are specified in the config files in the `clients` folder**
 
 ### Table 2
 
