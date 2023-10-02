@@ -18,6 +18,7 @@
 import sys
 import threading
 import traceback
+import warnings
 from logging import ERROR, INFO
 from typing import Any, Dict, List, Optional, Type, Union
 
@@ -214,6 +215,12 @@ def start_simulation(  # pylint: disable=too-many-arguments
         cluster_resources,
     )
 
+    log(
+        INFO,
+        "Optimize your simulation with Flower VCE: "
+        "https://flower.dev/docs/framework/how-to-run-simulations.html",
+    )
+
     # Log the resources that a single client will be able to use
     if client_resources is None:
         log(
@@ -221,6 +228,14 @@ def start_simulation(  # pylint: disable=too-many-arguments
             "No `client_resources` specified. Using minimal resources for clients.",
         )
         client_resources = {"num_cpus": 1, "num_gpus": 0.0}
+
+    # Each client needs at the very least one CPU
+    if "num_cpus" not in client_resources:
+        warnings.warn(
+            "No `num_cpus` specified in `client_resources`. "
+            "Using `num_cpus=1` for each client."
+        )
+        client_resources["num_cpus"] = 1
 
     log(
         INFO,
