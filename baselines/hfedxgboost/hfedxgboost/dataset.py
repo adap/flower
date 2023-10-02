@@ -8,7 +8,7 @@ partitioned, please include all those functions and logic in the
 `dataset_preparation.py` module. You can use all those functions from functions/methods
 defined here of course.
 """
-from typing import Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import torch
 from flwr.common import NDArray
@@ -24,7 +24,7 @@ from hfedxgboost.dataset_preparation import (
 
 def load_single_dataset(
     task_type: str, dataset_name: str, train_ratio: Optional[float] = 0.75
-) -> Tuple[NDArray, NDArray, NDArray]:
+) -> Tuple[NDArray, NDArray, NDArray, NDArray]:
     """Load a single dataset.
 
     Parameters
@@ -79,7 +79,7 @@ def divide_dataset_between_clients(
     pool_size: int,
     batch_size: Union[int, str],
     val_ratio: float = 0.0,
-) -> Tuple[DataLoader, DataLoader, DataLoader]:
+) -> Tuple[DataLoader, Union[List[DataLoader], List[None]], DataLoader]:
     """Divide the data between clients with IID distribution.
 
     Parameters
@@ -106,7 +106,7 @@ def divide_dataset_between_clients(
 
     # Split each partition into train/val and create DataLoader
     trainloaders = []
-    valloaders = []
+    valloaders: Union[List[DataLoader], List[None]] = []
     for ds in datasets:
         len_val = int(len(ds) * val_ratio)
         len_train = len(ds) - len_val
@@ -116,6 +116,6 @@ def divide_dataset_between_clients(
         if len_val != 0:
             valloaders.append(get_dataloader(ds_val, "val", batch_size))
         else:
-            valloaders = None
+            valloaders.append(None)
     testloader = get_dataloader(testset, "test", batch_size)
     return trainloaders, valloaders, testloader

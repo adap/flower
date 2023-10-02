@@ -4,12 +4,9 @@ It includes processioning the dataset, instantiate strategy, specify how the glo
 model is going to be evaluated, etc. At the end, this script saves the results.
 """
 import functools
-from typing import Dict
+from typing import Dict, Union
 
 import flwr as fl
-
-# these are the basic packages you'll need here
-# feel free to remove some if aren't needed
 import hydra
 import torch
 from flwr.common import Scalar
@@ -41,6 +38,7 @@ def main(cfg: DictConfig) -> None:
     """
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
+    writer: Union[results_writer, results_writer_centralized]
     if cfg.centralized:
         if cfg.dataset.dataset_name == "all":
             run_centralized(cfg, dataset_name=cfg.dataset.dataset_name)

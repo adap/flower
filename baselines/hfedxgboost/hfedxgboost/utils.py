@@ -108,8 +108,8 @@ def run_single_exp(
 
 
 def run_centralized(
-    config: DictConfig, dataset_name: str = "all", task_type: str = None
-) -> Optional[Tuple[float, float]]:
+    config: DictConfig, dataset_name: str = "all", task_type: Optional[str] = None
+) -> Union[Tuple[float, float], List[None]]:
     """Run the centralized training and testing process.
 
     Parameters
@@ -144,6 +144,7 @@ def run_centralized(
                 ", Test:",
                 result_test,
             )
+        return []
     else:
         if task_type:
             result_train, result_test = run_single_exp(

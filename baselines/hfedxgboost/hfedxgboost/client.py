@@ -3,7 +3,7 @@
 Please overwrite `flwr.client.NumPyClient` or `flwr.client.Client` and create a function
 to instantiate your client.
 """
-from typing import Tuple, Union
+from typing import Any, Tuple, Union
 
 import flwr as fl
 import torch
@@ -50,8 +50,7 @@ class FL_Client(fl.client.Client):
 
         self.trainloader_original = trainloader
         self.valloader_original = valloader
-        self.trainloader = None
-        self.valloader = None
+        self.valloader: Any
         self.n_estimators_client = (
             cfg.n_estimators_client
         )  # 100#cfg.dataset.n_estimators_client
@@ -208,7 +207,8 @@ class FL_Client(fl.client.Client):
     def get_parameters(
         self, ins: GetParametersIns
     ) -> Tuple[
-        GetParametersRes, Union[Tuple[XGBClassifier, int], Tuple[XGBRegressor, int]]
+        GetParametersRes,
+        Union[Tuple[XGBClassifier, int], Tuple[XGBRegressor, int]],
     ]:
         """Get CNN net weights and the tree.
 
@@ -229,13 +229,10 @@ class FL_Client(fl.client.Client):
                 A tuple containing either an XGBClassifier or XGBRegressor
                 object along with client's id.
         """
-        return [
-            GetParametersRes(
-                status=Status(Code.OK, ""),
-                parameters=ndarrays_to_parameters(self.net.get_weights()),
-            ),
-            (self.tree, int(self.cid)),
-        ]
+        return GetParametersRes(
+            status=Status(Code.OK, ""),
+            parameters=ndarrays_to_parameters(self.net.get_weights()),
+        ), (self.tree, int(self.cid))
 
     def fit(self, fit_params: FitIns) -> FitRes:
         """Trains a model using the given fit parameters.
@@ -261,7 +258,7 @@ class FL_Client(fl.client.Client):
             print("Client " + self.cid + ": recieved", len(aggregated_trees), "trees")
         else:
             print("Client " + self.cid + ": only had its own tree")
-        self.trainloader = single_tree_preds_from_each_client(
+        trainloader: Any = single_tree_preds_from_each_client(
             self.trainloader_original,
             batch_size,
             aggregated_trees,
@@ -277,14 +274,13 @@ class FL_Client(fl.client.Client):
         )
         # num_iterations = None special behaviour: train(...)
         # runs for a single epoch, however many updates it may be
-        num_iterations = num_iterations or len(self.trainloader)
-
+        num_iterations = num_iterations or len(trainloader)
         # Train the model
         print(f"Client {self.cid}: training for {num_iterations} iterations/updates")
         self.net.to(self.device)
         train_loss, train_result, num_examples = self.train(
             self.net,
-            self.trainloader,
+            trainloader,
             num_iterations=num_iterations,
             log_progress=self.log_progress,
         )

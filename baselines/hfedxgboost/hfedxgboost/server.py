@@ -43,7 +43,7 @@ class FL_Server(fl.server.Server):
         *,
         client_manager: ClientManager,
         early_stopper: Early_Stop,
-        strategy: Optional[Strategy] = None,
+        strategy: Strategy,
     ) -> None:
         self._client_manager = client_manager
         self.parameters = Parameters(tensors=[], tensor_type="numpy.ndarray")
@@ -133,7 +133,7 @@ class FL_Server(fl.server.Server):
             print("Server side did not aggregate trees.")
 
         return (
-            [CNN_aggregated, trees_aggregated],
+            (CNN_aggregated, trees_aggregated),
             metrics_aggregated,
             (results, failures),
         )
@@ -314,10 +314,9 @@ class FL_Server(fl.server.Server):
         random_client = self._client_manager.sample(1)[0]
         ins = GetParametersIns(config={})
         get_parameters_res_tree = random_client.get_parameters(ins=ins, timeout=timeout)
-        parameters = [get_parameters_res_tree[0].parameters, get_parameters_res_tree[1]]
         log(INFO, "Received initial parameters from one random client")
 
-        return parameters
+        return (get_parameters_res_tree[0].parameters, get_parameters_res_tree[1])
 
 
 def serverside_eval(
@@ -357,7 +356,7 @@ def serverside_eval(
     # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     metric_name = cfg.dataset.task.metric.name
 
-    device = cfg. server_device
+    device = cfg.server_device
     model = CNN(cfg)
     model.set_weights(parameters_to_ndarrays(parameters[0]))
     model.to(device)
