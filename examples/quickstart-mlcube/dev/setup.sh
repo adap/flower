@@ -8,9 +8,11 @@ rm -rf mlcube
 
 # Clone mlcube
 echo "Clone mlcube from GitHub"
-git clone https://github.com/mlcommons/mlcube_examples.git 
+git clone https://github.com/mlcommons/mlcube_examples.git
 cp -r mlcube_examples/mnist_fl/tensorflow mlcube
 rm -rf mlcube_examples
+cp dev/Dockerfile mlcube/build
+cp dev/requirements.txt mlcube/build
 
 # Download dataset
 cd mlcube
