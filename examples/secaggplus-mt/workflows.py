@@ -1,6 +1,6 @@
 import random
 from logging import WARNING
-from typing import Callable, Dict, Generator, List, Tuple
+from typing import Callable, Dict, Generator, List
 
 import numpy as np
 
@@ -55,16 +55,25 @@ from flwr.common.secure_aggregation.secaggplus_constants import (
 )
 from flwr.common.secure_aggregation.secaggplus_utils import pseudo_rand_gen
 from flwr.common.serde import named_values_from_proto, named_values_to_proto
-from flwr.common.typing import Value, FitIns
-from flwr.server.client_proxy import ClientProxy
+from flwr.common.typing import Value
 from flwr.proto.task_pb2 import SecureAggregation, Task
-from flwr.driver.workflow import FlowerWorkflow, FlowerWorkflowFactory, FLWorkflowFactory, WorkflowState
-from flwr.driver.task_utils import wrap_named_values_in_task, wrap_server_message_in_task
 
 
 LOG_EXPLAIN = True
 
 
+def get_workflow_factory() -> (
+    Callable[[Parameters, List[int]], Generator[Dict[int, Task], Dict[int, Task], None]]
+):
+    return _wrap_workflow_with_sec_agg
+
+
+def _wrap_in_task(named_values: Dict[str, Value]) -> Task:
+    return Task(sa=SecureAggregation(named_values=named_values_to_proto(named_values)))
+
+
+def _get_from_task(task: Task) -> Dict[str, Value]:
+    return named_values_from_proto(task.sa.named_values)
 
 
 _secure_aggregation_configuration = {
@@ -77,17 +86,15 @@ _secure_aggregation_configuration = {
 
 
 def workflow_with_sec_agg(
-    state: WorkflowState,
+    parameters: Parameters,
+    sampled_node_ids: List[int],
     sec_agg_config: Dict[str, Scalar],
-) -> FlowerWorkflow:
+) -> Generator[Dict[int, Task], Dict[int, Task], None]:
     """
     =============== Setup stage ===============
     """
-    # Sample clients
-    fit_config = state.strategy.configure_fit(state.current_round, state.parameters, state.client_manager)
-    proxy2fitins = dict(fit_config)
     # Protocol config
-    num_samples = len(fit_config)
+    num_samples = len(sampled_node_ids)
     num_shares = sec_agg_config[KEY_SHARE_NUMBER]
     threshold = sec_agg_config[KEY_THRESHOLD]
     mod_range = sec_agg_config[KEY_MOD_RANGE]
@@ -133,9 +140,9 @@ def workflow_with_sec_agg(
         num_shares += 1
 
     # Randomly assign secure IDs to clients
-    sids = [i for i in range(num_samples)]
+    sids = [i for i in range(len(sampled_node_ids))]
     random.shuffle(sids)
-    proxy2sid = dict(zip(nid2proxy.keys(), sids))
+    nid2sid = dict(zip(sampled_node_ids, sids))
     sid2nid = {sid: nid for nid, sid in nid2sid.items()}
     # Build neighbour relations (node ID -> secure IDs of neighbours)
     half_share = num_shares >> 1
@@ -144,10 +151,10 @@ def workflow_with_sec_agg(
             (nid2sid[node_id] + offset) % num_samples
             for offset in range(-half_share, half_share + 1)
         }
-        for node_id in nid2proxy
+        for node_id in sampled_node_ids
     }
 
-    surviving_node_ids = list(nid2proxy.keys())
+    surviving_node_ids = sampled_node_ids
     if LOG_EXPLAIN:
         print(
             f"Sending configurations to {num_samples} clients and allocating secure IDs..."
