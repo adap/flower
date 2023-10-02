@@ -15,8 +15,8 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
-from FedSMOO.dataset import load_datasets
-from FedSMOO.models import *
+from fedsmoo.dataset import load_datasets
+from fedsmoo.models import *
 
 # -------------------- FedSMOO Client ----------------------------------
 class FlowerClientFedSMOO(

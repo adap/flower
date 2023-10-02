@@ -36,7 +36,7 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
-from FedSMOO.models import test, set_H_param_list
+from fedsmoo.models import test, set_H_param_list
 
 # Flower Server class needed!! 
 # need to store/ aggregate more than just the parameters

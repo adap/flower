@@ -11,15 +11,16 @@ import flwr as fl
 import torch
 import logging 
 
-from FedSMOO.dataset import load_datasets
-from FedSMOO.utils import *
-from FedSMOO import client
-from FedSMOO.server import *
-from FedSMOO.strategy import *
+from fedsmoo.dataset import load_datasets
+from fedsmoo.utils import *
+from fedsmoo import client
+from fedsmoo.server import *
+from fedsmoo.strategy import *
 from flwr.server.server import Server
 
 import hydra
 from hydra.utils import instantiate
+from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
 
@@ -44,11 +45,7 @@ def main(cfg: DictConfig) -> None:
     # (2) tell each client what dataset partitions they should use (e.g. a this could
     # be a location in the file system, a list of dataloader, a list of ids to extract
     # from a dataset, it's up to you)
-    
-    # TODO: fix dirichlet (acc = 0.1 random chance)
-    # pathological seems to work fine
-    # TODO: fix perturbation averaging, adaptive alpha
-    
+        
     trainloaders, valloaders, testloader = load_datasets(
         config=cfg.dataset,
         num_clients=cfg.num_clients,
@@ -153,23 +150,10 @@ def main(cfg: DictConfig) -> None:
     # data = strategy.get_my_custom_data() -- assuming you have such method defined.
     # Hydra will generate for you a directory each time you run the code. You
     # can retrieve the path to that directory with this:
-    # save_path = HydraConfig.get().runtime.output_dir
-
+    
+    save_path = HydraConfig.get().runtime.output_dir
     accuracy_test = history.metrics_centralized["accuracy"]
-    plot_fn(cfg, accuracy_test)
-
-    if cfg.dataset.dirichlet:
-        dataset_prep = "dirichlet"
-    else:
-        dataset_prep = "pathological"
-
-    logfile = f"./results/{cfg.method}_{cfg.dataset.dataset_name}_{cfg.num_clients}_{dataset_prep}.log"
-    logging.basicConfig(filename=logfile, 
-					format='%(asctime)s %(message)s', 
-					filemode='w') 
-    logger=logging.getLogger() 
-    logger.setLevel(logging.DEBUG) 
-    logger.info(accuracy_test) 
+    plot_fn(save_path, accuracy_test)
 
 
 if __name__ == "__main__":

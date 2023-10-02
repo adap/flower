@@ -8,7 +8,7 @@ results, plotting.
 import matplotlib.pyplot as plt
 from typing import List, Tuple
 
-def plot_fn(cfg, acc: List[Tuple[int, float]]):
+def plot_fn(save_path, acc: List[Tuple[int, float]]):
     x_val = [x[0] for x in acc]
     y_val = [x[1] for x in acc]
 
@@ -16,9 +16,5 @@ def plot_fn(cfg, acc: List[Tuple[int, float]]):
     plt.plot(x_val,y_val,'-r')
     plt.grid()
 
-    if cfg.dataset.dirichlet:
-        dataset_prep = "dirichlet"
-    else:
-        dataset_prep = "pathological"
-    fname = f"./results/{cfg.method}_{cfg.dataset.dataset_name}_{cfg.num_clients}_{dataset_prep}.png"
+    fname = f"{save_path}/plot.png"
     plt.savefig(fname)

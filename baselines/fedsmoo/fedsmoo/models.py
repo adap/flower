@@ -17,7 +17,7 @@ from torch.nn.parameter import Parameter
 from torch.utils.data import DataLoader
 from torchvision.models import resnet
 from torchvision import models
-from FedSMOO.minimizers import *
+from fedsmoo.minimizers import *
 
 # class GroupNorm_(nn.Module):
 #     def __init__(self, num_channels):

@@ -12,7 +12,7 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
-from FedSMOO.models import test
+from fedsmoo.models import test
 from flwr.server.strategy import Strategy
 from flwr.server.strategy.fedavg import WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW
 

@@ -23,12 +23,12 @@ dataset:
 
 model:
   # model config
-  _target_: FedSMOO.models.ResNet18GN
+  _target_: fedsmoo.models.ResNet18GN
   num_classes: 10
 
 strategy:
   #_target_: flwr.server.strategy.FedAvg
-  _target_: FedSMOO.strategy.FedAvgWithStragglerDrop
+  _target_: fedsmoo.strategy.FedAvgWithStragglerDrop
   fraction_fit: 0.1       # 0.1, 0.05
   fraction_evaluate: 0.0   # 0.1-0.2?
   min_fit_clients: 2
