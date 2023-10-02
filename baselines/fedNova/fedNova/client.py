@@ -34,33 +34,18 @@ class FlowerClient(fl.client.NumPyClient):  # pylint: disable=too-many-instance-
 	def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
 		"""Returns the parameters of the current net."""
 		params = [val["cum_grad"].cpu().numpy() for _, val in self.optimizer.state_dict()["state"].items()]
-		# print("----------Client get parameters----------", len(params))
 		return params
 
 	def set_parameters(self, parameters: NDArrays) -> None:
 		"""Changes the parameters of the model using the given ones."""
-		# before_load = self.net.state_dict()
-		# print("before load", parameters)
-		# print("in set parameters", parameters, type(parameters))
-		# print("----------Client set parameters called----------", type(parameters), len(parameters))
 		if self.optim_state is not None:
 			self.optimizer.load_state_dict(self.optim_state)
 
 		self.optimizer.load_aggregated_grad(parameters)
 
-	# after_load = self.net.state_dict()
-	# print("after load", after_load)
-
 	def fit(self, parameters: NDArrays, config: DictConfig) -> Tuple[NDArrays, int, Dict]:
 		"""Implements distributed fit function for a given client."""
-		# print("----------Client fit called for Client : {} using device : {} ----------".format(self.client_id,
-		# 																						self.device))
-		# print("----------Client fit called for Client : {} Epoch: {} ----------".format(self.client_id, config["server_round"]))
 		self.set_parameters(parameters)
-		# params = [val.cpu().numpy() for _, val in self.net.state_dict().items()]
-		# torch.save(params, f"state/model_{self.client_id}_{config['server_round']}.pt")
-		# print("------client model params saved")
-		# torch.save("------Client :{} model params saved".format(self.client_id))
 
 		# Adjust learning rate based on server rounds
 		current_round = config["server_round"]
@@ -89,19 +74,16 @@ class FlowerClient(fl.client.NumPyClient):  # pylint: disable=too-many-instance-
 		local_stats = self.optimizer.get_local_stats()
 
 		self.optim_state = self.optimizer.state_dict()
-		# print("----------Client save state ----------", self.client_id)
 		torch.save(self.optim_state, f"state/client_{self.client_id}_state.pt")
-		# print("----------Client save completed ----------", self.client_id)
 
 		return self.get_parameters({}), len(self.trainloader), local_stats
 
 	def evaluate(self, parameters: NDArrays, config: Dict[str, Scalar]) -> Tuple[float, int, Dict]:
 		"""Implements distributed evaluation for a given client."""
-		# print("----------Evaluate for client: {} with params: {}----------------".format(self.client_id, len(parameters)))
 		self.set_parameters(parameters)
 		loss, accuracy = test(self.net, self.testloader, self.device)
-		print("-----Client: {} Round: {} Test Loss: {} Accuracy : {} ".format(self.client_id, config["server_round"],
-																			  loss, accuracy))
+		# print("-----Client: {} Round: {} Test Loss: {} Accuracy : {} ".format(self.client_id, config["server_round"],
+		# 																	  loss, accuracy))
 		return float(loss), len(self.testloader), {"accuracy": float(accuracy)}
 
 

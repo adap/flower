@@ -329,7 +329,7 @@ if __name__ == "__main__":
 
 	optimizer = ProxSGD(params, 0.0625, lr=0.1, weight_decay=1e-4, momentum=0)
 	# init_params = np.load("state/init_params.npy", allow_pickle=True)
-	# init_params= torch.load("state/init_params_torch.pt")
+	init_params= torch.load("state/init_params_torch.pt")
 	# init_params = saved_params
 
 	i= 0
@@ -360,17 +360,6 @@ if __name__ == "__main__":
 	# 	all_equal = [np.isclose(param[client[i]][j], param[client[i+1]][j]) for j in range(len(param[client[i]]))]
 	# 	print([(np.sum(x), x.shape) for x in all_equal])
 	# 	break
-	print("something")
-
-
-
-
-
-
-
-
-
-
 
 	# for epoch in range(1):
 	# 	losses = Meter(ptag='Loss')
