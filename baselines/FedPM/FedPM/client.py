@@ -12,17 +12,13 @@ import numpy as np
 import torch
 from scipy.stats import bernoulli
 from logging import INFO
-from models import sigmoid, load_model
+from models import load_model
 
 import torch.nn as nn
-
-
 from flwr.common.logger import log
-
 from flwr.common import (
     FitIns,
     FitRes,
-    Parameters,
     Status,
     Code,
     ndarrays_to_parameters,
@@ -33,27 +29,21 @@ from flwr.common import (
     EvaluateRes
 )
 
+# TO CHECK
+from models import get_parameters, set_parameters
+
 
 class FedPMClient(flwr.client.Client):
     def __init__(
             self,
-            cfg: Dict,
+            params: Dict,
             client_id: int,
             train_data_loader: DataLoader,
             test_data_loader: DataLoader,
             device='cpu',
-            compressor=None
     ) -> None:
 
-        super().__init__(
-            params=cfg,
-            client_id=client_id,
-            train_data_loader=train_data_loader,
-            test_data_loader=test_data_loader,
-            device=device,
-            compressor=compressor
-        )
-        self.params = cfg
+        self.params = params
         self.client_id = client_id
         self.train_data_loader = train_data_loader
         self.test_data_loader = test_data_loader
@@ -80,7 +70,6 @@ class FedPMClient(flwr.client.Client):
             self,
             fitins: FitIns
     ) -> FitRes:
-        prior = parameters_to_ndarrays(fitins.parameters)
         self.set_parameters(fitins.parameters)
         mask_probs = self.train_fedpm(
             model=self.local_model,
@@ -88,47 +77,7 @@ class FedPMClient(flwr.client.Client):
             iter_num=fitins.config.get('iter_num'),
             params=self.params,
         )
-        sampled_mask = None
-        round_rate = []
-        round_block_sizes = []
-        rhos_round = []
-        sampled_mask = []
-        posterior_params = []
-        prior_params = []
-        if self.compression:
-            for i, (name, param) in enumerate(mask_probs.items()):
-                if 'mask' in name:
-                    posterior_params.extend(sigmoid(param.cpu().numpy().flatten()))
-                    prior_params.extend(sigmoid(prior[i]).flatten())
-        else:
-            sampled_mask = self.sample_mask(mask_probs)
-
-        prior_params = np.asarray(prior_params)
-        posterior_params = np.asarray(posterior_params)
-        if self.compression:
-            sampled_params, block_sizes, bits, rhos, ids = self.compressor.compress(
-                posterior_update=np.float64(posterior_params),
-                prior=np.float64(prior_params),
-                compress_config=self.params.get('compressor').get('rec'),
-                old_ids=fitins.config.get('old_ids')
-            )
-            # sampled_mask.append(sampled_params)
-            j_start = 0
-            for i, (name, param) in enumerate(mask_probs.items()):
-                if 'mask' in name:
-                    sampled_mask.append(np.reshape(sampled_params[j_start: j_start + torch.numel(param)],
-                                                   param.shape))
-                    j_start += torch.numel(param)
-                else:
-                    sampled_mask.append(param.cpu().numpy())
-            round_block_sizes.append(np.mean(block_sizes))
-            if fitins.config.get('old_ids') is None and \
-                    self.params.get('compressor').get('rec').get('adaptive'):
-                round_rate.append(np.mean((np.asarray(bits) + np.log2(256)) / np.asarray(block_sizes)))
-            else:
-                round_rate.append(np.mean(np.asarray(bits) / np.asarray(block_sizes)))
-            rhos_round.extend(rhos)
-
+        sampled_mask = self.sample_mask(mask_probs)
         parameters = ndarrays_to_parameters(sampled_mask)
         status = Status(code=Code.OK, message="Success")
 
@@ -188,9 +137,9 @@ class FedPMClient(flwr.client.Client):
         """
 
         if optimizer is None:
-            optimizer = torch.optim.Adam(model.parameters(), lr=params.get('fedpm').get('local_lr'))
+            optimizer = torch.optim.Adam(model.parameters(), lr=params.get('strategy').get('fedpm').get('local_lr'))
 
-        for epoch in range(params.get('fedpm').get('local_epochs')):
+        for epoch in range(params.get('strategy').get('fedpm').get('local_epochs')):
             running_loss = 0
             total = 0
             correct = 0
@@ -205,5 +154,23 @@ class FedPMClient(flwr.client.Client):
                 correct += (pred_y == train_y).sum().item()
                 loss.backward()
                 optimizer.step()
-            # print("Epoch {}: train loss {}  -  Accuracy {}".format(epoch + 1, loss, correct/total))
+
         return model.state_dict()
+
+    def get_parameters(
+            self,
+            ins: GetParametersIns = None
+    ) -> GetParametersRes:
+        ndarrays = get_parameters(self.local_model)
+        parameters = ndarrays_to_parameters(ndarrays)
+        status = Status(code=Code.OK, message="Success")
+        return GetParametersRes(
+            status=status,
+            parameters=parameters
+        )
+
+    def set_parameters(self, parameters):
+        set_parameters(
+            self.local_model,
+            parameters_to_ndarrays(parameters)
+        )

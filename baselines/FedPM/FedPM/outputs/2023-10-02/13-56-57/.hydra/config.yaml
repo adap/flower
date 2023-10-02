@@ -1,0 +1,41 @@
+dataset:
+  name: mnist
+  split: iid
+  classes_pc: 4
+  minibatch_size: 64
+model:
+  name: LeNet
+  mode: dense
+  local_epochs: 3
+  activation: relu
+  agg_steps: 5
+strategy:
+  _target_: null
+  fedpm:
+    local_epochs: 3
+    local_lr: 0.1
+  fedavg:
+    local_lr: 0.0003
+    server_lr: 0.1
+  dense:
+    local_epochs: 3
+  sign_sgd:
+    local_lr: 0.01
+    server_lr: 0.0002
+client:
+  local_epochs: 3
+  local_lr: 0.1
+simulation:
+  fraction_fit: 0.2
+  fraction_evaluate: 0
+  n_clients: 10
+  n_rounds: 200
+  verbose: 0
+  store_output: true
+  strategy: fedpm
+ray_init_args:
+  ignore_reinit_error: true
+  include_dashboard: true
+  num_cpus: 6
+  num_gpus: 1
+  local_mode: true

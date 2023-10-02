@@ -38,7 +38,7 @@ client:
   local_lr: 0.1
 
 simulation:
-  fraction_fit: 1.0
+  fraction_fit: 0.2
   fraction_evaluate: 0
   n_clients: 10
   n_rounds: 200
@@ -51,4 +51,4 @@ ray_init_args:
   include_dashboard: True
   num_cpus: 6
   num_gpus: 1
-  local_mode: False
+  local_mode: True
