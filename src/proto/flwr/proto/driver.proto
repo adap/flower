@@ -40,7 +40,7 @@ message CreateWorkloadResponse { string workload_id = 1; }
 
 // GetNodes messages
 message GetNodesRequest { string workload_id = 1; }
-message GetNodesResponse { repeated uint64 node_ids = 1; }
+message GetNodesResponse { repeated Node nodes = 1; }
 
 // PushTaskIns messages
 message PushTaskInsRequest { repeated TaskIns task_ins_list = 1; }
