@@ -21,6 +21,8 @@ jobs:
     name: Build and deploy
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Install pandoc
@@ -39,3 +41,4 @@ jobs:
           aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./doc/build/html/ s3://flower.dev/docs/framework
           aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./baselines/doc/build/html/ s3://flower.dev/docs/baselines
           aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./examples/doc/build/html/ s3://flower.dev/docs/examples
+          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./datasets/doc/build/html/ s3://flower.dev/docs/datasets
