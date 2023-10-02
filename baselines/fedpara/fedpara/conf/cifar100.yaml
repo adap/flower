@@ -1,9 +1,9 @@
 ---
-seed: 17
+seed: 34213
 
-num_clients: 100
-num_rounds: 200
-clients_per_round: 16
+num_clients: 50
+num_rounds: 400
+clients_per_round: 8
 num_epochs: 5
 batch_size: 64
 
@@ -12,11 +12,11 @@ client_device: cuda
 
 client_resources:
   num_cpus: 2
-  num_gpus: 0.125
+  num_gpus: 0.0625
 
 dataset_config:
-  name: CIFAR10
-  num_classes: 10
+  name: CIFAR100
+  num_classes: 100
   alpha: 0.5
 
 model:

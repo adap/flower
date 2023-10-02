@@ -1,5 +1,5 @@
 """Main script for running FedPara."""
-
+from comet_ml import Experiment
 import flwr as fl
 import hydra
 import numpy as np
@@ -25,7 +25,17 @@ def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
 
     seed_everything(cfg.seed)
-
+    experiment = Experiment(
+    api_key="IZUqacouHXlsJu3hXQ5LuIy5Z",
+    project_name="fedpara",
+    workspace="yehias21"
+    )
+    experiment.set_name(f"flower | {cfg.strategy.algorithm} | {cfg.dataset_config.name} | Seed {cfg.seed}")
+    hyper_params = {
+        "dataset": cfg.dataset_config.name,
+        "seed": cfg.seed,
+        }
+    experiment.log_parameters(hyper_params)
     # 2. Prepare dataset
     train_loaders, test_loader = load_datasets(
         config=cfg.dataset_config,
@@ -45,7 +55,8 @@ def main(cfg: DictConfig) -> None:
     evaluate_fn = server.gen_evaluate_fn(
         test_loader=test_loader,
         model=cfg.model,
-        device=cfg.server_device
+        device=cfg.server_device,
+        experiment=experiment,
     )
 
     def get_on_fit_config():
@@ -75,7 +86,12 @@ def main(cfg: DictConfig) -> None:
         client_resources={
             "num_cpus": cfg.client_resources.num_cpus,
             "num_gpus": cfg.client_resources.num_gpus,
-        }
+        },
+        ray_init_args={
+            "num_cpus": 20,
+            "num_gpus": 1,
+            "_memory": 150 * 1024 * 1024 * 1024,
+        },
     )
 
     # 6. Save results

@@ -8,6 +8,28 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset
 from torchvision import datasets, transforms
 
+# class CustomDataset(Dataset):
+#     def __init__(self, root, train=True, dataset_name='CIFAR10', transform=None):
+#         if dataset_name == 'CIFAR10':
+#             from torchvision.datasets import CIFAR10 as OriginalDataset
+#         elif dataset_name == 'CIFAR100':
+#             from torchvision.datasets import CIFAR100 as OriginalDataset
+#         else:
+#             raise ValueError("Unsupported dataset name. Supported options are 'CIFAR10' and 'CIFAR100'.")
+
+#         self.original_dataset = OriginalDataset(root, train=train, download=True, transform=None)
+#         self.transform = transform
+
+#     def __len__(self):
+#         return len(self.original_dataset)
+
+#     def __getitem__(self, idx):
+#         image, label = self.original_dataset[idx]
+
+#         if self.transform:
+#             image = self.transform(image)
+
+#         return image, label
 
 def _get_dirichlet_data(y, n, alpha, num_c, partition_equal=False):
     n_nets = n
@@ -99,6 +121,7 @@ def _split_dataset(
         pickle.dump(train_datasets, file)
 
     return train_datasets
+ 
 
 
 def load_datasets(
@@ -106,39 +129,42 @@ def load_datasets(
 ) -> Tuple[List[DataLoader], DataLoader]:
     """Load the dataset and return the dataloaders for the clients and the server."""
     print("Loading data...")
-
     if config.name == "CIFAR10":
         Dataset = datasets.CIFAR10
     elif config.name == "CIFAR100":
         Dataset = datasets.CIFAR100
     else:
         raise NotImplementedError
-
     data_directory = f"./data/{config.name.lower()}/"
     ds_path = f"{data_directory}train_{num_clients}_{config.alpha:.2f}.pkl"
-    tranform_train = transforms.Compose([transforms.Resize((224,224)), transforms.RandomHorizontalFlip(p=0.7),
-                                         transforms.ToTensor(),
-                                         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
-    tranform_test = transforms.Compose([transforms.Resize((224, 224)), transforms.ToTensor(),
-                                        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
-    try:
-        with open(ds_path, "rb") as file:
-            train_datasets = pickle.load(file)
-    except FileNotFoundError:
-        dataset_train = Dataset(
-            data_directory, train=True, download=True, transform=tranform_train
-        )
-        train_datasets = _split_dataset(
-            dataset_train,
-            num_clients,
-            config.alpha,
-            config.num_classes,
-            ds_path,
-            partition_equal,
-        )
+    normalize = transforms.Normalize(mean=[0.491, 0.482, 0.447], std=[0.247, 0.243, 0.262])
+
+    trans_cifar = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            normalize,
+        ]
+    )
+    # try:
+    #     with open(ds_path, "rb") as file:
+    #         train_datasets = pickle.load(file)
+    # except FileNotFoundError:
+    dataset_train = Dataset(
+        data_directory, train=True, download=True, transform=transforms.Compose([
+        transforms.ToTensor(),
+        normalize,])
+    )
+    train_datasets = _split_dataset(
+        dataset_train,
+        num_clients,
+        config.alpha,
+        config.num_classes,
+        ds_path,
+        partition_equal,
+    )
 
     dataset_test = Dataset(
-        data_directory, train=False, download=True, transform=tranform_test
+        data_directory, train=False, download=True, transform=trans_cifar
     )
     test_loader = DataLoader(dataset_test, batch_size=batch_size, num_workers=1)
     train_loaders = [
@@ -147,3 +173,4 @@ def load_datasets(
     ]
 
     return train_loaders, test_loader
+

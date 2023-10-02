@@ -16,6 +16,7 @@ def gen_evaluate_fn(
     test_loader: DataLoader,
     model: DictConfig,
     device,
+    experiment=None,
 ) -> Callable[
     [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]
 ]:
@@ -38,7 +39,7 @@ def gen_evaluate_fn(
     """
 
     def evaluate(
-        _, parameters_ndarrays: NDArrays, __
+        server_round, parameters_ndarrays: NDArrays, __
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:  # pylint: disable=unused-argument
         """Use the entire CIFAR-10/100 test set for evaluation."""
         net = instantiate(model)
@@ -48,6 +49,10 @@ def gen_evaluate_fn(
         net.to(device)
 
         loss, accuracy = test(net, test_loader, device=device)
+        
+        experiment.log_metric("loss", loss, epoch=server_round)
+        experiment.log_metric("accuracy", accuracy*100, epoch=server_round)
+        
         return loss, {"accuracy": accuracy}
 
     return evaluate

@@ -55,6 +55,7 @@ class FlowerClient(fl.client.NumPyClient):
             self.device,
             epochs=self.num_epochs,
             hyperparams=config,
+            round=config["curr_round"],
         )
 
         return (
@@ -74,11 +75,11 @@ def gen_client_fn(
 
     def client_fn(cid: str) -> FlowerClient:
         """Create a new FlowerClient for a given cid."""
-
+        cid = int(cid)
         return FlowerClient(
-            cid=int(cid),
+            cid=cid,
             net=instantiate(model).to(args["device"]),
-            train_loader=train_loaders[int(cid)],
+            train_loader=train_loaders[cid],
             device=args["device"],
             num_epochs=num_epochs,
         )

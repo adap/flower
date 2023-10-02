@@ -12,7 +12,7 @@ from torchvision import transforms
 from tqdm import tqdm
 import torchvision.models as models
 import numpy as np
-
+import math
 
 class LowRank(nn.Module):
     def __init__(self,
@@ -118,7 +118,7 @@ class VGG16GN(nn.Module):
         # Extract the features and classifier from the pre-trained VGG16
         self.features = vgg16.features
         self.classifier = nn.Sequential(
-            nn.Linear(512*7*7, 512),
+            nn.Linear(512, 512),
             nn.ReLU(inplace=True),
             nn.Dropout(),
             nn.Linear(512, 512),
@@ -129,20 +129,23 @@ class VGG16GN(nn.Module):
         # Replace Conv2d layers with custom Conv2d
         for name, module in self.features.named_children():
             module = getattr(self.features, name)
+            # if isinstance(module, nn.Conv2d):
+            #     num_channels = module.in_channels
+            #     setattr(self.features, name, Conv2d(
+            #         num_channels,
+            #         module.out_channels,
+            #         module.kernel_size[0],
+            #         module.stride[0],
+            #         module.padding[0],
+            #         module.bias is not None,
+            #         ratio=ratio,
+            #         add_nonlinear=add_nonlinear,
+            #         jacobian_corr=jacobian_corr
+            #     ))
             if isinstance(module, nn.Conv2d):
-                num_channels = module.in_channels
-                setattr(self.features, name, Conv2d(
-                    num_channels,
-                    module.out_channels,
-                    module.kernel_size[0],
-                    module.stride[0],
-                    module.padding[0],
-                    module.bias is not None,
-                    ratio=ratio,
-                    add_nonlinear=add_nonlinear,
-                    jacobian_corr=jacobian_corr
-                ))
-
+                n = module.kernel_size[0] * module.kernel_size[1] * module.out_channels
+                module.weight.data.normal_(0, math.sqrt(2. / n))
+                module.bias.data.zero_()
             if isinstance(module, nn.BatchNorm2d):
                 num_channels = module.num_features
                 setattr(self.features, name, nn.GroupNorm(num_groups, num_channels))
@@ -200,6 +203,7 @@ def train(  # pylint: disable=too-many-arguments
         device: torch.device,
         epochs: int,
         hyperparams: Dict[str, Scalar],
+        round: int,
 ) -> None:
     """Train the network on the training set.
 
@@ -216,12 +220,14 @@ def train(  # pylint: disable=too-many-arguments
     hyperparams : Dict[str, Scalar]
         The hyperparameters to use for training.
     """
+    lr=hyperparams["eta_l"]*hyperparams["learning_decay"]**(round-1)
+    print(f"Learning rate: {lr}")
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(
         net.parameters(),
-        lr=hyperparams["eta_l"],
+        lr=lr,
         momentum=0,
-        weight_decay=hyperparams["weight_decay"],
+        weight_decay=0,
     )
     net.train()
     for _ in tqdm(range(epochs), desc="Local Training ..."):
