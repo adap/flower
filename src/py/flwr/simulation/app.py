@@ -16,12 +16,15 @@
 
 
 import sys
+import threading
+import traceback
 from logging import ERROR, INFO
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Type, Union
 
 import ray
+from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 
-from flwr.client import ClientLike
+from flwr.client import ClientFn
 from flwr.common import EventType, event
 from flwr.common.logger import log
 from flwr.server import Server
@@ -29,7 +32,13 @@ from flwr.server.app import ServerConfig, init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
-from flwr.simulation.ray_transport.ray_client_proxy import RayClientProxy
+from flwr.simulation.ray_transport.ray_actor import (
+    DefaultActor,
+    VirtualClientEngineActor,
+    VirtualClientEngineActorPool,
+    pool_size_from_resources,
+)
+from flwr.simulation.ray_transport.ray_client_proxy import RayActorClientProxy
 
 INVALID_ARGUMENTS_START_SIMULATION = """
 INVALID ARGUMENTS ERROR
@@ -38,7 +47,7 @@ Invalid Arguments in method:
 
 `start_simulation(
     *,
-    client_fn: Callable[[str], ClientLike],
+    client_fn: ClientFn,
     num_clients: Optional[int] = None,
     clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, float]] = None,
@@ -61,7 +70,7 @@ REASON:
 
 def start_simulation(  # pylint: disable=too-many-arguments
     *,
-    client_fn: Callable[[str], ClientLike],
+    client_fn: ClientFn,
     num_clients: Optional[int] = None,
     clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, float]] = None,
@@ -71,12 +80,15 @@ def start_simulation(  # pylint: disable=too-many-arguments
     client_manager: Optional[ClientManager] = None,
     ray_init_args: Optional[Dict[str, Any]] = None,
     keep_initialised: Optional[bool] = False,
+    actor_type: Type[VirtualClientEngineActor] = DefaultActor,
+    actor_kwargs: Optional[Dict[str, Any]] = None,
+    actor_scheduling: Union[str, NodeAffinitySchedulingStrategy] = "DEFAULT",
 ) -> History:
     """Start a Ray-based Flower simulation server.
 
     Parameters
     ----------
-    client_fn : Callable[[str], ClientLike]
+    client_fn : ClientFn
         A function creating client instances. The function must take a single
         `str` argument called `cid`. It should return a single client instance
         of type ClientLike. Note that the created client instances are ephemeral
@@ -93,11 +105,11 @@ def start_simulation(  # pylint: disable=too-many-arguments
         List `client_id`s for each client. This is only required if
         `num_clients` is not set. Setting both `num_clients` and `clients_ids`
         with `len(clients_ids)` not equal to `num_clients` generates an error.
-    client_resources : Optional[Dict[str, float]] (default: None)
-        CPU and GPU resources for a single client. Supported keys are
-        `num_cpus` and `num_gpus`. Example: `{"num_cpus": 4, "num_gpus": 1}`.
-        To understand the GPU utilization caused by `num_gpus`, consult the Ray
-        documentation on GPU support.
+    client_resources : Optional[Dict[str, float]] (default: `{"num_cpus": 1,
+        "num_gpus": 0.0}` CPU and GPU resources for a single client. Supported keys
+        are `num_cpus` and `num_gpus`. To understand the GPU utilization caused by
+        `num_gpus`, as well as using custom resources, please consult the Ray
+        documentation.
     server : Optional[flwr.server.Server] (default: None).
         An implementation of the abstract base class `flwr.server.Server`. If no
         instance is provided, then `start_server` will create one.
@@ -124,6 +136,24 @@ def start_simulation(  # pylint: disable=too-many-arguments
     keep_initialised: Optional[bool] (default: False)
         Set to True to prevent `ray.shutdown()` in case `ray.is_initialized()=True`.
 
+    actor_type: VirtualClientEngineActor (default: DefaultActor)
+        Optionally specify the type of actor to use. The actor object, which
+        persists throughout the simulation, will be the process in charge of
+        running the clients' jobs (i.e. their `fit()` method).
+
+    actor_kwargs: Optional[Dict[str, Any]] (default: None)
+        If you want to create your own Actor classes, you might need to pass
+        some input argument. You can use this dictionary for such purpose.
+
+    actor_scheduling: Optional[Union[str, NodeAffinitySchedulingStrategy]]
+        (default: "DEFAULT")
+        Optional string ("DEFAULT" or "SPREAD") for the VCE to choose in which
+        node the actor is placed. If you are an advanced user needed more control
+        you can use lower-level scheduling strategies to pin actors to specific
+        compute nodes (e.g. via NodeAffinitySchedulingStrategy). Please note this
+        is an advanced feature. For all details, please refer to the Ray documentation:
+        https://docs.ray.io/en/latest/ray-core/scheduling/index.html
+
     Returns
     -------
     hist : flwr.server.history.History
@@ -142,6 +172,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
         strategy=strategy,
         client_manager=client_manager,
     )
+
     log(
         INFO,
         "Starting Flower simulation, config: %s",
@@ -176,19 +207,80 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     # Initialize Ray
     ray.init(**ray_init_args)
+    cluster_resources = ray.cluster_resources()
     log(
         INFO,
         "Flower VCE: Ray initialized with resources: %s",
-        ray.cluster_resources(),
+        cluster_resources,
+    )
+
+    # Log the resources that a single client will be able to use
+    if client_resources is None:
+        log(
+            INFO,
+            "No `client_resources` specified. Using minimal resources for clients.",
+        )
+        client_resources = {"num_cpus": 1, "num_gpus": 0.0}
+
+    log(
+        INFO,
+        "Flower VCE: Resources for each Virtual Client: %s",
+        client_resources,
+    )
+
+    actor_args = {} if actor_kwargs is None else actor_kwargs
+
+    # An actor factory. This is called N times to add N actors
+    # to the pool. If at some point the pool can accommodate more actors
+    # this will be called again.
+    def create_actor_fn() -> Type[VirtualClientEngineActor]:
+        return actor_type.options(  # type: ignore
+            **client_resources,
+            scheduling_strategy=actor_scheduling,
+        ).remote(**actor_args)
+
+    # Instantiate ActorPool
+    pool = VirtualClientEngineActorPool(
+        create_actor_fn=create_actor_fn,
+        client_resources=client_resources,
+    )
+
+    f_stop = threading.Event()
+
+    # Periodically, check if the cluster has grown (i.e. a new
+    # node has been added). If this happens, we likely want to grow
+    # the actor pool by adding more Actors to it.
+    def update_resources(f_stop: threading.Event) -> None:
+        """Periodically check if more actors can be added to the pool.
+
+        If so, extend the pool.
+        """
+        if not f_stop.is_set():
+            num_max_actors = pool_size_from_resources(client_resources)
+            if num_max_actors > pool.num_actors:
+                num_new = num_max_actors - pool.num_actors
+                log(
+                    INFO, "The cluster expanded. Adding %s actors to the pool.", num_new
+                )
+                pool.add_actors_to_pool(num_actors=num_new)
+
+            threading.Timer(10, update_resources, [f_stop]).start()
+
+    update_resources(f_stop)
+
+    log(
+        INFO,
+        "Flower VCE: Creating %s with %s actors",
+        pool.__class__.__name__,
+        pool.num_actors,
     )
 
     # Register one RayClientProxy object for each client with the ClientManager
-    resources = client_resources if client_resources is not None else {}
     for cid in cids:
-        client_proxy = RayClientProxy(
+        client_proxy = RayActorClientProxy(
             client_fn=client_fn,
             cid=cid,
-            resources=resources,
+            actor_pool=pool,
         )
         initialized_server.client_manager().register(client=client_proxy)
 
@@ -201,18 +293,28 @@ def start_simulation(  # pylint: disable=too-many-arguments
         )
     except Exception as ex:
         log(ERROR, ex)
+        log(ERROR, traceback.format_exc())
         log(
             ERROR,
             "Your simulation crashed :(. This could be because of several reasons."
             "The most common are: "
             "\n\t > Your system couldn't fit a single VirtualClient: try lowering "
-            "`client_resources`. You used: %s"
-            "\n\t > Too many VirtualClients were spawned causing an issue: try raising "
-            "`client_resources`. You used: %s",
+            "`client_resources`."
+            "\n\t > All the actors in your pool crashed. This could be because: "
+            "\n\t\t - You clients hit an out-of-memory (OOM) error and actors couldn't "
+            "recover from it. Try launching your simulation with more generous "
+            "`client_resources` setting (i.e. it seems %s is "
+            "not enough for your workload). Use fewer concurrent actors. "
+            "\n\t\t - You were running a multi-node simulation and all worker nodes "
+            "disconnected. The head node might still be alive but cannot accommodate "
+            "any actor with resources: %s.",
             client_resources,
             client_resources,
         )
         hist = History()
+
+    # Stop time monitoring resources in cluster
+    f_stop.set()
 
     event(EventType.START_SIMULATION_LEAVE)
 
