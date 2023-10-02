@@ -33,7 +33,7 @@ efficiency by lowering both communication rounds and communication overhead by f
 
 ****Datasets:**** a9a, cod-rna, ijcnn1, space_ga
 
-****Hardware Setup:**** 
+****Hardware Setup:**** Most of the experiments were done on a machine with an Intel® Core™ i7-6820HQ Processor, that processor got 4 cores and 8 threads. 
 
 ****Contributors:**** [Aml Hassan Esmil](https://github.com/Aml-Hassan-Abd-El-hamid)
 
