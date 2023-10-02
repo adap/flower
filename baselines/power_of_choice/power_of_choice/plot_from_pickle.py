@@ -23,7 +23,7 @@ def plot_multiplot(metrics_type, paths):
         title = input(f"Enter title for plot {i + 1}/{num_plots}: ")
         titles.append(title)
 
-    for path, title in enumerate(zip(paths, titles)):
+    for path, title in zip(paths, titles):
         with open(path, "rb") as pkl_file:
             history_data = pickle.load(pkl_file)
 

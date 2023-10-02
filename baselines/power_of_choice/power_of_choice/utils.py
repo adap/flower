@@ -136,7 +136,7 @@ def plot_metric_from_history(
     rounds_centralized, accuracy_values_centralized = zip(*accuracy_centralized)
 
     # Create a figure with two subplots
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(24, 12))
 
     # Plot accuracy_centralized on the left subplot
     ax1.plot(
@@ -222,7 +222,7 @@ def plot_metrics_from_histories(
         Optional string to add at the end of the filename for the plot.
     """
     # Create a figure with two subplots
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(24, 12))
 
     for title, hist in title_and_histories:
         # Extract required metrics

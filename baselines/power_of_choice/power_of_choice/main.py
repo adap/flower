@@ -210,6 +210,7 @@ def main(cfg: DictConfig) -> None:
             on_fit_config_fn=get_on_fit_config(),
             evaluate_fn=get_evaluate_fn(server_model),
             on_evaluate_config_fn=get_on_evaluate_config(is_cpow),
+            fit_metrics_aggregation_fn=get_fit_metrics_aggregation_fn()
         )
     elif is_rand:
         # Instantiate FedAvg strategy

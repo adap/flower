@@ -22,7 +22,7 @@ class FlwrClient(fl.client.NumPyClient):
     def __init__(self, model, x_train, y_train) -> None:
         super().__init__()
         self.model = model
-        split_idx = math.floor(len(x_train) * 0.9)  # Use 10% of x_train for validation
+        split_idx = math.floor(len(x_train) * 0.95)  # Use 5% of x_train for validation
         self.x_train, self.y_train = x_train[:split_idx], y_train[:split_idx]
         self.x_val, self.y_val = x_train[split_idx:], y_train[split_idx:]
 

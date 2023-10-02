@@ -4,7 +4,7 @@
 # a similar configuration structure and hence be easy to customise)
 
 num_clients: 100
-num_rounds: 200
+num_rounds: 400
 batch_size: 32
 local_epochs: 5
 fraction_samples: 1.0

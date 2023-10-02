@@ -232,27 +232,26 @@ Then run:
 
 ```bash
 # This will run the experiment using FedAvg strategy
-python -m power_of_choice.main variant="rand" is_cnn=True
+python -m power_of_choice.main dataset.dataset="cifar10" variant="rand" is_cnn=True
 
 # This will run the experiment using pow-d with d=12 and CK=9
-python -m power_of_choice.main variant="base" is_cnn=True strategy.d=12 strategy.ck=9
+python -m power_of_choice.main dataset.dataset="cifar10" variant="base" is_cnn=True strategy.d=12 strategy.ck=9
 
 # This will run the experiment using cpow-d with d=12 and CK=9
-python -m power_of_choice.main variant="cpow" is_cnn=True strategy.d=12 strategy.ck=9
+python -m power_of_choice.main dataset.dataset="cifar10" variant="cpow" is_cnn=True strategy.d=12 strategy.ck=9
 
 # This will run the experiment using rpow-d with d=60 and CK=9
-python -m power_of_choice.main variant="rpow" is_cnn=True strategy.d=60 strategy.ck=9
+python -m power_of_choice.main dataset.dataset="cifar10" variant="rpow" is_cnn=True strategy.d=60 strategy.ck=9
 ```
 
-:warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
+The above commands would generate results by creating a directory under the following path `outputs/<date>/<dataset_name>_${variant}_d${strategy.d}_CK${strategy.ck}`, containing a `results.pkl` file that you can plot by using the following command:
 
 ```bash
-# it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameteres
-
-poetry run -m <baseline-name>.main --multirun num_client_per_round=5,10,50 dataset=femnist,cifar10
-# the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
-
-[Now show a figure/table displaying the results of the above command]
-
-# add more commands + plots for additional experiments.
+# This will plot a set of results in the same figure. 
+python -m power_of_choice.plot_from_pickle --metrics-type="paper_metrics" <paths_to_results>
 ```
+
+The resulting plots should look similar to the one below (reproducing Figure 6a of the paper).
+
+![](_static/Figure_6a.png)
+
