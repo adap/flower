@@ -12,7 +12,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: github.repository == 'adap/flower'
+    if: "! github.event.pull_request.head.repo.fork "
     steps:
       - uses: actions/checkout@v4
       - name: Pushes src/swift to flower-swift repository
