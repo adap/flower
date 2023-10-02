@@ -69,7 +69,7 @@ REASON:
 """
 
 
-def start_simulation(  # pylint: disable=too-many-arguments
+def start_simulation(  # pylint: disable=too-many-arguments,too-many-statements
     *,
     client_fn: ClientFn,
     num_clients: Optional[int] = None,
@@ -233,7 +233,8 @@ def start_simulation(  # pylint: disable=too-many-arguments
     if "num_cpus" not in client_resources:
         warnings.warn(
             "No `num_cpus` specified in `client_resources`. "
-            "Using `num_cpus=1` for each client."
+            "Using `num_cpus=1` for each client.",
+            stacklevel=2,
         )
         client_resources["num_cpus"] = 1
 
