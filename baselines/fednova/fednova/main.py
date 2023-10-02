@@ -4,8 +4,10 @@ import hydra
 from omegaconf import DictConfig, OmegaConf
 from strategy import FedNova, weighted_average
 from client import FlowerClient
+from flwr.common import ndarrays_to_parameters
 import flwr as fl
 from utils import fit_config
+from hydra.utils import instantiate
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -21,12 +23,6 @@ def main(cfg: DictConfig) -> None:
 	print(OmegaConf.to_yaml(cfg))
 
 	# 2. Prepare your dataset
-	# here you should call a function in datasets.py that returns whatever is needed to:
-	# (1) ensure the server can access the dataset used to evaluate your model after
-	# aggregation
-	# (2) tell each client what dataset partitions they should use (e.g. a this could
-	# be a location in the file system, a list of dataloader, a list of ids to extract
-	# from a dataset, it's up to you)
 
 	trainloaders, testloader, data_ratios = load_datasets(cfg)
 
@@ -39,11 +35,15 @@ def main(cfg: DictConfig) -> None:
 							  model=cfg.model,
 							  exp_config=cfg)
 
+	init_parameters = [layer_param.cpu().numpy() for _,layer_param in instantiate(cfg.model).state_dict().items()]
+	init_parameters = ndarrays_to_parameters(init_parameters)
+
 	# 4. Define your strategy
 	strategy = FedNova(evaluate_metrics_aggregation_fn=weighted_average,
 					   accept_failures=False,
 					   on_fit_config_fn=fit_config,
 					   on_evaluate_config_fn=fit_config)
+					   # initial_parameters=init_parameters)
 
 	# 5. Start Simulation
 
@@ -51,7 +51,7 @@ def main(cfg: DictConfig) -> None:
 											 num_clients=cfg.num_clients,
 											 config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
 											 strategy=strategy,
-											 client_resources={'num_cpus': 1, 'num_gpus': 0.166},
+											 client_resources=cfg.client_resources,
 											 ray_init_args={"ignore_reinit_error": True, "num_cpus": 6})
 
 	round, loss = history.losses_distributed[-1]

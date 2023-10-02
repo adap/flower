@@ -10,7 +10,7 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
-from models import test, train, vgg11
+from models import test, train
 
 
 class FlowerClient(fl.client.NumPyClient):  # pylint: disable=too-many-instance-attributes
@@ -95,9 +95,8 @@ def gen_client_fn(num_epochs: int, trainloaders: List[DataLoader], testloader: D
 
 		# Load model
 		device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-		# device = torch.device("cpu")
-		# net = instantiate(model).to(device)
-		net = vgg11().to(device)
+		net = instantiate(model).to(device)
+		# net = vgg11().to(device)
 
 		if os.path.exists(f"state/client_{cid}_state.pt"):
 			client_state = torch.load(f"state/client_{cid}_state.pt", map_location=device)

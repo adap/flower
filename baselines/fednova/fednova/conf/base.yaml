@@ -15,16 +15,21 @@ var_local_epochs: True
 var_min_epochs: 2
 var_max_epochs: 5
 
-
 model:
-  _target_: fednova.models.vgg11
+  _target_: models.VGG
 
 optimizer:
   _target_: models.ProxSGD
   lr: 0.02
   momentum: 0.9
   weight_decay: 1e-4
+  gmf: 0
+  mu: 0
 
+
+client_resources:
+  num_cpus: 1
+  num_gpus: 0.166
 
 #strategy:
 #  _target_: # points to your strategy (either custom or exiting in Flower)

@@ -18,9 +18,9 @@ class VGG(nn.Module):
 	VGG model
 	'''
 
-	def __init__(self, features):
+	def __init__(self):
 		super(VGG, self).__init__()
-		self.features = features
+		self.features = make_layers(cfg['A'])
 		self.classifier = nn.Sequential(
 			nn.Dropout(),
 			nn.Linear(512, 512),
@@ -67,11 +67,6 @@ cfg = {
 	'E': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M',
 		  512, 512, 512, 512, 'M'],
 }
-
-
-def vgg11():
-	"""VGG 11-layer model (configuration "A")"""
-	return VGG(make_layers(cfg['A']))
 
 
 def train(model, optimizer, trainloader, device, epochs):
@@ -323,6 +318,8 @@ if __name__ == "__main__":
 
 	model = vgg11().to(device)
 	params = model.parameters()
+	client_state = torch.load("state/client_0_state.pt")
+
 	# saved_params = [val.cpu().numpy() for _, val in model.state_dict().items()]
 	# torch.save(saved_params, "state/init_params_torch.pt")
 	# torch.save(params, "state/init_params.pt")
