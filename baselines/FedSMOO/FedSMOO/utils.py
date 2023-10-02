@@ -13,6 +13,8 @@ def plot_fn(cfg, acc: List[Tuple[int, float]]):
     y_val = [x[1] for x in acc]
 
     plt.plot(x_val,y_val,'or')
+    plt.plot(x_val,y_val,'-r')
+    plt.grid()
 
     if cfg.dataset.dirichlet:
         dataset_prep = "dirichlet"

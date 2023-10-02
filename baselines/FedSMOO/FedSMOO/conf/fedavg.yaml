@@ -43,5 +43,5 @@ client:
   stragglers: 0.9
 
 client_resources:
-  num_cpus: 10
-  num_gpus: 1
+  num_cpus: 4
+  num_gpus: 0.2

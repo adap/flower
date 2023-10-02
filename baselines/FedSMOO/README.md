@@ -51,14 +51,16 @@ dataset: [dataset1, dataset2] # list of datasets you include in your baseline
 To construct the Python environment follow these steps:
 
 ```bash
+# Set python version
+pyenv install 3.10.6
+pyenv local 3.10.6
+# Tell poetry to use python 3.10
+poetry env use 3.10.6
 # install the base Poetry environment
 poetry install
-
 # activate the environment
 poetry shell
 
-# install PyTorch with GPU support. Please note this baseline is very lightweight so it can run fine on a CPU.
-pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116
 ```
 
 ## Running the Experiments
