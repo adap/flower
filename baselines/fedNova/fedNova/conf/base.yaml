@@ -3,15 +3,32 @@
 # Please follow the provided structure (this will ensuring all baseline follow
 # a similar configuration structure and hence be easy to customise)
 
-dataset:
-  # dataset config
+#dataset:
+datapath: data/
+num_clients: 16
+num_epochs: 2
+num_rounds: 200
+batch_size: 32
+NIID: True
+alpha: 0.1
+var_local_epochs: True
+var_min_epochs: 2
+var_max_epochs: 5
+
 
 model:
-  # model config
+  _target_: fednova.models.vgg11
 
-strategy:
-  _target_: # points to your strategy (either custom or exiting in Flower)
-  # rest of strategy config
+optimizer:
+  _target_: models.ProxSGD
+  lr: 0.02
+  momentum: 0.9
+  weight_decay: 1e-4
 
-client:
-  # client config
+
+#strategy:
+#  _target_: # points to your strategy (either custom or exiting in Flower)
+#  # rest of strategy config
+
+#client:
+#  # client config
