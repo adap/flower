@@ -68,7 +68,7 @@ REASON:
 """
 
 
-def start_simulation(  # pylint: disable=too-many-arguments
+def start_simulation(  # pylint: disable=too-many-arguments,too-many-statements
     *,
     client_fn: ClientFn,
     num_clients: Optional[int] = None,
