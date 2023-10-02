@@ -37,7 +37,6 @@ from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.server import ServerConfig
 from flwr.server.client_manager import ClientManager, SimpleClientManager
-from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.strategy import FedAvg, Strategy
 
@@ -149,6 +148,9 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     driver.connect()
     lock = threading.Lock()
 
+    # Request workload_id
+    workload_id = driver.create_workload(CreateWorkloadRequest()).workload_id
+
     # Initialization
     hist = History()
     if client_manager is None:
@@ -180,6 +182,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         target=update_client_manager,
         args=(
             driver,
+            workload_id,
             client_manager,
             lock,
         ),
@@ -191,7 +194,9 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
 
     instructions = next(fl_workflow)
     while True:
-        node_responses = fetch_responses(driver, instructions, config.round_timeout)
+        node_responses = fetch_responses(
+            driver, workload_id, instructions, config.round_timeout
+        )
         try:
             instructions = fl_workflow.send(node_responses)
         except StopIteration:
@@ -218,6 +223,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
 
 def update_client_manager(
     driver: Driver,
+    workload_id: str,
     client_manager: ClientManager,
     lock: threading.Lock,
 ) -> None:
@@ -231,9 +237,6 @@ def update_client_manager(
     and dead nodes will be removed from the ClientManager via
     `client_manager.unregister()`.
     """
-    # Request for workload_id
-    workload_id = driver.create_workload(CreateWorkloadRequest()).workload_id
-
     # Loop until the driver is disconnected
     registered_nodes: Dict[int, DriverClientProxy] = {}
     while True:
@@ -274,30 +277,28 @@ def update_client_manager(
 # pylint: disable-next=too-many-locals
 def fetch_responses(
     driver: Driver,
-    instructions: Dict[ClientProxy, Task],
+    workload_id: str,
+    instructions: Dict[int, Task],
     timeout: Optional[float],
-) -> Dict[ClientProxy, Task]:
+) -> Dict[int, Task]:
     """Send instructions to clients and return their responses."""
-    # Create mapping from node_id to client_proxy
-    node_id_to_proxy = {proxy.node_id: proxy for proxy in instructions}
-
     # Build the list of TaskIns
     task_ins_list: List[TaskIns] = []
     driver_node = Node(node_id=0, anonymous=True)
-    for proxy, task in instructions.items():
+    for node_id, task in instructions.items():
         # Set the `consumer` and `producer` fields in Task
         #
         # Note that protobuf API `protobuf.message.MergeFrom(other_msg)`
         # does NOT always overwrite fields that are set in `other_msg`.
         # Please refer to:
         # https://googleapis.dev/python/protobuf/latest/google/protobuf/message.html
-        consumer = Node(node_id=proxy.node_id, anonymous=False)
+        consumer = Node(node_id=node_id, anonymous=False)
         task.MergeFrom(Task(producer=driver_node, consumer=consumer))
         # Create TaskIns and add it to the list
         task_ins = TaskIns(
             task_id="",  # Do not set, will be created and set by the DriverAPI
             group_id="",
-            workload_id=driver.workload_id,
+            workload_id=workload_id,
             task=task,
         )
         task_ins_list.append(task_ins)
@@ -323,8 +324,7 @@ def fetch_responses(
         time.sleep(3.0)
 
     # Build and return response dictionary
-    node_responses: Dict[ClientProxy, Task] = {
-        node_id_to_proxy[task_res.task.producer.node_id]: task_res.task
-        for task_res in task_res_list
+    node_responses: Dict[int, Task] = {
+        task_res.task.producer.node_id: task_res.task for task_res in task_res_list
     }
     return node_responses

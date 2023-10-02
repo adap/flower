@@ -26,7 +26,6 @@ from flwr.common.typing import GetParametersIns, Parameters, Scalar
 from flwr.driver.task_utils import wrap_server_message_in_task
 from flwr.proto.task_pb2 import Task
 from flwr.server.client_manager import ClientManager
-from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.strategy.strategy import Strategy
 
@@ -43,7 +42,7 @@ class WorkflowState:
     history: History
 
 
-FlowerWorkflow = Generator[Dict[ClientProxy, Task], Dict[ClientProxy, Task], None]
+FlowerWorkflow = Generator[Dict[int, Task], Dict[int, Task], None]
 FlowerWorkflowFactory = Callable[[WorkflowState], FlowerWorkflow]
 
 
@@ -66,42 +65,10 @@ class FLWorkflowFactory:
             else default_evaluate_workflow_factory
         )
 
-    def __call__(
-        self, state: WorkflowState
-    ) -> Generator[Dict[ClientProxy, Task], Dict[ClientProxy, Task], None]:
+    def __call__(self, state: WorkflowState) -> FlowerWorkflow:
         """Create the workflow."""
         # Initialize parameters
-        log(INFO, "Initializing global parameters")
-        parameters = state.strategy.initialize_parameters(
-            client_manager=state.client_manager
-        )
-        if parameters is not None:
-            log(INFO, "Using initial parameters provided by strategy")
-            state.parameters = parameters
-        # Get initial parameters from one of the clients
-        else:
-            log(INFO, "Requesting initial parameters from one random client")
-            random_client = state.client_manager.sample(1)[0]
-            # Send GetParametersIns and get the response
-            node_responses: Dict[ClientProxy, Task] = yield {
-                random_client: wrap_server_message_in_task(GetParametersIns(config={}))
-            }
-            get_parameters_res = serde.get_parameters_res_from_proto(
-                node_responses[random_client].legacy_client_message.get_parameters_res
-            )
-            log(INFO, "Received initial parameters from one random client")
-            state.parameters = get_parameters_res.parameters
-        log(INFO, "Evaluating initial parameters")
-        res = state.strategy.evaluate(0, parameters=state.parameters)
-        if res is not None:
-            log(
-                INFO,
-                "initial parameters (loss, other metrics): %s, %s",
-                res[0],
-                res[1],
-            )
-            state.history.add_loss_centralized(server_round=0, loss=res[0])
-            state.history.add_metrics_centralized(server_round=0, metrics=res[1])
+        yield from default_init_params_workflow_factory(state)
 
         # Run federated learning for num_rounds
         log(INFO, "FL starting")
@@ -143,8 +110,49 @@ class FLWorkflowFactory:
         log(INFO, "FL finished in %s", elapsed)
 
 
+def default_init_params_workflow_factory(state: WorkflowState) -> FlowerWorkflow:
+    """Create the default workflow for parameters initialization."""
+    log(INFO, "Initializing global parameters")
+    parameters = state.strategy.initialize_parameters(
+        client_manager=state.client_manager
+    )
+    if parameters is not None:
+        log(INFO, "Using initial parameters provided by strategy")
+        state.parameters = parameters
+    # Get initial parameters from one of the clients
+    else:
+        log(INFO, "Requesting initial parameters from one random client")
+        random_client = state.client_manager.sample(1)[0]
+        # Send GetParametersIns and get the response
+        node_responses = yield {
+            random_client.node_id: wrap_server_message_in_task(
+                GetParametersIns(config={})
+            )
+        }
+        get_parameters_res = serde.get_parameters_res_from_proto(
+            node_responses[
+                random_client.node_id
+            ].legacy_client_message.get_parameters_res
+        )
+        log(INFO, "Received initial parameters from one random client")
+        state.parameters = get_parameters_res.parameters
+
+    # Evaluate initial parameters
+    log(INFO, "Evaluating initial parameters")
+    res = state.strategy.evaluate(0, parameters=state.parameters)
+    if res is not None:
+        log(
+            INFO,
+            "initial parameters (loss, other metrics): %s, %s",
+            res[0],
+            res[1],
+        )
+        state.history.add_loss_centralized(server_round=0, loss=res[0])
+        state.history.add_metrics_centralized(server_round=0, metrics=res[1])
+
+
 def default_fit_workflow_factory(state: WorkflowState) -> FlowerWorkflow:
-    """Create the default workflow of a single fit round."""
+    """Create the default workflow for a single fit round."""
     # Get clients and their respective instructions from strategy
     client_instructions = state.strategy.configure_fit(
         server_round=state.current_round,
@@ -163,10 +171,13 @@ def default_fit_workflow_factory(state: WorkflowState) -> FlowerWorkflow:
         state.client_manager.num_available(),
     )
 
+    # Build dictionary mapping node_id to ClientProxy
+    node_id_to_proxy = {proxy.node_id: proxy for proxy, _ in client_instructions}
+
     # Send instructions to clients and
     # collect `fit` results from all clients participating in this round
     node_responses = yield {
-        proxy: wrap_server_message_in_task(fit_ins)
+        proxy.node_id: wrap_server_message_in_task(fit_ins)
         for proxy, fit_ins in client_instructions
     }
 
@@ -181,8 +192,11 @@ def default_fit_workflow_factory(state: WorkflowState) -> FlowerWorkflow:
 
     # Aggregate training results
     results = [
-        (proxy, serde.fit_res_from_proto(res.legacy_client_message.fit_res))
-        for proxy, res in node_responses.items()
+        (
+            node_id_to_proxy[node_id],
+            serde.fit_res_from_proto(res.legacy_client_message.fit_res),
+        )
+        for node_id, res in node_responses.items()
     ]
     aggregated_result: Tuple[
         Optional[Parameters],
@@ -200,7 +214,7 @@ def default_fit_workflow_factory(state: WorkflowState) -> FlowerWorkflow:
 
 
 def default_evaluate_workflow_factory(state: WorkflowState) -> FlowerWorkflow:
-    """Create the default workflow of a single evaluate round."""
+    """Create the default workflow for a single evaluate round."""
     # Get clients and their respective instructions from strategy
     client_instructions = state.strategy.configure_evaluate(
         server_round=state.current_round,
@@ -218,10 +232,13 @@ def default_evaluate_workflow_factory(state: WorkflowState) -> FlowerWorkflow:
         state.client_manager.num_available(),
     )
 
+    # Build dictionary mapping node_id to ClientProxy
+    node_id_to_proxy = {proxy.node_id: proxy for proxy, _ in client_instructions}
+
     # Send instructions to clients and
     # collect `evaluate` results from all clients participating in this round
     node_responses = yield {
-        proxy: wrap_server_message_in_task(evaluate_ins)
+        proxy.node_id: wrap_server_message_in_task(evaluate_ins)
         for proxy, evaluate_ins in client_instructions
     }
     # No exception/failure handling currently
@@ -235,8 +252,11 @@ def default_evaluate_workflow_factory(state: WorkflowState) -> FlowerWorkflow:
 
     # Aggregate the evaluation results
     results = [
-        (proxy, serde.evaluate_res_from_proto(res.legacy_client_message.evaluate_res))
-        for proxy, res in node_responses.items()
+        (
+            node_id_to_proxy[node_id],
+            serde.evaluate_res_from_proto(res.legacy_client_message.evaluate_res),
+        )
+        for node_id, res in node_responses.items()
     ]
     aggregated_result: Tuple[
         Optional[float],

@@ -47,7 +47,6 @@ class Driver:
         self.certificates = certificates
         self.channel: Optional[grpc.Channel] = None
         self.stub: Optional[driver_pb2_grpc.DriverStub] = None
-        self.workload_id: str = ""
 
     def connect(self) -> None:
         """Connect to the Driver API."""
@@ -85,9 +84,6 @@ class Driver:
 
         # Call Driver API
         res: driver_pb2.CreateWorkloadResponse = self.stub.CreateWorkload(request=req)
-
-        # Store and return workload_id
-        self.workload_id = res.workload_id
         return res
 
     def get_nodes(self, req: driver_pb2.GetNodesRequest) -> driver_pb2.GetNodesResponse:

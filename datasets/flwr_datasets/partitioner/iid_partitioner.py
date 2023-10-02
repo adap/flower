@@ -35,7 +35,18 @@ class IidPartitioner(Partitioner):
         self._num_partitions = num_partitions
 
     def load_partition(self, idx: int) -> datasets.Dataset:
-        """Load a single IID partition based on the partition index."""
+        """Load a single IID partition based on the partition index.
+
+        Parameters
+        ----------
+        idx: int
+            the index that corresponds to the requested partition
+
+        Returns
+        -------
+        dataset_partition: Dataset
+            single dataset partition
+        """
         return self.dataset.shard(
-            num_shards=self._num_partitions, index=idx, contiguous=True
+            num_shards=self._num_partitions, index=idx, contiguous=False
         )
