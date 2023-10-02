@@ -19,6 +19,7 @@ jobs:
   wheel:
     runs-on: ubuntu-22.04
     name: Build, test and upload wheel
+    if: github.repository == 'adap/flower'
     steps:
       - uses: actions/checkout@v3
       - name: Bootstrap
@@ -120,6 +121,7 @@ jobs:
       - name: Install dependencies
         run: python -m poetry install
       - name: Install Flower wheel from artifact store
+        if: github.repository == 'adap/flower'
         run: |
           python -m pip install https://artifact.flower.dev/py/${{ github.head_ref }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
       - name: Download dataset
@@ -154,6 +156,7 @@ jobs:
         run: |
           python -m poetry install
       - name: Install Flower wheel from artifact store
+        if: github.repository == 'adap/flower'
         run: |
           python -m pip install https://artifact.flower.dev/py/${{ github.head_ref }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
       - name: Cache Datasets
