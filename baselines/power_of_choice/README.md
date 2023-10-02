@@ -44,8 +44,6 @@ This is the model used by default.
 | CIFAR10 | 10 | 100 | Latent Dirichlet Allocation | All clients with same number of samples |
 
 
-:warning: *_Earlier you listed already the datasets that your baseline uses. Now you should include a breakdown of the details about each of them. Please include information about: how the dataset is partitioned (e.g. LDA with alpha 0.1 as default and all clients have the same number of training examples; or each client gets assigned a different number of samples following a power-law distribution with each client only instances of 2 classes)? if  your dataset is naturally partitioned just state “naturally partitioned”; how many partitions there are (i.e. how many clients)? Please include this an all information relevant about the dataset and its partitioning into a table._*
-
 ****Training Hyperparameters:**** 
 | Hyperparameter | Description | Default Value |
 | ---- | ----------- | ----- |
@@ -56,11 +54,6 @@ This is the model used by default.
 | `b` | Number of samples in the mini-batch of *rpow* | 64 |
 | `d` | Number of clients selected in the *first phase* | 6 |
 | `ck` | Number of clients selected at each round | 3 |
-
-
-## Environment Setup
-
-:warning: _The Python environment for all baselines should follow these guidelines in the `EXTENDED_README`. Specify the steps to create and activate your environment. If there are any external system-wide requirements, please include instructions for them too. These instructions should be comprehensive enough so anyone can run them (if non standard, describe them step-by-step)._
 
 
 ## Environment Setup
