@@ -8,7 +8,6 @@ import torch.nn as nn
 from flwr_datasets import FederatedDataset
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
-from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
 
@@ -46,7 +45,7 @@ def train(net, trainloader, epochs):
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
     for _ in range(epochs):
-        for batch in tqdm(trainloader):
+        for batch in tqdm(trainloader, "Training"):
             images = batch["img"]
             labels = batch["label"]
             optimizer.zero_grad()
@@ -59,7 +58,7 @@ def test(net, testloader):
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
     with torch.no_grad():
-        for batch in tqdm(testloader):
+        for batch in tqdm(testloader, "Testing"):
             images = batch["img"]
             labels = batch["label"]
             outputs = net(images)
@@ -67,14 +66,6 @@ def test(net, testloader):
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
     accuracy = correct / len(testloader.dataset)
     return loss, accuracy
-
-
-def load_data():
-    """Load CIFAR-10 (training and test set)."""
-    trf = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-    trainset = CIFAR10("./data", train=True, download=True, transform=trf)
-    testset = CIFAR10("./data", train=False, download=True, transform=trf)
-    return DataLoader(trainset, batch_size=32, shuffle=True), DataLoader(testset)
 
 
 # #############################################################################
