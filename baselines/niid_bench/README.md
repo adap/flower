@@ -72,10 +72,10 @@ poetry shell
 
 
 ## Running the Experiments
-You can run four algorithms fedavg, scaffold, fedprox, and fednova. To run any of them, use any of the corresponding main files. For instance, the following command will run with the default config provided in the corresponding configuration files.
+You can run four algorithms fedavg, scaffold, fedprox, and fednova. To run any of them, use any of the corresponding config files. For instance, the following command will run with the default config provided in the corresponding configuration files.
 
 ```bash
-python -m niid_bench.main_fedprox
+python -m niid_bench.main --config-name fedavg_base
 ```
 
 To change the configuration such as dataset or hyperparameters, specify them as part of the command line arguments.
