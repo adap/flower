@@ -1,5 +1,7 @@
 """Runs CNN federated learning for MNIST dataset."""
 
+from typing import Dict, Union
+
 import flwr as fl
 import hydra
 from hydra.core.hydra_config import HydraConfig
@@ -10,17 +12,18 @@ from fedprox import client, server, utils
 from fedprox.dataset import load_datasets
 from fedprox.utils import save_results_as_pickle
 
+FitConfig = Dict[str, Union[bool, float]]
+
 
 @hydra.main(config_path="conf", config_name="config", version_base=None)
 def main(cfg: DictConfig) -> None:
-    """Main function to run CNN federated learning on MNIST.
+    """Run CNN federated learning on MNIST.
 
     Parameters
     ----------
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
-
     # print config structured as YAML
     print(OmegaConf.to_yaml(cfg))
 
@@ -53,7 +56,9 @@ def main(cfg: DictConfig) -> None:
     def get_on_fit_config():
         def fit_config_fn(server_round: int):
             # resolve and convert to python dict
-            fit_config = OmegaConf.to_container(cfg.fit_config, resolve=True)
+            fit_config: FitConfig = OmegaConf.to_container(  # type: ignore
+                cfg.fit_config, resolve=True
+            )
             fit_config["curr_round"] = server_round  # add round info
             return fit_config
 
