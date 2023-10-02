@@ -72,27 +72,27 @@ poetry shell
 
 
 ## Running the Experiments
-You can run four algorithms fedavg, scaffold, fedprox, and fednova. To run any of them, use any of the corresponding main files. For instance, the following command will run with the default config provided in the corresponding configuration files.
+You can run four algorithms fedavg, scaffold, fedprox, and fednova. To run any of them, use any of the corresponding config files. For instance, the following command will run with the default config provided in the corresponding configuration files.
 
 ```bash
-python -m niid_bench.main_fedprox
+python -m niid_bench.main --config-name fedavg_base
 ```
 
 To change the configuration such as dataset or hyperparameters, specify them as part of the command line arguments.
 
 ```bash
-python -m niid_bench.main_scaffold dataset_name=mnist partitioning=iid # iid
-python -m niid_bench.main_fedavg dataset_name=mnist partitioning=dirichlet # dirichlet
-python -m niid_bench.main_fednova dataset_name=mnist partitioning=label_quantity labels_per_client=3 # sort and partition
+python -m niid_bench.main --config-name scaffold_base dataset_name=mnist partitioning=iid # iid
+python -m niid_bench.main --config-name fedprox_base dataset_name=mnist partitioning=dirichlet # dirichlet
+python -m niid_bench.main --config-name fednova_base dataset_name=mnist partitioning=label_quantity labels_per_client=3 # sort and partition
 ```
 
 
 ## Expected Results
 
-We provide the bash script run_all.sh that can be used to run all configurations for one seed with 7 configurations running at the same time.
+We provide the bash script run_exp.py that can be used to run all configurations. For instance, the following command runs all of them with 7 configurations running at the same time.
 
 ```bash
-./run_all.sh
+python run_exp.py --seed 42 --num-processes 7
 ```
 
 The above command generates results that can be parsed to get the accuracies for each configuration which can be presented in a table (similar to Table 3 in the paper).
