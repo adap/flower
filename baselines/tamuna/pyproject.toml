@@ -5,9 +5,9 @@ build-backend = "poetry.masonry.api"
 [tool.poetry]
 name = "tamuna"
 version = "1.0.0"
-description = "Flower Baselines"
+description = "TAMUNA: Doubly Accelerated Federated Learning with Local Training, Compression, and Partial Participation"
 license = "Apache-2.0"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["Ivan Agarský <agarskyivan@gmail.com>, Grigory Malinovsky"]
 readme = "README.md"
 homepage = "https://flower.dev"
 repository = "https://github.com/adap/flower"
