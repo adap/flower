@@ -245,7 +245,7 @@ class ProxSGD(Optimizer):
 
 		return local_stats
 
-	def set_init_params(self, init_params: NDArrays):
+	def set_model_params(self, init_params: NDArrays):
 		i = 0
 		for group in self.param_groups:
 			for p in group['params']:

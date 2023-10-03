@@ -1,3 +1,4 @@
+import torch
 from dataset import load_datasets
 from client import gen_client_fn
 import hydra
@@ -8,6 +9,8 @@ from flwr.common import ndarrays_to_parameters
 import flwr as fl
 from utils import fit_config
 from hydra.utils import instantiate
+import numpy as np
+import random
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -19,6 +22,15 @@ def main(cfg: DictConfig) -> None:
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
+
+	# Set seeds for reproduceability
+	torch.manual_seed(cfg.seed)
+	np.random.seed(cfg.seed)
+	random.seed(cfg.seed)
+	if torch.cuda.is_available():
+		torch.cuda.manual_seed(cfg.seed)
+		torch.backends.cudnn.deterministic = True
+
 	# 1. Print parsed config
 	print(OmegaConf.to_yaml(cfg))
 
@@ -59,15 +71,11 @@ def main(cfg: DictConfig) -> None:
 	print("---------------------Round: {} Test loss: Test Accuracy {}----------------------".format(round, loss, accuracy))
 
 
-# 6. Save your results
-# Here you can save the `history` returned by the simulation and include
-# also other buffers, statistics, info needed to be saved in order to later
-# on generate the plots you provide in the README.md. You can for instance
-# access elements that belong to the strategy for example:
-# data = strategy.get_my_custom_data() -- assuming you have such method defined.
-# Hydra will generate for you a directory each time you run the code. You
-# can retrieve the path to that directory with this:
-# save_path = HydraConfig.get().runtime.output_dir
+	# 6. Save your results
+	# data = strategy.get_my_custom_data() -- assuming you have such method defined.
+	# Hydra will generate for you a directory each time you run the code. You
+	# can retrieve the path to that directory with this:
+	# save_path = HydraConfig.get().runtime.output_dir
 
 
 if __name__ == "__main__":

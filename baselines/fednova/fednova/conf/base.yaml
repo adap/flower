@@ -15,6 +15,7 @@ var_local_epochs: True
 var_min_epochs: 2
 var_max_epochs: 5
 lr_scheduling: False
+seed: 3491
 
 model:
   _target_: models.VGG

@@ -30,7 +30,7 @@ class DataPartitioner(object):
 			self.partitions = []
 			self.ratio = sizes
 			rng = Random()
-			rng.seed(seed)
+			# rng.seed(seed)
 			data_len = len(data)
 			indexes = [x for x in range(0, data_len)]
 			rng.shuffle(indexes)
@@ -46,7 +46,7 @@ class DataPartitioner(object):
 	def __getNonIIDdata__(self, data, sizes, seed, alpha):
 		labelList = data.targets
 		rng = Random()
-		rng.seed(seed)
+		# rng.seed(seed)
 		a = [(label, idx) for idx, label in enumerate(labelList)]
 		# Same Part
 		labelIdxDict = dict()
@@ -100,7 +100,8 @@ class DataPartitioner(object):
 		labelList = np.array(data.targets)
 		min_size = 0
 		N = len(labelList)
-		np.random.seed(2020)
+		# set seed once in main.py
+		# np.random.seed(2020)
 
 		net_dataidx_map = {}
 		while min_size < K:

@@ -1,7 +1,6 @@
 from typing import Callable, Dict, List, Tuple
 import flwr as fl
 import numpy as np
-import os
 import torch
 from flwr.common.typing import NDArrays, Scalar
 from hydra.utils import instantiate
@@ -36,18 +35,17 @@ class FlowerClient(fl.client.NumPyClient):  # pylint: disable=too-many-instance-
 	def set_parameters(self, parameters: NDArrays) -> None:
 		"""Changes the parameters of the model using the given ones."""
 
-		# if self.optim_state is not None:
-		# 	self.optimizer.load_state_dict(self.optim_state)
-		# self.optimizer.load_aggregated_grad(parameters)
-		self.optimizer.set_init_params(parameters)
+		self.optimizer.set_model_params(parameters)
 
 	def fit(self, parameters: NDArrays, config: Dict[str, Scalar]) -> Tuple[NDArrays, int, Dict]:
 		"""Implements distributed fit function for a given client."""
-		# print("Called fit parameters with parameters:", config)
+
 		self.set_parameters(parameters)
 		self.optimizer.set_lr(config["lr"])
 
 		if self.exp_config.var_local_epochs:
+			seed_val = 2023 + int(self.client_id) + config["server_round"] + self.exp_config.seed
+			np.random.seed(seed_val)
 			num_epochs = np.random.randint(self.exp_config.var_min_epochs, self.exp_config.var_max_epochs)
 		else:
 			num_epochs = self.num_epochs
