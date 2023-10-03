@@ -39,11 +39,11 @@ def main(cfg: DictConfig) -> None:
 	init_parameters = ndarrays_to_parameters(init_parameters)
 
 	# 4. Define your strategy
-	strategy = FedNova(evaluate_metrics_aggregation_fn=weighted_average,
+	strategy = FedNova(exp_config=cfg,
+					   evaluate_metrics_aggregation_fn=weighted_average,
 					   accept_failures=False,
-					   on_fit_config_fn=fit_config,
-					   on_evaluate_config_fn=fit_config)
-					   # initial_parameters=init_parameters)
+					   on_evaluate_config_fn=fit_config,
+					   initial_parameters=init_parameters)
 
 	# 5. Start Simulation
 

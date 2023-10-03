@@ -7,13 +7,14 @@
 datapath: data/
 num_clients: 16
 num_epochs: 2
-num_rounds: 200
+num_rounds: 100
 batch_size: 32
 NIID: True
 alpha: 0.1
 var_local_epochs: True
 var_min_epochs: 2
 var_max_epochs: 5
+lr_scheduling: False
 
 model:
   _target_: models.VGG
@@ -30,10 +31,3 @@ optimizer:
 client_resources:
   num_cpus: 1
   num_gpus: 0.166
-
-#strategy:
-#  _target_: # points to your strategy (either custom or exiting in Flower)
-#  # rest of strategy config
-
-#client:
-#  # client config

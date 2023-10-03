@@ -1,16 +1,14 @@
 '''
 Modified from https://github.com/pytorch/vision.git
 '''
-import os.path
 
 import torch
 import math
 import torch.nn as nn
-import torch.nn.init as init
 from torch.optim.optimizer import Optimizer, required
 from utils import Meter, comp_accuracy
-from typing import List, Tuple
-import numpy as np
+from typing import List, Tuple, Dict
+from flwr.common.typing import NDArrays
 
 
 class VGG(nn.Module):
@@ -71,10 +69,6 @@ cfg = {
 
 def train(model, optimizer, trainloader, device, epochs):
 	criterion = nn.CrossEntropyLoss()
-	# optimizer = ProxSGD(model.parameters(), ratio, optimizer_config['gmf'], optimizer_config['mu'],
-	# 					optimizer_config['lr'], optimizer_config['momentum'], optimizer_config['dampening'], optimizer_config['weight_decay'],
-	# 					optimizer_config['nesterov'], optimizer_config['variance'])
-
 	model.train()
 
 	for epoch in range(epochs):
@@ -129,7 +123,9 @@ def test(model, test_loader, device) -> Tuple[float, float]:
 
 class ProxSGD(Optimizer):
 	"""
-	SGD optimizer modified with support for proximal updates
+	SGD optimizer modified with support for :
+	1. Maintaining a Global momentum buffer, set using : (self.gmf)
+	2. Proximal SGD updates, set using : (self.mu)
 	Args:
 		params (iterable): iterable of parameters to optimize or dicts defining
 			parameter groups
@@ -193,8 +189,9 @@ class ProxSGD(Optimizer):
 					d_p.add_(p.data, alpha=weight_decay)
 
 				param_state = self.state[p]
-				if 'old_init' not in param_state:
-					param_state['old_init'] = torch.clone(p.data).detach()
+
+				# if 'old_init' not in param_state:
+				# 	param_state['old_init'] = torch.clone(p.data).detach()
 
 				local_lr = group['lr']
 
@@ -239,7 +236,7 @@ class ProxSGD(Optimizer):
 
 		self.local_steps += 1
 
-	def get_local_stats(self) -> List:
+	def get_local_stats(self) -> Dict:
 		if self.mu != 0:
 			local_tau = torch.tensor(self.local_steps * self.ratio)
 		else:
@@ -248,55 +245,18 @@ class ProxSGD(Optimizer):
 
 		return local_stats
 
-	def load_aggregated_grad(self, agg_grad):
-		if len(agg_grad) == 0:
-			i = 0
-			# print("---------------No parameters received, filling it with init params------------")
-			init_params = torch.load("state/init_params_torch.pt")
-			for group in self.param_groups:
-				for p in group['params']:
-					p.data.copy_(init_params[i])
-					i+=1
-			return None
-
+	def set_init_params(self, init_params: NDArrays):
 		i = 0
 		for group in self.param_groups:
 			for p in group['params']:
 				param_state = self.state[p]
-				param_state['cum_grad'] = torch.tensor(agg_grad[i],device=param_state["cum_grad"].device)
+				p.data.copy_(torch.tensor(init_params[i], device=p.data.device))
+				param_state['old_init'] = torch.clone(p.data).detach()
 				i += 1
 
-		self.reset_local_buffers()
-		# print("-------------------optimizer load aggregated grad completed --------------------------")
-
-	def reset_local_buffers(self):
-		# Call this after every round of federated training
-		for group in self.param_groups:
-			lr = group['lr']
-			for p in group['params']:
-				param_state = self.state[p]
-
-				if self.gmf != 0:
-					if 'global_momentum_buffer' not in param_state:
-						buf = param_state['global_momentum_buffer'] = torch.clone(param_state['cum_grad']).detach()
-						buf.div_(lr)
-					else:
-						buf = param_state['global_momentum_buffer']
-						buf.mul_(self.gmf).add_(param_state['cum_grad'], 1 / lr)
-					param_state['old_init'].sub_(buf, alpha=lr)
-				else:
-					param_state['old_init'].sub_(param_state['cum_grad'])
-
-				p.data.copy_(param_state['old_init'])
-				param_state['cum_grad'].zero_()
-
-				# Reinitialize momentum buffer
-				if 'momentum_buffer' in param_state:
-					param_state['momentum_buffer'].zero_()
-
-		self.local_counter = 0
-		self.local_normalizing_vec = 0
-		self.local_steps = 0
+	def set_lr(self, lr: float):
+		for param_group in self.param_groups:
+			param_group['lr'] = lr
 
 
 if __name__ == "__main__":
@@ -316,15 +276,15 @@ if __name__ == "__main__":
 	# torch.cuda.set_device('0')
 	# torch.backends.cudnn.deterministic = True
 
-	model = vgg11().to(device)
-	params = model.parameters()
-	client_state = torch.load("state/client_0_state.pt")
+	model = VGG().to(device)
+	# params = model.parameters()
+	# client_state = torch.load("state/client_0_state.pt")
 
 	# saved_params = [val.cpu().numpy() for _, val in model.state_dict().items()]
 	# torch.save(saved_params, "state/init_params_torch.pt")
 	# torch.save(params, "state/init_params.pt")
 
-	optimizer = ProxSGD(params, 0.0625, lr=0.1, weight_decay=1e-4, momentum=0)
+	# optimizer = ProxSGD(params, 0.0625, lr=0.1, weight_decay=1e-4, momentum=0)
 	# init_params = np.load("state/init_params.npy", allow_pickle=True)
 	init_params= torch.load("state/init_params_torch.pt")
 	# init_params = saved_params
