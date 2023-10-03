@@ -32,7 +32,7 @@ jobs:
       - name: Build docs
         run: ./dev/build-docs.sh
       - name: Deploy docs
-        if: github.ref == 'refs/heads/main' && github.repository == 'adap/flower'
+        if: github.ref == 'refs/heads/main' && ! github.event.pull_request.head.repo.fork
         env:
           AWS_DEFAULT_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
