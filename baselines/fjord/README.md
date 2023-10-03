@@ -94,25 +94,23 @@ poetry shell
 
 
 ```bash
-cd fjord
-python main.py  # without knowledge distillation
+python -m fjord.main  # without knowledge distillation
 # or
-python main.py +train_mode=fjord_kd  # with knowledge distillation
+python -m fjord.main +train_mode=fjord_kd  # with knowledge distillation
 ```
 
 ### Through poetry
 
 ```bash
-cd fjord
-poetry run python main.py  # without knowledge distillation
+poetry run python -m fjord.main  # without knowledge distillation
 # or
-poetry run python main.py +train_mode=fjord_kd  # with knowledge distillation
+poetry run python -m fjord.main +train_mode=fjord_kd  # with knowledge distillation
 ```
 
 ## Expected Results
 
 ```bash
-cd fjord/scripts/
+cd scripts/
 ./run.sh
 ```
 

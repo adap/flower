@@ -16,7 +16,7 @@ from flwr.server.strategy import FedAvg
 
 import numpy as np
 
-from fjord.utils.logger import Logger
+from .utils.logger import Logger
 
 
 FJORD_CONFIG_TYPE = Dict[Union[str, float], List[Union[Dict[str, int], str]]]

@@ -10,8 +10,8 @@ from torch.optim.lr_scheduler import MultiStepLR
 from tqdm import tqdm
 import flwr as fl
 
-from fjord.od.samplers import ODSampler, BaseSampler
-from fjord.od.models.utils import (
+from .od.samplers import ODSampler, BaseSampler
+from .od.models.utils import (
     create_bn_layer,
     create_conv_layer,
     create_linear_layer,

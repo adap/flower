@@ -7,7 +7,7 @@ manual_seed: 123
 model: resnet18
 dataset: cifar10
 num_clients: 100
-data_path: "./data"
+data_path: "../data"
 num_workers: 4
 evaluate_every: 10
 

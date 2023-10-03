@@ -9,17 +9,17 @@ from torch.utils.data import DataLoader
 from torch.nn import Module
 from torch import Tensor
 
-from models import (
+from .models import (
     train,
     test,
     get_net
 )
-from dataset import load_data
+from .dataset import load_data
 
-from fjord.od.samplers import ODSampler
-from fjord.od.layers import ODConv2d, ODLinear, ODBatchNorm2d
-from fjord.utils.utils import save_model
-from fjord.utils.logger import Logger
+from .od.samplers import ODSampler
+from .od.layers import ODConv2d, ODLinear, ODBatchNorm2d
+from .utils.utils import save_model
+from .utils.logger import Logger
 
 
 FJORD_CONFIG_TYPE = Dict[Union[str, float], List[Union[Dict[str, int], str]]]

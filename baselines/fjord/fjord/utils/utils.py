@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from torch.nn import Module
 
-from fjord.utils.logger import Logger
+from utils.logger import Logger
 
 
 def get_parameters(net: Module) -> List[np.ndarray]:

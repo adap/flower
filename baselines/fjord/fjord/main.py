@@ -11,23 +11,23 @@ import torch
 from torch.utils.data import DataLoader
 import flwr as fl
 
-from dataset import (
+from .dataset import (
     load_data,
 )
-from client import (
+from .client import (
     FjORDClient,
     get_agg_config
 )
-from models import (
+from .models import (
     test,
     get_net,
 )
-from strategy import (
+from .strategy import (
     FjORDFedAVG
 )
 
-from fjord.utils.logger import Logger
-from fjord.utils.utils import (
+from .utils.logger import Logger
+from .utils.utils import (
     get_parameters,
     set_parameters,
     save_model
