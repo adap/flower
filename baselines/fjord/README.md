@@ -115,3 +115,5 @@ cd scripts/
 ```
 
 Plots and the associated code reside in `fjord/notebooks/visualise.ipynb`.
+
+![resnet18_cifar10_500_global_rounds_acc_pvalues](./_static/resnet18_cifar10_500_global_rounds_acc_pvalues.png)
