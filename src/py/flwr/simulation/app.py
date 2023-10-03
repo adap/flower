@@ -316,6 +316,7 @@ def start_simulation(  # pylint: disable=too-many-arguments,too-many-statements
             client_resources,
             client_resources,
         )
+        hist = History()
         if _raise_exception:
             # Stop time monitoring resources in cluster
             f_stop.set()
