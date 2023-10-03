@@ -75,7 +75,10 @@ poetry shell
 You can run four algorithms fedavg, scaffold, fedprox, and fednova. To run any of them, use any of the corresponding config files. For instance, the following command will run with the default config provided in the corresponding configuration files.
 
 ```bash
-python -m niid_bench.main --config-name fedavg_base
+# Run with default config, it will run FedAvg on cpu-only mode
+python -m niid_bench.main
+# Below to enable GPU utilization by the server and the clients.
+python -m niid_bench.main server_device=cuda client_resources.num_gpus=0.2
 ```
 
 To change the configuration such as dataset or hyperparameters, specify them as part of the command line arguments.
