@@ -15,7 +15,7 @@ jobs:
         run:
             working-directory: src/kotlin
     name: Release build and publish
-    if: "! github.event.pull_request.head.repo.fork "
+    if: github.repository == 'adap/flower'
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
