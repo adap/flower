@@ -30,4 +30,4 @@ strategy:
 
 hydra:
   run:
-    dir: outputs/${now:%Y-%m-%d}/${dataset.dataset}_${variant}_d${strategy.d}_CK${strategy.ck}
+    dir: outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}/${dataset.dataset}_${variant}_d${strategy.d}_CK${strategy.ck}
