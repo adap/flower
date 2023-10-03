@@ -9,7 +9,7 @@ dataset: [UCF-101] # list of datasets you include in your baseline
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
 
-**paper:** [https://arxiv.org/abs/2207.01975](https://arxiv.org/abs/2207.01975)
+**paper:** [arxiv.org/abs/2207.01975](https://arxiv.org/abs/2207.01975)
 
 
 **Authors:** Yasar Abbas Ur Rehman, Yan Gao, Jiajun Shen, Pedro Porto Buarque de Gusmao, Nicholas Lane
