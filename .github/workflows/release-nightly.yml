@@ -11,6 +11,7 @@ jobs:
   release_nightly:
     runs-on: ubuntu-22.04
     name: Nightly
+    if: "! github.event.pull_request.head.repo.fork "
     steps:
       - uses: actions/checkout@v4
       - name: Bootstrap
