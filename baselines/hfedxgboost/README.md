@@ -41,7 +41,7 @@ efficiency by lowering both communication rounds and communication overhead by f
 
 ****Task:**** Tabular classification and regression
 
-****Model:****: XGBoost model combined with 1-layer CNN
+****Model:**** XGBoost model combined with 1-layer CNN
 
 ****Dataset:**** 
 This baseline only includes 7 datasets with a focus on 4 of them (a9a, cod-rna, ijcnn1, space_ga).
