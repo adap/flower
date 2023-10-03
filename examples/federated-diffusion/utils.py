@@ -4,20 +4,7 @@ from functools import partial
 import numpy as np
 from PIL import Image
 
-try:
-    from tqdm import tqdm, trange
-except ImportError:
-    # If not tqdm is not available, provide a mock version of it
-    def tqdm(x, desc=""):
-        if len(desc) > 0:
-            print(desc)
-        return x
-
-    def trange(x, desc=""):
-        if len(desc) > 0:
-            print(desc)
-        return range(x)
-
+from tqdm import tqdm, trange
 
 import torch
 import torch.nn.functional as F
@@ -135,7 +122,7 @@ class IPR:
                 return x
 
         features = []
-        for bi in trange(num_batches, desc=desc):
+        for bi in trange(num_batches, desc=desc, disable=True):
             start = bi * self.batch_size
             end = start + self.batch_size
             batch = images[start:end]
@@ -244,7 +231,7 @@ def compute_metric(manifold_ref, feats_subject, desc=""):
     num_subjects = feats_subject.shape[0]
     count = 0
     dist = compute_pairwise_distances(manifold_ref.features, feats_subject)
-    for i in trange(num_subjects, desc=desc):
+    for i in trange(num_subjects, desc=desc, disable=True):
         count += (dist[:, i] < manifold_ref.radii).any()
     return count / num_subjects
 

@@ -13,6 +13,7 @@ class Params:
     rate_unbalance_cifar: float = 1.0
     iid: bool = False
     personalized: bool = True
+    batch_size_train: int = 32
 
 
 PARAMS = Params()

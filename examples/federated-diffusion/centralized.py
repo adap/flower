@@ -146,6 +146,7 @@ def train(model, train_dataloader, cid, server_round, epochs, timesteps, cpu):
             pipeline = DDPMPipeline(
                 unet=accelerator.unwrap_model(model), scheduler=noise_scheduler
             )
+            pipeline.set_progress_bar_config(disable=True)
             if (epoch + 1) % save_image_epochs == 0 or epoch == epochs - 1:
                 eval_batch_size = 16
                 seed = 0
@@ -181,6 +182,7 @@ def validate(model, cid, timesteps, device):
     pipeline = DDPMPipeline(
         unet=accelerator.unwrap_model(model), scheduler=noise_scheduler
     )
+    pipeline.set_progress_bar_config(disable=True)
     pipeline.to(device)
 
     transform = transforms.Compose(

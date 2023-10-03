@@ -10,8 +10,9 @@ from torchvision.datasets import CIFAR10
 
 
 def load_datasets(iid=True):
+    batch_size_train = PARAMS.batch_size_train
     if iid:
-        return load_iid_data()
+        return load_iid_data(batch_size_train)
     else:
         train_dataset_cifar, user_groups_train_cifar = get_dataset_cifar10_noniid(
             PARAMS.num_clients,
@@ -19,11 +20,10 @@ def load_datasets(iid=True):
             PARAMS.nsamples_cifar,
             PARAMS.rate_unbalance_cifar,
         )
-        return load_noniid_data(train_dataset_cifar, user_groups_train_cifar)
+        return load_noniid_data(train_dataset_cifar, user_groups_train_cifar, batch_size_train)
 
 
-def load_iid_data():
-    train_batch_size = 4
+def load_iid_data(batch_size: int):
 
     transform = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
@@ -39,7 +39,7 @@ def load_iid_data():
 
     for ds in datasets:
         trainloaders.append(
-            torch.utils.data.DataLoader(ds, batch_size=train_batch_size, shuffle=True)
+            torch.utils.data.DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=4)
         )
 
     return trainloaders
@@ -133,7 +133,7 @@ def cifar_extr_noniid(train_dataset, num_users, n_class, num_samples, rate_unbal
     return dict_users_train
 
 
-def load_noniid_data(train_dataset_cifar, user_groups_train_cifar):
+def load_noniid_data(train_dataset_cifar, user_groups_train_cifar, batch_size: int):
     for client_no, array in user_groups_train_cifar.items():
         class_no = []
 
@@ -150,7 +150,7 @@ def load_noniid_data(train_dataset_cifar, user_groups_train_cifar):
     for index_list in indices:
         subset = Subset(train_dataset_cifar, index_list)
         trainloaders.append(
-            torch.utils.data.DataLoader(subset, batch_size=4, shuffle=True)
+            torch.utils.data.DataLoader(subset, batch_size=batch_size, shuffle=True, num_workers=4)
         )
 
     return trainloaders
