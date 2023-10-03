@@ -7,7 +7,7 @@ dataset: ["CIFAR-10"]
 
 # FjORD: Fair and Accurate Federated Learning under heterogeneous targets with Ordered Dropout
 
-****Paper:**** https://openreview.net/forum?id=4fLr7H5D_eT
+****Paper:**** [openreview.net/forum?id=4fLr7H5D_eT](https://openreview.net/forum?id=4fLr7H5D_eT)
 
 ****Authors:**** Samuel Horváth\*, Stefanos Laskaridis\*, Mario Almeida\*, Ilias Leontiadis, Stylianos Venieris, Nicholas Donald Lane
 
