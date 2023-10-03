@@ -58,7 +58,7 @@ Each dataset can be partitioned across 2, 5 or 10 clients in an IID distribution
 
 Using the original hyperparameters didn't give the best performance sometimes, It's kinda normal as the paper used the same hyperparameters for all the datasets while some of them were small with few no.of features while some were big datasets with bigger no.of features, e.g: YearPredictionMSD had 515,345 rows and 90 features while space_ga got 3,167 rows and 6 features.<br>
 There are different hyperparameters used for each client setting in the federated system.<br>
-For the centralized model, I mostly used the paper's hyperparameters as they give very good results -except for abalone and cpusmall-, here are the used hyperparameters:
+For the centralized model, the paper's hyperparameters was mostly used as they give very good results -except for abalone and cpusmall-, here are the used hyperparameters:
 
 | Hyperparameter name | value |
 | -- | -- |
