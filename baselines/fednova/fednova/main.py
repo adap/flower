@@ -11,6 +11,7 @@ from utils import fit_config
 from hydra.utils import instantiate
 import numpy as np
 import random
+import os
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -34,7 +35,12 @@ def main(cfg: DictConfig) -> None:
 	# 1. Print parsed config
 	print(OmegaConf.to_yaml(cfg))
 
-	# 2. Prepare your dataset
+	# 2. Prepare your dataset and directories
+
+	if not os.path.exists(cfg.datapath):
+		os.makedirs(cfg.datapath)
+	if not os.path.exists(cfg.checkpoint_path):
+		os.makedirs(cfg.checkpoint_path)
 
 	trainloaders, testloader, data_ratios = load_datasets(cfg)
 

@@ -65,7 +65,7 @@ def load_datasets(config: DictConfig) -> Tuple[List[DataLoader], DataLoader, Lis
                                                         shuffle=True, pin_memory=True))
 
     test_loader = torch.utils.data.DataLoader(testset,
-                                              batch_size=config.batch_size,
+                                              batch_size=2*config.batch_size,
                                               shuffle=False, )
 
     return trainloaders, test_loader, ratio

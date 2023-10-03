@@ -5,16 +5,17 @@
 
 #dataset:
 datapath: data/
+checkpoint_path: checkpoints/
 num_clients: 16
 num_epochs: 2
-num_rounds: 100
+num_rounds: 200
 batch_size: 32
 NIID: True
 alpha: 0.1
 var_local_epochs: True
 var_min_epochs: 2
 var_max_epochs: 5
-lr_scheduling: False
+lr_scheduling: True
 seed: 3491
 
 model:
@@ -23,7 +24,7 @@ model:
 optimizer:
   _target_: models.ProxSGD
   lr: 0.02
-  momentum: 0.9
+  momentum: 0
   weight_decay: 1e-4
   gmf: 0
   mu: 0

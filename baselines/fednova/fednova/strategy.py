@@ -1,20 +1,22 @@
-from typing import List, Tuple, Union, Optional
+from typing import List, Tuple, Union, Optional, Dict
 import numpy as np
 from flwr.common import Metrics
-from flwr.common.typing import FitRes
+from flwr.common.typing import FitRes, Scalar, EvaluateRes
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
 from flwr.server.client_manager import ClientManager
-from functools import reduce
 from omegaconf import DictConfig
+from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
+from flwr.common.logger import log
+from logging import INFO, WARNING
+
 from flwr.common import (
 	FitIns,
-	FitRes,
 	NDArrays,
 	NDArray,
 	Parameters,
 	ndarrays_to_parameters,
-	parameters_to_ndarrays,
+	parameters_to_ndarrays
 )
 
 
@@ -25,13 +27,13 @@ class FedNova(FedAvg):
 		super().__init__(*args, **kwargs)
 
 		self.global_momentum_buffer: List[NDArray] = []
-		self.old_parameter_init: List[NDArray] = parameters_to_ndarrays(self.initial_parameters)
-		self.global_parameters: List[NDArray] = []
+		# self.old_parameter_init: List[NDArray] = parameters_to_ndarrays(self.initial_parameters)
+		self.global_parameters: List[NDArray] = parameters_to_ndarrays(self.initial_parameters)
 
 		self.exp_config = exp_config
 		self.lr = exp_config.optimizer.lr
 		self.gmf = exp_config.optimizer.gmf
-
+		self.best_acc = 0.0
 
 	def configure_fit(self, server_round: int, parameters: Parameters,
 					  client_manager: ClientManager) -> List[Tuple[ClientProxy, FitIns]]:
@@ -85,19 +87,18 @@ class FedNova(FedAvg):
 			aggregate_parameters.append((params, scale))
 
 		agg_cum_gradient = aggregate(aggregate_parameters)
-		self.global_parameters = self.update_server_params(agg_cum_gradient)
+		self.update_server_params(agg_cum_gradient)
 
 		return ndarrays_to_parameters(self.global_parameters), {}
 
 	def update_server_params(self, cum_grad: NDArrays):
-		updated_params = []
 
 		for i, layer_cum_grad in enumerate(cum_grad):
 
 			if self.gmf != 0:
 
 				# check if it's the first round of aggregation, if so, initialize the global momentum buffer
-				if self.global_momentum_buffer is None:
+				if len(self.global_momentum_buffer) == 0:
 					buf = layer_cum_grad / self.lr
 					self.global_momentum_buffer.append(buf)
 
@@ -105,15 +106,51 @@ class FedNova(FedAvg):
 					self.global_momentum_buffer[i] *= self.gmf
 					self.global_momentum_buffer[i] += layer_cum_grad / self.lr
 
-				self.old_parameter_init[i] -= self.global_momentum_buffer[i] * self.lr
+				self.global_parameters[i] -= self.global_momentum_buffer[i] * self.lr
 
 			else:
-				self.old_parameter_init[i] -= layer_cum_grad
+				self.global_parameters[i] -= layer_cum_grad
 
-			updated_params.append(self.old_parameter_init[i])
+	def aggregate_evaluate(self, server_round: int, results: List[Tuple[ClientProxy, EvaluateRes]],
+						   failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]]
+						   ) -> Tuple[Optional[float], Dict[str, Scalar]]:
 
-		return updated_params
+		"""Edit Aggregate evaluation method to allow checkpointing of model parameters
+		for best evaluation accuracy"""
 
+		if not results:
+			return None, {}
+		# Do not aggregate if there are failures and failures are not accepted
+		if not self.accept_failures and failures:
+			return None, {}
+
+		# Aggregate loss
+		loss_aggregated = weighted_loss_avg(
+			[
+				(evaluate_res.num_examples, evaluate_res.loss)
+				for _, evaluate_res in results
+			]
+		)
+
+		# Aggregate custom metrics if aggregation fn was provided
+		metrics_aggregated = {}
+		if self.evaluate_metrics_aggregation_fn:
+			eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
+			metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
+
+			if metrics_aggregated.get("accuracy", 0.0) > self.best_acc:
+				self.best_acc = metrics_aggregated.get("accuracy", 0.0)
+				# Save model parameters and state
+
+				np.savez(f"{self.exp_config.checkpoint_path}best_model_{server_round}.npz",
+						 self.global_parameters, [self.best_acc], self.global_momentum_buffer)
+
+				log(INFO, "Best model saved")
+
+		elif server_round == 1:  # Only log this warning once
+			log(WARNING, "No evaluate_metrics_aggregation_fn provided")
+
+		return loss_aggregated, metrics_aggregated
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
@@ -137,18 +174,4 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 	return {"accuracy": int(sum(accuracies)) / int(sum(examples))}
 
 
-def aggregate(results: List[Tuple[NDArrays, float]]) -> NDArrays:
-	"""Compute weighted average."""
-	# Calculate the total number of examples used during training
 
-	# Create a list of weights, each multiplied by the related number of examples
-	weighted_weights = [
-		[layer * scale for layer in weights] for weights, scale in results
-	]
-
-	# Compute average weights of each layer
-	weights_prime: NDArrays = [
-		reduce(np.add, layer_updates)
-		for layer_updates in zip(*weighted_weights)
-	]
-	return weights_prime
