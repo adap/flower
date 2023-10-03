@@ -74,7 +74,18 @@ pip install -e .
 ### Through poetry
 
 ```bash
+# Set python version
+pyenv install 3.10.6
+pyenv local 3.10.6
+
+# Tell poetry to use python 3.10
+poetry env use 3.10.6
+
+# install the base Poetry environment
 poetry install
+
+# activate the environment
+poetry shell
 ```
 
 ## Running the Experiments
