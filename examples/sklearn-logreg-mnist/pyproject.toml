@@ -15,5 +15,5 @@ authors = [
 python = "^3.8"
 flwr = "^1.0.0"
 # flwr = { path = "../../", develop = true }  # Development
+flwr-datasets = "^0.0.1"
 scikit-learn = "^1.1.1"
-openml = "^0.12.2"

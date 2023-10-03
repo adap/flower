@@ -1,19 +1,34 @@
+import argparse
 import warnings
-import flwr as fl
-import numpy as np
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
 
+import flwr as fl
 import utils
+from flwr_datasets import FederatedDataset
 
 if __name__ == "__main__":
-    # Load MNIST dataset from https://www.openml.org/d/554
-    (X_train, y_train), (X_test, y_test) = utils.load_mnist()
+    N_CLIENTS = 10
 
-    # Split train set into 10 partitions and randomly use one for training.
-    partition_id = np.random.choice(10)
-    (X_train, y_train) = utils.partition(X_train, y_train, 10)[partition_id]
+    parser = argparse.ArgumentParser(description="Flower")
+    parser.add_argument(
+        "--partition",
+        type=int,
+        choices=range(0, N_CLIENTS),
+        help="Specifies the artificial data partition",
+    )
+    args = parser.parse_args()
+    partition_id = args.partition
+
+    # Load the partition data
+    fds = FederatedDataset(dataset="mnist", partitioners={"train": N_CLIENTS})
+
+    dataset = fds.load_partition(partition_id, "train").with_format("numpy")
+    X, y = dataset["image"].reshape((len(dataset), -1)), dataset["label"]
+    # Split the on edge data: 80% train, 20% test
+    X_train, X_test = X[:int(0.8 * len(X))], X[int(0.8 * len(X)):]
+    y_train, y_test = y[:int(0.8 * len(y))], y[int(0.8 * len(y)):]
 
     # Create LogisticRegression Model
     model = LogisticRegression(
@@ -24,6 +39,7 @@ if __name__ == "__main__":
 
     # Setting initial parameters, akin to model.compile for keras models
     utils.set_initial_params(model)
+
 
     # Define Flower client
     class MnistClient(fl.client.NumPyClient):
@@ -44,6 +60,7 @@ if __name__ == "__main__":
             loss = log_loss(y_test, model.predict_proba(X_test))
             accuracy = model.score(X_test, y_test)
             return loss, len(X_test), {"accuracy": accuracy}
+
 
     # Start Flower client
     fl.client.start_numpy_client(server_address="0.0.0.0:8080", client=MnistClient())
