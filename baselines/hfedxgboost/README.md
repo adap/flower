@@ -182,6 +182,7 @@ python -m hfedxgboost.main --multirun clients=YearPredictionMSD_2_clients,YearPr
 | space_ga | Regression | 2<br>5<br>10 | 0.024<br>0.033<br>0.034 |
 | abalone | Regression | 2<br>5<br>10 | 10<br>10<br>10 | 
 | YearPredictionMSD | Regression | 2<br>5<br>10 | 119<br>118<br>118 | 
+| cpusmall | Regression | 2<br>5<br>10 | 13<br> <br>24 | 
 
 
 ## How to add a new dataset
