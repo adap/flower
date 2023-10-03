@@ -1,8 +1,8 @@
 ---
 title: Federated Self-supervised Learning for Video Understanding
 url: https://arxiv.org/abs/2207.01975
-labels: [cross-device, videossl] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [UCF-101] # list of datasets you include in your baseline
+labels: [cross-device, ssl, videossl]
+dataset: [UCF-101]
 ---
 
 # Federated Self-supervised Learning for Video Understanding
