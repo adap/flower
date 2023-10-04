@@ -7,7 +7,7 @@ dataset: [non-iid cifar10 dataset, synthetic dataset]
 
 # FedNova: Tackling the Objective Inconsistency Problem in Heterogeneous Federated Optimization
 
-****Paper:**** [](https://proceedings.neurips.cc/paper/2020/hash/564127c03caab942e503ee6f810f54fd-Abstract.html)
+****Paper:**** [arxiv.org/abs/2007.07481](https://arxiv.org/abs/2007.07481)
 
 ****Authors:**** *Jianyu Wang, Qinghua Liu, Hao Liang, Gauri Joshi, H. Vincent Poor*
 
@@ -20,7 +20,7 @@ dataset: [non-iid cifar10 dataset, synthetic dataset]
 
 ****Datasets:**** *_This basleline experiments tackles heterogeneous data sources. Non-IID CIFAR-10 dataset and Synthetic(1,1) dataset(creation methodology detailed in [link](https://arxiv.org/pdf/1812.06127.pdf) are used in the experiments._*
 
-****Hardware Setup:****: *_The baseline comprises of federated learning on 16 clients. If we want to run each client in parallel, it would require 16 cpu cores and roughly ~16 GB of GPU memory for a batch size of 32. 
+****Hardware Setup:**** *_The baseline comprises of federated learning on 16 clients. If we want to run each client in parallel, it would require 16 cpu cores and roughly ~16 GB of GPU memory for a batch size of 32. 
 However, most experiments were performed using a pool of 6 actors(6 clients run in parallel out of 16) requiring 6 cpu cores and 6GB of GPU memory. 
 The experiments were performed on a A100 machine however any GPU with 6GB of memory and 6 cpu cores should be sufficiently fast._*
 
@@ -40,7 +40,7 @@ The experiments were performed on a A100 machine however any GPU with 6GB of mem
 
 ## Environment Setup
 
-```python
+``` python
 # Set python version
 pyenv install 3.10.6
 pyenv local 3.10.6
@@ -81,7 +81,7 @@ poetry run -m <baseline-name>.main  <override_some_hyperparameters>
 
 :warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
 
-```bash
+``` bash
 # it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameteres
 
 poetry run -m <baseline-name>.main --multirun num_client_per_round=5,10,50 dataset=femnist,cifar10
