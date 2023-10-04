@@ -39,10 +39,10 @@ dataset: [FEMNIST, SHAKESPEARE]
 
 **Shakespeare Dataset Issue** : In the FedMeta paper experiment, the Shakespeare dataset had 1126 users. However, due to a current bug, the number of users has decreased to 660 users. Therefore, we have only maintained the total number of data.
 
-|   Dataset   |  #Clients  | #Samples | #Classes |                      #Partition Clients                      | #Partition Dataset   |
-|:-----------:|:----------:| :---: |:--------:|:------------------------------------------------------------:|----------------------|
-|   FEMNIST   |   1,068    | 235,683 |    62    | Train Clients : 0.8, Valid Clients : 0.1, Test Clients : 0.1 | Sup : 0.2, Qry : 0.8 |
-| SHAKESPEARE | 550 -> 110 | 625,127 |    80    | Train Clients : 0.8, Valid Clients : 0.1, Test Clients : 0.1 | Sup : 0.2, Qry : 0.8 |
+|   Dataset   |      #Clients       |     #Samples     | #Classes |                      #Partition Clients                      | #Partition Dataset   |
+|:-----------:|:-------------------:|:----------------:|:--------:|:------------------------------------------------------------:|----------------------|
+|   FEMNIST   |    About<br>1050    | About<br>240,000 |    62    | Train Clients : 0.8, Valid Clients : 0.1, Test Clients : 0.1 | Sup : 0.2, Qry : 0.8 |
+| SHAKESPEARE | About<br>550 -> 110 | About<br>620,000 |    80    | Train Clients : 0.8, Valid Clients : 0.1, Test Clients : 0.1 | Sup : 0.2, Qry : 0.8 |
 
 **The original specifications of the Leaf dataset can be found in the Leaf paper(_"LEAF: A Benchmark for Federated Settings"_).**
 
@@ -75,12 +75,30 @@ Poetry shell
 
 ****Download Dataset**** : Go [LEAF: A Benchmark for Federated Settings](https://github.com/TalwalkarLab/leaf) and Use the command below! You can download dataset (FEMNIST and SHAKESPEARE). 
 ```bash
-#FEMNIST dataset Download command for these experiments
-./preprocess.sh -s niid --iu 1068 --sf 0.3 -k 0 -t sample
+# clone LEAF repo
+git clone https://github.com/TalwalkarLab/leaf.git
+# prepare the Leaf GitHub libraries.
+pip3 install numpy
+pip3 install pillow
 
+# navigate to data directory and then the dataset
+cd leaf/data/femnist
+#FEMNIST dataset Download command for these experiments
+./preprocess.sh -s niid --sf 0.3 -k 0 -t sample
+
+# navigate to data directory and then the dataset
+cd leaf/data/shakespeare
 #SHAKESEPEARE dataset Download command for these experiments
 ./preprocess.sh -s niid --sf 0.16 -k 0 -t sample
 ```
+
+*Run `./preprocess.sh` with a choice of the following tags*
+* `-s` := 'iid' to sample in an i.i.d. manner, or 'niid' to sample in a non-i.i.d. manner; more information on i.i.d. versus non-i.i.d. is included in the 'Notes' section
+* `--sf`  := fraction of data to sample, written as a decimal; default is 0.1
+* `-k` := minimum number of samples per user
+* `-t` := 'user' to partition users into train-test groups, or 'sample' to partition each user's samples into train-test groups
+
+More detailed tag information can be found on Leaf GitHub.
 
 ****Start experiments**** : 
 ```bash  
