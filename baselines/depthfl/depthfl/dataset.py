@@ -41,6 +41,7 @@ def load_datasets(  # pylint: disable=too-many-arguments
     datasets, testset = _partition_data(
         num_clients,
         iid=config.iid,
+        beta=config.beta,
         seed=seed,
     )
     # Split each partition into train/val and create DataLoader

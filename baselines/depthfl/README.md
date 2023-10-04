@@ -135,6 +135,8 @@ python -m depthfl.main fit_config.feddyn=false fit_config.kd=false fit_config.ex
 
 # table 4
 python -m depthfl.main fit_config.kd=false
+python -m depthfl.main dataset_config.iid=false 
+python -m depthfl.main dataset_config.iid=false fit_config.kd=false
 ```
 
 The above commands would generate results in DepthFL paper. The numbers below are the results of a single run, and although they do not perfectly match the numbers recorded in the paper, they are very close.
@@ -165,5 +167,6 @@ Accuracy of the global model with/without self distillation on CIFAR-100.
 
 | Distribution | Dataset | KD | Classifier 1/4 | Classifier 2/4 | Classifier 3/4 | Classifier 4/4 | Ensemble | 
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| IID | CIFAR-100 | &cross;<br>&check; | 70.13<br>71.74 | 69.63<br>73.35 | 68.92<br>73.57 | 68.92<br>73.55 | 74.48<br>76.06 | 
+| IID | CIFAR100 | &cross;<br>&check; | 70.13<br>71.74 | 69.63<br>73.35 | 68.92<br>73.57 | 68.92<br>73.55 | 74.48<br>76.06 | 
+| non-IID | CIFAR100 | &cross;<br>&check; | 67.94<br>70.33 | 68.68<br>71.88 | 68.46<br>72.43 | 67.78<br>72.34 | 73.18<br>74.92 | 
 
