@@ -1,3 +1,4 @@
 PyYAML==5.3
-tensorflow-cpu<=2.14.0
+tensorflow==2.14.0
+tensorflow-estimator==2.14.0
 requests[security]
