@@ -11,8 +11,7 @@ echo "Clone mlcube from GitHub"
 git clone https://github.com/mlcommons/mlcube_examples.git
 cp -r mlcube_examples/mnist_fl/tensorflow mlcube
 rm -rf mlcube_examples
-cp dev/Dockerfile mlcube/build
-cp dev/requirements.txt mlcube/build
+cp dev/{Dockerfile,requirements.txt,mnist.py} mlcube/build
 
 # Download dataset
 cd mlcube
