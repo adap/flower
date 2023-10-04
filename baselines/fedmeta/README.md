@@ -39,21 +39,21 @@ dataset: [FEMNIST, SHAKESPEARE]
 
 **Shakespeare Dataset Issue** : In the FedMeta paper experiment, the Shakespeare dataset had 1126 users. However, due to a current bug, the number of users has decreased to 660 users. Therefore, we have only maintained the total number of data.
 
-|   Dataset   |      #Clients       |     #Samples     | #Classes |                      #Partition Clients                      | #Partition Dataset   |
-|:-----------:|:-------------------:|:----------------:|:--------:|:------------------------------------------------------------:|----------------------|
-|   FEMNIST   |    About<br>1050    | About<br>240,000 |    62    | Train Clients : 0.8, Valid Clients : 0.1, Test Clients : 0.1 | Sup : 0.2, Qry : 0.8 |
-| SHAKESPEARE | About<br>550 -> 110 | About<br>620,000 |    80    | Train Clients : 0.8, Valid Clients : 0.1, Test Clients : 0.1 | Sup : 0.2, Qry : 0.8 |
+|   Dataset   |      #Clients       |     #Samples     | #Classes |                      #Partition Clients                      |   #Partition Dataset   |
+|:-----------:|:-------------------:|:----------------:|:--------:|:------------------------------------------------------------:|:----------------------:|
+|   FEMNIST   |    About<br>1050    | About<br>240,000 |    62    | Train Clients : 0.8, Valid Clients : 0.1, Test Clients : 0.1 | Sup : 0.2<br>Qry : 0.8 |
+| SHAKESPEARE | About<br>550 -> 110 | About<br>620,000 |    80    | Train Clients : 0.8, Valid Clients : 0.1, Test Clients : 0.1 |   Sup : 0.2<br>Qry : 0.8   |
 
 **The original specifications of the Leaf dataset can be found in the Leaf paper(_"LEAF: A Benchmark for Federated Settings"_).**
 
 ****Training Hyperparameters:**** : The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python main.py algo=? data=?` directly)
 
-|     Algorithm     |    Dataset     | Clients per Round | Number of Rounds | Batch Size | Optimizer | Learning Rate(α, β) | Client Resources                     | Gradient Step |
-|:-----------------:|:--------------:|:-----------------:|:----------------:|:----------:|:---------:|:-------------------:|--------------------------------------|:-------------:|
-|      FedAvg       |     FEMNIST<br>SHAKESPEARE     |         4         |       2000<br>400       |     10     |   Adam    |       0.0001<br>0.001        | {'num_cpus': 4.0, 'num_gpus': 0.25 } |       -       |
-|   FedAvg(Meta)    |     FEMNIST<br>SHAKESPEARE     |         4         |       2000<br>400       |     10     |   Adam    |       0.0001<br>0.001        | {'num_cpus': 4.0, 'num_gpus': 0.25 } |       -       |
-|   FedMeta(MAML)   |     FEMNIST<br>SHAKESPEARE     |         4         |       2000<br>400       |     10     |   Adam    |   (0.001, 0.0001)<br>(0.1, 0.01)   | {'num_cpus': 4.0, 'num_gpus': 1.0 }  |       5<br>1       |
-| FedMeta(Meta-SGD)  |     FEMNIST<br>SHAKESPEARE     |         4         |       2000<br>400       |     10     |   Adam    |   (0.001, 0.0001)<br>(0.1, 0.01)   | {'num_cpus': 4.0, 'num_gpus': 1.0 }  |       5<br>1       |
+|     Algorithm     |    Dataset     | Clients per Round | Number of Rounds | Batch Size | Optimizer | Learning Rate(α, β) |            Client Resources             | Gradient Step |
+|:-----------------:|:--------------:|:-----------------:|:----------------:|:----------:|:---------:|:-------------------:|:---------------------------------------:|:-------------:|
+|      FedAvg       |     FEMNIST<br>SHAKESPEARE     |         4         |       2000<br>400       |     10     |   Adam    |       0.0001<br>0.001        | {'num_cpus': 4.0,<br>'num_gpus': 0.25 } |       -       |
+|   FedAvg(Meta)    |     FEMNIST<br>SHAKESPEARE     |         4         |       2000<br>400       |     10     |   Adam    |       0.0001<br>0.001        | {'num_cpus': 4.0,<br>'num_gpus': 0.25 } |       -       |
+|   FedMeta(MAML)   |     FEMNIST<br>SHAKESPEARE     |         4         |       2000<br>400       |     10     |   Adam    |   (0.001, 0.0001)<br>(0.1, 0.01)   | {'num_cpus': 4.0,<br>'num_gpus': 1.0 }  |       5<br>1       |
+| FedMeta(Meta-SGD)  |     FEMNIST<br>SHAKESPEARE     |         4         |       2000<br>400       |     10     |   Adam    |   (0.001, 0.0001)<br>(0.1, 0.01)   | {'num_cpus': 4.0,<br>'num_gpus': 1.0 }  |       5<br>1       |
 
 
 ## Environment Setup
