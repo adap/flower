@@ -22,7 +22,9 @@ num_clients: 100
 num_epochs: 5
 num_rounds: 400
 seed: 0
-client_device: 'cpu'
+client_resources:
+    num_cpus: 1
+    num_gpus: 0.0
 device: 'cpu'
 
 control:
