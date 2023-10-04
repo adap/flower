@@ -45,5 +45,5 @@ RUN python -m pip install -U flwr[rest]==${FLWR_VERSION}
 ENTRYPOINT ["python", "-c", "from flwr.server import run_server\nrun_server()"]
 
 # Test if Flower can be successfully installed and imported
-FROM server as server-test
+FROM server as test
 RUN python -c "from flwr.server import run_server"
