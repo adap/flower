@@ -19,9 +19,9 @@ This tutorial allows for a variety of settings (some shown in the diagrams above
 
 What follows is a step-by-step guide on how to setup your client/s and the server.
 
-## Clone this repo
+## Clone this example
 
-Start with cloning the Flower repo on your laptop or desktop machine. Later you'll run the same command on your embedded devices. We have prepared a single line which you can copy and execute:
+Start with cloning this example on your laptop or desktop machine. Later you'll run the same command on your embedded devices. We have prepared a single line which you can copy and execute:
 
 ```bash
 git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/embedded-devices . && rm -rf flower && cd embedded-devices
@@ -38,7 +38,7 @@ pip install -r requierments_pytorch.txt # to install Flower and PyTorch
 # pip install -r requirements_tensorflow.txt
 ```
 
-If you are working on this tutorial on your laptop or desktop, it can host the Flower server that will orchestrate the entire FL process. You could also use an embedded device (e.g. a Raspberry Pi) as the Flower server. In order to do that, pleas follow the setup steps below.
+If you are working on this tutorial on your laptop or desktop, it can host the Flower server that will orchestrate the entire FL process. You could also use an embedded device (e.g. a Raspberry Pi) as the Flower server. In order to do that, please follow the setup steps below.
 
 ## Setting up a Raspberry Pi
 
@@ -153,7 +153,7 @@ If you are working on this tutorial on your laptop or desktop, it can host the F
 
    ```bash
    # On your Jetson's terminal run
-   ./build_flower_client.sh --pytorch # or --tensorflow
+   ./build_jetson_flower_client.sh --pytorch # or --tensorflow
    # Bear in mind this might take a few minutes since the base images need to be donwloaded (~7GB) and decompressed.
    # To the above script pass the additional flag `--no-cache` to re-build the image.
    ```
@@ -182,7 +182,7 @@ If you are working on this tutorial on your laptop or desktop, it can host the F
 
 For this demo, we'll be using [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html), a popular dataset for image classification comprised of 10 classes (e.g. car, bird, airplane) and a total of 60K `32x32` RGB images. The training set contains 50K images. The server will automatically download the dataset should it not be found in `./data`. The clients do the same. The dataset is by default split into 50 partitions (each to be assigned to a different client). This can be controlled with the `NUM_CLIENTS` global variable in the client scripts. In this example, each device will play the role of a specific user (specified via `--cid` -- we'll show this later) and therefore only do local training with that portion of the data. For CIFAR-10, clients will be training a MobileNet-v2/3 model.
 
-You can run this example using MNIST and a smaller CNN model by passing flag `--mnist`. This is useful if you are using devices with a very limited amount of memory (e.g. RaspberryPi Zero). The partitioning of the dataset is done in the same way.
+You can run this example using MNIST and a smaller CNN model by passing flag `--mnist`. This is useful if you are using devices with a very limited amount of memory (e.g. RaspberryPi Zero) or if you want the training taking place on the embedded devices to be much faster (specially if these are CPU-only). The partitioning of the dataset is done in the same way.
 
 ### Start your Flower Server
 
@@ -209,7 +209,7 @@ Launch your Flower clients as follows. Remember that if you are using a Jetson d
 # Run the default example (CIFAR-10)
 python3 client_<FRAMEWORK>.py --cid=<CLIENT_ID> --server_address=<SERVER_ADDRESS>
 
-# If you are using a device with little RAM (e.g. Raspberry Pi Zero) use the MNIST dataset/model instead
+# Use MNIST (and a smaller model) if your devices require a more lightweight workload
 python3 client_<FRAMEWORK>.py --cid=<CLIENT_ID> --server_address=<SERVER_ADDRESS> --mnist
 ```
 
