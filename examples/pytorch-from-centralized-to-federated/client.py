@@ -1,24 +1,22 @@
 """Flower client example using PyTorch for CIFAR-10 image classification."""
-
-
-import os
-import sys
-import timeit
+import argparse
 from collections import OrderedDict
 from typing import Dict, List, Tuple
 
-import flwr as fl
 import numpy as np
 import torch
-import torchvision
+from datasets.utils.logging import disable_progress_bar
+from torch.utils.data import DataLoader
 
 import cifar
+import flwr as fl
+
+disable_progress_bar()
+
 
 USE_FEDBN: bool = True
 
-# pylint: disable=no-member
-DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-# pylint: enable=no-member
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 # Flower Client
@@ -26,21 +24,20 @@ class CifarClient(fl.client.NumPyClient):
     """Flower client implementing CIFAR-10 image classification using PyTorch."""
 
     def __init__(
-        self,
-        model: cifar.Net,
-        trainloader: torch.utils.data.DataLoader,
-        testloader: torch.utils.data.DataLoader,
-        num_examples: Dict,
+            self,
+            model: cifar.Net,
+            trainloader: DataLoader,
+            testloader: DataLoader,
     ) -> None:
         self.model = model
         self.trainloader = trainloader
         self.testloader = testloader
-        self.num_examples = num_examples
 
     def get_parameters(self, config: Dict[str, str]) -> List[np.ndarray]:
         self.model.train()
         if USE_FEDBN:
-            # Return model parameters as a list of NumPy ndarrays, excluding parameters of BN layers when using FedBN
+            # Return model parameters as a list of NumPy ndarrays, excluding
+            # parameters of BN layers when using FedBN
             return [
                 val.cpu().numpy()
                 for name, val in self.model.state_dict().items()
@@ -64,36 +61,39 @@ class CifarClient(fl.client.NumPyClient):
             self.model.load_state_dict(state_dict, strict=True)
 
     def fit(
-        self, parameters: List[np.ndarray], config: Dict[str, str]
+            self, parameters: List[np.ndarray], config: Dict[str, str]
     ) -> Tuple[List[np.ndarray], int, Dict]:
         # Set model parameters, train model, return updated model parameters
         self.set_parameters(parameters)
         cifar.train(self.model, self.trainloader, epochs=1, device=DEVICE)
-        return self.get_parameters(config={}), self.num_examples["trainset"], {}
+        return self.get_parameters(config={}), len(self.trainloader.dataset), {}
 
     def evaluate(
-        self, parameters: List[np.ndarray], config: Dict[str, str]
+            self, parameters: List[np.ndarray], config: Dict[str, str]
     ) -> Tuple[float, int, Dict]:
         # Set model parameters, evaluate model on local test dataset, return result
         self.set_parameters(parameters)
         loss, accuracy = cifar.test(self.model, self.testloader, device=DEVICE)
-        return float(loss), self.num_examples["testset"], {"accuracy": float(accuracy)}
+        return float(loss), len(self.testloader.dataset), {"accuracy": float(accuracy)}
 
 
 def main() -> None:
     """Load data, start CifarClient."""
+    parser = argparse.ArgumentParser(description="Flower")
+    parser.add_argument("--partition", type=int, choices=range(0, 10))
+    args = parser.parse_args()
 
     # Load data
-    trainloader, testloader, num_examples = cifar.load_data()
+    trainloader, testloader = cifar.load_data(args.partition)
 
     # Load model
     model = cifar.Net().to(DEVICE).train()
 
     # Perform a single forward pass to properly initialize BatchNorm
-    _ = model(next(iter(trainloader))[0].to(DEVICE))
+    _ = model(next(iter(trainloader))["img"].to(DEVICE))
 
     # Start client
-    client = CifarClient(model, trainloader, testloader, num_examples)
+    client = CifarClient(model, trainloader, testloader)
     fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=client)
 
 
