@@ -17,12 +17,12 @@
 
 import traceback
 from logging import ERROR
-from typing import Callable, Dict, Optional, cast
+from typing import Dict, Optional, cast
 
 import ray
 
 from flwr import common
-from flwr.client import Client, ClientLike, to_client
+from flwr.client import Client, ClientFn, ClientLike, to_client
 from flwr.client.client import (
     maybe_call_evaluate,
     maybe_call_fit,
@@ -33,10 +33,9 @@ from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 from flwr.simulation.ray_transport.ray_actor import (
     ClientRes,
+    JobFn,
     VirtualClientEngineActorPool,
 )
-
-ClientFn = Callable[[str], ClientLike]
 
 
 class RayClientProxy(ClientProxy):
@@ -130,12 +129,11 @@ class RayActorClientProxy(ClientProxy):
         self.client_fn = client_fn
         self.actor_pool = actor_pool
 
-    def _submit_job(
-        self, job_fn: Callable[[], ClientRes], timeout: Optional[float]
-    ) -> ClientRes:
+    def _submit_job(self, job_fn: JobFn, timeout: Optional[float]) -> ClientRes:
         try:
             self.actor_pool.submit_client_job(
-                lambda a, v: a.run.remote(v, self.cid), (job_fn, self.cid)
+                lambda a, c_fn, j_fn, cid: a.run.remote(c_fn, j_fn, cid),
+                (self.client_fn, job_fn, self.cid),
             )
             res = self.actor_pool.get_client_result(self.cid, timeout)
 
@@ -155,8 +153,7 @@ class RayActorClientProxy(ClientProxy):
     ) -> common.GetPropertiesRes:
         """Return client's properties."""
 
-        def get_properties() -> common.GetPropertiesRes:
-            client: Client = _create_client(self.client_fn, self.cid)
+        def get_properties(client: Client) -> common.GetPropertiesRes:
             return maybe_call_get_properties(
                 client=client,
                 get_properties_ins=ins,
@@ -174,8 +171,7 @@ class RayActorClientProxy(ClientProxy):
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
 
-        def get_parameters() -> common.GetParametersRes:
-            client: Client = _create_client(self.client_fn, self.cid)
+        def get_parameters(client: Client) -> common.GetParametersRes:
             return maybe_call_get_parameters(
                 client=client,
                 get_parameters_ins=ins,
@@ -191,8 +187,7 @@ class RayActorClientProxy(ClientProxy):
     def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
 
-        def fit() -> common.FitRes:
-            client: Client = _create_client(self.client_fn, self.cid)
+        def fit(client: Client) -> common.FitRes:
             return maybe_call_fit(
                 client=client,
                 fit_ins=ins,
@@ -210,8 +205,7 @@ class RayActorClientProxy(ClientProxy):
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
 
-        def evaluate() -> common.EvaluateRes:
-            client: Client = _create_client(self.client_fn, self.cid)
+        def evaluate(client: Client) -> common.EvaluateRes:
             return maybe_call_evaluate(
                 client=client,
                 evaluate_ins=ins,
