@@ -7,7 +7,7 @@ dataset: [MNIST, CIFAR10]
 
 # *HeteroFL*
 
-****Paper:**** *https://openreview.net/forum?id=TNkPBBYFkXg*
+****Paper:**** [openreview.net/forum?id=TNkPBBYFkXg](https://openreview.net/forum?id=TNkPBBYFkXg)
 
 ****Authors:**** *Enmao Diao, Jie Ding, Vahid Tarokh*
 
