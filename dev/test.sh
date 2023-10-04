@@ -43,7 +43,7 @@ python -m flake8 src/py/flwr
 echo "- flake8: done"
 
 echo "- pytest: start"
-python -m pytest --cov=src/py/flwr
+python -m pytest -s --cov=src/py/flwr
 echo "- pytest: done"
 
 echo "- All Python checks passed"
