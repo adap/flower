@@ -1,22 +1,22 @@
 # Federated Learning on Embedded Devices with Flower
 
-This example will show you how Flower makes it very easy to run Federated Learning workloads on edge devices. Here we'll be showing how to use NVIDIA Jetson devices and Raspberry Pi as Flower clients. You can run this example using either PyTorch or Tensorflow. The FL workload (i.e. model, dataset and training loop) is mostly borrowed from the [quickstart-pytorch](https://github.com/adap/flower/tree/main/examples/simulation-pytorch) and [quickstart-tensorflow](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow) examples. Go check those out if you are starting with Flower.
+This example will show you how Flower makes it very easy to run Federated Learning workloads on edge devices. Here we'll be showing how to use NVIDIA Jetson devices and Raspberry Pi as Flower clients. You can run this example using either PyTorch or Tensorflow. The FL workload (i.e. model, dataset and training loop) is mostly borrowed from the [quickstart-pytorch](https://github.com/adap/flower/tree/main/examples/simulation-pytorch) and [quickstart-tensorflow](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow) examples. 
 
-> This example is designed for beginners that know a bit about Flower and Pytorch (or Tensorflow/Keras) but that are less familiar with embedded devices. If you are already well versed in all-things Rapsberry Pi and NVIDIA Jetson, then you can simply run the `client.py` code you can find in the `quickstart-(tensorflow/pytorch)` examples in [the Flower repo](https://github.com/adap/flower) and run `server.py` from your laptop.
+> This example is designed for beginners that know a bit about Flower and ML but that are less familiar with embedded devices.
 
 ![alt text](_static/diagram.png)
 
 ## Getting things ready
 
-This is a list of components that you'll need:
+This tutorial allows for a variety of settings (some shown in the diagrams above). As long as you have access to one embedded device, you can follow along. This is a list of components that you'll need:
 
-- For Flower server: A machine running Linux/macOS.
-- For Flower clients (any two):
+- For Flower server: A machine running Linux/macOS/Windows (e.g. your laptop). You can run the server on an embedded device too!
+- For Flower clients (any one):
   - Raspberry Pi 4
   - Raspberry Pi Zero 2
   - NVIDIA Jetson Xavier-NX
   - NVIDIA Jetson Nano
-- A 32GB uSD card and ideally UHS-1 or better.
+- A uSD card with 32GB or more.
 - Software to flash the images to a uSD card:
   - For Raspberry Pi we recommend the [Raspberry Pi Imager](https://www.raspberrypi.com/software/)
   - For other devices [balenaEtcher](https://www.balena.io/etcher/) it's a great option.
@@ -182,16 +182,16 @@ If you are working on this tutorial on your laptop or desktop, they can host the
 
 ## Running FL with Flower
 
-For this demo, we'll be using [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html), a popular dataset for image classification comprised of 10 classes (e.g. car, bird, airplane) and a total of 60K `32x32` RGB images. The training set contains 50K images. The server will automatically download the dataset should it not be found in `./data`. The clients do the same. The dataset is by default split into 50 partitions (each to be assigned to a different client). This can be controlled with the `NUM_CLIENTS` global variable in the client scripts. In this example, each device will play the role of a specific user (specified by the command line -- we'll show this later) and therefore only do local training with that portion of the data. For CIFAR-10, clients will be training a MobileNet-v2/3 model.
+For this demo, we'll be using [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html), a popular dataset for image classification comprised of 10 classes (e.g. car, bird, airplane) and a total of 60K `32x32` RGB images. The training set contains 50K images. The server will automatically download the dataset should it not be found in `./data`. The clients do the same. The dataset is by default split into 50 partitions (each to be assigned to a different client). This can be controlled with the `NUM_CLIENTS` global variable in the client scripts. In this example, each device will play the role of a specific user (specified via `--cid` -- we'll show this later) and therefore only do local training with that portion of the data. For CIFAR-10, clients will be training a MobileNet-v2/3 model.
 
-You can run this example using MNIST and a smaller CNN model by passing flag `--mnist`. This is useful if you are using devices with a very limited amount of memory. The partitioning of the dataset is done in the same way.
+You can run this example using MNIST and a smaller CNN model by passing flag `--mnist`. This is useful if you are using devices with a very limited amount of memory (e.g. RaspberryPi Zero). The partitioning of the dataset is done in the same way.
 
 ### Start your Flower Server
 
 On the machine of your choice, launch the server:
 
 ```bash
-# Launch your server. It will be waiting until two clients connects
+# Launch your server.
 # Will wait for at least 2 clients to be connected, then will train for 3 FL rounds
 # The command below will sample all clients connected (since sample_fraction=1.0)
 python server.py --rounds 3 --min_num_clients 2 --sample_fraction 1.0 # append `--mnist` if you want to use that dataset/model setting
@@ -203,9 +203,9 @@ python server.py --rounds 3 --min_num_clients 2 --sample_fraction 1.0 # append `
 
 It's time to launch your clients! Ensure you have followed the setup stages outline above for the devices at your disposal.
 
-The first time you run this, the dataset will be downloaded. From the commands below, replace `<FRAMEWORK>` with either `pytorch` or `tf` to run the corresponding client Python file. In a FL setting, each client has its unique dataset. In this example you can simulate this by manually assigning an ID to a client (`cid)`) which should be an integer `[0, NUM_CLIENTS]`, where `NUM_CLIENTS` is the total number of partitions or clients that could participate at any point. This is defined at the top of the client files and defaults to 50. You can change this value to make each partition larger or smaller.
+The first time you run this, the dataset will be downloaded. From the commands below, replace `<FRAMEWORK>` with either `pytorch` or `tf` to run the corresponding client Python file. In a FL setting, each client has its unique dataset. In this example you can simulate this by manually assigning an ID to a client (`cid`) which should be an integer `[0, NUM_CLIENTS-1]`, where `NUM_CLIENTS` is the total number of partitions or clients that could participate at any point. This is defined at the top of the client files and defaults to `50`. You can change this value to make each partition larger or smaller.
 
-Launch your Flower clients as follows. Remember that if you are using a Jetson device, you need first to run your Docker container. If you are using Raspberry Pi Zero devices, it is normal if starting the clients take a few seconds.
+Launch your Flower clients as follows. Remember that if you are using a Jetson device, you need first to run your Docker container (see tha last steps for the Jetson setup). If you are using Raspberry Pi Zero devices, it is normal if starting the clients take a few seconds.
 
 ```bash
 # Run the default example (CIFAR-10)
@@ -215,4 +215,4 @@ python3 client_<FRAMEWORK>.py --cid=<CLIENT_ID> --server_address=<SERVER_ADDRESS
 python3 client_<FRAMEWORK>.py --cid=<CLIENT_ID> --server_address=<SERVER_ADDRESS> --mnist
 ```
 
-Repeat the above for as many devices as you have. Pass a different `CLIENT_ID` to each device. You can naturally run this example using different types of devices (e.g. RPi, RPi Zero, Jetson) at the same time as long as they are training the same model.
+Repeat the above for as many devices as you have. Pass a different `CLIENT_ID` to each device. You can naturally run this example using different types of devices (e.g. RPi, RPi Zero, Jetson) at the same time as long as they are training the same model. If you want to start more clients than the number of embedded devices you currently have access to, you can launch clients in your laptop: simply open a new terminal and run one of the `python3 client_<FRAMEWORK>.py ...` commands above.
