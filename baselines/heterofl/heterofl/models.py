@@ -6,8 +6,9 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from flwr.common import parameters_to_ndarrays
-from heterofl.utils import make_optimizer
 from torch import nn
+
+from heterofl.utils import make_optimizer
 
 
 class Conv(nn.Module):
@@ -497,7 +498,7 @@ def test(model, test_loader, label_split=None, device="cpu"):
             input_dict["img"] = images.to(device)
             input_dict["label"] = labels.to(device)
             if label_split is not None:
-                input_dict["label_split"] = label_split
+                input_dict["label_split"] = label_split.type(torch.int).to(device)
             output = model(input_dict)
             test_loss += output["loss"].item()
             correct += (

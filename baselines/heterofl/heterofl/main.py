@@ -2,18 +2,17 @@
 import pickle
 from pathlib import Path
 
-import client
 import flwr as fl
 import hydra
-import models
-import server
 import torch
-from client_manager_heterofl import ClientManagerHeteroFL
-from dataset import load_datasets
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
-from strategy import HeteroFL
-from utils import ModelRateManager, get_global_model_rate, preprocess_input
+
+from heterofl import client, models, server
+from heterofl.client_manager_heterofl import ClientManagerHeteroFL
+from heterofl.dataset import load_datasets
+from heterofl.strategy import HeteroFL
+from heterofl.utils import ModelRateManager, get_global_model_rate, preprocess_input
 
 
 @hydra.main(config_path="conf", config_name="base.yaml", version_base=None)
@@ -45,12 +44,12 @@ def main(cfg: DictConfig) -> None:
     # send this array(client_model_rate_mapping) as
     # an argument to client_manager and client
     model_split_rate = {"a": 1, "b": 0.5, "c": 0.25, "d": 0.125, "e": 0.0625}
-    model_split_mode = cfg.control.model_split_rate
+    # model_split_mode = cfg.control.model_split_mode
     model_mode = cfg.control.model_mode
 
-    client_to_model_rate_mapping = [0 for _ in range(cfg.num_clients)]
+    client_to_model_rate_mapping = [float(0) for _ in range(cfg.num_clients)]
     model_rate_manager = ModelRateManager(
-        model_split_mode, model_split_rate, model_mode
+        cfg.control.model_split_mode, model_split_rate, model_mode
     )
     client_manager = ClientManagerHeteroFL(
         model_rate_manager, client_to_model_rate_mapping, client_label_split=label_split
@@ -135,16 +134,16 @@ def main(cfg: DictConfig) -> None:
 
     # save the results
     save_path = HydraConfig.get().runtime.output_dir
-    results_path = Path(save_path) / "results.pkl"
-    model_path = Path(save_path) / "model.pth"
-    results = {"history": history}
+    # results_path = Path(save_path) / "results.pkl"
+    # model_path = Path(save_path) / "model.pth"
+    # results = {"history": history}
 
     # save the results as a python pickle
-    with open(str(results_path), "wb") as h:
-        pickle.dump(results, h, protocol=pickle.HIGHEST_PROTOCOL)
+    with open(str(Path(save_path) / "results.pkl"), "wb") as file_handle:
+        pickle.dump({"history": history}, file_handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     # save the model
-    torch.save(test_model.state_dict(), model_path)
+    torch.save(test_model.state_dict(), str(Path(save_path) / "model.pth"))
 
     # plot grpahs using history and save the results.
 

@@ -5,8 +5,6 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import flwr as fl
 import torch
-import torch.nn as nn
-from client_manager_heterofl import ClientManagerHeteroFL
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -19,13 +17,16 @@ from flwr.common import (
 )
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
-from models import (
+from torch import nn
+
+from heterofl.client_manager_heterofl import ClientManagerHeteroFL
+from heterofl.models import (
     get_parameters,
     get_state_dict_from_param,
     param_idx_to_local_params,
     param_model_rate_mapping,
 )
-from utils import make_optimizer, make_scheduler
+from heterofl.utils import make_optimizer, make_scheduler
 
 
 class HeteroFL(fl.server.strategy.Strategy):
@@ -61,14 +62,27 @@ class HeteroFL(fl.server.strategy.Strategy):
 
         self.model_name = model_name
         self.net = net
-        self.optim_scheduler_settings = optim_scheduler_settings
         self.global_model_rate = global_model_rate
-        # self.local_param_model_rate = None
-        # self.active_cl_mr = None
-        # self.active_cl_labels = []
+        # info required for configure and aggregate
+        # to be filled in initialize
+        self.local_param_model_rate: OrderedDict = OrderedDict()
+        # to be filled in initialize
+        self.active_cl_labels: List[torch.tensor] = []
+        # to be filled in configure
+        self.active_cl_mr: OrderedDict = OrderedDict()
         # required for scheduling the lr
-        # self.optimizer = (None,)
-        # self.scheduler = None
+        self.optimizer = make_optimizer(
+            optim_scheduler_settings["optimizer"],
+            self.net.parameters(),
+            learning_rate=optim_scheduler_settings["lr"],
+            momentum=optim_scheduler_settings["momentum"],
+            weight_decay=optim_scheduler_settings["weight_decay"],
+        )
+        self.scheduler = make_scheduler(
+            optim_scheduler_settings["scheduler"],
+            self.optimizer,
+            milestones=optim_scheduler_settings["milestones"],
+        )
 
     def __repr__(self) -> str:
         """Return a string representation of the HeteroFL object."""
@@ -80,7 +94,12 @@ class HeteroFL(fl.server.strategy.Strategy):
         """Initialize global model parameters."""
         # self.make_client_to_model_rate_mapping(client_manager)
         # net = conv(model_rate = 1)
+        if not isinstance(client_manager, ClientManagerHeteroFL):
+            raise ValueError(
+                "Not valid client manager, use ClientManagerHeterFL instead"
+            )
         clnt_mngr_heterofl: ClientManagerHeteroFL = client_manager
+
         ndarrays = get_parameters(self.net)
         self.local_param_model_rate = param_model_rate_mapping(
             self.model_name,
@@ -89,27 +108,24 @@ class HeteroFL(fl.server.strategy.Strategy):
             self.global_model_rate,
         )
 
-        self.active_cl_labels = clnt_mngr_heterofl.client_label_split.copy()
-        self.optimizer = make_optimizer(
-            self.optim_scheduler_settings["optimizer"],
-            self.net.parameters(),
-            learning_rate=self.optim_scheduler_settings["lr"],
-            momentum=self.optim_scheduler_settings["momentum"],
-            weight_decay=self.optim_scheduler_settings["weight_decay"],
-        )
-        self.scheduler = make_scheduler(
-            self.optim_scheduler_settings["scheduler"],
-            self.optimizer,
-            milestones=self.optim_scheduler_settings["milestones"],
-        )
+        if clnt_mngr_heterofl.client_label_split is not None:
+            self.active_cl_labels = clnt_mngr_heterofl.client_label_split.copy()
+
         return fl.common.ndarrays_to_parameters(ndarrays)
 
     def configure_fit(
-        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+        self,
+        server_round: int,
+        parameters: Parameters,
+        client_manager: ClientManager,
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
+        print(f"in configure fit , server round no. = {server_round}")
+        if not isinstance(client_manager, ClientManagerHeteroFL):
+            raise ValueError(
+                "Not valid client manager, use ClientManagerHeterFL instead"
+            )
         clnt_mngr_heterofl: ClientManagerHeteroFL = client_manager
-        print("in configure fit , server round no. = {}".format(server_round))
         # Sample clients
         # no need to change this
         sample_size, min_num_clients = self.num_fit_clients(
@@ -131,18 +147,26 @@ class HeteroFL(fl.server.strategy.Strategy):
 
         # Create custom configs
         fit_configurations = []
-        lr = self.optimizer.param_groups[0]["lr"]
-        print(f"lr = {lr}")
+        learning_rate = self.optimizer.param_groups[0]["lr"]
+        print(f"lr = {learning_rate}")
         for client in clients:
             model_rate = clnt_mngr_heterofl.get_client_to_model_mapping(client.cid)
             client_param_idx = self.local_param_model_rate[model_rate]
-            local_param = param_idx_to_local_params(global_parameters, client_param_idx)
+            local_param = param_idx_to_local_params(
+                global_parameters=global_parameters, client_param_idx=client_param_idx
+            )
             self.active_cl_mr[client.cid] = model_rate
             # local param are in the form of state_dict,
             #  so converting them only to values of tensors
-            local_param_fitres = [v.cpu() for v in local_param.values()]
+            local_param_fitres = [val.cpu() for val in local_param.values()]
             fit_configurations.append(
-                (client, FitIns(ndarrays_to_parameters(local_param_fitres), {"lr": lr}))
+                (
+                    client,
+                    FitIns(
+                        ndarrays_to_parameters(local_param_fitres),
+                        {"lr": learning_rate},
+                    ),
+                )
             )
 
         self.scheduler.step()
@@ -159,29 +183,29 @@ class HeteroFL(fl.server.strategy.Strategy):
         gl_model = self.net.state_dict()
 
         param_idx = []
-        for i in range(len(results)):
+        for res in results:
             param_idx.append(
                 copy.deepcopy(
-                    self.local_param_model_rate[self.active_cl_mr[results[i][0].cid]]
+                    self.local_param_model_rate[self.active_cl_mr[res[0].cid]]
                 )
             )
 
-        local_parameters_Param = [fit_res.parameters for _, fit_res in results]
-        local_parameters_ndarrays = [
-            parameters_to_ndarrays(local_parameters_Param[i])
-            for i in range(len(local_parameters_Param))
+        local_param_as_parameters = [fit_res.parameters for _, fit_res in results]
+        local_parameters_as_ndarrays = [
+            parameters_to_ndarrays(local_param_as_parameters[i])
+            for i in range(len(local_param_as_parameters))
         ]
         local_parameters: List[OrderedDict] = [
-            OrderedDict() for _ in range(len(local_parameters_Param))
+            OrderedDict() for _ in range(len(local_param_as_parameters))
         ]
         for i in range(len(results)):
-            # local_parameters_ndarrays[i] = parameters_to_ndarrays(
-            #     local_parameters_Param[i]
+            # local_parameters_as_ndarrays[i] = parameters_to_ndarrays(
+            #     local_param_as_parameters[i]
             # )
             j = 0
             # temp_od = OrderedDict()
             for k, _ in gl_model.items():
-                local_parameters[i][k] = local_parameters_ndarrays[i][j]
+                local_parameters[i][k] = local_parameters_as_ndarrays[i][j]
                 j += 1
             # local_parameters[i] = temp_od
 
@@ -189,14 +213,14 @@ class HeteroFL(fl.server.strategy.Strategy):
         if "conv" in self.model_name:
             output_bias_name = [k for k in gl_model.keys() if "bias" in k][-1]
             output_weight_name = [k for k in gl_model.keys() if "weight" in k][-1]
-            for k, v in gl_model.items():
+            for k, val in gl_model.items():
                 parameter_type = k.split(".")[-1]
-                count[k] = v.new_zeros(v.size(), dtype=torch.float32)
-                tmp_v = v.new_zeros(v.size(), dtype=torch.float32)
+                count[k] = val.new_zeros(val.size(), dtype=torch.float32)
+                tmp_v = val.new_zeros(val.size(), dtype=torch.float32)
                 for m in range(len(local_parameters)):
                     if "weight" in parameter_type or "bias" in parameter_type:
                         if parameter_type == "weight":
-                            if v.dim() > 1:
+                            if val.dim() > 1:
                                 if k == output_weight_name:
                                     label_split = self.active_cl_labels[
                                         int(results[m][0].cid)
@@ -234,17 +258,17 @@ class HeteroFL(fl.server.strategy.Strategy):
                         tmp_v += local_parameters[m][k]
                         count[k] += 1
                 tmp_v[count[k] > 0] = tmp_v[count[k] > 0].div_(count[k][count[k] > 0])
-                v[count[k] > 0] = tmp_v[count[k] > 0].to(v.dtype)
+                val[count[k] > 0] = tmp_v[count[k] > 0].to(val.dtype)
 
         elif "resnet" in self.model_name:
-            for k, v in gl_model.items():
+            for k, val in gl_model.items():
                 parameter_type = k.split(".")[-1]
-                count[k] = v.new_zeros(v.size(), dtype=torch.float32)
-                tmp_v = v.new_zeros(v.size(), dtype=torch.float32)
+                count[k] = val.new_zeros(val.size(), dtype=torch.float32)
+                tmp_v = val.new_zeros(val.size(), dtype=torch.float32)
                 for m in range(len(local_parameters)):
                     if "weight" in parameter_type or "bias" in parameter_type:
                         if parameter_type == "weight":
-                            if v.dim() > 1:
+                            if val.dim() > 1:
                                 if "linear" in k:
                                     label_split = self.active_cl_labels[
                                         int(results[m][0].cid)
@@ -282,7 +306,7 @@ class HeteroFL(fl.server.strategy.Strategy):
                         tmp_v += local_parameters[m][k]
                         count[k] += 1
                 tmp_v[count[k] > 0] = tmp_v[count[k] > 0].div_(count[k][count[k] > 0])
-                v[count[k] > 0] = tmp_v[count[k] > 0].to(v.dtype)
+                val[count[k] > 0] = tmp_v[count[k] > 0].to(val.dtype)
         else:
             raise ValueError("Not valid model name")
 

@@ -10,7 +10,8 @@ import torch
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.criterion import Criterion
-from utils import ModelRateManager
+
+# from heterofl.utils import ModelRateManager
 
 
 class ClientManagerHeteroFL(fl.server.ClientManager):
@@ -18,21 +19,21 @@ class ClientManagerHeteroFL(fl.server.ClientManager):
 
     def __init__(
         self,
-        model_rate_manager: ModelRateManager = None,
-        clients_to_model_rate_mapping: Optional[list[float]] = None,
+        model_rate_manager=None,
+        clients_to_model_rate_mapping=None,
         client_label_split: Optional[list[torch.tensor]] = None,
     ) -> None:
         super().__init__()
         self.clients: Dict[str, ClientProxy] = {}
 
         self.is_simulation = False
-        if model_rate_manager is not None:
+        if model_rate_manager is not None and clients_to_model_rate_mapping is not None:
             self.is_simulation = True
 
         self.model_rate_manager = model_rate_manager
 
         # have a common array in simulation to access in the client_fn and server side
-        if clients_to_model_rate_mapping is not None:
+        if self.is_simulation is True:
             self.clients_to_model_rate_mapping = clients_to_model_rate_mapping
             ans = self.model_rate_manager.create_model_rate_mapping(
                 len(clients_to_model_rate_mapping)
@@ -144,7 +145,7 @@ class ClientManagerHeteroFL(fl.server.ClientManager):
         """Return all available clients to model rate mapping."""
         return self.clients_to_model_rate_mapping.copy()
 
-    def update(self, server_round) -> None:
+    def update(self, server_round: int) -> None:
         """Update the client to model rate mapping."""
         if self.is_simulation is True:
             if (
@@ -156,6 +157,9 @@ class ClientManagerHeteroFL(fl.server.ClientManager):
                 # copy self.clients_to_model_rate_mapping , ans
                 for i, model_rate in enumerate(ans):
                     self.clients_to_model_rate_mapping[i] = model_rate
+                print(
+                    "clients to model rate mapping ", self.clients_to_model_rate_mapping
+                )
             return
 
         # to be handled in case of not a simulation, i.e. to get the properties

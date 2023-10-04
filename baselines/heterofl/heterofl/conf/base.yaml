@@ -26,7 +26,7 @@ client_device: 'cpu'
 device: 'cpu'
 
 control:
-  model_split_rate: 'fix'
+  model_split_mode: 'fix'
   model_mode: 'a2-b8'
 
 dataset_config:

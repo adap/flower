@@ -3,9 +3,10 @@
 from typing import List, Optional, Tuple
 
 import torch
-from dataset_preparation import _partition_data
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
+
+from heterofl.dataset_preparation import _partition_data
 
 
 def load_datasets(  # pylint: disable=too-many-arguments

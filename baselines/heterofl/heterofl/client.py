@@ -5,8 +5,9 @@ from typing import Callable, Dict, List, Tuple
 import flwr as fl
 import torch
 from flwr.common.typing import NDArrays
-from models import create_model, get_parameters, set_parameters, test, train
 from torch.utils.data import DataLoader
+
+from heterofl.models import create_model, get_parameters, set_parameters, test, train
 
 
 class FlowerNumPyClient(fl.client.NumPyClient):

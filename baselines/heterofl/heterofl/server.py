@@ -5,10 +5,11 @@ from typing import Callable, Dict, List, Optional, Tuple
 
 import torch
 from flwr.common.typing import NDArrays, Scalar
-from models import test
 from torch import nn
 from torch.utils.data import DataLoader
-from utils import save_model
+
+from heterofl.models import test
+from heterofl.utils import save_model
 
 
 def gen_evaluate_fn(
