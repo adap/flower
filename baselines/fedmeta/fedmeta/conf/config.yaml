@@ -13,7 +13,7 @@ defaults:
   - data: ???
 
 strategy:
-  _target_: strategy.FedMeta
+  _target_: fedmeta.strategy.FedMeta
   fraction_fit: 0.00001
   fraction_evaluate: 0.00001
   min_fit_clients : ${clients_per_round}

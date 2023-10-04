@@ -8,13 +8,15 @@ import hydra
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 from hydra.utils import instantiate
-from fedmeta.strategy import weighted_average
-from dataset import load_datasets
-from fedmeta.fedmeta_client_manager import fedmeta_client_manager
 import os
+
 import flwr as fl
-import client
-from utils import save_graph_params, plot_from_pkl
+
+import fedmeta.client as client
+from fedmeta.fedmeta_client_manager import fedmeta_client_manager
+from fedmeta.dataset import load_datasets
+from fedmeta.strategy import weighted_average
+from fedmeta.utils import save_graph_params, plot_from_pkl
 
 
 @hydra.main(config_path="conf", config_name="config", version_base=None)
@@ -81,7 +83,7 @@ def main(cfg: DictConfig) -> None:
 
     print("................")
     print(history)
-    output_path = HydraConfig.get().runtime.cwd + '/' + cfg.data.data + '/graph_params'
+    output_path = HydraConfig.get().runtime.cwd + '/fedmeta/' + cfg.data.data + '/graph_params'
     os.makedirs(output_path, exist_ok=True)
 
     data_params = {
@@ -93,7 +95,7 @@ def main(cfg: DictConfig) -> None:
     }
 
     save_graph_params(data_params)
-    plot_from_pkl(directory=f"./{cfg.data.data}/graph_params")
+    plot_from_pkl(directory=output_path)
     print("................")
 
 

@@ -4,17 +4,19 @@ Needed only when the strategy is not yet implemented in Flower or because you wa
 extend or modify the functionality of an existing strategy.
 """
 from typing import Dict, List, Optional, Tuple, Union
-from logging import WARNING, INFO
+from logging import WARNING
 from collections import OrderedDict
+import torch
+
 
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
 from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
 from flwr.server.client_manager import ClientManager
-from fedmeta_client_manager import evaluate_client_Criterion
-import torch
-from models import CNN_network, StackedLSTM
-from utils import update_ema
+
+from fedmeta.models import CNN_network, StackedLSTM
+from fedmeta.fedmeta_client_manager import evaluate_client_Criterion
+from fedmeta.utils import update_ema
 
 
 from flwr.common.logger import log

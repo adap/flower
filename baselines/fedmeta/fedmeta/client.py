@@ -13,7 +13,7 @@ import torch
 import torch.nn
 from torch.utils.data import DataLoader
 
-from models import train, test, train_meta, test_meta
+from fedmeta.models import train, test, train_meta, test_meta
 
 
 class FlowerClient(

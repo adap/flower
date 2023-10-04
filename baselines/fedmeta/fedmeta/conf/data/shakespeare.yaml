@@ -4,7 +4,7 @@
 # a similar configuration structure and hence be easy to customise)
 
 model:
-  _target_: models.StackedLSTM
+  _target_: fedmeta.models.StackedLSTM
 
 client_resources:
   num_cpus: 4

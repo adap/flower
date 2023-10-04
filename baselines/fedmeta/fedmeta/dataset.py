@@ -9,14 +9,16 @@ partitioned, please include all those functions and logic in the
 defined here of course.
 """
 
-from torch.utils.data import DataLoader, Dataset
 from omegaconf import DictConfig
 from typing import Tuple
-from dataset_preparation import _partition_data, split_train_validation_test_clients
+
 import numpy as np
-import torchvision.transforms as transforms
-from utils import word_to_indices, letter_to_vec
 import torch
+import torchvision.transforms as transforms
+from torch.utils.data import DataLoader, Dataset
+
+from fedmeta.dataset_preparation import _partition_data, split_train_validation_test_clients
+from fedmeta.utils import word_to_indices, letter_to_vec
 
 
 class ShakespeareDataset(Dataset):
