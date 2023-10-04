@@ -239,6 +239,8 @@ def create_event(event_type: EventType, event_details: Optional[Dict[str, Any]])
 
             response_json: str = result.decode("utf-8")
 
+            print(response_json)
+
             return response_json
         except urllib.error.URLError as ex:
             if FLWR_TELEMETRY_LOGGING == "1":
