@@ -119,10 +119,10 @@ If you proceed with all of the above experiments, You can get a graph of your ex
 **Femnist dataset experiment results**
 
 
-![](docs/femnist_result_graph.png)
+![](_static/femnist_result_graph.png)
 
 
 **Shakespeare dataset experiment results**
 
 
-![](docs/shakespeare_result_graph.png)
+![](_static/shakespeare_result_graph.png)

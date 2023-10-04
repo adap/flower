@@ -10,8 +10,7 @@ client_resources:
   num_cpus: 4
   num_gpus: 0.25
 
-#num_rounds: 2000
-num_rounds: 3
+num_rounds: 2000
 data: femnist
 support_ratio: 0.2
 batch_size: 10
