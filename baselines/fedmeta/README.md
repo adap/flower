@@ -116,13 +116,6 @@ python -m fedmeta.main algo=fedmeta_meta_sgd data=shakespeare path=../leaf/data/
 ## Expected Results
 If you proceed with all of the above experiments, You can get a graph of your experiment results as shown below along that `./femnist or shakespeare/graph_params/result_graph.png`.
 
-**Femnist dataset experiment results**
-
-
-![](_static/femnist_result_graph.png)
-
-
-**Shakespeare dataset experiment results**
-
-
-![](_static/shakespeare_result_graph.png)
+|                   FEMNIST                   |                     SHAKESPEARE                      |
+|:-------------------------------------------:|:----------------------------------------------------:|
+|    ![](_static/femnist_result_graph.png)    |      ![](_static/shakespeare_result_graph.png)       |
