@@ -3,7 +3,7 @@ requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
-name = "fedNova" # <----- Ensure it matches the name of your baseline directory containing all the source code
+name = "fednova" # <----- Ensure it matches the name of your baseline directory containing all the source code
 version = "1.0.0"
 description = "Flower Baselines"
 license = "Apache-2.0"
@@ -37,16 +37,17 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8.15, <3.12.0"  # don't change this
-flwr = "1.3.0" # don't change this
-ray = "1.11.1" # don't change this
+python = ">=3.10.0, <3.11.0"
+flwr = { extras = ["simulation"], version = "1.5.0" }
 hydra-core = "1.3.2" # don't change this
+torch = { url = "https://download.pytorch.org/whl/cu116/torch-1.13.1%2Bcu116-cp310-cp310-linux_x86_64.whl"}
+torchvision = { url = "https://download.pytorch.org/whl/cu116/torchvision-0.14.1%2Bcu116-cp310-cp310-linux_x86_64.whl"}
 
 [tool.poetry.dev-dependencies]
 isort = "==5.11.5"
 black = "==23.1.0"
 docformatter = "==1.5.1"
-mypy = "==0.961"
+mypy = "==1.4.1"
 pylint = "==2.8.2"
 flake8 = "==3.9.2"
 pytest = "==6.2.4"

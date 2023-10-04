@@ -5,17 +5,9 @@ labels: [normalized averaging, heterogeneous optimization, federated learning]  
 dataset: [non-iid cifar10 dataset, synthetic dataset]
 ---
 
-# : FedNova _*
+# FedNova: Tackling the Objective Inconsistency Problem in Heterogeneous Federated Optimization
 
-> Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
-
-> :warning: This is the template to follow when creating a new Flower Baseline. Please follow the instructions in `EXTENDED_README.md`
-
-> :warning: Please follow the instructions carefully. You can see the [FedProx-MNIST baseline](https://github.com/adap/flower/tree/main/baselines/fedprox) as an example of a baseline that followed this guide.
-
-> :warning: Please complete the metadata section at the very top of this README. This generates a table at the top of the file that will facilitate indexing baselines.
-
-****Paper:**** *https://proceedings.neurips.cc/paper/2020/hash/564127c03caab942e503ee6f810f54fd-Abstract.html*
+****Paper:**** [](https://proceedings.neurips.cc/paper/2020/hash/564127c03caab942e503ee6f810f54fd-Abstract.html)
 
 ****Authors:**** *Jianyu Wang, Qinghua Liu, Hao Liang, Gauri Joshi, H. Vincent Poor*
 
@@ -28,14 +20,16 @@ dataset: [non-iid cifar10 dataset, synthetic dataset]
 
 ****Datasets:**** *_This basleline experiments tackles heterogeneous data sources. Non-IID CIFAR-10 dataset and Synthetic(1,1) dataset(creation methodology detailed in [link](https://arxiv.org/pdf/1812.06127.pdf) are used in the experiments._*
 
-****Hardware Setup:**** :warning: *_Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Someone out there might not have access to the same resources you have so, could list the absolute minimum hardware needed to run the experiment in a reasonable amount of time ? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?_*
+****Hardware Setup:****: *_The baseline comprises of federated learning on 16 clients. If we want to run each client in parallel, it would require 16 cpu cores and roughly ~16 GB of GPU memory for a batch size of 32. 
+However, most experiments were performed using a pool of 6 actors(6 clients run in parallel out of 16) requiring 6 cpu cores and 6GB of GPU memory. 
+The experiments were performed on a A100 machine however any GPU with 6GB of memory and 6 cpu cores should be sufficiently fast._*
 
-****Contributors:**** :warning: *_Aasheesh Singh(Github: @ashdtu), MILA-Quebec AI Institute_*
+****Contributors:**** *_Aasheesh Singh (Github: @ashdtu), MILA-Quebec AI Institute_*
 
 
 ## Experimental Setup
 
-****Task:**** :warning: *_what’s the primary task that is being federated? (e.g. image classification, next-word prediction). If you have experiments for several, please list them_*
+****Task:**** :warning: *CIFAR-10 dataset --> Image classification_*
 
 ****Model:**** :warning: *_provide details about the model you used in your experiments (if more than use a list). If your model is small, describing it as a table would be :100:. Some FL methods do not use an off-the-shelve model (e.g. ResNet18) instead they create your own. If this is your case, please provide a summary here and give pointers to where in the paper (e.g. Appendix B.4) is detailed._*
 
@@ -46,8 +40,20 @@ dataset: [non-iid cifar10 dataset, synthetic dataset]
 
 ## Environment Setup
 
-:warning: _The Python environment for all baselines should follow these guidelines in the `EXTENDED_README`. Specify the steps to create and activate your environment. If there are any external system-wide requirements, please include instructions for them too. These instructions should be comprehensive enough so anyone can run them (if non standard, describe them step-by-step)._
+```python
+# Set python version
+pyenv install 3.10.6
+pyenv local 3.10.6
 
+# Tell poetry to use python 3.10
+poetry env use 3.10.6
+
+# install the base Poetry environment
+poetry install
+
+# activate the environment
+poetry shell
+```
 
 ## Running the Experiments
 

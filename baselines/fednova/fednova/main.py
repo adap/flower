@@ -12,6 +12,8 @@ from hydra.utils import instantiate
 import numpy as np
 import random
 import os
+from models import test
+from collections import OrderedDict
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -44,6 +46,18 @@ def main(cfg: DictConfig) -> None:
 
 	trainloaders, testloader, data_ratios = load_datasets(cfg)
 
+	if cfg.mode == "test":
+		device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+		checkpoint = np.load(f"{cfg.checkpoint_path}best_model_182.npz", allow_pickle=True)
+		model = instantiate(cfg.model)
+		params_dict = zip(model.state_dict().keys(), checkpoint['arr_0'])
+		state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+		model.load_state_dict(state_dict)
+		loss, accuracy = test(model.to(device), testloader, device)
+		print("----Loss: {}, Accuracy: {} on Test set ------".format(loss, accuracy))
+		return None
+
+
 	# 3. Define your clients
 
 	client_fn = gen_client_fn(num_epochs=cfg.num_epochs,
@@ -74,7 +88,7 @@ def main(cfg: DictConfig) -> None:
 
 	round, loss = history.losses_distributed[-1]
 	round, accuracy = history.metrics_distributed["accuracy"][-1]
-	print("---------------------Round: {} Test loss: Test Accuracy {}----------------------".format(round, loss, accuracy))
+	# print("---------------------Round: {} Test loss: Test Accuracy {}----------------------".format(round, loss, accuracy))
 
 
 	# 6. Save your results
