@@ -2,11 +2,11 @@
 
 This example will show you how Flower makes it very easy to run Federated Learning workloads on edge devices. Here we'll be showing how to use NVIDIA Jetson devices and Raspberry Pi as Flower clients. You can run this example using either PyTorch or Tensorflow. The FL workload (i.e. model, dataset and training loop) is mostly borrowed from the [quickstart-pytorch](https://github.com/adap/flower/tree/main/examples/simulation-pytorch) and [quickstart-tensorflow](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow) examples. 
 
-> This example is designed for beginners that know a bit about Flower and ML but that are less familiar with embedded devices. If you already have a couple of devices up and running, clone this example (see command below) and start the Flower clients after launching the Flower server on your laptop.
-
-![alt text](_static/diagram.png)
+![Different was of running Flower FL on embedded devices](_static/diagram.png)
 
 ## Getting things ready
+
+> This example is designed for beginners that know a bit about Flower and/or ML but that are less familiar with embedded devices. If you already have a couple of devices up and running, clone this example and start the Flower clients after launching the Flower server.
 
 This tutorial allows for a variety of settings (some shown in the diagrams above). As long as you have access to one embedded device, you can follow along. This is a list of components that you'll need:
 
