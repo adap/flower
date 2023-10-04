@@ -85,7 +85,7 @@ Poetry shell
 ****Start experiments**** : 
 ```bash  
 # FedAvg + Femnist Dataset
-python main.py algo=fedavg data=femnist path=(your leaf dataset path)/leaf/data/shakespeare/data
+python -m fedmeta.main algo=fedavg data=femnist path=(your leaf dataset path)/leaf/data/shakespeare/data
 
 # FedAvg(Meta) + Femnist Dataset
 python main.py algo=fedavg_meta data=femnist path=../leaf/data/shakespeare/data
