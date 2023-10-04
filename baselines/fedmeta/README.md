@@ -1,8 +1,8 @@
 ---
 title: Federated Meta-Learning with Fast Convergence and Efficient Communication
 url: https://arxiv.org/abs/1802.07876
-labels: [meta learning, maml, meta-sgd, personalization] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [FEMNIST, SHAKESPEARE] # list of datasets you include in your baseline
+labels: [meta learning, maml, meta-sgd, personalization] 
+dataset: [FEMNIST, SHAKESPEARE]
 ---
 
 # FedMeta: Federated Meta-Learning with Fast Convergence and Efficient Communication
