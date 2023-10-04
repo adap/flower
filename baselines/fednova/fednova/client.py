@@ -20,7 +20,6 @@ class FlowerClient(fl.client.NumPyClient):  # pylint: disable=too-many-instance-
 		self.exp_config = config
 		self.optimizer = instantiate(config.optimizer, params=self.net.parameters(), ratio=ratio)
 		self.trainloader = trainloader
-		# self.valloader = valloader
 		self.testloader = testloader
 		self.client_id = client_id
 		self.device = device
@@ -83,7 +82,6 @@ def gen_client_fn(num_epochs: int, trainloaders: List[DataLoader], testloader: D
 		# will train and evaluate on their own unique data
 		trainloader = trainloaders[int(cid)]
 		client_dataset_ratio = data_ratios[int(cid)]
-		# valloader = valloaders[int(cid)]
 
 		return FlowerClient(
 			net,
