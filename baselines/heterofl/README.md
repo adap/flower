@@ -1,5 +1,5 @@
 ---
-title: HETEROFL: COMPUTATION AND COMMUNICATION EFFICIENT FEDERATED LEARNING FOR HETEROGENEOUS CLIENTS
+title: HETEROFL- COMPUTATION AND COMMUNICATION EFFICIENT FEDERATED LEARNING FOR HETEROGENEOUS CLIENTS
 url: https://openreview.net/forum?id=TNkPBBYFkXg
 labels: [system heterogeneity, image classification]
 dataset: [MNIST, CIFAR10]
@@ -38,7 +38,20 @@ dataset: [MNIST, CIFAR10]
 
 ## Environment Setup
 
-:warning: _The Python environment for all baselines should follow these guidelines in the `EXTENDED_README`. Specify the steps to create and activate your environment. If there are any external system-wide requirements, please include instructions for them too. These instructions should be comprehensive enough so anyone can run them (if non standard, describe them step-by-step)._
+```
+# Set python version
+pyenv install 3.10.6
+pyenv local 3.10.6
+
+# Tell poetry to use python 3.10
+poetry env use 3.10.6
+
+# install the base Poetry environment
+poetry install
+
+# activate the environment
+poetry shell
+```
 
 
 ## Running the Experiments
