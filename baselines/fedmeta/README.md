@@ -88,27 +88,27 @@ Poetry shell
 python -m fedmeta.main algo=fedavg data=femnist path=(your leaf dataset path)/leaf/data/shakespeare/data
 
 # FedAvg(Meta) + Femnist Dataset
-python main.py algo=fedavg_meta data=femnist path=../leaf/data/shakespeare/data
+python -m fedmeta.main algo=fedavg_meta data=femnist path=../leaf/data/shakespeare/data
 
 # FedMeta(MAML) + Femnist Dataset
-python main.py algo=fedmeta_maml data=femnist path=../leaf/data/shakespeare/data
+python -m fedmeta.main algo=fedmeta_maml data=femnist path=../leaf/data/shakespeare/data
 
 # FedMeta(Meta-SGD) + Femnist Dataset
-python main.py algo=fedmeta_meta_sgd data=femnist path=../leaf/data/shakespeare/data
+python -m fedmeta.main algo=fedmeta_meta_sgd data=femnist path=../leaf/data/shakespeare/data
 
 
 
 #FedAvg + Shakespeare Dataset
-python main.py algo=fedavg data=shakespeare path=../leaf/data/shakespeare/data
+python -m fedmeta.main algo=fedavg data=shakespeare path=../leaf/data/shakespeare/data
 
 #FedAvg(Meta) + Shakespeare Dataset
-python main.py algo=fedavg_meta data=shakespeare path=../leaf/data/shakespeare/data
+python -m fedmeta.main algo=fedavg_meta data=shakespeare path=../leaf/data/shakespeare/data
 
 #FedMeta(MAML) + Shakespeare Dataset
-python main.py algo=fedmeta_maml data=shakespeare path=../leaf/data/shakespeare/data
+python -m fedmeta.main algo=fedmeta_maml data=shakespeare path=../leaf/data/shakespeare/data
 
 #FedMeta(Meta-SGD) + Shakespeare Dataset
-python main.py algo=fedmeta_meta_sgd data=shakespeare path=../leaf/data/shakespeare/data
+python -m fedmeta.main algo=fedmeta_meta_sgd data=shakespeare path=../leaf/data/shakespeare/data
 
 ```
 
