@@ -1,6 +1,6 @@
 import random
 from logging import WARNING
-from typing import Callable, Dict, Generator, List
+from typing import Any, Callable, Dict, Generator, List, Optional
 
 import numpy as np
 
@@ -56,16 +56,18 @@ from flwr.common.secure_aggregation.secaggplus_constants import (
 from flwr.common.secure_aggregation.secaggplus_utils import pseudo_rand_gen
 from flwr.common.serde import named_values_from_proto, named_values_to_proto
 from flwr.common.typing import Value
+from flwr.driver.workflow import FlowerWorkflow, FLWorkflowFactory, WorkflowState
 from flwr.proto.task_pb2 import SecureAggregation, Task
-
 
 LOG_EXPLAIN = True
 
 
-def get_workflow_factory() -> (
-    Callable[[Parameters, List[int]], Generator[Dict[int, Task], Dict[int, Task], None]]
-):
-    return _wrap_workflow_with_sec_agg
+class SecAggPlusWorkflow(FLWorkflowFactory):
+    def __init__(self, sec_agg_config: Optional[Dict[str, Scalar]] = None) -> None:
+        if sec_agg_config is None:
+            sec_agg_config = _secure_aggregation_configuration
+        sa_workflow_factory = lambda state: workflow_with_sec_agg(state, sec_agg_config)
+        super().__init__(fit_workflow_factory=sa_workflow_factory)
 
 
 def _wrap_in_task(named_values: Dict[str, Value]) -> Task:
@@ -86,15 +88,21 @@ _secure_aggregation_configuration = {
 
 
 def workflow_with_sec_agg(
-    parameters: Parameters,
-    sampled_node_ids: List[int],
+    state: WorkflowState,
     sec_agg_config: Dict[str, Scalar],
 ) -> Generator[Dict[int, Task], Dict[int, Task], None]:
+    # Get FitIns
+    pxy2fitins = dict(
+        state.strategy.configure_fit(
+            state.current_round, state.parameters, state.client_manager
+        )
+    )
+    sampled_node_ids = [proxy.node_id for proxy in pxy2fitins]
     """
     =============== Setup stage ===============
     """
     # Protocol config
-    num_samples = len(sampled_node_ids)
+    num_samples = len(pxy2fitins)
     num_shares = sec_agg_config[KEY_SHARE_NUMBER]
     threshold = sec_agg_config[KEY_THRESHOLD]
     mod_range = sec_agg_config[KEY_MOD_RANGE]
@@ -233,7 +241,7 @@ def workflow_with_sec_agg(
     if LOG_EXPLAIN:
         print(f"\nForwarding encrypted key shares and requesting masked input...")
     # Send encrypted secret key shares to clients (plus model parameters)
-    weights = parameters_to_ndarrays(parameters)
+    weights = parameters_to_ndarrays(state.parameters)
     yield {
         node_id: _wrap_in_task(
             named_values={
@@ -358,15 +366,5 @@ def workflow_with_sec_agg(
         print(
             "########################### Secure Aggregation End ###########################\n\n"
         )
-    aggregated_parameters = ndarrays_to_parameters(aggregated_vector)
     # Update model parameters
-    parameters.tensors = aggregated_parameters.tensors
-    parameters.tensor_type = aggregated_parameters.tensor_type
-
-
-def _wrap_workflow_with_sec_agg(
-    parameters: Parameters, sampled_node_ids: List[int]
-) -> Generator[Dict[int, Task], Dict[int, Task], None]:
-    return workflow_with_sec_agg(
-        parameters, sampled_node_ids, sec_agg_config=_secure_aggregation_configuration
-    )
+    state.parameters = ndarrays_to_parameters(aggregated_vector)
