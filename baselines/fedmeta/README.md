@@ -65,9 +65,6 @@ dataset: [FEMNIST, SHAKESPEARE]
 #Environment Setup
 Poetry install
 Poetry shell
-Pip install torch torch vision
-Pip install matplotlib
-pip install scikit-learn
 ```
 
 ## Running the Experiments
