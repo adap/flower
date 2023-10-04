@@ -28,6 +28,7 @@ def main(cfg: DictConfig) -> None:
         batch_size=cfg.batch_size,
     )
 
+
     # prepare function that will be used to spawn each client
     client_fn = client.gen_client_fn(
         num_clients=cfg.num_clients,
@@ -36,6 +37,8 @@ def main(cfg: DictConfig) -> None:
         valloaders=valloaders,
         num_rounds=cfg.num_rounds,
         learning_rate=cfg.learning_rate,
+        weight_decay=cfg.weight_decay,
+        momentum=cfg.momentum,
         model=cfg.model,
         lamda=cfg.lamda
     )
@@ -97,7 +100,6 @@ def main(cfg: DictConfig) -> None:
         f"_{strategy_name}"
         f"{'_iid' if cfg.dataset_config.iid else ''}"
         f"{'_balanced' if cfg.dataset_config.balance else ''}"
-        f"{'_powerlaw' if cfg.dataset_config.power_law else ''}"
         f"_C={cfg.num_clients}"
         f"_B={cfg.batch_size}"
         f"_E={cfg.num_epochs}"

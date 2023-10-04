@@ -98,6 +98,8 @@ def train(
     valloader: DataLoader,
     epochs: int,
     learning_rate: float,
+    weight_decay: float,
+    momentum: float,
     device: torch.device,
     global_centroid,
     feature_centroid,
@@ -121,8 +123,10 @@ def train(
 
     """
     net.train()
+    net = net.to(device)
     criterion = torch.nn.CrossEntropyLoss()
 
+    #classifier training and feature extractor training 
     for name, param in net.named_parameters():
         if name in net.feature_layers:
             param.requires_grad = False
@@ -130,7 +134,7 @@ def train(
             param.requires_grad = True
 
     params = filter(lambda p: p.requires_grad, net.parameters())
-    optimizer = torch.optim.SGD(params, lr=learning_rate, weight_decay=0.001)   
+    optimizer = torch.optim.SGD(params, lr=0.1, weight_decay=weight_decay, momentum=momentum)   
     net = train_classifier_epoch(net, trainloader, device, criterion, optimizer)
 
     for name, param in net.named_parameters():
@@ -140,7 +144,7 @@ def train(
             param.requires_grad = False
 
     params = filter(lambda p: p.requires_grad, net.parameters())
-    optimizer = torch.optim.SGD(params, lr=learning_rate, weight_decay=0.001)   
+    optimizer = torch.optim.SGD(params, lr=learning_rate, weight_decay=weight_decay, momentum=momentum)   
     for _ in range(epochs):
         net = train_features_epoch(
             net, trainloader, device, criterion, optimizer, global_centroid, feature_centroid, lamda
@@ -176,6 +180,7 @@ def train_classifier_epoch(
     nn.Module
         The model that has been trained for one epoch.
     """
+    net = net.to(device)
     for images, labels in trainloader:
         images, labels = images.to(device), labels.to(device)
         optimizer.zero_grad()
@@ -219,6 +224,7 @@ def train_features_epoch(
     nn.Module
         The model that has been trained for one epoch.
     """
+    net = net.to(device)
     for images, labels in trainloader:
         images, labels = images.to(device), labels.to(device)
         optimizer.zero_grad()

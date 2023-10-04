@@ -30,6 +30,8 @@ class FlowerClient(fl.client.NumPyClient):
         device: torch.device,
         num_epochs: int,
         learning_rate: float,
+        weight_decay: float,
+        momentum: float,
         lamda: float,
 
     ):
@@ -39,12 +41,16 @@ class FlowerClient(fl.client.NumPyClient):
         self.device = device
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
+        self.weight_decay = weight_decay
+        self.momentum = momentum
         self.lamda = lamda
         self.num_classes = self.net.num_classes
         self.feature_extractor = self.get_feature_extractor()
         self.feature_centroid = get_centroid(self.feature_extractor)
         self.class_sizes = self.get_class_sizes()
         self.class_fractions = self.get_class_fractions()
+        # print(self.class_sizes)
+
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Returns the parameters of the current net."""
@@ -102,7 +108,7 @@ class FlowerClient(fl.client.NumPyClient):
             for inputs, labels in train_data:
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
                 features, outputs = model(inputs)
-                feature_extractor = features.clone().detach()
+                feature_extractor = features.clone().detach().cpu()
                 for i in range(len(labels)):
                     if labels[i].item() not in feature_extractors.keys():
                         feature_extractors[labels[i].item()]=[]
@@ -157,6 +163,8 @@ class FlowerClient(fl.client.NumPyClient):
             self.valloader,
             self.num_epochs,
             self.learning_rate,
+            self.weight_decay,
+            self.momentum,
             self.device,
             self.global_centroid,
             self.feature_centroid,
@@ -183,6 +191,8 @@ def gen_client_fn(
     trainloaders: List[DataLoader],
     valloaders: List[DataLoader],
     learning_rate: float,
+    weight_decay: float,
+    momentum: float,
     model: DictConfig,
     lamda: float
 ) -> Tuple[
@@ -234,7 +244,7 @@ def gen_client_fn(
 
         # Create a  single Flower client representing a single organization
         return FlowerClient(
-            net, trainloader, valloader, device, num_epochs, learning_rate, lamda
+            net, trainloader, valloader, device, num_epochs, learning_rate, weight_decay, momentum, lamda
         )
 
     return client_fn

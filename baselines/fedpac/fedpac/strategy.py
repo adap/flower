@@ -180,7 +180,6 @@ class FedPAC(FedAvg):
                 for _, evaluate_res in results
             ]
         )
-
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
         if self.evaluate_metrics_aggregation_fn:

@@ -44,6 +44,7 @@ def load_datasets(  # pylint: disable=too-many-arguments
             dataset,
             num_clients,
             iid=config.iid,
+            balance=config.balance,
             s = config.s,
             seed=seed,
         )
@@ -52,6 +53,7 @@ def load_datasets(  # pylint: disable=too-many-arguments
             dataset,
             num_clients,
             iid=config.iid,
+            balance=config.balance,
             s = config.s,
             seed=seed,
         )        
