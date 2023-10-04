@@ -63,7 +63,15 @@ dataset: [FEMNIST, SHAKESPEARE]
 ## Environment Setup
 ```bash
 #Environment Setup
-Poetry install
+# Set python version
+pyenv install 3.10.6
+pyenv local 3.10.6
+
+# Tell poetry to use python 3.10
+poetry env use 3.10.6
+
+# install the base Poetry environment
+poetry install
 Poetry shell
 ```
 
