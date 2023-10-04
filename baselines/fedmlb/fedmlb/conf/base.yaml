@@ -16,7 +16,7 @@ clipnorm: 10.0
 l2_weight_decay: 1e-3
 lambda_1: 1.0 # it can be >= 0
 lambda_2: 1.0 # it can be >= 0
-random_seed: 16
+random_seed: 23
 starting_round: 1
 restart_from_checkpoint: True # if True, looks for a checkpoint of that config to restart the training
 save_checkpoint: True # if True, saves a checkpoint server model at the end of the training
