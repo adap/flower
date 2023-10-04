@@ -50,14 +50,10 @@ dataset: [FEMNIST, SHAKESPEARE]
 
 |     Algorithm     |    Dataset     | Clients per Round | Number of Rounds | Batch Size | Optimizer | Learning Rate(α, β) | Client Resources                     | Gradient Step |
 |:-----------------:|:--------------:|:-----------------:|:----------------:|:----------:|:---------:|:-------------------:|--------------------------------------|:-------------:|
-|      FedAvg       |     FEMNST     |         4         |       2000       |     10     |   Adam    |       0.0001        | {'num_cpus': 4.0, 'num_gpus': 0.25 } |       -       |
-|      FedAVg       |  SHAKESPEARE   |         4         |       400        |     10     |   Adam    |        0.001        | {'num_cpus': 4.0, 'num_gpus': 0.25 } |       -       |
-|   FedAvg(Meta)    |     FEMNST     |         4         |       2000       |     10     |   Adam    |       0.0001        | {'num_cpus': 4.0, 'num_gpus': 0.25 } |       -       |
-|   FedAvg(Meta)    |  SHAKESPEARE   |         4         |       400        |     10     |   Adam    |        0.001        | {'num_cpus': 4.0, 'num_gpus': 0.25 } |       -       |
-|   FedMeta(MAML)   |     FEMNST     |         4         |       2000       |     10     |   Adam    |   (0.001, 0.0001)   | {'num_cpus': 4.0, 'num_gpus': 1.0 }  |       5       |
-|   FedMeta(MAML)   |  SHAKESPEARE   |         4         |       400        |     10     |   Adam    |     (0.1, 0.01)     | {'num_cpus': 4.0, 'num_gpus': 1.0 }  |       1       |
-| FedMeta(Meta-SGD  |     FEMNST     |         4         |       2000       |     10     |   Adam    |   (0.001, 0.0001)   | {'num_cpus': 4.0, 'num_gpus': 1.0 }  |       5       |
-| FedMeta(Meta-SGD  |  SHAKESPEARE   |         4         |       400        |     10     |   Adam    |     (0.1, 0.01)     | {'num_cpus': 4.0, 'num_gpus': 1.0 }  |       1       |
+|      FedAvg       |     FEMNIST<br>SHAKESPEARE     |         4         |       2000<br>400       |     10     |   Adam    |       0.0001<br>0.001        | {'num_cpus': 4.0, 'num_gpus': 0.25 } |       -       |
+|   FedAvg(Meta)    |     FEMNIST<br>SHAKESPEARE     |         4         |       2000<br>400       |     10     |   Adam    |       0.0001<br>0.001        | {'num_cpus': 4.0, 'num_gpus': 0.25 } |       -       |
+|   FedMeta(MAML)   |     FEMNIST<br>SHAKESPEARE     |         4         |       2000<br>400       |     10     |   Adam    |   (0.001, 0.0001)<br>(0.1, 0.01)   | {'num_cpus': 4.0, 'num_gpus': 1.0 }  |       5<br>1       |
+| FedMeta(Meta-SGD)  |     FEMNIST<br>SHAKESPEARE     |         4         |       2000<br>400       |     10     |   Adam    |   (0.001, 0.0001)<br>(0.1, 0.01)   | {'num_cpus': 4.0, 'num_gpus': 1.0 }  |       5<br>1       |
 
 
 ## Environment Setup
