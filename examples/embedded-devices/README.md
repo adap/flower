@@ -21,7 +21,7 @@ This is a list of components that you'll need:
 
 What follows is a step-by-step guide on how to setup your client/s and the server.
 
-> TODO: can we add 3 diagrams?: 2RPi + laptop; 2Jetson + laptop; 1RPi + 1Jetson + laptop
+![alt text](_static/diagram.png)
 
 ## Clone this repo
 
