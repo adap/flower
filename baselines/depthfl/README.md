@@ -37,7 +37,7 @@ dataset: [CIFAR100]
 
 | Dataset | #classes | #partitions | partitioning method |
 | :------ | :---: | :---: | :---: |
-| CIFAR100 | 100 | 100 | IID |
+| CIFAR100 | 100 | 100 | IID or Non-IID |
 
 **Training Hyperparameters:**
 The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python main.py` directly)
