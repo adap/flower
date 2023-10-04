@@ -4,6 +4,8 @@ This example will show you how Flower makes it very easy to run Federated Learni
 
 > This example is designed for beginners that know a bit about Flower and Pytorch (or Tensorflow/Keras) but that are less familiar with embedded devices. If you are already well versed in all-things Rapsberry Pi and NVIDIA Jetson, then you can simply run the `client.py` code you can find in the `quickstart-(tensorflow/pytorch)` examples in [the Flower repo](https://github.com/adap/flower) and run `server.py` from your laptop.
 
+![alt text](_static/diagram.png)
+
 ## Getting things ready
 
 This is a list of components that you'll need:
@@ -20,8 +22,6 @@ This is a list of components that you'll need:
   - For other devices [balenaEtcher](https://www.balena.io/etcher/) it's a great option.
 
 What follows is a step-by-step guide on how to setup your client/s and the server.
-
-![alt text](_static/diagram.png)
 
 ## Clone this repo
 
