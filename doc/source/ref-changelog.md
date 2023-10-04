@@ -14,7 +14,7 @@
 
 - **Update Flower Baselines**
 
-  - FedProx ([#2286](https://github.com/adap/flower/pull/2286))
+  - FedProx ([#2210](https://github.com/adap/flower/pull/2210), [#2286](https://github.com/adap/flower/pull/2286))
 
 - **Update Flower Examples** ([#2384](https://github.com/adap/flower/pull/2384))
 
@@ -22,7 +22,7 @@
 
 - **General updates to the simulation engine** ([#2331](https://github.com/adap/flower/pull/2331))
 
-- **General improvements** ([#2309](https://github.com/adap/flower/pull/2309), [#2310](https://github.com/adap/flower/pull/2310), [2313](https://github.com/adap/flower/pull/2313), [#2316](https://github.com/adap/flower/pull/2316), [2317](https://github.com/adap/flower/pull/2317),[#2349](https://github.com/adap/flower/pull/2349), [#2360](https://github.com/adap/flower/pull/2360))
+- **General improvements** ([#2309](https://github.com/adap/flower/pull/2309), [#2310](https://github.com/adap/flower/pull/2310), [2313](https://github.com/adap/flower/pull/2313), [#2316](https://github.com/adap/flower/pull/2316), [2317](https://github.com/adap/flower/pull/2317),[#2349](https://github.com/adap/flower/pull/2349), [#2360](https://github.com/adap/flower/pull/2360), [#2402](https://github.com/adap/flower/pull/2402))
 
   Flower received many improvements under the hood, too many to list here.
 

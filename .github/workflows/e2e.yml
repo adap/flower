@@ -16,9 +16,39 @@ env:
   FLWR_TELEMETRY_ENABLED: 0
 
 jobs:
+  wheel:
+    runs-on: ubuntu-22.04
+    name: Build, test and upload wheel
+    steps:
+      - uses: actions/checkout@v3
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Install dependencies (mandatory only)
+        run: python -m poetry install
+      - name: Build wheel
+        run: ./dev/build.sh
+      - name: Test wheel
+        run: ./dev/test-wheel.sh
+      - name: Upload wheel
+        id: upload
+        env:
+          AWS_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
+        run: |
+          cd ./dist
+          echo "WHL_PATH=$(ls *.whl)" >> "$GITHUB_OUTPUT"
+          sha_short=$(git rev-parse --short HEAD)
+          echo "SHORT_SHA=$sha_short" >> "$GITHUB_OUTPUT"
+          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./ s3://artifact.flower.dev/py/${{ github.head_ref }}/$sha_short --recursive
+    outputs:
+      whl_path: ${{ steps.upload.outputs.WHL_PATH }}
+      short_sha: ${{ steps.upload.outputs.SHORT_SHA }}
+
   frameworks:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
+    needs: wheel
     # Using approach described here:
     # https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs
     strategy:
@@ -89,6 +119,9 @@ jobs:
           python-version: 3.8
       - name: Install dependencies
         run: python -m poetry install
+      - name: Install Flower wheel from artifact store
+        run: |
+          python -m pip install https://artifact.flower.dev/py/${{ github.head_ref }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
       - name: Download dataset
         if: ${{ matrix.dataset }}
         run: python -c "${{ matrix.dataset }}"
@@ -102,6 +135,7 @@ jobs:
   strategies:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
+    needs: wheel
     strategy:
       matrix:
         strat: ["FedMedian", "FedTrimmedAvg", "QFedAvg", "FaultTolerantFedAvg", "FedAvgM", "FedAdam", "FedAdagrad", "FedYogi"]
@@ -119,6 +153,9 @@ jobs:
       - name: Install dependencies
         run: |
           python -m poetry install
+      - name: Install Flower wheel from artifact store
+        run: |
+          python -m pip install https://artifact.flower.dev/py/${{ github.head_ref }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
       - name: Cache Datasets
         uses: actions/cache@v3
         with:

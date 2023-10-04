@@ -1,18 +1,14 @@
-name: Release
+name: Release nightly
 
 on:
   schedule:
     - cron: "0 23 * * *"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
 env:
   FLWR_TELEMETRY_ENABLED: 0
 
 jobs:
-  nightly_release:
+  release_nightly:
     runs-on: ubuntu-22.04
     name: Nightly
     steps:
