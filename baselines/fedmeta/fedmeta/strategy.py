@@ -11,7 +11,7 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
 from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
 from flwr.server.client_manager import ClientManager
-from Fedmeta_client_manager import evaluate_client_Criterion
+from fedmeta_client_manager import evaluate_client_Criterion
 import torch
 from models import CNN_network, StackedLSTM
 from utils import update_ema

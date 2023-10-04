@@ -32,12 +32,12 @@ class evaluate_client_Criterion(Criterion):
         return [str(result) for result in range(0, valid_client)]
 
 
-class Fedmeta_client_manager(SimpleClientManager):
+class fedmeta_client_manager(SimpleClientManager):
 
     """
     In the fit phase, clients must be sampled from the training client list.
     And in the evaluate stage, clients must be sampled from the validation client list.
-    So we modify 'Fedmeta_client_manager' to sample clients from [cid: List] for each list.
+    So we modify 'fedmeta_client_manager' to sample clients from [cid: List] for each list.
 
     """
 

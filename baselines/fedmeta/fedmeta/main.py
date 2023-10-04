@@ -8,9 +8,9 @@ import hydra
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 from hydra.utils import instantiate
-from strategy import weighted_average
+from fedmeta.strategy import weighted_average
 from dataset import load_datasets
-from Fedmeta_client_manager import Fedmeta_client_manager
+from fedmeta.fedmeta_client_manager import fedmeta_client_manager
 import os
 import flwr as fl
 import client
@@ -65,7 +65,7 @@ def main(cfg: DictConfig) -> None:
             "num_cpus": cfg.data.client_resources.num_cpus,
             "num_gpus": cfg.data.client_resources.num_gpus,
         },
-        client_manager=Fedmeta_client_manager(valid_client=len(valloaders['qry'])),
+        client_manager=fedmeta_client_manager(valid_client=len(valloaders['qry'])),
         strategy=strategy,
     )
 
