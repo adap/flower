@@ -1,26 +1,6 @@
----
-# this is the config that will be loaded as default by main.py
-# Please follow the provided structure (this will ensuring all baseline follow
-# a similar configuration structure and hence be easy to customise)
-
-# dataset:
-#   # dataset config
-
-# model:
-#   # model config
-
-# strategy:
-#   _target_: # points to your strategy (either custom or exiting in Flower)
-#   # rest of strategy config
-
-# client:
-#   # client config
-
-
-# dataset_config
 num_clients: 100
 num_epochs: 5
-num_rounds: 400
+num_rounds: 200
 seed: 0
 client_resources:
     num_cpus: 1
@@ -28,11 +8,11 @@ client_resources:
 server_device: 'cpu'
 
 control:
-  model_split_mode: 'fix'
-  model_mode: 'a2-b8'
+  model_split_mode: 'dynamic'
+  model_mode: 'a5-e5'
 
-dataset_config:
-  dataset_name: 'CIFAR10'
+dataset:
+  dataset_name: 'MNIST'
   iid: True
   shard_per_user : 2 # only used in case of non-iid (i.e. iid = false)
   balance: false
@@ -45,14 +25,14 @@ dataset_config:
 
 
 model:
-  model_name: resnet18
+  model_name: conv
   hidden_layers: [64 , 128 , 256 , 512]
   norm: bn
 
 strategy:
   optimizer: SGD
-  lr: 0.1
+  lr: 0.01
   momentum: 0.9
   weight_decay: 5.00e-04
   scheduler: MultiStepLR
-  milestones: [150 , 250]
+  milestones: [100]

@@ -49,7 +49,7 @@ def gen_evaluate_fn(
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         # pylint: disable=unused-argument
         """Use the entire test set for evaluation."""
-        if server_round % 50 != 0 and server_round < 395:
+        if server_round % 5 != 0 and server_round < 395:
             return 1, {}
 
         net = model

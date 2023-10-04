@@ -30,6 +30,9 @@ class FlowerNumPyClient(fl.client.NumPyClient):
         self.valloader = valloader
         self.model_rate = model_rate
         self.client_train_settings = client_train_settings
+        self.client_train_settings["device"] = torch.device(
+            "cuda:0" if torch.cuda.is_available() else "cpu"
+        )
         # print(
         #     "Client_with model rate = {} , cid of client = {}".format(
         #         self.model_rate, self.cid
@@ -70,7 +73,6 @@ def gen_client_fn(
     trainloaders: List[DataLoader],
     label_split: torch.tensor,
     valloaders: List[DataLoader],
-    device="cpu",
 ) -> Callable[[str], FlowerNumPyClient]:  # pylint: disable=too-many-arguments
     """Generate the client function that creates the Flower Clients.
 
@@ -94,8 +96,6 @@ def gen_client_fn(
     valloaders: List[DataLoader]
         A list of DataLoaders, each pointing to the dataset validation partition
         belonging to a particular client.
-    device : str
-        Device the client need to train on.
 
     Returns
     -------
@@ -107,6 +107,8 @@ def gen_client_fn(
         """Create a Flower client representing a single organization."""
         # Note: each client gets a different trainloader/valloader, so each client
         # will train and evaluate on their own unique data
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
         trainloader = trainloaders[int(cid)]
         valloader = valloaders[int(cid)]
         model_rate = client_to_model_rate_mapping[int(cid)]

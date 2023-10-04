@@ -35,11 +35,9 @@ def main(cfg: DictConfig) -> None:
         label_split,
         valloaders,
         testloader,
-    ) = load_datasets(
-        config=cfg.dataset_config, num_clients=cfg.num_clients, seed=cfg.seed
-    )
+    ) = load_datasets(config=cfg.dataset, num_clients=cfg.num_clients, seed=cfg.seed)
 
-    model_config = preprocess_input(cfg.model, cfg.dataset_config)
+    model_config = preprocess_input(cfg.model, cfg.dataset)
 
     # send this array(client_model_rate_mapping) as
     # an argument to client_manager and client
@@ -62,7 +60,7 @@ def main(cfg: DictConfig) -> None:
         model_config,
         model_rate=model_split_rate[get_global_model_rate(model_mode)],
         track=False,
-        device=cfg.client_device,
+        device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
     )
 
     # # for i in range(cfg.num_clients):
@@ -77,7 +75,6 @@ def main(cfg: DictConfig) -> None:
         "weight_decay": cfg.strategy.weight_decay,
         "scheduler": cfg.strategy.scheduler,
         "milestones": cfg.strategy.milestones,
-        "device": cfg.client_device,
     }
 
     optim_scheduler_settings = {
@@ -96,7 +93,6 @@ def main(cfg: DictConfig) -> None:
         trainloaders=trainloaders,
         label_split=label_split,
         valloaders=valloaders,
-        device=cfg.client_device,
     )
 
     strategy = HeteroFL(
@@ -104,7 +100,7 @@ def main(cfg: DictConfig) -> None:
         net=models.create_model(
             model_config,
             model_rate=model_split_rate[get_global_model_rate(model_mode)],
-            device=cfg.device,
+            device=cfg.server_device,
         ),
         optim_scheduler_settings=optim_scheduler_settings,
         global_model_rate=model_split_rate[get_global_model_rate(model_mode)],
@@ -113,7 +109,7 @@ def main(cfg: DictConfig) -> None:
             testloader,
             valloaders,
             label_split,
-            cfg.client_device,
+            torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
             test_model,
         ),
         fraction_fit=0.1,
@@ -127,7 +123,10 @@ def main(cfg: DictConfig) -> None:
         client_fn=client_fn,
         num_clients=cfg.num_clients,
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
-        client_resources={"num_cpus": 1.0, "num_gpus": 0},
+        client_resources={
+            "num_cpus": cfg.client_resources.num_cpus,
+            "num_gpus": cfg.client_resources.num_gpus,
+        },
         client_manager=client_manager,
         strategy=strategy,
     )

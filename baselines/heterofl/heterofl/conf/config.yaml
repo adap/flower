@@ -1,4 +1,3 @@
-# dataset_config
 num_clients: 100
 num_epochs: 16
 num_rounds: 200
