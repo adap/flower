@@ -11,11 +11,7 @@ This example will show you how Flower makes it very easy to run Federated Learni
 This tutorial allows for a variety of settings (some shown in the diagrams above). As long as you have access to one embedded device, you can follow along. This is a list of components that you'll need:
 
 - For Flower server: A machine running Linux/macOS/Windows (e.g. your laptop). You can run the server on an embedded device too!
-- For Flower clients (any one):
-  - Raspberry Pi 4
-  - Raspberry Pi Zero 2
-  - NVIDIA Jetson Xavier-NX
-  - NVIDIA Jetson Nano
+- For Flower clients (one or more): Raspberry Pi 4 (or Zero 2), or an NVIDIA Jetson Xavier-NX (or Nano), or anything similar to these.
 - A uSD card with 32GB or more.
 - Software to flash the images to a uSD card:
   - For Raspberry Pi we recommend the [Raspberry Pi Imager](https://www.raspberrypi.com/software/)
@@ -25,7 +21,7 @@ What follows is a step-by-step guide on how to setup your client/s and the serve
 
 ## Clone this repo
 
-Start with cloning the Flower repo on your laptop or desktop machine and checking out the example. Later you'll run the same command on your embedded devices. We have prepared a single line which you can copy into your shell:
+Start with cloning the Flower repo on your laptop or desktop machine. Later you'll run the same command on your embedded devices. We have prepared a single line which you can copy and execute:
 
 ```bash
 git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/embedded-devices . && rm -rf flower && cd embedded-devices
@@ -42,9 +38,11 @@ pip install -r requierments_pytorch.txt # to install Flower and PyTorch
 # pip install -r requirements_tensorflow.txt
 ```
 
-If you are working on this tutorial on your laptop or desktop, they can host the Flower server that will orchestrate the entire FL process. You could also use an embedded device (e.g. a Raspberry Pi) as the Flower server. In order to do that, you just need to follow the same setup steps as outlined below.
+If you are working on this tutorial on your laptop or desktop, it can host the Flower server that will orchestrate the entire FL process. You could also use an embedded device (e.g. a Raspberry Pi) as the Flower server. In order to do that, pleas follow the setup steps below.
 
 ## Setting up a Raspberry Pi
+
+> Wheter you use your RPi as a Flower server or a client, you need to follow these steps.
 
 ![alt text](_static/rpi_imager.png)
 
@@ -180,7 +178,7 @@ If you are working on this tutorial on your laptop or desktop, they can host the
 
 8. **Run your FL experiments with Flower**. Follow the steps in the section below.
 
-## Running FL with Flower
+## Running Embedded FL with Flower
 
 For this demo, we'll be using [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html), a popular dataset for image classification comprised of 10 classes (e.g. car, bird, airplane) and a total of 60K `32x32` RGB images. The training set contains 50K images. The server will automatically download the dataset should it not be found in `./data`. The clients do the same. The dataset is by default split into 50 partitions (each to be assigned to a different client). This can be controlled with the `NUM_CLIENTS` global variable in the client scripts. In this example, each device will play the role of a specific user (specified via `--cid` -- we'll show this later) and therefore only do local training with that portion of the data. For CIFAR-10, clients will be training a MobileNet-v2/3 model.
 

@@ -94,7 +94,7 @@ def test(net, testloader, device):
 
 
 def prepare_dataset(use_mnist: bool):
-    """Load CIFAR-10 (training and test set)."""
+    """Get MNIST/CIFAR-10 and return client partitions and global testset."""
     dataset = MNIST if use_mnist else CIFAR10
     if use_mnist:
         norm = Normalize((0.1307,), (0.3081,))
@@ -105,7 +105,7 @@ def prepare_dataset(use_mnist: bool):
     trainset = dataset("./data", train=True, download=True, transform=trf)
     testset = dataset("./data", train=False, download=True, transform=trf)
 
-    print("Partitioning dataset...")
+    print("Partitioning dataset (IID)...")
 
     # Split trainset into `num_partitions` trainsets
     num_images = len(trainset) // NUM_CLIENTS
@@ -137,6 +137,8 @@ def prepare_dataset(use_mnist: bool):
 
 # Flower client, adapted from Pytorch quickstart/simulation example
 class FlowerClient(fl.client.NumPyClient):
+    """A FlowerClient that trains a MobileNetV3 model for CIFAR-10
+    or a much smaller CNN for MNIST."""
     def __init__(self, trainset, valset, use_mnist):
         self.trainset = trainset
         self.valset = valset
@@ -168,7 +170,7 @@ class FlowerClient(fl.client.NumPyClient):
     def fit(self, parameters, config):
         print("Client sampled for fit()")
         self.set_parameters(parameters)
-        # Read from config
+        # Read hyperparameters from config set by the server
         batch, epochs = config["batch_size"], config["epochs"]
         # Construct dataloader
         trainloader = DataLoader(self.trainset, batch_size=batch, shuffle=True)

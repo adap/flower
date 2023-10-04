@@ -39,6 +39,9 @@ parser.add_argument(
 
 # Define metric aggregation function
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
+    """Thist function averages teh `accuracy` metric sent by 
+    the clients in a `evaluate` stage (i.e. clients received the global model
+    and evaluate it on their local validation sets). """
     # Multiply accuracy of each client by number of examples used
     accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
     examples = [num_examples for num_examples, _ in metrics]
@@ -63,11 +66,9 @@ def main():
 
     # Define strategy
     strategy = fl.server.strategy.FedAvg(
-        fraction_fit=args.sample_fraction,  # TODO: probably good to remove all these
+        fraction_fit=args.sample_fraction,
         fraction_evaluate=args.sample_fraction,
         min_fit_clients=args.min_num_clients,
-        min_evaluate_clients=args.min_num_clients,
-        min_available_clients=args.min_num_clients,
         on_fit_config_fn=fit_config,
         evaluate_metrics_aggregation_fn=weighted_average,
     )

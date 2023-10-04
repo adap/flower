@@ -30,7 +30,7 @@ NUM_CLIENTS = 50
 
 
 def prepare_dataset(use_mnist: bool):
-    """Download and partitions the CIFAR-10 dataset."""
+    """Download and partitions the CIFAR-10/MNIST dataset."""
     if use_mnist:
         (x_train, y_train), testset = tf.keras.datasets.mnist.load_data()
     else:
@@ -59,6 +59,8 @@ def prepare_dataset(use_mnist: bool):
 
 
 class FlowerClient(fl.client.NumPyClient):
+    """A FlowerClient that uses MobileNetV3 for CIFAR-10 or a much
+    smaller CNN for MNIST."""
     def __init__(self, trainset, valset, use_mnist: bool):
         self.x_train, self.y_train = trainset
         self.x_val, self.y_val = valset
@@ -95,7 +97,7 @@ class FlowerClient(fl.client.NumPyClient):
     def fit(self, parameters, config):
         print("Client sampled for fit()")
         self.set_parameters(parameters)
-        # Read from config
+        # Set hyperparameters from config sent by server/strategy
         batch, epochs = config["batch_size"], config["epochs"]
         # train
         self.model.fit(self.x_train, self.y_train, epochs=epochs, batch_size=batch)
