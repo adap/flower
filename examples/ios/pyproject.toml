@@ -10,4 +10,8 @@ authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
+<<<<<<< HEAD
 flwr = "1.0.0"
+=======
+flwr = "^1.0.0"
+>>>>>>> origin/main

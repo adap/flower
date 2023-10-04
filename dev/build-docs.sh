@@ -5,8 +5,19 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 ROOT=`pwd`
 
 cd doc
-make html
+./build-versioned-docs.sh
 
 cd $ROOT
 cd baselines/doc
-make html
+make docs
+
+cd $ROOT
+./dev/update-examples.sh
+cd examples/doc
+make docs
+
+cd $ROOT
+cd datasets/doc
+make docs
+
+cd $ROOT

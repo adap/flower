@@ -1,0 +1,20 @@
+[build-system]
+requires = ["poetry-core>=1.4.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "quickstart-fastai"
+version = "0.1.0"
+description = "Fastai Federated Learning Quickstart with Flower"
+authors = ["The Flower Authors <hello@flower.dev>"]
+
+[tool.poetry.dependencies]
+<<<<<<< HEAD:examples/quickstart_fastai/pyproject.toml
+python = ">=3.8,<3.11"
+flwr = "1.0.0"
+fastai = "2.7.10"
+=======
+python = ">=3.8,<3.10"
+flwr = "^1.0.0"
+fastai = "^2.7.10"
+>>>>>>> origin/main:examples/quickstart-fastai/pyproject.toml
