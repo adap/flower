@@ -19,7 +19,6 @@ jobs:
   wheel:
     runs-on: ubuntu-22.04
     name: Build, test and upload wheel
-    if: github.repository == 'adap/flower'
     steps:
       - uses: actions/checkout@v3
       - name: Bootstrap
@@ -31,6 +30,7 @@ jobs:
       - name: Test wheel
         run: ./dev/test-wheel.sh
       - name: Upload wheel
+        if: github.repository == 'adap/flower'
         id: upload
         env:
           AWS_DEFAULT_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
