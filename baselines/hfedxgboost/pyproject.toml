@@ -5,9 +5,9 @@ build-backend = "poetry.masonry.api"
 [tool.poetry]
 name = "hfedxgboost" # <----- Ensure it matches the name of your baseline directory containing all the source code
 version = "1.0.0"
-description = "Flower Baselines"
+description = "HFedXgboost: Gradient-less Federated Gradient Boosting Trees with Learnable Learning Rates"
 license = "Apache-2.0"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["Chenyang Ma", "Xinchi Qiu", "Daniel J. Beutel", "Nicholas D. Lane"]
 readme = "README.md"
 homepage = "https://flower.dev"
 repository = "https://github.com/adap/flower"
