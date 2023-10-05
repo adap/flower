@@ -16,6 +16,7 @@
 
 import threading
 import traceback
+import warnings
 from abc import ABC
 from logging import ERROR, WARNING
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union
@@ -27,6 +28,9 @@ from ray.util.actor_pool import ActorPool
 from flwr import common
 from flwr.client import Client, ClientFn
 from flwr.common.logger import log
+
+# Display Deprecation warning once
+warnings.filterwarnings("once", category=DeprecationWarning)
 
 # All possible returns by a client
 ClientRes = Union[
@@ -48,8 +52,6 @@ class ClientException(Exception):
 class VirtualClientEngineActor(ABC):
     """Abstract base class for VirtualClientEngine Actors."""
 
-    warned = False
-
     def terminate(self) -> None:
         """Manually terminate Actor object."""
         log(WARNING, "Manually terminating %s}", self.__class__.__name__)
@@ -63,14 +65,15 @@ class VirtualClientEngineActor(ABC):
         the client internally to `Client` by calling `.to_client()`.
         """
         if not isinstance(client, Client):
-            if not self.warned:
-                log(
-                    WARNING,
-                    "Ensure your client is of type `Client`. Please convert it"
-                    " to `Client` using the `.to_client()` method before returning it"
-                    " in your `client_fn` you pass to `start_simulation`}",
-                )
-                self.warned = True
+            mssg = (
+                " Ensure your client is of type `Client`. Please convert it"
+                " using the `.to_client()` method before returning it"
+                " in the `client_fn` you pass to `start_simulation`."
+                " We have applied this conversion on your behalf."
+                " Not returning a `Client` might trigger an erro in future versions of Flower."
+            )
+
+            warnings.warn(mssg, DeprecationWarning, stacklevel=2)
             client = client.to_client()
         return client
 

@@ -294,8 +294,6 @@ def start_numpy_client(
 
         plain_clientfn = convert
 
-    _check_actionable_client(plain_client, plain_clientfn)
-
     start_client(
         server_address=server_address,
         client_fn=plain_clientfn,
