@@ -8,6 +8,8 @@
 
 ### What's new?
 
+- **Update MLCube code example** ([#2425](https://github.com/adap/flower/pull/2425))
+
 - **Unify client API** ([#2303](https://github.com/adap/flower/pull/2303))
 
   Using the `client_fn`, Flower clients can interchangeably run as standalone processes (i.e. via `start_client`) or in simulation (i.e. via `start_simulation`) without requiring changes to how the client class is defined and instantiated.
