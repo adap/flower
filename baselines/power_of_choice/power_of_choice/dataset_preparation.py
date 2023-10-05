@@ -446,6 +446,7 @@ def create_lda_partitions(
         return partitions, dirichlet_dist
 
     if concentration.size == 1:
+        concentration_num_samples = np.repeat(concentration, num_partitions)
         concentration = np.repeat(concentration, classes.size)
     elif concentration.size != classes.size:  # Sequence
         raise ValueError(
@@ -470,6 +471,22 @@ def create_lda_partitions(
                  ({dirichlet_dist.shape}) must match the provided number
                   of partitions and classes ({num_partitions},{classes.size})"""
             )
+        
+    dirichlet_dist_samples = np.random.default_rng(seed).dirichlet(
+            alpha=concentration_num_samples, size=1
+        )[0]
+
+    # Calculate the number of samples for each partition based on the dirichlet_dist_samples
+    num_samples = [int(np.floor(dirichlet_dist_samples[i] * x.shape[0])) for i in range(num_partitions)]
+
+    # Calculate the remaining samples that need to be distributed among partitions
+    remaining_samples = x.shape[0] - sum(num_samples)
+
+    # Distribute the remaining samples to partitions with the highest LDA probability
+    while remaining_samples > 0:
+        partition_id = np.argmax([np.max(dist) for dist in dirichlet_dist_samples])
+        num_samples[partition_id] += 1
+        remaining_samples -= 1
 
     # Assuming balanced distribution
     empty_classes = classes.size * [False]
