@@ -74,7 +74,7 @@ class FL_Client(fl.client.Client):
         else:
             raise Exception("choose a valid task type, BINARY or REG")
         self.optimizer = torch.optim.Adam(
-            self.net.parameters(), lr=cfg.clients.CNN.lr, betas=(0.9, 0.999)
+            self.net.parameters(), lr=cfg.clients.CNN.lr, betas=(0.5, 0.999)
         )
 
     def train_one_loop(self, data):
