@@ -67,10 +67,7 @@ pyenv local 3.10.6
 poetry env use 3.10.6
 
 # install the base Poetry environment
-poetry install
-#if you have issue "Failed to unlock the collection!"
-export PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring
-#poetry start
+poetry add torch torchvision
 poetry shell
 ```
 
@@ -109,27 +106,27 @@ More detailed tag information can be found on Leaf GitHub.
 python -m fedmeta.main algo=fedavg data=femnist path=(your leaf dataset path)/leaf/data/femnist/data
 
 # FedAvg(Meta) + Femnist Dataset
-python -m fedmeta.main algo=fedavg_meta data=femnist path=../leaf/data/femnist/data
+python -m fedmeta.main algo=fedavg_meta data=femnist path=./leaf/data/femnist/data
 
 # FedMeta(MAML) + Femnist Dataset
-python -m fedmeta.main algo=fedmeta_maml data=femnist path=../leaf/data/femnist/data
+python -m fedmeta.main algo=fedmeta_maml data=femnist path=./leaf/data/femnist/data
 
 # FedMeta(Meta-SGD) + Femnist Dataset
-python -m fedmeta.main algo=fedmeta_meta_sgd data=femnist path=../leaf/data/femnist/data
+python -m fedmeta.main algo=fedmeta_meta_sgd data=femnist path=./leaf/data/femnist/data
 
 
 
 #FedAvg + Shakespeare Dataset
-python -m fedmeta.main algo=fedavg data=shakespeare path=../leaf/data/shakespeare/data
+python -m fedmeta.main algo=fedavg data=shakespeare path=./leaf/data/shakespeare/data
 
 #FedAvg(Meta) + Shakespeare Dataset
-python -m fedmeta.main algo=fedavg_meta data=shakespeare path=../leaf/data/shakespeare/data
+python -m fedmeta.main algo=fedavg_meta data=shakespeare path=./leaf/data/shakespeare/data
 
 #FedMeta(MAML) + Shakespeare Dataset
-python -m fedmeta.main algo=fedmeta_maml data=shakespeare path=../leaf/data/shakespeare/data
+python -m fedmeta.main algo=fedmeta_maml data=shakespeare path=./leaf/data/shakespeare/data
 
 #FedMeta(Meta-SGD) + Shakespeare Dataset
-python -m fedmeta.main algo=fedmeta_meta_sgd data=shakespeare path=../leaf/data/shakespeare/data
+python -m fedmeta.main algo=fedmeta_meta_sgd data=shakespeare path=./leaf/data/shakespeare/data
 
 ```
 
