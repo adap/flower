@@ -39,7 +39,9 @@
 ### Thanks to our contributors
 
 We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
 <!---TOKEN_v1.5.0-->
+
 `achiverram28`, `Adam Narozniak`, `Anass Anhari`, `Charles Beauville`, `Dana-Farber`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Edoardo Gabrielli`, `eunchung`, `Gustavo Bertoli`, `Heng Pan`, `Javier`, `Mahdi`, `Ruth Galindo`, `Steven Hé (Sīchàng)`, `Taner Topal`
 
 ### What's new?
