@@ -40,7 +40,7 @@ jobs:
 
   deploy_docs:
     needs: "build_docs"
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.repository == 'adap/flower'
     runs-on: macos-latest
     name: Deploy docs 
     steps:
