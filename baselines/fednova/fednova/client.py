@@ -6,8 +6,7 @@ from flwr.common.typing import NDArrays, Scalar
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
-
-from models import test, train
+from fednova.models import test, train
 
 
 class FlowerClient(fl.client.NumPyClient):  # pylint: disable=too-many-instance-attributes
@@ -63,8 +62,8 @@ class FlowerClient(fl.client.NumPyClient):  # pylint: disable=too-many-instance-
 		"""Implements distributed evaluation for a given client."""
 		self.set_parameters(parameters)
 		loss, accuracy = test(self.net, self.testloader, self.device)
-		print("-----Client: {} Round: {} Test Loss: {} Accuracy : {} ".format(self.client_id, config["server_round"],
-																			  loss, accuracy))
+		# print("-----Client: {} Round: {} Test Loss: {} Accuracy : {} ".format(self.client_id, config["server_round"],
+		# 																	  loss, accuracy))
 		return float(loss), len(self.testloader), {"accuracy": float(accuracy)}
 
 

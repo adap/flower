@@ -6,7 +6,7 @@ import torch
 import math
 import torch.nn as nn
 from torch.optim.optimizer import Optimizer, required
-from utils import Meter, comp_accuracy
+from fednova.utils import Meter, comp_accuracy
 from typing import List, Tuple, Dict
 from flwr.common.typing import NDArrays
 

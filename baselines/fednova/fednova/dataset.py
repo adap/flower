@@ -1,11 +1,10 @@
 from typing import Optional, Tuple, List
-
 import torch
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader, random_split
 from torchvision import datasets, transforms
 
-from dataset_preparation import DataPartitioner
+from fednova.dataset_preparation import DataPartitioner
 
 
 def load_datasets(config: DictConfig) -> Tuple[List[DataLoader], DataLoader, List]:
@@ -65,7 +64,7 @@ def load_datasets(config: DictConfig) -> Tuple[List[DataLoader], DataLoader, Lis
                                                         shuffle=True, pin_memory=True))
 
     test_loader = torch.utils.data.DataLoader(testset,
-                                              batch_size=2*config.batch_size,
+                                              batch_size=config.batch_size,
                                               shuffle=False, )
 
     return trainloaders, test_loader, ratio

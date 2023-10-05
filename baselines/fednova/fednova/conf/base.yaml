@@ -20,10 +20,10 @@ seed: 3491
 mode: train
 
 model:
-  _target_: models.VGG
+  _target_: fednova.models.VGG
 
 optimizer:
-  _target_: models.ProxSGD
+  _target_: fednova.models.ProxSGD
   lr: 0.02
   momentum: 0
   weight_decay: 1e-4

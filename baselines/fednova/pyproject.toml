@@ -42,8 +42,8 @@ flwr = { extras = ["simulation"], version = "1.5.0" }
 hydra-core = "1.3.2" # don't change this
 torch = { url = "https://download.pytorch.org/whl/cu116/torch-1.13.1%2Bcu116-cp310-cp310-linux_x86_64.whl"}
 torchvision = { url = "https://download.pytorch.org/whl/cu116/torchvision-0.14.1%2Bcu116-cp310-cp310-linux_x86_64.whl"}
-matplotlib = "3.7.1"
-pandas = "^2.0.3"
+matplotlib = "3.5.3"
+pandas = "1.3.5"
 
 [tool.poetry.dev-dependencies]
 isort = "==5.11.5"

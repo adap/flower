@@ -1,18 +1,17 @@
 import torch
-from dataset import load_datasets
-from client import gen_client_fn
+from fednova.dataset import load_datasets
+from fednova.client import gen_client_fn
 import hydra
 from omegaconf import DictConfig, OmegaConf
-from strategy import FedNova, weighted_average
-from client import FlowerClient
+from fednova.strategy import FedNova, weighted_average
 from flwr.common import ndarrays_to_parameters
 import flwr as fl
-from utils import fit_config
+from fednova.utils import fit_config
 from hydra.utils import instantiate
 import numpy as np
 import random
 import os
-from models import test
+from fednova.models import test
 from collections import OrderedDict
 
 
@@ -86,8 +85,9 @@ def main(cfg: DictConfig) -> None:
 											 client_resources=cfg.client_resources,
 											 ray_init_args={"ignore_reinit_error": True, "num_cpus": 6})
 
-	round, loss = history.losses_distributed[-1]
-	round, accuracy = history.metrics_distributed["accuracy"][-1]
+	# round, loss = history.losses_distributed[-1]
+	# round, accuracy = history.metrics_distributed["accuracy"][-1]
+	print(history)
 	# print("---------------------Round: {} Test loss: Test Accuracy {}----------------------".format(round, loss, accuracy))
 
 
