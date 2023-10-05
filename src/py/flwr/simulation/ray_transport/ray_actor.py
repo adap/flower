@@ -16,7 +16,6 @@
 
 import threading
 import traceback
-import warnings
 from abc import ABC
 from logging import ERROR, WARNING
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union
@@ -28,9 +27,7 @@ from ray.util.actor_pool import ActorPool
 from flwr import common
 from flwr.client import Client, ClientFn
 from flwr.common.logger import log
-
-# Display Deprecation warning once
-warnings.filterwarnings("once", category=DeprecationWarning)
+from flwr.simulation.ray_transport.utils import check_clientfn_returns_client
 
 # All possible returns by a client
 ClientRes = Union[
@@ -57,26 +54,6 @@ class VirtualClientEngineActor(ABC):
         log(WARNING, "Manually terminating %s}", self.__class__.__name__)
         ray.actor.exit_actor()
 
-    def check_clientfn_returns_client(self, client: Client) -> Client:
-        """Warn once that clients should be of type Client.
-
-        This is here for backwards compatibility. If a ClientFn is provided returning
-        a different type of client (e.g. NumPyClient) we'll warn the user but convert
-        the client internally to `Client` by calling `.to_client()`.
-        """
-        if not isinstance(client, Client):
-            mssg = (
-                " Ensure your client is of type `Client`. Please convert it"
-                " using the `.to_client()` method before returning it"
-                " in the `client_fn` you pass to `start_simulation`."
-                " We have applied this conversion on your behalf."
-                " Not returning a `Client` might trigger an erro in future versions of Flower."
-            )
-
-            warnings.warn(mssg, DeprecationWarning, stacklevel=2)
-            client = client.to_client()
-        return client
-
     def run(
         self,
         client_fn: ClientFn,
@@ -88,8 +65,8 @@ class VirtualClientEngineActor(ABC):
         # return also cid which is needed to ensure results
         # from the pool are correctly assigned to each ClientProxy
         try:
-            # Instantiate client
-            client = self.check_clientfn_returns_client(client_fn(cid))
+            # Instantiate client (check 'Client' type is returned)
+            client = check_clientfn_returns_client(client_fn(cid))
             # Run client job
             job_results = job_fn(client)
         except Exception as ex:
