@@ -6,7 +6,7 @@ tags=$(git tag --sort=-creatordate)
 new_version=$(echo "$tags" | sed -n '1p')
 old_version=$(echo "$tags" | sed -n '2p')
 
-shortlog=$(git shortlog "$old_version".."$new_version" -s | grep -vEi '(\(|\[)bot(\)|\])' | awk '{printf "%s\`%s %s\`",sep,$2,$3; sep=", "} END{print ""}')
+shortlog=$(git shortlog "$old_version".."$new_version" -s | grep -vEi '(\(|\[)bot(\)|\])' | awk '{name = substr($0, index($0, $2)); printf "%s`%s`", sep, name; sep=", "} END {print ""}'
 thanks="\n### Thanks to our contributors\n\nWe would like to give our special thanks to all the contributors who made the new version of Flower possible (in \`git shortlog\` order):\n<!---TOKEN_$new_version-->\n$shortlog"
 
 if ! grep "TOKEN_$new_version" doc/source/ref-changelog.md; then
