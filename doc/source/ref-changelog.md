@@ -39,6 +39,12 @@
 ### Thanks to our contributors
 
 We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+<!---TOKEN_v1.5.0-->
+`Adam Narozniak`, `Anass Anhari`, `Charles Beauville`, `Dana-Farber `, `Daniel J.`, `Daniel Nata`, `Edoardo Gabrielli`, `Gustavo Bertoli`, `Heng Pan`, `Javier `, `Mahdi `, `Steven Hé`, `Taner Topal`, `achiverram28 `, `danielnugraha `, `eunchung `, `ruthgal `
+
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
 
 `achiverram28`, `Adam Narozniak`, `Anass Anhari`, `Charles Beauville`, `Dana-Farber`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Edoardo Gabrielli`, `eunchung`, `Gustavo Bertoli`, `Heng Pan`, `Javier`, `Mahdi`, `Ruth Galindo`, `Steven Hé (Sīchàng)`, `Taner Topal`
 
