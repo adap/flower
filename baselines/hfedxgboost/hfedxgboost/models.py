@@ -96,7 +96,7 @@ class CNN(nn.Module):
         -------
             output (torch.Tensor): Output of the network after the forward pass.
         """
-        output = self.ReLU(self.conv1d(input_features))
+        output = self.conv1d(input_features)
         output = output.flatten(start_dim=1)
         output = self.ReLU(output)
         output = self.layer_direct(output)
