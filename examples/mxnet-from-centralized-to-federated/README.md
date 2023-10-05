@@ -4,6 +4,8 @@ This example demonstrates how an already existing centralized MXNet-based machin
 
 This introductory example for Flower uses MXNet, but you're not required to be a MXNet expert to run the example. The example will help you to understand how Flower can be used to build federated learning use cases based on an existing MXNet project.
 
+Note: Currently this example does not work on arm64 machines (including M1/M2 macs). Let us know if you made it work!
+
 ## Project Setup
 
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
