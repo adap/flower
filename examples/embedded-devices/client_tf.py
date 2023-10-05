@@ -59,8 +59,9 @@ def prepare_dataset(use_mnist: bool):
 
 
 class FlowerClient(fl.client.NumPyClient):
-    """A FlowerClient that uses MobileNetV3 for CIFAR-10 or a much
-    smaller CNN for MNIST."""
+    """A FlowerClient that uses MobileNetV3 for CIFAR-10 or a much smaller CNN for
+    MNIST."""
+
     def __init__(self, trainset, valset, use_mnist: bool):
         self.x_train, self.y_train = trainset
         self.x_val, self.y_val = valset

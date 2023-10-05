@@ -137,8 +137,9 @@ def prepare_dataset(use_mnist: bool):
 
 # Flower client, adapted from Pytorch quickstart/simulation example
 class FlowerClient(fl.client.NumPyClient):
-    """A FlowerClient that trains a MobileNetV3 model for CIFAR-10
-    or a much smaller CNN for MNIST."""
+    """A FlowerClient that trains a MobileNetV3 model for CIFAR-10 or a much smaller CNN
+    for MNIST."""
+
     def __init__(self, trainset, valset, use_mnist):
         self.trainset = trainset
         self.valset = valset

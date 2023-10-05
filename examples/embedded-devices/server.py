@@ -39,9 +39,9 @@ parser.add_argument(
 
 # Define metric aggregation function
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
-    """Thist function averages teh `accuracy` metric sent by 
-    the clients in a `evaluate` stage (i.e. clients received the global model
-    and evaluate it on their local validation sets). """
+    """Thist function averages teh `accuracy` metric sent by the clients in a `evaluate`
+    stage (i.e. clients received the global model and evaluate it on their local
+    validation sets)."""
     # Multiply accuracy of each client by number of examples used
     accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
     examples = [num_examples for num_examples, _ in metrics]
