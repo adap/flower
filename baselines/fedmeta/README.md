@@ -106,16 +106,16 @@ More detailed tag information can be found on Leaf GitHub.
 ****Start experiments**** : 
 ```bash  
 # FedAvg + Femnist Dataset
-python -m fedmeta.main algo=fedavg data=femnist path=(your leaf dataset path)/leaf/data/shakespeare/data
+python -m fedmeta.main algo=fedavg data=femnist path=(your leaf dataset path)/leaf/data/femnist/data
 
 # FedAvg(Meta) + Femnist Dataset
-python -m fedmeta.main algo=fedavg_meta data=femnist path=../leaf/data/shakespeare/data
+python -m fedmeta.main algo=fedavg_meta data=femnist path=../leaf/data/femnist/data
 
 # FedMeta(MAML) + Femnist Dataset
-python -m fedmeta.main algo=fedmeta_maml data=femnist path=../leaf/data/shakespeare/data
+python -m fedmeta.main algo=fedmeta_maml data=femnist path=../leaf/data/femnist/data
 
 # FedMeta(Meta-SGD) + Femnist Dataset
-python -m fedmeta.main algo=fedmeta_meta_sgd data=femnist path=../leaf/data/shakespeare/data
+python -m fedmeta.main algo=fedmeta_meta_sgd data=femnist path=../leaf/data/femnist/data
 
 
 
