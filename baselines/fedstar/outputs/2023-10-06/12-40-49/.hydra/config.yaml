@@ -1,0 +1,25 @@
+server:
+  server_address: '[::]:8080'
+  rounds: 2
+  num_clients: 5
+  min_sample_size: 2
+  gpu_memory: 1024
+  eval_step: 1
+  train_epochs: 1
+  batch_size: 64
+  learning_rate: 0.001
+  dataset_name: ambient_context
+  seed: 2021
+  verbose: 1
+client:
+  server_address: '[::]:8080'
+  num_clients: 5
+  gpu_memory: 1280
+  dataset_name: ambient_context
+  seed: 2021
+  batch_size: 64
+  l_per: 0.05
+  u_per: 1.0
+  fedstar: 'false'
+  class_distribute: 'false'
+  verbose: 1
