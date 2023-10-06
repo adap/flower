@@ -12,3 +12,4 @@ authors = ["The Flower Authors <hello@flower.dev>"]
 python = ">=3.8,<3.11"
 flwr = ">=1.0,<2.0"
 mxnet = "1.6.0"
+numpy = "1.23.1"
