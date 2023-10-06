@@ -210,12 +210,13 @@ The above command will evaluate the custom FedAvgM versus FedAvg on Fashion-MNIS
 To compare the improvement of the FedAvgM with Nesterov momentum (`strategy=custom-fedavgm`) and the FedAvgM without the Nesterov momentum (`strategy=fedavgm`), here we use the results of previous running with addition of the same conditions for the `fedavgm` strategy as follows:
 
 ```bash
-python -m fedavgm.main --multirun client.local_epochs=1 \ noniid.concentration=0.001,0.01,0.1,1,10,100 strategy=fedavgm \
+python -m fedavgm.main --multirun client.local_epochs=1 \
+noniid.concentration=0.001,0.01,0.1,1,10,100 strategy=fedavgm \
 server.reporting_fraction=0.05 num_rounds=1000 \
 num_clients=100 dataset=fmnist server.momentum=0.97 client.lr=0.003
 ```
 
-![](custom-fedavgm_vs_fedavgm_rounds=1000_fmnist.png)
+![](_static/custom-fedavgm_vs_fedavgm_rounds=1000_fmnist.png)
 
 Overall, FedAvgM with Nesterov momentum outperforms the FedAvgM without Nesterov momentum, being clear this behavior for higher non-iidness (0.01 and 0.001). For larger concentrations (1, 10, 100), it was observed some runs that the centralized evaluation resulted in a loss equal NaN or Inf, thus it was required multiple runs to guarantee the accuracies reported.
 
