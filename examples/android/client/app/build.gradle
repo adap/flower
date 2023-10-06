@@ -44,7 +44,7 @@ android {
 def grpc_version = '1.43.0'
 
 protobuf {
-    protoc { artifact = 'com.google.protobuf:protoc:3.17.3' }
+    protoc { artifact = 'com.google.protobuf:protoc:3.11.0' }
     plugins {
         grpc { artifact = "io.grpc:protoc-gen-grpc-java:$grpc_version"
         }

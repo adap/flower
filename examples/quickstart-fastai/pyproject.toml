@@ -12,4 +12,3 @@ authors = ["The Flower Authors <hello@flower.dev>"]
 python = ">=3.8,<3.11"
 flwr = ">=1.0,<2.0"
 fastai = "2.7.12"
-torch = "2.0.1"
