@@ -227,9 +227,7 @@ def evaluate(task_args: List[str]) -> None:
 
 
 def main():
-    """
-    mnist.py task task_specific_parameters...
-    """
+    """mnist.py task task_specific_parameters..."""
     # noinspection PyBroadException
     try:
         parser = argparse.ArgumentParser()
