@@ -1,3 +1,7 @@
+[build-system]
+requires = ["poetry-core>=1.4.0"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry]
 name = "pytorch_federated_variational_autoencoder"
 version = "0.1.0"
@@ -9,7 +13,3 @@ python = ">=3.8,<3.11"
 flwr = ">=1.0,<2.0"
 torch = "1.13.1"
 torchvision = "0.14.1"
-
-[build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.core.masonry.api"
