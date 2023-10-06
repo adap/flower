@@ -1,3 +1,5 @@
+"""Strategy for HeteroFL."""
+
 from logging import WARNING
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -87,6 +89,7 @@ class HeteroFL(FedAvg):
         return parameters_aggregated, metrics_aggregated
 
     def aggregate_hetero(self, results: List[Tuple[NDArrays, int]]) -> NDArrays:
+        """Aggregate function for HeteroFL."""
         for i, v in enumerate(self.parameters):
             count = np.zeros(v.shape)
             tmp_v = np.zeros(v.shape)

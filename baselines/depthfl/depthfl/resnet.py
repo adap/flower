@@ -1,10 +1,13 @@
+"""ResNet18 for DepthFL."""
+
 from typing import Callable, Optional
 
-import torch
 import torch.nn as nn
 
 
 class MyGroupNorm(nn.Module):
+    """Group Normalization layer."""
+
     def __init__(self, num_channels):
         super(MyGroupNorm, self).__init__()
         ## change num_groups to 32
@@ -13,31 +16,39 @@ class MyGroupNorm(nn.Module):
         )
 
     def forward(self, x):
+        """GN forward."""
         x = self.norm(x)
         return x
 
 
 class MyBatchNorm(nn.Module):
+    """Batch Normalization layer."""
+
     def __init__(self, num_channels):
         super(MyBatchNorm, self).__init__()
         self.norm = nn.BatchNorm2d(num_channels, track_running_stats=True)
 
     def forward(self, x):
+        """BN forward."""
         x = self.norm(x)
         return x
 
 
 def conv3x3(in_planes, out_planes, stride=1):
+    """Convolution layer 3x3."""
     return nn.Conv2d(
         in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False
     )
 
 
 def conv1x1(in_planes, planes, stride=1):
+    """Convolution layer 1x1."""
     return nn.Conv2d(in_planes, planes, kernel_size=1, stride=stride, bias=False)
 
 
 class SepConv(nn.Module):
+    """Bottleneck layer module."""
+
     def __init__(
         self,
         channel_in,
@@ -77,10 +88,13 @@ class SepConv(nn.Module):
         )
 
     def forward(self, x):
+        """SepConv forward."""
         return self.op(x)
 
 
 class BasicBlock(nn.Module):
+    """Basic Block for ResNet18."""
+
     expansion = 1
 
     def __init__(self, inplanes, planes, stride=1, downsample=None, norm_layer=None):
@@ -94,6 +108,7 @@ class BasicBlock(nn.Module):
         self.stride = stride
 
     def forward(self, x):
+        """BasicBlock forward."""
         residual = x
 
         output = self.conv1(x)
@@ -108,56 +123,18 @@ class BasicBlock(nn.Module):
 
         output += residual
         output = self.relu(output)
-        return output
-
-
-class BottleneckBlock(nn.Module):
-    expansion = 4
-
-    def __init__(self, inplanes, planes, stride=1, downsample=None, norm_layer=None):
-        super(BottleneckBlock, self).__init__()
-        self.conv1 = conv1x1(inplanes, planes)
-        self.bn1 = norm_layer(planes)
-        self.relu = nn.ReLU(inplace=True)
-
-        self.conv2 = conv3x3(planes, planes, stride)
-        self.bn2 = norm_layer(planes)
-
-        self.conv3 = conv1x1(planes, planes * self.expansion)
-        self.bn3 = norm_layer(planes * self.expansion)
-
-        self.downsample = downsample
-        self.stride = stride
-
-    def forward(self, x):
-        residual = x
-
-        output = self.conv1(x)
-        output = self.bn1(output)
-        output = self.relu(output)
-
-        output = self.conv2(output)
-        output = self.bn2(output)
-        output = self.relu(output)
-
-        output = self.conv3(output)
-        output = self.bn3(output)
-
-        if self.downsample is not None:
-            residual = self.downsample(x)
-
-        output += residual
-        output = self.relu(output)
-
         return output
 
 
 class Multi_ResNet(nn.Module):
-    """Resnet model
+    """Resnet model.
+
     Args:
         block (class): block type, BasicBlock or BottleneckBlock
         layers (int list): layer num in each block
+        n_blocks (int) : Depth of network
         num_classes (int): class num.
+        norm_layer (class): type of normalization layer.
     """
 
     def __init__(
@@ -166,13 +143,12 @@ class Multi_ResNet(nn.Module):
         layers,
         n_blocks,
         num_classes=1000,
-        norm_layer: Optional[Callable[..., nn.Module]] = None,
+        norm_layer: Optional[Callable[..., nn.Module]] = MyBatchNorm,
     ):
         super(Multi_ResNet, self).__init__()
         self.n_blocks = n_blocks
         self.inplanes = 64
         self.norm_layer = norm_layer
-        # self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False)
         self.conv1 = nn.Conv2d(
             3, self.inplanes, kernel_size=3, stride=1, padding=1, bias=False
         )
@@ -282,12 +258,14 @@ class Multi_ResNet(nn.Module):
                 nn.init.constant_(m.bias, 0)
 
     def _make_layer(self, block, planes, layers, stride=1, norm_layer=None):
-        """A block with 'layers' layers
+        """Create a block with layers.
+
         Args:
             block (class): block type
             planes (int): output channels = planes * expansion
             layers (int): layer num in the block
             stride (int): the first layer stride in the block.
+            norm_layer (class): type of normalization layer.
         """
         norm_layer = self.norm_layer
         downsample = None
@@ -313,6 +291,7 @@ class Multi_ResNet(nn.Module):
         return nn.Sequential(*layer)
 
     def forward(self, x):
+        """Resnet forward."""
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
@@ -355,6 +334,21 @@ class Multi_ResNet(nn.Module):
 
 
 def multi_resnet18(n_blocks=1, norm="bn", num_classes=100):
+    """Create resnet18 for HeteroFL.
+
+    Parameters
+    ----------
+    n_blocks: int
+        depth of network
+    norm: str
+        normalization layer type
+    num_classes: int
+        # of labels
+
+    Returns
+    -------
+    Callable [ [nn.Module,List[int],int,int,nn.Module], nn.Module]
+    """
     if norm == "gn":
         norm_layer = MyGroupNorm
 
@@ -370,36 +364,20 @@ def multi_resnet18(n_blocks=1, norm="bn", num_classes=100):
     )
 
 
-def multi_resnet34(n_blocks=4, norm="bn", num_classes=100):
-    if norm == "gn":
-        norm_layer = MyGroupNorm
+# if __name__ == "__main__":
+#     from ptflops import get_model_complexity_info
 
-    elif norm == "bn":
-        norm_layer = MyBatchNorm
+#     model = multi_resnet18(n_blocks=4, num_classes=100)
 
-    return Multi_ResNet(
-        BasicBlock,
-        [3, 4, 6, 3],
-        n_blocks,
-        num_classes=num_classes,
-        norm_layer=norm_layer,
-    )
+#     with torch.cuda.device(0):
+#         macs, params = get_model_complexity_info(
+#             model,
+#             (3, 32, 32),
+#             as_strings=True,
+#             print_per_layer_stat=False,
+#             verbose=True,
+#             units="MMac",
+#         )
 
-
-if __name__ == "__main__":
-    from ptflops import get_model_complexity_info
-
-    model = multi_resnet18(n_blocks=4, num_classes=100)
-
-    with torch.cuda.device(0):
-        macs, params = get_model_complexity_info(
-            model,
-            (3, 32, 32),
-            as_strings=True,
-            print_per_layer_stat=False,
-            verbose=True,
-            units="MMac",
-        )
-
-        print("{:<30}  {:<8}".format("Computational complexity: ", macs))
-        print("{:<30}  {:<8}".format("Number of parameters: ", params))
+#         print("{:<30}  {:<8}".format("Computational complexity: ", macs))
+#         print("{:<30}  {:<8}".format("Number of parameters: ", params))

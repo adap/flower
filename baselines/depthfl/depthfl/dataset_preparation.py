@@ -1,3 +1,5 @@
+"""Dataset(CIFAR100) preparation for DepthFL."""
+
 from typing import List, Optional, Tuple
 
 import numpy as np
@@ -7,7 +9,7 @@ from torchvision.datasets import CIFAR100
 
 
 def _download_data() -> Tuple[Dataset, Dataset]:
-    """Downloads (if necessary) and returns the CIFAR-100 dataset.
+    """Download (if necessary) and returns the CIFAR-100 dataset.
 
     Returns
     -------
@@ -45,24 +47,25 @@ def _partition_data(
     beta: Optional[float] = 0.5,
     seed: Optional[int] = 41,
 ) -> Tuple[List[Dataset], Dataset]:
-    """Split training set into iid or non iid partitions to simulate the federated
-    setting.
+    """Split training set to simulate the federated setting.
 
     Parameters
     ----------
     num_clients : int
         The number of clients that hold a part of the data
     iid : bool, optional
-        Whether the data should be independent and identically distributed between
-        the clients or if the data should first be sorted by labels and distributed by chunks
-        to each client (used to test the convergence in a worst case scenario), by default False
+        Whether the data should be independent and identically distributed
+        or if the data should first be sorted by labels and distributed by
+        noniid manner to each client, by default true
+    beta : hyperparameter for dirichlet distribution
     seed : int, optional
         Used to set a fix seed to replicate experiments, by default 42
 
     Returns
     -------
     Tuple[List[Dataset], Dataset]
-        A list of dataset for each client and a single dataset to be use for testing the model.
+        A list of dataset for each client and a
+        single dataset to be use for testing the model.
     """
     trainset, testset = _download_data()
 

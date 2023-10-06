@@ -63,11 +63,11 @@ class FlowerClient(
             ]  # store client's weights' shape (for HeteroFL)
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
-        """Returns the parameters of the current net."""
+        """Return the parameters of the current net."""
         return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
 
     def set_parameters(self, parameters: NDArrays) -> None:
-        """Changes the parameters of the model using the given ones."""
+        """Change the parameters of the model using the given ones."""
         params_dict = zip(self.net.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
         self.net.load_state_dict(prune(state_dict, self.param_idx), strict=True)
@@ -75,7 +75,7 @@ class FlowerClient(
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, Dict, int]:
-        """Implements distributed fit function for a given client."""
+        """Implement distributed fit function for a given client."""
         self.set_parameters(parameters)
         num_epochs = self.num_epochs
 
@@ -109,7 +109,7 @@ class FlowerClient(
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[float, int, Dict]:
-        """Implements distributed evaluation for a given client."""
+        """Implement distributed evaluation for a given client."""
         self.set_parameters(parameters)
         loss, accuracy, accuracy_single = test(self.net, self.valloader, self.device)
         return (
@@ -129,10 +129,8 @@ def gen_client_fn(
     learning_rate_decay: float,
     models: List[DictConfig],
     cfg: DictConfig,
-) -> Tuple[
-    Callable[[str], FlowerClient], DataLoader
-]:  # pylint: disable=too-many-arguments
-    """Generates the client function that creates the Flower Clients.
+) -> Callable[[str], FlowerClient]:
+    """Generate the client function that creates the Flower Clients.
 
     Parameters
     ----------
@@ -156,12 +154,13 @@ def gen_client_fn(
         The learning rate decay ratio per round for the SGD  optimizer of clients.
     models : List[DictConfig]
         A list of DictConfigs, each pointing to the model config of client's local model
+    cfg : DictConfig
+        Configuration
 
     Returns
     -------
-    Tuple[Callable[[str], FlowerClient], DataLoader]
-        A tuple containing the client function that creates Flower Clients and
-        the DataLoader that will be used for testing
+    Callable[[str], FlowerClient]
+        client function that creates Flower Clients
     """
 
     def client_fn(cid: str) -> FlowerClient:

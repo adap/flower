@@ -1,9 +1,12 @@
+"""ResNet18 for HeteroFL."""
+
 import numpy as np
-import torch
 import torch.nn as nn
 
 
 class Scaler(nn.Module):
+    """Scaler module for HeteroFL."""
+
     def __init__(self, rate, scale):
         super().__init__()
         if scale:
@@ -12,32 +15,40 @@ class Scaler(nn.Module):
             self.rate = 1
 
     def forward(self, input):
+        """Scaler forward."""
         output = input / self.rate if self.training else input
         return output
 
 
 class MyBatchNorm(nn.Module):
+    """Static Batch Normalization for HeteroFL."""
+
     def __init__(self, num_channels, track=True):
         super(MyBatchNorm, self).__init__()
         ## change num_groups to 32
         self.norm = nn.BatchNorm2d(num_channels, track_running_stats=track)
 
     def forward(self, x):
+        """BatchNorm forward."""
         x = self.norm(x)
         return x
 
 
 def conv3x3(in_planes, out_planes, stride=1):
+    """Convolution layer 3x3."""
     return nn.Conv2d(
         in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False
     )
 
 
 def conv1x1(in_planes, planes, stride=1):
+    """Convolution layer 1x1."""
     return nn.Conv2d(in_planes, planes, kernel_size=1, stride=stride, bias=False)
 
 
 class BasicBlock(nn.Module):
+    """Basic Block for ResNet18."""
+
     expansion = 1
 
     def __init__(
@@ -61,6 +72,7 @@ class BasicBlock(nn.Module):
         self.stride = stride
 
     def forward(self, x):
+        """BasicBlock forward."""
         residual = x
 
         output = self.conv1(x)
@@ -77,60 +89,12 @@ class BasicBlock(nn.Module):
 
         output += residual
         output = self.relu(output)
-        return output
-
-
-class BottleneckBlock(nn.Module):
-    expansion = 4
-
-    def __init__(
-        self,
-        inplanes,
-        planes,
-        stride=1,
-        scaler_rate=1,
-        downsample=None,
-        track=True,
-        scale=True,
-    ):
-        super(BottleneckBlock, self).__init__()
-        self.conv1 = conv1x1(inplanes, planes)
-        self.bn1 = MyBatchNorm(planes)
-        self.relu = nn.ReLU(inplace=True)
-
-        self.conv2 = conv3x3(planes, planes, stride)
-        self.bn2 = MyBatchNorm(planes)
-
-        self.conv3 = conv1x1(planes, planes * self.expansion)
-        self.bn3 = MyBatchNorm(planes * self.expansion)
-
-        self.downsample = downsample
-        self.stride = stride
-
-    def forward(self, x):
-        residual = x
-
-        output = self.conv1(x)
-        output = self.bn1(output)
-        output = self.relu(output)
-
-        output = self.conv2(output)
-        output = self.bn2(output)
-        output = self.relu(output)
-
-        output = self.conv3(output)
-        output = self.bn3(output)
-
-        if self.downsample is not None:
-            residual = self.downsample(x)
-
-        output += residual
-        output = self.relu(output)
-
         return output
 
 
 class Multi_ResNet(nn.Module):
+    """Resnet model."""
+
     def __init__(
         self, hidden_size, block, layers, num_classes, scaler_rate, track, scale
     ):
@@ -195,12 +159,16 @@ class Multi_ResNet(nn.Module):
     def _make_layer(
         self, block, planes, layers, stride=1, scaler_rate=1, track=True, scale=True
     ):
-        """A block with 'layers' layers
+        """Create a block with layers.
+
         Args:
             block (class): block type
             planes (int): output channels = planes * expansion
             layers (int): layer num in the block
             stride (int): the first layer stride in the block.
+            scaler_rate (float): for scaler module
+            track (bool): static batch normalization
+            scale (bool): for scaler module.
         """
         norm_layer = self.norm_layer
         downsample = None
@@ -236,6 +204,7 @@ class Multi_ResNet(nn.Module):
         return nn.Sequential(*layer)
 
     def forward(self, x):
+        """Resnet forward."""
         x = self.conv1(x)
         x = self.scaler(x)
         x = self.bn1(x)
@@ -253,6 +222,23 @@ class Multi_ResNet(nn.Module):
 
 
 def resnet18(n_blocks=4, track=False, scale=True, num_classes=100):
+    """Create resnet18 for HeteroFL.
+
+    Parameters
+    ----------
+    n_blocks: int
+        corresponds to width (divided by 4)
+    track: bool
+        static batch normalization
+    scale: bool
+        scaler module
+    num_classes: int
+        # of labels
+
+    Returns
+    -------
+    Callable [ [List[int],nn.Module,List[int],int,float,bool,bool], nn.Module]
+    """
     # width pruning ratio : (0.25, 0.50, 0.75, 0.10)
     model_rate = n_blocks / 4
     classes_size = num_classes
@@ -273,20 +259,20 @@ def resnet18(n_blocks=4, track=False, scale=True, num_classes=100):
     )
 
 
-if __name__ == "__main__":
-    from ptflops import get_model_complexity_info
+# if __name__ == "__main__":
+#     from ptflops import get_model_complexity_info
 
-    model = resnet18(100, 1.0)
+#     model = resnet18(100, 1.0)
 
-    with torch.cuda.device(0):
-        macs, params = get_model_complexity_info(
-            model,
-            (3, 32, 32),
-            as_strings=True,
-            print_per_layer_stat=False,
-            verbose=True,
-            units="MMac",
-        )
+#     with torch.cuda.device(0):
+#         macs, params = get_model_complexity_info(
+#             model,
+#             (3, 32, 32),
+#             as_strings=True,
+#             print_per_layer_stat=False,
+#             verbose=True,
+#             units="MMac",
+#         )
 
-        print("{:<30}  {:<8}".format("Computational complexity: ", macs))
-        print("{:<30}  {:<8}".format("Number of parameters: ", params))
+#         print("{:<30}  {:<8}".format("Computational complexity: ", macs))
+#         print("{:<30}  {:<8}".format("Number of parameters: ", params))

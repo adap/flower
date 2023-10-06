@@ -17,6 +17,7 @@ class KLLoss(nn.Module):
         super(KLLoss, self).__init__()
 
     def forward(self, pred, label):
+        """KL loss forward."""
         T = 1
         predict = F.log_softmax(pred / T, dim=1)
         target_data = F.softmax(label / T, dim=1)
@@ -59,8 +60,18 @@ def train(  # pylint: disable=too-many-arguments
         The number of epochs the model should be trained for.
     learning_rate : float
         The learning rate for the SGD optimizer.
+    feddyn : bool
+        whether using feddyn or fedavg
+    kd : bool
+        whether using self distillation
+    consistency_weight : float
+        hyperparameter for self distillation
+    prev_grads : dict
+        control variate for feddyn
     alpha : float
         Hyperparameter for the FedDyn.
+    extended : bool
+        if extended, train all sub-classifiers within local model
     """
     criterion = torch.nn.CrossEntropyLoss()
     criterion_kl = KLLoss().cuda()
@@ -127,10 +138,22 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
         The device on which the model should be trained, either 'cpu' or 'cuda'.
     criterion : torch.nn.CrossEntropyLoss
         The loss function to use for training
+    criterion_kl : nn.Module
+        The loss function for self distillation
     optimizer : torch.optim.Adam
         The optimizer to use for training
+    feddyn : bool
+        whether using feddyn or fedavg
+    kd : bool
+        whether using self distillation
+    consistency_weight : float
+        hyperparameter for self distillation
+    prev_grads : dict
+        control variate for feddyn
     alpha : float
         Hyperparameter for the FedDyn.
+    extended : bool
+        if extended, train all sub-classifiers within local model
     """
     for images, labels in trainloader:
         images, labels = images.to(device), labels.to(device)
@@ -191,7 +214,8 @@ def test(
     Returns
     -------
     Tuple[float, float, List[float]]
-        The loss and the accuracy of the input model on the given data.
+        The loss and the accuracy of the global model
+        and the list of accuracy for each classifier on the given data.
     """
     criterion = torch.nn.CrossEntropyLoss()
     correct, total, loss = 0, 0, 0.0
@@ -245,7 +269,8 @@ def test_sbn(
     Returns
     -------
     Tuple[float, float, List[float]]
-        The loss and the accuracy of the input model on the given data.
+        The loss and the accuracy of the global model
+        and the list of accuracy for each classifier on the given data.
     """
     # static batch normalization
     for trainloader in trainloaders:

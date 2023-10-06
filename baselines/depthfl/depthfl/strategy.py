@@ -1,3 +1,5 @@
+"""Strategy for DepthFL."""
+
 import os
 import pickle
 from logging import WARNING
@@ -22,7 +24,7 @@ from omegaconf import DictConfig
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
-    """Aggregation function for weighted average during evaluation.
+    """Weighted average during evaluation.
 
     Parameters
     ----------
@@ -113,6 +115,7 @@ def aggregate(
     is_weight: List,
     cfg: DictConfig,
 ) -> NDArrays:
+    """Aggregate model parameters with different depths."""
     param_count = [0] * len(origin)
     weights_sum = [np.zeros(v.shape) for v in origin]
 

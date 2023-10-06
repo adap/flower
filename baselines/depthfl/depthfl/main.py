@@ -1,3 +1,5 @@
+"""DepthFL main."""
+
 import copy
 
 import flwr as fl

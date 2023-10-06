@@ -1,3 +1,5 @@
+"""Server for DepthFL baseline."""
+
 import copy
 from collections import OrderedDict
 from logging import DEBUG, INFO
@@ -29,7 +31,7 @@ def gen_evaluate_fn(
 ) -> Callable[
     [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]
 ]:
-    """Generates the function for centralized evaluation.
+    """Generate the function for centralized evaluation.
 
     Parameters
     ----------
@@ -37,10 +39,13 @@ def gen_evaluate_fn(
         The dataloader to test the model with.
     device : torch.device
         The device to test the model on.
+    model : DictConfig
+        model configuration for instantiating
 
     Returns
     -------
-    Callable[ [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]] ]
+    Callable[ [int, NDArrays, Dict[str, Scalar]],
+        Optional[Tuple[float, Dict[str, Scalar]]] ]
         The centralized evaluation function.
     """
 
@@ -70,18 +75,23 @@ def gen_evaluate_fn_hetero(
 ) -> Callable[
     [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]
 ]:
-    """Generates the function for centralized evaluation.
+    """Generate the function for centralized evaluation.
 
     Parameters
     ----------
+    trainloaders : List[DataLoader]
+        The list of dataloaders to calculate statistics for BN
     testloader : DataLoader
         The dataloader to test the model with.
     device : torch.device
         The device to test the model on.
+    model_cfg : DictConfig
+        model configuration for instantiating
 
     Returns
     -------
-    Callable[ [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]] ]
+    Callable[ [int, NDArrays, Dict[str, Scalar]],
+        Optional[Tuple[float, Dict[str, Scalar]]] ]
         The centralized evaluation function.
     """
 
@@ -133,6 +143,8 @@ def gen_evaluate_fn_hetero(
 
 
 class Server_FedDyn(Server):
+    """Sever for FedDyn."""
+
     def fit_round(
         self,
         server_round: int,
@@ -140,7 +152,7 @@ class Server_FedDyn(Server):
     ) -> Optional[
         Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
     ]:
-        """Perform a single round of federated averaging."""
+        """Perform a single round."""
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_fit(
             server_round=server_round,

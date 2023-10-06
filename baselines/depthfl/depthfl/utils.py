@@ -11,10 +11,10 @@ from flwr.server.history import History
 def save_results_as_pickle(
     history: History,
     file_path: Union[str, Path],
-    extra_results: Optional[Dict] = {},
+    extra_results: Dict,
     default_filename: Optional[str] = "results.pkl",
 ) -> None:
-    """Saves results from simulation to pickle.
+    """Save results from simulation to pickle.
 
     Parameters
     ----------
@@ -26,7 +26,7 @@ def save_results_as_pickle(
         path doesn't exist, it will be created. If file exists, a
         randomly generated suffix will be added to the file name. This
         is done to avoid overwritting results.
-    extra_results : Optional[Dict]
+    extra_results : Dict
         A dictionary containing additional results you would like
         to be saved to disk. Default: {} (an empty dictionary)
     default_filename: Optional[str]
@@ -39,16 +39,14 @@ def save_results_as_pickle(
     path.mkdir(exist_ok=True, parents=True)
 
     def _add_random_suffix(path_: Path):
-        """Adds a randomly generated suffix to the file name (so it doesn't overwrite
-        the file).
-        """
+        """Add a randomly generated suffix to the file name."""
         print(f"File `{path_}` exists! ")
         suffix = token_hex(4)
         print(f"New results to be saved with suffix: {suffix}")
         return path_.parent / (path_.stem + "_" + suffix + ".pkl")
 
     def _complete_path_with_default_name(path_: Path):
-        """Appends the default file name to the path."""
+        """Append the default file name to the path."""
         print("Using default filename")
         return path_ / default_filename
 
