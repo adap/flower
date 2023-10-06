@@ -5,13 +5,15 @@ import torch
 import torchvision.transforms as transforms
 from torch.utils.data import ConcatDataset, Dataset, Subset, random_split
 from torchvision.datasets import EMNIST, CIFAR10
-import timeit
+import copy
 
-def get_label_list(dataset, num_classes):
-    label_counter = [0]*(num_classes+1)
-    for feature, label  in dataset:
-            label_counter[label+1] += 1
-    return label_counter
+
+
+def get_label_list(dataset):
+  label_counter = {}
+  for _, label in dataset:
+      label_counter[label] = label_counter.get(label, 0) + 1
+  return label_counter
 
 
 def _download_data(dataset: str) -> Tuple[Dataset, Dataset]:
@@ -175,6 +177,7 @@ def partition_emnist_data(
     print(len(trainset))
 
     partition_size = int(len(trainset) / num_clients) 
+    print(partition_size)
     lengths = [partition_size] * num_clients
     labels = np.unique(trainset.targets)
     num_classes = len(labels)
@@ -182,53 +185,69 @@ def partition_emnist_data(
     if iid:
         datasets = random_split(trainset, lengths, torch.Generator().manual_seed(seed))
         return datasets, testset
+    
     else:
         noniid_labels_list = [[i for i in range(10)],[i for i in range(10, 36)],[i for i in range(36,62)]]
         iid_partition_size = int(partition_size * s)
         noniid_partition_size = partition_size - iid_partition_size
         idxs = trainset.targets.argsort()
-        num_idxs_per_class = int(len(idxs)/num_classes)
         iid_shard_size = int(iid_partition_size/num_classes)
         noniid_shard_size = int(noniid_partition_size/num_classes)
         sorted_data = Subset(trainset, idxs)
-        start = timeit.default_timer()
-        label_index = get_label_list(sorted_data, num_classes)
-        print(timeit.default_timer()-start)
-        total_index = [sum(label_index[:i+1]) for i in labels]
-        print(iid_shard_size, noniid_shard_size)
-        # print(label_index)
-        # print(total_index[-1])
 
-
-        tmp = []
+        label_count = get_label_list(sorted_data)
+        label_index = {0:0}
+        cumulative_sum = 0
+        for key in label_count.keys():
+            cumulative_sum += label_count[key]
+            label_index[key+1] = cumulative_sum        
+        client_data = {} 
+        li = copy.copy(label_index)
         for idx in range(num_clients):
-            for i in labels:
-                if label_index[i]+iid_shard_size>total_index[i]:
-                    label_index[i]=total_index[i-1]+1
-                tmp.append(
-                    Subset(
-                        sorted_data, np.arange(label_index[i], label_index[i]+iid_shard_size)
-                    )
+            client_data[idx] = []
+
+            for i in labels:                        #Partition IID Data 
+                start = label_index[i]
+                stop = label_index[i]+iid_shard_size
+                if stop>li[i+1]:
+                    start=li[i]
+                    stop=start+iid_shard_size
+                    if stop>li[i+1]:
+                        start = li[i]
+                        stop=li[i+1]-1
+                    label_index[i] = li[i]
+                else:
+                    label_index[i] += iid_shard_size
+
+                data_array = np.arange(start, stop)
+                client_data[idx].append(
+                    Subset(sorted_data, data_array)
                 )
-                label_index[i] += iid_shard_size
-            noniid_labels = noniid_labels_list[idx%3]
-            # for ni in noniid_labels:
-            #     tmp.append(
-            #     Subset(
-            #         sorted_data, np.arange(label_index[int(ni)], label_index[int(ni)]+noniid_shard_size)
-            #     )
-            # )   
-            #     label_index[int(ni)] += noniid_shard_size
 
+            noniid_labels = noniid_labels_list[idx%3]               #Partition Non-IID Data
+            for ni in noniid_labels:
+                start = label_index[ni]
+                stop = label_index[ni]+noniid_shard_size
+                if stop>label_index[ni+1]:
+                    start=label_index[ni]
+                    stop=start+noniid_shard_size
+                    if stop>label_index[ni+1]:
+                        start = label_index[ni]
+                        stop=label_index[ni+1]-1
+                    label_index[ni] = label_index[ni]
 
-        m = int(len(tmp)/num_clients)
-        datasets = [
-            ConcatDataset(tmp[m*c : m*(c+1)])
-            for c in range(num_clients)
-        ]
-    for d in datasets:
-        l = get_label_list(d, num_classes)
-        print(l)
+                else:
+                    label_index[ni] += noniid_shard_size
+
+                data_array = np.arange(start, stop)
+                client_data[idx].append(
+                    Subset(sorted_data, data_array)
+                    )   
+                label_index[ni] += noniid_shard_size
+    datasets = [
+        ConcatDataset(client_data[c])
+        for c in range(num_clients)
+    ]
     return datasets, testset
 
 
