@@ -38,6 +38,13 @@ from flwr.server.client_proxy import ClientProxy
 from .aggregate import aggregate
 from .fedavg import FedAvg
 
+WARNING_NO_SERVER_OPT = """
+Setting both `server_momentum` and `server_learning_rate` to default values
+cause FedAvgM to work as a vanilla FedAvg strategy. Server optimization with
+momentum is enabled if either `server_momentum` is set to a value greater than
+0.0 or `server_learning_rate` is set to a value lower than 1.0.
+"""
+
 
 class FedAvgM(FedAvg):
     """Configurable FedAvg with Momentum strategy implementation."""
@@ -121,6 +128,9 @@ class FedAvgM(FedAvg):
         self.server_opt: bool = (self.server_momentum != 0.0) or (
             self.server_learning_rate != 1.0
         )
+        if not self.server_opt:
+            log(WARNING, WARNING_NO_SERVER_OPT)
+
         self.momentum_vector: Optional[NDArrays] = None
 
     def __repr__(self) -> str:
