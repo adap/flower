@@ -500,7 +500,7 @@ class SqliteState(State):
 
     def create_workload(self) -> int:
         """Create one workload and store it in state."""
-        # String representation of random integer from 0 to 9223372036854775807
+        # Sample random integer from 0 to 9223372036854775807
         workload_id: int = random.randrange(9223372036854775808)
 
         # Check conflicts
