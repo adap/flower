@@ -150,7 +150,7 @@ For FedAvgM evaluation, it was performed a hyperparameter search of server momen
 
 - Concentration = 1e-9 (extreme non-iid)
 ```bash
-python -m fedavgm.main --multirun client.local_epochs=1 noniid.concentration=0.01 strategy=custom-fedavgm,fedavg \
+python -m fedavgm.main --multirun client.local_epochs=1 noniid.concentration=1e-9 strategy=custom-fedavgm,fedavg \
 server.reporting_fraction=0.05 num_rounds=10000 num_clients=100 \
 dataset=cifar10 client.lr=0.0003 server.momentum=0.99
 ```
