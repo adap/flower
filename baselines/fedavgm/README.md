@@ -146,7 +146,14 @@ python -m fedavgm.main server.reporting_fraction=0.2 client.local_epochs=5 # wil
 ### CIFAR-10
 Similar to FedAvgM paper as reference, the CIFAR-10 evaluation runs 10.000 rounds.
 
-For FedAvgM evaluation, it was performed a hyperparameter search of server momentum and client learning rate (similar to Figure 6 reported above) for each of the concentrations under analysis, using the following commands:
+For FedAvgM evaluation, it was performed a hyperparameter search of server momentum and client learning rate (similar to Figure 6 reported below) for each of the concentrations under analysis, using the following commands:
+
+- Concentration = 1e-9 (extreme non-iid)
+```bash
+python -m fedavgm.main --multirun client.local_epochs=1 noniid.concentration=0.01 strategy=custom-fedavgm,fedavg \
+server.reporting_fraction=0.05 num_rounds=10000 num_clients=100 \
+dataset=cifar10 client.lr=0.0003 server.momentum=0.99
+```
 
 - Concentration = 0.01
 ```bash
@@ -178,7 +185,7 @@ dataset=cifar10 client.lr=0.003 server.momentum=0.9
 
 Summarizing all the results:
 
-![](_static/fedavgm_vs_fedavg_rounds=10000_cifar10.png)
+![](_static/fedavgm_vs_fedavg_rounds=10000_cifar10_w_1e-9.png)
 
 The following command reproduces the same behavior of Figure 6 from FedAvgM paper for the case of Local Epoch E=1, Reporting Fraction C=0.05, and concentration (α) = 1. In this example, it runs just 1.000 rounds:
 
