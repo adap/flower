@@ -39,8 +39,8 @@ def test_create_node() -> None:
     create_node(request=request, state=state)
 
     # Assert
-    state.register_node.assert_called_once()
-    state.unregister_node.assert_not_called()
+    state.create_node.assert_called_once()
+    state.delete_node.assert_not_called()
     state.store_task_ins.assert_not_called()
     state.get_task_ins.assert_not_called()
     state.store_task_res.assert_not_called()
@@ -57,8 +57,8 @@ def test_delete_node_failure() -> None:
     delete_node(request=request, state=state)
 
     # Assert
-    state.register_node.assert_not_called()
-    state.unregister_node.assert_not_called()
+    state.create_node.assert_not_called()
+    state.delete_node.assert_not_called()
     state.store_task_ins.assert_not_called()
     state.get_task_ins.assert_not_called()
     state.store_task_res.assert_not_called()
@@ -75,8 +75,8 @@ def test_delete_node_success() -> None:
     delete_node(request=request, state=state)
 
     # Assert
-    state.register_node.assert_not_called()
-    state.unregister_node.assert_called_once()
+    state.create_node.assert_not_called()
+    state.delete_node.assert_called_once()
     state.store_task_ins.assert_not_called()
     state.get_task_ins.assert_not_called()
     state.store_task_res.assert_not_called()
@@ -93,8 +93,8 @@ def test_pull_task_ins() -> None:
     pull_task_ins(request=request, state=state)
 
     # Assert
-    state.register_node.assert_not_called()
-    state.unregister_node.assert_not_called()
+    state.create_node.assert_not_called()
+    state.delete_node.assert_not_called()
     state.store_task_ins.assert_not_called()
     state.get_task_ins.assert_called_once()
     state.store_task_res.assert_not_called()
@@ -109,7 +109,7 @@ def test_push_task_res() -> None:
             TaskRes(
                 task_id="",
                 group_id="",
-                workload_id="",
+                workload_id=0,
                 task=Task(),
             ),
         ],
@@ -120,8 +120,8 @@ def test_push_task_res() -> None:
     push_task_res(request=request, state=state)
 
     # Assert
-    state.register_node.assert_not_called()
-    state.unregister_node.assert_not_called()
+    state.create_node.assert_not_called()
+    state.delete_node.assert_not_called()
     state.store_task_ins.assert_not_called()
     state.get_task_ins.assert_not_called()
     state.store_task_res.assert_called_once()

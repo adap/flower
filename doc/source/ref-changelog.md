@@ -8,6 +8,10 @@
 
 ### What's new?
 
+- **Fix the incorrect return types of Strategy** ([#2432](https://github.com/adap/flower/pull/2432/files))
+
+  The types of the return values in the docstrings in two methods (`aggregate_fit` and `aggregate_evaluate`) now match the hint types in the code.
+
 - **Unify client API** ([#2303](https://github.com/adap/flower/pull/2303))
 
   Using the `client_fn`, Flower clients can interchangeably run as standalone processes (i.e. via `start_client`) or in simulation (i.e. via `start_simulation`) without requiring changes to how the client class is defined and instantiated.
@@ -20,7 +24,7 @@
 
 - **General updates to baselines** ([#2301](https://github.com/adap/flower/pull/2301).[#2305](https://github.com/adap/flower/pull/2305), [#2307](https://github.com/adap/flower/pull/2307), [#2327](https://github.com/adap/flower/pull/2327))
 
-- **General updates to the simulation engine** ([#2331](https://github.com/adap/flower/pull/2331))
+- **General updates to the simulation engine** ([#2331](https://github.com/adap/flower/pull/2331), [#2448](https://github.com/adap/flower/pull/2448))
 
 - **General improvements** ([#2309](https://github.com/adap/flower/pull/2309), [#2310](https://github.com/adap/flower/pull/2310), [2313](https://github.com/adap/flower/pull/2313), [#2316](https://github.com/adap/flower/pull/2316), [2317](https://github.com/adap/flower/pull/2317),[#2349](https://github.com/adap/flower/pull/2349), [#2360](https://github.com/adap/flower/pull/2360), [#2402](https://github.com/adap/flower/pull/2402), [#2446](https://github.com/adap/flower/pull/2446))
 
