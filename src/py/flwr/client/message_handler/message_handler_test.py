@@ -120,7 +120,7 @@ def test_client_without_get_properties() -> None:
     task_ins: TaskIns = TaskIns(
         task_id=str(uuid.uuid4()),
         group_id="",
-        workload_id="",
+        workload_id=0,
         task=Task(
             producer=Node(node_id=0, anonymous=True),
             consumer=Node(node_id=0, anonymous=True),
@@ -146,7 +146,7 @@ def test_client_without_get_properties() -> None:
         TaskRes(
             task_id=str(uuid.uuid4()),
             group_id="",
-            workload_id="",
+            workload_id=0,
         )
     )
     # pylint: disable=no-member
@@ -183,7 +183,7 @@ def test_client_with_get_properties() -> None:
     task_ins = TaskIns(
         task_id=str(uuid.uuid4()),
         group_id="",
-        workload_id="",
+        workload_id=0,
         task=Task(
             producer=Node(node_id=0, anonymous=True),
             consumer=Node(node_id=0, anonymous=True),
@@ -209,7 +209,7 @@ def test_client_with_get_properties() -> None:
         TaskRes(
             task_id=str(uuid.uuid4()),
             group_id="",
-            workload_id="",
+            workload_id=0,
         )
     )
     # pylint: disable=no-member
