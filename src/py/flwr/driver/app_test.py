@@ -43,7 +43,7 @@ class TestClientManagerWithDriver(unittest.TestCase):
         ]
         driver = MagicMock()
         driver.stub = "driver stub"
-        driver.create_workload.return_value = CreateWorkloadResponse(workload_id="1")
+        driver.create_workload.return_value = CreateWorkloadResponse(workload_id=1)
         driver.get_nodes.return_value = GetNodesResponse(nodes=expected_nodes)
         client_manager = SimpleClientManager()
         lock = threading.Lock()
