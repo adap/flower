@@ -70,7 +70,7 @@ class DriverClientManager(ClientManager):
         if client.cid in self.nodes:
             return False
 
-        # Register node in with State
+        # Create node in State
         state: State = self.state_factory.state()
         client.node_id = state.create_node()
 
@@ -103,7 +103,7 @@ class DriverClientManager(ClientManager):
             del self.nodes[client.cid]
             ins_scheduler.stop()
 
-            # Unregister node_id in with State
+            # Delete node_id in State
             state: State = self.state_factory.state()
             state.delete_node(node_id=node_id)
 

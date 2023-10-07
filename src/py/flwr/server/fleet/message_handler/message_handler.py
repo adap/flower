@@ -39,7 +39,7 @@ def create_node(
     state: State,
 ) -> CreateNodeResponse:
     """."""
-    # Register node
+    # Create node
     node_id = state.create_node()
     return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))
 
