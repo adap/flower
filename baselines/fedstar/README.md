@@ -18,7 +18,7 @@ dataset: [Ambient Context, Speech Commands]
 
 ## About this baseline
 
-****What’s implemented:**** :warning: *_Concisely describe what experiment(s) in the publication can be replicated by running the code. Please only use a few sentences. Start with: “The code in this directory …”_*
+****What’s implemented:**** : The code is structured in such a way that all experiments for ambient context and speech commands can be derived.
 
 ****Datasets:**** : Ambient Context, Speech Commands
 
