@@ -1,5 +1,5 @@
 FROM ubuntu:22.04
-LABEL author="Marius Schlegel"
+LABEL author="The Flower Authors"
 
 RUN apt-get update && \
     # install Python
