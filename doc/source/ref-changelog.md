@@ -10,7 +10,7 @@
 
 - **Fix the incorrect return types of Strategy** ([#2432](https://github.com/adap/flower/pull/2432/files))
 
-  The types of the return values in the docstrings in two methods: aggregate_fit and aggregate_evaluate now match the hint types in the code.
+  The types of the return values in the docstrings in two methods (`aggregate_fit` and `aggregate_evaluate`) now match the hint types in the code.
 
 - **Unify client API** ([#2303](https://github.com/adap/flower/pull/2303))
 
