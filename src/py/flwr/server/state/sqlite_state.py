@@ -519,11 +519,8 @@ class SqliteState(State):
 
     def create_workload(self) -> int:
         """Create one workload and store it in state."""
-        # Sample a random 64-bit unsigned integer as workload_id
-        workload_id: int = random.getrandbits(64)
-
-        # Convert the workload_id to int64
-        sql_workload_id = uint64_to_int64(workload_id)
+        # Sample random integer from 0 to 9223372036854775807
+        workload_id: int = random.randrange(9223372036854775808)
 
         # Check conflicts
         query = "SELECT COUNT(*) FROM workload WHERE workload_id = ?;"

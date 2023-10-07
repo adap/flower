@@ -362,7 +362,7 @@ class StateTest(unittest.TestCase):
         state: State = self.state_factory()
         state.create_workload()
         invalid_workload_id = 61016
-        state.create_node()
+        node_id = 2
 
         # Execute
         retrieved_node_ids = state.get_nodes(invalid_workload_id)

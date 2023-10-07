@@ -213,8 +213,8 @@ class InMemoryState(State):
 
     def create_workload(self) -> int:
         """Create one workload."""
-        # Sample a random 64-bit unsigned integer as workload_id
-        workload_id: int = random.getrandbits(64)
+        # Sample random integer from 0 to 9223372036854775807
+        workload_id: int = random.randrange(9223372036854775808)
 
         if workload_id not in self.workload_ids:
             self.workload_ids.add(workload_id)
