@@ -12,6 +12,7 @@ import distutils.util
 from multiprocessing import Process
 import hydra
 from fedstar.client import AudioClient
+import tensorflow as tf
 
 multiprocessing.set_start_method("spawn", force=True)
 
@@ -56,7 +57,6 @@ class Client(Process):
     @staticmethod
     def setup_gpu(gpu, gpu_memory):
         os.environ["CUDA_VISIBLE_DEVICES"] = gpu if gpu is not None else ""
-        import tensorflow as tf
 
         gpus = tf.config.list_physical_devices("GPU")
         if not gpus:

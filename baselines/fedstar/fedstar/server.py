@@ -111,8 +111,6 @@ class AudioServer:
         return fit_config
 
     def get_eval_fn(self, ds_test):
-        import tensorflow as tf
-
         def evaluate(servr_round, weights, configs):
             loss, acc = 0, 0
             self.current_round += 1
@@ -141,8 +139,6 @@ class AudioServer:
 
 
 def clear_memory():
-    import tensorflow as tf
-
     gc.collect()
     tf.keras.backend.clear_session()
 
@@ -158,7 +154,6 @@ def set_logger_level():
 
 def set_gpu_limits(gpu_id, gpu_memory):
     os.environ["CUDA_VISIBLE_DEVICES"] = gpu_id
-    import tensorflow as tf
 
     gpus = tf.config.list_physical_devices("GPU")
     if not gpus:
