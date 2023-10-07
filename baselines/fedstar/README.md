@@ -1,8 +1,8 @@
 ---
 title: Federated Self-training for Semi-supervised Audio Recognition
 url: [dl.acm.org/doi/10.1145/3520128](https://dl.acm.org/doi/10.1145/3520128)
-labels: [Audio Classification, Semi Supervised learning] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [Ambient Context, Speech Commands] # list of datasets you include in your baseline
+labels: [Audio Classification, Semi Supervised learning]
+dataset: [Ambient Context, Speech Commands]
 ---
 
 # FedStar: Federated Self-training for Semi-supervised Audio Recognition
