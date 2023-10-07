@@ -8,7 +8,9 @@
 
 ### What's new?
 
-- **Update MLCube code example** ([#2425](https://github.com/adap/flower/pull/2425))
+- **Fix the incorrect return types of Strategy** ([#2432](https://github.com/adap/flower/pull/2432/files))
+
+  The types of the return values in the docstrings in two methods (`aggregate_fit` and `aggregate_evaluate`) now match the hint types in the code.
 
 - **Unify client API** ([#2303](https://github.com/adap/flower/pull/2303))
 
@@ -18,9 +20,9 @@
 
   - FedProx ([#2210](https://github.com/adap/flower/pull/2210), [#2286](https://github.com/adap/flower/pull/2286))
 
-- **Update Flower Examples** ([#2384](https://github.com/adap/flower/pull/2384))
+- **Update Flower Examples** ([#2384](https://github.com/adap/flower/pull/2384)), ([#2425](https://github.com/adap/flower/pull/2425))
 
-- **General updates to baselines** ([#2301](https://github.com/adap/flower/pull/2301).[#2305](https://github.com/adap/flower/pull/2305), [#2307](https://github.com/adap/flower/pull/2307), [#2327](https://github.com/adap/flower/pull/2327))
+- **General updates to baselines** ([#2301](https://github.com/adap/flower/pull/2301), [#2305](https://github.com/adap/flower/pull/2305), [#2307](https://github.com/adap/flower/pull/2307), [#2327](https://github.com/adap/flower/pull/2327))
 
 - **General updates to the simulation engine** ([#2331](https://github.com/adap/flower/pull/2331), [#2448](https://github.com/adap/flower/pull/2448))
 
