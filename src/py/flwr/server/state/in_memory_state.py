@@ -15,7 +15,7 @@
 """In-memory State implementation."""
 
 
-import random
+import os
 from datetime import datetime, timedelta
 from logging import ERROR
 from typing import Dict, List, Optional, Set
@@ -184,8 +184,8 @@ class InMemoryState(State):
 
     def create_node(self) -> int:
         """Create, store in state, and return `node_id`."""
-        # Sample a random 64-bit unsigned integer as node_id
-        node_id: int = random.getrandbits(64)
+        # Sample a random int64 as node_id
+        node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
         if node_id not in self.node_ids:
             self.node_ids.add(node_id)
@@ -213,8 +213,8 @@ class InMemoryState(State):
 
     def create_workload(self) -> int:
         """Create one workload."""
-        # Sample a random 64-bit unsigned integer as workload_id
-        workload_id: int = random.getrandbits(64)
+        # Sample a random int64 as workload_id
+        workload_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
         if workload_id not in self.workload_ids:
             self.workload_ids.add(workload_id)
