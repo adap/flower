@@ -283,7 +283,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: State = self.state_factory()
         task_ins = create_task_ins(
-            consumer_node_id=0, anonymous=True, workload_id="I'm invalid"
+            consumer_node_id=0, anonymous=True, workload_id=61016
         )
 
         # Execute
@@ -362,7 +362,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: State = self.state_factory()
         state.create_workload()
-        invalid_workload_id = ""
+        invalid_workload_id = 61016
         node_id = 2
 
         # Execute
@@ -420,7 +420,7 @@ class StateTest(unittest.TestCase):
 def create_task_ins(
     consumer_node_id: int,
     anonymous: bool,
-    workload_id: str,
+    workload_id: int,
     delivered_at: str = "",
 ) -> TaskIns:
     """Create a TaskIns for testing."""
@@ -448,7 +448,7 @@ def create_task_res(
     producer_node_id: int,
     anonymous: bool,
     ancestry: List[str],
-    workload_id: str,
+    workload_id: int,
 ) -> TaskRes:
     """Create a TaskRes for testing."""
     task_res = TaskRes(
