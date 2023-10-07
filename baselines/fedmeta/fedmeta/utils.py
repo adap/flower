@@ -117,10 +117,10 @@ def plot_from_pkl(directory="."):
     """
 
     color_mapping = {
-        "fedavg.pkl": "green",
-        "fedavg_meta.pkl": "blue",
-        "fedmeta_maml.pkl": "orange",
-        "fedmeta_meta_sgd.pkl": "red",
+        "fedavg.pkl": "#66CC00",
+        "fedavg_meta.pkl": "#3333CC",
+        "fedmeta_maml.pkl": "#FFCC00",
+        "fedmeta_meta_sgd.pkl": "#CC0000",
     }
 
     pkl_files = [f for f in os.listdir(directory) if f.endswith('.pkl')]
@@ -132,47 +132,28 @@ def plot_from_pkl(directory="."):
             data = pickle.load(f)
             all_data[file] = data
 
-    # plt.figure(figsize=(14, 6))
-    #
-    # # Acc graph
-    # plt.subplot(1, 2, 1)
-    # for file, data in all_data.items():
-    #     accuracies = [acc for _, acc in data["accuracy"]['accuracy']]
-    #     legend_ = file[:-4] if file.endswith('.pkl') else file
-    #     plt.plot(accuracies, label=legend_, color=color_mapping.get(file, "black"))
-    # plt.title("Accuracy")
-    # plt.legend()
-    #
-    # # Loss graph
-    # plt.subplot(1, 2, 2)
-    # for file, data in all_data.items():
-    #     loss = [loss for _, loss in data["loss"]]
-    #     legend_ = file[:-4] if file.endswith('.pkl') else file
-    #     plt.plot(loss, label=legend_, color=color_mapping.get(file, "black"))
-    # plt.title("Loss")
-    # plt.legend()
-    #
-    # plt.tight_layout()
-
-    plt.figure(figsize=(7, 12))  # figsize 변경
+    plt.figure(figsize=(7, 12))
 
     # Acc graph
-    plt.subplot(2, 1, 1)  # 변경: 첫 번째 인자를 2로, 두 번째 인자를 1로 설정
-    for file, data in all_data.items():
+    plt.subplot(2, 1, 1)
+    for file in sorted(all_data.keys()):
+        data = all_data[file]
         accuracies = [acc for _, acc in data["accuracy"]['accuracy']]
         legend_ = file[:-4] if file.endswith('.pkl') else file
-        plt.plot(accuracies, label=legend_, color=color_mapping.get(file, "black"))
+        plt.plot(accuracies, label=legend_, color=color_mapping.get(file, "black"), linewidth=3)
     plt.title("Accuracy")
+    plt.grid(True)
     plt.legend()
 
-    # Loss graph
-    plt.subplot(2, 1, 2)  # 변경: 첫 번째 인자를 2로, 두 번째 인자를 1로 설정
-    for file, data in all_data.items():
+    plt.subplot(2, 1, 2)
+    for file in sorted(all_data.keys()):
+        data = all_data[file]
         loss = [loss for _, loss in data["loss"]]
         legend_ = file[:-4] if file.endswith('.pkl') else file
-        plt.plot(loss, label=legend_, color=color_mapping.get(file, "black"))
+        plt.plot(loss, label=legend_, color=color_mapping.get(file, "black"), linewidth=3)
     plt.title("Loss")
     plt.legend()
+    plt.grid(True)
 
     plt.tight_layout()
 
