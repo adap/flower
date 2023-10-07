@@ -5,8 +5,7 @@ Quickstart XGBoost
 ==================
 
 .. meta::
-   :description lang=en: Check out this Federated Learning quickstart tutorial for using Flower with XGBoost to train classification models on trees.
-   :description lang=fr: Découvrez ce tutoriel de Federated Learning pour utiliser Flower avec XGBoost pour entrainer des modèles de classification sur des arbres.
+   :description: Check out this Federated Learning quickstart tutorial for using Flower with XGBoost to train classification models on trees.
 
 Let's build a horizontal federated learning system using XGBoost and Flower!
 
