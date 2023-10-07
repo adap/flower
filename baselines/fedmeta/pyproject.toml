@@ -3,11 +3,11 @@ requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
-name = "FedMeta" # <----- Ensure it matches the name of your baseline directory containing all the source code
+name = "fedmeta"
 version = "1.0.0"
-description = "Flower Baselines"
+description = "Implementation of FedMeta (Fei Chen et al. 2018)"
 license = "Apache-2.0"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["Jinsoo Kim <wlstn25092303@gmail.com>", "Kangyoon Lee <keylee@gachon.ac.kr>"]
 readme = "README.md"
 homepage = "https://flower.dev"
 repository = "https://github.com/adap/flower"

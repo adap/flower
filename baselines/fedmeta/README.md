@@ -39,10 +39,10 @@ dataset: [FEMNIST, SHAKESPEARE]
 
 **Shakespeare Dataset Issue** : In the FedMeta paper experiment, the Shakespeare dataset had 1126 users. However, due to a current bug, the number of users has decreased to 660 users. Therefore, we have only maintained the total number of data.
 
-|   Dataset   |      #Clients       |     #Samples     | #Classes |                       #Partition Clients                        |   #Partition Dataset   |
-|:-----------:|:-------------------:|:----------------:|:--------:|:---------------------------------------------------------------:|:----------------------:|
-|   FEMNIST   |    About<br>1050    | About<br>240,000 |    62    | Train Clients : 0.8 <br>Valid Clients : 0.1, Test Clients : 0.1 | Sup : 0.2<br>Qry : 0.8 |
-| SHAKESPEARE | About<br>550 -> 110 | About<br>620,000 |    80    | Train Clients : 0.8 <br>Valid Clients : 0.1, Test Clients : 0.1 |   Sup : 0.2<br>Qry : 0.8   |
+|   Dataset   | #Clients | #Samples | #Classes |                       #Partition Clients                        |   #Partition Dataset   |
+|:-----------:|:--------:|:--------:|:--------:|:---------------------------------------------------------------:|:----------------------:|
+|   FEMNIST   |   1109   | 245,337  |    62    | Train Clients : 0.8 <br>Valid Clients : 0.1, Test Clients : 0.1 | Sup : 0.2<br>Qry : 0.8 |
+| SHAKESPEARE |   138    | 646,697  |    80    | Train Clients : 0.8 <br>Valid Clients : 0.1, Test Clients : 0.1 |   Sup : 0.2<br>Qry : 0.8   |
 
 **The original specifications of the Leaf dataset can be found in the Leaf paper(_"LEAF: A Benchmark for Federated Settings"_).**
 
