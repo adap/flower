@@ -1,7 +1,7 @@
 import flwr as fl
 import hydra
 from hydra.core.hydra_config import HydraConfig
-from hydra.utils import instantiate
+from hydra.utils import instantiate, call
 from omegaconf import DictConfig, OmegaConf
 
 from fedpac import client, server, utils
@@ -29,20 +29,29 @@ def main(cfg: DictConfig) -> None:
     )
 
 
-    # prepare function that will be used to spawn each client
-    client_fn = client.gen_client_fn(
-        num_clients=cfg.num_clients,
+    # # prepare function that will be used to spawn each client
+    # client_fn = client.gen_client_fn(
+    #     num_clients=cfg.num_clients,
+    #     num_epochs=cfg.num_epochs,
+    #     trainloaders=trainloaders,
+    #     valloaders=valloaders,
+    #     num_rounds=cfg.num_rounds,
+    #     learning_rate=cfg.learning_rate,
+    #     weight_decay=cfg.weight_decay,
+    #     momentum=cfg.momentum,
+    #     model=cfg.model,
+    #     lamda=cfg.lamda
+    # )
+
+    client_fn = call(
+        cfg.gen_client_fn,
         num_epochs=cfg.num_epochs,
         trainloaders=trainloaders,
         valloaders=valloaders,
-        num_rounds=cfg.num_rounds,
         learning_rate=cfg.learning_rate,
         weight_decay=cfg.weight_decay,
-        momentum=cfg.momentum,
-        model=cfg.model,
-        lamda=cfg.lamda
-    )
-
+        momentum=cfg.momentum
+        )
     # get function that will executed by the strategy's evaluate() method
     # Set server's device
     device = cfg.server_device
@@ -50,24 +59,23 @@ def main(cfg: DictConfig) -> None:
 
     # get a function that will be used to construct the config that the client's
     # fit() method will received
-    def get_on_fit_config():
-        def fit_config_fn(server_round: int, global_centroid):
-            # resolve and convert to python dict
-            fit_config = OmegaConf.to_container(cfg.fit_config, resolve=True)
-            fit_config["curr_round"] = server_round             # add round info
-            fit_config.update({"global_centroid":global_centroid, 
-                                "classifier_head": None
-                            }) 
-            return fit_config
+    # def get_on_fit_config():
+    #     def fit_config_fn(server_round: int, global_centroid):
+    #         # resolve and convert to python dict
+    #         fit_config = OmegaConf.to_container(cfg.fit_config, resolve=True)
+    #         fit_config["curr_round"] = server_round             # add round info
+    #         fit_config.update({"global_centroid":global_centroid, 
+    #                             "classifier_head": None
+    #                         }) 
+    #         return fit_config
 
-        return fit_config_fn
+    #     return fit_config_fn
 
     # instantiate strategy according to config. Here we pass other arguments
     # that are only defined at run time.
     strategy = instantiate(
         cfg.strategy,
-        evaluate_fn=evaluate_fn,
-        on_fit_config_fn=get_on_fit_config()
+        evaluate_fn=evaluate_fn
     )
 
     # Start simulation
@@ -85,14 +93,14 @@ def main(cfg: DictConfig) -> None:
     # Experiment completed. Now we save the results and
     # generate plots using the `history`
     print("................")
-    print(history)
+    # print(history)
     # Hydra automatically creates an output directory
     # Let's retrieve it and save some results there
     save_path = HydraConfig.get().runtime.output_dir
 
     # save results as a Python pickle using a file_path
     # the directory created by Hydra for each run
-    save_results_as_pickle(history, file_path=save_path, extra_results={})
+    # save_results_as_pickle(history, file_path=save_path, extra_results={})
 
     # plot results and include them in the readme
     strategy_name = strategy.__class__.__name__

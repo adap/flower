@@ -1,7 +1,7 @@
 from typing import Callable, Dict, List, Optional, Tuple, Union
 from functools import reduce
 import numpy as np
-from logging import WARNING
+from logging import WARNING, INFO
 
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
@@ -110,9 +110,14 @@ class FedPAC(FedAvg):
         sample_size, min_num_clients = self.num_fit_clients(
             client_manager.num_available()
         )
+        if sample_size>=100 and server_round!=200:
+            num_clients=0.3*sample_size
+        else:
+            num_clients=sample_size
+
         self.avg_heads = [None]*sample_size
         clients = client_manager.sample(
-            num_clients=sample_size, min_num_clients=min_num_clients
+            num_clients=num_clients, min_num_clients=min_num_clients
         )
 
         fit_configurations = []
@@ -187,5 +192,4 @@ class FedPAC(FedAvg):
             metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
         elif server_round == 1:  # Only log this warning once
             log(WARNING, "No evaluate_metrics_aggregation_fn provided")
-
         return loss_aggregated, metrics_aggregated

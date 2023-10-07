@@ -9,6 +9,7 @@ import torch.nn as nn
 from flwr.common.logger import log
 from torch import Tensor
 from torch.utils.data import DataLoader
+from torch.nn.parameter import Parameter
 
 
 class EMNISTNet(nn.Module):
@@ -243,6 +244,80 @@ def train_features_epoch(
         optimizer.step()
     return net
 
+def fedavg_train(  # pylint: disable=too-many-arguments
+    net: nn.Module,
+    trainloader: DataLoader,
+    valloader: DataLoader,
+    epochs: int,
+    learning_rate: float,
+    weight_decay: float,
+    momentum: float,
+    device: torch.device,
+) -> None:
+    """Train the network on the training set.
+
+    Parameters
+    ----------
+    net : nn.Module
+        The neural network to train.
+    trainloader : DataLoader
+        The DataLoader containing the data to train the network on.
+    device : torch.device
+        The device on which the model should be trained, either 'cpu' or 'cuda'.
+    epochs : int
+        The number of epochs the model should be trained for.
+    learning_rate : float
+        The learning rate for the SGD optimizer.
+    proximal_mu : float
+        Parameter for the weight of the proximal term.
+    """
+    criterion = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, weight_decay=weight_decay, momentum=momentum)
+    net.train()
+    for _ in range(epochs):
+        net = _train_one_epoch(
+            net, trainloader, device, criterion, optimizer
+        )
+
+
+def _train_one_epoch(  # pylint: disable=too-many-arguments
+    net: nn.Module,
+    trainloader: DataLoader,
+    device: torch.device,
+    criterion: torch.nn.CrossEntropyLoss,
+    optimizer: torch.optim.Adam,
+) -> nn.Module:
+    """Train for one epoch.
+
+    Parameters
+    ----------
+    net : nn.Module
+        The neural network to train.
+    global_params : List[Parameter]
+        The parameters of the global model (from the server).
+    trainloader : DataLoader
+        The DataLoader containing the data to train the network on.
+    device : torch.device
+        The device on which the model should be trained, either 'cpu' or 'cuda'.
+    criterion : torch.nn.CrossEntropyLoss
+        The loss function to use for training
+    optimizer : torch.optim.Adam
+        The optimizer to use for training
+
+
+    Returns
+    -------
+    nn.Module
+        The model that has been trained for one epoch.
+    """
+    for images, labels in trainloader:
+        images, labels = images.to(device), labels.to(device)
+        optimizer.zero_grad()
+        _, outputs = net(images)
+        loss = criterion(outputs, labels)
+        loss.backward()
+        optimizer.step()
+    return net
 
 
 def test(
@@ -267,6 +342,7 @@ def test(
     criterion = torch.nn.CrossEntropyLoss()
     correct, total, loss = 0, 0, 0.0
     net.eval()
+    net = net.to(device)
     with torch.no_grad():
         for images, labels in testloader:
             images, labels = images.to(device), labels.to(device)

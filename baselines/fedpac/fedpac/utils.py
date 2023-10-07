@@ -12,7 +12,8 @@ import cvxpy as cvx
 import matplotlib.pyplot as plt
 
 from flwr.server.history import History
-from flwr.common import NDArray, NDArrays
+from flwr.common import  NDArrays
+from omegaconf import  OmegaConf
 
 from typing import Dict, Optional, Union, List, Tuple
 
@@ -117,6 +118,27 @@ def save_results_as_pickle(
     with open(str(path), "wb") as handle:
         pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
+
+def get_on_fit_config(config):
+    def fit_config_fn(server_round: int, global_centroid):
+        # resolve and convert to python dict
+        fit_config = OmegaConf.to_container(config, resolve=True)
+        fit_config["curr_round"] = server_round             # add round info
+        fit_config.update({"global_centroid":global_centroid, 
+                            "classifier_head": None
+                        }) 
+        return fit_config
+
+    return fit_config_fn
+
+def get_on_fit_fedavg_config(config):
+    def fit_config_fn(server_round: int):
+        # resolve and convert to python dict
+        fit_config = OmegaConf.to_container(config, resolve=True)
+        fit_config["curr_round"] = server_round             # add round info
+        return fit_config
+
+    return fit_config_fn
 
 def get_centroid(feature_list: List[torch.FloatTensor]):
     """Takes in the feature extraction layers list 

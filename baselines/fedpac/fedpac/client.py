@@ -14,7 +14,7 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
-from fedpac.models import test, train
+from fedpac.models import test, train, fedavg_train
 from fedpac.utils import get_centroid
 
 
@@ -184,9 +184,70 @@ class FlowerClient(fl.client.NumPyClient):
         return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
 
 
+class FedAvgClient(
+    fl.client.NumPyClient
+):  # pylint: disable=too-many-instance-attributes
+    """Standard Flower client for CNN training."""
+
+    def __init__(
+        self,
+        net: torch.nn.Module,
+        trainloader: DataLoader,
+        valloader: DataLoader,
+        device: torch.device,
+        num_epochs: int,
+        learning_rate: float,
+        weight_decay: float,
+        momentum: float,
+    ):  # pylint: disable=too-many-arguments
+        self.net = net
+        self.trainloader = trainloader
+        self.valloader = valloader
+        self.device = device
+        self.num_epochs = num_epochs
+        self.learning_rate = learning_rate
+        self.weight_decay = weight_decay
+        self.momentum = momentum
+
+    def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
+        """Return the parameters of the current net."""
+        return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
+
+    def set_parameters(self, parameters: NDArrays) -> None:
+        """Change the parameters of the model using the given ones."""
+        params_dict = zip(self.net.state_dict().keys(), parameters)
+        state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+        self.net.load_state_dict(state_dict, strict=True)
+
+    def fit(
+        self, parameters: NDArrays, config: Dict[str, Scalar]
+    ) -> Tuple[NDArrays, int, Dict]:
+        """Implement distributed fit function for a given client."""
+        self.set_parameters(parameters)
+
+        fedavg_train(
+            self.net,
+            self.trainloader,
+            self.valloader,
+            self.num_epochs,
+            self.learning_rate,
+            self.weight_decay,
+            self.momentum,
+            self.device,
+        )
+
+        return self.get_parameters({}), len(self.trainloader), {}
+
+    def evaluate(
+        self, parameters: NDArrays, config: Dict[str, Scalar]
+    ) -> Tuple[float, int, Dict]:
+        """Implement distributed evaluation for a given client."""
+        self.set_parameters(parameters)
+        loss, accuracy = test(self.net, self.valloader, self.device)
+        return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
+
+
 def gen_client_fn(
-    num_clients: int,
-    num_rounds: int,
     num_epochs: int,
     trainloaders: List[DataLoader],
     valloaders: List[DataLoader],
@@ -245,6 +306,69 @@ def gen_client_fn(
         # Create a  single Flower client representing a single organization
         return FlowerClient(
             net, trainloader, valloader, device, num_epochs, learning_rate, weight_decay, momentum, lamda
+        )
+
+    return client_fn
+
+
+def gen_fedavg_client_fn(
+    num_epochs: int,
+    trainloaders: List[DataLoader],
+    valloaders: List[DataLoader],
+    learning_rate: float,
+    weight_decay: float,
+    momentum: float,
+    model: DictConfig
+    ) -> Tuple[
+    Callable[[str], FlowerClient], DataLoader
+]:
+    """Generates the client function that creates the Flower Clients.
+
+    Parameters
+    ----------
+    device : torch.device
+        The device on which the the client will train on and test on.
+    iid : bool
+        The way to partition the data for each client, i.e. whether the data
+        should be independent and identically distributed between the clients
+        or if the data should first be sorted by labels and distributed by chunks
+        to each client (used to test the convergence in a worst case scenario)
+    balance : bool
+        Whether the dataset should contain an equal number of samples in each class,
+        by default True
+    num_clients : int
+        The number of clients present in the setup
+    num_epochs : int
+        The number of local epochs each client should run the training for before
+        sending it to the server.
+    batch_size : int
+        The size of the local batches each client trains on.
+    learning_rate : float
+        The learning rate for the SGD  optimizer of clients.
+
+    Returns
+    -------
+    Tuple[Callable[[str], FlowerClient], DataLoader]
+        A tuple containing the client function that creates Flower Clients and
+        the DataLoader that will be used for testing
+    """
+
+
+    def client_fn(cid: str) -> FlowerClient:
+        """Create a Flower client representing a single organization."""
+
+        # Load model
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        net = model.to(device)
+
+        # Note: each client gets a different trainloader/valloader, so each client
+        # will train and evaluate on their own unique data
+        trainloader = trainloaders[int(cid)]
+        valloader = valloaders[int(cid)]
+
+        # Create a  single Flower client representing a single organization
+        return FedAvgClient(
+            net, trainloader, valloader, device, num_epochs, learning_rate, weight_decay, momentum
         )
 
     return client_fn
