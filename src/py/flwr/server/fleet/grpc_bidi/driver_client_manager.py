@@ -15,6 +15,7 @@
 """Flower DriverClientManager."""
 
 
+import random
 import threading
 from typing import Dict, List, Optional, Set, Tuple
 
@@ -70,9 +71,13 @@ class DriverClientManager(ClientManager):
         if client.cid in self.nodes:
             return False
 
-        # Register node in with State
+        # Generate random integer ID
+        random_node_id: int = random.randrange(9223372036854775808)
+        client.node_id = random_node_id
+
+        # Register node_id in with State
         state: State = self.state_factory.state()
-        client.node_id = state.create_node()
+        state.register_node(node_id=random_node_id)
 
         # Create and start the instruction scheduler
         ins_scheduler = InsScheduler(
@@ -82,7 +87,7 @@ class DriverClientManager(ClientManager):
         ins_scheduler.start()
 
         # Store cid, node_id, and InsScheduler
-        self.nodes[client.cid] = (client.node_id, ins_scheduler)
+        self.nodes[client.cid] = (random_node_id, ins_scheduler)
 
         with self._cv:
             self._cv.notify_all()
@@ -105,7 +110,7 @@ class DriverClientManager(ClientManager):
 
             # Unregister node_id in with State
             state: State = self.state_factory.state()
-            state.delete_node(node_id=node_id)
+            state.unregister_node(node_id=node_id)
 
             with self._cv:
                 self._cv.notify_all()

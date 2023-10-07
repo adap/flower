@@ -73,11 +73,19 @@ class Driver:
         self,
         driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
         certificates: Optional[bytes] = None,
+        retry_interval: float = 1.0,
+        retry_times: int = 3,
     ) -> None:
+        if retry_interval < 0:
+            raise Exception("`retry_interval` must be greater than zero.")
+        if retry_times < 0:
+            raise Exception("`retry_times` must be greater than zero.")
         self.driver_service_address = driver_service_address
         self.certificates = certificates
         self.channel: Optional[grpc.Channel] = None
         self.stub: Optional[DriverStub] = None
+        self.retry_interval = retry_interval
+        self.retry_times = retry_times
 
     def connect(self) -> None:
         """Connect to the Driver API."""
@@ -106,54 +114,72 @@ class Driver:
 
     def create_workload(self, req: CreateWorkloadRequest) -> CreateWorkloadResponse:
         """Request for workload ID."""
-        res = cast(
-            CreateWorkloadResponse,
-            self._try_call_api("CreateWorkload", req),
-        )
-        return res
-
-    def get_nodes(self, req: GetNodesRequest) -> GetNodesResponse:
-        """Get client IDs."""
-        res = cast(GetNodesResponse, self._try_call_api("GetNodes", req))
-        return res
-
-    def push_task_ins(self, req: PushTaskInsRequest) -> PushTaskInsResponse:
-        """Schedule tasks."""
-        res = cast(
-            PushTaskInsResponse,
-            self._try_call_api("PushTaskIns", req),
-        )
-        return res
-
-    def pull_task_res(self, req: PullTaskResRequest) -> PullTaskResResponse:
-        """Get task results."""
-        res = cast(
-            PullTaskResResponse,
-            self._try_call_api("PullTaskRes", req),
-        )
-        return res
-
-    def _try_call_api(
-        self,
-        api_name: str,
-        request: DriverRequest,
-    ) -> DriverResponse:
         # Check if channel is open
         if self.stub is None:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
             raise Exception("`Driver` instance not connected")
 
-        # Call Driver API
-        api = cast(
-            Callable[[DriverRequest], DriverResponse], getattr(self.stub, api_name)
+        # Try calling DriverAPI
+        res = cast(
+            CreateWorkloadResponse,
+            self._try_call_stub_method(self.stub.CreateWorkload, req),
         )
-        retry_interval = INITIAL_RETRY_INTERVAL
+        return res
 
-        for retry_count in range(RETRY_TIMES + 1):
+    def get_nodes(self, req: GetNodesRequest) -> GetNodesResponse:
+        """Get client IDs."""
+        # Check if channel is open
+        if self.stub is None:
+            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
+            raise Exception("`Driver` instance not connected")
+
+        # Try calling DriverAPI
+        res = cast(
+            GetNodesResponse, self._try_call_stub_method(self.stub.GetNodes, req)
+        )
+        return res
+
+    def push_task_ins(self, req: PushTaskInsRequest) -> PushTaskInsResponse:
+        """Schedule tasks."""
+        # Check if channel is open
+        if self.stub is None:
+            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
+            raise Exception("`Driver` instance not connected")
+
+        # Try calling DriverAPI
+        res = cast(
+            PushTaskInsResponse,
+            self._try_call_stub_method(self.stub.PushTaskIns, req),
+        )
+        return res
+
+    def pull_task_res(self, req: PullTaskResRequest) -> PullTaskResResponse:
+        """Get task results."""
+        # Check if channel is open
+        if self.stub is None:
+            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
+            raise Exception("`Driver` instance not connected")
+
+        # Try calling DriverAPI
+        res = cast(
+            PullTaskResResponse,
+            self._try_call_stub_method(self.stub.PullTaskRes, req),
+        )
+        return res
+
+    def _try_call_stub_method(
+        self,
+        stub_method: Callable[[DriverRequest], DriverResponse],
+        request: DriverRequest,
+    ) -> DriverResponse:
+        # Call Driver API
+        retry_interval = self.retry_interval
+
+        for retry_count in range(self.retry_times + 1):
             try:
-                return api(request)
+                return stub_method(request)
             except grpc.RpcError as err:
-                if retry_count < RETRY_TIMES:
+                if retry_count < self.retry_times:
                     # pylint: disable-next=no-member
                     if err.code() == grpc.StatusCode.UNAVAILABLE:
                         log(
@@ -168,4 +194,4 @@ class Driver:
                     retry_interval *= 2
                 else:
                     raise
-        raise RuntimeError()
+        raise AssertionError("This code block should not be reachable")

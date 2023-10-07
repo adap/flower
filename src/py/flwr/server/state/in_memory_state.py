@@ -182,21 +182,16 @@ class InMemoryState(State):
         """
         return len(self.task_res_store)
 
-    def create_node(self) -> int:
-        """Create, store in state, and return `node_id`."""
-        # Sample a random 64-bit unsigned integer as node_id
-        node_id: int = random.getrandbits(64)
+    def register_node(self, node_id: int) -> None:
+        """Register a client node."""
+        if node_id in self.node_ids:
+            raise ValueError(f"Node {node_id} is already registered")
+        self.node_ids.add(node_id)
 
+    def unregister_node(self, node_id: int) -> None:
+        """Unregister a client node."""
         if node_id not in self.node_ids:
-            self.node_ids.add(node_id)
-            return node_id
-        log(ERROR, "Unexpected node registration failure.")
-        return 0
-
-    def delete_node(self, node_id: int) -> None:
-        """Delete a client node."""
-        if node_id not in self.node_ids:
-            raise ValueError(f"Node {node_id} not found")
+            raise ValueError(f"Node {node_id} is not registered")
         self.node_ids.remove(node_id)
 
     def get_nodes(self, workload_id: int) -> Set[int]:
