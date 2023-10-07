@@ -61,6 +61,7 @@ def partition_cifar_data(
     iid: Optional[bool] = False,
     balance: Optional[bool] = True,
     s: Optional[float] = 0.2,
+    sample_size: int = 600,
     seed: Optional[int] = 42,
 ) -> Tuple[List[Dataset], Dataset]:
     """Split training set into iid or non iid partitions to simulate the
@@ -99,12 +100,12 @@ def partition_cifar_data(
         return datasets, testset
     else:
         noniid_labels_list = [[0,1,2], [2,3,4], [4,5,6], [6,7,8], [8,9,0]]
-        iid_partition_size = int(partition_size * s)
-        noniid_partition_size = partition_size - iid_partition_size
-        idxs = trainset.targets.argsort()
+        iid_partition_size = int(sample_size * s)
+        noniid_partition_size = sample_size - iid_partition_size
+        idxs = np.array(trainset.targets).argsort()
         num_idxs_per_class = int(len(idxs)/num_classes)
         iid_shard_size = int(iid_partition_size/num_classes)
-        noniid_shard_size = int(noniid_partition_size/(len(noniid_labels_list)-1))
+        noniid_shard_size = int(noniid_partition_size/(len(noniid_labels_list[0])))
         sorted_data = Subset(trainset, idxs)
         label_index = {}
         for i in labels:
@@ -146,6 +147,7 @@ def partition_emnist_data(
     iid: Optional[bool] = False,
     balance: Optional[bool] = True,
     s: Optional[float] = 0.2,
+    sample_size: int = 1000,
     seed: Optional[int] = 42,
 ) -> Tuple[List[Dataset], Dataset]:
     
@@ -188,11 +190,10 @@ def partition_emnist_data(
     
     else:
         noniid_labels_list = [[i for i in range(10)],[i for i in range(10, 36)],[i for i in range(36,62)]]
-        iid_partition_size = int(partition_size * s)
-        noniid_partition_size = partition_size - iid_partition_size
+        iid_partition_size = int(sample_size * s)
+        noniid_partition_size = sample_size - iid_partition_size
         idxs = trainset.targets.argsort()
         iid_shard_size = int(iid_partition_size/num_classes)
-        noniid_shard_size = int(noniid_partition_size/num_classes)
         sorted_data = Subset(trainset, idxs)
 
         label_count = get_label_list(sorted_data)
@@ -204,8 +205,8 @@ def partition_emnist_data(
         client_data = {} 
         li = copy.copy(label_index)
         for idx in range(num_clients):
+            noniid_shard_size = int(noniid_partition_size/len(noniid_labels_list[idx%3]))
             client_data[idx] = []
-
             for i in labels:                        #Partition IID Data 
                 start = label_index[i]
                 stop = label_index[i]+iid_shard_size
@@ -248,6 +249,7 @@ def partition_emnist_data(
         ConcatDataset(client_data[c])
         for c in range(num_clients)
     ]
+
     return datasets, testset
 
 
