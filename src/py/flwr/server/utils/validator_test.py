@@ -135,7 +135,7 @@ def create_task_ins(
     task = TaskIns(
         task_id="",
         group_id="",
-        workload_id="",
+        workload_id=0,
         task=Task(
             delivered_at=delivered_at,
             producer=Node(node_id=0, anonymous=True),
@@ -162,7 +162,7 @@ def create_task_res(
     task_res = TaskRes(
         task_id="",
         group_id="",
-        workload_id="",
+        workload_id=0,
         task=Task(
             producer=Node(node_id=producer_node_id, anonymous=anonymous),
             consumer=Node(node_id=0, anonymous=True),

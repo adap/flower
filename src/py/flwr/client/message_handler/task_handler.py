@@ -129,7 +129,7 @@ def wrap_client_message_in_task_res(client_message: ClientMessage) -> TaskRes:
     return TaskRes(
         task_id="",
         group_id="",
-        workload_id="",
+        workload_id=0,
         task=Task(ancestry=[], legacy_client_message=client_message),
     )
 
