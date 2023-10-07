@@ -15,7 +15,7 @@
 """In-memory State implementation."""
 
 
-import random
+import os
 from datetime import datetime, timedelta
 from logging import ERROR
 from typing import Dict, List, Optional, Set
@@ -182,16 +182,21 @@ class InMemoryState(State):
         """
         return len(self.task_res_store)
 
-    def register_node(self, node_id: int) -> None:
-        """Register a client node."""
-        if node_id in self.node_ids:
-            raise ValueError(f"Node {node_id} is already registered")
-        self.node_ids.add(node_id)
+    def create_node(self) -> int:
+        """Create, store in state, and return `node_id`."""
+        # Sample a random int64 as node_id
+        node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
-    def unregister_node(self, node_id: int) -> None:
-        """Unregister a client node."""
         if node_id not in self.node_ids:
-            raise ValueError(f"Node {node_id} is not registered")
+            self.node_ids.add(node_id)
+            return node_id
+        log(ERROR, "Unexpected node registration failure.")
+        return 0
+
+    def delete_node(self, node_id: int) -> None:
+        """Delete a client node."""
+        if node_id not in self.node_ids:
+            raise ValueError(f"Node {node_id} not found")
         self.node_ids.remove(node_id)
 
     def get_nodes(self, workload_id: int) -> Set[int]:
@@ -208,8 +213,8 @@ class InMemoryState(State):
 
     def create_workload(self) -> int:
         """Create one workload."""
-        # Sample random integer from 0 to 9223372036854775807
-        workload_id: int = random.randrange(9223372036854775808)
+        # Sample a random int64 as workload_id
+        workload_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
         if workload_id not in self.workload_ids:
             self.workload_ids.add(workload_id)
