@@ -31,7 +31,6 @@ class Client(Process):
             # Configure GPU
             Client.setup_gpu(gpu=cfg["gpu_id"], gpu_memory=cfg["gpu_memory"])
             process_path = "/".join(parent_path.split('/')[:-3]) + "/"
-            process_path = os.path.join(process_path,"fedstar")
             # Create Client
             client = AudioClient(
                 client_id=cfg["client_id"],

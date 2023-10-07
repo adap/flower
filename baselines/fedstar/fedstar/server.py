@@ -193,7 +193,7 @@ def main(cfg):
     set_gpu_limits(gpu_id="0", gpu_memory=cfg["server"]["gpu_memory"])
     # Load Test Dataset
     ds_test, num_classes = DataBuilder.get_ds_test(
-        parent_path=os.path.join(parent_path,"fedstar"), data_dir=dataset_name, batch_size=cfg["server"]['batch_size'], buffer=1024, seed=cfg["server"]['seed']
+        parent_path=parent_path, data_dir=dataset_name, batch_size=cfg["server"]['batch_size'], buffer=1024, seed=cfg["server"]['seed']
     )
     # Create Server Object
     audio_server = AudioServer(
