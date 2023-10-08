@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from torch.nn import Module
 
-from utils.logger import Logger
+from .logger import Logger
 
 
 def get_parameters(net: Module) -> List[np.ndarray]:
