@@ -88,7 +88,7 @@ class TaskIns(google.protobuf.message.Message):
     TASK_FIELD_NUMBER: builtins.int
     task_id: builtins.str
     group_id: builtins.str
-    workload_id: builtins.str
+    workload_id: builtins.int
     @property
     def task(self) -> global___Task: ...
     def __init__(
@@ -96,7 +96,7 @@ class TaskIns(google.protobuf.message.Message):
         *,
         task_id: builtins.str = ...,
         group_id: builtins.str = ...,
-        workload_id: builtins.str = ...,
+        workload_id: builtins.int = ...,
         task: global___Task | None = ...,
     ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["task", b"task"]) -> builtins.bool: ...
@@ -114,7 +114,7 @@ class TaskRes(google.protobuf.message.Message):
     TASK_FIELD_NUMBER: builtins.int
     task_id: builtins.str
     group_id: builtins.str
-    workload_id: builtins.str
+    workload_id: builtins.int
     @property
     def task(self) -> global___Task: ...
     def __init__(
@@ -122,7 +122,7 @@ class TaskRes(google.protobuf.message.Message):
         *,
         task_id: builtins.str = ...,
         group_id: builtins.str = ...,
-        workload_id: builtins.str = ...,
+        workload_id: builtins.int = ...,
         task: global___Task | None = ...,
     ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["task", b"task"]) -> builtins.bool: ...

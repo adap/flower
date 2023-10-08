@@ -92,7 +92,7 @@ def test_validate_task_res() -> None:
     assert not validate_task_res(task_res)
 
     task_res.Clear()
-    task_res.workload_id = "123"
+    task_res.workload_id = 61016
     assert not validate_task_res(task_res)
 
     task_res.Clear()
