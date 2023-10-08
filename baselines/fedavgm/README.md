@@ -187,7 +187,7 @@ Summarizing all the results:
 
 ![](_static/fedavgm_vs_fedavg_rounds=10000_cifar10_w_1e-9.png)
 
-The following command reproduces the same behavior of Figure 6 from FedAvgM paper for the case of Local Epoch E=1, Reporting Fraction C=0.05, and concentration (α) = 1. In this example, it runs just 1.000 rounds:
+The following command reproduces the same behavior of Figure 6 from FedAvgM paper for the case of Local Epoch E=1, Reporting Fraction C=0.05, and concentration (α) = 1. In this example, it runs just 1,000 rounds:
 
 ```bash
 python -m fedavgm.main --multirun client.local_epochs=1 noniid.concentration=1 \
