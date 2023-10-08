@@ -44,8 +44,8 @@ def _download_data() -> Tuple[Dataset, Dataset]:
 def _partition_data(
     num_clients,
     iid: Optional[bool] = True,
-    beta: Optional[float] = 0.5,
-    seed: Optional[int] = 41,
+    beta=0.5,
+    seed=41,
 ) -> Tuple[List[Dataset], Dataset]:
     """Split training set to simulate the federated setting.
 
@@ -69,51 +69,57 @@ def _partition_data(
     """
     trainset, testset = _download_data()
 
-    datasets = []
+    datasets: List[Subset] = []
 
     if iid:
-        np.random.seed(seed)
-        num_sample = int(len(trainset) / (num_clients))
-        index = list(range(len(trainset)))
-        for _ in range(num_clients):
-            sample_idx = np.random.choice(index, num_sample, replace=False)
-            index = list(set(index) - set(sample_idx))
-            datasets.append(Subset(trainset, sample_idx))
+        distribute_iid(num_clients, seed, trainset, datasets)
 
     else:
-        labels = np.array([label for _, label in trainset])
-        min_size = 0
-        K = np.max(labels) + 1
-        N = labels.shape[0]
-        # net_dataidx_map = {}
-        n_nets = num_clients
-        np.random.seed(seed)
-
-        while min_size < 10:
-            idx_batch = [[] for _ in range(n_nets)]
-            # for each class in the dataset
-            for k in range(K):
-                idx_k = np.where(labels == k)[0]
-                np.random.shuffle(idx_k)
-                proportions = np.random.dirichlet(np.repeat(beta, n_nets))
-                ## Balance
-                proportions = np.array(
-                    [
-                        p * (len(idx_j) < N / n_nets)
-                        for p, idx_j in zip(proportions, idx_batch)
-                    ]
-                )
-                proportions = proportions / proportions.sum()
-                proportions = (np.cumsum(proportions) * len(idx_k)).astype(int)[:-1]
-                idx_batch = [
-                    idx_j + idx.tolist()
-                    for idx_j, idx in zip(idx_batch, np.split(idx_k, proportions))
-                ]
-                min_size = min([len(idx_j) for idx_j in idx_batch])
-
-        for j in range(n_nets):
-            np.random.shuffle(idx_batch[j])
-            # net_dataidx_map[j] = np.array(idx_batch[j])
-            datasets.append(Subset(trainset, np.array(idx_batch[j])))
+        distribute_noniid(num_clients, beta, seed, trainset, datasets)
 
     return datasets, testset
+
+
+def distribute_iid(num_clients, seed, trainset, datasets):
+    """Distribute dataset in iid manner."""
+    np.random.seed(seed)
+    num_sample = int(len(trainset) / (num_clients))
+    index = list(range(len(trainset)))
+    for _ in range(num_clients):
+        sample_idx = np.random.choice(index, num_sample, replace=False)
+        index = list(set(index) - set(sample_idx))
+        datasets.append(Subset(trainset, sample_idx))
+
+
+def distribute_noniid(num_clients, beta, seed, trainset, datasets):
+    """Distribute dataset in non-iid manner."""
+    labels = np.array([label for _, label in trainset])
+    min_size = 0
+    np.random.seed(seed)
+
+    while min_size < 10:
+        idx_batch: list = [[] for _ in range(num_clients)]
+        # for each class in the dataset
+        for k in range(np.max(labels) + 1):
+            idx_k = np.where(labels == k)[0]
+            np.random.shuffle(idx_k)
+            proportions = np.random.dirichlet(np.repeat(beta, num_clients))
+            ## Balance
+            proportions = np.array(
+                [
+                    p * (len(idx_j) < labels.shape[0] / num_clients)
+                    for p, idx_j in zip(proportions, idx_batch)
+                ]
+            )
+            proportions = proportions / proportions.sum()
+            proportions = (np.cumsum(proportions) * len(idx_k)).astype(int)[:-1]
+            idx_batch = [
+                idx_j + idx.tolist()
+                for idx_j, idx in zip(idx_batch, np.split(idx_k, proportions))
+            ]
+            min_size = min([len(idx_j) for idx_j in idx_batch])
+
+    for j in range(num_clients):
+        np.random.shuffle(idx_batch[j])
+        # net_dataidx_map[j] = np.array(idx_batch[j])
+        datasets.append(Subset(trainset, np.array(idx_batch[j])))

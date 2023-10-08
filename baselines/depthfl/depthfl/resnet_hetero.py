@@ -24,7 +24,7 @@ class MyBatchNorm(nn.Module):
     """Static Batch Normalization for HeteroFL."""
 
     def __init__(self, num_channels, track=True):
-        super(MyBatchNorm, self).__init__()
+        super().__init__()
         ## change num_groups to 32
         self.norm = nn.BatchNorm2d(num_channels, track_running_stats=track)
 
@@ -61,7 +61,7 @@ class BasicBlock(nn.Module):
         track=True,
         scale=True,
     ):
-        super(BasicBlock, self).__init__()
+        super().__init__()
         self.conv1 = conv3x3(inplanes, planes, stride)
         self.scaler = Scaler(scaler_rate, scale)
         self.bn1 = MyBatchNorm(planes, track)
@@ -98,7 +98,7 @@ class Multi_ResNet(nn.Module):
     def __init__(
         self, hidden_size, block, layers, num_classes, scaler_rate, track, scale
     ):
-        super(Multi_ResNet, self).__init__()
+        super().__init__()
 
         self.inplanes = hidden_size[0]
         self.norm_layer = MyBatchNorm

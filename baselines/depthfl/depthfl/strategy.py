@@ -74,7 +74,7 @@ class FedDyn(FedAvg):
 
         super().__init__(*args, **kwargs)
 
-    def aggregate_fit(
+    def aggregate_fit(  # type: ignore[override]
         self,
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
@@ -120,8 +120,8 @@ def aggregate(
     weights_sum = [np.zeros(v.shape) for v in origin]
 
     # summation & counting of parameters
-    for weight, _ in results:
-        for i, layer in enumerate(weight):
+    for parameters, _ in results:
+        for i, layer in enumerate(parameters):
             weights_sum[i] += layer
             param_count[i] += 1
 

@@ -3,7 +3,7 @@
 import pickle
 from pathlib import Path
 from secrets import token_hex
-from typing import Dict, Optional, Union
+from typing import Dict, Union
 
 from flwr.server.history import History
 
@@ -12,7 +12,7 @@ def save_results_as_pickle(
     history: History,
     file_path: Union[str, Path],
     extra_results: Dict,
-    default_filename: Optional[str] = "results.pkl",
+    default_filename: str = "results.pkl",
 ) -> None:
     """Save results from simulation to pickle.
 

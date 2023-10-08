@@ -14,20 +14,20 @@ class KLLoss(nn.Module):
     """KL divergence loss for self distillation."""
 
     def __init__(self):
-        super(KLLoss, self).__init__()
+        super().__init__()
+        self.temperature = 1
 
     def forward(self, pred, label):
         """KL loss forward."""
-        T = 1
-        predict = F.log_softmax(pred / T, dim=1)
-        target_data = F.softmax(label / T, dim=1)
+        predict = F.log_softmax(pred / self.temperature, dim=1)
+        target_data = F.softmax(label / self.temperature, dim=1)
         target_data = target_data + 10 ** (-7)
         with torch.no_grad():
             target = target_data.detach().clone()
 
         loss = (
-            T
-            * T
+            self.temperature
+            * self.temperature
             * ((target * (target.log() - predict)).sum(1).sum() / target.size()[0])
         )
         return loss
@@ -39,12 +39,9 @@ def train(  # pylint: disable=too-many-arguments
     device: torch.device,
     epochs: int,
     learning_rate: float,
-    feddyn: bool,
-    kd: bool,
+    config: dict,
     consistency_weight: float,
     prev_grads: dict,
-    alpha: float,
-    extended: bool,
 ) -> None:
     """Train the network on the training set.
 
@@ -60,21 +57,14 @@ def train(  # pylint: disable=too-many-arguments
         The number of epochs the model should be trained for.
     learning_rate : float
         The learning rate for the SGD optimizer.
-    feddyn : bool
-        whether using feddyn or fedavg
-    kd : bool
-        whether using self distillation
+    config : dict
+        training configuration
     consistency_weight : float
         hyperparameter for self distillation
     prev_grads : dict
         control variate for feddyn
-    alpha : float
-        Hyperparameter for the FedDyn.
-    extended : bool
-        if extended, train all sub-classifiers within local model
     """
     criterion = torch.nn.CrossEntropyLoss()
-    criterion_kl = KLLoss().cuda()
     optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, weight_decay=1e-3)
     global_params = {
         k: val.detach().clone().flatten() for (k, val) in net.named_parameters()
@@ -91,22 +81,25 @@ def train(  # pylint: disable=too-many-arguments
             trainloader,
             device,
             criterion,
-            criterion_kl,
             optimizer,
-            feddyn,
-            kd,
+            config,
             consistency_weight,
             prev_grads,
-            alpha,
-            extended,
         )
 
     # update prev_grads for FedDyn
-    if feddyn:
-        for k, param in net.named_parameters():
-            curr_param = param.detach().clone().flatten()
-            prev_grads[k] = prev_grads[k] - alpha * (curr_param - global_params[k])
-            prev_grads[k] = prev_grads[k].to(torch.device("cpu"))
+    if config["feddyn"]:
+        update_prev_grads(config, net, prev_grads, global_params)
+
+
+def update_prev_grads(config, net, prev_grads, global_params):
+    """Update prev_grads for FedDyn."""
+    for k, param in net.named_parameters():
+        curr_param = param.detach().clone().flatten()
+        prev_grads[k] = prev_grads[k] - config["alpha"] * (
+            curr_param - global_params[k]
+        )
+        prev_grads[k] = prev_grads[k].to(torch.device(torch.device("cpu")))
 
 
 def _train_one_epoch(  # pylint: disable=too-many-arguments
@@ -115,14 +108,10 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
     trainloader: DataLoader,
     device: torch.device,
     criterion: torch.nn.CrossEntropyLoss,
-    criterion_kl: nn.Module,
-    optimizer: torch.optim.Adam,
-    feddyn: bool,
-    kd: bool,
+    optimizer: torch.optim.SGD,
+    config: dict,
     consistency_weight: float,
     prev_grads: dict,
-    alpha: float,
-    extended: bool,
 ):
     """Train for one epoch.
 
@@ -138,63 +127,79 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
         The device on which the model should be trained, either 'cpu' or 'cuda'.
     criterion : torch.nn.CrossEntropyLoss
         The loss function to use for training
-    criterion_kl : nn.Module
-        The loss function for self distillation
     optimizer : torch.optim.Adam
         The optimizer to use for training
-    feddyn : bool
-        whether using feddyn or fedavg
-    kd : bool
-        whether using self distillation
+    config : dict
+        training configuration
     consistency_weight : float
         hyperparameter for self distillation
     prev_grads : dict
         control variate for feddyn
-    alpha : float
-        Hyperparameter for the FedDyn.
-    extended : bool
-        if extended, train all sub-classifiers within local model
     """
     for images, labels in trainloader:
         images, labels = images.to(device), labels.to(device)
-        loss = 0.0
+        loss = torch.zeros(1).to(device)
         optimizer.zero_grad()
         output_lst = net(images)
 
         for i, branch_output in enumerate(output_lst):
             # only trains last classifier in InclusiveFL
-            if not extended and i != len(output_lst) - 1:
+            if not config["extended"] and i != len(output_lst) - 1:
                 continue
 
             loss += criterion(branch_output, labels)
 
-            # self distillation term
-            if kd and len(output_lst) > 1:
-                for j in range(len(output_lst)):
-                    if j == i:
-                        continue
-                    else:
-                        loss += (
-                            consistency_weight
-                            * criterion_kl(branch_output, output_lst[j].detach())
-                            / (len(output_lst) - 1)
-                        )
+            if config["kd"] and len(output_lst) > 1:
+                # self distillation term
+                loss = self_distillation(
+                    output_lst,
+                    i,
+                    loss,
+                    consistency_weight,
+                    KLLoss().cuda(),
+                    branch_output,
+                )
 
         # Dynamic regularization in FedDyn
-        if feddyn:
-            for k, param in net.named_parameters():
-                curr_param = param.flatten()
-
-                lin_penalty = torch.dot(curr_param, prev_grads[k])
-                loss -= lin_penalty
-
-                quad_penalty = (
-                    alpha / 2.0 * torch.sum(torch.square(curr_param - global_params[k]))
-                )
-                loss += quad_penalty
+        if config["feddyn"]:
+            loss = dynamic_regularization(config, net, prev_grads, global_params, loss)
 
         loss.backward()
         optimizer.step()
+
+
+def self_distillation(
+    output_lst, i, loss, consistency_weight, criterion_kl, branch_output
+):
+    """'self distillation term."""
+    for j, output in enumerate(output_lst):
+        if j == i:
+            continue
+
+        loss += (
+            consistency_weight
+            * criterion_kl(branch_output, output.detach())
+            / (len(output_lst) - 1)
+        )
+
+    return loss
+
+
+def dynamic_regularization(config, net, prev_grads, global_params, loss):
+    """Dynamic regularization for FedDyn."""
+    for k, param in net.named_parameters():
+        curr_param = param.flatten()
+
+        lin_penalty = torch.dot(curr_param, prev_grads[k])
+        loss -= lin_penalty
+        quad_penalty = (
+            config["alpha"]
+            / 2.0
+            * torch.sum(torch.square(curr_param - global_params[k]))
+        )
+        loss += quad_penalty
+
+        return loss
 
 
 def test(

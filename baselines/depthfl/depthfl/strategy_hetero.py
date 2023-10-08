@@ -54,7 +54,7 @@ class HeteroFL(FedAvg):
 
         super().__init__(*args, **kwargs)
 
-    def aggregate_fit(
+    def aggregate_fit(  # type: ignore[override]
         self,
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
@@ -88,7 +88,9 @@ class HeteroFL(FedAvg):
 
         return parameters_aggregated, metrics_aggregated
 
-    def aggregate_hetero(self, results: List[Tuple[NDArrays, int]]) -> NDArrays:
+    def aggregate_hetero(
+        self, results: List[Tuple[NDArrays, Union[bool, bytes, float, int, str]]]
+    ):
         """Aggregate function for HeteroFL."""
         for i, v in enumerate(self.parameters):
             count = np.zeros(v.shape)

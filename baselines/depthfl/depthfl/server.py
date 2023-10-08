@@ -29,7 +29,8 @@ def gen_evaluate_fn(
     device: torch.device,
     model: DictConfig,
 ) -> Callable[
-    [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]
+    [int, NDArrays, Dict[str, Scalar]],
+    Tuple[float, Dict[str, Union[Scalar, List[float]]]],
 ]:
     """Generate the function for centralized evaluation.
 
@@ -51,7 +52,7 @@ def gen_evaluate_fn(
 
     def evaluate(
         server_round: int, parameters_ndarrays: NDArrays, config: Dict[str, Scalar]
-    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+    ) -> Tuple[float, Dict[str, Union[Scalar, List[float]]]]:
         # pylint: disable=unused-argument
         """Use the entire CIFAR-100 test set for evaluation."""
         net = instantiate(model)
@@ -73,7 +74,8 @@ def gen_evaluate_fn_hetero(
     device: torch.device,
     model_cfg: DictConfig,
 ) -> Callable[
-    [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]
+    [int, NDArrays, Dict[str, Scalar]],
+    Tuple[float, Dict[str, Union[Scalar, List[float]]]],
 ]:
     """Generate the function for centralized evaluation.
 
@@ -97,7 +99,7 @@ def gen_evaluate_fn_hetero(
 
     def evaluate(
         server_round: int, parameters_ndarrays: NDArrays, config: Dict[str, Scalar]
-    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+    ) -> Tuple[float, Dict[str, Union[Scalar, List[float]]]]:
         # pylint: disable=unused-argument
         """Use the entire CIFAR-100 test set for evaluation."""
         # test per 50 rounds (sbn takes a long time)
@@ -142,7 +144,7 @@ def gen_evaluate_fn_hetero(
     return evaluate
 
 
-class Server_FedDyn(Server):
+class ServerFedDyn(Server):
     """Sever for FedDyn."""
 
     def fit_round(
@@ -189,7 +191,7 @@ class Server_FedDyn(Server):
         aggregated_result: Tuple[
             Optional[Parameters],
             Dict[str, Scalar],
-        ] = self.strategy.aggregate_fit(
+        ] = self.strategy.aggregate_fit(  # type: ignore [call-arg]
             server_round, results, failures, parameters_to_ndarrays(self.parameters)
         )
         # ] = self.strategy.aggregate_fit(server_round, results, failures)

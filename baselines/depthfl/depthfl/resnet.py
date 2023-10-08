@@ -1,7 +1,5 @@
 """ResNet18 for DepthFL."""
 
-from typing import Callable, Optional
-
 import torch.nn as nn
 
 
@@ -9,7 +7,7 @@ class MyGroupNorm(nn.Module):
     """Group Normalization layer."""
 
     def __init__(self, num_channels):
-        super(MyGroupNorm, self).__init__()
+        super().__init__()
         ## change num_groups to 32
         self.norm = nn.GroupNorm(
             num_groups=16, num_channels=num_channels, eps=1e-5, affine=True
@@ -25,7 +23,7 @@ class MyBatchNorm(nn.Module):
     """Batch Normalization layer."""
 
     def __init__(self, num_channels):
-        super(MyBatchNorm, self).__init__()
+        super().__init__()
         self.norm = nn.BatchNorm2d(num_channels, track_running_stats=True)
 
     def forward(self, x):
@@ -56,10 +54,9 @@ class SepConv(nn.Module):
         kernel_size=3,
         stride=2,
         padding=1,
-        affine=True,
         norm_layer=MyGroupNorm,
     ):
-        super(SepConv, self).__init__()
+        super().__init__()
         self.op = nn.Sequential(
             nn.Conv2d(
                 channel_in,
@@ -98,7 +95,7 @@ class BasicBlock(nn.Module):
     expansion = 1
 
     def __init__(self, inplanes, planes, stride=1, downsample=None, norm_layer=None):
-        super(BasicBlock, self).__init__()
+        super().__init__()
         self.conv1 = conv3x3(inplanes, planes, stride)
         self.bn1 = norm_layer(planes)
         self.relu = nn.ReLU(inplace=True)
@@ -143,9 +140,9 @@ class Multi_ResNet(nn.Module):
         layers,
         n_blocks,
         num_classes=1000,
-        norm_layer: Optional[Callable[..., nn.Module]] = MyBatchNorm,
+        norm_layer=MyBatchNorm,
     ):
-        super(Multi_ResNet, self).__init__()
+        super().__init__()
         self.n_blocks = n_blocks
         self.inplanes = 64
         self.norm_layer = norm_layer

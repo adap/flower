@@ -55,15 +55,12 @@ def main(cfg: DictConfig) -> None:
 
     # prepare function that will be used to spawn each client
     client_fn = client.gen_client_fn(
-        num_clients=cfg.num_clients,
         num_epochs=cfg.num_epochs,
         trainloaders=trainloaders,
         valloaders=valloaders,
-        num_rounds=cfg.num_rounds,
         learning_rate=cfg.learning_rate,
         learning_rate_decay=cfg.learning_rate_decay,
         models=models,
-        cfg=cfg,
     )
 
     # get function that will executed by the strategy's evaluate() method
@@ -81,7 +78,7 @@ def main(cfg: DictConfig) -> None:
     # get a function that will be used to construct the config that the client's
     # fit() method will received
     def get_on_fit_config():
-        def fit_config_fn(server_round: int):
+        def fit_config_fn(server_round):
             # resolve and convert to python dict
             fit_config = OmegaConf.to_container(cfg.fit_config, resolve=True)
             fit_config["curr_round"] = server_round  # add round info
@@ -115,7 +112,7 @@ def main(cfg: DictConfig) -> None:
             "num_gpus": cfg.client_resources.num_gpus,
         },
         strategy=strategy,
-        server=server.Server_FedDyn(
+        server=server.ServerFedDyn(
             client_manager=SimpleClientManager(), strategy=strategy
         ),
     )

@@ -74,17 +74,17 @@ class FlowerClient(
 
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
-    ) -> Tuple[NDArrays, Dict, int]:
+    ) -> Tuple[NDArrays, int, Dict]:
         """Implement distributed fit function for a given client."""
         self.set_parameters(parameters)
         num_epochs = self.num_epochs
 
-        curr_round = config["curr_round"] - 1
+        curr_round = int(config["curr_round"]) - 1
 
         # consistency weight for self distillation in DepthFL
-        CONSISTENCY_WEIGHT = 300
-        current = np.clip(curr_round, 0.0, CONSISTENCY_WEIGHT)
-        phase = 1.0 - current / CONSISTENCY_WEIGHT
+        consistency_weight_constant = 300
+        current = np.clip(curr_round, 0.0, consistency_weight_constant)
+        phase = 1.0 - current / consistency_weight_constant
         consistency_weight = float(np.exp(-5.0 * phase * phase))
 
         train(
@@ -93,12 +93,9 @@ class FlowerClient(
             self.device,
             epochs=num_epochs,
             learning_rate=self.learning_rate * self.learning_rate_decay**curr_round,
-            feddyn=config["feddyn"],
-            kd=config["kd"],
+            config=config,
             consistency_weight=consistency_weight,
             prev_grads=self.prev_grads,
-            alpha=config["alpha"],
-            extended=config["extended"],
         )
 
         with open(f"prev_grads/client_{self.cid}", "wb") as f:
@@ -120,25 +117,17 @@ class FlowerClient(
 
 
 def gen_client_fn(
-    num_clients: int,
-    num_rounds: int,
     num_epochs: int,
     trainloaders: List[DataLoader],
     valloaders: List[DataLoader],
     learning_rate: float,
     learning_rate_decay: float,
     models: List[DictConfig],
-    cfg: DictConfig,
 ) -> Callable[[str], FlowerClient]:
     """Generate the client function that creates the Flower Clients.
 
     Parameters
     ----------
-    num_clients : int
-        The number of clients present in the setup
-    num_rounds: int
-        The number of rounds in the experiment. This is used to construct
-        the scheduling for stragglers
     num_epochs : int
         The number of local epochs each client should run the training for before
         sending it to the server.
@@ -154,8 +143,6 @@ def gen_client_fn(
         The learning rate decay ratio per round for the SGD  optimizer of clients.
     models : List[DictConfig]
         A list of DictConfigs, each pointing to the model config of client's local model
-    cfg : DictConfig
-        Configuration
 
     Returns
     -------
