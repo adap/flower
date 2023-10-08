@@ -16,9 +16,8 @@ from flwr.common import (
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
 
+from .client import FJORD_CONFIG_TYPE
 from .utils.logger import Logger
-
-FJORD_CONFIG_TYPE = Dict[Union[str, float], List[Union[Dict[str, int], str]]]
 
 
 # Define metric aggregation function
