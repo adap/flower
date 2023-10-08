@@ -1,5 +1,5 @@
 """Base sampler class."""
-from typing import Union
+from collections.abc import Generator
 
 from torch.nn import Module
 
@@ -30,7 +30,7 @@ class BaseSampler:
                 self.widths.append(m.width)
                 self.od_layers.append(m)
 
-    def width_sampler(self) -> Union[None, int]:
+    def width_sampler(self) -> Generator:
         """Sample width."""
         while True:
             yield None

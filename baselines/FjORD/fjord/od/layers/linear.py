@@ -1,5 +1,5 @@
 """Liner layer using Ordered Dropout."""
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 
 import numpy as np
 import torch.nn.functional as F
@@ -22,7 +22,7 @@ class ODLinear(nn.Linear):
         self.last_output_dim = None
 
     def forward(
-        self, x: Tensor, p: Union[Tuple[Module, float], float] = None
+        self, x: Tensor, p: Optional[Union[Tuple[Module, float], float]] = None
     ) -> Tensor:
         """Forward pass.
 
@@ -31,9 +31,9 @@ class ODLinear(nn.Linear):
         :param p: Tuple of layer and p or p.
         :return: Output of forward pass.
         """
-        p = check_layer(self, p)
         if not self.is_od and p is not None:
             raise ValueError("p must be None if is_od is False")
+        p = check_layer(self, p)
         in_dim = x.size(1)  # second dimension is input dimension
         self.last_input_dim = in_dim
         if not p:  # i.e., don't apply OD

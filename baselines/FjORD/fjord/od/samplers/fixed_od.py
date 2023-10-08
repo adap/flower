@@ -1,4 +1,5 @@
 """Ordered Dropout stochastic sampler."""
+from collections.abc import Generator
 from typing import List
 
 import numpy as np
@@ -18,7 +19,7 @@ class ODSampler(BaseSampler):
         self.p_s = np.array([p for p in p_s if p <= max_p])
         self.max_p = max_p
 
-    def width_sampler(self) -> float:
+    def width_sampler(self) -> Generator:
         """Sample width."""
         while True:
             p = np.random.choice(self.p_s)

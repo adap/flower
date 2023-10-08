@@ -1,7 +1,8 @@
 """Flower client implementing FjORD."""
 from collections import OrderedDict
 from copy import deepcopy
-from typing import Any, Dict, List, Tuple, Union
+from types import SimpleNamespace
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import flwr as fl
 import numpy as np
@@ -17,7 +18,9 @@ from .od.samplers import ODSampler
 from .utils.logger import Logger
 from .utils.utils import save_model
 
-FJORD_CONFIG_TYPE = Dict[Union[str, float], List[Union[Dict[str, int], str]]]
+FJORD_CONFIG_TYPE = Dict[
+    Union[str, float], List[Union[Dict[str, Optional[int]], Union[float, str, None]]]
+]
 
 
 def get_layer_from_state_dict(model: Module, state_dict_key: str) -> Module:
@@ -65,7 +68,7 @@ def get_agg_config(
     images = images.to(device)
     layers = net_to_state_dict_layers(net)
     # init min dims in networks
-    config = {p: [{} for _ in layers] for p in p_s}
+    config: FJORD_CONFIG_TYPE = {p: [{} for _ in layers] for p in p_s}
     config["layer"] = []
     config["layer_p"] = []
     with torch.no_grad():
@@ -109,8 +112,8 @@ class FjORDClient(fl.client.NumPyClient):
         know_distill: bool,
         max_p: float,
         p_s: List[float],
-        train_config: Dict[str, fl.common.Scalar],
-        fjord_config: Dict[str, fl.common.Scalar],
+        train_config: SimpleNamespace,
+        fjord_config: FJORD_CONFIG_TYPE,
         log_config: Dict[str, str],
         device: torch.device,
         seed: int,
@@ -178,7 +181,7 @@ class FjORDClient(fl.client.NumPyClient):
         """
         Logger.get().info(
             f"Training on client {self.cid} for round "
-            f"{config['current_round']}/{config['total_rounds']}"
+            f"{config['current_round']!r}/{config['total_rounds']!r}"
         )
 
         original_parameters = deepcopy(parameters)
@@ -193,8 +196,8 @@ class FjORDClient(fl.client.NumPyClient):
             self.max_p,
             p_s=self.p_s,
             epochs=self.train_config.local_epochs,
-            current_round=config["current_round"],
-            total_rounds=config["total_rounds"],
+            current_round=int(config["current_round"]),
+            total_rounds=int(config["total_rounds"]),
             train_config=self.train_config,
         )
 
@@ -214,7 +217,7 @@ class FjORDClient(fl.client.NumPyClient):
 
     def evaluate(
         self, parameters: List[np.ndarray], config: Dict[str, fl.common.Scalar]
-    ) -> Tuple[float, int, Dict[str, float]]:
+    ) -> Tuple[float, int, Dict[str, Union[bool, bytes, float, int, str]]]:
         """Validate the model on the test set.
 
         :param parameters: The parameters of the model.
@@ -224,11 +227,11 @@ class FjORDClient(fl.client.NumPyClient):
         """
         Logger.get().info(
             f"Evaluating on client {self.cid} for round "
-            f"{config['current_round']}/{config['total_rounds']}"
+            f"{config['current_round']!r}/{config['total_rounds']!r}"
         )
 
         self.set_parameters(parameters)
-        loss, accuracy = test(self.net, self.valloader, self.max_p)
+        loss, accuracy = test(self.net, self.valloader, [self.max_p])
         save_model(self.net, self.model_path, cid=self.cid)
 
-        return loss, len(self.valloader.dataset), {"accuracy": accuracy}
+        return loss[0], len(self.valloader.dataset), {"accuracy": accuracy[0]}

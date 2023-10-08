@@ -1,10 +1,12 @@
 """Utils function for Ordered Dropout layers."""
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 
 from torch.nn import Module
 
 
-def check_layer(layer: Module, p: Union[Tuple[Module, float], float]) -> float:
+def check_layer(
+    layer: Module, p: Union[Tuple[Module, Optional[float]], Optional[float]]
+) -> Optional[float]:
     """Check if layer is valid and return p.
 
     Args:
@@ -13,6 +15,9 @@ def check_layer(layer: Module, p: Union[Tuple[Module, float], float]) -> float:
     """
     # if p is tuple, check layer validity
     if isinstance(p, tuple):
-        p, sampled_layer = p
+        p_, sampled_layer = p
         assert layer == sampled_layer, "Layer mismatch"
-    return p
+    else:
+        p_ = p
+
+    return p_

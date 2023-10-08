@@ -1,7 +1,7 @@
 """ResNet model for Fjord."""
-from typing import Dict, List, Optional, Tuple
+from types import SimpleNamespace
+from typing import List, Optional, Tuple
 
-import flwr as fl
 import torch
 import torch.nn.functional as F
 from torch import nn
@@ -188,7 +188,7 @@ def train(
     total_rounds: int,
     p_s: List[float],
     epochs: int,
-    train_config: Dict[str, fl.common.Scalar],
+    train_config: SimpleNamespace,
 ) -> float:
     """Train the model on the training set.
 

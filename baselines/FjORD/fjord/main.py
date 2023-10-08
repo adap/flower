@@ -3,16 +3,17 @@ import math
 import os
 import random
 from types import SimpleNamespace
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import flwr as fl
 import hydra
 import numpy as np
 import torch
+from flwr.client import Client, NumPyClient
 from omegaconf import OmegaConf, open_dict
 from torch.utils.data import DataLoader
 
-from .client import FjORDClient, get_agg_config
+from .client import FJORD_CONFIG_TYPE, FjORDClient, get_agg_config
 from .dataset import load_data
 from .models import get_net, test
 from .strategy import FjORDFedAVG
@@ -31,7 +32,11 @@ def get_fit_config_fn(
     """
 
     def fit_config(rnd: int) -> Dict[str, fl.common.Scalar]:
-        config = {"current_round": rnd, "total_rounds": total_rounds, "lr": lr}
+        config: Dict[str, fl.common.Scalar] = {
+            "current_round": rnd,
+            "total_rounds": total_rounds,
+            "lr": lr,
+        }
         return config
 
     return fit_config
@@ -72,7 +77,7 @@ def get_eval_fn(
             }
 
         Logger.get().debug(f"Evaluation skipped for global round={server_round}.")
-        return None, {"accuracy": None}
+        return float("inf"), {"accuracy": "None"}
 
     return evaluate
 
@@ -81,10 +86,10 @@ def get_client_fn(
     args: Any,
     model_path: str,
     cid_to_max_p: Dict[int, float],
-    config: Dict[str, fl.common.Scalar],
-    train_config: Dict[str, fl.common.Scalar],
+    config: FJORD_CONFIG_TYPE,
+    train_config: SimpleNamespace,
     device: torch.device,
-) -> Callable[[int], FjORDClient]:
+) -> Callable[[str], Union[Client, NumPyClient]]:
     """Get client function that creates Flower client.
 
     :param args: CLI/Config Arguments
@@ -168,10 +173,10 @@ class FjORDBalancedClientManager(fl.server.SimpleClientManager):
             return []
 
         # construct p to available cids
-        max_p_to_cids = {p: [] for p in self.p_s}
+        max_p_to_cids: Dict[float, List[int]] = {p: [] for p in self.p_s}
         random.shuffle(available_cids)
-        for cid in available_cids:
-            client_id = int(cid)
+        for cid_s in available_cids:
+            client_id = int(cid_s)
             client_p = self.cid_to_max_p[client_id]
             max_p_to_cids[client_p].append(client_id)
 
@@ -208,7 +213,7 @@ def main(args: Any) -> None:
 
     path = args.data_path
     device = torch.device("cuda") if args.cuda else torch.device("cpu")
-    model_path = hydra.core.hydra_config.HydraConfig.get()["runtime"]["output_dir"]
+    model_path = hydra.core.hydra_config.HydraConfig.get().runtime.output_dir
 
     Logger.get().info(
         f"Training on {device} using PyTorch "

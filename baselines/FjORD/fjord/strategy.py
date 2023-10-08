@@ -29,11 +29,11 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     :return: Aggregated metrics
     """
     # Multiply accuracy of each client by number of examples used
-    accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
-    examples = [num_examples for num_examples, _ in metrics]
+    accuracies = np.array([num_examples * m["accuracy"] for num_examples, m in metrics])
+    examples = np.array([num_examples for num_examples, _ in metrics])
 
     # Aggregate and return custom metric (weighted average)
-    return {"accuracy": sum(accuracies) / sum(examples)}
+    return {"accuracy": accuracies.sum() / examples.sum()}
 
 
 def get_p_layer_updates(
@@ -106,8 +106,8 @@ def fjord_average(
             if len(layer_updates_p) == 0:
                 continue
             else:
-                in_dim = fjord_config[p][i]["in_dim"]
-                out_dim = fjord_config[p][i]["out_dim"]
+                in_dim = int(fjord_config[p][i]["in_dim"])
+                out_dim = int(fjord_config[p][i]["out_dim"])
                 assert num_examples_p > 0
                 # check whether the parameter to update is bias or weight
                 if len(update.shape) == 1:
@@ -131,7 +131,8 @@ def fjord_average(
 
 
 def aggregate(
-    results: List[Tuple[NDArrays, int, float, FJORD_CONFIG_TYPE]], original_parameters
+    results: List[Tuple[NDArrays, int, float, List[float], FJORD_CONFIG_TYPE]],
+    original_parameters,
 ) -> NDArrays:
     """Compute weighted average.
 

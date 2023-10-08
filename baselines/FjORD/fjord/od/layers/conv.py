@@ -1,5 +1,5 @@
 """Convolutional layer using Ordered Dropout."""
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 
 import numpy as np
 from torch import Tensor, nn
@@ -11,7 +11,7 @@ __all__ = ["ODConv1d", "ODConv2d", "ODConv3d"]
 
 
 def od_conv_forward(
-    layer: Module, x: Tensor, p: Union[Tuple[Module, float], float] = None
+    layer: Module, x: Tensor, p: Optional[Union[Tuple[Module, float], float]] = None
 ) -> Tensor:
     p = check_layer(layer, p)
     if not layer.is_od and p is not None:
@@ -54,7 +54,7 @@ class ODConv1d(nn.Conv1d):
         self.last_output_dim = None
 
     def forward(
-        self, x: Tensor, p: Union[Tuple[Module, float], float] = None
+        self, x: Tensor, p: Optional[Union[Tuple[Module, float], float]] = None
     ) -> Tensor:
         """Forward pass.
 
@@ -67,7 +67,7 @@ class ODConv1d(nn.Conv1d):
 
     def get_slice(self, *args, **kwargs) -> Tuple[Tensor, Tensor]:
         """Get slice of weights and bias."""
-        get_slice(self, *args, **kwargs)
+        return get_slice(self, *args, **kwargs)
 
 
 class ODConv2d(nn.Conv2d):
@@ -81,7 +81,7 @@ class ODConv2d(nn.Conv2d):
         self.last_output_dim = None
 
     def forward(
-        self, x: Tensor, p: Union[Tuple[Module, float], float] = None
+        self, x: Tensor, p: Optional[Union[Tuple[Module, float], float]] = None
     ) -> Tensor:
         """Forward pass.
 
@@ -94,7 +94,7 @@ class ODConv2d(nn.Conv2d):
 
     def get_slice(self, *args, **kwargs) -> Tuple[Tensor, Tensor]:
         """Get slice of weights and bias."""
-        get_slice(self, *args, **kwargs)
+        return get_slice(self, *args, **kwargs)
 
 
 class ODConv3d(nn.Conv3d):
@@ -108,7 +108,7 @@ class ODConv3d(nn.Conv3d):
         self.last_output_dim = None
 
     def forward(
-        self, x: Tensor, p: Union[Tuple[Module, float], float] = None
+        self, x: Tensor, p: Optional[Union[Tuple[Module, float], float]] = None
     ) -> Tensor:
         """Forward pass.
 
@@ -121,4 +121,4 @@ class ODConv3d(nn.Conv3d):
 
     def get_slice(self, *args, **kwargs) -> Tuple[Tensor, Tensor]:
         """Get slice of weights and bias."""
-        get_slice(self, *args, **kwargs)
+        return get_slice(self, *args, **kwargs)

@@ -1,6 +1,6 @@
 """Utility functions for fjord."""
 import os
-from typing import List, OrderedDict
+from typing import List, Optional, OrderedDict
 
 import numpy as np
 import torch
@@ -30,7 +30,10 @@ def set_parameters(net: Module, parameters: List[np.ndarray]) -> None:
 
 
 def save_model(
-    model: torch.nn.Module, model_path: str, is_best: bool = False, cid: int = None
+    model: torch.nn.Module,
+    model_path: str,
+    is_best: bool = False,
+    cid: Optional[int] = None,
 ) -> None:
     """Checkpoint model.
 
