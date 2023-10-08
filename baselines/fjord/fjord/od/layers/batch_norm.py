@@ -1,3 +1,4 @@
+"""BatchNorm using Ordered Dropout."""
 from typing import List, Optional
 
 import numpy as np
@@ -8,6 +9,8 @@ __all__ = ["ODBatchNorm2d"]
 
 
 class ODBatchNorm2d(nn.Module):
+    """Ordered Dropout BatchNorm2d."""
+
     def __init__(
         self,
         p_s: List[float],
@@ -28,7 +31,7 @@ class ODBatchNorm2d(nn.Module):
         self.bn = nn.ModuleDict(
             {
                 str(num_features): nn.BatchNorm2d(
-                    num_features, affine=False, *args, **kwargs
+                    num_features, *args, **kwargs, affine=False
                 )
                 for num_features in self.num_features_s
             }
@@ -48,6 +51,7 @@ class ODBatchNorm2d(nn.Module):
             self.bn[m].num_batches_tracked = torch.tensor(1, dtype=torch.long)
 
     def reset_parameters(self):
+        """Reset parameters."""
         if self.affine:
             nn.init.ones_(self.weight)
             nn.init.zeros_(self.bias)
@@ -55,6 +59,12 @@ class ODBatchNorm2d(nn.Module):
             self.bn[m].reset_parameters()
 
     def forward(self, x: Tensor) -> Tensor:
+        """Forward pass.
+
+        Args:
+        :param x: Input tensor.
+        :return: Output of forward pass.
+        """
         in_dim = x.size(1)  # second dimension is input dimension
         assert (
             in_dim in self.num_features_s

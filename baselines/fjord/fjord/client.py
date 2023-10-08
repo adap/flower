@@ -1,3 +1,4 @@
+"""Flower client implementing FjORD."""
 from collections import OrderedDict
 from copy import deepcopy
 from typing import Any, Dict, List, Tuple, Union
@@ -157,7 +158,7 @@ class FjORDClient(fl.client.NumPyClient):
         return net_to_state_dict_layers(self.net)
 
     def set_parameters(self, parameters: List[np.ndarray]) -> None:
-        """Sets the parameters of the model.
+        """Set the parameters of the model.
 
         :param parameters: The parameters of the model.
         """

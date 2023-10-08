@@ -1,10 +1,11 @@
+"""Utility functions for models."""
 from torch import nn
 
 from ..layers import ODBatchNorm2d, ODConv2d, ODLinear
 
 
 def create_linear_layer(od, is_od, *args, **kwargs):
-    """Creates linear layer.
+    """Create linear layer.
 
     :param od: whether to create OD layer
     :param is_od: whether to create OD layer
@@ -19,7 +20,7 @@ def create_linear_layer(od, is_od, *args, **kwargs):
 
 
 def create_conv_layer(od, is_od, *args, **kwargs):
-    """Creates conv layer.
+    """Create conv layer.
 
     :param od: whether to create OD layer
     :param is_od: whether to create OD layer
@@ -34,7 +35,7 @@ def create_conv_layer(od, is_od, *args, **kwargs):
 
 
 def create_bn_layer(od, p_s, *args, **kwargs):
-    """Creates batch norm layer.
+    """Create batch norm layer.
 
     :param od: whether to create OD layer
     :param p_s: list of p-values
@@ -55,6 +56,12 @@ class SequentialWithSampler(nn.Sequential):
         super(SequentialWithSampler, self).__init__(*args, **kwargs)
 
     def forward(self, x, sampler=None):
+        """Forward method for custom Sequential.
+
+        :param x: input
+        :param sampler: the sampler to use.
+        :return: Output of sequential
+        """
         if sampler is None:
             for module in self:
                 x = module(x)

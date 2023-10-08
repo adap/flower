@@ -1,3 +1,4 @@
+"""Base sampler class."""
 from typing import Union
 
 from torch.nn import Module
@@ -7,7 +8,7 @@ class BaseSampler:
     """Base class implementing p-value sampling per layer."""
 
     def __init__(self, model: Module, with_layer: bool = False) -> None:
-        """Initialises sampler.
+        """Initialise sampler.
 
         :param model: OD model
         :param with_layer: whether to return layer upon call.
@@ -19,7 +20,7 @@ class BaseSampler:
         self.layer_samples = self.layer_sampler()
 
     def prepare_sampler(self) -> None:
-        """Prepares sampler."""
+        """Prepare sampler."""
         self.num_od_layers = 0
         self.widths = []
         self.od_layers = []
@@ -30,17 +31,18 @@ class BaseSampler:
                 self.od_layers.append(m)
 
     def width_sampler(self) -> Union[None, int]:
-        """Samples width."""
+        """Sample width."""
         while True:
             yield None
 
     def layer_sampler(self) -> Module:
-        """Samples layer."""
+        """Sample layer."""
         while True:
             for m in self.od_layers:
                 yield m
 
     def __call__(self):
+        """Call sampler."""
         if self.with_layer:
             return next(self.width_samples), next(self.layer_samples)
         else:

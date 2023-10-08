@@ -1,3 +1,4 @@
+"""ResNet model for Fjord."""
 from typing import Dict, List, Optional, Tuple
 
 import flwr as fl
@@ -20,6 +21,8 @@ from .od.samplers import BaseSampler, ODSampler
 
 
 class BasicBlock(nn.Module):
+    """Basic Block for resnet."""
+
     expansion = 1
 
     def __init__(self, od, p_s, in_planes, planes, stride=1):
@@ -57,6 +60,13 @@ class BasicBlock(nn.Module):
             )
 
     def forward(self, x, sampler):
+        """Forward method for basic block.
+
+        Args:
+        :param x: input
+        :param sampler: sampler
+        :return: Output of forward pass
+        """
         if sampler is None:
             out = F.relu(self.bn1(self.conv1(x)))
             out = self.bn2(self.conv2(out))
@@ -109,6 +119,13 @@ class ResNet(nn.Module):
         return SequentialWithSampler(*layers)
 
     def forward(self, x, sampler=None):
+        """Forward method for ResNet.
+
+        Args:
+        :param x: input
+        :param sampler: sampler
+        :return: Output of forward pass
+        """
         if self.od:
             if sampler is None:
                 sampler = BaseSampler(self)
@@ -132,7 +149,13 @@ class ResNet(nn.Module):
         return out
 
 
-def ResNet18(od=False, p_s=[1.0]):
+def ResNet18(od=False, p_s=(1.0,)):
+    """Construct a ResNet-18 model.
+
+    Args:
+    :param od: whether to create OD (Ordered Dropout) layer
+    :param p_s: list of p-values
+    """
     return ResNet(od, p_s, BasicBlock, [2, 2, 2, 2])
 
 

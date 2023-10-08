@@ -1,3 +1,4 @@
+"""Ordered Dropout stochastic sampler."""
 from typing import List
 
 import numpy as np
@@ -18,6 +19,7 @@ class ODSampler(BaseSampler):
         self.max_p = max_p
 
     def width_sampler(self) -> float:
+        """Sample width."""
         while True:
             p = np.random.choice(self.p_s)
             for _ in range(self.num_od_layers):

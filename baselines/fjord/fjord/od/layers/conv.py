@@ -1,3 +1,4 @@
+"""Convolutional layer using Ordered Dropout."""
 from typing import Tuple, Union
 
 import numpy as np
@@ -29,12 +30,22 @@ def od_conv_forward(
 
 
 def get_slice(layer: Module, in_dim: int, out_dim: int) -> Tuple[Tensor, Tensor]:
+    """Get slice of weights and bias.
+
+    Args:
+    :param layer: The layer.
+    :param in_dim: The input dimension.
+    :param out_dim: The output dimension.
+    :return: The slice of weights and bias.
+    """
     weight_slice = layer.weight[:in_dim, :out_dim]
     bias_slice = layer.bias[:out_dim] if layer.bias is not None else None
     return weight_slice, bias_slice
 
 
 class ODConv1d(nn.Conv1d):
+    """Ordered Dropout Conv1d."""
+
     def __init__(self, is_od: bool = True, *args, **kwargs) -> None:
         self.is_od = is_od
         super(ODConv1d, self).__init__(*args, **kwargs)
@@ -45,13 +56,23 @@ class ODConv1d(nn.Conv1d):
     def forward(
         self, x: Tensor, p: Union[Tuple[Module, float], float] = None
     ) -> Tensor:
+        """Forward pass.
+
+        Args:
+        :param x: Input tensor.
+        :param p: Tuple of layer and p or p.
+        :return: Output of forward pass.
+        """
         return od_conv_forward(self, x, p)
 
     def get_slice(self, *args, **kwargs) -> Tuple[Tensor, Tensor]:
+        """Get slice of weights and bias."""
         get_slice(self, *args, **kwargs)
 
 
 class ODConv2d(nn.Conv2d):
+    """Ordered Dropout Conv2d."""
+
     def __init__(self, is_od: bool = True, *args, **kwargs) -> None:
         self.is_od = is_od
         super(ODConv2d, self).__init__(*args, **kwargs)
@@ -62,13 +83,23 @@ class ODConv2d(nn.Conv2d):
     def forward(
         self, x: Tensor, p: Union[Tuple[Module, float], float] = None
     ) -> Tensor:
+        """Forward pass.
+
+        Args:
+        :param x: Input tensor.
+        :param p: Tuple of layer and p or p.
+        :return: Output of forward pass.
+        """
         return od_conv_forward(self, x, p)
 
     def get_slice(self, *args, **kwargs) -> Tuple[Tensor, Tensor]:
+        """Get slice of weights and bias."""
         get_slice(self, *args, **kwargs)
 
 
 class ODConv3d(nn.Conv3d):
+    """Ordered Dropout Conv3d."""
+
     def __init__(self, is_od: bool = True, *args, **kwargs) -> None:
         self.is_od = is_od
         super(ODConv3d, self).__init__(*args, **kwargs)
@@ -79,7 +110,15 @@ class ODConv3d(nn.Conv3d):
     def forward(
         self, x: Tensor, p: Union[Tuple[Module, float], float] = None
     ) -> Tensor:
+        """Forward pass.
+
+        Args:
+        :param x: Input tensor.
+        :param p: Tuple of layer and p or p.
+        :return: Output of forward pass.
+        """
         return od_conv_forward(self, x, p)
 
     def get_slice(self, *args, **kwargs) -> Tuple[Tensor, Tensor]:
+        """Get slice of weights and bias."""
         get_slice(self, *args, **kwargs)

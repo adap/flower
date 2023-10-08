@@ -1,3 +1,4 @@
+"""Liner layer using Ordered Dropout."""
 from typing import Tuple, Union
 
 import numpy as np
@@ -11,6 +12,8 @@ __all__ = ["ODLinear"]
 
 
 class ODLinear(nn.Linear):
+    """Ordered Dropout Linear."""
+
     def __init__(self, is_od: bool = True, *args, **kwargs) -> None:
         super(ODLinear, self).__init__(*args, **kwargs)
         self.is_od = is_od
@@ -21,6 +24,13 @@ class ODLinear(nn.Linear):
     def forward(
         self, x: Tensor, p: Union[Tuple[Module, float], float] = None
     ) -> Tensor:
+        """Forward pass.
+
+        Args:
+        :param x: Input tensor.
+        :param p: Tuple of layer and p or p.
+        :return: Output of forward pass.
+        """
         p = check_layer(self, p)
         if not self.is_od and p is not None:
             raise ValueError("p must be None if is_od is False")
@@ -37,6 +47,14 @@ class ODLinear(nn.Linear):
         return F.linear(x, weights_red, bias_red)
 
     def get_slice(self, in_dim: int, out_dim: int) -> Tuple[Tensor, Tensor]:
+        """Get slice of weights and bias.
+
+        Args:
+        :param layer: The layer.
+        :param in_dim: The input dimension.
+        :param out_dim: The output dimension.
+        :return: The slice of weights and bias.
+        """
         weight_slice = self.weight[:in_dim, :out_dim]
         bias_slice = self.bias[:out_dim] if self.bias is not None else None
         return weight_slice, bias_slice

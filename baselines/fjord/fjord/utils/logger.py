@@ -1,3 +1,4 @@
+"""Logger functionality."""
 import logging
 
 import coloredlogs
@@ -6,7 +7,10 @@ import coloredlogs
 class Logger(object):
     """Logger class to be used by all modules in the project."""
 
-    log_format = "[%(asctime)s] (%(process)s) {%(filename)s:%(lineno)d} %(levelname)s - %(message)s"
+    log_format = (
+        "[%(asctime)s] (%(process)s) {%(filename)s:%(lineno)d}"
+        " %(levelname)s - %(message)s"
+    )
     log_level = None
 
     @classmethod
@@ -49,13 +53,14 @@ class Logger(object):
             return cls(logger_name)
 
     def __init__(self, logger_name="default"):
-        """Initialises logger not previously registered.
+        """Initialise logger not previously registered.
 
         :param logger_name: name of the logger
         """
         if logger_name in self.registered_loggers:
             raise ValueError(
-                f'Logger {logger_name} already exists. Call with Logger.get("{logger_name}")'
+                f"Logger {logger_name} already exists. "
+                f'Call with Logger.get("{logger_name}")'
             )
         else:
             self.name = logger_name

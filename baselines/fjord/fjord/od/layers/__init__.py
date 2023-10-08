@@ -1,3 +1,4 @@
+"""Ordered Dropout layers."""
 from .batch_norm import ODBatchNorm2d
 from .conv import ODConv2d
 from .linear import ODLinear

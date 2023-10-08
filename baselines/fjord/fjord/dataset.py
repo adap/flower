@@ -1,3 +1,4 @@
+"""Dataset for CIFAR10."""
 import random
 from typing import Optional, Tuple
 
@@ -16,7 +17,8 @@ class FLCifar10Client(Dataset):
     """Class implementing the partitioned CIFAR10 dataset."""
 
     def __init__(self, fl_dataset: Dataset, client_id: Optional[int] = None) -> None:
-        """
+        """Ctor.
+
         Args:
         :param fl_dataset: The CIFAR10 dataset.
         :param client_id: The client id to be used.
@@ -25,8 +27,7 @@ class FLCifar10Client(Dataset):
         self.set_client(client_id)
 
     def set_client(self, index: Optional[int] = None) -> None:
-        """Sets the client to the given index. If index is None, the whole dataset is
-        used.
+        """Set the client to the given index. If index is None, use the whole dataset.
 
         Args:
         :param index: Index of the client to be used.
@@ -46,7 +47,7 @@ class FLCifar10Client(Dataset):
             self.targets = [fl.targets[i] for i in indices]
 
     def __getitem__(self, index: int):
-        """Returns the item at the given index.
+        """Return the item at the given index.
 
         :param index: Index of the item to be returned.
         :return: The item at the given index.
@@ -67,6 +68,7 @@ class FLCifar10Client(Dataset):
         return img, target
 
     def __len__(self):
+        """Return the length of the dataset."""
         return self.length
 
 
@@ -81,7 +83,8 @@ class FLCifar10(CIFAR10):
         target_transform: Optional[Module] = None,
         download: Optional[bool] = False,
     ) -> None:
-        """
+        """Ctor.
+
         :param root: Root directory of dataset
         :param train: If True, creates dataset from training set
         :param transform: A function/transform that takes in an PIL image

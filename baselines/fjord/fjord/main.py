@@ -1,3 +1,4 @@
+"""Main script for FjORD."""
 import math
 import os
 import random
@@ -126,6 +127,11 @@ class FjORDBalancedClientManager(fl.server.SimpleClientManager):
     """
 
     def __init__(self, cid_to_max_p: Dict[int, float]) -> None:
+        """Ctor.
+
+        Args:
+        :param cid_to_max_p: Dictionary mapping client id to max p-value
+        """
         super(FjORDBalancedClientManager, self).__init__()
         self.cid_to_max_p = cid_to_max_p
         self.p_s = sorted(set(self.cid_to_max_p.values()))
@@ -136,6 +142,14 @@ class FjORDBalancedClientManager(fl.server.SimpleClientManager):
         min_num_clients: Optional[int] = None,
         criterion: Optional[fl.server.criterion.Criterion] = None,
     ) -> List[fl.server.client_proxy.ClientProxy]:
+        """Sample clients in a balanced way (equal per tier, remainder in Round-Robin).
+
+        Args:
+        :param num_clients: Number of clients to sample
+        :param min_num_clients: Minimum number of clients to sample
+        :param criterion: Client selection criterion
+        :return: List of sampled clients
+        """
         if min_num_clients is None:
             min_num_clients = num_clients
         self.wait_for(min_num_clients)
@@ -182,6 +196,11 @@ class FjORDBalancedClientManager(fl.server.SimpleClientManager):
 
 
 def main(args: Any) -> None:
+    """Enter main functionality.
+
+    Args:
+    :param args: CLI/Config Arguments
+    """
     torch.manual_seed(args.manual_seed)
     torch.use_deterministic_algorithms(True)
     np.random.seed(args.manual_seed)
@@ -238,7 +257,7 @@ def main(args: Any) -> None:
             ),
         )
     else:
-        raise ValueError(f"Strategy {args.strategy} " "is not currently supported")
+        raise ValueError(f"Strategy {args.strategy} is not currently supported")
 
     client_resources = args.client_resources
     if device.type != "cuda":
@@ -253,7 +272,7 @@ def main(args: Any) -> None:
         cl_manager = None
     else:
         raise ValueError(
-            f"Client selection {args.client_selection}" " is not currently supported"
+            f"Client selection {args.client_selection} is not currently supported"
         )
 
     Logger.get().info("Starting simulated run.")
@@ -273,6 +292,11 @@ def main(args: Any) -> None:
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def run_app(cfg):
+    """Run the application.
+
+    Args:
+    :param cfg: Hydra configuration
+    """
     OmegaConf.resolve(cfg)
     logfile = os.path.join(
         hydra.core.hydra_config.HydraConfig.get()["runtime"]["output_dir"], cfg.logfile
