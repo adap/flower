@@ -3,11 +3,11 @@ requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
-name = "fedavgm" # <----- Ensure it matches the name of your baseline directory containing all the source code
+name = "fedavgm" 
 version = "1.0.0"
-description = "Flower Baselines"
+description = "FedAvgM: Measuring the effects of non-identical data distribution for federated visual classification"
 license = "Apache-2.0"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["Gustavo Bertoli"]
 readme = "README.md"
 homepage = "https://flower.dev"
 repository = "https://github.com/adap/flower"
