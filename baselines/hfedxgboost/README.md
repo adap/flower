@@ -168,7 +168,7 @@ python -m hfedxgboost.main --multirun clients=YearPredictionMSD_2_clients,YearPr
  
 **Those results don't come from following the original paper hyper-parameters, the new hyper-parameters are specified in the config files in the `clients` folder**
 
-### Table 2
+### Table 2 -- Federated Binary Classification
 
 | Dataset | task type |no. of clients | server-side test Accuracy |
 | :---: | :---: | :---: | :---: |
