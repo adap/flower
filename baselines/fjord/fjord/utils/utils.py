@@ -1,5 +1,5 @@
-from typing import List, OrderedDict
 import os
+from typing import List, OrderedDict
 
 import numpy as np
 import torch
@@ -9,8 +9,8 @@ from .logger import Logger
 
 
 def get_parameters(net: Module) -> List[np.ndarray]:
-    """
-    Get statedict parameters as a list of numpy arrays.
+    """Get statedict parameters as a list of numpy arrays.
+
     :param net: PyTorch model
     :return: List of numpy arrays
     """
@@ -18,8 +18,8 @@ def get_parameters(net: Module) -> List[np.ndarray]:
 
 
 def set_parameters(net: Module, parameters: List[np.ndarray]) -> None:
-    """
-    Load parameters into PyTorch model.
+    """Load parameters into PyTorch model.
+
     :param net: PyTorch model
     :param parameters: List of numpy arrays
     """
@@ -28,11 +28,11 @@ def set_parameters(net: Module, parameters: List[np.ndarray]) -> None:
     net.load_state_dict(state_dict, strict=True)
 
 
-def save_model(model: torch.nn.Module, model_path: str,
-               is_best: bool = False, cid: int = None
-               ) -> None:
-    """
-    Checkpoint model.
+def save_model(
+    model: torch.nn.Module, model_path: str, is_best: bool = False, cid: int = None
+) -> None:
+    """Checkpoint model.
+
     :param model: model to be saved
     :param model_path: path to save the model
     :param is_best: whether this is the best model

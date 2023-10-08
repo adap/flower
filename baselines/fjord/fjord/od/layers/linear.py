@@ -1,10 +1,9 @@
-from typing import Union, Tuple
+from typing import Tuple, Union
 
 import numpy as np
-from torch import nn
-from torch import Tensor
-from torch.nn import Module
 import torch.nn.functional as F
+from torch import Tensor, nn
+from torch.nn import Module
 
 from .utils import check_layer
 
@@ -12,16 +11,16 @@ __all__ = ["ODLinear"]
 
 
 class ODLinear(nn.Linear):
-    def __init__(self, is_od: bool = True, *args, **kwargs
-                 ) -> None:
+    def __init__(self, is_od: bool = True, *args, **kwargs) -> None:
         super(ODLinear, self).__init__(*args, **kwargs)
         self.is_od = is_od
         self.width = self.out_features
         self.last_input_dim = None
         self.last_output_dim = None
 
-    def forward(self, x: Tensor,
-                p: Union[Tuple[Module, float], float] = None) -> Tensor:
+    def forward(
+        self, x: Tensor, p: Union[Tuple[Module, float], float] = None
+    ) -> Tensor:
         p = check_layer(self, p)
         if not self.is_od and p is not None:
             raise ValueError("p must be None if is_od is False")

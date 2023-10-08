@@ -1,8 +1,8 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
-VERSION = '0.1.0'
-DESCRIPTION = 'FjORD Flwr package'
-LONG_DESCRIPTION = 'Implementation of FjORD as a flwr baseline'
+VERSION = "0.1.0"
+DESCRIPTION = "FjORD Flwr package"
+LONG_DESCRIPTION = "Implementation of FjORD as a flwr baseline"
 
 setup(
     name="fjord",

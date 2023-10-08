@@ -3,10 +3,8 @@ from typing import Tuple, Union
 from torch.nn import Module
 
 
-def check_layer(layer: Module, p: Union[Tuple[Module, float], float]
-                ) -> float:
-    """
-    Check if layer is valid and return p.
+def check_layer(layer: Module, p: Union[Tuple[Module, float], float]) -> float:
+    """Check if layer is valid and return p.
 
     Args:
         layer: PyTorch layer

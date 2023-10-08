@@ -1,22 +1,22 @@
-from typing import List, Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
+import flwr as fl
 import torch
-from torch.utils.data import DataLoader
+import torch.nn.functional as F
 from torch import nn
 from torch.nn import Module
-import torch.nn.functional as F
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import MultiStepLR
+from torch.utils.data import DataLoader
 from tqdm import tqdm
-import flwr as fl
 
-from .od.samplers import ODSampler, BaseSampler
 from .od.models.utils import (
+    SequentialWithSampler,
     create_bn_layer,
     create_conv_layer,
     create_linear_layer,
-    SequentialWithSampler
 )
+from .od.samplers import BaseSampler, ODSampler
 
 
 class BasicBlock(nn.Module):
@@ -26,21 +26,34 @@ class BasicBlock(nn.Module):
         super(BasicBlock, self).__init__()
         self.od = od
         self.conv1 = create_conv_layer(
-            od, True, in_planes, planes, kernel_size=3,
-            stride=stride, padding=1, bias=False)
+            od,
+            True,
+            in_planes,
+            planes,
+            kernel_size=3,
+            stride=stride,
+            padding=1,
+            bias=False,
+        )
         self.bn1 = create_bn_layer(od, p_s, planes)
         self.conv2 = create_conv_layer(
-            od, True, planes, planes, kernel_size=3,
-            stride=1, padding=1, bias=False)
+            od, True, planes, planes, kernel_size=3, stride=1, padding=1, bias=False
+        )
         self.bn2 = create_bn_layer(od, p_s, planes)
 
         self.shortcut = SequentialWithSampler()
-        if stride != 1 or in_planes != self.expansion*planes:
+        if stride != 1 or in_planes != self.expansion * planes:
             self.shortcut = SequentialWithSampler(
                 create_conv_layer(
-                    od, True, in_planes, self.expansion*planes,
-                    kernel_size=1, stride=stride, bias=False),
-                create_bn_layer(od, p_s, self.expansion*planes)
+                    od,
+                    True,
+                    in_planes,
+                    self.expansion * planes,
+                    kernel_size=1,
+                    stride=stride,
+                    bias=False,
+                ),
+                create_bn_layer(od, p_s, self.expansion * planes),
             )
 
     def forward(self, x, sampler):
@@ -53,8 +66,9 @@ class BasicBlock(nn.Module):
             out = F.relu(self.bn1(self.conv1(x, p=sampler())))
             out = self.bn2(self.conv2(out, p=sampler()))
             shortcut = self.shortcut(x, sampler=sampler)
-            assert shortcut.shape == out.shape, \
-                f"Shortcut shape: {shortcut.shape} out.shape: {out.shape}"
+            assert (
+                shortcut.shape == out.shape
+            ), f"Shortcut shape: {shortcut.shape} out.shape: {out.shape}"
             out += shortcut
             # out += self.shortcut(x, sampler=sampler)
             out = F.relu(out)
@@ -64,38 +78,33 @@ class BasicBlock(nn.Module):
 # Adapted from:
 #   https://github.com/kuangliu/pytorch-cifar/blob/master/models/resnet.py
 class ResNet(nn.Module):
-    '''ResNet in PyTorch.
+    """ResNet in PyTorch.
 
     Reference:
     [1] Kaiming He, Xiangyu Zhang, Shaoqing Ren, Jian Sun
         Deep Residual Learning for Image Recognition. arXiv:1512.03385
-    '''
+    """
+
     def __init__(self, od, p_s, block, num_blocks, num_classes=10):
         super(ResNet, self).__init__()
         self.od = od
         self.in_planes = 64
 
         self.conv1 = create_conv_layer(
-            od, True, 3, 64, kernel_size=3,
-            stride=1, padding=1, bias=False)
+            od, True, 3, 64, kernel_size=3, stride=1, padding=1, bias=False
+        )
         self.bn1 = create_bn_layer(od, p_s, 64)
-        self.layer1 = self._make_layer(
-            od, p_s, block, 64, num_blocks[0], stride=1)
-        self.layer2 = self._make_layer(
-            od, p_s, block, 128, num_blocks[1], stride=2)
-        self.layer3 = self._make_layer(
-            od, p_s, block, 256, num_blocks[2], stride=2)
-        self.layer4 = self._make_layer(
-            od, p_s, block, 512, num_blocks[3], stride=2)
-        self.linear = create_linear_layer(
-            od, False, 512*block.expansion, num_classes)
+        self.layer1 = self._make_layer(od, p_s, block, 64, num_blocks[0], stride=1)
+        self.layer2 = self._make_layer(od, p_s, block, 128, num_blocks[1], stride=2)
+        self.layer3 = self._make_layer(od, p_s, block, 256, num_blocks[2], stride=2)
+        self.layer4 = self._make_layer(od, p_s, block, 512, num_blocks[3], stride=2)
+        self.linear = create_linear_layer(od, False, 512 * block.expansion, num_classes)
 
     def _make_layer(self, od, p_s, block, planes, num_blocks, stride):
-        strides = [stride] + [1]*(num_blocks-1)
+        strides = [stride] + [1] * (num_blocks - 1)
         layers = []
         for stride in strides:
-            layers.append(block(
-                od, p_s, self.in_planes, planes, stride))
+            layers.append(block(od, p_s, self.in_planes, planes, stride))
             self.in_planes = planes * block.expansion
         return SequentialWithSampler(*layers)
 
@@ -123,33 +132,43 @@ class ResNet(nn.Module):
         return out
 
 
-def ResNet18(od=False, p_s=[1.]):
+def ResNet18(od=False, p_s=[1.0]):
     return ResNet(od, p_s, BasicBlock, [2, 2, 2, 2])
 
 
-def get_net(model_name: str, p_s: List[float],
-            device: torch.device,
-            ) -> torch.nn.Module:
-    """
-    Initialise model.
+def get_net(
+    model_name: str,
+    p_s: List[float],
+    device: torch.device,
+) -> torch.nn.Module:
+    """Initialise model.
+
     :param model_name: name of the model
     :param p_s: list of p-values
     :param device: device to be used
-    :return: initialised model"""
-    if model_name == 'resnet18':
-        net = ResNet18(
-            od=True, p_s=p_s).to(device)
+    :return: initialised model
+    """
+    if model_name == "resnet18":
+        net = ResNet18(od=True, p_s=p_s).to(device)
     else:
         raise ValueError(f"Model {model_name} is not supported")
 
     return net
 
 
-def train(net: Module, trainloader: DataLoader, know_distill: bool,
-          max_p: float, current_round: int, total_rounds: int,
-          p_s: List[float], epochs: int,
-          train_config: Dict[str, fl.common.Scalar]) -> float:
+def train(
+    net: Module,
+    trainloader: DataLoader,
+    know_distill: bool,
+    max_p: float,
+    current_round: int,
+    total_rounds: int,
+    p_s: List[float],
+    epochs: int,
+    train_config: Dict[str, fl.common.Scalar],
+) -> float:
     """Train the model on the training set.
+
     :param net: The model to train.
     :param trainloader: The training set.
     :param know_distill: Whether the model being trained
@@ -165,27 +184,32 @@ def train(net: Module, trainloader: DataLoader, know_distill: bool,
     device = next(net.parameters()).device
     criterion = torch.nn.CrossEntropyLoss()
     net.train()
-    if train_config.optimiser == 'sgd':
-        optimizer = torch.optim.SGD(net.parameters(),
-                                    lr=train_config.lr,
-                                    momentum=train_config.momentum,
-                                    nesterov=train_config.nesterov,
-                                    weight_decay=train_config.weight_decay,)
+    if train_config.optimiser == "sgd":
+        optimizer = torch.optim.SGD(
+            net.parameters(),
+            lr=train_config.lr,
+            momentum=train_config.momentum,
+            nesterov=train_config.nesterov,
+            weight_decay=train_config.weight_decay,
+        )
     else:
         raise ValueError(f"Optimiser {train_config.optimiser} not supported")
-    lr_scheduler = get_lr_scheduler(optimizer, total_rounds,
-                                    method=train_config.lr_scheduler)
+    lr_scheduler = get_lr_scheduler(
+        optimizer, total_rounds, method=train_config.lr_scheduler
+    )
     for _ in range(current_round):
         lr_scheduler.step()
 
     sampler = ODSampler(
         p_s=p_s,
         max_p=max_p,
-        model=net,)
+        model=net,
+    )
     max_sampler = ODSampler(
         p_s=[max_p],
         max_p=max_p,
-        model=net,)
+        model=net,
+    )
 
     loss = 0.0
     samples = 0
@@ -196,13 +220,11 @@ def train(net: Module, trainloader: DataLoader, know_distill: bool,
             images = images.to(device)
             batch_size = images.shape[0]
             if know_distill:
-                full_output = net(
-                    images.to(device), sampler=max_sampler)
+                full_output = net(images.to(device), sampler=max_sampler)
                 full_loss = criterion(full_output, target)
                 full_loss.backward()
                 target = full_output.detach().softmax(dim=1)
-            partial_loss = criterion(
-                net(images, sampler=sampler), target)
+            partial_loss = criterion(net(images, sampler=sampler), target)
             partial_loss.backward()
             optimizer.step()
             loss += partial_loss.item() * batch_size
@@ -211,13 +233,16 @@ def train(net: Module, trainloader: DataLoader, know_distill: bool,
     return loss / samples
 
 
-def test(net: Module, testloader: DataLoader, p_s: List[float]
-         ) -> Tuple[List[float], List[float]]:
+def test(
+    net: Module, testloader: DataLoader, p_s: List[float]
+) -> Tuple[List[float], List[float]]:
     """Validate the model on the test set.
+
     :param net: The model to validate.
     :param testloader: The test set.
     :param p_s: The p values to use for validation.
-    :return: The loss and accuracy on the test set."""
+    :return: The loss and accuracy on the test set.
+    """
     device = next(net.parameters()).device
     criterion = torch.nn.CrossEntropyLoss()
     losses = []
@@ -229,15 +254,15 @@ def test(net: Module, testloader: DataLoader, p_s: List[float]
         p_sampler = ODSampler(
             p_s=[p],
             max_p=p,
-            model=net,)
+            model=net,
+        )
 
         with torch.no_grad():
             for images, labels in tqdm(testloader):
                 outputs = net(images.to(device), sampler=p_sampler)
                 labels = labels.to(device)
                 loss += criterion(outputs, labels).item() * images.shape[0]
-                correct += (torch.max(
-                    outputs.data, 1)[1] == labels).sum().item()
+                correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
         accuracy = correct / len(testloader.dataset)
         losses.append(loss / len(testloader.dataset))
         accuracies.append(accuracy)
@@ -245,22 +270,23 @@ def test(net: Module, testloader: DataLoader, p_s: List[float]
     return losses, accuracies
 
 
-def get_lr_scheduler(optimiser: Optimizer,
-                     total_epochs: int,
-                     method: Optional[str] = 'static',
-                     ) -> torch.optim.lr_scheduler._LRScheduler:
-    """
-    Get the learning rate scheduler.
+def get_lr_scheduler(
+    optimiser: Optimizer,
+    total_epochs: int,
+    method: Optional[str] = "static",
+) -> torch.optim.lr_scheduler._LRScheduler:
+    """Get the learning rate scheduler.
+
     :param optimiser: The optimiser for which to get the scheduler.
     :param total_epochs: The total number of epochs.
     :param method: The method to use for the scheduler.
         Supports static and cifar10.
     :return: The learning rate scheduler.
     """
-    if method == 'static':
+    if method == "static":
         return MultiStepLR(optimiser, [total_epochs + 1])
-    elif method == 'cifar10':
-        return MultiStepLR(optimiser,
-                           [int(0.5 * total_epochs), int(0.75 * total_epochs)],
-                           gamma=0.1)
+    elif method == "cifar10":
+        return MultiStepLR(
+            optimiser, [int(0.5 * total_epochs), int(0.75 * total_epochs)], gamma=0.1
+        )
     raise ValueError(f"{method} scheduler not currently supported.")

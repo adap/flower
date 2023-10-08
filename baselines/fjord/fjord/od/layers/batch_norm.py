@@ -2,16 +2,20 @@ from typing import List, Optional
 
 import numpy as np
 import torch
-from torch import nn, Tensor
-
+from torch import Tensor, nn
 
 __all__ = ["ODBatchNorm2d"]
 
 
 class ODBatchNorm2d(nn.Module):
-    def __init__(self, p_s: List[float], num_features: int,
-                 affine: Optional[bool] = True,
-                 *args, **kwargs) -> None:
+    def __init__(
+        self,
+        p_s: List[float],
+        num_features: int,
+        affine: Optional[bool] = True,
+        *args,
+        **kwargs,
+    ) -> None:
         super(ODBatchNorm2d, self).__init__()
         self.p_s = p_s
         self.is_od = False  # no sampling is happening here
@@ -24,9 +28,10 @@ class ODBatchNorm2d(nn.Module):
         self.bn = nn.ModuleDict(
             {
                 str(num_features): nn.BatchNorm2d(
-                    num_features, affine=False, *args, **kwargs)
+                    num_features, affine=False, *args, **kwargs
+                )
                 for num_features in self.num_features_s
-                }
+            }
         )
 
         # single track_running_stats
@@ -51,8 +56,9 @@ class ODBatchNorm2d(nn.Module):
 
     def forward(self, x: Tensor) -> Tensor:
         in_dim = x.size(1)  # second dimension is input dimension
-        assert in_dim in self.num_features_s, \
-            "input dimension not in selected num_features_s"
+        assert (
+            in_dim in self.num_features_s
+        ), "input dimension not in selected num_features_s"
         out = self.bn[str(in_dim)](x)
         if self.affine:
             out = out * self.weight[:in_dim] + self.bias[:in_dim]

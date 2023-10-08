@@ -6,13 +6,13 @@ from .base_sampler import BaseSampler
 
 
 class ODSampler(BaseSampler):
-    """
-    Implements OD sampling per layer up to p-max value
+    """Implements OD sampling per layer up to p-max value.
+
     :param p_s: list of p-values
     :param max_p: maximum p-value
     """
-    def __init__(self, p_s: List[float], max_p: float, *args, **kwargs
-                 ) -> None:
+
+    def __init__(self, p_s: List[float], max_p: float, *args, **kwargs) -> None:
         super(ODSampler, self).__init__(*args, **kwargs)
         self.p_s = np.array([p for p in p_s if p <= max_p])
         self.max_p = max_p
