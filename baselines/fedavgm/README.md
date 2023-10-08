@@ -144,7 +144,7 @@ python -m fedavgm.main server.reporting_fraction=0.2 client.local_epochs=5 # wil
 ## Expected Results
 
 ### CIFAR-10
-Similar to FedAvgM paper as reference, the CIFAR-10 evaluation runs 10.000 rounds.
+Similar to FedAvgM paper as reference, the CIFAR-10 evaluation runs 10,000 rounds.
 
 For FedAvgM evaluation, it was performed a hyperparameter search of server momentum and client learning rate (similar to Figure 6 reported below) for each of the concentrations under analysis, using the following commands:
 
