@@ -190,7 +190,7 @@ def train(net: Module, trainloader: DataLoader, know_distill: bool,
     loss = 0.0
     samples = 0
     for _ in range(epochs):
-        for images, labels in tqdm(trainloader):
+        for images, labels in trainloader:
             optimizer.zero_grad()
             target = labels.to(device)
             images = images.to(device)
