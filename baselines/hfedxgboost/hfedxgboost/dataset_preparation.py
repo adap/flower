@@ -144,10 +144,10 @@ def download_data(dataset_name: Optional[str] = "cod-rna"):
         DATASET_PATH = os.path.join(ALL_DATASETS_PATH, "YearPredictionMSD")
         if not os.path.exists(DATASET_PATH):
             print(
-                "long dowenload coming, it will be better if you dowenloaded",
-                "those 2 files manually with a faster dowenload manger program or",
-                "something and just place them in the rigte folder then get",
-                "the for loop out of the if condition to alter thier format",
+                "long download coming -~615MB-, it will be better if you downloaded",
+                "those 2 files manually with a faster download manager program or",
+                "something and just place them in the right folder then get",
+                "the for loop out of the if condition to alter their format",
             )
             os.makedirs(DATASET_PATH)
             urllib.request.urlretrieve(
