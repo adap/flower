@@ -15,7 +15,7 @@
 """SQLite based implemenation of server state."""
 
 
-import random
+import os
 import re
 import sqlite3
 from datetime import datetime, timedelta
@@ -469,13 +469,21 @@ class SqliteState(State):
 
         return None
 
-    def register_node(self, node_id: int) -> None:
-        """Store `node_id` in state."""
-        query = "INSERT INTO node VALUES(:node_id);"
-        self.query(query, {"node_id": node_id})
+    def create_node(self) -> int:
+        """Create, store in state, and return `node_id`."""
+        # Sample a random int64 as node_id
+        node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
-    def unregister_node(self, node_id: int) -> None:
-        """Remove `node_id` from state."""
+        query = "INSERT INTO node VALUES(:node_id);"
+        try:
+            self.query(query, {"node_id": node_id})
+        except sqlite3.IntegrityError:
+            log(ERROR, "Unexpected node registration failure.")
+            return 0
+        return node_id
+
+    def delete_node(self, node_id: int) -> None:
+        """Delete a client node."""
         query = "DELETE FROM node WHERE node_id = :node_id;"
         self.query(query, {"node_id": node_id})
 
@@ -500,8 +508,8 @@ class SqliteState(State):
 
     def create_workload(self) -> int:
         """Create one workload and store it in state."""
-        # Sample random integer from 0 to 9223372036854775807
-        workload_id: int = random.randrange(9223372036854775808)
+        # Sample a random int64 as workload_id
+        workload_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
         # Check conflicts
         query = "SELECT COUNT(*) FROM workload WHERE workload_id = ?;"
