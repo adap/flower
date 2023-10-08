@@ -2,7 +2,7 @@
 from collections import OrderedDict
 from copy import deepcopy
 from types import SimpleNamespace
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 
 import flwr as fl
 import numpy as np
@@ -19,7 +19,8 @@ from .utils.logger import Logger
 from .utils.utils import save_model
 
 FJORD_CONFIG_TYPE = Dict[
-    Union[str, float], List[Union[Dict[str, Optional[int]], Union[float, str, None]]]
+    Union[str, float],
+    List[Any],
 ]
 
 

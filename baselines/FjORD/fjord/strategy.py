@@ -188,7 +188,9 @@ class FjORDFedAVG(FedAvg):
 
         Logger.get().info(f"Aggregating for global round {server_round}")
         # Convert results
-        weights_results = [
+        weights_results: List[
+            Tuple[NDArrays, int, float, List[float], FJORD_CONFIG_TYPE]
+        ] = [
             (
                 parameters_to_ndarrays(fit_res.parameters),
                 fit_res.num_examples,
