@@ -36,8 +36,37 @@ EvaluateResultsAndFailures = Tuple[
 
 
 class FL_Server(fl.server.Server):
-    """Flower server."""
+    """
+    The FL_Server class is a sub-class of the fl.server.Server class. 
 
+    Attributes:
+
+        client_manager (ClientManager):responsible for managing the clients.
+        parameters (Parameters): The model parameters used for training 
+        and evaluation.
+        strategy (Strategy): The strategy used for selecting clients 
+        and aggregating results.
+        max_workers (None or int): The maximum number of workers 
+        for parallel execution.
+        early_stopper (Early_Stop): The early stopper used for 
+        determining when to stop training.
+
+    Methods:
+        fit_round(server_round, timeout): 
+            Runs a round of fitting on the server side.
+        check_res_cen(current_round, timeout, start_time, history): 
+            Gets results after fitting the model for the current round 
+            and checks if the training should stop.
+        fit(num_rounds, timeout): 
+            Runs federated learning for a given number of rounds.
+        evaluate_round(server_round, timeout):
+            Validates the current global model on a number of clients.
+        _get_initial_parameters(timeout): 
+            Gets initial parameters from one of the available clients.
+        serverside_eval(server_round, parameters, config, 
+                        cfg, testloader, batch_size): 
+            Performs server-side evaluation. 
+    """
     def __init__(
         self,
         *,
