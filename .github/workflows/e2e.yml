@@ -30,7 +30,7 @@ jobs:
       - name: Test wheel
         run: ./dev/test-wheel.sh
       - name: Upload wheel
-        if: github.repository == 'adap/flower' && ${{ !github.event.pull_request.head.repo.fork }}
+        if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
         id: upload
         env:
           AWS_DEFAULT_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
