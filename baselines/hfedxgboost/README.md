@@ -176,7 +176,7 @@ python -m hfedxgboost.main --multirun clients=YearPredictionMSD_2_clients,YearPr
 | cod_rna | Binary Classification | 2<br>5<br>10 | 0.96<br>0.96<br>0.95 | 
 | ijcnn1 | Binary Classification |2<br>5<br>10 | 0.98<br>0.97<br>0.96 |
 
-### Table 3
+### Table 3 -- Federated Regression
 
 | Dataset | task type |no. of clients | server-side test MSE |
 | :---: | :---: | :---: | :---: |
