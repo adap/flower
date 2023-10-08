@@ -9,6 +9,7 @@ from torch.optim.optimizer import Optimizer, required
 from fednova.utils import Meter, comp_accuracy
 from typing import List, Tuple, Dict
 from flwr.common.typing import NDArrays
+from collections import OrderedDict
 
 
 class VGG(nn.Module):
@@ -69,6 +70,7 @@ cfg = {
 
 def train(model, optimizer, trainloader, device, epochs):
 	criterion = nn.CrossEntropyLoss()
+	model = model.to(device)
 	model.train()
 
 	for epoch in range(epochs):
@@ -96,14 +98,15 @@ def train(model, optimizer, trainloader, device, epochs):
 			losses.update(loss.item(), data.size(0))
 			top1.update(train_acc[0].item(), data.size(0))
 
-			# print("Epoch: {} Batch: {} Loss: {} Acc: {}".format(epoch, batch_idx, loss.item(), train_acc[0].item()))
 
-			# if batch_idx == 5:
-			# 	break
-
-
-def test(model, test_loader, device) -> Tuple[float, float]:
+def test(model, test_loader, device, load_params=None) -> Tuple[float, float]:
 	criterion = nn.CrossEntropyLoss()
+	if load_params is not None:
+		params_dict = zip(model.state_dict().keys(), load_params)
+		state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+		model.load_state_dict(state_dict)
+
+	model = model.to(device)
 	model.eval()
 	top1 = Meter(ptag='Acc')
 	total_loss = 0.0
@@ -209,6 +212,8 @@ class ProxSGD(Optimizer):
 
 				# apply proximal updates
 				if self.mu != 0:
+					if param_state['old_init'].device != p.device:
+						param_state['old_init'] = param_state['old_init'].to(p.device)
 					d_p.add_(p.data - param_state['old_init'], alpha=self.mu)
 
 				# update accumalated local updates
@@ -236,7 +241,7 @@ class ProxSGD(Optimizer):
 
 		self.local_steps += 1
 
-	def get_local_stats(self) -> Dict:
+	def get_gradient_scaling(self) -> Dict[str, float]:
 		if self.mu != 0:
 			local_tau = torch.tensor(self.local_steps * self.ratio)
 		else:
@@ -250,8 +255,10 @@ class ProxSGD(Optimizer):
 		for group in self.param_groups:
 			for p in group['params']:
 				param_state = self.state[p]
-				p.data.copy_(torch.tensor(init_params[i], device=p.data.device))
-				param_state['old_init'] = torch.clone(p.data).detach()
+				param_tensor = torch.tensor(init_params[i])
+				p.data.copy_(param_tensor)
+				# param_state['old_init'] = torch.clone(p.data).detach()
+				param_state['old_init'] = param_tensor
 				i += 1
 
 	def set_lr(self, lr: float):

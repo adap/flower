@@ -4,15 +4,17 @@
 # a similar configuration structure and hence be easy to customise)
 
 #dataset:
-datapath: data/
-checkpoint_path: checkpoints/
+exp_name: vanilla_fednova
+datapath: fednova/data/
+checkpoint_path: fednova/checkpoints/
+results_dir: fednova/results/
 num_clients: 16
 num_epochs: 2
-num_rounds: 200
+num_rounds: 100
 batch_size: 32
 NIID: True
 alpha: 0.1
-var_local_epochs: True
+var_local_epochs: False
 var_min_epochs: 2
 var_max_epochs: 5
 lr_scheduling: True
@@ -24,7 +26,7 @@ model:
 
 optimizer:
   _target_: fednova.models.ProxSGD
-  lr: 0.02
+  lr: 0.05
   momentum: 0
   weight_decay: 1e-4
   gmf: 0
@@ -33,4 +35,4 @@ optimizer:
 
 client_resources:
   num_cpus: 1
-  num_gpus: 0.166
+  num_gpus: 0.125

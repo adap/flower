@@ -33,7 +33,7 @@ class FedNova(FedAvg):
 		self.exp_config = exp_config
 		self.lr = exp_config.optimizer.lr
 		self.gmf = exp_config.optimizer.gmf
-		self.best_acc = 0.0
+		self.best_test_acc = 0.0
 
 	def configure_fit(self, server_round: int, parameters: Parameters,
 					  client_manager: ClientManager) -> List[Tuple[ClientProxy, FitIns]]:
@@ -138,19 +138,38 @@ class FedNova(FedAvg):
 			eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
 			metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
 
-			if metrics_aggregated.get("accuracy", 0.0) > self.best_acc:
-				self.best_acc = metrics_aggregated.get("accuracy", 0.0)
-				# Save model parameters and state
-
-				np.savez(f"{self.exp_config.checkpoint_path}best_model_{server_round}.npz",
-						 self.global_parameters, [self.best_acc], self.global_momentum_buffer)
-
-				log(INFO, "Best model saved")
-
 		elif server_round == 1:  # Only log this warning once
 			log(WARNING, "No evaluate_metrics_aggregation_fn provided")
 
 		return loss_aggregated, metrics_aggregated
+
+	def evaluate(self, server_round: int, parameters: Parameters) -> Optional[Tuple[float, Dict[str, float]]]:
+
+		"""Evaluate model parameters using an evaluation function."""
+		if self.evaluate_fn is None:
+			# No evaluation function provided
+			return None
+
+		parameters_ndarrays = parameters_to_ndarrays(parameters)
+		eval_res = self.evaluate_fn(load_params=parameters_ndarrays)
+
+		if eval_res is None:
+			return None
+		else:
+			loss, accuracy = eval_res
+			# print("----------- Round: {} Test Loss: {} Test Accuracy : {}--------------------".format(server_round, loss, accuracy))
+			if accuracy > self.best_test_acc:
+				self.best_test_acc = accuracy
+				# Save model parameters and state
+				if server_round == 0:
+					return None
+				else:
+					np.savez(f"{self.exp_config.checkpoint_path}bestModel_{self.exp_config.exp_name}_varEpochs_{self.exp_config.var_local_epochs}.npz",
+						 self.global_parameters, [loss, self.best_test_acc], self.global_momentum_buffer)
+
+				log(INFO, "Model saved with Best Test accuracy: {}".format(self.best_test_acc))
+
+			return loss, {"accuracy": accuracy}
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:

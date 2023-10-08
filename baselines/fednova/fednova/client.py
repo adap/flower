@@ -13,13 +13,13 @@ class FlowerClient(fl.client.NumPyClient):  # pylint: disable=too-many-instance-
 	"""Standard Flower client for CNN training."""
 
 	def __init__(self, net: torch.nn.Module, client_id: str, trainloader: DataLoader,
-				 testloader: DataLoader, device: torch.device, num_epochs: int, ratio: float, config: DictConfig):
+				 valloader: DataLoader, device: torch.device, num_epochs: int, ratio: float, config: DictConfig):
 
 		self.net = net
 		self.exp_config = config
 		self.optimizer = instantiate(config.optimizer, params=self.net.parameters(), ratio=ratio)
-		self.trainloader = trainloader
-		self.testloader = testloader
+		self.trainLoader = trainloader
+		self.valLoader = valloader
 		self.client_id = client_id
 		self.device = device
 		self.num_epochs = num_epochs
@@ -50,21 +50,29 @@ class FlowerClient(fl.client.NumPyClient):  # pylint: disable=too-many-instance-
 
 		train(self.net,
 			  self.optimizer,
-			  self.trainloader,
+			  self.trainLoader,
 			  self.device,
 			  epochs=num_epochs)
 
-		local_stats = self.optimizer.get_local_stats()
+		# Get ratio by which the strategy would scale the local gradients from each client
+		# We use this scaling factor to aggregate the gradients on the server
+		grad_scaling_factor: Dict[str, float] = self.optimizer.get_gradient_scaling()
 
-		return self.get_parameters({}), len(self.trainloader), local_stats
+		return self.get_parameters({}), len(self.trainLoader), grad_scaling_factor
 
 	def evaluate(self, parameters: NDArrays, config: Dict[str, Scalar]) -> Tuple[float, int, Dict]:
 		"""Implements distributed evaluation for a given client."""
+
+		# Evaluation ideally is done on validation set, but because we already know the best hyper-parameters from the paper
+		# and since individual client datasets are already quite small, we merge the validation set with the training set
+		# and evaluate on the training set with the aggregated global model parameters.
+		# This behaviour can be modified by passing the validation set in the below test(self.valLoader) function
+		# and replacing len(self.valLoader) below.
+		# Note that we evaluate on the centralized test-set on server-side in the strategy.
+
 		self.set_parameters(parameters)
-		loss, accuracy = test(self.net, self.testloader, self.device)
-		# print("-----Client: {} Round: {} Test Loss: {} Accuracy : {} ".format(self.client_id, config["server_round"],
-		# 																	  loss, accuracy))
-		return float(loss), len(self.testloader), {"accuracy": float(accuracy)}
+		loss, accuracy = test(self.net, self.trainLoader, self.device)
+		return float(loss), len(self.trainLoader), {"accuracy": float(accuracy)}
 
 
 def gen_client_fn(num_epochs: int, trainloaders: List[DataLoader], testloader: DataLoader, data_ratios: List,
@@ -74,8 +82,8 @@ def gen_client_fn(num_epochs: int, trainloaders: List[DataLoader], testloader: D
 		"""Create a Flower client representing a single organization."""
 
 		# Load model
-		device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-		net = instantiate(model).to(device)
+		device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+		net = instantiate(model)
 
 		# Note: each client gets a different trainloader/valloader, so each client
 		# will train and evaluate on their own unique data
