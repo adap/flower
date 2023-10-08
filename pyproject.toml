@@ -60,7 +60,7 @@ flower-client = "flwr.client:run_client"
 python = "^3.8"
 # Mandatory dependencies
 numpy = "^1.21.0"
-grpcio = "^1.53.0,!=1.52.0"
+grpcio = "^1.53.0"
 protobuf = "^4.21.3"
 cryptography = "^41.0.2"
 pycryptodome = "^3.18.0"
