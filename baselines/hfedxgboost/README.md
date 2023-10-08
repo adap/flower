@@ -158,9 +158,9 @@ python -m hfedxgboost.main --multirun clients=YearPredictionMSD_2_clients,YearPr
 
 | Dataset | task type | test result | 
 | :---: | :---: | :---: |
-| a9a | Binary classification | 84% |
-| cod-rna | Binary classification | 97% |
-| ijcnn1 | Binary classification | 98% |
+| a9a | Binary classification | 84.9% |
+| cod-rna | Binary classification | 97.3% |
+| ijcnn1 | Binary classification | 98.7% |
 | abalone | Regression | 4.6 |
 | cpusmall | Regression | 9 |
 | space_ga | Regression | .032 |
@@ -172,9 +172,9 @@ python -m hfedxgboost.main --multirun clients=YearPredictionMSD_2_clients,YearPr
 
 | Dataset | task type |no. of clients | server-side test Accuracy |
 | :---: | :---: | :---: | :---: |
-| a9a | Binary Classification | 2<br>5<br>10 | 84% <br>84% <br> 83% |
-| cod_rna | Binary Classification | 2<br>5<br>10 | 96% <br>96% <br>95%  | 
-| ijcnn1 | Binary Classification |2<br>5<br>10 | 98% <br>97% <br>96%  |
+| a9a | Binary Classification | 2<br>5<br>10 | 83.8% <br>84.2% <br> 83.7% |
+| cod_rna | Binary Classification | 2<br>5<br>10 | 96.4% <br>96.2% <br>95.0%  | 
+| ijcnn1 | Binary Classification |2<br>5<br>10 | 98.0% <br>97.3% <br>96.7%  |
 
 ### Table 3 -- Federated Regression
 
