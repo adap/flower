@@ -154,7 +154,7 @@ python -m hfedxgboost.main --multirun clients="cpusmall_2_clients","cpusmall_5_c
 #results for YearPredictionMSD_2 dataset in table 3
 python -m hfedxgboost.main --multirun clients=YearPredictionMSD_2_clients,YearPredictionMSD_5_clients,YearPredictionMSD_10_clients dataset=YearPredictionMSD
 ```
-### Table 1
+### Table 1 -- Centralized Evaluation
 
 | Dataset | task type | test result | 
 | :---: | :---: | :---: |
