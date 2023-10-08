@@ -24,7 +24,7 @@ dataset: [CIFAR-10, Fashion-MNIST]
 
 **Hardware Setup:** This baseline was evaluated in a regular PC without GPU (Intel i7-10710U CPU, and 32 Gb RAM). The major constraint is to run a huge number of rounds such as the reference paper that reports 10.000 round for each case evaluated. 
 
-**Contributors:** Gustavo de Carvalho Bertoli [(@gubertoli)](https://github.com/gubertoli)
+**Contributors:** Gustavo Bertoli [(@gubertoli)](https://github.com/gubertoli)
 
 ## Experimental Setup
 
@@ -79,9 +79,27 @@ The following table shows the main hyperparameters for this baseline with their 
 | client learning rate | 0.01 |
 
 ### Custom FedAvgM
-In contrast with the original implementation from Flower v1.5.0, in this baseline we introduce the Nesterov accelerated gradient as part of the momentum applied in the server model. To use the original Flower implementation, use the argument `strategy=fedavgm`. By default, the custom implementation is used. But, you can also refer to it on the command line as `strategy=custom-fedavgm`.
+In contrast to the initial implementation found in Flower v1.5.0, our baseline incorporates the Nesterov accelerated gradient as a pivotal component of the momentum applied to the server model. It is worth emphasizing that the inclusion of Nesterov momentum aligns with the original definition of FedAvgM in the research paper.
 
-## Specifying the Python Version
+To use the original Flower implementation, use the argument `strategy=fedavgm`. By default, the custom implementation is used. But, you can also refer to it on the command line as `strategy=custom-fedavgm`.
+
+## Environment Setup
+
+This baseline works with TensorFlow 2.10, no additional step required once using Poetry to set up the environment.
+
+We use Poetry to manage the Python environment for each individual baseline. You can follow the instructions [here](https://python-poetry.org/docs/) to install Poetry in your machine. 
+
+To construct the Python environment with Poetry follow these steps:
+
+```bash
+# install the base Poetry environment
+poetry install
+
+# activate the environment
+poetry shell
+```
+
+### Specifying the Python Version
 This baseline was tested with Python 3.10.6.
 
 By default, Poetry will use the Python version in your system. In some settings, you might want to specify a particular version of Python to use inside your Poetry environment. You can do so with [`pyenv`](https://github.com/pyenv/pyenv). Check the documentation for the different ways of installing `pyenv`, but one easy way is using the [automatic installer](https://github.com/pyenv/pyenv-installer):
@@ -102,21 +120,6 @@ poetry env use 3.10.6
 # then you can install your Poetry environment (see the next setp)
 ```
 
-## Environment Setup
-
-This baseline works with TensorFlow 2.10, no additional step required once using Poetry to set up the environment.
-
-We use Poetry to manage the Python environment for each individual baseline. You can follow the instructions [here](https://python-poetry.org/docs/) to install Poetry in your machine. 
-
-To construct the Python environment with Poetry follow these steps:
-
-```bash
-# install the base Poetry environment
-poetry install
-
-# activate the environment
-poetry shell
-```
 ### Google Colab
 If you want to setup the environemnt on Google Colab, please executed the script `conf-colab.sh`, just use the Colab terminal and the following:
 
