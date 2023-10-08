@@ -105,7 +105,7 @@ def divide_dataset_between_clients(
     datasets = random_split(trainset, lengths, torch.Generator().manual_seed(0))
 
     # Split each partition into train/val and create DataLoader
-    trainloaders = []
+    trainloaders: List[DataLoader] = []
     valloaders: Union[List[DataLoader], List[None]] = []
     for ds in datasets:
         len_val = int(len(ds) * val_ratio)

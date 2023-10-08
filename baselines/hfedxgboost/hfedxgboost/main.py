@@ -125,25 +125,15 @@ def main(cfg: DictConfig) -> None:
 
         def client_fn(cid: str) -> fl.client.Client:
             """Create a federated learning client."""
-            if val_ratio > 0.0 and val_ratio <= 1.0:
-                return FL_Client(
-                    cfg,
-                    trainloaders[int(cid)],
-                    valloaders[int(cid)],
-                    client_pool_size,
-                    cid,
-                    log_progress=False,
-                )
-            else:
-                return FL_Client(
-                    cfg,
-                    trainloaders[int(cid)],
-                    None,
-                    client_pool_size,
-                    cid,
-                    log_progress=False,
-                )
-
+            return FL_Client(
+                cfg,
+                trainloaders[int(cid)],
+                valloaders[int(cid)],
+                client_pool_size,
+                cid,
+                log_progress=False,
+            )
+            
         # Start the simulation
         history = fl.simulation.start_simulation(
             client_fn=client_fn,
