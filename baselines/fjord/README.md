@@ -66,9 +66,8 @@ Extensive evaluation on both CNNs and RNNs across diverse modalities shows that 
 ### Through regular pip
 
 ```bash
-cd fjord
 pip install -r requirements.txt
-pip install -e .
+python setup.py install
 ```
 
 ### Through poetry
