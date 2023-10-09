@@ -69,7 +69,8 @@ REASON:
 """
 
 
-def start_simulation(  # pylint: disable=too-many-arguments,too-many-statements
+# pylint: disable=too-many-arguments,too-many-statements,too-many-branches
+def start_simulation(
     *,
     client_fn: ClientFn,
     num_clients: Optional[int] = None,
@@ -84,7 +85,6 @@ def start_simulation(  # pylint: disable=too-many-arguments,too-many-statements
     actor_type: Type[VirtualClientEngineActor] = DefaultActor,
     actor_kwargs: Optional[Dict[str, Any]] = None,
     actor_scheduling: Union[str, NodeAffinitySchedulingStrategy] = "DEFAULT",
-    _raise_exception: bool = False,
 ) -> History:
     """Start a Ray-based Flower simulation server.
 
@@ -155,10 +155,6 @@ def start_simulation(  # pylint: disable=too-many-arguments,too-many-statements
         compute nodes (e.g. via NodeAffinitySchedulingStrategy). Please note this
         is an advanced feature. For all details, please refer to the Ray documentation:
         https://docs.ray.io/en/latest/ray-core/scheduling/index.html
-
-    _raise_exception: Optional[bool] (default: False)
-        If True, raise an exception if the simulation crashes instead of exiting
-        gracefully.
 
     Returns
     -------
@@ -305,6 +301,7 @@ def start_simulation(  # pylint: disable=too-many-arguments,too-many-statements
         )
         initialized_server.client_manager().register(client=client_proxy)
 
+    hist = History()
     # pylint: disable=broad-except
     try:
         # Start training
@@ -332,16 +329,11 @@ def start_simulation(  # pylint: disable=too-many-arguments,too-many-statements
             client_resources,
             client_resources,
         )
-        hist = History()
-        if _raise_exception:
-            # Stop time monitoring resources in cluster
-            f_stop.set()
-            event(EventType.START_SIMULATION_LEAVE)
-            raise RuntimeError("Simulation crashed") from ex
+        raise RuntimeError("Simulation crashed.") from ex
 
-    # Stop time monitoring resources in cluster
-    f_stop.set()
-
-    event(EventType.START_SIMULATION_LEAVE)
+    finally:
+        # Stop time monitoring resources in cluster
+        f_stop.set()
+        event(EventType.START_SIMULATION_LEAVE)
 
     return hist
