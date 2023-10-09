@@ -1,7 +1,7 @@
 ---
-title: Tackling the Objective Inconsistency Problem in Heterogeneous Federated Optimization (NeurIPS 2020) \
-url: https://proceedings.neurips.cc/paper/2020/hash/564127c03caab942e503ee6f810f54fd-Abstract.html \
-labels: [normalized averaging, heterogeneous optimization, federated learning]  \
+title: Tackling the Objective Inconsistency Problem in Heterogeneous Federated Optimization (NeurIPS 2020)
+url: https://proceedings.neurips.cc/paper/2020/hash/564127c03caab942e503ee6f810f54fd-Abstract.html
+labels: [normalized averaging, heterogeneous optimization, federated learning]
 dataset: [non-iid cifar10 dataset, synthetic dataset]
 ---
 

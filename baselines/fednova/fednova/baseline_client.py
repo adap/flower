@@ -1,5 +1,6 @@
 from typing import Callable, Dict, List, Tuple
 
+from collections import OrderedDict
 import flwr as fl
 import numpy as np
 import torch
@@ -7,11 +8,12 @@ from flwr.common.typing import NDArrays, Scalar
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
+from torch.optim import SGD
 
 from fednova.models import test, train
 
 
-class FedNovaClient(fl.client.NumPyClient):  # pylint: disable=too-many-instance-attributes
+class FedAvgClient(fl.client.NumPyClient):  # pylint: disable=too-many-instance-attributes
 	"""Standard Flower client for CNN training."""
 
 	def __init__(self, net: torch.nn.Module, client_id: str, trainloader: DataLoader,
@@ -19,7 +21,8 @@ class FedNovaClient(fl.client.NumPyClient):  # pylint: disable=too-many-instance
 
 		self.net = net
 		self.exp_config = config
-		self.optimizer = instantiate(config.optimizer, params=self.net.parameters(), ratio=ratio)
+		self.optimizer = SGD(self.net.parameters(), lr=config.optimizer.lr, momentum=config.optimizer.momentum,
+							 weight_decay=config.optimizer.weight_decay)
 		self.trainLoader = trainloader
 		self.valLoader = valloader
 		self.client_id = client_id
@@ -29,18 +32,20 @@ class FedNovaClient(fl.client.NumPyClient):  # pylint: disable=too-many-instance
 
 	def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
 		"""Returns the parameters of the current net."""
-		params = [val["cum_grad"].cpu().numpy() for _, val in self.optimizer.state_dict()["state"].items()]
-		return params
+		return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
 
 	def set_parameters(self, parameters: NDArrays) -> None:
 		"""Changes the parameters of the model using the given ones."""
-		self.optimizer.set_model_params(parameters)
+		params_dict = zip(self.net.state_dict().keys(), parameters)
+		state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+		self.net.load_state_dict(state_dict, strict=True)
 
 	def fit(self, parameters: NDArrays, config: Dict[str, Scalar]) -> Tuple[NDArrays, int, Dict]:
 		"""Implements distributed fit function for a given client."""
 
 		self.set_parameters(parameters)
-		self.optimizer.set_lr(config["lr"])
+		for g in self.optimizer.param_groups:
+			g['lr'] = config["lr"]
 
 		if self.exp_config.var_local_epochs:
 			seed_val = 2023 + int(self.client_id) + config["server_round"] + self.exp_config.seed
@@ -53,13 +58,10 @@ class FedNovaClient(fl.client.NumPyClient):  # pylint: disable=too-many-instance
 			  self.optimizer,
 			  self.trainLoader,
 			  self.device,
-			  epochs=num_epochs)
+			  num_epochs,
+			  proximal_mu=self.exp_config.optimizer.mu)
 
-		# Get ratio by which the strategy would scale the local gradients from each client
-		# We use this scaling factor to aggregate the gradients on the server
-		grad_scaling_factor: Dict[str, float] = self.optimizer.get_gradient_scaling()
-
-		return self.get_parameters({}), len(self.trainLoader), grad_scaling_factor
+		return self.get_parameters({}), len(self.trainLoader), {}
 
 	def evaluate(self, parameters: NDArrays, config: Dict[str, Scalar]) -> Tuple[float, int, Dict]:
 		"""Implements distributed evaluation for a given client."""
@@ -76,10 +78,10 @@ class FedNovaClient(fl.client.NumPyClient):  # pylint: disable=too-many-instance
 		return float(loss), len(self.trainLoader), metrics
 
 
-def gen_clients_fednova(num_epochs: int, trainloaders: List[DataLoader], testloader: DataLoader, data_ratios: List,
-				model: DictConfig, exp_config: DictConfig) -> Callable[[str], FedNovaClient]:
+def gen_clients_fedavg(num_epochs: int, trainloaders: List[DataLoader], testloader: DataLoader, data_ratios: List,
+				model: DictConfig, exp_config: DictConfig) -> Callable[[str], FedAvgClient]:
 
-	def client_fn(cid: str) -> FedNovaClient:
+	def client_fn(cid: str) -> FedAvgClient:
 		"""Create a Flower client representing a single organization."""
 
 		# Load model
@@ -91,7 +93,7 @@ def gen_clients_fednova(num_epochs: int, trainloaders: List[DataLoader], testloa
 		trainloader = trainloaders[int(cid)]
 		client_dataset_ratio = data_ratios[int(cid)]
 
-		return FedNovaClient(
+		return FedAvgClient(
 			net,
 			cid,
 			trainloader,

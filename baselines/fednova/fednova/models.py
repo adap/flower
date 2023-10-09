@@ -6,6 +6,7 @@ import math
 from collections import OrderedDict
 from typing import Dict, List, Tuple
 
+import numpy as np
 import torch
 import torch.nn as nn
 from flwr.common.typing import NDArrays
@@ -70,9 +71,13 @@ cfg = {
 }
 
 
-def train(model, optimizer, trainloader, device, epochs):
+def train(model, optimizer, trainloader, device, epochs, proximal_mu=0.0):
 	criterion = nn.CrossEntropyLoss()
 	model = model.to(device)
+	if proximal_mu > 0.0:
+		global_params = [val.detach().clone() for val in model.parameters()]
+	else:
+		global_params = None
 	model.train()
 
 	for epoch in range(epochs):
@@ -83,16 +88,25 @@ def train(model, optimizer, trainloader, device, epochs):
 			data = data.to(device)
 			target = target.to(device)
 
+			optimizer.zero_grad()
+
 			# forward pass
 			output = model(data)
-			loss = criterion(output, target)
+
+			if global_params is None:
+				loss = criterion(output, target)
+			else:
+				# Proximal updates for FedProx
+				proximal_term = 0.0
+				for local_weights, global_weights in zip(model.parameters(), global_params):
+					proximal_term += torch.square((local_weights - global_weights).norm(2))
+				loss = criterion(output, target) + (proximal_mu / 2) * proximal_term
 
 			# backward pass
 			loss.backward()
 
 			# gradient step
 			optimizer.step()
-			optimizer.zero_grad()
 
 			# write log files
 			train_acc = comp_accuracy(output, target)
@@ -101,10 +115,21 @@ def train(model, optimizer, trainloader, device, epochs):
 			top1.update(train_acc[0].item(), data.size(0))
 
 
-def test(model, test_loader, device, load_params=None) -> Tuple[float, float]:
+def test(model, test_loader, device, *args) -> Tuple[float, Dict[str, float]]:
+	"""
+	The server Strategy(FedNova, FedAvg, FedProx) uses the same method to compute centralized evaluation on test set
+	using the args.
+	args[0]: int = server round
+	args[1]: List[NDArray] = server model parameters
+	args[2]: Dict = {}
+
+	The client uses this method without args.
+	"""
+
 	criterion = nn.CrossEntropyLoss()
-	if load_params is not None:
-		params_dict = zip(model.state_dict().keys(), load_params)
+	if len(args):
+		# load the model parameters
+		params_dict = zip(model.state_dict().keys(), args[1])
 		state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
 		model.load_state_dict(state_dict)
 
@@ -123,7 +148,7 @@ def test(model, test_loader, device, load_params=None) -> Tuple[float, float]:
 			top1.update(acc1[0].item(), data.size(0))
 
 	total_loss /= len(test_loader)
-	return total_loss, top1.avg
+	return total_loss, {"accuracy": top1.avg}
 
 
 class ProxSGD(Optimizer):
@@ -273,59 +298,37 @@ if __name__ == "__main__":
 
 	ssl._create_default_https_context = ssl._create_unverified_context
 
-	from dataset import load_datasets
+	# from dataset import load_datasets
 	from omegaconf import OmegaConf
-	from torch.optim import SGD
+	# from torch.optim import SGD
 
-	config = OmegaConf.create({"datapath": "data/", "num_clients": 1, "NIID": True, "alpha": 0.2, "batch_size": 8})
+	config = OmegaConf.load("conf/base.yaml")
 
-	device = torch.device('cuda')
-	# torch.manual_seed(args.seed)
-	# torch.cuda.manual_seed(args.seed)
-	# torch.cuda.set_device('0')
-	# torch.backends.cudnn.deterministic = True
+	# device = torch.device('cpu')
+	#
+	# model = VGG().to(device)
+	# optimizer = SGD(model.parameters(), lr=0.05, weight_decay=1e-4, momentum=0.9)
+	#
+	# new_params = [np.ones_like(val) for _, val in model.state_dict().items()]
+	#
+	# params_dict = zip(model.state_dict().keys(), new_params)
+	# state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+	# model.load_state_dict(state_dict, strict=True)
+	#
+	# optimizer_params = []
+	#
+	# for group in optimizer.param_groups:
+	# 	for p in group['params']:
+	# 		optimizer_params.append(p.data.cpu().numpy())
+	#
+	# print(optimizer_params)
 
-	model = VGG().to(device)
-	# params = model.parameters()
-	# client_state = torch.load("state/client_0_state.pt")
-
-	# saved_params = [val.cpu().numpy() for _, val in model.state_dict().items()]
-	# torch.save(saved_params, "state/init_params_torch.pt")
-	# torch.save(params, "state/init_params.pt")
-
-	# optimizer = ProxSGD(params, 0.0625, lr=0.1, weight_decay=1e-4, momentum=0)
-	# init_params = np.load("state/init_params.npy", allow_pickle=True)
-	init_params= torch.load("state/init_params_torch.pt")
-	# init_params = saved_params
-
-	i= 0
-	import time
-	print("started")
-	t1 = time.time()
-	for group in optimizer.param_groups:
-		for p in group['params']:
-			# p.data.copy_(torch.from_numpy(init_params[i]).to(device))
-			p.data.copy_(init_params[i])
-			i+=1
-
-	print("took  : {} seconds ".format(time.time() - t1))
+	# print("took  : {} seconds ".format(time.time() - t1))
 
 
 	# criterion = nn.CrossEntropyLoss()
 
 	# trainloader, testloader, ratio = load_datasets(config)
-	# print(len(testloader))
-	# model.train()
-	# files = os.listdir("state/")
-	# client = ["0", "1", "2", "3"]
-	# param = {}
-	# for cid in client:
-	# 	param[cid] = torch.load(f"state/model_{cid}_3.pt")
-	#
-	# for i in range(3):
-	# 	all_equal = [np.isclose(param[client[i]][j], param[client[i+1]][j]) for j in range(len(param[client[i]]))]
-	# 	print([(np.sum(x), x.shape) for x in all_equal])
-	# 	break
 
 	# for epoch in range(1):
 	# 	losses = Meter(ptag='Loss')
@@ -354,6 +357,16 @@ if __name__ == "__main__":
 	# 		print("loss:{} acc: {}".format(loss.item(), train_acc[0].item()))
 	# 		break
 
+	from utils import fit_config
+	from functools import partial
+	# config_fn = partial(fit_config, config)
+	# print(config_fn(50))
+	def abc(a, b, c, *args):
+		if len(args):
+			print(args[1])
 
+		print(a, b, c)
+
+	abc(1, 2, 3)
 	# params = optimizer.state_dict()
 	# torch.save(params, "state/proxsgd.pt")

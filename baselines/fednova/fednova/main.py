@@ -10,10 +10,12 @@ import numpy as np
 import pandas as pd
 import torch
 from flwr.common import ndarrays_to_parameters
+from flwr.server.strategy import FedAvg, FedProx
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
-from fednova.client import gen_client_fn
+from fednova.client import gen_clients_fednova
+from fednova.baseline_client import gen_clients_fedavg
 from fednova.dataset import load_datasets
 from fednova.models import test
 from fednova.strategy import FedNova, weighted_average
@@ -37,7 +39,7 @@ def main(cfg: DictConfig) -> None:
 	random.seed(cfg.seed)
 	if torch.cuda.is_available():
 		torch.cuda.manual_seed(cfg.seed)
-		# torch.backends.cudnn.deterministic = True
+	# torch.backends.cudnn.deterministic = True
 
 	# 1. Print parsed config
 	print(OmegaConf.to_yaml(cfg))
@@ -53,38 +55,62 @@ def main(cfg: DictConfig) -> None:
 	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 	if cfg.mode == "test":
-		checkpoint = np.load(f"{cfg.checkpoint_path}bestModel_{cfg.exp_name}_varEpochs_{cfg.var_local_epochs}.npz", allow_pickle=True)
+		checkpoint = np.load(f"{cfg.checkpoint_path}bestModel_{cfg.exp_name}_varEpochs_{cfg.var_local_epochs}.npz",
+							 allow_pickle=True)
 		model = instantiate(cfg.model)
 		params_dict = zip(model.state_dict().keys(), checkpoint['arr_0'])
 		state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
 		model.load_state_dict(state_dict)
-		loss, accuracy = test(model.to(device), testloader, device)
-		print("----Loss: {}, Accuracy: {} on Test set ------".format(loss, accuracy))
+		loss, metrics = test(model.to(device), testloader, device)
+		print("----Loss: {}, Accuracy: {} on Test set ------".format(loss, metrics["accuracy"]))
 		return None
-
 
 	# 3. Define your clients
 
-	client_fn = gen_client_fn(num_epochs=cfg.num_epochs,
-							  trainloaders=trainloaders,
-							  testloader=testloader,
-							  data_ratios=data_ratios,
-							  model=cfg.model,
-							  exp_config=cfg)
+	if cfg.strategy == "fednova":
+		client_function = gen_clients_fednova
+	else:
+		client_function = gen_clients_fedavg
+
+	client_fn = client_function(num_epochs=cfg.num_epochs,
+								trainloaders=trainloaders,
+								testloader=testloader,
+								data_ratios=data_ratios,
+								model=cfg.model,
+								exp_config=cfg)
+
+	# 4. Define your strategy
 
 	init_parameters = [layer_param.cpu().numpy() for _, layer_param in instantiate(cfg.model).state_dict().items()]
 	init_parameters = ndarrays_to_parameters(init_parameters)
 
 	eval_fn = partial(test, instantiate(cfg.model), testloader, device)
+	fit_config_fn = partial(fit_config, cfg)
 
-	# 4. Define your strategy
-	strategy = FedNova(exp_config=cfg,
-					   evaluate_metrics_aggregation_fn=weighted_average,
-					   accept_failures=False,
-					   on_evaluate_config_fn=fit_config,
-					   initial_parameters=init_parameters,
-					   evaluate_fn=eval_fn
-					   )
+	if cfg.strategy == "fednova":
+		strategy = FedNova(exp_config=cfg,
+						   evaluate_metrics_aggregation_fn=weighted_average,
+						   accept_failures=False,
+						   on_fit_config_fn=fit_config_fn,
+						   initial_parameters=init_parameters,
+						   evaluate_fn=eval_fn
+						   )
+
+	elif cfg.strategy == "fedavg" or cfg.strategy == "fedprox":
+
+		# Both FedAvg and FedProx use same strategy for weight aggregation
+		# The difference is that FedProx uses a proximal term in the loss function in the local client updates
+		# Check fednova/models.py train() for more details
+
+		strategy = FedAvg(evaluate_metrics_aggregation_fn=weighted_average,
+						  accept_failures=False,
+						  on_fit_config_fn=fit_config_fn,
+						  initial_parameters=init_parameters,
+						  evaluate_fn=eval_fn
+						  )
+
+	else:
+		raise NotImplementedError
 
 	# 5. Start Simulation
 
@@ -94,7 +120,6 @@ def main(cfg: DictConfig) -> None:
 											 strategy=strategy,
 											 client_resources=cfg.client_resources,
 											 ray_init_args={"ignore_reinit_error": True, "num_cpus": 8})
-
 
 	# 6. Save your results
 	# save_path = HydraConfig.get().runtime.output_dir
@@ -107,7 +132,12 @@ def main(cfg: DictConfig) -> None:
 	_, test_loss = zip(*history.losses_centralized)
 	_, test_accuracy = zip(*history.metrics_centralized["accuracy"])
 
-	file_name = f"{save_path}fednova_varEpoch_{cfg.var_local_epochs}_lr_{cfg.optimizer.lr}_momentum_{cfg.optimizer.momentum}_gmf_{cfg.optimizer.gmf}_" \
+	if len(test_loss) != len(round):
+		# drop zeroth round
+		test_loss = test_loss[1:]
+		test_accuracy = test_accuracy[1:]
+
+	file_name = f"{save_path}{cfg.strategy}_varEpoch_{cfg.var_local_epochs}_lr_{cfg.optimizer.lr}_momentum_{cfg.optimizer.momentum}_gmf_{cfg.optimizer.gmf}_" \
 				f"mu_{cfg.optimizer.mu}.csv"
 
 	df = pd.DataFrame({"round": round, "train_loss": train_loss, "train_accuracy": train_accuracy,
