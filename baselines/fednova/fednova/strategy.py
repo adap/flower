@@ -1,23 +1,23 @@
-from typing import List, Tuple, Union, Optional, Dict
+from logging import INFO, WARNING
+from typing import Dict, List, Optional, Tuple, Union
+
 import numpy as np
-from flwr.common import Metrics
-from flwr.common.typing import FitRes, Scalar, EvaluateRes
+from flwr.common import (
+    FitIns,
+    Metrics,
+    NDArray,
+    NDArrays,
+    Parameters,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
+)
+from flwr.common.logger import log
+from flwr.common.typing import EvaluateRes, FitRes, Scalar
+from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
-from flwr.server.client_manager import ClientManager
-from omegaconf import DictConfig
 from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
-from flwr.common.logger import log
-from logging import INFO, WARNING
-
-from flwr.common import (
-	FitIns,
-	NDArrays,
-	NDArray,
-	Parameters,
-	ndarrays_to_parameters,
-	parameters_to_ndarrays
-)
+from omegaconf import DictConfig
 
 
 class FedNova(FedAvg):

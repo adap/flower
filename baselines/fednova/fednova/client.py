@@ -1,4 +1,5 @@
 from typing import Callable, Dict, List, Tuple
+
 import flwr as fl
 import numpy as np
 import torch
@@ -6,6 +7,7 @@ from flwr.common.typing import NDArrays, Scalar
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
+
 from fednova.models import test, train
 
 
@@ -32,7 +34,6 @@ class FlowerClient(fl.client.NumPyClient):  # pylint: disable=too-many-instance-
 
 	def set_parameters(self, parameters: NDArrays) -> None:
 		"""Changes the parameters of the model using the given ones."""
-
 		self.optimizer.set_model_params(parameters)
 
 	def fit(self, parameters: NDArrays, config: Dict[str, Scalar]) -> Tuple[NDArrays, int, Dict]:

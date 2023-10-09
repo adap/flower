@@ -1,5 +1,6 @@
-import numpy as np
 from random import Random
+
+import numpy as np
 
 
 class Partition(object):

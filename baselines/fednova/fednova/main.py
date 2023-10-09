@@ -1,21 +1,23 @@
-import pandas as pd
-import torch
-import hydra
-from omegaconf import DictConfig, OmegaConf
-from flwr.common import ndarrays_to_parameters
-import flwr as fl
-from hydra.utils import instantiate
-import numpy as np
-import random
 import os
+import random
 import time
 from collections import OrderedDict
 from functools import partial
-from fednova.dataset import load_datasets
+
+import flwr as fl
+import hydra
+import numpy as np
+import pandas as pd
+import torch
+from flwr.common import ndarrays_to_parameters
+from hydra.utils import instantiate
+from omegaconf import DictConfig, OmegaConf
+
 from fednova.client import gen_client_fn
+from fednova.dataset import load_datasets
+from fednova.models import test
 from fednova.strategy import FedNova, weighted_average
 from fednova.utils import fit_config
-from fednova.models import test
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)

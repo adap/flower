@@ -2,14 +2,16 @@
 Modified from https://github.com/pytorch/vision.git
 '''
 
-import torch
 import math
-import torch.nn as nn
-from torch.optim.optimizer import Optimizer, required
-from fednova.utils import Meter, comp_accuracy
-from typing import List, Tuple, Dict
-from flwr.common.typing import NDArrays
 from collections import OrderedDict
+from typing import Dict, List, Tuple
+
+import torch
+import torch.nn as nn
+from flwr.common.typing import NDArrays
+from torch.optim.optimizer import Optimizer, required
+
+from fednova.utils import Meter, comp_accuracy
 
 
 class VGG(nn.Module):
@@ -271,9 +273,9 @@ if __name__ == "__main__":
 
 	ssl._create_default_https_context = ssl._create_unverified_context
 
-	from torch.optim import SGD
 	from dataset import load_datasets
 	from omegaconf import OmegaConf
+	from torch.optim import SGD
 
 	config = OmegaConf.create({"datapath": "data/", "num_clients": 1, "NIID": True, "alpha": 0.2, "batch_size": 8})
 

@@ -1,4 +1,5 @@
-from typing import Optional, Tuple, List
+from typing import List, Optional, Tuple
+
 import torch
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader, random_split
