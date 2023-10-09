@@ -14,9 +14,9 @@ class Scaler(nn.Module):
         else:
             self.rate = 1
 
-    def forward(self, input):
+    def forward(self, x):
         """Scaler forward."""
-        output = input / self.rate if self.training else input
+        output = x / self.rate if self.training else x
         return output
 
 
@@ -25,7 +25,7 @@ class MyBatchNorm(nn.Module):
 
     def __init__(self, num_channels, track=True):
         super().__init__()
-        ## change num_groups to 32
+        # change num_groups to 32
         self.norm = nn.BatchNorm2d(num_channels, track_running_stats=track)
 
     def forward(self, x):
@@ -46,12 +46,12 @@ def conv1x1(in_planes, planes, stride=1):
     return nn.Conv2d(in_planes, planes, kernel_size=1, stride=stride, bias=False)
 
 
-class BasicBlock(nn.Module):
+class BasicBlock(nn.Module):  # pylint: disable=too-many-instance-attributes
     """Basic Block for ResNet18."""
 
     expansion = 1
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         inplanes,
         planes,
@@ -92,10 +92,10 @@ class BasicBlock(nn.Module):
         return output
 
 
-class Multi_ResNet(nn.Module):
+class Resnet(nn.Module):  # pylint: disable=too-many-instance-attributes
     """Resnet model."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self, hidden_size, block, layers, num_classes, scaler_rate, track, scale
     ):
         super().__init__()
@@ -146,17 +146,19 @@ class Multi_ResNet(nn.Module):
             track=track,
             scale=scale,
         )
-        self.fc = nn.Linear(hidden_size[3] * block.expansion, num_classes)
+        self.fc_layer = nn.Linear(hidden_size[3] * block.expansion, num_classes)
         self.scala = nn.AdaptiveAvgPool2d(1)
 
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
-            elif isinstance(m, nn.GroupNorm) or isinstance(m, nn.BatchNorm2d):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
+        for module in self.modules():
+            if isinstance(module, nn.Conv2d):
+                nn.init.kaiming_normal_(
+                    module.weight, mode="fan_out", nonlinearity="relu"
+                )
+            elif isinstance(module, (nn.BatchNorm2d, nn.GroupNorm)):
+                nn.init.constant_(module.weight, 1)
+                nn.init.constant_(module.bias, 0)
 
-    def _make_layer(
+    def _make_layer(  # pylint: disable=too-many-arguments
         self, block, planes, layers, stride=1, scaler_rate=1, track=True, scale=True
     ):
         """Create a block with layers.
@@ -216,7 +218,7 @@ class Multi_ResNet(nn.Module):
         x = self.layer3(x)
         x = self.layer4(x)
         out = self.scala(x).view(x.size(0), -1)
-        out = self.fc(out)
+        out = self.fc_layer(out)
 
         return [out]
 
@@ -248,7 +250,7 @@ def resnet18(n_blocks=4, track=False, scale=True, num_classes=100):
 
     scaler_rate = model_rate
 
-    return Multi_ResNet(
+    return Resnet(
         hidden_size,
         BasicBlock,
         [2, 2, 2, 2],

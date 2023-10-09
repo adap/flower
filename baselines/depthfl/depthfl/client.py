@@ -98,8 +98,8 @@ class FlowerClient(
             prev_grads=self.prev_grads,
         )
 
-        with open(f"prev_grads/client_{self.cid}", "wb") as f:
-            pickle.dump(self.prev_grads, f)
+        with open(f"prev_grads/client_{self.cid}", "wb") as prev_grads_file:
+            pickle.dump(self.prev_grads, prev_grads_file)
 
         return self.get_parameters({}), len(self.trainloader), {"cid": self.cid}
 
@@ -116,7 +116,7 @@ class FlowerClient(
         )
 
 
-def gen_client_fn(
+def gen_client_fn(  # pylint: disable=too-many-arguments
     num_epochs: int,
     trainloaders: List[DataLoader],
     valloaders: List[DataLoader],
@@ -163,8 +163,8 @@ def gen_client_fn(
         trainloader = trainloaders[int(cid)]
         valloader = valloaders[int(cid)]
 
-        with open(f"prev_grads/client_{int(cid)}", "rb") as f:
-            prev_grads = pickle.load(f)
+        with open(f"prev_grads/client_{int(cid)}", "rb") as prev_grads_file:
+            prev_grads = pickle.load(prev_grads_file)
 
         return FlowerClient(
             net,

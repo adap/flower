@@ -52,7 +52,7 @@ class FedDyn(FedAvg):
 
     def __init__(self, cfg: DictConfig, net: nn.Module, *args, **kwargs):
         self.cfg = cfg
-        self.h = [np.zeros(v.shape) for (k, v) in net.state_dict().items()]
+        self.h_variate = [np.zeros(v.shape) for (k, v) in net.state_dict().items()]
 
         # tagging real weights / biases
         self.is_weight = []
@@ -71,49 +71,56 @@ class FedDyn(FedAvg):
             os.makedirs("prev_grads")
 
         for idx in range(cfg.num_clients):
-            with open(f"prev_grads/client_{idx}", "wb") as f:
-                pickle.dump(prev_grads[idx], f)
+            with open(f"prev_grads/client_{idx}", "wb") as prev_grads_file:
+                pickle.dump(prev_grads[idx], prev_grads_file)
 
         super().__init__(*args, **kwargs)
 
-    def aggregate_fit(  # type: ignore[override]
-        self,
-        server_round: int,
-        results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-        origin: NDArrays,
-    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """Aggregate fit results using weighted average."""
-        if not results:
-            return None, {}
-        # Do not aggregate if there are failures and failures are not accepted
-        if not self.accept_failures and failures:
-            return None, {}
 
-        # Convert results
-        weights_results = [
-            (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
-            for _, fit_res in results
-        ]
-        parameters_aggregated = ndarrays_to_parameters(
-            aggregate(weights_results, origin, self.h, self.is_weight, self.cfg)
+def aggregate_fit(
+    strategy,
+    server_round: int,
+    results: List[Tuple[ClientProxy, FitRes]],
+    failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+    origin: NDArrays,
+) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+    """Aggregate fit results using weighted average."""
+    if not results:
+        return None, {}
+    # Do not aggregate if there are failures and failures are not accepted
+    if not strategy.accept_failures and failures:
+        return None, {}
+
+    # Convert results
+    weights_results = [
+        (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
+        for _, fit_res in results
+    ]
+    parameters_aggregated = ndarrays_to_parameters(
+        aggregate(
+            weights_results,
+            origin,
+            strategy.h_variate,
+            strategy.is_weight,
+            strategy.cfg,
         )
+    )
 
-        # Aggregate custom metrics if aggregation fn was provided
-        metrics_aggregated = {}
-        if self.fit_metrics_aggregation_fn:
-            fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
-            metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
-        elif server_round == 1:  # Only log this warning once
-            log(WARNING, "No fit_metrics_aggregation_fn provided")
+    # Aggregate custom metrics if aggregation fn was provided
+    metrics_aggregated = {}
+    if strategy.fit_metrics_aggregation_fn:
+        fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
+        metrics_aggregated = strategy.fit_metrics_aggregation_fn(fit_metrics)
+    elif server_round == 1:  # Only log this warning once
+        log(WARNING, "No fit_metrics_aggregation_fn provided")
 
-        return parameters_aggregated, metrics_aggregated
+    return parameters_aggregated, metrics_aggregated
 
 
 def aggregate(
     results: List[Tuple[NDArrays, int]],
     origin: NDArrays,
-    h: List,
+    h_list: List,
     is_weight: List,
     cfg: DictConfig,
 ) -> NDArrays:
@@ -134,8 +141,8 @@ def aggregate(
             # print(np.isscalar(weight))
 
             # update h variable for FedDyn
-            h[i] = (
-                h[i]
+            h_list[i] = (
+                h_list[i]
                 - cfg.fit_config.alpha
                 * param_count[i]
                 * (weight - origin[i])
@@ -144,7 +151,7 @@ def aggregate(
 
             # applying h only for weights / biases
             if is_weight[i] and cfg.fit_config.feddyn:
-                weights_sum[i] = weight - h[i] / cfg.fit_config.alpha
+                weights_sum[i] = weight - h_list[i] / cfg.fit_config.alpha
             else:
                 weights_sum[i] = weight
 

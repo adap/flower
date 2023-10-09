@@ -54,47 +54,13 @@ class HeteroFL(FedAvg):
 
         super().__init__(*args, **kwargs)
 
-    def aggregate_fit(  # type: ignore[override]
-        self,
-        server_round: int,
-        results: List[Tuple[ClientProxy, FitRes]],
-        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-        origin: NDArrays,
-    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """Aggregate fit results using weighted average."""
-        if not results:
-            return None, {}
-        # Do not aggregate if there are failures and failures are not accepted
-        if not self.accept_failures and failures:
-            return None, {}
-
-        # Convert results
-        weights_results = [
-            (parameters_to_ndarrays(fit_res.parameters), fit_res.metrics["cid"])
-            for _, fit_res in results
-        ]
-
-        self.parameters = origin
-        self.aggregate_hetero(weights_results)
-        parameters_aggregated = ndarrays_to_parameters(self.parameters)
-
-        # Aggregate custom metrics if aggregation fn was provided
-        metrics_aggregated = {}
-        if self.fit_metrics_aggregation_fn:
-            fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
-            metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
-        elif server_round == 1:  # Only log this warning once
-            log(WARNING, "No fit_metrics_aggregation_fn provided")
-
-        return parameters_aggregated, metrics_aggregated
-
     def aggregate_hetero(
         self, results: List[Tuple[NDArrays, Union[bool, bytes, float, int, str]]]
     ):
         """Aggregate function for HeteroFL."""
-        for i, v in enumerate(self.parameters):
-            count = np.zeros(v.shape)
-            tmp_v = np.zeros(v.shape)
+        for i, params in enumerate(self.parameters):
+            count = np.zeros(params.shape)
+            tmp_v = np.zeros(params.shape)
             if self.is_weight[i]:
                 for weights, cid in results:
                     if self.cfg.exclusive_learning:
@@ -111,11 +77,46 @@ class HeteroFL(FedAvg):
                         )
                     ] += 1
                 tmp_v[count > 0] = np.divide(tmp_v[count > 0], count[count > 0])
-                v[count > 0] = tmp_v[count > 0]
+                params[count > 0] = tmp_v[count > 0]
 
             else:
                 for weights, _ in results:
                     tmp_v += weights[i]
                     count += 1
                 tmp_v = np.divide(tmp_v, count)
-                v = tmp_v
+                params = tmp_v
+
+
+def aggregate_fit(
+    strategy,
+    server_round: int,
+    results: List[Tuple[ClientProxy, FitRes]],
+    failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+    origin: NDArrays,
+) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+    """Aggregate fit results using weighted average."""
+    if not results:
+        return None, {}
+    # Do not aggregate if there are failures and failures are not accepted
+    if not strategy.accept_failures and failures:
+        return None, {}
+
+    # Convert results
+    weights_results = [
+        (parameters_to_ndarrays(fit_res.parameters), fit_res.metrics["cid"])
+        for _, fit_res in results
+    ]
+
+    strategy.parameters = origin
+    strategy.aggregate_hetero(weights_results)
+    parameters_aggregated = ndarrays_to_parameters(strategy.parameters)
+
+    # Aggregate custom metrics if aggregation fn was provided
+    metrics_aggregated = {}
+    if strategy.fit_metrics_aggregation_fn:
+        fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
+        metrics_aggregated = strategy.fit_metrics_aggregation_fn(fit_metrics)
+    elif server_round == 1:  # Only log this warning once
+        log(WARNING, "No fit_metrics_aggregation_fn provided")
+
+    return parameters_aggregated, metrics_aggregated

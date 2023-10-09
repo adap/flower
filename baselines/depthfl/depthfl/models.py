@@ -102,7 +102,7 @@ def update_prev_grads(config, net, prev_grads, global_params):
         prev_grads[k] = prev_grads[k].to(torch.device(torch.device("cpu")))
 
 
-def _train_one_epoch(  # pylint: disable=too-many-arguments
+def _train_one_epoch(  # pylint: disable=too-many-locals, too-many-arguments
     net: nn.Module,
     global_params: dict,
     trainloader: DataLoader,
@@ -153,15 +153,15 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
 
             # self distillation term
             if config["kd"] and len(output_lst) > 1:
-                for j in range(len(output_lst)):
+                for j, output in enumerate(output_lst):
                     if j == i:
                         continue
-                    else:
-                        loss += (
-                            consistency_weight
-                            * criterion_kl(branch_output, output_lst[j].detach())
-                            / (len(output_lst) - 1)
-                        )
+
+                    loss += (
+                        consistency_weight
+                        * criterion_kl(branch_output, output.detach())
+                        / (len(output_lst) - 1)
+                    )
 
         # Dynamic regularization in FedDyn
         if config["feddyn"]:
@@ -182,7 +182,7 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
         optimizer.step()
 
 
-def test(
+def test(  # pylint: disable=too-many-locals
     net: nn.Module, testloader: DataLoader, device: torch.device
 ) -> Tuple[float, float, List[float]]:
     """Evaluate the network on the entire test set.
@@ -232,7 +232,7 @@ def test(
     return loss, accuracy, accuracy_single
 
 
-def test_sbn(
+def test_sbn(  # pylint: disable=too-many-locals
     nets: List[nn.Module],
     trainloaders: List[DictConfig],
     testloader: DataLoader,

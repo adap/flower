@@ -17,6 +17,7 @@ from torch.utils.data import DataLoader
 
 from depthfl.client import prune
 from depthfl.models import test, test_sbn
+from depthfl.strategy import aggregate_fit
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
@@ -97,7 +98,7 @@ def gen_evaluate_fn_hetero(
         The centralized evaluation function.
     """
 
-    def evaluate(
+    def evaluate(  # pylint: disable=too-many-locals
         server_round: int, parameters_ndarrays: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[float, Dict[str, Union[Scalar, List[float]]]]:
         # pylint: disable=unused-argument
@@ -191,10 +192,13 @@ class ServerFedDyn(Server):
         aggregated_result: Tuple[
             Optional[Parameters],
             Dict[str, Scalar],
-        ] = self.strategy.aggregate_fit(  # type: ignore [call-arg]
-            server_round, results, failures, parameters_to_ndarrays(self.parameters)
+        ] = aggregate_fit(
+            self.strategy,
+            server_round,
+            results,
+            failures,
+            parameters_to_ndarrays(self.parameters),
         )
-        # ] = self.strategy.aggregate_fit(server_round, results, failures)
 
         parameters_aggregated, metrics_aggregated = aggregated_result
         return parameters_aggregated, metrics_aggregated, (results, failures)

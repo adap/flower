@@ -104,7 +104,7 @@ def distribute_noniid(num_clients, beta, seed, trainset, datasets):
             idx_k = np.where(labels == k)[0]
             np.random.shuffle(idx_k)
             proportions = np.random.dirichlet(np.repeat(beta, num_clients))
-            ## Balance
+            # Balance
             proportions = np.array(
                 [
                     p * (len(idx_j) < labels.shape[0] / num_clients)

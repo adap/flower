@@ -8,7 +8,7 @@ class MyGroupNorm(nn.Module):
 
     def __init__(self, num_channels):
         super().__init__()
-        ## change num_groups to 32
+        # change num_groups to 32
         self.norm = nn.GroupNorm(
             num_groups=16, num_channels=num_channels, eps=1e-5, affine=True
         )
@@ -47,7 +47,7 @@ def conv1x1(in_planes, planes, stride=1):
 class SepConv(nn.Module):
     """Bottleneck layer module."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         channel_in,
         channel_out,
@@ -57,7 +57,7 @@ class SepConv(nn.Module):
         norm_layer=MyGroupNorm,
     ):
         super().__init__()
-        self.op = nn.Sequential(
+        self.operations = nn.Sequential(
             nn.Conv2d(
                 channel_in,
                 channel_in,
@@ -86,7 +86,7 @@ class SepConv(nn.Module):
 
     def forward(self, x):
         """SepConv forward."""
-        return self.op(x)
+        return self.operations(x)
 
 
 class BasicBlock(nn.Module):
@@ -94,7 +94,9 @@ class BasicBlock(nn.Module):
 
     expansion = 1
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None, norm_layer=None):
+    def __init__(
+        self, inplanes, planes, stride=1, downsample=None, norm_layer=None
+    ):  # pylint: disable=too-many-arguments
         super().__init__()
         self.conv1 = conv3x3(inplanes, planes, stride)
         self.bn1 = norm_layer(planes)
@@ -123,7 +125,7 @@ class BasicBlock(nn.Module):
         return output
 
 
-class Multi_ResNet(nn.Module):
+class MultiResnet(nn.Module):  # pylint: disable=too-many-instance-attributes
     """Resnet model.
 
     Args:
@@ -134,7 +136,7 @@ class Multi_ResNet(nn.Module):
         norm_layer (class): type of normalization layer.
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         block,
         layers,
@@ -244,17 +246,21 @@ class Multi_ResNet(nn.Module):
 
         if n_blocks > 3:
             self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
-            self.fc = nn.Linear(512 * block.expansion, num_classes)
+            self.fc_layer = nn.Linear(512 * block.expansion, num_classes)
             self.scala4 = nn.AdaptiveAvgPool2d(1)
 
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
-            elif isinstance(m, nn.GroupNorm) or isinstance(m, nn.BatchNorm2d):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
+        for module in self.modules():
+            if isinstance(module, nn.Conv2d):
+                nn.init.kaiming_normal_(
+                    module.weight, mode="fan_out", nonlinearity="relu"
+                )
+            elif isinstance(module, (nn.BatchNorm2d, nn.GroupNorm)):
+                nn.init.constant_(module.weight, 1)
+                nn.init.constant_(module.bias, 0)
 
-    def _make_layer(self, block, planes, layers, stride=1, norm_layer=None):
+    def _make_layer(
+        self, block, planes, layers, stride=1, norm_layer=None
+    ):  # pylint: disable=too-many-arguments
         """Create a block with layers.
 
         Args:
@@ -325,7 +331,7 @@ class Multi_ResNet(nn.Module):
 
         x = self.layer4(x)
         out4_feature = self.scala4(x).view(x.size(0), -1)
-        output4 = self.fc(out4_feature)
+        output4 = self.fc_layer(out4_feature)
 
         return [middle_output1, middle_output2, middle_output3, output4]
 
@@ -352,7 +358,7 @@ def multi_resnet18(n_blocks=1, norm="bn", num_classes=100):
     elif norm == "bn":
         norm_layer = MyBatchNorm
 
-    return Multi_ResNet(
+    return MultiResnet(
         BasicBlock,
         [2, 2, 2, 2],
         n_blocks,
@@ -364,7 +370,7 @@ def multi_resnet18(n_blocks=1, norm="bn", num_classes=100):
 # if __name__ == "__main__":
 #     from ptflops import get_model_complexity_info
 
-#     model = multi_resnet18(n_blocks=4, num_classes=100)
+#     model = MultiResnet18(n_blocks=4, num_classes=100)
 
 #     with torch.cuda.device(0):
 #         macs, params = get_model_complexity_info(
