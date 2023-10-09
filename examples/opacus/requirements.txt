@@ -1,4 +1,3 @@
-flwr~=1.4.0
-numpy~=1.21.1
-torch~=2.0.1
-torchvision~=0.15.2
+flwr>=1.0, <2.0
+opacus==1.4.0
+torchvision==0.15.2
