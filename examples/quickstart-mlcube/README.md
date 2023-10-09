@@ -10,7 +10,11 @@ Start by cloning the example project. We prepared a single-line command that you
 git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-mlcube . && rm -rf flower && cd quickstart-mlcube
 ```
 
-Project dependencies (such as `tensorflow` and `flwr`) are defined in `pyproject.toml`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
+### Installing Dependencies
+
+Project dependencies (such as `tensorflow` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
+
+#### Poetry
 
 ```shell
 poetry install
@@ -23,11 +27,29 @@ Poetry will install all your dependencies in a newly created virtual environment
 poetry run python3 -c "import flwr"
 ```
 
-For the MLCube setup you will need to install Docker on your system. Please refer to the [Docker install guide](https://docs.docker.com/get-docker/) on how to do that.
+If you don't see any errors, you're good to go!
+
+#### pip
+
+Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
+
+```shell
+pip install -r requirements.txt
+```
+
+To verify that everything works correctly, you can run the following command:
+
+```shell
+python3 -c "import flwr"
+```
 
 If you don't see any errors, you're good to go!
 
-## MLCube setup
+#### Docker
+
+For the MLCube setup you will need to install Docker on your system. Please refer to the [Docker install guide](https://docs.docker.com/get-docker/) on how to do that.
+
+#### MLCube
 
 For the MLCube setup, we have prepared a script that you can execute in your shell using:
 
