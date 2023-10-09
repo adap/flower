@@ -31,7 +31,7 @@ SLEEP_TIME = 1
 class DriverClientProxy(ClientProxy):
     """Flower client proxy which delegates work using the Driver API."""
 
-    def __init__(self, node_id: int, driver: Driver, anonymous: bool, workload_id: str):
+    def __init__(self, node_id: int, driver: Driver, anonymous: bool, workload_id: int):
         super().__init__(str(node_id))
         self.node_id = node_id
         self.driver = driver
