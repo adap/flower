@@ -36,10 +36,10 @@ service Driver {
 
 // CreateWorkload
 message CreateWorkloadRequest {}
-message CreateWorkloadResponse { string workload_id = 1; }
+message CreateWorkloadResponse { uint64 workload_id = 1; }
 
 // GetNodes messages
-message GetNodesRequest { string workload_id = 1; }
+message GetNodesRequest { uint64 workload_id = 1; }
 message GetNodesResponse { repeated Node nodes = 1; }
 
 // PushTaskIns messages

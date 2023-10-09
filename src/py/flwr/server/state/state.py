@@ -140,7 +140,7 @@ class State(abc.ABC):
         """Remove `node_id` from state."""
 
     @abc.abstractmethod
-    def get_nodes(self, workload_id: str) -> Set[int]:
+    def get_nodes(self, workload_id: int) -> Set[int]:
         """Retrieve all currently stored node IDs as a set.
 
         Constraints
@@ -150,5 +150,5 @@ class State(abc.ABC):
         """
 
     @abc.abstractmethod
-    def create_workload(self) -> str:
+    def create_workload(self) -> int:
         """Create one workload."""
