@@ -1,4 +1,4 @@
-# Copyright 2022 Adap GmbH. All Rights Reserved.
+# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -132,11 +132,11 @@ class State(abc.ABC):
         """Delete all delivered TaskIns/TaskRes pairs."""
 
     @abc.abstractmethod
-    def register_node(self, node_id: int) -> None:
-        """Store `node_id` in state."""
+    def create_node(self) -> int:
+        """Create, store in state, and return `node_id`."""
 
     @abc.abstractmethod
-    def unregister_node(self, node_id: int) -> None:
+    def delete_node(self, node_id: int) -> None:
         """Remove `node_id` from state."""
 
     @abc.abstractmethod
