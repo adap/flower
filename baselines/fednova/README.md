@@ -1,13 +1,13 @@
 ---
-title: Tackling the Objective Inconsistency Problem in Heterogeneous Federated Optimization (NeurIPS 2020)
-url: https://proceedings.neurips.cc/paper/2020/hash/564127c03caab942e503ee6f810f54fd-Abstract.html
+title: FedNova (NeurIPS 2020)
+url: https://arxiv.org/abs/2007.07481
 labels: [normalized averaging, heterogeneous optimization, federated learning]
 dataset: [non-iid cifar10 dataset, synthetic dataset]
 ---
 
 # FedNova: Tackling the Objective Inconsistency Problem in Heterogeneous Federated Optimization
 
-****Paper:**** [arxiv.org/abs/2007.07481](https://arxiv.org/abs/2007.07481)
+****Paper:**** [https://proceedings.neurips.cc/paper/2020/hash/564127c03caab942e503ee6f810f54fd-Abstract.html](https://proceedings.neurips.cc/paper/2020/hash/564127c03caab942e503ee6f810f54fd-Abstract.html)
 
 ****Authors:**** *Jianyu Wang, Qinghua Liu, Hao Liang, Gauri Joshi, H. Vincent Poor*
 
@@ -24,7 +24,7 @@ dataset: [non-iid cifar10 dataset, synthetic dataset]
 However, most experiments were performed using a pool of 6 actors(6 clients run in parallel out of 16) requiring 6 cpu cores and 6GB of GPU memory. 
 The experiments were performed on a A100 machine however any GPU with 6GB of memory and 6 cpu cores should be sufficiently fast._*
 
-****Contributors:**** *_Aasheesh Singh (Github: @ashdtu), MILA-Quebec AI Institute_*
+****Contributors:**** *_Aasheesh Singh (Github: [@ashdtu](https://github.com/ashdtu)), MILA-Quebec AI Institute_*
 
 
 ## Experimental Setup
@@ -42,11 +42,11 @@ The experiments were performed on a A100 machine however any GPU with 6GB of mem
 
 ``` python
 # Set python version
-pyenv install 3.10.6
-pyenv local 3.10.6
+pyenv install 3.10.11
+pyenv local 3.10.11
 
 # Tell poetry to use python 3.10
-poetry env use 3.10.6
+poetry env use 3.10.11
 
 # install the base Poetry environment
 poetry install
