@@ -17,6 +17,9 @@ of the work will happen.
 Contributing to existing languages
 ----------------------------------
 
+.. youtube:: 10_Xfy5BOfQ
+   :width: 100%
+
 The first thing you will need to do in order to contribute is to create a
 Weblate account on this `page
 <https://hosted.weblate.org/accounts/register/>`_. More information
