@@ -108,7 +108,7 @@ class FedAvg(Strategy):
             Metrics aggregation function, optional.
         evaluate_metrics_aggregation_fn : Optional[MetricsAggregationFn]
             Metrics aggregation function, optional.
-        inplace: bool, optional
+        inplace : bool, optional
             Whether or not to perform in-place aggregation. In-place aggregation
             is more memory-efficient. Defaults to True.
         """
@@ -232,7 +232,7 @@ class FedAvg(Strategy):
             return None, {}
 
         if self.inplace:
-            # does in-place weighted averaged of results
+            # Does in-place weighted average of results
             aggregated_ndarrays = aggregate_inplace(results)
         else:
             # Convert results
