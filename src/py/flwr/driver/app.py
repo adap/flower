@@ -223,7 +223,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
 
 def update_client_manager(
     driver: Driver,
-    workload_id: str,
+    workload_id: int,
     client_manager: ClientManager,
     lock: threading.Lock,
 ) -> None:
@@ -277,7 +277,7 @@ def update_client_manager(
 # pylint: disable-next=too-many-locals
 def fetch_responses(
     driver: Driver,
-    workload_id: str,
+    workload_id: int,
     instructions: Dict[int, Task],
     timeout: Optional[float],
 ) -> Dict[int, Task]:
