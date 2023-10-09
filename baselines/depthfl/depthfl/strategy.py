@@ -9,7 +9,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 from flwr.common import (
-    Metrics,
     NDArrays,
     Parameters,
     Scalar,
@@ -21,30 +20,6 @@ from flwr.common.typing import FitRes
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
 from omegaconf import DictConfig
-
-
-def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
-    """Weighted average during evaluation.
-
-    Parameters
-    ----------
-    metrics : List[Tuple[int, Metrics]]
-        The list of metrics to aggregate.
-
-    Returns
-    -------
-    Metrics
-        The weighted average metric.
-    """
-    # Multiply accuracy of each client by number of examples used
-    accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
-    examples = [num_examples for num_examples, _ in metrics]
-
-    # Aggregate and return custom metric (weighted average)
-    print("here and nothing is breaking!!!")
-    return {
-        "accuracy": int(sum(accuracies)) / int(sum(examples))  # type:ignore[arg-type]
-    }
 
 
 class FedDyn(FedAvg):
