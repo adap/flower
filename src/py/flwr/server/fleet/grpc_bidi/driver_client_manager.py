@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 """Flower DriverClientManager."""
 
 
-import random
 import threading
 from typing import Dict, List, Optional, Set, Tuple
 
@@ -71,13 +70,9 @@ class DriverClientManager(ClientManager):
         if client.cid in self.nodes:
             return False
 
-        # Generate random integer ID
-        random_node_id: int = random.randrange(9223372036854775808)
-        client.node_id = random_node_id
-
-        # Register node_id in with State
+        # Create node in State
         state: State = self.state_factory.state()
-        state.register_node(node_id=random_node_id)
+        client.node_id = state.create_node()
 
         # Create and start the instruction scheduler
         ins_scheduler = InsScheduler(
@@ -87,7 +82,7 @@ class DriverClientManager(ClientManager):
         ins_scheduler.start()
 
         # Store cid, node_id, and InsScheduler
-        self.nodes[client.cid] = (random_node_id, ins_scheduler)
+        self.nodes[client.cid] = (client.node_id, ins_scheduler)
 
         with self._cv:
             self._cv.notify_all()
@@ -108,9 +103,9 @@ class DriverClientManager(ClientManager):
             del self.nodes[client.cid]
             ins_scheduler.stop()
 
-            # Unregister node_id in with State
+            # Delete node_id in State
             state: State = self.state_factory.state()
-            state.unregister_node(node_id=node_id)
+            state.delete_node(node_id=node_id)
 
             with self._cv:
                 self._cv.notify_all()
