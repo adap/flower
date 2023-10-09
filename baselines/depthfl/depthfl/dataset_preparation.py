@@ -98,7 +98,7 @@ def distribute_noniid(num_clients, beta, seed, trainset, datasets):
     np.random.seed(seed)
 
     while min_size < 10:
-        idx_batch: list = [[] for _ in range(num_clients)]
+        idx_batch = [[] for _ in range(num_clients)]
         # for each class in the dataset
         for k in range(np.max(labels) + 1):
             idx_k = np.where(labels == k)[0]

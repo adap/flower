@@ -42,7 +42,9 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
     # Aggregate and return custom metric (weighted average)
     print("here and nothing is breaking!!!")
-    return {"accuracy": int(sum(accuracies)) / int(sum(examples))}
+    return {
+        "accuracy": int(sum(accuracies)) / int(sum(examples))  # type:ignore[arg-type]
+    }
 
 
 class FedDyn(FedAvg):

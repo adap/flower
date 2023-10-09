@@ -136,6 +136,8 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
     prev_grads : dict
         control variate for feddyn
     """
+    criterion_kl = KLLoss().cuda()
+
     for images, labels in trainloader:
         images, labels = images.to(device), labels.to(device)
         loss = torch.zeros(1).to(device)
@@ -149,57 +151,35 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
 
             loss += criterion(branch_output, labels)
 
+            # self distillation term
             if config["kd"] and len(output_lst) > 1:
-                # self distillation term
-                loss = self_distillation(
-                    output_lst,
-                    i,
-                    loss,
-                    consistency_weight,
-                    KLLoss().cuda(),
-                    branch_output,
-                )
+                for j in range(len(output_lst)):
+                    if j == i:
+                        continue
+                    else:
+                        loss += (
+                            consistency_weight
+                            * criterion_kl(branch_output, output_lst[j].detach())
+                            / (len(output_lst) - 1)
+                        )
 
         # Dynamic regularization in FedDyn
         if config["feddyn"]:
-            loss = dynamic_regularization(config, net, prev_grads, global_params, loss)
+            for k, param in net.named_parameters():
+                curr_param = param.flatten()
+
+                lin_penalty = torch.dot(curr_param, prev_grads[k])
+                loss -= lin_penalty
+
+                quad_penalty = (
+                    config["alpha"]
+                    / 2.0
+                    * torch.sum(torch.square(curr_param - global_params[k]))
+                )
+                loss += quad_penalty
 
         loss.backward()
         optimizer.step()
-
-
-def self_distillation(
-    output_lst, i, loss, consistency_weight, criterion_kl, branch_output
-):
-    """'self distillation term."""
-    for j, output in enumerate(output_lst):
-        if j == i:
-            continue
-
-        loss += (
-            consistency_weight
-            * criterion_kl(branch_output, output.detach())
-            / (len(output_lst) - 1)
-        )
-
-    return loss
-
-
-def dynamic_regularization(config, net, prev_grads, global_params, loss):
-    """Dynamic regularization for FedDyn."""
-    for k, param in net.named_parameters():
-        curr_param = param.flatten()
-
-        lin_penalty = torch.dot(curr_param, prev_grads[k])
-        loss -= lin_penalty
-        quad_penalty = (
-            config["alpha"]
-            / 2.0
-            * torch.sum(torch.square(curr_param - global_params[k]))
-        )
-        loss += quad_penalty
-
-        return loss
 
 
 def test(
