@@ -38,7 +38,7 @@ jobs:
       - name: Install dependencies (mandatory only)
         run: python -m poetry install
       - name: Build Flower Datasets docs
-        run: ./dev/build-flower-datasets-docs.sh
+        run: ./dev/build-flwr-datasets-docs.sh
       - name: Deploy docs
         if: github.ref == 'refs/heads/main'
         env:
