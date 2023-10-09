@@ -20,10 +20,10 @@ jobs:
     name: Test
     runs-on: macos-latest
     steps:
-      - uses: fwal/setup-swift@2040b795e5c453c3a05fcb8316496afc8a74f192
+      - uses: fwal/setup-swift@cdcbe8e35d3801acd82d7109285e6ab22c9212c2
         with:
           swift-version: 5
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run tests
         run: arch -x86_64 xcodebuild test -scheme flwr -destination 'platform=iOS Simulator,name=iPhone 14 Pro Max,OS=16.2'
 
@@ -31,23 +31,23 @@ jobs:
     runs-on: macos-latest
     name: Build docs
     steps:
-      - uses: fwal/setup-swift@2040b795e5c453c3a05fcb8316496afc8a74f192
+      - uses: fwal/setup-swift@cdcbe8e35d3801acd82d7109285e6ab22c9212c2
         with:
           swift-version: 5
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Build docs
         run: ./dev/build-swift-api-ref.sh
 
   deploy_docs:
     needs: "build_docs"
-    if: github.ref == 'refs/heads/main'
+    if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
     runs-on: macos-latest
     name: Deploy docs 
     steps:
-      - uses: fwal/setup-swift@2040b795e5c453c3a05fcb8316496afc8a74f192
+      - uses: fwal/setup-swift@cdcbe8e35d3801acd82d7109285e6ab22c9212c2
         with:
           swift-version: 5
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Build and deploy docs
         env:
           AWS_DEFAULT_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
