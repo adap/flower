@@ -6,35 +6,32 @@ config. In this way, swapping your model for  another one can be done without ch
 the python code at all
 """
 
-from typing import Tuple, List
+from copy import deepcopy
+from typing import List, Tuple
 
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-from copy import deepcopy
-
 
 class StackedLSTM(nn.Module):
+    """StackedLSTM architecture.
+
+    As described in Fei Chen 2018 paper :
+
+    [FedMeta: Federated Meta-Learning with Fast Convergence and Efficient Communication]
+    (https://arxiv.org/abs/1802.07876)
     """
-    StackedLSTM architecture.
 
-  As described in Fei Chen 2018 paper :
-
-  [FedMeta: Federated Meta-Learning with Fast Convergence and Efficient Communication]
-  (https://arxiv.org/abs/1802.07876)
-
-  """
     def __init__(self):
-        super(StackedLSTM, self).__init__()
+        super().__init__()
 
         self.embedding = nn.Embedding(80, 8)
         self.lstm = nn.LSTM(8, 256, num_layers=2, dropout=0.5, batch_first=True)
-        self.fc = nn.Linear(256, 80)
+        self.fully_ = nn.Linear(256, 80)
 
     def forward(self, text):
-        """
-        Forward pass of the StackedLSTM.
+        """Forward pass of the StackedLSTM.
 
         Parameters
         ----------
@@ -45,31 +42,30 @@ class StackedLSTM(nn.Module):
         -------
         torch.Tensor
             The resulting Tensor after it has passed through the network
-
         """
         embedded = self.embedding(text)
         self.lstm.flatten_parameters()
         lstm_out, _ = self.lstm(embedded)
-        final_output = self.fc(lstm_out[:, -1, :])
+        final_output = self.fully_(lstm_out[:, -1, :])
         return final_output
 
 
-class CNN_network(nn.Module):
-    """
-    Convolutional Neural Network architecture.
+class FemnistNetwork(nn.Module):
+    """Convolutional Neural Network architecture.
 
     As described in Fei Chen 2018 paper :
 
     [FedMeta: Federated Meta-Learning with Fast Convergence and Efficient Communication]
     (https://arxiv.org/abs/1802.07876)
-
     """
 
     def __init__(self) -> None:
-        super(CNN_network, self).__init__()
+        super().__init__()
         self.conv1 = nn.Conv2d(in_channels=1, out_channels=32, kernel_size=5, padding=2)
         self.maxpool1 = nn.MaxPool2d(kernel_size=(2, 2))
-        self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=5, padding=2)
+        self.conv2 = nn.Conv2d(
+            in_channels=32, out_channels=64, kernel_size=5, padding=2
+        )
         self.maxpool2 = nn.MaxPool2d(kernel_size=(2, 2))
         self.linear1 = nn.Linear(7 * 7 * 64, 2048)
         self.linear2 = nn.Linear(2048, 62)
@@ -86,7 +82,6 @@ class CNN_network(nn.Module):
         -------
         torch.Tensor
             The resulting Tensor after it has passed through the network
-
         """
         x = torch.relu(self.conv1(x))
         x = self.maxpool1(x)
@@ -98,16 +93,15 @@ class CNN_network(nn.Module):
         return x
 
 
+# pylint: disable=too-many-arguments
 def train(
         net: nn.Module,
         trainloader: DataLoader,
-        testloader: DataLoader,
         device: torch.device,
         epochs: int,
         learning_rate: float,
 ) -> Tuple[float]:
-    """
-    Train the network on the training set.
+    """Train the network on the training set.
 
     Parameters
     ----------
@@ -135,9 +129,7 @@ def train(
     optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate, weight_decay=0.001)
     net.train()
     for _ in range(epochs):
-        net, loss = _train_one_epoch(
-            net, trainloader, device, criterion, optimizer
-        )
+        net, loss = _train_one_epoch(net, trainloader, device, criterion, optimizer)
     return loss
 
 
@@ -169,7 +161,6 @@ def _train_one_epoch(
         The model that has been trained for one epoch.
     total_loss
         The Loss that has been trained for one epoch.
-
     """
     total_loss = 0.0
 
@@ -184,6 +175,7 @@ def _train_one_epoch(
     return net, total_loss
 
 
+# pylint: disable=too-many-locals
 def test(
         net: nn.Module,
         trainloader: DataLoader,
@@ -193,8 +185,7 @@ def test(
         data: str,
         learning_rate: float,
 ) -> Tuple[float, float]:
-    """
-    Evaluate the network on the entire test set.
+    """Evaluate the network on the entire test set.
 
     Parameters
     ----------
@@ -217,25 +208,28 @@ def test(
     -------
     Tuple[float, float]
         The loss and the accuracy of the input model on the given data.
-
     """
     criterion = torch.nn.CrossEntropyLoss()
 
-    if algo == 'fedavg_meta':
-        total_loss = 0.0
-        optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate, weight_decay=0.001)
+    if algo == "fedavg_meta":
+        optimizer = torch.optim.Adam(
+            net.parameters(), lr=learning_rate, weight_decay=0.001
+        )
         net.train()
-        if data == 'femnist':
+        if data == "femnist":
             for images, labels in trainloader:
                 images, labels = images.to(device), labels.to(device)
                 loss = criterion(net(images), labels)
-                total_loss += loss * labels.size(0)
-            total_loss = total_loss / len(trainloader.dataset)
-            optimizer.zero_grad()
-            total_loss.backward()
-            optimizer.step()
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+                # total_loss += loss * labels.size(0)
+            # total_loss = total_loss / len(trainloader.dataset)
+            # optimizer.zero_grad()
+            # total_loss.backward()
+            # optimizer.step()
 
-        elif data == 'shakespeare':
+        elif data == "shakespeare":
             for images, labels in trainloader:
                 images, labels = images.to(device), labels.to(device)
                 loss = criterion(net(images), labels)
@@ -264,7 +258,7 @@ def train_meta(
         net: nn.Module,
         supportloader: DataLoader,
         queryloader: DataLoader,
-        alpha,
+        alpha: torch.nn.ParameterList,
         device: torch.device,
         gradient_step: int,
 ) -> Tuple[float, List]:
@@ -272,28 +266,25 @@ def train_meta(
 
     Parameters
     ----------
-    net : nn.Module
-        The neural network to train.
-    supportloader : DataLoader
-        The DataLoader containing the data to inner loop train the network on.
-    queryloader : DataLoader
-        The DataLoader containing the data to outer loop train the network on.
-   alpha : int
-        The learning rate for the optimizer.
-    device : torch.device
-        The device on which the model should be trained, either 'cpu' or 'cuda'.
-    gradient_step : int
-        The number of inner loop learning
+     net : nn.Module
+         The neural network to train.
+     supportloader : DataLoader
+         The DataLoader containing the data to inner loop train the network on.
+     queryloader : DataLoader
+         The DataLoader containing the data to outer loop train the network on.
+    alpha : torch.nn.ParameterList
+         The learning rate for the optimizer.
+     device : torch.device
+         The device on which the model should be trained, either 'cpu' or 'cuda'.
+     gradient_step : int
+         The number of inner loop learning
 
     Returns
     -------
-    nn.Module
-        The model that has been trained for one meta epoch.
-    total_loss
-        The Loss that has been trained for one epoch.
-    grads
-        The gradients that has been trained for one epoch.
-
+     total_loss
+         The Loss that has been trained for one epoch.
+     grads
+         The gradients that has been trained for one epoch.
     """
     criterion = torch.nn.CrossEntropyLoss()
     for _ in range(1):
@@ -302,7 +293,7 @@ def train_meta(
         )
     return loss, grads
 
-
+# pylint: disable=too-many-locals
 def _train_meta_one_epoch(
         net: nn.Module,
         supportloader: DataLoader,
@@ -311,36 +302,32 @@ def _train_meta_one_epoch(
         criterion: torch.nn.CrossEntropyLoss,
         device: torch.device,
         gradient_step: int,
-) -> nn.Module:
-    """
-    Train for one epoch.
+) -> Tuple[float, List]:
+    """Train for one epoch.
 
     Parameters
     ----------
-    net : nn.Module
-        The neural network to train.
-    supportloader : DataLoader
-        The DataLoader containing the data to inner loop train the network on.
-    queryloader : DataLoader
-        The DataLoader containing the data to outer loop train the network on.
-   alpha : torch.nn.ParameterList
-        The learning rate for the optimizer.
-    criterion : torch.nn.CrossEntropyLoss
-        The loss function to use for training
-    device : torch.device
-        The device on which the model should be trained, either 'cpu' or 'cuda'.
-    gradient_step : int
-        The number of inner loop learning
+     net : nn.Module
+         The neural network to train.
+     supportloader : DataLoader
+         The DataLoader containing the data to inner loop train the network on.
+     queryloader : DataLoader
+         The DataLoader containing the data to outer loop train the network on.
+    alpha : torch.nn.ParameterList
+         The learning rate for the optimizer.
+     criterion : torch.nn.CrossEntropyLoss
+         The loss function to use for training
+     device : torch.device
+         The device on which the model should be trained, either 'cpu' or 'cuda'.
+     gradient_step : int
+         The number of inner loop learning
 
     Returns
     -------
-    nn.Module
-        The model that has been trained for one meta epoch.
-    total_loss
-        The Loss that has been trained for one epoch.
-    grads
-        The gradients that has been trained for one epoch.
-
+     total_loss
+         The Loss that has been trained for one epoch.
+     grads
+         The gradients that has been trained for one epoch.
     """
     num_adaptation_steps = gradient_step
     train_net = deepcopy(net)
@@ -355,14 +342,16 @@ def _train_meta_one_epoch(
             loss_sum += loss * labels.size(0)
             sup_num_sample.append(labels.size(0))
             sup_total_loss.append(loss * labels.size(0))
-            grads = torch.autograd.grad(loss, list(train_net.parameters()), create_graph=True, retain_graph=True)
+            grads = torch.autograd.grad(
+                loss, list(train_net.parameters()), create_graph=True, retain_graph=True
+            )
 
-            for p, g, a in zip(train_net.parameters(), grads, alpha):
-                p.data = p.data - a * g
+            for param, grad_, alphas in zip(train_net.parameters(), grads, alpha):
+                param.data = param.data - alphas * grad_
 
-            for p in train_net.parameters():
-                if p.grad is not None:
-                    p.grad.zero_()
+            for param in train_net.parameters():
+                if param.grad is not None:
+                    param.grad.zero_()
 
     qry_total_loss = []
     qry_num_sample = []
@@ -376,11 +365,11 @@ def _train_meta_one_epoch(
     loss_sum = loss_sum / sum(qry_num_sample)
     grads = torch.autograd.grad(loss_sum, list(train_net.parameters()))
 
-    for p in train_net.parameters():
-        if p.grad is not None:
-            p.grad.zero_()
+    for param in train_net.parameters():
+        if param.grad is not None:
+            param.grad.zero_()
 
-    grads = [g.cpu().numpy() for g in grads]
+    grads = [grad_.cpu().numpy() for grad_ in grads]
     loss = sum(sup_total_loss) / sum(sup_num_sample)
     return loss, grads
 
@@ -393,8 +382,7 @@ def test_meta(
         device: torch.device,
         gradient_step: int,
 ) -> Tuple[float, float]:
-    """
-    Evaluate the network on the entire test set.
+    """Evaluate the network on the entire test set.
 
     Parameters
     ----------
@@ -431,14 +419,16 @@ def test_meta(
             loss_sum += loss * labels.size(0)
             sup_num_sample.append(labels.size(0))
             sup_total_loss.append(loss)
-            grads = torch.autograd.grad(loss, list(test_net.parameters()), create_graph=True, retain_graph=True)
+            grads = torch.autograd.grad(
+                loss, list(test_net.parameters()), create_graph=True, retain_graph=True
+            )
 
-            for p, g, a in zip(test_net.parameters(), grads, alpha):
-                p.data -= a * g
+            for param, grad_, alphas in zip(test_net.parameters(), grads, alpha):
+                param.data -= alphas * grad_
 
-            for p in test_net.parameters():
-                if p.grad is not None:
-                    p.grad.zero_()
+            for param in test_net.parameters():
+                if param.grad is not None:
+                    param.grad.zero_()
 
     test_net.eval()
     correct, total, loss = 0, 0, 0.0
@@ -454,5 +444,3 @@ def test_meta(
     loss = loss / total
     accuracy = correct / total
     return loss, accuracy
-
-

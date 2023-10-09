@@ -5,67 +5,61 @@ example, you may define here things like: loading a model from a checkpoint, sav
 results, plotting.
 """
 
-from typing import List, Dict
-import pickle
 import os
+import pickle
+from typing import Dict, List
+
 import matplotlib.pyplot as plt
 
 # Encoding list for the Shakespeare dataset
-ALL_LETTERS = "\n !\"&'(),-.0123456789:;>?ABCDEFGHIJKLMNOPQRSTUVWXYZ[]abcdefghijklmnopqrstuvwxyz}"
+ALL_LETTERS = (
+    "\n !\"&'(),-.0123456789:;>?ABCDEFGHIJKLMNOPQRSTUVWXYZ[]abcdefghijklmnopqrstuvwxyz}"
+)
 
 
 def _one_hot(
-        index: int,
-        size: int,
+    index: int,
+    size: int,
 ) -> List:
-    """
-    returns one-hot vector with given size and value 1 at given index
-
-    """
-
+    """Return one-hot vector with given size and value 1 at given index."""
     vec = [0 for _ in range(size)]
     vec[int(index)] = 1
     return vec
 
 
 def letter_to_vec(
-        letter: str,
+    letter: str,
 ) -> int:
-    """
-    returns one-hot representation of given letter
-
-    """
-
+    """Return one-hot representation of given letter."""
     index = ALL_LETTERS.find(letter)
     return index
 
 
 def word_to_indices(
-        word: str,
+    word: str,
 ) -> List:
-    """
-    returns a list of character indices
-    Args:
-        word: string
+    """Return a list of character indices.
 
-    Return:
+    Parameters
+    ----------
+        word: string.
+
+    Returns
+    -------
         indices: int list with length len(word)
-
     """
-
     indices = []
-    for c in word:
-        indices.append(ALL_LETTERS.find(c))
+    for count in word:
+        indices.append(ALL_LETTERS.find(count))
     return indices
 
 
 def update_ema(
-        prev_ema: float,
-        current_value: float,
-        smoothing_weight: float,
+    prev_ema: float,
+    current_value: float,
+    smoothing_weight: float,
 ) -> float:
-    """
-    We use EMA to visually enhance the learning trend for each round.
+    """We use EMA to visually enhance the learning trend for each round.
 
     Parameters
     ----------
@@ -81,7 +75,6 @@ def update_ema(
     -------
     EMA_Loss or EMA_ACC
         The weighted average metric.
-
     """
     if prev_ema is None:
         return current_value
@@ -89,33 +82,30 @@ def update_ema(
 
 
 def save_graph_params(data_info: Dict):
-    """
-    Save parameters to visualize experiment results (Loss, ACC)
+    """Save parameters to visualize experiment results (Loss, ACC).
 
     Parameters
     ----------
     data_info : Dict
         This is a parameter dictionary of data from which the experiment was completed.
     """
-
     if os.path.exists(f"{data_info['path']}/{data_info['algo']}.pkl"):
-        raise ValueError(f"'{data_info['path']}/{data_info['algo']}.pkl' is already exists!")
+        raise ValueError(
+            f"'{data_info['path']}/{data_info['algo']}.pkl' is already exists!"
+        )
 
-    with open(f"{data_info['path']}/{data_info['algo']}.pkl", 'wb') as f:
-        pickle.dump(data_info, f)
+    with open(f"{data_info['path']}/{data_info['algo']}.pkl", "wb") as file:
+        pickle.dump(data_info, file)
 
 
 def plot_from_pkl(directory="."):
-    """
-    Visualization of algorithms for each data (FedAvg, FedAvg_Meta, FedMeta_MAML, FedMeta_Meta-SGD)
+    """Visualization of algorithms like 4 Algorithm for data.
 
     Parameters
     ----------
     directory : str
         Graph params directory path for Femnist or Shakespeare
-
     """
-
     color_mapping = {
         "fedavg.pkl": "#66CC00",
         "fedavg_meta.pkl": "#3333CC",
@@ -123,13 +113,13 @@ def plot_from_pkl(directory="."):
         "fedmeta_meta_sgd.pkl": "#CC0000",
     }
 
-    pkl_files = [f for f in os.listdir(directory) if f.endswith('.pkl')]
+    pkl_files = [f for f in os.listdir(directory) if f.endswith(".pkl")]
 
     all_data = {}
 
     for file in pkl_files:
-        with open(os.path.join(directory, file), 'rb') as f:
-            data = pickle.load(f)
+        with open(os.path.join(directory, file), "rb") as file_:
+            data = pickle.load(file_)
             all_data[file] = data
 
     plt.figure(figsize=(7, 12))
@@ -138,9 +128,14 @@ def plot_from_pkl(directory="."):
     plt.subplot(2, 1, 1)
     for file in sorted(all_data.keys()):
         data = all_data[file]
-        accuracies = [acc for _, acc in data["accuracy"]['accuracy']]
-        legend_ = file[:-4] if file.endswith('.pkl') else file
-        plt.plot(accuracies, label=legend_, color=color_mapping.get(file, "black"), linewidth=3)
+        accuracies = [acc for _, acc in data["accuracy"]["accuracy"]]
+        legend_ = file[:-4] if file.endswith(".pkl") else file
+        plt.plot(
+            accuracies,
+            label=legend_,
+            color=color_mapping.get(file, "black"),
+            linewidth=3,
+        )
     plt.title("Accuracy")
     plt.grid(True)
     plt.legend()
@@ -149,8 +144,10 @@ def plot_from_pkl(directory="."):
     for file in sorted(all_data.keys()):
         data = all_data[file]
         loss = [loss for _, loss in data["loss"]]
-        legend_ = file[:-4] if file.endswith('.pkl') else file
-        plt.plot(loss, label=legend_, color=color_mapping.get(file, "black"), linewidth=3)
+        legend_ = file[:-4] if file.endswith(".pkl") else file
+        plt.plot(
+            loss, label=legend_, color=color_mapping.get(file, "black"), linewidth=3
+        )
     plt.title("Loss")
     plt.legend()
     plt.grid(True)

@@ -4,7 +4,7 @@
 # a similar configuration structure and hence be easy to customise)
 
 model:
-  _target_: fedmeta.models.CNN_network # model config
+  _target_: fedmeta.models.FemnistNetwork # model config
 
 client_resources:
   num_cpus: 4

@@ -1,68 +1,56 @@
-from flwr.server.client_manager import SimpleClientManager
-from typing import List, Optional
-from logging import INFO
-from flwr.common.logger import log
-from flwr.server.criterion import Criterion
-from flwr.server.client_proxy import ClientProxy
+"""Handles clients that are sampled every round.
+
+In a FedMeta experiment, there is a train and a test client. So we modified the manager
+to sample from each list each round.
+"""
+
 import random
+from logging import INFO
+from typing import List, Optional
+
+from flwr.common.logger import log
+from flwr.server.client_manager import SimpleClientManager
+from flwr.server.client_proxy import ClientProxy
+from flwr.server.criterion import Criterion
 
 
-class evaluate_client_Criterion(Criterion):
-    def __init__(self, min_evaluate_clients):
-        self.min_evaluate_clients = min_evaluate_clients
+class FedmetaClientManager(SimpleClientManager):
+    """In the fit phase, clients must be sampled from the training client list.
 
-    """Criterion to select evaluate clients."""
-    def select(
-            self,
-            valid_client: int
-    ) -> List:
-        """
-        Clients to be used in evaluation should be sampled from the validation client list.
-
-        Parameters
-            ----------
-            valid_client : int
-             Length of validation client list
-
-        Returns
-            -------
-            Return client cid list
-
-        """
-        return [str(result) for result in range(0, valid_client)]
-
-
-class fedmeta_client_manager(SimpleClientManager):
-
-    """
-    In the fit phase, clients must be sampled from the training client list.
     And in the evaluate stage, clients must be sampled from the validation client list.
-    So we modify 'fedmeta_client_manager' to sample clients from [cid: List] for each list.
-
+    So we modify 'fedmeta_client_manager' to sample clients from [cid: List] for each
+    list.
     """
 
     def __init__(self, valid_client, **kwargs):
         super().__init__(**kwargs)
         self.valid_client = valid_client
 
-    def sample(
-        self,
-        num_clients: int,
-        server_round: Optional[int] = None,
-        min_num_clients: Optional[int] = None,
-        criterion: Optional[Criterion] = None,
+    # pylint: disable=too-many-arguments
+    def sample(  # pylint: disable=arguments-differ
+            self,
+            num_clients: int,
+            min_num_clients: Optional[int] = None,
+            criterion: Optional[Criterion] = None,
+            server_round: Optional[int] = None,
+            step: Optional[str] = None
     ) -> List[ClientProxy]:
         """Sample a number of Flower ClientProxy instances."""
-
         # Block until at least num_clients are connected.
         if min_num_clients is None:
             min_num_clients = num_clients
         self.wait_for(min_num_clients)
 
         # Sample clients which meet the criterion
-        available_cids = list(self.clients)
+        if step == 'evaluate':
+            available_cids = [str(result) for result in range(0, self.valid_client)]
+        else:
+            available_cids = list(self.clients)
+
         if criterion is not None:
-            available_cids = criterion.select(self.valid_client)
+            available_cids = [
+                cid for cid in available_cids if criterion.select(self.clients[cid])
+            ]
 
         if num_clients > len(available_cids):
             log(

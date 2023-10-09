@@ -4,19 +4,19 @@ It includes processioning the dataset, instantiate strategy, specify how the glo
 model is going to be evaluated, etc. At the end, this script saves the results.
 """
 
-import hydra
-from hydra.core.hydra_config import HydraConfig
-from omegaconf import DictConfig, OmegaConf
-from hydra.utils import instantiate
 import os
 
 import flwr as fl
+import hydra
+from hydra.core.hydra_config import HydraConfig
+from hydra.utils import instantiate
+from omegaconf import DictConfig, OmegaConf
 
 import fedmeta.client as client
-from fedmeta.fedmeta_client_manager import fedmeta_client_manager
 from fedmeta.dataset import load_datasets
+from fedmeta.fedmeta_client_manager import FedmetaClientManager
 from fedmeta.strategy import weighted_average
-from fedmeta.utils import save_graph_params, plot_from_pkl
+from fedmeta.utils import plot_from_pkl, save_graph_params
 
 
 @hydra.main(config_path="conf", config_name="config", version_base=None)
@@ -30,13 +30,14 @@ def main(cfg: DictConfig) -> None:
 
         algo : FedAvg, FedAvg(Meta), FedMeta(MAML), FedMeta(Meta-SGD)
         data : Femnist, Shakespeare
-
     """
     # print config structured as YAML
     print(OmegaConf.to_yaml(cfg))
 
     # partition dataset and get dataloaders
-    trainloaders, valloaders, testloaders= load_datasets(config=cfg.data, path=cfg.path)
+    trainloaders, valloaders, _ = load_datasets(
+        config=cfg.data, path=cfg.path
+    )
 
     # prepare function that will be used to spawn each client
     client_fn = client.gen_client_fn(
@@ -61,13 +62,13 @@ def main(cfg: DictConfig) -> None:
     # Start Simulation
     history = fl.simulation.start_simulation(
         client_fn=client_fn,
-        num_clients=len(trainloaders['sup']),
+        num_clients=len(trainloaders["sup"]),
         config=fl.server.ServerConfig(num_rounds=cfg.data.num_rounds),
         client_resources={
             "num_cpus": cfg.data.client_resources.num_cpus,
             "num_gpus": cfg.data.client_resources.num_gpus,
         },
-        client_manager=fedmeta_client_manager(valid_client=len(valloaders['qry'])),
+        client_manager=FedmetaClientManager(valid_client=len(valloaders["qry"])),
         strategy=strategy,
     )
 
@@ -83,7 +84,9 @@ def main(cfg: DictConfig) -> None:
 
     print("................")
     print(history)
-    output_path = HydraConfig.get().runtime.cwd + '/fedmeta/' + cfg.data.data + '/graph_params'
+    output_path = (
+        HydraConfig.get().runtime.cwd + "/fedmeta/" + cfg.data.data + "/graph_params"
+    )
     os.makedirs(output_path, exist_ok=True)
 
     data_params = {
@@ -91,7 +94,7 @@ def main(cfg: DictConfig) -> None:
         "data": cfg.data.data,
         "loss": history.losses_distributed,
         "accuracy": history.metrics_distributed,
-        "path": output_path
+        "path": output_path,
     }
 
     save_graph_params(data_params)
