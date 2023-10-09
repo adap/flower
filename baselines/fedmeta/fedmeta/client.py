@@ -165,7 +165,6 @@ def gen_client_fn(
 
     def client_fn(cid: str) -> FlowerClient:
         """Create a Flower client representing a single organization."""
-        print(f"cid : {cid}")
 
         # Load model
         torch.manual_seed(42)
