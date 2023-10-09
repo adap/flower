@@ -35,6 +35,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_BIDI,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
+    TRANSPORT_TYPE_VCE,
 )
 from flwr.common.logger import log
 from flwr.proto.driver_pb2_grpc import add_DriverServicer_to_server
@@ -49,6 +50,7 @@ from flwr.server.fleet.grpc_bidi.grpc_server import (
     start_grpc_server,
 )
 from flwr.server.fleet.grpc_rere.fleet_servicer import FleetServicer
+from flwr.server.fleet.vce.vce_api import run_vce
 from flwr.server.history import History
 from flwr.server.server import Server
 from flwr.server.state import StateFactory
@@ -422,6 +424,9 @@ def run_server() -> None:
             state_factory=state_factory,
         )
         grpc_servers.append(fleet_server)
+    elif args.fleet_api_type == TRANSPORT_TYPE_VCE:
+        num_clients = 3  # TODO: take arg from CLI
+        _run_fleet_api_vce(num_clients=num_clients, state_factory=state_factory)
     else:
         raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
@@ -559,6 +564,12 @@ def _run_fleet_api_grpc_rere(
     fleet_grpc_server.start()
 
     return fleet_grpc_server
+
+
+def _run_fleet_api_vce(num_clients: int, state_factory: StateFactory):
+    log(INFO, "Flower VCE: Starting Fleet API (VirtualClientEngine)")
+
+    run_vce(num_clients, state_factory)
 
 
 # pylint: disable=import-outside-toplevel,too-many-arguments
@@ -727,6 +738,13 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         dest="fleet_api_type",
         const=TRANSPORT_TYPE_REST,
         help="Start a Fleet API server (REST, experimental)",
+    )
+    ex_group.add_argument(
+        "--vce",
+        action="store_const",
+        dest="fleet_api_type",
+        const=TRANSPORT_TYPE_VCE,
+        help="Start a Fleet API server (VirtualClientEngine)",
     )
 
     # Fleet API gRPC-bidi options

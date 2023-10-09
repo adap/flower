@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,24 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower constants."""
-
-
-MISSING_EXTRA_REST = """
-Extra dependencies required for using the REST-based Fleet API are missing.
-
-To use the REST API, install `flwr` with the `rest` extra:
-
-    `pip install flwr[rest]`.
-"""
-
-TRANSPORT_TYPE_GRPC_BIDI = "grpc-bidi"
-TRANSPORT_TYPE_GRPC_RERE = "grpc-rere"
-TRANSPORT_TYPE_REST = "rest"
-TRANSPORT_TYPE_VCE = "vce"
-TRANSPORT_TYPES = [
-    TRANSPORT_TYPE_GRPC_BIDI,
-    TRANSPORT_TYPE_GRPC_RERE,
-    TRANSPORT_TYPE_REST,
-    TRANSPORT_TYPE_VCE,
-]
+"""Fleet VirtualClientEngine side."""
