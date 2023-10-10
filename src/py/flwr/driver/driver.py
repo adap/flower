@@ -37,11 +37,11 @@ from flwr.proto.driver_pb2_grpc import DriverStub
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
 
-ERROR_MESSAGE_DRIVER_NOT_CONNECTED = """
-[Driver] Error: Not connected.
+ERROR_MESSAGE_DRIVER_NOT_INITIALIZED = """
+[Driver] Error: Not initialized.
 
-Call `connect()` on the `Driver` instance before calling any of the other `Driver`
-methods.
+Call `connect()` and then `create_workload()` on the `Driver` instance
+before calling any of the other `Driver` methods.
 """
 
 
@@ -57,6 +57,7 @@ class Driver:
         self.certificates = certificates
         self.channel: Optional[grpc.Channel] = None
         self.stub: Optional[DriverStub] = None
+        self.workload_id: Optional[int] = None
 
     def connect(self) -> None:
         """Connect to the Driver API."""
@@ -87,8 +88,13 @@ class Driver:
         """Request for workload ID."""
         # Check if channel is open
         if self.stub is None:
-            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
+            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_INITIALIZED)
             raise Exception("`Driver` instance not connected")
+
+        # Check if the workload has already been created
+        if self.workload_id is not None:
+            log(WARNING, "Workload already created")
+            return CreateWorkloadResponse(workload_id=self.workload_id)
 
         # Call Driver API
         res: CreateWorkloadResponse = self.stub.CreateWorkload(request=req)
@@ -96,10 +102,13 @@ class Driver:
 
     def get_nodes(self, req: GetNodesRequest) -> GetNodesResponse:
         """Get client IDs."""
-        # Check if channel is open
-        if self.stub is None:
-            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
-            raise Exception("`Driver` instance not connected")
+        # Check if channel is open and workload is created
+        if self.stub is None or self.workload_id is None:
+            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_INITIALIZED)
+            raise Exception("`Driver` instance not initialized")
+
+        # Set the `workload_id` field
+        req.workload_id = self.workload_id
 
         # Call Driver API
         res: GetNodesResponse = self.stub.GetNodes(request=req)
@@ -107,10 +116,14 @@ class Driver:
 
     def push_task_ins(self, req: PushTaskInsRequest) -> PushTaskInsResponse:
         """Schedule tasks."""
-        # Check if channel is open
-        if self.stub is None:
-            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
-            raise Exception("`Driver` instance not connected")
+        # Check if channel is open and workload is created
+        if self.stub is None or self.workload_id is None:
+            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_INITIALIZED)
+            raise Exception("`Driver` instance not initialized")
+
+        # Set the `workload_id` field
+        for task_ins in req.task_ins_list:
+            task_ins.workload_id = self.workload_id
 
         # Call Driver API
         res: PushTaskInsResponse = self.stub.PushTaskIns(request=req)
@@ -118,10 +131,10 @@ class Driver:
 
     def pull_task_res(self, req: PullTaskResRequest) -> PullTaskResResponse:
         """Get task results."""
-        # Check if channel is open
-        if self.stub is None:
-            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
-            raise Exception("`Driver` instance not connected")
+        # Check if channel is open and workload is created
+        if self.stub is None or self.workload_id is None:
+            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_INITIALIZED)
+            raise Exception("`Driver` instance not initialized")
 
         # Call Driver API
         res: PullTaskResResponse = self.stub.PullTaskRes(request=req)
