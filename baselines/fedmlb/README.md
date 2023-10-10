@@ -329,8 +329,9 @@ Note that (as in the original paper),
 the accuracy at the target round is based on the exponential moving average with the momentum parameter
 0.9. Tensorboard allows to easily visualize/calculate the moving average of a run.
 
-All the results reported in this repository can be also browsed 
-on this [tesnsorboard.dev online dashboard](https://tensorboard.dev/experiment/xOk73qh0TMK1nskkoNlBVA/#scalars).
+All the results reported in this repository can be also downloaded 
+from [this link](https://drive.google.com/file/d/1XeTnZfnW1ncaQxPdvDeShXq2dnRR5Njj/view?usp=sharing) 
+(`.csv` file, 2MB).
 
 ### Table 1a and Table 2
 
