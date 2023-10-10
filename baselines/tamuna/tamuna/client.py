@@ -162,7 +162,6 @@ def gen_tamuna_client_fn(
     trainloaders: List[DataLoader],
     learning_rate: float,
     model: DictConfig,
-    client_device: str,
 ) -> Callable[[str], TamunaClient]:
     """Generate the client function that creates Tamuna clients.
 
@@ -175,8 +174,6 @@ def gen_tamuna_client_fn(
         The learning rate for Tamuna optimizer for clients.
     model: DictConfig
         Architecture of the model being instantiated
-    client_device: str
-        Device to use for client training (cpu, cuda)
 
     Returns
     -------
@@ -187,7 +184,7 @@ def gen_tamuna_client_fn(
     def tamuna_client_fn(cid: str) -> TamunaClient:
         """Create a Tamuna client."""
         # Load model
-        device = torch.device(device=client_device)
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         net = instantiate(model).to(device)
 
         # Note: each client gets a different trainloader, so each client
@@ -203,7 +200,6 @@ def gen_fedavg_client_fn(
     trainloaders: List[DataLoader],
     learning_rate: float,
     model: DictConfig,
-    client_device: str,
 ) -> Callable[[str], FedAvgClient]:
     """Generate the client function that creates FedAvg clients.
 
@@ -216,8 +212,6 @@ def gen_fedavg_client_fn(
         The learning rate for the SGD optimizer for clients.
     model: DictConfig
         Architecture of the model being instantiated
-    client_device: str
-        Device to use for client training (cpu, cuda)
 
     Returns
     -------
@@ -228,7 +222,7 @@ def gen_fedavg_client_fn(
     def fedavg_client_fn(cid: str) -> FedAvgClient:
         """Create a FedAvg client."""
         # Load model
-        device = torch.device(device=client_device)
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         net = instantiate(model).to(device)
 
         # Note: each client gets a different trainloader, so each client

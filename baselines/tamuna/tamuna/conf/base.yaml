@@ -26,7 +26,6 @@ server:
   downlink_factor: 1
 
 client:
-  client_device: 'cuda:0'
   client_resources:
     num_cpus: 2
     num_gpus: 0.2

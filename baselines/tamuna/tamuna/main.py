@@ -81,7 +81,6 @@ def run_fedavg(
         trainloaders=trainloaders,
         learning_rate=cfg.client.learning_rate,
         model=cfg.model,
-        client_device=cfg.client.client_device,
     )
 
     # pylint: disable=unused-argument
@@ -156,7 +155,6 @@ def run_tamuna(
         trainloaders=trainloaders,
         learning_rate=cfg.client.learning_rate,
         model=cfg.model,
-        client_device=cfg.client.client_device,
     )
 
     # using only central evaluation

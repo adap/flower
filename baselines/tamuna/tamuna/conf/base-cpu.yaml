@@ -26,7 +26,6 @@ server:
   downlink_factor: 1
 
 client:
-  client_device: 'cpu'
   client_resources:
     num_cpus: 2
     num_gpus: 0
