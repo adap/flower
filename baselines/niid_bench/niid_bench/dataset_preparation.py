@@ -153,7 +153,7 @@ def partition_data(
     targets = t[rem_trainset.indices]
     num_remaining_classes = len(set(targets))
     remaining_classes = list(set(targets))
-    client_classes = [[] for _ in range(num_clients)]
+    client_classes: List[List] = [[] for _ in range(num_clients)]
     times = [0 for _ in range(num_remaining_classes)]
 
     for i in range(num_clients):
@@ -168,7 +168,7 @@ def partition_data(
                 times[index] += 1
                 j += 1
 
-    rem_trainsets_per_client = [[] for _ in range(num_clients)]
+    rem_trainsets_per_client: List[List] = [[] for _ in range(num_clients)]
 
     for i in range(num_remaining_classes):
         class_t = remaining_classes[i]
@@ -227,7 +227,7 @@ def partition_data_dirichlet(
     num_classes = len(set(t))
     total_samples = len(t)
     while min_samples < min_required_samples_per_client:
-        idx_clients = [[] for _ in range(num_clients)]
+        idx_clients: List[List] = [[] for _ in range(num_clients)]
         for k in range(num_classes):
             idx_k = np.where(t == k)[0]
             prng.shuffle(idx_k)
@@ -296,7 +296,7 @@ def partition_data_label_quantity(
                 times[index] += 1
                 j += 1
         contains.append(current)
-    idx_clients = [[] for _ in range(num_clients)]
+    idx_clients: List[List] = [[] for _ in range(num_clients)]
     for i in range(num_classes):
         idx_k = np.where(targets == i)[0]
         prng.shuffle(idx_k)

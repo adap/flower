@@ -302,7 +302,7 @@ def train_fednova(
     learning_rate: float,
     momentum: float,
     weight_decay: float,
-) -> int:
+) -> Tuple[float, List[torch.Tensor]]:
     """Train the network on the training set using FedNova.
 
     Parameters
@@ -324,8 +324,8 @@ def train_fednova(
 
     Returns
     -------
-    int
-        The number of local training steps.
+    tuple[float, List[torch.Tensor]]
+        The a_i and g_i values.
     """
     criterion = nn.CrossEntropyLoss()
     optimizer = SGD(

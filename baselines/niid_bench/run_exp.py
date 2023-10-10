@@ -5,6 +5,7 @@ import subprocess
 import time
 from collections import deque
 from itertools import product
+from typing import List
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--seed", type=int, default=42)
@@ -80,7 +81,7 @@ partitionings = [
     "label_quantity_3",
 ]
 
-commands = deque()
+commands: deque = deque()
 for partitioning, dataset_name in product(partitionings, dataset_names):
     labels_per_client = -1
     if "label_quantity" in partitioning:
@@ -95,7 +96,7 @@ MAX_PROCESSES_AT_ONCE = parser_args.num_processes
 
 # run max_processes_at_once processes at once with 10 second sleep interval
 # in between those processes until all commands are done
-processes = []
+processes: List = []
 while len(commands) > 0:
     while len(processes) < MAX_PROCESSES_AT_ONCE and len(commands) > 0:
         cmd = commands.popleft()
