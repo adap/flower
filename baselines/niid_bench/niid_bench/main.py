@@ -117,6 +117,10 @@ def main(cfg: DictConfig) -> None:
     # Hydra will generate for you a directory each time you run the code. You
     # can retrieve the path to that directory with this:
     # save_path = HydraConfig.get().runtime.output_dir
+    # save to a pickle file
+    import pickle
+    with open(os.path.join(save_path, "history.pkl"), 'wb') as f:
+        pickle.dump(history, f)
 
 
 if __name__ == "__main__":
