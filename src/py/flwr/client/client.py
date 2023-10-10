@@ -14,6 +14,8 @@
 # ==============================================================================
 """Flower client (abstract base class)."""
 
+# Needed to `Client` class can return a type of `Client` (not needed in py3.11+)
+from __future__ import annotations
 
 from abc import ABC
 
@@ -135,6 +137,10 @@ class Client(ABC):
             num_examples=0,
             metrics={},
         )
+
+    def to_client(self) -> Client:
+        """Return client (itself)."""
+        return self
 
 
 def has_get_properties(client: Client) -> bool:
