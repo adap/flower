@@ -1,5 +1,5 @@
-Improve docs translations
-=========================
+Contribute translations
+=======================
 
 Since `Flower 1.5
 <https://flower.dev/docs/framework/ref-changelog.html#v1-5-0-2023-08-31>`_ we
@@ -14,8 +14,8 @@ Our translation project is publicly available over on `Weblate
 <https://hosted.weblate.org/projects/flower-docs/framework/>`_, this where most
 of the work will happen.
 
-Contributing to existing languages
-----------------------------------
+Contribute to existing languages
+--------------------------------
 
 .. youtube:: 10_Xfy5BOfQ
    :width: 100%
@@ -63,10 +63,9 @@ file containing the string.
 For more information about translating using Weblate, you can check out this
 `in-depth guide <https://docs.weblate.org/en/latest/user/translating.html>`_.
 
-Adding new languages
---------------------
+Add new languages
+-----------------
 
 If you want to add a new language, you will first have to contact us, either on
 `Slack <https://flower.dev/join-slack>`_, or by opening an issue on our `GitHub
 repo <https://github.com/adap/flower>`_.
-
