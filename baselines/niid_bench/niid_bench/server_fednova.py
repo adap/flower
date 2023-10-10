@@ -5,11 +5,29 @@ from logging import DEBUG, INFO
 from flwr.common import parameters_to_ndarrays
 from flwr.common.logger import log
 from flwr.common.typing import Dict, Optional, Parameters, Scalar, Tuple
+from flwr.server.client_manager import ClientManager
 from flwr.server.server import FitResultsAndFailures, Server, fit_clients
+
+from niid_bench.strategy_fednova import FedNovaStrategy
 
 
 class FedNovaServer(Server):
     """Implement server for FedNova."""
+
+    def __init__(
+        self,
+        *,
+        client_manager: ClientManager,
+        strategy: Optional[FedNovaStrategy] = None,
+    ) -> None:
+        self._client_manager: ClientManager = client_manager
+        self.parameters: Parameters = Parameters(
+            tensors=[], tensor_type="numpy.ndarray"
+        )
+        self.strategy: FedNovaStrategy = (
+            strategy if strategy is not None else FedNovaStrategy()
+        )
+        self.max_workers: Optional[int] = None
 
     def fit_round(
         self,
@@ -56,7 +74,9 @@ class FedNovaServer(Server):
         aggregated_result: Tuple[
             Optional[Parameters],
             Dict[str, Scalar],
-        ] = self.strategy.aggregate_fit(server_round, params_np, results, failures)
+        ] = self.strategy.aggregate_fit_custom(
+            server_round, params_np, results, failures
+        )
 
         parameters_aggregated, metrics_aggregated = aggregated_result
         return parameters_aggregated, metrics_aggregated, (results, failures)

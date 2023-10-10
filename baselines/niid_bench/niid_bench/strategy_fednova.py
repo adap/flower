@@ -21,7 +21,7 @@ from flwr.server.strategy import FedAvg
 class FedNovaStrategy(FedAvg):
     """Custom FedAvg strategy with fednova based configuration and aggregation."""
 
-    def aggregate_fit(
+    def aggregate_fit_custom(
         self,
         server_round: int,
         server_params: NDArrays,
@@ -43,7 +43,7 @@ class FedNovaStrategy(FedAvg):
         total_samples = sum([fit_res.num_examples for _, fit_res in results])
         c = sum(
             [
-                fit_res.metrics["a_i"] * fit_res.num_examples / total_samples
+                float(fit_res.metrics["a_i"]) * fit_res.num_examples / total_samples
                 for _, fit_res in results
             ]
         )
@@ -55,12 +55,12 @@ class FedNovaStrategy(FedAvg):
         # Aggregate grad updates, t_eff*(sum_i(p_i*\eta*d_i))
         grad_updates_aggregated = aggregate(new_weights_results)
         # Final parameters = server_params - grad_updates_aggregated
-        parameters_aggregated = [
+        aggregated = [
             server_param - grad_update
             for server_param, grad_update in zip(server_params, grad_updates_aggregated)
         ]
 
-        parameters_aggregated = ndarrays_to_parameters(parameters_aggregated)
+        parameters_aggregated = ndarrays_to_parameters(aggregated)
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
         if self.fit_metrics_aggregation_fn:
@@ -72,7 +72,7 @@ class FedNovaStrategy(FedAvg):
         return parameters_aggregated, metrics_aggregated
 
 
-def aggregate(results: List[Tuple[NDArrays, int]]) -> NDArrays:
+def aggregate(results: List[Tuple[NDArrays, float]]) -> NDArrays:
     """Implement custom aggregate function for FedNova."""
     # Create a list of weights, each multiplied by the weight_factor
     weighted_weights = [

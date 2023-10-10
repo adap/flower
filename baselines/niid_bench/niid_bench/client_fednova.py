@@ -1,6 +1,6 @@
 """Defines the client class and support functions for FedNova."""
 
-from typing import Callable, Dict, List, OrderedDict, Tuple, Union
+from typing import Callable, Dict, List, OrderedDict
 
 import flwr as fl
 import torch
@@ -45,7 +45,7 @@ class FlowerClientFedNova(fl.client.NumPyClient):
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         self.net.load_state_dict(state_dict, strict=True)
 
-    def fit(self, parameters, config: Dict[str, Union[Scalar, List[torch.Tensor]]]):
+    def fit(self, parameters, config: Dict[str, Scalar]):
         """Implement distributed fit function for a given client for FedNova."""
         self.set_parameters(parameters)
         a_i, g_i = train_fednova(
@@ -76,9 +76,7 @@ def gen_client_fn(
     model: DictConfig,
     momentum: float = 0.9,
     weight_decay: float = 1e-5,
-) -> Tuple[
-    Callable[[str], FlowerClientFedNova], DataLoader
-]:  # pylint: disable=too-many-arguments
+) -> Callable[[str], FlowerClientFedNova]:  # pylint: disable=too-many-arguments
     """Generate the client function that creates the FedNova flower clients.
 
     Parameters
@@ -103,9 +101,8 @@ def gen_client_fn(
 
     Returns
     -------
-    Tuple[Callable[[str], FlowerClientFedNova], DataLoader]
-        A tuple containing the client function that creates the FedNova flower clients
-        and the DataLoader that will be used for testing
+    Callable[[str], FlowerClientFedNova]
+        The client function that creates the FedNova flower clients
     """
 
     def client_fn(cid: str) -> FlowerClientFedNova:
