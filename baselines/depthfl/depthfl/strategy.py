@@ -52,7 +52,7 @@ class FedDyn(FedAvg):
         super().__init__(*args, **kwargs)
 
 
-def aggregate_fit(
+def aggregate_fit_depthfl(
     strategy,
     server_round: int,
     results: List[Tuple[ClientProxy, FitRes]],

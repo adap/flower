@@ -19,6 +19,7 @@ server_device: cuda
 
 dataset_config:
   iid: true
+  beta: 0.5
 
 fit_config:
   feddyn: false

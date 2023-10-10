@@ -87,7 +87,7 @@ class HeteroFL(FedAvg):
                 params = tmp_v
 
 
-def aggregate_fit(
+def aggregate_fit_hetero(
     strategy,
     server_round: int,
     results: List[Tuple[ClientProxy, FitRes]],

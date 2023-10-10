@@ -17,7 +17,8 @@ from torch.utils.data import DataLoader
 
 from depthfl.client import prune
 from depthfl.models import test, test_sbn
-from depthfl.strategy import aggregate_fit
+from depthfl.strategy import aggregate_fit_depthfl
+from depthfl.strategy_hetero import aggregate_fit_hetero
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
@@ -188,7 +189,11 @@ class ServerFedDyn(Server):
             len(failures),
         )
 
-        # Aggregate training results
+        if "HeteroFL" in str(type(self.strategy)):
+            aggregate_fit = aggregate_fit_hetero
+        else:
+            aggregate_fit = aggregate_fit_depthfl
+
         aggregated_result: Tuple[
             Optional[Parameters],
             Dict[str, Scalar],
