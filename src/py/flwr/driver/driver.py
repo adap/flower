@@ -98,6 +98,7 @@ class Driver:
 
         # Call Driver API
         res: CreateWorkloadResponse = self.stub.CreateWorkload(request=req)
+        self.workload_id = res.workload_id
         return res
 
     def get_nodes(self, req: GetNodesRequest) -> GetNodesResponse:
