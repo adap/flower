@@ -279,7 +279,7 @@ def start_numpy_client(
     if client_fn:
 
         def convert(cid: str) -> Client:
-            """Convert NumPy client to Client upon instantiation."""
+            """Convert `NumPyClient` to `Client` upon instantiation."""
             return client_fn(cid).to_client()
 
         wrp_clientfn = convert
