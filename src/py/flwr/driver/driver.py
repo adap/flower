@@ -1,4 +1,4 @@
-# Copyright 2022 Adap GmbH. All Rights Reserved.
+# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,17 @@ import grpc
 from flwr.common import EventType, event
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from flwr.proto import driver_pb2, driver_pb2_grpc
+from flwr.proto.driver_pb2 import (
+    CreateWorkloadRequest,
+    CreateWorkloadResponse,
+    GetNodesRequest,
+    GetNodesResponse,
+    PullTaskResRequest,
+    PullTaskResResponse,
+    PushTaskInsRequest,
+    PushTaskInsResponse,
+)
+from flwr.proto.driver_pb2_grpc import DriverStub
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
 
@@ -46,7 +56,7 @@ class Driver:
         self.driver_service_address = driver_service_address
         self.certificates = certificates
         self.channel: Optional[grpc.Channel] = None
-        self.stub: Optional[driver_pb2_grpc.DriverStub] = None
+        self.stub: Optional[DriverStub] = None
 
     def connect(self) -> None:
         """Connect to the Driver API."""
@@ -58,7 +68,7 @@ class Driver:
             server_address=self.driver_service_address,
             root_certificates=self.certificates,
         )
-        self.stub = driver_pb2_grpc.DriverStub(self.channel)
+        self.stub = DriverStub(self.channel)
         log(INFO, "[Driver] Connected to %s", self.driver_service_address)
 
     def disconnect(self) -> None:
@@ -73,9 +83,7 @@ class Driver:
         channel.close()
         log(INFO, "[Driver] Disconnected")
 
-    def create_workload(
-        self, req: driver_pb2.CreateWorkloadRequest
-    ) -> driver_pb2.CreateWorkloadResponse:
+    def create_workload(self, req: CreateWorkloadRequest) -> CreateWorkloadResponse:
         """Request for workload ID."""
         # Check if channel is open
         if self.stub is None:
@@ -83,10 +91,10 @@ class Driver:
             raise Exception("`Driver` instance not connected")
 
         # Call Driver API
-        res: driver_pb2.CreateWorkloadResponse = self.stub.CreateWorkload(request=req)
+        res: CreateWorkloadResponse = self.stub.CreateWorkload(request=req)
         return res
 
-    def get_nodes(self, req: driver_pb2.GetNodesRequest) -> driver_pb2.GetNodesResponse:
+    def get_nodes(self, req: GetNodesRequest) -> GetNodesResponse:
         """Get client IDs."""
         # Check if channel is open
         if self.stub is None:
@@ -94,12 +102,10 @@ class Driver:
             raise Exception("`Driver` instance not connected")
 
         # Call Driver API
-        res: driver_pb2.GetNodesResponse = self.stub.GetNodes(request=req)
+        res: GetNodesResponse = self.stub.GetNodes(request=req)
         return res
 
-    def push_task_ins(
-        self, req: driver_pb2.PushTaskInsRequest
-    ) -> driver_pb2.PushTaskInsResponse:
+    def push_task_ins(self, req: PushTaskInsRequest) -> PushTaskInsResponse:
         """Schedule tasks."""
         # Check if channel is open
         if self.stub is None:
@@ -107,12 +113,10 @@ class Driver:
             raise Exception("`Driver` instance not connected")
 
         # Call Driver API
-        res: driver_pb2.PushTaskInsResponse = self.stub.PushTaskIns(request=req)
+        res: PushTaskInsResponse = self.stub.PushTaskIns(request=req)
         return res
 
-    def pull_task_res(
-        self, req: driver_pb2.PullTaskResRequest
-    ) -> driver_pb2.PullTaskResResponse:
+    def pull_task_res(self, req: PullTaskResRequest) -> PullTaskResResponse:
         """Get task results."""
         # Check if channel is open
         if self.stub is None:
@@ -120,5 +124,5 @@ class Driver:
             raise Exception("`Driver` instance not connected")
 
         # Call Driver API
-        res: driver_pb2.PullTaskResResponse = self.stub.PullTaskRes(request=req)
+        res: PullTaskResResponse = self.stub.PullTaskRes(request=req)
         return res
