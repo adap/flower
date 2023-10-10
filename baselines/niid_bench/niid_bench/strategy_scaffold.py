@@ -1,14 +1,23 @@
-from flwr.server.strategy import FedAvg
-from flwr.common.typing import List, Tuple, Union, Dict, Optional
-from flwr.common.logger import log
-from logging import WARNING
-from flwr.server.client_proxy import ClientProxy
-from flwr.common import Parameters
-from flwr.server.client_manager import ClientManager
-import torch
-from flwr.server.strategy.aggregate import aggregate
-from flwr.common import Scalar, Status, parameters_to_ndarrays, ndarrays_to_parameters
+"""Strategy class for SCAFFOLD."""
+
 from dataclasses import dataclass
+from logging import WARNING
+
+import torch
+from flwr.common import (
+    Parameters,
+    Scalar,
+    Status,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
+)
+from flwr.common.logger import log
+from flwr.common.typing import Dict, List, Optional, Tuple, Union
+from flwr.server.client_manager import ClientManager
+from flwr.server.client_proxy import ClientProxy
+from flwr.server.strategy import FedAvg
+from flwr.server.strategy.aggregate import aggregate
+
 
 @dataclass
 class FitIns:
@@ -16,6 +25,7 @@ class FitIns:
 
     parameters: Parameters
     config: Dict[str, Union[int, Parameters]]
+
 
 @dataclass
 class FitRes:
@@ -26,17 +36,24 @@ class FitRes:
     num_examples: int
     metrics: Dict[str, Union[int, Parameters]]
 
+
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
     List[Union[Tuple[ClientProxy, FitRes], BaseException]],
 ]
 
+
 class ScaffoldStrategy(FedAvg):
-    """Custom FedAvg strategy with scaffold based configuration and aggregation"""
+    """Implement custom strategy for SCAFFOLD based on FedAvg class."""
 
     def configure_fit(
-        self, server_round: int, parameters: Parameters, client_manager: ClientManager, server_cv: List[torch.Tensor]
+        self,
+        server_round: int,
+        parameters: Parameters,
+        client_manager: ClientManager,
+        server_cv: List[torch.Tensor],
     ) -> List[Tuple[ClientProxy, FitIns]]:
+        """Configure the next round of training."""
         # convert server cv into ndarrays
         server_cv_np = [cv.numpy() for cv in server_cv]
         """Configure the next round of training."""
@@ -44,7 +61,9 @@ class ScaffoldStrategy(FedAvg):
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
             config.update(self.on_fit_config_fn(server_round))
-        fit_ins = FitIns(parameters, config) # this FitIns has different types compared to the default
+        fit_ins = FitIns(
+            parameters, config
+        )  # this FitIns has different types compared to the default
 
         # Sample clients
         sample_size, min_num_clients = self.num_fit_clients(
@@ -79,9 +98,14 @@ class ScaffoldStrategy(FedAvg):
         parameters_aggregated = aggregate(weights_results)
 
         # Convert client cvs to ndarrays
-        client_cv_updates = [parameters_to_ndarrays(fit_res.metrics["server_update_c"]) for _, fit_res in results]
+        client_cv_updates = [
+            parameters_to_ndarrays(fit_res.metrics["server_update_c"])
+            for _, fit_res in results
+        ]
         # zip client cvs and num_examples
-        client_cv_updates = list(zip(client_cv_updates, [fit_res.num_examples for _, fit_res in results]))
+        client_cv_updates = list(
+            zip(client_cv_updates, [fit_res.num_examples for _, fit_res in results])
+        )
         aggregated_cv_update = aggregate(client_cv_updates)
 
         # Aggregate custom metrics if aggregation fn was provided

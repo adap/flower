@@ -1,8 +1,17 @@
-from typing import Optional, Tuple, List
-from omegaconf import DictConfig
+"""Partition the data and create the dataloaders."""
+
+from typing import List, Optional, Tuple
+
 import torch
+from omegaconf import DictConfig
 from torch.utils.data import DataLoader, random_split
-from niid_bench.dataset_preparation import partition_data, partition_data_dirichlet, partition_data_label_quantity
+
+from niid_bench.dataset_preparation import (
+    partition_data,
+    partition_data_dirichlet,
+    partition_data_label_quantity,
+)
+
 
 def load_datasets(
     config: DictConfig,
@@ -10,7 +19,7 @@ def load_datasets(
     val_ratio: float = 0.1,
     seed: Optional[int] = 42,
 ) -> Tuple[List[DataLoader], List[DataLoader], DataLoader]:
-    """Creates the dataloaders to be fed into the model.
+    """Create the dataloaders to be fed into the model.
 
     Parameters
     ----------
@@ -27,7 +36,7 @@ def load_datasets(
     Returns
     -------
     Tuple[DataLoader, DataLoader, DataLoader]
-        The DataLoader for training, the DataLoader for validation, the DataLoader for testing.
+        The DataLoaders for training, validation, and testing.
     """
     print(f"Dataset partitioning config: {config}")
     partitioning = ""

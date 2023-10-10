@@ -1,17 +1,18 @@
+"""Defines the client class and support functions for FedNova."""
+
+from typing import Callable, Dict, List, OrderedDict, Tuple, Union
+
 import flwr as fl
-from flwr.common import Scalar
-from typing import Dict, OrderedDict, Union, List, Tuple, Callable
 import torch
-from torch.utils.data import DataLoader
-from omegaconf import DictConfig
+from flwr.common import Scalar
 from hydra.utils import instantiate
+from omegaconf import DictConfig
+from torch.utils.data import DataLoader
 
-from niid_bench.models import train_fednova, test
+from niid_bench.models import test, train_fednova
 
 
-class FlowerClientFedNova(
-    fl.client.NumPyClient
-):
+class FlowerClientFedNova(fl.client.NumPyClient):
     """Flower client implementing FedNova."""
 
     def __init__(
@@ -43,28 +44,29 @@ class FlowerClientFedNova(
         params_dict = zip(self.net.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         self.net.load_state_dict(state_dict, strict=True)
-    
+
     def fit(self, parameters, config: Dict[str, Union[Scalar, List[torch.Tensor]]]):
-        """Implements distributed fit function for a given client using FedNova Strategy."""
+        """Implement distributed fit function for a given client for FedNova."""
         self.set_parameters(parameters)
         a_i, g_i = train_fednova(
-                self.net,
-                self.trainloader,
-                self.device,
-                self.num_epochs,
-                self.learning_rate,
-                self.momentum,
-                self.weight_decay,
-            )
+            self.net,
+            self.trainloader,
+            self.device,
+            self.num_epochs,
+            self.learning_rate,
+            self.momentum,
+            self.weight_decay,
+        )
         # final_p_np = self.get_parameters({})
         g_i_np = [param.cpu().numpy() for param in g_i]
         return g_i_np, len(self.trainloader.dataset), {"a_i": a_i}
-    
+
     def evaluate(self, parameters, config: Dict[str, Scalar]):
         """Evaluate using given parameters."""
         self.set_parameters(parameters)
         loss, acc = test(self.net, self.valloader, self.device)
         return float(loss), len(self.valloader.dataset), {"accuracy": float(acc)}
+
 
 def gen_client_fn(
     trainloaders: List[DataLoader],
@@ -72,12 +74,12 @@ def gen_client_fn(
     num_epochs: int,
     learning_rate: float,
     model: DictConfig,
-    momentum: float=0.9,
-    weight_decay: float=1e-5,
+    momentum: float = 0.9,
+    weight_decay: float = 1e-5,
 ) -> Tuple[
     Callable[[str], FlowerClientFedNova], DataLoader
 ]:  # pylint: disable=too-many-arguments
-    """Generates the client function that creates the FedNova flower clients.
+    """Generate the client function that creates the FedNova flower clients.
 
     Parameters
     ----------
@@ -102,13 +104,12 @@ def gen_client_fn(
     Returns
     -------
     Tuple[Callable[[str], FlowerClientFedNova], DataLoader]
-        A tuple containing the client function that creates the FedNova flower clients and
-        the DataLoader that will be used for testing
+        A tuple containing the client function that creates the FedNova flower clients
+        and the DataLoader that will be used for testing
     """
 
     def client_fn(cid: str) -> FlowerClientFedNova:
         """Create a Flower client representing a single organization."""
-
         # Load model
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         net = instantiate(model).to(device)

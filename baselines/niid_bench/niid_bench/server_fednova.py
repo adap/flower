@@ -1,11 +1,16 @@
-from flwr.server.server import Server, FitResultsAndFailures, fit_clients
-from flwr.common.typing import Scalar, Parameters, Optional, Tuple, Dict
-from flwr.common.logger import log
+"""Server class for FedNova."""
+
 from logging import DEBUG, INFO
+
 from flwr.common import parameters_to_ndarrays
+from flwr.common.logger import log
+from flwr.common.typing import Dict, Optional, Parameters, Scalar, Tuple
+from flwr.server.server import FitResultsAndFailures, Server, fit_clients
 
 
 class FedNovaServer(Server):
+    """Implement server for FedNova."""
+
     def fit_round(
         self,
         server_round: int,
@@ -14,7 +19,6 @@ class FedNovaServer(Server):
         Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
     ]:
         """Perform a single round of federated averaging."""
-
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_fit(
             server_round=server_round,

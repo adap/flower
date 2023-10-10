@@ -1,14 +1,18 @@
-import torch
-from typing import List, Tuple
-from torch.utils.data import Dataset, Subset, ConcatDataset
-from torchvision.datasets import CIFAR10, MNIST, FashionMNIST
-from torch.autograd import Variable
-import torch.nn.functional as F
-import numpy as np
-import torchvision.transforms as transforms
+"""Download data and partition data with different partitioning strategies."""
 
-def _download_data(dataset_name = "emnist") -> Tuple[Dataset, Dataset]:
-    """Downloads the requested dataset. Currently supports emnist and cifar10
+from typing import List, Tuple
+
+import numpy as np
+import torch
+import torch.nn.functional as F
+import torchvision.transforms as transforms
+from torch.autograd import Variable
+from torch.utils.data import ConcatDataset, Dataset, Subset
+from torchvision.datasets import CIFAR10, MNIST, FashionMNIST
+
+
+def _download_data(dataset_name="emnist") -> Tuple[Dataset, Dataset]:
+    """Download the requested dataset. Currently supports cifar10, mnist, and fmnist.
 
     Returns
     -------
@@ -20,9 +24,13 @@ def _download_data(dataset_name = "emnist") -> Tuple[Dataset, Dataset]:
         transform_train = transforms.Compose(
             [
                 transforms.ToTensor(),
-                transforms.Lambda(lambda x: F.pad(
-                    Variable(x.unsqueeze(0), requires_grad=False),
-                    (4, 4, 4, 4), mode='reflect').data.squeeze()),
+                transforms.Lambda(
+                    lambda x: F.pad(
+                        Variable(x.unsqueeze(0), requires_grad=False),
+                        (4, 4, 4, 4),
+                        mode="reflect",
+                    ).data.squeeze()
+                ),
                 transforms.ToPILImage(),
                 transforms.RandomCrop(32),
                 transforms.RandomHorizontalFlip(),
@@ -97,13 +105,11 @@ def _download_data(dataset_name = "emnist") -> Tuple[Dataset, Dataset]:
 
     return trainset, testset
 
+
 def partition_data(
-    num_clients,
-    similarity=1.0,
-    seed=42,
-    dataset_name = "emnist"
+    num_clients, similarity=1.0, seed=42, dataset_name="cifar10"
 ) -> Tuple[List[Dataset], Dataset]:
-    """Partitions the dataset into subsets for each client.
+    """Partition the dataset into subsets for each client.
 
     Parameters
     ----------
@@ -151,8 +157,8 @@ def partition_data(
     times = [0 for _ in range(num_remaining_classes)]
 
     for i in range(num_clients):
-        client_classes[i] = [remaining_classes[i%num_remaining_classes]]
-        times[i%num_remaining_classes] += 1
+        client_classes[i] = [remaining_classes[i % num_remaining_classes]]
+        times[i % num_remaining_classes] += 1
         j = 1
         while j < 2:
             index = prng.choice(num_remaining_classes)
@@ -173,22 +179,23 @@ def partition_data(
         for j in range(num_clients):
             if class_t in client_classes[j]:
                 act_idx = rem_trainset.indices[idx_k_split[ids]]
-                rem_trainsets_per_client[j].append(Subset(rem_trainset.dataset, act_idx))
+                rem_trainsets_per_client[j].append(
+                    Subset(rem_trainset.dataset, act_idx)
+                )
                 ids += 1
 
     for i in range(num_clients):
-        trainsets_per_client[i] = ConcatDataset([trainsets_per_client[i]] + rem_trainsets_per_client[i])
+        trainsets_per_client[i] = ConcatDataset(
+            [trainsets_per_client[i]] + rem_trainsets_per_client[i]
+        )
 
     return trainsets_per_client, testset
 
+
 def partition_data_dirichlet(
-    num_clients,
-    alpha,
-    seed=42,
-    dataset_name = "emnist"
+    num_clients, alpha, seed=42, dataset_name="cifar10"
 ) -> Tuple[List[Dataset], Dataset]:
-    """
-    Partitions according to the Dirichlet distribution
+    """Partition according to the Dirichlet distribution.
 
     Parameters
     ----------
@@ -225,25 +232,30 @@ def partition_data_dirichlet(
             idx_k = np.where(t == k)[0]
             prng.shuffle(idx_k)
             proportions = prng.dirichlet(np.repeat(alpha, num_clients))
-            proportions = np.array([p * (len(idx_j) < total_samples / num_clients) for p, idx_j in zip(proportions, idx_clients)])
+            proportions = np.array(
+                [
+                    p * (len(idx_j) < total_samples / num_clients)
+                    for p, idx_j in zip(proportions, idx_clients)
+                ]
+            )
             proportions = proportions / proportions.sum()
             proportions = (np.cumsum(proportions) * len(idx_k)).astype(int)[:-1]
             idx_k_split = np.split(idx_k, proportions)
-            idx_clients = [idx_j + idx.tolist() for idx_j, idx in zip(idx_clients, idx_k_split)]
+            idx_clients = [
+                idx_j + idx.tolist() for idx_j, idx in zip(idx_clients, idx_k_split)
+            ]
             min_samples = min([len(idx_j) for idx_j in idx_clients])
 
     trainsets_per_client = [Subset(trainset, idxs) for idxs in idx_clients]
     return trainsets_per_client, testset
 
+
 def partition_data_label_quantity(
-    num_clients,
-    labels_per_client,
-    seed=42,
-    dataset_name = "emnist"
-):
-    """
-    Partitions the data according to the number of labels per client
-    logic from https://github.com/Xtra-Computing/NIID-Bench/blob/f10d1a34515cff5a0c1bb85160aa6b10c892bab5/partition.py
+    num_clients, labels_per_client, seed=42, dataset_name="cifar10"
+) -> Tuple[List[Dataset], Dataset]:
+    """Partition the data according to the number of labels per client.
+
+    Logic from https://github.com/Xtra-Computing/NIID-Bench/.
 
     Parameters
     ----------
@@ -274,8 +286,8 @@ def partition_data_label_quantity(
     contains = []
 
     for i in range(num_clients):
-        current = [i%num_classes]
-        times[i%num_classes] += 1
+        current = [i % num_classes]
+        times[i % num_classes] += 1
         j = 1
         while j < labels_per_client:
             index = prng.randint(0, num_classes)
@@ -296,7 +308,6 @@ def partition_data_label_quantity(
                 ids += 1
     trainsets_per_client = [Subset(trainset, idxs) for idxs in idx_clients]
     return trainsets_per_client, testset
-
 
 
 if __name__ == "__main__":

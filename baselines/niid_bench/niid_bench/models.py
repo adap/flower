@@ -1,12 +1,28 @@
+"""Implement the neural network models and training functions."""
+
+from typing import List, Tuple
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import DataLoader
-from typing import Tuple, List
 from torch.nn.parameter import Parameter
-from torch.optim import Optimizer, SGD
+from torch.optim import SGD, Optimizer
+from torch.utils.data import DataLoader
+
 
 class CNN(nn.Module):
+    """Implement a CNN model for CIFAR-10.
+
+    Parameters
+    ----------
+    input_dim : int
+        The input dimension for classifier.
+    hidden_dims : List[int]
+        The hidden dimensions for classifier.
+    num_classes : int
+        The number of classes in the dataset.
+    """
+
     def __init__(self, input_dim, hidden_dims, num_classes):
         super().__init__()
         self.conv1 = nn.Conv2d(3, 6, 5)
@@ -18,16 +34,30 @@ class CNN(nn.Module):
         self.fc3 = nn.Linear(hidden_dims[1], num_classes)
 
     def forward(self, x):
+        """Implement forward pass."""
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(-1, 16*5*5)
+        x = x.view(-1, 16 * 5 * 5)
 
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
 
+
 class CNNMnist(nn.Module):
+    """Implement a CNN model for MNIST and Fashion-MNIST.
+
+    Parameters
+    ----------
+    input_dim : int
+        The input dimension for classifier.
+    hidden_dims : List[int]
+        The hidden dimensions for classifier.
+    num_classes : int
+        The number of classes in the dataset.
+    """
+
     def __init__(self, input_dim, hidden_dims, num_classes) -> None:
         super().__init__()
         self.conv1 = nn.Conv2d(1, 6, 5)
@@ -39,30 +69,35 @@ class CNNMnist(nn.Module):
         self.fc3 = nn.Linear(hidden_dims[1], num_classes)
 
     def forward(self, x):
+        """Implement forward pass."""
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
 
-        x = x.view(-1, 16*4*4)
+        x = x.view(-1, 16 * 4 * 4)
 
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
 
+
 class ScaffoldOptimizer(SGD):
-    """
-    Implements SGD optimizer step function as defined in the SCAFFOLD paper
-    """
+    """Implements SGD optimizer step function as defined in the SCAFFOLD paper."""
 
     def __init__(self, grads, step_size, momentum, weight_decay):
-        super().__init__(grads, lr=step_size, momentum=momentum, weight_decay=weight_decay)
+        super().__init__(
+            grads, lr=step_size, momentum=momentum, weight_decay=weight_decay
+        )
 
     def step_custom(self, server_cv, client_cv):
-        # y_i = y_i - \eta * (g_i + c - c_i)  --> y_i = y_i - \eta*(g_i + \mu*b_{t}) - \eta*(c - c_i) 
+        """Implement the custom step function fo SCAFFOLD."""
+        # y_i = y_i - \eta * (g_i + c - c_i)  -->
+        # y_i = y_i - \eta*(g_i + \mu*b_{t}) - \eta*(c - c_i)
         self.step()
         for group in self.param_groups:
             for p, s, c in zip(group["params"], server_cv, client_cv):
                 p.data.add_(s - c, alpha=-group["lr"])
+
 
 def train_scaffold(
     net: nn.Module,
@@ -99,12 +134,15 @@ def train_scaffold(
         The client's control variate.
     """
     criterion = nn.CrossEntropyLoss()
-    optimizer = ScaffoldOptimizer(net.parameters(), learning_rate, momentum, weight_decay)
+    optimizer = ScaffoldOptimizer(
+        net.parameters(), learning_rate, momentum, weight_decay
+    )
     net.train()
     for _ in range(epochs):
         net = _train_one_epoch_scaffold(
             net, trainloader, device, criterion, optimizer, server_cv, client_cv
         )
+
 
 def _train_one_epoch_scaffold(
     net: nn.Module,
@@ -122,8 +160,9 @@ def _train_one_epoch_scaffold(
         output = net(data)
         loss = criterion(output, target)
         loss.backward()
-        optimizer.step_custom(server_cv, client_cv) # type: ignore
+        optimizer.step_custom(server_cv, client_cv)  # type: ignore
     return net
+
 
 def train_fedavg(
     net: nn.Module,
@@ -134,9 +173,8 @@ def train_fedavg(
     momentum: float,
     weight_decay: float,
 ) -> None:
-    """
-    Train the network on the training set using FedAvg.
-    
+    """Train the network on the training set using FedAvg.
+
     Parameters
     ----------
     net : nn.Module
@@ -159,12 +197,13 @@ def train_fedavg(
     None
     """
     criterion = nn.CrossEntropyLoss()
-    optimizer = SGD(net.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
+    optimizer = SGD(
+        net.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay
+    )
     net.train()
     for _ in range(epochs):
-        net = _train_one_epoch(
-            net, trainloader, device, criterion, optimizer
-        )
+        net = _train_one_epoch(net, trainloader, device, criterion, optimizer)
+
 
 def _train_one_epoch(
     net: nn.Module,
@@ -180,8 +219,9 @@ def _train_one_epoch(
         output = net(data)
         loss = criterion(output, target)
         loss.backward()
-        optimizer.step() # type: ignore
+        optimizer.step()  # type: ignore
     return net
+
 
 def train_fedprox(
     net: nn.Module,
@@ -193,8 +233,7 @@ def train_fedprox(
     momentum: float,
     weight_decay: float,
 ) -> None:
-    """
-    Train the network on the training set using FedAvg.
+    """Train the network on the training set using FedAvg.
 
     Parameters
     ----------
@@ -220,13 +259,16 @@ def train_fedprox(
     None
     """
     criterion = nn.CrossEntropyLoss()
-    optimizer = SGD(net.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
+    optimizer = SGD(
+        net.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay
+    )
     global_params = [param.detach().clone() for param in net.parameters()]
     net.train()
     for _ in range(epochs):
         net = _train_one_epoch_fedprox(
             net, global_params, trainloader, device, criterion, optimizer, mu
         )
+
 
 def _train_one_epoch_fedprox(
     net: nn.Module,
@@ -245,11 +287,12 @@ def _train_one_epoch_fedprox(
         loss = criterion(output, target)
         proximal_term = 0.0
         for param, global_param in zip(net.parameters(), global_params):
-            proximal_term += torch.norm(param - global_param)**2
-        loss += (mu/2) * proximal_term
+            proximal_term += torch.norm(param - global_param) ** 2
+        loss += (mu / 2) * proximal_term
         loss.backward()
-        optimizer.step() # type: ignore
+        optimizer.step()  # type: ignore
     return net
+
 
 def train_fednova(
     net: nn.Module,
@@ -260,8 +303,7 @@ def train_fednova(
     momentum: float,
     weight_decay: float,
 ) -> int:
-    """
-    Train the network on the training set using FedNova.
+    """Train the network on the training set using FedNova.
 
     Parameters
     ----------
@@ -286,7 +328,9 @@ def train_fednova(
         The number of local training steps.
     """
     criterion = nn.CrossEntropyLoss()
-    optimizer = SGD(net.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
+    optimizer = SGD(
+        net.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay
+    )
     net.train()
     local_steps = 0
     # clone all the parameters
@@ -296,11 +340,17 @@ def train_fednova(
             net, trainloader, device, criterion, optimizer, local_steps
         )
     # compute ||a_i||_1
-    a_i = (local_steps - (momentum*(1 - momentum**local_steps)/(1 - momentum)))/(1 - momentum)
+    a_i = (
+        local_steps - (momentum * (1 - momentum**local_steps) / (1 - momentum))
+    ) / (1 - momentum)
     # compute g_i
-    g_i = [torch.div(prev_param - param.detach(), a_i) for prev_param, param in zip(prev_net, net.parameters())]
+    g_i = [
+        torch.div(prev_param - param.detach(), a_i)
+        for prev_param, param in zip(prev_net, net.parameters())
+    ]
 
     return a_i, g_i
+
 
 def _train_one_epoch_fednova(
     net: nn.Module,
@@ -317,15 +367,16 @@ def _train_one_epoch_fednova(
         output = net(data)
         loss = criterion(output, target)
         loss.backward()
-        optimizer.step() # type: ignore
+        optimizer.step()  # type: ignore
         local_steps += 1
     return net, local_steps
+
 
 def test(
     net: nn.Module, testloader: DataLoader, device: torch.device
 ) -> Tuple[float, float]:
     """Evaluate the network on the test set.
-    
+
     Parameters
     ----------
     net : nn.Module
@@ -340,7 +391,6 @@ def test(
     Tuple[float, float]
         The loss and accuracy of the network on the test set.
     """
-
     criterion = nn.CrossEntropyLoss(reduction="sum")
     net.eval()
     correct, total, loss = 0, 0, 0.0

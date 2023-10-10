@@ -1,20 +1,19 @@
-import flwr as fl
-from flwr.common import Scalar, ndarrays_to_parameters, parameters_to_ndarrays
-from typing import Dict, OrderedDict, Union, List, Tuple, Callable
-import torch
-from torch.utils.data import DataLoader
-from omegaconf import DictConfig
-from hydra.utils import instantiate
-from flwr.common.logger import log
-from logging import DEBUG, INFO
+"""Defines the client class and support functions for SCAFFOLD."""
 
-from niid_bench.models import train_scaffold, test
 import os
+from typing import Callable, Dict, List, OrderedDict, Tuple, Union
+
+import flwr as fl
+import torch
+from flwr.common import Scalar, ndarrays_to_parameters, parameters_to_ndarrays
+from hydra.utils import instantiate
+from omegaconf import DictConfig
+from torch.utils.data import DataLoader
+
+from niid_bench.models import test, train_scaffold
 
 
-class FlowerClientScaffold(
-    fl.client.NumPyClient
-):
+class FlowerClientScaffold(fl.client.NumPyClient):
     """Flower client implementing scaffold."""
 
     def __init__(
@@ -28,7 +27,7 @@ class FlowerClientScaffold(
         learning_rate: float,
         momentum: float,
         weight_decay: float,
-        dir: str="",
+        dir: str = "",
     ) -> None:
         self.id = id
         self.net = net
@@ -61,7 +60,7 @@ class FlowerClientScaffold(
         self.net.load_state_dict(state_dict, strict=True)
 
     def fit(self, parameters, config: Dict[str, Union[Scalar, List[torch.Tensor]]]):
-        """Implements distributed fit function for a given client using Scaffold Strategy."""
+        """Implement distributed fit function for a given client for SCAFFOLD."""
         self.set_parameters(parameters)
         self.client_cv = []
         for param in self.net.parameters():
@@ -91,19 +90,29 @@ class FlowerClientScaffold(
         server_update_c = []
         # update client control variate c_i_1 = c_i - c + 1/eta*K (x - y_i)
         for c_i_j, c_j, x_j, y_i_j in zip(self.client_cv, server_cv, x, y_i):
-            c_i_n.append(c_i_j - c_j + (1.0/(self.learning_rate*self.num_epochs*len(self.trainloader)))*(x_j - y_i_j))
+            c_i_n.append(
+                c_i_j
+                - c_j
+                + (1.0 / (self.learning_rate * self.num_epochs * len(self.trainloader)))
+                * (x_j - y_i_j)
+            )
             # y_i - x, c_i_n - c_i for the server
             server_update_x.append((y_i_j - x_j))
             server_update_c.append((c_i_n[-1] - c_i_j).cpu().numpy())
         self.client_cv = c_i_n
         torch.save(self.client_cv, f"{self.dir}/client_cv_{self.id}.pt")
-        return (server_update_x, len(self.trainloader.dataset), {"server_update_c": ndarrays_to_parameters(server_update_c)})
+        return (
+            server_update_x,
+            len(self.trainloader.dataset),
+            {"server_update_c": ndarrays_to_parameters(server_update_c)},
+        )
 
     def evaluate(self, parameters, config: Dict[str, Scalar]):
         """Evaluate using given parameters."""
         self.set_parameters(parameters)
         loss, acc = test(self.net, self.valloader, self.device)
         return float(loss), len(self.valloader.dataset), {"accuracy": float(acc)}
+
 
 def gen_client_fn(
     trainloaders: List[DataLoader],
@@ -112,12 +121,12 @@ def gen_client_fn(
     num_epochs: int,
     learning_rate: float,
     model: DictConfig,
-    momentum: float=0.9,
-    weight_decay: float=0.0,
+    momentum: float = 0.9,
+    weight_decay: float = 0.0,
 ) -> Tuple[
     Callable[[str], FlowerClientScaffold], DataLoader
 ]:  # pylint: disable=too-many-arguments
-    """Generates the client function that creates the scaffold flower clients.
+    """Generate the client function that creates the scaffold flower clients.
 
     Parameters
     ----------
@@ -142,13 +151,12 @@ def gen_client_fn(
     Returns
     -------
     Tuple[Callable[[str], FlowerClientScaffold], DataLoader]
-        A tuple containing the client function that creates the scaffold flower clients and
-        the DataLoader that will be used for testing
+        A tuple containing the client function that creates the scaffold flower clients
+        and the DataLoader that will be used for testing
     """
 
     def client_fn(cid: str) -> FlowerClientScaffold:
         """Create a Flower client representing a single organization."""
-
         # Load model
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         net = instantiate(model).to(device)

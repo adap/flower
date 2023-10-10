@@ -1,28 +1,48 @@
+"""Server class for SCAFFOLD."""
+
+import concurrent.futures
+from logging import DEBUG, INFO
+from typing import OrderedDict
+
+import torch
+from flwr.common import (
+    Code,
+    Parameters,
+    Scalar,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
+)
+from flwr.common.logger import log
+from flwr.common.typing import (
+    Callable,
+    Dict,
+    GetParametersIns,
+    List,
+    NDArrays,
+    Optional,
+    Tuple,
+    Union,
+)
 from flwr.server import Server
 from flwr.server.client_manager import ClientManager, SimpleClientManager
-from flwr.server.strategy import Strategy
 from flwr.server.client_proxy import ClientProxy
-from flwr.common.typing import List, Tuple, Optional, Union, Dict, NDArrays, Callable
-from omegaconf import DictConfig
-from flwr.common.logger import log
-from logging import DEBUG, INFO
-from flwr.common import Code, Parameters, Scalar, parameters_to_ndarrays, ndarrays_to_parameters
-from niid_bench.strategy_scaffold import FitIns, FitRes, FitResultsAndFailures
-from niid_bench.models import test
-from torch.utils.data import DataLoader
-from typing import OrderedDict
-import torch
-import concurrent.futures
+from flwr.server.strategy import Strategy
 from hydra.utils import instantiate
-from flwr.common.typing import GetParametersIns
+from omegaconf import DictConfig
+from torch.utils.data import DataLoader
+
+from niid_bench.models import test
+from niid_bench.strategy_scaffold import FitIns, FitRes, FitResultsAndFailures
+
 
 class ScaffoldServer(Server):
-    """Flower server implementing the communication for scaffold."""
-    
-    def __init__(self,
+    """Implement server for SCAFFOLD."""
+
+    def __init__(
+        self,
         strategy: Strategy,
         model: DictConfig,
-        client_manager: ClientManager=None,
+        client_manager: ClientManager = None,
     ):
         if client_manager is None:
             client_manager = SimpleClientManager()
@@ -32,7 +52,6 @@ class ScaffoldServer(Server):
 
     def _get_initial_parameters(self, timeout: Optional[float]) -> Parameters:
         """Get initial parameters from one of the available clients."""
-
         # Server-side parameter initialization
         parameters: Optional[Parameters] = self.strategy.initialize_parameters(
             client_manager=self._client_manager
@@ -47,10 +66,13 @@ class ScaffoldServer(Server):
         ins = GetParametersIns(config={})
         get_parameters_res = random_client.get_parameters(ins=ins, timeout=timeout)
         log(INFO, "Received initial parameters from one random client")
-        self.server_cv = [torch.from_numpy(t) for t in parameters_to_ndarrays(get_parameters_res.parameters)]
+        self.server_cv = [
+            torch.from_numpy(t)
+            for t in parameters_to_ndarrays(get_parameters_res.parameters)
+        ]
         return get_parameters_res.parameters
 
-    def _init_control_variates(self, model:DictConfig):
+    def _init_control_variates(self, model: DictConfig):
         server_cv = []
         for param in self.model_params.parameters():
             # server_cv.append(torch.zeros(param.shape))
@@ -100,9 +122,7 @@ class ScaffoldServer(Server):
 
         # Aggregate training results
         aggregated_result: Tuple[
-            Optional[NDArrays],
-            Dict[str, Scalar],
-            Optional[NDArrays]
+            Optional[NDArrays], Dict[str, Scalar], Optional[NDArrays]
         ] = self.strategy.aggregate_fit(server_round, results, failures)
 
         # convert server cv into ndarrays
@@ -111,11 +131,16 @@ class ScaffoldServer(Server):
         total_clients = len(self._client_manager.all())
         cv_multiplier = len(results) / total_clients
         aggregated_cv_update = aggregated_result[2]
-        self.server_cv = [torch.from_numpy(cv + cv_multiplier*aggregated_cv_update[i]) for i, cv in enumerate(server_cv_np)]
+        self.server_cv = [
+            torch.from_numpy(cv + cv_multiplier * aggregated_cv_update[i])
+            for i, cv in enumerate(server_cv_np)
+        ]
 
         # update parameters x = x + 1* aggregated_update
         curr_params = parameters_to_ndarrays(self.parameters)
-        updated_params = [x + aggregated_result[0][i] for i, x in enumerate(curr_params)]
+        updated_params = [
+            x + aggregated_result[0][i] for i, x in enumerate(curr_params)
+        ]
         parameters_aggregated = ndarrays_to_parameters(updated_params)
         # self.parameters = parameters_aggregated
 
@@ -123,30 +148,32 @@ class ScaffoldServer(Server):
         metrics_aggregated = aggregated_result[1]
         return parameters_aggregated, metrics_aggregated, (results, failures)
 
-def fit_clients(
-        client_instructions: List[Tuple[ClientProxy, FitIns]],
-        max_workers: Optional[int],
-        timeout: Optional[float],
-    ) -> FitResultsAndFailures:
-        """Refine parameters concurrently on all selected clients."""
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-            submitted_fs = {
-                executor.submit(fit_client, client_proxy, ins, timeout)
-                for client_proxy, ins in client_instructions
-            }
-            finished_fs, _ = concurrent.futures.wait(
-                fs=submitted_fs,
-                timeout=None,  # Handled in the respective communication stack
-            )
 
-        # Gather results
-        results: List[Tuple[ClientProxy, FitRes]] = []
-        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]] = []
-        for future in finished_fs:
-            _handle_finished_future_after_fit(
-                future=future, results=results, failures=failures
-            )
-        return results, failures
+def fit_clients(
+    client_instructions: List[Tuple[ClientProxy, FitIns]],
+    max_workers: Optional[int],
+    timeout: Optional[float],
+) -> FitResultsAndFailures:
+    """Refine parameters concurrently on all selected clients."""
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        submitted_fs = {
+            executor.submit(fit_client, client_proxy, ins, timeout)
+            for client_proxy, ins in client_instructions
+        }
+        finished_fs, _ = concurrent.futures.wait(
+            fs=submitted_fs,
+            timeout=None,  # Handled in the respective communication stack
+        )
+
+    # Gather results
+    results: List[Tuple[ClientProxy, FitRes]] = []
+    failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]] = []
+    for future in finished_fs:
+        _handle_finished_future_after_fit(
+            future=future, results=results, failures=failures
+        )
+    return results, failures
+
 
 def fit_client(
     client: ClientProxy, ins: FitIns, timeout: Optional[float]
@@ -181,8 +208,6 @@ def _handle_finished_future_after_fit(
     failures.append(result)
 
 
-
-
 def gen_evaluate_fn(
     testloader: DataLoader,
     device: torch.device,
@@ -190,7 +215,7 @@ def gen_evaluate_fn(
 ) -> Callable[
     [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]
 ]:
-    """Generates the function for centralized evaluation.
+    """Generate the function for centralized evaluation.
 
     Parameters
     ----------
@@ -201,8 +226,9 @@ def gen_evaluate_fn(
 
     Returns
     -------
-    Callable[ [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]] ]
-        The centralized evaluation function.
+    Callable[ [int, NDArrays, Dict[str, Scalar]],
+               Optional[Tuple[float, Dict[str, Scalar]]] ]
+    The centralized evaluation function.
     """
 
     def evaluate(
@@ -210,7 +236,6 @@ def gen_evaluate_fn(
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         # pylint: disable=unused-argument
         """Use the entire Emnist test set for evaluation."""
-
         net = instantiate(model)
         params_dict = zip(net.state_dict().keys(), parameters_ndarrays)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})

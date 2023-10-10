@@ -1,16 +1,18 @@
+"""Defines the client class and support functions for FedProx."""
+
+from typing import Callable, Dict, List, OrderedDict, Tuple, Union
+
 import flwr as fl
-from flwr.common import Scalar
-from typing import Dict, OrderedDict, Union, List, Tuple, Callable
 import torch
-from torch.utils.data import DataLoader
-from omegaconf import DictConfig
+from flwr.common import Scalar
 from hydra.utils import instantiate
+from omegaconf import DictConfig
+from torch.utils.data import DataLoader
 
-from niid_bench.models import train_fedprox, test
+from niid_bench.models import test, train_fedprox
 
-class FlowerClientFedProx(
-    fl.client.NumPyClient
-):
+
+class FlowerClientFedProx(fl.client.NumPyClient):
     """Flower client implementing FedProx."""
 
     def __init__(
@@ -46,7 +48,7 @@ class FlowerClientFedProx(
         self.net.load_state_dict(state_dict, strict=True)
 
     def fit(self, parameters, config: Dict[str, Union[Scalar, List[torch.Tensor]]]):
-        """Implements distributed fit function for a given client using FedProx Strategy."""
+        """Implement distributed fit function for a given client for FedProx."""
         self.set_parameters(parameters)
         train_fedprox(
             self.net,
@@ -67,6 +69,7 @@ class FlowerClientFedProx(
         loss, acc = test(self.net, self.valloader, self.device)
         return float(loss), len(self.valloader.dataset), {"accuracy": float(acc)}
 
+
 def gen_client_fn(
     trainloaders: List[DataLoader],
     valloaders: List[DataLoader],
@@ -74,12 +77,12 @@ def gen_client_fn(
     learning_rate: float,
     model: DictConfig,
     mu: float,
-    momentum: float=0.9,
-    weight_decay: float=1e-5,
+    momentum: float = 0.9,
+    weight_decay: float = 1e-5,
 ) -> Tuple[
     Callable[[str], FlowerClientFedProx], DataLoader
 ]:  # pylint: disable=too-many-arguments
-    """Generates the client function that creates the FedProx flower clients.
+    """Generate the client function that creates the FedProx flower clients.
 
     Parameters
     ----------
@@ -106,13 +109,12 @@ def gen_client_fn(
     Returns
     -------
     Tuple[Callable[[str], FlowerClientFedProx], DataLoader]
-        A tuple containing the client function that creates the FedProx flower clients and
-        the DataLoader that will be used for testing
+        A tuple containing the client function that creates the FedProx flower clients
+        and the DataLoader that will be used for testing
     """
 
     def client_fn(cid: str) -> FlowerClientFedProx:
         """Create a Flower client representing a single organization."""
-
         # Load model
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         net = instantiate(model).to(device)
