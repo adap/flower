@@ -7,7 +7,7 @@ This example demonstrates a federated learning setup with Android clients in a b
 - We use a strategy called FedAvgAndroid for this example.
 - The strategy is vanilla FedAvg with a custom serialization and deserialization to handle the Bytebuffers sent from Android clients to Python server.
 
-This background thread is established via WorkManager library of Android, thus it will run comfortably on Android Versions from 8 to 13.
+The background thread is established via the `WorkManager` library of Android, thus, it will run comfortably on Android Versions from 8 to 13.
 
 ## Project Setup
 
