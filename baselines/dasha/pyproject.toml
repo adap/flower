@@ -5,9 +5,9 @@ build-backend = "poetry.masonry.api"
 [tool.poetry]
 name = "dasha" # <----- Ensure it matches the name of your baseline directory containing all the source code
 version = "1.0.0"
-description = "Flower Baselines"
+description = "DASHA: Distributed nonconvex optimization with communication compression and optimal oracle complexity"
 license = "Apache-2.0"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["Alexander Tyurin <alexandertiurin@gmail.com>"]
 readme = "README.md"
 homepage = "https://flower.dev"
 repository = "https://github.com/adap/flower"
