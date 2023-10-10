@@ -21,7 +21,7 @@ Contributing to existing languages
    :width: 100%
 
 The first thing you will need to do in order to contribute is to create a
-Weblate account on this `page
+free Weblate account on this `page
 <https://hosted.weblate.org/accounts/register/>`_. More information
 about profile settings can be found `here
 <https://docs.weblate.org/en/latest/user/profile.html>`_.
