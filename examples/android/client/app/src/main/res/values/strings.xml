@@ -2,6 +2,6 @@
     <string name="app_name">Flower</string>
     <string name="notification_channel_id">1002</string>
     <string name="notification_title">FL Background Worker On</string>
-    <string name="cancel_download">cancel the FL process </string>
+    <string name="cancel_download">Cancel federated learning</string>
     <string name="channelId">123</string>
 </resources>
