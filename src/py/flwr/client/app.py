@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -280,24 +280,20 @@ def start_numpy_client(
     # We first need to convert either the supplied client or
     # client function to a standard `Client`.
 
-    plain_client = None
-    plain_clientfn = None
-
-    # Start
-    if client:
-        plain_client = client.to_client()
+    wrp_client = client.to_client() if client else None
+    wrp_clientfn = None
     if client_fn:
 
         def convert(cid: str) -> Client:
-            """Convert NumPy client to Client upon instantiation."""
+            """Convert `NumPyClient` to `Client` upon instantiation."""
             return client_fn(cid).to_client()
 
-        plain_clientfn = convert
+        wrp_clientfn = convert
 
     start_client(
         server_address=server_address,
-        client_fn=plain_clientfn,
-        client=plain_client,
+        client_fn=wrp_clientfn,
+        client=wrp_client,
         grpc_max_message_length=grpc_max_message_length,
         root_certificates=root_certificates,
         transport=transport,
