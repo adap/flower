@@ -75,7 +75,10 @@ poetry shell
 You can run four algorithms fedavg, scaffold, fedprox, and fednova. To run any of them, use any of the corresponding config files. For instance, the following command will run with the default config provided in the corresponding configuration files.
 
 ```bash
-python -m niid_bench.main --config-name fedavg_base
+# Run with default config, it will run FedAvg on cpu-only mode
+python -m niid_bench.main
+# Below to enable GPU utilization by the server and the clients.
+python -m niid_bench.main server_device=cuda client_resources.num_gpus=0.2
 ```
 
 To change the configuration such as dataset or hyperparameters, specify them as part of the command line arguments.
@@ -99,7 +102,7 @@ The above command generates results that can be parsed to get the accuracies for
 
 | Dataset | partitioning method | FedAvg | SCAFFOLD | FedProx | FedNova |
 | :------ | :------ | :---: | :---: | :---: | :---: |
-| MNIST | IID<br>Dirichlet (0.5)<br>Sort and Partition (1)<br>Sort and Partition (2)<br>Sort and Partition (3) | 99.1<br>98.9<br>10.0<br>96.6<br>98.2 | 99.2<br>99.0<br>10.0<br>96.6<br>97.8 | 99.2<br>99.0<br>81.3<br>96.7<br>97.8 | 99.0<br>98.8<br>55.1<br>96.5<br>97.7 |
-| FMNIST | IID<br>Dirichlet (0.5)<br>Sort and Partition (1)<br>Sort and Partition (2)<br>Sort and Partition (3) | 89.0<br>88.4<br>10.0<br>81.0<br>83.2 | 89.5<br>88.4<br>10.0<br>10.0<br>84.2 | 89.5<br>88.6<br>38.0<br>78.8<br>82.5 | 89.3<br>88.1<br>11.1<br>70.5<br>83.2 |
-| CIFAR10 | IID<br>Dirichlet (0.5)<br>Sort and Partition (1)<br>Sort and Partition (2)<br>Sort and Partition (3) | 71.7<br>63.4<br>10.0<br>49.9<br>58.1 | 70.7<br>68.0<br>10.0<br>48.9<br>60.0 | 70.6<br>65.6<br>11.6<br>50.0<br>60.0 | 71.1<br>65.0<br>10.0<br>46.4<br>57.7 |
+| MNIST | IID<br>Dirichlet (0.5)<br>Sort and Partition (1)<br>Sort and Partition (2)<br>Sort and Partition (3) | 99.09 &#xB1; 0.05<br>98.89 &#xB1; 0.07<br>19.33 &#xB1; 11.82<br>96.86 &#xB1; 0.30<br>97.86 &#xB1; 0.34 | 99.06 &#xB1; 0.15<br>99.07 &#xB1; 0.06<br>9.93 &#xB1; 0.12<br>96.92 &#xB1; 0.52<br>97.91 &#xB1; 0.10 | 99.16 &#xB1; 0.04<br>99.02 &#xB1; 0.02<br>51.79 &#xB1; 26.75<br>96.85 &#xB1; 0.15<br>97.85 &#xB1; 0.06 | 99.05 &#xB1; 0.06<br>98.03 &#xB1; 0.06<br>52.58 &#xB1; 14.08<br>96.65 &#xB1; 0.39<br>97.62 &#xB1; 0.07 |
+| FMNIST | IID<br>Dirichlet (0.5)<br>Sort and Partition (1)<br>Sort and Partition (2)<br>Sort and Partition (3) | 89.23 &#xB1; 0.45<br>8809 &#xB1; 0.29<br>28.39 &#xB1; 17.09<br>78.10 &#xB1; 2.51<br>82.43 &#xB1; 1.52 | 89.33 &#xB1; 0.27<br>88.44 &#xB1; 0.25<br>10.00 &#xB1; 0.00<br>33.80 &#xB1; 41.22<br>80.32 &#xB1; 5.03 | 89.42 &#xB1; 0.09<br>88.15 &#xB1; 0.42<br>32.65 &#xB1; 6.68<br>78.05 &#xB1; 0.99<br>82.99 &#xB1; 0.48 | 89.36 &#xB1; 0.09<br>88.22 &#xB1; 0.12<br>16.86 &#xB1; 9.30<br>71.67 &#xB1; 2.34<br>81.97 &#xB1; 1.34 |
+| CIFAR10 | IID<br>Dirichlet (0.5)<br>Sort and Partition (1)<br>Sort and Partition (2)<br>Sort and Partition (3) | 71.32 &#xB1; 0.33<br>62.47 &#xB1; 0.43<br>10.00 &#xB1; 0.00<br>51.17 &#xB1; 1.09<br>59.11 &#xB1; 0.87 | 71.66 &#xB1; 1.13<br>68.08 &#xB1; 0.96<br>10.00 &#xB1; 0.00<br>49.42 &#xB1; 2.18<br>61.00 &#xB1; 0.91 | 71.26 &#xB1; 1.18<br>65.63 &#xB1; 0.08<br>12.71 &#xB1; 0.96<br>50.44 &#xB1; 0.79<br>59.20 &#xB1; 1.18 | 70.69 &#xB1; 1.14<br>63.89 &#xB1; 1.40<br>10.00 &#xB1; 0.00 <br>46.9 &#xB1; 0.66<br>57.83 &#xB1; 0.42 |
 
