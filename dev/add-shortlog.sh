@@ -2,7 +2,7 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
-tags=$(git tag --sort=-creatordate)
+tags=$(git tag --sort=-v:refname)
 new_version=$(echo "$tags" | sed -n '1p')
 old_version=$(echo "$tags" | sed -n '2p')
 
