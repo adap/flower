@@ -1,5 +1,7 @@
 """Strategy for HeteroFL."""
 
+import os
+import pickle
 from logging import WARNING
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -51,6 +53,18 @@ class HeteroFL(FedAvg):
                 self.is_weight.append(False)
             else:
                 self.is_weight.append(True)
+
+        # prev_grads file for each client
+        prev_grads = [
+            {k: torch.zeros(v.numel()) for (k, v) in net.named_parameters()}
+        ] * cfg.num_clients
+
+        if not os.path.exists("prev_grads"):
+            os.makedirs("prev_grads")
+
+        for idx in range(cfg.num_clients):
+            with open(f"prev_grads/client_{idx}", "wb") as prev_grads_file:
+                pickle.dump(prev_grads[idx], prev_grads_file)
 
         super().__init__(*args, **kwargs)
 
