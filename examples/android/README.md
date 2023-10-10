@@ -1,6 +1,6 @@
 # Flower Android Example (TensorFlowLite)
 
-This example demonstrates a federated learning setup with Android Clients in the background thread. The training on Android is done on a CIFAR10 dataset using TensorFlow Lite. The setup is as follows:
+This example demonstrates a federated learning setup with Android clients in a background thread. The training on Android is done on a CIFAR10 dataset using TensorFlow Lite. The setup is as follows:
 
 - The CIFAR10 dataset is randomly split across 10 clients. Each Android client holds a local dataset of 5000 training examples and 1000 test examples.
 - The FL server runs in Python but all the clients run on Android.
