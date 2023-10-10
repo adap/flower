@@ -44,7 +44,7 @@ android {
 def grpc_version = '1.43.0'
 
 protobuf {
-    protoc { artifact = 'com.google.protobuf:protoc:3.11.0' }
+    protoc { artifact = 'com.google.protobuf:protoc:3.17.3' }
     plugins {
         grpc { artifact = "io.grpc:protoc-gen-grpc-java:$grpc_version"
         }
@@ -66,6 +66,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.0'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.work:work-runtime:2.8.1'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test:runner:1.5.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
@@ -85,6 +86,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
 
     implementation 'com.google.android.material:material:1.7.0'
+    implementation 'com.google.protobuf:protobuf-javalite:3.17.3'
 
 }
 
