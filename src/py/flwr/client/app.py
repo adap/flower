@@ -271,11 +271,8 @@ def start_numpy_client(
     # Start
     _check_actionable_client(client, client_fn)
 
-    wrp_client = None
+    wrp_client = client.to_client() if client else None
     wrp_clientfn = None
-
-    if client:
-        wrp_client = client.to_client()
     if client_fn:
 
         def convert(cid: str) -> Client:
