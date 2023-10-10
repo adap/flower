@@ -27,8 +27,12 @@ jobs:
         uses: ./.github/actions/bootstrap
       - name: Install pandoc
         run: sudo apt install pandoc
-      - name: Install dependencies (mandatory only)
+      - name: Install Flower dependencies (mandatory only)
         run: python -m poetry install --extras "simulation"
+      - name: Install Flower Datasets
+        run: |
+          cd datasets
+          python -m poetry install
       - name: Build docs
         run: ./dev/build-docs.sh
       - name: Deploy docs
@@ -41,3 +45,4 @@ jobs:
           aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./doc/build/html/ s3://flower.dev/docs/framework
           aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./baselines/doc/build/html/ s3://flower.dev/docs/baselines
           aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./examples/doc/build/html/ s3://flower.dev/docs/examples
+          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./datasets/doc/build/html/ s3://flower.dev/docs/datasets
