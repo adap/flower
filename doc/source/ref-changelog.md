@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **Updated** `Driver` **class to automatically set** `workload_id` **fields in** `get_nodes()` **and** `push_task_ins()` ([#2496](https://github.com/adap/flower/pull/2496))
+
 - **Support custom** `ClientManager` **in** `start_driver()` ([#2292](https://github.com/adap/flower/pull/2292))
 
 - **Update REST API to support create and delete nodes** ([#2283](https://github.com/adap/flower/pull/2283))
