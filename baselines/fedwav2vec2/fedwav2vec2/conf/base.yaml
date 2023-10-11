@@ -1,0 +1,37 @@
+---
+# this is the config that will be loaded as default by main.py
+# Please follow the provided structure (this will ensuring all baseline follow
+# a similar configuration structure and hence be easy to customise)
+
+pre_train_model_path: null
+# Path for label encoder file if want to ensure the same encode for every client
+label_path: ../docs/label_encoder.txt
+sb_config: conf/sb_config/w2v2.yaml # config with SpeechBrain recipe for Wav2Vec 2.0
+data_path: data # if you change this, ensure you `git cloned` the author's own repo to a directory with the new name
+rounds: 3 # global FL rounds
+local_epochs: 2 # local epochs for each client
+total_clients: 10
+server_cid: 19999
+
+# Device setup
+device: cuda
+parallel_backend: false # If using multi-gpus per client (disable if using CPU)
+
+dataset:
+  download_filename: TEDLIUM_release-3.tgz
+  extract_subdirectory: audio/TEDLIUM_release-3
+
+
+strategy:
+  _target_: strategy.CustomFedAvg
+  min_fit_clients: 3
+  fraction_fit: 0.1
+  min_available_clients: ${total_clients}
+  weight_strategy: num # strategy of weighting clients in: [num, loss, wer]
+  on_fit_config_fn:
+    _target_: server.get_on_fit_config_fn
+    local_epochs: ${local_epochs}
+
+client_resources:
+  num_cpus: 4
+  num_gpus: 1
