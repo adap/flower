@@ -42,7 +42,7 @@ jobs:
           sha_short=$(git rev-parse --short HEAD)
           echo "SHORT_SHA=$sha_short" >> "$GITHUB_OUTPUT"
           [ -z "${{ github.head_ref }}" ] && dir="${{ github.ref_name }}" || dir="pr/${{ github.head_ref }}"
-          echo "DIR=$dir" >> "GITHUB_OUTPUT"
+          echo "DIR=$dir" >> "$GITHUB_OUTPUT"
           aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./ s3://artifact.flower.dev/py/$dir/$sha_short --recursive
     outputs:
       whl_path: ${{ steps.upload.outputs.WHL_PATH }}
