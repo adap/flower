@@ -4,8 +4,10 @@ defaults:
   - clients: cpusmall_5_clients
 
 centralized: False
+use_wandb: True
 server_device: "cpu"
-
+val_ratio: 0.0
+batch_size: "whole"
 n_estimators_client: ${clients.n_estimators_client}
 task_type: ${dataset.task.task_type}
 client_num: ${clients.client_num}
@@ -46,6 +48,3 @@ run_experiment:
   min_fit_clients: 1
   fit_config:
     num_iterations: ${clients.num_iterations}
-
-val_ratio: 0.0
-batch_size: "whole"
