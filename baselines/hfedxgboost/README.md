@@ -131,25 +131,25 @@ python -m hfedxgboost.main --config-name Centralized_Baseline dataset=abalone xg
 ```bash
 #to run all the experiments for the centralized model with the original paper config for all the datasets
 #gives the output shown in Table 1
-python -m hfedxgboost.main --config-name "centralized_basline_all_datasets_paper_config"
+python -m hfedxgboost.main --config-name centralized_basline_all_datasets_paper_config
 
 #results for a9a dataset in table 2 
-python -m hfedxgboost.main --multirun clients="a9a_2_clients","a9a_5_clients","a9a_10_clients" dataset=a9a
+python -m hfedxgboost.main --multirun clients=a9a_2_clients,a9a_5_clients,a9a_10_clients dataset=a9a
 
 #results for cod_rna dataset in table 2
-python -m hfedxgboost.main --multirun clients="cod_rna_2_clients","cod_rna_5_clients","cod_rna_10_clients" dataset=cod_rna
+python -m hfedxgboost.main --multirun clients=cod_rna_2_clients,cod_rna_5_clients,cod_rna_10_clients dataset=cod_rna
 
 #results for ijcnn1 dataset in table 2
-python -m hfedxgboost.main --multirun clients="ijcnn1_2_clients","ijcnn1_5_clients","ijcnn1_10_clients" dataset=ijcnn1
+python -m hfedxgboost.main --multirun clients=ijcnn1_2_clients,ijcnn1_5_clients,ijcnn1_10_clients dataset=ijcnn1
 
 #results for space_ga dataset in table 3
-python -m hfedxgboost.main --multirun clients="space_ga_2_clients","space_ga_5_clients","space_ga_10_clients" dataset=space_ga
+python -m hfedxgboost.main --multirun clients=space_ga_2_clients,space_ga_5_clients,space_ga_10_clients dataset=space_ga
 
 #results for abalone dataset in table 3
-python -m hfedxgboost.main --multirun clients="abalone_2_clients","abalone_5_clients","abalone_10_clients" dataset=abalone
+python -m hfedxgboost.main --multirun clients=abalone_2_clients,abalone_5_clients,abalone_10_clients dataset=abalone
 
 #results for cpusmall dataset in table 3
-python -m hfedxgboost.main --multirun clients="cpusmall_2_clients","cpusmall_5_clients","cpusmall_10_clients" dataset=cpusmall
+python -m hfedxgboost.main --multirun clients=cpusmall_2_clients,cpusmall_5_clients,cpusmall_10_clients dataset=cpusmall
 
 #results for YearPredictionMSD_2 dataset in table 3
 python -m hfedxgboost.main --multirun clients=YearPredictionMSD_2_clients,YearPredictionMSD_5_clients,YearPredictionMSD_10_clients dataset=YearPredictionMSD
@@ -172,7 +172,7 @@ python -m hfedxgboost.main --multirun clients=YearPredictionMSD_2_clients,YearPr
 
 | Dataset | task type |no. of clients | server-side test Accuracy |
 | :---: | :---: | :---: | :---: |
-| a9a | Binary Classification | 2<br>5<br>10 | 83.8% <br>84.2% <br> 83.7% |
+| a9a | Binary Classification | 2<br>5<br>10 | 84.4% <br>84.2% <br> 83.7% |
 | cod_rna | Binary Classification | 2<br>5<br>10 | 96.4% <br>96.2% <br>95.0%  | 
 | ijcnn1 | Binary Classification |2<br>5<br>10 | 98.0% <br>97.3% <br>96.7%  |
 

@@ -18,6 +18,7 @@ baselines/datasets/leaf
 baselines/hfedxgboost/hfedxgboost/dataset
 baselines/hfedxgboost/dataset
 baselines/hfedxgboost/multirun
+baselines/hfedxgboost/wandb
 outputs
 
 # macOS
