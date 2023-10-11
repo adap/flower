@@ -105,8 +105,16 @@ def fjord_average(
             if len(layer_updates_p) == 0:
                 continue
             else:
-                in_dim = int(fjord_config[p][i]["in_dim"])
-                out_dim = int(fjord_config[p][i]["out_dim"])
+                in_dim = (
+                    int(fjord_config[p][i]["in_dim"])
+                    if fjord_config[p][i]["in_dim"]
+                    else None
+                )
+                out_dim = (
+                    int(fjord_config[p][i]["out_dim"])
+                    if fjord_config[p][i]["out_dim"]
+                    else None
+                )
                 assert num_examples_p > 0
                 # check whether the parameter to update is bias or weight
                 if len(update.shape) == 1:
