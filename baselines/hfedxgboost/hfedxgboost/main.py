@@ -37,11 +37,7 @@ metric = {
     }
 
 sweep_config['metric'] = metric
-parameters_dict = {
-    'optimizer': {
-        'values': ['adam', 'sgd']
-        }
-    }
+parameters_dict = {}
 sweep_config['parameters'] = parameters_dict
 
 parameters_dict.update({
@@ -50,7 +46,10 @@ parameters_dict.update({
         'distribution': 'uniform',
         'min': 0,
         'max': 0.1
-      }
+      },
+    'n':{
+        'values':[50,250,500,1000]
+    }
     })
 sweep_id = wandb.sweep(sweep_config, project="p2")
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -83,7 +82,8 @@ def main(cfg: DictConfig) -> None:
                     config = wandb.config
                     print("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",config)
                     cfg.clients.CNN.lr=config.learning_rate
-                    print("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",cfg.clients.CNN.lr)
+                    cfg.clients.n_estimators_client=config.n
+                    print("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",cfg.clients.n_estimators_client)
                     dataset_name = cfg.dataset.dataset_name
                     task_type = cfg.dataset.task.task_type
                     early_stopper = Early_Stop(cfg)
