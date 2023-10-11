@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 """ProtoBuf serialization and deserialization."""
 
 
-from typing import Any, Dict, List, cast
+from typing import Any, Dict, List, MutableMapping, cast
 
 from flwr.proto.task_pb2 import Value
 from flwr.proto.transport_pb2 import (
@@ -510,17 +510,18 @@ _python_list_type_to_message_and_field_name = {
 def _check_value(value: typing.Value) -> None:
     if isinstance(value, tuple(_python_type_to_field_name.keys())):
         return
-    if isinstance(value, list) and isinstance(
-        value[0], tuple(_python_type_to_field_name.keys())
-    ):
-        data_type = type(value[0])
-        for element in value:
-            if isinstance(element, data_type):
-                continue
-            raise Exception(
-                f"Inconsistent type: the types of elements in the list must be the same"
-                f"(expected {data_type}, but got {type(element)})"
-            )
+    if isinstance(value, list):
+        if len(value) > 0 and isinstance(
+            value[0], tuple(_python_type_to_field_name.keys())
+        ):
+            data_type = type(value[0])
+            for element in value:
+                if isinstance(element, data_type):
+                    continue
+                raise Exception(
+                    f"Inconsistent type: the types of elements in the list must "
+                    f"be the same (expected {data_type}, but got {type(element)})."
+                )
     else:
         raise TypeError(
             f"Accepted types: {bool, bytes, float, int, str} or "
@@ -535,7 +536,7 @@ def value_to_proto(value: typing.Value) -> Value:
     arg = {}
     if isinstance(value, list):
         msg_class, field_name = _python_list_type_to_message_and_field_name[
-            type(value[0])
+            type(value[0]) if len(value) > 0 else int
         ]
         arg[field_name] = msg_class(vals=value)
     else:
@@ -564,7 +565,7 @@ def named_values_to_proto(
 
 
 def named_values_from_proto(
-    named_values_proto: Dict[str, Value]
+    named_values_proto: MutableMapping[str, Value]
 ) -> Dict[str, typing.Value]:
     """Deserialize named values from ProtoBuf."""
     return {name: value_from_proto(value) for name, value in named_values_proto.items()}
