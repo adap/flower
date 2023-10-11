@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import time
 from logging import INFO
 from typing import Callable, Optional, Union
 
+from flwr.client.client import Client
 from flwr.client.typing import ClientFn, ClientLike
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
@@ -36,7 +37,6 @@ from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle
 from .numpy_client import NumPyClient
-from .numpy_client_wrapper import _wrap_numpy_client
 
 
 def _check_actionable_client(
@@ -271,10 +271,19 @@ def start_numpy_client(
     # Start
     _check_actionable_client(client, client_fn)
 
-    wrp_client = _wrap_numpy_client(client=client) if client else None
+    wrp_client = client.to_client() if client else None
+    wrp_clientfn = None
+    if client_fn:
+
+        def convert(cid: str) -> Client:
+            """Convert `NumPyClient` to `Client` upon instantiation."""
+            return client_fn(cid).to_client()
+
+        wrp_clientfn = convert
+
     start_client(
         server_address=server_address,
-        client_fn=client_fn,
+        client_fn=wrp_clientfn,
         client=wrp_client,
         grpc_max_message_length=grpc_max_message_length,
         root_certificates=root_certificates,
