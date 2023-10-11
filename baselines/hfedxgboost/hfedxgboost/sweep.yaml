@@ -1,0 +1,17 @@
+program: main.py
+method: random
+metric:
+  goal: minimize
+  name: loss
+parameters:
+  dataset:
+    value: [abalone]
+  clients:
+    value: abalone_5_clients
+  clients.n_estimators_client: 
+        values: [200,300]
+command:
+  - ${env}
+  - python
+  - ${program}
+  - ${args_no_hyphens}
