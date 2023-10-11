@@ -45,6 +45,8 @@ def main(cfg):
         strategy=strategy,
     )
 
+    print(OmegaConf.to_yaml(cfg))
+
     print("----------------------")
     print(history)
     print("----------------------")

@@ -2,7 +2,7 @@
 title: FedMix Approximation of Mixup under Mean Augmented Federated Learning
 url: https://arxiv.org/abs/2107.00233
 labels: ["data heterogeneity", "mixup", "non-iid"]
-dataset: ["cifar10", "femnist"]
+dataset: ["cifar10", "cifar100", "femnist"]
 ---
 
 # FedMix: Approximation of Mixup under Mean Augmented Federated Learning
@@ -18,7 +18,7 @@ dataset: ["cifar10", "femnist"]
 
 ****What’s implemented:**** The code in this directory implements two of the Federated Strategies mentioned in the paper: NaiveMix and FedMix
 
-****Datasets:**** CIFAR10, FEMNIST
+****Datasets:**** CIFAR10, CIFAR100, FEMNIST
 
 ****Hardware Setup:**** Experiments in this baseline were run on 2x Nvidia Tesla V100 16GB.
 
@@ -29,32 +29,33 @@ dataset: ["cifar10", "femnist"]
 
 ****Task:**** Image Classification
 
-****Model:**** Models used are modified versions of existing known models and are descirbed in Appendix B (Experimental Details). For the CIFAR10 dataset, the authors use a modified version of VGG, while LeNet-5 is used for the FEMNIST dataset.
+****Model:**** Models used are modified versions of existing known models and are descirbed in Appendix B (Experimental Details). For CIFAR10 and CIFAR100 datasets, the authors use a modified version of VGG, while LeNet-5 is used for the FEMNIST dataset.
 
-****Dataset:**** Both the datasets used (CIFAR10 and FEMNIST) incorporate data heterogenity in diferent ways to simulate a non-iid setting. For the CIFAR10 experiment, data is allocated such that each client has data from only a selected number of randomly chosen classes. For the FEMNIST experiment, data is allocated such that each client has data from only one writer, resulting in 200-300 samples per client on average.
+****Dataset:**** The datasets used (CIFAR10, CIFAR100 FEMNIST) incorporate data heterogenity in diferent ways to simulate a non-iid setting. For CIFAR10 and CIFAR100 experiments, data is allocated such that each client has data from only a selected number of randomly chosen classes. For the FEMNIST experiment, data is allocated such that each client has data from only one writer, resulting in 200-300 samples per client on average.
 
-| Property | CIFAR10 Partioning | FEMNIST Partitioning |
-| -- | -- | -- |
-| num classes | 10 | 62 |
-| num clients | 60 | 100 |
-| num classes per client | 2 | |
-| non-iidness type | data from selected classes | data from single writer |
+| Property | CIFAR10 Partioning | CIFAR100 Partioning | FEMNIST Partitioning |
+| -- | -- | -- | -- |
+| num classes | 10 | 100 | 62 |
+| num clients | 60 | 100 | 100 |
+| num classes per client | 2 | 20 | |
+| non-iidness type | data from selected classes | data from selected classes | data from single writer |
 
 
 ****Training Hyperparameters:****
 
-| Hyperparameter | CIFAR10 Experiments | FEMNIST Experiments |
-| -- | -- | -- |
-| local epochs | 2 | 10 |
-| local learning rate | 0.01 | 0.01|
-| local lr decay after round | 0.999 | 0.999 |
-| local batch size | 10 | 10 |
-| num classes per client | 2 | |
-| total number of clients | 60 | 100 |
-| clients per round | 15 | 10 |
-| mash batch size | full local data (`all`) | full local data (`all`)|
-| mixup ratio | 0.05 | 0.2 |
-| num rounds | 500 | 200 |
+| Hyperparameter | CIFAR10 Experiments | CIFAR100 Experiments | FEMNIST Experiments |
+| -- | -- | -- | -- |
+| local epochs | 2 | 10 | 10 |
+| local learning rate | 0.01 | 0.01 | 0.01|
+| local lr decay after round | 0.999 | 0.999 | 0.999 |
+| local batch size | 10 | 10 | 10 |
+| num classes per client | 2 | 20 |  |
+| total number of clients | 60 | 100 | 100 |
+| clients per round | 15 | 10 | 10 |
+| mash batch size | full local data (`all`) | full local data (`all`) | full local data (`all`)|
+| mixup ratio (fedmix) | 0.05 | 0.1 | 0.2 |
+| mixup ratio (naivemix) | 0.1 | 0.1 | 0.2 |
+| num rounds | 500 | 500 | 200 |
 
 
 ## Environment Setup
@@ -79,7 +80,7 @@ To run an experiment with default hyperparameters (as mentioned in the paper), e
 
 ```
 python -m fedmix.main +experiment={dataset}_{strategy}
-# dataset can be: cifar10, femnist
+# dataset can be: cifar10, cifar100, femnist
 # strategy can be: fedavg, naivemix, fedmix
 ```
 
@@ -87,3 +88,41 @@ To run custom experiments: create a new `.yaml` file in `conf/experiment` and ov
 
 ## Expected Results
 
+To get all results, run:
+
+```bash
+# femnist experiments
+python -m fedmix.main --multirun +experiment=femnist_fedavg,femnist_naivemix,femnist_fedmix
+
+# cifar10 experiments
+python -m fedmix.main --multirun +experiment=cifar10_fedavg,cifar10_naivemix,cifar10_fedmix
+
+# cifar100 experiments
+python -m fedmix.main --multirun +experiment=cifar100_fedavg,cifar100_naivemix,cifar100_fedmix
+```
+
+To generate table (similar to `Table 1` of paper) and figures (similar to `Figure 2` of paper), run the above commands and then:
+
+```bash
+# table
+python -m fedmix.generate_media --output_type=table --output_path="_static/table.png" --input_directory="results/"
+
+# femnist learning curve
+python -m fedmix.generate_media --output_type=figure --output_path="_static/femnist.png" --input_directory="results/" --dataset_name="femnist"
+
+# cifar10 learning curve
+python -m fedmix.generate_media --output_type=figure --output_path="_static/cifar10.png" --input_directory="results/" --dataset_name="cifar10"
+
+# cifar100 learning curve
+python -m fedmix.generate_media --output_type=figure --output_path="_static/cifar100.png" --input_directory="results/" --dataset_name="cifar100"
+```
+
+The expected results are shown below:
+
+| Algorithm | FEMNIST | CIFAR10 | CIFAR100 |
+| -- | -- | -- | -- |
+| FedAvg | **82.49** (85.3) | 62.77 (73.8) | 27.47 (50.4) |
+| NaiveMix | 78.45 (85.9) | **67.39** (77.4) | **29.75** (53.8) |
+| FedMix | 75.67 (**86.5**) | 63.09 (**81.2**) | 28.90 (**56.7**) |
+
+Numbers within `()` are the reported results from the paper.

@@ -1,4 +1,4 @@
-_target_: fedmix.strategy.FedAvgCustom
+_target_: fedmix.strategy.FedProxCustom
 fraction_fit: 0.000001
 fraction_evaluate: 0.0
 min_fit_clients: 15
@@ -6,3 +6,4 @@ min_evaluate_clients: 0
 min_available_clients: 15
 
 lr_decay_after_each_round: 0.999
+proximal_mu: 0.1

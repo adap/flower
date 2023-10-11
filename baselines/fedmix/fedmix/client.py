@@ -193,6 +193,7 @@ class FedMixClient(NumPyClient):
             l3 = self.mixup_ratio * torch.inner(
                 gradients.flatten(start_dim=1), mashed_image.flatten(start_dim=1)
             )
+
             l3 = torch.mean(l3)
 
             loss = l1 + l2 + l3

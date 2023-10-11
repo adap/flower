@@ -99,6 +99,10 @@ def _partition_cifar_new(
 
     dataset_indices = [np.where(assignment == i)[0] for i in range(num_clients)]
 
+    # print('number of data points of each client:', [len(lst) for lst in dataset_indices])
+    # print('total number of data points across clients:', sum([len(lst) for lst in dataset_indices]))
+    # print('number of unique data points:', len({i for lst in dataset_indices for i in lst}))
+
     return [Subset(trainset, ind) for ind in dataset_indices]
 
 
@@ -144,8 +148,9 @@ def _partition_femnist():
     y = torch.tensor(np.array(test_y))
     testset = TensorDataset(x, y)
 
-    print('train set size:', sum([len(c) for c in client_datasets]))
-    print('test set size:', len(testset))
+    # print('length of client datasets:', [len(c) for c in client_datasets])
+    # print('train set size:', sum([len(c) for c in client_datasets]))
+    # print('test set size:', len(testset))
 
     return client_datasets, testset
 
@@ -195,6 +200,8 @@ def _mash_data(client_datasets, mash_batch_size, num_classes):
 
         mashed_image, mashed_label = [], []
 
-    print("length of mashed data:", len(mashed_data))
+    # print('length of mashed data:', len(mashed_data))
+    # print('shapes of mashed data:', mashed_data[0][0].shape, mashed_data[0][1].shape)
+    # print('sample mashed label:', mashed_data[0][1])
 
     return mashed_data

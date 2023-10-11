@@ -13,3 +13,11 @@ num_rounds: 500
 client_resources:
   num_cpus: 4
   num_gpus: 0.25
+
+hydra:
+  run:
+    dir: results/${dataset.name}_${hydra.job.num}
+
+  sweep:
+    dir: results/
+    subdir: ${dataset.name}_${hydra.job.num}
