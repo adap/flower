@@ -122,7 +122,7 @@ class TestDriverMethods(unittest.TestCase):
         # Assert
         self.assertEqual(list(response.task_res_list), [task_res])
 
-    def test_create_workload_error_not_initialized(self) -> None:
+    def test_create_workload_error_not_connected(self) -> None:
         """Test `create_workload()` failure due to Driver not connected."""
         # Prepare
         self.driver.stub = None
@@ -141,5 +141,26 @@ class TestDriverMethods(unittest.TestCase):
         # Assert
         with self.assertRaises(Exception) as context:
             self.driver.get_nodes(GetNodesRequest())
+        self.assertIn("`Driver` instance not initialized", str(context.exception))
+        with self.assertRaises(Exception) as context:
+            self.driver.push_task_ins(PushTaskInsRequest())
+        self.assertIn("`Driver` instance not initialized", str(context.exception))
+        with self.assertRaises(Exception) as context:
+            self.driver.pull_task_res(PullTaskResRequest())
+        self.assertIn("`Driver` instance not initialized", str(context.exception))
 
+    def test_method_error_not_connected(self) -> None:
+        """Test method failure due to workload not created."""
+        # Prepare
+        self.driver.stub = None
+
+        # Assert
+        with self.assertRaises(Exception) as context:
+            self.driver.get_nodes(GetNodesRequest())
+        self.assertIn("`Driver` instance not initialized", str(context.exception))
+        with self.assertRaises(Exception) as context:
+            self.driver.push_task_ins(PushTaskInsRequest())
+        self.assertIn("`Driver` instance not initialized", str(context.exception))
+        with self.assertRaises(Exception) as context:
+            self.driver.pull_task_res(PullTaskResRequest())
         self.assertIn("`Driver` instance not initialized", str(context.exception))
