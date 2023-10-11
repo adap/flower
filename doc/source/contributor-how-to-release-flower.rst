@@ -10,8 +10,7 @@ Update the changelog (``changelog.md``) with all relevant changes that happened 
 
 `GitHub: Compare v1.2.0...main <https://github.com/adap/flower/compare/v1.2.0...main>`_
 
-Thank the authors who contributed since the last release. This command helps extract them: ``git log --format='%aN' v1.1.0..HEAD | sort -u``. The command has the same order as ``git shortlog``.
-
+Thank the authors who contributed since the last release. This can be done by running the `./dev/add-shortlog.sh` convenience script (it can be ran multiple times and will update the names in the list if new contributors were added in the meantime).
 
 During the release
 ------------------
@@ -20,8 +19,6 @@ The version number of a release is stated in ``pyproject.toml``. To release a ne
 
 1. Update the ``changelog.md`` section header ``Unreleased`` to contain the version number and date for the release you are building. Create a pull request with the change.
 2. Tag the release commit with the version number as soon as the PR is merged: ``git tag v0.12.3``, then ``git push --tags``
-3. Build the release with ``./dev/build.sh``, then publish it with ``./dev/publish.sh``
-4. Create an entry in GitHub releases with the release notes for the previously tagged commit and attach the build artifacts (:code:`.whl` and :code:`.tar.gz`).
 
 After the release
 -----------------
