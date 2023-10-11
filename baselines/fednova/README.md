@@ -30,13 +30,70 @@ the experiment can be run with 4 clients in parallel by setting client_resources
 
 ## Experimental Setup
 
-****Task:**** The task is an Image classification task on the  Non-IID CIFAR-10 dataset(10 classes).
+****Task:**** The task is Image classification on CIFAR-10 dataset.
 
-****Model:**** We use a standard VGG-11 model for the image classification task. 
+****Model:**** The experiment uses the below configuration of VGG-11 model for the image classification task. 
+```
+----------------------------------------------------------------
+        Layer (type)               Output Shape         Param #
+================================================================
+            Conv2d-1           [-1, 64, 32, 32]           1,792
+              ReLU-2           [-1, 64, 32, 32]               0
+         MaxPool2d-3           [-1, 64, 16, 16]               0
+            Conv2d-4          [-1, 128, 16, 16]          73,856
+              ReLU-5          [-1, 128, 16, 16]               0
+         MaxPool2d-6            [-1, 128, 8, 8]               0
+            Conv2d-7            [-1, 256, 8, 8]         295,168
+              ReLU-8            [-1, 256, 8, 8]               0
+            Conv2d-9            [-1, 256, 8, 8]         590,080
+             ReLU-10            [-1, 256, 8, 8]               0
+        MaxPool2d-11            [-1, 256, 4, 4]               0
+           Conv2d-12            [-1, 512, 4, 4]       1,180,160
+             ReLU-13            [-1, 512, 4, 4]               0
+           Conv2d-14            [-1, 512, 4, 4]       2,359,808
+             ReLU-15            [-1, 512, 4, 4]               0
+        MaxPool2d-16            [-1, 512, 2, 2]               0
+           Conv2d-17            [-1, 512, 2, 2]       2,359,808
+             ReLU-18            [-1, 512, 2, 2]               0
+           Conv2d-19            [-1, 512, 2, 2]       2,359,808
+             ReLU-20            [-1, 512, 2, 2]               0
+        MaxPool2d-21            [-1, 512, 1, 1]               0
+          Dropout-22                  [-1, 512]               0
+           Linear-23                  [-1, 512]         262,656
+             ReLU-24                  [-1, 512]               0
+          Dropout-25                  [-1, 512]               0
+           Linear-26                  [-1, 512]         262,656
+             ReLU-27                  [-1, 512]               0
+           Linear-28                   [-1, 10]           5,130
+================================================================
+Total params: 9,750,922
+Trainable params: 9,750,922
+Non-trainable params: 0
+----------------------------------------------------------------
+Input size (MB): 0.01
+Forward/backward pass size (MB): 2.57
+Params size (MB): 37.20
+Estimated Total Size (MB): 39.78
+----------------------------------------------------------------
+```
 
-****Dataset:**** Each client would have a highly skewed distribution of class labels following the Drichlet distribution.
+****Dataset:**** The dataset is Non-IID CIFAR-10 dataset which is partitioned across 16 clients using a Dirichlet distribution Dir16(0.1), (alpha=0.1) as done
+in [paper](https://arxiv.org/abs/2002.06440) . Each client gets a different skewed distribution of the class labels following this split.
 
-****Training Hyperparameters:**** Include a table with all the main hyperparameters in your baseline. Please show them with their default value. 
+****Training Hyperparameters:****
+
+| Hyperparameter                  | Description                                                                               | Default value |
+|----------------------------------|-------------------------------------------------------------------------------------------|---------------|
+| optimizer.learning_rate          | Learning rate of local client optimizers                                                  | 0.05          |
+| optimizer.momentum               | Momentum factor                                                                          | 0             |
+| optimizer.mu                     | Proximal updates factor                                                                  | 0             |
+| optimizer.weight_decay          | Weight decay for regularization                                                          | 1e-4          |
+| num_epochs                       | Number of local training epochs for clients                                               | 2             |
+| num_rounds                       | Number of server communication rounds                                                    | 100           |
+| var_local_epochs                 | Whether to have variable or fixed local client training epochs. If True, samples num_epochs uniformly in (2,5) | False         |
+| batch size                       | Batch size for training                                                                   | 32            |
+
+
 
 
 ## Environment Setup
