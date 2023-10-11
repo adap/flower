@@ -105,7 +105,7 @@ class FedNova(FedAvg):
 					return None
 				else:
 					np.savez(
-						f"{self.exp_config.checkpoint_path}bestModel_{self.exp_config.exp_name}_varEpochs_{self.exp_config.var_local_epochs}.npz",
+						f"{self.exp_config.checkpoint_path}bestModel_{self.exp_config.exp_name}_{self.exp_config.strategy}_varEpochs_{self.exp_config.var_local_epochs}.npz",
 						self.global_parameters, [loss, self.best_test_acc], self.global_momentum_buffer)
 
 				log(INFO, "Model saved with Best Test accuracy: {}".format(self.best_test_acc))

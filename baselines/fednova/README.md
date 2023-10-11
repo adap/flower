@@ -16,31 +16,35 @@ dataset: [non-iid cifar10 dataset, synthetic dataset]
 
 ## About this baseline
 
-****What’s implemented:**** *The code in this baseline aims to reproduce the results from Fig 5 in the paper which corresponds to Synthetic(1,1) experiment and further Table 1 for CIFAR 10 dataset.*
+****What’s implemented:**** *_The code in this baseline reproduces the results from Table-1 in the paper which corresponds to experiments on Non-IID CIFAR dataset._*
 
-****Datasets:**** *_This basleline experiments tackles heterogeneous data sources. Non-IID CIFAR-10 dataset and Synthetic(1,1) dataset(creation methodology detailed in [link](https://arxiv.org/pdf/1812.06127.pdf) are used in the experiments._*
+****Datasets:**** *_The dataset in the experiment is a Non-IID CIFAR-10 dataset which is partitioned across 16 clients using a Dirichlet distribution with parameter alpha=0.1._*
 
-****Hardware Setup:**** *_The baseline comprises of federated learning on 16 clients. If we want to run each client in parallel, it would require 16 cpu cores and roughly ~16 GB of GPU memory for a batch size of 32. 
-However, most experiments were performed using a pool of 6 actors(6 clients run in parallel out of 16) requiring 6 cpu cores and 6GB of GPU memory. 
-The experiments were performed on a A100 machine however any GPU with 6GB of memory and 6 cpu cores should be sufficiently fast._*
+****Hardware Setup:**** *_The experiment setting consists of 16 clients. The training is done on a single workstation consisting of 8 CPU cores, 32 GB of RAM and an Nvidia A100 GPU. 
+The total GPU memory usage for the experiment is ~ 10 GB(1.1 GB per client + main process). Therefore effectively, 8 clients run in parallel in this setup using the default config. 
+The total time for a single experiment in this setup is ~ 50 minutes. (or 30 second per communication round). In case of resource constraints, 
+the experiment can be run with 4 clients in parallel by setting client_resources  as following: {num_cpus: 1, num_gpus: 0.25}. This uses ~ 5.4 GB of GPU memory and 4 CPU cores._*
 
 ****Contributors:**** *_Aasheesh Singh (Github: [@ashdtu](https://github.com/ashdtu)), MILA-Quebec AI Institute_*
 
 
 ## Experimental Setup
 
-****Task:**** :warning: *CIFAR-10 dataset --> Image classification_*
+****Task:**** The task is an Image classification task on the  Non-IID CIFAR-10 dataset(10 classes).
 
-****Model:**** :warning: *_provide details about the model you used in your experiments (if more than use a list). If your model is small, describing it as a table would be :100:. Some FL methods do not use an off-the-shelve model (e.g. ResNet18) instead they create your own. If this is your case, please provide a summary here and give pointers to where in the paper (e.g. Appendix B.4) is detailed._*
+****Model:**** We use a standard VGG-11 model for the image classification task. 
 
-****Dataset:**** :warning: *_Earlier you listed already the datasets that your baseline uses. Now you should include a breakdown of the details about each of them. Please include information about: how the dataset is partitioned (e.g. LDA with alpha 0.1 as default and all clients have the same number of training examples; or each client gets assigned a different number of samples following a power-law distribution with each client only instances of 2 classes)? if  your dataset is naturally partitioned just state “naturally partitioned”; how many partitions there are (i.e. how many clients)? Please include this an all information relevant about the dataset and its partitioning into a table._*
+****Dataset:**** Each client would have a highly skewed distribution of class labels following the Drichlet distribution.
 
-****Training Hyperparameters:**** :warning: *_Include a table with all the main hyperparameters in your baseline. Please show them with their default value._*
+****Training Hyperparameters:**** Include a table with all the main hyperparameters in your baseline. Please show them with their default value. 
 
 
 ## Environment Setup
 
 ``` python
+# Navigate to baselines/fednova
+cd baselines/fednova
+
 # Set python version
 pyenv install 3.10.11
 pyenv local 3.10.11
@@ -48,7 +52,7 @@ pyenv local 3.10.11
 # Tell poetry to use python 3.10
 poetry env use 3.10.11
 
-# install the base Poetry environment
+# install the base Poetry environment, make sure there is no existing poetry.lock file and pyproject.toml file is located in the current directory
 poetry install
 
 # activate the environment
@@ -56,38 +60,47 @@ poetry shell
 ```
 
 ## Running the Experiments
+Once the poetry environment is active, you can use the following command to run the various experiments in the Table 1.
+You would need to specify the below two command line parameters to iterate through various experiment configurations. They are as follows:
 
-:warning: _Provide instructions on the steps to follow to run all the experiments._
+1. `experiment`: This parameter specifies the local optimizer configuration. It can take the following values:
+    - `vanilla`: This corresponds to the vanilla SGD as the client optimizer
+    - `momentum`: This corresponds to the SGD optimizer with momentum.
+    - `proximal`: This corresponds to the SGD optimizer with proximal term in the loss.
+    - `hybrd`: This corresponds to hybrid momentum scheme where both the local client optimizer and the server maintain a momentum buffer (only for FedNova strategy).
+
+2. `strategy`: This specifies the aggregation strategy for the client updates. The default is `fednova`. 
+If you do not specify this parameter, all experiments will run with FedNova as the strategy and reproduce the rightmost columns of Table-1. 
+It can take the following values:
+    - `fednova`: This corresponds to the FedNova(default) aggregation strategy. 
+    - `fedavg`: This corresponds to the FedAvg aggregation strategy. The left column of Table-1 can be reproduced by setting this parameter.
+
+3. `var_local_epochs`: Takes value True/False. This parameter specifies whether the number of local training epochs for each client are fixed(Epochs=2) or variable(Uniform sampled from [2,5) ). 
+It takes the following values:
+   - `False`: (default) This corresponds to the fixed number of local epochs for each client. This corresponds to the first part of the Table-1.
+   - `True`: This corresponds to the variable number of local epochs for each client. This corresponds to the second part of the Table-1.
+
 ```bash  
-# The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
+# general format
+python -m fednova.main +experiment=<exp_value> strategy=<strategy_value (fednova/fedavg)> var_local_epochs=<var_local_epochs_value (True/False)>
 
-poetry run -m <baseline-name>.main <no additional arguments> # where <baseline-name> is the name of this directory and that of the only sub-directory in this directory (i.e. where all your source code is)
+# example script
+python -m fednova.main +experiment=momentum strategy=fednova var_local_epochs=True
 
-# If you are using a dataset that requires a complicated download (i.e. not using one natively supported by TF/PyTorch) + preprocessing logic, you might want to tell people to run one script first that will do all that. Please ensure the download + preprocessing can be configured to suit (at least!) a different download directory (and use as default the current directory). The expected command to run to do this is:
-
-poetry run -m <baseline-name>.dataset_preparation <optional arguments, but default should always run>
-
-# It is expected that you baseline supports more than one dataset and different FL settings (e.g. different number of clients, dataset partitioning methods, etc). Please provide a list of commands showing how these experiments are run. Include also a short explanation of what each one does. Here it is expected you'll be using the Hydra syntax to override the default config.
-
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
-.
-.
-.
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
 ```
 
 
 ## Expected Results
 
-:warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
+Centralized Evaluation: Accuracy(in %) on centralized Test set
 
-``` bash
-# it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameteres
-
-poetry run -m <baseline-name>.main --multirun num_client_per_round=5,10,50 dataset=femnist,cifar10
-# the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
-
-[Now show a figure/table displaying the results of the above command]
-
-# add more commands + plots for additional experiments.
-```
+| Local Epochs | Client Optimizer | FedAvg | FedNova |
+| ------------ | ---------------- | ------ | ------- |
+| 2            | Vanilla          | 71.57  | 68.25   |
+| 2            | Momentum         | 75.92  | 73.33   |
+| 2            | Proximal         | -  | 67.47   |
+| Random(2-5)  | Vanilla          | -  | 72.27   |
+| Random(2-5)  | Momentum         | -  | 75.73   |
+| Random(2-5)  | Proximal         | -  | 71.48   |
+| Random(2-5)  | Server           |  N/A   |  -      |
+| Random(2-5)  | Hybrid           |   N/A    |  -      |

@@ -298,11 +298,19 @@ if __name__ == "__main__":
 
 	ssl._create_default_https_context = ssl._create_unverified_context
 
-	# from dataset import load_datasets
+	from fednova.dataset import load_datasets
 	from omegaconf import OmegaConf
 	# from torch.optim import SGD
+	import numpy as np
+	import random
+	random.seed(1)
+	np.random.seed(1)
 
-	config = OmegaConf.load("conf/base.yaml")
+	config = OmegaConf.load("fednova/conf/base.yaml")
+
+	trainloaders, testloader, data_ratios = load_datasets(config)
+	print([len(x) for x in trainloaders], len(testloader))
+	exit()
 
 	# device = torch.device('cpu')
 	#

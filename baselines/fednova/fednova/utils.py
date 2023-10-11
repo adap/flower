@@ -9,6 +9,8 @@ from typing import List, Tuple
 import torch
 from flwr.common import Metrics
 from omegaconf import DictConfig
+import matplotlib.pyplot as plt
+
 
 class Meter(object):
 	""" Computes and stores the average, variance, and current value """
@@ -124,3 +126,11 @@ def fit_config(exp_config: DictConfig, server_round: int):
 	config["lr"] = lr
 	config["server_round"] = server_round
 	return config
+
+
+def generate_plots():
+	pass
+
+
+if __name__ == "__main__":
+	pass

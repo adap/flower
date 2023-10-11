@@ -42,7 +42,10 @@ def main(cfg: DictConfig) -> None:
 	# torch.backends.cudnn.deterministic = True
 
 	# 1. Print parsed config
-	print(OmegaConf.to_yaml(cfg))
+	# print(OmegaConf.to_yaml(cfg))
+
+	print(cfg.optimizer)
+	exit(-1)
 
 	# 2. Prepare your dataset and directories
 
@@ -137,8 +140,7 @@ def main(cfg: DictConfig) -> None:
 		test_loss = test_loss[1:]
 		test_accuracy = test_accuracy[1:]
 
-	file_name = f"{save_path}{cfg.strategy}_varEpoch_{cfg.var_local_epochs}_lr_{cfg.optimizer.lr}_momentum_{cfg.optimizer.momentum}_gmf_{cfg.optimizer.gmf}_" \
-				f"mu_{cfg.optimizer.mu}.csv"
+	file_name = f"{save_path}{cfg.exp_name}_{cfg.strategy}_varEpoch_{cfg.var_local_epochs}.csv"
 
 	df = pd.DataFrame({"round": round, "train_loss": train_loss, "train_accuracy": train_accuracy,
 					   "test_loss": test_loss, "test_accuracy": test_accuracy})
