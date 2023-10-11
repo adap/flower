@@ -1,11 +1,11 @@
 """Defines the client class and support functions for SCAFFOLD."""
 
 import os
-from typing import Callable, Dict, List, OrderedDict, Tuple, Union
+from typing import Callable, Dict, List, OrderedDict
 
 import flwr as fl
 import torch
-from flwr.common import Scalar, ndarrays_to_parameters, parameters_to_ndarrays
+from flwr.common import Scalar
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
@@ -59,8 +59,11 @@ class FlowerClientScaffold(fl.client.NumPyClient):
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         self.net.load_state_dict(state_dict, strict=True)
 
-    def fit(self, parameters, config: Dict[str, Union[Scalar, List[torch.Tensor]]]):
+    def fit(self, parameters, config: Dict[str, Scalar]):
         """Implement distributed fit function for a given client for SCAFFOLD."""
+        # the first half are model parameters and the second are the server_cv
+        server_cv = parameters[len(parameters) // 2 :]
+        parameters = parameters[: len(parameters) // 2]
         self.set_parameters(parameters)
         self.client_cv = []
         for param in self.net.parameters():
@@ -69,8 +72,6 @@ class FlowerClientScaffold(fl.client.NumPyClient):
         if os.path.exists(f"{self.dir}/client_cv_{self.id}.pt"):
             self.client_cv = torch.load(f"{self.dir}/client_cv_{self.id}.pt")
         # convert the server control variate to a list of tensors
-        server_cv = config["server_cv"]
-        server_cv = parameters_to_ndarrays(server_cv)
         server_cv = [torch.Tensor(cv) for cv in server_cv]
         train_scaffold(
             self.net,
@@ -101,10 +102,13 @@ class FlowerClientScaffold(fl.client.NumPyClient):
             server_update_c.append((c_i_n[-1] - c_i_j).cpu().numpy())
         self.client_cv = c_i_n
         torch.save(self.client_cv, f"{self.dir}/client_cv_{self.id}.pt")
+
+        combined_updates = server_update_x + server_update_c
+
         return (
-            server_update_x,
+            combined_updates,
             len(self.trainloader.dataset),
-            {"server_update_c": ndarrays_to_parameters(server_update_c)},
+            {},
         )
 
     def evaluate(self, parameters, config: Dict[str, Scalar]):
@@ -123,9 +127,7 @@ def gen_client_fn(
     model: DictConfig,
     momentum: float = 0.9,
     weight_decay: float = 0.0,
-) -> Tuple[
-    Callable[[str], FlowerClientScaffold], DataLoader
-]:  # pylint: disable=too-many-arguments
+) -> Callable[[str], FlowerClientScaffold]:  # pylint: disable=too-many-arguments
     """Generate the client function that creates the scaffold flower clients.
 
     Parameters
@@ -137,22 +139,21 @@ def gen_client_fn(
         A list of DataLoaders, each pointing to the dataset validation partition
         belonging to a particular client.
     client_cv_dir : str
-        The directory where the client control variates are stored (persistent storage)
+        The directory where the client control variates are stored (persistent storage).
     num_epochs : int
         The number of local epochs each client should run the training for before
         sending it to the server.
     learning_rate : float
         The learning rate for the SGD  optimizer of clients.
     momentum : float
-        The momentum for SGD optimizer of clients
+        The momentum for SGD optimizer of clients.
     weight_decay : float
-        The weight decay for SGD optimizer of clients
+        The weight decay for SGD optimizer of clients.
 
     Returns
     -------
-    Tuple[Callable[[str], FlowerClientScaffold], DataLoader]
-        A tuple containing the client function that creates the scaffold flower clients
-        and the DataLoader that will be used for testing
+    Callable[[str], FlowerClientScaffold]
+        The client function that creates the scaffold flower clients.
     """
 
     def client_fn(cid: str) -> FlowerClientScaffold:
@@ -167,7 +168,7 @@ def gen_client_fn(
         valloader = valloaders[int(cid)]
 
         return FlowerClientScaffold(
-            cid,
+            int(cid),
             net,
             trainloader,
             valloader,

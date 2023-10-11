@@ -7,6 +7,8 @@ from typing import OrderedDict
 import torch
 from flwr.common import (
     Code,
+    FitIns,
+    FitRes,
     Parameters,
     Scalar,
     ndarrays_to_parameters,
@@ -32,7 +34,11 @@ from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
 from niid_bench.models import test
-from niid_bench.strategy_scaffold import FitIns, FitRes, FitResultsAndFailures
+
+FitResultsAndFailures = Tuple[
+    List[Tuple[ClientProxy, FitRes]],
+    List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+]
 
 
 class ScaffoldServer(Server):
@@ -42,13 +48,13 @@ class ScaffoldServer(Server):
         self,
         strategy: Strategy,
         model: DictConfig,
-        client_manager: ClientManager = None,
+        client_manager: Optional[ClientManager] = None,
     ):
         if client_manager is None:
             client_manager = SimpleClientManager()
         super().__init__(client_manager=client_manager, strategy=strategy)
         self.model_params = instantiate(model)
-        self.server_cv = None
+        self.server_cv: List[torch.Tensor] = []
 
     def _get_initial_parameters(self, timeout: Optional[float]) -> Parameters:
         """Get initial parameters from one of the available clients."""
@@ -79,6 +85,15 @@ class ScaffoldServer(Server):
             server_cv.append(param.clone().detach())
         return server_cv
 
+    def _update_parameters_with_cv(
+        self, parameters: Parameters, cv: List[torch.Tensor]
+    ) -> Parameters:
+        # extend the list of parameters arrays with the cv arrays
+        cv_np = [cv.numpy() for cv in cv]
+        parameters_np = parameters_to_ndarrays(parameters)
+        parameters_np.extend(cv_np)
+        return ndarrays_to_parameters(parameters_np)
+
     def fit_round(
         self,
         server_round: int,
@@ -90,9 +105,8 @@ class ScaffoldServer(Server):
         # Get clients and their respective instructions from strateg
         client_instructions = self.strategy.configure_fit(
             server_round=server_round,
-            parameters=self.parameters,
+            parameters=self._update_parameters_with_cv(self.parameters, self.server_cv),
             client_manager=self._client_manager,
-            server_cv=self.server_cv,
         )
 
         if not client_instructions:
@@ -122,15 +136,26 @@ class ScaffoldServer(Server):
 
         # Aggregate training results
         aggregated_result: Tuple[
-            Optional[NDArrays], Dict[str, Scalar], Optional[NDArrays]
+            Optional[Parameters], Dict[str, Scalar]
         ] = self.strategy.aggregate_fit(server_round, results, failures)
+
+        aggregated_result_arrays_combined = []
+        if aggregated_result[0] is not None:
+            aggregated_result_arrays_combined = parameters_to_ndarrays(
+                aggregated_result[0]
+            )
+        aggregated_parameters = aggregated_result_arrays_combined[
+            : len(aggregated_result_arrays_combined) // 2
+        ]
+        aggregated_cv_update = aggregated_result_arrays_combined[
+            len(aggregated_result_arrays_combined) // 2 :
+        ]
 
         # convert server cv into ndarrays
         server_cv_np = [cv.numpy() for cv in self.server_cv]
         # update server cv
         total_clients = len(self._client_manager.all())
         cv_multiplier = len(results) / total_clients
-        aggregated_cv_update = aggregated_result[2]
         self.server_cv = [
             torch.from_numpy(cv + cv_multiplier * aggregated_cv_update[i])
             for i, cv in enumerate(server_cv_np)
@@ -139,14 +164,13 @@ class ScaffoldServer(Server):
         # update parameters x = x + 1* aggregated_update
         curr_params = parameters_to_ndarrays(self.parameters)
         updated_params = [
-            x + aggregated_result[0][i] for i, x in enumerate(curr_params)
+            x + aggregated_parameters[i] for i, x in enumerate(curr_params)
         ]
-        parameters_aggregated = ndarrays_to_parameters(updated_params)
-        # self.parameters = parameters_aggregated
+        parameters_updated = ndarrays_to_parameters(updated_params)
 
         # metrics
         metrics_aggregated = aggregated_result[1]
-        return parameters_aggregated, metrics_aggregated, (results, failures)
+        return parameters_updated, metrics_aggregated, (results, failures)
 
 
 def fit_clients(
