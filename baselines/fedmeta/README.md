@@ -9,35 +9,35 @@ dataset: [FEMNIST, SHAKESPEARE]
 
 **Paper:** [arxiv.org/abs/1802.07876](https://arxiv.org/abs/1802.07876)
 
-****Authors:**** :Fei Chen, Mi Luo, Zhenhua Dong, Zhenguo Li, Xiuqiang He
+**Authors:** Fei Chen, Mi Luo, Zhenhua Dong, Zhenguo Li, Xiuqiang He
 
-****Abstract:**** :Statistical and systematic challenges in collaboratively training machine learning models across distributed networks of mobile devices have been the bottlenecks in the real-world application of federated learning. In this work, we show that meta-learning is a natural choice to handle these issues, and propose a federated meta-learning framework FedMeta, where a parameterized algorithm (or meta-learner) is shared, instead of a global model in previous approaches. We conduct an extensive empirical evaluation on LEAF datasets and a real-world production dataset, and demonstrate that FedMeta achieves a reduction in required communication cost by 2.82-4.33 times with faster convergence, and an increase in accuracy by 3.23%-14.84% as compared to Federated Averaging (FedAvg) which is a leading optimization algorithm in federated learning. Moreover, FedMeta preserves user privacy since only the parameterized algorithm is transmitted between mobile devices and central servers, and no raw data is collected onto the servers.
+**Abstract:** Statistical and systematic challenges in collaboratively training machine learning models across distributed networks of mobile devices have been the bottlenecks in the real-world application of federated learning. In this work, we show that meta-learning is a natural choice to handle these issues, and propose a federated meta-learning framework FedMeta, where a parameterized algorithm (or meta-learner) is shared, instead of a global model in previous approaches. We conduct an extensive empirical evaluation on LEAF datasets and a real-world production dataset, and demonstrate that FedMeta achieves a reduction in required communication cost by 2.82-4.33 times with faster convergence, and an increase in accuracy by 3.23%-14.84% as compared to Federated Averaging (FedAvg) which is a leading optimization algorithm in federated learning. Moreover, FedMeta preserves user privacy since only the parameterized algorithm is transmitted between mobile devices and central servers, and no raw data is collected onto the servers.
 
 
 ## About this baseline 
 
-****What’s implemented:**** : We reimplemented the experiments from the paper 'FedMeta: Federated Meta-Learning with Fast Convergence and Efficient Communication' by Fei Chen (2018). which proposed the FedMeta(MAML & Meta-SGD) algorithm. Specifically, we replicate the results from Table 2 and Figure 2 of the paper.
+**What’s implemented:** We reimplemented the experiments from the paper 'FedMeta: Federated Meta-Learning with Fast Convergence and Efficient Communication' by Fei Chen (2018). which proposed the FedMeta(MAML & Meta-SGD) algorithm. Specifically, we replicate the results from Table 2 and Figure 2 of the paper.
 
-****Datasets:**** : FEMNIST and SHAKESPEARE from Leaf Federated Learning Dataset
+**Datasets:** FEMNIST and SHAKESPEARE from Leaf Federated Learning Dataset
 
-****Hardware Setup:**** : These experiments were run on a machine with 16 CPU threads and 1 GPU(GeForce RTX 2080 Ti). **However, the FedMeta experiment using the Shakespeare dataset required more computing power (more than 4 GPUs).** Out of Memory errors may occur with some clients, but federated learning can continue to operate.
+**Hardware Setup:** These experiments were run on a machine with 16 CPU threads and 1 GPU(GeForce RTX 2080 Ti). **However, the FedMeta experiment using the Shakespeare dataset required more computing power (more than 4 GPUs).** Out of Memory errors may occur with some clients, but federated learning can continue to operate.
 
-****Contributors:**** : **Jinsoo Kim and Kangyoon Lee**
+**Contributors:** Jinsoo Kim and Kangyoon Lee
 
 
 ## Experimental Setup
 
-****Task:**** : A comparison task of four algorithms(FedAvg, FedAvg(Meta), FedMeta(MAML), FedMeta(Meta-SGD)) in the categories of Image Classification and next-word prediction.
+**Task:** A comparison task of four algorithms(FedAvg, FedAvg(Meta), FedMeta(MAML), FedMeta(Meta-SGD)) in the categories of Image Classification and next-word prediction.
 
-****Model:**** :This directory implements two models:
+**Model:** This directory implements two models:
 * A two-layer CNN network as used in the FedMeta paper for Femnist (see `models/CNN_Network`).
 * A StackedLSTM model used in the FedMeta paper for Shakespeare (see `models/StackedLSTM`).
 
 **You can see more detail in Apendix.A of the  paper**
 
-****Dataset:**** : This baseline includes the FEMNIST dataset and SHAKESPEARE. For data partitioning and sampling per client, we use the Leaf GitHub([LEAF: A Benchmark for Federated Settings](https://github.com/TalwalkarLab/leaf)). The data and client specifications used in this experiment are listed in the table below (Table 1 in the paper).
+**Dataset:** This baseline includes the FEMNIST dataset and SHAKESPEARE. For data partitioning and sampling per client, we use the Leaf GitHub([LEAF: A Benchmark for Federated Settings](https://github.com/TalwalkarLab/leaf)). The data and client specifications used in this experiment are listed in the table below (Table 1 in the paper).
 
-**Shakespeare Dataset Issue** : In the FedMeta paper experiment, the Shakespeare dataset had 1126 users. However, due to a current bug, the number of users has decreased to 660 users. Therefore, we have only maintained the total number of data.
+**Shakespeare Dataset Issue:** In the FedMeta paper experiment, the Shakespeare dataset had 1126 users. However, due to a current bug, the number of users has decreased to 660 users. Therefore, we have only maintained the total number of data.
 
 |   Dataset   | #Clients | #Samples | #Classes |                       #Partition Clients                        |   #Partition Dataset   |
 |:-----------:|:--------:|:--------:|:--------:|:---------------------------------------------------------------:|:----------------------:|
@@ -46,7 +46,7 @@ dataset: [FEMNIST, SHAKESPEARE]
 
 **The original specifications of the Leaf dataset can be found in the Leaf paper(_"LEAF: A Benchmark for Federated Settings"_).**
 
-****Training Hyperparameters:**** : The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python main.py algo=? data=?` directly)
+**Training Hyperparameters:** The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python main.py algo=? data=?` directly)
 
 |     Algorithm     |    Dataset     | Clients per Round | Number of Rounds | Batch Size | Optimizer | Learning Rate(α, β) |            Client Resources             | Gradient Step |
 |:-----------------:|:--------------:|:-----------------:|:----------------:|:----------:|:---------:|:-------------------:|:---------------------------------------:|:-------------:|
@@ -73,7 +73,7 @@ poetry shell
 
 ## Running the Experiments
 
-****Download Dataset**** : Go [LEAF: A Benchmark for Federated Settings](https://github.com/TalwalkarLab/leaf) and Use the command below! You can download dataset (FEMNIST and SHAKESPEARE). 
+**Download Dataset** Go [LEAF: A Benchmark for Federated Settings](https://github.com/TalwalkarLab/leaf) and Use the command below! You can download dataset (FEMNIST and SHAKESPEARE). 
 ```bash
 # clone LEAF repo
 git clone https://github.com/TalwalkarLab/leaf.git
@@ -100,7 +100,7 @@ cd leaf/data/shakespeare
 
 More detailed tag information can be found on Leaf GitHub.
 
-****Start experiments**** : 
+****Start experiments****
 ```bash  
 # FedAvg + Femnist Dataset
 python -m fedmeta.main algo=fedavg data=femnist path=(your leaf dataset path)/leaf/data/femnist/data
