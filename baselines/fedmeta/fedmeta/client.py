@@ -20,15 +20,15 @@ class FlowerClient(fl.client.NumPyClient):
 
     # pylint: disable=too-many-arguments
     def __init__(
-        self,
-        net: torch.nn.Module,
-        trainloaders: DataLoader,
-        valloaders: DataLoader,
-        cid: str,
-        device: torch.device,
-        num_epochs: int,
-        learning_rate: float,
-        gradient_step: int,
+            self,
+            net: torch.nn.Module,
+            trainloaders: DataLoader,
+            valloaders: DataLoader,
+            cid: str,
+            device: torch.device,
+            num_epochs: int,
+            learning_rate: float,
+            gradient_step: int,
     ):
         self.net = net
         self.trainloaders = trainloaders
@@ -50,7 +50,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.net.load_state_dict(state_dict, strict=True)
 
     def fit(  # type: ignore
-        self, parameters: NDArrays, config: Dict[str, Scalar]
+            self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, int, Dict]:
         """Implement distributed fit function for a given client."""
         self.set_parameters(parameters)
@@ -75,7 +75,7 @@ class FlowerClient(fl.client.NumPyClient):
         # FedMeta(MAML) & FedMeta(Meta-SGD) train inner and outer loop
         if algo in ('fedmeta_maml', 'fedmeta_meta_sgd'):
             alpha = config["alpha"]
-            loss, grads = train_meta( # type: ignore
+            loss, grads = train_meta(  # type: ignore
                 self.net,
                 self.trainloaders["sup"][self.cid],
                 self.trainloaders["qry"][self.cid],
@@ -87,7 +87,7 @@ class FlowerClient(fl.client.NumPyClient):
         raise ValueError("Unsupported algorithm")
 
     def evaluate(  # type: ignore
-        self, parameters: NDArrays, config: Dict[str, Scalar]
+            self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[float, int, Dict]:
         """Implement distributed evaluation for a given client."""
         self.set_parameters(parameters)
@@ -128,12 +128,12 @@ class FlowerClient(fl.client.NumPyClient):
 
 # pylint: disable=too-many-arguments
 def gen_client_fn(
-    num_epochs: int,
-    trainloaders: List[DataLoader],
-    valloaders: List[DataLoader],
-    learning_rate: float,
-    model: DictConfig,
-    gradient_step: int,
+        num_epochs: int,
+        trainloaders: List[DataLoader],
+        valloaders: List[DataLoader],
+        learning_rate: float,
+        model: DictConfig,
+        gradient_step: int,
 ) -> Callable[[str], FlowerClient]:
     """Generate the client function that creates the Flower Clients.
 

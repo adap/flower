@@ -32,12 +32,12 @@ from fedmeta.utils import update_ema
 
 # pylint: disable=too-many-arguments
 def fedmeta_update_meta_sgd(
-        net: torch.nn.Module,
-        alpha: torch.nn.ParameterList,
-        beta: float,
-        weights_results: NDArrays,
-        gradients_aggregated: NDArrays,
-        weight_decay: float,
+    net: torch.nn.Module,
+    alpha: torch.nn.ParameterList,
+    beta: float,
+    weights_results: NDArrays,
+    gradients_aggregated: NDArrays,
+    weight_decay: float,
 ) -> Tuple[NDArrays, torch.nn.ParameterList]:
     """Update model parameters for FedMeta(Meta-SGD).
 
@@ -80,11 +80,11 @@ def fedmeta_update_meta_sgd(
 
 
 def fedmeta_update_maml(
-        net: torch.nn.Module,
-        beta: float,
-        weights_results: NDArrays,
-        gradients_aggregated: NDArrays,
-        weight_decay: float,
+    net: torch.nn.Module,
+    beta: float,
+    weights_results: NDArrays,
+    gradients_aggregated: NDArrays,
+    weight_decay: float,
 ) -> NDArrays:
     """Update model parameters for FedMeta(Meta-SGD).
 
@@ -109,7 +109,9 @@ def fedmeta_update_maml(
     params_dict = zip(net.state_dict().keys(), weights_results)
     state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
     net.load_state_dict(state_dict, strict=True)
-    optimizer = torch.optim.Adam(list(net.parameters()), lr=beta, weight_decay=weight_decay)
+    optimizer = torch.optim.Adam(
+        list(net.parameters()), lr=beta, weight_decay=weight_decay
+    )
     for params, grad_ins in zip(net.parameters(), gradients_aggregated):
         params.grad = torch.tensor(grad_ins).to(params.dtype)
     optimizer.step()
@@ -164,7 +166,7 @@ class FedMeta(FedAvg):
         )
 
     def configure_fit(
-            self, server_round: int, parameters: Parameters, client_manager: ClientManager
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
         config = {"alpha": self.alpha, "algo": self.algo, "data": self.data}
@@ -181,14 +183,14 @@ class FedMeta(FedAvg):
             num_clients=sample_size,
             min_num_clients=min_num_clients,
             server_round=server_round,
-            step='evaluate'
+            step="fit",
         )
 
         # Return client/config pairs
         return [(client, fit_ins) for client in clients]
 
     def configure_evaluate(
-            self, server_round: int, parameters: Parameters, client_manager: ClientManager
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
         # Do not configure federated evaluation if fraction eval is 0.
@@ -210,17 +212,17 @@ class FedMeta(FedAvg):
             num_clients=sample_size,
             min_num_clients=min_num_clients,
             server_round=server_round,
-            step='evaluate'
+            step="evaluate",
         )
 
         # Return client/config pairs
         return [(client, evaluate_ins) for client in clients]
 
     def aggregate_fit(
-            self,
-            server_round: int,
-            results: List[Tuple[ClientProxy, FitRes]],
-            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+        self,
+        server_round: int,
+        results: List[Tuple[ClientProxy, FitRes]],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
@@ -237,9 +239,9 @@ class FedMeta(FedAvg):
 
         parameters_aggregated = aggregate(weights_results)
         if self.data == "femnist":
-            weight_decay = 0.001
+            weight_decay_ = 0.001
         else:
-            weight_decay = 0.0001
+            weight_decay_ = 0.0001
 
         # Gradient Average and Update Parameter for FedMeta(MAML)
         if self.algo == "fedmeta_maml":
@@ -249,14 +251,18 @@ class FedMeta(FedAvg):
             ]
             gradients_aggregated = aggregate(grads_results)
             weights_prime = fedmeta_update_maml(
-                self.net, self.beta, weights_results[0][0], gradients_aggregated, weight_decay
+                self.net,
+                self.beta,
+                weights_results[0][0],
+                gradients_aggregated,
+                weight_decay_,
             )
             parameters_aggregated = weights_prime
 
         # Gradient Average and Update Parameter for FedMeta(Meta-SGD)
         elif self.algo == "fedmeta_meta_sgd":
-            grads_results = [
-                (fit_res.metrics["grads"], fit_res.num_examples)  # type: ignore
+            grads_results: List[Tuple[NDArrays, int]] = [ # type: ignore
+                (fit_res.metrics["grads"], fit_res.num_examples)
                 for _, fit_res in results
             ]
             gradients_aggregated = aggregate(grads_results)
@@ -266,7 +272,7 @@ class FedMeta(FedAvg):
                 self.beta,
                 weights_results[0][0],
                 gradients_aggregated,
-                weight_decay,
+                weight_decay_,
             )
             self.alpha = update_alpha
             parameters_aggregated = weights_prime
@@ -282,10 +288,10 @@ class FedMeta(FedAvg):
         return ndarrays_to_parameters(parameters_aggregated), metrics_aggregated
 
     def aggregate_evaluate(
-            self,
-            server_round: int,
-            results: List[Tuple[ClientProxy, EvaluateRes]],
-            failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
+        self,
+        server_round: int,
+        results: List[Tuple[ClientProxy, EvaluateRes]],
+        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation losses using weighted average."""
         if not results:

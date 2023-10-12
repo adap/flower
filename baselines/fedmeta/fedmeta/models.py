@@ -210,24 +210,20 @@ def test(
         The loss and the accuracy of the input model on the given data.
     """
     criterion = torch.nn.CrossEntropyLoss()
-
+    total_loss = 0.0
     if algo == "fedavg_meta":
         optimizer = torch.optim.Adam(
             net.parameters(), lr=learning_rate, weight_decay=0.001
         )
         net.train()
+        optimizer.zero_grad()
         if data == "femnist":
             for images, labels in trainloader:
                 images, labels = images.to(device), labels.to(device)
                 loss = criterion(net(images), labels)
-                optimizer.zero_grad()
                 loss.backward()
-                optimizer.step()
-                # total_loss += loss * labels.size(0)
-            # total_loss = total_loss / len(trainloader.dataset)
-            # optimizer.zero_grad()
-            # total_loss.backward()
-            # optimizer.step()
+                total_loss += loss * labels.size(0)
+            optimizer.step()
 
         elif data == "shakespeare":
             for images, labels in trainloader:
@@ -332,6 +328,7 @@ def _train_meta_one_epoch(
     num_adaptation_steps = gradient_step
     train_net = deepcopy(net)
     alpha = [alpha.to(device) for alpha in alpha]
+    train_net.train()
     for _ in range(num_adaptation_steps):
         loss_sum = 0.0
         sup_num_sample = []
