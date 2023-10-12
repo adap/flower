@@ -15,9 +15,18 @@
 """Utils for FederatedDataset."""
 
 
+import warnings
 from typing import Dict, Union, cast
 
 from flwr_datasets.partitioner import IidPartitioner, Partitioner
+
+tested_datasets = [
+    "mnist",
+    "cifar10",
+    "fashion_mnist",
+    "sasha/dog-food",
+    "zh-plus/tiny-imagenet",
+]
 
 
 def _instantiate_partitioners(
@@ -60,17 +69,10 @@ def _instantiate_partitioners(
     return instantiated_partitioners
 
 
-def _check_if_dataset_supported(dataset: str) -> None:
+def _check_if_dataset_tested(dataset: str) -> None:
     """Check if the dataset is in the narrowed down list of the tested datasets."""
-    supported_datasets = [
-        "mnist",
-        "cifar10",
-        "fashion_mnist",
-        "sasha/dog-food",
-        "zh-plus/tiny-imagenet",
-    ]
-    if dataset not in supported_datasets:
-        raise ValueError(
-            f"The currently tested and supported dataset are {supported_datasets}. "
-            f"Given: {dataset}"
+    if dataset not in tested_datasets:
+        warnings.warn(
+            f"The currently tested dataset are {tested_datasets}. Given: {dataset}.",
+            stacklevel=1,
         )

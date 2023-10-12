@@ -202,7 +202,7 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
 
     def test_unsupported_dataset(self) -> None:  # pylint: disable=R0201
         """Test creating FederatedDataset for unsupported dataset."""
-        with pytest.raises(ValueError):
+        with pytest.warns(UserWarning):
             FederatedDataset(dataset="food101", partitioners={"train": 100})
 
 
