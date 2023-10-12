@@ -56,10 +56,38 @@ Each dataset can be partitioned across 2, 5 or 10 clients in an IID distribution
 
 ****Training Hyperparameters:**** 
 
-Using the original hyperparameters didn't give the best performance sometimes, It's kinda normal as the paper used the same hyperparameters for all the datasets while some of them were small with few no.of features while some were big datasets with bigger no.of features, e.g: YearPredictionMSD had 515,345 rows and 90 features while space_ga got 3,167 rows and 6 features.<br>
-There are different hyperparameters used for each client setting in the federated system.<br>
+Here are all the original hyperparameters for the federated horizontal XGBoost model -hyperparameters that are used only in the XGBoost model are initialized with xgb same for the ones only used in Adam-:
 
-For the centralized model, the paper's hyperparameters was mostly used as they give very good results -except for abalone and cpusmall-, here are the used hyperparameters:
+| Hyperparameter name | value |
+| -- | -- |
+| n_estimators | 500/no.of clients |
+| xgb max_depth | 8 |
+| xgb subsample | 0.8 |
+| xgb learning_rate | .1 |
+| xgb colsample_bylevel | 1 |
+| xgb colsample_bynode | 1 |
+| xgb colsample_bytree | 1 |
+| xgb alpha | 5 |
+| xgb gamma | 5 |
+| xgb num_parallel_tree | 1 |
+| xgb min_child_weight | 1 |
+| Adam learning rate | .0001 |
+| Adam Betas | 0.5, 0.999 |
+| no.of iterations for the CNN model | 100 |
+
+Those hyperparameters did  well for most datasets but for some datasets, it wasn't giving the best performance so a fine-tuning journey has started in order to achieve better results.<br>
+At first, it was a manual process basically experiencing different values for some groups of hyperparameters to explore those hyperparameters's effect on the performance of different datasets until I decided to focus on those groups of the following hyperparameters as they seemed to have the major effect on different datasets performances:
+| Hyperparameter name |
+| -- | 
+| n_estimators |
+| xgb max_depth | 
+| Adam learning rate | 
+| no.of iterations for the CNN model |
+
+All the final new values for those hyperparameters can be found in 3 `yaml` files named `dataset_name_<no. of clients>_clients` and all the original values for those hyperparameters can be found in 3 `yaml` files named `paper_<no. of clients>_clients`  -that created a large number of config files 3*7+3= 24 config files in the `clients` folder-
+
+
+For the centralized model, the paper's hyperparameters were mostly used as they give very good results -except for abalone and cpusmall-, here are the used hyperparameters -they can all be found in the `yaml` file named `paper_xgboost_centralized`:
 
 | Hyperparameter name | value |
 | -- | -- |
@@ -75,6 +103,7 @@ For the centralized model, the paper's hyperparameters was mostly used as they g
 | num_parallel_tree | 1 |
 | min_child_weight | 1 |
 
+There've been 
 To help with the fine-tuning of the hyperparameters process, there are 2 classes in the utils.py that write down the used hyperparameters in the experiments and the results for that experiment in 2 separate CSV files, some of the hyperparameters used in the experiments done during building this baseline can be found in results.csv and results_centralized.csv files.
 
 ## Environment Setup
