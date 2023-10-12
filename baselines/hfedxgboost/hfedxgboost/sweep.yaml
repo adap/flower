@@ -1,5 +1,7 @@
 program: main.py
 method: random
+#metric part is just here for documentation
+#not needed as this is random stratgy
 metric:
   goal: minimize
   name: loss
@@ -9,7 +11,14 @@ parameters:
   clients:
     value: abalone_5_clients
   clients.n_estimators_client: 
-        values: [200,300]
+    values: [200,300]
+  clients.num_iterations:
+    values: [100,500]
+  clients.xgb.max_depth: 
+    values: [4,8]
+  clients.CNN.lr:
+    min: .0001
+    max: 0.1
 command:
   - ${env}
   - python
