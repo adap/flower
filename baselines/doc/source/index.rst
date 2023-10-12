@@ -54,5 +54,3 @@ References
 
 Information-oriented API reference and other reference material.
 
-.. note::
-  This section will soon list all available Flower Baselines
