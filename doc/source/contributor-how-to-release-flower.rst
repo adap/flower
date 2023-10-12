@@ -20,7 +20,7 @@ The version number of a release is stated in ``pyproject.toml``. To release a ne
 1. Update the ``changelog.md`` section header ``Unreleased`` to contain the version number and date for the release you are building. Create a pull request with the change.
 2. Tag the release commit with the version number as soon as the PR is merged: ``git tag v0.12.3``, then ``git push --tags``. This will create a draft release on GitHub 
 containing the correct artifacts and the relevant part of the changelog.
-3. Check the draft release on GitHub, and if everything is good, publish the release.
+3. Check the draft release on GitHub, and if everything is good, publish it.
 
 After the release
 -----------------
