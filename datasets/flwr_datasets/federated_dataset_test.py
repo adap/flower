@@ -15,7 +15,6 @@
 """Federated Dataset tests."""
 # pylint: disable=W0212, C0103, C0206
 
-
 import unittest
 from typing import Dict, Union
 
@@ -23,6 +22,7 @@ import pytest
 from parameterized import parameterized, parameterized_class
 
 import datasets
+from datasets import DatasetDict, concatenate_datasets
 from flwr_datasets.federated_dataset import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner, Partitioner
 
@@ -92,6 +92,55 @@ class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
             len(dataset_test_partition0),
             len(dataset[self.test_split]) // num_test_partitions,
         )
+
+    def test_resplit_dataset_into_one(self) -> None:
+        """Test resplit into a single dataset."""
+        dataset = datasets.load_dataset(self.dataset_name)
+        dataset_length = sum([len(ds) for ds in dataset.values()])
+        fds = FederatedDataset(
+            dataset=self.dataset_name,
+            partitioners={"train": 100},
+            resplitter={("train", self.test_split): "full"},
+        )
+        full = fds.load_full("full")
+        self.assertEqual(dataset_length, len(full))
+
+    # pylint: disable=protected-access
+    def test_resplit_dataset_to_change_names(self) -> None:
+        """Test resplitter to change the names of the partitions."""
+        fds = FederatedDataset(
+            dataset=self.dataset_name,
+            partitioners={"new_train": 100},
+            resplitter={
+                ("train",): "new_train",
+                (self.test_split,): "new_" + self.test_split,
+            },
+        )
+        _ = fds.load_partition(0, "new_train")
+        assert fds._dataset is not None
+        self.assertEqual(
+            set(fds._dataset.keys()), {"new_train", "new_" + self.test_split}
+        )
+
+    def test_resplit_dataset_by_callable(self) -> None:
+        """Test resplitter to change the names of the partitions."""
+
+        def resplit(dataset: DatasetDict) -> DatasetDict:
+            return DatasetDict(
+                {
+                    "full": concatenate_datasets(
+                        [dataset["train"], dataset[self.test_split]]
+                    )
+                }
+            )
+
+        fds = FederatedDataset(
+            dataset=self.dataset_name, partitioners={"train": 100}, resplitter=resplit
+        )
+        full = fds.load_full("full")
+        dataset = datasets.load_dataset(self.dataset_name)
+        dataset_length = sum([len(ds) for ds in dataset.values()])
+        self.assertEqual(len(full), dataset_length)
 
 
 class PartitionersSpecificationForFederatedDatasets(unittest.TestCase):
@@ -189,6 +238,18 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
         """Test creating FederatedDataset for unsupported dataset."""
         with pytest.warns(UserWarning):
             FederatedDataset(dataset="food101", partitioners={"train": 100})
+
+    def test_cannot_use_the_old_split_names(self) -> None:
+        """Test if the initial split names can not be used."""
+        dataset = datasets.load_dataset("mnist")
+        sum([len(ds) for ds in dataset.values()])
+        fds = FederatedDataset(
+            dataset="mnist",
+            partitioners={"train": 100},
+            resplitter={("train", "test"): "full"},
+        )
+        with self.assertRaises(ValueError):
+            fds.load_partition(0, "train")
 
 
 if __name__ == "__main__":
