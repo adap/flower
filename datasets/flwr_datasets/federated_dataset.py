@@ -15,7 +15,7 @@
 """FederatedDataset."""
 
 
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 import datasets
 from datasets import Dataset, DatasetDict
@@ -35,8 +35,10 @@ class FederatedDataset:
     ----------
     dataset: str
         The name of the dataset in the Hugging Face Hub.
-    partitioners: Dict[str, int]
-        Dataset split to the number of IID partitions.
+    partitioners: Dict[str, Union[Partitioner, int]]
+        A dictionary mapping the Dataset split (a `str`) to a `Partitioner` or an `int`
+        (representing the number of IID partitions that this split should be partitioned
+         into).
 
     Examples
     --------
@@ -53,7 +55,12 @@ class FederatedDataset:
     >>> centralized = mnist_fds.load_full("test")
     """
 
-    def __init__(self, *, dataset: str, partitioners: Dict[str, int]) -> None:
+    def __init__(
+        self,
+        *,
+        dataset: str,
+        partitioners: Dict[str, Union[Partitioner, int]],
+    ) -> None:
         _check_if_dataset_tested(dataset)
         self._dataset_name: str = dataset
         self._partitioners: Dict[str, Partitioner] = _instantiate_partitioners(
