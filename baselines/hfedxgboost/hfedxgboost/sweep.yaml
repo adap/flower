@@ -4,7 +4,7 @@ method: random
 #not needed as this is random stratgy
 metric:
   goal: minimize
-  name: loss
+  name: server_loss
 parameters:
   dataset:
     value: [abalone]

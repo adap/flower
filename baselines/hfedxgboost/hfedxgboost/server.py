@@ -9,7 +9,7 @@ settings).
 import timeit
 from logging import DEBUG, INFO
 from typing import Dict, List, Optional, Tuple, Union
-
+import wandb
 import flwr as fl
 from flwr.common import EvaluateRes, FitRes, Parameters, Scalar, parameters_to_ndarrays
 from flwr.common.logger import log
@@ -204,6 +204,7 @@ class FL_Server(fl.server.Server):
             history.add_metrics_centralized(
                 server_round=current_round, metrics=metrics_cen
             )
+            wandb.log({"round": current_round, "server_loss": res_cen})
             if self.early_stopper.early_stop(res_cen):
                 return True
         return False
