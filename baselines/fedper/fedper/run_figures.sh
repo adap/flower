@@ -16,14 +16,14 @@ done
 # CIFAR10 Mobile (n head layers (FIGURE 4a))
 for num_head_layers in 2 3 4
 do
-    python -m fedper.main --config-path conf --config-name cifar10 model.num_head_layers=${num_head_layers} num_rounds=25 model_name=mobile algorithm=fedper&&
+    python -m fedper.main --config-path conf --config-name cifar10 model.num_head_layers=${num_head_layers} num_rounds=25 model_name=mobile algorithm=fedper
 done
 python -m fedper.main --config-path conf --config-name cifar10 num_rounds=25 model_name=mobile
 
 # CIFAR10 Resnet (n head layers (FIGURE 4b))
 for num_head_layers in 1 2 3
 do
-    python -m fedper.main --config-path conf --config-name cifar10 model.num_head_layers=${num_head_layers} num_rounds=25 model_name=resnet algorithm=fedper &&
+    python -m fedper.main --config-path conf --config-name cifar10 model.num_head_layers=${num_head_layers} num_rounds=25 model_name=resnet algorithm=fedper
 done
 python -m fedper.main --config-path conf --config-name cifar10 num_rounds=25 model_name=resnet 
 

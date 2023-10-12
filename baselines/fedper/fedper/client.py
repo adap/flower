@@ -277,6 +277,9 @@ def get_client_fn_simulation(
         general_data_transform = transforms.Compose(
             [
                 transforms.Resize((224, 224)),
+                transforms.RandomCrop(224, padding=4),
+                transforms.RandomHorizontalFlip(),
+                # transforms.ToTensor(),
                 transforms.Normalize(
                     MEAN[config.dataset.name], STD[config.dataset.name]
                 ),
@@ -315,7 +318,7 @@ def get_client_fn_simulation(
             testset.indices = data_indices[cid_use]["test"]
 
         # Create the train loader
-        trainloader = DataLoader(trainset, config.batch_size, shuffle=True)
+        trainloader = DataLoader(trainset, config.batch_size, shuffle=False)
         # Create the test loader
         testloader = DataLoader(testset, config.batch_size)
 

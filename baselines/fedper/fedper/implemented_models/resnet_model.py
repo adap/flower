@@ -207,7 +207,7 @@ class ResNetModelManager(ModelManager):
                 pass
 
         criterion = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.SGD(self.model.parameters(), lr=self.learning_rate)
+        optimizer = torch.optim.SGD(self.model.parameters(), lr=self.learning_rate, momentum=0.9)
         correct, total = 0, 0
         loss: torch.Tensor = 0.0
         # self.model.train()
