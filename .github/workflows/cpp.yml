@@ -36,7 +36,7 @@ jobs:
 
     - name: Run clang-tidy
       run: |
-        find ../src/cc/flwr -name '*.cc' | xargs clang-tidy
+        find ../src/cc/flwr/src -name '*.cc' | xargs clang-tidy
 
     - name: Run cppcheck
       run: |
