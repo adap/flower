@@ -95,7 +95,7 @@ class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
 
 
 class PartitionersSpecificationForFederatedDatasets(unittest.TestCase):
-    """Test the specifications of partitioners for FederatedDatasets."""
+    """Test the specifications of partitioners for `FederatedDataset`."""
 
     dataset_name = "cifar10"
     test_split = "test"
