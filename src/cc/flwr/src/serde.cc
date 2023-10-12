@@ -166,7 +166,7 @@ flwr_local::EvaluateIns evaluate_ins_from_proto(ServerMessage_EvaluateIns msg) {
 ClientMessage_EvaluateRes evaluate_res_to_proto(flwr_local::EvaluateRes res) {
   ClientMessage_EvaluateRes cres;
   google::protobuf::Map<::std::string, ::flwr::proto::Scalar> metrics_msg;
-  if (res.getMetrics() == std::nullopt) {
+  if (res.getMetrics() != std::nullopt) {
     metrics_msg = metrics_to_proto(res.getMetrics().value());
   }
   // Forward - compatible case

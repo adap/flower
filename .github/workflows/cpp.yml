@@ -40,5 +40,4 @@ jobs:
 
     - name: Run cppcheck
       run: |
-        cppcheck --enable=all --suppress=missingIncludeSystem ../src/cc/flwr/
-
+        cppcheck --enable=all --inline-suppr --suppress=missingIncludeSystem -I../src/cc/flwr/include ../src/cc/flwr/src

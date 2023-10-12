@@ -1,5 +1,6 @@
 #include "start.h"
 
+// cppcheck-suppress unusedFunction
 void start::start_client(std::string server_address, flwr_local::Client *client,
                          int grpc_max_message_length) {
   while (true) {
