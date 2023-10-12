@@ -15,18 +15,29 @@
 """Utils for FederatedDataset."""
 
 
-from typing import Dict
+import warnings
+from typing import Dict, Union
 
 from flwr_datasets.partitioner import IidPartitioner, Partitioner
 
+tested_datasets = [
+    "mnist",
+    "cifar10",
+    "fashion_mnist",
+    "sasha/dog-food",
+    "zh-plus/tiny-imagenet",
+]
 
-def _instantiate_partitioners(partitioners: Dict[str, int]) -> Dict[str, Partitioner]:
+
+def _instantiate_partitioners(
+    partitioners: Dict[str, Union[Partitioner, int]]
+) -> Dict[str, Partitioner]:
     """Transform the partitioners from the initial format to instantiated objects.
 
     Parameters
     ----------
-    partitioners: Dict[str, int]
-        Partitioners specified as split to the number of partitions format.
+    partitioners: Dict[str, Union[Partitioner, int]]
+        Dataset split to the Partitioner or a number of IID partitions.
 
     Returns
     -------
@@ -34,24 +45,32 @@ def _instantiate_partitioners(partitioners: Dict[str, int]) -> Dict[str, Partiti
         Partitioners specified as split to Partitioner object.
     """
     instantiated_partitioners: Dict[str, Partitioner] = {}
-    for split_name, num_partitions in partitioners.items():
-        instantiated_partitioners[split_name] = IidPartitioner(
-            num_partitions=num_partitions
+    if isinstance(partitioners, Dict):
+        for split, partitioner in partitioners.items():
+            if isinstance(partitioner, Partitioner):
+                instantiated_partitioners[split] = partitioner
+            elif isinstance(partitioner, int):
+                instantiated_partitioners[split] = IidPartitioner(
+                    num_partitions=partitioner
+                )
+            else:
+                raise ValueError(
+                    f"Incorrect type of the 'partitioners' value encountered. "
+                    f"Expected Partitioner or int. Given {type(partitioner)}"
+                )
+    else:
+        raise ValueError(
+            f"Incorrect type of the 'partitioners' encountered. "
+            f"Expected Dict[str, Union[int, Partitioner]]. "
+            f"Given {type(partitioners)}."
         )
     return instantiated_partitioners
 
 
-def _check_if_dataset_supported(dataset: str) -> None:
+def _check_if_dataset_tested(dataset: str) -> None:
     """Check if the dataset is in the narrowed down list of the tested datasets."""
-    supported_datasets = [
-        "mnist",
-        "cifar10",
-        "fashion_mnist",
-        "sasha/dog-food",
-        "zh-plus/tiny-imagenet",
-    ]
-    if dataset not in supported_datasets:
-        raise ValueError(
-            f"The currently tested and supported dataset are {supported_datasets}. "
-            f"Given: {dataset}"
+    if dataset not in tested_datasets:
+        warnings.warn(
+            f"The currently tested dataset are {tested_datasets}. Given: {dataset}.",
+            stacklevel=1,
         )

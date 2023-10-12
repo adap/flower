@@ -1,4 +1,4 @@
-# Copyright 2023 Adap GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -135,7 +135,7 @@ def create_task_ins(
     task = TaskIns(
         task_id="",
         group_id="",
-        workload_id="",
+        workload_id=0,
         task=Task(
             delivered_at=delivered_at,
             producer=Node(node_id=0, anonymous=True),
@@ -162,7 +162,7 @@ def create_task_res(
     task_res = TaskRes(
         task_id="",
         group_id="",
-        workload_id="",
+        workload_id=0,
         task=Task(
             producer=Node(node_id=producer_node_id, anonymous=anonymous),
             consumer=Node(node_id=0, anonymous=True),
