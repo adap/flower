@@ -21,7 +21,7 @@ import datasets
 from datasets import Dataset, DatasetDict
 from flwr_datasets.partitioner import Partitioner
 from flwr_datasets.resplitter import ResplitStrategy, Resplitter
-from flwr_datasets.utils import _check_if_dataset_supported, _instantiate_partitioners
+from flwr_datasets.utils import _check_if_dataset_tested, _instantiate_partitioners
 
 
 class FederatedDataset:
@@ -65,7 +65,7 @@ class FederatedDataset:
         ] = None,
         partitioners: Dict[str, int],
     ) -> None:
-        _check_if_dataset_supported(dataset)
+        _check_if_dataset_tested(dataset)
         self._dataset_name: str = dataset
         self._resplitter = resplitter
         self._partitioners: Dict[str, Partitioner] = _instantiate_partitioners(

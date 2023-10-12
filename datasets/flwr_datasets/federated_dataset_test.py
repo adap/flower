@@ -161,7 +161,7 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
 
     def test_unsupported_dataset(self) -> None:  # pylint: disable=R0201
         """Test creating FederatedDataset for unsupported dataset."""
-        with pytest.raises(ValueError):
+        with pytest.warns(UserWarning):
             FederatedDataset(dataset="food101", partitioners={"train": 100})
 
     def test_cannot_use_the_old_split_names(self) -> None:
