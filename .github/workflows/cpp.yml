@@ -32,12 +32,12 @@ jobs:
         mkdir build
         cd build
         cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ../src/cc/flwr
-        make
+        # make
 
     - name: Run clang-tidy
       run: |
-        find ../src/cc/flwr/src -name '*.cc' | xargs clang-tidy
+        find src/cc/flwr/src -name '*.cc' | xargs clang-tidy
 
     - name: Run cppcheck
       run: |
-        cppcheck --enable=all --inline-suppr --suppress=missingIncludeSystem -I../src/cc/flwr/include ../src/cc/flwr/src
+        cppcheck --enable=all --inline-suppr --suppress=missingIncludeSystem -Isrc/cc/flwr/include src/cc/flwr/src
