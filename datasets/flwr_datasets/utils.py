@@ -16,7 +16,7 @@
 
 
 import warnings
-from typing import Dict, Union, cast
+from typing import Dict, Union
 
 from flwr_datasets.partitioner import IidPartitioner, Partitioner
 
@@ -30,14 +30,14 @@ tested_datasets = [
 
 
 def _instantiate_partitioners(
-    partitioners: Union[int, Partitioner, Dict[str, int], Dict[str, Partitioner]]
+    partitioners: Dict[str, Union[Partitioner, int]]
 ) -> Dict[str, Partitioner]:
     """Transform the partitioners from the initial format to instantiated objects.
 
     Parameters
     ----------
-    partitioners: Dict[str, int]
-        Partitioners specified as split to the number of partitions format.
+    partitioners:  Dict[str, Union[Partitioner, int]]
+        Dataset split to the Partitioner or a number of IID partitions.
 
     Returns
     -------
@@ -45,27 +45,25 @@ def _instantiate_partitioners(
         Partitioners specified as split to Partitioner object.
     """
     instantiated_partitioners: Dict[str, Partitioner] = {}
-    if isinstance(partitioners, int):
-        # We assume that the int regards IidPartitioner specified for the train set
-        instantiated_partitioners["train"] = IidPartitioner(num_partitions=partitioners)
-    elif isinstance(partitioners, Partitioner):
-        # We assume that the Partitioner was specified for the train set
-        instantiated_partitioners["train"] = partitioners
-    elif isinstance(partitioners, Dict):
-        # dict_first_value = list(partitioners.values())[0]
-        # Dict[str, Partitioner]
-        if all(isinstance(val, Partitioner) for val in partitioners.values()):
-            # No need to do anything
-            instantiated_partitioners = cast(Dict[str, Partitioner], partitioners)
-        # Dict[str, int]
-        elif all(isinstance(val, int) for val in partitioners.values()):
-            for split_name, num_partitions in partitioners.items():
-                assert isinstance(num_partitions, int)
-                instantiated_partitioners[split_name] = IidPartitioner(
-                    num_partitions=num_partitions
+    if isinstance(partitioners, Dict):
+        for split, partitioner in partitioners.items():
+            if isinstance(partitioner, Partitioner):
+                instantiated_partitioners[split] = partitioner
+            elif isinstance(partitioner, int):
+                instantiated_partitioners[split] = IidPartitioner(
+                    num_partitions=partitioner
                 )
-        else:
-            raise ValueError("Incorrect type of the 'partitioners' encountered.")
+            else:
+                raise ValueError(
+                    f"Incorrect type of the 'partitioners' value encountered. "
+                    f"Expected Partitioner or int. Given {type(partitioner)}"
+                )
+    else:
+        raise ValueError(
+            f"Incorrect type of the 'partitioners' encountered. "
+            f"Expected Dict[str, Union[int, Partitioner]]. "
+            f"Given {type(partitioners)}."
+        )
     return instantiated_partitioners
 
 

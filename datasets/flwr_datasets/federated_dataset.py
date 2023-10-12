@@ -35,8 +35,8 @@ class FederatedDataset:
     ----------
     dataset: str
         The name of the dataset in the Hugging Face Hub.
-    partitioners: Dict[str, int]
-        Dataset split to the number of IID partitions.
+    partitioners: Dict[str, Union[Partitioner, int]]
+        Dataset split to the Partitioner or a number of IID partitions.
 
     Examples
     --------
@@ -57,7 +57,7 @@ class FederatedDataset:
         self,
         *,
         dataset: str,
-        partitioners: Union[int, Partitioner, Dict[str, int], Dict[str, Partitioner]],
+        partitioners: Dict[str, Union[Partitioner, int]],
     ) -> None:
         _check_if_dataset_tested(dataset)
         self._dataset_name: str = dataset
