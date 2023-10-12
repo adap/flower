@@ -77,9 +77,6 @@ poetry shell
 ```bash
 # clone LEAF repo
 git clone https://github.com/TalwalkarLab/leaf.git
-# prepare the Leaf GitHub libraries.
-pip3 install numpy
-pip3 install pillow
 
 # navigate to data directory and then the dataset
 cd leaf/data/femnist
