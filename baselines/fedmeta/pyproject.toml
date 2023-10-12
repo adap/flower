@@ -84,6 +84,9 @@ disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import
 good-names = "i,j,k,_,x,y,X,Y"
 signature-mutators="hydra.main.main"
 
+[tool.pylint.typecheck]
+generated-members="numpy.*, torch.*, tensorflow.*"
+
 [[tool.mypy.overrides]]
 module = [
     "importlib.metadata.*",
