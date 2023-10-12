@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ def handle(client_fn: ClientFn, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
             task_res = TaskRes(
                 task_id="",
                 group_id="",
-                workload_id="",
+                workload_id=0,
                 task=Task(
                     ancestry=[],
                     sa=SecureAggregation(named_values=serde.named_values_to_proto(res)),
