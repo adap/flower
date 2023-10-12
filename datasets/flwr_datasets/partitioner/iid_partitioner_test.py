@@ -18,6 +18,7 @@
 import unittest
 from typing import Tuple
 
+import numpy as np
 from parameterized import parameterized
 
 from datasets import Dataset
@@ -56,8 +57,8 @@ class TestIidPartitioner(unittest.TestCase):
         Only the correct data is tested in this method.
 
         In case the dataset is dividable among `num_partitions` the size of each
-        partition should be the same. This checks if the randomly chosen partition
-        has size as expected.
+        partition should be the same. This checks if the randomly chosen partition has
+        size as expected.
         """
         _, partitioner = _dummy_setup(num_partitions, num_rows)
         partition_size = num_rows // num_partitions
@@ -100,11 +101,16 @@ class TestIidPartitioner(unittest.TestCase):
         self, num_partitions: int, num_rows: int
     ) -> None:
         """Test if the data in partition is equal to the expected."""
-        _, partitioner = _dummy_setup(num_partitions, num_rows)
-        partition_size = num_rows // num_partitions
+        dataset, partitioner = _dummy_setup(num_partitions, num_rows)
         partition_index = 2
         partition = partitioner.load_partition(partition_index)
-        self.assertEqual(partition["features"][0], partition_index * partition_size)
+        row_id = 0
+        self.assertEqual(
+            partition["features"][row_id],
+            dataset[np.arange(partition_index, len(dataset), num_partitions)][
+                "features"
+            ][row_id],
+        )
 
     @parameterized.expand(  # type: ignore
         [

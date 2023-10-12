@@ -1,6 +1,9 @@
 Flower Framework Documentation
 ==============================
 
+.. meta::
+   :description: Check out the documentation of the main Flower Framework enabling easy Python development for Federated Learning.
+
 Welcome to Flower's documentation. `Flower <https://flower.dev>`_ is a friendly federated learning framework.
 
 
@@ -58,17 +61,15 @@ A learning-oriented series of federated learning tutorials, the best place to st
 
 QUICKSTART TUTORIALS: :doc:`PyTorch <tutorial-quickstart-pytorch>` | :doc:`TensorFlow <tutorial-quickstart-tensorflow>` | :doc:`🤗 Transformers <tutorial-quickstart-huggingface>` | :doc:`JAX <tutorial-quickstart-jax>` | :doc:`Pandas <tutorial-quickstart-pandas>` | :doc:`fastai <tutorial-quickstart-fastai>` | :doc:`PyTorch Lightning <tutorial-quickstart-pytorch-lightning>` | :doc:`MXNet <tutorial-quickstart-mxnet>` | :doc:`scikit-learn <tutorial-quickstart-scikitlearn>` | :doc:`XGBoost <tutorial-quickstart-xgboost>` | :doc:`Android <tutorial-quickstart-android>` | :doc:`iOS <tutorial-quickstart-ios>`
 
-.. grid:: 2
+We also made video tutorials for PyTorch:
 
-  .. grid-item-card::  PyTorch
+..  youtube:: jOmmuzMIQ4c
+   :width: 80%
 
-    ..  youtube:: jOmmuzMIQ4c
-       :width: 100%
+And TensorFlow:
 
-  .. grid-item-card::  TensorFlow
-
-    ..  youtube:: FGTc2TQq7VM
-       :width: 100%
+..  youtube:: FGTc2TQq7VM
+   :width: 80%
 
 How-to guides
 ~~~~~~~~~~~~~
@@ -158,6 +159,7 @@ The Flower community welcomes contributions. The following docs are intended to 
    contributor-how-to-create-new-messages
    contributor-how-to-write-documentation
    contributor-how-to-release-flower
+   contributor-how-to-contribute-translations
 
 .. toctree::
    :maxdepth: 1

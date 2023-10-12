@@ -13,4 +13,10 @@ cd $ROOT
 cd $ROOT
 ./dev/update-examples.sh
 cd examples/doc
-make html
+make docs
+
+cd $ROOT
+cd datasets/doc
+make docs
+
+cd $ROOT
