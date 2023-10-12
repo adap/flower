@@ -1,0 +1,43 @@
+name: C++ SDK
+
+on:
+  push:
+    paths:
+      - 'src/cc/flwr/**'
+  pull_request:
+    paths:
+      - 'src/cc/flwr/**'
+
+jobs:
+  build_and_test:
+    name: Build and test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-format cmake g++ clang-tidy cppcheck
+
+    - name: Check Formatting
+      run: |
+        find src/cc/flwr -name '*.cpp' -or -name '*.h' | xargs clang-format -i
+        git diff --exit-code
+
+    # - name: Build
+    #   run: |
+    #     mkdir build
+    #     cd build
+    #     cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ../src/cc/flwr
+    #     make
+
+    - name: Run clang-tidy
+      run: |
+        find src/cc/flwr -name '*.cpp' | xargs clang-tidy
+
+    - name: Run cppcheck
+      run: |
+        cppcheck --enable=all --suppress=missingIncludeSystem src/cc/flwr/
