@@ -28,13 +28,14 @@ def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
     torch.manual_seed(cfg.seed)
 
-    # get entire_trainloader
+    data_loaders = {}
+
     (
-        entire_trainloader,
-        trainloaders,
-        label_split,
-        valloaders,
-        testloader,
+        data_loaders["entire_trainloader"],
+        data_loaders["trainloaders"],
+        data_loaders["label_split"],
+        data_loaders["valloaders"],
+        data_loaders["testloader"],
     ) = load_datasets(config=cfg.dataset, num_clients=cfg.num_clients, seed=cfg.seed)
 
     model_config = preprocess_input(cfg.model, cfg.dataset)
@@ -49,9 +50,11 @@ def main(cfg: DictConfig) -> None:
     model_rate_manager = ModelRateManager(
         cfg.control.model_split_mode, model_split_rate, model_mode
     )
-    client_manager = ClientManagerHeteroFL(
-        model_rate_manager, client_to_model_rate_mapping, client_label_split=label_split
-    )
+    # client_manager = ClientManagerHeteroFL(
+    #     model_rate_manager,
+    #     client_to_model_rate_mapping,
+    #     client_label_split=data_loaders["label_split"],
+    # )
 
     model_config["global_model_rate"] = model_split_rate[
         get_global_model_rate(model_mode)
@@ -90,9 +93,7 @@ def main(cfg: DictConfig) -> None:
         model_config=model_config,
         client_to_model_rate_mapping=client_to_model_rate_mapping,
         client_train_settings=client_train_settings,
-        trainloaders=trainloaders,
-        label_split=label_split,
-        valloaders=valloaders,
+        data_loaders=data_loaders,
     )
 
     strategy = HeteroFL(
@@ -105,10 +106,7 @@ def main(cfg: DictConfig) -> None:
         optim_scheduler_settings=optim_scheduler_settings,
         global_model_rate=model_split_rate[get_global_model_rate(model_mode)],
         evaluate_fn=server.gen_evaluate_fn(
-            entire_trainloader,
-            testloader,
-            valloaders,
-            label_split,
+            data_loaders,
             torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
             test_model,
         ),
@@ -127,7 +125,11 @@ def main(cfg: DictConfig) -> None:
             "num_cpus": cfg.client_resources.num_cpus,
             "num_gpus": cfg.client_resources.num_gpus,
         },
-        client_manager=client_manager,
+        client_manager=ClientManagerHeteroFL(
+            model_rate_manager,
+            client_to_model_rate_mapping,
+            client_label_split=data_loaders["label_split"],
+        ),
         strategy=strategy,
     )
 

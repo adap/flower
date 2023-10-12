@@ -5,9 +5,10 @@ from typing import Callable, Dict, List, Tuple
 import flwr as fl
 import torch
 from flwr.common.typing import NDArrays
-from torch.utils.data import DataLoader
 
 from heterofl.models import create_model, get_parameters, set_parameters, test, train
+
+# from torch.utils.data import DataLoader
 
 
 class FlowerNumPyClient(fl.client.NumPyClient):
@@ -15,19 +16,17 @@ class FlowerNumPyClient(fl.client.NumPyClient):
 
     def __init__(
         self,
-        cid: str,
+        # cid: str,
         net: torch.nn.Module,
-        trainloader: DataLoader,
-        label_split: torch.tensor,
-        valloader: DataLoader,
+        dataloader,
         model_rate: float,
         client_train_settings: Dict,
     ):
-        self.cid = cid
+        # self.cid = cid
         self.net = net
-        self.trainloader = trainloader
-        self.label_split = label_split
-        self.valloader = valloader
+        self.trainloader = dataloader["trainloader"]
+        self.label_split = dataloader["label_split"]
+        self.valloader = dataloader["valloader"]
         self.model_rate = model_rate
         self.client_train_settings = client_train_settings
         self.client_train_settings["device"] = torch.device(
@@ -41,12 +40,12 @@ class FlowerNumPyClient(fl.client.NumPyClient):
 
     def get_parameters(self, config) -> NDArrays:
         """Return the parameters of the current net."""
-        print(f"[Client {self.cid}] get_parameters")
+        # print(f"[Client {self.cid}] get_parameters")
         return get_parameters(self.net)
 
     def fit(self, parameters, config) -> Tuple[NDArrays, int, Dict]:
         """Implement distributed fit function for a given client."""
-        print(f"cid = {self.cid}")
+        # print(f"cid = {self.cid}")
         set_parameters(self.net, parameters)
         self.client_train_settings["lr"] = config["lr"]
         train(
@@ -70,9 +69,7 @@ def gen_client_fn(
     model_config: Dict,
     client_to_model_rate_mapping: List[float],
     client_train_settings: Dict,
-    trainloaders: List[DataLoader],
-    label_split: torch.tensor,
-    valloaders: List[DataLoader],
+    data_loaders,
 ) -> Callable[[str], FlowerNumPyClient]:  # pylint: disable=too-many-arguments
     """Generate the client function that creates the Flower Clients.
 
@@ -109,20 +106,23 @@ def gen_client_fn(
         # will train and evaluate on their own unique data
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-        trainloader = trainloaders[int(cid)]
-        valloader = valloaders[int(cid)]
+        client_dataloader = {
+            "trainloader": data_loaders["trainloaders"][int(cid)],
+            "valloader": data_loaders["valloaders"][int(cid)],
+            "label_split": data_loaders["label_split"][int(cid)],
+        }
+        # trainloader = data_loaders["trainloaders"][int(cid)]
+        # valloader = data_loaders["valloaders"][int(cid)]
         model_rate = client_to_model_rate_mapping[int(cid)]
 
         return FlowerNumPyClient(
-            cid=cid,
+            # cid=cid,
             net=create_model(
                 model_config,
                 model_rate=model_rate,
                 device=device,
             ),
-            trainloader=trainloader,
-            label_split=label_split[int(cid)],
-            valloader=valloader,
+            dataloader=client_dataloader,
             model_rate=model_rate,
             client_train_settings=client_train_settings,
         )

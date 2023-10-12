@@ -1,22 +1,20 @@
 """Flower Server."""
 import time
 from collections import OrderedDict
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, Optional, Tuple
 
 import torch
 from flwr.common.typing import NDArrays, Scalar
 from torch import nn
-from torch.utils.data import DataLoader
 
 from heterofl.models import test
 from heterofl.utils import save_model
 
+# from torch.utils.data import DataLoader
+
 
 def gen_evaluate_fn(
-    trainloader: DataLoader,
-    testloader: DataLoader,
-    clients_testloaders: List[DataLoader],
-    label_split: List[torch.tensor],
+    data_loaders,
     device: torch.device,
     model: nn.Module,
 ) -> Callable[
@@ -65,7 +63,7 @@ def gen_evaluate_fn(
         start_time = time.time()
         with torch.no_grad():
             net.train(True)
-            for images, labels in trainloader:
+            for images, labels in data_loaders["entire_trainloader"]:
                 input_dict = {}
                 input_dict["img"] = images.to(device)
                 input_dict["label"] = labels.to(device)
@@ -75,11 +73,11 @@ def gen_evaluate_fn(
         local_metrics = {}
         local_metrics["loss"] = 0
         local_metrics["accuracy"] = 0
-        for i, clnt_tstldr in enumerate(clients_testloaders):
+        for i, clnt_tstldr in enumerate(data_loaders["valloaders"]):
             client_test_res = test(
                 net,
                 clnt_tstldr,
-                label_split[i].type(torch.int),
+                data_loaders["label_split"][i].type(torch.int),
                 device=device,
             )
             local_metrics["loss"] += client_test_res[0]
@@ -87,7 +85,7 @@ def gen_evaluate_fn(
 
         global_metrics = {}
         global_metrics["loss"], global_metrics["accuracy"] = test(
-            net, testloader, device=device
+            net, data_loaders["testloader"], device=device
         )
 
         # return statistics

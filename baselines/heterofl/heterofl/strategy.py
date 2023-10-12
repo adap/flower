@@ -128,14 +128,16 @@ class HeteroFL(fl.server.strategy.Strategy):
         clnt_mngr_heterofl: ClientManagerHeteroFL = client_manager
         # Sample clients
         # no need to change this
-        sample_size, min_num_clients = self.num_fit_clients(
-            clnt_mngr_heterofl.num_available()
-        )
+        clientts_selection_config = {}
+        (
+            clientts_selection_config["sample_size"],
+            clientts_selection_config["min_num_clients"],
+        ) = self.num_fit_clients(clnt_mngr_heterofl.num_available())
 
         # for sampling we pass the criterion to select the required clients
         clients = clnt_mngr_heterofl.sample(
-            num_clients=sample_size,
-            min_num_clients=min_num_clients,
+            num_clients=clientts_selection_config["sample_size"],
+            min_num_clients=clientts_selection_config["min_num_clients"],
         )
 
         # update client model rate mapping
@@ -209,108 +211,125 @@ class HeteroFL(fl.server.strategy.Strategy):
                 j += 1
             # local_parameters[i] = temp_od
 
-        count = OrderedDict()
         if "conv" in self.model_name:
-            output_bias_name = [k for k in gl_model.keys() if "bias" in k][-1]
-            output_weight_name = [k for k in gl_model.keys() if "weight" in k][-1]
-            for k, val in gl_model.items():
-                parameter_type = k.split(".")[-1]
-                count[k] = val.new_zeros(val.size(), dtype=torch.float32)
-                tmp_v = val.new_zeros(val.size(), dtype=torch.float32)
-                for m in range(len(local_parameters)):
-                    if "weight" in parameter_type or "bias" in parameter_type:
-                        if parameter_type == "weight":
-                            if val.dim() > 1:
-                                if k == output_weight_name:
-                                    label_split = self.active_cl_labels[
-                                        int(results[m][0].cid)
-                                    ]
-                                    label_split = label_split.type(torch.int)
-                                    param_idx[m][k] = list(param_idx[m][k])
-                                    param_idx[m][k][0] = param_idx[m][k][0][label_split]
-                                    tmp_v[
-                                        torch.meshgrid(param_idx[m][k])
-                                    ] += local_parameters[m][k][label_split]
-                                    count[k][torch.meshgrid(param_idx[m][k])] += 1
-                                else:
-                                    tmp_v[
-                                        torch.meshgrid(param_idx[m][k])
-                                    ] += local_parameters[m][k]
-                                    count[k][torch.meshgrid(param_idx[m][k])] += 1
-                            else:
-                                tmp_v[param_idx[m][k]] += local_parameters[m][k]
-                                count[k][param_idx[m][k]] += 1
-                        else:
-                            if k == output_bias_name:
-                                label_split = self.active_cl_labels[
-                                    int(results[m][0].cid)
-                                ]
-                                label_split = label_split.type(torch.int)
-                                param_idx[m][k] = param_idx[m][k][label_split]
-                                tmp_v[param_idx[m][k]] += local_parameters[m][k][
-                                    label_split
-                                ]
-                                count[k][param_idx[m][k]] += 1
-                            else:
-                                tmp_v[param_idx[m][k]] += local_parameters[m][k]
-                                count[k][param_idx[m][k]] += 1
-                    else:
-                        tmp_v += local_parameters[m][k]
-                        count[k] += 1
-                tmp_v[count[k] > 0] = tmp_v[count[k] > 0].div_(count[k][count[k] > 0])
-                val[count[k] > 0] = tmp_v[count[k] > 0].to(val.dtype)
+            self._aggregate_conv(param_idx, local_parameters, results)
 
         elif "resnet" in self.model_name:
-            for k, val in gl_model.items():
-                parameter_type = k.split(".")[-1]
-                count[k] = val.new_zeros(val.size(), dtype=torch.float32)
-                tmp_v = val.new_zeros(val.size(), dtype=torch.float32)
-                for m in range(len(local_parameters)):
-                    if "weight" in parameter_type or "bias" in parameter_type:
-                        if parameter_type == "weight":
-                            if val.dim() > 1:
-                                if "linear" in k:
-                                    label_split = self.active_cl_labels[
-                                        int(results[m][0].cid)
-                                    ]
-                                    label_split = label_split.type(torch.int)
-                                    param_idx[m][k] = list(param_idx[m][k])
-                                    param_idx[m][k][0] = param_idx[m][k][0][label_split]
-                                    tmp_v[
-                                        torch.meshgrid(param_idx[m][k])
-                                    ] += local_parameters[m][k][label_split]
-                                    count[k][torch.meshgrid(param_idx[m][k])] += 1
-                                else:
-                                    tmp_v[
-                                        torch.meshgrid(param_idx[m][k])
-                                    ] += local_parameters[m][k]
-                                    count[k][torch.meshgrid(param_idx[m][k])] += 1
-                            else:
-                                tmp_v[param_idx[m][k]] += local_parameters[m][k]
-                                count[k][param_idx[m][k]] += 1
-                        else:
-                            if "linear" in k:
-                                label_split = self.active_cl_labels[
-                                    int(results[m][0].cid)
-                                ]
-                                label_split = label_split.type(torch.int)
-                                param_idx[m][k] = param_idx[m][k][label_split]
-                                tmp_v[param_idx[m][k]] += local_parameters[m][k][
-                                    label_split
-                                ]
-                                count[k][param_idx[m][k]] += 1
-                            else:
-                                tmp_v[param_idx[m][k]] += local_parameters[m][k]
-                                count[k][param_idx[m][k]] += 1
-                    else:
-                        tmp_v += local_parameters[m][k]
-                        count[k] += 1
-                tmp_v[count[k] > 0] = tmp_v[count[k] > 0].div_(count[k][count[k] > 0])
-                val[count[k] > 0] = tmp_v[count[k] > 0].to(val.dtype)
+            self._aggregate_resnet18(param_idx, local_parameters, results)
         else:
             raise ValueError("Not valid model name")
 
         return ndarrays_to_parameters([v for k, v in gl_model.items()]), {}
+
+    def _aggregate_conv(self, param_idx, local_parameters, results):
+        gl_model = self.net.state_dict()
+        count = OrderedDict()
+        output_bias_name = [k for k in gl_model.keys() if "bias" in k][-1]
+        output_weight_name = [k for k in gl_model.keys() if "weight" in k][-1]
+        for k, val in gl_model.items():
+            parameter_type = k.split(".")[-1]
+            count[k] = val.new_zeros(val.size(), dtype=torch.float32)
+            tmp_v = val.new_zeros(val.size(), dtype=torch.float32)
+            for clnt, _ in enumerate(local_parameters):
+                # self._agg_layer()
+                if "weight" in parameter_type or "bias" in parameter_type:
+                    if parameter_type == "weight":
+                        if val.dim() > 1:
+                            if k == output_weight_name:
+                                label_split = self.active_cl_labels[
+                                    int(results[clnt][0].cid)
+                                ]
+                                label_split = label_split.type(torch.int)
+                                param_idx[clnt][k] = list(param_idx[clnt][k])
+                                param_idx[clnt][k][0] = param_idx[clnt][k][0][
+                                    label_split
+                                ]
+                                tmp_v[
+                                    torch.meshgrid(param_idx[clnt][k])
+                                ] += local_parameters[clnt][k][label_split]
+                                count[k][torch.meshgrid(param_idx[clnt][k])] += 1
+                            else:
+                                tmp_v[
+                                    torch.meshgrid(param_idx[clnt][k])
+                                ] += local_parameters[clnt][k]
+                                count[k][torch.meshgrid(param_idx[clnt][k])] += 1
+                        else:
+                            tmp_v[param_idx[clnt][k]] += local_parameters[clnt][k]
+                            count[k][param_idx[clnt][k]] += 1
+                    else:
+                        if k == output_bias_name:
+                            label_split = self.active_cl_labels[
+                                int(results[clnt][0].cid)
+                            ]
+                            label_split = label_split.type(torch.int)
+                            param_idx[clnt][k] = param_idx[clnt][k][label_split]
+                            tmp_v[param_idx[clnt][k]] += local_parameters[clnt][k][
+                                label_split
+                            ]
+                            count[k][param_idx[clnt][k]] += 1
+                        else:
+                            tmp_v[param_idx[clnt][k]] += local_parameters[clnt][k]
+                            count[k][param_idx[clnt][k]] += 1
+                else:
+                    tmp_v += local_parameters[clnt][k]
+                    count[k] += 1
+            tmp_v[count[k] > 0] = tmp_v[count[k] > 0].div_(count[k][count[k] > 0])
+            val[count[k] > 0] = tmp_v[count[k] > 0].to(val.dtype)
+    
+    # def _agg_layer(self,):
+        # return
+
+    def _aggregate_resnet18(self, param_idx, local_parameters, results):
+        gl_model = self.net.state_dict()
+        count = OrderedDict()
+        for k, val in gl_model.items():
+            parameter_type = k.split(".")[-1]
+            count[k] = val.new_zeros(val.size(), dtype=torch.float32)
+            tmp_v = val.new_zeros(val.size(), dtype=torch.float32)
+            for clnt, _ in enumerate(local_parameters):
+                if "weight" in parameter_type or "bias" in parameter_type:
+                    if parameter_type == "weight":
+                        if val.dim() > 1:
+                            if "linear" in k:
+                                label_split = self.active_cl_labels[
+                                    int(results[clnt][0].cid)
+                                ]
+                                label_split = label_split.type(torch.int)
+                                param_idx[clnt][k] = list(param_idx[clnt][k])
+                                param_idx[clnt][k][0] = param_idx[clnt][k][0][
+                                    label_split
+                                ]
+                                tmp_v[
+                                    torch.meshgrid(param_idx[clnt][k])
+                                ] += local_parameters[clnt][k][label_split]
+                                count[k][torch.meshgrid(param_idx[clnt][k])] += 1
+                            else:
+                                tmp_v[
+                                    torch.meshgrid(param_idx[clnt][k])
+                                ] += local_parameters[clnt][k]
+                                count[k][torch.meshgrid(param_idx[clnt][k])] += 1
+                        else:
+                            tmp_v[param_idx[clnt][k]] += local_parameters[clnt][k]
+                            count[k][param_idx[clnt][k]] += 1
+                    else:
+                        if "linear" in k:
+                            label_split = self.active_cl_labels[
+                                int(results[clnt][0].cid)
+                            ]
+                            label_split = label_split.type(torch.int)
+                            param_idx[clnt][k] = param_idx[clnt][k][label_split]
+                            tmp_v[param_idx[clnt][k]] += local_parameters[clnt][k][
+                                label_split
+                            ]
+                            count[k][param_idx[clnt][k]] += 1
+                        else:
+                            tmp_v[param_idx[clnt][k]] += local_parameters[clnt][k]
+                            count[k][param_idx[clnt][k]] += 1
+                else:
+                    tmp_v += local_parameters[clnt][k]
+                    count[k] += 1
+            tmp_v[count[k] > 0] = tmp_v[count[k] > 0].div_(count[k][count[k] > 0])
+            val[count[k] > 0] = tmp_v[count[k] > 0].to(val.dtype)
 
     def configure_evaluate(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager

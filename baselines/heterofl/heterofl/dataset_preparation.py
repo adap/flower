@@ -100,32 +100,18 @@ def non_iid(
     seed=42,
 ) -> Tuple[List[Dataset], List]:
     """Non-IID partition of dataset among clients."""
-    label = np.array(dataset.targets)
+    # label = np.array(dataset.targets)
     data_split: Dict[int, List] = {i: [] for i in range(num_clients)}
-    label_idx_split: Dict = {}
+    # label_idx_split: Dict = {}
 
-    for i, _ in enumerate(label):
-        label_i = label[i].item()
-        if label_i not in label_idx_split:
-            label_idx_split[label_i] = []
-        label_idx_split[label_i].append(i)
-
-    shard_per_class = int(shard_per_user * num_clients / classes_size)
-
-    for label_i in label_idx_split:
-        label_idx = label_idx_split[label_i]
-        num_leftover = len(label_idx) % shard_per_class
-        leftover = label_idx[-num_leftover:] if num_leftover > 0 else []
-        new_label_idx = (
-            np.array(label_idx[:-num_leftover])
-            if num_leftover > 0
-            else np.array(label_idx)
-        )
-        new_label_idx = new_label_idx.reshape((shard_per_class, -1)).tolist()
-
-        for i, leftover_label_idx in enumerate(leftover):
-            new_label_idx[i] = np.concatenate([new_label_idx[i], [leftover_label_idx]])
-        label_idx_split[label_i] = new_label_idx
+    label_idx_split, shard_per_class = _split_dataset_targets_idx(
+        dataset, shard_per_user, num_clients, classes_size
+    )
+    # for i, _ in enumerate(label):
+    #     label_i = label[i].item()
+    #     if label_i not in label_idx_split:
+    #         label_idx_split[label_i] = []
+    #     label_idx_split[label_i].append(i)
 
     if label_split is None:
         label_split = list(range(classes_size)) * shard_per_class
@@ -149,11 +135,46 @@ def non_iid(
             ].item()
             data_split[i].extend(label_idx_split[label_i].pop(idx))
 
+    # divided_dataset = [None for i in range(num_clients)]
+    # for i in range(num_clients):
+    #     divided_dataset[i] = Subset(dataset, data_split[i])
+
+    return _get_dataset_from_idx(dataset, data_split, num_clients), label_split
+
+
+def _split_dataset_targets_idx(dataset, shard_per_user, num_clients, classes_size):
+    label = np.array(dataset.targets)
+    label_idx_split: Dict = {}
+    for i, _ in enumerate(label):
+        label_i = label[i].item()
+        if label_i not in label_idx_split:
+            label_idx_split[label_i] = []
+        label_idx_split[label_i].append(i)
+
+    shard_per_class = int(shard_per_user * num_clients / classes_size)
+
+    for label_i in label_idx_split:
+        label_idx = label_idx_split[label_i]
+        num_leftover = len(label_idx) % shard_per_class
+        leftover = label_idx[-num_leftover:] if num_leftover > 0 else []
+        new_label_idx = (
+            np.array(label_idx[:-num_leftover])
+            if num_leftover > 0
+            else np.array(label_idx)
+        )
+        new_label_idx = new_label_idx.reshape((shard_per_class, -1)).tolist()
+
+        for i, leftover_label_idx in enumerate(leftover):
+            new_label_idx[i] = np.concatenate([new_label_idx[i], [leftover_label_idx]])
+        label_idx_split[label_i] = new_label_idx
+    return label_idx_split, shard_per_class
+
+
+def _get_dataset_from_idx(dataset, data_split, num_clients):
     divided_dataset = [None for i in range(num_clients)]
     for i in range(num_clients):
         divided_dataset[i] = Subset(dataset, data_split[i])
-
-    return divided_dataset, label_split
+    return divided_dataset
 
 
 def _balance_classes(

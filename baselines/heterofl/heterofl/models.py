@@ -16,70 +16,32 @@ class Conv(nn.Module):
 
     def __init__(
         self,
-        data_shape,
-        hidden_size,
-        classes_size,
-        rate=1,
-        track=False,
-        norm="bn",
-        scale=1,
-        mask=1,
+        model_config,
     ):
         super().__init__()
-        self.classes_size = classes_size
-        norm_model = norm
-        scale_model = scale
-        self.mask = mask
+        self.model_config = model_config
 
-        if norm_model == "bn":
-            norm = nn.BatchNorm2d(
-                hidden_size[0], momentum=None, track_running_stats=track
-            )
-        elif norm_model == "in":
-            norm = nn.GroupNorm(hidden_size[0], hidden_size[0])
-        elif norm_model == "ln":
-            norm = nn.GroupNorm(1, hidden_size[0])
-        elif norm_model == "gn":
-            norm = nn.GroupNorm(4, hidden_size[0])
-        elif norm_model == "none":
-            norm = nn.Identity()
-        else:
-            raise ValueError("Not valid norm")
-        if scale_model:
-            scaler = _Scaler(rate)
-        else:
-            scaler = nn.Identity()
         blocks = [
-            nn.Conv2d(data_shape[0], hidden_size[0], 3, 1, 1),
-            scaler,
-            norm,
+            nn.Conv2d(
+                model_config["data_shape"][0], model_config["hidden_size"][0], 3, 1, 1
+            ),
+            self._get_scale(),
+            self._get_norm(0),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2),
         ]
-        for i in range(len(hidden_size) - 1):
-            if norm_model == "bn":
-                norm = nn.BatchNorm2d(
-                    hidden_size[i + 1], momentum=None, track_running_stats=track
-                )
-            elif norm_model == "in":
-                norm = nn.GroupNorm(hidden_size[i + 1], hidden_size[i + 1])
-            elif norm_model == "ln":
-                norm = nn.GroupNorm(1, hidden_size[i + 1])
-            elif norm_model == "gn":
-                norm = nn.GroupNorm(4, hidden_size[i + 1])
-            elif norm_model == "none":
-                norm = nn.Identity()
-            else:
-                raise ValueError("Not valid norm")
-            if scale_model:
-                scaler = _Scaler(rate)
-            else:
-                scaler = nn.Identity()
+        for i in range(len(model_config["hidden_size"]) - 1):
             blocks.extend(
                 [
-                    nn.Conv2d(hidden_size[i], hidden_size[i + 1], 3, 1, 1),
-                    scaler,
-                    norm,
+                    nn.Conv2d(
+                        model_config["hidden_size"][i],
+                        model_config["hidden_size"][i + 1],
+                        3,
+                        1,
+                        1,
+                    ),
+                    self._get_scale(),
+                    self._get_norm(i + 1),
                     nn.ReLU(inplace=True),
                     nn.MaxPool2d(2),
                 ]
@@ -89,10 +51,43 @@ class Conv(nn.Module):
             [
                 nn.AdaptiveAvgPool2d(1),
                 nn.Flatten(),
-                nn.Linear(hidden_size[-1], classes_size),
+                nn.Linear(
+                    model_config["hidden_size"][-1], model_config["classes_size"]
+                ),
             ]
         )
         self.blocks = nn.Sequential(*blocks)
+
+    def _get_norm(self, j: int):
+        """Return the relavant norm."""
+        if self.model_config["norm"] == "bn":
+            norm = nn.BatchNorm2d(
+                self.model_config["hidden_size"][j],
+                momentum=None,
+                track_running_stats=self.model_config["track"],
+            )
+        elif self.model_config["norm"] == "in":
+            norm = nn.GroupNorm(
+                self.model_config["hidden_size"][j], self.model_config["hidden_size"][j]
+            )
+        elif self.model_config["norm"] == "ln":
+            norm = nn.GroupNorm(1, self.model_config["hidden_size"][j])
+        elif self.model_config["norm"] == "gn":
+            norm = nn.GroupNorm(4, self.model_config["hidden_size"][j])
+        elif self.model_config["norm"] == "none":
+            norm = nn.Identity()
+        else:
+            raise ValueError("Not valid norm")
+
+        return norm
+
+    def _get_scale(self):
+        """Return the relavant scaler."""
+        if self.model_config["scale"]:
+            scaler = _Scaler(self.model_config["rate"])
+        else:
+            scaler = nn.Identity()
+        return scaler
 
     def forward(self, input_dict):
         """Forward pass of the Conv.
@@ -112,8 +107,10 @@ class Conv(nn.Module):
         # output = {"loss": torch.tensor(0, device=self.device, dtype=torch.float32)}
         output = {}
         out = self.blocks(input_dict["img"])
-        if "label_split" in input_dict and self.mask:
-            label_mask = torch.zeros(self.classes_size, device=out.device)
+        if "label_split" in input_dict and self.model_config["mask"]:
+            label_mask = torch.zeros(
+                self.model_config["classes_size"], device=out.device
+            )
             label_mask[input_dict["label_split"]] = 1
             out = out.masked_fill(label_mask == 0, 0)
         output["score"] = out
@@ -123,18 +120,17 @@ class Conv(nn.Module):
 
 def conv(
     model_rate,
-    data_shape,
-    hidden_layers,
-    classes_size,
-    norm,
-    global_model_rate=1,
-    track=False,
+    model_config,
     device="cpu",
 ):
     """Create the Conv model."""
-    hidden_size = [int(np.ceil(model_rate * x)) for x in hidden_layers]
-    scaler_rate = model_rate / global_model_rate
-    model = Conv(data_shape, hidden_size, classes_size, scaler_rate, track, norm)
+    model_config["hidden_size"] = [
+        int(np.ceil(model_rate * x)) for x in model_config["hidden_layers"]
+    ]
+    scaler_rate = model_rate / model_config["global_model_rate"]
+    model_config["rate"] = scaler_rate
+    model = Conv(model_config)
+    # model = Conv(data_shape, hidden_size, classes_size, scaler_rate, track, norm)
     model.apply(_init_param)
     return model.to(device)
 
@@ -144,21 +140,25 @@ class Block(nn.Module):
 
     expansion = 1
 
-    def __init__(self, in_planes, planes, stride, rate, norm, scale=1, track=False):
+    def __init__(self, in_planes, planes, stride, model_config):
         super(Block, self).__init__()
-        if norm == "bn":
-            n_1 = nn.BatchNorm2d(in_planes, momentum=None, track_running_stats=track)
-            n_2 = nn.BatchNorm2d(planes, momentum=None, track_running_stats=track)
-        elif norm == "in":
+        if model_config["norm"] == "bn":
+            n_1 = nn.BatchNorm2d(
+                in_planes, momentum=None, track_running_stats=model_config["track"]
+            )
+            n_2 = nn.BatchNorm2d(
+                planes, momentum=None, track_running_stats=model_config["track"]
+            )
+        elif model_config["norm"] == "in":
             n_1 = nn.GroupNorm(in_planes, in_planes)
             n_2 = nn.GroupNorm(planes, planes)
-        elif norm == "ln":
+        elif model_config["norm"] == "ln":
             n_1 = nn.GroupNorm(1, in_planes)
             n_2 = nn.GroupNorm(1, planes)
-        elif norm == "gn":
+        elif model_config["norm"] == "gn":
             n_1 = nn.GroupNorm(4, in_planes)
             n_2 = nn.GroupNorm(4, planes)
-        elif norm == "none":
+        elif model_config["norm"] == "none":
             n_1 = nn.Identity()
             n_2 = nn.Identity()
         else:
@@ -171,8 +171,8 @@ class Block(nn.Module):
         self.conv2 = nn.Conv2d(
             planes, planes, kernel_size=3, stride=1, padding=1, bias=False
         )
-        if scale:
-            self.scaler = _Scaler(rate)
+        if model_config["scale"]:
+            self.scaler = _Scaler(model_config["rate"])
         else:
             self.scaler = nn.Identity()
 
@@ -213,97 +213,133 @@ class ResNet(nn.Module):
 
     def __init__(
         self,
-        data_shape,
-        hidden_size,
+        model_config,
         block,
         num_blocks,
-        num_classes,
-        rate,
-        track=False,
-        norm="bn",
-        scale=1,
-        mask=1,
     ):
+        self.model_config = model_config
         super(ResNet, self).__init__()
-        self.in_planes = hidden_size[0]
+        self.in_planes = model_config["hidden_size"][0]
         self.conv1 = nn.Conv2d(
-            data_shape[0],
-            hidden_size[0],
+            model_config["data_shape"][0],
+            model_config["hidden_size"][0],
             kernel_size=3,
             stride=1,
             padding=1,
             bias=False,
         )
+
+        # self.layers = []
+        # stride = 1
+        # for i in range(4):
+        #     self.layers.append(
+        #         self._make_layer(
+        #             block,
+        #             model_config["hidden_size"][i],
+        #             num_blocks[i],
+        #             stride=stride,
+        #         ).to(device)
+        #     )
+        #     stride = 2
+
+        # self.layer1 = self._make_layer(
+        #     block,
+        #     model_config["hidden_size"][0],
+        #     num_blocks[0],
+        #     stride=1,
+        #     rate=model_config["rate"],
+        #     norm=model_config["norm"],
+        #     track=model_config["track"],
+        # )
+        # self.layer2 = self._make_layer(
+        #     block,
+        #     model_config["hidden_size"][1],
+        #     num_blocks[1],
+        #     stride=2,
+        #     rate=model_config["rate"],
+        #     norm=model_config["norm"],
+        #     track=model_config["track"],
+        # )
+        # self.layer3 = self._make_layer(
+        #     block,
+        #     model_config["hidden_size"][2],
+        #     num_blocks[2],
+        #     stride=2,
+        #     rate=model_config["rate"],
+        #     norm=model_config["norm"],
+        #     track=model_config["track"],
+        # )
+        # self.layer4 = self._make_layer(
+        #     block,
+        #     model_config["hidden_size"][3],
+        #     num_blocks[3],
+        #     stride=2,
+        #     rate=model_config["rate"],
+        #     norm=model_config["norm"],
+        #     track=model_config["track"],
+        # )
+
         self.layer1 = self._make_layer(
             block,
-            hidden_size[0],
+            model_config["hidden_size"][0],
             num_blocks[0],
             stride=1,
-            rate=rate,
-            norm=norm,
-            track=track,
         )
         self.layer2 = self._make_layer(
             block,
-            hidden_size[1],
+            model_config["hidden_size"][1],
             num_blocks[1],
             stride=2,
-            rate=rate,
-            norm=norm,
-            track=track,
         )
         self.layer3 = self._make_layer(
             block,
-            hidden_size[2],
+            model_config["hidden_size"][2],
             num_blocks[2],
             stride=2,
-            rate=rate,
-            norm=norm,
-            track=track,
         )
         self.layer4 = self._make_layer(
             block,
-            hidden_size[3],
+            model_config["hidden_size"][3],
             num_blocks[3],
             stride=2,
-            rate=rate,
-            norm=norm,
-            track=track,
         )
 
-        self.classes_size = num_classes
-        self.mask = mask
+        # self.layers = [layer1, layer2, layer3, layer4]
 
-        if norm == "bn":
+        if model_config["norm"] == "bn":
             n_4 = nn.BatchNorm2d(
-                hidden_size[3] * block.expansion,
+                model_config["hidden_size"][3] * block.expansion,
                 momentum=None,
-                track_running_stats=track,
+                track_running_stats=model_config["track"],
             )
-        elif norm == "in":
+        elif model_config["norm"] == "in":
             n_4 = nn.GroupNorm(
-                hidden_size[3] * block.expansion, hidden_size[3] * block.expansion
+                model_config["hidden_size"][3] * block.expansion,
+                model_config["hidden_size"][3] * block.expansion,
             )
-        elif norm == "ln":
-            n_4 = nn.GroupNorm(1, hidden_size[3] * block.expansion)
-        elif norm == "gn":
-            n_4 = nn.GroupNorm(4, hidden_size[3] * block.expansion)
-        elif norm == "none":
+        elif model_config["norm"] == "ln":
+            n_4 = nn.GroupNorm(1, model_config["hidden_size"][3] * block.expansion)
+        elif model_config["norm"] == "gn":
+            n_4 = nn.GroupNorm(4, model_config["hidden_size"][3] * block.expansion)
+        elif model_config["norm"] == "none":
             n_4 = nn.Identity()
         else:
             raise ValueError("Not valid norm")
         self.n_4 = n_4
-        if scale:
-            self.scaler = _Scaler(rate)
+        if model_config["scale"]:
+            self.scaler = _Scaler(model_config["rate"])
         else:
             self.scaler = nn.Identity()
-        self.linear = nn.Linear(hidden_size[3] * block.expansion, num_classes)
+        self.linear = nn.Linear(
+            model_config["hidden_size"][3] * block.expansion,
+            model_config["classes_size"],
+        )
 
-    def _make_layer(self, block, planes, num_blocks, stride, rate, norm, track):
+    def _make_layer(self, block, planes, num_blocks, stride):
         strides = [stride] + [1] * (num_blocks - 1)
         layers = []
         for strd in strides:
-            layers.append(block(self.in_planes, planes, strd, rate, norm, track))
+            layers.append(block(self.in_planes, planes, strd, self.model_config.copy()))
             self.in_planes = planes * block.expansion
         return nn.Sequential(*layers)
 
@@ -325,6 +361,8 @@ class ResNet(nn.Module):
         output = {}
         x = input_dict["img"]
         out = self.conv1(x)
+        # for layer in self.layers:
+        #     out = layer(out)
         out = self.layer1(out)
         out = self.layer2(out)
         out = self.layer3(out)
@@ -333,8 +371,10 @@ class ResNet(nn.Module):
         out = F.adaptive_avg_pool2d(out, 1)
         out = out.view(out.size(0), -1)
         out = self.linear(out)
-        if "label_split" in input_dict and self.mask:
-            label_mask = torch.zeros(self.classes_size, device=out.device)
+        if "label_split" in input_dict and self.model_config["mask"]:
+            label_mask = torch.zeros(
+                self.model_config["classes_size"], device=out.device
+            )
             label_mask[input_dict["label_split"]] = 1
             out = out.masked_fill(label_mask == 0, 0)
         output["score"] = out
@@ -344,56 +384,90 @@ class ResNet(nn.Module):
 
 def resnet18(
     model_rate,
-    data_shape,
-    hidden_layers,
-    classes_size,
-    norm,
-    global_model_rate=1,
-    track=False,
+    model_config,
     device="cpu",
 ):
     """Create the ResNet18 model."""
-    hidden_size = [int(np.ceil(model_rate * x)) for x in hidden_layers]
-    scaler_rate = model_rate / global_model_rate
-    model = ResNet(
-        data_shape,
-        hidden_size,
-        Block,
-        [2, 2, 2, 2],
-        classes_size,
-        scaler_rate,
-        track,
-        norm,
-    )
+    model_config["hidden_size"] = [
+        int(np.ceil(model_rate * x)) for x in model_config["hidden_layers"]
+    ]
+    scaler_rate = model_rate / model_config["global_model_rate"]
+    model_config["rate"] = scaler_rate
+    model = ResNet(model_config, block=Block, num_blocks=[2, 2, 2, 2])
+    # model = ResNet(
+    #     data_shape,
+    #     hidden_size,
+    #     Block,
+    #     [2, 2, 2, 2],
+    #     classes_size,
+    #     scaler_rate,
+    #     track,
+    #     norm,
+    # )
     model.apply(_init_param)
     return model.to(device)
+
+
+# def resnet18(
+#     model_rate,
+#     data_shape,
+#     hidden_layers,
+#     classes_size,
+#     norm,
+#     global_model_rate=1,
+#     track=False,
+#     device="cpu",
+# ):
+#     """Create the ResNet18 model."""
+#     hidden_size = [int(np.ceil(model_rate * x)) for x in hidden_layers]
+#     scaler_rate = model_rate / global_model_rate
+#     model = ResNet(
+#         data_shape,
+#         hidden_size,
+#         Block,
+#         [2, 2, 2, 2],
+#         classes_size,
+#         scaler_rate,
+#         track,
+#         norm,
+#     )
+#     model.apply(_init_param)
+#     return model.to(device)
 
 
 def create_model(model_config, model_rate, track=False, device="cpu"):
     """Create the model based on the configuration given in hydra."""
     model = None
+    model_config = model_config.copy()
+    model_config["track"] = track
+    model_config["scale"] = 1
+    model_config["mask"] = 1
     if model_config["model"] == "conv":
-        model = conv(
-            model_rate=model_rate,
-            data_shape=model_config["data_shape"],
-            hidden_layers=model_config["hidden_layers"],
-            classes_size=model_config["classes_size"],
-            norm=model_config["norm"],
-            global_model_rate=model_config["global_model_rate"],
-            track=track,
-            device=device,
-        )
+        model = conv(model_rate=model_rate, model_config=model_config, device=device)
+        # model = conv(
+        #     model_rate=model_rate,
+        #     data_shape=model_config["data_shape"],
+        #     hidden_layers=model_config["hidden_layers"],
+        #     classes_size=model_config["classes_size"],
+        #     norm=model_config["norm"],
+        #     global_model_rate=model_config["global_model_rate"],
+        #     track=track,
+        #     device=device,
+        # )
     elif model_config["model"] == "resnet18":
         model = resnet18(
-            model_rate=model_rate,
-            data_shape=model_config["data_shape"],
-            hidden_layers=model_config["hidden_layers"],
-            classes_size=model_config["classes_size"],
-            norm=model_config["norm"],
-            global_model_rate=model_config["global_model_rate"],
-            track=track,
-            device=device,
+            model_rate=model_rate, model_config=model_config, device=device
         )
+        # model = resnet18(
+        #     model_rate=model_rate,
+        #     data_shape=model_config["data_shape"],
+        #     hidden_layers=model_config["hidden_layers"],
+        #     classes_size=model_config["classes_size"],
+        #     norm=model_config["norm"],
+        #     global_model_rate=model_config["global_model_rate"],
+        #     track=track,
+        #     device=device,
+        # )
     return model
 
 
@@ -538,105 +612,13 @@ def param_model_rate_mapping(
     print(unique_client_model_rate)
 
     if "conv" in model_name:
-        idx_i = [None for _ in range(len(unique_client_model_rate))]
-        idx = [OrderedDict() for _ in range(len(unique_client_model_rate))]
-        output_weight_name = [k for k in parameters.keys() if "weight" in k][-1]
-        output_bias_name = [k for k in parameters.keys() if "bias" in k][-1]
-        for k, val in parameters.items():
-            parameter_type = k.split(".")[-1]
-            for index, _ in enumerate(unique_client_model_rate):
-                if "weight" in parameter_type or "bias" in parameter_type:
-                    if parameter_type == "weight":
-                        if val.dim() > 1:
-                            input_size = val.size(1)
-                            output_size = val.size(0)
-                            if idx_i[index] is None:
-                                idx_i[index] = torch.arange(
-                                    input_size, device=val.device
-                                )
-                            input_idx_i_m = idx_i[index]
-                            if k == output_weight_name:
-                                output_idx_i_m = torch.arange(
-                                    output_size, device=val.device
-                                )
-                            else:
-                                scaler_rate = (
-                                    unique_client_model_rate[index] / global_model_rate
-                                )
-                                local_output_size = int(
-                                    np.ceil(output_size * scaler_rate)
-                                )
-                                output_idx_i_m = torch.arange(
-                                    output_size, device=val.device
-                                )[:local_output_size]
-                            idx[index][k] = output_idx_i_m, input_idx_i_m
-                            idx_i[index] = output_idx_i_m
-                        else:
-                            input_idx_i_m = idx_i[index]
-                            idx[index][k] = input_idx_i_m
-                    else:
-                        if k == output_bias_name:
-                            input_idx_i_m = idx_i[index]
-                            idx[index][k] = input_idx_i_m
-                        else:
-                            input_idx_i_m = idx_i[index]
-                            idx[index][k] = input_idx_i_m
-                else:
-                    pass
+        idx = _mr_to_param_idx_conv(
+            parameters, unique_client_model_rate, global_model_rate
+        )
     elif "resnet" in model_name:
-        idx_i = [None for _ in range(len(unique_client_model_rate))]
-        idx = [OrderedDict() for _ in range(len(unique_client_model_rate))]
-        for k, val in parameters.items():
-            parameter_type = k.split(".")[-1]
-            for index, _ in enumerate(unique_client_model_rate):
-                if "weight" in parameter_type or "bias" in parameter_type:
-                    if parameter_type == "weight":
-                        if val.dim() > 1:
-                            input_size = val.size(1)
-                            output_size = val.size(0)
-                            if "conv1" in k or "conv2" in k:
-                                if idx_i[index] is None:
-                                    idx_i[index] = torch.arange(
-                                        input_size, device=val.device
-                                    )
-                                input_idx_i_m = idx_i[index]
-                                scaler_rate = (
-                                    unique_client_model_rate[index] / global_model_rate
-                                )
-                                local_output_size = int(
-                                    np.ceil(output_size * scaler_rate)
-                                )
-                                output_idx_i_m = torch.arange(
-                                    output_size, device=val.device
-                                )[:local_output_size]
-                                idx_i[index] = output_idx_i_m
-                            elif "shortcut" in k:
-                                input_idx_i_m = idx[index][
-                                    k.replace("shortcut", "conv1")
-                                ][1]
-                                output_idx_i_m = idx_i[index]
-                            elif "linear" in k:
-                                input_idx_i_m = idx_i[index]
-                                output_idx_i_m = torch.arange(
-                                    output_size, device=val.device
-                                )
-                            else:
-                                raise ValueError("Not valid k")
-                            idx[index][k] = (output_idx_i_m, input_idx_i_m)
-                        else:
-                            input_idx_i_m = idx_i[index]
-                            idx[index][k] = input_idx_i_m
-                    else:
-                        input_size = val.size(0)
-                        if "linear" in k:
-                            input_idx_i_m = torch.arange(input_size, device=val.device)
-                            idx[index][k] = input_idx_i_m
-                        else:
-                            input_idx_i_m = idx_i[index]
-                            idx[index][k] = input_idx_i_m
-                else:
-                    pass
-
+        idx = _mr_to_param_idx_resnet18(
+            parameters, unique_client_model_rate, global_model_rate
+        )
     else:
         raise ValueError("Not valid model name")
 
@@ -646,6 +628,197 @@ def param_model_rate_mapping(
         param_idx_model_rate_mapping[unique_client_model_rate[i]] = idx[i]
 
     return param_idx_model_rate_mapping
+
+
+def _mr_to_param_idx_conv(parameters, unique_client_model_rate, global_model_rate):
+    idx_i = [None for _ in range(len(unique_client_model_rate))]
+    idx = [OrderedDict() for _ in range(len(unique_client_model_rate))]
+    output_weight_name = [k for k in parameters.keys() if "weight" in k][-1]
+    output_bias_name = [k for k in parameters.keys() if "bias" in k][-1]
+    for k, val in parameters.items():
+        parameter_type = k.split(".")[-1]
+        for index, _ in enumerate(unique_client_model_rate):
+            if "weight" in parameter_type or "bias" in parameter_type:
+                scaler_rate = unique_client_model_rate[index] / global_model_rate
+                _get_key_k_idx_conv(
+                    idx,
+                    idx_i,
+                    {
+                        "index": index,
+                        "parameter_type": parameter_type,
+                        "k": k,
+                        "val": val,
+                    },
+                    output_names={
+                        "output_weight_name": output_weight_name,
+                        "output_bias_name": output_bias_name,
+                    },
+                    scaler_rate=scaler_rate,
+                )
+            else:
+                pass
+    return idx
+
+
+def _get_key_k_idx_conv(
+    idx,
+    idx_i,
+    param_info,
+    output_names,
+    scaler_rate,
+):
+    if param_info["parameter_type"] == "weight":
+        if param_info["val"].dim() > 1:
+            input_size = param_info["val"].size(1)
+            output_size = param_info["val"].size(0)
+            if idx_i[param_info["index"]] is None:
+                idx_i[param_info["index"]] = torch.arange(
+                    input_size, device=param_info["val"].device
+                )
+            input_idx_i_m = idx_i[param_info["index"]]
+            if param_info["k"] == output_names["output_weight_name"]:
+                output_idx_i_m = torch.arange(
+                    output_size, device=param_info["val"].device
+                )
+            else:
+                local_output_size = int(np.ceil(output_size * (scaler_rate)))
+                output_idx_i_m = torch.arange(
+                    output_size, device=param_info["val"].device
+                )[:local_output_size]
+            idx[param_info["index"]][param_info["k"]] = output_idx_i_m, input_idx_i_m
+            idx_i[param_info["index"]] = output_idx_i_m
+        else:
+            input_idx_i_m = idx_i[param_info["index"]]
+            idx[param_info["index"]][param_info["k"]] = input_idx_i_m
+    else:
+        if param_info["k"] == output_names["output_bias_name"]:
+            input_idx_i_m = idx_i[param_info["index"]]
+            idx[param_info["index"]][param_info["k"]] = input_idx_i_m
+        else:
+            input_idx_i_m = idx_i[param_info["index"]]
+            idx[param_info["index"]][param_info["k"]] = input_idx_i_m
+
+
+def _mr_to_param_idx_resnet18(parameters, unique_client_model_rate, global_model_rate):
+    idx_i = [None for _ in range(len(unique_client_model_rate))]
+    idx = [OrderedDict() for _ in range(len(unique_client_model_rate))]
+    for k, val in parameters.items():
+        parameter_type = k.split(".")[-1]
+        for index, _ in enumerate(unique_client_model_rate):
+            if "weight" in parameter_type or "bias" in parameter_type:
+                scaler_rate = unique_client_model_rate[index] / global_model_rate
+                _get_key_k_idx_resnet18(
+                    idx,
+                    idx_i,
+                    {
+                        "index": index,
+                        "parameter_type": parameter_type,
+                        "k": k,
+                        "val": val,
+                    },
+                    scaler_rate=scaler_rate,
+                )
+                # if parameter_type == "weight":
+                #     if val.dim() > 1:
+                #         input_size = val.size(1)
+                #         output_size = val.size(0)
+                #         if "conv1" in k or "conv2" in k:
+                #             if idx_i[index] is None:
+                #                 idx_i[index] = torch.arange(
+                #                     input_size, device=val.device
+                #                 )
+                #             input_idx_i_m = idx_i[index]
+                #             # scaler_rate = (
+                #             #     unique_client_model_rate[index] / global_model_rate
+                #             # )
+                #             local_output_size = int(
+                #                 np.ceil(
+                #                     output_size
+                #                     * (
+                #                         unique_client_model_rate[index]
+                #                         / global_model_rate
+                #                     )
+                #                 )
+                #             )
+                #             output_idx_i_m = torch.arange(
+                #                 output_size, device=val.device
+                #             )[:local_output_size]
+                #             idx_i[index] = output_idx_i_m
+                #         elif "shortcut" in k:
+                #             input_idx_i_m = idx[index]
+                # [k.replace("shortcut", "conv1")][
+                #                 1
+                #             ]
+                #             output_idx_i_m = idx_i[index]
+                #         elif "linear" in k:
+                #             input_idx_i_m = idx_i[index]
+                #             output_idx_i_m = torch.arange(
+                #                 output_size, device=val.device
+                #             )
+                #         else:
+                #             raise ValueError("Not valid k")
+                #         idx[index][k] = (output_idx_i_m, input_idx_i_m)
+                #     else:
+                #         input_idx_i_m = idx_i[index]
+                #         idx[index][k] = input_idx_i_m
+                # else:
+                #     input_size = val.size(0)
+                #     if "linear" in k:
+                #         input_idx_i_m = torch.arange(input_size, device=val.device)
+                #         idx[index][k] = input_idx_i_m
+                #     else:
+                #         input_idx_i_m = idx_i[index]
+                #         idx[index][k] = input_idx_i_m
+            else:
+                pass
+    return idx
+
+
+def _get_key_k_idx_resnet18(
+    idx,
+    idx_i,
+    param_info,
+    scaler_rate,
+):
+    if param_info["parameter_type"] == "weight":
+        if param_info["val"].dim() > 1:
+            input_size = param_info["val"].size(1)
+            output_size = param_info["val"].size(0)
+            if "conv1" in param_info["k"] or "conv2" in param_info["k"]:
+                if idx_i[param_info["index"]] is None:
+                    idx_i[param_info["index"]] = torch.arange(
+                        input_size, device=param_info["val"].device
+                    )
+                input_idx_i_m = idx_i[param_info["index"]]
+                local_output_size = int(np.ceil(output_size * (scaler_rate)))
+                output_idx_i_m = torch.arange(
+                    output_size, device=param_info["val"].device
+                )[:local_output_size]
+                idx_i[param_info["index"]] = output_idx_i_m
+            elif "shortcut" in param_info["k"]:
+                input_idx_i_m = idx[param_info["index"]][
+                    param_info["k"].replace("shortcut", "conv1")
+                ][1]
+                output_idx_i_m = idx_i[param_info["index"]]
+            elif "linear" in param_info["k"]:
+                input_idx_i_m = idx_i[param_info["index"]]
+                output_idx_i_m = torch.arange(
+                    output_size, device=param_info["val"].device
+                )
+            else:
+                raise ValueError("Not valid k")
+            idx[param_info["index"]][param_info["k"]] = (output_idx_i_m, input_idx_i_m)
+        else:
+            input_idx_i_m = idx_i[param_info["index"]]
+            idx[param_info["index"]][param_info["k"]] = input_idx_i_m
+    else:
+        input_size = param_info["val"].size(0)
+        if "linear" in param_info["k"]:
+            input_idx_i_m = torch.arange(input_size, device=param_info["val"].device)
+            idx[param_info["index"]][param_info["k"]] = input_idx_i_m
+        else:
+            input_idx_i_m = idx_i[param_info["index"]]
+            idx[param_info["index"]][param_info["k"]] = input_idx_i_m
 
 
 def param_idx_to_local_params(global_parameters, client_param_idx):
