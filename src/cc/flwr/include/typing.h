@@ -87,7 +87,7 @@ private:
  */
 class ParametersRes {
 public:
-  explicit ParametersRes(const Parameters &parameters)
+  ParametersRes(const Parameters &parameters)
       : parameters(parameters) {}
 
   Parameters getParameters() { return parameters; }
