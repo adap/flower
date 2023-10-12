@@ -159,7 +159,7 @@ The Flower community welcomes contributions. The following docs are intended to 
    contributor-how-to-create-new-messages
    contributor-how-to-write-documentation
    contributor-how-to-release-flower
-   contributor-how-to-improve-docs-translation
+   contributor-how-to-contribute-translations
 
 .. toctree::
    :maxdepth: 1
