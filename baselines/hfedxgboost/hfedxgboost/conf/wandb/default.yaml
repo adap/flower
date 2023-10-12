@@ -1,0 +1,7 @@
+setup:
+    project: p1
+    entity:
+    mode: online
+watch:
+    log: all
+    log_freq: 100

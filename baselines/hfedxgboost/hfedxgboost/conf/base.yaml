@@ -2,6 +2,7 @@
 defaults: 
   - dataset: cpusmall
   - clients: cpusmall_5_clients
+  - wandb: default
 
 centralized: False
 use_wandb: True
