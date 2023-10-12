@@ -223,6 +223,7 @@ def test(
                 loss = criterion(net(images), labels)
                 loss.backward()
                 total_loss += loss * labels.size(0)
+            total_loss = total_loss / len(trainloader.dataset)
             optimizer.step()
 
         elif data == "shakespeare":

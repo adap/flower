@@ -67,6 +67,7 @@ pyenv local 3.10.6
 poetry env use 3.10.6
 
 # install the base Poetry environment
+poetry install
 poetry shell
 ```
 
