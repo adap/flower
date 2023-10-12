@@ -15,13 +15,15 @@
 """FederatedDataset."""
 
 
-from typing import Callable, Dict, Optional, Union
+from typing import Callable, Dict, Optional, Tuple, Union
 
 import datasets
 from datasets import Dataset, DatasetDict
+from flwr_datasets.merge_splitter import MergeSplitter
 from flwr_datasets.partitioner import Partitioner
-from flwr_datasets.resplitter import ResplitStrategy, Resplitter
 from flwr_datasets.utils import _check_if_dataset_tested, _instantiate_partitioners
+
+Resplitter = Callable[[DatasetDict], DatasetDict]
 
 
 class FederatedDataset:
@@ -60,9 +62,7 @@ class FederatedDataset:
         self,
         *,
         dataset: str,
-        resplitter: Optional[
-            Union[ResplitStrategy, Callable[[DatasetDict], DatasetDict]]
-        ] = None,
+        resplitter: Optional[Union[Resplitter, Dict[Tuple[str, ...], str]]] = None,
         partitioners: Dict[str, int],
     ) -> None:
         _check_if_dataset_tested(dataset)
@@ -173,9 +173,9 @@ class FederatedDataset:
         if self._dataset is None:
             raise ValueError("The dataset resplit should happen after the download.")
         if self._resplitter:
-            resplitter: Union[Resplitter, Callable[[DatasetDict], DatasetDict]]
+            resplitter: Resplitter
             if isinstance(self._resplitter, Dict):
-                resplitter = Resplitter(resplit_strategy=self._resplitter)
+                resplitter = MergeSplitter(resplit_strategy=self._resplitter)
             else:
                 resplitter = self._resplitter
             self._dataset = resplitter(self._dataset)

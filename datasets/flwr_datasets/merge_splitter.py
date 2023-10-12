@@ -5,10 +5,8 @@ from typing import Dict, List, Tuple
 import datasets
 from datasets import Dataset, DatasetDict
 
-ResplitStrategy = Dict[Tuple[str, ...], str]
 
-
-class Resplitter:
+class MergeSplitter:
     """Create a new dataset splits according to the `resplit_strategy`.
 
     The dataset comes with some predefined splits e.g. "train", "valid" and "test". This
@@ -24,9 +22,9 @@ class Resplitter:
 
     def __init__(
         self,
-        resplit_strategy: ResplitStrategy,
+        resplit_strategy: Dict[Tuple[str, ...], str],
     ) -> None:
-        self._resplit_strategy: ResplitStrategy = resplit_strategy
+        self._resplit_strategy: Dict[Tuple[str, ...], str] = resplit_strategy
         self._check_duplicate_desired_splits()
 
     def __call__(self, dataset: DatasetDict) -> DatasetDict:
