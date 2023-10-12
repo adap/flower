@@ -86,6 +86,25 @@ At first, it was a manual process basically experiencing different values for so
 
 All the final new values for those hyperparameters can be found in 3 `yaml` files named `dataset_name_<no. of clients>_clients` and all the original values for those hyperparameters can be found in 3 `yaml` files named `paper_<no. of clients>_clients`  -that created a large number of config files 3*7+3= 24 config files in the `clients` folder-
 
+Later `wandb` was incorporated to make the fine-tuning process easier, if you're interested in continuing the fine-tuning journey, here's how to run the wandb sweep -also, if you're new to wandb, check those sources [1](https://colab.research.google.com/github/wandb/examples/blob/master/colabs/pytorch/Organizing_Hyperparameter_Sweeps_in_PyTorch_with_W%26B.ipynb), [2](https://wandb.ai/adrishd/hydra-example/reports/Configuring-W-B-Projects-with-Hydra--VmlldzoxNTA2MzQw)-
+
+```
+#login to your wandb account
+
+wandb login
+
+#inside the folder flower/baselines/hfedxgboost/hfedxgboost run the commands below
+
+#Initiate WandB sweep
+
+wandb sweep wandb_sweep.yaml
+
+#that command -if ran with no error- will return a line that contains
+#the command that you can use to run the sweep agent, it'll look something like that:
+
+wandb agent <your user name on wandb>/flower-baselines_hfedxgboost_hfedxgboost/<the sweep name>
+
+```
 
 For the centralized model, the paper's hyperparameters were mostly used as they give very good results -except for abalone and cpusmall-, here are the used hyperparameters -they can all be found in the `yaml` file named `paper_xgboost_centralized`:
 
