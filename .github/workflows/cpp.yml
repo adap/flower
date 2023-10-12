@@ -2,11 +2,11 @@ name: C++ SDK
 
 on:
   push:
-    paths:
-      - 'src/cc/flwr/**'
+    branches: ['main']
+    paths: ['src/cc/flwr/**']
   pull_request:
-    paths:
-      - 'src/cc/flwr/**'
+    branches: ['main']
+    paths: ['src/cc/flwr/**']
 
 jobs:
   build_and_test:
@@ -27,12 +27,12 @@ jobs:
         find src/cc/flwr -name '*.cpp' -or -name '*.h' | xargs clang-format -i
         git diff --exit-code
 
-    # - name: Build
-    #   run: |
-    #     mkdir build
-    #     cd build
-    #     cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ../src/cc/flwr
-    #     make
+    - name: Build
+      run: |
+        mkdir build
+        cd build
+        cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ../src/cc/flwr
+        make
 
     - name: Run clang-tidy
       run: |

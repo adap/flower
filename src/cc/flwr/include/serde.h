@@ -23,7 +23,7 @@ using flwr::proto::Reason;
 using ProtoScalar = flwr::proto::Scalar;
 using flwr::proto::ClientMessage_EvaluateRes;
 using flwr::proto::ClientMessage_FitRes;
-using ClientMessage_ParametersRes=flwr::proto::ClientMessage_GetParametersRes;
+using ClientMessage_ParametersRes = flwr::proto::ClientMessage_GetParametersRes;
 using flwr::proto::ServerMessage_EvaluateIns;
 using flwr::proto::ServerMessage_FitIns;
 
@@ -51,20 +51,21 @@ flwr_local::Scalar scalar_from_proto(ProtoScalar scalar_msg);
  * Serialize client metrics type to protobuf metrics type
  * "Any" is used in Python, this part might be changed if needed
  */
-google::protobuf::Map<std::string, ProtoScalar> metrics_to_proto(
-    flwr_local::Metrics metrics);
+google::protobuf::Map<std::string, ProtoScalar>
+metrics_to_proto(flwr_local::Metrics metrics);
 
 /**
  * Deserialize protobuf metrics type to client metrics type
  * "Any" is used in Python, this part might be changed if needed
  */
-flwr_local::Metrics metrics_from_proto(
-    google::protobuf::Map<std::string, ProtoScalar> proto);
+flwr_local::Metrics
+metrics_from_proto(google::protobuf::Map<std::string, ProtoScalar> proto);
 
 /**
  * Serialize client ParametersRes type to protobuf ParametersRes type
  */
-ClientMessage_ParametersRes parameters_res_to_proto(flwr_local::ParametersRes res);
+ClientMessage_ParametersRes
+parameters_res_to_proto(flwr_local::ParametersRes res);
 
 /**
  * Deserialize protobuf FitIns type to client FitIns type

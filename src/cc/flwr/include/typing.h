@@ -30,7 +30,7 @@ namespace flwr_local {
  *
  */
 class Scalar {
- public:
+public:
   // Getters
   std::optional<bool> getBool() { return b; }
   std::optional<std::string> getBytes() { return bytes; }
@@ -45,7 +45,7 @@ class Scalar {
   void setInt(int i) { this->i = i; }
   void setString(std::string string) { this->string = string; }
 
- private:
+private:
   std::optional<bool> b = std::nullopt;
   std::optional<std::string> bytes = std::nullopt;
   std::optional<double> d = std::nullopt;
@@ -59,7 +59,7 @@ typedef std::map<std::string, flwr_local::Scalar> Metrics;
  * Model parameters
  */
 class Parameters {
- public:
+public:
   Parameters() {}
   Parameters(std::list<std::string> tensors, std::string tensor_type)
       : tensors(tensors), tensor_type(tensor_type) {}
@@ -74,7 +74,7 @@ class Parameters {
     this->tensor_type = tensor_type;
   }
 
- private:
+private:
   std::list<std::string> tensors;
   std::string tensor_type;
 };
@@ -83,13 +83,13 @@ class Parameters {
  * Response when asked to return parameters
  */
 class ParametersRes {
- public:
+public:
   ParametersRes(Parameters parameters) : parameters(parameters) {}
 
   Parameters getParameters() { return parameters; }
   void setParameters(Parameters p) { parameters = p; }
 
- private:
+private:
   Parameters parameters;
 };
 
@@ -97,8 +97,9 @@ class ParametersRes {
  * Fit instructions for a client
  */
 class FitIns {
- public:
-  FitIns(Parameters parameters, std::map<std::string, flwr_local::Scalar> config)
+public:
+  FitIns(Parameters parameters,
+         std::map<std::string, flwr_local::Scalar> config)
       : parameters(parameters), config(config) {}
 
   // Getters
@@ -111,7 +112,7 @@ class FitIns {
     this->config = config;
   }
 
- private:
+private:
   Parameters parameters;
   std::map<std::string, Scalar> config;
 };
@@ -120,17 +121,12 @@ class FitIns {
  * Fit response from a client
  */
 class FitRes {
- public:
+public:
   FitRes() {}
-  FitRes(Parameters parameters,
-         int num_examples,
-         int num_examples_ceil,
-         float fit_duration,
-         Metrics metrics)
-      : parameters(parameters),
-        num_examples(num_examples),
-        fit_duration(fit_duration),
-        metrics(metrics) {}
+  FitRes(Parameters parameters, int num_examples, int num_examples_ceil,
+         float fit_duration, Metrics metrics)
+      : parameters(parameters), num_examples(num_examples),
+        fit_duration(fit_duration), metrics(metrics) {}
 
   // Getters
   Parameters getParameters() { return parameters; }
@@ -152,7 +148,7 @@ class FitRes {
   void setFit_duration(float f) { fit_duration = f; }
   void setMetrics(flwr_local::Metrics m) { metrics = m; }
 
- private:
+private:
   Parameters parameters;
   int num_examples;
   // std::optional<int> num_examples_ceil = std::nullopt;
@@ -164,7 +160,7 @@ class FitRes {
  * Evaluate instructions for a client
  */
 class EvaluateIns {
- public:
+public:
   EvaluateIns(Parameters parameters, std::map<std::string, Scalar> config)
       : parameters(parameters), config(config) {}
 
@@ -178,7 +174,7 @@ class EvaluateIns {
     this->config = config;
   }
 
- private:
+private:
   Parameters parameters;
   std::map<std::string, Scalar> config;
 };
@@ -187,7 +183,7 @@ class EvaluateIns {
  * Evaluate response from a client
  */
 class EvaluateRes {
- public:
+public:
   EvaluateRes() {}
   EvaluateRes(float loss, int num_examples, float accuracy, Metrics metrics)
       : loss(loss), num_examples(num_examples), metrics(metrics) {}
@@ -202,7 +198,7 @@ class EvaluateRes {
   void setNum_example(int n) { num_examples = n; }
   void setMetrics(Metrics m) { metrics = m; }
 
- private:
+private:
   float loss;
   int num_examples;
   std::optional<Metrics> metrics = std::nullopt;
@@ -212,7 +208,7 @@ typedef std::map<std::string, flwr_local::Scalar> Config;
 typedef std::map<std::string, flwr_local::Scalar> Properties;
 
 class PropertiesIns {
- public:
+public:
   PropertiesIns() {}
 
   std::map<std::string, flwr_local::Scalar> getPropertiesIns() {
@@ -221,20 +217,20 @@ class PropertiesIns {
 
   void setPropertiesIns(Config c) { config = c; }
 
- private:
+private:
   Config config;
 };
 
 class PropertiesRes {
- public:
+public:
   PropertiesRes() {}
 
   Properties getPropertiesRes() { return properties; }
 
   void setPropertiesRes(Properties p) { properties = p; }
 
- private:
+private:
   Properties properties;
 };
 
-}  // namespace flwr_local
+} // namespace flwr_local
