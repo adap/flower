@@ -5,7 +5,7 @@ defaults:
   - wandb: default
 
 centralized: False
-use_wandb: True
+use_wandb: False
 server_device: "cpu"
 val_ratio: 0.0
 batch_size: "whole"
