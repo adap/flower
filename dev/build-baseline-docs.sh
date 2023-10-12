@@ -68,17 +68,20 @@ for d in $(printf '%s\n' */ | sort -V); do
   baseline=${d%/}
 
   if ! [[ "$baseline" =~ ^(baseline_template|dev|doc|flwr_baselines)$ ]]; then
-
     # For each baseline, copy the README into the source of the Baselines docs
     cp $baseline/README.md $ROOT/baselines/doc/source/$baseline.md 2>&1 >/dev/null
 
     # Copy the images to the same folder in source
     image_path=$(cd $baseline && find  . -type f -regex ".*\.png" | cut -c 3-)
-    image_dir=$(dirname $image_path)
 
-    mkdir -p $ROOT/baselines/doc/source/$image_dir && cp $baseline/$image_path $_
+    # for each image found, copy
+    for img in $image_path
+    do
+      image_dir=$(dirname $img)
 
-    images_arr+=("$ROOT/baselines/doc/source/$image_path")
+      mkdir -p $ROOT/baselines/doc/source/$image_dir && cp $baseline/$img $_
+      images_arr+=("$ROOT/baselines/doc/source/$img")
+    done
 
     if [[ $(grep -L "$baseline" $INDEX) ]]; then
 
