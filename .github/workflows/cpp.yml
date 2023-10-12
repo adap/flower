@@ -24,12 +24,12 @@ jobs:
 
     - name: Check Formatting
       run: |
-        find src/cc/flwr -name '*.cpp' -or -name '*.h' | xargs clang-format -i
+        find src/cc/flwr -name '*.cc' -or -name '*.h' | xargs clang-format -i
         git diff --exit-code
 
     - name: Run clang-tidy
       run: |
-        find src/cc/flwr -name '*.cpp' | xargs clang-tidy
+        find src/cc/flwr -name '*.cc' | xargs clang-tidy
 
     - name: Run cppcheck
       run: |
