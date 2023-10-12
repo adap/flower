@@ -261,7 +261,7 @@ class FedMeta(FedAvg):
 
         # Gradient Average and Update Parameter for FedMeta(Meta-SGD)
         elif self.algo == "fedmeta_meta_sgd":
-            grads_results: List[Tuple[NDArrays, int]] = [ # type: ignore
+            grads_results: List[Tuple[NDArrays, int]] = [  # type: ignore
                 (fit_res.metrics["grads"], fit_res.num_examples)
                 for _, fit_res in results
             ]

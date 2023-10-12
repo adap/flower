@@ -167,7 +167,7 @@ def _partition_data(
                 sup_x, qry_x, sup_y, qry_y = support_query_split(
                     all_x, all_y, support_ratio
                 )
-            except Exception: # pylint: disable=broad-except
+            except Exception:  # pylint: disable=broad-except
                 continue
 
         elif data_type == "shakespeare":

@@ -28,12 +28,12 @@ class FedmetaClientManager(SimpleClientManager):
 
     # pylint: disable=too-many-arguments
     def sample(  # pylint: disable=arguments-differ
-            self,
-            num_clients: int,
-            min_num_clients: Optional[int] = None,
-            criterion: Optional[Criterion] = None,
-            server_round: Optional[int] = None,
-            step: Optional[str] = None
+        self,
+        num_clients: int,
+        min_num_clients: Optional[int] = None,
+        criterion: Optional[Criterion] = None,
+        server_round: Optional[int] = None,
+        step: Optional[str] = None,
     ) -> List[ClientProxy]:
         """Sample a number of Flower ClientProxy instances."""
         # Block until at least num_clients are connected.
@@ -42,7 +42,7 @@ class FedmetaClientManager(SimpleClientManager):
         self.wait_for(min_num_clients)
 
         # Sample clients which meet the criterion
-        if step == 'evaluate':
+        if step == "evaluate":
             available_cids = [str(result) for result in range(0, self.valid_client)]
         else:
             available_cids = list(self.clients)

@@ -95,11 +95,11 @@ class FemnistNetwork(nn.Module):
 
 # pylint: disable=too-many-arguments
 def train(
-        net: nn.Module,
-        trainloader: DataLoader,
-        device: torch.device,
-        epochs: int,
-        learning_rate: float,
+    net: nn.Module,
+    trainloader: DataLoader,
+    device: torch.device,
+    epochs: int,
+    learning_rate: float,
 ) -> Tuple[float]:
     """Train the network on the training set.
 
@@ -134,11 +134,11 @@ def train(
 
 
 def _train_one_epoch(
-        net: nn.Module,
-        trainloader: DataLoader,
-        device: torch.device,
-        criterion: torch.nn.CrossEntropyLoss,
-        optimizer: torch.optim.Adam,
+    net: nn.Module,
+    trainloader: DataLoader,
+    device: torch.device,
+    criterion: torch.nn.CrossEntropyLoss,
+    optimizer: torch.optim.Adam,
 ) -> nn.Module:
     """Train for one epoch.
 
@@ -177,13 +177,13 @@ def _train_one_epoch(
 
 # pylint: disable=too-many-locals
 def test(
-        net: nn.Module,
-        trainloader: DataLoader,
-        testloader: DataLoader,
-        device: torch.device,
-        algo: str,
-        data: str,
-        learning_rate: float,
+    net: nn.Module,
+    trainloader: DataLoader,
+    testloader: DataLoader,
+    device: torch.device,
+    algo: str,
+    data: str,
+    learning_rate: float,
 ) -> Tuple[float, float]:
     """Evaluate the network on the entire test set.
 
@@ -252,12 +252,12 @@ def test(
 
 
 def train_meta(
-        net: nn.Module,
-        supportloader: DataLoader,
-        queryloader: DataLoader,
-        alpha: torch.nn.ParameterList,
-        device: torch.device,
-        gradient_step: int,
+    net: nn.Module,
+    supportloader: DataLoader,
+    queryloader: DataLoader,
+    alpha: torch.nn.ParameterList,
+    device: torch.device,
+    gradient_step: int,
 ) -> Tuple[float, List]:
     """Train the network on the training set.
 
@@ -290,15 +290,16 @@ def train_meta(
         )
     return loss, grads
 
+
 # pylint: disable=too-many-locals
 def _train_meta_one_epoch(
-        net: nn.Module,
-        supportloader: DataLoader,
-        queryloader: DataLoader,
-        alpha: torch.nn.ParameterList,
-        criterion: torch.nn.CrossEntropyLoss,
-        device: torch.device,
-        gradient_step: int,
+    net: nn.Module,
+    supportloader: DataLoader,
+    queryloader: DataLoader,
+    alpha: torch.nn.ParameterList,
+    criterion: torch.nn.CrossEntropyLoss,
+    device: torch.device,
+    gradient_step: int,
 ) -> Tuple[float, List]:
     """Train for one epoch.
 
@@ -373,12 +374,12 @@ def _train_meta_one_epoch(
 
 
 def test_meta(
-        net: nn.Module,
-        supportloader: DataLoader,
-        queryloader: DataLoader,
-        alpha: torch.nn.ParameterList,
-        device: torch.device,
-        gradient_step: int,
+    net: nn.Module,
+    supportloader: DataLoader,
+    queryloader: DataLoader,
+    alpha: torch.nn.ParameterList,
+    device: torch.device,
+    gradient_step: int,
 ) -> Tuple[float, float]:
     """Evaluate the network on the entire test set.
 

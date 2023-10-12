@@ -50,7 +50,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.net.load_state_dict(state_dict, strict=True)
 
     def fit(  # type: ignore
-            self, parameters: NDArrays, config: Dict[str, Scalar]
+        self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, int, Dict]:
         """Implement distributed fit function for a given client."""
         self.set_parameters(parameters)
@@ -62,7 +62,7 @@ class FlowerClient(fl.client.NumPyClient):
         )
 
         # FedAvg & FedAvg(Meta) train  basic Learning
-        if algo in ('fedavg', 'fedavg_meta'):
+        if algo in ("fedavg", "fedavg_meta"):
             loss = train(
                 self.net,
                 self.trainloaders["sup"][self.cid],
@@ -73,7 +73,7 @@ class FlowerClient(fl.client.NumPyClient):
             return self.get_parameters({}), total_len, {"loss": loss}
 
         # FedMeta(MAML) & FedMeta(Meta-SGD) train inner and outer loop
-        if algo in ('fedmeta_maml', 'fedmeta_meta_sgd'):
+        if algo in ("fedmeta_maml", "fedmeta_meta_sgd"):
             alpha = config["alpha"]
             loss, grads = train_meta(  # type: ignore
                 self.net,
@@ -87,7 +87,7 @@ class FlowerClient(fl.client.NumPyClient):
         raise ValueError("Unsupported algorithm")
 
     def evaluate(  # type: ignore
-            self, parameters: NDArrays, config: Dict[str, Scalar]
+        self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[float, int, Dict]:
         """Implement distributed evaluation for a given client."""
         self.set_parameters(parameters)
@@ -128,12 +128,12 @@ class FlowerClient(fl.client.NumPyClient):
 
 # pylint: disable=too-many-arguments
 def gen_client_fn(
-        num_epochs: int,
-        trainloaders: List[DataLoader],
-        valloaders: List[DataLoader],
-        learning_rate: float,
-        model: DictConfig,
-        gradient_step: int,
+    num_epochs: int,
+    trainloaders: List[DataLoader],
+    valloaders: List[DataLoader],
+    learning_rate: float,
+    model: DictConfig,
+    gradient_step: int,
 ) -> Callable[[str], FlowerClient]:
     """Generate the client function that creates the Flower Clients.
 
@@ -165,7 +165,6 @@ def gen_client_fn(
 
     def client_fn(cid: str) -> FlowerClient:
         """Create a Flower client representing a single organization."""
-
         # Load model
         torch.manual_seed(42)
         torch.cuda.manual_seed_all(42)

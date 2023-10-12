@@ -4,7 +4,6 @@ It includes processioning the dataset, instantiate strategy, specify how the glo
 model is going to be evaluated, etc. At the end, this script saves the results.
 """
 
-import os
 
 import flwr as fl
 import hydra
@@ -35,9 +34,7 @@ def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
 
     # partition dataset and get dataloaders
-    trainloaders, valloaders, _ = load_datasets(
-        config=cfg.data, path=cfg.path
-    )
+    trainloaders, valloaders, _ = load_datasets(config=cfg.data, path=cfg.path)
 
     # prepare function that will be used to spawn each client
     client_fn = client.gen_client_fn(
