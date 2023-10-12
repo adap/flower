@@ -40,10 +40,10 @@ public:
 
   // Setters
   void setBool(bool b) { this->b = b; }
-  void setBytes(std::string bytes) { this->bytes = bytes; }
+  void setBytes(const std::string &bytes) { this->bytes = bytes; }
   void setDouble(double d) { this->d = d; }
   void setInt(int i) { this->i = i; }
-  void setString(std::string string) { this->string = string; }
+  void setString(const std::string &string) { this->string = string; }
 
 private:
   std::optional<bool> b = std::nullopt;
@@ -61,7 +61,8 @@ typedef std::map<std::string, flwr_local::Scalar> Metrics;
 class Parameters {
 public:
   Parameters() {}
-  Parameters(std::list<std::string> tensors, std::string tensor_type)
+  Parameters(const std::list<std::string> &tensors,
+             const std::string &tensor_type)
       : tensors(tensors), tensor_type(tensor_type) {}
 
   // Getters
@@ -69,8 +70,10 @@ public:
   std::string getTensor_type() { return tensor_type; }
 
   // Setters
-  void setTensors(std::list<std::string> tensors) { this->tensors = tensors; }
-  void setTensor_type(std::string tensor_type) {
+  void setTensors(const std::list<std::string> &tensors) {
+    this->tensors = tensors;
+  }
+  void setTensor_type(const std::string &tensor_type) {
     this->tensor_type = tensor_type;
   }
 
@@ -84,10 +87,11 @@ private:
  */
 class ParametersRes {
 public:
-  ParametersRes(Parameters parameters) : parameters(parameters) {}
+  explicit ParametersRes(const Parameters &parameters)
+      : parameters(parameters) {}
 
   Parameters getParameters() { return parameters; }
-  void setParameters(Parameters p) { parameters = p; }
+  void setParameters(const Parameters &p) { parameters = p; }
 
 private:
   Parameters parameters;
@@ -98,8 +102,8 @@ private:
  */
 class FitIns {
 public:
-  FitIns(Parameters parameters,
-         std::map<std::string, flwr_local::Scalar> config)
+  FitIns(const Parameters &parameters,
+         const std::map<std::string, flwr_local::Scalar> &config)
       : parameters(parameters), config(config) {}
 
   // Getters
@@ -107,8 +111,8 @@ public:
   std::map<std::string, Scalar> getConfig() { return config; }
 
   // Setters
-  void setParameters(Parameters p) { parameters = p; }
-  void setConfig(std::map<std::string, Scalar> config) {
+  void setParameters(const Parameters &p) { parameters = p; }
+  void setConfig(const std::map<std::string, Scalar> &config) {
     this->config = config;
   }
 
@@ -123,8 +127,8 @@ private:
 class FitRes {
 public:
   FitRes() {}
-  FitRes(Parameters parameters, int num_examples, int num_examples_ceil,
-         float fit_duration, Metrics metrics)
+  FitRes(const Parameters &parameters, int num_examples, int num_examples_ceil,
+         float fit_duration, const Metrics &metrics)
       : parameters(parameters), num_examples(num_examples),
         fit_duration(fit_duration), metrics(metrics) {}
 
@@ -139,14 +143,14 @@ public:
   std::optional<Metrics> getMetrics() { return metrics; }
 
   // Setters
-  void setParameters(Parameters p) { parameters = p; }
+  void setParameters(const Parameters &p) { parameters = p; }
   void setNum_example(int n) { num_examples = n; }
   /*void setNum_examples_ceil(int n)
   {
           num_examples_ceil = n;
   }*/
   void setFit_duration(float f) { fit_duration = f; }
-  void setMetrics(flwr_local::Metrics m) { metrics = m; }
+  void setMetrics(const flwr_local::Metrics &m) { metrics = m; }
 
 private:
   Parameters parameters;
@@ -161,7 +165,8 @@ private:
  */
 class EvaluateIns {
 public:
-  EvaluateIns(Parameters parameters, std::map<std::string, Scalar> config)
+  EvaluateIns(const Parameters &parameters,
+              const std::map<std::string, Scalar> &config)
       : parameters(parameters), config(config) {}
 
   // Getters
@@ -169,8 +174,8 @@ public:
   std::map<std::string, Scalar> getConfig() { return config; }
 
   // Setters
-  void setParameters(Parameters p) { parameters = p; }
-  void setConfig(std::map<std::string, Scalar> config) {
+  void setParameters(const Parameters &p) { parameters = p; }
+  void setConfig(const std::map<std::string, Scalar> &config) {
     this->config = config;
   }
 
@@ -185,7 +190,8 @@ private:
 class EvaluateRes {
 public:
   EvaluateRes() {}
-  EvaluateRes(float loss, int num_examples, float accuracy, Metrics metrics)
+  EvaluateRes(float loss, int num_examples, float accuracy,
+              const Metrics &metrics)
       : loss(loss), num_examples(num_examples), metrics(metrics) {}
 
   // Getters
@@ -196,7 +202,7 @@ public:
   // Setters
   void setLoss(float f) { loss = f; }
   void setNum_example(int n) { num_examples = n; }
-  void setMetrics(Metrics m) { metrics = m; }
+  void setMetrics(const Metrics &m) { metrics = m; }
 
 private:
   float loss;
@@ -215,7 +221,7 @@ public:
     return static_cast<std::map<std::string, flwr_local::Scalar>>(config);
   }
 
-  void setPropertiesIns(Config c) { config = c; }
+  void setPropertiesIns(const Config &c) { config = c; }
 
 private:
   Config config;
@@ -227,7 +233,7 @@ public:
 
   Properties getPropertiesRes() { return properties; }
 
-  void setPropertiesRes(Properties p) { properties = p; }
+  void setPropertiesRes(const Properties &p) { properties = p; }
 
 private:
   Properties properties;

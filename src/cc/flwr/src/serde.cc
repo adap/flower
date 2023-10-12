@@ -137,20 +137,16 @@ ClientMessage_FitRes fit_res_to_proto(flwr_local::FitRes res) {
   ClientMessage_FitRes cres;
 
   MessageParameters parameters_proto = parameters_to_proto(res.getParameters());
-  google::protobuf::Map<::std::string, ::flwr::proto::Scalar> *metrics_msg;
-  if (res.getMetrics() == std::nullopt) {
-    metrics_msg = NULL;
-  } else {
-    google::protobuf::Map<::std::string, ::flwr::proto::Scalar> proto =
-        metrics_to_proto(res.getMetrics().value());
-    metrics_msg = &proto;
+  google::protobuf::Map<::std::string, ::flwr::proto::Scalar> metrics_msg;
+  if (res.getMetrics() != std::nullopt) {
+    metrics_msg = metrics_to_proto(res.getMetrics().value());
   }
 
   // Forward - compatible case
   *(cres.mutable_parameters()) = parameters_proto;
   cres.set_num_examples(res.getNum_example());
-  if (metrics_msg != NULL) {
-    *cres.mutable_metrics() = *metrics_msg;
+  if (!metrics_msg.empty()) {
+    *cres.mutable_metrics() = metrics_msg;
   }
   return cres;
 }
@@ -169,22 +165,17 @@ flwr_local::EvaluateIns evaluate_ins_from_proto(ServerMessage_EvaluateIns msg) {
  */
 ClientMessage_EvaluateRes evaluate_res_to_proto(flwr_local::EvaluateRes res) {
   ClientMessage_EvaluateRes cres;
-  google::protobuf::Map<::std::string, ::flwr::proto::Scalar> *metrics_msg;
-  google::protobuf::Map<::std::string, ::flwr::proto::Scalar> proto;
+  google::protobuf::Map<::std::string, ::flwr::proto::Scalar> metrics_msg;
   if (res.getMetrics() == std::nullopt) {
-    metrics_msg = NULL;
-  } else {
-    proto = metrics_to_proto(res.getMetrics().value());
-    metrics_msg = &proto;
+    metrics_msg = metrics_to_proto(res.getMetrics().value());
   }
-
   // Forward - compatible case
   cres.set_loss(res.getLoss());
   cres.set_num_examples(res.getNum_example());
-  if (metrics_msg != NULL) {
+  if (!metrics_msg.empty()) {
     auto &map = *cres.mutable_metrics();
 
-    for (auto &[key, value] : *metrics_msg) {
+    for (auto &[key, value] : metrics_msg) {
       map[key] = value;
     }
   }
