@@ -20,6 +20,8 @@
 
   - FedProx ([#2210](https://github.com/adap/flower/pull/2210), [#2286](https://github.com/adap/flower/pull/2286))
 
+  - FedMeta [#2438](https://github.com/adap/flower/pull/2438)
+
   - Baselines Docs ([#2290](https://github.com/adap/flower/pull/2290))
 
 - **Update Flower Examples** ([#2384](https://github.com/adap/flower/pull/2384)), ([#2425](https://github.com/adap/flower/pull/2425))
