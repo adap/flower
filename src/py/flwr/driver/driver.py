@@ -40,13 +40,13 @@ DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
 ERROR_MESSAGE_DRIVER_NOT_CONNECTED = """
 [Driver] Error: Not connected.
 
-Call `connect()` on the `Driver` instance before calling any of the other `Driver`
-methods.
+Call `connect()` on the `GrpcDriver` instance before calling any of the other
+`GrpcDriver` methods.
 """
 
 
-class Driver:
-    """`Driver` provides access to the Driver API."""
+class GrpcDriver:
+    """`GrpcDriver` provides access to the gRPC Driver APIs."""
 
     def __init__(
         self,
@@ -59,7 +59,7 @@ class Driver:
         self.stub: Optional[DriverStub] = None
 
     def connect(self) -> None:
-        """Connect to the Driver API."""
+        """Connect to the gRPC Driver API."""
         event(EventType.DRIVER_CONNECT)
         if self.channel is not None or self.stub is not None:
             log(WARNING, "Already connected")
@@ -72,7 +72,7 @@ class Driver:
         log(INFO, "[Driver] Connected to %s", self.driver_service_address)
 
     def disconnect(self) -> None:
-        """Disconnect from the Driver API."""
+        """Disconnect from the gRPC Driver API."""
         event(EventType.DRIVER_DISCONNECT)
         if self.channel is None or self.stub is None:
             log(WARNING, "Already disconnected")
@@ -88,9 +88,9 @@ class Driver:
         # Check if channel is open
         if self.stub is None:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
-            raise Exception("`Driver` instance not connected")
+            raise Exception("`GrpcDriver` instance not connected")
 
-        # Call Driver API
+        # Call gRPC Driver API
         res: CreateWorkloadResponse = self.stub.CreateWorkload(request=req)
         return res
 
@@ -99,9 +99,9 @@ class Driver:
         # Check if channel is open
         if self.stub is None:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
-            raise Exception("`Driver` instance not connected")
+            raise Exception("`GrpcDriver` instance not connected")
 
-        # Call Driver API
+        # Call gRPC Driver API
         res: GetNodesResponse = self.stub.GetNodes(request=req)
         return res
 
@@ -110,9 +110,9 @@ class Driver:
         # Check if channel is open
         if self.stub is None:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
-            raise Exception("`Driver` instance not connected")
+            raise Exception("`GrpcDriver` instance not connected")
 
-        # Call Driver API
+        # Call gRPC Driver API
         res: PushTaskInsResponse = self.stub.PushTaskIns(request=req)
         return res
 
@@ -121,8 +121,8 @@ class Driver:
         # Check if channel is open
         if self.stub is None:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
-            raise Exception("`Driver` instance not connected")
+            raise Exception("`GrpcDriver` instance not connected")
 
-        # Call Driver API
+        # Call gRPC Driver API
         res: PullTaskResResponse = self.stub.PullTaskRes(request=req)
         return res
