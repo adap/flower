@@ -2,18 +2,18 @@
 title: Multi-Level Branched Regularization for Federated Learning
 url: https://proceedings.mlr.press/v162/kim22a.html
 labels: [data heterogeneity, knowledge distillation, image classification] 
-dataset: [cifar100, tiny-imagenet] 
+dataset: [CIFAR-100, Tiny-ImageNet] 
 ---
 
-# *_FedMLB_*
+# FedMLB: Multi-Level Branched Regularization for Federated Learning*
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
-****Paper:**** [proceedings.mlr.press/v162/kim22a.html](https://proceedings.mlr.press/v162/kim22a.html)
+**Paper:** [proceedings.mlr.press/v162/kim22a.html](https://proceedings.mlr.press/v162/kim22a.html)
 
-****Authors:**** Jinkyu Kim, Geeho Kim, Bohyung Han
+**Authors:** Jinkyu Kim, Geeho Kim, Bohyung Han
 
-****Abstract:**** *_A critical challenge of federated learning is data
+**Abstract:** *_A critical challenge of federated learning is data
 heterogeneity and imbalance across clients, which
 leads to inconsistency between local networks and
 unstable convergence of global models. To alleviate
@@ -37,7 +37,7 @@ The source code is available in our project page._*
 
 ## About this baseline
 
-****What’s implemented:**** The code in this directory reproduces the results for FedMLB, FedAvg, and FedAvg+KD.
+**What’s implemented:** The code in this directory reproduces the results for FedMLB, FedAvg, and FedAvg+KD.
 The reproduced results use the CIFAR-100 dataset or the TinyImagenet dataset. Four settings are available for both
 the datasets,
 1. Moderate-scale with Dir(0.3), 100 clients, 5% participation, balanced dataset.
@@ -45,32 +45,32 @@ the datasets,
 3. Moderate-scale with Dir(0.6), 100 clients, 5% participation rate, balanced dataset.
 4. Large-scale experiments with Dir(0.6), 500 clients, 2% participation rate, balanced dataset.
 
-****Datasets:**** CIFAR-100, Tiny-ImageNet.
+**Datasets:** CIFAR-100, Tiny-ImageNet.
 
-****Hardware Setup:**** The code in this repository has been tested on a Linux machine with 64GB RAM. 
+**Hardware Setup:** The code in this repository has been tested on a Linux machine with 64GB RAM. 
 Be aware that in the default config the memory usage can exceed 10GB.
 
-****Contributors:**** Alessio Mora (University of Bologna, PhD, alessio.mora@unibo.it).
+**Contributors:** Alessio Mora (University of Bologna, PhD, alessio.mora@unibo.it).
 
 ## Experimental Setup
 
-****Task:**** Image classification
+**Task:** Image classification
 
-****Model:**** ResNet-18.
+**Model:** ResNet-18.
 
-****Dataset:**** Four settings are available for CIFAR-100,
+**Dataset:** Four settings are available for CIFAR-100,
 1. Moderate-scale with Dir(0.3), 100 clients, 5% participation, balanced dataset (500 examples per client).
 2. Large-scale experiments with Dir(0.3), 500 clients, 2% participation rate, balanced dataset (100 examples per client).
 3. Moderate-scale with Dir(0.6), 100 clients, 5% participation rate, balanced dataset (500 examples per client).
 4. Large-scale experiments with Dir(0.6), 500 clients, 2% participation rate, balanced dataset (100 examples per client).
 
-****Dataset:**** Four settings are available for Tiny-Imagenet,
+**Dataset:** Four settings are available for Tiny-Imagenet,
 1. Moderate-scale with Dir(0.3), 100 clients, 5% participation, balanced dataset (1000 examples per client).
 2. Large-scale experiments with Dir(0.3), 500 clients, 2% participation rate, balanced dataset (200 examples per client).
 3. Moderate-scale with Dir(0.6), 100 clients, 5% participation rate, balanced dataset (1000 examples per client).
 4. Large-scale experiments with Dir(0.6), 500 clients, 2% participation rate, balanced dataset (200 examples per client).
 
-****Training Hyperparameters:**** 
+**Training Hyperparameters:** 
 
 | Hyperparameter  | Description | Default Value |
 | ------------- | ------------- | ------------- |
