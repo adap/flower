@@ -270,7 +270,7 @@ def start_numpy_client(
     >>> )
     """
     warnings.warn(
-        "flwr.client.start_numpy_client() is deprecated and will"
+        "flwr.client.start_numpy_client() is deprecated and will "
         "be removed in a future version of Flower.",
         DeprecationWarning,
         stacklevel=2,

@@ -41,7 +41,7 @@ class DummyClient(NumPyClient):
 
 
 def get_dummy_client(cid: str) -> Client:
-    """Return a DummyClient."""
+    """Return a DummyClient converted to Client type."""
     return DummyClient(cid).to_client()
 
 

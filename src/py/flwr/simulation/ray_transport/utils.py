@@ -63,7 +63,7 @@ def enable_tf_gpu_growth() -> None:
 
 
 def check_clientfn_returns_client(client: Client) -> Client:
-    """Warn once that clients should be of type Client.
+    """Warn once that clients returned in `clinet_fn` should be of type Client.
 
     This is here for backwards compatibility. If a ClientFn is provided returning
     a different type of client (e.g. NumPyClient) we'll warn the user but convert
@@ -75,7 +75,7 @@ def check_clientfn_returns_client(client: Client) -> Client:
             " using the `.to_client()` method before returning it"
             " in the `client_fn` you pass to `start_simulation`."
             " We have applied this conversion on your behalf."
-            " Not returning a `Client` might trigger an erro in future"
+            " Not returning a `Client` might trigger an error in future"
             " versions of Flower."
         )
 
