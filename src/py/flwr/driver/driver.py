@@ -52,12 +52,13 @@ class Driver:
         self,
         driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
         certificates: Optional[bytes] = None,
+        workload_id: Optional[int] = None,
     ) -> None:
         self.driver_service_address = driver_service_address
         self.certificates = certificates
         self.channel: Optional[grpc.Channel] = None
         self.stub: Optional[DriverStub] = None
-        self.workload_id: Optional[int] = None
+        self.workload_id = workload_id
 
     def connect(self) -> None:
         """Connect to the Driver API."""
