@@ -33,13 +33,12 @@ jobs:
         cd build
         cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ../src/cc/flwr
         make
-        cd ..
 
     - name: Run clang-tidy
       run: |
-        find src/cc/flwr -name '*.cc' | xargs clang-tidy
+        find ../src/cc/flwr -name '*.cc' | xargs clang-tidy
 
     - name: Run cppcheck
       run: |
-        cppcheck --enable=all --suppress=missingIncludeSystem src/cc/flwr/
+        cppcheck --enable=all --suppress=missingIncludeSystem ../src/cc/flwr/
 
