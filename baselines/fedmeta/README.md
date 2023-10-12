@@ -73,7 +73,7 @@ poetry shell
 
 ## Running the Experiments
 
-**Download Dataset** Go [LEAF: A Benchmark for Federated Settings](https://github.com/TalwalkarLab/leaf) and Use the command below! You can download dataset (FEMNIST and SHAKESPEARE). 
+**Download Dataset:** Go [LEAF: A Benchmark for Federated Settings](https://github.com/TalwalkarLab/leaf) and Use the command below! You can download dataset (FEMNIST and SHAKESPEARE). 
 ```bash
 # clone LEAF repo
 git clone https://github.com/TalwalkarLab/leaf.git
