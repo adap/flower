@@ -84,10 +84,7 @@ def main(cfg: DictConfig) -> None:
 
     print("................")
     print(history)
-    output_path = (
-        HydraConfig.get().runtime.cwd + "/fedmeta/" + cfg.data.data + "/graph_params"
-    )
-    os.makedirs(output_path, exist_ok=True)
+    output_path = HydraConfig.get().runtime.output_dir
 
     data_params = {
         "algo": cfg.algo.algo,
