@@ -5,7 +5,7 @@ labels: [data heterogeneity, knowledge distillation, image classification]
 dataset: [CIFAR-100, Tiny-ImageNet] 
 ---
 
-# FedMLB: Multi-Level Branched Regularization for Federated Learning*
+# FedMLB: Multi-Level Branched Regularization for Federated Learning
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
