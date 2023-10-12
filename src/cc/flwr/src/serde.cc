@@ -7,7 +7,7 @@ MessageParameters parameters_to_proto(flwr_local::Parameters parameters) {
   MessageParameters mp;
   mp.set_tensor_type(parameters.getTensor_type());
 
-  for (auto& i : parameters.getTensors()) {
+  for (auto &i : parameters.getTensors()) {
     mp.add_tensors(i);
   }
   return mp;
@@ -60,23 +60,23 @@ ProtoScalar scalar_to_proto(flwr_local::Scalar scalar_msg) {
 flwr_local::Scalar scalar_from_proto(ProtoScalar scalar_msg) {
   flwr_local::Scalar scalar;
   switch (scalar_msg.scalar_case()) {
-    case 1:
-      scalar.setDouble(scalar_msg.double_());
-      return scalar;
-    case 8:
-      scalar.setInt(scalar_msg.sint64());
-      return scalar;
-    case 13:
-      scalar.setBool(scalar_msg.bool_());
-      return scalar;
-    case 14:
-      scalar.setString(scalar_msg.string());
-      return scalar;
-    case 15:
-      scalar.setBytes(scalar_msg.bytes());
-      return scalar;
-    case 0:
-      break;
+  case 1:
+    scalar.setDouble(scalar_msg.double_());
+    return scalar;
+  case 8:
+    scalar.setInt(scalar_msg.sint64());
+    return scalar;
+  case 13:
+    scalar.setBool(scalar_msg.bool_());
+    return scalar;
+  case 14:
+    scalar.setString(scalar_msg.string());
+    return scalar;
+  case 15:
+    scalar.setBytes(scalar_msg.bytes());
+    return scalar;
+  case 0:
+    break;
   }
   throw "Error scalar type";
 }
@@ -85,11 +85,11 @@ flwr_local::Scalar scalar_from_proto(ProtoScalar scalar_msg) {
  * Serialize client metrics type to protobuf metrics type
  * "Any" is used in Python, this part might be changed if needed
  */
-google::protobuf::Map<std::string, ProtoScalar> metrics_to_proto(
-    flwr_local::Metrics metrics) {
+google::protobuf::Map<std::string, ProtoScalar>
+metrics_to_proto(flwr_local::Metrics metrics) {
   google::protobuf::Map<std::string, ProtoScalar> proto;
 
-  for (auto& [key, value] : metrics) {
+  for (auto &[key, value] : metrics) {
     proto[key] = scalar_to_proto(value);
   }
 
@@ -100,11 +100,11 @@ google::protobuf::Map<std::string, ProtoScalar> metrics_to_proto(
  * Deserialize protobuf metrics type to client metrics type
  * "Any" is used in Python, this part might be changed if needed
  */
-flwr_local::Metrics metrics_from_proto(
-    google::protobuf::Map<std::string, ProtoScalar> proto) {
+flwr_local::Metrics
+metrics_from_proto(google::protobuf::Map<std::string, ProtoScalar> proto) {
   flwr_local::Metrics metrics;
 
-  for (auto& [key, value] : proto) {
+  for (auto &[key, value] : proto) {
     metrics[key] = scalar_from_proto(value);
   }
   return metrics;
@@ -113,7 +113,8 @@ flwr_local::Metrics metrics_from_proto(
 /**
  * Serialize client ParametersRes type to protobuf ParametersRes type
  */
-ClientMessage_ParametersRes parameters_res_to_proto(flwr_local::ParametersRes res) {
+ClientMessage_ParametersRes
+parameters_res_to_proto(flwr_local::ParametersRes res) {
   MessageParameters mp = parameters_to_proto(res.getParameters());
   ClientMessage_ParametersRes cpr;
   *(cpr.mutable_parameters()) = mp;
@@ -136,12 +137,11 @@ ClientMessage_FitRes fit_res_to_proto(flwr_local::FitRes res) {
   ClientMessage_FitRes cres;
 
   MessageParameters parameters_proto = parameters_to_proto(res.getParameters());
-  google::protobuf::Map< ::std::string, ::flwr::proto::Scalar>*
-      metrics_msg;
+  google::protobuf::Map<::std::string, ::flwr::proto::Scalar> *metrics_msg;
   if (res.getMetrics() == std::nullopt) {
     metrics_msg = NULL;
   } else {
-    google::protobuf::Map< ::std::string, ::flwr::proto::Scalar> proto =
+    google::protobuf::Map<::std::string, ::flwr::proto::Scalar> proto =
         metrics_to_proto(res.getMetrics().value());
     metrics_msg = &proto;
   }
@@ -169,9 +169,8 @@ flwr_local::EvaluateIns evaluate_ins_from_proto(ServerMessage_EvaluateIns msg) {
  */
 ClientMessage_EvaluateRes evaluate_res_to_proto(flwr_local::EvaluateRes res) {
   ClientMessage_EvaluateRes cres;
-  google::protobuf::Map< ::std::string, ::flwr::proto::Scalar>*
-      metrics_msg;
-  google::protobuf::Map< ::std::string, ::flwr::proto::Scalar> proto;
+  google::protobuf::Map<::std::string, ::flwr::proto::Scalar> *metrics_msg;
+  google::protobuf::Map<::std::string, ::flwr::proto::Scalar> proto;
   if (res.getMetrics() == std::nullopt) {
     metrics_msg = NULL;
   } else {
@@ -183,12 +182,12 @@ ClientMessage_EvaluateRes evaluate_res_to_proto(flwr_local::EvaluateRes res) {
   cres.set_loss(res.getLoss());
   cres.set_num_examples(res.getNum_example());
   if (metrics_msg != NULL) {
-    auto& map = *cres.mutable_metrics();
+    auto &map = *cres.mutable_metrics();
 
-    for (auto& [key, value] : *metrics_msg) {
+    for (auto &[key, value] : *metrics_msg) {
       map[key] = value;
     }
   }
-  
+
   return cres;
 }
