@@ -36,7 +36,7 @@ def _instantiate_partitioners(
 
     Parameters
     ----------
-    partitioners:  Dict[str, Union[Partitioner, int]]
+    partitioners: Dict[str, Union[Partitioner, int]]
         Dataset split to the Partitioner or a number of IID partitions.
 
     Returns
