@@ -20,15 +20,15 @@ class FlowerClient(fl.client.NumPyClient):
 
     # pylint: disable=too-many-arguments
     def __init__(
-            self,
-            net: torch.nn.Module,
-            trainloaders: DataLoader,
-            valloaders: DataLoader,
-            cid: str,
-            device: torch.device,
-            num_epochs: int,
-            learning_rate: float,
-            gradient_step: int,
+        self,
+        net: torch.nn.Module,
+        trainloaders: DataLoader,
+        valloaders: DataLoader,
+        cid: str,
+        device: torch.device,
+        num_epochs: int,
+        learning_rate: float,
+        gradient_step: int,
     ):
         self.net = net
         self.trainloaders = trainloaders
