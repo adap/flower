@@ -19,7 +19,7 @@ import sys
 import time
 import warnings
 from logging import INFO
-from typing import Callable, Optional, Union
+from typing import Optional, Union
 
 from flwr.client.client import Client
 from flwr.client.typing import ClientFn
@@ -210,7 +210,6 @@ def start_client(
 def start_numpy_client(
     *,
     server_address: str,
-    client_fn: Optional[Callable[[str], NumPyClient]] = None,
     client: Optional[NumPyClient] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
@@ -224,8 +223,6 @@ def start_numpy_client(
         The IPv4 or IPv6 address of the server. If the Flower server runs on
         the same machine on port 8080, then `server_address` would be
         `"[::]:8080"`.
-    client_fn : Optional[Callable[[str], NumPyClient]]
-        A callable that returns a client of type NumPyClient. (default: None)
     client : Optional[flwr.client.NumPyClient]
         An implementation of the abstract base class `flwr.client.NumPyClient`.
     grpc_max_message_length : int (default: 536_870_912, this equals 512MB)
@@ -249,23 +246,17 @@ def start_numpy_client(
     --------
     Starting a client with an insecure server connection:
 
-    >>> def client_fn(cid: str):
-    >>>     return FlowerClient()
-    >>>
     >>> start_numpy_client(
     >>>     server_address=localhost:8080,
-    >>>     client_fn=client_fn,
+    >>>     client=FlowerClient(),
     >>> )
 
     Starting an SSL-enabled gRPC client:
 
     >>> from pathlib import Path
-    >>> def client_fn(cid: str):
-    >>>     return FlowerClient()
-    >>>
     >>> start_numpy_client(
     >>>     server_address=localhost:8080,
-    >>>     client_fn=client_fn,
+    >>>     client=FlowerClient(),
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
@@ -281,18 +272,9 @@ def start_numpy_client(
     # client function to a standard `Client`.
 
     wrp_client = client.to_client() if client else None
-    wrp_clientfn = None
-    if client_fn:
-
-        def convert(cid: str) -> Client:
-            """Convert `NumPyClient` to `Client` upon instantiation."""
-            return client_fn(cid).to_client()
-
-        wrp_clientfn = convert
 
     start_client(
         server_address=server_address,
-        client_fn=wrp_clientfn,
         client=wrp_client,
         grpc_max_message_length=grpc_max_message_length,
         root_certificates=root_certificates,
