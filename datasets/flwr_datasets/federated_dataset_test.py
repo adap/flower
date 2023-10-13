@@ -13,15 +13,18 @@
 # limitations under the License.
 # ==============================================================================
 """Federated Dataset tests."""
+# pylint: disable=W0212, C0103, C0206
 
 
 import unittest
+from typing import Dict, Union
 
 import pytest
 from parameterized import parameterized, parameterized_class
 
 import datasets
 from flwr_datasets.federated_dataset import FederatedDataset
+from flwr_datasets.partitioner import IidPartitioner, Partitioner
 
 
 @parameterized_class(
@@ -91,6 +94,78 @@ class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
         )
 
 
+class PartitionersSpecificationForFederatedDatasets(unittest.TestCase):
+    """Test the specifications of partitioners for `FederatedDataset`."""
+
+    dataset_name = "cifar10"
+    test_split = "test"
+
+    def test_dict_of_partitioners_passes_partitioners(self) -> None:
+        """Test if partitioners are passed directly (no recreation)."""
+        num_train_partitions = 100
+        num_test_partitions = 100
+        partitioners: Dict[str, Union[Partitioner, int]] = {
+            "train": IidPartitioner(num_partitions=num_train_partitions),
+            "test": IidPartitioner(num_partitions=num_test_partitions),
+        }
+        fds = FederatedDataset(
+            dataset=self.dataset_name,
+            partitioners=partitioners,
+        )
+
+        self.assertTrue(
+            all(fds._partitioners[key] == partitioners[key] for key in partitioners)
+        )
+
+    def test_dict_str_int_produces_correct_partitioners(self) -> None:
+        """Test if dict partitioners have the same keys."""
+        num_train_partitions = 100
+        num_test_partitions = 100
+        fds = FederatedDataset(
+            dataset=self.dataset_name,
+            partitioners={
+                "train": num_train_partitions,
+                "test": num_test_partitions,
+            },
+        )
+        self.assertTrue(
+            len(fds._partitioners) == 2
+            and "train" in fds._partitioners
+            and "test" in fds._partitioners
+        )
+
+    def test_mixed_type_partitioners_passes_instantiated_partitioners(self) -> None:
+        """Test if an instantiated partitioner is passed directly."""
+        num_train_partitions = 100
+        num_test_partitions = 100
+        partitioners: Dict[str, Union[Partitioner, int]] = {
+            "train": IidPartitioner(num_partitions=num_train_partitions),
+            "test": num_test_partitions,
+        }
+        fds = FederatedDataset(
+            dataset=self.dataset_name,
+            partitioners=partitioners,
+        )
+        self.assertIs(fds._partitioners["train"], partitioners["train"])
+
+    def test_mixed_type_partitioners_creates_from_int(self) -> None:
+        """Test if an IidPartitioner partitioner is created."""
+        num_train_partitions = 100
+        num_test_partitions = 100
+        partitioners: Dict[str, Union[Partitioner, int]] = {
+            "train": IidPartitioner(num_partitions=num_train_partitions),
+            "test": num_test_partitions,
+        }
+        fds = FederatedDataset(
+            dataset=self.dataset_name,
+            partitioners=partitioners,
+        )
+        self.assertTrue(
+            isinstance(fds._partitioners["test"], IidPartitioner)
+            and fds._partitioners["test"]._num_partitions == num_test_partitions
+        )
+
+
 class IncorrectUsageFederatedDatasets(unittest.TestCase):
     """Test incorrect usages in FederatedDatasets."""
 
@@ -112,7 +187,7 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
 
     def test_unsupported_dataset(self) -> None:  # pylint: disable=R0201
         """Test creating FederatedDataset for unsupported dataset."""
-        with pytest.raises(ValueError):
+        with pytest.warns(UserWarning):
             FederatedDataset(dataset="food101", partitioners={"train": 100})
 
 

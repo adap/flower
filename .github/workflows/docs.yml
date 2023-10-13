@@ -27,8 +27,12 @@ jobs:
         uses: ./.github/actions/bootstrap
       - name: Install pandoc
         run: sudo apt install pandoc
-      - name: Install dependencies (mandatory only)
+      - name: Install Flower dependencies (mandatory only)
         run: python -m poetry install --extras "simulation"
+      - name: Install Flower Datasets
+        run: |
+          cd datasets
+          python -m poetry install
       - name: Build docs
         run: ./dev/build-docs.sh
       - name: Deploy docs
