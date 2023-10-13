@@ -65,6 +65,7 @@ protobuf = "^3.19.0"
 cryptography = "^41.0.2"
 pycryptodome = "^3.18.0"
 iterators = "^0.0.2"
+backoff = "^2.2.1"
 # Optional dependencies (VCE)
 ray = { version = "==2.6.3", optional = true }
 pydantic = { version = "<2.0.0", optional = true }
