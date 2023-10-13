@@ -180,6 +180,10 @@ class FlowerClient(fl.client.NumPyClient):
     ) -> Tuple[float, int, Dict]:
         """Implements distributed evaluation for a given client."""
         self.set_parameters(parameters)
+        self.avg_head = config['classifier_head']
+        if self.avg_head != None:
+            classifier_head = self.get_classifier_head(self.stats)
+            self.update_classifier(classifier_head)
         loss, accuracy = test(self.net, self.valloader, self.device)
         return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
 

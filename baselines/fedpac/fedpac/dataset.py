@@ -4,7 +4,7 @@ import torch
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader, random_split
 
-from fedpac.dataset_preparation import partition_cifar_data, partition_emnist_data
+from fedpac.dataset_preparation import partition_cifar_data, partition_emnist_data, _download_data
 from collections import defaultdict
 
 
@@ -40,14 +40,25 @@ def load_datasets(  # pylint: disable=too-many-arguments
     print(f"Dataset partitioning config: {config}")
     dataset = config.name
     if dataset=='cifar10':
-        datasets, testset = partition_cifar_data(
-            dataset,
+        trainset, testset = _download_data(dataset)
+        datasets = partition_cifar_data(
+            trainset,
             num_clients,
             iid=config.iid,
             balance=config.balance,
             s = config.s,
             seed=seed,
         )
+        val_datasets = partition_cifar_data(
+            testset,
+            num_clients,
+            iid=config.iid,
+            balance=config.balance,
+            s = config.s,
+            sample_size=300,
+            seed=seed,
+        )
+
     elif dataset=='emnist':
         datasets, testset = partition_emnist_data(
             dataset,
@@ -56,17 +67,18 @@ def load_datasets(  # pylint: disable=too-many-arguments
             balance=config.balance,
             s = config.s,
             seed=seed,
-        )        
+        )       
+
     # Split each partition into train/val and create DataLoader
     trainloaders = []
     valloaders = []
 
-    for dataset in datasets:
-        len_val = int(len(dataset) / (1 / val_ratio))
-        lengths = [len(dataset) - len_val, len_val]
-        ds_train, ds_val = random_split(
-            dataset, lengths, torch.Generator().manual_seed(seed)
-        )
-        trainloaders.append(DataLoader(ds_train, batch_size=batch_size, shuffle=True))
-        valloaders.append(DataLoader(ds_val, batch_size=batch_size))
+    for dataset, val_dataset in zip(datasets, val_datasets):
+        # len_val = int(len(dataset) / (1 / val_ratio))
+        # lengths = [len(dataset) - len_val, len_val]
+        # ds_train, ds_val = random_split(
+        #     dataset, lengths, torch.Generator().manual_seed(seed)
+        # )
+        trainloaders.append(DataLoader(dataset, batch_size=batch_size, shuffle=True))
+        valloaders.append(DataLoader(val_dataset, batch_size=batch_size))
     return trainloaders, valloaders, DataLoader(testset, batch_size=batch_size)

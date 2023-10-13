@@ -108,6 +108,8 @@ class FedPAC(FedAvg):
         """Configure the next round of training."""
         config = {}
 
+
+
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
             config = self.on_fit_config_fn(server_round, self.global_centroid)
@@ -117,15 +119,47 @@ class FedPAC(FedAvg):
             client_manager.num_available(), server_round
         )
 
-        self.avg_heads = [None]*sample_size
         clients = client_manager.sample(
             num_clients=sample_size, min_num_clients=min_num_clients
         )
+        if server_round==1:
+            self.avg_heads = [None]*sample_size
 
         fit_configurations = []
         for idx, client in enumerate(clients):
             config['classifier_head'] = self.avg_heads[idx]
             fit_configurations.append((client, FitIns(parameters, config)))
+
+        # Return client/config pairs
+        return fit_configurations
+    
+    def configure_evaluate(
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
+        """Configure the next round of evaluation."""
+        # Do not configure federated evaluation if fraction eval is 0.
+        if self.fraction_evaluate == 0.0:
+            return []
+
+        # Parameters and config
+        config = {}
+        if self.on_evaluate_config_fn is not None:
+            # Custom evaluation config function provided
+            config = self.on_evaluate_config_fn(server_round)
+        # evaluate_ins = EvaluateIns(parameters, config)
+
+        # Sample clients
+        sample_size, min_num_clients = self.num_evaluation_clients(
+            client_manager.num_available()
+        )
+        clients = client_manager.sample(
+                    num_clients=sample_size, min_num_clients=min_num_clients
+                )
+
+        fit_configurations = []
+        for idx, client in enumerate(clients):
+            config['classifier_head'] = self.avg_heads[idx]
+            fit_configurations.append((client, EvaluateIns(parameters, config)))
 
         # Return client/config pairs
         return fit_configurations
@@ -192,6 +226,8 @@ class FedPAC(FedAvg):
         if self.evaluate_metrics_aggregation_fn:
             eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
+            log(INFO, f'eval metrics: {metrics_aggregated}')
+
         elif server_round == 1:  # Only log this warning once
             log(WARNING, "No evaluate_metrics_aggregation_fn provided")
         return loss_aggregated, metrics_aggregated

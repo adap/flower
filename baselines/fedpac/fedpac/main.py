@@ -43,20 +43,6 @@ def main(cfg: DictConfig) -> None:
     device = cfg.server_device
     evaluate_fn = server.gen_evaluate_fn(testloader, device=device, model=cfg.model)
 
-    # get a function that will be used to construct the config that the client's
-    # fit() method will received
-    # def get_on_fit_config():
-    #     def fit_config_fn(server_round: int, global_centroid):
-    #         # resolve and convert to python dict
-    #         fit_config = OmegaConf.to_container(cfg.fit_config, resolve=True)
-    #         fit_config["curr_round"] = server_round             # add round info
-    #         fit_config.update({"global_centroid":global_centroid, 
-    #                             "classifier_head": None
-    #                         }) 
-    #         return fit_config
-
-    #     return fit_config_fn
-
     # instantiate strategy according to config. Here we pass other arguments
     # that are only defined at run time.
     strategy = instantiate(

@@ -232,13 +232,16 @@ def train_features_epoch(
         feat, out = net(images)
         feat_new = feat.clone().detach()
         loss0 = criterion(out, labels)
-        for i in range(len(labels)):
-            if labels[i].item() in global_centroid.keys():
-                feat[i] = global_centroid[labels[i].item()].detach()
-            else:
-                feat[i] = feature_centroid[labels[i].item()].detach()
-        loss_fn=nn.MSELoss()
-        loss1 = loss_fn(feat_new, feat)
+        if global_centroid !={}:
+            for i in range(len(labels)):
+                if labels[i].item() in global_centroid.keys():
+                    feat[i] = global_centroid[labels[i].item()].detach()
+                else:
+                    feat[i] = feature_centroid[labels[i].item()].detach()
+            loss_fn=nn.MSELoss()
+            loss1 = loss_fn(feat_new, feat)
+        else:
+            loss1 = torch.tensor(0)
         loss = loss0 + lamda*loss1
         loss.backward()
         optimizer.step()
