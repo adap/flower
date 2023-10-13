@@ -6,7 +6,7 @@ import numpy as np
 from workflows import get_workflow_factory
 
 from flwr.common import Metrics, ndarrays_to_parameters
-from flwr.driver import Driver
+from flwr.driver import GrpcDriver
 from flwr.proto import driver_pb2, node_pb2, task_pb2
 from flwr.server import History
 
@@ -23,7 +23,7 @@ def task_dict_to_task_ins_list(
         task_pb2.TaskIns(
             task_id="",  # Do not set, will be created and set by the DriverAPI
             group_id="",
-            workload_id="",
+            workload_id=workload_id,
             task=merge(
                 task,
                 task_pb2.Task(
@@ -71,7 +71,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 # -------------------------------------------------------------------------- Driver SDK
-driver = Driver(driver_service_address="0.0.0.0:9091", certificates=None)
+driver = GrpcDriver(driver_service_address="0.0.0.0:9091", certificates=None)
 # -------------------------------------------------------------------------- Driver SDK
 
 anonymous_client_nodes = False
@@ -84,7 +84,13 @@ wf_factory = get_workflow_factory()
 
 # -------------------------------------------------------------------------- Driver SDK
 driver.connect()
+create_workload_res: driver_pb2.CreateWorkloadResponse = driver.create_workload(
+    req=driver_pb2.CreateWorkloadRequest()
+)
 # -------------------------------------------------------------------------- Driver SDK
+
+workload_id = create_workload_res.workload_id
+print(f"Created workload id {workload_id}")
 
 history = History()
 for server_round in range(num_rounds):
@@ -113,7 +119,7 @@ for server_round in range(num_rounds):
         # loop and wait until enough client nodes are available.
         while True:
             # Get a list of node ID's from the server
-            get_nodes_req = driver_pb2.GetNodesRequest()
+            get_nodes_req = driver_pb2.GetNodesRequest(workload_id=workload_id)
 
             # ---------------------------------------------------------------------- Driver SDK
             get_nodes_res: driver_pb2.GetNodesResponse = driver.get_nodes(
@@ -121,7 +127,7 @@ for server_round in range(num_rounds):
             )
             # ---------------------------------------------------------------------- Driver SDK
 
-            all_node_ids: List[int] = get_nodes_res.node_ids
+            all_node_ids: List[int] = [node.node_id for node in get_nodes_res.nodes]
 
             if len(all_node_ids) >= num_client_nodes_per_round:
                 # Sample client nodes
