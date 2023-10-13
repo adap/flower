@@ -27,8 +27,10 @@ from flwr.common import (
 )
 from omegaconf import DictConfig
 
-from models import int_model
-from sb_recipe import get_weights, set_weights
+
+from fedwav2vec2.models import int_model
+from fedwav2vec2.sb_recipe import get_weights, set_weights
+
 
 
 class SpeechBrainClient(fl.client.Client):

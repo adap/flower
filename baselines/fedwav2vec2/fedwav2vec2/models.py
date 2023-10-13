@@ -33,8 +33,10 @@ def int_model(  # pylint: disable=too-many-arguments,too-many-locals
     """
     # Load hyperparameters file with command-line overrides
     save_path = save_path + "/client_" + str(cid)
+
     if cid == 19999:
         save_path = save_path +"server"
+
     # Override with FLOWER PARAMS
     if evaluate:
         overrides = {
@@ -84,8 +86,6 @@ def int_model(  # pylint: disable=too-many-arguments,too-many-locals
         params["train_csv"] = params["data_folder"] + "/ted_train_wo5.csv"
     params["label_encoder"] = label_path_
 
-    # Fixed pre-trained Huggingface Wav2vec2 path for sb_params:
-    # params["wav2vec_output"] = config.huggingface_model_save_path
     # Create experiment directory
     sb.create_experiment_directory(
         experiment_directory=params["output_folder"],

@@ -93,6 +93,7 @@ def _csv_path_audio(data_path_base: str, extract_path: str):
                         path = os.path.join(extract_path, "legacy/test/sph")
                 df = pd.read_csv(os.path.join(subdir,file))
                 df["wav"] = df["wav"].str.replace("path", path)
+
                 df.to_csv(os.path.join(subdir,file), index = False)
 
 
