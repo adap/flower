@@ -46,7 +46,7 @@ Call `connect()` on the `GrpcDriver` instance before calling any of the other
 
 
 class GrpcDriver:
-    """`GrpcDriver` provides access to the gRPC Driver APIs."""
+    """`GrpcDriver` provides access to the Driver API/service."""
 
     def __init__(
         self,
