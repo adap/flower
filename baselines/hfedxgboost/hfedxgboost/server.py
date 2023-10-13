@@ -24,6 +24,7 @@ from xgboost import XGBClassifier, XGBRegressor
 
 from hfedxgboost.models import CNN
 from hfedxgboost.utils import Early_Stop, single_tree_preds_from_each_client, test
+from omegaconf import DictConfig
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
@@ -69,11 +70,12 @@ class FL_Server(fl.server.Server):
     """
     def __init__(
         self,
-        *,
+        cfg: DictConfig,
         client_manager: ClientManager,
         early_stopper: Early_Stop,
         strategy: Strategy,
     ) -> None:
+        self.cfg=cfg
         self._client_manager = client_manager
         self.parameters = Parameters(tensors=[], tensor_type="numpy.ndarray")
         self.strategy = strategy
@@ -204,7 +206,8 @@ class FL_Server(fl.server.Server):
             history.add_metrics_centralized(
                 server_round=current_round, metrics=metrics_cen
             )
-            wandb.log({"round": current_round, "server_loss": res_cen})
+            if self.cfg.use_wandb:
+                wandb.log({"round": current_round, "server_loss": res_cen})
             if self.early_stopper.early_stop(res_cen):
                 return True
         return False
@@ -360,7 +363,7 @@ def serverside_eval(
         ],
     ],
     config: Dict[str, Scalar],
-    cfg,
+    cfg: DictConfig,
     testloader: DataLoader,
     batch_size: int,
 ) -> Tuple[float, Dict[str, float]]:

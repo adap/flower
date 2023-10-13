@@ -26,7 +26,7 @@ from hfedxgboost.utils import (
     results_writer_centralized,
     run_centralized,
 )
-def run_fed(cfg):
+def run_fed(cfg: DictConfig) -> None:
     print("Dataset Name", cfg.dataset.dataset_name)
     dataset_name = cfg.dataset.dataset_name
     task_type = cfg.dataset.task.task_type
@@ -115,6 +115,7 @@ def run_fed(cfg):
     history = fl.simulation.start_simulation(
         client_fn=client_fn,
         server=FL_Server(
+            cfg=cfg,
             client_manager=SimpleClientManager(),
             early_stopper=early_stopper,
             strategy=strategy,
