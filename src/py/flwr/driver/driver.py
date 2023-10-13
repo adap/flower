@@ -59,7 +59,7 @@ class GrpcDriver:
         self.stub: Optional[DriverStub] = None
 
     def connect(self) -> None:
-        """Connect to the gRPC Driver API."""
+        """Connect to the Driver API."""
         event(EventType.DRIVER_CONNECT)
         if self.channel is not None or self.stub is not None:
             log(WARNING, "Already connected")
