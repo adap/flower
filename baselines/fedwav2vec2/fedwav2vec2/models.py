@@ -16,8 +16,8 @@ from flwr.common import ndarrays_to_parameters
 from hyperpyyaml import load_hyperpyyaml
 from omegaconf import DictConfig
 
-from dataset import dataio_prepare
-from sb_recipe import ASR, get_weights
+from fedwav2vec2.dataset import dataio_prepare
+from fedwav2vec2.sb_recipe import ASR, get_weights
 
 
 def int_model(  # pylint: disable=too-many-arguments,too-many-locals
@@ -33,6 +33,8 @@ def int_model(  # pylint: disable=too-many-arguments,too-many-locals
     """
     # Load hyperparameters file with command-line overrides
     save_path = save_path + "/client_" + str(cid)
+    if cid == 19999:
+        save_path = save_path +"server"
     # Override with FLOWER PARAMS
     if evaluate:
         overrides = {
@@ -40,10 +42,14 @@ def int_model(  # pylint: disable=too-many-arguments,too-many-locals
             "number_of_epochs": 1,
             "test_batch_size": 4,
             "device": config.device,
+            "wav2vec_output": config.huggingface_model_save_path
         }
 
     else:
-        overrides = {"output_folder": save_path}
+        overrides = {
+        "output_folder": save_path,
+        "wav2vec_output": config.huggingface_model_save_path
+        }
 
     label_path_ = config.label_path
     if label_path_ is None:
@@ -78,6 +84,8 @@ def int_model(  # pylint: disable=too-many-arguments,too-many-locals
         params["train_csv"] = params["data_folder"] + "/ted_train_wo5.csv"
     params["label_encoder"] = label_path_
 
+    # Fixed pre-trained Huggingface Wav2vec2 path for sb_params:
+    # params["wav2vec_output"] = config.huggingface_model_save_path
     # Create experiment directory
     sb.create_experiment_directory(
         experiment_directory=params["output_folder"],

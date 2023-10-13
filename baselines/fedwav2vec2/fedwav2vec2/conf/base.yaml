@@ -5,10 +5,11 @@
 
 pre_train_model_path: null
 # Path for label encoder file if want to ensure the same encode for every client
-label_path: ../docs/label_encoder.txt
-sb_config: conf/sb_config/w2v2.yaml # config with SpeechBrain recipe for Wav2Vec 2.0
+label_path: docs/label_encoder.txt
+huggingface_model_save_path: docs/pretrained_wav2vec2
+sb_config: fedwav2vec2/conf/sb_config/w2v2.yaml # config with SpeechBrain recipe for Wav2Vec 2.0
 data_path: data # if you change this, ensure you `git cloned` the author's own repo to a directory with the new name
-rounds: 3 # global FL rounds
+rounds: 1 # global FL rounds
 local_epochs: 2 # local epochs for each client
 total_clients: 10
 server_cid: 19999

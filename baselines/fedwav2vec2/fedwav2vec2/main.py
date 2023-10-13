@@ -13,9 +13,9 @@ from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
-from client import get_client_fn
-from models import pre_trained_point
-from server import get_evaluate_fn
+from fedwav2vec2.client import get_client_fn
+from fedwav2vec2.models import pre_trained_point
+from fedwav2vec2.server import get_evaluate_fn
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
