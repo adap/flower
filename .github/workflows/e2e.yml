@@ -121,11 +121,6 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: 3.8
-      - name: Install NVidia packages
-        if: ${{ matrix.directory == 'pytorch-lightning' }}
-        run: |
-          sudo apt update && sudo apt upgrade
-          sudo apt install nvidia-cuda-toolkit libcudnn8
       - name: Install dependencies
         run: python -m poetry install
       - name: Install Flower wheel from artifact store
