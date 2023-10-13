@@ -19,7 +19,7 @@ from typing import Callable, Dict, Optional, Tuple, Union
 
 import datasets
 from datasets import Dataset, DatasetDict
-from flwr_datasets.merge_splitter import MergeSplitter
+from flwr_datasets.merge_resplitter import MergeResplitter
 from flwr_datasets.partitioner import Partitioner
 from flwr_datasets.utils import _check_if_dataset_tested, _instantiate_partitioners
 
@@ -39,7 +39,7 @@ class FederatedDataset:
     dataset: str
         The name of the dataset in the Hugging Face Hub.
     resplitter: Optional[Union[Resplitter, Dict[Tuple[str, ...], str]]]
-        Resplit strategy or custom `Callable` that transforms splits in the `DatasetDict`.
+        Resplit strategy or `Callable` that transforms splits in the `DatasetDict`.
     partitioners: Dict[str, Union[Partitioner, int]]
         A dictionary mapping the Dataset split (a `str`) to a `Partitioner` or an `int`
         (representing the number of IID partitions that this split should be partitioned
@@ -176,7 +176,7 @@ class FederatedDataset:
         if self._resplitter:
             resplitter: Resplitter
             if isinstance(self._resplitter, Dict):
-                resplitter = MergeSplitter(resplit_strategy=self._resplitter)
+                resplitter = MergeResplitter(merge_config=self._resplitter)
             else:
                 resplitter = self._resplitter
             self._dataset = resplitter(self._dataset)

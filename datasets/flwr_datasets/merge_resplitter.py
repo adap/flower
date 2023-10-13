@@ -1,4 +1,4 @@
-"""Resplitter class for Flower Datasets."""
+"""MergeResplitter class for Flower Datasets."""
 import collections
 from typing import Dict, List, Tuple
 
@@ -7,35 +7,51 @@ from datasets import Dataset, DatasetDict
 
 
 class MergeResplitter:
-    """Create a new dataset splits according to the `resplit_strategy`.
+    """Merge existing splits of the dataset and assign them custom names.
 
-    The dataset comes with some predefined splits e.g. "train", "valid" and "test". This
-    class allows you to create a new dataset with splits created according to your needs
-    specified in `resplit_strategy`.
+    Create new `DatasetDict` with new split names corresponding to the merged existing
+    splits (e.g. "train", "valid" and "test").
 
     Parameters
     ----------
-    resplit_strategy: ResplitStrategy
+    merge_config: Dict[Tuple[str, ...], str]
         Dictionary with keys - tuples of the current split names to values - the desired
         split names
+
+    Examples
+    --------
+    Create new `DatasetDict` with a split name "new_train" that is created as a merger
+    of the "train" and "valid" splits. Keep the "test" split.
+
+    >>> # Assuming there is a dataset_dict of type `DatasetDict`
+    >>> # dataset_dict is {"train": train-data, "valid": valid-data, "test": test-data}
+    >>> merge_resplitter = MergeResplitter(
+    >>>     merge_config={
+    >>>         ("train", "valid"): "new_train",
+    >>>         ("test", ): "test"
+    >>>     }
+    >>> )
+    >>> new_dataset_dict = merge_resplitter(dataset_dict)
+    >>> # new_dataset_dict is
+    >>> # {"new_train": concatenation of train-data and valid-data, "test": test-data}
     """
 
     def __init__(
         self,
-        resplit_strategy: Dict[Tuple[str, ...], str],
+        merge_config: Dict[Tuple[str, ...], str],
     ) -> None:
-        self._resplit_strategy: Dict[Tuple[str, ...], str] = resplit_strategy
+        self._merge_config: Dict[Tuple[str, ...], str] = merge_config
         self._check_duplicate_desired_splits()
 
     def __call__(self, dataset: DatasetDict) -> DatasetDict:
-        """Resplit the dataset according to the `resplit_strategy`."""
-        self._check_correct_keys_in_resplit_strategy(dataset)
+        """Resplit the dataset according to the `merge_config`."""
+        self._check_correct_keys_in_merge_config(dataset)
         return self.resplit(dataset)
 
     def resplit(self, dataset: DatasetDict) -> DatasetDict:
-        """Resplit the dataset according to the `resplit_strategy`."""
+        """Resplit the dataset according to the `merge_config`."""
         resplit_dataset = {}
-        for divided_from__list, divide_to in self._resplit_strategy.items():
+        for divided_from__list, divide_to in self._merge_config.items():
             datasets_from_list: List[Dataset] = []
             for divide_from in divided_from__list:
                 datasets_from_list.append(dataset[divide_from])
@@ -47,10 +63,10 @@ class MergeResplitter:
                 resplit_dataset[divide_to] = datasets_from_list[0]
         return datasets.DatasetDict(resplit_dataset)
 
-    def _check_correct_keys_in_resplit_strategy(self, dataset: DatasetDict) -> None:
-        """Check if the keys in resplit_strategy are existing dataset splits."""
+    def _check_correct_keys_in_merge_config(self, dataset: DatasetDict) -> None:
+        """Check if the keys in merge_config are existing dataset splits."""
         dataset_keys = dataset.keys()
-        specified_dataset_keys = self._resplit_strategy.keys()
+        specified_dataset_keys = self._merge_config.keys()
         for key_list in specified_dataset_keys:
             for key in key_list:
                 if key not in dataset_keys:
@@ -62,7 +78,7 @@ class MergeResplitter:
 
     def _check_duplicate_desired_splits(self) -> None:
         """Check for duplicate desired split names."""
-        desired_splits = list(self._resplit_strategy.values())
+        desired_splits = list(self._merge_config.values())
         duplicates = [
             item
             for item, count in collections.Counter(desired_splits).items()
