@@ -1,5 +1,6 @@
 import os
 import numpy as np
+from PIL import Image
 from monai.transforms import (
     EnsureChannelFirst,
     Compose,
@@ -18,7 +19,9 @@ import tarfile
 
 def load_data():
     image_file_list, image_label_list, num_total, num_class = _download_data()
-    trainX, trainY, valX, valY, testX, testY = _split_data(image_file_list, image_label_list, num_total)
+    trainX, trainY, valX, valY, testX, testY = _split_data(
+        image_file_list, image_label_list, num_total
+    )
     train_transforms, val_transforms = _get_transforms()
 
     train_ds = MedNISTDataset(trainX, trainY, train_transforms)
@@ -34,7 +37,6 @@ def load_data():
 
 
 class MedNISTDataset(Dataset):
-
     def __init__(self, image_files, labels, transforms):
         self.image_files = image_files
         self.labels = labels
@@ -48,14 +50,23 @@ class MedNISTDataset(Dataset):
 
 
 def _download_data():
-    data_dir = './MedNIST/'
-    _download_and_extract("https://dl.dropboxusercontent.com/s/5wwskxctvcxiuea/MedNIST.tar.gz", os.path.join(data_dir))
+    data_dir = "./MedNIST/"
+    _download_and_extract(
+        "https://dl.dropboxusercontent.com/s/5wwskxctvcxiuea/MedNIST.tar.gz",
+        os.path.join(data_dir),
+    )
 
-    class_names = sorted([x for x in os.listdir(data_dir) if os.path.isdir(os.path.join(data_dir, x))])
+    class_names = sorted(
+        [x for x in os.listdir(data_dir) if os.path.isdir(os.path.join(data_dir, x))]
+    )
     num_class = len(class_names)
-    image_files = [[os.path.join(data_dir, class_name, x) 
-                    for x in os.listdir(os.path.join(data_dir, class_name))] 
-                   for class_name in class_names]
+    image_files = [
+        [
+            os.path.join(data_dir, class_name, x)
+            for x in os.listdir(os.path.join(data_dir, class_name))
+        ]
+        for class_name in class_names
+    ]
     image_file_list = []
     image_label_list = []
     for i, class_name in enumerate(class_names):
@@ -83,38 +94,40 @@ def _split_data(image_file_list, image_label_list, num_total):
             trainX.append(image_file_list[i])
             trainY.append(image_label_list[i])
 
-
     return trainX, trainY, valX, valY, testX, testY
 
-def _get_transforms():
-    train_transforms = Compose([
-        LoadImage(image_only=True),
-        EnsureChannelFirst(),
-        ScaleIntensity(),
-        RandRotate(range_x=15, prob=0.5, keep_size=True),
-        RandFlip(spatial_axis=0, prob=0.5),
-        RandZoom(min_zoom=0.9, max_zoom=1.1, prob=0.5, keep_size=True),
-        ToTensor()
-    ])
 
-    val_transforms = Compose([
-        LoadImage(image_only=True),
-        EnsureChannelFirst(),
-        ScaleIntensity(),
-        ToTensor()
-    ])
-    
+def _get_transforms():
+    train_transforms = Compose(
+        [
+            LoadImage(image_only=True),
+            EnsureChannelFirst(),
+            ScaleIntensity(),
+            RandRotate(range_x=15, prob=0.5, keep_size=True),
+            RandFlip(spatial_axis=0, prob=0.5),
+            RandZoom(min_zoom=0.9, max_zoom=1.1, prob=0.5, keep_size=True),
+            ToTensor(),
+        ]
+    )
+
+    val_transforms = Compose(
+        [LoadImage(image_only=True), EnsureChannelFirst(), ScaleIntensity(), ToTensor()]
+    )
+
     return train_transforms, val_transforms
+
 
 def _download_and_extract(url, dest_folder):
     if not os.path.isdir(dest_folder):
         # Download the tar.gz file
         tar_gz_filename = url.split("/")[-1]
-        if not os.path.isfile(tar_gz_filename ):
-            with request.urlopen(url) as response, open(tar_gz_filename, 'wb') as out_file:
+        if not os.path.isfile(tar_gz_filename):
+            with request.urlopen(url) as response, open(
+                tar_gz_filename, "wb"
+            ) as out_file:
                 out_file.write(response.read())
-        
+
         # Extract the tar.gz file
-        with tarfile.open(tar_gz_filename, 'r:gz') as tar_ref:
+        with tarfile.open(tar_gz_filename, "r:gz") as tar_ref:
             tar_ref.extractall()
 
