@@ -210,7 +210,7 @@ def start_client(
 def start_numpy_client(
     *,
     server_address: str,
-    client: Optional[NumPyClient] = None,
+    client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
     transport: Optional[str] = None,
@@ -223,7 +223,7 @@ def start_numpy_client(
         The IPv4 or IPv6 address of the server. If the Flower server runs on
         the same machine on port 8080, then `server_address` would be
         `"[::]:8080"`.
-    client : Optional[flwr.client.NumPyClient]
+    client : flwr.client.NumPyClient
         An implementation of the abstract base class `flwr.client.NumPyClient`.
     grpc_max_message_length : int (default: 536_870_912, this equals 512MB)
         The maximum length of gRPC messages that can be exchanged with the
@@ -274,10 +274,9 @@ def start_numpy_client(
     )
 
     # Calling this function is deprecated. A warning is thrown.
-    # We first need to convert either the supplied client or
-    # client function to a standard `Client`.
+    # We first need to convert either the supplied client to `Client.`
 
-    wrp_client = client.to_client() if client else None
+    wrp_client = client.to_client()
 
     start_client(
         server_address=server_address,
