@@ -262,7 +262,13 @@ def start_numpy_client(
     """
     warnings.warn(
         "flwr.client.start_numpy_client() is deprecated and will "
-        "be removed in a future version of Flower.",
+        "be removed in a future version of Flower. Instead, pass "
+        "your client to `flwr.client.start_client()` by calling "
+        "first the `.to_client()` method as shown below: \n"
+        "\tflwr.client.start_client(\n"
+        "\t\tserver_address='<IP>:<PORT>',\n"
+        "\t\tclient=FlowerClient().to_client()\n"
+        "\t)",
         DeprecationWarning,
         stacklevel=2,
     )
