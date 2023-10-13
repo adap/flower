@@ -90,7 +90,7 @@ class GrpcDriver:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
             raise Exception("`GrpcDriver` instance not connected")
 
-        # Call gRPC Driver API
+        # Call Driver API
         res: CreateWorkloadResponse = self.stub.CreateWorkload(request=req)
         return res
 
