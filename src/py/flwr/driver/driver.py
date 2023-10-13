@@ -72,7 +72,7 @@ class GrpcDriver:
         log(INFO, "[Driver] Connected to %s", self.driver_service_address)
 
     def disconnect(self) -> None:
-        """Disconnect from the gRPC Driver API."""
+        """Disconnect from the Driver API."""
         event(EventType.DRIVER_DISCONNECT)
         if self.channel is None or self.stub is None:
             log(WARNING, "Already disconnected")
