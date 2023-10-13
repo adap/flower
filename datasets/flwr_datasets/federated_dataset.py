@@ -39,7 +39,7 @@ class FederatedDataset:
     dataset: str
         The name of the dataset in the Hugging Face Hub.
     resplitter: Optional[Union[Resplitter, Dict[Tuple[str, ...], str]]]
-        Resplit strategy or custom Callable that transforms the dataset.
+        Resplit strategy or custom `Callable` that transforms splits in the `DatasetDict`.
     partitioners: Dict[str, Union[Partitioner, int]]
         A dictionary mapping the Dataset split (a `str`) to a `Partitioner` or an `int`
         (representing the number of IID partitions that this split should be partitioned
@@ -165,9 +165,8 @@ class FederatedDataset:
             self._partitioners[split].dataset = self._dataset[split]
 
     def _resplit_dataset_if_needed(self) -> None:
-        # this can't be called many times
-        # either a new attribute is needed e.g. resplit_dataset
-        # or a bool flag that the resplit happened
+        # The actual re-splitting can't be done more than once.
+        # The attribute `_resplit` indicates that the resplit happened.
 
         # Resplit only once
         if self._resplit:

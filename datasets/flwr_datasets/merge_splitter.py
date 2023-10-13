@@ -6,7 +6,7 @@ import datasets
 from datasets import Dataset, DatasetDict
 
 
-class MergeSplitter:
+class MergeResplitter:
     """Create a new dataset splits according to the `resplit_strategy`.
 
     The dataset comes with some predefined splits e.g. "train", "valid" and "test". This
