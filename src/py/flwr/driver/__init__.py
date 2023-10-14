@@ -16,9 +16,9 @@
 
 
 from .app import start_driver
-from .driver import Driver
+from .driver import GrpcDriver
 
 __all__ = [
     "start_driver",
-    "Driver",
+    "GrpcDriver",
 ]
