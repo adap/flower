@@ -15,8 +15,8 @@ def create_linear_layer(od, is_od, *args, **kwargs):
     """
     if od:
         return ODLinear(is_od, *args, **kwargs)
-    else:
-        return nn.Linear(*args, **kwargs)
+
+    return nn.Linear(*args, **kwargs)
 
 
 def create_conv_layer(od, is_od, *args, **kwargs):
@@ -30,8 +30,8 @@ def create_conv_layer(od, is_od, *args, **kwargs):
     """
     if od:
         return ODConv2d(is_od, *args, **kwargs)
-    else:
-        return nn.Conv2d(*args, **kwargs)
+
+    return nn.Conv2d(*args, **kwargs)
 
 
 def create_bn_layer(od, p_s, *args, **kwargs):
@@ -45,15 +45,12 @@ def create_bn_layer(od, p_s, *args, **kwargs):
     """
     if od:
         return ODBatchNorm2d(p_s, *args, **kwargs)
-    else:
-        return nn.BatchNorm2d(*args, **kwargs)
+
+    return nn.BatchNorm2d(*args, **kwargs)
 
 
 class SequentialWithSampler(nn.Sequential):
     """Implements sequential model with sampler."""
-
-    def __init__(self, *args, **kwargs):
-        super(SequentialWithSampler, self).__init__(*args, **kwargs)
 
     def forward(self, x, sampler=None):
         """Forward method for custom Sequential.

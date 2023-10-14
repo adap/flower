@@ -101,10 +101,12 @@ def get_agg_config(
 
 
 # Define Flower client
-class FjORDClient(fl.client.NumPyClient):
+class FjORDClient(
+    fl.client.NumPyClient
+):  # pylint: disable=too-many-instance-attributes
     """Flower client training on CIFAR-10."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         cid: int,
         model_name: str,

@@ -59,7 +59,7 @@ def get_p_layer_updates(
     return layer_updates_p, num_examples_p
 
 
-def fjord_average(
+def fjord_average(  # pylint: disable=too-many-arguments
     i: int,
     layer_updates: List[np.ndarray],
     num_examples: List[int],
@@ -93,9 +93,9 @@ def fjord_average(
         )
         if len(layer_updates_p) == 0:
             return update
-        else:
-            assert num_examples_p > 0
-            return reduce(np.add, layer_updates_p) / num_examples_p
+
+        assert num_examples_p > 0
+        return reduce(np.add, layer_updates_p) / num_examples_p
     elif fjord_config["layer"][i] in ["ODLinear", "ODConv2d", "ODBatchNorm2d"]:
         # perform nested updates
         for p in p_s[::-1]:

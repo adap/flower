@@ -75,7 +75,7 @@ class FLCifar10Client(Dataset):
 class FLCifar10(CIFAR10):
     """CIFAR10 Federated Dataset."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         root: str,
         train: Optional[bool] = True,

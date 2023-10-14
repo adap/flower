@@ -15,7 +15,7 @@ class ODLinear(nn.Linear):
     """Ordered Dropout Linear."""
 
     def __init__(self, is_od: bool = True, *args, **kwargs) -> None:
-        super(ODLinear, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.is_od = is_od
         self.width = self.out_features
         self.last_input_dim = None

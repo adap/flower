@@ -8,7 +8,7 @@ from torch import Tensor, nn
 __all__ = ["ODBatchNorm2d"]
 
 
-class ODBatchNorm2d(nn.Module):
+class ODBatchNorm2d(nn.Module):  # pylint: disable=too-many-instance-attributes
     """Ordered Dropout BatchNorm2d."""
 
     def __init__(
@@ -19,7 +19,7 @@ class ODBatchNorm2d(nn.Module):
         *args,
         **kwargs,
     ) -> None:
-        super(ODBatchNorm2d, self).__init__()
+        super().__init__()
         self.p_s = p_s
         self.is_od = False  # no sampling is happening here
         self.num_features = num_features

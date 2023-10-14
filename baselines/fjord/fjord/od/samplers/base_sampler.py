@@ -45,5 +45,5 @@ class BaseSampler:
         """Call sampler."""
         if self.with_layer:
             return next(self.width_samples), next(self.layer_samples)
-        else:
-            return next(self.width_samples)
+
+        return next(self.width_samples)

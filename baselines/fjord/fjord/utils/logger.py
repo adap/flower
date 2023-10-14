@@ -49,8 +49,8 @@ class Logger(object):
         """
         if logger_name in cls.registered_loggers:
             return cls.registered_loggers[logger_name]
-        else:
-            return cls(logger_name)
+
+        return cls(logger_name)
 
     def __init__(self, logger_name="default"):
         """Initialise logger not previously registered.

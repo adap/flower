@@ -48,7 +48,7 @@ class ODConv1d(nn.Conv1d):
 
     def __init__(self, is_od: bool = True, *args, **kwargs) -> None:
         self.is_od = is_od
-        super(ODConv1d, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.width = self.out_channels
         self.last_input_dim = None
         self.last_output_dim = None
@@ -75,7 +75,7 @@ class ODConv2d(nn.Conv2d):
 
     def __init__(self, is_od: bool = True, *args, **kwargs) -> None:
         self.is_od = is_od
-        super(ODConv2d, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.width = self.out_channels
         self.last_input_dim = None
         self.last_output_dim = None
@@ -102,7 +102,7 @@ class ODConv3d(nn.Conv3d):
 
     def __init__(self, is_od: bool = True, *args, **kwargs) -> None:
         self.is_od = is_od
-        super(ODConv3d, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.width = self.out_channels
         self.last_input_dim = None
         self.last_output_dim = None

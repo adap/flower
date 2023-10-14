@@ -15,7 +15,7 @@ class ODSampler(BaseSampler):
     """
 
     def __init__(self, p_s: List[float], max_p: float, *args, **kwargs) -> None:
-        super(ODSampler, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.p_s = np.array([p for p in p_s if p <= max_p])
         self.max_p = max_p
 

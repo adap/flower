@@ -25,8 +25,10 @@ class BasicBlock(nn.Module):
 
     expansion = 1
 
-    def __init__(self, od, p_s, in_planes, planes, stride=1):
-        super(BasicBlock, self).__init__()
+    def __init__(
+        self, od, p_s, in_planes, planes, stride=1
+    ):  # pylint: disable=too-many-arguments
+        super().__init__()
         self.od = od
         self.conv1 = create_conv_layer(
             od,
@@ -87,7 +89,7 @@ class BasicBlock(nn.Module):
 
 # Adapted from:
 #   https://github.com/kuangliu/pytorch-cifar/blob/master/models/resnet.py
-class ResNet(nn.Module):
+class ResNet(nn.Module):  # pylint: disable=too-many-instance-attributes
     """ResNet in PyTorch.
 
     Reference:
@@ -95,8 +97,10 @@ class ResNet(nn.Module):
         Deep Residual Learning for Image Recognition. arXiv:1512.03385
     """
 
-    def __init__(self, od, p_s, block, num_blocks, num_classes=10):
-        super(ResNet, self).__init__()
+    def __init__(
+        self, od, p_s, block, num_blocks, num_classes=10
+    ):  # pylint: disable=too-many-arguments
+        super().__init__()
         self.od = od
         self.in_planes = 64
 
@@ -110,7 +114,9 @@ class ResNet(nn.Module):
         self.layer4 = self._make_layer(od, p_s, block, 512, num_blocks[3], stride=2)
         self.linear = create_linear_layer(od, False, 512 * block.expansion, num_classes)
 
-    def _make_layer(self, od, p_s, block, planes, num_blocks, stride):
+    def _make_layer(
+        self, od, p_s, block, planes, num_blocks, stride
+    ):  # pylint: disable=too-many-arguments
         strides = [stride] + [1] * (num_blocks - 1)
         layers = []
         for stride in strides:
@@ -179,7 +185,7 @@ def get_net(
     return net
 
 
-def train(
+def train(  # pylint: disable=too-many-locals, too-many-arguments
     net: Module,
     trainloader: DataLoader,
     know_distill: bool,

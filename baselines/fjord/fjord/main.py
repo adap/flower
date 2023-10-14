@@ -57,7 +57,7 @@ def get_eval_fn(
     def evaluate(
         server_round: int,
         parameters: fl.common.NDArrays,
-        config: Dict[str, fl.common.Scalar],
+        config: Dict[str, fl.common.Scalar],  # pylint: disable=unused-argument
     ) -> Optional[Tuple[float, Dict[str, fl.common.Scalar]]]:
         if server_round and (server_round % args.evaluate_every == 0):
             net = get_net(args.model, args.p_s, device)
@@ -82,7 +82,7 @@ def get_eval_fn(
     return evaluate
 
 
-def get_client_fn(
+def get_client_fn(  # pylint: disable=too-many-arguments
     args: Any,
     model_path: str,
     cid_to_max_p: Dict[int, float],
@@ -137,7 +137,7 @@ class FjORDBalancedClientManager(fl.server.SimpleClientManager):
         Args:
         :param cid_to_max_p: Dictionary mapping client id to max p-value
         """
-        super(FjORDBalancedClientManager, self).__init__()
+        super().__init__()
         self.cid_to_max_p = cid_to_max_p
         self.p_s = sorted(set(self.cid_to_max_p.values()))
 
