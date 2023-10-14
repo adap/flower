@@ -24,18 +24,6 @@ Flower Baselines are a collection of organised directories used to reproduce res
 .. BASELINES_TABLE_ANCHOR
 
 
-How-to guides
-~~~~~~~~~~~~~
-
-Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
-
-.. toctree::
-  :maxdepth: 1
-
-  how-to-use-baselines
-  how-to-contribute-baselines
-
-  
 Tutorials
 ~~~~~~~~~
 
@@ -43,6 +31,19 @@ A learning-oriented series of tutorials, the best place to start.
 
 .. note::
   Coming soon
+
+
+How-to guides
+~~~~~~~~~~~~~
+
+Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
+
+.. toctree::
+  :maxdepth: 1
+  :caption: How-to Guides
+
+  how-to-use-baselines
+  how-to-contribute-baselines
 
 
 Explanations
