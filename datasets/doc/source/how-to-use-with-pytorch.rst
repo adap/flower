@@ -45,7 +45,7 @@ That is why we iterate over all the samples from this batch and apply our transf
 Alternatively, you can use the `map() <https://huggingface.co/docs/datasets/v2.14.5/en/package_reference/main_classes#datasets.Dataset.map>`_
 function. Note that the operation is instant (contrary to the ``set_transform`` and ``with_transform``). Remember that the ``map``
 will modify the existing dataset if the key in the dictionary you return is already present and append a new feature if
-it did not exist before. Below, we modify the "img" feature of our dataset.::
+it did not exist before. Below, we modify the ``"img"`` feature of our dataset.::
 
   from torch.utils.data import DataLoader
   from torchvision.transforms import ToTensor
