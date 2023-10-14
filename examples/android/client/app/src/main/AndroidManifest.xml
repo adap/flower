@@ -31,7 +31,7 @@
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
 
-        <service android:name=".MyWorker"
+        <service android:name=".FlowerWorker"
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 

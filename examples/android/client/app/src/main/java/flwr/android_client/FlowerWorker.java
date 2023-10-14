@@ -42,7 +42,7 @@ import androidx.work.WorkManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-public class MyWorker extends Worker {
+public class FlowerWorker extends Worker {
 
     private ManagedChannel channel;
     public FlowerClient fc;
@@ -73,9 +73,9 @@ public class MyWorker extends Worker {
 
     private static String PROGRESS = "PROGRESS";
 
-    public MyWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public FlowerWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
-        MyWorker worker = this;
+        FlowerWorker worker = this;
         notificationManager = (NotificationManager)
                 context.getSystemService(NOTIFICATION_SERVICE);
         fc = new FlowerClient(context.getApplicationContext());
@@ -162,7 +162,7 @@ public class MyWorker extends Worker {
     public CompletableFuture<Void> runGrpc() {
 
         CompletableFuture<Void> future = new CompletableFuture<>();
-        MyWorker worker = this;
+        FlowerWorker worker = this;
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
         ProgressUpdater progressUpdater = new ProgressUpdater();
@@ -247,7 +247,7 @@ public class MyWorker extends Worker {
 
     private static class FlowerServiceRunnable{
         protected Throwable failed;
-        public void run(FlowerServiceStub asyncStub, MyWorker worker ,  CountDownLatch latch , ProgressUpdater progressUpdater , Context context) {
+        public void run(FlowerServiceStub asyncStub, FlowerWorker worker ,  CountDownLatch latch , ProgressUpdater progressUpdater , Context context) {
             join(asyncStub, worker , latch , progressUpdater , context);
         }
 
@@ -281,7 +281,7 @@ public class MyWorker extends Worker {
             }
         }
 
-        private void join(FlowerServiceStub asyncStub, MyWorker worker, CountDownLatch latch , ProgressUpdater progressUpdater , Context context)
+        private void join(FlowerServiceStub asyncStub, FlowerWorker worker, CountDownLatch latch , ProgressUpdater progressUpdater , Context context)
                 throws RuntimeException {
             final CountDownLatch finishLatch = new CountDownLatch(1);
 
@@ -320,7 +320,7 @@ public class MyWorker extends Worker {
             }
         }
 
-        private void handleMessage(ServerMessage message, MyWorker worker , ProgressUpdater progressUpdater , Context context) {
+        private void handleMessage(ServerMessage message, FlowerWorker worker , ProgressUpdater progressUpdater , Context context) {
 
             try {
                 ByteBuffer[] weights;

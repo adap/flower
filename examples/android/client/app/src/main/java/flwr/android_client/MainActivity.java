@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
                     .build();
 
             PeriodicWorkRequest workRequest = new PeriodicWorkRequest.Builder(
-                    MyWorker.class, 15, TimeUnit.MINUTES)
+                    FlowerWorker.class, 15, TimeUnit.MINUTES)
                     .setInitialDelay(0, TimeUnit.MILLISECONDS)
                     .setInputData(new Data.Builder()
                             .putString( "dataslice", deviceIdEditText.getText().toString() )
