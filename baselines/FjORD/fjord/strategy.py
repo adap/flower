@@ -199,7 +199,7 @@ class FjORDFedAVG(FedAvg):
         weights_results: List[
             Tuple[NDArrays, int, float, List[float], FJORD_CONFIG_TYPE]
         ] = [
-            (
+            (  # type: ignore
                 parameters_to_ndarrays(fit_res.parameters),
                 fit_res.num_examples,
                 fit_res.metrics["max_p"],

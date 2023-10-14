@@ -7,12 +7,12 @@ dataset: ["CIFAR-10"]
 
 # FjORD: Fair and Accurate Federated Learning under heterogeneous targets with Ordered Dropout
 
-****Paper:**** [openreview.net/forum?id=4fLr7H5D_eT](https://openreview.net/forum?id=4fLr7H5D_eT)
+**Paper:** [openreview.net/forum?id=4fLr7H5D_eT](https://openreview.net/forum?id=4fLr7H5D_eT)
 
-****Authors:**** Samuel Horváth\*, Stefanos Laskaridis\*, Mario Almeida\*, Ilias Leontiadis, Stylianos Venieris, Nicholas Donald Lane
+**Authors:** Samuel Horváth\*, Stefanos Laskaridis\*, Mario Almeida\*, Ilias Leontiadis, Stylianos Venieris, Nicholas Donald Lane
 
 
-****Abstract:**** Federated Learning (FL) has been gaining significant traction across different ML tasks, ranging from vision to keyboard predictions. In large-scale deployments, client heterogeneity is a fact and constitutes a primary problem for fairness, training performance and accuracy. Although significant efforts have been made into tackling statistical data heterogeneity, the diversity in the processing capabilities and network bandwidth of clients, termed system heterogeneity, has remained largely unexplored. Current solutions either disregard a large portion of available devices or set a uniform limit on the model's capacity, restricted by the least capable participants.
+**Abstract:** Federated Learning (FL) has been gaining significant traction across different ML tasks, ranging from vision to keyboard predictions. In large-scale deployments, client heterogeneity is a fact and constitutes a primary problem for fairness, training performance and accuracy. Although significant efforts have been made into tackling statistical data heterogeneity, the diversity in the processing capabilities and network bandwidth of clients, termed system heterogeneity, has remained largely unexplored. Current solutions either disregard a large portion of available devices or set a uniform limit on the model's capacity, restricted by the least capable participants.
 
 In this work, we introduce Ordered Dropout, a mechanism that achieves an ordered, nested representation of knowledge in Neural Networks and enables the extraction of lower footprint submodels without the need for retraining. We further show that for linear maps our Ordered Dropout is equivalent to SVD.  We employ this technique, along with a self-distillation methodology, in the realm of FL in a framework called FjORD. FjORD alleviates the problem of client system heterogeneity by tailoring the model width to the client's capabilities.
 Extensive evaluation on both CNNs and RNNs across diverse modalities shows that FjORD consistently leads to significant performance gains over state-of-the-art baselines while maintaining its nested structure.
@@ -20,22 +20,22 @@ Extensive evaluation on both CNNs and RNNs across diverse modalities shows that 
 
 ## About this baseline
 
-****What’s implemented:**** The code in this directory implements the two variants of FjORD, with and without knowledge distillation.
+**What’s implemented:** The code in this directory implements the two variants of FjORD, with and without knowledge distillation.
 
-****Datasets:**** CIFAR-10
+**Datasets:** CIFAR-10
 
-****Hardware Setup:**** We trained the baseline on an Nvidia RTX 4090.
+**Hardware Setup:** We trained the baseline on an Nvidia RTX 4090.
 
-****Contributors:**** @stevelaskaridis ([Brave Software](https://brave.com/)), @SamuelHorvath ([MBZUAI](https://mbzuai.ac.ae/))
+**Contributors:** @stevelaskaridis ([Brave Software](https://brave.com/)), @SamuelHorvath ([MBZUAI](https://mbzuai.ac.ae/))
 
 
 ## Experimental Setup
 
-****Task:**** Image Classification
+**Task:** Image Classification
 
-****Model:**** ResNet-18
+**Model:** ResNet-18
 
-****Dataset:****
+**Dataset:**
 
 | **Feature**                | **Value**                    |
 | -------------------------- | ---------------------------- |
@@ -44,7 +44,7 @@ Extensive evaluation on both CNNs and RNNs across diverse modalities shows that 
 | **Number of Partitions**   | 100 clients                  |
 | **Data points per client** | 500 samples                  |
 
-****Training Hyperparameters:****
+**Training Hyperparameters:**
 
 | **Hyperparameter**      | **Value**                 |
 | ----------------------- | ------------------------- |

@@ -53,7 +53,7 @@ torchvision = { url = "https://download.pytorch.org/whl/cu117/torchvision-0.15.2
 isort = "==5.11.5"
 black = "==23.1.0"
 docformatter = "==1.5.1"
-mypy = "==1.2"
+mypy = "==1.4.1"
 pylint = "==2.8.2"
 flake8 = "==3.9.2"
 pytest = "==6.2.4"
@@ -89,6 +89,10 @@ plugins = "numpy.typing.mypy_plugin"
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
 good-names = "i,j,k,_,x,y,X,Y"
 signature-mutators="hydra.main.main"
+
+[tool.pylint.typecheck]
+generated-members="numpy.*, torch.*, tensorflow.*"
+
 
 [[tool.mypy.overrides]]
 module = [
