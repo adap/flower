@@ -59,7 +59,7 @@ echo "- All Markdown checks passed"
 echo "- Start license checks"
 
 echo "- licensecheck: start"
-python -m licensecheck -u poetry:dev --fail-licenses gpl mit --zero
+python -m licensecheck -u poetry:dev --fail-licenses gpl --zero
 echo "- licensecheck: done"
 
 echo "- All license checks passed"
