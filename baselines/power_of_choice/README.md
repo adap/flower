@@ -218,7 +218,17 @@ The above commands would generate results by creating a directory under the foll
 python -m power_of_choice.plot_from_pickle --metrics-type="paper_metrics" <paths_to_results>
 ```
 
-The resulting plots should look similar to the one below (reproducing Figure 6a of the paper).
+The resulting plots should look similar to those below.
 
+#### Figure 4a
+![](_static/Figure_4a.png)
+
+#### Figure 4b
+![](_static/Figure_4b.png)
+
+#### Figure 6a
 ![](_static/Figure_6a.png)
+
+#### Figure 6b
+![](_static/Figure_6b.png)
 

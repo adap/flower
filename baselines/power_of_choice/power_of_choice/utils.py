@@ -11,6 +11,7 @@ from pathlib import Path
 from secrets import token_hex
 from typing import Dict, List, Optional, Tuple, Union
 
+import numpy as np
 import matplotlib.pyplot as plt
 from flwr.server.history import History
 
@@ -222,7 +223,7 @@ def plot_metrics_from_histories(
         Optional string to add at the end of the filename for the plot.
     """
     # Create a figure with two subplots
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(24, 12))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(30, 15))
 
     for title, hist in title_and_histories:
         # Extract required metrics
@@ -235,19 +236,45 @@ def plot_metrics_from_histories(
         rounds_distributed, loss_values_distributed = zip(*training_losses_distributed)
         rounds_centralized, accuracy_values_centralized = zip(*accuracy_centralized)
 
-        # Plot accuracy_centralized in the left subplot
-        ax1.plot(rounds_centralized, accuracy_values_centralized, label=f"{title}")
+        # Apply moving average smoothing
+        window_size = 5
+        smoothed_loss = []
+        smoothed_accuracy = []
 
-        # Plot losses_distributed in the right subplot
-        ax2.plot(rounds_distributed, loss_values_distributed, label=f"{title}")
+        for i in range(len(loss_values_distributed)):
+            actual_window_size = min(i + 1, window_size)
+            window = np.ones(actual_window_size) / actual_window_size
+            smoothed_loss.append(np.convolve(loss_values_distributed[max(0, i-actual_window_size+1):i+1], window, 'valid')[0])
+        
+        for i in range(len(accuracy_values_centralized)):
+            actual_window_size = min(i + 1, window_size)
+            window = np.ones(actual_window_size) / actual_window_size
+            smoothed_accuracy.append(np.convolve(accuracy_values_centralized[max(0, i-actual_window_size+1):i+1], window, 'valid')[0])
 
-    ax1.set_xlabel("Communication round")
-    ax1.set_ylabel("Test accuracy")
-    ax1.legend()
+        ax1.plot(rounds_centralized, smoothed_accuracy, label=f"{title}")
+        ax2.plot(rounds_distributed, smoothed_loss, label=f"{title}")
 
-    ax2.set_xlabel("Communication round")
-    ax2.set_ylabel("Training loss")
-    ax2.legend()
+    ax1.set_xlabel("Communication round", fontsize=20)
+    ax1.set_ylabel("Test accuracy", fontsize=20)
+    ax1.set_ylim(0.1, 0.9)  # Set the y-axis limit
+
+    ax2.set_xlabel("Communication round", fontsize=20)
+    ax2.set_ylabel("Training loss", fontsize=20)
+
+    # Enlarge the legend and place it outside of the plot
+    ax1.legend(fontsize=18)
+    ax2.legend(fontsize=18)
+
+    # Add gridlines
+    ax1.grid(True)
+    ax2.grid(True)
+
+    # Increase text size
+    ax1.tick_params(axis='both', which='major', labelsize=18)
+    ax2.tick_params(axis='both', which='major', labelsize=18)
+
+    # Amplify the main title size
+    fig.suptitle("MLP on FMNIST with alpha=2", fontsize=24)
 
     # Adjust layout to avoid overlapping labels and titles
     plt.tight_layout()
@@ -296,6 +323,15 @@ def plot_variances_training_loss_from_history(
     plt.xlabel("Communication round")
     plt.ylabel("Training loss variance")
     plt.legend()
+
+    # Add gridlines
+    plt.grid(True)
+
+    # Increase text size
+    plt.tick_params(axis='both', which='major', labelsize=14)
+
+    # Add a title to the figure
+    plt.title("Training Loss Variance from History", fontsize=16)
 
     plt.savefig(Path(save_plot_path) / Path(f"Plot_loss_variance{suffix}.png"))
     plt.close()
