@@ -21,6 +21,8 @@ Flower Baselines
 
 Flower Baselines are a collection of organised scripts used to reproduce results from well-known publications or benchmarks. You can check which baselines already exist and/or contribute your own baseline.
 
+.. BASELINES_TABLE_ANCHOR
+
 Tutorials
 ~~~~~~~~~
 
@@ -54,5 +56,3 @@ References
 
 Information-oriented API reference and other reference material.
 
-.. note::
-  This section will soon list all available Flower Baselines
