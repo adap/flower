@@ -55,6 +55,21 @@ Each dataset can be partitioned across 2, 5 or 10 clients in an IID distribution
 
 
 ****Training Hyperparameters:**** 
+For the centralized model, the paper's hyperparameters were mostly used as they give very good results -except for abalone and cpusmall-, here are the used hyperparameters -they can all be found in the `yaml` file named `paper_xgboost_centralized`:
+
+| Hyperparameter name | value |
+| -- | -- |
+| n_estimators | 500 |
+| max_depth | 8 |
+| subsample | 0.8 |
+| learning_rate | .1 |
+| colsample_bylevel | 1 |
+| colsample_bynode | 1 |
+| colsample_bytree | 1 |
+| alpha | 5 |
+| gamma | 5 |
+| num_parallel_tree | 1 |
+| min_child_weight | 1 |
 
 Here are all the original hyperparameters for the federated horizontal XGBoost model -hyperparameters that are used only in the XGBoost model are initialized with xgb same for the ones only used in Adam-:
 
@@ -86,9 +101,20 @@ At first, it was a manual process basically experiencing different values for so
 
 All the final new values for those hyperparameters can be found in 3 `yaml` files named `dataset_name_<no. of clients>_clients` and all the original values for those hyperparameters can be found in 3 `yaml` files named `paper_<no. of clients>_clients`  -that created a large number of config files 3*7+3= 24 config files in the `clients` folder-
 
-Later `wandb` was incorporated to make the fine-tuning process easier, if you're interested in continuing the fine-tuning journey, here's how to run the wandb sweep -also, if you're new to wandb, check those sources [1](https://colab.research.google.com/github/wandb/examples/blob/master/colabs/pytorch/Organizing_Hyperparameter_Sweeps_in_PyTorch_with_W%26B.ipynb), [2](https://wandb.ai/adrishd/hydra-example/reports/Configuring-W-B-Projects-with-Hydra--VmlldzoxNTA2MzQw)-
+Later `wandb` was incorporated to make the fine-tuning process easier.
+
+**what to to do if you're interested in continuing the fine-tuning journey?**
+
+There are 3 main things that you should consider:
+
+1- You can use WandB to automate the fine-tuning process, modify the `sweep.yaml` file to control your experiments settings including your search methods, values to choose from,....... <br>
+Here's how to run the wandb sweep -also, if you're new to wandb, check those sources [1](https://colab.research.google.com/github/wandb/examples/blob/master/colabs/pytorch/Organizing_Hyperparameter_Sweeps_in_PyTorch_with_W%26B.ipynb), [2](https://wandb.ai/adrishd/hydra-example/reports/Configuring-W-B-Projects-with-Hydra--VmlldzoxNTA2MzQw)-
 
 ```
+#remember to activate the poetry shell
+
+poetry shell
+
 #login to your wandb account
 
 wandb login
@@ -97,7 +123,7 @@ wandb login
 
 #Initiate WandB sweep
 
-wandb sweep wandb_sweep.yaml
+wandb sweep sweep.yaml
 
 #that command -if ran with no error- will return a line that contains
 #the command that you can use to run the sweep agent, it'll look something like that:
@@ -106,24 +132,10 @@ wandb agent <your user name on wandb>/flower-baselines_hfedxgboost_hfedxgboost/<
 
 ```
 
-For the centralized model, the paper's hyperparameters were mostly used as they give very good results -except for abalone and cpusmall-, here are the used hyperparameters -they can all be found in the `yaml` file named `paper_xgboost_centralized`:
+2- The config files named `<dataset name>_<no.of clients>_clients.yaml` are meant to keep the final hyperparameters values, so whenever you think you're done with fine-tuning some hyperparameters, add them to their config files so the one after you can use them.
 
-| Hyperparameter name | value |
-| -- | -- |
-| n_estimators | 500 |
-| max_depth | 8 |
-| subsample | 0.8 |
-| learning_rate | .1 |
-| colsample_bylevel | 1 |
-| colsample_bynode | 1 |
-| colsample_bytree | 1 |
-| alpha | 5 |
-| gamma | 5 |
-| num_parallel_tree | 1 |
-| min_child_weight | 1 |
-
-There've been 
-To help with the fine-tuning of the hyperparameters process, there are 2 classes in the utils.py that write down the used hyperparameters in the experiments and the results for that experiment in 2 separate CSV files, some of the hyperparameters used in the experiments done during building this baseline can be found in results.csv and results_centralized.csv files.
+3- To help with the fine-tuning of the hyperparameters process, there are 2 classes in the utils.py that write down the used hyperparameters in the experiments and the results for that experiment in 2 separate CSV files, some of the hyperparameters used in the experiments done during building this baseline can be found in results.csv and results_centralized.csv files.<br>
+More important, those 2 files focus on writing down only the hyperparameters that I thought was important so if you're interested in experimenting with other hyperparameters, don't forget to add them to the writers classes so you can track them more easily, especially if you intend to do some experiments away from WandB.
 
 ## Environment Setup
 
@@ -222,7 +234,7 @@ python -m hfedxgboost.main --multirun clients=YearPredictionMSD_2_clients,YearPr
 | :---: | :---: | :---: | :---: |
 | a9a | Binary Classification | 2<br>5<br>10 | 84.4% <br>84.2% <br> 83.7% |
 | cod_rna | Binary Classification | 2<br>5<br>10 | 96.4% <br>96.2% <br>95.0%  | 
-| ijcnn1 | Binary Classification |2<br>5<br>10 | 98.0% <br>97.3% <br>96.7%  |
+| ijcnn1 | Binary Classification |2<br>5<br>10 | 98.0% <br>97.28% <br>96.8%  |
 
 ### Table 3 -- Federated Regression
 
@@ -230,8 +242,8 @@ python -m hfedxgboost.main --multirun clients=YearPredictionMSD_2_clients,YearPr
 | :---: | :---: | :---: | :---: |
 | space_ga | Regression | 2<br>5<br>10 | 0.024<br>0.033<br>0.034 |
 | abalone | Regression | 2<br>5<br>10 | 10<br>10<br>10 | 
+| cpusmall | Regression | 2<br>5<br>10 | 13<br>20.68<br>15.28 | 
 | YearPredictionMSD | Regression | 2<br>5<br>10 | 119<br>118<br>118 | 
-| cpusmall | Regression | 2<br>5<br>10 | 13<br>35<br>24 | 
 
 
 ## How to add a new dataset
