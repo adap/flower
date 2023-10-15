@@ -57,10 +57,10 @@ flower-server = "flwr.server:run_server"
 flower-client = "flwr.client:run_client"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.8"  # PSF License Agreement
 # Mandatory dependencies
-numpy = "^1.21.0"
-grpcio = "^1.48.2,!=1.52.0"
+numpy = "^1.21.0"  # BSD 3-Clause "New" or "Revised" License
+grpcio = "^1.48.2,!=1.52.0"  # 
 protobuf = "^3.19.0"
 cryptography = "^41.0.2"
 pycryptodome = "^3.18.0"
@@ -119,6 +119,7 @@ twine = "==4.0.2"
 pyroma = "==4.2"
 check-wheel-contents = "==0.4.0"
 GitPython = "==3.1.32"
+licensecheck = "==2023.5.1"
 
 [tool.isort]
 line_length = 88

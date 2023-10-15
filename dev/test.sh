@@ -55,3 +55,11 @@ python -m mdformat --check --number doc/source examples
 echo "- mdformat: done"
 
 echo "- All Markdown checks passed"
+
+echo "- Start license checks"
+
+echo "- licensecheck: start"
+python -m licensecheck -u poetry:dev --fail-licenses gpl
+echo "- licensecheck: done"
+
+echo "- All license checks passed"
