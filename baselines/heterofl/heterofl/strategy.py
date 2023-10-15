@@ -231,53 +231,79 @@ class HeteroFL(fl.server.strategy.Strategy):
             count[k] = val.new_zeros(val.size(), dtype=torch.float32)
             tmp_v = val.new_zeros(val.size(), dtype=torch.float32)
             for clnt, _ in enumerate(local_parameters):
-                # self._agg_layer()
                 if "weight" in parameter_type or "bias" in parameter_type:
-                    if parameter_type == "weight":
-                        if val.dim() > 1:
-                            if k == output_weight_name:
-                                label_split = self.active_cl_labels[
-                                    int(results[clnt][0].cid)
-                                ]
-                                label_split = label_split.type(torch.int)
-                                param_idx[clnt][k] = list(param_idx[clnt][k])
-                                param_idx[clnt][k][0] = param_idx[clnt][k][0][
-                                    label_split
-                                ]
-                                tmp_v[
-                                    torch.meshgrid(param_idx[clnt][k])
-                                ] += local_parameters[clnt][k][label_split]
-                                count[k][torch.meshgrid(param_idx[clnt][k])] += 1
-                            else:
-                                tmp_v[
-                                    torch.meshgrid(param_idx[clnt][k])
-                                ] += local_parameters[clnt][k]
-                                count[k][torch.meshgrid(param_idx[clnt][k])] += 1
-                        else:
-                            tmp_v[param_idx[clnt][k]] += local_parameters[clnt][k]
-                            count[k][param_idx[clnt][k]] += 1
-                    else:
-                        if k == output_bias_name:
-                            label_split = self.active_cl_labels[
-                                int(results[clnt][0].cid)
-                            ]
-                            label_split = label_split.type(torch.int)
-                            param_idx[clnt][k] = param_idx[clnt][k][label_split]
-                            tmp_v[param_idx[clnt][k]] += local_parameters[clnt][k][
-                                label_split
-                            ]
-                            count[k][param_idx[clnt][k]] += 1
-                        else:
-                            tmp_v[param_idx[clnt][k]] += local_parameters[clnt][k]
-                            count[k][param_idx[clnt][k]] += 1
+                    self._agg_layer_conv(
+                        {
+                            "cid": int(results[clnt][0].cid),
+                            "param_idx": param_idx,
+                            "local_parameters": local_parameters,
+                        },
+                        {
+                            "tmp_v": tmp_v,
+                            "count": count,
+                        },
+                        {
+                            "clnt": clnt,
+                            "parameter_type": parameter_type,
+                            "k": k,
+                            "val": val,
+                        },
+                        {
+                            "output_weight_name": output_weight_name,
+                            "output_bias_name": output_bias_name,
+                        },
+                    )
                 else:
                     tmp_v += local_parameters[clnt][k]
                     count[k] += 1
             tmp_v[count[k] > 0] = tmp_v[count[k] > 0].div_(count[k][count[k] > 0])
             val[count[k] > 0] = tmp_v[count[k] > 0].to(val.dtype)
-    
-    # def _agg_layer(self,):
-        # return
+
+    def _agg_layer_conv(
+        self,
+        clnt_params,
+        tmp_v_count,
+        param_info,
+        output_names,
+    ):
+        # pi = param_info
+        param_idx = clnt_params["param_idx"]
+        clnt = param_info["clnt"]
+        k = param_info["k"]
+        tmp_v = tmp_v_count["tmp_v"]
+        count = tmp_v_count["count"]
+
+        if param_info["parameter_type"] == "weight":
+            if param_info["val"].dim() > 1:
+                if k == output_names["output_weight_name"]:
+                    label_split = self.active_cl_labels[clnt_params["cid"]]
+                    label_split = label_split.type(torch.int)
+                    param_idx[clnt][k] = list(param_idx[clnt][k])
+                    param_idx[clnt][k][0] = param_idx[clnt][k][0][label_split]
+                    tmp_v[torch.meshgrid(param_idx[clnt][k])] += clnt_params[
+                        "local_parameters"
+                    ][clnt][k][label_split]
+                    count[k][torch.meshgrid(param_idx[clnt][k])] += 1
+                else:
+                    tmp_v[torch.meshgrid(param_idx[clnt][k])] += clnt_params[
+                        "local_parameters"
+                    ][clnt][k]
+                    count[k][torch.meshgrid(param_idx[clnt][k])] += 1
+            else:
+                tmp_v[param_idx[clnt][k]] += clnt_params["local_parameters"][clnt][k]
+                count[k][param_idx[clnt][k]] += 1
+        else:
+            if k == output_names["output_bias_name"]:
+                label_split = self.active_cl_labels[clnt_params["cid"]]
+                label_split = label_split.type(torch.int)
+                param_idx[clnt][k] = param_idx[clnt][k][label_split]
+                tmp_v[param_idx[clnt][k]] += clnt_params["local_parameters"][clnt][k][
+                    label_split
+                ]
+                count[k][param_idx[clnt][k]] += 1
+            else:
+                tmp_v[param_idx[clnt][k]] += clnt_params["local_parameters"][clnt][k]
+                count[k][param_idx[clnt][k]] += 1
 
     def _aggregate_resnet18(self, param_idx, local_parameters, results):
         gl_model = self.net.state_dict()
@@ -288,48 +314,63 @@ class HeteroFL(fl.server.strategy.Strategy):
             tmp_v = val.new_zeros(val.size(), dtype=torch.float32)
             for clnt, _ in enumerate(local_parameters):
                 if "weight" in parameter_type or "bias" in parameter_type:
-                    if parameter_type == "weight":
-                        if val.dim() > 1:
-                            if "linear" in k:
-                                label_split = self.active_cl_labels[
-                                    int(results[clnt][0].cid)
-                                ]
-                                label_split = label_split.type(torch.int)
-                                param_idx[clnt][k] = list(param_idx[clnt][k])
-                                param_idx[clnt][k][0] = param_idx[clnt][k][0][
-                                    label_split
-                                ]
-                                tmp_v[
-                                    torch.meshgrid(param_idx[clnt][k])
-                                ] += local_parameters[clnt][k][label_split]
-                                count[k][torch.meshgrid(param_idx[clnt][k])] += 1
-                            else:
-                                tmp_v[
-                                    torch.meshgrid(param_idx[clnt][k])
-                                ] += local_parameters[clnt][k]
-                                count[k][torch.meshgrid(param_idx[clnt][k])] += 1
-                        else:
-                            tmp_v[param_idx[clnt][k]] += local_parameters[clnt][k]
-                            count[k][param_idx[clnt][k]] += 1
-                    else:
-                        if "linear" in k:
-                            label_split = self.active_cl_labels[
-                                int(results[clnt][0].cid)
-                            ]
-                            label_split = label_split.type(torch.int)
-                            param_idx[clnt][k] = param_idx[clnt][k][label_split]
-                            tmp_v[param_idx[clnt][k]] += local_parameters[clnt][k][
-                                label_split
-                            ]
-                            count[k][param_idx[clnt][k]] += 1
-                        else:
-                            tmp_v[param_idx[clnt][k]] += local_parameters[clnt][k]
-                            count[k][param_idx[clnt][k]] += 1
+                    self._agg_layer_resnet18(
+                        {
+                            "cid": int(results[clnt][0].cid),
+                            "param_idx": param_idx,
+                            "local_parameters": local_parameters,
+                        },
+                        tmp_v,
+                        count,
+                        {
+                            "clnt": clnt,
+                            "parameter_type": parameter_type,
+                            "k": k,
+                            "val": val,
+                        },
+                    )
                 else:
                     tmp_v += local_parameters[clnt][k]
                     count[k] += 1
             tmp_v[count[k] > 0] = tmp_v[count[k] > 0].div_(count[k][count[k] > 0])
             val[count[k] > 0] = tmp_v[count[k] > 0].to(val.dtype)
+
+    def _agg_layer_resnet18(self, clnt_params, tmp_v, count, param_info):
+        param_idx = clnt_params["param_idx"]
+        k = param_info["k"]
+        clnt = param_info["clnt"]
+
+        if param_info["parameter_type"] == "weight":
+            if param_info["val"].dim() > 1:
+                if "linear" in k:
+                    label_split = self.active_cl_labels[clnt_params["cid"]]
+                    label_split = label_split.type(torch.int)
+                    param_idx[clnt][k] = list(param_idx[clnt][k])
+                    param_idx[clnt][k][0] = param_idx[clnt][k][0][label_split]
+                    tmp_v[torch.meshgrid(param_idx[clnt][k])] += clnt_params[
+                        "local_parameters"
+                    ][clnt][k][label_split]
+                    count[k][torch.meshgrid(param_idx[clnt][k])] += 1
+                else:
+                    tmp_v[torch.meshgrid(param_idx[clnt][k])] += clnt_params[
+                        "local_parameters"
+                    ][clnt][k]
+                    count[k][torch.meshgrid(param_idx[clnt][k])] += 1
+            else:
+                tmp_v[param_idx[clnt][k]] += clnt_params["local_parameters"][clnt][k]
+                count[k][param_idx[clnt][k]] += 1
+        else:
+            if "linear" in k:
+                label_split = self.active_cl_labels[clnt_params["cid"]]
+                label_split = label_split.type(torch.int)
+                param_idx[clnt][k] = param_idx[clnt][k][label_split]
+                tmp_v[param_idx[clnt][k]] += clnt_params["local_parameters"][clnt][k][
+                    label_split
+                ]
+                count[k][param_idx[clnt][k]] += 1
+            else:
+                tmp_v[param_idx[clnt][k]] += clnt_params["local_parameters"][clnt][k]
+                count[k][param_idx[clnt][k]] += 1
 
     def configure_evaluate(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
