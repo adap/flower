@@ -1,4 +1,4 @@
-# Copyright 2022 Adap GmbH. All Rights Reserved.
+# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ from flwr.server.history import History
 from flwr.server.server import Server
 from flwr.server.strategy import Strategy
 
-from .driver import Driver
+from .driver import GrpcDriver
 from .driver_client_proxy import DriverClientProxy
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
@@ -112,7 +112,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
     # Create the Driver
-    driver = Driver(driver_service_address=address, certificates=certificates)
+    driver = GrpcDriver(driver_service_address=address, certificates=certificates)
     driver.connect()
     lock = threading.Lock()
 
@@ -157,7 +157,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
 
 
 def update_client_manager(
-    driver: Driver,
+    driver: GrpcDriver,
     client_manager: ClientManager,
     lock: threading.Lock,
 ) -> None:
