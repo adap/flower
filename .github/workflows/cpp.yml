@@ -75,3 +75,4 @@ jobs:
           then echo "Training worked correctly";
           else echo "Training had an issue" && exit 1;
         fi
+
