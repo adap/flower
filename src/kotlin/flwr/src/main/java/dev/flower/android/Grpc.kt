@@ -8,21 +8,22 @@ import flwr.proto.FleetOuterClass.DeleteNodeResponse
 import flwr.proto.FleetOuterClass.PullTaskInsRequest
 import flwr.proto.FleetOuterClass.PullTaskInsResponse
 import flwr.proto.FleetOuterClass.PushTaskResRequest
-import io.grpc.ManagedChannel
-import io.grpc.ManagedChannelBuilder
-import io.grpc.stub.StreamObserver
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import java.util.concurrent.CountDownLatch
 import flwr.proto.FlowerServiceGrpc
 import flwr.proto.NodeOuterClass.Node
 import flwr.proto.TaskOuterClass.TaskIns
 import flwr.proto.TaskOuterClass.TaskRes
 import flwr.proto.Transport.ServerMessage
+import io.grpc.ManagedChannel
+import io.grpc.ManagedChannelBuilder
+import io.grpc.stub.StreamObserver
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.withContext
+import java.util.concurrent.CountDownLatch
 
 internal class FlowerGrpc
 @Throws constructor(
@@ -147,8 +148,9 @@ internal class FlwrRere
         requestChannel.send(request)
     }
 
-    private suspend fun receive(requestChannel: Channel<PullTaskInsRequest>, node: Node) = flow {
+    private suspend fun receive(requestChannel: Channel<PullTaskInsRequest>, node: Node, withTimeout: Boolean = false) = flow {
         coroutineScope {
+            var numberOfTries = 0
             val responses = Channel<TaskIns?>(1)
             for (request in requestChannel)
                 asyncStub.pullTaskIns(request, object : StreamObserver<PullTaskInsResponse> {
@@ -171,9 +173,14 @@ internal class FlwrRere
 
             for (response in responses) {
                 if (response == null) {
+                    if (numberOfTries >= 10) {
+                        cancel("Timeout")
+                    }
                     delay(3000)
+                    numberOfTries++
                     request(requestChannel, node)
                 } else {
+                    numberOfTries = 0
                     emit(response)
                 }
             }
@@ -227,10 +234,10 @@ internal class FlwrRere
     }
 }
 
-suspend fun createFlowerRere(
+suspend fun startFlowerRere(
     serverAddress: String,
     useTLS: Boolean,
     client: Client,
 ) {
-    FlwrRere(createChannel(serverAddress, useTLS), client)
+    FlwrRere(createChannel(serverAddress, useTLS), client).startGrpcRere()
 }
