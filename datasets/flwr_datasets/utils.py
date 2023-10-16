@@ -16,8 +16,10 @@
 
 
 import warnings
-from typing import Dict, Union
+from typing import Dict, Optional, Tuple, Union, cast
 
+from flwr_datasets.common import Resplitter
+from flwr_datasets.merge_resplitter import MergeResplitter
 from flwr_datasets.partitioner import IidPartitioner, Partitioner
 
 tested_datasets = [
@@ -65,6 +67,15 @@ def _instantiate_partitioners(
             f"Given {type(partitioners)}."
         )
     return instantiated_partitioners
+
+
+def _instantiate_resplitter_if_needed(
+    resplitter: Optional[Union[Resplitter, Dict[Tuple[str, ...], str]]]
+) -> Optional[Resplitter]:
+    """Instantiate `MergeResplitter` if resplitter is merge_config."""
+    if resplitter and isinstance(resplitter, Dict):
+        resplitter = MergeResplitter(merge_config=resplitter)
+    return cast(Optional[Resplitter], resplitter)
 
 
 def _check_if_dataset_tested(dataset: str) -> None:
