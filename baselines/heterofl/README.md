@@ -16,13 +16,19 @@ dataset: [MNIST, CIFAR10]
 
 ## About this baseline
 
-****What’s implemented:****  *The code in this directory is an implementation of HeteroFL in pytorch using flower. By modifying the configuration in the base.yaml, the results in the paper can be replicated, with both fixed and dynamic computational complexities among clients.*
+****What’s implemented:****  *The code in this directory is an implementation of HeteroFL in pytorch using flower. The code incorporates references from the authors' implementation. I have also implemented custom model split and aggregation as suggested by @negedng which is available [here](github.com/msck72/heterofl_custom_aggregation). By modifying the configuration in the base.yaml, the results in the paper can be replicated, with both fixed and dynamic computational complexities among clients.*
+
+****Terminology & some implementation details:****  *__Model rate__ defines the computational complextiy of a client. Authors have defined five different computation complexity levels {a, b, c, d, e} with the hidden channel shrinkage ratio r = 0.5.  
+__Model split mode__ specifies whether the computaional complexities of clients are fixed (throughout the experiment), or whether they are dynamic (change their mode_rate/computational-complexity every-round).  
+__Model mode__ determines the proportionality of clients with various computation complexity levels, for example, a4-b2-e4 determines at each round, proportion of clients with computational complexity level a = 4 / (4 + 2 + 4) * num_clients , similarly, proportion of clients with computational complexity level b = 2 / (4 + 2 + 4) * num_clients and so on.*
+
+*ModelRateManager manages the model rate of client in simulation, which changes the model rate based on the model mode of the setup and ClientManagerHeterofl keeps track of model rates of the clients, so that configure fit knows which/how-much subset of the model that needs to be sent to the client.*
 
 ****Datasets:**** *The code utilized benchmark datasets such as MNIST and CIFAR-10 for its experimentation.*
 
 ****Hardware Setup:**** :warning: *_Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Someone out there might not have access to the same resources you have so, could list the absolute minimum hardware needed to run the experiment in a reasonable amount of time ? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?_*
 
-****Contributors:**** :warning: *_let the world know who contributed to this baseline. This could be either your name, your name and affiliation at the time, or your GitHub profile name if you prefer. If multiple contributors signed up for this baseline, please list yourself and your colleagues_*
+****Contributors:**** *M S Chaitanya Kumar [(github.com/msck72)](github.com/msck72)*
 
 
 ## Experimental Setup
@@ -38,41 +44,18 @@ dataset: [MNIST, CIFAR10]
 
 ## Environment Setup
 
-```
-# Set python version
-pyenv install 3.10.6
-pyenv local 3.10.6
-
-# Tell poetry to use python 3.10
-poetry env use 3.10.6
-
-# install the base Poetry environment
-poetry install
-
-# activate the environment
-poetry shell
-```
-
-
-## Running the Experiments
-
-:warning: _Provide instructions on the steps to follow to run all the experiments._
 ```bash  
 # The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
 
-poetry run -m <baseline-name>.main <no additional arguments> # where <baseline-name> is the name of this directory and that of the only sub-directory in this directory (i.e. where all your source code is)
+poetry run -m heterofl.main  # Which runs the heterofl with arguments availbale in heterfl/conf/base.yaml
 
-# If you are using a dataset that requires a complicated download (i.e. not using one natively supported by TF/PyTorch) + preprocessing logic, you might want to tell people to run one script first that will do all that. Please ensure the download + preprocessing can be configured to suit (at least!) a different download directory (and use as default the current directory). The expected command to run to do this is:
+# We could override the settings that were specified in base.yaml using the command-line-arguments
+# Here's an example for changing the dataset name, non-iid and model
+poetry run -m heterofl.main dataset.dataset_name='CIFAR10' dataset.iid=False model.model_name='resnet18'
 
-poetry run -m <baseline-name>.dataset_preparation <optional arguments, but default should always run>
+# Similarly, another example for changing num_rounds, model_split_mode, and model_mode
+poetry run -m heterofl.main num_rounds=400 control.model_split_mode='dynamic' control.model_mode='a1-b1'
 
-# It is expected that you baseline supports more than one dataset and different FL settings (e.g. different number of clients, dataset partitioning methods, etc). Please provide a list of commands showing how these experiments are run. Include also a short explanation of what each one does. Here it is expected you'll be using the Hydra syntax to override the default config.
-
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
-.
-.
-.
-poetry run -m <baseline-name>.main  <override_some_hyperparameters>
 ```
 
 
