@@ -67,7 +67,7 @@ def _parse_args_client() -> argparse.ArgumentParser:
     parser.add_argument(
         "--app-dir",
         default="",
-        help="Look for APP in the specified directory, by adding this to the PYTHONPATH."
+        help="Look for APP in specified directory, by adding this to the PYTHONPATH."
         " Defaults to the current working directory.",
     )
 
