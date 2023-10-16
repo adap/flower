@@ -36,7 +36,7 @@ mv FLICKR-AES_image_score.txt flickr
 - GeForce RTX 3080 16GB
 - GeForce RTX 4090 24GB
 
-It's worth mentioning that GPU memory for each client is ~7.5GB. When training on less powerful GPUs, one can reduce the number of GPU in the configuration setting to e.g. 0.33. 
+It's worth mentioning that GPU memory for each client is ~7.5GB. When training on powerful GPUs, one can reduce ratio of GPU needed for each client in the configuration setting to e.g. `num_gpus` to 0.33. 
 
 > NOTE: One experiment carried out using 1 GPU (RTX 4090) takes somehwere between 1-3h depending on dataset and model. Running ResNet34 compared to MobileNet-v1 takes approximately 10-15% longer.  
 
