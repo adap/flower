@@ -118,7 +118,7 @@ class TestResplitter(unittest.TestCase):
         ):
             _ = MergeResplitter(strategy)
 
-    def test_duplicate_merge_split_name(self) -> None:
+    def test_duplicate_merge_split_name(self) -> None:  # pylint: disable=R0201
         """Test that the new split names are not the same."""
         strategy: Dict[Tuple[str, ...], str] = {
             ("train", "valid"): "new_train",
