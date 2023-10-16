@@ -20,7 +20,7 @@ dataset: [FEMNIST, SHAKESPEARE]
 
 **Datasets:** FEMNIST and SHAKESPEARE from Leaf Federated Learning Dataset
 
-**Hardware Setup:** These experiments were run on a machine with 16 CPU threads and 1 GPU(GeForce RTX 2080 Ti). **However, the FedMeta experiment using the Shakespeare dataset required more computing power (more than 4 GPUs).** Out of Memory errors may occur with some clients, but federated learning can continue to operate.
+**Hardware Setup:** These experiments were run on a machine with 16 CPU threads and 1 GPU(GeForce RTX 2080 Ti). **FedMeta experiment using the Shakespeare dataset required more computing power.** Out of Memory errors may occur with some clients, but federated learning can continue to operate. On a GPU with more VRAM (A6000 with 48GB) no clients failed. 
 
 **Contributors:** Jinsoo Kim and Kangyoon Lee
 
