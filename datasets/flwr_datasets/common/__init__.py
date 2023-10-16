@@ -1,4 +1,4 @@
-# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,13 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower driver SDK."""
+"""Common components in Flower Datasets."""
 
 
-from .app import start_driver
-from .driver import GrpcDriver
+from .typing import Resplitter
 
-__all__ = [
-    "start_driver",
-    "GrpcDriver",
-]
+__all__ = ["Resplitter"]
