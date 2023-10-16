@@ -45,10 +45,3 @@ To install Poetry on a different OS, to customise your installation, or to furth
     poetry install
 
 3. Run the baseline as indicated in the :code:`[Running the Experiments]` section in the :code:`README.md` 
-
-
-Available Baselines
--------------------
-
-.. note::
-  To be updated soon once the existing baselines are adjusted to the new format.
