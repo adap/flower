@@ -39,28 +39,28 @@ class TestResplitter(unittest.TestCase):
 
     def test_resplitting_train_size(self) -> None:
         """Test if resplitting for just renaming keeps the lengths correct."""
-        strategy: Dict[Tuple[str, ...], str] = {("train",): "new_train"}
+        strategy: Dict[str, Tuple[str, ...]] = {"new_train": ("train",)}
         resplitter = MergeResplitter(strategy)
         new_dataset = resplitter(self.dataset_dict)
         self.assertEqual(len(new_dataset["new_train"]), 3)
 
     def test_resplitting_valid_size(self) -> None:
         """Test if resplitting for just renaming keeps the lengths correct."""
-        strategy: Dict[Tuple[str, ...], str] = {("valid",): "new_valid"}
+        strategy: Dict[str, Tuple[str, ...]] = {"new_valid": ("valid",)}
         resplitter = MergeResplitter(strategy)
         new_dataset = resplitter(self.dataset_dict)
         self.assertEqual(len(new_dataset["new_valid"]), 2)
 
     def test_resplitting_test_size(self) -> None:
         """Test if resplitting for just renaming keeps the lengths correct."""
-        strategy: Dict[Tuple[str, ...], str] = {("test",): "new_test"}
+        strategy: Dict[str, Tuple[str, ...]] = {"new_test": ("test",)}
         resplitter = MergeResplitter(strategy)
         new_dataset = resplitter(self.dataset_dict)
         self.assertEqual(len(new_dataset["new_test"]), 1)
 
     def test_resplitting_train_the_same(self) -> None:
         """Test if resplitting for just renaming keeps the dataset the same."""
-        strategy: Dict[Tuple[str, ...], str] = {("train",): "new_train"}
+        strategy: Dict[str, Tuple[str, ...]] = {"new_train": ("train",)}
         resplitter = MergeResplitter(strategy)
         new_dataset = resplitter(self.dataset_dict)
         self.assertTrue(
@@ -69,8 +69,8 @@ class TestResplitter(unittest.TestCase):
 
     def test_combined_train_valid_size(self) -> None:
         """Test if the resplitting that combines the datasets has correct size."""
-        strategy: Dict[Tuple[str, ...], str] = {
-            ("train", "valid"): "train_valid_combined"
+        strategy: Dict[str, Tuple[str, ...]] = {
+            "train_valid_combined": ("train", "valid")
         }
         resplitter = MergeResplitter(strategy)
         new_dataset = resplitter(self.dataset_dict)
@@ -78,9 +78,9 @@ class TestResplitter(unittest.TestCase):
 
     def test_resplitting_test_with_combined_strategy_size(self) -> None:
         """Test if the resplitting that combines the datasets has correct size."""
-        strategy: Dict[Tuple[str, ...], str] = {
-            ("train", "valid"): "train_valid_combined",
-            ("test",): "test",
+        strategy: Dict[str, Tuple[str, ...]] = {
+            "train_valid_combined": ("train", "valid"),
+            "test": ("test",),
         }
         resplitter = MergeResplitter(strategy)
         new_dataset = resplitter(self.dataset_dict)
@@ -88,9 +88,9 @@ class TestResplitter(unittest.TestCase):
 
     def test_invalid_resplit_strategy_exception_message(self) -> None:
         """Test if the resplitting raises error when non-existing split is given."""
-        strategy: Dict[Tuple[str, ...], str] = {
-            ("invalid_split",): "new_train",
-            ("test",): "new_test",
+        strategy: Dict[str, Tuple[str, ...]] = {
+            "new_train": ("invalid_split",),
+            "new_test": ("test",),
         }
         resplitter = MergeResplitter(strategy)
         with self.assertRaisesRegex(
@@ -100,29 +100,18 @@ class TestResplitter(unittest.TestCase):
 
     def test_nonexistent_split_in_strategy(self) -> None:
         """Test if the exception is raised when the nonexistent split name is given."""
-        strategy: Dict[Tuple[str, ...], str] = {("nonexistent_split",): "new_split"}
+        strategy: Dict[str, Tuple[str, ...]] = {"new_split": ("nonexistent_split",)}
         resplitter = MergeResplitter(strategy)
         with self.assertRaisesRegex(
             ValueError, "The given dataset key 'nonexistent_split' is not present"
         ):
             resplitter(self.dataset_dict)
 
-    def test_duplicate_desired_split_name(self) -> None:
-        """Test that the new split names are not the same."""
-        strategy: Dict[Tuple[str, ...], str] = {
-            ("train",): "new_train",
-            ("valid",): "new_train",
-        }
-        with self.assertRaisesRegex(
-            ValueError, "Duplicate desired split name 'new_train' in `merge_config`."
-        ):
-            _ = MergeResplitter(strategy)
-
     def test_duplicate_merge_split_name(self) -> None:  # pylint: disable=R0201
         """Test that the new split names are not the same."""
-        strategy: Dict[Tuple[str, ...], str] = {
-            ("train", "valid"): "new_train",
-            ("train",): "test",
+        strategy: Dict[str, Tuple[str, ...]] = {
+            "new_train": ("train", "valid"),
+            "test": ("train",),
         }
         with pytest.warns(UserWarning):
             _ = MergeResplitter(strategy)
@@ -130,7 +119,7 @@ class TestResplitter(unittest.TestCase):
     def test_empty_dataset_dict(self) -> None:
         """Test that the error is raised when the empty DatasetDict is given."""
         empty_dataset = DatasetDict({})
-        strategy: Dict[Tuple[str, ...], str] = {("train",): "new_train"}
+        strategy: Dict[str, Tuple[str, ...]] = {"new_train": ("train",)}
         resplitter = MergeResplitter(strategy)
         with self.assertRaisesRegex(
             ValueError, "The given dataset key 'train' is not present"

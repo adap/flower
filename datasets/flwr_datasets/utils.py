@@ -70,7 +70,7 @@ def _instantiate_partitioners(
 
 
 def _instantiate_resplitter_if_needed(
-    resplitter: Optional[Union[Resplitter, Dict[Tuple[str, ...], str]]]
+    resplitter: Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]]
 ) -> Optional[Resplitter]:
     """Instantiate `MergeResplitter` if resplitter is merge_config."""
     if resplitter and isinstance(resplitter, Dict):

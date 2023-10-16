@@ -101,7 +101,7 @@ class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
         fds = FederatedDataset(
             dataset=self.dataset_name,
             partitioners={"train": 100},
-            resplitter={("train", self.test_split): "full"},
+            resplitter={"full": ("train", self.test_split)},
         )
         full = fds.load_full("full")
         self.assertEqual(dataset_length, len(full))
@@ -113,8 +113,8 @@ class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
             dataset=self.dataset_name,
             partitioners={"new_train": 100},
             resplitter={
-                ("train",): "new_train",
-                (self.test_split,): "new_" + self.test_split,
+                "new_train": ("train",),
+                "new_" + self.test_split: (self.test_split,),
             },
         )
         _ = fds.load_partition(0, "new_train")
@@ -247,7 +247,7 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
         fds = FederatedDataset(
             dataset="mnist",
             partitioners={"train": 100},
-            resplitter={("train", "test"): "full"},
+            resplitter={"full": ("train", "test")},
         )
         with self.assertRaises(ValueError):
             fds.load_partition(0, "train")

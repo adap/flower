@@ -32,9 +32,9 @@ class MergeResplitter:
 
     Parameters
     ----------
-    merge_config: Dict[Tuple[str, ...], str]
-        Dictionary with keys - tuples of the current split names to values - the desired
-        split names
+    merge_config: Dict[str, Tuple[str, ...]]
+        Dictionary with keys - the desired split names to values - tuples of the current
+        split names that will be merged together
 
     Examples
     --------
@@ -45,8 +45,8 @@ class MergeResplitter:
     >>> # dataset_dict is {"train": train-data, "valid": valid-data, "test": test-data}
     >>> merge_resplitter = MergeResplitter(
     >>>     merge_config={
-    >>>         ("train", "valid"): "new_train",
-    >>>         ("test", ): "test"
+    >>>         "new_train": ("train", "valid"),
+    >>>         "test": ("test", )
     >>>     }
     >>> )
     >>> new_dataset_dict = merge_resplitter(dataset_dict)
@@ -56,10 +56,9 @@ class MergeResplitter:
 
     def __init__(
         self,
-        merge_config: Dict[Tuple[str, ...], str],
+        merge_config: Dict[str, Tuple[str, ...]],
     ) -> None:
-        self._merge_config: Dict[Tuple[str, ...], str] = merge_config
-        self._check_duplicate_desired_splits()
+        self._merge_config: Dict[str, Tuple[str, ...]] = merge_config
         self._check_duplicate_merge_splits()
 
     def __call__(self, dataset: DatasetDict) -> DatasetDict:
@@ -70,7 +69,7 @@ class MergeResplitter:
     def resplit(self, dataset: DatasetDict) -> DatasetDict:
         """Resplit the dataset according to the `merge_config`."""
         resplit_dataset = {}
-        for divided_from__list, divide_to in self._merge_config.items():
+        for divide_to, divided_from__list in self._merge_config.items():
             datasets_from_list: List[Dataset] = []
             for divide_from in divided_from__list:
                 datasets_from_list.append(dataset[divide_from])
@@ -85,7 +84,7 @@ class MergeResplitter:
     def _check_correct_keys_in_merge_config(self, dataset: DatasetDict) -> None:
         """Check if the keys in merge_config are existing dataset splits."""
         dataset_keys = dataset.keys()
-        specified_dataset_keys = self._merge_config.keys()
+        specified_dataset_keys = self._merge_config.values()
         for key_list in specified_dataset_keys:
             for key in key_list:
                 if key not in dataset_keys:
@@ -95,22 +94,9 @@ class MergeResplitter:
                         f"available in your dataset."
                     )
 
-    def _check_duplicate_desired_splits(self) -> None:
-        """Check for duplicate desired split names."""
-        desired_splits = list(self._merge_config.values())
-        duplicates = [
-            item
-            for item, count in collections.Counter(desired_splits).items()
-            if count > 1
-        ]
-        if duplicates:
-            raise ValueError(
-                f"Duplicate desired split name '{duplicates[0]}' in `merge_config`."
-            )
-
     def _check_duplicate_merge_splits(self) -> None:
         """Check if the original splits are duplicated for new splits creation."""
-        merge_splits = reduce(lambda x, y: x + y, self._merge_config.keys())
+        merge_splits = reduce(lambda x, y: x + y, self._merge_config.values())
         duplicates = [
             item
             for item, count in collections.Counter(merge_splits).items()

@@ -40,7 +40,7 @@ class FederatedDataset:
     ----------
     dataset: str
         The name of the dataset in the Hugging Face Hub.
-    resplitter: Optional[Union[Resplitter, Dict[Tuple[str, ...], str]]]
+    resplitter: Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]]
         `Callable` that transforms `DatasetDict` splits, or configuration dict for
         `MergeResplitter`.
     partitioners: Dict[str, Union[Partitioner, int]]
@@ -67,7 +67,7 @@ class FederatedDataset:
         self,
         *,
         dataset: str,
-        resplitter: Optional[Union[Resplitter, Dict[Tuple[str, ...], str]]] = None,
+        resplitter: Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]] = None,
         partitioners: Dict[str, Union[Partitioner, int]],
     ) -> None:
         _check_if_dataset_tested(dataset)
