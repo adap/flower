@@ -15,7 +15,7 @@
 """FederatedDataset."""
 
 
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 import datasets
 from datasets import Dataset, DatasetDict
@@ -38,8 +38,10 @@ class FederatedDataset:
     subset: str
         Secondary information regarding the dataset, most often subset or version
          (that is passed to the name in datasets.load_dataset).
-    partitioners: Dict[str, int]
-        Dataset split to the number of IID partitions.
+    partitioners: Dict[str, Union[Partitioner, int]]
+        A dictionary mapping the Dataset split (a `str`) to a `Partitioner` or an `int`
+        (representing the number of IID partitions that this split should be partitioned
+         into).
 
     Examples
     --------
@@ -61,7 +63,7 @@ class FederatedDataset:
         *,
         dataset: str,
         subset: Optional[str] = None,
-        partitioners: Dict[str, int],
+        partitioners: Dict[str, Union[Partitioner, int]],
     ) -> None:
         _check_if_dataset_tested(dataset)
         self._dataset_name: str = dataset
