@@ -14,8 +14,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+    - name: Bootstrap
+      uses: ./.github/actions/bootstrap
 
     - name: Install Dependencies
       run: |
@@ -43,3 +44,22 @@ jobs:
       run: |
         cd build
         cppcheck --enable=all --inline-suppr --suppress=missingIncludeSystem -I../src/cc/flwr/include ../src/cc/flwr/src
+
+    - name: End-to-end test
+      run: |
+        cd examples/quickstart-cpp
+        cmake -S . -B build
+        cmake --build build
+        pip install ../..
+        timeout 2m python server.py &
+        pid=$!
+        sleep 3
+        build/flwr_client 0 127.0.0.1:8080 &
+        sleep 3
+        build/flwr_client 1 127.0.0.1:8080 &
+        wait $pid
+        res=$?
+        if [[ "$res" = "0" ]];
+          then echo "Training worked correctly";
+          else echo "Training had an issue" && exit 1;
+        fi
