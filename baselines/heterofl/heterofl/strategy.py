@@ -201,15 +201,10 @@ class HeteroFL(fl.server.strategy.Strategy):
             OrderedDict() for _ in range(len(local_param_as_parameters))
         ]
         for i in range(len(results)):
-            # local_parameters_as_ndarrays[i] = parameters_to_ndarrays(
-            #     local_param_as_parameters[i]
-            # )
             j = 0
-            # temp_od = OrderedDict()
             for k, _ in gl_model.items():
                 local_parameters[i][k] = local_parameters_as_ndarrays[i][j]
                 j += 1
-            # local_parameters[i] = temp_od
 
         if "conv" in self.model_name:
             self._aggregate_conv(param_idx, local_parameters, results)

@@ -11,6 +11,7 @@ from omegaconf import DictConfig, OmegaConf
 from heterofl import client, models, server
 from heterofl.client_manager_heterofl import ClientManagerHeteroFL
 from heterofl.dataset import load_datasets
+from heterofl.model_properties import get_model_properties
 from heterofl.strategy import HeteroFL
 from heterofl.utils import ModelRateManager, get_global_model_rate, preprocess_input
 
@@ -66,6 +67,12 @@ def main(cfg: DictConfig) -> None:
         device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
     )
 
+    get_model_properties(
+        model_config,
+        model_split_rate,
+        model_mode + "",
+        data_loaders["entire_trainloader"],
+    )
     # # for i in range(cfg.num_clients):
     #     # client_to_model_rate_mapping[i]
 

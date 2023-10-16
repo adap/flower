@@ -28,6 +28,8 @@ model:
   model_name: conv
   hidden_layers: [64 , 128 , 256 , 512]
   norm: bn
+  scale: 1
+  mask: 1
 
 strategy:
   optimizer: SGD

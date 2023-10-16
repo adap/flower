@@ -35,6 +35,9 @@ def preprocess_input(cfg_model, cfg_data):
 
     model_config["hidden_layers"] = cfg_model.hidden_layers
     model_config["norm"] = cfg_model.norm
+    model_config["scale"] = cfg_model.scale
+    print("scale = ", model_config["scale"])
+    model_config["mask"] = cfg_model.mask
 
     return model_config
 
