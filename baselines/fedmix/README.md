@@ -2,7 +2,7 @@
 title: FedMix Approximation of Mixup under Mean Augmented Federated Learning
 url: https://arxiv.org/abs/2107.00233
 labels: ["data heterogeneity", "mixup", "non-iid"]
-dataset: ["cifar10", "cifar100", "femnist"]
+dataset: ["CIFAR-10", "CIFAR-100", "FEMNIST"]
 ---
 
 # FedMix: Approximation of Mixup under Mean Augmented Federated Learning
