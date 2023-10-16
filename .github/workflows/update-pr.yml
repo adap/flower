@@ -8,7 +8,7 @@ jobs:
   autoupdate:
     runs-on: ubuntu-latest
     steps:
-      - name: Automatically update PR
+      - name: Automatically update mergeable PRs
         uses: adRise/update-pr-branch@0.7
         with:
           token: ${{ secrets.ACTION_USER_TOKEN }}
