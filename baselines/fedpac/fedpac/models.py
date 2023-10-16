@@ -43,12 +43,19 @@ class EMNISTNet(nn.Module):
         x = self.conv2(x)
         x = self.relu2(x)
         x = self.pool2(x)
-        x = x.view(-1, 5 * 5 * 32)
+        x = x.view(-1, self.num_flat_features(x))
         x = self.fc1(x)
         x = self.relu3(x)
         y = self.fc2(x)
         return x, y
 
+    def num_flat_features(self, x):
+        size = x.size()[1:]
+        num_features = 1
+        for s in size:
+            num_features *= s
+        return num_features
+    
 class CIFARNet(nn.Module):
     """Implementation of the model used in the FedPAC paper for training on
     CIFAR10 data."""

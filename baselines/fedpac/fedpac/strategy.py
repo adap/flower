@@ -40,7 +40,7 @@ def metrics_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     # examples = [num_examples for num_examples, _ in metrics]
     # Aggregate and return custom metric (average)
     print("here and nothing is breaking!!!")
-    return {"accuracy": int(sum(accuracies)) / len(accuracies)}
+    return {"accuracy": sum(accuracies) / len(accuracies)}
 
 
 def loss_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
@@ -152,6 +152,9 @@ class FedPAC(FedAvg):
         sample_size, min_num_clients = self.num_evaluation_clients(
             client_manager.num_available()
         )
+        if server_round==1:
+            self.avg_heads = [None]*sample_size
+
         clients = client_manager.sample(
                     num_clients=sample_size, min_num_clients=min_num_clients
                 )

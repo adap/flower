@@ -6,7 +6,6 @@ import torch
 from pathlib import Path
 from secrets import token_hex
 from functools import reduce
-from itertools import pairwise
 import numpy as np
 import cvxpy as cvx
 import matplotlib.pyplot as plt
@@ -117,6 +116,18 @@ def save_results_as_pickle(
     # save results to pickle
     with open(str(path), "wb") as handle:
         pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+def pairwise(data):
+    """ Simple generator of the pairs (x, y) in a tuple such that index x < index y.
+    Args:
+    data Indexable (including ability to query length) containing the elements
+    Returns:
+    Generator over the pairs of the elements of 'data'
+    """
+    n = len(data)
+    for i in range(n):
+        for j in range(i, n):
+            yield (data[i], data[j])
 
 
 def get_on_fit_config(config):
@@ -245,7 +256,6 @@ def aggregate_heads(stats, device):
             alpha = None
         
         agg_head.append(alpha)
-
     return agg_head
 
 

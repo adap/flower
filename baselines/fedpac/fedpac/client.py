@@ -72,17 +72,17 @@ class FlowerClient(fl.client.NumPyClient):
         return sizes
 
     def get_class_fractions(self):
-        total = len(self.trainloader)
+        total = len(self.trainloader.dataset)
         return self.class_sizes / total
 
 
     def get_statistics(self):
         dim = self.net.state_dict()[self.net.classifier_layers[0]][0].shape[0] 
-        feat_dict = self.feature_extractor
+        feat_dict = self.get_feature_extractor()
         for k in feat_dict.keys():
             feat_dict[k] = torch.stack(feat_dict[k])
         
-        py = self.get_class_fractions()
+        py = self.class_fractions
         py2 = torch.square(py)
         v = 0
         h_ref = torch.zeros((self.num_classes, dim), device=self.device)
@@ -120,16 +120,16 @@ class FlowerClient(fl.client.NumPyClient):
 
 
     def get_classifier_head(self):
-        w = copy.deepcopy(self.net)
+        w = copy.deepcopy(self.net.state_dict())
         keys = self.net.classifier_layers
         for k in keys:
             w[k] = torch.zeros_like(w[k])
         
         w0 = 0
-        for i in range(len(w)):
+        for i in range(len(self.avg_head)):
             w0+=self.avg_head[i]
             for k in keys:
-                w[k] += self.avg_head[i]*self.avg_head[i][k] 
+                w[k] += self.avg_head[i]*self.net.state_dict()[k] 
         
         for k in keys:
             w[k] = torch.div(w[k], w0)
@@ -138,7 +138,7 @@ class FlowerClient(fl.client.NumPyClient):
 
     def update_classifier(self, classifier):
         local_weight = self.net.state_dict()
-        classifier_keys = self.classifier_layers
+        classifier_keys = self.net.classifier_layers
         for k in local_weight.keys():
             if k in classifier_keys:
                 local_weight[k] = classifier[k]
@@ -154,7 +154,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.global_centroid = config["global_centroid"]
         self.avg_head = config['classifier_head']
         if self.avg_head != None:
-            classifier_head = self.get_classifier_head(self.stats)
+            classifier_head = self.get_classifier_head()
             self.update_classifier(classifier_head)
 
         train(
@@ -182,7 +182,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.set_parameters(parameters)
         self.avg_head = config['classifier_head']
         if self.avg_head != None:
-            classifier_head = self.get_classifier_head(self.stats)
+            classifier_head = self.get_classifier_head()
             self.update_classifier(classifier_head)
         loss, accuracy = test(self.net, self.valloader, self.device)
         return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
