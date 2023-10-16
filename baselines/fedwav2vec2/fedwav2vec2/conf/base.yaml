@@ -11,7 +11,7 @@ huggingface_model_save_path: docs/pretrained_wav2vec2
 sb_config: fedwav2vec2/conf/sb_config/w2v2.yaml # config with SpeechBrain recipe for Wav2Vec 2.0
 data_path: data # if you change this, ensure you `git cloned` the author's own repo to a directory with the new name
 rounds: 100 # global FL rounds
-local_epochs: 15 # local epochs for each client
+local_epochs: 20 # local epochs for each client
 total_clients: 1943
 server_cid: 19999
 
@@ -24,12 +24,12 @@ parallel_backend: false # If using multi-gpus per client (disable if using CPU)
 dataset:
   download_filename: TEDLIUM_release-3.tgz
 
-  extract_subdirectory: audio/TEDLIUM_release-3
+  extract_subdirectory: audio
 
 
 strategy:
   _target_: fedwav2vec2.strategy.CustomFedAvg
-  min_fit_clients: 10
+  min_fit_clients: 20
   fraction_fit: 0.01
   min_available_clients: ${total_clients}
   weight_strategy: num # strategy of weighting clients in: [num, loss, wer]

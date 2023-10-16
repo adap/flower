@@ -93,7 +93,6 @@ def _csv_path_audio(data_path_base: str, extract_path: str):
                         path = os.path.join(extract_path, "legacy/test/sph")
                 df = pd.read_csv(os.path.join(subdir,file))
                 df["wav"] = df["wav"].str.replace("path", path)
-
                 df.to_csv(os.path.join(subdir,file), index = False)
 
 
@@ -118,7 +117,7 @@ def download_and_extract(cfg: DictConfig) -> None:
         finally:
             _delete_file(FILENAME)
 
-    _csv_path_audio(cfg.data_path, EXTRACT_PATH)
+    _csv_path_audio(cfg.data_path, f"{EXTRACT_PATH}/TEDLIUM_release-3")
 
     # remove output dir. No need to keep it around
     save_path = HydraConfig.get().runtime.output_dir

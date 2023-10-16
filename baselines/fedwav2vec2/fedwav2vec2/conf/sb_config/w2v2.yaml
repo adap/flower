@@ -30,7 +30,7 @@ skip_prep: False # Skip data preparation
 device: cpu
 # Training parameters
 
-avoid_if_longer_than: 90.0
+avoid_if_longer_than: 10.0
 avoid_if_smaller_than: 0.1
 
 
