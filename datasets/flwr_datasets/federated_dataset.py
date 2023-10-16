@@ -39,11 +39,12 @@ class FederatedDataset:
     dataset: str
         The name of the dataset in the Hugging Face Hub.
     resplitter: Optional[Union[Resplitter, Dict[Tuple[str, ...], str]]]
-        `Callable` that transforms `DatasetDict` splits, or configuration dict for `MergeResplitter`.
+        `Callable` that transforms `DatasetDict` splits, or configuration dict for
+        `MergeResplitter`.
     partitioners: Dict[str, Union[Partitioner, int]]
         A dictionary mapping the Dataset split (a `str`) to a `Partitioner` or an `int`
         (representing the number of IID partitions that this split should be partitioned
-         into).
+        into).
 
     Examples
     --------
