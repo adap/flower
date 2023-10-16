@@ -40,6 +40,9 @@ class FederatedDataset:
     ----------
     dataset: str
         The name of the dataset in the Hugging Face Hub.
+    subset: str
+        Secondary information regarding the dataset, most often subset or version
+         (that is passed to the name in datasets.load_dataset).
     resplitter: Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]]
         `Callable` that transforms `DatasetDict` splits, or configuration dict for
         `MergeResplitter`.
@@ -67,11 +70,13 @@ class FederatedDataset:
         self,
         *,
         dataset: str,
+        subset: Optional[str] = None,
         resplitter: Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]] = None,
         partitioners: Dict[str, Union[Partitioner, int]],
     ) -> None:
         _check_if_dataset_tested(dataset)
         self._dataset_name: str = dataset
+        self._subset: Optional[str] = subset
         self._resplitter: Optional[Resplitter] = _instantiate_resplitter_if_needed(
             resplitter
         )
@@ -136,7 +141,9 @@ class FederatedDataset:
     def _download_dataset_if_none(self) -> None:
         """Lazily load (and potentially download) the Dataset instance into memory."""
         if self._dataset is None:
-            self._dataset = datasets.load_dataset(self._dataset_name)
+            self._dataset = datasets.load_dataset(
+                path=self._dataset_name, name=self._subset
+            )
 
     def _check_if_split_present(self, split: str) -> None:
         """Check if the split (for partitioning or full return) is in the dataset."""
