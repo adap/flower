@@ -18,6 +18,18 @@ jobs:
     - name: Bootstrap
       uses: ./.github/actions/bootstrap
 
+    - name: Cache SDK build
+      uses: actions/cache@v3
+      with:
+        path: build/
+        key: ${{ runner.os }}-sdk-build
+
+    - name: Cache example build
+      uses: actions/cache@v3
+      with:
+        path: examples/quickstart-cpp/build/
+        key: ${{ runner.os }}-example-build
+
     - name: Install Dependencies
       run: |
         sudo apt-get update
