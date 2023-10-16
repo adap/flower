@@ -15,6 +15,6 @@ jobs:
           base: 'main'
           required_approval_count: 1
           require_passed_checks: true
+          require_auto_merge_enabled: true
           sort: 'created'
           direction: 'desc'
-          require_auto_merge_enabled: true
