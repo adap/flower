@@ -18,6 +18,8 @@
 import unittest
 from typing import Dict, Tuple
 
+import pytest
+
 from datasets import Dataset, DatasetDict
 from flwr_datasets.merge_resplitter import MergeResplitter
 
@@ -112,8 +114,17 @@ class TestResplitter(unittest.TestCase):
             ("valid",): "new_train",
         }
         with self.assertRaisesRegex(
-            ValueError, "Duplicate desired split name 'new_train' in resplit strategy"
+            ValueError, "Duplicate desired split name 'new_train' in `merge_config`."
         ):
+            _ = MergeResplitter(strategy)
+
+    def test_duplicate_merge_split_name(self) -> None:
+        """Test that the new split names are not the same."""
+        strategy: Dict[Tuple[str, ...], str] = {
+            ("train", "valid"): "new_train",
+            ("train",): "test",
+        }
+        with pytest.warns(UserWarning):
             _ = MergeResplitter(strategy)
 
     def test_empty_dataset_dict(self) -> None:

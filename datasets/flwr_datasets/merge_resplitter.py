@@ -16,6 +16,8 @@
 
 
 import collections
+import warnings
+from functools import reduce
 from typing import Dict, List, Tuple
 
 import datasets
@@ -58,6 +60,7 @@ class MergeResplitter:
     ) -> None:
         self._merge_config: Dict[Tuple[str, ...], str] = merge_config
         self._check_duplicate_desired_splits()
+        self._check_duplicate_merge_splits()
 
     def __call__(self, dataset: DatasetDict) -> DatasetDict:
         """Resplit the dataset according to the `merge_config`."""
@@ -101,7 +104,21 @@ class MergeResplitter:
             if count > 1
         ]
         if duplicates:
-            print(f"Duplicate desired split name '{duplicates[0]}' in resplit strategy")
             raise ValueError(
-                f"Duplicate desired split name '{duplicates[0]}' in resplit strategy"
+                f"Duplicate desired split name '{duplicates[0]}' in `merge_config`."
+            )
+
+    def _check_duplicate_merge_splits(self) -> None:
+        """Check if the original splits are duplicated for new splits creation."""
+        merge_splits = reduce(lambda x, y: x + y, self._merge_config.keys())
+        duplicates = [
+            item
+            for item, count in collections.Counter(merge_splits).items()
+            if count > 1
+        ]
+        if duplicates:
+            warnings.warn(
+                f"More than one desired splits used '{duplicates[0]}' in "
+                f"`merge_config`. Make sure that is the intended behavior.",
+                stacklevel=1,
             )
