@@ -1,6 +1,6 @@
 """Strategy of the Federated Learning."""
 
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import flwr as fl
@@ -21,6 +21,7 @@ from flwr.server.client_proxy import ClientProxy
 
 from pFedHN.models import CNNHyper
 
+import numpy as np
 
 # pylint: disable=invalid-name
 # pylint: disable=too-many-instance-attributes
@@ -30,11 +31,10 @@ class pFedHN(fl.server.strategy.Strategy):
     # pylint: disable=too-many-arguments
     def __init__(
         self,
-        config,
         fraction_fit: float = 0.0,
         fraction_evaluate: float = 1.0,
         min_fit_clients: int = 1,
-        min_evaluate_clients: int = 1,
+        min_evaluate_clients: int = 2,
         min_available_clients: int = 1,
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
@@ -53,18 +53,8 @@ class pFedHN(fl.server.strategy.Strategy):
         self.min_available_clients = min_available_clients
         self.accept_failures = accept_failures
         self.initial_parameters = initial_parameters
-        self.cfg = config
         self.evaluate_fn = evaluate_fn
-        # Initialising our hnet model in server
-        self.hnet = CNNHyper(
-            n_nodes=self.cfg.client.num_nodes,
-            embedding_dim=int(1 + self.cfg.client.num_nodes / 4),
-            in_channels=self.cfg.model.in_channels,
-            n_kernels=self.cfg.model.n_kernels,
-            out_dim=self.cfg.model.out_dim,
-            hidden_dim=100,
-            n_hidden=1,
-        )
+        self.results = defaultdict(list)
 
     def __repr__(self) -> str:
         """Return the strategy name."""
@@ -75,9 +65,6 @@ class pFedHN(fl.server.strategy.Strategy):
     ) -> Optional[Parameters]:
         """Initialize global model parameters."""
         client_manager.num_available()
-
-        self.hnet.to(torch.device("cpu"))
-
         initial_parameters = self.initial_parameters
         self.initial_parameters = None
         return initial_parameters
@@ -88,7 +75,8 @@ class pFedHN(fl.server.strategy.Strategy):
 
     def num_evaluate_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Use a fraction of available clients for evaluation."""
-        return min(0, num_available_clients), self.min_available_clients
+        num_clients = int(num_available_clients * self.fraction_evaluate)
+        return min(1, num_available_clients), self.min_available_clients
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -103,54 +91,11 @@ class pFedHN(fl.server.strategy.Strategy):
             min_num_clients=min_num_clients,
         )
 
-        self.hnet.train()
-
-        # function to generate weights for each client
-        def weights_to_clients(client_id):
-            weights = self.hnet(
-                torch.tensor([client_id], dtype=torch.long).to(torch.device("cpu"))
-            )
-            return weights
-
         fit_configurations = []
-        for _idx, client in enumerate(clients):
-            # pylint: disable=attribute-defined-outside-init
-            self.weights = weights_to_clients(int(client.cid))
-            array = [val.cpu().detach().numpy() for _, val in self.weights.items()]
-
-            # Converting the weights to parameters
-            parameters = ndarrays_to_parameters(array)
+        for _idx, client in enumerate(clients):            
             fit_configurations.append((client, FitIns(parameters, {})))
 
         return fit_configurations
-
-    def gradient_upgradation(self, delta_theta_param: Parameters):
-        """Update the gradients of the hypernetwork."""
-        optim = torch.optim.Adam(params=self.hnet.parameters(), lr=1e-2)
-        optim.zero_grad()
-
-        param_dict = zip(
-            self.hnet.state_dict().keys(),
-            fl.common.parameters_to_ndarrays(delta_theta_param),
-        )
-        delta_theta = OrderedDict({k: torch.Tensor(v) for k, v in param_dict})
-
-        weights = self.weights
-
-        # calculating phi gradient
-        hnet_grads = torch.autograd.grad(
-            list(weights.values()),
-            self.hnet.parameters(),
-            grad_outputs=list(delta_theta.values()),
-            allow_unused=True,
-        )
-
-        # update hnet weights
-        for p, g in zip(self.hnet.parameters(), hnet_grads):
-            p.grad = g
-
-        torch.nn.utils.clip_grad_norm_(self.hnet.parameters(), 50)
-        optim.step()
 
     def aggregate_fit(
         self,
@@ -162,28 +107,16 @@ class pFedHN(fl.server.strategy.Strategy):
         _, fit_res = results[0]
 
         delta_theta = fit_res.parameters
+        test_loss = fit_res.metrics["test_loss"]
+        test_acc = fit_res.metrics["test_acc"]
 
-        self.gradient_upgradation(delta_theta)
-
-        return None, {}
+        return delta_theta, {"test_loss":test_loss,"test_acc":test_acc}
 
     def configure_evaluate(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
-        sample_size, min_num_clients = self.num_evaluate_clients(
-            client_manager.num_available()
-        )
-        clients = client_manager.sample(
-            num_clients=sample_size, min_num_clients=min_num_clients
-        )
-        eval_configurations = []
-        for _idx, client in enumerate(clients):
-            eval_configurations.append(
-                (client, EvaluateIns(parameters, {"server_round": server_round}))
-            )
-
-        return eval_configurations
+        return []
 
     def aggregate_evaluate(
         self,
@@ -192,6 +125,7 @@ class pFedHN(fl.server.strategy.Strategy):
         failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation metrics."""
+
         if not results:
             return None, {}
         return None, {}

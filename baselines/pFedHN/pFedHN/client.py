@@ -7,6 +7,7 @@ import torch
 
 from pFedHN.models import CNNTarget
 from pFedHN.trainer import train
+from pFedHN.utils import get_device
 
 
 # pylint: disable=too-many-instance-attributes
@@ -32,13 +33,17 @@ class FlowerClient(fl.client.NumPyClient):
         net (CNNTarget): Target neural network model.
     """
 
-    def __init__(self, cid, trainloader, testloader, cfg) -> None:
+    def __init__(self, cid, trainloader, testloader,valloader, cfg,local_layers,local_optims,local) -> None:
         super().__init__()
 
         self.cid = cid
         self.trainloader = trainloader
         self.testloader = testloader
-        self.device = torch.device(cfg.model.device)
+        self.valloader = valloader
+        self.local_layers = local_layers
+        self.local_optims = local_optims
+        self.local = local
+        self.device = get_device()
         self.epochs = cfg.client.num_epochs
         self.n_kernels = cfg.model.n_kernels
         self.learning_rate = cfg.model.inner_lr
@@ -47,6 +52,7 @@ class FlowerClient(fl.client.NumPyClient):
             in_channels=cfg.model.in_channels,
             n_kernels=self.n_kernels,
             out_dim=cfg.model.out_dim,
+            local=self.local,
         )
 
     def set_parameters(self, parameters):
@@ -68,18 +74,6 @@ class FlowerClient(fl.client.NumPyClient):
         self.net.load_state_dict(state_dict, strict=True)
         return state_dict
 
-    def get_parameters(self, config):
-        """Get the target network parameters and send them to the server.
-
-        Args:
-            config (Parameter): Delta Theta.
-
-        Returns
-        -------
-            list: List of parameter values.
-        """
-        return [val.cpu().numpy() for _, val in config.items()]
-
     def fit(self, parameters, config):
         """Perform federated training on the client.
 
@@ -94,10 +88,14 @@ class FlowerClient(fl.client.NumPyClient):
         """
         inner_state = self.set_parameters(parameters)
 
-        train(
+        test_loss,test_acc,final_state = train(
             self.net,
             self.trainloader,
             self.testloader,
+            self.valloader,
+            self.local_layers,
+            self.local_optims,
+            self.local,
             self.epochs,
             self.learning_rate,
             self.weight_decay,
@@ -105,17 +103,16 @@ class FlowerClient(fl.client.NumPyClient):
             self.cid,
         )
 
-        final_state = self.net.state_dict()
-
         # Calculating delta theta
         delta_theta = OrderedDict(
             {k: v - final_state[k] for k, v in inner_state.items()}
         )
 
-        return self.get_parameters(delta_theta), len(self.trainloader), {}
+        delta_theta = [val.cpu().numpy() for _, val in delta_theta.items()]
 
+        return delta_theta, len(self.trainloader), {"test_loss":test_loss,"test_acc":test_acc}
 
-def generate_client_fn(trainloaders, testloaders, config):
+def generate_client_fn(trainloaders, testloaders, valloaders,config,local_layers,local_optims,local=False):
     """Generate a function which returns a new FlowerClient.
 
     Args:
@@ -129,6 +126,6 @@ def generate_client_fn(trainloaders, testloaders, config):
     """
 
     def client_fn(cid: str):
-        return FlowerClient(cid, trainloaders, testloaders, config)
+        return FlowerClient(cid, trainloaders, testloaders,valloaders,config,local_layers,local_optims,local)
 
     return client_fn
