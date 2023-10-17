@@ -19,8 +19,17 @@ import itertools
 import random
 import time
 from dataclasses import dataclass
-from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, Generator, Iterable, Optional, Tuple, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    Iterable,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+)
 
 
 def exponential(
@@ -114,7 +123,7 @@ class SafeInvoker:
         A generator yielding successive wait times in seconds. If the generator
         is finite, the giveup event will be triggered when the generator raises
         `StopIteration`.
-    exception: Union[Exception, Iterable[Exception]]
+    exception:  Union[Type[Exception], Iterable[Type[Exception]]]
         An exception type (or iterable of types) that triggers backoff.
     max_tries: Optional[int] (default: None)
         The maximum number of attempts to make before giving up. Once exhausted,
@@ -148,7 +157,7 @@ class SafeInvoker:
     def __init__(
         self,
         wait: Generator[float, None, None],
-        exception: Union[Exception, Iterable[Exception]],
+        exception: Union[Type[Exception], Iterable[Type[Exception]]],
         *,
         max_tries: Optional[int] = None,
         max_time: Optional[float] = None,
@@ -170,7 +179,7 @@ class SafeInvoker:
 
     def invoke(
         self,
-        func: Callable[[Any], Any],
+        func: Callable[..., Any],
         *args: Tuple[Any, ...],
         **kwargs: Dict[str, Any],
     ) -> Any:
@@ -184,7 +193,7 @@ class SafeInvoker:
 
         Parameters
         ----------
-        func: Callable[[Any], Any]
+        func: Callable[..., Any]
             The function to be invoked.
         *args: Tuple[Any, ...]
             Positional arguments to pass to `func`.
@@ -218,11 +227,11 @@ class SafeInvoker:
                 handler(details)
 
         tries = 0
-        start = datetime.now()
+        start = time.time()
 
         while True:
             tries += 1
-            elapsed = timedelta.total_seconds(datetime.now() - start)
+            elapsed = time.time() - start
             details = Details(
                 func=func, args=args, kwargs=kwargs, tries=tries, elapsed=elapsed
             )
