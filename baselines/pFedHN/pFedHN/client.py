@@ -18,13 +18,21 @@ class FlowerClient(fl.client.NumPyClient):
         cid (str): The client ID.
         trainloader (torch.utils.data.DataLoader): DataLoader for training data.
         testloader (torch.utils.data.DataLoader): DataLoader for test data.
+        valloader (torch.utils.data.DataLoader): DataLoader for validation data
         cfg (Config): Hydra Configuration.
+        local_layers (list): List of local layers.
+        local_optims (list): List of local optimizers.
+        local (bool): Whether to use local layers.
 
     Attributes
     ----------
         cid (str): The client ID.
         trainloader (torch.utils.data.DataLoader): DataLoader for training data.
         testloader (torch.utils.data.DataLoader): DataLoader for test data.
+        valloader (torch.utils.data.DataLoader): DataLoader for validation data
+        local_layers (list): List of local layers.
+        local_optims (list): List of local optimizers.
+        local (bool): Whether to use local layers.
         device (torch.device): The device to run the model on.
         epochs (int): Number of training epochs.
         n_kernels (int): Number of convolutional kernels.
@@ -144,6 +152,10 @@ def generate_client_fn(
         trainloaders (list): List of DataLoader objects for training data.
         testloaders (list): List of DataLoader objects for test data.
         config (Config): Hydra Configuration.
+        local_layers (list): List of local layers.
+        local_optims (list): List of local optimizers.
+        local (bool): Whether to use local layers.
+
 
     Returns
     -------
