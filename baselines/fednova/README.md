@@ -2,7 +2,7 @@
 title: FedNova (NeurIPS 2020)
 url: https://arxiv.org/abs/2007.07481
 labels: [normalized averaging, heterogeneous optimization, federated learning]
-dataset: [non-iid cifar10 dataset, synthetic dataset]
+dataset: [non-iid cifar10 dataset]
 ---
 
 # FedNova: Tackling the Objective Inconsistency Problem in Heterogeneous Federated Optimization
@@ -155,7 +155,7 @@ Centralized Evaluation: Accuracy(in %) on centralized Test set
 | ------------ | ---------------- | ------ | ------- |
 | 2            | Vanilla          | 71.57  | 68.25   |
 | 2            | Momentum         | 75.92  | 73.33   |
-| 2            | Proximal         | -  | 67.47   |
+| 2            | Proximal         | 72.69  | 67.47   |
 | Random(2-5)  | Vanilla          | -  | 72.27   |
 | Random(2-5)  | Momentum         | -  | 75.73   |
 | Random(2-5)  | Proximal         | -  | 71.48   |
