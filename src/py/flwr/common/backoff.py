@@ -140,7 +140,9 @@ class SafeInvoker:
         data class object detailing the invocation.
     on_giveup: Optional[Callable[[Details], None]] (default: None)
         A callable to be executed in the event that `max_tries` or `max_time` is
-        exceeded. The parameter is a data class object detailing the invocation.
+        exceeded, `giveup_condition` returns True, or `wait` generator raises
+        `StopInteration`. The parameter is a data class object detailing the
+        invocation.
     """
 
     def __init__(
