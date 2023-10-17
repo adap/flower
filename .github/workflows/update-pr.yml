@@ -1,0 +1,20 @@
+name: PR update
+
+on:
+  push:
+    branches:
+      - 'main'
+jobs:
+  autoupdate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Automatically update mergeable PRs
+        uses: adRise/update-pr-branch@0.7
+        with:
+          token: ${{ secrets.ACTION_USER_TOKEN }}
+          base: 'main'
+          required_approval_count: 1
+          require_passed_checks: true
+          require_auto_merge_enabled: true
+          sort: 'created'
+          direction: 'desc'
