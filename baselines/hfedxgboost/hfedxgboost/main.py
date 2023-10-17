@@ -159,7 +159,6 @@ def main(cfg: DictConfig) -> None:
                 strategy=strategy,
             )
 
-            # print(type(history.metrics_centralized),history.metrics_centralized)
             print(history)
             writer = results_writer(cfg)
             best_res, best_res_round = writer.extract_best_res(history)
