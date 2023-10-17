@@ -53,7 +53,7 @@ jobs:
           cat body.md
           
       - name: Release
-        uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
+        uses: softprops/action-gh-release@0.1.15
         with:
           body_path: ./body.md
           draft: true
