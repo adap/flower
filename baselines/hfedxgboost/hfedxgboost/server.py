@@ -9,7 +9,7 @@ settings).
 import timeit
 from logging import DEBUG, INFO
 from typing import Dict, List, Optional, Tuple, Union
-import wandb
+
 import flwr as fl
 from flwr.common import EvaluateRes, FitRes, Parameters, Scalar, parameters_to_ndarrays
 from flwr.common.logger import log
@@ -19,12 +19,13 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.server import evaluate_clients, fit_clients
 from flwr.server.strategy import Strategy
+from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 from xgboost import XGBClassifier, XGBRegressor
 
+import wandb
 from hfedxgboost.models import CNN
 from hfedxgboost.utils import Early_Stop, single_tree_preds_from_each_client, test
-from omegaconf import DictConfig
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
@@ -37,37 +38,38 @@ EvaluateResultsAndFailures = Tuple[
 
 
 class FL_Server(fl.server.Server):
-    """
-    The FL_Server class is a sub-class of the fl.server.Server class. 
+    """The FL_Server class is a sub-class of the fl.server.Server class.
 
-    Attributes:
-
+    Attributes
+    ----------
         client_manager (ClientManager):responsible for managing the clients.
-        parameters (Parameters): The model parameters used for training 
+        parameters (Parameters): The model parameters used for training
         and evaluation.
-        strategy (Strategy): The strategy used for selecting clients 
+        strategy (Strategy): The strategy used for selecting clients
         and aggregating results.
-        max_workers (None or int): The maximum number of workers 
+        max_workers (None or int): The maximum number of workers
         for parallel execution.
-        early_stopper (Early_Stop): The early stopper used for 
+        early_stopper (Early_Stop): The early stopper used for
         determining when to stop training.
 
-    Methods:
-        fit_round(server_round, timeout): 
+    Methods
+    -------
+        fit_round(server_round, timeout):
             Runs a round of fitting on the server side.
-        check_res_cen(current_round, timeout, start_time, history): 
-            Gets results after fitting the model for the current round 
+        check_res_cen(current_round, timeout, start_time, history):
+            Gets results after fitting the model for the current round
             and checks if the training should stop.
-        fit(num_rounds, timeout): 
+        fit(num_rounds, timeout):
             Runs federated learning for a given number of rounds.
         evaluate_round(server_round, timeout):
             Validates the current global model on a number of clients.
-        _get_initial_parameters(timeout): 
+        _get_initial_parameters(timeout):
             Gets initial parameters from one of the available clients.
-        serverside_eval(server_round, parameters, config, 
-                        cfg, testloader, batch_size): 
-            Performs server-side evaluation. 
+        serverside_eval(server_round, parameters, config,
+                        cfg, testloader, batch_size):
+            Performs server-side evaluation.
     """
+
     def __init__(
         self,
         cfg: DictConfig,
@@ -75,7 +77,7 @@ class FL_Server(fl.server.Server):
         early_stopper: Early_Stop,
         strategy: Strategy,
     ) -> None:
-        self.cfg=cfg
+        self.cfg = cfg
         self._client_manager = client_manager
         self.parameters = Parameters(tensors=[], tensor_type="numpy.ndarray")
         self.strategy = strategy
@@ -207,7 +209,7 @@ class FL_Server(fl.server.Server):
                 server_round=current_round, metrics=metrics_cen
             )
             if self.cfg.use_wandb:
-                wandb.log({"round": current_round, "server_loss": res_cen})
+                wandb.log({"server_metric_value": metrics_cen, "server_loss": loss_cen})
             if self.early_stopper.early_stop(res_cen):
                 return True
         return False

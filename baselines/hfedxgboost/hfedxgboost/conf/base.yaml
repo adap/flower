@@ -6,6 +6,7 @@ defaults:
 
 centralized: False
 use_wandb: False
+show_each_client_performance_on_its_local_data: False
 server_device: "cpu"
 val_ratio: 0.0
 batch_size: "whole"

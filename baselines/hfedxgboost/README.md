@@ -135,7 +135,7 @@ wandb agent <your user name on wandb>/flower-baselines_hfedxgboost_hfedxgboost/<
 2- The config files named `<dataset name>_<no.of clients>_clients.yaml` are meant to keep the final hyperparameters values, so whenever you think you're done with fine-tuning some hyperparameters, add them to their config files so the one after you can use them.
 
 3- To help with the fine-tuning of the hyperparameters process, there are 2 classes in the utils.py that write down the used hyperparameters in the experiments and the results for that experiment in 2 separate CSV files, some of the hyperparameters used in the experiments done during building this baseline can be found in results.csv and results_centralized.csv files.<br>
-More important, those 2 files focus on writing down only the hyperparameters that I thought was important so if you're interested in experimenting with other hyperparameters, don't forget to add them to the writers classes so you can track them more easily, especially if you intend to do some experiments away from WandB.
+More important, those 2 classes focus on writing down only the hyperparameters that I thought was important so if you're interested in experimenting with other hyperparameters, don't forget to add them to the writers classes so you can track them more easily, especially if you intend to do some experiments away from WandB.
 
 ## Environment Setup
 
@@ -241,7 +241,7 @@ python -m hfedxgboost.main --multirun clients=YearPredictionMSD_2_clients,YearPr
 | Dataset | task type |no. of clients | server-side test MSE |
 | :---: | :---: | :---: | :---: |
 | space_ga | Regression | 2<br>5<br>10 | 0.024<br>0.033<br>0.034 |
-| abalone | Regression | 2<br>5<br>10 | 10<br>10<br>10 | 
+| abalone | Regression | 2<br>5<br>10 | 5.5<br>10<br>10 | 
 | cpusmall | Regression | 2<br>5<br>10 | 13<br>20.68<br>15.28 | 
 | YearPredictionMSD | Regression | 2<br>5<br>10 | 119<br>118<br>118 | 
 

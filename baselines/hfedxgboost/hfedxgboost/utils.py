@@ -194,12 +194,13 @@ def run_centralized(
                 )
 
 
-def clients_preformance_on_local_data(
+def clients_performance_on_local_data(
     config: DictConfig, trainloaders, X_test, y_test, task_type: str
 ) -> None:
     """Evaluate the performance of clients on local data using XGBoost.
 
-    Parmeters:
+    Parameters
+    ----------
         config (DictConfig): Hydra configuration object.
         trainloaders: List of data loaders for each client.
         X_test: Test features.
@@ -228,7 +229,8 @@ def single_tree_prediction(
 ) -> Optional[NDArray]:
     """Perform a single tree prediction using the provided tree object on given dataset.
 
-    Parmeters:
+    Parameters
+    ----------
         tree (either XGBClassifier or XGBRegressor): The tree object
         used for prediction.
         n_tree (int): The index of the tree to be used for prediction.
@@ -255,7 +257,7 @@ def single_tree_prediction(
 def single_tree_preds_from_each_client(
     trainloader: DataLoader,
     batch_size: int,
-    client_tree_ensemples: Union[
+    client_tree_ensamples: Union[
         Tuple[XGBClassifier, int],
         Tuple[XGBRegressor, int],
         List[Union[Tuple[XGBClassifier, int], Tuple[XGBRegressor, int]]],
@@ -263,20 +265,22 @@ def single_tree_preds_from_each_client(
     n_estimators_client: int,
     client_num: int,
 ) -> Optional[Tuple[NDArray, NDArray]]:
-    """Predict using trees from client tree ensemples.
+    """Predict using trees from client tree ensamples.
 
-    Extract each tree from each tree ensemple from each client,
+    Extract each tree from each tree ensample from each client,
     and predict the output of the data using that tree,
     place those predictions in the preds_from_all_trees_from_all_clients,
     and return it.
-    Parmeters:
+
+    Parameters
+    ----------
         trainloader:
-            - a dataloder that contains the dataset to be predicted.
-        client_tree_ensemples:
-            - the trained XGBoost tree ensemple from each client,
-            each tree ensemples comes attached
+            - a dataloader that contains the dataset to be predicted.
+        client_tree_ensamples:
+            - the trained XGBoost tree ensample from each client,
+            each tree ensembles comes attached
             to its client id in a tuple
-            - can come as a single tuple of XGBoost tree ensemple and
+            - can come as a single tuple of XGBoost tree ensample and
             its client id or multiple tuples in one list.
 
     Returns
@@ -294,14 +298,14 @@ def single_tree_preds_from_each_client(
         (x_train.shape[0], client_num * n_estimators_client), dtype=np.float32
     )
 
-    if isinstance(client_tree_ensemples, list) is False:
-        temp_trees = [client_tree_ensemples[0]] * client_num
-    elif isinstance(client_tree_ensemples, list):
-        client_tree_ensemples.sort(key=lambda x: x[1])
-        temp_trees = [i[0] for i in client_tree_ensemples]
-        if len(client_tree_ensemples) != client_num:
-            temp_trees += [client_tree_ensemples[0][0]] * (
-                client_num - len(client_tree_ensemples)
+    if isinstance(client_tree_ensamples, list) is False:
+        temp_trees = [client_tree_ensamples[0]] * client_num
+    elif isinstance(client_tree_ensamples, list):
+        client_tree_ensamples.sort(key=lambda x: x[1])
+        temp_trees = [i[0] for i in client_tree_ensamples]
+        if len(client_tree_ensamples) != client_num:
+            temp_trees += [client_tree_ensamples[0][0]] * (
+                client_num - len(client_tree_ensamples)
             )
 
     for i, _ in enumerate(temp_trees):
@@ -375,7 +379,7 @@ class Early_Stop:
         """Check if the model made any progress in number of rounds.
 
         If it didn't it will return the best result and the server
-        will stop runing the fit function, if
+        will stop running the fit function, if
         it did it will return None, and won't stop the server.
 
         Parameters
@@ -419,7 +423,7 @@ class Early_Stop:
 
 # results
 class results_writer:
-    """Write the results for the federated experments."""
+    """Write the results for the federated experiments."""
 
     def __init__(self, cfg) -> None:
         self.dataset_name = cfg.dataset.dataset_name
@@ -508,7 +512,7 @@ class results_writer:
 
 
 class results_writer_centralized:
-    """Write the results for the centralized experments."""
+    """Write the results for the centralized experiments."""
 
     def __init__(self, cfg) -> None:
         self.dataset_name = cfg.dataset.dataset_name
