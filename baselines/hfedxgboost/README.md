@@ -241,7 +241,7 @@ python -m hfedxgboost.main --multirun clients=YearPredictionMSD_2_clients,YearPr
 | Dataset | task type |no. of clients | server-side test MSE |
 | :---: | :---: | :---: | :---: |
 | space_ga | Regression | 2<br>5<br>10 | 0.024<br>0.033<br>0.034 |
-| abalone | Regression | 2<br>5<br>10 | 5.5<br>7.2<br>10 | 
+| abalone | Regression | 2<br>5<br>10 | 5.5<br>7.2<br>7.5 | 
 | cpusmall | Regression | 2<br>5<br>10 | 13<br>20.68<br>15.28 | 
 | YearPredictionMSD | Regression | 2<br>5<br>10 | 119<br>118<br>118 | 
 
