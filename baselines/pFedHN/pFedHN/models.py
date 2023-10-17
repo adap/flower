@@ -124,8 +124,9 @@ class CNNHyper(nn.Module):
             self.l1_bias = spectral_norm(self.l1_bias)
             self.l2_weights = spectral_norm(self.l2_weights)
             self.l2_bias = spectral_norm(self.l2_bias)
-            self.l3_weights = spectral_norm(self.l3_weights)
-            self.l3_bias = spectral_norm(self.l3_bias)
+            if not self.local:
+                self.l3_weights = spectral_norm(self.l3_weights)
+                self.l3_bias = spectral_norm(self.l3_bias)
 
         elif spec_norm and self.in_channels == 1:
             self.c1_weights = spectral_norm(self.c1_weights)
