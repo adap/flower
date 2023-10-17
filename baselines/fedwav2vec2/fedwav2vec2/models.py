@@ -32,10 +32,11 @@ def int_model(  # pylint: disable=too-many-arguments,too-many-locals
     the correct path for the corresponding clients, and creating the model.
     """
     # Load hyperparameters file with command-line overrides
-    save_path = save_path + "/client_" + str(cid)
 
     if cid == 19999:
         save_path = save_path +"server"
+    else:
+        save_path = save_path + "/client_" + str(cid)
 
     # Override with FLOWER PARAMS
     if evaluate:

@@ -31,6 +31,7 @@ strategy:
   _target_: fedwav2vec2.strategy.CustomFedAvg
   min_fit_clients: 20
   fraction_fit: 0.01
+  fraction_evaluate: 0.00
   min_available_clients: ${total_clients}
   weight_strategy: num # strategy of weighting clients in: [num, loss, wer]
   on_fit_config_fn:
