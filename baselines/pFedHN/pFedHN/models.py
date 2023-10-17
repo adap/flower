@@ -2,7 +2,6 @@
 import ssl
 from collections import OrderedDict
 
-import torch
 import torch.nn.functional as F
 from torch import nn
 from torch.nn.utils import spectral_norm
@@ -12,7 +11,12 @@ from torch.nn.utils import spectral_norm
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
+
 class LocalLayer(nn.Module):
+    """Local Layer for performing the fucntionality of Personal Classifier.
+
+    This is for the experimentation of pFedHNPC.
+    """
 
     def __init__(self, n_input=84, n_output=10, nonlinearity=False):
         super().__init__()
@@ -25,7 +29,9 @@ class LocalLayer(nn.Module):
         self.layer = nn.Sequential(*layers)
 
     def forward(self, x):
+        """Forward pass of the hypernetwork."""
         return self.layer(x)
+
 
 # pylint: disable=too-many-instance-attributes
 class CNNHyper(nn.Module):
@@ -87,7 +93,6 @@ class CNNHyper(nn.Module):
                 self.l3_weights = nn.Linear(hidden_dim, self.out_dim * 84)
                 self.l3_bias = nn.Linear(hidden_dim, self.out_dim)
 
-
         elif self.in_channels == 1:
             self.c1_weights = nn.Linear(
                 hidden_dim, self.n_kernels * self.in_channels * 3 * 3
@@ -135,7 +140,6 @@ class CNNHyper(nn.Module):
             self.l2_bias = spectral_norm(self.l2_bias)
             self.l3_weights = spectral_norm(self.l3_weights)
             self.l3_bias = spectral_norm(self.l3_bias)
-
 
     def forward(self, idx):
         """Forward pass of the hypernetwork."""
@@ -186,11 +190,10 @@ class CNNHyper(nn.Module):
                     "fc1.bias": self.l1_bias(features).view(-1),
                     "fc2.weight": self.l2_weights(features).view(84, 120),
                     "fc2.bias": self.l2_bias(features).view(-1),
-                    "fc3.weight":self.l3_weights(features).view(self.out_dim, 84),
+                    "fc3.weight": self.l3_weights(features).view(self.out_dim, 84),
                     "fc3.bias": self.l3_bias(features).view(-1),
                 }
             )
-    
 
         return weights
 
@@ -200,7 +203,7 @@ class CNNTarget(nn.Module):
     """Target Network for pFedHN."""
 
     # pylint: disable=too-many-arguments
-    def __init__(self, in_channels, n_kernels, out_dim,local=False):
+    def __init__(self, in_channels, n_kernels, out_dim, local=False):
         super().__init__()
 
         self.in_channels = in_channels
@@ -223,7 +226,6 @@ class CNNTarget(nn.Module):
             self.fc1 = nn.Linear(2 * 2 * n_kernels * 3 * 3, 120)
             self.fc2 = nn.Linear(120, 84)
             self.fc3 = nn.Linear(84, out_dim)
-
 
     def forward(self, x):
         """Forward pass of the target network."""

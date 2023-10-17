@@ -3,12 +3,13 @@
 import torch
 import torch.utils.data
 
+
 # pylint: disable=too-many-arguments
 def train(
     netw,
     trainloader,
     testloader,
-    valloader,
+    valloader,  # pylint: disable=unused-argument
     local_layers,
     local_optims,
     local,
@@ -17,7 +18,7 @@ def train(
     weight_decay: float,
     device,
     cid,
-) -> None:
+):
     """Train the network on the training set."""
     # pylint: disable=too-many-locals
     net = netw.to(device)
@@ -66,4 +67,4 @@ def train(
             local_optims[int(cid)].step()
 
     final_state = net.state_dict()
-    return prev_loss,prev_acc,final_state
+    return prev_loss, prev_acc, final_state

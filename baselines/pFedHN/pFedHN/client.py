@@ -33,7 +33,18 @@ class FlowerClient(fl.client.NumPyClient):
         net (CNNTarget): Target neural network model.
     """
 
-    def __init__(self, cid, trainloader, testloader,valloader, cfg,local_layers,local_optims,local) -> None:
+    # pylint: disable=too-many-arguments
+    def __init__(
+        self,
+        cid,
+        trainloader,
+        testloader,
+        valloader,
+        cfg,
+        local_layers,
+        local_optims,
+        local,
+    ) -> None:
         super().__init__()
 
         self.cid = cid
@@ -88,7 +99,7 @@ class FlowerClient(fl.client.NumPyClient):
         """
         inner_state = self.set_parameters(parameters)
 
-        test_loss,test_acc,final_state = train(
+        test_loss, test_acc, final_state = train(
             self.net,
             self.trainloader,
             self.testloader,
@@ -110,9 +121,23 @@ class FlowerClient(fl.client.NumPyClient):
 
         delta_theta = [val.cpu().numpy() for _, val in delta_theta.items()]
 
-        return delta_theta, len(self.trainloader), {"test_loss":test_loss,"test_acc":test_acc}
+        return (
+            delta_theta,
+            len(self.trainloader),
+            {"test_loss": test_loss, "test_acc": test_acc},
+        )
 
-def generate_client_fn(trainloaders, testloaders, valloaders,config,local_layers,local_optims,local=False):
+
+# pylint: disable=too-many-arguments
+def generate_client_fn(
+    trainloaders,
+    testloaders,
+    valloaders,
+    config,
+    local_layers,
+    local_optims,
+    local=False,
+):
     """Generate a function which returns a new FlowerClient.
 
     Args:
@@ -126,6 +151,15 @@ def generate_client_fn(trainloaders, testloaders, valloaders,config,local_layers
     """
 
     def client_fn(cid: str):
-        return FlowerClient(cid, trainloaders, testloaders,valloaders,config,local_layers,local_optims,local)
+        return FlowerClient(
+            cid,
+            trainloaders,
+            testloaders,
+            valloaders,
+            config,
+            local_layers,
+            local_optims,
+            local,
+        )
 
     return client_fn

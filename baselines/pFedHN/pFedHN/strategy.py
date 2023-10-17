@@ -1,10 +1,8 @@
 """Strategy of the Federated Learning."""
 
-from collections import OrderedDict, defaultdict
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import flwr as fl
-import torch
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -13,15 +11,11 @@ from flwr.common import (
     NDArrays,
     Parameters,
     Scalar,
-    ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
-from pFedHN.models import CNNHyper
-
-import numpy as np
 
 # pylint: disable=invalid-name
 # pylint: disable=too-many-instance-attributes
@@ -54,7 +48,6 @@ class pFedHN(fl.server.strategy.Strategy):
         self.accept_failures = accept_failures
         self.initial_parameters = initial_parameters
         self.evaluate_fn = evaluate_fn
-        self.results = defaultdict(list)
 
     def __repr__(self) -> str:
         """Return the strategy name."""
@@ -75,11 +68,14 @@ class pFedHN(fl.server.strategy.Strategy):
 
     def num_evaluate_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Use a fraction of available clients for evaluation."""
-        num_clients = int(num_available_clients * self.fraction_evaluate)
+        int(num_available_clients * self.fraction_evaluate)
         return min(1, num_available_clients), self.min_available_clients
 
     def configure_fit(
-        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+        self,
+        server_round: int,
+        parameters: Parameters,
+        client_manager: ClientManager,
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
         sample_size, min_num_clients = self.num_fit_clients(
@@ -92,7 +88,7 @@ class pFedHN(fl.server.strategy.Strategy):
         )
 
         fit_configurations = []
-        for _idx, client in enumerate(clients):            
+        for _idx, client in enumerate(clients):
             fit_configurations.append((client, FitIns(parameters, {})))
 
         return fit_configurations
@@ -110,7 +106,7 @@ class pFedHN(fl.server.strategy.Strategy):
         test_loss = fit_res.metrics["test_loss"]
         test_acc = fit_res.metrics["test_acc"]
 
-        return delta_theta, {"test_loss":test_loss,"test_acc":test_acc}
+        return delta_theta, {"test_loss": test_loss, "test_acc": test_acc}
 
     def configure_evaluate(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -125,7 +121,6 @@ class pFedHN(fl.server.strategy.Strategy):
         failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation metrics."""
-
         if not results:
             return None, {}
         return None, {}
