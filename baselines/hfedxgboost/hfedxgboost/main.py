@@ -8,7 +8,6 @@ from typing import Dict, Union
 
 import flwr as fl
 import hydra
-import omegaconf
 import torch
 from flwr.common import Scalar
 from flwr.server.app import ServerConfig
@@ -167,12 +166,9 @@ def main(cfg: DictConfig) -> None:
             writer.write_res("results.csv")
 
         if cfg.use_wandb:
-            omegaconf.OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True)
             group_key = f"{cfg.dataset.dataset_name}"
-            with wandb.init(**cfg.wandb.setup, group=group_key):
-                run_fed(cfg)
-        else:
-            run_fed(cfg)
+            wandb.init(**cfg.wandb.setup, group=group_key)
+        run_fed(cfg)
 
 
 if __name__ == "__main__":
