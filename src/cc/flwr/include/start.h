@@ -16,9 +16,9 @@
 #ifndef START_H
 #define START_H
 #pragma once
-#include <grpcpp/grpcpp.h>
 #include "client.h"
 #include "message_handler.h"
+#include <grpcpp/grpcpp.h>
 using flwr::proto::ClientMessage;
 using flwr::proto::FlowerService;
 using flwr::proto::ServerMessage;
@@ -27,7 +27,7 @@ using grpc::ClientContext;
 using grpc::ClientReaderWriter;
 using grpc::Status;
 
-#define GRPC_MAX_MESSAGE_LENGTH 536870912  //  == 512 * 1024 * 1024
+#define GRPC_MAX_MESSAGE_LENGTH 536870912 //  == 512 * 1024 * 1024
 
 /**
  * @brief Start a C++ Flower Client which connects to a gRPC server
@@ -52,9 +52,9 @@ using grpc::Status;
  */
 
 class start {
- public:
-  static void start_client(std::string server_address,
-                    flwr_local::Client* client,
-                    int grpc_max_message_length = GRPC_MAX_MESSAGE_LENGTH);
+public:
+  static void
+  start_client(std::string server_address, flwr_local::Client *client,
+               int grpc_max_message_length = GRPC_MAX_MESSAGE_LENGTH);
 };
 #endif

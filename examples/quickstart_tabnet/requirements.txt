@@ -1,4 +1,0 @@
-flwr~=1.4.0
-tabnet~=0.1.6
-tensorflow~=2.12.0
-tensorflow_datasets~=4.9.2

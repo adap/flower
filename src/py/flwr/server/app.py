@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -282,8 +282,7 @@ def run_fleet_api() -> None:
     # Start Fleet API
     if args.fleet_api_type == TRANSPORT_TYPE_REST:
         if (
-            importlib.util.find_spec("fastapi")
-            and importlib.util.find_spec("requests")
+            importlib.util.find_spec("requests")
             and importlib.util.find_spec("starlette")
             and importlib.util.find_spec("uvicorn")
         ) is None:
@@ -376,8 +375,7 @@ def run_server() -> None:
     # Start Fleet API
     if args.fleet_api_type == TRANSPORT_TYPE_REST:
         if (
-            importlib.util.find_spec("fastapi")
-            and importlib.util.find_spec("requests")
+            importlib.util.find_spec("requests")
             and importlib.util.find_spec("starlette")
             and importlib.util.find_spec("uvicorn")
         ) is None:

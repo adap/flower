@@ -1,0 +1,29 @@
+name: "bootstrap"
+description: "Bootstrap Python environment (install and configure Python version and build tools)"
+inputs:
+  python-version:
+    description: "Version range or exact version of Python or PyPy to use, using SemVer's version range syntax."
+    default: 3.8
+  pip-version: 
+    description: "Version of pip to be installed using pip"
+    default: 23.1.2
+  setuptools-version:
+    description: "Version of setuptools to be installed using pip"
+    default: 68.0.0
+  poetry-version:
+    description: "Version of poetry to be installed using pip"
+    default: 1.5.1
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ inputs.python-version }}
+    - name: Install build tools
+      run: |
+        python -m pip install -U pip==${{ inputs.pip-version }}
+        python -m pip install -U setuptools==${{ inputs.setuptools-version }}
+        python -m pip install -U poetry==${{ inputs.poetry-version }}
+        python -m poetry config virtualenvs.create false
+      shell: bash

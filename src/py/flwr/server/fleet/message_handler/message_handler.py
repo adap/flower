@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,14 +19,40 @@ from typing import List, Optional
 from uuid import UUID
 
 from flwr.proto.fleet_pb2 import (
+    CreateNodeRequest,
+    CreateNodeResponse,
+    DeleteNodeRequest,
+    DeleteNodeResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
     PushTaskResRequest,
     PushTaskResResponse,
     Reconnect,
 )
+from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 from flwr.server.state import State
+
+
+def create_node(
+    request: CreateNodeRequest,  # pylint: disable=unused-argument
+    state: State,
+) -> CreateNodeResponse:
+    """."""
+    # Create node
+    node_id = state.create_node()
+    return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))
+
+
+def delete_node(request: DeleteNodeRequest, state: State) -> DeleteNodeResponse:
+    """."""
+    # Validate node_id
+    if request.node.anonymous or request.node.node_id <= 0:
+        return DeleteNodeResponse()
+
+    # Update state
+    state.delete_node(node_id=request.node.node_id)
+    return DeleteNodeResponse()
 
 
 def pull_task_ins(request: PullTaskInsRequest, state: State) -> PullTaskInsResponse:

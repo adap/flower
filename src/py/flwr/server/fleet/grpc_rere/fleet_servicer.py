@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,6 +22,10 @@ import grpc
 from flwr.common.logger import log
 from flwr.proto import fleet_pb2_grpc
 from flwr.proto.fleet_pb2 import (
+    CreateNodeRequest,
+    CreateNodeResponse,
+    DeleteNodeRequest,
+    DeleteNodeResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
     PushTaskResRequest,
@@ -36,6 +40,26 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
 
     def __init__(self, state: State) -> None:
         self.state = state
+
+    def CreateNode(
+        self, request: CreateNodeRequest, context: grpc.ServicerContext
+    ) -> CreateNodeResponse:
+        """."""
+        log(INFO, "FleetServicer.CreateNode")
+        return message_handler.create_node(
+            request=request,
+            state=self.state,
+        )
+
+    def DeleteNode(
+        self, request: DeleteNodeRequest, context: grpc.ServicerContext
+    ) -> DeleteNodeResponse:
+        """."""
+        log(INFO, "FleetServicer.DeleteNode")
+        return message_handler.delete_node(
+            request=request,
+            state=self.state,
+        )
 
     def PullTaskIns(
         self, request: PullTaskInsRequest, context: grpc.ServicerContext
