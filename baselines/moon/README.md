@@ -10,11 +10,11 @@ dataset: [CIFAR-10, CIFAR-100]
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
 
-****Paper:**** : [arxiv.org/abs/2103.16257](https://arxiv.org/abs/2103.16257)
+****Paper:**** [arxiv.org/abs/2103.16257](https://arxiv.org/abs/2103.16257)
 
-****Authors:**** :Qinbin Li, Bingsheng He, Dawn Song
+****Authors:**** Qinbin Li, Bingsheng He, Dawn Song
 
-****Abstract:**** :Federated learning enables multiple parties to collaboratively train a machine learning model without communicating their local data. A key challenge in federated learning is to handle the heterogeneity of local data distribution across parties. Although many studies have been proposed to address this challenge, we find that they fail to achieve high performance in image datasets with deep learning models. In this paper, we propose MOON: modelcontrastive federated learning. MOON is a simple and effective federated learning framework. The key idea of MOON is to utilize the similarity between model representations to correct the local training of individual parties, i.e., conducting contrastive learning in model-level. Our extensive experiments show that MOON significantly outperforms the other state-of-the-art federated learning algorithms on various image classification tasks.
+****Abstract:**** Federated learning enables multiple parties to collaboratively train a machine learning model without communicating their local data. A key challenge in federated learning is to handle the heterogeneity of local data distribution across parties. Although many studies have been proposed to address this challenge, we find that they fail to achieve high performance in image datasets with deep learning models. In this paper, we propose MOON: modelcontrastive federated learning. MOON is a simple and effective federated learning framework. The key idea of MOON is to utilize the similarity between model representations to correct the local training of individual parties, i.e., conducting contrastive learning in model-level. Our extensive experiments show that MOON significantly outperforms the other state-of-the-art federated learning algorithms on various image classification tasks.
 
 
 
@@ -120,17 +120,22 @@ For CIFAR-10 with FedProx, the accuracy after running 100 rounds is 0.6852 (see 
 You can find the curve comparing MOON and FedProx on CIFAR-10 and CIFAR-100 below.
 
 
-<img alt="CIFAR-10" src="_static/cifar10_moon_fedprox.png" width="400"/> <img alt="CIFAR-100" src="_static/cifar100_moon_fedprox.png" width="400"/>
+<img alt="CIFAR-10" src="_static/cifar10_moon_fedprox.png" width="500"/> <img alt="CIFAR-100" src="_static/cifar100_moon_fedprox.png" width="500"/>
 
 
 You can tune the hyperparameter `mu` for both MOON and FedProx by changing the configuration file in `conf`.
 
-You can also run the experiments in Figure 8 of the paper. To run MOON on CIFAR-100 with 50 clients (Figure 8(a) of the paper):
+### Figure 8(a)
+You can run the experiments in Figure 8 of the paper. To run MOON on CIFAR-100 with 50 clients (Figure 8(a) of the paper):
 ```bash
-python -m moon.main cifar100_50clients
+python -m moon.main --config-name cifar100_50clients
 ```
+
+You can find the curve presenting MOON (\mu=10) below.
+
+<img alt="CIFAR-100" src="_static/cifar100_50clients_moon.png" width="500"/>
 
 To run MOON on CIFAR-100 with 100 clients (Figure 8(b) of the paper):
 ```bash
-python -m moon.main cifar100_100clients
+python -m moon.main --config-name cifar100_100clients
 ```
