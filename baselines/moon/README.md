@@ -77,7 +77,6 @@ poetry install
 
 # activate the environment
 poetry shell
-
 ```
 
 
