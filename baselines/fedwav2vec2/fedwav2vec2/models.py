@@ -34,7 +34,7 @@ def int_model(  # pylint: disable=too-many-arguments,too-many-locals
     # Load hyperparameters file with command-line overrides
 
     if cid == 19999:
-        save_path = save_path +"server"
+        save_path = save_path + "server"
     else:
         save_path = save_path + "/client_" + str(cid)
 
@@ -45,13 +45,13 @@ def int_model(  # pylint: disable=too-many-arguments,too-many-locals
             "number_of_epochs": 1,
             "test_batch_size": 4,
             "device": config.device,
-            "wav2vec_output": config.huggingface_model_save_path
+            "wav2vec_output": config.huggingface_model_save_path,
         }
 
     else:
         overrides = {
-        "output_folder": save_path,
-        "wav2vec_output": config.huggingface_model_save_path
+            "output_folder": save_path,
+            "wav2vec_output": config.huggingface_model_save_path,
         }
 
     label_path_ = config.label_path

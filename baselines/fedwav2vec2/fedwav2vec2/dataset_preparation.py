@@ -79,9 +79,9 @@ def _delete_file(filename):
 
 def _csv_path_audio(data_path_base: str, extract_path: str):
     """Change the path corespond to your actual path."""
-    for subdir, dirs, files in os.walk("./data"):
+    for subdir, _dirs, files in os.walk("./data"):
         for file in files:
-            if file.endswith('.csv'):
+            if file.endswith(".csv"):
                 if "client" in subdir:
                     path = path = os.path.join(extract_path, "legacy/train/sph")
                 else:
@@ -91,9 +91,9 @@ def _csv_path_audio(data_path_base: str, extract_path: str):
                         path = os.path.join(extract_path, "legacy/dev/sph")
                     else:
                         path = os.path.join(extract_path, "legacy/test/sph")
-                df = pd.read_csv(os.path.join(subdir,file))
+                df = pd.read_csv(os.path.join(subdir, file))
                 df["wav"] = df["wav"].str.replace("path", path)
-                df.to_csv(os.path.join(subdir,file), index = False)
+                df.to_csv(os.path.join(subdir, file), index=False)
 
 
 @hydra.main(config_path="./conf", config_name="base", version_base=None)
