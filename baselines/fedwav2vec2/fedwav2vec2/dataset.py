@@ -84,12 +84,9 @@ def dataio_prepare(hparams):
     @sb.utils.data_pipeline.provides("sig")
     def audio_pipeline(wav, start_seg, end_seg):
         info = torchaudio.info(wav)
-        if end_seg != 0.002:
-            start = int(float(start_seg) * hparams["sample_rate"])
-            stop = int(float(end_seg) * hparams["sample_rate"])
-            speech_segment = {"file": wav, "start": start, "stop": stop}
-        else:
-            speech_segment = {"file": wav}
+        start = int(float(start_seg) * hparams["sample_rate"])
+        stop = int(float(end_seg) * hparams["sample_rate"])
+        speech_segment = {"file": wav, "start": start, "stop": stop}
         sig = sb.dataio.dataio.read_audio(speech_segment)
         # resample to correct 16Hz if different or else remain the same
         resampled = torchaudio.transforms.Resample(

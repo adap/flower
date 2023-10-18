@@ -32,7 +32,12 @@ def int_model(  # pylint: disable=too-many-arguments,too-many-locals
     the correct path for the corresponding clients, and creating the model.
     """
     # Load hyperparameters file with command-line overrides
-    save_path = save_path + "/client_" + str(cid)
+
+    if cid == 19999:
+        save_path = save_path +"server"
+    else:
+        save_path = save_path + "/client_" + str(cid)
+
     # Override with FLOWER PARAMS
     if evaluate:
         overrides = {
@@ -40,10 +45,14 @@ def int_model(  # pylint: disable=too-many-arguments,too-many-locals
             "number_of_epochs": 1,
             "test_batch_size": 4,
             "device": config.device,
+            "wav2vec_output": config.huggingface_model_save_path
         }
 
     else:
-        overrides = {"output_folder": save_path}
+        overrides = {
+        "output_folder": save_path,
+        "wav2vec_output": config.huggingface_model_save_path
+        }
 
     label_path_ = config.label_path
     if label_path_ is None:
@@ -74,6 +83,8 @@ def int_model(  # pylint: disable=too-many-arguments,too-many-locals
     params["valid_csv"] = params["data_folder"] + "/ted_dev.csv"
     params["test_csv"] = params["data_folder"] + "/ted_test.csv"
 
+    if int(cid) < 1341:
+        params["train_csv"] = params["data_folder"] + "/ted_train_wo5.csv"
     params["label_encoder"] = label_path_
 
     # Create experiment directory
