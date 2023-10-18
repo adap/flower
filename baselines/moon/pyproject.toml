@@ -5,7 +5,7 @@ build-backend = "poetry.masonry.api"
 [tool.poetry]
 name = "moon" # <----- Ensure it matches the name of your baseline directory containing all the source code
 version = "1.0.0"
-description = "Flower Baselines - Model-Contrastive Federated Learning"
+description = "Model-Contrastive Federated Learning"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.dev>", "Qinbin Li <liqinbin1998@gmail.com>"]
 readme = "README.md"
@@ -82,7 +82,7 @@ strict = false
 plugins = "numpy.typing.mypy_plugin"
 
 [tool.pylint."MESSAGES CONTROL"]
-disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias,E1101"
+disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
 good-names = "i,j,k,_,x,y,X,Y,K,N,X_train,X_test,fc,l1,l2,l3,h,lr,mu"
 max-args = 10
 max-attributes = 15
@@ -90,6 +90,9 @@ max-locals = 36
 max-branches = 20
 max-statements = 55
 signature-mutators="hydra.main.main"
+
+[tool.pylint.typecheck]
+generated-members="numpy.*, torch.*, tensorflow.*"
 
 [[tool.mypy.overrides]]
 module = [
