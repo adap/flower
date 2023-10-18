@@ -9,11 +9,11 @@ parameters:
   use_wandb: 
     value: True
   dataset:
-    value: [abalone]
+    value: [cpusmall]
   clients:
-    value: abalone_5_clients
+    value: cpusmall_5_clients
   clients.n_estimators_client: 
-    values: [5,10,25]
+    values: [10,25,50,100,150,200,250]
   clients.num_iterations:
     values: [100,500]
   clients.xgb.max_depth: 
