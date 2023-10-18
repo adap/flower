@@ -1,37 +1,37 @@
 ---
-title: DepthFL:Depthwise Federated Learning for Heterogeneous Clients
+title: DepthFL: Depthwise Federated Learning for Heterogeneous Clients
 url: https://openreview.net/forum?id=pf8RIZTMU58
 labels: [image classification, system heterogeneity, cross-device, knowledge distillation]
-dataset: [CIFAR100]
+dataset: [CIFAR-100]
 ---
 
 # DepthFL: Depthwise Federated Learning for Heterogeneous Clients
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
-****Paper:**** : [openreview.net/forum?id=pf8RIZTMU58](https://openreview.net/forum?id=pf8RIZTMU58)
+**Paper:** [openreview.net/forum?id=pf8RIZTMU58](https://openreview.net/forum?id=pf8RIZTMU58)
 
-****Authors:**** : Minjae Kim, Sangyoon Yu, Suhyun Kim, Soo-Mook Moon
+**Authors:** Minjae Kim, Sangyoon Yu, Suhyun Kim, Soo-Mook Moon
 
-****Abstract:**** : Federated learning is for training a global model without collecting private local data from clients. As they repeatedly need to upload locally-updated weights or gradients instead, clients require both computation and communication resources enough to participate in learning, but in reality their resources are heterogeneous. To enable resource-constrained clients to train smaller local models, width scaling techniques have been used, which reduces the channels of a global model. Unfortunately, width scaling suffers from heterogeneity of local models when averaging them, leading to a lower accuracy than when simply excluding resource-constrained clients from training. This paper proposes a new approach based on depth scaling called DepthFL. DepthFL defines local models of different depths by pruning the deepest layers off the global model, and allocates them to clients depending on their available resources. Since many clients do not have enough resources to train deep local models, this would make deep layers partially-trained with insufficient data, unlike shallow layers that are fully trained. DepthFL alleviates this problem by mutual self-distillation of knowledge among the classifiers of various depths within a local model. Our experiments show that depth-scaled local models build a global model better than width-scaled ones, and that self-distillation is highly effective in training data-insufficient deep layers.
+**Abstract:** Federated learning is for training a global model without collecting private local data from clients. As they repeatedly need to upload locally-updated weights or gradients instead, clients require both computation and communication resources enough to participate in learning, but in reality their resources are heterogeneous. To enable resource-constrained clients to train smaller local models, width scaling techniques have been used, which reduces the channels of a global model. Unfortunately, width scaling suffers from heterogeneity of local models when averaging them, leading to a lower accuracy than when simply excluding resource-constrained clients from training. This paper proposes a new approach based on depth scaling called DepthFL. DepthFL defines local models of different depths by pruning the deepest layers off the global model, and allocates them to clients depending on their available resources. Since many clients do not have enough resources to train deep local models, this would make deep layers partially-trained with insufficient data, unlike shallow layers that are fully trained. DepthFL alleviates this problem by mutual self-distillation of knowledge among the classifiers of various depths within a local model. Our experiments show that depth-scaled local models build a global model better than width-scaled ones, and that self-distillation is highly effective in training data-insufficient deep layers.
 
 
 ## About this baseline
 
-****What’s implemented:**** The code in this directory replicates the experiments in DepthFL: Depthwise Federated Learning for Heterogeneous Clients (Kim et al., 2023) for CIFAR100, which proposed the DepthFL algorithm. Concretely, it replicates the results for CIFAR100 dataset in Table 2,3 and 4.
+**What’s implemented:** The code in this directory replicates the experiments in DepthFL: Depthwise Federated Learning for Heterogeneous Clients (Kim et al., 2023) for CIFAR100, which proposed the DepthFL algorithm. Concretely, it replicates the results for CIFAR100 dataset in Table 2, 3 and 4.
 
-****Datasets:**** CIFAR100 from PyTorch's Torchvision
+**Datasets:** CIFAR100 from PyTorch's Torchvision
 
-****Hardware Setup:**** These experiments were run on a server with Nvidia 3090 GPUs. Any machine with 1x 8GB GPU or more would be able to run it in a reasonable amount of time. With the default settings, clients make use of 1.3GB of VRAM. Lower `num_gpus` in `client_resources` to train more clients in parallel on your GPU(s). 
+**Hardware Setup:** These experiments were run on a server with Nvidia 3090 GPUs. Any machine with 1x 8GB GPU or more would be able to run it in a reasonable amount of time. With the default settings, clients make use of 1.3GB of VRAM. Lower `num_gpus` in `client_resources` to train more clients in parallel on your GPU(s). 
 
-****Contributors:**** Minjae Kim
+**Contributors:** Minjae Kim
 
 
 ## Experimental Setup
 
-****Task:**** Image Classification
+**Task:** Image Classification
 
-****Model:**** ResNet18
+**Model:** ResNet18
 
 **Dataset:** This baseline only includes the CIFAR100 dataset. By default it will be partitioned into 100 clients following IID distribution. The settings are as follow:
 
@@ -40,7 +40,7 @@ dataset: [CIFAR100]
 | CIFAR100 | 100 | 100 | IID or Non-IID |
 
 **Training Hyperparameters:**
-The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python main.py` directly)
+The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python -m depthfl.main` directly)
 
 | Description | Default Value |
 | ----------- | ----- |
@@ -69,10 +69,10 @@ pyenv local 3.10.6
 # Tell poetry to use python 3.10
 poetry env use 3.10.6
 
-# install the base Poetry environment
+# Install the base Poetry environment
 poetry install
 
-# activate the environment
+# Activate the environment
 poetry shell
 ```
 
@@ -100,7 +100,7 @@ python -m depthfl.main --config-name="heterofl" exclusive_learning=true model_si
 
 ### Stateful clients comment
 
-To implement `feddyn`, stateful clients that store prev_grads information are needed. Since flwr does not yet officially support stateful clients, it was implemented as a temporary measure by loading `prev_grads` from disk when creating a client, and then storing it again on disk after learning. Specifically, there are files that store the state of each client in the `prev_grads` folder.
+To implement `feddyn`, stateful clients that store prev_grads information are needed. Since flwr does not yet officially support stateful clients, it was implemented as a temporary measure by loading `prev_grads` from disk when creating a client, and then storing it again on disk after learning. Specifically, there are files that store the state of each client in the `prev_grads` folder. When the strategy is instantiated (for both `FedDyn` and `HeteroFL`) the content of `prev_grads` is reset. 
 
 
 ## Expected Results
@@ -108,14 +108,14 @@ To implement `feddyn`, stateful clients that store prev_grads information are ne
 With the following command we run DepthFL (FedDyn / FedAvg), InclusiveFL, and HeteroFL to replicate the results of table 2,3,4 in DepthFL paper. Tables 2, 3, and 4 may contain results from the same experiment in multiple tables. 
 
 ```bash
-# table 2
+## table 2
 python -m depthfl.main # table 2 & 4
 python -m depthfl.main exclusive_learning=true model_size=1
 python -m depthfl.main exclusive_learning=true model_size=2
 python -m depthfl.main exclusive_learning=true model_size=3
 python -m depthfl.main exclusive_learning=true model_size=4
 
-# table 2 & 3
+## table 2 & 3
 
 # HeteroFL & corresponding excluive learning
 python -m depthfl.main --config-name="heterofl" 
@@ -130,10 +130,10 @@ python -m depthfl.main fit_config.feddyn=false fit_config.kd=false  exclusive_le
 python -m depthfl.main fit_config.feddyn=false fit_config.kd=false  exclusive_learning=true model_size=3
 python -m depthfl.main fit_config.feddyn=false fit_config.kd=false  exclusive_learning=true model_size=4
 
-# table 3
+## table 3
 python -m depthfl.main fit_config.feddyn=false fit_config.kd=false fit_config.extended=false
 
-# table 4
+## table 4
 python -m depthfl.main fit_config.kd=false
 python -m depthfl.main dataset_config.iid=false 
 python -m depthfl.main dataset_config.iid=false fit_config.kd=false
