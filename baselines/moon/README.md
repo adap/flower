@@ -106,9 +106,9 @@ python -m moon.main --config-name cifar100_fedprox
 
 ## Expected Results
 
-You can find the output log in `_static` directory. After running the above commands, you can see the accuracy list at the end of the ouput, which is the test accuracy of the global model. For example, in one running, for CIFAR-10 with MOON, the accuracy after running 100 rounds is 0.7071 (see `_static/cifar10_moon.log`). 
+You can find the output log in `_static` directory. After running the above commands, you can see the accuracy list at the end of the ouput, which is the test accuracy of the global model. For example, in one running, for CIFAR-10 with MOON, the accuracy after running 100 rounds is 0.7071 (see `_static/cifar10_moon_log.txt`). 
 
-For CIFAR-10 with FedProx, the accuracy after running 100 rounds is 0.6852 (see `_static/cifar10_fedprox.log`). For CIFAR100 with MOON, the accuracy after running 100 rounds is 0.6636 (see`_static/cifar100_moon.log`). For CIFAR100 with FedProx, the accuracy after running 100 rounds is 0.6494. The results are summarized below:
+For CIFAR-10 with FedProx, the accuracy after running 100 rounds is 0.6852 (see `_static/cifar10_fedprox_log.txt`). For CIFAR100 with MOON, the accuracy after running 100 rounds is 0.6636 (see`_static/cifar100_moon_log.txt`). For CIFAR100 with FedProx, the accuracy after running 100 rounds is 0.6494. The results are summarized below:
 
 
 |  | CIFAR-10 | CIFAR-100 |
