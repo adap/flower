@@ -244,8 +244,8 @@ class FL_Client(fl.client.Client):
         batch_size = fit_params.config["batch_size"]
 
         # set parmeters
-        self.net.set_weights(parameters_to_ndarrays(fit_params.parameters[0]))
-        aggregated_trees = fit_params.parameters[1]
+        self.net.set_weights(parameters_to_ndarrays(fit_params.parameters[0]))  # type: ignore # noqa: E501 # pylint: disable=line-too-long
+        aggregated_trees = fit_params.parameters[1]  # type: ignore # noqa: E501 # pylint: disable=line-too-long
 
         if isinstance(aggregated_trees, list):
             print("Client " + self.cid + ": recieved", len(aggregated_trees), "trees")

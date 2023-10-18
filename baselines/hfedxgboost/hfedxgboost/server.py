@@ -145,7 +145,7 @@ class FL_Server(fl.server.Server):
         # the tests is convinced that aggregated_parm is a Parameters | None
         # which is not true as aggregated_parm is actually List[Union[Parameters,None]]
         if aggregated_parm:
-            CNN_aggregated, trees_aggregated = aggregated_parm[0], aggregated_parm[1]
+            CNN_aggregated, trees_aggregated = aggregated_parm[0], aggregated_parm[1]  # type: ignore # noqa: E501 # pylint: disable=line-too-long
         else:
             raise Exception("aggregated parameters is None")
 
@@ -339,7 +339,7 @@ class FL_Server(fl.server.Server):
         get_parameters_res_tree = random_client.get_parameters(ins=ins, timeout=timeout)
         log(INFO, "Received initial parameters from one random client")
 
-        return (get_parameters_res_tree[0].parameters, get_parameters_res_tree[1])
+        return (get_parameters_res_tree[0].parameters, get_parameters_res_tree[1])  # type: ignore # noqa: E501 # pylint: disable=line-too-long
 
 
 def serverside_eval(

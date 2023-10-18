@@ -167,11 +167,9 @@ def main(cfg: DictConfig) -> None:
             writer.write_res("results.csv")
 
         if cfg.use_wandb:
-            wandb_cfg = omegaconf.OmegaConf.to_container(
-                cfg, resolve=True, throw_on_missing=True
-            )
+            omegaconf.OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True)
             group_key = f"{cfg.dataset.dataset_name}"
-            with wandb.init(**cfg.wandb.setup, group=group_key, config=wandb_cfg):
+            with wandb.init(**cfg.wandb.setup, group=group_key):
                 run_fed(cfg)
         else:
             run_fed(cfg)
