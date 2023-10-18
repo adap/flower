@@ -111,7 +111,7 @@ def main(cfg: DictConfig) -> None:
     # remove saved models
     if cfg.alg == "moon":
         shutil.rmtree(cfg.model.dir)
-        
+
     # 6. Save your results
     # Here you can save the `history` returned by the simulation and include
     # also other buffers, statistics, info needed to be saved in order to later
