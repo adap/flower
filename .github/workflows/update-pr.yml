@@ -11,10 +11,9 @@ jobs:
       - name: Automatically update mergeable PRs
         uses: adRise/update-pr-branch@v0.7.0
         with:
-          token: ${{ secrets.ACTION_USER_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           base: 'main'
           required_approval_count: 1
           require_passed_checks: true
-          require_auto_merge_enabled: true
           sort: 'created'
           direction: 'desc'
