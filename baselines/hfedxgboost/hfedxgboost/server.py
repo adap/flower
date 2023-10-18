@@ -88,27 +88,11 @@ class FL_Server(fl.server.Server):
         self,
         server_round: int,
         timeout: Optional[float],
-    ) -> Optional[
-        Tuple[
-            Optional[
-                Tuple[
-                    Parameters,
-                    Union[
-                        Tuple[XGBClassifier, int],
-                        Tuple[XGBRegressor, int],
-                        List[
-                            Union[Tuple[XGBClassifier, int], Tuple[XGBRegressor, int]]
-                        ],
-                    ],
-                ]
-            ],
-            Dict[str, Scalar],
-            FitResultsAndFailures,
-        ]
-    ]:
+    ):
         """Run a round of fitting on the server side.
 
-        Parmeters:
+        Parameters
+        ----------
             self: The instance of the class.
             server_round (int): The round of server communication.
             timeout (float, optional): Maximum time to wait for client responses.
@@ -154,11 +138,16 @@ class FL_Server(fl.server.Server):
             len(failures),
         )
 
-        metrics_aggregated: Dict[str, Scalar]
-        aggregated, metrics_aggregated = self.strategy.aggregate_fit(
+        # metrics_aggregated: Dict[str, Scalar]
+        aggregated_parm, metrics_aggregated = self.strategy.aggregate_fit(
             server_round, results, failures
         )
-        CNN_aggregated, trees_aggregated = aggregated[0], aggregated[1]
+        # the tests is convinced that aggregated_parm is a Parameters | None
+        # which is not true as aggregated_parm is actually List[Union[Parameters,None]]
+        if aggregated_parm:
+            CNN_aggregated, trees_aggregated = aggregated_parm[0], aggregated_parm[1]
+        else:
+            raise Exception("aggregated parameters is None")
 
         if isinstance(trees_aggregated, list):
             print("Server side aggregated", len(trees_aggregated), "trees.")
@@ -261,7 +250,7 @@ class FL_Server(fl.server.Server):
                     history.add_metrics_distributed(
                         server_round=current_round, metrics=evaluate_metrics_fed
                     )
-            # Stop if no progress is happenning
+            # Stop if no progress is happening
             if stop:
                 break
 
@@ -332,12 +321,11 @@ class FL_Server(fl.server.Server):
         loss_aggregated, metrics_aggregated = aggregated_result
         return loss_aggregated, metrics_aggregated, (results, failures)
 
-    def _get_initial_parameters(
-        self, timeout: Optional[float]
-    ) -> Tuple[Parameters, Union[Tuple[XGBClassifier, int], Tuple[XGBRegressor, int]]]:
+    def _get_initial_parameters(self, timeout: Optional[float]):
         """Get initial parameters from one of the available clients.
 
-        Parmeters:
+        Parameters
+        ----------
             timeout (float, optional): The time limit for the request in seconds.
             Defaults to None.
 

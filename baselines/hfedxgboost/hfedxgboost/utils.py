@@ -225,7 +225,9 @@ def clients_performance_on_local_data(
 
 
 def single_tree_prediction(
-    tree: Union[XGBClassifier, XGBRegressor], n_tree: int, dataset: NDArray
+    tree,
+    n_tree: int,
+    dataset: NDArray,
 ) -> Optional[NDArray]:
     """Perform a single tree prediction using the provided tree object on given dataset.
 
@@ -249,14 +251,14 @@ def single_tree_prediction(
         )
         return None
 
-    return tree.predict(  # type: ignore
+    return tree.predict(
         dataset, iteration_range=(n_tree, n_tree + 1), output_margin=True
     )
 
 
 def single_tree_preds_from_each_client(
     trainloader: DataLoader,
-    batch_size: int,
+    batch_size,
     client_tree_ensamples: Union[
         Tuple[XGBClassifier, int],
         Tuple[XGBRegressor, int],
@@ -297,7 +299,6 @@ def single_tree_preds_from_each_client(
     preds_from_all_trees_from_all_clients = np.zeros(
         (x_train.shape[0], client_num * n_estimators_client), dtype=np.float32
     )
-
     if isinstance(client_tree_ensamples, list) is False:
         temp_trees = [client_tree_ensamples[0]] * client_num
     elif isinstance(client_tree_ensamples, list):

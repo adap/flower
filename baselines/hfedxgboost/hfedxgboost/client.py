@@ -3,7 +3,7 @@
 Please overwrite `flwr.client.NumPyClient` or `flwr.client.Client` and create a function
 to instantiate your client.
 """
-from typing import Any, Tuple, Union
+from typing import Any, Tuple
 
 import flwr as fl
 import torch
@@ -14,7 +14,6 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
-    GetParametersIns,
     GetParametersRes,
     Status,
     ndarrays_to_parameters,
@@ -23,7 +22,6 @@ from flwr.common import (
 from torch.utils.data import DataLoader
 from torchmetrics import Accuracy, MeanSquaredError
 from tqdm import tqdm
-from xgboost import XGBClassifier, XGBRegressor
 
 from hfedxgboost.models import CNN, fit_XGBoost
 from hfedxgboost.utils import single_tree_preds_from_each_client
@@ -111,7 +109,7 @@ class FL_Client(fl.client.Client):
         self,
         net: CNN,
         trainloader: DataLoader,
-        num_iterations: int,
+        num_iterations,
         log_progress: bool = True,
     ) -> Tuple[float, float, int]:
         """Train CNN model on a given dataset(trainloader) for(num_iterations).
@@ -204,12 +202,7 @@ class FL_Client(fl.client.Client):
 
         return total_loss / n_samples, total_result / n_samples, n_samples
 
-    def get_parameters(
-        self, ins: GetParametersIns
-    ) -> Tuple[
-        GetParametersRes,
-        Union[Tuple[XGBClassifier, int], Tuple[XGBRegressor, int]],
-    ]:
+    def get_parameters(self, ins):
         """Get CNN net weights and the tree.
 
         Parameters
@@ -272,11 +265,13 @@ class FL_Client(fl.client.Client):
             self.n_estimators_client,
             self.client_num,
         )
-        # num_iterations = None special behaviour: train(...)
+        # num_iterations = None special behavior: train(...)
         # runs for a single epoch, however many updates it may be
         num_iterations = num_iterations or len(trainloader)
         # Train the model
-        print(f"Client {self.cid}: training for {num_iterations} iterations/updates")
+        print(
+            "Client", self.cid, ": training for", num_iterations, "iterations/updates"
+        )
         self.net.to(self.device)
         train_loss, train_result, num_examples = self.train(
             self.net,
