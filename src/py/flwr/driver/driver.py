@@ -152,6 +152,7 @@ class Driver:
     def get_nodes(self) -> List[Node]:
         """Get client IDs."""
         self._check_and_init_grpc_driver()
+
         # Call GrpcDriver method
         res = self.grpc_driver.get_nodes(GetNodesRequest(workload_id=self.workload_id))
         return list(res.nodes)
@@ -159,13 +160,16 @@ class Driver:
     def push_task_ins(self, task_ins_list: Iterable[TaskIns]) -> List[str]:
         """Schedule tasks."""
         self._check_and_init_grpc_driver()
+
         # Set workload_id
         for task_ins in task_ins_list:
             task_ins.workload_id = self.workload_id
+
         # Call GrpcDriver method
         res = self.grpc_driver.push_task_ins(
             PushTaskInsRequest(task_ins_list=task_ins_list)
         )
+
         # Cache received task_ids
         self.task_id_pool.update(res.task_ids)
         return list(res.task_ids)
@@ -176,9 +180,11 @@ class Driver:
         Retrieve all task results if `task_ids` is None.
         """
         self._check_and_init_grpc_driver()
+
         # Check if task_ids is None
         if task_ids is None:
             task_ids = list(self.task_id_pool)
+
         # Call GrpcDriver method
         res = self.grpc_driver.pull_task_res(
             PullTaskResRequest(node=self.node, task_ids=task_ids)
