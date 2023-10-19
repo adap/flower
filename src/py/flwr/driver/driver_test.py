@@ -24,7 +24,7 @@ from flwr.proto.driver_pb2 import (
     PullTaskResRequest,
     PushTaskInsRequest,
 )
-from flwr.proto.task_pb2 import TaskIns
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 
 
 class TestDriver(unittest.TestCase):
@@ -83,11 +83,10 @@ class TestDriver(unittest.TestCase):
         args, kwargs = self.mock_grpc_driver.get_nodes.call_args
 
         # Assert
-        assert len(args) == 1
-        assert len(kwargs) == 0
-        req = args[0]
-        assert isinstance(req, GetNodesRequest)
-        self.assertEqual(req.workload_id, 61016)
+        self.assertEqual(len(args), 1)
+        self.assertEqual(len(kwargs), 0)
+        self.assertIsInstance(args[0], GetNodesRequest)
+        self.assertEqual(args[0].workload_id, 61016)
         self.assertEqual(nodes, mock_response.nodes)
 
     def test_push_task_ins(self) -> None:
@@ -104,56 +103,62 @@ class TestDriver(unittest.TestCase):
         args, kwargs = self.mock_grpc_driver.push_task_ins.call_args
 
         # Assert
-        assert len(args) == 1
-        assert len(kwargs) == 0
-        req = args[0]
-        assert isinstance(req, PushTaskInsRequest)
+        self.assertEqual(len(args), 1)
+        self.assertEqual(len(kwargs), 0)
+        self.assertIsInstance(args[0], PushTaskInsRequest)
         self.assertEqual(task_ids, mock_response.task_ids)
-        for task_ins in req.task_ins_list:
+        for task_ins in args[0].task_ins_list:
             self.assertEqual(task_ins.workload_id, 61016)
 
     def test_pull_task_res_with_given_task_ids(self) -> None:
         """Test pulling task results with specific task IDs."""
         # Prepare
         self.driver.workload_id = 61016
+        self.driver.task_id_pool = {"id1", "id2", "id3", "id4"}
         mock_response = Mock()
-        mock_response.task_res_list = [Mock(), Mock()]
+        mock_response.task_res_list = [
+            TaskRes(task=Task(ancestry=["id2"])),
+            TaskRes(task=Task(ancestry=["id3"])),
+        ]
         self.mock_grpc_driver.pull_task_res.return_value = mock_response
-        task_ids = ["id1", "id2"]
+        task_ids = ["id1", "id2", "id3"]
 
         # Execute
         task_res_list = self.driver.pull_task_res(task_ids)
         args, kwargs = self.mock_grpc_driver.pull_task_res.call_args
 
         # Assert
-        assert len(args) == 1
-        assert len(kwargs) == 0
-        req = args[0]
-        assert isinstance(req, PullTaskResRequest)
-        self.assertEqual(task_ids, req.task_ids)
+        self.assertEqual(len(args), 1)
+        self.assertEqual(len(kwargs), 0)
+        self.assertIsInstance(args[0], PullTaskResRequest)
+        self.assertEqual(args[0].task_ids, task_ids)
         self.assertEqual(task_res_list, mock_response.task_res_list)
+        self.assertEqual(self.driver.task_id_pool, {"id1", "id4"})
 
     def test_pull_task_res_without_given_task_ids(self) -> None:
         """Test pulling all task results when no task IDs are provided."""
         # Prepare
         self.driver.workload_id = 61016
         mock_response = Mock()
-        mock_response.task_res_list = [Mock(), Mock()]
+        mock_response.task_res_list = [
+            TaskRes(task=Task(ancestry=["id1"])),
+            TaskRes(task=Task(ancestry=["id2"])),
+        ]
         self.mock_grpc_driver.pull_task_res.return_value = mock_response
-        self.driver.task_id_pool = {"id1", "id2"}
-        task_ids = {"id1", "id2"}
+        self.driver.task_id_pool = {"id1", "id2", "id3"}
+        task_ids = {"id1", "id2", "id3"}
 
         # Execute
         task_res_list = self.driver.pull_task_res()
         args, kwargs = self.mock_grpc_driver.pull_task_res.call_args
 
         # Assert
-        assert len(args) == 1
-        assert len(kwargs) == 0
-        req = args[0]
-        assert isinstance(req, PullTaskResRequest)
-        self.assertEqual(task_ids, set(req.task_ids))
+        self.assertEqual(len(args), 1)
+        self.assertEqual(len(kwargs), 0)
+        self.assertIsInstance(args[0], PullTaskResRequest)
+        self.assertEqual(set(args[0].task_ids), task_ids)
         self.assertEqual(task_res_list, mock_response.task_res_list)
+        self.assertEqual(self.driver.task_id_pool, {"id3"})
 
     def test_del_with_initialized_driver(self) -> None:
         """Test cleanup behavior when Driver is initialized."""

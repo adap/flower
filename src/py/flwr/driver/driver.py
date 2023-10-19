@@ -179,15 +179,17 @@ class Driver:
         # Check if task_ids is None
         if task_ids is None:
             task_ids = list(self.task_id_pool)
-        self.task_id_pool.difference_update(task_ids)
         # Call GrpcDriver method
         res = self.grpc_driver.pull_task_res(
             PullTaskResRequest(node=self.node, task_ids=task_ids)
         )
+        self.task_id_pool.difference_update(
+            [task_res.task.ancestry[0] for task_res in res.task_res_list]
+        )
         return list(res.task_res_list)
 
     def __del__(self) -> None:
-        """."""
+        """Disconnect GrpcDriver if connected."""
         # Check if GrpcDriver is initialized
         if self.workload_id == 0:
             return
