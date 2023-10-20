@@ -85,7 +85,8 @@ def main(cfg: DictConfig) -> None:
 
     # 4. Define your strategy
     strategy = fl.server.strategy.FedAvg(
-        fraction_fit=cfg.fraction_fit, evaluate_fn=evaluate_fn
+        # Clients in MOON do not perform federated evaluation (see the client's evaluate())
+        fraction_fit=cfg.fraction_fit, fraction_evaluate=0.0, evaluate_fn=evaluate_fn
     )
     # 5. Start Simulation
     # history = fl.simulation.start_simulation(<arguments for simulation>)
