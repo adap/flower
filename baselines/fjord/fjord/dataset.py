@@ -146,7 +146,7 @@ def load_data(
     :return: The training and test sets.
     """
 
-    def seed_worker(worker_id):
+    def seed_worker(worker_id):  # pylint: disable=unused-argument
         worker_seed = torch.initial_seed() % 2**32
         np.random.seed(worker_seed)
         random.seed(worker_seed)
