@@ -380,8 +380,6 @@ def train_moon(
     device="cpu",
 ):
     """Training function for MOON."""
-    # net = nn.DataParallel(net)
-    # net.cuda()
     net.to(device)
     global_net.to(device)
     previous_net.to(device)
@@ -415,25 +413,29 @@ def train_moon(
             target.requires_grad = False
             target = target.long()
 
+            # pro1 is the representation by the current model (Line 14 of Algorithm 1)
             _, pro1, out = net(x)
+            # pro2 is the representation by the global model (Line 15 of Algorithm 1)
             _, pro2, _ = global_net(x)
-
+            # posi is the positive pair
             posi = cos(pro1, pro2)
             logits = posi.reshape(-1, 1)
 
             previous_net.to(device)
+            # pro 3 is the representation by the previous model (Line 16 of Algorithm 1)
             _, pro3, _ = previous_net(x)
+            # nega is the negative pair
             nega = cos(pro1, pro3)
             logits = torch.cat((logits, nega.reshape(-1, 1)), dim=1)
 
             previous_net.to("cpu")
-
             logits /= temperature
             labels = torch.zeros(x.size(0)).cuda().long()
-
+            # compute the model-contrastive loss (Line 17 of Algorithm 1)
             loss2 = mu * criterion(logits, labels)
-
+            # compute the cross-entropy loss (Line 13 of Algorithm 1)
             loss1 = criterion(out, target)
+            # compute the loss (Line 18 of Algorithm 1)
             loss = loss1 + loss2
 
             loss.backward()

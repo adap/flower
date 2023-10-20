@@ -71,7 +71,6 @@ class FlowerClient(fl.client.NumPyClient):
     ) -> Tuple[NDArrays, int, Dict]:
         """Implement distributed fit function for a given client."""
         self.set_parameters(parameters)
-        # if self.prev_net is None:
         prev_net = init_net(self.dataset, self.model, self.output_dim)
         if not os.path.exists(os.path.join(self.model_dir, str(self.net_id))):
             prev_net = copy.deepcopy(self.net)
