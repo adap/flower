@@ -1,6 +1,6 @@
 ---
 title: Federated Self-training for Semi-supervised Audio Recognition
-url: [dl.acm.org/doi/10.1145/3520128](https://dl.acm.org/doi/10.1145/3520128)
+url: https://dl.acm.org/doi/10.1145/3520128
 labels: [Audio Classification, Semi Supervised learning]
 dataset: [Ambient Context, Speech Commands]
 ---
@@ -9,25 +9,26 @@ dataset: [Ambient Context, Speech Commands]
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
-****Paper:**** :[dl.acm.org/doi/10.1145/3520128](https://dl.acm.org/doi/10.1145/3520128)
+****Paper:****  [dl.acm.org/doi/10.1145/3520128](https://dl.acm.org/doi/10.1145/3520128)
 
-****Authors:**** : Vasileios Tsouvalas, Aaqib Saeed, Tanir Özcelebi
+****Authors:**** Vasileios Tsouvalas, Aaqib Saeed, Tanir Özcelebi
 
-****Abstract:**** : Federated Learning is a distributed machine learning paradigm dealing with decentralized and personal datasets. Since data reside on devices such as smartphones and virtual assistants, labeling is entrusted to the clients or labels are extracted in an automated way. Specifically, in the case of audio data, acquiring semantic annotations can be prohibitively expensive and time-consuming. As a result, an abundance of audio data remains unlabeled and unexploited on users’ devices. Most existing federated learning approaches focus on supervised learning without harnessing the unlabeled data. In this work, we study the problem of semi-supervised learning of audio models via self-training in conjunction with federated learning. We propose FedSTAR to exploit large-scale on-device unlabeled data to improve the generalization of audio recognition models. We further demonstrate that self-supervised pre-trained models can accelerate the training of on-device models, significantly improving convergence within fewer training rounds. We conduct experiments on diverse public audio classification datasets and investigate the performance of our models under varying percentages of labeled and unlabeled data. Notably, we show that with as little as 3% labeled data available, FedSTAR on average can improve the recognition rate by 13.28% compared to the fully supervised federated model.
+****Abstract:**** Federated Learning is a distributed machine learning paradigm dealing with decentralized and personal datasets. Since data reside on devices such as smartphones and virtual assistants, labeling is entrusted to the clients or labels are extracted in an automated way. Specifically, in the case of audio data, acquiring semantic annotations can be prohibitively expensive and time-consuming. As a result, an abundance of audio data remains unlabeled and unexploited on users’ devices. Most existing federated learning approaches focus on supervised learning without harnessing the unlabeled data. In this work, we study the problem of semi-supervised learning of audio models via self-training in conjunction with federated learning. We propose FedSTAR to exploit large-scale on-device unlabeled data to improve the generalization of audio recognition models. We further demonstrate that self-supervised pre-trained models can accelerate the training of on-device models, significantly improving convergence within fewer training rounds. We conduct experiments on diverse public audio classification datasets and investigate the performance of our models under varying percentages of labeled and unlabeled data. Notably, we show that with as little as 3% labeled data available, FedSTAR on average can improve the recognition rate by 13.28% compared to the fully supervised federated model.
 
 
 ## About this baseline
 
-****What’s implemented:**** : The code is structured in such a way that all experiments for ambient context and speech commands can be derived.
+****What’s implemented:**** The code is structured in such a way that all experiments for ambient context and speech commands can be derived.
 
-****Datasets:**** : Ambient Context, Speech Commands
+****Datasets:**** Ambient Context, Speech Commands
 
-****Hardware Setup:**** : These experiments were run on a linux server with 56 CPU threads with 325 GB Ram with A10 GPU in it. Any machine with 8 CPU cores and 16 GB memory or more would be able to run it in a reasonable amount of time. Note: I have install tensorflow with GPU support but by default, the entire experiment runs on CPU-only mode. For cpu you need to replace value of gpus to None present in distribute_gpus function inside clients.py file.
+****Hardware Setup:**** These experiments were run on a linux server with 56 CPU threads with 325 GB Ram with A10 GPU in it. Any machine with 8 CPU cores and 16 GB memory or more would be able to run it in a reasonable amount of time. Note: I have install tensorflow with GPU support but by default, the entire experiment runs on CPU-only mode. For cpu you need to replace value of gpus to None present in distribute_gpus function inside clients.py file.
 
-****Contributors:****: Raj Parekh [GitHub](https://github.com/Raj-Parekh24), [Mail](rajparekhwc@gmail.com)
+****Contributors:**** Raj Parekh [GitHub](https://github.com/Raj-Parekh24), [Mail](rajparekhwc@gmail.com)
 
 
 ## Environment Setup
+```bash
 # Set python version
 pyenv local 3.10.6
 # Tell poetry to use python 3.10
@@ -36,13 +37,15 @@ poetry env use 3.10.6
 poetry install
 # Start the shell to activate your environment.
 poetry shell
-# Run dataset shell script
+# The below script will download the datasets and create a directory structure requir to run this experiment.
 . setup_datasets.sh
+```
 
 ## Running the Experiments
-###### python -m fedstar.server
-###### python -m fedstar.client
-
+```bash
+python -m fedstar.server
+python -m fedstar.clients
+```
 ## Expected Results
 
 :warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
