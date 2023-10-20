@@ -2,8 +2,6 @@ import time
 import itertools
 import numpy as np
 import tensorflow as tf
-import tensorflow_addons as tfa
-
 
 class History(tf.keras.callbacks.History):
     def __init__(self):
@@ -43,7 +41,7 @@ class Network:
             padding="same",
             kernel_regularizer=tf.keras.regularizers.l2(l2_rate),
         )(inputs)
-        x_t = tfa.layers.GroupNormalization(groups=4)(x_t)
+        x_t = tf.keras.layers.GroupNormalization(groups=4)(x_t)
         x_t = tf.keras.layers.Activation("relu")(x_t)
         x_f = tf.keras.layers.Conv2D(
             num_features,
@@ -51,7 +49,7 @@ class Network:
             padding="same",
             kernel_regularizer=tf.keras.regularizers.l2(l2_rate),
         )(inputs)
-        x_f = tfa.layers.GroupNormalization(groups=4)(x_f)
+        x_f = tf.keras.layers.GroupNormalization(groups=4)(x_f)
         x_f = tf.keras.layers.Activation("relu")(x_f)
         x = tf.keras.layers.Concatenate(axis=-1)([x_t, x_f])
         x = tf.keras.layers.Conv2D(
@@ -60,7 +58,7 @@ class Network:
             padding="same",
             kernel_regularizer=tf.keras.regularizers.l2(l2_rate),
         )(x)
-        x = tfa.layers.GroupNormalization(groups=4)(x)
+        x = tf.keras.layers.GroupNormalization(groups=4)(x)
         x = tf.keras.layers.Activation("relu")(x)
         if add_max_pool:
             x = tf.keras.layers.MaxPooling2D(pool_size=(2, 2))(x)
