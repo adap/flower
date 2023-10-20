@@ -26,7 +26,7 @@ dataset: [CIFAR-10, CIFAR-100]
 
 ****Hardware Setup:**** The experiments are run on a server with 4x Intel Xeon Gold 6226R and 8x Nvidia GeForce RTX 3090. A machine with at least 1x 16GB GPU should be able to run the experiments in a reasonable time.
 
-****Contributors:**** Qinbin Li
+****Contributors:**** [Qinbin Li](https://qinbinli.com)
 
 ****Description:**** MOON requires to compute the model-contrastive loss in local training, which requires access to the local model of the previous round (Lines 14-17 of Algorithm 1 of the paper). Since currently `FlowerClient` does not preserve the states when starting a new round, we store the local models into the specified `model.dir` in local training indexed by the client ID, which will be loaded to the corresponding client in the next round.
 
@@ -105,9 +105,9 @@ python -m moon.main --config-name cifar100_fedprox
 
 ## Expected Results
 
-You can find the output log in `_static` directory. After running the above commands, you can see the accuracy list at the end of the ouput, which is the test accuracy of the global model. For example, in one running, for CIFAR-10 with MOON, the accuracy after running 100 rounds is 0.7071 (see `_static/cifar10_moon_log.txt`). 
+You can find the output logs of a single run in this [link](https://drive.google.com/drive/folders/1YZEU2NcHWEHVyuJMlc1QvBSAvNMjH-aR?usp=share_link). After running the above commands, you can see the accuracy list at the end of the ouput, which is the test accuracy of the global model. For example, in one running, for CIFAR-10 with MOON, the accuracy after running 100 rounds is 0.7071. 
 
-For CIFAR-10 with FedProx, the accuracy after running 100 rounds is 0.6852 (see `_static/cifar10_fedprox_log.txt`). For CIFAR100 with MOON, the accuracy after running 100 rounds is 0.6636 (see`_static/cifar100_moon_log.txt`). For CIFAR100 with FedProx, the accuracy after running 100 rounds is 0.6494. The results are summarized below:
+For CIFAR-10 with FedProx, the accuracy after running 100 rounds is 0.6852. For CIFAR100 with MOON, the accuracy after running 100 rounds is 0.6636. For CIFAR100 with FedProx, the accuracy after running 100 rounds is 0.6494. The results are summarized below:
 
 
 |  | CIFAR-10 | CIFAR-100 |
@@ -125,16 +125,22 @@ You can find the curve comparing MOON and FedProx on CIFAR-10 and CIFAR-100 belo
 You can tune the hyperparameter `mu` for both MOON and FedProx by changing the configuration file in `conf`.
 
 ### Figure 8(a)
-You can run the experiments in Figure 8 of the paper. To run MOON on CIFAR-100 with 50 clients (Figure 8(a) of the paper):
+You can run the experiments in Figure 8 of the paper. To run MOON (`mu=10`) on CIFAR-100 with 50 clients (Figure 8(a) of the paper):
 ```bash
 python -m moon.main --config-name cifar100_50clients
 ```
 
-You can find the curve presenting MOON (\mu=10) below.
+To run FedProx on CIFAR-100 with 50 clients (Figure 8(a) of the paper):
+```bash
+python -m moon.main --config-name cifar100_50clients_fedprox
+```
 
-<img alt="CIFAR-100" src="_static/cifar100_50clients_moon.png" width="500"/>
 
-To run MOON on CIFAR-100 with 100 clients (Figure 8(b) of the paper):
+You can find the curve presenting MOON and FedProx below.
+
+<img alt="CIFAR-100" src="_static/cifar100_50clients_moon_fedprox.png" width="500"/>
+
+You may also run MOON on CIFAR-100 with 100 clients (Figure 8(b) of the paper):
 ```bash
 python -m moon.main --config-name cifar100_100clients
 ```
