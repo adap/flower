@@ -80,7 +80,7 @@ def main(cfg: DictConfig) -> None:
 
     # get function that will executed by the strategy's evaluate() method
     # Set server's device
-    device = cfg.server_device
+    device = torch.device("cuda:0") if torch.cuda.is_available() and cfg.server_device=="cuda" else "cpu"
     evaluate_fn = server.gen_evaluate_fn(test_global_dl, device=device, cfg=cfg)
 
     # 4. Define your strategy
