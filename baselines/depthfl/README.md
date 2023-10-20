@@ -1,5 +1,5 @@
 ---
-title: DepthFL: Depthwise Federated Learning for Heterogeneous Clients
+title: DepthFL:Depthwise Federated Learning for Heterogeneous Clients
 url: https://openreview.net/forum?id=pf8RIZTMU58
 labels: [image classification, system heterogeneity, cross-device, knowledge distillation]
 dataset: [CIFAR-100]
