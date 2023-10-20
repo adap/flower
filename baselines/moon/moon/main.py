@@ -94,7 +94,8 @@ def main(cfg: DictConfig) -> None:
     # if needed by your method.)
     # strategy = instantiate(cfg.strategy, <additional arguments if desired>)
     strategy = fl.server.strategy.FedAvg(
-        fraction_fit=cfg.fraction_fit, evaluate_fn=evaluate_fn
+        fraction_fit=cfg.fraction_fit,
+        evaluate_fn=evaluate_fn,
     )
     # 5. Start Simulation
     # history = fl.simulation.start_simulation(<arguments for simulation>)
