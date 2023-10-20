@@ -43,7 +43,6 @@ ray = "2.6.3" # don't change this
 hydra-core = "1.3.2" # don't change this
 tensorflow = "2.14.0"
 pandas = "2.1.1"
-tensorflow-addons = "^0.21.0"
 
 [tool.poetry.dev-dependencies]
 isort = "==5.11.5"
