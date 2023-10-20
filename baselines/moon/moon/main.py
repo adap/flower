@@ -3,6 +3,7 @@
 It includes processioning the dataset, instantiate strategy, specify how the global
 model is going to be evaluated, etc. At the end, this script saves the results.
 """
+import os
 import random
 import shutil
 from pathlib import Path
@@ -31,8 +32,13 @@ def main(cfg: DictConfig) -> None:
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
+    # Clean the model directory to save models for MOON
+    if cfg.alg == "moon":
+        if os.path.exists(cfg.model.dir):
+            shutil.rmtree(cfg.model.dir)
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
+
     # 2. Prepare your dataset
     np.random.seed(cfg.seed)
     torch.manual_seed(cfg.seed)
