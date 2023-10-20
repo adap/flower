@@ -17,7 +17,7 @@ from moon.models import init_net, test
 
 def gen_evaluate_fn(
     testloader: DataLoader,
-    device: torch.device,  # pylint: disable=E1101
+    device: torch.device,
     cfg: DictConfig,
 ) -> Callable[
     [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]

@@ -34,12 +34,6 @@ def main(cfg: DictConfig) -> None:
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
     # 2. Prepare your dataset
-    # here you should call a function in datasets.py that returns whatever is needed to:
-    # (1) ensure the server can access the dataset used to evaluate your model after
-    # aggregation
-    # (2) tell each client what dataset partitions they should use (e.g. a this could
-    # be a location in the file system, a list of dataloader, a list of ids to extract
-    # from a dataset, it's up to you)
     np.random.seed(cfg.seed)
     torch.manual_seed(cfg.seed)
     if torch.cuda.is_available():
@@ -86,15 +80,19 @@ def main(cfg: DictConfig) -> None:
 
     # get function that will executed by the strategy's evaluate() method
     # Set server's device
-    device = cfg.server_device
+    device = (
+        torch.device("cuda:0")
+        if torch.cuda.is_available() and cfg.server_device == "cuda"
+        else "cpu"
+    )
     evaluate_fn = server.gen_evaluate_fn(test_global_dl, device=device, cfg=cfg)
 
     # 4. Define your strategy
-    # pass all relevant argument (including the global dataset used after aggregation,
-    # if needed by your method.)
-    # strategy = instantiate(cfg.strategy, <additional arguments if desired>)
     strategy = fl.server.strategy.FedAvg(
+        # Clients in MOON do not perform federated evaluation
+        # (see the client's evaluate())
         fraction_fit=cfg.fraction_fit,
+        fraction_evaluate=0.0,
         evaluate_fn=evaluate_fn,
     )
     # 5. Start Simulation
@@ -114,15 +112,6 @@ def main(cfg: DictConfig) -> None:
         shutil.rmtree(cfg.model.dir)
 
     # 6. Save your results
-    # Here you can save the `history` returned by the simulation and include
-    # also other buffers, statistics, info needed to be saved in order to later
-    # on generate the plots you provide in the README.md. You can for instance
-    # access elements that belong to the strategy for example:
-    # data = strategy.get_my_custom_data() -- assuming you have such method defined.
-    # Hydra will generate for you a directory each time you run the code. You
-    # can retrieve the path to that directory with this:
-    # save_path = HydraConfig.get().runtime.output_dir
-
     # Experiment completed. Now we save the results and
     # generate plots using the `history`
     print("................")

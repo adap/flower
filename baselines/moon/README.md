@@ -10,35 +10,35 @@ dataset: [CIFAR-10, CIFAR-100]
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
 
-****Paper:**** [arxiv.org/abs/2103.16257](https://arxiv.org/abs/2103.16257)
+**Paper:** [arxiv.org/abs/2103.16257](https://arxiv.org/abs/2103.16257)
 
-****Authors:**** Qinbin Li, Bingsheng He, Dawn Song
+**Authors:** Qinbin Li, Bingsheng He, Dawn Song
 
-****Abstract:**** Federated learning enables multiple parties to collaboratively train a machine learning model without communicating their local data. A key challenge in federated learning is to handle the heterogeneity of local data distribution across parties. Although many studies have been proposed to address this challenge, we find that they fail to achieve high performance in image datasets with deep learning models. In this paper, we propose MOON: modelcontrastive federated learning. MOON is a simple and effective federated learning framework. The key idea of MOON is to utilize the similarity between model representations to correct the local training of individual parties, i.e., conducting contrastive learning in model-level. Our extensive experiments show that MOON significantly outperforms the other state-of-the-art federated learning algorithms on various image classification tasks.
+**Abstract:** Federated learning enables multiple parties to collaboratively train a machine learning model without communicating their local data. A key challenge in federated learning is to handle the heterogeneity of local data distribution across parties. Although many studies have been proposed to address this challenge, we find that they fail to achieve high performance in image datasets with deep learning models. In this paper, we propose MOON: modelcontrastive federated learning. MOON is a simple and effective federated learning framework. The key idea of MOON is to utilize the similarity between model representations to correct the local training of individual parties, i.e., conducting contrastive learning in model-level. Our extensive experiments show that MOON significantly outperforms the other state-of-the-art federated learning algorithms on various image classification tasks.
 
 
 
 ## About this baseline
 
-****What’s implemented:**** The code in this directory replicates the experiments in *Model-Contrastive Federated Learning* (Li et al., 2021), which proposed the MOON algorithm. Concretely ,it replicates the results of MOON for CIFAR-10 and CIFAR-100 in Table 1.
+**What’s implemented:** The code in this directory replicates the experiments in *Model-Contrastive Federated Learning* (Li et al., 2021), which proposed the MOON algorithm. Concretely ,it replicates the results of MOON for CIFAR-10 and CIFAR-100 in Table 1.
 
-****Datasets:**** CIFAR-10 and CIFAR-100
+**Datasets:** CIFAR-10 and CIFAR-100
 
-****Hardware Setup:**** The experiments are run on a server with 4x Intel Xeon Gold 6226R and 8x Nvidia GeForce RTX 3090. A machine with at least 1x 16GB GPU should be able to run the experiments in a reasonable time.
+**Hardware Setup:** The experiments are run on a server with 4x Intel Xeon Gold 6226R and 8x Nvidia GeForce RTX 3090. A machine with at least 1x 16GB GPU should be able to run the experiments in a reasonable time.
 
 ****Contributors:**** [Qinbin Li](https://qinbinli.com)
 
-****Description:**** MOON requires to compute the model-contrastive loss in local training, which requires access to the local model of the previous round (Lines 14-17 of Algorithm 1 of the paper). Since currently `FlowerClient` does not preserve the states when starting a new round, we store the local models into the specified `model.dir` in local training indexed by the client ID, which will be loaded to the corresponding client in the next round.
+**Description:** MOON requires to compute the model-contrastive loss in local training, which requires access to the local model of the previous round (Lines 14-17 of Algorithm 1 of the paper). Since currently `FlowerClient` does not preserve the states when starting a new round, we store the local models into the specified `model.dir` in local training indexed by the client ID, which will be loaded to the corresponding client in the next round.
 
 ## Experimental Setup
 
-****Task:**** Image classification.
+**Task:** Image classification.
 
-****Model:**** This directory implements two models as same as the paper:
+**Model:** This directory implements two models as same as the paper:
 * A simple-CNN with a projection head for CIFAR-10
 * A ResNet-50 with a projection head for CIFAR-100.
   
-****Dataset:**** This directory includes CIFAR-10 and CIFAR-100. They are partitioned in the same way as the paper. The settings are as follow:
+**Dataset:** This directory includes CIFAR-10 and CIFAR-100. They are partitioned in the same way as the paper. The settings are as follow:
 
 | Dataset | partitioning method |
 | :------ | :---: |
@@ -46,7 +46,7 @@ dataset: [CIFAR-10, CIFAR-100]
 | CIFAR-100 | Dirichlet with beta 0.5 |
 
 
-****Training Hyperparameters:****
+**Training Hyperparameters:**
 
 | Description | Default Value |
 | ----------- | ----- |
@@ -68,14 +68,14 @@ dataset: [CIFAR-10, CIFAR-100]
 To construct the Python environment follow these steps:
 
 ```bash
-# set local python version via pyenv
+# Set local python version via pyenv
 pyenv local 3.10.6
-# then fix that for poetry
+# Then fix that for poetry
 poetry env use 3.10.6
-# then install poetry env
+# Then install poetry env
 poetry install
 
-# activate the environment
+# Activate the environment
 poetry shell
 ```
 

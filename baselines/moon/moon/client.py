@@ -17,8 +17,6 @@ from torch.utils.data import DataLoader
 
 from moon.models import init_net, train_fedprox, train_moon
 
-# pylint: disable=E1101
-
 
 # pylint: disable=too-many-instance-attributes
 class FlowerClient(fl.client.NumPyClient):
