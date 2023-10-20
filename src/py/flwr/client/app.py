@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,10 +17,12 @@
 
 import sys
 import time
+import warnings
 from logging import INFO
-from typing import Callable, Optional, Union
+from typing import Optional, Union
 
-from flwr.client.typing import ClientFn, ClientLike
+from flwr.client.client import Client
+from flwr.client.typing import ClientFn
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
@@ -36,11 +38,10 @@ from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle
 from .numpy_client import NumPyClient
-from .numpy_client_wrapper import _wrap_numpy_client
 
 
 def _check_actionable_client(
-    client: Optional[ClientLike], client_fn: Optional[ClientFn]
+    client: Optional[Client], client_fn: Optional[ClientFn]
 ) -> None:
     if client_fn is None and client is None:
         raise Exception("Both `client_fn` and `client` are `None`, but one is required")
@@ -57,7 +58,7 @@ def start_client(
     *,
     server_address: str,
     client_fn: Optional[ClientFn] = None,
-    client: Optional[ClientLike] = None,
+    client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
     transport: Optional[str] = None,
@@ -124,7 +125,7 @@ def start_client(
         # Wrap `Client` instance in `client_fn`
         def single_client_factory(
             cid: str,  # pylint: disable=unused-argument
-        ) -> ClientLike:
+        ) -> Client:
             if client is None:  # Added this to keep mypy happy
                 raise Exception(
                     "Both `client_fn` and `client` are `None`, but one is required"
@@ -209,8 +210,7 @@ def start_client(
 def start_numpy_client(
     *,
     server_address: str,
-    client_fn: Optional[Callable[[str], NumPyClient]] = None,
-    client: Optional[NumPyClient] = None,
+    client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
     transport: Optional[str] = None,
@@ -223,9 +223,7 @@ def start_numpy_client(
         The IPv4 or IPv6 address of the server. If the Flower server runs on
         the same machine on port 8080, then `server_address` would be
         `"[::]:8080"`.
-    client_fn : Optional[Callable[[str], NumPyClient]]
-        A callable that instantiates a NumPyClient. (default: None)
-    client : Optional[flwr.client.NumPyClient]
+    client : flwr.client.NumPyClient
         An implementation of the abstract base class `flwr.client.NumPyClient`.
     grpc_max_message_length : int (default: 536_870_912, this equals 512MB)
         The maximum length of gRPC messages that can be exchanged with the
@@ -248,33 +246,40 @@ def start_numpy_client(
     --------
     Starting a client with an insecure server connection:
 
-    >>> def client_fn(cid: str):
-    >>>     return FlowerClient()
-    >>>
     >>> start_numpy_client(
     >>>     server_address=localhost:8080,
-    >>>     client_fn=client_fn,
+    >>>     client=FlowerClient(),
     >>> )
 
     Starting an SSL-enabled gRPC client:
 
     >>> from pathlib import Path
-    >>> def client_fn(cid: str):
-    >>>     return FlowerClient()
-    >>>
     >>> start_numpy_client(
     >>>     server_address=localhost:8080,
-    >>>     client_fn=client_fn,
+    >>>     client=FlowerClient(),
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
-    # Start
-    _check_actionable_client(client, client_fn)
+    warnings.warn(
+        "flwr.client.start_numpy_client() is deprecated and will "
+        "be removed in a future version of Flower. Instead, pass "
+        "your client to `flwr.client.start_client()` by calling "
+        "first the `.to_client()` method as shown below: \n"
+        "\tflwr.client.start_client(\n"
+        "\t\tserver_address='<IP>:<PORT>',\n"
+        "\t\tclient=FlowerClient().to_client()\n"
+        "\t)",
+        DeprecationWarning,
+        stacklevel=2,
+    )
 
-    wrp_client = _wrap_numpy_client(client=client) if client else None
+    # Calling this function is deprecated. A warning is thrown.
+    # We first need to convert either the supplied client to `Client.`
+
+    wrp_client = client.to_client()
+
     start_client(
         server_address=server_address,
-        client_fn=client_fn,
         client=wrp_client,
         grpc_max_message_length=grpc_max_message_length,
         root_certificates=root_certificates,

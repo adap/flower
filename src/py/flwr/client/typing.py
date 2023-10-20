@@ -14,10 +14,8 @@
 # ==============================================================================
 """Custom types for Flower clients."""
 
-from typing import Callable, Union
+from typing import Callable
 
 from .client import Client as Client
-from .numpy_client import NumPyClient as NumPyClient
 
-ClientLike = Union[Client, NumPyClient]
-ClientFn = Callable[[str], ClientLike]
+ClientFn = Callable[[str], Client]
