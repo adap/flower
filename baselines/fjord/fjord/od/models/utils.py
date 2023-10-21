@@ -14,7 +14,7 @@ def create_linear_layer(od, is_od, *args, **kwargs):
     :return: nn.Linear or ODLinear
     """
     if od:
-        return ODLinear(is_od, *args, **kwargs)
+        return ODLinear(*args, is_od=is_od, **kwargs)
 
     return nn.Linear(*args, **kwargs)
 
@@ -29,7 +29,7 @@ def create_conv_layer(od, is_od, *args, **kwargs):
     :return: nn.Conv2d or ODConv2d
     """
     if od:
-        return ODConv2d(is_od, *args, **kwargs)
+        return ODConv2d(*args, is_od=is_od, **kwargs)
 
     return nn.Conv2d(*args, **kwargs)
 
@@ -44,7 +44,9 @@ def create_bn_layer(od, p_s, *args, **kwargs):
     :return: nn.BatchNorm2d or ODBatchNorm2d
     """
     if od:
-        return ODBatchNorm2d(p_s, *args, **kwargs)
+        num_features = kwargs["num_features"]
+        del kwargs["num_features"]
+        return ODBatchNorm2d(*args, p_s=p_s, num_features=num_features, **kwargs)
 
     return nn.BatchNorm2d(*args, **kwargs)
 
@@ -52,7 +54,7 @@ def create_bn_layer(od, p_s, *args, **kwargs):
 class SequentialWithSampler(nn.Sequential):
     """Implements sequential model with sampler."""
 
-    def forward(self, x, sampler=None):
+    def forward(self, input, sampler=None):  # pylint: disable=redefined-builtin
         """Forward method for custom Sequential.
 
         :param x: input
@@ -61,13 +63,13 @@ class SequentialWithSampler(nn.Sequential):
         """
         if sampler is None:
             for module in self:
-                x = module(x)
+                input = module(input)
         else:
             for module in self:
                 if hasattr(module, "od") and module.od:
-                    x = module(x, sampler=sampler)
+                    input = module(input, sampler=sampler)
                 elif hasattr(module, "is_od") and module.is_od:
-                    x = module(x, p=sampler())
+                    input = module(input, p=sampler())
                 else:
-                    x = module(x)
-        return x
+                    input = module(input)
+        return input

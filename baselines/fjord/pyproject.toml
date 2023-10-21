@@ -86,7 +86,7 @@ strict = false
 plugins = "numpy.typing.mypy_plugin"
 
 [tool.pylint."MESSAGES CONTROL"]
-disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
+disable = "duplicate-code,too-few-public-methods,useless-import-alias"
 good-names = "i,j,k,_,x,y,X,Y,fl,lr,p,p_,bn,NUM_CLIENTS,od,m,g,ResNet18,FJORD_CONFIG_TYPE"
 signature-mutators="hydra.main.main"
 

@@ -191,6 +191,7 @@ class FjORDBalancedClientManager(fl.server.SimpleClientManager):
         for p in self.p_s:
             if remainder == 0:
                 break
+            cid = random.choice(max_p_to_cids[p])
             while cid not in selected_cids:
                 cid = random.choice(max_p_to_cids[p])
             selected_cids.add(cid)

@@ -4,7 +4,7 @@ import logging
 import coloredlogs
 
 
-class Logger(object):
+class Logger:
     """Logger class to be used by all modules in the project."""
 
     log_format = (
@@ -25,7 +25,7 @@ class Logger(object):
         numeric_level = getattr(logging, loglevel.upper(), None)
 
         if not isinstance(numeric_level, int):
-            raise ValueError("Invalid log level: %s" % loglevel)
+            raise ValueError(f"Invalid log level: {loglevel}")
         if logfile:
             logging.basicConfig(
                 handlers=[logging.FileHandler(logfile), logging.StreamHandler()],
@@ -62,16 +62,16 @@ class Logger(object):
                 f"Logger {logger_name} already exists. "
                 f'Call with Logger.get("{logger_name}")'
             )
-        else:
-            self.name = logger_name
-            self.logger = logging.getLogger(self.name)
-            self.registered_loggers[self.name] = self.logger
-            coloredlogs.install(
-                level=self.log_level,
-                logger=self.logger,
-                fmt=self.log_format,
-                datefmt="%Y-%m-%d %H:%M:%S",
-            )
+
+        self.name = logger_name
+        self.logger = logging.getLogger(self.name)
+        self.registered_loggers[self.name] = self.logger
+        coloredlogs.install(
+            level=self.log_level,
+            logger=self.logger,
+            fmt=self.log_format,
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
 
         self.warn = self.warning
 

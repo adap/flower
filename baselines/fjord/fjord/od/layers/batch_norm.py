@@ -13,10 +13,10 @@ class ODBatchNorm2d(nn.Module):  # pylint: disable=too-many-instance-attributes
 
     def __init__(
         self,
+        *args,
         p_s: List[float],
         num_features: int,
         affine: Optional[bool] = True,
-        *args,
         **kwargs,
     ) -> None:
         super().__init__()

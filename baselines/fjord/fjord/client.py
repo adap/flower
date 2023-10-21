@@ -81,7 +81,7 @@ def get_agg_config(
             )
             net(images, sampler=max_sampler)
             for i, layer in enumerate(layers):
-                if isinstance(layer, ODConv2d) or isinstance(layer, ODLinear):
+                if isinstance(layer, (ODConv2d, ODLinear)):
                     config[p][i]["in_dim"] = layer.last_input_dim
                     config[p][i]["out_dim"] = layer.last_output_dim
                 elif isinstance(layer, ODBatchNorm2d):
@@ -179,8 +179,8 @@ class FjORDClient(
 
         :param parameters: The parameters of the model.
         :param config: The train configuration.
-        :return: The parameters of the model, the number of
-            samples used for training, and the training metrics
+        :return: The parameters of the model, the number of samples used for training,
+            and the training metrics
         """
         Logger.get().info(
             f"Training on client {self.cid} for round "
@@ -225,8 +225,8 @@ class FjORDClient(
 
         :param parameters: The parameters of the model.
         :param config: The eval configuration.
-        :return: The loss on the test set, the number of samples
-            used for evaluation, and the evaluation metrics.
+        :return: The loss on the test set, the number of samples used for evaluation,
+            and the evaluation metrics.
         """
         Logger.get().info(
             f"Evaluating on client {self.cid} for round "

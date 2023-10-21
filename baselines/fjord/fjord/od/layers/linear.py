@@ -14,7 +14,7 @@ __all__ = ["ODLinear"]
 class ODLinear(nn.Linear):
     """Ordered Dropout Linear."""
 
-    def __init__(self, is_od: bool = True, *args, **kwargs) -> None:
+    def __init__(self, *args, is_od: bool = True, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.is_od = is_od
         self.width = self.out_features
@@ -22,19 +22,21 @@ class ODLinear(nn.Linear):
         self.last_output_dim = None
 
     def forward(
-        self, x: Tensor, p: Optional[Union[Tuple[Module, float], float]] = None
+        self,
+        input: Tensor,  # pylint: disable=redefined-builtin
+        p: Optional[Union[Tuple[Module, float], float]] = None,
     ) -> Tensor:
         """Forward pass.
 
         Args:
-        :param x: Input tensor.
+        :param input: Input tensor.
         :param p: Tuple of layer and p or p.
         :return: Output of forward pass.
         """
         if not self.is_od and p is not None:
             raise ValueError("p must be None if is_od is False")
         p = check_layer(self, p)
-        in_dim = x.size(1)  # second dimension is input dimension
+        in_dim = input.size(1)  # second dimension is input dimension
         self.last_input_dim = in_dim
         if not p:  # i.e., don't apply OD
             out_dim = self.width
@@ -44,7 +46,7 @@ class ODLinear(nn.Linear):
         # subsampled weights and bias
         weights_red = self.weight[:out_dim, :in_dim]
         bias_red = self.bias[:out_dim] if self.bias is not None else None
-        return F.linear(x, weights_red, bias_red)
+        return F.linear(input, weights_red, bias_red)  # pylint: disable=not-callable
 
     def get_slice(self, in_dim: int, out_dim: int) -> Tuple[Tensor, Tensor]:
         """Get slice of weights and bias.

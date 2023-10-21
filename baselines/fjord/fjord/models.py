@@ -40,11 +40,11 @@ class BasicBlock(nn.Module):
             padding=1,
             bias=False,
         )
-        self.bn1 = create_bn_layer(od, p_s, planes)
+        self.bn1 = create_bn_layer(od=od, p_s=p_s, num_features=planes)
         self.conv2 = create_conv_layer(
             od, True, planes, planes, kernel_size=3, stride=1, padding=1, bias=False
         )
-        self.bn2 = create_bn_layer(od, p_s, planes)
+        self.bn2 = create_bn_layer(od=od, p_s=p_s, num_features=planes)
 
         self.shortcut = SequentialWithSampler()
         if stride != 1 or in_planes != self.expansion * planes:
@@ -58,7 +58,7 @@ class BasicBlock(nn.Module):
                     stride=stride,
                     bias=False,
                 ),
-                create_bn_layer(od, p_s, self.expansion * planes),
+                create_bn_layer(od=od, p_s=p_s, num_features=self.expansion * planes),
             )
 
     def forward(self, x, sampler):
@@ -107,7 +107,7 @@ class ResNet(nn.Module):  # pylint: disable=too-many-instance-attributes
         self.conv1 = create_conv_layer(
             od, True, 3, 64, kernel_size=3, stride=1, padding=1, bias=False
         )
-        self.bn1 = create_bn_layer(od, p_s, 64)
+        self.bn1 = create_bn_layer(od=od, p_s=p_s, num_features=64)
         self.layer1 = self._make_layer(od, p_s, block, 64, num_blocks[0], stride=1)
         self.layer2 = self._make_layer(od, p_s, block, 128, num_blocks[1], stride=2)
         self.layer3 = self._make_layer(od, p_s, block, 256, num_blocks[2], stride=2)
@@ -119,8 +119,8 @@ class ResNet(nn.Module):  # pylint: disable=too-many-instance-attributes
     ):  # pylint: disable=too-many-arguments
         strides = [stride] + [1] * (num_blocks - 1)
         layers = []
-        for stride in strides:
-            layers.append(block(od, p_s, self.in_planes, planes, stride))
+        for strd in strides:
+            layers.append(block(od, p_s, self.in_planes, planes, strd))
             self.in_planes = planes * block.expansion
         return SequentialWithSampler(*layers)
 
@@ -140,7 +140,7 @@ class ResNet(nn.Module):  # pylint: disable=too-many-instance-attributes
             out = self.layer2(out, sampler=sampler)
             out = self.layer3(out, sampler=sampler)
             out = self.layer4(out, sampler=sampler)
-            out = F.avg_pool2d(out, 4)
+            out = F.avg_pool2d(out, 4)  # pylint: disable=not-callable
             out = out.view(out.size(0), -1)
             out = self.linear(out)
         else:
@@ -149,7 +149,7 @@ class ResNet(nn.Module):  # pylint: disable=too-many-instance-attributes
             out = self.layer2(out)
             out = self.layer3(out)
             out = self.layer4(out)
-            out = F.avg_pool2d(out, 4)
+            out = F.avg_pool2d(out, 4)  # pylint: disable=not-callable
             out = out.view(out.size(0), -1)
             out = self.linear(out)
         return out
@@ -200,8 +200,7 @@ def train(  # pylint: disable=too-many-locals, too-many-arguments
 
     :param net: The model to train.
     :param trainloader: The training set.
-    :param know_distill: Whether the model being trained
-        uses knowledge distillation.
+    :param know_distill: Whether the model being trained uses knowledge distillation.
     :param max_p: The maximum p value.
     :param current_round: The current round of training.
     :param total_rounds: The total number of rounds of training.
@@ -308,13 +307,12 @@ def get_lr_scheduler(
 
     :param optimiser: The optimiser for which to get the scheduler.
     :param total_epochs: The total number of epochs.
-    :param method: The method to use for the scheduler.
-        Supports static and cifar10.
+    :param method: The method to use for the scheduler. Supports static and cifar10.
     :return: The learning rate scheduler.
     """
     if method == "static":
         return MultiStepLR(optimiser, [total_epochs + 1])
-    elif method == "cifar10":
+    if method == "cifar10":
         return MultiStepLR(
             optimiser, [int(0.5 * total_epochs), int(0.75 * total_epochs)], gamma=0.1
         )

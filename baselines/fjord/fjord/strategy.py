@@ -55,7 +55,7 @@ def get_p_layer_updates(
         for p_max, layer_update in zip(p_max_s, layer_updates)
         if p_max >= p
     ]
-    num_examples_p = sum([n for p_max, n in zip(p_max_s, num_examples) if p_max >= p])
+    num_examples_p = sum(n for p_max, n in zip(p_max_s, num_examples) if p_max >= p)
     return layer_updates_p, num_examples_p
 
 
@@ -96,7 +96,7 @@ def fjord_average(  # pylint: disable=too-many-arguments
 
         assert num_examples_p > 0
         return reduce(np.add, layer_updates_p) / num_examples_p
-    elif fjord_config["layer"][i] in ["ODLinear", "ODConv2d", "ODBatchNorm2d"]:
+    if fjord_config["layer"][i] in ["ODLinear", "ODConv2d", "ODBatchNorm2d"]:
         # perform nested updates
         for p in p_s[::-1]:
             layer_updates_p, num_examples_p = get_p_layer_updates(
@@ -104,37 +104,35 @@ def fjord_average(  # pylint: disable=too-many-arguments
             )
             if len(layer_updates_p) == 0:
                 continue
+            in_dim = (
+                int(fjord_config[p][i]["in_dim"])
+                if fjord_config[p][i]["in_dim"]
+                else None
+            )
+            out_dim = (
+                int(fjord_config[p][i]["out_dim"])
+                if fjord_config[p][i]["out_dim"]
+                else None
+            )
+            assert num_examples_p > 0
+            # check whether the parameter to update is bias or weight
+            if len(update.shape) == 1:
+                # bias or ODBatchNorm2d
+                layer_updates_p = [
+                    layer_update[:out_dim] for layer_update in layer_updates_p
+                ]
+                update[:out_dim] = reduce(np.add, layer_updates_p) / num_examples_p
             else:
-                in_dim = (
-                    int(fjord_config[p][i]["in_dim"])
-                    if fjord_config[p][i]["in_dim"]
-                    else None
+                # weight
+                layer_updates_p = [
+                    layer_update[:out_dim, :in_dim] for layer_update in layer_updates_p
+                ]
+                update[:out_dim, :in_dim] = (
+                    reduce(np.add, layer_updates_p) / num_examples_p
                 )
-                out_dim = (
-                    int(fjord_config[p][i]["out_dim"])
-                    if fjord_config[p][i]["out_dim"]
-                    else None
-                )
-                assert num_examples_p > 0
-                # check whether the parameter to update is bias or weight
-                if len(update.shape) == 1:
-                    # bias or ODBatchNorm2d
-                    layer_updates_p = [
-                        layer_update[:out_dim] for layer_update in layer_updates_p
-                    ]
-                    update[:out_dim] = reduce(np.add, layer_updates_p) / num_examples_p
-                else:
-                    # weight
-                    layer_updates_p = [
-                        layer_update[:out_dim, :in_dim]
-                        for layer_update in layer_updates_p
-                    ]
-                    update[:out_dim, :in_dim] = (
-                        reduce(np.add, layer_updates_p) / num_examples_p
-                    )
         return update
-    else:
-        raise ValueError(f"Unsupported layer {fjord_config['layer'][i]}")
+
+    raise ValueError(f"Unsupported layer {fjord_config['layer'][i]}")
 
 
 def aggregate(

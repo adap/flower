@@ -87,10 +87,10 @@ class FLCifar10(CIFAR10):
 
         :param root: Root directory of dataset
         :param train: If True, creates dataset from training set
-        :param transform: A function/transform that takes in an PIL image
-            and returns a transformed version.
-        :param target_transform: A function/transform that takes in the
-            target and transforms it.
+        :param transform: A function/transform that takes in an PIL image and returns a
+            transformed version.
+        :param target_transform: A function/transform that takes in the target and
+            transforms it.
         :param download: If true, downloads the dataset from the internet.
         """
         super().__init__(
