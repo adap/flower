@@ -1,0 +1,3 @@
+- fit_config.kd=True
+- dataset_config.iid=True
+- num_rounds=20

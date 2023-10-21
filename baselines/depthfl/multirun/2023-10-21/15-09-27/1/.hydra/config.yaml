@@ -1,0 +1,32 @@
+num_clients: 100
+num_epochs: 5
+batch_size: 50
+num_rounds: 20
+fraction: 0.1
+learning_rate: 0.1
+learning_rate_decay: 0.998
+static_bn: false
+exclusive_learning: false
+model_size: 1
+client_resources:
+  num_cpus: 1
+  num_gpus: 0.5
+server_device: cuda
+dataset_config:
+  iid: false
+  beta: 0.5
+fit_config:
+  feddyn: true
+  kd: true
+  alpha: 0.1
+  extended: true
+  drop_client: false
+model:
+  _target_: depthfl.resnet.multi_resnet18
+  n_blocks: 4
+  num_classes: 100
+strategy:
+  _target_: depthfl.strategy.FedDyn
+  fraction_fit: 1.0e-05
+  fraction_evaluate: 0.0
+  min_evaluate_clients: 0
