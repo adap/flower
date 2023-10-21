@@ -122,11 +122,14 @@ class FlServer(fl.server.Server):
             len(client_instructions),
             self._client_manager.num_available(),
         )
-
         # Collect `fit` results from all clients participating in this round
+        if self.cfg.server.max_workers == "None":
+            max_workers = None
+        else:
+            max_workers = int(self.cfg.server.max_workers)
         results, failures = fit_clients(
             client_instructions=client_instructions,
-            max_workers=self.cfg.server.max_workers,
+            max_workers=max_workers,
             timeout=timeout,
         )
 
@@ -343,6 +346,7 @@ class FlServer(fl.server.Server):
 
 
 def serverside_eval(
+    server_round: int,
     parameters: Tuple[
         Parameters,
         Union[
@@ -351,10 +355,9 @@ def serverside_eval(
             List[Union[Tuple[XGBClassifier, int], Tuple[XGBRegressor, int]]],
         ],
     ],
-    # config: Dict[str, Scalar],
+    config: Dict[str, Scalar],
     cfg: DictConfig,
     testloader: DataLoader,
-    batch_size: int,
 ) -> Tuple[float, Dict[str, float]]:
     """Perform server-side evaluation.
 
@@ -375,6 +378,7 @@ def serverside_eval(
         Tuple[float, Dict]: A tuple containing the evaluation loss (float) and
         a dictionary containing the evaluation metric(s) (float).
     """
+    print(config, server_round)
     # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     metric_name = cfg.dataset.task.metric.name
 
@@ -386,7 +390,7 @@ def serverside_eval(
     trees_aggregated = parameters[1]
     testloader = single_tree_preds_from_each_client(
         testloader,
-        batch_size,
+        cfg.run_experiment.batch_size,
         trees_aggregated,
         cfg.n_estimators_client,
         cfg.client_num,

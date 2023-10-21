@@ -120,7 +120,6 @@ def main(cfg: DictConfig) -> None:
                 serverside_eval,
                 cfg=cfg,
                 testloader=testloader,
-                batch_size=cfg.run_experiment.batch_size,
             ),
         )
 

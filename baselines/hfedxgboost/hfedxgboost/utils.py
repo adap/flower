@@ -475,7 +475,6 @@ class ResultsWriter:
             its corresponding round number (int)
         """
         for key in history.metrics_centralized.keys():
-            # print("history.metrics_centralized", history.metrics_centralized[key])
             for i in history.metrics_centralized[key]:
                 if (
                     self.compare_fn(i[1].item(), self.best_res) == i[1]
