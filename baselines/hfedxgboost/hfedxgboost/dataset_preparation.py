@@ -30,145 +30,144 @@ def download_data(dataset_name: Optional[str] = "cod-rna"):
         The pathes for the data that will be used in train and test,
         with train of full dataset in index 0
     """
-    ALL_DATASETS_PATH = "./dataset"
-    if dataset_name == "a9a":
-        DATASET_PATH = os.path.join(ALL_DATASETS_PATH, "a9a")
-        if not os.path.exists(DATASET_PATH):
-            os.makedirs(DATASET_PATH)
-            urllib.request.urlretrieve(
-                "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/a9a",
-                f"{os.path.join(DATASET_PATH, 'a9a')}",
-            )
-            urllib.request.urlretrieve(
-                "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/a9a.t",
-                f"{os.path.join(DATASET_PATH, 'a9a.t')}",
-            )
-        # training then test ✅
-        return [os.path.join(DATASET_PATH, "a9a"), os.path.join(DATASET_PATH, "a9a.t")]
-    if dataset_name == "cod-rna":
-        DATASET_PATH = os.path.join(ALL_DATASETS_PATH, "cod-rna")
-        if not os.path.exists(DATASET_PATH):
-            os.makedirs(DATASET_PATH)
-            urllib.request.urlretrieve(
-                "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/cod-rna",
-                f"{os.path.join(DATASET_PATH, 'cod-rna')}",
-            )
-            urllib.request.urlretrieve(
-                "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/cod-rna.t",
-                f"{os.path.join(DATASET_PATH, 'cod-rna.t')}",
-            )
-            urllib.request.urlretrieve(
-                "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/cod-rna.r",
-                f"{os.path.join(DATASET_PATH, 'cod-rna.r')}",
-            )
-        # training then test ✅
-        return [
-            os.path.join(DATASET_PATH, "cod-rna.t"),
-            os.path.join(DATASET_PATH, "cod-rna.r"),
-        ]
+    all_datasets_path = "./dataset"
+    if dataset_name:
+        dataset_path = os.path.join(all_datasets_path, dataset_name)
+    match dataset_name:
+        case "a9a":
+            if not os.path.exists(dataset_path):
+                os.makedirs(dataset_path)
+                urllib.request.urlretrieve(
+                    "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets"
+                    "/binary/a9a",
+                    f"{os.path.join(dataset_path, 'a9a')}",
+                )
+                urllib.request.urlretrieve(
+                    "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets"
+                    "/binary/a9a.t",
+                    f"{os.path.join(dataset_path, 'a9a.t')}",
+                )
+            # training then test ✅
+            return_list = [
+                os.path.join(dataset_path, "a9a"),
+                os.path.join(dataset_path, "a9a.t"),
+            ]
+        case "cod-rna":
+            if not os.path.exists(dataset_path):
+                os.makedirs(dataset_path)
+                urllib.request.urlretrieve(
+                    "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets"
+                    "/binary/cod-rna.t",
+                    f"{os.path.join(dataset_path, 'cod-rna.t')}",
+                )
+                urllib.request.urlretrieve(
+                    "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets"
+                    "/binary/cod-rna.r",
+                    f"{os.path.join(dataset_path, 'cod-rna.r')}",
+                )
+            # training then test ✅
+            return_list = [
+                os.path.join(dataset_path, "cod-rna.t"),
+                os.path.join(dataset_path, "cod-rna.r"),
+            ]
 
-    if dataset_name == "ijcnn1":
-        DATASET_PATH = os.path.join(ALL_DATASETS_PATH, "ijcnn1")
-        if not os.path.exists(DATASET_PATH):
-            os.makedirs(DATASET_PATH)
+        case "ijcnn1":
+            if not os.path.exists(dataset_path):
+                os.makedirs(dataset_path)
 
-            urllib.request.urlretrieve(
-                "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/ijcnn1.bz2",
-                f"{os.path.join(DATASET_PATH, 'ijcnn1.tr.bz2')}",
-            )
-            urllib.request.urlretrieve(
-                "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/ijcnn1.t.bz2",
-                f"{os.path.join(DATASET_PATH, 'ijcnn1.t.bz2')}",
-            )
-            urllib.request.urlretrieve(
-                "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/ijcnn1.tr.bz2",
-                f"{os.path.join(DATASET_PATH, 'ijcnn1.tr.bz2')}",
-            )
-            urllib.request.urlretrieve(
-                "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/ijcnn1.val.bz2",
-                f"{os.path.join(DATASET_PATH, 'ijcnn1.val.bz2')}",
-            )
+                urllib.request.urlretrieve(
+                    "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets"
+                    "/binary/ijcnn1.bz2",
+                    f"{os.path.join(dataset_path, 'ijcnn1.tr.bz2')}",
+                )
+                urllib.request.urlretrieve(
+                    "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets"
+                    "/binary/ijcnn1.t.bz2",
+                    f"{os.path.join(dataset_path, 'ijcnn1.t.bz2')}",
+                )
+                urllib.request.urlretrieve(
+                    "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets"
+                    "/binary/ijcnn1.tr.bz2",
+                    f"{os.path.join(dataset_path, 'ijcnn1.tr.bz2')}",
+                )
+                urllib.request.urlretrieve(
+                    "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets"
+                    "/binary/ijcnn1.val.bz2",
+                    f"{os.path.join(dataset_path, 'ijcnn1.val.bz2')}",
+                )
 
-            for filepath in os.listdir(DATASET_PATH):
-                abs_filepath = os.path.join(DATASET_PATH, filepath)
-                with bz2.BZ2File(abs_filepath) as fr, open(
-                    abs_filepath[:-4], "wb"
-                ) as fw:
-                    shutil.copyfileobj(fr, fw)
-        # training then test ✅
-        return [
-            os.path.join(DATASET_PATH, "ijcnn1.t"),
-            os.path.join(DATASET_PATH, "ijcnn1.tr"),
-        ]
+                for filepath in os.listdir(dataset_path):
+                    abs_filepath = os.path.join(dataset_path, filepath)
+                    with bz2.BZ2File(abs_filepath) as freader, open(
+                        abs_filepath[:-4], "wb"
+                    ) as fwriter:
+                        shutil.copyfileobj(freader, fwriter)
+            # training then test ✅
+            return_list = [
+                os.path.join(dataset_path, "ijcnn1.t"),
+                os.path.join(dataset_path, "ijcnn1.tr"),
+            ]
 
-    if dataset_name == "space_ga":
-        DATASET_PATH = os.path.join(ALL_DATASETS_PATH, "space_ga")
-        if not os.path.exists(DATASET_PATH):
-            os.makedirs(DATASET_PATH)
-            urllib.request.urlretrieve(
-                "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression/space_ga",
-                f"{os.path.join(DATASET_PATH, 'space_ga')}",
-            )
-            urllib.request.urlretrieve(
-                "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression/space_ga_scale",
-                f"{os.path.join(DATASET_PATH, 'space_ga_scale')}",
-            )
-        return [os.path.join(DATASET_PATH, "space_ga_scale")]
-    if dataset_name == "abalone":
-        DATASET_PATH = os.path.join(ALL_DATASETS_PATH, "abalone")
-        if not os.path.exists(DATASET_PATH):
-            os.makedirs(DATASET_PATH)
-            urllib.request.urlretrieve(
-                "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression/abalone",
-                f"{os.path.join(DATASET_PATH, 'abalone')}",
-            )
-            urllib.request.urlretrieve(
-                "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression/abalone_scale",
-                f"{os.path.join(DATASET_PATH, 'abalone_scale')}",
-            )
-        return [os.path.join(DATASET_PATH, "abalone_scale")]
-    if dataset_name == "cpusmall":
-        DATASET_PATH = os.path.join(ALL_DATASETS_PATH, "cpusmall")
-        if not os.path.exists(DATASET_PATH):
-            os.makedirs(DATASET_PATH)
-            urllib.request.urlretrieve(
-                "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression/cpusmall",
-                f"{os.path.join(DATASET_PATH, 'cpusmall')}",
-            )
-            urllib.request.urlretrieve(
-                "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression/cpusmall_scale",
-                f"{os.path.join(DATASET_PATH, 'cpusmall_scale')}",
-            )
-        return [os.path.join(DATASET_PATH, "cpusmall_scale")]
-    if dataset_name == "YearPredictionMSD":
-        DATASET_PATH = os.path.join(ALL_DATASETS_PATH, "YearPredictionMSD")
-        if not os.path.exists(DATASET_PATH):
-            print(
-                "long download coming -~615MB-, it will be better if you downloaded",
-                "those 2 files manually with a faster download manager program or",
-                "something and just place them in the right folder then get",
-                "the for loop out of the if condition to alter their format",
-            )
-            os.makedirs(DATASET_PATH)
-            urllib.request.urlretrieve(
-                "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression/YearPredictionMSD.bz2",
-                f"{os.path.join(DATASET_PATH, 'YearPredictionMSD.bz2')}",
-            )
-            urllib.request.urlretrieve(
-                "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression/YearPredictionMSD.t.bz2",
-                f"{os.path.join(DATASET_PATH, 'YearPredictionMSD.t.bz2')}",
-            )
-            for filepath in os.listdir(DATASET_PATH):
-                print("it will take sometime")
-                abs_filepath = os.path.join(DATASET_PATH, filepath)
-                with bz2.BZ2File(abs_filepath) as fr, open(
-                    abs_filepath[:-4], "wb"
-                ) as fw:
-                    shutil.copyfileobj(fr, fw)
-        return [
-            os.path.join(DATASET_PATH, "YearPredictionMSD"),
-            os.path.join(DATASET_PATH, "YearPredictionMSD.t"),
-        ]
+        case "space_ga":
+            if not os.path.exists(dataset_path):
+                os.makedirs(dataset_path)
+                urllib.request.urlretrieve(
+                    "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets"
+                    "/regression/space_ga_scale",
+                    f"{os.path.join(dataset_path, 'space_ga_scale')}",
+                )
+            return_list = [os.path.join(dataset_path, "space_ga_scale")]
+        case "abalone":
+            if not os.path.exists(dataset_path):
+                os.makedirs(dataset_path)
+                urllib.request.urlretrieve(
+                    "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets"
+                    "/regression/abalone_scale",
+                    f"{os.path.join(dataset_path, 'abalone_scale')}",
+                )
+            return_list = [os.path.join(dataset_path, "abalone_scale")]
+        case "cpusmall":
+            if not os.path.exists(dataset_path):
+                os.makedirs(dataset_path)
+                urllib.request.urlretrieve(
+                    "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets"
+                    "/regression/cpusmall_scale",
+                    f"{os.path.join(dataset_path, 'cpusmall_scale')}",
+                )
+            return_list = [os.path.join(dataset_path, "cpusmall_scale")]
+        case "YearPredictionMSD":
+            if not os.path.exists(dataset_path):
+                print(
+                    "long download coming -~615MB-, it'll be better if you downloaded",
+                    "those 2 files manually with a faster download manager program or",
+                    "something and just place them in the right folder then get",
+                    "the for loop out of the if condition to alter their format",
+                )
+                os.makedirs(dataset_path)
+                urllib.request.urlretrieve(
+                    "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets"
+                    "/regression/YearPredictionMSD.bz2",
+                    f"{os.path.join(dataset_path, 'YearPredictionMSD.bz2')}",
+                )
+                urllib.request.urlretrieve(
+                    "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets"
+                    "/regression/YearPredictionMSD.t.bz2",
+                    f"{os.path.join(dataset_path, 'YearPredictionMSD.t.bz2')}",
+                )
+                for filepath in os.listdir(dataset_path):
+                    print("it will take sometime")
+                    abs_filepath = os.path.join(dataset_path, filepath)
+                    with bz2.BZ2File(abs_filepath) as freader, open(
+                        abs_filepath[:-4], "wb"
+                    ) as fwriter:
+                        shutil.copyfileobj(freader, fwriter)
+            return_list = [
+                os.path.join(dataset_path, "YearPredictionMSD"),
+                os.path.join(dataset_path, "YearPredictionMSD.t"),
+            ]
+        case _:
+            raise Exception("write your own dataset downloader")
+    return return_list
 
 
 def datafiles_fusion(data_paths):
@@ -225,20 +224,20 @@ def train_test_split(X, y, train_ratio=0.75):
     np.random.shuffle(full)
     y = full[:, -1]  # for last column
     X = full[:, :-1]  # for all but last column
-    q = int(X.shape[0] * train_ratio)
+    num_training_samples = int(X.shape[0] * train_ratio)
 
-    X_train = X[0:q]
-    y_train = y[0:q]
+    x_train = X[0:num_training_samples]
+    y_train = y[0:num_training_samples]
 
-    X_test = X[q:]
-    y_test = y[q:]
+    x_test = X[num_training_samples:]
+    y_test = y[num_training_samples:]
 
-    X_train.flags.writeable = True
+    x_train.flags.writeable = True
     y_train.flags.writeable = True
-    X_test.flags.writeable = True
+    x_test.flags.writeable = True
     y_test.flags.writeable = True
 
-    return X_train, y_train, X_test, y_test
+    return x_train, y_train, x_test, y_test
 
 
 def modify_labels(y_train, y_test):

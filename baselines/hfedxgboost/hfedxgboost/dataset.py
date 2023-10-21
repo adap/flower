@@ -36,17 +36,17 @@ def load_single_dataset(
 
     Returns
     -------
-            X_train (numpy array): The training data features.
+            x_train (numpy array): The training data features.
             y_train (numpy array): The training data labels.
             X_test (numpy array): The testing data features.
             y_test (numpy array): The testing data labels.
     """
     datafiles_paths = download_data(dataset_name)
     X, Y = datafiles_fusion(datafiles_paths)
-    X_train, y_train, X_test, y_test = train_test_split(X, Y, train_ratio=train_ratio)
+    x_train, y_train, x_test, y_test = train_test_split(X, Y, train_ratio=train_ratio)
     if task_type.upper() == "BINARY":
         y_train, y_test = modify_labels(y_train, y_test)
-    return X_train, y_train, X_test, y_test
+    return x_train, y_train, x_test, y_test
 
 
 def get_dataloader(
@@ -98,8 +98,7 @@ def divide_dataset_between_clients(
     # Split training set into `num_clients` partitions to simulate
     # different local datasets
     trainset_length = len(trainset)
-    partition_size = trainset_length // pool_size
-    lengths = [partition_size] * pool_size
+    lengths = [trainset_length // pool_size] * pool_size
     if sum(lengths) != trainset_length:
         lengths[-1] = trainset_length - sum(lengths[0:-1])
     datasets = random_split(trainset, lengths, torch.Generator().manual_seed(0))
@@ -107,15 +106,15 @@ def divide_dataset_between_clients(
     # Split each partition into train/val and create DataLoader
     trainloaders: List[DataLoader] = []
     valloaders: Union[List[DataLoader], List[None]] = []
-    for ds in datasets:
-        len_val = int(len(ds) * val_ratio)
-        len_train = len(ds) - len_val
-        lengths = [len_train, len_val]
-        ds_train, ds_val = random_split(ds, lengths, torch.Generator().manual_seed(0))
+    for dataset in datasets:
+        len_val = int(len(dataset) * val_ratio)
+        len_train = len(dataset) - len_val
+        ds_train, ds_val = random_split(
+            dataset, [len_train, len_val], torch.Generator().manual_seed(0)
+        )
         trainloaders.append(get_dataloader(ds_train, "train", batch_size))
         if len_val != 0:
             valloaders.append(get_dataloader(ds_val, "val", batch_size))
         else:
             valloaders.append(None)
-    testloader = get_dataloader(testset, "test", batch_size)
-    return trainloaders, valloaders, testloader
+    return trainloaders, valloaders, get_dataloader(testset, "test", batch_size)

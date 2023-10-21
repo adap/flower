@@ -5,6 +5,7 @@ example, you may define here things like: loading a model from a checkpoint, sav
 results, plotting.
 """
 import csv
+import math
 import os
 import os.path
 from typing import List, Optional, Tuple, Union
@@ -20,7 +21,7 @@ from tqdm import tqdm
 from xgboost import XGBClassifier, XGBRegressor
 
 from hfedxgboost.dataset import load_single_dataset
-from hfedxgboost.models import CNN, fit_XGBoost
+from hfedxgboost.models import CNN, fit_xgboost
 
 dataset_tasks = {
     "a9a": "BINARY",
@@ -96,13 +97,13 @@ def run_single_exp(
     - result_train (float): Evaluation result on the training set.
     - result_test (float): Evaluation result on the test set.
     """
-    X_train, y_train, X_test, y_test = load_single_dataset(
+    x_train, y_train, x_test, y_test = load_single_dataset(
         task_type, dataset_name, train_ratio=config.dataset.train_ratio
     )
-    tree = fit_XGBoost(config, task_type, X_train, y_train, n_estimators)
-    preds_train = tree.predict(X_train)
+    tree = fit_xgboost(config, task_type, x_train, y_train, n_estimators)
+    preds_train = tree.predict(x_train)
     result_train = evaluate(task_type, y_train, preds_train)
-    preds_test = tree.predict(X_test)
+    preds_test = tree.predict(x_test)
     result_test = evaluate(task_type, y_test, preds_test)
     return result_train, result_test
 
@@ -145,57 +146,57 @@ def run_centralized(
                 result_test,
             )
         return []
-    else:
-        if task_type:
-            result_train, result_test = run_single_exp(
-                config,
-                dataset_name,
-                task_type,
-                config.xgboost_params_centralized.n_estimators,
-            )
-            print(
-                "Results for",
-                dataset_name,
-                ", Task:",
-                task_type,
-                ", Train:",
-                result_train,
-                ", Test:",
-                result_test,
-            )
-            return result_train, result_test
-        else:
-            if dataset_name in dataset_tasks.keys():
-                result_train, result_test = run_single_exp(
-                    config,
-                    dataset_name,
-                    dataset_tasks[dataset_name],
-                    config.xgboost_params_centralized.n_estimators,
-                )
-                print(
-                    "Results for",
-                    dataset_name,
-                    ", Task:",
-                    dataset_tasks[dataset_name],
-                    ", Train:",
-                    result_train,
-                    ", Test:",
-                    result_test,
-                )
-                return result_train, result_test
-            else:
-                raise Exception(
-                    "task_type should be assigned to be BINARY for"
-                    "binary classification"
-                    "tasks or REG for regression tasks"
-                    "or the dataset should be one of the follwing"
-                    "a9a, cod-rna, ijcnn1, space_ga, abalone,",
-                    "cpusmall, YearPredictionMSD",
-                )
+
+    if task_type:
+        result_train, result_test = run_single_exp(
+            config,
+            dataset_name,
+            task_type,
+            config.xgboost_params_centralized.n_estimators,
+        )
+        print(
+            "Results for",
+            dataset_name,
+            ", Task:",
+            task_type,
+            ", Train:",
+            result_train,
+            ", Test:",
+            result_test,
+        )
+        return result_train, result_test
+
+    if dataset_name in dataset_tasks.keys():
+        result_train, result_test = run_single_exp(
+            config,
+            dataset_name,
+            dataset_tasks[dataset_name],
+            config.xgboost_params_centralized.n_estimators,
+        )
+        print(
+            "Results for",
+            dataset_name,
+            ", Task:",
+            dataset_tasks[dataset_name],
+            ", Train:",
+            result_train,
+            ", Test:",
+            result_test,
+        )
+        return result_train, result_test
+
+    raise Exception(
+        "task_type should be assigned to be BINARY for"
+        "binary classification"
+        "tasks or REG for regression tasks"
+        "or the dataset should be one of the follwing"
+        "a9a, cod-rna, ijcnn1, space_ga, abalone,",
+        "cpusmall, YearPredictionMSD",
+    )
 
 
-def clients_performance_on_local_data(
-    config: DictConfig, trainloaders, X_test, y_test, task_type: str
+def local_clients_performance(
+    config: DictConfig, trainloaders, x_test, y_test, task_type: str
 ) -> None:
     """Evaluate the performance of clients on local data using XGBoost.
 
@@ -203,22 +204,25 @@ def clients_performance_on_local_data(
     ----------
         config (DictConfig): Hydra configuration object.
         trainloaders: List of data loaders for each client.
-        X_test: Test features.
+        x_test: Test features.
         y_test: Test labels.
         task_type (str): Type of prediction task.
     """
-    n_estimators_client = 500 // config.client_num
     for i, trainloader in enumerate(trainloaders):
         for local_dataset in trainloader:
-            local_X_train, local_y_train = local_dataset[0], local_dataset[1]
-            tree = fit_XGBoost(
-                config, task_type, local_X_train, local_y_train, n_estimators_client
+            local_x_train, local_y_train = local_dataset[0], local_dataset[1]
+            tree = fit_xgboost(
+                config,
+                task_type,
+                local_x_train,
+                local_y_train,
+                500 // config.client_num,
             )
 
-            preds_train = tree.predict(local_X_train)
+            preds_train = tree.predict(local_x_train)
             result_train = evaluate(task_type, local_y_train, preds_train)
 
-            preds_test = tree.predict(X_test)
+            preds_test = tree.predict(x_test)
             result_test = evaluate(task_type, y_test, preds_test)
             print("Local Client %d XGBoost Training Results: %f" % (i, result_train))
             print("Local Client %d XGBoost Testing Results: %f" % (i, result_test))
@@ -352,8 +356,8 @@ def test(
     total_loss, total_result, n_samples = 0.0, 0.0, 0
     net.eval()
     with torch.no_grad():
-        progress_bar = tqdm(testloader, desc="TEST") if log_progress else testloader
-        for data in progress_bar:
+        # progress_bar = tqdm(testloader, desc="TEST") if log_progress else testloader
+        for data in tqdm(testloader, desc="TEST") if log_progress else testloader:
             tree_outputs, labels = data[0].to(device), data[1].to(device)
             outputs = net(tree_outputs)
             total_loss += criterion(outputs, labels).item()
@@ -367,7 +371,7 @@ def test(
     return total_loss / n_samples, total_result / n_samples, n_samples
 
 
-class Early_Stop:
+class EarlyStop:
     """Stop the tain when no progress is happening."""
 
     def __init__(self, cfg):
@@ -423,26 +427,40 @@ class Early_Stop:
 
 
 # results
-class results_writer:
+
+
+def create_res_csv(filename, fields) -> None:
+    """Create a CSV file with the provided file name."""
+    if not os.path.isfile(filename):
+        with open(filename, "w") as csvfile:
+            csvwriter = csv.writer(csvfile)
+            csvwriter.writerow(fields)
+
+
+class ResultsWriter:
     """Write the results for the federated experiments."""
 
     def __init__(self, cfg) -> None:
-        self.dataset_name = cfg.dataset.dataset_name
-        # self.task_type=cfg.dataset.task_type
-        self.n_estimators_client = cfg.n_estimators_client
-        self.num_rounds = cfg.run_experiment.num_rounds
-        self.client_num = cfg.client_num
-        self.xgb_max_depth = cfg.clients.xgb.max_depth
-        self.CNN_lr = cfg.clients.CNN.lr
+        self.cfg = cfg
         self.tas_type = cfg.dataset.task.task_type
-        self.num_iterations = cfg.run_experiment.fit_config.num_iterations
         if self.tas_type == "REG":
-            self.best_res = 99999999999.999
+            self.best_res = math.inf
             self.compare_fn = min
         if self.tas_type == "BINARY":
             self.best_res = -1
             self.compare_fn = max
         self.best_res_round_num = 0
+        self.fields = [
+            "dataset_name",
+            "client_num",
+            "n_estimators_client",
+            "num_rounds",
+            "xgb_max_depth",
+            "cnn_lr",
+            "best_res",
+            "best_res_round_num",
+            "num_iterations",
+        ]
 
     def extract_best_res(self, history) -> Tuple[float, int]:
         """Take the history & returns the best result and its corresponding round num.
@@ -456,9 +474,9 @@ class results_writer:
             Tuple[float, int]: a tuple containing the best result (float) and
             its corresponding round number (int)
         """
-        for t in history.metrics_centralized.keys():
-            print("history.metrics_centralized[t]", history.metrics_centralized[t])
-            for i in history.metrics_centralized[t]:
+        for key in history.metrics_centralized.keys():
+            # print("history.metrics_centralized", history.metrics_centralized[key])
+            for i in history.metrics_centralized[key]:
                 if (
                     self.compare_fn(i[1].item(), self.best_res) == i[1]
                     and i[1].item() != self.best_res
@@ -466,24 +484,6 @@ class results_writer:
                     self.best_res = i[1].item()
                     self.best_res_round_num = i[0]
         return (self.best_res, self.best_res_round_num)
-
-    def create_res_csv(self, filename) -> None:
-        """Create a CSV file with the provided file name."""
-        if not (os.path.isfile(filename)):
-            fields = [
-                "dataset_name",
-                "client_num",
-                "n_estimators_client",
-                "num_rounds",
-                "xgb_max_depth",
-                "CNN_lr",
-                "best_res",
-                "best_res_round_num",
-                "num_iterations",
-            ]
-            with open(filename, "w") as csvfile:
-                csvwriter = csv.writer(csvfile)
-                csvwriter.writerow(fields)
 
     def write_res(self, filename) -> None:
         """Write the results of the federated model to a CSV file.
@@ -497,63 +497,43 @@ class results_writer:
             filename: string that indicates the CSV file that will be written in.
         """
         row = [
-            str(self.dataset_name),
-            str(self.client_num),
-            str(self.n_estimators_client),
-            str(self.num_rounds),
-            str(self.xgb_max_depth),
-            str(self.CNN_lr),
+            str(self.cfg.dataset.dataset_name),
+            str(self.cfg.client_num),
+            str(self.cfg.clients.n_estimators_client),
+            str(self.cfg.run_experiment.num_rounds),
+            str(self.cfg.clients.xgb.max_depth),
+            str(self.cfg.clients.CNN.lr),
             str(self.best_res),
             str(self.best_res_round_num),
-            str(self.num_iterations),
+            str(self.cfg.run_experiment.fit_config.num_iterations),
         ]
         with open(filename, "a") as csvfile:
             csvwriter = csv.writer(csvfile)
             csvwriter.writerow(row)
 
 
-class results_writer_centralized:
+class CentralizedResultsWriter:
     """Write the results for the centralized experiments."""
 
     def __init__(self, cfg) -> None:
-        self.dataset_name = cfg.dataset.dataset_name
-        self.n_estimators_client = cfg.xgboost_params_centralized.n_estimators
-        self.xgb_max_depth = cfg.xgboost_params_centralized.max_depth
+        self.cfg = cfg
         self.tas_type = cfg.dataset.task.task_type
-        self.subsample = cfg.xgboost_params_centralized.subsample
-        self.learning_rate = cfg.xgboost_params_centralized.learning_rate
-        self.colsample_bylevel = cfg.xgboost_params_centralized.colsample_bylevel
-        self.colsample_bynode = cfg.xgboost_params_centralized.colsample_bynode
-        self.colsample_bytree = cfg.xgboost_params_centralized.colsample_bytree
-        self.alpha = cfg.xgboost_params_centralized.alpha
-        self.gamma = cfg.xgboost_params_centralized.gamma
-        self.num_parallel_tree = cfg.xgboost_params_centralized.num_parallel_tree
-        self.min_child_weight = cfg.xgboost_params_centralized.min_child_weight
-
-    def create_res_csv(self, filename) -> None:
-        """Create a CSV file with the provided file name."""
-        if not (os.path.isfile(filename)):
-            fields = [
-                "dataset_name",
-                "n_estimators_client",
-                "xgb_max_depth",
-                "subsample",
-                "learning_rate",
-                "colsample_bylevel",
-                "colsample_bynode",
-                "colsample_bytree",
-                "alpha",
-                "gamma",
-                "num_parallel_tree",
-                "min_child_weight",
-                "result_train",
-                "result_test",
-            ]
-            with open(filename, "w") as csvfile:
-                # creating a csv writer object
-                csvwriter = csv.writer(csvfile)
-                # writing the fields
-                csvwriter.writerow(fields)
+        self.fields = [
+            "dataset_name",
+            "n_estimators_client",
+            "xgb_max_depth",
+            "subsample",
+            "learning_rate",
+            "colsample_bylevel",
+            "colsample_bynode",
+            "colsample_bytree",
+            "alpha",
+            "gamma",
+            "num_parallel_tree",
+            "min_child_weight",
+            "result_train",
+            "result_test",
+        ]
 
     def write_res(self, filename, result_train, result_test) -> None:
         """Write the results of the centralized model to a CSV file.
@@ -567,18 +547,18 @@ class results_writer_centralized:
             filename: string that indicates the CSV file that will be written in.
         """
         row = [
-            str(self.dataset_name),
-            str(self.n_estimators_client),
-            str(self.xgb_max_depth),
-            str(self.subsample),
-            str(self.learning_rate),
-            str(self.colsample_bylevel),
-            str(self.colsample_bynode),
-            str(self.colsample_bytree),
-            str(self.alpha),
-            str(self.gamma),
-            str(self.num_parallel_tree),
-            str(self.min_child_weight),
+            str(self.cfg.dataset.dataset_name),
+            str(self.cfg.xgboost_params_centralized.n_estimators),
+            str(self.cfg.xgboost_params_centralized.max_depth),
+            str(self.cfg.xgboost_params_centralized.subsample),
+            str(self.cfg.xgboost_params_centralized.learning_rate),
+            str(self.cfg.xgboost_params_centralized.colsample_bylevel),
+            str(self.cfg.xgboost_params_centralized.colsample_bynode),
+            str(self.cfg.xgboost_params_centralized.colsample_bytree),
+            str(self.cfg.xgboost_params_centralized.alpha),
+            str(self.cfg.xgboost_params_centralized.gamma),
+            str(self.cfg.xgboost_params_centralized.num_parallel_tree),
+            str(self.cfg.xgboost_params_centralized.min_child_weight),
             str(result_train),
             str(result_test),
         ]

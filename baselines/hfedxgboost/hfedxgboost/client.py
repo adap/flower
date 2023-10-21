@@ -7,7 +7,6 @@ from typing import Any, Tuple
 
 import flwr as fl
 import torch
-import torch.nn as nn
 from flwr.common import (
     Code,
     EvaluateIns,
@@ -19,15 +18,14 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
+from hydra.utils import instantiate
 from torch.utils.data import DataLoader
-from torchmetrics import Accuracy, MeanSquaredError
-from tqdm import tqdm
 
-from hfedxgboost.models import CNN, fit_XGBoost
+from hfedxgboost.models import CNN, fit_xgboost
 from hfedxgboost.utils import single_tree_preds_from_each_client
 
 
-class FL_Client(fl.client.Client):
+class FlClient(fl.client.Client):
     """Custom class contains the methods that the client need."""
 
     def __init__(
@@ -35,47 +33,22 @@ class FL_Client(fl.client.Client):
         cfg,
         trainloader: DataLoader,
         valloader: DataLoader,
-        client_num: int,
         cid: str,
-        log_progress: bool = False,
     ):
-        self.task_type = cfg.dataset.task.task_type
         self.cid = cid
         self.config = cfg
-        for dataset in trainloader:
-            data, label = dataset[0], dataset[1]
-        self.tree = fit_XGBoost(cfg, self.task_type, data, label, 100)
 
         self.trainloader_original = trainloader
         self.valloader_original = valloader
         self.valloader: Any
-        self.n_estimators_client = (
-            cfg.n_estimators_client
-        )  # 100#cfg.dataset.n_estimators_client
-        self.client_num = client_num
-        self.properties = {"tensor_type": "numpy.ndarray"}
-        self.log_progress = log_progress
 
         # instantiate model
         self.net = CNN(cfg)
 
         # determine device
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        if self.task_type == "BINARY":
-            self.metric_fn = Accuracy(task="binary")
-            self.metric_name = "accuracy"
-            self.criterion = nn.BCELoss()
-        elif self.task_type == "REG":
-            self.metric_fn = MeanSquaredError()
-            self.metric_name = "mse"
-            self.criterion = nn.MSELoss()
-        else:
-            raise Exception("choose a valid task type, BINARY or REG")
-        self.optimizer = torch.optim.Adam(
-            self.net.parameters(), lr=cfg.clients.CNN.lr, betas=(0.5, 0.999)
-        )
 
-    def train_one_loop(self, data):
+    def train_one_loop(self, data, optimizer, metric_fn, criterion):
         """Trains the neural network model for one loop iteration.
 
         Parameters
@@ -92,16 +65,16 @@ class FL_Client(fl.client.Client):
             n_samples (int): The number of samples used for training in the iteration.
         """
         tree_outputs, labels = data[0].to(self.device), data[1].to(self.device)
-        self.optimizer.zero_grad()
+        optimizer.zero_grad()
 
         outputs = self.net(tree_outputs)
-        loss = self.criterion(outputs, labels)
+        loss = criterion(outputs, labels)
         loss.backward()
-        self.optimizer.step()
+        optimizer.step()
 
         # Collected training loss and accuracy statistics
         n_samples = labels.size(0)
-        metric_val = self.metric_fn(outputs, labels.type(torch.int))
+        metric_val = metric_fn(outputs, labels.type(torch.int))
 
         return loss.item(), metric_val * n_samples, n_samples
 
@@ -110,7 +83,6 @@ class FL_Client(fl.client.Client):
         net: CNN,
         trainloader: DataLoader,
         num_iterations,
-        log_progress: bool = True,
     ) -> Tuple[float, float, int]:
         """Train CNN model on a given dataset(trainloader) for(num_iterations).
 
@@ -121,8 +93,6 @@ class FL_Client(fl.client.Client):
              the training dataset.
             num_iterations (int): The number of iterations or batches to
              be processed by the network.
-            log_progress (bool, optional): Set to True if you want to log the
-             training progress using tqdm progress bar. Default is True.
 
         Returns
         -------
@@ -134,16 +104,9 @@ class FL_Client(fl.client.Client):
 
             - The training is formulated in terms of the number of updates or iterations
             processed by the network.
-            - If log_progress is set to True, it displays the training progress with a
-            progress bar and prints the average loss and evaluation result per sample.
         """
         net.train()
         total_loss, total_result, total_n_samples = 0.0, 0.0, 0
-        progress_bar = (
-            tqdm(iter(trainloader), total=num_iterations, desc="TRAIN")
-            if log_progress
-            else iter(trainloader)
-        )
 
         # Unusually, this training is formulated in terms of number of
         # updates/iterations/batches processed
@@ -151,20 +114,18 @@ class FL_Client(fl.client.Client):
         # data across clients: resulting
         # in differences between dataset sizes and hence inconsistent numbers of updates
         # per 'epoch'.
-        for _i, data in zip(range(num_iterations), progress_bar):
-            loss, metric_val, n_samples = self.train_one_loop(data)
+        optimizer = torch.optim.Adam(
+            self.net.parameters(), lr=self.config.clients.CNN.lr, betas=(0.5, 0.999)
+        )
+        metric_fn = instantiate(self.config.dataset.task.metric.fn)
+        criterion = instantiate(self.config.dataset.task.criterion)
+        for _i, data in zip(range(num_iterations), trainloader):
+            loss, metric_val, n_samples = self.train_one_loop(
+                data, optimizer, metric_fn, criterion
+            )
             total_loss += loss
             total_result += metric_val
             total_n_samples += n_samples
-            if log_progress:
-                progress_bar.set_postfix(
-                    {
-                        "train_loss": total_loss / n_samples,
-                        "train_" + self.metric_name: total_result / n_samples,
-                    }
-                )
-        if log_progress:
-            print("\n")
 
         return (
             total_loss / total_n_samples,
@@ -186,19 +147,16 @@ class FL_Client(fl.client.Client):
         """
         total_loss, total_result, n_samples = 0.0, 0.0, 0
         net.eval()
+        metric_fn = instantiate(self.config.dataset.task.metric.fn)
+        criterion = instantiate(self.config.dataset.task.criterion)
         with torch.no_grad():
-            progress_bar = (
-                tqdm(testloader, desc="TEST") if self.log_progress else testloader
-            )
-            for data in progress_bar:
+            for data in testloader:
                 tree_outputs, labels = data[0].to(self.device), data[1].to(self.device)
                 outputs = net(tree_outputs)
-                total_loss += self.criterion(outputs, labels).item()
+                total_loss += criterion(outputs, labels).item()
                 n_samples += labels.size(0)
-                metric_val = self.metric_fn(outputs.cpu(), labels.type(torch.int).cpu())
+                metric_val = metric_fn(outputs.cpu(), labels.type(torch.int).cpu())
                 total_result += metric_val * labels.size(0)
-        if self.log_progress:
-            print("\n")
 
         return total_loss / n_samples, total_result / n_samples, n_samples
 
@@ -222,17 +180,23 @@ class FL_Client(fl.client.Client):
                 A tuple containing either an XGBClassifier or XGBRegressor
                 object along with client's id.
         """
+        for dataset in self.trainloader_original:
+            data, label = dataset[0], dataset[1]
+
+        tree = fit_xgboost(
+            self.config, self.config.dataset.task.task_type, data, label, 100
+        )
         return GetParametersRes(
             status=Status(Code.OK, ""),
             parameters=ndarrays_to_parameters(self.net.get_weights()),
-        ), (self.tree, int(self.cid))
+        ), (tree, int(self.cid))
 
-    def fit(self, fit_params: FitIns) -> FitRes:
+    def fit(self, ins: FitIns) -> FitRes:
         """Trains a model using the given fit parameters.
 
         Parameters
         ----------
-            fit_params: FitIns - The fit parameters that contain the configuration
+            ins: FitIns - The fit parameters that contain the configuration
             and parameters needed for training.
 
         Returns
@@ -240,12 +204,12 @@ class FL_Client(fl.client.Client):
             FitRes - An object that contains the status, trained parameters,
             number of examples processed, and metrics.
         """
-        num_iterations = fit_params.config["num_iterations"]
-        batch_size = fit_params.config["batch_size"]
+        num_iterations = ins.config["num_iterations"]
+        batch_size = ins.config["batch_size"]
 
         # set parmeters
-        self.net.set_weights(parameters_to_ndarrays(fit_params.parameters[0]))  # type: ignore # noqa: E501 # pylint: disable=line-too-long
-        aggregated_trees = fit_params.parameters[1]  # type: ignore # noqa: E501 # pylint: disable=line-too-long
+        self.net.set_weights(parameters_to_ndarrays(ins.parameters[0]))  # type: ignore # noqa: E501 # pylint: disable=line-too-long
+        aggregated_trees = ins.parameters[1]  # type: ignore # noqa: E501 # pylint: disable=line-too-long
 
         if isinstance(aggregated_trees, list):
             print("Client " + self.cid + ": recieved", len(aggregated_trees), "trees")
@@ -255,15 +219,15 @@ class FL_Client(fl.client.Client):
             self.trainloader_original,
             batch_size,
             aggregated_trees,
-            self.n_estimators_client,
-            self.client_num,
+            self.config.n_estimators_client,
+            self.config.clients.client_num,
         )
         self.valloader = single_tree_preds_from_each_client(
             self.valloader_original,
             batch_size,
             aggregated_trees,
-            self.n_estimators_client,
-            self.client_num,
+            self.config.n_estimators_client,
+            self.config.clients.client_num,
         )
         # num_iterations = None special behavior: train(...)
         # runs for a single epoch, however many updates it may be
@@ -277,7 +241,6 @@ class FL_Client(fl.client.Client):
             self.net,
             trainloader,
             num_iterations=num_iterations,
-            log_progress=self.log_progress,
         )
         print(
             f"Client {self.cid}: training round complete, {num_examples}",
@@ -287,23 +250,26 @@ class FL_Client(fl.client.Client):
         # Return training information: model, number of examples processed and metrics
         return FitRes(
             status=Status(Code.OK, ""),
-            parameters=self.get_parameters(fit_params.config),
+            parameters=self.get_parameters(ins.config),
             num_examples=num_examples,
-            metrics={"loss": train_loss, self.metric_name: train_result},
+            metrics={
+                "loss": train_loss,
+                self.config.dataset.task.metric.name: train_result,
+            },
         )
 
-    def evaluate(self, eval_params: EvaluateIns) -> EvaluateRes:
+    def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         """Evaluate CNN model using the given evaluation parameters.
 
         Parameters
         ----------
-          eval_params: An instance of EvaluateIns class that contains the parameters
+          ins: An instance of EvaluateIns class that contains the parameters
           for evaluation.
         Return:
           An EvaluateRes object that contains the evaluation results.
         """
         # set the weights of the CNN net
-        self.net.set_weights(parameters_to_ndarrays(eval_params.parameters))
+        self.net.set_weights(parameters_to_ndarrays(ins.parameters))
 
         # Evaluate the model
         self.net.to(self.device)
@@ -315,11 +281,13 @@ class FL_Client(fl.client.Client):
         # Return evaluation information
         print(
             f"Client {self.cid}: evaluation on {num_examples} examples:",
-            f"loss={loss:.4f}, {self.metric_name}={result:.4f}",
+            f"loss={loss:.4f}",
+            self.config.dataset.task.metric.name,
+            f"={result:.4f}",
         )
         return EvaluateRes(
             status=Status(Code.OK, ""),
             loss=loss,
             num_examples=num_examples,
-            metrics={self.metric_name: result},
+            metrics={self.config.dataset.task.metric.name: result},
         )

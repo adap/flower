@@ -25,7 +25,7 @@ from xgboost import XGBClassifier, XGBRegressor
 
 import wandb
 from hfedxgboost.models import CNN
-from hfedxgboost.utils import Early_Stop, single_tree_preds_from_each_client, test
+from hfedxgboost.utils import EarlyStop, single_tree_preds_from_each_client, test
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
@@ -37,7 +37,7 @@ EvaluateResultsAndFailures = Tuple[
 ]
 
 
-class FL_Server(fl.server.Server):
+class FlServer(fl.server.Server):
     """The FL_Server class is a sub-class of the fl.server.Server class.
 
     Attributes
@@ -49,7 +49,7 @@ class FL_Server(fl.server.Server):
         and aggregating results.
         max_workers (None or int): The maximum number of workers
         for parallel execution.
-        early_stopper (Early_Stop): The early stopper used for
+        early_stopper (EarlyStop): The early stopper used for
         determining when to stop training.
 
     Methods
@@ -74,14 +74,14 @@ class FL_Server(fl.server.Server):
         self,
         cfg: DictConfig,
         client_manager: ClientManager,
-        early_stopper: Early_Stop,
+        early_stopper: EarlyStop,
         strategy: Strategy,
     ) -> None:
+        super().__init__(client_manager=client_manager)
         self.cfg = cfg
         self._client_manager = client_manager
         self.parameters = Parameters(tensors=[], tensor_type="numpy.ndarray")
         self.strategy = strategy
-        self.max_workers = None
         self.early_stopper = early_stopper
 
     def fit_round(
@@ -126,7 +126,7 @@ class FL_Server(fl.server.Server):
         # Collect `fit` results from all clients participating in this round
         results, failures = fit_clients(
             client_instructions=client_instructions,
-            max_workers=self.max_workers,
+            max_workers=self.cfg.server.max_workers,
             timeout=timeout,
         )
 
@@ -145,7 +145,7 @@ class FL_Server(fl.server.Server):
         # the tests is convinced that aggregated_parm is a Parameters | None
         # which is not true as aggregated_parm is actually List[Union[Parameters,None]]
         if aggregated_parm:
-            CNN_aggregated, trees_aggregated = aggregated_parm[0], aggregated_parm[1]  # type: ignore # noqa: E501 # pylint: disable=line-too-long
+            cnn_aggregated, trees_aggregated = aggregated_parm[0], aggregated_parm[1]  # type: ignore # noqa: E501 # pylint: disable=line-too-long
         else:
             raise Exception("aggregated parameters is None")
 
@@ -155,7 +155,7 @@ class FL_Server(fl.server.Server):
             print("Server side did not aggregate trees.")
 
         return (
-            (CNN_aggregated, trees_aggregated),
+            (cnn_aggregated, trees_aggregated),
             metrics_aggregated,
             (results, failures),
         )
@@ -343,7 +343,6 @@ class FL_Server(fl.server.Server):
 
 
 def serverside_eval(
-    server_round: int,
     parameters: Tuple[
         Parameters,
         Union[
@@ -352,7 +351,7 @@ def serverside_eval(
             List[Union[Tuple[XGBClassifier, int], Tuple[XGBRegressor, int]]],
         ],
     ],
-    config: Dict[str, Scalar],
+    # config: Dict[str, Scalar],
     cfg: DictConfig,
     testloader: DataLoader,
     batch_size: int,
@@ -379,7 +378,7 @@ def serverside_eval(
     # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     metric_name = cfg.dataset.task.metric.name
 
-    device = cfg.server_device
+    device = cfg.server.device
     model = CNN(cfg)
     model.set_weights(parameters_to_ndarrays(parameters[0]))
     model.to(device)

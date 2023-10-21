@@ -18,10 +18,10 @@ from omegaconf import DictConfig
 from xgboost import XGBClassifier, XGBRegressor
 
 
-def fit_XGBoost(
+def fit_xgboost(
     config: DictConfig,
     task_type: str,
-    X_train: NDArray,
+    x_train: NDArray,
     y_train: NDArray,
     n_estimators: int,
 ) -> Union[XGBClassifier, XGBRegressor]:
@@ -32,7 +32,7 @@ def fit_XGBoost(
         config (DictConfig): Hydra configuration.
         task_type (str): Type of task, "REG" for regression and "BINARY"
         for binary classification.
-        X_train (NDArray): Input features for training.
+        x_train (NDArray): Input features for training.
         y_train (NDArray): Labels for training.
         n_estimators (int): Number of trees to build.
 
@@ -47,7 +47,7 @@ def fit_XGBoost(
             tree = instantiate(config.XGBoost.classifier, n_estimators=n_estimators)
     else:
         tree = instantiate(config.XGBoost)
-    tree.fit(X_train, y_train)
+    tree.fit(x_train, y_train)
     return tree
 
 
@@ -55,7 +55,7 @@ class CNN(nn.Module):
     """CNN model."""
 
     def __init__(self, cfg, n_channel: int = 64) -> None:
-        super(CNN, self).__init__()
+        super().__init__()
         n_out = 1
         self.task_type = cfg.dataset.task.task_type
         n_estimators_client = cfg.n_estimators_client
@@ -71,7 +71,7 @@ class CNN(nn.Module):
 
         self.layer_direct = nn.Linear(n_channel * client_num, n_out)
 
-        self.ReLU = nn.ReLU()
+        self.relu = nn.ReLU()
 
         if self.task_type == "BINARY":
             self.final_layer = nn.Sigmoid()
@@ -98,7 +98,7 @@ class CNN(nn.Module):
         """
         output = self.conv1d(input_features)
         output = output.flatten(start_dim=1)
-        output = self.ReLU(output)
+        output = self.relu(output)
         output = self.layer_direct(output)
         output = self.final_layer(output)
         return output
@@ -106,7 +106,8 @@ class CNN(nn.Module):
     def get_weights(self) -> fl.common.NDArrays:
         """Get model weights.
 
-        Parmeters:
+        Parameters
+        ----------
             a list of NumPy arrays.
         """
         return [
@@ -117,12 +118,13 @@ class CNN(nn.Module):
     def set_weights(self, weights: fl.common.NDArrays) -> None:
         """Set the CNN model weights.
 
-        Parmeters:
+        Parameters
+        ----------
             weights:a list of NumPy arrays
         """
         layer_dict = {}
-        for k, v in zip(self.state_dict().keys(), weights):
-            if v.ndim != 0:
-                layer_dict[k] = torch.Tensor(np.array(v, copy=True))
+        for key, value in zip(self.state_dict().keys(), weights):
+            if value.ndim != 0:
+                layer_dict[key] = torch.Tensor(np.array(value, copy=True))
         state_dict = OrderedDict(layer_dict)
         self.load_state_dict(state_dict, strict=True)

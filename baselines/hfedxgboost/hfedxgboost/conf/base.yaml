@@ -7,12 +7,11 @@ defaults:
 centralized: False
 use_wandb: False
 show_each_client_performance_on_its_local_data: False
-server_device: "cpu"
 val_ratio: 0.0
 batch_size: "whole"
 n_estimators_client: ${clients.n_estimators_client}
 task_type: ${dataset.task.task_type}
-client_num: ${clients.client_num}
+#client_num: ${clients.client_num}
 
 XGBoost:
   _target_:  ${dataset.task.xgb._target_}
@@ -28,6 +27,10 @@ XGBoost:
   gamma: 5
   num_parallel_tree: 1
   min_child_weight: 1
+
+server:
+    max_workers: None
+    device: "cpu"
 
 client_resources:
     num_cpus: 1
