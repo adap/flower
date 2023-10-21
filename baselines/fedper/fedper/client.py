@@ -278,7 +278,7 @@ def get_client_fn_simulation(
             [
                 transforms.Resize((224, 224)),
                 transforms.RandomCrop(224, padding=4),
-                transforms.RandomHorizontalFlip(),
+                # transforms.RandomHorizontalFlip(),
                 # transforms.ToTensor(),
                 transforms.Normalize(
                     MEAN[config.dataset.name], STD[config.dataset.name]
