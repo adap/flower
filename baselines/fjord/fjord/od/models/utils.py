@@ -57,7 +57,7 @@ class SequentialWithSampler(nn.Sequential):
     def forward(self, input, sampler=None):  # pylint: disable=redefined-builtin
         """Forward method for custom Sequential.
 
-        :param x: input
+        :param input: input
         :param sampler: the sampler to use.
         :return: Output of sequential
         """

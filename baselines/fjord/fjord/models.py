@@ -302,7 +302,7 @@ def get_lr_scheduler(
     optimiser: Optimizer,
     total_epochs: int,
     method: Optional[str] = "static",
-) -> torch.optim.lr_scheduler._LRScheduler:
+) -> torch.optim.lr_scheduler.LRScheduler:
     """Get the learning rate scheduler.
 
     :param optimiser: The optimiser for which to get the scheduler.

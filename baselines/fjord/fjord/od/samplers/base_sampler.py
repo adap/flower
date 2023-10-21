@@ -30,7 +30,7 @@ class BaseSampler:
                 self.widths.append(m.width)
                 self.od_layers.append(m)
 
-    def width_sampler(self) -> Generator:
+    def width_sampler(self) -> Generator:  # pylint: disable=no-self-use
         """Sample width."""
         while True:
             yield None
