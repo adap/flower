@@ -131,8 +131,9 @@ python -m depthfl.main --multirun exclusive_learning=true model_size=1,2,3,4
 
 ```bash
 ## table 3 (Width Scaling - Duplicate results from table 2)
-python -m depthfl.main --config-name="heterofl" --multirun exclusive_learning=true model.scale=false model_size=1,2,3,4 
 python -m depthfl.main --config-name="heterofl" 
+python -m depthfl.main --config-name="heterofl" --multirun exclusive_learning=true model.scale=false model_size=1,2,3,4 
+
 
 ## table 3 (Depth Scaling : Exclusive Learning, DepthFL(FedAvg) rows - Duplicate results from table 2)
 python -m depthfl.main fit_config.feddyn=false fit_config.kd=false 
