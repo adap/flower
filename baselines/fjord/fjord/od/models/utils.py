@@ -54,7 +54,9 @@ def create_bn_layer(od, p_s, *args, **kwargs):
 class SequentialWithSampler(nn.Sequential):
     """Implements sequential model with sampler."""
 
-    def forward(self, input, sampler=None):  # pylint: disable=redefined-builtin
+    def forward(
+        self, input, sampler=None
+    ):  # pylint: disable=redefined-builtin, arguments-differ
         """Forward method for custom Sequential.
 
         :param input: input

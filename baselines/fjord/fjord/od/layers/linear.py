@@ -21,7 +21,7 @@ class ODLinear(nn.Linear):
         self.last_input_dim = None
         self.last_output_dim = None
 
-    def forward(
+    def forward(  # pylint: disable=arguments-differ
         self,
         input: Tensor,  # pylint: disable=redefined-builtin
         p: Optional[Union[Tuple[Module, float], float]] = None,
