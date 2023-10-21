@@ -108,15 +108,15 @@ To implement `feddyn`, stateful clients that store prev_grads information are ne
 With the following command we run DepthFL (FedDyn / FedAvg), InclusiveFL, and HeteroFL to replicate the results of table 2,3,4 in DepthFL paper. Tables 2, 3, and 4 may contain results from the same experiment in multiple tables. 
 
 ```bash
-## table 2 (HeteroFL row)
+# table 2 (HeteroFL row)
 python -m depthfl.main --config-name="heterofl" 
 python -m depthfl.main --config-name="heterofl" --multirun exclusive_learning=true model.scale=false model_size=1,2,3,4 
 
-## table 2 (DepthFL(FedAvg) row)
+# table 2 (DepthFL(FedAvg) row)
 python -m depthfl.main fit_config.feddyn=false fit_config.kd=false 
 python -m depthfl.main --multirun fit_config.feddyn=false fit_config.kd=false  exclusive_learning=true model_size=1,2,3,4
 
-## table 2 (DepthFL row)
+# table 2 (DepthFL row)
 python -m depthfl.main
 python -m depthfl.main --multirun exclusive_learning=true model_size=1,2,3,4
 ```
@@ -130,12 +130,12 @@ python -m depthfl.main --multirun exclusive_learning=true model_size=1,2,3,4
 | HeteroFL<br>DepthFL (FedAvg)<br>DepthFL | CIFAR100 | 57.61<br>72.67<br>76.06 | 64.39<br>67.08<br>69.68 | 66.08<br>70.78<br>73.21 | 62.03<br>68.41<br>70.29 | 51.99<br>59.17<br>60.32 |
 
 ```bash
-## table 3 (Width Scaling - Duplicate results from table 2)
+# table 3 (Width Scaling - Duplicate results from table 2)
 python -m depthfl.main --config-name="heterofl" 
 python -m depthfl.main --config-name="heterofl" --multirun exclusive_learning=true model.scale=false model_size=1,2,3,4 
 
 
-## table 3 (Depth Scaling : Exclusive Learning, DepthFL(FedAvg) rows - Duplicate results from table 2)
+# table 3 (Depth Scaling : Exclusive Learning, DepthFL(FedAvg) rows - Duplicate results from table 2)
 python -m depthfl.main fit_config.feddyn=false fit_config.kd=false 
 python -m depthfl.main --multirun fit_config.feddyn=false fit_config.kd=false  exclusive_learning=true model_size=1,2,3,4
 
@@ -156,7 +156,7 @@ Accuracy of global sub-models compared to exclusive learning on CIFAR-100.
 | Depth Scaling | Exclusive Learning<br>InclusiveFL<br>DepthFL (FedAvg) | 67.08<br>47.61<br>66.18 | 68.00<br>53.88<br>67.56 | 66.19<br>59.48<br>67.97 | 56.78<br>60.46<br>68.01 |
 
 ```bash
-## table 4
+# table 4
 python -m depthfl.main --multirun fit_config.kd=true,false dataset_config.iid=true,false
 ```
 
