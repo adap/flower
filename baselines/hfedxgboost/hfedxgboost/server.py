@@ -11,6 +11,7 @@ from logging import DEBUG, INFO
 from typing import Dict, List, Optional, Tuple, Union
 
 import flwr as fl
+import wandb
 from flwr.common import EvaluateRes, FitRes, Parameters, Scalar, parameters_to_ndarrays
 from flwr.common.logger import log
 from flwr.common.typing import GetParametersIns
@@ -23,7 +24,6 @@ from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 from xgboost import XGBClassifier, XGBRegressor
 
-import wandb
 from hfedxgboost.models import CNN
 from hfedxgboost.utils import EarlyStop, single_tree_preds_from_each_client, test
 

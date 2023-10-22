@@ -9,6 +9,7 @@ from typing import Dict, Union
 import flwr as fl
 import hydra
 import torch
+import wandb
 from flwr.common import Scalar
 from flwr.server.app import ServerConfig
 from flwr.server.client_manager import SimpleClientManager
@@ -16,7 +17,6 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 from torch.utils.data import TensorDataset
 
-import wandb
 from hfedxgboost.client import FlClient
 from hfedxgboost.dataset import divide_dataset_between_clients, load_single_dataset
 from hfedxgboost.server import FlServer, serverside_eval
