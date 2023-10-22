@@ -57,11 +57,9 @@ def aggregate_meamed(results: List[Tuple[NDArrays, int]], q: int) -> NDArrays:
     """Compute the mean around the median"""
     # Number of models to aggregate
     to_keep = len(results) - q
-
+    
     # Compute median vector model
     median_model = aggregate_median(results)
-
-    print(f"Median model: {median_model}")
 
     # Compute the distance matrix between the median model and the other models
     closest_models = []
