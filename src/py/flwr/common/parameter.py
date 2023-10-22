@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ def ndarray_to_bytes(ndarray: NDArray) -> bytes:
     # WARNING: NEVER set allow_pickle to true.
     # Reason: loading pickled data can execute arbitrary code
     # Source: https://numpy.org/doc/stable/reference/generated/numpy.save.html
-    np.save(bytes_io, ndarray, allow_pickle=False)  # type: ignore
+    np.save(bytes_io, ndarray, allow_pickle=False)
     return bytes_io.getvalue()
 
 
@@ -50,5 +50,5 @@ def bytes_to_ndarray(tensor: bytes) -> NDArray:
     # WARNING: NEVER set allow_pickle to true.
     # Reason: loading pickled data can execute arbitrary code
     # Source: https://numpy.org/doc/stable/reference/generated/numpy.load.html
-    ndarray_deserialized = np.load(bytes_io, allow_pickle=False)  # type: ignore
+    ndarray_deserialized = np.load(bytes_io, allow_pickle=False)
     return cast(NDArray, ndarray_deserialized)

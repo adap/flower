@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,13 +18,14 @@
 import sys
 import threading
 import traceback
+import warnings
 from logging import ERROR, INFO
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Type, Union
 
 import ray
 from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 
-from flwr.client import ClientLike
+from flwr.client import ClientFn
 from flwr.common import EventType, event
 from flwr.common.logger import log
 from flwr.server import Server
@@ -47,7 +48,7 @@ Invalid Arguments in method:
 
 `start_simulation(
     *,
-    client_fn: Callable[[str], ClientLike],
+    client_fn: ClientFn,
     num_clients: Optional[int] = None,
     clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, float]] = None,
@@ -68,9 +69,10 @@ REASON:
 """
 
 
-def start_simulation(  # pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-statements,too-many-branches
+def start_simulation(
     *,
-    client_fn: Callable[[str], ClientLike],
+    client_fn: ClientFn,
     num_clients: Optional[int] = None,
     clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, float]] = None,
@@ -88,10 +90,10 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     Parameters
     ----------
-    client_fn : Callable[[str], ClientLike]
+    client_fn : ClientFn
         A function creating client instances. The function must take a single
         `str` argument called `cid`. It should return a single client instance
-        of type ClientLike. Note that the created client instances are ephemeral
+        of type Client. Note that the created client instances are ephemeral
         and will often be destroyed after a single method invocation. Since client
         instances are not long-lived, they should not attempt to carry state over
         method invocations. Any state required by the instance (model, dataset,
@@ -214,6 +216,12 @@ def start_simulation(  # pylint: disable=too-many-arguments
         cluster_resources,
     )
 
+    log(
+        INFO,
+        "Optimize your simulation with Flower VCE: "
+        "https://flower.dev/docs/framework/how-to-run-simulations.html",
+    )
+
     # Log the resources that a single client will be able to use
     if client_resources is None:
         log(
@@ -221,6 +229,15 @@ def start_simulation(  # pylint: disable=too-many-arguments
             "No `client_resources` specified. Using minimal resources for clients.",
         )
         client_resources = {"num_cpus": 1, "num_gpus": 0.0}
+
+    # Each client needs at the very least one CPU
+    if "num_cpus" not in client_resources:
+        warnings.warn(
+            "No `num_cpus` specified in `client_resources`. "
+            "Using `num_cpus=1` for each client.",
+            stacklevel=2,
+        )
+        client_resources["num_cpus"] = 1
 
     log(
         INFO,
@@ -284,6 +301,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
         )
         initialized_server.client_manager().register(client=client_proxy)
 
+    hist = History()
     # pylint: disable=broad-except
     try:
         # Start training
@@ -311,11 +329,11 @@ def start_simulation(  # pylint: disable=too-many-arguments
             client_resources,
             client_resources,
         )
-        hist = History()
+        raise RuntimeError("Simulation crashed.") from ex
 
-    # Stop time monitoring resources in cluster
-    f_stop.set()
-
-    event(EventType.START_SIMULATION_LEAVE)
+    finally:
+        # Stop time monitoring resources in cluster
+        f_stop.set()
+        event(EventType.START_SIMULATION_LEAVE)
 
     return hist

@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 import uuid
 
 from flwr.client import Client
+from flwr.client.typing import ClientFn
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -103,6 +104,13 @@ class ClientWithProps(Client):
         )
 
 
+def _get_client_fn(client: Client) -> ClientFn:
+    def client_fn(cid: str) -> Client:  # pylint: disable=unused-argument
+        return client
+
+    return client_fn
+
+
 def test_client_without_get_properties() -> None:
     """Test client implementing get_properties."""
     # Prepare
@@ -112,7 +120,7 @@ def test_client_without_get_properties() -> None:
     task_ins: TaskIns = TaskIns(
         task_id=str(uuid.uuid4()),
         group_id="",
-        workload_id="",
+        workload_id=0,
         task=Task(
             producer=Node(node_id=0, anonymous=True),
             consumer=Node(node_id=0, anonymous=True),
@@ -123,7 +131,7 @@ def test_client_without_get_properties() -> None:
 
     # Execute
     task_res, actual_sleep_duration, actual_keep_going = handle(
-        client=client, task_ins=task_ins
+        client_fn=_get_client_fn(client), task_ins=task_ins
     )
 
     if not task_res.HasField("task"):
@@ -138,7 +146,7 @@ def test_client_without_get_properties() -> None:
         TaskRes(
             task_id=str(uuid.uuid4()),
             group_id="",
-            workload_id="",
+            workload_id=0,
         )
     )
     # pylint: disable=no-member
@@ -175,7 +183,7 @@ def test_client_with_get_properties() -> None:
     task_ins = TaskIns(
         task_id=str(uuid.uuid4()),
         group_id="",
-        workload_id="",
+        workload_id=0,
         task=Task(
             producer=Node(node_id=0, anonymous=True),
             consumer=Node(node_id=0, anonymous=True),
@@ -186,7 +194,7 @@ def test_client_with_get_properties() -> None:
 
     # Execute
     task_res, actual_sleep_duration, actual_keep_going = handle(
-        client=client, task_ins=task_ins
+        client_fn=_get_client_fn(client), task_ins=task_ins
     )
 
     if not task_res.HasField("task"):
@@ -201,7 +209,7 @@ def test_client_with_get_properties() -> None:
         TaskRes(
             task_id=str(uuid.uuid4()),
             group_id="",
-            workload_id="",
+            workload_id=0,
         )
     )
     # pylint: disable=no-member

@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ def aggregate_median(results: List[Tuple[NDArrays, int]]) -> NDArrays:
 
     # Compute median weight of each layer
     median_w: NDArrays = [
-        np.median(np.asarray(layer), axis=0) for layer in zip(*weights)  # type: ignore
+        np.median(np.asarray(layer), axis=0) for layer in zip(*weights)
     ]
     return median_w
 
@@ -101,8 +101,8 @@ def weighted_loss_avg(results: List[Tuple[int, float]]) -> float:
 def aggregate_qffl(
     parameters: NDArrays, deltas: List[NDArrays], hs_fll: List[NDArrays]
 ) -> NDArrays:
-    """Compute weighted average based on  Q-FFL paper."""
-    demominator = np.sum(np.asarray(hs_fll))
+    """Compute weighted average based on Q-FFL paper."""
+    demominator: float = np.sum(np.asarray(hs_fll))
     scaled_deltas = []
     for client_delta in deltas:
         scaled_deltas.append([layer * 1.0 / demominator for layer in client_delta])
@@ -122,14 +122,12 @@ def _compute_distances(weights: List[NDArrays]) -> NDArray:
     Input: weights - list of weights vectors
     Output: distances - matrix distance_matrix of squared distances between the vectors
     """
-    flat_w = np.array(
-        [np.concatenate(p, axis=None).ravel() for p in weights]  # type: ignore
-    )
+    flat_w = np.array([np.concatenate(p, axis=None).ravel() for p in weights])
     distance_matrix = np.zeros((len(weights), len(weights)))
     for i, _ in enumerate(flat_w):
         for j, _ in enumerate(flat_w):
             delta = flat_w[i] - flat_w[j]
-            norm = np.linalg.norm(delta)  # type: ignore
+            norm = np.linalg.norm(delta)
             distance_matrix[i, j] = norm**2
     return distance_matrix
 

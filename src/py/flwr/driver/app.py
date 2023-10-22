@@ -1,4 +1,4 @@
-# Copyright 2022 Adap GmbH. All Rights Reserved.
+# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,19 +16,23 @@
 
 
 import sys
+import threading
+import time
 from logging import INFO
-from typing import Optional
+from typing import Dict, Optional
 
 from flwr.common import EventType, event
 from flwr.common.address import parse_address
 from flwr.common.logger import log
+from flwr.proto import driver_pb2
 from flwr.server.app import ServerConfig, init_defaults, run_fl
+from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.server import Server
 from flwr.server.strategy import Strategy
 
-from .driver import Driver
-from .driver_client_manager import DriverClientManager
+from .driver import GrpcDriver
+from .driver_client_proxy import DriverClientProxy
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
 
@@ -40,13 +44,13 @@ methods.
 """
 
 
-def start_driver(  # pylint: disable=too-many-arguments
+def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     *,
     server_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
     server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,
     strategy: Optional[Strategy] = None,
-    client_manager: Optional[DriverClientManager] = None,
+    client_manager: Optional[ClientManager] = None,
     certificates: Optional[bytes] = None,
 ) -> History:
     """Start a Flower Driver API server.
@@ -107,12 +111,10 @@ def start_driver(  # pylint: disable=too-many-arguments
     host, port, is_v6 = parsed_address
     address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
-    # Create the Driver and DriverClientManager if None is provided
-    if client_manager is None:
-        driver = Driver(driver_service_address=address, certificates=certificates)
-        driver.connect()
-
-        client_manager = DriverClientManager(driver=driver)
+    # Create the Driver
+    driver = GrpcDriver(driver_service_address=address, certificates=certificates)
+    driver.connect()
+    lock = threading.Lock()
 
     # Initialize the Driver API server and config
     initialized_server, initialized_config = init_defaults(
@@ -127,15 +129,83 @@ def start_driver(  # pylint: disable=too-many-arguments
         initialized_config,
     )
 
+    # Start the thread updating nodes
+    thread = threading.Thread(
+        target=update_client_manager,
+        args=(
+            driver,
+            initialized_server.client_manager(),
+            lock,
+        ),
+    )
+    thread.start()
+
     # Start training
     hist = run_fl(
         server=initialized_server,
         config=initialized_config,
     )
 
-    # Stop the Driver API server
-    client_manager.driver.disconnect()
+    # Stop the Driver API server and the thread
+    with lock:
+        driver.disconnect()
+    thread.join()
 
     event(EventType.START_SERVER_LEAVE)
 
     return hist
+
+
+def update_client_manager(
+    driver: GrpcDriver,
+    client_manager: ClientManager,
+    lock: threading.Lock,
+) -> None:
+    """Update the nodes list in the client manager.
+
+    This function periodically communicates with the associated driver to get all
+    node_ids. Each node_id is then converted into a `DriverClientProxy` instance
+    and stored in the `registered_nodes` dictionary with node_id as key.
+
+    New nodes will be added to the ClientManager via `client_manager.register()`,
+    and dead nodes will be removed from the ClientManager via
+    `client_manager.unregister()`.
+    """
+    # Request for workload_id
+    workload_id = driver.create_workload(driver_pb2.CreateWorkloadRequest()).workload_id
+
+    # Loop until the driver is disconnected
+    registered_nodes: Dict[int, DriverClientProxy] = {}
+    while True:
+        with lock:
+            # End the while loop if the driver is disconnected
+            if driver.stub is None:
+                break
+            get_nodes_res = driver.get_nodes(
+                req=driver_pb2.GetNodesRequest(workload_id=workload_id)
+            )
+        all_node_ids = {node.node_id for node in get_nodes_res.nodes}
+        dead_nodes = set(registered_nodes).difference(all_node_ids)
+        new_nodes = all_node_ids.difference(registered_nodes)
+
+        # Unregister dead nodes
+        for node_id in dead_nodes:
+            client_proxy = registered_nodes[node_id]
+            client_manager.unregister(client_proxy)
+            del registered_nodes[node_id]
+
+        # Register new nodes
+        for node_id in new_nodes:
+            client_proxy = DriverClientProxy(
+                node_id=node_id,
+                driver=driver,
+                anonymous=False,
+                workload_id=workload_id,
+            )
+            if client_manager.register(client_proxy):
+                registered_nodes[node_id] = client_proxy
+            else:
+                raise RuntimeError("Could not register node.")
+
+        # Sleep for 3 seconds
+        time.sleep(3)

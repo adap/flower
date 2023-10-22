@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ from logging import ERROR, INFO, WARN
 from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast
 
 from flwr.client.message_handler.task_handler import (
+    configure_task_res,
     get_task_ins,
     validate_task_ins,
     validate_task_res,
@@ -29,13 +30,16 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import MISSING_EXTRA_REST
 from flwr.common.logger import log
 from flwr.proto.fleet_pb2 import (
+    CreateNodeRequest,
+    CreateNodeResponse,
+    DeleteNodeRequest,
     PullTaskInsRequest,
     PullTaskInsResponse,
     PushTaskResRequest,
     PushTaskResResponse,
 )
 from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
+from flwr.proto.task_pb2 import TaskIns, TaskRes
 
 try:
     import requests
@@ -43,9 +47,12 @@ except ModuleNotFoundError:
     sys.exit(MISSING_EXTRA_REST)
 
 
+KEY_NODE = "node"
 KEY_TASK_INS = "current_task_ins"
 
 
+PATH_CREATE_NODE: str = "api/v0/fleet/create-node"
+PATH_DELETE_NODE: str = "api/v0/fleet/delete-node"
 PATH_PULL_TASK_INS: str = "api/v0/fleet/pull-task-ins"
 PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 
@@ -115,16 +122,97 @@ def http_request_response(
     # Necessary state to link TaskRes to TaskIns
     state: Dict[str, Optional[TaskIns]] = {KEY_TASK_INS: None}
 
+    # Enable create_node and delete_node to store node
+    node_store: Dict[str, Optional[Node]] = {KEY_NODE: None}
+
     ###########################################################################
     # receive/send functions
     ###########################################################################
 
+    def create_node() -> None:
+        """Set create_node."""
+        create_node_req_proto = CreateNodeRequest()
+        create_node_req_bytes: bytes = create_node_req_proto.SerializeToString()
+
+        res = requests.post(
+            url=f"{base_url}/{PATH_CREATE_NODE}",
+            headers={
+                "Accept": "application/protobuf",
+                "Content-Type": "application/protobuf",
+            },
+            data=create_node_req_bytes,
+            verify=verify,
+        )
+
+        # Check status code and headers
+        if res.status_code != 200:
+            return
+        if "content-type" not in res.headers:
+            log(
+                WARN,
+                "[Node] POST /%s: missing header `Content-Type`",
+                PATH_PULL_TASK_INS,
+            )
+            return
+        if res.headers["content-type"] != "application/protobuf":
+            log(
+                WARN,
+                "[Node] POST /%s: header `Content-Type` has wrong value",
+                PATH_PULL_TASK_INS,
+            )
+            return
+
+        # Deserialize ProtoBuf from bytes
+        create_node_response_proto = CreateNodeResponse()
+        create_node_response_proto.ParseFromString(res.content)
+        # pylint: disable-next=no-member
+        node_store[KEY_NODE] = create_node_response_proto.node
+
+    def delete_node() -> None:
+        """Set delete_node."""
+        if node_store[KEY_NODE] is None:
+            log(ERROR, "Node instance missing")
+            return
+        node: Node = cast(Node, node_store[KEY_NODE])
+        delete_node_req_proto = DeleteNodeRequest(node=node)
+        delete_node_req_req_bytes: bytes = delete_node_req_proto.SerializeToString()
+        res = requests.post(
+            url=f"{base_url}/{PATH_DELETE_NODE}",
+            headers={
+                "Accept": "application/protobuf",
+                "Content-Type": "application/protobuf",
+            },
+            data=delete_node_req_req_bytes,
+            verify=verify,
+        )
+
+        # Check status code and headers
+        if res.status_code != 200:
+            return
+        if "content-type" not in res.headers:
+            log(
+                WARN,
+                "[Node] POST /%s: missing header `Content-Type`",
+                PATH_PULL_TASK_INS,
+            )
+            return
+        if res.headers["content-type"] != "application/protobuf":
+            log(
+                WARN,
+                "[Node] POST /%s: header `Content-Type` has wrong value",
+                PATH_PULL_TASK_INS,
+            )
+
     def receive() -> Optional[TaskIns]:
         """Receive next task from server."""
-        # Serialize ProtoBuf to bytes
-        pull_task_ins_req_proto = PullTaskInsRequest(
-            node=Node(node_id=0, anonymous=True),
-        )
+        # Get Node
+        if node_store[KEY_NODE] is None:
+            log(ERROR, "Node instance missing")
+            return None
+        node: Node = cast(Node, node_store[KEY_NODE])
+
+        # Request instructions (task) from server
+        pull_task_ins_req_proto = PullTaskInsRequest(node=node)
         pull_task_ins_req_bytes: bytes = pull_task_ins_req_proto.SerializeToString()
 
         # Request instructions (task) from server
@@ -179,6 +267,12 @@ def http_request_response(
 
     def send(task_res: TaskRes) -> None:
         """Send task result back to server."""
+        # Get Node
+        if node_store[KEY_NODE] is None:
+            log(ERROR, "Node instance missing")
+            return
+        node: Node = cast(Node, node_store[KEY_NODE])
+
         if state[KEY_TASK_INS] is None:
             log(ERROR, "No current TaskIns")
             return
@@ -190,27 +284,8 @@ def http_request_response(
             state[KEY_TASK_INS] = None
             log(ERROR, "TaskRes has been initialized accidentally")
 
-        # Fill `group_id` and `workload_id` in TaskRes
-        # Note that protobuf API `protobuf.message.MergeFrom(other_msg)`
-        # does NOT always overwrite fields that are set in `other_msg`.
-        # Please refer to:
-        # https://googleapis.dev/python/protobuf/latest/google/protobuf/message.html
-        task_res.MergeFrom(
-            TaskRes(
-                task_id="",  # This will be generated by the server
-                group_id=task_ins.group_id,
-                workload_id=task_ins.workload_id,
-            )
-        )
-
-        # Fill `producer`, `consumer`, and `ancestry` in Task
-        task_res.task.MergeFrom(
-            Task(
-                producer=Node(node_id=0, anonymous=True),
-                consumer=task_ins.task.producer,
-                ancestry=[task_ins.task_id],
-            )
-        )
+        # Configure TaskRes
+        task_res = configure_task_res(task_res, task_ins, node)
 
         # Serialize ProtoBuf to bytes
         push_task_res_request_proto = PushTaskResRequest(task_res_list=[task_res])
@@ -261,6 +336,6 @@ def http_request_response(
 
     try:
         # Yield methods
-        yield (receive, send, None, None)
+        yield (receive, send, create_node, delete_node)
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)
