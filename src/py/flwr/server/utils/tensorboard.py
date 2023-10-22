@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,21 +17,30 @@
 
 import os
 from datetime import datetime
-from typing import Callable, Dict, List, Optional, Tuple, TypeVar, Union, cast
-
-try:
-    import tensorflow as tf
-except ImportError:
-    tf = None
+from logging import WARN
+from typing import Callable, Dict, List, Optional, Tuple, Union, cast
 
 from flwr.common import EvaluateRes, Scalar
+from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import Strategy
 
-TBW = TypeVar("TBW")
+try:
+    import tensorflow as TF
+except ModuleNotFoundError:
+    TF = None
+
+MISSING_EXTRA_TF = """
+Extra dependency required for using tensorboard are missing.
+The program will continue without tensorboard.
+
+In order to use tensorboard, install `tensorflow` with the following command:
+
+    `pip install tensorflow`.
+"""
 
 
-def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
+def tensorboard(logdir: str) -> Callable[[Strategy], Strategy]:
     """TensorBoard logger for Flower strategies.
 
     It will log loss, num_examples and all metrics which are of type float or int.
@@ -52,7 +61,7 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
     """
     print(
         "\n\t\033[32mStart TensorBoard with the following parameters"
-        + f"\n\t$ tensorboard --logdir {logdir}\033[39m\n"
+        f"\n\t$ tensorboard --logdir {logdir}\033[39m\n"
     )
     # Create logdir if it does not yet exist
     os.makedirs(logdir, exist_ok=True)
@@ -71,12 +80,14 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
     run_id = run_id + "-" + datetime.now().strftime("%Y%m%dT%H%M%S")
     logdir_run = os.path.join(logdir, run_id)
 
-    def decorator(strategy_class: Strategy) -> TBW:
+    def decorator(strategy_class: Strategy) -> Strategy:
         """Return overloaded Strategy Wrapper."""
+        if TF is None:
+            log(WARN, MISSING_EXTRA_TF)
+            return strategy_class
 
         class TBWrapper(strategy_class):  # type: ignore
-            """Strategy wrapper which hooks into some methods for TensorBoard
-            logging."""
+            """Strategy wrapper that hooks into some methods for TensorBoard logging."""
 
             def aggregate_evaluate(
                 self,
@@ -84,8 +95,7 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
                 results: List[Tuple[ClientProxy, EvaluateRes]],
                 failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
             ) -> Tuple[Optional[float], Dict[str, Scalar]]:
-                """Hooks into aggregate_evaluate for TensorBoard logging
-                purpose."""
+                """Hooks into aggregate_evaluate for TensorBoard logging purpose."""
                 # Execute decorated function and extract results for logging
                 # They will be returned at the end of this function but also
                 # used for logging
@@ -96,7 +106,7 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
                 )
 
                 # Server logs
-                writer = tf.summary.create_file_writer(
+                writer = TF.summary.create_file_writer(
                     os.path.join(logdir_run, "server")
                 )
 
@@ -104,7 +114,7 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
                 with writer.as_default(
                     step=server_round
                 ):  # pylint: disable=not-context-manager
-                    tf.summary.scalar(
+                    TF.summary.scalar(
                         "server/loss_aggregated", loss_aggregated, step=server_round
                     )
                     writer.flush()
@@ -120,22 +130,22 @@ def tensorboard(logdir: str) -> Callable[[Strategy], TBW]:
                         evaluate_res.metrics,
                     )
 
-                    writer = tf.summary.create_file_writer(
+                    writer = TF.summary.create_file_writer(
                         os.path.join(logdir_run, "clients", client.cid)
                     )
                     with writer.as_default(  # pylint: disable=not-context-manager
                         step=server_round
                     ):
-                        tf.summary.scalar("clients/loss", loss)
-                        tf.summary.scalar("clients/num_examples", num_examples)
+                        TF.summary.scalar("clients/loss", loss)
+                        TF.summary.scalar("clients/num_examples", num_examples)
                         if metrics is not None:
                             for key, value in metrics.items():
                                 if type(value) in [int, float]:
-                                    tf.summary.scalar(f"clients/{key}", value)
+                                    TF.summary.scalar(f"clients/{key}", value)
                         writer.flush()
 
                 return loss_aggregated, config
 
-        return cast(TBW, TBWrapper)
+        return cast(Strategy, TBWrapper)
 
     return decorator

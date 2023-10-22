@@ -1,4 +1,4 @@
-# Copyright 2022 Adap GmbH. All Rights Reserved.
+# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ class StateFactory:
 
     def state(self) -> State:
         """Return a State instance and create it, if necessary."""
-
         # InMemoryState
         if self.database == ":flwr-in-memory-state:":
             if self.state_instance is None:

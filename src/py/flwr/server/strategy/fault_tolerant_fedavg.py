@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -77,10 +77,9 @@ class FaultTolerantFedAvg(FedAvg):
         )
         self.completion_rate_fit = min_completion_rate_fit
         self.completion_rate_evaluate = min_completion_rate_evaluate
-        self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
-        self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         return "FaultTolerantFedAvg()"
 
     def aggregate_fit(

@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ def aggregate_median(results: List[Tuple[NDArrays, int]]) -> NDArrays:
 
     # Compute median weight of each layer
     median_w: NDArrays = [
-        np.median(np.asarray(layer), axis=0) for layer in zip(*weights)  # type: ignore
+        np.median(np.asarray(layer), axis=0) for layer in zip(*weights)
     ]
     return median_w
 
@@ -87,7 +87,7 @@ def aggregate_krum(
         best_results = [results[i] for i in best_indices]
         return aggregate(best_results)
 
-    # Return the index of the client which minimizes the score (Krum)
+    # Return the model parameters that minimize the score (Krum)
     return weights[np.argmin(scores)]
 
 
@@ -101,8 +101,8 @@ def weighted_loss_avg(results: List[Tuple[int, float]]) -> float:
 def aggregate_qffl(
     parameters: NDArrays, deltas: List[NDArrays], hs_fll: List[NDArrays]
 ) -> NDArrays:
-    """Compute weighted average based on  Q-FFL paper."""
-    demominator = np.sum(np.asarray(hs_fll))
+    """Compute weighted average based on Q-FFL paper."""
+    demominator: float = np.sum(np.asarray(hs_fll))
     scaled_deltas = []
     for client_delta in deltas:
         scaled_deltas.append([layer * 1.0 / demominator for layer in client_delta])
@@ -122,13 +122,49 @@ def _compute_distances(weights: List[NDArrays]) -> NDArray:
     Input: weights - list of weights vectors
     Output: distances - matrix distance_matrix of squared distances between the vectors
     """
-    flat_w = np.array(
-        [np.concatenate(p, axis=None).ravel() for p in weights]  # type: ignore
-    )
+    flat_w = np.array([np.concatenate(p, axis=None).ravel() for p in weights])
     distance_matrix = np.zeros((len(weights), len(weights)))
     for i, _ in enumerate(flat_w):
         for j, _ in enumerate(flat_w):
             delta = flat_w[i] - flat_w[j]
-            norm = np.linalg.norm(delta)  # type: ignore
+            norm = np.linalg.norm(delta)
             distance_matrix[i, j] = norm**2
     return distance_matrix
+
+
+def _trim_mean(array: NDArray, proportiontocut: float) -> NDArray:
+    """Compute trimmed mean along axis=0.
+
+    It is based on the scipy implementation.
+
+    https://docs.scipy.org/doc/scipy/reference/generated/
+    scipy.stats.trim_mean.html.
+    """
+    axis = 0
+    nobs = array.shape[axis]
+    lowercut = int(proportiontocut * nobs)
+    uppercut = nobs - lowercut
+    if lowercut > uppercut:
+        raise ValueError("Proportion too big.")
+
+    atmp = np.partition(array, (lowercut, uppercut - 1), axis)
+
+    slice_list = [slice(None)] * atmp.ndim
+    slice_list[axis] = slice(lowercut, uppercut)
+    result: NDArray = np.mean(atmp[tuple(slice_list)], axis=axis)
+    return result
+
+
+def aggregate_trimmed_avg(
+    results: List[Tuple[NDArrays, int]], proportiontocut: float
+) -> NDArrays:
+    """Compute trimmed average."""
+    # Create a list of weights and ignore the number of examples
+    weights = [weights for weights, _ in results]
+
+    trimmed_w: NDArrays = [
+        _trim_mean(np.asarray(layer), proportiontocut=proportiontocut)
+        for layer in zip(*weights)
+    ]
+
+    return trimmed_w

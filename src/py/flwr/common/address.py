@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ IPV6: int = 6
 
 
 def parse_address(address: str) -> Optional[Tuple[str, int, Optional[bool]]]:
-    """Parses an IP address into host, port, and version.
+    """Parse an IP address into host, port, and version.
 
     Parameters
     ----------

@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -92,6 +92,13 @@ class SimpleClientManager(ClientManager):
         self._cv = threading.Condition()
 
     def __len__(self) -> int:
+        """Return the number of available clients.
+
+        Returns
+        -------
+        num_available : int
+            The number of currently available clients.
+        """
         return len(self.clients)
 
     def num_available(self) -> int:

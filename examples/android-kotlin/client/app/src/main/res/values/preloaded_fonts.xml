@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="preloaded_fonts" translatable="false">
+        <item>@font/montserrat_light</item>
+        <item>@font/montserrat_medium</item>
+        <item>@font/share_tech_mono</item>
+    </array>
+</resources>

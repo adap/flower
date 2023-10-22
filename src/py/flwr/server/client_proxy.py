@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ class ClientProxy(ABC):
         ins: GetPropertiesIns,
         timeout: Optional[float],
     ) -> GetPropertiesRes:
-        """Returns the client's properties."""
+        """Return the client's properties."""
 
     @abstractmethod
     def get_parameters(

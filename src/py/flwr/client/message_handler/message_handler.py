@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,14 @@ from flwr.client.client import (
     maybe_call_get_parameters,
     maybe_call_get_properties,
 )
+from flwr.client.message_handler.task_handler import (
+    get_server_message_from_task_ins,
+    wrap_client_message_in_task_res,
+)
+from flwr.client.secure_aggregation import SecureAggregationHandler
+from flwr.client.typing import ClientFn
 from flwr.common import serde
+from flwr.proto.task_pb2 import SecureAggregation, Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 
 
@@ -32,15 +39,65 @@ class UnknownServerMessage(Exception):
     """Exception indicating that the received message is unknown."""
 
 
-def handle(
-    client: Client, server_msg: ServerMessage
+def handle(client_fn: ClientFn, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
+    """Handle incoming TaskIns from the server.
+
+    Parameters
+    ----------
+    client_fn : ClientFn
+        A callable that instantiates a Client.
+    task_ins: TaskIns
+        The task instruction coming from the server, to be processed by the client.
+
+    Returns
+    -------
+    task_res: TaskRes
+        The task response that should be returned to the server.
+    sleep_duration : int
+        Number of seconds that the client should disconnect from the server.
+    keep_going : bool
+        Flag that indicates whether the client should continue to process the
+        next message from the server (True) or disconnect and optionally
+        reconnect later (False).
+    """
+    server_msg = get_server_message_from_task_ins(task_ins, exclude_reconnect_ins=False)
+    if server_msg is None:
+        # Instantiate the client
+        client = client_fn("-1")
+        # Secure Aggregation
+        if task_ins.task.HasField("sa") and isinstance(
+            client, SecureAggregationHandler
+        ):
+            # pylint: disable-next=invalid-name
+            named_values = serde.named_values_from_proto(task_ins.task.sa.named_values)
+            res = client.handle_secure_aggregation(named_values)
+            task_res = TaskRes(
+                task_id="",
+                group_id="",
+                workload_id=0,
+                task=Task(
+                    ancestry=[],
+                    sa=SecureAggregation(named_values=serde.named_values_to_proto(res)),
+                ),
+            )
+            return task_res, 0, True
+        raise NotImplementedError()
+    client_msg, sleep_duration, keep_going = handle_legacy_message(
+        client_fn, server_msg
+    )
+    task_res = wrap_client_message_in_task_res(client_msg)
+    return task_res, sleep_duration, keep_going
+
+
+def handle_legacy_message(
+    client_fn: ClientFn, server_msg: ServerMessage
 ) -> Tuple[ClientMessage, int, bool]:
     """Handle incoming messages from the server.
 
     Parameters
     ----------
-    client : Client
-        The Client instance provided by the user.
+    client_fn : ClientFn
+        A callable that instantiates a Client.
     server_msg: ServerMessage
         The message coming from the server, to be processed by the client.
 
@@ -59,6 +116,10 @@ def handle(
     if field == "reconnect_ins":
         disconnect_msg, sleep_duration = _reconnect(server_msg.reconnect_ins)
         return disconnect_msg, sleep_duration, False
+
+    # Instantiate the client
+    client = client_fn("-1")
+    # Execute task
     if field == "get_properties_ins":
         return _get_properties(client, server_msg.get_properties_ins), 0, True
     if field == "get_parameters_ins":

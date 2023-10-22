@@ -9,9 +9,7 @@ description = "Differentially Private Federated Learning with Opacus and Flower"
 authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
-flwr = "^0.17.0"
-# flwr = { path = "../../", develop = true }  # Development
-opacus = "~0.14.0"
-torch = "~1.7.0"
-torchvision = "~0.8.0"
+python = ">=3.8,<3.11"
+flwr = ">=1.0,<2.0"
+opacus = "1.4.0"
+torchvision = "0.15.2"

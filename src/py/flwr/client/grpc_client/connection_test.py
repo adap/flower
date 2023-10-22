@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,9 +23,10 @@ from unittest.mock import patch
 
 import grpc
 
+from flwr.proto.task_pb2 import Task, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.client_manager import SimpleClientManager
-from flwr.server.grpc_server.grpc_server import start_grpc_server
+from flwr.server.fleet.grpc_bidi.grpc_server import start_grpc_server
 
 from .connection import grpc_connection
 
@@ -71,14 +72,14 @@ def mock_join(  # type: ignore # pylint: disable=invalid-name
 
 
 @patch(
-    "flwr.server.grpc_server.flower_service_servicer.FlowerServiceServicer.Join",
+    "flwr.server.fleet.grpc_bidi.flower_service_servicer.FlowerServiceServicer.Join",
     mock_join,
 )
 def test_integration_connection() -> None:
     """Create a server and establish a connection to it.
 
-    Purpose of this integration test is to simulate multiple clients
-    with multiple roundtrips between server and client.
+    Purpose of this integration test is to simulate multiple clients with multiple
+    roundtrips between server and client.
     """
     # Prepare
     port = unused_tcp_port()
@@ -93,20 +94,39 @@ def test_integration_connection() -> None:
         messages_received: int = 0
 
         with grpc_connection(server_address=f"[::]:{port}") as conn:
-            receive, send = conn
+            receive, send, _, _ = conn
 
             # Setup processing loop
             while True:
                 # Block until server responds with a message
-                server_message = receive()
+                task_ins = receive()
+
+                if task_ins is None:
+                    raise ValueError("Unexpected None value")
+
+                # pylint: disable=no-member
+                if task_ins.HasField("task") and task_ins.task.HasField(
+                    "legacy_server_message"
+                ):
+                    server_message = task_ins.task.legacy_server_message
+                else:
+                    server_message = None
+                # pylint: enable=no-member
+
+                if server_message is None:
+                    raise ValueError("Unexpected None value")
 
                 messages_received += 1
                 if server_message.HasField("reconnect_ins"):
-                    send(CLIENT_MESSAGE_DISCONNECT)
+                    task_res = TaskRes(
+                        task=Task(legacy_client_message=CLIENT_MESSAGE_DISCONNECT)
+                    )
+                    send(task_res)
                     break
 
                 # Process server_message and send client_message...
-                send(CLIENT_MESSAGE)
+                task_res = TaskRes(task=Task(legacy_client_message=CLIENT_MESSAGE))
+                send(task_res)
 
         return messages_received
 

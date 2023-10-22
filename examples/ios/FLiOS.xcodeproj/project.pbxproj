@@ -11,6 +11,8 @@
 		19764EED297D3ABE009F3E5D /* BenchmarkModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19764EEC297D3ABE009F3E5D /* BenchmarkModel.swift */; };
 		19764EEF297D3AC9009F3E5D /* BenchmarkSuite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19764EEE297D3AC9009F3E5D /* BenchmarkSuite.swift */; };
 		21075DC929788ED400311461 /* FLiOSModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21075DC829788ED400311461 /* FLiOSModel.swift */; };
+		210BBB812AA5D10C00B283AC /* MLFlwrClientModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210BBB802AA5D10C00B283AC /* MLFlwrClientModel.swift */; };
+		210BBB822AA5D10C00B283AC /* MLFlwrClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210BBB7F2AA5D10C00B283AC /* MLFlwrClient.swift */; };
 		21A77AC32865B22B0062EBD8 /* Array+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A6F2865B22A0062EBD8 /* Array+Extensions.swift */; };
 		21A77AC42865B22B0062EBD8 /* Math.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A702865B22A0062EBD8 /* Math.swift */; };
 		21A77AC52865B22B0062EBD8 /* UIImage+CVPixelBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21A77A712865B22A0062EBD8 /* UIImage+CVPixelBuffer.swift */; };
@@ -126,6 +128,9 @@
 		19764EEC297D3ABE009F3E5D /* BenchmarkModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkModel.swift; sourceTree = "<group>"; };
 		19764EEE297D3AC9009F3E5D /* BenchmarkSuite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkSuite.swift; sourceTree = "<group>"; };
 		21075DC829788ED400311461 /* FLiOSModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLiOSModel.swift; sourceTree = "<group>"; };
+		210BBB7E2AA5D04500B283AC /* flwr */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = flwr; path = ../../src/swift/flwr; sourceTree = "<group>"; };
+		210BBB7F2AA5D10C00B283AC /* MLFlwrClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLFlwrClient.swift; sourceTree = "<group>"; };
+		210BBB802AA5D10C00B283AC /* MLFlwrClientModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLFlwrClientModel.swift; sourceTree = "<group>"; };
 		21A77A6F2865B22A0062EBD8 /* Array+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Array+Extensions.swift"; sourceTree = "<group>"; };
 		21A77A702865B22A0062EBD8 /* Math.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Math.swift; sourceTree = "<group>"; };
 		21A77A712865B22A0062EBD8 /* UIImage+CVPixelBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIImage+CVPixelBuffer.swift"; sourceTree = "<group>"; };
@@ -218,7 +223,6 @@
 		21B540722865B14000185DEE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		21B540742865B14100185DEE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		21B540772865B14100185DEE /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		50B5A2C4294C841300B0ABC6 /* flwr */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = flwr; path = ../../src/swift/flwr; sourceTree = "<group>"; };
 		50CDF0E0299D807300AEBD55 /* DataLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataLoader.swift; sourceTree = "<group>"; };
 		50EB97C929AC9C94000AC771 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -243,6 +247,14 @@
 				19764EEE297D3AC9009F3E5D /* BenchmarkSuite.swift */,
 			);
 			path = Benchmark;
+			sourceTree = "<group>";
+		};
+		210BBB7D2AA5D04500B283AC /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				210BBB7E2AA5D04500B283AC /* flwr */,
+			);
+			name = Packages;
 			sourceTree = "<group>";
 		};
 		21A77A6E2865B22A0062EBD8 /* CoreMLHelpers */ = {
@@ -345,6 +357,8 @@
 		21A77B162865B23D0062EBD8 /* CoreMLClient */ = {
 			isa = PBXGroup;
 			children = (
+				210BBB7F2AA5D10C00B283AC /* MLFlwrClient.swift */,
+				210BBB802AA5D10C00B283AC /* MLFlwrClientModel.swift */,
 				50CDF0E0299D807300AEBD55 /* DataLoader.swift */,
 				21A77B202865B3B10062EBD8 /* MLModelInspect.swift */,
 				50EB97C929AC9C94000AC771 /* Constants.swift */,
@@ -362,7 +376,7 @@
 		21B540642865B14000185DEE = {
 			isa = PBXGroup;
 			children = (
-				50B5A2C3294C841300B0ABC6 /* Packages */,
+				210BBB7D2AA5D04500B283AC /* Packages */,
 				21B5406F2865B14000185DEE /* FLiOS */,
 				21B5406E2865B14000185DEE /* Products */,
 				21A77B2E2865B5420062EBD8 /* Frameworks */,
@@ -420,14 +434,6 @@
 			path = MNIST;
 			sourceTree = "<group>";
 		};
-		50B5A2C3294C841300B0ABC6 /* Packages */ = {
-			isa = PBXGroup;
-			children = (
-				50B5A2C4294C841300B0ABC6 /* flwr */,
-			);
-			name = Packages;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -478,7 +484,6 @@
 			);
 			mainGroup = 21B540642865B14000185DEE;
 			packageReferences = (
-				09EDEEC8287FE30900D5E0A0 /* XCRemoteSwiftPackageReference "swift-protobuf" */,
 			);
 			productRefGroup = 21B5406E2865B14000185DEE /* Products */;
 			projectDirPath = "";
@@ -529,6 +534,7 @@
 				21A77ADC2865B22B0062EBD8 /* BayesianProbitRegressor.proto in Sources */,
 				21A77ADE2865B22B0062EBD8 /* Gazetteer.proto in Sources */,
 				21A77ADB2865B22B0062EBD8 /* SoundAnalysisPreprocessing.pb.swift in Sources */,
+				210BBB822AA5D10C00B283AC /* MLFlwrClient.swift in Sources */,
 				21A77AC32865B22B0062EBD8 /* Array+Extensions.swift in Sources */,
 				21A77B152865B22B0062EBD8 /* Scaler.pb.swift in Sources */,
 				21A77B092865B22B0062EBD8 /* Parameters.pb.swift in Sources */,
@@ -592,6 +598,7 @@
 				21A77AF72865B22B0062EBD8 /* ItemSimilarityRecommender.pb.swift in Sources */,
 				21A77AD92865B22B0062EBD8 /* FeatureVectorizer.proto in Sources */,
 				21A77B012865B22B0062EBD8 /* TextClassifier.proto in Sources */,
+				210BBB812AA5D10C00B283AC /* MLFlwrClientModel.swift in Sources */,
 				21A77B0F2865B22B0062EBD8 /* LinkedModel.proto in Sources */,
 				21A77ADF2865B22B0062EBD8 /* MIL.pb.swift in Sources */,
 				21A77AE52865B22B0062EBD8 /* GLMRegressor.pb.swift in Sources */,
@@ -810,17 +817,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		09EDEEC8287FE30900D5E0A0 /* XCRemoteSwiftPackageReference "swift-protobuf" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/apple/swift-protobuf.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		21A77B312865B55D0062EBD8 /* Flower */ = {

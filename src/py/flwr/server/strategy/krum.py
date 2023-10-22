@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 [Blanchard et al., 2017].
 
-Paper: https://proceedings.neurips.cc/paper/2017/file/f4b9ec30ad9f68f89b29639786cb62ef-Paper.pdf
+Paper: proceedings.neurips.cc/paper/2017/file/f4b9ec30ad9f68f89b29639786cb62ef-Paper.pdf
 """
 
 
@@ -38,19 +38,11 @@ from flwr.server.client_proxy import ClientProxy
 from .aggregate import aggregate_krum
 from .fedavg import FedAvg
 
-WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
-Setting `min_available_clients` lower than `min_fit_clients` or
-`min_evaluate_clients` can cause the server to fail when there are too few clients
-connected to the server. `min_available_clients` must be set to a value larger
-than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
-"""
 
-
-# flake8: noqa: E501
 class Krum(FedAvg):
     """Configurable Krum strategy implementation."""
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes,line-too-long
+    # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
     def __init__(
         self,
         *,
@@ -74,7 +66,7 @@ class Krum(FedAvg):
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
     ) -> None:
-        """Configurable Krum strategy.
+        """Krum strategy.
 
         Parameters
         ----------
@@ -91,7 +83,8 @@ class Krum(FedAvg):
         num_malicious_clients : int, optional
             Number of malicious clients in the system. Defaults to 0.
         num_clients_to_keep : int, optional
-            Number of clients to keep before averaging (MultiKrum). Defaults to 0, in that case classical Krum is applied.
+            Number of clients to keep before averaging (MultiKrum). Defaults to 0, in
+            that case classical Krum is applied.
         evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
             Optional function used for validation. Defaults to None.
         on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
@@ -103,13 +96,6 @@ class Krum(FedAvg):
         initial_parameters : Parameters, optional
             Initial global model parameters.
         """
-
-        if (
-            min_fit_clients > min_available_clients
-            or min_evaluate_clients > min_available_clients
-        ):
-            log(WARNING, WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW)
-
         super().__init__(
             fraction_fit=fraction_fit,
             fraction_evaluate=fraction_evaluate,
@@ -124,12 +110,11 @@ class Krum(FedAvg):
             fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
             evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
-        self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
-        self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
         self.num_malicious_clients = num_malicious_clients
         self.num_clients_to_keep = num_clients_to_keep
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"Krum(accept_failures={self.accept_failures})"
         return rep
 

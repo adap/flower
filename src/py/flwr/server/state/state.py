@@ -1,4 +1,4 @@
-# Copyright 2022 Adap GmbH. All Rights Reserved.
+# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,9 +31,9 @@ class State(abc.ABC):
 
         Usually, the Driver API calls this to schedule instructions.
 
-        Stores the value of the task_ins in the state and, if successful, returns the
-        task_id (UUID) of the task_ins. If, for any reason, storing the task_ins fails,
-        `None` is returned.
+        Stores the value of the `task_ins` in the state and, if successful, returns the
+        `task_id` (UUID) of the `task_ins`. If, for any reason,
+        storing the `task_ins` fails, `None` is returned.
 
         Constraints
         -----------
@@ -42,6 +42,9 @@ class State(abc.ABC):
 
         If `task_ins.task.consumer.anonymous` is `False`, then
         `task_ins.task.consumer.node_id` MUST be set (not 0)
+
+        If `task_ins.workload_id` is invalid, then
+        storing the `task_ins` MUST fail.
         """
 
     @abc.abstractmethod
@@ -88,6 +91,9 @@ class State(abc.ABC):
 
         If `task_res.task.consumer.anonymous` is `False`, then
         `task_res.task.consumer.node_id` MUST be set (not 0)
+
+        If `task_res.workload_id` is invalid, then
+        storing the `task_res` MUST fail.
         """
 
     @abc.abstractmethod
@@ -109,14 +115,14 @@ class State(abc.ABC):
 
     @abc.abstractmethod
     def num_task_ins(self) -> int:
-        """Number of task_ins in store.
+        """Calculate the number of task_ins in store.
 
         This includes delivered but not yet deleted task_ins.
         """
 
     @abc.abstractmethod
     def num_task_res(self) -> int:
-        """Number of task_res in store.
+        """Calculate the number of task_res in store.
 
         This includes delivered but not yet deleted task_res.
         """
@@ -126,13 +132,23 @@ class State(abc.ABC):
         """Delete all delivered TaskIns/TaskRes pairs."""
 
     @abc.abstractmethod
-    def register_node(self, node_id: int) -> None:
-        """Store `node_id` in state."""
+    def create_node(self) -> int:
+        """Create, store in state, and return `node_id`."""
 
     @abc.abstractmethod
-    def unregister_node(self, node_id: int) -> None:
+    def delete_node(self, node_id: int) -> None:
         """Remove `node_id` from state."""
 
     @abc.abstractmethod
-    def get_nodes(self) -> Set[int]:
-        """Retrieve all currently stored node IDs as a set."""
+    def get_nodes(self, workload_id: int) -> Set[int]:
+        """Retrieve all currently stored node IDs as a set.
+
+        Constraints
+        -----------
+        If the provided `workload_id` does not exist or has no matching nodes,
+        an empty `Set` MUST be returned.
+        """
+
+    @abc.abstractmethod
+    def create_workload(self) -> int:
+        """Create one workload."""

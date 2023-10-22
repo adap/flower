@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ from .address import parse_address
 
 def test_ipv4_correct() -> None:
     """Test if a correct IPv4 address is correctly parsed."""
-
     # Prepare
     addresses = [
         ("127.0.0.1:8080", ("127.0.0.1", 8080, False)),
@@ -38,7 +37,6 @@ def test_ipv4_correct() -> None:
 
 def test_ipv4_incorrect() -> None:
     """Test if an incorrect IPv4 address returns None."""
-
     # Prepare
     addresses = [
         "127.0.0.1",
@@ -59,7 +57,6 @@ def test_ipv4_incorrect() -> None:
 
 def test_ipv6_correct() -> None:
     """Test if a correct IPv6 address is correctly parsed."""
-
     # Prepare
     addresses = [
         ("[::1]:8080", ("::1", 8080, True)),
@@ -91,7 +88,6 @@ def test_ipv6_correct() -> None:
 
 def test_ipv6_incorrect() -> None:
     """Test if an incorrect IPv6 address returns None."""
-
     # Prepare
     addresses = [
         "2001:db8:3333:4444:5555:6666:7777:8888:9988898",
@@ -111,7 +107,6 @@ def test_ipv6_incorrect() -> None:
 
 def test_domain_correct() -> None:
     """Test if a correct domain address is correctly parsed."""
-
     # Prepare
     addresses = [
         ("flower.dev:123", ("flower.dev", 123, None)),
@@ -133,7 +128,6 @@ def test_domain_correct() -> None:
 
 def test_domain_incorrect() -> None:
     """Test if an incorrect domain address returns None."""
-
     # Prepare
     addresses = [
         "flower.dev",

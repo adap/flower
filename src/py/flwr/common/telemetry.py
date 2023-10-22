@@ -1,4 +1,4 @@
-# Copyright 2023 Adap GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -120,11 +120,11 @@ class EventType(str, Enum):
     # Ping
     PING = auto()
 
-    # Client
+    # Client: start_client
     START_CLIENT_ENTER = auto()
     START_CLIENT_LEAVE = auto()
 
-    # Server
+    # Server: start_server
     START_SERVER_ENTER = auto()
     START_SERVER_LEAVE = auto()
 
@@ -144,9 +144,13 @@ class EventType(str, Enum):
     START_SIMULATION_ENTER = auto()
     START_SIMULATION_LEAVE = auto()
 
-    # Driver Client
+    # Driver: Driver
     DRIVER_CONNECT = auto()
     DRIVER_DISCONNECT = auto()
+
+    # Driver: start_driver
+    START_DRIVER_ENTER = auto()
+    START_DRIVER_LEAVE = auto()
 
 
 # Use the ThreadPoolExecutor with max_workers=1 to have a queue
@@ -160,11 +164,6 @@ state: Dict[str, Union[Optional[str], Optional[ThreadPoolExecutor]]] = {
 }
 
 
-# In Python 3.7 pylint will throw an error stating that
-# "Value 'Future' is unsubscriptable".
-# This pylint disable line can be remove when dropping support
-# for Python 3.7
-# pylint: disable-next=unsubscriptable-object
 def event(
     event_type: EventType,
     event_details: Optional[Dict[str, Any]] = None,

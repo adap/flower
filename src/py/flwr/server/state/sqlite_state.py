@@ -1,4 +1,4 @@
-# Copyright 2023 Adap GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 """SQLite based implemenation of server state."""
 
 
+import os
 import re
 import sqlite3
 from datetime import datetime, timedelta
@@ -36,11 +37,17 @@ CREATE TABLE IF NOT EXISTS node(
 );
 """
 
+SQL_CREATE_TABLE_WORKLOAD = """
+CREATE TABLE IF NOT EXISTS workload(
+    workload_id INTEGER UNIQUE
+);
+"""
+
 SQL_CREATE_TABLE_TASK_INS = """
 CREATE TABLE IF NOT EXISTS task_ins(
     task_id                 TEXT UNIQUE,
     group_id                TEXT,
-    workload_id             TEXT,
+    workload_id             INTEGER,
     producer_anonymous      BOOLEAN,
     producer_node_id        INTEGER,
     consumer_anonymous      BOOLEAN,
@@ -50,7 +57,8 @@ CREATE TABLE IF NOT EXISTS task_ins(
     ttl                     TEXT,
     ancestry                TEXT,
     legacy_server_message   BLOB,
-    legacy_client_message   BLOB
+    legacy_client_message   BLOB,
+    FOREIGN KEY(workload_id) REFERENCES workload(workload_id)
 );
 """
 
@@ -59,7 +67,7 @@ SQL_CREATE_TABLE_TASK_RES = """
 CREATE TABLE IF NOT EXISTS task_res(
     task_id                 TEXT UNIQUE,
     group_id                TEXT,
-    workload_id             TEXT,
+    workload_id             INTEGER,
     producer_anonymous      BOOLEAN,
     producer_node_id        INTEGER,
     consumer_anonymous      BOOLEAN,
@@ -69,7 +77,8 @@ CREATE TABLE IF NOT EXISTS task_res(
     ttl                     TEXT,
     ancestry                TEXT,
     legacy_server_message   BLOB,
-    legacy_client_message   BLOB
+    legacy_client_message   BLOB,
+    FOREIGN KEY(workload_id) REFERENCES workload(workload_id)
 );
 """
 
@@ -103,16 +112,17 @@ class SqliteState(State):
             Log each query which is executed.
         """
         self.conn = sqlite3.connect(self.database_path)
+        self.conn.execute("PRAGMA foreign_keys = ON;")
         self.conn.row_factory = dict_factory
         if log_queries:
             self.conn.set_trace_callback(lambda query: log(DEBUG, query))
         cur = self.conn.cursor()
 
         # Create each table if not exists queries
+        cur.execute(SQL_CREATE_TABLE_WORKLOAD)
         cur.execute(SQL_CREATE_TABLE_TASK_INS)
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
         cur.execute(SQL_CREATE_TABLE_NODE)
-
         res = cur.execute("SELECT name FROM sqlite_schema;")
 
         return res.fetchall()
@@ -190,7 +200,13 @@ class SqliteState(State):
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_ins VALUES({columns});"
 
-        self.query(query, data)
+        # Only invalid workload_id can trigger IntegrityError.
+        # This may need to be changed in the future version with more integrity checks.
+        try:
+            self.query(query, data)
+        except sqlite3.IntegrityError:
+            log(ERROR, "`workload` is invalid")
+            return None
 
         return task_id
 
@@ -226,7 +242,7 @@ class SqliteState(State):
         if node_id == 0:
             msg = (
                 "`node_id` must be >= 1"
-                + "\n\n For requesting anonymous tasks use `node_id` equal `None`"
+                "\n\n For requesting anonymous tasks use `node_id` equal `None`"
             )
             raise AssertionError(msg)
 
@@ -319,7 +335,13 @@ class SqliteState(State):
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_res VALUES({columns});"
 
-        self.query(query, data)
+        # Only invalid workload_id can trigger IntegrityError.
+        # This may need to be changed in the future version with more integrity checks.
+        try:
+            self.query(query, data)
+        except sqlite3.IntegrityError:
+            log(ERROR, "`workload` is invalid")
+            return None
 
         return task_id
 
@@ -390,7 +412,7 @@ class SqliteState(State):
         return result
 
     def num_task_ins(self) -> int:
-        """Number of task_ins in store.
+        """Calculate the number of task_ins in store.
 
         This includes delivered but not yet deleted task_ins.
         """
@@ -401,7 +423,7 @@ class SqliteState(State):
         return num
 
     def num_task_res(self) -> int:
-        """Number of task_res in store.
+        """Calculate the number of task_res in store.
 
         This includes delivered but not yet deleted task_res.
         """
@@ -447,32 +469,66 @@ class SqliteState(State):
 
         return None
 
-    def register_node(self, node_id: int) -> None:
-        """Store `node_id` in state."""
-        query = "INSERT INTO node VALUES(:node_id);"
-        self.query(query, {"node_id": node_id})
+    def create_node(self) -> int:
+        """Create, store in state, and return `node_id`."""
+        # Sample a random int64 as node_id
+        node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
-    def unregister_node(self, node_id: int) -> None:
-        """Remove `node_id` from state."""
+        query = "INSERT INTO node VALUES(:node_id);"
+        try:
+            self.query(query, {"node_id": node_id})
+        except sqlite3.IntegrityError:
+            log(ERROR, "Unexpected node registration failure.")
+            return 0
+        return node_id
+
+    def delete_node(self, node_id: int) -> None:
+        """Delete a client node."""
         query = "DELETE FROM node WHERE node_id = :node_id;"
         self.query(query, {"node_id": node_id})
 
-    def get_nodes(self) -> Set[int]:
-        """Retrieve all currently stored node IDs as a set."""
+    def get_nodes(self, workload_id: int) -> Set[int]:
+        """Retrieve all currently stored node IDs as a set.
+
+        Constraints
+        -----------
+        If the provided `workload_id` does not exist or has no matching nodes,
+        an empty `Set` MUST be returned.
+        """
+        # Validate workload ID
+        query = "SELECT COUNT(*) FROM workload WHERE workload_id = ?;"
+        if self.query(query, (workload_id,))[0]["COUNT(*)"] == 0:
+            return set()
+
+        # Get nodes
         query = "SELECT * FROM node;"
         rows = self.query(query)
         result: Set[int] = {row["node_id"] for row in rows}
         return result
 
+    def create_workload(self) -> int:
+        """Create one workload and store it in state."""
+        # Sample a random int64 as workload_id
+        workload_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
+
+        # Check conflicts
+        query = "SELECT COUNT(*) FROM workload WHERE workload_id = ?;"
+        # If workload_id does not exist
+        if self.query(query, (workload_id,))[0]["COUNT(*)"] == 0:
+            query = "INSERT INTO workload VALUES(:workload_id);"
+            self.query(query, {"workload_id": workload_id})
+            return workload_id
+        log(ERROR, "Unexpected workload creation failure.")
+        return 0
+
 
 def dict_factory(
     cursor: sqlite3.Cursor,
-    row: sqlite3.Row,  # type: ignore
+    row: sqlite3.Row,
 ) -> Dict[str, Any]:
-    """Used to turn SQLite results into dicts.
+    """Turn SQLite results into dicts.
 
-    Less efficent for retrival of large amounts of data but easier to
-    use.
+    Less efficent for retrival of large amounts of data but easier to use.
     """
     fields = [column[0] for column in cursor.description]
     return dict(zip(fields, row))

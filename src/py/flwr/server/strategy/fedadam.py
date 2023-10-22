@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Adaptive Federated Optimization using Adam (FedAdam) [Reddi et al., 2020]
-strategy.
+"""Adaptive Federated Optimization using Adam (FedAdam) strategy.
 
-Paper: https://arxiv.org/abs/2003.00295
+[Reddi et al., 2020]
+
+Paper: arxiv.org/abs/2003.00295
 """
 
 
@@ -37,15 +38,13 @@ from flwr.server.client_proxy import ClientProxy
 from .fedopt import FedOpt
 
 
-# flake8: noqa: E501
 class FedAdam(FedOpt):
-    """Adaptive Federated Optimization using Adam (FedAdam) [Reddi et al.,
-    2020] strategy.
+    """FedAdam - Adaptive Federated Optimization using Adam.
 
     Paper: https://arxiv.org/abs/2003.00295
     """
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals,line-too-long
+    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals, line-too-long
     def __init__(
         self,
         *,
@@ -134,6 +133,7 @@ class FedAdam(FedOpt):
         )
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"FedAdam(accept_failures={self.accept_failures})"
         return rep
 
