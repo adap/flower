@@ -95,8 +95,8 @@ class ScaffoldOptimizer(SGD):
         # y_i = y_i - \eta*(g_i + \mu*b_{t}) - \eta*(c - c_i)
         self.step()
         for group in self.param_groups:
-            for p, s, c in zip(group["params"], server_cv, client_cv):
-                p.data.add_(s - c, alpha=-group["lr"])
+            for par, s_cv, c_cv in zip(group["params"], server_cv, client_cv):
+                par.data.add_(s_cv - c_cv, alpha=-group["lr"])
 
 
 def train_scaffold(
@@ -110,6 +110,7 @@ def train_scaffold(
     server_cv: torch.Tensor,
     client_cv: torch.Tensor,
 ) -> None:
+    # pylint: disable=too-many-arguments
     """Train the network on the training set using SCAFFOLD.
 
     Parameters
@@ -153,6 +154,7 @@ def _train_one_epoch_scaffold(
     server_cv: torch.Tensor,
     client_cv: torch.Tensor,
 ) -> nn.Module:
+    # pylint: disable=too-many-arguments
     """Train the network on the training set for one epoch."""
     for data, target in trainloader:
         data, target = data.to(device), target.to(device)
@@ -173,6 +175,7 @@ def train_fedavg(
     momentum: float,
     weight_decay: float,
 ) -> None:
+    # pylint: disable=too-many-arguments
     """Train the network on the training set using FedAvg.
 
     Parameters
@@ -228,11 +231,12 @@ def train_fedprox(
     trainloader: DataLoader,
     device: torch.device,
     epochs: int,
-    mu: float,
+    proximal_mu: float,
     learning_rate: float,
     momentum: float,
     weight_decay: float,
 ) -> None:
+    # pylint: disable=too-many-arguments
     """Train the network on the training set using FedAvg.
 
     Parameters
@@ -245,7 +249,7 @@ def train_fedprox(
         The device on which to train the network.
     epochs : int
         The number of epochs to train the network.
-    mu : float
+    proximal_mu : float
         The proximal mu parameter.
     learning_rate : float
         The learning rate.
@@ -266,7 +270,7 @@ def train_fedprox(
     net.train()
     for _ in range(epochs):
         net = _train_one_epoch_fedprox(
-            net, global_params, trainloader, device, criterion, optimizer, mu
+            net, global_params, trainloader, device, criterion, optimizer, proximal_mu
         )
 
 
@@ -277,8 +281,9 @@ def _train_one_epoch_fedprox(
     device: torch.device,
     criterion: nn.Module,
     optimizer: Optimizer,
-    mu: float,
+    proximal_mu: float,
 ) -> nn.Module:
+    # pylint: disable=too-many-arguments
     """Train the network on the training set for one epoch."""
     for data, target in trainloader:
         data, target = data.to(device), target.to(device)
@@ -288,7 +293,7 @@ def _train_one_epoch_fedprox(
         proximal_term = 0.0
         for param, global_param in zip(net.parameters(), global_params):
             proximal_term += torch.norm(param - global_param) ** 2
-        loss += (mu / 2) * proximal_term
+        loss += (proximal_mu / 2) * proximal_term
         loss.backward()
         optimizer.step()  # type: ignore
     return net
@@ -303,6 +308,7 @@ def train_fednova(
     momentum: float,
     weight_decay: float,
 ) -> Tuple[float, List[torch.Tensor]]:
+    # pylint: disable=too-many-arguments
     """Train the network on the training set using FedNova.
 
     Parameters
@@ -360,6 +366,7 @@ def _train_one_epoch_fednova(
     optimizer: Optimizer,
     local_steps: int,
 ) -> Tuple[nn.Module, int]:
+    # pylint: disable=too-many-arguments
     """Train the network on the training set for one epoch."""
     for data, target in trainloader:
         data, target = data.to(device), target.to(device)

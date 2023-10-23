@@ -13,6 +13,7 @@ from niid_bench.dataset_preparation import (
 )
 
 
+# pylint: disable=too-many-locals, too-many-branches
 def load_datasets(
     config: DictConfig,
     num_clients: int,

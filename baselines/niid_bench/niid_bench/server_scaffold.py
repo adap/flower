@@ -78,22 +78,7 @@ class ScaffoldServer(Server):
         ]
         return get_parameters_res.parameters
 
-    def _init_control_variates(self, model: DictConfig):
-        server_cv = []
-        for param in self.model_params.parameters():
-            # server_cv.append(torch.zeros(param.shape))
-            server_cv.append(param.clone().detach())
-        return server_cv
-
-    def _update_parameters_with_cv(
-        self, parameters: Parameters, cv: List[torch.Tensor]
-    ) -> Parameters:
-        # extend the list of parameters arrays with the cv arrays
-        cv_np = [cv.numpy() for cv in cv]
-        parameters_np = parameters_to_ndarrays(parameters)
-        parameters_np.extend(cv_np)
-        return ndarrays_to_parameters(parameters_np)
-
+    # pylint: disable=too-many-locals
     def fit_round(
         self,
         server_round: int,
@@ -105,7 +90,7 @@ class ScaffoldServer(Server):
         # Get clients and their respective instructions from strateg
         client_instructions = self.strategy.configure_fit(
             server_round=server_round,
-            parameters=self._update_parameters_with_cv(self.parameters, self.server_cv),
+            parameters=update_parameters_with_cv(self.parameters, self.server_cv),
             client_manager=self._client_manager,
         )
 
@@ -171,6 +156,17 @@ class ScaffoldServer(Server):
         # metrics
         metrics_aggregated = aggregated_result[1]
         return parameters_updated, metrics_aggregated, (results, failures)
+
+
+def update_parameters_with_cv(
+    parameters: Parameters, s_cv: List[torch.Tensor]
+) -> Parameters:
+    """Extend the list of parameters with the server control variate."""
+    # extend the list of parameters arrays with the cv arrays
+    cv_np = [cv.numpy() for cv in s_cv]
+    parameters_np = parameters_to_ndarrays(parameters)
+    parameters_np.extend(cv_np)
+    return ndarrays_to_parameters(parameters_np)
 
 
 def fit_clients(

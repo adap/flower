@@ -41,14 +41,14 @@ class FedNovaStrategy(FedAvg):
             for _, fit_res in results
         ]
         total_samples = sum([fit_res.num_examples for _, fit_res in results])
-        c = sum(
+        c_fact = sum(
             [
                 float(fit_res.metrics["a_i"]) * fit_res.num_examples / total_samples
                 for _, fit_res in results
             ]
         )
         new_weights_results = [
-            (result[0], c * (fit_res.num_examples / total_samples))
+            (result[0], c_fact * (fit_res.num_examples / total_samples))
             for result, (_, fit_res) in zip(weights_results, results)
         ]
 

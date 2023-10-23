@@ -106,6 +106,7 @@ def _download_data(dataset_name="emnist") -> Tuple[Dataset, Dataset]:
     return trainset, testset
 
 
+# pylint: disable=too-many-locals
 def partition_data(
     num_clients, similarity=1.0, seed=42, dataset_name="cifar10"
 ) -> Tuple[List[Dataset], Dataset]:
@@ -145,12 +146,12 @@ def partition_data(
     if similarity == 1.0:
         return trainsets_per_client, testset
 
-    t = rem_trainset.dataset.targets
-    if isinstance(t, list):
-        t = np.array(t)
-    if isinstance(t, torch.Tensor):
-        t = t.numpy()
-    targets = t[rem_trainset.indices]
+    tmp_t = rem_trainset.dataset.targets
+    if isinstance(tmp_t, list):
+        tmp_t = np.array(tmp_t)
+    if isinstance(tmp_t, torch.Tensor):
+        tmp_t = tmp_t.numpy()
+    targets = tmp_t[rem_trainset.indices]
     num_remaining_classes = len(set(targets))
     remaining_classes = list(set(targets))
     client_classes: List[List] = [[] for _ in range(num_clients)]
@@ -219,17 +220,17 @@ def partition_data_dirichlet(
     prng = np.random.RandomState(seed)
 
     # get the targets
-    t = trainset.targets
-    if isinstance(t, list):
-        t = np.array(t)
-    if isinstance(t, torch.Tensor):
-        t = t.numpy()
-    num_classes = len(set(t))
-    total_samples = len(t)
+    tmp_t = trainset.targets
+    if isinstance(tmp_t, list):
+        tmp_t = np.array(tmp_t)
+    if isinstance(tmp_t, torch.Tensor):
+        tmp_t = tmp_t.numpy()
+    num_classes = len(set(tmp_t))
+    total_samples = len(tmp_t)
     while min_samples < min_required_samples_per_client:
         idx_clients: List[List] = [[] for _ in range(num_clients)]
         for k in range(num_classes):
-            idx_k = np.where(t == k)[0]
+            idx_k = np.where(tmp_t == k)[0]
             prng.shuffle(idx_k)
             proportions = prng.dirichlet(np.repeat(alpha, num_clients))
             proportions = np.array(

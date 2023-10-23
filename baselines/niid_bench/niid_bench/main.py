@@ -4,6 +4,7 @@ It includes processioning the dataset, instantiate strategy, specify how the glo
 model is going to be evaluated, etc. At the end, this script saves the results.
 """
 import os
+import pickle
 
 # these are the basic packages you'll need here
 # feel free to remove some if aren't needed
@@ -123,10 +124,9 @@ def main(cfg: DictConfig) -> None:
     # can retrieve the path to that directory with this:
     # save_path = HydraConfig.get().runtime.output_dir
     # save to a pickle file
-    import pickle
 
-    with open(os.path.join(save_path, "history.pkl"), "wb") as f:
-        pickle.dump(history, f)
+    with open(os.path.join(save_path, "history.pkl"), "wb") as f_ptr:
+        pickle.dump(history, f_ptr)
 
 
 if __name__ == "__main__":

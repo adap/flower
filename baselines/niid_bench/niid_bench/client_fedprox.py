@@ -12,9 +12,11 @@ from torch.utils.data import DataLoader
 from niid_bench.models import test, train_fedprox
 
 
+# pylint: disable=too-many-instance-attributes
 class FlowerClientFedProx(fl.client.NumPyClient):
     """Flower client implementing FedProx."""
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         net: torch.nn.Module,
@@ -22,7 +24,7 @@ class FlowerClientFedProx(fl.client.NumPyClient):
         valloader: DataLoader,
         device: torch.device,
         num_epochs: int,
-        mu: float,
+        proximal_mu: float,
         learning_rate: float,
         momentum: float,
         weight_decay: float,
@@ -32,7 +34,7 @@ class FlowerClientFedProx(fl.client.NumPyClient):
         self.valloader = valloader
         self.device = device
         self.num_epochs = num_epochs
-        self.mu = mu
+        self.proximal_mu = proximal_mu
         self.learning_rate = learning_rate
         self.momentum = momentum
         self.weight_decay = weight_decay
@@ -55,7 +57,7 @@ class FlowerClientFedProx(fl.client.NumPyClient):
             self.trainloader,
             self.device,
             self.num_epochs,
-            self.mu,
+            self.proximal_mu,
             self.learning_rate,
             self.momentum,
             self.weight_decay,
@@ -70,13 +72,14 @@ class FlowerClientFedProx(fl.client.NumPyClient):
         return float(loss), len(self.valloader.dataset), {"accuracy": float(acc)}
 
 
+# pylint: disable=too-many-arguments
 def gen_client_fn(
     trainloaders: List[DataLoader],
     valloaders: List[DataLoader],
     num_epochs: int,
     learning_rate: float,
     model: DictConfig,
-    mu: float,
+    proximal_mu: float,
     momentum: float = 0.9,
     weight_decay: float = 1e-5,
 ) -> Callable[[str], FlowerClientFedProx]:  # pylint: disable=too-many-arguments
@@ -97,7 +100,7 @@ def gen_client_fn(
         The learning rate for the SGD  optimizer of clients.
     model : DictConfig
         The model configuration.
-    mu : float
+    proximal_mu : float
         The proximal mu parameter.
     momentum : float
         The momentum for SGD optimizer of clients
@@ -127,7 +130,7 @@ def gen_client_fn(
             valloader,
             device,
             num_epochs,
-            mu,
+            proximal_mu,
             learning_rate,
             momentum,
             weight_decay,

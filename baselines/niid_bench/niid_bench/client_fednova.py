@@ -12,9 +12,11 @@ from torch.utils.data import DataLoader
 from niid_bench.models import test, train_fednova
 
 
+# pylint: disable=too-many-instance-attributes
 class FlowerClientFedNova(fl.client.NumPyClient):
     """Flower client implementing FedNova."""
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         net: torch.nn.Module,
@@ -68,6 +70,7 @@ class FlowerClientFedNova(fl.client.NumPyClient):
         return float(loss), len(self.valloader.dataset), {"accuracy": float(acc)}
 
 
+# pylint: disable=too-many-arguments
 def gen_client_fn(
     trainloaders: List[DataLoader],
     valloaders: List[DataLoader],

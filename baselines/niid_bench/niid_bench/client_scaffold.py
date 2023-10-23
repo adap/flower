@@ -13,12 +13,14 @@ from torch.utils.data import DataLoader
 from niid_bench.models import test, train_scaffold
 
 
+# pylint: disable=too-many-instance-attributes
 class FlowerClientScaffold(fl.client.NumPyClient):
     """Flower client implementing scaffold."""
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
-        id: int,
+        cid: int,
         net: torch.nn.Module,
         trainloader: DataLoader,
         valloader: DataLoader,
@@ -27,9 +29,9 @@ class FlowerClientScaffold(fl.client.NumPyClient):
         learning_rate: float,
         momentum: float,
         weight_decay: float,
-        dir: str = "",
+        save_dir: str = "",
     ) -> None:
-        self.id = id
+        self.cid = cid
         self.net = net
         self.trainloader = trainloader
         self.valloader = valloader
@@ -43,9 +45,9 @@ class FlowerClientScaffold(fl.client.NumPyClient):
         for param in self.net.parameters():
             self.client_cv.append(torch.zeros(param.shape))
         # save cv to directory
-        if dir == "":
-            dir = "client_cvs"
-        self.dir = dir
+        if save_dir == "":
+            save_dir = "client_cvs"
+        self.dir = save_dir
         if not os.path.exists(self.dir):
             os.makedirs(self.dir)
 
@@ -69,8 +71,8 @@ class FlowerClientScaffold(fl.client.NumPyClient):
         for param in self.net.parameters():
             self.client_cv.append(param.clone().detach())
         # load client control variate
-        if os.path.exists(f"{self.dir}/client_cv_{self.id}.pt"):
-            self.client_cv = torch.load(f"{self.dir}/client_cv_{self.id}.pt")
+        if os.path.exists(f"{self.dir}/client_cv_{self.cid}.pt"):
+            self.client_cv = torch.load(f"{self.dir}/client_cv_{self.cid}.pt")
         # convert the server control variate to a list of tensors
         server_cv = [torch.Tensor(cv) for cv in server_cv]
         train_scaffold(
@@ -101,7 +103,7 @@ class FlowerClientScaffold(fl.client.NumPyClient):
             server_update_x.append((y_i_j - x_j))
             server_update_c.append((c_i_n[-1] - c_i_j).cpu().numpy())
         self.client_cv = c_i_n
-        torch.save(self.client_cv, f"{self.dir}/client_cv_{self.id}.pt")
+        torch.save(self.client_cv, f"{self.dir}/client_cv_{self.cid}.pt")
 
         combined_updates = server_update_x + server_update_c
 
@@ -118,6 +120,7 @@ class FlowerClientScaffold(fl.client.NumPyClient):
         return float(loss), len(self.valloader.dataset), {"accuracy": float(acc)}
 
 
+# pylint: disable=too-many-arguments
 def gen_client_fn(
     trainloaders: List[DataLoader],
     valloaders: List[DataLoader],
@@ -177,7 +180,7 @@ def gen_client_fn(
             learning_rate,
             momentum,
             weight_decay,
-            dir=client_cv_dir,
+            save_dir=client_cv_dir,
         )
 
     return client_fn

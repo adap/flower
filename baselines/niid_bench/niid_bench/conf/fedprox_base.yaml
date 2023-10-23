@@ -21,7 +21,7 @@ weight_decay: 0.00001
 client_fn:
   _target_: niid_bench.client_fedprox.gen_client_fn
   _recursive_: False
-  mu: ${mu}
+  proximal_mu: ${mu}
   num_epochs: ${num_epochs}
   learning_rate: ${learning_rate}
   momentum: ${momentum}
