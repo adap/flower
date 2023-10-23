@@ -32,7 +32,10 @@ class TestDriver(unittest.TestCase):
 
     def setUp(self) -> None:
         """Initialize mock GrpcDriver and Driver instance before each test."""
+        mock_response = Mock()
+        mock_response.workload_id = 61016
         self.mock_grpc_driver = Mock()
+        self.mock_grpc_driver.create_workload.return_value = mock_response
         self.patcher = patch(
             "flwr.driver.driver.GrpcDriver", return_value=self.mock_grpc_driver
         )
@@ -46,7 +49,7 @@ class TestDriver(unittest.TestCase):
     def test_check_and_init_grpc_driver_already_initialized(self) -> None:
         """Test that GrpcDriver doesn't initialize if workload is created."""
         # Prepare
-        self.driver.workload_id = 61016
+        self.driver.grpc_driver = self.mock_grpc_driver
 
         # Execute
         # pylint: disable-next=protected-access
@@ -57,11 +60,6 @@ class TestDriver(unittest.TestCase):
 
     def test_check_and_init_grpc_driver_needs_initialization(self) -> None:
         """Test GrpcDriver initialization when workload is not created."""
-        # Prepare
-        mock_response = Mock()
-        mock_response.workload_id = 61016
-        self.mock_grpc_driver.create_workload.return_value = mock_response
-
         # Execute
         # pylint: disable-next=protected-access
         self.driver._check_and_init_grpc_driver()
@@ -73,7 +71,6 @@ class TestDriver(unittest.TestCase):
     def test_get_nodes(self) -> None:
         """Test retrieval of nodes."""
         # Prepare
-        self.driver.workload_id = 61016
         mock_response = Mock()
         mock_response.nodes = [Mock(), Mock()]
         self.mock_grpc_driver.get_nodes.return_value = mock_response
@@ -83,6 +80,7 @@ class TestDriver(unittest.TestCase):
         args, kwargs = self.mock_grpc_driver.get_nodes.call_args
 
         # Assert
+        self.mock_grpc_driver.connect.assert_called_once()
         self.assertEqual(len(args), 1)
         self.assertEqual(len(kwargs), 0)
         self.assertIsInstance(args[0], GetNodesRequest)
@@ -92,7 +90,6 @@ class TestDriver(unittest.TestCase):
     def test_push_task_ins(self) -> None:
         """Test pushing task instructions."""
         # Prepare
-        self.driver.workload_id = 61016
         mock_response = Mock()
         mock_response.task_ids = ["id1", "id2"]
         self.mock_grpc_driver.push_task_ins.return_value = mock_response
@@ -103,6 +100,7 @@ class TestDriver(unittest.TestCase):
         args, kwargs = self.mock_grpc_driver.push_task_ins.call_args
 
         # Assert
+        self.mock_grpc_driver.connect.assert_called_once()
         self.assertEqual(len(args), 1)
         self.assertEqual(len(kwargs), 0)
         self.assertIsInstance(args[0], PushTaskInsRequest)
@@ -113,7 +111,6 @@ class TestDriver(unittest.TestCase):
     def test_pull_task_res_with_given_task_ids(self) -> None:
         """Test pulling task results with specific task IDs."""
         # Prepare
-        self.driver.workload_id = 61016
         self.driver.task_id_pool = {"id1", "id2", "id3", "id4"}
         mock_response = Mock()
         mock_response.task_res_list = [
@@ -128,6 +125,7 @@ class TestDriver(unittest.TestCase):
         args, kwargs = self.mock_grpc_driver.pull_task_res.call_args
 
         # Assert
+        self.mock_grpc_driver.connect.assert_called_once()
         self.assertEqual(len(args), 1)
         self.assertEqual(len(kwargs), 0)
         self.assertIsInstance(args[0], PullTaskResRequest)
@@ -138,7 +136,6 @@ class TestDriver(unittest.TestCase):
     def test_pull_task_res_without_given_task_ids(self) -> None:
         """Test pulling all task results when no task IDs are provided."""
         # Prepare
-        self.driver.workload_id = 61016
         mock_response = Mock()
         mock_response.task_res_list = [
             TaskRes(task=Task(ancestry=["id1"])),
@@ -153,6 +150,7 @@ class TestDriver(unittest.TestCase):
         args, kwargs = self.mock_grpc_driver.pull_task_res.call_args
 
         # Assert
+        self.mock_grpc_driver.connect.assert_called_once()
         self.assertEqual(len(args), 1)
         self.assertEqual(len(kwargs), 0)
         self.assertIsInstance(args[0], PullTaskResRequest)
@@ -163,7 +161,8 @@ class TestDriver(unittest.TestCase):
     def test_del_with_initialized_driver(self) -> None:
         """Test cleanup behavior when Driver is initialized."""
         # Prepare
-        self.driver.workload_id = 61016
+        # pylint: disable-next=protected-access
+        self.driver._check_and_init_grpc_driver()
 
         # Execute
         self.driver.__del__()

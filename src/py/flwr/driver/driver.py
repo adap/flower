@@ -134,17 +134,18 @@ class Driver:
     """`Driver` class provides an interface to the Driver API."""
 
     def __init__(self) -> None:
-        self.grpc_driver = GrpcDriver()
+        self.grpc_driver: Optional[GrpcDriver] = None
         self.workload_id: Optional[int] = None
         self.task_id_pool: Set[str] = set()
         self.node = Node(node_id=0, anonymous=True)
 
     def _check_and_init_grpc_driver(self) -> None:
         # Check if the GrpcDriver is initialized
-        if self.workload_id is not None:
+        if self.grpc_driver is not None:
             return
 
         # Connect and create workload
+        self.grpc_driver = GrpcDriver()
         self.grpc_driver.connect()
         res = self.grpc_driver.create_workload(CreateWorkloadRequest())
         self.workload_id = res.workload_id
@@ -154,7 +155,7 @@ class Driver:
         self._check_and_init_grpc_driver()
 
         # Call GrpcDriver method
-        res = self.grpc_driver.get_nodes(
+        res = self.grpc_driver.get_nodes(  # type: ignore
             GetNodesRequest(workload_id=self.workload_id)  # type: ignore
         )
         return list(res.nodes)
@@ -168,7 +169,7 @@ class Driver:
             task_ins.workload_id = self.workload_id  # type: ignore
 
         # Call GrpcDriver method
-        res = self.grpc_driver.push_task_ins(
+        res = self.grpc_driver.push_task_ins(  # type: ignore
             PushTaskInsRequest(task_ins_list=task_ins_list)
         )
 
@@ -188,7 +189,7 @@ class Driver:
             task_ids = list(self.task_id_pool)
 
         # Call GrpcDriver method
-        res = self.grpc_driver.pull_task_res(
+        res = self.grpc_driver.pull_task_res(  # type: ignore
             PullTaskResRequest(node=self.node, task_ids=task_ids)
         )
         self.task_id_pool.difference_update(
@@ -199,7 +200,7 @@ class Driver:
     def __del__(self) -> None:
         """Disconnect GrpcDriver if connected."""
         # Check if GrpcDriver is initialized
-        if self.workload_id is None:
+        if self.grpc_driver is None:
             return
 
         # Disconnect
