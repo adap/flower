@@ -8,7 +8,7 @@ algorithms: [fedavg, scaffold, fedprox, fednova]
 
 # Federated Learning on Non-IID Data Silos: An Experimental Study
 
-****Paper:**** : [https://arxiv.org/abs/2102.02079](https://arxiv.org/abs/2102.02079)
+**Paper:** [https://arxiv.org/abs/2102.02079](https://arxiv.org/abs/2102.02079)
 
 ****Authors:**** : Qinbin Li, Yiqun Diao, Quan Chen, Bingsheng He
 
