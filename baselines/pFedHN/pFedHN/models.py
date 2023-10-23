@@ -12,9 +12,34 @@ from torch.nn.utils import spectral_norm
 ssl._create_default_https_context = ssl._create_unverified_context
 
 
+class LocalLayer(nn.Module):
+    """Local Layer for performing the fucntionality of Personal Classifier.
+
+    This is for the experimentation of pFedHNPC.
+    """
+
+    def __init__(self, n_input=84, n_output=10, nonlinearity=False):
+        super().__init__()
+        self.nonlinearity = nonlinearity
+        layers = []
+        if nonlinearity:
+            layers.append(nn.ReLU())
+
+        layers.append(nn.Linear(n_input, n_output))
+        self.layer = nn.Sequential(*layers)
+
+    def forward(self, x):
+        """Forward pass of the hypernetwork."""
+        return self.layer(x)
+
+
 # pylint: disable=too-many-instance-attributes
 class CNNHyper(nn.Module):
-    """HyperNetwork for pFedHN."""
+    """HyperNetwork for pFedHN.
+
+    in_channels = 1 , refers to the MNIST and in_channels = 3 refers to CIFAR10 and
+    CIFAR100 datasets.
+    """
 
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-statements
@@ -27,13 +52,15 @@ class CNNHyper(nn.Module):
         out_dim,
         hidden_dim=100,
         spec_norm=False,
-        n_hidden=1,
+        n_hidden=3,
+        local=False,
     ):
         super().__init__()
 
         self.in_channels = in_channels
         self.out_dim = out_dim
         self.n_kernels = n_kernels
+        self.local = local
         self.embeddings = nn.Embedding(
             num_embeddings=n_nodes, embedding_dim=embedding_dim
         )
@@ -66,8 +93,9 @@ class CNNHyper(nn.Module):
             self.l1_bias = nn.Linear(hidden_dim, 120)
             self.l2_weights = nn.Linear(hidden_dim, 84 * 120)
             self.l2_bias = nn.Linear(hidden_dim, 84)
-            self.l3_weights = nn.Linear(hidden_dim, self.out_dim * 84)
-            self.l3_bias = nn.Linear(hidden_dim, self.out_dim)
+            if not self.local:
+                self.l3_weights = nn.Linear(hidden_dim, self.out_dim * 84)
+                self.l3_bias = nn.Linear(hidden_dim, self.out_dim)
 
         elif self.in_channels == 1:
             self.c1_weights = nn.Linear(
@@ -100,8 +128,9 @@ class CNNHyper(nn.Module):
             self.l1_bias = spectral_norm(self.l1_bias)
             self.l2_weights = spectral_norm(self.l2_weights)
             self.l2_bias = spectral_norm(self.l2_bias)
-            self.l3_weights = spectral_norm(self.l3_weights)
-            self.l3_bias = spectral_norm(self.l3_bias)
+            if not self.local:
+                self.l3_weights = spectral_norm(self.l3_weights)
+                self.l3_bias = spectral_norm(self.l3_bias)
 
         elif spec_norm and self.in_channels == 1:
             self.c1_weights = spectral_norm(self.c1_weights)
@@ -118,7 +147,11 @@ class CNNHyper(nn.Module):
             self.l3_bias = spectral_norm(self.l3_bias)
 
     def forward(self, idx):
-        """Forward pass of the hypernetwork."""
+        """Forward pass of the hypernetwork.
+
+        This returns the state_dict containing the param-name and weights which we load
+        it into the target network
+        """
         emd = self.embeddings(idx)
         features = self.mlp(emd)
 
@@ -139,10 +172,11 @@ class CNNHyper(nn.Module):
                     "fc1.bias": self.l1_bias(features).view(-1),
                     "fc2.weight": self.l2_weights(features).view(84, 120),
                     "fc2.bias": self.l2_bias(features).view(-1),
-                    "fc3.weight": self.l3_weights(features).view(self.out_dim, 84),
-                    "fc3.bias": self.l3_bias(features).view(-1),
                 }
             )
+            if not self.local:
+                weights["fc3.weight"] = self.l3_weights(features).view(self.out_dim, 84)
+                weights["fc3.bias"] = self.l3_bias(features).view(-1)
 
         elif self.in_channels == 1:
             weights = OrderedDict(
@@ -175,13 +209,18 @@ class CNNHyper(nn.Module):
 
 # pylint: disable=too-many-instance-attributes
 class CNNTarget(nn.Module):
-    """Target Network for pFedHN."""
+    """Target Network for pFedHN.
+
+    Target Network is that network which is trained in the client using the weights from
+    its personalised hypernetwork.
+    """
 
     # pylint: disable=too-many-arguments
-    def __init__(self, in_channels, n_kernels, out_dim):
+    def __init__(self, in_channels, n_kernels, out_dim, local=False):
         super().__init__()
 
         self.in_channels = in_channels
+        self.local = local
 
         if self.in_channels == 3:
             self.conv1 = nn.Conv2d(in_channels, n_kernels, 5)
@@ -189,7 +228,8 @@ class CNNTarget(nn.Module):
             self.conv2 = nn.Conv2d(n_kernels, 2 * n_kernels, 5)
             self.fc1 = nn.Linear(2 * n_kernels * 5 * 5, 120)
             self.fc2 = nn.Linear(120, 84)
-            self.fc3 = nn.Linear(84, out_dim)
+            if not self.local:
+                self.fc3 = nn.Linear(84, out_dim)
 
         elif self.in_channels == 1:
             self.conv1 = nn.Conv2d(in_channels, n_kernels, 3)
@@ -208,7 +248,8 @@ class CNNTarget(nn.Module):
             x = x.view(x.shape[0], -1)
             x = F.relu(self.fc1(x))
             x = F.relu(self.fc2(x))
-            x = self.fc3(x)
+            if not self.local:
+                x = self.fc3(x)
 
         elif self.in_channels == 1:
             x = self.pool(F.relu(self.conv1(x)))
@@ -218,5 +259,4 @@ class CNNTarget(nn.Module):
             x = F.relu(self.fc1(x))
             x = F.relu(self.fc2(x))
             x = self.fc3(x)
-
         return x
