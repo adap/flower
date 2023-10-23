@@ -106,7 +106,6 @@ class SizePartitioner(Partitioner):
         left_unassigned_samples = len(self.dataset) - assigned_samples
         # If there is any sample(s) left unassigned, assign it to the largest partition.
         partition_sizes_as_num_of_samples[-1] += left_unassigned_samples
-        print(partition_sizes_as_num_of_samples)
         for idx, partition_size in enumerate(partition_sizes_as_num_of_samples):
             self._cid_to_size[idx] = partition_size
 
