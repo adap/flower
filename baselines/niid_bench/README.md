@@ -98,7 +98,7 @@ We provide the bash script run_exp.py that can be used to run all configurations
 python run_exp.py --seed 42 --num-processes 4
 ```
 
-The above command generates results that can be parsed to get the accuracies for each configuration which can be presented in a table (similar to Table 3 in the paper).
+The above command generates results that can be parsed to get the best accuracies across all rounds for each configuration which can be presented in a table (similar to Table 3 in the paper).
 
 | Dataset | partitioning method | FedAvg | SCAFFOLD | FedProx | FedNova |
 | :------ | :------ | :---: | :---: | :---: | :---: |
