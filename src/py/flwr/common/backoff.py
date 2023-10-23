@@ -115,7 +115,7 @@ class Details:
 
 # pylint: disable-next=too-many-instance-attributes
 class SafeInvoker:
-    """Wrapper class for backoff and retry triggered by exceptions.
+    """Wrapper class for retry (with backoff) triggered by exceptions.
 
     Parameters
     ----------
