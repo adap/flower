@@ -6,31 +6,32 @@ dataset:
 
 model:
   # model config
-  device: "cpu"
-  n_kernels: 16
+  n_kernels: 16 # number of kernels for the hypernetwork: 16 for CIFAR10 and CIFAR100, 7 for MNIST
   inner_lr: 5e-3
   wd: 5e-5
   lr: 1e-2
-  in_channels: 3
-  out_dim: 10
+  in_channels: 3 # 3 for CIFAR10 and CIFAR100, 1 for MNIST
+  out_dim: 10 # 10 for MNIST and CIFAR10, 100 for CIFAR100
   we_dec: 1e-3
-  local: False
-  variant: "pFedHN"
+  local: False # True: for pFedHNPC, False: pFedHN
+  variant: 0 # 0: pFedHN , 1: pFedHNPC
+  n_hidden: 3 # number of hidden layers for the hypernetwork: 3 for CIFAR10 and CIFAR100, 1 for MNIST
 
 
 strategy:
   _target_: pFedHN.strategy.pFedHN
   # strategy config
 
-server:
+server: # Hyperparameters for the hypernetwork which is in the server
+  embedding_dim_denominator: 4 ## Explained at Hypernetwork initialisation in server.py
   lr: 1e-2
   wd: 1e-3
-  momentum: 0.9
+  momentum: 0.9 
 
 client:
   # client config
   num_epochs: 50
-  num_rounds: 200
+  num_rounds: 5000
   num_nodes: 1
   batch_size: 64
   num_classes_per_node: 2
