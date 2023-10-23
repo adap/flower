@@ -63,7 +63,7 @@ def main(cfg: DictConfig) -> None:
     test_model = models.create_model(
         model_config,
         model_rate=model_split_rate[get_global_model_rate(model_mode)],
-        track=False,
+        track=True,
         device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
     )
 
@@ -72,6 +72,7 @@ def main(cfg: DictConfig) -> None:
         model_split_rate,
         model_mode + "",
         data_loaders["entire_trainloader"],
+        cfg.dataset.batch_size.train,
     )
     # # for i in range(cfg.num_clients):
     #     # client_to_model_rate_mapping[i]
@@ -116,6 +117,14 @@ def main(cfg: DictConfig) -> None:
             data_loaders,
             torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
             test_model,
+            models.create_model(
+                model_config,
+                model_rate=model_split_rate[get_global_model_rate(model_mode)],
+                track=False,
+                device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
+            )
+            .state_dict()
+            .keys(),
         ),
         fraction_fit=0.1,
         fraction_evaluate=0.1,

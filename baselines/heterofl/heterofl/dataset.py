@@ -39,7 +39,10 @@ def load_datasets(  # pylint: disable=too-many-arguments
         num_clients,
         dataset_name=config.dataset_name,
         iid=config.iid,
-        balance=config.balance,
+        dataset_division={
+            "shard_per_user": config.shard_per_user,
+            "balance": config.balance,
+        },
         seed=seed,
     )
     # Split each partition into train/val and create DataLoader

@@ -17,6 +17,7 @@ def gen_evaluate_fn(
     data_loaders,
     device: torch.device,
     model: nn.Module,
+    keys,
 ) -> Callable[
     [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]
 ]:
@@ -41,6 +42,7 @@ def gen_evaluate_fn(
             Optional[Tuple[float, Dict[str, Scalar]]] ]
         The centralized evaluation function.
     """
+    intermediate_keys = keys
 
     def evaluate(
         server_round: int, parameters_ndarrays: NDArrays, config: Dict[str, Scalar]
@@ -51,9 +53,9 @@ def gen_evaluate_fn(
             return 1, {}
 
         net = model
-        params_dict = zip(net.state_dict().keys(), parameters_ndarrays)
+        params_dict = zip(intermediate_keys, parameters_ndarrays)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
-        net.load_state_dict(state_dict, strict=True)
+        net.load_state_dict(state_dict, strict=False)
         net.to(device)
 
         if server_round % 100 == 0:

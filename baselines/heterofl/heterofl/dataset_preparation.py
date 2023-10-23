@@ -39,18 +39,15 @@ def _partition_data(
     num_clients: int,
     dataset_name: str,
     iid: Optional[bool] = False,
-    shard_per_user: int = 2,  # only in case of non-iid
-    balance: Optional[bool] = False,
+    dataset_division=None,
     seed: Optional[int] = 42,
 ) -> Tuple[Dataset, List[Dataset], List[torch.tensor], List[Dataset], Dataset]:
     trainset, testset = _download_data(dataset_name)
 
     if dataset_name in ("MNIST", "CIFAR10"):
         classes_size = 10
-    # else:
-    # dataset_classes_size needs to be calculated
 
-    if balance:
+    if dataset_division["balance"]:
         trainset = _balance_classes(trainset, seed)
 
     if iid:
@@ -58,10 +55,18 @@ def _partition_data(
         client_testsets, _ = iid_partition(testset, num_clients, seed=seed)
     else:
         datasets, label_split = non_iid(
-            trainset, num_clients, shard_per_user, classes_size
+            {"dataset": trainset, "classes_size": classes_size},
+            num_clients,
+            dataset_division["shard_per_user"],
         )
         client_testsets, _ = non_iid(
-            testset, num_clients, shard_per_user, classes_size, label_split
+            {
+                "dataset": testset,
+                "classes_size": classes_size,
+            },
+            num_clients,
+            dataset_division["shard_per_user"],
+            label_split,
         )
 
         tensor_label_split = []
@@ -92,29 +97,24 @@ def iid_partition(
 
 
 def non_iid(
-    dataset: Dataset,
+    dataset_info,
     num_clients: int,
     shard_per_user: int,
-    classes_size: int,
     label_split=None,
     seed=42,
 ) -> Tuple[List[Dataset], List]:
     """Non-IID partition of dataset among clients."""
-    # label = np.array(dataset.targets)
     data_split: Dict[int, List] = {i: [] for i in range(num_clients)}
-    # label_idx_split: Dict = {}
 
     label_idx_split, shard_per_class = _split_dataset_targets_idx(
-        dataset, shard_per_user, num_clients, classes_size
+        dataset_info["dataset"],
+        shard_per_user,
+        num_clients,
+        dataset_info["classes_size"],
     )
-    # for i, _ in enumerate(label):
-    #     label_i = label[i].item()
-    #     if label_i not in label_idx_split:
-    #         label_idx_split[label_i] = []
-    #     label_idx_split[label_i].append(i)
 
     if label_split is None:
-        label_split = list(range(classes_size)) * shard_per_class
+        label_split = list(range(dataset_info["classes_size"])) * shard_per_class
         label_split = torch.tensor(label_split)[
             torch.randperm(
                 len(label_split), generator=torch.Generator().manual_seed(seed)
@@ -135,11 +135,10 @@ def non_iid(
             ].item()
             data_split[i].extend(label_idx_split[label_i].pop(idx))
 
-    # divided_dataset = [None for i in range(num_clients)]
-    # for i in range(num_clients):
-    #     divided_dataset[i] = Subset(dataset, data_split[i])
-
-    return _get_dataset_from_idx(dataset, data_split, num_clients), label_split
+    return (
+        _get_dataset_from_idx(dataset_info["dataset"], data_split, num_clients),
+        label_split,
+    )
 
 
 def _split_dataset_targets_idx(dataset, shard_per_user, num_clients, classes_size):
