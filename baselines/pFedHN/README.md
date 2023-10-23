@@ -21,7 +21,7 @@ Dataset: MNIST, CIFAR-10, CIFAR-100 # list of datasets you include in your basel
 
 ****Datasets:**** MNIST,CIFAR-10,CIFAR-100 from torchvision 
 
-****Hardware Setup:**** Will be updated
+****Hardware Setup:**** All of the experiments were run on the 12-core CPU of a MacBook Pro M2 Pro with 32GB of RAM. 
 
 ****Contributors:**** 
 ---
@@ -129,6 +129,24 @@ python -m pFedHN.main dataset.data="mnist" model.n_kernels=7 model.in_channels=1
 python -m pFedHN.main model.local=True model.variant=1 model.lr=5e-2 # this will run the pFedHNPC for CIFAR-10 dataset where local=True is for using LocalLayer and variant=1 for setting pFedHNPC . Learning rate is modified to 5e-2
 
 python -m pFedHN.main dataset.data="cifar100" model.out_dim=100 client.num_classes_per_node=10 model.local=True model.variant=1 model.lr=5e-2 # this will run the pFedHNPC for CIFAR-100 dataset where local=True is for using LocalLayer and variant=1 for setting pFedHNPC . Learning rate is modified to 5e-2
+
+## If you want to check out the other comparison algorithms follow below
+
+## FedAvg
+
+python -m pFedHN.comparison_experiments.main dataset.data="mnist" model.n_kernels=7 model.in_channels=1 # for running FedAvg for MNIST using the given Non-IID Distribution
+
+python -m pFedHN.comparison_experiments.main # for running FedAvg for CIFAR-10 dataset using the given Non-IID Distribution
+
+python -m pFedHN.comparison_experiments.main dataset.data="cifar100" model.out_dim=100 client.num_classes_per_node=10 # for running FedAvg for CIFAR-100 dataset using the given Non-IID Distribution
+
+## PerFedAvg
+
+python -m pFedHN.comparison_experiments.main dataset.data="mnist" model.n_kernels=7 model.in_channels=1 model.variant=1 model.gamma=0.99 # for running PerFedAvg for MNIST dataset using the given Non-IID Distribution
+
+python -m pFedHN.comparison_experiments.main model.variant=1 model.lr=1e-3 # for running PerFedAvg for CIFAR-10 dataset using the given Non-IID Distribution
+
+python -m pFedHN.comparison_experiments.main dataset.data="cifar100" model.out_dim=100 client.num_classes_per_node=10 model.variant=1 model.beta=1e-2 model.delta=1e-2 model.lr=1e-2 model.gamma=0.95 # for running PerFedAvg for CIFAR-100 dataset using the given Non-IID Distribution
 
 ```
 
