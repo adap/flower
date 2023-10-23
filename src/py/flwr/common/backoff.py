@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""`SafeInvoker` to argument other functions with error handling and retries."""
+"""`SafeInvoker` to augment other functions with error handling and retries."""
 
 
 import itertools
