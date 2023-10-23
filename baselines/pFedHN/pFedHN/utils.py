@@ -7,9 +7,9 @@ results, plotting.
 import json
 import random
 
-import matplotlib.pyplot as plt
 import numpy as np
 import torch
+from matplotlib import pyplot as plt
 
 
 ##########################################################
