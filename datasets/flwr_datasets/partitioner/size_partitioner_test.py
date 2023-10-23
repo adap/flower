@@ -90,7 +90,7 @@ class TestLinearPartitioner(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             partitioner.load_partition(1)
         self.assertIn(
-            "The given specification of the parameter num_partitions=10 for the given "
+            "The given specification of the parameter num_partitions=100 for the given "
             "dataset results in the partitions sizes that are not greater than 0.",
             str(context.exception),
         )
