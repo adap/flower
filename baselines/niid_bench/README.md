@@ -10,36 +10,36 @@ algorithms: [fedavg, scaffold, fedprox, fednova]
 
 **Paper:** [https://arxiv.org/abs/2102.02079](https://arxiv.org/abs/2102.02079)
 
-****Authors:**** : Qinbin Li, Yiqun Diao, Quan Chen, Bingsheng He
+**Authors:** Qinbin Li, Yiqun Diao, Quan Chen, Bingsheng He
 
-****Abstract:**** : Due to the increasing privacy concerns and data regulations, training data have been increasingly fragmented, forming distributed databases of multiple "data silos" (e.g., within different organizations and countries). To develop effective machine learning services, there is a must to exploit data from such distributed databases without exchanging the raw data. Recently, federated learning (FL) has been a solution with growing interests, which enables multiple parties to collaboratively train a machine learning model without exchanging their local data. A key and common challenge on distributed databases is the heterogeneity of the data distribution among the parties. The data of different parties are usually non-independently and identically distributed (i.e., non-IID). There have been many FL algorithms to address the learning effectiveness under non-IID data settings. However, there lacks an experimental study on systematically understanding their advantages and disadvantages, as previous studies have very rigid data partitioning strategies among parties, which are hardly representative and thorough. In this paper, to help researchers better understand and study the non-IID data setting in federated learning, we propose comprehensive data partitioning strategies to cover the typical non-IID data cases. Moreover, we conduct extensive experiments to evaluate state-of-the-art FL algorithms. We find that non-IID does bring significant challenges in learning accuracy of FL algorithms, and none of the existing state-of-the-art FL algorithms outperforms others in all cases. Our experiments provide insights for future studies of addressing the challenges in "data silos".
+**Abstract:** Due to the increasing privacy concerns and data regulations, training data have been increasingly fragmented, forming distributed databases of multiple "data silos" (e.g., within different organizations and countries). To develop effective machine learning services, there is a must to exploit data from such distributed databases without exchanging the raw data. Recently, federated learning (FL) has been a solution with growing interests, which enables multiple parties to collaboratively train a machine learning model without exchanging their local data. A key and common challenge on distributed databases is the heterogeneity of the data distribution among the parties. The data of different parties are usually non-independently and identically distributed (i.e., non-IID). There have been many FL algorithms to address the learning effectiveness under non-IID data settings. However, there lacks an experimental study on systematically understanding their advantages and disadvantages, as previous studies have very rigid data partitioning strategies among parties, which are hardly representative and thorough. In this paper, to help researchers better understand and study the non-IID data setting in federated learning, we propose comprehensive data partitioning strategies to cover the typical non-IID data cases. Moreover, we conduct extensive experiments to evaluate state-of-the-art FL algorithms. We find that non-IID does bring significant challenges in learning accuracy of FL algorithms, and none of the existing state-of-the-art FL algorithms outperforms others in all cases. Our experiments provide insights for future studies of addressing the challenges in "data silos".
 
 
 ## About this baseline
 
-****What’s implemented:**** The code in this directory replicates many experiments from the aforementioned paper. Specifically, it contains implementations for four FL protocols, FedAvg (McMahan et al. 2017), SCAFFOLD (Karimireddy et al. 2019), FedProx (Li et al. 2018), and FedNova (Wang et al. 2020). The FL protocols are evaluated across various non-IID data partition strategies across clients on three image classification datasets MNIST, CIFAR10, and Fashion-mnist.
+**What’s implemented:** The code in this directory replicates many experiments from the aforementioned paper. Specifically, it contains implementations for four FL protocols, FedAvg (McMahan et al. 2017), SCAFFOLD (Karimireddy et al. 2019), FedProx (Li et al. 2018), and FedNova (Wang et al. 2020). The FL protocols are evaluated across various non-IID data partition strategies across clients on three image classification datasets MNIST, CIFAR10, and Fashion-mnist.
 
-****Datasets:**** MNIST, CIFAR10, and Fashion-mnist from PyTorch's Torchvision
+**Datasets:** MNIST, CIFAR10, and Fashion-mnist from PyTorch's Torchvision
 
-****Hardware Setup:**** These experiments were run on a linux server with 56 CPU threads with 250 GB Ram. There are 105 configurations to run per seed and at any time 7 configurations have been run parallely. The experiments required close to 12 hrs to finish for one seed. Nevertheless, to run a subset of configurations, such as only one FL protocol across all datasets and splits, a machine with 4-8 threads and 16 GB memory can run in reasonable time.
+**Hardware Setup:** These experiments were run on a linux server with 56 CPU threads with 250 GB Ram. There are 105 configurations to run per seed and at any time 7 configurations have been run parallely. The experiments required close to 12 hrs to finish for one seed. Nevertheless, to run a subset of configurations, such as only one FL protocol across all datasets and splits, a machine with 4-8 threads and 16 GB memory can run in reasonable time.
 
-****Contributors:**** Aashish Kolluri, PhD Candidate, National University of Singapore
+**Contributors:** Aashish Kolluri, PhD Candidate, National University of Singapore
 
 
 ## Experimental Setup
 
-****Task:**** Image classification
+**Task:** Image classification
 
-****Model:**** This directory implements CNNs as mentioned in the paper (Section V, paragraph 1). Specifically, the CNNs have two 2D convolutional layers with 6 and 16 output channels, kernel size 5, and stride 1.
+**Model:** This directory implements CNNs as mentioned in the paper (Section V, paragraph 1). Specifically, the CNNs have two 2D convolutional layers with 6 and 16 output channels, kernel size 5, and stride 1.
 
-****Dataset:**** This directory has three image classification datasets that are used in the baseline, MNIST, CIFAR10, and Fashion-mnist. Further, five different data-splitting strategies are used including iid and four non-iid strategies based on label skewness. In the first non-iid strategy, for each label the data is split based on proportions sampled from a dirichlet distribution (with parameter 0.5). In the three remaining strategies, each client gets data from randomly chosen #C labels where #C is 1, 2, or 3. For the clients that are supposed to receive data from the same label the data is equally split between them. The baseline considers 10 clients. The following table shows all dataset and data splitting configurations.
+**Dataset:** This directory has three image classification datasets that are used in the baseline, MNIST, CIFAR10, and Fashion-mnist. Further, five different data-splitting strategies are used including iid and four non-iid strategies based on label skewness. In the first non-iid strategy, for each label the data is split based on proportions sampled from a dirichlet distribution (with parameter 0.5). In the three remaining strategies, each client gets data from randomly chosen #C labels where #C is 1, 2, or 3. For the clients that are supposed to receive data from the same label the data is equally split between them. The baseline considers 10 clients. The following table shows all dataset and data splitting configurations.
 
 | Datasets | #classes | #partitions | partitioning method | partition settings |
 | :------ | :---: | :---: | :---: | :---: |
 | CIFAR10, MNIST, Fashion-mnist | 10 | 10 | IID<br>dirichlet<br>sort and partition<br>sort and partition<br>sort and partition | NA<br>distribution parameter 0.5<br>1 label per client<br>2 labels per client<br>3 labels per client |
 
 
-****Training Hyperparameters:**** There are four FL algorithms and they have many common hyperparameters and few different ones. The following table shows the common hyperparameters and their default values.
+**Training Hyperparameters:** There are four FL algorithms and they have many common hyperparameters and few different ones. The following table shows the common hyperparameters and their default values.
 
 | Description | Default Value |
 | ----------- | ----- |
@@ -95,7 +95,7 @@ python -m niid_bench.main --config-name fednova_base dataset_name=mnist partitio
 We provide the bash script run_exp.py that can be used to run all configurations. For instance, the following command runs all of them with 7 configurations running at the same time.
 
 ```bash
-python run_exp.py --seed 42 --num-processes 7
+python run_exp.py --seed 42 --num-processes 4
 ```
 
 The above command generates results that can be parsed to get the accuracies for each configuration which can be presented in a table (similar to Table 3 in the paper).
