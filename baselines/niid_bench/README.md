@@ -2,7 +2,7 @@
 title: "Federated Learning on Non-IID Data Silos: An Experimental Study"
 url: https://arxiv.org/abs/2102.02079
 labels: [data heterogeneity, image classification, benchmark]
-dataset: [cifar10, mnist, fashion-mnist]
+dataset: [CIFAR-10, MNIST, Fashion-MNIST]
 algorithms: [fedavg, scaffold, fedprox, fednova]
 ---
 
