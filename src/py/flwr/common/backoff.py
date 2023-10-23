@@ -104,7 +104,7 @@ def full_jitter(value: float) -> float:
 class Details:
     """Details for event handlers in SafeInvoker."""
 
-    func: Callable[[Any], Any]
+    func: Callable[..., Any]
     args: Tuple[Any, ...]
     kwargs: Dict[str, Any]
     tries: int
@@ -123,7 +123,7 @@ class SafeInvoker:
         A generator yielding successive wait times in seconds. If the generator
         is finite, the giveup event will be triggered when the generator raises
         `StopIteration`.
-    exception:  Union[Type[Exception], Iterable[Type[Exception]]]
+    exception: Union[Type[Exception], Iterable[Type[Exception]]]
         An exception type (or iterable of types) that triggers backoff.
     max_tries: Optional[int] (default: None)
         The maximum number of attempts to make before giving up. Once exhausted,
@@ -131,7 +131,8 @@ class SafeInvoker:
         to the number of tries.
     max_time: Optional[float] (default: None)
         The maximum total amount of time to try before giving up. Once this time
-        has expired, the exception will be allowed to escape.
+        has expired, the function won't be interrupted immediately, but the exception
+        will be allowed to escape. If set to None, there is no limit to the total time.
     jitter: Optional[Callable[[float], float]] (default: full_jitter)
         A function of the value yielded by `wait_gen` returning the actual time
         to wait. This function helps distribute wait times stochastically to avoid
@@ -140,7 +141,8 @@ class SafeInvoker:
         `jitter=None`.
     giveup_condition: Optional[Callable[[Exception], bool]] (default: None)
         A function accepting an exception instance, returning whether or not
-        to give up. If set to None, the strategy is to always continue.
+        to give up prematurely before other give-up conditions are evaluated.
+        If set to None, the strategy is to never give up prematurely.
     on_success: Optional[Callable[[Details], None]] (default: None)
         A callable to be executed in the event of success. The parameter is a
         data class object detailing the invocation.
@@ -152,6 +154,17 @@ class SafeInvoker:
         exceeded, `giveup_condition` returns True, or `wait` generator raises
         `StopInteration`. The parameter is a data class object detailing the
         invocation.
+
+    Examples
+    --------
+    Initialize a `SafeInvoker` with exponential backoff and call a function:
+
+    >>> invoker = SafeInvoker(
+    >>>     exponential(),
+    >>>     grpc.RpcError,
+    >>>     max_tries=3,
+    >>> )
+    >>> invoker.invoke(my_func, arg1, arg2, kw1=kwarg1)
     """
 
     def __init__(
