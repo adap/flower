@@ -35,7 +35,7 @@ def main(cfg: DictConfig):
         cfg.client.num_classes_per_node,
     )
 
-    if cfg.model.variant == "pFedHNPC":
+    if cfg.model.variant == 1:
         node_local_layers = [
             LocalLayer(n_input=84, n_output=cfg.model.out_dim).to(get_device())
             for _ in range(cfg.client.num_nodes)

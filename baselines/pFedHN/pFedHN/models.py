@@ -35,7 +35,11 @@ class LocalLayer(nn.Module):
 
 # pylint: disable=too-many-instance-attributes
 class CNNHyper(nn.Module):
-    """HyperNetwork for pFedHN."""
+    """HyperNetwork for pFedHN.
+
+    in_channels = 1 , refers to the MNIST and in_channels = 3 refers to CIFAR10 and
+    CIFAR100 datasets.
+    """
 
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-statements
@@ -143,7 +147,11 @@ class CNNHyper(nn.Module):
             self.l3_bias = spectral_norm(self.l3_bias)
 
     def forward(self, idx):
-        """Forward pass of the hypernetwork."""
+        """Forward pass of the hypernetwork.
+
+        This returns the state_dict containing the param-name and weights which we load
+        it into the target network
+        """
         emd = self.embeddings(idx)
         features = self.mlp(emd)
 
@@ -201,7 +209,11 @@ class CNNHyper(nn.Module):
 
 # pylint: disable=too-many-instance-attributes
 class CNNTarget(nn.Module):
-    """Target Network for pFedHN."""
+    """Target Network for pFedHN.
+
+    Target Network is that network which is trained in the client using the weights from
+    its personalised hypernetwork.
+    """
 
     # pylint: disable=too-many-arguments
     def __init__(self, in_channels, n_kernels, out_dim, local=False):

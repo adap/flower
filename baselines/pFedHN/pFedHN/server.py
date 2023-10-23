@@ -1,7 +1,6 @@
-"""Create global evaluation function.
+"""Server for pFedHN . Here the HyperNetwork lies and it performs the necessary.
 
-Optionally, also define a new Server class (please note this is not needed in most
-settings).
+actions.
 """
 import concurrent.futures
 import json
@@ -38,12 +37,19 @@ class pFedHNServer(Server):
         self.cfg = cfg
         self.hnet = CNNHyper(
             n_nodes=self.cfg.client.num_nodes,
-            embedding_dim=int(1 + self.cfg.client.num_nodes / 4),
+            # The dimension is given in page 6 of the paper
+            # Under Section 5 - Training Stratergies.
+            # Justification is given in Supplementary Material
+            # Section C Additional Experiments - C.2.2
+            embedding_dim=int(
+                1
+                + self.cfg.client.num_nodes / self.cfg.server.embedding_dim_denominator
+            ),
             in_channels=self.cfg.model.in_channels,
             n_kernels=self.cfg.model.n_kernels,
             out_dim=self.cfg.model.out_dim,
             hidden_dim=100,
-            n_hidden=3,
+            n_hidden=self.cfg.model.n_hidden,
             local=self.cfg.model.local,
         )
         self.parameters: Parameters = Parameters(

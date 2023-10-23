@@ -77,7 +77,10 @@ class pFedHN(fl.server.strategy.Strategy):
         parameters: Parameters,
         client_manager: ClientManager,
     ) -> List[Tuple[ClientProxy, FitIns]]:
-        """Configure the next round of training."""
+        """Configure the next round of training.
+
+        Here only one client per round is taken as given in the pFedHN algorithm
+        """
         sample_size, min_num_clients = self.num_fit_clients(
             client_manager.num_available()
         )
@@ -99,7 +102,10 @@ class pFedHN(fl.server.strategy.Strategy):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """Use the delta_theta to update the hypernetwork."""
+        """Send delta_theta and other metrics to server for Hypernetwork update.
+
+        These are recieved from only one client which was selected during configure_fit
+        """
         _, fit_res = results[0]
 
         delta_theta = fit_res.parameters
