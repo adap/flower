@@ -135,13 +135,13 @@ class Driver:
 
     def __init__(self) -> None:
         self.grpc_driver = GrpcDriver()
-        self.workload_id = 0
+        self.workload_id: Optional[int] = None
         self.task_id_pool: Set[str] = set()
         self.node = Node(node_id=0, anonymous=True)
 
     def _check_and_init_grpc_driver(self) -> None:
         # Check if the GrpcDriver is initialized
-        if self.workload_id != 0:
+        if self.workload_id is not None:
             return
 
         # Connect and create workload
@@ -150,11 +150,13 @@ class Driver:
         self.workload_id = res.workload_id
 
     def get_nodes(self) -> List[Node]:
-        """Get client IDs."""
+        """Get node IDs."""
         self._check_and_init_grpc_driver()
 
         # Call GrpcDriver method
-        res = self.grpc_driver.get_nodes(GetNodesRequest(workload_id=self.workload_id))
+        res = self.grpc_driver.get_nodes(
+            GetNodesRequest(workload_id=self.workload_id)  # type: ignore
+        )
         return list(res.nodes)
 
     def push_task_ins(self, task_ins_list: Iterable[TaskIns]) -> List[str]:
@@ -163,7 +165,7 @@ class Driver:
 
         # Set workload_id
         for task_ins in task_ins_list:
-            task_ins.workload_id = self.workload_id
+            task_ins.workload_id = self.workload_id  # type: ignore
 
         # Call GrpcDriver method
         res = self.grpc_driver.push_task_ins(
@@ -197,7 +199,7 @@ class Driver:
     def __del__(self) -> None:
         """Disconnect GrpcDriver if connected."""
         # Check if GrpcDriver is initialized
-        if self.workload_id == 0:
+        if self.workload_id is None:
             return
 
         # Disconnect
