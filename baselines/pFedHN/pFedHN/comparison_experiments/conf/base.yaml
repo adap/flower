@@ -1,0 +1,25 @@
+---
+dataset:
+  # dataset config
+  data: "cifar10"
+  root: "./data"
+
+model:
+  # model config
+  n_kernels: 16
+  lr: 5e-3
+  wd: 5e-5
+  in_channels: 3
+  out_dim: 10
+  variant: 0
+  beta: 1e-3
+  delta: 1e-3
+  gamma: 0.97
+
+client:
+  # client config
+  num_epochs: 50
+  num_rounds: 5000
+  num_nodes: 50
+  batch_size: 64
+  num_classes_per_node: 2
