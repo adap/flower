@@ -27,10 +27,8 @@ from flwr.common import (
 )
 from omegaconf import DictConfig
 
-
 from fedwav2vec2.models import int_model
 from fedwav2vec2.sb_recipe import get_weights, set_weights
-
 
 
 class SpeechBrainClient(fl.client.Client):
@@ -46,8 +44,6 @@ class SpeechBrainClient(fl.client.Client):
         fl.common.logger.log(logging.DEBUG, "Starting client %s", cid)
 
     def get_parameters(self, _: GetParametersIns) -> GetParametersRes:
-        print(f"Client {self.cid}: get_parameters")
-
         weights: NDArrays = get_weights(self.modules)
         parameters = ndarrays_to_parameters(weights)
         gc.collect()
@@ -55,22 +51,14 @@ class SpeechBrainClient(fl.client.Client):
         return GetParametersRes(status=status, parameters=parameters)
 
     def fit(self, ins: FitIns) -> FitRes:
-        print(
-            f"==============================Client {self.cid}: fit=============================="
-        )
         weights: NDArrays = fl.common.parameters_to_ndarrays(ins.parameters)
         config = ins.config
 
         # Read training configuration
         epochs = int(config["epochs"])
 
-        print("Client {} start".format(self.cid))
-
         (_, num_examples, avg_loss, avg_wer) = self._train_speech_recogniser(
             weights, epochs
-        )
-        print(
-            f"==============================Client {self.cid}: end=============================="
         )
         metrics = {"train_loss": avg_loss, "wer": avg_wer}
 
@@ -90,8 +78,6 @@ class SpeechBrainClient(fl.client.Client):
         )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        print(f"Client {self.cid}: evaluate")
-
         weights = parameters_to_ndarrays(ins.parameters)
 
         # config = ins.config

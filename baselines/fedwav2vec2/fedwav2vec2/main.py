@@ -50,7 +50,9 @@ def main(cfg: DictConfig) -> None:
         pretrained = None
 
     strategy = instantiate(
-        cfg.strategy, initial_parameters=pretrained, evaluate_fn=get_evaluate_fn(cfg, save_path=save_path)
+        cfg.strategy,
+        initial_parameters=pretrained,
+        evaluate_fn=get_evaluate_fn(cfg, save_path=save_path),
     )
 
     fl.simulation.start_simulation(

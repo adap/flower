@@ -33,6 +33,7 @@ dataset: [TED-LIUM 3]
 
 **Model:** Wav2vec2.0-large [from Huggingface](https://huggingface.co/facebook/wav2vec2-large-lv60) totalling 317M parameters. Read more in the [wav2vec2.0 paper](https://arxiv.org/abs/2006.11477).
 
+
 **Dataset:** In this paper, we divided the training dataset of TED-LIUM 3 into 1943 clients, where each of them is represented by a speaker from TED-LIUM 3. The clients are ordered by CID, with `client_0` having the largest amount of speech hours and `client_1943` having the smallest. Each client's data will be divided into training, development, and test sets with an 80-10-10 ratio. For client who has more than 10 minutes, we extract 5 minutes from their training set for analysis purposes. This portion will not be used during training or in any part of this baseline. For clients with duration less than 10 minutes, all the speaker data will represent the local dataset for the client. The full structure breakdown is below: 
 ```bash
 ├── data
@@ -67,6 +68,7 @@ For more details, please refer to the relevant section in the paper.
 | `strategy.weight_strategy` | `num`| Different way to average clients weight. Could be chose between `num`,`loss`,`wer` |
 | `client_resources.num_cpus` | `8`| Number of cpus per client. Recommended to have more than 8 |
 | `client_réources.num_gpus` | `1`| Number of gpus per client. Recommended to have at least 1 with VRAM > 24GB |
+
 
 
 
