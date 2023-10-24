@@ -6,7 +6,7 @@ dataset: [UCF-101]
 ---
 
 # Federated Self-supervised Learning for Video Understanding
-> Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
+> Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper--.
 
 
 **paper:** [arxiv.org/abs/2207.01975](https://arxiv.org/abs/2207.01975)
