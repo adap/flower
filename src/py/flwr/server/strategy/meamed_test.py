@@ -127,7 +127,8 @@ def test_aggregate_fit() -> None:
     # Prepare
     previous_weights: NDArrays = [array([0.1, 0.1, 0.1, 0.1], dtype=float32)]
     strategy = MeaMed(
-        initial_parameters=ndarrays_to_parameters(previous_weights), num_clients_to_exclude=1
+        initial_parameters=ndarrays_to_parameters(previous_weights),
+        num_clients_to_exclude=1,
     )
     param_0: Parameters = ndarrays_to_parameters(
         [array([0.2, 0.2, 0.2, 0.2], dtype=float32)]

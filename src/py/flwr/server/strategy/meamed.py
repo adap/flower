@@ -132,9 +132,7 @@ class MeaMed(FedAvg):
             for _, fit_res in results
         ]
         parameters_aggregated = ndarrays_to_parameters(
-            aggregate_meamed(
-                weights_results, self.num_clients_to_exclude
-            )
+            aggregate_meamed(weights_results, self.num_clients_to_exclude)
         )
 
         # Aggregate custom metrics if aggregation fn was provided

@@ -65,9 +65,9 @@ def enable_tf_gpu_growth() -> None:
 def check_clientfn_returns_client(client: Client) -> Client:
     """Warn once that clients returned in `clinet_fn` should be of type Client.
 
-    This is here for backwards compatibility. If a ClientFn is provided returning
-    a different type of client (e.g. NumPyClient) we'll warn the user but convert
-    the client internally to `Client` by calling `.to_client()`.
+    This is here for backwards compatibility. If a ClientFn is provided returning a
+    different type of client (e.g. NumPyClient) we'll warn the user but convert the
+    client internally to `Client` by calling `.to_client()`.
     """
     if not isinstance(client, Client):
         mssg = (
