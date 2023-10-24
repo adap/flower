@@ -1,11 +1,13 @@
 # Flower Android Example (TensorFlowLite)
 
-This example demonstrates a federated learning setup with Android Clients. The training on Android is done on a CIFAR10 dataset using TensorFlow Lite. The setup is as follows:
+This example demonstrates a federated learning setup with Android clients in a background thread. The training on Android is done on a CIFAR10 dataset using TensorFlow Lite. The setup is as follows:
 
 - The CIFAR10 dataset is randomly split across 10 clients. Each Android client holds a local dataset of 5000 training examples and 1000 test examples.
 - The FL server runs in Python but all the clients run on Android.
 - We use a strategy called FedAvgAndroid for this example.
 - The strategy is vanilla FedAvg with a custom serialization and deserialization to handle the Bytebuffers sent from Android clients to Python server.
+
+The background thread is established via the `WorkManager` library of Android, thus, it will run comfortably on Android Versions from 8 to 13.
 
 ## Project Setup
 
@@ -42,7 +44,7 @@ Write the command below in your terminal to install the dependencies according t
 pip install -r requirements.txt
 ```
 
-# Run Federated Learning on Android Devices
+## Run Federated Learning on Android Devices
 
 The included `run.sh` will start the Flower server (using `server.py`). You can simply start it in a terminal as follows:
 

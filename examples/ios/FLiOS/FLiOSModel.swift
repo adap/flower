@@ -131,7 +131,8 @@ public class FLiOSModel: ObservableObject {
                 let layerWrappers = modelInspect.getLayerWrappers()
                 self.mlFlwrClient = MLFlwrClient(layerWrappers: layerWrappers,
                                                  dataLoader: dataLoader,
-                                                 compiledModelUrl: compiledModelUrl)
+                                                 compiledModelUrl: compiledModelUrl,
+                                                 modelUrl: url)
             case .local:
                 self.localClient = LocalClient(dataLoader: dataLoader, compiledModelUrl: compiledModelUrl)
             }
@@ -203,7 +204,7 @@ class LocalClient {
     
     func runMLTask(statusHandler: @escaping (Constants.TaskStatus) -> Void,
                    numEpochs: Int,
-                   task: flwr.MLTask
+                   task: MLTask
     ) {
         let dataset: MLBatchProvider
         let configuration = MLModelConfiguration()

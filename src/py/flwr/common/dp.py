@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ from flwr.common.typing import NDArrays
 def _get_update_norm(update: NDArrays) -> float:
     flattened_update = update[0]
     for i in range(1, len(update)):
-        flattened_update = np.append(flattened_update, update[i])  # type: ignore
+        flattened_update = np.append(flattened_update, update[i])
     return float(np.sqrt(np.sum(np.square(flattened_update))))
 
 
