@@ -215,6 +215,17 @@ server.strategy.Krum
     .. automethod:: __init__
 
 
+.. _flwr-server-strategy-MeaMed-apiref:
+
+server.strategy.MeaMed
+^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: flwr.server.strategy.MeaMed
+    :members:
+
+    .. automethod:: __init__
+
+
 .. _flwr-server-strategy-FedXgbNnAvg-apiref:
 
 server.strategy.FedXgbNnAvg
