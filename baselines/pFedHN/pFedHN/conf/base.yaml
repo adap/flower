@@ -32,6 +32,6 @@ client:
   # client config
   num_epochs: 50
   num_rounds: 5000
-  num_nodes: 1
+  num_nodes: 50
   batch_size: 64
   num_classes_per_node: 2
