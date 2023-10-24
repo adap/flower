@@ -38,6 +38,10 @@
 
   Flower received many improvements under the hood, too many to list here.
 
+- **Add new** `MeaMed` **strategy** ([#1816](https://github.com/adap/flower/pull/1816))
+
+  The new `MeaMed` strategy implements "mean around median" by [Xie et al., 2018](https://arxiv.org/pdf/1802.10116.pdf)
+
 ### Incompatible changes
 
 - **Remove support for Python 3.7** ([#2280](https://github.com/adap/flower/pull/2280), [#2299](https://github.com/adap/flower/pull/2299), [#2304](https://github.com/adap/flower/pull/2304), [#2306](https://github.com/adap/flower/pull/2306), [#2355](https://github.com/adap/flower/pull/2355), [#2356](https://github.com/adap/flower/pull/2356))
