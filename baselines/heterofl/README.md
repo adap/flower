@@ -16,7 +16,7 @@ dataset: [MNIST, CIFAR10]
 
 ## About this baseline
 
-****What’s implemented:****  The code in this directory is an implementation of HeteroFL in pytorch using flower. The code incorporates references from the authors' implementation. I have also implemented custom model split and aggregation as suggested by @negedng, which is available [here](https://github.com/msck72/heterofl_custom_aggregation). By modifying the configuration in the base.yaml, the results in the paper can be replicated, with both fixed and dynamic computational complexities among clients.
+****What’s implemented:****  The code in this directory is an implementation of HeteroFL in pytorch using flower. The code incorporates references from the authors' implementation. Implementation of custom model split and aggregation as suggested by @negedng, is available [here](https://github.com/msck72/heterofl_custom_aggregation). By modifying the configuration in the base.yaml, the results in the paper can be replicated, with both fixed and dynamic computational complexities among clients.
 
 ****Key Terminology:****
 + *Model rate* defines the computational complextiy of a client. Authors have defined five different computation complexity levels {a, b, c, d, e} with the hidden channel shrinkage ratio r = 0.5. 
