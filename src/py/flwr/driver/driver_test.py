@@ -50,10 +50,11 @@ class TestDriver(unittest.TestCase):
         """Test that GrpcDriver doesn't initialize if workload is created."""
         # Prepare
         self.driver.grpc_driver = self.mock_grpc_driver
+        self.driver.workload_id = 61016
 
         # Execute
         # pylint: disable-next=protected-access
-        self.driver._check_and_init_grpc_driver()
+        self.driver._get_grpc_driver_and_workload_id()
 
         # Assert
         self.mock_grpc_driver.connect.assert_not_called()
@@ -62,7 +63,7 @@ class TestDriver(unittest.TestCase):
         """Test GrpcDriver initialization when workload is not created."""
         # Execute
         # pylint: disable-next=protected-access
-        self.driver._check_and_init_grpc_driver()
+        self.driver._get_grpc_driver_and_workload_id()
 
         # Assert
         self.mock_grpc_driver.connect.assert_called_once()
@@ -111,7 +112,6 @@ class TestDriver(unittest.TestCase):
     def test_pull_task_res_with_given_task_ids(self) -> None:
         """Test pulling task results with specific task IDs."""
         # Prepare
-        self.driver.task_id_pool = {"id1", "id2", "id3", "id4"}
         mock_response = Mock()
         mock_response.task_res_list = [
             TaskRes(task=Task(ancestry=["id2"])),
@@ -131,38 +131,12 @@ class TestDriver(unittest.TestCase):
         self.assertIsInstance(args[0], PullTaskResRequest)
         self.assertEqual(args[0].task_ids, task_ids)
         self.assertEqual(task_res_list, mock_response.task_res_list)
-        self.assertEqual(self.driver.task_id_pool, {"id1", "id4"})
-
-    def test_pull_task_res_without_given_task_ids(self) -> None:
-        """Test pulling all task results when no task IDs are provided."""
-        # Prepare
-        mock_response = Mock()
-        mock_response.task_res_list = [
-            TaskRes(task=Task(ancestry=["id1"])),
-            TaskRes(task=Task(ancestry=["id2"])),
-        ]
-        self.mock_grpc_driver.pull_task_res.return_value = mock_response
-        self.driver.task_id_pool = {"id1", "id2", "id3"}
-        task_ids = {"id1", "id2", "id3"}
-
-        # Execute
-        task_res_list = self.driver.pull_task_res()
-        args, kwargs = self.mock_grpc_driver.pull_task_res.call_args
-
-        # Assert
-        self.mock_grpc_driver.connect.assert_called_once()
-        self.assertEqual(len(args), 1)
-        self.assertEqual(len(kwargs), 0)
-        self.assertIsInstance(args[0], PullTaskResRequest)
-        self.assertEqual(set(args[0].task_ids), task_ids)
-        self.assertEqual(task_res_list, mock_response.task_res_list)
-        self.assertEqual(self.driver.task_id_pool, {"id3"})
 
     def test_del_with_initialized_driver(self) -> None:
         """Test cleanup behavior when Driver is initialized."""
         # Prepare
         # pylint: disable-next=protected-access
-        self.driver._check_and_init_grpc_driver()
+        self.driver._get_grpc_driver_and_workload_id()
 
         # Execute
         self.driver.__del__()

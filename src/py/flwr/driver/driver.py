@@ -16,7 +16,7 @@
 
 
 from logging import ERROR, INFO, WARNING
-from typing import Iterable, List, Optional, Set
+from typing import Iterable, List, Optional, Tuple
 
 import grpc
 
@@ -136,64 +136,46 @@ class Driver:
     def __init__(self) -> None:
         self.grpc_driver: Optional[GrpcDriver] = None
         self.workload_id: Optional[int] = None
-        self.task_id_pool: Set[str] = set()
         self.node = Node(node_id=0, anonymous=True)
 
-    def _check_and_init_grpc_driver(self) -> None:
+    def _get_grpc_driver_and_workload_id(self) -> Tuple[GrpcDriver, int]:
         # Check if the GrpcDriver is initialized
-        if self.grpc_driver is not None:
-            return
+        if self.grpc_driver is None or self.workload_id is None:
+            # Connect and create workload
+            self.grpc_driver = GrpcDriver()
+            self.grpc_driver.connect()
+            res = self.grpc_driver.create_workload(CreateWorkloadRequest())
+            self.workload_id = res.workload_id
 
-        # Connect and create workload
-        self.grpc_driver = GrpcDriver()
-        self.grpc_driver.connect()
-        res = self.grpc_driver.create_workload(CreateWorkloadRequest())
-        self.workload_id = res.workload_id
+        return self.grpc_driver, self.workload_id
 
     def get_nodes(self) -> List[Node]:
         """Get node IDs."""
-        self._check_and_init_grpc_driver()
+        grpc_driver, workload_id = self._get_grpc_driver_and_workload_id()
 
         # Call GrpcDriver method
-        res = self.grpc_driver.get_nodes(  # type: ignore
-            GetNodesRequest(workload_id=self.workload_id)  # type: ignore
-        )
+        res = grpc_driver.get_nodes(GetNodesRequest(workload_id=workload_id))
         return list(res.nodes)
 
-    def push_task_ins(self, task_ins_list: Iterable[TaskIns]) -> List[str]:
+    def push_task_ins(self, task_ins_list: List[TaskIns]) -> List[str]:
         """Schedule tasks."""
-        self._check_and_init_grpc_driver()
+        grpc_driver, workload_id = self._get_grpc_driver_and_workload_id()
 
         # Set workload_id
         for task_ins in task_ins_list:
-            task_ins.workload_id = self.workload_id  # type: ignore
+            task_ins.workload_id = workload_id
 
         # Call GrpcDriver method
-        res = self.grpc_driver.push_task_ins(  # type: ignore
-            PushTaskInsRequest(task_ins_list=task_ins_list)
-        )
-
-        # Cache received task_ids
-        self.task_id_pool.update(res.task_ids)
+        res = grpc_driver.push_task_ins(PushTaskInsRequest(task_ins_list=task_ins_list))
         return list(res.task_ids)
 
-    def pull_task_res(self, task_ids: Optional[Iterable[str]] = None) -> List[TaskRes]:
-        """Get task results.
-
-        Retrieve all task results if `task_ids` is None.
-        """
-        self._check_and_init_grpc_driver()
-
-        # Check if task_ids is None
-        if task_ids is None:
-            task_ids = list(self.task_id_pool)
+    def pull_task_res(self, task_ids: Optional[Iterable[str]]) -> List[TaskRes]:
+        """Get task results."""
+        grpc_driver, _ = self._get_grpc_driver_and_workload_id()
 
         # Call GrpcDriver method
-        res = self.grpc_driver.pull_task_res(  # type: ignore
+        res = grpc_driver.pull_task_res(
             PullTaskResRequest(node=self.node, task_ids=task_ids)
-        )
-        self.task_id_pool.difference_update(
-            [task_res.task.ancestry[0] for task_res in res.task_res_list]
         )
         return list(res.task_res_list)
 
