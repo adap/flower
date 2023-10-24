@@ -35,3 +35,6 @@ client:
   num_nodes: 50
   batch_size: 64
   num_classes_per_node: 2
+
+client_resources:
+  gpus: 0
