@@ -56,7 +56,7 @@ class BaseClient(NumPyClient):
 
     def __init__(
         self,
-        data_oaders: ClientDataloaders,
+        data_loaders: ClientDataloaders,
         config: DictConfig,
         client_essentials: ClientEssentials,
         model_manager_class: Union[
@@ -81,8 +81,8 @@ class BaseClient(NumPyClient):
         self.model_manager = model_manager_class(
             client_id=self.client_id,
             config=config,
-            trainloader=data_oaders.trainloader,
-            testloader=data_oaders.testloader,
+            trainloader=data_loaders.trainloader,
+            testloader=data_loaders.testloader,
             client_save_path=self.client_state_save_path,
             learning_rate=config["learning_rate"],
         )
@@ -338,13 +338,13 @@ def get_client_fn_simulation(
         )
         if client_state_save_path != "":
             return FedPerClient(
-                data_oaders=client_data_loaders,
+                data_loaders=client_data_loaders,
                 client_essentials=client_essentials,
                 config=config,
                 model_manager_class=manager,
             )
         return BaseClient(
-            data_oaders=client_data_loaders,
+            data_loaders=client_data_loaders,
             client_essentials=client_essentials,
             config=config,
             model_manager_class=manager,
