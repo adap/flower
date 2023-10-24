@@ -53,10 +53,10 @@ def aggregate_median(results: List[Tuple[NDArrays, int]]) -> NDArrays:
     return median_w
 
 
-def aggregate_meamed(results: List[Tuple[NDArrays, int]], q: int) -> NDArrays:
+def aggregate_meamed(results: List[Tuple[NDArrays, int]], to_exclude: int) -> NDArrays:
     """Compute the mean around the median."""
     # Number of models to aggregate
-    to_keep = len(results) - q
+    to_keep = len(results) - to_exclude
 
     # Compute median vector model
     median_model = aggregate_median(results)
