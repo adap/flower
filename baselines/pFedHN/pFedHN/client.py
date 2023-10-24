@@ -62,7 +62,8 @@ class FlowerClient(fl.client.NumPyClient):
         self.local_layers = local_layers
         self.local_optims = local_optims
         self.local = local
-        self.device = get_device()
+        self.gpus = cfg.client_resources.gpus
+        self.device = get_device(gpus=self.gpus)
         self.epochs = cfg.client.num_epochs
         self.n_kernels = cfg.model.n_kernels
         self.learning_rate = cfg.model.inner_lr
