@@ -169,7 +169,7 @@ class Driver:
         res = grpc_driver.push_task_ins(PushTaskInsRequest(task_ins_list=task_ins_list))
         return list(res.task_ids)
 
-    def pull_task_res(self, task_ids: Optional[Iterable[str]]) -> List[TaskRes]:
+    def pull_task_res(self, task_ids: Iterable[str]) -> List[TaskRes]:
         """Get task results."""
         grpc_driver, _ = self._get_grpc_driver_and_workload_id()
 
