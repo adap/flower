@@ -110,6 +110,13 @@ python -m fedwav2vec2.main client_resources.num_gpus=0.5
 
 ## Expected Results
 
+The baseline aims to repoduce server model's behavior like the graph below:
+
+<p align="center">
+      <img src="docs/result_figure.png" alt="SSL vs non-SSL performance with FL setting" width="400">
+</p>
+
+
 :warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
 
 ```bash
