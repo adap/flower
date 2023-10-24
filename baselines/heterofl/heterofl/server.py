@@ -25,16 +25,15 @@ def gen_evaluate_fn(
 
     Parameters
     ----------
-    trainloader: DataLoader
-        The Dataloader that was used for training the main model
-    testloader : DataLoader
-        The dataloader to test the model with.
-    clients_testloader : List[DataLoader]
-        The client's test dataloader to test the model with for local results.
-    label_split : List[torch.tensor]
-        The list of labels that clients were distributed with.
+    data_loaders :
+        A dictionary containing dataloaders for testing and
+        label split of each client.
     device : torch.device
         The device to test the model on.
+    model :
+        Model for testing.
+    keys :
+        keys of the model that it is trained on.
 
     Returns
     -------
@@ -49,8 +48,8 @@ def gen_evaluate_fn(
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         # pylint: disable=unused-argument
         """Use the entire test set for evaluation."""
-        if server_round % 5 != 0 and server_round < 395:
-            return 1, {}
+        # if server_round % 5 != 0 and server_round < 395:
+        #     return 1, {}
 
         net = model
         params_dict = zip(intermediate_keys, parameters_ndarrays)

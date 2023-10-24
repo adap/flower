@@ -30,8 +30,8 @@ def get_model_properties(
     total_model_parameters /= ttl_prcntg
 
     space = total_model_parameters * 32.0 / 8 / (1024**2.0)
-    print("num_of_parameters = ", total_model_parameters / 1000 , " K")
-    print("total_flops = ", total_flops / 1000000 , " M")
+    print("num_of_parameters = ", total_model_parameters / 1000, " K")
+    print("total_flops = ", total_flops / 1000000, " M")
     print("space = ", space)
 
     return total_model_parameters, total_flops, space

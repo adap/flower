@@ -9,7 +9,7 @@ server_device: 'cpu'
 
 control:
   model_split_mode: 'dynamic'
-  model_mode: 'a5-e5'
+  model_mode: 'a1-e1'
 
 dataset:
   dataset_name: 'MNIST'
@@ -25,7 +25,7 @@ dataset:
 
 
 model:
-  model_name: conv
+  model_name: conv  # use 'resnet18' for cifar10
   hidden_layers: [64 , 128 , 256 , 512]
   norm: bn
   scale: 1
