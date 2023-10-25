@@ -16,7 +16,7 @@
 
 
 from logging import ERROR, INFO, WARNING
-from typing import Optional
+from typing import Iterable, List, Optional, Tuple
 
 import grpc
 
@@ -34,6 +34,8 @@ from flwr.proto.driver_pb2 import (
     PushTaskInsResponse,
 )
 from flwr.proto.driver_pb2_grpc import DriverStub
+from flwr.proto.node_pb2 import Node
+from flwr.proto.task_pb2 import TaskIns, TaskRes
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
 
@@ -46,7 +48,7 @@ Call `connect()` on the `GrpcDriver` instance before calling any of the other
 
 
 class GrpcDriver:
-    """`GrpcDriver` provides access to the Driver API/service."""
+    """`GrpcDriver` provides access to the gRPC Driver API/service."""
 
     def __init__(
         self,
@@ -126,3 +128,62 @@ class GrpcDriver:
         # Call Driver API
         res: PullTaskResResponse = self.stub.PullTaskRes(request=req)
         return res
+
+
+class Driver:
+    """`Driver` class provides an interface to the Driver API."""
+
+    def __init__(self) -> None:
+        self.grpc_driver: Optional[GrpcDriver] = None
+        self.workload_id: Optional[int] = None
+        self.node = Node(node_id=0, anonymous=True)
+
+    def _get_grpc_driver_and_workload_id(self) -> Tuple[GrpcDriver, int]:
+        # Check if the GrpcDriver is initialized
+        if self.grpc_driver is None or self.workload_id is None:
+            # Connect and create workload
+            self.grpc_driver = GrpcDriver()
+            self.grpc_driver.connect()
+            res = self.grpc_driver.create_workload(CreateWorkloadRequest())
+            self.workload_id = res.workload_id
+
+        return self.grpc_driver, self.workload_id
+
+    def get_nodes(self) -> List[Node]:
+        """Get node IDs."""
+        grpc_driver, workload_id = self._get_grpc_driver_and_workload_id()
+
+        # Call GrpcDriver method
+        res = grpc_driver.get_nodes(GetNodesRequest(workload_id=workload_id))
+        return list(res.nodes)
+
+    def push_task_ins(self, task_ins_list: List[TaskIns]) -> List[str]:
+        """Schedule tasks."""
+        grpc_driver, workload_id = self._get_grpc_driver_and_workload_id()
+
+        # Set workload_id
+        for task_ins in task_ins_list:
+            task_ins.workload_id = workload_id
+
+        # Call GrpcDriver method
+        res = grpc_driver.push_task_ins(PushTaskInsRequest(task_ins_list=task_ins_list))
+        return list(res.task_ids)
+
+    def pull_task_res(self, task_ids: Iterable[str]) -> List[TaskRes]:
+        """Get task results."""
+        grpc_driver, _ = self._get_grpc_driver_and_workload_id()
+
+        # Call GrpcDriver method
+        res = grpc_driver.pull_task_res(
+            PullTaskResRequest(node=self.node, task_ids=task_ids)
+        )
+        return list(res.task_res_list)
+
+    def __del__(self) -> None:
+        """Disconnect GrpcDriver if connected."""
+        # Check if GrpcDriver is initialized
+        if self.grpc_driver is None:
+            return
+
+        # Disconnect
+        self.grpc_driver.disconnect()
