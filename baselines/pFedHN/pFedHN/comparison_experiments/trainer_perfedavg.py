@@ -56,7 +56,15 @@ def test_metrics(
 
 
 def train_perfedavg(
-    model: torch.nn.Module, trainloader, testloader, cid, device, lr, beta, gamma,epochs
+    model: torch.nn.Module,
+    trainloader,
+    testloader,
+    cid,
+    device,
+    lr,
+    beta,
+    gamma,
+    epochs,
 ):
     """Train the network on the training set."""
     train_loader = trainloader[int(cid)]

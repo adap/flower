@@ -107,7 +107,7 @@ class FlowerClient(fl.client.NumPyClient):
                 self.learning_rate,
                 self.beta,
                 self.gamma,
-                self.epochs
+                self.epochs,
             )
         else:
             test_loss, test_acc = train_fedavg(
