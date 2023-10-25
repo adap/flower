@@ -37,4 +37,5 @@ client:
   num_classes_per_node: 2
 
 client_resources:
+  cpus: 1
   gpus: 0

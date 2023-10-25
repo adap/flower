@@ -26,4 +26,7 @@ client:
   fraction_fit: 0.1
   min_fit_clients: 5
   min_available_clients: 5
-  
+
+client_resources:
+  cpus: 1
+  gpus: 0

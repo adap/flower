@@ -43,7 +43,8 @@ class FlowerClient(fl.client.NumPyClient):
         self.trainloader = trainloader
         self.testloader = testloader
         self.valloader = valloader
-        self.device = get_device()
+        self.gpus = cfg.client_resources.gpus
+        self.device = get_device(gpus=self.gpus)
         self.epochs = cfg.client.num_epochs
         self.n_kernels = cfg.model.n_kernels
         self.learning_rate = cfg.model.lr
