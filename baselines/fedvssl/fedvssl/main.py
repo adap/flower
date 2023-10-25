@@ -137,7 +137,7 @@ if __name__ == "__main__":
 
         # first the paths needs to be defined otherwise the program may not be able to locate the files of the ctp
         from utils import init_p_paths
-        init_p_paths("FedVSSL")
+        init_p_paths("fedvssl")
 
         client_resources = {"num_cpus": args.cpus_per_client, "num_gpus": args.gpus_per_client}
         base_work_dir = 'ucf_' + args.exp_name

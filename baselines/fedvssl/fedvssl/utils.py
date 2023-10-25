@@ -29,8 +29,8 @@ import pdb
 
 def init_p_paths(folder_name):
     if os.path.basename(os.path.abspath(os.getcwd())) == f"{folder_name}":
-        # if require change the current working directory. The CtP folder is in the FedVSSL/FedVSSL. Therefore the current working directory 
-        # is required to be FedVSSL/FedVSSL
+        # if require change the current working directory. The CtP folder is in the fedvssl/fedvssl. Therefore the current working directory
+        # is required to be fedvssl/fedvssl
         path_dir = os.getcwd()
       
         os.chdir(path_dir)
