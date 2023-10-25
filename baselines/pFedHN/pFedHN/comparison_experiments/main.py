@@ -36,11 +36,11 @@ def main(cfg: DictConfig):
 
     # instantiate strategy according to config
     strategy = LogResultsStrategy(
-        fraction_fit=0.1,
-        min_fit_clients=5,
+        fraction_fit=cfg.client.fraction_fit,
+        min_fit_clients=cfg.client.min_fit_clients,
         fraction_evaluate=0.0,
         min_evaluate_clients=0,
-        min_available_clients=5,
+        min_available_clients=cfg.client.min_available_clients,
     )
 
     # Start simulation

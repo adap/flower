@@ -46,12 +46,12 @@ class LogResultsStrategy(fl.server.strategy.fedavg.FedAvg):
         ]
         parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
         for _client, fit_res in results:
-            total_loss += float(fit_res.metrics["train_loss"])
-            total_acc += float(fit_res.metrics["train_acc"])
+            total_loss += float(fit_res.metrics["test_loss"])
+            total_acc += float(fit_res.metrics["test_acc"])
         total_samp = len(results)
         log(
             DEBUG,
-            f"TrainLoss: {total_loss/total_samp} || TrainAcc: {total_acc/total_samp}",
+            f"TestLoss: {total_loss/total_samp} || TestAcc: {total_acc/total_samp}",
         )
         results_dict = {
             "round": server_round,

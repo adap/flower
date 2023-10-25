@@ -23,3 +23,7 @@ client:
   num_nodes: 50
   batch_size: 64
   num_classes_per_node: 2
+  fraction_fit: 0.1
+  min_fit_clients: 5
+  min_available_clients: 5
+  

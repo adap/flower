@@ -23,7 +23,7 @@ class PerFedAvgOptimizer(torch.optim.Optimizer):
                 p.data.add_(other=d_p, alpha=step_size)
 
 
-def train_metrics(
+def test_metrics(
     model: torch.nn.Module, testloader, cid, device, lr, beta, optim, criterion
 ):
     """Metrics for trained network during training using testloader."""
@@ -56,7 +56,7 @@ def train_metrics(
 
 
 def train_perfedavg(
-    model: torch.nn.Module, trainloader, testloader, cid, device, lr, beta, gamma
+    model: torch.nn.Module, trainloader, testloader, cid, device, lr, beta, gamma,epochs
 ):
     """Train the network on the training set."""
     train_loader = trainloader[int(cid)]
@@ -66,8 +66,8 @@ def train_perfedavg(
         optimizer=optimizer, gamma=gamma
     )
     model.train()
-    # local_epoc = 5
-    local_epoc = 10
+    # local_epoc = 10
+    local_epoc = epochs
     for _ in range(local_epoc):
         for _ in range(len(train_loader) // 2):
             x, y = next(iter(train_loader))
@@ -94,7 +94,7 @@ def train_perfedavg(
             optimizer.step(beta=beta)
     learning_rate_scheduler.step()
 
-    loss, acc = train_metrics(
+    loss, acc = test_metrics(
         model, testloader, cid, device, lr, beta, optimizer, criterion
     )
     return loss, acc

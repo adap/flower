@@ -132,6 +132,8 @@ python -m pFedHN.main dataset.data="cifar100" model.out_dim=100 client.num_class
 
 ## If you want to check out the other comparison algorithms follow below
 
+## By default for FedAvg and PerFedAvg we are taking 50 clients and 5 clients in each round for fit with a fraction fit of 0.1 for the standard results. The users can modify by this by using client.fraction_fit,client.min_fit_clients and client.min_available_clients . 
+
 ## FedAvg
 
 python -m pFedHN.comparison_experiments.main dataset.data="mnist" model.n_kernels=7 model.in_channels=1 # for running FedAvg for MNIST using the given Non-IID Distribution
@@ -140,13 +142,15 @@ python -m pFedHN.comparison_experiments.main # for running FedAvg for CIFAR-10 d
 
 python -m pFedHN.comparison_experiments.main dataset.data="cifar100" model.out_dim=100 client.num_classes_per_node=10 # for running FedAvg for CIFAR-100 dataset using the given Non-IID Distribution
 
-## PerFedAvg
+## PerFedAvg 
 
-python -m pFedHN.comparison_experiments.main dataset.data="mnist" model.n_kernels=7 model.in_channels=1 model.variant=1 model.gamma=0.99 # for running PerFedAvg for MNIST dataset using the given Non-IID Distribution
+# The number of epochs here for each client is 10.
 
-python -m pFedHN.comparison_experiments.main model.variant=1 model.lr=1e-3 # for running PerFedAvg for CIFAR-10 dataset using the given Non-IID Distribution
+python -m pFedHN.comparison_experiments.main dataset.data="mnist" model.n_kernels=7 model.in_channels=1 model.variant=1 model.gamma=0.99 client.num_epochs=10 # for running PerFedAvg for MNIST dataset using the given Non-IID Distribution
 
-python -m pFedHN.comparison_experiments.main dataset.data="cifar100" model.out_dim=100 client.num_classes_per_node=10 model.variant=1 model.beta=1e-2 model.delta=1e-2 model.lr=1e-2 model.gamma=0.95 # for running PerFedAvg for CIFAR-100 dataset using the given Non-IID Distribution
+python -m pFedHN.comparison_experiments.main model.variant=1 model.lr=1e-3 client.num_epochs=10 # for running PerFedAvg for CIFAR-10 dataset using the given Non-IID Distribution
+
+python -m pFedHN.comparison_experiments.main dataset.data="cifar100" model.out_dim=100 client.num_classes_per_node=10 model.variant=1 model.beta=1e-2 model.delta=1e-2 model.lr=1e-2 model.gamma=0.95 client.num_epochs=10 # for running PerFedAvg for CIFAR-100 dataset using the given Non-IID Distribution
 
 ```
 
