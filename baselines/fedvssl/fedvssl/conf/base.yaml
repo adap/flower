@@ -3,15 +3,34 @@
 # Please follow the provided structure (this will ensuring all baseline follow
 # a similar configuration structure and hence be easy to customise)
 
-dataset:
-  # dataset config
 
-model:
-  # model config
+### hyper-parameters for FL pre-training ###
+pre_training: true
+exp_name: fedvssl_results
+data_dir: /local/scratch/ucf101
+partition_dir: /local/scratch/ucf101/UCF_101_dummy
 
+# FL settings
+pool_size: 2
+rounds: 20
+
+# FedVSSL strategy
 strategy:
-  _target_: # points to your strategy (either custom or exiting in Flower)
-  # rest of strategy config
+  _target_: strategy.FedVSSL # need to change after path modification
+  mix_coeff: 0.9
+  swbeta: 1
+  base_work_dir: fedvssl_results
+  fraction_fit: 1.0
+  min_fit_clients: 2
+  min_available_clients: 2
+  fedavg: false
 
-client:
-  # client config
+# ray config
+cpus_per_client: 2
+gpus_per_client: 1
+include_dashboard: false
+
+
+### hyper-parameters for downstream fine-tuning ###
+exp_name_finetune: finetune_results
+pretrained_model_path: ucf_FedVSSL_results/round-20-weights.array.npz
