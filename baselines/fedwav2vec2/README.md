@@ -33,9 +33,43 @@ dataset: [TED-LIUM 3]
 
 **Model:** Wav2vec2.0-large [from Huggingface](https://huggingface.co/facebook/wav2vec2-large-lv60) totalling 317M parameters. Read more in the [wav2vec2.0 paper](https://arxiv.org/abs/2006.11477).
 
-**Dataset:** :warning: *_Earlier you listed already the datasets that your baseline uses. Now you should include a breakdown of the details about each of them. Please include information about: how the dataset is partitioned (e.g. LDA with alpha 0.1 as default and all clients have the same number of training examples; or each client gets assigned a different number of samples following a power-law distribution with each client only instances of 2 classes)? if  your dataset is naturally partitioned just state “naturally partitioned”; how many partitions there are (i.e. how many clients)? Please include this an all information relevant about the dataset and its partitioning into a table._*
 
-**Training Hyperparameters:** :warning: *_Include a table with all the main hyperparameters in your baseline. Please show them with their default value._*
+**Dataset:** In this paper, we divided the training dataset of TED-LIUM 3 into 1943 clients, where each of them is represented by a speaker from TED-LIUM 3. The clients are ordered by CID, with `client_0` having the largest amount of speech hours and `client_1943` having the smallest. Each client's data will be divided into training, development, and test sets with an 80-10-10 ratio. For client who has more than 10 minutes, we extract 5 minutes from their training set for analysis purposes. This portion will not be used during training or in any part of this baseline. For clients with duration less than 10 minutes, all the speaker data will represent the local dataset for the client. The full structure breakdown is below: 
+```bash
+├── data
+│   ├── client_{cid}
+│   │   ├── ted_train.csv
+│   │   ├── ted_dev.csv
+│   │   ├── ted_test.csv
+│   │   ├── ted_train_full5.csv {Analysis dataset contains only 5m from ted_train.csv}
+│   │   ├── ted_train_wo5.csv {the training file for client who has more than 10m}
+│   ├── server
+│   │   ├── ted_train.csv {all TED-LIUM 3 train set}
+│   │   ├── ted_dev.csv {all TED-LIUM 3 valid set}
+│   │   ├── ted_test.csv {all TED-LIUM 3 test set}
+
+```
+For more details, please refer to the relevant section in the paper.
+
+**Training Hyperparameters:** 
+| Hyperparameter | Default Value | Description |
+| ------- | ----- | ------- |
+| `pre_train_model_path` | `null` | Path to pre-trained model or checkpoint. The best checkpoint could be found [here](https://github.com/tuanct1997/Federated-Learning-ASR-based-on-wav2vec-2.0/tree/main/material/pre-trained) |
+| `label_path` | `docs/pretrained_wav2vec2` | Label each character for every client to ensure consistency during training phase|
+| `sb_config` | `fedwav2vec2/conf/sb_config/w2v2.yaml` | Speechbrain config file for architecture model. Please refer to [SpeechBrain](https://github.com/speechbrain/speechbrain) for more information |
+| `rounds` | `100` | Indicate the number of Federated Learning (FL) rounds|
+| `local_epochs` | `20` | Specify the number of training epochs at the client side |
+| `total_clients` | `1943` | Size of client pool, with a maxium set at 1943 clients|
+| `server_cid` | `19999` | ID of the server to distinguish from the client's ID |
+| `device` | `cuda` | You can choose between `cpu` or `cuda` for training device, but it is recommended to use `cuda`|
+| `parallel_backend` | `false` | Multi-gpus training. Only active if you have more than 1 gpu per client | 
+| `strategy.min_fit_client` | `20` | Number of clients involve per round. Default is 20 as indicated in the paper |
+| `strategy.fraction_fit` | `0.01` | Ratio of client pool to involve during training |
+| `strategy.weight_strategy` | `num`| Different way to average clients weight. Could be chose between `num`,`loss`,`wer` |
+| `client_resources.num_cpus` | `8`| Number of cpus per client. Recommended to have more than 8 |
+| `client_réources.num_gpus` | `1`| Number of gpus per client. Recommended to have at least 1 with VRAM > 24GB |
+
+
 
 
 ## Environment Setup
@@ -77,6 +111,13 @@ python -m fedwav2vec2.main client_resources.num_gpus=0.5
 
 
 ## Expected Results
+
+The baseline aims to repoduce server model's behavior like the graph below:
+
+<p align="center">
+      <img src="docs/result_figure.png" alt="SSL vs non-SSL performance with FL setting" width="400">
+</p>
+
 
 :warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
 
