@@ -180,12 +180,16 @@ def start_client(
                 create_node()  # pylint: disable=not-callable
 
             while True:
+                # Receive
                 task_ins = receive()
                 if task_ins is None:
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
+
+                # Process
                 task_res, sleep_duration, keep_going = handle(client_fn, task_ins)
-                send(task_res)
+
+                # Send
                 if not keep_going:
                     break
 
