@@ -1,0 +1,91 @@
+name: C++ SDK
+
+on:
+  push:
+    branches: ['main']
+    paths: ['src/cc/flwr/**']
+  pull_request:
+    branches: ['main']
+    paths: ['src/cc/flwr/**']
+
+jobs:
+  build_and_test:
+    name: Build and test
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Bootstrap
+      uses: ./.github/actions/bootstrap
+
+    - name: Cache restore SDK build
+      uses: actions/cache/restore@v3
+      with:
+        path: build/
+        key: ${{ runner.os }}-sdk-build
+
+    - name: Cache restore example build
+      uses: actions/cache/restore@v3
+      with:
+        path: examples/quickstart-cpp/build/
+        key: ${{ runner.os }}-example-build
+
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-format cmake g++ clang-tidy cppcheck
+
+    - name: Check Formatting
+      run: |
+        find src/cc/flwr -name '*.cc' -or -name '*.h' | xargs clang-format -i
+        git diff --exit-code
+
+    - name: Build
+      run: |
+        mkdir -p build
+        cd build
+        cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ../src/cc/flwr
+        make
+
+    - name: Run clang-tidy
+      run: |
+        cd build
+        find ../src/cc/flwr/src -name '*.cc' | xargs clang-tidy
+
+    - name: Run cppcheck
+      run: |
+        cd build
+        cppcheck --enable=all --inline-suppr --suppress=missingIncludeSystem -I../src/cc/flwr/include ../src/cc/flwr/src
+
+    - name: End-to-end test
+      run: |
+        cd examples/quickstart-cpp
+        cmake -S . -B build
+        cmake --build build
+        pip install ../..
+        timeout 2m python server.py &
+        pid=$!
+        sleep 3
+        build/flwr_client 0 127.0.0.1:8080 &
+        sleep 3
+        build/flwr_client 1 127.0.0.1:8080 &
+        wait $pid
+        res=$?
+        if [[ "$res" = "0" ]];
+          then echo "Training worked correctly";
+          else echo "Training had an issue" && exit 1;
+        fi
+
+    - name: Cache save SDK build
+      uses: actions/cache/save@v3
+      if: github.ref_name == 'main'
+      with:
+        path: build/
+        key: ${{ runner.os }}-sdk-build
+
+    - name: Cache save example build
+      uses: actions/cache/save@v3
+      if: github.ref_name == 'main'
+      with:
+        path: examples/quickstart-cpp/build/
+        key: ${{ runner.os }}-example-build
