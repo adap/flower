@@ -19,12 +19,14 @@
 import threading
 import time
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import Mock, patch
 
 from flwr.driver.app import update_client_manager
 from flwr.proto.driver_pb2 import CreateWorkloadResponse, GetNodesResponse
 from flwr.proto.node_pb2 import Node
 from flwr.server.client_manager import SimpleClientManager
+
+from .driver import Driver
 
 
 class TestClientManagerWithDriver(unittest.TestCase):
@@ -37,16 +39,20 @@ class TestClientManagerWithDriver(unittest.TestCase):
     def test_simple_client_manager_update(self) -> None:
         """Tests if the node update works correctly."""
         # Prepare
+        mock_grpc_driver = Mock()
+        mock_grpc_driver.create_workload.return_value = CreateWorkloadResponse(
+            workload_id=61016
+        )
         expected_nodes = [Node(node_id=i, anonymous=False) for i in range(100)]
         expected_updated_nodes = [
             Node(node_id=i, anonymous=False) for i in range(80, 120)
         ]
-        driver = MagicMock()
-        driver.stub = "driver stub"
-        driver.create_workload.return_value = CreateWorkloadResponse(workload_id=1)
-        driver.get_nodes.return_value = GetNodesResponse(nodes=expected_nodes)
+        mock_grpc_driver.get_nodes.return_value = GetNodesResponse(nodes=expected_nodes)
         client_manager = SimpleClientManager()
-        lock = threading.Lock()
+        patcher = patch("flwr.driver.driver.GrpcDriver", return_value=mock_grpc_driver)
+        patcher.start()
+        driver = Driver()
+        bool_ref = [True]
 
         # Execute
         thread = threading.Thread(
@@ -54,7 +60,7 @@ class TestClientManagerWithDriver(unittest.TestCase):
             args=(
                 driver,
                 client_manager,
-                lock,
+                bool_ref,
             ),
             daemon=True,
         )
@@ -64,21 +70,23 @@ class TestClientManagerWithDriver(unittest.TestCase):
         # Retrieve all nodes in `client_manager`
         node_ids = {proxy.node_id for proxy in client_manager.all().values()}
         # Update the GetNodesResponse and wait until the `client_manager` is updated
-        driver.get_nodes.return_value = GetNodesResponse(nodes=expected_updated_nodes)
+        mock_grpc_driver.get_nodes.return_value = GetNodesResponse(
+            nodes=expected_updated_nodes
+        )
         while True:
-            with lock:
-                if len(client_manager.all()) == len(expected_updated_nodes):
-                    break
+            if len(client_manager) == len(expected_updated_nodes):
+                break
             time.sleep(1.3)
         # Retrieve all nodes in `client_manager`
         updated_node_ids = {proxy.node_id for proxy in client_manager.all().values()}
-        # Simulate `driver.disconnect()`
-        driver.stub = None
+        # Stop client manager update
+        bool_ref[0] = False
 
         # Assert
-        driver.create_workload.assert_called_once()
+        mock_grpc_driver.create_workload.assert_called_once()
         assert node_ids == {node.node_id for node in expected_nodes}
         assert updated_node_ids == {node.node_id for node in expected_updated_nodes}
 
         # Exit
+        patcher.stop()
         thread.join()

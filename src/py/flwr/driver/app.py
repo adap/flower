@@ -19,18 +19,18 @@ import sys
 import threading
 import time
 from logging import INFO
-from typing import Dict, Optional
+from typing import Dict, List, Optional, cast
 
 from flwr.common import EventType, event
 from flwr.common.address import parse_address
 from flwr.common.logger import log
-from flwr.proto import driver_pb2
 from flwr.server.app import ServerConfig, init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.server import Server
 from flwr.server.strategy import Strategy
 
+from .driver import Driver
 from .driver_client_proxy import DriverClientProxy
 from .grpc_driver import GrpcDriver
 
@@ -111,11 +111,6 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     host, port, is_v6 = parsed_address
     address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
-    # Create the Driver
-    driver = GrpcDriver(driver_service_address=address, certificates=certificates)
-    driver.connect()
-    lock = threading.Lock()
-
     # Initialize the Driver API server and config
     initialized_server, initialized_config = init_defaults(
         server=server,
@@ -130,12 +125,13 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     )
 
     # Start the thread updating nodes
+    bool_ref = [True]
     thread = threading.Thread(
         target=update_client_manager,
         args=(
-            driver,
+            Driver(driver_service_address=address, certificates=certificates),
             initialized_server.client_manager(),
-            lock,
+            bool_ref,
         ),
     )
     thread.start()
@@ -147,8 +143,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     )
 
     # Stop the Driver API server and the thread
-    with lock:
-        driver.disconnect()
+    bool_ref[0] = False
     thread.join()
 
     event(EventType.START_SERVER_LEAVE)
@@ -157,9 +152,9 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
 
 
 def update_client_manager(
-    driver: GrpcDriver,
+    driver: Driver,
     client_manager: ClientManager,
-    lock: threading.Lock,
+    bool_ref: List[bool],
 ) -> None:
     """Update the nodes list in the client manager.
 
@@ -171,20 +166,11 @@ def update_client_manager(
     and dead nodes will be removed from the ClientManager via
     `client_manager.unregister()`.
     """
-    # Request for workload_id
-    workload_id = driver.create_workload(driver_pb2.CreateWorkloadRequest()).workload_id
-
     # Loop until the driver is disconnected
     registered_nodes: Dict[int, DriverClientProxy] = {}
-    while True:
-        with lock:
-            # End the while loop if the driver is disconnected
-            if driver.stub is None:
-                break
-            get_nodes_res = driver.get_nodes(
-                req=driver_pb2.GetNodesRequest(workload_id=workload_id)
-            )
-        all_node_ids = {node.node_id for node in get_nodes_res.nodes}
+    while bool_ref[0]:
+        nodes = driver.get_nodes()
+        all_node_ids = {node.node_id for node in nodes}
         dead_nodes = set(registered_nodes).difference(all_node_ids)
         new_nodes = all_node_ids.difference(registered_nodes)
 
@@ -198,9 +184,9 @@ def update_client_manager(
         for node_id in new_nodes:
             client_proxy = DriverClientProxy(
                 node_id=node_id,
-                driver=driver,
+                driver=cast(GrpcDriver, driver.grpc_driver),
                 anonymous=False,
-                workload_id=workload_id,
+                workload_id=cast(int, driver.workload_id),
             )
             if client_manager.register(client_proxy):
                 registered_nodes[node_id] = client_proxy
@@ -209,3 +195,4 @@ def update_client_manager(
 
         # Sleep for 3 seconds
         time.sleep(3)
+    del driver
