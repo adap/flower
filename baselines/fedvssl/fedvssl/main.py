@@ -94,43 +94,43 @@ def fit_config(rnd: int) -> Dict[str, str]:
     }
     return config
 
-def parse_args():
-    parser = argparse.ArgumentParser(description='Running FedVSSL and downstream fine-tuning.')
-
-    parser.add_argument('--pre_training', default=False, type=t_f, help='set true for FL pre-training, else for downstream fine-tuning.')
-
-    ### hyper-parameters for FL pre-training ###
-    parser.add_argument('--exp_name', default='FedVSSL_results', type=str, help='experimental name used for SSL pre-training.')
-    parser.add_argument('--data_dir', default='/local/scratch/ucf101', type=str, help='dataset directory.')
-    parser.add_argument('--partition_dir', default='/local/scratch/ucf101/UCF_101_dummy', type=str,
-                        help='directory for FL partition .json files.')
-
-    # FL settings
-    parser.add_argument('--pool_size', default=2, type=int, help='number of dataset partitions (= number of total clients).')
-    parser.add_argument('--rounds', default=20, type=int, help='number of FL rounds.')
-    parser.add_argument('--num_clients_per_round', default=2, type=int, help='number of clients participating in the training.')
-
-    # ray config
-    parser.add_argument('--cpus_per_client', default=2, type=int, help='number of CPUs used for each client.')
-    parser.add_argument('--gpus_per_client', default=1, type=int, help='number of GPUs used for each client.')
-    parser.add_argument('--include_dashboard', default=False, type=bool, help='number of GPUs used for each client.')
-
-    # FedVSSL
-    parser.add_argument('--mix_coeff', default=0.9, type=float, help='hyper-parameter alpha in the paper.')
-    parser.add_argument('--swbeta', default=1, type=int, help='hyper-parameter beta in the paper.')
-
-    # FedAvg baseline
-    parser.add_argument('--fedavg', default=False, type=t_f, help='run FedAvg baseline')
-
-    ### hyper-parameters for downstream fine-tuning ###
-    parser.add_argument('--exp_name_finetune', default='finetune_results', type=str,
-                        help='experimental name used for downstream fine-tuning.')
-    parser.add_argument('--pretrained_model_path', default='ucf_FedVSSL_results/round-20-weights.array.npz', type=str,
-                        help='FL pre-trained SSL model used for downstream fine-tuning.')
-
-    args = parser.parse_args()
-
-    return args
+# def parse_args():
+#     parser = argparse.ArgumentParser(description='Running FedVSSL and downstream fine-tuning.')
+#
+#     parser.add_argument('--pre_training', default=False, type=t_f, help='set true for FL pre-training, else for downstream fine-tuning.')
+#
+#     ### hyper-parameters for FL pre-training ###
+#     parser.add_argument('--exp_name', default='FedVSSL_results', type=str, help='experimental name used for SSL pre-training.')
+#     parser.add_argument('--data_dir', default='/local/scratch/ucf101', type=str, help='dataset directory.')
+#     parser.add_argument('--partition_dir', default='/local/scratch/ucf101/UCF_101_dummy', type=str,
+#                         help='directory for FL partition .json files.')
+#
+#     # FL settings
+#     parser.add_argument('--pool_size', default=2, type=int, help='number of dataset partitions (= number of total clients).')
+#     parser.add_argument('--rounds', default=20, type=int, help='number of FL rounds.')
+#     parser.add_argument('--num_clients_per_round', default=2, type=int, help='number of clients participating in the training.')
+#
+#     # ray config
+#     parser.add_argument('--cpus_per_client', default=2, type=int, help='number of CPUs used for each client.')
+#     parser.add_argument('--gpus_per_client', default=1, type=int, help='number of GPUs used for each client.')
+#     parser.add_argument('--include_dashboard', default=False, type=bool, help='number of GPUs used for each client.')
+#
+#     # FedVSSL
+#     parser.add_argument('--mix_coeff', default=0.9, type=float, help='hyper-parameter alpha in the paper.')
+#     parser.add_argument('--swbeta', default=1, type=int, help='hyper-parameter beta in the paper.')
+#
+#     # FedAvg baseline
+#     parser.add_argument('--fedavg', default=False, type=t_f, help='run FedAvg baseline')
+#
+#     ### hyper-parameters for downstream fine-tuning ###
+#     parser.add_argument('--exp_name_finetune', default='finetune_results', type=str,
+#                         help='experimental name used for downstream fine-tuning.')
+#     parser.add_argument('--pretrained_model_path', default='ucf_FedVSSL_results/round-20-weights.array.npz', type=str,
+#                         help='FL pre-trained SSL model used for downstream fine-tuning.')
+#
+#     args = parser.parse_args()
+#
+#     return args
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
