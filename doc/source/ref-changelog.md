@@ -28,6 +28,8 @@
 
   - FedMeta [#2438](https://github.com/adap/flower/pull/2438)
 
+  - FjORD [#2431](https://github.com/adap/flower/pull/2431)
+
   - MOON [#2421](https://github.com/adap/flower/pull/2421)
 
 - **Update Flower Examples** ([#2384](https://github.com/adap/flower/pull/2384),[#2425](https://github.com/adap/flower/pull/2425), [#2526](https://github.com/adap/flower/pull/2526))
