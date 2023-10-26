@@ -7,8 +7,8 @@
 ### hyper-parameters for FL pre-training ###
 pre_training: true
 exp_name: fedvssl_results
-data_dir: /local/scratch/ucf101
-partition_dir: /local/scratch/ucf101/UCF_101_dummy
+data_dir: /home/data1/ucf101
+partition_dir: /home/data1/ucf101/annotations
 
 # FL settings
 pool_size: 2
@@ -16,7 +16,7 @@ rounds: 20
 
 # FedVSSL strategy
 strategy:
-  _target_: strategy.FedVSSL # need to change after path modification
+  _target_: fedvssl.strategy.FedVSSL # need to change after path modification
   mix_coeff: 0.9
   swbeta: 1
   base_work_dir: fedvssl_results
@@ -33,4 +33,4 @@ include_dashboard: false
 
 ### hyper-parameters for downstream fine-tuning ###
 exp_name_finetune: finetune_results
-pretrained_model_path: fedvssl_results/round-1-weights.array.npz
+pretrained_model_path: /home/data1/round-540-weights.array.npz
