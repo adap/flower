@@ -17,6 +17,7 @@
 #define GRPC_RERE_H
 #pragma once
 #include "message_handler.h"
+#include "task_handler.h"
 #include <grpcpp/grpcpp.h>
 
 void create_node(const std::unique_ptr<flwr::proto::Fleet::Stub> &stub);
