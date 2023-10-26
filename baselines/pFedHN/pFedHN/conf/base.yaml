@@ -12,7 +12,6 @@ model:
   lr: 1e-2
   in_channels: 3 # 3 for CIFAR10 and CIFAR100, 1 for MNIST
   out_dim: 10 # 10 for MNIST and CIFAR10, 100 for CIFAR100
-  we_dec: 1e-3
   local: False # True: for pFedHNPC, False: pFedHN
   variant: 0 # 0: pFedHN , 1: pFedHNPC
   n_hidden: 3 # number of hidden layers for the hypernetwork: 3 for CIFAR10 and CIFAR100, 1 for MNIST

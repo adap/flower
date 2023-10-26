@@ -45,7 +45,7 @@ def main(cfg: DictConfig):
                 node_local_layers[i].parameters(),
                 lr=cfg.model.inner_lr,
                 momentum=0.9,
-                weight_decay=cfg.model.we_dec,
+                weight_decay=cfg.model.wd,
             )
             for i in range(cfg.client.num_nodes)
         ]
