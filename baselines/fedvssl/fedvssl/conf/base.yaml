@@ -33,4 +33,4 @@ include_dashboard: false
 
 ### hyper-parameters for downstream fine-tuning ###
 exp_name_finetune: finetune_results
-pretrained_model_path: fedssl_results/round-1-weights.array.npz
+pretrained_model_path: fedvssl_results/round-1-weights.array.npz
