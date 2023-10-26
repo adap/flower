@@ -19,6 +19,7 @@ import itertools
 import random
 import time
 from dataclasses import dataclass
+from logging import WARNING
 from typing import (
     Any,
     Callable,
@@ -30,6 +31,8 @@ from typing import (
     Type,
     Union,
 )
+
+from flwr.common.logger import log
 
 
 def exponential(
@@ -102,9 +105,9 @@ def full_jitter(value: float) -> float:
 
 @dataclass
 class Details:
-    """Details for event handlers in SafeInvoker."""
+    """Details for event handlers in Retrier."""
 
-    func: Callable[..., Any]
+    target: Callable[..., Any]
     args: Tuple[Any, ...]
     kwargs: Dict[str, Any]
     tries: int
@@ -114,7 +117,7 @@ class Details:
 
 
 # pylint: disable-next=too-many-instance-attributes
-class SafeInvoker:
+class Retrier:
     """Wrapper class for retry (with backoff) triggered by exceptions.
 
     Parameters
@@ -123,8 +126,8 @@ class SafeInvoker:
         A generator yielding successive wait times in seconds. If the generator
         is finite, the giveup event will be triggered when the generator raises
         `StopIteration`.
-    exception: Union[Type[Exception], Iterable[Type[Exception]]]
-        An exception type (or iterable of types) that triggers backoff.
+    exception: Union[Type[Exception], Tuple[Type[Exception]]]
+        An exception type (or tuple of types) that triggers backoff.
     max_tries: Optional[int] (default: None)
         The maximum number of attempts to make before giving up. Once exhausted,
         the exception will be allowed to escape. If set to None, there is no limit
@@ -157,9 +160,9 @@ class SafeInvoker:
 
     Examples
     --------
-    Initialize a `SafeInvoker` with exponential backoff and call a function:
+    Initialize a `Retrier` with exponential backoff and call a function:
 
-    >>> invoker = SafeInvoker(
+    >>> invoker = Retrier(
     >>>     exponential(),
     >>>     grpc.RpcError,
     >>>     max_tries=3,
@@ -170,7 +173,7 @@ class SafeInvoker:
     def __init__(
         self,
         wait: Generator[float, None, None],
-        exception: Union[Type[Exception], Iterable[Type[Exception]]],
+        exception: Union[Type[Exception], Tuple[Type[Exception], ...]],
         *,
         max_tries: Optional[int] = None,
         max_time: Optional[float] = None,
@@ -189,10 +192,16 @@ class SafeInvoker:
         self.on_success = on_success
         self.on_backoff = on_backoff
         self.on_giveup = on_giveup
+        if max_tries is None and max_time is None:
+            log(
+                WARNING,
+                "Neither 'max_tries' nor 'max_time' is set. This might result in "
+                "the Retrier continuously retrying without any limit.",
+            )
 
     def invoke(
         self,
-        func: Callable[..., Any],
+        target: Callable[..., Any],
         *args: Tuple[Any, ...],
         **kwargs: Dict[str, Any],
     ) -> Any:
@@ -232,6 +241,12 @@ class SafeInvoker:
         exceptions that trigger a retry, as well as conditions to stop retries,
         are also determined by the class's initialization parameters.
         """
+        if self.max_tries is None and self.max_time is None:
+            log(
+                WARNING,
+                "Neither 'max_tries' nor 'max_time' is set. This might result in "
+                "the Retrier continuously retrying without any limit.",
+            )
 
         def try_call_event_handler(
             handler: Optional[Callable[[Details], None]], details: Details
@@ -246,11 +261,11 @@ class SafeInvoker:
             tries += 1
             elapsed = time.time() - start
             details = Details(
-                func=func, args=args, kwargs=kwargs, tries=tries, elapsed=elapsed
+                target=target, args=args, kwargs=kwargs, tries=tries, elapsed=elapsed
             )
 
             try:
-                ret = func(*args, **kwargs)
+                ret = target(*args, **kwargs)
             except self.exception as err:  # type: ignore
                 # Check if giveup event should be triggered
                 max_tries_exceeded = tries == self.max_tries

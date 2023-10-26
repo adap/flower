@@ -20,7 +20,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from flwr.common.backoff import SafeInvoker, constant
+from flwr.common.backoff import Retrier, constant
 
 # Assuming SafeInvoker and related utilities have been imported here...
 
@@ -55,7 +55,7 @@ def test_successful_invocation() -> None:
     success_handler = Mock()
     backoff_handler = Mock()
     giveup_handler = Mock()
-    invoker = SafeInvoker(
+    invoker = Retrier(
         constant(0.1),
         ValueError,
         on_success=success_handler,
@@ -77,18 +77,29 @@ def test_failure() -> None:
     """Check termination when unexpected exception is raised."""
     # Prepare
     # `constant([0.1])` generator will raise `StopIteration` after one iteration.
-    invoker = SafeInvoker(constant(0.1), TypeError)
+    invoker = Retrier(constant(0.1), TypeError)
 
     # Execute and Assert
     with pytest.raises(ValueError):
         invoker.invoke(failing_function)
 
 
+def test_failure_two_exceptions(mock_sleep: MagicMock) -> None:
+    """Verify one retry on a specified iterable of exceptions."""
+    # Prepare
+    invoker = Retrier(constant(0.1), (TypeError, ValueError), max_tries=2, jitter=None)
+
+    # Execute and Assert
+    with pytest.raises(ValueError):
+        invoker.invoke(failing_function)
+    mock_sleep.assert_called_once_with(0.1)
+
+
 def test_backoff_on_failure(mock_sleep: MagicMock) -> None:
     """Verify one retry on specified exception."""
     # Prepare
     # `constant([0.1])` generator will raise `StopIteration` after one iteration.
-    invoker = SafeInvoker(constant([0.1]), ValueError, jitter=None)
+    invoker = Retrier(constant([0.1]), ValueError, jitter=None)
 
     # Execute and Assert
     with pytest.raises(ValueError):
@@ -100,7 +111,7 @@ def test_max_tries(mock_sleep: MagicMock) -> None:
     """Check termination after `max_tries`."""
     # Prepare
     # Disable `jitter` to ensure 0.1s wait time.
-    invoker = SafeInvoker(constant(0.1), ValueError, max_tries=2, jitter=None)
+    invoker = Retrier(constant(0.1), ValueError, max_tries=2, jitter=None)
 
     # Execute and Assert
     with pytest.raises(ValueError):
@@ -117,7 +128,7 @@ def test_max_time(mock_time: MagicMock, mock_sleep: MagicMock) -> None:
         0.0,
         3.0,
     ]
-    invoker = SafeInvoker(constant(2), ValueError, max_time=2.5)
+    invoker = Retrier(constant(2), ValueError, max_time=2.5)
 
     # Execute and Assert
     with pytest.raises(ValueError):
@@ -132,7 +143,7 @@ def test_event_handlers() -> None:
     success_handler = Mock()
     backoff_handler = Mock()
     giveup_handler = Mock()
-    invoker = SafeInvoker(
+    invoker = Retrier(
         constant(0.1),
         ValueError,
         max_tries=2,
@@ -156,7 +167,7 @@ def test_giveup_condition() -> None:
     def should_give_up(exc: Exception) -> bool:
         return isinstance(exc, ValueError)
 
-    invoker = SafeInvoker(constant(0.1), ValueError, giveup_condition=should_give_up)
+    invoker = Retrier(constant(0.1), ValueError, giveup_condition=should_give_up)
 
     # Execute and Assert
     with pytest.raises(ValueError):
