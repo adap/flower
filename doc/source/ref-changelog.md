@@ -2,11 +2,15 @@
 
 ## Unreleased
 
+### What's new?
+
 - **Support custom** `ClientManager` **in** `start_driver()` ([#2292](https://github.com/adap/flower/pull/2292))
 
 - **Update REST API to support create and delete nodes** ([#2283](https://github.com/adap/flower/pull/2283))
 
-### What's new?
+- **Update the C++ SDK** ([#2537](https://github/com/adap/flower/pull/2537), [#2528](https://github/com/adap/flower/pull/2528), [#2523](https://github.com/adap/flower/pull/2523), [#2522](https://github.com/adap/flower/pull/2522))
+
+  Add gRPC request-response capability to the C++ SDK.
 
 - **Fix the incorrect return types of Strategy** ([#2432](https://github.com/adap/flower/pull/2432/files))
 
