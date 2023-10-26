@@ -201,11 +201,11 @@ def main(cfg: DictConfig) -> None:
 
         # we give an example on how one can perform fine-tuning uisng UCF-101 dataset.
         cfg_path = "CtP/configs/ctp/r3d_18_kinetics/finetune_ucf101.py"
-        cfg = Config.fromfile(cfg_path)
-        cfg.model.backbone['pretrained'] = None
+        cfg_ = Config.fromfile(cfg_path)
+        cfg_.model.backbone['pretrained'] = None
 
         # build a model using the configuration file from Ctp repository
-        model = build_model(cfg.model)
+        model = build_model(cfg_.model)
 
         # path to the pretrained model. We provide certain federated pretrained model that can be easily downloaded
         # from the following link: https://github.com/yasar-rehman/FEDVSSL
