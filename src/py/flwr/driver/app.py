@@ -31,8 +31,8 @@ from flwr.server.history import History
 from flwr.server.server import Server
 from flwr.server.strategy import Strategy
 
-from .driver import GrpcDriver
 from .driver_client_proxy import DriverClientProxy
+from .grpc_driver import GrpcDriver
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
 

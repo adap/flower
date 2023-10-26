@@ -15,114 +15,73 @@
 """Flower driver service client."""
 
 
-from logging import ERROR, INFO, WARNING
-from typing import Optional
+from typing import Iterable, List, Optional, Tuple
 
-import grpc
-
-from flwr.common import EventType, event
-from flwr.common.grpc import create_channel
-from flwr.common.logger import log
+from flwr.driver.grpc_driver import GrpcDriver
 from flwr.proto.driver_pb2 import (
     CreateWorkloadRequest,
-    CreateWorkloadResponse,
     GetNodesRequest,
-    GetNodesResponse,
     PullTaskResRequest,
-    PullTaskResResponse,
     PushTaskInsRequest,
-    PushTaskInsResponse,
 )
-from flwr.proto.driver_pb2_grpc import DriverStub
-
-DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
-
-ERROR_MESSAGE_DRIVER_NOT_CONNECTED = """
-[Driver] Error: Not connected.
-
-Call `connect()` on the `GrpcDriver` instance before calling any of the other
-`GrpcDriver` methods.
-"""
+from flwr.proto.node_pb2 import Node
+from flwr.proto.task_pb2 import TaskIns, TaskRes
 
 
-class GrpcDriver:
-    """`GrpcDriver` provides access to the Driver API/service."""
+class Driver:
+    """`Driver` class provides an interface to the Driver API."""
 
-    def __init__(
-        self,
-        driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
-        certificates: Optional[bytes] = None,
-    ) -> None:
-        self.driver_service_address = driver_service_address
-        self.certificates = certificates
-        self.channel: Optional[grpc.Channel] = None
-        self.stub: Optional[DriverStub] = None
+    def __init__(self) -> None:
+        self.grpc_driver: Optional[GrpcDriver] = None
+        self.workload_id: Optional[int] = None
+        self.node = Node(node_id=0, anonymous=True)
 
-    def connect(self) -> None:
-        """Connect to the Driver API."""
-        event(EventType.DRIVER_CONNECT)
-        if self.channel is not None or self.stub is not None:
-            log(WARNING, "Already connected")
-            return
-        self.channel = create_channel(
-            server_address=self.driver_service_address,
-            root_certificates=self.certificates,
-        )
-        self.stub = DriverStub(self.channel)
-        log(INFO, "[Driver] Connected to %s", self.driver_service_address)
+    def _get_grpc_driver_and_workload_id(self) -> Tuple[GrpcDriver, int]:
+        # Check if the GrpcDriver is initialized
+        if self.grpc_driver is None or self.workload_id is None:
+            # Connect and create workload
+            self.grpc_driver = GrpcDriver()
+            self.grpc_driver.connect()
+            res = self.grpc_driver.create_workload(CreateWorkloadRequest())
+            self.workload_id = res.workload_id
 
-    def disconnect(self) -> None:
-        """Disconnect from the Driver API."""
-        event(EventType.DRIVER_DISCONNECT)
-        if self.channel is None or self.stub is None:
-            log(WARNING, "Already disconnected")
-            return
-        channel = self.channel
-        self.channel = None
-        self.stub = None
-        channel.close()
-        log(INFO, "[Driver] Disconnected")
+        return self.grpc_driver, self.workload_id
 
-    def create_workload(self, req: CreateWorkloadRequest) -> CreateWorkloadResponse:
-        """Request for workload ID."""
-        # Check if channel is open
-        if self.stub is None:
-            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
-            raise Exception("`GrpcDriver` instance not connected")
+    def get_nodes(self) -> List[Node]:
+        """Get node IDs."""
+        grpc_driver, workload_id = self._get_grpc_driver_and_workload_id()
 
-        # Call Driver API
-        res: CreateWorkloadResponse = self.stub.CreateWorkload(request=req)
-        return res
+        # Call GrpcDriver method
+        res = grpc_driver.get_nodes(GetNodesRequest(workload_id=workload_id))
+        return list(res.nodes)
 
-    def get_nodes(self, req: GetNodesRequest) -> GetNodesResponse:
-        """Get client IDs."""
-        # Check if channel is open
-        if self.stub is None:
-            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
-            raise Exception("`GrpcDriver` instance not connected")
-
-        # Call gRPC Driver API
-        res: GetNodesResponse = self.stub.GetNodes(request=req)
-        return res
-
-    def push_task_ins(self, req: PushTaskInsRequest) -> PushTaskInsResponse:
+    def push_task_ins(self, task_ins_list: List[TaskIns]) -> List[str]:
         """Schedule tasks."""
-        # Check if channel is open
-        if self.stub is None:
-            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
-            raise Exception("`GrpcDriver` instance not connected")
+        grpc_driver, workload_id = self._get_grpc_driver_and_workload_id()
 
-        # Call gRPC Driver API
-        res: PushTaskInsResponse = self.stub.PushTaskIns(request=req)
-        return res
+        # Set workload_id
+        for task_ins in task_ins_list:
+            task_ins.workload_id = workload_id
 
-    def pull_task_res(self, req: PullTaskResRequest) -> PullTaskResResponse:
+        # Call GrpcDriver method
+        res = grpc_driver.push_task_ins(PushTaskInsRequest(task_ins_list=task_ins_list))
+        return list(res.task_ids)
+
+    def pull_task_res(self, task_ids: Iterable[str]) -> List[TaskRes]:
         """Get task results."""
-        # Check if channel is open
-        if self.stub is None:
-            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
-            raise Exception("`GrpcDriver` instance not connected")
+        grpc_driver, _ = self._get_grpc_driver_and_workload_id()
 
-        # Call Driver API
-        res: PullTaskResResponse = self.stub.PullTaskRes(request=req)
-        return res
+        # Call GrpcDriver method
+        res = grpc_driver.pull_task_res(
+            PullTaskResRequest(node=self.node, task_ids=task_ids)
+        )
+        return list(res.task_res_list)
+
+    def __del__(self) -> None:
+        """Disconnect GrpcDriver if connected."""
+        # Check if GrpcDriver is initialized
+        if self.grpc_driver is None:
+            return
+
+        # Disconnect
+        self.grpc_driver.disconnect()
