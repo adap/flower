@@ -67,7 +67,7 @@ For more details, please refer to the relevant section in the paper.
 | `strategy.fraction_fit` | `0.01` | Ratio of client pool to involve during training |
 | `strategy.weight_strategy` | `num`| Different way to average clients weight. Could be chose between `num`,`loss`,`wer` |
 | `client_resources.num_cpus` | `8`| Number of cpus per client. Recommended to have more than 8 |
-| `client_réources.num_gpus` | `1`| Number of gpus per client. Recommended to have at least 1 with VRAM > 24GB |
+| `client_resources.num_gpus` | `1`| Number of gpus per client. Recommended to have at least 1 with VRAM > 24GB |
 
 
 
@@ -85,7 +85,7 @@ poetry env use 3.10.6
 poetry install
 
 # Activate your environment
-poetry sehll
+poetry shell
 ```
 
 ```bash
