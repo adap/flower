@@ -82,7 +82,8 @@ poetry shell
 To run this DepthFL, first ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
 
 ```bash
-python -m depthfl.main # this will run using the default settings in the `conf/config.yaml`
+# this will run using the default settings in the `conf/config.yaml`
+python -m depthfl.main  # 'accuracy' : accuracy of the ensemble model, 'accuracy_single' : accuracy of each classifier.
 
 # you can override settings directly from the command line
 python -m depthfl.main exclusive_learning=true model_size=1 # exclusive learning - 100% (a)
