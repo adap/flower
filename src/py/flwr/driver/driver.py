@@ -29,7 +29,22 @@ from flwr.proto.task_pb2 import TaskIns, TaskRes
 
 
 class Driver:
-    """`Driver` class provides an interface to the Driver API."""
+    """`Driver` class provides an interface to the Driver API.
+
+    Parameters
+    ----------
+    driver_service_address : Optional[str]
+        The IPv4 or IPv6 address of the Driver API server.
+        Defaults to `"[::]:9091"`.
+    certificates : bytes (default: None)
+        Tuple containing root certificate, server certificate, and private key
+        to start a secure SSL-enabled server. The tuple is expected to have
+        three bytes elements in the following order:
+
+            * CA certificate.
+            * server certificate.
+            * server private key.
+    """
 
     def __init__(
         self,
