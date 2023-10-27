@@ -29,19 +29,7 @@ endif()
 ######################
 ### FLWR_LIB
 
-FetchContent_Declare(
-  flwr_repo
-  GIT_REPOSITORY https://github.com/adap/flower.git
-  GIT_TAG        add-cpp-proto  # MUST BE CHANGED TO MAIN
-)
-
-FetchContent_GetProperties(flwr_repo)
-if(NOT flwr_repo_POPULATED)
-  FetchContent_Populate(flwr_repo)
-endif()
-
-set(FLWR_SOURCE_ROOT "${flwr_repo_SOURCE_DIR}")
-set(FLWR_SDK_PATH "${FLWR_SOURCE_ROOT}/src/cc/flwr")
+set(FLWR_SDK_PATH "../../src/cc/flwr")
 
 file(GLOB FLWR_SRCS "${FLWR_SDK_PATH}/src/*.cc")
 file(GLOB FLWR_PROTO_SRCS "${FLWR_SDK_PATH}/include/flwr/proto/*.cc")
