@@ -32,7 +32,7 @@ endif()
 
 if(USE_LOCAL_FLWR)
   set(FLWR_SOURCE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../..")
-else
+else()
   FetchContent_Declare(
     flwr_repo
     GIT_REPOSITORY https://github.com/adap/flower.git
