@@ -4,7 +4,6 @@ project(flwr VERSION 1.0
   LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
-set(ABSL_PROPAGATE_CXX_STD ON)
 
 # Assume gRPC and other dependencies are necessary
 include(FetchContent)
@@ -92,59 +91,11 @@ target_link_libraries(flwr_grpc_proto
 
 # For the internal use of flwr
 file(GLOB FLWR_SRCS "src/*.cc")
-
 add_library(flwr ${FLWR_SRCS})
 
 target_include_directories(flwr PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
 )
 
 # Link gRPC and other dependencies
 target_link_libraries(flwr PRIVATE flwr_grpc_proto)
-
-# Merge the two libraries
-add_library(flwr_merged STATIC $<TARGET_OBJECTS:flwr> $<TARGET_OBJECTS:flwr_grpc_proto>)
-
-target_include_directories(flwr_merged PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
-)
-# This will create a 'flwrConfig.cmake' for users to find
-install(TARGETS flwr_merged EXPORT flwrTargets
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
-  PUBLIC_HEADER DESTINATION include
-)
-install(
-    FILES 
-    ${CMAKE_CURRENT_BINARY_DIR}/flwr/proto/fleet.grpc.pb.h 
-    ${CMAKE_CURRENT_BINARY_DIR}/flwr/proto/fleet.pb.h
-    ${CMAKE_CURRENT_BINARY_DIR}/flwr/proto/node.grpc.pb.h 
-    ${CMAKE_CURRENT_BINARY_DIR}/flwr/proto/node.pb.h
-    ${CMAKE_CURRENT_BINARY_DIR}/flwr/proto/task.grpc.pb.h 
-    ${CMAKE_CURRENT_BINARY_DIR}/flwr/proto/task.pb.h
-    ${CMAKE_CURRENT_BINARY_DIR}/flwr/proto/transport.grpc.pb.h 
-    ${CMAKE_CURRENT_BINARY_DIR}/flwr/proto/transport.pb.h
-    DESTINATION include
-)
-install(DIRECTORY include/ DESTINATION include)
-
-install(EXPORT flwrTargets
-  FILE flwrConfig.cmake
-  NAMESPACE flwr::
-  DESTINATION lib/cmake/flwr
-)
-
-# Optional: Generate and install package version file
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-  "${CMAKE_CURRENT_BINARY_DIR}/flwrConfigVersion.cmake"
-  VERSION ${PROJECT_VERSION}
-  COMPATIBILITY AnyNewerVersion
-)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/flwrConfigVersion.cmake"
-  DESTINATION lib/cmake/flwr
-)
-
