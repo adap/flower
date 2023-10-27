@@ -236,7 +236,7 @@ def generic_create_grpc_server(  # pylint: disable=too-many-arguments
         # Is it permissible to send keepalive pings from the client without
         # any outstanding streams. More explanation here:
         # https://github.com/adap/flower/pull/2197
-        ("grpc.keepalive_permit_without_calls", 0),
+        ("grpc.keepalive_permit_without_calls", 1),
     ]
 
     server = grpc.server(
