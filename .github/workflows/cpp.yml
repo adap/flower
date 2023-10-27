@@ -55,12 +55,12 @@ jobs:
     - name: Run cppcheck
       run: |
         cd build
-        cppcheck --enable=all --inline-suppr --suppress=missingIncludeSystem -I../src/cc/flwr/include ../src/cc/flwr/src
+        cppcheck --enable=all -I../src/cc/flwr/include ../src/cc/flwr/src
 
     - name: End-to-end test
       run: |
         cd examples/quickstart-cpp
-        cmake -S . -B build
+        cmake -DUSE_LOCAL_FLWR=ON -S . -B build
         cmake --build build
         pip install ../..
         timeout 2m python server.py &
