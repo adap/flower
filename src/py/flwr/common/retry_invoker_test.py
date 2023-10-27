@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for `Retrier`."""
+"""Tests for `RetryInvoker`."""
 
 
 from typing import Generator
@@ -20,7 +20,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from flwr.common.retrier import Retrier, constant
+from flwr.common.retry_invoker import RetryInvoker, constant
 
 
 def successful_function() -> str:
@@ -53,7 +53,7 @@ def test_successful_invocation() -> None:
     success_handler = Mock()
     backoff_handler = Mock()
     giveup_handler = Mock()
-    retrier = Retrier(
+    invoker = RetryInvoker(
         constant(0.1),
         ValueError,
         max_tries=None,
@@ -64,7 +64,7 @@ def test_successful_invocation() -> None:
     )
 
     # Execute
-    result = retrier.invoke(successful_function)
+    result = invoker.invoke(successful_function)
 
     # Assert
     assert result == "success"
@@ -77,23 +77,23 @@ def test_failure() -> None:
     """Check termination when unexpected exception is raised."""
     # Prepare
     # `constant([0.1])` generator will raise `StopIteration` after one iteration.
-    retrier = Retrier(constant(0.1), TypeError, None, None)
+    invoker = RetryInvoker(constant(0.1), TypeError, None, None)
 
     # Execute and Assert
     with pytest.raises(ValueError):
-        retrier.invoke(failing_function)
+        invoker.invoke(failing_function)
 
 
 def test_failure_two_exceptions(mock_sleep: MagicMock) -> None:
     """Verify one retry on a specified iterable of exceptions."""
     # Prepare
-    retrier = Retrier(
+    invoker = RetryInvoker(
         constant(0.1), (TypeError, ValueError), max_tries=2, max_time=None, jitter=None
     )
 
     # Execute and Assert
     with pytest.raises(ValueError):
-        retrier.invoke(failing_function)
+        invoker.invoke(failing_function)
     mock_sleep.assert_called_once_with(0.1)
 
 
@@ -101,11 +101,11 @@ def test_backoff_on_failure(mock_sleep: MagicMock) -> None:
     """Verify one retry on specified exception."""
     # Prepare
     # `constant([0.1])` generator will raise `StopIteration` after one iteration.
-    retrier = Retrier(constant([0.1]), ValueError, None, None, jitter=None)
+    invoker = RetryInvoker(constant([0.1]), ValueError, None, None, jitter=None)
 
     # Execute and Assert
     with pytest.raises(ValueError):
-        retrier.invoke(failing_function)
+        invoker.invoke(failing_function)
     mock_sleep.assert_called_once_with(0.1)
 
 
@@ -113,13 +113,13 @@ def test_max_tries(mock_sleep: MagicMock) -> None:
     """Check termination after `max_tries`."""
     # Prepare
     # Disable `jitter` to ensure 0.1s wait time.
-    retrier = Retrier(
+    invoker = RetryInvoker(
         constant(0.1), ValueError, max_tries=2, max_time=None, jitter=None
     )
 
     # Execute and Assert
     with pytest.raises(ValueError):
-        retrier.invoke(failing_function)
+        invoker.invoke(failing_function)
     # Assert 1 sleep call due to the max_tries being set to 2
     mock_sleep.assert_called_once_with(0.1)
 
@@ -132,11 +132,11 @@ def test_max_time(mock_time: MagicMock, mock_sleep: MagicMock) -> None:
         0.0,
         3.0,
     ]
-    retrier = Retrier(constant(2), ValueError, max_tries=None, max_time=2.5)
+    invoker = RetryInvoker(constant(2), ValueError, max_tries=None, max_time=2.5)
 
     # Execute and Assert
     with pytest.raises(ValueError):
-        retrier.invoke(failing_function)
+        invoker.invoke(failing_function)
     # Assert no wait because `max_time` is exceeded before the first retry.
     mock_sleep.assert_not_called()
 
@@ -147,7 +147,7 @@ def test_event_handlers() -> None:
     success_handler = Mock()
     backoff_handler = Mock()
     giveup_handler = Mock()
-    retrier = Retrier(
+    invoker = RetryInvoker(
         constant(0.1),
         ValueError,
         max_tries=2,
@@ -159,7 +159,7 @@ def test_event_handlers() -> None:
 
     # Execute and Assert
     with pytest.raises(ValueError):
-        retrier.invoke(failing_function)
+        invoker.invoke(failing_function)
     backoff_handler.assert_called_once()
     giveup_handler.assert_called_once()
     success_handler.assert_not_called()
@@ -172,10 +172,10 @@ def test_giveup_condition() -> None:
     def should_give_up(exc: Exception) -> bool:
         return isinstance(exc, ValueError)
 
-    retrier = Retrier(
-        constant(0.1), ValueError, None, None, giveup_condition=should_give_up
+    invoker = RetryInvoker(
+        constant(0.1), ValueError, None, None, should_giveup=should_give_up
     )
 
     # Execute and Assert
     with pytest.raises(ValueError):
-        retrier.invoke(failing_function)
+        invoker.invoke(failing_function)
