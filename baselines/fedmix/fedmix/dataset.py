@@ -36,8 +36,7 @@ def load_datasets(config, num_clients, seed):
     if dataset_name in ['cifar10', 'cifar100']:
         client_datasets = _partition_cifar_new(trainset, num_classes, num_clients, config.num_classes_per_client, seed)
     else:
-        client_datasets, testset = _partition_femnist()
-        client_datasets = client_datasets[:num_clients]
+        client_datasets, testset = _partition_femnist(num_clients)
 
     mashed_data = _mash_data(client_datasets, config.mash_batch_size, num_classes)
 

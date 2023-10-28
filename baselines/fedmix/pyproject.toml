@@ -5,9 +5,9 @@ build-backend = "poetry.masonry.api"
 [tool.poetry]
 name = "fedmix" # <----- Ensure it matches the name of your baseline directory containing all the source code
 version = "1.0.0"
-description = "FedMix: Approximation of Mixup under Mean Augmented Federated Learning"
+description = "Flower Baselines"
 license = "Apache-2.0"
-authors = ["Pranjal Gulati <pranjal.carmel@gmail.com>"]
+authors = ["The Flower Authors <hello@flower.dev>"]
 readme = "README.md"
 homepage = "https://flower.dev"
 repository = "https://github.com/adap/flower"
@@ -42,7 +42,6 @@ flwr = { extras = ["simulation"], version = "1.5.0" }
 hydra-core = "1.3.2" # don't change this
 torch = { url = "https://download.pytorch.org/whl/cu116/torch-1.13.1%2Bcu116-cp310-cp310-linux_x86_64.whl" }
 torchvision = { url = "https://download.pytorch.org/whl/cu116/torchvision-0.14.1%2Bcu116-cp310-cp310-linux_x86_64.whl" }
-pillow = "9.5.0" # needed <10.0.0 for LEAF repo scripts
 
 [tool.poetry.dev-dependencies]
 isort = "==5.11.5"

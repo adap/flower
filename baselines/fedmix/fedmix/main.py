@@ -7,7 +7,7 @@ from omegaconf import OmegaConf
 
 from fedmix import client, server
 from fedmix.dataset import load_datasets
-from fedmix.utils import save_results_as_pickle
+from fedmix.utilities import save_results_as_pickle
 
 
 @hydra.main(config_path="conf", config_name="config", version_base=None)

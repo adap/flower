@@ -16,7 +16,7 @@ client_resources:
 
 hydra:
   run:
-    dir: results/${dataset.name}_${hydra.job.num}
+    dir: results/${dataset.name}/${now:%Y-%m-%d}/${now:%H-%M-%S} 
 
   sweep:
     dir: results/

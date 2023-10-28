@@ -2,36 +2,36 @@
 title: FedMix Approximation of Mixup under Mean Augmented Federated Learning
 url: https://arxiv.org/abs/2107.00233
 labels: ["data heterogeneity", "mixup", "non-iid"]
-dataset: ["CIFAR-10", "CIFAR-100", "FEMNIST"]
+dataset: ["cifar10", "cifar100", "femnist"]
 ---
 
 # FedMix: Approximation of Mixup under Mean Augmented Federated Learning
 
-**Paper:** [arxiv.org/abs/2107.00233](https://arxiv.org/abs/2107.00233)
+****Paper:**** [arxiv.org/abs/2107.00233](https://arxiv.org/abs/2107.00233)
 
-**Authors:** Tehrim Yoon, Sumin Shin, Sung Ju Hwang, Eunho Yang
+****Authors:**** Tehrim Yoon, Sumin Shin, Sung Ju Hwang, Eunho Yang
 
-**Abstract:** Federated learning (FL) allows edge devices to collectively learn a model without directly sharing data within each device, thus preserving privacy and eliminating the need to store data globally. While there are promising results under the assumption of independent and identically distributed (iid) local data, current state-of-the-art algorithms suffer from performance degradation as the heterogeneity of local data across clients increases. To resolve this issue, we propose a simple framework, Mean Augmented Federated Learning (MAFL), where clients send and receive averaged local data, subject to the privacy requirements of target applications. Under our framework, we propose a new augmentation algorithm, named FedMix, which is inspired by a phenomenal yet simple data augmentation method, Mixup, but does not require local raw data to be directly shared among devices. Our method shows greatly improved performance in the standard benchmark datasets of FL, under highly non-iid federated settings, compared to conventional algorithms.
+****Abstract:**** Federated learning (FL) allows edge devices to collectively learn a model without directly sharing data within each device, thus preserving privacy and eliminating the need to store data globally. While there are promising results under the assumption of independent and identically distributed (iid) local data, current state-of-the-art algorithms suffer from performance degradation as the heterogeneity of local data across clients increases. To resolve this issue, we propose a simple framework, Mean Augmented Federated Learning (MAFL), where clients send and receive averaged local data, subject to the privacy requirements of target applications. Under our framework, we propose a new augmentation algorithm, named FedMix, which is inspired by a phenomenal yet simple data augmentation method, Mixup, but does not require local raw data to be directly shared among devices. Our method shows greatly improved performance in the standard benchmark datasets of FL, under highly non-iid federated settings, compared to conventional algorithms.
 
 
 ## About this baseline
 
-**What’s implemented:** The code in this directory implements two of the Federated Strategies mentioned in the paper: NaiveMix and FedMix
+****What’s implemented:**** The code in this directory implements two of the Federated Strategies mentioned in the paper: NaiveMix and FedMix
 
-**Datasets:** CIFAR10, CIFAR100, FEMNIST
+****Datasets:**** CIFAR10, CIFAR100, FEMNIST
 
-**Hardware Setup:** Experiments in this baseline were run on 2x Nvidia Tesla V100 16GB.
+****Hardware Setup:**** Experiments in this baseline were run on 2x Nvidia Tesla V100 16GB.
 
-**Contributors:** [DevPranjal](https://github.com/DevPranjal)
+****Contributors:**** [DevPranjal](https://github.com/DevPranjal)
 
 
 ## Experimental Setup
 
-**Task:** Image Classification
+****Task:**** Image Classification
 
-**Model:** Models used are modified versions of existing known models and are descirbed in Appendix B (Experimental Details). For CIFAR10 and CIFAR100 datasets, the authors use a modified version of VGG, while LeNet-5 is used for the FEMNIST dataset.
+****Model:**** Models used are modified versions of existing known models and are descirbed in Appendix B (Experimental Details). For CIFAR10 and CIFAR100 datasets, the authors use a modified version of VGG, while LeNet-5 is used for the FEMNIST dataset.
 
-**Dataset:** The datasets used (CIFAR10, CIFAR100 FEMNIST) incorporate data heterogenity in diferent ways to simulate a non-iid setting. For CIFAR10 and CIFAR100 experiments, data is allocated such that each client has data from only a selected number of randomly chosen classes. For the FEMNIST experiment, data is allocated such that each client has data from only one writer, resulting in 200-300 samples per client on average.
+****Dataset:**** The datasets used (CIFAR10, CIFAR100 FEMNIST) incorporate data heterogenity in diferent ways to simulate a non-iid setting. For CIFAR10 and CIFAR100 experiments, data is allocated such that each client has data from only a selected number of randomly chosen classes. For the FEMNIST experiment, data is allocated such that each client has data from only one writer, resulting in 200-300 samples per client on average.
 
 | Property | CIFAR10 Partioning | CIFAR100 Partioning | FEMNIST Partitioning |
 | -- | -- | -- | -- |
@@ -41,7 +41,7 @@ dataset: ["CIFAR-10", "CIFAR-100", "FEMNIST"]
 | non-iidness type | data from selected classes | data from selected classes | data from single writer |
 
 
-**Training Hyperparameters:**
+****Training Hyperparameters:****
 
 | Hyperparameter | CIFAR10 Experiments | CIFAR100 Experiments | FEMNIST Experiments |
 | -- | -- | -- | -- |
@@ -75,6 +75,14 @@ poetry shell
 ```
 
 ## Running the Experiments
+
+To setup the directory for FEMNIST experiments, run:
+
+```
+git clone https://github.com/TalwalkarLab/leaf.git
+cp -r leaf/data/femnist fedmix/
+cp -r leaf/data/utils fedmix/
+```
 
 To run an experiment with default hyperparameters (as mentioned in the paper), execute:
 

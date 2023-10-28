@@ -6,6 +6,7 @@ import torch.nn.functional as F
 import torchvision.transforms as transforms
 from torch.utils.data import Subset, TensorDataset
 import os
+import random
 import json
 from torchvision.datasets import CIFAR10, CIFAR100
 
@@ -15,6 +16,8 @@ def _download_cifar10():
     transform = transforms.Compose(
         [
             transforms.ToTensor(),
+            transforms.RandomCrop(32, padding=4),
+            transforms.RandomHorizontalFlip(),
             transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
         ]
     )
@@ -29,6 +32,8 @@ def _download_cifar100():
     transform = transforms.Compose(
         [
             transforms.ToTensor(),
+            transforms.RandomCrop(32, padding=4),
+            transforms.RandomHorizontalFlip(),
             transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
         ]
     )
@@ -73,7 +78,8 @@ def _partition_cifar_new(
     trainset, num_classes, num_clients, num_classes_per_client, seed
 ):
     """..."""
-    labels = set(range(num_classes))    
+    labels = set(range(num_classes))
+    np.random.seed(seed)
 
     nlbl = [
         np.random.choice(len(labels), num_classes_per_client, replace=False)
@@ -99,10 +105,6 @@ def _partition_cifar_new(
 
     dataset_indices = [np.where(assignment == i)[0] for i in range(num_clients)]
 
-    # print('number of data points of each client:', [len(lst) for lst in dataset_indices])
-    # print('total number of data points across clients:', sum([len(lst) for lst in dataset_indices]))
-    # print('number of unique data points:', len({i for lst in dataset_indices for i in lst}))
-
     return [Subset(trainset, ind) for ind in dataset_indices]
 
 
@@ -110,16 +112,19 @@ def _download_femnist(num_clients):
     os.system(f'cd fedmix/femnist && ./preprocess.sh -s niid --iu {num_clients / 3550} --sf 0.1 -t sample')
 
 
-def _partition_femnist():
+def _partition_femnist(num_clients):
     train_path = 'fedmix/femnist/data/train'
     train_json_files = [f for f in os.listdir(train_path) if f.endswith('.json')]
-    client_datasets = []
+    client_datasets_dict = {}
+
+    train_user_ids = []
 
     for train_json in train_json_files:
         with open(os.path.join(train_path, train_json), 'r') as file:
             data = json.load(file)
             user_data = data['user_data']
-            for user_info in user_data.values():
+            for user_id, user_info in user_data.items():
+                train_user_ids.append(user_id)
                 x = np.array(user_info['x'])
                 x = x.reshape(-1, 1, 28, 28)
                 y = np.array(user_info['y'])
@@ -127,30 +132,39 @@ def _partition_femnist():
                 x = torch.tensor(x, dtype=torch.float32)
                 y = torch.tensor(y)
 
-                client_datasets.append(TensorDataset(x, y))
+                client_datasets_dict[user_id] = TensorDataset(x, y)
+
+    user_ids = list(client_datasets_dict.keys())
+    selected_user_ids = random.sample(user_ids, num_clients)
+
+    print('selected users:', selected_user_ids)
+
+    client_datasets = []
+    for user_id in selected_user_ids:
+        client_datasets.append(client_datasets_dict[user_id])
 
     test_path = 'fedmix/femnist/data/test'
     test_json_files = [f for f in os.listdir(test_path) if f.endswith('.json')]
     test_x, test_y = [], []
 
+    test_user_ids = []
+
     for test_json in test_json_files:
         with open(os.path.join(test_path, test_json), 'r') as file:
             data = json.load(file)
             user_data = data['user_data']
-            for user_info in user_data.values():
-                x = user_info['x']
-                y = user_info['y']
+            for user_id, user_info in user_data.items():
+                test_user_ids.append(user_id)
+                if user_id in selected_user_ids:
+                    x = user_info['x']
+                    y = user_info['y']
 
-                test_x.extend(x)
-                test_y.extend(y)
+                    test_x.extend(x)
+                    test_y.extend(y)
 
     x = torch.tensor(np.array(test_x).reshape(-1, 1, 28, 28), dtype=torch.float32)
     y = torch.tensor(np.array(test_y))
     testset = TensorDataset(x, y)
-
-    # print('length of client datasets:', [len(c) for c in client_datasets])
-    # print('train set size:', sum([len(c) for c in client_datasets]))
-    # print('test set size:', len(testset))
 
     return client_datasets, testset
 
@@ -199,9 +213,5 @@ def _mash_data(client_datasets, mash_batch_size, num_classes):
             )
 
         mashed_image, mashed_label = [], []
-
-    # print('length of mashed data:', len(mashed_data))
-    # print('shapes of mashed data:', mashed_data[0][0].shape, mashed_data[0][1].shape)
-    # print('sample mashed label:', mashed_data[0][1])
 
     return mashed_data
