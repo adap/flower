@@ -8,7 +8,7 @@ mod task_handler;
 mod typing;
 
 pub mod flwr_proto {
-    tonic::include_proto!("flwr.proto");
+    include!(concat!(env!("OUT_DIR"), "/flwr.proto.rs"));
 }
 
 struct TestClient;
