@@ -6,6 +6,14 @@ html, body{
     background: #f8f8f8
 }
 
-.toctree-wrapper.compound .caption {
-    display: none;
+h1 {
+    font-size: 40px;
+}
+
+h2 {
+    font-size: 30px;
+}
+
+p {
+    font-size: 16px;
 }
