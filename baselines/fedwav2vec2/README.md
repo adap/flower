@@ -1,7 +1,7 @@
 ---
 title: Federated Learning for ASR based on Wav2vec2.0
 url: https://ieeexplore.ieee.org/document/10096426
-labels: [speech, asr]
+labels: [speech, asr, cross-device]
 dataset: [TED-LIUM 3]
 ---
 
@@ -70,6 +70,7 @@ For more details, please refer to the relevant section in the paper.
 | `client_resources.num_gpus` | `1`| Number of gpus per client. Recommended to have at least 1 with VRAM > 24GB |
 
 
+By default, long audio sequences (>10s) are excluded from training. This is done so to keep the VRAM usage low enough to train a client on a 16GB GPU. This hyperparameter is defined in the `sb_config` under the `avoid_if_longer_than` tag.
 
 
 ## Environment Setup
@@ -112,22 +113,8 @@ python -m fedwav2vec2.main client_resources.num_gpus=0.5
 
 ## Expected Results
 
-The baseline aims to repoduce server model's behavior like the graph below:
+Running the command above will generate the `SSL` results as shown on the plot below. The results should closely follow those in Figure 1 in the paper.
 
 <p align="center">
-      <img src="docs/result_figure.png" alt="SSL vs non-SSL performance with FL setting" width="400">
+      <img src="_static/fedwav2vec.png" alt="SSL vs non-SSL performance with FL setting" width="700">
 </p>
-
-
-:warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
-
-```bash
-# it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameteres
-
-poetry run python -m <baseline-name>.main --multirun num_client_per_round=5,10,50 dataset=femnist,cifar10
-# the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
-
-[Now show a figure/table displaying the results of the above command]
-
-# add more commands + plots for additional experiments.
-```
