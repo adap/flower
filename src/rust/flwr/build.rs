@@ -1,9 +1,10 @@
 fn main() {
+    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
+    let proto_src = format!("{}/../../proto/flwr/proto/fleet.proto", manifest_dir);
+    let proto_include = format!("{}/../../proto", manifest_dir);
+
     tonic_build::configure()
         .build_server(false)
-        .compile(
-            &["../../proto/flwr/proto/fleet.proto"],
-            &["../../proto"], // specify the root location to search proto dependencies
-        )
+        .compile(&[&proto_src], &[&proto_include])
         .unwrap();
 }
