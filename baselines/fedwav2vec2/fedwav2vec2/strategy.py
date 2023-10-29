@@ -33,6 +33,7 @@ class CustomFedAvg(fl.server.strategy.FedAvg):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Union[bool, bytes, float, int, str]]]:
+        """Aggregate results using different weighing metrics (train_loss or WER)."""
         if not results:
             return None, {}
         # Do not aggregate if there are failures and failures are not accepted

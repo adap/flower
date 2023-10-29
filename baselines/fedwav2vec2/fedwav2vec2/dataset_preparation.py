@@ -28,7 +28,8 @@ def _download_file(url, filename):
         try:
             with urllib.request.urlopen(
                 url,
-                context=ssl._create_unverified_context(),  # pylint: disable=protected-access
+                # pylint: disable=protected-access
+                context=ssl._create_unverified_context(),
             ) as response, open(filename, "wb") as out_file:
                 total_size = int(response.getheader("Content-Length"))
                 block_size = 1024 * 8
@@ -41,7 +42,7 @@ def _download_file(url, filename):
                     out_file.write(data)
                     percent = int(count * block_size * 100 / total_size)
                     print(
-                        f"\rDownloading: {percent}% [{count * block_size}/{total_size}]",
+                        f"\rDownload: {percent}% [{count * block_size}/{total_size}]",
                         end="",
                     )
                 print("\nDownload complete.")
@@ -77,7 +78,7 @@ def _delete_file(filename):
     print(f"Deleted {filename}.")
 
 
-def _csv_path_audio(data_path_base: str, extract_path: str):
+def _csv_path_audio(extract_path: str):
     """Change the path corespond to your actual path."""
     for subdir, _dirs, files in os.walk("./data"):
         for file in files:
@@ -91,33 +92,34 @@ def _csv_path_audio(data_path_base: str, extract_path: str):
                         path = os.path.join(extract_path, "legacy/dev/sph")
                     else:
                         path = os.path.join(extract_path, "legacy/test/sph")
-                df = pd.read_csv(os.path.join(subdir, file))
-                df["wav"] = df["wav"].str.replace("path", path)
-                df.to_csv(os.path.join(subdir, file), index=False)
+                d_f = pd.read_csv(os.path.join(subdir, file))
+                d_f["wav"] = d_f["wav"].str.replace("path", path)
+                d_f.to_csv(os.path.join(subdir, file), index=False)
 
 
 @hydra.main(config_path="./conf", config_name="base", version_base=None)
 def download_and_extract(cfg: DictConfig) -> None:
+    """Download and extract TEDIUM-3 dataset."""
     print(OmegaConf.to_yaml(cfg))
-    URL = (
+    url = (
         "https://projets-lium.univ-lemans.fr"
         "/wp-content/uploads/corpus/TED-LIUM/TEDLIUM_release-3.tgz"
     )
     # URL = "https://www.openslr.org/resources/51/TEDLIUM_release-3.tgz"
-    FILENAME = f"{cfg.data_path}/{cfg.dataset.download_filename}"
-    EXTRACT_PATH = f"{cfg.data_path}/{cfg.dataset.extract_subdirectory}"
+    filename = f"{cfg.data_path}/{cfg.dataset.download_filename}"
+    extract_path = f"{cfg.data_path}/{cfg.dataset.extract_subdirectory}"
 
-    print(f"{EXTRACT_PATH = }")
-    print(f"{FILENAME = }")
+    print(f"{extract_path = }")
+    print(f"{filename = }")
 
-    if not os.path.exists(EXTRACT_PATH):
+    if not os.path.exists(extract_path):
         try:
-            _download_file(URL, FILENAME)
-            _extract_file(FILENAME, EXTRACT_PATH)
+            _download_file(url, filename)
+            _extract_file(filename, extract_path)
         finally:
-            _delete_file(FILENAME)
+            _delete_file(filename)
 
-    _csv_path_audio(cfg.data_path, f"{EXTRACT_PATH}/TEDLIUM_release-3")
+    _csv_path_audio(f"{extract_path}/TEDLIUM_release-3")
 
     # remove output dir. No need to keep it around
     save_path = HydraConfig.get().runtime.output_dir

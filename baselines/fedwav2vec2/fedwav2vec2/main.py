@@ -5,9 +5,6 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 """
 
 import flwr as fl
-
-# these are the basic packages you'll need here
-# feel free to remove some if aren't needed
 import hydra
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
@@ -43,7 +40,7 @@ def main(cfg: DictConfig) -> None:
         print("PRETRAINED INITIALIZE")
 
         pretrained = pre_trained_point(
-            save_path.output,
+            save_path,
             cfg,
         )
     else:

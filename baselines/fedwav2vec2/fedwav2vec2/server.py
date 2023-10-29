@@ -28,12 +28,13 @@ def get_on_fit_config_fn(local_epochs: int) -> Callable[[int], Dict[str, str]]:
 
 
 def get_evaluate_fn(config: DictConfig, save_path: str):
+    """Return function to execute during global evaluation."""
     config_ = config
 
     def evaluate_fn(
         server_round: int, weights: fl.common.NDArrays, config: Dict[str, Scalar]
     ):
-        """Function for centralized evaluation."""
+        """Run centralized evaluation."""
         _ = (server_round, config)
         # int model
         asr_brain, dataset = int_model(

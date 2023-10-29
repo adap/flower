@@ -26,7 +26,7 @@ def int_model(  # pylint: disable=too-many-arguments,too-many-locals
     save_path,
     evaluate=False,
 ):
-    """Setting up the experiment.
+    """Set up the experiment.
 
     Loading the hyperparameters from config files and command-line overrides, setting
     the correct path for the corresponding clients, and creating the model.
@@ -113,7 +113,7 @@ def int_model(  # pylint: disable=too-many-arguments,too-many-locals
 
 
 def pre_trained_point(save, config: DictConfig):
-    """Returns a pre-trained model from a path and hyperparameters."""
+    """Return a pre-trained model from a path and hyperparameters."""
     state_dict = torch.load(config.pre_train_model_path)
 
     overrides = {"output_folder": save}

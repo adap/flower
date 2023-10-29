@@ -5,6 +5,7 @@ import gc
 import time
 from collections import OrderedDict
 from enum import Enum, auto
+from typing import Dict, Optional
 
 import flwr as fl
 import numpy as np
@@ -71,7 +72,8 @@ class ASR(sb.core.Brain):
     """Override of SpeechBrain default Brain class."""
 
     def compute_forward(self, batch, _):
-        """Forward computations from the waveform batches to the output
+        """Forward computations from the waveform batches to the output.
+
         probabilities.
         """
         batch = batch.to(self.device)
@@ -86,7 +88,7 @@ class ASR(sb.core.Brain):
         return p_ctc, wav_lens
 
     def compute_objectives(self, predictions, batch, stage):
-        """Computes the CTC loss given predictions and targets."""
+        """Compute the CTC loss given predictions and targets."""
         ids = batch.id
         p_ctc, wav_lens = predictions
         chars, char_lens = batch.char_encoded
@@ -95,8 +97,8 @@ class ASR(sb.core.Brain):
         sequence = sb.decoders.ctc_greedy_decode(
             p_ctc, wav_lens, self.hparams.blank_index
         )
-        # ==================================Add by Salima================================
-        # ===============================================================================
+        # ==============================Add by Salima=======================
+        # ==================================================================
 
         if stage != sb.Stage.TRAIN:
             self.cer_metric.append(
@@ -125,7 +127,7 @@ class ASR(sb.core.Brain):
         return loss
 
     def init_optimizers(self):
-        # Initializes the wav2vec2 optimizer and model optimizer.
+        """Initialize the wav2vec2 optimizer and model optimizer."""
         self.wav2vec_optimizer = self.hparams.wav2vec_opt_class(
             self.modules.wav2vec2.parameters()
         )
@@ -155,7 +157,7 @@ class ASR(sb.core.Brain):
         return loss.detach().cpu()
 
     def evaluate_batch(self, batch, stage):
-        """Computations needed for validation/test batches."""
+        """Compute validation/test batches."""
         # Get data.
         batch = batch.to(self.device)
 
@@ -165,7 +167,7 @@ class ASR(sb.core.Brain):
         return loss.detach()
 
     def on_stage_start(self, stage, epoch=None):
-        """Gets called when a stage (either training, validation, test) starts."""
+        """Call when a stage (either training, validation, test) starts."""
         _ = epoch
         # self.ctc_metrics = self.hparams.ctc_stats()
         if stage != sb.Stage.TRAIN:
@@ -176,7 +178,7 @@ class ASR(sb.core.Brain):
             # self.wer_metric = self.hparams.error_rate_computer()
 
     def on_stage_end(self, stage, stage_loss, epoch=None):
-        """Gets called at the end of a stage."""
+        """Call at the end of a stage."""
         # Compute/store important stats
         stage_stats = {"loss": stage_loss}
 
@@ -235,8 +237,8 @@ class ASR(sb.core.Brain):
         train_set,
         valid_set=None,
         progressbar=None,
-        train_loader_kwargs={},
-        valid_loader_kwargs={},
+        train_loader_kwargs=Optional[Dict],
+        valid_loader_kwargs=Optional[Dict],
     ):
         """Iterate epochs and datasets to improve objective.
 
@@ -265,12 +267,12 @@ class ASR(sb.core.Brain):
             A set of data to use for validation. If a Dataset is given, a
             DataLoader is automatically created. If a DataLoader is given, it is
             used directly.
-        train_loader_kwargs : dict
+        train_loader_kwargs : Optional[Dict]
             Kwargs passed to `make_dataloader()` for making the train_loader
             (if train_set is a Dataset, not DataLoader).
             E.G. batch_size, num_workers.
             DataLoader kwargs are all valid.
-        valid_loader_kwargs : dict
+        valid_loader_kwargs : Optional[Dict]
             Kwargs passed to `make_dataloader()` for making the valid_loader
             (if valid_set is a Dataset, not DataLoader).
             E.g., batch_size, num_workers.
@@ -401,9 +403,10 @@ class ASR(sb.core.Brain):
         max_key=None,
         min_key=None,
         progressbar=None,
-        test_loader_kwargs={},
+        test_loader_kwargs=Optional[Dict],
     ):
-        """Iterate test_set and evaluate brain performance. By default, loads the best-
+        """Iterate test_set and evaluate brain performance. By default, loads the best-.
+
         performing checkpoint (as recorded using the checkpointer).
 
         Arguments
@@ -419,7 +422,7 @@ class ASR(sb.core.Brain):
             ``on_evaluate_start()``.
         progressbar : bool
             Whether to display the progress in a progressbar.
-        test_loader_kwargs : dict
+        test_loader_kwargs : Optional[Dict]
             Kwargs passed to ``make_dataloader()`` if ``test_set`` is not a
             DataLoader. NOTE: ``loader_kwargs["ckpt_prefix"]`` gets
             automatically overwritten to ``None`` (so that the test DataLoader
