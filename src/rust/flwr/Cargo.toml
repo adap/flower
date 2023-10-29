@@ -4,7 +4,9 @@ version = "0.1.0"
 edition = "2021"
 include = ["src/**/*", "proto/**/*"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "flwr"
+path = "src/lib.rs"
 
 [dependencies]
 async-channel = "2.0.0"

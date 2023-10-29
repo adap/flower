@@ -1,15 +1,6 @@
-mod client;
-mod grpc_bidi;
-mod grpc_rere;
-mod message_handler;
-mod serde;
-mod start;
-mod task_handler;
-mod typing;
-
-pub mod flwr_proto {
-    include!("flwr.proto.rs");
-}
+use flwr::client;
+use flwr::start;
+use flwr::typing;
 
 struct TestClient;
 
