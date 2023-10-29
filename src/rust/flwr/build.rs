@@ -5,6 +5,7 @@ fn main() {
 
     tonic_build::configure()
         .build_server(false)
+        .out_dir(format!("{}/src", manifest_dir))
         .compile(&[&proto_src], &[&proto_include])
         .unwrap();
 }
