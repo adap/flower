@@ -143,7 +143,7 @@ def load_datasets(
         )
 
     dataset_test = Dataset(
-        data_directory, train=False, download=True, transform=trans_cifar
+        data_directory, train=False, download=True, transform=get_transforms(False)
     )
     test_loader = DataLoader(dataset_test, batch_size=batch_size, num_workers=1)
     train_loaders = [
