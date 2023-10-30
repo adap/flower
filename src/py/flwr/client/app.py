@@ -19,7 +19,7 @@ import sys
 import time
 import warnings
 from logging import INFO
-from typing import Callable, Iterator, Optional, Tuple, Union, ContextManager
+from typing import Callable, ContextManager, Optional, Tuple, Union
 
 from flwr.client.client import Client
 from flwr.client.typing import ClientFn
