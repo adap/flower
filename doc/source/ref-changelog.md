@@ -4,6 +4,10 @@
 
 ### What's new?
 
+- **Add new Flower Rust SDK** ([#2546](https://github.com/adap/flower/pull/2546))
+
+  You can now write Rust clients for Flower! We also added a dummy quickstart example that shows how a Rust project using Rust would look like.
+
 - **Support custom** `ClientManager` **in** `start_driver()` ([#2292](https://github.com/adap/flower/pull/2292))
 
 - **Update REST API to support create and delete nodes** ([#2283](https://github.com/adap/flower/pull/2283))
