@@ -19,13 +19,17 @@ from fedvssl.CtP.pyvrl.builder import build_dataset, build_model
 
 
 def init_p_paths(folder_name):
+    """Initialise the correct working directory."""
     if os.path.basename(os.path.abspath(os.getcwd())) == f"{folder_name}":
-        # if require change the current working directory. The CtP folder is in the fedvssl/fedvssl. Therefore the current working directory
+        # if require change the current working directory.
+        # The CtP folder is in the fedvssl/fedvssl.
+        # Therefore, the current working directory
         # is required to be fedvssl/fedvssl
         path_dir = os.getcwd()
 
         os.chdir(path_dir)
-        # if the CtP folder is outside the current working directory, the path could be the defined as below:
+        # if the CtP folder is outside the current working directory,
+        # the path could be the defined as below:
         # os.chdir("..")
 
     root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), f"{path_dir}"))
@@ -34,6 +38,7 @@ def init_p_paths(folder_name):
 
 
 def set_config_mmcv(args, cfg):
+    """Set MMCV configs."""
     # set cudnn_benchmark
     if cfg.get("cudnn_benchmark", True):
         torch.backends.cudnn.benchmark = True
@@ -46,7 +51,8 @@ def set_config_mmcv(args, cfg):
 
     # if the CLI args has already specified a resume_from path,
     # we will recover training process from it.
-    # otherwise, if there exists a trained model in work directory, we will resume training from it
+    # otherwise, if there exists a trained model in work directory,
+    # we will resume training from it
 
     if args.resume_from is not None:
         cfg.resume_from = args.resume_from
@@ -55,7 +61,8 @@ def set_config_mmcv(args, cfg):
             chk_name_list = [
                 fn for fn in os.listdir(cfg.work_dir) if fn.endswith(".pth")
             ]
-            # if there may exists multiple checkpoint, we will select a latest one (with a highest epoch number)
+            # if there may exists multiple checkpoint,
+            # we will select the latest one (with the highest epoch number)
             if len(chk_name_list) > 0:
                 chk_epoch_list = [
                     int(re.findall(r"\d+", fn)[0])
@@ -105,25 +112,26 @@ def set_config_mmcv(args, cfg):
     return distributed, logger
 
 
-def load_model(args, cfg):
+def load_model(cfg):
     """Load SSL model."""
-    # set_config_mmcv(args, cfg)
     model = build_model(cfg.model)
-    # TODO replace with videoSSL model
+    # replace with videoSSL model
     return model
 
 
-def load_data(args, cfg):
+def load_data(cfg):
     """Load the data partition for a single client ID."""
     train_dataset = build_dataset(cfg.data.train)
     return train_dataset
 
 
-def load_test_data(args, cfg):
+def load_test_data(cfg):
+    """Load test data."""
     test_dataset = build_dataset(cfg.data.val)
     return test_dataset
 
 
-def train_model_cl(model, train_dataset, args, cfg, distributed, logger):
+def train_model_cl(model, train_dataset, cfg, distributed, logger):
+    """Train downstream model."""
     # model code
     train_network(model, train_dataset, cfg, distributed=distributed, logger=logger)

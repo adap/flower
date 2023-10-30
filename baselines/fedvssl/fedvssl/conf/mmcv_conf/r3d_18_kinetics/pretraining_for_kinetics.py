@@ -1,3 +1,5 @@
+"""Config file used for pre-training on K-400 dataset."""
+
 _base_ = "../pretraining_runtime_kinetics.py"
 
 work_dir = "./output/ctp/r3d_18_kinetics/pretraining/"

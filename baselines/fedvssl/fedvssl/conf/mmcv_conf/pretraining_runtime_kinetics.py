@@ -1,3 +1,5 @@
+"""Config file used for pre-training on K-400 dataset."""
+
 _base_ = "./pretraining_runtime_ucf.py"
 
 data = {

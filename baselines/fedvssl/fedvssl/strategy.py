@@ -3,21 +3,29 @@
 Needed only when the strategy is not yet implemented in Flower or because you want to
 extend or modify the functionality of an existing strategy.
 """
-# import all all the necessary libraries
+# import all the necessary libraries
 import os
 import re
 from functools import reduce
-from typing import List, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import flwr as fl
 import mmcv
 import numpy as np
-from flwr.common import ndarrays_to_parameters  # parameters_to_weights,
-from flwr.common import parameters_to_ndarrays  # weights_to_parameters,
-from flwr.common import NDArrays
+from flwr.common import (
+    FitRes,
+    NDArrays,
+    Parameters,
+    Scalar,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
+)
+from flwr.server.client_proxy import ClientProxy
 
 
 class FedVSSL(fl.server.strategy.FedAvg):
+    """Define the custom strategy for FedVSSL."""
+
     def __init__(
         self,
         num_rounds: int = 1,
@@ -25,7 +33,6 @@ class FedVSSL(fl.server.strategy.FedAvg):
         swbeta: int = 0,
         base_work_dir: str = "ucf_FedVSSL",
         fedavg: bool = False,
-        *args,
         **kwargs,
     ):
         assert (
@@ -38,14 +45,14 @@ class FedVSSL(fl.server.strategy.FedAvg):
         self.swbeta = swbeta  # 0: SWA off; 1:SWA on
         self.base_work_dir = base_work_dir
         self.fedavg = fedavg
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
 
     def aggregate_fit(
         self,
         server_round: int,
-        results: List[Tuple[fl.server.client_proxy.ClientProxy, fl.common.FitRes]],
-        failures: List[BaseException],
-    ):
+        results: List[Tuple[ClientProxy, FitRes]],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
             return None, {}
@@ -54,7 +61,7 @@ class FedVSSL(fl.server.strategy.FedAvg):
             return None, {}
 
         # Divide the weights based on the backbone and classification head
-        ######################################################################################################3
+        ###################################################################
 
         # Aggregate all the weights and the number of examples
         weight_results = [

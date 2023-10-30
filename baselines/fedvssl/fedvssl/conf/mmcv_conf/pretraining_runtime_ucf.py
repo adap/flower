@@ -1,3 +1,5 @@
+"""Config file used for pre-training on UCF-101 dataset."""
+
 dist_params = {"backend": "nccl"}
 log_level = "INFO"
 load_from = None

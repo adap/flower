@@ -11,14 +11,11 @@ from math import exp
 import flwr as fl
 import torch
 
+from .utils import train_model_cl
+
 # pylint: disable=no-member
 # DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # pylint: enable=no-member
-
-
-# order classes by number of samples
-def takeSecond(elem):
-    return elem[1]
 
 
 class SslClient(fl.client.NumPyClient):
@@ -33,7 +30,6 @@ class SslClient(fl.client.NumPyClient):
         args,
         distributed,
         logger,
-        videossl,
     ):
         self.model = model
         self.train_dataset = train_dataset
@@ -42,18 +38,19 @@ class SslClient(fl.client.NumPyClient):
         self.cfg = cfg
         self.distributed = distributed
         self.logger = logger
-        self.videossl = videossl
         self.mu = 0.3
 
     def get_parameters(self, config):
-        # Return local model parameters as a list of NumPy ndarrays
+        """Return local model parameters as a list of NumPy ndarrays."""
         return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
     def set_parameters(self, parameters):
+        """Set local model parameters (only backbone)."""
         state_dict = OrderedDict()
         params_dict = zip(self.model.state_dict().keys(), parameters)
 
-        # define a new state_dict and update only the backbone weights but keep the cls weights
+        # define a new state_dict
+        # only update the backbone weights but keep the cls weights
         for k, v in params_dict:
             if (
                 k.strip().split(".")[0] == "backbone"
@@ -65,9 +62,11 @@ class SslClient(fl.client.NumPyClient):
         self.model.load_state_dict(state_dict, strict=True)
 
     def get_properties(self, ins):
+        """Get properties."""
         return self.properties
 
     def fit(self, parameters, config):
+        """Customise the training function."""
         int(config["epoch_global"])
         self.cfg.lr_config = {"policy": "step", "step": [100, 200]}
 
@@ -94,10 +93,9 @@ class SslClient(fl.client.NumPyClient):
         # Update local model w/ global parameters
         self.set_parameters(parameters)
 
-        self.videossl.train_model_cl(
+        train_model_cl(
             model=self.model,
             train_dataset=self.train_dataset,
-            args=self.args,
             cfg=self.cfg,
             distributed=self.distributed,
             logger=self.logger,
@@ -109,17 +107,17 @@ class SslClient(fl.client.NumPyClient):
         # fetch loss from log file
         work_dir = self.args.work_dir
         log_f_list = []
-        for f in os.listdir(work_dir):
-            if f.endswith("log.json"):
-                num = int("".join(f.split(".")[0].split("_")))
-                log_f_list.append((f, num))
+        for file_item in os.listdir(work_dir):
+            if file_item.endswith("log.json"):
+                num = int("".join(file_item.split(".")[0].split("_")))
+                log_f_list.append((file_item, num))
 
         # take the last log file
-        log_f_list.sort(key=takeSecond)
+        log_f_list.sort(key=lambda x: x[1])
         log_f_name = work_dir + "/" + log_f_list[-1][0]
         loss_list = []
-        with open(log_f_name, "r") as f:
-            for line in f.readlines():
+        with open(log_f_name, "r") as f_r:
+            for line in f_r.readlines():
                 line_dict = eval(line.strip())
                 loss = float(line_dict["loss"])
                 loss_list.append(loss)
@@ -134,6 +132,7 @@ class SslClient(fl.client.NumPyClient):
         return self.get_parameters(config=None), num_examples, metrics
 
     def evaluate(self, parameters, config):
+        """Local evaluation, but we do not perform client evaluation in this project."""
         # for completion
         result = 0
 

@@ -1,3 +1,5 @@
+"""Config file used for pre-training on UCF-101 dataset."""
+
 _base_ = "../pretraining_runtime_ucf.py"
 # _base_ = '../pretraining_runtime_kinetics.py'
 

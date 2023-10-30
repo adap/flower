@@ -1,11 +1,15 @@
+"""Data partitioning script for UCF-101 dataset."""
+
 import argparse
 import json
 import os
 import random
 
 
-# Use this script file to create data partitions on UCF101 dataset for federated learning from .json files.
+# Use this script file to create data partitions
+# on UCF101 dataset for federated learning from .json files.
 def parse_args():
+    """Parse argument to the main function."""
     parser = argparse.ArgumentParser(description="Build partition UCF101 dataset")
     parser.add_argument(
         "--json_path",
@@ -34,6 +38,7 @@ def parse_args():
 
 
 def main():
+    """Define the main function for data partitioning."""
     args = parse_args()
     json_path = args.json_path
     output_path = args.output_path
@@ -48,8 +53,8 @@ def main():
     # load .json files and concatenate
     data_list = []
     # for i in range(1, 4):
-    with open(json_path + "/train_split_1.json", "r") as f:
-        json_object = json.load(f)
+    with open(json_path + "/train_split_1.json", "r") as f_r:
+        json_object = json.load(f_r)
         data_list += json_object
 
     # data splitting to each client

@@ -1,3 +1,5 @@
+"""Data partitioning script for K-400 dataset."""
+
 import argparse
 import json
 import os
@@ -5,6 +7,7 @@ import random
 
 
 def parse_args():
+    """Parse argument to the main function."""
     parser = argparse.ArgumentParser(
         description="Build non-iid partition Kinetics-400 dataset"
     )
@@ -23,6 +26,7 @@ def parse_args():
 
 
 def main():
+    """Define the main function for data partitioning."""
     args = parse_args()
     out_path = args.out_path
     input_path = args.input_path
@@ -37,8 +41,8 @@ def main():
 
     # generate label_name_dict.
     # key is label index while value is list of sample names.
-    with open(input_path, "r") as f:
-        for line in f.readlines():
+    with open(input_path, "r") as f_r:
+        for line in f_r.readlines():
             cls_ind = int(line.split(" ")[1])
             name = line.split(" ")[0]
             label_name_dict[cls_ind].append(name)
@@ -46,14 +50,11 @@ def main():
     # generate a list where elements are tuple (label_ind, num_samples)
     label_len_list = []
     for i in range(1, 401):
-        l = len(label_name_dict[i])
-        label_len_list.append((i, l))
+        length = len(label_name_dict[i])
+        label_len_list.append((i, length))
 
     # order classes by number of samples
-    def takeSecond(elem):
-        return elem[1]
-
-    label_len_list.sort(key=takeSecond)
+    label_len_list.sort(key=lambda x: x[1])
 
     for i in range(50):
         cid1 = i + 1
@@ -96,11 +97,15 @@ def main():
                 client_list2.append({"name": ele, "label": int(lab2)})
 
         # generate json file for each client.
-        with open(os.path.join(out_path, "client_dist{}.json".format(cid1)), "w") as f:
-            json.dump(client_list1, f, indent=2)
+        with open(
+            os.path.join(out_path, "client_dist{}.json".format(cid1)), "w"
+        ) as f_w:
+            json.dump(client_list1, f_w, indent=2)
 
-        with open(os.path.join(out_path, "client_dist{}.json".format(cid2)), "w") as f:
-            json.dump(client_list2, f, indent=2)
+        with open(
+            os.path.join(out_path, "client_dist{}.json".format(cid2)), "w"
+        ) as f_w:
+            json.dump(client_list2, f_w, indent=2)
 
 
 if __name__ == "__main__":

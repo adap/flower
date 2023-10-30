@@ -6,6 +6,8 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 # these are the basic packages you'll need here
 # feel free to remove some if aren't needed
 
+import subprocess
+import textwrap
 from argparse import Namespace
 from collections import OrderedDict
 from typing import Dict
@@ -20,21 +22,23 @@ from mmengine.config import Config
 from omegaconf import DictConfig, OmegaConf
 
 from .client import SslClient
+from .CtP.pyvrl.builder import build_model
+from .utils import init_p_paths, load_data, load_model, set_config_mmcv
 
 
 def t_f(arg):
-    ua = str(arg).upper()
-    if "TRUE".startswith(ua):
+    """Transfer bool format."""
+    label = str(arg).upper()
+    if "TRUE".startswith(label):
         return True
-    elif "FALSE".startswith(ua):
+    elif "FALSE".startswith(label):
         return False
-    else:
-        pass  # error condition mayb
 
 
-def initial_setup(cid, base_work_dir, rounds, data_dir, num_gpus, partition_dir, cfg_path):
-    import utils as utils
-
+def initial_setup(
+    cid, base_work_dir, rounds, data_dir, num_gpus, partition_dir, cfg_path
+):
+    """Initialise setup for instantiating client class."""
     cid_plus_one = str(int(cid) + 1)
     args = Namespace(
         cfg=cfg_path,  # Path to the pretraining configuration file
@@ -55,26 +59,29 @@ def initial_setup(cid, base_work_dir, rounds, data_dir, num_gpus, partition_dir,
     print("Starting client", args.cid)
     # fetch the configuration file
     cfg = Config.fromfile(args.cfg)
-    # define the client data files; usually contains paths to the samples and annotations
+    # define the client data files;
+    # usually contains paths to the samples and annotations
     cfg.data.train.data_source.ann_file = (
         partition_dir + "/client_dist" + cid_plus_one + ".json"
     )
 
-    distributed, logger = utils.set_config_mmcv(args, cfg)
-    # These two arguments needs to be false during federated pretraining otherwise the client will load the previously saved checkpoint
+    distributed, logger = set_config_mmcv(args, cfg)
+    # These two arguments needs to be false during federated pretraining
+    # otherwise the client will load the previously saved checkpoint
 
     cfg.resume_from = False
     cfg.load_from = False
 
     # load the model
-    model = utils.load_model(args, cfg)
+    model = load_model(cfg)
     # load the training data
-    train_dataset = utils.load_data(args, cfg)
+    train_dataset = load_data(cfg)
 
-    # since during pretraining of FedVSSL we don't need any testing data, we can left it empty.
+    # since during pretraining of FedVSSL
+    # we don't need any testing data, we can left it empty.
     test_dataset = " "
 
-    return args, cfg, distributed, logger, model, train_dataset, test_dataset, utils
+    return args, cfg, distributed, logger, model, train_dataset, test_dataset
 
 
 def fit_config(rnd: int) -> Dict[str, str]:
@@ -87,12 +94,13 @@ def fit_config(rnd: int) -> Dict[str, str]:
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig) -> None:
+    """Define the main function for FL pre-training or fine-tuning."""
     # print config structured as YAML
     print(OmegaConf.to_yaml(cfg))
 
     if cfg.pre_training:
-        # first the paths needs to be defined otherwise the program may not be able to locate the files of the ctp
-        from .utils import init_p_paths
+        # first the paths needs to be defined
+        # otherwise the program may not be able to locate the files of the ctp
 
         init_p_paths("fedvssl")
 
@@ -115,9 +123,14 @@ def main(cfg: DictConfig) -> None:
                 model,
                 train_dataset,
                 test_dataset,
-                videossl,
             ) = initial_setup(
-                cid, base_work_dir, rounds, data_dir, num_gpus, partition_dir, cfg.cfg_path_pretrain
+                cid,
+                base_work_dir,
+                rounds,
+                data_dir,
+                num_gpus,
+                partition_dir,
+                cfg.cfg_path_pretrain,
             )
             return SslClient(
                 model,
@@ -127,7 +140,6 @@ def main(cfg: DictConfig) -> None:
                 args,
                 distributed,
                 logger,
-                videossl,
             )
 
         # configure the strategy
@@ -149,11 +161,6 @@ def main(cfg: DictConfig) -> None:
             ray_init_args=ray_config,
         )
     else:
-        import subprocess
-        import textwrap
-
-        from .CtP.pyvrl.builder import build_model
-
         # we give an example on how one can perform fine-tuning uisng UCF-101 dataset.
         cfg_path = cfg.cfg_path_finetune
         cfg_ = Config.fromfile(cfg_path)
@@ -162,14 +169,16 @@ def main(cfg: DictConfig) -> None:
         # build a model using the configuration file from Ctp repository
         model = build_model(cfg_.model)
 
-        # path to the pretrained model. We provide certain federated pretrained model that can be easily downloaded
+        # path to the pretrained model.
+        # We provide certain federated pretrained model that can be easily downloaded
         # from the following link: https://github.com/yasar-rehman/FEDVSSL
         # here we gave an example with FedVSSL (alpha=0, beta=0) checkpoint file
         # The files after federated pretraining are usually saved in .npz format.
 
         pretrained = cfg.pretrained_model_path
 
-        # conversion of the .npz files to the .pth format. If the files are saved in .npz format
+        # conversion of the .npz files to the .pth format.
+        # If the files are saved in .npz format
         if pretrained.endswith(".npz"):
             # following changes are made here
             params = np.load(pretrained, allow_pickle=True)
@@ -183,11 +192,13 @@ def main(cfg: DictConfig) -> None:
             }
             torch.save(state_dict, "./model_pretrained.pth")
 
-        # -----------------------------------------------------------------------------------------------------------------------
-        # The cfg_path need to be updated with the following updated configuration contents to be able to load the pretrained model.
-        # Instead of executing the blow mentioned code, one can also directly modify the "pretrained" variable by opening the path represented
-        # by the config_path variable
-        #
+        # ---------------------------------------------------
+        # The cfg_path need to be updated with the following updated
+        # configuration contents to be able to load the pretrained model.
+        # Instead of executing the blow mentioned code,
+        # one can also directly modify the "pretrained" variable by
+        # opening the path represented by the config_path variable
+
         config_content = textwrap.dedent(
             f"""\
                 _base_ = ['../../recognizers/_base_/model_r3d18.py',
@@ -201,8 +212,8 @@ def main(cfg: DictConfig) -> None:
                """
         ).strip("\n")
 
-        with open(cfg_path, "w") as f:
-            f.write(config_content)
+        with open(cfg_path, "w") as f_w:
+            f_w.write(config_content)
 
         subprocess.run(
             [
@@ -215,11 +226,13 @@ def main(cfg: DictConfig) -> None:
             ]
         )
 
-        # -----------------------------------------------------------------------------------------------------------------------
-        # The cfg_path need to be updated with the following updated configuration contents to be able to load the pretrained model.
-        # Instead of executing the blow mentioned code, one can also directly modify the "pretrained" variable by opening the file represented
-        # by the cfg_path_test variable
-        #
+        # -----------------------------------------
+        # The cfg_path need to be updated with the following
+        # updated configuration contents to be able to load the pretrained model.
+        # Instead of executing the blow mentioned code,
+        # one can also directly modify the "pretrained" variable by
+        # opening the file represented by the cfg_path_test variable
+
         config_content_test = textwrap.dedent(
             f"""\
                 _base_ = ['../../recognizers/_base_/model_r3d18.py',
@@ -234,8 +247,8 @@ def main(cfg: DictConfig) -> None:
         ).strip("\n")
 
         cfg_path_test = cfg.test_script
-        with open(cfg_path_test, "w") as f:
-            f.write(config_content_test)
+        with open(cfg_path_test, "w") as f_w:
+            f_w.write(config_content_test)
 
         # Evaluating the finetuned model
         subprocess.run(
