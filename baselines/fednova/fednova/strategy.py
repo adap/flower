@@ -50,7 +50,8 @@ class FedNova(FedAvg):
 
 		for client, res in results:
 			params = parameters_to_ndarrays(res.parameters)
-			scale = res.metrics["weight"] * (tau_eff / res.metrics["local_norm"])
+			# scale = res.metrics["weight"] * (tau_eff / res.metrics["local_norm"])
+			scale = res.metrics["weight"]
 			aggregate_parameters.append((params, scale))
 
 		agg_cum_gradient = aggregate(aggregate_parameters)

@@ -42,10 +42,7 @@ def main(cfg: DictConfig) -> None:
 	# torch.backends.cudnn.deterministic = True
 
 	# 1. Print parsed config
-	# print(OmegaConf.to_yaml(cfg))
-
-	print(cfg.optimizer)
-	exit(-1)
+	print(OmegaConf.to_yaml(cfg))
 
 	# 2. Prepare your dataset and directories
 
@@ -96,7 +93,8 @@ def main(cfg: DictConfig) -> None:
 						   accept_failures=False,
 						   on_fit_config_fn=fit_config_fn,
 						   initial_parameters=init_parameters,
-						   evaluate_fn=eval_fn
+						   evaluate_fn=eval_fn,
+						   fraction_evaluate=0.0
 						   )
 
 	elif cfg.strategy == "fedavg" or cfg.strategy == "fedprox":
@@ -109,7 +107,8 @@ def main(cfg: DictConfig) -> None:
 						  accept_failures=False,
 						  on_fit_config_fn=fit_config_fn,
 						  initial_parameters=init_parameters,
-						  evaluate_fn=eval_fn
+						  evaluate_fn=eval_fn,
+						  fraction_evaluate=0.0
 						  )
 
 	else:
@@ -130,20 +129,23 @@ def main(cfg: DictConfig) -> None:
 	if not os.path.exists(save_path):
 		os.makedirs(save_path)
 
-	round, train_loss = zip(*history.losses_distributed)
-	_, train_accuracy = zip(*history.metrics_distributed["accuracy"])
-	_, test_loss = zip(*history.losses_centralized)
+	# round, train_loss = zip(*history.losses_distributed)
+	# _, train_accuracy = zip(*history.metrics_distributed["accuracy"])
+	round, test_loss = zip(*history.losses_centralized)
 	_, test_accuracy = zip(*history.metrics_centralized["accuracy"])
 
-	if len(test_loss) != len(round):
-		# drop zeroth round
+	if len(round) != cfg.num_rounds:
+		# drop zeroth evaluation round before start of training
 		test_loss = test_loss[1:]
 		test_accuracy = test_accuracy[1:]
+		round = round[1:]
 
-	file_name = f"{save_path}{cfg.exp_name}_{cfg.strategy}_varEpoch_{cfg.var_local_epochs}.csv"
+	file_name = f"{save_path}{cfg.exp_name}_{cfg.strategy}_varEpoch_{cfg.var_local_epochs}_seed_{cfg.seed}_vanilla_scheduling_false_no_decay.csv"
 
-	df = pd.DataFrame({"round": round, "train_loss": train_loss, "train_accuracy": train_accuracy,
-					   "test_loss": test_loss, "test_accuracy": test_accuracy})
+	# df = pd.DataFrame({"round": round, "train_loss": train_loss, "train_accuracy": train_accuracy,
+	# 				   "test_loss": test_loss, "test_accuracy": test_accuracy})
+	#
+	df = pd.DataFrame({"round": round, "test_loss": test_loss, "test_accuracy": test_accuracy})
 
 	df.to_csv(file_name, index=False)
 

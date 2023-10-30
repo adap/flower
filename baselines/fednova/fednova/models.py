@@ -12,7 +12,7 @@ import torch.nn as nn
 from flwr.common.typing import NDArrays
 from torch.optim.optimizer import Optimizer, required
 
-from fednova.utils import Meter, comp_accuracy
+from fednova.utils import comp_accuracy
 
 
 class VGG(nn.Module):
@@ -71,7 +71,7 @@ cfg = {
 }
 
 
-def train(model, optimizer, trainloader, device, epochs, proximal_mu=0.0):
+def train(model, optimizer, trainloader, device, epochs, proximal_mu=0.0) -> Tuple[float, float]:
 	criterion = nn.CrossEntropyLoss()
 	model = model.to(device)
 	if proximal_mu > 0.0:
@@ -80,9 +80,9 @@ def train(model, optimizer, trainloader, device, epochs, proximal_mu=0.0):
 		global_params = None
 	model.train()
 
+	train_losses = []
+	train_accuracy = []
 	for epoch in range(epochs):
-		losses = Meter(ptag='Loss')
-		top1 = Meter(ptag='Prec@1')
 		for batch_idx, (data, target) in enumerate(trainloader):
 			# data loading
 			data = data.to(device)
@@ -109,10 +109,15 @@ def train(model, optimizer, trainloader, device, epochs, proximal_mu=0.0):
 			optimizer.step()
 
 			# write log files
-			train_acc = comp_accuracy(output, target)
+			acc = comp_accuracy(output, target)
 
-			losses.update(loss.item(), data.size(0))
-			top1.update(train_acc[0].item(), data.size(0))
+			train_losses.append(loss.item())
+			train_accuracy.append(acc[0].item())
+
+	train_loss = sum(train_losses) / len(train_losses)
+	train_acc = sum(train_accuracy) / len(train_accuracy)
+
+	return train_loss, train_acc
 
 
 def test(model, test_loader, device, *args) -> Tuple[float, Dict[str, float]]:
@@ -135,7 +140,7 @@ def test(model, test_loader, device, *args) -> Tuple[float, Dict[str, float]]:
 
 	model = model.to(device)
 	model.eval()
-	top1 = Meter(ptag='Acc')
+	accuracy = []
 	total_loss = 0.0
 
 	with torch.no_grad():
@@ -145,10 +150,10 @@ def test(model, test_loader, device, *args) -> Tuple[float, Dict[str, float]]:
 			outputs = model(data)
 			total_loss += criterion(outputs, target).item()
 			acc1 = comp_accuracy(outputs, target)
-			top1.update(acc1[0].item(), data.size(0))
+			accuracy.append(acc1[0].item())
 
 	total_loss /= len(test_loader)
-	return total_loss, {"accuracy": top1.avg}
+	return total_loss, {"accuracy": sum(accuracy) / len(accuracy)}
 
 
 class ProxSGD(Optimizer):
@@ -298,23 +303,28 @@ if __name__ == "__main__":
 
 	ssl._create_default_https_context = ssl._create_unverified_context
 
-	from fednova.dataset import load_datasets
+	# from fednova.dataset import load_datasets
 	from omegaconf import OmegaConf
 	# from torch.optim import SGD
 	import numpy as np
 	import random
 	random.seed(1)
 	np.random.seed(1)
+	from torchsummary import summary
 
 	config = OmegaConf.load("fednova/conf/base.yaml")
 
-	trainloaders, testloader, data_ratios = load_datasets(config)
-	print([len(x) for x in trainloaders], len(testloader))
-	exit()
+	# trainloaders, testloader, data_ratios = load_datasets(config)
+	# print([len(x) for x in trainloaders], len(testloader))
+	# exit()
 
 	# device = torch.device('cpu')
 	#
-	# model = VGG().to(device)
+	model = VGG().to('cuda')
+
+	print(summary(model, (3, 32, 32)))
+
+
 	# optimizer = SGD(model.parameters(), lr=0.05, weight_decay=1e-4, momentum=0.9)
 	#
 	# new_params = [np.ones_like(val) for _, val in model.state_dict().items()]

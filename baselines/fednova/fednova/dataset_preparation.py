@@ -1,5 +1,10 @@
-from random import Random
+"""
+The Non-IID CIFAR dataset splits obtained from the author's implementation of FedNova
+source: https://github.com/JYWa/FedNova/blob/master/util_v4.py
+"""
 
+
+from random import Random
 import numpy as np
 
 
@@ -44,64 +49,13 @@ class DataPartitioner(object):
 	def use(self, partition):
 		return Partition(self.data, self.partitions[partition])
 
-	def __getNonIIDdata__(self, data, sizes, seed, alpha):
-		labelList = data.targets
-		rng = Random()
-		# rng.seed(seed)
-		a = [(label, idx) for idx, label in enumerate(labelList)]
-		# Same Part
-		labelIdxDict = dict()
-		for label, idx in a:
-			labelIdxDict.setdefault(label, [])
-			labelIdxDict[label].append(idx)
-		labelNum = len(labelIdxDict)
-		labelNameList = [key for key in labelIdxDict]
-		labelIdxPointer = [0] * labelNum
-		# sizes = number of nodes
-		partitions = [list() for i in range(len(sizes))]
-		eachPartitionLen = int(len(labelList) / len(sizes))
-		# majorLabelNumPerPartition = ceil(labelNum/len(partitions))
-		majorLabelNumPerPartition = 2
-		basicLabelRatio = alpha
-
-		interval = 1
-		labelPointer = 0
-
-		# basic part
-		for partPointer in range(len(partitions)):
-			requiredLabelList = list()
-			for _ in range(majorLabelNumPerPartition):
-				requiredLabelList.append(labelPointer)
-				labelPointer += interval
-				if labelPointer > labelNum - 1:
-					labelPointer = interval
-					interval += 1
-			for labelIdx in requiredLabelList:
-				start = labelIdxPointer[labelIdx]
-				idxIncrement = int(basicLabelRatio * len(labelIdxDict[labelNameList[labelIdx]]))
-				partitions[partPointer].extend(labelIdxDict[labelNameList[labelIdx]][start:start + idxIncrement])
-				labelIdxPointer[labelIdx] += idxIncrement
-
-		# random part
-		remainLabels = list()
-		for labelIdx in range(labelNum):
-			remainLabels.extend(labelIdxDict[labelNameList[labelIdx]][labelIdxPointer[labelIdx]:])
-		rng.shuffle(remainLabels)
-		for partPointer in range(len(partitions)):
-			idxIncrement = eachPartitionLen - len(partitions[partPointer])
-			partitions[partPointer].extend(remainLabels[:idxIncrement])
-			rng.shuffle(partitions[partPointer])
-			remainLabels = remainLabels[idxIncrement:]
-
-		return partitions
-
 	def __getDirichletData__(self, data, psizes, seed, alpha):
 		n_nets = len(psizes)
 		K = 10
 		labelList = np.array(data.targets)
 		min_size = 0
 		N = len(labelList)
-		# set seed once in main.py
+		# we set seed once in main.py
 		# np.random.seed(2020)
 
 		net_dataidx_map = {}
@@ -136,6 +90,6 @@ class DataPartitioner(object):
 			local_sizes.append(len(net_dataidx_map[i]))
 		local_sizes = np.array(local_sizes)
 		weights = local_sizes / np.sum(local_sizes)
-		print(weights)
+		print("Client Data ratios: ", weights)
 
 		return idx_batch, weights

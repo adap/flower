@@ -61,7 +61,13 @@ class FedAvgClient(fl.client.NumPyClient):  # pylint: disable=too-many-instance-
 			  num_epochs,
 			  proximal_mu=self.exp_config.optimizer.mu)
 
-		return self.get_parameters({}), len(self.trainLoader), {}
+		# num_local_steps = len(self.trainLoader) * num_epochs
+		# scaling_factor = self.data_ratio * num_local_steps
+		scaling_factor = len(self.trainLoader) * num_epochs
+		# scaling_factor = 1
+		# scaling_factor = self.data_ratio
+
+		return self.get_parameters({}), int(scaling_factor), {}
 
 	def evaluate(self, parameters: NDArrays, config: Dict[str, Scalar]) -> Tuple[float, int, Dict]:
 		"""Implements distributed evaluation for a given client."""
