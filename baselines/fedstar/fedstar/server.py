@@ -37,6 +37,8 @@ class AudioServer:
         # Flower Parameters
         self.evalution_step = flwr_evalution_step
         self.sample_fraction = float(flwr_min_sample_size / flwr_min_num_clients)
+        print("-"*100)
+        print(self.sample_fraction)
         self.min_sample_size = flwr_min_sample_size
         self.min_num_clients = flwr_min_num_clients
         self.rounds = flwr_rounds
@@ -69,7 +71,7 @@ class AudioServer:
         print("|"*50)
         print(server_address)
         flwr.server.start_server(
-            server_address="0.0.0.0:8080",
+            server_address=server_address,
             server=flwr.server.Server(
                 client_manager=self.client_manager, strategy=self.strategy
             ),

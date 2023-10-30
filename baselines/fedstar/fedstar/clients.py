@@ -31,7 +31,7 @@ class Client(Process):
                 break
             # Configure GPU
             Client.setup_gpu(gpu=cfg["gpu_id"], gpu_memory=cfg["gpu_memory"])
-            process_path = "/".join(parent_path.split('/')[:-3]) + "/"
+            process_path = (os.sep).join(parent_path.split(os.sep)[:-3]) + os.sep
             # Create Client
             client = AudioClient(
                 client_id=cfg["client_id"],
@@ -74,14 +74,26 @@ class Client(Process):
             except RuntimeError as e:
                 print(e)
 
-def distribute_gpus(num_clients, client_memory=1280):
-    #gpus = ["0","1"]
+def distribute_gpus(num_clients, client_memory=1024):
+    """
+        To Use GPU on client side a high memory or multiple gpu's might required.
+        Uncomment the lines accordingle to use it
+    """
+    """
+     provide gpu id list, the current list is for 1 gpu. For 2 gpu's the list will be
+     gpus = ["0","1"]
+    """
+    # gpus = ["0"]
     gpus = None #to run clients on cpu
     clients_gpu = [None] * num_clients
     if not gpus:
         return clients_gpu
     else:
-        gpu_free_mem = [11000, 11000]
+        """
+            based on your gpu's memory define list accordingly.
+            Currently it defines to use 5000 MB of gpu vram from both GPU's
+        """
+        gpu_free_mem = [5000]
         for client_id in range(num_clients):
             gpu_id = gpu_free_mem.index(max(gpu_free_mem))
             if gpu_free_mem[gpu_id] >= client_memory:

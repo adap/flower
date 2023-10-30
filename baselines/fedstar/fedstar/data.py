@@ -6,7 +6,7 @@ import os
 
 def ambient_context_path_extracter(path):
 	arr = path.split("_")[:-1]
-	file_path = "_".join(arr)+"/"+path
+	file_path = "_".join(arr)+os.sep+path
 	return file_path
 
 class DataBuilder:
@@ -20,18 +20,17 @@ class DataBuilder:
 		train_path = os.path.join(path,"train_split.txt")
 		test_path = os.path.join(path,"test_split.txt")
 		path_data_dir = os.path.join(parent_path,"datasets",data_dir)
-		print("\\"*50)
 		print(train_path)
 		print(test_path)
 		print(path_data_dir)
-		print("/"*50)
 		if train:
 			train_files_path, train_labels = [], []
 			if data_dir == "speech_commands":
 				print("Dataset is speech_commands")
 				train_user_files = pd.read_csv(train_path, header=None).values.flatten()
 				for tr_uf in train_user_files:
-					train_files_path.append(os.path.join(path_data_dir,"Data","Train",tr_uf))
+					path_tr_uf = os.path.join(*tr_uf.split("/"))
+					train_files_path.append(os.path.join(path_data_dir,"Data","Train",path_tr_uf))
 					label = tr_uf.split("/")[0]
 					if label in __class__.WORDS:
 						train_labels.append(tr_uf.split("/")[0])
@@ -64,7 +63,8 @@ class DataBuilder:
 				print("Dataset is speech_commands")
 				test_user_files = pd.read_csv(test_path, header=None).values.flatten()
 				for ts_uf in test_user_files:
-					test_files_path.append(os.path.join(path_data_dir,"Data","Test",ts_uf))
+					path_ts_uf = os.path.join(*ts_uf.split("/"))
+					test_files_path.append(os.path.join(path_data_dir,"Data","Test",path_ts_uf))
 					test_labels.append(ts_uf.split("/")[0])
 			elif data_dir == "ambient_context":
 				print("Dataset is ambient_context")

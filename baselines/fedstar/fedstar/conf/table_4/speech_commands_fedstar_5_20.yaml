@@ -4,28 +4,28 @@
 # a similar configuration structure and hence be easy to customise)
 
 server:
-  server_address: "[::]:8080"
+  server_address: "localhost:8080"
   rounds: 100
   num_clients: 5
-  min_sample_size: 4
-  gpu_memory: 1024
+  min_sample_size: 5
+  gpu_memory: 2048
   eval_step: 1
   train_epochs: 1
   batch_size: 64
   learning_rate: 0.001
-  dataset_name: "ambient_context"
+  dataset_name: "speech_commands"
   seed: 2021
   verbose: 1
 
 client:
-  server_address: "[::]:8080"
+  server_address: "localhost:8080"
   num_clients: 5
-  gpu_memory: 1280
-  dataset_name: "ambient_context"
+  gpu_memory: 2048
+  dataset_name: "speech_commands"
   seed: 2021
   batch_size: 64
-  l_per: 0.05
-  u_per: 0.5
-  fedstar: "false"
+  l_per: 0.2
+  u_per: 0.8
+  fedstar: "true"
   class_distribute: "false"
   verbose: 1

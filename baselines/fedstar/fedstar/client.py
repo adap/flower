@@ -127,8 +127,9 @@ class AudioClient(flwr.client.NumPyClient):
         # Clear Memory
         tf.keras.backend.clear_session()
         gc.collect()
+        weights = model.get_weights()
         return (
-            model.get_weights(),
+            weights,
             self.num_examples_train,
             {"local_train_round": self.local_train_round},
         )
