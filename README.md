@@ -102,7 +102,7 @@ Flower Baselines is a collection of community-contributed experiments that repro
 - [Adaptive Federated Optimization](https://arxiv.org/abs/2003.00295):
   - [CIFAR-10/100](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/adaptive_federated_optimization)
 
-Check the Flower documentation to learn more: [Using Baselines](https://flower.dev/docs/baselines/using-baselines.html)
+Check the Flower documentation to learn more: [Using Baselines](https://flower.dev/docs/baselines/how-to-use-baselines.html)
 
 The Flower community loves contributions! Make your work more visible and enable others to build on it by contributing it as a baseline: [Contributing Baselines](https://flower.dev/docs/baselines/how-to-contribute-baselines.html)
 
