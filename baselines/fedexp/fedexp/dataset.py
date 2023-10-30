@@ -116,12 +116,16 @@ def load_datasets(
 
     data_directory = f"./data/{config.name.lower()}/"
     ds_path = f"{data_directory}train_{num_clients}_{config.alpha:.2f}.pkl"
-    trans_cifar = transforms.Compose(
-        [
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.491, 0.482, 0.447], std=[0.247, 0.243, 0.262]),
-        ]
-    )
+    def get_transforms(is_train: bool):
+        t_list = [
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.491, 0.482, 0.447], std=[0.247, 0.243, 0.262]),
+            ]
+        if config.use_data_augmentation and is_train:
+            t_list.append(transforms.RandomCrop(32, padding=4))
+            t_list.append(transforms.RandomHorizontalFlip())
+
+        return transforms.Compose(t_list)
     try:
         with open(ds_path, "rb") as file:
             train_datasets = pickle.load(file)
