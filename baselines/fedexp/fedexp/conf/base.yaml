@@ -28,7 +28,6 @@ hyperparams:
   decay : 0.998
   weight_decay: 0.0001
   max_norm: 10
-  use_data_augmentation: true
   use_gradient_clipping: true
 
 strategy:
