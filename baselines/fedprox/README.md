@@ -2,7 +2,7 @@
 title: Federated Optimization in Heterogeneous Networks
 url: https://arxiv.org/abs/1812.06127
 labels: [image classification, cross-device, stragglers]
-dataset: [mnist]
+dataset: [MNIST]
 ---
 
 # FedProx: Federated Optimization in Heterogeneous Networks
@@ -59,6 +59,13 @@ The following table shows the main hyperparameters for this baseline with their 
 To construct the Python environment, simply run:
 
 ```bash
+# Set directory to use python 3.10 (install with `pyenv install <version>` if you don't have it)
+pyenv local 3.10.12
+
+# Tell poetry to use python3.10
+poetry env use 3.10.12
+
+# Install
 poetry install
 ```
 
@@ -97,6 +104,6 @@ python -m fedprox.main --multirun mu=0.0,2.0 stragglers_fraction=0.0,0.5,0.9 '+r
 python -m fedprox.main --config-name fedavg --multirun stragglers_fraction=0.0,0.5,0.9 '+repeat_num=range(5)'
 ```
 
-The above commands would generate results that you can plot and would look like:
+The above commands would generate results that you can plot and would look like the plot shown below. This plot was generated using the jupyter notebook in the `docs/` directory of this baseline after running the `--multirun` commands above.
 
-![](docs/FedProx_mnist.png)
+![](_static/FedProx_mnist.png)

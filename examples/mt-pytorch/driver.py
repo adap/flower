@@ -2,7 +2,7 @@ from typing import List, Tuple
 import random
 import time
 
-from flwr.driver import Driver
+from flwr.driver import GrpcDriver
 from flwr.common import (
     ServerMessage,
     FitIns,
@@ -43,7 +43,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 # -------------------------------------------------------------------------- Driver SDK
-driver = Driver(driver_service_address="0.0.0.0:9091", certificates=None)
+driver = GrpcDriver(driver_service_address="0.0.0.0:9091", certificates=None)
 # -------------------------------------------------------------------------- Driver SDK
 
 anonymous_client_nodes = False

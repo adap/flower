@@ -4,6 +4,9 @@
 Quickstart iOS
 ==============
 
+.. meta::
+   :description: Read this Federated Learning quickstart tutorial for creating an iOS app using Flower to train a neural network on MNIST.
+
 In this tutorial we will learn how to train a Neural Network on MNIST using Flower and CoreML on iOS devices. 
 
 First of all, for running the Flower Python server, it is recommended to create a virtual environment and run everything within a `virtualenv <https://flower.dev/docs/recommended-env-setup.html>`_.
