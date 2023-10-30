@@ -2,11 +2,15 @@
 
 ## Unreleased
 
+### What's new?
+
 - **Support custom** `ClientManager` **in** `start_driver()` ([#2292](https://github.com/adap/flower/pull/2292))
 
 - **Update REST API to support create and delete nodes** ([#2283](https://github.com/adap/flower/pull/2283))
 
-### What's new?
+- **Update the C++ SDK** ([#2537](https://github/com/adap/flower/pull/2537), [#2528](https://github/com/adap/flower/pull/2528), [#2523](https://github.com/adap/flower/pull/2523), [#2522](https://github.com/adap/flower/pull/2522))
+
+  Add gRPC request-response capability to the C++ SDK.
 
 - **Fix the incorrect return types of Strategy** ([#2432](https://github.com/adap/flower/pull/2432/files))
 
@@ -27,6 +31,12 @@
   - TAMUNA ([#2254](https://github.com/adap/flower/pull/2254), [#2508](https://github.com/adap/flower/pull/2508))
 
   - FedMeta [#2438](https://github.com/adap/flower/pull/2438)
+
+  - FjORD [#2431](https://github.com/adap/flower/pull/2431)
+
+  - MOON [#2421](https://github.com/adap/flower/pull/2421)
+
+  - DepthFL [#2295](https://github.com/adap/flower/pull/2295)
 
 - **Update Flower Examples** ([#2384](https://github.com/adap/flower/pull/2384),[#2425](https://github.com/adap/flower/pull/2425), [#2526](https://github.com/adap/flower/pull/2526))
 
