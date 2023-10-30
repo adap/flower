@@ -19,10 +19,9 @@
 import threading
 import time
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import Mock, patch
 
 from flwr.driver.app import update_client_manager
-from flwr.proto.driver_pb2 import CreateWorkloadResponse, GetNodesResponse
 from flwr.proto.node_pb2 import Node
 from flwr.server.client_manager import SimpleClientManager
 
@@ -41,12 +40,14 @@ class TestClientManagerWithDriver(unittest.TestCase):
         expected_updated_nodes = [
             Node(node_id=i, anonymous=False) for i in range(80, 120)
         ]
-        driver = MagicMock()
-        driver.stub = "driver stub"
-        driver.create_workload.return_value = CreateWorkloadResponse(workload_id=1)
-        driver.get_nodes.return_value = GetNodesResponse(nodes=expected_nodes)
+        sleep = time.sleep
+        # Reduce sleep time by 100x for testing purposes
+        patcher = patch("time.sleep", lambda s: sleep(0.01 * s))
+        patcher.start()
+        driver = Mock()
+        driver.get_nodes.return_value = expected_nodes
         client_manager = SimpleClientManager()
-        lock = threading.Lock()
+        ref_exit_flag = [False]
 
         # Execute
         thread = threading.Thread(
@@ -54,7 +55,7 @@ class TestClientManagerWithDriver(unittest.TestCase):
             args=(
                 driver,
                 client_manager,
-                lock,
+                ref_exit_flag,
             ),
             daemon=True,
         )
@@ -64,21 +65,19 @@ class TestClientManagerWithDriver(unittest.TestCase):
         # Retrieve all nodes in `client_manager`
         node_ids = {proxy.node_id for proxy in client_manager.all().values()}
         # Update the GetNodesResponse and wait until the `client_manager` is updated
-        driver.get_nodes.return_value = GetNodesResponse(nodes=expected_updated_nodes)
+        driver.get_nodes.return_value = expected_updated_nodes
         while True:
-            with lock:
-                if len(client_manager.all()) == len(expected_updated_nodes):
-                    break
+            if len(client_manager) == len(expected_updated_nodes):
+                break
             time.sleep(1.3)
         # Retrieve all nodes in `client_manager`
         updated_node_ids = {proxy.node_id for proxy in client_manager.all().values()}
-        # Simulate `driver.disconnect()`
-        driver.stub = None
 
         # Assert
-        driver.create_workload.assert_called_once()
         assert node_ids == {node.node_id for node in expected_nodes}
         assert updated_node_ids == {node.node_id for node in expected_updated_nodes}
 
         # Exit
+        ref_exit_flag[0] = True
         thread.join()
+        patcher.stop()
