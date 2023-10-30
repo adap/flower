@@ -19,7 +19,7 @@ import sys
 import time
 import warnings
 from logging import INFO
-from typing import Optional, Union
+from typing import ContextManager, Optional, Tuple, Union
 
 from flwr.client.client import Client
 from flwr.client.typing import ClientFn
@@ -135,7 +135,7 @@ def start_client(
         client_fn = single_client_factory
 
     # Initialize connection context manager
-    connection, address = _init_connection(transport,server_address)
+    connection, address = _init_connection(transport, server_address)
 
     while True:
         sleep_duration: int = 0
@@ -262,7 +262,9 @@ def start_numpy_client(
     )
 
 
-def _init_connection(transport: Optional[str], server_address: str):
+def _init_connection(
+    transport: Optional[str], server_address: str
+) -> Tuple[ContextManager, str]:
     # Parse IP address
     parsed_address = parse_address(server_address)
     if not parsed_address:
