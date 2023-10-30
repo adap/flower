@@ -37,3 +37,10 @@ ClientMessage _evaluate(flwr_local::Client *client,
 
 std::tuple<ClientMessage, int, bool> handle(flwr_local::Client *client,
                                             ServerMessage server_msg);
+
+std::tuple<flwr::proto::TaskRes, int, bool>
+handle_task(flwr_local::Client *client, const flwr::proto::TaskIns &task_ins);
+
+flwr::proto::TaskRes configure_task_res(const flwr::proto::TaskRes &task_res,
+                                        const flwr::proto::TaskIns &task_ins,
+                                        const flwr::proto::Node &node);
