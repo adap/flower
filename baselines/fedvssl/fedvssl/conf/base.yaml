@@ -5,13 +5,13 @@
 
 
 ### hyper-parameters for FL pre-training ###
-pre_training: true
+pre_training: false
 exp_name: fedvssl_results
-data_dir: /home/data1/ucf101
+data_dir: /home/data1
 partition_dir: /home/data1/ucf101/annotations
 
 # FL settings
-pool_size: 2
+pool_size: 5
 rounds: 20
 
 # FedVSSL strategy
@@ -21,8 +21,8 @@ strategy:
   swbeta: 1
   base_work_dir: fedvssl_results
   fraction_fit: 1.0
-  min_fit_clients: 2
-  min_available_clients: 2
+  min_fit_clients: 5
+  min_available_clients: 5
   fedavg: false
 
 # ray config
@@ -33,4 +33,5 @@ include_dashboard: false
 
 ### hyper-parameters for downstream fine-tuning ###
 exp_name_finetune: finetune_results
-pretrained_model_path: /home/data1/round-540-weights.array.npz
+# pretrained_model_path: /home/data1/round-540-weights.array.npz
+pretrained_model_path: /home/data1/FVSSL_reproduce/flower/baselines/fedvssl/fedvssl_results/round-20-weights.array.npz

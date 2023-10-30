@@ -272,7 +272,7 @@ def main(cfg: DictConfig) -> None:
 
         # Evaluating the finetuned model
         process_obj = subprocess.run(["bash", "fedvssl/CtP/tools/dist_test.sh", \
-                                      f"{cfg_path_test}", "4", \
+                                      f"{cfg_path_test}", "1", \
                                       f"--work_dir {cfg.exp_name_finetune}",
                                       f"--data_dir {cfg.data_dir}", \
                                       f"--progress"])
