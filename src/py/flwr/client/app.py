@@ -19,7 +19,7 @@ import sys
 import time
 import warnings
 from logging import INFO
-from typing import ContextManager, Optional, Tuple, Union
+from typing import Callable, Iterator, Optional, Tuple, Union
 
 from flwr.client.client import Client
 from flwr.client.typing import ClientFn
@@ -33,6 +33,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPES,
 )
 from flwr.common.logger import log
+from flwr.proto.task_pb2 import TaskIns, TaskRes
 
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
@@ -260,7 +261,17 @@ def start_numpy_client(
 
 def _init_connection(
     transport: Optional[str], server_address: str
-) -> Tuple[ContextManager, str]:
+) -> tuple[
+    Iterator[
+        Tuple[
+            Callable[[], Optional[TaskIns]],
+            Callable[[TaskRes], None],
+            Optional[Callable[[], None]],
+            Optional[Callable[[], None]],
+        ]
+    ],
+    str,
+]:
     # Parse IP address
     parsed_address = parse_address(server_address)
     if not parsed_address:
