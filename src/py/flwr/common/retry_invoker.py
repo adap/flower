@@ -111,7 +111,7 @@ class RetryInvoker:
         A generator yielding successive wait times in seconds. If the generator
         is finite, the giveup event will be triggered when the generator raises
         `StopIteration`.
-    exception: Union[Type[Exception], Tuple[Type[Exception]]]
+    recoverable_exceptions: Union[Type[Exception], Tuple[Type[Exception]]]
         An exception type (or tuple of types) that triggers backoff.
     max_tries: Optional[int]
         The maximum number of attempts to make before giving up. Once exhausted,
