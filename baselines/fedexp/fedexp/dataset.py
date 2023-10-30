@@ -131,7 +131,7 @@ def load_datasets(
             train_datasets = pickle.load(file)
     except FileNotFoundError:
         dataset_train = Dataset(
-            data_directory, train=True, download=True, transform=trans_cifar
+            data_directory, train=True, download=True, transform=get_transforms(True)
         )
         train_datasets = _split_dataset(
             dataset_train,
