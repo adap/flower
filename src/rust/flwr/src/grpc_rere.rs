@@ -119,8 +119,8 @@ impl GrpcRereConnection {
 
         if !task_handler::validate_task_res(&task_res) {
             self.state.insert(KEY_TASK_INS.to_string(), None);
-            eprintln!("TaskRes has been initialized accidentally");
-            return Err("TaskRes has been initialized accidentally".into());
+            eprintln!("TaskRes is invalid");
+            return Err("TaskRes is invalid".into());
         }
 
         let task_res = task_handler::configure_task_res(task_res, &task_ins, node);

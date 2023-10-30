@@ -37,7 +37,7 @@ impl GrpcConnection {
         let mut stub = proto::flower_service_client::FlowerServiceClient::new(channel.clone());
 
         let (tx, rx) = async_channel::bounded(1); // This is our queue equivalent in async Rust
-                                                  //
+
         let response = stub.join(Request::new(rx)).await?;
         let server_message_stream = response.into_inner();
 
@@ -51,8 +51,6 @@ impl GrpcConnection {
 
     pub async fn receive(&mut self) -> Result<proto::TaskIns, Box<dyn std::error::Error>> {
         if let Some(Ok(server_message)) = self.server_message_iterator.next().await {
-            // Here you will need to translate the Python logic that converts a ServerMessage into a TaskIns.
-            // I'll just put a placeholder for now.
             let task_ins = proto::TaskIns {
                 group_id: "".to_string(),
                 workload_id: 0,
