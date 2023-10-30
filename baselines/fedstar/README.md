@@ -38,9 +38,9 @@ poetry install
 # Start the shell to activate your environment.
 poetry shell
 # making the shell script executable
-chmod +x setup_stasets.sh
+chmod +x setup_datasets.sh
 # The below script will download the datasets and create a directory structure requir to run this experiment.
-. setup_datasets.sh
+./setup_datasets.sh
 ```
 
 ## Running the Experiments
