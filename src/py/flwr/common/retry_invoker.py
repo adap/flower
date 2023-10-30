@@ -121,16 +121,6 @@ class RetryInvoker:
         The maximum total amount of time to try before giving up. Once this time
         has expired, this method won't be interrupted immediately, but the exception
         will be allowed to escape. If set to None, there is no limit to the total time.
-    jitter: Optional[Callable[[float], float]] (default: full_jitter)
-        A function of the value yielded by `wait_strategy` returning the actual time
-        to wait. This function helps distribute wait times stochastically to avoid
-        timing collisions across concurrent clients. Wait times are jittered by
-        default using the `full_jitter` function. To disable jittering, pass
-        `jitter=None`.
-    should_giveup: Optional[Callable[[Exception], bool]] (default: None)
-        A function accepting an exception instance, returning whether or not
-        to give up prematurely before other give-up conditions are evaluated.
-        If set to None, the strategy is to never give up prematurely.
     on_success: Optional[Callable[[RetryState], None]] (default: None)
         A callable to be executed in the event of success. The parameter is a
         data class object detailing the invocation.
@@ -142,6 +132,16 @@ class RetryInvoker:
         exceeded, `should_giveup` returns True, or `wait_strategy` generator raises
         `StopInteration`. The parameter is a data class object detailing the
         invocation.
+    jitter: Optional[Callable[[float], float]] (default: full_jitter)
+        A function of the value yielded by `wait_strategy` returning the actual time
+        to wait. This function helps distribute wait times stochastically to avoid
+        timing collisions across concurrent clients. Wait times are jittered by
+        default using the `full_jitter` function. To disable jittering, pass
+        `jitter=None`.
+    should_giveup: Optional[Callable[[Exception], bool]] (default: None)
+        A function accepting an exception instance, returning whether or not
+        to give up prematurely before other give-up conditions are evaluated.
+        If set to None, the strategy is to never give up prematurely.
 
     Examples
     --------
