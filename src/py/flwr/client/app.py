@@ -19,7 +19,7 @@ import sys
 import time
 import warnings
 from logging import INFO
-from typing import Callable, Iterator, Optional, Tuple, Union
+from typing import Callable, Iterator, Optional, Tuple, Union, ContextManager
 
 from flwr.client.client import Client
 from flwr.client.typing import ClientFn
@@ -142,8 +142,8 @@ def start_client(
         sleep_duration: int = 0
         with connection(
             address,
-            max_message_length=grpc_max_message_length,
-            root_certificates=root_certificates,
+            grpc_max_message_length,
+            root_certificates,
         ) as conn:
             receive, send, create_node, delete_node = conn
 
@@ -261,14 +261,17 @@ def start_numpy_client(
 
 def _init_connection(
     transport: Optional[str], server_address: str
-) -> tuple[
-    Iterator[
-        Tuple[
-            Callable[[], Optional[TaskIns]],
-            Callable[[TaskRes], None],
-            Optional[Callable[[], None]],
-            Optional[Callable[[], None]],
-        ]
+) -> Tuple[
+    Callable[
+        [str, int, Union[bytes, str, None]],
+        ContextManager[
+            Tuple[
+                Callable[[], Optional[TaskIns]],
+                Callable[[TaskRes], None],
+                Optional[Callable[[], None]],
+                Optional[Callable[[], None]],
+            ]
+        ],
     ],
     str,
 ]:
