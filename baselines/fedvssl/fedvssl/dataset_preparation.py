@@ -112,7 +112,7 @@ subprocess.run(
     [
         "python data_partitioning_ucf.py --json_path /data/ucf101/annotations \
 --output_path /data/ucf101/annotations/client_distribution/ \
---num_clients 10"
+--num_clients 5"
     ],
     shell=True,
 )

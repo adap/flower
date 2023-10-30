@@ -32,12 +32,12 @@ def t_f(arg):
         pass  # error condition mayb
 
 
-def initial_setup(cid, base_work_dir, rounds, data_dir, num_gpus, partition_dir):
+def initial_setup(cid, base_work_dir, rounds, data_dir, num_gpus, partition_dir, cfg_path):
     import utils as utils
 
     cid_plus_one = str(int(cid) + 1)
     args = Namespace(
-        cfg="fedvssl/conf/mmcv_conf/r3d_18_ucf101/pretraining.py",  # Path to the pretraining configuration file
+        cfg=cfg_path,  # Path to the pretraining configuration file
         checkpoint=None,
         cid=int(cid),
         data_dir=data_dir,
@@ -109,7 +109,7 @@ def main(cfg: DictConfig) -> None:
         def client_fn(cid: str):
             (
                 args,
-                cfg,
+                config,
                 distributed,
                 logger,
                 model,
@@ -117,13 +117,13 @@ def main(cfg: DictConfig) -> None:
                 test_dataset,
                 videossl,
             ) = initial_setup(
-                cid, base_work_dir, rounds, data_dir, num_gpus, partition_dir
+                cid, base_work_dir, rounds, data_dir, num_gpus, partition_dir, cfg.cfg_path_pretrain
             )
             return SslClient(
                 model,
                 train_dataset,
                 test_dataset,
-                cfg,
+                config,
                 args,
                 distributed,
                 logger,
@@ -155,7 +155,7 @@ def main(cfg: DictConfig) -> None:
         from .CtP.pyvrl.builder import build_model
 
         # we give an example on how one can perform fine-tuning uisng UCF-101 dataset.
-        cfg_path = "fedvssl/CtP/configs/ctp/r3d_18_kinetics/finetune_ucf101.py"
+        cfg_path = cfg.cfg_path_finetune
         cfg_ = Config.fromfile(cfg_path)
         cfg_.model.backbone["pretrained"] = None
 
@@ -189,10 +189,10 @@ def main(cfg: DictConfig) -> None:
         # by the config_path variable
         #
         config_content = textwrap.dedent(
-            """\
+            f"""\
                 _base_ = ['../../recognizers/_base_/model_r3d18.py',
                 '../../recognizers/_base_/runtime_ucf101.py']
-                work_dir = './output/ctp/r3d_18_kinetics/finetune_ucf101/'
+                work_dir = '{cfg.exp_name_finetune}'
                 model = dict(
                     backbone=dict(
                         pretrained='./model_pretrained.pth',
@@ -207,7 +207,7 @@ def main(cfg: DictConfig) -> None:
         subprocess.run(
             [
                 "bash",
-                "fedvssl/CtP/tools/dist_train.sh",
+                f"{cfg.dist_train_path}",
                 f"{cfg_path}",
                 "4",
                 f"--work_dir {cfg.exp_name_finetune}",
@@ -221,10 +221,10 @@ def main(cfg: DictConfig) -> None:
         # by the cfg_path_test variable
         #
         config_content_test = textwrap.dedent(
-            """\
+            f"""\
                 _base_ = ['../../recognizers/_base_/model_r3d18.py',
                 '../../recognizers/_base_/runtime_ucf101.py']
-                work_dir = './output/ctp/r3d_18_ucf101/finetune_ucf101/'
+                work_dir = '{cfg.exp_name_finetune}'
                 model = dict(
                     backbone=dict(
                     pretrained='/finetune/ucf101/epoch_150.pth',
@@ -233,7 +233,7 @@ def main(cfg: DictConfig) -> None:
                """
         ).strip("\n")
 
-        cfg_path_test = "fedvssl/CtP/configs/ctp/r3d_18_ucf101/finetune_ucf101.py"
+        cfg_path_test = cfg.test_script
         with open(cfg_path_test, "w") as f:
             f.write(config_content_test)
 
@@ -241,7 +241,7 @@ def main(cfg: DictConfig) -> None:
         subprocess.run(
             [
                 "bash",
-                "fedvssl/CtP/tools/dist_test.sh",
+                f"{cfg.dist_test_path}",
                 f"{cfg_path_test}",
                 "1",
                 f"--work_dir {cfg.exp_name_finetune}",

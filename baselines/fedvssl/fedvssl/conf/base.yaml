@@ -9,6 +9,7 @@ pre_training: false
 exp_name: fedvssl_results
 data_dir: /home/data1
 partition_dir: /home/data1/ucf101/annotations
+cfg_path_pretrain: fedvssl/conf/mmcv_conf/r3d_18_ucf101/pretraining.py
 
 # FL settings
 pool_size: 5
@@ -33,5 +34,11 @@ include_dashboard: false
 
 ### hyper-parameters for downstream fine-tuning ###
 exp_name_finetune: finetune_results
-# pretrained_model_path: /home/data1/round-540-weights.array.npz
+cfg_path_finetune: fedvssl/CtP/configs/ctp/r3d_18_kinetics/finetune_ucf101.py
 pretrained_model_path: /home/data1/FVSSL_reproduce/flower/baselines/fedvssl/fedvssl_results/round-20-weights.array.npz
+
+# CtP file locations
+dist_train_path: fedvssl/CtP/tools/dist_train.sh
+dist_test_path: fedvssl/CtP/tools/dist_test.sh
+test_script: fedvssl/CtP/configs/ctp/r3d_18_ucf101/finetune_ucf101.py
+
