@@ -1,8 +1,8 @@
 ---
 title: Federated Learning with Personalization Layers
 url: https://arxiv.org/abs/1912.00818
-labels: ["system heterogeneity", "image classification", "personalization", "horizontal data partition"] 
-dataset: ["CIFAR-10", "FLICKR-AES"] 
+labels: [system heterogeneity, image classification, personalization, horizontal data partition] 
+dataset: [CIFAR-10, FLICKR-AES] 
 ---
 
 # Federated Learning with Personalization Layers
