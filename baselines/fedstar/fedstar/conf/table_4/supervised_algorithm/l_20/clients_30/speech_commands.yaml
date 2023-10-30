@@ -24,8 +24,8 @@ client:
   dataset_name: "speech_commands"
   seed: 2021
   batch_size: 64
-  l_per: 1.00
-  u_per: 0.00
+  l_per: 0.2
+  u_per: 0.8
   fedstar: "false"
   class_distribute: "false"
   verbose: 1

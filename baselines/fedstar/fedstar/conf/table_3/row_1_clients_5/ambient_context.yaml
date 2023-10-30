@@ -25,7 +25,7 @@ client:
   seed: 2021
   batch_size: 64
   l_per: 1.00
-  u_per: 0.5
+  u_per: 0.00
   fedstar: "false"
   class_distribute: "false"
   verbose: 1

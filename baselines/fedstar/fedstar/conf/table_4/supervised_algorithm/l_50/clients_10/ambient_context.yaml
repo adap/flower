@@ -6,26 +6,26 @@
 server:
   server_address: "localhost:8080"
   rounds: 100
-  num_clients: 15
-  min_sample_size: 15
+  num_clients: 10
+  min_sample_size: 10
   gpu_memory: 2048
   eval_step: 1
   train_epochs: 1
   batch_size: 64
   learning_rate: 0.001
-  dataset_name: "speech_commands"
+  dataset_name: "ambient_context"
   seed: 2021
   verbose: 1
 
 client:
   server_address: "localhost:8080"
-  num_clients: 15
+  num_clients: 10
   gpu_memory: 1024
-  dataset_name: "speech_commands"
+  dataset_name: "ambient_context"
   seed: 2021
   batch_size: 64
-  l_per: 1.00
-  u_per: 0.00
+  l_per: 0.5
+  u_per: 0.5
   fedstar: "false"
   class_distribute: "false"
   verbose: 1
