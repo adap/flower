@@ -173,6 +173,14 @@ def set_gpu_limits(gpu_id, gpu_memory):
         except RuntimeError as e:
             print(e)
 
+"""
+    Change the config path and yaml file name based on expermients you want to run.
+    The current configs will call the basic config file which runs the small experiment to check integrity.
+    Eg:- 
+    To carry out results for experiment in row 3 row 1 col 1. The parameters will be
+    config_path = conf/table_3/row_2_clients_10
+    config_name = speech_commands
+"""
 @hydra.main(config_path="conf", config_name="base")
 def main(cfg):
     # Set Experiment Parameters
