@@ -4,7 +4,7 @@ seed: 0
 num_clients: 100
 num_rounds: 500
 clients_per_round: 20
-num_epochs: 20
+local_steps: 20
 batch_size: 50
 
 server_device: cuda
