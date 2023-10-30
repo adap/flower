@@ -26,7 +26,7 @@ As common SSL training pipline, this code has two parts: SSL pre-training in FL 
 
 **Dataset:** UCF-101
 
-**Hardware Setup:** These experiments were on a server with 6 GTX-3090 GPU and 128 CPU threads. 
+**Hardware Setup:** These experiments (SSL pre-train + downstream fine-tuning) were on a server with 6 GTX-3090 GPU and 128 CPU threads. 
 
 **Contributers:** Yasar Abbas Ur Rehman and Yan Gao
 
@@ -80,27 +80,24 @@ To run FedVSSL with UCF-101 baseline, first follow the instruction in `dataset_p
 Then, ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
 
 ```bash
-# direct to FedVSSL code directory
-cd FedVSSL
-
 # clone CtP repo
-git clone https://github.com/yan-gao-GY/CtP.git
+git clone https://github.com/yan-gao-GY/CtP.git fedvssl/CtP
 
 # run federated SSL training with FedVSSL
-python -m main --pre_training=True # this will run using the default settings.
+python -m fedvssl.main pre_training=true # this will run using the default settings.
 
 # you can override settings directly from the command line
-python -m main --pre_training=True --mix_coeff=1 --rounds=100 # will set hyper-parameter alpha to 1 and the number of rounds to 100
+python -m fedvssl.main pre_training=true mix_coeff=1 rounds=100 # will set hyper-parameter alpha to 1 and the number of rounds to 100
 
 # run downstream fine-tuning with pre-trained SSL model
-python -m main --pre_training=False # this will run using the default settings.
+python -m fedvssl.main pre_training=false # this will run using the default settings.
 ```
 
 To run using FedAvg:
 ```bash
 # this will run FedAvg baseline
 # This is done so to match the experimental setup in the paper
-python -m main --fedavg=True
+python -m fedvssl.main fedavg=true
 
 # this config can also be overriden.
 ```
@@ -112,10 +109,10 @@ The pre-training in the paper was conducted on Kinectics-400, which would take t
 As a result, we provide the following command with pre-training on UCF-101, in order to validate FedVSSL.
 
 ```bash
-python -m main --pre_training=True # this will run using the default settings.
+python -m fedvssl.main pre_training=true # this will run using the default settings.
 ```
 
-To check the results, please direct to `ucf_FedVSSL_results/clientN/*.log.json` files in default, and check the loss changes during training.
+To check the results, please direct to `fedvssl_results/clientN/*.log.json` files in default, and check the loss changes during training.
 If you have enough resource, feel free to try with Kinectics-400 following `data_partitioning_k400.py` for data partitioning.
 
 ### Downstream fine-tuning results on UCF-101
@@ -124,7 +121,7 @@ We provide the checkpoints of the pre-trained SSL models on Kinectics-400.
 With them as starting points, we can run downstream fine-tuning on UCF-101 to obtain the expected results in the paper.
 
 ```bash
-python -m main --pre_training=False --pretrained_model_path=/path/to/checkpoints
+python -m fedvssl.main pre_training=false pretrained_model_path=/path/to/checkpoints
 
 # following the table below to change the checkpoints path.
 ```
