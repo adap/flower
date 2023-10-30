@@ -135,7 +135,7 @@ def start_client(
         client_fn = single_client_factory
 
     # Initialize connection context manager
-    connection, address = _init_connection(transport,server_address)
+    connection, address = _init_connection(transport, server_address)
 
     while True:
         sleep_duration: int = 0
