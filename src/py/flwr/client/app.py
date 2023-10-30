@@ -134,37 +134,8 @@ def start_client(
 
         client_fn = single_client_factory
 
-    # Parse IP address
-    parsed_address = parse_address(server_address)
-    if not parsed_address:
-        sys.exit(f"Server address ({server_address}) cannot be parsed.")
-    host, port, is_v6 = parsed_address
-    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
-
-    # Set the default transport layer
-    if transport is None:
-        transport = TRANSPORT_TYPE_GRPC_BIDI
-
-    # Use either gRPC bidirectional streaming or REST request/response
-    if transport == TRANSPORT_TYPE_REST:
-        try:
-            from .rest_client.connection import http_request_response
-        except ModuleNotFoundError:
-            sys.exit(MISSING_EXTRA_REST)
-        if server_address[:4] != "http":
-            sys.exit(
-                "When using the REST API, please provide `https://` or "
-                "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
-            )
-        connection = http_request_response
-    elif transport == TRANSPORT_TYPE_GRPC_RERE:
-        connection = grpc_request_response
-    elif transport == TRANSPORT_TYPE_GRPC_BIDI:
-        connection = grpc_connection
-    else:
-        raise ValueError(
-            f"Unknown transport type: {transport} (possible: {TRANSPORT_TYPES})"
-        )
+    # Initialize connection context manager
+    connection, address = _init_connection(transport,server_address)
 
     while True:
         sleep_duration: int = 0
@@ -289,3 +260,39 @@ def start_numpy_client(
         root_certificates=root_certificates,
         transport=transport,
     )
+
+
+def _init_connection(transport: Optional[str], server_address: str):
+    # Parse IP address
+    parsed_address = parse_address(server_address)
+    if not parsed_address:
+        sys.exit(f"Server address ({server_address}) cannot be parsed.")
+    host, port, is_v6 = parsed_address
+    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+
+    # Set the default transport layer
+    if transport is None:
+        transport = TRANSPORT_TYPE_GRPC_BIDI
+
+    # Use either gRPC bidirectional streaming or REST request/response
+    if transport == TRANSPORT_TYPE_REST:
+        try:
+            from .rest_client.connection import http_request_response
+        except ModuleNotFoundError:
+            sys.exit(MISSING_EXTRA_REST)
+        if server_address[:4] != "http":
+            sys.exit(
+                "When using the REST API, please provide `https://` or "
+                "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
+            )
+        connection = http_request_response
+    elif transport == TRANSPORT_TYPE_GRPC_RERE:
+        connection = grpc_request_response
+    elif transport == TRANSPORT_TYPE_GRPC_BIDI:
+        connection = grpc_connection
+    else:
+        raise ValueError(
+            f"Unknown transport type: {transport} (possible: {TRANSPORT_TYPES})"
+        )
+
+    return connection, address
