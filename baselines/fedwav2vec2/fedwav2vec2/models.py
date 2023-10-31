@@ -23,6 +23,7 @@ from fedwav2vec2.sb_recipe import ASR, get_weights
 def int_model(  # pylint: disable=too-many-arguments,too-many-locals
     cid,
     config: DictConfig,
+    device: torch.device,
     save_path,
     evaluate=False,
 ):
@@ -44,7 +45,7 @@ def int_model(  # pylint: disable=too-many-arguments,too-many-locals
             "output_folder": save_path,
             "number_of_epochs": 1,
             "test_batch_size": 4,
-            "device": config.device,
+            "device": device,
             "wav2vec_output": config.huggingface_model_save_path,
         }
 
@@ -59,7 +60,7 @@ def int_model(  # pylint: disable=too-many-arguments,too-many-locals
         label_path_ = os.path.join(save_path, "label_encoder.txt")
 
     _, run_opts, _ = sb.parse_arguments(config.sb_config)
-    run_opts["device"] = config.device
+    run_opts["device"] = device
     run_opts["data_parallel_backend"] = config.parallel_backend
     run_opts["noprogressbar"] = True  # disable tqdm progress bar
 
@@ -112,7 +113,7 @@ def int_model(  # pylint: disable=too-many-arguments,too-many-locals
     return asr_brain, [train_data, valid_data, test_data]
 
 
-def pre_trained_point(save, config: DictConfig):
+def pre_trained_point(save, config: DictConfig, server_device: torch.device):
     """Return a pre-trained model from a path and hyperparameters."""
     state_dict = torch.load(config.pre_train_model_path)
 
@@ -123,7 +124,7 @@ def pre_trained_point(save, config: DictConfig):
     with open(hparams) as fin:
         params = load_hyperpyyaml(fin, overrides)
 
-    run_opts["device"] = config.device
+    run_opts["device"] = server_device
     run_opts["data_parallel_backend"] = config.parallel_backend
     run_opts["noprogressbar"] = True  # disable tqdm progress bar
 

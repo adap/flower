@@ -89,6 +89,8 @@ poetry install
 poetry shell
 ```
 
+When you run this baseline for the first time, you need first to download the data-to-client mapping files as well as the `TED-LIUM-3`` dataset.
+
 ```bash
 # Then create a directory using the same name as you'll use for `dada_dir` in your config (see conf/base.yaml)
 mkdir data
@@ -97,6 +99,7 @@ mkdir data
 git clone https://github.com/tuanct1997/Federated-Learning-ASR-based-on-wav2vec-2.0.git _temp && mv _temp/data/* data/ && rm -rf _temp
 
 # Download dataset, extract and prepare dataset partitions
+# This might take a while depending on your internet connection
 python -m fedwav2vec2.dataset_preparation
 ```
 
@@ -104,7 +107,8 @@ python -m fedwav2vec2.dataset_preparation
 ## Running the Experiments
 
 ```bash
-python -m fedwav2vec2.main # will run on Flower client per GPU
+# Run with default arguments (one client per GPU)
+python -m fedwav2vec2.main
 
 # if you have a large GPU (32GB+) you migth want to fit two per GPU
 python -m fedwav2vec2.main client_resources.num_gpus=0.5
