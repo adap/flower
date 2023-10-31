@@ -1,18 +1,19 @@
 ---
 title: Gradient-less Federated Gradient Boosting Trees with Learnable Learning Rates
 URL:  https://arxiv.org/abs/2304.07537
-labels: ["cross-silo", "tree-based", "XGBoost", "Horizontal federated XGBoost", "Classification", "Regression", "Tabular Datasets"] 
+labels: [cross-silo, tree-based, XGBoost, Classification, Regression, Tabular] 
 dataset: [a9a, cod-rna, ijcnn1, space_ga, cpusmall, YearPredictionMSD] 
 ---
 
-# HFedXgboost: Gradient-less Federated Gradient Boosting Trees with Learnable Learning Rates
+# Gradient-less Federated Gradient Boosting Trees with Learnable Learning Rates
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
-****Paper:**** [arxiv.org/abs/2304.07537](https://arxiv.org/abs/2304.07537)
-****Authors:**** Chenyang Ma, Xinchi Qiu, Daniel J. Beutel, Nicholas D. Lane
+**Paper:** [arxiv.org/abs/2304.07537](https://arxiv.org/abs/2304.07537)
 
-****Abstract:**** The privacy-sensitive nature of decentralized datasets and
+**Authors:** Chenyang Ma, Xinchi Qiu, Daniel J. Beutel, Nicholas D. Lane
+
+**Abstract:** The privacy-sensitive nature of decentralized datasets and
 the robustness of eXtreme Gradient Boosting (XGBoost) on
 tabular data raise the need to train XGBoost in the con-
 text of federated learning (FL). Existing works on federated
@@ -29,21 +30,21 @@ efficiency by lowering both communication rounds and communication overhead by f
 
 ## About this baseline
 
-****What’s implemented:**** The code in this directory replicates the experiments in "Gradient-less Federated Gradient Boosting Trees with Learnable Learning Rates" (Ma et al., 2023) for a9a, cod-rna, ijcnn1, space_ga datasets, which proposed the FedXGBllr algorithm. Concretely, it replicates the results for a9a, cod-rna, ijcnn1, space_ga datasets in Table 2.
+**What’s implemented:** The code in this directory replicates the experiments in "Gradient-less Federated Gradient Boosting Trees with Learnable Learning Rates" (Ma et al., 2023) for a9a, cod-rna, ijcnn1, space_ga datasets, which proposed the FedXGBllr algorithm. Concretely, it replicates the results for a9a, cod-rna, ijcnn1, space_ga datasets in Table 2.
 
-****Datasets:**** a9a, cod-rna, ijcnn1, space_ga
+**Datasets:** a9a, cod-rna, ijcnn1, space_ga
 
-****Hardware Setup:**** Most of the experiments were done on a machine with an Intel® Core™ i7-6820HQ Processor, that processor got 4 cores and 8 threads. 
+**Hardware Setup:** Most of the experiments were done on a machine with an Intel® Core™ i7-6820HQ Processor, that processor got 4 cores and 8 threads. 
 
-****Contributors:**** [Aml Hassan Esmil](https://github.com/Aml-Hassan-Abd-El-hamid)
+**Contributors:** [Aml Hassan Esmil](https://github.com/Aml-Hassan-Abd-El-hamid)
 
 ## Experimental Setup
 
-****Task:**** Tabular classification and regression
+**Task:** Tabular classification and regression
 
-****Model:**** XGBoost model combined with 1-layer CNN
+**Model:** XGBoost model combined with 1-layer CNN
 
-****Dataset:**** 
+**Dataset:** 
 This baseline only includes 7 datasets with a focus on 4 of them (a9a, cod-rna, ijcnn1, space_ga).
 
 Each dataset can be partitioned across 2, 5 or 10 clients in an IID distribution.
@@ -54,7 +55,7 @@ Each dataset can be partitioned across 2, 5 or 10 clients in an IID distribution
 | Regression | abalone<br>cpusmall<br>space_ga<br>YearPredictionMSD | 8<br>12<br>6<br>90 | 4,177<br>8,192<br>3,167<br>515,345 |
 
 
-****Training Hyperparameters:**** 
+**Training Hyperparameters:** 
 For the centralized model, the paper's hyperparameters were mostly used as they give very good results -except for abalone and cpusmall-, here are the used hyperparameters -they can all be found in the `yaml` file named `paper_xgboost_centralized`:
 
 | Hyperparameter name | value |
@@ -99,43 +100,7 @@ At first, it was a manual process basically experiencing different values for so
 | Adam learning rate | 
 | no.of iterations for the CNN model |
 
-All the final new values for those hyperparameters can be found in 3 `yaml` files named `dataset_name_<no. of clients>_clients` and all the original values for those hyperparameters can be found in 3 `yaml` files named `paper_<no. of clients>_clients`  -that created a large number of config files 3*7+3= 24 config files in the `clients` folder-
-
-Later `wandb` was incorporated to make the fine-tuning process easier.
-
-**what to to do if you're interested in continuing the fine-tuning journey?**
-
-There are 3 main things that you should consider:
-
-1- You can use WandB to automate the fine-tuning process, modify the `sweep.yaml` file to control your experiments settings including your search methods, values to choose from,....... <br>
-Here's how to run the wandb sweep -also, if you're new to wandb, check those sources [1](https://colab.research.google.com/github/wandb/examples/blob/master/colabs/pytorch/Organizing_Hyperparameter_Sweeps_in_PyTorch_with_W%26B.ipynb), [2](https://wandb.ai/adrishd/hydra-example/reports/Configuring-W-B-Projects-with-Hydra--VmlldzoxNTA2MzQw)-
-
-```
-#remember to activate the poetry shell
-
-poetry shell
-
-#login to your wandb account
-
-wandb login
-
-#inside the folder flower/baselines/hfedxgboost/hfedxgboost run the commands below
-
-#Initiate WandB sweep
-
-wandb sweep sweep.yaml
-
-#that command -if ran with no error- will return a line that contains
-#the command that you can use to run the sweep agent, it'll look something like that:
-
-wandb agent <your user name on wandb>/flower-baselines_hfedxgboost_hfedxgboost/<the sweep name>
-
-```
-
-2- The config files named `<dataset name>_<no.of clients>_clients.yaml` are meant to keep the final hyperparameters values, so whenever you think you're done with fine-tuning some hyperparameters, add them to their config files so the one after you can use them.
-
-3- To help with the fine-tuning of the hyperparameters process, there are 2 classes in the utils.py that write down the used hyperparameters in the experiments and the results for that experiment in 2 separate CSV files, some of the hyperparameters used in the experiments done during building this baseline can be found in results.csv and results_centralized.csv files.<br>
-More important, those 2 classes focus on writing down only the hyperparameters that I thought was important so if you're interested in experimenting with other hyperparameters, don't forget to add them to the writers classes so you can track them more easily, especially if you intend to do some experiments away from WandB.
+All the final new values for those hyperparameters can be found in 3 `yaml` files named `dataset_name_<no. of clients>_clients` and all the original values for those hyperparameters can be found in 3 `yaml` files named `paper_<no. of clients>_clients`. This resulted in a large number of config files 3*7+3= 24 config files in the `clients` folder.
 
 ## Environment Setup
 
@@ -150,16 +115,20 @@ eval "$(pyenv virtualenv-init -)"
 ```
 2- Install **poetry** at the system level: https://python-poetry.org/docs/ --> running curl -sSL https://install.python-poetry.org | python3 -(dont' forget to add to your .bashrc or equivalent)
 
-3- Then install a version of Python of your choice via pyenv, eg: pyenv install 3.10.6
+3- Then install a version of Python of your choice via pyenv, eg: `pyenv install 3.10.6`
 
-4- In the Horizontal_XGBoost directory where you can see pyproject.toml, write the following commands in your terminal:
+4- In the this directory (i.e. `/baselines/hfedxgboost`) where you can see `pyproject.toml`, execute the following commands in your terminal:
 ```
+# Set python version
 pyenv local 3.10.6
+# Tell Poetry to use it
 poetry env use 3.10.6
+# Install all dependencies
 poetry install 
-```
+# Activate your environment
+poetry shell
 
-Run `Poetry shell` in your terminal to activate the environment.
+```
 
 ## Running the Experiments
 
@@ -246,6 +215,44 @@ python -m hfedxgboost.main --multirun clients=YearPredictionMSD_2_clients,YearPr
 | YearPredictionMSD | Regression | 2<br>5<br>10 | 119<br>118<br>118 | 
 
 
+
+
+
+## Doing your own finetuning
+
+There are 3 main things that you should consider:
+
+1- You can use WandB to automate the fine-tuning process, modify the `sweep.yaml` file to control your experiments settings including your search methods, values to choose from, etc. Below we demonstrate how to run the `wandb` sweep.
+If you're new to `wandb` you might want to read the following resources to [do hyperparameter tuning with W&B+PyTorch](https://colab.research.google.com/github/wandb/examples/blob/master/colabs/pytorch/Organizing_Hyperparameter_Sweeps_in_PyTorch_with_W%26B.ipynb), and [use W&B alongside Hydra](https://wandb.ai/adrishd/hydra-example/reports/Configuring-W-B-Projects-with-Hydra--VmlldzoxNTA2MzQw).
+
+```
+# Remember to activate the poetry shell
+
+poetry shell
+
+# login to your wandb account
+
+wandb login
+
+# Inside the folder flower/baselines/hfedxgboost/hfedxgboost run the commands below
+
+# Initiate WandB sweep
+
+wandb sweep sweep.yaml
+
+# that command -if ran with no error- will return a line that contains
+# the command that you can use to run the sweep agent, it'll look something like that:
+
+wandb agent <your user name on wandb>/flower-baselines_hfedxgboost_hfedxgboost/<the sweep name>
+
+```
+
+2- The config files named `<dataset name>_<no.of clients>_clients.yaml` are meant to keep the final hyperparameters values, so whenever you think you're done with fine-tuning some hyperparameters, add them to their config files so the one after you can use them.
+
+3- To help with the fine-tuning of the hyperparameters process, there are 2 classes in the utils.py that write down the used hyperparameters in the experiments and the results for that experiment in 2 separate CSV files, some of the hyperparameters used in the experiments done during building this baseline can be found in results.csv and results_centralized.csv files.<br>
+More important, those 2 classes focus on writing down only the hyperparameters that I thought was important so if you're interested in experimenting with other hyperparameters, don't forget to add them to the writers classes so you can track them more easily, especially if you intend to do some experiments away from WandB.
+
+
 ## How to add a new dataset
 
 This code doesn't cover all the datasets from the paper yet, so if you wish to add a new dataset, here are the steps:
@@ -280,7 +287,7 @@ for filepath in os.listdir(DATASET_PATH):
 
 :warning: `datafiles_fusion` function uses `sklearn.datasets.load_svmlight_file` to load the dataset, if your dataset is `csv` or something that function won't work on it and you will have to alter the `datafiles_fusion` function to work with you dataset files format.
 
-**2-Add config files for your dataset:**
+**2- Add config files for your dataset:**
 
 **a- config files for the centralized baseline:**
 
