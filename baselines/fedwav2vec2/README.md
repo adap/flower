@@ -20,7 +20,7 @@ dataset: [TED-LIUM 3]
 
 **What’s implemented:** Figure 1 in the paper.
 
-**Datasets:** TED-LIUM 3 dataset. It's requires a 54GB download. Once extracted it is ~60 GB. You can read more about this dataset in the [TED-LIUM 3](https://arxiv.org/abs/1805.04699) paper. A more concise description of this dataset can be found in the [OpenSLR](https://www.openslr.org/51/) site.
+**Datasets:** TED-LIUM 3 dataset. It requires a 54GB download. Once extracted it is ~60 GB. You can read more about this dataset in the [TED-LIUM 3](https://arxiv.org/abs/1805.04699) paper. A more concise description of this dataset can be found in the [OpenSLR](https://www.openslr.org/51/) site.
 
 **Hardware Setup:** Training `wav2vec2.0` is a bit memory intensive so you'd need at least a 24GB GPU. With the current settings, each client requires ~15GB of VRAM. This suggest you could run the experiment fine on a 16GB GPU but not if you also need to pack the global model evaluation stage on the same GPU. On a single RTX 3090Ti (24GB VRAM) each round takes between 20 and 40 minutes (depending on which clients are sampled, some clients have more data than others).
 
@@ -113,6 +113,8 @@ python -m fedwav2vec2.main
 # if you have a large GPU (32GB+) you migth want to fit two per GPU
 python -m fedwav2vec2.main client_resources.num_gpus=0.5
 ```
+
+When running the experiment, a structure of directories `<date>/<time>` will be created by Hydra. Inside you'll find a directory for each client (where their log is recorded). Another directory at the same level `<date>/<time>server` is created where the server log is recorded. For this baseline the metric of interes it the Word Error Rate (`WER`) which is logged in `train_log.txt` at the end of each round.
 
 
 ## Expected Results
