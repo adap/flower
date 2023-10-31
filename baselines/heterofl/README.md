@@ -129,6 +129,10 @@ These models use static batch normalization (sBN) and they incorporate a Scaler 
       <td>[150, 250]</td>
       <td>[300, 500]</td>
     </tr>
+    <tr>
+      <td colspan="2">hidden layers</td>
+      <td colspan="2">[64 , 128 , 256 , 512]</td>
+    </tr>
   </tbody>
 </table>
 

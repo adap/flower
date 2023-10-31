@@ -109,7 +109,7 @@ def main(cfg: DictConfig) -> None:
         net=models.create_model(
             model_config,
             model_rate=model_split_rate[get_global_model_rate(model_mode)],
-            device=cfg.server_device,
+            device="cpu",
         ),
         optim_scheduler_settings=optim_scheduler_settings,
         global_model_rate=model_split_rate[get_global_model_rate(model_mode)],

@@ -5,7 +5,6 @@ seed: 0
 client_resources:
     num_cpus: 1
     num_gpus: 0.0
-server_device: 'cpu'
 
 control:
   model_split_mode: 'dynamic'
