@@ -6,7 +6,6 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 
 import flwr as fl
 import hydra
-import torch
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
@@ -32,13 +31,12 @@ def main(cfg: DictConfig) -> None:
     # Let's retrieve it and save some results there
     save_path = HydraConfig.get().runtime.output_dir
 
-    server_device = torch.device(cfg.server_device)
     if cfg.pre_train_model_path is not None:
         print("PRETRAINED INITIALIZE")
 
         pretrained = pre_trained_point(
             save_path,
-            server_device,
+            cfg.server_device,
             cfg,
         )
     else:
@@ -48,7 +46,7 @@ def main(cfg: DictConfig) -> None:
         cfg.strategy,
         initial_parameters=pretrained,
         evaluate_fn=get_evaluate_fn(
-            cfg, server_device=server_device, save_path=save_path
+            cfg, server_device=cfg.server_device, save_path=save_path
         ),
     )
 

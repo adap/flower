@@ -164,7 +164,7 @@ def get_client_fn(config: DictConfig, save_path: str):
 
     def client_fn(cid: str) -> fl.client.Client:
         """Generate the simulated clients."""
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        device = "cuda" if torch.cuda.is_available() else "cpu"
 
         asr_brain, dataset = int_model(cid, config, device=device, save_path=save_path)
         return SpeechBrainClient(cid, asr_brain, dataset)

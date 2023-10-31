@@ -23,7 +23,7 @@ from fedwav2vec2.sb_recipe import ASR, get_weights
 def int_model(  # pylint: disable=too-many-arguments,too-many-locals
     cid,
     config: DictConfig,
-    device: torch.device,
+    device: str,
     save_path,
     evaluate=False,
 ):
@@ -113,7 +113,7 @@ def int_model(  # pylint: disable=too-many-arguments,too-many-locals
     return asr_brain, [train_data, valid_data, test_data]
 
 
-def pre_trained_point(save, config: DictConfig, server_device: torch.device):
+def pre_trained_point(save, config: DictConfig, server_device: str):
     """Return a pre-trained model from a path and hyperparameters."""
     state_dict = torch.load(config.pre_train_model_path)
 

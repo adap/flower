@@ -61,7 +61,7 @@ For more details, please refer to the relevant section in the paper.
 | `local_epochs` | `20` | Specify the number of training epochs at the client side |
 | `total_clients` | `1943` | Size of client pool, with a maxium set at 1943 clients|
 | `server_cid` | `19999` | ID of the server to distinguish from the client's ID |
-| `device` | `cuda` | You can choose between `cpu` or `cuda` for training device, but it is recommended to use `cuda`|
+| `server_device` | `cuda` | You can choose between `cpu` or `cuda` for centralised evaluation, but it is recommended to use `cuda`|
 | `parallel_backend` | `false` | Multi-gpus training. Only active if you have more than 1 gpu per client | 
 | `strategy.min_fit_client` | `20` | Number of clients involve per round. Default is 20 as indicated in the paper |
 | `strategy.fraction_fit` | `0.01` | Ratio of client pool to involve during training |

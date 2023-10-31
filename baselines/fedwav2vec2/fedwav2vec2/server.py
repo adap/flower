@@ -27,7 +27,7 @@ def get_on_fit_config_fn(local_epochs: int) -> Callable[[int], Dict[str, str]]:
     return fit_config
 
 
-def get_evaluate_fn(config: DictConfig, server_device: torch.device, save_path: str):
+def get_evaluate_fn(config: DictConfig, server_device: str, save_path: str):
     """Return function to execute during global evaluation."""
     config_ = config
 
