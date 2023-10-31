@@ -4,6 +4,8 @@ import flwr as fl
 import torch
 import torch.nn as nn
 
+from task import load_data
+
 
 class ClientModel(nn.Module):
     def __init__(self):
@@ -12,19 +14,6 @@ class ClientModel(nn.Module):
 
     def forward(self, x):
         return self.fc(x)
-
-
-def load_data():
-    # Create some dummy data
-    X = torch.randn(100, 5)  # 100 samples, 5 features
-    y = (torch.sum(X, dim=1) > 0).float()  # Sum of features > 0 as positive label
-
-    # Split the data
-    X_train = X[:80]
-    y_train = y[:80]
-    X_test = X[80:]
-    y_test = y[80:]
-    return (X_train, y_train), (X_test, y_test)
 
 
 # Define Flower client
@@ -36,11 +25,13 @@ class FlowerClient(fl.client.NumPyClient):
         self.optimizer = torch.optim.SGD(self.model.parameters(), lr=0.01)
 
     def get_parameters(self, config):
-        pass
+        print("wesh")
+        return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
     def fit(self, parameters, config):
         self.embedding = self.model(self.data[0][0])
-        return self.embedding.detach().numpy(), 1, {}
+        print(type(self.embedding.detach().numpy()))
+        return [self.embedding.detach().numpy()], 1, {}
 
     def evaluate(self, parameters, config):
         self.embedding.backward(torch.from_numpy(parameters))
