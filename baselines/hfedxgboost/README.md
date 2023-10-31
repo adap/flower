@@ -227,17 +227,14 @@ If you're new to `wandb` you might want to read the following resources to [do h
 
 ```
 # Remember to activate the poetry shell
-
 poetry shell
 
 # login to your wandb account
-
 wandb login
 
 # Inside the folder flower/baselines/hfedxgboost/hfedxgboost run the commands below
 
 # Initiate WandB sweep
-
 wandb sweep sweep.yaml
 
 # that command -if ran with no error- will return a line that contains
