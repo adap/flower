@@ -17,11 +17,12 @@
 
 import sys
 import time
+import warnings
 from logging import INFO
-from typing import Callable, Optional, Union
+from typing import Callable, ContextManager, Optional, Tuple, Union
 
 from flwr.client.client import Client
-from flwr.client.typing import ClientFn, ClientLike
+from flwr.client.typing import ClientFn
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
@@ -32,6 +33,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPES,
 )
 from flwr.common.logger import log
+from flwr.proto.task_pb2 import TaskIns, TaskRes
 
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
@@ -40,7 +42,7 @@ from .numpy_client import NumPyClient
 
 
 def _check_actionable_client(
-    client: Optional[ClientLike], client_fn: Optional[ClientFn]
+    client: Optional[Client], client_fn: Optional[ClientFn]
 ) -> None:
     if client_fn is None and client is None:
         raise Exception("Both `client_fn` and `client` are `None`, but one is required")
@@ -57,7 +59,7 @@ def start_client(
     *,
     server_address: str,
     client_fn: Optional[ClientFn] = None,
-    client: Optional[ClientLike] = None,
+    client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
     transport: Optional[str] = None,
@@ -124,7 +126,7 @@ def start_client(
         # Wrap `Client` instance in `client_fn`
         def single_client_factory(
             cid: str,  # pylint: disable=unused-argument
-        ) -> ClientLike:
+        ) -> Client:
             if client is None:  # Added this to keep mypy happy
                 raise Exception(
                     "Both `client_fn` and `client` are `None`, but one is required"
@@ -133,44 +135,15 @@ def start_client(
 
         client_fn = single_client_factory
 
-    # Parse IP address
-    parsed_address = parse_address(server_address)
-    if not parsed_address:
-        sys.exit(f"Server address ({server_address}) cannot be parsed.")
-    host, port, is_v6 = parsed_address
-    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
-
-    # Set the default transport layer
-    if transport is None:
-        transport = TRANSPORT_TYPE_GRPC_BIDI
-
-    # Use either gRPC bidirectional streaming or REST request/response
-    if transport == TRANSPORT_TYPE_REST:
-        try:
-            from .rest_client.connection import http_request_response
-        except ModuleNotFoundError:
-            sys.exit(MISSING_EXTRA_REST)
-        if server_address[:4] != "http":
-            sys.exit(
-                "When using the REST API, please provide `https://` or "
-                "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
-            )
-        connection = http_request_response
-    elif transport == TRANSPORT_TYPE_GRPC_RERE:
-        connection = grpc_request_response
-    elif transport == TRANSPORT_TYPE_GRPC_BIDI:
-        connection = grpc_connection
-    else:
-        raise ValueError(
-            f"Unknown transport type: {transport} (possible: {TRANSPORT_TYPES})"
-        )
+    # Initialize connection context manager
+    connection, address = _init_connection(transport, server_address)
 
     while True:
         sleep_duration: int = 0
         with connection(
             address,
-            max_message_length=grpc_max_message_length,
-            root_certificates=root_certificates,
+            grpc_max_message_length,
+            root_certificates,
         ) as conn:
             receive, send, create_node, delete_node = conn
 
@@ -209,8 +182,7 @@ def start_client(
 def start_numpy_client(
     *,
     server_address: str,
-    client_fn: Optional[Callable[[str], NumPyClient]] = None,
-    client: Optional[NumPyClient] = None,
+    client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
     transport: Optional[str] = None,
@@ -223,9 +195,7 @@ def start_numpy_client(
         The IPv4 or IPv6 address of the server. If the Flower server runs on
         the same machine on port 8080, then `server_address` would be
         `"[::]:8080"`.
-    client_fn : Optional[Callable[[str], NumPyClient]]
-        A callable that instantiates a NumPyClient. (default: None)
-    client : Optional[flwr.client.NumPyClient]
+    client : flwr.client.NumPyClient
         An implementation of the abstract base class `flwr.client.NumPyClient`.
     grpc_max_message_length : int (default: 536_870_912, this equals 512MB)
         The maximum length of gRPC messages that can be exchanged with the
@@ -248,44 +218,93 @@ def start_numpy_client(
     --------
     Starting a client with an insecure server connection:
 
-    >>> def client_fn(cid: str):
-    >>>     return FlowerClient()
-    >>>
     >>> start_numpy_client(
     >>>     server_address=localhost:8080,
-    >>>     client_fn=client_fn,
+    >>>     client=FlowerClient(),
     >>> )
 
     Starting an SSL-enabled gRPC client:
 
     >>> from pathlib import Path
-    >>> def client_fn(cid: str):
-    >>>     return FlowerClient()
-    >>>
     >>> start_numpy_client(
     >>>     server_address=localhost:8080,
-    >>>     client_fn=client_fn,
+    >>>     client=FlowerClient(),
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
-    # Start
-    _check_actionable_client(client, client_fn)
+    warnings.warn(
+        "flwr.client.start_numpy_client() is deprecated and will "
+        "be removed in a future version of Flower. Instead, pass "
+        "your client to `flwr.client.start_client()` by calling "
+        "first the `.to_client()` method as shown below: \n"
+        "\tflwr.client.start_client(\n"
+        "\t\tserver_address='<IP>:<PORT>',\n"
+        "\t\tclient=FlowerClient().to_client()\n"
+        "\t)",
+        DeprecationWarning,
+        stacklevel=2,
+    )
 
-    wrp_client = client.to_client() if client else None
-    wrp_clientfn = None
-    if client_fn:
+    # Calling this function is deprecated. A warning is thrown.
+    # We first need to convert either the supplied client to `Client.`
 
-        def convert(cid: str) -> Client:
-            """Convert `NumPyClient` to `Client` upon instantiation."""
-            return client_fn(cid).to_client()
-
-        wrp_clientfn = convert
+    wrp_client = client.to_client()
 
     start_client(
         server_address=server_address,
-        client_fn=wrp_clientfn,
         client=wrp_client,
         grpc_max_message_length=grpc_max_message_length,
         root_certificates=root_certificates,
         transport=transport,
     )
+
+
+def _init_connection(
+    transport: Optional[str], server_address: str
+) -> Tuple[
+    Callable[
+        [str, int, Union[bytes, str, None]],
+        ContextManager[
+            Tuple[
+                Callable[[], Optional[TaskIns]],
+                Callable[[TaskRes], None],
+                Optional[Callable[[], None]],
+                Optional[Callable[[], None]],
+            ]
+        ],
+    ],
+    str,
+]:
+    # Parse IP address
+    parsed_address = parse_address(server_address)
+    if not parsed_address:
+        sys.exit(f"Server address ({server_address}) cannot be parsed.")
+    host, port, is_v6 = parsed_address
+    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+
+    # Set the default transport layer
+    if transport is None:
+        transport = TRANSPORT_TYPE_GRPC_BIDI
+
+    # Use either gRPC bidirectional streaming or REST request/response
+    if transport == TRANSPORT_TYPE_REST:
+        try:
+            from .rest_client.connection import http_request_response
+        except ModuleNotFoundError:
+            sys.exit(MISSING_EXTRA_REST)
+        if server_address[:4] != "http":
+            sys.exit(
+                "When using the REST API, please provide `https://` or "
+                "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
+            )
+        connection = http_request_response
+    elif transport == TRANSPORT_TYPE_GRPC_RERE:
+        connection = grpc_request_response
+    elif transport == TRANSPORT_TYPE_GRPC_BIDI:
+        connection = grpc_connection
+    else:
+        raise ValueError(
+            f"Unknown transport type: {transport} (possible: {TRANSPORT_TYPES})"
+        )
+
+    return connection, address

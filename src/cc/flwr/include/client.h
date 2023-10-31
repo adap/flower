@@ -22,7 +22,7 @@ namespace flwr_local {
  *
  */
 class Client {
- public:
+public:
   /**
    *
    * @brief Return the current local model parameters
@@ -60,4 +60,4 @@ class Client {
    */
   virtual EvaluateRes evaluate(EvaluateIns ins) = 0;
 };
-}  // namespace flwr_local
+} // namespace flwr_local
