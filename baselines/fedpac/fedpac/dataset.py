@@ -1,12 +1,13 @@
 from typing import Optional, Tuple
 
-import torch
 from omegaconf import DictConfig
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader
 
-from fedpac.dataset_preparation import partition_cifar_data, partition_emnist_data, _download_data
-from collections import defaultdict
-
+from fedpac.dataset_preparation import (
+    _download_data,
+    partition_cifar_data,
+    partition_emnist_data,
+)
 
 
 def load_datasets(  # pylint: disable=too-many-arguments
@@ -16,7 +17,7 @@ def load_datasets(  # pylint: disable=too-many-arguments
     batch_size: Optional[int] = 32,
     seed: Optional[int] = 42,
 ) -> Tuple[DataLoader, DataLoader, DataLoader]:
-    """Creates the dataloaders to be fed into the model.
+    """Create the dataloaders to be fed into the model.
 
     Parameters
     ----------
@@ -39,14 +40,14 @@ def load_datasets(  # pylint: disable=too-many-arguments
     """
     print(f"Dataset partitioning config: {config}")
     dataset = config.name
-    if dataset=='cifar10':
+    if dataset == "cifar10":
         trainset, testset = _download_data(dataset)
         datasets = partition_cifar_data(
             trainset,
             num_clients,
             iid=config.iid,
             balance=config.balance,
-            s = config.s,
+            s=config.s,
             seed=seed,
         )
         val_datasets = partition_cifar_data(
@@ -54,20 +55,20 @@ def load_datasets(  # pylint: disable=too-many-arguments
             num_clients,
             iid=config.iid,
             balance=config.balance,
-            s = config.s,
+            s=config.s,
             sample_size=300,
             seed=seed,
         )
 
-    elif dataset=='emnist':
+    elif dataset == "emnist":
         datasets, testset = partition_emnist_data(
             dataset,
             num_clients,
             iid=config.iid,
             balance=config.balance,
-            s = config.s,
+            s=config.s,
             seed=seed,
-        )       
+        )
 
     # Split each partition into train/val and create DataLoader
     trainloaders = []

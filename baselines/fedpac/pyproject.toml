@@ -5,7 +5,7 @@ build-backend = "poetry.masonry.api"
 [tool.poetry]
 name = "fedpac"
 version = "1.0.0"
-description = "Implementation of FedProx (Lin et al. 2020)"
+description = "Personalized Federated Learning with Feature Alignment and Classifier Collaboration"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.dev>"]
 readme = "README.md"

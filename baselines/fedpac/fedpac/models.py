@@ -1,20 +1,19 @@
 """Implementation of the model used for the EMNIST and CIFAR10 experiments."""
 
 
-from logging import INFO
-from typing import Optional, Tuple, List
+from typing import Tuple
 
 import torch
 import torch.nn as nn
-from flwr.common.logger import log
 from torch import Tensor
 from torch.utils.data import DataLoader
-from torch.nn.parameter import Parameter
 
 
 class EMNISTNet(nn.Module):
-    """Implementation of the model used in the FedPAC paper for training on
-    EMNIST data."""
+    """Implementation of the model used in the FedPAC paper for training.
+
+    on EMNIST data.
+    """
 
     # pylint: disable=too-many-instance-attributes
     def __init__(self, num_classes: int) -> None:
@@ -29,11 +28,15 @@ class EMNISTNet(nn.Module):
         self.relu3 = nn.LeakyReLU()
         self.fc2 = nn.Linear(128, num_classes)
         self.num_classes = num_classes
-        self.feature_layers  = ['conv1.weight', 'conv1.bias',
-                                'conv2.weight', 'conv2.bias',
-                                'fc1.weight', 'fc1.bias']
-        self.classifier_layers = ['fc2.weight', 'fc2.bias']
-
+        self.feature_layers = [
+            "conv1.weight",
+            "conv1.bias",
+            "conv2.weight",
+            "conv2.bias",
+            "fc1.weight",
+            "fc1.bias",
+        ]
+        self.classifier_layers = ["fc2.weight", "fc2.bias"]
 
     def forward(self, x: Tensor) -> Tensor:
         """Forward step in training."""
@@ -55,10 +58,12 @@ class EMNISTNet(nn.Module):
         for s in size:
             num_features *= s
         return num_features
-    
+
+
 class CIFARNet(nn.Module):
-    """Implementation of the model used in the FedPAC paper for training on
-    CIFAR10 data."""
+    """Implementation of the model used in the FedPAC paper for training on CIFAR10
+    data.
+    """
 
     # pylint: disable=too-many-instance-attributes
     def __init__(self, num_classes: int) -> None:
@@ -76,11 +81,17 @@ class CIFARNet(nn.Module):
         self.relu3 = nn.LeakyReLU()
         self.fc2 = nn.Linear(128, num_classes)
         self.num_classes = num_classes
-        self.feature_layers  = ['conv1.weight', 'conv1.bias',
-                                'conv2.weight', 'conv2.bias',
-                                'conv3.weight', 'conv3.bias',
-                                'fc1.weight', 'fc1.bias']
-        self.classifier_layers = ['fc2.weight', 'fc2.bias']
+        self.feature_layers = [
+            "conv1.weight",
+            "conv1.bias",
+            "conv2.weight",
+            "conv2.bias",
+            "conv3.weight",
+            "conv3.bias",
+            "fc1.weight",
+            "fc1.bias",
+        ]
+        self.classifier_layers = ["fc2.weight", "fc2.bias"]
 
     def forward(self, x: Tensor) -> Tensor:
         """Forward step in training."""
@@ -99,8 +110,9 @@ class CIFARNet(nn.Module):
         y = self.fc2(x)
         return x, y
 
+
 # pylint: disable=too-many-arguments, too-many-locals, too-many-branches
-def train(  
+def train(
     net: nn.Module,
     trainloader: DataLoader,
     valloader: DataLoader,
@@ -111,7 +123,7 @@ def train(
     device: torch.device,
     global_centroid,
     feature_centroid,
-    lamda
+    lamda,
 ) -> None:
     """Train the network on the training set.
 
@@ -127,14 +139,13 @@ def train(
         The number of epochs the model should be trained for.
     learning_rate : float
         The learning rate for the SGD optimizer.
-    feature_centroid: 
-
+    feature_centroid:
     """
     net.train()
     net = net.to(device)
     criterion = torch.nn.CrossEntropyLoss()
 
-    #classifier training and feature extractor training 
+    # classifier training and feature extractor training
     for name, param in net.named_parameters():
         if name in net.feature_layers:
             param.requires_grad = False
@@ -142,7 +153,9 @@ def train(
             param.requires_grad = True
 
     params = filter(lambda p: p.requires_grad, net.parameters())
-    optimizer = torch.optim.SGD(params, lr=0.1, weight_decay=weight_decay, momentum=momentum)   
+    optimizer = torch.optim.SGD(
+        params, lr=0.1, weight_decay=weight_decay, momentum=momentum
+    )
     net = train_classifier_epoch(net, trainloader, device, criterion, optimizer)
 
     for name, param in net.named_parameters():
@@ -152,11 +165,21 @@ def train(
             param.requires_grad = False
 
     params = filter(lambda p: p.requires_grad, net.parameters())
-    optimizer = torch.optim.SGD(params, lr=learning_rate, weight_decay=weight_decay, momentum=momentum)   
+    optimizer = torch.optim.SGD(
+        params, lr=learning_rate, weight_decay=weight_decay, momentum=momentum
+    )
     for _ in range(epochs):
         net = train_features_epoch(
-            net, trainloader, device, criterion, optimizer, global_centroid, feature_centroid, lamda
+            net,
+            trainloader,
+            device,
+            criterion,
+            optimizer,
+            global_centroid,
+            feature_centroid,
+            lamda,
         )
+
 
 def train_classifier_epoch(
     net: nn.Module,
@@ -207,7 +230,7 @@ def train_features_epoch(
     optimizer: torch.optim.Adam,
     global_centroid,
     feature_centroid,
-    lamda
+    lamda,
 ) -> nn.Module:
     """Train for one epoch.
 
@@ -239,20 +262,21 @@ def train_features_epoch(
         feat, out = net(images)
         feat_new = feat.clone().detach()
         loss0 = criterion(out, labels)
-        if global_centroid !={}:
+        if global_centroid != {}:
             for i in range(len(labels)):
                 if labels[i].item() in global_centroid.keys():
                     feat[i] = global_centroid[labels[i].item()].detach()
                 else:
                     feat[i] = feature_centroid[labels[i].item()].detach()
-            loss_fn=nn.MSELoss()
+            loss_fn = nn.MSELoss()
             loss1 = loss_fn(feat_new, feat)
         else:
             loss1 = torch.tensor(0)
-        loss = loss0 + lamda*loss1
+        loss = loss0 + lamda * loss1
         loss.backward()
         optimizer.step()
     return net
+
 
 def fedavg_train(  # pylint: disable=too-many-arguments
     net: nn.Module,
@@ -282,12 +306,12 @@ def fedavg_train(  # pylint: disable=too-many-arguments
         Parameter for the weight of the proximal term.
     """
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, weight_decay=weight_decay, momentum=momentum)
+    optimizer = torch.optim.SGD(
+        net.parameters(), lr=learning_rate, weight_decay=weight_decay, momentum=momentum
+    )
     net.train()
     for _ in range(epochs):
-        net = _train_one_epoch(
-            net, trainloader, device, criterion, optimizer
-        )
+        net = _train_one_epoch(net, trainloader, device, criterion, optimizer)
 
 
 def _train_one_epoch(  # pylint: disable=too-many-arguments

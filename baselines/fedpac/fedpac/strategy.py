@@ -1,30 +1,29 @@
+from logging import INFO, WARNING
 from typing import Callable, Dict, List, Optional, Tuple, Union
-from functools import reduce
-import numpy as np
-from logging import WARNING, INFO
-
-from flwr.server.client_manager import ClientManager
-from flwr.server.client_proxy import ClientProxy
-from flwr.server.strategy import FedAvg
-from fedpac.utils import aggregate_weights, aggregate_centroids, aggregate_heads
-from flwr.common.logger import log
 
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
     FitIns,
     FitRes,
+    Metrics,
     MetricsAggregationFn,
     NDArrays,
     Parameters,
     Scalar,
     ndarrays_to_parameters,
     parameters_to_ndarrays,
-    Metrics
 )
+from flwr.common.logger import log
+from flwr.server.client_manager import ClientManager
+from flwr.server.client_proxy import ClientProxy
+from flwr.server.strategy import FedAvg
+
+from fedpac.utils import aggregate_centroids, aggregate_heads, aggregate_weights
+
 
 def metrics_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
-    """Aggregation function for weighted average during evaluation.
+    """Do weighted average during evaluation.
 
     Parameters
     ----------
@@ -36,7 +35,7 @@ def metrics_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     Metrics
         The weighted average metric.
     """
-    accuracies = [m['accuracy'] for _, m in metrics]
+    accuracies = [m["accuracy"] for _, m in metrics]
     # examples = [num_examples for num_examples, _ in metrics]
     # Aggregate and return custom metric (average)
     print("here and nothing is breaking!!!")
@@ -49,7 +48,8 @@ def loss_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 class FedPAC(FedAvg):
-    """FedPAC strategy"""
+    """FedPAC strategy."""
+
     def __init__(
         self,
         *,
@@ -70,23 +70,28 @@ class FedPAC(FedAvg):
         initial_parameters: Optional[Parameters] = None,
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
-        device
+        device,
     ) -> None:
-
         super().__init__()
         self.global_centroid = {}
         self.on_fit_config_fn = on_fit_config_fn
         self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
-        self.device=device
+        self.device = device
         self.evaluate_fn = evaluate_fn
         self.fraction_fit = fraction_fit
         self.fraction_evaluate = fraction_evaluate
 
-    def num_fit_clients(self, num_available_clients: int, server_round: int) -> Tuple[int, int]:
+    def num_fit_clients(
+        self, num_available_clients: int, server_round: int
+    ) -> Tuple[int, int]:
         """Return the sample size and the required number of available clients."""
-        num_clients = int(num_available_clients * self.fraction_fit) if server_round!=200 else num_available_clients
+        num_clients = (
+            int(num_available_clients * self.fraction_fit)
+            if server_round != 200
+            else num_available_clients
+        )
         return max(num_clients, self.min_fit_clients), self.min_available_clients
-    
+
     def evaluate(
         self, server_round: int, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
@@ -100,15 +105,12 @@ class FedPAC(FedAvg):
             return None
         loss, metrics = eval_res
         return loss, metrics
-    
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ):
         """Configure the next round of training."""
         config = {}
-
-
 
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
@@ -122,17 +124,17 @@ class FedPAC(FedAvg):
         clients = client_manager.sample(
             num_clients=sample_size, min_num_clients=min_num_clients
         )
-        if server_round==1:
-            self.avg_heads = [None]*sample_size
+        if server_round == 1:
+            self.avg_heads = [None] * sample_size
 
         fit_configurations = []
         for idx, client in enumerate(clients):
-            config['classifier_head'] = self.avg_heads[idx]
+            config["classifier_head"] = self.avg_heads[idx]
             fit_configurations.append((client, FitIns(parameters, config)))
 
         # Return client/config pairs
         return fit_configurations
-    
+
     def configure_evaluate(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
@@ -152,21 +154,20 @@ class FedPAC(FedAvg):
         sample_size, min_num_clients = self.num_evaluation_clients(
             client_manager.num_available()
         )
-        if server_round==1:
-            self.avg_heads = [None]*sample_size
+        if server_round == 1:
+            self.avg_heads = [None] * sample_size
 
         clients = client_manager.sample(
-                    num_clients=sample_size, min_num_clients=min_num_clients
-                )
+            num_clients=sample_size, min_num_clients=min_num_clients
+        )
 
         fit_configurations = []
         for idx, client in enumerate(clients):
-            config['classifier_head'] = self.avg_heads[idx]
+            config["classifier_head"] = self.avg_heads[idx]
             fit_configurations.append((client, EvaluateIns(parameters, config)))
 
         # Return client/config pairs
         return fit_configurations
-
 
     def aggregate_fit(
         self,
@@ -190,7 +191,9 @@ class FedPAC(FedAvg):
         centroids = [fit_res.metrics["centroid"] for _, fit_res in results]
         stats = [fit_res.metrics["stats"] for _, fit_res in results]
         self.global_centroid = aggregate_centroids(centroids, class_sizes)
-        parameters_aggregated = ndarrays_to_parameters(aggregate_weights(weights_results))
+        parameters_aggregated = ndarrays_to_parameters(
+            aggregate_weights(weights_results)
+        )
         self.avg_heads = aggregate_heads(stats, self.device)
 
         # Aggregate custom metrics if aggregation fn was provided
@@ -202,8 +205,7 @@ class FedPAC(FedAvg):
             log(WARNING, "No fit_metrics_aggregation_fn provided")
 
         return parameters_aggregated, metrics_aggregated
-    
-    
+
     def aggregate_evaluate(
         self,
         server_round: int,
@@ -229,7 +231,7 @@ class FedPAC(FedAvg):
         if self.evaluate_metrics_aggregation_fn:
             eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
             metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
-            log(INFO, f'eval metrics: {metrics_aggregated}')
+            log(INFO, f"eval metrics: {metrics_aggregated}")
 
         elif server_round == 1:  # Only log this warning once
             log(WARNING, "No evaluate_metrics_aggregation_fn provided")
@@ -237,13 +239,19 @@ class FedPAC(FedAvg):
 
 
 class FedAvgWithRandomSampling(FedAvg):
-    """Custom FedAvg with random client selection"""
+    """Custom FedAvg with random client selection."""
 
-    def num_fit_clients(self, num_available_clients: int, server_round: int) -> Tuple[int, int]:
+    def num_fit_clients(
+        self, num_available_clients: int, server_round: int
+    ) -> Tuple[int, int]:
         """Return the sample size and the required number of available clients."""
-        num_clients = int(num_available_clients * self.fraction_fit) if server_round!=200 else num_available_clients
+        num_clients = (
+            int(num_available_clients * self.fraction_fit)
+            if server_round != 200
+            else num_available_clients
+        )
         return max(num_clients, self.min_fit_clients), self.min_available_clients
-    
+
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
@@ -258,7 +266,7 @@ class FedAvgWithRandomSampling(FedAvg):
         sample_size, min_num_clients = self.num_fit_clients(
             client_manager.num_available(), server_round
         )
-    
+
         clients = client_manager.sample(
             num_clients=sample_size, min_num_clients=min_num_clients
         )

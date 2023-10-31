@@ -1,24 +1,22 @@
 import flwr as fl
 import hydra
 from hydra.core.hydra_config import HydraConfig
-from hydra.utils import instantiate, call
+from hydra.utils import call, instantiate
 from omegaconf import DictConfig, OmegaConf
 
-from fedpac import client, server, utils
+from fedpac import server, utils
 from fedpac.dataset import load_datasets
-from fedpac.utils import save_results_as_pickle
 
 
 @hydra.main(config_path="conf", config_name="config", version_base=None)
 def main(cfg: DictConfig) -> None:
-    """Main function to run federated learning rounds.
+    """Run federated learning rounds.
 
     Parameters
     ----------
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
-
     # print config structured as YAML
     print(OmegaConf.to_yaml(cfg))
 
@@ -36,8 +34,8 @@ def main(cfg: DictConfig) -> None:
         valloaders=valloaders,
         learning_rate=cfg.learning_rate,
         weight_decay=cfg.weight_decay,
-        momentum=cfg.momentum
-        )
+        momentum=cfg.momentum,
+    )
     # get function that will executed by the strategy's evaluate() method
     # Set server's device
     device = cfg.server_device
@@ -45,10 +43,7 @@ def main(cfg: DictConfig) -> None:
 
     # instantiate strategy according to config. Here we pass other arguments
     # that are only defined at run time.
-    strategy = instantiate(
-        cfg.strategy,
-        evaluate_fn=evaluate_fn
-    )
+    strategy = instantiate(cfg.strategy, evaluate_fn=evaluate_fn)
 
     # Start simulation
     history = fl.simulation.start_simulation(

@@ -2,7 +2,7 @@
 title: Personalized Federated Learning with Feature Alignment and Classifier Collaboration
 url: https://openreview.net/forum?id=SXZr8aDKia
 labels: [label1, label2] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [dataset1, dataset2] # list of datasets you include in your baseline
+dataset: [EMNIST, CIFAR-10]
 ---
 
 # Personalized Federated Learning with Feature Alignment and Classifier Collaboration
@@ -11,36 +11,36 @@ dataset: [dataset1, dataset2] # list of datasets you include in your baseline
 
 **Paper:** [openreview.net/forum?id=SXZr8aDKia](https://openreview.net/forum?id=SXZr8aDKia)
 
-****Authors:**** Jian Xu, Xinyi Tong, Shao-Lun Huang
+**Authors:** Jian Xu, Xinyi Tong, Shao-Lun Huang
 
-****Abstract:**** Data heterogeneity is one of the most challenging issues in federated learning, which motivates a variety of approaches to learn personalized models for participating clients. One such approach in deep neural networks based tasks is employing a shared feature representation and learning a customized classifier head for each client. However, previous works do not utilize the global knowledge during local representation learning and also neglect the fine-grained collaboration between local classifier heads, which limits the model generalization ability. In this work, we conduct explicit local-global feature alignment by leveraging global semantic knowledge for learning a better representation. Moreover, we quantify the benefit of classifier combination for each client as a function of the combining weights and derive an optimization problem for estimating optimal weights. Finally, extensive evaluation results on benchmark datasets with various heterogeneous data scenarios demonstrate the effectiveness of our proposed method.
+**Abstract:** Data heterogeneity is one of the most challenging issues in federated learning, which motivates a variety of approaches to learn personalized models for participating clients. One such approach in deep neural networks based tasks is employing a shared feature representation and learning a customized classifier head for each client. However, previous works do not utilize the global knowledge during local representation learning and also neglect the fine-grained collaboration between local classifier heads, which limits the model generalization ability. In this work, we conduct explicit local-global feature alignment by leveraging global semantic knowledge for learning a better representation. Moreover, we quantify the benefit of classifier combination for each client as a function of the combining weights and derive an optimization problem for estimating optimal weights. Finally, extensive evaluation results on benchmark datasets with various heterogeneous data scenarios demonstrate the effectiveness of our proposed method.
 
 
 ## About this baseline
 
-****What’s implemented:**** The code in this directory replicates the experiments in *Personalized Federated Learning with Feature Alignment and Classifier Collaboration* (Xu et al., 2023) for EMNIST and CIFAR10, which proposed the FedPAC algorithm. Concretely, it replicates the results for EMNIST and CIFAR10 in Table 1.
+**What’s implemented:** The code in this directory replicates the experiments in *Personalized Federated Learning with Feature Alignment and Classifier Collaboration* (Xu et al., 2023) for EMNIST and CIFAR10, which proposed the FedPAC algorithm. Concretely, it replicates the results for EMNIST and CIFAR10 in Table 1.
 
-****Datasets:**** EMNIST and CIFAR10 from PyTorch's Torchvision
+**Datasets:** EMNIST and CIFAR10 from PyTorch's Torchvision
 <!-- 
-****Hardware Setup:**** These experiments were run on a desktop machine with 24 CPU threads. Any machine with 4 CPU cores or more would be able to run it in a reasonable amount of time. Note: we install PyTorch with GPU support but by default, the entire experiment runs on CPU-only mode. -->
+**Hardware Setup:** These experiments were run on a desktop machine with 24 CPU threads. Any machine with 4 CPU cores or more would be able to run it in a reasonable amount of time. Note: we install PyTorch with GPU support but by default, the entire experiment runs on CPU-only mode. -->
 
-****Contributors:**** Apsal S Kalathukunnel
+**Contributors:** Apsal S Kalathukunnel
 
 
 ## Experimental Setup
 
-****Task:**** Image classification
+**Task:** Image classification
 
-****Model:**** This directory implements twp different CNN models
+**Model:** This directory implements twp different CNN models
 for EMNIST/Fashion-MNIST and CIFAR-10/CINIC-10, respectively. The first CNN model is constructed by two convolution layers with 16 and 32 channels respectively, each followed by a max pooling layer, and two fully-connected layers with 128 and 10 units before softmax output. LeakyReLU is used as the activation function. The second CNN model is similar to the first one but has one more convolution layer with 64 channels.
 
-****Dataset:**** Two datasets used for experiments are EMNIST and CIFAR10. EMNIST (Extended MNIST) is a 62-class image classification dataset, extending the classic MNIST dataset. It contains 62 categories of handwritten characters, including 10 digits, 26
+**Dataset:** Two datasets used for experiments are EMNIST and CIFAR10. EMNIST (Extended MNIST) is a 62-class image classification dataset, extending the classic MNIST dataset. It contains 62 categories of handwritten characters, including 10 digits, 26
 uppercase letters and 26 lowercase letters. CIFAR-10 with 10 categories of color images. In the experiments, all clients have the same data size, in which s% of data (20% by default) are uniformly sampled from all classes, and the remaining (100 - s)% from a set of dominant classes for each client. Clients are explicitly divided into multiple groups where clients in each group share the same dominant
 classes, and we also intentionally keep the size of local training data small to pose the need for FL. The testing data on each client has the same distribution as the training data.
 
 
 
-****Training Hyperparameters:**** The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python main.py` directly)
+**Training Hyperparameters:** The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python main.py` directly)
 
 | Description | Default Value |
 | ----------- | ----- |
@@ -60,12 +60,11 @@ To construct the Python environment follow these steps:
 pyenv local 3.10.6
 # Tell poetry to use python 3.10
 poetry env use 3.10.6
-# install the base Poetry environment
+# Install the base Poetry environment
 poetry install
 
-# activate the environment
+# Activate the environment
 poetry shell
-
 ```
 
 

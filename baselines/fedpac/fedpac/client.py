@@ -2,21 +2,18 @@
 """Defines the Flower Client and a function to instantiate it."""
 
 
+import copy
 from collections import OrderedDict
 from typing import Callable, Dict, List, Tuple
 
 import flwr as fl
-import numpy as np
 import torch
-import copy
 from flwr.common.typing import NDArrays, Scalar
-from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
-from fedpac.models import test, train, fedavg_train
+from fedpac.models import fedavg_train, test, train
 from fedpac.utils import get_centroid
-
 
 
 class FlowerClient(fl.client.NumPyClient):
@@ -33,7 +30,6 @@ class FlowerClient(fl.client.NumPyClient):
         weight_decay: float,
         momentum: float,
         lamda: float,
-
     ):
         self.net = net
         self.trainloader = trainloader
@@ -51,22 +47,20 @@ class FlowerClient(fl.client.NumPyClient):
         self.class_fractions = self.get_class_fractions()
         # print(self.class_sizes)
 
-
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
-        """Returns the parameters of the current net."""
+        """Return the parameters of the current net."""
         return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
 
     def set_parameters(self, parameters: NDArrays) -> None:
-        """Changes the parameters of the model using the given ones."""
+        """Change the parameters of the model using the given ones."""
         params_dict = zip(self.net.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         self.net.load_state_dict(state_dict, strict=True)
 
-
     def get_class_sizes(self):
         dataloader = self.trainloader
         sizes = torch.zeros(self.num_classes)
-        for images, labels  in dataloader:
+        for _images, labels in dataloader:
             for i in range(self.num_classes):
                 sizes[i] = sizes[i] + (i == labels).sum()
         return sizes
@@ -75,13 +69,12 @@ class FlowerClient(fl.client.NumPyClient):
         total = len(self.trainloader.dataset)
         return self.class_sizes / total
 
-
     def get_statistics(self):
-        dim = self.net.state_dict()[self.net.classifier_layers[0]][0].shape[0] 
+        dim = self.net.state_dict()[self.net.classifier_layers[0]][0].shape[0]
         feat_dict = self.get_feature_extractor()
         for k in feat_dict.keys():
             feat_dict[k] = torch.stack(feat_dict[k])
-        
+
         py = self.class_fractions
         py2 = torch.square(py)
         v = 0
@@ -91,19 +84,19 @@ class FlowerClient(fl.client.NumPyClient):
             feat_k = feat_dict[k]
             num_k = feat_k.shape[0]
             feat_k_mu = feat_k.mean(dim=0)
-            h_ref[k] = py[k]*feat_k_mu
-            v += (py[k]*torch.trace((torch.mm(torch.t(feat_k), feat_k)/num_k))).item()
-            v -= (py2[k]*(torch.mul(feat_k_mu, feat_k_mu))).sum().item()
-        v = v/datasize.item()
+            h_ref[k] = py[k] * feat_k_mu
+            v += (
+                py[k] * torch.trace((torch.mm(torch.t(feat_k), feat_k) / num_k))
+            ).item()
+            v -= (py2[k] * (torch.mul(feat_k_mu, feat_k_mu))).sum().item()
+        v = v / datasize.item()
         return (v, h_ref)
 
-        
-    
     def get_feature_extractor(self):
-        """function to extract feature extractor layers"""
+        """Extract feature extractor layers."""
         feature_extractors = {}
-        model=self.net
-        train_data= self.trainloader
+        model = self.net
+        train_data = self.trainloader
         with torch.no_grad():
             for inputs, labels in train_data:
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
@@ -111,26 +104,27 @@ class FlowerClient(fl.client.NumPyClient):
                 feature_extractor = features.clone().detach().cpu()
                 for i in range(len(labels)):
                     if labels[i].item() not in feature_extractors.keys():
-                        feature_extractors[labels[i].item()]=[]
-                        feature_extractors[labels[i].item()].append(feature_extractor[i,:])
+                        feature_extractors[labels[i].item()] = []
+                        feature_extractors[labels[i].item()].append(
+                            feature_extractor[i, :]
+                        )
                     else:
-                        feature_extractors[labels[i].item()] = [feature_extractor[i,:]]
+                        feature_extractors[labels[i].item()] = [feature_extractor[i, :]]
 
         return feature_extractors
-
 
     def get_classifier_head(self):
         w = copy.deepcopy(self.net.state_dict())
         keys = self.net.classifier_layers
         for k in keys:
             w[k] = torch.zeros_like(w[k])
-        
+
         w0 = 0
         for i in range(len(self.avg_head)):
-            w0+=self.avg_head[i]
+            w0 += self.avg_head[i]
             for k in keys:
-                w[k] += self.avg_head[i]*self.net.state_dict()[k] 
-        
+                w[k] += self.avg_head[i] * self.net.state_dict()[k]
+
         for k in keys:
             w[k] = torch.div(w[k], w0)
 
@@ -142,18 +136,17 @@ class FlowerClient(fl.client.NumPyClient):
         for k in local_weight.keys():
             if k in classifier_keys:
                 local_weight[k] = classifier[k]
-        self.net.load_state_dict(local_weight)       
-
+        self.net.load_state_dict(local_weight)
 
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, int, Dict]:
-        """Implements distributed fit function for a given client."""
+        """Implement distributed fit function for a given client."""
         self.set_parameters(parameters)
         self.stats = self.get_statistics()
         self.global_centroid = config["global_centroid"]
-        self.avg_head = config['classifier_head']
-        if self.avg_head != None:
+        self.avg_head = config["classifier_head"]
+        if self.avg_head is not None:
             classifier_head = self.get_classifier_head()
             self.update_classifier(classifier_head)
 
@@ -168,20 +161,25 @@ class FlowerClient(fl.client.NumPyClient):
             self.device,
             self.global_centroid,
             self.feature_centroid,
-            self.lamda
-          )
-        return self.get_parameters({}), len(self.trainloader), {'centroid': self.feature_centroid, 
-                                                                'class_sizes': self.class_sizes,
-                                                                'stats':(self.stats)
-                                                            }
+            self.lamda,
+        )
+        return (
+            self.get_parameters({}),
+            len(self.trainloader),
+            {
+                "centroid": self.feature_centroid,
+                "class_sizes": self.class_sizes,
+                "stats": (self.stats),
+            },
+        )
 
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[float, int, Dict]:
-        """Implements distributed evaluation for a given client."""
+        """Implement distributed evaluation for a given client."""
         self.set_parameters(parameters)
-        self.avg_head = config['classifier_head']
-        if self.avg_head != None:
+        self.avg_head = config["classifier_head"]
+        if self.avg_head is not None:
             classifier_head = self.get_classifier_head()
             self.update_classifier(classifier_head)
         loss, accuracy = test(self.net, self.valloader, self.device)
@@ -259,11 +257,9 @@ def gen_client_fn(
     weight_decay: float,
     momentum: float,
     model: DictConfig,
-    lamda: float
-) -> Tuple[
-    Callable[[str], FlowerClient], DataLoader
-]:
-    """Generates the client function that creates the Flower Clients.
+    lamda: float,
+) -> Tuple[Callable[[str], FlowerClient], DataLoader]:
+    """Generate the client function that creates the Flower Clients.
 
     Parameters
     ----------
@@ -294,10 +290,8 @@ def gen_client_fn(
         the DataLoader that will be used for testing
     """
 
-
     def client_fn(cid: str) -> FlowerClient:
         """Create a Flower client representing a single organization."""
-
         # Load model
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         net = model.to(device)
@@ -309,7 +303,15 @@ def gen_client_fn(
 
         # Create a  single Flower client representing a single organization
         return FlowerClient(
-            net, trainloader, valloader, device, num_epochs, learning_rate, weight_decay, momentum, lamda
+            net,
+            trainloader,
+            valloader,
+            device,
+            num_epochs,
+            learning_rate,
+            weight_decay,
+            momentum,
+            lamda,
         )
 
     return client_fn
@@ -322,11 +324,9 @@ def gen_fedavg_client_fn(
     learning_rate: float,
     weight_decay: float,
     momentum: float,
-    model: DictConfig
-    ) -> Tuple[
-    Callable[[str], FlowerClient], DataLoader
-]:
-    """Generates the client function that creates the Flower Clients.
+    model: DictConfig,
+) -> Tuple[Callable[[str], FlowerClient], DataLoader]:
+    """Generate the client function that creates the Flower Clients.
 
     Parameters
     ----------
@@ -357,10 +357,8 @@ def gen_fedavg_client_fn(
         the DataLoader that will be used for testing
     """
 
-
     def client_fn(cid: str) -> FlowerClient:
         """Create a Flower client representing a single organization."""
-
         # Load model
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         net = model.to(device)
@@ -372,7 +370,14 @@ def gen_fedavg_client_fn(
 
         # Create a  single Flower client representing a single organization
         return FedAvgClient(
-            net, trainloader, valloader, device, num_epochs, learning_rate, weight_decay, momentum
+            net,
+            trainloader,
+            valloader,
+            device,
+            num_epochs,
+            learning_rate,
+            weight_decay,
+            momentum,
         )
 
     return client_fn
