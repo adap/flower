@@ -81,11 +81,10 @@ class Strategy(fl.server.strategy.FedAvg):
             (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for _, fit_res in results
         ]
-        print(weights_results[0])
         embeddings_aggregated = aggregate(weights_results)[0]
         embedding_server = torch.from_numpy(embeddings_aggregated).requires_grad_()
         output = self.model(embedding_server)
-        loss = self.criterion(output, self.data[0][1])
+        loss = self.criterion(output, self.data[0][1].unsqueeze(1))
         loss.backward()
 
         gradient_np = embedding_server.grad.numpy()

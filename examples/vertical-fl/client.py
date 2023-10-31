@@ -25,19 +25,17 @@ class FlowerClient(fl.client.NumPyClient):
         self.optimizer = torch.optim.SGD(self.model.parameters(), lr=0.01)
 
     def get_parameters(self, config):
-        print("wesh")
         return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
     def fit(self, parameters, config):
         self.embedding = self.model(self.data[0][0])
-        print(type(self.embedding.detach().numpy()))
         return [self.embedding.detach().numpy()], 1, {}
 
     def evaluate(self, parameters, config):
-        self.embedding.backward(torch.from_numpy(parameters))
+        self.embedding.backward(torch.from_numpy(parameters[0]))
         self.optimizer.step()
         self.optimizer.zero_grad()
-        return 1, 1, {"accuracy"}
+        return 1.0, 1, {"accuracy": 0.0}
 
 
 # Start Flower client
