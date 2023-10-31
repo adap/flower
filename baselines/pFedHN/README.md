@@ -1,29 +1,29 @@
 ---
 Title: Personalized Federated Learning using Hypernetworks
 Url: https://arxiv.org/abs/2103.04628
-Labels: ["data heterogenity", "hypernetworks","personalised federated learning",] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-Dataset: MNIST, CIFAR-10, CIFAR-100 # list of datasets you include in your baseline
+Labels: [data heterogenity, hypernetworks, personalised FL,]
+Dataset: [MNIST, CIFAR-10, CIFAR-100]
 ---
 
-# *pFedHN*
+# Personalized Federated Learning using Hypernetworks
 
+> Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
+**Paper:** [arxiv.org/abs/2103.04628](https://arxiv.org/abs/2103.04628)
 
-****Paper:**** [arxiv.org/abs/2103.04628](https://arxiv.org/abs/2103.04628)
+**Authors:** Aviv Shamsian, Aviv Navon, Ethan Fetaya, Gal Chechik
 
-****Authors:**** Aviv Shamsian,Aviv Navon,Ethan Fetaya,Gal Chechik
-
-****Abstract:**** Personalized federated learning is tasked with training machine learning models for multiple clients, each with its own data distribution. The goal is to train personalized models in a collaborative way while accounting for data disparities across clients and reducing communication costs. We propose a novel approach to this problem using hypernetworks, termed pFedHN for personalized Federated HyperNetworks. In this approach, a central hypernetwork model is trained to generate a set of models, one model for each client. This architecture provides effective parameter sharing across clients, while maintaining the capacity to generate unique and diverse personal models. Furthermore, since hypernetwork parameters are never transmitted, this approach decouples the communication cost from the trainable model size. We test pFedHN empirically in several personalized federated learning challenges and find that it outperforms previous methods. Finally, since hypernetworks share information across clients we show that pFedHN can generalize better to new clients whose distributions differ from any client observed during training.
+**Abstract:** Personalized federated learning is tasked with training machine learning models for multiple clients, each with its own data distribution. The goal is to train personalized models in a collaborative way while accounting for data disparities across clients and reducing communication costs. We propose a novel approach to this problem using hypernetworks, termed pFedHN for personalized Federated HyperNetworks. In this approach, a central hypernetwork model is trained to generate a set of models, one model for each client. This architecture provides effective parameter sharing across clients, while maintaining the capacity to generate unique and diverse personal models. Furthermore, since hypernetwork parameters are never transmitted, this approach decouples the communication cost from the trainable model size. We test pFedHN empirically in several personalized federated learning challenges and find that it outperforms previous methods. Finally, since hypernetworks share information across clients we show that pFedHN can generalize better to new clients whose distributions differ from any client observed during training.
 
 ## About this baseline
 
-****What’s implemented:**** "The code in the repository reproduces the paper by implementing the concept of hypernetworks which create weights for that target network thus resolving the problems of dataheterogenity.The hypernetworks lies in the server and the clients have the target model. Initially hypernetwork sends the weights from the server which is loaded into the target net . After the targetnet is trained we pass the delta_theta to the client , which inturn updated the phi_gradients for the hypernetwork and the flow goes on."
+**What’s implemented:** The code in the repository reproduces the paper by implementing the concept of hypernetworks which create weights for that target network thus resolving the problems of dataheterogenity. The hypernetworks lies in the server and the clients have the target model. Initially hypernetwork sends the weights from the server which is loaded into the target net. After the targetnet is trained we pass the delta_theta to the client, which inturn updated the phi_gradients for the hypernetwork and the flow goes on.
 
-****Datasets:**** MNIST,CIFAR-10,CIFAR-100 from torchvision 
+**Datasets:** MNIST, CIFAR-10, CIFAR-100 from torchvision 
 
-****Hardware Setup:**** All of the experiments were run on the 12-core CPU of a MacBook Pro M2 Pro with 32GB of RAM. 
+**Hardware Setup:** All of the experiments were run on the 12-core CPU of a MacBook Pro M2 Pro with 32GB of RAM. 
 
-****Contributors:**** 
+**Contributors:** 
 ---
 | Names     | Profiles |
 | ----------- | ----------- |
@@ -34,20 +34,19 @@ Dataset: MNIST, CIFAR-10, CIFAR-100 # list of datasets you include in your basel
 
 ## Experimental Setup
 
-****Task:**** : Image Classification
+**Task:** Image Classification
 
-****Model:**** : CNNHyper for the HyperNetwork , CNNTarget For the TargetNetwork
+**Model:** CNNHyper for the HyperNetwork , CNNTarget For the TargetNetwork
 
 **Dataset:** This baseline includes the MNIST, CIFAR-10 , CIFAR-100 datasets. By default it will be partitioned into 50 clients following Non-IID distribution. The settings are as follow:
 
 | Dataset | #classes | partitioning method | classes per client |
 | :------ | :---: | :---: | :---: |
 | MNIST | 10 | Non-IID | 2 |
-| CIFAR10 | 10 | Non-IID | 2 |
-| CIFAR10 | 100 | Non-IID | 10 |
+| CIFAR10 | 10<br>100 | Non-IID | 2<br>10 |
 
 
-****Training Hyperparameters:**** The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python3 -m pFedHN.main` directly)
+**Training Hyperparameters:** The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python3 -m pFedHN.main` directly)
 
 | Description | Default Value |
 | ----------- | ----- |
@@ -106,7 +105,7 @@ poetry env use 3.10.11
 # Install the base Poetry environment
 poetry install
 
-# activate the environment
+# Activate the environment
 poetry shell
 ```
 
