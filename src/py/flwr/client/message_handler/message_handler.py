@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,9 +28,8 @@ from flwr.client.message_handler.task_handler import (
     get_server_message_from_task_ins,
     wrap_client_message_in_task_res,
 )
-from flwr.client.numpy_client_wrapper import to_client
 from flwr.client.secure_aggregation import SecureAggregationHandler
-from flwr.client.typing import ClientFn, ClientLike
+from flwr.client.typing import ClientFn
 from flwr.common import serde
 from flwr.proto.task_pb2 import SecureAggregation, Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
@@ -64,8 +63,7 @@ def handle(client_fn: ClientFn, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
     server_msg = get_server_message_from_task_ins(task_ins, exclude_reconnect_ins=False)
     if server_msg is None:
         # Instantiate the client
-        client_like: ClientLike = client_fn("-1")
-        client = to_client(client_like)
+        client = client_fn("-1")
         # Secure Aggregation
         if task_ins.task.HasField("sa") and isinstance(
             client, SecureAggregationHandler
@@ -76,7 +74,7 @@ def handle(client_fn: ClientFn, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
             task_res = TaskRes(
                 task_id="",
                 group_id="",
-                workload_id="",
+                workload_id=0,
                 task=Task(
                     ancestry=[],
                     sa=SecureAggregation(named_values=serde.named_values_to_proto(res)),
@@ -120,8 +118,7 @@ def handle_legacy_message(
         return disconnect_msg, sleep_duration, False
 
     # Instantiate the client
-    client_like: ClientLike = client_fn("-1")
-    client = to_client(client_like)
+    client = client_fn("-1")
     # Execute task
     if field == "get_properties_ins":
         return _get_properties(client, server_msg.get_properties_ins), 0, True

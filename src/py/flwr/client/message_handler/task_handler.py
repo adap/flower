@@ -1,4 +1,4 @@
-# Copyright 2023 Adap GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -129,7 +129,7 @@ def wrap_client_message_in_task_res(client_message: ClientMessage) -> TaskRes:
     return TaskRes(
         task_id="",
         group_id="",
-        workload_id="",
+        workload_id=0,
         task=Task(ancestry=[], legacy_client_message=client_message),
     )
 
