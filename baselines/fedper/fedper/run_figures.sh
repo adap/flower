@@ -31,6 +31,6 @@ python -m fedper.main --config-path conf --config-name cifar10 num_rounds=25 mod
 for model in mobile resnet
 do 
     python -m fedper.main --config-path conf --config-name flickr model.num_head_layers=2 model_name=${model} algorithm=fedper num_rounds=35&&
-    python -m fedper.main --config-path conf --config-name flickr model_name=${model} num_rounds=35
+    python -m fedper.main --config-path conf --config-name flickr algorithm=fedavg model_name=${model} num_rounds=35
 done
 
