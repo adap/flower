@@ -158,6 +158,8 @@ def plot_metric_from_history(
     axs[0].set_ylabel("Loss")
     axs[1].set_ylabel("Accuracy")
 
+    axs[0].grid()
+    axs[1].grid()
     # plt.title(f"{metric_type.capitalize()} Validation - MNIST")
     plt.xlabel("Rounds")
     # plt.legend(loc="lower right")
