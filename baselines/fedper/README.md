@@ -22,8 +22,15 @@ dataset: [CIFAR-10, FLICKR-AES]
 **Datasets:** CIFAR10 from PyTorch's Torchvision and FLICKR-AES. FLICKR-AES was proposed as dataset in _Personalized Image Aesthetics_ (Ren et al., 2017) and can be downloaded using a link provided on thier [GitHub](https://github.com/alanspike/personalizedImageAesthetics). One must first download FLICKR-AES-001.zip (5.76GB), extract all inside and place in baseline/FedPer/datasets. To this location, also download the other 2 related files: (1) FLICKR-AES_image_labeled_by_each_worker.csv, and (2) FLICKR-AES_image_score.txt. Images are also scaled to 224x224 for both datasets. This is not explicitly stated in the paper but seems to be boosting performance. Also, for FLICKR dataset, it is stated in the paper that they use data from clients with more than 60 and less than 290 rated images. This amounts to circa 60 clients and we randomly select 30 out of these (as in paper). Therefore, the results might differ somewhat but only slighly. Since the pre-processing steps in the paper are somewhat obscure, the metric values in the plots below may differ slightly, but not the overall results and findings. 
 
 ```bash
-# cd into fedper/datasets
+# These steps are not needed if you are only interested in CIFAR-10
+
+# Create the `datasets` directory if it doesn't exist already
+mkdir datasets
+
+# move/copy the downloaded FLICKR-AES-001.zip file to `datasets/`
+
 # unzip dataset to a directory named `flickr`
+cd datasets
 unzip FLICKR-AES-001.zip -d flickr
 
 # then move the .csv files inside flickr
@@ -85,12 +92,13 @@ pyenv local 3.10.6
 # Tell poetry to use python 3.10
 poetry env use 3.10.6
 
-# install the base Poetry environment
+# Install the base Poetry environment
 poetry install
 
-# activate the environment
+# Activate the environment
 poetry shell
 ```
+
 ## Running the Experiments
 ```bash
 python -m fedper.main # this will run using the default settings in the `conf/base.yaml` 
@@ -98,23 +106,13 @@ python -m fedper.main # this will run using the default settings in the `conf/ba
 # When running models for flickr dataset, it is important to keep batch size at 4 or lower since some clients (for reproducing experiment) will have very few examples of one class
 ```
 
-To reproduce figures:
-```bash
-# make fedper/run_figures.sh executable
-chmod u+x fedper/run_figures.sh
-# uncomment lines in script that you want to run, then  
-bash fedper/run_figures.sh
-
-# this config can also be overriden from the CLI
-```
-
-What you need to change in configuration files: 
+While the config files contain a large number of settings, the ones below are the main ones you'd likely want to modify to .
 ```bash
 algorithm: fedavg, fedper # these are currently supported
 server_device: 'cuda:0', 'cpu'
 dataset.name: 'cifar10', 'flickr'
-num_classes: 10, 100, 5 # respectively 
-dataset.num_classes: 4, 8, 10 #for non-iid split assigning n num_classes to each client (these numbers for CIFAR10 experiments)
+num_classes: 10, 5 # respectively 
+dataset.num_classes: 4, 8, 10 # for non-iid split assigning n num_classes to each client (these numbers for CIFAR10 experiments)
 model_name: mobile, resnet
 ```
 
@@ -130,16 +128,25 @@ python -m fedper.main --multirun --config_name cifar10 dataset.num_classes=4,8,1
 
 ## Expected Results
 
+To reproduce figures make `fedper/run_figures.sh` executable and run it. By default all experiments will be run:
+
+```bash
+# Make fedper/run_figures.sh executable
+chmod u+x fedper/run_figures.sh
+# Run the script 
+bash fedper/run_figures.sh
+```
+
 Having run the `run_figures.sh`, the expected results should look something like this: 
 
 **MobileNet-v1 and ResNet-34 on CIFAR10**
 
-<img src="_static/mobile_plot_figure_2.png" width="500"/> <img src="_static/resnet_plot_figure_2.png" width="500"/>
+<img src="_static/mobile_plot_figure_2.png" width="400"/> <img src="_static/resnet_plot_figure_2.png" width="400"/>
 
 **MobileNet-v1 and ResNet-34 on CIFAR10 using varying size of head**
 
-<img src="_static/mobile_plot_figure_num_head.png" width="500"/> <img src="_static/resnet_plot_figure_num_head.png" width="500"/>
+<img src="_static/mobile_plot_figure_num_head.png" width="400"/> <img src="_static/resnet_plot_figure_num_head.png" width="400"/>
 
 **MobileNet-v1 and ResNet-34 on FLICKR-AES**
 
-<img src="_static/mobile_plot_figure_flickr.png" width="500"/> <img src="_static/resnet_plot_figure_flickr.png" width="500"/>
+<img src="_static/mobile_plot_figure_flickr.png" width="400"/> <img src="_static/resnet_plot_figure_flickr.png" width="400"/>
