@@ -19,27 +19,32 @@ The Flower Community is growing quickly - we're a friendly group of researchers,
 Flower Baselines
 ----------------
 
-Flower Baselines are a collection of organised scripts used to reproduce results from well-known publications or benchmarks. You can check which baselines already exist and/or contribute your own baseline.
+Flower Baselines are a collection of organised directories used to reproduce results from well-known publications or benchmarks. You can check which baselines already exist and/or contribute your own baseline.
+
+.. BASELINES_TABLE_ANCHOR
+
 
 Tutorials
 ~~~~~~~~~
 
 A learning-oriented series of tutorials, the best place to start.
 
-.. toctree::
-  :maxdepth: 1
-  :caption: Tutorials
-   
-  tutorial-use-baselines
-  tutorial-contribute-baselines
+.. note::
+  Coming soon
+
 
 How-to guides
 ~~~~~~~~~~~~~
 
 Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
 
-.. note::
-  Coming soon
+.. toctree::
+  :maxdepth: 1
+  :caption: How-to Guides
+
+  how-to-use-baselines
+  how-to-contribute-baselines
+
 
 Explanations
 ~~~~~~~~~~~~
@@ -54,5 +59,3 @@ References
 
 Information-oriented API reference and other reference material.
 
-.. note::
-  This section will soon list all available Flower Baselines
