@@ -14,9 +14,13 @@
 
 #pragma once
 // cppcheck-suppress missingInclude
-#include "transport.grpc.pb.h"
+#include "flwr/proto/transport.grpc.pb.h"
 // cppcheck-suppress missingInclude
-#include "transport.pb.h"
+#include "flwr/proto/transport.pb.h"
+// cppcheck-suppress missingInclude
+#include "flwr/proto/fleet.grpc.pb.h"
+// cppcheck-suppress missingInclude
+#include "flwr/proto/fleet.pb.h"
 #include "typing.h"
 using flwr::proto::ClientMessage;
 using flwr::proto::ServerMessage;
