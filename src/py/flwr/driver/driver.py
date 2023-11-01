@@ -51,6 +51,11 @@ class Driver:
             * CA certificate.
             * server certificate.
             * server private key.
+    invoker : Optional[RetryInvoker] (default: None)
+        A `RetryInvoker` object to control the retry behavior on Driver API failures.
+        If set to None, a default instance is created with an exponential backoff
+        strategy, up to 10 attempts, a 300-second time limit, and retries are aborted
+        only if the RpcError's status code is not `StatusCode.UNAVAILABLE`.
     """
 
     def __init__(
