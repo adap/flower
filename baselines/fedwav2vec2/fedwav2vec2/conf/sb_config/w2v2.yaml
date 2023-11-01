@@ -27,7 +27,6 @@ train_csv: data/ted_train.csv
 valid_csv: data/ted_dev.csv
 test_csv: data/ted_test.csv
 skip_prep: False # Skip data preparation
-device: cpu
 # Training parameters
 
 avoid_if_longer_than: 10.0

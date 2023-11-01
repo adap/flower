@@ -18,14 +18,13 @@ dataset: [TED-LIUM 3]
 
 ## About this baseline
 
-**What’s implemented:** Figure 1 in the paper.
+**What’s implemented:** Figure 1 in the paper. However, this baseline only provide the SSL from figure 1. However, this baseline exclusively offers the self-supervised learning (SSL) approach as depicted in Figure 1 due to it superior performance. If you wish to implement non-SSL methods yourself, you can use the provided recipe and pre-trained model by Speechbrain, available at this link: [Speechbrain Recipe for Non-SSL](https://github.com/speechbrain/speechbrain/tree/develop/recipes/CommonVoice/ASR/seq2seq).
 
 **Datasets:** TED-LIUM 3 dataset. It's requires a 54GB download. Once extracted it is ~60 GB. You can read more about this dataset in the [TED-LIUM 3](https://arxiv.org/abs/1805.04699) paper. A more concise description of this dataset can be found in the [OpenSLR](https://www.openslr.org/51/) site.
 
 **Hardware Setup:** Training `wav2vec2.0` is a bit memory intensive so you'd need at least a 24GB GPU. With the current settings, each client requires ~15GB of VRAM. This suggest you could run the experiment fine on a 16GB GPU but not if you also need to pack the global model evaluation stage on the same GPU. On a single RTX 3090Ti (24GB VRAM) each round takes between 20 and 40 minutes (depending on which clients are sampled, some clients have more data than others).
 
-**Contributors:** Tuan Nguyen
-
+**Contributors:** [Tuan Nguyen](https://www.linkedin.com/in/manh-tuan-nguyen-595898203)
 
 ## Experimental Setup
 
@@ -68,7 +67,6 @@ For more details, please refer to the relevant section in the paper.
 | `strategy.weight_strategy` | `num`| Different way to average clients weight. Could be chose between `num`,`loss`,`wer` |
 | `client_resources.num_cpus` | `8`| Number of cpus per client. Recommended to have more than 8 |
 | `client_réources.num_gpus` | `1`| Number of gpus per client. Recommended to have at least 1 with VRAM > 24GB |
-
 
 
 
