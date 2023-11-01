@@ -148,7 +148,7 @@ class RetryInvoker:
     Initialize a `RetryInvoker` with exponential backoff and invoke a function:
 
     >>> invoker = RetryInvoker(
-    ...     exponential,  # # or use lambda: exponential(3, 2) to pass arguments
+    ...     exponential,  # Or use `lambda: exponential(3, 2)` to pass arguments
     ...     grpc.RpcError,
     ...     max_tries=3,
     ...     max_time=None,
