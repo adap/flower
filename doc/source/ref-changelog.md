@@ -38,6 +38,8 @@
 
   - DepthFL [#2295](https://github.com/adap/flower/pull/2295)
 
+  - FedPer [#2266](https://github.com/adap/flower/pull/2266)
+
   - FedWav2vec [#2551](https://github.com/adap/flower/pull/2551)
 
 - **Update Flower Examples** ([#2384](https://github.com/adap/flower/pull/2384),[#2425](https://github.com/adap/flower/pull/2425), [#2526](https://github.com/adap/flower/pull/2526))
