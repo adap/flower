@@ -54,7 +54,7 @@ def test_successful_invocation() -> None:
     backoff_handler = Mock()
     giveup_handler = Mock()
     invoker = RetryInvoker(
-        constant(0.1),
+        lambda: constant(0.1),
         ValueError,
         max_tries=None,
         max_time=None,
@@ -77,7 +77,7 @@ def test_failure() -> None:
     """Check termination when unexpected exception is raised."""
     # Prepare
     # `constant([0.1])` generator will raise `StopIteration` after one iteration.
-    invoker = RetryInvoker(constant(0.1), TypeError, None, None)
+    invoker = RetryInvoker(lambda: constant(0.1), TypeError, None, None)
 
     # Execute and Assert
     with pytest.raises(ValueError):
@@ -88,7 +88,11 @@ def test_failure_two_exceptions(mock_sleep: MagicMock) -> None:
     """Verify one retry on a specified iterable of exceptions."""
     # Prepare
     invoker = RetryInvoker(
-        constant(0.1), (TypeError, ValueError), max_tries=2, max_time=None, jitter=None
+        lambda: constant(0.1),
+        (TypeError, ValueError),
+        max_tries=2,
+        max_time=None,
+        jitter=None,
     )
 
     # Execute and Assert
@@ -101,7 +105,7 @@ def test_backoff_on_failure(mock_sleep: MagicMock) -> None:
     """Verify one retry on specified exception."""
     # Prepare
     # `constant([0.1])` generator will raise `StopIteration` after one iteration.
-    invoker = RetryInvoker(constant([0.1]), ValueError, None, None, jitter=None)
+    invoker = RetryInvoker(lambda: constant([0.1]), ValueError, None, None, jitter=None)
 
     # Execute and Assert
     with pytest.raises(ValueError):
@@ -114,7 +118,7 @@ def test_max_tries(mock_sleep: MagicMock) -> None:
     # Prepare
     # Disable `jitter` to ensure 0.1s wait time.
     invoker = RetryInvoker(
-        constant(0.1), ValueError, max_tries=2, max_time=None, jitter=None
+        lambda: constant(0.1), ValueError, max_tries=2, max_time=None, jitter=None
     )
 
     # Execute and Assert
@@ -132,7 +136,9 @@ def test_max_time(mock_time: MagicMock, mock_sleep: MagicMock) -> None:
         0.0,
         3.0,
     ]
-    invoker = RetryInvoker(constant(2), ValueError, max_tries=None, max_time=2.5)
+    invoker = RetryInvoker(
+        lambda: constant(2), ValueError, max_tries=None, max_time=2.5
+    )
 
     # Execute and Assert
     with pytest.raises(ValueError):
@@ -148,7 +154,7 @@ def test_event_handlers() -> None:
     backoff_handler = Mock()
     giveup_handler = Mock()
     invoker = RetryInvoker(
-        constant(0.1),
+        lambda: constant(0.1),
         ValueError,
         max_tries=2,
         max_time=None,
@@ -173,7 +179,7 @@ def test_giveup_condition() -> None:
         return isinstance(exc, ValueError)
 
     invoker = RetryInvoker(
-        constant(0.1), ValueError, None, None, should_giveup=should_give_up
+        lambda: constant(0.1), ValueError, None, None, should_giveup=should_give_up
     )
 
     # Execute and Assert
