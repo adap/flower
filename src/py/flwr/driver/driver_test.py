@@ -18,6 +18,8 @@
 import unittest
 from unittest.mock import Mock, patch
 
+from grpc import RpcError, StatusCode
+
 from flwr.driver.driver import Driver
 from flwr.proto.driver_pb2 import (
     GetNodesRequest,
@@ -25,6 +27,13 @@ from flwr.proto.driver_pb2 import (
     PushTaskInsRequest,
 )
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
+
+
+def mock_rpc_error(code: StatusCode) -> RpcError:
+    """Get an RpcError with the given error code."""
+    err = RpcError()
+    err.code = lambda: code
+    return err
 
 
 class TestDriver(unittest.TestCase):
@@ -151,3 +160,122 @@ class TestDriver(unittest.TestCase):
 
         # Assert
         self.mock_grpc_driver.disconnect.assert_not_called()
+
+
+class TestDriverRetryMechanism(unittest.TestCase):
+    """Test class for verifying the retry mechanism of the Driver."""
+
+    def setUp(self) -> None:
+        """Initialize mock GrpcDriver and Driver instance before each test."""
+        mock_response = Mock()
+        mock_response.workload_id = 61016
+        self.mock_grpc_driver = Mock()
+        self.mock_grpc_driver.create_workload.return_value = mock_response
+        self.patcher = patch(
+            "flwr.driver.driver.GrpcDriver", return_value=self.mock_grpc_driver
+        )
+        self.sleep_patcher = patch("time.sleep", lambda s: None)
+        self.patcher.start()
+        self.sleep_patcher.start()
+        self.driver = Driver()
+
+    def tearDown(self) -> None:
+        """Cleanup after each test."""
+        self.sleep_patcher.stop()
+        self.patcher.stop()
+
+    def test_retry_get_nodes(self) -> None:
+        """Test if the `get_nodes` method retries on RpcError."""
+        # Prepare
+        mock_correct_res = Mock()
+        mock_correct_res.nodes = ["a", "b", "c"]
+        self.mock_grpc_driver.get_nodes.side_effect = [
+            mock_rpc_error(StatusCode.UNAVAILABLE)
+        ] * 3 + [mock_correct_res]
+        driver = Driver()
+
+        # Execute
+        res = driver.get_nodes()
+
+        # Assert
+        self.assertEqual(res, mock_correct_res.nodes)
+        # `get_nodes` is expected to be called 4 times (3 failures + 1 success)
+        self.assertEqual(self.mock_grpc_driver.get_nodes.call_count, 4)
+
+    def test_retry_push_task_ins(self) -> None:
+        """Test if the `push_task_ins` method retries on RpcError."""
+        # Prepare
+        mock_correct_res = Mock()
+        mock_correct_res.task_ids = ["a", "b", "c"]
+        self.mock_grpc_driver.push_task_ins.side_effect = [
+            mock_rpc_error(StatusCode.UNAVAILABLE)
+        ] * 3 + [mock_correct_res]
+        driver = Driver()
+
+        # Execute
+        res = driver.push_task_ins([TaskIns(), TaskIns(), TaskIns()])
+
+        # Assert
+        self.assertEqual(res, mock_correct_res.task_ids)
+        # `push_task_ins` is expected to be called 4 times (3 failures + 1 success)
+        self.assertEqual(self.mock_grpc_driver.push_task_ins.call_count, 4)
+
+    def test_retry_pull_task_res(self) -> None:
+        """Test if the `pull_task_res` method retries on RpcError."""
+        # Prepare
+        mock_correct_res = Mock()
+        mock_correct_res.task_res_list = ["resa", "resb", "resc"]
+        self.mock_grpc_driver.pull_task_res.side_effect = [
+            mock_rpc_error(StatusCode.UNAVAILABLE)
+        ] * 3 + [mock_correct_res]
+        driver = Driver()
+
+        # Execute
+        res = driver.pull_task_res(["a", "b", "c"])
+
+        # Assert
+        self.assertEqual(res, mock_correct_res.task_res_list)
+        # `pull_task_res` is expected to be called 4 times (3 failures + 1 success)
+        self.assertEqual(self.mock_grpc_driver.pull_task_res.call_count, 4)
+
+    def test_retry_get_nodes_and_fail(self) -> None:
+        """Test if the `get_nodes` method fail on invalid RpcError."""
+        # Prepare
+        self.mock_grpc_driver.get_nodes.side_effect = mock_rpc_error(
+            StatusCode.UNIMPLEMENTED
+        )
+        driver = Driver()
+
+        # Execute and assert
+        with self.assertRaises(RpcError) as context:
+            driver.get_nodes()
+        self.mock_grpc_driver.get_nodes.assert_called_once()
+        self.assertEqual(context.exception.code(), StatusCode.UNIMPLEMENTED)
+
+    def test_retry_push_task_ins_and_fail(self) -> None:
+        """Test if the `push_task_ins` method fail on invalid RpcError."""
+        # Prepare
+        self.mock_grpc_driver.push_task_ins.side_effect = mock_rpc_error(
+            StatusCode.UNIMPLEMENTED
+        )
+        driver = Driver()
+
+        # Execute and assert
+        with self.assertRaises(RpcError) as context:
+            driver.push_task_ins([TaskIns()])
+        self.mock_grpc_driver.push_task_ins.assert_called_once()
+        self.assertEqual(context.exception.code(), StatusCode.UNIMPLEMENTED)
+
+    def test_retry_pull_task_res_and_fail(self) -> None:
+        """Test if the `pull_task_res` method fail on invalid RpcError."""
+        # Prepare
+        self.mock_grpc_driver.pull_task_res.side_effect = mock_rpc_error(
+            StatusCode.UNIMPLEMENTED
+        )
+        driver = Driver()
+
+        # Execute and assert
+        with self.assertRaises(RpcError) as context:
+            driver.pull_task_res(["a", "b", "c"])
+        self.mock_grpc_driver.pull_task_res.assert_called_once()
+        self.assertEqual(context.exception.code(), StatusCode.UNIMPLEMENTED)

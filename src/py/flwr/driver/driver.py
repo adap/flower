@@ -67,12 +67,12 @@ class Driver:
         self.lock = Lock()
         # Initialize invoker
         if invoker is None:
-            err_codes = [StatusCode.UNAVAILABLE]
+            err_codes = (StatusCode.UNAVAILABLE,)
             invoker = RetryInvoker(
-                exponential(),
+                exponential,
                 RpcError,
-                max_tries=5,
-                max_time=None,
+                max_tries=10,
+                max_time=300,
                 should_giveup=lambda e: e.code() not in err_codes,  # type: ignore
             )
         self.invoker = invoker
