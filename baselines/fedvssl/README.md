@@ -135,7 +135,21 @@ python -m fedvssl.main pre_training=false pretrained_model_path=/path/to/checkpo
 |FedVSSL$(\alpha=0.9, \beta=0)$| [round-540.npz](https://drive.google.com/file/d/1W1oCnLXX0UJhQ4MlmRw-r7z5DTCeO75b/view?usp=sharing) | 80.62     |
 |FedVSSL$(\alpha=0.9, \beta=1)$| [round-540.npz](https://drive.google.com/file/d/1BK-bbyunxTWNqs-QyOYiohaNv-t3-hYe/view?usp=sharing) | 79.41     |
 
+# Playing Around with code
+In this toy experiment, we simulate the cross-silo scenario with UCF-101 video data that is distributed among 5 clients. We did the FL pretraining of CtP SSL for 20 rounds followed by finetuning the whole network on UCF-101 video data. The base.yaml file contains all the details about the pretraining and finetuning setup. 
 
+To start the pretraining one can use the following code:
+``` bash
+python -m fedvssl.main pre_training=true
+```
+This will create a folder named fedvssl_results to save the global checkpoints and the local clients' training logs.
 
+After pretraining one can use the following code to run the finetunining. 
+```bash
+python -m fedvssl.main pre_training=false pretrained_model_path=/path/to/checkpoints
+```
+The finetuning lasts for 150 epochs. 
 
-
+| Method | FL-Setup| Clients| Pretrain Dataset | Finetune Dataset| Top-1% Acc. | Top 5% Acc.|
+|--------| --------|--------|------------------|-----------------|-------------|------------|
+|FedVSSL$(\alpha=0.9,\beta=1)$ | Cross-Silo| 5 | UCF-101| UCF-101| 66.32%| 86.57%|
