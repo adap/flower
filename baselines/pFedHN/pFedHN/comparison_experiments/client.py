@@ -8,7 +8,6 @@ import torch
 from pFedHN.comparison_experiments.trainer_fedavg import train_fedavg
 from pFedHN.comparison_experiments.trainer_perfedavg import train_perfedavg
 from pFedHN.models import CNNTarget
-from pFedHN.utils import get_device
 
 
 # pylint: disable=too-many-instance-attributes
@@ -43,8 +42,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.trainloader = trainloader
         self.testloader = testloader
         self.valloader = valloader
-        self.gpus = cfg.client_resources.gpus
-        self.device = get_device(gpus=self.gpus)
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.epochs = cfg.client.num_epochs
         self.n_kernels = cfg.model.n_kernels
         self.learning_rate = cfg.model.lr

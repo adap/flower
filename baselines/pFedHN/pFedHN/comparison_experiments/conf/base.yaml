@@ -28,5 +28,5 @@ client:
   min_available_clients: 5
 
 client_resources:
-  cpus: 1
-  gpus: 0
+  num_cpus: 1
+  num_gpus: 0
