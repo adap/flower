@@ -84,8 +84,11 @@ Then, download the `CtP` repo:
 git clone https://github.com/yan-gao-GY/CtP.git fedvssl/CtP
 ```
 
-After that, please follow the instruction in `fevssl/dataset_preparation.py` to download the dataset, 
-complete pre-processing and data partitioning for FL. Finally, we can launch the training:
+After that, Please make sure you have installed `unrar` by `sudo apt install unrar`.
+Then, please follow the instruction in `fevssl/dataset_preparation.py` to download the dataset, 
+complete pre-processing and data partitioning for FL.
+
+Finally, we can launch the training:
 
 ```bash
 # run federated SSL training with FedVSSL
