@@ -11,7 +11,7 @@ from pFedHN.client import generate_client_fn
 from pFedHN.dataset import gen_random_loaders
 from pFedHN.models import LocalLayer
 from pFedHN.server import pFedHNServer
-from pFedHN.utils import get_device, set_seed
+from pFedHN.utils import set_seed
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -37,7 +37,7 @@ def main(cfg: DictConfig):
 
     if cfg.model.variant == 1:
         node_local_layers = [
-            LocalLayer(n_input=84, n_output=cfg.model.out_dim).to(get_device())
+            LocalLayer(n_input=84, n_output=cfg.model.out_dim)
             for _ in range(cfg.client.num_nodes)
         ]
         node_local_optimizers = [
@@ -77,10 +77,7 @@ def main(cfg: DictConfig):
         ),
         config=fl.server.ServerConfig(num_rounds=cfg.client.num_rounds),
         strategy=strategy,
-        client_resources={
-            "num_cpus": cfg.client_resources.cpus,
-            "num_gpus": cfg.client_resources.gpus,
-        },
+        client_resources=cfg.client_resources,
     )
 
 

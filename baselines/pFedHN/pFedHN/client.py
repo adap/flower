@@ -6,8 +6,7 @@ import flwr as fl
 import torch
 
 from pFedHN.models import CNNTarget
-from pFedHN.trainer import train
-from pFedHN.utils import get_device
+from pFedHN.trainer import test, train
 
 
 # pylint: disable=too-many-instance-attributes
@@ -62,8 +61,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.local_layers = local_layers
         self.local_optims = local_optims
         self.local = local
-        self.gpus = cfg.client_resources.gpus
-        self.device = get_device(gpus=self.gpus)
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.epochs = cfg.client.num_epochs
         self.n_kernels = cfg.model.n_kernels
         self.learning_rate = cfg.model.inner_lr
@@ -108,7 +106,7 @@ class FlowerClient(fl.client.NumPyClient):
         """
         inner_state = self.set_parameters(parameters)
 
-        test_loss, test_acc, final_state = train(
+        final_state = train(
             self.net,
             self.trainloader,
             self.testloader,
@@ -133,7 +131,25 @@ class FlowerClient(fl.client.NumPyClient):
         return (
             delta_theta,
             len(self.trainloader),
-            {"test_loss": test_loss, "test_acc": test_acc},
+            # {"test_loss": test_loss, "test_acc": test_acc},
+            {},
+        )
+
+    def evaluate(self, parameters, config):
+        """Evaluate function."""
+        self.set_parameters(parameters)
+        eval_loss, eval_correct, eval_total = test(
+            self.net,
+            self.testloader,
+            self.local,
+            self.local_layers,
+            self.cid,
+            self.device,
+        )
+        return (
+            float(eval_loss),
+            len(self.testloader),
+            {"correct": eval_correct, "total": eval_total},
         )
 
 

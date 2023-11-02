@@ -3,7 +3,6 @@
 actions.
 """
 import concurrent.futures
-import json
 import timeit
 from collections import OrderedDict
 from logging import DEBUG, INFO
@@ -11,7 +10,15 @@ from typing import List, Optional, Tuple, Union
 
 import flwr as fl
 import torch
-from flwr.common import Code, FitIns, FitRes, Parameters, ndarrays_to_parameters
+from flwr.common import (
+    Code,
+    EvaluateIns,
+    EvaluateRes,
+    FitIns,
+    FitRes,
+    Parameters,
+    ndarrays_to_parameters,
+)
 from flwr.common.logger import log
 from flwr.server import Server
 from flwr.server.client_manager import ClientManager
@@ -20,11 +27,14 @@ from flwr.server.history import History
 from flwr.server.strategy import Strategy
 
 from pFedHN.models import CNNHyper
-from pFedHN.utils import get_device
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
     List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+]
+EvaluateResultsAndFailures = Tuple[
+    List[Tuple[ClientProxy, EvaluateRes]],
+    List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
 ]
 
 
@@ -61,14 +71,78 @@ class pFedHNServer(Server):
         # self._client_manager = client_manager
         # self.strategy = strategy
 
-    def fit_round(self, server_round: int, timeout: Optional[float]):
-        """Perform a single round of federated averaging."""
-        # pylint: disable=too-many-locals
-        self.hnet.to(get_device())
+    def evaluate_round(self, server_round: int, timeout: Optional[float]):
+        """Perform federated evaluation."""
+        self.hnet.to(torch.device("cpu"))
 
         def weights_to_clients(client_id):
             weights = self.hnet(
-                torch.tensor([client_id], dtype=torch.long).to(get_device())
+                torch.tensor([client_id], dtype=torch.long).to(torch.device("cpu"))
+            )
+            return weights
+
+        client_instructions = self.strategy.configure_evaluate(
+            server_round=server_round,
+            parameters=None,  # type: ignore[arg-type]
+            client_manager=self._client_manager,
+        )
+
+        for client_instruction in client_instructions:
+            client_id = client_instruction[0].cid
+            client_weights = weights_to_clients(int(client_id))
+            array = [val.cpu().detach().numpy() for _, val in client_weights.items()]
+            parameters = ndarrays_to_parameters(array)
+            client_instruction[1].parameters = parameters
+
+        if not client_instructions:
+            log(INFO, "evaluate_round %s: no clients selected, cancel", server_round)
+            return None
+
+        log(
+            DEBUG,
+            "evaluate_round %s: strategy sampled %s clients (out of %s)",
+            server_round,
+            len(client_instructions),
+            self._client_manager.num_available(),
+        )
+        results, failures = evaluate_clients(
+            client_instructions,
+            max_workers=self.max_workers,
+            timeout=timeout,
+        )
+
+        log(
+            DEBUG,
+            "evaluate_round %s received %s results and %s failures",
+            server_round,
+            len(results),
+            len(failures),
+        )
+
+        self.hnet.eval()
+        aggregated_result = self.strategy.aggregate_evaluate(
+            server_round, results, failures
+        )
+        avg_loss = aggregated_result[0]
+        avg_acc = aggregated_result[1]["avg_acc"]
+
+        log(
+            DEBUG,
+            "AvgLoss: %.4f, AvgAcc: %.4f",
+            avg_loss,
+            avg_acc,
+        )
+
+        return avg_loss, avg_acc, (results, failures)
+
+    def fit_round(self, server_round: int, timeout: Optional[float]):
+        """Perform a single round of federated averaging."""
+        # pylint: disable=too-many-locals
+        self.hnet.to(torch.device("cpu"))
+
+        def weights_to_clients(client_id):
+            weights = self.hnet(
+                torch.tensor([client_id], dtype=torch.long).to(torch.device("cpu"))
             )
             return weights
 
@@ -159,31 +233,32 @@ class pFedHNServer(Server):
         ndarr = [val.cpu().numpy() for _, val in self.hnet.state_dict().items()]
         hnet_parameters = ndarrays_to_parameters(ndarr)
 
-        self.loss.append(metrics_aggregated["test_loss"])
-        self.accuracies.append(metrics_aggregated["test_acc"])
+        # self.loss.append(metrics_aggregated["test_loss"])
+        # self.accuracies.append(metrics_aggregated["test_acc"])
 
-        data = {
-            "round": server_round,
-            "loss": float(metrics_aggregated["test_loss"]),
-            "accuracies": float(metrics_aggregated["test_acc"]),
-        }
+        # data = {
+        #     "round": server_round,
+        #     "loss": float(metrics_aggregated["test_loss"]),
+        #     "accuracies": float(metrics_aggregated["test_acc"]),
+        # }
 
-        self.data.append(data)
-        file_path = "res.json"
+        # self.data.append(data)
+        # file_path = "res.json"
 
-        with open(file_path, "w", encoding="utf-8") as json_file:
-            json.dump(self.data, json_file)
+        # with open(file_path, "w", encoding="utf-8") as json_file:
+        #     json.dump(self.data, json_file)
 
-        log(
-            DEBUG,
-            "TargetModelLoss: %.4f, TargetModelAcc: %.4f",
-            metrics_aggregated["test_loss"],
-            metrics_aggregated["test_acc"],
-        )
+        # log(
+        #     DEBUG,
+        #     "TargetModelLoss: %.4f, TargetModelAcc: %.4f",
+        #     metrics_aggregated["test_loss"],
+        #     metrics_aggregated["test_acc"],
+        # )
         return hnet_parameters, metrics_aggregated, (results, failures)
 
     def fit(self, num_rounds: int, timeout: Optional[float]):
         """Handle all the fit operations in server side."""
+        # pylint: disable=too-many-locals
         history = History()
         log(INFO, "Hypernetwork is present in the server")
         log(INFO, "FL Starting")
@@ -221,6 +296,19 @@ class pFedHNServer(Server):
                     )
                     history.add_metrics_centralized(
                         server_round=current_round, metrics=metrics_cen
+                    )
+            res_fed = self.evaluate_round(
+                server_round=current_round,
+                timeout=timeout,
+            )
+            if res_fed is not None:
+                loss_fed, acc_fed, _ = res_fed
+                if loss_fed is not None:
+                    history.add_loss_distributed(
+                        server_round=current_round, loss=loss_fed
+                    )
+                    history.add_metrics_distributed(
+                        server_round=current_round, metrics={"avg_acc": acc_fed}
                     )
 
         end_time = timeit.default_timer()
@@ -277,6 +365,67 @@ def _handle_finished_future_after_fit(
 
     # Successfully received a result from a client
     result: Tuple[ClientProxy, FitRes] = future.result()
+    _, res = result
+
+    # Check result status code
+    if res.status.code == Code.OK:
+        results.append(result)
+        return
+
+    # Not successful, client returned a result where the status code is not OK
+    failures.append(result)
+
+
+def evaluate_clients(
+    client_instructions: List[Tuple[ClientProxy, EvaluateIns]],
+    max_workers: Optional[int],
+    timeout: Optional[float],
+) -> EvaluateResultsAndFailures:
+    """Evaluate parameters concurrently on all selected clients."""
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        submitted_fs = {
+            executor.submit(evaluate_client, client_proxy, ins, timeout)
+            for client_proxy, ins in client_instructions
+        }
+        finished_fs, _ = concurrent.futures.wait(
+            fs=submitted_fs,
+            timeout=None,  # Handled in the respective communication stack
+        )
+
+    # Gather results
+    results: List[Tuple[ClientProxy, EvaluateRes]] = []
+    failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]] = []
+    for future in finished_fs:
+        _handle_finished_future_after_evaluate(
+            future=future, results=results, failures=failures
+        )
+    return results, failures
+
+
+def evaluate_client(
+    client: ClientProxy,
+    ins: EvaluateIns,
+    timeout: Optional[float],
+) -> Tuple[ClientProxy, EvaluateRes]:
+    """Evaluate parameters on a single client."""
+    evaluate_res = client.evaluate(ins, timeout=timeout)
+    return client, evaluate_res
+
+
+def _handle_finished_future_after_evaluate(
+    future: concurrent.futures.Future,  # type: ignore
+    results: List[Tuple[ClientProxy, EvaluateRes]],
+    failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
+) -> None:
+    """Convert finished future into either a result or a failure."""
+    # Check if there was an exception
+    failure = future.exception()
+    if failure is not None:
+        failures.append(failure)
+        return
+
+    # Successfully received a result from a client
+    result: Tuple[ClientProxy, EvaluateRes] = future.result()
     _, res = result
 
     # Check result status code

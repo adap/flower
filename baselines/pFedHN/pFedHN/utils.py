@@ -22,13 +22,6 @@ def set_seed(seed):
     torch.manual_seed(seed)
 
 
-def get_device(no_cuda=False, gpus="0"):
-    """Get the device."""
-    return torch.device(
-        f"cuda:{gpus}" if torch.cuda.is_available() and not no_cuda else "cpu"
-    )
-
-
 ##########################################################
 # THE PLOTS #
 ##########################################################
@@ -36,7 +29,7 @@ def get_device(no_cuda=False, gpus="0"):
 
 def show_plots():
     """Display the plots based on results stored in res.json."""
-    with open("res.json", "r", encoding="utf-8") as json_file:
+    with open("res_test_1.json", "r", encoding="utf-8") as json_file:
         data = json.load(json_file)
 
     # Use the loaded data
@@ -45,26 +38,19 @@ def show_plots():
     accuracy_values = [entry["accuracies"] for entry in data]
 
     plt.figure(figsize=(8, 4))
-    plt.plot(rounds, loss_values, marker="o")
+    plt.plot(rounds, loss_values)
     plt.title("Loss vs Round")
     plt.xlabel("Round")
     plt.ylabel("Loss")
-    plt.grid(True)
     plt.show()
 
     # Accuracy vs Round
     plt.figure(figsize=(8, 4))
-    plt.plot(rounds, accuracy_values, marker="o", color="green")
+    plt.plot(rounds, accuracy_values, color="green")
     plt.title("Accuracy vs Round")
     plt.xlabel("Round")
     plt.ylabel("Accuracy")
-    plt.grid(True)
-
-    # Accuracy vs Loss
-    plt.figure(figsize=(8, 4))
-    plt.plot(loss_values, accuracy_values, marker="o", color="red")
-    plt.title("Accuracy vs Loss")
-    plt.xlabel("Loss")
-    plt.ylabel("Accuracy")
-    plt.grid(True)
     plt.show()
+
+
+# show_plots()

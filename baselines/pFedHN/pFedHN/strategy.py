@@ -3,6 +3,7 @@
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import flwr as fl
+import numpy as np
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -28,7 +29,7 @@ class pFedHN(fl.server.strategy.Strategy):
         fraction_fit: float = 0.0,
         fraction_evaluate: float = 1.0,
         min_fit_clients: int = 1,
-        min_evaluate_clients: int = 2,
+        min_evaluate_clients: int = 1,
         min_available_clients: int = 1,
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
@@ -68,8 +69,8 @@ class pFedHN(fl.server.strategy.Strategy):
 
     def num_evaluate_clients(self, num_available_clients: int) -> Tuple[int, int]:
         """Use a fraction of available clients for evaluation."""
-        int(num_available_clients * self.fraction_evaluate)
-        return min(1, num_available_clients), self.min_available_clients
+        num_clients = int(num_available_clients * self.fraction_evaluate)
+        return max(num_clients, self.min_evaluate_clients), self.min_available_clients
 
     def configure_fit(
         self,
@@ -109,16 +110,33 @@ class pFedHN(fl.server.strategy.Strategy):
         _, fit_res = results[0]
 
         delta_theta = fit_res.parameters
-        test_loss = fit_res.metrics["test_loss"]
-        test_acc = fit_res.metrics["test_acc"]
+        # test_loss = fit_res.metrics["test_loss"]
+        # test_acc = fit_res.metrics["test_acc"]
 
-        return delta_theta, {"test_loss": test_loss, "test_acc": test_acc}
+        # return delta_theta, {"test_loss": test_loss, "test_acc": test_acc}
+        return delta_theta, {}
 
     def configure_evaluate(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
-        return []
+        if server_round % 10 != 0:
+            return []
+
+        sample_size, min_num_clients = self.num_evaluate_clients(
+            client_manager.num_available()
+        )
+
+        clients = client_manager.sample(
+            num_clients=sample_size,
+            min_num_clients=min_num_clients,
+        )
+
+        fit_configurations = []
+        for _idx, client in enumerate(clients):
+            fit_configurations.append((client, EvaluateIns(parameters, {})))
+
+        return fit_configurations
 
     def aggregate_evaluate(
         self,
@@ -127,9 +145,22 @@ class pFedHN(fl.server.strategy.Strategy):
         failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation metrics."""
+        if server_round % 10 != 0:
+            return None, {}
+
         if not results:
             return None, {}
-        return None, {}
+
+        avg_loss = np.mean([evaluate_res.loss for _, evaluate_res in results])
+        total_samples = sum(
+            eres.metrics["total"] for _, eres in results  # type: ignore[misc]
+        )
+        total_correct = sum(
+            eres.metrics["correct"] for _, eres in results  # type: ignore[misc]
+        )
+        avg_acc = total_correct / total_samples
+
+        return avg_loss, {"avg_acc": avg_acc}  # type: ignore[return-value]
 
     def evaluate(
         self, server_round: int, parameters: Parameters

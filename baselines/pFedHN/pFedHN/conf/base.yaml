@@ -9,7 +9,6 @@ model:
   n_kernels: 16 # number of kernels for the hypernetwork: 16 for CIFAR10 and CIFAR100, 7 for MNIST
   inner_lr: 5e-3
   wd: 5e-5
-  lr: 1e-2
   in_channels: 3 # 3 for CIFAR10 and CIFAR100, 1 for MNIST
   out_dim: 10 # 10 for MNIST and CIFAR10, 100 for CIFAR100
   local: False # True: for pFedHNPC, False: pFedHN
@@ -35,6 +34,8 @@ client:
   batch_size: 64
   num_classes_per_node: 2
 
+server_device: cpu
+
 client_resources:
-  cpus: 1
-  gpus: 0
+  num_cpus: 1
+  num_gpus: 0
