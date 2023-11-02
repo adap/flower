@@ -2,6 +2,7 @@
 
 actions.
 """
+import json
 import concurrent.futures
 import timeit
 from collections import OrderedDict
@@ -126,6 +127,17 @@ class pFedHNServer(Server):
         avg_loss = aggregated_result[0]
         avg_acc = aggregated_result[1]["avg_acc"]
 
+        data = {
+            "round": server_round,
+            "avg_loss": avg_loss,
+            "avg_accuracy": avg_acc,
+        }
+
+        self.data.append(data)
+
+        with open("res.json","w",encoding="utf-8") as f:
+            json.dump(self.data,f)
+            
         log(
             DEBUG,
             "AvgLoss: %.4f, AvgAcc: %.4f",

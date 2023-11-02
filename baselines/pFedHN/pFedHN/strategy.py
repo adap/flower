@@ -117,7 +117,7 @@ class pFedHN(fl.server.strategy.Strategy):
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
-        if server_round % 10 != 0:
+        if server_round % 30 != 0:
             return []
 
         sample_size, min_num_clients = self.num_evaluate_clients(
@@ -142,7 +142,7 @@ class pFedHN(fl.server.strategy.Strategy):
         failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation metrics."""
-        if server_round % 10 != 0:
+        if server_round % 30 != 0:
             return None, {}
 
         if not results:
