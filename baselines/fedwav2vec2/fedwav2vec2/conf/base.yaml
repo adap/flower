@@ -14,7 +14,7 @@ rounds: 100 # global FL rounds
 local_epochs: 20 # local epochs for each client
 total_clients: 1943
 server_cid: 19999
-
+save_checkpoint: null
 # Device setup
 device: cuda
 
