@@ -5,7 +5,7 @@ build-backend = "poetry.masonry.api"
 [tool.poetry]
 name = "fedvssl" # <----- Ensure it matches the name of your baseline directory containing all the source code
 version = "1.0.0"
-description = "Flower Baselines"
+description = "Federated Self-supervised Learning for Video Understanding"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.dev>"]
 readme = "README.md"
@@ -40,26 +40,13 @@ classifiers = [
 python = ">=3.8.15, <3.12.0"  # don't change this
 flwr = { extras = ["simulation"], version = "1.5.0" }
 hydra-core = "1.3.2" # don't change this
-absl-py = "0.12.0"
-numpy = "1.21.0"
-addict = "2.4.0"
-aiohttp = "3.7.4.post0"
-aiohttp_cors = "0.7.0"
-aioredis = "1.3.1"
-alabaster = "0.7.12"
-argh = "0.26.2"
-astropy = "4.0.2"
-async_generator = "1.10"
-async-timeout = "3.0.1"
-atomicwrites = "1.4.0"
-backcall = "0.2.0"
 
 
 [tool.poetry.dev-dependencies]
 isort = "==5.11.5"
 black = "==23.1.0"
 docformatter = "==1.5.1"
-mypy = "==0.961"
+mypy = "==1.4.1"
 pylint = "==2.8.2"
 flake8 = "==3.9.2"
 pytest = "==6.2.4"
@@ -104,6 +91,9 @@ module = [
 follow_imports = "skip"
 follow_imports_for_stubs = true
 disallow_untyped_calls = false
+
+[tool.pylint.typecheck]
+generated-members="numpy.*, torch.*, tensorflow.*"
 
 [[tool.mypy.overrides]]
 module = "torch.*"
