@@ -76,13 +76,18 @@ pip install mmcv==1.2.4
 ```
 
 ## Running the Experiments
-To run FedVSSL with UCF-101 baseline, first follow the instruction in `dataset_preparation.py` to download the dataset, complete pre-processing and data partitioning for FL.
-Then, ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
+To run FedVSSL with UCF-101 baseline, please ensure you have activated your Poetry environment (execute `poetry shell` from this directory).
+Then, download the `CtP` repo:
 
 ```bash
 # clone CtP repo
 git clone https://github.com/yan-gao-GY/CtP.git fedvssl/CtP
+```
 
+After that, please follow the instruction in `fevssl/dataset_preparation.py` to download the dataset, 
+complete pre-processing and data partitioning for FL. Finally, we can launch the training:
+
+```bash
 # run federated SSL training with FedVSSL
 python -m fedvssl.main pre_training=true # this will run using the default settings.
 
