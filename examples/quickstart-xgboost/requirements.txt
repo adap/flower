@@ -1,3 +1,4 @@
 flwr>=1.0, <2.0
+flwr_datasets
 xgboost==2.0.1
 tqdm==4.65.0

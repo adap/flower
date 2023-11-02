@@ -38,7 +38,7 @@ class XGbBagging(fl.server.strategy.FedAvg):
 
         return (
             Parameters(
-                tensor_type="", tensors=[bytes(bytearray(weights_avg, "utf-8"))]
+                tensor_type="", tensors=[bytes(weights_avg, "utf-8")]
             ),
             {},
         )
