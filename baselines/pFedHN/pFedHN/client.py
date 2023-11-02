@@ -85,11 +85,11 @@ class FlowerClient(fl.client.NumPyClient):
         """
         state_dict = OrderedDict(
             {
-                k: torch.Tensor(v)
+                k: torch.Tensor(v).to(self.device)
                 for k, v in zip(self.net.state_dict().keys(), parameters)
             }
         )
-        self.net.load_state_dict(state_dict, strict=True)
+        self.net.to(self.device).load_state_dict(state_dict, strict=True)
         return state_dict
 
     def fit(self, parameters, config):
@@ -131,7 +131,6 @@ class FlowerClient(fl.client.NumPyClient):
         return (
             delta_theta,
             len(self.trainloader),
-            # {"test_loss": test_loss, "test_acc": test_acc},
             {},
         )
 

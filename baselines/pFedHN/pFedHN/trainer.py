@@ -31,20 +31,6 @@ def train(
         net.parameters(), lr=learning_rate, momentum=0.9, weight_decay=weight_decay
     )
 
-    # evaluation on the sent model
-    # with torch.no_grad():
-    #     net.eval()
-    #     batch = next(iter(testloader[int(cid)]))
-    #     img, label = tuple(t.to(device) for t in batch)
-    #     if local:
-    #         net_out = net(img)
-    #         pred = local_layers[int(cid)](net_out)
-    #     else:
-    #         pred = net(img)
-    #     prev_loss = criteria(pred, label)
-    #     prev_acc = pred.argmax(1).eq(label).sum().item() / len(label)
-    #     net.train()
-
     # inner updates -> obtaining theta_tilda
     for _i in range(epochs):
         net.train()
@@ -66,39 +52,7 @@ def train(
         optim.step()
         if local:
             local_optims[int(cid)].step()
-
-    # with torch.no_grad():
-    #     # net.eval()
-    #     # batch = next(iter(testloader[int(cid)]))
-    #     # img, label = tuple(t.to(device) for t in batch)
-    #     # if local:
-    #     #     net_out = net(img)
-    #     #     pred = local_layers[int(cid)](net_out)
-    #     # else:
-    #     #     pred = net(img)
-    #     # prev_loss = criteria(pred, label)
-    #     # prev_acc = pred.argmax(1).eq(label).sum().item() / len(label)
-    #     # net.train()
-    #     running_loss = 0.0
-    #     running_correct = 0.0
-    #     running_samples = 0.0
-    #     for batch_count,batch in enumerate(testloader[int(cid)]):
-    #         img, label = tuple(t.to(device) for t in batch)
-    #         if local:
-    #             net_out = net(img)
-    #             pred = local_layers[int(cid)](net_out)
-    #         else:
-    #             pred = net(img)
-    #         running_loss += criteria(pred, label).item()
-    #         running_correct += pred.argmax(1).eq(label).sum().item()
-    #         running_samples += len(label)
-
-    #     eval_loss = running_loss / (batch_count+1)
-    #     eval_acc = running_correct / running_samples
-
     final_state = net.state_dict()
-    # return eval_loss, eval_acc, final_state
-    # return prev_loss, prev_acc, final_state
     return final_state
 
 
@@ -122,7 +76,6 @@ def test(
     for batch_count, batch in enumerate(testloader[int(cid)]):
         img, label = tuple(t.to(device) for t in batch)
 
-        # pred = net(img)
         if local:
             net_out = net(img)
             pred = local_layers[int(cid)].to(device)(net_out)

@@ -34,8 +34,6 @@ client:
   batch_size: 64
   num_classes_per_node: 2
 
-server_device: cpu
-
 client_resources:
   num_cpus: 1
   num_gpus: 0

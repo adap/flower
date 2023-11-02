@@ -68,16 +68,16 @@ class pFedHNServer(Server):
         self.loss: List = []
         self.accuracies: List = []
         self.data: List = []
-        # self._client_manager = client_manager
-        # self.strategy = strategy
 
     def evaluate_round(self, server_round: int, timeout: Optional[float]):
         """Perform federated evaluation."""
-        self.hnet.to(torch.device("cpu"))
+        self.hnet.to(torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
 
         def weights_to_clients(client_id):
             weights = self.hnet(
-                torch.tensor([client_id], dtype=torch.long).to(torch.device("cpu"))
+                torch.tensor([client_id], dtype=torch.long).to(
+                    torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+                )
             )
             return weights
 
@@ -138,11 +138,13 @@ class pFedHNServer(Server):
     def fit_round(self, server_round: int, timeout: Optional[float]):
         """Perform a single round of federated averaging."""
         # pylint: disable=too-many-locals
-        self.hnet.to(torch.device("cpu"))
+        self.hnet.to(torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
 
         def weights_to_clients(client_id):
             weights = self.hnet(
-                torch.tensor([client_id], dtype=torch.long).to(torch.device("cpu"))
+                torch.tensor([client_id], dtype=torch.long).to(
+                    torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+                )
             )
             return weights
 
@@ -214,7 +216,14 @@ class pFedHNServer(Server):
             fl.common.parameters_to_ndarrays(delta_theta),  # type: ignore[arg-type]
         )
 
-        delta_theta_dict = OrderedDict({k: torch.Tensor(v) for k, v in param_dict})
+        delta_theta_dict = OrderedDict(
+            {
+                k: torch.Tensor(v).to(
+                    torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+                )
+                for k, v in param_dict
+            }
+        )
 
         # calculating phi gradient
         hnet_grads = torch.autograd.grad(
@@ -233,27 +242,6 @@ class pFedHNServer(Server):
         ndarr = [val.cpu().numpy() for _, val in self.hnet.state_dict().items()]
         hnet_parameters = ndarrays_to_parameters(ndarr)
 
-        # self.loss.append(metrics_aggregated["test_loss"])
-        # self.accuracies.append(metrics_aggregated["test_acc"])
-
-        # data = {
-        #     "round": server_round,
-        #     "loss": float(metrics_aggregated["test_loss"]),
-        #     "accuracies": float(metrics_aggregated["test_acc"]),
-        # }
-
-        # self.data.append(data)
-        # file_path = "res.json"
-
-        # with open(file_path, "w", encoding="utf-8") as json_file:
-        #     json.dump(self.data, json_file)
-
-        # log(
-        #     DEBUG,
-        #     "TargetModelLoss: %.4f, TargetModelAcc: %.4f",
-        #     metrics_aggregated["test_loss"],
-        #     metrics_aggregated["test_acc"],
-        # )
         return hnet_parameters, metrics_aggregated, (results, failures)
 
     def fit(self, num_rounds: int, timeout: Optional[float]):

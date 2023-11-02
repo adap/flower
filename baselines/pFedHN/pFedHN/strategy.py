@@ -110,10 +110,7 @@ class pFedHN(fl.server.strategy.Strategy):
         _, fit_res = results[0]
 
         delta_theta = fit_res.parameters
-        # test_loss = fit_res.metrics["test_loss"]
-        # test_acc = fit_res.metrics["test_acc"]
 
-        # return delta_theta, {"test_loss": test_loss, "test_acc": test_acc}
         return delta_theta, {}
 
     def configure_evaluate(
