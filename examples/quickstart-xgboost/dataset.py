@@ -1,16 +1,20 @@
-import numpy as np
 import datasets
 import xgboost as xgb
 
 from flwr_datasets import FederatedDataset
-from flwr_datasets.partitioner import (IidPartitioner, LinearPartitioner,
-                                       SquarePartitioner, ExponentialPartitioner)
+from flwr_datasets.partitioner import (
+    IidPartitioner,
+    LinearPartitioner,
+    SquarePartitioner,
+    ExponentialPartitioner,
+)
 
-SPLIT_DICT = {"uniform": IidPartitioner,
-              "linear": LinearPartitioner,
-              "square": SquarePartitioner,
-              "exponential": ExponentialPartitioner
-              }
+SPLIT_DICT = {
+    "uniform": IidPartitioner,
+    "linear": LinearPartitioner,
+    "square": SquarePartitioner,
+    "exponential": ExponentialPartitioner,
+}
 
 
 def init_higgs(num_partitions: int, split_method: str) -> FederatedDataset:
@@ -33,10 +37,13 @@ def split_train_test(partition: datasets.Dataset, split_rate: float, seed: int):
     partition_train = train_test["train"]
     partition_test = train_test["test"]
 
+    num_train = len(partition_train)
+    num_val = len(partition_test)
+
     # Reformat data for xgboost input
     train_data = _reformat_data(partition_train)
     val_data = _reformat_data(partition_test)
-    return train_data, val_data
+    return train_data, val_data, num_train, num_val
 
 
 def _reformat_data(partition):
@@ -44,7 +51,3 @@ def _reformat_data(partition):
     y = partition["label"]
     new_data = xgb.DMatrix(x, label=y)
     return new_data
-
-
-
-

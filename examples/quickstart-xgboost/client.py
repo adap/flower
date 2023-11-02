@@ -31,20 +31,20 @@ partition = load_partition(fds, partition_id)
 # train/test splitting and data re-formatting
 SEED = 42
 split_rate = 0.2
-train_data, val_data = split_train_test(partition, split_rate, SEED)
+train_data, val_data, num_train, num_val = split_train_test(partition, split_rate, SEED)
 
 # Hyper-parameters for training
 num_local_round = 1
 params = {
-            "objective": "binary:logistic",
-            "eta": 0.1,  # lr
-            "max_depth": 8,
-            "eval_metric": "auc",
-            "nthread": 16,
-            "num_parallel_tree": 1,
-            "subsample": 1,
-            "tree_method": "hist",
-        }
+    "objective": "binary:logistic",
+    "eta": 0.1,  # lr
+    "max_depth": 8,
+    "eval_metric": "auc",
+    "nthread": 16,
+    "num_parallel_tree": 1,
+    "subsample": 1,
+    "tree_method": "hist",
+}
 
 
 # Define Flower client
@@ -63,11 +63,15 @@ class FlowerClient(fl.client.Client):
         )
 
     def local_boost(self):
+        # update trees based on local training data.
         for i in range(num_local_round):
             self.bst.update(train_data, self.bst.num_boosted_rounds())
 
         # extract the last N=num_local_round trees as new local model
-        bst = self.bst[self.bst.num_boosted_rounds() - num_local_round: self.bst.num_boosted_rounds()]
+        bst = self.bst[
+            self.bst.num_boosted_rounds()
+            - num_local_round : self.bst.num_boosted_rounds()
+        ]
         return bst
 
     def fit(self, ins: FitIns) -> FitRes:
@@ -102,13 +106,14 @@ class FlowerClient(fl.client.Client):
                 message="OK",
             ),
             parameters=Parameters(tensor_type="", tensors=[local_model_bytes]),
-            num_examples=0,
+            num_examples=num_train,
             metrics={},
         )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         eval_results = self.bst.eval_set(
-            evals=[(train_data, "train"), (val_data, "valid")], iteration=self.bst.num_boosted_rounds() - 1
+            evals=[(train_data, "train"), (val_data, "valid")],
+            iteration=self.bst.num_boosted_rounds() - 1,
         )
         auc = round(float(eval_results.split("\t")[2].split(":")[1]), 4)
 
@@ -121,11 +126,12 @@ class FlowerClient(fl.client.Client):
                 message="OK",
             ),
             loss=0.0,
-            num_examples=1,
+            num_examples=num_val,
             metrics={"AUC": auc},
         )
 
 
 # Start Flower client
-fl.client.start_client(server_address="127.0.0.1:8080", client=FlowerClient().to_client())
-
+fl.client.start_client(
+    server_address="127.0.0.1:8080", client=FlowerClient().to_client()
+)

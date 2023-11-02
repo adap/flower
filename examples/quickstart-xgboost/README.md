@@ -1,17 +1,17 @@
 # Flower Example using XGBoost
 
-This introductory example to Flower uses PyTorch, but deep knowledge of PyTorch is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case.
-Running this example in itself is quite easy.
+This example demonstrates how to perform EXtreme Gradient Boosting (XGBoost) within Flower using `xgboost` package.
+Tree-based with bagging method is used for aggregation on the server.
 
 ## Project Setup
 
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-pytorch . && rm -rf flower && cd quickstart-pytorch
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-xgboost . && rm -rf flower && cd quickstart-xgboost
 ```
 
-This will create a new directory called `quickstart-pytorch` containing the following files:
+This will create a new directory called `quickstart-xgboost` containing the following files:
 
 ```shell
 -- pyproject.toml
@@ -72,4 +72,4 @@ Start client 2 in the second terminal:
 python3 client.py
 ```
 
-You will see that XGBoost is starting a federated training. Look at the [code](https://github.com/adap/flower/tree/main/examples/quickstart-xgboost) for a detailed explanation.
+You will see that XGBoost is starting a federated training. Look at the [code](https://github.com/adap/flower/tree/main/examples/quickstart-xgboost) and [tutorial](https://flower.dev/docs/framework/tutorial-quickstart-xgboost.html) for a detailed explanation.
