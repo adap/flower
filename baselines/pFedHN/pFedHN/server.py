@@ -2,8 +2,8 @@
 
 actions.
 """
-import json
 import concurrent.futures
+import json
 import timeit
 from collections import OrderedDict
 from logging import DEBUG, INFO
@@ -72,6 +72,7 @@ class pFedHNServer(Server):
 
     def evaluate_round(self, server_round: int, timeout: Optional[float]):
         """Perform federated evaluation."""
+        # pylint: disable=too-many-locals
         self.hnet.to(torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
 
         def weights_to_clients(client_id):
@@ -135,9 +136,9 @@ class pFedHNServer(Server):
 
         self.data.append(data)
 
-        with open("res.json","w",encoding="utf-8") as f:
-            json.dump(self.data,f)
-            
+        with open("res.json", "w", encoding="utf-8") as f:
+            json.dump(self.data, f)
+
         log(
             DEBUG,
             "AvgLoss: %.4f, AvgAcc: %.4f",
