@@ -22,8 +22,7 @@ subprocess.run(
     [
         "wget https://www.crcv.ucf.edu/data/UCF101/UCF101.rar \
         -O data/ucf101/UCF101.rar \
-        --no-check-certificate && \
-        unrar e data/ucf101/UCF101.rar data/ucf101/UCF101_raw/"
+        --no-check-certificate"
     ],
     shell=True,
 )
