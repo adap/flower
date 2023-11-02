@@ -21,7 +21,7 @@ Dataset: [MNIST, CIFAR-10, CIFAR-100]
 
 **Datasets:** MNIST, CIFAR-10, CIFAR-100 from torchvision 
 
-**Hardware Setup:** All of the experiments were run on the 12-core CPU of a MacBook Pro M2 Pro with 32GB of RAM. 
+**Hardware Setup:** The experiments were conducted on a 12-core CPU MacBook Pro M2 Pro with 32GB of RAM, as well as on an HPC Cluster equipped with NVIDIA A100-PCIE-40GB GPU, alternately.
 
 **Contributors:** 
 ---
@@ -129,30 +129,10 @@ python -m pFedHN.main model.local=True model.variant=1 model.lr=5e-2 # this will
 
 python -m pFedHN.main dataset.data="cifar100" model.out_dim=100 client.num_classes_per_node=10 model.local=True model.variant=1 model.lr=5e-2 # this will run the pFedHNPC for CIFAR-100 dataset where local=True is for using LocalLayer and variant=1 for setting pFedHNPC . Learning rate is modified to 5e-2
 
-## If you want to check out the other comparison algorithms follow below
-
-## By default for FedAvg and PerFedAvg we are taking 50 clients and 5 clients in each round for fit with a fraction fit of 0.1 for the standard results. The users can modify by this by using client.fraction_fit,client.min_fit_clients and client.min_available_clients . 
-
-## FedAvg
-
-python -m pFedHN.comparison_experiments.main dataset.data="mnist" model.n_kernels=7 model.in_channels=1 # for running FedAvg for MNIST using the given Non-IID Distribution
-
-python -m pFedHN.comparison_experiments.main # for running FedAvg for CIFAR-10 dataset using the given Non-IID Distribution
-
-python -m pFedHN.comparison_experiments.main dataset.data="cifar100" model.out_dim=100 client.num_classes_per_node=10 # for running FedAvg for CIFAR-100 dataset using the given Non-IID Distribution
-
-## PerFedAvg 
-
-# The number of epochs here for each client is 10.
-
-python -m pFedHN.comparison_experiments.main dataset.data="mnist" model.n_kernels=7 model.in_channels=1 model.variant=1 model.gamma=0.99 client.num_epochs=10 # for running PerFedAvg for MNIST dataset using the given Non-IID Distribution
-
-python -m pFedHN.comparison_experiments.main model.variant=1 model.lr=1e-3 client.num_epochs=10 # for running PerFedAvg for CIFAR-10 dataset using the given Non-IID Distribution
-
-python -m pFedHN.comparison_experiments.main dataset.data="cifar100" model.out_dim=100 client.num_classes_per_node=10 model.variant=1 model.beta=1e-2 model.delta=1e-2 model.lr=1e-2 model.gamma=0.95 client.num_epochs=10 # for running PerFedAvg for CIFAR-100 dataset using the given Non-IID Distribution
-
 ```
 
 ## Expected Results
 
-Will be updated
+| Algorithm | Dataset | Num_Clients | Paper_Accuracy | Experimented_Accuracy | Experimented_Loss | Hardware | Time-Taken |
+| ----------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
+| pFedHN | MNIST | 50 | 99.28 ± 0.11 | 99.18 | 0.04258 | NVIDIA A100-PCIE-40GB, num_gpus=0.5 |  9602.4372 seconds |
