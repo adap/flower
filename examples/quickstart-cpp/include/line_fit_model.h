@@ -9,7 +9,7 @@
 
 #include "synthetic_dataset.h"
 #include "linear_algebra_util.h"
-#include <cstddef>
+
 class LineFitModel {
  public:
   LineFitModel(int num_iterations, double learning_rate, int num_params);
