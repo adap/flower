@@ -111,6 +111,12 @@ python -m fedwav2vec2.main
 
 # if you have a large GPU (32GB+) you migth want to fit two per GPU
 python -m fedwav2vec2.main client_resources.num_gpus=0.5
+
+# the global model can be saved at the end of each round if you specify a checkpoint path
+python -m fedwav2vec2.main save_checkpoint=<path-to-checkpoint-dir> # if directory doesn't exist, it will be created
+
+# then you can use it as the starting point for your global model like so:
+python -m fedwav2vec2.main pre_train_model_path=<path-to-checkpoint-dir>/last_checkpoint.pt
 ```
 
 When running the experiment, a structure of directories `<date>/<time>` will be created by Hydra. Inside you'll find a directory for each client (where their log is recorded). Another directory at the same level `<date>/<time>server` is created where the server log is recorded. For this baseline the metric of interes it the Word Error Rate (`WER`) which is logged in `train_log.txt` at the end of each round.
