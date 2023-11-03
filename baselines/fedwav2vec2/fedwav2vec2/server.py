@@ -7,6 +7,8 @@ settings).
 import gc
 from typing import Callable, Dict
 
+import os
+
 import flwr as fl
 import torch
 from flwr.common import Scalar
@@ -51,6 +53,13 @@ def get_evaluate_fn(config: DictConfig, server_device: str, save_path: str):
             server_params=weights,
             epochs=1,
         )
+        #Save model if indicated
+        if config_.save_checkpoint is not None:
+            if not os.path.exists(config_.save_checkpoint):
+                os.mkdir(config_.save_checkpoint)
+            checkpoint = os.path.join(config_.save_checkpoint,"last_checkpoint.pt")
+            torch.save(asr_brain.modules.state_dict(),checkpoint)
+            print(f"Checkpoint saved for round {server_round}")
 
         del client, asr_brain, dataset
         if torch.cuda.is_available():

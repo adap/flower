@@ -36,8 +36,8 @@ def main(cfg: DictConfig) -> None:
 
         pretrained = pre_trained_point(
             save_path,
-            cfg.server_device,
             cfg,
+            cfg.server_device
         )
     else:
         pretrained = None

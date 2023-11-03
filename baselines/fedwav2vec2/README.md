@@ -54,6 +54,7 @@ For more details, please refer to the relevant section in the paper.
 | Hyperparameter | Default Value | Description |
 | ------- | ----- | ------- |
 | `pre_train_model_path` | `null` | Path to pre-trained model or checkpoint. The best checkpoint could be found [here](https://github.com/tuanct1997/Federated-Learning-ASR-based-on-wav2vec-2.0/tree/main/material/pre-trained) |
+| `save_checkpoint` | `null` | Path to folder where server model will be saved at each round |
 | `label_path` | `docs/pretrained_wav2vec2` | Label each character for every client to ensure consistency during training phase|
 | `sb_config` | `fedwav2vec2/conf/sb_config/w2v2.yaml` | Speechbrain config file for architecture model. Please refer to [SpeechBrain](https://github.com/speechbrain/speechbrain) for more information |
 | `rounds` | `100` | Indicate the number of Federated Learning (FL) rounds|
