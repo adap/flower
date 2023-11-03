@@ -66,7 +66,7 @@ cryptography = "^41.0.2"
 pycryptodome = "^3.18.0"
 iterators = "^0.0.2"
 # Optional dependencies (VCE)
-ray = { version = "==2.6.3", extras = ["default"], optional = true }
+ray = { version = "==2.6.3", optional = true }
 pydantic = { version = "<2.0.0", optional = true }
 # Optional dependencies (REST transport layer)
 requests = { version = "^2.31.0", optional = true }
@@ -86,7 +86,7 @@ clang-format = "==16.0.6"
 isort = "==5.11.5"
 black = { version = "==23.3.0", extras = ["jupyter"] }
 docformatter = "==1.7.5"
-mypy = "==1.4.1"
+mypy = "==1.5.1"
 pylint = "==2.13.9"
 flake8 = "==3.9.2"
 pytest = "==7.4.0"
@@ -117,7 +117,9 @@ mdformat-beautysh = "==0.1.1"
 mdformat-myst = "==0.1.5"
 twine = "==4.0.2"
 pyroma = "==4.2"
+check-wheel-contents = "==0.4.0"
 GitPython = "==3.1.32"
+licensecheck = "==2023.5.1"
 
 [tool.isort]
 line_length = 88

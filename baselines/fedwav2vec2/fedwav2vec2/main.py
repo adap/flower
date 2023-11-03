@@ -5,9 +5,6 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 """
 
 import flwr as fl
-
-# these are the basic packages you'll need here
-# feel free to remove some if aren't needed
 import hydra
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
@@ -30,11 +27,6 @@ def main(cfg: DictConfig) -> None:
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
 
-    if cfg.device == "cpu":
-        assert not (
-            cfg.parallel_backend
-        ), "If device is CPU, please set --parallel_backend to False"
-
     # Hydra automatically creates an output directory
     # Let's retrieve it and save some results there
     save_path = HydraConfig.get().runtime.output_dir
@@ -45,6 +37,7 @@ def main(cfg: DictConfig) -> None:
         pretrained = pre_trained_point(
             save_path,
             cfg,
+            cfg.server_device
         )
     else:
         pretrained = None
@@ -52,7 +45,9 @@ def main(cfg: DictConfig) -> None:
     strategy = instantiate(
         cfg.strategy,
         initial_parameters=pretrained,
-        evaluate_fn=get_evaluate_fn(cfg, save_path=save_path),
+        evaluate_fn=get_evaluate_fn(
+            cfg, server_device=cfg.server_device, save_path=save_path
+        ),
     )
 
     fl.simulation.start_simulation(

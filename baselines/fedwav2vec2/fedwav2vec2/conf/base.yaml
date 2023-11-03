@@ -18,10 +18,12 @@ total_clients: 1943
 server_cid: 19999
 
 # Device setup
-device: cuda
+server_device: cuda
+parallel_backend: false # If using multi-gpus per client (disable it if using server_device=cpu)
 
-
-parallel_backend: false # If using multi-gpus per client (disable if using CPU)
+client_resources:
+  num_cpus: 8
+  num_gpus: 1
 
 dataset:
   download_filename: TEDLIUM_release-3.tgz
@@ -39,7 +41,3 @@ strategy:
   on_fit_config_fn:
     _target_: fedwav2vec2.server.get_on_fit_config_fn
     local_epochs: ${local_epochs}
-
-client_resources:
-  num_cpus: 8
-  num_gpus: 1

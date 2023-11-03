@@ -32,7 +32,7 @@ flwr_local::ParametersRes SimpleFlwrClient::get_parameters() {
     tensors.push_back(oss2.str());
 
     std::string tensor_str = "cpp_double";
-    return flwr_local::Parameters(tensors, tensor_str);
+    return flwr_local::ParametersRes(flwr_local::Parameters(tensors, tensor_str));
 };
 
 void SimpleFlwrClient::set_parameters(flwr_local::Parameters params) {

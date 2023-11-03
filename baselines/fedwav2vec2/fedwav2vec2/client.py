@@ -44,6 +44,7 @@ class SpeechBrainClient(fl.client.Client):
         fl.common.logger.log(logging.DEBUG, "Starting client %s", cid)
 
     def get_parameters(self, _: GetParametersIns) -> GetParametersRes:
+        """Return the parameters of the current net."""
         weights: NDArrays = get_weights(self.modules)
         parameters = ndarrays_to_parameters(weights)
         gc.collect()
@@ -51,6 +52,7 @@ class SpeechBrainClient(fl.client.Client):
         return GetParametersRes(status=status, parameters=parameters)
 
     def fit(self, ins: FitIns) -> FitRes:
+        """Implement distributed fit function for a given client."""
         weights: NDArrays = fl.common.parameters_to_ndarrays(ins.parameters)
         config = ins.config
 
@@ -78,11 +80,8 @@ class SpeechBrainClient(fl.client.Client):
         )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
+        """Implement distributed evaluation for a given client."""
         weights = parameters_to_ndarrays(ins.parameters)
-
-        # config = ins.config
-        # epochs = int(config["epochs"])
-        # batch_size = int(config["batch_size"])
 
         num_examples, loss, wer = self.evaluate_train_speech_recogniser(
             server_params=weights,
@@ -161,9 +160,13 @@ class SpeechBrainClient(fl.client.Client):
 
 
 def get_client_fn(config: DictConfig, save_path: str):
+    """Return a function that creates a Flower client."""
+
     def client_fn(cid: str) -> fl.client.Client:
-        """Function to generate the simulated clients."""
-        asr_brain, dataset = int_model(cid, config, save_path)
+        """Generate the simulated clients."""
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+
+        asr_brain, dataset = int_model(cid, config, device=device, save_path=save_path)
         return SpeechBrainClient(cid, asr_brain, dataset)
 
     return client_fn
