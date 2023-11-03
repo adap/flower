@@ -43,7 +43,7 @@ def main(cfg: DictConfig) -> None:
         print("PRETRAINED INITIALIZE")
 
         pretrained = pre_trained_point(
-            save_path.output,
+            save_path,
             cfg,
         )
     else:
