@@ -34,11 +34,7 @@ def main(cfg: DictConfig) -> None:
     if cfg.pre_train_model_path is not None:
         print("PRETRAINED INITIALIZE")
 
-        pretrained = pre_trained_point(
-            save_path,
-            cfg,
-            cfg.server_device
-        )
+        pretrained = pre_trained_point(save_path, cfg, cfg.server_device)
     else:
         pretrained = None
 
