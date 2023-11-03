@@ -1,19 +1,14 @@
-from logging import WARNING
-import traceback
 import flwr as fl
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from flwr.common import log, ndarrays_to_parameters, parameters_to_ndarrays
-from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
-
-from task import load_data
+from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
 
 
 class ServerModel(nn.Module):
-    def __init__(self):
+    def __init__(self, input_size):
         super(ServerModel, self).__init__()
-        self.fc = nn.Linear(10, 1)  # Simple Linear layer
+        self.fc = nn.Linear(input_size, 1)  # Simple Linear layer
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
@@ -24,6 +19,7 @@ class ServerModel(nn.Module):
 class Strategy(fl.server.strategy.FedAvg):
     def __init__(
         self,
+        labels,
         *,
         fraction_fit=1,
         fraction_evaluate=1,
@@ -52,13 +48,13 @@ class Strategy(fl.server.strategy.FedAvg):
             fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
             evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
-        self.model = ServerModel()
+        self.model = ServerModel(input_size=12)
         self.initial_parameters = ndarrays_to_parameters(
             [val.cpu().numpy() for _, val in self.model.state_dict().items()]
         )
         self.optimizer = optim.SGD(self.model.parameters(), lr=0.01)
         self.criterion = nn.BCELoss()
-        self.data = load_data()
+        self.label = torch.tensor(labels).float().unsqueeze(1)
 
     def configure_fit(self, server_round, parameters, client_manager):
         return super().configure_fit(server_round, parameters, client_manager)
@@ -69,37 +65,38 @@ class Strategy(fl.server.strategy.FedAvg):
         results,
         failures,
     ):
-        if not results:
-            [traceback.print_tb(fail.__traceback__) for fail in failures]
-            return None, {}
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
 
         # Convert results
-        weights_results = [
-            (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
+        embedding_results = [
+            torch.from_numpy(parameters_to_ndarrays(fit_res.parameters)[0])
             for _, fit_res in results
         ]
-        embeddings_aggregated = aggregate(weights_results)[0]
-        embedding_server = torch.from_numpy(embeddings_aggregated).requires_grad_()
+        embeddings_aggregated = torch.cat(embedding_results, dim=1)
+        embedding_server = embeddings_aggregated.detach().requires_grad_()
         output = self.model(embedding_server)
-        loss = self.criterion(output, self.data[0][1].unsqueeze(1))
+        loss = self.criterion(output, self.label)
         loss.backward()
 
-        gradient_np = embedding_server.grad.numpy()
         self.optimizer.step()
         self.optimizer.zero_grad()
 
-        parameters_aggregated = ndarrays_to_parameters([gradient_np])
+        grads = embedding_server.grad.split([4, 4, 4], dim=1)
+        np_grads = [grad.numpy() for grad in grads]
+        parameters_aggregated = ndarrays_to_parameters(np_grads)
 
-        # Aggregate custom metrics if aggregation fn was provided
-        metrics_aggregated = {}
-        if self.fit_metrics_aggregation_fn:
-            fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
-            metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
-        elif rnd == 1:  # Only log this warning once
-            log(WARNING, "No fit_metrics_aggregation_fn provided")
+        with torch.no_grad():
+            correct = 0
+            output = self.model(embedding_server)
+            predicted = (output > 0.5).float()
+
+            correct += (predicted == self.label).sum().item()
+
+            accuracy = correct / len(self.label) * 100
+
+        metrics_aggregated = {"accuracy": accuracy}
 
         return parameters_aggregated, metrics_aggregated
 
@@ -109,26 +106,4 @@ class Strategy(fl.server.strategy.FedAvg):
         results,
         failures,
     ):
-        if not results:
-            return None, {}
-        # Do not aggregate if there are failures and failures are not accepted
-        if not self.accept_failures and failures:
-            return None, {}
-
-        # Aggregate loss
-        loss_aggregated = weighted_loss_avg(
-            [
-                (evaluate_res.num_examples, evaluate_res.loss)
-                for _, evaluate_res in results
-            ]
-        )
-
-        # Aggregate custom metrics if aggregation fn was provided
-        metrics_aggregated = {}
-        if self.evaluate_metrics_aggregation_fn:
-            eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
-            metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
-        elif rnd == 1:  # Only log this warning once
-            log(WARNING, "No evaluate_metrics_aggregation_fn provided")
-
-        return loss_aggregated, metrics_aggregated
+        return None, {}
