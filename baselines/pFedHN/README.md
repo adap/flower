@@ -125,9 +125,9 @@ python -m pFedHN.main dataset.data="mnist" model.n_kernels=7 model.in_channels=1
 
 # For MNIST we are not conducting experiments as the paper has not done it.
 
-python -m pFedHN.main model.local=True model.variant=1 model.lr=5e-2 # this will run the pFedHNPC for CIFAR-10 dataset where local=True is for using LocalLayer and variant=1 for setting pFedHNPC . Learning rate is modified to 5e-2
+python -m pFedHN.main model.local=True model.variant=1 server.lr=5e-2 # this will run the pFedHNPC for CIFAR-10 dataset where local=True is for using LocalLayer and variant=1 for setting pFedHNPC . Learning rate is modified to 5e-2
 
-python -m pFedHN.main dataset.data="cifar100" model.out_dim=100 client.num_classes_per_node=10 model.local=True model.variant=1 model.lr=5e-2 # this will run the pFedHNPC for CIFAR-100 dataset where local=True is for using LocalLayer and variant=1 for setting pFedHNPC . Learning rate is modified to 5e-2
+python -m pFedHN.main dataset.data="cifar100" model.out_dim=100 client.num_classes_per_node=10 model.local=True model.variant=1 server.lr=5e-2 # this will run the pFedHNPC for CIFAR-100 dataset where local=True is for using LocalLayer and variant=1 for setting pFedHNPC . Learning rate is modified to 5e-2
 
 ```
 
@@ -137,3 +137,4 @@ python -m pFedHN.main dataset.data="cifar100" model.out_dim=100 client.num_class
 | ----------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
 | pFedHN | MNIST | 50 | 99.28 ± 0.11 | 99.18 | 0.04258 | NVIDIA A100-PCIE-40GB, num_gpus=0.5 |  9602.4372 seconds |
 | pFedHN | CIFAR-10 | 50 | 88.38 ± 0.29 | 82.37 | 0.81694 | MacBook Pro M2 Pro, 12 Core CPU | 15252.1581 seconds |
+| pFedHNPC | CIFAR-10 | 50 | 90.08 ± 0.63 | 85.25 | 0.70374 | MacBook Pro M2 Pro, 12 Core CPU | 15279.2597 seconds |
