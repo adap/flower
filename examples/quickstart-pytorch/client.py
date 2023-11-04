@@ -105,7 +105,7 @@ class FlowerClient(fl.client.NumPyClient):
 
 def client_fn(cid: str):
     """."""
-    return FlowerClient()
+    return FlowerClient().to_client()
 
 
 app = fl.app.Flower(

@@ -21,6 +21,7 @@ from logging import INFO
 
 from uvicorn.importer import import_from_string
 
+from flwr.app import Flower
 from flwr.client import start_client
 from flwr.common.logger import log
 
@@ -39,15 +40,13 @@ def run_client() -> None:
     if app_dir is not None:
         sys.path.insert(0, app_dir)
 
-    def app_client_fn(cid: str):
-        """."""
-        app = import_from_string(args.app)
-        client = app.client_fn(cid=cid)
-        return client
+    def _load() -> Flower:
+        app: Flower = import_from_string(args.app)
+        return app
 
     return start_client(
         server_address=args.server,
-        client_fn=app_client_fn,
+        load_app_fn=_load,
         transport="grpc-rere",  # Only
     )
 

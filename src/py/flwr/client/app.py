@@ -61,6 +61,7 @@ def _check_actionable_client(
 def start_client(
     *,
     server_address: str,
+    load_app_fn: Optional[Callable[[], Flower]] = None,
     client_fn: Optional[ClientFn] = None,
     client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
@@ -75,6 +76,8 @@ def start_client(
         The IPv4 or IPv6 address of the server. If the Flower
         server runs on the same machine on port 8080, then `server_address`
         would be `"[::]:8080"`.
+    load_app_fn : ...
+        ...
     client_fn : Optional[ClientFn]
         A callable that instantiates a Client. (default: None)
     client : Optional[flwr.client.Client]
@@ -123,20 +126,29 @@ def start_client(
     """
     event(EventType.START_CLIENT_ENTER)
 
-    _check_actionable_client(client, client_fn)
+    if load_app_fn is None:
+        _check_actionable_client(client, client_fn)
 
-    if client_fn is None:
-        # Wrap `Client` instance in `client_fn`
-        def single_client_factory(
-            cid: str,  # pylint: disable=unused-argument
-        ) -> Client:
-            if client is None:  # Added this to keep mypy happy
-                raise Exception(
-                    "Both `client_fn` and `client` are `None`, but one is required"
-                )
-            return client  # Always return the same instance
+        if client_fn is None:
+            # Wrap `Client` instance in `client_fn`
+            def single_client_factory(
+                cid: str,  # pylint: disable=unused-argument
+            ) -> Client:
+                if client is None:  # Added this to keep mypy happy
+                    raise Exception(
+                        "Both `client_fn` and `client` are `None`, but one is required"
+                    )
+                return client  # Always return the same instance
 
-        client_fn = single_client_factory
+            client_fn = single_client_factory
+
+        def _load_app():
+            return Flower(client_fn=client_fn)
+
+        load_app_fn = _load_app
+
+    # At this point, only `load_app_fn` should be used
+    # Both `client` and `client_fn` must not be used directly
 
     # Initialize connection context manager
     connection, address = _init_connection(transport, server_address)
@@ -167,7 +179,7 @@ def start_client(
                     break
 
                 # Load app
-                app = Flower(client_fn=client_fn)
+                app = load_app_fn()
 
                 # Process
                 fwd_msg: Fwd = Fwd(
