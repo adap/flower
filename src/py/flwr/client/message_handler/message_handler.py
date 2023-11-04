@@ -115,9 +115,7 @@ def handle(client_fn: ClientFn, task_ins: TaskIns) -> TaskRes:
             )
             return task_res
         raise NotImplementedError()
-    client_msg = handle_legacy_message(
-        client_fn, server_msg
-    )
+    client_msg = handle_legacy_message(client_fn, server_msg)
     task_res = wrap_client_message_in_task_res(client_msg)
     return task_res
 

@@ -161,7 +161,7 @@ def start_client(
                     continue
 
                 # Handle control message
-                sleep_duration, keep_going = handle_control_message(task_res=task_res)
+                sleep_duration, keep_going = handle_control_message(task_ins=task_ins)
 
                 # Handle task message
                 task_res = handle(client_fn, task_ins)
