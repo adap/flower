@@ -37,7 +37,7 @@ from flwr.proto.task_pb2 import TaskIns, TaskRes
 
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
-from .message_handler.message_handler import handle
+from .message_handler.message_handler import handle, handle_control_message
 from .numpy_client import NumPyClient
 
 
@@ -160,9 +160,12 @@ def start_client(
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
 
-                # Handle task
-                task_res, sleep_duration, keep_going = handle(client_fn, task_ins)
-                
+                # Handle control message
+                sleep_duration, keep_going = handle_control_message(task_res=task_res)
+
+                # Handle task message
+                task_res = handle(client_fn, task_ins)
+
                 # Send
                 send(task_res)
                 if not keep_going:
