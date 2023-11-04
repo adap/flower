@@ -21,7 +21,9 @@ import warnings
 from logging import INFO
 from typing import Callable, ContextManager, Optional, Tuple, Union
 
+from flwr.app import Bwd, Flower, Fwd
 from flwr.client.client import Client
+from flwr.client.message_handler.message_handler import handle_control_message
 from flwr.client.typing import ClientFn
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
@@ -37,7 +39,6 @@ from flwr.proto.task_pb2 import TaskIns, TaskRes
 
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
-from .message_handler.message_handler import handle
 from .numpy_client import NumPyClient
 
 
@@ -53,7 +54,9 @@ def _check_actionable_client(
         )
 
 
-# pylint: disable=import-outside-toplevel,too-many-locals,too-many-branches
+# pylint: disable=import-outside-toplevel
+# pylint: disable=too-many-branches
+# pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
 def start_client(
     *,
@@ -158,10 +161,24 @@ def start_client(
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
 
+                # Check preconditions
+                sleep_duration, keep_going = handle_control_message(task_ins=task_ins)
+                if not keep_going:
+                    break
+
+                # Load app
+                app = Flower(client_fn=client_fn)
+
                 # Process
-                task_res, sleep_duration, keep_going = handle(client_fn, task_ins)
+                fwd_msg: Fwd = Fwd(
+                    task_ins=task_ins,
+                    state={},
+                    data={},
+                )
+                bwd_msg: Bwd = app(fwd=fwd_msg)
 
                 # Send
+                send(bwd_msg.task_res)
                 if not keep_going:
                     break
 

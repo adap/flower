@@ -111,3 +111,12 @@ def client_fn(cid: str):
 app = fl.app.Flower(
     client_fn=client_fn,
 )
+
+
+if __name__ == "__main__":
+    # Start Flower client
+    fl.client.start_client(
+        server_address="0.0.0.0:9092",
+        client=FlowerClient().to_client(),
+        transport="grpc-rere",
+    )

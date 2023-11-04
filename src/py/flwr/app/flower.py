@@ -15,9 +15,53 @@
 """Flower app."""
 
 
-class Flower:
+from dataclasses import dataclass
+from typing import Callable, Dict, Union
+
+from flwr.client.message_handler.message_handler import handle
+from flwr.client.typing import ClientFn
+from flwr.proto.task_pb2 import TaskIns, TaskRes
+
+
+@dataclass
+class Fwd:
     """."""
 
-    def __init__(self, client_fn) -> None:
+    task_ins: TaskIns
+    state: Dict  # TBD
+    data: Dict  # TBD
+
+
+@dataclass
+class Bwd:
+    """."""
+
+    task_res: Union[TaskRes, Exception]
+    state: Dict  # TBD
+    data: Dict  # TBD
+
+
+App = Callable[[Fwd], Bwd]
+
+
+class Flower:
+    """Flower app class."""
+
+    def __init__(
+        self,
+        client_fn: ClientFn,  # Only for backward compatibility
+    ) -> None:
         self.client_fn = client_fn
 
+    def __call__(self, fwd: Fwd) -> Bwd:
+        """."""
+        # Execute the task
+        task_res, _, _ = handle(
+            client_fn=self.client_fn,
+            task_ins=fwd.task_ins,
+        )
+        return Bwd(
+            task_res=task_res,
+            state={},
+            data={},
+        )

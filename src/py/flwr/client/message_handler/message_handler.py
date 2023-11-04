@@ -39,6 +39,39 @@ class UnknownServerMessage(Exception):
     """Exception indicating that the received message is unknown."""
 
 
+def handle_control_message(task_ins: TaskIns) -> Tuple[int, bool]:
+    """Handle control part of the incoming message.
+
+    Parameters
+    ----------
+    task_ins: TaskIns
+        The task instruction coming from the server, to be processed by the client.
+
+    Returns
+    -------
+    sleep_duration : int
+        Number of seconds that the client should disconnect from the server.
+    keep_going : bool
+        Flag that indicates whether the client should continue to process the
+        next message from the server (True) or disconnect and optionally
+        reconnect later (False).
+    """
+    server_msg = get_server_message_from_task_ins(task_ins, exclude_reconnect_ins=False)
+
+    # SecAgg message
+    if server_msg is None:
+        return 0, True
+
+    # ReconnectIns message
+    field = server_msg.WhichOneof("msg")
+    if field == "reconnect_ins":
+        disconnect_msg, sleep_duration = _reconnect(server_msg.reconnect_ins)
+        return disconnect_msg, sleep_duration, False
+
+    # Any other message
+    return 0, True
+
+
 def handle(client_fn: ClientFn, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
     """Handle incoming TaskIns from the server.
 
