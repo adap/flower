@@ -162,7 +162,7 @@ def start_client(
 
                 # Handle task message
                 task_res, sleep_duration, keep_going = handle(client_fn, task_ins)
-                
+
                 # Send
                 send(task_res)
                 if not keep_going:
