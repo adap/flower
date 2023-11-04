@@ -1,6 +1,11 @@
 import warnings
 from collections import OrderedDict
-from flwr.common import Metrics, ndarrays_to_parameters, parameters_to_ndarrays
+from flwr.common import (
+    Metrics,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
+    bytes_to_ndarray,
+)
 
 import flwr as fl
 import torch
@@ -20,7 +25,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-def train(net1, net2, trainloader, epochs):
+def train(net1, net2, trainloader, config, epochs):
     """Train the model on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net1.parameters(), lr=0.001, momentum=0.9)
@@ -28,8 +33,13 @@ def train(net1, net2, trainloader, epochs):
     lambda_align = 5e-6
     all_labels = torch.arange(10).to(DEVICE)
     one_hot_all_labels = torch.eye(10, dtype=torch.float).to(DEVICE)
-    z_g, mu_g, log_var_g = net2(one_hot_all_labels)
+    # z_g, mu_g, log_var_g = net2(one_hot_all_labels)
 
+    z_g, mu_g, log_var_g = (
+        torch.tensor(bytes_to_ndarray(config["z_g"])).to(DEVICE),
+        torch.tensor(bytes_to_ndarray(config["mu_g"])).to(DEVICE),
+        torch.tensor(bytes_to_ndarray(config["log_var_g"])).to(DEVICE),
+    )
     for _ in range(epochs):
         for images, labels in tqdm(trainloader):
             optimizer.zero_grad()
@@ -89,24 +99,21 @@ class FlowerClient(fl.client.NumPyClient):
 
     def get_parameters(self, config):
         n1 = [val.cpu().numpy() for _, val in net1.state_dict().items()]
-        # n2 = [val.cpu().numpy() for _, val in net2.state_dict().items()]
-        # return n1 + n2
         return n1
 
     def set_parameters(self, parameters):
-        params_dict1 = zip(net1.state_dict().keys(), parameters[: self.model_len])
+        params_dict1 = zip(net1.state_dict().keys(), parameters)
         state_dict1 = OrderedDict({k: torch.tensor(v) for k, v in params_dict1})
-        # params_dict2 = zip(net2.state_dict().keys(), parameters[self.model_len :])
-        # state_dict2 = OrderedDict({k: torch.tensor(v) for k, v in params_dict2})
+
         net1.load_state_dict(state_dict1, strict=True)
-        # net2.load_state_dict(state_dict2, strict=True)
 
     def fit(self, parameters, config):
         self.set_parameters(parameters)
         print("..............")
-        print(config['dict'])
+        print(bytes_to_ndarray(config["mu_g"]))
+
         # print(parameters_to_ndarrays(config["dict"])[0].shape())
-        train(net1, net2, trainloader, epochs=1)
+        train(net1, net2, trainloader, config, epochs=1)
         return self.get_parameters(config={}), len(trainloader.dataset), {}
 
     def evaluate(self, parameters, config):

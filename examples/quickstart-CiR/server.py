@@ -18,10 +18,16 @@ all_labels = torch.arange(10).to(DEVICE)
 one_hot_all_labels = torch.eye(10, dtype=torch.float).to(DEVICE)
 z_g, mu_g, log_var_g = net_gen(one_hot_all_labels)
 serialized_gen_stats = ndarrays_to_parameters(
-    [mu_g.cpu().detach().numpy(), log_var_g.cpu().detach().numpy()]
+    [
+        z_g.cpu().detach().numpy(),
+        mu_g.cpu().detach().numpy(),
+        log_var_g.cpu().detach().numpy(),
+    ]
 )
 
 
+# print(mu_g)
+# print(mu_g.cpu().detach().numpy())
 # Define metric aggregation function
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     # Multiply accuracy of each client by number of examples used
