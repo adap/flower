@@ -160,7 +160,7 @@ def start_client(
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
 
-                # Handle task
+                # Handle task message
                 task_res, sleep_duration, keep_going = handle(client_fn, task_ins)
                 
                 # Send
