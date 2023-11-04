@@ -44,7 +44,7 @@ def handle_control_message(task_ins: TaskIns) -> Tuple[int, bool]:
 
     Parameters
     ----------
-    task_ins: TaskIns
+    task_ins : TaskIns
         The task instruction coming from the server, to be processed by the client.
 
     Returns
@@ -84,7 +84,7 @@ def handle(client_fn: ClientFn, task_ins: TaskIns) -> TaskRes:
 
     Returns
     -------
-    task_res: TaskRes
+    task_res : TaskRes
         The task response that should be returned to the server.
     """
     server_msg = get_server_message_from_task_ins(task_ins, exclude_reconnect_ins=False)
@@ -128,7 +128,7 @@ def handle_legacy_message(
 
     Returns
     -------
-    client_msg: ClientMessage
+    client_msg : ClientMessage
         The result message that should be returned to the server.
     """
     field = server_msg.WhichOneof("msg")
