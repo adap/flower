@@ -86,12 +86,6 @@ def handle(client_fn: ClientFn, task_ins: TaskIns) -> TaskRes:
     -------
     task_res: TaskRes
         The task response that should be returned to the server.
-    sleep_duration : int
-        Number of seconds that the client should disconnect from the server.
-    keep_going : bool
-        Flag that indicates whether the client should continue to process the
-        next message from the server (True) or disconnect and optionally
-        reconnect later (False).
     """
     server_msg = get_server_message_from_task_ins(task_ins, exclude_reconnect_ins=False)
     if server_msg is None:
@@ -136,12 +130,6 @@ def handle_legacy_message(
     -------
     client_msg: ClientMessage
         The result message that should be returned to the server.
-    sleep_duration : int
-        Number of seconds that the client should disconnect from the server.
-    keep_going : bool
-        Flag that indicates whether the client should continue to process the
-        next message from the server (True) or disconnect and optionally
-        reconnect later (False).
     """
     field = server_msg.WhichOneof("msg")
     if field == "reconnect_ins":
