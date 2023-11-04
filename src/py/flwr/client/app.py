@@ -53,7 +53,9 @@ def _check_actionable_client(
         )
 
 
-# pylint: disable=import-outside-toplevel,too-many-locals,too-many-branches
+# pylint: disable=import-outside-toplevel
+# pylint: disable=too-many-branches
+# pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
 def start_client(
     *,
@@ -152,11 +154,16 @@ def start_client(
                 create_node()  # pylint: disable=not-callable
 
             while True:
+                # Receive
                 task_ins = receive()
                 if task_ins is None:
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
+
+                # Handle task
                 task_res, sleep_duration, keep_going = handle(client_fn, task_ins)
+                
+                # Send
                 send(task_res)
                 if not keep_going:
                     break
