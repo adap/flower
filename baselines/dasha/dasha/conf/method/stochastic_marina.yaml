@@ -1,0 +1,11 @@
+strategy:
+  _target_: dasha.strategy.MarinaAggregator
+  step_size: ???
+
+client:
+  _target_: dasha.client.StochasticMarinaClient
+  mega_batch_size: 10
+  batch_size: 25
+  device: cpu
+  evaluate_accuracy: false
+  strict_load: true
