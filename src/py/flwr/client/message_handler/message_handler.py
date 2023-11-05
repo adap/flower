@@ -44,7 +44,7 @@ def handle_control_message(task_ins: TaskIns) -> Tuple[int, bool]:
 
     Parameters
     ----------
-    task_ins: TaskIns
+    task_ins : TaskIns
         The task instruction coming from the server, to be processed by the client.
 
     Returns
@@ -72,7 +72,7 @@ def handle_control_message(task_ins: TaskIns) -> Tuple[int, bool]:
     return 0, True
 
 
-def handle(client_fn: ClientFn, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
+def handle(client_fn: ClientFn, task_ins: TaskIns) -> TaskRes:
     """Handle incoming TaskIns from the server.
 
     Parameters
@@ -84,14 +84,8 @@ def handle(client_fn: ClientFn, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
 
     Returns
     -------
-    task_res: TaskRes
+    task_res : TaskRes
         The task response that should be returned to the server.
-    sleep_duration : int
-        Number of seconds that the client should disconnect from the server.
-    keep_going : bool
-        Flag that indicates whether the client should continue to process the
-        next message from the server (True) or disconnect and optionally
-        reconnect later (False).
     """
     server_msg = get_server_message_from_task_ins(task_ins, exclude_reconnect_ins=False)
     if server_msg is None:
@@ -113,18 +107,16 @@ def handle(client_fn: ClientFn, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
                     sa=SecureAggregation(named_values=serde.named_values_to_proto(res)),
                 ),
             )
-            return task_res, 0, True
+            return task_res
         raise NotImplementedError()
-    client_msg, sleep_duration, keep_going = handle_legacy_message(
-        client_fn, server_msg
-    )
+    client_msg = handle_legacy_message(client_fn, server_msg)
     task_res = wrap_client_message_in_task_res(client_msg)
-    return task_res, sleep_duration, keep_going
+    return task_res
 
 
 def handle_legacy_message(
     client_fn: ClientFn, server_msg: ServerMessage
-) -> Tuple[ClientMessage, int, bool]:
+) -> ClientMessage:
     """Handle incoming messages from the server.
 
     Parameters
@@ -136,31 +128,25 @@ def handle_legacy_message(
 
     Returns
     -------
-    client_msg: ClientMessage
+    client_msg : ClientMessage
         The result message that should be returned to the server.
-    sleep_duration : int
-        Number of seconds that the client should disconnect from the server.
-    keep_going : bool
-        Flag that indicates whether the client should continue to process the
-        next message from the server (True) or disconnect and optionally
-        reconnect later (False).
     """
     field = server_msg.WhichOneof("msg")
     if field == "reconnect_ins":
         disconnect_msg, sleep_duration = _reconnect(server_msg.reconnect_ins)
-        return disconnect_msg, sleep_duration, False
+        return disconnect_msg
 
     # Instantiate the client
     client = client_fn("-1")
     # Execute task
     if field == "get_properties_ins":
-        return _get_properties(client, server_msg.get_properties_ins), 0, True
+        return _get_properties(client, server_msg.get_properties_ins)
     if field == "get_parameters_ins":
-        return _get_parameters(client, server_msg.get_parameters_ins), 0, True
+        return _get_parameters(client, server_msg.get_parameters_ins)
     if field == "fit_ins":
-        return _fit(client, server_msg.fit_ins), 0, True
+        return _fit(client, server_msg.fit_ins)
     if field == "evaluate_ins":
-        return _evaluate(client, server_msg.evaluate_ins), 0, True
+        return _evaluate(client, server_msg.evaluate_ins)
     raise UnknownServerMessage()
 
 

@@ -56,7 +56,7 @@ class Flower:
     def __call__(self, fwd: Fwd) -> Bwd:
         """."""
         # Execute the task
-        task_res, _, _ = handle(
+        task_res = handle(
             client_fn=self.client_fn,
             task_ins=fwd.task_ins,
         )

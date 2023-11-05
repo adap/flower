@@ -23,7 +23,6 @@ from typing import Callable, ContextManager, Optional, Tuple, Union
 
 from flwr.app import Bwd, Flower, Fwd
 from flwr.client.client import Client
-from flwr.client.message_handler.message_handler import handle_control_message
 from flwr.client.typing import ClientFn
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
@@ -39,6 +38,7 @@ from flwr.proto.task_pb2 import TaskIns, TaskRes
 
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
+from .message_handler.message_handler import handle_control_message
 from .numpy_client import NumPyClient
 
 
@@ -173,7 +173,7 @@ def start_client(
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
 
-                # Check preconditions
+                # Handle control message
                 sleep_duration, keep_going = handle_control_message(task_ins=task_ins)
                 if not keep_going:
                     break
@@ -181,7 +181,7 @@ def start_client(
                 # Load app
                 app = load_app_fn()
 
-                # Process
+                # Handle task message
                 fwd_msg: Fwd = Fwd(
                     task_ins=task_ins,
                     state={},
