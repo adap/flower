@@ -171,6 +171,7 @@ python -m hfedxgboost.main --multirun clients=cod_rna_2_clients,cod_rna_5_client
 #results for ijcnn1 dataset in table 2
 python -m hfedxgboost.main --multirun clients=ijcnn1_2_clients,ijcnn1_5_clients,ijcnn1_10_clients dataset=ijcnn1
 
+#Notice that: the MSE results shown in the tables usually happen in early FL rounds (instead in the last round/s)
 #results for space_ga dataset in table 3
 python -m hfedxgboost.main --multirun clients=space_ga_2_clients,space_ga_5_clients,space_ga_10_clients dataset=space_ga
 
