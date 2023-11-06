@@ -1,0 +1,43 @@
+---
+# this is the config that will be loaded as default by main.py
+# Please follow the provided structure (this will ensuring all baseline follow
+# a similar configuration structure and hence be easy to customise)
+
+pre_train_model_path: null # Path to checkpoint exp: docs/checkpoint/last_checkpoint.pt
+save_checkpoint: null # Path to folder for checkpoint
+
+# Path for label encoder file if want to ensure the same encode for every client
+label_path: docs/label_encoder.txt
+
+huggingface_model_save_path: docs/pretrained_wav2vec2
+sb_config: fedwav2vec2/conf/sb_config/w2v2.yaml # config with SpeechBrain recipe for Wav2Vec 2.0
+data_path: data # if you change this, ensure you `git cloned` the author's own repo to a directory with the new name
+rounds: 100 # global FL rounds
+local_epochs: 20 # local epochs for each client
+total_clients: 1943
+server_cid: 19999
+
+# Device setup
+server_device: cuda
+parallel_backend: false # If using multi-gpus per client (disable it if using server_device=cpu)
+
+client_resources:
+  num_cpus: 8
+  num_gpus: 1
+
+dataset:
+  download_filename: TEDLIUM_release-3.tgz
+
+  extract_subdirectory: audio
+
+
+strategy:
+  _target_: fedwav2vec2.strategy.CustomFedAvg
+  min_fit_clients: 20
+  fraction_fit: 0.01
+  fraction_evaluate: 0.00
+  min_available_clients: ${total_clients}
+  weight_strategy: num # strategy of weighting clients in: [num, loss, wer]
+  on_fit_config_fn:
+    _target_: fedwav2vec2.server.get_on_fit_config_fn
+    local_epochs: ${local_epochs}
