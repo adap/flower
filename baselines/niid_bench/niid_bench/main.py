@@ -35,6 +35,7 @@ def main(cfg: DictConfig) -> None:
     # 1. Print parsed config
     if "mnist" in cfg.dataset_name:
         cfg.model.input_dim = 256
+        # pylint: disable=protected-access
         cfg.model._target_ = "niid_bench.models.CNNMnist"
     print(OmegaConf.to_yaml(cfg))
 
@@ -55,6 +56,7 @@ def main(cfg: DictConfig) -> None:
     # Define a function that returns another function that will be used during
     # simulation to instantiate each individual client
     client_fn = None
+    # pylint: disable=protected-access
     if cfg.client_fn._target_ == "niid_bench.client_scaffold.gen_client_fn":
         save_path = HydraConfig.get().runtime.output_dir
         client_cv_dir = os.path.join(save_path, "client_cvs")
