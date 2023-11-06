@@ -29,6 +29,7 @@ from heterofl.models import (
 from heterofl.utils import make_optimizer, make_scheduler
 
 
+# pylint: disable=too-many-instance-attributes
 class HeteroFL(fl.server.strategy.Strategy):
     """HeteroFL strategy.
 
@@ -37,6 +38,7 @@ class HeteroFL(fl.server.strategy.Strategy):
     computational complexity and aggregate received models from clients.
     """
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         model_name: str,

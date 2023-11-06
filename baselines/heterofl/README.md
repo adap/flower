@@ -7,44 +7,44 @@ dataset: [MNIST, CIFAR10]
 
 # HeteroFL : Computation And Communication Efficient Federated Learning For Heterogeneous Clients
 
-****Paper:**** [openreview.net/forum?id=TNkPBBYFkXg](https://openreview.net/forum?id=TNkPBBYFkXg)
+**Paper:** [openreview.net/forum?id=TNkPBBYFkXg](https://openreview.net/forum?id=TNkPBBYFkXg)
 
-****Authors:**** Enmao Diao, Jie Ding, Vahid Tarokh
+**Authors:** Enmao Diao, Jie Ding, Vahid Tarokh
 
-****Abstract:**** Federated Learning (FL) is a method of training machine learning models on private data distributed over a large number of possibly heterogeneous clients such as mobile phones and IoT devices. In this work, we propose a new federated learning framework named HeteroFL to address heterogeneous clients equipped with very different computation and communication capabilities. Our solution can enable the training of heterogeneous local models with varying computation complexities and still produce a single global inference model. For the first time, our method challenges the underlying assumption of existing work that local models have to share the same architecture as the global model. We demonstrate several strategies to enhance FL training and conduct extensive empirical evaluations, including five computation complexity levels of three model architecture on three datasets. We show that adaptively distributing subnetworks according to clients’ capabilities is both computation and communication efficient.
+**Abstract:** Federated Learning (FL) is a method of training machine learning models on private data distributed over a large number of possibly heterogeneous clients such as mobile phones and IoT devices. In this work, we propose a new federated learning framework named HeteroFL to address heterogeneous clients equipped with very different computation and communication capabilities. Our solution can enable the training of heterogeneous local models with varying computation complexities and still produce a single global inference model. For the first time, our method challenges the underlying assumption of existing work that local models have to share the same architecture as the global model. We demonstrate several strategies to enhance FL training and conduct extensive empirical evaluations, including five computation complexity levels of three model architecture on three datasets. We show that adaptively distributing subnetworks according to clients’ capabilities is both computation and communication efficient.
 
 
 ## About this baseline
 
-****What’s implemented:****  The code in this directory is an implementation of HeteroFL in pytorch using flower. The code incorporates references from the authors' implementation. Implementation of custom model split and aggregation as suggested by @negedng, is available [here](https://github.com/msck72/heterofl_custom_aggregation). By modifying the configuration in the base.yaml, the results in the paper can be replicated, with both fixed and dynamic computational complexities among clients.
+**What’s implemented:**  The code in this directory is an implementation of HeteroFL in pytorch using flower. The code incorporates references from the authors' implementation. Implementation of custom model split and aggregation as suggested by @negedng, is available [here](https://github.com/msck72/heterofl_custom_aggregation). By modifying the configuration in the base.yaml, the results in the paper can be replicated, with both fixed and dynamic computational complexities among clients.
 
-****Key Terminology:****
+**Key Terminology:**
 + *Model rate* defines the computational complextiy of a client. Authors have defined five different computation complexity levels {a, b, c, d, e} with the hidden channel shrinkage ratio r = 0.5. 
 
 + *Model split mode* specifies whether the computaional complexities of clients are fixed (throughout the experiment), or whether they are dynamic (change their mode_rate/computational-complexity every-round). 
 
 + *Model mode* determines the proportionality of clients with various computation complexity levels, for example, a4-b2-e4 determines at each round, proportion of clients with computational complexity level a = 4 / (4 + 2 + 4) * num_clients , similarly, proportion of clients with computational complexity level b = 2 / (4 + 2 + 4) * num_clients and so on.
 
-****Implementation Insights:****
+**Implementation Insights:**
 *ModelRateManager* manages the model rate of client in simulation, which changes the model rate based on the model mode of the setup and *ClientManagerHeterofl* keeps track of model rates of the clients, so configure fit knows which/how-much subset of the model that needs to be sent to the client.
 
-****Datasets:**** The code utilized benchmark MNIST and CIFAR-10 datasets from Pytorch's torchvision for its experimentation.
+**Datasets:** The code utilized benchmark MNIST and CIFAR-10 datasets from Pytorch's torchvision for its experimentation.
 
-****Hardware Setup:****  The experiments were run on Google colab pro with 50GB RAM and T4 TPU. For MNIST dataset & CNN model, it approximatemy takes 1.5 hours to complete 200 rounds while for CIFAR10 dataset & ResNet18 model it takes around 3-4 hours to complete 400 rounds (may vary based on the model-mode of the setup).
+**Hardware Setup:**  The experiments were run on Google colab pro with 50GB RAM and T4 TPU. For MNIST dataset & CNN model, it approximatemy takes 1.5 hours to complete 200 rounds while for CIFAR10 dataset & ResNet18 model it takes around 3-4 hours to complete 400 rounds (may vary based on the model-mode of the setup).
 
-****Contributors:**** M S Chaitanya Kumar [(github.com/msck72)](github.com/msck72)
+**Contributors:** M S Chaitanya Kumar [(github.com/msck72)](github.com/msck72)
 
 
 ## Experimental Setup
 
-****Task:**** Image Classification.
-****Model:**** This baseline uses two models:
+**Task:** Image Classification.
+**Model:** This baseline uses two models:
 + Convolutional Neural Network(CNN) model is used for MNIST dataset.
 + PreResNet (preactivated ResNet) model is used for CIFAR10 dataset.
 
 These models use static batch normalization (sBN) and they incorporate a Scaler module following each convolutional layer.
 
-****Dataset:**** This baseline includes MNIST and CIFAR10 datasets. 
+**Dataset:** This baseline includes MNIST and CIFAR10 datasets. 
 <table>
   <thead>
     <tr>
@@ -68,7 +68,7 @@ These models use static batch normalization (sBN) and they incorporate a Scaler 
   </tbody>
 </table>
 
-****Training Hyperparameters:**** 
+**Training Hyperparameters:** 
 <table>
   <thead>
     <tr>

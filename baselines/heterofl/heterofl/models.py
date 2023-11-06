@@ -207,6 +207,7 @@ class Block(nn.Module):
         return out
 
 
+# pylint: disable=too-many-instance-attributes
 class ResNet(nn.Module):
     """Implementation of a Residual Neural Network (ResNet) model with sBN."""
 
