@@ -6,8 +6,8 @@ This example can be run in three modes:
 
 - **Centralized training**: the standard way of training ML models, where all the data is available to the node doing the finetuning.
 - **Federated Learning**: the better way of doing ML, where a model is finetuned collaboratively by nodes (i.e. clients), each using their own data. These clients can run:
-  - in _simulation_ mode: a client is a Python process
-  - in _on-device_ mode: clients are detached entities and each runs on a different device.
+  - in _simulation_ mode: a client is an ephemeral Python process with a portion of the system resources assigned to it.
+  - in _on-device_ mode: clients are detached entities and each can run on a different device.
 
 ## Running the example
 
@@ -31,7 +31,7 @@ This will create a new directory called `whisper-federated-finetuning` containin
 -- requirements.txt  <- Example dependencies
 ```
 
-This example can be run in different ways, please refer to the corresponding section for further instructions. This example was tested with `PyTorch 2.1.0` for all the different ways of running this example except when running on the Raspberry Pi, which seemed to only work with `PyTorch 1.13.1`. Please not the requirement files do not specify a version of PyTorch, therefore you need pick on that works for you and your system.
+This example can be run in different ways, please refer to the corresponding section for further instructions. This example was tested with `PyTorch 2.1.0` for all the different ways of running this example except when running on the Raspberry Pi, which seemed to only work with `PyTorch 1.13.1`. Please not the requirement files do not specify a version of PyTorch, therefore you need to choose one that works for you and your system.
 
 ## Centralized Training
 
