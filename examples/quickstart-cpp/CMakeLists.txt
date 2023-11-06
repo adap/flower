@@ -29,7 +29,6 @@ endif()
 
 ######################
 ### FLWR_LIB
-
 if(USE_LOCAL_FLWR)
   set(FLWR_SOURCE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../..")
 else()

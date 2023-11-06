@@ -1,6 +1,6 @@
 /***********************************************************************************************************
- *
- * @file libtorch_client.h
+ * 
+ * @file simple_client.h
  *
  * @brief Define an example flower client, train and test method
  *
