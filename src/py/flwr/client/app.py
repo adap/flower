@@ -36,7 +36,7 @@ from flwr.proto.task_pb2 import TaskIns, TaskRes
 
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
-from .message_handler.message_handler import handle
+from .message_handler.message_handler import handle, handle_control_message
 from .numpy_client import NumPyClient
 
 
@@ -159,13 +159,17 @@ def start_client(
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
 
+                # Handle control message
+                task_res, sleep_duration = handle_control_message(task_ins=task_ins)
+                if task_res:
+                    send(task_res)
+                    break
+
                 # Handle task message
-                task_res, sleep_duration, keep_going = handle(client_fn, task_ins)
+                task_res = handle(client_fn, task_ins)
 
                 # Send
                 send(task_res)
-                if not keep_going:
-                    break
 
             # Unregister node
             if delete_node is not None:
