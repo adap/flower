@@ -1,14 +1,14 @@
 /*************************************************************************************************
  *
- * @file message_handler.h
+ * @file task_handler.h
  *
- * @brief Handle server messages by calling appropriate client methods
+ * @brief Handle incoming or outgoing tasks
  *
- * @author Lekang Jiang
+ * @author The Flower Authors
  *
  * @version 1.0
  *
- * @date 04/09/2021
+ * @date 06/11/2023
  *
  *************************************************************************************************/
 

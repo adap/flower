@@ -1,15 +1,14 @@
 /*************************************************************************************************
  *
- * @file start.h
+ * @file grpc-rere.h
  *
- * @brief Create a gRPC channel to connect to the server and enable message
- *communication
+ * @brief Provide functions for establishing gRPC request-response communication
  *
- * @author Lekang Jiang
+ * @author The Flower Authors
  *
  * @version 1.0
  *
- * @date 06/09/2021
+ * @date 06/11/2023
  *
  *************************************************************************************************/
 
