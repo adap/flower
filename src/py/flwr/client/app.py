@@ -17,7 +17,6 @@
 
 import sys
 import time
-import warnings
 from logging import INFO
 from typing import Callable, ContextManager, Optional, Tuple, Union
 
@@ -242,18 +241,18 @@ def start_numpy_client(
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
-    warnings.warn(
-        "flwr.client.start_numpy_client() is deprecated and will "
-        "be removed in a future version of Flower. Instead, pass "
-        "your client to `flwr.client.start_client()` by calling "
-        "first the `.to_client()` method as shown below: \n"
-        "\tflwr.client.start_client(\n"
-        "\t\tserver_address='<IP>:<PORT>',\n"
-        "\t\tclient=FlowerClient().to_client()\n"
-        "\t)",
-        DeprecationWarning,
-        stacklevel=2,
-    )
+    # warnings.warn(
+    #     "flwr.client.start_numpy_client() is deprecated and will "
+    #     "be removed in a future version of Flower. Instead, pass "
+    #     "your client to `flwr.client.start_client()` by calling "
+    #     "first the `.to_client()` method as shown below: \n"
+    #     "\tflwr.client.start_client(\n"
+    #     "\t\tserver_address='<IP>:<PORT>',\n"
+    #     "\t\tclient=FlowerClient().to_client()\n"
+    #     "\t)",
+    #     DeprecationWarning,
+    #     stacklevel=2,
+    # )
 
     # Calling this function is deprecated. A warning is thrown.
     # We first need to convert either the supplied client to `Client.`
