@@ -3,11 +3,11 @@ requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
-name = "niid_bench" # <----- Ensure it matches the name of your baseline directory containing all the source code
+name = "Federated Learning on Non-IID Data Silos: An Experimental Study" # <----- Ensure it matches the name of your baseline directory containing all the source code
 version = "1.0.0"
 description = "Federated Learning on Non-IID Data Silos: An Experimental Study"
 license = "Apache-2.0"
-authors = ["Aashish Kolluri, <aashishkolluri6@gmail.com>"]
+authors = ["Aashish Kolluri <aashishkolluri6@gmail.com>"]
 readme = "README.md"
 homepage = "https://flower.dev"
 repository = "https://github.com/adap/flower"
