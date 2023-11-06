@@ -66,13 +66,8 @@ protobuf = "^3.19.0"
 cryptography = "^41.0.2"
 pycryptodome = "^3.18.0"
 iterators = "^0.0.2"
-# Optional dependencies (VCE)
-ray = { version = "==2.6.3", optional = true }
-pydantic = { version = "<2.0.0", optional = true }
-# Optional dependencies (REST transport layer)
-requests = { version = "^2.31.0", optional = true }
-starlette = { version = "^0.31.0", optional = true }
-uvicorn = { version = "^0.23.0", extras = ["standard"], optional = true }
+# Optional dependencies
+ray = { extras = ["default"], version = ">=1.9.2,<1.12.0", optional = true }
 
 [tool.poetry.extras]
 simulation = ["ray", "pydantic"]
