@@ -15,7 +15,9 @@ if [[ -d "$REF_API_DIR" ]]; then
 fi
 
 # Remove the old html files
-rm -r build
+if [[ -d build ]]; then
+  rm -r build
+fi
 
-# Generate new rst files
+# Generate new rst files and html files
 sphinx-build -M html source build
