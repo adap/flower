@@ -190,7 +190,7 @@ def set_params(model: torch.nn.ModuleList, params: List[fl.common.NDArrays]):
     model.load_state_dict(state_dict, strict=True)
 
 
-def get_model(device, num_classes, compile: bool=True):
+def get_model(device, num_classes, compile: bool = True):
     """Create model: Whisper-tiny Encoder + classification head"""
     encoder = WhisperForConditionalGeneration.from_pretrained(
         "openai/whisper-tiny"

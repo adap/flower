@@ -21,14 +21,18 @@ parser.add_argument("--cid", type=int, required=True, help="Client id.")
 parser.add_argument(
     "--server_address", type=str, required=True, help="IP of the server."
 )
-parser.add_argument("--no-compile", action='store_true', help="To not compile client models.")
+parser.add_argument(
+    "--no-compile", action="store_true", help="To not compile client models."
+)
 
 
 class WhisperFlowerClient(fl.client.NumPyClient):
+    """A Flower client that does trains a classification head attached to the encoder of
+    a Whisper-tiny encoder for Keyword spotting."""
+
     def __init__(self, trainset, num_classes: int, disable_tqdm: bool, compile: bool):
         self.disable_tqdm = disable_tqdm
         self.trainset = trainset.with_format("torch", columns=["data", "targets"])
-        # self.train_loader = DataLoader(train_dataset, batch_size=8, shuffle=False, num_workers=4, sampler=ss)
 
         # Determine device
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -37,15 +41,24 @@ class WhisperFlowerClient(fl.client.NumPyClient):
         self.encoder, self.classifier = get_model(self.device, num_classes, compile)
 
     def get_parameters(self, config):
+        """Return parameters in a format that is understood by the server."""
         return [val.cpu().numpy() for _, val in self.classifier.state_dict().items()]
 
     def fit(self, parameters, config):
+        """Do on-device training.
+
+        Here the client receives the parameters of the classification head from the
+        server. Then trains that classifier using the data that belongs to this client.
+        Finally, The updated classifier is sent back to the server for aggregation.
+        """
+
+        # Apply the classifier parameters to the model in this client
         set_params(self.classifier, parameters)
 
         # Read from config
         batch, epochs = config["batch_size"], config["epochs"]
 
-        # construct sampler
+        # construct sampler in order to have balanced batches
         hist = np.histogram(self.trainset["targets"], bins=12)
         w_per_class = (
             len(self.trainset) / hist[0]
@@ -78,7 +91,7 @@ class WhisperFlowerClient(fl.client.NumPyClient):
             disable_tqdm=self.disable_tqdm,
         )
 
-        # Return local model and statistics
+        # Return local classification head and statistics
         return self.get_parameters({}), len(train_loader.dataset), {}
 
 
@@ -89,8 +102,10 @@ def get_client_fn(
     client_data_path: str = "./",
     num_classes: int = 12,
     disable_tqdm: bool = False,
-    compile: bool=True,
+    compile: bool = True,
 ):
+    """Return a function that can be used to instantiate a particular client."""
+
     def client_fn(cid: str):
         torch.set_float32_matmul_precision(
             "high"
@@ -127,12 +142,16 @@ def get_client_fn(
             full_train_dataset.save_to_disk(f"{client_data_path}/client{cid}.hf")
             torch.set_num_threads(og_threads)
 
-        return WhisperFlowerClient(full_train_dataset, num_classes, disable_tqdm, compile)
+        return WhisperFlowerClient(
+            full_train_dataset, num_classes, disable_tqdm, compile
+        )
 
     return client_fn
 
 
 def run_client():
+    """Run clinet."""
+
     # Parse input arguments
     args = parser.parse_args()
 
@@ -145,7 +164,9 @@ def run_client():
     processor = WhisperProcessor.from_pretrained("openai/whisper-tiny")
     prepare_dataset_fn = get_encoding_fn(processor)
 
-    client_fn = get_client_fn(sc_train, prepare_dataset_fn, client_mapping, compile=not(args.no_compile))
+    client_fn = get_client_fn(
+        sc_train, prepare_dataset_fn, client_mapping, compile=not (args.no_compile)
+    )
 
     fl.client.start_numpy_client(
         server_address=f"{args.server_address}:8080", client=client_fn(args.cid)

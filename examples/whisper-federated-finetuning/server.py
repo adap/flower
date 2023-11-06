@@ -72,17 +72,21 @@ def main():
     # Parse input arguments
     args = parser.parse_args()
 
+    # The sever will use the validation set to assess the performance of the global
+    # model after each round. Then, the test set will be used for evaluating the global
+    # model after the last round
     sc_val = load_dataset("speech_commands", "v0.02", split="validation", token=False)
     sc_test = load_dataset("speech_commands", "v0.02", split="test", token=False)
 
     processor = WhisperProcessor.from_pretrained("openai/whisper-tiny")
     prepare_dataset_fn = get_encoding_fn(processor)
 
+    # We use a standard FedAvg strategy
     strategy = fl.server.strategy.FedAvg(
         fraction_fit=0.00001,
-        min_fit_clients=2,
-        fraction_evaluate=0.0,
-        min_available_clients=2,
+        min_fit_clients=2,  # the strategy will wait until at least 2 clients are sampled for fit
+        fraction_evaluate=0.0,  # we don't do federated evaluation in this example
+        min_available_clients=2,  # the strategy will do nothing until 2 clients are connected to the server
         on_fit_config_fn=fit_config,
         evaluate_fn=get_evaluate_fn(
             sc_val, sc_test, prepare_dataset_fn, args.num_rounds
