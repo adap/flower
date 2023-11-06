@@ -41,8 +41,8 @@ def load_datasets(
     """
     print(f"Dataset partitioning config: {config}")
     partitioning = ""
-    if "_partitioning" in config:
-        partitioning = config._partitioning
+    if "partitioning" in config:
+        partitioning = config.partitioning
     # partition the data
     if partitioning == "dirichlet":
         alpha = 0.5
@@ -52,7 +52,7 @@ def load_datasets(
             num_clients,
             alpha=alpha,
             seed=seed,
-            dataset_name=config._name,
+            dataset_name=config.name,
         )
     elif partitioning == "label_quantity":
         labels_per_client = 2
@@ -62,14 +62,14 @@ def load_datasets(
             num_clients,
             labels_per_client=labels_per_client,
             seed=seed,
-            dataset_name=config._name,
+            dataset_name=config.name,
         )
     elif partitioning == "iid":
         datasets, testset = partition_data(
             num_clients,
             similarity=1.0,
             seed=seed,
-            dataset_name=config._name,
+            dataset_name=config.name,
         )
     elif partitioning == "iid_noniid":
         similarity = 0.5
@@ -79,7 +79,7 @@ def load_datasets(
             num_clients,
             similarity=similarity,
             seed=seed,
-            dataset_name=config._name,
+            dataset_name=config.name,
         )
 
     batch_size = -1

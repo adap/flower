@@ -29,8 +29,8 @@ client_fn:
 
 dataset:
   # dataset config
-  _name: ${dataset_name}
-  _partitioning: ${partitioning}
+  name: ${dataset_name}
+  partitioning: ${partitioning}
   batch_size: ${batch_size} # batch_size = batch_size_ratio * total_local_data_size
   val_split: 0.0
   seed: ${dataset_seed}
