@@ -185,7 +185,6 @@ def start_client(
                 fwd_msg: Fwd = Fwd(
                     task_ins=task_ins,
                     state={},
-                    data={},
                 )
                 bwd_msg: Bwd = app(fwd=fwd_msg)
 

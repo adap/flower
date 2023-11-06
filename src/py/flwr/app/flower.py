@@ -61,5 +61,4 @@ class Flower:
         return Bwd(
             task_res=task_res,
             state={},
-            data={},
         )
