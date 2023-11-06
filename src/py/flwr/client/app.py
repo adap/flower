@@ -17,7 +17,6 @@
 
 import sys
 import time
-import warnings
 from logging import INFO
 from typing import Callable, ContextManager, Optional, Tuple, Union
 
@@ -37,7 +36,7 @@ from flwr.proto.task_pb2 import TaskIns, TaskRes
 
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
-from .message_handler.message_handler import handle
+from .message_handler.message_handler import handle, handle_control_message
 from .numpy_client import NumPyClient
 
 
@@ -53,7 +52,9 @@ def _check_actionable_client(
         )
 
 
-# pylint: disable=import-outside-toplevel,too-many-locals,too-many-branches
+# pylint: disable=import-outside-toplevel
+# pylint: disable=too-many-branches
+# pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
 def start_client(
     *,
@@ -152,14 +153,23 @@ def start_client(
                 create_node()  # pylint: disable=not-callable
 
             while True:
+                # Receive
                 task_ins = receive()
                 if task_ins is None:
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
-                task_res, sleep_duration, keep_going = handle(client_fn, task_ins)
-                send(task_res)
-                if not keep_going:
+
+                # Handle control message
+                task_res, sleep_duration = handle_control_message(task_ins=task_ins)
+                if task_res:
+                    send(task_res)
                     break
+
+                # Handle task message
+                task_res = handle(client_fn, task_ins)
+
+                # Send
+                send(task_res)
 
             # Unregister node
             if delete_node is not None:
@@ -232,18 +242,18 @@ def start_numpy_client(
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
-    warnings.warn(
-        "flwr.client.start_numpy_client() is deprecated and will "
-        "be removed in a future version of Flower. Instead, pass "
-        "your client to `flwr.client.start_client()` by calling "
-        "first the `.to_client()` method as shown below: \n"
-        "\tflwr.client.start_client(\n"
-        "\t\tserver_address='<IP>:<PORT>',\n"
-        "\t\tclient=FlowerClient().to_client()\n"
-        "\t)",
-        DeprecationWarning,
-        stacklevel=2,
-    )
+    # warnings.warn(
+    #     "flwr.client.start_numpy_client() is deprecated and will "
+    #     "be removed in a future version of Flower. Instead, pass "
+    #     "your client to `flwr.client.start_client()` by calling "
+    #     "first the `.to_client()` method as shown below: \n"
+    #     "\tflwr.client.start_client(\n"
+    #     "\t\tserver_address='<IP>:<PORT>',\n"
+    #     "\t\tclient=FlowerClient().to_client()\n"
+    #     "\t)",
+    #     DeprecationWarning,
+    #     stacklevel=2,
+    # )
 
     # Calling this function is deprecated. A warning is thrown.
     # We first need to convert either the supplied client to `Client.`
