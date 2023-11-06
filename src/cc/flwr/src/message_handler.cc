@@ -1,7 +1,7 @@
 #include "message_handler.h"
 
-std::tuple<ClientMessage, int> _reconnect(
-    ServerMessage_Reconnect reconnect_msg) {
+std::tuple<ClientMessage, int>
+_reconnect(ServerMessage_Reconnect reconnect_msg) {
   // Determine the reason for sending Disconnect message
   Reason reason = Reason::ACK;
   int sleep_duration = 0;
@@ -19,14 +19,14 @@ std::tuple<ClientMessage, int> _reconnect(
   return std::make_tuple(cm, sleep_duration);
 }
 
-ClientMessage _get_parameters(flwr_local::Client* client) {
+ClientMessage _get_parameters(flwr_local::Client *client) {
   ClientMessage cm;
   *(cm.mutable_get_parameters_res()) =
       parameters_res_to_proto(client->get_parameters());
   return cm;
 }
 
-ClientMessage _fit(flwr_local::Client* client, ServerMessage_FitIns fit_msg) {
+ClientMessage _fit(flwr_local::Client *client, ServerMessage_FitIns fit_msg) {
   // Deserialize fit instruction
   flwr_local::FitIns fit_ins = fit_ins_from_proto(fit_msg);
   // Perform fit
@@ -37,7 +37,7 @@ ClientMessage _fit(flwr_local::Client* client, ServerMessage_FitIns fit_msg) {
   return cm;
 }
 
-ClientMessage _evaluate(flwr_local::Client* client,
+ClientMessage _evaluate(flwr_local::Client *client,
                         ServerMessage_EvaluateIns evaluate_msg) {
   // Deserialize evaluate instruction
   flwr_local::EvaluateIns evaluate_ins = evaluate_ins_from_proto(evaluate_msg);
@@ -49,7 +49,7 @@ ClientMessage _evaluate(flwr_local::Client* client,
   return cm;
 }
 
-std::tuple<ClientMessage, int, bool> handle(flwr_local::Client* client,
+std::tuple<ClientMessage, int, bool> handle(flwr_local::Client *client,
                                             ServerMessage server_msg) {
   if (server_msg.has_reconnect_ins()) {
     std::tuple<ClientMessage, int> rec = _reconnect(server_msg.reconnect_ins());
@@ -66,4 +66,39 @@ std::tuple<ClientMessage, int, bool> handle(flwr_local::Client* client,
                            true);
   }
   throw "Unkown server message";
+}
+
+std::tuple<flwr::proto::TaskRes, int, bool>
+handle_task(flwr_local::Client *client, const flwr::proto::TaskIns &task_ins) {
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  if (!task_ins.task().has_legacy_server_message()) {
+    // TODO: Handle SecureAggregation
+    throw std::runtime_error("Task still needs legacy server message");
+  }
+  ServerMessage server_msg = task_ins.task().legacy_server_message();
+#pragma GCC diagnostic pop
+
+  std::tuple<ClientMessage, int, bool> legacy_res = handle(client, server_msg);
+  std::unique_ptr<ClientMessage> client_message =
+      std::make_unique<ClientMessage>(std::get<0>(legacy_res));
+
+  flwr::proto::TaskRes task_res;
+  task_res.set_task_id("");
+  task_res.set_group_id("");
+  task_res.set_workload_id(0);
+
+  std::unique_ptr<flwr::proto::Task> task =
+      std::make_unique<flwr::proto::Task>();
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  task->set_allocated_legacy_client_message(
+      client_message.release()); // Ownership transferred to `task`
+#pragma GCC diagnostic pop
+
+  task_res.set_allocated_task(task.release());
+  return std::make_tuple(task_res, std::get<1>(legacy_res),
+                         std::get<2>(legacy_res));
 }

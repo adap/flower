@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -98,6 +98,8 @@ def test_value_serialization_deserialization() -> None:
         # string scalar and list
         "abcdefghijklmnopqrstuvwxy",
         ["456hgdhfd", "1234567890123456789012345678901", "I'm a string."],
+        # empty list
+        [],
     ]
 
     for value in values:
@@ -134,6 +136,8 @@ def test_named_values_serialization_deserialization() -> None:
         # string scalar and list
         "abcdefghijklmnopqrstuvwxy",
         ["456hgdhfd", "1234567890123456789012345678901", "I'm a string."],
+        # empty list
+        [],
     ]
     named_values = {f"value {i}": value for i, value in enumerate(values)}
 
