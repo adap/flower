@@ -89,6 +89,7 @@ black = { version = "==23.3.0", extras = ["jupyter"] }
 docformatter = "==1.7.5"
 mypy = "==1.5.1"
 pylint = "==2.13.9"
+pylint-protobuf = "0.21.0"
 flake8 = "==3.9.2"
 pytest = "==7.4.0"
 pytest-cov = "==3.0.0"

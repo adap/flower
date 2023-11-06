@@ -35,7 +35,7 @@ python -m mypy src/py
 echo "- mypy: done"
 
 echo "- pylint: start"
-python -m pylint --ignore=src/py/flwr/proto src/py/flwr
+python -m pylint --ignore=src/py/flwr/proto --load-plugins=pylint_protobuf src/py/flwr
 echo "- pylint: done"
 
 echo "- flake8: start"
