@@ -16,12 +16,13 @@
 
 
 from dataclasses import dataclass
-from typing import Callable, Dict
+from typing import Callable
 
 from flwr.client.message_handler.message_handler import handle
 from flwr.client.typing import ClientFn
-from flwr.proto.task_pb2 import TaskIns, TaskRes
 from flwr.client.workload_state import WorkloadState
+from flwr.proto.task_pb2 import TaskIns, TaskRes
+
 
 @dataclass
 class Fwd:
