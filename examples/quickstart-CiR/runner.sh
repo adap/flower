@@ -6,8 +6,9 @@ gnome-terminal -- bash -c "python server.py; read -p 'Press Enter to exit';"
 # Wait for 2 seconds
 sleep 2
 
-# Start the first client in the second terminal
-gnome-terminal -- bash -c "python client.py; read -p 'Press Enter to exit';"
+num_clients=4
 
-# Start the second client in the third terminal
-gnome-terminal -- bash -c "python client.py; read -p 'Press Enter to exit';"
+# Start the clients in a for loop
+for i in $(seq 0 $((num_clients - 1))); do
+    gnome-terminal -- bash -c "sleep $i; python client.py --client_idx $i; read -p 'Press Enter to exit';"
+done

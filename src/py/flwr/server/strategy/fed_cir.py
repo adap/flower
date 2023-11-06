@@ -1,23 +1,3 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
-"""Federated Averaging (FedCiRs) [McMahan et al., 2016] strategy.
-
-Paper: arxiv.org/abs/1602.05629
-"""
-
-
 from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
@@ -37,6 +17,7 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
+from flwr.server.utils import AlexNet, Generator, Enclassifier
 from .aggregate import aggregate, weighted_loss_avg
 from .fedavg import FedAvg
 
@@ -50,67 +31,7 @@ import torch
 import torch.nn as nn
 from collections import OrderedDict
 
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-
-class Generator(nn.Module):  # W_g
-    def __init__(self, num_classes=10, latent_dim=20):
-        super(Generator, self).__init__()
-        self.net = nn.Sequential(nn.Linear(num_classes, 128), nn.ReLU())
-        self.fc_mu = nn.Linear(128, latent_dim)
-        self.fc_logvar = nn.Linear(128, latent_dim)
-
-    def reparameterize(self, mu, logvar):
-        std = torch.exp(0.5 * logvar)
-        eps = torch.randn_like(std)
-        return mu + eps * std
-
-    def forward(self, y):
-        z0 = self.net(y)
-        mu = self.fc_mu(z0)
-        logvar = self.fc_logvar(z0)
-        z = self.reparameterize(mu, logvar)
-        return z, mu, logvar
-
-
-class Enclassifier(nn.Module):
-    def __init__(self, latent_dim=20, num_classes=10):
-        super(Enclassifier, self).__init__()
-
-        # Encoder
-        self.encoder = nn.Sequential(
-            nn.Conv2d(1, 32, kernel_size=4, stride=2, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=4, stride=2, padding=1),
-            nn.ReLU(),
-        )
-        self.fc_mu = nn.Linear(64 * 7 * 7, latent_dim)
-        self.fc_logvar = nn.Linear(64 * 7 * 7, latent_dim)
-
-        # Classifier
-        self.clf = nn.Sequential(
-            nn.Linear(20, 128),
-            nn.ReLU(),
-            nn.Linear(128, num_classes),
-        )
-
-    def encode(self, x):
-        x = self.encoder(x)
-        x = x.view(x.size(0), -1)
-        mu = self.fc_mu(x)
-        logvar = self.fc_logvar(x)
-        return mu, logvar
-
-    def reparameterize(self, mu, logvar):
-        std = torch.exp(0.5 * logvar)
-        eps = torch.randn_like(std)
-        return mu + eps * std
-
-    def forward(self, x):
-        mu, logvar = self.encode(x)
-        z = self.reparameterize(mu, logvar)
-        pred = self.clf(z)
-        return pred, mu, logvar
+DEVICE = torch.device("cpu")
 
 
 class FedCiR(FedAvg):
@@ -141,6 +62,7 @@ class FedCiR(FedAvg):
         lr_g=1e-2,
         steps_g=25,
         gen_stats=None,
+        num_classes=10,
     ) -> None:
         """Federated Averaging strategy.
 
@@ -199,22 +121,17 @@ class FedCiR(FedAvg):
         self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
         self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
         self.lr_gen = lr_g
+        self.num_classes = num_classes
         self.steps_gen = steps_g
         self.gen_stats = gen_stats
-        self.gen_model = Generator().to(DEVICE)
+        self.gen_model = Generator(
+            num_classes=self.num_classes, latent_dim=4096, other_dim=1000
+        ).to(DEVICE)
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
         rep = f"FedCiRs(accept_failures={self.accept_failures})"
         return rep
-
-    def initialize_parameters(
-        self, client_manager: ClientManager
-    ) -> Optional[Parameters]:
-        """Initialize global model parameters."""
-        initial_parameters = self.initial_parameters
-        self.initial_parameters = None  # Don't keep initial parameters in memory
-        return initial_parameters
 
     def evaluate(
         self, server_round: int, parameters: Parameters
@@ -301,14 +218,17 @@ class FedCiR(FedAvg):
             for _, fit_res in results
         ]
         temp_local_models = [
-            Enclassifier().to(DEVICE) for _ in range(len(weights_results))
+            AlexNet(num_classes=self.num_classes, latent_dim=4096, other_dim=1000).to(
+                DEVICE
+            )
+            for _ in range(len(weights_results))
         ]
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(self.gen_model.parameters(), lr=self.lr_gen)
 
-        all_labels = torch.arange(10).to(DEVICE)
+        all_labels = torch.arange(self.num_classes).to(DEVICE)
 
-        one_hot_all_labels = torch.eye(10, dtype=torch.float).to(DEVICE)
+        one_hot_all_labels = torch.eye(self.num_classes, dtype=torch.float).to(DEVICE)
         for temp_local_model in temp_local_models:
             temp_local_model.eval()
 
@@ -328,7 +248,7 @@ class FedCiR(FedAvg):
             print(f"generator loss at step {step}:{loss}")
             loss.backward()
             optimizer.step()
-            
+
         z_g, mu_g, log_var_g = self.gen_model(one_hot_all_labels)
         self.gen_stats = ndarrays_to_parameters(
             [
@@ -337,7 +257,6 @@ class FedCiR(FedAvg):
                 log_var_g.cpu().detach().numpy(),
             ]
         )
-
         parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
 
         # Aggregate custom metrics if aggregation fn was provided

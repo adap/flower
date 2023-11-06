@@ -15,25 +15,30 @@ from torch.utils.data import DataLoader
 from torchvision.datasets import MNIST
 from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
-from models import Enclassifier, Generator
+from models import AlexNet, Generator
+import argparse
+from utils_pacs import make_dataloaders
 
 # #############################################################################
 # 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
 # #############################################################################
 
 warnings.filterwarnings("ignore", category=UserWarning)
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+DEVICE = torch.device("cpu")
+num_classes = 7
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--client_idx", type=int, required=True, help="Client index")
+args = parser.parse_args()
 
 
-def train(net1, net2, trainloader, config, epochs):
+def train(net1, trainloader, config, epochs):
     """Train the model on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net1.parameters(), lr=0.001, momentum=0.9)
     lambda_reg = 0.5
     lambda_align = 5e-6
-    all_labels = torch.arange(10).to(DEVICE)
-    one_hot_all_labels = torch.eye(10, dtype=torch.float).to(DEVICE)
-    # z_g, mu_g, log_var_g = net2(one_hot_all_labels)
+    all_labels = torch.arange(num_classes).to(DEVICE)
 
     z_g, mu_g, log_var_g = (
         torch.tensor(bytes_to_ndarray(config["z_g"])).to(DEVICE),
@@ -86,9 +91,10 @@ def load_data():
 # #############################################################################
 
 # Load model and data (simple CNN, MNIST)
-net1 = Enclassifier().to(DEVICE)
-net2 = Generator().to(DEVICE)
-trainloader, testloader = load_data()
+net1 = AlexNet(num_classes=num_classes, latent_dim=4096, other_dim=1000).to(DEVICE)
+trainloaders, testloaders, valloader = make_dataloaders(batch_size=64)
+trainloader = trainloaders[args.client_idx]
+testloader = testloaders[args.client_idx]
 
 
 # Define Flower client
@@ -109,11 +115,9 @@ class FlowerClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         self.set_parameters(parameters)
-        print("..............")
-        print(bytes_to_ndarray(config["mu_g"]))
 
         # print(parameters_to_ndarrays(config["dict"])[0].shape())
-        train(net1, net2, trainloader, config, epochs=1)
+        train(net1, trainloader, config, epochs=5)
         return self.get_parameters(config={}), len(trainloader.dataset), {}
 
     def evaluate(self, parameters, config):
@@ -123,7 +127,7 @@ class FlowerClient(fl.client.NumPyClient):
 
 
 # Start Flower client
-fl.client.start_numpy_client(
+fl.client.start_client(
     server_address="127.0.0.1:8080",
-    client=FlowerClient(),
+    client=FlowerClient().to_client(),
 )
