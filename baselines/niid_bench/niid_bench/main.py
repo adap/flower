@@ -6,8 +6,6 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 import os
 import pickle
 
-# these are the basic packages you'll need here
-# feel free to remove some if aren't needed
 import flwr as fl
 import hydra
 from flwr.server.client_manager import SimpleClientManager
@@ -40,12 +38,6 @@ def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
 
     # 2. Prepare your dataset
-    # here you should call a function in datasets.py that returns whatever is needed to:
-    # (1) ensure the server can access the dataset used to evaluate your model after
-    # aggregation
-    # (2) tell each client what dataset partitions they should use (e.g. a this could
-    # be a location in the file system, a list of dataloader, a list of ids to extract
-    # from a dataset, it's up to you)
     trainloaders, valloaders, testloader = load_datasets(
         config=cfg.dataset,
         num_clients=cfg.num_clients,
@@ -53,8 +45,6 @@ def main(cfg: DictConfig) -> None:
     )
 
     # 3. Define your clients
-    # Define a function that returns another function that will be used during
-    # simulation to instantiate each individual client
     client_fn = None
     # pylint: disable=protected-access
     if cfg.client_fn._target_ == "niid_bench.client_scaffold.gen_client_fn":
@@ -80,9 +70,6 @@ def main(cfg: DictConfig) -> None:
     evaluate_fn = gen_evaluate_fn(testloader, device=device, model=cfg.model)
 
     # 4. Define your strategy
-    # pass all relevant argument (including the global dataset used after aggregation,
-    # if needed by your method.)
-    # strategy = instantiate(cfg.strategy, <additional arguments if desired>)
     strategy = instantiate(
         cfg.strategy,
         evaluate_fn=evaluate_fn,
@@ -98,7 +85,6 @@ def main(cfg: DictConfig) -> None:
         )
 
     # 6. Start Simulation
-    # history = fl.simulation.start_simulation(<arguments for simulation>)
     history = fl.simulation.start_simulation(
         server=server,
         client_fn=client_fn,
@@ -117,16 +103,6 @@ def main(cfg: DictConfig) -> None:
     print(save_path)
 
     # 7. Save your results
-    # Here you can save the `history` returned by the simulation and include
-    # also other buffers, statistics, info needed to be saved in order to later
-    # on generate the plots you provide in the README.md. You can for instance
-    # access elements that belong to the strategy for example:
-    # data = strategy.get_my_custom_data() -- assuming you have such method defined.
-    # Hydra will generate for you a directory each time you run the code. You
-    # can retrieve the path to that directory with this:
-    # save_path = HydraConfig.get().runtime.output_dir
-    # save to a pickle file
-
     with open(os.path.join(save_path, "history.pkl"), "wb") as f_ptr:
         pickle.dump(history, f_ptr)
 

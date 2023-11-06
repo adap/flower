@@ -162,7 +162,7 @@ def _train_one_epoch_scaffold(
         output = net(data)
         loss = criterion(output, target)
         loss.backward()
-        optimizer.step_custom(server_cv, client_cv)  # type: ignore
+        optimizer.step_custom(server_cv, client_cv)
     return net
 
 
@@ -222,7 +222,7 @@ def _train_one_epoch(
         output = net(data)
         loss = criterion(output, target)
         loss.backward()
-        optimizer.step()  # type: ignore
+        optimizer.step()
     return net
 
 
@@ -295,7 +295,7 @@ def _train_one_epoch_fedprox(
             proximal_term += torch.norm(param - global_param) ** 2
         loss += (proximal_mu / 2) * proximal_term
         loss.backward()
-        optimizer.step()  # type: ignore
+        optimizer.step()
     return net
 
 
@@ -374,7 +374,7 @@ def _train_one_epoch_fednova(
         output = net(data)
         loss = criterion(output, target)
         loss.backward()
-        optimizer.step()  # type: ignore
+        optimizer.step()
         local_steps += 1
     return net, local_steps
 
