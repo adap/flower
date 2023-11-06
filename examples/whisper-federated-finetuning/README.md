@@ -56,13 +56,30 @@ TEST ---> loss = 0.001703281509680464, accuracy = 0.9740286298568507
 
 ## Federated Learning
 
-Centralized training is ok but in many settings it cannot be realised. Primarily because the training data must remain distributed (i.e. on the client side) and cannot be aggregated into a single node (e.g. your server). With Flower we can easily design a federated finetuning pipeline by which clients locally train the classification head on their own data, before communicating it to a central server. There, the updates sent by the clients get aggregated and re-distributed among clients for another round of FL. This process is repeated until convergence. Note that, unlike the encoder part of the Whisper model, the classification head is incredibly lightweight (just 780K parameters), adding little communication costs as a result.
+Centralized training is ok but in many settings it cannot be realised. Primarily because the training data must remain distributed (i.e. on the client side) and cannot be aggregated into a single node (e.g. your server). With Flower we can easily design a federated finetuning pipeline by which clients locally train the classification head on their data, before communicating it to a central server. There, the updates sent by the clients get aggregated and re-distributed among clients for another round of FL. This process is repeated until convergence. Note that, unlike the encoder part of the Whisper model, the classification head is incredibly lightweight (just 780K parameters), adding little communication costs as a result.
 
-Flower supports two ways of doing Federated Learning: simulated and non-simulated FL. The former, managed by the [`VirtualClientEngine`](https://flower.dev/docs/framework/how-to-run-simulations.html), allows you to run large scale workloads in a system-aware manner, that scales with the resources available on your system (whether it is a laptop, a desktop with a single GPU, or a cluster of GPU servers). The latter is better suited for settings where clients are unique devices (e.g. a server, a smart device, etc). This example shows you how to use both.
+Flower supports two ways of doing Federated Learning: simulated and non-simulated FL. The former, managed by the [`VirtualClientEngine`](https://flower.dev/docs/framework/how-to-run-simulations.html), allows you to run large-scale workloads in a system-aware manner, that scales with the resources available on your system (whether it is a laptop, a desktop with a single GPU, or a cluster of GPU servers). The latter is better suited for settings where clients are unique devices (e.g. a server, a smart device, etc). This example shows you how to use both.
+
+### Preparing the dataset
+
+If you have run the centralized version of this example first, you probably realized that it takes some time to get a fully pre-processed SpeechCommands dataset using the HuggingFace API. This pre-processing is ideal so nothing slowdowns our training once we launch the experiment. For the federated part of this example, we also need to pre-process the data however in a different way since first the training set needs to be split into N different buckets, one for each client. 
+
+To launch a Flower client we write a `client_fn` callable that will: (1) Load the dataset of the client; then (2) return the Client object itself. In `client.py` we have included a few lines of code that preprocess the training partition of a given client and saves it to disk (so this doesn't have to be repeated each time you run the experiment). You can run the experiment right away and the data will be pre-processed on-demand (i.e. when the `i`-th client is spawned for the first time), or you can pre-process all client partitions first. In order to do so, please run:
+
+```bash
+# will write to disk all pre-processed data partitions
+# by default these will go to a new directory named `client_datasets`
+# Similarly to the centralised setting, this preprocessing will take a while (30mins approx)
+python sim.py --preprocess
+```
+
+The resulting data partitions are not equal-sized (which is what you'd often find in practice in the real world). If we make a bar plot showing the amount of data each client has this is the result.
+
+![Amount of data per client](_static/whisper_flower_data.png)
 
 ### Federated Finetuning (Simulation)
 
-The setup instructions for simulations are the same as those described for the centralised setting above. Then, you can launch your simulation as shown below.
+The setup instructions for simulations are the same as those described for the centralized setting above. Then, you can launch your simulation as shown below.
 
 ```bash
 # By default it will run 2 clients in parallel on a single GPU (which should be fine if your GPU has at least 16GB )
@@ -70,7 +87,9 @@ The setup instructions for simulations are the same as those described for the c
 python sim.py --num-rounds 5
 ```
 
-With just 5 FL rounds, the global model should be reaching ~95% test accuracy. On an RTX 3090Ti, running 5 rounds took ~5minutues.
+![Global validation accuracy FL with Whisper model](_static/whisper_flower_acc.png)
+
+With just 5 FL rounds, the global model should be reaching ~95% validation accuracy. A test accuracy of 97% can be reached with 10 rounds of FL training using the default hyperparameters. On an RTX 3090Ti, each round takes ~20-30s depending on the amount of data the clients select in a round have. 
 
 ### Federated Finetuning (non-simulated)
 

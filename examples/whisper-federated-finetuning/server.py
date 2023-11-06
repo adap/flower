@@ -42,12 +42,15 @@ def get_evaluate_fn(val_set, test_set, encoding_fn, num_rounds):
         classifier.to(device)
 
         # prepare dataset
+        og_threads = torch.get_num_threads()
+        torch.set_num_threads(1) # ! still, not clear to me why this is needed if we want `num_proc>1`
         if server_round == num_rounds:
             prefix = "test"
             encoded = test_set.map(encoding_fn, num_proc=4, remove_columns=remove_cols)
         else:
             prefix = "val"
             encoded = val_set.map(encoding_fn, num_proc=4, remove_columns=remove_cols)
+        torch.set_num_threads(og_threads)
 
         val_encoded = encoded.with_format("torch", columns=["data", "targets"])
         val_loader = DataLoader(val_encoded, batch_size=64, num_workers=4)
