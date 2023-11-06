@@ -3,12 +3,12 @@ title: "Federated Learning on Non-IID Data Silos: An Experimental Study"
 url: https://arxiv.org/abs/2102.02079
 labels: [data heterogeneity, image classification, benchmark]
 dataset: [CIFAR-10, MNIST, Fashion-MNIST]
-algorithms: [fedavg, scaffold, fedprox, fednova]
+algorithms: [FedAvg, SCAFFOLD, FedProx, FedNova]
 ---
 
 # Federated Learning on Non-IID Data Silos: An Experimental Study
 
-**Paper:** [https://arxiv.org/abs/2102.02079](https://arxiv.org/abs/2102.02079)
+**Paper:** [arxiv.org/abs/2102.02079](https://arxiv.org/abs/2102.02079)
 
 **Authors:** Qinbin Li, Yiqun Diao, Quan Chen, Bingsheng He
 
@@ -17,7 +17,7 @@ algorithms: [fedavg, scaffold, fedprox, fednova]
 
 ## About this baseline
 
-**What’s implemented:** The code in this directory replicates many experiments from the aforementioned paper. Specifically, it contains implementations for four FL protocols, FedAvg (McMahan et al. 2017), SCAFFOLD (Karimireddy et al. 2019), FedProx (Li et al. 2018), and FedNova (Wang et al. 2020). The FL protocols are evaluated across various non-IID data partition strategies across clients on three image classification datasets MNIST, CIFAR10, and Fashion-mnist.
+**What’s implemented:** The code in this directory replicates many experiments from the aforementioned paper. Specifically, it contains implementations for four FL protocols, `FedAvg` (McMahan et al. 2017), `SCAFFOLD` (Karimireddy et al. 2019), `FedProx` (Li et al. 2018), and `FedNova` (Wang et al. 2020). The FL protocols are evaluated across various non-IID data partition strategies across clients on three image classification datasets MNIST, CIFAR10, and Fashion-mnist.
 
 **Datasets:** MNIST, CIFAR10, and Fashion-mnist from PyTorch's Torchvision
 
@@ -72,7 +72,7 @@ poetry shell
 
 
 ## Running the Experiments
-You can run four algorithms fedavg, scaffold, fedprox, and fednova. To run any of them, use any of the corresponding config files. For instance, the following command will run with the default config provided in the corresponding configuration files.
+You can run four algorithms `FedAvg`, `SCAFFOLD`, `FedProx`, and `FedNova`. To run any of them, use any of the corresponding config files. For instance, the following command will run with the default config provided in the corresponding configuration files.
 
 ```bash
 # Run with default config, it will run FedAvg on cpu-only mode
@@ -92,7 +92,7 @@ python -m niid_bench.main --config-name fednova_base dataset_name=mnist partitio
 
 ## Expected Results
 
-We provide the bash script run_exp.py that can be used to run all configurations. For instance, the following command runs all of them with 7 configurations running at the same time.
+We provide the bash script run_exp.py that can be used to run all configurations. For instance, the following command runs all of them with 4 configurations running at the same time. Consider lowering `--num-processes` if your machine runs slow. With `--num-processe 1` one experiment will be run at a time.
 
 ```bash
 python run_exp.py --seed 42 --num-processes 4
@@ -105,4 +105,3 @@ The above command generates results that can be parsed to get the best accuracie
 | MNIST | IID<br>Dirichlet (0.5)<br>Sort and Partition (1)<br>Sort and Partition (2)<br>Sort and Partition (3) | 99.09 &#xB1; 0.05<br>98.89 &#xB1; 0.07<br>19.33 &#xB1; 11.82<br>96.86 &#xB1; 0.30<br>97.86 &#xB1; 0.34 | 99.06 &#xB1; 0.15<br>99.07 &#xB1; 0.06<br>9.93 &#xB1; 0.12<br>96.92 &#xB1; 0.52<br>97.91 &#xB1; 0.10 | 99.16 &#xB1; 0.04<br>99.02 &#xB1; 0.02<br>51.79 &#xB1; 26.75<br>96.85 &#xB1; 0.15<br>97.85 &#xB1; 0.06 | 99.05 &#xB1; 0.06<br>98.03 &#xB1; 0.06<br>52.58 &#xB1; 14.08<br>96.65 &#xB1; 0.39<br>97.62 &#xB1; 0.07 |
 | FMNIST | IID<br>Dirichlet (0.5)<br>Sort and Partition (1)<br>Sort and Partition (2)<br>Sort and Partition (3) | 89.23 &#xB1; 0.45<br>88.09 &#xB1; 0.29<br>28.39 &#xB1; 17.09<br>78.10 &#xB1; 2.51<br>82.43 &#xB1; 1.52 | 89.33 &#xB1; 0.27<br>88.44 &#xB1; 0.25<br>10.00 &#xB1; 0.00<br>33.80 &#xB1; 41.22<br>80.32 &#xB1; 5.03 | 89.42 &#xB1; 0.09<br>88.15 &#xB1; 0.42<br>32.65 &#xB1; 6.68<br>78.05 &#xB1; 0.99<br>82.99 &#xB1; 0.48 | 89.36 &#xB1; 0.09<br>88.22 &#xB1; 0.12<br>16.86 &#xB1; 9.30<br>71.67 &#xB1; 2.34<br>81.97 &#xB1; 1.34 |
 | CIFAR10 | IID<br>Dirichlet (0.5)<br>Sort and Partition (1)<br>Sort and Partition (2)<br>Sort and Partition (3) | 71.32 &#xB1; 0.33<br>62.47 &#xB1; 0.43<br>10.00 &#xB1; 0.00<br>51.17 &#xB1; 1.09<br>59.11 &#xB1; 0.87 | 71.66 &#xB1; 1.13<br>68.08 &#xB1; 0.96<br>10.00 &#xB1; 0.00<br>49.42 &#xB1; 2.18<br>61.00 &#xB1; 0.91 | 71.26 &#xB1; 1.18<br>65.63 &#xB1; 0.08<br>12.71 &#xB1; 0.96<br>50.44 &#xB1; 0.79<br>59.20 &#xB1; 1.18 | 70.69 &#xB1; 1.14<br>63.89 &#xB1; 1.40<br>10.00 &#xB1; 0.00 <br>46.9 &#xB1; 0.66<br>57.83 &#xB1; 0.42 |
-
