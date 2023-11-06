@@ -65,8 +65,8 @@ def handle_control_message(task_ins: TaskIns) -> Tuple[int, bool]:
     # ReconnectIns message
     field = server_msg.WhichOneof("msg")
     if field == "reconnect_ins":
-        disconnect_msg, sleep_duration = _reconnect(server_msg.reconnect_ins)
-        return disconnect_msg, sleep_duration, False
+        _, sleep_duration = _reconnect(server_msg.reconnect_ins)
+        return sleep_duration, False
 
     # Any other message
     return 0, True
@@ -133,7 +133,7 @@ def handle_legacy_message(
     """
     field = server_msg.WhichOneof("msg")
     if field == "reconnect_ins":
-        disconnect_msg, sleep_duration = _reconnect(server_msg.reconnect_ins)
+        disconnect_msg, _ = _reconnect(server_msg.reconnect_ins)
         return disconnect_msg
 
     # Instantiate the client
