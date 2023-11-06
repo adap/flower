@@ -29,7 +29,6 @@ class Fwd:
 
     task_ins: TaskIns
     state: Dict  # TBD
-    data: Dict  # TBD
 
 
 @dataclass
@@ -38,7 +37,6 @@ class Bwd:
 
     task_res: TaskRes
     state: Dict  # TBD
-    data: Dict  # TBD
 
 
 App = Callable[[Fwd], Bwd]
