@@ -16,7 +16,7 @@
 
 
 from dataclasses import dataclass
-from typing import Callable, Dict, Union
+from typing import Callable, Dict
 
 from flwr.client.message_handler.message_handler import handle
 from flwr.client.typing import ClientFn
@@ -36,7 +36,7 @@ class Fwd:
 class Bwd:
     """."""
 
-    task_res: Union[TaskRes, Exception]
+    task_res: TaskRes
     state: Dict  # TBD
     data: Dict  # TBD
 

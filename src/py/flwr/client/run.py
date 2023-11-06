@@ -72,7 +72,7 @@ def _parse_args_client() -> argparse.ArgumentParser:
 
     parser.add_argument(
         "--app",
-        help="",
+        help="For example: `client:app` or `project.package.module:wrapper.app",
     )
 
     return parser
