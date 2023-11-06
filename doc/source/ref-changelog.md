@@ -4,6 +4,8 @@
 
 ### What's new?
 
+- **Add experimental support for Python 3.12** ([#2565](https://github.com/adap/flower/pull/2565))
+
 - **Support custom** `ClientManager` **in** `start_driver()` ([#2292](https://github.com/adap/flower/pull/2292))
 
 - **Update REST API to support create and delete nodes** ([#2283](https://github.com/adap/flower/pull/2283))
