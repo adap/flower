@@ -138,7 +138,7 @@ def gen_client_fn(is_cnn: bool = False) -> Callable[[str], fl.client.Client]:
         else:
             model = create_MLP_model()
 
-        model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
+        model.compile("sgd", "sparse_categorical_crossentropy", metrics=["accuracy"])
 
         # Load data partition (divide MNIST into NUM_CLIENTS distinct partitions)
         (x_train_cid, y_train_cid) = load_dataset(cid, is_cnn)
