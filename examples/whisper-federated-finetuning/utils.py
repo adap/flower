@@ -175,9 +175,9 @@ def get_model(device, num_classes):
     encoder = torch.compile(encoder)
 
     classifier = torch.nn.Sequential(
-        torch.nn.Conv1d(1500, 512, kernel_size=1),
+        torch.nn.Conv1d(1500, 256, kernel_size=1, groups=10),
         torch.nn.ReLU(),
         torch.nn.Flatten(1),
-        torch.nn.Linear(512 * 384, num_classes),
+        torch.nn.Linear(256 * 384, num_classes),
     ).to(device)
     return encoder, classifier

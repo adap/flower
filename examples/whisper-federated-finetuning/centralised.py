@@ -4,8 +4,7 @@ from transformers import WhisperForConditionalGeneration, WhisperProcessor
 import torch
 from torch.utils.data import DataLoader, WeightedRandomSampler
 import numpy as np
-from tqdm import tqdm
-from datasets import Dataset, concatenate_datasets
+from datasets import concatenate_datasets
 import random
 
 from utils import (
@@ -42,17 +41,15 @@ def save_classifier(classifier, acc: float):
 def main():
     args = parser.parse_args()
 
-    processor = WhisperProcessor.from_pretrained("openai/whisper-tiny")
-    model = WhisperForConditionalGeneration.from_pretrained(
-        "openai/whisper-tiny"
-    ).get_encoder()
-
     # load train and test partitions
     sc = load_dataset("speech_commands", "v0.02", split="train", token=False)
     sc_val = load_dataset("speech_commands", "v0.02", split="validation", token=False)
     sc_test = load_dataset("speech_commands", "v0.02", split="test", token=False)
 
     # pre-process dataset
+    # ! If you know how to speedup this pre-processing stage, please do let us know!
+    # ! Become a contributor by proposing as a new PR !
+    processor = WhisperProcessor.from_pretrained("openai/whisper-tiny")
     prepare_dataset_fn = get_encoding_fn(processor)
     og_threads = torch.get_num_threads()
     print(f"{og_threads = }")
@@ -66,7 +63,10 @@ def main():
     )
 
     # create and pre-process the dataset of silences
-    silences_dataset = prepare_silences_dataset(sc)
+    silences_dataset = prepare_silences_dataset(sc, ratio_silence=0.001)
+    # ! You might want to save this encoded_silences dataset to disk, so this stage is not
+    # ! needed each time you run the code. Alternatively, this silence generation could be
+    # ! implemented as part of a `collate_fn` in the standard PyTorch dataloader...
     encoded_silences = silences_dataset.map(
         prepare_dataset_fn, num_proc=4, remove_columns=remove_cols
     )
@@ -79,19 +79,18 @@ def main():
     hist = np.histogram(full_train_dataset["targets"], bins=12)
     print(f"{[int(count) for count in hist[0]]}")
 
-    # make balanced batches
+    # make balanced batches with a WeightedRandomSampler
     w_per_class = (
         len(full_train_dataset) / hist[0]
     )  # doesn't have to add up to 1 (relative is what matters)
     print(f"{w_per_class = }")
     w_ss = [w_per_class[t] for t in full_train_dataset["targets"]]
-
-    ss = WeightedRandomSampler(w_ss, len(w_ss))
+    sampler = WeightedRandomSampler(w_ss, len(w_ss))
 
     # prepare dataloaders
     train_dataset = full_train_dataset.with_format("torch", columns=["data", "targets"])
     train_loader = DataLoader(
-        train_dataset, batch_size=64, shuffle=False, num_workers=4, sampler=ss
+        train_dataset, batch_size=64, shuffle=False, num_workers=4, sampler=sampler
     )
     val_encoded = val_encoded.with_format("torch", columns=["data", "targets"])
     val_loader = DataLoader(val_encoded, batch_size=64, num_workers=4)
@@ -109,6 +108,10 @@ def main():
     classifier = classifier.to(device)
     optimizer = torch.optim.SGD(classifier.parameters(), lr=0.001)
     encoder.eval()
+
+    # Let's count the size of the classification head
+    classifier_head_params = sum(p.numel() for p in classifier.parameters())
+    print(f"{classifier_head_params = }")
 
     # eval initial model
     loss, accuracy = eval_model(encoder, classifier, criterion, val_loader, device)
