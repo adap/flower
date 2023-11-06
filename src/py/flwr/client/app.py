@@ -174,8 +174,6 @@ def start_client(
 
                 # Handle control message
                 sleep_duration, keep_going = handle_control_message(task_ins=task_ins)
-                if not keep_going:
-                    break
 
                 # Load app
                 app = load_app_fn()
