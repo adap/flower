@@ -34,10 +34,12 @@ from .fedavg import FedAvg
 
 class FedXgbNnAvg(FedAvg):
     """Configurable FedXgbNnAvg strategy implementation."""
-    def __init__(self, *args, **kwargs):
-        """Federated XGBoost [Ma et al., 2023] strategy
-            Implementation based on https://arxiv.org/abs/2304.07537 
-        """ 
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Federated XGBoost [Ma et al., 2023] strategy.
+
+        Implementation based on https://arxiv.org/abs/2304.07537.
+        """
         super().__init__(*args, **kwargs)
 
     def __repr__(self) -> str:
