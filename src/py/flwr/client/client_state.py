@@ -20,6 +20,6 @@ from typing import Dict
 
 @dataclass
 class WorkloadState:
-    """State of a workload exectued by a client."""
+    """State of a workload executed by a client node."""
 
     state: Dict[str, str]
