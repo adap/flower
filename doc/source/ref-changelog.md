@@ -4,7 +4,7 @@
 
 ### What's new?
 
-- **Add support for Python 3.12** ([#2564](https://github.com/adap/flower/pull/2564))
+- **Add experimental support for Python 3.12** ([#2564](https://github.com/adap/flower/pull/2564))
 
 - **Support custom** `ClientManager` **in** `start_driver()` ([#2292](https://github.com/adap/flower/pull/2292))
 
