@@ -141,7 +141,7 @@ def start_client(
 
             client_fn = single_client_factory
 
-        def _load_app():
+        def _load_app() -> Flower:
             return Flower(client_fn=client_fn)
 
         load_app_fn = _load_app

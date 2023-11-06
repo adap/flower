@@ -28,7 +28,7 @@ class Fwd:
     """."""
 
     task_ins: TaskIns
-    state: Dict  # TBD
+    state: Dict[str, str]  # TBD
 
 
 @dataclass
@@ -36,7 +36,7 @@ class Bwd:
     """."""
 
     task_res: TaskRes
-    state: Dict  # TBD
+    state: Dict[str, str]  # TBD
 
 
 App = Callable[[Fwd], Bwd]
