@@ -17,7 +17,6 @@
 
 import sys
 import time
-import warnings
 from logging import INFO
 from typing import Callable, ContextManager, Optional, Tuple, Union
 
@@ -53,7 +52,9 @@ def _check_actionable_client(
         )
 
 
-# pylint: disable=import-outside-toplevel,too-many-locals,too-many-branches
+# pylint: disable=import-outside-toplevel
+# pylint: disable=too-many-branches
+# pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
 def start_client(
     *,
@@ -152,11 +153,16 @@ def start_client(
                 create_node()  # pylint: disable=not-callable
 
             while True:
+                # Receive
                 task_ins = receive()
                 if task_ins is None:
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
+
+                # Handle task message
                 task_res, sleep_duration, keep_going = handle(client_fn, task_ins)
+
+                # Send
                 send(task_res)
                 if not keep_going:
                     break
@@ -232,18 +238,18 @@ def start_numpy_client(
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
-    warnings.warn(
-        "flwr.client.start_numpy_client() is deprecated and will "
-        "be removed in a future version of Flower. Instead, pass "
-        "your client to `flwr.client.start_client()` by calling "
-        "first the `.to_client()` method as shown below: \n"
-        "\tflwr.client.start_client(\n"
-        "\t\tserver_address='<IP>:<PORT>',\n"
-        "\t\tclient=FlowerClient().to_client()\n"
-        "\t)",
-        DeprecationWarning,
-        stacklevel=2,
-    )
+    # warnings.warn(
+    #     "flwr.client.start_numpy_client() is deprecated and will "
+    #     "be removed in a future version of Flower. Instead, pass "
+    #     "your client to `flwr.client.start_client()` by calling "
+    #     "first the `.to_client()` method as shown below: \n"
+    #     "\tflwr.client.start_client(\n"
+    #     "\t\tserver_address='<IP>:<PORT>',\n"
+    #     "\t\tclient=FlowerClient().to_client()\n"
+    #     "\t)",
+    #     DeprecationWarning,
+    #     stacklevel=2,
+    # )
 
     # Calling this function is deprecated. A warning is thrown.
     # We first need to convert either the supplied client to `Client.`
