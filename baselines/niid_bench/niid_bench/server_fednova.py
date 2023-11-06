@@ -20,14 +20,10 @@ class FedNovaServer(Server):
         client_manager: ClientManager,
         strategy: Optional[FedNovaStrategy] = None,
     ) -> None:
-        self._client_manager: ClientManager = client_manager
-        self.parameters: Parameters = Parameters(
-            tensors=[], tensor_type="numpy.ndarray"
-        )
+        super().__init__(client_manager=client_manager, strategy=strategy)
         self.strategy: FedNovaStrategy = (
             strategy if strategy is not None else FedNovaStrategy()
         )
-        self.max_workers: Optional[int] = None
 
     def fit_round(
         self,
