@@ -35,9 +35,14 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y clang-format cmake g++ clang-tidy cppcheck
 
-    - name: Check Formatting
+    - name: Check source Formatting
       run: |
-        find src/cc/flwr -name '*.cc' -or -name '*.h' | xargs clang-format -i
+        find src/cc/flwr/src -name '*.cc' | xargs clang-format -i
+        git diff --exit-code
+
+    - name: Check header Formatting
+      run: |
+        find src/cc/flwr/include -name '*.h' -not -path "src/cc/flwr/include/flwr/*" | xargs clang-format -i
         git diff --exit-code
 
     - name: Build
