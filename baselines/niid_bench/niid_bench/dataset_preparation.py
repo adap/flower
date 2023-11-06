@@ -130,7 +130,7 @@ def partition_data(
     trainsets_per_client = []
     # for s% similarity sample iid data per client
     s_fraction = int(similarity * len(trainset))
-    prng = np.random.RandomState(seed)
+    prng = np.random.default_rng(seed)
     idxs = prng.choice(len(trainset), s_fraction, replace=False)
     iid_trainset = Subset(trainset, idxs)
     rem_trainset = Subset(trainset, np.setdiff1d(np.arange(len(trainset)), idxs))
@@ -217,7 +217,7 @@ def partition_data_dirichlet(
     trainset, testset = _download_data(dataset_name)
     min_required_samples_per_client = 10
     min_samples = 0
-    prng = np.random.RandomState(seed)
+    prng = np.random.default_rng(seed)
 
     # get the targets
     tmp_t = trainset.targets
@@ -275,7 +275,7 @@ def partition_data_label_quantity(
         The list of datasets for each client, the test dataset.
     """
     trainset, testset = _download_data(dataset_name)
-    prng = np.random.RandomState(seed)
+    prng = np.random.default_rng(seed)
 
     targets = trainset.targets
     if isinstance(targets, list):
@@ -291,7 +291,7 @@ def partition_data_label_quantity(
         times[i % num_classes] += 1
         j = 1
         while j < labels_per_client:
-            index = prng.randint(0, num_classes)
+            index = prng.choice(num_classes, 1)[0]
             if index not in current:
                 current.append(index)
                 times[index] += 1
