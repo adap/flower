@@ -15,9 +15,9 @@
 """Flower app package."""
 
 
-from .flower import Bwd as Bwd
-from .flower import Flower as Flower
-from .flower import Fwd as Fwd
+from flwr.client.flower import Bwd as Bwd
+from flwr.client.flower import Flower as Flower
+from flwr.client.flower import Fwd as Fwd
 
 __all__ = [
     "Flower",
