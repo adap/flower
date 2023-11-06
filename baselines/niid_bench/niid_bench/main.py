@@ -17,8 +17,7 @@ from omegaconf import DictConfig, OmegaConf
 from niid_bench.dataset import load_datasets
 from niid_bench.server_fednova import FedNovaServer
 from niid_bench.server_scaffold import ScaffoldServer, gen_evaluate_fn
-from niid_bench.strategy_fednova import FedNovaStrategy
-from niid_bench.strategy_scaffold import ScaffoldStrategy
+from niid_bench.strategy import FedNovaStrategy, ScaffoldStrategy
 
 
 @hydra.main(config_path="conf", config_name="fedavg_base", version_base=None)

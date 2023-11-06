@@ -43,7 +43,7 @@ model:
   num_classes: 10
 
 strategy:
-  _target_: niid_bench.strategy_scaffold.ScaffoldStrategy # points to your strategy (either custom or exiting in Flower)
+  _target_: niid_bench.strategy.ScaffoldStrategy # points to your strategy (either custom or exiting in Flower)
   # rest of strategy config
   fraction_fit: 0.00001 # because we want the number of clients to sample on each round to be solely defined by min_fit_clients
   fraction_evaluate: 0.0

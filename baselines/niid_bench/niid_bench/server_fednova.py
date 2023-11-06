@@ -8,7 +8,7 @@ from flwr.common.typing import Dict, Optional, Parameters, Scalar, Tuple
 from flwr.server.client_manager import ClientManager
 from flwr.server.server import FitResultsAndFailures, Server, fit_clients
 
-from niid_bench.strategy_fednova import FedNovaStrategy
+from niid_bench.strategy import FedNovaStrategy
 
 
 class FedNovaServer(Server):
