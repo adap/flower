@@ -1,7 +1,6 @@
 import datasets
 import xgboost as xgb
 
-from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import (
     IidPartitioner,
     LinearPartitioner,
@@ -9,7 +8,7 @@ from flwr_datasets.partitioner import (
     ExponentialPartitioner,
 )
 
-SPLIT_DICT = {
+CORRELATION_TO_PARTITIONER = {
     "uniform": IidPartitioner,
     "linear": LinearPartitioner,
     "square": SquarePartitioner,
@@ -17,37 +16,27 @@ SPLIT_DICT = {
 }
 
 
-def init_higgs(num_partitions: int, split_method: str) -> FederatedDataset:
-    """Initialise FederatedDataset based on selected split method."""
-    partitioner = SPLIT_DICT[split_method](num_partitions=num_partitions)
-    fds = FederatedDataset(dataset="jxie/higgs", partitioners={"train": partitioner})
-    return fds
+def instantiate_partitioner(partitioner_type: str, num_partitions: int):
+    """Initialise partitioner based on selected partitioner type and number of partitions."""
+    partitioner = CORRELATION_TO_PARTITIONER[partitioner_type](num_partitions=num_partitions)
+    return partitioner
 
 
-def load_partition(fds: FederatedDataset, partition_id: int) -> datasets.Dataset:
-    """Load partition based on the given partition ID."""
-    partition = fds.load_partition(idx=partition_id, split="train")
-    partition.set_format("numpy")
-    return partition
-
-
-def split_train_test(partition: datasets.Dataset, split_rate: float, seed: int):
+def train_test_split(partition: datasets.Dataset, test_fraction: float, seed: int):
     """Split the data into train and validation set given split rate."""
-    train_test = partition.train_test_split(test_size=split_rate, seed=seed)
+    train_test = partition.train_test_split(test_size=test_fraction, seed=seed)
     partition_train = train_test["train"]
     partition_test = train_test["test"]
 
     num_train = len(partition_train)
-    num_val = len(partition_test)
+    num_test = len(partition_test)
 
-    # Reformat data for xgboost input
-    train_data = _reformat_data(partition_train)
-    val_data = _reformat_data(partition_test)
-    return train_data, val_data, num_train, num_val
+    return partition_train, partition_test, num_train, num_test
 
 
-def _reformat_data(partition):
-    x = partition["inputs"]
-    y = partition["label"]
+def transform_dataset_to_dmatrix(data):
+    """transform dataset to DMatrix format for xgboost."""
+    x = data["inputs"]
+    y = data["label"]
     new_data = xgb.DMatrix(x, label=y)
     return new_data

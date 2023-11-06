@@ -2,6 +2,7 @@ import warnings
 import xgboost as xgb
 
 import flwr as fl
+from flwr_datasets import FederatedDataset
 from flwr.common import (
     Code,
     EvaluateIns,
@@ -14,26 +15,36 @@ from flwr.common import (
     Status,
 )
 
-from dataset import init_higgs, load_partition, split_train_test
+from dataset import instantiate_partitioner, train_test_split, transform_dataset_to_dmatrix
 
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
 # Load (HIGGS) dataset and conduct partitioning
 num_partitions = 20
-split_method = "uniform"
-fds = init_higgs(num_partitions, "uniform")
+# partitioner type is chosen from ["uniform", "linear", "square", "exponential"]
+partitioner_type = "uniform"
+
+# instantiate partitioner
+partitioner = instantiate_partitioner(partitioner_type=partitioner_type, num_partitions=num_partitions)
+fds = FederatedDataset(dataset="jxie/higgs", partitioners={"train": partitioner})
 
 # let's use the first partition as an example
 partition_id = 0
-partition = load_partition(fds, partition_id)
+partition = fds.load_partition(idx=partition_id, split="train")
+partition.set_format("numpy")
 
 # train/test splitting and data re-formatting
 SEED = 42
-split_rate = 0.2
-train_data, val_data, num_train, num_val = split_train_test(partition, split_rate, SEED)
+test_fraction = 0.2
+train_data, valid_data, num_train, num_val = train_test_split(partition, test_fraction=test_fraction, seed=SEED)
 
-# Hyper-parameters for training
+# reformat data to DMatrix for xgboost
+train_dmatrix = transform_dataset_to_dmatrix(train_data)
+valid_dmatrix = transform_dataset_to_dmatrix(valid_data)
+
+
+# Hyper-parameters for xgboost training
 num_local_round = 1
 params = {
     "objective": "binary:logistic",
@@ -65,7 +76,7 @@ class FlowerClient(fl.client.Client):
     def local_boost(self):
         # update trees based on local training data.
         for i in range(num_local_round):
-            self.bst.update(train_data, self.bst.num_boosted_rounds())
+            self.bst.update(train_dmatrix, self.bst.num_boosted_rounds())
 
         # extract the last N=num_local_round trees as new local model
         bst = self.bst[
@@ -80,9 +91,9 @@ class FlowerClient(fl.client.Client):
             print("Start training at round 1")
             bst = xgb.train(
                 params,
-                train_data,
+                train_dmatrix,
                 num_boost_round=num_local_round,
-                evals=[(val_data, "validate"), (train_data, "train")],
+                evals=[(valid_dmatrix, "validate"), (train_dmatrix, "train")],
             )
             self.config = bst.save_config()
             self.bst = bst
@@ -112,7 +123,7 @@ class FlowerClient(fl.client.Client):
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         eval_results = self.bst.eval_set(
-            evals=[(train_data, "train"), (val_data, "valid")],
+            evals=[(train_dmatrix, "train"), (valid_dmatrix, "valid")],
             iteration=self.bst.num_boosted_rounds() - 1,
         )
         auc = round(float(eval_results.split("\t")[2].split(":")[1]), 4)
