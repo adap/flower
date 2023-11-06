@@ -1,13 +1,13 @@
 package dev.flower.android
 
-import java.nio.ByteBuffer
 import com.google.protobuf.ByteString
-import flwr.proto.Transport.ServerMessage
 import flwr.proto.Transport.ClientMessage
-import flwr.proto.Transport.Parameters as ProtoParameters
-import flwr.proto.Transport.Status as ProtoStatus
 import flwr.proto.Transport.Reason
+import flwr.proto.Transport.ServerMessage
+import java.nio.ByteBuffer
+import flwr.proto.Transport.Parameters as ProtoParameters
 import flwr.proto.Transport.Scalar as ProtoScalar
+import flwr.proto.Transport.Status as ProtoStatus
 
 internal fun parametersToProto(parameters: Parameters): ProtoParameters {
     val tensors: MutableList<ByteString> = ArrayList()
@@ -22,11 +22,11 @@ internal fun parametersFromProto(msg: ProtoParameters): Parameters {
 }
 
 internal fun statusToProto(status: Status): ProtoStatus {
-    return ProtoStatus.newBuilder().setCodeValue(status.code).setMessage(status.message).build()
+    return ProtoStatus.newBuilder().setCodeValue(status.code.value).setMessage(status.message).build()
 }
 
 internal fun statusFromProto(msg: ProtoStatus): Status {
-    return Status(msg.codeValue, msg.message)
+    return Status(Code.fromInt(msg.codeValue), msg.message)
 }
 
 internal fun reconnectInsToProto(ins: ReconnectIns): ServerMessage.ReconnectIns {
@@ -47,7 +47,7 @@ internal fun disconnectResToProto(res: DisconnectRes): ClientMessage.DisconnectR
         "WIFI_UNAVAILABLE" -> Reason.WIFI_UNAVAILABLE
         else -> Reason.UNKNOWN
     }
-   return ClientMessage.DisconnectRes.newBuilder().setReason(reason).build()
+    return ClientMessage.DisconnectRes.newBuilder().setReason(reason).build()
 }
 
 internal fun disconnectResFromProto(msg: ClientMessage.DisconnectRes): DisconnectRes {
@@ -173,24 +173,23 @@ internal fun metricsFromProto(proto: Map<String, ProtoScalar>): Metrics {
     return proto.mapValues { (_, value) -> scalarFromProto(value) }
 }
 
-internal inline fun<reified T> scalarToProto(scalar: Scalar<T>): ProtoScalar {
-   return when (T::class) {
-        Scalar.BoolValue::class -> ProtoScalar.newBuilder().setBool(scalar.value as Boolean).build()
-        Scalar.BytesValue::class -> ProtoScalar.newBuilder().setBytes(scalar.value as ByteString).build()
-        Scalar.DoubleValue::class -> ProtoScalar.newBuilder().setDouble(scalar.value as Double).build()
-        Scalar.SInt64Value::class -> ProtoScalar.newBuilder().setSint64(scalar.value as Long).build()
-        Scalar.StringValue::class -> ProtoScalar.newBuilder().setString(scalar.value as String).build()
-        else -> throw IllegalArgumentException("Accepted Types : Bool, Data, Float, Int, Str")
+internal fun scalarToProto(scalar: Scalar): ProtoScalar {
+    return when (scalar) {
+        is Scalar.BoolValue -> ProtoScalar.newBuilder().setBool(scalar.value).build()
+        is Scalar.BytesValue -> ProtoScalar.newBuilder().setBytes(ByteString.copyFrom(scalar.value)).build()
+        is Scalar.SInt64Value -> ProtoScalar.newBuilder().setSint64(scalar.value).build()
+        is Scalar.DoubleValue -> ProtoScalar.newBuilder().setDouble(scalar.value).build()
+        is Scalar.StringValue -> ProtoScalar.newBuilder().setString(scalar.value).build()
     }
 }
 
-internal inline fun <reified T> scalarFromProto(scalarMsg: ProtoScalar): Scalar<T> {
-  return when (scalarMsg.scalarCase) {
-      ProtoScalar.ScalarCase.BOOL -> Scalar.BoolValue(scalarMsg.bool)
-      ProtoScalar.ScalarCase.BYTES -> Scalar.BytesValue(scalarMsg.bytes)
-      ProtoScalar.ScalarCase.DOUBLE -> Scalar.DoubleValue(scalarMsg.double)
-      ProtoScalar.ScalarCase.SINT64 -> Scalar.SInt64Value(scalarMsg.sint64)
-      ProtoScalar.ScalarCase.STRING -> Scalar.StringValue(scalarMsg.string)
-      else -> throw IllegalArgumentException("Accepted Types : Bool, Data, Float, Int, Str")
-   } as Scalar<T>
+internal fun scalarFromProto(scalarMsg: ProtoScalar): Scalar {
+    return when (scalarMsg.scalarCase) {
+        ProtoScalar.ScalarCase.BOOL -> Scalar.BoolValue(scalarMsg.bool)
+        ProtoScalar.ScalarCase.BYTES -> Scalar.BytesValue(ByteBuffer.wrap(scalarMsg.bytes.toByteArray()))
+        ProtoScalar.ScalarCase.DOUBLE -> Scalar.DoubleValue(scalarMsg.double)
+        ProtoScalar.ScalarCase.SINT64 -> Scalar.SInt64Value(scalarMsg.sint64)
+        ProtoScalar.ScalarCase.STRING -> Scalar.StringValue(scalarMsg.string)
+        else -> throw IllegalArgumentException("Accepted Types : Bool, Data, Float, Int, Str")
+    }
 }
