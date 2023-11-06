@@ -12,16 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Wrapper for NumPyClient objects."""
-
-from flwr.client.typing import ClientLike
-
-from .client import Client
-from .numpy_client import NumPyClient, _wrap_numpy_client
+"""Flower Datasets type definitions."""
 
 
-def to_client(client_like: ClientLike) -> Client:
-    """Take any Client-like object and return it as a Client."""
-    if isinstance(client_like, NumPyClient):
-        return _wrap_numpy_client(client=client_like)
-    return client_like
+from typing import Callable
+
+from datasets import DatasetDict
+
+Resplitter = Callable[[DatasetDict], DatasetDict]
