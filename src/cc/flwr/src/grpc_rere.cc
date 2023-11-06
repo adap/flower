@@ -110,18 +110,14 @@ receive(const std::unique_ptr<flwr::proto::Fleet::Stub> &stub) {
 
   if (response.task_ins_list_size() > 0) {
     flwr::proto::TaskIns task_ins = response.task_ins_list().at(0);
-    // TODO: Validate TaskIns
-
-    {
+    if (validate_task_ins(task_ins, true)) {
       std::lock_guard<std::mutex> state_lock(state_mutex);
       state[KEY_TASK_INS] = task_ins;
+      return task_ins;
     }
-
-    return task_ins;
-  } else {
-    std::cerr << "TaskIns list is empty." << std::endl;
-    return std::nullopt;
   }
+  std::cerr << "TaskIns list is empty." << std::endl;
+  return std::nullopt;
 }
 
 void send(const std::unique_ptr<flwr::proto::Fleet::Stub> &stub,
@@ -136,7 +132,12 @@ void send(const std::unique_ptr<flwr::proto::Fleet::Stub> &stub,
     return;
   }
 
-  // TODO: Validate TaskIns
+  if (!validate_task_res(task_res)) {
+    std::cerr << "TaskRes is invalid" << std::endl;
+    std::lock_guard<std::mutex> state_lock(state_mutex);
+    state[KEY_TASK_INS].reset();
+    return;
+  }
 
   flwr::proto::TaskRes new_task_res =
       configure_task_res(task_res, *task_ins, *node);
@@ -151,8 +152,8 @@ void send(const std::unique_ptr<flwr::proto::Fleet::Stub> &stub,
   if (!status.ok()) {
     std::cerr << "PushTaskRes RPC failed with status: "
               << status.error_message() << std::endl;
-    return;
-  } else {
+  }
+  {
     std::lock_guard<std::mutex> state_lock(state_mutex);
     state[KEY_TASK_INS].reset();
   }
