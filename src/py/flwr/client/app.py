@@ -160,15 +160,16 @@ def start_client(
                     continue
 
                 # Handle control message
-                sleep_duration, keep_going = handle_control_message(task_ins=task_ins)
+                task_res, sleep_duration = handle_control_message(task_ins=task_ins)
+                if task_res:
+                    send(task_res)
+                    break
 
                 # Handle task message
                 task_res = handle(client_fn, task_ins)
 
                 # Send
                 send(task_res)
-                if not keep_going:
-                    break
 
             # Unregister node
             if delete_node is not None:
