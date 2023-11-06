@@ -34,6 +34,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
@@ -81,12 +82,12 @@ rest = ["requests", "starlette", "uvicorn"]
 types-dataclasses = "==0.6.6"
 types-protobuf = "==4.24.0.1"
 types-requests = "==2.31.0.2"
-types-setuptools = "==68.0.0.3"
+types-setuptools = "==68.2.0.0"
 clang-format = "==16.0.6"
 isort = "==5.11.5"
 black = { version = "==23.3.0", extras = ["jupyter"] }
 docformatter = "==1.7.5"
-mypy = "==1.4.1"
+mypy = "==1.5.1"
 pylint = "==2.13.9"
 flake8 = "==3.9.2"
 pytest = "==7.4.0"
@@ -119,6 +120,7 @@ twine = "==4.0.2"
 pyroma = "==4.2"
 check-wheel-contents = "==0.4.0"
 GitPython = "==3.1.32"
+licensecheck = "==2023.5.1"
 
 [tool.isort]
 line_length = 88

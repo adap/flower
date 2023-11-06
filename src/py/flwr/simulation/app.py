@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -69,7 +69,8 @@ REASON:
 """
 
 
-def start_simulation(  # pylint: disable=too-many-arguments,too-many-statements
+# pylint: disable=too-many-arguments,too-many-statements,too-many-branches
+def start_simulation(
     *,
     client_fn: ClientFn,
     num_clients: Optional[int] = None,
@@ -92,7 +93,7 @@ def start_simulation(  # pylint: disable=too-many-arguments,too-many-statements
     client_fn : ClientFn
         A function creating client instances. The function must take a single
         `str` argument called `cid`. It should return a single client instance
-        of type ClientLike. Note that the created client instances are ephemeral
+        of type Client. Note that the created client instances are ephemeral
         and will often be destroyed after a single method invocation. Since client
         instances are not long-lived, they should not attempt to carry state over
         method invocations. Any state required by the instance (model, dataset,
@@ -300,6 +301,7 @@ def start_simulation(  # pylint: disable=too-many-arguments,too-many-statements
         )
         initialized_server.client_manager().register(client=client_proxy)
 
+    hist = History()
     # pylint: disable=broad-except
     try:
         # Start training
@@ -327,11 +329,11 @@ def start_simulation(  # pylint: disable=too-many-arguments,too-many-statements
             client_resources,
             client_resources,
         )
-        hist = History()
+        raise RuntimeError("Simulation crashed.") from ex
 
-    # Stop time monitoring resources in cluster
-    f_stop.set()
-
-    event(EventType.START_SIMULATION_LEAVE)
+    finally:
+        # Stop time monitoring resources in cluster
+        f_stop.set()
+        event(EventType.START_SIMULATION_LEAVE)
 
     return hist

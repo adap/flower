@@ -26,8 +26,9 @@ from ray import ObjectRef
 from ray.util.actor_pool import ActorPool
 
 from flwr import common
-from flwr.client import Client, ClientFn, to_client
+from flwr.client import Client, ClientFn
 from flwr.common.logger import log
+from flwr.simulation.ray_transport.utils import check_clientfn_returns_client
 
 # All possible returns by a client
 ClientRes = Union[
@@ -65,9 +66,8 @@ class VirtualClientEngineActor(ABC):
         # return also cid which is needed to ensure results
         # from the pool are correctly assigned to each ClientProxy
         try:
-            # Instantiate client
-            client_like = client_fn(cid)
-            client = to_client(client_like=client_like)
+            # Instantiate client (check 'Client' type is returned)
+            client = check_clientfn_returns_client(client_fn(cid))
             # Run client job
             job_results = job_fn(client)
         except Exception as ex:
