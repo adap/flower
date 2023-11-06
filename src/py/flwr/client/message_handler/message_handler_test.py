@@ -130,7 +130,9 @@ def test_client_without_get_properties() -> None:
     )
 
     # Execute
-    actual_sleep_duration, actual_keep_going = handle_control_message(task_ins=task_ins)
+    disconnect_task_res, actual_sleep_duration = handle_control_message(
+        task_ins=task_ins
+    )
     task_res = handle(client_fn=_get_client_fn(client), task_ins=task_ins)
 
     if not task_res.HasField("task"):
@@ -170,8 +172,8 @@ def test_client_without_get_properties() -> None:
     expected_msg = ClientMessage(get_properties_res=expected_get_properties_res)
 
     assert actual_msg == expected_msg
+    assert not disconnect_task_res
     assert actual_sleep_duration == 0
-    assert actual_keep_going is True
 
 
 def test_client_with_get_properties() -> None:
@@ -192,7 +194,9 @@ def test_client_with_get_properties() -> None:
     )
 
     # Execute
-    actual_sleep_duration, actual_keep_going = handle_control_message(task_ins=task_ins)
+    disconnect_task_res, actual_sleep_duration = handle_control_message(
+        task_ins=task_ins
+    )
     task_res = handle(client_fn=_get_client_fn(client), task_ins=task_ins)
 
     if not task_res.HasField("task"):
@@ -235,5 +239,5 @@ def test_client_with_get_properties() -> None:
     expected_msg = ClientMessage(get_properties_res=expected_get_properties_res)
 
     assert actual_msg == expected_msg
+    assert not disconnect_task_res
     assert actual_sleep_duration == 0
-    assert actual_keep_going is True
