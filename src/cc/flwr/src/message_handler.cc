@@ -67,3 +67,38 @@ std::tuple<ClientMessage, int, bool> handle(flwr_local::Client *client,
   }
   throw "Unkown server message";
 }
+
+std::tuple<flwr::proto::TaskRes, int, bool>
+handle_task(flwr_local::Client *client, const flwr::proto::TaskIns &task_ins) {
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  if (!task_ins.task().has_legacy_server_message()) {
+    // TODO: Handle SecureAggregation
+    throw std::runtime_error("Task still needs legacy server message");
+  }
+  ServerMessage server_msg = task_ins.task().legacy_server_message();
+#pragma GCC diagnostic pop
+
+  std::tuple<ClientMessage, int, bool> legacy_res = handle(client, server_msg);
+  std::unique_ptr<ClientMessage> client_message =
+      std::make_unique<ClientMessage>(std::get<0>(legacy_res));
+
+  flwr::proto::TaskRes task_res;
+  task_res.set_task_id("");
+  task_res.set_group_id("");
+  task_res.set_workload_id(0);
+
+  std::unique_ptr<flwr::proto::Task> task =
+      std::make_unique<flwr::proto::Task>();
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  task->set_allocated_legacy_client_message(
+      client_message.release()); // Ownership transferred to `task`
+#pragma GCC diagnostic pop
+
+  task_res.set_allocated_task(task.release());
+  return std::make_tuple(task_res, std::get<1>(legacy_res),
+                         std::get<2>(legacy_res));
+}
