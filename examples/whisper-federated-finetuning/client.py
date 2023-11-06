@@ -21,10 +21,11 @@ parser.add_argument("--cid", type=int, required=True, help="Client id.")
 parser.add_argument(
     "--server_address", type=str, required=True, help="IP of the server."
 )
+parser.add_argument("--no-compile", action='store_true', help="To not compile client models.")
 
 
 class WhisperFlowerClient(fl.client.NumPyClient):
-    def __init__(self, trainset, num_classes: int, disable_tqdm: bool):
+    def __init__(self, trainset, num_classes: int, disable_tqdm: bool, compile: bool):
         self.disable_tqdm = disable_tqdm
         self.trainset = trainset.with_format("torch", columns=["data", "targets"])
         # self.train_loader = DataLoader(train_dataset, batch_size=8, shuffle=False, num_workers=4, sampler=ss)
@@ -33,7 +34,7 @@ class WhisperFlowerClient(fl.client.NumPyClient):
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
         # processor = WhisperProcessor.from_pretrained("openai/whisper-tiny")
-        self.encoder, self.classifier = get_model(self.device, num_classes)
+        self.encoder, self.classifier = get_model(self.device, num_classes, compile)
 
     def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in self.classifier.state_dict().items()]
@@ -88,6 +89,7 @@ def get_client_fn(
     client_data_path: str = "./",
     num_classes: int = 12,
     disable_tqdm: bool = False,
+    compile: bool=True,
 ):
     def client_fn(cid: str):
         torch.set_float32_matmul_precision(
@@ -125,7 +127,7 @@ def get_client_fn(
             full_train_dataset.save_to_disk(f"{client_data_path}/client{cid}.hf")
             torch.set_num_threads(og_threads)
 
-        return WhisperFlowerClient(full_train_dataset, num_classes, disable_tqdm)
+        return WhisperFlowerClient(full_train_dataset, num_classes, disable_tqdm, compile)
 
     return client_fn
 
@@ -143,7 +145,7 @@ def run_client():
     processor = WhisperProcessor.from_pretrained("openai/whisper-tiny")
     prepare_dataset_fn = get_encoding_fn(processor)
 
-    client_fn = get_client_fn(sc_train, prepare_dataset_fn, client_mapping)
+    client_fn = get_client_fn(sc_train, prepare_dataset_fn, client_mapping, compile=not(args.no_compile))
 
     fl.client.start_numpy_client(
         server_address=f"{args.server_address}:8080", client=client_fn(args.cid)

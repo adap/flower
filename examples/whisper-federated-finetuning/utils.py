@@ -36,11 +36,13 @@ def train_one_epoch(
     device,
     disable_tqdm: bool = False,
 ):
+    """Train the classification head.
+
+    This is a very standard looking way of training PyTorch models.
+    """
     model.eval()
     classifier.train()
     classifier.to(device)
-    losses = []
-    accuracies = []
     loss_avg, acc_avg = RunningAvg(), RunningAvg()
     with tqdm(total=len(dataloader.dataset), disable=disable_tqdm) as t:
         for b in dataloader:
@@ -59,10 +61,7 @@ def train_one_epoch(
             _, predicted = torch.max(resres.data, 1)
             correct = (predicted == labels).sum().item()
             acc = correct / data.shape[0]
-            # print(loss, acc)
             loss_ = loss.cpu().item()
-            losses.append(loss_)
-            accuracies.append(acc)
 
             loss_avg.update(loss_)
             acc_avg.update(acc)
@@ -72,10 +71,12 @@ def train_one_epoch(
                 {"avg_loss": f"{loss_avg():.4f}", "avg_acc": f"{acc_avg():.4f}"}
             )
 
-    return losses, accuracies
-
 
 def eval_model(model, classifier, criterion, dataloader, device):
+    """Evaluate a model on a validation/test set.
+
+    This is a very normal looking way of doing this with PyTorch.
+    """
     model.eval()
     classifier.eval()
     classifier.to(device)
@@ -103,6 +104,14 @@ def eval_model(model, classifier, criterion, dataloader, device):
 
 
 def prepare_silences_dataset(train_dataset, ratio_silence: float = 0.1) -> Dataset:
+    """Generate silences for the train set.
+
+    One of the classes in the SpeechCommands datatset is `silence`. However, the dataset
+    does not include clips of silence. It does however include 5 long files with different
+    background sounds. The taks of this function is to extract several (defined by `ratio_silence`)
+    one-second long clips from those background audio files. Later, those audio clips will be
+    included into the training set.
+    """
     # retrieve original silence audio clips
     silences = [d for d in train_dataset if d["label"] == 35]
     # figure out how many to add
@@ -127,6 +136,12 @@ def prepare_silences_dataset(train_dataset, ratio_silence: float = 0.1) -> Datas
 
 
 def construct_client_mapping(full_trainset, num_clients: int = 100):
+    """Create a mapping to partition the dataset into `num_client` buckets.
+
+    These buckets contain the same number of `spekaer_id` but likely different
+    number of training exampes since each `speaker_id` in SpeechCommands does
+    provide different amounts of data to the dataset.
+    """
     client_ids = list(set(full_trainset["speaker_id"]))
     client_ids.remove(
         None
@@ -143,12 +158,21 @@ def construct_client_mapping(full_trainset, num_clients: int = 100):
 
 
 def get_encoding_fn(processor):
+    """Return a function to use to pre-process/encode the SpeechCommands dataset.
+
+    We are working with the 12classes version of this dataset, therefore we need to do
+    some reassignment of labels.
+    """
+
     def prepare_dataset(batch):
         audio = batch["audio"]
         data = {}
         data["data"] = processor(
             audio["array"], sampling_rate=audio["sampling_rate"], return_tensors="pt"
         ).input_features
+
+        # All unknown keywords are assigned label 11. The silence clips get assigned label 10
+        # In this way we have 12 classes with labels 0-11
         data["targets"] = (
             11
             if batch["is_unknown"]
@@ -166,18 +190,21 @@ def set_params(model: torch.nn.ModuleList, params: List[fl.common.NDArrays]):
     model.load_state_dict(state_dict, strict=True)
 
 
-def get_model(device, num_classes):
-    # processor = WhisperProcessor.from_pretrained("openai/whisper-tiny")
+def get_model(device, num_classes, compile: bool=True):
+    """Create model: Whisper-tiny Encoder + classification head"""
     encoder = WhisperForConditionalGeneration.from_pretrained(
         "openai/whisper-tiny"
     ).get_encoder()
     encoder = encoder.to(device)
-    encoder = torch.compile(encoder)
+    if compile:
+        encoder = torch.compile(encoder)
 
+    # This classification head is 782K parameters
+    # This is the only part of the model that is trained in federation
     classifier = torch.nn.Sequential(
-        torch.nn.Conv1d(1500, 256, kernel_size=1, groups=10),
+        torch.nn.Conv1d(1500, 128, kernel_size=1),
         torch.nn.ReLU(),
         torch.nn.Flatten(1),
-        torch.nn.Linear(256 * 384, num_classes),
+        torch.nn.Linear(128 * 384, num_classes),
     ).to(device)
     return encoder, classifier

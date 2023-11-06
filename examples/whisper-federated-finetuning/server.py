@@ -43,7 +43,9 @@ def get_evaluate_fn(val_set, test_set, encoding_fn, num_rounds):
 
         # prepare dataset
         og_threads = torch.get_num_threads()
-        torch.set_num_threads(1) # ! still, not clear to me why this is needed if we want `num_proc>1`
+        torch.set_num_threads(
+            1
+        )  # ! still, not clear to me why this is needed if we want `num_proc>1`
         if server_round == num_rounds:
             prefix = "test"
             encoded = test_set.map(encoding_fn, num_proc=4, remove_columns=remove_cols)

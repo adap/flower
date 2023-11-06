@@ -1,6 +1,6 @@
-# Whisper+Flower: On-device Federated Downstreaming for Speech Classification
+# On-device Federated Downstreaming for Speech Classification
 
-This example demonstrates how to, from a pre-trained Whisper model, finetune it for the downstream task of keyword spotting. We'll be implementing a federated downstream finetuning pipeline using Flower involving a total of 100 clients. As for the downstream dataset, we'll be using the [Google Speech Commands](https://huggingface.co/datasets/speech_commands) dataset for keyword spotting. We'll take the encoder part of the [Whisper-tiny](https://huggingface.co/openai/whisper-tiny) model, freeze its parameters, and learn a lightweight classification head to correctly classify a spoken word.
+This example demonstrates how to, from a pre-trained [Whisper](https://openai.com/research/whisper) model, finetune it for the downstream task of keyword spotting. We'll be implementing a federated downstream finetuning pipeline using Flower involving a total of 100 clients. As for the downstream dataset, we'll be using the [Google Speech Commands](https://huggingface.co/datasets/speech_commands) dataset for keyword spotting. We'll take the encoder part of the [Whisper-tiny](https://huggingface.co/openai/whisper-tiny) model, freeze its parameters, and learn a lightweight classification (<800K parameters !!) head to correctly classify a spoken word.
 
 This example can be run in three modes:
 
@@ -9,7 +9,31 @@ This example can be run in three modes:
   - in _simulation_ mode: a client is a Python process
   - in _on-device_ mode: clients are detached entities and each runs on a different device.
 
-## Centralized training
+## Running the example
+
+Start by cloning the code example. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+
+```shell
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/whisper-federated-finetuning . && rm -rf flower && cd whisper-federated-finetuning
+```
+
+This will create a new directory called `whisper-federated-finetuning` containing the following files:
+
+```
+-- README.md         <- Your're reading this right now
+-- rpi_setup.md      <- A guide that illustrates how to setup your RPi from scratch
+-- sim.py            <- Runs the example with Flower simulation
+-- server.py         <- Defines the server-side logic for the on-device setting
+-- client.py         <- Defines the client-side logic for the on-device setting
+-- utils.py          <- auxiliary functions for this example
+-- centralised.py    <- Runs the example in centralized mode
+-- pyproject.toml    <- Example dependencies
+-- requirements.txt  <- Example dependencies
+```
+
+This example can be run in different ways, please refer to the corresponding section for further instructions. This example was tested with `PyTorch 2.1.0` for all the ways of running this example except when running on the Raspberry Pi, which seemed to only work with `PyTorch 1.13.1`.
+
+## Centralized Training
 
 This section describes how to finetune `Whisper-tiny` for keyword spotting without making use of Federated Learning. This means that the whole training set is available at any point and therefore it is in its entirety to finetune the model each epoch.
 
@@ -20,7 +44,7 @@ pip install torch==2.1.0 --index-url https://download.pytorch.org/whl/cu118
 pip install -r requirements.txt
 ```
 
-Then run centralized training as follows. Please note that the first time you run the code, the `SpeechCommnads` dataset will be downloaded and pre-processed using :hugging:API (which takes a little while -- approx 30min). Subsequent runs shouldn't require this preprocessing.
+Then run centralized training as follows. Please note that the first time you run the code, the `SpeechCommnads` dataset will be downloaded and pre-processed using 🤗 API (which takes a little while -- approx 30min). Subsequent runs shouldn't require this preprocessing.
 
 ```bash
 python centralised.py --compile # don't use `--compile` flag if you are using pytorch < 2.0
@@ -62,7 +86,7 @@ Flower supports two ways of doing Federated Learning: simulated and non-simulate
 
 ### Preparing the dataset
 
-If you have run the centralized version of this example first, you probably realized that it takes some time to get a fully pre-processed SpeechCommands dataset using the HuggingFace API. This pre-processing is ideal so nothing slowdowns our training once we launch the experiment. For the federated part of this example, we also need to pre-process the data however in a different way since first the training set needs to be split into N different buckets, one for each client. 
+If you have run the centralized version of this example first, you probably realized that it takes some time to get a fully pre-processed SpeechCommands dataset using the 🤗 HuggingFace API. This pre-processing is ideal so nothing slowdowns our training once we launch the experiment. For the federated part of this example, we also need to pre-process the data however in a different way since first the training set needs to be split into N different buckets, one for each client. 
 
 To launch a Flower client we write a `client_fn` callable that will: (1) Load the dataset of the client; then (2) return the Client object itself. In `client.py` we have included a few lines of code that preprocess the training partition of a given client and saves it to disk (so this doesn't have to be repeated each time you run the experiment). You can run the experiment right away and the data will be pre-processed on-demand (i.e. when the `i`-th client is spawned for the first time), or you can pre-process all client partitions first. In order to do so, please run:
 
@@ -77,38 +101,56 @@ The resulting data partitions are not equal-sized (which is what you'd often fin
 
 ![Amount of data per client](_static/whisper_flower_data.png)
 
-### Federated Finetuning (Simulation)
+### Federated Downstreaming (Simulation)
 
 The setup instructions for simulations are the same as those described for the centralized setting above. Then, you can launch your simulation as shown below.
 
 ```bash
 # By default it will run 2 clients in parallel on a single GPU (which should be fine if your GPU has at least 16GB )
 # If that's too much, consider reduing either the batch size or raise `num_gpus` passed to `start_simulation`
-python sim.py --num-rounds 5
+python sim.py --num-rounds 10 # append --num_gpus=0 if you don't have GPUs on your system
 ```
 
 ![Global validation accuracy FL with Whisper model](_static/whisper_flower_acc.png)
 
 With just 5 FL rounds, the global model should be reaching ~95% validation accuracy. A test accuracy of 97% can be reached with 10 rounds of FL training using the default hyperparameters. On an RTX 3090Ti, each round takes ~20-30s depending on the amount of data the clients select in a round have. 
 
-### Federated Finetuning (non-simulated)
+### Federated Downstreaming (non-simulated)
 
-> Please follow the steps [here](rpi_setup_guide.md) if you are looking for a step-by-step guide on how to setup your Raspberry Pi to run this example.
+Running the exact same FL pipeline as in the simulation setting can be done without using Flower's simulation engine. To achieve this, you need to launch first a server and then two or more clients. You can do this on your development machine assuming you have setup your environment already.
 
-Setting up the environment for the Raspberry Pi is not that different from the steps you'd follow on any other Ubuntu machine (yes, this example assumes your Raspberry Pi -- either 5 or 4 -- runs Ubuntu server 22.04/23.10 64bits). If you have a Raspberry Pi already up and running you can probably skip most of the steps below.
+First, launch the server, which will orchestrate the FL process:
+```bash
+# The server will wait until at least two clients are connected
+python server.py --server_addres=<YOUR_SERVER_IP>
+```
 
-#### Running the experiment
+Then on different (new) terminals run:
+```bash
+# use a difference `--cid` (client id) to make this device load a particular dataset partition
+python client.py --server_address=<YOUR_SERVER_IP> --cid=0
 
-Since you won't be running in simulation mode, you need to run first the Server (which will orchestrate the entire experiment) and then the Clients (one per device).
+# and on a new terminal
+python client.py --server_address=<YOUR_SERVER_IP> --cid=1
+```
 
-First launch the server on your development machine.
+Once the second client connects to the server, the FL process will begin. 
+
+
+### Federated Downstreaming on Raspberry Pi
+
+> Please follow the steps [here](rpi_setup.md) if you are looking for a step-by-step guide on how to setup your Raspberry Pi to run this example.
+
+Setting up the environment for the Raspberry Pi is not that different from the steps you'd follow on any other Ubuntu machine (this example assumes your Raspberry Pi -- either 5 or 4 -- runs Ubuntu server 22.04/23.10 64bits). 
+
+In order to run this example on a Raspberry Pi, you'll need to follow the same steps as outlined above in the `non-simulated` section. First, launch the server on your development machine.
 
 ```bash
 # The server will wait until at least two clients are connected
 python server.py --server_addres=<YOUR_SERVER_IP>
 ```
 
-Then, on each of your Raspberry Pi do the following. If you only have one RPi, you can still run the example! You can launch a client in a separate terminal on your development machine.
+Then, on each of your Raspberry Pi do the following. If you only have one RPi, you can still run the example! But you will need two clients. In addition to the one on the Raspberry Pi, you could launch a client in a separate terminal on your development machine.
 
 ```bash
 # use a difference `--cid` (client id) to make this device load a particular dataset partition
