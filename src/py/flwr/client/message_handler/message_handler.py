@@ -15,7 +15,7 @@
 """Client-side message handler."""
 
 
-from typing import Tuple
+from typing import Optional, Tuple
 
 from flwr.client.client import (
     Client,
@@ -35,11 +35,15 @@ from flwr.proto.task_pb2 import SecureAggregation, Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
 
 
+class UnexpectedServerMessage(Exception):
+    """Exception indicating that the received message is unexpected."""
+
+
 class UnknownServerMessage(Exception):
     """Exception indicating that the received message is unknown."""
 
 
-def handle_control_message(task_ins: TaskIns) -> Tuple[int, bool]:
+def handle_control_message(task_ins: TaskIns) -> Tuple[Optional[TaskRes], int]:
     """Handle control part of the incoming message.
 
     Parameters
@@ -60,16 +64,17 @@ def handle_control_message(task_ins: TaskIns) -> Tuple[int, bool]:
 
     # SecAgg message
     if server_msg is None:
-        return 0, True
+        return None, 0
 
     # ReconnectIns message
     field = server_msg.WhichOneof("msg")
     if field == "reconnect_ins":
-        _, sleep_duration = _reconnect(server_msg.reconnect_ins)
-        return sleep_duration, False
+        disconnect_msg, sleep_duration = _reconnect(server_msg.reconnect_ins)
+        task_res = wrap_client_message_in_task_res(disconnect_msg)
+        return task_res, sleep_duration
 
     # Any other message
-    return 0, True
+    return None, 0
 
 
 def handle(client_fn: ClientFn, task_ins: TaskIns) -> TaskRes:
@@ -132,9 +137,10 @@ def handle_legacy_message(
         The result message that should be returned to the server.
     """
     field = server_msg.WhichOneof("msg")
+
+    # Must be handled elsewhere
     if field == "reconnect_ins":
-        disconnect_msg, _ = _reconnect(server_msg.reconnect_ins)
-        return disconnect_msg
+        raise UnexpectedServerMessage()
 
     # Instantiate the client
     client = client_fn("-1")
