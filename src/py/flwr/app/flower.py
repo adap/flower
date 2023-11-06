@@ -21,14 +21,14 @@ from typing import Callable, Dict
 from flwr.client.message_handler.message_handler import handle
 from flwr.client.typing import ClientFn
 from flwr.proto.task_pb2 import TaskIns, TaskRes
-
+from flwr.client.workload_state import WorkloadState
 
 @dataclass
 class Fwd:
     """."""
 
     task_ins: TaskIns
-    state: Dict[str, str]  # TBD
+    state: WorkloadState
 
 
 @dataclass
@@ -36,7 +36,7 @@ class Bwd:
     """."""
 
     task_res: TaskRes
-    state: Dict[str, str]  # TBD
+    state: WorkloadState
 
 
 App = Callable[[Fwd], Bwd]
@@ -60,5 +60,5 @@ class Flower:
         )
         return Bwd(
             task_res=task_res,
-            state={},
+            state=WorkloadState(state={}),
         )

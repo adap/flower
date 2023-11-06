@@ -39,7 +39,7 @@ from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
 from .numpy_client import NumPyClient
-
+from .workload_state import WorkloadState
 
 def _check_actionable_client(
     client: Optional[Client], client_fn: Optional[ClientFn]
@@ -184,7 +184,7 @@ def start_client(
                 # Handle task message
                 fwd_msg: Fwd = Fwd(
                     task_ins=task_ins,
-                    state={},
+                    state=WorkloadState(state={}),
                 )
                 bwd_msg: Bwd = app(fwd=fwd_msg)
 
