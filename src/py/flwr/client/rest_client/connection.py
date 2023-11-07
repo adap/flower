@@ -27,7 +27,7 @@ from flwr.client.message_handler.task_handler import (
     validate_task_res,
 )
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from flwr.common.constant import MISSING_EXTRA_REST
+from flwr.common.constant import MISSING_EXTRA_REST, TRANSPORT_TIMEOUT
 from flwr.common.logger import log
 from flwr.proto.fleet_pb2 import (
     CreateNodeRequest,
@@ -142,6 +142,7 @@ def http_request_response(
             },
             data=create_node_req_bytes,
             verify=verify,
+            timeout=TRANSPORT_TIMEOUT,
         )
 
         # Check status code and headers
@@ -184,6 +185,7 @@ def http_request_response(
             },
             data=delete_node_req_req_bytes,
             verify=verify,
+            timeout=TRANSPORT_TIMEOUT,
         )
 
         # Check status code and headers
@@ -224,6 +226,7 @@ def http_request_response(
             },
             data=pull_task_ins_req_bytes,
             verify=verify,
+            timeout=TRANSPORT_TIMEOUT,
         )
 
         # Check status code and headers
@@ -302,6 +305,7 @@ def http_request_response(
             },
             data=push_task_res_request_bytes,
             verify=verify,
+            timeout=TRANSPORT_TIMEOUT,
         )
 
         state[KEY_TASK_INS] = None
