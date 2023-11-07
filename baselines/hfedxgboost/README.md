@@ -13,19 +13,7 @@ dataset: [a9a, cod-rna, ijcnn1, space_ga, cpusmall, YearPredictionMSD]
 
 **Authors:** Chenyang Ma, Xinchi Qiu, Daniel J. Beutel, Nicholas D. Lane
 
-**Abstract:** The privacy-sensitive nature of decentralized datasets and
-the robustness of eXtreme Gradient Boosting (XGBoost) on
-tabular data raise the need to train XGBoost in the con-
-text of federated learning (FL). Existing works on federated
-XGBoost in the horizontal setting rely on the sharing of gradients, which induce per-node level communication frequency
-and serious privacy concerns. To alleviate these problems, we
-develop an innovative framework for horizontal federated
-XGBoost which does not depend on the sharing of gradients and simultaneously boosts privacy and communication
-efficiency by making the learning rates of the aggregated
-tree ensembles are learnable. We conduct extensive evaluations
-on various classification and regression datasets, showing
-our approach achieves performance comparable to the state-of-the-art method and effectively improves communication
-efficiency by lowering both communication rounds and communication overhead by factors ranging from 25x to 700x.
+**Abstract:** The privacy-sensitive nature of decentralized datasets and the robustness of eXtreme Gradient Boosting (XGBoost) on tabular data raise the need to train XGBoost in the context of federated learning (FL). Existing works on federated XGBoost in the horizontal setting rely on the sharing of gradients, which induce per-node level communication frequency and serious privacy concerns. To alleviate these problems, we develop an innovative framework for horizontal federated XGBoost which does not depend on the sharing of gradients and simultaneously boosts privacy and communication efficiency by making the learning rates of the aggregated tree ensembles are learnable. We conduct extensive evaluations on various classification and regression datasets, showing our approach achieve performance comparable to the state-of-the-art method and effectively improves communication efficiency by lowering both communication rounds and communication overhead by factors ranging from 25x to 700x.
 
 
 ## About this baseline
@@ -104,21 +92,9 @@ All the final new values for those hyperparameters can be found in 3 `yaml` file
 
 ## Environment Setup
 
-#### Steps to set up env:
-1- Install **pyenv**, follow the instructions from this: https://github.com/pyenv/pyenv-installer 
-Note: if you faced the following warning: warning: seems you still have not added 'pyenv' to the load path. and you're not capable of using pyenv in the terminal, you might need to check out this issue: https://github.com/pyenv/pyenv-installer/issues/112
-specifically, try the following script:
-```
-export PATH="$HOME/.pyenv/bin:$PATH"
-eval "$(pyenv init --path)"
-eval "$(pyenv virtualenv-init -)"
-```
-2- Install **poetry** at the system level: https://python-poetry.org/docs/ --> running curl -sSL https://install.python-poetry.org | python3 -(dont' forget to add to your .bashrc or equivalent)
+These steps assume you have already installed `Poetry` and `pyenv`. In the this directory (i.e. `/baselines/hfedxgboost`) where you can see `pyproject.toml`, execute the following commands in your terminal:
 
-3- Then install a version of Python of your choice via pyenv, eg: `pyenv install 3.10.6`
-
-4- In the this directory (i.e. `/baselines/hfedxgboost`) where you can see `pyproject.toml`, execute the following commands in your terminal:
-```
+```bash
 # Set python version
 pyenv local 3.10.6
 # Tell Poetry to use it
@@ -127,28 +103,27 @@ poetry env use 3.10.6
 poetry install 
 # Activate your environment
 poetry shell
-
 ```
 
 ## Running the Experiments
 
-```bash
+With your environment activated you can run the experiments directly. The datasets will be downloaded automatically.
 
-#to run the experiments for the centralized model  with customized hyperparameters
-#write a command that looks like that in your terminal
-python -m hfedxgboost.main --config-name Centralized_Baseline dataset=<name of the config file that contain the dataset name, task,...> xgboost_params_centralized=<name of the config file containing the xgboot customized hyperparameters>
+```bash
+# to run the experiments for the centralized model with customized hyperparameters run
+python -m hfedxgboost.main --config-name Centralized_Baseline dataset=<name-of-config-file> xgboost_params_centralized=<name-of-config-file-with-hyperparameters>
 #e.g
-#to run the centralized model with customized hyperparameters for cpusmall dataset, it should give 7 test MSE which is better than the 9 MSE that #the default centralized model hyperparameters give.
+# to run the centralized model with customized hyperparameters for cpusmall dataset
 python -m hfedxgboost.main --config-name Centralized_Baseline dataset=cpusmall xgboost_params_centralized=cpusmall_xgboost_centralized
 
-#to run the federated version for any dataset with no.of clients
-python -m hfedxgboost.main dataset=<name of the config file that contain the dataset name, task,...> clients=<name of the config file containing the customized hyperparameters and the no.of clients>
-#e.g
-#to run the federated version for a9a dataset with 5 clients
+# to run the federated version for any dataset with no.of clients
+python -m hfedxgboost.main dataset=<name-of-config-file> clients=<name-of-client-config-file>
+# for example
+# to run the federated version for a9a dataset with 5 clients
 python -m hfedxgboost.main dataset=a9a clients=a9a_5_clients
 
-#if you wish to change any parameters from any config file from the terminal, then you should follow this formula
-python -m hfedxgboost.main folder=config_file_name folder.parameter_name=its new value
+# if you wish to change any parameters from any config file from the terminal, then you should follow this formula
+python -m hfedxgboost.main folder=config_file_name folder.parameter_name=its_new_value
 #e.g:
 python -m hfedxgboost.main --config-name Centralized_Baseline dataset=abalone xgboost_params_centralized=abalone_xgboost_centralized xgboost_params_centralized.max_depth=8 dataset.train_ratio=.80
 ```
@@ -156,36 +131,17 @@ python -m hfedxgboost.main --config-name Centralized_Baseline dataset=abalone xg
 
 ## Expected Results
 
+This section shows how to reproduce some of the results in the paper. Tables 2 and 3 were obtained using different hyperparameters than those indicated in the paper. Without these some experimetn exhibited worse performance. Still, some results remain far from those in the original paper.
 
+### Table 1: Centralized Evaluation
 ```bash
-#to run all the experiments for the centralized model with the original paper config for all the datasets
-#gives the output shown in Table 1
+# to run all the experiments for the centralized model with the original paper config for all the datasets
+# gives the output shown in Table 1
 python -m hfedxgboost.main --config-name centralized_basline_all_datasets_paper_config
 
-#results for a9a dataset in table 2 
-python -m hfedxgboost.main --multirun clients=a9a_2_clients,a9a_5_clients,a9a_10_clients dataset=a9a
-
-#results for cod_rna dataset in table 2
-python -m hfedxgboost.main --multirun clients=cod_rna_2_clients,cod_rna_5_clients,cod_rna_10_clients dataset=cod_rna
-
-#results for ijcnn1 dataset in table 2
-python -m hfedxgboost.main --multirun clients=ijcnn1_2_clients,ijcnn1_5_clients,ijcnn1_10_clients dataset=ijcnn1
-
-#Notice that: the MSE results shown in the tables usually happen in early FL rounds (instead in the last round/s)
-#results for space_ga dataset in table 3
-python -m hfedxgboost.main --multirun clients=space_ga_2_clients,space_ga_5_clients,space_ga_10_clients dataset=space_ga
-
-#results for abalone dataset in table 3
-python -m hfedxgboost.main --multirun clients=abalone_2_clients,abalone_5_clients,abalone_10_clients dataset=abalone
-
-#results for cpusmall dataset in table 3
-python -m hfedxgboost.main --multirun clients=cpusmall_2_clients,cpusmall_5_clients,cpusmall_10_clients dataset=cpusmall
-
-#results for YearPredictionMSD_2 dataset in table 3
-python -m hfedxgboost.main --multirun clients=YearPredictionMSD_2_clients,YearPredictionMSD_5_clients,YearPredictionMSD_10_clients dataset=YearPredictionMSD
+# Please note that unlike in the federated experiments, the results will be only printed on the terminal
+# and won't be logged into a file.
 ```
-### Table 1 -- Centralized Evaluation
-
 | Dataset | task type | test result | 
 | :---: | :---: | :---: |
 | a9a | Binary classification | 84.9% |
@@ -195,10 +151,19 @@ python -m hfedxgboost.main --multirun clients=YearPredictionMSD_2_clients,YearPr
 | cpusmall | Regression | 9 |
 | space_ga | Regression | .032 |
 | YearPredictionMSD | Regression | 76.41 |
- 
-**Those results don't come from following the original paper hyper-parameters, the new hyper-parameters are specified in the config files in the `clients` folder**
 
-### Table 2 -- Federated Binary Classification
+### Table 2: Federated Binary Classification
+
+```bash
+# Results for a9a dataset in table 2 
+python -m hfedxgboost.main --multirun clients=a9a_2_clients,a9a_5_clients,a9a_10_clients dataset=a9a
+
+# Results for cod_rna dataset in table 2
+python -m hfedxgboost.main --multirun clients=cod_rna_2_clients,cod_rna_5_clients,cod_rna_10_clients dataset=cod_rna
+
+# Results for ijcnn1 dataset in table 2
+python -m hfedxgboost.main --multirun clients=ijcnn1_2_clients,ijcnn1_5_clients,ijcnn1_10_clients dataset=ijcnn1
+```
 
 | Dataset | task type |no. of clients | server-side test Accuracy |
 | :---: | :---: | :---: | :---: |
@@ -206,7 +171,22 @@ python -m hfedxgboost.main --multirun clients=YearPredictionMSD_2_clients,YearPr
 | cod_rna | Binary Classification | 2<br>5<br>10 | 96.4% <br>96.2% <br>95.0%  | 
 | ijcnn1 | Binary Classification |2<br>5<br>10 | 98.0% <br>97.28% <br>96.8%  |
 
-### Table 3 -- Federated Regression
+
+### Table 3: Federated Regression
+```bash
+# Notice that: the MSE results shown in the tables usually happen in early FL rounds (instead in the last round/s)
+# Results for space_ga dataset in table 3
+python -m hfedxgboost.main --multirun clients=space_ga_2_clients,space_ga_5_clients,space_ga_10_clients dataset=space_ga
+
+# Results for abalone dataset in table 3
+python -m hfedxgboost.main --multirun clients=abalone_2_clients,abalone_5_clients,abalone_10_clients dataset=abalone
+
+# Results for cpusmall dataset in table 3
+python -m hfedxgboost.main --multirun clients=cpusmall_2_clients,cpusmall_5_clients,cpusmall_10_clients dataset=cpusmall
+
+# Results for YearPredictionMSD_2 dataset in table 3
+python -m hfedxgboost.main --multirun clients=YearPredictionMSD_2_clients,YearPredictionMSD_5_clients,YearPredictionMSD_10_clients dataset=YearPredictionMSD
+```
 
 | Dataset | task type |no. of clients | server-side test MSE |
 | :---: | :---: | :---: | :---: |
@@ -214,9 +194,6 @@ python -m hfedxgboost.main --multirun clients=YearPredictionMSD_2_clients,YearPr
 | abalone | Regression | 2<br>5<br>10 | 5.5<br>6.87<br>7.5 | 
 | cpusmall | Regression | 2<br>5<br>10 | 13<br>15.13<br>15.28 | 
 | YearPredictionMSD | Regression | 2<br>5<br>10 | 119<br>118<br>118 | 
-
-
-
 
 
 ## Doing your own finetuning
