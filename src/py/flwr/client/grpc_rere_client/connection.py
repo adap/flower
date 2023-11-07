@@ -57,7 +57,7 @@ def grpc_request_response(
     root_certificates: Optional[
         Union[bytes, str]
     ] = None,  # pylint: disable=unused-argument
-    timeout: int = TRANSPORT_DEFAULT_TIMEOUT,  # pylint: disable=unused-argument
+    timeout: int = TRANSPORT_DEFAULT_TIMEOUT,
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[TaskIns]],
@@ -127,6 +127,7 @@ def grpc_request_response(
         create_node_request = CreateNodeRequest()
         create_node_response = stub.CreateNode(
             request=create_node_request,
+            timeout=timeout,
         )
         node_store[KEY_NODE] = create_node_response.node
 
@@ -139,7 +140,7 @@ def grpc_request_response(
         node: Node = cast(Node, node_store[KEY_NODE])
 
         delete_node_request = DeleteNodeRequest(node=node)
-        stub.DeleteNode(request=delete_node_request)
+        stub.DeleteNode(request=delete_node_request, timeout=timeout)
 
     def receive() -> Optional[TaskIns]:
         """Receive next task from server."""
@@ -151,7 +152,7 @@ def grpc_request_response(
 
         # Request instructions (task) from server
         request = PullTaskInsRequest(node=node)
-        response = stub.PullTaskIns(request=request)
+        response = stub.PullTaskIns(request=request, timeout=timeout)
 
         # Get the current TaskIns
         task_ins: Optional[TaskIns] = get_task_ins(response)
@@ -192,7 +193,7 @@ def grpc_request_response(
 
         # Serialize ProtoBuf to bytes
         request = PushTaskResRequest(task_res_list=[task_res])
-        _ = stub.PushTaskRes(request)
+        _ = stub.PushTaskRes(request=request, timeout=timeout)
 
         state[KEY_TASK_INS] = None
 
