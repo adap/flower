@@ -27,11 +27,11 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
+    TRANSPORT_DEFAULT_TIMEOUT,
     TRANSPORT_TYPE_GRPC_BIDI,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
-    TRANSPORT_DEFAULT_TIMEOUT,
 )
 from flwr.common.logger import log
 from flwr.proto.task_pb2 import TaskIns, TaskRes
