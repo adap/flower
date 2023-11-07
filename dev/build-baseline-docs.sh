@@ -54,7 +54,7 @@ function add_table_entry ()
 # Create Sphinx table block and header
 ! sed -i '' -e "s/.. BASELINES_TABLE_ANCHOR/$table_body/" $INDEX
 
-! grep ":caption: References" $INDEX && echo "$initial_text" >> $INDEX && echo "" >> $INDEX
+! grep -q ":caption: References" $INDEX && echo "$initial_text" >> $INDEX && echo "" >> $INDEX
 
 rm -f "baselines/doc/source/*.md"
 
@@ -70,6 +70,16 @@ for d in $(printf '%s\n' */ | sort -V); do
   if ! [[ "$baseline" =~ ^(baseline_template|dev|doc|flwr_baselines)$ ]]; then
     # For each baseline, copy the README into the source of the Baselines docs
     cp $baseline/README.md $ROOT/baselines/doc/source/$baseline.md 2>&1 >/dev/null
+
+    gh_text="[<img src='_static/view-gh.png' alt='View on GitHub' width='200'/>](https://github.com/adap/flower/blob/main/baselines/$baseline)"
+    readme_file="$ROOT/baselines/doc/source/$baseline.md"
+
+    if ! grep -Fq "$gh_text" "$readme_file"; then
+        # Use sed to insert text after the H1 header
+        sed -i '' "/^# /a\\
+$gh_text
+" "$readme_file"
+    fi
 
     # Copy the images to the same folder in source
     image_path=$(cd $baseline && find  . -type f -regex ".*\.png" | cut -c 3-)
