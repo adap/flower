@@ -21,16 +21,18 @@ from typing import Tuple
 from parameterized import parameterized
 
 from datasets import Dataset
-from flwr_datasets.partitioner.cid_partitioner import CidPartitioner
+from flwr_datasets.partitioner.natural_id_partitioner import NaturalIdPartitioner
 
 
-def _dummy_setup(num_rows: int, n_unique_cids: int) -> Tuple[Dataset, CidPartitioner]:
+def _dummy_setup(
+    num_rows: int, n_unique_cids: int
+) -> Tuple[Dataset, NaturalIdPartitioner]:
     """Create a dummy dataset and partitioner based on given arguments.
 
     The partitioner has automatically the dataset assigned to it.
     """
     dataset = _create_dataset(num_rows, n_unique_cids)
-    partitioner = CidPartitioner(partition_by="cid")
+    partitioner = NaturalIdPartitioner(partition_by="cid")
     partitioner.dataset = dataset
     return dataset, partitioner
 
@@ -61,9 +63,9 @@ class TestCidPartitioner(unittest.TestCase):
         Only the correct data is tested in this method.
         """
         _, partitioner = _dummy_setup(num_rows, num_unique_cid)
-        # Simulate usage to start lazy index_to_cid creation
+        # Simulate usage to start lazy node_id_to_natural_id creation
         _ = partitioner.load_partition(0)
-        self.assertEqual(len(partitioner.index_to_cid), num_unique_cid)
+        self.assertEqual(len(partitioner.node_id_to_natural_id), num_unique_cid)
 
     @parameterized.expand(  # type: ignore
         # num_rows, num_unique_cids
@@ -87,7 +89,7 @@ class TestCidPartitioner(unittest.TestCase):
     def test_partitioner_with_non_existing_column_partition_by(self) -> None:
         """Test error when the partition_by columns does not exist."""
         dataset = _create_dataset(10, 2)
-        partitioner = CidPartitioner(partition_by="not-cid")
+        partitioner = NaturalIdPartitioner(partition_by="not-cid")
         partitioner.dataset = dataset
         with self.assertRaises(ValueError):
             partitioner.load_partition(0)
@@ -102,13 +104,13 @@ class TestCidPartitioner(unittest.TestCase):
         """Test if the # of available partitions is equal to # of unique clients."""
         _, partitioner = _dummy_setup(num_rows, num_unique_cid)
         _ = partitioner.load_partition(idx=0)
-        self.assertEqual(len(partitioner.index_to_cid), num_unique_cid)
+        self.assertEqual(len(partitioner.node_id_to_natural_id), num_unique_cid)
 
     def test_cannot_set_index_to_cid(self) -> None:
-        """Test the lack of ability to set index_to_cid."""
+        """Test the lack of ability to set node_id_to_natural_id."""
         _, partitioner = _dummy_setup(num_rows=10, n_unique_cids=2)
         with self.assertRaises(AttributeError):
-            partitioner.index_to_cid = {0: "0"}
+            partitioner.node_id_to_natural_id = {0: "0"}
 
 
 if __name__ == "__main__":

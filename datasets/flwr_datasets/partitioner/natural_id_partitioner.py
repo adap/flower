@@ -12,31 +12,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Cid partitioner class that works with Hugging Face Datasets."""
+"""Natural id partitioner class that works with Hugging Face Datasets."""
 from typing import Dict
 
 import datasets
 from flwr_datasets.partitioner.partitioner import Partitioner
 
 
-class CidPartitioner(Partitioner):
-    """Partitioner for dataset that can be divided by a reference to clients."""
+class NaturalIdPartitioner(Partitioner):
+    """Partitioner for dataset that can be divided by a reference to id in dataset."""
 
     def __init__(
         self,
         partition_by: str,
     ):
         super().__init__()
-        self._index_to_cid: Dict[int, str] = {}
+        self._node_id_to_natural_id: Dict[int, str] = {}
         self._partition_by = partition_by
 
-    def _create_int_idx_to_cid(self) -> None:
-        """Create a mapping from int indices to unique client ids.
+    def _create_int_node_id_to_natural_id(self) -> None:
+        """Create a mapping from int indices to unique client ids from dataset.
 
-        Client ids come from the columns specified in `partition_by`.
+        Natural ids come from the column specified in `partition_by`.
         """
-        unique_cid = self.dataset.unique(self._partition_by)
-        self._index_to_cid = dict(zip(range(len(unique_cid)), unique_cid))
+        unique_natural_ids = self.dataset.unique(self._partition_by)
+        self._node_id_to_natural_id = dict(
+            zip(range(len(unique_natural_ids)), unique_natural_ids)
+        )
 
     def load_partition(self, idx: int) -> datasets.Dataset:
         """Load a single partition corresponding to a single CID.
@@ -53,19 +55,21 @@ class CidPartitioner(Partitioner):
         dataset_partition: Dataset
             single dataset partition
         """
-        if len(self._index_to_cid) == 0:
-            self._create_int_idx_to_cid()
+        if len(self._node_id_to_natural_id) == 0:
+            self._create_int_node_id_to_natural_id()
 
         return self.dataset.filter(
-            lambda row: row[self._partition_by] == self._index_to_cid[idx]
+            lambda row: row[self._partition_by] == self._node_id_to_natural_id[idx]
         )
 
     @property
-    def index_to_cid(self) -> Dict[int, str]:
+    def node_id_to_natural_id(self) -> Dict[int, str]:
         """Index to corresponding cid from the dataset property."""
-        return self._index_to_cid
+        return self._node_id_to_natural_id
 
     # pylint: disable=R0201
-    @index_to_cid.setter
-    def index_to_cid(self, value: Dict[int, str]) -> None:
-        raise AttributeError("Setting the index_to_cid dictionary is not allowed.")
+    @node_id_to_natural_id.setter
+    def node_id_to_natural_id(self, value: Dict[int, str]) -> None:
+        raise AttributeError(
+            "Setting the node_id_to_natural_id dictionary is not allowed."
+        )

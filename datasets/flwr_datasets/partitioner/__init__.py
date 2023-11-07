@@ -15,8 +15,8 @@
 """Flower Datasets Partitioner package."""
 
 
-from .cid_partitioner import CidPartitioner
 from .iid_partitioner import IidPartitioner
+from .natural_id_partitioner import NaturalIdPartitioner
 from .partitioner import Partitioner
 
-__all__ = ["IidPartitioner", "Partitioner", "CidPartitioner"]
+__all__ = ["IidPartitioner", "Partitioner", "NaturalIdPartitioner"]
