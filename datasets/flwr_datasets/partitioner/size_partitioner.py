@@ -24,7 +24,7 @@ from flwr_datasets.partitioner.partitioner import Partitioner
 
 
 class SizePartitioner(Partitioner):
-    """Base class for the deterministic size partitioning schemes based on the `node_id`.
+    """Base class for the deterministic size partitioning based on the `node_id`.
 
     The client with `node_id` has the following relationship regarding the number of
     samples.
