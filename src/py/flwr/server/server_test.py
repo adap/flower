@@ -84,33 +84,33 @@ class SuccessClient(ClientProxy):
 class FailingClient(ClientProxy):
     """Test class."""
 
-    # pylint: disable-next=broad-exception-raised
     def get_properties(
         self, ins: GetPropertiesIns, timeout: Optional[float]
     ) -> GetPropertiesRes:
         """Raise an Exception to simulate failure in the client."""
+        # pylint: disable-next=broad-exception-raised
         raise Exception()
 
-    # pylint: disable-next=broad-exception-raised
     def get_parameters(
         self, ins: GetParametersIns, timeout: Optional[float]
     ) -> GetParametersRes:
         """Raise an Exception to simulate failure in the client."""
+        # pylint: disable-next=broad-exception-raised
         raise Exception()
 
-    # pylint: disable-next=broad-exception-raised
     def fit(self, ins: FitIns, timeout: Optional[float]) -> FitRes:
         """Raise an Exception to simulate failure in the client."""
+        # pylint: disable-next=broad-exception-raised
         raise Exception()
 
-    # pylint: disable-next=broad-exception-raised
     def evaluate(self, ins: EvaluateIns, timeout: Optional[float]) -> EvaluateRes:
         """Raise an Exception to simulate failure in the client."""
+        # pylint: disable-next=broad-exception-raised
         raise Exception()
 
-    # pylint: disable-next=broad-exception-raised
     def reconnect(self, ins: ReconnectIns, timeout: Optional[float]) -> DisconnectRes:
         """Raise an Exception to simulate failure in the client."""
+        # pylint: disable-next=broad-exception-raised
         raise Exception()
 
 
