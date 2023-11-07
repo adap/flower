@@ -146,10 +146,8 @@ class SqliteState(State):
             with self.conn:
                 if (
                     len(data) > 0
-                    # pylint: disable-next=C0123
-                    and (type(data) == tuple or type(data) == list)
-                    # pylint: disable-next=C0123
-                    and (type(data[0]) == tuple or type(data[0]) == dict)
+                    and (isinstance(data, tuple) or isinstance(data, list))
+                    and (isinstance(data[0], tuple) or isinstance(data[0], dict))
                 ):
                     rows = self.conn.executemany(query, data)
                 else:
