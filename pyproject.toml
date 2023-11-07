@@ -58,7 +58,7 @@ flower-server = "flwr.server:run_server"
 flower-client = "flwr.client:run_client"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.8.1"
 # Mandatory dependencies
 numpy = "^1.21.0"
 grpcio = "^1.48.2,!=1.52.0"
