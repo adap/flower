@@ -76,20 +76,20 @@ class SizePartitioner(Partitioner):
         """
         # The partitioning is done lazily - only when the first partition is requested.
         # A single run creates the indices assignments for all the partition indices.
-        self._determine_cid_to_indices_if_needed()
+        self._determine_id_to_indices_if_needed()
         return self.dataset.select(self._cid_to_indices[idx])
 
     @property
-    def cid_to_size(self) -> Dict[int, int]:
+    def id_to_size(self) -> Dict[int, int]:
         """Cid to the number of samples."""
         return self._cid_to_size
 
     @property
-    def cid_to_indices(self) -> Dict[int, List[int]]:
+    def id_to_indices(self) -> Dict[int, List[int]]:
         """Cid to the list of indices."""
         return self._cid_to_indices
 
-    def _determine_cid_to_size(self) -> None:
+    def _determine_id_to_size(self) -> None:
         """Determine data quantity associated with partition indices."""
         data_division_in_units = self._cid_to_size_fnc(
             np.linspace(start=1, stop=self._num_partitions, num=self._num_partitions)
@@ -109,13 +109,13 @@ class SizePartitioner(Partitioner):
         for idx, partition_size in enumerate(partition_sizes_as_num_of_samples):
             self._cid_to_size[idx] = partition_size
 
-        self._check_if_cid_to_size_possible()
+        self._check_if_id_to_size_possible()
 
-    def _determine_cid_to_indices_if_needed(self) -> None:
+    def _determine_id_to_indices_if_needed(self) -> None:
         """Create an assignment of indices to the partition indices.."""
         if self._cid_to_indices_determined is True:
             return
-        self._determine_cid_to_size()
+        self._determine_id_to_size()
         total_samples_assigned = 0
         for idx, quantity in self._cid_to_size.items():
             self._cid_to_indices[idx] = list(
@@ -124,8 +124,8 @@ class SizePartitioner(Partitioner):
             total_samples_assigned += quantity
         self._cid_to_indices_determined = True
 
-    def _check_if_cid_to_size_possible(self) -> None:
-        all_positive = all(value >= 1 for value in self.cid_to_size.values())
+    def _check_if_id_to_size_possible(self) -> None:
+        all_positive = all(value >= 1 for value in self.id_to_size.values())
         if not all_positive:
             raise ValueError(
                 f"The given specification of the parameter num_partitions"
