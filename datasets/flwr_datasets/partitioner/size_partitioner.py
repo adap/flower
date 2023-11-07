@@ -125,7 +125,7 @@ class SizePartitioner(Partitioner):
         self._cid_to_indices_determined = True
 
     def _check_if_cid_to_size_possible(self) -> None:
-        all_positive = all(value > 0 for value in self.cid_to_size.values())
+        all_positive = all(value >= 1 for value in self.cid_to_size.values())
         if not all_positive:
             raise ValueError(
                 f"The given specification of the parameter num_partitions"
