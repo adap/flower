@@ -155,7 +155,7 @@ Then, on each of your Raspberry Pi do the following. If you only have one RPi, y
 
 ```bash
 # use a difference `--cid` (client id) to make this device load a particular dataset partition
-python client.py --server_address=<YOUR_SERVER_IP> --cid=0
+python client.py --server_address=<YOUR_SERVER_IP> --cid=0 --no-compile
 ```
 
 Some clients have more data than others, but on average, the RPi5 is 1.9x faster than an RPi4. A client with 850 training examples needs ~19min on an RPi to complete an epoch of on-device finetuning.

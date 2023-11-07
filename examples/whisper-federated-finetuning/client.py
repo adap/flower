@@ -25,6 +25,8 @@ parser.add_argument(
     "--no-compile", action="store_true", help="To not compile client models."
 )
 
+CLIENT_DATA = "client_datasets"
+
 
 class WhisperFlowerClient(fl.client.NumPyClient):
     """A Flower client that does trains a classification head attached to the encoder of
@@ -165,7 +167,7 @@ def run_client():
     prepare_dataset_fn = get_encoding_fn(processor)
 
     client_fn = get_client_fn(
-        sc_train, prepare_dataset_fn, client_mapping, compile=not (args.no_compile)
+        sc_train, prepare_dataset_fn, client_mapping, compile=not (args.no_compile), client_data_path=CLIENT_DATA
     )
 
     fl.client.start_numpy_client(
