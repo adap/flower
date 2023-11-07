@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""CID partitioner tests."""
+"""NaturalIdPartitioner partitioner tests."""
+
+
 import itertools
 import math
 import unittest
@@ -25,90 +27,90 @@ from flwr_datasets.partitioner.natural_id_partitioner import NaturalIdPartitione
 
 
 def _dummy_setup(
-    num_rows: int, n_unique_cids: int
+    num_rows: int, n_unique_natural_ids: int
 ) -> Tuple[Dataset, NaturalIdPartitioner]:
     """Create a dummy dataset and partitioner based on given arguments.
 
     The partitioner has automatically the dataset assigned to it.
     """
-    dataset = _create_dataset(num_rows, n_unique_cids)
-    partitioner = NaturalIdPartitioner(partition_by="cid")
+    dataset = _create_dataset(num_rows, n_unique_natural_ids)
+    partitioner = NaturalIdPartitioner(partition_by="natural_id")
     partitioner.dataset = dataset
     return dataset, partitioner
 
 
-def _create_dataset(num_rows: int, n_unique_cids: int) -> Dataset:
-    """Create dataset based on the number of rows and unique cids."""
+def _create_dataset(num_rows: int, n_unique_natural_ids: int) -> Dataset:
+    """Create dataset based on the number of rows and unique natural ids."""
     data = {
         "features": list(range(num_rows)),
-        "cid": [f"{i % n_unique_cids}" for i in range(num_rows)],
+        "natural_id": [f"{i % n_unique_natural_ids}" for i in range(num_rows)],
         "labels": [i % 2 for i in range(num_rows)],
     }
     dataset = Dataset.from_dict(data)
     return dataset
 
 
-class TestCidPartitioner(unittest.TestCase):
+class TestNaturalIdPartitioner(unittest.TestCase):
     """Test IidPartitioner."""
 
     @parameterized.expand(  # type: ignore
-        # num_rows, num_unique_cids
+        # num_rows, num_unique_natural_ids
         list(itertools.product([10, 30, 100, 1000], [2, 3, 4, 5]))
     )
     def test_load_partition_num_partitions(
-        self, num_rows: int, num_unique_cid: int
+        self, num_rows: int, num_unique_natural_id: int
     ) -> None:
-        """Test if the number of partitions match the number of unique cids.
+        """Test if the number of partitions match the number of unique natural ids.
 
         Only the correct data is tested in this method.
         """
-        _, partitioner = _dummy_setup(num_rows, num_unique_cid)
+        _, partitioner = _dummy_setup(num_rows, num_unique_natural_id)
         # Simulate usage to start lazy node_id_to_natural_id creation
         _ = partitioner.load_partition(0)
-        self.assertEqual(len(partitioner.node_id_to_natural_id), num_unique_cid)
+        self.assertEqual(len(partitioner.node_id_to_natural_id), num_unique_natural_id)
 
     @parameterized.expand(  # type: ignore
-        # num_rows, num_unique_cids
+        # num_rows, num_unique_natural_ids
         list(itertools.product([10, 30, 100, 1000], [2, 3, 4, 5]))
     )
     def test_load_partition_max_partition_size(
-        self, num_rows: int, num_unique_cid: int
+        self, num_rows: int, num_unique_natural_ids: int
     ) -> None:
-        """Test if the number of partitions match the number of unique cids.
+        """Test if the number of partitions match the number of unique natural ids.
 
         Only the correct data is tested in this method.
         """
         print(num_rows)
-        print(num_unique_cid)
-        _, partitioner = _dummy_setup(num_rows, num_unique_cid)
+        print(num_unique_natural_ids)
+        _, partitioner = _dummy_setup(num_rows, num_unique_natural_ids)
         max_size = max(
-            [len(partitioner.load_partition(i)) for i in range(num_unique_cid)]
+            [len(partitioner.load_partition(i)) for i in range(num_unique_natural_ids)]
         )
-        self.assertEqual(max_size, math.ceil(num_rows / num_unique_cid))
+        self.assertEqual(max_size, math.ceil(num_rows / num_unique_natural_ids))
 
     def test_partitioner_with_non_existing_column_partition_by(self) -> None:
         """Test error when the partition_by columns does not exist."""
         dataset = _create_dataset(10, 2)
-        partitioner = NaturalIdPartitioner(partition_by="not-cid")
+        partitioner = NaturalIdPartitioner(partition_by="not-existing")
         partitioner.dataset = dataset
         with self.assertRaises(ValueError):
             partitioner.load_partition(0)
 
     @parameterized.expand(  # type: ignore
-        # num_rows, num_unique_cids
+        # num_rows, num_unique_natural_ids
         list(itertools.product([10, 30, 100, 1000], [2, 3, 4, 5]))
     )
     def test_correct_number_of_partitions(
-        self, num_rows: int, num_unique_cid: int
+        self, num_rows: int, num_unique_natural_ids: int
     ) -> None:
         """Test if the # of available partitions is equal to # of unique clients."""
-        _, partitioner = _dummy_setup(num_rows, num_unique_cid)
+        _, partitioner = _dummy_setup(num_rows, num_unique_natural_ids)
         _ = partitioner.load_partition(idx=0)
-        self.assertEqual(len(partitioner.node_id_to_natural_id), num_unique_cid)
+        self.assertEqual(len(partitioner.node_id_to_natural_id), num_unique_natural_ids)
 
-    def test_cannot_set_index_to_cid(self) -> None:
+    def test_cannot_set_node_id_to_natural_id(self) -> None:
         """Test the lack of ability to set node_id_to_natural_id."""
-        _, partitioner = _dummy_setup(num_rows=10, n_unique_cids=2)
+        _, partitioner = _dummy_setup(num_rows=10, n_unique_natural_ids=2)
         with self.assertRaises(AttributeError):
             partitioner.node_id_to_natural_id = {0: "0"}
 

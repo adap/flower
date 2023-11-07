@@ -13,6 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 """Natural id partitioner class that works with Hugging Face Datasets."""
+
+
 from typing import Dict
 
 import datasets
@@ -41,9 +43,10 @@ class NaturalIdPartitioner(Partitioner):
         )
 
     def load_partition(self, idx: int) -> datasets.Dataset:
-        """Load a single partition corresponding to a single CID.
+        """Load a single partition corresponding to a single `node_id`.
 
-        The choice of the partition is based on unique integers assigned to each cid.
+        The choice of the partition is based on unique integers assigned to each
+        natural id present in the dataset in the `partition_by` column.
 
         Parameters
         ----------
@@ -64,7 +67,10 @@ class NaturalIdPartitioner(Partitioner):
 
     @property
     def node_id_to_natural_id(self) -> Dict[int, str]:
-        """Index to corresponding cid from the dataset property."""
+        """Node id to corresponding natural id present.
+
+        Natural ids are the unique values in `partition_by` column in dataset.
+        """
         return self._node_id_to_natural_id
 
     # pylint: disable=R0201
