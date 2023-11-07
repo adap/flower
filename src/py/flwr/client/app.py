@@ -52,6 +52,22 @@ def run_client() -> None:
     args = _parse_args_client().parse_args()
 
     print(args.server)
+    print(args.app_dir)
+    print(args.app)
+
+    app_dir = args.app_dir
+    if app_dir is not None:
+        sys.path.insert(0, app_dir)
+
+    def _load() -> Flower:
+        app: Flower = import_from_string(args.app)
+        return app
+
+    return start_client(
+        server_address=args.server,
+        load_app_fn=_load,
+        transport="grpc-rere",  # Only
+    )
 
 
 def _parse_args_client() -> argparse.ArgumentParser:
@@ -62,8 +78,20 @@ def _parse_args_client() -> argparse.ArgumentParser:
 
     parser.add_argument(
         "--server",
-        help="Server address",
         default="0.0.0.0:9092",
+        help="Server address",
+    )
+
+    parser.add_argument(
+        "--app-dir",
+        default="",
+        help="Look for APP in specified directory, by adding this to the PYTHONPATH."
+        " Defaults to the current working directory.",
+    )
+
+    parser.add_argument(
+        "--app",
+        help="For example: `client:app` or `project.package.module:wrapper.app",
     )
 
     return parser
@@ -366,55 +394,3 @@ def _init_connection(
         )
 
     return connection, address
-
-
-def run_client() -> None:
-    """Run Flower client."""
-    log(INFO, "Long-running Flower client starting")
-
-    args = _parse_args_client().parse_args()
-
-    print(args.server)
-    print(args.app_dir)
-    print(args.app)
-
-    app_dir = args.app_dir
-    if app_dir is not None:
-        sys.path.insert(0, app_dir)
-
-    def _load() -> Flower:
-        app: Flower = import_from_string(args.app)
-        return app
-
-    return start_client(
-        server_address=args.server,
-        load_app_fn=_load,
-        transport="grpc-rere",  # Only
-    )
-
-
-def _parse_args_client() -> argparse.ArgumentParser:
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Start a long-running Flower client",
-    )
-
-    parser.add_argument(
-        "--server",
-        default="0.0.0.0:9092",
-        help="Server address",
-    )
-
-    parser.add_argument(
-        "--app-dir",
-        default="",
-        help="Look for APP in specified directory, by adding this to the PYTHONPATH."
-        " Defaults to the current working directory.",
-    )
-
-    parser.add_argument(
-        "--app",
-        help="For example: `client:app` or `project.package.module:wrapper.app",
-    )
-
-    return parser
