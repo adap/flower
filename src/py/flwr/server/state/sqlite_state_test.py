@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Test for utility functions."""
-# pylint: disable=no-self-use, invalid-name, disable=R0904
+# pylint: disable=invalid-name, disable=R0904
 
 import unittest
 

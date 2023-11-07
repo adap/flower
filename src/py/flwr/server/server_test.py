@@ -48,13 +48,13 @@ class SuccessClient(ClientProxy):
         self, ins: GetPropertiesIns, timeout: Optional[float]
     ) -> GetPropertiesRes:
         """Raise an Exception because this method is not expected to be called."""
-        raise Exception()
+        raise NotImplementedError()
 
     def get_parameters(
         self, ins: GetParametersIns, timeout: Optional[float]
     ) -> GetParametersRes:
         """Raise an Exception because this method is not expected to be called."""
-        raise Exception()
+        raise NotImplementedError()
 
     def fit(self, ins: FitIns, timeout: Optional[float]) -> FitRes:
         """Simulate fit by returning a success FitRes with simple set of weights."""
@@ -84,26 +84,31 @@ class SuccessClient(ClientProxy):
 class FailingClient(ClientProxy):
     """Test class."""
 
+    # pylint: disable-next=broad-exception-raised
     def get_properties(
         self, ins: GetPropertiesIns, timeout: Optional[float]
     ) -> GetPropertiesRes:
         """Raise an Exception to simulate failure in the client."""
         raise Exception()
 
+    # pylint: disable-next=broad-exception-raised
     def get_parameters(
         self, ins: GetParametersIns, timeout: Optional[float]
     ) -> GetParametersRes:
         """Raise an Exception to simulate failure in the client."""
         raise Exception()
 
+    # pylint: disable-next=broad-exception-raised
     def fit(self, ins: FitIns, timeout: Optional[float]) -> FitRes:
         """Raise an Exception to simulate failure in the client."""
         raise Exception()
 
+    # pylint: disable-next=broad-exception-raised
     def evaluate(self, ins: EvaluateIns, timeout: Optional[float]) -> EvaluateRes:
         """Raise an Exception to simulate failure in the client."""
         raise Exception()
 
+    # pylint: disable-next=broad-exception-raised
     def reconnect(self, ins: ReconnectIns, timeout: Optional[float]) -> DisconnectRes:
         """Raise an Exception to simulate failure in the client."""
         raise Exception()

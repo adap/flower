@@ -231,7 +231,7 @@ def _fit(self: Client, ins: FitIns) -> FitRes:
         and isinstance(results[1], int)
         and isinstance(results[2], dict)
     ):
-        raise Exception(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT)
+        raise TypeError(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT)
 
     # Return FitRes
     parameters_prime, num_examples, metrics = results
@@ -255,7 +255,7 @@ def _evaluate(self: Client, ins: EvaluateIns) -> EvaluateRes:
         and isinstance(results[1], int)
         and isinstance(results[2], dict)
     ):
-        raise Exception(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_EVALUATE)
+        raise TypeError(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_EVALUATE)
 
     # Return EvaluateRes
     loss, num_examples, metrics = results

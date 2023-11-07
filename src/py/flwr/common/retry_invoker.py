@@ -156,6 +156,7 @@ class RetryInvoker:
     >>> invoker.invoke(my_func, arg1, arg2, kw1=kwarg1)
     """
 
+    # pylint: disable-next=too-many-arguments
     def __init__(
         self,
         wait_factory: Callable[[], Generator[float, None, None]],

@@ -70,6 +70,7 @@ def test_workflow_successful() -> None:
             _ = next(ins_wrapper_iterator)
             bridge.set_res_wrapper(ResWrapper(client_message=ClientMessage()))
         except Exception as exception:
+            # pylint: disable-next=broad-exception-raised
             raise Exception from exception
 
     # Wait until worker_thread is finished

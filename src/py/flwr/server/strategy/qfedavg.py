@@ -185,7 +185,7 @@ class QFedAvg(FedAvg):
         hs_ffl = []
 
         if self.pre_weights is None:
-            raise Exception("QffedAvg pre_weights are None in aggregate_fit")
+            raise AttributeError("QffedAvg pre_weights are None in aggregate_fit")
 
         weights_before = self.pre_weights
         eval_result = self.evaluate(

@@ -134,7 +134,7 @@ class SqliteState(State):
     ) -> List[Dict[str, Any]]:
         """Execute a SQL query."""
         if self.conn is None:
-            raise Exception("State is not initialized.")
+            raise AttributeError("State is not initialized.")
 
         if data is None:
             data = []
@@ -459,7 +459,7 @@ class SqliteState(State):
         """
 
         if self.conn is None:
-            raise Exception("State not intitialized")
+            raise AttributeError("State not intitialized")
 
         with self.conn:
             self.conn.execute(query_1, data)

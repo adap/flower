@@ -59,7 +59,9 @@ def server_message_to_proto(server_message: typing.ServerMessage) -> ServerMessa
                 server_message.evaluate_ins,
             )
         )
-    raise Exception("No instruction set in ServerMessage, cannot serialize to ProtoBuf")
+    raise ValueError(
+        "No instruction set in ServerMessage, cannot serialize to ProtoBuf"
+    )
 
 
 def server_message_from_proto(
@@ -91,7 +93,7 @@ def server_message_from_proto(
                 server_message_proto.evaluate_ins,
             )
         )
-    raise Exception(
+    raise ValueError(
         "Unsupported instruction in ServerMessage, cannot deserialize from ProtoBuf"
     )
 
@@ -125,7 +127,9 @@ def client_message_to_proto(client_message: typing.ClientMessage) -> ClientMessa
                 client_message.evaluate_res,
             )
         )
-    raise Exception("No instruction set in ClientMessage, cannot serialize to ProtoBuf")
+    raise ValueError(
+        "No instruction set in ClientMessage, cannot serialize to ProtoBuf"
+    )
 
 
 def client_message_from_proto(
@@ -157,7 +161,7 @@ def client_message_from_proto(
                 client_message_proto.evaluate_res,
             )
         )
-    raise Exception(
+    raise ValueError(
         "Unsupported instruction in ClientMessage, cannot deserialize from ProtoBuf"
     )
 
@@ -474,7 +478,7 @@ def scalar_to_proto(scalar: typing.Scalar) -> Scalar:
     if isinstance(scalar, str):
         return Scalar(string=scalar)
 
-    raise Exception(
+    raise ValueError(
         f"Accepted types: {bool, bytes, float, int, str} (but not {type(scalar)})"
     )
 
@@ -518,7 +522,7 @@ def _check_value(value: typing.Value) -> None:
             for element in value:
                 if isinstance(element, data_type):
                     continue
-                raise Exception(
+                raise TypeError(
                     f"Inconsistent type: the types of elements in the list must "
                     f"be the same (expected {data_type}, but got {type(element)})."
                 )

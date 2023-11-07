@@ -41,19 +41,19 @@ class PlainClient(Client):
 
     def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
         """Raise an Exception because this method is not expected to be called."""
-        raise Exception()
+        raise NotImplementedError()
 
     def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
         """Raise an Exception because this method is not expected to be called."""
-        raise Exception()
+        raise NotImplementedError()
 
     def fit(self, ins: FitIns) -> FitRes:
         """Raise an Exception because this method is not expected to be called."""
-        raise Exception()
+        raise NotImplementedError()
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         """Raise an Exception because this method is not expected to be called."""
-        raise Exception()
+        raise NotImplementedError()
 
 
 class NeedsWrappingClient(NumPyClient):
@@ -61,23 +61,23 @@ class NeedsWrappingClient(NumPyClient):
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         """Raise an Exception because this method is not expected to be called."""
-        raise Exception()
+        raise NotImplementedError()
 
     def get_parameters(self, config: Config) -> NDArrays:
         """Raise an Exception because this method is not expected to be called."""
-        raise Exception()
+        raise NotImplementedError()
 
     def fit(
         self, parameters: NDArrays, config: Config
     ) -> Tuple[NDArrays, int, Dict[str, Scalar]]:
         """Raise an Exception because this method is not expected to be called."""
-        raise Exception()
+        raise NotImplementedError()
 
     def evaluate(
         self, parameters: NDArrays, config: Config
     ) -> Tuple[float, int, Dict[str, Scalar]]:
         """Raise an Exception because this method is not expected to be called."""
-        raise Exception()
+        raise NotImplementedError()
 
 
 def test_to_client_with_client() -> None:

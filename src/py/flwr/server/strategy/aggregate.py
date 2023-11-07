@@ -26,7 +26,7 @@ from flwr.common import NDArray, NDArrays
 def aggregate(results: List[Tuple[NDArrays, int]]) -> NDArrays:
     """Compute weighted average."""
     # Calculate the total number of examples used during training
-    num_examples_total = sum([num_examples for _, num_examples in results])
+    num_examples_total = sum(num_examples for (_, num_examples) in results)
 
     # Create a list of weights, each multiplied by the related number of examples
     weighted_weights = [
@@ -69,9 +69,9 @@ def aggregate_krum(
     # For each client, take the n-f-2 closest parameters vectors
     num_closest = max(1, len(weights) - num_malicious - 2)
     closest_indices = []
-    for i, _ in enumerate(distance_matrix):
+    for distance in distance_matrix:
         closest_indices.append(
-            np.argsort(distance_matrix[i])[1 : num_closest + 1].tolist()  # noqa: E203
+            np.argsort(distance)[1 : num_closest + 1].tolist()  # noqa: E203
         )
 
     # Compute the score for each client, that is the sum of the distances
@@ -93,7 +93,7 @@ def aggregate_krum(
 
 def weighted_loss_avg(results: List[Tuple[int, float]]) -> float:
     """Aggregate evaluation results obtained from multiple clients."""
-    num_total_evaluation_examples = sum([num_examples for num_examples, _ in results])
+    num_total_evaluation_examples = sum(num_examples for (num_examples, _) in results)
     weighted_losses = [num_examples * loss for num_examples, loss in results]
     return sum(weighted_losses) / num_total_evaluation_examples
 
@@ -124,9 +124,9 @@ def _compute_distances(weights: List[NDArrays]) -> NDArray:
     """
     flat_w = np.array([np.concatenate(p, axis=None).ravel() for p in weights])
     distance_matrix = np.zeros((len(weights), len(weights)))
-    for i, _ in enumerate(flat_w):
-        for j, _ in enumerate(flat_w):
-            delta = flat_w[i] - flat_w[j]
+    for i, flat_w_i in enumerate(flat_w):
+        for j, flat_w_j in enumerate(flat_w):
+            delta = flat_w_i - flat_w_j
             norm = np.linalg.norm(delta)
             distance_matrix[i, j] = norm**2
     return distance_matrix
