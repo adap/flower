@@ -10,7 +10,7 @@ authors = ["Ragy Haddad <ragy202@gmail.com>"]
 maintainers = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
-python = "^3.8.1"
+python = "^3.8"
 flwr = { path = "../../", develop = true, extras = ["simulation"] }
 numpy = "^1.21.0"
 pandas = "^2.0.0"
