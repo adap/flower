@@ -13,14 +13,14 @@ git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/qui
 
 This will create a new directory called `quickstart-xgboost` containing the following files:
 
-```shell
--- pyproject.toml
--- requirements.txt
--- client.py
--- server.py
--- strategy.py
--- dataset.py
--- README.md
+```
+-- README.md         <- Your're reading this right now
+-- server.py         <- Defines the server-side logic
+-- strategy.py       <- Defines the tree-based bagging aggregation
+-- client.py         <- Defines the client-side logic
+-- dataset.py        <- Defines the functions of data loading and partitioning
+-- pyproject.toml    <- Example dependencies (if you use Poetry)
+-- requirements.txt  <- Example dependencies
 ```
 
 ### Installing Dependencies
