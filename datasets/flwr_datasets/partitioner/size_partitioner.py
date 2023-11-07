@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""DataQuantityPartitioner class."""
+"""SizePartitioner class."""
+
+
 from typing import Callable, Dict, List, Union
 
 import numpy as np
@@ -37,22 +39,22 @@ class SizePartitioner(Partitioner):
 
     Parameters
     ----------
-    num_partitions: int
+    num_partitions : int
         The total number of partitions that the data will be divided into.
-    cid_to_size_fnc: Callable
+    cid_to_size_fn : Callable
         Function that defines the relationship between cid and the number of samples.
     """
 
     def __init__(
         self,
         num_partitions: int,
-        cid_to_size_fnc: Callable,  # type: ignore[type-arg]
+        cid_to_size_fn: Callable,  # type: ignore[type-arg]
     ) -> None:
         super().__init__()
         if num_partitions <= 0:
             raise ValueError("The number of partitions must be greater than zero.")
         self._num_partitions = num_partitions
-        self._cid_to_size_fnc = cid_to_size_fnc
+        self._cid_to_size_fn = cid_to_size_fn
 
         self._cid_to_size: Dict[int, int] = {}
         self._cid_to_indices: Dict[int, List[int]] = {}
@@ -66,7 +68,7 @@ class SizePartitioner(Partitioner):
 
         Parameters
         ----------
-        idx: int
+        idx : int
             the index that corresponds to the requested partition
 
         Returns
@@ -91,7 +93,7 @@ class SizePartitioner(Partitioner):
 
     def _determine_id_to_size(self) -> None:
         """Determine data quantity associated with partition indices."""
-        data_division_in_units = self._cid_to_size_fnc(
+        data_division_in_units = self._cid_to_size_fn(
             np.linspace(start=1, stop=self._num_partitions, num=self._num_partitions)
         )
         total_units: Union[int, float] = data_division_in_units.sum()

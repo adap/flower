@@ -13,6 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 """ExponentialPartitioner class."""
+
+
 import numpy as np
 
 from flwr_datasets.partitioner.size_partitioner import SizePartitioner
@@ -31,11 +33,11 @@ class ExponentialPartitioner(SizePartitioner):
 
     Parameters
     ----------
-    num_partitions: int
+    num_partitions : int
         The total number of partitions that the data will be divided into.
     """
 
     def __init__(self, num_partitions: int) -> None:
-        super().__init__(num_partitions=num_partitions, cid_to_size_fnc=np.exp)
+        super().__init__(num_partitions=num_partitions, cid_to_size_fn=np.exp)
         if num_partitions <= 0:
             raise ValueError("The number of partitions must be greater than zero.")

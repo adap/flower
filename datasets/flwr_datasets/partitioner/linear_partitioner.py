@@ -14,6 +14,7 @@
 # ==============================================================================
 """LinearPartitioner class."""
 
+
 from flwr_datasets.partitioner.size_partitioner import SizePartitioner
 
 
@@ -26,11 +27,11 @@ class LinearPartitioner(SizePartitioner):
 
     Parameters
     ----------
-    num_partitions: int
+    num_partitions : int
         The total number of partitions that the data will be divided into.
     """
 
     def __init__(self, num_partitions: int) -> None:
-        super().__init__(num_partitions=num_partitions, cid_to_size_fnc=lambda x: x)
+        super().__init__(num_partitions=num_partitions, cid_to_size_fn=lambda x: x)
         if num_partitions <= 0:
             raise ValueError("The number of partitions must be greater than zero.")
