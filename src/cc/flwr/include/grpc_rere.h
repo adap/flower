@@ -1,15 +1,14 @@
 /*************************************************************************************************
  *
- * @file start.h
+ * @file grpc-rere.h
  *
- * @brief Create a gRPC channel to connect to the server and enable message
- *communication
+ * @brief Provide functions for establishing gRPC request-response communication
  *
- * @author Lekang Jiang
+ * @author The Flower Authors
  *
  * @version 1.0
  *
- * @date 06/09/2021
+ * @date 06/11/2023
  *
  *************************************************************************************************/
 
@@ -17,6 +16,7 @@
 #define GRPC_RERE_H
 #pragma once
 #include "message_handler.h"
+#include "task_handler.h"
 #include <grpcpp/grpcpp.h>
 
 void create_node(const std::unique_ptr<flwr::proto::Fleet::Stub> &stub);
