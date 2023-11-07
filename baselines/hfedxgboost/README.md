@@ -11,7 +11,7 @@ dataset: [a9a, cod-rna, ijcnn1, space_ga, cpusmall, YearPredictionMSD]
 
 **Paper:** [arxiv.org/abs/2304.07537](https://arxiv.org/abs/2304.07537)
 
-**Authors:** Chenyang Ma, Xinchi Qiu, Daniel J. Beutel, Nicholas D. Lane
+**Authors:** Chenyang Ma, Xinchi Qiu, Daniel J. Beutel, Nicholas D. Laneearly_stop_patience_rounds: 100
 
 **Abstract:** The privacy-sensitive nature of decentralized datasets and the robustness of eXtreme Gradient Boosting (XGBoost) on tabular data raise the need to train XGBoost in the context of federated learning (FL). Existing works on federated XGBoost in the horizontal setting rely on the sharing of gradients, which induce per-node level communication frequency and serious privacy concerns. To alleviate these problems, we develop an innovative framework for horizontal federated XGBoost which does not depend on the sharing of gradients and simultaneously boosts privacy and communication efficiency by making the learning rates of the aggregated tree ensembles are learnable. We conduct extensive evaluations on various classification and regression datasets, showing our approach achieve performance comparable to the state-of-the-art method and effectively improves communication efficiency by lowering both communication rounds and communication overhead by factors ranging from 25x to 700x.
 
@@ -267,7 +267,7 @@ for filepath in os.listdir(DATASET_PATH):
 **a- config files for the centralized baseline:**
 
 - To run the centralized model on your dataset with the original hyper-parameters from the paper alongside all the other datasets added before just do the following step:
-   - in the dictionary called `dataset_tasks` in the `utils.py` file add your dataset name as a key -the same name that you put in the `download_data` function  in the step before- and add its task type, this code perform for 2 tasks: `BINARY` which is binary classification or `REG` which is regression.
+   - in the dictionary called `dataset_tasks` in the `utils.py` file add your dataset name as a key -the same name that you put in the `download_data` function  in the step before- and add its task type, this code performs for 2 tasks: `BINARY` which is binary classification or `REG` which is regression.
     
 - To run the centralized model on your dataset you need to create a config file `<your dataset>.yaml` in the `xgboost_params_centralized` folder and another .yaml file in the `dataset` folder -you will find that one of course inside the `conf` folder :) - and you need to specify the hyper-parameters of your choice for the xgboost model
 
@@ -277,12 +277,14 @@ for filepath in os.listdir(DATASET_PATH):
        - task: <config file name with your task type, "Regression" or "Binary_Classification">
     dataset_name: "<your dataset name, must be the same name used in the download_data function>"
     train_ratio: <percentage of the training data of the whole dataset>
+    early_stop_patience_rounds: <no.of epochs that the early stopper class should wait before ending the training>
     ```
   - the .yaml file in the `xgboost_params_centralized` folder should contain the values for all the hyper-parameters of your choice for the xgboost model
 
+You can skip this whole step and use the paper default hyper-parameters from the paper, they're all written in the "paper_<no. clients>_clients.yaml" files.<br>
 **b- config files for the federated baseline:**
 
-To run the federated baseline with your dataset, you need to first create the .yaml file in the `dataset` folder that was mentioned before and you need to create config files that contain the no.of the clients and it should look something like this:
+To run the federated baseline with your dataset using your customized hyper-parameters, you need first to create the .yaml file in the `dataset` folder that was mentioned before and you need to create config files that contain the no.of the clients and it should look something like this:
 ```
 n_estimators_client: <int used in xgboost and CNN model>
 num_rounds: <int to indicate the round of communications between the server and the clients>
