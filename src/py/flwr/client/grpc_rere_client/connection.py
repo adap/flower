@@ -52,7 +52,8 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 @contextmanager
 def grpc_request_response(
     server_address: str,
-    max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=unused-argument
+    # pylint: disable-next=unused-argument
+    max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[
         Union[bytes, str]
     ] = None,  # pylint: disable=unused-argument
