@@ -1,8 +1,10 @@
 import warnings
+from logging import INFO
 import xgboost as xgb
 
 import flwr as fl
 from flwr_datasets import FederatedDataset
+from flwr.common.logger import log
 from flwr.common import (
     Code,
     EvaluateIns,
@@ -88,7 +90,7 @@ class FlowerClient(fl.client.Client):
     def fit(self, ins: FitIns) -> FitRes:
         if not self.bst:
             # first round local training
-            print("Start training at round 1")
+            log(INFO, "Start training at round 1")
             bst = xgb.train(
                 params,
                 train_dmatrix,
@@ -98,7 +100,7 @@ class FlowerClient(fl.client.Client):
             self.config = bst.save_config()
             self.bst = bst
         else:
-            print("load global model")
+            log(INFO, "Load global model")
             for item in ins.parameters.tensors:
                 global_model = bytearray(item)
 
@@ -129,7 +131,7 @@ class FlowerClient(fl.client.Client):
         auc = round(float(eval_results.split("\t")[2].split(":")[1]), 4)
 
         global_round = ins.config["global_round"]
-        print(f"AUC = {auc} at round {global_round}")
+        log(INFO, f"AUC = {auc} at round {global_round}")
 
         return EvaluateRes(
             status=Status(
