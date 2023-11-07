@@ -92,7 +92,7 @@ python -m niid_bench.main --config-name fednova_base dataset_name=mnist partitio
 
 ## Expected Results
 
-We provide the bash script run_exp.py that can be used to run all configurations. For instance, the following command runs all of them with 4 configurations running at the same time. Consider lowering `--num-processes` if your machine runs slow. With `--num-processe 1` one experiment will be run at a time.
+We provide the bash script run_exp.py that can be used to run all configurations. For instance, the following command runs all of them with 4 configurations running at the same time. Consider lowering `--num-processes` if your machine runs slow. With `--num-processes 1` one experiment will be run at a time.
 
 ```bash
 python run_exp.py --seed 42 --num-processes 4
