@@ -45,6 +45,30 @@ from .numpy_client import NumPyClient
 from .workload_state import WorkloadState
 
 
+def run_client() -> None:
+    """Run Flower client."""
+    log(INFO, "Long-running Flower client starting")
+
+    args = _parse_args_client().parse_args()
+
+    print(args.server)
+
+
+def _parse_args_client() -> argparse.ArgumentParser:
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Start a long-running Flower client",
+    )
+
+    parser.add_argument(
+        "--server",
+        help="Server address",
+        default="0.0.0.0:9092",
+    )
+
+    return parser
+
+
 def _check_actionable_client(
     client: Optional[Client], client_fn: Optional[ClientFn]
 ) -> None:
