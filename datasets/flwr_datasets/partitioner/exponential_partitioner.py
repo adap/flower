@@ -19,11 +19,15 @@ from flwr_datasets.partitioner.size_partitioner import SizePartitioner
 
 
 class ExponentialPartitioner(SizePartitioner):
-    """Partitioner creates partitions of size that are correlated with exp(ids).
+    """Partitioner creates partitions of size that are correlated with exp(idx).
 
-    The amount of data each client gets is correlated with the squared client's ID.
-    For instance, if the IDs range from 1 to M, client with ID 1 gets e units of data,
-    client 2 gets e^2 units, and so on, up to client M which gets e^M units.
+    The amount of data each client gets is correlated with the exponent of partition ID.
+    For instance, if the IDs range from 1 to M, client with ID 1 gets e units of
+    data, client 2 gets e^2 units, and so on, up to client M which gets e^M units.
+    The floor operation is applied on each of these numbers, it means floor(2.71...)
+    = 2; e^2 ~ 7.39 floor(7.39) = 7. The number is rounded down = the fraction is
+    always cut. The remainders of theses unassigned (fraction) samples is added to the
+    biggest partition (the one with the biggest idx).
 
     Parameters
     ----------
