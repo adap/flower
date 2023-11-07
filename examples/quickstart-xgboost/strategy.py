@@ -82,7 +82,7 @@ def aggregate(bst_prev, bst_curr):
             "iteration_indptr"
         ]
         bst_prev["learner"]["gradient_booster"]["model"]["iteration_indptr"].append(
-            iteration_indptr[-1] + 1 * paral_tree_num_curr
+            iteration_indptr[-1] + paral_tree_num_curr
         )
 
         # aggregate new trees

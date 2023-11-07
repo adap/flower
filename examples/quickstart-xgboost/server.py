@@ -19,9 +19,8 @@ def eval_config(rnd: int) -> Dict[str, str]:
 
 def evaluate_metrics_aggregation(eval_metrics):
     """Return an aggregated metric (AUC) for evaluation."""
-    auc_aggregated = sum([metrics["AUC"] for _, metrics in eval_metrics]) / len(
-        eval_metrics
-    )
+    total_num = sum([num for num, _ in eval_metrics])
+    auc_aggregated = sum([metrics["AUC"] * num for num, metrics in eval_metrics]) / total_num
     metrics_aggregated = {"AUC": auc_aggregated}
     return metrics_aggregated
 

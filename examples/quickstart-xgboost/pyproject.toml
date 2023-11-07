@@ -11,6 +11,5 @@ authors = ["The Flower Authors <hello@flower.dev>"]
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
 flwr = ">=1.0,<2.0"
-torch = "1.13.1"
-torchvision = "0.14.1"
-tqdm = "4.65.0"
+flwr-datasets = ">=0.0.1,<1.0.0"
+xgboost = ">=2.0.0,<3.0.0"
