@@ -12,34 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Long-running Flower client."""
+"""Workload state."""
+
+from dataclasses import dataclass
+from typing import Dict
 
 
-import argparse
-from logging import INFO
+@dataclass
+class WorkloadState:
+    """State of a workload executed by a client node."""
 
-from flwr.common.logger import log
-
-
-def run_client() -> None:
-    """Run Flower client."""
-    log(INFO, "Long-running Flower client starting")
-
-    args = _parse_args_client().parse_args()
-
-    print(args.server)
-
-
-def _parse_args_client() -> argparse.ArgumentParser:
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Start a long-running Flower client",
-    )
-
-    parser.add_argument(
-        "--server",
-        help="Server address",
-        default="0.0.0.0:9092",
-    )
-
-    return parser
+    state: Dict[str, str]
