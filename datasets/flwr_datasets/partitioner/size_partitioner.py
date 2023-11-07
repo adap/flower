@@ -24,42 +24,45 @@ from flwr_datasets.partitioner.partitioner import Partitioner
 
 
 class SizePartitioner(Partitioner):
-    """Base class for the deterministic size partitioning schemes based on the cid.
+    """Base class for the deterministic size partitioning schemes based on the node id.
 
-    The client with cid has the following relationship regarding the number of samples.
-    cid_to_size_fnc(cid) ~ number of samples for cid
+    The client with node is has the following relationship regarding the number of
+    samples.
 
-    If the function doesn't transform the cid it's a linear correlations of the number
-    of sample for cid and the value of cid. For instance, if the IDs range from 1 to M,
-    client with ID 1 gets 1 unit of data, client 2 gets 2 units, and so on, up to client
-     M which gets M units.
+    node_id_to_size_fn(node_id) ~ number of samples for node_id
 
-    Note that size corresponding to the cid is deterministic, yet in case of different
-    dataset shuffling the assignment of samples to cid will vary.
+    If the function doesn't transform the node_id it's a linear correlations between
+    the number of sample for the node and the value of node_id. For instance, if the
+    node ids range from 1 to M, node with id 1 gets 1 unit of data, client 2 gets 2
+    units, and so on, up to node M which gets M units.
+
+    Note that size corresponding to the node_id is deterministic, yet in case of
+    different dataset shuffling the assignment of samples to node_id will vary.
 
     Parameters
     ----------
     num_partitions : int
         The total number of partitions that the data will be divided into.
-    cid_to_size_fn : Callable
-        Function that defines the relationship between cid and the number of samples.
+    node_id_to_size_fn : Callable
+        Function that defines the relationship between node id and the number of
+        samples.
     """
 
     def __init__(
         self,
         num_partitions: int,
-        cid_to_size_fn: Callable,  # type: ignore[type-arg]
+        node_id_to_size_fn: Callable,  # type: ignore[type-arg]
     ) -> None:
         super().__init__()
         if num_partitions <= 0:
             raise ValueError("The number of partitions must be greater than zero.")
         self._num_partitions = num_partitions
-        self._cid_to_size_fn = cid_to_size_fn
+        self._node_id_to_size_fn = node_id_to_size_fn
 
-        self._cid_to_size: Dict[int, int] = {}
-        self._cid_to_indices: Dict[int, List[int]] = {}
+        self._node_id_to_size: Dict[int, int] = {}
+        self._node_id_to_indices: Dict[int, List[int]] = {}
         # A flag to perform only a single compute to determine the indices
-        self._cid_to_indices_determined = False
+        self._node_id_to_indices_determined = False
 
     def load_partition(self, idx: int) -> datasets.Dataset:
         """Load a single partition based on the partition index.
@@ -78,22 +81,22 @@ class SizePartitioner(Partitioner):
         """
         # The partitioning is done lazily - only when the first partition is requested.
         # A single run creates the indices assignments for all the partition indices.
-        self._determine_id_to_indices_if_needed()
-        return self.dataset.select(self._cid_to_indices[idx])
+        self._determine_node_id_to_indices_if_needed()
+        return self.dataset.select(self._node_id_to_indices[idx])
 
     @property
-    def id_to_size(self) -> Dict[int, int]:
-        """Cid to the number of samples."""
-        return self._cid_to_size
+    def node_id_to_size(self) -> Dict[int, int]:
+        """Node id to the number of samples."""
+        return self._node_id_to_size
 
     @property
-    def id_to_indices(self) -> Dict[int, List[int]]:
-        """Cid to the list of indices."""
-        return self._cid_to_indices
+    def node_id_to_indices(self) -> Dict[int, List[int]]:
+        """Node id to the list of indices."""
+        return self._node_id_to_indices
 
-    def _determine_id_to_size(self) -> None:
+    def _determine_node_id_to_size(self) -> None:
         """Determine data quantity associated with partition indices."""
-        data_division_in_units = self._cid_to_size_fn(
+        data_division_in_units = self._node_id_to_size_fn(
             np.linspace(start=1, stop=self._num_partitions, num=self._num_partitions)
         )
         total_units: Union[int, float] = data_division_in_units.sum()
@@ -109,25 +112,25 @@ class SizePartitioner(Partitioner):
         # If there is any sample(s) left unassigned, assign it to the largest partition.
         partition_sizes_as_num_of_samples[-1] += left_unassigned_samples
         for idx, partition_size in enumerate(partition_sizes_as_num_of_samples):
-            self._cid_to_size[idx] = partition_size
+            self._node_id_to_size[idx] = partition_size
 
-        self._check_if_id_to_size_possible()
+        self._check_if_node_id_to_size_possible()
 
-    def _determine_id_to_indices_if_needed(self) -> None:
+    def _determine_node_id_to_indices_if_needed(self) -> None:
         """Create an assignment of indices to the partition indices.."""
-        if self._cid_to_indices_determined is True:
+        if self._node_id_to_indices_determined is True:
             return
-        self._determine_id_to_size()
+        self._determine_node_id_to_size()
         total_samples_assigned = 0
-        for idx, quantity in self._cid_to_size.items():
-            self._cid_to_indices[idx] = list(
+        for idx, quantity in self._node_id_to_size.items():
+            self._node_id_to_indices[idx] = list(
                 range(total_samples_assigned, total_samples_assigned + quantity)
             )
             total_samples_assigned += quantity
-        self._cid_to_indices_determined = True
+        self._node_id_to_indices_determined = True
 
-    def _check_if_id_to_size_possible(self) -> None:
-        all_positive = all(value >= 1 for value in self.id_to_size.values())
+    def _check_if_node_id_to_size_possible(self) -> None:
+        all_positive = all(value >= 1 for value in self.node_id_to_size.values())
         if not all_positive:
             raise ValueError(
                 f"The given specification of the parameter num_partitions"
