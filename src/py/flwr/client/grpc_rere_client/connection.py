@@ -27,6 +27,7 @@ from flwr.client.message_handler.task_handler import (
     validate_task_res,
 )
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common.constant import TRANSPORT_DEFAULT_TIMEOUT
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.proto.fleet_pb2 import (
@@ -51,10 +52,11 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 @contextmanager
 def grpc_request_response(
     server_address: str,
-    max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
+    max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=unused-argument
     root_certificates: Optional[
         Union[bytes, str]
     ] = None,  # pylint: disable=unused-argument
+    timeout: int = TRANSPORT_DEFAULT_TIMEOUT,  # pylint: disable=unused-argument
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[TaskIns]],
@@ -80,6 +82,8 @@ def grpc_request_response(
         Path of the root certificate. If provided, a secure
         connection using the certificates will be established to an SSL-enabled
         Flower server. Bytes won't work for the REST API.
+    timeout : int (default: 60)
+        A timeout (in seconds) for making requests to the server.
 
     Returns
     -------

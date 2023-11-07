@@ -31,6 +31,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
+    TRANSPORT_DEFAULT_TIMEOUT,
 )
 from flwr.common.logger import log
 from flwr.proto.task_pb2 import TaskIns, TaskRes
@@ -89,6 +90,7 @@ def start_client(
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
     transport: Optional[str] = None,
+    timeout: int = TRANSPORT_DEFAULT_TIMEOUT,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -119,6 +121,8 @@ def start_client(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    timeout : int (default: 60)
+        A timeout (in seconds) for making requests to the server.
 
     Examples
     --------
@@ -170,6 +174,7 @@ def start_client(
             address,
             grpc_max_message_length,
             root_certificates,
+            timeout,
         ) as conn:
             receive, send, create_node, delete_node = conn
 
@@ -221,6 +226,7 @@ def start_numpy_client(
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
     transport: Optional[str] = None,
+    timeout: int = TRANSPORT_DEFAULT_TIMEOUT,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
@@ -248,6 +254,8 @@ def start_numpy_client(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    timeout : int (default: 60)
+        A timeout (in seconds) for making requests to the server.
 
     Examples
     --------
@@ -291,6 +299,7 @@ def start_numpy_client(
         grpc_max_message_length=grpc_max_message_length,
         root_certificates=root_certificates,
         transport=transport,
+        timeout=timeout,
     )
 
 
@@ -298,7 +307,7 @@ def _init_connection(
     transport: Optional[str], server_address: str
 ) -> Tuple[
     Callable[
-        [str, int, Union[bytes, str, None]],
+        [str, int, Union[bytes, str, None], int],
         ContextManager[
             Tuple[
                 Callable[[], Optional[TaskIns]],
