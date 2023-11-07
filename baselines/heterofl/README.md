@@ -162,17 +162,17 @@ poetry shell
 # The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs)
 # should run (including dataset download and necessary partitioning) by executing the command:
 
-poetry run -m heterofl.main  # Which runs the heterofl with arguments availbale in heterfl/conf/base.yaml
+python run -m heterofl.main  # Which runs the heterofl with arguments availbale in heterfl/conf/base.yaml
 
 # We could override the settings that were specified in base.yaml using the command-line-arguments
 # Here's an example for changing the dataset name, non-iid and model
-poetry run -m heterofl.main dataset.dataset_name='CIFAR10' dataset.iid=False model.model_name='resnet18'
+python run -m heterofl.main dataset.dataset_name='CIFAR10' dataset.iid=False model.model_name='resnet18'
 
 # Similarly, another example for changing num_rounds, model_split_mode, and model_mode
-poetry run -m heterofl.main num_rounds=400 control.model_split_mode='dynamic' control.model_mode='a1-b1'
+python run -m heterofl.main num_rounds=400 control.model_split_mode='dynamic' control.model_mode='a1-b1'
 
 # Similarly, another example for changing num_rounds, model_split_mode, and model_mode
-poetry run -m heterofl.main num_rounds=400 control.model_split_mode='dynamic' control.model_mode='a1-b1'
+python run -m heterofl.main num_rounds=400 control.model_split_mode='dynamic' control.model_mode='a1-b1'
 
 ```
 
@@ -181,13 +181,13 @@ poetry run -m heterofl.main num_rounds=400 control.model_split_mode='dynamic' co
 
 ```bash
 # running the multirun for IID-MNIST with various model-modes using default config
-poetry run -m heterofl.main --multirun control.model_mode='a1','a1-e1','a1-b1-c1-d1-e1'
+python run -m heterofl.main --multirun control.model_mode='a1','a1-e1','a1-b1-c1-d1-e1'
 
 # running the multirun for IID-CIFAR10 dataset with various model-modes by modifying default config
-poetry run -m heterofl.main --multirun control.model_mode='a1','a1-e1','a1-b1-c1-d1-e1' dataset.dataset_name='CIFAR10' model.model_name='resnet18' num_rounds=400 strategy.lr=0.1 strategy.milestones=[150, 250]
+python run -m heterofl.main --multirun control.model_mode='a1','a1-e1','a1-b1-c1-d1-e1' dataset.dataset_name='CIFAR10' model.model_name='resnet18' num_rounds=400 strategy.lr=0.1 strategy.milestones=[150, 250]
 
 # running the multirun for non-IID-MNIST with various model-modes by modifying default config
-poetry run -m heterofl.main --multirun control.model_mode='a1','a1-e1','a1-b1-c1-d1-e1' dataset.iid=False num_rounds=400 strategy.milestones=[200]
+python run -m heterofl.main --multirun control.model_mode='a1','a1-e1','a1-b1-c1-d1-e1' dataset.iid=False num_rounds=400 strategy.milestones=[200]
 
 # similarly, we can perform for various model-modes, datasets. But we cannot multirun with both non-iid and iid at once for reproducing the tables below, since the number of rounds and milestones for MultiStepLR are different for non-iid and iid. The tables below are the reproduced results of various multiruns.
 ```
