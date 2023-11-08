@@ -27,7 +27,7 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
-    TRANSPORT_DEFAULT_TIMEOUT,
+    TRANSPORT_TIMEOUT_DEFAULT,
     TRANSPORT_TYPE_GRPC_BIDI,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
@@ -90,7 +90,7 @@ def start_client(
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
     transport: Optional[str] = None,
-    timeout: int = TRANSPORT_DEFAULT_TIMEOUT,
+    timeout: int = TRANSPORT_TIMEOUT_DEFAULT,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -226,7 +226,7 @@ def start_numpy_client(
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
     transport: Optional[str] = None,
-    timeout: int = TRANSPORT_DEFAULT_TIMEOUT,
+    timeout: int = TRANSPORT_TIMEOUT_DEFAULT,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
