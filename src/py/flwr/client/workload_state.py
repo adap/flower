@@ -26,4 +26,4 @@ WorkloadStateTypes = Union[bool, int, float, str, ndarray]
 class WorkloadState:
     """State of a workload executed by a client node."""
 
-    state: Dict[str, Union[WorkloadStateTypes, dict[str, WorkloadStateTypes]]]
+    state: Dict[str, Union[WorkloadStateTypes, Dict[str, WorkloadStateTypes]]]
