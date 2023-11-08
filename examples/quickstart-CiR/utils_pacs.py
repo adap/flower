@@ -67,7 +67,7 @@ def make_dataloaders(dataset_kinds=data_kinds, k=2, batch_size=32, verbose=False
     combined_val_dataset = ConcatDataset(val_subsets)
     valloader = DataLoader(combined_val_dataset, batch_size=batch_size, shuffle=True)
 
-    return trainloaders, testloaders, valloader
+    return (trainloaders, testloaders, valloader)
 
 
 if __name__ == "__main__":
