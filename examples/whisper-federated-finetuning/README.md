@@ -179,6 +179,7 @@ Once the second client connects to the server, the FL process will begin. Each c
 
 ```bash
 # python client.py --server_address='localhost' --cid=50
+# This client runs on a NVIDIA RTX 3090Ti
 INFO flwr 2023-11-08 14:12:50,135 | grpc.py:49 | Opened insecure gRPC connection (no certificates were passed)
 DEBUG flwr 2023-11-08 14:12:50,136 | connection.py:42 | ChannelConnectivity.IDLE
 DEBUG flwr 2023-11-08 14:12:50,136 | connection.py:42 | ChannelConnectivity.CONNECTING
@@ -222,7 +223,7 @@ The first time you run a client on the RPi, the dataset of a client needs to be 
 
 |                **Stage**                |                      Notes                       | **RPi 4** | **RPi 5** |
 | :-------------------------------------: | :----------------------------------------------: | --------- | --------- |
-| Filter through training set (~85k rows) |     doing `.filter()` in `client.client_fn`      | 3:00      | 0.37      |
+| Filter through training set (~85k rows) |     doing `.filter()` in `client.client_fn`      | 1:58      | 0.37      |
 | Encode 845 rows with `WhisperProcessor` | doing `.map()` passing `utils.prepare_dataset()` | 1:55      | 1:06      |
 
 Some clients have more data than others, but on average, the RPi5 is 1.9x faster than an RPi4 when training the classification head given a frozen encoder. A client with 925 training examples needs ~20min on an RPi to complete an epoch of on-device finetuning.
