@@ -76,16 +76,12 @@ for d in $(printf '%s\n' */ | sort -V); do
 
     if ! grep -Fq "$gh_text" "$readme_file"; then
       awk -v text="$gh_text" '
-        /^# / {
-          print $0 "\n" text;
-          found=1;
-          next
-        }
-        found && NF {
-          print $0;
-          next
-        }
-        { print }
+      /^# / && !found {
+        print $0 "\n" text;
+        found=1;
+        next;
+      }
+      { print }
       ' "$readme_file" > tmpfile && mv tmpfile "$readme_file"
     fi
     # Copy the images to the same folder in source
