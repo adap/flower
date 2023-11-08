@@ -1,5 +1,7 @@
 # On-device Federated Downstreaming for Speech Classification
 
+![Keyword Spotting with Whisper overview](_static/keyword_spotting_overview.png)
+
 This example demonstrates how to, from a pre-trained [Whisper](https://openai.com/research/whisper) model, finetune it for the downstream task of keyword spotting. We'll be implementing a federated downstream finetuning pipeline using Flower involving a total of 100 clients. As for the downstream dataset, we'll be using the [Google Speech Commands](https://huggingface.co/datasets/speech_commands) dataset for keyword spotting. We'll take the encoder part of the [Whisper-tiny](https://huggingface.co/openai/whisper-tiny) model, freeze its parameters, and learn a lightweight classification (\<800K parameters !!) head to correctly classify a spoken word.
 
 This example can be run in three modes:
@@ -31,7 +33,7 @@ This will create a new directory called `whisper-federated-finetuning` containin
 -- requirements.txt  <- Example dependencies
 ```
 
-This example can be run in different ways, please refer to the corresponding section for further instructions. This example was tested with `PyTorch 2.1.0` for all the different ways of running this example except when running on the Raspberry Pi, which seemed to only work with `PyTorch 1.13.1`. Please not the requirement files do not specify a version of PyTorch, therefore you need to choose one that works for you and your system.
+This example can be run in different ways, please refer to the corresponding section for further instructions. This example was tested with `PyTorch 2.1.0` for all the different ways of running this example except when running on the Raspberry Pi, which seemed to only work with `PyTorch 1.13.1`. Please note the requirement files do not specify a version of PyTorch, therefore you need to choose one that works for you and your system.
 
 ## Centralized Training
 
@@ -82,13 +84,39 @@ TEST ---> loss = 0.001703281509680464, accuracy = 0.9740286298568507
 
 Centralized training is ok but in many settings it cannot be realised. Primarily because the training data must remain distributed (i.e. on the client side) and cannot be aggregated into a single node (e.g. your server). With Flower we can easily design a federated finetuning pipeline by which clients locally train the classification head on their data, before communicating it to a central server. There, the updates sent by the clients get aggregated and re-distributed among clients for another round of FL. This process is repeated until convergence. Note that, unlike the encoder part of the Whisper model, the classification head is incredibly lightweight (just 780K parameters), adding little communication costs as a result.
 
+In this example, we partition the training set along the `speaker_id` column into 100 buckets to simulate that many groups of people. You can think of each group as an individual FL _client_ that contains several users/speakers. One way to think about this is to view each client as an office with several people working there, each interacting with the Keyword spotting system. This example exclusively federates the training of the classification head.
+
+```python
+from datasets import load_dataset
+sc = load_dataset("speech_commands", "v0.02", split="train", token=False)
+# Dataset({
+#     features: ['file', 'audio', 'label', 'is_unknown', 'speaker_id', 'utterance_id'],
+#     num_rows: 84848
+# })
+
+# The training set is comprised of ~85K 1-second audio clips from 2112 individual speakers
+ids = set(sc['speaker_id'])
+print(len(ids))
+# 2113  # <--- +1 since the a "None" speaker is included (for the clips of audio to construct the _silence_ training examples)
+```
+
+![Federated Whisper downstreaming pipeline](_static/federated_finetuning_flower_pipeline.png)
+
+An overview of the FL pipeline built with Flower for this example is illustrated above. 
+
+1. At the start of a round, the server communicates the classification head to a fraction of the clients. At round #0, the classification head is randomly intialised.
+2. Each client, using a frozen pre-trained Whisper encoder, trains the classification head using its own datasets.
+3. Once on-site training is completed, each client sends back the (now updated) classification head to the Flower server.
+4. The Flower server aggregates (via FedAvg) the classification heads in order to obtain a new _global_ classification head. This head will be shared with clients in the next round.
+
+
 Flower supports two ways of doing Federated Learning: simulated and non-simulated FL. The former, managed by the [`VirtualClientEngine`](https://flower.dev/docs/framework/how-to-run-simulations.html), allows you to run large-scale workloads in a system-aware manner, that scales with the resources available on your system (whether it is a laptop, a desktop with a single GPU, or a cluster of GPU servers). The latter is better suited for settings where clients are unique devices (e.g. a server, a smart device, etc). This example shows you how to use both.
 
 ### Preparing the dataset
 
-If you have run the centralized version of this example first, you probably realized that it takes some time to get a fully pre-processed SpeechCommands dataset using the 🤗 HuggingFace API. This pre-processing is ideal so nothing slowdowns our training once we launch the experiment. For the federated part of this example, we also need to pre-process the data however in a different way since first the training set needs to be split into N different buckets, one for each client.
+If you have run the centralized version of this example first, you probably realized that it takes some time to get a fully pre-processed SpeechCommands dataset using the 🤗 HuggingFace API. This pre-processing is ideal so nothing slowdowns our training once we launch the experiment. For the federated part of this example, we also need to pre-process the data however in a different way since first the training set needs to be split into N different buckets, one for each FL client.
 
-To launch a Flower client we write a `client_fn` callable that will: (1) Load the dataset of the client; then (2) return the Client object itself. In `client.py` we have included a few lines of code that preprocess the training partition of a given client and saves it to disk (so this doesn't have to be repeated each time you run the experiment). You can run the experiment right away and the data will be pre-processed on-demand (i.e. when the `i`-th client is spawned for the first time), or you can pre-process all client partitions first. In order to do so, please run:
+To launch a Flower client we need a `client_fn` callable that will: (1) Load the dataset of the client; then, (2) return the Client object itself. In `client.py` we have included a few lines of code that preprocess the training partition of a given client and save it to disk (so this doesn't have to be repeated each time you run the experiment). You can run the experiment right away and the data will be pre-processed on-demand (i.e. when the `i`-th client is spawned for the first time), or you can pre-process all client partitions first. In order to do so, please run:
 
 ```bash
 # will write to disk all pre-processed data partitions
@@ -97,18 +125,18 @@ To launch a Flower client we write a `client_fn` callable that will: (1) Load th
 python sim.py --preprocess
 ```
 
-The resulting data partitions are not equal-sized (which is what you'd often find in practice in the real world). If we make a bar plot showing the amount of data each client has this is the result.
+The resulting data partitions are not equal-sized (which is what you'd often find in practice in the real world) because not all `speaker_id` contributed the same amount of audio clips when the [Speech Commands Dataset](https://arxiv.org/abs/1804.03209) was created. If we make a bar plot showing the amount of data each client has this is the result.
 
 ![Amount of data per client](_static/whisper_flower_data.png)
 
 ### Federated Downstreaming (Simulation)
 
-The setup instructions for simulations are the same as those described for the centralized setting above. Then, you can launch your simulation as shown below.
+The setup instructions for simulations are the same as those described for the centralized setting above: install PyTorch and then `pip install -r requirements.txt`. Then, you can launch your simulation as shown below. Without changes to the code or input arguments, the simulation will sample `10` clients per round, these would do 1 local epoch of finetuning the classification head while the encoder remains frozen. Once this is completed, the classification head is sent to the server for aggregation via `FedAvg`. By default, this example assumes you have a GPU available.
 
 ```bash
 # By default it will run 2 clients in parallel on a single GPU (which should be fine if your GPU has at least 16GB )
 # If that's too much, consider reduing either the batch size or raise `num_gpus` passed to `start_simulation`
-python sim.py --num-rounds 10 # append --num_gpus=0 if you don't have GPUs on your system
+python sim.py # append --num_gpus=0 if you don't have GPUs on your system
 ```
 
 ![Global validation accuracy FL with Whisper model](_static/whisper_flower_acc.png)
