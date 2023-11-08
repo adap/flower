@@ -142,7 +142,10 @@ python sim.py # append --num_gpus=0 if you don't have GPUs on your system
 
 # Once finished centralised evaluation loss/acc metrics will be shown
 
-INFO flwr 2023-11-08 14:03:57,557 | app.py:229 | app_fit: metrics_centralized {'val_accuracy': [(0, 0.03977158885994791), (1, 0.6940492887196954), (2, 0.5969745541975556), (3, 0.8794830695251452), (4, 0.9021238228811861), (5, 0.8943097575636145), (6, 0.9047285113203767), (7, 0.9330795431777199), (8, 0.9446002805049089), (9, 0.9556201162091765)], 'test_accuracy': [(10, 0.9719836400817996)]}
+INFO flwr 2023-11-08 14:03:57,557 | app.py:229 | app_fit: metrics_centralized {'val_accuracy': [(0, 0.03977158885994791),
+ (1, 0.6940492887196954), (2, 0.5969745541975556), (3, 0.8794830695251452), (4, 0.9021238228811861), (5, 0.8943097575636145),
+ (6, 0.9047285113203767), (7, 0.9330795431777199), (8, 0.9446002805049089), (9, 0.9556201162091765)],
+ 'test_accuracy': [(10, 0.9719836400817996)]}
 ```
 
 ![Global validation accuracy FL with Whisper model](_static/whisper_flower_acc.png)
@@ -160,6 +163,7 @@ First, launch the server, which will orchestrate the FL process:
 
 ```bash
 # The server will wait until at least two clients are connected
+# you can use `--server_address='localhost'` if you are running everything on the same machine.
 python server.py --server_addres=<YOUR_SERVER_IP>
 ```
 
@@ -173,8 +177,28 @@ python client.py --server_address=<YOUR_SERVER_IP> --cid=0
 # and on a new terminal/machine (and optionally a different `cid`)
 python client.py --server_address=<YOUR_SERVER_IP> --cid=1
 ```
+Once the second client connects to the server, the FL process will begin. Each client will report its training progress. The server process will do the same
 
-Once the second client connects to the server, the FL process will begin.
+```bash
+# python client.py --server_address='localhost' --cid=50
+INFO flwr 2023-11-08 14:12:50,135 | grpc.py:49 | Opened insecure gRPC connection (no certificates were passed)
+DEBUG flwr 2023-11-08 14:12:50,136 | connection.py:42 | ChannelConnectivity.IDLE
+DEBUG flwr 2023-11-08 14:12:50,136 | connection.py:42 | ChannelConnectivity.CONNECTING
+DEBUG flwr 2023-11-08 14:12:50,140 | connection.py:42 | ChannelConnectivity.READY
+ 99%|████████████████████████| 920/925 [00:09<00:00, 93.39it/s, avg_loss=2.4414, avg_acc=0.1837]
+ 99%|████████████████████████| 920/925 [00:04<00:00, 216.93it/s, avg_loss=2.0191, avg_acc=0.3315]
+ 99%|████████████████████████| 920/925 [00:04<00:00, 214.29it/s, avg_loss=1.5950, avg_acc=0.5500]
+ 99%|████████████████████████| 920/925 [00:04<00:00, 212.70it/s, avg_loss=1.1883, avg_acc=0.7348]
+ 99%|████████████████████████| 920/925 [00:04<00:00, 208.69it/s, avg_loss=0.8466, avg_acc=0.8228]
+ 99%|████████████████████████| 920/925 [00:04<00:00, 206.31it/s, avg_loss=0.6353, avg_acc=0.8837]
+ 99%|████████████████████████| 920/925 [00:03<00:00, 266.73it/s, avg_loss=0.4842, avg_acc=0.9207]
+ 99%|████████████████████████| 920/925 [00:04<00:00, 212.13it/s, avg_loss=0.3519, avg_acc=0.9391]
+ 99%|████████████████████████| 920/925 [00:04<00:00, 213.17it/s, avg_loss=0.3233, avg_acc=0.9359]
+ 99%|████████████████████████| 920/925 [00:04<00:00, 205.12it/s, avg_loss=0.2646, avg_acc=0.9543]
+DEBUG flwr 2023-11-08 14:20:01,065 | connection.py:139 | gRPC channel closed
+INFO flwr 2023-11-08 14:20:01,065 | app.py:215 | Disconnect and shut down
+```
+
 
 ### Federated Downstreaming on Raspberry Pi
 
@@ -197,4 +221,30 @@ Then, on each of your Raspberry Pi do the following. If you only have one RPi, y
 python client.py --server_address=<YOUR_SERVER_IP> --cid=0 --no-compile
 ```
 
-Some clients have more data than others, but on average, the RPi5 is 1.9x faster than an RPi4. A client with 850 training examples needs ~19min on an RPi to complete an epoch of on-device finetuning.
+The first time you run a client on the RPi, the dataset of a client needs to be extracted from the full train set and then pre-processed. The Raspberry Pi 5 is also faster in this pre-processing stage using `.filter()` and `.map()` of 🤗 HuggingFace Dataset. `map()` used `num_proc=4`:
+
+| **Stage**                | Notes | **RPi 4** | **RPi 5**         |
+| :--------------------------: | :---: |-----------|----------------- |
+| Filter through training set (~85k rows) |  doing `.filter()` in `client.client_fn`   |     3:00 | 0.37|
+| Encode 845 rows with `WhisperProcessor` | doing `.map()` passing `utils.prepare_dataset()` | 1:55 | 1:06|
+
+
+Some clients have more data than others, but on average, the RPi5 is 1.9x faster than an RPi4 when training the classification head given a frozen encoder. A client with 400 training examples needs ~10min on an RPi to complete an epoch of on-device finetuning.
+
+```bash
+# Running the 83-th client on a RPi 5 showed the following log (a RPi4 ran client 50)
+python client.py --cid=83 --server_address=<YOUR_SERVER_IP> --no-compile
+INFO flwr 2023-11-08 14:37:26,535 | grpc.py:49 | Opened insecure gRPC connection (no certificates were passed)
+DEBUG flwr 2023-11-08 14:37:26,541 | connection.py:42 | ChannelConnectivity.IDLE
+DEBUG flwr 2023-11-08 14:37:26,564 | connection.py:42 | ChannelConnectivity.CONNECTING
+DEBUG flwr 2023-11-08 14:37:26,569 | connection.py:42 | ChannelConnectivity.READY
+ 99%|████████████████████████████████| 400/405 [09:49<00:07,  1.47s/it, avg_loss=2.5919, avg_acc=0.1575]
+ 99%|████████████████████████████████| 400/405 [09:49<00:07,  1.47s/it, avg_loss=2.0055, avg_acc=0.3050]
+ 99%|████████████████████████████████| 400/405 [09:52<00:07,  1.48s/it, avg_loss=1.7478, avg_acc=0.5025]
+ 99%|████████████████████████████████| 400/405 [09:51<00:07,  1.48s/it, avg_loss=1.2836, avg_acc=0.7350]
+ 99%|████████████████████████████████| 400/405 [09:53<00:07,  1.48s/it, avg_loss=0.9044, avg_acc=0.8525]
+ 99%|████████████████████████████████| 400/405 [09:50<00:07,  1.48s/it, avg_loss=0.5766, avg_acc=0.9200]
+ 99%|████████████████████████████████| 400/405 [09:50<00:07,  1.48s/it, avg_loss=0.3212, avg_acc=0.9525]
+...
+```
+
