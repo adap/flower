@@ -27,7 +27,7 @@ from flwr.client.message_handler.task_handler import (
     validate_task_res,
 )
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from flwr.common.constant import MISSING_EXTRA_REST, TRANSPORT_DEFAULT_TIMEOUT
+from flwr.common.constant import MISSING_EXTRA_REST, TRANSPORT_TIMEOUT_DEFAULT
 from flwr.common.logger import log
 from flwr.proto.fleet_pb2 import (
     CreateNodeRequest,
@@ -66,7 +66,7 @@ def http_request_response(
     root_certificates: Optional[
         Union[bytes, str]
     ] = None,  # pylint: disable=unused-argument
-    timeout: int = TRANSPORT_DEFAULT_TIMEOUT,
+    timeout: int = TRANSPORT_TIMEOUT_DEFAULT,
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[TaskIns]],
