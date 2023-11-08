@@ -75,17 +75,18 @@ for d in $(printf '%s\n' */ | sort -V); do
     readme_file="$ROOT/baselines/doc/source/$baseline.md"
 
     if ! grep -Fq "$gh_text" "$readme_file"; then
-      # Use sed to insert text after the H1 header
-      if [[ "$(uname)" == "Darwin" ]]; then
-        # macOS
-        sed -i '' -e "/^# /a\\
-  $gh_text
-  " "$readme_file"
-      else
-        # Assuming GNU sed on Linux
-        sed -i -e "/^# /a\\
-  $gh_text" "$readme_file"
-      fi
+      awk -v text="$gh_text" '
+        /^# / {
+          print $0 "\n" text;
+          found=1;
+          next
+        }
+        found && NF {
+          print $0;
+          next
+        }
+        { print }
+      ' "$readme_file" > tmpfile && mv tmpfile "$readme_file"
     fi
     # Copy the images to the same folder in source
     image_path=$(cd $baseline && find  . -type f -regex ".*\.png" | cut -c 3-)
