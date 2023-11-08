@@ -40,7 +40,7 @@ Let's begin by installing :code:`pyenv`. We'll be following the standard procedu
   sudo apt install build-essential zlib1g-dev libssl-dev libsqlite3-dev \
             libreadline-dev libbz2-dev libffi-dev liblzma-dev
 
-  # now clone pyenv into your home directory (this is the default way of insalling pyenv)
+  # now clone pyenv into your home directory (this is the default way of installing pyenv)
   git clone https://github.com/pyenv/pyenv.git ~/.pyenv
 
   # Then add pyenv to your path by adding the below to your .bashrc/.zshrc
@@ -65,7 +65,7 @@ Then you can proceed and install any version of Python. Most baselines currently
   # once done, you should see that that version is avaialble
   pyenv versions
   # system
-  # * 3.10.6
+  # * 3.10.6  # <-- you just installed this
 
 Now that we have :code:`pyenv` installed, we are ready to install :code:`poetry`. Installing Poetry can be done from a single command:
 
