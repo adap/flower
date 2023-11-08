@@ -1,6 +1,5 @@
 # On-device Federated Downstreaming for Speech Classification
 
-
 This example demonstrates how to, from a pre-trained [Whisper](https://openai.com/research/whisper) model, finetune it for the downstream task of keyword spotting. We'll be implementing a federated downstream finetuning pipeline using Flower involving a total of 100 clients. As for the downstream dataset, we'll be using the [Google Speech Commands](https://huggingface.co/datasets/speech_commands) dataset for keyword spotting. We'll take the encoder part of the [Whisper-tiny](https://huggingface.co/openai/whisper-tiny) model, freeze its parameters, and learn a lightweight classification (\<800K parameters !!) head to correctly classify a spoken word.
 
 ![Keyword Spotting with Whisper overview](_static/keyword_spotting_overview.png)
@@ -104,13 +103,12 @@ print(len(ids))
 
 ![Federated Whisper downstreaming pipeline](_static/federated_finetuning_flower_pipeline.png)
 
-An overview of the FL pipeline built with Flower for this example is illustrated above. 
+An overview of the FL pipeline built with Flower for this example is illustrated above.
 
 1. At the start of a round, the server communicates the classification head to a fraction of the clients. At round #0, the classification head is randomly intialised.
 2. Each client, using a frozen pre-trained Whisper encoder, trains the classification head using its own datasets.
 3. Once on-site training is completed, each client sends back the (now updated) classification head to the Flower server.
 4. The Flower server aggregates (via FedAvg) the classification heads in order to obtain a new _global_ classification head. This head will be shared with clients in the next round.
-
 
 Flower supports two ways of doing Federated Learning: simulated and non-simulated FL. The former, managed by the [`VirtualClientEngine`](https://flower.dev/docs/framework/how-to-run-simulations.html), allows you to run large-scale workloads in a system-aware manner, that scales with the resources available on your system (whether it is a laptop, a desktop with a single GPU, or a cluster of GPU servers). The latter is better suited for settings where clients are unique devices (e.g. a server, a smart device, etc). This example shows you how to use both.
 
@@ -154,7 +152,6 @@ With just 5 FL rounds, the global model should be reaching ~95% validation accur
 
 Take a look at the [Documentation](https://flower.dev/docs/framework/how-to-run-simulations.html) for more details on how you can customize your simulation.
 
-
 ### Federated Downstreaming (non-simulated)
 
 Running the exact same FL pipeline as in the simulation setting can be done without using Flower's simulation engine. To achieve this, you need to launch first a server and then two or more clients. You can do this on your development machine assuming you have set up your environment already.
@@ -177,6 +174,7 @@ python client.py --server_address=<YOUR_SERVER_IP> --cid=0
 # and on a new terminal/machine (and optionally a different `cid`)
 python client.py --server_address=<YOUR_SERVER_IP> --cid=1
 ```
+
 Once the second client connects to the server, the FL process will begin. Each client will report its training progress. The server process will do the same
 
 ```bash
@@ -185,20 +183,19 @@ INFO flwr 2023-11-08 14:12:50,135 | grpc.py:49 | Opened insecure gRPC connection
 DEBUG flwr 2023-11-08 14:12:50,136 | connection.py:42 | ChannelConnectivity.IDLE
 DEBUG flwr 2023-11-08 14:12:50,136 | connection.py:42 | ChannelConnectivity.CONNECTING
 DEBUG flwr 2023-11-08 14:12:50,140 | connection.py:42 | ChannelConnectivity.READY
- 99%|████████████████████████| 920/925 [00:09<00:00, 93.39it/s, avg_loss=2.4414, avg_acc=0.1837]
- 99%|████████████████████████| 920/925 [00:04<00:00, 216.93it/s, avg_loss=2.0191, avg_acc=0.3315]
- 99%|████████████████████████| 920/925 [00:04<00:00, 214.29it/s, avg_loss=1.5950, avg_acc=0.5500]
- 99%|████████████████████████| 920/925 [00:04<00:00, 212.70it/s, avg_loss=1.1883, avg_acc=0.7348]
- 99%|████████████████████████| 920/925 [00:04<00:00, 208.69it/s, avg_loss=0.8466, avg_acc=0.8228]
- 99%|████████████████████████| 920/925 [00:04<00:00, 206.31it/s, avg_loss=0.6353, avg_acc=0.8837]
- 99%|████████████████████████| 920/925 [00:03<00:00, 266.73it/s, avg_loss=0.4842, avg_acc=0.9207]
- 99%|████████████████████████| 920/925 [00:04<00:00, 212.13it/s, avg_loss=0.3519, avg_acc=0.9391]
- 99%|████████████████████████| 920/925 [00:04<00:00, 213.17it/s, avg_loss=0.3233, avg_acc=0.9359]
- 99%|████████████████████████| 920/925 [00:04<00:00, 205.12it/s, avg_loss=0.2646, avg_acc=0.9543]
+99%|████████████████████████| 920/925 [00:09<00:00, 93.39it/s, avg_loss=2.4414, avg_acc=0.1837]
+99%|████████████████████████| 920/925 [00:04<00:00, 216.93it/s, avg_loss=2.0191, avg_acc=0.3315]
+99%|████████████████████████| 920/925 [00:04<00:00, 214.29it/s, avg_loss=1.5950, avg_acc=0.5500]
+99%|████████████████████████| 920/925 [00:04<00:00, 212.70it/s, avg_loss=1.1883, avg_acc=0.7348]
+99%|████████████████████████| 920/925 [00:04<00:00, 208.69it/s, avg_loss=0.8466, avg_acc=0.8228]
+99%|████████████████████████| 920/925 [00:04<00:00, 206.31it/s, avg_loss=0.6353, avg_acc=0.8837]
+99%|████████████████████████| 920/925 [00:03<00:00, 266.73it/s, avg_loss=0.4842, avg_acc=0.9207]
+99%|████████████████████████| 920/925 [00:04<00:00, 212.13it/s, avg_loss=0.3519, avg_acc=0.9391]
+99%|████████████████████████| 920/925 [00:04<00:00, 213.17it/s, avg_loss=0.3233, avg_acc=0.9359]
+99%|████████████████████████| 920/925 [00:04<00:00, 205.12it/s, avg_loss=0.2646, avg_acc=0.9543]
 DEBUG flwr 2023-11-08 14:20:01,065 | connection.py:139 | gRPC channel closed
 INFO flwr 2023-11-08 14:20:01,065 | app.py:215 | Disconnect and shut down
 ```
-
 
 ### Federated Downstreaming on Raspberry Pi
 
@@ -223,11 +220,10 @@ python client.py --server_address=<YOUR_SERVER_IP> --cid=0 --no-compile
 
 The first time you run a client on the RPi, the dataset of a client needs to be extracted from the full train set and then pre-processed. The Raspberry Pi 5 is also faster in this pre-processing stage using `.filter()` and `.map()` of 🤗 HuggingFace Dataset. `map()` used `num_proc=4`:
 
-| **Stage**                | Notes | **RPi 4** | **RPi 5**         |
-| :--------------------------: | :---: |-----------|----------------- |
-| Filter through training set (~85k rows) |  doing `.filter()` in `client.client_fn`   |     3:00 | 0.37|
-| Encode 845 rows with `WhisperProcessor` | doing `.map()` passing `utils.prepare_dataset()` | 1:55 | 1:06|
-
+|                **Stage**                |                      Notes                       | **RPi 4** | **RPi 5** |
+| :-------------------------------------: | :----------------------------------------------: | --------- | --------- |
+| Filter through training set (~85k rows) |     doing `.filter()` in `client.client_fn`      | 3:00      | 0.37      |
+| Encode 845 rows with `WhisperProcessor` | doing `.map()` passing `utils.prepare_dataset()` | 1:55      | 1:06      |
 
 Some clients have more data than others, but on average, the RPi5 is 1.9x faster than an RPi4 when training the classification head given a frozen encoder. A client with 400 training examples needs ~10min on an RPi to complete an epoch of on-device finetuning.
 
@@ -238,13 +234,12 @@ INFO flwr 2023-11-08 14:37:26,535 | grpc.py:49 | Opened insecure gRPC connection
 DEBUG flwr 2023-11-08 14:37:26,541 | connection.py:42 | ChannelConnectivity.IDLE
 DEBUG flwr 2023-11-08 14:37:26,564 | connection.py:42 | ChannelConnectivity.CONNECTING
 DEBUG flwr 2023-11-08 14:37:26,569 | connection.py:42 | ChannelConnectivity.READY
- 99%|████████████████████████████████| 400/405 [09:49<00:07,  1.47s/it, avg_loss=2.5919, avg_acc=0.1575]
- 99%|████████████████████████████████| 400/405 [09:49<00:07,  1.47s/it, avg_loss=2.0055, avg_acc=0.3050]
- 99%|████████████████████████████████| 400/405 [09:52<00:07,  1.48s/it, avg_loss=1.7478, avg_acc=0.5025]
- 99%|████████████████████████████████| 400/405 [09:51<00:07,  1.48s/it, avg_loss=1.2836, avg_acc=0.7350]
- 99%|████████████████████████████████| 400/405 [09:53<00:07,  1.48s/it, avg_loss=0.9044, avg_acc=0.8525]
- 99%|████████████████████████████████| 400/405 [09:50<00:07,  1.48s/it, avg_loss=0.5766, avg_acc=0.9200]
- 99%|████████████████████████████████| 400/405 [09:50<00:07,  1.48s/it, avg_loss=0.3212, avg_acc=0.9525]
+99%|████████████████████████████████| 400/405 [09:49<00:07,  1.47s/it, avg_loss=2.5919, avg_acc=0.1575]
+99%|████████████████████████████████| 400/405 [09:49<00:07,  1.47s/it, avg_loss=2.0055, avg_acc=0.3050]
+99%|████████████████████████████████| 400/405 [09:52<00:07,  1.48s/it, avg_loss=1.7478, avg_acc=0.5025]
+99%|████████████████████████████████| 400/405 [09:51<00:07,  1.48s/it, avg_loss=1.2836, avg_acc=0.7350]
+99%|████████████████████████████████| 400/405 [09:53<00:07,  1.48s/it, avg_loss=0.9044, avg_acc=0.8525]
+99%|████████████████████████████████| 400/405 [09:50<00:07,  1.48s/it, avg_loss=0.5766, avg_acc=0.9200]
+99%|████████████████████████████████| 400/405 [09:50<00:07,  1.48s/it, avg_loss=0.3212, avg_acc=0.9525]
 ...
 ```
-
