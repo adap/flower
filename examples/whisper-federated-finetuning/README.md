@@ -97,7 +97,7 @@ sc = load_dataset("speech_commands", "v0.02", split="train", token=False)
 # The training set is comprised of ~85K 1-second audio clips from 2112 individual speakers
 ids = set(sc['speaker_id'])
 print(len(ids))
-# 2113  # <--- +1 since the a "None" speaker is included (for the clips of audio to construct the _silence_ training examples)
+# 2113  # <--- +1 since a "None" speaker is included (for clips to construct the _silence_ training examples)
 ```
 
 ![Federated Whisper downstreaming pipeline](_static/federated_finetuning_flower_pipeline.png)
