@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Datasets package version helper. (Copied from the Flower.)"""
+"""Flower Datasets package version helper.
+
+The code is copied from flwr.
+"""
 
 
 import importlib.metadata as importlib_metadata

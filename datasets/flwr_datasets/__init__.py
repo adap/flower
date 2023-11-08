@@ -16,6 +16,7 @@
 
 
 from flwr.common.version import package_version as _package_version
+
 from .federated_dataset import FederatedDataset
 
 __all__ = ["FederatedDataset"]
