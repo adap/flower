@@ -1,4 +1,5 @@
 import warnings
+import argparse
 from logging import INFO
 import xgboost as xgb
 
@@ -17,29 +18,75 @@ from flwr.common import (
     Status,
 )
 
-from dataset import instantiate_partitioner, train_test_split, transform_dataset_to_dmatrix
+from dataset import (
+    instantiate_partitioner,
+    train_test_split,
+    transform_dataset_to_dmatrix,
+)
 
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
+
+def args_parser():
+    """Parse arguments to define experimental settings."""
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--num_partitions", default=20, type=int, help="Number of partitions."
+    )
+    parser.add_argument(
+        "--partitioner_type",
+        default="uniform",
+        type=str,
+        choices=["uniform", "linear", "square", "exponential"],
+        help="Partitioner types.",
+    )
+    parser.add_argument(
+        "--partition_id",
+        default=0,
+        type=int,
+        help="Partition ID used for the current client.",
+    )
+    parser.add_argument(
+        "--seed", default=42, type=int, help="Seed used for train/test splitting."
+    )
+    parser.add_argument(
+        "--test_fraction",
+        default=0.2,
+        type=float,
+        help="test fraction for train/test splitting.",
+    )
+
+    args_ = parser.parse_args()
+    return args_
+
+
+# Parse arguments for experimental settings
+args = args_parser()
+
 # Load (HIGGS) dataset and conduct partitioning
-num_partitions = 20
+num_partitions = args.num_partitions
 # partitioner type is chosen from ["uniform", "linear", "square", "exponential"]
-partitioner_type = "uniform"
+partitioner_type = args.partitioner_type
 
 # instantiate partitioner
-partitioner = instantiate_partitioner(partitioner_type=partitioner_type, num_partitions=num_partitions)
+partitioner = instantiate_partitioner(
+    partitioner_type=partitioner_type, num_partitions=num_partitions
+)
 fds = FederatedDataset(dataset="jxie/higgs", partitioners={"train": partitioner})
 
 # let's use the first partition as an example
-partition_id = 0
+partition_id = args.partition_id
 partition = fds.load_partition(idx=partition_id, split="train")
 partition.set_format("numpy")
 
 # train/test splitting and data re-formatting
-SEED = 42
-test_fraction = 0.2
-train_data, valid_data, num_train, num_val = train_test_split(partition, test_fraction=test_fraction, seed=SEED)
+SEED = args.seed
+test_fraction = args.test_fraction
+train_data, valid_data, num_train, num_val = train_test_split(
+    partition, test_fraction=test_fraction, seed=SEED
+)
 
 # reformat data to DMatrix for xgboost
 train_dmatrix = transform_dataset_to_dmatrix(train_data)

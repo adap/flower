@@ -37,9 +37,7 @@ class XGbBagging(fl.server.strategy.FedAvg):
         weights_avg = json.dumps(global_model)
 
         return (
-            Parameters(
-                tensor_type="", tensors=[bytes(weights_avg, "utf-8")]
-            ),
+            Parameters(tensor_type="", tensors=[bytes(weights_avg, "utf-8")]),
             {},
         )
 

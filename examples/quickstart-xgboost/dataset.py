@@ -17,8 +17,11 @@ CORRELATION_TO_PARTITIONER = {
 
 
 def instantiate_partitioner(partitioner_type: str, num_partitions: int):
-    """Initialise partitioner based on selected partitioner type and number of partitions."""
-    partitioner = CORRELATION_TO_PARTITIONER[partitioner_type](num_partitions=num_partitions)
+    """Initialise partitioner based on selected partitioner type and number of
+    partitions."""
+    partitioner = CORRELATION_TO_PARTITIONER[partitioner_type](
+        num_partitions=num_partitions
+    )
     return partitioner
 
 
@@ -35,7 +38,7 @@ def train_test_split(partition: datasets.Dataset, test_fraction: float, seed: in
 
 
 def transform_dataset_to_dmatrix(data):
-    """transform dataset to DMatrix format for xgboost."""
+    """Transform dataset to DMatrix format for xgboost."""
     x = data["inputs"]
     y = data["label"]
     new_data = xgb.DMatrix(x, label=y)
