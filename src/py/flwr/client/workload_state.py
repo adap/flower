@@ -15,11 +15,15 @@
 """Workload state."""
 
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, Union
+
+from numpy import ndarray
+
+WorkloadStateTypes = Union[bool, int, float, str, ndarray]
 
 
 @dataclass
 class WorkloadState:
     """State of a workload executed by a client node."""
 
-    state: Dict[str, str]
+    state: Dict[str, Union[WorkloadStateTypes, dict[str, WorkloadStateTypes]]]
