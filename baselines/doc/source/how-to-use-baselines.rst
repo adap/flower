@@ -81,7 +81,7 @@ Now that we have :code:`pyenv` installed, we are ready to install :code:`poetry`
 To install Poetry from source, to customise your installation, or to further integrate Poetry with your shell after installation, please check `the Poetry documentation <https://python-poetry.org/docs/#installation>`_.
 
 Using a Flower Baseline
-----------------
+-----------------------
 
 To use Flower Baselines you need first to install :code:`pyenv` and :code:`Poetry`, then:
 
