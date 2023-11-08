@@ -14,7 +14,7 @@
 # ==============================================================================
 """Flower Datasets package version helper.
 
-The code is copied from flwr.
+The code is an exact copy from flwr.
 """
 
 
