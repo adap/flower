@@ -675,6 +675,15 @@ def _parse_args_server() -> argparse.ArgumentParser:
         "(meaning, a Driver API and a Fleet API), "
         "that clients will be able to connect to.",
     )
+    
+    # Add a new argument for the `--insecure` flag
+    parser.add_argument(
+        "--insecure",
+        action="store_true",
+        help="Run the server without HTTPS. "
+        "By default, the server runs with HTTPS enabled. "
+        "Use this flag only if you understand the risks."
+    )
 
     _add_args_common(parser=parser)
     _add_args_driver_api(parser=parser)
