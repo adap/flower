@@ -24,4 +24,4 @@ from flwr.common.typing import NDArrays, Value
 class WorkloadState:
     """State of a workload executed by a client node."""
 
-    state: Dict[str, Union[Value, NDArrays, Dict[str, Value, NDArrays]]]
+    state: Dict[str, Union[Value, NDArrays, Dict[str, Union[Value, NDArrays]]]]
