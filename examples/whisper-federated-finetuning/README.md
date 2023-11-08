@@ -1,4 +1,4 @@
-# On-device Federated Downstreaming for Speech Classification
+# On-device Federated Finetuning for Speech Classification
 
 This example demonstrates how to, from a pre-trained [Whisper](https://openai.com/research/whisper) model, finetune it for the downstream task of keyword spotting. We'll be implementing a federated downstream finetuning pipeline using Flower involving a total of 100 clients. As for the downstream dataset, we'll be using the [Google Speech Commands](https://huggingface.co/datasets/speech_commands) dataset for keyword spotting. We'll take the encoder part of the [Whisper-tiny](https://huggingface.co/openai/whisper-tiny) model, freeze its parameters, and learn a lightweight classification (\<800K parameters !!) head to correctly classify a spoken word.
 
@@ -101,12 +101,12 @@ print(len(ids))
 # 2113  # <--- +1 since a "None" speaker is included (for clips to construct the _silence_ training examples)
 ```
 
-![Federated Whisper downstreaming pipeline](_static/federated_finetuning_flower_pipeline.png)
+![Federated Whisper Finetuning pipeline](_static/federated_finetuning_flower_pipeline.png)
 
 An overview of the FL pipeline built with Flower for this example is illustrated above.
 
 1. At the start of a round, the server communicates the classification head to a fraction of the clients. At round #0, the classification head is randomly intialised.
-2. Each client, using a frozen pre-trained Whisper encoder, trains the classification head using its own datasets.
+2. Each client, using a frozen pre-trained Whisper encoder, trains the classification head using its own data samples.
 3. Once on-site training is completed, each client sends back the (now updated) classification head to the Flower server.
 4. The Flower server aggregates (via FedAvg) the classification heads in order to obtain a new _global_ classification head. This head will be shared with clients in the next round.
 
@@ -129,7 +129,7 @@ The resulting data partitions are not equal-sized (which is what you'd often fin
 
 ![Amount of data per client](_static/whisper_flower_data.png)
 
-### Federated Downstreaming (Simulation)
+### Federated Finetuning (Simulation)
 
 The setup instructions for simulations are the same as those described for the centralized setting above: install PyTorch and then `pip install -r requirements.txt`. Then, you can launch your simulation as shown below. Without changes to the code or input arguments, the simulation will sample `10` clients per round, these would do 1 local epoch of finetuning the classification head while the encoder remains frozen. Once this is completed, the classification head is sent to the server for aggregation via `FedAvg`. By default, this example assumes you have a GPU available.
 
@@ -152,7 +152,7 @@ With just 5 FL rounds, the global model should be reaching ~95% validation accur
 
 Take a look at the [Documentation](https://flower.dev/docs/framework/how-to-run-simulations.html) for more details on how you can customize your simulation.
 
-### Federated Downstreaming (non-simulated)
+### Federated Finetuning (non-simulated)
 
 Running the exact same FL pipeline as in the simulation setting can be done without using Flower's simulation engine. To achieve this, you need to launch first a server and then two or more clients. You can do this on your development machine assuming you have set up your environment already.
 
@@ -197,7 +197,7 @@ DEBUG flwr 2023-11-08 14:20:01,065 | connection.py:139 | gRPC channel closed
 INFO flwr 2023-11-08 14:20:01,065 | app.py:215 | Disconnect and shut down
 ```
 
-### Federated Downstreaming on Raspberry Pi
+### Federated Finetuning on Raspberry Pi
 
 Setting up the environment for the Raspberry Pi is not that different from the steps you'd follow on any other Ubuntu machine (this example assumes your Raspberry Pi -- either 5 or 4 -- runs Ubuntu server 22.04/23.10 64bits). Note that unlike in the previous sections of this example, clients for Raspberry Pi work better when using PyTorch 1.13.1 (or earlier versions to PyTorch 2.0 in general).
 
@@ -225,21 +225,25 @@ The first time you run a client on the RPi, the dataset of a client needs to be 
 | Filter through training set (~85k rows) |     doing `.filter()` in `client.client_fn`      | 3:00      | 0.37      |
 | Encode 845 rows with `WhisperProcessor` | doing `.map()` passing `utils.prepare_dataset()` | 1:55      | 1:06      |
 
-Some clients have more data than others, but on average, the RPi5 is 1.9x faster than an RPi4 when training the classification head given a frozen encoder. A client with 400 training examples needs ~10min on an RPi to complete an epoch of on-device finetuning.
+Some clients have more data than others, but on average, the RPi5 is 1.9x faster than an RPi4 when training the classification head given a frozen encoder. A client with 925 training examples needs ~20min on an RPi to complete an epoch of on-device finetuning.
 
 ```bash
-# Running the 83-th client on a RPi 5 showed the following log (a RPi4 ran client 50)
-python client.py --cid=83 --server_address=<YOUR_SERVER_IP> --no-compile
-INFO flwr 2023-11-08 14:37:26,535 | grpc.py:49 | Opened insecure gRPC connection (no certificates were passed)
-DEBUG flwr 2023-11-08 14:37:26,541 | connection.py:42 | ChannelConnectivity.IDLE
-DEBUG flwr 2023-11-08 14:37:26,564 | connection.py:42 | ChannelConnectivity.CONNECTING
-DEBUG flwr 2023-11-08 14:37:26,569 | connection.py:42 | ChannelConnectivity.READY
-99%|████████████████████████████████| 400/405 [09:49<00:07,  1.47s/it, avg_loss=2.5919, avg_acc=0.1575]
-99%|████████████████████████████████| 400/405 [09:49<00:07,  1.47s/it, avg_loss=2.0055, avg_acc=0.3050]
-99%|████████████████████████████████| 400/405 [09:52<00:07,  1.48s/it, avg_loss=1.7478, avg_acc=0.5025]
-99%|████████████████████████████████| 400/405 [09:51<00:07,  1.48s/it, avg_loss=1.2836, avg_acc=0.7350]
-99%|████████████████████████████████| 400/405 [09:53<00:07,  1.48s/it, avg_loss=0.9044, avg_acc=0.8525]
-99%|████████████████████████████████| 400/405 [09:50<00:07,  1.48s/it, avg_loss=0.5766, avg_acc=0.9200]
-99%|████████████████████████████████| 400/405 [09:50<00:07,  1.48s/it, avg_loss=0.3212, avg_acc=0.9525]
-...
+# Running the 50-th client on a RPi 5 showed the following log (a RPi4 ran client 83)
+python client.py --cid=50 --server_address=<YOUR_SERVER_IP> --no-compile
+INFO flwr 2023-11-08 16:20:33,331 | grpc.py:49 | Opened insecure gRPC connection (no certificates were passed)
+DEBUG flwr 2023-11-08 16:20:33,333 | connection.py:42 | ChannelConnectivity.IDLE
+DEBUG flwr 2023-11-08 16:20:33,334 | connection.py:42 | ChannelConnectivity.CONNECTING
+DEBUG flwr 2023-11-08 16:20:33,349 | connection.py:42 | ChannelConnectivity.READY
+99%|████████████████████████████████████████| 920/925 [20:09<00:06,  1.31s/it, avg_loss=2.4392, avg_acc=0.1902]
+99%|████████████████████████████████████████| 920/925 [20:06<00:06,  1.31s/it, avg_loss=1.9830, avg_acc=0.3533]
+99%|████████████████████████████████████████| 920/925 [20:06<00:06,  1.31s/it, avg_loss=1.6069, avg_acc=0.5641]
+99%|████████████████████████████████████████| 920/925 [20:07<00:06,  1.31s/it, avg_loss=1.1933, avg_acc=0.7402]
+99%|████████████████████████████████████████| 920/925 [20:07<00:06,  1.31s/it, avg_loss=0.8749, avg_acc=0.8478]
+99%|████████████████████████████████████████| 920/925 [20:06<00:06,  1.31s/it, avg_loss=0.5933, avg_acc=0.9109]
+99%|████████████████████████████████████████| 920/925 [20:08<00:06,  1.31s/it, avg_loss=0.4882, avg_acc=0.9359]
+99%|████████████████████████████████████████| 920/925 [20:01<00:06,  1.31s/it, avg_loss=0.4022, avg_acc=0.9304]
+99%|████████████████████████████████████████| 920/925 [20:10<00:06,  1.32s/it, avg_loss=0.3219, avg_acc=0.9533]
+99%|████████████████████████████████████████| 920/925 [20:13<00:06,  1.32s/it, avg_loss=0.2729, avg_acc=0.9641]
+DEBUG flwr 2023-11-08 19:47:56,544 | connection.py:139 | gRPC channel closed
+INFO flwr 2023-11-08 19:47:56,544 | app.py:215 | Disconnect and shut down
 ```
