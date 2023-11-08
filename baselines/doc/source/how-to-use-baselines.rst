@@ -25,10 +25,11 @@ All baselines are available in the directory `baselines <https://github.com/adap
 Please note that some baselines might include additional files (e.g. a :code:`requirements.txt`) or a hierarchy of :code:`.yaml` files for `Hydra <https://hydra.cc/>`_.
 
 
-Setting up your Machine
+Setting up your machine
 -----------------------
+
 .. note::
-  Flower baselines are designed to run on Ubuntu 22.04. While a GPU is not required to run the baselines, some of the more computationally demaning ones do benefit from GPU acceleration.
+  Flower baselines are designed to run on Ubuntu 22.04. While a GPU is not required to run the baselines, some of the more computationally demanding ones do benefit from GPU acceleration.
 
 Common to all baselines is `Poetry <https://python-poetry.org/docs/>`_, a tool to manage Python dependencies. Baselines also make use of `Pyenv <https://github.com/pyenv/pyenv>`_. You'll need to install both on your system before running a baseline. What follows is a step-by-step guide on getting :code:`pyenv` and :code:`Poetry` installed on your system.
 
@@ -79,10 +80,10 @@ Now that we have :code:`pyenv` installed, we are ready to install :code:`poetry`
 
 To install Poetry from source, to customise your installation, or to further integrate Poetry with your shell after installation, please check `the Poetry documentation <https://python-poetry.org/docs/#installation>`_.
 
-Using a Baseline
+Using a Flower Baseline
 ----------------
 
-To use Flower baselines you need first to install :code:`pyenv` and :code:`Poetry`, then:
+To use Flower Baselines you need first to install :code:`pyenv` and :code:`Poetry`, then:
 
 1. Clone the flower repository
 
