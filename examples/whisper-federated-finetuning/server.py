@@ -10,7 +10,7 @@ from utils import eval_model, get_model, set_params, remove_cols, get_encoding_f
 
 
 parser = argparse.ArgumentParser(description="Flower+Whisper")
-parser.add_argument("--num_rounds", type=int, default=10, help="Number of FL rounds.")
+parser.add_argument("--num_rounds", type=int, default=5, help="Number of FL rounds.")
 parser.add_argument(
     "--server_address", type=str, required=True, help="IP of the server."
 )

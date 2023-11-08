@@ -89,14 +89,15 @@ In this example, we partition the training set along the `speaker_id` column int
 
 ```python
 from datasets import load_dataset
-sc = load_dataset("speech_commands", "v0.02", split="train", token=False)
+sc_train = load_dataset("speech_commands", "v0.02", split="train", token=False)
+print(sc_train)
 # Dataset({
 #     features: ['file', 'audio', 'label', 'is_unknown', 'speaker_id', 'utterance_id'],
 #     num_rows: 84848
 # })
 
 # The training set is comprised of ~85K 1-second audio clips from 2112 individual speakers
-ids = set(sc['speaker_id'])
+ids = set(sc_train['speaker_id'])
 print(len(ids))
 # 2113  # <--- +1 since a "None" speaker is included (for clips to construct the _silence_ training examples)
 ```
@@ -138,11 +139,18 @@ The setup instructions for simulations are the same as those described for the c
 # By default it will run 2 clients in parallel on a single GPU (which should be fine if your GPU has at least 16GB )
 # If that's too much, consider reduing either the batch size or raise `num_gpus` passed to `start_simulation`
 python sim.py # append --num_gpus=0 if you don't have GPUs on your system
+
+# Once finished centralised evaluation loss/acc metrics will be shown
+
+INFO flwr 2023-11-08 14:03:57,557 | app.py:229 | app_fit: metrics_centralized {'val_accuracy': [(0, 0.03977158885994791), (1, 0.6940492887196954), (2, 0.5969745541975556), (3, 0.8794830695251452), (4, 0.9021238228811861), (5, 0.8943097575636145), (6, 0.9047285113203767), (7, 0.9330795431777199), (8, 0.9446002805049089), (9, 0.9556201162091765)], 'test_accuracy': [(10, 0.9719836400817996)]}
 ```
 
 ![Global validation accuracy FL with Whisper model](_static/whisper_flower_acc.png)
 
 With just 5 FL rounds, the global model should be reaching ~95% validation accuracy. A test accuracy of 97% can be reached with 10 rounds of FL training using the default hyperparameters. On an RTX 3090Ti, each round takes ~20-30s depending on the amount of data the clients selected in a round have.
+
+Take a look at the [Documentation](https://flower.dev/docs/framework/how-to-run-simulations.html) for more details on how you can customize your simulation.
+
 
 ### Federated Downstreaming (non-simulated)
 
@@ -158,10 +166,11 @@ python server.py --server_addres=<YOUR_SERVER_IP>
 Then on different (new) terminals run:
 
 ```bash
-# use a difference `--cid` (client id) to make this device load a particular dataset partition
+# use a difference `--cid` (client id) to make the client load a particular dataset partition (any integer between 0-99)
+# you can use `--server_address='localhost'` if you are running everything on the same machine.
 python client.py --server_address=<YOUR_SERVER_IP> --cid=0
 
-# and on a new terminal
+# and on a new terminal/machine (and optionally a different `cid`)
 python client.py --server_address=<YOUR_SERVER_IP> --cid=1
 ```
 
@@ -169,9 +178,9 @@ Once the second client connects to the server, the FL process will begin.
 
 ### Federated Downstreaming on Raspberry Pi
 
-> Please follow the steps [here](rpi_setup.md) if you are looking for a step-by-step guide on how to setup your Raspberry Pi to run this example.
+Setting up the environment for the Raspberry Pi is not that different from the steps you'd follow on any other Ubuntu machine (this example assumes your Raspberry Pi -- either 5 or 4 -- runs Ubuntu server 22.04/23.10 64bits). Note that unlike in the previous sections of this example, clients for Raspberry Pi work better when using PyTorch 1.13.1 (or earlier versions to PyTorch 2.0 in general).
 
-Setting up the environment for the Raspberry Pi is not that different from the steps you'd follow on any other Ubuntu machine (this example assumes your Raspberry Pi -- either 5 or 4 -- runs Ubuntu server 22.04/23.10 64bits).
+> Please follow the steps [here](rpi_setup.md) if you are looking for a step-by-step guide on how to setup your Raspberry Pi to run this example.
 
 In order to run this example on a Raspberry Pi, you'll need to follow the same steps as outlined above in the `non-simulated` section. First, launch the server on your development machine.
 
@@ -180,10 +189,11 @@ In order to run this example on a Raspberry Pi, you'll need to follow the same s
 python server.py --server_addres=<YOUR_SERVER_IP>
 ```
 
-Then, on each of your Raspberry Pi do the following. If you only have one RPi, you can still run the example! But you will need two clients. In addition to the one on the Raspberry Pi, you could launch a client in a separate terminal on your development machine.
+Then, on each of your Raspberry Pi do the following. If you only have one RPi, you can still run the example! But you will need two clients. In addition to the one on the Raspberry Pi, you could launch a client in a separate terminal on your development machine (as shown above in the `non-simulated` section).
 
 ```bash
 # use a difference `--cid` (client id) to make this device load a particular dataset partition
+# we pass the `--no-compile` option since for RPi we are not using PyTorch 2.0+
 python client.py --server_address=<YOUR_SERVER_IP> --cid=0 --no-compile
 ```
 
