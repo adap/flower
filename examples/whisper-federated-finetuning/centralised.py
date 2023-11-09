@@ -63,7 +63,7 @@ def main():
     )
 
     # create and pre-process the dataset of silences
-    silences_dataset = prepare_silences_dataset(sc, ratio_silence=0.001)
+    silences_dataset = prepare_silences_dataset(sc, ratio_silence=0.1)
     # ! You might want to save this encoded_silences dataset to disk, so this stage is not
     # ! needed each time you run the code. Alternatively, this silence generation could be
     # ! implemented as part of a `collate_fn` in the standard PyTorch dataloader...

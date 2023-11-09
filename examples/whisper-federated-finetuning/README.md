@@ -46,7 +46,7 @@ pip install torch==2.1.0 --index-url https://download.pytorch.org/whl/cu118
 pip install -r requirements.txt
 ```
 
-Then run centralized training as follows. Please note that the first time you run the code, the `SpeechCommnads` dataset will be downloaded and pre-processed using 🤗 API (which takes a little while -- approx 30min). Subsequent runs shouldn't require this preprocessing.
+Then run centralized training as follows. Please note that the first time you run the code, the `SpeechCommnads` dataset will be downloaded and pre-processed using 🤗 API (which takes a little while -- approx 40min -- and is cached in `~/.cache/huggingface/datasets/speechcommands` wiht a footprint of ~83GB). Subsequent runs shouldn't require this preprocessing.
 
 ```bash
 python centralised.py --compile # don't use `--compile` flag if you are using pytorch < 2.0
@@ -116,7 +116,7 @@ Flower supports two ways of doing Federated Learning: simulated and non-simulate
 
 If you have run the centralized version of this example first, you probably realized that it takes some time to get a fully pre-processed SpeechCommands dataset using the 🤗 HuggingFace API. This pre-processing is ideal so nothing slowdowns our training once we launch the experiment. For the federated part of this example, we also need to pre-process the data however in a different way since first the training set needs to be split into N different buckets, one for each FL client.
 
-To launch a Flower client we need a `client_fn` callable that will: (1) Load the dataset of the client; then, (2) return the Client object itself. In `client.py` we have included a few lines of code that preprocess the training partition of a given client and save it to disk (so this doesn't have to be repeated each time you run the experiment). You can run the experiment right away and the data will be pre-processed on-demand (i.e. when the `i`-th client is spawned for the first time), or you can pre-process all client partitions first. In order to do so, please run:
+To launch a Flower client we need a `client_fn` callable that will: (1) Load the dataset of the client; then, (2) return the Client object itself. In `client.py` we have included a few lines of code that preprocess the training partition of a given client and save it to disk (so this doesn't have to be repeated each time you run the experiment). The average pre-processed partition is ~0.5GB. You can run the experiment right away and the data will be pre-processed on-demand (i.e. when the `i`-th client is spawned for the first time), or you can pre-process all client partitions first. In order to do so, please run:
 
 ```bash
 # will write to disk all pre-processed data partitions
