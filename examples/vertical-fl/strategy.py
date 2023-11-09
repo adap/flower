@@ -8,7 +8,7 @@ from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
 class ServerModel(nn.Module):
     def __init__(self, input_size):
         super(ServerModel, self).__init__()
-        self.fc = nn.Linear(input_size, 1)  # Simple Linear layer
+        self.fc = nn.Linear(input_size, 1)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
@@ -48,16 +48,13 @@ class Strategy(fl.server.strategy.FedAvg):
             fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
             evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
-        self.model = ServerModel(input_size=12)
+        self.model = ServerModel(12)
         self.initial_parameters = ndarrays_to_parameters(
             [val.cpu().numpy() for _, val in self.model.state_dict().items()]
         )
         self.optimizer = optim.SGD(self.model.parameters(), lr=0.01)
         self.criterion = nn.BCELoss()
         self.label = torch.tensor(labels).float().unsqueeze(1)
-
-    def configure_fit(self, server_round, parameters, client_manager):
-        return super().configure_fit(server_round, parameters, client_manager)
 
     def aggregate_fit(
         self,

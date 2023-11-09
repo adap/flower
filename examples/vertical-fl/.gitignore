@@ -1,3 +1,1 @@
-!docs/data
-!README.md
-docs/results
+docs/results/*.npy

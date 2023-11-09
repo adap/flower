@@ -84,7 +84,7 @@ def _partition_data(df, all_keywords):
 class ClientModel(nn.Module):
     def __init__(self, input_size):
         super(ClientModel, self).__init__()
-        self.fc = nn.Linear(input_size, 4)  # Simple Linear layer
+        self.fc = nn.Linear(input_size, 4)
 
     def forward(self, x):
         return self.fc(x)
