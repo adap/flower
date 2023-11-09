@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -707,18 +707,11 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     # Fleet API transport layer type
     ex_group = parser.add_mutually_exclusive_group()
     ex_group.add_argument(
-        "--grpc-bidi",
-        action="store_const",
-        dest="fleet_api_type",
-        const=TRANSPORT_TYPE_GRPC_BIDI,
-        default=TRANSPORT_TYPE_GRPC_BIDI,
-        help="Start a Fleet API server (gRPC-bidi)",
-    )
-    ex_group.add_argument(
         "--grpc-rere",
         action="store_const",
         dest="fleet_api_type",
         const=TRANSPORT_TYPE_GRPC_RERE,
+        default=TRANSPORT_TYPE_GRPC_RERE,
         help="Start a Fleet API server (gRPC-rere)",
     )
     ex_group.add_argument(
@@ -728,15 +721,12 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         const=TRANSPORT_TYPE_REST,
         help="Start a Fleet API server (REST, experimental)",
     )
-
-    # Fleet API gRPC-bidi options
-    grpc_bidi_group = parser.add_argument_group(
-        "Fleet API (gRPC-bidi) server options", ""
-    )
-    grpc_bidi_group.add_argument(
-        "--grpc-bidi-fleet-api-address",
-        help="Fleet API (gRPC-bidi) server address (IPv4, IPv6, or a domain name)",
-        default=ADDRESS_FLEET_API_GRPC_RERE,
+    ex_group.add_argument(
+        "--grpc-bidi",
+        action="store_const",
+        dest="fleet_api_type",
+        const=TRANSPORT_TYPE_GRPC_BIDI,
+        help="Start a Fleet API server (gRPC-bidi)",
     )
 
     # Fleet API gRPC-rere options
@@ -773,4 +763,14 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         help="Set the number of concurrent workers for the Fleet API REST server.",
         type=int,
         default=1,
+    )
+
+    # Fleet API gRPC-bidi options
+    grpc_bidi_group = parser.add_argument_group(
+        "Fleet API (gRPC-bidi) server options", ""
+    )
+    grpc_bidi_group.add_argument(
+        "--grpc-bidi-fleet-api-address",
+        help="Fleet API (gRPC-bidi) server address (IPv4, IPv6, or a domain name)",
+        default=ADDRESS_FLEET_API_GRPC_RERE,
     )
