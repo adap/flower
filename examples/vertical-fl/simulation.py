@@ -15,7 +15,7 @@ def client_fn(cid):
 hist = fl.simulation.start_simulation(
     client_fn=client_fn,
     num_clients=3,
-    config=fl.server.ServerConfig(num_rounds=500),
+    config=fl.server.ServerConfig(num_rounds=1000),
     strategy=Strategy(label),
 )
 

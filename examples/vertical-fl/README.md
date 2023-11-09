@@ -82,7 +82,7 @@ for `poetry`, otherwise just run:
 python3 simulation.py
 ```
 
-This will start the Vertical FL training for 500 rounds with 3 clients.
+This will start the Vertical FL training for 1000 rounds with 3 clients.
 Eventhough the number of rounds is quite high, this should only take a few
 seconds to run as the model is very small.
 
@@ -451,12 +451,12 @@ function:
 hist = fl.simulation.start_simulation(
     client_fn=client_fn,
     num_clients=3,
-    config=fl.server.ServerConfig(num_rounds=500),
+    config=fl.server.ServerConfig(num_rounds=1000),
     strategy=Strategy(label),
 )
 ```
 
-As mentioned before, we train for 500 rounds but it should still last less than
+As mentioned before, we train for 1000 rounds but it should still last only
 a few seconds.
 
 Note that we store the results of the simulation into `hist`, this will allow us
@@ -465,7 +465,7 @@ rounds.
 
 ## Results
 
-Here we can observe the results after 500 rounds:
+Here we can observe the results after 1000 rounds:
 
 ![Accuracy plot](docs/results/accuracy.png)
 
