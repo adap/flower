@@ -20,7 +20,7 @@ jobs:
     name: Test
     runs-on: macos-latest
     steps:
-      - uses: fwal/setup-swift@cdcbe8e35d3801acd82d7109285e6ab22c9212c2
+      - uses: fwal/setup-swift@f51889efb55dccf13be0ee727e3d6c89a096fb4c
         with:
           swift-version: 5
       - uses: actions/checkout@v4
@@ -31,7 +31,7 @@ jobs:
     runs-on: macos-latest
     name: Build docs
     steps:
-      - uses: fwal/setup-swift@cdcbe8e35d3801acd82d7109285e6ab22c9212c2
+      - uses: fwal/setup-swift@f51889efb55dccf13be0ee727e3d6c89a096fb4c
         with:
           swift-version: 5
       - uses: actions/checkout@v4
@@ -40,11 +40,11 @@ jobs:
 
   deploy_docs:
     needs: "build_docs"
-    if: github.ref == 'refs/heads/main'
+    if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
     runs-on: macos-latest
     name: Deploy docs 
     steps:
-      - uses: fwal/setup-swift@cdcbe8e35d3801acd82d7109285e6ab22c9212c2
+      - uses: fwal/setup-swift@f51889efb55dccf13be0ee727e3d6c89a096fb4c
         with:
           swift-version: 5
       - uses: actions/checkout@v4

@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ from typing import Dict, Optional, cast
 import ray
 
 from flwr import common
-from flwr.client import Client, ClientFn, ClientLike, to_client
+from flwr.client import Client, ClientFn
 from flwr.client.client import (
     maybe_call_evaluate,
     maybe_call_fit,
@@ -275,5 +275,5 @@ def launch_and_evaluate(
 
 def _create_client(client_fn: ClientFn, cid: str) -> Client:
     """Create a client instance."""
-    client_like: ClientLike = client_fn(cid)
-    return to_client(client_like=client_like)
+    # Materialize client
+    return client_fn(cid)
