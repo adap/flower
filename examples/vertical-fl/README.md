@@ -1,8 +1,11 @@
 # Vertical Federated Learning example
 
 This example will showcase how you can perform Vertical Federated Learning using
-Flower. We'll be using the Titanic dataset to train simple regression
-models for binary classification.
+Flower. We'll be using the [Titanic dataset](https://www.kaggle.com/competitions/titanic/data) 
+to train simple regression models for binary classification. We will go into
+more details below, but the main idea of Vertical Federated Learning is that
+each clients are holding different feature sets of the same <TODO> and that the
+server is holding the labels of this <TODO>.
 
 ## Project Setup
 
@@ -85,9 +88,14 @@ seconds to run as the model is very small.
 
 ## Explanations
 
-### Vertical FL
+### Vertical FL vs Horizontal FL
 
-What is Vertical Federated Learning?
+|                       | Horizontal Federated Learning (HFL)                                                                                                                                                                      | Vertical Federated Learning (VFL)                                                                                                                                                                                                                                                                                                                                        |
+|-----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Data Distribution     | Clients have different data instances but share the same feature space.  Think of different hospitals having different patients' data (samples)  but recording the same types of information (features). | Each client holds different features for the same instances.  Imagine different institutions holding various tests or  measurements for the same group of patients.                                                                                                                                                                                                      |
+| Model Training        | Each client trains a model on their local data,  which contains all the feature columns for its samples.                                                                                                 | Clients train models on their respective features without  having access to the complete feature set.  Each model only sees a vertical slice of the data (hence the name 'Vertical').                                                                                                                                                                                    |
+| Aggregation           | The server aggregates these local models by averaging  the parameters or gradients to update a global model.                                                                                             | The server aggregates the updates such as gradients or parameters,  which are then used to update the global model.  However, since each client sees only a part of the features,  the server typically has a more complex role,  sometimes needing to coordinate more sophisticated aggregation strategies  that may involve secure multi-party computation techniques. |
+| Privacy Consideration | The raw data stays on the client's side, only model updates are shared,  which helps in maintaining privacy.                                                                                             | VFL is designed to ensure that no participant can access  the complete feature set of any sample,  thereby preserving the privacy of data.                                                                                                                                                                                                                               |
 
 ### Data
 
