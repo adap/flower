@@ -21,7 +21,7 @@ DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 num_clients = 4
 import os
 
-os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:660"
+# os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:660"
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
@@ -31,24 +31,6 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
     # Aggregate and return custom metric (weighted average)
     return {"accuracy": sum(accuracies) / sum(examples)}
-
-
-net = AlexNet(num_classes=num_classes, latent_dim=4096, other_dim=1000).to(DEVICE)
-net_gen = Generator(num_classes=num_classes, latent_dim=4096, other_dim=1000).to(DEVICE)
-n1 = [val.cpu().numpy() for _, val in net.state_dict().items()]
-n2 = [val.cpu().numpy() for _, val in net_gen.state_dict().items()]
-initial_params = ndarrays_to_parameters(n1)
-initial_generator_params = ndarrays_to_parameters(n2)
-all_labels = torch.arange(num_classes).to(DEVICE)
-one_hot_all_labels = torch.eye(num_classes, dtype=torch.float).to(DEVICE)
-z_g, mu_g, log_var_g = net_gen(one_hot_all_labels)
-serialized_gen_stats = ndarrays_to_parameters(
-    [
-        z_g.cpu().detach().numpy(),
-        mu_g.cpu().detach().numpy(),
-        log_var_g.cpu().detach().numpy(),
-    ]
-)
 
 
 # Start Flower server
@@ -167,6 +149,24 @@ if __name__ == "__main__":
     except RuntimeError:
         pass
     processes = []
+    net = AlexNet(num_classes=num_classes, latent_dim=4096, other_dim=1000).to(DEVICE)
+    net_gen = Generator(num_classes=num_classes, latent_dim=4096, other_dim=1000).to(
+        DEVICE
+    )
+    n1 = [val.cpu().numpy() for _, val in net.state_dict().items()]
+    n2 = [val.cpu().numpy() for _, val in net_gen.state_dict().items()]
+    initial_params = ndarrays_to_parameters(n1)
+    initial_generator_params = ndarrays_to_parameters(n2)
+    all_labels = torch.arange(num_classes).to(DEVICE)
+    one_hot_all_labels = torch.eye(num_classes, dtype=torch.float).to(DEVICE)
+    z_g, mu_g, log_var_g = net_gen(one_hot_all_labels)
+    serialized_gen_stats = ndarrays_to_parameters(
+        [
+            z_g.cpu().detach().numpy(),
+            mu_g.cpu().detach().numpy(),
+            log_var_g.cpu().detach().numpy(),
+        ]
+    )
 
     server_process = mp.Process(
         target=server_task,

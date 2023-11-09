@@ -12,12 +12,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
-from torchvision.datasets import MNIST
 from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
 from models import AlexNet, Generator
 import argparse
-from utils_pacs import make_dataloaders
+from utils_pacs import make_dataloaders, train, test
 
 # #############################################################################
 # 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
@@ -30,60 +29,6 @@ num_classes = 7
 parser = argparse.ArgumentParser()
 parser.add_argument("--client_idx", type=int, required=True, help="Client index")
 args = parser.parse_args()
-
-
-def train(net1, trainloader, config, epochs):
-    """Train the model on the training set."""
-    criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(net1.parameters(), lr=0.001, momentum=0.9)
-    lambda_reg = 0.5
-    lambda_align = 5e-6
-    all_labels = torch.arange(num_classes).to(DEVICE)
-
-    z_g, mu_g, log_var_g = (
-        torch.tensor(bytes_to_ndarray(config["z_g"])).to(DEVICE),
-        torch.tensor(bytes_to_ndarray(config["mu_g"])).to(DEVICE),
-        torch.tensor(bytes_to_ndarray(config["log_var_g"])).to(DEVICE),
-    )
-    for _ in range(epochs):
-        for images, labels in tqdm(trainloader):
-            optimizer.zero_grad()
-            images, labels = images.to(DEVICE), labels.to(DEVICE)
-            pred, mu, log_var = net1(images)
-            loss_fl = criterion(pred, labels)
-
-            loss_reg = criterion(net1.clf(z_g), all_labels)
-
-            # KL Div
-            loss_align = 0.5 * (log_var_g[labels] - log_var - 1) + (
-                log_var.exp() + (mu - mu_g[labels]).pow(2)
-            ) / (2 * log_var_g[labels].exp())
-            loss_align_reduced = loss_align.mean(dim=1).mean()
-            loss = loss_fl + lambda_reg * loss_reg + lambda_align * loss_align_reduced
-            loss.backward(retain_graph=True)
-            optimizer.step()
-
-
-def test(net1, testloader):
-    """Validate the model on the test set."""
-    criterion = torch.nn.CrossEntropyLoss()
-    correct, loss = 0, 0.0
-    with torch.no_grad():
-        for images, labels in tqdm(testloader):
-            outputs = net1(images.to(DEVICE))[0]
-            labels = labels.to(DEVICE)
-            loss += criterion(outputs, labels).item()
-            correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
-    accuracy = correct / len(testloader.dataset)
-    return loss, accuracy
-
-
-def load_data():
-    """Load CIFAR-10 (training and test set)."""
-    trf = Compose([ToTensor(), Normalize((0.5,), (0.5,))])
-    trainset = MNIST("./data", train=True, download=True, transform=trf)
-    testset = MNIST("./data", train=False, download=True, transform=trf)
-    return DataLoader(trainset, batch_size=64, shuffle=True), DataLoader(testset)
 
 
 # #############################################################################
