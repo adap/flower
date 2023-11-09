@@ -84,7 +84,7 @@ def distribute_gpus(num_clients, client_memory=1024):
      gpus = ["0","1"]
     """
     # gpus = ["0"]
-    gpus = None #to run clients on cpu
+    gpus = tf.config.list_physical_devices("GPU")
     clients_gpu = [None] * num_clients
     if not gpus:
         return clients_gpu
@@ -93,7 +93,7 @@ def distribute_gpus(num_clients, client_memory=1024):
             based on your gpu's memory define list accordingly.
             Currently it defines to use 5000 MB of gpu vram from both GPU's
         """
-        gpu_free_mem = [5000]
+        gpu_free_mem = [15000] # set the gpu limit based on your system.
         for client_id in range(num_clients):
             gpu_id = gpu_free_mem.index(max(gpu_free_mem))
             if gpu_free_mem[gpu_id] >= client_memory:
