@@ -69,7 +69,7 @@ def aggregate(bst_prev, bst_curr):
     if not bst_prev:
         return bst_curr
     else:
-        # get the tree numbers
+        # Get the tree numbers
         tree_num_prev, paral_tree_num_prev = _get_tree_nums(bst_prev)
         tree_num_curr, paral_tree_num_curr = _get_tree_nums(bst_curr)
 
@@ -83,7 +83,7 @@ def aggregate(bst_prev, bst_curr):
             iteration_indptr[-1] + paral_tree_num_curr
         )
 
-        # aggregate new trees
+        # Aggregate new trees
         trees_curr = bst_curr["learner"]["gradient_booster"]["model"]["trees"]
         for tree_count in range(paral_tree_num_curr):
             trees_curr[tree_count]["id"] = tree_num_prev + tree_count
@@ -95,13 +95,13 @@ def aggregate(bst_prev, bst_curr):
 
 
 def _get_tree_nums(xgb_model):
-    # get the number of trees
+    # Get the number of trees
     tree_num = int(
         xgb_model["learner"]["gradient_booster"]["model"]["gbtree_model_param"][
             "num_trees"
         ]
     )
-    # get the number of parallel trees
+    # Get the number of parallel trees
     paral_tree_num = int(
         xgb_model["learner"]["gradient_booster"]["model"]["gbtree_model_param"][
             "num_parallel_tree"

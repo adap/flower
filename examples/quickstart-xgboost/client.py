@@ -1,5 +1,4 @@
 import warnings
-import argparse
 from logging import INFO
 import xgboost as xgb
 
@@ -23,72 +22,39 @@ from dataset import (
     train_test_split,
     transform_dataset_to_dmatrix,
 )
+from utils import client_args_parser
 
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
-def args_parser():
-    """Parse arguments to define experimental settings."""
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        "--num_partitions", default=20, type=int, help="Number of partitions."
-    )
-    parser.add_argument(
-        "--partitioner_type",
-        default="uniform",
-        type=str,
-        choices=["uniform", "linear", "square", "exponential"],
-        help="Partitioner types.",
-    )
-    parser.add_argument(
-        "--partition_id",
-        default=0,
-        type=int,
-        help="Partition ID used for the current client.",
-    )
-    parser.add_argument(
-        "--seed", default=42, type=int, help="Seed used for train/test splitting."
-    )
-    parser.add_argument(
-        "--test_fraction",
-        default=0.2,
-        type=float,
-        help="test fraction for train/test splitting.",
-    )
-
-    args_ = parser.parse_args()
-    return args_
-
-
 # Parse arguments for experimental settings
-args = args_parser()
+args = client_args_parser()
 
 # Load (HIGGS) dataset and conduct partitioning
 num_partitions = args.num_partitions
-# partitioner type is chosen from ["uniform", "linear", "square", "exponential"]
+# Partitioner type is chosen from ["uniform", "linear", "square", "exponential"]
 partitioner_type = args.partitioner_type
 
-# instantiate partitioner
+# Instantiate partitioner
 partitioner = instantiate_partitioner(
     partitioner_type=partitioner_type, num_partitions=num_partitions
 )
 fds = FederatedDataset(dataset="jxie/higgs", partitioners={"train": partitioner})
 
-# let's use the first partition as an example
+# Let's use the first partition as an example
 partition_id = args.partition_id
 partition = fds.load_partition(idx=partition_id, split="train")
 partition.set_format("numpy")
 
-# train/test splitting and data re-formatting
+# Train/test splitting and data re-formatting
 SEED = args.seed
 test_fraction = args.test_fraction
 train_data, valid_data, num_train, num_val = train_test_split(
     partition, test_fraction=test_fraction, seed=SEED
 )
 
-# reformat data to DMatrix for xgboost
+# Reformat data to DMatrix for xgboost
 train_dmatrix = transform_dataset_to_dmatrix(train_data)
 valid_dmatrix = transform_dataset_to_dmatrix(valid_data)
 
@@ -97,7 +63,7 @@ valid_dmatrix = transform_dataset_to_dmatrix(valid_data)
 num_local_round = 1
 params = {
     "objective": "binary:logistic",
-    "eta": 0.1,  # lr
+    "eta": 0.1,  # Learning rate
     "max_depth": 8,
     "eval_metric": "auc",
     "nthread": 16,
@@ -111,6 +77,7 @@ params = {
 class FlowerClient(fl.client.Client):
     def __init__(self):
         self.bst = None
+        self.config = None
 
     def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
         _ = (self, ins)
@@ -122,12 +89,12 @@ class FlowerClient(fl.client.Client):
             parameters=Parameters(tensor_type="", tensors=[]),
         )
 
-    def local_boost(self):
-        # update trees based on local training data.
+    def _local_boost(self):
+        # Update trees based on local training data.
         for i in range(num_local_round):
             self.bst.update(train_dmatrix, self.bst.num_boosted_rounds())
 
-        # extract the last N=num_local_round trees as new local model
+        # Extract the last N=num_local_round trees as new local model
         bst = self.bst[
             self.bst.num_boosted_rounds()
             - num_local_round : self.bst.num_boosted_rounds()
@@ -136,7 +103,7 @@ class FlowerClient(fl.client.Client):
 
     def fit(self, ins: FitIns) -> FitRes:
         if not self.bst:
-            # first round local training
+            # First round local training
             log(INFO, "Start training at round 1")
             bst = xgb.train(
                 params,
@@ -151,11 +118,11 @@ class FlowerClient(fl.client.Client):
             for item in ins.parameters.tensors:
                 global_model = bytearray(item)
 
-            # load global model into booster
+            # Load global model into booster
             self.bst.load_model(global_model)
             self.bst.load_config(self.config)
 
-            bst = self.local_boost()
+            bst = self._local_boost()
 
         local_model = bst.save_raw("json")
         local_model_bytes = bytes(local_model)
@@ -193,5 +160,5 @@ class FlowerClient(fl.client.Client):
 
 # Start Flower client
 fl.client.start_client(
-    server_address="127.0.0.1:8080", client=FlowerClient().to_client()
+    server_address="127.0.0.1:8080", client=FlowerClient()
 )

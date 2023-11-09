@@ -1,5 +1,6 @@
 import datasets
 import xgboost as xgb
+from datasets import DatasetDict
 
 from flwr_datasets.partitioner import (
     IidPartitioner,
@@ -37,7 +38,7 @@ def train_test_split(partition: datasets.Dataset, test_fraction: float, seed: in
     return partition_train, partition_test, num_train, num_test
 
 
-def transform_dataset_to_dmatrix(data):
+def transform_dataset_to_dmatrix(data: DatasetDict):
     """Transform dataset to DMatrix format for xgboost."""
     x = data["inputs"]
     y = data["label"]
