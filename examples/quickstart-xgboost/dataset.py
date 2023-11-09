@@ -1,7 +1,6 @@
 import datasets
 import xgboost as xgb
-from datasets import DatasetDict
-
+from datasets import DatasetDict, concatenate_datasets
 from flwr_datasets.partitioner import (
     IidPartitioner,
     LinearPartitioner,
@@ -38,9 +37,31 @@ def train_test_split(partition: datasets.Dataset, test_fraction: float, seed: in
     return partition_train, partition_test, num_train, num_test
 
 
-def transform_dataset_to_dmatrix(data: DatasetDict):
+def transform_dataset_to_dmatrix(data):
     """Transform dataset to DMatrix format for xgboost."""
     x = data["inputs"]
     y = data["label"]
     new_data = xgb.DMatrix(x, label=y)
     return new_data
+
+
+def resplit(dataset: DatasetDict) -> DatasetDict:
+    """Increase the quantity of centralised test samples from 500K to 1M."""
+    return DatasetDict(
+        {
+            "train": dataset["train"].select(
+                range(0, dataset["train"].num_rows - 500_000)
+            ),
+            "test": concatenate_datasets(
+                [
+                    dataset["train"].select(
+                        range(
+                            dataset["train"].num_rows - 500_000,
+                            dataset["train"].num_rows,
+                        )
+                    ),
+                    dataset["test"],
+                ]
+            ),
+        }
+    )

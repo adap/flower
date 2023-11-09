@@ -21,6 +21,7 @@ from dataset import (
     instantiate_partitioner,
     train_test_split,
     transform_dataset_to_dmatrix,
+    resplit,
 )
 from utils import client_args_parser
 
@@ -40,19 +41,29 @@ partitioner_type = args.partitioner_type
 partitioner = instantiate_partitioner(
     partitioner_type=partitioner_type, num_partitions=num_partitions
 )
-fds = FederatedDataset(dataset="jxie/higgs", partitioners={"train": partitioner})
+fds = FederatedDataset(
+    dataset="jxie/higgs", partitioners={"train": partitioner}, resplitter=resplit
+)
 
 # Let's use the first partition as an example
 partition_id = args.partition_id
 partition = fds.load_partition(idx=partition_id, split="train")
 partition.set_format("numpy")
 
-# Train/test splitting and data re-formatting
-SEED = args.seed
-test_fraction = args.test_fraction
-train_data, valid_data, num_train, num_val = train_test_split(
-    partition, test_fraction=test_fraction, seed=SEED
-)
+if args.centralised_eval:
+    # Use centralised test set for evaluation
+    train_data = partition
+    valid_data = fds.load_full("test")
+    valid_data.set_format("numpy")
+    num_train = train_data.shape[0]
+    num_val = valid_data.shape[0]
+else:
+    # Train/test splitting
+    SEED = args.seed
+    test_fraction = args.test_fraction
+    train_data, valid_data, num_train, num_val = train_test_split(
+        partition, test_fraction=test_fraction, seed=SEED
+    )
 
 # Reformat data to DMatrix for xgboost
 train_dmatrix = transform_dataset_to_dmatrix(train_data)
@@ -114,7 +125,7 @@ class FlowerClient(fl.client.Client):
             self.config = bst.save_config()
             self.bst = bst
         else:
-            log(INFO, "Load global model")
+            log(INFO, "Load global model...")
             for item in ins.parameters.tensors:
                 global_model = bytearray(item)
 
@@ -139,10 +150,10 @@ class FlowerClient(fl.client.Client):
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
         eval_results = self.bst.eval_set(
-            evals=[(train_dmatrix, "train"), (valid_dmatrix, "valid")],
+            evals=[(valid_dmatrix, "valid")],
             iteration=self.bst.num_boosted_rounds() - 1,
         )
-        auc = round(float(eval_results.split("\t")[2].split(":")[1]), 4)
+        auc = round(float(eval_results.split("\t")[1].split(":")[1]), 4)
 
         global_round = ins.config["global_round"]
         log(INFO, f"AUC = {auc} at round {global_round}")
@@ -159,6 +170,4 @@ class FlowerClient(fl.client.Client):
 
 
 # Start Flower client
-fl.client.start_client(
-    server_address="127.0.0.1:8080", client=FlowerClient()
-)
+fl.client.start_client(server_address="127.0.0.1:8080", client=FlowerClient())

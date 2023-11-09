@@ -1,5 +1,5 @@
 from logging import WARNING
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 import flwr as fl
 import json
 
@@ -14,6 +14,19 @@ from flwr.common.logger import log
 
 
 class XGbBagging(fl.server.strategy.FedAvg):
+    def __init__(
+        self,
+        evaluate_function: Optional[
+            Callable[
+                [int, Parameters, Dict[str, Scalar]],
+                Optional[Tuple[float, Dict[str, Scalar]]],
+            ]
+        ] = None,
+        **kwargs,
+    ):
+        self.evaluate_function = evaluate_function
+        super().__init__(**kwargs)
+
     def aggregate_fit(
         self,
         server_round: int,
@@ -63,6 +76,19 @@ class XGbBagging(fl.server.strategy.FedAvg):
             log(WARNING, "No evaluate_metrics_aggregation_fn provided")
 
         return 0, metrics_aggregated
+
+    def evaluate(
+        self, server_round: int, parameters: Parameters
+    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+        """Evaluate model parameters using an evaluation function."""
+        if self.evaluate_function is None:
+            # No evaluation function provided
+            return None
+        eval_res = self.evaluate_function(server_round, parameters, {})
+        if eval_res is None:
+            return None
+        loss, metrics = eval_res
+        return loss, metrics
 
 
 def aggregate(bst_prev, bst_curr):

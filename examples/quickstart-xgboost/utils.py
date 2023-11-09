@@ -2,7 +2,7 @@ import argparse
 
 
 def client_args_parser():
-    """Parse arguments to define experimental settings."""
+    """Parse arguments to define experimental settings on client side."""
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -28,7 +28,46 @@ def client_args_parser():
         "--test_fraction",
         default=0.2,
         type=float,
-        help="test fraction for train/test splitting.",
+        help="Test fraction for train/test splitting.",
+    )
+    parser.add_argument(
+        "--centralised_eval",
+        default=True,
+        type=bool,
+        help="Conduct centralised evaluation (True), or client evaluation on hold-out data (False).",
+    )
+
+    args = parser.parse_args()
+    return args
+
+
+def server_args_parser():
+    """Parse arguments to define experimental settings on server side."""
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--pool_size", default=2, type=int, help="Number of total clients."
+    )
+    parser.add_argument(
+        "--num_rounds", default=5, type=int, help="Number of FL rounds."
+    )
+    parser.add_argument(
+        "--num_clients_per_round",
+        default=2,
+        type=int,
+        help="Number of clients participate in training each round.",
+    )
+    parser.add_argument(
+        "--num_evaluate_clients",
+        default=2,
+        type=int,
+        help="Number of clients selected for evaluation.",
+    )
+    parser.add_argument(
+        "--centralised_eval",
+        default=True,
+        type=bool,
+        help="Conduct centralised evaluation (True), or client evaluation on hold-out data (False).",
     )
 
     args = parser.parse_args()
