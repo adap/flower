@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, Code, ServerMessage, Status
 
-from .message_handler import handle
+from .message_handler import handle, handle_control_message
 
 
 class ClientWithoutProps(Client):
@@ -120,7 +120,7 @@ def test_client_without_get_properties() -> None:
     task_ins: TaskIns = TaskIns(
         task_id=str(uuid.uuid4()),
         group_id="",
-        workload_id="",
+        workload_id=0,
         task=Task(
             producer=Node(node_id=0, anonymous=True),
             consumer=Node(node_id=0, anonymous=True),
@@ -130,9 +130,10 @@ def test_client_without_get_properties() -> None:
     )
 
     # Execute
-    task_res, actual_sleep_duration, actual_keep_going = handle(
-        client_fn=_get_client_fn(client), task_ins=task_ins
+    disconnect_task_res, actual_sleep_duration = handle_control_message(
+        task_ins=task_ins
     )
+    task_res = handle(client_fn=_get_client_fn(client), task_ins=task_ins)
 
     if not task_res.HasField("task"):
         raise ValueError("Task value not found")
@@ -146,7 +147,7 @@ def test_client_without_get_properties() -> None:
         TaskRes(
             task_id=str(uuid.uuid4()),
             group_id="",
-            workload_id="",
+            workload_id=0,
         )
     )
     # pylint: disable=no-member
@@ -171,8 +172,8 @@ def test_client_without_get_properties() -> None:
     expected_msg = ClientMessage(get_properties_res=expected_get_properties_res)
 
     assert actual_msg == expected_msg
+    assert not disconnect_task_res
     assert actual_sleep_duration == 0
-    assert actual_keep_going is True
 
 
 def test_client_with_get_properties() -> None:
@@ -183,7 +184,7 @@ def test_client_with_get_properties() -> None:
     task_ins = TaskIns(
         task_id=str(uuid.uuid4()),
         group_id="",
-        workload_id="",
+        workload_id=0,
         task=Task(
             producer=Node(node_id=0, anonymous=True),
             consumer=Node(node_id=0, anonymous=True),
@@ -193,9 +194,10 @@ def test_client_with_get_properties() -> None:
     )
 
     # Execute
-    task_res, actual_sleep_duration, actual_keep_going = handle(
-        client_fn=_get_client_fn(client), task_ins=task_ins
+    disconnect_task_res, actual_sleep_duration = handle_control_message(
+        task_ins=task_ins
     )
+    task_res = handle(client_fn=_get_client_fn(client), task_ins=task_ins)
 
     if not task_res.HasField("task"):
         raise ValueError("Task value not found")
@@ -209,7 +211,7 @@ def test_client_with_get_properties() -> None:
         TaskRes(
             task_id=str(uuid.uuid4()),
             group_id="",
-            workload_id="",
+            workload_id=0,
         )
     )
     # pylint: disable=no-member
@@ -237,5 +239,5 @@ def test_client_with_get_properties() -> None:
     expected_msg = ClientMessage(get_properties_res=expected_get_properties_res)
 
     assert actual_msg == expected_msg
+    assert not disconnect_task_res
     assert actual_sleep_duration == 0
-    assert actual_keep_going is True
