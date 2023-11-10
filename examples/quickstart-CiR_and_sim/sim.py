@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader, random_split
 
 import flwr as fl
 from flwr.common import Metrics, ndarrays_to_parameters
+from flwr.common.logger import configure
 from flwr.common.typing import Scalar
 
 from utils_pacs import make_dataloaders, train, test
@@ -61,7 +62,7 @@ class FlowerClient(fl.client.NumPyClient):
         # trainloader = DataLoader(self.trainset, batch_size=batch, shuffle=True)
 
         # Define optimizer
-        optimizer = torch.optim.SGD(self.model.parameters(), lr=0.01, momentum=0.9)
+        optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
         # Train
         train(
             self.model,
@@ -164,6 +165,10 @@ def get_evaluate_fn(
 def main():
     # Parse input arguments
     args = parser.parse_args()
+
+    configure(identifier="my_cir_app", filename="app_logs.log")
+
+
 
     # Download dataset and partition it
     trainsets, valsets, testset = make_dataloaders(batch_size=32)

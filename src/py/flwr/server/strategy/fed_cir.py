@@ -1,4 +1,4 @@
-from logging import WARNING
+from logging import WARNING, DEBUG
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from flwr.common import (
@@ -59,7 +59,7 @@ class FedCiR(FedAvg):
         initial_generator_params: Optional[Parameters] = None,
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
-        lr_g=1e-2,
+        lr_g=1e-6,
         steps_g=25,
         gen_stats=None,
         num_classes=10,
@@ -245,10 +245,19 @@ class FedCiR(FedAvg):
                 )
 
             loss = criterion(torch.stack(preds).mean(dim=0), all_labels)
-            print(f"generator loss at step {step}:{loss}")
-            loss.backward()
-            optimizer.step()
+            threshold = 1e-6  # Define a threshold for the negligible loss
+            log(DEBUG, f"generator loss at step {step}: {loss}")
 
+            if (
+                loss.item() > threshold
+            ):  # Check if the loss is greater than the threshold
+                loss.backward()
+                optimizer.step()
+            else:
+                log(
+                    DEBUG,
+                    f"Skipping optimization at step {step} due to negligible loss",
+                )
         z_g, mu_g, log_var_g = self.gen_model(one_hot_all_labels)
         self.gen_stats = ndarrays_to_parameters(
             [

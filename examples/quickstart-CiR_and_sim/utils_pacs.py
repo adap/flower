@@ -73,35 +73,64 @@ def make_dataloaders(dataset_kinds=data_kinds, k=2, batch_size=32, verbose=False
     return (trainloaders, valloaders, testloader)
 
 
+import torch
+from tqdm import tqdm
+
+
+def bytes_to_ndarray(byte_str):
+    # Placeholder for the actual bytes_to_ndarray implementation.
+    pass
+
+
 def train(net1, trainloader, optim, config, epochs, device: str, num_classes=7):
     """Train the model on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
-    lambda_reg = 0.5
-    lambda_align = 5e-6
-    all_labels = torch.arange(num_classes).to(device)
+    lambda_reg = config.get("lambda_reg", 0.5)
+    lambda_align = config.get("lambda_align", 5e-6)
+    keys_to_check = ["z_g", "mu_g", "log_var_g"]
 
-    z_g, mu_g, log_var_g = (
-        torch.tensor(bytes_to_ndarray(config["z_g"])).to(device),
-        torch.tensor(bytes_to_ndarray(config["mu_g"])).to(device),
-        torch.tensor(bytes_to_ndarray(config["log_var_g"])).to(device),
-    )
+    # Pre-compute all_labels and check if z_g, mu_g, log_var_g are in config
+    all_labels = torch.arange(num_classes).to(device)
+    use_advanced_loss = all(key in config for key in keys_to_check)
+
+    # Pre-compute tensors from config if using advanced loss
+    if use_advanced_loss:
+        z_g, mu_g, log_var_g = (
+            torch.tensor(
+                bytes_to_ndarray(config["z_g"]), dtype=torch.float32, device=device
+            ),
+            torch.tensor(
+                bytes_to_ndarray(config["mu_g"]), dtype=torch.float32, device=device
+            ),
+            torch.tensor(
+                bytes_to_ndarray(config["log_var_g"]),
+                dtype=torch.float32,
+                device=device,
+            ),
+        )
+
     for _ in range(epochs):
         for images, labels in tqdm(trainloader):
             optim.zero_grad()
             images, labels = images.to(device), labels.to(device)
             pred, mu, log_var = net1(images)
+
             # loss_fl
             loss_fl = criterion(pred, labels)
-            # loss_reg
-            loss_reg = criterion(net1.clf(z_g), all_labels)
+            loss = loss_fl
 
-            # KL Div
-            loss_align = 0.5 * (log_var_g[labels] - log_var - 1) + (
-                log_var.exp() + (mu - mu_g[labels]).pow(2)
-            ) / (2 * log_var_g[labels].exp())
-            loss_align_reduced = loss_align.mean(dim=1).mean()
-            loss = loss_fl + lambda_reg * loss_reg + lambda_align * loss_align_reduced
-            loss.backward(retain_graph=True)
+            if use_advanced_loss:
+                # loss_reg
+                loss_reg = criterion(net1.clf(z_g), all_labels)
+
+                # KL Div
+                loss_align = 0.5 * (log_var_g[labels] - log_var - 1) + (
+                    log_var.exp() + (mu - mu_g[labels]).pow(2)
+                ) / (2 * log_var_g[labels].exp())
+                loss_align_reduced = loss_align.mean(dim=1).mean()
+                loss += lambda_reg * loss_reg + lambda_align * loss_align_reduced
+
+            loss.backward(retain_graph=use_advanced_loss)
             optim.step()
 
 
