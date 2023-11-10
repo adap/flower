@@ -17,14 +17,14 @@
 
 
 import unittest
-from unittest.mock import patch
 from typing import Dict, Union
+from unittest.mock import patch
 
 import pytest
 from parameterized import parameterized, parameterized_class
 
 import datasets
-from datasets import DatasetDict, concatenate_datasets, Dataset
+from datasets import Dataset, DatasetDict, concatenate_datasets
 from flwr_datasets.federated_dataset import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner, Partitioner
 
@@ -144,15 +144,15 @@ class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
         dataset_length = sum([len(ds) for ds in dataset.values()])
         self.assertEqual(len(full), dataset_length)
 
+
 class ArtificialDatasetTest(unittest.TestCase):
     """Test using small artificial dataset, mocked load_dataset."""
 
     def _dummy_setup(self, train_rows: int = 10, test_rows: int = 5) -> DatasetDict:
         """Create a dummy DatasetDict with train, test splits."""
-
         data_train = {
             "features": list(range(train_rows)),
-            "labels": list(range(100, 100 + train_rows))
+            "labels": list(range(100, 100 + train_rows)),
         }
         data_test = {
             "features": [200] + [201] * (test_rows - 1),
@@ -162,7 +162,7 @@ class ArtificialDatasetTest(unittest.TestCase):
         test_dataset = Dataset.from_dict(data_test)
         return DatasetDict({"train": train_dataset, "test": test_dataset})
 
-    @patch('datasets.load_dataset')
+    @patch("datasets.load_dataset")
     def test_shuffling_applied(self, mock_func):
         """Test if argument is used."""
         dummy_ds = self._dummy_setup()
@@ -170,10 +170,7 @@ class ArtificialDatasetTest(unittest.TestCase):
 
         expected_result = dummy_ds.shuffle(seed=42)["train"]["features"]
         fds = FederatedDataset(
-            dataset="does-not-matter",
-            partitioners={"train": 10},
-            shuffle=True,
-            seed=42
+            dataset="does-not-matter", partitioners={"train": 10}, shuffle=True, seed=42
         )
         train = fds.load_full("train")
         # This should be shuffled
@@ -181,10 +178,9 @@ class ArtificialDatasetTest(unittest.TestCase):
 
         self.assertEqual(expected_result, result)
 
-    @patch('datasets.load_dataset')
+    @patch("datasets.load_dataset")
     def test_shuffling_not_applied(self, mock_func):
         """Test if argument is not used."""
-
         dummy_ds = self._dummy_setup()
         mock_func.return_value = dummy_ds
 
@@ -200,20 +196,18 @@ class ArtificialDatasetTest(unittest.TestCase):
 
         self.assertEqual(expected_result, result)
 
-    @patch('datasets.load_dataset')
+    @patch("datasets.load_dataset")
     def test_shuffling_before_to_resplitting_applied(self, mock_func):
         """Check if the order is met and if the shuffling happens."""
+
         def resplit(dataset: DatasetDict) -> DatasetDict:
             #  "Move" the last sample from test to train
             return DatasetDict(
                 {
                     "train": concatenate_datasets(
                         [dataset["train"], dataset["test"].select([0])]
-                            ),
-                    "test":
-                        dataset["test"].select(
-                            range(1, dataset["test"].num_rows)
-                        )
+                    ),
+                    "test": dataset["test"].select(range(1, dataset["test"].num_rows)),
                 }
             )
 
@@ -221,14 +215,13 @@ class ArtificialDatasetTest(unittest.TestCase):
         mock_func.return_value = dummy_ds
 
         expected_result = concatenate_datasets(
-                        [dummy_ds["train"].shuffle(42),
-                         dummy_ds["test"].shuffle(42).select([0])])["features"]
+            [dummy_ds["train"].shuffle(42), dummy_ds["test"].shuffle(42).select([0])]
+        )["features"]
         fds = FederatedDataset(
             dataset="does-not-matter",
             partitioners={"train": 10},
             resplitter=resplit,
             shuffle=True,
-
         )
         train = fds.load_full("train")
         # This should not be shuffled
