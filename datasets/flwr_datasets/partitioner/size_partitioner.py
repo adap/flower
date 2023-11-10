@@ -67,7 +67,7 @@ class SizePartitioner(Partitioner):
     def load_partition(self, idx: int) -> datasets.Dataset:
         """Load a single partition based on the partition index.
 
-        For this partitioner the number of samples is dependent on the partition idx.
+        The number of samples is dependent on the partition node_id.
 
         Parameters
         ----------
