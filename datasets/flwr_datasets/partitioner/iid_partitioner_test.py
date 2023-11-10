@@ -18,7 +18,6 @@
 import unittest
 from typing import Tuple
 
-import numpy as np
 from parameterized import parameterized
 
 from datasets import Dataset
@@ -107,10 +106,10 @@ class TestIidPartitioner(unittest.TestCase):
         partition = partitioner.load_partition(partition_index)
         row_id = 0
         self.assertEqual(
-            partition["features"][row_id],
+            partition[row_id]["features"],
             # Note it's contiguous so partition_size * partition_index gets the first
             # element of the partition of partition_index
-            dataset["features"][partition_size * partition_index + row_id],
+            dataset[partition_size * partition_index + row_id]["features"],
         )
 
     @parameterized.expand(  # type: ignore
