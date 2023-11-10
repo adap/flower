@@ -93,7 +93,7 @@ def start_simulation(
     client_fn : ClientFn
         A function creating client instances. The function must take a single
         `str` argument called `cid`. It should return a single client instance
-        of type ClientLike. Note that the created client instances are ephemeral
+        of type Client. Note that the created client instances are ephemeral
         and will often be destroyed after a single method invocation. Since client
         instances are not long-lived, they should not attempt to carry state over
         method invocations. Any state required by the instance (model, dataset,
