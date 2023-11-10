@@ -93,7 +93,7 @@ def distribute_gpus(num_clients, client_memory=1024):
             based on your gpu's memory define list accordingly.
             Currently it defines to use 5000 MB of gpu vram from both GPU's
         """
-        gpu_free_mem = [15000] # set the gpu limit based on your system.
+        gpu_free_mem = [0] # set the gpu limit based on your system.
         for client_id in range(num_clients):
             gpu_id = gpu_free_mem.index(max(gpu_free_mem))
             if gpu_free_mem[gpu_id] >= client_memory:
@@ -103,7 +103,7 @@ def distribute_gpus(num_clients, client_memory=1024):
                 clients_gpu[client_id] = None
     return clients_gpu
 
-@hydra.main(config_path="conf", config_name="base")
+@hydra.main(config_path="conf/table_3/row_2_clients_10", config_name="ambient_context")
 def main(cfg):
     clients_gpu = distribute_gpus(
         num_clients=cfg["client"]["num_clients"], client_memory=cfg["client"]["gpu_memory"]

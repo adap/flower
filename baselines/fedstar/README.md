@@ -59,6 +59,11 @@ poetry run python -m <baseline-name>.main --multirun num_client_per_round=5,10,5
 # the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
 
 [Now show a figure/table displaying the results of the above command]
+| Clients | Speech Commands Actual | Speech Commands Implementation | Ambient Context Actual | Ambient Context Implementation |
+|---------|-------------------------|---------------------------------|------------------------|--------------------------------|
+|    5    |          96.93          |               90.81               |          71.88         |             73.13                |
+|   10    |          96.78          |               93.56               |          68.01         |             70.56                |
+|   15    |          96.33          |               93.72               |          66.86         |             66.28                |
+|   30    |          94.62          |               89.63               |          65.14         |             66.17                |
 
-# add more commands + plots for additional experiments.
 ```
