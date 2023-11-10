@@ -31,10 +31,10 @@ from flwr_datasets.utils import (
 class FederatedDataset:
     """Representation of a dataset for federated learning/evaluation/analytics.
 
-     Download, partition data among clients (edge devices), or load full dataset.
+    Download, partition data among clients (edge devices), or load full dataset.
 
-     Partitions are created using IidPartitioner. Support for different partitioners
-     specification and types will come in future releases.
+    Partitions are created using IidPartitioner. Support for different partitioners
+    specification and types will come in future releases.
 
     Parameters
     ----------
@@ -42,7 +42,7 @@ class FederatedDataset:
         The name of the dataset in the Hugging Face Hub.
     subset: str
         Secondary information regarding the dataset, most often subset or version
-         (that is passed to the name in datasets.load_dataset).
+        (that is passed to the name in datasets.load_dataset).
     resplitter: Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]]
         `Callable` that transforms `DatasetDict` splits, or configuration dict for
         `MergeResplitter`.
