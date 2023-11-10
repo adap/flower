@@ -49,21 +49,11 @@ python -m fedstar.server
 python -m fedstar.clients
 ```
 ## Expected Results
-
-:warning: _Your baseline implementation should replicate several of the experiments in the original paper. Please include here the exact command(s) needed to run each of those experiments followed by a figure (e.g. a line plot) or table showing the results you obtained when you ran the code. Below is an example of how you can present this. Please add command followed by results for all your experiments._
-
-```bash
-# it is likely that for one experiment you need to sweep over different hyperparameters. You are encouraged to use Hydra's multirun functionality for this. This is an example of how you could achieve this for some typical FL hyperparameteres
-
-poetry run python -m <baseline-name>.main --multirun num_client_per_round=5,10,50 dataset=femnist,cifar10
-# the above command will run a total of 6 individual experiments (because 3client_configs x 2datasets = 6 -- you can think of it as a grid).
-
-[Now show a figure/table displaying the results of the above command]
-| Clients | Speech Commands Actual | Speech Commands Implementation | Ambient Context Actual | Ambient Context Implementation |
-|---------|-------------------------|---------------------------------|------------------------|--------------------------------|
-|    5    |          96.93          |               90.81               |          71.88         |             73.13                |
-|   10    |          96.78          |               93.56               |          68.01         |             70.56                |
-|   15    |          96.33          |               93.72               |          66.86         |             66.28                |
-|   30    |          94.62          |               89.63               |          65.14         |             66.17                |
-
+| Clients | Speech Commands |                | Ambient Context |                |
+|---------|-----------------|----------------|-----------------|----------------|
+|         | Actual          | Implementation | Actual          | Implementation |
+| N=5     | 96.93           | 90.81          | 71.88           | 73.13          |
+| N=10    | 96.78           | 93.56          | 68.01           | 70.56          |
+| N=15    | 96.33           | 93.72          | 66.86           | 66.28          |
+| N=30    | 94.62           | 89.63          | 65.14           | 66.17          |
 ```
