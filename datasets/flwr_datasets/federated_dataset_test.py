@@ -18,7 +18,7 @@
 
 import unittest
 from typing import Dict, Union
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 from parameterized import parameterized, parameterized_class
@@ -148,6 +148,7 @@ class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
 class ArtificialDatasetTest(unittest.TestCase):
     """Test using small artificial dataset, mocked load_dataset."""
 
+    # pylint: disable=no-self-use
     def _dummy_setup(self, train_rows: int = 10, test_rows: int = 5) -> DatasetDict:
         """Create a dummy DatasetDict with train, test splits."""
         data_train = {
@@ -163,7 +164,7 @@ class ArtificialDatasetTest(unittest.TestCase):
         return DatasetDict({"train": train_dataset, "test": test_dataset})
 
     @patch("datasets.load_dataset")
-    def test_shuffling_applied(self, mock_func):
+    def test_shuffling_applied(self, mock_func: Mock) -> None:
         """Test if argument is used."""
         dummy_ds = self._dummy_setup()
         mock_func.return_value = dummy_ds
@@ -179,7 +180,7 @@ class ArtificialDatasetTest(unittest.TestCase):
         self.assertEqual(expected_result, result)
 
     @patch("datasets.load_dataset")
-    def test_shuffling_not_applied(self, mock_func):
+    def test_shuffling_not_applied(self, mock_func: Mock) -> None:
         """Test if argument is not used."""
         dummy_ds = self._dummy_setup()
         mock_func.return_value = dummy_ds
@@ -197,7 +198,7 @@ class ArtificialDatasetTest(unittest.TestCase):
         self.assertEqual(expected_result, result)
 
     @patch("datasets.load_dataset")
-    def test_shuffling_before_to_resplitting_applied(self, mock_func):
+    def test_shuffling_before_to_resplitting_applied(self, mock_func: Mock) -> None:
         """Check if the order is met and if the shuffling happens."""
 
         def resplit(dataset: DatasetDict) -> DatasetDict:
