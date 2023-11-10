@@ -21,8 +21,6 @@ import time
 from logging import INFO
 from typing import Callable, ContextManager, Optional, Tuple, Union
 
-from uvicorn.importer import import_from_string
-
 from flwr.app import Bwd, Flower, Fwd
 from flwr.client.client import Client
 from flwr.client.typing import ClientFn
@@ -38,6 +36,7 @@ from flwr.common.constant import (
 from flwr.common.logger import log
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 
+from .flower import load_callable
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
@@ -60,7 +59,7 @@ def run_client() -> None:
         sys.path.insert(0, app_dir)
 
     def _load() -> Flower:
-        app: Flower = import_from_string(args.app)
+        app: Flower = load_callable(args.app)
         return app
 
     return start_client(

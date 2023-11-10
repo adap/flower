@@ -15,8 +15,9 @@
 """Flower app."""
 
 
+import importlib
 from dataclasses import dataclass
-from typing import Callable
+from typing import Callable, cast
 
 from flwr.client.message_handler.message_handler import handle
 from flwr.client.typing import ClientFn
@@ -40,7 +41,7 @@ class Bwd:
     state: WorkloadState
 
 
-App = Callable[[Fwd], Bwd]
+FlowerCallable = Callable[[Fwd], Bwd]
 
 
 class Flower:
@@ -63,3 +64,46 @@ class Flower:
             task_res=task_res,
             state=WorkloadState(state={}),
         )
+
+
+class LoadCallableError(Exception):
+    """."""
+
+
+def load_callable(module_attribute_str: str) -> Flower:
+    """."""
+    module_str, _, attributes_str = module_attribute_str.partition(":")
+    if not module_str:
+        raise LoadCallableError(
+            f"Missing module in {module_attribute_str}",
+        ) from None
+    if not attributes_str:
+        raise LoadCallableError(
+            f"Missing attribute in {module_attribute_str}",
+        ) from None
+
+    # Load module
+    try:
+        module = importlib.import_module(module_str)
+    except ModuleNotFoundError:
+        raise LoadCallableError(
+            f"Unable to load module {module_str}",
+        ) from None
+
+    # Recursively load attribute
+    attribute = module
+    try:
+        for attribute_str in attributes_str.split("."):
+            attribute = getattr(attribute, attribute_str)
+    except AttributeError:
+        raise LoadCallableError(
+            f"Unable to load attribute {attributes_str} from module {module_str}",
+        ) from None
+
+    # Check type
+    if not isinstance(attribute, Flower):
+        raise LoadCallableError(
+            f"Attribute {attributes_str} is not of type {Flower}",
+        ) from None
+
+    return cast(Flower, attribute)
