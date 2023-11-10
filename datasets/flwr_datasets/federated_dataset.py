@@ -46,7 +46,7 @@ class FederatedDataset:
     resplitter: Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]]
         `Callable` that transforms `DatasetDict` splits, or configuration dict for
         `MergeResplitter`.
-    partitioners: Dict[str, Union[Partitioner, int]]
+    partitioner: Dict[str, Union[Partitioner, int]]
         A dictionary mapping the Dataset split (a `str`) to a `Partitioner` or an `int`
         (representing the number of IID partitions that this split should be partitioned
         into).
@@ -55,7 +55,7 @@ class FederatedDataset:
     --------
     Use MNIST dataset for Federated Learning with 100 clients (edge devices):
 
-    >>> mnist_fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
+    >>> mnist_fds = FederatedDataset(dataset="mnist", partitioner={"train": 100})
 
     Load partition for client with ID 10.
 
@@ -72,7 +72,7 @@ class FederatedDataset:
         dataset: str,
         subset: Optional[str] = None,
         resplitter: Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]] = None,
-        partitioners: Dict[str, Union[Partitioner, int]],
+        partitioner: Dict[str, Union[Partitioner, int]],
     ) -> None:
         _check_if_dataset_tested(dataset)
         self._dataset_name: str = dataset
@@ -81,7 +81,7 @@ class FederatedDataset:
             resplitter
         )
         self._partitioners: Dict[str, Partitioner] = _instantiate_partitioners(
-            partitioners
+            partitioner
         )
         #  Init (download) lazily on the first call to `load_partition` or `load_full`
         self._dataset: Optional[DatasetDict] = None
