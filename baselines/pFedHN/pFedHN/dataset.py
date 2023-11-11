@@ -21,7 +21,7 @@ def get_datasets(data_name, dataroot, normalize=True, val_size=10000):
     if data_name == "mnist":
         normalization = transforms.Normalize((0.1307,), (0.3081,))
         data_obj = MNIST
-    if data_name == "cifar10":
+    elif data_name == "cifar10":
         normalization = transforms.Normalize(
             (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
         )
