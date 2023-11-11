@@ -15,6 +15,10 @@
 """Flower Datasets main package."""
 
 
+from flwr_datasets.common.version import package_version as _package_version
+
 from .federated_dataset import FederatedDataset
 
 __all__ = ["FederatedDataset"]
+
+__version__ = _package_version
