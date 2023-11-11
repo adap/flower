@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2020 Adap GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,23 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Datasets Partitioner package."""
+"""Flower app package."""
 
 
-from .exponential_partitioner import ExponentialPartitioner
-from .iid_partitioner import IidPartitioner
-from .linear_partitioner import LinearPartitioner
-from .natural_id_partitioner import NaturalIdPartitioner
-from .partitioner import Partitioner
-from .size_partitioner import SizePartitioner
-from .square_partitioner import SquarePartitioner
+from flwr.client.flower import Bwd as Bwd
+from flwr.client.flower import Flower as Flower
+from flwr.client.flower import Fwd as Fwd
 
 __all__ = [
-    "IidPartitioner",
-    "Partitioner",
-    "NaturalIdPartitioner",
-    "SizePartitioner",
-    "LinearPartitioner",
-    "SquarePartitioner",
-    "ExponentialPartitioner",
+    "Flower",
+    "Fwd",
+    "Bwd",
 ]
