@@ -79,9 +79,6 @@ class FlowerClient(fl.client.NumPyClient):
         Args:
             parameters (list): List of parameter values.
 
-        Returns
-        -------
-            OrderedDict: The inner_state_dict of the target network.
         """
         state_dict = OrderedDict(
             {
@@ -90,7 +87,6 @@ class FlowerClient(fl.client.NumPyClient):
             }
         )
         self.net.to(self.device).load_state_dict(state_dict, strict=True)
-        return state_dict
 
     def fit(self, parameters, config):
         """Perform federated training on the client.
@@ -101,10 +97,10 @@ class FlowerClient(fl.client.NumPyClient):
 
         Returns
         -------
-            tuple: A tuple containing delta theta (parameter updates),
+            tuple: A tuple containing final_state(parameters),
                    the number of training samples, and metrics.
         """
-        inner_state = self.set_parameters(parameters)
+        self.set_parameters(parameters)
 
         final_state = train(
             self.net,
@@ -121,15 +117,10 @@ class FlowerClient(fl.client.NumPyClient):
             self.cid,
         )
 
-        # Calculating delta theta
-        delta_theta = OrderedDict(
-            {k: v - final_state[k] for k, v in inner_state.items()}
-        )
-
-        delta_theta = [val.cpu().numpy() for _, val in delta_theta.items()]
+        final_state_val = [val.cpu().numpy() for _, val in final_state.items()]
 
         return (
-            delta_theta,
+            final_state_val,
             len(self.trainloader),
             {},
         )

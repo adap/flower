@@ -117,7 +117,7 @@ To run this pFedHN, first ensure you have activated your Poetry environment (exe
 ## These instructions are for the pFedHN Experiments
 python -m pFedHN.main # this will run using the default settings in the `conf/config.yaml` that is for the CIFAR-10 dataset
 
-python -m pFedHN.main dataset.data="cifar100" model.out_dim=100 client.num_classes_per_node=10 # this will run for the CIFAR-100 dataset where we give each client 10 classes and number of classes is 100
+python -m pFedHN.main dataset.data="cifar100" model.out_dim=100 client.num_classes_per_node=10 client.batch_size=128 # this will run for the CIFAR-100 dataset where we give each client 10 classes and number of classes is 100
 
 python -m pFedHN.main dataset.data="mnist" model.n_kernels=7 model.in_channels=1 model.n_hidden=1 # this will run for the MNIST dataset where the number of input channels is 1 , the number of hidden layers in hypernetwork is 1 and the number of kernels used in the CNNTarget is 7
 
@@ -127,7 +127,7 @@ python -m pFedHN.main dataset.data="mnist" model.n_kernels=7 model.in_channels=1
 
 python -m pFedHN.main model.local=True model.variant=1 server.lr=5e-2 # this will run the pFedHNPC for CIFAR-10 dataset where local=True is for using LocalLayer and variant=1 for setting pFedHNPC . Learning rate is modified to 5e-2
 
-python -m pFedHN.main dataset.data="cifar100" model.out_dim=100 client.num_classes_per_node=10 model.local=True model.variant=1 server.lr=5e-2 # this will run the pFedHNPC for CIFAR-100 dataset where local=True is for using LocalLayer and variant=1 for setting pFedHNPC . Learning rate is modified to 5e-2
+python -m pFedHN.main dataset.data="cifar100" model.out_dim=100 client.num_classes_per_node=10 model.local=True model.variant=1 server.lr=5e-2 client.batch_size=128 # this will run the pFedHNPC for CIFAR-100 dataset where local=True is for using LocalLayer and variant=1 for setting pFedHNPC . Learning rate is modified to 5e-2
 
 ```
 
@@ -136,5 +136,5 @@ python -m pFedHN.main dataset.data="cifar100" model.out_dim=100 client.num_class
 | Algorithm | Dataset | Num_Clients | Paper_Accuracy | Experimented_Accuracy | Experimented_Loss | Hardware | Time-Taken |
 | ----------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
 | pFedHN | MNIST | 50 | 99.28 ± 0.11 | 99.18 | 0.04258 | NVIDIA A100-PCIE-40GB, num_gpus=0.5 |  9602.4372 seconds |
-| pFedHN | CIFAR-10 | 50 | 88.38 ± 0.29 | 82.37 | 0.81694 | MacBook Pro M2 Pro, 12 Core CPU | 15252.1581 seconds |
-| pFedHNPC | CIFAR-10 | 50 | 90.08 ± 0.63 | 85.25 | 0.70374 | MacBook Pro M2 Pro, 12 Core CPU | 15279.2597 seconds |
+| pFedHN | CIFAR-10 | 50 | 88.38 ± 0.29 | 88.01 | 0.81694 | MacBook Pro M2 Pro, 12 Core CPU | 15227.9250 seconds |
+| pFedHN | CIFAR-100 | 50 | 59.48 ± 0.67 | 57.21 | 3.6549 | MacBook Pro M2 Pro, 12 Core CPU | 20808.95235 seconds |

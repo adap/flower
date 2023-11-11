@@ -63,6 +63,27 @@ class pFedHNServer(Server):
             n_hidden=self.cfg.model.n_hidden,
             local=self.cfg.model.local,
         )
+        self.hnet.to(torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
+
+        self.optimizer = torch.optim.SGD(
+            [
+                {
+                    "params": [
+                        p for n, p in self.hnet.named_parameters() if "embed" not in n
+                    ]
+                },
+                {
+                    "params": [
+                        p for n, p in self.hnet.named_parameters() if "embed" in n
+                    ],
+                    "lr": self.cfg.server.lr,
+                },
+            ],
+            lr=self.cfg.server.lr,
+            momentum=self.cfg.server.momentum,
+            weight_decay=self.cfg.server.wd,
+        )
+
         self.parameters: Parameters = Parameters(
             tensors=[], tensor_type="numpy.ndarray"
         )
@@ -73,7 +94,7 @@ class pFedHNServer(Server):
     def evaluate_round(self, server_round: int, timeout: Optional[float]):
         """Perform federated evaluation."""
         # pylint: disable=too-many-locals
-        self.hnet.to(torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
+        self.hnet.eval()
 
         def weights_to_clients(client_id):
             weights = self.hnet(
@@ -121,7 +142,6 @@ class pFedHNServer(Server):
             len(failures),
         )
 
-        self.hnet.eval()
         aggregated_result = self.strategy.aggregate_evaluate(
             server_round, results, failures
         )
@@ -136,7 +156,7 @@ class pFedHNServer(Server):
 
         self.data.append(data)
 
-        with open("res.json", "w", encoding="utf-8") as f:
+        with open("res2.json", "w", encoding="utf-8") as f:
             json.dump(self.data, f)
 
         log(
@@ -151,7 +171,7 @@ class pFedHNServer(Server):
     def fit_round(self, server_round: int, timeout: Optional[float]):
         """Perform a single round of federated averaging."""
         # pylint: disable=too-many-locals
-        self.hnet.to(torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
+        self.hnet.train()
 
         def weights_to_clients(client_id):
             weights = self.hnet(
@@ -171,6 +191,11 @@ class pFedHNServer(Server):
         one_client_cid = one_client[0].cid
 
         one_client_weights = weights_to_clients(int(one_client_cid))
+
+        inner_state = OrderedDict(
+            {k: tensor.data for k, tensor in one_client_weights.items()}
+        )
+
         array = [val.cpu().detach().numpy() for _, val in one_client_weights.items()]
         parameters = ndarrays_to_parameters(array)
 
@@ -200,49 +225,30 @@ class pFedHNServer(Server):
             len(failures),
         )
 
-        self.hnet.train()
-        delta_theta, metrics_aggregated = self.strategy.aggregate_fit(
+        final_state_val, metrics_aggregated = self.strategy.aggregate_fit(
             server_round, results, failures
         )
-        # optim = torch.optim.Adam(params=self.hnet.parameters(), lr=1e-2)
-        optim = torch.optim.SGD(
-            [
-                {
-                    "params": [
-                        p for n, p in self.hnet.named_parameters() if "embed" not in n
-                    ]
-                },
-                {
-                    "params": [
-                        p for n, p in self.hnet.named_parameters() if "embed" in n
-                    ],
-                    "lr": self.cfg.server.lr,
-                },
-            ],
-            lr=self.cfg.server.lr,
-            momentum=self.cfg.server.momentum,
-            weight_decay=self.cfg.server.wd,
-        )
-        optim.zero_grad()
-        param_dict = zip(
-            self.hnet.state_dict().keys(),
-            fl.common.parameters_to_ndarrays(delta_theta),  # type: ignore[arg-type]
+        final_dict = zip(
+            one_client_weights.keys(),
+            fl.common.parameters_to_ndarrays(final_state_val),  # type: ignore[arg-type]
         )
 
-        delta_theta_dict = OrderedDict(
+        final_state = OrderedDict(
             {
                 k: torch.Tensor(v).to(
                     torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
                 )
-                for k, v in param_dict
+                for k, v in final_dict
             }
         )
+        delta_theta = OrderedDict(
+            {k: inner_state[k] - final_state[k] for k in one_client_weights.keys()}
+        )
 
-        # calculating phi gradient
         hnet_grads = torch.autograd.grad(
             list(one_client_weights.values()),
             self.hnet.parameters(),  # type: ignore[arg-type]
-            grad_outputs=list(delta_theta_dict.values()),
+            grad_outputs=list(delta_theta.values()),
         )
 
         # update hnet weights
@@ -250,7 +256,7 @@ class pFedHNServer(Server):
             model_parameter.grad = gradient
 
         torch.nn.utils.clip_grad_norm_(self.hnet.parameters(), 50)
-        optim.step()
+        self.optimizer.step()
 
         ndarr = [val.cpu().numpy() for _, val in self.hnet.state_dict().items()]
         hnet_parameters = ndarrays_to_parameters(ndarr)
