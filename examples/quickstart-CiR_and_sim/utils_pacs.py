@@ -5,7 +5,9 @@ import os
 from sklearn.model_selection import StratifiedKFold
 from collections import Counter
 from tqdm import tqdm
-
+from torch.nn.parameter import Parameter
+from typing import List, Tuple
+import torch.nn as nn
 # Define the root directory where your dataset is located
 dataset_root = "data/pacs_data/"
 from flwr.common import (
@@ -73,15 +75,6 @@ def make_dataloaders(dataset_kinds=data_kinds, k=2, batch_size=32, verbose=False
     return (trainloaders, valloaders, testloader)
 
 
-import torch
-from tqdm import tqdm
-
-
-def bytes_to_ndarray(byte_str):
-    # Placeholder for the actual bytes_to_ndarray implementation.
-    pass
-
-
 def train(net1, trainloader, optim, config, epochs, device: str, num_classes=7):
     """Train the model on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
@@ -133,6 +126,47 @@ def train(net1, trainloader, optim, config, epochs, device: str, num_classes=7):
             loss.backward(retain_graph=use_advanced_loss)
             optim.step()
 
+def train_prox(  
+    net,
+    trainloader,
+    optim,
+    config,
+    epochs,
+    device,
+    num_classes,
+):
+
+    criterion = torch.nn.CrossEntropyLoss()
+    global_params = [val.detach().clone() for val in net.parameters()]
+    net.train()
+    for _ in range(epochs):
+        net = _train_one_epoch(
+            net, global_params, trainloader, device, criterion, optim, config.get("proximal_mu", 1)
+        )
+
+
+def _train_one_epoch(  
+    net,
+    global_params: List[Parameter],
+    trainloader: DataLoader,
+    device: torch.device,
+    criterion: torch.nn.CrossEntropyLoss,
+    optimizer: torch.optim.Adam,
+    proximal_mu: float,
+) -> nn.Module:
+
+    for images, labels in trainloader:
+        images, labels = images.to(device), labels.to(device)
+        optimizer.zero_grad()
+        proximal_term = 0.0
+        for local_weights, global_weights in zip(net.parameters(), global_params):
+            proximal_term += torch.square((local_weights - global_weights).norm(2))
+        loss = criterion(net(images), labels) + (proximal_mu / 2) * proximal_term
+        print(type(net(images)))
+        print(type(labels))
+        loss.backward()
+        optimizer.step()
+    return net
 
 def test(net1, testloader, device: str):
     """Validate the model on the test set."""
