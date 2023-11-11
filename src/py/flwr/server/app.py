@@ -22,6 +22,7 @@ import threading
 from dataclasses import dataclass
 from logging import ERROR, INFO, WARN
 from os.path import isfile
+from pathlib import Path
 from signal import SIGINT, SIGTERM, signal
 from types import FrameType
 from typing import List, Optional, Tuple
@@ -254,6 +255,7 @@ def run_driver_api() -> None:
     grpc_server: grpc.Server = _run_driver_api_grpc(
         address=address,
         state_factory=state_factory,
+        certificates=None,
     )
 
     # Graceful shutdown
@@ -315,6 +317,7 @@ def run_fleet_api() -> None:
         fleet_server = _run_fleet_api_grpc_bidi(
             address=address,
             state_factory=state_factory,
+            certificates=None,
         )
         grpc_servers.append(fleet_server)
     elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
@@ -327,6 +330,7 @@ def run_fleet_api() -> None:
         fleet_server = _run_fleet_api_grpc_rere(
             address=address,
             state_factory=state_factory,
+            certificates=None,
         )
         grpc_servers.append(fleet_server)
     else:
@@ -346,7 +350,7 @@ def run_fleet_api() -> None:
         bckg_threads[0].join()
 
 
-# pylint: disable=too-many-branches
+# pylint: disable=too-many-branches, too-many-locals, too-many-statements
 def run_server() -> None:
     """Run Flower server (Driver API and Fleet API)."""
     log(INFO, "Starting Flower server")
@@ -360,6 +364,23 @@ def run_server() -> None:
     host, port, is_v6 = parsed_address
     address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
+    # Obtain certificates
+    if args.insecure:
+        certificates = None
+    # Check if certificates are provided
+    elif args.certificates:
+        certificates = (
+            Path(args.certificates[0]).read_bytes(),  # CA certificate
+            Path(args.certificates[1]).read_bytes(),  # server certificate
+            Path(args.certificates[2]).read_bytes(),  # server private key
+        )
+    else:
+        sys.exit(
+            "Certificates are required unless running in insecure mode. "
+            "Please provide certificate paths with '--certificates' or run the server "
+            "in insecure mode using '--insecure' if you understand the risks."
+        )
+
     # Initialize StateFactory
     state_factory = StateFactory(args.database)
 
@@ -367,6 +388,7 @@ def run_server() -> None:
     driver_server: grpc.Server = _run_driver_api_grpc(
         address=address,
         state_factory=state_factory,
+        certificates=certificates,
     )
 
     grpc_servers = [driver_server]
@@ -408,6 +430,7 @@ def run_server() -> None:
         fleet_server = _run_fleet_api_grpc_bidi(
             address=address,
             state_factory=state_factory,
+            certificates=certificates,
         )
         grpc_servers.append(fleet_server)
     elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
@@ -420,6 +443,7 @@ def run_server() -> None:
         fleet_server = _run_fleet_api_grpc_rere(
             address=address,
             state_factory=state_factory,
+            certificates=certificates,
         )
         grpc_servers.append(fleet_server)
     else:
@@ -490,6 +514,7 @@ def _register_exit_handlers(
 def _run_driver_api_grpc(
     address: str,
     state_factory: StateFactory,
+    certificates: Optional[Tuple[bytes, bytes, bytes]],
 ) -> grpc.Server:
     """Run Driver API (gRPC, request-response)."""
     # Create Driver API gRPC server
@@ -501,7 +526,7 @@ def _run_driver_api_grpc(
         servicer_and_add_fn=(driver_servicer, driver_add_servicer_to_server_fn),
         server_address=address,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        certificates=None,
+        certificates=certificates,
     )
 
     log(INFO, "Flower ECE: Starting Driver API (gRPC-rere) on %s", address)
@@ -513,6 +538,7 @@ def _run_driver_api_grpc(
 def _run_fleet_api_grpc_bidi(
     address: str,
     state_factory: StateFactory,
+    certificates: Optional[Tuple[bytes, bytes, bytes]],
 ) -> grpc.Server:
     """Run Fleet API (gRPC, bidirectional streaming)."""
     # DriverClientManager
@@ -529,7 +555,7 @@ def _run_fleet_api_grpc_bidi(
         servicer_and_add_fn=(fleet_servicer, fleet_add_servicer_to_server_fn),
         server_address=address,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        certificates=None,
+        certificates=certificates,
     )
 
     log(INFO, "Flower ECE: Starting Fleet API (gRPC-bidi) on %s", address)
@@ -541,6 +567,7 @@ def _run_fleet_api_grpc_bidi(
 def _run_fleet_api_grpc_rere(
     address: str,
     state_factory: StateFactory,
+    certificates: Optional[Tuple[bytes, bytes, bytes]],
 ) -> grpc.Server:
     """Run Fleet API (gRPC, request-response)."""
     # Create Fleet API gRPC server
@@ -552,7 +579,7 @@ def _run_fleet_api_grpc_rere(
         servicer_and_add_fn=(fleet_servicer, fleet_add_servicer_to_server_fn),
         server_address=address,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        certificates=None,
+        certificates=certificates,
     )
 
     log(INFO, "Flower ECE: Starting Fleet API (gRPC-rere) on %s", address)
@@ -675,14 +702,23 @@ def _parse_args_server() -> argparse.ArgumentParser:
         "(meaning, a Driver API and a Fleet API), "
         "that clients will be able to connect to.",
     )
-    
-    # Add a new argument for the `--insecure` flag
+
+    # Add "--insecure" and "--certificates"
     parser.add_argument(
         "--insecure",
         action="store_true",
-        help="Run the server without HTTPS. "
-        "By default, the server runs with HTTPS enabled. "
-        "Use this flag only if you understand the risks."
+        help="Run the server without HTTPS, regardless of whether certificate "
+        "paths are provided. By default, the server runs with HTTPS enabled. "
+        "Use this flag only if you understand the risks.",
+    )
+    parser.add_argument(
+        "--certificates",
+        nargs=3,
+        metavar=("CA_CERT", "SERVER_CERT", "PRIVATE_KEY"),
+        type=str,
+        help="Paths to the CA certificate, server certificate, and server private "
+        "key, in that order. Note: The server can only be started without "
+        "certificates by enabling the `--insecure` flag.",
     )
 
     _add_args_common(parser=parser)
