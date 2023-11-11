@@ -14,7 +14,6 @@
 
   Thanks to an initial contribution made by [Fiona Victoria](https://github.com/fionavictoria), Flower now offers an example of Federated Learning applied to Diffusion models.
 
-### What's new?
 - **Update the C++ SDK** ([#2537](https://github/com/adap/flower/pull/2537), [#2528](https://github/com/adap/flower/pull/2528), [#2523](https://github.com/adap/flower/pull/2523), [#2522](https://github.com/adap/flower/pull/2522))
 
   Add gRPC request-response capability to the C++ SDK.
