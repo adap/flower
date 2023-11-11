@@ -16,7 +16,7 @@
 
 from typing import List
 
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.client.flower import Bwd, Fwd
 
 from .typing import App, Layer
 
@@ -25,8 +25,8 @@ def make_app(app: App, middleware_layers: List[Layer]) -> App:
     """."""
 
     def wrap_app(_app: App, _layer: Layer) -> App:
-        def new_app(task_ins: TaskIns) -> TaskRes:
-            return _layer(task_ins, _app)
+        def new_app(fwd: Fwd) -> Bwd:
+            return _layer(fwd, _app)
 
         return new_app
 

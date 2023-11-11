@@ -18,6 +18,8 @@
 import unittest
 from typing import List
 
+from flwr.client.flower import Bwd, Fwd
+from flwr.client.workload_state import WorkloadState
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 
 from .typing import App, Layer
@@ -27,13 +29,13 @@ from .utils import make_app
 def make_mock_middleware(name: str, footprint: List[str]) -> Layer:
     """Make a mock middleware layer."""
 
-    def middleware(task_ins: TaskIns, app: App) -> TaskRes:
+    def middleware(fwd: Fwd, app: App) -> Bwd:
         footprint.append(name)
-        task_ins.task_id += f"{name}"
-        task_res = app(task_ins)
+        fwd.task_ins.task_id += f"{name}"
+        bwd = app(fwd)
         footprint.append(name)
-        task_res.task_id += f"{name}"
-        return task_res
+        bwd.task_res.task_id += f"{name}"
+        return bwd
 
     return middleware
 
@@ -41,10 +43,10 @@ def make_mock_middleware(name: str, footprint: List[str]) -> Layer:
 def make_mock_app(name: str, footprint: List[str]) -> App:
     """Make a mock app."""
 
-    def app(task_ins: TaskIns) -> TaskRes:
+    def app(fwd: Fwd) -> Bwd:
         footprint.append(name)
-        task_ins.task_id += f"{name}"
-        return TaskRes(task_id=name)
+        fwd.task_ins.task_id += f"{name}"
+        return Bwd(task_res=TaskRes(task_id=name), state=WorkloadState({}))
 
     return app
 
@@ -65,7 +67,7 @@ class TestMakeApp(unittest.TestCase):
 
         # Execute
         wrapped_app = make_app(mock_app, mock_middleware_layers)
-        task_res = wrapped_app(task_ins)
+        task_res = wrapped_app(Fwd(task_ins=task_ins, state=WorkloadState({}))).task_res
 
         # Assert
         trace = mock_middleware_names + ["app"]
@@ -81,16 +83,15 @@ class TestMakeApp(unittest.TestCase):
         mock_app = make_mock_app("app", footprint)
         task_ins = TaskIns()
 
-        # pylint: disable-next=unused-argument
-        def filter_layer(task_ins: TaskIns, app: App) -> TaskRes:
+        def filter_layer(fwd: Fwd, _: App) -> Bwd:
             footprint.append("filter")
-            task_ins.task_id += "filter"
+            fwd.task_ins.task_id += "filter"
             # Skip calling app
-            return TaskRes(task_id="filter")
+            return Bwd(task_res=TaskRes(task_id="filter"), state=WorkloadState({}))
 
         # Execute
         wrapped_app = make_app(mock_app, [filter_layer])
-        task_res = wrapped_app(task_ins)
+        task_res = wrapped_app(Fwd(task_ins=task_ins, state=WorkloadState({}))).task_res
 
         # Assert
         self.assertEqual(footprint, ["filter"])

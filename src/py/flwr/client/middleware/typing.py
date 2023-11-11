@@ -16,7 +16,7 @@
 
 from typing import Callable
 
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.client.flower import Bwd, Fwd
 
-App = Callable[[TaskIns], TaskRes]
-Layer = Callable[[TaskIns, App], TaskRes]
+App = Callable[[Fwd], Bwd]
+Layer = Callable[[Fwd, App], Bwd]
