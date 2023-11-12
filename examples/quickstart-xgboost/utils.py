@@ -32,7 +32,7 @@ def client_args_parser():
     )
     parser.add_argument(
         "--centralised_eval",
-        action='store_true',
+        action="store_true",
         help="Conduct centralised evaluation (True), or client evaluation on hold-out data (False).",
     )
 
@@ -64,7 +64,7 @@ def server_args_parser():
     )
     parser.add_argument(
         "--centralised_eval",
-        action='store_true',
+        action="store_true",
         help="Conduct centralised evaluation (True), or client evaluation on hold-out data (False).",
     )
 

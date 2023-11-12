@@ -45,7 +45,9 @@ class XGbBagging(fl.server.strategy.FedAvg):
         for _, fit_res in results:
             update = fit_res.parameters.tensors
             for item in update:
-                self.global_model = aggregate(self.global_model, json.loads(bytearray(item)))
+                self.global_model = aggregate(
+                    self.global_model, json.loads(bytearray(item))
+                )
 
         weights_avg = json.dumps(self.global_model)
 

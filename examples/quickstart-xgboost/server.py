@@ -61,6 +61,7 @@ def evaluate_metrics_aggregation(eval_metrics):
 
 def get_evaluate_fn(test_data):
     """Return a function for centralised evaluation."""
+
     def evaluate_fn(
         server_round: int, parameters: Parameters, config: Dict[str, Scalar]
     ):

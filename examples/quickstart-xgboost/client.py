@@ -106,7 +106,10 @@ class FlowerClient(fl.client.Client):
             self.bst.update(train_dmatrix, self.bst.num_boosted_rounds())
 
         # Extract the last N=num_local_round trees for sever aggregation
-        bst = self.bst[self.bst.num_boosted_rounds() - num_local_round: self.bst.num_boosted_rounds()]
+        bst = self.bst[
+            self.bst.num_boosted_rounds()
+            - num_local_round : self.bst.num_boosted_rounds()
+        ]
 
         return bst
 
