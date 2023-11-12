@@ -366,6 +366,7 @@ def run_server() -> None:
 
     # Obtain certificates
     if args.insecure:
+        log(WARN, "The server will be started without HTTPS.")
         certificates = None
     # Check if certificates are provided
     elif args.certificates:
