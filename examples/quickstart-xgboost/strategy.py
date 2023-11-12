@@ -25,6 +25,7 @@ class XGbBagging(fl.server.strategy.FedAvg):
         **kwargs,
     ):
         self.evaluate_function = evaluate_function
+        self.global_model = None
         super().__init__(**kwargs)
 
     def aggregate_fit(
@@ -41,13 +42,12 @@ class XGbBagging(fl.server.strategy.FedAvg):
             return None, {}
 
         # Aggregate all the client trees
-        global_model = None
         for _, fit_res in results:
             update = fit_res.parameters.tensors
             for item in update:
-                global_model = aggregate(global_model, json.loads(bytearray(item)))
+                self.global_model = aggregate(self.global_model, json.loads(bytearray(item)))
 
-        weights_avg = json.dumps(global_model)
+        weights_avg = json.dumps(self.global_model)
 
         return (
             Parameters(tensor_type="", tensors=[bytes(weights_avg, "utf-8")]),

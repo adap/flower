@@ -105,11 +105,9 @@ class FlowerClient(fl.client.Client):
         for i in range(num_local_round):
             self.bst.update(train_dmatrix, self.bst.num_boosted_rounds())
 
-        # Extract the last N=num_local_round trees as new local model
-        bst = self.bst[
-            self.bst.num_boosted_rounds()
-            - num_local_round : self.bst.num_boosted_rounds()
-        ]
+        # Extract the last N=num_local_round trees for sever aggregation
+        bst = self.bst[self.bst.num_boosted_rounds() - num_local_round: self.bst.num_boosted_rounds()]
+
         return bst
 
     def fit(self, ins: FitIns) -> FitRes:
@@ -125,7 +123,6 @@ class FlowerClient(fl.client.Client):
             self.config = bst.save_config()
             self.bst = bst
         else:
-            log(INFO, "Load global model...")
             for item in ins.parameters.tensors:
                 global_model = bytearray(item)
 
