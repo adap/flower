@@ -1,1 +1,5 @@
 wandb/
+dataset/
+docs/results/models/*.pth
+docs/results/pers/*.pickle
+docs/results/*.json

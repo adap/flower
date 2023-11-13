@@ -15,16 +15,21 @@ PrecisionAndRecall = namedtuple("PrecisinoAndRecall", ["precision", "recall"])
 
 
 class IPR:
-    def __init__(self, batch_size=50, k=3, num_samples=10000, model=None):
+    def __init__(self, batch_size=50, k=3, num_samples=10000, model=None, device="cpu"):
         self.manifold_ref = None
         self.batch_size = batch_size
         self.k = k
         self.num_samples = num_samples
+        self.device = str(device)
         if model is None:
             print(
                 "loading vgg16 for improved precision and recall...", end="", flush=True
             )
-            self.vgg16 = models.vgg16(pretrained=True).cuda().eval()
+            if self.device == "cuda":
+                self.vgg16 = models.vgg16(pretrained=True).cuda().eval()
+            else:
+                self.vgg16 = models.vgg16(pretrained=True).eval()
+
             print("done")
         else:
             self.vgg16 = model
@@ -127,7 +132,10 @@ class IPR:
             end = start + self.batch_size
             batch = images[start:end]
             batch = resize(batch)
-            before_fc = self.vgg16.features(batch.cuda())
+            if self.device == "cuda":
+                before_fc = self.vgg16.features(batch.cuda())
+            else:
+                before_fc = self.vgg16.features(batch)
             before_fc = before_fc.view(-1, 7 * 7 * 512)
             feature = self.vgg16.classifier[:4](before_fc)
             features.append(feature.cpu().data.numpy())
@@ -156,7 +164,10 @@ class IPR:
 
         features = []
         for batch in tqdm(dataloader, desc=desc):
-            before_fc = self.vgg16.features(batch.cuda())
+            if self.device == "cuda":
+                before_fc = self.vgg16.features(batch.cuda())
+            else:
+                before_fc = self.vgg16.features(batch)
             before_fc = before_fc.view(-1, 7 * 7 * 512)
             feature = self.vgg16.classifier[:4](before_fc)
             features.append(feature.cpu().data.numpy())

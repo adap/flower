@@ -6,7 +6,8 @@ but it will be very slow, it is recommended to run it on a CUDA GPU.
 
 ## Project Setup
 
-Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+Start by cloning the example project. We prepared a single-line command that you
+can copy into your shell which will checkout the example for you:
 
 ```shell
 git clone --depth=1 https://github.com/adap/flower.git _tmp && mv _tmp/examples/federated-diffusion . && rm -rf _tmp && cd federated-diffusion
@@ -48,7 +49,8 @@ This example requires the following dependencies:
 
 - wandb
 
-Which can be installed using `poetry install` if you are using `poetry` or `pip install -r requirements.txt`.
+Which can be installed using `poetry install` if you are using `poetry` or `pip
+install -r requirements.txt`.
 
 ## Usage
 
@@ -64,7 +66,25 @@ Or, if you are using `poetry`:
 poetry run python main.py
 ```
 
-You can change the default parameters by modifing the values in `conf.py`.
+You can change the default parameters by using the following command line
+arguments:
+
+- `--num_inference_steps [INTEGER]`: Sets the number of inference steps (default: 100).
+- `--num_clients [INTEGER]`: Specifies the number of federated clients (default: 2).
+- `--num_epochs [INTEGER]`: Determines the number of local epochs (default: 1).
+- `--num_rounds [INTEGER]`: Configures the number of communication rounds (default: 2).
+- `--server_device [STRING]`: Chooses the server device, such as 'cpu' or 'gpu' (default: 'cpu').
+- `--nclass_cifar [INTEGER]`: Sets the number of classes for CIFAR dataset (default: 2).
+- `--nsamples_cifar [INTEGER]`: Defines the number of samples for CIFAR dataset (default: 2500, calculated as 50000/20).
+- `--rate_unbalance_cifar [FLOAT]`: Adjusts the rate of unbalance for the CIFAR dataset (default: 1.0).
+- `--iid [FLAG]`: Sets the IID distribution of the dataset. Include this flag to set it to True (default: False).
+- `--personalized [FLAG]`: Enables personalized settings. Include this flag to set it to True (default: True).
+- `--batch_size_train [INTEGER]`: Specifies the batch size for training (default: 32).
+- `--batch_size_test [INTEGER]`: Specifies the batch size for testing (default: 4).
+- `--personalization_layers [INTEGER]`:  Number of personalization layers to
+  use, no applicable with `--personalized False`(default: 4).
+
+Each argument is optional and, if not provided, the default value will be used.
 
 ## Experiment tracking
 
@@ -142,21 +162,21 @@ def get_model():
 Then, we can write the training function:
 
 ```python
-def train(model, train_dataloader, cid, server_round, epochs, timesteps, cpu):
+def train(args, model, train_dataloader, cid, server_round, cpu):
     learning_rate = 1e-4
-    lr_warmup_steps = int(PARAMS.num_inference_steps / 2)
+    lr_warmup_steps = int(args.num_inference_steps / 2)
     mixed_precision = "fp16"
     gradient_accumulation_steps = 1
     save_image_epochs = 50
 
     # Weights and biases initialization is skipped...
 
-    noise_scheduler = DDPMScheduler(num_train_timesteps=timesteps)
+    noise_scheduler = DDPMScheduler(num_train_timesteps=args.num_inference_steps)
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
     lr_scheduler = get_cosine_schedule_with_warmup(
         optimizer=optimizer,
         num_warmup_steps=lr_warmup_steps,
-        num_training_steps=(len(train_dataloader) * epochs),
+        num_training_steps=(len(train_dataloader) * args.num_epochs),
     )
 
     # Initialize accelerator and tensorboard logging
@@ -179,7 +199,7 @@ def train(model, train_dataloader, cid, server_round, epochs, timesteps, cpu):
     global_step = 0
     # Now you train the model
 
-    for epoch in range(epochs):
+    for epoch in range(args.num_epochs):
         for _, batch in enumerate(train_dataloader):
             clean_images = batch[0]  # 0 index is images, 1 index is label
             # Sample noise to add to the images
@@ -223,7 +243,7 @@ def train(model, train_dataloader, cid, server_round, epochs, timesteps, cpu):
                 images = pipeline(
                     batch_size=eval_batch_size,
                     generator=torch.manual_seed(seed),
-                    num_inference_steps=PARAMS.num_inference_steps,
+                    num_inference_steps=args.num_inference_steps,
                 ).images
 
                 image_grid = make_grid(images, rows=4, cols=4)
@@ -248,7 +268,7 @@ The `validate` function will only focus on the generation of new images and
 comparing the generated images with the ground truth from the same label:
 
 ```python
-def validate(model, cid, timesteps, device):
+def validate(args, model, cid, device):
     mixed_precision = "fp16"
     gradient_accumulation_steps = 1
 
@@ -257,7 +277,7 @@ def validate(model, cid, timesteps, device):
         gradient_accumulation_steps=gradient_accumulation_steps,
     )
 
-    noise_scheduler = DDPMScheduler(num_train_timesteps=timesteps)
+    noise_scheduler = DDPMScheduler(num_train_timesteps=args.num_inference_steps)
     pipeline = DDPMPipeline(
         unet=accelerator.unwrap_model(model), scheduler=noise_scheduler
     )
@@ -277,7 +297,7 @@ def validate(model, cid, timesteps, device):
     val_dataset.data = val_dataset.data[subset_indices]
     val_dataset.targets = [val_dataset.targets[i] for i in subset_indices]
     cifar10_1k_val_dataloader = torch.utils.data.DataLoader(
-        val_dataset, batch_size=4, shuffle=True
+        val_dataset, batch_size=args.batch_size_test, shuffle=True
     )
 
     eval_batch_size = 100  # 100
@@ -286,7 +306,7 @@ def validate(model, cid, timesteps, device):
         images = pipeline(
             batch_size=eval_batch_size,
             generator=torch.manual_seed(int(time.time())),
-            num_inference_steps=PARAMS.num_inference_steps,
+            num_inference_steps=args.num_inference_steps,
         ).images
         all_images.append(images)
     gen_images = [item for sublist in all_images for item in sublist]
@@ -345,9 +365,7 @@ the second client will only have images of dogs and cats).
 For IID partitioning:
 
 ```python
-def load_iid_data():
-    train_batch_size = 4
-
+def load_iid_data(args, batch_size: int):
     transform = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
     )
@@ -355,14 +373,14 @@ def load_iid_data():
     dataset = CIFAR10("./dataset", train=True, download=True, transform=transform)
 
     # Split training set into N partitions to simulate the individual dataset
-    partition_size = len(dataset) // PARAMS.num_clients
-    lengths = [partition_size] * PARAMS.num_clients
+    partition_size = len(dataset) // args.num_clients
+    lengths = [partition_size] * args.num_clients
     datasets = random_split(dataset, lengths)
     trainloaders = []
 
     for ds in datasets:
         trainloaders.append(
-            torch.utils.data.DataLoader(ds, batch_size=train_batch_size, shuffle=True)
+            torch.utils.data.DataLoader(ds, batch_size=batch_size, shuffle=True)
         )
 
     return trainloaders
@@ -446,7 +464,7 @@ def cifar_extr_noniid(train_dataset, num_users, n_class, num_samples, rate_unbal
 Then we can just use this function to create the data loaders based on the generated indices:
 
 ```python
-def load_noniid_data(train_dataset_cifar, user_groups_train_cifar):
+def load_noniid_data(train_dataset_cifar, user_groups_train_cifar, batch_size: int):
     for client_no, array in user_groups_train_cifar.items():
         class_no = []
 
@@ -463,7 +481,7 @@ def load_noniid_data(train_dataset_cifar, user_groups_train_cifar):
     for index_list in indices:
         subset = Subset(train_dataset_cifar, index_list)
         trainloaders.append(
-            torch.utils.data.DataLoader(subset, batch_size=4, shuffle=True)
+            torch.utils.data.DataLoader(subset, batch_size=batch_size, shuffle=True)
         )
 
     return trainloaders
@@ -472,17 +490,20 @@ def load_noniid_data(train_dataset_cifar, user_groups_train_cifar):
 Putting everything together, we write a function that provides a simple interface:
 
 ```python
-def load_datasets(iid=True):
+def load_datasets(args, iid=True):
+    batch_size_train = args.batch_size_train
     if iid:
-        return load_iid_data()
+        return load_iid_data(args, batch_size_train)
     else:
         train_dataset_cifar, user_groups_train_cifar = get_dataset_cifar10_noniid(
-            PARAMS.num_clients,
-            PARAMS.nclass_cifar,
-            PARAMS.nsamples_cifar,
-            PARAMS.rate_unbalance_cifar,
+            args.num_clients,
+            args.nclass_cifar,
+            args.nsamples_cifar,
+            args.rate_unbalance_cifar,
         )
-        return load_noniid_data(train_dataset_cifar, user_groups_train_cifar)
+        return load_noniid_data(
+            train_dataset_cifar, user_groups_train_cifar, batch_size_train
+        )
 ```
 
 ### Writing the client
@@ -516,15 +537,13 @@ The `FlowerClient` itself will be:
 ```python
 class FlowerClient(fl.client.NumPyClient):
     def __init__(
-        self, model, trainloader, cid, timesteps, epochs, device, personalization_layers
+        self, model, trainloader, cid, device, args,
     ):
         self.model = model
         self.trainloader = trainloader
         self.cid = cid
-        self.timesteps = timesteps
-        self.epochs = epochs
         self.device = device
-        self.personalization_layers = personalization_layers
+        self.args = args
 
     def get_parameters(self, config):
         return get_parameters(self.model)
@@ -537,26 +556,25 @@ class FlowerClient(fl.client.NumPyClient):
         server_round = config["server_round"]
 
         cpu = False
-        if PARAMS.device == "cpu":
+        if str(self.device) == "cpu":
             cpu = True
 
         # Update local model parameters
-        if int(server_round) > 1 and PARAMS.personalized:
+        if int(server_round) > 1 and self.args.personalized:
             load_personalization_weight(
-                self.cid, self.model, self.personalization_layers
+                self.cid, self.model, self.args.personalization_layers
             )
 
         train(
+            self.args,
             self.model,
             self.trainloader,
             self.cid,
             server_round,
-            self.epochs,
-            self.timesteps,
             cpu,
         )
-        if PARAMS.personalized:
-            save_personalization_weight(self.cid, self.model, self.personalization_layers)
+        if self.args.personalized:
+            save_personalization_weight(self.cid, self.model, self.args.personalization_layers)
 
         return get_parameters(self.model), len(self.trainloader), {}
 
@@ -567,7 +585,7 @@ class FlowerClient(fl.client.NumPyClient):
         server_round = config["server_round"]
 
         precision, recall, num_examples = validate(
-            self.model, self.cid, self.timesteps, self.device
+            self.args, self.model, self.cid, self.device
         )
         results = {
             "precision": precision,
@@ -587,7 +605,7 @@ class FlowerClient(fl.client.NumPyClient):
 Note that in the above `FlowerClient` we also added personalization. This will
 allow each client's model to keep a locally trained subset of parameters that
 won't be affected by the global aggregation. This can be easily disabled by
-setting `personalized` to `False` inside `conf.py`. For this personalization to
+setting `--personalized False`. For this personalization to
 work we also added 2 utility functions:
 
 ```python
@@ -618,31 +636,30 @@ the same file.
 Finally, in order to instantiate our clients, we write our `client_fn`:
 
 ```python
-def client_fn(cid):
-    """Create a Flower client representing a single organization."""
+def gen_client_fn(args):
+    trainloaders = load_datasets(args.iid)
 
-    timesteps = PARAMS.num_inference_steps  # diffusion model decay steps
-    epochs = PARAMS.num_epochs  # training epochs
+    def client_fn(cid):
+        """Create a Flower client representing a single organization."""
 
-    # Load model
-    model = get_model().to(DEVICE)
-    personalization_layers = 4
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    # Load data (CIFAR-10)
-    # Note: each client gets a different trainloader/valloader, so each client
-    # will train and evaluate on their own unique data
-    trainloader = TRAINLOADERS[int(cid)]
+        # Load model
+        model = get_model().to(device)
 
-    # Create a  single Flower client representing a single organization
-    return FlowerClient(
-        model,
-        trainloader,
-        cid,
-        timesteps,
-        epochs,
-        PARAMS.device,
-        personalization_layers,
-    )
+        # Load data (CIFAR-10)
+        # Note: each client gets a different trainloader/valloader, so each client
+        # will train and evaluate on their own unique data
+        trainloader = trainloaders[int(cid)]
+
+        # Create a  single Flower client representing a single organization
+        return FlowerClient(
+            model,
+            trainloader,
+            cid,
+            device,
+            args,
+        )
 ```
 
 Now, we should be all set on the client-side.
@@ -841,9 +858,9 @@ In order to start the simulation, we first instantiate our strategy:
 strategy = SaveModelAndMetricsStrategy(
     fraction_fit=1.0,  # Sample 100% of available clients for training
     fraction_evaluate=0.5,  # Sample 50% of available clients for evaluation
-    min_fit_clients=PARAMS.num_clients,  # Never sample less than 10 clients for training
-    min_evaluate_clients=PARAMS.num_clients,  # Never sample less than 5 clients for evaluation
-    min_available_clients=PARAMS.num_clients,  # Wait until all 10 clients are available
+    min_fit_clients=args.num_clients,  # Never sample less than 10 clients for training
+    min_evaluate_clients=args.num_clients,  # Never sample less than 5 clients for evaluation
+    min_available_clients=args.num_clients,  # Wait until all 10 clients are available
     on_fit_config_fn=trainconfig,
     on_evaluate_config_fn=trainconfig,
     client_manager=client_manager,
@@ -898,11 +915,13 @@ Then, once all of this is defined, we can finally call our `start_simulation` fu
 # Start simulation
 fl.simulation.start_simulation(
     client_fn=client_fn,
-    num_clients=PARAMS.num_clients,
+    num_clients=args.num_clients,
     # client_resources={"num_cpus": 10, "num_gpus":1},
-    config=fl.server.ServerConfig(num_rounds=PARAMS.num_rounds),
+    config=fl.server.ServerConfig(num_rounds=args.num_rounds),
     strategy=strategy,
 )
 ```
 
-We commented out the `client_resources` parameters as it will depend on each person's setup. Read more about how to set these up in the [Documentation](https://flower.dev/docs/framework/how-to-run-simulations.html#virtualclientengine-resources).
+We commented out the `client_resources` parameters as it will depend on each
+person's setup. Read more about how to set these up in the
+[Documentation](https://flower.dev/docs/framework/how-to-run-simulations.html#virtualclientengine-resources).

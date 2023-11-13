@@ -5,7 +5,6 @@ import torch.nn.functional as F
 import torchvision.transforms as transforms
 import wandb
 from accelerate import Accelerator
-from config import PARAMS
 from diffusers import DDPMPipeline, DDPMScheduler, UNet2DModel
 from diffusers.optimization import get_cosine_schedule_with_warmup
 from torchvision.datasets import CIFAR10
@@ -46,37 +45,37 @@ def get_model():
     return model
 
 
-def train(model, train_dataloader, cid, server_round, epochs, timesteps, cpu):
+def train(args, model, train_dataloader, cid, server_round, cpu):
     learning_rate = 1e-4
-    lr_warmup_steps = int(PARAMS.num_inference_steps / 2)
+    lr_warmup_steps = int(args.num_inference_steps / 2)
     mixed_precision = "fp16"
     gradient_accumulation_steps = 1
     save_image_epochs = 50
 
     # Set group and job_type to see auto-grouping in the UI
     wandb.init(
-        project="Diffusion-Cifar10-IID-Default-4Clients-10Rnds",
+        project="Diffusion-Cifar10",
         group="Rnd-" + str(server_round),
         # track hyperparameters and run metadata
         config={
-            "N_Clients": PARAMS.num_clients,
-            "N_ServerRnds": PARAMS.num_rounds,
-            "T": PARAMS.num_inference_steps,
+            "N_Clients": args.num_clients,
+            "N_ServerRnds": args.num_rounds,
+            "T": args.num_inference_steps,
             "Scheduler": "cosine",
             "AggregationStrategy": "FedAvg",
             "Dataset": "CIFAR-10",
-            "Epochs": PARAMS.num_epochs,
+            "Epochs": args.num_epochs,
         },
     )
 
     wandb.run.name = "Client-" + cid
 
-    noise_scheduler = DDPMScheduler(num_train_timesteps=timesteps)
+    noise_scheduler = DDPMScheduler(num_train_timesteps=args.num_inference_steps)
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
     lr_scheduler = get_cosine_schedule_with_warmup(
         optimizer=optimizer,
         num_warmup_steps=lr_warmup_steps,
-        num_training_steps=(len(train_dataloader) * epochs),
+        num_training_steps=(len(train_dataloader) * args.num_epochs),
     )
 
     # Initialize accelerator and tensorboard logging
@@ -99,7 +98,7 @@ def train(model, train_dataloader, cid, server_round, epochs, timesteps, cpu):
     global_step = 0
     # Now you train the model
 
-    for epoch in range(epochs):
+    for epoch in range(args.num_epochs):
         # log metrics to wandb
         wandb.log({"Epoch": epoch, "cid": int(cid), "Server round": server_round})
 
@@ -147,7 +146,7 @@ def train(model, train_dataloader, cid, server_round, epochs, timesteps, cpu):
                 unet=accelerator.unwrap_model(model), scheduler=noise_scheduler
             )
             pipeline.set_progress_bar_config(disable=True)
-            if (epoch + 1) % save_image_epochs == 0 or epoch == epochs - 1:
+            if (epoch + 1) % save_image_epochs == 0 or epoch == args.num_epochs - 1:
                 eval_batch_size = 16
                 seed = 0
 
@@ -156,7 +155,7 @@ def train(model, train_dataloader, cid, server_round, epochs, timesteps, cpu):
                 images = pipeline(
                     batch_size=eval_batch_size,
                     generator=torch.manual_seed(seed),
-                    num_inference_steps=PARAMS.num_inference_steps,
+                    num_inference_steps=args.num_inference_steps,
                 ).images
 
                 # Make a grid out of the images
@@ -169,7 +168,7 @@ def train(model, train_dataloader, cid, server_round, epochs, timesteps, cpu):
                     print("Could not save images in wandb")
 
 
-def validate(model, cid, timesteps, device):
+def validate(args, model, cid, device):
     mixed_precision = "fp16"
     gradient_accumulation_steps = 1
 
@@ -178,7 +177,7 @@ def validate(model, cid, timesteps, device):
         gradient_accumulation_steps=gradient_accumulation_steps,
     )
 
-    noise_scheduler = DDPMScheduler(num_train_timesteps=timesteps)
+    noise_scheduler = DDPMScheduler(num_train_timesteps=args.num_inference_steps)
     pipeline = DDPMPipeline(
         unet=accelerator.unwrap_model(model), scheduler=noise_scheduler
     )
@@ -199,7 +198,7 @@ def validate(model, cid, timesteps, device):
     val_dataset.data = val_dataset.data[subset_indices]
     val_dataset.targets = [val_dataset.targets[i] for i in subset_indices]
     cifar10_1k_val_dataloader = torch.utils.data.DataLoader(
-        val_dataset, batch_size=4, shuffle=True
+        val_dataset, batch_size=args.batch_size_test, shuffle=True
     )
 
     eval_batch_size = 100  # 100
@@ -208,16 +207,18 @@ def validate(model, cid, timesteps, device):
         images = pipeline(
             batch_size=eval_batch_size,
             generator=torch.manual_seed(int(time.time())),
-            num_inference_steps=PARAMS.num_inference_steps,
+            num_inference_steps=args.num_inference_steps,
         ).images
         all_images.append(images)
     gen_images = [item for sublist in all_images for item in sublist]
     # Make a grid out of the images
     orig_tensor, gen_tensor, _ = prepare_tensors(
-        cifar10_1k_val_dataloader, gen_images, num=1000
+        cifar10_1k_val_dataloader, gen_images, num=subset_size
     )
 
-    ipr = IPR(4, 3, 1000)  # args.batch_size, args.k, args.num_samples
+    ipr = IPR(
+        args.batch_size_test, 3, subset_size, device=device
+    )  # args.batch_size, args.k, args.num_samples
     if device == "cuda":
         ipr.compute_manifold_ref(
             orig_tensor.float().cuda()

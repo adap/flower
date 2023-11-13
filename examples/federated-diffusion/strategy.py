@@ -65,6 +65,7 @@ class SaveModelAndMetricsStrategy(fl.server.strategy.FedAvg):
         fit_metrics_aggregation_fn=None,
         evaluate_metrics_aggregation_fn=None,
         client_manager=None,
+        args=None,
     ):
         super().__init__(
             fraction_fit=fraction_fit,
@@ -82,6 +83,7 @@ class SaveModelAndMetricsStrategy(fl.server.strategy.FedAvg):
         )
         self.client_manager = client_manager
         self.history = History()
+        self.args = args
 
     def aggregate_fit(
         self,
@@ -105,11 +107,11 @@ class SaveModelAndMetricsStrategy(fl.server.strategy.FedAvg):
             state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
             model.load_state_dict(state_dict, strict=True)
 
-            output_dir = "ddpm-cifar10-32-iid-default-flwr/clients4/model"
+            output_dir = f"{self.args.model_path}/models"
             os.makedirs(output_dir, exist_ok=True)
             torch.save(
                 model.state_dict(),
-                f"ddpm-cifar10-32-iid-default-flwr/clients4/model/model_round_{server_round}.pth",
+                f"{output_dir}/model_round_{server_round}.pth",
             )
 
         return aggregated_parameters, aggregated_metrics
@@ -170,7 +172,8 @@ class SaveModelAndMetricsStrategy(fl.server.strategy.FedAvg):
                 }
                 print(data)
                 # Serialize data into file:
-                json.dump(data, open("logs.json", "a"))
+                os.makedirs(self.args.log_path, exist_ok=True)
+                json.dump(data, open(f"{self.args.log_path}/logs.json", "a"))
 
                 loss_aggregated, metrics_aggregated = aggregated_loss, data
         else:

@@ -4,27 +4,27 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torchvision.transforms as transforms
-from config import PARAMS
 from torch.utils.data import Subset, random_split
 from torchvision.datasets import CIFAR10
 
 
-def load_datasets(iid=True):
-    batch_size_train = PARAMS.batch_size_train
+def load_datasets(args, iid=True):
+    batch_size_train = args.batch_size_train
     if iid:
-        return load_iid_data(batch_size_train)
+        return load_iid_data(args, batch_size_train)
     else:
         train_dataset_cifar, user_groups_train_cifar = get_dataset_cifar10_noniid(
-            PARAMS.num_clients,
-            PARAMS.nclass_cifar,
-            PARAMS.nsamples_cifar,
-            PARAMS.rate_unbalance_cifar,
+            args.num_clients,
+            args.nclass_cifar,
+            args.nsamples_cifar,
+            args.rate_unbalance_cifar,
         )
-        return load_noniid_data(train_dataset_cifar, user_groups_train_cifar, batch_size_train)
+        return load_noniid_data(
+            train_dataset_cifar, user_groups_train_cifar, batch_size_train
+        )
 
 
-def load_iid_data(batch_size: int):
-
+def load_iid_data(args, batch_size: int):
     transform = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
     )
@@ -32,14 +32,16 @@ def load_iid_data(batch_size: int):
     dataset = CIFAR10("./dataset", train=True, download=True, transform=transform)
 
     # Split training set into N partitions to simulate the individual dataset
-    partition_size = len(dataset) // PARAMS.num_clients
-    lengths = [partition_size] * PARAMS.num_clients
+    partition_size = len(dataset) // args.num_clients
+    lengths = [partition_size] * args.num_clients
     datasets = random_split(dataset, lengths)
     trainloaders = []
 
     for ds in datasets:
         trainloaders.append(
-            torch.utils.data.DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=4)
+            torch.utils.data.DataLoader(
+                ds, batch_size=batch_size, shuffle=True, num_workers=4
+            )
         )
 
     return trainloaders
@@ -150,7 +152,9 @@ def load_noniid_data(train_dataset_cifar, user_groups_train_cifar, batch_size: i
     for index_list in indices:
         subset = Subset(train_dataset_cifar, index_list)
         trainloaders.append(
-            torch.utils.data.DataLoader(subset, batch_size=batch_size, shuffle=True, num_workers=4)
+            torch.utils.data.DataLoader(
+                subset, batch_size=batch_size, shuffle=True, num_workers=4
+            )
         )
 
     return trainloaders

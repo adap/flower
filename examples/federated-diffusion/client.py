@@ -1,15 +1,14 @@
 import json
+import os
 import pickle
 from collections import OrderedDict
 
 import torch
 from centralized import get_model, train, validate
-from config import PARAMS
 from data import load_datasets
 
 import flwr as fl
 
-TRAINLOADERS = load_datasets(PARAMS.iid)
 
 def get_parameters(net):
     return [val.cpu().numpy() for _, val in net.state_dict().items()]
@@ -21,18 +20,19 @@ def set_parameters(net, parameters):
     net.load_state_dict(state_dict, strict=True)
 
 
-def save_personalization_weight(cid, model, personalization_layers):
+def save_personalization_weight(cid, model, personalization_layers, path):
     weights = get_parameters(model)
     # save weight
     personalized_weight = weights[len(weights) - personalization_layers :]
-    with open(f"Per_{cid}.pickle", "wb") as file_weight:
+    os.makedirs(path, exist_ok=True)
+    with open(f"{path}/Per_{cid}.pickle", "wb") as file_weight:
         pickle.dump(personalized_weight, file_weight)
     file_weight.close()
 
 
-def load_personalization_weight(cid, model, personalization_layers):
+def load_personalization_weight(cid, model, personalization_layers, path):
     weights = get_parameters(model)
-    with open(f"Per_{cid}.pickle", "rb") as file_weight:
+    with open(f"{path}/Per_{cid}.pickle", "rb") as file_weight:
         personalized_weight = pickle.load(file_weight)
         file_weight.close()
     weights[len(weights) - personalization_layers :] = personalized_weight
@@ -42,16 +42,12 @@ def load_personalization_weight(cid, model, personalization_layers):
 
 
 class FlowerClient(fl.client.NumPyClient):
-    def __init__(
-        self, model, trainloader, cid, timesteps, epochs, device, personalization_layers
-    ):
+    def __init__(self, model, trainloader, cid, device, args):
         self.model = model
         self.trainloader = trainloader
         self.cid = cid
-        self.timesteps = timesteps
-        self.epochs = epochs
         self.device = device
-        self.personalization_layers = personalization_layers
+        self.args = args
 
     def get_parameters(self, config):
         return get_parameters(self.model)
@@ -68,23 +64,28 @@ class FlowerClient(fl.client.NumPyClient):
             cpu = True
 
         # Update local model parameters
-        if int(server_round) > 1 and PARAMS.personalized:
+        if int(server_round) > 1 and self.args.personalized:
             load_personalization_weight(
-                self.cid, self.model, self.personalization_layers
+                self.cid,
+                self.model,
+                self.args.personalization_layers,
+                self.args.personalization_path,
             )
 
         train(
+            self.args,
             self.model,
             self.trainloader,
             self.cid,
             server_round,
-            self.epochs,
-            self.timesteps,
             cpu,
         )
-        if PARAMS.personalized:
+        if self.args.personalized:
             save_personalization_weight(
-                self.cid, self.model, self.personalization_layers
+                self.cid,
+                self.model,
+                self.args.personalization_layers,
+                self.args.personalization_path,
             )
 
         return get_parameters(self.model), len(self.trainloader), {}
@@ -96,7 +97,7 @@ class FlowerClient(fl.client.NumPyClient):
         server_round = config["server_round"]
 
         precision, recall, num_examples = validate(
-            self.model, self.cid, self.timesteps, self.device
+            self.args, self.model, self.cid, self.device
         )
         results = {
             "precision": precision,
@@ -104,7 +105,8 @@ class FlowerClient(fl.client.NumPyClient):
             "cid": self.cid,
             "server_round": server_round,
         }
-        json.dump(results, open("logs.json", "a"))
+        os.makedirs(self.args.log_path, exist_ok=True)
+        json.dump(results, open(f"{self.args.log_path}/logs.json", "a"))
         results.pop("server_round")
 
         return (
@@ -114,30 +116,29 @@ class FlowerClient(fl.client.NumPyClient):
         )
 
 
-def client_fn(cid):
-    """Create a Flower client representing a single organization."""
+def gen_client_fn(args):
+    trainloaders = load_datasets(args, args.iid)
 
-    timesteps = PARAMS.num_inference_steps  # diffusion model decay steps
-    epochs = PARAMS.num_epochs  # training epochs
+    def client_fn(cid):
+        """Create a Flower client representing a single organization."""
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    # Load model
-    model = get_model().to(device)
-    personalization_layers = 4
+        # Load model
+        model = get_model().to(device)
 
-    # Load data (CIFAR-10)
-    # Note: each client gets a different trainloader/valloader, so each client
-    # will train and evaluate on their own unique data
-    trainloader = TRAINLOADERS[int(cid)]
+        # Load data (CIFAR-10)
+        # Note: each client gets a different trainloader/valloader, so each client
+        # will train and evaluate on their own unique data
+        trainloader = trainloaders[int(cid)]
 
-    # Create a  single Flower client representing a single organization
-    return FlowerClient(
-        model,
-        trainloader,
-        cid,
-        timesteps,
-        epochs,
-        device,
-        personalization_layers,
-    )
+        # Create a  single Flower client representing a single organization
+        return FlowerClient(
+            model,
+            trainloader,
+            cid,
+            device,
+            args,
+        )
+
+    return client_fn
