@@ -48,6 +48,7 @@ matplotlib = "^3.5.1"
 scikit-image = "^0.18.1"
 scikit-learn = "^1.2.1"
 wget = "^3.2"
+virtualenv = "==20.24.6"
 pandas = "^1.5.3"
 pyhamcrest = "^2.0.4"
 
