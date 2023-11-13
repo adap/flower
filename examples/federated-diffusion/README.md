@@ -83,6 +83,12 @@ arguments:
 - `--batch_size_test [INTEGER]`: Specifies the batch size for testing (default: 4).
 - `--personalization_layers [INTEGER]`:  Number of personalization layers to
   use, no applicable with `--personalized False`(default: 4).
+- `--personalization_path [STRING]`:  Path to save the personalization layers
+  to (default: `docs/results/pers`).
+- `--model_path [STRING]`: Path to save the models to (default:
+  `docs/results/models`).
+- `--log_path [STRING]`: Path to save the logs to (default:
+  `docs/results`).
 
 Each argument is optional and, if not provided, the default value will be used.
 
