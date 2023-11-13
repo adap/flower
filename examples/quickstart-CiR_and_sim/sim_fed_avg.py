@@ -10,7 +10,7 @@ from flwr.common.logger import configure
 from flwr.common.typing import Scalar
 
 from utils_pacs import make_dataloaders, train, test
-from models import AlexNet
+from models import ResNet18
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
@@ -40,7 +40,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.val_loader = valset
 
         # Instantiate model
-        self.model = AlexNet()
+        self.model = ResNet18(num_classes=NUM_CLASSES, latent_dim=256, other_dim=128)
 
         # Determine device
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -119,7 +119,7 @@ def fit_config(server_round: int) -> Dict[str, Scalar]:
 def set_params(model: torch.nn.ModuleList, params: List[fl.common.NDArrays]):
     """Set model weights from a list of NumPy ndarrays."""
     params_dict = zip(model.state_dict().keys(), params)
-    state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+    state_dict = OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
     model.load_state_dict(state_dict, strict=True)
 
 
@@ -147,7 +147,7 @@ def get_evaluate_fn(
         # Determine device
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-        model = AlexNet()
+        model = ResNet18(num_classes=NUM_CLASSES, latent_dim=256, other_dim=128)
         set_params(model, parameters)
         model.to(device)
 
@@ -164,11 +164,11 @@ def main():
     # Parse input arguments
     args = parser.parse_args()
 
-    configure(identifier="my_fed_avg_app", filename="logs_fed_avg.log")
+    configure(identifier="my_fed_avg_app", filename="logs_fed_avg-test.log")
 
     # Download dataset and partition it
     trainsets, valsets, testset = make_dataloaders(batch_size=32)
-    net = AlexNet(num_classes=NUM_CLASSES, latent_dim=4096, other_dim=1000).to(DEVICE)
+    net = ResNet18(num_classes=NUM_CLASSES, latent_dim=256, other_dim=128).to(DEVICE)
 
     n1 = [val.cpu().numpy() for _, val in net.state_dict().items()]
     initial_params = ndarrays_to_parameters(n1)

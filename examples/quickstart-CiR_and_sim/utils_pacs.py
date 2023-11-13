@@ -8,6 +8,7 @@ from tqdm import tqdm
 from torch.nn.parameter import Parameter
 from typing import List, Tuple
 import torch.nn as nn
+
 # Define the root directory where your dataset is located
 dataset_root = "data/pacs_data/"
 from flwr.common import (
@@ -26,7 +27,7 @@ def make_dataloaders(dataset_kinds=data_kinds, k=2, batch_size=32, verbose=False
     # Define data transformations
     transform = transforms.Compose(
         [
-            transforms.Resize((224, 224)),
+            transforms.Resize((128, 128)),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ]
@@ -70,7 +71,7 @@ def make_dataloaders(dataset_kinds=data_kinds, k=2, batch_size=32, verbose=False
             else:
                 test_subsets.append(val_dataset)
     combined_test_dataset = ConcatDataset(test_subsets)
-    testloader = DataLoader(combined_test_dataset, batch_size=batch_size, shuffle=True)
+    testloader = DataLoader(combined_test_dataset, batch_size=batch_size, shuffle=False)
 
     return (trainloaders, valloaders, testloader)
 
@@ -126,7 +127,8 @@ def train(net1, trainloader, optim, config, epochs, device: str, num_classes=7):
             loss.backward(retain_graph=use_advanced_loss)
             optim.step()
 
-def train_prox(  
+
+def train_prox(
     net,
     trainloader,
     optim,
@@ -135,17 +137,23 @@ def train_prox(
     device,
     num_classes,
 ):
-
     criterion = torch.nn.CrossEntropyLoss()
-    global_params = [val.detach().clone() for val in net.parameters()]
+    # global_params = [val.detach().clone() for val in net.parameters()]
+    global_params = []
     net.train()
     for _ in range(epochs):
         net = _train_one_epoch(
-            net, global_params, trainloader, device, criterion, optim, config.get("proximal_mu", 1)
+            net,
+            global_params,
+            trainloader,
+            device,
+            criterion,
+            optim,
+            config.get("proximal_mu", 1),
         )
 
 
-def _train_one_epoch(  
+def _train_one_epoch(
     net,
     global_params: List[Parameter],
     trainloader: DataLoader,
@@ -154,19 +162,19 @@ def _train_one_epoch(
     optimizer: torch.optim.Adam,
     proximal_mu: float,
 ) -> nn.Module:
-
     for images, labels in trainloader:
         images, labels = images.to(device), labels.to(device)
         optimizer.zero_grad()
         proximal_term = 0.0
-        for local_weights, global_weights in zip(net.parameters(), global_params):
-            proximal_term += torch.square((local_weights - global_weights).norm(2))
-        loss = criterion(net(images), labels) + (proximal_mu / 2) * proximal_term
-        print(type(net(images)))
-        print(type(labels))
+        # for local_weights, global_weights in zip(net.parameters(), global_params):
+        #     proximal_term += torch.square((local_weights - global_weights).norm(2))
+        pred, _, _ = net(images)
+        loss = criterion(pred, labels) + (proximal_mu / 2) * proximal_term
+
         loss.backward()
         optimizer.step()
     return net
+
 
 def test(net1, testloader, device: str):
     """Validate the model on the test set."""
@@ -183,9 +191,10 @@ def test(net1, testloader, device: str):
 
 
 if __name__ == "__main__":
-    aq, bq, cq = make_dataloaders(verbose=True)
+    aq, bq, cq = make_dataloaders(verbose=False)
 
     cc = 0
-    for feat, label in cq:
-        print(len(label))
-        cc += len(label)
+    for idx, (feat, label) in enumerate(aq[0]):
+        # print(len(label))
+        # cc += len(label)
+        print(idx)

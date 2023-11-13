@@ -3,12 +3,15 @@ import torch.nn as nn
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 from torchsummary import summary
+import torchvision.models as models, ResNet18_Weights
 
 
 class Generator(nn.Module):  # W_g
-    def __init__(self, num_classes=10, latent_dim=20, other_dim=128):
+    def __init__(self, num_classes=7, latent_dim=256, other_dim=128):
         super(Generator, self).__init__()
-        self.net = nn.Sequential(nn.Linear(num_classes, other_dim), nn.ReLU())
+        self.net = nn.Sequential(
+            nn.Linear(num_classes, other_dim), nn.ReLU(), nn.BatchNorm1d(other_dim)
+        )
         self.fc_mu = nn.Linear(other_dim, latent_dim)
         self.fc_logvar = nn.Linear(other_dim, latent_dim)
 
@@ -116,6 +119,57 @@ class AlexNet(nn.Module):
         return pred, mu, logvar
 
 
+class ResNet18(nn.Module):
+    def __init__(self, num_classes=7, latent_dim=256, other_dim=128):
+        super(ResNet18, self).__init__()
+        # Load the pre-trained ResNet-18 model from torchvision
+        self.resnet18 = models.resnet18(weights=ResNet18_Weights.DEFAULT)
+
+        # Extract individual layers for further modification if needed
+        self.conv1 = self.resnet18.conv1
+        self.bn1 = self.resnet18.bn1
+        self.relu = self.resnet18.relu
+        self.maxpool = self.resnet18.maxpool
+        self.layer1 = self.resnet18.layer1
+        self.layer2 = self.resnet18.layer2
+        self.layer3 = self.resnet18.layer3
+        self.layer4 = self.resnet18.layer4
+        self.avgpool = self.resnet18.avgpool
+        self.fc_mu = nn.Linear(self.resnet18.fc.in_features, latent_dim)
+        self.fc_logvar = nn.Linear(self.resnet18.fc.in_features, latent_dim)
+
+        # Modify self.fc to include two fully connected layers with ReLU and BatchNorm
+        self.clf = nn.Sequential(
+            nn.Linear(latent_dim, other_dim),
+            nn.BatchNorm1d(other_dim),
+            nn.ReLU(),
+            nn.Linear(other_dim, num_classes),
+        )
+
+    def reparameterize(self, mu, logvar):
+        std = torch.exp(0.5 * logvar)
+        eps = torch.randn_like(std)
+        return mu + eps * std
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.maxpool(x)
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+        x = self.avgpool(x)
+        x = x.view(x.size(0), -1)
+        mu = self.fc_mu(x)
+        logvar = self.fc_logvar(x)
+        z = self.reparameterize(mu, logvar)
+
+        pred = self.clf(z)
+        return pred, mu, logvar
+
+
 if __name__ == "__main__":
-    net = AlexNet().to(DEVICE)
-    summary(net, (3, 224, 224))
+    net = ResNet18().to(DEVICE)
+    summary(net, (3, 128, 128))

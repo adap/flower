@@ -166,9 +166,7 @@ def main():
     # Parse input arguments
     args = parser.parse_args()
 
-    configure(identifier="my_cir_app", filename="app_logs.log")
-
-
+    configure(identifier="my_fed_cir_app", filename="logs_fed_cir.log")
 
     # Download dataset and partition it
     trainsets, valsets, testset = make_dataloaders(batch_size=32)
@@ -201,6 +199,8 @@ def main():
         # on_fit_config_fn=fit_config,
         evaluate_metrics_aggregation_fn=weighted_average,  # Aggregate federated metrics
         evaluate_fn=get_evaluate_fn(testset),  # Global evaluation function
+        lr_g=1e-3,
+        steps_g=10,
     )
 
     # Resources to be assigned to each virtual client

@@ -23,7 +23,7 @@ parser.add_argument(
 parser.add_argument(
     "--num_gpus",
     type=float,
-    default=0,
+    default=0.3,
     help="Ratio of GPU memory to assign to a virtual client",
 )
 parser.add_argument("--num_rounds", type=int, default=10, help="Number of FL rounds.")
