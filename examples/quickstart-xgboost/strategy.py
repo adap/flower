@@ -93,7 +93,8 @@ class XGbBagging(fl.server.strategy.FedAvg):
         return loss, metrics
 
 
-def aggregate(bst_prev, bst_curr):
+def aggregate(bst_prev: Optional[Dict], bst_curr: Dict) -> Dict:
+    """Conduct bagging aggregation for given trees."""
     if not bst_prev:
         return bst_curr
     else:
@@ -122,7 +123,7 @@ def aggregate(bst_prev, bst_curr):
         return bst_prev
 
 
-def _get_tree_nums(xgb_model):
+def _get_tree_nums(xgb_model: Dict) -> (int, int):
     # Get the number of trees
     tree_num = int(
         xgb_model["learner"]["gradient_booster"]["model"]["gbtree_model_param"][

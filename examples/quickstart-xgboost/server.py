@@ -21,12 +21,13 @@ num_evaluate_clients = args.num_evaluate_clients
 centralised_eval = args.centralised_eval
 
 # Load centralised test set
-fds = FederatedDataset(
-    dataset="jxie/higgs", partitioners={"train": 20}, resplitter=resplit
-)
-test_set = fds.load_full("test")
-test_set.set_format("numpy")
-test_dmatrix = transform_dataset_to_dmatrix(test_set)
+if centralised_eval:
+    fds = FederatedDataset(
+        dataset="jxie/higgs", partitioners={"train": 20}, resplitter=resplit
+    )
+    test_set = fds.load_full("test")
+    test_set.set_format("numpy")
+    test_dmatrix = transform_dataset_to_dmatrix(test_set)
 
 # Hyper-parameters used for initialisation
 params = {
