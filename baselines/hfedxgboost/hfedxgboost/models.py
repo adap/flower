@@ -54,7 +54,7 @@ def fit_xgboost(
 class CNN(nn.Module):
     """CNN model."""
 
-    def __init__(self, cfg, n_channel: int = 64) -> None:
+    def __init__(self, cfg: DictConfig, n_channel: int = 64) -> None:
         super().__init__()
         n_out = 1
         self.task_type = cfg.dataset.task.task_type
@@ -62,8 +62,8 @@ class CNN(nn.Module):
         client_num = cfg.client_num
 
         self.conv1d = nn.Conv1d(
-            1,
-            n_channel,
+            in_channels=1,
+            out_channels=n_channel,
             kernel_size=n_estimators_client,
             stride=n_estimators_client,
             padding=0,

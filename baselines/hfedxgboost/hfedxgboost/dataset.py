@@ -46,6 +46,28 @@ def load_single_dataset(
     x_train, y_train, x_test, y_test = train_test_split(X, Y, train_ratio=train_ratio)
     if task_type.upper() == "BINARY":
         y_train, y_test = modify_labels(y_train, y_test)
+
+        print(
+            "First class ratio in train data",
+            y_train[y_train == 0.0].size / x_train.shape[0],
+        )
+        print(
+            "Second class ratio in train data",
+            y_train[y_train != 0.0].size / x_train.shape[0],
+        )
+        print(
+            "First class ratio in test data",
+            y_test[y_test == 0.0].size / x_test.shape[0],
+        )
+        print(
+            "Second class ratio in test data",
+            y_test[y_test != 0.0].size / x_test.shape[0],
+        )
+
+    print("Feature dimension of the dataset:", x_train.shape[1])
+    print("Size of the trainset:", x_train.shape[0])
+    print("Size of the testset:", x_test.shape[0])
+
     return x_train, y_train, x_test, y_test
 
 

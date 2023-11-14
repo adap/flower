@@ -19,6 +19,7 @@ from flwr.common import (
     parameters_to_ndarrays,
 )
 from hydra.utils import instantiate
+from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
 from hfedxgboost.models import CNN, fit_xgboost
@@ -30,7 +31,7 @@ class FlClient(fl.client.Client):
 
     def __init__(
         self,
-        cfg,
+        cfg: DictConfig,
         trainloader: DataLoader,
         valloader: DataLoader,
         cid: str,
@@ -82,7 +83,7 @@ class FlClient(fl.client.Client):
         self,
         net: CNN,
         trainloader: DataLoader,
-        num_iterations,
+        num_iterations: int,
     ) -> Tuple[float, float, int]:
         """Train CNN model on a given dataset(trainloader) for(num_iterations).
 
@@ -229,9 +230,9 @@ class FlClient(fl.client.Client):
             self.config.n_estimators_client,
             self.config.clients.client_num,
         )
-        # num_iterations = None special behavior: train(...)
+
         # runs for a single epoch, however many updates it may be
-        num_iterations = num_iterations or len(trainloader)
+        num_iterations = int(num_iterations) or len(trainloader)
         # Train the model
         print(
             "Client", self.cid, ": training for", num_iterations, "iterations/updates"

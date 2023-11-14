@@ -1,1 +1,1 @@
-"""Template baseline package."""
+"""hfedxgboost baseline package."""

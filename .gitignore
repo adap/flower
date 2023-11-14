@@ -15,12 +15,6 @@ examples/**/dataset/**
 
 # Flower Baselines
 baselines/datasets/leaf
-baselines/hfedxgboost/hfedxgboost/dataset
-baselines/hfedxgboost/dataset
-baselines/hfedxgboost/multirun
-baselines/hfedxgboost/wandb
-baselines/hfedxgboost/hfedxgboost/wandb
-outputs
 
 # macOS
 .DS_Store

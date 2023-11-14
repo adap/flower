@@ -64,26 +64,6 @@ def main(cfg: DictConfig) -> None:
             cfg.dataset.dataset_name,
             train_ratio=cfg.dataset.train_ratio,
         )
-        print("Feature dimension of the dataset:", x_train.shape[1])
-        print("Size of the trainset:", x_train.shape[0])
-        print("Size of the testset:", x_test.shape[0])
-        if cfg.dataset.task.task_type == "BINARY":
-            print(
-                "First class ratio in train data",
-                y_train[y_train == 0.0].size / x_train.shape[0],
-            )
-            print(
-                "Second class ratio in train data",
-                y_train[y_train != 0.0].size / x_train.shape[0],
-            )
-            print(
-                "First class ratio in test data",
-                y_test[y_test == 0.0].size / x_test.shape[0],
-            )
-            print(
-                "Second class ratio in test data",
-                y_test[y_test != 0.0].size / x_test.shape[0],
-            )
 
         trainloaders, valloaders, testloader = divide_dataset_between_clients(
             TensorDataset(torch.from_numpy(x_train), torch.from_numpy(y_train)),
