@@ -1,4 +1,4 @@
-# Copyright 2023 Adap GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 """In-memory State implementation."""
 
 
+import os
 from datetime import datetime, timedelta
 from logging import ERROR
 from typing import Dict, List, Optional, Set
@@ -31,6 +32,7 @@ class InMemoryState(State):
 
     def __init__(self) -> None:
         self.node_ids: Set[int] = set()
+        self.workload_ids: Set[int] = set()
         self.task_ins_store: Dict[UUID, TaskIns] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
 
@@ -40,6 +42,10 @@ class InMemoryState(State):
         errors = validate_task_ins_or_res(task_ins)
         if any(errors):
             log(ERROR, errors)
+            return None
+        # Validate workload_id
+        if task_ins.workload_id not in self.workload_ids:
+            log(ERROR, "`workload_id` is invalid")
             return None
 
         # Create task_id, created_at and ttl
@@ -96,6 +102,11 @@ class InMemoryState(State):
         errors = validate_task_ins_or_res(task_res)
         if any(errors):
             log(ERROR, errors)
+            return None
+
+        # Validate workload_id
+        if task_res.workload_id not in self.workload_ids:
+            log(ERROR, "`workload_id` is invalid")
             return None
 
         # Create task_id, created_at and ttl
@@ -171,18 +182,42 @@ class InMemoryState(State):
         """
         return len(self.task_res_store)
 
-    def register_node(self, node_id: int) -> None:
-        """Register a client node."""
-        if node_id in self.node_ids:
-            raise ValueError(f"Node {node_id} is already registered")
-        self.node_ids.add(node_id)
+    def create_node(self) -> int:
+        """Create, store in state, and return `node_id`."""
+        # Sample a random int64 as node_id
+        node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
-    def unregister_node(self, node_id: int) -> None:
-        """Unregister a client node."""
         if node_id not in self.node_ids:
-            raise ValueError(f"Node {node_id} is not registered")
+            self.node_ids.add(node_id)
+            return node_id
+        log(ERROR, "Unexpected node registration failure.")
+        return 0
+
+    def delete_node(self, node_id: int) -> None:
+        """Delete a client node."""
+        if node_id not in self.node_ids:
+            raise ValueError(f"Node {node_id} not found")
         self.node_ids.remove(node_id)
 
-    def get_nodes(self) -> Set[int]:
-        """Return all available client nodes."""
+    def get_nodes(self, workload_id: int) -> Set[int]:
+        """Return all available client nodes.
+
+        Constraints
+        -----------
+        If the provided `workload_id` does not exist or has no matching nodes,
+        an empty `Set` MUST be returned.
+        """
+        if workload_id not in self.workload_ids:
+            return set()
         return self.node_ids
+
+    def create_workload(self) -> int:
+        """Create one workload."""
+        # Sample a random int64 as workload_id
+        workload_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
+
+        if workload_id not in self.workload_ids:
+            self.workload_ids.add(workload_id)
+            return workload_id
+        log(ERROR, "Unexpected workload creation failure.")
+        return 0

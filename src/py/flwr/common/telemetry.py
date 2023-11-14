@@ -1,4 +1,4 @@
-# Copyright 2023 Adap GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -164,11 +164,6 @@ state: Dict[str, Union[Optional[str], Optional[ThreadPoolExecutor]]] = {
 }
 
 
-# In Python 3.7 pylint will throw an error stating that
-# "Value 'Future' is unsubscriptable".
-# This pylint disable line can be remove when dropping support
-# for Python 3.7
-# pylint: disable-next=unsubscriptable-object
 def event(
     event_type: EventType,
     event_details: Optional[Dict[str, Any]] = None,

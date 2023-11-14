@@ -9,6 +9,6 @@ description = "Keras Federated Learning Quickstart with Flower"
 authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
-python = ">=3.7,<3.11"
+python = ">=3.8,<3.11"
 flwr = { path = "../../", develop = true, extras = ["simulation", "rest"] }
 tensorflow-cpu = "^2.9.1, !=2.11.1"

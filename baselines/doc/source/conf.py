@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,11 +32,11 @@ sys.path.insert(0, os.path.abspath("../../src/py"))
 # -- Project information -----------------------------------------------------
 
 project = "Flower"
-copyright = "2022 Adap GmbH"
+copyright = "2022 Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "1.5.0"
+release = "1.6.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -69,9 +69,11 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # Sphinx redirects, implemented after the doc filename changes.
 # To prevent 404 errors and redirect to the new pages.
-# redirects = {
-# }
-
+redirects = {
+    # Renamed pages
+    "contributing-baselines": "tutorial-contribute-baselines.html",
+    "using-baselines": "tutorial-use-baselines.html",
+}
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -139,3 +141,4 @@ mermaid_version = ""
 # -- Options for MyST config  -------------------------------------
 # Enable this option to link to headers (`#`, `##`, or `###`)
 myst_heading_anchors = 3
+myst_enable_extensions = ["dollarmath"]

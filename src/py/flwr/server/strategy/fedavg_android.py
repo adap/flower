@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -242,5 +242,5 @@ class FedAvgAndroid(Strategy):
     # pylint: disable=R0201
     def bytes_to_ndarray(self, tensor: bytes) -> NDArray:
         """Deserialize NumPy array from bytes."""
-        ndarray_deserialized = np.frombuffer(tensor, dtype=np.float32)  # type: ignore
+        ndarray_deserialized = np.frombuffer(tensor, dtype=np.float32)
         return cast(NDArray, ndarray_deserialized)
