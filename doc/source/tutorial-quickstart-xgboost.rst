@@ -9,7 +9,7 @@ Quickstart XGBoost
 
 Federated XGBoost
 -------------
-EXtreme Gradient Boosting (**XGBoost**) a robust and efficient implementation of gradient-boosted decision tree (**GBDT**), that maximises the computational boundaries for boosted tree methods.
+EXtreme Gradient Boosting (**XGBoost**) is a robust and efficient implementation of gradient-boosted decision tree (**GBDT**), that maximises the computational boundaries for boosted tree methods.
 It's primarily designed to enhance both the performance and computational speed of machine learning models.
 In XGBoost, trees are constructed concurrently, unlike the sequential approach taken by GBDT.
 
@@ -33,7 +33,7 @@ We first need to install Flower and Flower Datasets. You can do this by running 
 
 .. code-block:: shell
 
-  $ pip install flwr flwr_datasets
+  $ pip install flwr flwr-datasets
 
 Since we want to use :code:`xgboost` package to build up XGBoost trees, let's go ahead and install :code:`xgboost`:
 
@@ -401,7 +401,7 @@ Then, the fetched information will be aggregated.
 After that, the trees (containing model weights) are aggregated to generate a new tree model.
 
 After traversal of all clients' models, a new global model is generated,
-followed by the serialisation, and sending back the each client.
+followed by the serialisation, and sending back each client.
 
 
 Launch federated XGBoost!
