@@ -16,30 +16,13 @@
 
 
 import importlib
-from dataclasses import dataclass
-from typing import Callable, cast
+from typing import Callable, List, Optional, cast
 
 from flwr.client.message_handler.message_handler import handle
+from flwr.client.middleware import Layer, make_app
 from flwr.client.typing import ClientFn
-from flwr.client.workload_state import WorkloadState
-from flwr.proto.task_pb2 import TaskIns, TaskRes
 
-
-@dataclass
-class Fwd:
-    """."""
-
-    task_ins: TaskIns
-    state: WorkloadState
-
-
-@dataclass
-class Bwd:
-    """."""
-
-    task_res: TaskRes
-    state: WorkloadState
-
+from .typing import Bwd, Fwd
 
 FlowerCallable = Callable[[Fwd], Bwd]
 
@@ -50,20 +33,29 @@ class Flower:
     def __init__(
         self,
         client_fn: ClientFn,  # Only for backward compatibility
+        middleware: Optional[List[Layer]] = None,
     ) -> None:
         self.client_fn = client_fn
+        self.mw_list = middleware if middleware is not None else []
 
     def __call__(self, fwd: Fwd) -> Bwd:
         """."""
+
+        # Create wrapper function for `handle`
+        def handle_app(_fwd: Fwd) -> Bwd:
+            task_res = handle(
+                client_fn=self.client_fn,
+                task_ins=_fwd.task_ins,
+            )
+            return Bwd(task_res=task_res, state=_fwd.state)
+
+        # Wrap middleware layers around handle_app
+        app = make_app(handle_app, self.mw_list)
+
         # Execute the task
-        task_res = handle(
-            client_fn=self.client_fn,
-            task_ins=fwd.task_ins,
-        )
-        return Bwd(
-            task_res=task_res,
-            state=WorkloadState(state={}),
-        )
+        bwd = app(fwd)
+
+        return bwd
 
 
 class LoadCallableError(Exception):

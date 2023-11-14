@@ -18,7 +18,7 @@
 import unittest
 from typing import List
 
-from flwr.client.flower import Bwd, Fwd
+from flwr.client.typing import Bwd, Fwd
 from flwr.client.workload_state import WorkloadState
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 
