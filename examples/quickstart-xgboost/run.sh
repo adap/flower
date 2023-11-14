@@ -4,7 +4,7 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/
 
 echo "Starting server"
 python server.py &
-sleep 3  # Sleep for 3s to give the server enough time to start
+sleep 15  # Sleep for 15s to give the server enough time to start
 
 for i in `seq 0 1`; do
     echo "Starting client $i"
