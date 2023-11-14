@@ -1,7 +1,7 @@
 # Vertical Federated Learning example
 
 This example will showcase how you can perform Vertical Federated Learning using
-Flower. We'll be using the [Titanic dataset](https://www.kaggle.com/competitions/titanic/data) 
+Flower. We'll be using the [Titanic dataset](https://www.kaggle.com/competitions/titanic/data)
 to train simple regression models for binary classification. We will go into
 more details below, but the main idea of Vertical Federated Learning is that
 each client is holding different feature sets of the same dataset and that the
@@ -91,7 +91,7 @@ seconds to run as the model is very small.
 ### Vertical FL vs Horizontal FL
 
 |                       | Horizontal Federated Learning (HFL or just FL)                                                                                                                                                           | Vertical Federated Learning (VFL)                                                                                                                                                                                                                                                                                                                                        |
-|-----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Data Distribution     | Clients have different data instances but share the same feature space.  Think of different hospitals having different patients' data (samples)  but recording the same types of information (features). | Each client holds different features for the same instances.  Imagine different institutions holding various tests or  measurements for the same group of patients.                                                                                                                                                                                                      |
 | Model Training        | Each client trains a model on their local data,  which contains all the feature columns for its samples.                                                                                                 | Clients train models on their respective features without  having access to the complete feature set.  Each model only sees a vertical slice of the data (hence the name 'Vertical').                                                                                                                                                                                    |
 | Aggregation           | The server aggregates these local models by averaging  the parameters or gradients to update a global model.                                                                                             | The server aggregates the updates such as gradients or parameters,  which are then used to update the global model.  However, since each client sees only a part of the features,  the server typically has a more complex role,  sometimes needing to coordinate more sophisticated aggregation strategies  that may involve secure multi-party computation techniques. |
@@ -251,7 +251,7 @@ This returns the 3 partitions for our clients and the labels for our server.
 
 Each client's model is a neural network designed to operate on a distinct subset
 of features held by a client. In this example we will use simple linear
-regression models. 
+regression models.
 
 ```python3
 class ClientModel(nn.Module):
@@ -273,7 +273,7 @@ processing.
 
 The server's model acts as the central aggregator in the VFL system. It's also a
 neural network but with a slightly different architecture tailored to its role
-in aggregating the client models' outputs. 
+in aggregating the client models' outputs.
 
 ```python3
 class ServerModel(nn.Module):
@@ -362,7 +362,7 @@ together. This means that we go from 3 tensors of size `(892, 4)` to 1 tensor of
 size `(892, 12)`. The combined embeddings are fed through the server model to
 get the prediction output. The loss between the predicted output and the actual
 labels is calculated. Backward propagation is then performed to calculate the
-gradients, which are used to update the server model's parameters. 
+gradients, which are used to update the server model's parameters.
 
 The optimizer updates the server model's parameters based on the calculated
 gradients, and the gradients are reset to zero to prepare for the next round of
@@ -442,6 +442,20 @@ def client_fn(cid):
 
 We pass a `client_id` and its corresponding partition to each client.
 
+### Evaluation
+
+Please note that we do not perform distributed evaluation. This is because only
+the server holds some labels to compare the results to. This is why the only
+evaluation we perform is on the server side.
+
+In this example, we use the `FlowerClient` `evaluate` function for
+backpropagation instead of using it for evaluation. We do this because we know
+that the `evaluate` function of the clients will be called after the fit
+function. This allows us to aggregate our models in `aggregate_fit` and then
+send them back to the clients using this `evaluate` function and perform the
+backpropagation. This is not done for evaluation, hence why we return `None` in
+the `aggregate_evaluate` function of the strategy.
+
 ### Starting the simulation
 
 Putting everything together, to start our simulation we use the following
@@ -468,4 +482,3 @@ rounds.
 Here we can observe the results after 1000 rounds:
 
 ![Accuracy plot](docs/results/accuracy.png)
-
