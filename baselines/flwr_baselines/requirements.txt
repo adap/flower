@@ -27,3 +27,4 @@ flake8 == 3.9.2
 pytest == 6.2.4
 pytest-watch == 4.2.0
 types-requests == 2.27.7
+pydantic ==2.4.2
