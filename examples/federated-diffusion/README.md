@@ -49,8 +49,7 @@ This example requires the following dependencies:
 
 - wandb
 
-Which can be installed using `poetry install` if you are using `poetry` or `pip
-install -r requirements.txt`.
+Which can be installed using `poetry install` if you are using `poetry` or `pip install -r requirements.txt`.
 
 ## Usage
 
