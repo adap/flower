@@ -6,10 +6,9 @@
 
 - **Add experimental support for Python 3.12** ([#2565](https://github.com/adap/flower/pull/2565))
 
-- **Add new** `FedAvg+CIFAR10` **Flower Baseline** ([#2190](https://github.com/adap/flower/pull/2190), [#1960](https://github.com/adap/flower/pull/1960)) 
+- **Add new** `FedAvg+CIFAR10` **Flower Baseline** ([#2190](https://github.com/adap/flower/pull/2190), [#1960](https://github.com/adap/flower/pull/1960))
 
   The new `FedAvg+CIFAR10` baseline implements the `CIFAR10` experiment described in the [FedAvg paper](https://arxiv.org/abs/1602.05629).
-
 
 - **Support custom** `ClientManager` **in** `start_driver()` ([#2292](https://github.com/adap/flower/pull/2292))
 
