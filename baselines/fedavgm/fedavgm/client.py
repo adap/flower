@@ -61,7 +61,7 @@ def generate_client_fn(partitions, model, num_classes):
             full_x_train_cid[split_idx:],
             full_y_train_cid[split_idx:],
         )
-        
+
         return FlowerClient(
             x_train_cid, y_train_cid, x_val_cid, y_val_cid, model, num_classes
         )

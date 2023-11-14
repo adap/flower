@@ -69,17 +69,22 @@ def main(cfg: DictConfig) -> None:
     save_path = HydraConfig.get().runtime.output_dir
 
     strategy_name = strategy.__class__.__name__
+    dataset_type = "cifar10" if cfg.dataset.input_shape == [32, 32, 3] else "fmnist"
+
+    def format_variable(x):
+        return f"{x!r}" if isinstance(x, bytes) else f"{x}"
+
     file_suffix: str = (
-        f"_{strategy_name}"
-        f"{'_cifar10' if cfg.dataset.input_shape == [32, 32, 3] else '_fmnist'}"
-        f"_clients={cfg.num_clients}"
-        f"_rounds={cfg.num_rounds}"
-        f"_C={cfg.server.reporting_fraction}"
-        f"_E={cfg.client.local_epochs}"
-        f"_alpha={cfg.noniid.concentration}"
-        f"_server-momentum={cfg.server.momentum}"
-        f"_client-lr={cfg.client.lr}"
-        f"_acc={final_acc:.4f}"
+        f"_{format_variable(strategy_name)}"
+        f"_{format_variable(dataset_type)}"
+        f"_clients={format_variable(cfg.num_clients)}"
+        f"_rounds={format_variable(cfg.num_rounds)}"
+        f"_C={format_variable(cfg.server.reporting_fraction)}"
+        f"_E={format_variable(cfg.client.local_epochs)}"
+        f"_alpha={format_variable(cfg.noniid.concentration)}"
+        f"_server-momentum={format_variable(cfg.server.momentum)}"
+        f"_client-lr={format_variable(cfg.client.lr)}"
+        f"_acc={format_variable(final_acc):.4f}"
     )
 
     filename = "results" + file_suffix + ".pkl"

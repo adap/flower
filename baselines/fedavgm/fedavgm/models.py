@@ -12,7 +12,6 @@ def cnn(input_shape, num_classes, lr):
 
     Communication-efficient learning of deep networks from decentralized data
     """
-    
     input_shape = tuple(input_shape)
 
     weight_decay = 0.004
