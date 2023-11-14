@@ -142,6 +142,8 @@ def grpc_request_response(
         delete_node_request = DeleteNodeRequest(node=node)
         stub.DeleteNode(request=delete_node_request, timeout=timeout)
 
+        del node_store[KEY_NODE]
+
     def receive() -> Optional[TaskIns]:
         """Receive next task from server."""
         # Get Node
