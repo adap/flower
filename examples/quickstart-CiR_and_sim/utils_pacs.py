@@ -138,8 +138,7 @@ def train_prox(
     num_classes,
 ):
     criterion = torch.nn.CrossEntropyLoss()
-    # global_params = [val.detach().clone() for val in net.parameters()]
-    global_params = []
+    global_params = [val.detach().clone() for val in net.parameters()]
     net.train()
     for _ in range(epochs):
         net = _train_one_epoch(
@@ -166,8 +165,8 @@ def _train_one_epoch(
         images, labels = images.to(device), labels.to(device)
         optimizer.zero_grad()
         proximal_term = 0.0
-        # for local_weights, global_weights in zip(net.parameters(), global_params):
-        #     proximal_term += torch.square((local_weights - global_weights).norm(2))
+        for local_weights, global_weights in zip(net.parameters(), global_params):
+            proximal_term += torch.square((local_weights - global_weights).norm(2))
         pred, _, _ = net(images)
         loss = criterion(pred, labels) + (proximal_mu / 2) * proximal_term
 

@@ -12,7 +12,7 @@ from flwr.common.logger import configure
 from flwr.common.typing import Scalar
 
 from utils_pacs import make_dataloaders, train, test
-from models import AlexNet, Generator
+from models import ResNet18, Generator
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
@@ -42,7 +42,9 @@ class FlowerClient(fl.client.NumPyClient):
         self.val_loader = valset
 
         # Instantiate model
-        self.model = AlexNet()
+        self.model = ResNet18(
+            num_classes=NUM_CLASSES, latent_dim=256, other_dim=128, point_estimate=False
+        )
 
         # Determine device
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -149,7 +151,9 @@ def get_evaluate_fn(
         # Determine device
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-        model = AlexNet()
+        model = ResNet18(
+            num_classes=NUM_CLASSES, latent_dim=256, other_dim=128, point_estimate=False
+        )
         set_params(model, parameters)
         model.to(device)
 
@@ -170,8 +174,10 @@ def main():
 
     # Download dataset and partition it
     trainsets, valsets, testset = make_dataloaders(batch_size=32)
-    net = AlexNet(num_classes=NUM_CLASSES, latent_dim=4096, other_dim=1000).to(DEVICE)
-    net_gen = Generator(num_classes=NUM_CLASSES, latent_dim=4096, other_dim=1000).to(
+    net = ResNet18(
+        num_classes=NUM_CLASSES, latent_dim=256, other_dim=128, point_estimate=False
+    )
+    net_gen = Generator(num_classes=NUM_CLASSES, latent_dim=256, other_dim=128).to(
         DEVICE
     )
     n1 = [val.cpu().numpy() for _, val in net.state_dict().items()]

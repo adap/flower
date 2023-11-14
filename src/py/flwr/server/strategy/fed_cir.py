@@ -17,7 +17,7 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
-from flwr.server.utils import AlexNet, Generator, Enclassifier
+from flwr.server.utils import Generator, ResNet18
 from .aggregate import aggregate, weighted_loss_avg
 from .fedavg import FedAvg
 
@@ -125,7 +125,7 @@ class FedCiR(FedAvg):
         self.steps_gen = steps_g
         self.gen_stats = gen_stats
         self.gen_model = Generator(
-            num_classes=self.num_classes, latent_dim=4096, other_dim=1000
+            num_classes=self.num_classes, latent_dim=256, other_dim=128
         ).to(DEVICE)
 
     def __repr__(self) -> str:
@@ -218,9 +218,12 @@ class FedCiR(FedAvg):
             for _, fit_res in results
         ]
         temp_local_models = [
-            AlexNet(num_classes=self.num_classes, latent_dim=4096, other_dim=1000).to(
-                DEVICE
-            )
+            ResNet18(
+                num_classes=self.num_classes,
+                latent_dim=256,
+                other_dim=128,
+                point_estimate=False,
+            ).to(DEVICE)
             for _ in range(len(weights_results))
         ]
         criterion = torch.nn.CrossEntropyLoss()

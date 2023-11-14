@@ -3,7 +3,7 @@ import torch.nn as nn
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 from torchsummary import summary
-import torchvision.models as models, ResNet18_Weights
+import torchvision.models as models
 
 
 class Generator(nn.Module):  # W_g
@@ -120,11 +120,13 @@ class AlexNet(nn.Module):
 
 
 class ResNet18(nn.Module):
-    def __init__(self, num_classes=7, latent_dim=256, other_dim=128):
+    def __init__(
+        self, num_classes=7, latent_dim=256, other_dim=128, point_estimate=False
+    ):
         super(ResNet18, self).__init__()
         # Load the pre-trained ResNet-18 model from torchvision
-        self.resnet18 = models.resnet18(weights=ResNet18_Weights.DEFAULT)
-
+        self.resnet18 = models.resnet18(weights="DEFAULT")
+        self.point_estimate = point_estimate
         # Extract individual layers for further modification if needed
         self.conv1 = self.resnet18.conv1
         self.bn1 = self.resnet18.bn1
@@ -164,7 +166,10 @@ class ResNet18(nn.Module):
         x = x.view(x.size(0), -1)
         mu = self.fc_mu(x)
         logvar = self.fc_logvar(x)
-        z = self.reparameterize(mu, logvar)
+        if self.point_estimate:
+            z = mu
+        else:
+            z = self.reparameterize(mu, logvar)
 
         pred = self.clf(z)
         return pred, mu, logvar

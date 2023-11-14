@@ -26,7 +26,7 @@ parser.add_argument(
     default=0.3,
     help="Ratio of GPU memory to assign to a virtual client",
 )
-parser.add_argument("--num_rounds", type=int, default=10, help="Number of FL rounds.")
+parser.add_argument("--num_rounds", type=int, default=100, help="Number of FL rounds.")
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 NUM_CLIENTS = 4
@@ -40,7 +40,9 @@ class FlowerClient(fl.client.NumPyClient):
         self.val_loader = valset
 
         # Instantiate model
-        self.model = ResNet18(num_classes=NUM_CLASSES, latent_dim=256, other_dim=128)
+        self.model = ResNet18(
+            num_classes=NUM_CLASSES, latent_dim=256, other_dim=128, point_estimate=True
+        )
 
         # Determine device
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -54,13 +56,16 @@ class FlowerClient(fl.client.NumPyClient):
         print(f"config:{config}")
         # Read from config
         # batch, epochs = config["batch_size"], config["epochs"]
-        epochs = 5
+        epochs = 1
 
         # Construct dataloader
         # trainloader = DataLoader(self.trainset, batch_size=batch, shuffle=True)
 
         # Define optimizer
-        optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
+        # optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
+        optimizer = torch.optim.SGD(
+            self.model.parameters(), lr=1e-2, momentum=0.9, weight_decay=5e-4
+        )
         # Train
         train(
             self.model,
@@ -147,7 +152,9 @@ def get_evaluate_fn(
         # Determine device
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-        model = ResNet18(num_classes=NUM_CLASSES, latent_dim=256, other_dim=128)
+        model = ResNet18(
+            num_classes=NUM_CLASSES, latent_dim=256, other_dim=128, point_estimate=True
+        )
         set_params(model, parameters)
         model.to(device)
 
@@ -164,11 +171,13 @@ def main():
     # Parse input arguments
     args = parser.parse_args()
 
-    configure(identifier="my_fed_avg_app", filename="logs_fed_avg-test.log")
+    configure(identifier="my_fed_avg_app", filename="logs_fed_avg-r-100sgd-e1.log")
 
     # Download dataset and partition it
     trainsets, valsets, testset = make_dataloaders(batch_size=32)
-    net = ResNet18(num_classes=NUM_CLASSES, latent_dim=256, other_dim=128).to(DEVICE)
+    net = ResNet18(
+        num_classes=NUM_CLASSES, latent_dim=256, other_dim=128, point_estimate=True
+    ).to(DEVICE)
 
     n1 = [val.cpu().numpy() for _, val in net.state_dict().items()]
     initial_params = ndarrays_to_parameters(n1)
