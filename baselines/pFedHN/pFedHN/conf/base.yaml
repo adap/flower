@@ -16,9 +16,10 @@ model:
   n_hidden: 3 # number of hidden layers for the hypernetwork: 3 for CIFAR10 and CIFAR100, 1 for MNIST
 
 
+# strategy config
 strategy:
   _target_: pFedHN.strategy.pFedHN
-  # strategy config
+  evaluate_every: 2
 
 server: # Hyperparameters for the hypernetwork which is in the server
   embedding_dim_denominator: 4 ## Explained at Hypernetwork initialisation in server.py
@@ -26,11 +27,12 @@ server: # Hyperparameters for the hypernetwork which is in the server
   wd: 1e-3
   momentum: 0.9 
 
+num_rounds: 5000
+num_clients: 50
+
 client:
   # client config
   num_epochs: 50
-  num_rounds: 5000
-  num_nodes: 50
   batch_size: 64
   num_classes_per_node: 2
 

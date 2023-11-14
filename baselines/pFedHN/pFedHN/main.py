@@ -30,7 +30,7 @@ def main(cfg: DictConfig):
     trainloaders, valloaders, testloaders = gen_random_loaders(
         cfg.dataset.data,
         cfg.dataset.root,
-        cfg.client.num_nodes,
+        cfg.num_clients,
         cfg.client.batch_size,
         cfg.client.num_classes_per_node,
     )
@@ -38,7 +38,7 @@ def main(cfg: DictConfig):
     if cfg.model.variant == 1:
         node_local_layers = [
             LocalLayer(n_input=84, n_output=cfg.model.out_dim)
-            for _ in range(cfg.client.num_nodes)
+            for _ in range(cfg.num_clients)
         ]
         node_local_optimizers = [
             torch.optim.SGD(
@@ -47,7 +47,7 @@ def main(cfg: DictConfig):
                 momentum=0.9,
                 weight_decay=cfg.model.wd,
             )
-            for i in range(cfg.client.num_nodes)
+            for i in range(cfg.num_clients)
         ]
         client_fn = generate_client_fn(
             trainloaders,
@@ -65,17 +65,17 @@ def main(cfg: DictConfig):
         )
 
     # instantiate strategy according to config
-    strategy = instantiate(cfg.strategy, cfg)
+    strategy = instantiate(cfg.strategy)
 
     # Start simulation
 
     fl.simulation.start_simulation(
         client_fn=client_fn,
-        num_clients=cfg.client.num_nodes,
+        num_clients=cfg.num_clients,
         server=pFedHNServer(
             client_manager=SimpleClientManager(), strategy=strategy, cfg=cfg
         ),
-        config=fl.server.ServerConfig(num_rounds=cfg.client.num_rounds),
+        config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
         strategy=strategy,
         client_resources=cfg.client_resources,
     )

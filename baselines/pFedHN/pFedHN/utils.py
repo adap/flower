@@ -45,6 +45,3 @@ def show_plots():
     plt.xlabel("Round")
     plt.ylabel("Accuracy")
     plt.show()
-
-
-show_plots()

@@ -26,6 +26,7 @@ from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.strategy import Strategy
+from omegaconf import DictConfig
 
 from pFedHN.models import CNNHyper
 
@@ -43,18 +44,19 @@ EvaluateResultsAndFailures = Tuple[
 class pFedHNServer(Server):
     """HyperNetwork Server Implementation."""
 
-    def __init__(self, client_manager: ClientManager, strategy: Strategy, cfg):
+    def __init__(
+        self, client_manager: ClientManager, strategy: Strategy, cfg: DictConfig
+    ):
         super().__init__(client_manager=client_manager, strategy=strategy)
         self.cfg = cfg
         self.hnet = CNNHyper(
-            n_nodes=self.cfg.client.num_nodes,
+            n_nodes=self.cfg.num_clients,
             # The dimension is given in page 6 of the paper
             # Under Section 5 - Training Stratergies.
             # Justification is given in Supplementary Material
             # Section C Additional Experiments - C.2.2
             embedding_dim=int(
-                1
-                + self.cfg.client.num_nodes / self.cfg.server.embedding_dim_denominator
+                1 + self.cfg.num_clients / self.cfg.server.embedding_dim_denominator
             ),
             in_channels=self.cfg.model.in_channels,
             n_kernels=self.cfg.model.n_kernels,

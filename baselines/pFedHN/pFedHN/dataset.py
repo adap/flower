@@ -1,23 +1,22 @@
+"""Dataset."""
 import random
-import ssl
 from collections import defaultdict
 
 import numpy as np
 import torch.utils.data
 import torchvision.transforms as transforms
-from torchvision.datasets import MNIST,CIFAR10, CIFAR100
+from torchvision.datasets import CIFAR10, CIFAR100, MNIST
 
 
 def get_datasets(data_name, dataroot, normalize=True, val_size=10000):
-    """
-    get_datasets returns train/val/test data splits of CIFAR10/100 datasets
+    """Get_datasets returns train/val/test data splits of CIFAR10/100 datasets.
+
     :param data_name: name of dataset, choose from [cifar10, cifar100]
     :param dataroot: root to data dir
     :param normalize: True/False to normalize the data
     :param val_size: validation split size (in #samples)
     :return: train_set, val_set, test_set (tuple of pytorch dataset/subset)
     """
-
     if data_name == "mnist":
         normalization = transforms.Normalize((0.1307,), (0.3081,))
         data_obj = MNIST
@@ -52,8 +51,8 @@ def get_datasets(data_name, dataroot, normalize=True, val_size=10000):
 
 
 def get_num_classes_samples(dataset):
-    """
-    extracts info about certain dataset
+    """Extract info about certain dataset.
+
     :param dataset: pytorch dataset object
     :return: dataset info number of classes, number of samples, list of labels
     """
@@ -78,21 +77,24 @@ def get_num_classes_samples(dataset):
 def gen_classes_per_node(
     dataset, num_users, classes_per_user=2, high_prob=0.6, low_prob=0.4
 ):
-    """
-    creates the data distribution of each client
+    """Create the data distribution of each client.
+
     :param dataset: pytorch dataset object
     :param num_users: number of clients
     :param classes_per_user: number of classes assigned to each client
     :param high_prob: highest prob sampled
     :param low_prob: lowest prob sampled
-    :return: dictionary mapping between classes and proportions, each entry refers to other client
+    :return: dictionary mapping between classes and proportions, each entry
+    refers to other client
     """
     num_classes, num_samples, _ = get_num_classes_samples(dataset)
 
     # -------------------------------------------#
     # Divide classes + num samples for each user #
     # -------------------------------------------#
-    # assert (classes_per_user * num_users) % num_classes == 0, "equal classes appearance is needed"
+    # assert (
+    #     classes_per_user * num_users
+    # ) % num_classes == 0, "equal classes appearance is needed"
     count_per_class = (classes_per_user * num_users) // num_classes + 1
     class_dict = {}
     for i in range(num_classes):
@@ -119,8 +121,8 @@ def gen_classes_per_node(
 
 
 def gen_data_split(dataset, num_users, class_partitions):
-    """
-    divide data indexes for each client based on class_partition
+    """Divide data indexes for each client based on class_partition.
+
     :param dataset: pytorch dataset object (train/val/test)
     :param num_users: number of clients
     :param class_partitions: proportion of classes per client
@@ -155,8 +157,8 @@ def gen_data_split(dataset, num_users, class_partitions):
 
 
 def gen_random_loaders(data_name, data_path, num_users, bz, classes_per_user):
-    """
-    generates train/val/test loaders of each client
+    """Generate train/val/test loaders of each client.
+
     :param data_name: name of dataset, choose from [cifar10, cifar100]
     :param data_path: root path for data dir
     :param num_users: number of clients
@@ -179,12 +181,10 @@ def gen_random_loaders(data_name, data_path, num_users, bz, classes_per_user):
             loader_params["shuffle"] = True
         usr_subset_idx = gen_data_split(d, num_users, cls_partitions)
         # create subsets for each client
-        subsets = list(map(lambda x: torch.utils.data.Subset(d, x), usr_subset_idx))
+        subsets = [torch.utils.data.Subset(d, x) for x in usr_subset_idx]
         # create dataloaders from subsets
         dataloaders.append(
-            list(
-                map(lambda x: torch.utils.data.DataLoader(x, **loader_params), subsets)
-            )
+            [torch.utils.data.DataLoader(x, **loader_params) for x in subsets]
         )
 
     return dataloaders

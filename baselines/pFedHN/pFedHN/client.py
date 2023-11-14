@@ -78,7 +78,6 @@ class FlowerClient(fl.client.NumPyClient):
 
         Args:
             parameters (list): List of parameter values.
-
         """
         state_dict = OrderedDict(
             {
