@@ -38,8 +38,7 @@ class FdsToTensorFlow(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """Disable progress bar to keep the log clean.
-        """
+        """Disable progress bar to keep the log clean."""
         disable_progress_bar()
 
     def _create_tensorflow_dataset(self, batch_size: int) -> tf.data.Dataset:
