@@ -135,7 +135,7 @@ def grpc_request_response(
 
         delete_node_request = DeleteNodeRequest(node=node)
         stub.DeleteNode(request=delete_node_request)
-        
+
         del node_store[KEY_NODE]
 
     def receive() -> Optional[TaskIns]:
