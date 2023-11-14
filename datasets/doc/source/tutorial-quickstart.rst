@@ -5,17 +5,23 @@ Run Flower Datasets as fast as possible by learning only the essentials.
 
 Install Federated Datasets
 --------------------------
-Run on the command line::
+Run on the command line
+
+.. code-block:: bash
 
   python -m pip install flwr-datasets[vision]
 
 Install the ML framework
 ------------------------
-TensorFlow::
+TensorFlow
+
+.. code-block:: bash
 
   pip install tensorflow
 
-PyTorch::
+PyTorch
+
+.. code-block:: bash
 
   pip install torch torchvision
 
@@ -41,7 +47,7 @@ supported by your framework.
 
 Conversion
 ----------
-For more detailed instructions, go to :doc:`how-to`.
+For more detailed instructions, go to :doc:`how-to-use-with-pytorch`.
 
 PyTorch DataLoader
 ^^^^^^^^^^^^^^^^^^

@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ sys.path.insert(0, os.path.abspath("../../src/py"))
 # -- Project information -----------------------------------------------------
 
 project = "Flower"
-copyright = "2022 Adap GmbH"
+copyright = "2022 Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
@@ -141,3 +141,4 @@ mermaid_version = ""
 # -- Options for MyST config  -------------------------------------
 # Enable this option to link to headers (`#`, `##`, or `###`)
 myst_heading_anchors = 3
+myst_enable_extensions = ["dollarmath"]

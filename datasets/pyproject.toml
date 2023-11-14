@@ -10,7 +10,7 @@ license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.dev>"]
 readme = "README.md"
 homepage = "https://flower.dev"
-repository = "https://github.com/adap/flower/datasets"
+repository = "https://github.com/adap/flower"
 documentation = "https://flower.dev/docs/datasets"
 keywords = [
     "flower",
@@ -22,7 +22,7 @@ keywords = [
     "dataset",
 ]
 classifiers = [
-    "Development Status :: 1 - Planning",
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: Apache Software License",
