@@ -1,7 +1,9 @@
-"""Create global evaluation function.
-
-Optionally, also define a new Server class (please note this is not needed in most
-settings).
+"""
+This custom server class extends Flower's default server class 
+to build a federated learning setup that involves a combination of a CNN model and an XGBoost model, 
+a customized model aggregation that can work with this model combination, 
+incorporate the usage of an early stopping mechanism to stop training when needed 
+and incorporate the usage of wandb for fine-tuning purposes.
 """
 
 # Flower server
