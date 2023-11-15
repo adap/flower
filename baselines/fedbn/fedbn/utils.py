@@ -57,7 +57,7 @@ def quick_plot(path_to_pickled_history: str):
     fig, axs = plt.subplots(figsize=(10,6))
     for dataset, loss in fussed_losses.items():
         plt.plot(range(len(loss)), loss, label=dataset)
-        plt.title(f"client: {config['client']['_target_']}\n num_clients: {config['num_clients']}, percent: {config['dataset']['percent']}")
+        plt.title(f"client: {config['client']['client_label']}\n num_clients: {config['num_clients']}, percent: {config['dataset']['percent']}")
         plt.legend()
         plt.grid()
         plt.xlabel('Round')

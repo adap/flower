@@ -27,7 +27,7 @@ model:
 strategy:
   _target_: flwr.server.strategy.FedAvg
   fraction_fit: 1.0
-  fraction_evaluate: 1.0
+  fraction_evaluate: 0.0
   min_available_clients: ${num_clients}
   on_fit_config_fn:
     _target_: fedbn.strategy.get_on_fit_config
