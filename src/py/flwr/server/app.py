@@ -248,6 +248,9 @@ def run_driver_api() -> None:
     host, port, is_v6 = parsed_address
     address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
+    # Obtain certificates
+    certificates = _try_obtain_certificates(args)
+
     # Initialize StateFactory
     state_factory = StateFactory(args.database)
 
@@ -255,7 +258,7 @@ def run_driver_api() -> None:
     grpc_server: grpc.Server = _run_driver_api_grpc(
         address=address,
         state_factory=state_factory,
-        certificates=None,
+        certificates=certificates,
     )
 
     # Graceful shutdown
@@ -274,6 +277,9 @@ def run_fleet_api() -> None:
     log(INFO, "Starting Flower server (Fleet API)")
     event(EventType.RUN_FLEET_API_ENTER)
     args = _parse_args_fleet().parse_args()
+
+    # Obtain certificates
+    certificates = _try_obtain_certificates(args)
 
     # Initialize StateFactory
     state_factory = StateFactory(args.database)
@@ -317,7 +323,7 @@ def run_fleet_api() -> None:
         fleet_server = _run_fleet_api_grpc_bidi(
             address=address,
             state_factory=state_factory,
-            certificates=None,
+            certificates=certificates,
         )
         grpc_servers.append(fleet_server)
     elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
@@ -330,7 +336,7 @@ def run_fleet_api() -> None:
         fleet_server = _run_fleet_api_grpc_rere(
             address=address,
             state_factory=state_factory,
-            certificates=None,
+            certificates=certificates,
         )
         grpc_servers.append(fleet_server)
     else:
@@ -365,22 +371,7 @@ def run_server() -> None:
     address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
     # Obtain certificates
-    if args.insecure:
-        log(WARN, "The server will be started without HTTPS.")
-        certificates = None
-    # Check if certificates are provided
-    elif args.certificates:
-        certificates = (
-            Path(args.certificates[0]).read_bytes(),  # CA certificate
-            Path(args.certificates[1]).read_bytes(),  # server certificate
-            Path(args.certificates[2]).read_bytes(),  # server private key
-        )
-    else:
-        sys.exit(
-            "Certificates are required unless running in insecure mode. "
-            "Please provide certificate paths with '--certificates' or run the server "
-            "in insecure mode using '--insecure' if you understand the risks."
-        )
+    certificates = _try_obtain_certificates(args)
 
     # Initialize StateFactory
     state_factory = StateFactory(args.database)
@@ -464,6 +455,29 @@ def run_server() -> None:
                 if not thread.is_alive():
                     sys.exit(1)
         driver_server.wait_for_termination(timeout=1)
+
+
+def _try_obtain_certificates(
+    args: argparse.Namespace,
+) -> Optional[Tuple[bytes, bytes, bytes]]:
+    # Obtain certificates
+    if args.insecure:
+        log(WARN, "The server will be started without HTTPS.")
+        certificates = None
+    # Check if certificates are provided
+    elif args.certificates:
+        certificates = (
+            Path(args.certificates[0]).read_bytes(),  # CA certificate
+            Path(args.certificates[1]).read_bytes(),  # server certificate
+            Path(args.certificates[2]).read_bytes(),  # server private key
+        )
+    else:
+        sys.exit(
+            "Certificates are required unless running in insecure mode. "
+            "Please provide certificate paths with '--certificates' or run the server "
+            "in insecure mode using '--insecure' if you understand the risks."
+        )
+    return certificates
 
 
 def _register_exit_handlers(
@@ -704,7 +718,14 @@ def _parse_args_server() -> argparse.ArgumentParser:
         "that clients will be able to connect to.",
     )
 
-    # Add "--insecure" and "--certificates"
+    _add_args_common(parser=parser)
+    _add_args_driver_api(parser=parser)
+    _add_args_fleet_api(parser=parser)
+
+    return parser
+
+
+def _add_args_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--insecure",
         action="store_true",
@@ -721,15 +742,6 @@ def _parse_args_server() -> argparse.ArgumentParser:
         "key, in that order. Note: The server can only be started without "
         "certificates by enabling the `--insecure` flag.",
     )
-
-    _add_args_common(parser=parser)
-    _add_args_driver_api(parser=parser)
-    _add_args_fleet_api(parser=parser)
-
-    return parser
-
-
-def _add_args_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--database",
         help="A string representing the path to the database "
