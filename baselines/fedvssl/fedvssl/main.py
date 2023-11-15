@@ -179,7 +179,7 @@ def main(cfg: DictConfig) -> None:
 
         # conversion of the .npz files to the .pth format.
         # If the files are saved in .npz format
-        if pretrained.endswith(".npz"):
+        if pretrained and pretrained.endswith(".npz"):
             # following changes are made here
             params = np.load(pretrained, allow_pickle=True)
             params = params["arr_0"].item()
