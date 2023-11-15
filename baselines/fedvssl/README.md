@@ -74,7 +74,10 @@ poetry shell
 pip install torch==1.7.1+cu110 torchvision==0.8.2+cu110 torchaudio==0.7.2 -f https://download.pytorch.org/whl/torch_stable.html
 
 # install mmcv package
-pip install mmcv==1.2.4
+pip install mmcv-full==1.2.4 -f https://download.openmmlab.com/mmcv/dist/cu110/torch1.7.1/index.html
+pip install numpy==1.21.0
+pip install tensorboard
+pip install mmengine==0.9.0
 ```
 
 ## Running the Experiments
