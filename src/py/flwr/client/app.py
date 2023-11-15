@@ -234,7 +234,7 @@ def start_client(
                     break
 
                 # Load app
-                app = load_app_fn()
+                app: Flower = load_app_fn()
 
                 # Handle task message
                 fwd_msg: Fwd = Fwd(
