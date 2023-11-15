@@ -111,7 +111,7 @@ class FederatedDataset:
         ----------
         idx : int
             Partition index for the selected split, idx in {0, ..., num_partitions - 1}.
-        split: Optional[str]
+        split : Optional[str]
             Name of the (partitioned) split (e.g. "train", "test"). You can skip this
             parameter if there is only one partitioner for the dataset. The name will be
             inferred automatically. For example, if `partitioners={"train": 10}`, you do
@@ -121,7 +121,7 @@ class FederatedDataset:
 
         Returns
         -------
-        partition: Dataset
+        partition : Dataset
             Single partition from the dataset split.
         """
         if not self._dataset_prepared:
