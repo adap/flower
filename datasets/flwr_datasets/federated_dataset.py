@@ -101,7 +101,7 @@ class FederatedDataset:
         # Indicate if the dataset is prepared for `load_partition` or `load_full`
         self._dataset_prepared: bool = False
 
-    def load_partition(self, idx: int, split: Optional[str] = None) -> Dataset:
+    def load_partition(self, node_id: int, split: Optional[str] = None) -> Dataset:
         """Load the partition specified by the idx in the selected split.
 
         The dataset is downloaded only when the first call to `load_partition` or
@@ -109,7 +109,7 @@ class FederatedDataset:
 
         Parameters
         ----------
-        idx : int
+        node_id : int
             Partition index for the selected split, idx in {0, ..., num_partitions - 1}.
         split : Optional[str]
             Name of the (partitioned) split (e.g. "train", "test"). You can skip this
@@ -135,7 +135,7 @@ class FederatedDataset:
         self._check_if_split_possible_to_federate(split)
         partitioner: Partitioner = self._partitioners[split]
         self._assign_dataset_to_partitioner(split)
-        return partitioner.load_partition(idx)
+        return partitioner.load_partition(node_id)
 
     def load_full(self, split: str) -> Dataset:
         """Load the full split of the dataset.

@@ -53,7 +53,7 @@ If you plan to change the type of the dataset to run the code with your ML frame
 
 # Usage
 
-The Flower Datasets exposes `FederatedDataset(dataset, partitioners)` abstraction to represent the dataset needed for federated learning/analytics. It has two powerful methods that let you handle the dataset preprocessing. They are `load_partition(idx, split)` and `load_full(split)`.
+The Flower Datasets exposes `FederatedDataset(dataset, partitioners)` abstraction to represent the dataset needed for federated learning/analytics. It has two powerful methods that let you handle the dataset preprocessing. They are `load_partition(node_id, split)` and `load_full(split)`.
 
 Here's a quick example of how to partition the MNIST dataset:
 
