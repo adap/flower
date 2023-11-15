@@ -34,6 +34,7 @@ args = client_args_parser()
 
 # Load (HIGGS) dataset and conduct partitioning
 num_partitions = args.num_partitions
+
 # Partitioner type is chosen from ["uniform", "linear", "square", "exponential"]
 partitioner_type = args.partitioner_type
 
