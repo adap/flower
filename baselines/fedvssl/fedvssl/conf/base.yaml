@@ -35,7 +35,7 @@ include_dashboard: false
 ### hyper-parameters for downstream fine-tuning ###
 exp_name_finetune: finetune_results
 cfg_path_finetune: fedvssl/CtP/configs/ctp/r3d_18_kinetics/finetune_ucf101.py
-pretrained_model_path: /home/data1/FVSSL_reproduce/flower/baselines/fedvssl/fedvssl_results/round-20-weights.array.npz
+pretrained_model_path: null
 
 # CtP file locations
 dist_train_path: fedvssl/CtP/tools/dist_train.sh
