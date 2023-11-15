@@ -18,8 +18,8 @@
 import warnings
 from typing import Dict, Optional, Tuple, Union, cast
 
-from flwr_datasets.common import Resplitter
 from flwr_datasets.partitioner import IidPartitioner, Partitioner
+from flwr_datasets.resplitter import Resplitter
 from flwr_datasets.resplitter.merge_resplitter import MergeResplitter
 
 tested_datasets = [
