@@ -64,7 +64,6 @@ extensions = [
 # Generate .rst files
 autosummary_generate = True
 
-# Ignore __all__ in __init__ files.
 # Document ONLY the objects from __all__ (present in __init__ files).
 # It will be done recursively starting from flwr_dataset.__init__
 # It's controlled in the index.rst file.
