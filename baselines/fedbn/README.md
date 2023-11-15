@@ -146,7 +146,14 @@ Replicate the results shown below by running the following command. First ensure
 
 # Reproduces the results in Table 3 of the paper.
 python -m fedbn.main --multirun num_rounds=100 client=fedavg,fedbn
+
+# If you want to repeat the same experiment 5 times with differen random seeds (none fixed in the code)
+# adding '+repeat_num=range(5)' adds an aunshiliary new parameter (not used in the code) that forces the --multirun
+# to run a total of 2x5 configs
+python -m fedbn.main --multirun num_rounds=100 client=fedavg,fedbn client_resources.num_gpus=0.2 '+repeat_num=range(5)'
+
 # then use the notebook in docs/multirun_plot.ipynb to create the plot below
+# The results show each strategy averaged for the N runs you run the experiment
 ```
 
 ![FedBn vs FedAvg on all datasets](_static/train_loss.png)
