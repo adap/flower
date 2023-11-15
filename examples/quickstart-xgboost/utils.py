@@ -16,7 +16,7 @@ def client_args_parser():
         help="Partitioner types.",
     )
     parser.add_argument(
-        "--partition_id",
+        "--node-id",
         default=0,
         type=int,
         help="Partition ID used for the current client.",
