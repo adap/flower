@@ -18,6 +18,7 @@
 
 import unittest
 from typing import Dict, Union
+from unittest.mock import Mock, patch
 
 import pytest
 from parameterized import parameterized, parameterized_class
@@ -154,6 +155,92 @@ class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
         dataset = datasets.load_dataset(self.dataset_name)
         dataset_length = sum([len(ds) for ds in dataset.values()])
         self.assertEqual(len(full), dataset_length)
+
+
+class ArtificialDatasetTest(unittest.TestCase):
+    """Test using small artificial dataset, mocked load_dataset."""
+
+    # pylint: disable=no-self-use
+    def _dummy_setup(self, train_rows: int = 10, test_rows: int = 5) -> DatasetDict:
+        """Create a dummy DatasetDict with train, test splits."""
+        data_train = {
+            "features": list(range(train_rows)),
+            "labels": list(range(100, 100 + train_rows)),
+        }
+        data_test = {
+            "features": [200] + [201] * (test_rows - 1),
+            "labels": [202] + [203] * (test_rows - 1),
+        }
+        train_dataset = Dataset.from_dict(data_train)
+        test_dataset = Dataset.from_dict(data_test)
+        return DatasetDict({"train": train_dataset, "test": test_dataset})
+
+    @patch("datasets.load_dataset")
+    def test_shuffling_applied(self, mock_func: Mock) -> None:
+        """Test if argument is used."""
+        dummy_ds = self._dummy_setup()
+        mock_func.return_value = dummy_ds
+
+        expected_result = dummy_ds.shuffle(seed=42)["train"]["features"]
+        fds = FederatedDataset(
+            dataset="does-not-matter", partitioners={"train": 10}, shuffle=True, seed=42
+        )
+        train = fds.load_full("train")
+        # This should be shuffled
+        result = train["features"]
+
+        self.assertEqual(expected_result, result)
+
+    @patch("datasets.load_dataset")
+    def test_shuffling_not_applied(self, mock_func: Mock) -> None:
+        """Test if argument is not used."""
+        dummy_ds = self._dummy_setup()
+        mock_func.return_value = dummy_ds
+
+        expected_result = dummy_ds["train"]["features"]
+        fds = FederatedDataset(
+            dataset="does-not-matter",
+            partitioners={"train": 10},
+            shuffle=False,
+        )
+        train = fds.load_full("train")
+        # This should not be shuffled
+        result = train["features"]
+
+        self.assertEqual(expected_result, result)
+
+    @patch("datasets.load_dataset")
+    def test_shuffling_before_to_resplitting_applied(self, mock_func: Mock) -> None:
+        """Check if the order is met and if the shuffling happens."""
+
+        def resplit(dataset: DatasetDict) -> DatasetDict:
+            #  "Move" the last sample from test to train
+            return DatasetDict(
+                {
+                    "train": concatenate_datasets(
+                        [dataset["train"], dataset["test"].select([0])]
+                    ),
+                    "test": dataset["test"].select(range(1, dataset["test"].num_rows)),
+                }
+            )
+
+        dummy_ds = self._dummy_setup()
+        mock_func.return_value = dummy_ds
+
+        expected_result = concatenate_datasets(
+            [dummy_ds["train"].shuffle(42), dummy_ds["test"].shuffle(42).select([0])]
+        )["features"]
+        fds = FederatedDataset(
+            dataset="does-not-matter",
+            partitioners={"train": 10},
+            resplitter=resplit,
+            shuffle=True,
+        )
+        train = fds.load_full("train")
+        # This should not be shuffled
+        result = train["features"]
+
+        self.assertEqual(expected_result, result)
 
 
 class PartitionersSpecificationForFederatedDatasets(unittest.TestCase):
