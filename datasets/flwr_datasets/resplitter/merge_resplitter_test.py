@@ -21,7 +21,7 @@ from typing import Dict, Tuple
 import pytest
 
 from datasets import Dataset, DatasetDict
-from flwr_datasets.merge_resplitter import MergeResplitter
+from flwr_datasets.resplitter.merge_resplitter import MergeResplitter
 
 
 class TestResplitter(unittest.TestCase):
