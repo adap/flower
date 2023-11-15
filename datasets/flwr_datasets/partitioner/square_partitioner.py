@@ -21,7 +21,7 @@ from flwr_datasets.partitioner.size_partitioner import SizePartitioner
 
 
 class SquarePartitioner(SizePartitioner):
-    """Partitioner creates partitions of size that are correlated with squared idx.
+    """Partitioner creates partitions of size that are correlated with squared node_id.
 
     The amount of data each client gets is correlated with the squared partition ID.
     For instance, if the IDs range from 1 to M, client with ID 1 gets 1 unit of data,

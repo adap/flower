@@ -12,17 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Datasets main package."""
+"""Resplitter package."""
 
 
-from flwr_datasets import partitioner, resplitter
-from flwr_datasets.common.version import package_version as _package_version
-from flwr_datasets.federated_dataset import FederatedDataset
+from .merge_resplitter import MergeResplitter
+from .resplitter import Resplitter
 
 __all__ = [
-    "FederatedDataset",
-    "partitioner",
-    "resplitter",
+    "MergeResplitter",
+    "Resplitter",
 ]
-
-__version__ = _package_version

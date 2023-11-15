@@ -19,6 +19,14 @@ std::optional<flwr::proto::Node> get_node_from_store() {
   return node->second;
 }
 
+void delete_node_from_store() {
+  std::lock_guard<std::mutex> lock(node_store_mutex);
+  auto node = node_store.find(KEY_NODE);
+  if (node == node_store.end() || !node->second.has_value()) {
+    node_store.erase(node);
+  }
+}
+
 std::optional<flwr::proto::TaskIns> get_current_task_ins() {
   std::lock_guard<std::mutex> state_lock(state_mutex);
   auto current_task_ins = state.find(KEY_TASK_INS);
@@ -80,8 +88,7 @@ void delete_node(const std::unique_ptr<flwr::proto::Fleet::Stub> &stub) {
     delete_node_request.release_node(); // Release if status is ok
   }
 
-  // TODO: Check if Node needs to be removed from local map
-  // node_store.erase(node);
+  delete_node_from_store();
 }
 
 std::optional<flwr::proto::TaskIns>
