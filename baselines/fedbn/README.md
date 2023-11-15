@@ -66,25 +66,36 @@ cd data ..
 
 ## Running the Experiments
 
-First, activate your environment 
+First, activate your environment via `poetry shell`. The commands below show how to run the experiments and modify some of its key hyperparameters via the cli.
 
-:warning: _Provide instructions on the steps to follow to run all the experiments._
-```bash  
-# The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
+```bash
+# run with default arguments
+python -m fedbn.main
 
-poetry run python -m <baseline-name>.main <no additional arguments> # where <baseline-name> is the name of this directory and that of the only sub-directory in this directory (i.e. where all your source code is)
+# if you only care about clients doing fit() and not evaluate(),
+# you can disable that stage like so:
+python -m fedbn.main strategy.fraction_evaluate=0 # your code will run many times faster
 
-# If you are using a dataset that requires a complicated download (i.e. not using one natively supported by TF/PyTorch) + preprocessing logic, you might want to tell people to run one script first that will do all that. Please ensure the download + preprocessing can be configured to suit (at least!) a different download directory (and use as default the current directory). The expected command to run to do this is:
+# adjust hyperparameters like the number of rounds or batch size like this
+python -m fedbn.main num_rounds=100 dataset.batch_size
 
-poetry run python -m <baseline-name>.dataset_preparation <optional arguments, but default should always run>
+# increase the number of clients like this (note this should be a multiple 
+# of the number of dataset you involve in the experiment -- 5 by default)
+# this means that without changing other hyperparemeters, you can only have
+# either 5,10,15,20,25,30,35,40,45 or 50 clients
+python -m fedbn.main num_clients=20
 
-# It is expected that you baseline supports more than one dataset and different FL settings (e.g. different number of clients, dataset partitioning methods, etc). Please provide a list of commands showing how these experiments are run. Include also a short explanation of what each one does. Here it is expected you'll be using the Hydra syntax to override the default config.
+# by default clients get assigned a 10th of the data in a dataset
+# this is because the datasets you downloaded were pre-processed by the authors
+# of the FedBN paper. They created 10 partitions.
+# You can increase the amount of partitions each client gets by increasing dataset.percent
+# PLease note that as you increase that value, the maximum number of clients
+# you can have in your experiment gets reduced (this is because partitions are fixed and
+# can't be -- unless you add support for it -- partitioned into smaller ones)
+python -m fedbn.main dataset.percent=0.2 # max allowed is 25 clients
 
-poetry run python -m <baseline-name>.main  <override_some_hyperparameters>
-.
-.
-.
-poetry run python -m <baseline-name>.main  <override_some_hyperparameters>
+# run with FedAvg clients leaving the rest default
+python -m fedbn.main client=fedavg
 ```
 
 ## Limitations

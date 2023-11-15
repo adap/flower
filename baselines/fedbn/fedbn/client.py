@@ -52,6 +52,10 @@ class FlowerClient(fl.client.NumPyClient):
         """Set model parameters, train model, return updated model parameters."""
         self.set_parameters(parameters)
 
+        # evaluate the state of the global model on the train set; the loss returned
+        # is what's reported in Fig3 in the FedBN paper (what this baseline focuses in reproducing)
+        pre_train_loss, pre_train_acc = test(self.model, self.trainloader, device=self.device)
+
         # train model on local dataset
         loss, acc = train(
             self.model,
@@ -65,11 +69,12 @@ class FlowerClient(fl.client.NumPyClient):
         metrics = {
             "dataset_name": self.dataset_name,
             "round": round,
-            "train_acc": acc,
-            "train_loss": loss,
-            "num_train_examples": len(self.trainloader.dataset),
+            "accuracy": acc,
+            "loss": loss,
+            "pre_train_loss": pre_train_loss,
+            "pre_train_acc": pre_train_acc,
         }
-
+        print(f"Fit ({self.dataset_name}): {loss = } | {acc = }| num_samples: {len(self.trainloader.dataset)}" )
         return (
             self.get_parameters({}),
             len(self.trainloader.dataset),
@@ -83,6 +88,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.set_parameters(parameters)
 
         loss, accuracy = test(self.model, self.testloader, device=self.device)
+        print(f"Evaluate ({self.dataset_name}): {loss = } | {accuracy = } | num_samples: {len(self.testloader.dataset)}")
         return (
             float(loss),
             len(self.testloader.dataset),

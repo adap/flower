@@ -29,7 +29,12 @@ strategy:
   fraction_fit: 1.0
   fraction_evaluate: 1.0
   min_available_clients: ${num_clients}
-
+  on_fit_config_fn:
+    _target_: fedbn.strategy.get_on_fit_config
+  evaluate_metrics_aggregation_fn:
+    _target_: fedbn.strategy.get_metrics_aggregation_fn
+  fit_metrics_aggregation_fn:
+    _target_: fedbn.strategy.get_metrics_aggregation_fn
 
 client_resources:
   num_cpus: 2

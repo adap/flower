@@ -205,14 +205,14 @@ def load_partition(
         raise NotImplementedError(f"dataset: {dataset} is not available")
 
     trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True)
-    testloader = DataLoader(testset, batch_size=batch_size, shuffle=False)
+    testloader = DataLoader(testset, batch_size=100, shuffle=False)
 
     return trainloader, testloader
 
 
 def get_data(dataset_cfg: DictConfig) -> List[Tuple[DataLoader, DataLoader, str]]:
+    """Generate dataloaders for each client."""
     client_data = []
-
     d_cfg = dataset_cfg
 
     allowed_percent = (np.arange(1,11)/10).tolist()
@@ -241,6 +241,7 @@ def get_data(dataset_cfg: DictConfig) -> List[Tuple[DataLoader, DataLoader, str]
 
             client_data.append((trainloader, testloader, dataset_name))
 
+    # Ensure there is an entry in the list for each client
     assert len(client_data) == d_cfg.num_clients, f"{len(client_data) = } | {d_cfg.num_clients = }"
 
     return client_data

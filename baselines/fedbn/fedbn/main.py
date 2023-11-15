@@ -5,6 +5,7 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 """
 # these are the basic packages you'll need here
 # feel free to remove some if aren't needed
+import pickle
 import hydra
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
@@ -15,7 +16,7 @@ import flwr as fl
 
 from fedbn.dataset import get_data
 from fedbn.client import gen_client_fn
-from fedbn.server import get_on_fit_config
+
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig) -> None:
@@ -38,7 +39,7 @@ def main(cfg: DictConfig) -> None:
     client_fn = gen_client_fn(client_data_loaders, cfg.client, cfg.model)
 
     # 4. Define your strategy
-    strategy = instantiate(cfg.strategy, on_fit_config_fn=get_on_fit_config())
+    strategy = instantiate(cfg.strategy)
 
     # 5. Start Simulation
     history = fl.simulation.start_simulation(
@@ -53,14 +54,18 @@ def main(cfg: DictConfig) -> None:
         )
 
     # 6. Save your results
-    # Here you can save the `history` returned by the simulation and include
-    # also other buffers, statistics, info needed to be saved in order to later
-    # on generate the plots you provide in the README.md. You can for instance
-    # access elements that belong to the strategy for example:
-    # data = strategy.get_my_custom_data() -- assuming you have such method defined.
-    # Hydra will generate for you a directory each time you run the code. You
-    # can retrieve the path to that directory with this:
-    # save_path = HydraConfig.get().runtime.output_dir
+    print("................")
+    print(history)
+
+    # Hydra automatically creates an output directory
+    # Let's retrieve it and save some results there
+    save_path = HydraConfig.get().runtime.output_dir
+
+    # save results as a Python pickle using a file_path
+    # the directory created by Hydra for each run
+    data = {"history": history}
+    with open(f"{str(save_path)}/history.pkl", "wb") as handle:
+        pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 if __name__ == "__main__":
     main()
