@@ -64,14 +64,14 @@ class SizePartitioner(Partitioner):
         # A flag to perform only a single compute to determine the indices
         self._node_id_to_indices_determined = False
 
-    def load_partition(self, idx: int) -> datasets.Dataset:
+    def load_partition(self, node_id: int) -> datasets.Dataset:
         """Load a single partition based on the partition index.
 
         The number of samples is dependent on the partition node_id.
 
         Parameters
         ----------
-        idx : int
+        node_id : int
             the index that corresponds to the requested partition
 
         Returns
@@ -82,7 +82,7 @@ class SizePartitioner(Partitioner):
         # The partitioning is done lazily - only when the first partition is requested.
         # A single run creates the indices assignments for all the partition indices.
         self._determine_node_id_to_indices_if_needed()
-        return self.dataset.select(self._node_id_to_indices[idx])
+        return self.dataset.select(self._node_id_to_indices[node_id])
 
     @property
     def node_id_to_size(self) -> Dict[int, int]:

@@ -102,7 +102,7 @@ class FederatedDataset:
         self._dataset_prepared: bool = False
 
     def load_partition(self, node_id: int, split: str) -> Dataset:
-        """Load the partition specified by the idx in the selected split.
+        """Load the partition specified by the node_id in the selected split.
 
         The dataset is downloaded only when the first call to `load_partition` or
         `load_full` is made.
@@ -110,7 +110,8 @@ class FederatedDataset:
         Parameters
         ----------
         node_id : int
-            Partition index for the selected split, idx in {0, ..., num_partitions - 1}.
+            Partition index for the selected split, node_id in {0, ...,
+            num_partitions - 1}.
         split : str
             Name of the (partitioned) split (e.g. "train", "test").
 
