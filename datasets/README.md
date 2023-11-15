@@ -59,9 +59,9 @@ If you plan to change the type of the dataset to run the code with your ML frame
 
 # Usage
 
-The Flower Datasets exposes `FederatedDataset` abstraction to represent the dataset needed for federated learning/analytics. It has two powerful methods that let you handle the dataset preprocessing. They are `load_partition(node_id, split)` and `load_full(split)`.
+Flower Datasets exposes the `FederatedDataset` abstraction to represent the dataset needed for federated learning/evaluation/analytics. It has two powerful methods that let you handle the dataset preprocessing: `load_partition(node_id, split)` and `load_full(split)`.
 
-Here's the most basic quick example of how to partition the MNIST dataset:
+Here's a basic quickstart example of how to partition the MNIST dataset:
 
 ```
 from flwr_datasets import FederatedDataset
@@ -80,11 +80,11 @@ For more details, please refer to the specific how-to guides or tutorial. They s
 
 Here are a few of the things that we will work on in future releases:
 
-* ✅Support for more datasets (especially the ones that have user id present).
-* ✅Creation of custom `Partitioner`s.
-* ✅More out-of-the-box `Partitioner`s.
-* ✅Passing `Partitioner`s via `FederatedDataset`'s `partitioner` argument. 
-* ✅Customization of the dataset splitting before the partitioning.
+* ✅ Support for more datasets (especially the ones that have user id present).
+* ✅ Creation of custom `Partitioner`s.
+* ✅ More out-of-the-box `Partitioner`s.
+* ✅ Passing `Partitioner`s via `FederatedDataset`'s `partitioners` argument. 
+* ✅ Customization of the dataset splitting before the partitioning.
 * Simplification of the dataset transformation to the popular frameworks/types.
 * Creation of the synthetic data,
 * Support for Vertical FL.
