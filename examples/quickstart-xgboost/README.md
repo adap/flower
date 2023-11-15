@@ -71,7 +71,7 @@ python3 client.py node-id=0
 Start client 2 in the second terminal:
 
 ```shell
-python3 client.py partition_id=1
+python3 client.py node-id=1
 ```
 
 You will see that XGBoost is starting a federated training.
