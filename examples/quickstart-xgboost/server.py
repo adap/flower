@@ -7,7 +7,7 @@ from flwr.common.logger import log
 from flwr.common import Parameters, Scalar
 from flwr_datasets import FederatedDataset
 
-from strategy import XGbBagging
+from strategy import XgbBagging
 from utils import server_args_parser
 from dataset import resplit, transform_dataset_to_dmatrix
 
@@ -90,7 +90,7 @@ def get_evaluate_fn(test_data):
 
 
 # Define strategy
-strategy = XGbBagging(
+strategy = XgbBagging(
     evaluate_function=get_evaluate_fn(test_dmatrix) if centralised_eval else None,
     fraction_fit=(float(num_clients_per_round) / pool_size),
     min_fit_clients=num_clients_per_round,

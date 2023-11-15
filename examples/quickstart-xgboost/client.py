@@ -47,8 +47,8 @@ fds = FederatedDataset(
 )
 
 # Let's use the first partition as an example
-partition_id = args.partition_id
-partition = fds.load_partition(idx=partition_id, split="train")
+node_id = args.node_id
+partition = fds.load_partition(idx=node_id, split="train")
 partition.set_format("numpy")
 
 if args.centralised_eval:
