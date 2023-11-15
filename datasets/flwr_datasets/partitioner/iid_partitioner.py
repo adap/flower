@@ -39,7 +39,7 @@ class IidPartitioner(Partitioner):
 
         Parameters
         ----------
-        node_id: int
+        node_id : int
             the index that corresponds to the requested partition
 
         Returns
