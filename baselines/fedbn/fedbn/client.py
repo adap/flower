@@ -77,7 +77,7 @@ class FlowerClient(fl.client.NumPyClient):
             "pre_train_loss": pre_train_loss,
             "pre_train_acc": pre_train_acc,
         }
-        print(f"Fit ({self.dataset_name}): {loss = } | {acc = }| num_samples: {len(self.trainloader.dataset)}" )
+        # print(f"Fit ({self.dataset_name}): {loss = } | {acc = }| num_samples: {len(self.trainloader.dataset)}" )
         return (
             self.get_parameters({}),
             len(self.trainloader.dataset),
@@ -91,7 +91,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.set_parameters(parameters)
 
         loss, accuracy = test(self.model, self.testloader, device=self.device)
-        print(f"Evaluate ({self.dataset_name}): {loss = } | {accuracy = } | num_samples: {len(self.testloader.dataset)}")
+        # print(f"Evaluate ({self.dataset_name}): {loss = } | {accuracy = } | num_samples: {len(self.testloader.dataset)}")
         return (
             float(loss),
             len(self.testloader.dataset),

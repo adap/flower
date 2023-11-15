@@ -1,11 +1,11 @@
 ---
-title: FedBN: Federated Learning on Non-IID Features via Local Batch Normalization
+title: "FedBN: Federated Learning on Non-IID Features via Local Batch Normalization"
 url: https://arxiv.org/abs/2102.07623
-labels: [label1, label2] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
+labels: [label1, label2]
 dataset: [MNIST, MNIST-M, SVHN, USPS, SynthDigits]
 ---
 
-# :warning: FedBN: Federated Learning on Non-IID Features via Local Batch Normalization
+# FedBN: Federated Learning on Non-IID Features via Local Batch Normalization
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
@@ -21,23 +21,47 @@ dataset: [MNIST, MNIST-M, SVHN, USPS, SynthDigits]
 
 **What’s implemented:** Figure 3 in the paper: convergence in training loss comparing `FedBN` to `FedAvg` for five datasets.
 
-**Datasets:** :warning: *_List the datasets you used (if you used a medium to large dataset, >10GB please also include the sizes of the dataset)._*
+**Datasets:** Vision datasets including digits 0-9. These datasets are: [MNIST](https://ieeexplore.ieee.org/document/726791), [MNIST-M]((https://arxiv.org/pdf/1505.07818.pdf)), [SVHN](http://ufldl.stanford.edu/housenumbers/nips2011_housenumbers.pdf), [USPS](https://ieeexplore.ieee.org/document/291440), and [SynthDigits](https://arxiv.org/pdf/1505.07818.pdf).
 
-**Hardware Setup:** :warning: *_Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Someone out there might not have access to the same resources you have so, could list the absolute minimum hardware needed to run the experiment in a reasonable amount of time ? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?_*
+**Hardware Setup:** Using the default configurations, any machine with 8 CPU cores should be capable too run 100 rounds of FedAvg or FedBN in under 5 minutes. Therefore a GPU is not needed if you stick to the small model used in the paper and you limit clients to use a 10% of the data in each dataset (these are the default settings)
 
 **Contributors:** :warning: *_let the world know who contributed to this baseline. This could be either your name, your name and affiliation at the time, or your GitHub profile name if you prefer. If multiple contributors signed up for this baseline, please list yourself and your colleagues_*
 
 
 ## Experimental Setup
 
-**Task:** :warning: *_what’s the primary task that is being federated? (e.g. image classification, next-word prediction). If you have experiments for several, please list them_*
+**Task:** Image classification
 
-**Model:** :warning: *_provide details about the model you used in your experiments (if more than use a list). If your model is small, describing it as a table would be :100:. Some FL methods do not use an off-the-shelve model (e.g. ResNet18) instead they create your own. If this is your case, please provide a summary here and give pointers to where in the paper (e.g. Appendix B.4) is detailed._*
+**Model:** A six-layer CNN with 14,219,210 parameters following the structure described in appendix D.2.
 
-**Dataset:** :warning: *_Earlier you listed already the datasets that your baseline uses. Now you should include a breakdown of the details about each of them. Please include information about: how the dataset is partitioned (e.g. LDA with alpha 0.1 as default and all clients have the same number of training examples; or each client gets assigned a different number of samples following a power-law distribution with each client only instances of 2 classes)? if  your dataset is naturally partitioned just state “naturally partitioned”; how many partitions there are (i.e. how many clients)? Please include this an all information relevant about the dataset and its partitioning into a table._*
+**Dataset:**  This baseline makes use of the pre-processed partitions created and opensource by the authors of the FedBN paper. You can read more about how those were created [here](https://github.com/med-air/FedBN). Follow the steps below in the `Environment Setup` section to download them. 
 
-**Training Hyperparameters:** :warning: *_Include a table with all the main hyperparameters in your baseline. Please show them with their default value._*
 
+A more detailed explanation of the datasets is given in the following table.
+
+|     | MNIST     | MNIST-M   | SVHN  |  USPS    | SynthDigits |
+|--- |---        |---        |---    |---            |---    |
+| data type| handwritten digits| MNIST modification randomly colored with colored patches| Street view house numbers | handwritten digits from envelopes by the U.S. Postal Service | Syntehtic digits Windows TM font varying the orientation, blur and stroke colors |
+| color | greyscale | RGB | RGB | greyscale | RGB |
+| pixelsize | 28x28 | 28 x 28 | 32 x32 | 16 x16 | 32 x32 |
+| labels | 0-9 | 0-9 | 1-10 | 0-9 | 1-10 |
+| number of trainset | 60.000 | 60.000 | 73.257 | 9,298 | 50.000 |
+| number of testset| 10.000 | 10.000 | 26.032 | - | - |
+| image shape | (28,28) | (28,28,3) | (32,32,3) | (16,16) | (32,32,3) |
+
+
+**Training Hyperparameters:** By default (i.e. if you don't override anything in the config) these main hyperparameters used are shown in the table below. For a complete list of hyperparemters, please refer to the config files in `fedbn/conf`.
+
+| Description | Value |
+| ----------- | ----- |
+| rounds | 10 |
+| num_clients | 5 |
+| clients_per_round | 5 |
+| training samples per client| 743 |
+| lr | 10E-2 |
+| local epochs | 1 |
+| loss | cross entropy loss |
+| optimizer | SGD |
 
 ## Environment Setup
 
