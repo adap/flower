@@ -5,11 +5,15 @@ example, you may define here things like: loading a model from a checkpoint, sav
 results, plotting.
 """
 
-import pickle, yaml
+import pickle
 from pathlib import Path
-import matplotlib.pyplot as plt
 
-def saveFig(name, fig):
+import matplotlib.pyplot as plt
+import yaml
+
+
+def save_fig(name, fig):
+    """Save matplotlib plot."""
     fig.savefig(
         name,
         dpi=None,
@@ -34,34 +38,39 @@ def _read_pickle_and_config(path_to_pickle):
 
     return data, config
 
+
 def _fuse_by_dataset(losses):
     fussed_losses = {}
-    keys = losses[0][1].keys()
+    losses[0][1].keys()
 
     for _, loss_dict in losses:
-        for k,v in loss_dict.items():
+        for k, val in loss_dict.items():
             if k in fussed_losses:
-                fussed_losses[k].append(v)
+                fussed_losses[k].append(val)
             else:
-                fussed_losses[k] = [v]
+                fussed_losses[k] = [val]
     return fussed_losses
 
-def quick_plot(path_to_pickled_history: str):
 
+def quick_plot(path_to_pickled_history: str):
+    """Plot training loss for all datasets in the same plot."""
     data, config = _read_pickle_and_config(path_to_pickled_history)
 
-    pre_train_loss = data['history'].metrics_distributed_fit['pre_train_losses']
+    pre_train_loss = data["history"].metrics_distributed_fit["pre_train_losses"]
 
     fussed_losses = _fuse_by_dataset(pre_train_loss)
 
-    fig, axs = plt.subplots(figsize=(10,6))
+    fig, _ = plt.subplots(figsize=(10, 6))
     for dataset, loss in fussed_losses.items():
         plt.plot(range(len(loss)), loss, label=dataset)
-        plt.title(f"client: {config['client']['client_label']}\n num_clients: {config['num_clients']}, percent: {config['dataset']['percent']}")
+        plt.title(
+            f"client: {config['client']['client_label']}\n num_clients:"
+            " {config['num_clients']}, percent: {config['dataset']['percent']}"
+        )
         plt.legend()
         plt.grid()
-        plt.xlabel('Round')
-        plt.ylabel('Train Loss')
-    
+        plt.xlabel("Round")
+        plt.ylabel("Train Loss")
+
     dir_path = Path(path_to_pickled_history).parent
-    saveFig(f'{dir_path}/train_loss.png', fig)
+    save_fig(f"{dir_path}/train_loss.png", fig)

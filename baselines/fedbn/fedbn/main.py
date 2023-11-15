@@ -6,17 +6,16 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 # these are the basic packages you'll need here
 # feel free to remove some if aren't needed
 import pickle
-import hydra
 from pathlib import Path
+
+import flwr as fl
+import hydra
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
-
-import flwr as fl
-
-from fedbn.dataset import get_data
 from fedbn.client import gen_client_fn
+from fedbn.dataset import get_data
 from fedbn.utils import quick_plot
 
 
@@ -42,7 +41,7 @@ def main(cfg: DictConfig) -> None:
     # case as with params in BN layers of FedBN clients) is lost
     # once a client completes its training. An upcoming version of
     # Flower suports stateful clients
-    bn_states = Path(save_path)/"bn_states"
+    bn_states = Path(save_path) / "bn_states"
     bn_states.mkdir()
 
     # 2. Prepare your dataset
@@ -66,7 +65,7 @@ def main(cfg: DictConfig) -> None:
             "num_gpus": cfg.client_resources.num_gpus,
         },
         strategy=strategy,
-        )
+    )
 
     # 6. Save your results
     print("................")
@@ -78,7 +77,7 @@ def main(cfg: DictConfig) -> None:
     history_path = f"{str(save_path)}/history.pkl"
     with open(history_path, "wb") as handle:
         pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    
+
     # simple plot
     quick_plot(history_path)
 

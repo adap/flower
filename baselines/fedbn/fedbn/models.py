@@ -12,7 +12,10 @@ import torch
 from torch import nn
 
 
+# pylint: disable=too-many-instance-attributes
 class CNNModel(nn.Module):
+    """CNN model proposed in the FedBN paper."""
+
     def __init__(self, num_classes=10):
         super().__init__()
         self.conv1 = nn.Conv2d(3, 64, 5, 1, 2)
@@ -52,6 +55,7 @@ class CNNModel(nn.Module):
         return x
 
 
+# pylint: disable=too-many-locals
 def train(model, traindata, epochs, device) -> Tuple[float, float]:
     """Train the network."""
     # Define loss and optimizer
@@ -85,7 +89,8 @@ def train(model, traindata, epochs, device) -> Tuple[float, float]:
             loss = running_loss
             accuracy = correct / total
 
-            # TODO: resetting running_loss looks suspicious, check if things don't work as expected
+            # TODO: resetting running_loss looks suspicious,
+            # TODO: check if things don't work as expected
             # if i == len(traindata) - 1:  # print every 100 mini-batches
             #     running_loss = 0.0
         loss = loss / len(traindata)
