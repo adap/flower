@@ -150,7 +150,7 @@ class FederatedDataset:
 
         Returns
         -------
-        dataset_split: Dataset
+        dataset_split : Dataset
             Part of the dataset identified by its split name.
         """
         if not self._dataset_prepared:
