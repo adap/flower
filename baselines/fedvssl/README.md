@@ -84,7 +84,7 @@ To run FedVSSL with UCF-101 baseline, please ensure you have activated your Poet
 # clone CtP repo
 git clone https://github.com/yan-gao-GY/CtP.git fedvssl/CtP
 
-sudo apt install unrar
+sudo apt install unrar unzip
 
 cd fedvssl
 python dataset_preparation.py
