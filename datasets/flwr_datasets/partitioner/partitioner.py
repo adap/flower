@@ -58,12 +58,12 @@ class Partitioner(ABC):
 
         Parameters
         ----------
-        node_id: int
+        node_id : int
             the index that corresponds to the requested partition
 
         Returns
         -------
-        dataset_partition: Dataset
+        dataset_partition : Dataset
             single dataset partition
         """
 
@@ -75,7 +75,7 @@ class Partitioner(ABC):
 
         Returns
         -------
-        dataset_assigned: bool
+        dataset_assigned : bool
             True if a dataset is assigned, otherwise False.
         """
         return self._dataset is not None

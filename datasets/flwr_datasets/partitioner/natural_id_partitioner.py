@@ -55,7 +55,7 @@ class NaturalIdPartitioner(Partitioner):
 
         Returns
         -------
-        dataset_partition: Dataset
+        dataset_partition : Dataset
             single dataset partition
         """
         if len(self._node_id_to_natural_id) == 0:
