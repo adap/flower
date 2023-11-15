@@ -2,6 +2,8 @@
 
 from collections import OrderedDict
 from typing import Callable, Dict, List, Tuple
+from pathlib import Path
+import pickle
 
 import flwr as fl
 import torch
@@ -22,6 +24,7 @@ class FlowerClient(fl.client.NumPyClient):
         trainloader: DataLoader,
         testloader: DataLoader,
         dataset_name: str,
+        **kwargs,
     ) -> None:
         self.trainloader = trainloader
         self.testloader = testloader
@@ -97,10 +100,33 @@ class FlowerClient(fl.client.NumPyClient):
 
 
 class FedBNFlowerClient(FlowerClient):
+
+    def __init__(self, bn_state_dir: Path, client_id: int, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.bn_state_dir = bn_state_dir
+        self.bn_state_pkl = bn_state_dir/f"client_{client_id}.pkl"
+
+    def _save_bn_statedict(self):
+
+        bn_state = {name: val.cpu().numpy()
+            for name, val in self.model.state_dict().items()
+            if "bn" in name}
+            
+        with open(self.bn_state_pkl, "wb") as handle:
+            pickle.dump(bn_state, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    def _load_bn_statedict(self):
+        with open(self.bn_state_pkl, "rb") as handle:
+            data = pickle.load(handle)
+        bn_stae_dict = {k: torch.tensor(v) for k, v in data.items()}
+        return bn_stae_dict
+
     def get_parameters(self, config) -> NDArrays:
         """Return model parameters as a list of NumPy ndarrays w or w/o using BN
         layers.
         """
+        # first update bn_state_dir
+        self._save_bn_statedict()
         # self.model.train() # TODO: is this needed ? check
         # Excluding parameters of BN layers when using FedBN
         return [
@@ -119,11 +145,17 @@ class FedBNFlowerClient(FlowerClient):
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
         self.model.load_state_dict(state_dict, strict=False)
 
+        # now also load from bn_state_dir
+        if self.bn_state_pkl.exists(): # it won't exist in the first round
+            bn_state_dict = self._load_bn_statedict()
+            self.model.load_state_dict(bn_state_dict, strict=False)
+
 
 def gen_client_fn(
     client_data: List[Tuple[DataLoader,DataLoader,int]],
     client_cfg: DictConfig,
     model_cfg: DictConfig,
+    bn_state_dir: Path,
 ) -> Callable[[str], FlowerClient]:
     """"""
 
@@ -137,6 +169,7 @@ def gen_client_fn(
         trainloader, valloader, dataset_name = client_data[int(cid)]
         return instantiate(
             client_cfg, model=net, trainloader=trainloader, testloader=valloader, dataset_name=dataset_name,
+            bn_state_dir=bn_state_dir, client_id=int(cid),
         )
 
     return client_fn
