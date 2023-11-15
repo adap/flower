@@ -1,4 +1,6 @@
 import os
+from sys import argv
+
 import flwr as fl
 import tensorflow as tf
 import tensorflow_datasets as tfds
@@ -8,6 +10,12 @@ train_size = 125
 BATCH_SIZE = 50
 col_names = ["sepal_length", "sepal_width", "petal_length", "petal_width"]
 
+if len(argv) > 1:
+    transport = argv[1]
+else:
+    transport = "grpc-bidi"
+
+prefix = "http://" if transport == "rest" else ""
 
 def transform(ds):
     features = tf.unstack(ds["features"])
@@ -83,4 +91,4 @@ def client_fn(cid):
 
 if __name__ == "__main__":
     # Start Flower client
-    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=FlowerClient())
+    fl.client.start_numpy_client(server_address=f"{prefix}127.0.0.1:8080", client=FlowerClient(), transport=transport)

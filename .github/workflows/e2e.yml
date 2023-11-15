@@ -51,7 +51,7 @@ jobs:
 
   frameworks:
     runs-on: ubuntu-22.04
-    timeout-minutes: 10
+    timeout-minutes: 15
     needs: wheel
     # Using approach described here:
     # https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs
@@ -130,12 +130,16 @@ jobs:
       - name: Download dataset
         if: ${{ matrix.dataset }}
         run: python -c "${{ matrix.dataset }}"
-      - name: Run edge client test
-        run: ./../test.sh "${{ matrix.directory }}"
-      - name: Run virtual client test
+      - name: Run virtual client test 
         run: python simulation.py
-      - name: Run driver test
-        run: ./../test_driver.sh
+      - name: Run edge client test
+        run: ./../test_server.sh "${{ matrix.directory }}"
+      - name: Run driver test using gRPC bidi and in-memory state
+        run: ./../test_flower_server.sh "${{ matrix.directory }}" bidi mem
+      - name: Run driver test using gRPC bidi and SQLite database
+        run: ./../test_flower_server.sh "${{ matrix.directory }}" bidi db
+      - name: Run driver test using gRPC rere and in-memory state
+        run: ./../test_flower_server.sh "${{ matrix.directory }}" rere mem
 
   strategies:
     runs-on: ubuntu-22.04
@@ -173,3 +177,4 @@ jobs:
       - name: Test strategies
         run: |
           python test.py "${{ matrix.strat }}"
+          

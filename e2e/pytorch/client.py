@@ -1,5 +1,6 @@
 import warnings
 from collections import OrderedDict
+from sys import argv
 
 import torch
 import torch.nn as nn
@@ -10,6 +11,13 @@ from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
 
 import flwr as fl
+
+if len(argv) > 1:
+    transport = argv[1]
+else:
+    transport = "grpc-bidi"
+
+prefix = "http://" if transport == "rest" else ""
 
 # #############################################################################
 # 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
@@ -113,6 +121,7 @@ def client_fn(cid):
 if __name__ == "__main__":
     # Start Flower client
     fl.client.start_numpy_client(
-        server_address="127.0.0.1:8080",
+        server_address=f"{prefix}127.0.0.1:8080",
         client=FlowerClient(),
+        transport=transport,
     )
