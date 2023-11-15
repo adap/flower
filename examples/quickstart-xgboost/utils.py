@@ -6,7 +6,7 @@ def client_args_parser():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        "--num_partitions", default=20, type=int, help="Number of partitions."
+        "--num-partitions", default=20, type=int, help="Number of partitions."
     )
     parser.add_argument(
         "--partitioner_type",
