@@ -1,7 +1,7 @@
 ---
 title: Federated Self-supervised Learning for Video Understanding
 url: https://arxiv.org/abs/2207.01975
-labels: [cross-device, ssl, videossl]
+labels: [cross-device, ssl, video, videossl]
 dataset: [UCF-101, Kinectics-400]
 ---
 
