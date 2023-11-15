@@ -1,10 +1,251 @@
-"""Handle basic dataset creation.
+"""Digits dataset."""
+import os
+import numpy as np
+from PIL import Image
+from typing import Tuple, Dict, List
 
-In case of PyTorch it should return dataloaders for your dataset (for both the clients
-and the server). If you are using a custom dataset class, this module is the place to
-define it. If your dataset requires to be downloaded (and this is not done
-automatically -- e.g. as it is the case for many dataset in TorchVision) and
-partitioned, please include all those functions and logic in the
-`dataset_preparation.py` module. You can use all those functions from functions/methods
-defined here of course.
-"""
+from random import shuffle
+
+from omegaconf import DictConfig
+from torchvision import transforms
+from torch.utils.data import Dataset, DataLoader
+
+class DigitsDataset(Dataset):
+    """Split datasets."""
+
+    total_partitions: int = 10
+
+    def __init__(
+        self,
+        data_path: str,
+        channels: int,
+        train: bool,
+        partitions: List[int] = None,
+        transform=None,
+    ):
+        if train:
+            # construct dataset by loading one or more partitions
+            self.images, self.labels = np.load(
+                os.path.join(
+                    data_path,
+                    f"partitions/train_part{partitions[0]}.pkl",
+                ),
+                allow_pickle=True,
+            )
+            for part in partitions[1:]:
+                images, labels = np.load(
+                    os.path.join(
+                        data_path,
+                        f"partitions/train_part{part}.pkl",
+                    ),
+                    allow_pickle=True,
+                )
+                self.images = np.concatenate([self.images, images], axis=0)
+                self.labels = np.concatenate([self.labels, labels], axis=0)     
+            
+        else:
+            self.images, self.labels = np.load(
+                os.path.join(data_path, "test.pkl"), allow_pickle=True
+            )
+
+        self.transform = transform
+        self.channels = channels
+        self.labels = self.labels.astype(np.int32).squeeze()
+
+    def __len__(self):
+        return self.images.shape[0]
+
+    def __getitem__(self, idx):
+        image = self.images[idx]
+        label = self.labels[idx]
+        if self.channels == 1:
+            image = Image.fromarray(image, mode="L")
+        elif self.channels == 3:
+            image = Image.fromarray(image, mode="RGB")
+        else:
+            raise ValueError(f"{self.channels} channel is not allowed.")
+
+        if self.transform is not None:
+            image = self.transform(image)
+
+        return image, label
+
+def load_partition(
+    dataset: str,
+    path_to_data: str,
+    partition_indx: List[int],
+    batch_size: int
+) -> Tuple[DataLoader, DataLoader, Dict]:
+    """Load 'MNIST', 'SVHN', 'USPS', 'SynthDigits', 'MNIST_M' for the training
+    and test data to simulate a partition."""
+
+    data_path = os.path.join(path_to_data, dataset)
+
+    if dataset == "MNIST":
+
+        transform = transforms.Compose(
+            [
+                transforms.Grayscale(num_output_channels=3),
+                transforms.ToTensor(),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            ]
+        )
+
+        trainset = DigitsDataset(
+            data_path=data_path,
+            channels=1,
+            partitions=partition_indx,
+            train=True,
+            transform=transform,
+        )
+        testset = DigitsDataset(
+            data_path=data_path,
+            channels=1,
+            train=False,
+            transform=transform,
+        )
+
+    elif dataset == "SVHN":
+
+        transform = transforms.Compose(
+            [
+                transforms.Resize([28, 28]),
+                transforms.ToTensor(),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            ]
+        )
+
+        trainset = DigitsDataset(
+            data_path=data_path,
+            channels=3,
+            partitions=partition_indx,
+            train=True,
+            transform=transform,
+        )
+        testset = DigitsDataset(
+            data_path=data_path,
+            channels=3,
+            train=False,
+            transform=transform,
+        )
+
+    elif dataset == "USPS":
+
+        transform = transforms.Compose(
+            [
+                transforms.Resize([28, 28]),
+                transforms.Grayscale(num_output_channels=3),
+                transforms.ToTensor(),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            ]
+        )
+
+        trainset = DigitsDataset(
+            data_path=data_path,
+            channels=1,
+            partitions=partition_indx,
+            train=True,
+            transform=transform,
+        )
+        testset = DigitsDataset(
+            data_path=data_path,
+            channels=1,
+            train=False,
+            transform=transform,
+        )
+
+    elif dataset == "SynthDigits":
+
+        transform = transforms.Compose(
+            [
+                transforms.Resize([28, 28]),
+                transforms.ToTensor(),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            ]
+        )
+
+        trainset = DigitsDataset(
+            data_path=data_path,
+            channels=3,
+            partitions=partition_indx,
+            train=True,
+            transform=transform,
+        )
+        testset = DigitsDataset(
+            data_path=data_path,
+            channels=3,
+            train=False,
+            transform=transform,
+        )
+
+    elif dataset == "MNIST_M":
+
+        transform = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            ]
+        )
+
+        trainset = DigitsDataset(
+            data_path=data_path,
+            channels=3,
+            partitions=partition_indx,
+            train=True,
+            transform=transform,
+        )
+        testset = DigitsDataset(
+            data_path=data_path,
+            channels=3,
+            train=False,
+            transform=transform,
+        )
+
+    else:
+        raise NotImplementedError(f"dataset: {dataset} is not available")
+
+    num_examples = {
+        "dataset": dataset,
+        "trainset": len(trainset),
+        "testset": len(testset),
+    }
+
+    trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True)
+    testloader = DataLoader(testset, batch_size=batch_size, shuffle=False)
+
+    return trainloader, testloader, num_examples
+
+def get_data(dataset_cfg: DictConfig) -> List[Tuple[DataLoader, DataLoader, int]]:
+    client_data = []
+
+    d_cfg = dataset_cfg
+
+    allowed_percent = (np.arange(1,11)/10).tolist()
+    assert d_cfg.percent in allowed_percent, f"'dataset.percent' should be in {allowed_percent}. \nThis is because the trainset is pre-partitioned into 10 disjoint sets."
+    max_expected_clients = len(d_cfg.to_include) * 1/d_cfg.percent
+
+    num_clients_step = len(d_cfg.to_include)
+    possible_client_configs = np.arange(num_clients_step,max_expected_clients + num_clients_step, num_clients_step, dtype=np.int32).tolist()
+    assert d_cfg.num_clients in possible_client_configs, f"'dataset.num_clients' should be in {possible_client_configs}. \n this is because you include {len(d_cfg.to_include)} datasets (i.e. {d_cfg.to_include}) and each should be used by the same number of clients. The values of `num_clients` also depend on the 'dataset.percent' you chose."
+
+    num_clients_per_dataset = d_cfg.num_clients // num_clients_step
+    total_partitions = 10 # each dataset was pre-processed by the authors and split into 10 partitions
+    num_parts = int(d_cfg.percent * total_partitions)
+
+    for dataset_name in dataset_cfg.to_include:
+        parts = list(range(total_partitions))
+        shuffle(parts)
+        for i in range(num_clients_per_dataset):
+            parts_for_client = parts[i*num_parts:(i+1)*num_parts]
+            print(f"{dataset_name = } | {parts_for_client = }")
+            trainloader, testloader, num_ex = load_partition(dataset_name,
+                                                            path_to_data=d_cfg.data_path,
+                                                            partition_indx=parts_for_client,
+                                                            batch_size=d_cfg.batch_size,
+                                                            )
+
+            client_data.append((trainloader, testloader, num_ex))
+
+    assert len(client_data) == d_cfg.num_clients, f"{len(client_data) = } | {d_cfg.num_clients = }"
+
+    return client_data

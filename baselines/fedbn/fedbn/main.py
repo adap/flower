@@ -8,6 +8,7 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 import hydra
 from omegaconf import DictConfig, OmegaConf
 
+from fedbn.dataset import get_data
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig) -> None:
@@ -22,14 +23,13 @@ def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
 
     # 2. Prepare your dataset
-    # here you should call a function in datasets.py that returns whatever is needed to:
-    # (1) ensure the server can access the dataset used to evaluate your model after
-    # aggregation
-    # (2) tell each client what dataset partitions they should use (e.g. a this could
-    # be a location in the file system, a list of dataloader, a list of ids to extract
-    # from a dataset, it's up to you)
+    # please ensure you followed the README.md and you downloaded the
+    # pre-processed dataset suplied by the authors of the FedBN paper
+    client_data_loaders = get_data(cfg.dataset)
 
     # 3. Define your clients
+
+
     # Define a function that returns another function that will be used during
     # simulation to instantiate each individual client
     # client_fn = client.<my_function_that_returns_a_function>()
@@ -51,3 +51,6 @@ def main(cfg: DictConfig) -> None:
     # Hydra will generate for you a directory each time you run the code. You
     # can retrieve the path to that directory with this:
     # save_path = HydraConfig.get().runtime.output_dir
+
+if __name__ == "__main__":
+    main()
