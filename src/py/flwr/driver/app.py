@@ -52,7 +52,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     config: Optional[ServerConfig] = None,
     strategy: Optional[Strategy] = None,
     client_manager: Optional[ClientManager] = None,
-    certificates: Optional[Union[bytes, str]] = None,
+    root_certificates: Optional[Union[bytes, str]] = None,
 ) -> History:
     """Start a Flower Driver API server.
 
@@ -77,7 +77,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         `flwr.driver.driver_client_manager.DriverClientManager`. If no
         implementation is provided, then `start_driver` will use
         `flwr.driver.driver_client_manager.DriverClientManager`.
-    certificates : Optional[Union[bytes, str]] (default: None)
+    root_certificates : Optional[Union[bytes, str]] (default: None)
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
@@ -109,9 +109,9 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
     # Create the Driver
-    if isinstance(certificates, str):
-        certificates = Path(certificates).read_bytes()
-    driver = GrpcDriver(driver_service_address=address, certificates=certificates)
+    if isinstance(root_certificates, str):
+        root_certificates = Path(root_certificates).read_bytes()
+    driver = GrpcDriver(driver_service_address=address, certificates=root_certificates)
     driver.connect()
     lock = threading.Lock()
 
