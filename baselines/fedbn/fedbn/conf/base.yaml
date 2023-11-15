@@ -3,6 +3,10 @@
 # Please follow the provided structure (this will ensuring all baseline follow
 # a similar configuration structure and hence be easy to customise)
 
+defaults:
+  - client: fedbn
+
+num_rounds: 10
 num_clients: 5 # any multiple of 5 between 5 and 50 (both included)
                # this value should be choosen taking dataset.percent into consideration
                # for example if percent=0.2 then at most we can have 25 clients, each
@@ -26,8 +30,6 @@ strategy:
   fraction_evaluate: 1.0
   min_available_clients: ${num_clients}
 
-client:
-  _target_: fedbn.client.FedBNFlowerClient
 
 client_resources:
   num_cpus: 2

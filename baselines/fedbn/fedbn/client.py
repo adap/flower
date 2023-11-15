@@ -21,9 +21,11 @@ class FlowerClient(fl.client.NumPyClient):
         model: CNNModel,
         trainloader: DataLoader,
         testloader: DataLoader,
+        dataset_name: str,
     ) -> None:
         self.trainloader = trainloader
         self.testloader = testloader
+        self.dataset_name = dataset_name
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.model = model.to(self.device)
 
@@ -49,7 +51,6 @@ class FlowerClient(fl.client.NumPyClient):
     ) -> Tuple[NDArrays, int, Dict]:
         """Set model parameters, train model, return updated model parameters."""
         self.set_parameters(parameters)
-        train_loss, train_acc = test(self.model, self.trainloader, device=self.device)
 
         # train model on local dataset
         loss, acc = train(
@@ -62,11 +63,11 @@ class FlowerClient(fl.client.NumPyClient):
         # construct metrics to return to server
         round = config["round"]
         metrics = {
+            "dataset_name": self.dataset_name,
             "round": round,
-            "pre_train_acc": train_acc,
-            "pre_train_loss": train_loss,
             "train_acc": acc,
-            "_train_loss": loss,
+            "train_loss": loss,
+            "num_train_examples": len(self.trainloader.dataset),
         }
 
         return (
@@ -85,7 +86,7 @@ class FlowerClient(fl.client.NumPyClient):
         return (
             float(loss),
             len(self.testloader.dataset),
-            {"loss": loss, "accuracy": accuracy},
+            {"loss": loss, "accuracy": accuracy, "dataset_name": self.dataset_name},
         )
 
 
@@ -114,8 +115,7 @@ class FedBNFlowerClient(FlowerClient):
 
 
 def gen_client_fn(
-    trainloaders: List[DataLoader],
-    valloaders: List[DataLoader],
+    client_data: List[Tuple[DataLoader,DataLoader,int]],
     client_cfg: DictConfig,
     model_cfg: DictConfig,
 ) -> Callable[[str], FlowerClient]:
@@ -128,11 +128,9 @@ def gen_client_fn(
 
         # Note: each client gets a different trainloader/valloader, so each client
         # will train and evaluate on their own unique data
-        trainloader = trainloaders[int(cid)]
-        valloader = valloaders[int(cid)]
-
+        trainloader, valloader, dataset_name = client_data[int(cid)]
         return instantiate(
-            client_cfg, model=net, trainloader=trainloader, testloader=valloader
+            client_cfg, model=net, trainloader=trainloader, testloader=valloader, dataset_name=dataset_name,
         )
 
     return client_fn

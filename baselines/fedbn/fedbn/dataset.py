@@ -50,7 +50,7 @@ class DigitsDataset(Dataset):
 
         self.transform = transform
         self.channels = channels
-        self.labels = self.labels.astype(np.int32).squeeze()
+        self.labels = self.labels.squeeze()
 
     def __len__(self):
         return self.images.shape[0]
@@ -75,7 +75,7 @@ def load_partition(
     path_to_data: str,
     partition_indx: List[int],
     batch_size: int
-) -> Tuple[DataLoader, DataLoader, Dict]:
+) -> Tuple[DataLoader, DataLoader]:
     """Load 'MNIST', 'SVHN', 'USPS', 'SynthDigits', 'MNIST_M' for the training
     and test data to simulate a partition."""
 
@@ -204,18 +204,13 @@ def load_partition(
     else:
         raise NotImplementedError(f"dataset: {dataset} is not available")
 
-    num_examples = {
-        "dataset": dataset,
-        "trainset": len(trainset),
-        "testset": len(testset),
-    }
-
     trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True)
     testloader = DataLoader(testset, batch_size=batch_size, shuffle=False)
 
-    return trainloader, testloader, num_examples
+    return trainloader, testloader
 
-def get_data(dataset_cfg: DictConfig) -> List[Tuple[DataLoader, DataLoader, int]]:
+
+def get_data(dataset_cfg: DictConfig) -> List[Tuple[DataLoader, DataLoader, str]]:
     client_data = []
 
     d_cfg = dataset_cfg
@@ -238,13 +233,13 @@ def get_data(dataset_cfg: DictConfig) -> List[Tuple[DataLoader, DataLoader, int]
         for i in range(num_clients_per_dataset):
             parts_for_client = parts[i*num_parts:(i+1)*num_parts]
             print(f"{dataset_name = } | {parts_for_client = }")
-            trainloader, testloader, num_ex = load_partition(dataset_name,
-                                                            path_to_data=d_cfg.data_path,
-                                                            partition_indx=parts_for_client,
-                                                            batch_size=d_cfg.batch_size,
-                                                            )
+            trainloader, testloader = load_partition(dataset_name,
+                                                     path_to_data=d_cfg.data_path,
+                                                     partition_indx=parts_for_client,
+                                                     batch_size=d_cfg.batch_size,
+                                                     )
 
-            client_data.append((trainloader, testloader, num_ex))
+            client_data.append((trainloader, testloader, dataset_name))
 
     assert len(client_data) == d_cfg.num_clients, f"{len(client_data) = } | {d_cfg.num_clients = }"
 

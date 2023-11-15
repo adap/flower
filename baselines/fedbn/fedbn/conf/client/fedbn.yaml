@@ -1,0 +1,3 @@
+---
+# standard FedBN Flower Client
+_target_: fedbn.client.FedBNFlowerClient
