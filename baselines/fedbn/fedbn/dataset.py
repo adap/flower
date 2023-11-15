@@ -201,7 +201,7 @@ def load_partition(
         raise NotImplementedError(f"dataset: {dataset} is not available")
 
     trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True)
-    testloader = DataLoader(testset, batch_size=100, shuffle=False)
+    testloader = DataLoader(testset, batch_size=batch_size, shuffle=False)
 
     return trainloader, testloader
 

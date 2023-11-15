@@ -65,8 +65,8 @@ def train(model, traindata, epochs, device) -> Tuple[float, float]:
     # Train the network
     model.to(device)
     model.train()
+    total_loss = 0.0
     for _ in range(epochs):  # loop over the dataset multiple times
-        running_loss = 0.0
         total = 0.0
         correct = 0
         for _i, data in enumerate(traindata, 0):
@@ -82,19 +82,12 @@ def train(model, traindata, epochs, device) -> Tuple[float, float]:
             optimizer.step()
 
             # print statistics
-            running_loss += loss.item()
+            total_loss += loss.item()
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
-            loss = running_loss
-            accuracy = correct / total
 
-            # TODO: resetting running_loss looks suspicious,
-            # TODO: check if things don't work as expected
-            # if i == len(traindata) - 1:  # print every 100 mini-batches
-            #     running_loss = 0.0
-        loss = loss / len(traindata)
-    return loss, accuracy
+    return total_loss / len(traindata), correct / total
 
 
 def test(model, testdata, device) -> Tuple[float, float]:

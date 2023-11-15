@@ -1,7 +1,7 @@
 ---
 title: "FedBN: Federated Learning on Non-IID Features via Local Batch Normalization"
 url: https://arxiv.org/abs/2102.07623
-labels: [label1, label2]
+labels: [data heterogeneity, feature shift, cross-silo]
 dataset: [MNIST, MNIST-M, SVHN, USPS, SynthDigits]
 ---
 
@@ -21,7 +21,7 @@ dataset: [MNIST, MNIST-M, SVHN, USPS, SynthDigits]
 
 **What’s implemented:** Figure 3 in the paper: convergence in training loss comparing `FedBN` to `FedAvg` for five datasets.
 
-**Datasets:** Vision datasets including digits 0-9. These datasets are: [MNIST](https://ieeexplore.ieee.org/document/726791), [MNIST-M]((https://arxiv.org/pdf/1505.07818.pdf)), [SVHN](http://ufldl.stanford.edu/housenumbers/nips2011_housenumbers.pdf), [USPS](https://ieeexplore.ieee.org/document/291440), and [SynthDigits](https://arxiv.org/pdf/1505.07818.pdf).
+**Datasets:** Vision datasets including digits 0-9. These datasets are: [MNIST](https://ieeexplore.ieee.org/document/726791), [MNIST-M](https://arxiv.org/pdf/1505.07818.pdf), [SVHN](http://ufldl.stanford.edu/housenumbers/nips2011_housenumbers.pdf), [USPS](https://ieeexplore.ieee.org/document/291440), and [SynthDigits](https://arxiv.org/pdf/1505.07818.pdf).
 
 **Hardware Setup:** Using the default configurations, any machine with 8 CPU cores should be capable too run 100 rounds of FedAvg or FedBN in under 5 minutes. Therefore a GPU is not needed if you stick to the small model used in the paper and you limit clients to use a 10% of the data in each dataset (these are the default settings)
 
@@ -56,12 +56,15 @@ A more detailed explanation of the datasets is given in the following table.
 | ----------- | ----- |
 | rounds | 10 |
 | num_clients | 5 |
-| clients_per_round | 5 |
+| strategy_fraction_fit | 1.0 |
+| strategy.fraction_evaluate | 0.0 |
 | training samples per client| 743 |
 | lr | 10E-2 |
 | local epochs | 1 |
 | loss | cross entropy loss |
 | optimizer | SGD |
+| client_resources.num_cpu | 2 |
+| client_resources.num_gpus | 0.0 |
 
 ## Environment Setup
 
@@ -90,15 +93,20 @@ cd data ..
 
 ## Running the Experiments
 
-First, activate your environment via `poetry shell`. The commands below show how to run the experiments and modify some of its key hyperparameters via the cli. Each time you run an experiment, the log and results will be stored inside `outputs/<date>/<time>`.
+First, activate your environment via `poetry shell`. The commands below show how to run the experiments and modify some of its key hyperparameters via the cli. Each time you run an experiment, the log and results will be stored inside `outputs/<date>/<time>`. Please refer to [the Documentation](https://flower.dev/docs/framework/how-to-run-simulations.html) to learn more about Flower Simulation.
 
 ```bash
 # run with default arguments
 python -m fedbn.main
 
-# if you only care about clients doing fit() and not evaluate(),
-# you can disable that stage like so:
-python -m fedbn.main strategy.fraction_evaluate=0 # your code will run many times faster
+# by default, the experiments run in CPU-only mode
+# allow for 5 clients in paralle on a gpu by doing
+python -m fedbn.main client_resources.num_gpus=0.2
+
+# By default, federated evaluation is disabled. Therefore the only metrics
+# returned to the server are those related to the training set
+# If you want to enable federated evaluation set `fraction_evaluate=1.0` to involve all clients
+python -m fedbn.main strategy.fraction_evaluate=1 # your code will run slower
 
 # adjust hyperparameters like the number of rounds or batch size like this
 python -m fedbn.main num_rounds=100 dataset.batch_size
@@ -124,7 +132,11 @@ python -m fedbn.main client=fedavg
 
 ## Limitations
 
-dataset-number of clients relationship
+The pre-processing of the five datasets provided by the authors, imposes some limitations on the number of clients tha can be spawned for the experiment. Naturally, this limiation can be circumbented if you edit the code, and in particular the `dataset.DigitsDataset` constructor. The aforementioned limitation happens because each dataset is partitioned into 10 disjoint sets and a 'DigitsDataset' can only be constructed by concatenating any set of such partitions (at least one, at most all 10). _How does the limitation manifest?_ Given that we have 5 datasets, if a client just takes one partition, a FL setup can accomodate 50 clients, one using a different partition. But, if you want for instance each client have 3 partitions of the same dataset (yes, clients can only hold data of one dataset) then the maximum number of clients gets reduced to 20. Following this logic you can see that if a client wants to use all 10 partitions of a given dataset, then only 5 clients can participate in the experiment. 
+
+Another limitation in the current implementation is that there should be the same number of clients for each dataset. Also, all clients should contain the same number of partitions of their respective datasets. You can remove these constrain my editing `dataset.get_data()`.
+
+The function `dataset.get_data()` contains a few `assert` that should make it easy find the right valid set of arguments for `num_clients` given the values of `dataset.percent` and `dataset.to_include`.
 
 ## Expected Results
 
@@ -132,8 +144,8 @@ Replicate the results shown below by running the following command. First ensure
 
 ```bash
 
+# Reproduces the results in Table 3 of the paper.
 python -m fedbn.main --multirun num_rounds=100 client=fedavg,fedbn
-
 # then use the notebook in docs/multirun_plot.ipynb to create the plot below
 ```
 

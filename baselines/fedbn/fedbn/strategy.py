@@ -50,21 +50,21 @@ def get_metrics_aggregation_fn():
                     num_examples * mett["pre_train_loss"],
                 )
 
-        # now normalise by the amount of total data used in the round
-        total_examples = sum(totals.values())
-        accuracies.update((k, v / total_examples) for k, v in accuracies.items())
-        losses.update((k, v / total_examples) for k, v in losses.items())
+        # now normalise each metric per-dataset by the amount of total data
+        # used in the round
+        accuracies.update((k, v / totals[k]) for k, v in accuracies.items())
+        losses.update((k, v / totals[k]) for k, v in losses.items())
 
         to_return = {"accuracy": accuracies, "losses": losses}
 
-        if "pre_train_acc" in metrics[0]:
+        if "pre_train_acc" in metrics[0][1]:
             pre_train_accuracies.update(
-                (k, v / total_examples) for k, v in pre_train_accuracies.items()
+                (k, v / totals[k]) for k, v in pre_train_accuracies.items()
             )
             to_return = {**to_return, "pre_train_accuracies": pre_train_accuracies}
-        if "pre_train_loss" in metrics[0]:
+        if "pre_train_loss" in metrics[0][1]:
             pre_train_losses.update(
-                (k, v / total_examples) for k, v in pre_train_losses.items()
+                (k, v / totals[k]) for k, v in pre_train_losses.items()
             )
             to_return = {**to_return, "pre_train_losses": pre_train_losses}
 
