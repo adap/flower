@@ -13,7 +13,7 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.common.logger import log
 
 
-class XgbBagging(fl.server.strategy.FedAvg):
+class FedXgbBagging(fl.server.strategy.FedAvg):
     def __init__(
         self,
         evaluate_function: Optional[
