@@ -42,7 +42,7 @@ class NaturalIdPartitioner(Partitioner):
             zip(range(len(unique_natural_ids)), unique_natural_ids)
         )
 
-    def load_partition(self, idx: int) -> datasets.Dataset:
+    def load_partition(self, node_id: int) -> datasets.Dataset:
         """Load a single partition corresponding to a single `node_id`.
 
         The choice of the partition is based on unique integers assigned to each
@@ -50,19 +50,19 @@ class NaturalIdPartitioner(Partitioner):
 
         Parameters
         ----------
-        idx: int
+        node_id : int
             the index that corresponds to the requested partition
 
         Returns
         -------
-        dataset_partition: Dataset
+        dataset_partition : Dataset
             single dataset partition
         """
         if len(self._node_id_to_natural_id) == 0:
             self._create_int_node_id_to_natural_id()
 
         return self.dataset.filter(
-            lambda row: row[self._partition_by] == self._node_id_to_natural_id[idx]
+            lambda row: row[self._partition_by] == self._node_id_to_natural_id[node_id]
         )
 
     @property
