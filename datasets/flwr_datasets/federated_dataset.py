@@ -62,7 +62,7 @@ class FederatedDataset:
     --------
     Use MNIST dataset for Federated Learning with 100 clients (edge devices):
 
-    >>> mnist_fds = FederatedDataset(dataset="mnist", partitioner={"train": 100})
+    >>> mnist_fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
 
     Load partition for client with ID 10.
 
@@ -80,7 +80,7 @@ class FederatedDataset:
         dataset: str,
         subset: Optional[str] = None,
         resplitter: Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]] = None,
-        partitioner: Dict[str, Union[Partitioner, int]],
+        partitioners: Dict[str, Union[Partitioner, int]],
         shuffle: bool = True,
         seed: Optional[int] = 42,
     ) -> None:
@@ -91,7 +91,7 @@ class FederatedDataset:
             resplitter
         )
         self._partitioners: Dict[str, Partitioner] = _instantiate_partitioners(
-            partitioner
+            partitioners
         )
         self._shuffle = shuffle
         self._seed = seed
@@ -109,7 +109,7 @@ class FederatedDataset:
 
         Parameters
         ----------
-        node_id: int
+        node_id : int
             Partition index for the selected split, idx in {0, ..., num_partitions - 1}.
         split : str
             Name of the (partitioned) split (e.g. "train", "test").

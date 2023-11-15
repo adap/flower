@@ -45,7 +45,7 @@ class FdsToTensorFlow(unittest.TestCase):
     def _create_tensorflow_dataset(self, batch_size: int) -> tf.data.Dataset:
         """Create a tensorflow dataset from the FederatedDataset."""
         partition_id = 0
-        fds = FederatedDataset(dataset=self.dataset_name, partitioner={"train": 100})
+        fds = FederatedDataset(dataset=self.dataset_name, partitioners={"train": 100})
         partition = fds.load_partition(partition_id, "train")
         tf_dataset = partition.to_tf_dataset(columns="img", label_cols="label",
                                              batch_size=batch_size,

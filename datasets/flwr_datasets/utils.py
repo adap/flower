@@ -34,7 +34,7 @@ tested_datasets = [
 def _instantiate_partitioners(
     partitioners: Dict[str, Union[Partitioner, int]]
 ) -> Dict[str, Partitioner]:
-    """Transform the partitioner from the initial format to instantiated objects.
+    """Transform the partitioners from the initial format to instantiated objects.
 
     Parameters
     ----------
@@ -43,7 +43,7 @@ def _instantiate_partitioners(
 
     Returns
     -------
-    partitioner: Dict[str, Partitioner]
+    partitioners: Dict[str, Partitioner]
         Partitioners specified as split to Partitioner object.
     """
     instantiated_partitioners: Dict[str, Partitioner] = {}
@@ -57,12 +57,12 @@ def _instantiate_partitioners(
                 )
             else:
                 raise ValueError(
-                    f"Incorrect type of the 'partitioner' value encountered. "
+                    f"Incorrect type of the 'partitioners' value encountered. "
                     f"Expected Partitioner or int. Given {type(partitioner)}"
                 )
     else:
         raise ValueError(
-            f"Incorrect type of the 'partitioner' encountered. "
+            f"Incorrect type of the 'partitioners' encountered. "
             f"Expected Dict[str, Union[int, Partitioner]]. "
             f"Given {type(partitioners)}."
         )
