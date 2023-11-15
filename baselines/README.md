@@ -23,15 +23,15 @@ Please note that some baselines might include additional files (e.g. a `requirem
 
 ## Running the baselines
 
-Each baseline is self-contained in its own directory. Furthermore, each baseline defines its own Python environment using [Poetry](https://python-poetry.org/docs/) via a `pyproject.toml` file. In order to run a baseline:
+Each baseline is self-contained in its own directory. Furthermore, each baseline defines its own Python environment using [Poetry](https://python-poetry.org/docs/) via a `pyproject.toml` file and  [`pyenv`](https://github.com/pyenv/pyenv). If you haven't setup `Poetry` and `pyenv` already on your machine, please take a look at the [Documentation](https://flower.dev/docs/baselines/how-to-use-baselines.html#setting-up-your-machine) for a guide on how to do so. 
 
-1. First, ensure you have Poetry installed in your system. For Linux and macOS, installing Poetry can be done from a single command:
+Assuming `pyenv` and `Poetry` are already installed on your system. Running a baseline can be done by:
+
+1. Cloning the flower repository
 
     ```bash
-    curl -sSL https://install.python-poetry.org | python3 -
+    git clone https://github.com/adap/flower.git && cd flower
     ```
-
-    To install Poetry on a different OS, to customise your installation, or to further integrate Poetry with your shell after installation, please check [the Poetry documentation](https://python-poetry.org/docs/#installing-with-the-official-installer).
 
 2. Navigate inside the directory of the baseline you'd like to run.
 3. Follow the `[Environment Setup]` instructions in the `README.md`. In most cases this will require you to just do:
@@ -39,7 +39,7 @@ Each baseline is self-contained in its own directory. Furthermore, each baseline
     ```bash
     poetry install
     ```
-4. Run the baseline as indicated in the `[Running the Experiments]` section in the `README.md`
+4. Run the baseline as indicated in the `[Running the Experiments]` section in the `README.md` or in the `[Expected Results]` section to reproduce the experiments in the paper.
 
 
 ## Contributing a new baseline
