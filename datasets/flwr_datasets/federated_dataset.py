@@ -38,18 +38,25 @@ class FederatedDataset:
 
     Parameters
     ----------
-    dataset: str
+    dataset : str
         The name of the dataset in the Hugging Face Hub.
-    subset: str
+    subset : str
         Secondary information regarding the dataset, most often subset or version
         (that is passed to the name in datasets.load_dataset).
-    resplitter: Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]]
+    resplitter : Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]]
         `Callable` that transforms `DatasetDict` splits, or configuration dict for
         `MergeResplitter`.
-    partitioner: Dict[str, Union[Partitioner, int]]
+    partitioners : Dict[str, Union[Partitioner, int]]
         A dictionary mapping the Dataset split (a `str`) to a `Partitioner` or an `int`
         (representing the number of IID partitions that this split should be partitioned
         into).
+    shuffle : bool
+        Whether to randomize the order of samples. Applied prior to resplitting,
+        speratelly to each of the present splits in the dataset. It uses the `seed`
+        argument. Defaults to True.
+    seed : Optional[int]
+        Seed used for dataset shuffling. It has no effect if `shuffle` is False. The
+        seed cannot be set in the later stages.
 
     Examples
     --------
@@ -66,6 +73,7 @@ class FederatedDataset:
     >>> centralized = mnist_fds.load_full("test")
     """
 
+    # pylint: disable=too-many-instance-attributes
     def __init__(
         self,
         *,
@@ -73,6 +81,8 @@ class FederatedDataset:
         subset: Optional[str] = None,
         resplitter: Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]] = None,
         partitioner: Dict[str, Union[Partitioner, int]],
+        shuffle: bool = True,
+        seed: Optional[int] = 42,
     ) -> None:
         _check_if_dataset_tested(dataset)
         self._dataset_name: str = dataset
@@ -83,9 +93,13 @@ class FederatedDataset:
         self._partitioners: Dict[str, Partitioner] = _instantiate_partitioners(
             partitioner
         )
-        #  Init (download) lazily on the first call to `load_partition` or `load_full`
+        self._shuffle = shuffle
+        self._seed = seed
+        #  _dataset is prepared lazily on the first call to `load_partition`
+        #  or `load_full`. See _prepare_datasets for more details
         self._dataset: Optional[DatasetDict] = None
-        self._resplit: bool = False  # Indicate if the resplit happened
+        # Indicate if the dataset is prepared for `load_partition` or `load_full`
+        self._dataset_prepared: bool = False
 
     def load_partition(self, node_id: int, split: str) -> Dataset:
         """Load the partition specified by the idx in the selected split.
@@ -97,7 +111,7 @@ class FederatedDataset:
         ----------
         node_id: int
             Partition index for the selected split, idx in {0, ..., num_partitions - 1}.
-        split: str
+        split : str
             Name of the (partitioned) split (e.g. "train", "test").
 
         Returns
@@ -105,8 +119,8 @@ class FederatedDataset:
         partition: Dataset
             Single partition from the dataset split.
         """
-        self._download_dataset_if_none()
-        self._resplit_dataset_if_needed()
+        if not self._dataset_prepared:
+            self._prepare_dataset()
         if self._dataset is None:
             raise ValueError("Dataset is not loaded yet.")
         self._check_if_split_present(split)
@@ -123,7 +137,7 @@ class FederatedDataset:
 
         Parameters
         ----------
-        split: str
+        split : str
             Split name of the downloaded dataset (e.g. "train", "test").
 
         Returns
@@ -131,19 +145,12 @@ class FederatedDataset:
         dataset_split: Dataset
             Part of the dataset identified by its split name.
         """
-        self._download_dataset_if_none()
-        self._resplit_dataset_if_needed()
+        if not self._dataset_prepared:
+            self._prepare_dataset()
         if self._dataset is None:
             raise ValueError("Dataset is not loaded yet.")
         self._check_if_split_present(split)
         return self._dataset[split]
-
-    def _download_dataset_if_none(self) -> None:
-        """Lazily load (and potentially download) the Dataset instance into memory."""
-        if self._dataset is None:
-            self._dataset = datasets.load_dataset(
-                path=self._dataset_name, name=self._subset
-            )
 
     def _check_if_split_present(self, split: str) -> None:
         """Check if the split (for partitioning or full return) is in the dataset."""
@@ -176,15 +183,34 @@ class FederatedDataset:
         if not self._partitioners[split].is_dataset_assigned():
             self._partitioners[split].dataset = self._dataset[split]
 
-    def _resplit_dataset_if_needed(self) -> None:
-        # The actual re-splitting can't be done more than once.
-        # The attribute `_resplit` indicates that the resplit happened.
+    def _prepare_dataset(self) -> None:
+        """Prepare the dataset (prior to partitioning) by download, shuffle, replit.
 
-        # Resplit only once
-        if self._resplit:
-            return
-        if self._dataset is None:
-            raise ValueError("The dataset resplit should happen after the download.")
+        Run only ONCE when triggered by load_* function. (In future more control whether
+        this should happen lazily or not can be added). The operations done here should
+        not happen more than once.
+
+        It is controlled by a single flag, `_dataset_prepared` that is set True at the
+        end of the function.
+
+        Notes
+        -----
+        The shuffling should happen before the resplitting. Here is the explanation.
+        If the dataset has a non-random order of samples e.g. each split has first
+        only label 0, then only label 1. Then in case of resplitting e.g.
+        someone creates: "train" train[:int(0.75 * len(train))], test: concat(
+        train[int(0.75 * len(train)):], test). The new test took the 0.25 of e.g.
+        the train that is only label 0 (assuming the equal count of labels).
+        Therefore, for such edge cases (for which we have split) the split should
+        happen before the resplitting.
+        """
+        self._dataset = datasets.load_dataset(
+            path=self._dataset_name, name=self._subset
+        )
+        if self._shuffle:
+            # Note it shuffles all the splits. The self._dataset is DatasetDict
+            # so e.g. {"train": train_data, "test": test_data}. All splits get shuffled.
+            self._dataset = self._dataset.shuffle(seed=self._seed)
         if self._resplitter:
             self._dataset = self._resplitter(self._dataset)
-        self._resplit = True
+        self._dataset_prepared = True
