@@ -25,7 +25,7 @@ dataset: [MNIST, MNIST-M, SVHN, USPS, SynthDigits]
 
 **Hardware Setup:** Using the default configurations, any machine with 8 CPU cores should be capable too run 100 rounds of FedAvg or FedBN in under 5 minutes. Therefore a GPU is not needed if you stick to the small model used in the paper and you limit clients to use a 10% of the data in each dataset (these are the default settings)
 
-**Contributors:** :warning: *_let the world know who contributed to this baseline. This could be either your name, your name and affiliation at the time, or your GitHub profile name if you prefer. If multiple contributors signed up for this baseline, please list yourself and your colleagues_*
+**Contributors:** Meirui Jiang, Maria Boerner, Javier Fernandez-Marques
 
 
 ## Experimental Setup
