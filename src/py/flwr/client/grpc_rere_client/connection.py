@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -135,6 +135,8 @@ def grpc_request_response(
 
         delete_node_request = DeleteNodeRequest(node=node)
         stub.DeleteNode(request=delete_node_request)
+
+        del node_store[KEY_NODE]
 
     def receive() -> Optional[TaskIns]:
         """Receive next task from server."""
