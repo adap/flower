@@ -65,10 +65,10 @@ extensions = [
 autosummary_generate = True
 
 # Ignore __all__ in __init__ files.
-# Otherwise, ONLY the objects from __all__ are documented and the recursive mode
-# of autosummary stops.
-autosummary_ignore_module_all = True
-# autoclass_content = "class"
+# Document ONLY the objects from __all__ (present in __init__ files).
+# It will be done recursively starting from flwr_dataset.__init__
+# It's controlled in the index.rst file.
+autosummary_ignore_module_all = False
 
 # Each class and function docs start with the path to it
 # Make the flwr_datasets.federated_dataset.FederatedDataset appear as FederatedDataset
