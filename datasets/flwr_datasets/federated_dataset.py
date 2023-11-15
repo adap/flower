@@ -100,9 +100,9 @@ class FederatedDataset:
         split: Optional[str]
             Name of the (partitioned) split (e.g. "train", "test"). You can skip this
             parameter if there is only one partitioner for the dataset. The name will be
-             inferred automatically. (e.g. if partitioners={"train": 10} you do not need
-              to give this parameter, but if partitioners={"train": 10, "test": 100} you
-              need to give it, to differentiate which partitioner should be used.
+            inferred automatically. For example, if `partitioners={"train": 10}`, you do not need
+            to provide this argument, but if `partitioners={"train": 10, "test": 100}`, you
+            need to set it to differentiate which partitioner should be used.
 
         Returns
         -------
@@ -199,6 +199,6 @@ class FederatedDataset:
     def _check_if_no_split_keyword_possible(self) -> None:
         if len(self._partitioners) != 1:
             raise ValueError(
-                "Please give the split argument. You can omit the split keyword only if"
-                " there is a single partitioner specified."
+                "Please set the `split` argument. You can only omit the split keyword if"
+                " there is exactly one partitioner specified."
             )
