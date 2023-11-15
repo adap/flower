@@ -171,7 +171,7 @@ class ArtificialDatasetTest(unittest.TestCase):
 
         expected_result = dummy_ds.shuffle(seed=42)["train"]["features"]
         fds = FederatedDataset(
-            dataset="does-not-matter", partitioners={"train": 10}, shuffle=True, seed=42
+            dataset="does-not-matter", partitioner={"train": 10}, shuffle=True, seed=42
         )
         train = fds.load_full("train")
         # This should be shuffled
@@ -188,7 +188,7 @@ class ArtificialDatasetTest(unittest.TestCase):
         expected_result = dummy_ds["train"]["features"]
         fds = FederatedDataset(
             dataset="does-not-matter",
-            partitioners={"train": 10},
+            partitioner={"train": 10},
             shuffle=False,
         )
         train = fds.load_full("train")
@@ -220,7 +220,7 @@ class ArtificialDatasetTest(unittest.TestCase):
         )["features"]
         fds = FederatedDataset(
             dataset="does-not-matter",
-            partitioners={"train": 10},
+            partitioner={"train": 10},
             resplitter=resplit,
             shuffle=True,
         )
