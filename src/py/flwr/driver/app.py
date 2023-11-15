@@ -96,7 +96,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     Starting a driver that connects to an SSL-enabled server:
 
     >>> start_driver(
-    >>>     certificates=Path("/crts/root.pem").read_bytes()
+    >>>     root_certificates=Path("/crts/root.pem").read_bytes()
     >>> )
     """
     event(EventType.START_DRIVER_ENTER)
