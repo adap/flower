@@ -52,14 +52,14 @@ pip install -r requirements.txt
 
 ## Run Federated Learning with XGBoost and Flower
 
-Afterwards you are ready to start the Flower server as well as the clients. 
+Afterwards you are ready to start the Flower server as well as the clients.
 You can simply start the server in a terminal as follows:
 
 ```shell
 python3 server.py
 ```
 
-Now you are ready to start the Flower clients which will participate in the learning. 
+Now you are ready to start the Flower clients which will participate in the learning.
 To do so simply open two more terminal windows and run the following commands.
 
 Start client 1 in the first terminal:
@@ -83,5 +83,5 @@ bash run.sh
 ```
 
 Besides, we provide options to customise the experimental settings, including data partitioning and centralised/distributed evaluation (see `utils.py`).
-Look at the [code](https://github.com/adap/flower/tree/main/examples/quickstart-xgboost) 
+Look at the [code](https://github.com/adap/flower/tree/main/examples/quickstart-xgboost)
 and [tutorial](https://flower.dev/docs/framework/tutorial-quickstart-xgboost.html) for a detailed explanation.
