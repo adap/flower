@@ -38,25 +38,25 @@ class FederatedDataset:
 
     Parameters
     ----------
-    dataset: str
+    dataset : str
         The name of the dataset in the Hugging Face Hub.
-    subset: str
+    subset : str
         Secondary information regarding the dataset, most often subset or version
         (that is passed to the name in datasets.load_dataset).
-    resplitter: Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]]
+    resplitter : Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]]
         `Callable` that transforms `DatasetDict` splits, or configuration dict for
         `MergeResplitter`.
-    partitioners: Dict[str, Union[Partitioner, int]]
+    partitioners : Dict[str, Union[Partitioner, int]]
         A dictionary mapping the Dataset split (a `str`) to a `Partitioner` or an `int`
         (representing the number of IID partitions that this split should be partitioned
         into).
-    shuffle: bool
+    shuffle : bool
         Whether to randomize the order of samples. Applied prior to resplitting,
         speratelly to each of the present splits in the dataset. It uses the `seed`
         argument. Defaults to True.
-    seed: Optional[int]
+    seed : Optional[int]
         Seed used for dataset shuffling. It has no effect if `shuffle` is False. The
-        seed con not be set in the later stages.
+        seed cannot be set in the later stages.
 
     Examples
     --------
@@ -109,9 +109,9 @@ class FederatedDataset:
 
         Parameters
         ----------
-        idx: int
+        idx : int
             Partition index for the selected split, idx in {0, ..., num_partitions - 1}.
-        split: str
+        split : str
             Name of the (partitioned) split (e.g. "train", "test").
 
         Returns
@@ -137,7 +137,7 @@ class FederatedDataset:
 
         Parameters
         ----------
-        split: str
+        split : str
             Split name of the downloaded dataset (e.g. "train", "test").
 
         Returns
@@ -195,14 +195,14 @@ class FederatedDataset:
 
         Notes
         -----
-            The shuffling should happen before the resplitting. Here is the explanation.
-            If the dataset has a non-random order of samples e.g. each split has first
-            only label 0, then only label 1. Then in case of resplitting e.g.
-            someone creates: "train" train[:int(0.75 * len(train))], test: concat(
-            train[int(0.75 * len(train)):], test). The new test took the 0.25 of e.g.
-            the train that is only label 0 (assuming the equal count of labels).
-            Therefore, for such edge cases (for which we have split) the split should
-            happen before the resplitting.
+        The shuffling should happen before the resplitting. Here is the explanation.
+        If the dataset has a non-random order of samples e.g. each split has first
+        only label 0, then only label 1. Then in case of resplitting e.g.
+        someone creates: "train" train[:int(0.75 * len(train))], test: concat(
+        train[int(0.75 * len(train)):], test). The new test took the 0.25 of e.g.
+        the train that is only label 0 (assuming the equal count of labels).
+        Therefore, for such edge cases (for which we have split) the split should
+        happen before the resplitting.
         """
         self._dataset = datasets.load_dataset(
             path=self._dataset_name, name=self._subset
