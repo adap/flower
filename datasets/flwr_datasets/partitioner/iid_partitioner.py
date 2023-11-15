@@ -24,7 +24,7 @@ class IidPartitioner(Partitioner):
 
     Parameters
     ----------
-    num_partitions: int
+    num_partitions : int
         The total number of partitions that the data will be divided into.
     """
 
@@ -44,7 +44,7 @@ class IidPartitioner(Partitioner):
 
         Returns
         -------
-        dataset_partition: Dataset
+        dataset_partition : Dataset
             single dataset partition
         """
         return self.dataset.shard(
