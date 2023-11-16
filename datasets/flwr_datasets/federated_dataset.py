@@ -49,8 +49,8 @@ class FederatedDataset:
     partitioners : Dict[str, Union[Partitioner, int]]
         A dictionary mapping the Dataset split (a `str`) to a `Partitioner` or an `int`
         (representing the number of IID partitions that this split should be partitioned
-        into). One or multiple `Partitioner`s can be specified in that manner, but at
-        most, one per split.
+        into). One or multiple `Partitioner` objects can be specified in that manner,
+        but at most, one per split.
     shuffle : bool
         Whether to randomize the order of samples. Applied prior to resplitting,
         speratelly to each of the present splits in the dataset. It uses the `seed`
