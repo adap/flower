@@ -106,7 +106,7 @@ Flower Baselines is a collection of community-contributed projects that reproduc
 - [niid-Bench](https://github.com/adap/flower/tree/main/baselines/niid_bench)
 - [TAMUNA](https://github.com/adap/flower/tree/main/baselines/tamuna)
 - [FedAvg](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/fedavg_mnist)
-- [Adaptive Federated Optimization](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/adaptive_federated_optimization)
+- [FedOpt](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/adaptive_federated_optimization)
 
 Please refer to the [Flower Baselines Documentation](https://flower.dev/docs/baselines/) for a detailed categorization of baselines and for additional info including:
 * [How to use Flower Baselines](https://flower.dev/docs/baselines/how-to-use-baselines.html)
