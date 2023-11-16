@@ -46,7 +46,7 @@
 
   - niid-Bench [#2428](https://github.com/adap/flower/pull/2428)
 
-  - FedBN [#2608](https://github.com/adap/flower/pull/2608)
+  - FedBN ([#2608](https://github.com/adap/flower/pull/2608), [#2615](https://github.com/adap/flower/pull/2615))
 
 - **Update Flower Examples** ([#2384](https://github.com/adap/flower/pull/2384),[#2425](https://github.com/adap/flower/pull/2425), [#2526](https://github.com/adap/flower/pull/2526))
 
