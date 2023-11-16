@@ -462,7 +462,7 @@ def _try_obtain_certificates(
 ) -> Optional[Tuple[bytes, bytes, bytes]]:
     # Obtain certificates
     if args.insecure:
-        log(WARN, "The server will be started without HTTPS.")
+        log(WARN, "Option `--insecure` was set. Starting insecure HTTP server.")
         certificates = None
     # Check if certificates are provided
     elif args.certificates:
