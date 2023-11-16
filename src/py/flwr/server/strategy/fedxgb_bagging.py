@@ -28,6 +28,7 @@ from flwr.server.client_proxy import ClientProxy
 class FedXgbBagging(fl.server.strategy.FedAvg):
     """Configurable FedXgbBagging strategy implementation."""
 
+    # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
     def __init__(
         self,
         evaluate_function: Optional[
@@ -107,7 +108,10 @@ class FedXgbBagging(fl.server.strategy.FedAvg):
         return loss, metrics
 
 
-def aggregate(bst_prev: Optional[Dict], bst_curr: Dict) -> Dict:
+def aggregate(
+    bst_prev: Optional[Dict[str, Union[int, slice]]],
+    bst_curr: Dict[str, Union[int, slice]],
+) -> Dict[str, Union[int, slice]]:
     """Conduct bagging aggregation for given trees."""
     if not bst_prev:
         return bst_curr
@@ -137,7 +141,7 @@ def aggregate(bst_prev: Optional[Dict], bst_curr: Dict) -> Dict:
         return bst_prev
 
 
-def _get_tree_nums(xgb_model: Dict) -> (int, int):
+def _get_tree_nums(xgb_model: Dict[str, Union[int, slice]]) -> Tuple[int, int]:
     # Get the number of trees
     tree_num = int(
         xgb_model["learner"]["gradient_booster"]["model"]["gbtree_model_param"][
