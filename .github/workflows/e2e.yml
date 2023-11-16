@@ -60,6 +60,8 @@ jobs:
         include:
           - directory: bare
 
+          - directory: bare-https
+
           - directory: jax
 
           - directory: pytorch

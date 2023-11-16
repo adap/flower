@@ -2,7 +2,7 @@
 set -e
 
 case "$1" in
-  pandas)
+  pandas | bare-https)
     server_file="server.py"
     ;;
   *)
