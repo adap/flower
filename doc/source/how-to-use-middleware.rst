@@ -7,21 +7,21 @@ In this tutorial, we will learn how to utilize built-in middleware layers to aug
 What is Middleware?
 ===================
 
-Middleware is a callable that wraps around an application. It can manipulate or inspect incoming tasks (``TaskIns``) and the resulting tasks (``TaskRes``). The signature for a middleware layer is as follows:
+Middleware is a callable that wraps around an application. It can manipulate or inspect incoming tasks (``TaskIns``) in the ``Fwd`` and the resulting tasks (``TaskRes``) in the ``Bwd``. The signature for a middleware layer (``Layer``) is as follows:
 
 .. code-block:: python
-
-    Layer = Callable[[TaskIns, App], TaskRes]
+    APP = Callable[[Fwd], Bwd]
+    Layer = Callable[[Fwd, App], Bwd]
 
 A typical middleware function might look something like this:
 
 .. code-block:: python
 
-    def example_middleware(task_ins: TaskIns, app: App) -> TaskRes:
-        # Do something with task_ins before passing to app.
-        task_res = app(task_ins)
-        # Do something with task_res before returning.
-        return task_res
+    def example_middleware(fwd: Fwd, app: App) -> Bwd:
+        # Do something with Fwd before passing to app.
+        bwd = app(fwd)
+        # Do something with Bwd before returning.
+        return bwd
 
 Using Middleware Layers
 =======================
@@ -75,7 +75,7 @@ When the application runs, the middleware layers are executed in the order they 
 4. ``example_middleware2`` (on the way back)
 5. ``example_middleware1`` (outermost layer on the way back)
 
-Each middleware has a chance to inspect and modify the ``TaskIns`` before passing it to the next layer, and likewise with the ``TaskRes`` before returning it up the stack.
+Each middleware has a chance to inspect and modify the ``TaskIns`` in the ``Fwd`` before passing it to the next layer, and likewise with the ``TaskRes`` in the ``Bwd`` before returning it up the stack.
 
 Conclusion
 ==========
