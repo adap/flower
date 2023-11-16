@@ -12,17 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Datasets main package."""
+"""Resplitter."""
 
 
-from flwr_datasets import partitioner, resplitter
-from flwr_datasets.common.version import package_version as _package_version
-from flwr_datasets.federated_dataset import FederatedDataset
+from typing import Callable
 
-__all__ = [
-    "FederatedDataset",
-    "partitioner",
-    "resplitter",
-]
+from datasets import DatasetDict
 
-__version__ = _package_version
+Resplitter = Callable[[DatasetDict], DatasetDict]
