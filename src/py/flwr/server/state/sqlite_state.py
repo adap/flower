@@ -1,4 +1,4 @@
-# Copyright 2023 Adap GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -146,10 +146,8 @@ class SqliteState(State):
             with self.conn:
                 if (
                     len(data) > 0
-                    # pylint: disable-next=C0123
-                    and (type(data) == tuple or type(data) == list)
-                    # pylint: disable-next=C0123
-                    and (type(data[0]) == tuple or type(data[0]) == dict)
+                    and isinstance(data, (tuple, list))
+                    and isinstance(data[0], (tuple, dict))
                 ):
                     rows = self.conn.executemany(query, data)
                 else:
