@@ -1,6 +1,4 @@
-#!/bin/bash
-
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+"""Resplitter package."""
 
-set -e
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../../
 
-HASH=$(printf "$(git rev-parse HEAD)\n$(git diff | sha1sum)" | sha1sum | cut -c1-7)
+from .merge_resplitter import MergeResplitter
+from .resplitter import Resplitter
 
-rm -rf dist
-python -m poetry build
-docker build -f src/docker/default.Dockerfile -t flower:latest -t flower:$HASH .
-docker build -f src/docker/sshd.Dockerfile --build-arg SSH_PUBLIC_KEY="$(cat docker/ssh_key.pub)" -t flower-sshd:latest -t flower-sshd:$HASH .
+__all__ = [
+    "MergeResplitter",
+    "Resplitter",
+]
