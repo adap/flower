@@ -19,8 +19,8 @@ from typing import Dict, Optional, Tuple, Union
 
 import datasets
 from datasets import Dataset, DatasetDict
-from flwr_datasets.common import Resplitter
 from flwr_datasets.partitioner import Partitioner
+from flwr_datasets.resplitter import Resplitter
 from flwr_datasets.utils import (
     _check_if_dataset_tested,
     _instantiate_partitioners,
@@ -49,7 +49,8 @@ class FederatedDataset:
     partitioners : Dict[str, Union[Partitioner, int]]
         A dictionary mapping the Dataset split (a `str`) to a `Partitioner` or an `int`
         (representing the number of IID partitions that this split should be partitioned
-        into).
+        into). One or multiple `Partitioner`s can be specified in that manner, but at
+        most, one per split.
     shuffle : bool
         Whether to randomize the order of samples. Applied prior to resplitting,
         speratelly to each of the present splits in the dataset. It uses the `seed`
@@ -101,7 +102,7 @@ class FederatedDataset:
         # Indicate if the dataset is prepared for `load_partition` or `load_full`
         self._dataset_prepared: bool = False
 
-    def load_partition(self, idx: int, split: str) -> Dataset:
+    def load_partition(self, node_id: int, split: Optional[str] = None) -> Dataset:
         """Load the partition specified by the idx in the selected split.
 
         The dataset is downloaded only when the first call to `load_partition` or
@@ -109,25 +110,33 @@ class FederatedDataset:
 
         Parameters
         ----------
-        idx : int
+        node_id : int
             Partition index for the selected split, idx in {0, ..., num_partitions - 1}.
-        split : str
-            Name of the (partitioned) split (e.g. "train", "test").
+        split : Optional[str]
+            Name of the (partitioned) split (e.g. "train", "test"). You can skip this
+            parameter if there is only one partitioner for the dataset. The name will be
+            inferred automatically. For example, if `partitioners={"train": 10}`, you do
+            not need to provide this argument, but if `partitioners={"train": 10,
+            "test": 100}`, you need to set it to differentiate which partitioner should
+            be used.
 
         Returns
         -------
-        partition: Dataset
+        partition : Dataset
             Single partition from the dataset split.
         """
         if not self._dataset_prepared:
             self._prepare_dataset()
         if self._dataset is None:
             raise ValueError("Dataset is not loaded yet.")
+        if split is None:
+            self._check_if_no_split_keyword_possible()
+            split = list(self._partitioners.keys())[0]
         self._check_if_split_present(split)
         self._check_if_split_possible_to_federate(split)
         partitioner: Partitioner = self._partitioners[split]
         self._assign_dataset_to_partitioner(split)
-        return partitioner.load_partition(idx)
+        return partitioner.load_partition(node_id)
 
     def load_full(self, split: str) -> Dataset:
         """Load the full split of the dataset.
@@ -142,7 +151,7 @@ class FederatedDataset:
 
         Returns
         -------
-        dataset_split: Dataset
+        dataset_split : Dataset
             Part of the dataset identified by its split name.
         """
         if not self._dataset_prepared:
@@ -214,3 +223,10 @@ class FederatedDataset:
         if self._resplitter:
             self._dataset = self._resplitter(self._dataset)
         self._dataset_prepared = True
+
+    def _check_if_no_split_keyword_possible(self) -> None:
+        if len(self._partitioners) != 1:
+            raise ValueError(
+                "Please set the `split` argument. You can only omit the split keyword "
+                "if there is exactly one partitioner specified."
+            )
