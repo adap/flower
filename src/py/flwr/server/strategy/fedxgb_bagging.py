@@ -57,15 +57,16 @@ class FedXgbBagging(fl.server.strategy.FedAvg):
             return None, {}
 
         # Aggregate all the client trees
+        global_model = self.global_model
         for _, fit_res in results:
             update = fit_res.parameters.tensors
             for bst in update:
-                self.global_model = aggregate(self.global_model, bst)
+                global_model = aggregate(global_model, bst)
 
-        weights = self.global_model
+        self.global_model = global_model
 
         return (
-            Parameters(tensor_type="", tensors=[weights]),
+            Parameters(tensor_type="", tensors=[global_model]),
             {},
         )
 
