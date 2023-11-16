@@ -19,7 +19,8 @@ import sys
 import threading
 import time
 from logging import INFO
-from typing import Dict, Optional
+from pathlib import Path
+from typing import Dict, Optional, Union
 
 from flwr.common import EventType, event
 from flwr.common.address import parse_address
@@ -51,7 +52,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     config: Optional[ServerConfig] = None,
     strategy: Optional[Strategy] = None,
     client_manager: Optional[ClientManager] = None,
-    certificates: Optional[bytes] = None,
+    root_certificates: Optional[Union[bytes, str]] = None,
 ) -> History:
     """Start a Flower Driver API server.
 
@@ -76,14 +77,10 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         `flwr.driver.driver_client_manager.DriverClientManager`. If no
         implementation is provided, then `start_driver` will use
         `flwr.driver.driver_client_manager.DriverClientManager`.
-    certificates : bytes (default: None)
-        Tuple containing root certificate, server certificate, and private key
-        to start a secure SSL-enabled server. The tuple is expected to have
-        three bytes elements in the following order:
-
-            * CA certificate.
-            * server certificate.
-            * server private key.
+    root_certificates : Optional[Union[bytes, str]] (default: None)
+        The PEM-encoded root certificates as a byte string or a path string.
+        If provided, a secure connection using the certificates will be
+        established to an SSL-enabled Flower server.
 
     Returns
     -------
@@ -99,7 +96,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     Starting a driver that connects to an SSL-enabled server:
 
     >>> start_driver(
-    >>>     certificates=Path("/crts/root.pem").read_bytes()
+    >>>     root_certificates=Path("/crts/root.pem").read_bytes()
     >>> )
     """
     event(EventType.START_DRIVER_ENTER)
@@ -112,7 +109,9 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
     # Create the Driver
-    driver = GrpcDriver(driver_service_address=address, certificates=certificates)
+    if isinstance(root_certificates, str):
+        root_certificates = Path(root_certificates).read_bytes()
+    driver = GrpcDriver(driver_service_address=address, certificates=root_certificates)
     driver.connect()
     lock = threading.Lock()
 
