@@ -7,8 +7,8 @@
 ### hyper-parameters for FL pre-training ###
 pre_training: false
 exp_name: fedvssl_results
-data_dir: fedvssl/data
-partition_dir: fedvssl/data/ucf101/annotations
+data_dir: fedvssl/data/ucf101
+partition_dir: annotations/client_distribution
 cfg_path_pretrain: fedvssl/conf/mmcv_conf/r3d_18_ucf101/pretraining_for_ucf.py
 
 # FL settings
@@ -27,9 +27,10 @@ strategy:
   fedavg: false
 
 # ray config
-cpus_per_client: 2
-gpus_per_client: 1
-include_dashboard: false
+client_resources:
+  num_gpus: 1.0
+  num_cpus: 2
+  include_dashboard: false
 
 
 ### hyper-parameters for downstream fine-tuning ###

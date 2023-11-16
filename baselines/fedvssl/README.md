@@ -106,7 +106,7 @@ python -m fedvssl.main pre_training=true # this will run using the default setti
 python -m fedvssl.main pre_training=true mix_coeff=1 rounds=100 # will set hyper-parameter alpha to 1 and the number of rounds to 100
 
 # run downstream fine-tuning with pre-trained SSL model
-python -m fedvssl.main pre_training=false # this will run using the default settings.
+python -m fedvssl.main pre_training=false pretrained_model_path=<CHECKPOINT>.npz # this will run using the default settings.
 ```
 
 To run using FedAvg:
@@ -136,7 +136,7 @@ To check the results, please direct to `fedvssl_results/clientN/*.log.json` file
 
 After pre-training one can use the following command to run the fine-tuning. 
 ```bash
-python -m fedvssl.main pre_training=false pretrained_model_path=/path/to/checkpoints
+python -m fedvssl.main pre_training=false pretrained_model_path=<CHECKPOINT>.npz
 ```
 The fine-tuning lasts for 150 epochs.
 
@@ -151,7 +151,7 @@ We provide the checkpoints of the pre-trained SSL models on Kinectics-400.
 With them as starting points, one can run downstream fine-tuning on UCF-101 to obtain the expected results in the paper.
 
 ```bash
-python -m fedvssl.main pre_training=false pretrained_model_path=/path/to/checkpoints
+python -m fedvssl.main pre_training=false pretrained_model_path=<CHECKPOINT>.npz
 
 # following the table below to change the checkpoints path.
 ```

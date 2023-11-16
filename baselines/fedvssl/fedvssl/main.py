@@ -105,14 +105,14 @@ def main(cfg: DictConfig) -> None:
         init_p_paths("fedvssl")
 
         client_resources = {
-            "num_cpus": cfg.cpus_per_client,
-            "num_gpus": cfg.gpus_per_client,
+            "num_cpus": cfg.client_resources.num_cpus,
+            "num_gpus": cfg.client_resources.num_gpus,
         }
         base_work_dir = cfg.exp_name
         rounds = cfg.rounds
         data_dir = cfg.data_dir
         partition_dir = cfg.partition_dir
-        num_gpus = cfg.gpus_per_client
+        num_gpus = cfg.client_resources.num_gpus
 
         def client_fn(cid: str):
             (
@@ -149,7 +149,7 @@ def main(cfg: DictConfig) -> None:
         )
 
         # (optional) specify ray config
-        ray_config = {"include_dashboard": cfg.include_dashboard}
+        ray_config = {"include_dashboard": cfg.client_resources.include_dashboard}
 
         # start simulation
         fl.simulation.start_simulation(
