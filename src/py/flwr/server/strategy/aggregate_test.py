@@ -19,7 +19,7 @@ from typing import List, Tuple
 
 import numpy as np
 
-from .aggregate import aggregate, weighted_loss_avg
+from .aggregate import aggregate, aggregate_meamed, weighted_loss_avg
 
 
 def test_aggregate() -> None:
@@ -64,3 +64,27 @@ def test_weighted_loss_avg_multiple_values() -> None:
 
     # Assert
     assert expected == actual
+
+
+def test_aggregate_meamed() -> None:
+    """Test mean around median aggregation."""
+    weights0 = [np.array([1, 6, 11]), np.array([16, 21, 26])]
+    weights1 = [np.array([2, 7, 12]), np.array([17, 22, 27])]
+    weights3 = [np.array([3, 8, 13]), np.array([18, 23, 28])]
+    weights4 = [np.array([4, 9, 14]), np.array([19, 24, 29])]
+    weights5 = [np.array([5, 10, 15]), np.array([20, 25, 30])]
+
+    results = [
+        (weights0, 1),
+        (weights1, 1),
+        (weights3, 1),
+        (weights4, 1),
+        (weights5, 1),
+    ]
+    expected = [np.array([3.0, 8.0, 13.0]), np.array([18.0, 23.0, 28.0])]
+
+    # Execute
+    actual = aggregate_meamed(results, 2)
+
+    # Assert
+    np.testing.assert_equal(expected, actual)

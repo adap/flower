@@ -53,6 +53,31 @@ def aggregate_median(results: List[Tuple[NDArrays, int]]) -> NDArrays:
     return median_w
 
 
+def aggregate_meamed(results: List[Tuple[NDArrays, int]], to_exclude: int) -> NDArrays:
+    """Compute the mean around the median."""
+    # Number of models to aggregate
+    to_keep = len(results) - to_exclude
+
+    # Compute median vector model
+    median_model = aggregate_median(results)
+
+    # Compute the distance matrix between the median model and the other models
+    closest_models = []
+    distance_matrix = _compute_distances([median_model] + [w for w, _ in results])
+
+    # Take the to_keep closest parameters around median_model. We ignore the first
+    # element of the distance matrix because it is the distance between the median
+    # model and itself.
+    closest_models.append(
+        np.argsort(distance_matrix[0])[1 : to_keep + 1].tolist()  # noqa: E203
+    )
+
+    closest_w = [(results[i - 1][0], results[i - 1][1]) for i in closest_models[0]]
+
+    # Compute the average of the to_keep closest parameters
+    return aggregate(closest_w)
+
+
 def aggregate_krum(
     results: List[Tuple[NDArrays, int]], num_malicious: int, to_keep: int
 ) -> NDArrays:
