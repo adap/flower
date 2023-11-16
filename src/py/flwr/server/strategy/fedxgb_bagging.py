@@ -1,19 +1,33 @@
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""Federated XGBoost bagging aggregation strategy."""
+
+
+import json
 from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple, Union
-import flwr as fl
-import json
 
-from flwr.common import (
-    EvaluateRes,
-    FitRes,
-    Parameters,
-    Scalar,
-)
-from flwr.server.client_proxy import ClientProxy
+import flwr as fl
+from flwr.common import EvaluateRes, FitRes, Parameters, Scalar
 from flwr.common.logger import log
+from flwr.server.client_proxy import ClientProxy
 
 
 class FedXgbBagging(fl.server.strategy.FedAvg):
+    """Configurable FedXgbBagging strategy implementation."""
+
     def __init__(
         self,
         evaluate_function: Optional[

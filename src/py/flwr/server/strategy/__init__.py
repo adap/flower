@@ -27,8 +27,8 @@ from .fedmedian import FedMedian as FedMedian
 from .fedopt import FedOpt as FedOpt
 from .fedprox import FedProx as FedProx
 from .fedtrimmedavg import FedTrimmedAvg as FedTrimmedAvg
-from .fedxgb_nn_avg import FedXgbNnAvg as FedXgbNnAvg
 from .fedxgb_bagging import FedXgbBagging as FedXgbBagging
+from .fedxgb_nn_avg import FedXgbNnAvg as FedXgbNnAvg
 from .fedyogi import FedYogi as FedYogi
 from .krum import Krum as Krum
 from .qfedavg import QFedAvg as QFedAvg
