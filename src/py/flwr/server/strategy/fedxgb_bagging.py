@@ -110,7 +110,7 @@ class FedXgbBagging(fl.server.strategy.FedAvg):
 def aggregate(
     bst_prev_org: Optional[bytes],
     bst_curr_org: bytes,
-) -> Optional[bytes]:
+) -> bytes:
     """Conduct bagging aggregation for given trees."""
     if not bst_prev_org:
         return bst_curr_org
