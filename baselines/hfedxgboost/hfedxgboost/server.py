@@ -1,9 +1,9 @@
-"""
-This custom server class extends Flower's default server class 
-to build a federated learning setup that involves a combination of a CNN model and an XGBoost model, 
-a customized model aggregation that can work with this model combination, 
-incorporate the usage of an early stopping mechanism to stop training when needed 
-and incorporate the usage of wandb for fine-tuning purposes.
+"""A custom server class extends Flower's default server class to build a federated.
+
+learning setup that involves a combination of a CNN model and an XGBoost model, a
+customized model aggregation that can work with this model combination, incorporate the
+usage of an early stopping mechanism to stop training when needed and incorporate the
+usage of wandb for fine-tuning purposes.
 """
 
 # Flower server
