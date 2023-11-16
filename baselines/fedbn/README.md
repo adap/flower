@@ -23,7 +23,7 @@ dataset: [MNIST, MNIST-M, SVHN, USPS, SynthDigits]
 
 **Datasets:** Vision datasets including digits 0-9. These datasets are: [MNIST](https://ieeexplore.ieee.org/document/726791), [MNIST-M](https://arxiv.org/pdf/1505.07818.pdf), [SVHN](http://ufldl.stanford.edu/housenumbers/nips2011_housenumbers.pdf), [USPS](https://ieeexplore.ieee.org/document/291440), and [SynthDigits](https://arxiv.org/pdf/1505.07818.pdf).
 
-**Hardware Setup:** Using the default configurations, any machine with 8 CPU cores should be capable too run 100 rounds of FedAvg or FedBN in under 5 minutes. Therefore a GPU is not needed if you stick to the small model used in the paper and you limit clients to use a 10% of the data in each dataset (these are the default settings)
+**Hardware Setup:** Using the default configurations, any machine with 8 CPU cores should be capable to run 100 rounds of FedAvg or FedBN in under 5 minutes. Therefore a GPU is not needed if you stick to the small model used in the paper and you limit clients to use a 10% of the data in each dataset (these are the default settings)
 
 **Contributors:** Meirui Jiang, Maria Boerner, Javier Fernandez-Marques
 
@@ -34,7 +34,7 @@ dataset: [MNIST, MNIST-M, SVHN, USPS, SynthDigits]
 
 **Model:** A six-layer CNN with 14,219,210 parameters following the structure described in appendix D.2.
 
-**Dataset:**  This baseline makes use of the pre-processed partitions created and opensource by the authors of the FedBN paper. You can read more about how those were created [here](https://github.com/med-air/FedBN). Follow the steps below in the `Environment Setup` section to download them. 
+**Dataset:**  This baseline makes use of the pre-processed partitions created and open source by the authors of the FedBN paper. You can read more about how those were created [here](https://github.com/med-air/FedBN). Follow the steps below in the `Environment Setup` section to download them. 
 
 
 A more detailed explanation of the datasets is given in the following table.
@@ -50,7 +50,7 @@ A more detailed explanation of the datasets is given in the following table.
 | image shape | (28,28) | (28,28,3) | (32,32,3) | (16,16) | (32,32,3) |
 
 
-**Training Hyperparameters:** By default (i.e. if you don't override anything in the config) these main hyperparameters used are shown in the table below. For a complete list of hyperparemters, please refer to the config files in `fedbn/conf`.
+**Training Hyperparameters:** By default (i.e. if you don't override anything in the config) these main hyperparameters used are shown in the table below. For a complete list of hyperparameters, please refer to the config files in `fedbn/conf`.
 
 | Description | Value |
 | ----------- | ----- |
@@ -100,7 +100,7 @@ First, activate your environment via `poetry shell`. The commands below show how
 python -m fedbn.main
 
 # by default, the experiments run in CPU-only mode
-# allow for 5 clients in paralle on a gpu by doing
+# allow for 5 clients in parallel on a gpu by doing
 python -m fedbn.main client_resources.num_gpus=0.2
 
 # By default, federated evaluation is disabled. Therefore the only metrics
@@ -113,7 +113,7 @@ python -m fedbn.main num_rounds=100 dataset.batch_size
 
 # increase the number of clients like this (note this should be a multiple 
 # of the number of dataset you involve in the experiment -- 5 by default)
-# this means that without changing other hyperparemeters, you can only have
+# this means that without changing other hyperparameters, you can only have
 # either 5,10,15,20,25,30,35,40,45 or 50 clients
 python -m fedbn.main num_clients=20
 
@@ -121,7 +121,7 @@ python -m fedbn.main num_clients=20
 # this is because the datasets you downloaded were pre-processed by the authors
 # of the FedBN paper. They created 10 partitions.
 # You can increase the amount of partitions each client gets by increasing dataset.percent
-# PLease note that as you increase that value, the maximum number of clients
+# Please note that as you increase that value, the maximum number of clients
 # you can have in your experiment gets reduced (this is because partitions are fixed and
 # can't be -- unless you add support for it -- partitioned into smaller ones)
 python -m fedbn.main dataset.percent=0.2 # max allowed is 25 clients
@@ -132,7 +132,7 @@ python -m fedbn.main client=fedavg
 
 ## Limitations
 
-The pre-processing of the five datasets provided by the authors, imposes some limitations on the number of clients tha can be spawned for the experiment. Naturally, this limiation can be circumbented if you edit the code, and in particular the `dataset.DigitsDataset` constructor. The aforementioned limitation happens because each dataset is partitioned into 10 disjoint sets and a 'DigitsDataset' can only be constructed by concatenating any set of such partitions (at least one, at most all 10). _How does the limitation manifest?_ Given that we have 5 datasets, if a client just takes one partition, a FL setup can accomodate 50 clients, one using a different partition. But, if you want for instance each client have 3 partitions of the same dataset (yes, clients can only hold data of one dataset) then the maximum number of clients gets reduced to 20. Following this logic you can see that if a client wants to use all 10 partitions of a given dataset, then only 5 clients can participate in the experiment. 
+The pre-processing of the five datasets provided by the authors, imposes some limitations on the number of clients that can be spawned for the experiment. Naturally, this limitation can be circumvented if you edit the code, and in particular the `dataset.DigitsDataset` constructor. The aforementioned limitation happens because each dataset is partitioned into 10 disjoint sets and a 'DigitsDataset' can only be constructed by concatenating any set of such partitions (at least one, at most all 10). _How does the limitation manifest?_ Given that we have 5 datasets, if a client just takes one partition, a FL setup can accommodate 50 clients, one using a different partition. But, if you want for instance each client have 3 partitions of the same dataset (yes, clients can only hold data of one dataset) then the maximum number of clients gets reduced to 20. Following this logic you can see that if a client wants to use all 10 partitions of a given dataset, then only 5 clients can participate in the experiment. 
 
 Another limitation in the current implementation is that there should be the same number of clients for each dataset. Also, all clients should contain the same number of partitions of their respective datasets. You can remove these constrain my editing `dataset.get_data()`.
 
@@ -147,8 +147,8 @@ Replicate the results shown below by running the following command. First ensure
 # Reproduces the results in Table 3 of the paper.
 python -m fedbn.main --multirun num_rounds=100 client=fedavg,fedbn
 
-# If you want to repeat the same experiment 5 times with differen random seeds (none fixed in the code)
-# adding '+repeat_num=range(5)' adds an aunshiliary new parameter (not used in the code) that forces the --multirun
+# If you want to repeat the same experiment 5 times with different random seeds (none fixed in the code)
+# adding '+repeat_num=range(5)' adds an aunxhiliary new parameter (not used in the code) that forces the --multirun
 # to run a total of 2x5 configs
 python -m fedbn.main --multirun num_rounds=100 client=fedavg,fedbn client_resources.num_gpus=0.2 '+repeat_num=range(5)'
 
