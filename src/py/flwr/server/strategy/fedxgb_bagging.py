@@ -19,13 +19,14 @@ import json
 from logging import WARNING
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
-import flwr as fl
 from flwr.common import EvaluateRes, FitRes, Parameters, Scalar
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 
+from .fedavg import FedAvg
 
-class FedXgbBagging(fl.server.strategy.FedAvg):
+
+class FedXgbBagging(FedAvg):
     """Configurable FedXgbBagging strategy implementation."""
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
