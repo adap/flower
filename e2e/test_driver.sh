@@ -3,7 +3,7 @@ set -e
 
 case "$1" in
   bare-https)
-    cert_arg="--certificates ../certificates/ca.crt ../certificates/server.pem ../certificates/server.key"
+    cert_arg="--certificates certificates/ca.crt certificates/server.pem certificates/server.key"
     ;;
   *)
     cert_arg="--insecure"
