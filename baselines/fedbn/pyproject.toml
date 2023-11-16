@@ -57,6 +57,7 @@ pytest-watch = "==4.2.0"
 ruff = "==0.0.272"
 types-requests = "==2.27.7"
 types-pyyaml = "6.0.12.12"
+virtualenv = "^20.21.0"
 
 [tool.isort]
 line_length = 88
