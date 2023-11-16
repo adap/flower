@@ -68,7 +68,7 @@ class Bulyan(FedAvg):
     ) -> None:
         """Bulyan strategy.
 
-        Implementation based on arxiv.org/abs/1802.07927.
+        Implementation based on https://arxiv.org/abs/1802.07927.
 
         Parameters
         ----------
