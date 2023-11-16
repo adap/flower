@@ -8,17 +8,17 @@ Tree-based with bagging method is used for aggregation on the server.
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-xgboost . && rm -rf flower && cd quickstart-xgboost
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/xgboost-comprehensive . && rm -rf flower && cd xgboost-comprehensive
 ```
 
-This will create a new directory called `quickstart-xgboost` containing the following files:
+This will create a new directory called `xgboost-comprehensive` containing the following files:
 
 ```
 -- README.md         <- Your're reading this right now
 -- server.py         <- Defines the server-side logic
--- strategy.py       <- Defines the tree-based bagging aggregation
 -- client.py         <- Defines the client-side logic
 -- dataset.py        <- Defines the functions of data loading and partitioning
+-- utils.py          <- Defines the arguments parser for clients and server.
 -- pyproject.toml    <- Example dependencies (if you use Poetry)
 -- requirements.txt  <- Example dependencies
 ```
@@ -83,5 +83,5 @@ bash run.sh
 ```
 
 Besides, we provide options to customise the experimental settings, including data partitioning and centralised/distributed evaluation (see `utils.py`).
-Look at the [code](https://github.com/adap/flower/tree/main/examples/quickstart-xgboost)
+Look at the [code](https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive)
 and [tutorial](https://flower.dev/docs/framework/tutorial-quickstart-xgboost.html) for a detailed explanation.

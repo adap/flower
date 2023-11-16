@@ -7,7 +7,7 @@ from flwr.common.logger import log
 from flwr.common import Parameters, Scalar
 from flwr_datasets import FederatedDataset
 
-from strategy import FedXgbBagging
+from flwr.server.strategy import FedXgbBagging
 from utils import server_args_parser
 from dataset import resplit, transform_dataset_to_dmatrix
 
