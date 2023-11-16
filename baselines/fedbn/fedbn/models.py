@@ -56,11 +56,11 @@ class CNNModel(nn.Module):
 
 
 # pylint: disable=too-many-locals
-def train(model, traindata, epochs, lr, device) -> Tuple[float, float]:
+def train(model, traindata, epochs, l_r, device) -> Tuple[float, float]:
     """Train the network."""
     # Define loss and optimizer
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=lr)
+    optimizer = torch.optim.SGD(model.parameters(), lr=l_r)
 
     # Train the network
     model.to(device)

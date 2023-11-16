@@ -216,14 +216,14 @@ def get_data(dataset_cfg: DictConfig) -> List[Tuple[DataLoader, DataLoader, str]
         10  # each dataset was pre-processed by the authors and split into 10 partitions
     )
     # First check that percent used is allowed
-    allowed_percent = (np.arange(1, total_partitions+1) / total_partitions).tolist()
+    allowed_percent = (np.arange(1, total_partitions + 1) / total_partitions).tolist()
     assert d_cfg.percent in allowed_percent, (
         f"'dataset.percent' should be in {allowed_percent}."
         "\nThis is because the trainset is pre-partitioned into 10 disjoint sets."
     )
 
-    # Then check that with the percent selected, the desired number of clients (and there
-    # fore dataloaders) can be created.
+    # Then check that with the percent selected, the desired number of clients (and
+    # therefore dataloaders) can be created.
     max_expected_clients = len(d_cfg.to_include) * 1 / d_cfg.percent
 
     num_clients_step = len(d_cfg.to_include)

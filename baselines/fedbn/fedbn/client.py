@@ -21,13 +21,13 @@ class FlowerClient(fl.client.NumPyClient):
     This base class is what plain FedAvg clients do.
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         model: CNNModel,
         trainloader: DataLoader,
         testloader: DataLoader,
         dataset_name: str,
-        lr: float,
+        l_r: float,
         **kwargs,  # pylint: disable=unused-argument
     ) -> None:
         self.trainloader = trainloader
@@ -35,7 +35,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.dataset_name = dataset_name
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.model = model.to(self.device)
-        self.lr = lr
+        self.l_r = l_r
 
     def get_parameters(self, config) -> NDArrays:
         """Return model parameters as a list of NumPy ndarrays w or w/o.
@@ -72,7 +72,7 @@ class FlowerClient(fl.client.NumPyClient):
             self.model,
             self.trainloader,
             epochs=1,
-            lr=self.lr,
+            l_r=self.l_r,
             device=self.device,
         )
 
