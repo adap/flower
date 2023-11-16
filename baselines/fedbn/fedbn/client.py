@@ -16,9 +16,9 @@ from fedbn.models import CNNModel, test, train
 
 
 class FlowerClient(fl.client.NumPyClient):
-    """A standar FlowerClient. This base class.
+    """A standar FlowerClient.
 
-    is what plain FedAvg clients do.
+    This base class is what plain FedAvg clients do.
     """
 
     def __init__(
@@ -27,6 +27,7 @@ class FlowerClient(fl.client.NumPyClient):
         trainloader: DataLoader,
         testloader: DataLoader,
         dataset_name: str,
+        lr: float,
         **kwargs,  # pylint: disable=unused-argument
     ) -> None:
         self.trainloader = trainloader
@@ -34,6 +35,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.dataset_name = dataset_name
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.model = model.to(self.device)
+        self.lr = lr
 
     def get_parameters(self, config) -> NDArrays:
         """Return model parameters as a list of NumPy ndarrays w or w/o.
@@ -58,22 +60,23 @@ class FlowerClient(fl.client.NumPyClient):
         """Set model parameters, train model, return updated model parameters."""
         self.set_parameters(parameters)
 
-        # evaluate the state of the global model on the train set; the loss returned
+        # Evaluate the state of the global model on the train set; the loss returned
         # is what's reported in Fig3 in the FedBN paper (what this baseline focuses
         # in reproducing)
         pre_train_loss, pre_train_acc = test(
             self.model, self.trainloader, device=self.device
         )
 
-        # train model on local dataset
+        # Train model on local dataset
         loss, acc = train(
             self.model,
             self.trainloader,
             epochs=1,
+            lr=self.lr,
             device=self.device,
         )
 
-        # construct metrics to return to server
+        # Construct metrics to return to server
         fl_round = config["round"]
         metrics = {
             "dataset_name": self.dataset_name,
@@ -107,9 +110,16 @@ class FlowerClient(fl.client.NumPyClient):
 class FedBNFlowerClient(FlowerClient):
     """Similar to FlowerClient but this is used by FedBN clients."""
 
-    def __init__(self, bn_state_dir: Path, client_id: int, *args, **kwargs) -> None:
+    def __init__(self, save_path: Path, client_id: int, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.bn_state_dir = bn_state_dir
+        # For FedBN clients we need to persist the state of the BN
+        # layers across rounds. In Simulation clients are statess
+        # so everything not communicated to the server (as it is the
+        # case as with params in BN layers of FedBN clients) is lost
+        # once a client completes its training. An upcoming version of
+        # Flower suports stateful clients
+        bn_state_dir = save_path / "bn_states"
+        bn_state_dir.mkdir(exist_ok=True)
         self.bn_state_pkl = bn_state_dir / f"client_{client_id}.pkl"
 
     def _save_bn_statedict(self) -> None:
@@ -135,7 +145,7 @@ class FedBNFlowerClient(FlowerClient):
 
         layers.
         """
-        # first update bn_state_dir
+        # First update bn_state_dir
         self._save_bn_statedict()
         # Excluding parameters of BN layers when using FedBN
         return [
@@ -154,8 +164,8 @@ class FedBNFlowerClient(FlowerClient):
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
         self.model.load_state_dict(state_dict, strict=False)
 
-        # now also load from bn_state_dir
-        if self.bn_state_pkl.exists():  # it won't exist in the first round
+        # Now also load from bn_state_dir
+        if self.bn_state_pkl.exists():  # It won't exist in the first round
             bn_state_dict = self._load_bn_statedict()
             self.model.load_state_dict(bn_state_dict, strict=False)
 
@@ -164,7 +174,7 @@ def gen_client_fn(
     client_data: List[Tuple[DataLoader, DataLoader, str]],
     client_cfg: DictConfig,
     model_cfg: DictConfig,
-    bn_state_dir: Path,
+    save_path: Path,
 ) -> Callable[[str], FlowerClient]:
     """Return a function that will be called to instantiate the cid-th client."""
 
@@ -182,7 +192,7 @@ def gen_client_fn(
             trainloader=trainloader,
             testloader=valloader,
             dataset_name=dataset_name,
-            bn_state_dir=bn_state_dir,
+            save_path=save_path,
             client_id=int(cid),
         )
 
