@@ -59,15 +59,11 @@ class FedXgbBagging(fl.server.strategy.FedAvg):
         # Aggregate all the client trees
         for _, fit_res in results:
             update = fit_res.parameters.tensors
-            for item in update:
-                self.global_model = aggregate(
-                    self.global_model, json.loads(bytearray(item))
-                )
-
-        weights_avg = json.dumps(self.global_model)
+            for bst in update:
+                self.global_model = aggregate(self.global_model, bst)
 
         return (
-            Parameters(tensor_type="", tensors=[bytes(weights_avg, "utf-8")]),
+            Parameters(tensor_type="", tensors=[self.global_model]),
             {},
         )
 
@@ -109,9 +105,9 @@ class FedXgbBagging(fl.server.strategy.FedAvg):
 
 
 def aggregate(
-    bst_prev: Optional[Dict[str, Union[int, slice]]],
-    bst_curr: Dict[str, Union[int, slice]],
-) -> Dict[str, Union[int, slice]]:
+    bst_prev: Optional[bytes],
+    bst_curr: bytes,
+) -> bytes:
     """Conduct bagging aggregation for given trees."""
     if not bst_prev:
         return bst_curr
@@ -119,6 +115,9 @@ def aggregate(
         # Get the tree numbers
         tree_num_prev, paral_tree_num_prev = _get_tree_nums(bst_prev)
         tree_num_curr, paral_tree_num_curr = _get_tree_nums(bst_curr)
+
+        bst_prev = json.loads(bytearray(bst_prev))
+        bst_curr = json.loads(bytearray(bst_curr))
 
         bst_prev["learner"]["gradient_booster"]["model"]["gbtree_model_param"][
             "num_trees"
@@ -138,10 +137,14 @@ def aggregate(
                 trees_curr[tree_count]
             )
             bst_prev["learner"]["gradient_booster"]["model"]["tree_info"].append(0)
+
+        bst_prev = bytes(json.dumps(bst_prev), "utf-8")
+
         return bst_prev
 
 
-def _get_tree_nums(xgb_model: Dict[str, Union[int, slice]]) -> Tuple[int, int]:
+def _get_tree_nums(xgb_model: bytes) -> Tuple[int, int]:
+    xgb_model = json.loads(bytearray(xgb_model))
     # Get the number of trees
     tree_num = int(
         xgb_model["learner"]["gradient_booster"]["model"]["gbtree_model_param"][
