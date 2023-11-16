@@ -15,6 +15,7 @@
 """Contains the strategy abstraction and different implementations."""
 
 
+from .bulyan import Bulyan as Bulyan
 from .dpfedavg_adaptive import DPFedAvgAdaptive as DPFedAvgAdaptive
 from .dpfedavg_fixed import DPFedAvgFixed as DPFedAvgFixed
 from .fault_tolerant_fedavg import FaultTolerantFedAvg as FaultTolerantFedAvg
@@ -50,6 +51,7 @@ __all__ = [
     "FedMedian",
     "FedTrimmedAvg",
     "Krum",
+    "Bulyan",
     "DPFedAvgAdaptive",
     "DPFedAvgFixed",
     "Strategy",
