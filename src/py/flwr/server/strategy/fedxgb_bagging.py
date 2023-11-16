@@ -17,7 +17,7 @@
 
 import json
 from logging import WARNING
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import flwr as fl
 from flwr.common import EvaluateRes, FitRes, Parameters, Scalar
@@ -37,7 +37,7 @@ class FedXgbBagging(fl.server.strategy.FedAvg):
                 Optional[Tuple[float, Dict[str, Scalar]]],
             ]
         ] = None,
-        **kwargs,
+        **kwargs: Any,
     ):
         self.evaluate_function = evaluate_function
         self.global_model = None
@@ -62,8 +62,10 @@ class FedXgbBagging(fl.server.strategy.FedAvg):
             for bst in update:
                 self.global_model = aggregate(self.global_model, bst)
 
+        weights = self.global_model
+
         return (
-            Parameters(tensor_type="", tensors=[self.global_model]),
+            Parameters(tensor_type="", tensors=[weights]),
             {},
         )
 
@@ -105,19 +107,19 @@ class FedXgbBagging(fl.server.strategy.FedAvg):
 
 
 def aggregate(
-    bst_prev: Optional[bytes],
-    bst_curr: bytes,
-) -> bytes:
+    bst_prev_org: Optional[bytes],
+    bst_curr_org: bytes,
+) -> Optional[bytes]:
     """Conduct bagging aggregation for given trees."""
-    if not bst_prev:
-        return bst_curr
+    if not bst_prev_org:
+        return bst_curr_org
     else:
         # Get the tree numbers
-        tree_num_prev, paral_tree_num_prev = _get_tree_nums(bst_prev)
-        tree_num_curr, paral_tree_num_curr = _get_tree_nums(bst_curr)
+        tree_num_prev, paral_tree_num_prev = _get_tree_nums(bst_prev_org)
+        tree_num_curr, paral_tree_num_curr = _get_tree_nums(bst_curr_org)
 
-        bst_prev = json.loads(bytearray(bst_prev))
-        bst_curr = json.loads(bytearray(bst_curr))
+        bst_prev = json.loads(bytearray(bst_prev_org))
+        bst_curr = json.loads(bytearray(bst_curr_org))
 
         bst_prev["learner"]["gradient_booster"]["model"]["gbtree_model_param"][
             "num_trees"
@@ -143,8 +145,8 @@ def aggregate(
         return bst_prev
 
 
-def _get_tree_nums(xgb_model: bytes) -> Tuple[int, int]:
-    xgb_model = json.loads(bytearray(xgb_model))
+def _get_tree_nums(xgb_model_org: bytes) -> Tuple[int, int]:
+    xgb_model = json.loads(bytearray(xgb_model_org))
     # Get the number of trees
     tree_num = int(
         xgb_model["learner"]["gradient_booster"]["model"]["gbtree_model_param"][
