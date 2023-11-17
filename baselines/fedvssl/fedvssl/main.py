@@ -112,7 +112,7 @@ def main(cfg: DictConfig) -> None:
         rounds = cfg.rounds
         data_dir = cfg.data_dir
         partition_dir = cfg.partition_dir
-        num_gpus = cfg.client_resources.num_gpus
+        num_gpus = int(np.ceil(cfg.client_resources.num_gpus))
 
         def client_fn(cid: str):
             (
