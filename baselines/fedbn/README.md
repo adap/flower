@@ -59,7 +59,7 @@ A more detailed explanation of the datasets is given in the following table.
 | strategy_fraction_fit | 1.0 |
 | strategy.fraction_evaluate | 0.0 |
 | training samples per client| 743 |
-| lr | 10E-2 |
+| client.l_r | 10E-2 |
 | local epochs | 1 |
 | loss | cross entropy loss |
 | optimizer | SGD |

@@ -60,6 +60,8 @@ jobs:
         include:
           - directory: bare
 
+          - directory: bare-https
+
           - directory: jax
 
           - directory: pytorch
@@ -135,7 +137,7 @@ jobs:
       - name: Run virtual client test
         run: python simulation.py
       - name: Run driver test
-        run: ./../test_driver.sh
+        run: ./../test_driver.sh "${{ matrix.directory }}"
 
   strategies:
     runs-on: ubuntu-22.04
