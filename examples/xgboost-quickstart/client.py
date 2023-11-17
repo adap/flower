@@ -1,3 +1,4 @@
+import argparse
 import warnings
 from typing import Union
 from logging import INFO
@@ -23,6 +24,16 @@ from flwr_datasets.partitioner import IidPartitioner
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
+# Define arguments parser for the client/node ID.
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--node-id",
+    default=0,
+    type=int,
+    help="Node ID used for the current client.",
+)
+args = parser.parse_args()
+
 
 # Define data partitioning related functions
 def train_test_split(partition: Dataset, test_fraction: float, seed: int):
@@ -46,11 +57,11 @@ def transform_dataset_to_dmatrix(data: Union[Dataset, DatasetDict]) -> xgb.core.
 
 
 # Load (HIGGS) dataset and conduct partitioning
-partitioner = IidPartitioner(num_partitions=10)
+partitioner = IidPartitioner(num_partitions=2)
 fds = FederatedDataset(dataset="jxie/higgs", partitioners={"train": partitioner})
 
 # Let's use the first partition as an example
-partition = fds.load_partition(idx=0, split="train")
+partition = fds.load_partition(idx=args.node_id, split="train")
 partition.set_format("numpy")
 
 # Train/test splitting
