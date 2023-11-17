@@ -16,7 +16,7 @@ from fedbn.models import CNNModel, test, train
 
 
 class FlowerClient(fl.client.NumPyClient):
-    """A standar FlowerClient.
+    """A standard FlowerClient.
 
     This base class is what plain FedAvg clients do.
     """
