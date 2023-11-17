@@ -9,7 +9,7 @@ This project provides a minimal code example to enable you to get stated quickly
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-xgboost . && rm -rf flower && cd quickstart-xgboost
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/xgboost-quickstart . && rm -rf flower && cd xgboost-quickstart
 ```
 
 This will create a new directory called `xgboost-quickstart` containing the following files:
@@ -18,7 +18,6 @@ This will create a new directory called `xgboost-quickstart` containing the foll
 -- README.md         <- Your're reading this right now
 -- server.py         <- Defines the server-side logic
 -- client.py         <- Defines the client-side logic
--- dataset.py        <- Defines the functions of data loading and partitioning
 -- pyproject.toml    <- Example dependencies (if you use Poetry)
 -- requirements.txt  <- Example dependencies
 ```
@@ -82,5 +81,5 @@ Alternatively, you can use `run.sh` to run the same experiment in a single termi
 bash run.sh
 ```
 
-Look at the [code](https://github.com/adap/flower/tree/main/examples/quickstart-xgboost)
+Look at the [code](https://github.com/adap/flower/tree/main/examples/xgboost-quickstart)
 and [tutorial](https://flower.dev/docs/framework/tutorial-quickstart-xgboost.html) for a detailed explanation.
