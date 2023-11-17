@@ -7,7 +7,7 @@
 ### hyper-parameters for FL pre-training ###
 pre_training: false
 exp_name: fedvssl_results
-data_dir: fedvssl/data/ucf101
+data_dir: fedvssl/data
 partition_dir: annotations/client_distribution
 cfg_path_pretrain: fedvssl/conf/mmcv_conf/r3d_18_ucf101/pretraining_for_ucf.py
 
