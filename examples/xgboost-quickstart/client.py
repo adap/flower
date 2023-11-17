@@ -60,7 +60,7 @@ def transform_dataset_to_dmatrix(data: Union[Dataset, DatasetDict]) -> xgb.core.
 partitioner = IidPartitioner(num_partitions=2)
 fds = FederatedDataset(dataset="jxie/higgs", partitioners={"train": partitioner})
 
-# Let's use the first partition as an example
+# Load the partition for this `node_id`
 partition = fds.load_partition(idx=args.node_id, split="train")
 partition.set_format("numpy")
 
