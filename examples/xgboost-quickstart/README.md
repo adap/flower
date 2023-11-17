@@ -12,7 +12,7 @@ Start by cloning the example project. We prepared a single-line command that you
 git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-xgboost . && rm -rf flower && cd quickstart-xgboost
 ```
 
-This will create a new directory called `quickstart-xgboost` containing the following files:
+This will create a new directory called `xgboost-quickstart` containing the following files:
 
 ```
 -- README.md         <- Your're reading this right now
