@@ -4,6 +4,7 @@ This example demonstrates how to perform EXtreme Gradient Boosting (XGBoost) wit
 Tree-based with bagging method is used for aggregation on the server.
 
 This project provides a minimal code example to enable you to get stated quickly. For a more comprehensive code example, take a look at [xgboost-comprehensive](https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive).
+
 ## Project Setup
 
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
