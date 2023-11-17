@@ -1,5 +1,5 @@
 import flwr as fl
-from strategy import FedXgbBagging
+from flwr.server.strategy import FedXgbBagging
 
 
 # FL experimental settings
