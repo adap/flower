@@ -1,6 +1,6 @@
 # Flower Example using XGBoost (Comprehensive)
 
-This example demonstrates a comprehensive federated learning setup using Flower with XGBoost. 
+This example demonstrates a comprehensive federated learning setup using Flower with XGBoost.
 It differs from the quickstart example in the following ways:
 
 - Arguments parsers of server and clients for hyperparameters selection.
@@ -8,7 +8,6 @@ It differs from the quickstart example in the following ways:
 - Customised number of partitions.
 - Customised partitioner type (uniform, linear, square, exponential).
 - Centralised/distributed evaluation.
-
 
 ## Project Setup
 
@@ -61,7 +60,7 @@ pip install -r requirements.txt
 ## Run Federated Learning with XGBoost and Flower
 
 The included `run.sh` will start the Flower server (using `server.py`) with centralised evaluation,
-sleep for 15 seconds to ensure that the server is up, 
+sleep for 15 seconds to ensure that the server is up,
 and then start 5 Flower clients (using `client.py`) with a small subset of the data from exponential partition distribution.
 You can simply start everything in a terminal as follows:
 
@@ -69,14 +68,14 @@ You can simply start everything in a terminal as follows:
 poetry run ./run.sh
 ```
 
-The `run.sh` script starts processes in the background so that you don't have to open eleven terminal windows. 
-If you experiment with the code example and something goes wrong, simply using `CTRL + C` on Linux (or `CMD + C` on macOS) wouldn't normally kill all these processes, 
-which is why the script ends with `trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT` and `wait`. 
-This simply allows you to stop the experiment using `CTRL + C` (or `CMD + C`). 
-If you change the script and anything goes wrong you can still use `killall python` (or `killall python3`) 
+The `run.sh` script starts processes in the background so that you don't have to open eleven terminal windows.
+If you experiment with the code example and something goes wrong, simply using `CTRL + C` on Linux (or `CMD + C` on macOS) wouldn't normally kill all these processes,
+which is why the script ends with `trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT` and `wait`.
+This simply allows you to stop the experiment using `CTRL + C` (or `CMD + C`).
+If you change the script and anything goes wrong you can still use `killall python` (or `killall python3`)
 to kill all background processes (or a more specific command if you have other Python processes running that you don't want to kill).
 
-You can also manually run `poetry run python3 server.py --pool-size=N --num-clients-per-round=N` 
+You can also manually run `poetry run python3 server.py --pool-size=N --num-clients-per-round=N`
 and `poetry run python3 client.py --node-id=NODE_ID --num-partitions=N` for as many clients as you want,
 but you have to make sure that each command is run in a different terminal window (or a different computer on the network).
 
