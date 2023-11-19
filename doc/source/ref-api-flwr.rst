@@ -214,6 +214,16 @@ server.strategy.Krum
 
     .. automethod:: __init__
 
+.. _flwr-server-strategy-Bulyan-apiref:
+
+server.strategy.Bulyan
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: flwr.server.strategy.Bulyan
+    :members:
+
+    .. automethod:: __init__
+
 
 .. _flwr-server-strategy-FedXgbNnAvg-apiref:
 

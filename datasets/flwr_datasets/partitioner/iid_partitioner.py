@@ -24,7 +24,7 @@ class IidPartitioner(Partitioner):
 
     Parameters
     ----------
-    num_partitions: int
+    num_partitions : int
         The total number of partitions that the data will be divided into.
     """
 
@@ -34,19 +34,19 @@ class IidPartitioner(Partitioner):
             raise ValueError("The number of partitions must be greater than zero.")
         self._num_partitions = num_partitions
 
-    def load_partition(self, idx: int) -> datasets.Dataset:
+    def load_partition(self, node_id: int) -> datasets.Dataset:
         """Load a single IID partition based on the partition index.
 
         Parameters
         ----------
-        idx: int
+        node_id : int
             the index that corresponds to the requested partition
 
         Returns
         -------
-        dataset_partition: Dataset
+        dataset_partition : Dataset
             single dataset partition
         """
         return self.dataset.shard(
-            num_shards=self._num_partitions, index=idx, contiguous=False
+            num_shards=self._num_partitions, index=node_id, contiguous=True
         )
