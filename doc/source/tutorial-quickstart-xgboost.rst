@@ -23,7 +23,10 @@ Federated learning ensures that raw data remains on the local device, making it 
 Given the robustness and efficiency of XGBoost, combining it with federated learning offers a promising solution for these specific challenges.
 
 In this tutorial we will learn how to train a federated XGBoost model on HIGGS dataset using Flower and :code:`xgboost` package.
-Our example consists of two *clients* and one *server*, where the local trees are aggregated based on bagging criterion on the server.
+We use a simple example (`full code xgboost-quickstart <https://github.com/adap/flower/tree/main/examples/xgboost-quickstart>`_) with two *clients* and one *server*
+to demonstrate how federated XGBoost works,
+and then we dive into a more complex example (`full code xgboost-comprehensive <https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive>`_) to run various experiments.
+
 
 Environment Setup
 -------------
@@ -48,14 +51,19 @@ Flower Client
 *Clients* are responsible for generating individual weight-updates for the model based on their local datasets.
 Now that we have all our dependencies installed, let's run a simple distributed training with two clients and one server.
 
-In a file called :code:`client.py`, import xgboost, Flower and related functions from :code:`dataset.py`:
+In a file called :code:`client.py`, import xgboost, Flower, Flower Datasets and other related functions:
 
 .. code-block:: python
 
+    import argparse
+    from typing import Union
+    from logging import INFO
+    from datasets import Dataset, DatasetDict
     import xgboost as xgb
 
     import flwr as fl
     from flwr_datasets import FederatedDataset
+    from flwr.common.logger import log
     from flwr.common import (
         Code,
         EvaluateIns,
@@ -67,42 +75,79 @@ In a file called :code:`client.py`, import xgboost, Flower and related functions
         Parameters,
         Status,
     )
-
-    from dataset import instantiate_partitioner, train_test_split, transform_dataset_to_dmatrix
+    from flwr_datasets.partitioner import IidPartitioner
 
 Dataset partition and hyper-parameter selection
 ~~~~~~~~
-Prior to local training, we require loading the HIGGS dataset from Flower Datasets and conduct data partitioning for FL.
-Currently, we provide four options to split the dataset to simulate the non-uniformity in data quantity (uniform, linear, square, exponential) based on the number of samples.
-
-The implementation details can be found in :code:`dataset.py` from `full code example <https://github.com/adap/flower/tree/main/examples/xgboost-quickstart>`_.
+Prior to local training, we require loading the HIGGS dataset from Flower Datasets and conduct data partitioning for FL:
 
 .. code-block:: python
 
     # Load (HIGGS) dataset and conduct partitioning
-    num_partitions = 20
-    # partitioner type is chosen from ["uniform", "linear", "square", "exponential"]
-    partitioner_type = "uniform"
-
-    # instantiate partitioner
-    partitioner = instantiate_partitioner(partitioner_type=partitioner_type, num_partitions=num_partitions)
+    partitioner = IidPartitioner(num_partitions=2)
     fds = FederatedDataset(dataset="jxie/higgs", partitioners={"train": partitioner})
 
-    # let's use the first partition as an example
-    partition_id = 0
-    partition = fds.load_partition(idx=partition_id, split="train")
+    # Load the partition for this `node_id`
+    partition = fds.load_partition(idx=args.node_id, split="train")
     partition.set_format("numpy")
 
-    # train/test splitting and data re-formatting
-    SEED = 42
-    test_fraction = 0.2
-    train_data, valid_data, num_train, num_val = train_test_split(partition, test_fraction=test_fraction, seed=SEED)
+In this example, we split the dataset into two partitions with uniform distribution (:code:`IidPartitioner(num_partitions=2)`).
+Then, we load the partition for the given client based on :code:`node_id`:
 
-    # reformat data to DMatrix for xgboost
+.. code-block:: python
+
+    # We first define arguments parser for user to specify the client/node ID.
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--node-id",
+        default=0,
+        type=int,
+        help="Node ID used for the current client.",
+    )
+    args = parser.parse_args()
+
+    # Load the partition for this `node_id`.
+    partition = fds.load_partition(idx=args.node_id, split="train")
+    partition.set_format("numpy")
+
+After that, we do train/test splitting on the given partition (client's local data), and transform data format for :code:`xgboost` package.
+
+.. code-block:: python
+
+    # Train/test splitting
+    train_data, valid_data, num_train, num_val = train_test_split(
+        partition, test_fraction=0.2, seed=42
+    )
+
+    # Reformat data to DMatrix for xgboost
     train_dmatrix = transform_dataset_to_dmatrix(train_data)
     valid_dmatrix = transform_dataset_to_dmatrix(valid_data)
 
-Then, we define the hyper-parameters used for XGBoost training.
+The functions of :code:`train_test_split` and :code:`transform_dataset_to_dmatrix` are defined as below:
+
+.. code-block:: python
+
+    # Define data partitioning related functions
+    def train_test_split(partition: Dataset, test_fraction: float, seed: int):
+        """Split the data into train and validation set given split rate."""
+        train_test = partition.train_test_split(test_size=test_fraction, seed=seed)
+        partition_train = train_test["train"]
+        partition_test = train_test["test"]
+
+        num_train = len(partition_train)
+        num_test = len(partition_test)
+
+        return partition_train, partition_test, num_train, num_test
+
+
+    def transform_dataset_to_dmatrix(data: Union[Dataset, DatasetDict]) -> xgb.core.DMatrix:
+        """Transform dataset to DMatrix format for xgboost."""
+        x = data["inputs"]
+        y = data["label"]
+        new_data = xgb.DMatrix(x, label=y)
+        return new_data
+
+Finally, we define the hyper-parameters used for XGBoost training.
 
 .. code-block:: python
 
@@ -122,6 +167,7 @@ The :code:`num_local_round` represents the number of iterations for local tree b
 We use CPU for the training in default.
 One can shift it to GPU by setting :code:`tree_method` to :code:`gpu_hist`.
 We use AUC as evaluation metric.
+
 
 Flower client definition for XGBoost
 ~~~~~~~~
@@ -404,7 +450,7 @@ After traversal of all clients' models, a new global model is generated,
 followed by the serialisation, and sending back each client.
 
 
-Launch federated XGBoost!
+Launch Federated XGBoost!
 ---------------------------
 
 With both client and server ready, we can now run everything and see federated
@@ -473,3 +519,9 @@ The AUC values can be checked in :code:`metrics_distributed`.
 One can see that the average AUC increases over FL rounds.
 
 The full `source code <https://github.com/adap/flower/blob/main/examples/quickstart-xgboost/>`_ for this example can be found in :code:`examples/quickstart-xgboost`.
+
+
+Comprehensive Federated XGBoost
+---------------------------
+
+Currently, we provide four options to split the dataset to simulate the non-uniformity in data quantity (uniform, linear, square, exponential) based on the number of samples.
