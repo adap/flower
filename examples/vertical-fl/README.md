@@ -97,6 +97,12 @@ seconds to run as the model is very small.
 | Aggregation           | The server aggregates these local models by averaging  the parameters or gradients to update a global model.                                                                                             | The server aggregates the updates such as gradients or parameters,  which are then used to update the global model.  However, since each client sees only a part of the features,  the server typically has a more complex role,  sometimes needing to coordinate more sophisticated aggregation strategies  that may involve secure multi-party computation techniques. |
 | Privacy Consideration | The raw data stays on the client's side, only model updates are shared,  which helps in maintaining privacy.                                                                                             | VFL is designed to ensure that no participant can access  the complete feature set of any sample,  thereby preserving the privacy of data.                                                                                                                                                                                                                               |
 
+HFL            |  VFL
+:-------------------------:|:-------------------------:
+![HFL diagram](docs/hfl.jpg)  |  ![VFL diagram](docs/vfl.jpg)
+
+This diagram illustrates HFL vs VFL using a simplified version of what we will be building in this example. Note that on the VFL side, the server holds the labels (the `Survived` column) and will be the only one capable of performing evaluation. 
+
 ### Data
 
 #### About
