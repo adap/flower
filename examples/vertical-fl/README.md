@@ -101,7 +101,7 @@ HFL            |  VFL
 :-------------------------:|:-------------------------:
 ![HFL diagram](docs/hfl.jpg)  |  ![VFL diagram](docs/vfl.jpg)
 
-This diagram illustrates HFL vs VFL using a simplified version of what we will be building in this example. Note that on the VFL side, the server holds the labels (the `Survived` column) and will be the only one capable of performing evaluation. 
+Those diagrams illustrate HFL vs VFL using a simplified version of what we will be building in this example. Note that on the VFL side, the server holds the labels (the `Survived` column) and will be the only one capable of performing evaluation. 
 
 ### Data
 
