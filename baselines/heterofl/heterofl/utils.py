@@ -1,4 +1,6 @@
 """Contains utility functions."""
+import errno
+import os
 from pathlib import Path
 
 import numpy as np
@@ -168,3 +170,43 @@ def save_model(model, path):
     current_path = HydraConfig.get().runtime.output_dir
     model_save_path = Path(current_path) / path
     torch.save(model.state_dict(), model_save_path)
+
+
+def check_exists(path):
+    """Check if the given path exists."""
+    return os.path.exists(path)
+
+
+def makedir_exist_ok(path):
+    """Create a directory."""
+    try:
+        os.makedirs(path)
+    except OSError as e:
+        if e.errno == errno.EEXIST:
+            pass
+        else:
+            raise
+    return
+
+
+def save(input, path, protocol=2, mode="torch"):
+    """Save the input in a given path."""
+    dirname = os.path.dirname(path)
+    makedir_exist_ok(dirname)
+    if mode == "torch":
+        torch.save(input, path, pickle_protocol=protocol)
+    elif mode == "numpy":
+        np.save(path, input, allow_pickle=True)
+    else:
+        raise ValueError("Not valid save mode")
+    return
+
+
+def load(path, mode="torch"):
+    """Load the file from given path."""
+    if mode == "torch":
+        return torch.load(path, map_location=lambda storage, loc: storage)
+    elif mode == "numpy":
+        return np.load(path, allow_pickle=True)
+    else:
+        raise ValueError("Not valid save mode")

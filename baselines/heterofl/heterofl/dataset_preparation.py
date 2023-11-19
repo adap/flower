@@ -6,29 +6,58 @@ import numpy as np
 import torch
 from torch.utils.data import ConcatDataset, Dataset, Subset, random_split
 from torchvision import transforms
-from torchvision.datasets import CIFAR10, MNIST
+
+import heterofl.datasets as dt
 
 
 def _download_data(dataset_name: str) -> Tuple[Dataset, Dataset]:
+    root = "./data/{}".format(dataset_name)
     if dataset_name == "MNIST":
-        transform = transforms.Compose(
-            [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
+        trainset = dt.MNIST(
+            root=root,
+            split="train",
+            subset="label",
+            transform=dt.Compose(
+                [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
+            ),
         )
-        trainset = MNIST("./dataset", train=True, download=True, transform=transform)
-        testset = MNIST("./dataset", train=False, download=True, transform=transform)
+        testset = dt.MNIST(
+            root=root,
+            split="test",
+            subset="label",
+            transform=dt.Compose(
+                [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
+            ),
+        )
     elif dataset_name == "CIFAR10":
-        transform = transforms.Compose(
-            [
-                transforms.RandomCrop(32, padding=4),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
-                ),
-            ]
+        trainset = dt.CIFAR10(
+            root=root,
+            split="train",
+            subset="label",
+            transform=dt.Compose(
+                [
+                    transforms.RandomCrop(32, padding=4),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.ToTensor(),
+                    transforms.Normalize(
+                        (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
+                    ),
+                ]
+            ),
         )
-        trainset = CIFAR10("./dataset", train=True, download=True, transform=transform)
-        testset = CIFAR10("./dataset", train=False, download=True, transform=transform)
+        testset = dt.CIFAR10(
+            root=root,
+            split="test",
+            subset="label",
+            transform=dt.Compose(
+                [
+                    transforms.ToTensor(),
+                    transforms.Normalize(
+                        (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
+                    ),
+                ]
+            ),
+        )
     else:
         raise ValueError(f"{dataset_name} is not valid")
 
@@ -142,7 +171,7 @@ def non_iid(
 
 
 def _split_dataset_targets_idx(dataset, shard_per_user, num_clients, classes_size):
-    label = np.array(dataset.targets)
+    label = np.array(dataset.target)
     label_idx_split: Dict = {}
     for i, _ in enumerate(label):
         label_i = label[i].item()
