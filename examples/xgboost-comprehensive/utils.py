@@ -1,6 +1,18 @@
 import argparse
 
 
+BST_PARAMS = {
+    "objective": "binary:logistic",
+    "eta": 0.1,  # Learning rate
+    "max_depth": 8,
+    "eval_metric": "auc",
+    "nthread": 16,
+    "num_parallel_tree": 1,
+    "subsample": 1,
+    "tree_method": "hist",
+}
+
+
 def client_args_parser():
     """Parse arguments to define experimental settings on client side."""
     parser = argparse.ArgumentParser()
