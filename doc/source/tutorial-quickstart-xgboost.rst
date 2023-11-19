@@ -75,7 +75,7 @@ Dataset partition and hyper-parameter selection
 Prior to local training, we require loading the HIGGS dataset from Flower Datasets and conduct data partitioning for FL.
 Currently, we provide four options to split the dataset to simulate the non-uniformity in data quantity (uniform, linear, square, exponential) based on the number of samples.
 
-The implementation details can be found in :code:`dataset.py` from `full code example <https://github.com/adap/flower/tree/main/examples/quickstart-xgboost>`_.
+The implementation details can be found in :code:`dataset.py` from `full code example <https://github.com/adap/flower/tree/main/examples/xgboost-quickstart>`_.
 
 .. code-block:: python
 
