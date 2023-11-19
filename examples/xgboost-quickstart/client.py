@@ -88,7 +88,7 @@ params = {
 
 
 # Define Flower client
-class FlowerClient(fl.client.Client):
+class XgbClient(fl.client.Client):
     def __init__(self):
         self.bst = None
         self.config = None
@@ -170,4 +170,4 @@ class FlowerClient(fl.client.Client):
 
 
 # Start Flower client
-fl.client.start_client(server_address="127.0.0.1:8080", client=FlowerClient())
+fl.client.start_client(server_address="127.0.0.1:8080", client=XgbClient())
