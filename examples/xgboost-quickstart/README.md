@@ -19,6 +19,7 @@ This will create a new directory called `xgboost-quickstart` containing the foll
 -- README.md         <- Your're reading this right now
 -- server.py         <- Defines the server-side logic
 -- client.py         <- Defines the client-side logic
+-- run.sh            <- Commands to run experiments
 -- pyproject.toml    <- Example dependencies (if you use Poetry)
 -- requirements.txt  <- Example dependencies
 ```
@@ -79,7 +80,7 @@ You will see that XGBoost is starting a federated training.
 Alternatively, you can use `run.sh` to run the same experiment in a single terminal as follows:
 
 ```shell
-bash run.sh
+poetry run ./run.sh
 ```
 
 Look at the [code](https://github.com/adap/flower/tree/main/examples/xgboost-quickstart)
