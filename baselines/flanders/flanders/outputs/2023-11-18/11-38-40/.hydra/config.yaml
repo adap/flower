@@ -1,0 +1,5 @@
+dataset: cifar
+model: null
+strategy:
+  _target_: null
+client: null
