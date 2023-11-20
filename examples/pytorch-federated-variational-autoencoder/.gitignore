@@ -1,2 +1,4 @@
 *.gz
 cifar-10-batches-py/
+*.png
+mnist_data

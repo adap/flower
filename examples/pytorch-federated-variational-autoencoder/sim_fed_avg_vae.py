@@ -1,18 +1,26 @@
 import argparse
 from collections import OrderedDict
 from typing import Dict, Tuple, List
+from torch.utils.data import DataLoader
 
 import torch
-import torchvision
-from torch.utils.data import DataLoader, random_split
 
 import flwr as fl
 from flwr.common import Metrics, ndarrays_to_parameters
 from flwr.common.logger import configure
 from flwr.common.typing import Scalar
 
-from utils_pacs import make_dataloaders, train, test
-from models import ResNet18, Generator
+from utils_mnist import (
+    load_data_mnist,
+    train,
+    test,
+    visualize_gen_image,
+    visualize_gmm_latent_representation,
+    non_iid_train_iid_test,
+    iid_train_iid_test,alignment_dataloader
+)
+from utils_mnist import VAE
+import os
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
@@ -25,26 +33,28 @@ parser.add_argument(
 parser.add_argument(
     "--num_gpus",
     type=float,
-    default=0.3,
+    default=0.5,
     help="Ratio of GPU memory to assign to a virtual client",
 )
 parser.add_argument("--num_rounds", type=int, default=100, help="Number of FL rounds.")
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-NUM_CLIENTS = 4
+NUM_CLIENTS = 5
 NUM_CLASSES = 7
+IDENTIFIER = "my_fed_avg_vae_niid_test"
+if not os.path.exists(IDENTIFIER):
+    os.makedirs(IDENTIFIER)
 
 
 # Flower client, adapted from Pytorch quickstart example
 class FlowerClient(fl.client.NumPyClient):
-    def __init__(self, trainset, valset):
-        self.train_loader = trainset
-        self.val_loader = valset
+    def __init__(self, trainset, valset, cid):
+        self.trainset = trainset
+        self.valset = valset
+        self.cid = cid
 
         # Instantiate model
-        self.model = ResNet18(
-            num_classes=NUM_CLASSES, latent_dim=256, other_dim=128, point_estimate=False
-        )
+        self.model = VAE()
 
         # Determine device
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -55,20 +65,20 @@ class FlowerClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         set_params(self.model, parameters)
-
+        print(f"config:{config}")
         # Read from config
-        # batch, epochs = config["batch_size"], config["epochs"]
-        epochs = 5
+        batch, epochs = config["batch_size"], config["epochs"]
 
         # Construct dataloader
-        # trainloader = DataLoader(self.trainset, batch_size=batch, shuffle=True)
+        trainloader = DataLoader(self.trainset, batch_size=batch, shuffle=True)
 
         # Define optimizer
+        # optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
         optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
         # Train
         train(
             self.model,
-            self.train_loader,
+            trainloader,
             optimizer,
             config,
             epochs=epochs,
@@ -76,20 +86,34 @@ class FlowerClient(fl.client.NumPyClient):
             num_classes=NUM_CLASSES,
         )
 
+        visualize_gen_image(
+            self.model,
+            DataLoader(self.valset, batch_size=64),
+            self.device,
+            f'for_client_{self.cid}_train_at_round_{config.get("server_round")}',
+            folder=IDENTIFIER,
+        )
+        visualize_gmm_latent_representation(
+            self.model,
+            DataLoader(self.valset, batch_size=64),
+            self.device,
+            f'for_client_{self.cid}_train_at_round_{config.get("server_round")}',
+            folder=IDENTIFIER,
+        )
         # Return local model and statistics
-        return self.get_parameters({}), len(self.train_loader.dataset), {}
+        return self.get_parameters({}), len(trainloader.dataset), {}
 
     def evaluate(self, parameters, config):
         set_params(self.model, parameters)
 
         # Construct dataloader
-        # valloader = DataLoader(self.valset, batch_size=64)
+        valloader = DataLoader(self.valset, batch_size=64)
 
         # Evaluate
-        loss, accuracy = test(self.model, self.val_loader, device=self.device)
+        loss, accuracy = test(self.model, valloader, device=self.device)
 
         # Return statistics
-        return float(loss), len(self.val_loader.dataset), {"accuracy": float(accuracy)}
+        return float(loss), len(valloader.dataset), {"accuracy": float(accuracy)}
 
 
 def get_client_fn(train_partitions, val_partitions):
@@ -106,7 +130,7 @@ def get_client_fn(train_partitions, val_partitions):
         trainset, valset = train_partitions[int(cid)], val_partitions[int(cid)]
 
         # Create and return client
-        return FlowerClient(trainset, valset).to_client()
+        return FlowerClient(trainset, valset, cid).to_client()
 
     return client_fn
 
@@ -114,8 +138,9 @@ def get_client_fn(train_partitions, val_partitions):
 def fit_config(server_round: int) -> Dict[str, Scalar]:
     """Return a configuration with static batch size and (local) epochs."""
     config = {
-        "epochs": 1,  # Number of local epochs done by clients
-        "batch_size": 32,  # Batch size to use by clients during fit()
+        "epochs": 10,  # Number of local epochs done by clients
+        "batch_size": 64,  # Batch size to use by clients during fit()
+        "server_round": server_round,
     }
     return config
 
@@ -151,17 +176,19 @@ def get_evaluate_fn(
         # Determine device
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-        model = ResNet18(
-            num_classes=NUM_CLASSES, latent_dim=256, other_dim=128, point_estimate=False
-        )
+        model = VAE()
         set_params(model, parameters)
         model.to(device)
 
-        # testloader = DataLoader(testset, batch_size=50)
-        testloader = testset
-        loss, accuracy = test(model, testloader, device=device)
+        testloader = DataLoader(testset, batch_size=64)
+        visualize_gen_image(
+            model, testloader, device, f"server_eval_{server_round}", folder=IDENTIFIER
+        )
+        visualize_gmm_latent_representation(
+            model, testloader, device, f"server_eval_{server_round}", folder=IDENTIFIER
+        )
 
-        return loss, {"accuracy": accuracy}
+        # return loss, {"accuracy": accuracy}
 
     return evaluate
 
@@ -170,43 +197,23 @@ def main():
     # Parse input arguments
     args = parser.parse_args()
 
-    configure(identifier="my_fed_cir_app", filename="logs_fed_cir-r-100.log")
+    configure(identifier=IDENTIFIER, filename="logs_fed_vae_noniid_test.log")
 
     # Download dataset and partition it
-    trainsets, valsets, testset = make_dataloaders(batch_size=32)
-    net = ResNet18(
-        num_classes=NUM_CLASSES, latent_dim=256, other_dim=128, point_estimate=False
-    )
-    net_gen = Generator(num_classes=NUM_CLASSES, latent_dim=256, other_dim=128).to(
-        DEVICE
-    )
+    trainsets, valsets = non_iid_train_iid_test()
+    net = VAE().to(DEVICE)
+
     n1 = [val.cpu().numpy() for _, val in net.state_dict().items()]
-    n2 = [val.cpu().numpy() for _, val in net_gen.state_dict().items()]
     initial_params = ndarrays_to_parameters(n1)
-    initial_generator_params = ndarrays_to_parameters(n2)
-    all_labels = torch.arange(NUM_CLASSES).to(DEVICE)
-    one_hot_all_labels = torch.eye(NUM_CLASSES, dtype=torch.float).to(DEVICE)
-    z_g, mu_g, log_var_g = net_gen(one_hot_all_labels)
-    serialized_gen_stats = ndarrays_to_parameters(
-        [
-            z_g.cpu().detach().numpy(),
-            mu_g.cpu().detach().numpy(),
-            log_var_g.cpu().detach().numpy(),
-        ]
-    )
-    strategy = fl.server.strategy.FedCiR(
+
+    strategy = fl.server.strategy.FedAvg(
         initial_parameters=initial_params,
-        initial_generator_params=initial_generator_params,
-        gen_stats=serialized_gen_stats,
-        num_classes=NUM_CLASSES,
         min_fit_clients=NUM_CLIENTS,
         min_available_clients=NUM_CLIENTS,
         min_evaluate_clients=NUM_CLIENTS,
-        # on_fit_config_fn=fit_config,
+        on_fit_config_fn=fit_config,
         evaluate_metrics_aggregation_fn=weighted_average,  # Aggregate federated metrics
-        evaluate_fn=get_evaluate_fn(testset),  # Global evaluation function
-        lr_g=1e-3,
-        steps_g=10,
+        evaluate_fn=get_evaluate_fn(valsets[-1]),  # Global evaluation function
     )
 
     # Resources to be assigned to each virtual client

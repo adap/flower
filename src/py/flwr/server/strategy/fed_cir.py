@@ -1,5 +1,6 @@
 from logging import WARNING, DEBUG
 from typing import Callable, Dict, List, Optional, Tuple, Union
+import torch.nn.functional as F
 
 from flwr.common import (
     EvaluateIns,
@@ -17,7 +18,7 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
-from flwr.server.utils import Generator, ResNet18
+from flwr.server.utils import Generator, ResNet18, VAE
 from .aggregate import aggregate, weighted_loss_avg
 from .fedavg import FedAvg
 
@@ -63,6 +64,7 @@ class FedCiR(FedAvg):
         steps_g=25,
         gen_stats=None,
         num_classes=10,
+        alignment_dataloader=None,
     ) -> None:
         """Federated Averaging strategy.
 
@@ -124,9 +126,8 @@ class FedCiR(FedAvg):
         self.num_classes = num_classes
         self.steps_gen = steps_g
         self.gen_stats = gen_stats
-        self.gen_model = Generator(
-            num_classes=self.num_classes, latent_dim=256, other_dim=128
-        ).to(DEVICE)
+        self.gen_model = VAE(encoder_only=True).to(DEVICE)
+        self.alignment_loader = alignment_dataloader
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
@@ -151,14 +152,15 @@ class FedCiR(FedAvg):
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
-        config = {
-            "z_g": self.gen_stats.tensors[0],
-            "mu_g": self.gen_stats.tensors[1],
-            "log_var_g": self.gen_stats.tensors[2],
-        }
+        # config = {
+        #     "z_g": self.gen_stats.tensors[0],
+        #     "mu_g": self.gen_stats.tensors[1],
+        #     "log_var_g": self.gen_stats.tensors[2],
+        # }
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
             config = self.on_fit_config_fn(server_round)
+            config["gen_params"] = self.gen_stats
         fit_ins = FitIns(parameters, config)
 
         # Sample clients
@@ -217,37 +219,29 @@ class FedCiR(FedAvg):
             (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for _, fit_res in results
         ]
-        temp_local_models = [
-            ResNet18(
-                num_classes=self.num_classes,
-                latent_dim=256,
-                other_dim=128,
-                point_estimate=False,
-            ).to(DEVICE)
-            for _ in range(len(weights_results))
-        ]
-        criterion = torch.nn.CrossEntropyLoss()
+        temp_local_models = [VAE().to(DEVICE) for _ in range(len(weights_results))]
         optimizer = torch.optim.Adam(self.gen_model.parameters(), lr=self.lr_gen)
 
-        all_labels = torch.arange(self.num_classes).to(DEVICE)
-
-        one_hot_all_labels = torch.eye(self.num_classes, dtype=torch.float).to(DEVICE)
         for temp_local_model in temp_local_models:
             temp_local_model.eval()
 
-        for step in range(self.steps_gen):
+        for step, (align_img, _) in enumerate(self.alignment_loader):
             preds = []
             optimizer.zero_grad()
+            align_img = align_img.to(DEVICE)
+
             for idx, (weights, _) in enumerate(weights_results):
                 params_dict = zip(temp_local_models[idx].state_dict().keys(), weights)
                 state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
                 temp_local_models[idx].load_state_dict(state_dict, strict=True)
 
                 preds.append(
-                    temp_local_models[idx].clf(self.gen_model(one_hot_all_labels)[0])
+                    temp_local_models[idx].decoder(self.gen_model(align_img)[0])
                 )
 
-            loss = criterion(torch.stack(preds).mean(dim=0), all_labels)
+            loss = F.binary_cross_entropy(
+                torch.stack(preds).mean(dim=0), align_img.view(-1, 784), reduction="sum"
+            )
             threshold = 1e-6  # Define a threshold for the negligible loss
             log(DEBUG, f"generator loss at step {step}: {loss}")
 
@@ -261,13 +255,9 @@ class FedCiR(FedAvg):
                     DEBUG,
                     f"Skipping optimization at step {step} due to negligible loss",
                 )
-        z_g, mu_g, log_var_g = self.gen_model(one_hot_all_labels)
+        # z_g, mu_g, log_var_g = self.gen_model(one_hot_all_labels)
         self.gen_stats = ndarrays_to_parameters(
-            [
-                z_g.cpu().detach().numpy(),
-                mu_g.cpu().detach().numpy(),
-                log_var_g.cpu().detach().numpy(),
-            ]
+            [val.cpu().numpy() for _, val in self.gen_model.state_dict().items()]
         )
         parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
 
