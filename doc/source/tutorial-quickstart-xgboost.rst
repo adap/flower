@@ -669,7 +669,7 @@ As for distributed evaluation on the clients, it's same as the quick-start examp
 overriding the :code:`evaluate()` method insides the :code:`XgbClient` class in :code:`client.py`.
 
 Arguments parser
----------------------------
+~~~~~~~~
 
 In :code:`utils.py`, we define the arguments parsers for clients and server, allowing users to specify different experimental settings.
 Let's first see the sever side:
@@ -760,7 +760,7 @@ This defines various options for client data partitioning.
 Besides, clients also have a option to conduct evaluation on centralised test set by setting :code:`--centralised-eval`.
 
 Example commands
----------------------------
+~~~~~~~~
 
 To run a centralised evaluated experiment on 5 clients with exponential distribution for 50 rounds,
 we first start the server as below:
