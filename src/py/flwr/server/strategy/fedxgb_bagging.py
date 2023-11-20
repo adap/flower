@@ -1,19 +1,35 @@
-from logging import WARNING
-from typing import Callable, Dict, List, Optional, Tuple, Union
-import flwr as fl
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""Federated XGBoost bagging aggregation strategy."""
+
+
 import json
+from logging import WARNING
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
-from flwr.common import (
-    EvaluateRes,
-    FitRes,
-    Parameters,
-    Scalar,
-)
-from flwr.server.client_proxy import ClientProxy
+from flwr.common import EvaluateRes, FitRes, Parameters, Scalar
 from flwr.common.logger import log
+from flwr.server.client_proxy import ClientProxy
+
+from .fedavg import FedAvg
 
 
-class FedXgbBagging(fl.server.strategy.FedAvg):
+class FedXgbBagging(FedAvg):
+    """Configurable FedXgbBagging strategy implementation."""
+
+    # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
     def __init__(
         self,
         evaluate_function: Optional[
@@ -22,10 +38,10 @@ class FedXgbBagging(fl.server.strategy.FedAvg):
                 Optional[Tuple[float, Dict[str, Scalar]]],
             ]
         ] = None,
-        **kwargs,
+        **kwargs: Any,
     ):
         self.evaluate_function = evaluate_function
-        self.global_model = None
+        self.global_model: Optional[bytes] = None
         super().__init__(**kwargs)
 
     def aggregate_fit(
@@ -42,17 +58,16 @@ class FedXgbBagging(fl.server.strategy.FedAvg):
             return None, {}
 
         # Aggregate all the client trees
+        global_model = self.global_model
         for _, fit_res in results:
             update = fit_res.parameters.tensors
-            for item in update:
-                self.global_model = aggregate(
-                    self.global_model, json.loads(bytearray(item))
-                )
+            for bst in update:
+                global_model = aggregate(global_model, bst)
 
-        weights_avg = json.dumps(self.global_model)
+        self.global_model = global_model
 
         return (
-            Parameters(tensor_type="", tensors=[bytes(weights_avg, "utf-8")]),
+            Parameters(tensor_type="", tensors=[cast(bytes, global_model)]),
             {},
         )
 
@@ -93,37 +108,47 @@ class FedXgbBagging(fl.server.strategy.FedAvg):
         return loss, metrics
 
 
-def aggregate(bst_prev: Optional[Dict], bst_curr: Dict) -> Dict:
+def aggregate(
+    bst_prev_org: Optional[bytes],
+    bst_curr_org: bytes,
+) -> bytes:
     """Conduct bagging aggregation for given trees."""
-    if not bst_prev:
-        return bst_curr
-    else:
-        # Get the tree numbers
-        tree_num_prev, paral_tree_num_prev = _get_tree_nums(bst_prev)
-        tree_num_curr, paral_tree_num_curr = _get_tree_nums(bst_curr)
+    if not bst_prev_org:
+        return bst_curr_org
 
-        bst_prev["learner"]["gradient_booster"]["model"]["gbtree_model_param"][
-            "num_trees"
-        ] = str(tree_num_prev + paral_tree_num_curr)
-        iteration_indptr = bst_prev["learner"]["gradient_booster"]["model"][
-            "iteration_indptr"
-        ]
-        bst_prev["learner"]["gradient_booster"]["model"]["iteration_indptr"].append(
-            iteration_indptr[-1] + paral_tree_num_curr
+    # Get the tree numbers
+    tree_num_prev, _ = _get_tree_nums(bst_prev_org)
+    _, paral_tree_num_curr = _get_tree_nums(bst_curr_org)
+
+    bst_prev = json.loads(bytearray(bst_prev_org))
+    bst_curr = json.loads(bytearray(bst_curr_org))
+
+    bst_prev["learner"]["gradient_booster"]["model"]["gbtree_model_param"][
+        "num_trees"
+    ] = str(tree_num_prev + paral_tree_num_curr)
+    iteration_indptr = bst_prev["learner"]["gradient_booster"]["model"][
+        "iteration_indptr"
+    ]
+    bst_prev["learner"]["gradient_booster"]["model"]["iteration_indptr"].append(
+        iteration_indptr[-1] + paral_tree_num_curr
+    )
+
+    # Aggregate new trees
+    trees_curr = bst_curr["learner"]["gradient_booster"]["model"]["trees"]
+    for tree_count in range(paral_tree_num_curr):
+        trees_curr[tree_count]["id"] = tree_num_prev + tree_count
+        bst_prev["learner"]["gradient_booster"]["model"]["trees"].append(
+            trees_curr[tree_count]
         )
+        bst_prev["learner"]["gradient_booster"]["model"]["tree_info"].append(0)
 
-        # Aggregate new trees
-        trees_curr = bst_curr["learner"]["gradient_booster"]["model"]["trees"]
-        for tree_count in range(paral_tree_num_curr):
-            trees_curr[tree_count]["id"] = tree_num_prev + tree_count
-            bst_prev["learner"]["gradient_booster"]["model"]["trees"].append(
-                trees_curr[tree_count]
-            )
-            bst_prev["learner"]["gradient_booster"]["model"]["tree_info"].append(0)
-        return bst_prev
+    bst_prev_bytes = bytes(json.dumps(bst_prev), "utf-8")
+
+    return bst_prev_bytes
 
 
-def _get_tree_nums(xgb_model: Dict) -> (int, int):
+def _get_tree_nums(xgb_model_org: bytes) -> Tuple[int, int]:
+    xgb_model = json.loads(bytearray(xgb_model_org))
     # Get the number of trees
     tree_num = int(
         xgb_model["learner"]["gradient_booster"]["model"]["gbtree_model_param"][
