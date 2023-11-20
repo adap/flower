@@ -49,7 +49,6 @@ MNIST (multilabel classification, fully connected, feed forward NN):
 - input: 784
 - hidden layer 1: 128
 - hidden layer 2: 256
-- dropout: 0.2
 
 California Housing (linear regression):
 - cyclic coordinate descent (CCD)
@@ -70,8 +69,10 @@ California Housing (linear regression):
 | Dataset | # of clients  | Clients per round | # of rounds | Batch size | Learning rate | $\lambda_1$ | $\lambda_2$ | Optimizer | Dropout | Alpha | Beta | # of clients to keep | Sampling |
 | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
 | Income | 100 | 100 | 100 | \ | \ | 1.0 | 0.0 | CCD | \ | 0.0 | 0.0 | 1 | \ |
-| MNIST | 100 | 100 | 100 | 32 | $10^-3$ | \ | \ | Adam | 0.2 | 0.0 | 0.0 | 1 | \ |
+| MNIST | 100 | 100 | 100 | 32 | $10^{-3}$ | \ | \ | Adam | 0.2 | 0.0 | 0.0 | 1 | \ |
 | California Housing | 100 | 100 | 100 | \ | \ | 0.5 | 0.5 | CCD | \ | 0.0 | 0.0 | 1 | \ |
+
+Where $\lambda_1$ and $\lambda_2$ are Lasso and Ridge regularization terms.
 
 TODO: Might add CIFAR-10.
 
