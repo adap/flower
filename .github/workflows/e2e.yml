@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Build, test and upload wheel
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Install dependencies (mandatory only)
@@ -41,10 +41,13 @@ jobs:
           echo "WHL_PATH=$(ls *.whl)" >> "$GITHUB_OUTPUT"
           sha_short=$(git rev-parse --short HEAD)
           echo "SHORT_SHA=$sha_short" >> "$GITHUB_OUTPUT"
-          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./ s3://artifact.flower.dev/py/${{ github.head_ref }}/$sha_short --recursive
+          [ -z "${{ github.head_ref }}" ] && dir="${{ github.ref_name }}" || dir="pr/${{ github.head_ref }}"
+          echo "DIR=$dir" >> "$GITHUB_OUTPUT"
+          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./ s3://artifact.flower.dev/py/$dir/$sha_short --recursive
     outputs:
       whl_path: ${{ steps.upload.outputs.WHL_PATH }}
       short_sha: ${{ steps.upload.outputs.SHORT_SHA }}
+      dir: ${{ steps.upload.outputs.DIR }}
 
   frameworks:
     runs-on: ubuntu-22.04
@@ -56,6 +59,8 @@ jobs:
       matrix:
         include:
           - directory: bare
+
+          - directory: bare-https
 
           - directory: jax
 
@@ -123,7 +128,7 @@ jobs:
       - name: Install Flower wheel from artifact store
         if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
         run: |
-          python -m pip install https://artifact.flower.dev/py/${{ github.head_ref }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
+          python -m pip install https://artifact.flower.dev/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
       - name: Download dataset
         if: ${{ matrix.dataset }}
         run: python -c "${{ matrix.dataset }}"
@@ -132,7 +137,7 @@ jobs:
       - name: Run virtual client test
         run: python simulation.py
       - name: Run driver test
-        run: ./../test_driver.sh
+        run: ./../test_driver.sh "${{ matrix.directory }}"
 
   strategies:
     runs-on: ubuntu-22.04
@@ -158,7 +163,7 @@ jobs:
       - name: Install Flower wheel from artifact store
         if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
         run: |
-          python -m pip install https://artifact.flower.dev/py/${{ github.head_ref }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
+          python -m pip install https://artifact.flower.dev/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
       - name: Cache Datasets
         uses: actions/cache@v3
         with:

@@ -5,6 +5,10 @@ case "$1" in
   pandas)
     server_file="server.py"
     ;;
+  bare-https)
+    ./generate.sh
+    server_file="server.py"
+    ;;
   *)
     server_file="../server.py"
     ;;
