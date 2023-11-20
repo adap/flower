@@ -15,6 +15,7 @@
 """Flower client app."""
 
 
+import argparse
 import sys
 import time
 from logging import INFO
@@ -38,6 +39,30 @@ from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle, handle_control_message
 from .numpy_client import NumPyClient
+
+
+def run_client() -> None:
+    """Run Flower client."""
+    log(INFO, "Long-running Flower client starting")
+
+    args = _parse_args_client().parse_args()
+
+    print(args.server)
+
+
+def _parse_args_client() -> argparse.ArgumentParser:
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Start a long-running Flower client",
+    )
+
+    parser.add_argument(
+        "--server",
+        help="Server address",
+        default="0.0.0.0:9092",
+    )
+
+    return parser
 
 
 def _check_actionable_client(
