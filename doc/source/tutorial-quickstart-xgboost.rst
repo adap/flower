@@ -88,7 +88,8 @@ Prior to local training, we require loading the HIGGS dataset from Flower Datase
 .. code-block:: python
 
     # Load (HIGGS) dataset and conduct partitioning
-    partitioner = IidPartitioner(num_partitions=2)
+    # We use a small subset (num_partitions=30) of the dataset for demonstration to speed up the data loading process.
+    partitioner = IidPartitioner(num_partitions=30)
     fds = FederatedDataset(dataset="jxie/higgs", partitioners={"train": partitioner})
 
     # Load the partition for this `node_id`
@@ -544,39 +545,39 @@ You should now see how the training does in the very first terminal (the one tha
 
 .. code-block:: shell
 
-    INFO flwr 2023-11-19 18:36:33,599 | app.py:163 | Starting Flower server, config: ServerConfig(num_rounds=5, round_timeout=None)
-    INFO flwr 2023-11-19 18:36:33,629 | app.py:176 | Flower ECE: gRPC server running (5 rounds), SSL is disabled
-    INFO flwr 2023-11-19 18:36:33,629 | server.py:89 | Initializing global parameters
-    INFO flwr 2023-11-19 18:36:33,629 | server.py:276 | Requesting initial parameters from one random client
-    INFO flwr 2023-11-19 18:40:03,997 | server.py:280 | Received initial parameters from one random client
-    INFO flwr 2023-11-19 18:40:03,999 | server.py:91 | Evaluating initial parameters
-    INFO flwr 2023-11-19 18:40:04,000 | server.py:104 | FL starting
-    DEBUG flwr 2023-11-19 18:40:04,098 | server.py:222 | fit_round 1: strategy sampled 2 clients (out of 2)
-    DEBUG flwr 2023-11-19 18:40:09,097 | server.py:236 | fit_round 1 received 2 results and 0 failures
-    DEBUG flwr 2023-11-19 18:40:09,108 | server.py:173 | evaluate_round 1: strategy sampled 2 clients (out of 2)
-    DEBUG flwr 2023-11-19 18:40:09,236 | server.py:187 | evaluate_round 1 received 2 results and 0 failures
-    DEBUG flwr 2023-11-19 18:40:09,237 | server.py:222 | fit_round 2: strategy sampled 2 clients (out of 2)
-    DEBUG flwr 2023-11-19 18:40:09,819 | server.py:236 | fit_round 2 received 2 results and 0 failures
-    DEBUG flwr 2023-11-19 18:40:09,855 | server.py:173 | evaluate_round 2: strategy sampled 2 clients (out of 2)
-    DEBUG flwr 2023-11-19 18:40:10,007 | server.py:187 | evaluate_round 2 received 2 results and 0 failures
-    DEBUG flwr 2023-11-19 18:40:10,007 | server.py:222 | fit_round 3: strategy sampled 2 clients (out of 2)
-    DEBUG flwr 2023-11-19 18:40:10,623 | server.py:236 | fit_round 3 received 2 results and 0 failures
-    DEBUG flwr 2023-11-19 18:40:10,674 | server.py:173 | evaluate_round 3: strategy sampled 2 clients (out of 2)
-    DEBUG flwr 2023-11-19 18:40:10,847 | server.py:187 | evaluate_round 3 received 2 results and 0 failures
-    DEBUG flwr 2023-11-19 18:40:10,847 | server.py:222 | fit_round 4: strategy sampled 2 clients (out of 2)
-    DEBUG flwr 2023-11-19 18:40:11,515 | server.py:236 | fit_round 4 received 2 results and 0 failures
-    DEBUG flwr 2023-11-19 18:40:11,581 | server.py:173 | evaluate_round 4: strategy sampled 2 clients (out of 2)
-    DEBUG flwr 2023-11-19 18:40:11,775 | server.py:187 | evaluate_round 4 received 2 results and 0 failures
-    DEBUG flwr 2023-11-19 18:40:11,775 | server.py:222 | fit_round 5: strategy sampled 2 clients (out of 2)
-    DEBUG flwr 2023-11-19 18:40:12,568 | server.py:236 | fit_round 5 received 2 results and 0 failures
-    DEBUG flwr 2023-11-19 18:40:12,648 | server.py:173 | evaluate_round 5: strategy sampled 2 clients (out of 2)
-    DEBUG flwr 2023-11-19 18:40:12,862 | server.py:187 | evaluate_round 5 received 2 results and 0 failures
-    INFO flwr 2023-11-19 18:40:12,862 | server.py:153 | FL finished in 8.86196927200001
-    INFO flwr 2023-11-19 18:40:12,864 | app.py:226 | app_fit: losses_distributed [(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
-    INFO flwr 2023-11-19 18:40:12,864 | app.py:227 | app_fit: metrics_distributed_fit {}
-    INFO flwr 2023-11-19 18:40:12,864 | app.py:228 | app_fit: metrics_distributed {'AUC': [(1, 0.76315), (2, 0.7734), (3, 0.7783), (4, 0.7824), (5, 0.78595)]}
-    INFO flwr 2023-11-19 18:40:12,864 | app.py:229 | app_fit: losses_centralized []
-    INFO flwr 2023-11-19 18:40:12,864 | app.py:230 | app_fit: metrics_centralized {}
+    INFO flwr 2023-11-20 11:21:56,454 | app.py:163 | Starting Flower server, config: ServerConfig(num_rounds=5, round_timeout=None)
+    INFO flwr 2023-11-20 11:21:56,473 | app.py:176 | Flower ECE: gRPC server running (5 rounds), SSL is disabled
+    INFO flwr 2023-11-20 11:21:56,473 | server.py:89 | Initializing global parameters
+    INFO flwr 2023-11-20 11:21:56,473 | server.py:276 | Requesting initial parameters from one random client
+    INFO flwr 2023-11-20 11:22:38,302 | server.py:280 | Received initial parameters from one random client
+    INFO flwr 2023-11-20 11:22:38,302 | server.py:91 | Evaluating initial parameters
+    INFO flwr 2023-11-20 11:22:38,302 | server.py:104 | FL starting
+    DEBUG flwr 2023-11-20 11:22:38,302 | server.py:222 | fit_round 1: strategy sampled 2 clients (out of 2)
+    DEBUG flwr 2023-11-20 11:22:38,636 | server.py:236 | fit_round 1 received 2 results and 0 failures
+    DEBUG flwr 2023-11-20 11:22:38,643 | server.py:173 | evaluate_round 1: strategy sampled 2 clients (out of 2)
+    DEBUG flwr 2023-11-20 11:22:38,653 | server.py:187 | evaluate_round 1 received 2 results and 0 failures
+    DEBUG flwr 2023-11-20 11:22:38,653 | server.py:222 | fit_round 2: strategy sampled 2 clients (out of 2)
+    DEBUG flwr 2023-11-20 11:22:38,721 | server.py:236 | fit_round 2 received 2 results and 0 failures
+    DEBUG flwr 2023-11-20 11:22:38,745 | server.py:173 | evaluate_round 2: strategy sampled 2 clients (out of 2)
+    DEBUG flwr 2023-11-20 11:22:38,756 | server.py:187 | evaluate_round 2 received 2 results and 0 failures
+    DEBUG flwr 2023-11-20 11:22:38,756 | server.py:222 | fit_round 3: strategy sampled 2 clients (out of 2)
+    DEBUG flwr 2023-11-20 11:22:38,831 | server.py:236 | fit_round 3 received 2 results and 0 failures
+    DEBUG flwr 2023-11-20 11:22:38,868 | server.py:173 | evaluate_round 3: strategy sampled 2 clients (out of 2)
+    DEBUG flwr 2023-11-20 11:22:38,881 | server.py:187 | evaluate_round 3 received 2 results and 0 failures
+    DEBUG flwr 2023-11-20 11:22:38,881 | server.py:222 | fit_round 4: strategy sampled 2 clients (out of 2)
+    DEBUG flwr 2023-11-20 11:22:38,960 | server.py:236 | fit_round 4 received 2 results and 0 failures
+    DEBUG flwr 2023-11-20 11:22:39,012 | server.py:173 | evaluate_round 4: strategy sampled 2 clients (out of 2)
+    DEBUG flwr 2023-11-20 11:22:39,026 | server.py:187 | evaluate_round 4 received 2 results and 0 failures
+    DEBUG flwr 2023-11-20 11:22:39,026 | server.py:222 | fit_round 5: strategy sampled 2 clients (out of 2)
+    DEBUG flwr 2023-11-20 11:22:39,111 | server.py:236 | fit_round 5 received 2 results and 0 failures
+    DEBUG flwr 2023-11-20 11:22:39,177 | server.py:173 | evaluate_round 5: strategy sampled 2 clients (out of 2)
+    DEBUG flwr 2023-11-20 11:22:39,193 | server.py:187 | evaluate_round 5 received 2 results and 0 failures
+    INFO flwr 2023-11-20 11:22:39,193 | server.py:153 | FL finished in 0.8905023969999988
+    INFO flwr 2023-11-20 11:22:39,193 | app.py:226 | app_fit: losses_distributed [(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+    INFO flwr 2023-11-20 11:22:39,193 | app.py:227 | app_fit: metrics_distributed_fit {}
+    INFO flwr 2023-11-20 11:22:39,193 | app.py:228 | app_fit: metrics_distributed {'AUC': [(1, 0.7572), (2, 0.7705), (3, 0.77595), (4, 0.78), (5, 0.78385)]}
+    INFO flwr 2023-11-20 11:22:39,193 | app.py:229 | app_fit: losses_centralized []
+    INFO flwr 2023-11-20 11:22:39,193 | app.py:230 | app_fit: metrics_centralized {}
 
 Congratulations!
 You've successfully built and run your first federated XGBoost system.
