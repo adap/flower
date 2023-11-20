@@ -3,8 +3,8 @@
 # Please follow the provided structure (this will ensuring all baseline follow
 # a similar configuration structure and hence be easy to customise)
 
-num_rounds: 10
-num_clients: 10
+num_rounds: 200
+num_clients: 100
 expected_maximum: 0.9924
 
 dataset:
@@ -21,14 +21,15 @@ model:
 
 strategy:
   _target_: flwr.server.strategy.FedAvg
-  fraction_fit: 1.0
+  fraction_fit: 0.1
   fraction_evaluate: 0.0
 
 client:
+  lr: 0.01
   train_fn:
     _target_: fedavg.models.train
-    learning_rate: 0.1
-    epochs: 5
+    learning_rate: ${client.lr}
+    epochs: 1
   evaluate_fn:
     _target_: fedavg.models.evaluate
   model_cfg: ${model}
