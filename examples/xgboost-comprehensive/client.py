@@ -47,6 +47,7 @@ fds = FederatedDataset(
 )
 
 # Load the partition for this `node_id`
+log(INFO, "Loading partition...")
 node_id = args.node_id
 partition = fds.load_partition(idx=node_id, split="train")
 partition.set_format("numpy")
@@ -67,6 +68,7 @@ else:
     )
 
 # Reformat data to DMatrix for xgboost
+log(INFO, "Reformatting data...")
 train_dmatrix = transform_dataset_to_dmatrix(train_data)
 valid_dmatrix = transform_dataset_to_dmatrix(valid_data)
 

@@ -57,10 +57,12 @@ def transform_dataset_to_dmatrix(data: Union[Dataset, DatasetDict]) -> xgb.core.
 
 
 # Load (HIGGS) dataset and conduct partitioning
-partitioner = IidPartitioner(num_partitions=2)
+# We use a small subset (num_partitions=30) of the dataset for demonstration to speed up the data loading process.
+partitioner = IidPartitioner(num_partitions=30)
 fds = FederatedDataset(dataset="jxie/higgs", partitioners={"train": partitioner})
 
 # Load the partition for this `node_id`
+log(INFO, "Loading partition...")
 partition = fds.load_partition(idx=args.node_id, split="train")
 partition.set_format("numpy")
 
@@ -70,6 +72,7 @@ train_data, valid_data, num_train, num_val = train_test_split(
 )
 
 # Reformat data to DMatrix for xgboost
+log(INFO, "Reformatting data...")
 train_dmatrix = transform_dataset_to_dmatrix(train_data)
 valid_dmatrix = transform_dataset_to_dmatrix(valid_data)
 
