@@ -93,7 +93,7 @@ Prior to local training, we require loading the HIGGS dataset from Flower Datase
     fds = FederatedDataset(dataset="jxie/higgs", partitioners={"train": partitioner})
 
     # Load the partition for this `node_id`
-    partition = fds.load_partition(idx=args.node_id, split="train")
+    partition = fds.load_partition(node_id=args.node_id, split="train")
     partition.set_format("numpy")
 
 In this example, we split the dataset into two partitions with uniform distribution (:code:`IidPartitioner(num_partitions=2)`).
