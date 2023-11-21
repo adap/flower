@@ -18,7 +18,7 @@
 import argparse
 import sys
 import time
-from logging import INFO, WARN
+from logging import INFO
 from typing import Callable, ContextManager, Optional, Tuple, Union
 
 from flwr.client.client import Client
@@ -33,7 +33,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
 )
-from flwr.common.logger import log
+from flwr.common.logger import log, warn_experimental_feature
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 
 from .flower import load_callable
@@ -199,15 +199,7 @@ def start_client(
 
         load_callable_fn = _load_app
     else:
-        log(
-            WARN,
-            """
-            EXPERIMENTAL FEATURE: `load_callable_fn`
-
-            This is an experimental feature. It could change significantly or be removed
-            entirely in future versions of Flower.
-            """,
-        )
+        warn_experimental_feature("`load_callable_fn`")
 
     # At this point, only `load_callable_fn` should be used
     # Both `client` and `client_fn` must not be used directly
