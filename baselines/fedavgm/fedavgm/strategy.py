@@ -4,7 +4,6 @@ Needed only when the strategy is not yet implemented in Flower or because you wa
 extend or modify the functionality of an existing strategy.
 """
 
-import numpy as np
 from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
@@ -119,14 +118,13 @@ class CustomFedAvgM(FedAvg):
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
-
         if not results:
             return None, {}
-        
+
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
-        
+
         # Convert results
         weights_results = [
             (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
@@ -137,7 +135,7 @@ class CustomFedAvgM(FedAvg):
 
         # original implementation follows convention described in
         # https://pytorch.org/docs/stable/generated/torch.optim.SGD.html
-        
+
         # remember that updates are the opposite of gradients
         pseudo_gradient: NDArrays = [
             x - y
@@ -147,15 +145,13 @@ class CustomFedAvgM(FedAvg):
         ]
 
         if server_round > 1:
-            assert (
-                self.momentum_vector
-            ), "Momentum should have been created on round 1."
+            assert self.momentum_vector, "Momentum should have been created on round 1."
 
             self.momentum_vector = [
                 self.server_momentum * v + w
                 for w, v in zip(pseudo_gradient, self.momentum_vector)
             ]
-        else:   # Round 1
+        else:  # Round 1
             # Initialize server-side model
             assert (
                 self.initial_parameters is not None
@@ -165,16 +161,18 @@ class CustomFedAvgM(FedAvg):
 
         # Applying Nesterov
         pseudo_gradient = [
-            g + self.server_momentum * v 
+            g + self.server_momentum * v
             for g, v in zip(pseudo_gradient, self.momentum_vector)
         ]
 
         # Federated Averaging with Server Momentum
         fedavgm_result = [
             w - self.server_learning_rate * v
-            for w, v in zip(parameters_to_ndarrays(self.initial_parameters), pseudo_gradient)
+            for w, v in zip(
+                parameters_to_ndarrays(self.initial_parameters), pseudo_gradient
+            )
         ]
-            
+
         # Update current weights
         self.initial_parameters = ndarrays_to_parameters(fedavgm_result)
 
