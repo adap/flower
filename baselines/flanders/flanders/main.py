@@ -21,16 +21,7 @@ import random
 import pandas as pd
 
 from typing import Dict, Callable, Optional, Tuple, List
-from neural_networks.dataset_utils import (
-    get_mnist, 
-    do_fl_partitioning, 
-    get_dataloader, 
-    get_circles, 
-    get_cifar_10, 
-    get_partitioned_house, 
-    get_partitioned_income
-)
-from neural_networks.neural_networks import (
+from .models import (
     MnistNet, 
     ToyNN, 
     roc_auc_multiclass, 
@@ -39,7 +30,7 @@ from neural_networks.neural_networks import (
     test_mnist, 
     train_toy
 )
-from clients import (
+from .client import (
     CifarClient, 
     HouseClient, 
     IncomeClient, 
@@ -50,23 +41,22 @@ from clients import (
     set_sklearn_model_params, 
     get_sklearn_model_params
 )
-from neural_networks.neural_networks import CifarNet, test_cifar
-from strategy.utilities import save_results
+from .utils import save_results
 
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.datasets import MNIST
 
-from strategy.flanders import Flanders
+from .strategy import Flanders
 
 
-from attacks import (
-    fang_attack, 
-    gaussian_attack, 
-    lie_attack, 
-    no_attack, 
-    minmax_attack
-)
+#from attacks import (
+#    fang_attack, 
+#    gaussian_attack, 
+#    lie_attack, 
+#    no_attack, 
+#    minmax_attack
+#)
 
 from flwr.server.strategy.fedavg import FedAvg
 from flwr.common import (

@@ -2,7 +2,7 @@ import numpy as np
 
 from typing import Callable, Dict, List, Optional, Tuple, Union
 from flwr.server.strategy.fedavg import FedAvg
-from utils import (
+from .utils import (
     save_params, 
     save_predicted_params,
     load_all_time_series, 

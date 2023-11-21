@@ -12,8 +12,8 @@ import pandas as pd
 from collections import OrderedDict
 from typing import Dict, List, Union, Tuple
 from pathlib import Path
-from neural_networks.dataset_utils import get_mnist, do_fl_partitioning, get_dataloader, get_circles
-from neural_networks.neural_networks import CifarNet, train_cifar, test_cifar, MnistNet, ToyNN, test_toy, train_mnist, test_mnist, train_toy
+from .dataset import get_mnist, do_fl_partitioning, get_circles
+from .models import CifarNet, train_cifar, test_cifar, MnistNet, ToyNN, test_toy, train_mnist, test_mnist, train_toy
 from sklearn.linear_model import LogisticRegression, LinearRegression, Ridge, Lasso, ElasticNet
 from sklearn.metrics import accuracy_score, log_loss
 
