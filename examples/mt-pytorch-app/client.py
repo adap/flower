@@ -108,8 +108,8 @@ def client_fn(cid: str):
     return FlowerClient().to_client()
 
 
-# To run this: `flower-client --app client:app`
-app = fl.app.Flower(
+# To run this: `flower-client --callable client:flower`
+flower = fl.app.Flower(
     client_fn=client_fn,
 )
 

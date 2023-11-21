@@ -18,7 +18,7 @@
 import argparse
 import sys
 import time
-from logging import INFO
+from logging import INFO, WARN
 from typing import Callable, ContextManager, Optional, Tuple, Union
 
 from flwr.app import Bwd, Flower, Fwd
@@ -51,20 +51,20 @@ def run_client() -> None:
     args = _parse_args_client().parse_args()
 
     print(args.server)
-    print(args.app_dir)
-    print(args.app)
+    print(args.callable_dir)
+    print(args.callable)
 
-    app_dir = args.app_dir
-    if app_dir is not None:
-        sys.path.insert(0, app_dir)
+    callable_dir = args.callable_dir
+    if callable_dir is not None:
+        sys.path.insert(0, callable_dir)
 
     def _load() -> Flower:
-        app: Flower = load_callable(args.app)
-        return app
+        callable: Flower = load_callable(args.callable)
+        return callable
 
     return start_client(
         server_address=args.server,
-        load_app_fn=_load,
+        load_callable_fn=_load,
         transport="grpc-rere",  # Only
     )
 
@@ -80,17 +80,15 @@ def _parse_args_client() -> argparse.ArgumentParser:
         default="0.0.0.0:9092",
         help="Server address",
     )
-
     parser.add_argument(
-        "--app-dir",
-        default="",
-        help="Look for APP in specified directory, by adding this to the PYTHONPATH."
-        " Defaults to the current working directory.",
+        "--callable",
+        help="For example: `client:flower` or `project.package.module:wrapper.flower",
     )
-
     parser.add_argument(
-        "--app",
-        help="For example: `client:app` or `project.package.module:wrapper.app",
+        "--callable-dir",
+        default="",
+        help="Add specified directory to the PYTHONPATH and load callable from there."
+        " Default: current working directory.",
     )
 
     return parser
@@ -115,7 +113,7 @@ def _check_actionable_client(
 def start_client(
     *,
     server_address: str,
-    load_app_fn: Optional[Callable[[], Flower]] = None,
+    load_callable_fn: Optional[Callable[[], Flower]] = None,
     client_fn: Optional[ClientFn] = None,
     client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
@@ -130,7 +128,7 @@ def start_client(
         The IPv4 or IPv6 address of the server. If the Flower
         server runs on the same machine on port 8080, then `server_address`
         would be `"[::]:8080"`.
-    load_app_fn : ...
+    load_callable_fn : Optional[Callable[[], Flower]] (default: None)
         ...
     client_fn : Optional[ClientFn]
         A callable that instantiates a Client. (default: None)
@@ -180,7 +178,7 @@ def start_client(
     """
     event(EventType.START_CLIENT_ENTER)
 
-    if load_app_fn is None:
+    if load_callable_fn is None:
         _check_actionable_client(client, client_fn)
 
         if client_fn is None:
@@ -199,9 +197,19 @@ def start_client(
         def _load_app() -> Flower:
             return Flower(client_fn=client_fn)
 
-        load_app_fn = _load_app
+        load_callable_fn = _load_app
+    else:
+        log(
+            WARN,
+            """
+            EXPERIMENTAL FEATURE: `load_callable_fn`
 
-    # At this point, only `load_app_fn` should be used
+            This is an experimental feature. It could change significantly or be removed
+            entirely in future versions of Flower.
+            """,
+        )
+
+    # At this point, only `load_callable_fn` should be used
     # Both `client` and `client_fn` must not be used directly
 
     # Initialize connection context manager
@@ -234,7 +242,7 @@ def start_client(
                     break
 
                 # Load app
-                app: Flower = load_app_fn()
+                app: Flower = load_callable_fn()
 
                 # Handle task message
                 fwd_msg: Fwd = Fwd(
