@@ -34,7 +34,7 @@ dataset: [CIFAR-10]
 
 **Model:** A ResNet-18 model without any modifications to it's original architecture with the exception of replacing BatchNormalization layers with [GroupNorm](https://pytorch.org/docs/stable/generated/torch.nn.GroupNorm.html) layers.
 
-**Dataset:** We follow the pre-processing of the dataset CIFAR-10 as indicated in Appendix C.1, resulting in `3x24x24` input images. Then, the entire dataset is split into the 500 clients, resulting in 100 trianing examples per client. The test set is used for centralised evaluation.
+**Dataset:** We follow the pre-processing of the dataset CIFAR-10 as indicated in Appendix C.1, resulting in `3x24x24` input images. Then, the entire dataset is split into the 500 clients, resulting in 100 trianing examples per client. The test set is used for centralised evaluation. The dataset can be split either IID or non-IID. The latter, following LDA with user-defined alpha (defaults to 0.1)
 
 **Training Hyperparameters:** :warning: *_Include a table with all the main hyperparameters in your baseline. Please show them with their default value._*
 
