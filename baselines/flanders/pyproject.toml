@@ -5,7 +5,7 @@ build-backend = "poetry.masonry.api"
 [tool.poetry]
 name = "flanders" # <----- Ensure it matches the name of your baseline directory containing all the source code
 version = "1.0.0"
-description = "Flower Baselines"
+description = "FLANDERS"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.dev>"]
 readme = "README.md"
