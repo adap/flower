@@ -25,7 +25,7 @@ pip install -r requirements.txt
 ## Start the long-running Flower server
 
 ```bash
-flower-server --grpc-rere
+flower-server
 ```
 
 ## Start the long-running Flower client
@@ -33,13 +33,13 @@ flower-server --grpc-rere
 In a new terminal window, start the first long-running Flower client:
 
 ```bash
-flower-client --grpc-rere --app client:app
+flower-client --app client:app
 ```
 
 In yet another new terminal window, start the second long-running Flower client:
 
 ```bash
-flower-client --grpc-rere --app client:app
+flower-client --app client:app
 ```
 
 ## Start the Driver script
