@@ -45,7 +45,7 @@ FlowerCallable = Callable[[Fwd], Bwd]
 
 
 class Flower:
-    """Flower app class."""
+    """Flower callable."""
 
     def __init__(
         self,
