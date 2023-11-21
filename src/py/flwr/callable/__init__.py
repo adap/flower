@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower app package."""
+"""Flower callable package."""
 
 
 from flwr.client.flower import Bwd as Bwd

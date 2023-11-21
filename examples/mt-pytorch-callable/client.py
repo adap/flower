@@ -109,7 +109,7 @@ def client_fn(cid: str):
 
 
 # To run this: `flower-client --callable client:flower`
-flower = fl.app.Flower(
+flower = fl.callable.Flower(
     client_fn=client_fn,
 )
 
