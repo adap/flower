@@ -91,20 +91,26 @@ Stay tuned, more tutorials are coming soon. Topics include **Privacy and Securit
 
 ## Flower Baselines
 
-Flower Baselines is a collection of community-contributed experiments that reproduce the experiments performed in popular federated learning publications. Researchers can build on Flower Baselines to quickly evaluate new ideas:
+Flower Baselines is a collection of community-contributed projects that reproduce the experiments performed in popular federated learning publications. Researchers can build on Flower Baselines to quickly evaluate new ideas. The Flower community loves contributions! Make your work more visible and enable others to build on it by contributing it as a baseline!
 
-- [FedAvg](https://arxiv.org/abs/1602.05629):
-  - [MNIST](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/fedavg_mnist)
-- [FedProx](https://arxiv.org/abs/1812.06127):
-  - [MNIST](https://github.com/adap/flower/tree/main/baselines/fedprox/)
-- [FedBN: Federated Learning on non-IID Features via Local Batch Normalization](https://arxiv.org/abs/2102.07623):
-  - [Convergence Rate](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/fedbn/convergence_rate)
-- [Adaptive Federated Optimization](https://arxiv.org/abs/2003.00295):
-  - [CIFAR-10/100](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/adaptive_federated_optimization)
+- [DASHA](https://github.com/adap/flower/tree/main/baselines/dasha)
+- [DepthFL](https://github.com/adap/flower/tree/main/baselines/depthfl)
+- [FedBN](https://github.com/adap/flower/tree/main/baselines/fedbn)
+- [FedMeta](https://github.com/adap/flower/tree/main/baselines/fedmeta)
+- [FedMLB](https://github.com/adap/flower/tree/main/baselines/fedmlb)
+- [FedPer](https://github.com/adap/flower/tree/main/baselines/fedper)
+- [FedProx](https://github.com/adap/flower/tree/main/baselines/fedprox)
+- [FedWav2vec2](https://github.com/adap/flower/tree/main/baselines/fedwav2vec2)
+- [FjORD](https://github.com/adap/flower/tree/main/baselines/fjord)
+- [MOON](https://github.com/adap/flower/tree/main/baselines/moon)
+- [niid-Bench](https://github.com/adap/flower/tree/main/baselines/niid_bench)
+- [TAMUNA](https://github.com/adap/flower/tree/main/baselines/tamuna)
+- [FedAvg](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/fedavg_mnist)
+- [FedOpt](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/adaptive_federated_optimization)
 
-Check the Flower documentation to learn more: [Using Baselines](https://flower.dev/docs/baselines/how-to-use-baselines.html)
-
-The Flower community loves contributions! Make your work more visible and enable others to build on it by contributing it as a baseline: [Contributing Baselines](https://flower.dev/docs/baselines/how-to-contribute-baselines.html)
+Please refer to the [Flower Baselines Documentation](https://flower.dev/docs/baselines/) for a detailed categorization of baselines and for additional info including:
+* [How to use Flower Baselines](https://flower.dev/docs/baselines/how-to-use-baselines.html)
+* [How to contribute a new Flower Baseline](https://flower.dev/docs/baselines/how-to-contribute-baselines.html)
 
 ## Flower Usage Examples
 

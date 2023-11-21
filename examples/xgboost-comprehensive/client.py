@@ -23,7 +23,7 @@ from dataset import (
     transform_dataset_to_dmatrix,
     resplit,
 )
-from utils import client_args_parser
+from utils import client_args_parser, BST_PARAMS
 
 
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -46,7 +46,8 @@ fds = FederatedDataset(
     dataset="jxie/higgs", partitioners={"train": partitioner}, resplitter=resplit
 )
 
-# Let's use the first partition as an example
+# Load the partition for this `node_id`
+log(INFO, "Loading partition...")
 node_id = args.node_id
 partition = fds.load_partition(idx=node_id, split="train")
 partition.set_format("numpy")
@@ -67,26 +68,18 @@ else:
     )
 
 # Reformat data to DMatrix for xgboost
+log(INFO, "Reformatting data...")
 train_dmatrix = transform_dataset_to_dmatrix(train_data)
 valid_dmatrix = transform_dataset_to_dmatrix(valid_data)
 
 
 # Hyper-parameters for xgboost training
 num_local_round = 1
-params = {
-    "objective": "binary:logistic",
-    "eta": 0.1,  # Learning rate
-    "max_depth": 8,
-    "eval_metric": "auc",
-    "nthread": 16,
-    "num_parallel_tree": 1,
-    "subsample": 1,
-    "tree_method": "hist",
-}
+params = BST_PARAMS
 
 
 # Define Flower client
-class FlowerClient(fl.client.Client):
+class XgbClient(fl.client.Client):
     def __init__(self):
         self.bst = None
         self.config = None
@@ -171,4 +164,4 @@ class FlowerClient(fl.client.Client):
 
 
 # Start Flower client
-fl.client.start_client(server_address="127.0.0.1:8080", client=FlowerClient())
+fl.client.start_client(server_address="127.0.0.1:8080", client=XgbClient())
