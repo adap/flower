@@ -59,8 +59,8 @@ def run_client() -> None:
         sys.path.insert(0, callable_dir)
 
     def _load() -> Flower:
-        callable: Flower = load_callable(args.callable)
-        return callable
+        flower: Flower = load_callable(args.callable)
+        return flower
 
     return start_client(
         server_address=args.server,
