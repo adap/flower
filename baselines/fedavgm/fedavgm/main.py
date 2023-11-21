@@ -72,7 +72,7 @@ def main(cfg: DictConfig) -> None:
     dataset_type = "cifar10" if cfg.dataset.input_shape == [32, 32, 3] else "fmnist"
 
     def format_variable(x):
-        return f"{x!r}" if isinstance(x, bytes) else f"{x}"
+        return f"{x!r}" if isinstance(x, bytes) else x
 
     file_suffix: str = (
         f"_{format_variable(strategy_name)}"
