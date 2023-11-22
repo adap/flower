@@ -6,7 +6,10 @@ from torchvision.transforms import ToTensor, Normalize, Compose
 
 
 # transformation to convert images to tensors and apply normalization
-mnist_transforms = Compose([ToTensor(), Normalize((0.1307,), (0.3081,))])
+def apply_transforms(batch):
+    transforms = Compose([ToTensor(), Normalize((0.1307,), (0.3081,))])
+    batch["image"] = [transforms(img) for img in batch["image"]]
+    return batch
 
 
 # Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')

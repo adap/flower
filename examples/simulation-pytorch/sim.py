@@ -13,7 +13,7 @@ from datasets import Dataset
 from datasets.utils.logging import disable_progress_bar
 from flwr_datasets import FederatedDataset
 
-from utils import Net, train, test, mnist_transforms
+from utils import Net, train, test, apply_transforms
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
@@ -100,14 +100,8 @@ def get_client_fn(dataset: FederatedDataset):
         valset = client_dataset_splits["test"]
 
         # Now we apply the transform to each batch.
-        trainset = trainset.map(
-            lambda img: {"image": mnist_transforms(img)},
-            input_columns="image",
-        ).with_format("torch")
-
-        valset = valset.map(
-            lambda img: {"image": mnist_transforms(img)}, input_columns="image"
-        ).with_format("torch")
+        trainset = trainset.with_transform(apply_transforms)
+        valset = valset.with_transform(apply_transforms)
 
         # Create and return client
         return FlowerClient(trainset, valset)
@@ -160,9 +154,7 @@ def get_evaluate_fn(
         model.to(device)
 
         # Apply transform to dataset
-        testset = centralized_testset.map(
-            lambda img: {"image": mnist_transforms(img)}, input_columns="image"
-        ).with_format("torch")
+        testset = centralized_testset.with_transform(apply_transforms)
 
         # Disable tqdm for dataset preprocessing
         disable_progress_bar()
@@ -211,6 +203,7 @@ def main():
         config=fl.server.ServerConfig(num_rounds=args.num_rounds),
         strategy=strategy,
         actor_kwargs={
+            # TODO: I used to need this but, is it still needed?
             "on_actor_init_fn": disable_progress_bar  # disable tqdm on each actor/process spawning virtual clients
         },
     )
