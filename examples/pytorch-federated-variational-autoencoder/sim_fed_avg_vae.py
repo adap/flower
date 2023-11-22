@@ -17,31 +17,35 @@ from utils_mnist import (
     visualize_gen_image,
     visualize_gmm_latent_representation,
     non_iid_train_iid_test,
-    iid_train_iid_test,alignment_dataloader
+    iid_train_iid_test,
+    alignment_dataloader,
 )
 from utils_mnist import VAE
 import os
+import numpy as np
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
 parser.add_argument(
     "--num_cpus",
     type=int,
-    default=10,
+    default=6,
     help="Number of CPUs to assign to a virtual client",
 )
 parser.add_argument(
     "--num_gpus",
     type=float,
-    default=0.5,
+    default=0.3,
     help="Ratio of GPU memory to assign to a virtual client",
 )
-parser.add_argument("--num_rounds", type=int, default=100, help="Number of FL rounds.")
+parser.add_argument("--num_rounds", type=int, default=10, help="Number of FL rounds.")
+parser.add_argument("--identifier", type=str, required=True, help="Name of experiment.")
 
+args = parser.parse_args()
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 NUM_CLIENTS = 5
 NUM_CLASSES = 7
-IDENTIFIER = "my_fed_avg_vae_niid_test"
+IDENTIFIER = args.identifier
 if not os.path.exists(IDENTIFIER):
     os.makedirs(IDENTIFIER)
 
@@ -178,6 +182,9 @@ def get_evaluate_fn(
 
         model = VAE()
         set_params(model, parameters)
+        if server_round == 0 or server_round == args.num_rounds:
+            with open(f"{IDENTIFIER}/weights_avg_round_{server_round}.npy", "wb") as f:
+                np.save(f, np.array(parameters, dtype=object))
         model.to(device)
 
         testloader = DataLoader(testset, batch_size=64)
@@ -195,9 +202,8 @@ def get_evaluate_fn(
 
 def main():
     # Parse input arguments
-    args = parser.parse_args()
 
-    configure(identifier=IDENTIFIER, filename="logs_fed_vae_noniid_test.log")
+    configure(identifier=IDENTIFIER, filename=f"logs_{IDENTIFIER}.log")
 
     # Download dataset and partition it
     trainsets, valsets = non_iid_train_iid_test()

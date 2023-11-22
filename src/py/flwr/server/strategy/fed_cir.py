@@ -61,7 +61,7 @@ class FedCiR(FedAvg):
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         lr_g=1e-6,
-        steps_g=25,
+        steps_g=10,
         gen_stats=None,
         num_classes=10,
         alignment_dataloader=None,
@@ -225,36 +225,43 @@ class FedCiR(FedAvg):
         for temp_local_model in temp_local_models:
             temp_local_model.eval()
 
-        for step, (align_img, _) in enumerate(self.alignment_loader):
-            preds = []
-            optimizer.zero_grad()
-            align_img = align_img.to(DEVICE)
+        for ep_g in range(self.steps_gen):
+            for step, (align_img, _) in enumerate(self.alignment_loader):
+                preds = []
+                optimizer.zero_grad()
+                align_img = align_img.to(DEVICE)
 
-            for idx, (weights, _) in enumerate(weights_results):
-                params_dict = zip(temp_local_models[idx].state_dict().keys(), weights)
-                state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-                temp_local_models[idx].load_state_dict(state_dict, strict=True)
+                for idx, (weights, _) in enumerate(weights_results):
+                    params_dict = zip(
+                        temp_local_models[idx].state_dict().keys(), weights
+                    )
+                    state_dict = OrderedDict(
+                        {k: torch.tensor(v) for k, v in params_dict}
+                    )
+                    temp_local_models[idx].load_state_dict(state_dict, strict=True)
 
-                preds.append(
-                    temp_local_models[idx].decoder(self.gen_model(align_img)[0])
+                    preds.append(
+                        temp_local_models[idx].decoder(self.gen_model(align_img)[0])
+                    )
+
+                loss = F.binary_cross_entropy(
+                    torch.stack(preds).mean(dim=0),
+                    align_img.view(-1, 784),
+                    reduction="sum",
                 )
+                threshold = 1e-6  # Define a threshold for the negligible loss
+                log(DEBUG, f"generator loss at ep {ep_g} step {step}: {loss}")
 
-            loss = F.binary_cross_entropy(
-                torch.stack(preds).mean(dim=0), align_img.view(-1, 784), reduction="sum"
-            )
-            threshold = 1e-6  # Define a threshold for the negligible loss
-            log(DEBUG, f"generator loss at step {step}: {loss}")
-
-            if (
-                loss.item() > threshold
-            ):  # Check if the loss is greater than the threshold
-                loss.backward()
-                optimizer.step()
-            else:
-                log(
-                    DEBUG,
-                    f"Skipping optimization at step {step} due to negligible loss",
-                )
+                if (
+                    loss.item() > threshold
+                ):  # Check if the loss is greater than the threshold
+                    loss.backward()
+                    optimizer.step()
+                else:
+                    log(
+                        DEBUG,
+                        f"Skipping optimization at step {step} due to negligible loss",
+                    )
         # z_g, mu_g, log_var_g = self.gen_model(one_hot_all_labels)
         self.gen_stats = ndarrays_to_parameters(
             [val.cpu().numpy() for _, val in self.gen_model.state_dict().items()]

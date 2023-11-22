@@ -13,13 +13,14 @@ from flwr.common.typing import Scalar
 from utils_mnist import (
     test,
     visualize_gen_image,
-    visualize_latent_representation,
+    visualize_gmm_latent_representation,
     non_iid_train_iid_test,
     alignment_dataloader,
     train_align,
 )
 from utils_mnist import VAE
 import os
+import numpy as np
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
@@ -32,15 +33,17 @@ parser.add_argument(
 parser.add_argument(
     "--num_gpus",
     type=float,
-    default=0.2,
+    default=0.3,
     help="Ratio of GPU memory to assign to a virtual client",
 )
-parser.add_argument("--num_rounds", type=int, default=50, help="Number of FL rounds.")
+parser.add_argument("--num_rounds", type=int, default=10, help="Number of FL rounds.")
+parser.add_argument("--identifier", type=str, required=True, help="Name of experiment.")
+args = parser.parse_args()
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 NUM_CLIENTS = 5
 NUM_CLASSES = 7
-IDENTIFIER = "my_fed_cir_vae_l_align_niid"
+IDENTIFIER = args.identifier
 if not os.path.exists(IDENTIFIER):
     os.makedirs(IDENTIFIER)
 
@@ -91,7 +94,7 @@ class FlowerClient(fl.client.NumPyClient):
             f'for_client_{self.cid}_train_at_round_{config.get("server_round")}',
             folder=IDENTIFIER,
         )
-        visualize_latent_representation(
+        visualize_gmm_latent_representation(
             self.model,
             DataLoader(self.valset, batch_size=64),
             self.device,
@@ -176,13 +179,16 @@ def get_evaluate_fn(
 
         model = VAE()
         set_params(model, parameters)
+        if server_round == 0 or server_round == args.num_rounds:
+            with open(f"{IDENTIFIER}/weights_cir_round_{server_round}.npy", "wb") as f:
+                np.save(f, np.array(parameters, dtype=object))
         model.to(device)
 
         testloader = DataLoader(testset, batch_size=64)
         visualize_gen_image(
             model, testloader, device, f"server_eval_{server_round}", folder=IDENTIFIER
         )
-        visualize_latent_representation(
+        visualize_gmm_latent_representation(
             model, testloader, device, f"server_eval_{server_round}", folder=IDENTIFIER
         )
 
@@ -191,9 +197,8 @@ def get_evaluate_fn(
 
 def main():
     # Parse input arguments
-    args = parser.parse_args()
 
-    configure(identifier=IDENTIFIER, filename="logs_fedcir_vae_l_align_niid.log")
+    configure(identifier=IDENTIFIER, filename=f"logs_{IDENTIFIER}.log")
 
     # Download dataset and partition it
     trainsets, valsets = non_iid_train_iid_test()
@@ -217,6 +222,7 @@ def main():
         evaluate_fn=get_evaluate_fn(valsets[-1]),  # Global evaluation function
         alignment_dataloader=alignment_dataloader(batch_size=samples_per_class * 10),
         lr_g=1e-3,
+        steps_g=5,
     )
 
     # Resources to be assigned to each virtual client
