@@ -70,7 +70,7 @@ Below is an example of a Grafana dashboard showing a histogram of memory usage f
 
 
 <div align="center">
-    <img src="public/grafana-memory-usage.png" alt="Grafana Memory Usage Histogram" width="500"/>
+    <img src="public/grafana-memory-usage.png" alt="Grafana Memory Usage Histogram" width="600"/>
 </div>
 
 
