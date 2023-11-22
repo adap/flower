@@ -203,7 +203,6 @@ def main():
         config=fl.server.ServerConfig(num_rounds=args.num_rounds),
         strategy=strategy,
         actor_kwargs={
-            # TODO: I used to need this but, is it still needed?
             "on_actor_init_fn": disable_progress_bar  # disable tqdm on each actor/process spawning virtual clients
         },
     )

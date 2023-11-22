@@ -1,6 +1,6 @@
 # Flower Simulation example using PyTorch
 
-This introductory example uses the simulation capabilities of Flower to simulate a large number of clients on either a single machine or a cluster of machines. Take a look at the [Documentation](https://flower.dev/docs/framework/how-to-run-simulations.html) for a deep dive on how Flower simulation works.
+This introductory example uses the simulation capabilities of Flower to simulate a large number of clients on either a single machine. Take a look at the [Documentation](https://flower.dev/docs/framework/how-to-run-simulations.html) for a deep dive into how Flower simulation works. This example uses [Flower Datasets](https://flower.dev/docs/datasets/) to download, partition and preprocess the CIFAR-10 dataset. This examples uses 100 clients by default. 
 
 ## Running the example (via Jupyter Notebook)
 
@@ -41,7 +41,7 @@ poetry shell
 Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
 
 ```shell
-poetry run python3 -c "import flwr"
+poetry run python -c "import flwr"
 ```
 
 If you don't see any errors you're good to go!
@@ -58,7 +58,7 @@ pip install -r requirements.txt
 
 ```bash
 # You can run the example without activating your environemnt
-poetry run python3 sim.py
+poetry run python sim.py
 
 # Or by first activating it
 poetry shell
