@@ -22,7 +22,7 @@ following files:
 ```shell
 -- pyproject.toml
 -- requirements.txt
--- docs/data/train.csv
+-- _static/data/train.csv
 -- client.py
 -- plot.py
 -- simulation.py
@@ -99,7 +99,7 @@ seconds to run as the model is very small.
 
 |             HFL              |             VFL              |
 | :--------------------------: | :--------------------------: |
-| ![HFL diagram](docs/hfl.jpg) | ![VFL diagram](docs/vfl.jpg) |
+| ![HFL diagram](_static/hfl.jpg) | ![VFL diagram](_static/vfl.jpg) |
 
 Those diagrams illustrate HFL vs VFL using a simplified version of what we will be building in this example. Note that on the VFL side, the server holds the labels (the `Survived` column) and will be the only one capable of performing evaluation.
 
@@ -112,7 +112,7 @@ the Titanic based on various features.
 
 You can see an exhaustive list of the features over on [Kaggle](https://www.kaggle.com/competitions/titanic/data).
 
-The data is stored as a CSV file in `docs/data/train.csv`, it contains 892
+The data is stored as a CSV file in `_static/data/train.csv`, it contains 892
 samples with labels.
 
 #### Preprocessing
@@ -238,7 +238,7 @@ Note that our final data processing function looks like that:
 
 ```python3
 def get_partitions_and_label():
-    df = pd.read_csv("docs/data/train.csv")
+    df = pd.read_csv("_static/data/train.csv")
     processed_df = df.dropna(subset=["Embarked", "Fare"]).copy()
     processed_df, all_keywords = _create_features(processed_df)
     raw_partitions = _partition_data(processed_df, all_keywords)
@@ -487,4 +487,4 @@ rounds.
 
 Here we can observe the results after 1000 rounds:
 
-![Accuracy plot](docs/results/accuracy.png)
+![Accuracy plot](_static/results/accuracy.png)

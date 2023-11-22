@@ -19,4 +19,4 @@ hist = fl.simulation.start_simulation(
     strategy=Strategy(label),
 )
 
-np.save("docs/results/hist.npy", hist)
+np.save("_static/results/hist.npy", hist)
