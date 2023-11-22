@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower app."""
+"""Flower callable."""
 
 
 import importlib
@@ -28,7 +28,7 @@ FlowerCallable = Callable[[Fwd], Bwd]
 
 
 class Flower:
-    """Flower app class."""
+    """Flower callable."""
 
     def __init__(
         self,

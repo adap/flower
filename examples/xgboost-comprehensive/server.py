@@ -6,9 +6,9 @@ import flwr as fl
 from flwr.common.logger import log
 from flwr.common import Parameters, Scalar
 from flwr_datasets import FederatedDataset
+from flwr.server.strategy import FedXgbBagging
 
-from strategy import FedXgbBagging
-from utils import server_args_parser
+from utils import server_args_parser, BST_PARAMS
 from dataset import resplit, transform_dataset_to_dmatrix
 
 
@@ -30,16 +30,7 @@ if centralised_eval:
     test_dmatrix = transform_dataset_to_dmatrix(test_set)
 
 # Hyper-parameters used for initialisation
-params = {
-    "objective": "binary:logistic",
-    "eta": 0.1,  # Learning rate
-    "max_depth": 8,
-    "eval_metric": "auc",
-    "nthread": 16,
-    "num_parallel_tree": 1,
-    "subsample": 1,
-    "tree_method": "hist",
-}
+params = BST_PARAMS
 
 
 def eval_config(rnd: int) -> Dict[str, str]:
