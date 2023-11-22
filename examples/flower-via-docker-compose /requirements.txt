@@ -1,0 +1,10 @@
+flwr
+tensorflow
+psutil
+ping3
+docker
+scipy
+numpy
+
+
+
