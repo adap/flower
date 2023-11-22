@@ -98,6 +98,7 @@ def load_data(node_id):
 net = Net().to(DEVICE)
 trainloader, testloader = load_data(standalone_mode=False)
 
+
 # Define Flower client
 class FlowerClient(fl.client.NumPyClient):
     def get_parameters(self, config):
