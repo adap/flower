@@ -1,6 +1,7 @@
 # Flower Example using XGBoost
 
 This example demonstrates how to perform EXtreme Gradient Boosting (XGBoost) within Flower using `xgboost` package.
+We use [HIGGS](https://archive.ics.uci.edu/dataset/280/higgs) dataset for this example to perform a binary classification task.
 Tree-based with bagging method is used for aggregation on the server.
 
 This project provides a minimal code example to enable you to get stated quickly. For a more comprehensive code example, take a look at [xgboost-comprehensive](https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive).
@@ -19,6 +20,7 @@ This will create a new directory called `xgboost-quickstart` containing the foll
 -- README.md         <- Your're reading this right now
 -- server.py         <- Defines the server-side logic
 -- client.py         <- Defines the client-side logic
+-- run.sh            <- Commands to run experiments
 -- pyproject.toml    <- Example dependencies (if you use Poetry)
 -- requirements.txt  <- Example dependencies
 ```
@@ -79,7 +81,7 @@ You will see that XGBoost is starting a federated training.
 Alternatively, you can use `run.sh` to run the same experiment in a single terminal as follows:
 
 ```shell
-bash run.sh
+poetry run ./run.sh
 ```
 
 Look at the [code](https://github.com/adap/flower/tree/main/examples/xgboost-quickstart)
