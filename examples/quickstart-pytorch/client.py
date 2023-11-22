@@ -62,7 +62,7 @@ def test(net, testloader):
         for batch in tqdm(testloader, "Testing"):
             images = batch["img"]
             labels = batch["label"]
-            outputs = net(images)
+            outputs = net(images.to(DEVICE))
             loss += criterion(outputs, labels).item()
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
     accuracy = correct / len(testloader.dataset)
