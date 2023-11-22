@@ -56,8 +56,8 @@ Afterwards you are ready to start the Flower server as well as the clients. You 
 python3 server.py
 ```
 
-Now you are ready to start the Flower clients which will participate in the learning. We need to specify the node id to 
-use different partitions of the data on different nodes.  To do so simply open two more terminal windows and run the 
+Now you are ready to start the Flower clients which will participate in the learning. We need to specify the node id to
+use different partitions of the data on different nodes.  To do so simply open two more terminal windows and run the
 following commands.
 
 Start client 1 in the first terminal:
