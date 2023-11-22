@@ -26,9 +26,9 @@ for d in $(printf '%s\n' */ | sort -V); do
   # For each example, copy all images of the _static folder into the examples
   # docs static folder
   [[ $example != doc ]] && [ -d "$example/_static" ] && {
-    cp $example/_static/**/*.jpg $ROOT/examples/doc/source/_static/ 2>/dev/null || true
-    cp $example/_static/**/*.png $ROOT/examples/doc/source/_static/ 2>/dev/null || true
-    cp $example/_static/**/*.jpeg $ROOT/examples/doc/source/_static/ 2>/dev/null || true
+    cp $example/_static/**.jpg $ROOT/examples/doc/source/_static/ 2>/dev/null || true
+    cp $example/_static/**.png $ROOT/examples/doc/source/_static/ 2>/dev/null || true
+    cp $example/_static/**.jpeg $ROOT/examples/doc/source/_static/ 2>/dev/null || true
   }
   # For each example, insert the name of the example into the index file
   [[ $example != doc ]] && (echo $INSERT_LINE; echo a; echo $example; echo .; echo wq) | ed $INDEX 2>&1 >/dev/null
