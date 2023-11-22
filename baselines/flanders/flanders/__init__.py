@@ -1,1 +1,1 @@
-"""Template baseline package."""
+"""FLANDERS package."""

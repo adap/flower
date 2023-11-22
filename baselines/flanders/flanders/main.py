@@ -15,6 +15,7 @@ import shutil
 import numpy as np
 import flwr as fl
 from flwr.common.typing import Scalar
+from flwr.server.client_manager import SimpleClientManager
 import torch
 import os
 import random
@@ -42,6 +43,7 @@ from .client import (
     get_sklearn_model_params
 )
 from .utils import save_results
+from .server import EnhancedServer
 
 from torch.utils.data import DataLoader
 from torchvision import transforms
@@ -80,7 +82,8 @@ def main(cfg: DictConfig) -> None:
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
 
-    print(cfg.dataset)
+    print(cfg.dataset.name)
+    print(cfg.server.pool_size)
 
     evaluate_fn = mnist_evaluate
 
@@ -92,27 +95,47 @@ def main(cfg: DictConfig) -> None:
     # be a location in the file system, a list of dataloader, a list of ids to extract
     # from a dataset, it's up to you)
 
+    # Managed by clients
+
     # 3. Define your clients
     # Define a function that returns another function that will be used during
     # simulation to instantiate each individual client
     # client_fn = client.<my_function_that_returns_a_function>()
-    client = MnistClient
-    def client_fn(cid: int, pool_size: int):
+    def client_fn(cid: int, pool_size: int = 10, dataset_name: str = cfg.dataset.name):
+        if dataset_name == "mnist":
+            client = MnistClient
+        else:
+            raise NotImplementedError(f"Dataset {dataset_name} not implemented")
         return client(cid, pool_size)
 
     # 4. Define your strategy
     # pass all relevant argument (including the global dataset used after aggregation,
     # if needed by your method.)
     # strategy = instantiate(cfg.strategy, <additional arguments if desired>)
-    strategy = instantiate(cfg.strategy)
+    strategy = instantiate(
+        cfg.strategy,
+        evaluate_fn=evaluate_fn,
+        on_fit_config_fn=fit_config,
+        fraction_fit=1,
+        fraction_evaluate=0,                # no federated evaluation
+        min_fit_clients=1,
+        min_evaluate_clients=0,
+        warmup_rounds=1,
+        to_keep=1,                                    # Used in Flanders, MultiKrum, TrimmedMean (in Bulyan it is forced to 1)
+        min_available_clients=1,                    # All clients should be available
+        window=1,                                      # Used in Flanders
+        sampling=1,                                  # Used in Flanders
+    )
 
 
     # 5. Start Simulation
     # history = fl.simulation.start_simulation(<arguments for simulation>)
-    fl.simulation.start_simulation(
+    history = fl.simulation.start_simulation(
         client_fn=client_fn,
-        num_clients=cfg.pool_size,
-        config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
+        client_resources={"num_cpus": 1},
+        num_clients=cfg.server.pool_size,
+        server=EnhancedServer(num_malicious=cfg.server.num_malicious, attack_fn=None, client_manager=SimpleClientManager),
+        config=fl.server.ServerConfig(num_rounds=cfg.server.num_rounds),
         strategy=strategy
     )
 
@@ -126,11 +149,19 @@ def main(cfg: DictConfig) -> None:
     # can retrieve the path to that directory with this:
     # save_path = HydraConfig.get().runtime.output_dir
 
+def fit_config(server_round: int) -> Dict[str, Scalar]:
+    """Return a configuration with static batch size and (local) epochs."""
+    config = {
+        "epochs": 1,  # number of local epochs
+        "batch_size": 32,
+    }
+    return config
+
 def mnist_evaluate(
     server_round: int, parameters: fl.common.NDArrays, config: Dict[str, Scalar]
 ):
     # determine device
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cpu")
 
     model = MnistNet()
     set_params(model, parameters)
@@ -140,12 +171,13 @@ def mnist_evaluate(
     testloader = DataLoader(testset, batch_size=32, shuffle=False, num_workers=1)
     loss, accuracy, auc = test_mnist(model, testloader, device=device)
 
-    config["id"] = args.exp_num
+    #config["id"] = args.exp_num
     config["round"] = server_round
     config["auc"] = auc
     save_results(loss, accuracy, config=config)
+    print(f"Round {server_round} accuracy: {accuracy} loss: {loss} auc: {auc}")
 
-    # return statistics
     return loss, {"accuracy": accuracy, "auc": auc}
 
-main()
+if __name__ == "__main__":
+    main()

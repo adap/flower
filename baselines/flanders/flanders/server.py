@@ -31,7 +31,7 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.strategy import FedAvg, Strategy
 
-from utils import (
+from .utils import (
     save_params, 
     save_predicted_params,
     load_all_time_series, 
@@ -57,6 +57,7 @@ class EnhancedServer(Server):
 
     def __init__(
             self,
+            num_malicious: int,
             attack_fn:Optional[Callable],
             *args: Any,
             **kwargs: Any
@@ -73,13 +74,31 @@ class EnhancedServer(Server):
     ) -> Optional[
         Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
     ]:
-        """Perform a single round of federated averaging."""
+        """Perform a single round of federated learning."""
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_fit(
             server_round=server_round,
             parameters=self.parameters,
             client_manager=self._client_manager,
         )
+
+        # Randomly decide which client is malicious
+        if server_round > self.warmup_rounds:
+            self.malicious_selected = np.random.choice(
+                [proxy.cid for proxy, ins in client_instructions], size=self.num_malicious, replace=False
+            )
+            log(
+                DEBUG,
+                "fit_round %s: malicious clients selected %s",
+                server_round,
+                self.malicious_selected,
+            )
+            # Save instruction for malicious clients into FitIns
+            for proxy, ins in client_instructions:
+                if proxy.cid in self.malicious_selected:
+                    ins["malicious"] = True
+                else:
+                    ins["malicious"] = False
 
         if not client_instructions:
             log(INFO, "fit_round %s: no clients selected, cancel", server_round)

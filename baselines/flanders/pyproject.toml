@@ -58,11 +58,6 @@ ruff = "==0.0.272"
 types-requests = "==2.27.7"
 virtualenv = "20.21.0"
 
-[[tool.poetry.source]]
-name = "natsort"
-url = "natsort-8.4.0-py3-none-any.whl"
-priority = "explicit"
-
 [tool.isort]
 line_length = 88
 indent = "    "

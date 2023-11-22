@@ -68,9 +68,9 @@ California Housing (linear regression):
 
 | Dataset | # of clients  | Clients per round | # of rounds | Batch size | Learning rate | $\lambda_1$ | $\lambda_2$ | Optimizer | Dropout | Alpha | Beta | # of clients to keep | Sampling |
 | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
-| Income | 100 | 100 | 100 | \ | \ | 1.0 | 0.0 | CCD | \ | 0.0 | 0.0 | 1 | \ |
-| MNIST | 100 | 100 | 100 | 32 | $10^{-3}$ | \ | \ | Adam | 0.2 | 0.0 | 0.0 | 1 | \ |
-| California Housing | 100 | 100 | 100 | \ | \ | 0.5 | 0.5 | CCD | \ | 0.0 | 0.0 | 1 | \ |
+| Income | 100 | 100 | 50 | \ | \ | 1.0 | 0.0 | CCD | \ | 0.0 | 0.0 | 1 | \ |
+| MNIST | 100 | 100 | 50 | 32 | $10^{-3}$ | \ | \ | Adam | 0.2 | 0.0 | 0.0 | 1 | \ |
+| California Housing | 100 | 100 | 50 | \ | \ | 0.5 | 0.5 | CCD | \ | 0.0 | 0.0 | 1 | \ |
 
 Where $\lambda_1$ and $\lambda_2$ are Lasso and Ridge regularization terms.
 

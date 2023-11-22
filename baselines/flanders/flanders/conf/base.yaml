@@ -2,10 +2,10 @@
 # this is the config that will be loaded as default by main.py
 # Please follow the provided structure (this will ensuring all baseline follow
 # a similar configuration structure and hence be easy to customise)
-defaults:
-  - _self_
-  - override hydra/hydra_logging: disabled
-  - override hydra/job_logging: disabled
+#defaults:
+#  - _self_
+#  - override hydra/hydra_logging: disabled
+#  - override hydra/job_logging: disabled
 
 hydra:
   output_subdir: null
@@ -14,13 +14,21 @@ hydra:
 
 dataset:
   # dataset config
+  name: mnist
 
 model:
   # model config
+  _target_: flanders.models.MnistNet
 
 strategy:
-  _target_: # points to your strategy (either custom or exiting in Flower)
-  # rest of strategy config
+  _target_: flanders.strategy.Flanders
+  attack_fn: null
+
+server:
+  _target_: flanders.server.EnhancedServer
+  num_rounds: 2
+  pool_size: 1
+  num_malicious: 0
 
 client:
   # client config
