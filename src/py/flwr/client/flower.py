@@ -45,7 +45,30 @@ FlowerCallable = Callable[[Fwd], Bwd]
 
 
 class Flower:
-    """Flower callable."""
+    """Flower callable.
+
+    Examples
+    --------
+    Assuming a typical client implementation in `FlowerClient`, you can wrap it in a
+    Flower callable as follows:
+
+    >>> class FlowerClient(NumPyClient):
+    >>>     # ...
+    >>>
+    >>> def client_fn(cid):
+    >>>    return FlowerClient().to_client()
+    >>>
+    >>> flower = Flower(client_fn)
+
+    If the above code is in a Python module called `client`, it can be started as
+    follows:
+
+    >>> flower-client --callable client:flower
+
+    In this `client:flower` example, `client` refers to the Python module in which the
+    previous code lives in. `flower` refers to the global attribute `flower` that points
+    to an object of type `Flower` (a Flower callable).
+    """
 
     def __init__(
         self,
@@ -71,7 +94,13 @@ class LoadCallableError(Exception):
 
 
 def load_callable(module_attribute_str: str) -> Flower:
-    """."""
+    """Load the `Flower` object specified in a module attribute string.
+
+    The module/attribute string should have the form <module>:<attribute>. Valid
+    examples include `client:flower` and `project.package.module:wrapper.flower`. It
+    must refer to a module on the PYTHONPATH, the module needs to have the specified
+    attribute, and the attribute must be of type `Flower`.
+    """
     module_str, _, attributes_str = module_attribute_str.partition(":")
     if not module_str:
         raise LoadCallableError(

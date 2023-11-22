@@ -82,7 +82,7 @@ def _parse_args_client() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--callable",
-        help="For example: `client:flower` or `project.package.module:wrapper.flower",
+        help="For example: `client:flower` or `project.package.module:wrapper.flower`",
     )
     parser.add_argument(
         "--callable-dir",
