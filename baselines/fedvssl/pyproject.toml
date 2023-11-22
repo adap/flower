@@ -40,7 +40,11 @@ classifiers = [
 python = ">=3.8.15, <3.12.0"  # don't change this
 flwr = { extras = ["simulation"], version = "1.5.0" }
 hydra-core = "1.3.2" # don't change this
-
+torch = { url = "https://download.pytorch.org/whl/cu110/torch-1.7.1%2Bcu110-cp39-cp39-linux_x86_64.whl"}
+torchvision = { url = "https://download.pytorch.org/whl/cu110/torchvision-0.8.2%2Bcu110-cp39-cp39-linux_x86_64.whl"}
+mmengine = "0.9.0"
+tensorboard = "2.15.1"
+numpy = "1.23.0"
 
 [tool.poetry.dev-dependencies]
 isort = "==5.11.5"
