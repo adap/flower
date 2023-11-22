@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 
 from contextlib import contextmanager
-from logging import DEBUG, ERROR, WARN
+from logging import DEBUG, ERROR
 from pathlib import Path
 from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast
 
@@ -28,7 +28,7 @@ from flwr.client.message_handler.task_handler import (
 )
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.grpc import create_channel
-from flwr.common.logger import log
+from flwr.common.logger import log, warn_experimental_feature
 from flwr.proto.fleet_pb2 import (
     CreateNodeRequest,
     DeleteNodeRequest,
@@ -88,6 +88,8 @@ def grpc_request_response(
     create_node : Optional[Callable]
     delete_node : Optional[Callable]
     """
+    warn_experimental_feature("`grpc-rere`")
+
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
 
@@ -98,14 +100,6 @@ def grpc_request_response(
     )
     channel.subscribe(on_channel_state_change)
     stub = FleetStub(channel)
-
-    log(
-        WARN,
-        """
-        EXPERIMENTAL: `grpc-rere` is an experimental transport layer, it might change
-        considerably in future versions of Flower
-        """,
-    )
 
     # Necessary state to link TaskRes to TaskIns
     state: Dict[str, Optional[TaskIns]] = {KEY_TASK_INS: None}
@@ -135,6 +129,8 @@ def grpc_request_response(
 
         delete_node_request = DeleteNodeRequest(node=node)
         stub.DeleteNode(request=delete_node_request)
+
+        del node_store[KEY_NODE]
 
     def receive() -> Optional[TaskIns]:
         """Receive next task from server."""
