@@ -98,15 +98,20 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, len(self.testloader.dataset), {"accuracy": accuracy}
 
 
+def apply_transforms(batch):
+    batch["img"] = [pytorch_transforms(img) for img in batch["img"]]
+    return batch
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
-        "--partition",
+        "--node-id",
         type=int,
         choices=[0, 1, 2],
         required=True,
         help="Partition of the dataset (0,1 or 2). "
-        "The dataset is divided into 3 partitions created artificially.",
+             "The dataset is divided into 3 partitions created artificially.",
     )
     args = parser.parse_args()
     # Load model
@@ -119,15 +124,9 @@ if __name__ == "__main__":
     pytorch_transforms = Compose(
         [ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
     )
-    partition_train_test = partition_train_test.map(
-        lambda img: {"img": pytorch_transforms(img)}, input_columns="img"
-    )
-    trainloader = DataLoader(
-        partition_train_test["train"].with_format("torch"), batch_size=32, shuffle=True
-    )
-    testloader = DataLoader(
-        partition_train_test["test"].with_format("torch"), batch_size=32
-    )
+    partition_train_test = partition_train_test.with_transform(apply_transforms)
+    trainloader = DataLoader(partition_train_test["train"], batch_size=32, shuffle=True)
+    testloader = DataLoader(partition_train_test["test"], batch_size=32)
     # Start Flower client
     fl.client.start_numpy_client(
         server_address="127.0.0.1:8080",
