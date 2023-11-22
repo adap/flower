@@ -68,7 +68,11 @@ By following these steps, you will have a fully functional federated learning en
 2. **Grafana Dashboard Example**:
 Below is an example of a Grafana dashboard showing a histogram of memory usage for a specific client-container:
 
-![Grafana Memory Usage Histogram](public/grafana-memory-usage.png)
+
+<div align="center">
+    <img src="public/grafana-memory-usage.png" alt="Grafana Memory Usage Histogram" width="400"/>
+</div>
+
 
 This histogram offers a visual representation of the container's memory usage over time, highlighting the contrast in resource utilization between training and non-training periods. As evident from the graph, there are noticeable differences in memory consumption during active training phases compared to times when the container is not engaged in training.
 
