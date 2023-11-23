@@ -70,7 +70,11 @@ def test(net, testloader):
 
 
 @click.command()
-@click.option('--node-id', type=click.Choice(["0", "1", "2"]), help="Partition of the dataset, which is divided into 3 iid partitions created artificially")
+@click.option(
+    "--node-id",
+    type=click.Choice(["0", "1", "2"]),
+    help="Partition of the dataset, which is divided into 3 iid partitions created artificially",
+)
 def load_data(node_id):
     """Load partition CIFAR10 data."""
     fds = FederatedDataset(dataset="cifar10", partitioners={"train": 3})
@@ -80,10 +84,12 @@ def load_data(node_id):
     pytorch_transforms = Compose(
         [ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
     )
+
     def apply_transforms(batch):
         """Apply transforms to the partition from FederatedDataset."""
         batch["img"] = [pytorch_transforms(img) for img in batch["img"]]
         return batch
+
     partition_train_test = partition_train_test.with_transform(apply_transforms)
     trainloader = DataLoader(partition_train_test["train"], batch_size=32, shuffle=True)
     testloader = DataLoader(partition_train_test["test"], batch_size=32)
