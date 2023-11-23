@@ -13,7 +13,7 @@ Create a ``FederatedDataset``::
   partition = fds.load_partition(0, "train")
   centralized_dataset = fds.load_full("test")
 
-Determine the names of the features::
+Inspect the names of the features::
 
   partition.features
 
@@ -25,7 +25,7 @@ In case of CIFAR10, you should see the following output.
   'label': ClassLabel(names=['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog',
   'frog', 'horse', 'ship', 'truck'], id=None)}
 
-Let's move to the transformations.
+We will use the keys in the partition features in order to construct a `tf.data.Dataset <https://www.tensorflow.org/api_docs/python/tf/data/Dataset>_`. Let's move to the transformations.
 
 NumPy
 -----
@@ -45,7 +45,7 @@ Transform the data to ``TensorFlow Dataset``::
 
 TensorFlow Tensors
 ------------------
-Transform the data to the ``TensorFlow Tensors`` (it's not the TensorFlow dataset)::
+Transform the data to the TensorFlow `tf.Tensor <https://www.tensorflow.org/api_docs/python/tf/Tensor>`_ (it's not the TensorFlow dataset)::
 
   data_tf = partition.with_format("tf")
   # Assuming you have defined your model and compiled it
