@@ -13,9 +13,7 @@ from fedavgm.dataset import cifar10, partition
 
 def plot_concentrations_cifar10():
     """Create a plot with different concentrations for dataset using LDA."""
-    x_train, y_train, x_test, y_test, input_shape, num_classes = cifar10(
-        10, (32, 32, 3)
-    )
+    x_train, y_train, x_test, y_test, _, num_classes = cifar10(10, (32, 32, 3))
     x = np.concatenate((x_train, x_test), axis=0)
     y = np.concatenate((y_train, y_test), axis=0)
     num_clients = 30
@@ -31,31 +29,30 @@ def plot_concentrations_cifar10():
     axs[0].set_position(pos)
 
     for i, concentration in enumerate(concentration_values):
-        partitions = partition(x, y, num_clients, concentration, num_classes)
+        partitions = partition(x, y, num_clients, concentration)
 
-        for c in range(num_clients):
-            _, y_client = partitions[c]
+        for client in range(num_clients):
+            _, y_client = partitions[client]
             lefts = [0]
-            ax = axs[i]
+            axis = axs[i]
             class_counts = np.bincount(y_client, minlength=num_classes)
             np.sum(class_counts > 0)
 
             class_distribution = class_counts.astype(np.float16) / len(y_client)
 
-            for idx, v in enumerate(class_distribution[:-1]):
-                lefts.append(lefts[idx] + v)
+            for idx, val in enumerate(class_distribution[:-1]):
+                lefts.append(lefts[idx] + val)
 
-            ax.barh(c, class_distribution, left=lefts, color=color)
-            ax.set_xticks([])
-            ax.set_yticks([])
-            ax.set_xlabel("Class distribution")
-            ax.set_title(f"Concentration = {concentration}")
+            axis.barh(client, class_distribution, left=lefts, color=color)
+            axis.set_xticks([])
+            axis.set_yticks([])
+            axis.set_xlabel("Class distribution")
+            axis.set_title(f"Concentration = {concentration}")
 
     fig.text(0, 0.5, "Client", va="center", rotation="vertical")
     plt.tight_layout()
     plt.savefig("../_static/concentration_cifar10_v2.png")
     print(">>> Concentration plot created")
-    return None
 
 
 if __name__ == "__main__":

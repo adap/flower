@@ -38,9 +38,7 @@ def main(cfg: DictConfig) -> None:
         cfg.dataset
     )
 
-    partitions = partition(
-        x_train, y_train, cfg.num_clients, cfg.noniid.concentration, num_classes
-    )
+    partitions = partition(x_train, y_train, cfg.num_clients, cfg.noniid.concentration)
 
     print(f">>> [Model]: Num. Classes {num_classes} | Input shape: {input_shape}")
 

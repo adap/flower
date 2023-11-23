@@ -38,7 +38,7 @@ def fmnist(num_classes, input_shape):
     return x_train, y_train, x_test, y_test, input_shape, num_classes
 
 
-def partition(x_train, y_train, num_clients, concentration, num_classes):
+def partition(x_train, y_train, num_clients, concentration):
     """Create non-iid partitions.
 
     The partitions uses a LDA distribution based on concentration.
