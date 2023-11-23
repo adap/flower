@@ -13,8 +13,7 @@ cd examples/doc
 make docs
 
 cd $ROOT
-cd datasets/doc
-make docs
+./datasets/dev/build-flwr-datasets-docs.sh
 
 cd $ROOT
 cd doc
