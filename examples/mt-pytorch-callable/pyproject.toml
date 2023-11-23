@@ -3,13 +3,14 @@ requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "xgboost-comprehensive"
+name = "quickstart-pytorch"
 version = "0.1.0"
-description = "Federated XGBoost with Flower (comprehensive)"
+description = "PyTorch Federated Learning Quickstart with Flower"
 authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
-flwr-nightly = ">=1.0,<2.0"
-flwr-datasets = ">=0.0.2,<1.0.0"
-xgboost = ">=2.0.0,<3.0.0"
+flwr = { path = "../../", develop = true, extras = ["simulation", "rest"] }
+torch = "1.13.1"
+torchvision = "0.14.1"
+tqdm = "4.65.0"

@@ -1,5 +1,8 @@
+import argparse
 import warnings
+from typing import Union
 from logging import INFO
+from datasets import Dataset, DatasetDict
 import xgboost as xgb
 
 import flwr as fl
@@ -16,68 +19,75 @@ from flwr.common import (
     Parameters,
     Status,
 )
-
-from dataset import (
-    instantiate_partitioner,
-    train_test_split,
-    transform_dataset_to_dmatrix,
-    resplit,
-)
-from utils import client_args_parser, BST_PARAMS
+from flwr_datasets.partitioner import IidPartitioner
 
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
+# Define arguments parser for the client/node ID.
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--node-id",
+    default=0,
+    type=int,
+    help="Node ID used for the current client.",
+)
+args = parser.parse_args()
 
-# Parse arguments for experimental settings
-args = client_args_parser()
+
+# Define data partitioning related functions
+def train_test_split(partition: Dataset, test_fraction: float, seed: int):
+    """Split the data into train and validation set given split rate."""
+    train_test = partition.train_test_split(test_size=test_fraction, seed=seed)
+    partition_train = train_test["train"]
+    partition_test = train_test["test"]
+
+    num_train = len(partition_train)
+    num_test = len(partition_test)
+
+    return partition_train, partition_test, num_train, num_test
+
+
+def transform_dataset_to_dmatrix(data: Union[Dataset, DatasetDict]) -> xgb.core.DMatrix:
+    """Transform dataset to DMatrix format for xgboost."""
+    x = data["inputs"]
+    y = data["label"]
+    new_data = xgb.DMatrix(x, label=y)
+    return new_data
+
 
 # Load (HIGGS) dataset and conduct partitioning
-num_partitions = args.num_partitions
-
-# Partitioner type is chosen from ["uniform", "linear", "square", "exponential"]
-partitioner_type = args.partitioner_type
-
-# Instantiate partitioner
-partitioner = instantiate_partitioner(
-    partitioner_type=partitioner_type, num_partitions=num_partitions
-)
-fds = FederatedDataset(
-    dataset="jxie/higgs",
-    partitioners={"train": partitioner},
-    resplitter=resplit,
-)
+# We use a small subset (num_partitions=30) of the dataset for demonstration to speed up the data loading process.
+partitioner = IidPartitioner(num_partitions=30)
+fds = FederatedDataset(dataset="jxie/higgs", partitioners={"train": partitioner})
 
 # Load the partition for this `node_id`
 log(INFO, "Loading partition...")
-node_id = args.node_id
-partition = fds.load_partition(node_id=node_id, split="train")
+partition = fds.load_partition(node_id=args.node_id, split="train")
 partition.set_format("numpy")
 
-if args.centralised_eval:
-    # Use centralised test set for evaluation
-    train_data = partition
-    valid_data = fds.load_full("test")
-    valid_data.set_format("numpy")
-    num_train = train_data.shape[0]
-    num_val = valid_data.shape[0]
-else:
-    # Train/test splitting
-    SEED = args.seed
-    test_fraction = args.test_fraction
-    train_data, valid_data, num_train, num_val = train_test_split(
-        partition, test_fraction=test_fraction, seed=SEED
-    )
+# Train/test splitting
+train_data, valid_data, num_train, num_val = train_test_split(
+    partition, test_fraction=0.2, seed=42
+)
 
 # Reformat data to DMatrix for xgboost
 log(INFO, "Reformatting data...")
 train_dmatrix = transform_dataset_to_dmatrix(train_data)
 valid_dmatrix = transform_dataset_to_dmatrix(valid_data)
 
-
 # Hyper-parameters for xgboost training
 num_local_round = 1
-params = BST_PARAMS
+params = {
+    "objective": "binary:logistic",
+    "eta": 0.1,  # Learning rate
+    "max_depth": 8,
+    "eval_metric": "auc",
+    "nthread": 16,
+    "num_parallel_tree": 1,
+    "subsample": 1,
+    "tree_method": "hist",
+}
 
 
 # Define Flower client
@@ -150,9 +160,6 @@ class XgbClient(fl.client.Client):
             iteration=self.bst.num_boosted_rounds() - 1,
         )
         auc = round(float(eval_results.split("\t")[1].split(":")[1]), 4)
-
-        global_round = ins.config["global_round"]
-        log(INFO, f"AUC = {auc} at round {global_round}")
 
         return EvaluateRes(
             status=Status(
