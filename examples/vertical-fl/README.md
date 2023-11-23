@@ -393,6 +393,15 @@ guides each participant's model to adjust and improve, achieving optimization
 not just based on its own data but also leveraging insights from the entire
 network's data.
 
+We do not need to return parameters here because updates are completed locally
+in VFL. But the server should still send the gradients back to all clients to
+let them continue the back prop and update their local model. In Flower, the
+parameters returned by `aggregate_fit` will be stored and sent to
+`Client.evaluate` via `configure_fit`. So we take advantage of this and return
+our gradients in `aggregate_fit` so that they'll be sent to `Client.evaluate` as
+`parameters`. That's also why we can obtain gradients from the `parameters`
+argument in `Client.evaluate` (see next section).
+
 The last thing we have to do is to redefine the `aggregate_evaluate` function to
 disable distributed evaluation (as the clients do not hold any labels to test
 their local models).
