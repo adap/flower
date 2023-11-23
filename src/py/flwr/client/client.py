@@ -19,6 +19,7 @@ from __future__ import annotations
 
 from abc import ABC
 
+from flwr.client.workload_state import WorkloadState
 from flwr.common import (
     Code,
     EvaluateIns,
@@ -36,6 +37,8 @@ from flwr.common import (
 
 class Client(ABC):
     """Abstract base class for Flower clients."""
+
+    state: WorkloadState
 
     def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
         """Return set of client's properties.
