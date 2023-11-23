@@ -507,4 +507,4 @@ rounds.
 
 Here we can observe the results after 1000 rounds:
 
-![Accuracy plot](_static/accuracy.png)
+![Accuracy plot](_static/vfl-accuracy.png)
