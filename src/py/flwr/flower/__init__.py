@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2020 Adap GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,20 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower main package."""
+"""Flower callable package."""
 
 
-from flwr.common.version import package_version as _package_version
-
-from . import client, common, driver, flower, server, simulation
+from flwr.client.flower import Bwd as Bwd
+from flwr.client.flower import Flower as Flower
+from flwr.client.flower import Fwd as Fwd
 
 __all__ = [
-    "client",
-    "common",
-    "driver",
-    "flower",
-    "server",
-    "simulation",
+    "Flower",
+    "Fwd",
+    "Bwd",
 ]
-
-__version__ = _package_version
