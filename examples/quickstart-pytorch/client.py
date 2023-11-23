@@ -1,7 +1,7 @@
+import argparse
 import warnings
 from collections import OrderedDict
 
-import click
 import flwr as fl
 from flwr_datasets import FederatedDataset
 import torch
@@ -69,16 +69,10 @@ def test(net, testloader):
     return loss, accuracy
 
 
-@click.command()
-@click.option(
-    "--node-id",
-    type=click.Choice(["0", "1", "2"]),
-    help="Partition of the dataset, which is divided into 3 iid partitions created artificially",
-)
 def load_data(node_id):
     """Load partition CIFAR10 data."""
     fds = FederatedDataset(dataset="cifar10", partitioners={"train": 3})
-    partition = fds.load_partition(int(node_id), "train")
+    partition = fds.load_partition(node_id)
     # Divide data on each node: 80% train, 20% test
     partition_train_test = partition.train_test_split(test_size=0.2)
     pytorch_transforms = Compose(
@@ -100,9 +94,15 @@ def load_data(node_id):
 # 2. Federation of the pipeline with Flower
 # #############################################################################
 
+# Get node id
+parser = argparse.ArgumentParser(description="Flower")
+parser.add_argument("--node-id", choices=[0, 1, 2], type=int, help="Partition of the "
+"dataset, which is divided into 3 iid partitions created artificially.")
+node_id = parser.parse_args().node_id
+
 # Load model and data (simple CNN, CIFAR-10)
 net = Net().to(DEVICE)
-trainloader, testloader = load_data(standalone_mode=False)
+trainloader, testloader = load_data(node_id=node_id)
 
 
 # Define Flower client
