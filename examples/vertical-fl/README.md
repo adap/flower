@@ -295,7 +295,7 @@ class ServerModel(nn.Module):
 
 It comprises a single linear layer that accepts the concatenated outputs from
 all client models as its input. The number of inputs to this layer equals the
-total number of outputs from the client models ( $3 x 4 = 12$ ). After processing
+total number of outputs from the client models ( $3 \times 4 = 12$ ). After processing
 these inputs, the linear layer's output is passed through a sigmoid activation
 function (`nn.Sigmoid()`), which maps the result to a `(0, 1)` range, providing
 a probability score indicative of the likelihood of survival.
@@ -381,6 +381,17 @@ simplicity here), ready to be sent back to the respective client models.
 Finally, with no gradient calculation needed, the model's predictions are
 compared to the true labels to calculate the accuracy of the model after the
 update.
+
+Note that this `aggregate_fit` function returns gradients instead of trained
+weights. This is because, in this setting, sharing gradients allows each
+participant to benefit from the collective feedback gathered from the entire
+pool of data without the need to align their different feature spaces (trained
+weights are directly tied to specific features of the dataset but not gradients,
+which are just a measure of the sensitivity of the loss function to changes in
+the model's parameters). This shared feedback, encapsulated in the gradients,
+guides each participant's model to adjust and improve, achieving optimization
+not just based on its own data but also leveraging insights from the entire
+network's data.
 
 The last thing we have to do is to redefine the `aggregate_evaluate` function to
 disable distributed evaluation (as the clients do not hold any labels to test
