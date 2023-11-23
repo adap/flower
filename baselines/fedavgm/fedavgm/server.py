@@ -10,7 +10,7 @@ def get_on_fit_config(config: DictConfig):
     The config dict is sent to the client fit() method.
     """
 
-    def fit_config_fn(server_round: int):
+    def fit_config_fn(server_round: int):  # pylint: disable=unused-argument
         # option to use scheduling of learning rate based on round
         # if server_round > 50:
         #     lr = config.lr / 10
@@ -28,7 +28,9 @@ def get_evaluate_fn(model, x_test, y_test, num_rounds, num_classes):
     The method evaluate_fn runs after global model aggregation.
     """
 
-    def evaluate_fn(server_round: int, parameters, config):
+    def evaluate_fn(
+        server_round: int, parameters, config
+    ):  # pylint: disable=unused-argument
         if server_round == num_rounds:  # evaluates global model just on the last round
             # instantiate the model
             model.set_weights(parameters)

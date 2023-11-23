@@ -19,6 +19,7 @@ from fedavgm.dataset import partition
 from fedavgm.server import get_evaluate_fn
 
 
+# pylint: disable=too-many-locals
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.

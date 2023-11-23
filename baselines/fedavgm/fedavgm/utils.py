@@ -10,6 +10,8 @@ import numpy as np
 
 from fedavgm.dataset import cifar10, partition
 
+# pylint: disable=too-many-locals
+
 
 def plot_concentrations_cifar10():
     """Create a plot with different concentrations for dataset using LDA."""

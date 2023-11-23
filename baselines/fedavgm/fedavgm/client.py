@@ -10,6 +10,7 @@ from keras.utils import to_categorical
 class FlowerClient(fl.client.NumPyClient):
     """Standard Flower client."""
 
+    # pylint: disable=too-many-arguments
     def __init__(self, x_train, y_train, x_val, y_val, model, num_classes) -> None:
         # local model
         self.model = instantiate(model)

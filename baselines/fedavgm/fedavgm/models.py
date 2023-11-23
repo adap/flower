@@ -4,7 +4,7 @@ from flwr.common import ndarrays_to_parameters
 from keras.optimizers import SGD
 from keras.regularizers import l2
 from tensorflow import keras
-from tensorflow.nn import local_response_normalization
+from tensorflow.nn import local_response_normalization  # pylint: disable=import-error
 
 
 def cnn(input_shape, num_classes, learning_rate):
