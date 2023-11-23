@@ -22,6 +22,7 @@ from logging import INFO
 from typing import Callable, ContextManager, Optional, Tuple, Union
 
 from flwr.client.client import Client
+from flwr.client.flower import Bwd, Flower, Fwd
 from flwr.client.typing import ClientFn
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
@@ -32,13 +33,15 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
 )
-from flwr.common.logger import log
+from flwr.common.logger import log, warn_experimental_feature
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 
+from .flower import load_callable
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
-from .message_handler.message_handler import handle, handle_control_message
+from .message_handler.message_handler import handle_control_message
 from .numpy_client import NumPyClient
+from .workload_state import WorkloadState
 
 
 def run_client() -> None:
@@ -48,6 +51,22 @@ def run_client() -> None:
     args = _parse_args_client().parse_args()
 
     print(args.server)
+    print(args.callable_dir)
+    print(args.callable)
+
+    callable_dir = args.callable_dir
+    if callable_dir is not None:
+        sys.path.insert(0, callable_dir)
+
+    def _load() -> Flower:
+        flower: Flower = load_callable(args.callable)
+        return flower
+
+    return start_client(
+        server_address=args.server,
+        load_callable_fn=_load,
+        transport="grpc-rere",  # Only
+    )
 
 
 def _parse_args_client() -> argparse.ArgumentParser:
@@ -58,8 +77,18 @@ def _parse_args_client() -> argparse.ArgumentParser:
 
     parser.add_argument(
         "--server",
-        help="Server address",
         default="0.0.0.0:9092",
+        help="Server address",
+    )
+    parser.add_argument(
+        "--callable",
+        help="For example: `client:flower` or `project.package.module:wrapper.flower`",
+    )
+    parser.add_argument(
+        "--callable-dir",
+        default="",
+        help="Add specified directory to the PYTHONPATH and load callable from there."
+        " Default: current working directory.",
     )
 
     return parser
@@ -84,6 +113,7 @@ def _check_actionable_client(
 def start_client(
     *,
     server_address: str,
+    load_callable_fn: Optional[Callable[[], Flower]] = None,
     client_fn: Optional[ClientFn] = None,
     client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
@@ -98,6 +128,8 @@ def start_client(
         The IPv4 or IPv6 address of the server. If the Flower
         server runs on the same machine on port 8080, then `server_address`
         would be `"[::]:8080"`.
+    load_callable_fn : Optional[Callable[[], Flower]] (default: None)
+        ...
     client_fn : Optional[ClientFn]
         A callable that instantiates a Client. (default: None)
     client : Optional[flwr.client.Client]
@@ -146,20 +178,31 @@ def start_client(
     """
     event(EventType.START_CLIENT_ENTER)
 
-    _check_actionable_client(client, client_fn)
+    if load_callable_fn is None:
+        _check_actionable_client(client, client_fn)
 
-    if client_fn is None:
-        # Wrap `Client` instance in `client_fn`
-        def single_client_factory(
-            cid: str,  # pylint: disable=unused-argument
-        ) -> Client:
-            if client is None:  # Added this to keep mypy happy
-                raise Exception(
-                    "Both `client_fn` and `client` are `None`, but one is required"
-                )
-            return client  # Always return the same instance
+        if client_fn is None:
+            # Wrap `Client` instance in `client_fn`
+            def single_client_factory(
+                cid: str,  # pylint: disable=unused-argument
+            ) -> Client:
+                if client is None:  # Added this to keep mypy happy
+                    raise Exception(
+                        "Both `client_fn` and `client` are `None`, but one is required"
+                    )
+                return client  # Always return the same instance
 
-        client_fn = single_client_factory
+            client_fn = single_client_factory
+
+        def _load_app() -> Flower:
+            return Flower(client_fn=client_fn)
+
+        load_callable_fn = _load_app
+    else:
+        warn_experimental_feature("`load_callable_fn`")
+
+    # At this point, only `load_callable_fn` should be used
+    # Both `client` and `client_fn` must not be used directly
 
     # Initialize connection context manager
     connection, address = _init_connection(transport, server_address)
@@ -190,11 +233,18 @@ def start_client(
                     send(task_res)
                     break
 
+                # Load app
+                app: Flower = load_callable_fn()
+
                 # Handle task message
-                task_res = handle(client_fn, task_ins)
+                fwd_msg: Fwd = Fwd(
+                    task_ins=task_ins,
+                    state=WorkloadState(state={}),
+                )
+                bwd_msg: Bwd = app(fwd=fwd_msg)
 
                 # Send
-                send(task_res)
+                send(bwd_msg.task_res)
 
             # Unregister node
             if delete_node is not None:
