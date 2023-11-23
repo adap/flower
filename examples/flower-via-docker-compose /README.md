@@ -52,7 +52,19 @@ Before starting, ensure the following prerequisites are met:
    - The script will launch several services as defined in your `docker-compose.yml` file:
      - **Monitoring Services**: Prometheus for metrics collection, Cadvisor for container monitoring, and Grafana for data visualization.
      - **Flower Federated Learning Environment**: The Flower server and client containers are initialized and start running.
-   
+   - After launching the services, verify that all Docker containers are running correctly by executing the `docker ps` command. Here's an example output:
+     ```bash
+     ➜  ~ docker ps
+     CONTAINER ID   IMAGE                               COMMAND                  CREATED          STATUS                   PORTS                                            NAMES
+     72063c8968d3   flower-via-docker-compose-client3   "python client.py --…"   12 minutes ago   Up 13 seconds            0.0.0.0:6003->6003/tcp                           client3
+     77ca59fc42e6   flower-via-docker-compose-client2   "python client.py --…"   12 minutes ago   Up 13 seconds            0.0.0.0:6002->6002/tcp                           client2
+     2dc33f0b4ef6   flower-via-docker-compose-client1   "python client.py --…"   12 minutes ago   Up 13 seconds            0.0.0.0:6001->6001/tcp                           client1
+     8d87f3655476   flower-via-docker-compose-server    "python server.py --…"   12 minutes ago   Up 13 seconds            0.0.0.0:6000->6000/tcp, 0.0.0.0:8265->8265/tcp   server
+     dbcd8cf1faf1   grafana/grafana:latest              "/run.sh --config=/e…"   12 minutes ago   Up 5 minutes             0.0.0.0:3000->3000/tcp                           grafana
+     80c4a599b2a3   prom/prometheus:latest              "/bin/prometheus --c…"   12 minutes ago   Up 5 minutes             0.0.0.0:9090->9090/tcp                           prometheus
+     169880ab80bd   gcr.io/cadvisor/cadvisor:v0.47.0    "/usr/bin/cadvisor -…"   12 minutes ago   Up 5 minutes (healthy)   0.0.0.0:8080->8080/tcp                           cadvisor
+     ```
+
 3. **Begin Training Process**: 
    - The federated learning training automatically begins once all client containers are successfully connected to the Flower server. This synchronizes the learning process across all participating clients.
 
