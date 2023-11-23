@@ -143,6 +143,11 @@ class CustomFedAvgM(FedAvg):
         # original implementation follows convention described in
         # https://pytorch.org/docs/stable/generated/torch.optim.SGD.html
 
+        # do the check for self.initial_parameters being set
+        assert (
+            self.initial_parameters is not None
+        ), "Initial parameters must be set for CustomFedAvgM strategy"
+
         # remember that updates are the opposite of gradients
         pseudo_gradient: NDArrays = [
             x - y
