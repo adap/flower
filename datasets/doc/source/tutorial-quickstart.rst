@@ -5,7 +5,7 @@ Run Flower Datasets as fast as possible by learning only the essentials.
 
 Install Federated Datasets
 --------------------------
-Run on the command line
+On the command line, run
 
 .. code-block:: bash
 
@@ -28,12 +28,11 @@ PyTorch
 Choose the dataset
 ------------------
 Choose the dataset by going to Hugging Face `Datasets Hub <https://huggingface.co/datasets>`_ and searching for your
-dataset by name. Note that the name is case sensitive, so make sure to pass the correct name as the `dataset` parameter
-to `FederatedDataset`.
+dataset by name that you will pass to the `dataset` parameter of `FederatedDataset`. Note that the name is case sensitive.
 
 Partition the dataset
 ---------------------
-::
+To iid partition your dataset, choose the split you want to partition and the number of partitions::
 
   from flwr_datasets import FederatedDataset
 
@@ -42,12 +41,32 @@ Partition the dataset
   centralized_dataset = fds.load_full("test")
 
 Now you're ready to go. You have ten partitions created from the train split of the MNIST dataset and the test split
-for the centralized evaluation. We will convert the type of the dataset from Hugging Face's Dataset type to the one
+for the centralized evaluation. We will convert the type of the dataset from Hugging Face's `Dataset` type to the one
 supported by your framework.
+
+Display the features
+--------------------
+Determine the names of the features of your dataset (you can alternatively do that directly on the Hugging Face
+website). The names can vary along different datasets e.g. "img" or "image", "label" or "labels". You will also see
+the names of label categories. Type::
+
+  partition.features
+
+In case of CIFAR10, you should see the following output.
+
+.. code-block:: none
+
+  {'img': Image(decode=True, id=None),
+  'label': ClassLabel(names=['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog',
+  'frog', 'horse', 'ship', 'truck'], id=None)}
+
+Note that the image is denoted by "img" which is crucial for the next steps (conversion you the ML
+framework of your choice).
 
 Conversion
 ----------
-For more detailed instructions, go to :doc:`how-to-use-with-pytorch`.
+For more detailed instructions, go to :doc:`how-to-use-with-pytorch`, :doc:`how-to-use-with-numpy`, or
+:doc:`how-to-use-with-tensorflow`.
 
 PyTorch DataLoader
 ^^^^^^^^^^^^^^^^^^
@@ -64,7 +83,7 @@ Transform the Dataset directly into the DataLoader::
 
 NumPy
 ^^^^^
-NumPy can be used as input to the TensorFlow model and is very straightforward::
+NumPy can be used as input to the TensorFlow and scikit-learn models and it is very straightforward::
 
    partition_np = partition.with_format("numpy")
    X_train, y_train = partition_np["img"], partition_np["label"]

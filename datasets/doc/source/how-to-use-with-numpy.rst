@@ -3,7 +3,7 @@ Use with NumPy
 
 Let's integrate ``flwr-datasets`` with NumPy.
 
-Prepare the desired partitioning::
+Create a ``FederatedDataset``::
 
   from flwr_datasets import FederatedDataset
 
@@ -11,6 +11,22 @@ Prepare the desired partitioning::
   partition = fds.load_partition(0, "train")
   centralized_dataset = fds.load_full("test")
 
+Determine the names of the features::
+
+  partition.features
+
+In case of CIFAR10, you should see the following output.
+
+.. code-block:: none
+
+  {'img': Image(decode=True, id=None),
+  'label': ClassLabel(names=['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog',
+  'frog', 'horse', 'ship', 'truck'], id=None)}
+
+Let's move to the transformations.
+
+NumPy
+-----
 Transform to NumPy::
 
   partition_np = partition.with_format("numpy")
