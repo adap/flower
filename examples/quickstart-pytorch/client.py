@@ -96,8 +96,11 @@ def load_data(node_id):
 
 # Get node id
 parser = argparse.ArgumentParser(description="Flower")
-parser.add_argument("--node-id", choices=[0, 1, 2], type=int, help="Partition of the "
-"dataset, which is divided into 3 iid partitions created artificially.")
+parser.add_argument(
+    "--node-id",
+    choices=[0, 1, 2],
+    type=int,
+    help="Partition of the dataset divided into 3 iid partitions created artificially.")
 node_id = parser.parse_args().node_id
 
 # Load model and data (simple CNN, CIFAR-10)
