@@ -51,20 +51,22 @@ For more detailed instructions, go to :doc:`how-to-use-with-pytorch`.
 
 PyTorch DataLoader
 ^^^^^^^^^^^^^^^^^^
-Transform the Dataset directly into the DataLoader::
+Transform the Dataset into the DataLoader, use the PyTorch transforms (`Compose` and all the others are also
+possible)::
 
   from torch.utils.data import DataLoader
   from torchvision.transforms import ToTensor
 
   transforms = ToTensor()
-  partition_torch = partition.map(
-        lambda img: {"img": transforms(img)}, input_columns="img"
-    ).with_format("torch")
+  def apply_transforms(batch):
+    batch["img"] = [transforms(img) for img in batch["img"]]
+    return batch
+  partition_torch = partition.with_transform(apply_transforms)
   dataloader = DataLoader(partition_torch, batch_size=64)
 
 NumPy
 ^^^^^
-NumPy can be used as input to the TensorFlow model and is very straightforward::
+NumPy can be used as input to the TensorFlow and scikit-learn models and it is very straightforward::
 
    partition_np = partition.with_format("numpy")
    X_train, y_train = partition_np["img"], partition_np["label"]
