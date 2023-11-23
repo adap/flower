@@ -70,8 +70,10 @@ If you want to divide the dataset, you can use (at any point before passing the 
 Or you can simply calculate the indices yourself::
 
   partition_len = len(partition)
-  partition_train = partition.select(range(int(0.8 * partition_len)))
-  partition_test = partition.select(range(int(0.8 * partition_len), partition_len))
+  # Split `partition` 80:20
+  num_train_examples = int(0.8 * partition_len)
+  partition_train = partition.select(range(num_train_examples)) ) # use first 80% 
+  partition_test = partition.select(range(num_train_examples, partition_len)) ) # use last 20%
 
 And during the training loop, you need to apply one change. With a typical dataloader, you get a list returned for each iteration::
 
