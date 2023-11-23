@@ -9,7 +9,7 @@ On the command line, run
 
 .. code-block:: bash
 
-  python -m pip install flwr-datasets[vision]
+  python -m pip install "flwr-datasets[vision]"
 
 Install the ML framework
 ------------------------
