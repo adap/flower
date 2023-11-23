@@ -79,13 +79,14 @@ class Flower:
     def __call__(self, fwd: Fwd) -> Bwd:
         """."""
         # Execute the task
-        task_res = handle(
+        task_res, state_updated = handle(
             client_fn=self.client_fn,
+            state=fwd.state,
             task_ins=fwd.task_ins,
         )
         return Bwd(
             task_res=task_res,
-            state=WorkloadState(state={}),
+            state=state_updated,
         )
 
 

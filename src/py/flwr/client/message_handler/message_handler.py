@@ -33,6 +33,7 @@ from flwr.client.typing import ClientFn
 from flwr.common import serde
 from flwr.proto.task_pb2 import SecureAggregation, Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
+from flwr.client.workload_state import WorkloadState
 
 
 class UnexpectedServerMessage(Exception):
@@ -77,13 +78,15 @@ def handle_control_message(task_ins: TaskIns) -> Tuple[Optional[TaskRes], int]:
     return None, 0
 
 
-def handle(client_fn: ClientFn, task_ins: TaskIns) -> TaskRes:
+def handle(client_fn: ClientFn, state: WorkloadState, task_ins: TaskIns) -> TaskRes:
     """Handle incoming TaskIns from the server.
 
     Parameters
     ----------
     client_fn : ClientFn
         A callable that instantiates a Client.
+    state : WorkloadState
+        A dataclass storing the state for the workload being executed by the client.
     task_ins: TaskIns
         The task instruction coming from the server, to be processed by the client.
 
@@ -96,6 +99,7 @@ def handle(client_fn: ClientFn, task_ins: TaskIns) -> TaskRes:
     if server_msg is None:
         # Instantiate the client
         client = client_fn("-1")
+        # TODO: inject state into client object
         # Secure Aggregation
         if task_ins.task.HasField("sa") and isinstance(
             client, SecureAggregationHandler
@@ -112,15 +116,15 @@ def handle(client_fn: ClientFn, task_ins: TaskIns) -> TaskRes:
                     sa=SecureAggregation(named_values=serde.named_values_to_proto(res)),
                 ),
             )
-            return task_res
+            return task_res # TODO: return updated state
         raise NotImplementedError()
-    client_msg = handle_legacy_message(client_fn, server_msg)
+    client_msg, updated_state = handle_legacy_message(client_fn, state, server_msg)
     task_res = wrap_client_message_in_task_res(client_msg)
-    return task_res
+    return task_res, updated_state
 
 
 def handle_legacy_message(
-    client_fn: ClientFn, server_msg: ServerMessage
+    client_fn: ClientFn, state: WorkloadState, server_msg: ServerMessage
 ) -> ClientMessage:
     """Handle incoming messages from the server.
 
@@ -128,6 +132,8 @@ def handle_legacy_message(
     ----------
     client_fn : ClientFn
         A callable that instantiates a Client.
+    state : WorkloadState
+        A dataclass storing the state for the workload being executed by the client.
     server_msg: ServerMessage
         The message coming from the server, to be processed by the client.
 
@@ -144,15 +150,19 @@ def handle_legacy_message(
 
     # Instantiate the client
     client = client_fn("-1")
+    # TODO: inject state into client object
     # Execute task
+    message = None
     if field == "get_properties_ins":
-        return _get_properties(client, server_msg.get_properties_ins)
+        message = _get_properties(client, server_msg.get_properties_ins)
     if field == "get_parameters_ins":
-        return _get_parameters(client, server_msg.get_parameters_ins)
+        message = _get_parameters(client, server_msg.get_parameters_ins)
     if field == "fit_ins":
-        return _fit(client, server_msg.fit_ins)
+        message = _fit(client, server_msg.fit_ins)
     if field == "evaluate_ins":
-        return _evaluate(client, server_msg.evaluate_ins)
+        message = _evaluate(client, server_msg.evaluate_ins)
+    if message:
+        return message # TODO: return updated state
     raise UnknownServerMessage()
 
 
