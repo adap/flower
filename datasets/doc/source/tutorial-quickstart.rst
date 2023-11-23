@@ -70,15 +70,17 @@ For more detailed instructions, go to :doc:`how-to-use-with-pytorch`, :doc:`how-
 
 PyTorch DataLoader
 ^^^^^^^^^^^^^^^^^^
-Transform the Dataset directly into the DataLoader::
+Transform the Dataset into the DataLoader, use the PyTorch transforms (`Compose` and all the others are also
+possible)::
 
   from torch.utils.data import DataLoader
   from torchvision.transforms import ToTensor
 
   transforms = ToTensor()
-  partition_torch = partition.map(
-        lambda img: {"img": transforms(img)}, input_columns="img"
-    ).with_format("torch")
+  def apply_transforms(batch):
+    batch["img"] = [transforms(img) for img in batch["img"]]
+    return batch
+  partition_torch = partition.with_transform(apply_transforms)
   dataloader = DataLoader(partition_torch, batch_size=64)
 
 NumPy
