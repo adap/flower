@@ -24,7 +24,14 @@ from flwr.server.strategy.aggregate import aggregate
 
 
 class CustomFedAvgM(FedAvg):
-    """Re-implmentation of FedAvgM."""
+    """Re-implmentation of FedAvgM.
+
+    This implementation of FedAvgM diverges from original (Flwr v1.5.0) implementation.
+    Here, the re-implementation introduces the Nesterov Accelerated Gradient (NAG),
+    same as reported in the original FedAvgM paper:
+
+    https://arxiv.org/pdf/1909.06335.pdf
+    """
 
     def __init__(
         self,
