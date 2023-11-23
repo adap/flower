@@ -65,8 +65,12 @@ Before starting, ensure the following prerequisites are met:
      169880ab80bd   gcr.io/cadvisor/cadvisor:v0.47.0    "/usr/bin/cadvisor -…"   12 minutes ago   Up 5 minutes (healthy)   0.0.0.0:8080->8080/tcp                           cadvisor
      ```
 
-3. **Begin Training Process**: 
+3. **Automated Grafana Configuration**:
+   - Grafana is set up to automatically load pre-defined data sources and dashboards for immediate monitoring. This automation is facilitated by provisioning files: `prometheus-datasource.yml` for data sources and `default_dashboard.json` for dashboards. These files are located in the `./config/provisioning/` directory of the project and are mounted directly into the Grafana container through Docker Compose volume mappings. This ensures that upon startup, Grafana is pre-configured with the necessary settings for monitoring without any manual setup.
+
+4. **Begin Training Process**: 
    - The federated learning training automatically begins once all client containers are successfully connected to the Flower server. This synchronizes the learning process across all participating clients.
+
 
 By following these steps, you will have a fully functional federated learning environment with device heterogeneity and monitoring capabilities.
 
@@ -74,11 +78,11 @@ By following these steps, you will have a fully functional federated learning en
 
 ## Monitoring with Grafana
 1. **Access and Customize Grafana Dashboard**:
-   - Visit `http://localhost:3000` to enter Grafana.
-   - Connect to Prometheus at `http://host.docker.internal:9090` as the data source.
-   - Use Grafana's intuitive interface to create dashboards that visually represent key performance metrics, facilitating an in-depth understanding of device behavior and performance in the federated learning process.
+   - Visit `http://localhost:3000` to enter Grafana. Thanks to the automated setup, Grafana will already have Prometheus as a data source and a pre-configured dashboard for monitoring, similar to the example provided below.
+   - You can further customize or create new dashboards as per your requirements.
+
 2. **Grafana Dashboard Example**:
-Below is an example of a Grafana dashboard showing a histogram of memory usage for a specific client-container:
+Below is an example of a Grafana dashboard showing a Bar Chart of memory usage for a specific client-container:
 
 
 <img src="public/grafana-memory-usage.png" alt="Grafana Memory Usage Histogram" width="600"/>

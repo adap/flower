@@ -7,6 +7,11 @@ __pycache__/
 # ignore .vscode directory
 .vscode/
 
+# ignore mlflow and mlruns directories
+mlflow/
+mlruns/
+dataset/
+
 # ignore .npz files
 *.npz
 

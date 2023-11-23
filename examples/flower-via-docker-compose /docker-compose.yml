@@ -1,18 +1,4 @@
-import random
 
-
-def create_docker_compose(total_clients, number_of_rounds):
-    # cpus is used to set the number of CPUs available to the container as a fraction of the total number of CPUs on the host machine.
-    # mem_limit is used to set the memory limit for the container.
-    client_configs = [
-        {'mem_limit': '3g', 'batch_size': 32,  "cpus": 3.5, 'learning_rate': 0.001},
-        {'mem_limit': '4g', 'batch_size': 64,  "cpus": 3, 'learning_rate': 0.02},
-        {'mem_limit': '5g', 'batch_size': 128, "cpus": 2.5, 'learning_rate': 0.09},
-        {'mem_limit': '6g', 'batch_size': 256, "cpus": 1, 'learning_rate': 0.15},
-        # Add or modify the configurations depending on your host machine
-    ]
-
-    docker_compose_content = f"""
 version: '3'
 services:
   prometheus:
@@ -72,7 +58,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: python server.py --number_of_rounds={number_of_rounds} --total_clients={total_clients}
+    command: python server.py --number_of_rounds=10 --total_clients=3
     restart: always
     environment:
       FLASK_RUN_PORT: 6000
@@ -86,42 +72,77 @@ services:
     depends_on:
       - prometheus
       - grafana
-"""
-    # Add client services
-    for i in range(1, total_clients + 1):
-        config = random.choice(client_configs)
-        docker_compose_content += f"""
-  client{i}:
-    container_name: client{i}
+
+  client1:
+    container_name: client1
     build:
       context: .
       dockerfile: Dockerfile
-    command: python client.py --server_address=server:8080 --batch_size={config["batch_size"]} --learning_rate={config["learning_rate"]}
+    command: python client.py --server_address=server:8080 --batch_size=64 --learning_rate=0.02
     restart: always
-    mem_limit: {config['mem_limit']}
+    mem_limit: 4g
     deploy:
       resources:
         limits:
-          cpus: "{(config['cpus'])}"
+          cpus: "3"
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - "{6000 + i}:{6000 + i}"
+      - "6001:6001"
     depends_on:
       - server
     environment:
-      FLASK_RUN_PORT: {6000 + i}
-      container_name: client{i}
+      FLASK_RUN_PORT: 6001
+      container_name: client1
       DOCKER_HOST_IP: host.docker.internal
-"""
 
-    docker_compose_content += "volumes:\n  grafana-storage:\n"
+  client2:
+    container_name: client2
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python client.py --server_address=server:8080 --batch_size=32 --learning_rate=0.001
+    restart: always
+    mem_limit: 3g
+    deploy:
+      resources:
+        limits:
+          cpus: "3.5"
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "6002:6002"
+    depends_on:
+      - server
+    environment:
+      FLASK_RUN_PORT: 6002
+      container_name: client2
+      DOCKER_HOST_IP: host.docker.internal
 
-    with open('docker-compose.yml', 'w') as file:
-        file.write(docker_compose_content)
-
-if __name__ == "__main__":
-    total_clients = 3  # Number of clients that will be created
-    number_of_rounds = 10  # Number of rounds that the server will run for
-    create_docker_compose(total_clients,number_of_rounds)
+  client3:
+    container_name: client3
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python client.py --server_address=server:8080 --batch_size=256 --learning_rate=0.15
+    restart: always
+    mem_limit: 6g
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "6003:6003"
+    depends_on:
+      - server
+    environment:
+      FLASK_RUN_PORT: 6003
+      container_name: client3
+      DOCKER_HOST_IP: host.docker.internal
+volumes:
+  grafana-storage:
