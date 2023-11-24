@@ -3,59 +3,60 @@
 # This file is distributed under the same license as the Flower package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-11-23 18:31+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2023-11-25 19:00+0000\n"
+"Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
+"Language-Team: Chinese (Simplified) <https://hosted.weblate.org/projects/"
+"flower-docs/framework/zh_Hans/>\n"
 "Language: zh_Hans\n"
-"Language-Team: zh_Hans <LL@li.org>\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 5.2.1-rc\n"
 "Generated-By: Babel 2.13.1\n"
 
 #: ../../source/contributor-explanation-architecture.rst:2
 msgid "Flower Architecture"
-msgstr ""
+msgstr "Flower的架构"
 
 #: ../../source/contributor-explanation-architecture.rst:5
 msgid "Edge Client Engine"
-msgstr ""
+msgstr "边缘客户端引擎"
 
 #: ../../source/contributor-explanation-architecture.rst:7
 msgid ""
 "`Flower <https://flower.dev>`_ core framework architecture with Edge "
 "Client Engine"
-msgstr ""
+msgstr "具有边缘客户端引擎的`Flower <https://flower.dev>`核心架构"
 
 #: ../../source/contributor-explanation-architecture.rst:13
 msgid "Virtual Client Engine"
-msgstr ""
+msgstr "虚拟客户端引擎"
 
 #: ../../source/contributor-explanation-architecture.rst:15
 msgid ""
 "`Flower <https://flower.dev>`_ core framework architecture with Virtual "
 "Client Engine"
-msgstr ""
+msgstr "具有虚拟客户端引擎的`Flower <https://flower.dev>`核心架构"
 
 #: ../../source/contributor-explanation-architecture.rst:21
 msgid "Virtual Client Engine and Edge Client Engine in the same workload"
-msgstr ""
+msgstr "可同步进行的虚拟客户端引擎和边缘客户端引擎"
 
 #: ../../source/contributor-explanation-architecture.rst:23
 msgid ""
 "`Flower <https://flower.dev>`_ core framework architecture with both "
 "Virtual Client Engine and Edge Client Engine"
-msgstr ""
+msgstr "具有虚拟客户端引擎和边缘客户端引擎的`Flower <https://flower.dev>`核心架构"
 
 #: ../../source/contributor-how-create-new-messages.rst:2
 msgid "Creating New Messages"
-msgstr ""
+msgstr "创建新信息"
 
 #: ../../source/contributor-how-create-new-messages.rst:4
 msgid ""
@@ -13605,4 +13606,3 @@ msgid ""
 "pytorch.html>`__ shows how to build a simple federated learning system "
 "with PyTorch and Flower."
 msgstr ""
-
