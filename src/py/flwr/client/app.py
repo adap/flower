@@ -78,17 +78,6 @@ def _parse_args_client() -> argparse.ArgumentParser:
     parser.add_argument(
         "--server",
         default="0.0.0.0:9092",
-        help="Server address",
-    )
-    parser.add_argument(
-        "--callable",
-        help="For example: `client:flower` or `project.package.module:wrapper.flower",
-    )
-    parser.add_argument(
-        "--callable-dir",
-        default="",
-        help="Add specified directory to the PYTHONPATH and load callable from there."
-        " Default: current working directory.",
     )
 
     return parser

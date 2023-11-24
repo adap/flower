@@ -16,46 +16,77 @@
 
 
 import importlib
-from typing import Callable, List, Optional, cast
+from dataclasses import dataclass
+from typing import Callable, cast
 
 from flwr.client.message_handler.message_handler import handle
-from flwr.client.middleware import Layer, make_app
 from flwr.client.typing import ClientFn
+from flwr.client.workload_state import WorkloadState
+from flwr.proto.task_pb2 import TaskIns, TaskRes
 
-from .typing import Bwd, Fwd
+
+@dataclass
+class Fwd:
+    """."""
+
+    task_ins: TaskIns
+    state: WorkloadState
+
+
+@dataclass
+class Bwd:
+    """."""
+
+    task_res: TaskRes
+    state: WorkloadState
+
 
 FlowerCallable = Callable[[Fwd], Bwd]
 
 
 class Flower:
-    """Flower callable."""
+    """Flower callable.
+
+    Examples
+    --------
+    Assuming a typical client implementation in `FlowerClient`, you can wrap it in a
+    Flower callable as follows:
+
+    >>> class FlowerClient(NumPyClient):
+    >>>     # ...
+    >>>
+    >>> def client_fn(cid):
+    >>>    return FlowerClient().to_client()
+    >>>
+    >>> flower = Flower(client_fn)
+
+    If the above code is in a Python module called `client`, it can be started as
+    follows:
+
+    >>> flower-client --callable client:flower
+
+    In this `client:flower` example, `client` refers to the Python module in which the
+    previous code lives in. `flower` refers to the global attribute `flower` that points
+    to an object of type `Flower` (a Flower callable).
+    """
 
     def __init__(
         self,
         client_fn: ClientFn,  # Only for backward compatibility
-        middleware: Optional[List[Layer]] = None,
     ) -> None:
         self.client_fn = client_fn
-        self.mw_list = middleware if middleware is not None else []
 
     def __call__(self, fwd: Fwd) -> Bwd:
         """."""
-
-        # Create wrapper function for `handle`
-        def handle_app(_fwd: Fwd) -> Bwd:
-            task_res = handle(
-                client_fn=self.client_fn,
-                task_ins=_fwd.task_ins,
-            )
-            return Bwd(task_res=task_res, state=_fwd.state)
-
-        # Wrap middleware layers around handle_app
-        app = make_app(handle_app, self.mw_list)
-
         # Execute the task
-        bwd = app(fwd)
-
-        return bwd
+        task_res = handle(
+            client_fn=self.client_fn,
+            task_ins=fwd.task_ins,
+        )
+        return Bwd(
+            task_res=task_res,
+            state=WorkloadState(state={}),
+        )
 
 
 class LoadCallableError(Exception):
@@ -63,7 +94,13 @@ class LoadCallableError(Exception):
 
 
 def load_callable(module_attribute_str: str) -> Flower:
-    """."""
+    """Load the `Flower` object specified in a module attribute string.
+
+    The module/attribute string should have the form <module>:<attribute>. Valid
+    examples include `client:flower` and `project.package.module:wrapper.flower`. It
+    must refer to a module on the PYTHONPATH, the module needs to have the specified
+    attribute, and the attribute must be of type `Flower`.
+    """
     module_str, _, attributes_str = module_attribute_str.partition(":")
     if not module_str:
         raise LoadCallableError(

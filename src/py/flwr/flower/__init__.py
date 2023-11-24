@@ -15,9 +15,9 @@
 """Flower callable package."""
 
 
+from flwr.client.flower import Bwd as Bwd
 from flwr.client.flower import Flower as Flower
-from flwr.client.typing import Bwd as Bwd
-from flwr.client.typing import Fwd as Fwd
+from flwr.client.flower import Fwd as Fwd
 
 __all__ = [
     "Flower",
