@@ -101,7 +101,7 @@ def handle(
     if server_msg is None:
         # Instantiate the client
         client = client_fn("-1")
-        client.state = state  # TODO: inject state into client object
+        client.state = state
         # Secure Aggregation
         if task_ins.task.HasField("sa") and isinstance(
             client, SecureAggregationHandler
@@ -118,7 +118,7 @@ def handle(
                     sa=SecureAggregation(named_values=serde.named_values_to_proto(res)),
                 ),
             )
-            return task_res, client.state  # TODO: return updated state
+            return task_res, client.state
         raise NotImplementedError()
     client_msg, updated_state = handle_legacy_message(client_fn, state, server_msg)
     task_res = wrap_client_message_in_task_res(client_msg)
@@ -152,7 +152,7 @@ def handle_legacy_message(
 
     # Instantiate the client
     client = client_fn("-1")
-    client.state = state  # TODO: inject state into client object
+    client.state = state
     # Execute task
     message = None
     if field == "get_properties_ins":
@@ -164,7 +164,7 @@ def handle_legacy_message(
     if field == "evaluate_ins":
         message = _evaluate(client, server_msg.evaluate_ins)
     if message:
-        return message, client.state  # TODO: return updated state
+        return message, client.state
     raise UnknownServerMessage()
 
 

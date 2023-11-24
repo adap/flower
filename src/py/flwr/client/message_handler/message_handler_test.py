@@ -19,6 +19,7 @@ import uuid
 
 from flwr.client import Client
 from flwr.client.typing import ClientFn
+from flwr.client.workload_state import WorkloadState
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -133,7 +134,11 @@ def test_client_without_get_properties() -> None:
     disconnect_task_res, actual_sleep_duration = handle_control_message(
         task_ins=task_ins
     )
-    task_res = handle(client_fn=_get_client_fn(client), task_ins=task_ins)
+    task_res, state_updated = handle(  # pylint: disable=unused-variable
+        client_fn=_get_client_fn(client),
+        state=WorkloadState(state={}),
+        task_ins=task_ins,
+    )
 
     if not task_res.HasField("task"):
         raise ValueError("Task value not found")
@@ -197,7 +202,11 @@ def test_client_with_get_properties() -> None:
     disconnect_task_res, actual_sleep_duration = handle_control_message(
         task_ins=task_ins
     )
-    task_res = handle(client_fn=_get_client_fn(client), task_ins=task_ins)
+    task_res, updated_state = handle(  # pylint: disable=unused-variable
+        client_fn=_get_client_fn(client),
+        state=WorkloadState(state={}),
+        task_ins=task_ins,
+    )
 
     if not task_res.HasField("task"):
         raise ValueError("Task value not found")
