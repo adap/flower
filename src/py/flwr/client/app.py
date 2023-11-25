@@ -18,8 +18,11 @@
 import argparse
 import sys
 import time
-from logging import INFO
+from logging import INFO, WARN
+from pathlib import Path
 from typing import Callable, ContextManager, Optional, Tuple, Union
+
+import certifi
 
 from flwr.client.client import Client
 from flwr.client.flower import Bwd, Flower, Fwd
@@ -50,6 +53,17 @@ def run_client() -> None:
 
     args = _parse_args_client().parse_args()
 
+    # Obtain certificates
+    if args.insecure:
+        log(WARN, "Option `--insecure` was set. Starting insecure HTTP client.")
+        certificates = None
+    else:
+        # Load the certificates if provided, or load the system certificates
+        cert_path = args.certificates
+        if cert_path is None:
+            cert_path = certifi.where()
+        certificates = Path(cert_path).read_bytes()
+
     print(args.server)
     print(args.callable_dir)
     print(args.callable)
@@ -66,6 +80,7 @@ def run_client() -> None:
         server_address=args.server,
         load_callable_fn=_load,
         transport="grpc-rere",  # Only
+        root_certificates=certificates,
     )
 
 
@@ -75,6 +90,20 @@ def _parse_args_client() -> argparse.ArgumentParser:
         description="Start a long-running Flower client",
     )
 
+    parser.add_argument(
+        "--insecure",
+        action="store_true",
+        help="Run the client without HTTPS, regardless of whether certificate "
+        "paths are provided. By default, the client runs with HTTPS enabled. "
+        "Use this flag only if you understand the risks.",
+    )
+    parser.add_argument(
+        "--certificates",
+        metavar="ROOT_CERT",
+        type=str,
+        help="Specifies the path to the PEM-encoded root certificate file for "
+        "establishing secure HTTPS connections.",
+    )
     parser.add_argument(
         "--server",
         default="0.0.0.0:9092",
