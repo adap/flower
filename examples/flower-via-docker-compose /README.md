@@ -1,4 +1,8 @@
-# Leveraging Flower and Docker for  Device Heterogeneity Management in Federated Learning
+# Leveraging Flower and Docker for Device Heterogeneity Management in Federated Learning 
+<p align="center">
+  <img src="https://flower.dev/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fflower_white_border.c2012e70.png&w=640&q=75" width="140px" alt="Flower Website" />
+  <img src="public/01-symbol_blue-docker-logo.png" width="140px" alt="Docker Logo" />
+</p>
 
 
 ## Introduction
