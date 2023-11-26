@@ -17,7 +17,7 @@ from threading import Lock
 
 lock = Lock()            # if the script is run on multiple processors we need a lock to save the results
 
-def save_params(parameters, cid, remove_last=False, rrl=False):
+def save_params(parameters, cid, dir="clients_params", remove_last=False, rrl=False):
     """
     Args:
     - parameters (ndarray): decoded parameters to append at the end of the file
@@ -26,21 +26,22 @@ def save_params(parameters, cid, remove_last=False, rrl=False):
     - rrl (bool): if True, remove the last saved parameters and replace with the ones saved before this round
     """
     new_params = parameters
-    # Save parameters in client_params/cid_params
-    path = f"strategy/clients_params/{cid}_params.npy"
-    if os.path.exists("strategy/clients_params") == False:
-        os.mkdir("strategy/clients_params")
-    if os.path.exists(path):
+    # Save parameters in clients_params/cid_params
+    path_file = f"{dir}/{cid}_params.npy"
+    if os.path.exists(dir) == False:
+        os.mkdir(dir)
+    if os.path.exists(path_file):
         # load old parameters
-        old_params = np.load(path, allow_pickle=True)
+        old_params = np.load(path_file, allow_pickle=True)
         if remove_last:
             old_params = old_params[:-1]
             if rrl:
                 new_params = old_params[-1]
         # add new parameters
         new_params = np.vstack((old_params, new_params))
+    print(f"new_params shape of {cid}: {new_params.shape}")
     # save parameters
-    np.save(path, new_params)
+    np.save(path_file, new_params)
 
 
 def save_predicted_params(parameters, cid):
@@ -80,7 +81,7 @@ def save_results(loss, accuracy, config=None):
             df.to_csv(csv_path, index=False, header=True)
 
 
-def load_all_time_series(dir="", window=0):
+def load_all_time_series(dir="clients_params", window=0):
         """
         Load all time series in order to have a tensor of shape (m,T,n)
         where:
@@ -93,6 +94,7 @@ def load_all_time_series(dir="", window=0):
         data = []
         for file in files:
             data.append(np.load(os.path.join(dir, file), allow_pickle=True))
+
         return np.array(data)[:,-window:,:]
 
 

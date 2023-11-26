@@ -86,6 +86,19 @@ class Flanders(FedAvg):
                 fit_metrics_aggregation_fn = fit_metrics_aggregation_fn,
                 evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
             )
+        self.dataset_name = dataset_name
+        self.attack_name = attack_name
+        self.iid = iid
+        self.warmup_rounds = warmup_rounds
+        self.to_keep = to_keep
+        self.attack_fn = attack_fn
+        self.window = window
+        self.maxiter = maxiter
+        self.sampling = sampling
+        self.alpha = alpha
+        self.beta = beta
+        self.params_indexes = None
+        self.malicious_selected = False
 
 
     def aggregate_fit(
@@ -118,31 +131,37 @@ class Flanders(FedAvg):
             win = self.window
             if server_round < self.window:
                 win = server_round
-            M = load_all_time_series(dir="strategy/clients_params", window=win)
+            M = load_all_time_series(dir="clients_params", window=win)
             M = np.transpose(M, (0, 2, 1))  # (clients, params, time)
 
 
             M_hat = M[:,:,-1].copy()
             pred_step = 1
-            
+            print(f"aggregate_fit - Computing MAR on M {M.shape}")
             Mr = mar(M[:,:,:-1], pred_step, maxiter=self.maxiter, alpha=self.alpha, beta=self.beta)
 
             # TODO: generalize this to user-selected distance functions
+            print("aggregate_fit - Computing anomaly scores")
             delta = np.subtract(M_hat, Mr[:,:,0])
             anomaly_scores = np.sum(delta**2,axis=-1)**(1./2)
+            print(f"aggregate_fit - Anomaly scores: {anomaly_scores}")
 
+            print("aggregate_fit - Selecting good clients")
             good_clients_idx = sorted(np.argsort(anomaly_scores)[:self.to_keep])
             malicious_clients_idx = sorted(np.argsort(anomaly_scores)[self.to_keep:])
             results = np.array(results)[good_clients_idx].tolist()
-
+            print(f"aggregate_fit - Good clients: {good_clients_idx}")
+            
+            print(f"aggregate_fit - clients_state: {clients_state}")
             for idx in good_clients_idx:
-                if clients_state[idx]:
+                if clients_state[str(idx)]:
                     self.malicious_selected = True
                     break
                 else:
                     self.malicious_selected = False
 
             # Apply FedAvg for the remaining clients
+            print("aggregate_fit - Applying FedAvg for the remaining clients")
             parameters_aggregated, metrics_aggregated = super().aggregate_fit(server_round, results, failures)
 
             # For clients detected as malicious, set their parameters to be the averaged ones in their files
@@ -153,7 +172,8 @@ class Flanders(FedAvg):
                         new_params = flatten_params(parameters_to_ndarrays(parameters_aggregated))[self.params_indexes]
                     else:
                         new_params = flatten_params(parameters_to_ndarrays(parameters_aggregated))
-                    save_params(new_params, idx, remove_last=True, rrl=True)
+                    print(f"aggregate_fit - Saving parameters of client {idx} with shape {new_params.shape}")
+                    save_params(new_params, idx, dir="clients_params", remove_last=True, rrl=True)
         else:
             # Apply FedAvg on the first round
             parameters_aggregated, metrics_aggregated = super().aggregate_fit(server_round, results, failures)
@@ -174,7 +194,7 @@ def mar(X, pred_step, alpha=1, beta=1, maxiter=100, window=0):
     B = np.random.randn(n, n)
     X_norm = (X-np.min(X))/np.max(X)
    
-    for it in range(maxiter):
+    for _ in range(maxiter):
         temp0 = B.T @ B
         temp1 = np.zeros((m, m))
         temp2 = np.zeros((m, m))

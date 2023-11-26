@@ -3,7 +3,7 @@
 Optionally, also define a new Server class (please note this is not needed in most
 settings).
 """
-from flwr.server import Server
+from flwr.server.server import fit_clients, Server
 
 import concurrent.futures
 import timeit
@@ -58,13 +58,22 @@ class EnhancedServer(Server):
     def __init__(
             self,
             num_malicious: int,
+            warmup_rounds: int,
             attack_fn:Optional[Callable],
+            sampling: int = 0,
             *args: Any,
             **kwargs: Any
         ) -> None:
         """Initialize."""
 
+        # TODO: Move all the parameters saving logic from the strategy to the server
         super().__init__(*args, **kwargs)
+        self.num_malicious = num_malicious
+        self.warmup_rounds = warmup_rounds
+        self.attack_fn = attack_fn
+        self.sampling = sampling
+        self.aggregated_parameters = []
+        self.params_indexes = []
 
     
     def fit_round(
@@ -83,22 +92,24 @@ class EnhancedServer(Server):
         )
 
         # Randomly decide which client is malicious
-        if server_round > self.warmup_rounds:
-            self.malicious_selected = np.random.choice(
-                [proxy.cid for proxy, ins in client_instructions], size=self.num_malicious, replace=False
-            )
-            log(
-                DEBUG,
-                "fit_round %s: malicious clients selected %s",
-                server_round,
-                self.malicious_selected,
-            )
-            # Save instruction for malicious clients into FitIns
-            for proxy, ins in client_instructions:
-                if proxy.cid in self.malicious_selected:
-                    ins["malicious"] = True
-                else:
-                    ins["malicious"] = False
+        size = self.num_malicious
+        if self.warmup_rounds > server_round:
+            size = 0
+        self.malicious_selected = np.random.choice(
+            [proxy.cid for proxy, _ in client_instructions], size=size, replace=False
+        )
+        log(
+            DEBUG,
+            "fit_round %s: malicious clients selected %s",
+            server_round,
+            self.malicious_selected,
+        )
+        # Save instruction for malicious clients into FitIns
+        for proxy, ins in client_instructions:
+            if proxy.cid in self.malicious_selected:
+                ins.config["malicious"] = True
+            else:
+                ins.config["malicious"] = False
 
         if not client_instructions:
             log(INFO, "fit_round %s: no clients selected, cancel", server_round)
@@ -112,10 +123,10 @@ class EnhancedServer(Server):
         )
 
         # Collect `fit` results from all clients participating in this round
-        results, failures = super.fit_clients(
+        results, failures = fit_clients(
             client_instructions=client_instructions,
             max_workers=self.max_workers,
-            timeout=timeout,
+            timeout=timeout
         )
         log(
             DEBUG,
@@ -141,9 +152,11 @@ class EnhancedServer(Server):
 
                 params = params[self.params_indexes]
 
+            print(f"fit_round 1 - Saving parameters of client {fitres.metrics['cid']} with shape {params.shape}")
             save_params(params, fitres.metrics['cid'])
 
             # Re-arrange results in the same order as clients' cids impose
+            print("fit_round - Re-arranging results in the same order as clients' cids impose")
             ordered_results[int(fitres.metrics['cid'])] = (proxy, fitres)
 
         # Initialize aggregated_parameters if it is the first round
@@ -155,6 +168,7 @@ class EnhancedServer(Server):
 
         # Apply attack function
         if self.attack_fn is not None and server_round > self.warmup_rounds:
+            print("fit_round - Applying attack function")
             results, others = self.attack_fn(
                 ordered_results, clients_state, magnitude=self.magnitude,
                 w_re=self.aggregated_parameters, malicious_selected=self.malicious_selected,
@@ -171,6 +185,7 @@ class EnhancedServer(Server):
                         params = flatten_params(parameters_to_ndarrays(fitres.parameters))[self.params_indexes]
                     else:
                         params = flatten_params(parameters_to_ndarrays(fitres.parameters))
+                    print(f"fit_round 2 - Saving parameters of client {fitres.metrics['cid']} with shape {params.shape}")
                     save_params(params, fitres.metrics['cid'], remove_last=True)
         else:
             results = ordered_results
@@ -180,6 +195,7 @@ class EnhancedServer(Server):
         clients_state = {k: clients_state[k] for k in sorted(clients_state)}
 
         # Aggregate training results
+        print("fit_round - Aggregating training results")
         aggregated_result: Tuple[
             Optional[Parameters],
             Dict[str, Scalar],

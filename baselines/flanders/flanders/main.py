@@ -85,6 +85,13 @@ def main(cfg: DictConfig) -> None:
     print(cfg.dataset.name)
     print(cfg.server.pool_size)
 
+    # Delete old client_params and clients_predicted_params
+    # TODO: parametrize this
+    if os.path.exists("clients_params"):
+        shutil.rmtree("clients_params")
+    if os.path.exists("clients_predicted_params"):
+        shutil.rmtree("clients_predicted_params")
+
     evaluate_fn = mnist_evaluate
 
     # 2. Prepare your dataset
@@ -118,12 +125,12 @@ def main(cfg: DictConfig) -> None:
         on_fit_config_fn=fit_config,
         fraction_fit=1,
         fraction_evaluate=0,                # no federated evaluation
-        min_fit_clients=1,
+        min_fit_clients=2,
         min_evaluate_clients=0,
-        warmup_rounds=1,
-        to_keep=1,                                    # Used in Flanders, MultiKrum, TrimmedMean (in Bulyan it is forced to 1)
-        min_available_clients=1,                    # All clients should be available
-        window=1,                                      # Used in Flanders
+        warmup_rounds=2,
+        to_keep=2,                                    # Used in Flanders, MultiKrum, TrimmedMean (in Bulyan it is forced to 1)
+        min_available_clients=2,                    # All clients should be available
+        window=2,                                      # Used in Flanders
         sampling=1,                                  # Used in Flanders
     )
 
@@ -132,9 +139,16 @@ def main(cfg: DictConfig) -> None:
     # history = fl.simulation.start_simulation(<arguments for simulation>)
     history = fl.simulation.start_simulation(
         client_fn=client_fn,
-        client_resources={"num_cpus": 1},
+        client_resources={"num_cpus": 10},
         num_clients=cfg.server.pool_size,
-        server=EnhancedServer(num_malicious=cfg.server.num_malicious, attack_fn=None, client_manager=SimpleClientManager),
+        server=EnhancedServer(
+            warmup_rounds=cfg.server.warmup_rounds,
+            num_malicious=cfg.server.num_malicious,
+            attack_fn=None,
+            client_manager=SimpleClientManager(),
+            strategy=strategy,
+            sampling=cfg.server.sampling,
+        ),
         config=fl.server.ServerConfig(num_rounds=cfg.server.num_rounds),
         strategy=strategy
     )

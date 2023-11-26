@@ -26,9 +26,11 @@ strategy:
 
 server:
   _target_: flanders.server.EnhancedServer
-  num_rounds: 2
-  pool_size: 1
+  num_rounds: 3
+  pool_size: 2
   num_malicious: 0
+  warmup_rounds: 2
+  sampling: 500
 
 client:
   # client config
