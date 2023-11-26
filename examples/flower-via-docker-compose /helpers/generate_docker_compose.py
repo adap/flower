@@ -27,12 +27,12 @@ services:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     depends_on:
       - cadvisor
-    restart: always
+    restart: on-failure
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.0
     container_name: cadvisor
-    restart: always
+    restart: on-failure
     privileged: true
     mem_limit: 500m
     ports:
@@ -51,6 +51,7 @@ services:
     ports:
       - 3000:3000
     mem_limit: 400m
+    restart: on-failure
     volumes:
       - grafana-storage:/var/lib/grafana
       - ./config/grafana.ini:/etc/grafana/grafana.ini
@@ -73,7 +74,6 @@ services:
       context: .
       dockerfile: Dockerfile
     command: python server.py --number_of_rounds={number_of_rounds} --total_clients={total_clients}
-    restart: always
     environment:
       FLASK_RUN_PORT: 6000
       DOCKER_HOST_IP: host.docker.internal
@@ -97,7 +97,6 @@ services:
       context: .
       dockerfile: Dockerfile
     command: python client.py --server_address=server:8080 --batch_size={config["batch_size"]} --learning_rate={config["learning_rate"]}
-    restart: always
     mem_limit: {config['mem_limit']}
     deploy:
       resources:
@@ -122,6 +121,6 @@ services:
         file.write(docker_compose_content)
 
 if __name__ == "__main__":
-    total_clients = 3  # Number of clients that will be created
-    number_of_rounds = 10  # Number of rounds that the server will run for
+    total_clients = 2  # Number of clients that will be created
+    number_of_rounds = 5  # Number of rounds that the server will run for
     create_docker_compose(total_clients,number_of_rounds)

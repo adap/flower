@@ -43,13 +43,21 @@ Before starting, ensure the following prerequisites are met:
 
 ### Step 2: Build and Launch Containers
 1. **Execute Initialization Script**: 
-   - Run the `docker_init.sh` script to build the Docker images and start the Docker Compose process. Use the following command:
+   - To build the Docker images and start the containers, use the following command:
      ```bash
-     ./docker_init.sh
+     docker-compose up
      ```
+   - If you make any changes to the Dockerfile or other configuration files, you should rebuild the images to reflect these changes. This can be done by adding the `--build` flag to the command:
+     ```bash
+     docker-compose up --build
+     ```
+   - The `--build` flag instructs Docker Compose to rebuild the images before starting the containers, ensuring that any code or configuration changes are included.
+   - To stop all services, you have two options:
+     - Run `docker-compose down` in another terminal if you are in the same directory. This command will stop and remove the containers, networks, and volumes created by `docker-compose up`.
+     - Press `Ctrl+C` once in the terminal where `docker-compose up` is running. This will stop the containers but won't remove them or the networks and volumes they use.
    
 2. **Services Startup**: 
-   - The script will launch several services as defined in your `docker-compose.yml` file:
+   - Several services will launch as defined in your `docker-compose.yml` file:
      - **Monitoring Services**: Prometheus for metrics collection, Cadvisor for container monitoring, and Grafana for data visualization.
      - **Flower Federated Learning Environment**: The Flower server and client containers are initialized and start running.
    - After launching the services, verify that all Docker containers are running correctly by executing the `docker ps` command. Here's an example output:
@@ -63,6 +71,11 @@ Before starting, ensure the following prerequisites are met:
      dbcd8cf1faf1   grafana/grafana:latest              "/run.sh --config=/e…"   12 minutes ago   Up 5 minutes             0.0.0.0:3000->3000/tcp                           grafana
      80c4a599b2a3   prom/prometheus:latest              "/bin/prometheus --c…"   12 minutes ago   Up 5 minutes             0.0.0.0:9090->9090/tcp                           prometheus
      169880ab80bd   gcr.io/cadvisor/cadvisor:v0.47.0    "/usr/bin/cadvisor -…"   12 minutes ago   Up 5 minutes (healthy)   0.0.0.0:8080->8080/tcp                           cadvisor
+     ```
+
+   - To monitor the resource utilization of your containers in real-time and see the limits imposed in the Docker Compose file, you can use the `docker stats` command. This command provides a live stream of container CPU, memory, and network usage statistics.
+      ```bash
+      ➜  ~ docker stats
      ```
 
 3. **Automated Grafana Configuration**:
@@ -89,6 +102,11 @@ Below is an example of a Grafana dashboard showing a Bar Chart of memory usage f
 
 
 This histogram offers a visual representation of the container's memory usage over time, highlighting the contrast in resource utilization between training and non-training periods. As evident from the graph, there are noticeable differences in memory consumption during active training phases compared to times when the container is not engaged in training.
+
+## Additional Resources
+- **Grafana Tutorials**: Explore a variety of tutorials on Grafana at [Grafana Tutorials](https://grafana.com/tutorials/).
+- **Prometheus Overview**: Learn more about Prometheus at their [official documentation](https://prometheus.io/docs/introduction/overview/).
+- **cAdvisor Guide**: For information on monitoring Docker containers with cAdvisor, see this [Prometheus guide](https://prometheus.io/docs/guides/cadvisor/).
 
 ## Conclusion
 This project serves as a foundational example of managing device heterogeneity within the federated learning context, employing the Flower framework alongside Docker, Prometheus, and Grafana. It's designed to be a starting point for users to explore and further adapt to the complexities of device heterogeneity in federated learning environments.
