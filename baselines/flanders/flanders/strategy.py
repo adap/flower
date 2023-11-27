@@ -63,7 +63,8 @@ class Flanders(FedAvg):
         maxiter: int = 100,
         sampling: str = None,
         alpha: float = 1,
-        beta: float = 1
+        beta: float = 1,
+        distance_function: Callable = None,
     ) -> None:
         """
         Parameters
@@ -99,6 +100,7 @@ class Flanders(FedAvg):
         self.beta = beta
         self.params_indexes = None
         self.malicious_selected = False
+        self.distance_function = distance_function
 
 
     def aggregate_fit(
@@ -109,7 +111,7 @@ class Flanders(FedAvg):
         clients_state: List[bool],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """
-        Apply MAR forecasting to exclude malicious clients from the average.
+        Apply MAR forecasting to exclude malicious clients from FedAvg.
 
         Parameters
         ----------
@@ -140,10 +142,8 @@ class Flanders(FedAvg):
             print(f"aggregate_fit - Computing MAR on M {M.shape}")
             Mr = mar(M[:,:,:-1], pred_step, maxiter=self.maxiter, alpha=self.alpha, beta=self.beta)
 
-            # TODO: generalize this to user-selected distance functions
             print("aggregate_fit - Computing anomaly scores")
-            delta = np.subtract(M_hat, Mr[:,:,0])
-            anomaly_scores = np.sum(delta**2,axis=-1)**(1./2)
+            anomaly_scores = self.distance_function(M_hat, Mr[:,:,0])
             print(f"aggregate_fit - Anomaly scores: {anomaly_scores}")
 
             print("aggregate_fit - Selecting good clients")
@@ -151,7 +151,7 @@ class Flanders(FedAvg):
             malicious_clients_idx = sorted(np.argsort(anomaly_scores)[self.to_keep:])
             results = np.array(results)[good_clients_idx].tolist()
             print(f"aggregate_fit - Good clients: {good_clients_idx}")
-            
+
             print(f"aggregate_fit - clients_state: {clients_state}")
             for idx in good_clients_idx:
                 if clients_state[str(idx)]:

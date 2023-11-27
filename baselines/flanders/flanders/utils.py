@@ -17,6 +17,26 @@ from threading import Lock
 
 lock = Lock()            # if the script is run on multiple processors we need a lock to save the results
 
+def l2_norm(true_matrix, predicted_matrix):
+    """
+    Compute the l2 norm between two matrices.
+
+    Parameters
+    ----------
+    true_matrix : ndarray
+        The true matrix.
+    predicted_matrix : ndarray
+        The predicted matrix by MAR.
+
+    Returns
+    -------
+    anomaly_scores : ndarray
+        1-d array of anomaly scores.
+    """
+    delta = np.subtract(true_matrix, predicted_matrix)
+    anomaly_scores = np.sum(delta**2,axis=-1)**(1./2)
+    return anomaly_scores
+
 def save_params(parameters, cid, dir="clients_params", remove_last=False, rrl=False):
     """
     Args:

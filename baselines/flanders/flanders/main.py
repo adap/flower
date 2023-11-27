@@ -42,7 +42,7 @@ from .client import (
     set_sklearn_model_params, 
     get_sklearn_model_params
 )
-from .utils import save_results
+from .utils import save_results, l2_norm
 from .server import EnhancedServer
 
 from torch.utils.data import DataLoader
@@ -124,14 +124,15 @@ def main(cfg: DictConfig) -> None:
         evaluate_fn=evaluate_fn,
         on_fit_config_fn=fit_config,
         fraction_fit=1,
-        fraction_evaluate=0,                # no federated evaluation
+        fraction_evaluate=0,
         min_fit_clients=2,
         min_evaluate_clients=0,
         warmup_rounds=2,
-        to_keep=2,                                    # Used in Flanders, MultiKrum, TrimmedMean (in Bulyan it is forced to 1)
-        min_available_clients=2,                    # All clients should be available
-        window=2,                                      # Used in Flanders
-        sampling=1,                                  # Used in Flanders
+        to_keep=2,
+        min_available_clients=2,
+        window=2,
+        sampling=1,
+        distance_function=l2_norm
     )
 
 
