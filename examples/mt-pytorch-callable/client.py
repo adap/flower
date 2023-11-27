@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
+from flwr.client.middleware.wandb import get_wandb_middleware, test_middleware
 
 
 # #############################################################################
@@ -111,6 +112,10 @@ def client_fn(cid: str):
 # To run this: `flower-client --callable client:flower`
 flower = fl.flower.Flower(
     client_fn=client_fn,
+    middleware=[
+        test_middleware
+        # get_wandb_middleware(project_name="W&B Middleware Test", client_id="test")
+    ],
 )
 
 
