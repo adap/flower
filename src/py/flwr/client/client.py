@@ -143,12 +143,10 @@ class Client(ABC):
 
     def get_state(self) -> WorkloadState:
         """Get the workload state from this client."""
-        print("get_state()")
         return self.state
 
     def set_state(self, state: WorkloadState) -> None:
         """Apply a workload state to this client."""
-        print("set_state()")
         self.state = state
 
     def to_client(self) -> Client:
