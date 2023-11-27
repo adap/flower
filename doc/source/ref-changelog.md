@@ -6,6 +6,10 @@
 
 - **Add experimental support for Python 3.12** ([#2565](https://github.com/adap/flower/pull/2565))
 
+- **Add Vertical FL example** ([#2598](https://github.com/adap/flower/pull/2598))
+
+  We had many questions about Vertical Federated Learning using Flower, so we decided to add an simple example for it on the [Titanic dataset](https://www.kaggle.com/competitions/titanic/data) alongside a tutorial (in the README).
+
 - **Support custom** `ClientManager` **in** `start_driver()` ([#2292](https://github.com/adap/flower/pull/2292))
 
 - **Update REST API to support create and delete nodes** ([#2283](https://github.com/adap/flower/pull/2283))
