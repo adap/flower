@@ -22,7 +22,6 @@ from flwr.client.message_handler.message_handler import handle
 from flwr.client.middleware.typing import Layer
 from flwr.client.middleware.utils import make_app
 from flwr.client.typing import Bwd, ClientFn, Fwd
-from flwr.client.workload_state import WorkloadState
 
 
 class Flower:
@@ -68,7 +67,7 @@ class Flower:
                 client_fn=self.client_fn,
                 task_ins=_fwd.task_ins,
             )
-            return Bwd(task_res=task_res, state=WorkloadState(state={}))
+            return Bwd(task_res=task_res, state=_fwd.state)
 
         # Wrap middleware layers around handle_app
         app = make_app(handle_app, self.mw_list)
