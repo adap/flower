@@ -141,6 +141,14 @@ class Client(ABC):
             metrics={},
         )
 
+    def get_state(self) -> WorkloadState:
+        """Get the workload state from this client."""
+        return self.state
+
+    def set_state(self, state: WorkloadState) -> None:
+        """Apply a workload state to this client."""
+        self.state = state
+
     def to_client(self) -> Client:
         """Return client (itself)."""
         return self
