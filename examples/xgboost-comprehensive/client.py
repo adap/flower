@@ -101,11 +101,12 @@ class XgbClient(fl.client.Client):
         for i in range(num_local_round):
             self.bst.update(train_dmatrix, self.bst.num_boosted_rounds())
 
-        # Extract the last N=num_local_round trees for sever aggregation
+        # Bagging: extract the last N=num_local_round trees for sever aggregation
+        # Cyclic: return the entire model
         bst = self.bst[
             self.bst.num_boosted_rounds()
             - num_local_round : self.bst.num_boosted_rounds()
-        ]
+        ] if args.train_method == "bagging" else self.bst
 
         return bst
 

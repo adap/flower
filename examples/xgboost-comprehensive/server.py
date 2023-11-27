@@ -1,4 +1,5 @@
-from typing import Dict
+import warnings
+from typing import Dict, List, Optional
 from logging import INFO
 import xgboost as xgb
 
@@ -7,13 +8,21 @@ from flwr.common.logger import log
 from flwr.common import Parameters, Scalar
 from flwr_datasets import FederatedDataset
 from flwr.server.strategy import FedXgbBagging
+from flwr.server.strategy import FedXgbCyclic
+from flwr.server.client_proxy import ClientProxy
+from flwr.server.criterion import Criterion
+from flwr.server.client_manager import SimpleClientManager
 
 from utils import server_args_parser, BST_PARAMS
 from dataset import resplit, transform_dataset_to_dmatrix
 
 
+warnings.filterwarnings("ignore", category=UserWarning)
+
+
 # Parse arguments for experimental settings
 args = server_args_parser()
+train_method = args.train_method
 pool_size = args.pool_size
 num_rounds = args.num_rounds
 num_clients_per_round = args.num_clients_per_round
@@ -53,7 +62,6 @@ def evaluate_metrics_aggregation(eval_metrics):
 
 def get_evaluate_fn(test_data):
     """Return a function for centralised evaluation."""
-
     def evaluate_fn(
         server_round: int, parameters: Parameters, config: Dict[str, Scalar]
     ):
@@ -76,27 +84,72 @@ def get_evaluate_fn(test_data):
             log(INFO, f"AUC = {auc} at round {server_round}")
 
             return 0, {"AUC": auc}
-
     return evaluate_fn
 
 
+class CyclicClientManager(SimpleClientManager):
+    """Provides a cyclic client selection rule."""
+    def sample(
+        self,
+        num_clients: int,
+        min_num_clients: Optional[int] = None,
+        criterion: Optional[Criterion] = None,
+    ) -> List[ClientProxy]:
+        """Sample a number of Flower ClientProxy instances."""
+        # Block until at least num_clients are connected.
+        if min_num_clients is None:
+            min_num_clients = num_clients
+        self.wait_for(min_num_clients)
+        # Sample clients which meet the criterion
+        available_cids = list(self.clients)
+        if criterion is not None:
+            available_cids = [
+                cid for cid in available_cids if criterion.select(self.clients[cid])
+            ]
+
+        if num_clients > len(available_cids):
+            log(
+                INFO,
+                "Sampling failed: number of available clients"
+                " (%s) is less than number of requested clients (%s).",
+                len(available_cids),
+                num_clients,
+            )
+            return []
+
+        # Return all available clients
+        return [self.clients[cid] for cid in available_cids]
+
+
 # Define strategy
-strategy = FedXgbBagging(
-    evaluate_function=get_evaluate_fn(test_dmatrix) if centralised_eval else None,
-    fraction_fit=(float(num_clients_per_round) / pool_size),
-    min_fit_clients=num_clients_per_round,
-    min_available_clients=pool_size,
-    min_evaluate_clients=num_evaluate_clients if not centralised_eval else 0,
-    fraction_evaluate=1.0 if not centralised_eval else 0.0,
-    on_evaluate_config_fn=eval_config,
-    evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation
-    if not centralised_eval
-    else None,
-)
+if train_method == "bagging":
+    # Bagging training
+    strategy = FedXgbBagging(
+        evaluate_function=get_evaluate_fn(test_dmatrix) if centralised_eval else None,
+        fraction_fit=(float(num_clients_per_round) / pool_size),
+        min_fit_clients=num_clients_per_round,
+        min_available_clients=pool_size,
+        min_evaluate_clients=num_evaluate_clients if not centralised_eval else 0,
+        fraction_evaluate=1.0 if not centralised_eval else 0.0,
+        on_evaluate_config_fn=eval_config,
+        evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation
+        if not centralised_eval
+        else None,
+    )
+else:
+    # Cyclic training
+    strategy = FedXgbCyclic(
+        fraction_fit=1.0,
+        min_available_clients=pool_size,
+        fraction_evaluate=1.0,
+        evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation,
+        on_evaluate_config_fn=eval_config,
+    )
 
 # Start Flower server
 fl.server.start_server(
     server_address="0.0.0.0:8080",
     config=fl.server.ServerConfig(num_rounds=num_rounds),
     strategy=strategy,
+    client_manager=CyclicClientManager() if train_method == "cyclic" else None,
 )
