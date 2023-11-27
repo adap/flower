@@ -16,7 +16,7 @@
 
 from typing import List
 
-from flwr.client.flower import Bwd, Fwd
+from flwr.client.typing import Bwd, Fwd
 
 from .typing import App, Layer
 

@@ -22,8 +22,8 @@ from logging import INFO
 from typing import Callable, ContextManager, Optional, Tuple, Union
 
 from flwr.client.client import Client
-from flwr.client.flower import Bwd, Flower, Fwd
-from flwr.client.typing import ClientFn
+from flwr.client.flower import Flower
+from flwr.client.typing import Bwd, ClientFn, Fwd
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (

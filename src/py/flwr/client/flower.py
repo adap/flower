@@ -16,34 +16,13 @@
 
 
 import importlib
-from dataclasses import dataclass
-from typing import Callable, List, Optional, cast
+from typing import List, Optional, cast
 
 from flwr.client.message_handler.message_handler import handle
 from flwr.client.middleware.typing import Layer
 from flwr.client.middleware.utils import make_app
-from flwr.client.typing import ClientFn
+from flwr.client.typing import Bwd, ClientFn, Fwd
 from flwr.client.workload_state import WorkloadState
-from flwr.proto.task_pb2 import TaskIns, TaskRes
-
-
-@dataclass
-class Fwd:
-    """."""
-
-    task_ins: TaskIns
-    state: WorkloadState
-
-
-@dataclass
-class Bwd:
-    """."""
-
-    task_res: TaskRes
-    state: WorkloadState
-
-
-FlowerCallable = Callable[[Fwd], Bwd]
 
 
 class Flower:

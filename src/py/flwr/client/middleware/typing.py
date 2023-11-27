@@ -16,7 +16,7 @@
 
 from typing import Callable
 
-from flwr.client.flower import Bwd, Fwd
+from flwr.client.typing import Bwd, Fwd
 
 App = Callable[[Fwd], Bwd]
 Layer = Callable[[Fwd, App], Bwd]
