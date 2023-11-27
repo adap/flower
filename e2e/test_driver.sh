@@ -29,7 +29,7 @@ wait $pid
 res=$?
 
 if [[ "$res" = "0" ]];
-  then echo "Training worked correctly" && pkill python && pkill flower-client;
+  then echo "Training worked correctly" && pkill python;
   else echo "Training had an issue" && exit 1;
 fi
 
