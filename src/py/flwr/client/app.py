@@ -54,15 +54,16 @@ def run_client() -> None:
     # Obtain certificates
     if args.insecure:
         log(WARN, "Option `--insecure` was set. Starting insecure HTTP client.")
-        certificates = None
+        root_certificates = None
     else:
         # Load the certificates if provided, or load the system certificates
         cert_path = args.root_certificates
         if cert_path is None:
-            certificates = None
+            root_certificates = None
         else:
-            certificates = Path(cert_path).read_bytes()
+            root_certificates = Path(cert_path).read_bytes()
 
+    print(args.root_certificates)
     print(args.server)
     print(args.callable_dir)
     print(args.callable)
@@ -79,8 +80,8 @@ def run_client() -> None:
         server_address=args.server,
         load_callable_fn=_load,
         transport="grpc-rere",  # Only
-        root_certificates=certificates,
-        insecure=not args.insecure,
+        root_certificates=root_certificates,
+        insecure=args.insecure,
     )
 
 
