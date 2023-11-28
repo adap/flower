@@ -113,37 +113,40 @@ def client_fn(cid: str):
     return FlowerClient().to_client()
 
 
-def test_middleware(fwd, app):
-    print("before")
-
-    bwd = app(fwd)
-
-    print("after")
-
-    return bwd
-
-
-def get_middleware(name, id):
-    now = datetime.datetime.now().strftime("%b%d_%H_%M_%S")
+def get_middleware(name):
+    now = datetime.datetime.now().strftime("%b%d_%H_%M")
     wandb_group = f"exp_{now}"
-    wandb.init(project=name, group=wandb_group, name=f"client-{id}")
 
     def wandb_middleware(fwd, app):
         start_time = None
+        project_name = name
+        group_name = wandb_group
         round = ""
+        client_id = fwd.task_ins.task.consumer.node_id
 
         server_message = server_message_from_proto(
             fwd.task_ins.task.legacy_server_message
         )
+
         if server_message.fit_ins:
             config = server_message.fit_ins.config
             if "round" in config:
                 round = f"_rnd-{config['round']}"
+            if "project" in config:
+                project_name = str(config["project"])
+            if "group" in config:
+                group_name = str(config["group"])
             start_time = time.time()
         if server_message.evaluate_ins:
             config = server_message.evaluate_ins.config
             if "round" in config:
                 round = f"_rnd-{config['round']}"
+            if "project" in config:
+                project_name = str(config["project"])
+            if "group" in config:
+                group_name = str(config["group"])
+
+        wandb.init(project=project_name, group=group_name, name=f"client-{client_id}")
 
         bwd = app(fwd)
 
@@ -180,7 +183,7 @@ def get_middleware(name, id):
 
 # To run this: `flower-client --callable client:flower`
 flower = fl.flower.Flower(
-    client_fn=client_fn, middleware=[test_middleware, get_middleware("W&B Test 2", 2)]
+    client_fn=client_fn, middleware=[get_middleware("MT PyTorch Callable")]
 )
 
 
