@@ -4,6 +4,12 @@
 
 ## v1.6.0 (2023-11-28)
 
+### Thanks to our contributors
+
+We would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):
+
+`Aashish Kolluri`, `Adam Narozniak`, `Alessio Mora`, `Barathwaja S`, `Charles Beauville`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Gabriel Mota`, `Heng Pan`, `Ivan Agarský`, `JS.KIM`, `Javier`, `Marius Schlegel`, `Navin Chandra`, `Nic Lane`, `Peterpan828`, `Qinbin Li`, `Shaz-hash`, `Steve Laskaridis`, `Taner Topal`, `William Lindskog`, `Yan Gao`, `cnxdeveloper`, `k3nfalt` <!---TOKEN_v1.6.0-->
+
 ### What's new?
 
 - **Add experimental support for Python 3.12** ([#2565](https://github.com/adap/flower/pull/2565))
