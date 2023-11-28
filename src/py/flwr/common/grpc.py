@@ -39,7 +39,7 @@ def create_channel(
         ("grpc.max_receive_message_length", max_message_length),
     ]
 
-    if use_grpc_certificates:
+    if use_grpc_certificates or root_certificates is not None:
         ssl_channel_credentials = grpc.ssl_channel_credentials(root_certificates)
         channel = grpc.secure_channel(
             server_address, ssl_channel_credentials, options=channel_options
