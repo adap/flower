@@ -62,6 +62,7 @@ def evaluate_metrics_aggregation(eval_metrics):
 
 def get_evaluate_fn(test_data):
     """Return a function for centralised evaluation."""
+
     def evaluate_fn(
         server_round: int, parameters: Parameters, config: Dict[str, Scalar]
     ):
@@ -84,11 +85,13 @@ def get_evaluate_fn(test_data):
             log(INFO, f"AUC = {auc} at round {server_round}")
 
             return 0, {"AUC": auc}
+
     return evaluate_fn
 
 
 class CyclicClientManager(SimpleClientManager):
     """Provides a cyclic client selection rule."""
+
     def sample(
         self,
         num_clients: int,

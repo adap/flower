@@ -103,10 +103,14 @@ class XgbClient(fl.client.Client):
 
         # Bagging: extract the last N=num_local_round trees for sever aggregation
         # Cyclic: return the entire model
-        bst = self.bst[
-            self.bst.num_boosted_rounds()
-            - num_local_round : self.bst.num_boosted_rounds()
-        ] if args.train_method == "bagging" else self.bst
+        bst = (
+            self.bst[
+                self.bst.num_boosted_rounds()
+                - num_local_round : self.bst.num_boosted_rounds()
+            ]
+            if args.train_method == "bagging"
+            else self.bst
+        )
 
         return bst
 

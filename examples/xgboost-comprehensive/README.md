@@ -71,7 +71,9 @@ You can simply start everything in a terminal as follows:
 ```shell
 poetry run ./run_bagging.sh
 ```
+
 Or
+
 ```shell
 poetry run ./run_cyclic.sh
 ```
