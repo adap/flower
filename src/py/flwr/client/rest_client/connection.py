@@ -65,6 +65,7 @@ def http_request_response(
     root_certificates: Optional[
         Union[bytes, str]
     ] = None,  # pylint: disable=unused-argument
+    use_grpc_certificates: bool = True,  # pylint: disable=unused-argument
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[TaskIns]],

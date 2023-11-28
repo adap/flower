@@ -52,9 +52,8 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 def grpc_request_response(
     server_address: str,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
-    root_certificates: Optional[
-        Union[bytes, str]
-    ] = None,  # pylint: disable=unused-argument
+    root_certificates: Optional[Union[bytes, str]] = None,
+    use_grpc_certificates: bool = True,
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[TaskIns]],
@@ -96,6 +95,7 @@ def grpc_request_response(
     channel = create_channel(
         server_address=server_address,
         root_certificates=root_certificates,
+        use_grpc_certificates=use_grpc_certificates,
         max_message_length=max_message_length,
     )
     channel.subscribe(on_channel_state_change)

@@ -28,6 +28,7 @@ GRPC_MAX_MESSAGE_LENGTH: int = 536_870_912  # == 512 * 1024 * 1024
 def create_channel(
     server_address: str,
     root_certificates: Optional[bytes] = None,
+    use_grpc_certificates: bool = True,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
 ) -> grpc.Channel:
     """Create a gRPC channel, either secure or insecure."""
@@ -38,7 +39,7 @@ def create_channel(
         ("grpc.max_receive_message_length", max_message_length),
     ]
 
-    if root_certificates is not None:
+    if use_grpc_certificates:
         ssl_channel_credentials = grpc.ssl_channel_credentials(root_certificates)
         channel = grpc.secure_channel(
             server_address, ssl_channel_credentials, options=channel_options

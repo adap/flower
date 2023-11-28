@@ -22,8 +22,6 @@ from logging import INFO, WARN
 from pathlib import Path
 from typing import Callable, ContextManager, Optional, Tuple, Union
 
-import certifi
-
 from flwr.client.client import Client
 from flwr.client.flower import Bwd, Flower, Fwd
 from flwr.client.typing import ClientFn
@@ -61,8 +59,9 @@ def run_client() -> None:
         # Load the certificates if provided, or load the system certificates
         cert_path = args.certificates
         if cert_path is None:
-            cert_path = certifi.where()
-        certificates = Path(cert_path).read_bytes()
+            certificates = None
+        else:
+            certificates = Path(cert_path).read_bytes()
 
     print(args.server)
     print(args.callable_dir)
@@ -81,6 +80,7 @@ def run_client() -> None:
         load_callable_fn=_load,
         transport="grpc-rere",  # Only
         root_certificates=certificates,
+        use_grpc_certificates=not args.insecure,
     )
 
 
@@ -147,6 +147,7 @@ def start_client(
     client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
+    use_grpc_certificates: bool = True,
     transport: Optional[str] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
@@ -175,6 +176,10 @@ def start_client(
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
+    use_grpc_certificates : bool (default: True)
+        Enables HTTPS connection when True, using system certificates
+        if `root_certificates` is None. Starts an insecure gRPC connection
+        when False, ignoring `root_certificates`.
     transport : Optional[str] (default: None)
         Configure the transport layer. Allowed values:
         - 'grpc-bidi': gRPC, bidirectional streaming
@@ -183,7 +188,7 @@ def start_client(
 
     Examples
     --------
-    Starting a gRPC client with an insecure server connection:
+    Starting an SSL-enabled gRPC client using system certificates:
 
     >>> def client_fn(cid: str):
     >>>     return FlowerClient()
@@ -193,16 +198,22 @@ def start_client(
     >>>     client_fn=client_fn,
     >>> )
 
-    Starting an SSL-enabled gRPC client:
+    Starting an SSL-enabled gRPC client using provided certificates:
 
     >>> from pathlib import Path
-    >>> def client_fn(cid: str):
-    >>>     return FlowerClient()
     >>>
     >>> start_client(
     >>>     server_address=localhost:8080,
     >>>     client_fn=client_fn,
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
+    >>> )
+
+    Starting a gRPC client with an insecure server connection:
+
+    >>> start_client(
+    >>>     server_address=localhost:8080,
+    >>>     client_fn=client_fn,
+    >>>     use_grpc_certificates=False,
     >>> )
     """
     event(EventType.START_CLIENT_ENTER)
@@ -242,6 +253,7 @@ def start_client(
             address,
             grpc_max_message_length,
             root_certificates,
+            use_grpc_certificates,
         ) as conn:
             receive, send, create_node, delete_node = conn
 
@@ -299,6 +311,7 @@ def start_numpy_client(
     client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
+    use_grpc_certificates: bool = True,
     transport: Optional[str] = None,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
@@ -322,6 +335,10 @@ def start_numpy_client(
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
+    use_grpc_certificates : bool (default: True)
+        Enables HTTPS connection when True, using system certificates
+        if `root_certificates` is None. Starts an insecure gRPC connection
+        when False, ignoring `root_certificates`.
     transport : Optional[str] (default: None)
         Configure the transport layer. Allowed values:
         - 'grpc-bidi': gRPC, bidirectional streaming
@@ -330,20 +347,29 @@ def start_numpy_client(
 
     Examples
     --------
-    Starting a client with an insecure server connection:
+    Starting an SSL-enabled gRPC client using system certificates:
 
     >>> start_numpy_client(
     >>>     server_address=localhost:8080,
     >>>     client=FlowerClient(),
     >>> )
 
-    Starting an SSL-enabled gRPC client:
+    Starting an SSL-enabled gRPC client using provided certificates:
 
     >>> from pathlib import Path
+    >>>
     >>> start_numpy_client(
     >>>     server_address=localhost:8080,
     >>>     client=FlowerClient(),
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
+    >>> )
+
+    Starting a gRPC client with an insecure server connection:
+
+    >>> start_numpy_client(
+    >>>     server_address=localhost:8080,
+    >>>     client=FlowerClient(),
+    >>>     use_grpc_certificates=False,
     >>> )
     """
     # warnings.warn(
@@ -369,6 +395,7 @@ def start_numpy_client(
         client=wrp_client,
         grpc_max_message_length=grpc_max_message_length,
         root_certificates=root_certificates,
+        use_grpc_certificates=use_grpc_certificates,
         transport=transport,
     )
 
@@ -377,7 +404,7 @@ def _init_connection(
     transport: Optional[str], server_address: str
 ) -> Tuple[
     Callable[
-        [str, int, Union[bytes, str, None]],
+        [str, int, Union[bytes, str, None], bool],
         ContextManager[
             Tuple[
                 Callable[[], Optional[TaskIns]],
