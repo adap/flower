@@ -6,6 +6,7 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 # these are the basic packages you'll need here
 # feel free to remove some if aren't needed
 
+import warnings
 import subprocess
 import textwrap
 from argparse import Namespace
@@ -24,6 +25,9 @@ from omegaconf import DictConfig, OmegaConf
 from .client import SslClient
 from .CtP.pyvrl.builder import build_model
 from .utils import init_p_paths, load_data, load_model, set_config_mmcv
+
+
+warnings.filterwarnings("ignore", category=UserWarning)
 
 
 def t_f(arg):
@@ -220,7 +224,7 @@ def main(cfg: DictConfig) -> None:
                 "bash",
                 f"{cfg.dist_train_path}",
                 f"{cfg_path}",
-                "4",
+                "1",
                 f"--work_dir {cfg.exp_name_finetune}",
                 f"--data_dir {cfg.data_dir}",
             ]
@@ -256,7 +260,7 @@ def main(cfg: DictConfig) -> None:
                 "bash",
                 f"{cfg.dist_test_path}",
                 f"{cfg_path_test}",
-                "1",
+                f"{cfg.finetune_num_gpus}",
                 f"--work_dir {cfg.exp_name_finetune}",
                 f"--data_dir {cfg.data_dir}",
                 "--progress",
