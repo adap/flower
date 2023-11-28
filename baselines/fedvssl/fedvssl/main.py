@@ -21,6 +21,7 @@ from flwr.common import parameters_to_ndarrays
 from hydra.utils import instantiate
 from mmengine.config import Config
 from omegaconf import DictConfig, OmegaConf
+from hydra.core.hydra_config import HydraConfig
 
 from .client import SslClient
 from .CtP.pyvrl.builder import build_model
@@ -102,6 +103,8 @@ def main(cfg: DictConfig) -> None:
     # print config structured as YAML
     print(OmegaConf.to_yaml(cfg))
 
+    save_path = HydraConfig.get().runtime.output_dir
+
     if cfg.pre_training:
         # first the paths needs to be defined
         # otherwise the program may not be able to locate the files of the ctp
@@ -112,7 +115,7 @@ def main(cfg: DictConfig) -> None:
             "num_cpus": cfg.client_resources.num_cpus,
             "num_gpus": cfg.client_resources.num_gpus,
         }
-        base_work_dir = cfg.exp_name
+        base_work_dir = save_path + f"/{cfg.exp_name}"
         rounds = cfg.rounds
         data_dir = cfg.data_dir + "/ucf101"
         partition_dir = cfg.partition_dir
@@ -169,6 +172,7 @@ def main(cfg: DictConfig) -> None:
         cfg_path = cfg.cfg_path_finetune
         cfg_ = Config.fromfile(cfg_path)
         cfg_.model.backbone["pretrained"] = None
+        work_dir_finetune = save_path + f"/{cfg.exp_name_finetune}"
 
         # build a model using the configuration file from Ctp repository
         model = build_model(cfg_.model)
@@ -207,7 +211,7 @@ def main(cfg: DictConfig) -> None:
             f"""\
                 _base_ = ['../../recognizers/_base_/model_r3d18.py',
                 '../../recognizers/_base_/runtime_ucf101.py']
-                work_dir = '{cfg.exp_name_finetune}'
+                work_dir = '{work_dir_finetune}'
                 model = dict(
                     backbone=dict(
                         pretrained='./model_pretrained.pth',
@@ -225,7 +229,7 @@ def main(cfg: DictConfig) -> None:
                 f"{cfg.dist_train_path}",
                 f"{cfg_path}",
                 "1",
-                f"--work_dir {cfg.exp_name_finetune}",
+                f"--work_dir {work_dir_finetune}",
                 f"--data_dir {cfg.data_dir}",
             ]
         )
@@ -241,7 +245,7 @@ def main(cfg: DictConfig) -> None:
             f"""\
                 _base_ = ['../../recognizers/_base_/model_r3d18.py',
                 '../../recognizers/_base_/runtime_ucf101.py']
-                work_dir = '{cfg.exp_name_finetune}'
+                work_dir = '{work_dir_finetune}'
                 model = dict(
                     backbone=dict(
                     pretrained='/finetune/ucf101/epoch_150.pth',
@@ -261,7 +265,7 @@ def main(cfg: DictConfig) -> None:
                 f"{cfg.dist_test_path}",
                 f"{cfg_path_test}",
                 f"{cfg.finetune_num_gpus}",
-                f"--work_dir {cfg.exp_name_finetune}",
+                f"--work_dir {work_dir_finetune}",
                 f"--data_dir {cfg.data_dir}",
                 "--progress",
             ]
