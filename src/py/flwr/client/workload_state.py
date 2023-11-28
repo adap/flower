@@ -15,11 +15,13 @@
 """Workload state."""
 
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, Union
+
+from flwr.common.typing import NDArrays, Value
 
 
 @dataclass
 class WorkloadState:
     """State of a workload executed by a client node."""
 
-    state: Dict[str, str]
+    state: Dict[str, Union[Value, NDArrays, Dict[str, Union[Value, NDArrays]]]]

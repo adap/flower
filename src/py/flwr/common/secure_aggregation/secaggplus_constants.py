@@ -15,6 +15,9 @@
 """Constants for the SecAgg/SecAgg+ protocol."""
 
 
+# The key for secaggplus state in a workload state
+KEY_SECAGGPLUS_STATE = "secaggplus_state"
+
 # Names of stages
 STAGE_SETUP = "setup"
 STAGE_SHARE_KEYS = "share_keys"
