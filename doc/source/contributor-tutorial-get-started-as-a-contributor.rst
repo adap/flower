@@ -37,7 +37,7 @@ packages::
 
   $ apt update
   $ apt install build-essential zlib1g-dev libssl-dev libsqlite3-dev \
-                libreadline-dev libbz2-dev libffi-dev liblzma-dev
+                libreadline-dev libbz2-dev libffi-dev liblzma-dev pandoc
 
 
 Create Flower Dev Environment
