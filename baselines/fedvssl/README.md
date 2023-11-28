@@ -71,7 +71,7 @@ poetry install
 poetry shell
 
 # install mmcv package
-pip install mmcv-full==1.2.4 -f https://download.openmmlab.com/mmcv/dist/cu110/torch1.7.1/index.html
+pip install mmcv-full==1.7.1 -f https://download.openmmlab.com/mmcv/dist/cu117/torch1.13/index.html
 ```
 
 ## Running the Experiments
