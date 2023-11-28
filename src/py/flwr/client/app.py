@@ -214,13 +214,12 @@ def start_client(
     >>>     server_address=localhost:8080,
     >>>     client_fn=client_fn,
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
-    >>>     insecure=False,
     >>> )
     """
     event(EventType.START_CLIENT_ENTER)
 
     if insecure is None:
-        insecure = True if root_certificates is None else False
+        insecure = root_certificates is None
 
     if load_callable_fn is None:
         _check_actionable_client(client, client_fn)
@@ -373,7 +372,6 @@ def start_numpy_client(
     >>>     server_address=localhost:8080,
     >>>     client=FlowerClient(),
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
-    >>>     insecure=False,
     >>> )
     """
     # warnings.warn(
