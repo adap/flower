@@ -40,8 +40,8 @@ from .flower import load_callable
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
+from .node_state import NodeState
 from .numpy_client import NumPyClient
-from .workload_state import WorkloadState
 
 
 def run_client() -> None:
@@ -207,6 +207,8 @@ def start_client(
     # Initialize connection context manager
     connection, address = _init_connection(transport, server_address)
 
+    node_state = NodeState()
+
     while True:
         sleep_duration: int = 0
         with connection(
@@ -233,15 +235,26 @@ def start_client(
                     send(task_res)
                     break
 
+                # Register state
+                node_state.register_workloadstate(workload_id=task_ins.workload_id)
+
                 # Load app
                 app: Flower = load_callable_fn()
 
                 # Handle task message
                 fwd_msg: Fwd = Fwd(
                     task_ins=task_ins,
-                    state=WorkloadState(state={}),
+                    state=node_state.retrieve_workloadstate(
+                        workload_id=task_ins.workload_id
+                    ),
                 )
                 bwd_msg: Bwd = app(fwd=fwd_msg)
+
+                # Update node state
+                node_state.update_workloadstate(
+                    workload_id=bwd_msg.task_res.workload_id,
+                    workload_state=bwd_msg.state,
+                )
 
                 # Send
                 send(bwd_msg.task_res)
