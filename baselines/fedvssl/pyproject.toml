@@ -40,9 +40,10 @@ classifiers = [
 python = ">=3.10, <3.12.0"  # don't change this
 flwr = { extras = ["simulation"], version = "1.5.0" }
 hydra-core = "1.3.2" # don't change this
-torch = { url = "https://download.pytorch.org/whl/cu110/torch-1.7.1%2Bcu110-cp39-cp39-linux_x86_64.whl"}
-torchvision = { url = "https://download.pytorch.org/whl/cu110/torchvision-0.8.2%2Bcu110-cp39-cp39-linux_x86_64.whl"}
-mmengine = "0.9.0"
+torch = { url = "https://download.pytorch.org/whl/cu117/torch-1.13.1%2Bcu117-cp310-cp310-linux_x86_64.whl" }
+torchvision = { url = "https://download.pytorch.org/whl/cu117/torchvision-0.14.1%2Bcu117-cp310-cp310-linux_x86_64.whl" }
+mmengine = "0.10.0"
+yapf = "0.40.1"
 tensorboard = "2.15.1"
 numpy = "1.23.0"
 
