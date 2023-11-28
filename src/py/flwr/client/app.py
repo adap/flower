@@ -148,7 +148,7 @@ def start_client(
     client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
-    insecure: bool = True,
+    insecure: Optional[bool] = None,
     transport: Optional[str] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
@@ -218,6 +218,9 @@ def start_client(
     >>> )
     """
     event(EventType.START_CLIENT_ENTER)
+
+    if insecure is None:
+        insecure = True if root_certificates is None else False
 
     if load_callable_fn is None:
         _check_actionable_client(client, client_fn)
@@ -312,7 +315,7 @@ def start_numpy_client(
     client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
-    insecure: bool = True,
+    insecure: Optional[bool] = None,
     transport: Optional[str] = None,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
@@ -336,7 +339,7 @@ def start_numpy_client(
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
-    insecure : bool (default: True)
+    insecure : Optional[bool] (default: None)
         Starts an insecure gRPC connection when True. Enables HTTPS connection
         when False, using system certificates if `root_certificates` is None.
     transport : Optional[str] (default: None)
