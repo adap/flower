@@ -87,8 +87,9 @@ def secure_aggregation_middleware(
                 raise ValueError("TaskIns does not contain a FitIns message.")
             fit_res_proto = app(fwd).task_res.task.legacy_client_message.fit_res
             return serde.fit_res_from_proto(fit_res_proto)
-
+        print(f"Received named_values: {named_values.keys()}")
         res = func(workload_state, named_values, fit)
+        print(f"Returning named_values: {res.keys()}")
         return Bwd(
             task_res=TaskRes(
                 task_id="",
