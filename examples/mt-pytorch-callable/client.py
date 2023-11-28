@@ -112,10 +112,10 @@ def client_fn(cid: str):
 # To run this: `flower-client --callable client:flower`
 flower = fl.flower.Flower(
     client_fn=client_fn,
-    middleware=[
-        test_middleware
-        # get_wandb_middleware(project_name="W&B Middleware Test", client_id="test")
-    ],
+    # middleware=[
+    #     test_middleware
+    #     # get_wandb_middleware(project_name="W&B Middleware Test", client_id="test")
+    # ],
 )
 
 
