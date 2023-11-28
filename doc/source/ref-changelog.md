@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v1.6.0 (2023-11-28)
+
 ### What's new?
 
 - **Add experimental support for Python 3.12** ([#2565](https://github.com/adap/flower/pull/2565))
