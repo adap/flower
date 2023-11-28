@@ -443,18 +443,9 @@ def _collect_masked_input(
         state.sk1_share_dict[src] = sk1_share
 
     # Fit client
-    parameters_bytes = cast(List[bytes], named_values[KEY_PARAMETERS])
-    parameters = [bytes_to_ndarray(w) for w in parameters_bytes]
-    if isinstance(state.client, Client):
-        fit_res = state.client.fit(
-            FitIns(parameters=ndarrays_to_parameters(parameters), config={})
-        )
-        parameters_factor = fit_res.num_examples
-        parameters = parameters_to_ndarrays(fit_res.parameters)
-    elif isinstance(state.client, NumPyClient):
-        parameters, parameters_factor, _ = state.client.fit(parameters, {})
-    else:
-        log(ERROR, "Client %d: fit function is missing.", state.sid)
+    fit_res = fit()
+    parameters_factor = fit_res.num_examples
+    parameters = parameters_to_ndarrays(fit_res.parameters)
 
     # Quantize parameter update (vector)
     quantized_parameters = quantize(
