@@ -9,6 +9,11 @@ scrape_configs:
     scrape_interval: 1s 
     metrics_path: '/metrics'
     static_configs:
-      - targets: ['host.docker.internal:8080']
+      - targets: ['cadvisor:8080']
         labels:
           group: 'cadvisor'
+  - job_name: 'server_metrics'
+    scrape_interval: 5s
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['server:8000']

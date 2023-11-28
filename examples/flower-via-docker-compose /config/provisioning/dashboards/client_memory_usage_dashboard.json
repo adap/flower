@@ -5,7 +5,7 @@
         "builtIn": 1,
         "datasource": {
           "type": "grafana",
-          "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
+          "uid": "-- Grafana --"
         },
         "enable": true,
         "hide": true,
@@ -70,8 +70,8 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
+        "h": 18,
+        "w": 24,
         "x": 0,
         "y": 0
       },
@@ -115,7 +115,7 @@
           "useBackend": false
         }
       ],
-      "title": "Panel Title",
+      "title": "Memory Usage",
       "type": "barchart"
     }
   ],
@@ -132,7 +132,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "barchart_memory",
+  "title": "Client Memory Usage",
   "uid": "cd0d5026-20aa-4614-9dfe-0c14f1d6522f",
   "version": 1,
   "weekStart": ""

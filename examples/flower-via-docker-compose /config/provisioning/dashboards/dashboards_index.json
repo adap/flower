@@ -1,0 +1,80 @@
+{
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": {
+            "type": "grafana",
+            "uid": "-- Grafana --"
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 4,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
+        },
+        "gridPos": {
+          "h": 20,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "id": 1,
+        "options": {
+          "code": {
+            "language": "plaintext",
+            "showLineNumbers": false,
+            "showMiniMap": false
+          },
+          "mode": "markdown",
+          "content": "# Grafana Dashboards Index\n\nWelcome to the Grafana Dashboard Index. Below, you'll find an organized view of all available dashboards categorized for easy navigation.\n\n## Dashboard Categories\n\n| Category                           | Dashboard Description                               | Link                                          |\n|------------------------------------|----------------------------------------------------|-----------------------------------------------|\n| **Server-Specific Metrics**        |                                                    |                                               |\n| Server Memory Usage                | Memory usage metrics for the server                | [View Dashboard](/d/cdd71a29-8e29-4608-ac80-4f94741f63e4/container_memory_usage_bytes{name=\"server\"}) |\n| Server Cumulative CPU Time         | Cumulative CPU time consumed by the server         | [View Dashboard](/d/fbad3f40-4404-43b4-a8de-a03a08cd4ef9/container_cpu_usage_seconds_total{name=\"server\"}) |\n| Model Accuracy                     | Model accuracy as reported by the server           | [View Dashboard](/d/f63a7d0f-d29a-4a2e-b748-7bb66f9c17d7/model_accuracy{instance=\"server:8000\"}) |\n| Model Loss                         | Model loss as reported by the server               | [View Dashboard](/d/b697e6b8-0590-4ffb-a4f3-d14f004fb6ce/model_loss{instance=\"server:8000\"}) |\n| **Client-Specific Metrics**        |                                                    |                                               |\n| Memory Usage                       | Insights into `client1` memory usage               | [View Dashboard](/d/cd0d5026-20aa-4614-9dfe-0c14f1d6522f/container_memory_usage_bytes{name=\"client1\"})  |\n| Cumulative CPU Time                | Cumulative CPU time consumed by `client1`          | [View Dashboard](/d/be38333d-f7bb-40c9-809f-662d1e27fbad/container_cpu_usage_seconds_total{name=\"client1\"}) |\n| Cumulative Packets Received                | Cumulative count of packets received by `client1`          | [View Dashboard](/d/a6be6c63-6243-4d55-99d9-1db2d9f5f6d5/container_network_receive_packets_total{name=\"client1\"}) |\n| Cumulative Packets transmitted                | Cumulative count of packets transmitted by `client1`          | [View Dashboard](/d/c30ee11e-5cfc-4d93-a76b-410c2cb05909/container_network_transmit_packets_total{name=\"client1\"})|"
+          
+        },
+        "pluginVersion": "10.1.5",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
+            },
+            "expr": "",
+            "instant": false,
+            "range": true,
+            "refId": "A"
+          }
+        ],
+        "type": "text"
+      }
+    ],
+    "refresh": "",
+    "schemaVersion": 38,
+    "style": "dark",
+    "tags": [],
+    "templating": {
+      "list": []
+    },
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "Dashboards index",
+    "uid": "f1dbc02e-f23e-477f-81ea-f48c4f997db9",
+    "version": 1,
+    "weekStart": ""
+  }

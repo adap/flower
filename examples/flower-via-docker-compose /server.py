@@ -2,10 +2,15 @@ import argparse
 import flwr as fl
 import logging
 from strategy.strategy import FedCustom
+from prometheus_client import start_http_server, Gauge
 
 # Initialize Logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Define Prometheus Metrics
+accuracy_gauge = Gauge('model_accuracy', 'Global model accuracy')
+loss_gauge = Gauge('model_loss', 'Global model loss')
 
 # Parse command line arguments
 parser = argparse.ArgumentParser(description='Flower Server')
@@ -28,5 +33,11 @@ def start_fl_server(strategy, rounds):
 
 # Main Function
 if __name__ == "__main__":   
-    strategy_instance = FedCustom(total_clients = args.total_clients)
+    
+     # Start Prometheus Metrics Server
+    start_http_server(8000) 
+    
+    # Initialize Strategy Instance and Start FL Server 
+    strategy_instance = FedCustom(accuracy_gauge = accuracy_gauge, loss_gauge = loss_gauge, total_clients = args.total_clients)
     start_fl_server(strategy_instance, args.number_of_rounds)
+ 

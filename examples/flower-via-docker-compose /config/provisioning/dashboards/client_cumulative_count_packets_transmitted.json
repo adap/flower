@@ -1,0 +1,174 @@
+{
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": {
+            "type": "grafana",
+            "uid": "-- Grafana --"
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 80,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "__systemRef": "hideSeriesFrom",
+              "matcher": {
+                "id": "byNames",
+                "options": {
+                  "mode": "exclude",
+                  "names": [
+                    "{__name__=\"container_network_transmit_packets_total\", container_label_com_docker_compose_config_hash=\"b681de79eb57dfed350b9e8c1248f599e4832f2ed964a49bb18b9a59d22bacca\", container_label_com_docker_compose_container_number=\"1\", container_label_com_docker_compose_depends_on=\"server:service_started\", container_label_com_docker_compose_image=\"sha256:8c4c51797ea545857b3188b9ef2a5a0292127592ee92782d4fb01a9a9f460f9a\", container_label_com_docker_compose_oneoff=\"False\", container_label_com_docker_compose_project=\"flower-via-docker-compose\", container_label_com_docker_compose_project_config_files=\"/Users/nickvlachakis/Desktop/Flower-Contribution/flower/examples/flower-via-docker-compose /docker-compose.yml\", container_label_com_docker_compose_project_working_dir=\"/Users/nickvlachakis/Desktop/Flower-Contribution/flower/examples/flower-via-docker-compose \", container_label_com_docker_compose_service=\"client1\", container_label_com_docker_compose_version=\"2.6.1\", group=\"cadvisor\", id=\"/docker/351b646fac58bdfa95d43b63483363ba451690ca78d3ca31c0223ab3b66660d2\", image=\"flower-via-docker-compose_client1\", instance=\"cadvisor:8080\", interface=\"eth0\", job=\"cadvisor\", name=\"client1\"}"
+                  ],
+                  "prefix": "All except:",
+                  "readOnly": true
+                }
+              },
+              "properties": [
+                {
+                  "id": "custom.hideFrom",
+                  "value": {
+                    "legend": true,
+                    "tooltip": false,
+                    "viz": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 18,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "id": 1,
+        "options": {
+          "barRadius": 0,
+          "barWidth": 0.97,
+          "fullHighlight": false,
+          "groupWidth": 0.7,
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "orientation": "auto",
+          "showValue": "auto",
+          "stacking": "none",
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          },
+          "xTickLabelRotation": 0,
+          "xTickLabelSpacing": 0
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
+            },
+            "disableTextWrap": false,
+            "editorMode": "builder",
+            "expr": "container_network_transmit_packets_total{name=\"client1\"}",
+            "fullMetaSearch": false,
+            "includeNullMetadata": true,
+            "instant": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "A",
+            "useBackend": false
+          }
+        ],
+        "title": "Cumulative count of packets transmitted",
+        "type": "timeseries"
+      }
+    ],
+    "refresh": "",
+    "schemaVersion": 38,
+    "style": "dark",
+    "tags": [],
+    "templating": {
+      "list": []
+    },
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "Client cumulative count of packets transmitted",
+    "uid": "c30ee11e-5cfc-4d93-a76b-410c2cb05909",
+    "version": 7,
+    "weekStart": ""
+  }

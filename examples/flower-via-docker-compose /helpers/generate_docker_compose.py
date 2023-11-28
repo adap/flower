@@ -83,6 +83,7 @@ services:
     ports:
       - "6000:6000"
       - "8265:8265"
+      - "8000:8000"
     depends_on:
       - prometheus
       - grafana

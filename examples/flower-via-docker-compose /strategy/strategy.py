@@ -15,6 +15,7 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
 import flwr as fl
 import logging
+from prometheus_client import Gauge
 
 logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)     # Create logger for the module
@@ -29,7 +30,9 @@ class FedCustom(fl.server.strategy.Strategy):
         min_evaluate_clients: int = 2,
         min_available_clients: int = 2,
         initial_parameters: Optional[Parameters] = None,
-        total_clients: int = 2
+        total_clients: int = 2,
+        accuracy_gauge: Gauge = None,
+        loss_gauge: Gauge = None,
     ) -> None:
         super().__init__()
         self.fraction_fit = fraction_fit
@@ -39,6 +42,8 @@ class FedCustom(fl.server.strategy.Strategy):
         self.min_available_clients = min_available_clients
         self.initial_parameters = initial_parameters
         self.total_clients = total_clients
+        self.accuracy_gauge = accuracy_gauge
+        self.loss_gauge = loss_gauge
 
     def __repr__(self) -> str:
         return "FedCustom"
@@ -126,6 +131,10 @@ class FedCustom(fl.server.strategy.Strategy):
         accuracies = [evaluate_res.metrics["accuracy"] * evaluate_res.num_examples for _, evaluate_res in results]
         examples = [evaluate_res.num_examples for _, evaluate_res in results]
         accuracy_aggregated = sum(accuracies) / sum(examples) if sum(examples) != 0 else 0
+
+        # Set Prometheus metrics
+        self.accuracy_gauge.set(accuracy_aggregated)
+        self.loss_gauge.set(loss_aggregated)
 
         metrics_aggregated = {
             "loss": loss_aggregated, 
