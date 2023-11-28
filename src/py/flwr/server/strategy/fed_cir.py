@@ -21,6 +21,7 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.utils import Generator, ResNet18, VAE
 from .aggregate import aggregate, weighted_loss_avg
 from .fedavg import FedAvg
+import wandb
 
 WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
 Setting `min_available_clients` lower than `min_fit_clients` or
@@ -60,7 +61,7 @@ class FedCiR(FedAvg):
         initial_generator_params: Optional[Parameters] = None,
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
-        lr_g=1e-6,
+        lr_g=1e-3,
         steps_g=10,
         gen_stats=None,
         num_classes=10,
@@ -214,6 +215,20 @@ class FedCiR(FedAvg):
         if not self.accept_failures and failures:
             return None, {}
 
+        def vae_loss(recon_img, img, mu, logvar):
+            # Reconstruction loss using binary cross-entropy
+            recon_loss = F.binary_cross_entropy(
+                recon_img, img.view(-1, img.shape[2] * img.shape[3]), reduction="sum"
+            )
+
+            # KL divergence loss
+            kld_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+
+            # Total VAE loss
+            total_loss = recon_loss + kld_loss
+
+            return total_loss
+
         # Convert results
         weights_results = [
             (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
@@ -239,15 +254,11 @@ class FedCiR(FedAvg):
                         {k: torch.tensor(v) for k, v in params_dict}
                     )
                     temp_local_models[idx].load_state_dict(state_dict, strict=True)
+                    z_g, mu_g, logvar_g = self.gen_model(align_img)
+                    preds.append(temp_local_models[idx].decoder(z_g))
 
-                    preds.append(
-                        temp_local_models[idx].decoder(self.gen_model(align_img)[0])
-                    )
-
-                loss = F.binary_cross_entropy(
-                    torch.stack(preds).mean(dim=0),
-                    align_img.view(-1, 784),
-                    reduction="sum",
+                loss = vae_loss(
+                    torch.stack(preds).mean(dim=0), align_img, mu_g, logvar_g
                 )
                 threshold = 1e-6  # Define a threshold for the negligible loss
                 log(DEBUG, f"generator loss at ep {ep_g} step {step}: {loss}")
@@ -262,6 +273,7 @@ class FedCiR(FedAvg):
                         DEBUG,
                         f"Skipping optimization at step {step} due to negligible loss",
                     )
+        wandb.log(data={f"final_gen_loss": loss.item(), "client_round": server_round})
         # z_g, mu_g, log_var_g = self.gen_model(one_hot_all_labels)
         self.gen_stats = ndarrays_to_parameters(
             [val.cpu().numpy() for _, val in self.gen_model.state_dict().items()]
@@ -276,6 +288,29 @@ class FedCiR(FedAvg):
         elif server_round == 1:  # Only log this warning once
             log(WARNING, "No fit_metrics_aggregation_fn provided")
 
+        fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
+
+        for fit_metric in fit_metrics:
+            data = {
+                f"train_num_examples_{fit_metric[1]['cid']}": fit_metric[0],
+                f"train_vae_loss_term_{fit_metric[1]['cid']}": fit_metric[1][
+                    "vae_loss_term"
+                ],
+                f"train_reg_term_{fit_metric[1]['cid']}": fit_metric[1]["reg_term"],
+                f"train_align_term_{fit_metric[1]['cid']}": fit_metric[1]["align_term"],
+                f"train_true_image_{fit_metric[1]['cid']}": wandb.Image(
+                    fit_metric[1]["true_image"]
+                ),
+                f"train_gen_image_{fit_metric[1]['cid']}": wandb.Image(
+                    fit_metric[1]["gen_image"]
+                ),
+                f"train_latent_rep_{fit_metric[1]['cid']}": wandb.Image(
+                    fit_metric[1]["latent_rep"]
+                ),
+                "client_round": fit_metric[1]["client_round"],
+            }
+
+            wandb.log(data)
         return parameters_aggregated, metrics_aggregated
 
     def aggregate_evaluate(
@@ -306,5 +341,18 @@ class FedCiR(FedAvg):
             metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
         elif server_round == 1:  # Only log this warning once
             log(WARNING, "No evaluate_metrics_aggregation_fn provided")
+        eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
+
+        for eval_metric in eval_metrics:
+            data = {
+                f"eval_num_examples_{eval_metric[1]['cid']}": eval_metric[0],
+                f"eval_accuracy_{eval_metric[1]['cid']}": eval_metric[1]["accuracy"],
+                f"eval_local_val_loss_{eval_metric[1]['cid']}": eval_metric[1][
+                    "local_val_loss"
+                ],
+                "client_round": server_round,
+            }
+
+            wandb.log(data)
 
         return loss_aggregated, metrics_aggregated

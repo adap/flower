@@ -18,13 +18,20 @@ Paper: arxiv.org/abs/1812.06127
 """
 
 
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
-from flwr.common import FitIns, MetricsAggregationFn, NDArrays, Parameters, Scalar
+from flwr.common import (
+    FitIns,
+    MetricsAggregationFn,
+    NDArrays,
+    Parameters,
+    Scalar,
+    FitRes,
+)
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
-
 from .fedavg import FedAvg
+import wandb
 
 
 class FedProx(FedAvg):
@@ -169,3 +176,35 @@ class FedProx(FedAvg):
             )
             for client, fit_ins in client_config_pairs
         ]
+
+    def aggregate_fit(
+        self,
+        server_round: int,
+        results: List[Tuple[ClientProxy, FitRes]],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+        """Aggregate fit results using weighted average."""
+        aggregated_parameters, aggregated_metrics = super().aggregate_fit(
+            server_round, results, failures
+        )
+        fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
+
+        for fit_metric in fit_metrics:
+            data = {
+                f"train_num_examples_{fit_metric[1]['cid']}": fit_metric[0],
+                f"train_true_image_{fit_metric[1]['cid']}": wandb.Image(
+                    fit_metric[1]["true_image"]
+                ),
+                f"train_gen_image_{fit_metric[1]['cid']}": wandb.Image(
+                    fit_metric[1]["gen_image"]
+                ),
+                f"train_latent_rep_{fit_metric[1]['cid']}": wandb.Image(
+                    fit_metric[1]["latent_rep"]
+                ),
+                f"train_vae_term_{fit_metric[1]['cid']}": fit_metric[1]["vae_term"],
+                f"train_prox_term_{fit_metric[1]['cid']}": fit_metric[1]["prox_term"],
+                "client_round": fit_metric[1]["client_round"],
+            }
+
+            wandb.log(data)
+        return aggregated_parameters, aggregated_metrics

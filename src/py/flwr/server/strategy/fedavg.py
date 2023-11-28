@@ -39,6 +39,7 @@ from flwr.server.client_proxy import ClientProxy
 
 from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy
+import wandb
 
 WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
 Setting `min_available_clients` lower than `min_fit_clients` or
@@ -240,7 +241,24 @@ class FedAvg(Strategy):
             metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
         elif server_round == 1:  # Only log this warning once
             log(WARNING, "No fit_metrics_aggregation_fn provided")
+        fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
 
+        for fit_metric in fit_metrics:
+            data = {
+                f"train_num_examples_{fit_metric[1]['cid']}": fit_metric[0],
+                f"train_true_image_{fit_metric[1]['cid']}": wandb.Image(
+                    fit_metric[1]["true_image"]
+                ),
+                f"train_gen_image_{fit_metric[1]['cid']}": wandb.Image(
+                    fit_metric[1]["gen_image"]
+                ),
+                f"train_latent_rep_{fit_metric[1]['cid']}": wandb.Image(
+                    fit_metric[1]["latent_rep"]
+                ),
+                "client_round": fit_metric[1]["client_round"],
+            }
+
+            wandb.log(data)
         return parameters_aggregated, metrics_aggregated
 
     def aggregate_evaluate(
@@ -271,5 +289,17 @@ class FedAvg(Strategy):
             metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
         elif server_round == 1:  # Only log this warning once
             log(WARNING, "No evaluate_metrics_aggregation_fn provided")
+        eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
 
+        for eval_metric in eval_metrics:
+            data = {
+                f"eval_num_examples_{eval_metric[1]['cid']}": eval_metric[0],
+                f"eval_accuracy_{eval_metric[1]['cid']}": eval_metric[1]["accuracy"],
+                f"eval_local_val_loss_{eval_metric[1]['cid']}": eval_metric[1][
+                    "local_val_loss"
+                ],
+                "client_round": server_round,
+            }
+
+            wandb.log(data)
         return loss_aggregated, metrics_aggregated

@@ -2,58 +2,59 @@ import argparse
 from collections import OrderedDict
 from typing import Dict, Tuple, List
 from torch.utils.data import DataLoader
-
+from logging import WARNING, DEBUG
 import torch
-import wandb
+
 import flwr as fl
 from flwr.common import Metrics, ndarrays_to_parameters
-from flwr.common.logger import configure
+from flwr.common.logger import configure, log
 from flwr.common.typing import Scalar
+import wandb
+import os
+import yaml
+
+os.environ["WANDB_START_METHOD"] = "thread"
 
 from utils_mnist import (
-    load_data_mnist,
-    train,
     test,
     visualize_gen_image,
     visualize_gmm_latent_representation,
     non_iid_train_iid_test,
-    iid_train_iid_test,
     alignment_dataloader,
-    train_prox,
+    train_align,
     eval_reconstrution,
 )
 from utils_mnist import VAE
 import os
 import numpy as np
 
-NUM_CLIENTS = 5
-NUM_CLASSES = 7
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
 parser.add_argument(
     "--num_cpus",
     type=int,
-    default=5,
+    default=6,
     help="Number of CPUs to assign to a virtual client",
 )
 parser.add_argument(
     "--num_gpus",
     type=float,
-    default=1 / (NUM_CLIENTS - 2),
+    default=0.3,
     help="Ratio of GPU memory to assign to a virtual client",
 )
-parser.add_argument("--num_rounds", type=int, default=10, help="Number of FL rounds.")
+parser.add_argument("--num_rounds", type=int, default=50, help="Number of FL rounds.")
 parser.add_argument("--identifier", type=str, required=True, help="Name of experiment.")
 args = parser.parse_args()
+
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+NUM_CLIENTS = 5
+NUM_CLASSES = 10
 IDENTIFIER = args.identifier
 if not os.path.exists(IDENTIFIER):
     os.makedirs(IDENTIFIER)
-
 configure(identifier=IDENTIFIER, filename=f"logs_{IDENTIFIER}.log")
 
 
-# Flower client, adapted from Pytorch quickstart example
 class FlowerClient(fl.client.NumPyClient):
     def __init__(self, trainset, valset, cid):
         self.trainset = trainset
@@ -64,7 +65,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.model = VAE()
 
         # Determine device
-        self.device = DEVICE
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.model.to(self.device)  # send model to device
 
     def get_parameters(self, config):
@@ -72,18 +73,15 @@ class FlowerClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         set_params(self.model, parameters)
-        print(f"config:{config}")
         # Read from config
         batch, epochs = config["batch_size"], config["epochs"]
-        print(config["proximal_mu"])
+
         # Construct dataloader
         trainloader = DataLoader(self.trainset, batch_size=batch, shuffle=True)
 
-        # Define optimizer
-        # optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
         optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
         # Train
-        vae_term, prox_term = train_prox(
+        vae_loss_term, reg_term, align_term = train_align(
             self.model,
             trainloader,
             optimizer,
@@ -107,18 +105,20 @@ class FlowerClient(fl.client.NumPyClient):
             f'for_client_{self.cid}_train_at_round_{config.get("server_round")}',
             folder=IDENTIFIER,
         )
+
         # Return local model and statistics
         return (
             self.get_parameters({}),
             len(trainloader.dataset),
             {
                 "cid": self.cid,
+                "vae_loss_term": vae_loss_term,
+                "reg_term": reg_term,
+                "align_term": align_term,
                 "true_image": true_img,
                 "gen_image": gen_img,
                 "latent_rep": latent_reps,
                 "client_round": config["server_round"],
-                "vae_term": vae_term,
-                "prox_term": prox_term,
             },
         )
 
@@ -181,10 +181,9 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 def main():
-    # Parse input arguments
     run = wandb.init(
         entity="mak",
-        group="prox",
+        group="cir",
         reinit=True,
     )
 
@@ -195,13 +194,16 @@ def main():
     wandb.define_metric("train_*", step_metric="client_round")
     wandb.define_metric("eval_*", step_metric="client_round")
 
+    # Parse input arguments
     def fit_config(server_round: int) -> Dict[str, Scalar]:
         """Return a configuration with static batch size and (local) epochs."""
         config = {
-            "epochs": wandb.config["epochs"],  # Number of local epochs done by clients
-            "batch_size": wandb.config["batch_size"],
-            "proximal_mu": wandb.config["proximal_mu"],
+            "epochs": 2,  # Number of local epochs done by clients
+            "batch_size": 64,  # Batch size to use by clients during fit()
             "server_round": server_round,
+            "sample_per_class": wandb.config["sample_per_class"],
+            "lambda_reg": wandb.config["lambda_reg"],
+            "lambda_align": wandb.config["lambda_align"],
         }
         return config
 
@@ -216,14 +218,14 @@ def main():
             """Use the entire test set for evaluation."""
 
             # Determine device
-            device = DEVICE
+            device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
             model = VAE()
             model.to(device)
             set_params(model, parameters)
             if server_round == 0 or server_round == args.num_rounds:
                 with open(
-                    f"{IDENTIFIER}/weights_prox_round_{server_round}.npy", "wb"
+                    f"{IDENTIFIER}/weights_cir_round_{server_round}.npy", "wb"
                 ) as f:
                     np.save(f, np.array(parameters, dtype=object))
                 wandb.watch(model)
@@ -259,19 +261,26 @@ def main():
     # Download dataset and partition it
     trainsets, valsets = non_iid_train_iid_test()
     net = VAE().to(DEVICE)
+    gen_net = VAE(encoder_only=True).to(DEVICE)
 
     n1 = [val.cpu().numpy() for _, val in net.state_dict().items()]
     initial_params = ndarrays_to_parameters(n1)
-
-    strategy = fl.server.strategy.FedProx(
+    n2 = [val.cpu().numpy() for _, val in gen_net.state_dict().items()]
+    initial_gen_params = ndarrays_to_parameters(n2)
+    samples_per_class = wandb.config["sample_per_class"]
+    strategy = fl.server.strategy.FedCiR(
         initial_parameters=initial_params,
+        initial_generator_params=initial_gen_params,
+        gen_stats=initial_gen_params,
         min_fit_clients=NUM_CLIENTS,
         min_available_clients=NUM_CLIENTS,
         min_evaluate_clients=NUM_CLIENTS,
         on_fit_config_fn=fit_config,
         evaluate_metrics_aggregation_fn=weighted_average,  # Aggregate federated metrics
         evaluate_fn=get_evaluate_fn(valsets[-1]),  # Global evaluation function
-        proximal_mu=wandb.config["proximal_mu"],
+        alignment_dataloader=alignment_dataloader(batch_size=samples_per_class * 10),
+        lr_g=1e-3,
+        steps_g=20,
     )
 
     # Resources to be assigned to each virtual client
@@ -287,9 +296,6 @@ def main():
         client_resources=client_resources,
         config=fl.server.ServerConfig(num_rounds=args.num_rounds),
         strategy=strategy,
-        ray_init_args={
-            "include_dashboard": True,  # we need this one for tracking
-        },
     )
 
 
@@ -298,9 +304,9 @@ if __name__ == "__main__":
         "method": "random",
         "metric": {"name": "global_val_loss", "goal": "minimize"},
         "parameters": {
-            "epochs": {"values": [2, 5, 10]},
-            "batch_size": {"values": [32, 64, 128]},
-            "proximal_mu": {"values": [0.1, 0.5, 1, 2, 5]},
+            "sample_per_class": {"values": [50, 100, 150]},
+            "lambda_reg": {"min": 0.0, "max": 1.0},
+            "lambda_align": {"values": [1, 10, 50, 100]},
         },
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)

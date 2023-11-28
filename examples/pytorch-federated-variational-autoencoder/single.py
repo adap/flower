@@ -1,4 +1,9 @@
-from utils_mnist import train, test, test2, train_and_eval, Net, load_data_mnist, VAE
+from utils_mnist import (
+    train,
+    load_data_mnist,
+    VAE,
+    visualize_latent_representation,
+)
 import torch
 import os
 import matplotlib.pyplot as plt
@@ -15,7 +20,7 @@ model = net
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 config = {"identifier": IDENTIFIER}
 # Train
-train_and_eval(
+model = train(
     model,
     train_loader,
     optimizer,
@@ -23,12 +28,12 @@ train_and_eval(
     epochs=epochs,
     device=DEVICE,
     num_classes=None,
-    testloader=val_loader,
+    if_return=True,
 )
+visualize_latent_representation(model, val_loader, DEVICE, "final_sum1", IDENTIFIER)
 
+# with torch.no_grad():
+#     z = torch.randn(64, 2).cuda()
+#     sample = net.decoder(z).cuda()
 
-with torch.no_grad():
-    z = torch.randn(64, 2).cuda()
-    sample = net.decoder(z).cuda()
-
-    save_image(sample.view(64, 1, 28, 28), "./samples/sample_" + ".png")
+#     save_image(sample.view(64, 1, 28, 28), "./samples/sample_" + ".png")

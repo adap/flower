@@ -19,35 +19,39 @@ from utils_mnist import (
     non_iid_train_iid_test,
     iid_train_iid_test,
     alignment_dataloader,
+    eval_reconstrution,
 )
 from utils_mnist import VAE
 import os
 import numpy as np
 
+NUM_CLIENTS = 5
+NUM_CLASSES = 7
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
 parser.add_argument(
     "--num_cpus",
     type=int,
-    default=6,
+    default=7,
     help="Number of CPUs to assign to a virtual client",
 )
 parser.add_argument(
     "--num_gpus",
     type=float,
-    default=0.3,
+    default=1 / NUM_CLIENTS,
     help="Ratio of GPU memory to assign to a virtual client",
 )
-parser.add_argument("--num_rounds", type=int, default=10, help="Number of FL rounds.")
+parser.add_argument("--num_rounds", type=int, default=2, help="Number of FL rounds.")
 parser.add_argument("--identifier", type=str, required=True, help="Name of experiment.")
+import wandb
 
 args = parser.parse_args()
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-NUM_CLIENTS = 5
-NUM_CLASSES = 7
 IDENTIFIER = args.identifier
 if not os.path.exists(IDENTIFIER):
     os.makedirs(IDENTIFIER)
+
+configure(identifier=IDENTIFIER, filename=f"logs_{IDENTIFIER}.log")
 
 
 # Flower client, adapted from Pytorch quickstart example
@@ -61,7 +65,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.model = VAE()
 
         # Determine device
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.device = DEVICE
         self.model.to(self.device)  # send model to device
 
     def get_parameters(self, config):
@@ -69,7 +73,6 @@ class FlowerClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
         set_params(self.model, parameters)
-        print(f"config:{config}")
         # Read from config
         batch, epochs = config["batch_size"], config["epochs"]
 
@@ -90,14 +93,14 @@ class FlowerClient(fl.client.NumPyClient):
             num_classes=NUM_CLASSES,
         )
 
-        visualize_gen_image(
+        true_img, gen_img = true_img, gen_img = visualize_gen_image(
             self.model,
             DataLoader(self.valset, batch_size=64),
             self.device,
             f'for_client_{self.cid}_train_at_round_{config.get("server_round")}',
             folder=IDENTIFIER,
         )
-        visualize_gmm_latent_representation(
+        latent_reps = visualize_gmm_latent_representation(
             self.model,
             DataLoader(self.valset, batch_size=64),
             self.device,
@@ -105,7 +108,17 @@ class FlowerClient(fl.client.NumPyClient):
             folder=IDENTIFIER,
         )
         # Return local model and statistics
-        return self.get_parameters({}), len(trainloader.dataset), {}
+        return (
+            self.get_parameters({}),
+            len(trainloader.dataset),
+            {
+                "cid": self.cid,
+                "true_image": true_img,
+                "gen_image": gen_img,
+                "latent_rep": latent_reps,
+                "client_round": config["server_round"],
+            },
+        )
 
     def evaluate(self, parameters, config):
         set_params(self.model, parameters)
@@ -115,9 +128,16 @@ class FlowerClient(fl.client.NumPyClient):
 
         # Evaluate
         loss, accuracy = test(self.model, valloader, device=self.device)
-
         # Return statistics
-        return float(loss), len(valloader.dataset), {"accuracy": float(accuracy)}
+        return (
+            float(loss),
+            len(valloader.dataset),
+            {
+                "accuracy": float(accuracy),
+                "cid": self.cid,
+                "local_val_loss": float(loss),
+            },
+        )
 
 
 def get_client_fn(train_partitions, val_partitions):
@@ -139,16 +159,6 @@ def get_client_fn(train_partitions, val_partitions):
     return client_fn
 
 
-def fit_config(server_round: int) -> Dict[str, Scalar]:
-    """Return a configuration with static batch size and (local) epochs."""
-    config = {
-        "epochs": 10,  # Number of local epochs done by clients
-        "batch_size": 64,  # Batch size to use by clients during fit()
-        "server_round": server_round,
-    }
-    return config
-
-
 def set_params(model: torch.nn.ModuleList, params: List[fl.common.NDArrays]):
     """Set model weights from a list of NumPy ndarrays."""
     params_dict = zip(model.state_dict().keys(), params)
@@ -167,43 +177,80 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     return {"accuracy": sum(accuracies) / sum(examples)}
 
 
-def get_evaluate_fn(
-    testset,
-):
-    """Return an evaluation function for centralized evaluation."""
-
-    def evaluate(
-        server_round: int, parameters: fl.common.NDArrays, config: Dict[str, Scalar]
-    ):
-        """Use the entire test set for evaluation."""
-
-        # Determine device
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-        model = VAE()
-        set_params(model, parameters)
-        if server_round == 0 or server_round == args.num_rounds:
-            with open(f"{IDENTIFIER}/weights_avg_round_{server_round}.npy", "wb") as f:
-                np.save(f, np.array(parameters, dtype=object))
-        model.to(device)
-
-        testloader = DataLoader(testset, batch_size=64)
-        visualize_gen_image(
-            model, testloader, device, f"server_eval_{server_round}", folder=IDENTIFIER
-        )
-        visualize_gmm_latent_representation(
-            model, testloader, device, f"server_eval_{server_round}", folder=IDENTIFIER
-        )
-
-        # return loss, {"accuracy": accuracy}
-
-    return evaluate
-
-
 def main():
     # Parse input arguments
+    run = wandb.init(
+        entity="mak",
+        group="avg",
+        reinit=True,
+    )
 
-    configure(identifier=IDENTIFIER, filename=f"logs_{IDENTIFIER}.log")
+    print(f"running these hparams-> {wandb.config}")
+    wandb.define_metric("server_round")
+    wandb.define_metric("global_*", step_metric="server_round")
+    wandb.define_metric("client_round")
+    wandb.define_metric("train_*", step_metric="client_round")
+    wandb.define_metric("eval_*", step_metric="client_round")
+
+    def fit_config(server_round: int) -> Dict[str, Scalar]:
+        """Return a configuration with static batch size and (local) epochs."""
+        config = {
+            "epochs": wandb.config["epochs"],  # Number of local epochs done by clients
+            "batch_size": wandb.config[
+                "batch_size"
+            ],  # Batch size to use by clients during fit()
+            "server_round": server_round,
+        }
+        return config
+
+    def get_evaluate_fn(testset):
+        """Return an evaluation function for centralized evaluation."""
+
+        def evaluate(
+            server_round: int, parameters: fl.common.NDArrays, config: Dict[str, Scalar]
+        ):
+            """Use the entire test set for evaluation."""
+
+            # Determine device
+            device = DEVICE
+
+            model = VAE()
+            model.to(device)
+            set_params(model, parameters)
+            if server_round == 0 or server_round == args.num_rounds:
+                with open(
+                    f"{IDENTIFIER}/weights_avg_round_{server_round}.npy", "wb"
+                ) as f:
+                    np.save(f, np.array(parameters, dtype=object))
+                wandb.watch(model)
+
+            testloader = DataLoader(testset, batch_size=64)
+            true_img, gen_img = visualize_gen_image(
+                model,
+                testloader,
+                device,
+                f"server_eval_{server_round}",
+                folder=IDENTIFIER,
+            )
+            latent_reps = visualize_gmm_latent_representation(
+                model,
+                testloader,
+                device,
+                f"server_eval_{server_round}",
+                folder=IDENTIFIER,
+            )
+            global_val_loss = eval_reconstrution(model, testloader, device)
+            wandb.log(
+                {
+                    f"global_true_image": wandb.Image(true_img),
+                    f"global_gen_image": wandb.Image(gen_img),
+                    f"global_latent_rep": wandb.Image(latent_reps),
+                    f"global_val_loss": global_val_loss,
+                    "server_round": server_round,
+                }
+            )
+
+        return evaluate
 
     # Download dataset and partition it
     trainsets, valsets = non_iid_train_iid_test()
@@ -235,8 +282,21 @@ def main():
         client_resources=client_resources,
         config=fl.server.ServerConfig(num_rounds=args.num_rounds),
         strategy=strategy,
+        ray_init_args={
+            "include_dashboard": True,  # we need this one for tracking
+        },
     )
 
 
 if __name__ == "__main__":
-    main()
+    sweep_config = {
+        "method": "random",
+        "metric": {"name": "global_val_loss", "goal": "minimize"},
+        "parameters": {
+            "epochs": {"values": [2, 5, 10]},
+            "batch_size": {"values": [32, 64, 128]},
+        },
+    }
+    sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
+
+    wandb.agent(sweep_id, function=main, count=6)

@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from torchvision.utils import save_image
 from collections import OrderedDict
+import copy
 
 from flwr.common import parameters_to_ndarrays
 from torch.nn.parameter import Parameter
@@ -235,7 +236,16 @@ def iid_train_iid_test():
     return partition_datasets_train, partition_datasets_test
 
 
-def train(net, trainloader, optimizer, config, epochs, device, num_classes=None):
+def train(
+    net,
+    trainloader,
+    optimizer,
+    config,
+    epochs,
+    device,
+    num_classes=None,
+    if_return=False,
+):
     """Train the network on the training set."""
     net.train()
     for _ in range(epochs):
@@ -247,10 +257,12 @@ def train(net, trainloader, optimizer, config, epochs, device, num_classes=None)
                 recon_images, images.view(-1, 784), reduction="sum"
             )
 
-            kld_loss = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
-            loss = recon_loss + kld_loss
+            kld_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+            loss = recon_loss + kld_loss * 1
             loss.backward()
             optimizer.step()
+    if if_return:
+        return net
 
 
 def train_prox(
@@ -266,7 +278,7 @@ def train_prox(
     global_params = [val.detach().clone() for val in net.parameters()]
     net.train()
     for _ in range(epochs):
-        net = _train_one_epoch(
+        net, vae_term, prox_term = _train_one_epoch(
             net,
             global_params,
             trainloader,
@@ -275,6 +287,7 @@ def train_prox(
             optim,
             config.get("proximal_mu", 1),
         )
+    return vae_term, prox_term
 
 
 def _train_one_epoch(
@@ -299,9 +312,26 @@ def _train_one_epoch(
         kld_loss = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
         loss = recon_loss + kld_loss + (proximal_mu / 2) * proximal_term
 
+        vae_term = recon_loss + kld_loss
+        prox_term = (proximal_mu / 2) * proximal_term
         loss.backward()
         optimizer.step()
-    return net
+    return net, vae_term, prox_term
+
+
+def vae_loss(recon_img, img, mu, logvar):
+    # Reconstruction loss using binary cross-entropy
+    recon_loss = F.binary_cross_entropy(
+        recon_img, img.view(-1, img.shape[2] * img.shape[3]), reduction="sum"
+    )
+
+    # KL divergence loss
+    kld_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+
+    # Total VAE loss
+    total_loss = recon_loss + kld_loss
+
+    return total_loss
 
 
 def train_align(net, trainloader, optimizer, config, epochs, device, num_classes=None):
@@ -312,24 +342,26 @@ def train_align(net, trainloader, optimizer, config, epochs, device, num_classes
     params_dict = zip(temp_gen_model.state_dict().keys(), gen_weights)
     state_dict = OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
     temp_gen_model.load_state_dict(state_dict, strict=True)
+    copied_model = copy.deepcopy(temp_gen_model)
+
     temp_gen_model.eval()
-    sample_per_class = 100
+    sample_per_class = config.get("sample_per_class", 100)
     align_loader = alignment_dataloader(
         samples_per_class=sample_per_class, batch_size=sample_per_class * 10
     )
-    lambda_align = config.get("lambda_align", 5e-5)
+    lambda_reg = config.get("lambda_reg", 0.1)
+
+    lambda_align = config.get("lambda_align", 100)
 
     for _ in range(epochs):
         for images, _ in trainloader:
             images = images.to(device)
             optimizer.zero_grad()
             recon_images, mu, logvar = net(images)
-            recon_loss = F.binary_cross_entropy(
-                recon_images, images.view(-1, 784), reduction="sum"
-            )
-
-            kld_loss = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
-            loss = recon_loss + kld_loss
+            vae_loss1 = vae_loss(recon_images, images, mu, logvar)
+            z_g, mu_g, logvar_g = temp_gen_model(images)
+            vae_loss2 = vae_loss(net.decoder(z_g), images, mu_g, logvar_g)
+            loss = vae_loss1 + lambda_reg * vae_loss2
             for align_img, _ in align_loader:
                 align_img = align_img.to(device)
                 _, mu_g, log_var_g = temp_gen_model(align_img)
@@ -338,13 +370,24 @@ def train_align(net, trainloader, optimizer, config, epochs, device, num_classes
                 loss_align = 0.5 * (log_var_g - log_var - 1) + (
                     log_var.exp() + (mu - mu_g).pow(2)
                 ) / (2 * log_var_g.exp())
-            loss_align_reduced = loss_align.mean(dim=1).sum()
+            loss_align_reduced = loss_align.sum(dim=1).sum()
             loss += lambda_align * loss_align_reduced
             loss.backward()
             optimizer.step()
+    assert all(
+        torch.equal(val1, val2)
+        for (_, val1), (_, val2) in zip(
+            temp_gen_model.state_dict().items(), copied_model.state_dict().items()
+        )
+    ), "Not all parameters are equal."
+    return (
+        vae_loss1.item(),
+        lambda_reg * vae_loss2.item(),
+        lambda_align * loss_align_reduced.item(),
+    )
 
 
-def test(net, testloader, device):
+def test(net, testloader, device, kl_term=0):
     """Validate the network on the entire test set."""
     total, loss = 0, 0.0
     net.eval()
@@ -356,10 +399,26 @@ def test(net, testloader, device):
                 recon_images, images.view(-1, 784), reduction="sum"
             )
             kld_loss = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
-            loss += recon_loss + kld_loss
+            loss += recon_loss + kld_loss * kl_term
             total += len(images)
     # TODO: accu=-1*loss
     return (loss.item() / total), -1 * (loss.item() / total)
+
+
+def eval_reconstrution(net, testloader, device):
+    """Validate the network on the entire test set."""
+    total, loss = 0, 0.0
+    net.eval()
+    with torch.no_grad():
+        for idx, data in enumerate(testloader):
+            images = data[0].to(device)
+            recon_images, mu, logvar = net(images)
+            recon_loss = F.binary_cross_entropy(
+                recon_images, images.view(-1, 784), reduction="sum"
+            )
+            loss += recon_loss
+            total += len(images)
+    return loss.item() / total
 
 
 def visualize_gen_image(net, testloader, device, rnd=None, folder=None):
@@ -375,6 +434,10 @@ def visualize_gen_image(net, testloader, device, rnd=None, folder=None):
         generated_img = generated_tensors[0]
         save_image(
             generated_img.view(64, 1, 28, 28), f"{folder}/test_generated_at_{rnd}.png"
+        )
+        return (
+            f"{folder}/true_img_at_{rnd}.png",
+            f"{folder}/test_generated_at_{rnd}.png",
         )
 
 
@@ -460,6 +523,7 @@ def visualize_gmm_latent_representation(
         c=gm.predict(all_latents),
         cmap="tab10",
         label="Latent Points",
+        zorder=2,
     )
     axs[0].set_title("Latent Representation with GMM Predictions")
     axs[0].set_xlabel("Principal Component 1")
@@ -473,6 +537,7 @@ def visualize_gmm_latent_representation(
         c=all_labels,
         cmap="tab10",
         label="Labels",
+        zorder=2,
     )
     axs[1].set_title("Latent Representation with True Labels")
     axs[1].set_xlabel("Principal Component 1")
@@ -485,6 +550,7 @@ def visualize_gmm_latent_representation(
     plt.colorbar(scatter1, ax=axs, label="Digit Label")
 
     plt.savefig(f"{folder}/latent_rep_at_{rnd}.png")
+    return f"{folder}/latent_rep_at_{rnd}.png"
 
 
 def sample(net, device):
