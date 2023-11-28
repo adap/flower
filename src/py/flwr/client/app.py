@@ -207,6 +207,9 @@ def start_client(
     # Initialize connection context manager
     connection, address = _init_connection(transport, server_address)
 
+    # Create workload state
+    workload_state = WorkloadState(state={})
+
     while True:
         sleep_duration: int = 0
         with connection(
@@ -239,7 +242,7 @@ def start_client(
                 # Handle task message
                 fwd_msg: Fwd = Fwd(
                     task_ins=task_ins,
-                    state=WorkloadState(state={}),
+                    state=workload_state,
                 )
                 bwd_msg: Bwd = app(fwd=fwd_msg)
 

@@ -15,17 +15,18 @@
 """The SecAgg+ protocol handler tests."""
 
 import unittest
+from unittest.mock import Mock
 from itertools import product
 from typing import Any, Dict, List, cast
 
 from flwr.client import NumPyClient
 from flwr.common.secure_aggregation.secaggplus_constants import (
+    KEY_SECAGGPLUS_STATE,
     KEY_ACTIVE_SECURE_ID_LIST,
     KEY_CIPHERTEXT_LIST,
     KEY_CLIPPING_RANGE,
     KEY_DEAD_SECURE_ID_LIST,
     KEY_MOD_RANGE,
-    KEY_PARAMETERS,
     KEY_SAMPLE_NUMBER,
     KEY_SECURE_ID,
     KEY_SHARE_NUMBER,
@@ -40,28 +41,41 @@ from flwr.common.secure_aggregation.secaggplus_constants import (
     STAGES,
 )
 from flwr.common.typing import Value
+from flwr.proto.task_pb2 import TaskIns, TaskRes, Task, SecureAggregation
+from flwr.client.middleware import make_app
+from flwr.client.typing import Fwd, Bwd
+from flwr.client.workload_state import WorkloadState
+from flwr.common import serde
+import pickle
 
-from .secaggplus_handler import SecAggPlusHandler, check_named_values
+from .secaggplus_middleware import secaggplus_middleware, check_named_values, check_stage, SecAggPlusState
 
 
-class EmptyFlowerNumPyClient(NumPyClient, SecAggPlusHandler):
-    """Empty NumPyClient."""
+def get_test_handler(state: SecAggPlusState):
+    """."""
+    
+    def empty_app(_: Fwd) -> Bwd:
+        return Bwd(task_res=TaskRes(), state=WorkloadState(state={}))
+    
+    app = make_app(empty_app, secaggplus_middleware)
+    
+    def func(named_values: Dict[str, Value]) -> Dict[str, Value]:
+        workload_state = WorkloadState(state={KEY_SECAGGPLUS_STATE: pickle.dumps(state)})
+        bwd = app(Fwd(
+            task_ins=TaskIns(task=Task(sa=SecureAggregation(named_values=serde.named_values_to_proto(named_values)))),
+            state=workload_state
+        ))
+        state.__dict__.update()
+        return serde.named_values_from_proto(bwd.task_res.task.sa)
+    
+    return func
 
 
 class TestSecAggPlusHandler(unittest.TestCase):
     """Test the SecAgg+ protocol handler."""
 
-    def test_invalid_handler(self) -> None:
-        """Test invalid handler."""
-        handler = SecAggPlusHandler()
-
-        with self.assertRaises(TypeError):
-            handler.handle_secure_aggregation({})
-
     def test_stage_transition(self) -> None:
         """Test stage transition."""
-        handler = EmptyFlowerNumPyClient()
-
         assert STAGES == (
             STAGE_SETUP,
             STAGE_SHARE_KEYS,
@@ -88,29 +102,16 @@ class TestSecAggPlusHandler(unittest.TestCase):
         # If the next stage is valid, the function should update the current stage
         # and then raise KeyError or other exceptions when trying to execute SA.
         for current_stage, next_stage in valid_transitions:
-            # pylint: disable-next=protected-access
-            handler._current_stage = current_stage
-
-            with self.assertRaises(KeyError):
-                handler.handle_secure_aggregation({KEY_STAGE: next_stage})
-            # pylint: disable-next=protected-access
-            assert handler._current_stage == next_stage
+            check_stage(current_stage, {KEY_STAGE: next_stage})
 
         # Test invalid transitions
         # If the next stage is invalid, the function should raise ValueError
         for current_stage, next_stage in invalid_transitions:
-            # pylint: disable-next=protected-access
-            handler._current_stage = current_stage
-
             with self.assertRaises(ValueError):
-                handler.handle_secure_aggregation({KEY_STAGE: next_stage})
-            # pylint: disable-next=protected-access
-            assert handler._current_stage == current_stage
+                check_stage(current_stage, {KEY_STAGE: next_stage})
 
     def test_stage_setup_check(self) -> None:
         """Test content checking for the setup stage."""
-        handler = EmptyFlowerNumPyClient()
-
         valid_key_type_pairs = [
             (KEY_SAMPLE_NUMBER, int),
             (KEY_SECURE_ID, int),
@@ -135,11 +136,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
         }
 
         # Test valid `named_values`
-        try:
-            check_named_values(STAGE_SETUP, valid_named_values.copy())
-        # pylint: disable-next=broad-except
-        except Exception as exc:
-            self.fail(f"check_named_values() raised {type(exc)} unexpectedly!")
+        check_named_values(STAGE_SETUP, valid_named_values.copy())
 
         # Set the stage
         valid_named_values[KEY_STAGE] = STAGE_SETUP
@@ -153,21 +150,18 @@ class TestSecAggPlusHandler(unittest.TestCase):
                 if other_type == value_type:
                     continue
                 invalid_named_values[key] = other_value
-                # pylint: disable-next=protected-access
-                handler._current_stage = STAGE_UNMASK
                 with self.assertRaises(TypeError):
-                    handler.handle_secure_aggregation(invalid_named_values.copy())
+                    check_named_values(STAGE_SETUP, invalid_named_values.copy())
 
             # Test missing key
             invalid_named_values.pop(key)
             # pylint: disable-next=protected-access
-            handler._current_stage = STAGE_UNMASK
             with self.assertRaises(KeyError):
-                handler.handle_secure_aggregation(invalid_named_values.copy())
+                check_named_values(STAGE_SETUP, invalid_named_values.copy())
 
     def test_stage_share_keys_check(self) -> None:
         """Test content checking for the share keys stage."""
-        handler = EmptyFlowerNumPyClient()
+        handler = get_test_handler()
 
         valid_named_values: Dict[str, Value] = {
             "1": [b"public key 1", b"public key 2"],
@@ -203,12 +197,11 @@ class TestSecAggPlusHandler(unittest.TestCase):
 
     def test_stage_collect_masked_input_check(self) -> None:
         """Test content checking for the collect masked input stage."""
-        handler = EmptyFlowerNumPyClient()
+        handler = get_test_handler()
 
         valid_named_values: Dict[str, Value] = {
             KEY_CIPHERTEXT_LIST: [b"ctxt!", b"ctxt@", b"ctxt#", b"ctxt?"],
             KEY_SOURCE_LIST: [32, 51324, 32324123, -3],
-            KEY_PARAMETERS: [b"params1", b"params2"],
         }
 
         # Test valid `named_values`
@@ -246,7 +239,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
 
     def test_stage_unmask_check(self) -> None:
         """Test content checking for the unmasking stage."""
-        handler = EmptyFlowerNumPyClient()
+        handler = get_test_handler()
 
         valid_named_values: Dict[str, Value] = {
             KEY_ACTIVE_SECURE_ID_LIST: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],

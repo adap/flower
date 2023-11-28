@@ -36,7 +36,6 @@ from flwr.common.secure_aggregation.secaggplus_constants import (
     KEY_DESTINATION_LIST,
     KEY_MASKED_PARAMETERS,
     KEY_MOD_RANGE,
-    KEY_PARAMETERS,
     KEY_PUBLIC_KEY_1,
     KEY_PUBLIC_KEY_2,
     KEY_SAMPLE_NUMBER,
@@ -250,7 +249,9 @@ def workflow_with_sec_agg(
                 KEY_CIPHERTEXT_LIST: fwd_ciphertexts[nid2sid[node_id]],
                 KEY_SOURCE_LIST: fwd_srcs[nid2sid[node_id]],
             },
-            fit_ins=FitIns(parameters=parameters, config={}),
+            fit_ins=FitIns(
+                parameters=parameters, config={"drop": nid2sid[node_id] == 0}
+            ),
         )
         for node_id in surviving_node_ids
     }

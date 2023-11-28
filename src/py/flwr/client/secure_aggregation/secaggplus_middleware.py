@@ -51,7 +51,6 @@ from flwr.common.secure_aggregation.secaggplus_constants import (
     KEY_DESTINATION_LIST,
     KEY_MASKED_PARAMETERS,
     KEY_MOD_RANGE,
-    KEY_PARAMETERS,
     KEY_PUBLIC_KEY_1,
     KEY_PUBLIC_KEY_2,
     KEY_SAMPLE_NUMBER,
@@ -139,17 +138,18 @@ def secaggplus_middleware(
     # Execute
     if state.current_stage == STAGE_SETUP:
         res = _setup(state, named_values)
-    if state.current_stage == STAGE_SHARE_KEYS:
+    elif state.current_stage == STAGE_SHARE_KEYS:
         res = _share_keys(state, named_values)
-    if state.current_stage == STAGE_COLLECT_MASKED_INPUT:
+    elif state.current_stage == STAGE_COLLECT_MASKED_INPUT:
         res = _collect_masked_input(state, named_values, fit)
-    if state.current_stage == STAGE_UNMASK:
+    elif state.current_stage == STAGE_UNMASK:
         res = _unmask(state, named_values)
     else:
         raise ValueError(f"Unknown secagg stage: {state.current_stage}")
 
     # Store state
     workload_state.state[KEY_SECAGGPLUS_STATE] = pickle.dumps(state)
+    print(f"RES: {res.keys()}")
     return res
 
 
@@ -273,7 +273,6 @@ def check_named_values(stage: str, named_values: Dict[str, Value]) -> None:
         key_type_pairs = [
             (KEY_CIPHERTEXT_LIST, bytes),
             (KEY_SOURCE_LIST, int),
-            (KEY_PARAMETERS, bytes),
         ]
         for key, expected_type in key_type_pairs:
             if key not in named_values:

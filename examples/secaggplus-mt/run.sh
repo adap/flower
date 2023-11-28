@@ -1,6 +1,6 @@
 #!/bin/bash
 # Kill any currently running client.py processes
-pkill -f 'python client.py'
+pkill -f 'flower-client'
 
 # Kill any currently running flower-server processes
 pkill -f 'flower-server'
@@ -18,8 +18,7 @@ echo "Starting $N clients in background..."
 # Start N client processes
 for i in $(seq 1 $N)
 do
-  # python client.py > /dev/null 2>&1 &
-  flower-client --callable client:flower &
+  flower-client --callable client:flower > /dev/null 2>&1 &
   sleep 0.1
 done
 

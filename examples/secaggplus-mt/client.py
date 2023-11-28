@@ -19,11 +19,11 @@ class FlowerClient(fl.client.Client):
             metrics={},
         )
         # Force a significant delay for testing purposes
-        if self._shared_state.sid == 0:
-            print(f"Client {self._shared_state.sid} dropped for testing purposes.")
+        if fit_ins.config["drop"]:
+            print(f"Client dropped for testing purposes.")
             time.sleep(4)
             return ret
-        print(f"Client {self._shared_state.sid} uploading {ret_vec[0]}...")
+        print(f"Client uploading {ret_vec[0]}...")
         return ret
 
 
