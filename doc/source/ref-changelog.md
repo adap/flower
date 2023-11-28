@@ -35,7 +35,7 @@ We would like to give our special thanks to all the contributors who made the ne
 - **Make HTTPS the new default** ([#2591](https://github.com/adap/flower/pull/2591), [#2636](https://github.com/adap/flower/pull/2636))
 
   Moving forward, `flower-server` will fail without either --insecure or --certificates a b c, and `flower-client` will start with HTTPS-enabled by default.
-`start_client` and `start_numpy_client` will still start in the insecure mode by default for backward compatibility.
+  `start_client` and `start_numpy_client` will still start in the insecure mode by default for backward compatibility.
 
 - **Unify client API** ([#2303](https://github.com/adap/flower/pull/2303), [#2390](https://github.com/adap/flower/pull/2390), [#2493](https://github.com/adap/flower/pull/2493))
 
