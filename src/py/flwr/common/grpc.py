@@ -32,6 +32,14 @@ def create_channel(
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
 ) -> grpc.Channel:
     """Create a gRPC channel, either secure or insecure."""
+    # Check for conflicting parameters
+    if insecure and root_certificates is not None:
+        raise ValueError(
+            "Invalid configuration: 'root_certificates' should not be provided "
+            "when 'insecure' is set to True. For an insecure connection, omit "
+            "'root_certificates', or set 'insecure' to False for a secure connection."
+        )
+
     # Possible options:
     # https://github.com/grpc/grpc/blob/v1.43.x/include/grpc/impl/codegen/grpc_types.h
     channel_options = [

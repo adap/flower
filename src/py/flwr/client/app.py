@@ -53,6 +53,13 @@ def run_client() -> None:
 
     # Obtain certificates
     if args.insecure:
+        if args.root_certificates is not None:
+            sys.exit(
+                "Conflicting options: The '--insecure' flag disables HTTPS, "
+                "but '--root-certificates' was also specified. Please remove "
+                "the '--root-certificates' option when running in insecure mode, "
+                "or omit '--insecure' to use HTTPS."
+            )
         log(WARN, "Option `--insecure` was set. Starting insecure HTTP client.")
         root_certificates = None
     else:
@@ -94,9 +101,8 @@ def _parse_args_client() -> argparse.ArgumentParser:
     parser.add_argument(
         "--insecure",
         action="store_true",
-        help="Run the client without HTTPS, regardless of whether certificate "
-        "paths are provided. By default, the client runs with HTTPS enabled. "
-        "Use this flag only if you understand the risks.",
+        help="Run the client without HTTPS. By default, the client runs with "
+        "HTTPS enabled. Use this flag only if you understand the risks.",
     )
     parser.add_argument(
         "--root-certificates",
