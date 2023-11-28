@@ -99,7 +99,7 @@ def _parse_args_client() -> argparse.ArgumentParser:
         "Use this flag only if you understand the risks.",
     )
     parser.add_argument(
-        "--root_certificates",
+        "--root-certificates",
         metavar="ROOT_CERT",
         type=str,
         help="Specifies the path to the PEM-encoded root certificate file for "
