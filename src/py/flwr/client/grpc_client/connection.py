@@ -45,9 +45,9 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 @contextmanager
 def grpc_connection(
     server_address: str,
+    insecure: bool,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
-    use_grpc_certificates: bool = True,
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[TaskIns]],
@@ -101,8 +101,8 @@ def grpc_connection(
 
     channel = create_channel(
         server_address=server_address,
+        insecure=insecure,
         root_certificates=root_certificates,
-        use_grpc_certificates=use_grpc_certificates,
         max_message_length=max_message_length,
     )
     channel.subscribe(on_channel_state_change)

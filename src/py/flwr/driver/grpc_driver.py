@@ -66,8 +66,8 @@ class GrpcDriver:
             return
         self.channel = create_channel(
             server_address=self.driver_service_address,
+            insecure=(self.certificates is None),
             root_certificates=self.certificates,
-            use_grpc_certificates=False,
         )
         self.stub = DriverStub(self.channel)
         log(INFO, "[Driver] Connected to %s", self.driver_service_address)

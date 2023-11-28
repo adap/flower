@@ -61,11 +61,11 @@ PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 # pylint: disable-next=too-many-statements
 def http_request_response(
     server_address: str,
+    insecure: bool,  # pylint: disable=unused-argument
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
     root_certificates: Optional[
         Union[bytes, str]
     ] = None,  # pylint: disable=unused-argument
-    use_grpc_certificates: bool = True,  # pylint: disable=unused-argument
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[TaskIns]],

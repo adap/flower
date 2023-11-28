@@ -35,4 +35,5 @@ if __name__ == "__main__":
         server_address="127.0.0.1:8080", 
         client=FlowerClient(),
         root_certificates=Path("certificates/ca.crt").read_bytes(),
+        insecure=False,
     )

@@ -5,7 +5,7 @@ case "$1" in
   bare-https)
     ./generate.sh
     server_arg="--certificates certificates/ca.crt certificates/server.pem certificates/server.key"
-    client_arg="--certificates certificates/ca.crt"
+    client_arg="--root_certificates certificates/ca.crt"
     ;;
   *)
     server_arg="--insecure"
