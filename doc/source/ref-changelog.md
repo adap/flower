@@ -24,13 +24,18 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Update REST API to support create and delete nodes** ([#2283](https://github.com/adap/flower/pull/2283))
 
-- **Update the Android SDK** ([#2187](https://github/com/adap/flower/pull/2187))
+- **Update the Android SDK** ([#2187](https://github.com/adap/flower/pull/2187))
 
   Add gRPC request-response capability to the Android SDK.
 
-- **Update the C++ SDK** ([#2537](https://github/com/adap/flower/pull/2537), [#2528](https://github/com/adap/flower/pull/2528), [#2523](https://github.com/adap/flower/pull/2523), [#2522](https://github.com/adap/flower/pull/2522))
+- **Update the C++ SDK** ([#2537](https://github.com/adap/flower/pull/2537), [#2528](https://github.com/adap/flower/pull/2528), [#2523](https://github.com/adap/flower/pull/2523), [#2522](https://github.com/adap/flower/pull/2522))
 
   Add gRPC request-response capability to the C++ SDK.
+
+- **Make HTTPS the new default** ([#2591](https://github.com/adap/flower/pull/2591), [#2636](https://github.com/adap/flower/pull/2636))
+
+  Moving forward, `flower-server` will fail without either --insecure or --certificates a b c, and `flower-client` will start with HTTPS-enabled by default.
+`start_client` and `start_numpy_client` will still start in the insecure mode by default for backward compatibility.
 
 - **Unify client API** ([#2303](https://github.com/adap/flower/pull/2303), [#2390](https://github.com/adap/flower/pull/2390), [#2493](https://github.com/adap/flower/pull/2493))
 
