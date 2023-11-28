@@ -101,5 +101,3 @@ The figure above shows the centralised tested AUC performance over FL rounds on 
 One can see that all settings obtain stable performance boost over FL rounds (especially noticeable at the start of training).
 As expected, uniform client distribution shows higher AUC values (beyond 83% at the end) than square/exponential setup.
 Feel free to explore more interesting experiments by yourself!
-
-#### Cyclic training experiment
