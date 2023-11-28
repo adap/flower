@@ -34,6 +34,7 @@ if centralised_eval:
     fds = FederatedDataset(
         dataset="jxie/higgs", partitioners={"train": 20}, resplitter=resplit
     )
+    log(INFO, "Loading centralised test set...")
     test_set = fds.load_full("test")
     test_set.set_format("numpy")
     test_dmatrix = transform_dataset_to_dmatrix(test_set)
@@ -43,6 +44,14 @@ params = BST_PARAMS
 
 
 def eval_config(rnd: int) -> Dict[str, str]:
+    """Return a configuration with global epochs."""
+    config = {
+        "global_round": str(rnd),
+    }
+    return config
+
+
+def fit_config(rnd: int) -> Dict[str, str]:
     """Return a configuration with global epochs."""
     config = {
         "global_round": str(rnd),
@@ -135,6 +144,7 @@ if train_method == "bagging":
         min_evaluate_clients=num_evaluate_clients if not centralised_eval else 0,
         fraction_evaluate=1.0 if not centralised_eval else 0.0,
         on_evaluate_config_fn=eval_config,
+        on_fit_config_fn=fit_config,
         evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation
         if not centralised_eval
         else None,
@@ -147,6 +157,7 @@ else:
         fraction_evaluate=1.0,
         evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation,
         on_evaluate_config_fn=eval_config,
+        on_fit_config_fn=fit_config,
     )
 
 # Start Flower server

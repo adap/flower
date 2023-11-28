@@ -82,10 +82,6 @@ params = BST_PARAMS
 
 # Define Flower client
 class XgbClient(fl.client.Client):
-    def __init__(self):
-        self.bst = None
-        self.config = None
-
     def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
         _ = (self, ins)
         return GetParametersRes(
@@ -96,26 +92,27 @@ class XgbClient(fl.client.Client):
             parameters=Parameters(tensor_type="", tensors=[]),
         )
 
-    def _local_boost(self):
+    def _local_boost(self, bst_input):
         # Update trees based on local training data.
         for i in range(num_local_round):
-            self.bst.update(train_dmatrix, self.bst.num_boosted_rounds())
+            bst_input.update(train_dmatrix, bst_input.num_boosted_rounds())
 
         # Bagging: extract the last N=num_local_round trees for sever aggregation
         # Cyclic: return the entire model
         bst = (
-            self.bst[
-                self.bst.num_boosted_rounds()
-                - num_local_round : self.bst.num_boosted_rounds()
+            bst_input[
+                bst_input.num_boosted_rounds()
+                - num_local_round : bst_input.num_boosted_rounds()
             ]
             if args.train_method == "bagging"
-            else self.bst
+            else bst_input
         )
 
         return bst
 
     def fit(self, ins: FitIns) -> FitRes:
-        if not self.bst:
+        global_round = int(ins.config["global_round"])
+        if global_round == 1:
             # First round local training
             log(INFO, "Start training at round 1")
             bst = xgb.train(
@@ -124,18 +121,18 @@ class XgbClient(fl.client.Client):
                 num_boost_round=num_local_round,
                 evals=[(valid_dmatrix, "validate"), (train_dmatrix, "train")],
             )
-            self.config = bst.save_config()
-            self.bst = bst
         else:
+            bst = xgb.Booster(params=params)
             for item in ins.parameters.tensors:
                 global_model = bytearray(item)
 
             # Load global model into booster
-            self.bst.load_model(global_model)
-            self.bst.load_config(self.config)
+            bst.load_model(global_model)
 
-            bst = self._local_boost()
+            # Local training
+            bst = self._local_boost(bst)
 
+        # Save model
         local_model = bst.save_raw("json")
         local_model_bytes = bytes(local_model)
 
@@ -150,9 +147,16 @@ class XgbClient(fl.client.Client):
         )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        eval_results = self.bst.eval_set(
+        # Load global model
+        bst = xgb.Booster(params=params)
+        for para in ins.parameters.tensors:
+            para_b = bytearray(para)
+        bst.load_model(para_b)
+
+        # Run evaluation
+        eval_results = bst.eval_set(
             evals=[(valid_dmatrix, "valid")],
-            iteration=self.bst.num_boosted_rounds() - 1,
+            iteration=bst.num_boosted_rounds() - 1,
         )
         auc = round(float(eval_results.split("\t")[1].split(":")[1]), 4)
 
