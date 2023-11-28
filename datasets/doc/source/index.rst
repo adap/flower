@@ -38,11 +38,15 @@ References
 
 Information-oriented API reference and other reference material.
 
-.. toctree::
-   :maxdepth: 2
+.. autosummary::
+   :toctree: ref-api
+   :template: autosummary/module.rst
    :caption: API reference
+   :recursive:
 
-   ref-api-flwr-datasets
+      flwr_datasets
+
+
 
 Main features
 -------------
