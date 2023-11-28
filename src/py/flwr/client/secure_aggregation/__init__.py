@@ -13,12 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 """Secure Aggregation handlers."""
-
-
-from .handler import SecureAggregationHandler
-from .secaggplus_handler import SecAggPlusHandler
+from .secaggplus_middleware import secaggplus_middleware
 
 __all__ = [
-    "SecAggPlusHandler",
-    "SecureAggregationHandler",
+    "secaggplus_middleware",
 ]

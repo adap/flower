@@ -5,11 +5,11 @@ import numpy as np
 import flwr as fl
 from flwr.common import Status, FitIns, FitRes, Code
 from flwr.common.parameter import ndarrays_to_parameters
-from flwr.client.secure_aggregation import SecAggPlusHandler
+from flwr.client.secure_aggregation import secaggplus_middleware
 
 
 # Define Flower client with the SecAgg+ protocol
-class FlowerClient(fl.client.Client, SecAggPlusHandler):
+class FlowerClient(fl.client.Client):
     def fit(self, fit_ins: FitIns) -> FitRes:
         ret_vec = [np.ones(3)]
         ret = FitRes(
@@ -27,9 +27,22 @@ class FlowerClient(fl.client.Client, SecAggPlusHandler):
         return ret
 
 
-# Start Flower client
-fl.client.start_client(
-    server_address="0.0.0.0:9092",
-    client=FlowerClient(),
-    transport="grpc-rere",
+def client_fn(cid: str):
+    """."""
+    return FlowerClient().to_client()
+
+
+# To run this: `flower-client --callable client:flower`
+flower = fl.flower.Flower(
+    client_fn=client_fn,
+    middleware=[secaggplus_middleware],
 )
+
+
+if __name__ == "__main__":
+    # Start Flower client
+    fl.client.start_client(
+        server_address="0.0.0.0:9092",
+        client=FlowerClient(),
+        transport="grpc-rere",
+    )

@@ -16,18 +16,13 @@
 
 
 import os
+import pickle
 from dataclasses import dataclass, field
-from logging import ERROR, INFO, WARNING
-from typing import Any, Dict, List, Optional, Tuple, Union, cast, Callable, Literal
+from logging import INFO, WARNING
+from typing import Any, Callable, Dict, List, Tuple, cast
 
-from flwr.client.client import Client
-from flwr.client.numpy_client import NumPyClient
-from flwr.common import (
-    bytes_to_ndarray,
-    ndarray_to_bytes,
-    ndarrays_to_parameters,
-    parameters_to_ndarrays,
-)
+from flwr.client.workload_state import WorkloadState
+from flwr.common import ndarray_to_bytes, parameters_to_ndarrays
 from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.shamir import create_shares
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
@@ -47,10 +42,8 @@ from flwr.common.secure_aggregation.ndarrays_arithmetic import (
     parameters_multiply,
     parameters_subtraction,
 )
-from flwr.client.workload_state import WorkloadState
 from flwr.common.secure_aggregation.quantization import quantize
 from flwr.common.secure_aggregation.secaggplus_constants import (
-    KEY_SECAGGPLUS_STATE,
     KEY_ACTIVE_SECURE_ID_LIST,
     KEY_CIPHERTEXT_LIST,
     KEY_CLIPPING_RANGE,
@@ -62,6 +55,7 @@ from flwr.common.secure_aggregation.secaggplus_constants import (
     KEY_PUBLIC_KEY_1,
     KEY_PUBLIC_KEY_2,
     KEY_SAMPLE_NUMBER,
+    KEY_SECAGGPLUS_STATE,
     KEY_SECURE_ID,
     KEY_SECURE_ID_LIST,
     KEY_SHARE_LIST,
@@ -81,9 +75,9 @@ from flwr.common.secure_aggregation.secaggplus_utils import (
     share_keys_plaintext_concat,
     share_keys_plaintext_separate,
 )
-from flwr.common.typing import FitIns, Value, FitRes
+from flwr.common.typing import FitRes, Value
 
-from .handler import SecureAggregationHandler
+from .middleware import secure_aggregation_middleware
 
 
 @dataclass
@@ -117,18 +111,24 @@ class SecAggPlusState:
     public_keys_dict: Dict[int, Tuple[bytes, bytes]] = field(default_factory=dict)
 
 
+@secure_aggregation_middleware
 def secaggplus_middleware(
     workload_state: WorkloadState,
     named_values: Dict[str, Value],
     fit: Callable[[], FitRes],
 ) -> Dict[str, Value]:
-    if KEY_SECAGGPLUS_STATE in state:
-        state = SecAggPlusState(**workload_state[KEY_SECAGGPLUS_STATE])
+    """Handle incoming message and return results, following the SecAgg+ protocol."""
+    # Retrieve state
+    if KEY_SECAGGPLUS_STATE in workload_state.state:
+        state = cast(
+            SecAggPlusState,
+            pickle.loads(cast(bytes, workload_state.state[KEY_SECAGGPLUS_STATE])),
+        )
     else:
         state = SecAggPlusState()
 
     # Check the validity of the next stage
-    check_stage(state, named_values)
+    check_stage(state.current_stage, named_values)
 
     # Update the current stage
     state.current_stage = cast(str, named_values.pop(KEY_STAGE))
@@ -138,58 +138,63 @@ def secaggplus_middleware(
 
     # Execute
     if state.current_stage == STAGE_SETUP:
-        return _setup(state, named_values)
+        res = _setup(state, named_values)
     if state.current_stage == STAGE_SHARE_KEYS:
-        return _share_keys(state, named_values)
+        res = _share_keys(state, named_values)
     if state.current_stage == STAGE_COLLECT_MASKED_INPUT:
-        return _collect_masked_input(state, named_values, fit)
+        res = _collect_masked_input(state, named_values, fit)
     if state.current_stage == STAGE_UNMASK:
-        return _unmask(state, named_values)
-    raise ValueError(f"Unknown secagg stage: {state.current_stage}")
+        res = _unmask(state, named_values)
+    else:
+        raise ValueError(f"Unknown secagg stage: {state.current_stage}")
+
+    # Store state
+    workload_state.state[KEY_SECAGGPLUS_STATE] = pickle.dumps(state)
+    return res
 
 
-class SecAggPlusHandler(SecureAggregationHandler):
-    """Message handler for the SecAgg+ protocol."""
+# class SecAggPlusHandler(SecureAggregationHandler):
+#     """Message handler for the SecAgg+ protocol."""
 
-    _shared_state = SecAggPlusState()
-    _current_stage = STAGE_UNMASK
+#     _shared_state = SecAggPlusState()
+#     _current_stage = STAGE_UNMASK
 
-    def __call__(
-        self, named_values: Dict[str, Value], fit: Callable[[], FitRes]
-    ) -> Dict[str, Value]:
-        """Handle incoming message and return results, following the SecAgg+ protocol.
+#     def __call__(
+#         self, named_values: Dict[str, Value], fit: Callable[[], FitRes]
+#     ) -> Dict[str, Value]:
+#         """Handle incoming message and return results, following the SecAgg+ protocol.
 
-        Parameters
-        ----------
-        named_values : Dict[str, Value]
-            The named values retrieved from the SecureAggregation sub-message
-            of Task message in the server's TaskIns.
+#         Parameters
+#         ----------
+#         named_values : Dict[str, Value]
+#             The named values retrieved from the SecureAggregation sub-message
+#             of Task message in the server's TaskIns.
 
-        Returns
-        -------
-        Dict[str, Value]
-            The final/intermediate results of the SecAgg+ protocol.
-        """
-        # Check the validity of the next stage
-        check_stage(self._current_stage, named_values)
+#         Returns
+#         -------
+#         Dict[str, Value]
+#             The final/intermediate results of the SecAgg+ protocol.
+#         """
+#         # Check the validity of the next stage
+#         check_stage(self._current_stage, named_values)
 
-        # Update the current stage
-        self._current_stage = cast(str, named_values.pop(KEY_STAGE))
+#         # Update the current stage
+#         self._current_stage = cast(str, named_values.pop(KEY_STAGE))
 
-        # Check the validity of the `named_values` based on the current stage
-        check_named_values(self._current_stage, named_values)
+#         # Check the validity of the `named_values` based on the current stage
+#         check_named_values(self._current_stage, named_values)
 
-        # Execute
-        if self._current_stage == STAGE_SETUP:
-            self._shared_state = SecAggPlusState(client=self)
-            return _setup(self._shared_state, named_values)
-        if self._current_stage == STAGE_SHARE_KEYS:
-            return _share_keys(self._shared_state, named_values)
-        if self._current_stage == STAGE_COLLECT_MASKED_INPUT:
-            return _collect_masked_input(self._shared_state, named_values)
-        if self._current_stage == STAGE_UNMASK:
-            return _unmask(self._shared_state, named_values)
-        raise ValueError(f"Unknown secagg stage: {self._current_stage}")
+#         # Execute
+#         if self._current_stage == STAGE_SETUP:
+#             self._shared_state = SecAggPlusState(client=self)
+#             return _setup(self._shared_state, named_values)
+#         if self._current_stage == STAGE_SHARE_KEYS:
+#             return _share_keys(self._shared_state, named_values)
+#         if self._current_stage == STAGE_COLLECT_MASKED_INPUT:
+#             return _collect_masked_input(self._shared_state, named_values)
+#         if self._current_stage == STAGE_UNMASK:
+#             return _unmask(self._shared_state, named_values)
+#         raise ValueError(f"Unknown secagg stage: {self._current_stage}")
 
 
 def check_stage(current_stage: str, named_values: Dict[str, Value]) -> None:

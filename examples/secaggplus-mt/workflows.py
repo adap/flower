@@ -1,6 +1,6 @@
 import random
 from logging import WARNING
-from typing import Callable, Dict, Generator, List
+from typing import Callable, Dict, Generator, List, Optional
 
 import numpy as np
 
@@ -55,8 +55,9 @@ from flwr.common.secure_aggregation.secaggplus_constants import (
 )
 from flwr.common.secure_aggregation.secaggplus_utils import pseudo_rand_gen
 from flwr.common.serde import named_values_from_proto, named_values_to_proto
-from flwr.common.typing import Value
+from flwr.common.typing import Value, FitIns, ServerMessage
 from flwr.proto.task_pb2 import SecureAggregation, Task
+from flwr.common import serde
 
 
 LOG_EXPLAIN = True
@@ -68,8 +69,17 @@ def get_workflow_factory() -> (
     return _wrap_workflow_with_sec_agg
 
 
-def _wrap_in_task(named_values: Dict[str, Value]) -> Task:
-    return Task(sa=SecureAggregation(named_values=named_values_to_proto(named_values)))
+def _wrap_in_task(
+    named_values: Dict[str, Value], fit_ins: Optional[FitIns] = None
+) -> Task:
+    return Task(
+        sa=SecureAggregation(named_values=named_values_to_proto(named_values)),
+        legacy_server_message=serde.server_message_to_proto(
+            ServerMessage(fit_ins=fit_ins)
+        )
+        if fit_ins is not None
+        else None,
+    )
 
 
 def _get_from_task(task: Task) -> Dict[str, Value]:
@@ -233,15 +243,14 @@ def workflow_with_sec_agg(
     if LOG_EXPLAIN:
         print(f"\nForwarding encrypted key shares and requesting masked input...")
     # Send encrypted secret key shares to clients (plus model parameters)
-    weights = parameters_to_ndarrays(parameters)
     yield {
         node_id: _wrap_in_task(
             named_values={
                 KEY_STAGE: STAGE_COLLECT_MASKED_INPUT,
                 KEY_CIPHERTEXT_LIST: fwd_ciphertexts[nid2sid[node_id]],
                 KEY_SOURCE_LIST: fwd_srcs[nid2sid[node_id]],
-                KEY_PARAMETERS: [ndarray_to_bytes(arr) for arr in weights],
-            }
+            },
+            fit_ins=FitIns(parameters=parameters, config={}),
         )
         for node_id in surviving_node_ids
     }
@@ -249,6 +258,7 @@ def workflow_with_sec_agg(
     node_messages = yield
     surviving_node_ids = [node_id for node_id in node_messages]
     # Get shape of vector sent by first client
+    weights = parameters_to_ndarrays(parameters)
     masked_vector = [np.array([0], dtype=int)] + get_zero_parameters(
         [w.shape for w in weights]
     )
