@@ -36,15 +36,13 @@ def _get_latest_tag(gh_api):
 def _get_pull_requests_since_tag(gh_api, tag):
     """Get a list of pull requests merged into the main branch since a given tag."""
     repo = gh_api.get_repo(REPO_NAME)
-    commits = set(
-        [commit.sha for commit in repo.compare(tag.commit.sha, "main").commits]
-    )
+    commits = {commit.sha for commit in repo.compare(tag.commit.sha, "main").commits}
     prs = set()
-    for pr in repo.get_pulls(
+    for pr_info in repo.get_pulls(
         state="closed", sort="created", direction="desc", base="main"
     ):
-        if pr.merge_commit_sha in commits:
-            prs.add(pr)
+        if pr_info.merge_commit_sha in commits:
+            prs.add(pr_info)
         if len(prs) == len(commits):
             break
     return prs
@@ -55,10 +53,10 @@ def _format_pr_reference(title, number, url):
     return f"- **{title}** ([#{number}]({url}))"
 
 
-def _extract_changelog_entry(pr):
+def _extract_changelog_entry(pr_info):
     """Extract the changelog entry from a pull request's body."""
     entry_match = re.search(
-        f"{CHANGELOG_SECTION_HEADER}(.+?)(?=##|$)", pr.body, re.DOTALL
+        f"{CHANGELOG_SECTION_HEADER}(.+?)(?=##|$)", pr_info.body, re.DOTALL
     )
     if not entry_match:
         return None, "general"
@@ -100,14 +98,16 @@ def _update_changelog(prs):
             next_header_index if next_header_index != -1 else len(content)
         )
 
-        for pr in prs:
-            pr_entry_text, category = _extract_changelog_entry(pr)
+        for pr_info in prs:
+            pr_entry_text, category = _extract_changelog_entry(pr_info)
 
             # Skip if PR should be skipped or already in changelog
-            if category == "skip" or f"#{pr.number}]" in content:
+            if category == "skip" or f"#{pr_info.number}]" in content:
                 continue
 
-            pr_reference = _format_pr_reference(pr.title, pr.number, pr.html_url)
+            pr_reference = _format_pr_reference(
+                pr_info.title, pr_info.number, pr_info.html_url
+            )
 
             # Process based on category
             if category in ["general", "baselines", "examples", "sdk", "simulations"]:
@@ -115,14 +115,14 @@ def _update_changelog(prs):
                 content = _update_entry(
                     content,
                     entry_title,
-                    pr,
+                    pr_info,
                     unreleased_index,
                     next_header_index,
                 )
 
             elif pr_entry_text:
                 content = _insert_new_entry(
-                    content, pr, pr_reference, pr_entry_text, unreleased_index
+                    content, pr_info, pr_reference, pr_entry_text, unreleased_index
                 )
 
             else:
@@ -153,31 +153,37 @@ def _get_category_title(category):
     return headers.get(category, "")
 
 
-def _update_entry(content, category_title, pr, unreleased_index, next_header_index):
+def _update_entry(
+    content, category_title, pr_info, unreleased_index, next_header_index
+):
     """Update a specific section in the changelog content."""
     section_index = content.find(category_title, unreleased_index, next_header_index)
     if section_index != -1:
         newline_index = content.find("\n", section_index)
         closing_parenthesis_index = content.rfind(")", unreleased_index, newline_index)
-        updated_entry = f", [{pr.number}]({pr.html_url})"
+        updated_entry = f", [{pr_info.number}]({pr_info.html_url})"
         content = (
             content[:closing_parenthesis_index]
             + updated_entry
             + content[closing_parenthesis_index:]
         )
     else:
-        new_section = f"\n- **{category_title}** ([#{pr.number}]({pr.html_url}))\n"
+        new_section = (
+            f"\n- **{category_title}** ([#{pr_info.number}]({pr_info.html_url}))\n"
+        )
         insert_index = content.find("\n", unreleased_index) + 1
         content = content[:insert_index] + new_section + content[insert_index:]
     return content
 
 
-def _insert_new_entry(content, pr, pr_reference, pr_entry_text, unreleased_index):
+def _insert_new_entry(content, pr_info, pr_reference, pr_entry_text, unreleased_index):
     """Insert a new entry into the changelog."""
     existing_entry_start = content.find(pr_entry_text)
     if existing_entry_start != -1:
         pr_ref_end = content.rfind("\n", 0, existing_entry_start)
-        updated_entry = f"{content[pr_ref_end]}\n, [{pr.number}]({pr.html_url})"
+        updated_entry = (
+            f"{content[pr_ref_end]}\n, [{pr_info.number}]({pr_info.html_url})"
+        )
         content = content[:pr_ref_end] + updated_entry + content[existing_entry_start:]
     else:
         insert_index = content.find("\n", unreleased_index) + 1
@@ -201,13 +207,18 @@ def _insert_entry_no_desc(content, pr_reference, unreleased_index):
     return content
 
 
-if __name__ == "__main__":
+def main():
+    """Updaet changelog using the descriptions of PRs since the latest tag."""
     # Initialize GitHub Client with provided token (as argument)
     gh_api = Github(argv[1])
     latest_tag = _get_latest_tag(gh_api)
     if not latest_tag:
         print("No tags found in the repository.")
-        exit(1)
+        return
 
     prs = _get_pull_requests_since_tag(gh_api, latest_tag)
     _update_changelog(prs)
+
+
+if __name__ == "__main__":
+    main()
