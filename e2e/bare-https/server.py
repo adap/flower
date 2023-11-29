@@ -6,9 +6,9 @@ hist = fl.server.start_server(
     server_address="127.0.0.1:8080",
     config=fl.server.ServerConfig(num_rounds=3),
     credentials=(
-        Path("certificates/ca.crt").read_bytes(),
-        Path("certificates/server.pem").read_bytes(),
-        Path("certificates/server.key").read_bytes(),
+        Path("credentials/ca.crt").read_bytes(),
+        Path("credentials/server.pem").read_bytes(),
+        Path("credentials/server.key").read_bytes(),
     ),
 )
 
