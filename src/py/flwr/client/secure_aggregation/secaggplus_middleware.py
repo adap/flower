@@ -16,7 +16,6 @@
 
 
 import os
-import pickle
 from dataclasses import dataclass, field
 from logging import INFO, WARNING
 from typing import Any, Callable, Dict, List, Tuple, cast
@@ -118,13 +117,12 @@ def secaggplus_middleware(
 ) -> Dict[str, Value]:
     """Handle incoming message and return results, following the SecAgg+ protocol."""
     # Retrieve state
-    if KEY_SECAGGPLUS_STATE in workload_state.state:
-        state = cast(
-            SecAggPlusState,
-            pickle.loads(cast(bytes, workload_state.state[KEY_SECAGGPLUS_STATE])),
-        )
-    else:
-        state = SecAggPlusState()
+    if KEY_SECAGGPLUS_STATE not in workload_state.state:
+        workload_state.state[KEY_SECAGGPLUS_STATE] = SecAggPlusState()  # type: ignore
+    state = cast(
+        SecAggPlusState,
+        workload_state.state[KEY_SECAGGPLUS_STATE],
+    )
 
     # Check the validity of the next stage
     check_stage(state.current_stage, named_values)
@@ -147,54 +145,7 @@ def secaggplus_middleware(
     else:
         raise ValueError(f"Unknown secagg stage: {state.current_stage}")
 
-    # Store state
-    workload_state.state[KEY_SECAGGPLUS_STATE] = pickle.dumps(state)
-    print(f"RES: {res.keys()}")
     return res
-
-
-# class SecAggPlusHandler(SecureAggregationHandler):
-#     """Message handler for the SecAgg+ protocol."""
-
-#     _shared_state = SecAggPlusState()
-#     _current_stage = STAGE_UNMASK
-
-#     def __call__(
-#         self, named_values: Dict[str, Value], fit: Callable[[], FitRes]
-#     ) -> Dict[str, Value]:
-#         """Handle incoming message and return results, following the SecAgg+ protocol.
-
-#         Parameters
-#         ----------
-#         named_values : Dict[str, Value]
-#             The named values retrieved from the SecureAggregation sub-message
-#             of Task message in the server's TaskIns.
-
-#         Returns
-#         -------
-#         Dict[str, Value]
-#             The final/intermediate results of the SecAgg+ protocol.
-#         """
-#         # Check the validity of the next stage
-#         check_stage(self._current_stage, named_values)
-
-#         # Update the current stage
-#         self._current_stage = cast(str, named_values.pop(KEY_STAGE))
-
-#         # Check the validity of the `named_values` based on the current stage
-#         check_named_values(self._current_stage, named_values)
-
-#         # Execute
-#         if self._current_stage == STAGE_SETUP:
-#             self._shared_state = SecAggPlusState(client=self)
-#             return _setup(self._shared_state, named_values)
-#         if self._current_stage == STAGE_SHARE_KEYS:
-#             return _share_keys(self._shared_state, named_values)
-#         if self._current_stage == STAGE_COLLECT_MASKED_INPUT:
-#             return _collect_masked_input(self._shared_state, named_values)
-#         if self._current_stage == STAGE_UNMASK:
-#             return _unmask(self._shared_state, named_values)
-#         raise ValueError(f"Unknown secagg stage: {self._current_stage}")
 
 
 def check_stage(current_stage: str, named_values: Dict[str, Value]) -> None:
