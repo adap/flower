@@ -1,0 +1,213 @@
+# mypy: ignore-errors
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""This module is used to update the changelog."""
+
+
+import re
+from sys import argv
+
+from github import Github
+
+REPO_NAME = "adap/flower"
+CHANGELOG_FILE = "doc/source/ref-changelog.md"
+CHANGELOG_SECTION_HEADER = "## Changelog entry"
+
+
+def _get_latest_tag(gh_api):
+    """Retrieve the latest tag from the GitHub repository."""
+    repo = gh_api.get_repo(REPO_NAME)
+    tags = repo.get_tags()
+    return tags[0] if tags.totalCount > 0 else None
+
+
+def _get_pull_requests_since_tag(gh_api, tag):
+    """Get a list of pull requests merged into the main branch since a given tag."""
+    repo = gh_api.get_repo(REPO_NAME)
+    commits = set(
+        [commit.sha for commit in repo.compare(tag.commit.sha, "main").commits]
+    )
+    prs = set()
+    for pr in repo.get_pulls(
+        state="closed", sort="created", direction="desc", base="main"
+    ):
+        if pr.merge_commit_sha in commits:
+            prs.add(pr)
+        if len(prs) == len(commits):
+            break
+    return prs
+
+
+def _format_pr_reference(title, number, url):
+    """Format a pull request reference as a markdown list item."""
+    return f"- **{title}** ([#{number}]({url}))"
+
+
+def _extract_changelog_entry(pr):
+    """Extract the changelog entry from a pull request's body."""
+    entry_match = re.search(
+        f"{CHANGELOG_SECTION_HEADER}(.+?)(?=##|$)", pr.body, re.DOTALL
+    )
+    if not entry_match:
+        return None, "general"
+
+    entry_text = entry_match.group(1).strip()
+
+    # Remove markdown comments
+    entry_text = re.sub(r"<!--.*?-->", "", entry_text, flags=re.DOTALL).strip()
+
+    if "<general>" in entry_text:
+        return entry_text, "general"
+    if "<skip>" in entry_text:
+        return entry_text, "skip"
+    if "<baselines>" in entry_text:
+        return entry_text, "baselines"
+    if "<examples>" in entry_text:
+        return entry_text, "examples"
+    if "<sdk>" in entry_text:
+        return entry_text, "sdk"
+    if "<simulations>" in entry_text:
+        return entry_text, "simulations"
+
+    return entry_text, None
+
+
+def _update_changelog(prs):
+    """Update the changelog file with entries from provided pull requests."""
+    with open(CHANGELOG_FILE, "r+") as file:
+        content = file.read()
+        unreleased_index = content.find("## Unreleased")
+
+        if unreleased_index == -1:
+            print("Unreleased header not found in the changelog.")
+            return
+
+        # Find the end of the Unreleased section
+        next_header_index = content.find("##", unreleased_index + 1)
+        next_header_index = (
+            next_header_index if next_header_index != -1 else len(content)
+        )
+
+        for pr in prs:
+            pr_entry_text, category = _extract_changelog_entry(pr)
+
+            # Skip if PR should be skipped or already in changelog
+            if category == "skip" or f"#{pr.number}]" in content:
+                continue
+
+            pr_reference = _format_pr_reference(pr.title, pr.number, pr.html_url)
+
+            # Process based on category
+            if category in ["general", "baselines", "examples", "sdk", "simulations"]:
+                entry_title = _get_category_title(category)
+                content = _update_entry(
+                    content,
+                    entry_title,
+                    pr,
+                    unreleased_index,
+                    next_header_index,
+                )
+
+            elif pr_entry_text:
+                content = _insert_new_entry(
+                    content, pr, pr_reference, pr_entry_text, unreleased_index
+                )
+
+            else:
+                content = _insert_entry_no_desc(content, pr_reference, unreleased_index)
+
+            next_header_index = content.find("##", unreleased_index + 1)
+            next_header_index = (
+                next_header_index if next_header_index != -1 else len(content)
+            )
+
+        # Finalize content update
+        file.seek(0)
+        file.write(content)
+        file.truncate()
+
+    print("Changelog updated.")
+
+
+def _get_category_title(category):
+    """Get the title of a changelog section based on its category."""
+    headers = {
+        "general": "General improvements",
+        "baselines": "General updates to Flower Baselines",
+        "examples": "General updates to Flower Examples",
+        "sdk": "General updates to Flower SDKs",
+        "simulations": "General updates to Flower Simulations",
+    }
+    return headers.get(category, "")
+
+
+def _update_entry(content, category_title, pr, unreleased_index, next_header_index):
+    """Update a specific section in the changelog content."""
+    section_index = content.find(category_title, unreleased_index, next_header_index)
+    if section_index != -1:
+        newline_index = content.find("\n", section_index)
+        closing_parenthesis_index = content.rfind(")", unreleased_index, newline_index)
+        updated_entry = f", [{pr.number}]({pr.html_url})"
+        content = (
+            content[:closing_parenthesis_index]
+            + updated_entry
+            + content[closing_parenthesis_index:]
+        )
+    else:
+        new_section = f"\n- **{category_title}** ([#{pr.number}]({pr.html_url}))\n"
+        insert_index = content.find("\n", unreleased_index) + 1
+        content = content[:insert_index] + new_section + content[insert_index:]
+    return content
+
+
+def _insert_new_entry(content, pr, pr_reference, pr_entry_text, unreleased_index):
+    """Insert a new entry into the changelog."""
+    existing_entry_start = content.find(pr_entry_text)
+    if existing_entry_start != -1:
+        pr_ref_end = content.rfind("\n", 0, existing_entry_start)
+        updated_entry = f"{content[pr_ref_end]}\n, [{pr.number}]({pr.html_url})"
+        content = content[:pr_ref_end] + updated_entry + content[existing_entry_start:]
+    else:
+        insert_index = content.find("\n", unreleased_index) + 1
+        content = (
+            content[:insert_index]
+            + pr_reference
+            + "\n  "
+            + pr_entry_text
+            + "\n"
+            + content[insert_index:]
+        )
+    return content
+
+
+def _insert_entry_no_desc(content, pr_reference, unreleased_index):
+    """Insert a changelog entry for a pull request with no specific description."""
+    insert_index = content.find("\n", unreleased_index) + 1
+    content = (
+        content[:insert_index] + "\n" + pr_reference + "\n" + content[insert_index:]
+    )
+    return content
+
+
+if __name__ == "__main__":
+    # Initialize GitHub Client with provided token (as argument)
+    gh_api = Github(argv[1])
+    latest_tag = _get_latest_tag(gh_api)
+    if not latest_tag:
+        print("No tags found in the repository.")
+        exit(1)
+
+    prs = _get_pull_requests_since_tag(gh_api, latest_tag)
+    _update_changelog(prs)
