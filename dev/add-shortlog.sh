@@ -3,10 +3,10 @@ set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
 tags=$(git tag --sort=-v:refname)
-new_version=$(echo "$tags" | sed -n '1p')
-old_version=$(echo "$tags" | sed -n '2p')
+new_version=$1
+old_version=$(echo "$tags" | sed -n '1p')
 
-shortlog=$(git shortlog "$old_version".."$new_version" -s | grep -vEi '(\(|\[)bot(\)|\])' | awk '{name = substr($0, index($0, $2)); printf "%s`%s`", sep, name; sep=", "} END {print ""}')
+shortlog=$(git shortlog "$old_version"..main -s | grep -vEi '(\(|\[)bot(\)|\])' | awk '{name = substr($0, index($0, $2)); printf "%s`%s`", sep, name; sep=", "} END {print ""}')
 
 token="<!---TOKEN_$new_version-->"
 thanks="\n### Thanks to our contributors\n\nWe would like to give our special thanks to all the contributors who made the new version of Flower possible (in \`git shortlog\` order):\n\n$shortlog $token"
