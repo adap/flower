@@ -2,6 +2,7 @@ import flwr as fl
 import numpy as np
 from strategy import Strategy
 from client import FlowerClient
+from pathlib import Path
 from task import get_partitions_and_label
 
 partitions, label = get_partitions_and_label()
@@ -19,4 +20,6 @@ hist = fl.simulation.start_simulation(
     strategy=Strategy(label),
 )
 
-np.save("_static/results/hist.npy", hist)
+results_dir = Path("_static/results")
+results_dir.mkdir(exist_ok=True)
+np.save(str(results_dir/"hist.npy"), hist)
