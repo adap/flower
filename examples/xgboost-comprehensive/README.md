@@ -12,6 +12,30 @@ It differs from the [xgboost-quickstart](https://github.com/adap/flower/tree/mai
 - Bagging/cyclic training methods.
 - Flower simulation
 
+
+## Training Strategies
+This example provides two training strategies, **bagging aggregation** and **cyclic training**.
+
+### Bagging Aggregation
+Bagging (bootstrap) aggregation is an ensemble meta-algorithm in machine learning, 
+used for enhancing the stability and accuracy of machine learning algorithms. 
+Here, we leverage this algorithm for XGBoost trees.
+
+Specifically, each client is treated as a bootstrap by random subsampling (data partitioning in FL). 
+At each FL round, all clients boost a number of trees (in this example, 1 tree) based on the local bootstrap samples. 
+Then, the clients' trees are aggregated on the server, and concatenates them to the global model from previous round. 
+The aggregated tree ensemble is regarded as a new global model.
+
+This way, let's consider a scenario with M clients. 
+Given FL round R, the bagging models consist of (M * R) trees.
+
+### Cyclic Training
+Cyclic XGBoost training performs FL in a client-by-client fashion.
+Instead of aggregating multiple clients, 
+there is only one single client participating in the training per round in the cyclic training scenario.
+The trained local XGBoost trees will be passed to the next client as an initialised model for next round's boosting.
+
+
 ## Project Setup
 
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
@@ -62,9 +86,10 @@ Write the command below in your terminal to install the dependencies according t
 pip install -r requirements.txt
 ```
 
+
 ## Run Federated Learning with XGBoost and Flower
 
-### Independent client/server setup
+### Independent Client/Server Setup
 
 We have two scripts to run bagging and cyclic (client-by-client) experiments.
 The included `run_bagging.sh` or `run_cyclic.sh` will start the Flower server (using `server.py`),
@@ -93,7 +118,7 @@ You can also manually run `poetry run python3 server.py --train-method=bagging/c
 and `poetry run python3 client.py --train-method=bagging/cyclic --node-id=NODE_ID --num-partitions=N` for as many clients as you want,
 but you have to make sure that each command is run in a different terminal window (or a different computer on the network).
 
-### Flower simulation setup
+### Flower Simulation Setup
 
 We also provide example code (`sim.py`) to use the simulation capabilities of Flower to simulate federated XGBoost training on either a single machine or a cluster of machines.
 To run bagging aggregation with 5 clients for 30 rounds evaluated on centralised test set:
@@ -116,9 +141,19 @@ and [tutorial](https://flower.dev/docs/framework/tutorial-quickstart-xgboost.htm
 
 #### Bagging aggregation experiment
 
-![](_static/xgboost_flower_auc.png)
+![](_static/xgboost_flower_auc_bagging.png)
 
-The figure above shows the centralised tested AUC performance over FL rounds on 4 experimental settings.
+The figure above shows the centralised tested AUC performance over FL rounds with bagging aggregation strategy on 4 experimental settings.
 One can see that all settings obtain stable performance boost over FL rounds (especially noticeable at the start of training).
-As expected, uniform client distribution shows higher AUC values (beyond 83% at the end) than square/exponential setup.
+As expected, uniform client distribution shows higher AUC values than square/exponential setup.
+
+
+#### Cyclic training experiment
+
+![](_static/xgboost_flower_auc_cyclic.png)
+
+This figure shows the cyclic training results on centralised test set.
+The models with cyclic training requires more rounds to converge
+because only a single client participate in the training per round.
+
 Feel free to explore more interesting experiments by yourself!
