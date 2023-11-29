@@ -41,6 +41,10 @@ Example: The variable `rnd` was renamed to `server_round` to improve readability
 - [ ] Make CI checks pass
 - [ ] Ping maintainers on [Slack](https://flower.dev/join-slack/) (channel `#contributions`)
 
+## Changelog entry
+
+<general>
+
 ### Any other comments?
 
 <!--
