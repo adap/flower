@@ -25,7 +25,7 @@ from flwr.proto.task_pb2 import SecureAggregation, Task, TaskRes
 
 
 def secure_aggregation_middleware(
-    func: Callable[
+    fn: Callable[
         [WorkloadState, Dict[str, Value], Callable[[], FitRes]], Dict[str, Value]
     ]
 ) -> Layer:
@@ -38,7 +38,7 @@ def secure_aggregation_middleware(
 
     Parameters
     ----------
-    func : Callable[
+    fn : Callable[
         [WorkloadState, Dict[str, Value], Callable[[], FitRes]], Dict[str, Value]
     ]
         The user-defined function to be transformed into a middleware layer.
@@ -88,7 +88,7 @@ def secure_aggregation_middleware(
             fit_res_proto = app(fwd).task_res.task.legacy_client_message.fit_res
             return serde.fit_res_from_proto(fit_res_proto)
 
-        res = func(workload_state, named_values, fit)
+        res = fn(workload_state, named_values, fit)
         return Bwd(
             task_res=TaskRes(
                 task_id="",
