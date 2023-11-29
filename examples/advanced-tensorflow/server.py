@@ -32,7 +32,7 @@ def main() -> None:
         server_address="0.0.0.0:8080",
         config=fl.server.ServerConfig(num_rounds=4),
         strategy=strategy,
-        certificates=(
+        credentials=(
             Path(".cache/certificates/ca.crt").read_bytes(),
             Path(".cache/certificates/server.pem").read_bytes(),
             Path(".cache/certificates/server.key").read_bytes(),

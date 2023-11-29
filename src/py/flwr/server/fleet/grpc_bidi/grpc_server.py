@@ -30,7 +30,7 @@ from flwr.server.driver.driver_servicer import DriverServicer
 from flwr.server.fleet.grpc_bidi.flower_service_servicer import FlowerServiceServicer
 from flwr.server.fleet.grpc_rere.fleet_servicer import FleetServicer
 
-INVALID_CERTIFICATES_ERR_MSG = """
+INVALID_CREDENTIALS_ERR_MSG = """
     When setting any of root_certificate, certificate, or private_key,
     all of them need to be set.
 """
@@ -38,15 +38,15 @@ INVALID_CERTIFICATES_ERR_MSG = """
 AddServicerToServerFn = Callable[..., Any]
 
 
-def valid_certificates(certificates: Tuple[bytes, bytes, bytes]) -> bool:
-    """Validate certificates tuple."""
+def valid_credentials(credentials: Tuple[bytes, bytes, bytes]) -> bool:
+    """Validate credentials tuple."""
     is_valid = (
-        all(isinstance(certificate, bytes) for certificate in certificates)
-        and len(certificates) == 3
+        all(isinstance(credential, bytes) for credential in credentials)
+        and len(credentials) == 3
     )
 
     if not is_valid:
-        log(ERROR, INVALID_CERTIFICATES_ERR_MSG)
+        log(ERROR, INVALID_CREDENTIALS_ERR_MSG)
 
     return is_valid
 
@@ -57,7 +57,7 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
     max_concurrent_workers: int = 1000,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     keepalive_time_ms: int = 210000,
-    certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
+    credentials: Optional[Tuple[bytes, bytes, bytes]] = None,
 ) -> grpc.Server:
     """Create and start a gRPC server running FlowerServiceServicer.
 
@@ -101,7 +101,7 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
         Mobile Flower clients may choose to increase this value if their server
         environment allows long-running idle TCP connections.
         (default: 210000)
-    certificates : Tuple[bytes, bytes, bytes] (default: None)
+    credentials : Tuple[bytes, bytes, bytes] (default: None)
         Tuple containing root certificate, server certificate, and private key to
         start a secure SSL-enabled server. The tuple is expected to have three bytes
         elements in the following order:
@@ -123,7 +123,7 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
     >>> start_grpc_server(
     >>>     client_manager=ClientManager(),
     >>>     server_address="localhost:8080",
-    >>>     certificates=(
+    >>>     credentials=(
     >>>         Path("/crts/root.pem").read_bytes(),
     >>>         Path("/crts/localhost.crt").read_bytes(),
     >>>         Path("/crts/localhost.key").read_bytes(),
@@ -139,7 +139,7 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
         max_concurrent_workers=max_concurrent_workers,
         max_message_length=max_message_length,
         keepalive_time_ms=keepalive_time_ms,
-        certificates=certificates,
+        credentials=credentials,
     )
 
     server.start()
@@ -157,7 +157,7 @@ def generic_create_grpc_server(  # pylint: disable=too-many-arguments
     max_concurrent_workers: int = 1000,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     keepalive_time_ms: int = 210000,
-    certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
+    credentials: Optional[Tuple[bytes, bytes, bytes]] = None,
 ) -> grpc.Server:
     """Create a gRPC server with a single servicer.
 
@@ -195,7 +195,7 @@ def generic_create_grpc_server(  # pylint: disable=too-many-arguments
         Mobile Flower clients may choose to increase this value if their server
         environment allows long-running idle TCP connections.
         (default: 210000)
-    certificates : Tuple[bytes, bytes, bytes] (default: None)
+    credentials : Tuple[bytes, bytes, bytes] (default: None)
         Tuple containing root certificate, server certificate, and private key to
         start a secure SSL-enabled server. The tuple is expected to have three bytes
         elements in the following order:
@@ -248,11 +248,11 @@ def generic_create_grpc_server(  # pylint: disable=too-many-arguments
     )
     add_servicer_to_server_fn(servicer, server)
 
-    if certificates is not None:
-        if not valid_certificates(certificates):
+    if credentials is not None:
+        if not valid_credentials(credentials):
             sys.exit(1)
 
-        root_certificate_b, certificate_b, private_key_b = certificates
+        root_certificate_b, certificate_b, private_key_b = credentials
 
         server_credentials = grpc.ssl_server_credentials(
             ((private_key_b, certificate_b),),

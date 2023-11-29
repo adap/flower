@@ -1,5 +1,5 @@
 #!/bin/bash
-# This script will generate all certificates if ca.crt does not exist
+# This script will generate all credentials
 
 set -e
 # Change directory to the script's directory
@@ -7,18 +7,12 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 
 CA_PASSWORD=notsafe
 
-CERT_DIR=certificates
+CERT_DIR=credentials
 
 # Generate directories if not exists
 mkdir -p $CERT_DIR
 
-# Uncomment the below block if you want to skip certificate generation if they already exist.
-# if [ -f "$CERT_DIR/ca.crt" ]; then
-#     echo "Skipping certificate generation as they already exist."
-#     exit 0
-# fi
-
-# Clearing any existing files in the certificates directory
+# Clearing any existing files in the credentials directory
 rm -f $CERT_DIR/*
 
 # Generate the root certificate authority key and certificate based on key
@@ -39,7 +33,7 @@ openssl req \
     -new \
     -key $CERT_DIR/server.key \
     -out $CERT_DIR/server.csr \
-    -config certificate.conf
+    -config credential.conf
 
 # Generate a certificate for the server
 openssl x509 \
@@ -51,5 +45,5 @@ openssl x509 \
     -out $CERT_DIR/server.pem \
     -days 365 \
     -sha256 \
-    -extfile certificate.conf \
+    -extfile credential.conf \
     -extensions req_ext

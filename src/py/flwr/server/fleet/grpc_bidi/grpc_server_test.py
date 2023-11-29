@@ -23,29 +23,26 @@ from pathlib import Path
 from typing import Tuple, cast
 
 from flwr.server.client_manager import SimpleClientManager
-from flwr.server.fleet.grpc_bidi.grpc_server import (
-    start_grpc_server,
-    valid_certificates,
-)
+from flwr.server.fleet.grpc_bidi.grpc_server import start_grpc_server, valid_credentials
 
 root_dir = dirname(abspath(join(__file__, "../../../../../..")))
 
 
-def load_certificates() -> Tuple[str, str, str]:
-    """Generate and load SSL credentials/certificates.
+def load_credentials() -> Tuple[str, str, str]:
+    """Generate and load SSL credentials.
 
     Utility function for loading for SSL-enabled gRPC servertests.
     """
-    # Trigger script which generates the certificates
+    # Trigger script which generates the credentials
     subprocess.run(["bash", "./dev/certificates/generate.sh"], check=True, cwd=root_dir)
 
-    certificates = (
+    credentials = (
         join(root_dir, ".cache/certificates/ca.crt"),
         join(root_dir, ".cache/certificates/server.pem"),
         join(root_dir, ".cache/certificates/server.key"),
     )
 
-    return certificates
+    return credentials
 
 
 def unused_tcp_port() -> int:
@@ -56,25 +53,25 @@ def unused_tcp_port() -> int:
         return cast(int, sock.getsockname()[1])
 
 
-def test_valid_certificates_when_correct() -> None:
+def test_valid_credentials_when_correct() -> None:
     """Test is validation function works correctly when passed valid list."""
     # Prepare
-    certificates = (b"a_byte_string", b"a_byte_string", b"a_byte_string")
+    credentials = (b"a_byte_string", b"a_byte_string", b"a_byte_string")
 
     # Execute
-    is_valid = valid_certificates(certificates)
+    is_valid = valid_credentials(credentials)
 
     # Assert
     assert is_valid
 
 
-def test_valid_certificates_when_wrong() -> None:
+def test_valid_credentials_when_wrong() -> None:
     """Test is validation function works correctly when passed invalid list."""
     # Prepare
-    certificates = ("not_a_byte_string", b"a_byte_string", b"a_byte_string")
+    credentials = ("not_a_byte_string", b"a_byte_string", b"a_byte_string")
 
     # Execute
-    is_valid = valid_certificates(certificates)  # type: ignore
+    is_valid = valid_credentials(credentials)  # type: ignore
 
     # Assert
     assert not is_valid
@@ -101,16 +98,16 @@ def test_integration_start_and_shutdown_secure_server() -> None:
     port = unused_tcp_port()
     client_manager = SimpleClientManager()
 
-    certificates = load_certificates()
+    credentials = load_credentials()
 
     # Execute
     server = start_grpc_server(
         client_manager=client_manager,
         server_address=f"[::]:{port}",
-        certificates=(
-            Path(certificates[0]).read_bytes(),
-            Path(certificates[1]).read_bytes(),
-            Path(certificates[2]).read_bytes(),
+        credentials=(
+            Path(credentials[0]).read_bytes(),
+            Path(credentials[1]).read_bytes(),
+            Path(credentials[2]).read_bytes(),
         ),
     )
 
