@@ -120,6 +120,7 @@ twine = "==4.0.2"
 pyroma = "==4.2"
 check-wheel-contents = "==0.4.0"
 GitPython = "==3.1.32"
+PyGithub = "==2.1.1"
 licensecheck = "==2023.5.1"
 
 [tool.isort]
