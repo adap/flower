@@ -34,12 +34,12 @@ def load_credentials() -> Tuple[str, str, str]:
     Utility function for loading for SSL-enabled gRPC servertests.
     """
     # Trigger script which generates the credentials
-    subprocess.run(["bash", "./dev/certificates/generate.sh"], check=True, cwd=root_dir)
+    subprocess.run(["bash", "./dev/credentials/generate.sh"], check=True, cwd=root_dir)
 
     credentials = (
-        join(root_dir, ".cache/certificates/ca.crt"),
-        join(root_dir, ".cache/certificates/server.pem"),
-        join(root_dir, ".cache/certificates/server.key"),
+        join(root_dir, ".cache/credentials/ca.crt"),
+        join(root_dir, ".cache/credentials/server.pem"),
+        join(root_dir, ".cache/credentials/server.key"),
     )
 
     return credentials

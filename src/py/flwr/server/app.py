@@ -84,6 +84,7 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     client_manager: Optional[ClientManager] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     credentials: Optional[Tuple[bytes, bytes, bytes]] = None,
+    insecure: Optional[bool] = None,
 ) -> History:
     """Start a Flower server using the gRPC transport layer.
 
@@ -145,6 +146,18 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     >>> )
     """
     event(EventType.START_SERVER_ENTER)
+
+    # Auto-fill insecure
+    if insecure is None:
+        insecure = credentials is None
+
+    # Check for conflicting parameters
+    if insecure and credentials is not None:
+        raise ValueError(
+            "Invalid configuration: 'credentials' should not be provided "
+            "when 'insecure' is set to True. To start an insecure gRPC server, omit "
+            "'credentials', or set 'insecure' to False to start a secure gRPC server."
+        )
 
     # Parse IP address
     parsed_address = parse_address(server_address)
@@ -460,6 +473,14 @@ def run_server() -> None:
 def _try_obtain_credentials(
     args: argparse.Namespace,
 ) -> Optional[Tuple[bytes, bytes, bytes]]:
+    # Check for conflicting parameters
+    if args.insecure and args.credentials is not None:
+        sys.exit(
+            "Conflicting options: The '--insecure' flag disables HTTPS, "
+            "but '--credentials' was also specified. Please remove "
+            "the '--credentials' option when running in insecure mode, "
+            "or omit '--insecure' to use HTTPS."
+        )
     # Obtain credentials
     if args.insecure:
         log(WARN, "Option `--insecure` was set. Starting insecure HTTP server.")
@@ -729,9 +750,8 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--insecure",
         action="store_true",
-        help="Run the server without HTTPS, regardless of whether credential "
-        "paths are provided. By default, the server runs with HTTPS enabled. "
-        "Use this flag only if you understand the risks.",
+        help="Run the server without HTTPS. By default, the server runs with "
+        "HTTPS enabled. Use this flag only if you understand the risks.",
     )
     parser.add_argument(
         "--credentials",
