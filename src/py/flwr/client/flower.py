@@ -73,9 +73,15 @@ class Flower:
         app = make_app(handle_app, self.mw_list)
 
         # Execute the task
-        bwd = app(fwd)
-
-        return bwd
+        task_res, state_updated = handle(
+            client_fn=self.client_fn,
+            state=fwd.state,
+            task_ins=fwd.task_ins,
+        )
+        return Bwd(
+            task_res=task_res,
+            state=state_updated,
+        )
 
 
 class LoadCallableError(Exception):
