@@ -63,25 +63,18 @@ class Flower:
 
         # Create wrapper function for `handle`
         def handle_app(_fwd: Fwd) -> Bwd:
-            task_res = handle(
+            task_res, state_updated = handle(
                 client_fn=self.client_fn,
+                state=_fwd.state,
                 task_ins=_fwd.task_ins,
             )
-            return Bwd(task_res=task_res, state=_fwd.state)
+            return Bwd(task_res=task_res, state=state_updated)
 
         # Wrap middleware layers around handle_app
         app = make_app(handle_app, self.mw_list)
 
         # Execute the task
-        task_res, state_updated = handle(
-            client_fn=self.client_fn,
-            state=fwd.state,
-            task_ins=fwd.task_ins,
-        )
-        return Bwd(
-            task_res=task_res,
-            state=state_updated,
-        )
+        return app(fwd)
 
 
 class LoadCallableError(Exception):

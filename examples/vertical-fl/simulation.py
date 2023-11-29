@@ -22,4 +22,4 @@ hist = fl.simulation.start_simulation(
 
 results_dir = Path("_static/results")
 results_dir.mkdir(exist_ok=True)
-np.save(str(results_dir/"hist.npy"), hist)
+np.save(str(results_dir / "hist.npy"), hist)
