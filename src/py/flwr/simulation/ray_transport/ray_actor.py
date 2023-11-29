@@ -424,5 +424,5 @@ class VirtualClientEngineActorPool(ActorPool):
                 break
 
         # Fetch result belonging to the VirtualClient calling this method
-        # Return both result from taks and (potentially) updated workload state
+        # Return both result from tasks and (potentially) updated workload state
         return self._fetch_future_result(cid)
