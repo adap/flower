@@ -66,25 +66,26 @@ def _extract_changelog_entry(pr_info):
     # Remove markdown comments
     entry_text = re.sub(r"<!--.*?-->", "", entry_text, flags=re.DOTALL).strip()
 
-    if "<general>" in entry_text:
-        return entry_text, "general"
-    if "<skip>" in entry_text:
-        return entry_text, "skip"
-    if "<baselines>" in entry_text:
-        return entry_text, "baselines"
-    if "<examples>" in entry_text:
-        return entry_text, "examples"
-    if "<sdk>" in entry_text:
-        return entry_text, "sdk"
-    if "<simulations>" in entry_text:
-        return entry_text, "simulations"
+    token_markers = {
+        "general": "<general>",
+        "skip": "<skip>",
+        "baselines": "<baselines>",
+        "examples": "<examples>",
+        "sdk": "<sdk>",
+        "simulations": "<simulations>",
+    }
 
-    return entry_text, None
+    # Find the token based on the presence of its marker in entry_text
+    token = next(
+        (token for token, marker in token_markers.items() if marker in entry_text), None
+    )
+
+    return entry_text, token
 
 
 def _update_changelog(prs):
     """Update the changelog file with entries from provided pull requests."""
-    with open(CHANGELOG_FILE, "r+") as file:
+    with open(CHANGELOG_FILE, "r+", encoding="utf-8") as file:
         content = file.read()
         unreleased_index = content.find("## Unreleased")
 
