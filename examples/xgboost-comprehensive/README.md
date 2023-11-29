@@ -10,6 +10,7 @@ It differs from the [xgboost-quickstart](https://github.com/adap/flower/tree/mai
 - Customised partitioner type (uniform, linear, square, exponential).
 - Centralised/distributed evaluation.
 - Bagging/cyclic training methods.
+- Flower simulation
 
 ## Project Setup
 
@@ -26,7 +27,8 @@ This will create a new directory called `xgboost-comprehensive` containing the f
 -- server.py         <- Defines the server-side logic
 -- client.py         <- Defines the client-side logic
 -- dataset.py        <- Defines the functions of data loading and partitioning
--- utils.py          <- Defines the arguments parser for clients and server
+-- utils.py          <- Defines the utility functions
+-- sim.py            <- Example of using Flower simulation
 -- run_bagging.sh    <- Commands to run bagging experiments
 -- run_cyclic.sh     <- Commands to run cyclic experiments
 -- pyproject.toml    <- Example dependencies (if you use Poetry)
@@ -62,6 +64,8 @@ pip install -r requirements.txt
 
 ## Run Federated Learning with XGBoost and Flower
 
+### Independent client/server setup
+
 We have two scripts to run bagging and cyclic (client-by-client) experiments.
 The included `run_bagging.sh` or `run_cyclic.sh` will start the Flower server (using `server.py`),
 sleep for 15 seconds to ensure that the server is up,
@@ -88,6 +92,21 @@ to kill all background processes (or a more specific command if you have other P
 You can also manually run `poetry run python3 server.py --train-method=bagging/cyclic --pool-size=N --num-clients-per-round=N`
 and `poetry run python3 client.py --train-method=bagging/cyclic --node-id=NODE_ID --num-partitions=N` for as many clients as you want,
 but you have to make sure that each command is run in a different terminal window (or a different computer on the network).
+
+### Flower simulation setup
+
+We also provide example code (`sim.py`) to use the simulation capabilities of Flower to simulate federated XGBoost training on either a single machine or a cluster of machines.
+To run bagging aggregation with 5 clients for 30 rounds evaluated on centralised test set:
+
+```shell
+poetry run python3 sim.py --train-method=bagging --pool-size=5 --num-clients-per-round=5 --num-rounds=30 --centralised-eval
+```
+
+To run cyclic training with 5 clients for 30 rounds evaluated on centralised test set:
+
+```shell
+poetry run python3 sim.py --train-method=cyclic --pool-size=5 --num-rounds=30 --centralised-eval-client
+```
 
 In addition, we provide more options to customise the experimental settings, including data partitioning and centralised/distributed evaluation (see `utils.py`).
 Look at the [code](https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive)
