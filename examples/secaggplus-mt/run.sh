@@ -18,7 +18,7 @@ echo "Starting $N clients in background..."
 # Start N client processes
 for i in $(seq 1 $N)
 do
-  flower-client --callable client:flower > /dev/null 2>&1 &
+  flower-client --insecure --callable client:flower > /dev/null 2>&1 &
   sleep 0.1
 done
 
