@@ -2,8 +2,7 @@ import re
 from sys import argv
 from github import Github
 
-# Constants
-REPO_NAME = "adap/flower"  # Replace with your GitHub repo
+REPO_NAME = "adap/flower"
 CHANGELOG_FILE = "doc/source/ref-changelog.md"
 CHANGELOG_SECTION_HEADER = "## Changelog entry"
 
@@ -136,7 +135,7 @@ def update_changelog(prs):
                         + content[closing_parenthesis_index:]
                     )
                 else:
-                    # Create a new 'General improvements' section
+                    # Create a new 'General Baselines' section
                     new_section = f"\n- **General updates to Flower Baselines** ([#{pr.number}]({pr.html_url}))\n"
                     insert_index = content.find("\n", unreleased_index) + 1
                     content = (
@@ -169,7 +168,7 @@ def update_changelog(prs):
                         + content[closing_parenthesis_index:]
                     )
                 else:
-                    # Create a new 'General improvements' section
+                    # Create a new 'General Examples' section
                     new_section = f"\n- **General updates to Flower Examples** ([#{pr.number}]({pr.html_url}))\n"
                     insert_index = content.find("\n", unreleased_index) + 1
                     content = (
@@ -202,7 +201,7 @@ def update_changelog(prs):
                         + content[closing_parenthesis_index:]
                     )
                 else:
-                    # Create a new 'General improvements' section
+                    # Create a new 'General SDKs' section
                     new_section = f"\n- **General updates to Flower SDKs** ([#{pr.number}]({pr.html_url}))\n"
                     insert_index = content.find("\n", unreleased_index) + 1
                     content = (
@@ -235,7 +234,7 @@ def update_changelog(prs):
                         + content[closing_parenthesis_index:]
                     )
                 else:
-                    # Create a new 'General improvements' section
+                    # Create a new 'General Simulations' section
                     new_section = f"\n- **General updates to Flower Simulations** ([#{pr.number}]({pr.html_url}))\n"
                     insert_index = content.find("\n", unreleased_index) + 1
                     content = (
@@ -303,6 +302,6 @@ def main(g):
 
 
 if __name__ == "__main__":
-    # Initialize GitHub Client
+    # Initialize GitHub Client with provided token (as argument)
     g = Github(argv[1])
     main(g)
