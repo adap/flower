@@ -1,5 +1,7 @@
+# mypy: ignore-errors
 import re
 from sys import argv
+
 from github import Github
 
 REPO_NAME = "adap/flower"
