@@ -50,6 +50,8 @@ We would like to give our special thanks to all the contributors who made the ne
 
 - **Add new** `XGB Bagging` **strategy** ([#2611](https://github.com/adap/flower/pull/2611))
 
+- **Introduce `WorkloadState`** ([#2564](https://github.com/adap/flower/pull/2564), [#2632](https://github.com/adap/flower/pull/2632))
+
 - **Update Flower Baselines**
 
   - FedProx ([#2210](https://github.com/adap/flower/pull/2210), [#2286](https://github.com/adap/flower/pull/2286), [#2509](https://github.com/adap/flower/pull/2509))
