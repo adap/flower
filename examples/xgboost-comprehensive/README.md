@@ -12,29 +12,30 @@ It differs from the [xgboost-quickstart](https://github.com/adap/flower/tree/mai
 - Bagging/cyclic training methods.
 - Flower simulation
 
-
 ## Training Strategies
+
 This example provides two training strategies, **bagging aggregation** and **cyclic training**.
 
 ### Bagging Aggregation
-Bagging (bootstrap) aggregation is an ensemble meta-algorithm in machine learning, 
-used for enhancing the stability and accuracy of machine learning algorithms. 
+
+Bagging (bootstrap) aggregation is an ensemble meta-algorithm in machine learning,
+used for enhancing the stability and accuracy of machine learning algorithms.
 Here, we leverage this algorithm for XGBoost trees.
 
-Specifically, each client is treated as a bootstrap by random subsampling (data partitioning in FL). 
-At each FL round, all clients boost a number of trees (in this example, 1 tree) based on the local bootstrap samples. 
-Then, the clients' trees are aggregated on the server, and concatenates them to the global model from previous round. 
+Specifically, each client is treated as a bootstrap by random subsampling (data partitioning in FL).
+At each FL round, all clients boost a number of trees (in this example, 1 tree) based on the local bootstrap samples.
+Then, the clients' trees are aggregated on the server, and concatenates them to the global model from previous round.
 The aggregated tree ensemble is regarded as a new global model.
 
-This way, let's consider a scenario with M clients. 
+This way, let's consider a scenario with M clients.
 Given FL round R, the bagging models consist of (M * R) trees.
 
 ### Cyclic Training
+
 Cyclic XGBoost training performs FL in a client-by-client fashion.
-Instead of aggregating multiple clients, 
+Instead of aggregating multiple clients,
 there is only one single client participating in the training per round in the cyclic training scenario.
 The trained local XGBoost trees will be passed to the next client as an initialised model for next round's boosting.
-
 
 ## Project Setup
 
@@ -85,7 +86,6 @@ Write the command below in your terminal to install the dependencies according t
 ```shell
 pip install -r requirements.txt
 ```
-
 
 ## Run Federated Learning with XGBoost and Flower
 
@@ -146,7 +146,6 @@ and [tutorial](https://flower.dev/docs/framework/tutorial-quickstart-xgboost.htm
 The figure above shows the centralised tested AUC performance over FL rounds with bagging aggregation strategy on 4 experimental settings.
 One can see that all settings obtain stable performance boost over FL rounds (especially noticeable at the start of training).
 As expected, uniform client distribution shows higher AUC values than square/exponential setup.
-
 
 #### Cyclic training experiment
 
