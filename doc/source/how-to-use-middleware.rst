@@ -9,6 +9,7 @@ What is Middleware?
 Middleware is a callable that wraps around an application. It can manipulate or inspect incoming tasks (``TaskIns``) in the ``Fwd`` and the resulting tasks (``TaskRes``) in the ``Bwd``. The signature for a middleware layer (``Layer``) is as follows:
 
 .. code-block:: python
+
     APP = Callable[[Fwd], Bwd]
     Layer = Callable[[Fwd, App], Bwd]
 
