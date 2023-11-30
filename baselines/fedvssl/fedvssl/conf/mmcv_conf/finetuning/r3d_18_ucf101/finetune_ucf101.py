@@ -1,3 +1,5 @@
+"""Config file used for fine-tuning on UCF-101 dataset."""
+
 _base_ = ['../model_r3d18.py',
           '../runtime_ucf101.py']
 

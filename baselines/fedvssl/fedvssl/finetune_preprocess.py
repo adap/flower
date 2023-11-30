@@ -1,3 +1,7 @@
+"""
+Pre-process pre-trained SSL model for downstream fine-tuning.
+"""
+
 import argparse
 from collections import OrderedDict
 import numpy as np

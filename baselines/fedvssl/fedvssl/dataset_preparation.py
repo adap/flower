@@ -7,7 +7,8 @@ uncomment the lines below and tell us in the README.md (see the "Running the Exp
 block) that this file should be executed first.
 """
 
-# make sure you have installed unrar package. One can install it using `sudo apt install unrar`.
+# make sure you have installed unrar package. 
+# One can install it using `sudo apt install unrar`.
 
 import json
 import subprocess

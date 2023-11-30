@@ -1,3 +1,5 @@
+"""Config file used for fine-tuning on UCF-101 dataset."""
+
 model = dict(
     type='TSN',
     backbone=dict(
