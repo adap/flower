@@ -132,17 +132,17 @@ cd ..
 Finally, we can launch the training. To run using FedVSSL:
 ```bash
 # Run federated SSL training with FedVSSL
-python -m fedvssl.main pre_training=true # this will run using the default settings.
+python -m fedvssl.main # this will run using the default settings.
 
 # You can override settings directly from the command line
-python -m fedvssl.main pre_training=true mix_coeff=1 rounds=100 # will set hyper-parameter alpha to 1 and the number of rounds to 100
+python -m fedvssl.main mix_coeff=1 rounds=100 # will set hyper-parameter alpha to 1 and the number of rounds to 100
 ```
 
 To run using FedAvg:
 ```bash
 # This will run FedAvg baseline
 # This is done so to match the experimental setup in the paper
-python -m fedvssl.main pre_training=true fedavg=true
+python -m fedvssl.main fedavg=true
 
 # This config can also be overriden.
 ```
@@ -179,7 +179,7 @@ In this experiment, we simulate the cross-silo scenario with UCF-101 video data 
 
 To start the pre-training one can use the following command:
 ```bash
-python -m fedvssl.main pre_training=true # this will run using the default settings.
+python -m fedvssl.main  # this will run using the default settings.
 ```
 
 This will create a folder named fedvssl_results to save the global checkpoints and the local clients' training logs.
