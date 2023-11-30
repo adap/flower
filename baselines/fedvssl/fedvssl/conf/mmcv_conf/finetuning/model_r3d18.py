@@ -19,7 +19,7 @@ model = dict(
         zero_init_residual=False,
         pretrained=None,
     ),
-    st_module=dict(spatial_type="avg", temporal_size=2, spatial_size=7),  # 16//8
+    st_module=dict(spatial_type="avg", temporal_size=2, spatial_size=7),
     cls_head=dict(
         with_avg_pool=False,
         temporal_feature_size=1,
