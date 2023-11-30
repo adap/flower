@@ -1,8 +1,5 @@
-"""
-Dataset pre-processing: convert .txt files to .json files
-"""
+"""Dataset pre-processing: convert .txt files to .json files."""
 import json
-
 
 # We use the .json files for the annotations.
 # One can convert the train_split_1.txt to train_split_1.json
@@ -30,4 +27,3 @@ for i in range(len(ann_path)):
         anns.append({"name": name, "label": int(label)})
     with open(out_path[i], "w") as f:
         json.dump(anns, f, indent=2)
-        
