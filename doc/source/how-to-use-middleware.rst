@@ -10,7 +10,7 @@ Middleware is a callable that wraps around an application. It can manipulate or 
 
 .. code-block:: python
 
-    APP = Callable[[Fwd], Bwd]
+    App = Callable[[Fwd], Bwd]
     Layer = Callable[[Fwd, App], Bwd]
 
 A typical middleware function might look something like this:
