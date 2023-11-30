@@ -26,6 +26,7 @@ from utils_mnist import (
 from utils_mnist import VAE
 import os
 import numpy as np
+import matplotlib.pyplot as plt
 
 NUM_CLIENTS = 5
 NUM_CLASSES = 10
@@ -52,6 +53,7 @@ IDENTIFIER = args.identifier
 if not os.path.exists(IDENTIFIER):
     os.makedirs(IDENTIFIER)
 configure(identifier=IDENTIFIER, filename=f"logs_{IDENTIFIER}.log")
+import ray
 
 
 class FlowerClient(fl.client.NumPyClient):
@@ -256,6 +258,7 @@ def main():
                     "server_round": server_round,
                 }
             )
+            plt.close("all")
 
         return evaluate
 
@@ -279,7 +282,9 @@ def main():
         on_fit_config_fn=fit_config,
         evaluate_metrics_aggregation_fn=weighted_average,  # Aggregate federated metrics
         evaluate_fn=get_evaluate_fn(valsets[-1]),  # Global evaluation function
-        alignment_dataloader=alignment_dataloader(batch_size=samples_per_class * 10),
+        alignment_dataloader=alignment_dataloader(
+            samples_per_class=samples_per_class, batch_size=samples_per_class * 10
+        ),
         lr_g=wandb.config["lr_g"],
         steps_g=wandb.config["steps_g"],
     )
@@ -301,6 +306,8 @@ def main():
             "include_dashboard": True,  # we need this one for tracking
         },
     )
+    ray.shutdown()
+    wandb.finish()
 
 
 if __name__ == "__main__":
@@ -311,7 +318,7 @@ if __name__ == "__main__":
             "sample_per_class": {"values": [50, 100, 150]},
             "lambda_reg": {"min": 0.0, "max": 1.0},
             "lambda_align": {"values": [1, 10, 50, 100]},
-            "lr_g": {"values": [1e-3, 1e-2, 1e-1]},
+            "lr_g": {"values": [1e-3, 1e-2, 1e-4]},
             "steps_g": {"values": [5, 10, 15, 20]},
         },
     }

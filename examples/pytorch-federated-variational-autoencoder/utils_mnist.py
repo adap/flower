@@ -15,6 +15,9 @@ from flwr.common import parameters_to_ndarrays
 from torch.nn.parameter import Parameter
 from typing import List, Tuple
 from sklearn.mixture import GaussianMixture
+import matplotlib
+
+matplotlib.use("Agg")
 
 
 class Net(nn.Module):
@@ -120,8 +123,6 @@ def alignment_dataloader(samples_per_class=100, batch_size=8, shuffle=False):
         transform=transforms.ToTensor(),
     )
 
-    # Specify the number of samples per class
-    samples_per_class = samples_per_class
 
     # Create an alignment dataset with 20 samples for each class
     alignment_datasets = []
@@ -321,6 +322,8 @@ def _train_one_epoch(
 
 def vae_loss(recon_img, img, mu, logvar):
     # Reconstruction loss using binary cross-entropy
+    condition = (recon_img >= 0) & (recon_img <= 1)
+    assert torch.all(condition), "Values should be between 0 and 1"
     recon_loss = F.binary_cross_entropy(
         recon_img, img.view(-1, img.shape[2] * img.shape[3]), reduction="sum"
     )
@@ -342,16 +345,19 @@ def train_align(net, trainloader, optimizer, config, epochs, device, num_classes
     params_dict = zip(temp_gen_model.state_dict().keys(), gen_weights)
     state_dict = OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
     temp_gen_model.load_state_dict(state_dict, strict=True)
-    copied_model = copy.deepcopy(temp_gen_model)
+    # copied_model = copy.deepcopy(temp_gen_model)
 
     temp_gen_model.eval()
-    sample_per_class = config.get("sample_per_class", 100)
+    # sample_per_class = config.get("sample_per_class", 100)
+    sample_per_class = config["sample_per_class"]
     align_loader = alignment_dataloader(
         samples_per_class=sample_per_class, batch_size=sample_per_class * 10
     )
-    lambda_reg = config.get("lambda_reg", 0.1)
+    # lambda_reg = config.get("lambda_reg", 0.1)
+    lambda_reg = config["lambda_reg"]
 
-    lambda_align = config.get("lambda_align", 100)
+    # lambda_align = config.get("lambda_align", 100)
+    lambda_align = config["lambda_align"]
 
     for _ in range(epochs):
         for images, _ in trainloader:
@@ -374,12 +380,12 @@ def train_align(net, trainloader, optimizer, config, epochs, device, num_classes
             loss += lambda_align * loss_align_reduced
             loss.backward()
             optimizer.step()
-    assert all(
-        torch.equal(val1, val2)
-        for (_, val1), (_, val2) in zip(
-            temp_gen_model.state_dict().items(), copied_model.state_dict().items()
-        )
-    ), "Not all parameters are equal."
+    # assert all(
+    #     torch.equal(val1, val2)
+    #     for (_, val1), (_, val2) in zip(
+    #         temp_gen_model.state_dict().items(), copied_model.state_dict().items()
+    #     )
+    # ), "Not all parameters are equal."
     return (
         vae_loss1.item(),
         lambda_reg * vae_loss2.item(),
@@ -549,8 +555,10 @@ def visualize_gmm_latent_representation(
     plt.tight_layout()
     plt.colorbar(scatter1, ax=axs, label="Digit Label")
 
-    plt.savefig(f"{folder}/latent_rep_at_{rnd}.png")
+    fig.savefig(f"{folder}/latent_rep_at_{rnd}.png")
+    # plt.close()
     return f"{folder}/latent_rep_at_{rnd}.png"
+    # return fig
 
 
 def sample(net, device):

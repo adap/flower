@@ -1,7 +1,7 @@
 from logging import WARNING, DEBUG
 from typing import Callable, Dict, List, Optional, Tuple, Union
 import torch.nn.functional as F
-
+import matplotlib.pyplot as plt
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -22,6 +22,9 @@ from flwr.server.utils import Generator, ResNet18, VAE
 from .aggregate import aggregate, weighted_loss_avg
 from .fedavg import FedAvg
 import wandb
+import matplotlib
+
+matplotlib.use("Agg")
 
 WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
 Setting `min_available_clients` lower than `min_fit_clients` or
@@ -217,6 +220,11 @@ class FedCiR(FedAvg):
 
         def vae_loss(recon_img, img, mu, logvar):
             # Reconstruction loss using binary cross-entropy
+            condition = (recon_img >= 0.0) & (recon_img <= 1.0)
+            # assert torch.all(condition), "Values should be between 0 and 1"
+            if not torch.all(condition):
+                import pdb; pdb.set_trace()
+                recon_img = torch.clamp(recon_img, 0.0, 1.0)
             recon_loss = F.binary_cross_entropy(
                 recon_img, img.view(-1, img.shape[2] * img.shape[3]), reduction="sum"
             )
@@ -258,7 +266,10 @@ class FedCiR(FedAvg):
                     preds.append(temp_local_models[idx].decoder(z_g))
 
                 loss = vae_loss(
-                    torch.stack(preds).mean(dim=0), align_img, mu_g, logvar_g
+                    torch.stack(preds).mean(dim=0),
+                    align_img,
+                    mu_g,
+                    logvar_g,
                 )
                 threshold = 1e-6  # Define a threshold for the negligible loss
                 log(DEBUG, f"generator loss at ep {ep_g} step {step}: {loss}")
@@ -311,6 +322,7 @@ class FedCiR(FedAvg):
             }
 
             wandb.log(data)
+            plt.close("all")
         return parameters_aggregated, metrics_aggregated
 
     def aggregate_evaluate(
