@@ -1,14 +1,19 @@
 [tool.poetry]
-name = "pytorch_federated_variational_autoencoder"
+name = "pytorch_federated_vae"
 version = "0.1.0"
 description = "Federated Variational Autoencoder Example"
 authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
-flwr = ">=1.0,<2.0"
+flwr = { path = "../../", develop = true} 
 torch = "1.13.1"
 torchvision = "0.14.1"
+wandb = "^0.16.0"
+torchsummary = "^1.5.1"
+matplotlib = "3.7"
+scikit-learn = "^1.3.2"
+ray = {extras = ["default"], version = "^2.8.0"}
 
 [build-system]
 requires = ["poetry-core>=1.4.0"]

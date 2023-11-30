@@ -11,7 +11,6 @@ from flwr.common.logger import configure, log
 from flwr.common.typing import Scalar
 import wandb
 import os
-import yaml
 
 os.environ["WANDB_START_METHOD"] = "thread"
 
@@ -28,27 +27,27 @@ from utils_mnist import VAE
 import os
 import numpy as np
 
+NUM_CLIENTS = 5
+NUM_CLASSES = 10
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
 parser.add_argument(
     "--num_cpus",
     type=int,
-    default=6,
+    default=5,
     help="Number of CPUs to assign to a virtual client",
 )
 parser.add_argument(
     "--num_gpus",
     type=float,
-    default=0.3,
+    default=0,
     help="Ratio of GPU memory to assign to a virtual client",
 )
-parser.add_argument("--num_rounds", type=int, default=50, help="Number of FL rounds.")
+parser.add_argument("--num_rounds", type=int, default=10, help="Number of FL rounds.")
 parser.add_argument("--identifier", type=str, required=True, help="Name of experiment.")
 args = parser.parse_args()
 
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-NUM_CLIENTS = 5
-NUM_CLASSES = 10
+DEVICE = torch.device("cpu")
 IDENTIFIER = args.identifier
 if not os.path.exists(IDENTIFIER):
     os.makedirs(IDENTIFIER)
@@ -65,7 +64,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.model = VAE()
 
         # Determine device
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.device = DEVICE
         self.model.to(self.device)  # send model to device
 
     def get_parameters(self, config):
@@ -204,6 +203,8 @@ def main():
             "sample_per_class": wandb.config["sample_per_class"],
             "lambda_reg": wandb.config["lambda_reg"],
             "lambda_align": wandb.config["lambda_align"],
+            "lr_g": wandb.config["lr_g"],
+            "steps_g": wandb.config["steps_g"],
         }
         return config
 
@@ -218,7 +219,7 @@ def main():
             """Use the entire test set for evaluation."""
 
             # Determine device
-            device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+            device = DEVICE
 
             model = VAE()
             model.to(device)
@@ -279,8 +280,8 @@ def main():
         evaluate_metrics_aggregation_fn=weighted_average,  # Aggregate federated metrics
         evaluate_fn=get_evaluate_fn(valsets[-1]),  # Global evaluation function
         alignment_dataloader=alignment_dataloader(batch_size=samples_per_class * 10),
-        lr_g=1e-3,
-        steps_g=20,
+        lr_g=wandb.config["lr_g"],
+        steps_g=wandb.config["steps_g"],
     )
 
     # Resources to be assigned to each virtual client
@@ -296,6 +297,9 @@ def main():
         client_resources=client_resources,
         config=fl.server.ServerConfig(num_rounds=args.num_rounds),
         strategy=strategy,
+        ray_init_args={
+            "include_dashboard": True,  # we need this one for tracking
+        },
     )
 
 
@@ -307,8 +311,10 @@ if __name__ == "__main__":
             "sample_per_class": {"values": [50, 100, 150]},
             "lambda_reg": {"min": 0.0, "max": 1.0},
             "lambda_align": {"values": [1, 10, 50, 100]},
+            "lr_g": {"values": [1e-3, 1e-2, 1e-1]},
+            "steps_g": {"values": [5, 10, 15, 20]},
         },
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=6)
+    wandb.agent(sweep_id, function=main, count=10)

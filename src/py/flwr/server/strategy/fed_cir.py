@@ -33,7 +33,7 @@ import torch
 import torch.nn as nn
 from collections import OrderedDict
 
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+DEVICE = torch.device("cpu")
 
 
 class FedCiR(FedAvg):
