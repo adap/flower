@@ -64,52 +64,87 @@ Please make sure you have installed CUDA 11.0 on your machine
 To construct the Python environment follow these steps:
 
 ```bash
-# install the base Poetry environment
+# Install the base Poetry environment
 poetry install
 
-# activate the environment
+# Activate the environment
 poetry shell
 
-# install mmcv package
+# Install mmcv package
 pip install mmcv-full==1.7.1 -f https://download.openmmlab.com/mmcv/dist/cu117/torch1.13/index.html
 ```
 
 ## Running the Experiments
-To run FedVSSL with UCF-101 baseline, please ensure you have activated your Poetry environment (execute `poetry shell` from this directory). Then, download the `CtP` repo, download the datasets and preprocess it:
+To run FedVSSL with UCF-101 baseline, please ensure you have activated your Poetry environment (execute `poetry shell` from this directory). 
+Then, download the `CtP` repo and install required packages:
 
 ```bash
-# clone CtP repo
+# Clone CtP repo
 git clone https://github.com/yan-gao-GY/CtP.git fedvssl/CtP
 
 sudo apt install unrar unzip
+```
 
+### Dataset preparation
+Let's first download UCF-101 dataset and related annotation files:
+
+```bash
 cd fedvssl
-python dataset_preparation.py
+mkdir -p data/ucf101/
+
+# Downloading
+wget https://www.crcv.ucf.edu/data/UCF101/UCF101.rar -O data/ucf101/UCF101.rar --no-check-certificate
+
+# Unzipping
+unrar e data/ucf101/UCF101.rar data/ucf101/UCF101_raw/
+
+# Downloading the train/test split
+wget https://www.crcv.ucf.edu/data/UCF101/UCF101TrainTestSplits-RecognitionTask.zip -O data/ucf101/UCF101TrainTestSplits-RecognitionTask.zip --no-check-certificate
+
+# Unzipping
+unzip data/ucf101/UCF101TrainTestSplits-RecognitionTask.zip -d data/ucf101/
+```
+
+Then, we use the scripts to pre-process the dataset:
+
+```bash
+# Pre-processing the dataset
+python CtP/scripts/process_ucf101.py --raw_dir data/ucf101/UCF101_raw/ --ann_dir data/ucf101/ucfTrainTestlist/ --out_dir data/ucf101/
+
+# Covert to .json files
+python dataset_convert_to_json.py
+
+# (optional)
+rm data/ucf101/UCF101.rar
+rm -r data/ucf101/UCF101_raw/
+```
+
+Then, we perform data partitioning for FL:
+
+```bash
+python data_partitioning_ucf.py --json_path data/ucf101/annotations --output_path data/ucf101/annotations/client_distribution/ --num_clients 5
 
 cd ..
 ```
 
 
-Finally, we can launch the training.
-
 ### Federated SSL pre-training
-
-To run using FedVSSL:
+Finally, we can launch the training. To run using FedVSSL:
 ```bash
-# run federated SSL training with FedVSSL
+# Run federated SSL training with FedVSSL
 python -m fedvssl.main pre_training=true # this will run using the default settings.
 
-# you can override settings directly from the command line
+# You can override settings directly from the command line
 python -m fedvssl.main pre_training=true mix_coeff=1 rounds=100 # will set hyper-parameter alpha to 1 and the number of rounds to 100
 ```
 
 To run using FedAvg:
 ```bash
-# this will run FedAvg baseline
+# This will run FedAvg baseline
 # This is done so to match the experimental setup in the paper
 python -m fedvssl.main pre_training=true fedavg=true
 
-# this config can also be overriden.
+# This config can also be overriden.
 ```
 
 ### Downstream fine-tuning
@@ -150,10 +185,8 @@ python -m fedvssl.main pre_training=true # this will run using the default setti
 This will create a folder named fedvssl_results to save the global checkpoints and the local clients' training logs.
 To check the results, please direct to `fedvssl_results/clientN/*.log.json` files in default, and check the loss changes during training.
 
-After pre-training one can use the following command to run the fine-tuning. 
-```bash
-python -m fedvssl.main pre_training=false pretrained_model_path=<CHECKPOINT>.npz
-```
+After pre-training one can use the provided commands to run the fine-tuning. 
+
 The fine-tuning lasts for 150 epochs.
 
 | Method | FL-Setup| Clients| Pretrain Dataset | Finetune Dataset| Top-1% Acc. | Top 5% Acc.|
@@ -166,11 +199,6 @@ The fine-tuning lasts for 150 epochs.
 We provide the checkpoints of the pre-trained SSL models on Kinectics-400.
 With them as starting points, one can run downstream fine-tuning on UCF-101 to obtain the expected results in the paper.
 
-```bash
-python -m fedvssl.main pre_training=false pretrained_model_path=<CHECKPOINT>.npz
-
-# following the table below to change the checkpoints path.
-```
 
 | Method  | Checkpoint file                                                                                     | UCF Top-1 |
 |---------|-----------------------------------------------------------------------------------------------------|-----------|
