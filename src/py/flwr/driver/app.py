@@ -20,7 +20,7 @@ import threading
 import time
 from logging import INFO
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Dict, List, Optional, Union, cast
 
 from flwr.common import EventType, event
 from flwr.common.address import parse_address
@@ -113,7 +113,6 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         root_certificates = Path(root_certificates).read_bytes()
     driver = GrpcDriver(driver_service_address=address, certificates=root_certificates)
     driver.connect()
-    lock = threading.Lock()
 
     # Initialize the Driver API server and config
     initialized_server, initialized_config = init_defaults(
@@ -133,7 +132,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     thread = threading.Thread(
         target=update_client_manager,
         args=(
-            Driver(driver_service_address=address, certificates=certificates),
+            Driver(driver_service_address=address, certificates=root_certificates),
             initialized_server.client_manager(),
             ref_exit_flag,
         ),
