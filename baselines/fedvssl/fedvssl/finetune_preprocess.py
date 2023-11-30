@@ -1,13 +1,13 @@
-"""
-Pre-process pre-trained SSL model for downstream fine-tuning.
-"""
+"""Pre-process pre-trained SSL model for downstream fine-tuning."""
 
 import argparse
 from collections import OrderedDict
+
 import numpy as np
 import torch
-from mmengine.config import Config
 from flwr.common import parameters_to_ndarrays
+from mmengine.config import Config
+
 from .CtP.pyvrl.builder import build_model
 
 
@@ -47,8 +47,6 @@ params = params["arr_0"].item()
 params = parameters_to_ndarrays(params)
 params_dict = zip(model.state_dict().keys(), params)
 state_dict = {
-    "state_dict": OrderedDict(
-        {k: torch.from_numpy(v) for k, v in params_dict}
-    )
+    "state_dict": OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
 }
 torch.save(state_dict, "./model_pretrained.pth")

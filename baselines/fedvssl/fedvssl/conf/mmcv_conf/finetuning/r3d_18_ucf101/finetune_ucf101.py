@@ -1,12 +1,11 @@
 """Config file used for fine-tuning on UCF-101 dataset."""
 
-_base_ = ['../model_r3d18.py',
-          '../runtime_ucf101.py']
+_base_ = ["../model_r3d18.py", "../runtime_ucf101.py"]
 
-work_dir = './finetune_results/'
+work_dir = "./finetune_results/"
 
 model = dict(
     backbone=dict(
-        pretrained='./model_pretrained.pth',
+        pretrained="./model_pretrained.pth",
     ),
 )

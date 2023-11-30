@@ -5,24 +5,18 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 """
 # These are the basic packages you'll need here
 
-import subprocess
-import textwrap
 from argparse import Namespace
-from collections import OrderedDict
 from typing import Dict
 
 import flwr as fl
 import hydra
 import numpy as np
-import torch
-from flwr.common import parameters_to_ndarrays
+from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from mmengine.config import Config
 from omegaconf import DictConfig, OmegaConf
-from hydra.core.hydra_config import HydraConfig
 
 from .client import SslClient
-from .CtP.pyvrl.builder import build_model
 from .utils import init_p_paths, load_data, load_model, set_config_mmcv
 
 

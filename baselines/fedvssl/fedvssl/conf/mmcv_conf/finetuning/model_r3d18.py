@@ -1,9 +1,9 @@
 """Config file used for fine-tuning on UCF-101 dataset."""
 
 model = dict(
-    type='TSN',
+    type="TSN",
     backbone=dict(
-        type='R3D',
+        type="R3D",
         depth=18,
         num_stages=4,
         stem=dict(
@@ -19,10 +19,7 @@ model = dict(
         zero_init_residual=False,
         pretrained=None,
     ),
-    st_module=dict(
-        spatial_type='avg',
-        temporal_size=2,  # 16//8
-        spatial_size=7),
+    st_module=dict(spatial_type="avg", temporal_size=2, spatial_size=7),  # 16//8
     cls_head=dict(
         with_avg_pool=False,
         temporal_feature_size=1,
@@ -30,6 +27,6 @@ model = dict(
         dropout_ratio=0.5,
         in_channels=512,
         init_std=0.001,
-        num_classes=101
-    )
+        num_classes=101,
+    ),
 )
