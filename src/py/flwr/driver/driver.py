@@ -43,14 +43,10 @@ class Driver:
     driver_service_address : Optional[str]
         The IPv4 or IPv6 address of the Driver API server.
         Defaults to `"[::]:9091"`.
-    certificates : bytes (default: None)
-        Tuple containing root certificate, server certificate, and private key
-        to start a secure SSL-enabled server. The tuple is expected to have
-        three bytes elements in the following order:
-
-            * CA certificate.
-            * server certificate.
-            * server private key.
+    root_certificates : Optional[bytes] (default: None)
+        The PEM-encoded root certificates as a byte string. If provided,
+        a secure connection using the certificates will be established to
+        an SSL-enabled Flower server.
     invoker : Optional[RetryInvoker] (default: None)
         A `RetryInvoker` object to control the retry behavior on Driver API failures.
         If set to None, a default instance is created with an exponential backoff
@@ -61,11 +57,11 @@ class Driver:
     def __init__(
         self,
         driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
-        certificates: Optional[bytes] = None,
+        root_certificates: Optional[bytes] = None,
         invoker: Optional[RetryInvoker] = None,
     ) -> None:
         self.addr = driver_service_address
-        self.certificates = certificates
+        self.root_certificates = root_certificates
         self.grpc_driver: Optional[GrpcDriver] = None
         self.workload_id: Optional[int] = None
         self.node = Node(node_id=0, anonymous=True)
@@ -88,7 +84,8 @@ class Driver:
             if self.grpc_driver is None or self.workload_id is None:
                 # Connect and create workload
                 self.grpc_driver = GrpcDriver(
-                    driver_service_address=self.addr, certificates=self.certificates
+                    driver_service_address=self.addr,
+                    root_certificates=self.root_certificates,
                 )
                 self.grpc_driver.connect()
                 res = self.grpc_driver.create_workload(CreateWorkloadRequest())
