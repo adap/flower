@@ -1,9 +1,6 @@
 """Config file used for pre-training on UCF-101 dataset."""
 
 _base_ = "../pretraining_runtime_ucf.py"
-# _base_ = '../pretraining_runtime_kinetics.py'
-
-# work_dir = './output/ctp/r3d_18_ucf101/pretraining/'
 
 model = {
     "type": "CtP",
