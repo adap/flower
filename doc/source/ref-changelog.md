@@ -2,7 +2,6 @@
 
 ## Unreleased
 
-
 - **Update Flower Baselines**
 
   - HFedXGBoost [#2226](https://github.com/adap/flower/pull/2226)
