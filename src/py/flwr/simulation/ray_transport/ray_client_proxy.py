@@ -29,6 +29,7 @@ from flwr.client.client import (
     maybe_call_get_parameters,
     maybe_call_get_properties,
 )
+from flwr.client.workload_state import WorkloadState
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 from flwr.simulation.ray_transport.ray_actor import (
@@ -132,10 +133,10 @@ class RayActorClientProxy(ClientProxy):
     def _submit_job(self, job_fn: JobFn, timeout: Optional[float]) -> ClientRes:
         try:
             self.actor_pool.submit_client_job(
-                lambda a, c_fn, j_fn, cid: a.run.remote(c_fn, j_fn, cid),
-                (self.client_fn, job_fn, self.cid),
+                lambda a, c_fn, j_fn, cid, state: a.run.remote(c_fn, j_fn, cid, state),
+                (self.client_fn, job_fn, self.cid, WorkloadState(state={})),
             )
-            res = self.actor_pool.get_client_result(self.cid, timeout)
+            res, _ = self.actor_pool.get_client_result(self.cid, timeout)
 
         except Exception as ex:
             if self.actor_pool.num_actors == 0:
