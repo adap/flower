@@ -56,6 +56,8 @@ def _partition_cifar(
 
     client_datasets = []
 
+    # indices_used = set()
+
     for _client_id in range(num_clients):
         selected_classes = np.random.choice(
             num_classes, num_classes_per_client, replace=False
@@ -68,8 +70,12 @@ def _partition_cifar(
         np.random.shuffle(selected_indices)
         client_indices = selected_indices[:partition_size]
 
+        # indices_used.update(client_indices)
+
         client_dataset = Subset(trainset, client_indices)
         client_datasets.append(client_dataset)
+
+    # print(len(indices_used))
 
     return client_datasets
 
@@ -105,15 +111,20 @@ def _partition_cifar_new(
 
     dataset_indices = [np.where(assignment == i)[0] for i in range(num_clients)]
 
+    print('number of data points of each client:', [len(lst) for lst in dataset_indices])
+    print('total number of data points across clients:', sum([len(lst) for lst in dataset_indices]))
+    print('number of unique data points:', len({i for lst in dataset_indices for i in lst}))
+
     return [Subset(trainset, ind) for ind in dataset_indices]
 
 
 def _download_femnist(num_clients):
-    os.system(f'cd fedmix/femnist && ./preprocess.sh -s niid --iu {num_clients / 3550} --sf 0.1 -t sample')
+    os.system(f'cd fedmix/femnist && ./preprocess.sh -s niid --iu {num_clients / 3550} --sf 0.1 -t sample --smplseed 1697538548 --spltseed 1697539598')
 
 
 def _partition_femnist(num_clients):
-    train_path = 'fedmix/femnist/data/train'
+    # train_path = 'fedmix/femnist/data/train'
+    train_path = '/scratch/apoorva_v.iitr/femnist/data/train'
     train_json_files = [f for f in os.listdir(train_path) if f.endswith('.json')]
     client_datasets_dict = {}
 
@@ -144,6 +155,7 @@ def _partition_femnist(num_clients):
         client_datasets.append(client_datasets_dict[user_id])
 
     test_path = 'fedmix/femnist/data/test'
+    # test_path = '/scratch/apoorva_v.iitr/femnist/data/test'
     test_json_files = [f for f in os.listdir(test_path) if f.endswith('.json')]
     test_x, test_y = [], []
 
@@ -165,6 +177,14 @@ def _partition_femnist(num_clients):
     x = torch.tensor(np.array(test_x).reshape(-1, 1, 28, 28), dtype=torch.float32)
     y = torch.tensor(np.array(test_y))
     testset = TensorDataset(x, y)
+
+    print('length of client datasets:', [len(c) for c in client_datasets])
+    print('train set size:', sum([len(c) for c in client_datasets]))
+    print('test set size:', len(testset))
+
+    # print('train users:', train_user_ids)
+    # print('test users:', test_user_ids)
+    # print('common user ids:', set(test_user_ids).intersection(train_user_ids))
 
     return client_datasets, testset
 
@@ -213,5 +233,9 @@ def _mash_data(client_datasets, mash_batch_size, num_classes):
             )
 
         mashed_image, mashed_label = [], []
+
+    print('length of mashed data:', len(mashed_data))
+    print('shapes of mashed data:', mashed_data[0][0].shape, mashed_data[0][1].shape)
+    print('sample mashed label:', mashed_data[0][1])
 
     return mashed_data

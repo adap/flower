@@ -124,3 +124,13 @@ python -m fedmix.generate_media --output_type=figure --output_path="_static/cifa
 # cifar100 learning curve
 python -m fedmix.generate_media --output_type=figure --output_path="_static/cifar100.png" --input_directory="results/" --dataset_name="cifar100"
 ```
+
+The expected results are shown below:
+
+| Algorithm | FEMNIST | CIFAR10 | CIFAR100 |
+| -- | -- | -- | -- |
+| FedAvg | **80.58** (85.3) | **65.16** (73.8) | - (50.4) |
+| NaiveMix | 78.78 (85.9) | 61.30 (77.4) | - (53.8) |
+| FedMix | 73.46 (**86.5**) | 62.91 (**81.2**) | - (**56.7**) |
+
+Numbers within `()` are the reported results from the paper.

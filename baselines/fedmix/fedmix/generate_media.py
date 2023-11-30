@@ -97,7 +97,7 @@ def main():
 
         plt.xlabel('Comm. Round')
         plt.ylabel('Test Acc. (%)')
-        plt.text(0.7*len(rounds), 50*max(accuracies), 'Max Accuracy:\n' + '\n'.join([f'{l}: {a:.2f}' for l, a in max_accuracies.items()]))
+        plt.text(0.7*len(rounds), 0.5*max(accuracies), 'Max Accuracy:\n' + '\n'.join([f'{l}: {a:.2f}' for l, a in max_accuracies.items()]))
         plt.legend()
 
         plt.savefig(args.output_path)
