@@ -63,7 +63,7 @@ fds = FederatedDataset(dataset="jxie/higgs", partitioners={"train": partitioner}
 
 # Load the partition for this `node_id`
 log(INFO, "Loading partition...")
-partition = fds.load_partition(idx=args.node_id, split="train")
+partition = fds.load_partition(node_id=args.node_id, split="train")
 partition.set_format("numpy")
 
 # Train/test splitting

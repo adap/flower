@@ -22,6 +22,7 @@ from typing import List, Tuple, Type, cast
 import ray
 
 from flwr.client import Client, NumPyClient
+from flwr.client.workload_state import WorkloadState
 from flwr.common import Code, GetPropertiesRes, Status
 from flwr.simulation.ray_transport.ray_actor import (
     ClientRes,
@@ -120,14 +121,14 @@ def test_cid_consistency_all_submit_first() -> None:
     for prox in proxies:
         job = job_fn(prox.cid)
         prox.actor_pool.submit_client_job(
-            lambda a, c_fn, j_fn, cid: a.run.remote(c_fn, j_fn, cid),
-            (prox.client_fn, job, prox.cid),
+            lambda a, c_fn, j_fn, cid, state: a.run.remote(c_fn, j_fn, cid, state),
+            (prox.client_fn, job, prox.cid, WorkloadState(state={})),
         )
 
     # fetch results one at a time
     shuffle(proxies)
     for prox in proxies:
-        res = prox.actor_pool.get_client_result(prox.cid, timeout=None)
+        res, _ = prox.actor_pool.get_client_result(prox.cid, timeout=None)
         res = cast(GetPropertiesRes, res)
         assert int(prox.cid) * pi == res.properties["result"]
 
@@ -145,14 +146,14 @@ def test_cid_consistency_without_proxies() -> None:
     for cid in cids:
         job = job_fn(cid)
         pool.submit_client_job(
-            lambda a, c_fn, j_fn, cid_: a.run.remote(c_fn, j_fn, cid_),
-            (get_dummy_client, job, cid),
+            lambda a, c_fn, j_fn, cid_, state: a.run.remote(c_fn, j_fn, cid_, state),
+            (get_dummy_client, job, cid, WorkloadState(state={})),
         )
 
     # fetch results one at a time
     shuffle(cids)
     for cid in cids:
-        res = pool.get_client_result(cid, timeout=None)
+        res, _ = pool.get_client_result(cid, timeout=None)
         res = cast(GetPropertiesRes, res)
         assert int(cid) * pi == res.properties["result"]
 

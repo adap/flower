@@ -10,7 +10,7 @@ Standard setup - download the dataset, choose the partitioning::
   partition = fds.load_partition(0, "train")
   centralized_dataset = fds.load_full("test")
 
-Determine the names of our features (you can alternatively do that directly on the Hugging Face website). The name can
+Determine the names of the features (you can alternatively do that directly on the Hugging Face website). The name can
 vary e.g. "img" or "image", "label" or "labels"::
 
   partition.features
@@ -38,7 +38,7 @@ That is why we iterate over all the samples from this batch and apply our transf
     return batch
 
   partition_torch = partition.with_transform(apply_transforms)
-  # At this point, you can check if you didn't make any mistakes by calling partition_torch[0]
+  # Now, you can check if you didn't make any mistakes by calling partition_torch[0]
   dataloader = DataLoader(partition_torch, batch_size=64)
 
 
@@ -70,8 +70,10 @@ If you want to divide the dataset, you can use (at any point before passing the 
 Or you can simply calculate the indices yourself::
 
   partition_len = len(partition)
-  partition_train = partition[:int(0.8 * partition_len)]
-  partition_test = partition[int(0.8 * partition_len):]
+  # Split `partition` 80:20
+  num_train_examples = int(0.8 * partition_len)
+  partition_train = partition.select(range(num_train_examples)) ) # use first 80% 
+  partition_test = partition.select(range(num_train_examples, partition_len)) ) # use last 20%
 
 And during the training loop, you need to apply one change. With a typical dataloader, you get a list returned for each iteration::
 

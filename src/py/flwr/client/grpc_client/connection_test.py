@@ -93,7 +93,7 @@ def test_integration_connection() -> None:
     def run_client() -> int:
         messages_received: int = 0
 
-        with grpc_connection(server_address=f"[::]:{port}") as conn:
+        with grpc_connection(server_address=f"[::]:{port}", insecure=True) as conn:
             receive, send, _, _ = conn
 
             # Setup processing loop

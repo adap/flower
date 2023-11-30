@@ -23,8 +23,11 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, 1, {"accuracy": accuracy}
 
 def client_fn(cid):
-    return FlowerClient()
+    return FlowerClient().to_client()
 
+flower = fl.flower.Flower(
+    client_fn=client_fn,
+)
 
 if __name__ == "__main__":
     # Start Flower client
@@ -32,4 +35,5 @@ if __name__ == "__main__":
         server_address="127.0.0.1:8080", 
         client=FlowerClient(),
         root_certificates=Path("certificates/ca.crt").read_bytes(),
+        insecure=False,
     )
