@@ -23,7 +23,7 @@ import numpy as np
 import flwr
 from flwr.common.typing import Config, GetParametersIns
 from flwr.driver.driver_client_proxy import DriverClientProxy
-from flwr.proto import driver_pb2, node_pb2, task_pb2
+from flwr.proto import node_pb2, task_pb2
 from flwr.proto.transport_pb2 import ClientMessage, Parameters, Scalar
 
 MESSAGE_PARAMETERS = Parameters(tensors=[b"abc"], tensor_type="np")
@@ -37,35 +37,29 @@ class DriverClientProxyTestCase(unittest.TestCase):
     def setUp(self) -> None:
         """Set up mocks for tests."""
         self.driver = MagicMock()
-        self.driver.get_nodes.return_value = driver_pb2.GetNodesResponse(
-            nodes=[node_pb2.Node(node_id=1, anonymous=False)]
-        )
+        self.driver.get_nodes.return_value = [node_pb2.Node(node_id=1, anonymous=False)]
 
     def test_get_properties(self) -> None:
         """Test positive case."""
         # Prepare
-        self.driver.push_task_ins.return_value = driver_pb2.PushTaskInsResponse(
-            task_ids=["19341fd7-62e1-4eb4-beb4-9876d3acda32"]
-        )
-        self.driver.pull_task_res.return_value = driver_pb2.PullTaskResResponse(
-            task_res_list=[
-                task_pb2.TaskRes(
-                    task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
-                    group_id="",
-                    workload_id=0,
-                    task=task_pb2.Task(
-                        legacy_client_message=ClientMessage(
-                            get_properties_res=ClientMessage.GetPropertiesRes(
-                                properties=CLIENT_PROPERTIES
-                            )
+        self.driver.push_task_ins.return_value = [
+            "19341fd7-62e1-4eb4-beb4-9876d3acda32"
+        ]
+        self.driver.pull_task_res.return_value = [
+            task_pb2.TaskRes(
+                task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
+                group_id="",
+                workload_id=0,
+                task=task_pb2.Task(
+                    legacy_client_message=ClientMessage(
+                        get_properties_res=ClientMessage.GetPropertiesRes(
+                            properties=CLIENT_PROPERTIES
                         )
-                    ),
-                )
-            ]
-        )
-        client = DriverClientProxy(
-            node_id=1, driver=self.driver, anonymous=True, workload_id=0
-        )
+                    )
+                ),
+            )
+        ]
+        client = DriverClientProxy(node_id=1, driver=self.driver, anonymous=True)
         request_properties: Config = {"tensor_type": "str"}
         ins: flwr.common.GetPropertiesIns = flwr.common.GetPropertiesIns(
             config=request_properties
@@ -80,28 +74,24 @@ class DriverClientProxyTestCase(unittest.TestCase):
     def test_get_parameters(self) -> None:
         """Test positive case."""
         # Prepare
-        self.driver.push_task_ins.return_value = driver_pb2.PushTaskInsResponse(
-            task_ids=["19341fd7-62e1-4eb4-beb4-9876d3acda32"]
-        )
-        self.driver.pull_task_res.return_value = driver_pb2.PullTaskResResponse(
-            task_res_list=[
-                task_pb2.TaskRes(
-                    task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
-                    group_id="",
-                    workload_id=0,
-                    task=task_pb2.Task(
-                        legacy_client_message=ClientMessage(
-                            get_parameters_res=ClientMessage.GetParametersRes(
-                                parameters=MESSAGE_PARAMETERS,
-                            )
+        self.driver.push_task_ins.return_value = [
+            "19341fd7-62e1-4eb4-beb4-9876d3acda32"
+        ]
+        self.driver.pull_task_res.return_value = [
+            task_pb2.TaskRes(
+                task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
+                group_id="",
+                workload_id=0,
+                task=task_pb2.Task(
+                    legacy_client_message=ClientMessage(
+                        get_parameters_res=ClientMessage.GetParametersRes(
+                            parameters=MESSAGE_PARAMETERS,
                         )
-                    ),
-                )
-            ]
-        )
-        client = DriverClientProxy(
-            node_id=1, driver=self.driver, anonymous=True, workload_id=0
-        )
+                    )
+                ),
+            )
+        ]
+        client = DriverClientProxy(node_id=1, driver=self.driver, anonymous=True)
         get_parameters_ins = GetParametersIns(config={})
 
         # Execute
@@ -115,29 +105,25 @@ class DriverClientProxyTestCase(unittest.TestCase):
     def test_fit(self) -> None:
         """Test positive case."""
         # Prepare
-        self.driver.push_task_ins.return_value = driver_pb2.PushTaskInsResponse(
-            task_ids=["19341fd7-62e1-4eb4-beb4-9876d3acda32"]
-        )
-        self.driver.pull_task_res.return_value = driver_pb2.PullTaskResResponse(
-            task_res_list=[
-                task_pb2.TaskRes(
-                    task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
-                    group_id="",
-                    workload_id=0,
-                    task=task_pb2.Task(
-                        legacy_client_message=ClientMessage(
-                            fit_res=ClientMessage.FitRes(
-                                parameters=MESSAGE_PARAMETERS,
-                                num_examples=10,
-                            )
+        self.driver.push_task_ins.return_value = [
+            "19341fd7-62e1-4eb4-beb4-9876d3acda32"
+        ]
+        self.driver.pull_task_res.return_value = [
+            task_pb2.TaskRes(
+                task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
+                group_id="",
+                workload_id=0,
+                task=task_pb2.Task(
+                    legacy_client_message=ClientMessage(
+                        fit_res=ClientMessage.FitRes(
+                            parameters=MESSAGE_PARAMETERS,
+                            num_examples=10,
                         )
-                    ),
-                )
-            ]
-        )
-        client = DriverClientProxy(
-            node_id=1, driver=self.driver, anonymous=True, workload_id=0
-        )
+                    )
+                ),
+            )
+        ]
+        client = DriverClientProxy(node_id=1, driver=self.driver, anonymous=True)
         parameters = flwr.common.ndarrays_to_parameters([np.ones((2, 2))])
         ins: flwr.common.FitIns = flwr.common.FitIns(parameters, {})
 
@@ -152,28 +138,22 @@ class DriverClientProxyTestCase(unittest.TestCase):
     def test_evaluate(self) -> None:
         """Test positive case."""
         # Prepare
-        self.driver.push_task_ins.return_value = driver_pb2.PushTaskInsResponse(
-            task_ids=["19341fd7-62e1-4eb4-beb4-9876d3acda32"]
-        )
-        self.driver.pull_task_res.return_value = driver_pb2.PullTaskResResponse(
-            task_res_list=[
-                task_pb2.TaskRes(
-                    task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
-                    group_id="",
-                    workload_id=0,
-                    task=task_pb2.Task(
-                        legacy_client_message=ClientMessage(
-                            evaluate_res=ClientMessage.EvaluateRes(
-                                loss=0.0, num_examples=0
-                            )
-                        )
-                    ),
-                )
-            ]
-        )
-        client = DriverClientProxy(
-            node_id=1, driver=self.driver, anonymous=True, workload_id=0
-        )
+        self.driver.push_task_ins.return_value = [
+            "19341fd7-62e1-4eb4-beb4-9876d3acda32"
+        ]
+        self.driver.pull_task_res.return_value = [
+            task_pb2.TaskRes(
+                task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
+                group_id="",
+                workload_id=0,
+                task=task_pb2.Task(
+                    legacy_client_message=ClientMessage(
+                        evaluate_res=ClientMessage.EvaluateRes(loss=0.0, num_examples=0)
+                    )
+                ),
+            )
+        ]
+        client = DriverClientProxy(node_id=1, driver=self.driver, anonymous=True)
         parameters = flwr.common.Parameters(tensors=[], tensor_type="np")
         evaluate_ins: flwr.common.EvaluateIns = flwr.common.EvaluateIns(parameters, {})
 

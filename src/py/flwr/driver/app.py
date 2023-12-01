@@ -20,7 +20,7 @@ import threading
 import time
 from logging import INFO
 from pathlib import Path
-from typing import Dict, List, Optional, Union, cast
+from typing import Dict, List, Optional, Union
 
 from flwr.common import EventType, event
 from flwr.common.address import parse_address
@@ -33,7 +33,6 @@ from flwr.server.strategy import Strategy
 
 from .driver import Driver
 from .driver_client_proxy import DriverClientProxy
-from .grpc_driver import GrpcDriver
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
 
@@ -111,8 +110,6 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     # Create the Driver
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
-    driver = GrpcDriver(driver_service_address=address, certificates=root_certificates)
-    driver.connect()
 
     # Initialize the Driver API server and config
     initialized_server, initialized_config = init_defaults(
@@ -186,9 +183,8 @@ def update_client_manager(
         for node_id in new_nodes:
             client_proxy = DriverClientProxy(
                 node_id=node_id,
-                driver=cast(GrpcDriver, driver.grpc_driver),
+                driver=driver,
                 anonymous=False,
-                workload_id=cast(int, driver.workload_id),
             )
             if client_manager.register(client_proxy):
                 registered_nodes[node_id] = client_proxy
@@ -197,5 +193,3 @@ def update_client_manager(
 
         # Sleep for 3 seconds
         time.sleep(3)
-    # Exit
-    del driver
