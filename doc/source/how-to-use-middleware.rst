@@ -1,32 +1,32 @@
 Use Built-in Middleware Layers
 ==============================
 
-In this tutorial, we will learn how to utilize built-in middleware layers to augment the behavior of an application. Middleware allows us to perform operations before and after a task is processed in the application.
+In this tutorial, we will learn how to utilize built-in middleware layers to augment the behavior of a flower callable. Middleware allows us to perform operations before and after a task is processed in the flower callable.
 
 What is Middleware?
 -------------------
 
-Middleware is a callable that wraps around an application. It can manipulate or inspect incoming tasks (``TaskIns``) in the ``Fwd`` and the resulting tasks (``TaskRes``) in the ``Bwd``. The signature for a middleware layer (``Layer``) is as follows:
+Middleware is a callable that wraps around a Flower Callable. It can manipulate or inspect incoming tasks (``TaskIns``) in the ``Fwd`` and the resulting tasks (``TaskRes``) in the ``Bwd``. The signature for a middleware layer (``Layer``) is as follows:
 
 .. code-block:: python
 
-    App = Callable[[Fwd], Bwd]
-    Layer = Callable[[Fwd, App], Bwd]
+    FlowerCallable = Callable[[Fwd], Bwd]
+    Layer = Callable[[Fwd, FlowerCallable], Bwd]
 
 A typical middleware function might look something like this:
 
 .. code-block:: python
 
-    def example_middleware(fwd: Fwd, app: App) -> Bwd:
-        # Do something with Fwd before passing to app.
-        bwd = app(fwd)
+    def example_middleware(fwd: Fwd, fc: FlowerCallable) -> Bwd:
+        # Do something with Fwd before passing to the inner flower callable.
+        bwd = fc(fwd)
         # Do something with Bwd before returning.
         return bwd
 
 Using Middleware Layers
 -----------------------
 
-To use middleware layers in your application, you can follow these steps:
+To use middleware layers in your flower callable, you can follow these steps:
 
 1. Import the Required Middleware
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -45,18 +45,18 @@ Define your client function (``client_fn``) that will be wrapped by the middlewa
 
 .. code-block:: python
 
-    def client_fn():
+    def client_fn(cid):
         # Your client code goes here.
-        pass
+        return # your client
 
-3. Create the Application with Middleware
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+3. Create the FlowerCallable with Middleware
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Create your application and pass the middleware layers as a list to the ``middleware`` argument. The order in which you provide the middleware layers matters:
+Create your flower callable and pass the middleware layers as a list to the ``middleware`` argument. The order in which you provide the middleware layers matters:
 
 .. code-block:: python
 
-    app = fl.app.Flower(
+    flower = fl.app.Flower(
         client_fn=client_fn,
         middleware=[
             example_middleware1,  # Middleware layer 1
@@ -67,7 +67,7 @@ Create your application and pass the middleware layers as a list to the ``middle
 Order of Execution
 ------------------
 
-When the application runs, the middleware layers are executed in the order they are provided in the list:
+When the flower callable runs, the middleware layers are executed in the order they are provided in the list:
 
 1. ``example_middleware1`` (outermost layer)
 2. ``example_middleware2`` (next layer)
@@ -80,6 +80,6 @@ Each middleware has a chance to inspect and modify the ``TaskIns`` in the ``Fwd`
 Conclusion
 ----------
 
-By following this guide, you have learned how to effectively use middleware layers to enhance your application's functionality. Remember that the order of middleware is crucial and affects how the input and output are processed.
+By following this guide, you have learned how to effectively use middleware layers to enhance your flower callable's functionality. Remember that the order of middleware is crucial and affects how the input and output are processed.
 
-Enjoy building more robust and flexible applications with middleware layers!
+Enjoy building more robust and flexible flower callables with middleware layers!

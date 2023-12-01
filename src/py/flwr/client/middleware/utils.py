@@ -14,21 +14,24 @@
 # ==============================================================================
 """Utility functions for middleware layers."""
 
+
 from typing import List
 
 from flwr.client.typing import Bwd, FlowerCallable, Fwd, Layer
 
 
-def make_fc(app: FlowerCallable, middleware_layers: List[Layer]) -> FlowerCallable:
+def make_fc(
+    flower_callable: FlowerCallable, middleware_layers: List[Layer]
+) -> FlowerCallable:
     """."""
 
-    def wrap_app(_app: FlowerCallable, _layer: Layer) -> FlowerCallable:
+    def wrap_fc(_fc: FlowerCallable, _layer: Layer) -> FlowerCallable:
         def new_app(fwd: Fwd) -> Bwd:
-            return _layer(fwd, _app)
+            return _layer(fwd, _fc)
 
         return new_app
 
     for layer in reversed(middleware_layers):
-        app = wrap_app(app, layer)
+        flower_callable = wrap_fc(flower_callable, layer)
 
-    return app
+    return flower_callable
