@@ -22,7 +22,7 @@ from flwr.client.typing import Bwd, FlowerCallable, Fwd, Layer
 from flwr.client.workload_state import WorkloadState
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 
-from .utils import make_app
+from .utils import make_fc
 
 
 def make_mock_middleware(name: str, footprint: List[str]) -> Layer:
@@ -65,7 +65,7 @@ class TestMakeApp(unittest.TestCase):
         task_ins = TaskIns()
 
         # Execute
-        wrapped_app = make_app(mock_app, mock_middleware_layers)
+        wrapped_app = make_fc(mock_app, mock_middleware_layers)
         task_res = wrapped_app(Fwd(task_ins=task_ins, state=WorkloadState({}))).task_res
 
         # Assert
@@ -89,7 +89,7 @@ class TestMakeApp(unittest.TestCase):
             return Bwd(task_res=TaskRes(task_id="filter"), state=WorkloadState({}))
 
         # Execute
-        wrapped_app = make_app(mock_app, [filter_layer])
+        wrapped_app = make_fc(mock_app, [filter_layer])
         task_res = wrapped_app(Fwd(task_ins=task_ins, state=WorkloadState({}))).task_res
 
         # Assert

@@ -19,7 +19,7 @@ import importlib
 from typing import List, Optional, cast
 
 from flwr.client.message_handler.message_handler import handle
-from flwr.client.middleware.utils import make_app
+from flwr.client.middleware.utils import make_fc
 from flwr.client.typing import Bwd, ClientFn, Fwd, Layer
 
 
@@ -54,26 +54,21 @@ class Flower:
         client_fn: ClientFn,  # Only for backward compatibility
         middleware: Optional[List[Layer]] = None,
     ) -> None:
-        self.client_fn = client_fn
-        self.mw_list = middleware if middleware is not None else []
-
-    def __call__(self, fwd: Fwd) -> Bwd:
-        """."""
-
         # Create wrapper function for `handle`
-        def handle_app(_fwd: Fwd) -> Bwd:
+        def fn(fwd: Fwd) -> Bwd:
             task_res, state_updated = handle(
-                client_fn=self.client_fn,
-                state=_fwd.state,
-                task_ins=_fwd.task_ins,
+                client_fn=client_fn,
+                state=fwd.state,
+                task_ins=fwd.task_ins,
             )
             return Bwd(task_res=task_res, state=state_updated)
 
         # Wrap middleware layers around handle_app
-        app = make_app(handle_app, self.mw_list)
+        self._call = make_fc(fn, middleware if middleware is not None else [])
 
-        # Execute the task
-        return app(fwd)
+    def __call__(self, fwd: Fwd) -> Bwd:
+        """."""
+        return self._call(fwd)
 
 
 class LoadCallableError(Exception):

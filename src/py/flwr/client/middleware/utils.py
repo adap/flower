@@ -19,7 +19,7 @@ from typing import List
 from flwr.client.typing import Bwd, FlowerCallable, Fwd, Layer
 
 
-def make_app(app: FlowerCallable, middleware_layers: List[Layer]) -> FlowerCallable:
+def make_fc(app: FlowerCallable, middleware_layers: List[Layer]) -> FlowerCallable:
     """."""
 
     def wrap_app(_app: FlowerCallable, _layer: Layer) -> FlowerCallable:
