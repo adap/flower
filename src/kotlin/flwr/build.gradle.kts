@@ -81,6 +81,7 @@ dependencies {
     implementation("io.grpc:grpc-stub:$grpcVersion")
     implementation("javax.annotation:javax.annotation-api:1.3.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
+    implementation("androidx.work:work-runtime-ktx:2.8.1")
 
     protobuf(files("../../proto"))
     dokkaPlugin("org.jetbrains.dokka:android-documentation-plugin:1.8.20")
