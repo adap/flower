@@ -63,7 +63,7 @@ class Flower:
             )
             return Bwd(task_res=task_res, state=state_updated)
 
-        # Wrap middleware layers around handle_app
+        # Wrap middleware layers around fn
         self._call = make_fc(fn, middleware if middleware is not None else [])
 
     def __call__(self, fwd: Fwd) -> Bwd:
