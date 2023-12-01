@@ -135,14 +135,14 @@ Finally, we can launch the training. To run using FedVSSL:
 python -m fedvssl.main # this will run using the default settings.
 
 # You can override settings directly from the command line
-python -m fedvssl.main mix_coeff=1 rounds=100 # will set hyper-parameter alpha to 1 and the number of rounds to 100
+python -m fedvssl.main strategy.mix_coeff=1 rounds=100 # will set hyper-parameter alpha to 1 and the number of rounds to 100
 ```
 
 To run using FedAvg:
 ```bash
 # This will run FedAvg baseline
 # This is done so to match the experimental setup in the paper
-python -m fedvssl.main fedavg=true
+python -m fedvssl.main strategy.fedavg=true
 
 # This config can also be overriden.
 ```
