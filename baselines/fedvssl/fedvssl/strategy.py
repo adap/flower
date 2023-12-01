@@ -74,6 +74,8 @@ class FedVSSL(fl.server.strategy.FedAvg):
 
         if self.fedavg:
             weights_avg = ndarrays_to_parameters(weights_avg)
+            glb_dir = self.base_work_dir
+            mmcv.mkdir_or_exist(os.path.abspath(glb_dir))
         else:
             # Aggregate all the weights and the loss
             loss_results = [
