@@ -18,18 +18,17 @@
 import unittest
 from typing import List
 
-from flwr.client.typing import Bwd, Fwd
+from flwr.client.typing import Bwd, FlowerCallable, Fwd, Layer
 from flwr.client.workload_state import WorkloadState
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 
-from .typing import App, Layer
 from .utils import make_app
 
 
 def make_mock_middleware(name: str, footprint: List[str]) -> Layer:
     """Make a mock middleware layer."""
 
-    def middleware(fwd: Fwd, app: App) -> Bwd:
+    def middleware(fwd: Fwd, app: FlowerCallable) -> Bwd:
         footprint.append(name)
         fwd.task_ins.task_id += f"{name}"
         bwd = app(fwd)
@@ -40,7 +39,7 @@ def make_mock_middleware(name: str, footprint: List[str]) -> Layer:
     return middleware
 
 
-def make_mock_app(name: str, footprint: List[str]) -> App:
+def make_mock_app(name: str, footprint: List[str]) -> FlowerCallable:
     """Make a mock app."""
 
     def app(fwd: Fwd) -> Bwd:
@@ -83,7 +82,7 @@ class TestMakeApp(unittest.TestCase):
         mock_app = make_mock_app("app", footprint)
         task_ins = TaskIns()
 
-        def filter_layer(fwd: Fwd, _: App) -> Bwd:
+        def filter_layer(fwd: Fwd, _: FlowerCallable) -> Bwd:
             footprint.append("filter")
             fwd.task_ins.task_id += "filter"
             # Skip calling app

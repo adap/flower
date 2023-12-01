@@ -16,15 +16,13 @@
 
 from typing import List
 
-from flwr.client.typing import Bwd, Fwd
-
-from .typing import App, Layer
+from flwr.client.typing import Bwd, FlowerCallable, Fwd, Layer
 
 
-def make_app(app: App, middleware_layers: List[Layer]) -> App:
+def make_app(app: FlowerCallable, middleware_layers: List[Layer]) -> FlowerCallable:
     """."""
 
-    def wrap_app(_app: App, _layer: Layer) -> App:
+    def wrap_app(_app: FlowerCallable, _layer: Layer) -> FlowerCallable:
         def new_app(fwd: Fwd) -> Bwd:
             return _layer(fwd, _app)
 

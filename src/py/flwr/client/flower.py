@@ -19,9 +19,8 @@ import importlib
 from typing import List, Optional, cast
 
 from flwr.client.message_handler.message_handler import handle
-from flwr.client.middleware.typing import Layer
 from flwr.client.middleware.utils import make_app
-from flwr.client.typing import Bwd, ClientFn, Fwd
+from flwr.client.typing import Bwd, ClientFn, Fwd, Layer
 
 
 class Flower:
