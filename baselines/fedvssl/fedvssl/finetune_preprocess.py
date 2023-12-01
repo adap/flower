@@ -46,9 +46,10 @@ params = np.load(args.pretrained_model_path, allow_pickle=True)
 try:
     params = params["arr_0"].item()
 except:
+    # For the cases where the weights are stored as NumPy arrays instead of parameters
     params = [
         np.array(v) for v in list(params["arr_0"])
-    ]  # for the cases where the weights are stored as NumPy arrays instead of parameters
+    ]
 try:
     params = parameters_to_ndarrays(params)
 except:
