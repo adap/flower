@@ -43,8 +43,14 @@ model = build_model(cfg.model)
 
 # Conversion of the format of pre-trained SSL model from .npz files to .pth format.
 params = np.load(args.pretrained_model_path, allow_pickle=True)
-params = params["arr_0"].item()
-params = parameters_to_ndarrays(params)
+try:
+    params = params["arr_0"].item()
+except:
+    params =  [np.array(v) for v in list(params["arr_0"])] # for the cases where the weights are stored as NumPy arrays instead of parameters
+try:
+    params = parameters_to_ndarrays(params)
+except:
+    pass
 params_dict = zip(model.state_dict().keys(), params)
 state_dict = {
     "state_dict": OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
