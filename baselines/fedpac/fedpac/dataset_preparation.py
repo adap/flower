@@ -11,7 +11,7 @@ from torchvision.datasets import CIFAR10, EMNIST
 def get_label_list(dataset):
     label_counter = {}
     for _, labels in dataset:
-        if isinstance(labels, int):
+        if isinstance(labels, int) or isinstance(labels, torch.tensor) :
             label_counter[int(labels)] = label_counter.get(int(labels), 0) + 1
         else:
             for label in labels:
@@ -171,13 +171,13 @@ def partition_cifar_data(
                 client_data[idx].append(Subset(sorted_data, data_array))
                 label_index[ni] += noniid_shard_size
         datasets = [ConcatDataset(client_data[c]) for c in range(num_clients)]
-        # l = get_label_list(datasets[-1])
-        # print(l)
+        l = get_label_list(datasets[-1])
+        print(l)
     return datasets
 
 
 def partition_emnist_data(
-    dataset,
+    trainset,
     num_clients,
     iid: Optional[bool] = False,
     balance: Optional[bool] = True,
@@ -207,20 +207,19 @@ def partition_emnist_data(
     Tuple[List[Dataset], Dataset]
         A list of dataset for each client and a single dataset to be use for testing the model.
     """
-    trainset, testset = _download_data(dataset)
 
     if balance:
         trainset = _balance_classes(trainset, seed)
 
     partition_size = int(len(trainset) / num_clients)
-    sample_size = partition_size
+    # sample_size = partition_size
     lengths = [partition_size] * num_clients
     labels = np.unique(trainset.targets)
     num_classes = len(labels)
 
     if iid:
         datasets = random_split(trainset, lengths, torch.Generator().manual_seed(seed))
-        return datasets, testset
+        return datasets
 
     else:
         noniid_labels_list = [
@@ -284,7 +283,7 @@ def partition_emnist_data(
     datasets = [ConcatDataset(client_data[c]) for c in range(num_clients)]
     l = get_label_list(datasets[-1])
     print(l)
-    return datasets, testset
+    return datasets
 
 
 def _balance_classes(

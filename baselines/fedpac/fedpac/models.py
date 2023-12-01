@@ -5,6 +5,8 @@ from typing import Tuple
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
+
 from torch import Tensor
 from torch.utils.data import DataLoader
 
@@ -104,12 +106,18 @@ class CIFARNet(nn.Module):
         x = self.conv3(x)
         x = self.relu3(x)
         x = self.pool3(x)
-        x = x.view(-1, 3 * 3 * 64)
+        x = x.view(-1, self.num_flat_features(x))
         x = self.fc1(x)
         x = self.relu3(x)
         y = self.fc2(x)
         return x, y
-
+        
+    def num_flat_features(self, x):
+        size = x.size()[1:]
+        num_features = 1
+        for s in size:
+            num_features *= s
+        return num_features
 
 # pylint: disable=too-many-arguments, too-many-locals, too-many-branches
 def train(

@@ -61,12 +61,22 @@ def load_datasets(  # pylint: disable=too-many-arguments
         )
 
     elif dataset == "emnist":
-        datasets, testset = partition_emnist_data(
-            dataset,
+        trainset, testset = _download_data(dataset)
+        datasets = partition_emnist_data(
+            trainset,
             num_clients,
             iid=config.iid,
             balance=config.balance,
             s=config.s,
+            seed=seed,
+        )
+        val_datasets = partition_emnist_data(
+            testset,
+            num_clients,
+            iid=config.iid,
+            balance=config.balance,
+            s=config.s,
+            sample_size=600,
             seed=seed,
         )
 
