@@ -30,6 +30,7 @@ from flwr.common import (
 )
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
+from matplotlib import pyplot as plt
 from .fedavg import FedAvg
 import wandb
 
@@ -207,4 +208,5 @@ class FedProx(FedAvg):
             }
 
             wandb.log(data)
+            plt.close("all")
         return aggregated_parameters, aggregated_metrics

@@ -9,7 +9,7 @@ import flwr as fl
 from flwr.common import Metrics, ndarrays_to_parameters
 from flwr.common.logger import configure
 from flwr.common.typing import Scalar
-
+import ray
 from utils_mnist import (
     load_data_mnist,
     train,
@@ -33,16 +33,16 @@ parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 parser.add_argument(
     "--num_cpus",
     type=int,
-    default=5,
+    default=6,
     help="Number of CPUs to assign to a virtual client",
 )
 parser.add_argument(
     "--num_gpus",
     type=float,
-    default=1 / (NUM_CLIENTS - 2),
+    default=1 / 3,
     help="Ratio of GPU memory to assign to a virtual client",
 )
-parser.add_argument("--num_rounds", type=int, default=10, help="Number of FL rounds.")
+parser.add_argument("--num_rounds", type=int, default=50, help="Number of FL rounds.")
 parser.add_argument("--identifier", type=str, required=True, help="Name of experiment.")
 args = parser.parse_args()
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -253,7 +253,7 @@ def main():
                     "server_round": server_round,
                 }
             )
-
+            plt.close("all")
         return evaluate
 
     # Download dataset and partition it
@@ -291,6 +291,8 @@ def main():
             "include_dashboard": True,  # we need this one for tracking
         },
     )
+    ray.shutdown()
+    wandb.finish()
 
 
 if __name__ == "__main__":
@@ -305,4 +307,4 @@ if __name__ == "__main__":
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=6)
+    wandb.agent(sweep_id, function=main, count=10)

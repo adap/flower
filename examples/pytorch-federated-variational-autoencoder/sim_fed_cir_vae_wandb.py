@@ -41,14 +41,14 @@ parser.add_argument(
 parser.add_argument(
     "--num_gpus",
     type=float,
-    default=0,
+    default=1 / 3,
     help="Ratio of GPU memory to assign to a virtual client",
 )
-parser.add_argument("--num_rounds", type=int, default=10, help="Number of FL rounds.")
+parser.add_argument("--num_rounds", type=int, default=50, help="Number of FL rounds.")
 parser.add_argument("--identifier", type=str, required=True, help="Name of experiment.")
 args = parser.parse_args()
 
-DEVICE = torch.device("cpu")
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 IDENTIFIER = args.identifier
 if not os.path.exists(IDENTIFIER):
     os.makedirs(IDENTIFIER)
@@ -287,6 +287,7 @@ def main():
         ),
         lr_g=wandb.config["lr_g"],
         steps_g=wandb.config["steps_g"],
+        device=DEVICE,
     )
 
     # Resources to be assigned to each virtual client

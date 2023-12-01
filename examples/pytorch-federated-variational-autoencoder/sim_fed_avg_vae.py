@@ -1,6 +1,7 @@
 import argparse
 from collections import OrderedDict
 from typing import Dict, Tuple, List
+import ray
 from torch.utils.data import DataLoader
 
 import torch
@@ -24,6 +25,8 @@ from utils_mnist import (
 from utils_mnist import VAE
 import os
 import numpy as np
+import matplotlib.pyplot as plt
+import ray
 
 NUM_CLIENTS = 5
 NUM_CLASSES = 7
@@ -41,7 +44,7 @@ parser.add_argument(
     default=1 / NUM_CLIENTS,
     help="Ratio of GPU memory to assign to a virtual client",
 )
-parser.add_argument("--num_rounds", type=int, default=2, help="Number of FL rounds.")
+parser.add_argument("--num_rounds", type=int, default=50, help="Number of FL rounds.")
 parser.add_argument("--identifier", type=str, required=True, help="Name of experiment.")
 import wandb
 
@@ -249,6 +252,7 @@ def main():
                     "server_round": server_round,
                 }
             )
+            plt.close("all")
 
         return evaluate
 
@@ -286,6 +290,8 @@ def main():
             "include_dashboard": True,  # we need this one for tracking
         },
     )
+    ray.shutdown()
+    wandb.finish()
 
 
 if __name__ == "__main__":

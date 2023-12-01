@@ -36,8 +36,6 @@ import torch
 import torch.nn as nn
 from collections import OrderedDict
 
-DEVICE = torch.device("cpu")
-
 
 class FedCiR(FedAvg):
     """Configurable FedCiRs strategy implementation."""
@@ -69,6 +67,7 @@ class FedCiR(FedAvg):
         gen_stats=None,
         num_classes=10,
         alignment_dataloader=None,
+        device=None,
     ) -> None:
         """Federated Averaging strategy.
 
@@ -130,7 +129,8 @@ class FedCiR(FedAvg):
         self.num_classes = num_classes
         self.steps_gen = steps_g
         self.gen_stats = gen_stats
-        self.gen_model = VAE(encoder_only=True).to(DEVICE)
+        self.device = device
+        self.gen_model = VAE(encoder_only=True).to(self.device)
         self.alignment_loader = alignment_dataloader
 
     def __repr__(self) -> str:
@@ -223,7 +223,7 @@ class FedCiR(FedAvg):
             condition = (recon_img >= 0.0) & (recon_img <= 1.0)
             # assert torch.all(condition), "Values should be between 0 and 1"
             if not torch.all(condition):
-                import pdb; pdb.set_trace()
+                ValueError("Values should be between 0 and 1")
                 recon_img = torch.clamp(recon_img, 0.0, 1.0)
             recon_loss = F.binary_cross_entropy(
                 recon_img, img.view(-1, img.shape[2] * img.shape[3]), reduction="sum"
@@ -242,7 +242,7 @@ class FedCiR(FedAvg):
             (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for _, fit_res in results
         ]
-        temp_local_models = [VAE().to(DEVICE) for _ in range(len(weights_results))]
+        temp_local_models = [VAE().to(self.device) for _ in range(len(weights_results))]
         optimizer = torch.optim.Adam(self.gen_model.parameters(), lr=self.lr_gen)
 
         for temp_local_model in temp_local_models:
@@ -252,7 +252,7 @@ class FedCiR(FedAvg):
             for step, (align_img, _) in enumerate(self.alignment_loader):
                 preds = []
                 optimizer.zero_grad()
-                align_img = align_img.to(DEVICE)
+                align_img = align_img.to(self.device)
 
                 for idx, (weights, _) in enumerate(weights_results):
                     params_dict = zip(
