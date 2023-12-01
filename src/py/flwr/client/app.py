@@ -73,14 +73,14 @@ def run_client() -> None:
     print(args.root_certificates)
     print(args.server)
     print(args.dir)
-    print(args.target)
+    print(args.callable)
 
-    target_dir = args.dir
-    if target_dir is not None:
-        sys.path.insert(0, target_dir)
+    callable_dir = args.dir
+    if callable_dir is not None:
+        sys.path.insert(0, callable_dir)
 
     def _load() -> Flower:
-        flower: Flower = load_callable(args.target)
+        flower: Flower = load_callable(args.callable)
         return flower
 
     return start_client(
@@ -99,10 +99,8 @@ def _parse_args_client() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "target",
-        help="The target Flower object to run as a client. For example: "
-        "'client:flower' or 'project.package.module:wrapper.flower'. "
-        "This is a required positional argument.",
+        "callable",
+        help="For example: `client:flower` or `project.package.module:wrapper.flower`",
     )
     parser.add_argument(
         "--insecure",
@@ -126,7 +124,7 @@ def _parse_args_client() -> argparse.ArgumentParser:
         "--dir",
         default="",
         help="Add specified directory to the PYTHONPATH and load Flower "
-        "object from there."
+        "callable from there."
         " Default: current working directory.",
     )
 
