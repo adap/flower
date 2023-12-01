@@ -75,6 +75,7 @@ protobuf {
 dependencies {
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.compose.runtime:runtime:1.5.0")
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.0"))
     implementation("io.grpc:grpc-okhttp:$grpcVersion")
     implementation("io.grpc:grpc-protobuf-lite:$grpcVersion")
