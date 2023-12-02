@@ -123,7 +123,6 @@ def alignment_dataloader(samples_per_class=100, batch_size=8, shuffle=False):
         transform=transforms.ToTensor(),
     )
 
-
     # Create an alignment dataset with 20 samples for each class
     alignment_datasets = []
 
@@ -133,6 +132,28 @@ def alignment_dataloader(samples_per_class=100, batch_size=8, shuffle=False):
         ]
         selected_indices = class_indices[:samples_per_class]
         alignment_dataset = Subset(mnist_test, selected_indices)
+        alignment_datasets.append(alignment_dataset)
+
+    # Concatenate the alignment datasets into one
+    alignment_dataset = ConcatDataset(alignment_datasets)
+
+    # Create a DataLoader for the alignment dataset
+    alignment_loader = DataLoader(
+        alignment_dataset, batch_size=batch_size, shuffle=shuffle
+    )
+    return alignment_loader
+
+
+def subset_alignment_dataloader(samples_per_class=100, batch_size=8, shuffle=True):
+    test_dataset = MNIST(
+        root="./mnist_data", train=False, download=True, transform=transforms.ToTensor()
+    )
+    partitions_idx = non_iid_train_iid_test_6789(alignment=True)
+    torch.manual_seed(6789)
+    alignment_datasets = []
+    for partition_idx in partitions_idx:
+        selected_points = partition_idx[:samples_per_class]
+        alignment_dataset = Subset(test_dataset, selected_points)
         alignment_datasets.append(alignment_dataset)
 
     # Concatenate the alignment datasets into one
@@ -190,7 +211,7 @@ def non_iid_train_iid_test():
 
         # Load the MNIST test dataset
     test_dataset = MNIST(
-        root="./data", train=False, download=True, transform=transforms.ToTensor()
+        root="./mnist_data", train=False, download=True, transform=transforms.ToTensor()
     )
 
     # Specify the size of each partition
@@ -203,6 +224,62 @@ def non_iid_train_iid_test():
         test_dataset, partition_sizes
     )
     return partition_datasets_train, partition_datasets_test
+
+
+def non_iid_train_iid_test_6789(seed=6789, alignment=False):
+    # Load the MNIST training dataset
+    torch.manual_seed(seed)
+
+    train_dataset = MNIST(
+        root="./mnist_data/", train=True, download=True, transform=transforms.ToTensor()
+    )
+
+    # Define class pairs for each partition
+    class_partitions = [(6, 7), (8, 9)]
+
+    # Create a list to store datasets for each partition
+    partition_datasets_train = []
+
+    # Iterate over class pairs and create a dataset for each partition
+    for class_pair in class_partitions:
+        class_filter = lambda label: label in class_pair
+        filtered_indices = [
+            i for i, (_, label) in enumerate(train_dataset) if class_filter(label)
+        ]
+
+        # Use Subset to create a dataset with filtered indices
+        partition_dataset = Subset(train_dataset, filtered_indices)
+        partition_datasets_train.append(partition_dataset)
+
+        # Load the MNIST test dataset
+    test_dataset = MNIST(
+        root="./mnist_data", train=False, download=True, transform=transforms.ToTensor()
+    )
+    class_partitions_test = [6, 7, 8, 9]
+
+    partition_datasets_test = []
+    partition_datasets_alignment = []
+
+    # Iterate over class pairs and create a dataset for each partition
+    for class_pair in class_partitions_test:
+        class_filter = class_pair
+        filtered_indices = [
+            i for i, (_, label) in enumerate(test_dataset) if class_filter == label
+        ]
+
+        # Use Subset to create a dataset with filtered indices
+        partition_datasets_test.append(Subset(test_dataset, filtered_indices[500:]))
+        partition_datasets_alignment.append(filtered_indices[:500])
+
+    if alignment:
+        return partition_datasets_alignment
+    combined_testset = [ConcatDataset(partition_datasets_test)] * len(
+        partition_datasets_train
+    )
+    return (
+        partition_datasets_train,
+        combined_testset,
+    )
 
 
 def iid_train_iid_test():
@@ -337,7 +414,15 @@ def vae_loss(recon_img, img, mu, logvar):
     return total_loss
 
 
-def train_align(net, trainloader, optimizer, config, epochs, device, num_classes=None):
+def train_align(
+    net,
+    trainloader,
+    optimizer,
+    config,
+    epochs,
+    device,
+    num_classes=None,
+):
     """Train the network on the training set."""
     net.train()
     temp_gen_model = VAE(encoder_only=True).to(device)
@@ -350,15 +435,15 @@ def train_align(net, trainloader, optimizer, config, epochs, device, num_classes
     temp_gen_model.eval()
     # sample_per_class = config.get("sample_per_class", 100)
     sample_per_class = config["sample_per_class"]
-    align_loader = alignment_dataloader(
-        samples_per_class=sample_per_class, batch_size=sample_per_class * 10
-    )
+
     # lambda_reg = config.get("lambda_reg", 0.1)
     lambda_reg = config["lambda_reg"]
 
     # lambda_align = config.get("lambda_align", 100)
     lambda_align = config["lambda_align"]
-
+    align_loader = subset_alignment_dataloader(
+        samples_per_class=sample_per_class, batch_size=sample_per_class * num_classes
+    )
     for _ in range(epochs):
         for images, _ in trainloader:
             images = images.to(device)
@@ -488,7 +573,7 @@ def visualize_latent_representation(
 
 
 def visualize_gmm_latent_representation(
-    model, test_loader, device, rnd=None, folder=None, use_PCA=False
+    model, test_loader, device, rnd=None, folder=None, use_PCA=False,num_class=10
 ):
     model.eval()
     all_latents = []
@@ -502,6 +587,7 @@ def visualize_gmm_latent_representation(
             all_latents.append(z.cpu().numpy())
             all_means.append(mu.cpu().numpy())
             all_labels.append(labels.numpy())
+    import pdb; pdb.set_trace()
 
     all_latents = np.concatenate(all_latents, axis=0)
     all_labels = np.concatenate(all_labels, axis=0)
@@ -517,7 +603,7 @@ def visualize_gmm_latent_representation(
 
         # Convert to numpy array
         reduced_latents = reduced_latents.numpy()
-    gm = GaussianMixture(n_components=10, random_state=42).fit(reduced_latents)
+    gm = GaussianMixture(n_components=num_class, random_state=42).fit(reduced_latents)
 
     # Create 1x2 subplots
     fig, axs = plt.subplots(1, 2, figsize=(15, 6))
@@ -556,7 +642,7 @@ def visualize_gmm_latent_representation(
     plt.colorbar(scatter1, ax=axs, label="Digit Label")
 
     fig.savefig(f"{folder}/latent_rep_at_{rnd}.png")
-    # plt.close()
+    plt.close()
     return f"{folder}/latent_rep_at_{rnd}.png"
     # return fig
 
@@ -583,4 +669,4 @@ def generate(net, image):
 
 
 if __name__ == "__main__":
-    non_iid_train_iid_test()
+    subset_alignment_dataloader(100, 100 * 4)

@@ -1,65 +1,61 @@
 import argparse
 from collections import OrderedDict
 from typing import Dict, Tuple, List
-import ray
 from torch.utils.data import DataLoader
-
+from logging import WARNING, DEBUG
 import torch
 
 import flwr as fl
 from flwr.common import Metrics, ndarrays_to_parameters
-from flwr.common.logger import configure
+from flwr.common.logger import configure, log
 from flwr.common.typing import Scalar
+import wandb
+import os
+
+os.environ["WANDB_START_METHOD"] = "thread"
 
 from utils_mnist import (
-    load_data_mnist,
-    train,
     test,
     visualize_gen_image,
     visualize_gmm_latent_representation,
-    non_iid_train_iid_test,
-    iid_train_iid_test,
-    alignment_dataloader,
-    eval_reconstrution,
     non_iid_train_iid_test_6789,
-    subset_alignment_dataloader
+    subset_alignment_dataloader,
+    train_align,
+    eval_reconstrution,
 )
 from utils_mnist import VAE
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import ray
 
 NUM_CLIENTS = 2
-NUM_CLASSES = 7
+NUM_CLASSES = 4
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
 parser.add_argument(
     "--num_cpus",
     type=int,
-    default=7,
+    default=6,
     help="Number of CPUs to assign to a virtual client",
 )
 parser.add_argument(
     "--num_gpus",
     type=float,
-    default=1 / NUM_CLIENTS,
+    default=1 / 2,
     help="Ratio of GPU memory to assign to a virtual client",
 )
-parser.add_argument("--num_rounds", type=int, default=50, help="Number of FL rounds.")
+parser.add_argument("--num_rounds", type=int, default=20, help="Number of FL rounds.")
 parser.add_argument("--identifier", type=str, required=True, help="Name of experiment.")
-import wandb
-
 args = parser.parse_args()
+
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 IDENTIFIER = args.identifier
 if not os.path.exists(IDENTIFIER):
     os.makedirs(IDENTIFIER)
-
 configure(identifier=IDENTIFIER, filename=f"logs_{IDENTIFIER}.log")
+import ray
 
 
-# Flower client, adapted from Pytorch quickstart example
 class FlowerClient(fl.client.NumPyClient):
     def __init__(self, trainset, valset, cid):
         self.trainset = trainset
@@ -84,11 +80,9 @@ class FlowerClient(fl.client.NumPyClient):
         # Construct dataloader
         trainloader = DataLoader(self.trainset, batch_size=batch, shuffle=True)
 
-        # Define optimizer
-        # optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
         optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
         # Train
-        train(
+        vae_loss_term, reg_term, align_term = train_align(
             self.model,
             trainloader,
             optimizer,
@@ -100,7 +94,7 @@ class FlowerClient(fl.client.NumPyClient):
 
         true_img, gen_img = true_img, gen_img = visualize_gen_image(
             self.model,
-            DataLoader(self.valset, batch_size=64),
+            DataLoader(self.valset, batch_size=64, shuffle=True),
             self.device,
             f'for_client_{self.cid}_train_at_round_{config.get("server_round")}',
             folder=IDENTIFIER,
@@ -111,13 +105,18 @@ class FlowerClient(fl.client.NumPyClient):
             self.device,
             f'for_client_{self.cid}_train_at_round_{config.get("server_round")}',
             folder=IDENTIFIER,
+            num_class=NUM_CLASSES,
         )
+
         # Return local model and statistics
         return (
             self.get_parameters({}),
             len(trainloader.dataset),
             {
                 "cid": self.cid,
+                "vae_loss_term": vae_loss_term,
+                "reg_term": reg_term,
+                "align_term": align_term,
                 "true_image": true_img,
                 "gen_image": gen_img,
                 "latent_rep": latent_reps,
@@ -133,6 +132,7 @@ class FlowerClient(fl.client.NumPyClient):
 
         # Evaluate
         loss, accuracy = test(self.model, valloader, device=self.device)
+
         # Return statistics
         return (
             float(loss),
@@ -183,10 +183,9 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 def main():
-    # Parse input arguments
     run = wandb.init(
         entity="mak",
-        group="avg",
+        group="cir",
         reinit=True,
     )
 
@@ -197,25 +196,30 @@ def main():
     wandb.define_metric("train_*", step_metric="client_round")
     wandb.define_metric("eval_*", step_metric="client_round")
 
+    # Parse input arguments
     def fit_config(server_round: int) -> Dict[str, Scalar]:
         """Return a configuration with static batch size and (local) epochs."""
         config = {
             "epochs": wandb.config["epochs"],  # Number of local epochs done by clients
-            "batch_size": wandb.config[
-                "batch_size"
-            ],  # Batch size to use by clients during fit()
+            "batch_size": wandb.config["batch_size"],
             "server_round": server_round,
+            "sample_per_class": wandb.config["sample_per_class"],
+            "lambda_reg": wandb.config["lambda_reg"],
+            "lambda_align": wandb.config["lambda_align"],
+            "lr_g": wandb.config["lr_g"],
+            "steps_g": wandb.config["steps_g"],
         }
         return config
 
-    def get_evaluate_fn(testset):
+    def get_evaluate_fn(
+        testset,
+    ):
         """Return an evaluation function for centralized evaluation."""
 
         def evaluate(
             server_round: int, parameters: fl.common.NDArrays, config: Dict[str, Scalar]
         ):
             """Use the entire test set for evaluation."""
-
             # Determine device
             device = DEVICE
 
@@ -224,12 +228,12 @@ def main():
             set_params(model, parameters)
             if server_round == 0 or server_round == args.num_rounds:
                 with open(
-                    f"{IDENTIFIER}/weights_avg_round_{server_round}.npy", "wb"
+                    f"{IDENTIFIER}/weights_cir_round_{server_round}.npy", "wb"
                 ) as f:
                     np.save(f, np.array(parameters, dtype=object))
                 wandb.watch(model)
 
-            testloader = DataLoader(testset, batch_size=64)
+            testloader = DataLoader(testset, batch_size=64, shuffle=True)
             true_img, gen_img = visualize_gen_image(
                 model,
                 testloader,
@@ -243,6 +247,7 @@ def main():
                 device,
                 f"server_eval_{server_round}",
                 folder=IDENTIFIER,
+                num_class=NUM_CLASSES,
             )
             global_val_loss = eval_reconstrution(model, testloader, device)
             wandb.log(
@@ -261,18 +266,30 @@ def main():
     # Download dataset and partition it
     trainsets, valsets = non_iid_train_iid_test_6789()
     net = VAE().to(DEVICE)
-
+    gen_net = VAE(encoder_only=True).to(DEVICE)
     n1 = [val.cpu().numpy() for _, val in net.state_dict().items()]
     initial_params = ndarrays_to_parameters(n1)
-
-    strategy = fl.server.strategy.FedAvg(
+    n2 = [val.cpu().numpy() for _, val in gen_net.state_dict().items()]
+    initial_gen_params = ndarrays_to_parameters(n2)
+    samples_per_class = wandb.config["sample_per_class"]
+    strategy = fl.server.strategy.FedCiR(
         initial_parameters=initial_params,
+        initial_generator_params=initial_gen_params,
+        gen_stats=initial_gen_params,
         min_fit_clients=NUM_CLIENTS,
         min_available_clients=NUM_CLIENTS,
         min_evaluate_clients=NUM_CLIENTS,
         on_fit_config_fn=fit_config,
         evaluate_metrics_aggregation_fn=weighted_average,  # Aggregate federated metrics
         evaluate_fn=get_evaluate_fn(valsets[-1]),  # Global evaluation function
+        alignment_dataloader=subset_alignment_dataloader(
+            samples_per_class=samples_per_class,
+            batch_size=samples_per_class * NUM_CLASSES,
+        ),
+        lr_g=wandb.config["lr_g"],
+        steps_g=wandb.config["steps_g"],
+        device=DEVICE,
+        num_classes=NUM_CLASSES,
     )
 
     # Resources to be assigned to each virtual client
@@ -301,10 +318,15 @@ if __name__ == "__main__":
         "method": "random",
         "metric": {"name": "global_val_loss", "goal": "minimize"},
         "parameters": {
-            "epochs": {"values": [2, 5, 10]},
+            "sample_per_class": {"values": [50, 100, 150, 200, 250, 300]},
+            "lambda_reg": {"min": 0.0, "max": 1.0},
+            "lambda_align": {"values": [1, 10, 50, 100]},
+            "lr_g": {"values": [1e-3, 1e-2, 1e-4]},
+            "steps_g": {"values": [5, 10, 15, 20]},
+            "epochs": {"values": [1, 2, 3, 4, 5]},
             "batch_size": {"values": [32, 64, 128]},
         },
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=6)
+    wandb.agent(sweep_id, function=main, count=15)
