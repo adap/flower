@@ -15,7 +15,6 @@
 """Utilities for Actors in the Virtual Client Engine."""
 
 import traceback
-import warnings
 from logging import ERROR
 
 from flwr.client import Client
@@ -27,7 +26,7 @@ except ModuleNotFoundError:
     TF = None
 
 # Display Deprecation warning once
-warnings.filterwarnings("once", category=DeprecationWarning)
+# warnings.filterwarnings("once", category=DeprecationWarning)
 
 
 def enable_tf_gpu_growth() -> None:
@@ -70,15 +69,15 @@ def check_clientfn_returns_client(client: Client) -> Client:
     the client internally to `Client` by calling `.to_client()`.
     """
     if not isinstance(client, Client):
-        mssg = (
-            " Ensure your client is of type `Client`. Please convert it"
-            " using the `.to_client()` method before returning it"
-            " in the `client_fn` you pass to `start_simulation`."
-            " We have applied this conversion on your behalf."
-            " Not returning a `Client` might trigger an error in future"
-            " versions of Flower."
-        )
+        # mssg = (
+        #     " Ensure your client is of type `Client`. Please convert it"
+        #     " using the `.to_client()` method before returning it"
+        #     " in the `client_fn` you pass to `start_simulation`."
+        #     " We have applied this conversion on your behalf."
+        #     " Not returning a `Client` might trigger an error in future"
+        #     " versions of Flower."
+        # )
 
-        warnings.warn(mssg, DeprecationWarning, stacklevel=2)
+        # warnings.warn(mssg, DeprecationWarning, stacklevel=2)
         client = client.to_client()
     return client

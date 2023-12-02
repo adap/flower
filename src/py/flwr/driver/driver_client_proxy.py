@@ -23,7 +23,7 @@ from flwr.common import serde
 from flwr.proto import driver_pb2, node_pb2, task_pb2, transport_pb2
 from flwr.server.client_proxy import ClientProxy
 
-from .driver import GrpcDriver
+from .grpc_driver import GrpcDriver
 
 SLEEP_TIME = 1
 

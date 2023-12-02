@@ -16,7 +16,7 @@
 
 
 import logging
-from logging import LogRecord
+from logging import WARN, LogRecord
 from logging.handlers import HTTPHandler
 from typing import Any, Dict, Optional, Tuple
 
@@ -97,3 +97,17 @@ def configure(
 
 logger = logging.getLogger(LOGGER_NAME)  # pylint: disable=invalid-name
 log = logger.log  # pylint: disable=invalid-name
+
+
+def warn_experimental_feature(name: str) -> None:
+    """Warn the user when they use an experimental feature."""
+    log(
+        WARN,
+        """
+        EXPERIMENTAL FEATURE: %s
+
+        This is an experimental feature. It could change significantly or be removed
+        entirely in future versions of Flower.
+        """,
+        name,
+    )

@@ -12,7 +12,7 @@ This tutorial allows for a variety of settings (some shown in the diagrams above
 
 - For Flower server: A machine running Linux/macOS/Windows (e.g. your laptop). You can run the server on an embedded device too!
 - For Flower clients (one or more): Raspberry Pi 4 (or Zero 2), or an NVIDIA Jetson Xavier-NX (or Nano), or anything similar to these.
-- A uSD card with 32GB or more.
+- A uSD card with 32GB or more. While 32GB is enough for the RPi, a larger 64GB uSD card works best for the NVIDIA Jetson.
 - Software to flash the images to a uSD card:
   - For Raspberry Pi we recommend the [Raspberry Pi Imager](https://www.raspberrypi.com/software/)
   - For other devices [balenaEtcher](https://www.balena.io/etcher/) it's a great option.
