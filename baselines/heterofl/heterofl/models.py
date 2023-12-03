@@ -1,4 +1,4 @@
-"""Conv & resnet17 model architecture, training, testing functions."""
+"""Conv & resnet18 model architecture, training, testing functions."""
 import copy
 from typing import List, OrderedDict
 
@@ -343,7 +343,7 @@ def resnet18(
     ]
     scaler_rate = model_rate / model_config["global_model_rate"]
     model_config["rate"] = scaler_rate
-    model = ResNet(model_config, block=Block, num_blocks=[2, 2, 2, 2])
+    model = ResNet(model_config, block=Block, num_blocks=[1, 1, 1, 2])
     model.apply(_init_param)
     return model.to(device)
 

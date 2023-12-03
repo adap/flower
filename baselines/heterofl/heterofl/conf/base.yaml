@@ -1,18 +1,18 @@
 num_clients: 100
 num_epochs: 5
-num_rounds: 200
+num_rounds: 800
 seed: 0
 client_resources:
     num_cpus: 1
-    num_gpus: 0.0
+    num_gpus: 0.08
 
 control:
   model_split_mode: 'dynamic'
-  model_mode: 'a1-e1'
+  model_mode: 'a1-b1-c1-d1-e1'
 
 dataset:
-  dataset_name: 'MNIST'
-  iid: True
+  dataset_name: 'CIFAR10'
+  iid: False
   shard_per_user : 2 # only used in case of non-iid (i.e. iid = false)
   balance: false
   batch_size:
@@ -24,7 +24,7 @@ dataset:
 
 
 model:
-  model_name: conv  # use 'resnet18' for cifar10
+  model_name: resnet18  # use 'resnet18' for cifar10
   hidden_layers: [64 , 128 , 256 , 512]
   norm: bn
   scale: 1
@@ -32,8 +32,8 @@ model:
 
 strategy:
   optimizer: SGD
-  lr: 0.01
+  lr: 0.1
   momentum: 0.9
   weight_decay: 5.00e-04
   scheduler: MultiStepLR
-  milestones: [100]
+  milestones: [300, 500]
