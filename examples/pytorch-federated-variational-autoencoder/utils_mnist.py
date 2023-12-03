@@ -573,7 +573,7 @@ def visualize_latent_representation(
 
 
 def visualize_gmm_latent_representation(
-    model, test_loader, device, rnd=None, folder=None, use_PCA=False,num_class=10
+    model, test_loader, device, rnd=None, folder=None, use_PCA=False, num_class=10
 ):
     model.eval()
     all_latents = []
@@ -587,7 +587,6 @@ def visualize_gmm_latent_representation(
             all_latents.append(z.cpu().numpy())
             all_means.append(mu.cpu().numpy())
             all_labels.append(labels.numpy())
-    import pdb; pdb.set_trace()
 
     all_latents = np.concatenate(all_latents, axis=0)
     all_labels = np.concatenate(all_labels, axis=0)
@@ -613,7 +612,7 @@ def visualize_gmm_latent_representation(
         all_means[:, 0],
         all_means[:, 1],
         c=gm.predict(all_latents),
-        cmap="tab10",
+        cmap="viridis",
         label="Latent Points",
         zorder=2,
     )
@@ -627,7 +626,7 @@ def visualize_gmm_latent_representation(
         all_means[:, 0],
         all_means[:, 1],
         c=all_labels,
-        cmap="tab10",
+        cmap="viridis",
         label="Labels",
         zorder=2,
     )
@@ -636,10 +635,19 @@ def visualize_gmm_latent_representation(
     axs[1].set_ylabel("Principal Component 2")
     axs[1].legend()
     axs[1].grid()
+    # Create a colorbar for the scatter plots
+    # cbar1 = plt.colorbar(scatter1, ax=axs[0], label="GMM Predictions")
+    cbar2 = plt.colorbar(scatter2, ax=axs[1], label="True Labels")
+
+    # Set colorbar ticks and labels based on unique label values
+    unique_labels = np.unique(all_labels)
+    # cbar1.set_ticks(unique_labels)
+    # cbar1.set_ticklabels(unique_labels)
+    cbar2.set_ticks(unique_labels)
+    cbar2.set_ticklabels(unique_labels)
 
     # Adjust layout for better spacing
     plt.tight_layout()
-    plt.colorbar(scatter1, ax=axs, label="Digit Label")
 
     fig.savefig(f"{folder}/latent_rep_at_{rnd}.png")
     plt.close()

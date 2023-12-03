@@ -185,7 +185,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 def main():
     run = wandb.init(
         entity="mak",
-        group="cir",
+        group="cir20",
         reinit=True,
     )
 
@@ -318,7 +318,7 @@ if __name__ == "__main__":
         "method": "random",
         "metric": {"name": "global_val_loss", "goal": "minimize"},
         "parameters": {
-            "sample_per_class": {"values": [50, 100, 150, 200, 250, 300]},
+            "sample_per_class": {"values": [50, 100, 200, 300, 400, 500]},
             "lambda_reg": {"min": 0.0, "max": 1.0},
             "lambda_align": {"values": [1, 10, 50, 100]},
             "lr_g": {"values": [1e-3, 1e-2, 1e-4]},
@@ -329,4 +329,4 @@ if __name__ == "__main__":
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=15)
+    wandb.agent(sweep_id, function=main, count=20)
