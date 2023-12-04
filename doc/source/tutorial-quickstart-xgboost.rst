@@ -2,13 +2,16 @@
 
 
 Quickstart XGBoost
-==================
+=====================
 
 .. meta::
    :description: Check out this Federated Learning quickstart tutorial for using Flower with XGBoost to train classification models on trees.
 
+..  youtube:: AY1vpXUpesc
+   :width: 100%
+
 Federated XGBoost
--------------
+-------------------
 
 EXtreme Gradient Boosting (**XGBoost**) is a robust and efficient implementation of gradient-boosted decision tree (**GBDT**), that maximises the computational boundaries for boosted tree methods.
 It's primarily designed to enhance both the performance and computational speed of machine learning models.
@@ -17,7 +20,7 @@ In XGBoost, trees are constructed concurrently, unlike the sequential approach t
 Often, for tabular data on medium-sized datasets with fewer than 10k training examples, XGBoost surpasses the results of deep learning techniques.
 
 Why federated XGBoost?
-~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Indeed, as the demand for data privacy and decentralized learning grows, there's an increasing requirement to implement federated XGBoost systems for specialised applications, like survival analysis and financial fraud detection.
 
@@ -31,7 +34,7 @@ and then we dive into a more complex example (`full code xgboost-comprehensive <
 
 
 Environment Setup
--------------
+--------------------
 
 First of all, it is recommended to create a virtual environment and run everything within a `virtualenv <https://flower.dev/docs/recommended-env-setup.html>`_.
 
@@ -49,7 +52,7 @@ Since we want to use :code:`xgboost` package to build up XGBoost trees, let's go
 
 
 Flower Client
--------------
+-----------------
 
 *Clients* are responsible for generating individual weight-updates for the model based on their local datasets.
 Now that we have all our dependencies installed, let's run a simple distributed training with two clients and one server.
@@ -81,7 +84,7 @@ In a file called :code:`client.py`, import xgboost, Flower, Flower Datasets and 
     from flwr_datasets.partitioner import IidPartitioner
 
 Dataset partition and hyper-parameter selection
-~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Prior to local training, we require loading the HIGGS dataset from Flower Datasets and conduct data partitioning for FL:
 
@@ -93,7 +96,7 @@ Prior to local training, we require loading the HIGGS dataset from Flower Datase
     fds = FederatedDataset(dataset="jxie/higgs", partitioners={"train": partitioner})
 
     # Load the partition for this `node_id`
-    partition = fds.load_partition(idx=args.node_id, split="train")
+    partition = fds.load_partition(node_id=args.node_id, split="train")
     partition.set_format("numpy")
 
 In this example, we split the dataset into two partitions with uniform distribution (:code:`IidPartitioner(num_partitions=2)`).
@@ -175,7 +178,7 @@ We use AUC as evaluation metric.
 
 
 Flower client definition for XGBoost
-~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 After loading the dataset we define the Flower client.
 We follow the general rule to define :code:`XgbClient` class inherited from :code:`fl.client.Client`.
@@ -303,7 +306,7 @@ clients running on different machines, all that needs to change is the
 
 
 Flower Server
--------------
+------------------
 
 These updates are then sent to the *server* which will aggregate them to produce a better model.
 Finally, the *server* sends this improved version of the model back to each *client* to finish a complete FL round.
@@ -348,7 +351,7 @@ Then, we start the server:
     )
 
 Tree-based bagging aggregation
-~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You must be curious about how bagging aggregation works. Let's look into the details.
 
@@ -517,7 +520,7 @@ followed by the serialisation, and sending back to each client.
 
 
 Launch Federated XGBoost!
----------------------------
+-------------------------------
 
 With both client and server ready, we can now run everything and see federated
 learning in action. FL systems usually have a server and multiple clients. We
@@ -588,7 +591,7 @@ The full `source code <https://github.com/adap/flower/blob/main/examples/xgboost
 
 
 Comprehensive Federated XGBoost
----------------------------
+-----------------------------------
 
 Now that you have known how federated XGBoost work with Flower, it's time to run some more comprehensive experiments by customising the experimental settings.
 In the xgboost-comprehensive example (`full code <https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive>`_),
@@ -596,7 +599,7 @@ we provide more options to define various experimental setups, including data pa
 Let's take a look!
 
 Customised data partitioning
-~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In :code:`dataset.py`, we have a function :code:`instantiate_partitioner` to instantiate the data partitioner
 based on the given :code:`num_partitions` and :code:`partitioner_type`.
@@ -629,7 +632,7 @@ Currently, we provide four supported partitioner type to simulate the uniformity
 
 
 Customised centralised/distributed evaluation
-~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To facilitate centralised evaluation, we define a function in :code:`server.py`:
 
@@ -670,7 +673,7 @@ As for distributed evaluation on the clients, it's same as the quick-start examp
 overriding the :code:`evaluate()` method insides the :code:`XgbClient` class in :code:`client.py`.
 
 Arguments parser
-~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 In :code:`utils.py`, we define the arguments parsers for clients and server, allowing users to specify different experimental settings.
 Let's first see the sever side:
@@ -761,7 +764,7 @@ This defines various options for client data partitioning.
 Besides, clients also have a option to conduct evaluation on centralised test set by setting :code:`--centralised-eval`.
 
 Example commands
-~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 To run a centralised evaluated experiment on 5 clients with exponential distribution for 50 rounds,
 we first start the server as below:
@@ -776,4 +779,4 @@ Then, on each client terminal, we start the clients:
 
     $ python3 clients.py --num-partitions=5 --partitioner-type=exponential --node-id=NODE_ID
 
-The full `source code <https://github.com/adap/flower/blob/main/examples/xgboost-comprehensive/>`_ for this comprehensive example can be found in :code:`examples/xgboost-comprehensive`.
+The full `code <https://github.com/adap/flower/blob/main/examples/xgboost-comprehensive/>`_ for this comprehensive example can be found in :code:`examples/xgboost-comprehensive`.
