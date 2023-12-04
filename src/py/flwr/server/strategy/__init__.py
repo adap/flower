@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 """Contains the strategy abstraction and different implementations."""
 
 
+from .bulyan import Bulyan as Bulyan
 from .dpfedavg_adaptive import DPFedAvgAdaptive as DPFedAvgAdaptive
 from .dpfedavg_fixed import DPFedAvgFixed as DPFedAvgFixed
 from .fault_tolerant_fedavg import FaultTolerantFedAvg as FaultTolerantFedAvg
@@ -27,6 +28,7 @@ from .fedmedian import FedMedian as FedMedian
 from .fedopt import FedOpt as FedOpt
 from .fedprox import FedProx as FedProx
 from .fedtrimmedavg import FedTrimmedAvg as FedTrimmedAvg
+from .fedxgb_bagging import FedXgbBagging as FedXgbBagging
 from .fedxgb_nn_avg import FedXgbNnAvg as FedXgbNnAvg
 from .fedyogi import FedYogi as FedYogi
 from .krum import Krum as Krum
@@ -39,6 +41,7 @@ __all__ = [
     "FedAdam",
     "FedAvg",
     "FedXgbNnAvg",
+    "FedXgbBagging",
     "FedAvgAndroid",
     "FedAvgM",
     "FedOpt",
@@ -48,6 +51,7 @@ __all__ = [
     "FedMedian",
     "FedTrimmedAvg",
     "Krum",
+    "Bulyan",
     "DPFedAvgAdaptive",
     "DPFedAvgFixed",
     "Strategy",

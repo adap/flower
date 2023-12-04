@@ -11,6 +11,7 @@ jobs:
   release_nightly:
     runs-on: ubuntu-22.04
     name: Nightly
+    if: github.repository == 'adap/flower'
     steps:
       - uses: actions/checkout@v4
       - name: Bootstrap

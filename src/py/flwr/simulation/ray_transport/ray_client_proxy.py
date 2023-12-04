@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,13 +22,14 @@ from typing import Dict, Optional, cast
 import ray
 
 from flwr import common
-from flwr.client import Client, ClientFn, ClientLike, to_client
+from flwr.client import Client, ClientFn
 from flwr.client.client import (
     maybe_call_evaluate,
     maybe_call_fit,
     maybe_call_get_parameters,
     maybe_call_get_properties,
 )
+from flwr.client.workload_state import WorkloadState
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 from flwr.simulation.ray_transport.ray_actor import (
@@ -132,10 +133,10 @@ class RayActorClientProxy(ClientProxy):
     def _submit_job(self, job_fn: JobFn, timeout: Optional[float]) -> ClientRes:
         try:
             self.actor_pool.submit_client_job(
-                lambda a, c_fn, j_fn, cid: a.run.remote(c_fn, j_fn, cid),
-                (self.client_fn, job_fn, self.cid),
+                lambda a, c_fn, j_fn, cid, state: a.run.remote(c_fn, j_fn, cid, state),
+                (self.client_fn, job_fn, self.cid, WorkloadState(state={})),
             )
-            res = self.actor_pool.get_client_result(self.cid, timeout)
+            res, _ = self.actor_pool.get_client_result(self.cid, timeout)
 
         except Exception as ex:
             if self.actor_pool.num_actors == 0:
@@ -275,5 +276,5 @@ def launch_and_evaluate(
 
 def _create_client(client_fn: ClientFn, cid: str) -> Client:
     """Create a client instance."""
-    client_like: ClientLike = client_fn(cid)
-    return to_client(client_like=client_like)
+    # Materialize client
+    return client_fn(cid)
