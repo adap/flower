@@ -1,15 +1,12 @@
-"""Define any utility function.
-
-They are not directly relevant to  the other (more FL specific) python modules. For
-example, you may define here things like: loading a model from a checkpoint, saving
-results, plotting.
-"""
 from typing import List, Tuple
 
 import torch
 from flwr.common import Metrics
 from omegaconf import DictConfig
 import matplotlib.pyplot as plt
+import pandas as pd
+import os
+import numpy as np
 
 
 def comp_accuracy(output, target, topk=(1,)):
@@ -59,13 +56,75 @@ def fit_config(exp_config: DictConfig, server_round: int):
 	return config
 
 
-def generate_plots():
+def generate_plots(local_solver: str = "vanilla", var_epochs: bool = False):
 	"""Generate plots for the experiment."""
-	metrics = ["train_loss", "train_accuracy", "test_loss", "test_accuracy"]
-	for metric in metrics[-1]:
-		pass
+	metrics = ["test_accuracy"]
+	base_path = "results/"
+	save_path = "../_static/"
+	all_files = os.listdir(base_path)
 
+	if local_solver == "proximal": baseline_strategy = "fedprox"
+	else: baseline_strategy = "fedavg"
+
+	baseline_files = [os.path.join(base_path, f) for f in all_files if f.startswith(f"{local_solver}_fedavg_varEpoch_{var_epochs}_")]
+	fednova_files = [os.path.join(base_path, f) for f in all_files if f.startswith(f"{local_solver}_fednova_varEpoch_{var_epochs}_")]
+
+	baseline_df = [pd.read_csv(f) for f in baseline_files]
+	baseline_df = [df for df in baseline_df if not df.isna().any().any()]
+
+	assert len(baseline_df) >= 1, f"Atleast one results file must contain non-NaN values. NaN values found in {baseline_files}"
+
+	fednova_df = [pd.read_csv(f) for f in fednova_files]
+	fednova_df = [df for df in fednova_df if not df.isna().any().any()]
+
+	assert len(fednova_df) >= 1, f"Atleast one results file must contain non-NaN values. NaN values found in {fednova_files}"
+
+	def get_confidence_interval(data):
+		"""Return 95% confidence intervals along with mean"""
+		mean = np.mean(data, axis=0)
+		std = np.std(data, axis=0)
+		lower = mean - 1.96 * std / np.sqrt(len(data))
+		upper = mean + 1.96 * std / np.sqrt(len(data))
+		return mean, lower, upper
+
+	for metric in metrics:
+		baseline_metric_data = np.array([df[metric].values for df in baseline_df])
+		fednova_metric_data = np.array([df[metric].values for df in fednova_df])
+
+		baseline_mean, baseline_lower, baseline_upper = get_confidence_interval(baseline_metric_data)
+		fednova_mean, fednova_lower, fednova_upper = get_confidence_interval(fednova_metric_data)
+
+		epochs = np.arange(1, len(baseline_mean)+1)
+
+		plt.figure()
+		if baseline_strategy == "fedavg": baseline_label = "FedAvg"
+		elif baseline_strategy == "fedprox": baseline_label = "FedProx"
+
+		plt.plot(epochs, baseline_mean, label=baseline_label)
+		plt.fill_between(epochs, baseline_lower, baseline_upper, alpha=0.3)
+		plt.plot(epochs, fednova_mean, label="FedNova", c="red")
+		plt.fill_between(epochs, fednova_lower, fednova_upper, alpha=0.3, color="red")
+		plt.ylabel("Test Accuracy %")
+		plt.xlabel("Communication rounds")
+		plt.xlim([0, 103])
+		plt.ylim([30, 80])
+		plt.legend(loc="lower right")
+		plt.grid()
+		if local_solver == "momentum": optimizer = "SGD-M"
+		elif local_solver == "proximal": optimizer = "SGD w/ Proximal"
+		else: optimizer = "SGD"
+		if var_epochs: title = f"Local Solver: {optimizer}, Epochs ~ U(2, 5)"
+		else: title = f"Local Solver: {optimizer}, Epochs = 2"
+		plt.title(title)
+		# plt.savefig(f"{save_path}testAccuracy_{local_solver}_varEpochs_{var_epochs}.png")
+		plt.show()
+
+		print(f"---------------------------Local Solver: {local_solver.upper()}---------------------------")
+		print(f"{baseline_label}: {baseline_mean[-1]:.2f} ± {baseline_upper[-1] - baseline_mean[-1]:.2f}")
+		print(f"FedNova: {fednova_mean[-1]:.2f} ± {fednova_upper[-1] - fednova_mean[-1]:.2f}")
 
 
 if __name__ == "__main__":
-	pass
+	generate_plots(local_solver="vanilla")
+	generate_plots(local_solver="momentum")
+	generate_plots(local_solver="proximal")

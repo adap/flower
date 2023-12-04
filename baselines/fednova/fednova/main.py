@@ -51,7 +51,7 @@ def main(cfg: DictConfig) -> None:
 	if not os.path.exists(cfg.checkpoint_path):
 		os.makedirs(cfg.checkpoint_path)
 
-	trainloaders, testloader, data_ratios = load_datasets(cfg)
+	trainloaders, testloader, data_sizes = load_datasets(cfg)
 	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 	if cfg.mode == "test":
@@ -75,7 +75,7 @@ def main(cfg: DictConfig) -> None:
 	client_fn = client_function(num_epochs=cfg.num_epochs,
 								trainloaders=trainloaders,
 								testloader=testloader,
-								data_ratios=data_ratios,
+								data_sizes=data_sizes,
 								model=cfg.model,
 								exp_config=cfg)
 
@@ -140,11 +140,11 @@ def main(cfg: DictConfig) -> None:
 		test_accuracy = test_accuracy[1:]
 		round = round[1:]
 
-	file_name = f"{save_path}{cfg.exp_name}_{cfg.strategy}_varEpoch_{cfg.var_local_epochs}_seed_{cfg.seed}_vanilla_scheduling_false_no_decay.csv"
+	file_name = f"{save_path}{cfg.exp_name}_{cfg.strategy}_varEpoch_{cfg.var_local_epochs}_seed_{cfg.seed}_Dec3.csv"
 
 	# df = pd.DataFrame({"round": round, "train_loss": train_loss, "train_accuracy": train_accuracy,
 	# 				   "test_loss": test_loss, "test_accuracy": test_accuracy})
-	#
+
 	df = pd.DataFrame({"round": round, "test_loss": test_loss, "test_accuracy": test_accuracy})
 
 	df.to_csv(file_name, index=False)

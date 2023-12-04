@@ -55,8 +55,7 @@ class DataPartitioner(object):
 		labelList = np.array(data.targets)
 		min_size = 0
 		N = len(labelList)
-		# we set seed once in main.py
-		# np.random.seed(2020)
+		np.random.seed(2020)
 
 		net_dataidx_map = {}
 		while min_size < K:
@@ -83,13 +82,12 @@ class DataPartitioner(object):
 			unq, unq_cnt = np.unique(labelList[dataidx], return_counts=True)
 			tmp = {unq[i]: unq_cnt[i] for i in range(len(unq))}
 			net_cls_counts[net_i] = tmp
-		print('Data statistics: %s' % str(net_cls_counts))
+		# print('Data statistics: %s' % str(net_cls_counts))
 
 		local_sizes = []
 		for i in range(n_nets):
 			local_sizes.append(len(net_dataidx_map[i]))
 		local_sizes = np.array(local_sizes)
-		weights = local_sizes / np.sum(local_sizes)
-		print("Client Data ratios: ", weights)
+		print("Client Dataset sizes: ", local_sizes)
 
-		return idx_batch, weights
+		return idx_batch, local_sizes

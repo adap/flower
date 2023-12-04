@@ -76,7 +76,7 @@ class FedNovaClient(fl.client.NumPyClient):  # pylint: disable=too-many-instance
 		return float(loss), len(self.trainLoader), metrics
 
 
-def gen_clients_fednova(num_epochs: int, trainloaders: List[DataLoader], testloader: DataLoader, data_ratios: List,
+def gen_clients_fednova(num_epochs: int, trainloaders: List[DataLoader], testloader: DataLoader, data_sizes: List,
 				model: DictConfig, exp_config: DictConfig) -> Callable[[str], FedNovaClient]:
 
 	def client_fn(cid: str) -> FedNovaClient:
@@ -89,7 +89,8 @@ def gen_clients_fednova(num_epochs: int, trainloaders: List[DataLoader], testloa
 		# Note: each client gets a different trainloader/valloader, so each client
 		# will train and evaluate on their own unique data
 		trainloader = trainloaders[int(cid)]
-		client_dataset_ratio = data_ratios[int(cid)]
+		client_dataset_size: int = data_sizes[int(cid)]
+		client_dataset_ratio: float = client_dataset_size / sum(data_sizes)
 
 		return FedNovaClient(
 			net,

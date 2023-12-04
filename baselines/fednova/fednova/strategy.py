@@ -50,8 +50,7 @@ class FedNova(FedAvg):
 
 		for client, res in results:
 			params = parameters_to_ndarrays(res.parameters)
-			# scale = res.metrics["weight"] * (tau_eff / res.metrics["local_norm"])
-			scale = res.metrics["weight"]
+			scale = res.metrics["weight"] * (tau_eff / res.metrics["local_norm"])
 			aggregate_parameters.append((params, scale))
 
 		agg_cum_gradient = aggregate(aggregate_parameters)
@@ -95,8 +94,6 @@ class FedNova(FedAvg):
 		else:
 			loss, metrics = eval_res
 			accuracy = metrics["accuracy"]
-
-			# print("----------- Round: {} Test Loss: {} Test Accuracy : {}--------------------".format(server_round, loss, accuracy))
 
 			if accuracy > self.best_test_acc:
 				self.best_test_acc = accuracy

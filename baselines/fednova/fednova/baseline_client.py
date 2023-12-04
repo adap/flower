@@ -17,7 +17,7 @@ class FedAvgClient(fl.client.NumPyClient):  # pylint: disable=too-many-instance-
 	"""Standard Flower client for CNN training."""
 
 	def __init__(self, net: torch.nn.Module, client_id: str, trainloader: DataLoader,
-				 valloader: DataLoader, device: torch.device, num_epochs: int, ratio: float, config: DictConfig):
+				 valloader: DataLoader, device: torch.device, num_epochs: int, data_size: int, config: DictConfig):
 
 		self.net = net
 		self.exp_config = config
@@ -28,7 +28,7 @@ class FedAvgClient(fl.client.NumPyClient):  # pylint: disable=too-many-instance-
 		self.client_id = client_id
 		self.device = device
 		self.num_epochs = num_epochs
-		self.data_ratio = ratio
+		self.num_data_samples = data_size
 
 	def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
 		"""Returns the parameters of the current net."""
@@ -61,11 +61,7 @@ class FedAvgClient(fl.client.NumPyClient):  # pylint: disable=too-many-instance-
 			  num_epochs,
 			  proximal_mu=self.exp_config.optimizer.mu)
 
-		# num_local_steps = len(self.trainLoader) * num_epochs
-		# scaling_factor = self.data_ratio * num_local_steps
-		scaling_factor = len(self.trainLoader) * num_epochs
-		# scaling_factor = 1
-		# scaling_factor = self.data_ratio
+		scaling_factor = self.num_data_samples
 
 		return self.get_parameters({}), int(scaling_factor), {}
 
@@ -84,7 +80,7 @@ class FedAvgClient(fl.client.NumPyClient):  # pylint: disable=too-many-instance-
 		return float(loss), len(self.trainLoader), metrics
 
 
-def gen_clients_fedavg(num_epochs: int, trainloaders: List[DataLoader], testloader: DataLoader, data_ratios: List,
+def gen_clients_fedavg(num_epochs: int, trainloaders: List[DataLoader], testloader: DataLoader, data_sizes: List,
 				model: DictConfig, exp_config: DictConfig) -> Callable[[str], FedAvgClient]:
 
 	def client_fn(cid: str) -> FedAvgClient:
@@ -97,7 +93,7 @@ def gen_clients_fedavg(num_epochs: int, trainloaders: List[DataLoader], testload
 		# Note: each client gets a different trainloader/valloader, so each client
 		# will train and evaluate on their own unique data
 		trainloader = trainloaders[int(cid)]
-		client_dataset_ratio = data_ratios[int(cid)]
+		client_dataset_sizes = data_sizes[int(cid)]
 
 		return FedAvgClient(
 			net,
@@ -106,7 +102,7 @@ def gen_clients_fedavg(num_epochs: int, trainloaders: List[DataLoader], testload
 			testloader,
 			device,
 			num_epochs,
-			client_dataset_ratio,
+			client_dataset_sizes,
 			exp_config
 		)
 
