@@ -1,8 +1,20 @@
 # Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 
-FROM ubuntu:22.04 as base
+ARG UBUNTU_VERSION=22.04
+FROM ubuntu:$UBUNTU_VERSION as base
 
 ENV DEBIAN_FRONTEND noninteractive
+# Send stdout and stderr stream directly to the terminal. Ensures that no
+# output is retained in a buffer if the application crashes.
+ENV PYTHONUNBUFFERED 1
+# Typically, bytecode is created on the first invocation to speed up following invocation.
+# However, in Docker we only make a single invocation (when we start the container).
+# Therefore, we can disable bytecode writing.
+ENV PYTHONDONTWRITEBYTECODE 1
+# Ensure that python encoding is always UTF-8.
+ENV PYTHONIOENCODING UTF-8
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
 
 # Install system dependencies
 RUN apt-get update \
@@ -17,6 +29,8 @@ RUN apt-get update \
 ARG PYTHON_VERSION
 ENV PYENV_ROOT /root/.pyenv
 ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
+# https://github.com/hadolint/hadolint/wiki/DL4006
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
 RUN pyenv install ${PYTHON_VERSION} \
     && pyenv global ${PYTHON_VERSION} \
@@ -24,25 +38,19 @@ RUN pyenv install ${PYTHON_VERSION} \
 
 # Install specific version of pip
 ARG PIP_VERSION
-RUN python -m pip install pip==$PIP_VERSION
+RUN python -m pip install --no-cache-dir pip==$PIP_VERSION
 
 # Install specific version of setuptools
 ARG SETUPTOOLS_VERSION
-RUN python -m pip install setuptools==$SETUPTOOLS_VERSION
-
-# Install poetry as all examples use it and therefore it should be available for custom images
-ARG POETRY_VERSION
-RUN curl -sSL https://install.python-poetry.org | python3 - --version ${POETRY_VERSION}
-ENV PATH /root/.local/bin:$PATH
-RUN poetry config virtualenvs.create false
+RUN python -m pip install --no-cache-dir setuptools==$SETUPTOOLS_VERSION
 
 # Server image
 FROM base as server
 
 WORKDIR /app
 ARG FLWR_VERSION
-RUN python -m pip install -U flwr[rest]==${FLWR_VERSION}
-ENTRYPOINT ["python", "-c", "from flwr.server import run_server\nrun_server()"]
+RUN python -m pip install -U --no-cache-dir flwr[rest]==${FLWR_VERSION}
+ENTRYPOINT ["python", "-c", "from flwr.server import run_server; run_server()"]
 
 # Test if Flower can be successfully installed and imported
 FROM server as test
