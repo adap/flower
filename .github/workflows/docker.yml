@@ -22,10 +22,10 @@ on:
     push
 
 jobs:
-    buildx:
-        name: Test
+    build-push-image:
+        name: Build server images and push them to dockerhub
         runs-on: ubuntu-22.04
-        timeout-minutes: 60
+        timeout-minutes: 120
         steps:
             - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
@@ -58,10 +58,11 @@ jobs:
                     SETUPTOOLS_VERSION=${{ steps.bootstrap.outputs.setuptools-version }}
                     FLWR_VERSION=1.6.0
                     UBUNTU_VERSION=22.04
-                tags: flwr/server:1.6.0-py38-ubuntu22.04
+                tags: flwr/server:1.6.0-py${{ steps.bootstrap.outputs.python-version }}-ubuntu22.04
                 push: false
 
-            - run: |
+            - name: Summary
+              run: |
                 cat <<EOT >>${GITHUB_STEP_SUMMARY}
                 Server image: ${{steps.build.outputs.imageid}}
                 EOT
