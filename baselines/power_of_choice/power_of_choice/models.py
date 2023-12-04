@@ -18,7 +18,7 @@ def create_MLP_model():
         [
             tf.keras.layers.Flatten(input_shape=(28, 28)),
             tf.keras.layers.Dense(64, activation="relu"),
-            tf.keras.layers.Dropout(0.2),
+            tf.keras.layers.Dropout(0.5),
             tf.keras.layers.Dense(30, activation="relu"),
             tf.keras.layers.Dense(10, activation="softmax"),
         ]
@@ -49,6 +49,7 @@ def create_CNN_model():
             tf.keras.layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2)),
             tf.keras.layers.Flatten(),
             tf.keras.layers.Dense(120, activation="relu"),
+            tf.keras.layers.Dense(100, activation="relu"),
             tf.keras.layers.Dense(84, activation="relu"),
             tf.keras.layers.Dense(50, activation="relu"),
             tf.keras.layers.Dense(10, activation="softmax"),

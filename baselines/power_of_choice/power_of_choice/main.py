@@ -26,6 +26,7 @@ from omegaconf import DictConfig, OmegaConf
 from power_of_choice.client import gen_client_fn
 from power_of_choice.models import create_CNN_model, create_MLP_model
 from power_of_choice.server import PowerOfChoiceCommAndCompVariant, PowerOfChoiceServer
+from power_of_choice.strategy import Rand
 from power_of_choice.utils import save_results_as_pickle
 
 enable_tf_gpu_growth()
@@ -91,6 +92,7 @@ def main(cfg: DictConfig) -> None:
                 "learning_rate": learning_rate,
             }
 
+            # override hyperparameters with values from configuration, if present
             config["batch_size"] = cfg.batch_size
             config["local_epochs"] = cfg.local_epochs
             config["fraction_samples"] = cfg.fraction_samples
@@ -180,7 +182,7 @@ def main(cfg: DictConfig) -> None:
         server_model = create_MLP_model()
 
     server_model.compile(
-        "adam", "sparse_categorical_crossentropy", metrics=["accuracy"]
+        "sgd", "sparse_categorical_crossentropy", metrics=["accuracy"]
     )
 
     is_cpow = False
@@ -213,16 +215,13 @@ def main(cfg: DictConfig) -> None:
             fit_metrics_aggregation_fn=get_fit_metrics_aggregation_fn()
         )
     elif is_rand:
-        # Instantiate FedAvg strategy
-        strategy = FedAvg(
-            fraction_fit=round(cfg.strategy.ck / cfg.num_clients, 2),
-            fraction_evaluate=round(cfg.strategy.ck / cfg.num_clients, 2),
-            min_fit_clients=round(cfg.strategy.ck / cfg.num_clients),
-            min_evaluate_clients=round(cfg.strategy.ck / cfg.num_clients),
+        # Instantiate rand strategy
+        strategy = Rand(
             on_fit_config_fn=get_on_fit_config(),
             evaluate_fn=get_evaluate_fn(server_model),
             on_evaluate_config_fn=get_on_evaluate_config(is_cpow, cfg.b),
             fit_metrics_aggregation_fn=get_fit_metrics_aggregation_fn(),
+            ck=cfg.strategy.ck
         )
     else:
         # Instantiate strategy with base config

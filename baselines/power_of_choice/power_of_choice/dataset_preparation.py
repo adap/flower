@@ -544,6 +544,13 @@ def download_and_preprocess(cfg: DictConfig) -> None:
     x_train = x_train.astype("float32") / 255.0
     x_test = x_test.astype("float32") / 255.0
 
+    if dataset in ["fmnist"]:
+        # For FMNIST we want to apply a specific normalization
+        mean = 0.1307
+        std = 0.3081
+        x_train = (x_train - mean) / std
+        x_test = (x_test - mean) / std
+
     num_partitions = total_clients
     concentration = cfg.alpha
     seed = cfg.seed if cfg.seed is not None else 42

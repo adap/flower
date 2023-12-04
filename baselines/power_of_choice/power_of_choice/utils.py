@@ -237,7 +237,7 @@ def plot_metrics_from_histories(
         rounds_centralized, accuracy_values_centralized = zip(*accuracy_centralized)
 
         # Apply moving average smoothing
-        window_size = 5
+        window_size = 10
         smoothed_loss = []
         smoothed_accuracy = []
 
