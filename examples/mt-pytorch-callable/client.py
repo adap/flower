@@ -154,6 +154,9 @@ def get_middleware(name):
 
         if len(round) > 0:
             results_to_log["round"] = round
+            step = round
+        else:
+            step = None
 
         client_message = client_message_from_proto(
             bwd.task_res.task.legacy_client_message
@@ -174,7 +177,7 @@ def get_middleware(name):
             if "accuracy" in client_message.fit_res.metrics:
                 results_to_log["accuracy"] = client_message.fit_res.metrics["accuracy"]
 
-        wandb.log(results_to_log)
+        wandb.log(results_to_log, step=step)
 
         return bwd
 
