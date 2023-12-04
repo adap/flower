@@ -71,7 +71,7 @@ When the flower callable runs, the middleware layers are executed in the order t
 
 1. ``example_middleware1`` (outermost layer)
 2. ``example_middleware2`` (next layer)
-3. Message handler (core app functionality)
+3. Message handler (core function that handles `TaskIns` and returns `TaskRes`)
 4. ``example_middleware2`` (on the way back)
 5. ``example_middleware1`` (outermost layer on the way back)
 
