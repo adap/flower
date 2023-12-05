@@ -23,7 +23,7 @@ from dataset import (
     transform_dataset_to_dmatrix,
     resplit,
 )
-from utils import client_args_parser, BST_PARAMS
+from utils import client_args_parser, BST_PARAMS, NUM_LOCAL_ROUND
 
 
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -76,8 +76,13 @@ valid_dmatrix = transform_dataset_to_dmatrix(valid_data)
 
 
 # Hyper-parameters for xgboost training
-num_local_round = 1
+num_local_round = NUM_LOCAL_ROUND
 params = BST_PARAMS
+
+# Setup learning rate
+if args.train_method == "bagging" and args.scaled_lr:
+    new_lr = params["eta"] / num_partitions
+    params.update({"eta": new_lr})
 
 
 # Define Flower client

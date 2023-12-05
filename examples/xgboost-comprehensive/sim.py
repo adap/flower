@@ -25,6 +25,7 @@ from dataset import (
 )
 from utils import (
     sim_args_parser,
+    NUM_LOCAL_ROUND,
     BST_PARAMS,
     eval_config,
     fit_config,
@@ -35,11 +36,6 @@ from utils import (
 
 
 warnings.filterwarnings("ignore", category=UserWarning)
-
-
-# Hyper-parameters for xgboost training
-num_local_round = 1
-params = BST_PARAMS
 
 
 def get_client_fn(fds, args):
@@ -72,6 +68,13 @@ def get_client_fn(fds, args):
         # Reformat data to DMatrix for xgboost
         train_dmatrix = transform_dataset_to_dmatrix(train_data)
         valid_dmatrix = transform_dataset_to_dmatrix(valid_data)
+
+        # Setup learning rate
+        params = BST_PARAMS
+        if args.train_method == "bagging" and args.scaled_lr:
+            new_lr = params["eta"] / args.pool_size
+            params.update({"eta": new_lr})
+        num_local_round = NUM_LOCAL_ROUND
 
         # Create and return client
         return XgbClient(
