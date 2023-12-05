@@ -62,6 +62,7 @@ class DirichletPartitioner(Partitioner):
         self._self_balancing = self_balancing
         self._shuffle = shuffle
         self._seed = seed
+        self._rng = np.random.default_rng(seed=self._seed)  # NumPy random generator
 
         # Utility attributes
         # _num_unique_classes is determined during the first call to load_partition
@@ -132,7 +133,7 @@ class DirichletPartitioner(Partitioner):
                 indices_representing_class_k = np.nonzero(targets == k)[0]
                 # Determine division (the fractions) of the data representing class k
                 # among the partitions
-                class_k_division_proportions = np.random.dirichlet(self._alpha)
+                class_k_division_proportions = self._rng.dirichlet(self._alpha)
                 nid_to_proportion_of_k_samples = {}
                 for nid in range(self._num_partitions):
                     nid_to_proportion_of_k_samples[nid] = class_k_division_proportions[
@@ -152,7 +153,7 @@ class DirichletPartitioner(Partitioner):
                             nid_to_proportion_of_k_samples[nid] = 0
 
                     # Normalize the proportions such that they sum up to 1
-                    sum_proportions = nid_to_proportion_of_k_samples.values().sum()
+                    sum_proportions = sum(nid_to_proportion_of_k_samples.values())
                     for nid, proportion in nid_to_proportion_of_k_samples.items():
                         nid_to_proportion_of_k_samples[nid] = (
                             proportion / sum_proportions
@@ -189,7 +190,8 @@ class DirichletPartitioner(Partitioner):
         # Shuffle the indices not to have the datasets with targets in sequences like
         # [00000, 11111, ...])
         for node_id, indices in node_id_to_indices.items():
-            node_id_to_indices[node_id] = node_id_to_indices[node_id]
+            # In place shuffling
+            self._rng.shuffle(indices)
         self._node_id_to_indices = node_id_to_indices
         self._node_id_to_indices_determined = True
 
@@ -205,15 +207,16 @@ if __name__ == "__main__":
         "id": [f"{i % n_unique_natural_ids}" for i in range(num_rows)],
         "labels": [i % 2 for i in range(num_rows)],
     }
+    num_partitions = 10
     dataset = Dataset.from_dict(data)
-    print(dataset)
     d = DirichletPartitioner(
-        num_partitions=10,
+        num_partitions=num_partitions,
         alpha=0.5,
         partition_by="id",
         min_partition_size=0,
         self_balancing=False,
     )
     d.dataset = dataset
-    p = d.load_partition(0)
-    print(p[:])
+    p_list = [d.load_partition(i) for i in range(num_partitions)]
+    print(p_list[0][:])
+    print([p.num_rows for p in p_list])
