@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Dirichlet partitioner class that works with Hugging Face Datasets."""
-from typing import List, Optional, Union, Dict
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 from common.typing import NDArrayFloat, NDArrayInt
@@ -23,8 +23,10 @@ import datasets
 
 
 class DirichletPartitioner(Partitioner):
-    """Partitioner based on Dirichlet distribution with balancing (not mentioned in
-    paper).
+    """Partitioner based on Dirichlet distribution.
+
+    The balancing (not mentioned in paper but implemented in the code) is controlled by
+    `self_balancing` parameter.
 
     Implementation based on Bayesian Nonparametric Federated Learning of Neural Networks
     https://arxiv.org/abs/1905.12022
@@ -47,16 +49,14 @@ class DirichletPartitioner(Partitioner):
         self_balancing: bool = True,
         shuffle: bool = True,
         seed: bool = 42,
-    ):
+    ) -> None:
         super().__init__()
         # Attributes based on the constructor
-        # todo: some check of the num_partitions
         self._num_partitions = num_partitions
         self._alpha: NDArrayFloat = self._initialize_alpha(alpha)
         self._partition_by = partition_by
         if min_partition_size is None:
-            # todo: think if that is reasonable (other ppl say # of unique classes)
-            # todo: Or maybe 1 is better?
+            # Note that zero might make problems with the training
             min_partition_size = 0
         self._min_partition_size: int = min_partition_size
         self._self_balancing = self_balancing
@@ -87,6 +87,7 @@ class DirichletPartitioner(Partitioner):
         # The partitioning is done lazily - only when the first partition is
         # requested. Only the first call creates the indices assignments for all the
         # partition indices.
+        self._check_num_partitions_correctness_if_needed()
         self._determine_node_id_to_indices_if_needed()
         return self.dataset.select(self._node_id_to_indices[node_id])
 
@@ -194,6 +195,14 @@ class DirichletPartitioner(Partitioner):
             self._rng.shuffle(indices)
         self._node_id_to_indices = node_id_to_indices
         self._node_id_to_indices_determined = True
+
+    def _check_num_partitions_correctness_if_needed(self) -> None:
+        if not self._node_id_to_indices_determined:
+            if self._num_partitions > self.dataset.num_rows:
+                raise ValueError(
+                    "The number of partitions needs to be smaller that the "
+                    "number of samples in the dataset. "
+                )
 
 
 if __name__ == "__main__":
