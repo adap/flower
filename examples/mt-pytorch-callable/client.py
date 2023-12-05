@@ -1,20 +1,18 @@
-import datetime
 import time
 import warnings
 from collections import OrderedDict
 
-import flwr as fl
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
 import wandb
-from flwr.common.serde import client_message_from_proto, server_message_from_proto
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
 
+import flwr as fl
+from flwr.common.serde import client_message_from_proto, server_message_from_proto
 
 # #############################################################################
 # 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
@@ -114,15 +112,14 @@ def client_fn(cid: str):
 
 
 def get_middleware(name):
-    now = datetime.datetime.now().strftime("%b%d_%H_%M")
-    wandb_group = f"exp_{now}"
-
     def wandb_middleware(fwd, app):
         start_time = None
+
         project_name = name
-        group_name = wandb_group
+        group_name = f"Workload ID: {fwd.task_ins.workload_id}"
+        run_name = f"Client ID: {fwd.task_ins.task.consumer.node_id}"
+
         round = ""
-        client_id = fwd.task_ins.task.consumer.node_id
 
         server_message = server_message_from_proto(
             fwd.task_ins.task.legacy_server_message
@@ -136,7 +133,9 @@ def get_middleware(name):
                 project_name = str(config["project"])
             if "group" in config:
                 group_name = str(config["group"])
+
             start_time = time.time()
+
         if server_message.evaluate_ins:
             config = server_message.evaluate_ins.config
             if "round" in config:
@@ -146,17 +145,12 @@ def get_middleware(name):
             if "group" in config:
                 group_name = str(config["group"])
 
-        wandb.init(project=project_name, group=group_name, name=f"client-{client_id}")
+        wandb.init(project=project_name, group=group_name, name=run_name)
 
         bwd = app(fwd)
 
         results_to_log = {}
-
-        if len(round) > 0:
-            results_to_log["round"] = round
-            step = round
-        else:
-            step = None
+        step = round if len(round) > 0 else None
 
         client_message = client_message_from_proto(
             bwd.task_res.task.legacy_client_message
