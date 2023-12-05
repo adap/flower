@@ -25,8 +25,8 @@ jobs:
     with:
       flwr-version: 1.6.0
     secrets:
-      docker-username: ${{ secrets.DOCKERHUB_USERNAME }}
-      docker-token: ${{ secrets.DOCKERHUB_TOKEN }}
+      dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
 #           run: |
 #               cat <<EOT >>${GITHUB_STEP_SUMMARY}
 #               Server image: ${{steps.build.outputs.imageid}}
