@@ -1,0 +1,33 @@
+on:
+  # workflow_dispatch:
+  #     inputs:
+  #         python-version:
+  #             description: "Python version"
+  #             type: string
+  #             required: true
+  #         pip-version:
+  #             description: "Pip version"
+  #             type: string
+  #             required: true
+  #         setuptools-version:
+  #             description: "Setuptools version"
+  #             type: string
+  #             required: true
+  #         flwr-version:
+  #             description: "Flower version"
+  #             type: string
+  #             required: true
+  push
+
+jobs:
+  build-server-images:
+    uses: ./.github/workflows/_docker-server.yml
+    with:
+      flwr-version: 1.6.0
+    secrets:
+      docker-username: ${{ secrets.DOCKERHUB_USERNAME }}
+      docker-token: ${{ secrets.DOCKERHUB_TOKEN }}
+#           run: |
+#               cat <<EOT >>${GITHUB_STEP_SUMMARY}
+#               Server image: ${{steps.build.outputs.imageid}}
+#               EOT
