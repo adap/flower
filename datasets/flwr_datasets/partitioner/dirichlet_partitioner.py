@@ -13,26 +13,30 @@
 # limitations under the License.
 # ==============================================================================
 """Dirichlet partitioner class that works with Hugging Face Datasets."""
-from typing import List, Union, Optional
+from typing import List, Optional, Union
 
-import datasets
 import numpy as np
-
 from common.typing import NDArrayFloat
 from partitioner import Partitioner
 
+import datasets
+
 
 class DirichletPartitioner(Partitioner):
-    """
-    Partitioner based on Dirichlet distribution with balancing (not mentioned in paper).
+    """Partitioner based on Dirichlet distribution with balancing (not mentioned in
+    paper).
 
     Implementation based on todo:paste-the-url
     """
 
-    def __init__(self, num_partitions: int,
-                 alpha: Union[float, List[float], NDArrayFloat],
-                 partition_by: str, min_require_size: Optional[int] = None,
-                 self_balancing: bool = True):
+    def __init__(
+        self,
+        num_partitions: int,
+        alpha: Union[float, List[float], NDArrayFloat],
+        partition_by: str,
+        min_require_size: Optional[int] = None,
+        self_balancing: bool = True,
+    ):
         super().__init__()
         self._num_partitions = num_partitions
         self._partition_by = partition_by
@@ -42,7 +46,8 @@ class DirichletPartitioner(Partitioner):
 
         self._num_unique_classes: Optional[int] = None
         self._alpha: Optional[
-            NDArrayFloat] = alpha  # was Non before, check what is right
+            NDArrayFloat
+        ] = alpha  # was Non before, check what is right
         # todo: think if that is reasonable (other ppl say # of unique classes)
         if min_require_size is None:
             min_require_size = 0
@@ -88,21 +93,26 @@ class DirichletPartitioner(Partitioner):
                 for k in self._unique_classes:
                     # k is the value of class
                     indices_representing_class_k = np.where(targets == k)[0]
-                    class_k_division_proportion = np.random.dirichlet(self._alpha, )
+                    class_k_division_proportion = np.random.dirichlet(
+                        self._alpha,
+                    )
                     # each node gets assigned a proportion of examples that will
                     # get assigned based on the dirichlet probability
                     nid_to_proportion_of_k_samples = {}
                     for nid in range(self._num_partitions):
-                        nid_to_proportion_of_k_samples[nid] = \
-                        class_k_division_proportion[nid]
+                        nid_to_proportion_of_k_samples[
+                            nid
+                        ] = class_k_division_proportion[nid]
 
                     # Balancing (not mentioned in the paper)
                     if self._self_balancing:
                         for nid, proportion in nid_to_proportion_of_k_samples.items():
                             # if from the previous classes you got too much samples
                             # don't add any further
-                            if len(nid_to_indices[
-                                       nid]) > self._avg_num_of_samples_per_node:
+                            if (
+                                len(nid_to_indices[nid])
+                                > self._avg_num_of_samples_per_node
+                            ):
                                 nid_to_proportion_of_k_samples[nid] = 0
 
                         # Renormalize such that p sums to 1
@@ -111,18 +121,21 @@ class DirichletPartitioner(Partitioner):
                         sum_proportions = nid_to_proportion_of_k_samples.values().sum()
 
                         for nid, proportion in nid_to_proportion_of_k_samples.items():
-                            nid_to_proportion_of_k_samples[
-                                nid] = proportion / sum_proportions
+                            nid_to_proportion_of_k_samples[nid] = (
+                                proportion / sum_proportions
+                            )
 
                     # Determine the split indices
                     # Drop the last one (it adds up to the total number of samples (
                     # todo: check if it does)
-                    indices_on_which_split = (np.cumsum(
-                        list(nid_to_proportion_of_k_samples.values())) * len(
-                        indices_representing_class_k)).astype(int)[:-1]
+                    indices_on_which_split = (
+                        np.cumsum(list(nid_to_proportion_of_k_samples.values()))
+                        * len(indices_representing_class_k)
+                    ).astype(int)[:-1]
 
-                    split_indices = np.split(indices_representing_class_k,
-                                             indices_on_which_split)
+                    split_indices = np.split(
+                        indices_representing_class_k, indices_on_which_split
+                    )
 
                     # Append to the exisiting indices assignements
                     for nid in nid_to_indices:
@@ -133,7 +146,8 @@ class DirichletPartitioner(Partitioner):
                 # If not repeat the process
                 # Otherwise break the while infinite loop
                 min_sample_size_on_client = min(
-                    len(indices) for indices in nid_to_indices.values())
+                    len(indices) for indices in nid_to_indices.values()
+                )
                 if min_sample_size_on_client >= self._min_require_size:
                     break
 
@@ -155,7 +169,8 @@ class DirichletPartitioner(Partitioner):
 
         if isinstance(self._alpha, float):
             self._alpha = np.array([self._alpha], dtype=float).repeat(
-                self._num_partitions)
+                self._num_partitions
+            )
         elif isinstance(self._alpha, List):
             # todo check the correct shape
             self.alpha = np.asarray(self._alpha)
@@ -168,7 +183,8 @@ class DirichletPartitioner(Partitioner):
 
 if __name__ == "__main__":
     print("hello")
-    from datasets import load_dataset, Dataset
+    from datasets import Dataset
+
     num_rows = 100
     n_unique_natural_ids = 3
     data = {
@@ -178,8 +194,13 @@ if __name__ == "__main__":
     }
     dataset = Dataset.from_dict(data)
     print(dataset)
-    d = DirichletPartitioner(num_partitions=10, alpha=0.5, partition_by="id", min_require_size=0, self_balancing=False)
+    d = DirichletPartitioner(
+        num_partitions=10,
+        alpha=0.5,
+        partition_by="id",
+        min_require_size=0,
+        self_balancing=False,
+    )
     d.dataset = dataset
     p = d.load_partition(0)
     print(p[:])
-
