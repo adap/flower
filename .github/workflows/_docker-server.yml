@@ -1,4 +1,4 @@
-name: Docker server image build
+name: Reusable docker server image build workflow
 
 on:
   workflow_call:
@@ -8,21 +8,19 @@ on:
         required: true
         type: string
       python-version:
-        description: "Version of Python e.g. (3.11.0 or 3.11)."
-        default: "3.11"
+        description: "Version of Python e.g. (3.11.7 or 3.11). Defaults to 3.11."
         required: false
         type: string
       pip-version:
-        description: "Version of pip."
+        description: "Version of pip. Defaults to the version defined in actions/bootstrap."
         required: false
         type: string
       setuptools-version:
-        description: "Version of setuptools."
+        description: "Version of setuptools. Defaults to the version defined in actions/bootstrap."
         required: false
         type: string
       ubuntu-version:
-        description: "Version of Ubuntu."
-        default: "22.04"
+        description: "Version of Ubuntu. Defaults to 22.04."
         required: false
         type: string
     secrets:
@@ -30,9 +28,18 @@ on:
         required: true
       dockerhub-token:
         required: true
+    outputs:
+      metadata:
+        description: "Metadata of the docker image."
+        value: ${{ jobs.build-manifest.outputs.metadata }}
 
 env:
   REGISTRY_IMAGE: flwr/server
+  DEFAULT_PYTHON: 3.11
+  DEFAULT_UBUNTU: 22.04
+
+permissions:
+  contents: read
 
 # based on https://docs.docker.com/build/ci/github-actions/multi-platform/#distribute-build-across-multiple-runners
 jobs:
@@ -43,12 +50,14 @@ jobs:
     outputs:
       pip-version: ${{ steps.versions.outputs.pip-version }}
       setuptools-version: ${{ steps.versions.outputs.setuptools-version }}
+      python-version: ${{ steps.versions.outputs.python-version }}
+      ubuntu-version: ${{ steps.versions.outputs.ubuntu-version }}
 
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - uses: ./.github/actions/bootstrap
-        if: inputs.pip-version == '' && inputs.setuptools-version == ''
+        if: ${{ !(inputs.pip-version != '' && inputs.setuptools-version != '') }}
         id: bootstrap
 
       - id: versions
@@ -65,13 +74,25 @@ jobs:
               echo "setuptools-version=${{ inputs.setuptools-version }}" >> "$GITHUB_OUTPUT"
           fi
 
+          if [[ "${{ inputs.python-version }}" = "" ]]; then
+              echo "python-version=${{  env.DEFAULT_PYTHON }}" >> "$GITHUB_OUTPUT"
+          else
+              echo "python-version=${{ inputs.python-version }}" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [[ "${{ inputs.ubuntu-version }}" = "" ]]; then
+              echo "ubuntu-version=${{  env.DEFAULT_UBUNTU  }}" >> "$GITHUB_OUTPUT"
+          else
+              echo "ubuntu-version=${{ inputs.ubuntu-version }}" >> "$GITHUB_OUTPUT"
+          fi
+
   build:
     name: Build server image
     runs-on: ubuntu-22.04
-    timeout-minutes: 120
+    timeout-minutes: 60
     needs: parameters
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         platform: [
             # build-push action and qemu use different platform names
@@ -110,11 +131,11 @@ jobs:
           platforms: ${{ matrix.platform.docker }}
           context: src/docker/server
           build-args: |
-            PYTHON_VERSION=${{ inputs.python-version }}
+            PYTHON_VERSION=${{ needs.parameters.outputs.python-version }}
             PIP_VERSION=${{ needs.parameters.outputs.pip-version }}
             SETUPTOOLS_VERSION=${{ needs.parameters.outputs.setuptools-version }}
             FLWR_VERSION=${{ inputs.flwr-version }}
-            UBUNTU_VERSION=${{ inputs.ubuntu-version }}
+            UBUNTU_VERSION=${{ needs.parameters.outputs.ubuntu-version }}
           outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
 
       - name: Export digest
@@ -135,7 +156,9 @@ jobs:
     name: Build and push docker manifest for all platforms
     runs-on: ubuntu-22.04
     timeout-minutes: 10
-    needs: build
+    needs: [parameters, build]
+    outputs:
+      metadata: ${{ steps.meta.outputs.json }}
     steps:
       - name: Download digests
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
@@ -149,7 +172,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY_IMAGE }}
           tags: |
-            ${{ inputs.flwr-version }}-py${{ inputs.python-version }}-ubuntu${{ inputs.ubuntu-version }}
+            ${{ inputs.flwr-version }}-py${{ needs.parameters.outputs.python-version }}-ubuntu${{ needs.parameters.outputs.ubuntu-version }}
             ${{ inputs.flwr-version }}
 
       - name: Set up Docker Buildx
