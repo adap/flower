@@ -13,10 +13,10 @@
 # limitations under the License.
 # ==============================================================================
 """Dirichlet partitioner class that works with Hugging Face Datasets."""
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 
 import numpy as np
-from common.typing import NDArrayFloat
+from common.typing import NDArrayFloat, NDArrayInt
 from partitioner import Partitioner
 
 import datasets
@@ -26,7 +26,16 @@ class DirichletPartitioner(Partitioner):
     """Partitioner based on Dirichlet distribution with balancing (not mentioned in
     paper).
 
-    Implementation based on todo:paste-the-url
+    Implementation based on Bayesian Nonparametric Federated Learning of Neural Networks
+    https://arxiv.org/abs/1905.12022
+
+    Parameters
+    ----------
+    num_partitions
+    alpha
+    partition_by
+    min_partition_size
+    self_balancing
     """
 
     def __init__(
@@ -34,26 +43,32 @@ class DirichletPartitioner(Partitioner):
         num_partitions: int,
         alpha: Union[float, List[float], NDArrayFloat],
         partition_by: str,
-        min_require_size: Optional[int] = None,
+        min_partition_size: Optional[int] = None,
         self_balancing: bool = True,
+        shuffle: bool = True,
+        seed: bool = 42,
     ):
         super().__init__()
-        self._num_partitions = num_partitions
-        self._partition_by = partition_by
-
-        self._dataset_partioned = False
-        self._self_balancing = self_balancing
-
-        self._num_unique_classes: Optional[int] = None
-        self._alpha: Optional[
-            NDArrayFloat
-        ] = alpha  # was Non before, check what is right
-        # todo: think if that is reasonable (other ppl say # of unique classes)
-        if min_require_size is None:
-            min_require_size = 0
-        self._min_require_size: int = min_require_size
-
+        # Attributes based on the constructor
         # todo: some check of the num_partitions
+        self._num_partitions = num_partitions
+        self._alpha: NDArrayFloat = self._initialize_alpha(alpha)
+        self._partition_by = partition_by
+        if min_partition_size is None:
+            # todo: think if that is reasonable (other ppl say # of unique classes)
+            # todo: Or maybe 1 is better?
+            min_partition_size = 0
+        self._min_partition_size: int = min_partition_size
+        self._self_balancing = self_balancing
+        self._shuffle = shuffle
+        self._seed = seed
+
+        # Utility attributes
+        # _num_unique_classes is determined during the first call to load_partition
+        self._num_unique_classes: Optional[int] = None
+        # _node_id_to_indices_determined is True after the first call to load_partition
+        self._node_id_to_indices: Dict[Union[str, int], NDArrayInt] = {}
+        self._node_id_to_indices_determined = False
 
     def load_partition(self, node_id: int) -> datasets.Dataset:
         """Load a partition based on the partition index.
@@ -66,119 +81,117 @@ class DirichletPartitioner(Partitioner):
         Returns
         -------
         dataset_partition : Dataset
-            single dataset partition
+            single partition of a dataset
         """
-        # If not divided yet, you need to divide the samples
-        if not self._dataset_partioned:
-            # Determine the number of unique classes
-            self._determine_basic_info()
+        # The partitioning is done lazily - only when the first partition is
+        # requested. Only the first call creates the indices assignments for all the
+        # partition indices.
+        self._determine_node_id_to_indices_if_needed()
+        return self.dataset.select(self._node_id_to_indices[node_id])
 
-            # This will be modified at the end of the loop to check if the condition
-            # of min_required_size is met. If not the next dirichlet sampling will be
-            # performed
-            min_partition_size_obtained_in_interation = 0
-
-            # maybe labels not targets?
-            targets = np.array(self.dataset[self._partition_by])
-            while True:
-                dataset_indices = list(range(len(self.dataset)))
-                # Prepare data structure to store nid_to_indices
-                nid_to_indices = {}
-                for nid in range(self._num_partitions):
-                    nid_to_indices[nid] = []
-
-                # Iterated over all unique labels
-
-                # Not names (int counterpart is needed)
-                for k in self._unique_classes:
-                    # k is the value of class
-                    indices_representing_class_k = np.where(targets == k)[0]
-                    class_k_division_proportion = np.random.dirichlet(
-                        self._alpha,
-                    )
-                    # each node gets assigned a proportion of examples that will
-                    # get assigned based on the dirichlet probability
-                    nid_to_proportion_of_k_samples = {}
-                    for nid in range(self._num_partitions):
-                        nid_to_proportion_of_k_samples[
-                            nid
-                        ] = class_k_division_proportion[nid]
-
-                    # Balancing (not mentioned in the paper)
-                    if self._self_balancing:
-                        for nid, proportion in nid_to_proportion_of_k_samples.items():
-                            # if from the previous classes you got too much samples
-                            # don't add any further
-                            if (
-                                len(nid_to_indices[nid])
-                                > self._avg_num_of_samples_per_node
-                            ):
-                                nid_to_proportion_of_k_samples[nid] = 0
-
-                        # Renormalize such that p sums to 1
-                        # (apply this opperation even if htere was no change; it
-                        # won't modify the values)
-                        sum_proportions = nid_to_proportion_of_k_samples.values().sum()
-
-                        for nid, proportion in nid_to_proportion_of_k_samples.items():
-                            nid_to_proportion_of_k_samples[nid] = (
-                                proportion / sum_proportions
-                            )
-
-                    # Determine the split indices
-                    # Drop the last one (it adds up to the total number of samples (
-                    # todo: check if it does)
-                    indices_on_which_split = (
-                        np.cumsum(list(nid_to_proportion_of_k_samples.values()))
-                        * len(indices_representing_class_k)
-                    ).astype(int)[:-1]
-
-                    split_indices = np.split(
-                        indices_representing_class_k, indices_on_which_split
-                    )
-
-                    # Append to the exisiting indices assignements
-                    for nid in nid_to_indices:
-                        nid_to_indices[nid].extend(split_indices[nid].tolist())
-
-                # Determine if the assignements meet hte min_samples_size_per_node
-                # requriement
-                # If not repeat the process
-                # Otherwise break the while infinite loop
-                min_sample_size_on_client = min(
-                    len(indices) for indices in nid_to_indices.values()
-                )
-                if min_sample_size_on_client >= self._min_require_size:
-                    break
-
-            # Shuffling the indices not to have the samples per class in sequences [
-            # 00000, 11111 etc)
-            self._node_id_to_indices = nid_to_indices
-            self._dataset_partioned = True
-            return self.dataset.select(self._node_id_to_indices[node_id])
-        else:
-            return self.dataset.select(self._node_id_to_indices[node_id])
-
-    def _determine_basic_info(self):
-        # Determine the basic information that are needed for dirichlet partiioner to
-        # start
-        self._unique_classes = self.dataset.unique(self._partition_by)
-
-        self._num_unique_classes = len(self._unique_classes)
-        self._avg_num_of_samples_per_node = self.dataset.num_rows / self._num_partitions
-
-        if isinstance(self._alpha, float):
-            self._alpha = np.array([self._alpha], dtype=float).repeat(
-                self._num_partitions
-            )
-        elif isinstance(self._alpha, List):
+    def _initialize_alpha(
+        self, alpha: Union[float, List[float], NDArrayFloat]
+    ) -> NDArrayFloat:
+        if isinstance(alpha, float):
+            alpha = np.array([alpha], dtype=float).repeat(self._num_partitions)
+        elif isinstance(alpha, List):
             # todo check the correct shape
-            self.alpha = np.asarray(self._alpha)
-        elif isinstance(self._alpha, NDArrayFloat):
+            self.alpha = np.asarray(alpha)
+        elif isinstance(alpha, NDArrayFloat):
             # todo also check the correct shape
             pass
         else:
             raise ValueError("The alpha type does not match the required one")
+        return alpha
+
+    def _determine_node_id_to_indices_if_needed(self):
+        """Create an assignment of indices to the partition indices."""
+        if not self._node_id_to_indices_determined:
+            pass
+
+        # Generate information needed for Dirichlet partitioning
+        self._unique_classes = self.dataset.unique(self._partition_by)
+        self._num_unique_classes = len(self._unique_classes)
+        # This is needed only if self._self_balancing is True (the default option)
+        self._avg_num_of_samples_per_node = self.dataset.num_rows / self._num_partitions
+
+        # Change targets list data type to numpy
+        targets = np.array(self.dataset[self._partition_by])
+
+        # Repeat the sampling procedure based on the Dirichlet distribution until the
+        # min_partition_size is reached.
+        while True:
+            # Prepare data structure to store indices assigned to node ids
+            node_id_to_indices = {}
+            for nid in range(self._num_partitions):
+                node_id_to_indices[nid] = []
+
+            # Iterated over all unique labels (they are not necessarily of type int)
+            for k in self._unique_classes:
+                # Access all the indices associated with class k
+                indices_representing_class_k = np.nonzero(targets == k)[0]
+                # Determine division (the fractions) of the data representing class k
+                # among the partitions
+                class_k_division_proportions = np.random.dirichlet(self._alpha)
+                nid_to_proportion_of_k_samples = {}
+                for nid in range(self._num_partitions):
+                    nid_to_proportion_of_k_samples[nid] = class_k_division_proportions[
+                        nid
+                    ]
+                # Balancing (not mentioned in the paper but implemented)
+                # Do not assign additional samples to the node if it already has more
+                # than the average numbers of samples per partition. Note that it might
+                # especially affect classes that are later in the order. This is the
+                # reason for more sparse division that the alpha might suggest.
+                if self._self_balancing:
+                    for nid, proportion in nid_to_proportion_of_k_samples.items():
+                        if (
+                            len(node_id_to_indices[nid])
+                            > self._avg_num_of_samples_per_node
+                        ):
+                            nid_to_proportion_of_k_samples[nid] = 0
+
+                    # Normalize the proportions such that they sum up to 1
+                    sum_proportions = nid_to_proportion_of_k_samples.values().sum()
+                    for nid, proportion in nid_to_proportion_of_k_samples.items():
+                        nid_to_proportion_of_k_samples[nid] = (
+                            proportion / sum_proportions
+                        )
+
+                # Determine the split indices
+                cumsum_division_fractions = np.cumsum(
+                    list(nid_to_proportion_of_k_samples.values())
+                )
+                cumsum_division_numbers = cumsum_division_fractions * len(
+                    indices_representing_class_k
+                )
+                # [:-1] is because the np.split requires the division indices but the
+                # last element represents the sum = total number of samples
+                indices_on_which_split = cumsum_division_numbers.astype(int)[:-1]
+
+                split_indices = np.split(
+                    indices_representing_class_k, indices_on_which_split
+                )
+
+                # Append new indices (coming from class k) to the existing indices
+                for nid in node_id_to_indices:
+                    node_id_to_indices[nid].extend(split_indices[nid].tolist())
+
+            # Determine if the indices assignment meets the min_partition_size
+            # If it does not mean the requirement repeat the Dirichlet sampling process
+            # Otherwise break the while loop
+            min_sample_size_on_client = min(
+                len(indices) for indices in node_id_to_indices.values()
+            )
+            if min_sample_size_on_client >= self._min_partition_size:
+                break
+
+        # Shuffle the indices not to have the datasets with targets in sequences like
+        # [00000, 11111, ...])
+        for node_id, indices in node_id_to_indices.items():
+            node_id_to_indices[node_id] = node_id_to_indices[node_id]
+        self._node_id_to_indices = node_id_to_indices
+        self._node_id_to_indices_determined = True
 
 
 if __name__ == "__main__":
@@ -198,7 +211,7 @@ if __name__ == "__main__":
         num_partitions=10,
         alpha=0.5,
         partition_by="id",
-        min_require_size=0,
+        min_partition_size=0,
         self_balancing=False,
     )
     d.dataset = dataset
