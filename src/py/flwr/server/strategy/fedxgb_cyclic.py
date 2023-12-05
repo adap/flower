@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Federated XGBoost bagging aggregation strategy."""
+"""Federated XGBoost cyclic aggregation strategy."""
 
 
 from logging import WARNING
@@ -27,7 +27,7 @@ from .fedavg import FedAvg
 
 
 class FedXgbCyclic(FedAvg):
-    """Configurable FedXgbBagging strategy implementation."""
+    """Configurable FedXgbCyclic strategy implementation."""
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
     def __init__(
