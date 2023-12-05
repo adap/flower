@@ -13,7 +13,6 @@
 # limitations under the License.
 # ==============================================================================
 """Node state."""
-
 from typing import Any, Dict
 
 from flwr.client.workload_state import WorkloadState
@@ -34,10 +33,14 @@ class NodeState:
 
     def retrieve_workloadstate(self, workload_id: int) -> WorkloadState:
         """Get workload state given a workload_id."""
-        if workload_id not in self.workload_states:
-            # TODO: warn, register and return? or raise error ?
-            self.register_workloadstate(workload_id)
-        return self.workload_states[workload_id]
+        if workload_id in self.workload_states:
+            return self.workload_states[workload_id]
+
+        raise RuntimeError(
+            f"WorkloadState for workload_id={workload_id} doesn't exist."
+            " A workload must be registered before it can be retrieved or updated "
+            " by a client."
+        )
 
     def update_workloadstate(
         self, workload_id: int, workload_state: WorkloadState
