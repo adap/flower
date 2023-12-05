@@ -25,20 +25,16 @@ jobs:
     - name: Get artifacts and publish
       env:
         GITHUB_REF: ${{ github.ref }}
-        PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
       run: |
-        TAG_NAME=$(echo "${GITHUB_REF#refs/tags/}" | cut -c2-)
+        TAG_NAME=$(echo "${GITHUB_REF_NAME}" | cut -c2-)
 
         wheel_name="flwr-${TAG_NAME}-py3-none-any.whl"        
         tar_name="flwr-${TAG_NAME}.tar.gz"
 
         wheel_url="https://artifact.flower.dev/py/release/v${TAG_NAME}/${wheel_name}"
         tar_url="https://artifact.flower.dev/py/release/v${TAG_NAME}/${tar_name}"
-        
-        echo $wheel_url
-        echo $tar_url
 
         curl $wheel_url --output $wheel_name
         curl $tar_url --output $tar_name
 
-        python -m poetry publish -u __token__ -p $PYPI_TOKEN
+        python -m poetry publish -u __token__ -p ${{ secrets.PYPI_TOKEN }}
