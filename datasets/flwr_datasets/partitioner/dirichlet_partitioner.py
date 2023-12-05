@@ -97,13 +97,24 @@ class DirichletPartitioner(Partitioner):
         if isinstance(alpha, float):
             alpha = np.array([alpha], dtype=float).repeat(self._num_partitions)
         elif isinstance(alpha, List):
-            # todo check the correct shape
+            if len(alpha) != self._num_partitions:
+                raise ValueError(
+                    "The alpha parameter needs to be of length of equal to the "
+                    "num_partitions."
+                )
             self.alpha = np.asarray(alpha)
         elif isinstance(alpha, NDArrayFloat):
-            # todo also check the correct shape
-            pass
+            if alpha.ndim == 1 and alpha.shape[0] != self._num_partitions:
+                raise ValueError("The alpha parameter needs to be of length of equal to"
+                                 "the num_partitions.")
+            elif alpha.ndim == 2:
+                alpha = alpha.flatten()
+                if alpha.shape[0] != self._num_partitions:
+                    raise ValueError(
+                        "The alpha parameter needs to be of length of equal to "
+                        "the num_partitions.")
         else:
-            raise ValueError("The alpha type does not match the required one")
+            raise ValueError("The given alpha format is not supported.")
         return alpha
 
     def _determine_node_id_to_indices_if_needed(self):
