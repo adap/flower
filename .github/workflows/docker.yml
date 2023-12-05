@@ -37,11 +37,11 @@ jobs:
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
 
-            # - name: Login to Docker Hub
-            #   uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
-            #   with:
-            #     username: ${{ secrets.DOCKERHUB_USERNAME }}
-            #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+            - name: Login to Docker Hub
+              uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+              with:
+                username: ${{ secrets.DOCKERHUB_USERNAME }}
+                password: ${{ secrets.DOCKERHUB_TOKEN }}
 
             - uses: ./.github/actions/bootstrap
               id: bootstrap
@@ -50,7 +50,7 @@ jobs:
               id: build
               uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5.1.0
               with:
-                platforms: linux/arm/v7 # linux/amd64,linux/arm64
+                platforms: linux/amd64 #linux/arm/v7 # linux/amd64,linux/arm64
                 context: src/docker/server
                 build-args: |
                     PYTHON_VERSION=${{ steps.bootstrap.outputs.python-version }}
@@ -59,7 +59,7 @@ jobs:
                     FLWR_VERSION=1.6.0
                     UBUNTU_VERSION=22.04
                 tags: flwr/server:1.6.0-py${{ steps.bootstrap.outputs.python-version }}-ubuntu22.04
-                push: false
+                push: true
 
             - name: Summary
               run: |
