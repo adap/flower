@@ -28,7 +28,7 @@ from .fedavg import FedAvg
 
 class FedXgbCyclic(FedAvg):
     """Configurable FedXgbCyclic strategy implementation."""
-    
+
     # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
     def __init__(
         self,
