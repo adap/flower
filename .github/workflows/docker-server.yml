@@ -1,0 +1,52 @@
+name: Build docker server image
+
+on:
+  workflow_dispatch:
+    inputs:
+      flwr-version:
+        description: "Version of Flower e.g. (1.6.0)."
+        required: true
+        type: string
+      python-version:
+        description: "Version of Python e.g. (3.11.7 or 3.11). Defaults to the version defined in _docker-server.yaml."
+        required: false
+        type: string
+      pip-version:
+        description: "Version of pip. Defaults to the version defined in _docker-server.yaml."
+        required: false
+        type: string
+      setuptools-version:
+        description: "Version of setuptools. Defaults to the version defined in _docker-server.yaml."
+        required: false
+        type: string
+      ubuntu-version:
+        description: "Version of Ubuntu. Defaults to the version defined in _docker-server.yaml."
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build-server-images:
+    uses: ./.github/workflows/_docker-server.yml
+    with:
+      flwr-version: ${{ github.event.inputs.flwr-version }}
+      python-version: ${{ github.event.inputs.python-version }}
+      pip-version: ${{ github.event.inputs.pip-version }}
+      setuptools-version: ${{ github.event.inputs.setuptools-version }}
+      ubuntu-version: ${{ github.event.inputs.ubuntu-version }}
+    secrets:
+      dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  summary:
+    runs-on: ubuntu-22.04
+    needs: build-server-images
+    steps:
+      - run: |
+          echo "### Images" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          for IMAGE in $(echo ${{ toJson(needs.build-server-images.outputs.metadata) }} | jq -r '.tags[]' ); do
+            echo "- $IMAGE" >> $GITHUB_STEP_SUMMARY
+          done

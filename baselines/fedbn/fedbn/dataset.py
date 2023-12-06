@@ -24,7 +24,7 @@ class DigitsDataset(Dataset):
         transform=None,
     ):
         if train and partitions is not None:
-            # construct dataset by loading one or more partitions
+            # Construct dataset by loading one or more partitions
             self.images, self.labels = np.load(
                 os.path.join(
                     data_path,
@@ -212,11 +212,18 @@ def get_data(dataset_cfg: DictConfig) -> List[Tuple[DataLoader, DataLoader, str]
     client_data = []
     d_cfg = dataset_cfg
 
-    allowed_percent = (np.arange(1, 11) / 10).tolist()
+    total_partitions = (
+        10  # each dataset was pre-processed by the authors and split into 10 partitions
+    )
+    # First check that percent used is allowed
+    allowed_percent = (np.arange(1, total_partitions + 1) / total_partitions).tolist()
     assert d_cfg.percent in allowed_percent, (
         f"'dataset.percent' should be in {allowed_percent}."
         "\nThis is because the trainset is pre-partitioned into 10 disjoint sets."
     )
+
+    # Then check that with the percent selected, the desired number of clients (and
+    # therefore dataloaders) can be created.
     max_expected_clients = len(d_cfg.to_include) * 1 / d_cfg.percent
 
     num_clients_step = len(d_cfg.to_include)
@@ -234,10 +241,10 @@ def get_data(dataset_cfg: DictConfig) -> List[Tuple[DataLoader, DataLoader, str]
         "'dataset.percent' you chose."
     )
 
+    # All good, then create as many dataloaders as clients in the experiment.
+    # Each dataloader might containe one or more partitions (depends on 'percent')
+    # Each dataloader contains data of the same dataset.
     num_clients_per_dataset = d_cfg.num_clients // num_clients_step
-    total_partitions = (
-        10  # each dataset was pre-processed by the authors and split into 10 partitions
-    )
     num_parts = int(d_cfg.percent * total_partitions)
 
     for dataset_name in dataset_cfg.to_include:

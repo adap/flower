@@ -1,10 +1,29 @@
 import argparse
 
 
+BST_PARAMS = {
+    "objective": "binary:logistic",
+    "eta": 0.1,  # Learning rate
+    "max_depth": 8,
+    "eval_metric": "auc",
+    "nthread": 16,
+    "num_parallel_tree": 1,
+    "subsample": 1,
+    "tree_method": "hist",
+}
+
+
 def client_args_parser():
     """Parse arguments to define experimental settings on client side."""
     parser = argparse.ArgumentParser()
 
+    parser.add_argument(
+        "--train-method",
+        default="bagging",
+        type=str,
+        choices=["bagging", "cyclic"],
+        help="Training methods selected from bagging aggregation or cyclic training.",
+    )
     parser.add_argument(
         "--num-partitions", default=10, type=int, help="Number of partitions."
     )
@@ -44,6 +63,13 @@ def server_args_parser():
     """Parse arguments to define experimental settings on server side."""
     parser = argparse.ArgumentParser()
 
+    parser.add_argument(
+        "--train-method",
+        default="bagging",
+        type=str,
+        choices=["bagging", "cyclic"],
+        help="Training methods selected from bagging aggregation or cyclic training.",
+    )
     parser.add_argument(
         "--pool-size", default=2, type=int, help="Number of total clients."
     )

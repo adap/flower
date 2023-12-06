@@ -3,8 +3,7 @@
 It includes processioning the dataset, instantiate strategy, specify how the global
 model is going to be evaluated, etc. At the end, this script saves the results.
 """
-# these are the basic packages you'll need here
-# feel free to remove some if aren't needed
+
 import pickle
 from pathlib import Path
 
@@ -33,16 +32,7 @@ def main(cfg: DictConfig) -> None:
 
     # Hydra automatically creates an output directory
     # Let's retrieve it and save some results there
-    save_path = HydraConfig.get().runtime.output_dir
-
-    # For FedBN clients we need to persist the state of the BN
-    # layers across rounds. In Simulation clients are statess
-    # so everything not communicated to the server (as it is the
-    # case as with params in BN layers of FedBN clients) is lost
-    # once a client completes its training. An upcoming version of
-    # Flower suports stateful clients
-    bn_states = Path(save_path) / "bn_states"
-    bn_states.mkdir()
+    save_path = Path(HydraConfig.get().runtime.output_dir)
 
     # 2. Prepare your dataset
     # please ensure you followed the README.md and you downloaded the
@@ -50,7 +40,7 @@ def main(cfg: DictConfig) -> None:
     client_data_loaders = get_data(cfg.dataset)
 
     # 3. Define your client generation function
-    client_fn = gen_client_fn(client_data_loaders, cfg.client, cfg.model, bn_states)
+    client_fn = gen_client_fn(client_data_loaders, cfg.client, cfg.model, save_path)
 
     # 4. Define your strategy
     strategy = instantiate(cfg.strategy)
@@ -71,14 +61,14 @@ def main(cfg: DictConfig) -> None:
     print("................")
     print(history)
 
-    # save results as a Python pickle using a file_path
+    # Save results as a Python pickle using a file_path
     # the directory created by Hydra for each run
     data = {"history": history}
     history_path = f"{str(save_path)}/history.pkl"
     with open(history_path, "wb") as handle:
         pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    # simple plot
+    # Simple plot
     quick_plot(history_path)
 
 
