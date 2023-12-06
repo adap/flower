@@ -103,6 +103,7 @@ class CyclicClientManager(SimpleClientManager):
         if min_num_clients is None:
             min_num_clients = num_clients
         self.wait_for(min_num_clients)
+
         # Sample clients which meet the criterion
         available_cids = list(self.clients)
         if criterion is not None:
