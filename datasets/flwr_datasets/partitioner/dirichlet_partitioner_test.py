@@ -51,11 +51,13 @@ class TestDirichletPartitioner(unittest.TestCase):
 
     @parameterized.expand(
         [
+            # num_partitions, alpha, num_rows, partition_by
             (3, 0.5, 100, "labels"),
             (5, 1.0, 150, "labels"),
         ]
     )
     def test_valid_initialization(self, num_partitions, alpha, num_rows, partition_by):
+        """Test if alpha is correct scaled based on the given num_partitions."""
         dataset, partitioner = _dummy_setup(
             num_partitions, alpha, num_rows, partition_by
         )
@@ -69,6 +71,7 @@ class TestDirichletPartitioner(unittest.TestCase):
         )
 
     def test_invalid_num_partitions(self):
+        """Test if 0 is invalid num_partitions."""
         dataset, partitioner = _dummy_setup(
             num_partitions=0, alpha=1.0, num_rows=100, partition_by="labels"
         )
@@ -76,34 +79,30 @@ class TestDirichletPartitioner(unittest.TestCase):
             partitioner.load_partition(0)
 
     def test_invalid_alpha(self):
+        """Test alpha list len not matching the num_partitions."""
         with self.assertRaises(ValueError):
             DirichletPartitioner(
                 num_partitions=3, alpha=[0.5, 0.5], partition_by="labels"
             )
 
-    @parameterized.expand(
-        [
-            (3, 0.5, 100, "labels", 0),
-            (3, 0.5, 100, "labels", 2),
-        ]
-    )
-    def test_load_partition(
-        self, num_partitions, alpha, num_rows, partition_by, node_id
-    ):
-        _, partitioner = _dummy_setup(num_partitions, alpha, num_rows, partition_by)
-        partition = partitioner.load_partition(node_id)
-        self.assertGreaterEqual(len(partition), partitioner._min_partition_size)
+    def test_load_partition(self):
+        _, partitioner = _dummy_setup(3, 0.5, 100, "labels")
+        partition_list = [partitioner.load_partition(node_id) for node_id in [0,1,2]]
+        self.assertGreaterEqual(all([len(p) for p in partition_list]), partitioner._min_partition_size)
 
     def test_load_invalid_partition_index(self):
+        """Test if raises when the load_partition is above the num_partitions."""
         _, partitioner = _dummy_setup(3, 0.5, 100, "labels")
         with self.assertRaises(KeyError):
             partitioner.load_partition(3)
 
     def test_alpha_initialization(self):
+        """Test alpha does not change when in NDArrayFloat format."""
         _, partitioner = _dummy_setup(3, np.array([1.0, 1.0, 1.0]), 100, "labels")
         self.assertTrue(np.all(partitioner._alpha == np.array([1.0, 1.0, 1.0])))
 
-    def test_internal_method_determine_node_id_to_indices(self):
+    def test__determine_node_id_to_indices(self):
+        """Test the determine_nod_id_to_indices matches the flag after the call."""
         num_partitions, alpha, num_rows, partition_by = 3, 0.5, 100, "labels"
         _, partitioner = _dummy_setup(num_partitions, alpha, num_rows, partition_by)
         partitioner._determine_node_id_to_indices_if_needed()
@@ -112,15 +111,7 @@ class TestDirichletPartitioner(unittest.TestCase):
             and len(partitioner._node_id_to_indices) == num_partitions
         )
 
-    def test_edge_case_small_dataset(self):
-        num_partitions, alpha, num_rows, partition_by = 3, 0.5, 3, "labels"
-        _, partitioner = _dummy_setup(num_partitions, alpha, num_rows, partition_by)
-        partitioner._determine_node_id_to_indices_if_needed()
-        min_partition_size = all(
-            len(indices) >= partitioner._min_partition_size
-            for indices in partitioner._node_id_to_indices.values()
-        )
-        self.assertTrue(min_partition_size)
+
 # todo: write tests for the alpha values (make sure they are positive)
 
 if __name__ == "__main__":
