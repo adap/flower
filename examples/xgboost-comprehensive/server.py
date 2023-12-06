@@ -108,10 +108,12 @@ class CyclicClientManager(SimpleClientManager):
         criterion: Optional[Criterion] = None,
     ) -> List[ClientProxy]:
         """Sample a number of Flower ClientProxy instances."""
+        
         # Block until at least num_clients are connected.
         if min_num_clients is None:
             min_num_clients = num_clients
         self.wait_for(min_num_clients)
+
         # Sample clients which meet the criterion
         available_cids = list(self.clients)
         if criterion is not None:
