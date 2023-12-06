@@ -23,7 +23,7 @@ from github import Github
 
 REPO_NAME = "adap/flower"
 CHANGELOG_FILE = "doc/source/ref-changelog.md"
-CHANGELOG_SECTION_HEADER = "## Changelog entry"
+CHANGELOG_SECTION_HEADER = "### Changelog entry"
 
 
 def _get_latest_tag(gh_api):
