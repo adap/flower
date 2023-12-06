@@ -38,7 +38,7 @@ jobs:
     name: Summary
     runs-on: ubuntu-22.04
     needs: build-server-images
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - run: |
           echo "### Images" >> $GITHUB_STEP_SUMMARY
