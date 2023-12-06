@@ -51,7 +51,9 @@ class DriverClientProxy(ClientProxy):
         )
         return cast(
             common.GetPropertiesRes,
-            self._send_receive_msg(server_message_proto, timeout).get_properties_res,
+            self._send_receive_msg(
+                server_message_proto, timeout, None
+            ).get_properties_res,
         )
 
     def get_parameters(
@@ -65,10 +67,14 @@ class DriverClientProxy(ClientProxy):
         )
         return cast(
             common.GetParametersRes,
-            self._send_receive_msg(server_message_proto, timeout).get_parameters_res,
+            self._send_receive_msg(
+                server_message_proto, timeout, None
+            ).get_parameters_res,
         )
 
-    def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
+    def fit(
+        self, ins: common.FitIns, timeout: Optional[float], group_id: Optional[int]
+    ) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
         server_message_proto: transport_pb2.ServerMessage = (
             serde.server_message_to_proto(
@@ -77,11 +83,11 @@ class DriverClientProxy(ClientProxy):
         )
         return cast(
             common.FitRes,
-            self._send_receive_msg(server_message_proto, timeout).fit_res,
+            self._send_receive_msg(server_message_proto, timeout, group_id).fit_res,
         )
 
     def evaluate(
-        self, ins: common.EvaluateIns, timeout: Optional[float]
+        self, ins: common.EvaluateIns, timeout: Optional[float], group_id: Optional[int]
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
         server_message_proto: transport_pb2.ServerMessage = (
@@ -91,7 +97,9 @@ class DriverClientProxy(ClientProxy):
         )
         return cast(
             common.EvaluateRes,
-            self._send_receive_msg(server_message_proto, timeout).evaluate_res,
+            self._send_receive_msg(
+                server_message_proto, timeout, group_id
+            ).evaluate_res,
         )
 
     def reconnect(
@@ -101,12 +109,15 @@ class DriverClientProxy(ClientProxy):
         return common.DisconnectRes(reason="")  # Nothing to do here (yet)
 
     def _send_receive_msg(
-        self, server_message: transport_pb2.ServerMessage, timeout: Optional[float]
+        self,
+        server_message: transport_pb2.ServerMessage,
+        timeout: Optional[float],
+        group_id: Optional[int],
     ) -> transport_pb2.ClientMessage:
         task_ins = task_pb2.TaskIns(
             task_id="",
-            group_id="",
             workload_id=self.workload_id,
+            group_id=str(group_id) if group_id else "",
             task=task_pb2.Task(
                 producer=node_pb2.Node(
                     node_id=0,

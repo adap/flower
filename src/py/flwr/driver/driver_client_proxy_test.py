@@ -122,8 +122,8 @@ class DriverClientProxyTestCase(unittest.TestCase):
             task_res_list=[
                 task_pb2.TaskRes(
                     task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
-                    group_id="",
                     workload_id=0,
+                    group_id="1",
                     task=task_pb2.Task(
                         legacy_client_message=ClientMessage(
                             fit_res=ClientMessage.FitRes(
@@ -142,7 +142,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
         ins: flwr.common.FitIns = flwr.common.FitIns(parameters, {})
 
         # Execute
-        fit_res = client.fit(ins=ins, timeout=None)
+        fit_res = client.fit(ins=ins, timeout=None, group_id=1)
 
         # Assert
         assert fit_res.parameters.tensor_type == "np"
@@ -159,8 +159,8 @@ class DriverClientProxyTestCase(unittest.TestCase):
             task_res_list=[
                 task_pb2.TaskRes(
                     task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
-                    group_id="",
                     workload_id=0,
+                    group_id="1",
                     task=task_pb2.Task(
                         legacy_client_message=ClientMessage(
                             evaluate_res=ClientMessage.EvaluateRes(
@@ -178,7 +178,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
         evaluate_ins: flwr.common.EvaluateIns = flwr.common.EvaluateIns(parameters, {})
 
         # Execute
-        evaluate_res = client.evaluate(evaluate_ins, timeout=None)
+        evaluate_res = client.evaluate(evaluate_ins, timeout=None, group_id=1)
 
         # Assert
         assert 0.0 == evaluate_res.loss

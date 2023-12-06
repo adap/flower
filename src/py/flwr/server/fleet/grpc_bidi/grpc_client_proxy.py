@@ -77,6 +77,7 @@ class GrpcClientProxy(ClientProxy):
         self,
         ins: common.FitIns,
         timeout: Optional[float],
+        group_id: Optional[int],
     ) -> common.FitRes:
         """Refine the provided parameters using the locally held dataset."""
         fit_ins_msg = serde.fit_ins_to_proto(ins)
@@ -95,6 +96,7 @@ class GrpcClientProxy(ClientProxy):
         self,
         ins: common.EvaluateIns,
         timeout: Optional[float],
+        group_id: Optional[int],
     ) -> common.EvaluateRes:
         """Evaluate the provided parameters using the locally held dataset."""
         evaluate_msg = serde.evaluate_ins_to_proto(ins)

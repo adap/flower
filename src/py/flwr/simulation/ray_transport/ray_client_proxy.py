@@ -81,7 +81,9 @@ class RayClientProxy(ClientProxy):
             res,
         )
 
-    def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
+    def fit(
+        self, ins: common.FitIns, timeout: Optional[float], group_id: Optional[int]
+    ) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
         future_fit_res = launch_and_fit.options(  # type: ignore
             **self.resources,
@@ -97,7 +99,7 @@ class RayClientProxy(ClientProxy):
         )
 
     def evaluate(
-        self, ins: common.EvaluateIns, timeout: Optional[float]
+        self, ins: common.EvaluateIns, timeout: Optional[float], group_id: Optional[int]
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
         future_evaluate_res = launch_and_evaluate.options(  # type: ignore
@@ -185,7 +187,9 @@ class RayActorClientProxy(ClientProxy):
             res,
         )
 
-    def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
+    def fit(
+        self, ins: common.FitIns, timeout: Optional[float], group_id: Optional[int]
+    ) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
 
         def fit(client: Client) -> common.FitRes:
@@ -202,7 +206,7 @@ class RayActorClientProxy(ClientProxy):
         )
 
     def evaluate(
-        self, ins: common.EvaluateIns, timeout: Optional[float]
+        self, ins: common.EvaluateIns, timeout: Optional[float], group_id: Optional[int]
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
 
