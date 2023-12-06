@@ -135,7 +135,6 @@ def fang_attack(
         if old_lambda > threshold and malicious_selected == False:
             l = old_lambda * 0.5
 
-
     # Compute sign vector s
     magnitude = []
     for i in range(len(w_re)):

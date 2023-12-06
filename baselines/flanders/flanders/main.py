@@ -22,15 +22,7 @@ import random
 import pandas as pd
 
 from typing import Dict, Callable, Optional, Tuple, List
-from .models import (
-    MnistNet, 
-    ToyNN, 
-    roc_auc_multiclass, 
-    test_toy, 
-    train_mnist, 
-    test_mnist, 
-    train_toy
-)
+
 from .client import (
     CifarClient, 
     HouseClient, 
@@ -42,7 +34,7 @@ from .client import (
     set_sklearn_model_params, 
     get_sklearn_model_params
 )
-from .utils import save_results, l2_norm
+from .utils import l2_norm, mnist_evaluate
 from .server import EnhancedServer
 
 from torch.utils.data import DataLoader
@@ -86,11 +78,8 @@ def main(cfg: DictConfig) -> None:
     print(cfg.server.pool_size)
 
     # Delete old client_params and clients_predicted_params
-    # TODO: parametrize this
-    if os.path.exists("clients_params"):
-        shutil.rmtree("clients_params")
-    if os.path.exists("clients_predicted_params"):
-        shutil.rmtree("clients_predicted_params")
+    if os.path.exists(cfg.server.history_dir):
+        shutil.rmtree(cfg.server.history_dir)
 
     evaluate_fn = mnist_evaluate
 
@@ -135,7 +124,6 @@ def main(cfg: DictConfig) -> None:
         distance_function=l2_norm
     )
 
-
     # 5. Start Simulation
     # history = fl.simulation.start_simulation(<arguments for simulation>)
     history = fl.simulation.start_simulation(
@@ -149,6 +137,7 @@ def main(cfg: DictConfig) -> None:
             client_manager=SimpleClientManager(),
             strategy=strategy,
             sampling=cfg.server.sampling,
+            history_dir=cfg.server.history_dir
         ),
         config=fl.server.ServerConfig(num_rounds=cfg.server.num_rounds),
         strategy=strategy
@@ -171,28 +160,6 @@ def fit_config(server_round: int) -> Dict[str, Scalar]:
         "batch_size": 32,
     }
     return config
-
-def mnist_evaluate(
-    server_round: int, parameters: fl.common.NDArrays, config: Dict[str, Scalar]
-):
-    # determine device
-    device = torch.device("cpu")
-
-    model = MnistNet()
-    set_params(model, parameters)
-    model.to(device)
-
-    testset = MNIST("", train=False, download=True, transform=transforms.ToTensor())
-    testloader = DataLoader(testset, batch_size=32, shuffle=False, num_workers=1)
-    loss, accuracy, auc = test_mnist(model, testloader, device=device)
-
-    #config["id"] = args.exp_num
-    config["round"] = server_round
-    config["auc"] = auc
-    save_results(loss, accuracy, config=config)
-    print(f"Round {server_round} accuracy: {accuracy} loss: {loss} auc: {auc}")
-
-    return loss, {"accuracy": accuracy, "auc": auc}
 
 if __name__ == "__main__":
     main()

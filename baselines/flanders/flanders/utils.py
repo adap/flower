@@ -5,6 +5,7 @@ Collection of help functions needed by the strategies.
 import numpy as np
 import os
 import json
+import torch
 import pandas as pd
 from natsort import natsorted
 from typing import Dict, Optional, Tuple, List
@@ -12,8 +13,23 @@ from flwr.common import (
     Parameters,
     Scalar,
     parameters_to_ndarrays,
+    NDArrays,
 )
 from threading import Lock
+from torch.utils.data import DataLoader
+from torchvision import transforms
+from torchvision.datasets import MNIST
+
+from .models import (
+    MnistNet, 
+    ToyNN, 
+    roc_auc_multiclass, 
+    test_toy, 
+    train_mnist, 
+    test_mnist, 
+    train_toy
+)
+from .client import set_params
 
 lock = Lock()            # if the script is run on multiple processors we need a lock to save the results
 
@@ -154,3 +170,25 @@ def evaluate_aggregated(
         return None
     loss, metrics = eval_res
     return loss, metrics
+
+def mnist_evaluate(
+    server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
+):
+    # determine device
+    device = torch.device("cpu")
+
+    model = MnistNet()
+    set_params(model, parameters)
+    model.to(device)
+
+    testset = MNIST("", train=False, download=True, transform=transforms.ToTensor())
+    testloader = DataLoader(testset, batch_size=32, shuffle=False, num_workers=1)
+    loss, accuracy, auc = test_mnist(model, testloader, device=device)
+
+    #config["id"] = args.exp_num
+    config["round"] = server_round
+    config["auc"] = auc
+    save_results(loss, accuracy, config=config)
+    print(f"Round {server_round} accuracy: {accuracy} loss: {loss} auc: {auc}")
+
+    return loss, {"accuracy": accuracy, "auc": auc}

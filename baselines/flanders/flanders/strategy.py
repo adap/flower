@@ -128,14 +128,16 @@ class Flanders(FedAvg):
             Aggregated parameters.
         metrics_aggregated: Dict[str, Scalar]
             Aggregated metrics.
+        malicious_clients_idx: List[int]
+            List of malicious clients' cids (indexes).
         """
+        malicious_clients_idx = []
         if server_round > 1:
             win = self.window
             if server_round < self.window:
                 win = server_round
             M = load_all_time_series(dir="clients_params", window=win)
             M = np.transpose(M, (0, 2, 1))  # (clients, params, time)
-
 
             M_hat = M[:,:,-1].copy()
             pred_step = 1
@@ -163,22 +165,11 @@ class Flanders(FedAvg):
             # Apply FedAvg for the remaining clients
             print("aggregate_fit - Applying FedAvg for the remaining clients")
             parameters_aggregated, metrics_aggregated = super().aggregate_fit(server_round, results, failures)
-
-            # For clients detected as malicious, set their parameters to be the averaged ones in their files
-            # otherwise the forecasting in next round won't be reliable
-            if self.warmup_rounds > server_round:
-                for idx in malicious_clients_idx:
-                    if self.sampling > 0:
-                        new_params = flatten_params(parameters_to_ndarrays(parameters_aggregated))[self.params_indexes]
-                    else:
-                        new_params = flatten_params(parameters_to_ndarrays(parameters_aggregated))
-                    print(f"aggregate_fit - Saving parameters of client {idx} with shape {new_params.shape}")
-                    save_params(new_params, idx, dir="clients_params", remove_last=True, rrl=True)
         else:
-            # Apply FedAvg on the first round
+            # Apply FedAvg on every clients' params during the first round
             parameters_aggregated, metrics_aggregated = super().aggregate_fit(server_round, results, failures)
 
-        return parameters_aggregated, metrics_aggregated
+        return parameters_aggregated, metrics_aggregated, malicious_clients_idx
 
 def mar(X, pred_step, alpha=1, beta=1, maxiter=100, window=0):
     '''

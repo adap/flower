@@ -61,6 +61,7 @@ class EnhancedServer(Server):
             warmup_rounds: int,
             attack_fn:Optional[Callable],
             sampling: int = 0,
+            history_dir: str = "clients_params",
             *args: Any,
             **kwargs: Any
         ) -> None:
@@ -74,6 +75,7 @@ class EnhancedServer(Server):
         self.sampling = sampling
         self.aggregated_parameters = []
         self.params_indexes = []
+        self.history_dir = history_dir
 
     
     def fit_round(
@@ -153,7 +155,7 @@ class EnhancedServer(Server):
                 params = params[self.params_indexes]
 
             print(f"fit_round 1 - Saving parameters of client {fitres.metrics['cid']} with shape {params.shape}")
-            save_params(params, fitres.metrics['cid'])
+            save_params(params, fitres.metrics['cid'], dir=self.history_dir)
 
             # Re-arrange results in the same order as clients' cids impose
             print("fit_round - Re-arranging results in the same order as clients' cids impose")
@@ -186,7 +188,7 @@ class EnhancedServer(Server):
                     else:
                         params = flatten_params(parameters_to_ndarrays(fitres.parameters))
                     print(f"fit_round 2 - Saving parameters of client {fitres.metrics['cid']} with shape {params.shape}")
-                    save_params(params, fitres.metrics['cid'], remove_last=True)
+                    save_params(params, fitres.metrics['cid'], dir=self.history_dir, remove_last=True)
         else:
             results = ordered_results
             others = {}
@@ -196,10 +198,19 @@ class EnhancedServer(Server):
 
         # Aggregate training results
         print("fit_round - Aggregating training results")
-        aggregated_result: Tuple[
-            Optional[Parameters],
-            Dict[str, Scalar],
-        ] = self.strategy.aggregate_fit(server_round, results, failures, clients_state)
+        aggregated_result = self.strategy.aggregate_fit(server_round, results, failures, clients_state)
 
-        parameters_aggregated, metrics_aggregated = aggregated_result
+        parameters_aggregated, metrics_aggregated, malicious_clients_idx = aggregated_result
+        print(f"fit_round - Malicious clients: {malicious_clients_idx}")
+        # For clients detected as malicious, set their parameters to be the averaged ones in their files
+        # otherwise the forecasting in next round won't be reliable
+        if self.warmup_rounds > server_round:
+            print(f"fit_round - Saving parameters of clients")
+            for idx in malicious_clients_idx:
+                if self.sampling > 0:
+                    new_params = flatten_params(parameters_to_ndarrays(parameters_aggregated))[self.params_indexes]
+                else:
+                    new_params = flatten_params(parameters_to_ndarrays(parameters_aggregated))
+                save_params(new_params, idx, dir=self.history_dir, remove_last=True, rrl=True)
+
         return parameters_aggregated, metrics_aggregated, (results, failures)
