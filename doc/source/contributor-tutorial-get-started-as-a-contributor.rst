@@ -30,8 +30,8 @@ but you can change it by providing a specific :code:`<version>`)::
 
   $ ./dev/venv-create.sh <version>
 
-If you don't have :code:`pyenv` installed, 
-you can use the following script that will install pyenv, 
+If you don't have :code:`pyenv` installed,
+you can use the following script that will install pyenv,
 set it up and create the virtual environment (with :code:`Python 3.8.17` by default)::
 
   $ ./dev/setup-defaults.sh <version>
@@ -83,7 +83,7 @@ Run Github Actions (CI) locally
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Developers could run the full set of Github Actions workflows under their local
-environment by using `Act <https://github.com/nektos/act>_`. Please refer to
+environment by using `Act <https://github.com/nektos/act>`_. Please refer to
 the installation instructions under the linked repository and run the next
 command under Flower main cloned repository folder::
 
@@ -116,6 +116,6 @@ convenience script to re-build the documentation yet, but it's pretty easy::
 
 This will generate HTML documentation in ``doc/build/html``.
 
-Note that, in order to build the documentation locally 
-(with ``poetry run make html``, like described below), 
-`Pandoc <https://pandoc.org/installing.html>_` needs to be installed on the system. 
+Note that, in order to build the documentation locally
+(with ``poetry run make html``, like described below),
+`Pandoc <https://pandoc.org/installing.html>`_ needs to be installed on the system.
