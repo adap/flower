@@ -55,6 +55,9 @@ def _format_pr_reference(title, number, url):
 
 def _extract_changelog_entry(pr_info):
     """Extract the changelog entry from a pull request's body."""
+    if not pr_info.body:
+        return None, "general"
+
     entry_match = re.search(
         f"{CHANGELOG_SECTION_HEADER}(.+?)(?=##|$)", pr_info.body, re.DOTALL
     )
