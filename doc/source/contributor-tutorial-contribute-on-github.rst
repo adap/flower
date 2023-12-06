@@ -195,6 +195,10 @@ Creating and merging a pull request (PR)
     The input box in the middle is there for you to describe what your PR does and to link it to existing issues. 
     We have placed comments (that won't be rendered once the PR is opened) to guide you through the process.
 
+    It is important to follow the instructions described in comments. For instance, in order to not break how our changelog system works,
+    you should read the information above the `Changelog entry` section carefully. Essentially, in this section,
+    you should put the description of your changes that will be added to the changelog alongside your PR title.
+
     At the bottom you will find the button to open the PR. This will notify reviewers that a new PR has been opened and 
     that they should look over it to merge or to request changes.
 
