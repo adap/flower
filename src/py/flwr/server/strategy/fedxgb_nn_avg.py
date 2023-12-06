@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 Strategy in the horizontal setting based on building Neural Network and averaging on
 prediction outcomes.
 
-Paper: Coming
+Paper: arxiv.org/abs/2304.07537
 """
 
 
@@ -34,6 +34,13 @@ from .fedavg import FedAvg
 
 class FedXgbNnAvg(FedAvg):
     """Configurable FedXgbNnAvg strategy implementation."""
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Federated XGBoost [Ma et al., 2023] strategy.
+
+        Implementation based on https://arxiv.org/abs/2304.07537.
+        """
+        super().__init__(*args, **kwargs)
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""

@@ -63,14 +63,14 @@ class TaskIns(google.protobuf.message.Message):
     TASK_FIELD_NUMBER: builtins.int
     task_id: typing.Text
     group_id: typing.Text
-    workload_id: typing.Text
+    workload_id: builtins.int
     @property
     def task(self) -> global___Task: ...
     def __init__(self,
         *,
         task_id: typing.Text = ...,
         group_id: typing.Text = ...,
-        workload_id: typing.Text = ...,
+        workload_id: builtins.int = ...,
         task: typing.Optional[global___Task] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["task",b"task"]) -> builtins.bool: ...
@@ -85,14 +85,14 @@ class TaskRes(google.protobuf.message.Message):
     TASK_FIELD_NUMBER: builtins.int
     task_id: typing.Text
     group_id: typing.Text
-    workload_id: typing.Text
+    workload_id: builtins.int
     @property
     def task(self) -> global___Task: ...
     def __init__(self,
         *,
         task_id: typing.Text = ...,
         group_id: typing.Text = ...,
-        workload_id: typing.Text = ...,
+        workload_id: builtins.int = ...,
         task: typing.Optional[global___Task] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["task",b"task"]) -> builtins.bool: ...
