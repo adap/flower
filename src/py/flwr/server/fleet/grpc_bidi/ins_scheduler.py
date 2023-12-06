@@ -153,6 +153,7 @@ def _call_client_proxy(
         fit_res: FitRes = client_proxy.fit(
             ins=fit_ins,
             timeout=timeout,
+            group_id=None,
         )
         fit_res_proto = serde.fit_res_to_proto(res=fit_res)
         return ClientMessage(fit_res=fit_res_proto)
@@ -162,6 +163,7 @@ def _call_client_proxy(
         evaluate_res: EvaluateRes = client_proxy.evaluate(
             ins=evaluate_ins,
             timeout=timeout,
+            group_id=None,
         )
         evaluate_res_proto = serde.evaluate_res_to_proto(res=evaluate_res)
         return ClientMessage(evaluate_res=evaluate_res_proto)

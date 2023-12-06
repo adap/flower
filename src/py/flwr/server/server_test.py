@@ -56,7 +56,9 @@ class SuccessClient(ClientProxy):
         """Raise an Exception because this method is not expected to be called."""
         raise Exception()
 
-    def fit(self, ins: FitIns, timeout: Optional[float]) -> FitRes:
+    def fit(
+        self, ins: FitIns, timeout: Optional[float], group_id: Optional[int]
+    ) -> FitRes:
         """Simulate fit by returning a success FitRes with simple set of weights."""
         arr = np.array([[1, 2], [3, 4], [5, 6]])
         arr_serialized = ndarray_to_bytes(arr)
@@ -67,7 +69,9 @@ class SuccessClient(ClientProxy):
             metrics={},
         )
 
-    def evaluate(self, ins: EvaluateIns, timeout: Optional[float]) -> EvaluateRes:
+    def evaluate(
+        self, ins: EvaluateIns, timeout: Optional[float], group_id: Optional[int]
+    ) -> EvaluateRes:
         """Simulate evaluate by returning a success EvaluateRes with loss 1.0."""
         return EvaluateRes(
             status=Status(code=Code.OK, message="Success"),
@@ -96,11 +100,15 @@ class FailingClient(ClientProxy):
         """Raise an Exception to simulate failure in the client."""
         raise Exception()
 
-    def fit(self, ins: FitIns, timeout: Optional[float]) -> FitRes:
+    def fit(
+        self, ins: FitIns, timeout: Optional[float], group_id: Optional[int]
+    ) -> FitRes:
         """Raise an Exception to simulate failure in the client."""
         raise Exception()
 
-    def evaluate(self, ins: EvaluateIns, timeout: Optional[float]) -> EvaluateRes:
+    def evaluate(
+        self, ins: EvaluateIns, timeout: Optional[float], group_id: Optional[int]
+    ) -> EvaluateRes:
         """Raise an Exception to simulate failure in the client."""
         raise Exception()
 
@@ -122,7 +130,7 @@ def test_fit_clients() -> None:
     client_instructions = [(c, ins) for c in clients]
 
     # Execute
-    results, failures = fit_clients(client_instructions, None, None)
+    results, failures = fit_clients(client_instructions, None, None, None)
 
     # Assert
     assert len(results) == 1
@@ -150,6 +158,7 @@ def test_eval_clients() -> None:
         client_instructions=client_instructions,
         max_workers=None,
         timeout=None,
+        group_id=None,
     )
 
     # Assert

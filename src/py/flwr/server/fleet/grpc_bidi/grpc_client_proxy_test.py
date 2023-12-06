@@ -84,7 +84,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         ins: flwr.common.FitIns = flwr.common.FitIns(parameters, {})
 
         # Execute
-        fit_res = client.fit(ins=ins, timeout=None)
+        fit_res = client.fit(ins=ins, timeout=None, group_id=None)
 
         # Assert
         assert fit_res.parameters.tensor_type == "np"
@@ -102,7 +102,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         evaluate_ins: flwr.common.EvaluateIns = flwr.common.EvaluateIns(parameters, {})
 
         # Execute
-        evaluate_res = client.evaluate(evaluate_ins, timeout=None)
+        evaluate_res = client.evaluate(evaluate_ins, timeout=None, group_id=None)
 
         # Assert
         assert (0, 0.0) == (
