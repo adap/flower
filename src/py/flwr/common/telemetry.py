@@ -152,7 +152,7 @@ class EventType(str, Enum):
     START_DRIVER_ENTER = auto()
     START_DRIVER_LEAVE = auto()
 
-    # Driver API and Fleet API
+    # SuperNode: flower-client
     RUN_CLIENT_ENTER = auto()
     RUN_CLIENT_LEAVE = auto()
 
