@@ -37,6 +37,7 @@ Instead of aggregating multiple clients,
 there is only one single client participating in the training per round in the cyclic training scenario.
 The trained local XGBoost trees will be passed to the next client as an initialised model for next round's boosting.
 
+
 ## Project Setup
 
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
