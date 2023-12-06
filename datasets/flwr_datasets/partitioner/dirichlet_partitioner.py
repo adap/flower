@@ -16,13 +16,13 @@
 from typing import Dict, List, Optional, Union
 
 import numpy as np
-from common.typing import NDArrayFloat, NDArrayInt
-from partitioner import Partitioner
 
 import datasets
+from flwr_datasets.common.typing import NDArrayFloat
+from flwr_datasets.partitioner.partitioner import Partitioner
 
 
-class DirichletPartitioner(Partitioner):
+class DirichletPartitioner(Partitioner):  # pylint: disable=R0902
     """Partitioner based on Dirichlet distribution.
 
     The balancing (not mentioned in paper but implemented in the code) is controlled by
@@ -40,7 +40,7 @@ class DirichletPartitioner(Partitioner):
     self_balancing
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=R0913
         self,
         num_partitions: int,
         alpha: Union[float, List[float], NDArrayFloat],
@@ -48,7 +48,7 @@ class DirichletPartitioner(Partitioner):
         min_partition_size: Optional[int] = None,
         self_balancing: bool = True,
         shuffle: bool = True,
-        seed: bool = 42,
+        seed: int = 42,
     ) -> None:
         super().__init__()
         # Attributes based on the constructor
@@ -65,10 +65,11 @@ class DirichletPartitioner(Partitioner):
         self._rng = np.random.default_rng(seed=self._seed)  # NumPy random generator
 
         # Utility attributes
-        # _num_unique_classes is determined during the first call to load_partition
+        # The attributes below are determined during the first call to load_partition
         self._num_unique_classes: Optional[int] = None
-        # _node_id_to_indices_determined is True after the first call to load_partition
-        self._node_id_to_indices: Dict[Union[str, int], NDArrayInt] = {}
+        self._avg_num_of_samples_per_node: Optional[float] = None
+        self._unique_classes: Optional[Union[List[int], List[str]]] = None
+        self._node_id_to_indices: Dict[int, List[int]] = {}
         self._node_id_to_indices_determined = False
 
     def load_partition(self, node_id: int) -> datasets.Dataset:
@@ -102,8 +103,9 @@ class DirichletPartitioner(Partitioner):
                     "The alpha parameter needs to be of length of equal to the "
                     "num_partitions."
                 )
-            self.alpha = np.asarray(alpha)
-        elif isinstance(alpha, NDArrayFloat):
+            alpha = np.asarray(alpha)
+        elif isinstance(alpha, np.ndarray):
+            # pylint: disable=R1720
             if alpha.ndim == 1 and alpha.shape[0] != self._num_partitions:
                 raise ValueError(
                     "The alpha parameter needs to be of length of equal to"
@@ -120,13 +122,14 @@ class DirichletPartitioner(Partitioner):
             raise ValueError("The given alpha format is not supported.")
         return alpha
 
-    def _determine_node_id_to_indices_if_needed(self):
+    def _determine_node_id_to_indices_if_needed(self) -> None:  # pylint: disable=R0914
         """Create an assignment of indices to the partition indices."""
         if not self._node_id_to_indices_determined:
             pass
 
         # Generate information needed for Dirichlet partitioning
         self._unique_classes = self.dataset.unique(self._partition_by)
+        assert self._unique_classes is not None
         self._num_unique_classes = len(self._unique_classes)
         # This is needed only if self._self_balancing is True (the default option)
         self._avg_num_of_samples_per_node = self.dataset.num_rows / self._num_partitions
@@ -138,7 +141,7 @@ class DirichletPartitioner(Partitioner):
         # min_partition_size is reached.
         while True:
             # Prepare data structure to store indices assigned to node ids
-            node_id_to_indices = {}
+            node_id_to_indices: Dict[int, List[int]] = {}
             for nid in range(self._num_partitions):
                 node_id_to_indices[nid] = []
 
@@ -160,7 +163,8 @@ class DirichletPartitioner(Partitioner):
                 # especially affect classes that are later in the order. This is the
                 # reason for more sparse division that the alpha might suggest.
                 if self._self_balancing:
-                    for nid in nid_to_proportion_of_k_samples:
+                    assert self._avg_num_of_samples_per_node is not None
+                    for nid in nid_to_proportion_of_k_samples.copy():
                         if (
                             len(node_id_to_indices[nid])
                             > self._avg_num_of_samples_per_node
@@ -169,10 +173,8 @@ class DirichletPartitioner(Partitioner):
 
                     # Normalize the proportions such that they sum up to 1
                     sum_proportions = sum(nid_to_proportion_of_k_samples.values())
-                    for nid, proportion in nid_to_proportion_of_k_samples.items():
-                        nid_to_proportion_of_k_samples[nid] = (
-                            proportion / sum_proportions
-                        )
+                    for nid, prop in nid_to_proportion_of_k_samples.copy().items():
+                        nid_to_proportion_of_k_samples[nid] = prop / sum_proportions
 
                 # Determine the split indices
                 cumsum_division_fractions = np.cumsum(
@@ -190,8 +192,8 @@ class DirichletPartitioner(Partitioner):
                 )
 
                 # Append new indices (coming from class k) to the existing indices
-                for nid in node_id_to_indices:
-                    node_id_to_indices[nid].extend(split_indices[nid].tolist())
+                for nid, indices in node_id_to_indices.items():
+                    indices.extend(split_indices[nid].tolist())
 
             # Determine if the indices assignment meets the min_partition_size
             # If it does not mean the requirement repeat the Dirichlet sampling process
@@ -217,29 +219,3 @@ class DirichletPartitioner(Partitioner):
                     "The number of partitions needs to be smaller that the "
                     "number of samples in the dataset. "
                 )
-
-
-if __name__ == "__main__":
-    print("hello")
-    from datasets import Dataset
-
-    num_rows = 100
-    n_unique_natural_ids = 3
-    data = {
-        "features": list(range(num_rows)),
-        "id": [f"{i % n_unique_natural_ids}" for i in range(num_rows)],
-        "labels": [i % 2 for i in range(num_rows)],
-    }
-    num_partitions = 10
-    dataset = Dataset.from_dict(data)
-    d = DirichletPartitioner(
-        num_partitions=num_partitions,
-        alpha=0.5,
-        partition_by="id",
-        min_partition_size=0,
-        self_balancing=False,
-    )
-    d.dataset = dataset
-    p_list = [d.load_partition(i) for i in range(num_partitions)]
-    print(p_list[0][:])
-    print([p.num_rows for p in p_list])
