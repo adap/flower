@@ -197,7 +197,7 @@ Creating and merging a pull request (PR)
 
     It is important to follow the instructions described in comments. For instance, in order to not break how our changelog system works,
     you should read the information above the ``Changelog entry`` section carefully.
-    You can also checkout some examples and details in the `appendix <#changelog-entry>`_ of this page.
+    You can also checkout some examples and details in the appendix :ref:`below <Changelog entry>`.
 
     At the bottom you will find the button to open the PR. This will notify reviewers that a new PR has been opened and 
     that they should look over it to merge or to request changes.
@@ -350,10 +350,8 @@ Once you have made your first PR, and want to contribute more, be sure to check 
 Appendix
 --------
 
-.. _changelog-entry:
-
 Changelog entry
-:::::::::::::::
+***************
 
 When opening a new PR, inside its description, there should be a ``Changelog entry`` header.
 
