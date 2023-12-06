@@ -158,8 +158,11 @@ def _update_entry(
     content, category_title, pr_info, unreleased_index, next_header_index
 ):
     """Update a specific section in the changelog content."""
-    section_index = content.find(category_title, unreleased_index, next_header_index)
-    if section_index != -1:
+    if (
+        section_index := content.find(
+            category_title, unreleased_index, next_header_index
+        )
+    ) != -1:
         newline_index = content.find("\n", section_index)
         closing_parenthesis_index = content.rfind(")", unreleased_index, newline_index)
         updated_entry = f", [{pr_info.number}]({pr_info.html_url})"
@@ -179,8 +182,7 @@ def _update_entry(
 
 def _insert_new_entry(content, pr_info, pr_reference, pr_entry_text, unreleased_index):
     """Insert a new entry into the changelog."""
-    existing_entry_start = content.find(pr_entry_text)
-    if existing_entry_start != -1:
+    if (existing_entry_start := content.find(pr_entry_text)) != -1:
         pr_ref_end = content.rfind("\n", 0, existing_entry_start)
         updated_entry = (
             f"{content[pr_ref_end]}\n, [{pr_info.number}]({pr_info.html_url})"
