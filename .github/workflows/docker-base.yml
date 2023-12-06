@@ -2,8 +2,8 @@ name: Build docker base image
 
 on:
   push:
-    # paths:
-    #   - src/docker/base
+    branches: ["main"]
+    paths: ["src/docker/base/**"]
 
 permissions:
   contents: read
@@ -33,15 +33,17 @@ jobs:
           echo "setuptools-version=${{ steps.bootstrap.outputs.setuptools-version }}" >> "$GITHUB_OUTPUT"
           echo "ubuntu-version=${{ env.DEFAULT_UBUNTU }}" >> "$GITHUB_OUTPUT"
 
-  build-server-images:
+  build-base-images:
+    name: Build images
     uses: ./.github/workflows/_docker-build.yml
     needs: parameters
     strategy:
+      fail-fast: true
       matrix:
         python-version: [3.11]
     with:
-      namespace_repository: flwr/base
-      file: src/docker/base
+      namespace-repository: flwr/base
+      file-dir: src/docker/base
       build-args: |
         PYTHON_VERSION=${{ matrix.python-version }}
         PIP_VERSION=${{ needs.parameters.outputs.pip-version }}

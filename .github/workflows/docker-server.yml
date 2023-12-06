@@ -8,20 +8,21 @@ on:
         required: true
         type: string
       base-image-version:
-        description: "Version of Flower base image."
+        description: "Version of the Flower base image."
         required: false
         type: string
-        default: "22.04"
+        default: "py3.11-ubuntu22.04"
 
 permissions:
   contents: read
 
 jobs:
   build-server-images:
+    name: Build images
     uses: ./.github/workflows/_docker-build.yml
     with:
-      namespace_repository: flwr/server
-      file: src/docker/server
+      namespace-repository: flwr/server
+      file-dir: src/docker/server
       build-args: |
         FLWR_VERSION=${{ github.event.inputs.flwr-version }}
         BASE_IMAGE_VERSION=${{ github.event.inputs.base-image-version }}
@@ -34,8 +35,10 @@ jobs:
       dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
 
   summary:
+    name: Summary
     runs-on: ubuntu-22.04
     needs: build-server-images
+    timeout-minutes: 5
     steps:
       - run: |
           echo "### Images" >> $GITHUB_STEP_SUMMARY
