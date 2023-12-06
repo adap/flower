@@ -1,29 +1,15 @@
 name: Build docker base image
 
 on:
-  workflow_dispatch:
-    inputs:
-      python-version:
-        description: "Version of Python e.g. (3.11.7 or 3.11)"
-        required: false
-        type: string
-        default: "3.11"
-      pip-version:
-        description: "Version of pip. Defaults to the version defined in actions/bootstrap."
-        required: false
-        type: string
-      setuptools-version:
-        description: "Version of setuptools. Defaults to the version defined in actions/bootstrap."
-        required: false
-        type: string
-      ubuntu-version:
-        description: "Version of Ubuntu. Defaults to the version defined in _docker-server.yaml."
-        required: false
-        type: string
-        default: "22.04"
+  push:
+    # paths:
+    #   - src/docker/base
 
 permissions:
   contents: read
+
+env:
+  DEFAULT_UBUNTU: 22.04
 
 jobs:
   parameters:
@@ -33,53 +19,35 @@ jobs:
     outputs:
       pip-version: ${{ steps.versions.outputs.pip-version }}
       setuptools-version: ${{ steps.versions.outputs.setuptools-version }}
+      ubuntu-version: ${{ steps.versions.outputs.ubuntu-version }}
 
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - uses: ./.github/actions/bootstrap
-        if: ${{ !(github.event.inputs.pip-version != '' && github.event.inputs.setuptools-version != '') }}
         id: bootstrap
 
       - id: versions
         run: |
-          if [[ "${{ github.event.inputs.pip-version }}" = "" ]]; then
-              echo "pip-version=${{  steps.bootstrap.outputs.pip-version }}" >> "$GITHUB_OUTPUT"
-          else
-              echo "pip-version=${{ github.event.inputs.pip-version }}" >> "$GITHUB_OUTPUT"
-          fi
-
-          if [[ "${{ github.event.inputs.setuptools-version }}" = "" ]]; then
-              echo "setuptools-version=${{  steps.bootstrap.outputs.setuptools-version }}" >> "$GITHUB_OUTPUT"
-          else
-              echo "setuptools-version=${{ github.event.inputs.setuptools-version }}" >> "$GITHUB_OUTPUT"
-          fi
+          echo "pip-version=${{ steps.bootstrap.outputs.pip-version }}" >> "$GITHUB_OUTPUT"
+          echo "setuptools-version=${{ steps.bootstrap.outputs.setuptools-version }}" >> "$GITHUB_OUTPUT"
+          echo "ubuntu-version=${{ env.DEFAULT_UBUNTU }}" >> "$GITHUB_OUTPUT"
 
   build-server-images:
-    uses: ./.github/workflows/_docker-server.yml
+    uses: ./.github/workflows/_docker-build.yml
     needs: parameters
+    strategy:
+      matrix:
+        python-version: [3.11]
     with:
       namespace_repository: flwr/base
-      file: src/docker/server
+      file: src/docker/base
       build-args: |
-        PYTHON_VERSION=${{ github.event.inputs.python-version }}
+        PYTHON_VERSION=${{ matrix.python-version }}
         PIP_VERSION=${{ needs.parameters.outputs.pip-version }}
         SETUPTOOLS_VERSION=${{ needs.parameters.outputs.setuptools-version }}
-        UBUNTU_VERSION=${{ github.event.inputs.ubuntu-version }}
-      tags: |
-        py${{ github.event.inputs.python-version }}-ubuntu${{ github.event.inputs.ubuntu-version }}
-        test
+        UBUNTU_VERSION=${{ needs.parameters.outputs.ubuntu-version }}
+      tags: py${{ matrix.python-version }}-ubuntu${{ needs.parameters.outputs.ubuntu-version }}
     secrets:
       dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
-
-  summary:
-    runs-on: ubuntu-22.04
-    needs: build-server-images
-    steps:
-      - run: |
-          echo "### Images" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          for IMAGE in $(echo ${{ toJson(needs.build-server-images.outputs.metadata) }} | jq -r '.tags[]' ); do
-            echo "- $IMAGE" >> $GITHUB_STEP_SUMMARY
-          done

@@ -45,11 +45,9 @@ jobs:
             # build-push action and qemu use different platform names
             # therefore we create a map
             { qemu: "", docker: "linux/amd64" },
-            # { qemu: "arm64", docker: "linux/arm64" },
+            { qemu: "arm64", docker: "linux/arm64" },
           ]
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-
       - name: Set up QEMU
         if: matrix.platform.qemu != ''
         uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3.0.0
@@ -76,7 +74,7 @@ jobs:
         uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5.1.0
         with:
           platforms: ${{ matrix.platform.docker }}
-          context: ${{ inputs.file }}
+          context: "{{defaultContext}}:${{ inputs.file }}"
           build-args: ${{ inputs.build-args }}
           outputs: type=image,name=${{ inputs.namespace_repository }},push-by-digest=true,name-canonical=true,push=true
 

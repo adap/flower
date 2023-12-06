@@ -1,7 +1,7 @@
 # Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 
-ARG BASE_VERSION=22.04
-FROM flwr/base:$BASE_VERSION
+ARG BASE_IMAGE_VERSION=22.04
+FROM flwr/base:$BASE_IMAGE_VERSION
 
 WORKDIR /app
 ARG FLWR_VERSION
