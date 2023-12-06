@@ -116,10 +116,11 @@ def get_middleware(name):
         start_time = None
 
         project_name = name
-        group_name = f"Workload ID: {fwd.task_ins.workload_id}"
-        run_name = f"Client ID: {fwd.task_ins.task.consumer.node_id}"
-
-        round = ""
+        workload_id = str(fwd.task_ins.workload_id)
+        client_id = str(fwd.task_ins.task.consumer.node_id)
+        group_id = str(fwd.task_ins.group_id)
+        group_name = f"Workload ID: {workload_id}"
+        run_name = f"Client ID: {client_id}"
 
         server_message = server_message_from_proto(
             fwd.task_ins.task.legacy_server_message
@@ -128,7 +129,7 @@ def get_middleware(name):
         if server_message.fit_ins:
             config = server_message.fit_ins.config
             if "round" in config:
-                round = f"_rnd-{config['round']}"
+                round = config["round"]
             if "project" in config:
                 project_name = str(config["project"])
             if "group" in config:
@@ -139,22 +140,32 @@ def get_middleware(name):
         if server_message.evaluate_ins:
             config = server_message.evaluate_ins.config
             if "round" in config:
-                round = f"_rnd-{config['round']}"
+                round = config["round"]
             if "project" in config:
                 project_name = str(config["project"])
             if "group" in config:
                 group_name = str(config["group"])
 
-        wandb.init(project=project_name, group=group_name, name=run_name)
+        # wandb.init(
+        #     project=project_name,
+        #     group=group_name,
+        #     name=run_name,
+        #     id=f"{workload_id}{client_id}",
+        #     resume="allow",
+        #     reinit=True,
+        # )
 
         bwd = app(fwd)
 
         results_to_log = {}
-        step = round if len(round) > 0 else None
 
         client_message = client_message_from_proto(
             bwd.task_res.task.legacy_client_message
         )
+
+        eval_group_id = str(bwd.task_res.group_id)
+        print(f"Group ID: {group_id}")
+        print(f"Eval Group ID: {eval_group_id}")
 
         if client_message.evaluate_res:
             results_to_log["evaluate_loss"] = client_message.evaluate_res.loss
@@ -171,7 +182,7 @@ def get_middleware(name):
             if "accuracy" in client_message.fit_res.metrics:
                 results_to_log["accuracy"] = client_message.fit_res.metrics["accuracy"]
 
-        wandb.log(results_to_log, step=step)
+        # wandb.log(results_to_log, step=round)
 
         return bwd
 
