@@ -33,11 +33,19 @@ class DirichletPartitioner(Partitioner):  # pylint: disable=R0902
 
     Parameters
     ----------
-    num_partitions
-    alpha
-    partition_by
-    min_partition_size
-    self_balancing
+    num_partitions : int
+        The total number of partitions that the data will be divided into.
+    alpha : Union[float, List[float], NDArrayFloat]
+        Concentration parameter to the Dirichlet distribution
+    partition_by : str
+        Column name of the labels (targets) based on which Dirichlet sampling works.
+    min_partition_size : int
+        The minimum number of samples that each partitions will have (the sampling
+        process is repeated if any partition is too small).
+    self_balancing: bool
+        Weather assign further samples to a partition after the number of samples
+        exceeded the average number of samples per partition. (True in the original
+        paper's code although not mentioned in paper itself).
     """
 
     def __init__(  # pylint: disable=R0913
