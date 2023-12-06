@@ -222,8 +222,8 @@ class DirichletPartitioner(Partitioner):  # pylint: disable=R0902
 
     def _check_num_partitions_correctness_if_needed(self) -> None:
         if not self._node_id_to_indices_determined:
-            if self._num_partitions > self.dataset.num_rows:
+            if self._num_partitions > self.dataset.num_rows or self._num_partitions < 1:
                 raise ValueError(
-                    "The number of partitions needs to be smaller that the "
-                    "number of samples in the dataset. "
+                    "The number of partitions needs to be greater than zero and smaller"
+                    " than the number of samples in the dataset."
                 )
