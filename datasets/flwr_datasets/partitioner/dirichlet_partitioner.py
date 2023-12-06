@@ -103,6 +103,20 @@ class DirichletPartitioner(Partitioner):  # pylint: disable=R0902
     def _initialize_alpha(
         self, alpha: Union[float, List[float], NDArrayFloat]
     ) -> NDArrayFloat:
+        """Convert alpha to the used format in the code a NDArrayFloat.
+
+        The alpha can be provided in constructor can be in different format for user
+        convenience. The format into which it's transformed here is used throughout the
+        code for computation.
+        Parameters:
+            alpha: Union[float, List[float], NDArrayFloat]
+                Concentration parameter to the Dirichlet distribution
+
+        Returns
+        -------
+        alpha : NDArrayFloat
+            Concentration parameter in a format ready to used in computation.
+        """
         if isinstance(alpha, float):
             alpha = np.array([alpha], dtype=float).repeat(self._num_partitions)
         elif isinstance(alpha, List):
@@ -221,6 +235,7 @@ class DirichletPartitioner(Partitioner):  # pylint: disable=R0902
         self._node_id_to_indices_determined = True
 
     def _check_num_partitions_correctness_if_needed(self) -> None:
+        """Test num_partitions when the dataset is given (in load_partition)."""
         if not self._node_id_to_indices_determined:
             if self._num_partitions > self.dataset.num_rows or self._num_partitions < 1:
                 raise ValueError(
