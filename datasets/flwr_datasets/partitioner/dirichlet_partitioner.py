@@ -42,7 +42,7 @@ class DirichletPartitioner(Partitioner):  # pylint: disable=R0902
     min_partition_size : int
         The minimum number of samples that each partitions will have (the sampling
         process is repeated if any partition is too small).
-    self_balancing: bool
+    self_balancing : bool
         Weather assign further samples to a partition after the number of samples
         exceeded the average number of samples per partition. (True in the original
         paper's code although not mentioned in paper itself).
@@ -108,8 +108,10 @@ class DirichletPartitioner(Partitioner):  # pylint: disable=R0902
         The alpha can be provided in constructor can be in different format for user
         convenience. The format into which it's transformed here is used throughout the
         code for computation.
-        Parameters:
-            alpha: Union[float, List[float], NDArrayFloat]
+
+        Parameters
+        ----------
+            alpha : Union[float, List[float], NDArrayFloat]
                 Concentration parameter to the Dirichlet distribution
 
         Returns
@@ -142,6 +144,11 @@ class DirichletPartitioner(Partitioner):  # pylint: disable=R0902
                     )
         else:
             raise ValueError("The given alpha format is not supported.")
+        if not (alpha > 0).all():
+            raise ValueError(
+                f"Alpha values should be strictly greater than zero. "
+                f"Instead it'd be converted to {alpha}"
+            )
         return alpha
 
     def _determine_node_id_to_indices_if_needed(self) -> None:  # pylint: disable=R0914
