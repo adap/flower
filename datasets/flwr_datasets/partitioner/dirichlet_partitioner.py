@@ -105,14 +105,17 @@ class DirichletPartitioner(Partitioner):
             self.alpha = np.asarray(alpha)
         elif isinstance(alpha, NDArrayFloat):
             if alpha.ndim == 1 and alpha.shape[0] != self._num_partitions:
-                raise ValueError("The alpha parameter needs to be of length of equal to"
-                                 "the num_partitions.")
+                raise ValueError(
+                    "The alpha parameter needs to be of length of equal to"
+                    "the num_partitions."
+                )
             elif alpha.ndim == 2:
                 alpha = alpha.flatten()
                 if alpha.shape[0] != self._num_partitions:
                     raise ValueError(
                         "The alpha parameter needs to be of length of equal to "
-                        "the num_partitions.")
+                        "the num_partitions."
+                    )
         else:
             raise ValueError("The given alpha format is not supported.")
         return alpha
@@ -157,7 +160,7 @@ class DirichletPartitioner(Partitioner):
                 # especially affect classes that are later in the order. This is the
                 # reason for more sparse division that the alpha might suggest.
                 if self._self_balancing:
-                    for nid, proportion in nid_to_proportion_of_k_samples.items():
+                    for nid in nid_to_proportion_of_k_samples:
                         if (
                             len(node_id_to_indices[nid])
                             > self._avg_num_of_samples_per_node
@@ -201,7 +204,7 @@ class DirichletPartitioner(Partitioner):
 
         # Shuffle the indices not to have the datasets with targets in sequences like
         # [00000, 11111, ...])
-        for node_id, indices in node_id_to_indices.items():
+        for indices in node_id_to_indices.values():
             # In place shuffling
             self._rng.shuffle(indices)
         self._node_id_to_indices = node_id_to_indices
