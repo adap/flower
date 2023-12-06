@@ -209,7 +209,7 @@ def _insert_entry_no_desc(content, pr_reference, unreleased_index):
 
 
 def main():
-    """Updaet changelog using the descriptions of PRs since the latest tag."""
+    """Update changelog using the descriptions of PRs since the latest tag."""
     # Initialize GitHub Client with provided token (as argument)
     gh_api = Github(argv[1])
     latest_tag = _get_latest_tag(gh_api)
