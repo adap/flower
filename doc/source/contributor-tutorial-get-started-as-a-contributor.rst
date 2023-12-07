@@ -51,17 +51,13 @@ GitHub::
 
 2. Let's create the Python environment for all-things Flower. If you wish to use :code:`pyenv`, we provide two convenience scripts that you can use. If you prefer using something else than :code:`pyenv`, create a new environment, activate and skip to the last point where all packages are installed.
 
-* If you don't have :code:`pyenv` installed, the following script that will install it, set it up, and create the virtual environment (with :code:`Python 3.8.17` by
-default)::
+* If you don't have :code:`pyenv` installed, the following script that will install it, set it up, and create the virtual environment (with :code:`Python 3.8.17` by default)::
 
-  $ ./dev/setup-defaults.sh <version>
-  # once completed, run the bootstrap script
+  $ ./dev/setup-defaults.sh <version> # once completed, run the bootstrap script
   
-* If you already have :code:`pyenv` installed (along with the :code:`pyenv-virtualenv` plugin), you can use the following convenience script (with :code:`Python 3.8.17` by 
-default)::
+* If you already have :code:`pyenv` installed (along with the :code:`pyenv-virtualenv` plugin), you can use the following convenience script (with :code:`Python 3.8.17` by  default)::
 
-  $ ./dev/venv-create.sh <version>
-  # once completed, run the bootstrap script
+  $ ./dev/venv-create.sh <version> # once completed, run the bootstrap script
 
 3. Install the Flower package in development mode (think
 :code:`pip install -e`) along with all necessary dependencies::
@@ -143,6 +139,6 @@ convenience script to re-build the documentation yet, but it's pretty easy::
 
 This will generate HTML documentation in ``doc/build/html``.
 
-Note that, in order to build the documentation locally 
-(with ``poetry run make html``, like described below), 
-`Pandoc <https://pandoc.org/installing.html>_` needs to be installed on the system. 
+Note that, in order to build the documentation locally
+(with ``poetry run make html``, like described below),
+`Pandoc <https://pandoc.org/installing.html>`_ needs to be installed on the system.
