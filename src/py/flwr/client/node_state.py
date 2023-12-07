@@ -27,7 +27,6 @@ class NodeState:
         self._meta: Dict[str, Any] = {}  # holds metadata about the node
         self.workload_states: Dict[int, WorkloadState] = {}
 
-    # main methods would be those related to WorkloadState objects
     def register_workloadstate(self, workload_id: int) -> None:
         """Register new workload state for this node."""
         if workload_id not in self.workload_states:
