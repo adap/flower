@@ -105,7 +105,25 @@ if __name__ == "__main__":
     num_epochs = 1
     learning_rate = 1e-1
 
-    train_images, train_labels, test_images, test_labels = map(mx.array, mnist.mnist())
+
+    fds = FederatedDataset(dataset="mnist", partitioners={"train": 3})
+    partition = fds.load_partition(node_id = args.node_id)
+    partition_splits = partition.train_test_split(test_size=0.2)
+
+    partition_splits['train'].set_format("numpy")
+    partition_splits['test'].set_format("numpy")
+
+    train_partition = partition_splits['train'].map( lambda img: {"img": img.reshape(-1, 28*28).squeeze().astype(np.float32)/255.0}, input_columns="image")
+    test_partition = partition_splits['test'].map( lambda img: {"img": img.reshape(-1, 28*28).squeeze().astype(np.float32)/255.0}, input_columns="image")
+
+    data = (
+        train_partition["img"],
+        train_partition["label"].astype(np.uint32),
+        test_partition["img"],
+        test_partition["label"].astype(np.uint32),
+    )
+
+    train_images, train_labels, test_images, test_labels = map(mx.array, data)
     model = MLP(num_layers, train_images.shape[-1], hidden_dim, num_classes)
 
     loss_and_grad_fn = nn.value_and_grad(model, loss_fn)
