@@ -135,13 +135,13 @@ class RayActorClientProxy(ClientProxy):
         # The VCE is not exposed to TaskIns, it won't handle multilple workloads
         # For the time being, fixing workload_id is a small compromise
         # This will be one of the first points to address integrating VCE + DriverAPI
-        w_id = 0
+        workload_id = 0
 
         # Register state
-        self.proxy_state.register_workloadstate(workload_id=w_id)
+        self.proxy_state.register_workloadstate(workload_id=workload_id)
 
         # Retrieve state
-        state = self.proxy_state.retrieve_workloadstate(workload_id=w_id)
+        state = self.proxy_state.retrieve_workloadstate(workload_id=workload_id)
 
         try:
             self.actor_pool.submit_client_job(
@@ -152,7 +152,7 @@ class RayActorClientProxy(ClientProxy):
 
             # Update state
             self.proxy_state.update_workloadstate(
-                workload_id=w_id, workload_state=updated_state
+                workload_id=workload_id, workload_state=updated_state
             )
 
         except Exception as ex:
