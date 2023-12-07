@@ -13,3 +13,4 @@ python = ">=3.8,<3.11"
 flwr = ">=1.0,<2.0"
 mlx = "==0.0.3"
 numpy = "==1.24.4"
+flwr-datasets = {extras = ["vision"], version = "^0.0.2"}
