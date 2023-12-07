@@ -72,7 +72,7 @@ class LoadCallableError(Exception):
     """."""
 
 
-def load_callable(module_attribute_str: str) -> Flower:
+def load_flower_callable(module_attribute_str: str) -> Flower:
     """Load the `Flower` object specified in a module attribute string.
 
     The module/attribute string should have the form <module>:<attribute>. Valid
