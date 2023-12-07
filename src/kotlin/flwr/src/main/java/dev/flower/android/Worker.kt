@@ -27,6 +27,13 @@ class FlwrWorker(private val context: Context,
         return Result.success()
     }
 
+    /**
+     * Start a PeriodicWorker that runs Flower client in the background.
+     *
+     * @param interval The interval for the PeriodicWorker to resume its work in minutes.
+     * @param serverAddress The IPv4 or IPv6 address of the server. If the Flower server runs on the
+     * same machine on port 8080, then server_address would be “[::]:8080”.
+     */
     fun startFlwrPeriodicWorker(interval: Long, serverAddress: String) {
         val constraints: Constraints = Constraints.Builder().build()
 
