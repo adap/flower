@@ -59,6 +59,7 @@ class DirichletPartitioner(Partitioner):  # pylint: disable=R0902
         seed: int = 42,
     ) -> None:
         super().__init__()
+        self._check_num_partitions_greater_than_zero(num_partitions)
         # Attributes based on the constructor
         self._num_partitions = num_partitions
         self._alpha: NDArrayFloat = self._initialize_alpha(alpha)
@@ -244,8 +245,13 @@ class DirichletPartitioner(Partitioner):  # pylint: disable=R0902
     def _check_num_partitions_correctness_if_needed(self) -> None:
         """Test num_partitions when the dataset is given (in load_partition)."""
         if not self._node_id_to_indices_determined:
-            if self._num_partitions > self.dataset.num_rows or self._num_partitions < 1:
+            if self._num_partitions > self.dataset.num_rows:
                 raise ValueError(
-                    "The number of partitions needs to be greater than zero and smaller"
-                    " than the number of samples in the dataset."
+                    "The number of partitions needs to be smaller than the number of "
+                    "samples in the dataset."
                 )
+
+    def _check_num_partitions_greater_than_zero(self, num_partitions: int) -> None:
+        """Test num_partition left sides correctness."""
+        if not num_partitions > 0:
+            raise ValueError("The number of partitions needs to be greater than zero.")
