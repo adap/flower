@@ -55,7 +55,7 @@ GitHub::
 
   $ ./dev/setup-defaults.sh <version> # once completed, run the bootstrap script
   
-* If you already have :code:`pyenv` installed (along with the :code:`pyenv-virtualenv` plugin), you can use the following convenience script (with :code:`Python 3.8.17` by  default)::
+* If you already have :code:`pyenv` installed (along with the :code:`pyenv-virtualenv` plugin), you can use the following convenience script (with :code:`Python 3.8.17` by default)::
 
   $ ./dev/venv-create.sh <version> # once completed, run the bootstrap script
 
