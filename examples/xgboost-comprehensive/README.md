@@ -76,7 +76,7 @@ poetry shell
 Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
 
 ```shell
-poetry run python3 -c "import flwr"
+poetry run python -c "import flwr"
 ```
 
 If you don't see any errors you're good to go!
@@ -90,6 +90,8 @@ pip install -r requirements.txt
 ```
 
 ## Run Federated Learning with XGBoost and Flower
+
+You can run this example in two ways: either by manually launching the server, and then several clients that connect to it; or by launching a Flower simulation. Both run the same workload, yielding identical results. The former is ideal for deployments on different machines, while the latter makes it easy to simulate large client cohorts in a resource-aware maner. You can read more about how Flower Simulation works in the [Documentation](https://flower.dev/docs/framework/how-to-run-simulations.html).
 
 ### Independent Client/Server Setup
 
@@ -118,34 +120,35 @@ trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT` and `wait`.
 ```
 
 This simply allows you to stop the experiment using `CTRL + C` (or `CMD + C`).
-If you change the script and anything goes wrong you can still use `killall python` (or `killall python3`)
-to kill all background processes (or a more specific command if you have other Python processes running that you don't want to kill).
+If you change the script and anything goes wrong you can still use `killall python` (or `killall python`)
+to kill all background processes. Consider using a more specific command if you have other Python processes running that you don't want to kill.
 
 You can also run the example without the scripts. First, launch the server:
 
 ```bash
-poetry run python3 server.py --train-method=bagging/cyclic --pool-size=N --num-clients-per-round=N
+poetry run python server.py --train-method=bagging/cyclic --pool-size=N --num-clients-per-round=N
 ```
 
 Then run at least two clients (each on a new terminal or computer in your network) passing different `NODE_ID` and all using the same `N` (denoting the total number of clients or data partitions):
 
 ```bash
-poetry run python3 client.py --train-method=bagging/cyclic --node-id=NODE_ID --num-partitions=N
+poetry run python client.py --train-method=bagging/cyclic --node-id=NODE_ID --num-partitions=N
 ```
 
 ### Flower Simulation Setup
 
-We also provide example code (`sim.py`) to use the simulation capabilities of Flower to simulate federated XGBoost training on either a single machine or a cluster of machines.
+We also provide an example code (`sim.py`) to use the simulation capabilities of Flower to simulate federated XGBoost training on either a single machine or a cluster of machines. With default arguments, each client will use 2 CPUs.
+
 To run bagging aggregation with 5 clients for 30 rounds evaluated on centralised test set:
 
 ```shell
-poetry run python3 sim.py --train-method=bagging --pool-size=5 --num-clients-per-round=5 --num-rounds=30 --centralised-eval
+poetry run python sim.py --train-method=bagging --pool-size=5 --num-clients-per-round=5 --num-rounds=30 --centralised-eval
 ```
 
 To run cyclic training with 5 clients for 30 rounds evaluated on centralised test set:
 
 ```shell
-poetry run python3 sim.py --train-method=cyclic --pool-size=5 --num-rounds=30 --centralised-eval-client
+poetry run python sim.py --train-method=cyclic --pool-size=5 --num-rounds=30 --centralised-eval-client
 ```
 
 In addition, we provide more options to customise the experimental settings, including data partitioning and centralised/distributed evaluation (see `utils.py`).
