@@ -1,5 +1,4 @@
 import argparse
-from collections import OrderedDict
 
 import flwr as fl
 import mlx.core as mx
@@ -44,25 +43,20 @@ def batch_iterate(batch_size, X, y):
         yield X[ids], y[ids]
 
 
-# Load model and data (simple CNN, CIFAR-10)
-num_layers = 2
-hidden_dim = 32
-num_classes = 10
-batch_size = 256
-num_epochs = 1
-learning_rate = 1e-1
-
-train_images, train_labels, test_images, test_labels = map(mx.array, mnist.mnist())
-model = MLP(num_layers, train_images.shape[-1], hidden_dim, num_classes)
-
-loss_and_grad_fn = nn.value_and_grad(model, loss_fn)
-optimizer = optim.SGD(learning_rate=learning_rate)
-
-
 # Define Flower client
 class FlowerClient(fl.client.NumPyClient):
+    def __init__(
+        self, model, optim, loss_and_grad_fn, data, num_epochs, batch_size
+    ) -> None:
+        self.model = model
+        self.optimizer = optim
+        self.loss_and_grad_fn = loss_and_grad_fn
+        self.train_images, self.train_labels, self.test_images, self.test_labels = data
+        self.num_epochs = num_epochs
+        self.batch_size = batch_size
+
     def get_parameters(self, config):
-        layers = model.parameters()["layers"]
+        layers = self.model.parameters()["layers"]
         return [np.array(val) for layer in layers for _, val in layer.items()]
 
     def set_parameters(self, parameters):
@@ -71,22 +65,24 @@ class FlowerClient(fl.client.NumPyClient):
             {"weight": mx.array(parameters[i]), "bias": mx.array(parameters[i + 1])}
             for i in range(0, len(parameters), 2)
         ]
-        model.update(new_params)
+        self.model.update(new_params)
 
     def fit(self, parameters, config):
         self.set_parameters(parameters)
-        for _ in range(num_epochs):
-            for X, y in batch_iterate(batch_size, train_images, train_labels):
-                loss, grads = loss_and_grad_fn(model, X, y)
-                optimizer.update(model, grads)
-                mx.eval(model.parameters(), optimizer.state)
-        return self.get_parameters(config={}), len(train_images), {}
+        for _ in range(self.num_epochs):
+            for X, y in batch_iterate(
+                self.batch_size, self.train_images, self.train_labels
+            ):
+                loss, grads = self.loss_and_grad_fn(self.model, X, y)
+                self.optimizer.update(self.model, grads)
+                mx.eval(self.model.parameters(), self.optimizer.state)
+        return self.get_parameters(config={}), len(self.train_images), {}
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
-        accuracy = eval_fn(model, test_images, test_labels)
-        loss = loss_fn(model, test_images, test_labels)
-        return loss.item(), len(test_images), {"accuracy": accuracy.item()}
+        accuracy = eval_fn(self.model, self.test_images, self.test_labels)
+        loss = loss_fn(self.model, self.test_images, self.test_labels)
+        return loss.item(), len(self.test_images), {"accuracy": accuracy.item()}
 
 
 if __name__ == "__main__":
@@ -96,8 +92,28 @@ if __name__ == "__main__":
     if not args.gpu:
         mx.set_default_device(mx.cpu)
 
+    num_layers = 2
+    hidden_dim = 32
+    num_classes = 10
+    batch_size = 256
+    num_epochs = 1
+    learning_rate = 1e-1
+
+    train_images, train_labels, test_images, test_labels = map(mx.array, mnist.mnist())
+    model = MLP(num_layers, train_images.shape[-1], hidden_dim, num_classes)
+
+    loss_and_grad_fn = nn.value_and_grad(model, loss_fn)
+    optimizer = optim.SGD(learning_rate=learning_rate)
+
     # Start Flower client
     fl.client.start_numpy_client(
         server_address="127.0.0.1:8080",
-        client=FlowerClient(),
+        client=FlowerClient(
+            model,
+            optimizer,
+            loss_and_grad_fn,
+            (train_images, train_labels, test_images, test_labels),
+            num_epochs,
+            batch_size,
+        ),
     )
