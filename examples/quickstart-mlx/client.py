@@ -6,7 +6,7 @@ import mlx.nn as nn
 import mlx.optimizers as optim
 import numpy as np
 
-import mnist
+from flwr_datasets import FederatedDataset
 
 
 class MLP(nn.Module):
