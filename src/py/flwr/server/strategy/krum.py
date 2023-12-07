@@ -41,7 +41,9 @@ from .fedavg import FedAvg
 
 # pylint: disable=line-too-long
 class Krum(FedAvg):
-    """Krum strategy.
+    """Krum [Blanchard et al., 2017] strategy.
+    
+    Implementation based on https://arxiv.org/abs/1703.02757
 
     Parameters
     ----------

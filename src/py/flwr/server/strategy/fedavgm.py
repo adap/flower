@@ -42,7 +42,7 @@ from .fedavg import FedAvg
 class FedAvgM(FedAvg):
     """Federated Averaging with Momentum strategy.
 
-    Implementation based on https://arxiv.org/pdf/1909.06335.pdf
+    Implementation based on https://arxiv.org/abs/1909.06335
 
     Parameters
     ----------

@@ -70,16 +70,16 @@ class FedYogi(FedOpt):
     evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn]
         Metrics aggregation function, optional.
     eta : float, optional
-        Server-side learning rate. Defaults to 1e-1.
+        Server-side learning rate. Defaults to 1e-2.
     eta_l : float, optional
-        Client-side learning rate. Defaults to 1e-1.
+        Client-side learning rate. Defaults to 0.0316.
     beta_1 : float, optional
         Momentum parameter. Defaults to 0.9.
     beta_2 : float, optional
         Second moment parameter. Defaults to 0.99.
     tau : float, optional
         Controls the algorithm's degree of adaptability.
-        Defaults to 1e-9.
+        Defaults to 1e-3.
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals, line-too-long
