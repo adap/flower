@@ -57,7 +57,7 @@ GitHub::
   
 * If you already have :code:`pyenv` installed (along with the :code:`pyenv-virtualenv` plugin), you can use the following convenience script (with :code:`Python 3.8.17` by default)::
 
-  $ ./dev/venv-create.sh <version> # once completed, run the bootstrap script
+  $ ./dev/venv-create.sh <version> # once completed, run the `bootstrap.sh` script
 
 3. Install the Flower package in development mode (think
 :code:`pip install -e`) along with all necessary dependencies::
