@@ -107,16 +107,29 @@ Or
 poetry run ./run_cyclic.sh
 ```
 
-The script starts processes in the background so that you don't have to open eleven terminal windows.
+The script starts processes in the background so that you don't have to open six terminal windows.
 If you experiment with the code example and something goes wrong, simply using `CTRL + C` on Linux (or `CMD + C` on macOS) wouldn't normally kill all these processes,
-which is why the script ends with `trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT` and `wait`.
+which is why the script ends with
+
+```bash
+trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT` and `wait`.
+```
+
 This simply allows you to stop the experiment using `CTRL + C` (or `CMD + C`).
 If you change the script and anything goes wrong you can still use `killall python` (or `killall python3`)
 to kill all background processes (or a more specific command if you have other Python processes running that you don't want to kill).
 
-You can also manually run `poetry run python3 server.py --train-method=bagging/cyclic --pool-size=N --num-clients-per-round=N`
-and `poetry run python3 client.py --train-method=bagging/cyclic --node-id=NODE_ID --num-partitions=N` for as many clients as you want,
-but you have to make sure that each command is run in a different terminal window (or a different computer on the network).
+You can also run the example without the scripts. First, launch the server:
+
+```bash
+poetry run python3 server.py --train-method=bagging/cyclic --pool-size=N --num-clients-per-round=N
+```
+
+Then run at least two clients (each on a new terminal or computer in your network) passing different `NODE_ID` and all using the same `N` (denoting the total number of clients or data partitions):
+
+```bash
+poetry run python3 client.py --train-method=bagging/cyclic --node-id=NODE_ID --num-partitions=N
+```
 
 ### Flower Simulation Setup
 
@@ -134,8 +147,7 @@ poetry run python3 sim.py --train-method=cyclic --pool-size=5 --num-rounds=30 --
 ```
 
 In addition, we provide more options to customise the experimental settings, including data partitioning and centralised/distributed evaluation (see `utils.py`).
-Look at the [code](https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive)
-and [tutorial](https://flower.dev/docs/framework/tutorial-quickstart-xgboost.html) for a detailed explanation.
+Check the [tutorial](https://flower.dev/docs/framework/tutorial-quickstart-xgboost.html) for a detailed explanation.
 
 ### Expected Experimental Results
 
