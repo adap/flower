@@ -13,10 +13,12 @@
 # limitations under the License.
 # ==============================================================================
 """Test DirichletPartitioner."""
+# pylint: disable=W0212
 import unittest
 from typing import Tuple, Union
 
 import numpy as np
+from numpy.typing import NDArray
 from parameterized import parameterized
 
 from datasets import Dataset
@@ -25,7 +27,7 @@ from flwr_datasets.partitioner.dirichlet_partitioner import DirichletPartitioner
 
 def _dummy_setup(
     num_partitions: int,
-    alpha: Union[float, np.ndarray],
+    alpha: Union[float, NDArray[np.float_]],
     num_rows: int,
     partition_by: str,
     self_balancing: bool = True,
@@ -49,18 +51,18 @@ def _dummy_setup(
 class TestDirichletPartitionerSuccess(unittest.TestCase):
     """Test DirichletPartitioner used with no exceptions."""
 
-    @parameterized.expand(
+    @parameterized.expand(  # type: ignore
         [
             # num_partitions, alpha, num_rows, partition_by
             (3, 0.5, 100, "labels"),
             (5, 1.0, 150, "labels"),
         ]
     )
-    def test_valid_initialization(self, num_partitions, alpha, num_rows, partition_by):
+    def test_valid_initialization(
+        self, num_partitions: int, alpha: float, num_rows: int, partition_by: str
+    ) -> None:
         """Test if alpha is correct scaled based on the given num_partitions."""
-        dataset, partitioner = _dummy_setup(
-            num_partitions, alpha, num_rows, partition_by
-        )
+        _, partitioner = _dummy_setup(num_partitions, alpha, num_rows, partition_by)
         self.assertEqual(
             (
                 partitioner._num_partitions,
@@ -70,20 +72,20 @@ class TestDirichletPartitionerSuccess(unittest.TestCase):
             (num_partitions, num_partitions, partition_by),
         )
 
-    def test_min_partition_size_requirement(self):
+    def test_min_partition_size_requirement(self) -> None:
         """Test if partitions are created with min partition size required."""
         _, partitioner = _dummy_setup(3, 0.5, 100, "labels")
         partition_list = [partitioner.load_partition(node_id) for node_id in [0, 1, 2]]
         self.assertTrue(
-            all([len(p) > partitioner._min_partition_size for p in partition_list])
+            all(len(p) > partitioner._min_partition_size for p in partition_list)
         )
 
-    def test_alpha_in_ndarray_initialization(self):
+    def test_alpha_in_ndarray_initialization(self) -> None:
         """Test alpha does not change when in NDArrayFloat format."""
         _, partitioner = _dummy_setup(3, np.array([1.0, 1.0, 1.0]), 100, "labels")
         self.assertTrue(np.all(partitioner._alpha == np.array([1.0, 1.0, 1.0])))
 
-    def test__determine_node_id_to_indices(self):
+    def test__determine_node_id_to_indices(self) -> None:
         """Test the determine_nod_id_to_indices matches the flag after the call."""
         num_partitions, alpha, num_rows, partition_by = 3, 0.5, 100, "labels"
         _, partitioner = _dummy_setup(num_partitions, alpha, num_rows, partition_by)
@@ -97,14 +99,14 @@ class TestDirichletPartitionerSuccess(unittest.TestCase):
 class TestDirichletPartitionerFailure(unittest.TestCase):
     """Test DirichletPartitioner failures (exceptions) by incorrect usage."""
 
-    @parameterized.expand([(-2,), (-1,), (3,), (4,), (100,)])
+    @parameterized.expand([(-2,), (-1,), (3,), (4,), (100,)])  # type: ignore
     def test_load_invalid_partition_index(self, partition_id):
         """Test if raises when the load_partition is above the num_partitions."""
         _, partitioner = _dummy_setup(3, 0.5, 100, "labels")
         with self.assertRaises(KeyError):
             partitioner.load_partition(partition_id)
 
-    @parameterized.expand(
+    @parameterized.expand(  # type: ignore
         [
             # alpha, num_partitions
             (-0.5, 1),
@@ -127,9 +129,9 @@ class TestDirichletPartitionerFailure(unittest.TestCase):
         """Test if giving the negative value of alpha raises error."""
         num_rows, partition_by = 100, "labels"
         with self.assertRaises(ValueError):
-            _, partitioner = _dummy_setup(num_partitions, alpha, num_rows, partition_by)
+            _, _ = _dummy_setup(num_partitions, alpha, num_rows, partition_by)
 
-    @parameterized.expand(
+    @parameterized.expand(  # type: ignore
         [
             # alpha, num_partitions
             # alpha greater than the num_partitions
@@ -147,11 +149,13 @@ class TestDirichletPartitionerFailure(unittest.TestCase):
                 num_partitions=num_partitions, alpha=alpha, partition_by="labels"
             )
 
-    @parameterized.expand([(0,), (-1,), (11,), (100,)])  # num_partitions,
+    @parameterized.expand(  # type: ignore
+        [(0,), (-1,), (11,), (100,)]
+    )  # num_partitions,
     def test_invalid_num_partitions(self, num_partitions):
         """Test if 0 is invalid num_partitions."""
         with self.assertRaises(ValueError):
-            dataset, partitioner = _dummy_setup(
+            _, partitioner = _dummy_setup(
                 num_partitions=num_partitions,
                 alpha=1.0,
                 num_rows=10,
