@@ -1,12 +1,12 @@
 import argparse
 
-import flwr as fl
 import mlx.core as mx
 import mlx.nn as nn
 import mlx.optimizers as optim
 import numpy as np
-
 from flwr_datasets import FederatedDataset
+
+import flwr as fl
 
 
 class MLP(nn.Module):
@@ -89,10 +89,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Train a simple MLP on MNIST with MLX.")
     parser.add_argument("--gpu", action="store_true", help="Use the Metal back-end.")
     parser.add_argument(
-    "--node-id",
-    choices=[0, 1, 2],
-    type=int,
-    help="Partition of the dataset divided into 3 iid partitions created artificially.",
+        "--node-id",
+        choices=[0, 1, 2],
+        type=int,
+        help="Partition of the dataset divided into 3 iid partitions created artificially.",
     )
     args = parser.parse_args()
     if not args.gpu:
@@ -105,16 +105,25 @@ if __name__ == "__main__":
     num_epochs = 1
     learning_rate = 1e-1
 
-
     fds = FederatedDataset(dataset="mnist", partitioners={"train": 3})
-    partition = fds.load_partition(node_id = args.node_id)
+    partition = fds.load_partition(node_id=args.node_id)
     partition_splits = partition.train_test_split(test_size=0.2)
 
-    partition_splits['train'].set_format("numpy")
-    partition_splits['test'].set_format("numpy")
+    partition_splits["train"].set_format("numpy")
+    partition_splits["test"].set_format("numpy")
 
-    train_partition = partition_splits['train'].map( lambda img: {"img": img.reshape(-1, 28*28).squeeze().astype(np.float32)/255.0}, input_columns="image")
-    test_partition = partition_splits['test'].map( lambda img: {"img": img.reshape(-1, 28*28).squeeze().astype(np.float32)/255.0}, input_columns="image")
+    train_partition = partition_splits["train"].map(
+        lambda img: {
+            "img": img.reshape(-1, 28 * 28).squeeze().astype(np.float32) / 255.0
+        },
+        input_columns="image",
+    )
+    test_partition = partition_splits["test"].map(
+        lambda img: {
+            "img": img.reshape(-1, 28 * 28).squeeze().astype(np.float32) / 255.0
+        },
+        input_columns="image",
+    )
 
     data = (
         train_partition["img"],
