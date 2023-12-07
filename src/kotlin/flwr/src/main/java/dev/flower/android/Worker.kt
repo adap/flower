@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit
 
 class FlwrWorker(private val context: Context,
                  workerParams: WorkerParameters,
-                 private val flwrClient: Client,
+                 private val client: Client,
                  private val grpcRere: Boolean) : CoroutineWorker(context, workerParams) {
     override suspend fun doWork(): Result {
         if (grpcRere) {
