@@ -106,7 +106,7 @@ if __name__ == "__main__":
     optimizer = optim.SGD(learning_rate=learning_rate)
 
     # Start Flower client
-    fl.client.start_numpy_client(
+    fl.client.start_client(
         server_address="127.0.0.1:8080",
         client=FlowerClient(
             model,
@@ -115,5 +115,5 @@ if __name__ == "__main__":
             (train_images, train_labels, test_images, test_labels),
             num_epochs,
             batch_size,
-        ),
+        ).to_client(),
     )
