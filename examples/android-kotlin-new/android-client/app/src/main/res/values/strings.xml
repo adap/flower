@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">FlwrGlance</string>
+    <string name="activity_log">Activity Log</string>
+    <string name="train">Train Federated!</string>
+    <string name="fl_server_port">Server Port</string>
+    <string name="fl_server_ip">Server IP</string>
+    <string name="welcome_to_flower">Welcome to Flower! \n</string>
+    <string name="connect_to_flower_server">Connect to Flower Server</string>
+    <string name="background_task">Background Task</string>
+    <string name="scheduling_in_minutes">Scheduling in Minutes</string>
+</resources>

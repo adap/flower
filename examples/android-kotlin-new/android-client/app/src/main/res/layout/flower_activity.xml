@@ -1,0 +1,140 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f2f2f2"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
+        android:paddingStart="16dp"
+        android:text="@string/connect_to_flower_server"
+        android:textStyle="bold"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="#4a5663" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/serverIP"
+            style="@style/Widget.Material3.TextInputEditText.FilledBox"
+            android:layout_width="225dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:fontFamily="@font/montserrat_light"
+            android:hint="@string/fl_server_ip"
+            android:importantForAutofill="no"
+            android:inputType="phone"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="#4a5663" />
+
+        <EditText
+            android:id="@+id/serverPort"
+            style="@style/Widget.Material3.TextInputEditText.FilledBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:fontFamily="@font/montserrat_light"
+            android:hint="@string/fl_server_port"
+            android:importantForAutofill="no"
+            android:inputType="numberDecimal"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="#4a5663" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="278dp"
+            android:layout_height="match_parent"
+            android:paddingStart="16dp"
+            android:text="@string/background_task"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="#4a5663"
+            android:textStyle="bold" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/enableBackgroundTask"
+            android:layout_width="93dp"
+            android:layout_height="7dp"
+            android:layout_marginStart="8dp"
+            android:text=""
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="#4a5663" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/scheduling"
+        style="@style/Widget.Material3.TextInputEditText.FilledBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:ems="10"
+        android:fontFamily="@font/montserrat_light"
+        android:hint="@string/scheduling_in_minutes"
+        android:importantForAutofill="no"
+        android:inputType="numberDecimal"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="#4a5663" />
+
+    <Button
+        android:id="@+id/trainFederated"
+        style="@android:style/Widget.Material.Button.Colored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="28dp"
+        android:background="@drawable/rounded_corner"
+        android:backgroundTint="#F2B705"
+        android:fontFamily="@font/share_tech_mono"
+        android:onClick="runGrpc"
+        android:text="@string/train" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:fontFamily="@font/montserrat_medium"
+        android:text="@string/activity_log"
+        android:textAlignment="center"
+        android:textColor="#4a5663"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/grpc_response_text"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/rounded_corner"
+        android:backgroundTint="#4a5663"
+        android:fontFamily="@font/share_tech_mono"
+        android:gravity="bottom"
+        android:nestedScrollingEnabled="true"
+        android:overScrollMode="always"
+        android:scrollbarAlwaysDrawVerticalTrack="false"
+        android:scrollbars="vertical"
+        android:text="@string/welcome_to_flower"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textColor="#f2f2f2"
+        android:textSize="12sp" />
+
+</LinearLayout>
