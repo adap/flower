@@ -30,7 +30,7 @@ class FlwrWorker(private val context: Context,
     /**
      * Start a PeriodicWorker that runs Flower client in the background.
      *
-     * @param interval The interval for the PeriodicWorker to resume its work in minutes.
+     * @param interval The interval for the PeriodicWorker to resume its work periodically in minutes.
      * @param serverAddress The IPv4 or IPv6 address of the server. If the Flower server runs on the
      * same machine on port 8080, then server_address would be “[::]:8080”.
      */
