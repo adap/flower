@@ -76,7 +76,6 @@ class VirtualClientEngineActor(ABC):
             job_results = job_fn(client)
             # Retrieve state (potentially updated)
             updated_state = client.get_state()
-            print(f"Actor finishing ({cid}) !!!: {updated_state = }")
         except Exception as ex:
             client_trace = traceback.format_exc()
             message = (

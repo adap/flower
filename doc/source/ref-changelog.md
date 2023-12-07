@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **General updates to Flower Examples** ([#2381](https://github.com/adap/flower/pull/2381))
+
 - **Update Flower Baselines**
 
   - HFedXGBoost [#2226](https://github.com/adap/flower/pull/2226)
