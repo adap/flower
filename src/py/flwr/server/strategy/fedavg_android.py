@@ -39,6 +39,7 @@ from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy
 
 
+# pylint: disable=line-too-long
 class FedAvgAndroid(Strategy):
     """Federated Averaging strategy.
 
@@ -69,7 +70,7 @@ class FedAvgAndroid(Strategy):
         Initial global model parameters.
     """
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
+    # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
         *,
