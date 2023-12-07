@@ -6,9 +6,8 @@ from flwr.common.logger import log
 from flwr_datasets import FederatedDataset
 from flwr.server.strategy import FedXgbBagging, FedXgbCyclic
 
-from utils import (
-    server_args_parser,
-    BST_PARAMS,
+from utils import server_args_parser
+from server_utils import (
     eval_config,
     fit_config,
     evaluate_metrics_aggregation,
@@ -39,9 +38,6 @@ if centralised_eval:
     test_set = fds.load_full("test")
     test_set.set_format("numpy")
     test_dmatrix = transform_dataset_to_dmatrix(test_set)
-
-# Hyper-parameters used for initialisation
-params = BST_PARAMS
 
 
 # Define strategy

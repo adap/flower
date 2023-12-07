@@ -52,7 +52,9 @@ This will create a new directory called `xgboost-comprehensive` containing the f
 -- server.py         <- Defines the server-side logic
 -- client.py         <- Defines the client-side logic
 -- dataset.py        <- Defines the functions of data loading and partitioning
--- utils.py          <- Defines the utility functions
+-- utils.py          <- Defines the arguments parser and hyper-parameters
+-- client_utils.py   <- Defines the client utility functions
+-- server_utils.py   <- Defines the server utility functions
 -- sim.py            <- Example of using Flower simulation
 -- run_bagging.sh    <- Commands to run bagging experiments
 -- run_cyclic.sh     <- Commands to run cyclic experiments
