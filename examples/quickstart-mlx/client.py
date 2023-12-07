@@ -88,6 +88,12 @@ class FlowerClient(fl.client.NumPyClient):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Train a simple MLP on MNIST with MLX.")
     parser.add_argument("--gpu", action="store_true", help="Use the Metal back-end.")
+    parser.add_argument(
+    "--node-id",
+    choices=[0, 1, 2],
+    type=int,
+    help="Partition of the dataset divided into 3 iid partitions created artificially.",
+    )
     args = parser.parse_args()
     if not args.gpu:
         mx.set_default_device(mx.cpu)
