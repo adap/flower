@@ -35,7 +35,7 @@ As common SSL training pipline, this code has two parts: SSL pre-training in FL 
 **Task:** Action Recognition
 
 **Model:** 
-* We first pretrain the R3D-18 model using Catch-the-Patch (CtP) SSL technique in FL settings. The details of the CtP SSL technique can be found at `CtP/pyvrl/models/pretraining/ctp`, and the details of the R3D model can be found at`/CtP/pyvrl/models/backbones/r3d.py`. 
+* We first pretrain the R3D-18 model using Catch-the-Patch (CtP) SSL technique in FL settings. The details of the CtP SSL technique can be found at `CtP/pyvrl/models/pretraining/ctp`, and the details of the R3D-18 model can be found at`/CtP/pyvrl/models/backbones/r3d.py`. 
 * After pertaining, we finetunes the R3D-18 model on UCF-101 dataset.
 
 **Dataset:** This baseline only demonstrates SSL pre-training and supervised fine-tuning with UCF-101 dataset. However, we also provide the script files to generate the partitions for Kinetics-400 datasets. 
