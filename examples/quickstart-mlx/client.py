@@ -5,6 +5,7 @@ import mlx.nn as nn
 import mlx.optimizers as optim
 import numpy as np
 from flwr_datasets import FederatedDataset
+from datasets.utils.logging import disable_progress_bar
 
 import flwr as fl
 
@@ -85,8 +86,66 @@ class FlowerClient(fl.client.NumPyClient):
         return loss.item(), len(self.test_images), {"accuracy": accuracy.item()}
 
 
+def get_client_fn(num_clients=3):
+    def client_fn(node_id):
+        disable_progress_bar()
+
+        num_layers = 2
+        hidden_dim = 32
+        num_classes = 10
+        batch_size = 256
+        num_epochs = 1
+        learning_rate = 1e-1
+
+        fds = FederatedDataset(dataset="mnist", partitioners={"train": num_clients})
+        partition = fds.load_partition(node_id=int(node_id))
+        partition_splits = partition.train_test_split(test_size=0.2)
+
+        partition_splits["train"].set_format("numpy")
+        partition_splits["test"].set_format("numpy")
+
+        train_partition = partition_splits["train"].map(
+            lambda img: {
+                "img": img.reshape(-1, 28 * 28).squeeze().astype(np.float32) / 255.0
+            },
+            input_columns="image",
+        )
+        test_partition = partition_splits["test"].map(
+            lambda img: {
+                "img": img.reshape(-1, 28 * 28).squeeze().astype(np.float32) / 255.0
+            },
+            input_columns="image",
+        )
+
+        data = (
+            train_partition["img"],
+            train_partition["label"].astype(np.uint32),
+            test_partition["img"],
+            test_partition["label"].astype(np.uint32),
+        )
+
+        train_images, train_labels, test_images, test_labels = map(mx.array, data)
+        model = MLP(num_layers, train_images.shape[-1], hidden_dim, num_classes)
+
+        loss_and_grad_fn = nn.value_and_grad(model, loss_fn)
+        optimizer = optim.SGD(learning_rate=learning_rate)
+
+        return FlowerClient(
+            model,
+            optimizer,
+            loss_and_grad_fn,
+            (train_images, train_labels, test_images, test_labels),
+            num_epochs,
+            batch_size,
+        ).to_client()
+
+    return client_fn
+
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser("Train a simple MLP on MNIST with MLX.")
+    parser = argparse.ArgumentParser(
+        "Perform FL on a simple MLP on MNIST with MLX and Flower."
+    )
     parser.add_argument("--gpu", action="store_true", help="Use the Metal back-end.")
     parser.add_argument(
         "--node-id",
@@ -98,55 +157,8 @@ if __name__ == "__main__":
     if not args.gpu:
         mx.set_default_device(mx.cpu)
 
-    num_layers = 2
-    hidden_dim = 32
-    num_classes = 10
-    batch_size = 256
-    num_epochs = 1
-    learning_rate = 1e-1
-
-    fds = FederatedDataset(dataset="mnist", partitioners={"train": 3})
-    partition = fds.load_partition(node_id=args.node_id)
-    partition_splits = partition.train_test_split(test_size=0.2)
-
-    partition_splits["train"].set_format("numpy")
-    partition_splits["test"].set_format("numpy")
-
-    train_partition = partition_splits["train"].map(
-        lambda img: {
-            "img": img.reshape(-1, 28 * 28).squeeze().astype(np.float32) / 255.0
-        },
-        input_columns="image",
-    )
-    test_partition = partition_splits["test"].map(
-        lambda img: {
-            "img": img.reshape(-1, 28 * 28).squeeze().astype(np.float32) / 255.0
-        },
-        input_columns="image",
-    )
-
-    data = (
-        train_partition["img"],
-        train_partition["label"].astype(np.uint32),
-        test_partition["img"],
-        test_partition["label"].astype(np.uint32),
-    )
-
-    train_images, train_labels, test_images, test_labels = map(mx.array, data)
-    model = MLP(num_layers, train_images.shape[-1], hidden_dim, num_classes)
-
-    loss_and_grad_fn = nn.value_and_grad(model, loss_fn)
-    optimizer = optim.SGD(learning_rate=learning_rate)
-
     # Start Flower client
     fl.client.start_client(
         server_address="127.0.0.1:8080",
-        client=FlowerClient(
-            model,
-            optimizer,
-            loss_and_grad_fn,
-            (train_images, train_labels, test_images, test_labels),
-            num_epochs,
-            batch_size,
-        ).to_client(),
+        client=get_client_fn()(args.node_id),
     )
