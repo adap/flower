@@ -63,8 +63,9 @@ class DataPartitioner:
         """Return a partition of the dataset."""
         return Partition(self.data, self.partitions[partition])
 
+    @staticmethod
     def _get_dirichlet_data_(
-        self, data, psizes, seed, alpha
+        data, psizes, seed, alpha
     ):  # pylint: disable=too-many-locals
         """Return a partition of the dataset based on Dirichlet distribution."""
         n_nets = len(psizes)
