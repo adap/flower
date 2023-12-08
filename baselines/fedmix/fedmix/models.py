@@ -1,5 +1,6 @@
 """..."""
 
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -57,8 +58,7 @@ class CustomVGG(nn.Module):
         out = self.layer4(out)
         out = self.layer5(out)
         out = self.layer6(out)
-        out = out.reshape(out.size(0), -1)
-        out = self.fc(out)
+        out = self.fc(torch.flatten(out, 1))
         out = self.fc1(out)
         out = self.fc2(out)
         return out

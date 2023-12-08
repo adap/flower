@@ -10,6 +10,7 @@ from fedmix.dataset_preparation import (
     _mash_data,
     _partition_cifar,
     _partition_cifar_new,
+    _partition_cifar_new_new,
     _partition_femnist
 )
 
@@ -34,7 +35,7 @@ def load_datasets(config, num_clients, seed):
         raise Exception('dataset_name must be one of ["cifar10", "cifar100", "femnist"]')
 
     if dataset_name in ['cifar10', 'cifar100']:
-        client_datasets = _partition_cifar_new(trainset, num_classes, num_clients, config.num_classes_per_client, seed)
+        client_datasets = _partition_cifar_new_new(trainset, num_classes, num_clients, config.num_classes_per_client, seed)
     else:
         client_datasets, testset = _partition_femnist(num_clients)
 

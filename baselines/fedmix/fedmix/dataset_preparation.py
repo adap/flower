@@ -9,7 +9,8 @@ import os
 import random
 import json
 from torchvision.datasets import CIFAR10, CIFAR100
-
+import torch
+from torch.utils.data import ConcatDataset, Dataset, Subset, random_split
 
 def _download_cifar10():
     """..."""
@@ -22,8 +23,15 @@ def _download_cifar10():
         ]
     )
 
+    test_transform = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        ]
+    )
+
     trainset = CIFAR10("./dataset", train=True, download=True, transform=transform)
-    testset = CIFAR10("./dataset", train=False, download=True, transform=transform)
+    testset = CIFAR10("./dataset", train=False, download=True, transform=test_transform)
     return trainset, testset
 
 
@@ -116,6 +124,98 @@ def _partition_cifar_new(
     print('number of unique data points:', len({i for lst in dataset_indices for i in lst}))
 
     return [Subset(trainset, ind) for ind in dataset_indices]
+
+def _sort_by_class(
+    trainset: Dataset,
+) -> Dataset:
+    """Sort dataset by class/label.
+
+    Parameters
+    ----------
+    trainset : Dataset
+        The training dataset that needs to be sorted.
+
+    Returns
+    -------
+    Dataset
+        The sorted training dataset.
+    """
+    class_counts = np.bincount(trainset.targets)
+    idxs = trainset.targets.argsort()  # sort targets in ascending order
+
+    tmp = []  # create subset of smallest class
+    tmp_targets = []  # same for targets
+
+    start = 0
+    for count in np.cumsum(class_counts):
+        tmp.append(
+            Subset(trainset, idxs[start : int(count + start)])
+        )  # add rest of classes
+        tmp_targets.append(trainset.targets[idxs[start : int(count + start)]])
+        start += count
+    sorted_dataset = ConcatDataset(tmp)  # concat dataset
+    sorted_dataset.targets = torch.cat(tmp_targets)  # concat targets
+    return sorted_dataset
+
+def _partition_cifar_new_new(
+    trainset, num_classes, num_clients, num_classes_per_client, seed
+):
+    random.seed(seed)
+    trainset.targets = torch.tensor(trainset.targets)
+    trainset_sorted = _sort_by_class(trainset)
+
+    # create sub-dataset, one per class
+    img_count, _ = np.histogram(trainset.targets)
+    num_images_class = img_count[0] # number of images per class
+    print(f"{num_images_class =}")
+    classes_buckets = [Subset(trainset_sorted, np.arange(i*num_images_class, (i+1)*num_images_class)) for i in range(num_classes)]
+
+    # Figure out how many buckets we need to create given
+    total_buckets = num_clients * num_classes_per_client
+    print(f"{total_buckets = }")
+    buckets_per_class = int(total_buckets / num_classes)
+    print(f"{buckets_per_class = }")
+
+    # construct dictionary of data buckets
+    # each entry corresponds to the buckets of a class
+    # buckets in a class have been constructed by evenly splitting the contents of that class
+    # taking into account the number of clients and number of classes clients will take
+    data_buckets_dict = {}
+    for cls_id, cls_bucket in enumerate(classes_buckets):
+        imgs_bucket = len(cls_bucket)
+        imgs_per_data_bucket = imgs_bucket // buckets_per_class
+        data_buckets = [Subset(cls_bucket, np.arange(i*imgs_per_data_bucket, min(imgs_bucket, (i+1)*imgs_per_data_bucket))) for i in range(buckets_per_class)]
+        data_buckets_dict[cls_id] = data_buckets
+    
+    def get_data_buckets_for_client(buckets_dict):
+
+        def _pop_from_buckets(class_id):
+            
+            val = buckets_dict[class_id].pop(-1)
+            if len(buckets_dict[class_id]) == 0:
+                del buckets_dict[class_id]
+            
+            return val
+        
+        classes_remaining = list(buckets_dict.keys())
+        if len(classes_remaining) == 1:
+            # If one class remains, take all the samples
+            classes_to_use = classes_remaining * len(buckets_dict[classes_remaining[0]])
+        else:
+            classes_to_use = random.sample(classes_remaining, min(len(classes_remaining), num_classes_per_client))
+        
+        return ConcatDataset([_pop_from_buckets(i) for i in classes_to_use])
+    
+    datasets = [get_data_buckets_for_client(data_buckets_dict) for _ in range(num_clients)]
+
+    print('number of data points of each client:', [len(dd) for dd in datasets])
+    print('total number of data points across clients:', sum([len(dd) for dd in datasets]))
+    unique_lbls_count = []
+    for dd in datasets:
+        num_labels = len(set([int(lbl) for _, lbl in dd]))
+        unique_lbls_count.append(num_labels)
+    print('number of unique data points:', unique_lbls_count)
+    return datasets
 
 
 def _download_femnist(num_clients):
