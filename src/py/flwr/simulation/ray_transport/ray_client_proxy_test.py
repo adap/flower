@@ -53,6 +53,9 @@ def job_fn(cid: str) -> JobFn:  # pragma: no cover
     def cid_times_pi(client: Client) -> ClientRes:  # pylint: disable=unused-argument
         result = int(cid) * pi
 
+        # store something in state
+        client.numpy_client.state.state["result"] = str(result)  # type: ignore
+
         # now let's convert it to a GetPropertiesRes response
         return GetPropertiesRes(
             status=Status(Code(0), message="test"), properties={"result": result}
@@ -109,28 +112,40 @@ def test_cid_consistency_one_at_a_time() -> None:
     ray.shutdown()
 
 
-def test_cid_consistency_all_submit_first() -> None:
+def test_cid_consistency_all_submit_first_workload_consistency() -> None:
     """Test that ClientProxies get the result of client job they submit.
 
-    All jobs are submitted at the same time. Then fetched one at a time.
+    All jobs are submitted at the same time. Then fetched one at a time. This also tests
+    NodeState (at each Proxy) and WorkloadState basic functionality.
     """
     proxies, _ = prep()
+    workload_id = 0
 
     # submit all jobs (collect later)
     shuffle(proxies)
     for prox in proxies:
+        # Register state
+        prox.proxy_state.register_workloadstate(workload_id=workload_id)
+        # Retrieve state
+        state = prox.proxy_state.retrieve_workloadstate(workload_id=workload_id)
+
         job = job_fn(prox.cid)
         prox.actor_pool.submit_client_job(
             lambda a, c_fn, j_fn, cid, state: a.run.remote(c_fn, j_fn, cid, state),
-            (prox.client_fn, job, prox.cid, WorkloadState(state={})),
+            (prox.client_fn, job, prox.cid, state),
         )
 
     # fetch results one at a time
     shuffle(proxies)
     for prox in proxies:
-        res, _ = prox.actor_pool.get_client_result(prox.cid, timeout=None)
+        res, updated_state = prox.actor_pool.get_client_result(prox.cid, timeout=None)
+        prox.proxy_state.update_workloadstate(workload_id, workload_state=updated_state)
         res = cast(GetPropertiesRes, res)
         assert int(prox.cid) * pi == res.properties["result"]
+        assert (
+            str(int(prox.cid) * pi)
+            == prox.proxy_state.retrieve_workloadstate(workload_id).state["result"]
+        )
 
     ray.shutdown()
 
