@@ -1,7 +1,8 @@
 # Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 
 ARG BASE_IMAGE_VERSION=py3.11-ubuntu22.04
-FROM flwr/base:$BASE_IMAGE_VERSION as server
+ARG BASE_REPOSITORY=flwr/base
+FROM $BASE_REPOSITORY:$BASE_IMAGE_VERSION as server
 
 WORKDIR /app
 ARG FLWR_VERSION

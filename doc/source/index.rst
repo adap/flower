@@ -160,6 +160,7 @@ The Flower community welcomes contributions. The following docs are intended to 
    contributor-how-to-write-documentation
    contributor-how-to-release-flower
    contributor-how-to-contribute-translations
+   contributor-how-to-build-docker-images
 
 .. toctree::
    :maxdepth: 1
