@@ -20,7 +20,7 @@ class FedAvgClient(
 ):  # pylint: disable=too-many-instance-attributes
     """Standard Flower client for FedAvg."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         net: torch.nn.Module,
         client_id: str,
@@ -39,8 +39,8 @@ class FedAvgClient(
             momentum=config.optimizer.momentum,
             weight_decay=config.optimizer.weight_decay,
         )
-        self.trainLoader = trainloader
-        self.valLoader = valloader
+        self.trainloader = trainloader
+        self.valloader = valloader
         self.client_id = client_id
         self.device = device
         self.num_epochs = num_epochs
@@ -81,7 +81,7 @@ class FedAvgClient(
         train(
             self.net,
             self.optimizer,
-            self.trainLoader,
+            self.trainloader,
             self.device,
             num_epochs,
             proximal_mu=self.exp_config.optimizer.mu,
@@ -100,16 +100,16 @@ class FedAvgClient(
         # datasets are already quite small, we merge the validation set with the
         # training set and evaluate on the training set with the aggregated global
         # model parameters. This behaviour can be modified by passing the validation
-        # set in the below test(self.valLoader) function and replacing len(
-        # self.valLoader) below. Note that we evaluate on the centralized test-set on
+        # set in the below test(self.valloader) function and replacing len(
+        # self.valloader) below. Note that we evaluate on the centralized test-set on
         # server-side in the strategy.
 
         self.set_parameters(parameters)
-        loss, metrics = test(self.net, self.trainLoader, self.device)
-        return float(loss), len(self.trainLoader), metrics
+        loss, metrics = test(self.net, self.trainloader, self.device)
+        return float(loss), len(self.trainloader), metrics
 
 
-def gen_clients_fedavg(
+def gen_clients_fedavg(  # pylint: disable=too-many-arguments
     num_epochs: int,
     trainloaders: List[DataLoader],
     testloader: DataLoader,

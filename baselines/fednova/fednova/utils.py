@@ -60,6 +60,7 @@ def fit_config(exp_config: DictConfig, server_round: int):
     return config
 
 
+# pylint: disable=too-many-locals, too-many-statements
 def generate_plots(local_solver: str = "vanilla", var_epochs: bool = False):
     """Generate plots for the experiment."""
     metrics = ["test_accuracy"]
@@ -151,15 +152,16 @@ def generate_plots(local_solver: str = "vanilla", var_epochs: bool = False):
             f"{save_path}testAccuracy_{local_solver}_varEpochs_{var_epochs}.png"
         )
 
-
         print(
             f"---------------------------Local Solver: {local_solver.upper()} "
             f"Var Epochs: {var_epochs}---------------------------"
         )
 
         print(
-            "Number of valid seeds: Baseline: {} FedNova: {} ".format(len(baseline_df),
-                                                                      len(fednova_df)))
+            "Number of valid seeds: Baseline: {} FedNova: {} ".format(
+                len(baseline_df), len(fednova_df)
+            )
+        )
 
         print(
             f"{baseline_label}: {baseline_mean[-1]:.2f} ± "

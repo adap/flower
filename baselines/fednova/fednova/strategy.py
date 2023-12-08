@@ -28,9 +28,10 @@ class FedNova(FedAvg):
         super().__init__(*args, **kwargs)
 
         self.global_momentum_buffer: List[NDArray] = []
-        self.global_parameters: List[NDArray] = parameters_to_ndarrays(
-            self.initial_parameters
-        )
+        if self.initial_parameters is not None:
+            self.global_parameters: List[NDArray] = parameters_to_ndarrays(
+                self.initial_parameters
+            )
 
         self.exp_config = exp_config
         self.lr = exp_config.optimizer.lr
@@ -99,34 +100,32 @@ class FedNova(FedAvg):
 
         if eval_res is None:
             return None
-        else:
-            loss, metrics = eval_res
-            accuracy = float(metrics["accuracy"])
 
-            if accuracy > self.best_test_acc:
-                self.best_test_acc = accuracy
+        loss, metrics = eval_res
+        accuracy = float(metrics["accuracy"])
 
-                # Save model parameters and state
-                if server_round == 0:
-                    return None
-                else:
-                    np.savez(
-                        f"{self.exp_config.checkpoint_path}bestModel_"
-                        f"{self.exp_config.exp_name}_{self.exp_config.strategy}_"
-                        f"varEpochs_{self.exp_config.var_local_epochs}.npz",
-                        self.global_parameters,
-                        [loss, self.best_test_acc],
-                        self.global_momentum_buffer,
-                    )
+        if accuracy > self.best_test_acc:
+            self.best_test_acc = accuracy
 
-                log(
-                    INFO,
-                    "Model saved with Best Test accuracy: {}".format(
-                        self.best_test_acc
-                    ),
-                )
+            # Save model parameters and state
+            if server_round == 0:
+                return None
 
-            return loss, metrics
+            np.savez(
+                f"{self.exp_config.checkpoint_path}bestModel_"
+                f"{self.exp_config.exp_name}_{self.exp_config.strategy}_"
+                f"varEpochs_{self.exp_config.var_local_epochs}.npz",
+                self.global_parameters,
+                [loss, self.best_test_acc],
+                self.global_momentum_buffer,
+            )
+
+            log(
+                INFO,
+                "Model saved with Best Test accuracy: {}".format(self.best_test_acc),
+            )
+
+        return loss, metrics
 
 
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:

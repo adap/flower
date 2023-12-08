@@ -1,5 +1,4 @@
-"""
-VGG Model Architecture: Adapted from https://github.com/pytorch/vision.git .
+"""VGG Model Architecture: Adapted from https://github.com/pytorch/vision.git .
 
 Contains Train, Test function definitions for local client training
 """
@@ -20,7 +19,7 @@ class VGG(nn.Module):
     """VGG model."""
 
     def __init__(self):
-        super(VGG, self).__init__()
+        super().__init__()
         self.features = make_layers(cfg["A"])
         self.classifier = nn.Sequential(
             nn.Dropout(),
@@ -112,6 +111,7 @@ cfg = {
 }
 
 
+# pylint: disable=too-many-locals,too-many-arguments
 def train(
     model, optimizer, trainloader, device, epochs, proximal_mu=0.0
 ) -> Tuple[float, float]:
@@ -200,7 +200,7 @@ def test(model, test_loader, device, *args) -> Tuple[float, Dict[str, float]]:
     return total_loss, {"accuracy": sum(accuracy) / len(accuracy)}
 
 
-class ProxSGD(Optimizer):
+class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
     """Optimizer class for FedNova that supports Proximal, SGD, and Momentum updates.
 
     SGD optimizer modified with support for :
@@ -219,7 +219,7 @@ class ProxSGD(Optimizer):
             nesterov (bool, optional): enables Nesterov momentum (default: False)
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         params,
         ratio: float,
@@ -258,15 +258,15 @@ class ProxSGD(Optimizer):
         }
         if nesterov and (momentum <= 0 or dampening != 0):
             raise ValueError("Nesterov momentum requires a momentum and zero dampening")
-        super(ProxSGD, self).__init__(params, defaults)
+        super().__init__(params, defaults)
 
     def __setstate__(self, state):
         """Set the optimizer state."""
-        super(ProxSGD, self).__setstate__(state)
+        super().__setstate__(state)
         for group in self.param_groups:
             group.setdefault("nesterov", False)
 
-    def step(self, closure=None):
+    def step(self, closure=None):  # pylint: disable=too-many-branches
         """Perform a single optimization step."""
         for group in self.param_groups:
             weight_decay = group["weight_decay"]

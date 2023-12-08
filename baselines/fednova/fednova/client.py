@@ -18,7 +18,7 @@ class FedNovaClient(
 ):  # pylint: disable=too-many-instance-attributes
     """Standard Flower client for CNN training."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         net: torch.nn.Module,
         client_id: str,
@@ -34,8 +34,8 @@ class FedNovaClient(
         self.optimizer = instantiate(
             config.optimizer, params=self.net.parameters(), ratio=ratio
         )
-        self.trainLoader = trainloader
-        self.valLoader = valloader
+        self.trainloader = trainloader
+        self.valloader = valloader
         self.client_id = client_id
         self.device = device
         self.num_epochs = num_epochs
@@ -75,14 +75,14 @@ class FedNovaClient(
             num_epochs = self.num_epochs
 
         train(
-            self.net, self.optimizer, self.trainLoader, self.device, epochs=num_epochs
+            self.net, self.optimizer, self.trainloader, self.device, epochs=num_epochs
         )
 
         # Get ratio by which the strategy would scale local gradients from each client
         # We use this scaling factor to aggregate the gradients on the server
         grad_scaling_factor: Dict[str, float] = self.optimizer.get_gradient_scaling()
 
-        return self.get_parameters({}), len(self.trainLoader), grad_scaling_factor
+        return self.get_parameters({}), len(self.trainloader), grad_scaling_factor
 
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]
@@ -93,16 +93,16 @@ class FedNovaClient(
         # datasets are already quite small, we merge the validation set with the
         # training set and evaluate on the training set with the aggregated global
         # model parameters. This behaviour can be modified by passing the validation
-        # set in the below test(self.valLoader) function and replacing len(
-        # self.valLoader) below. Note that we evaluate on the centralized test-set on
+        # set in the below test(self.valloader) function and replacing len(
+        # self.valloader) below. Note that we evaluate on the centralized test-set on
         # server-side in the strategy.
 
         self.set_parameters(parameters)
-        loss, metrics = test(self.net, self.trainLoader, self.device)
-        return float(loss), len(self.trainLoader), metrics
+        loss, metrics = test(self.net, self.trainloader, self.device)
+        return float(loss), len(self.trainloader), metrics
 
 
-def gen_clients_fednova(
+def gen_clients_fednova(  # pylint: disable=too-many-arguments
     num_epochs: int,
     trainloaders: List[DataLoader],
     testloader: DataLoader,

@@ -129,7 +129,7 @@ You would need to specify the below two command line parameters to iterate throu
 2. `strategy`: This specifies the aggregation strategy for the client updates. The default is `fednova`. 
 If you do not specify this parameter, all experiments will run with FedNova as the strategy and reproduce the rightmost columns of Table-1. 
 It can take the following values:
-    - `fednova`: This corresponds to the FedNova(default) aggregation strategy. 
+    - `fednova`: This corresponds to the FedNova (default) aggregation strategy. 
     - `fedavg`: This corresponds to the FedAvg aggregation strategy. The left column of Table-1 can be reproduced by setting this parameter.
 
 3. `var_local_epochs`: Takes value True/False. This parameter specifies whether the number of local training epochs for each client are fixed(Epochs=2) or variable(Uniform sampled from [2,5) ). 
@@ -152,6 +152,8 @@ python -m fednova.main +experiment=momentum strategy=fednova var_local_epochs=Tr
 The results below correspond to Table-1 of of the paper on the non-IID CIFAR-10 dataset.
 
 Centralized Evaluation: Accuracy(in %) on centralized Test set. Mean and Confidence Intervals plotted over at-least 3 seeds.
+
+> Add comment about FedAvg+moment collapsing sometimes (not the case w/ FedNova)
 
 | Local Epochs | Client Optimizer | FedAvg | FedNova |
 | ------------ | ---------------- | ------ | ------- |

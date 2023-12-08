@@ -9,7 +9,7 @@ from random import Random
 import numpy as np
 
 
-class Partition(object):
+class Partition:
     """Dataset-like object, but only access a subset of it."""
 
     def __init__(self, data, index):
@@ -26,10 +26,10 @@ class Partition(object):
         return self.data[data_idx]
 
 
-class DataPartitioner(object):
+class DataPartitioner:
     """Partitions a dataset into different chuncks."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         data,
         sizes,
@@ -63,13 +63,15 @@ class DataPartitioner(object):
         """Return a partition of the dataset."""
         return Partition(self.data, self.partitions[partition])
 
-    def __getDirichletData__(self, data, psizes, seed, alpha):
+    def __getDirichletData__(
+        self, data, psizes, seed, alpha
+    ):  # pylint: disable=too-many-locals
         """Return a partition of the dataset based on Dirichlet distribution."""
         n_nets = len(psizes)
         K = 10
-        labelList = np.array(data.targets)
+        label_list = np.array(data.targets)
         min_size = 0
-        N = len(labelList)
+        N = len(label_list)
         np.random.seed(2020)
 
         net_dataidx_map = {}
@@ -77,7 +79,7 @@ class DataPartitioner(object):
             idx_batch = [[] for _ in range(n_nets)]
             # for each class in the dataset
             for k in range(K):
-                idx_k = np.where(labelList == k)[0]
+                idx_k = np.where(label_list == k)[0]
                 np.random.shuffle(idx_k)
                 proportions = np.random.dirichlet(np.repeat(alpha, n_nets))
                 # Balance
@@ -102,7 +104,7 @@ class DataPartitioner(object):
         net_cls_counts = {}
 
         for net_i, dataidx in net_dataidx_map.items():
-            unq, unq_cnt = np.unique(labelList[dataidx], return_counts=True)
+            unq, unq_cnt = np.unique(label_list[dataidx], return_counts=True)
             tmp = {unq[i]: unq_cnt[i] for i in range(len(unq))}
             net_cls_counts[net_i] = tmp
         # print('Data statistics: %s' % str(net_cls_counts))

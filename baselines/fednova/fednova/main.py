@@ -12,20 +12,17 @@ import numpy as np
 import pandas as pd
 import torch
 from flwr.common import ndarrays_to_parameters
-from flwr.server.strategy import FedAvg
-from hydra.utils import instantiate
+from hydra.utils import call, instantiate
 from omegaconf import DictConfig, OmegaConf
 
-from fednova.baseline_client import gen_clients_fedavg
-from fednova.client import gen_clients_fednova
 from fednova.dataset import load_datasets
 from fednova.models import test
-from fednova.strategy import FedNova, weighted_average
+from fednova.strategy import weighted_average
 from fednova.utils import fit_config
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
-def main(cfg: DictConfig) -> None:
+def main(cfg: DictConfig) -> None:  # pylint: disable=too-many-locals
     """Run the baseline.
 
     Parameters
@@ -75,13 +72,8 @@ def main(cfg: DictConfig) -> None:
         return None
 
     # 3. Define your clients
-
-    if cfg.strategy == "fednova":
-        client_function = gen_clients_fednova
-    else:
-        client_function = gen_clients_fedavg
-
-    client_fn = client_function(
+    client_fn = call(
+        cfg.strategy.client_fn,
         num_epochs=cfg.num_epochs,
         trainloaders=trainloaders,
         testloader=testloader,
@@ -92,42 +84,26 @@ def main(cfg: DictConfig) -> None:
 
     # 4. Define your strategy
 
-    init_parameters = [
+    ndarrays = [
         layer_param.cpu().numpy()
         for _, layer_param in instantiate(cfg.model).state_dict().items()
     ]
-    init_parameters = ndarrays_to_parameters(init_parameters)
+    init_parameters = ndarrays_to_parameters(ndarrays)
 
     eval_fn = partial(test, instantiate(cfg.model), testloader, device)
     fit_config_fn = partial(fit_config, cfg)
 
-    if cfg.strategy == "fednova":
-        strategy = FedNova(
-            exp_config=cfg,
-            evaluate_metrics_aggregation_fn=weighted_average,
-            accept_failures=False,
-            on_fit_config_fn=fit_config_fn,
-            initial_parameters=init_parameters,
-            evaluate_fn=eval_fn,
-            fraction_evaluate=0.0,
-        )
-
-    elif cfg.strategy == "fedavg" or cfg.strategy == "fedprox":
-        # Both FedAvg and FedProx use same strategy for weight aggregation The
-        # difference is that FedProx uses a proximal term in the loss function in the
-        # local client updates Check fednova/models.py train() for more details
-
-        strategy = FedAvg(
-            evaluate_metrics_aggregation_fn=weighted_average,
-            accept_failures=False,
-            on_fit_config_fn=fit_config_fn,
-            initial_parameters=init_parameters,
-            evaluate_fn=eval_fn,
-            fraction_evaluate=0.0,
-        )
-
-    else:
-        raise NotImplementedError
+    extra_args = {} if cfg.strategy.name == "fedavg" else {"exp_config": cfg}
+    strategy = instantiate(
+        cfg.strategy.strategy,
+        evaluate_metrics_aggregation_fn=weighted_average,
+        accept_failures=False,
+        on_fit_config_fn=fit_config_fn,
+        initial_parameters=init_parameters,
+        evaluate_fn=eval_fn,
+        fraction_evaluate=0.0,
+        **extra_args,
+    )
 
     # 5. Start Simulation
 
