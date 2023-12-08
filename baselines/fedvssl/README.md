@@ -26,7 +26,7 @@ As common SSL training pipline, this code has two parts: SSL pre-training in FL 
 
 **Dataset:** [UCF-101](https://www.crcv.ucf.edu/data/UCF101.php)
 
-**Hardware Setup:** These experiments (SSL pre-train + downstream fine-tuning) were on a server with 6 GTX-3090 GPU and 128 CPU threads. 
+**Hardware Setup:** These experiments (SSL pre-train + downstream fine-tuning) were on a server with 6x RTX-3090 GPU and 128 CPU threads. Assuming a single client runs per GPU, on a RTX 3090 it takes 34s for a client to complete its local training (1 epoch); on an A100 this goes down to 17s. In this baseline 5 clients participate in each round for a total of 20 rounds. On a single A100 you can run the federated pre-training in under 1h.
 
 **Contributers:** Yasar Abbas Ur Rehman and Yan Gao
 
@@ -150,6 +150,9 @@ python -m fedvssl.main strategy.fedavg=true
 # This config can also be overriden.
 ```
 
+Running any of the above will create a directory structure in the form of `outputs/<DATE>/<TIME>/fedvssl_results` to save the global checkpoints and the local clients' training logs.
+
+
 ### Downstream fine-tuning
 
 The downstream fine-tuning does not involve Flower because it's done in centralized fashion. Let's finetune the model we just pretrained with `FedVSSL` will finetune using UCF-101. First,
@@ -157,6 +160,8 @@ we need to transform model format:
 
 ```bash
 python -m fedvssl.finetune_preprocess --pretrained_model_path=<CHECKPOINT>.npz
+# check for checkpoints in the output directory of your experiment (outputs/<DATE>/<TIMES>/fedvssl_results)
+# Where <DATE>/<TIME> are the date and time when you launched the experiment
 ```
 
 Then, launch the fine-tuning using `CtP` script. Results will stored in a new directory named `finetune_results`.
@@ -186,8 +191,6 @@ To start the pre-training one can use the following command:
 python -m fedvssl.main  # this will run using the default settings.
 ```
 
-This will create a folder named `fedvssl_results` to save the global checkpoints and the local clients' training logs.
-To check the results, please direct to `fedvssl_results/clientN/*.log.json` files in default, and check the loss changes during training.
 
 After pre-training one can use the provided commands in the section above to run the fine-tuning. 
 

@@ -93,6 +93,7 @@ def main(cfg: DictConfig) -> None:
         "num_gpus": cfg.client_resources.num_gpus,
     }
     base_work_dir = save_path + f"/{cfg.exp_name}"
+    cfg.strategy.base_work_dir = base_work_dir
     rounds = cfg.rounds
     data_dir = cfg.data_dir + "/ucf101"
     partition_dir = cfg.partition_dir
