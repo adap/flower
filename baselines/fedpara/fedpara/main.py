@@ -88,9 +88,9 @@ def main(cfg: DictConfig) -> None:
             "num_gpus": cfg.client_resources.num_gpus,
         },
         ray_init_args={
-            "num_cpus": 20,
+            "num_cpus": 40,
             "num_gpus": 1,
-            "_memory": 150 * 1024 * 1024 * 1024,
+            "_memory": 110 * 1024 * 1024 * 1024,
         },
     )
 

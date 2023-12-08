@@ -1,7 +1,7 @@
 """Model definitions for FedPara."""
 
 from typing import Dict, Tuple
-
+from torch.nn import init
 import torch
 import torch.nn.functional as F
 from flwr.common import Scalar
@@ -15,46 +15,32 @@ import numpy as np
 import math
 
 class LowRank(nn.Module):
-    def __init__(self,
-                 in_channels: int,
-                 out_channels: int,
-                 low_rank: int,
-                 kernel_size: int):
-        super().__init__()
-        self.T = nn.Parameter(
-            torch.empty(size=(low_rank, low_rank, kernel_size, kernel_size)),
-            requires_grad=True
-        )
-        self.O = nn.Parameter(
-            torch.empty(size=(low_rank, out_channels)),
-            requires_grad=True
-        )
-        self.I = nn.Parameter(
-            torch.empty(size=(low_rank, in_channels)),
-            requires_grad=True
-        )
-        self._init_parameters()
+  def __init__(self,
+               in_channels: int,
+               out_channels: int,
+               low_rank: int,
+               kernel_size: int):
+    super().__init__()
+    self.T = nn.Parameter(
+        torch.empty(size=(low_rank, low_rank, kernel_size, kernel_size)),
+        requires_grad=True
+    )
+    self.X = nn.Parameter(
+        torch.empty(size=(low_rank, out_channels)),
+        requires_grad=True
+    )
+    self.Y = nn.Parameter(
+        torch.empty(size=(low_rank, in_channels)),
+        requires_grad=True
+    )
 
-    def _init_parameters(self):
-        # Initialization affects the convergence stability for our parameterization
-        fan = nn.init._calculate_correct_fan(self.T, mode='fan_in')
-        gain = nn.init.calculate_gain('relu', 0)
-        std_t = gain / np.sqrt(fan)
-
-        fan = nn.init._calculate_correct_fan(self.O, mode='fan_in')
-        std_o = gain / np.sqrt(fan)
-
-        fan = nn.init._calculate_correct_fan(self.I, mode='fan_in')
-        std_i = gain / np.sqrt(fan)
-
-        nn.init.normal_(self.T, 0, std_t)
-        nn.init.normal_(self.O, 0, std_o)
-        nn.init.normal_(self.I, 0, std_i)
-
-    def forward(self):
-        # torch.einsum simplify the tensor produce (matrix multiplication)
-        return torch.einsum("xyzw,xo,yi->oizw", self.T, self.O, self.I)
-
+    init.kaiming_normal_(self.T, mode='fan_out', nonlinearity='leaky_relu')
+    init.kaiming_normal_(self.X, mode='fan_out', nonlinearity='leaky_relu')
+    init.kaiming_normal_(self.Y, mode='fan_out', nonlinearity='leaky_relu')
+    
+  def forward(self):
+    # torch.einsum simplify the tensor produce (matrix multiplication)
+    return torch.einsum("xyzw,xo,yi->oizw", self.T, self.X, self.Y)
 
 class Conv2d(nn.Module):
     def __init__(self,
@@ -64,7 +50,7 @@ class Conv2d(nn.Module):
                  stride: int = 1,
                  padding: int = 0,
                  bias: bool = False,
-                 ratio: float = 0.0,
+                 ratio: float = 0.1,
                  add_nonlinear: bool = False,
                  jacobian_corr: bool = False):
         super().__init__()
@@ -119,37 +105,36 @@ class VGG16GN(nn.Module):
         self.features = vgg16.features
         self.classifier = nn.Sequential(
             nn.Linear(512, 512),
-            nn.ReLU(inplace=True),
+            nn.LeakyReLU(inplace=True),
             nn.Dropout(),
             nn.Linear(512, 512),
-            nn.ReLU(inplace=True),
+            nn.LeakyReLU(inplace=True),
             nn.Dropout(),
             nn.Linear(512, num_classes)
         )
-        # Replace Conv2d layers with custom Conv2d
         for name, module in self.features.named_children():
             module = getattr(self.features, name)
-            # if isinstance(module, nn.Conv2d):
-            #     num_channels = module.in_channels
-            #     setattr(self.features, name, Conv2d(
-            #         num_channels,
-            #         module.out_channels,
-            #         module.kernel_size[0],
-            #         module.stride[0],
-            #         module.padding[0],
-            #         module.bias is not None,
-            #         ratio=ratio,
-            #         add_nonlinear=add_nonlinear,
-            #         jacobian_corr=jacobian_corr
-            #     ))
             if isinstance(module, nn.Conv2d):
-                n = module.kernel_size[0] * module.kernel_size[1] * module.out_channels
-                module.weight.data.normal_(0, math.sqrt(2. / n))
-                module.bias.data.zero_()
+                num_channels = module.in_channels
+                setattr(self.features, name, Conv2d(
+                    num_channels,
+                    module.out_channels,
+                    module.kernel_size[0],
+                    module.stride[0],
+                    module.padding[0],
+                    module.bias is not None,
+                    ratio=ratio,
+                    add_nonlinear=add_nonlinear,
+                    jacobian_corr=jacobian_corr
+                ))
+                # replace every relu with leaky relu
+            if isinstance(module, nn.ReLU):
+                setattr(self.features, name, nn.LeakyReLU(inplace=True))
             if isinstance(module, nn.BatchNorm2d):
                 num_channels = module.num_features
                 setattr(self.features, name, nn.GroupNorm(num_groups, num_channels))
-
+        # initilize the weights using kaiming normal
+    
     def forward(self, x):
         x = self.features(x)
         x = torch.flatten(x, 1)  # Flatten the tensor

@@ -12,7 +12,7 @@ client_device: cuda
 
 client_resources:
   num_cpus: 2
-  num_gpus: 0.125
+  num_gpus: 0.25
 
 dataset_config:
   name: CIFAR10
