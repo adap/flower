@@ -102,8 +102,18 @@ partition_splits = partition.train_test_split(test_size=0.2)
 partition_splits['train'].set_format("numpy")
 partition_splits['test'].set_format("numpy")
 
-train_partition = partition_splits['train'].map( lambda img: {"img": img.reshape(-1, 28*28).squeeze().astype(np.float32)/255.0}, input_columns="image")
-test_partition = partition_splits['test'].map( lambda img: {"img": img.reshape(-1, 28*28).squeeze().astype(np.float32)/255.0}, input_columns="image")
+train_partition = partition_splits["train"].map(
+    lambda img: {
+        "img": img.reshape(-1, 28 * 28).squeeze().astype(np.float32) / 255.0
+    },
+    input_columns="image",
+)
+test_partition = partition_splits["test"].map(
+    lambda img: {
+        "img": img.reshape(-1, 28 * 28).squeeze().astype(np.float32) / 255.0
+    },
+    input_columns="image",
+)
 
 data = (
     train_partition["img"],
@@ -112,7 +122,7 @@ data = (
     test_partition["label"].astype(np.uint32),
 )
 
-train_images, train_labels, test_images, test_labels = map(mx.array, data)
+train_images, train_labels, test_images, test_labels = map(mlx.core.array, data)
 ```
 
 ### The model
@@ -129,7 +139,7 @@ class MLP(mlx.nn.Module):
         super().__init__()
         layer_sizes = [input_dim] + [hidden_dim] * num_layers + [output_dim]
         self.layers = [
-            nn.Linear(idim, odim)
+            mlx.nn.Linear(idim, odim)
             for idim, odim in zip(layer_sizes[:-1], layer_sizes[1:])
         ]
 
@@ -144,15 +154,15 @@ We also define some utility functions to test our model and to iterate over batc
 
 ```python
 def loss_fn(model, X, y):
-    return mlx.core.mean(nn.losses.cross_entropy(model(X), y))
+    return mlx.core.mean(mlx.nn.losses.cross_entropy(model(X), y))
 
 
 def eval_fn(model, X, y):
-    return mlx.core.mean(mx.argmax(model(X), axis=1) == y)
+    return mlx.core.mean(mlx.core.argmax(model(X), axis=1) == y)
 
 
 def batch_iterate(batch_size, X, y):
-    perm = mx.array(np.random.permutation(y.size))
+    perm = mlx.core.array(np.random.permutation(y.size))
     for s in range(0, y.size, batch_size):
         ids = perm[s : s + batch_size]
         yield X[ids], y[ids]
@@ -171,10 +181,10 @@ The way MLX stores its parameters is as follows:
 ```
 { 
   "layers": [
-    {"weight": mx.array, "bias": mx.array},
-    {"weight": mx.array, "bias": mx.array},
+    {"weight": mlx.core.array, "bias": mlx.core.array},
+    {"weight": mlx.core.array, "bias": mlx.core.array},
     ...,
-    {"weight": mx.array, "bias": mx.array}
+    {"weight": mlx.core.array, "bias": mlx.core.array}
   ]
 }
 ```
@@ -197,7 +207,7 @@ keys of each layer dict:
 def set_parameters(self, parameters):
     new_params = {}
     new_params["layers"] = [
-        {"weight": mx.array(parameters[i]), "bias": mx.array(parameters[i + 1])}
+        {"weight": mlx.core.array(parameters[i]), "bias": mlx.core.array(parameters[i + 1])}
         for i in range(0, len(parameters), 2)
     ]
     self.model.update(new_params)
@@ -214,7 +224,7 @@ def fit(self, parameters, config):
         ):
             loss, grads = self.loss_and_grad_fn(self.model, X, y)
             self.optimizer.update(self.model, grads)
-            mx.eval(self.model.parameters(), self.optimizer.state)
+            mlx.core.eval(self.model.parameters(), self.optimizer.state)
     return self.get_parameters(config={}), len(self.train_images), {}
 ```
 
@@ -255,7 +265,7 @@ class FlowerClient(fl.client.NumPyClient):
     def set_parameters(self, parameters):
         new_params = {}
         new_params["layers"] = [
-            {"weight": mx.array(parameters[i]), "bias": mx.array(parameters[i + 1])}
+            {"weight": mlx.core.array(parameters[i]), "bias": mlx.core.array(parameters[i + 1])}
             for i in range(0, len(parameters), 2)
         ]
         self.model.update(new_params)
@@ -268,7 +278,7 @@ class FlowerClient(fl.client.NumPyClient):
             ):
                 loss, grads = self.loss_and_grad_fn(self.model, X, y)
                 self.optimizer.update(self.model, grads)
-                mx.eval(self.model.parameters(), self.optimizer.state)
+                mlx.core.eval(self.model.parameters(), self.optimizer.state)
         return self.get_parameters(config={}), len(self.train_images), {}
 
     def evaluate(self, parameters, config):
@@ -291,8 +301,8 @@ learning_rate = 1e-1
 
 model = MLP(num_layers, train_images.shape[-1], hidden_dim, num_classes)
 
-loss_and_grad_fn = nn.value_and_grad(model, loss_fn)
-optimizer = optim.SGD(learning_rate=learning_rate)
+loss_and_grad_fn = mlx.nn.value_and_grad(model, loss_fn)
+optimizer = mlx.optimizers.SGD(learning_rate=learning_rate)
 ```
 
 Finally, we can instantiate it by using the `start_client` function:
