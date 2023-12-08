@@ -11,7 +11,8 @@ import anytree
 import numpy as np
 from PIL import Image
 from tqdm import tqdm
-from utils import makedir_exist_ok
+
+from heterofl.utils import makedir_exist_ok
 
 IMG_EXTENSIONS = [".jpg", ".jpeg", ".png", ".ppm", ".bmp", ".pgm", ".tif"]
 

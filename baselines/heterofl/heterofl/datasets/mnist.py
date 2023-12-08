@@ -7,15 +7,15 @@ import numpy as np
 import torch
 from PIL import Image
 from torch.utils.data import Dataset
-from utils import check_exists, load, makedir_exist_ok, save
 
-from .utils import (
+from heterofl.datasets.utils import (
     download_url,
     extract_file,
     make_classes_counts,
     make_flat_index,
     make_tree,
 )
+from heterofl.utils import check_exists, load, makedir_exist_ok, save
 
 
 class MNIST(Dataset):
