@@ -61,17 +61,18 @@ For UCF-101 dataset, one can simply run the `dataset_preparation.py` file to dow
 ## Environment Setup
 Please make sure you have installed CUDA 11.0 on your machine 
 (see [NVIDIA CUDA Toolkit website](https://developer.nvidia.com/cuda-11.0-download-archive?target_os=Linux)).
-To construct the Python environment follow these steps:
+To construct the Python environment follow these steps (asuming you arelady have `pyenv` and `Poetry` in your system):
 
 ```bash
+# Set directory to use python 3.10 (install with `pyenv install <version>` if you don't have it)
+pyenv local 3.10.12
+poetry env use 3.10.12
+
 # Install the base Poetry environment
 poetry install
 
 # Activate the environment
 poetry shell
-
-# Install mmcv package
-pip install mmcv-full==1.7.1 -f https://download.openmmlab.com/mmcv/dist/cu117/torch1.13/index.html
 ```
 
 ## Running the Experiments
