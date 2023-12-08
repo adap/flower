@@ -74,7 +74,7 @@ class Bulyan(FedAvg):
         arguments to the first_aggregation rule
     """
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes, too-many-locals
+    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals
     def __init__(
         self,
         *,
