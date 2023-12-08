@@ -33,7 +33,7 @@ def get_model():
 
 def get_builder():
     wrapped_model = (
-        ModelWrapper(get_model()) if "nn" in sys.argv else LogisticRegressionModel()
+        ModelWrapper(get_model()) if "nn" in sys.argv else Cifar10CNNModel()
     )
 
     builder = Builder(wrapped_model)
