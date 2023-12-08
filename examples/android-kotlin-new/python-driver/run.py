@@ -37,8 +37,7 @@ def get_builder():
     )
 
     builder = Builder(wrapped_model)
-    builder.add_multiply("multiply01", [0, 1, 2], 2.0)
-    builder.add_function(multiply, "multiply02", [3])
+    builder.add_function(multiply, "multiply01", [0, 1, 2])
     builder.add_function(custom_preprocessing, "custom01", [4, 5, 6])
 
     return builder
