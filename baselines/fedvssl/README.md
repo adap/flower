@@ -35,10 +35,10 @@ As common SSL training pipline, this code has two parts: SSL pre-training in FL 
 **Task:** Action Recognition
 
 **Model:** 
-* This directory first pretrain Catch-the-Patch (CtP) model from the CtP (see `CtP/pyvrl/models/pretraining/ctp`) repository during FL pretrainin stage The backbone model is R3D-18 (see `/CtP/pyvrl/models/backbones/r3d.py`). 
-* After pretraining it finetunes the R3D-18 model on UCF-101 dataset.
+* We first pretrain the Catch-the-Patch (CtP) model from the CtP (see `CtP/pyvrl/models/pretraining/ctp`) repository during the FL pretrainin stage. The backbone model is R3D-18 (see `/CtP/pyvrl/models/backbones/r3d.py`). 
+* After pertaining, we finetunes the R3D-18 model on UCF-101 dataset.
 
-**Dataset:** This baselines only demonstrates SSL pre-training and supervised fine-tuning with UCF-101 dataset. However, we also provide the script files to generate the partitions for Kinetics-400 datasets. 
+**Dataset:** This baseline only demonstrates SSL pre-training and supervised fine-tuning with UCF-101 dataset. However, we also provide the script files to generate the partitions for Kinetics-400 datasets. 
 For UCF-101 dataset, one can simply run the `dataset_preparation.py` file to download and generate the iid splits.
 
 | Dataset | #classes | #partitions | partitioning method |  partition settings  |
