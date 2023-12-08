@@ -1,7 +1,7 @@
 ---
 title: Federated Self-supervised Learning for Video Understanding
 url: https://arxiv.org/abs/2207.01975
-labels: [cross-device, ssl, video, videossl]
+labels: [action recognition, cross-device, ssl, video, videossl]
 dataset: [UCF-101, Kinectics-400]
 ---
 
@@ -21,10 +21,10 @@ dataset: [UCF-101, Kinectics-400]
 
 ## About this baseline
 
-**Whats's implemented:** The code in this directory replicates the experiments in * Federated Self-supervised Learning for Video Understanding* (Rehman et al., 2022) for UCF-101, which proposed the FedVSSL algorithm. Specifically, it replicates the results for UCF-101 in Table 4 in the paper.
+**Whats's implemented:** The code in this directory replicates the experiments in *Federated Self-supervised Learning for Video Understanding* (Rehman et al., 2022) for UCF-101, which proposed the FedVSSL algorithm. Specifically, it replicates the results for UCF-101 in Table 4 in the paper.
 As common SSL training pipline, this code has two parts: SSL pre-training in FL and downstream fine-tuning.
 
-**Dataset:** UCF-101
+**Dataset:** [UCF-101](https://www.crcv.ucf.edu/data/UCF101.php)
 
 **Hardware Setup:** These experiments (SSL pre-train + downstream fine-tuning) were on a server with 6 GTX-3090 GPU and 128 CPU threads. 
 
@@ -38,8 +38,8 @@ As common SSL training pipline, this code has two parts: SSL pre-training in FL 
 * This directory first pretrain Catch-the-Patch (CtP) model from the CtP (see `CtP/pyvrl/models/pretraining/ctp`) repository during FL pretrainin stage The backbone model is R3D-18 (see `/CtP/pyvrl/models/backbones/r3d.py`). 
 * After pretraining it finetunes the R3D-18 model on UCF-101 dataset.
 
-**Dataset:** This baselines only include pre-training and fine-tuning with UCF-101 dataset. However, we also provide the script files to generate the partitions for Kinetics-400 datasets. 
-For UCF-101 dataset, one can simply run the `dataset_preparation.py` file to download and generate the iid splits for UCF-101 datasets.
+**Dataset:** This baselines only demonstrates SSL pre-training and supervised fine-tuning with UCF-101 dataset. However, we also provide the script files to generate the partitions for Kinetics-400 datasets. 
+For UCF-101 dataset, one can simply run the `dataset_preparation.py` file to download and generate the iid splits.
 
 | Dataset | #classes | #partitions | partitioning method |  partition settings  |
 |:--------|:--------:|:-----------:| :---: |:--------------------:|
@@ -82,6 +82,7 @@ Then, download the `CtP` repo and install required packages:
 # Clone CtP repo
 git clone https://github.com/yan-gao-GY/CtP.git fedvssl/CtP
 
+# Additional packages to decompress the dataset
 sudo apt install unrar unzip
 ```
 
@@ -129,7 +130,8 @@ cd ..
 
 
 ### Federated SSL pre-training
-Finally, we can launch the training. To run using FedVSSL:
+
+Finally, we can launch the training. To run SSL pretraining using `FedVSSL`:
 ```bash
 # Run federated SSL training with FedVSSL
 python -m fedvssl.main # this will run using the default settings.
@@ -138,7 +140,8 @@ python -m fedvssl.main # this will run using the default settings.
 python -m fedvssl.main strategy.mix_coeff=1 rounds=100 # will set hyper-parameter alpha to 1 and the number of rounds to 100
 ```
 
-To run using FedAvg:
+To run using `FedAvg`:
+
 ```bash
 # This will run FedAvg baseline
 # This is done so to match the experimental setup in the paper
@@ -148,14 +151,15 @@ python -m fedvssl.main strategy.fedavg=true
 ```
 
 ### Downstream fine-tuning
-To run downstream fine-tuning with pre-trained SSL model,
-we first need to transform model format:
+
+The downstream fine-tuning does not involve Flower because it's done in centralized fashion. Let's finetune the model we just pretrained with `FedVSSL` will finetune using UCF-101. First,
+we need to transform model format:
 
 ```bash
 python -m fedvssl.finetune_preprocess --pretrained_model_path=<CHECKPOINT>.npz
 ```
 
-Then, launch the fine-tuning using CtP script:
+Then, launch the fine-tuning using `CtP` script. Results will stored in a new directory named `finetune_results`.
 
 ```bash
 bash fedvssl/CtP/tools/dist_train.sh fedvssl/conf/mmcv_conf/finetuning/r3d_18_ucf101/finetune_ucf101.py 1 --work_dir=./finetune_results --data_dir=fedvssl/data
@@ -172,20 +176,20 @@ bash fedvssl/CtP/tools/dist_test.sh fedvssl/conf/mmcv_conf/finetuning/r3d_18_ucf
 ## Expected results
 
 ### Pre-training and fine-tuning on UCF-101
-The pre-training in the paper was conducted on Kinectics-400, which would take too much resource to complete the training.
-As a result, we provide the following command with pre-training on UCF-101, in order to validate FedVSSL.
+The pre-training in the paper was conducted on Kinectics-400, which takes a considerable amount of time without access to server-grade hardware.
+As a result, we provide the following command to do pre-training on UCF-101, in order to validate FedVSSL.
 
-In this experiment, we simulate the cross-silo scenario with UCF-101 video data that is distributed among 5 clients. We did the FL pre-training of CtP SSL for 20 rounds followed by fine-tuning the whole network on UCF-101 video data. The `conf/base.yaml` file contains all the details about the pre-training and fine-tuning setup. 
+In this experiment, we simulate the cross-silo scenario with UCF-101 video data that distributed among 5 clients. We did the FL pre-training of CtP SSL for 20 rounds followed by fine-tuning the whole network on UCF-101 video data. The `conf/base.yaml` file contains all the details about the pre-training and fine-tuning setup. 
 
 To start the pre-training one can use the following command:
 ```bash
 python -m fedvssl.main  # this will run using the default settings.
 ```
 
-This will create a folder named fedvssl_results to save the global checkpoints and the local clients' training logs.
+This will create a folder named `fedvssl_results` to save the global checkpoints and the local clients' training logs.
 To check the results, please direct to `fedvssl_results/clientN/*.log.json` files in default, and check the loss changes during training.
 
-After pre-training one can use the provided commands to run the fine-tuning. 
+After pre-training one can use the provided commands in the section above to run the fine-tuning. 
 
 The fine-tuning lasts for 150 epochs.
 

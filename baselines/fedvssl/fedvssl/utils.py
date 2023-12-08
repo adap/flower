@@ -1,8 +1,7 @@
 """Define any utility function.
 
-They are not directly relevant to  the other (more FL specific) python modules. For
-example, you may define here things like: loading a model from a checkpoint, saving
-results, plotting.
+They are not directly relevant to  the other (more FL specific) python modules. For example,
+you may define here things like: loading a model from a checkpoint, saving results, plotting.
 """
 
 import os
@@ -14,8 +13,15 @@ import torch
 from mmcv.runner import init_dist
 from mmcv.utils import collect_env
 
-from fedvssl.CtP.pyvrl.apis import get_root_logger, set_random_seed, train_network
-from fedvssl.CtP.pyvrl.builder import build_dataset, build_model
+from fedvssl.CtP.pyvrl.apis import (  # pylint: disable=E0611,E0401
+    get_root_logger,
+    set_random_seed,
+    train_network,
+)
+from fedvssl.CtP.pyvrl.builder import (  # pylint: disable=E0611,E0401
+    build_dataset,
+    build_model,
+)
 
 
 def init_p_paths(folder_name):
@@ -58,9 +64,7 @@ def set_config_mmcv(args, cfg):
         cfg.resume_from = args.resume_from
     else:
         if os.path.isdir(cfg.work_dir):
-            chk_name_list = [
-                fn for fn in os.listdir(cfg.work_dir) if fn.endswith(".pth")
-            ]
+            chk_name_list = [fn for fn in os.listdir(cfg.work_dir) if fn.endswith(".pth")]
             # if there may exists multiple checkpoint,
             # we will select the latest one (with the highest epoch number)
             if len(chk_name_list) > 0:

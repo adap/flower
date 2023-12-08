@@ -8,6 +8,7 @@ import torch
 from flwr.common import parameters_to_ndarrays
 from mmengine.config import Config
 
+# pylint: disable=import-error,no-name-in-module
 from .CtP.pyvrl.builder import build_model
 
 
@@ -28,8 +29,7 @@ def args_parser():
         help="Path of pre-trained SSL model.",
     )
 
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 args = args_parser()
@@ -50,12 +50,8 @@ if params["arr_0"].shape == ():
     params = parameters_to_ndarrays(params)
 else:
     # For the cases where weights are stored as NumPy arrays
-    params = [
-        np.array(v) for v in list(params["arr_0"])
-    ]
+    params = [np.array(v) for v in list(params["arr_0"])]
 
 params_dict = zip(model.state_dict().keys(), params)
-state_dict = {
-    "state_dict": OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
-}
+state_dict = {"state_dict": OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})}
 torch.save(state_dict, "./model_pretrained.pth")

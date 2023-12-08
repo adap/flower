@@ -29,9 +29,7 @@ def parse_args():
         type=int,
         help="number of clients for partitioning.",
     )
-    parser.add_argument(
-        "--seed", default=7, type=int, help="random seed for partitioning."
-    )
+    parser.add_argument("--seed", default=7, type=int, help="random seed for partitioning.")
     args = parser.parse_args()
 
     return args
@@ -64,9 +62,7 @@ def main():
         client_data = data_list[
             int(i * num_data / num_clients) : int((i + 1) * num_data / num_clients)
         ]
-        with open(
-            os.path.join(output_path, "client_dist" + str(i + 1) + ".json"), "w"
-        ) as f:
+        with open(os.path.join(output_path, "client_dist" + str(i + 1) + ".json"), "w") as f:
             json.dump(client_data, f, indent=2)
 
 

@@ -1,7 +1,7 @@
 """Create and connect the building blocks for your experiments; start the simulation.
 
-It includes processioning the dataset, instantiate strategy, specify how the global
-model is going to be evaluated, etc. At the end, this script saves the results.
+It includes processioning the dataset, instantiate strategy, specify how the global model is
+going to be evaluated, etc. At the end, this script saves the results.
 """
 # These are the basic packages you'll need here
 
@@ -20,9 +20,8 @@ from .client import SslClient
 from .utils import init_p_paths, load_data, load_model, set_config_mmcv
 
 
-def initial_setup(
-    cid, base_work_dir, rounds, data_dir, num_gpus, partition_dir, cfg_path
-):
+# pylint: disable=too-many-arguments
+def initial_setup(cid, base_work_dir, rounds, data_dir, num_gpus, partition_dir, cfg_path):
     """Initialise setup for instantiating client class."""
     cid_plus_one = str(int(cid) + 1)
     args = Namespace(
@@ -41,9 +40,9 @@ def initial_setup(
         work_dir=base_work_dir + "/client" + cid_plus_one,
     )
 
-    print("Starting client", args.cid)
+    print("Starting client", args.cid)  # pylint: disable=no-member
     # Fetch the configuration file
-    cfg = Config.fromfile(args.cfg)
+    cfg = Config.fromfile(args.cfg)  # pylint: disable=no-member
     # Define the client data files;
     # Usually contains paths to the samples and annotations
     cfg.data.train.data_source.ann_file = (

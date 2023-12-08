@@ -1,7 +1,7 @@
 """Define your client class and a function to construct such clients.
 
-Please overwrite `flwr.client.NumPyClient` or `flwr.client.Client` and create a function
-to instantiate your client.
+Please overwrite `flwr.client.NumPyClient` or `flwr.client.Client` and create a function to
+instantiate your client.
 """
 import os
 import re
@@ -13,15 +13,12 @@ import torch
 
 from .utils import train_model_cl
 
-# pylint: disable=no-member
-# DEVICE: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-# pylint: enable=no-member
 
-
+# pylint: disable=too-many-instance-attributes
 class SslClient(fl.client.NumPyClient):
     """Flower client implementing video SSL w/ PyTorch."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         model,
         train_dataset,
@@ -61,30 +58,20 @@ class SslClient(fl.client.NumPyClient):
 
         self.model.load_state_dict(state_dict, strict=True)
 
-    def get_properties(self, ins):
-        """Get properties."""
-        return self.properties
-
-    def fit(self, parameters, config):
+    def fit(self, parameters, config):  # pylint: disable=too-many-locals
         """Customise the training function."""
         int(config["epoch_global"])
         self.cfg.lr_config = {"policy": "step", "step": [100, 200]}
 
-        chk_name_list = [
-            fn for fn in os.listdir(self.cfg.work_dir) if fn.endswith(".pth")
-        ]
+        chk_name_list = [fn for fn in os.listdir(self.cfg.work_dir) if fn.endswith(".pth")]
         chk_epoch_list = [
-            int(re.findall(r"\d+", fn)[0])
-            for fn in chk_name_list
-            if fn.startswith("epoch")
+            int(re.findall(r"\d+", fn)[0]) for fn in chk_name_list if fn.startswith("epoch")
         ]
 
         # Gathering  local epochs if there are any
         if chk_epoch_list:
             chk_epoch_list.sort()
-            checkpoint = os.path.join(
-                self.cfg.work_dir, f"epoch_{chk_epoch_list[-1]}.pth"
-            )
+            checkpoint = os.path.join(self.cfg.work_dir, f"epoch_{chk_epoch_list[-1]}.pth")
             pr_model = torch.load(checkpoint)
             state_dict_pr = pr_model["state_dict"]
             # load the model with previous state_dictionary

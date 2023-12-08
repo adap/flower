@@ -60,7 +60,7 @@ ruff = "==0.0.272"
 types-requests = "==2.27.7"
 
 [tool.isort]
-line_length = 88
+line_length = 94
 indent = "    "
 multi_line_output = 3
 include_trailing_comma = true
@@ -68,7 +68,7 @@ force_grid_wrap = 0
 use_parentheses = true
 
 [tool.black]
-line-length = 88
+line-length = 94
 target-version = ["py38", "py39", "py310", "py311"]
 
 [tool.pytest.ini_options]
@@ -85,7 +85,7 @@ plugins = "numpy.typing.mypy_plugin"
 
 [tool.pylint."MESSAGES CONTROL"]
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
-good-names = "i,j,k,_,x,y,X,Y"
+good-names = "i,j,k,f,_,x,y,X,Y,mu,v"
 signature-mutators="hydra.main.main"
 
 [[tool.mypy.overrides]]
@@ -99,6 +99,7 @@ disallow_untyped_calls = false
 
 [tool.pylint.typecheck]
 generated-members="numpy.*, torch.*, tensorflow.*"
+# ignore-paths="fedvssl/CtP/"
 
 [[tool.mypy.overrides]]
 module = "torch.*"
@@ -106,12 +107,12 @@ follow_imports = "skip"
 follow_imports_for_stubs = true
 
 [tool.docformatter]
-wrap-summaries = 88
-wrap-descriptions = 88
+wrap-summaries = 94
+wrap-descriptions = 94
 
 [tool.ruff]
 target-version = "py38"
-line-length = 88
+line-length = 94
 select = ["D", "E", "F", "W", "B", "ISC", "C4"]
 fixable = ["D", "E", "F", "W", "B", "ISC", "C4"]
 ignore = ["B024", "B027"]

@@ -1,7 +1,7 @@
 """Optionally define a custom strategy.
 
-Needed only when the strategy is not yet implemented in Flower or because you want to
-extend or modify the functionality of an existing strategy.
+Needed only when the strategy is not yet implemented in Flower or because you want to extend
+or modify the functionality of an existing strategy.
 """
 # import all the necessary libraries
 import os
@@ -26,7 +26,7 @@ from flwr.server.client_proxy import ClientProxy
 class FedVSSL(fl.server.strategy.FedAvg):
     """Define the custom strategy for FedVSSL."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         num_rounds: int = 1,
         mix_coeff: float = 0.2,
@@ -35,9 +35,10 @@ class FedVSSL(fl.server.strategy.FedAvg):
         fedavg: bool = False,
         **kwargs,
     ):
-        assert (
-            isinstance(swbeta, int) and swbeta >= 0 and swbeta <= 1
-        ), "the value must be an integer and either 0 or 1 "
+        assert isinstance(swbeta, int) and swbeta in [
+            0,
+            1,
+        ], "the value must be an integer and either 0 or 1 "
         self.num_rounds = (num_rounds,)
         self.mix_coeff = (
             mix_coeff  # coefficient for mixing the loss and fedavg aggregation methods
@@ -100,9 +101,7 @@ class FedVSSL(fl.server.strategy.FedAvg):
             # load the previous weights if there are any
 
             if server_round > 1 and self.swbeta == 1:
-                chk_name_list = [
-                    fn for fn in os.listdir(glb_dir) if fn.endswith(".npz")
-                ]
+                chk_name_list = [fn for fn in os.listdir(glb_dir) if fn.endswith(".npz")]
                 chk_epoch_list = [
                     int(re.findall(r"\d+", fn)[0])
                     for fn in chk_name_list

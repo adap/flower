@@ -16,7 +16,7 @@ out_path = [
 
 assert len(ann_path) == len(out_path)
 
-for i in range(len(ann_path)):
+for i, _ in enumerate(ann_path):
     with open(ann_path[i], "r") as f:
         lines = f.read().splitlines()
     anns = []
