@@ -6,6 +6,7 @@
 defaults:
   - _self_
   - strategy: fednova
+  - optimizer: vanilla
 
 var_local_epochs: False
 datapath: fednova/data/
