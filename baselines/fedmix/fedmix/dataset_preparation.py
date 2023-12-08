@@ -165,9 +165,9 @@ def _partition_cifar_new_new(
     trainset_sorted = _sort_by_class(trainset)
 
     # create sub-dataset, one per class
-    img_count, _ = np.histogram(trainset.targets)
+    img_count, _ = np.histogram(trainset.targets, bins=num_classes)
     num_images_class = img_count[0] # number of images per class
-    print(f"{num_images_class =}")
+    print(f"{num_images_class = }")
     classes_buckets = [Subset(trainset_sorted, np.arange(i*num_images_class, (i+1)*num_images_class)) for i in range(num_classes)]
 
     # Figure out how many buckets we need to create given
