@@ -64,11 +64,7 @@ def main(cfg: DictConfig) -> None:  # pylint: disable=too-many-locals
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         model.load_state_dict(state_dict)
         loss, metrics = test(model.to(device), testloader, device)
-        print(
-            "----Loss: {}, Accuracy: {} on Test set ------".format(
-                loss, metrics["accuracy"]
-            )
-        )
+        print(f"----Loss: {loss}, Accuracy: {metrics['accuracy']} on Test set ------")
         return None
 
     # 3. Define your clients
@@ -122,36 +118,34 @@ def main(cfg: DictConfig) -> None:  # pylint: disable=too-many-locals
     if not os.path.exists(save_path):
         os.makedirs(save_path)
 
-    # round, train_loss = zip(*history.losses_distributed)
+    # rounds, train_loss = zip(*history.losses_distributed)
     # _, train_accuracy = zip(*history.metrics_distributed["accuracy"])
-    round, test_loss = zip(*history.losses_centralized)
+    rounds, test_loss = zip(*history.losses_centralized)
     _, test_accuracy = zip(*history.metrics_centralized["accuracy"])
 
-    if len(round) != cfg.num_rounds:
+    if len(rounds) != cfg.num_rounds:
         # drop zeroth evaluation round before start of training
         test_loss = test_loss[1:]
         test_accuracy = test_accuracy[1:]
-        round = round[1:]
+        rounds = rounds[1:]
 
     file_name = (
         f"{save_path}{cfg.exp_name}_{cfg.strategy}_varEpoch_"
         f"{cfg.var_local_epochs}_seed_{cfg.seed}.csv"
     )
 
-    # df = pd.DataFrame({"round": round, "train_loss": train_loss, "train_accuracy":
+    # df = pd.DataFrame({"round": rounds, "train_loss": train_loss, "train_accuracy":
     # train_accuracy, "test_loss": test_loss, "test_accuracy": test_accuracy})
 
     df = pd.DataFrame(
-        {"round": round, "test_loss": test_loss, "test_accuracy": test_accuracy}
+        {"round": rounds, "test_loss": test_loss, "test_accuracy": test_accuracy}
     )
 
     df.to_csv(file_name, index=False)
 
-    print(
-        "---------Experiment Completed in : {} minutes".format(
-            (time.time() - start) / 60
-        )
-    )
+    print(f"---------Experiment Completed in : {(time.time()-start)/60} minutes")
+
+    return None
 
 
 if __name__ == "__main__":

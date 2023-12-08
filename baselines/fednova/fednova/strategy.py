@@ -120,10 +120,7 @@ class FedNova(FedAvg):
                 self.global_momentum_buffer,
             )
 
-            log(
-                INFO,
-                "Model saved with Best Test accuracy: {}".format(self.best_test_acc),
-            )
+            log(INFO, "Model saved with Best Test accuracy %.3f: ", self.best_test_acc)
 
         return loss, metrics
 

@@ -8,8 +8,8 @@ from collections import OrderedDict
 from typing import Dict, Tuple
 
 import torch
-import torch.nn as nn
 from flwr.common.typing import NDArrays
+from torch import nn
 from torch.optim.optimizer import Optimizer, required
 
 from fednova.utils import comp_accuracy
@@ -45,11 +45,11 @@ class VGG(nn.Module):
         return x
 
 
-def make_layers(cfg, batch_norm=False):
+def make_layers(network_cfg, batch_norm=False):
     """Define the layer configuration of the VGG-16 network."""
     layers = []
     in_channels = 3
-    for v in cfg:
+    for v in network_cfg:
         if v == "M":
             layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
         else:
@@ -176,7 +176,7 @@ def test(model, test_loader, device, *args) -> Tuple[float, Dict[str, float]]:
     args[1]: List[NDArray] = server model parameters args[2]: Dict = {}
     """
     criterion = nn.CrossEntropyLoss()
-    if len(args):
+    if len(args) > 1:
         # load the model parameters
         params_dict = zip(model.state_dict().keys(), args[1])
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
@@ -242,11 +242,11 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
         self.lr = lr
 
         if lr is not required and lr < 0.0:
-            raise ValueError("Invalid learning rate: {}".format(lr))
+            raise ValueError(f"Invalid learning rate: {lr}")
         if momentum < 0.0:
-            raise ValueError("Invalid momentum value: {}".format(momentum))
+            raise ValueError(f"Invalid momentum value: {momentum}")
         if weight_decay < 0.0:
-            raise ValueError("Invalid weight_decay value: {}".format(weight_decay))
+            raise ValueError(f"Invalid weight_decay value: {weight_decay}")
 
         defaults = {
             "lr": lr,
@@ -322,12 +322,12 @@ class ProxSGD(Optimizer):  # pylint: disable=too-many-instance-attributes
             self.local_counter = self.local_counter * self.momentum + 1
             self.local_normalizing_vec += self.local_counter
 
-        self.etamu = local_lr * self.mu
-        if self.etamu != 0:
-            self.local_normalizing_vec *= 1 - self.etamu
+        etamu = local_lr * self.mu
+        if etamu != 0:
+            self.local_normalizing_vec *= 1 - etamu
             self.local_normalizing_vec += 1
 
-        if self.momentum == 0 and self.etamu == 0:
+        if self.momentum == 0 and etamu == 0:
             self.local_normalizing_vec += 1
 
         self.local_steps += 1

@@ -33,15 +33,15 @@ class DataPartitioner:
         self,
         data,
         sizes,
-        seed=1234,
-        isNonIID=False,
+        seed=2020,
+        is_non_iid=False,
         alpha=0,
         dataset=None,
     ):
         self.data = data
         self.dataset = dataset
-        if isNonIID:
-            self.partitions, self.ratio = self.__getDirichletData__(
+        if is_non_iid:
+            self.partitions, self.ratio = self._get_dirichlet_data_(
                 data, sizes, seed, alpha
             )
 
@@ -63,7 +63,7 @@ class DataPartitioner:
         """Return a partition of the dataset."""
         return Partition(self.data, self.partitions[partition])
 
-    def __getDirichletData__(
+    def _get_dirichlet_data_(
         self, data, psizes, seed, alpha
     ):  # pylint: disable=too-many-locals
         """Return a partition of the dataset based on Dirichlet distribution."""
@@ -72,7 +72,7 @@ class DataPartitioner:
         label_list = np.array(data.targets)
         min_size = 0
         N = len(label_list)
-        np.random.seed(2020)
+        np.random.seed(seed)
 
         net_dataidx_map = {}
         while min_size < K:
@@ -95,7 +95,7 @@ class DataPartitioner:
                     idx_j + idx.tolist()
                     for idx_j, idx in zip(idx_batch, np.split(idx_k, proportions))
                 ]
-                min_size = min([len(idx_j) for idx_j in idx_batch])
+                min_size = min((len(idx_j) for idx_j in idx_batch))
 
         for j in range(n_nets):
             np.random.shuffle(idx_batch[j])

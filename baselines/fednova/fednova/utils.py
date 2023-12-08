@@ -158,9 +158,8 @@ def generate_plots(local_solver: str = "vanilla", var_epochs: bool = False):
         )
 
         print(
-            "Number of valid seeds: Baseline: {} FedNova: {} ".format(
-                len(baseline_df), len(fednova_df)
-            )
+            f"Number of valid seeds: Baseline: {len(baseline_df)} "
+            f"FedNova: {len(fednova_df)}"
         )
 
         print(
@@ -176,6 +175,6 @@ def generate_plots(local_solver: str = "vanilla", var_epochs: bool = False):
 
 
 if __name__ == "__main__":
-    for var_epochs in [False, True]:
-        for local_solver in ["vanilla", "momentum", "proximal"]:
-            generate_plots(local_solver=local_solver, var_epochs=var_epochs)
+    for variable_epochs in [False, True]:
+        for solver in ["vanilla", "momentum", "proximal"]:
+            generate_plots(local_solver=solver, var_epochs=variable_epochs)

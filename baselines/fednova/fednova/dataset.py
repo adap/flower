@@ -59,7 +59,7 @@ def load_datasets(config: DictConfig) -> Tuple[List[DataLoader], DataLoader, Lis
     partition_sizes = [1.0 / config.num_clients for _ in range(config.num_clients)]
 
     partition_obj = DataPartitioner(
-        trainset, partition_sizes, isNonIID=config.NIID, alpha=config.alpha
+        trainset, partition_sizes, is_non_iid=config.NIID, alpha=config.alpha
     )
     ratio = partition_obj.ratio
 
