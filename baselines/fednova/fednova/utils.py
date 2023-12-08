@@ -150,12 +150,17 @@ def generate_plots(local_solver: str = "vanilla", var_epochs: bool = False):
         plt.savefig(
             f"{save_path}testAccuracy_{local_solver}_varEpochs_{var_epochs}.png"
         )
-        plt.show()
+
 
         print(
-            f"---------------------------Local Solver: {local_solver.upper()}"
-            f"---------------------------"
+            f"---------------------------Local Solver: {local_solver.upper()} "
+            f"Var Epochs: {var_epochs}---------------------------"
         )
+
+        print(
+            "Number of valid seeds: Baseline: {} FedNova: {} ".format(len(baseline_df),
+                                                                      len(fednova_df)))
+
         print(
             f"{baseline_label}: {baseline_mean[-1]:.2f} ± "
             f"{baseline_upper[-1] - baseline_mean[-1]:.2f}"
@@ -165,8 +170,10 @@ def generate_plots(local_solver: str = "vanilla", var_epochs: bool = False):
             f"{fednova_upper[-1] - fednova_mean[-1]:.2f}"
         )
 
+        plt.show()
+
 
 if __name__ == "__main__":
-    generate_plots(local_solver="vanilla")
-    generate_plots(local_solver="momentum")
-    generate_plots(local_solver="proximal")
+    for var_epochs in [False, True]:
+        for local_solver in ["vanilla", "momentum", "proximal"]:
+            generate_plots(local_solver=local_solver, var_epochs=var_epochs)

@@ -149,15 +149,34 @@ python -m fednova.main +experiment=momentum strategy=fednova var_local_epochs=Tr
 
 ## Expected Results
 
-Centralized Evaluation: Accuracy(in %) on centralized Test set
+The results below correspond to Table-1 of of the paper on the non-IID CIFAR-10 dataset.
+
+Centralized Evaluation: Accuracy(in %) on centralized Test set. Mean and Confidence Intervals plotted over at-least 3 seeds.
 
 | Local Epochs | Client Optimizer | FedAvg | FedNova |
 | ------------ | ---------------- | ------ | ------- |
-| 2            | Vanilla          | 71.57  | 68.25   |
-| 2            | Momentum         | 75.92  | 73.33   |
-| 2            | Proximal         | 72.69  | 67.47   |
-| Random(2-5)  | Vanilla          | -  | 72.27   |
-| Random(2-5)  | Momentum         | -  | 75.73   |
-| Random(2-5)  | Proximal         | -  | 71.48   |
+| 2            | Vanilla          | 62.35 ± 1.33 | 67.04 ± 0.94 |
+| 2            | Momentum         | 70.78 ± 1.03 | 73.01 ± 0.32 |
+| 2            | Proximal         | 62.30 ± 0.38 | 67.00 ± 0.47 |
+| Random(2-5)  | Vanilla          | 64.30 ± 1.75 | 70.54 ± 0.43 |
+| Random(2-5)  | Momentum         | 72.75 ± 1.28 | 74.26 ± 0.39 |
+| Random(2-5)  | Proximal         | 64.47 ± 0.28 | 69.25 ± 1.30 |
 | Random(2-5)  | Server           |  N/A   |  -      |
 | Random(2-5)  | Hybrid           |   N/A    |  -      |
+
+## Plots
+
+The plots below correspond to Figure-6(page-11) and Figure-7 in the Addendum section (page-34) of the full length [paper](https://arxiv.org/abs/2007.07481).
+
+### FedAvg vs FedNova for various local solvers with fixed local epochs = 2
+
+![FedAvg vs FedNova](_static/testAccuracy_vanilla_varEpochs_False.png)
+![FedAvg vs FedNova](_static/testAccuracy_momentum_varEpochs_False.png)
+![FedAvg vs FedNova](_static/testAccuracy_proximal_varEpochs_False.png)
+
+
+### FedAvg vs FedNova for various local solvers with variable local epochs ~ U(2,5)
+
+![FedAvg vs FedNova](_static/testAccuracy_vanilla_varEpochs_True.png)
+![FedAvg vs FedNova](_static/testAccuracy_momentum_varEpochs_True.png)
+![FedAvg vs FedNova](_static/testAccuracy_proximal_varEpochs_True.png)

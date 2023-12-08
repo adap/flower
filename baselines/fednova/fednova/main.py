@@ -159,7 +159,7 @@ def main(cfg: DictConfig) -> None:
 
     file_name = (
         f"{save_path}{cfg.exp_name}_{cfg.strategy}_varEpoch_"
-        f"{cfg.var_local_epochs}_seed_{cfg.seed}_Dec3.csv"
+        f"{cfg.var_local_epochs}_seed_{cfg.seed}.csv"
     )
 
     # df = pd.DataFrame({"round": round, "train_loss": train_loss, "train_accuracy":
