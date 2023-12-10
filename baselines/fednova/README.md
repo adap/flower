@@ -16,14 +16,14 @@ dataset: [non-iid, cifar10, dataset]
 
 ## About this baseline
 
-**What’s implemented:** *_The code in this baseline reproduces the results from Table-1 in the paper which corresponds to experiments on Non-IID CIFAR dataset._*
+**What’s implemented:** *_The code in this baseline reproduces the results from Table 1 in the paper which corresponds to experiments on Non-IID CIFAR dataset._*
 
 **Datasets:** *_The dataset in the experiment is a Non-IID CIFAR-10 dataset which is partitioned across 16 clients using a Dirichlet distribution with parameter alpha=0.1._*
 
 **Hardware Setup:** *_The experiment setting consists of 16 clients. The training is done on a single workstation consisting of 8 CPU cores, 32 GB of RAM and an Nvidia A100 GPU. 
 The total GPU memory usage for the experiment is ~ 10 GB(1.1 GB per client + main process). Therefore effectively, 8 clients run in parallel in this setup using the default config. 
-The total time for a single experiment in this setup is ~ 50 minutes. (or 30 second per communication round). In case of resource constraints, 
-the experiment can be run with 4 clients in parallel by setting client_resources  as following: {num_cpus: 1, num_gpus: 0.25}. This uses ~ 5.4 GB of GPU memory and 4 CPU cores._*
+The total time for a single experiment in this setup is ~ 50 minutes. (or 30 seconds per communication round). In case of resource constraints, 
+the experiment can be run with 4 clients in parallel by setting client_resources as follows: {num_cpus: 1, num_gpus: 0.25}. This uses ~ 5.4 GB of GPU memory and 4 CPU cores._*
 
 **Contributors:** *_Aasheesh Singh (Github: [@ashdtu](https://github.com/ashdtu)), MILA-Quebec AI Institute_*
 
@@ -78,7 +78,7 @@ Estimated Total Size (MB): 39.78
 ```
 
 **Dataset:** The dataset is Non-IID CIFAR-10 dataset which is partitioned across 16 clients using a Dirichlet distribution Dir16(0.1), (alpha=0.1) as done
-in [paper](https://arxiv.org/abs/2002.06440). Each client gets a different skewed distribution of the class labels following this split.
+in the [paper](https://arxiv.org/abs/2002.06440). Each client gets a different skewed distribution of the class labels following this split.
 
 **Training Hyperparameters:**
 
@@ -149,9 +149,9 @@ python -m fednova.main +experiment=momentum strategy=fednova var_local_epochs=Tr
 
 ## Expected Results
 
-The results below correspond to Table 1 of of the paper on the non-IID CIFAR-10 dataset.
+The results below correspond to Table 1 of the paper on the non-IID CIFAR-10 dataset.
 
-Centralized Evaluation: Accuracy(in %) on centralized Test set. Mean and Confidence Intervals plotted over atleast 3 seeds.
+Centralized Evaluation: Accuracy(in %) on centralized Test set. Mean and Confidence Intervals plotted over at least 3 seeds.
 
 > Add comment about FedAvg+moment collapsing sometimes (not the case w/ FedNova)
 
