@@ -60,9 +60,9 @@ def test(net, testloader):
     correct, loss = 0, 0.0
     with torch.no_grad():
         for batch in tqdm(testloader, "Testing"):
-            images = batch["img"]
-            labels = batch["label"]
-            outputs = net(images.to(DEVICE))
+            images = batch["img"].to(DEVICE)
+            labels = batch["label"].to(DEVICE)
+            outputs = net(images)
             loss += criterion(outputs, labels).item()
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
     accuracy = correct / len(testloader.dataset)
@@ -100,7 +100,8 @@ parser.add_argument(
     "--node-id",
     choices=[0, 1, 2],
     type=int,
-    help="Partition of the dataset divided into 3 iid partitions created artificially.")
+    help="Partition of the dataset divided into 3 iid partitions created artificially.",
+)
 node_id = parser.parse_args().node_id
 
 # Load model and data (simple CNN, CIFAR-10)
