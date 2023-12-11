@@ -85,20 +85,6 @@ To use the original Flower implementation, use the argument `strategy=fedavgm`. 
 
 ## Environment Setup
 
-This baseline works with TensorFlow 2.10, no additional step required once using Poetry to set up the environment.
-
-We use Poetry to manage the Python environment for each individual baseline. You can follow the instructions [here](https://python-poetry.org/docs/) to install Poetry in your machine. 
-
-To construct the Python environment with Poetry follow these steps:
-
-```bash
-# install the base Poetry environment
-poetry install
-
-# activate the environment
-poetry shell
-```
-
 ### Specifying the Python Version
 This baseline was tested with Python 3.10.6.
 
@@ -118,6 +104,22 @@ pyenv local 3.10.6
 poetry env use 3.10.6
 
 # then you can install your Poetry environment (see the next setp)
+```
+
+### Dependencies
+
+This baseline works with TensorFlow 2.10, no additional step required once using Poetry to set up the environment.
+
+We use Poetry to manage the Python environment for each individual baseline. You can follow the instructions [here](https://python-poetry.org/docs/) to install Poetry in your machine. 
+
+To construct the Python environment with Poetry follow these steps:
+
+```bash
+# install the base Poetry environment
+poetry install
+
+# activate the environment
+poetry shell
 ```
 
 ### Google Colab
