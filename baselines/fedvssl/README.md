@@ -38,7 +38,11 @@ As common SSL training pipline, this code has two parts: SSL pre-training in FL 
 * We first pre-train the R3D-18 model using the Catch-the-Patch (CtP) SSL technique in FL settings. The details of the CtP SSL technique can be found at `fedvssl/CtP/pyvrl/models/pretraining/ctp`, and the details of the R3D-18 model can be found at `fedvssl/CtP/pyvrl/models/backbones/r3d.py`. 
 * After pre-training, we fine-tune the pre-trained R3D-18 model on the UCF-101 dataset.
 
-**Dataset:** This baseline only demonstrates SSL pre-training and supervised fine-tuning with UCF-101 dataset. However, we also provide the script files to generate the partitions for Kinetics-400 datasets. 
+**Dataset:** The pre-training in the paper was conducted on Kinectics-400 dataset, and we provide the script to generate the partitions for FL training.
+However, the original dataset source as well as the pre-processing scripts they offered are not available currently.
+Alternately, one can download this dataset from PyTorch ([torchvision-datasets-Kinetics](https://pytorch.org/vision/stable/generated/torchvision.datasets.Kinetics.html)).
+
+In this baseline, we demonstrate SSL pre-training and supervised fine-tuning with UCF-101 dataset. 
 For UCF-101 dataset, one can simply follow the dataset preparation instruction below to download and generate the FL partitions.
 
 | Dataset | #classes | #partitions | partitioning method |  partition settings  |
