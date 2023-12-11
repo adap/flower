@@ -3,7 +3,12 @@ name: Build docker base image
 on:
   push:
     branches: ["main"]
-    paths: ["src/docker/base/**"]
+    paths:
+      - "src/docker/base/**"
+      - ".github/workflows/docker-base.yml"
+      # re-run if something chnages in the bootstrap action (e.g. version of the dependencies)
+      - ".github/actions/bootstrap/action.yml"
+      - ".github/workflows/_docker-build.yml"
 
 permissions:
   contents: read
@@ -40,7 +45,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: [3.11]
+        python-version: [3.8, 3.9, 3.10, 3.11]
     with:
       namespace-repository: flwr/base
       file-dir: src/docker/base
