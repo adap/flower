@@ -35,7 +35,7 @@ As common SSL training pipline, this code has two parts: SSL pre-training in FL 
 **Task:** Action Recognition
 
 **Model:** 
-* We first pre-train the R3D-18 model using the Catch-the-Patch (CtP) SSL technique in FL settings. The details of the CtP SSL technique can be found at `fedvssl/CtP/pyvrl/models/pretraining/ctp`, and the details of the R3D-18 model can be found at `fedvssl/CtP/pyvrl/models/backbones/r3d.py`. 
+* We first pre-train the R3D-18 model using the Catch-the-Patch (CtP [paper](https://arxiv.org/abs/2105.02545)) SSL technique in FL settings. The details of the CtP SSL technique can be found at `fedvssl/CtP/pyvrl/models/pretraining/ctp`, and the details of the R3D-18 model can be found at `fedvssl/CtP/pyvrl/models/backbones/r3d.py`. 
 * After pre-training, we fine-tune the pre-trained R3D-18 model on the UCF-101 dataset.
 
 **Dataset:** The pre-training in the paper was conducted on Kinectics-400 dataset, and we provide the script to generate the partitions for FL training.
@@ -201,9 +201,9 @@ After pre-training one can use the provided commands in the section above to run
 
 The fine-tuning lasts for 150 epochs.
 
-| Method | FL-Setup| Clients| Pretrain Dataset | Finetune Dataset| Top-1% Acc. | Top 5% Acc.|
-|--------| --------|--------|------------------|-----------------|-------------|------------|
-|FedVSSL$(\alpha=0.9,\beta=1)$ | Cross-Silo| 5 | UCF-101| UCF-101| 66.32%| 86.57%|
+| Method                        | FL-Setup| Clients| Pretrain Dataset | Finetune Dataset| Top-1% Acc. | Top 5% Acc.|
+|-------------------------------| --------|--------|------------------|-----------------|-------------|------------|
+| FedVSSL(`alpha=0.9`,`beta=1`) | Cross-Silo| 5 | UCF-101| UCF-101| 66.32%| 86.57%|
 
 
 ### Pre-training on Kinectics-400 and fine-tuning on UCF-101
@@ -212,14 +212,14 @@ We provide the checkpoints of the pre-trained SSL models on Kinectics-400.
 With them as starting points, one can run downstream fine-tuning on UCF-101 to obtain the expected results in the paper.
 
 
-| Method  | Checkpoint file                                                                                     | UCF Top-1 |
-|---------|-----------------------------------------------------------------------------------------------------|-----------|
-|FedVSSL$(\alpha=0, \beta=0)$ | [round-540.npz](https://drive.google.com/file/d/15EEIQay5FRBMloEzt1SQ8l8VjZFzpVNt/view?usp=sharing) | 79.91     |
-|FedVSSL$(\alpha=1, \beta=0)$ | [round-540.npz](https://drive.google.com/file/d/1OUj8kb0ahJSKAZEB-ES94pOG5-fB-28-/view?usp=sharing) | 79.14     |
-|FedVSSL$(\alpha=0, \beta=1)$ | [round-540.npz](https://drive.google.com/file/d/1N62kXPcLQ_tM45yd2kBYjNOskdHclwLM/view?usp=sharing) | 79.43     |
-|FedVSSL$(\alpha=1, \beta=1)$ | [round-540.npz](https://drive.google.com/file/d/1SKb5aXjpVAeWbzTKMFN9rjHW_LQsmUXj/view?usp=sharing) | 78.99     |
-|FedVSSL$(\alpha=0.9, \beta=0)$| [round-540.npz](https://drive.google.com/file/d/1W1oCnLXX0UJhQ4MlmRw-r7z5DTCeO75b/view?usp=sharing) | 80.62     |
-|FedVSSL$(\alpha=0.9, \beta=1)$| [round-540.npz](https://drive.google.com/file/d/1BK-bbyunxTWNqs-QyOYiohaNv-t3-hYe/view?usp=sharing) | 79.41     |
+| Method                    | Checkpoint file                                                                                     | UCF Top-1 |
+|---------------------------|-----------------------------------------------------------------------------------------------------|-----------|
+| FedVSSL(`alpha=0`, `beta=0`) | [round-540.npz](https://drive.google.com/file/d/15EEIQay5FRBMloEzt1SQ8l8VjZFzpVNt/view?usp=sharing) | 79.91     |
+| FedVSSL(`alpha=1`, `beta=0`) | [round-540.npz](https://drive.google.com/file/d/1OUj8kb0ahJSKAZEB-ES94pOG5-fB-28-/view?usp=sharing) | 79.14     |
+| FedVSSL(`alpha=0`, `beta=1`) | [round-540.npz](https://drive.google.com/file/d/1N62kXPcLQ_tM45yd2kBYjNOskdHclwLM/view?usp=sharing) | 79.43     |
+| FedVSSL(`alpha=1`, `beta=1`) | [round-540.npz](https://drive.google.com/file/d/1SKb5aXjpVAeWbzTKMFN9rjHW_LQsmUXj/view?usp=sharing) | 78.99     |
+| FedVSSL(`alpha=0.9`, `beta=0`) | [round-540.npz](https://drive.google.com/file/d/1W1oCnLXX0UJhQ4MlmRw-r7z5DTCeO75b/view?usp=sharing) | 80.62     |
+| FedVSSL(`alpha=0.9`, `beta=1`) | [round-540.npz](https://drive.google.com/file/d/1BK-bbyunxTWNqs-QyOYiohaNv-t3-hYe/view?usp=sharing) | 79.41     |
 
 
 
