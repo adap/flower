@@ -57,7 +57,7 @@ to the Flower server. Here, we are passing the flag ``--insecure``.
   `SSL <https://flower.dev/docs/framework/how-to-run-flower-in-docker.html#enabling-ssl-for-secure-connections>`_
   when deploying to a production environment.
 
-You can use ``--help`` to view all available flags that the server provides:
+You can use ``--help`` to view all available flags that the server supports:
 
 .. code-block:: bash
 
@@ -117,7 +117,7 @@ updates of system dependencies that should not change the functionality of Flowe
 want to ensure that you always use the same image, you can specify the hash of the image instead of
 the tag.
 
-The following command returns the image hash referenced by the current tag:
+The following command returns the current image hash referenced by the `server:1.6.0-py3.11-ubuntu22.04` tag:
 
 .. code-block:: bash
 
