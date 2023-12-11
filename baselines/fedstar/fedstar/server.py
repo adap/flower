@@ -181,10 +181,11 @@ def set_gpu_limits(gpu_id, gpu_memory):
     config_path = conf/table_3/row_2_clients_10
     config_name = speech_commands
 """
-@hydra.main(config_path="conf", config_name="base")
+@hydra.main(config_path="")
 def main(cfg):
     # Set Experiment Parameters
     unique_id = str(uuid.uuid1())
+    print(cfg)
     dataset_name = cfg["server"]["dataset_name"]
     # Notify Experiment ID to console.
     print(

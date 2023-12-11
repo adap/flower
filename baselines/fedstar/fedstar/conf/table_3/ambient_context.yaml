@@ -6,8 +6,8 @@
 server:
   server_address: "localhost:8080"
   rounds: 100
-  num_clients: 5
-  min_sample_size: 5
+  num_clients: ${num_clients}
+  min_sample_size: ${min_sample_size}
   gpu_memory: 2048
   eval_step: 1
   train_epochs: 1
@@ -19,7 +19,7 @@ server:
 
 client:
   server_address: "localhost:8080"
-  num_clients: 5
+  num_clients: ${num_clients}
   gpu_memory: 1024
   dataset_name: "ambient_context"
   seed: 2021
