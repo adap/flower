@@ -43,9 +43,9 @@ jobs:
     uses: ./.github/workflows/_docker-build.yml
     needs: parameters
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
-        python-version: [3.8, 3.9, 3.10, 3.11]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
     with:
       namespace-repository: flwr/base
       file-dir: src/docker/base
