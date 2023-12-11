@@ -22,7 +22,9 @@ dataset: [Ambient Context, Speech Commands]
 
 ****Datasets:**** Ambient Context, Speech Commands
 
-****Hardware Setup:**** These experiments were run on a linux server with 56 CPU threads with 325 GB Ram with A10 GPU in it. Any machine with 8 CPU cores and 16 GB memory or more would be able to run it in a reasonable amount of time. Note: I have install tensorflow with GPU support but by default, the entire experiment runs on CPU-only mode. For cpu you need to replace value of gpus to None present in distribute_gpus function inside clients.py file.
+****Hardware Setup:**** These experiments were run on a linux server with 56 CPU threads with 328 GB Ram with A10 GPU in it. Any machine with 8 CPU cores and 16 GB memory or more would be able to run experiments with small number of clients in a reasonable amount of time. Note: I have install tensorflow with GPU support but by default, the entire experiment runs on **CPU-only mode**. 
+
+**To use gpu you need to add a list of your gpus memory to a gpus variable present at 96 line in distribute_gpus function inside clients.py file**.
 
 ****Contributors:**** Raj Parekh [GitHub](https://github.com/Raj-Parekh24), [Mail](rajparekhwc@gmail.com)
 

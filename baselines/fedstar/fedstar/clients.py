@@ -83,8 +83,8 @@ def distribute_gpus(num_clients, client_memory=1024):
      provide gpu id list, the current list is for 1 gpu. For 2 gpu's the list will be
      gpus = ["0","1"]
     """
-    # gpus = ["0"]
-    gpus = tf.config.list_physical_devices("GPU")
+    #gpus = tf.config.list_physical_devices("GPU")
+    gpus = None
     clients_gpu = [None] * num_clients
     if not gpus:
         return clients_gpu
