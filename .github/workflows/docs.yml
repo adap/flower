@@ -24,19 +24,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Check copyright line
-        shell: bash
-        run: |
-          EXIT_CODE=0
-
-          while IFS= read -r -d '' file; do
-              COPYRIGHT=$(grep -h -r "copyright = " "$file")
-              if [ "$COPYRIGHT" != "copyright = f\"{datetime.date.today().year} Flower Labs GmbH\"" ]; then
-                  echo "::error file=$file::Wrong copyright line. Expected: copyright = f\"{datetime.date.today().year} Flower Labs GmbH\""
-                  EXIT_CODE=1
-              fi
-          done < <(find . -path "*/doc/source/conf.py" -print0)
-
-          exit $EXIT_CODE
+        run: ./dev/test-copyright.sh
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Install pandoc
