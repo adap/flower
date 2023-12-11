@@ -103,7 +103,7 @@ def distribute_gpus(num_clients, client_memory=1024):
                 clients_gpu[client_id] = None
     return clients_gpu
 
-@hydra.main(config_path="")
+@hydra.main(config_path="conf/table_3", config_name="base")
 def main(cfg):
     clients_gpu = distribute_gpus(
         num_clients=cfg["client"]["num_clients"], client_memory=cfg["client"]["gpu_memory"]

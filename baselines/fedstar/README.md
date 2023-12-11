@@ -46,9 +46,16 @@ chmod +x setup_datasets.sh
 ```
 
 ## Running the Experiments
+### Table 3
+To run table 3 federated learning experiments. You have to override some parameters.
++ num_clients = number of clients
++ min_sample_size = Value greater than 80% of num clients.
++ dataset_name = ambient_context/speech_commands
+
+Below is a sample command to for dataset = ambient_context and clients = 5
 ```bash
-python -m fedstar.server
-python -m fedstar.clients
+python -m fedstar.server server.num_clients=5 server.min_sample_size=5 server.dataset_name=ambient_context
+python -m fedstar.clients client.num_clients=5 client.dataset_name=ambient_context
 ```
 ## Expected Results
 ### Table 3
