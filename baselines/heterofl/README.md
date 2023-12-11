@@ -214,20 +214,42 @@ Results of the combination of various computation complexity levels for **MNIST*
 
 Results of the combination of various computation complexity levels for **CIFAR10** dataset with **dynamic** scenario(where a client does not belong to a fixed computational complexity level):
 
-| Model | Ratio | Parameters | FLOPS | Space(MB) | IID-accuracy | non-IId local-acc | non-IID global-acc |
-| :--: | :-----: | :-----: | :-------: | :-------: | :----------: | :---------------: | :----------------: |
-| a | 1  | 11172.17  K |	557.656  M	| 42.618 | 90.83 | 89.45 | 53.59 |
-| a-e | 0.502  | 5608.34  K | 280.035  M | 21.394 | 89.98 | 90.72 | 54.67 |
-| a-b-c-d-e | 0.267  | 2978.118  K	| 149.048  M |	11.361 | 87.46 | 87.11 | 45.08 |
-| b | 1  | 2796.714  K	| 140.416  M | 10.669 | 88.59 | 92.18 | 52.83 |
-| b-e | 0.508  | 1420.612  K |	71.415  M | 5.419 | 89.23 | 87.36 | 49.58 |
-| b-c-d-e | 0.332  | 929.605  K | 46.896  M | 3.546 | 87.61 | 88.84 | 48.07 |
-| c | 1  | 701.018  K | 35.605  M | 2.674 | 85.74 | 88.1 | 54.43 |
-| c-e | 0.626  | 438.598  K | 22.378  M | 1.673 | 87.32 | 90.8 | 56.47 |
-| c-d-e | 0.438  | 307.2354  K |	15.723  M | 1.172 | 85.59 | 89.63 | 54.26 |
-| d | 1  | 176.178  K | 9.152  M | 0.672 | 82.91 | 85.83 | 47.5 |
-| d-e | 0.626  | 110.344  K | 5.782  M |	0.421 | 82.77 | 90.38 | 56.24 |
-| e | 1  | 44.51  K | 2.413  M | 0.170 | 76.53 | 83.55 | 48.29 |
+<table align="center">
+<tbody>
+	<tr>
+		<th rowspan=3>Model</th>
+		<th rowspan=3>Ratio</th>
+		<th rowspan=3>Parameters</th>
+		<th rowspan=3>FLOPS</th>
+		<th rowspan=3>Space(MB)</th>
+		<th rowspan=3>IID-accuracy</th>
+		<th colspan=4> non-IID</th>
+	</tr>
+	<tr>
+		<th colspan=2>local-acc</th>
+		<th colspan=2>global-acc</th>
+	</tr>
+ <tr>
+		<th>800th</th>
+		<th>Best of 800</th>
+		<th>800th</th>
+		<th>Best of 800</th>
+	</tr>
+<tr> <td align="center"> a			</td><td> 1 </td><td> 9622.09  K	</td><td> 330.246 M </td><td> 36.705	</td><td> 90.83 </td><td> 89.04 </td><td> 92.41 </td><td> 48.72 </td><td> 59.29	</td></tr>
+<tr> <td align="center"> a-e		</td><td> 0.502 </td><td> 4830.22  K	</td><td> 165.859 M </td><td> 18.426	</td><td> 89.98 </td><td> 87.98 </td><td> 91.25	</td><td> 50.16 </td><td> 57.66	</td></tr>
+<tr> <td align="center"> a-b-c-d-e	</td><td> 0.267 </td><td> 2564.95  K	</td><td> 88.354 M	 </td><td> 9.785	</td><td> 87.46 </td><td> 89.75 </td><td> 91.19	</td><td> 46.96 </td><td> 55.6	</td></tr>
+<tr> <td align="center"> b			</td><td> 1 </td><td> 2408.746  K	</td><td> 83.334 M	 </td><td> 9.189	</td><td> 88.59 </td><td> 89.31 </td><td> 92.07	</td><td> 49.85 </td><td> 60.79	</td></tr>
+<tr> <td align="center"> b-e		</td><td> 0.508 </td><td> 1223.548  K	</td><td> 42.403 M	 </td><td> 4.667	</td><td> 89.23 </td><td> 90.93 </td><td> 92.3	</td><td> 55.46 </td><td> 61.98	</td></tr>
+<tr> <td align="center"> b-c-d-e	</td><td> 0.332 </td><td> 800.665  K	</td><td> 27.881 M	 </td><td> 3.054	</td><td> 87.61 </td><td> 89.23 </td><td> 91.83	</td><td> 51.59 </td><td> 59.4	</td></tr> 
+<tr> <td align="center"> c			</td><td> 1 </td><td> 603.802  K	</td><td> 21.220 M	 </td><td> 2.303	</td><td> 85.74 </td><td> 89.83 </td><td> 91.75	</td><td> 44.03 </td><td> 58.26	</td></tr>
+<tr> <td align="center"> c-e		</td><td> 0.532 </td><td> 321.076  K	</td><td> 11.345 M	 </td><td> 1.225	</td><td> 87.32 </td><td> 89.28 </td><td> 91.56	</td><td> 53.43 </td><td> 59.5	</td></tr> 
+<tr> <td align="center"> c-d-e		</td><td> 0.438 </td><td> 264.638  K	</td><td> 9.396 M	 </td><td> 1.010	</td><td> 85.59 </td><td> 91.48 </td><td> 92.05	</td><td> 58.26 </td><td> 61.79	</td></tr>
+<tr> <td align="center"> d			</td><td> 1 </td><td> 151.762  K	</td><td> 5.498 M	 </td><td> 0.579	</td><td> 82.91 </td><td> 90.81 </td><td> 91.47	</td><td> 55.95 </td><td> 58.34	</td></tr>
+<tr> <td align="center"> d-e		</td><td> 0.626 </td><td> 95.056  K		</td><td> 3.485 M	 </td><td> 0.363	</td><td> 82.77 </td><td> 88.79 </td><td> 90.13	</td><td> 48.49 </td><td> 54.18	</td></tr>
+<tr> <td align="center"> e			</td><td> 1 </td><td> 38.35  K		</td><td> 1.471 M	 </td><td> 0.146	</td><td> 76.53 </td><td> 90.05 </td><td> 90.91	</td><td> 54.68 </td><td> 57.05	</td></tr>
+</tbody>
+
+</table>
 
 
 
