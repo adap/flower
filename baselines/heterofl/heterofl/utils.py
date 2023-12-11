@@ -172,6 +172,10 @@ def save_model(model, path):
     torch.save(model.state_dict(), model_save_path)
 
 
+# """ The following functions(check_exists, makedir_exit_ok, save, load)
+# are adopted from authors (of heterofl) implementation."""
+
+
 def check_exists(path):
     """Check if the given path exists."""
     return os.path.exists(path)

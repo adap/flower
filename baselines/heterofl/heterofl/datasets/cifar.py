@@ -1,4 +1,4 @@
-"""CIFAR10 dataset class."""
+"""CIFAR10 dataset class, adopted from authors implementation."""
 import os
 import pickle
 

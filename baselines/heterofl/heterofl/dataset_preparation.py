@@ -132,7 +132,10 @@ def non_iid(
     label_split=None,
     seed=42,
 ) -> Tuple[List[Dataset], List]:
-    """Non-IID partition of dataset among clients."""
+    """Non-IID partition of dataset among clients.
+
+    Adopted from authors (of heterofl) implementation.
+    """
     data_split: Dict[int, List] = {i: [] for i in range(num_clients)}
 
     label_idx_split, shard_per_class = _split_dataset_targets_idx(

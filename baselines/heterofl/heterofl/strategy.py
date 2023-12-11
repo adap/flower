@@ -182,7 +182,10 @@ class HeteroFL(fl.server.strategy.Strategy):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """Aggregate fit results using weighted average."""
+        """Aggregate fit results using weighted average.
+
+        Adopted from authors implementation.
+        """
         print("in aggregate fit")
         gl_model = self.net.state_dict()
 

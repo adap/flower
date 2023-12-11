@@ -1,4 +1,7 @@
-"""Contains utility functions required for datasests."""
+"""Contains utility functions required for datasests.
+
+Adopted from authors implementation.
+"""
 import glob
 import gzip
 import hashlib

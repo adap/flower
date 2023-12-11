@@ -1,4 +1,7 @@
-"""Conv & resnet18 model architecture, training, testing functions."""
+"""Conv & resnet18 model architecture, training, testing functions.
+
+Classes Conv, Block, Resnet18 are adopted from authors implementation.
+"""
 import copy
 from typing import List, OrderedDict
 

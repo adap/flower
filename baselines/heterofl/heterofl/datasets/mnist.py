@@ -1,4 +1,4 @@
-"""MNIST dataset class."""
+"""MNIST dataset class, adopted from authors implementation."""
 import codecs
 import os
 
