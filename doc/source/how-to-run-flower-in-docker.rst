@@ -117,7 +117,7 @@ updates of system dependencies that should not change the functionality of Flowe
 want to ensure that you always use the same image, you can specify the hash of the image instead of
 the tag.
 
-The following command returns the current image hash referenced by the `server:1.6.0-py3.11-ubuntu22.04` tag:
+The following command returns the current image hash referenced by the ``server:1.6.0-py3.11-ubuntu22.04`` tag:
 
 .. code-block:: bash
 
