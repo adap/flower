@@ -189,7 +189,7 @@ bash fedvssl/CtP/tools/dist_test.sh fedvssl/conf/mmcv_conf/finetuning/r3d_18_ucf
 The pre-training in the paper was conducted on Kinectics-400, which takes a considerable amount of time without access to server-grade hardware (~5 days with a RTX 3090).
 As a result, we provide the following command to do pre-training on UCF-101, in order to validate FedVSSL.
 
-In this experiment, we simulate the cross-silo scenario with UCF-101 video data that distributed among 5 clients. We did the FL pre-training of CtP SSL for 20 rounds followed by fine-tuning the whole network on UCF-101 video data. The `conf/base.yaml` file contains all the details about the pre-training and fine-tuning setup. 
+In this experiment, we simulate the cross-silo scenario with UCF-101 video data that distributed among 5 clients. We did the FL pre-training of CtP SSL for 20 rounds followed by fine-tuning the whole network on UCF-101 video data. The `conf/base.yaml` file contains all the details about the pre-training setup. 
 
 To start the pre-training one can use the following command:
 ```bash
