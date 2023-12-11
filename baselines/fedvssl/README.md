@@ -35,26 +35,26 @@ As common SSL training pipline, this code has two parts: SSL pre-training in FL 
 **Task:** Action Recognition
 
 **Model:** 
-* We first pretrain the R3D-18 model using the Catch-the-Patch (CtP) SSL technique in FL settings. The details of the CtP SSL technique can be found at `CtP/pyvrl/models/pretraining/ctp`, and the details of the R3D-18 model can be found at `/CtP/pyvrl/models/backbones/r3d.py`. 
-* After pertaining, we finetuned the pretrained R3D-18 model on the UCF-101 dataset.
+* We first pre-train the R3D-18 model using the Catch-the-Patch (CtP) SSL technique in FL settings. The details of the CtP SSL technique can be found at `fedvssl/CtP/pyvrl/models/pretraining/ctp`, and the details of the R3D-18 model can be found at `fedvssl/CtP/pyvrl/models/backbones/r3d.py`. 
+* After pre-training, we fine-tune the pre-trained R3D-18 model on the UCF-101 dataset.
 
 **Dataset:** This baseline only demonstrates SSL pre-training and supervised fine-tuning with UCF-101 dataset. However, we also provide the script files to generate the partitions for Kinetics-400 datasets. 
-For UCF-101 dataset, one can simply run the `dataset_preparation.py` file to download and generate the iid splits.
+For UCF-101 dataset, one can simply follow the dataset preparation instruction below to download and generate the FL partitions.
 
 | Dataset | #classes | #partitions | partitioning method |  partition settings  |
 |:--------|:--------:|:-----------:| :---: |:--------------------:|
 | UCF101  |   101    |     10      | randomly partitioned |       uniform        |
 | Kinectics-400    |   400    |     100     | randomly partitioned | 8 classes per client |
 
-**Training Hyperparameters:** The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run python main.py directly)
+**Training Hyperparameters:** The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python main.py` directly)
 
 | Description        |            Default Value            |
 |:-------------------|:-----------------------------------:|
-| total clients      |                 2                  |
-| clients per round  |                 2                  | 
+| total clients      |                  5                  |
+| clients per round  |                  5                  | 
 | number of rounds	  |                 20                  | 
 | client resources	  | {'num_cpus': 2.0, 'num_gpus': 1.0 } | 
-| optimizer	  |                 SGD                  | 
+| optimizer	  |                 SGD                 | 
 | alpha coefficient	 |                 0.9                 | 
 | beta coefficient	  |                  1                  | 
 
@@ -156,7 +156,7 @@ Running any of the above will create a directory structure in the form of `outpu
 
 ### Downstream fine-tuning
 
-The downstream fine-tuning does not involve Flower because it's done in centralized fashion. Let's finetune the model we just pretrained with `FedVSSL` will finetune using UCF-101. First,
+The downstream fine-tuning does not involve Flower because it's done in centralised fashion. Let's fine-tune the model we just pre-trained with `FedVSSL` using UCF-101. First,
 we need to transform model format:
 
 ```bash
@@ -165,7 +165,7 @@ python -m fedvssl.finetune_preprocess --pretrained_model_path=<CHECKPOINT>.npz
 # Where <DATE>/<TIME> are the date and time when you launched the experiment
 ```
 
-Then, launch the fine-tuning using `CtP` script. Results will stored in a new directory named `finetune_results`.
+Then, launch the fine-tuning using `CtP` script. Results will be stored in a new directory named `finetune_results`.
 
 ```bash
 bash fedvssl/CtP/tools/dist_train.sh fedvssl/conf/mmcv_conf/finetuning/r3d_18_ucf101/finetune_ucf101.py 1 --work_dir=./finetune_results --data_dir=fedvssl/data
@@ -182,7 +182,7 @@ bash fedvssl/CtP/tools/dist_test.sh fedvssl/conf/mmcv_conf/finetuning/r3d_18_ucf
 ## Expected results
 
 ### Pre-training and fine-tuning on UCF-101
-The pre-training in the paper was conducted on Kinectics-400, which takes a considerable amount of time without access to server-grade hardware.
+The pre-training in the paper was conducted on Kinectics-400, which takes a considerable amount of time without access to server-grade hardware (~5 days with a RTX 3090).
 As a result, we provide the following command to do pre-training on UCF-101, in order to validate FedVSSL.
 
 In this experiment, we simulate the cross-silo scenario with UCF-101 video data that distributed among 5 clients. We did the FL pre-training of CtP SSL for 20 rounds followed by fine-tuning the whole network on UCF-101 video data. The `conf/base.yaml` file contains all the details about the pre-training and fine-tuning setup. 
