@@ -59,7 +59,11 @@ class EnhancedServer(Server):
             self,
             num_malicious: int,
             warmup_rounds: int,
-            attack_fn:Optional[Callable],
+            attack_fn:Callable,
+            dataset_name: str,
+            threshold: float = 0.0,
+            to_keep: int = 1,
+            magnitude: float = 0.0,
             sampling: int = 0,
             history_dir: str = "clients_params",
             *args: Any,
@@ -67,7 +71,6 @@ class EnhancedServer(Server):
         ) -> None:
         """Initialize."""
 
-        # TODO: Move all the parameters saving logic from the strategy to the server
         super().__init__(*args, **kwargs)
         self.num_malicious = num_malicious
         self.warmup_rounds = warmup_rounds
@@ -76,6 +79,12 @@ class EnhancedServer(Server):
         self.aggregated_parameters = []
         self.params_indexes = []
         self.history_dir = history_dir
+        self.dataset_name = dataset_name
+        self.magnitude = magnitude
+        self.malicious_selected = False
+        self.threshold = threshold
+        self.old_lambda = 0.0
+        self.to_keep = to_keep
 
     
     def fit_round(
@@ -93,10 +102,22 @@ class EnhancedServer(Server):
             client_manager=self._client_manager,
         )
 
+        if not client_instructions:
+            log(INFO, "fit_round %s: no clients selected, cancel", server_round)
+            return None
+        log(
+            DEBUG,
+            "fit_round %s: strategy sampled %s clients (out of %s)",
+            server_round,
+            len(client_instructions),
+            self._client_manager.num_available(),
+        )
+
         # Randomly decide which client is malicious
         size = self.num_malicious
         if self.warmup_rounds > server_round:
             size = 0
+        print(f"fit_round - Selecting {size} malicious clients")
         self.malicious_selected = np.random.choice(
             [proxy.cid for proxy, _ in client_instructions], size=size, replace=False
         )
@@ -113,17 +134,8 @@ class EnhancedServer(Server):
             else:
                 ins.config["malicious"] = False
 
-        if not client_instructions:
-            log(INFO, "fit_round %s: no clients selected, cancel", server_round)
-            return None
-        log(
-            DEBUG,
-            "fit_round %s: strategy sampled %s clients (out of %s)",
-            server_round,
-            len(client_instructions),
-            self._client_manager.num_available(),
-        )
-
+        for proxy, ins in client_instructions:
+            print(f"fit_round - Client {proxy.cid} malicious: {ins.config['malicious']}")        
         # Collect `fit` results from all clients participating in this round
         results, failures = fit_clients(
             client_instructions=client_instructions,
@@ -169,14 +181,15 @@ class EnhancedServer(Server):
                     break
 
         # Apply attack function
+        # the server simulates an attacker that controls a fraction of the clients
         if self.attack_fn is not None and server_round > self.warmup_rounds:
             print("fit_round - Applying attack function")
             results, others = self.attack_fn(
                 ordered_results, clients_state, magnitude=self.magnitude,
                 w_re=self.aggregated_parameters, malicious_selected=self.malicious_selected,
                 threshold=self.threshold, d=len(self.aggregated_parameters), old_lambda=self.old_lambda,
-                dataset_name=self.dataset_name, agr_function=self.strategy_name, to_keep = self.to_keep,
-                malicious_num=self.m[-1]
+                dataset_name=self.dataset_name, to_keep = self.to_keep,
+                malicious_num=self.num_malicious
             )
             self.old_lambda = others.get('lambda', 0.0)
 
@@ -195,6 +208,7 @@ class EnhancedServer(Server):
 
         # Sort clients states
         clients_state = {k: clients_state[k] for k in sorted(clients_state)}
+        print(f"fit_round - Clients state: {clients_state}")
 
         # Aggregate training results
         print("fit_round - Aggregating training results")

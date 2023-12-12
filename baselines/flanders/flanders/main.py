@@ -34,6 +34,13 @@ from .client import (
     set_sklearn_model_params, 
     get_sklearn_model_params
 )
+from .attacks import (
+    fang_attack,
+    gaussian_attack,
+    lie_attack,
+    no_attack,
+    minmax_attack
+)
 from .utils import l2_norm, mnist_evaluate
 from .server import EnhancedServer
 
@@ -83,6 +90,22 @@ def main(cfg: DictConfig) -> None:
 
     evaluate_fn = mnist_evaluate
 
+    attacks = {
+        "no_attack": no_attack,
+        "gaussian_attack": gaussian_attack,
+        "lie_attack": lie_attack,
+        "fang_attack": fang_attack,
+        "minmax_attack": minmax_attack
+    }
+
+    clients = {
+        "mnist": MnistClient,
+        "cifar": CifarClient,
+        "house": HouseClient,
+        "income": IncomeClient,
+        "toy": ToyClient
+    }
+
     # 2. Prepare your dataset
     # here you should call a function in datasets.py that returns whatever is needed to:
     # (1) ensure the server can access the dataset used to evaluate your model after
@@ -98,10 +121,7 @@ def main(cfg: DictConfig) -> None:
     # simulation to instantiate each individual client
     # client_fn = client.<my_function_that_returns_a_function>()
     def client_fn(cid: int, pool_size: int = 10, dataset_name: str = cfg.dataset.name):
-        if dataset_name == "mnist":
-            client = MnistClient
-        else:
-            raise NotImplementedError(f"Dataset {dataset_name} not implemented")
+        client = clients[dataset_name]
         return client(cid, pool_size)
 
     # 4. Define your strategy
@@ -117,7 +137,7 @@ def main(cfg: DictConfig) -> None:
         min_fit_clients=2,
         min_evaluate_clients=0,
         warmup_rounds=2,
-        to_keep=2,
+        to_keep=1,
         min_available_clients=2,
         window=2,
         sampling=1,
@@ -133,11 +153,13 @@ def main(cfg: DictConfig) -> None:
         server=EnhancedServer(
             warmup_rounds=cfg.server.warmup_rounds,
             num_malicious=cfg.server.num_malicious,
-            attack_fn=None,
+            attack_fn=attacks[cfg.server.attack_fn],
+            magnitude=cfg.server.magnitude,
             client_manager=SimpleClientManager(),
             strategy=strategy,
             sampling=cfg.server.sampling,
-            history_dir=cfg.server.history_dir
+            history_dir=cfg.server.history_dir,
+            dataset_name=cfg.dataset.name,
         ),
         config=fl.server.ServerConfig(num_rounds=cfg.server.num_rounds),
         strategy=strategy

@@ -2,6 +2,7 @@ import numpy as np
 
 from typing import Callable, Dict, List, Optional, Tuple, Union
 from flwr.server.strategy.fedavg import FedAvg
+from flwr.server.client_manager import ClientManager
 from .utils import (
     save_params, 
     save_predicted_params,
@@ -16,7 +17,7 @@ from flwr.common import (
     NDArrays,
     Parameters,
     Scalar,
-    parameters_to_ndarrays,
+    FitIns,
 )
 from flwr.server.client_proxy import ClientProxy
 
@@ -58,7 +59,6 @@ class Flanders(FedAvg):
         iid: bool = True,
         warmup_rounds: int = 1,
         to_keep: int = 1,
-        attack_fn: Optional[Callable],
         window: int = 0,
         maxiter: int = 100,
         sampling: str = None,
@@ -92,7 +92,6 @@ class Flanders(FedAvg):
         self.iid = iid
         self.warmup_rounds = warmup_rounds
         self.to_keep = to_keep
-        self.attack_fn = attack_fn
         self.window = window
         self.maxiter = maxiter
         self.sampling = sampling
@@ -102,7 +101,29 @@ class Flanders(FedAvg):
         self.malicious_selected = False
         self.distance_function = distance_function
 
+    def configure_fit(
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+    ) -> List[Tuple[ClientProxy, FitIns]]:
+        """Configure the next round of training."""
+        
+        # Sample clients
+        sample_size, min_num_clients = self.num_fit_clients(
+            client_manager.num_available()
+        )
+        
+        # Custom FitIns object for each client
+        fit_ins_list = [
+            FitIns(parameters, {} if not self.on_fit_config_fn else self.on_fit_config_fn(server_round)) 
+            for _ in range(sample_size)
+        ]
 
+        clients = client_manager.sample(
+            num_clients=sample_size, min_num_clients=min_num_clients
+        )
+
+        # Return client/config pairs
+        return [(client, fit) for client, fit in zip(clients, fit_ins_list)]
+        
     def aggregate_fit(
         self,
         server_round: int,

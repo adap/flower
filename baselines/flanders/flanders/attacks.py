@@ -1,19 +1,17 @@
 import math
 import numpy as np
-import matplotlib.pyplot as plt
 from typing import Dict, List, Tuple
 from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
     FitRes,
     NDArrays,
+    NDArray,
     Parameters,
 )
 from flwr.server.client_proxy import ClientProxy
 from scipy.stats import norm
-
-from utilities import flatten_params
-from strategy.krum import krum, _compute_distances
+#from strategy.krum import krum, _compute_distances
 
 def no_attack(
         ordered_results:List[Tuple[ClientProxy, FitRes]], 
@@ -38,7 +36,9 @@ def gaussian_attack(
             if dataset_name == "income":
                 new_params = [perturbate(layer) for layer in params]
             else:
-                new_params = np.apply_along_axis(perturbate, 0, params)
+                new_params = []
+                for p in params:
+                    new_params.append(np.apply_along_axis(perturbate, 0, p))
             fitres.parameters = ndarrays_to_parameters(new_params)
             results[int(fitres.metrics['cid'])] = (proxy, fitres)
     return results, {}
@@ -62,6 +62,7 @@ def lie_attack(
     if s < 0:
         s = 1
     z_max = norm.ppf((n - m - s) / (n - m))
+
     for proxy, fitres in ordered_results:
         if states[fitres.metrics["cid"]]:
             mul_std = [layer * z_max for layer in grads_stdev]
@@ -100,6 +101,8 @@ def fang_attack(
     
     n = len(ordered_results)                                        # number of clients
     c = sum(val == True for val in states.values())                 # number of corrupted clients
+    if c < 2:
+        c = 2
 
     # lambda initialization
     if old_lambda == 0:
@@ -238,3 +241,55 @@ def minmax_attack(
             fitres.parameters = corrupted_params
             results[int(fitres.metrics['cid'])] = (proxy, fitres)
     return results, {"lambda": l}
+
+def krum(results: List[Tuple[List, int]], m: int, to_keep: int, num_closest=None):
+    """
+    Get the best parameters vector according to the Krum function.
+    Output: the best parameters vector.
+    """
+    weights = [w for w, _ in results]                                       # list of weights
+    M = _compute_distances(weights)                                         # matrix of distances
+
+    if not num_closest:
+        num_closest = len(weights) - m - 2                                  # number of closest points to use
+    if num_closest <= 0:
+        num_closest = 1
+    elif num_closest > len(weights):
+        num_closest = len(weights)
+
+    closest_indices = _get_closest_indices(M, num_closest)                  # indices of closest points
+    scores = [np.sum(M[i,closest_indices[i]]) for i in range(len(M))]       # scores i->j for each i
+    
+    best_index = np.argmin(scores)                                          # index of the best score
+    best_indices = np.argsort(scores)[::-1][len(scores)-to_keep:]           # indices of best scores (multikrum)
+    return weights[best_index], best_index, best_indices, scores
+
+
+def _compute_distances(weights: List[NDArrays]) -> NDArray:
+    """Compute distances between vectors.
+
+    Input: weights - list of weights vectors
+    Output: distances - matrix distance_matrix of squared distances between the vectors
+    """
+    flat_w = np.array([np.concatenate(p, axis=None).ravel() for p in weights])
+    distance_matrix = np.zeros((len(weights), len(weights)))
+    for i, _ in enumerate(flat_w):
+        for j, _ in enumerate(flat_w):
+            delta = flat_w[i] - flat_w[j]
+            norm = np.linalg.norm(delta)
+            distance_matrix[i, j] = norm**2
+    return distance_matrix
+
+def _get_closest_indices(M, num_closest: int) -> List[int]:
+    """
+    Get the indices of the closest points.
+    Input: 
+        M - matrix of squared distances between the vectors
+        num_closest - number of closest points to get for each parameter vector
+    Output:
+        closest_indices - list of lists of indices of the closest points for each parameter vector 
+    """
+    closest_indices = []
+    for i in range(len(M)):
+        closest_indices.append(np.argsort(M[i])[1:num_closest+1].tolist())
+    return closest_indices

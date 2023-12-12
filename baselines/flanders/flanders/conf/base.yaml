@@ -22,16 +22,17 @@ model:
 
 strategy:
   _target_: flanders.strategy.Flanders
-  attack_fn: null
 
 server:
   _target_: flanders.server.EnhancedServer
   num_rounds: 3
-  pool_size: 2
-  num_malicious: 0
-  warmup_rounds: 2
+  pool_size: 3
+  num_malicious: 1
+  warmup_rounds: 1
   sampling: 500
   history_dir: clients_params
+  magnitude: 100
+  attack_fn: minmax_attack
 
 client:
   # client config
