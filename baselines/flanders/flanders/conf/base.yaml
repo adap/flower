@@ -14,7 +14,7 @@ hydra:
 
 dataset:
   # dataset config
-  name: mnist
+  name: house
 
 model:
   # model config

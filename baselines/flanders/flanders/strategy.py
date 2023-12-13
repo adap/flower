@@ -129,7 +129,7 @@ class Flanders(FedAvg):
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-        clients_state: List[bool],
+        clients_state: Dict[int, bool],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """
         Apply MAR forecasting to exclude malicious clients from FedAvg.

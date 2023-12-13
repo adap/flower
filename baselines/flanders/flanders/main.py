@@ -27,7 +27,6 @@ from .client import (
     CifarClient, 
     HouseClient, 
     IncomeClient, 
-    ToyClient, 
     set_params, 
     get_params, 
     MnistClient, 
@@ -41,7 +40,19 @@ from .attacks import (
     no_attack,
     minmax_attack
 )
-from .utils import l2_norm, mnist_evaluate
+from .utils import (
+    l2_norm,
+    mnist_evaluate,
+    cifar_evaluate,
+    house_evaluate,
+    income_evaluate
+)
+from .dataset import (
+    get_partitioned_income,
+    get_partitioned_house,
+    get_cifar_10,
+    do_fl_partitioning
+)
 from .server import EnhancedServer
 
 from torch.utils.data import DataLoader
@@ -49,15 +60,6 @@ from torchvision import transforms
 from torchvision.datasets import MNIST
 
 from .strategy import Flanders
-
-
-#from attacks import (
-#    fang_attack, 
-#    gaussian_attack, 
-#    lie_attack, 
-#    no_attack, 
-#    minmax_attack
-#)
 
 from flwr.server.strategy.fedavg import FedAvg
 from flwr.common import (
@@ -88,8 +90,6 @@ def main(cfg: DictConfig) -> None:
     if os.path.exists(cfg.server.history_dir):
         shutil.rmtree(cfg.server.history_dir)
 
-    evaluate_fn = mnist_evaluate
-
     attacks = {
         "no_attack": no_attack,
         "gaussian_attack": gaussian_attack,
@@ -99,12 +99,13 @@ def main(cfg: DictConfig) -> None:
     }
 
     clients = {
-        "mnist": MnistClient,
-        "cifar": CifarClient,
-        "house": HouseClient,
-        "income": IncomeClient,
-        "toy": ToyClient
+        "mnist": (MnistClient, mnist_evaluate),
+        "cifar": (CifarClient, cifar_evaluate),
+        "house": (HouseClient, house_evaluate),
+        "income": (IncomeClient, income_evaluate)
     }
+
+    evaluate_fn = clients[cfg.dataset.name][1]
 
     # 2. Prepare your dataset
     # here you should call a function in datasets.py that returns whatever is needed to:
@@ -113,16 +114,32 @@ def main(cfg: DictConfig) -> None:
     # (2) tell each client what dataset partitions they should use (e.g. a this could
     # be a location in the file system, a list of dataloader, a list of ids to extract
     # from a dataset, it's up to you)
-
-    # Managed by clients
+    if cfg.dataset.name == "cifar":
+        train_path, testset = get_cifar_10()
+        fed_dir = do_fl_partitioning(
+            train_path, pool_size=cfg.server.pool_size, alpha=10000, num_classes=10, val_ratio=0.5, seed=1234
+        )
+    elif cfg.dataset.name == "income":
+        X_train, X_test, y_train, y_test = get_partitioned_income("flanders/datasets_files/adult.csv", cfg.server.pool_size)
+    elif cfg.dataset.name == "house":
+        X_train, X_test, y_train, y_test = get_partitioned_house("flanders/datasets_files/houses_preprocessed.csv", cfg.server.pool_size)
 
     # 3. Define your clients
     # Define a function that returns another function that will be used during
     # simulation to instantiate each individual client
     # client_fn = client.<my_function_that_returns_a_function>()
-    def client_fn(cid: int, pool_size: int = 10, dataset_name: str = cfg.dataset.name):
-        client = clients[dataset_name]
-        return client(cid, pool_size)
+    def client_fn(cid: str, pool_size: int = 10, dataset_name: str = cfg.dataset.name):
+        client = clients[dataset_name][0]
+        cid_idx = int(cid)
+        if dataset_name == "cifar":
+            return client(cid, fed_dir)
+        elif dataset_name == "income":
+            return client(cid, X_train[cid_idx], y_train[cid_idx], X_test[cid_idx], y_test[cid_idx])
+        elif dataset_name == "house":
+            return client(cid, X_train[cid_idx], y_train[cid_idx], X_test[cid_idx], y_test[cid_idx])
+        else:
+            raise ValueError("Dataset not supported")
+
 
     # 4. Define your strategy
     # pass all relevant argument (including the global dataset used after aggregation,

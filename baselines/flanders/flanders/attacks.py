@@ -102,6 +102,8 @@ def fang_attack(
     n = len(ordered_results)                                        # number of clients
     c = sum(val == True for val in states.values())                 # number of corrupted clients
     if c < 2:
+        # there can't be an attack with less than 2 malicious clients
+        # to avoid division by 0
         c = 2
 
     # lambda initialization

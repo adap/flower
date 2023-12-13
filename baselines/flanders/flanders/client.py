@@ -12,9 +12,9 @@ import pandas as pd
 from collections import OrderedDict
 from typing import Dict, List, Union, Tuple
 from pathlib import Path
-from .dataset import get_mnist, do_fl_partitioning, get_circles
-from .models import CifarNet, train_cifar, test_cifar, MnistNet, ToyNN, test_toy, train_mnist, test_mnist, train_toy
-from sklearn.linear_model import LogisticRegression, LinearRegression, Ridge, Lasso, ElasticNet
+from .dataset import get_mnist, do_fl_partitioning, get_dataloader
+from .models import CifarNet, train_cifar, test_cifar, MnistNet, train_mnist, test_mnist
+from sklearn.linear_model import LogisticRegression, ElasticNet
 from sklearn.metrics import accuracy_score, log_loss
 
 XY = Tuple[np.ndarray, np.ndarray]
@@ -104,7 +104,7 @@ class MnistClient(fl.client.NumPyClient):
         # Load data for this client and get trainloader
         num_workers = 1
 
-        trainloader = get_mnist("datasets", 32, self.cid, nb_clients=self.pool_size, is_train=True, workers=num_workers)
+        trainloader = get_mnist("flanders/datasets_files", 32, self.cid, nb_clients=self.pool_size, is_train=True, workers=num_workers)
 
         # Send model to device
         self.net.to(self.device)
@@ -232,48 +232,4 @@ class HouseClient(fl.client.NumPyClient):
         return new_parameters, len(self.x_train), {"malicious": config["malicious"], "cid": self.cid}
     
     def evaluate(self, parameters, config):
-        return 0, 0, {"accuracy": 0}
-
-
-class ToyClient(fl.client.NumPyClient):
-    def __init__(self, cid: str, pool_size: int):
-        self.cid = cid
-        self.properties: Dict[str, Scalar] = {"tensor_type": "numpy.ndarray"}
-        self.net = ToyNN()
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-    def get_parameters(self, config):
-        return get_params(self.net)
-
-    def fit(self, parameters, config):
-        set_params(self.net, parameters)
-
-        # Load data for this client and get trainloader
-        #num_workers = len(ray.worker.get_resource_ids()["CPU"])
-        num_workers = 1
-        trainloader = get_circles(32, n_samples=10000, workers=num_workers, is_train=True)
-
-        self.net.to(self.device)
-        train_toy(self.net, trainloader, epochs=config["epochs"], device=self.device)
-
-        new_parameters = self.get_parameters(config={})
-
-        # Return local model and statistics
-        return new_parameters, len(trainloader.dataset), {"malicious": config["malicious"], "cid": self.cid}
-
-    def evaluate(self, parameters, config):
-        set_params(self.net, parameters)
-
-        # Load data for this client and get trainloader
-        #num_workers = len(ray.worker.get_resource_ids()["CPU"])
-        num_workers = 1
-        testloader = get_circles(32, n_samples=10000, workers=num_workers, is_train=False)
-
-        # Send model to device
-        self.net.to(self.device)
-
-        # Evaluate
-        loss, accuracy = test_toy(self.net, testloader, device=self.device)
-
-        # Return statistics
-        return float(loss), len(testloader), {"accuracy": float(accuracy)}
+        raise NotImplementedError("HouseClient.evaluate not implemented")

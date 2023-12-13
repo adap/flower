@@ -11,7 +11,6 @@ from PIL import Image
 from torchvision.datasets import VisionDataset
 from typing import Callable, Optional, Tuple, Any
 from .dataset_preparation import create_lda_partitions
-from sklearn.datasets import make_circles
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
@@ -31,11 +30,23 @@ class Data(torch.utils.data.Dataset):
         return self.len
 
 def get_dataset(path_to_data: Path, cid: str, partition: str):
-
     # generate path to cid's data
     path_to_data = path_to_data / cid / (partition + ".pt")
 
     return TorchVision_FL(path_to_data, transform=cifar10Transformation())
+
+
+def get_dataloader(
+    path_to_data: str, cid: str, is_train: bool, batch_size: int, workers: int
+):
+    """Generates trainset/valset object and returns appropiate dataloader."""
+
+    partition = "train" if is_train else "val"
+    dataset = get_dataset(Path(path_to_data), str(cid), partition)
+
+    # we use as number of workers all the cpu cores assigned to this actor
+    kwargs = {"num_workers": workers, "pin_memory": True, "drop_last": False}
+    return DataLoader(dataset, batch_size=batch_size, **kwargs)
 
 
 def get_random_id_splits(total: int, val_ratio: float, shuffle: bool = True):
@@ -169,7 +180,7 @@ class TorchVision_FL(VisionDataset):
         return len(self.data)
 
 
-def get_cifar_10(path_to_data="datasets/cifar_10/data"):
+def get_cifar_10(path_to_data="flanders/datasets_files/cifar_10/data"):
     """Downloads CIFAR10 dataset and generates a unified training set (it will
     be partitioned later using the LDA partitioning mechanism."""
 
@@ -236,29 +247,6 @@ def get_mnist(
 
     return loader
 
-def get_circles(
-    batch_size: int,
-    n_samples: int = 1000,
-    workers=1,
-    is_train=True
-):
-    # Create a dataset with 10,000 samples.
-    X, y = make_circles(n_samples = n_samples,
-                        noise= 0.05,
-                        random_state=26)
-    if is_train:
-        X_train, _, y_train, _ = train_test_split(X, y, test_size=.33)
-        # Instantiate training and test data
-        train_data = Data(X_train, y_train)
-        dataloader = DataLoader(dataset=train_data, batch_size=batch_size, shuffle=True, num_workers=workers)
-    else:
-        _, X_test, _, y_test = train_test_split(X, y, test_size=.33)
-        # Instantiate training and test data
-        test_data = Data(X_test, y_test)
-        dataloader = DataLoader(dataset=test_data, batch_size=batch_size, shuffle=True, num_workers=workers)
-    return dataloader
-
-
 def dataset_partitioner(
     dataset: torch.utils.data.Dataset,
     batch_size: int,
@@ -303,13 +291,13 @@ def dataset_partitioner(
     return data_loader
 
 def get_partitioned_income(path: str, pool_size: int, train_size=0.8, test_size=0.2):
-    data=pd.read_csv(path)
-    copy=data
-    encoder=OrdinalEncoder()
-    encoded_values=encoder.fit_transform(data)
-    data=pd.DataFrame(data=encoded_values, columns=copy.columns)
-    Y=data["income"]
-    data=data.loc[:,data.columns!="income"]
+    data = pd.read_csv(path)
+    copy = data
+    encoder = OrdinalEncoder()
+    encoded_values = encoder.fit_transform(data)
+    data = pd.DataFrame(data = encoded_values, columns = copy.columns)
+    Y = data["income"]
+    data = data.loc[:,data.columns != "income"]
 
     X_train, X_test, y_train, y_test = [], [], [], []
     train_size = int((len(data) * train_size) // pool_size)+2
@@ -323,6 +311,33 @@ def get_partitioned_income(path: str, pool_size: int, train_size=0.8, test_size=
             shuffle=True,
             stratify=Y
         )
+        X_train.append(xtrain)
+        X_test.append(xtest)
+        y_train.append(ytrain)
+        y_test.append(ytest)
+
+    return X_train, X_test, y_train, y_test
+
+def get_partitioned_house(path: str, pool_size: int, train_size=0.8, test_size=0.2):
+    data = pd.read_csv(path)
+    Y = data['median_house_value'].values
+    data = data.drop(['median_house_value'] , axis = 1).values
+
+    X_train, X_test, y_train, y_test = [], [], [], []
+    train_size = int((len(data) * train_size) // pool_size)+2
+    test_size = int((len(data) * test_size) // pool_size)-2
+    for i in range(pool_size):
+        xtrain, xtest, ytrain, ytest = train_test_split(
+            data, Y, 
+            train_size=train_size, 
+            test_size=test_size, 
+            random_state=i, 
+            shuffle=True
+        )
+        sd = preprocessing.RobustScaler()
+        xtrain = sd.fit_transform(xtrain)
+        xtest = sd.fit_transform(xtest)
+
         X_train.append(xtrain)
         X_test.append(xtest)
         y_train.append(ytrain)
