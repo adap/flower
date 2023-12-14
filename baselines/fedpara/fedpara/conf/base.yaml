@@ -16,17 +16,21 @@ client_resources:
 
 dataset_config:
   name: CIFAR10
+  partition: non-iid
   num_classes: 10
   alpha: 0.5
 
 model:
-  _target_: fedpara.models.VGG16GN
+  _target_: fedpara.models.VGG
   num_classes: ${dataset_config.num_classes}
+  conv_type: lowrank # lowrank or standard
+  activation: relu # relu or leaky_relu
 
 hyperparams:
   eta_l: 0.1
   learning_decay: 0.992
-
+  momentum: 0.0
+  weight_decay: 0
 
 strategy:
   _target_: fedpara.strategy.FedPara

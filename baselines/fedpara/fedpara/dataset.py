@@ -2,131 +2,88 @@
 
 import pickle
 from typing import List, Tuple
-
+import random 
 import numpy as np
+from collections import defaultdict
 import torch
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader, Dataset
 from torchvision import datasets, transforms
+import omegaconf
 
-# class CustomDataset(Dataset):
-#     def __init__(self, root, train=True, dataset_name='CIFAR10', transform=None):
-#         if dataset_name == 'CIFAR10':
-#             from torchvision.datasets import CIFAR10 as OriginalDataset
-#         elif dataset_name == 'CIFAR100':
-#             from torchvision.datasets import CIFAR100 as OriginalDataset
-#         else:
-#             raise ValueError("Unsupported dataset name. Supported options are 'CIFAR10' and 'CIFAR100'.")
+class DatasetSplit(Dataset):
+    def __init__(self, dataset, idxs):
+        self.dataset = dataset
+        self.targets = dataset.targets
+        self.idxs = list(idxs)
 
-#         self.original_dataset = OriginalDataset(root, train=train, download=True, transform=None)
-#         self.transform = transform
+    def __len__(self):
+        return len(self.idxs)
 
-#     def __len__(self):
-#         return len(self.original_dataset)
-
-#     def __getitem__(self, idx):
-#         image, label = self.original_dataset[idx]
-
-#         if self.transform:
-#             image = self.transform(image)
-
-#         return image, label
-
-def _get_dirichlet_data(y, n, alpha, num_c, partition_equal=False):
-    n_nets = n
-    K = num_c
-    labelList_true = y
-    N = len(labelList_true)
-    net_dataidx_map = {}
-    p_client = np.zeros((n, K))
-    for i in range(n):
-        p_client[i] = np.random.dirichlet(np.repeat(alpha, K))
-    idx_batch = [[] for _ in range(n)]
-    m = int(N / n)
-
-    if not partition_equal:
-        for k in range(K):
-            idx_k = np.where(labelList_true == k)[0]
-            np.random.shuffle(idx_k)
-            proportions = p_client[:, k]
-            proportions /= proportions.sum()
-            proportions = (np.cumsum(proportions) * len(idx_k)).astype(int)[:-1]
-            idx_batch = [
-                idx_j + idx.tolist()
-                for idx_j, idx in zip(idx_batch, np.split(idx_k, proportions))
-            ]
-    else:
-        idx_labels = [np.where(labelList_true == k)[0] for k in range(K)]
-        idx_counter = [0 for k in range(K)]
-        total_cnt = 0
-        p_client_cdf = np.cumsum(p_client, axis=1)
-
-        while total_cnt < m * n:
-            curr_clnt = np.random.randint(n)
-            if len(idx_batch[curr_clnt]) >= m:
-                continue
-            total_cnt += 1
-            curr_prior = p_client_cdf[curr_clnt]
-            while True:
-                cls_label = np.argmax(np.random.uniform() <= curr_prior)
-                if idx_counter[cls_label] >= len(idx_labels[cls_label]):
-                    continue
-                idx_batch[curr_clnt].append(
-                    idx_labels[cls_label][idx_counter[cls_label]]
-                )
-                idx_counter[cls_label] += 1
-                break
-
-    for j in range(n_nets):
-        np.random.shuffle(idx_batch[j])
-        net_dataidx_map[j] = idx_batch[j]
-    net_cls_counts = {}
-    for net_i, dataidx in net_dataidx_map.items():
-        unq, unq_cnt = np.unique(labelList_true[dataidx], return_counts=True)
-        tmp = {unq[i]: unq_cnt[i] for i in range(len(unq))}
-        net_cls_counts[net_i] = tmp
-    local_sizes = []
-    for i in range(n_nets):
-        local_sizes.append(len(net_dataidx_map[i]))
-    local_sizes = np.array(local_sizes)
-    weights = local_sizes / np.sum(local_sizes)
-
-    print("Data statistics: %s" % str(net_cls_counts))
-    print("Data ratio: %s" % str(weights))
-
-    return idx_batch
+    def __getitem__(self, item):
+        image, label = self.dataset[self.idxs[item]]
+        return image, label
+    
+def iid(dataset, num_users):
+    """
+    Sample I.I.D. client data from CIFAR dataset
+    :param dataset:
+    :param num_users:
+    :return: dict of image index
+    """
+    num_items = int(len(dataset)/num_users)
+    dict_users, all_idxs = {}, [i for i in range(len(dataset))]
+    for i in range(num_users):
+        dict_users[i] = set(np.random.choice(all_idxs, num_items, replace=False))
+        all_idxs = list(set(all_idxs) - dict_users[i])
+    return dict_users
 
 
-def _split_dataset(
-    train_dataset, num_clients, alpha, num_classes, save_path, partition_equal=False
-):
-    print("Preparing dataset...")
-    train_loader = DataLoader(train_dataset, batch_size=len(train_dataset))
-    X_train = next(iter(train_loader))[0].numpy()
-    Y_train = next(iter(train_loader))[1].numpy()
-    inds = _get_dirichlet_data(
-        Y_train, num_clients, alpha, num_classes, partition_equal=partition_equal
-    )
-    train_datasets = []
-    for i, ind in enumerate(inds):
-        n_i = len(ind)
-        x = X_train[ind]
-        x_train = torch.Tensor(x[0:n_i])
-        y = Y_train[ind]
-        y_train = torch.LongTensor(y[0:n_i])
-        print(f"Client {i} : Training examples - {len(x_train)}")
-        dataset_train_torch = TensorDataset(x_train, y_train)
-        train_datasets.append(dataset_train_torch)
+def noniid(dataset, no_participants, alpha=0.5):
+    """
+    Input: Number of participants and alpha (param for distribution)
+    Output: A list of indices denoting data in CIFAR training set.
+    Requires: cifar_classes, a preprocessed class-indice dictionary.
+    Sample Method: take a uniformly sampled 10/100-dimension vector as parameters for
+    dirichlet distribution to sample number of images in each class.
+    """
+    np.random.seed(666)
+    random.seed(666)
+    cifar_classes = {}
+    for ind, x in enumerate(dataset):
+        _, label = x
+        if label in cifar_classes:
+            cifar_classes[label].append(ind)
+        else:
+            cifar_classes[label] = [ind]
 
-    with open(save_path, "wb") as file:
-        pickle.dump(train_datasets, file)
-
-    return train_datasets
- 
+    per_participant_list = defaultdict(list)
+    no_classes = len(cifar_classes.keys())
+    class_size = len(cifar_classes[0])
+    datasize = {}
+    for n in range(no_classes):
+        random.shuffle(cifar_classes[n])
+        sampled_probabilities = class_size * np.random.dirichlet(
+            np.array(no_participants * [alpha]))
+        for user in range(no_participants):
+            no_imgs = int(round(sampled_probabilities[user]))
+            datasize[user, n] = no_imgs
+            sampled_list = cifar_classes[n][:min(len(cifar_classes[n]), no_imgs)]
+            per_participant_list[user].extend(sampled_list)
+            cifar_classes[n] = cifar_classes[n][min(len(cifar_classes[n]), no_imgs):]
+    train_img_size = np.zeros(no_participants)
+    for i in range(no_participants):
+        train_img_size[i] = sum([datasize[i,j] for j in range(no_classes)])
+    clas_weight = np.zeros((no_participants,no_classes))
+    for i in range(no_participants):
+        for j in range(no_classes):
+            clas_weight[i,j] = float(datasize[i,j])/float((train_img_size[i]))
+    return per_participant_list, clas_weight
 
 
 def load_datasets(
     config, num_clients, batch_size, partition_equal=True
 ) -> Tuple[List[DataLoader], DataLoader]:
+    
     """Load the dataset and return the dataloaders for the clients and the server."""
     print("Loading data...")
     if config.name == "CIFAR10":
@@ -137,39 +94,38 @@ def load_datasets(
         raise NotImplementedError
     data_directory = f"./data/{config.name.lower()}/"
     ds_path = f"{data_directory}train_{num_clients}_{config.alpha:.2f}.pkl"
-    normalize = transforms.Normalize(mean=[0.491, 0.482, 0.447], std=[0.247, 0.243, 0.262])
-
-    trans_cifar = transforms.Compose(
-        [
+    transform_train = transforms.Compose([
+            transforms.RandomCrop(32, padding=4),
+            transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
-            normalize,
-        ]
-    )
-    # try:
-    #     with open(ds_path, "rb") as file:
-    #         train_datasets = pickle.load(file)
-    # except FileNotFoundError:
-    dataset_train = Dataset(
-        data_directory, train=True, download=True, transform=transforms.Compose([
-        transforms.ToTensor(),
-        normalize,])
-    )
-    train_datasets = _split_dataset(
-        dataset_train,
-        num_clients,
-        config.alpha,
-        config.num_classes,
-        ds_path,
-        partition_equal,
-    )
-
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        ])
+    transform_test = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        ])
+    try:
+        with open(ds_path, "rb") as file:
+            train_datasets = pickle.load(file)
+    except FileNotFoundError:
+        dataset_train = Dataset(
+            data_directory, train=True, download=True, transform=transform_train)
+        if config.partition == "iid":
+            train_datasets = iid(
+                dataset_train,
+                num_clients)
+        else:
+            train_datasets, _ = noniid(
+                dataset_train,
+                num_clients,
+                config.alpha)
     dataset_test = Dataset(
-        data_directory, train=False, download=True, transform=trans_cifar
+        data_directory, train=False, download=True, transform=transform_test
     )
     test_loader = DataLoader(dataset_test, batch_size=batch_size, num_workers=1)
     train_loaders = [
-        DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=1)
-        for ds in train_datasets
+        DataLoader(DatasetSplit(dataset_train, ids), batch_size=batch_size, shuffle=True, num_workers=1)
+        for ids in train_datasets.values()
     ]
 
     return train_loaders, test_loader

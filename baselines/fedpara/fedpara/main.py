@@ -23,8 +23,8 @@ def main(cfg: DictConfig) -> None:
     """
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
-
     seed_everything(cfg.seed)
+    # # Comet ML tracking
     experiment = Experiment(
     api_key="IZUqacouHXlsJu3hXQ5LuIy5Z",
     project_name="fedpara",
@@ -35,7 +35,7 @@ def main(cfg: DictConfig) -> None:
         "dataset": cfg.dataset_config.name,
         "seed": cfg.seed,
         }
-    experiment.log_parameters(hyper_params)
+    # experiment.log_parameters(hyper_params)
     # 2. Prepare dataset
     train_loaders, test_loader = load_datasets(
         config=cfg.dataset_config,

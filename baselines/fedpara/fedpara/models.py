@@ -19,7 +19,8 @@ class LowRank(nn.Module):
                in_channels: int,
                out_channels: int,
                low_rank: int,
-               kernel_size: int):
+               kernel_size: int
+               ,activation: str = 'relu'):
     super().__init__()
     self.T = nn.Parameter(
         torch.empty(size=(low_rank, low_rank, kernel_size, kernel_size)),
@@ -33,15 +34,14 @@ class LowRank(nn.Module):
         torch.empty(size=(low_rank, in_channels)),
         requires_grad=True
     )
-
-    init.kaiming_normal_(self.T, mode='fan_out', nonlinearity='leaky_relu')
-    init.kaiming_normal_(self.X, mode='fan_out', nonlinearity='leaky_relu')
-    init.kaiming_normal_(self.Y, mode='fan_out', nonlinearity='leaky_relu')
+    if activation == 'leakyrelu': activation = 'leaky_relu'
+    init.kaiming_normal_(self.T, mode='fan_out', nonlinearity=activation)
+    init.kaiming_normal_(self.X, mode='fan_out', nonlinearity=activation)
+    init.kaiming_normal_(self.Y, mode='fan_out', nonlinearity=activation)
     
   def forward(self):
     # torch.einsum simplify the tensor produce (matrix multiplication)
     return torch.einsum("xyzw,xo,yi->oizw", self.T, self.X, self.Y)
-
 class Conv2d(nn.Module):
     def __init__(self,
                  in_channels: int,
@@ -52,7 +52,7 @@ class Conv2d(nn.Module):
                  bias: bool = False,
                  ratio: float = 0.1,
                  add_nonlinear: bool = False,
-                 jacobian_corr: bool = False):
+                 activation: str = 'relu'):
         super().__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -63,9 +63,9 @@ class Conv2d(nn.Module):
         self.ratio = ratio
         self.low_rank = self._calc_from_ratio()
         self.add_nonlinear = add_nonlinear
-        self.jacobian_corr = jacobian_corr
-        self.W1 = LowRank(in_channels, out_channels, self.low_rank, kernel_size)
-        self.W2 = LowRank(in_channels, out_channels, self.low_rank, kernel_size)
+        self.activation = activation
+        self.W1 = LowRank(in_channels, out_channels, self.low_rank, kernel_size,activation)
+        self.W2 = LowRank(in_channels, out_channels, self.low_rank, kernel_size,activation)
         self.bias = nn.Parameter(torch.zeros(out_channels)) if bias else None
         self.tanh = nn.Tanh()
 
@@ -94,50 +94,74 @@ class Conv2d(nn.Module):
             W = self.W1() * self.W2()
         out = F.conv2d(input=x, weight=W, bias=self.bias,
                        stride=self.stride, padding=self.padding)
-        return out
-
-
-class VGG16GN(nn.Module):
-    def __init__(self, num_classes=10, num_groups=2, ratio=0.1, add_nonlinear=False, jacobian_corr=False):
-        super(VGG16GN, self).__init__()
-        vgg16 = models.vgg16_bn()
-        # Extract the features and classifier from the pre-trained VGG16
-        self.features = vgg16.features
+        return out    
+class VGG(nn.Module):
+    def __init__(self,num_classes, num_groups=2, ratio=0.1, activation='relu',
+                  conv_type='lowrank', add_nonlinear=False):
+        super(VGG, self).__init__()
+        if activation == 'relu':
+            self.activation = nn.ReLU(inplace=True)
+        elif activation == 'leaky_relu':
+            self.activation = nn.LeakyReLU(inplace=True)
+        self.conv_type = conv_type
+        self.num_groups = num_groups
+        self.num_classes = num_classes     
+        self.ratio = ratio
+        self.add_nonlinear = add_nonlinear  
+        self.features = self.make_layers([64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M'
+                                          , 512, 512, 512, 'M', 512, 512, 512, 'M'])
         self.classifier = nn.Sequential(
-            nn.Linear(512, 512),
-            nn.LeakyReLU(inplace=True),
             nn.Dropout(),
             nn.Linear(512, 512),
-            nn.LeakyReLU(inplace=True),
+            self.activation,
             nn.Dropout(),
-            nn.Linear(512, num_classes)
+            nn.Linear(512, 512),
+            self.activation,
+            nn.Linear(512, num_classes),
         )
-        for name, module in self.features.named_children():
+        self.init_weights()
+
+    def init_weights(self):
+         for name, module in self.features.named_children():
             module = getattr(self.features, name)
             if isinstance(module, nn.Conv2d):
-                num_channels = module.in_channels
-                setattr(self.features, name, Conv2d(
-                    num_channels,
-                    module.out_channels,
-                    module.kernel_size[0],
-                    module.stride[0],
-                    module.padding[0],
-                    module.bias is not None,
-                    ratio=ratio,
-                    add_nonlinear=add_nonlinear,
-                    jacobian_corr=jacobian_corr
-                ))
-                # replace every relu with leaky relu
-            if isinstance(module, nn.ReLU):
-                setattr(self.features, name, nn.LeakyReLU(inplace=True))
-            if isinstance(module, nn.BatchNorm2d):
-                num_channels = module.num_features
-                setattr(self.features, name, nn.GroupNorm(num_groups, num_channels))
-        # initilize the weights using kaiming normal
-    
-    def forward(self, x):
-        x = self.features(x)
-        x = torch.flatten(x, 1)  # Flatten the tensor
+                if self.conv_type == 'lowrank':
+                    num_channels = module.in_channels
+                    setattr(self.features, name, Conv2d(
+                        num_channels,
+                        module.out_channels,
+                        module.kernel_size[0],
+                        module.stride[0],
+                        module.padding[0],
+                        module.bias is not None,
+                        ratio=self.ratio,
+                        add_nonlinear=self.add_nonlinear,
+                        # send the name of the activation function to the Conv2d class
+                        activation=self.activation.__class__.__name__.lower()
+                    ))
+                elif self.conv_type == 'standard':
+                    n = module.kernel_size[0] * module.kernel_size[1] * module.out_channels
+                    module.weight.data.normal_(0, math.sqrt(2. / n))
+                    module.bias.data.zero_()
+
+    def make_layers(self,cfg, group_norm=True):
+        layers = []
+        in_channels = 3
+        for v in cfg:
+            if v == 'M':
+                layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
+            else:
+                conv2d = nn.Conv2d(in_channels, v, kernel_size=3, padding=1)
+                if group_norm:
+                    layers += [conv2d, nn.GroupNorm(self.num_groups,v), self.activation]
+                else:
+                    layers += [conv2d, self.activation]
+                in_channels = v
+        return nn.Sequential(*layers)
+
+    def forward(self, input):
+        x = self.features(input)
+        x = x.view(x.size(0), -1)
         x = self.classifier(x)
         return x
 
@@ -211,8 +235,8 @@ def train(  # pylint: disable=too-many-arguments
     optimizer = torch.optim.SGD(
         net.parameters(),
         lr=lr,
-        momentum=0,
-        weight_decay=0,
+        momentum=hyperparams["momentum"],
+        weight_decay=hyperparams["weight_decay"],
     )
     net.train()
     for _ in tqdm(range(epochs), desc="Local Training ..."):
@@ -267,7 +291,7 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
 
 
 if __name__ == "__main__":
-    model = VGG16GN(num_classes=10, num_groups=2)
+    model = VGG(num_classes=10, num_groups=2)
     model = torch.nn.Sequential(*list(model.features.children()))
     # Print the modified VGG16GN model architecture
     print(model)
