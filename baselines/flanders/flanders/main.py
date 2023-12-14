@@ -91,7 +91,6 @@ def main(cfg: DictConfig) -> None:
         shutil.rmtree(cfg.server.history_dir)
 
     attacks = {
-        "no_attack": no_attack,
         "gaussian_attack": gaussian_attack,
         "lie_attack": lie_attack,
         "fang_attack": fang_attack,
@@ -133,6 +132,8 @@ def main(cfg: DictConfig) -> None:
         cid_idx = int(cid)
         if dataset_name == "cifar":
             return client(cid, fed_dir)
+        elif dataset_name == "mnist":
+            return client(cid, pool_size)
         elif dataset_name == "income":
             return client(cid, X_train[cid_idx], y_train[cid_idx], X_test[cid_idx], y_test[cid_idx])
         elif dataset_name == "house":
@@ -163,24 +164,32 @@ def main(cfg: DictConfig) -> None:
 
     # 5. Start Simulation
     # history = fl.simulation.start_simulation(<arguments for simulation>)
-    history = fl.simulation.start_simulation(
-        client_fn=client_fn,
-        client_resources={"num_cpus": 10},
-        num_clients=cfg.server.pool_size,
-        server=EnhancedServer(
-            warmup_rounds=cfg.server.warmup_rounds,
-            num_malicious=cfg.server.num_malicious,
-            attack_fn=attacks[cfg.server.attack_fn],
-            magnitude=cfg.server.magnitude,
-            client_manager=SimpleClientManager(),
-            strategy=strategy,
-            sampling=cfg.server.sampling,
-            history_dir=cfg.server.history_dir,
-            dataset_name=cfg.dataset.name,
-        ),
-        config=fl.server.ServerConfig(num_rounds=cfg.server.num_rounds),
-        strategy=strategy
-    )
+    for dataset_name in cfg.dataset.name:
+        for attack_fn in cfg.server.attack_fn:
+            for num_malicious in cfg.server.num_malicious:
+                # the experiment with num_malicious = 0 should be done only one time
+                if num_malicious == 0 and attack_fn != "gaussian_attack":
+                    continue
+                history = fl.simulation.start_simulation(
+                    client_fn=client_fn,
+                    client_resources={"num_cpus": 10},
+                    num_clients=cfg.server.pool_size,
+                    server=EnhancedServer(
+                        warmup_rounds=cfg.server.warmup_rounds,
+                        num_malicious=num_malicious,
+                        attack_fn=attacks[attack_fn],
+                        magnitude=cfg.server.magnitude,
+                        client_manager=SimpleClientManager(),
+                        strategy=strategy,
+                        sampling=cfg.server.sampling,
+                        history_dir=cfg.server.history_dir,
+                        dataset_name=dataset_name
+                    ),
+                    config=fl.server.ServerConfig(num_rounds=cfg.server.num_rounds),
+                    strategy=strategy
+                )
+
+                print(f"history: {history}")
 
     # 6. Save your results
     # Here you can save the `history` returned by the simulation and include

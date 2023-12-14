@@ -122,7 +122,7 @@ class MnistClient(fl.client.NumPyClient):
 
         # Load data for this client and get trainloader
         num_workers = len(ray.worker.get_resource_ids()["CPU"])
-        testloader = get_mnist("datasets", 32, self.cid, nb_clients=self.pool_size, is_train=False, workers=num_workers)
+        testloader = get_mnist("flanders/datasets_files", 32, self.cid, nb_clients=self.pool_size, is_train=False, workers=num_workers)
 
         # Send model to device
         self.net.to(self.device)

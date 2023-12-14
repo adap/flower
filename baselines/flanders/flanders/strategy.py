@@ -18,6 +18,7 @@ from flwr.common import (
     Parameters,
     Scalar,
     FitIns,
+    parameters_to_ndarrays
 )
 from flwr.server.client_proxy import ClientProxy
 
@@ -191,6 +192,21 @@ class Flanders(FedAvg):
             parameters_aggregated, metrics_aggregated = super().aggregate_fit(server_round, results, failures)
 
         return parameters_aggregated, metrics_aggregated, malicious_clients_idx
+
+
+    def evaluate(
+        self, server_round: int, parameters: Parameters, config: Dict[str, Scalar]
+    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+        if self.evaluate_fn is None:
+            # No evaluation function provided
+            return None
+            
+        eval_res = self.evaluate_fn(server_round, parameters_to_ndarrays(parameters), config)
+        if eval_res is None:
+            return None
+        loss, metrics = eval_res
+        return loss, metrics
+
 
 def mar(X, pred_step, alpha=1, beta=1, maxiter=100, window=0):
     '''
