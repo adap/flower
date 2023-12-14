@@ -1,15 +1,21 @@
+import os
+import time
+import datetime
 import warnings
 from collections import OrderedDict
 
-import flwr as fl
+import tensorflow as tf
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import wandb
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
 
+import flwr as fl
+from flwr.common.serde import client_message_from_proto, server_message_from_proto
 
 # #############################################################################
 # 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
@@ -108,9 +114,104 @@ def client_fn(cid: str):
     return FlowerClient().to_client()
 
 
+def get_middleware(logdir):
+    os.makedirs(logdir, exist_ok=True)
+
+    # To allow multiple runs and group those we will create a subdir
+    # in the logdir which is named as number of directories in logdir + 1
+    run_id = str(
+        len(
+            [
+                name
+                for name in os.listdir(logdir)
+                if os.path.isdir(os.path.join(logdir, name))
+            ]
+        )
+    )
+    run_id = run_id + "-" + datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
+    logdir_run = os.path.join(logdir, run_id)
+
+    def wandb_middleware(fwd, app):
+        start_time = None
+
+        project_name = logdir
+        workload_id = str(fwd.task_ins.workload_id)
+        client_id = str(fwd.task_ins.task.consumer.node_id)
+        group_id = str(fwd.task_ins.group_id)
+        group_name = f"Workload ID: {workload_id}"
+        run_name = f"Client ID: {client_id}"
+
+        server_message = server_message_from_proto(
+            fwd.task_ins.task.legacy_server_message
+        )
+
+        if server_message.fit_ins:
+            config = server_message.fit_ins.config
+            if "round" in config:
+                round = config["round"]
+            if "project" in config:
+                project_name = str(config["project"])
+            if "group" in config:
+                group_name = str(config["group"])
+
+            start_time = time.time()
+
+        if server_message.evaluate_ins:
+            config = server_message.evaluate_ins.config
+            if "round" in config:
+                round = config["round"]
+            if "project" in config:
+                project_name = str(config["project"])
+            if "group" in config:
+                group_name = str(config["group"])
+
+        bwd = app(fwd)
+
+        client_message = client_message_from_proto(
+            bwd.task_res.task.legacy_client_message
+        )
+
+        writer = tf.summary.create_file_writer(os.path.join(logdir_run, client_id))
+
+        # Write aggregated loss
+        with writer.as_default(step=group_id):  # pylint: disable=not-context-manager
+            if client_message.evaluate_res:
+                tf.summary.scalar(
+                    "eval_loss", client_message.evaluate_res.loss, step=group_id
+                )
+                if "accuracy" in client_message.evaluate_res.metrics:
+                    tf.summary.scalar(
+                        "eval_accuracy",
+                        client_message.evaluate_res.metrics["accuracy"],
+                        step=group_id,
+                    )
+            if client_message.fit_res:
+                if start_time is not None:
+                    tf.summary.scalar(
+                        "fit_time", time.time() - start_time, step=group_id
+                    )
+                if "accuracy" in client_message.fit_res.metrics:
+                    tf.summary.scalar(
+                        "training_accuracy",
+                        client_message.fit_res.metrics["accuracy"],
+                        step=group_id,
+                    )
+                if "loss" in client_message.fit_res.metrics:
+                    tf.summary.scalar(
+                        "training_loss",
+                        client_message.fit_res.metrics["loss"],
+                        step=group_id,
+                    )
+            writer.flush()
+
+        return bwd
+
+    return wandb_middleware
+
+
 # To run this: `flower-client --callable client:flower`
 flower = fl.flower.Flower(
-    client_fn=client_fn,
+    client_fn=client_fn, middleware=[get_middleware("MT PyTorch Callable")]
 )
 
 
