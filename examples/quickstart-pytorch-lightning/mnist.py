@@ -61,18 +61,18 @@ class LitAutoEncoder(pl.LightningModule):
 
 def collate_fn(batch):
     """Change the dictionary to tuple to keep the exact dataloader behavior."""
-    images = [torch.tensor(item["image"], dtype=torch.float) for item in batch]
+    images = [item["image"] for item in batch]
     labels = [item["label"] for item in batch]
 
     images_tensor = torch.stack(images)
-    labels_tensor = torch.tensor(labels, dtype=torch.uint8)
+    labels_tensor = torch.tensor(labels)
 
     return images_tensor, labels_tensor
 
 
 def apply_transforms(batch):
     """Apply transforms to the partition from FederatedDataset."""
-    batch["img"] = [transforms.functional.to_tensor(img) for img in batch["img"]]
+    batch["image"] = [transforms.functional.to_tensor(img) for img in batch["image"]]
     return batch
 
 
@@ -86,15 +86,15 @@ def load_data(partition):
     # 60 % for the federated train and 20 % for the federated validation (both in fit)
     partition_train_valid = partition_full["train"].train_test_split(train_size=0.75)
     trainloader = DataLoader(
-        partition_train_valid["train"].with_format("torch"), batch_size=32,
+        partition_train_valid["train"], batch_size=32,
         shuffle=True, collate_fn=collate_fn, num_workers=1
     )
     valloader = DataLoader(
-        partition_train_valid["test"].with_format("torch"), batch_size=32,
+        partition_train_valid["test"], batch_size=32,
         collate_fn=collate_fn, num_workers=1
     )
     testloader = DataLoader(
-        partition_full["test"].with_format("torch"), batch_size=32,
+        partition_full["test"], batch_size=32,
         collate_fn=collate_fn, num_workers=1
     )
     return trainloader, valloader, testloader
