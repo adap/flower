@@ -81,7 +81,7 @@ def noniid(dataset, no_participants, alpha=0.5):
 
 
 def load_datasets(
-    config, num_clients, batch_size, partition_equal=True
+    config, num_clients, batch_size
 ) -> Tuple[List[DataLoader], DataLoader]:
     
     """Load the dataset and return the dataloaders for the clients and the server."""
@@ -122,9 +122,9 @@ def load_datasets(
     dataset_test = Dataset(
         data_directory, train=False, download=True, transform=transform_test
     )
-    test_loader = DataLoader(dataset_test, batch_size=batch_size, num_workers=1)
+    test_loader = DataLoader(dataset_test, batch_size=batch_size, num_workers=2)
     train_loaders = [
-        DataLoader(DatasetSplit(dataset_train, ids), batch_size=batch_size, shuffle=True, num_workers=1)
+        DataLoader(DatasetSplit(dataset_train, ids), batch_size=batch_size, shuffle=True, num_workers=2)
         for ids in train_datasets.values()
     ]
 

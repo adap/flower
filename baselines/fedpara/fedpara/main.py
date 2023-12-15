@@ -6,13 +6,11 @@ import numpy as np
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
-
 from fedpara import client, server, utils
 from fedpara.dataset import load_datasets
 from fedpara.utils import get_parameters, seed_everything
 
-
-@hydra.main(config_path="conf", config_name="base", version_base=None)
+@hydra.main(config_path="conf", config_name="cifar10", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.
 
@@ -25,10 +23,11 @@ def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
     seed_everything(cfg.seed)
     # # Comet ML tracking
+    credentials = OmegaConf.load("fedpara/conf/credentials.yaml")
     experiment = Experiment(
-    api_key="IZUqacouHXlsJu3hXQ5LuIy5Z",
-    project_name="fedpara",
-    workspace="yehias21"
+    api_key=credentials.api_key,
+    project_name=credentials.project_name,
+    workspace=credentials.workspace,
     )
     experiment.set_name(f"flower | {cfg.strategy.algorithm} | {cfg.dataset_config.name} | Seed {cfg.seed}")
     hyper_params = {
@@ -41,7 +40,6 @@ def main(cfg: DictConfig) -> None:
         config=cfg.dataset_config,
         num_clients=cfg.num_clients,
         batch_size=cfg.batch_size,
-        partition_equal=True,
     )
 
     # 3. Define clients
@@ -90,7 +88,7 @@ def main(cfg: DictConfig) -> None:
         ray_init_args={
             "num_cpus": 40,
             "num_gpus": 1,
-            "_memory": 110 * 1024 * 1024 * 1024,
+            "_memory": 30 * 1024 * 1024 * 1024,
         },
     )
 

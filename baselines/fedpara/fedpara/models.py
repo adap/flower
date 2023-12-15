@@ -291,9 +291,18 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
 
 
 if __name__ == "__main__":
-    model = VGG(num_classes=10, num_groups=2)
+    model = VGG(num_classes=10, num_groups=2, conv_type='standard')
     model = torch.nn.Sequential(*list(model.features.children()))
     # Print the modified VGG16GN model architecture
     print(model)
     total_trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f"Total number of parameters: {total_trainable_params / 1e6}")
+    param_size = 0
+    for param in model.parameters():
+        param_size += param.nelement() * param.element_size()
+    buffer_size = 0
+    for buffer in model.buffers():
+        buffer_size += buffer.nelement() * buffer.element_size()
+
+    size_all_mb = (param_size + buffer_size) / 1024**2
+    print('model size: {:.3f}MB'.format(size_all_mb))
