@@ -18,6 +18,7 @@ from heterofl.datasets.utils import (
 from heterofl.utils import check_exists, load, makedir_exist_ok, save
 
 
+# pylint: disable=too-many-instance-attributes
 class CIFAR10(Dataset):
     """CIFAR10 dataset."""
 
@@ -52,10 +53,10 @@ class CIFAR10(Dataset):
     def __getitem__(self, index):
         """Get the item with index."""
         img, target = Image.fromarray(self.img[index]), torch.tensor(self.target[index])
-        input = {"img": img, self.subset: target}
+        inp = {"img": img, self.subset: target}
         if self.transform is not None:
-            input = self.transform(input)
-        return input["img"], input["label"]
+            inp = self.transform(inp)
+        return inp["img"], inp["label"]
 
     def __len__(self):
         """Length of the dataset."""
@@ -79,7 +80,6 @@ class CIFAR10(Dataset):
         save(train_set, os.path.join(self.processed_folder, "train.pt"))
         save(test_set, os.path.join(self.processed_folder, "test.pt"))
         save(meta, os.path.join(self.processed_folder, "meta.pt"))
-        return
 
     def download(self):
         """Download dataset from the url."""
@@ -88,7 +88,6 @@ class CIFAR10(Dataset):
             filename = os.path.basename(url)
             download_url(url, self.raw_folder, filename, md5)
             extract_file(os.path.join(self.raw_folder, filename))
-        return
 
     def __repr__(self):
         """Represent CIFAR10 as string."""
@@ -118,12 +117,12 @@ class CIFAR10(Dataset):
         train_target, test_target = {"label": train_label}, {"label": test_label}
         with open(
             os.path.join(self.raw_folder, "cifar-10-batches-py", "batches.meta"), "rb"
-        ) as f:
-            data = pickle.load(f, encoding="latin1")
+        ) as fle:
+            data = pickle.load(fle, encoding="latin1")
             classes = data["label_names"]
         classes_to_labels = {"label": anytree.Node("U", index=[])}
-        for c in classes:
-            make_tree(classes_to_labels["label"], [c])
+        for cls in classes:
+            make_tree(classes_to_labels["label"], [cls])
         classes_size = {"label": make_flat_index(classes_to_labels["label"])}
         return (
             (train_img, train_target),
@@ -136,8 +135,8 @@ def _read_pickle_file(path, filenames):
     img, label = [], []
     for filename in filenames:
         file_path = os.path.join(path, filename)
-        with open(file_path, "rb") as f:
-            entry = pickle.load(f, encoding="latin1")
+        with open(file_path, "rb") as file:
+            entry = pickle.load(file, encoding="latin1")
             img.append(entry["data"])
             label.extend(entry["labels"]) if "labels" in entry else label.extend(
                 entry["fine_labels"]

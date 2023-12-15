@@ -20,9 +20,9 @@ from heterofl.utils import makedir_exist_ok
 IMG_EXTENSIONS = [".jpg", ".jpeg", ".png", ".ppm", ".bmp", ".pgm", ".tif"]
 
 
-def find_classes(dir):
+def find_classes(drctry):
     """Find the classes in a directory."""
-    classes = [d.name for d in os.scandir(dir) if d.is_dir()]
+    classes = [d.name for d in os.scandir(drctry) if d.is_dir()]
     classes.sort()
     classes_to_labels = {classes[i]: i for i in range(len(classes))}
     return classes_to_labels
@@ -30,8 +30,8 @@ def find_classes(dir):
 
 def pil_loader(path):
     """Load image from path using PIL."""
-    with open(path, "rb") as f:
-        img = Image.open(f)
+    with open(path, "rb") as file:
+        img = Image.open(file)
         return img.convert("RGB")
 
 
@@ -82,8 +82,8 @@ def _make_bar_updater(pbar):
 
 def _calculate_md5(path, chunk_size=1024 * 1024):
     md5 = hashlib.md5()
-    with open(path, "rb") as f:
-        for chunk in iter(lambda: f.read(chunk_size), b""):
+    with open(path, "rb") as file:
+        for chunk in iter(lambda: file.read(chunk_size), b""):
             md5.update(chunk)
     return md5.hexdigest()
 
@@ -128,7 +128,6 @@ def download_url(url, root, filename, md5):
                 )
         if not _check_integrity(path, md5):
             raise RuntimeError("Not valid downloaded file")
-    return
 
 
 def extract_file(src, dest=None, delete=False):
@@ -150,7 +149,6 @@ def extract_file(src, dest=None, delete=False):
             out_f.write(zip_f.read())
     if delete:
         os.remove(src)
-    return
 
 
 def make_data(root, extensions):
@@ -163,6 +161,7 @@ def make_data(root, extensions):
     return path
 
 
+# pylint: disable=dangerous-default-value
 def make_img(path, classes_to_labels, extensions=IMG_EXTENSIONS):
     """Make image."""
     img, label = [], []
@@ -170,16 +169,18 @@ def make_img(path, classes_to_labels, extensions=IMG_EXTENSIONS):
     leaf_nodes = classes_to_labels.leaves
     for node in leaf_nodes:
         classes.append(node.name)
-    for c in sorted(classes):
-        d = os.path.join(path, c)
-        if not os.path.isdir(d):
+    for cls in sorted(classes):
+        folder = os.path.join(path, cls)
+        if not os.path.isdir(folder):
             continue
-        for root, _, filenames in sorted(os.walk(d)):
+        for root, _, filenames in sorted(os.walk(folder)):
             for filename in sorted(filenames):
                 if has_file_allowed_extension(filename, extensions):
                     cur_path = os.path.join(root, filename)
                     img.append(cur_path)
-                    label.append(anytree.find_by_attr(classes_to_labels, c).flat_index)
+                    label.append(
+                        anytree.find_by_attr(classes_to_labels, cls).flat_index
+                    )
     return img, label
 
 
@@ -224,23 +225,23 @@ def make_flat_index(root, given=None):
     return classes_size
 
 
-class Compose(object):
+class Compose:
     """Custom Compose class."""
 
     def __init__(self, transforms):
         self.transforms = transforms
 
-    def __call__(self, input):
+    def __call__(self, inp):
         """Apply transforms when called."""
-        for t in self.transforms:
-            input["img"] = t(input["img"])
-        return input
+        for transform in self.transforms:
+            inp["img"] = transform(inp["img"])
+        return inp
 
     def __repr__(self):
         """Represent Compose as string."""
         format_string = self.__class__.__name__ + "("
-        for t in self.transforms:
+        for transform in self.transforms:
             format_string += "\n"
-            format_string += "    {0}".format(t)
+            format_string += "    {0}".format(transform)
         format_string += "\n)"
         return format_string

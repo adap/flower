@@ -185,25 +185,23 @@ def makedir_exist_ok(path):
     """Create a directory."""
     try:
         os.makedirs(path)
-    except OSError as e:
-        if e.errno == errno.EEXIST:
+    except OSError as os_err:
+        if os_err.errno == errno.EEXIST:
             pass
         else:
             raise
-    return
 
 
-def save(input, path, protocol=2, mode="torch"):
-    """Save the input in a given path."""
+def save(inp, path, protocol=2, mode="torch"):
+    """Save the inp in a given path."""
     dirname = os.path.dirname(path)
     makedir_exist_ok(dirname)
     if mode == "torch":
-        torch.save(input, path, pickle_protocol=protocol)
+        torch.save(inp, path, pickle_protocol=protocol)
     elif mode == "numpy":
-        np.save(path, input, allow_pickle=True)
+        np.save(path, inp, allow_pickle=True)
     else:
         raise ValueError("Not valid save mode")
-    return
 
 
 def load(path, mode="torch"):

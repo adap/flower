@@ -18,6 +18,7 @@ from heterofl.datasets.utils import (
 from heterofl.utils import check_exists, load, makedir_exist_ok, save
 
 
+# pylint: disable=too-many-instance-attributes
 class MNIST(Dataset):
     """MNIST dataset."""
 
@@ -66,10 +67,10 @@ class MNIST(Dataset):
         img, target = Image.fromarray(self.img[index], mode="L"), torch.tensor(
             self.target[index]
         )
-        input = {"img": img, self.subset: target}
+        inp = {"img": img, self.subset: target}
         if self.transform is not None:
-            input = self.transform(input)
-        return input
+            inp = self.transform(inp)
+        return inp
 
     def __len__(self):
         """Length of the dataset."""
@@ -93,7 +94,6 @@ class MNIST(Dataset):
         save(train_set, os.path.join(self.processed_folder, "train.pt"))
         save(test_set, os.path.join(self.processed_folder, "test.pt"))
         save(meta, os.path.join(self.processed_folder, "meta.pt"))
-        return
 
     def download(self):
         """Download and save the dataset accordingly."""
@@ -102,7 +102,6 @@ class MNIST(Dataset):
             filename = os.path.basename(url)
             download_url(url, self.raw_folder, filename, md5)
             extract_file(os.path.join(self.raw_folder, filename))
-        return
 
     def __repr__(self):
         """Represent CIFAR10 as string."""
@@ -130,8 +129,8 @@ class MNIST(Dataset):
         train_target, test_target = {"label": train_label}, {"label": test_label}
         classes_to_labels = {"label": anytree.Node("U", index=[])}
         classes = list(map(str, list(range(10))))
-        for c in classes:
-            make_tree(classes_to_labels["label"], [c])
+        for cls in classes:
+            make_tree(classes_to_labels["label"], [cls])
         classes_size = {"label": make_flat_index(classes_to_labels["label"])}
         return (
             (train_img, train_target),
@@ -140,13 +139,13 @@ class MNIST(Dataset):
         )
 
 
-def _get_int(b):
-    return int(codecs.encode(b, "hex"), 16)
+def _get_int(num):
+    return int(codecs.encode(num, "hex"), 16)
 
 
 def _read_image_file(path):
-    with open(path, "rb") as f:
-        data = f.read()
+    with open(path, "rb") as file:
+        data = file.read()
         assert _get_int(data[:4]) == 2051
         length = _get_int(data[4:8])
         num_rows = _get_int(data[8:12])
@@ -158,8 +157,8 @@ def _read_image_file(path):
 
 
 def _read_label_file(path):
-    with open(path, "rb") as f:
-        data = f.read()
+    with open(path, "rb") as file:
+        data = file.read()
         assert _get_int(data[:4]) == 2049
         length = _get_int(data[4:8])
         parsed = (
