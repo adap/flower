@@ -64,7 +64,7 @@ def main() -> None:
         help="Specifies the artificial data partition",
     )
     args = parser.parse_args()
-    node_id = args.partition
+    node_id = args.node_id
 
     # Model and data
     model = mnist.LitAutoEncoder()
