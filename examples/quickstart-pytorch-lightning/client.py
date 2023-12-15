@@ -61,6 +61,7 @@ def main() -> None:
         "--node-id",
         type=int,
         choices=range(0, 10),
+        required=True,
         help="Specifies the artificial data partition",
     )
     args = parser.parse_args()
