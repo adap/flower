@@ -16,32 +16,10 @@
 
 
 import importlib
-from dataclasses import dataclass
-from typing import Callable, cast
+from typing import cast
 
 from flwr.client.message_handler.message_handler import handle
-from flwr.client.typing import ClientFn
-from flwr.client.workload_state import WorkloadState
-from flwr.proto.task_pb2 import TaskIns, TaskRes
-
-
-@dataclass
-class Fwd:
-    """."""
-
-    task_ins: TaskIns
-    state: WorkloadState
-
-
-@dataclass
-class Bwd:
-    """."""
-
-    task_res: TaskRes
-    state: WorkloadState
-
-
-FlowerCallable = Callable[[Fwd], Bwd]
+from flwr.client.typing import Bwd, ClientFn, Fwd
 
 
 class Flower:
@@ -94,7 +72,7 @@ class LoadCallableError(Exception):
     """."""
 
 
-def load_callable(module_attribute_str: str) -> Flower:
+def load_flower_callable(module_attribute_str: str) -> Flower:
     """Load the `Flower` object specified in a module attribute string.
 
     The module/attribute string should have the form <module>:<attribute>. Valid
