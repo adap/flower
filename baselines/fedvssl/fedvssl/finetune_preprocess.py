@@ -53,5 +53,7 @@ else:
     params = [np.array(v) for v in list(params["arr_0"])]
 
 params_dict = zip(model.state_dict().keys(), params)
-state_dict = {"state_dict": OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})}
+state_dict = {
+    "state_dict": OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
+}
 torch.save(state_dict, "./model_pretrained.pth")

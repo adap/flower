@@ -98,10 +98,14 @@ def main():
                 client_list2.append({"name": ele, "label": int(lab2)})
 
         # generate json file for each client.
-        with open(os.path.join(out_path, "client_dist{}.json".format(cid1)), "w") as f_w:
+        with open(
+            os.path.join(out_path, "client_dist{}.json".format(cid1)), "w"
+        ) as f_w:
             json.dump(client_list1, f_w, indent=2)
 
-        with open(os.path.join(out_path, "client_dist{}.json".format(cid2)), "w") as f_w:
+        with open(
+            os.path.join(out_path, "client_dist{}.json".format(cid2)), "w"
+        ) as f_w:
             json.dump(client_list2, f_w, indent=2)
 
 

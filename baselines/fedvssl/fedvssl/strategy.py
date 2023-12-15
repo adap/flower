@@ -1,7 +1,7 @@
 """Optionally define a custom strategy.
 
-Needed only when the strategy is not yet implemented in Flower or because you want to extend
-or modify the functionality of an existing strategy.
+Needed only when the strategy is not yet implemented in Flower or because you want to
+extend or modify the functionality of an existing strategy.
 """
 # import all the necessary libraries
 import os
@@ -101,7 +101,9 @@ class FedVSSL(fl.server.strategy.FedAvg):
             # load the previous weights if there are any
 
             if server_round > 1 and self.swbeta == 1:
-                chk_name_list = [fn for fn in os.listdir(glb_dir) if fn.endswith(".npz")]
+                chk_name_list = [
+                    fn for fn in os.listdir(glb_dir) if fn.endswith(".npz")
+                ]
                 chk_epoch_list = [
                     int(re.findall(r"\d+", fn)[0])
                     for fn in chk_name_list

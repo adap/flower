@@ -1,7 +1,7 @@
 """Define your client class and a function to construct such clients.
 
-Please overwrite `flwr.client.NumPyClient` or `flwr.client.Client` and create a function to
-instantiate your client.
+Please overwrite `flwr.client.NumPyClient` or `flwr.client.Client` and create a function
+to instantiate your client.
 """
 import os
 import re
@@ -63,15 +63,21 @@ class SslClient(fl.client.NumPyClient):
         int(config["epoch_global"])
         self.cfg.lr_config = {"policy": "step", "step": [100, 200]}
 
-        chk_name_list = [fn for fn in os.listdir(self.cfg.work_dir) if fn.endswith(".pth")]
+        chk_name_list = [
+            fn for fn in os.listdir(self.cfg.work_dir) if fn.endswith(".pth")
+        ]
         chk_epoch_list = [
-            int(re.findall(r"\d+", fn)[0]) for fn in chk_name_list if fn.startswith("epoch")
+            int(re.findall(r"\d+", fn)[0])
+            for fn in chk_name_list
+            if fn.startswith("epoch")
         ]
 
         # Gathering  local epochs if there are any
         if chk_epoch_list:
             chk_epoch_list.sort()
-            checkpoint = os.path.join(self.cfg.work_dir, f"epoch_{chk_epoch_list[-1]}.pth")
+            checkpoint = os.path.join(
+                self.cfg.work_dir, f"epoch_{chk_epoch_list[-1]}.pth"
+            )
             pr_model = torch.load(checkpoint)
             state_dict_pr = pr_model["state_dict"]
             # load the model with previous state_dictionary
@@ -105,7 +111,7 @@ class SslClient(fl.client.NumPyClient):
         loss_list = []
         with open(log_f_name, "r") as f_r:
             for line in f_r.readlines():
-                line_dict = eval(line.strip())
+                line_dict = eval(line.strip())  # pylint: disable=eval-used
                 loss = float(line_dict["loss"])
                 loss_list.append(loss)
 

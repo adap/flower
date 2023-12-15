@@ -62,7 +62,7 @@ types-requests = "==2.27.7"
 virtualenv = "20.21.0"
 
 [tool.isort]
-line_length = 94
+line_length = 88
 indent = "    "
 multi_line_output = 3
 include_trailing_comma = true
@@ -70,7 +70,7 @@ force_grid_wrap = 0
 use_parentheses = true
 
 [tool.black]
-line-length = 94
+line-length = 88
 target-version = ["py38", "py39", "py310", "py311"]
 
 [tool.pytest.ini_options]
@@ -109,12 +109,12 @@ follow_imports = "skip"
 follow_imports_for_stubs = true
 
 [tool.docformatter]
-wrap-summaries = 94
-wrap-descriptions = 94
+wrap-summaries = 88
+wrap-descriptions = 88
 
 [tool.ruff]
 target-version = "py38"
-line-length = 94
+line-length = 88
 select = ["D", "E", "F", "W", "B", "ISC", "C4"]
 fixable = ["D", "E", "F", "W", "B", "ISC", "C4"]
 ignore = ["B024", "B027"]

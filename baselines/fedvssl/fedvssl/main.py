@@ -1,7 +1,7 @@
 """Create and connect the building blocks for your experiments; start the simulation.
 
-It includes processioning the dataset, instantiate strategy, specify how the global model is
-going to be evaluated, etc. At the end, this script saves the results.
+It includes processioning the dataset, instantiate strategy, specify how the global
+model is going to be evaluated, etc. At the end, this script saves the results.
 """
 # These are the basic packages you'll need here
 
@@ -21,7 +21,9 @@ from .utils import init_p_paths, load_data, load_model, set_config_mmcv
 
 
 # pylint: disable=too-many-arguments
-def initial_setup(cid, base_work_dir, rounds, data_dir, num_gpus, partition_dir, cfg_path):
+def initial_setup(
+    cid, base_work_dir, rounds, data_dir, num_gpus, partition_dir, cfg_path
+):
     """Initialise setup for instantiating client class."""
     cid_plus_one = str(int(cid) + 1)
     args = Namespace(
