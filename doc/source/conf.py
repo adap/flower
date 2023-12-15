@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
 # ==============================================================================
 
 
+import datetime
 import os
 import sys
 from git import Repo
@@ -81,11 +82,11 @@ gettext_compact = "framework-docs"
 # -- Project information -----------------------------------------------------
 
 project = "Flower"
-copyright = "2022 Adap GmbH"
+copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "1.6.0"
+release = "1.7.0"
 
 # -- General configuration ---------------------------------------------------
 
