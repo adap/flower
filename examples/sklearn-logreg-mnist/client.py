@@ -16,7 +16,7 @@ if __name__ == "__main__":
         "--node-id",
         type=int,
         choices=range(0, N_CLIENTS),
-        default=1,
+        required=True,
         help="Specifies the artificial data partition",
     )
     args = parser.parse_args()
