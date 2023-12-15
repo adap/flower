@@ -1,7 +1,10 @@
+from datetime import datetime
+
 import flwr as fl
 import numpy as np
 
 SUBSET_SIZE = 1000
+STATE_VAR = 'timestamp'
 
 
 model_params = np.array([1])
@@ -12,20 +15,36 @@ class FlowerClient(fl.client.NumPyClient):
     def get_parameters(self, config):
         return model_params
 
+    def _record_timestamp_to_state(self):
+        """Record timestamp to client's state."""
+        t_stamp = datetime.now().timestamp()
+        if STATE_VAR in self.state.state:
+            self.state.state[STATE_VAR] += f",{t_stamp}"
+        else:
+            self.state.state[STATE_VAR] = str(t_stamp)
+    
+    def _retrieve_timestamp_from_state(self):
+        return self.state.state[STATE_VAR]
+    
     def fit(self, parameters, config):
         model_params = parameters
         model_params = [param * (objective/np.mean(param)) for param in model_params]
-        return model_params, 1, {}
+        self._record_timestamp_to_state()
+        return model_params, 1, {STATE_VAR: self._retrieve_timestamp_from_state()}
 
     def evaluate(self, parameters, config):
         model_params = parameters
         loss = min(np.abs(1 - np.mean(model_params)/objective), 1)
         accuracy = 1 - loss
-        return loss, 1, {"accuracy": accuracy}
+        self._record_timestamp_to_state()
+        return loss, 1, {"accuracy": accuracy, STATE_VAR: self._retrieve_timestamp_from_state()}
 
 def client_fn(cid):
-    return FlowerClient()
+    return FlowerClient().to_client()
 
+flower = fl.flower.Flower(
+    client_fn=client_fn,
+)
 
 if __name__ == "__main__":
     # Start Flower client
