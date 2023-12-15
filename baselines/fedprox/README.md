@@ -2,7 +2,7 @@
 title: Federated Optimization in Heterogeneous Networks
 url: https://arxiv.org/abs/1812.06127
 labels: [image classification, cross-device, stragglers]
-dataset: [mnist]
+dataset: [MNIST]
 ---
 
 # FedProx: Federated Optimization in Heterogeneous Networks

@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 
 from typing import Dict, Tuple
 
-from flwr.client import ClientLike, to_client
 from flwr.common import (
     Config,
     EvaluateIns,
@@ -83,26 +82,18 @@ class NeedsWrappingClient(NumPyClient):
 
 def test_to_client_with_client() -> None:
     """Test to_client."""
-    # Prepare
-    client_like: ClientLike = PlainClient()
-
-    # Execute
-    actual = to_client(client_like=client_like)
+    client = PlainClient().to_client()
 
     # Assert
-    assert isinstance(actual, Client)
+    assert isinstance(client, Client)
 
 
 def test_to_client_with_numpyclient() -> None:
     """Test fit_clients."""
-    # Prepare
-    client_like: ClientLike = NeedsWrappingClient()
-
-    # Execute
-    actual = to_client(client_like=client_like)
+    client = NeedsWrappingClient().to_client()
 
     # Assert
-    assert isinstance(actual, Client)
+    assert isinstance(client, Client)
 
 
 def test_start_client_transport_invalid() -> None:
