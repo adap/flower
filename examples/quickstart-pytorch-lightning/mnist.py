@@ -3,14 +3,13 @@
 Source: pytorchlightning.ai (2021/02/04)
 """
 
+from flwr_datasets import FederatedDataset
 import pytorch_lightning as pl
 import torch
 from torch import nn
 from torch.nn import functional as F
 from torch.utils.data import DataLoader
 from torchvision import transforms
-
-from flwr_datasets import FederatedDataset
 
 
 class LitAutoEncoder(pl.LightningModule):
@@ -101,6 +100,7 @@ def main() -> None:
     """Centralized training."""
 
     # Load data
+
     train_loader, val_loader, test_loader = load_data(0)
 
     # Load model

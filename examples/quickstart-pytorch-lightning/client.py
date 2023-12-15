@@ -58,17 +58,17 @@ def main() -> None:
 
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
-        "--partition",
+        "--node-id",
         type=int,
         choices=range(0, 10),
         help="Specifies the artificial data partition",
     )
     args = parser.parse_args()
-    partition_id = args.partition
+    node_id = args.partition
 
     # Model and data
     model = mnist.LitAutoEncoder()
-    train_loader, val_loader, test_loader = mnist.load_data(partition_id)
+    train_loader, val_loader, test_loader = mnist.load_data(node_id)
 
     # Flower client
     client = FlowerClient(model, train_loader, val_loader, test_loader)
