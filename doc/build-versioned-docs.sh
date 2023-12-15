@@ -76,7 +76,9 @@ END
 
     # Restore branch as it was to avoid conflicts
     git restore source/_templates
-    rm -rf source/ref-api
+    git restore source/_templates/autosummary || rm -rf source/_templates/autosummary
+    rm source/ref-api/*.rst
+
     if [ "$current_version" = "v1.5.0" ]; then
       git restore source/conf.py
     fi
