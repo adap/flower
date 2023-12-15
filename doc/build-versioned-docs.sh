@@ -13,6 +13,7 @@ rm -rf doc/build
 tmp_dir=`mktemp -d`
 cp -r doc/locales ${tmp_dir}/locales
 cp -r doc/source/_templates ${tmp_dir}/_templates
+cp -r doc/source/ref-api ${tmp_dir}/ref-api
 
 cd doc
 
@@ -70,12 +71,14 @@ END
     
     # Copy updated version of html files
     cp -r ${tmp_dir}/_templates source
+    cp -r ${tmp_dir}/ref-api source
  
     # Actually building the docs for a given language and version
     sphinx-build -b html source/ build/html/${current_version}/${current_language} -A lang=True -D language=${current_language}
 
     # Restore branch as it was to avoid conflicts
     git restore source/_templates
+    rm -rf source/ref-api
     if [ "$current_version" = "v1.5.0" ]; then
       git restore source/conf.py
     fi
