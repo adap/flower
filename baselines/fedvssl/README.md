@@ -63,8 +63,8 @@ For UCF-101 dataset, one can simply follow the dataset preparation instruction b
 | beta coefficient	  |                  1                  | 
 
 ## Environment Setup
-Please make sure you have installed CUDA 11.0 on your machine 
-(see [NVIDIA CUDA Toolkit website](https://developer.nvidia.com/cuda-11.0-download-archive?target_os=Linux)).
+Please make sure you have installed CUDA 11.7 on your machine 
+(see [NVIDIA CUDA Toolkit website](https://developer.nvidia.com/cuda-11-7-0-download-archive)).
 To construct the Python environment follow these steps (asuming you arelady have `pyenv` and `Poetry` in your system):
 
 ```bash
