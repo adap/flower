@@ -12,7 +12,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 # Parse arguments
 parser = argparse.ArgumentParser(description="Flower")
 parser.add_argument(
-    "--partition",
+    "--node-id",
     type=int,
     choices=[0, 1, 2],
     required=True,
