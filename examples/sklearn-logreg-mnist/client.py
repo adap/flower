@@ -13,13 +13,14 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
-        "--partition",
+        "--node-id",
         type=int,
         choices=range(0, N_CLIENTS),
+        default=1,
         help="Specifies the artificial data partition",
     )
     args = parser.parse_args()
-    partition_id = args.partition
+    partition_id = args.node_id
 
     # Load the partition data
     fds = FederatedDataset(dataset="mnist", partitioners={"train": N_CLIENTS})
