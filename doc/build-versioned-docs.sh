@@ -103,6 +103,7 @@ for current_language in ${languages}; do
   export current_language
   sphinx-build -b html source/ build/html/${current_version}/${current_language} -A lang=True -D language=${current_language}
 done
+rm source/ref-api/*.rst
 
 # Copy main version to the root of the built docs
 cp -r build/html/main/en/* build/html/
