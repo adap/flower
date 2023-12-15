@@ -10,7 +10,7 @@ https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html
 # pylint: disable=W0223
 
 
-from typing import Tuple, Dict
+from typing import Tuple
 
 import torch
 import torch.nn as nn
@@ -51,26 +51,24 @@ class Net(nn.Module):
         return x
 
 
-def load_data(partition_id: int) -> (
-        Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]
-):
-    """Load CIFAR-10 (training and test set)."""
+def load_data(node_id: int):
+    """Load partition CIFAR10 data."""
     fds = FederatedDataset(dataset="cifar10", partitioners={"train": 3})
-    partition = fds.load_partition(partition_id, "train")
+    partition = fds.load_partition(node_id)
     # Divide data on each node: 80% train, 20% test
     partition_train_test = partition.train_test_split(test_size=0.2)
     pytorch_transforms = Compose(
         [ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
     )
-    partition_train_test = partition_train_test.map(
-        lambda img: {"img": pytorch_transforms(img)}, input_columns="img"
-    )
-    trainloader = DataLoader(
-        partition_train_test["train"].with_format("torch"), batch_size=32, shuffle=True
-    )
-    testloader = DataLoader(
-        partition_train_test["test"].with_format("torch"), batch_size=32
-    )
+
+    def apply_transforms(batch):
+        """Apply transforms to the partition from FederatedDataset."""
+        batch["img"] = [pytorch_transforms(img) for img in batch["img"]]
+        return batch
+
+    partition_train_test = partition_train_test.with_transform(apply_transforms)
+    trainloader = DataLoader(partition_train_test["train"], batch_size=32, shuffle=True)
+    testloader = DataLoader(partition_train_test["test"], batch_size=32)
     return trainloader, testloader
 
 
