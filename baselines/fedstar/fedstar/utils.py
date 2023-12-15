@@ -1,6 +1,7 @@
-import random
-import itertools
 import collections
+import itertools
+import random
+
 import numpy as np
 import tensorflow as tf
 
@@ -107,13 +108,13 @@ class DataTools:
         ranges = []
         assert size != 0 and partitions > 0
         if rest:
-            index = [x for x in range(0, total, size)]
+            index = list(range(0, total, size))
             extra = [index[i] + i for i in range(rest + 1)] + [
                 x + rest for x in index[rest + 1 :][: partitions - rest]
             ]
             ranges = [(extra[i], extra[i + 1]) for i in range(len(extra) - 1)]
         else:
-            index = [x for x in range(0, total + 1, size)]
+            index = list(range(0, total + 1, size))
             ranges = [(index[i], index[i + 1]) for i in range(len(index) - 1)]
         return [(dataset[0][i:j], dataset[1][i:j]) for i, j in ranges]
 
@@ -221,16 +222,12 @@ class DataTools:
             )
             random.Random(seed).shuffle(distribution)
         else:
-            classes = [i for i in range(_num_classes_)]
+            classes = list(range(_num_classes_))
             random.Random(seed).shuffle(classes)
             _iter_ = iter(classes)
-            distribute_fun = lambda: (
-                yield from (
-                    list(itertools.islice(_iter_, distribution[i]))
-                    for i in range(_num_clients_)
-                )
-            )
-            distribution = [i for i in distribute_fun()]
+            def distribute_fun():
+                return (yield from (list(itertools.islice(_iter_, distribution[i])) for i in range(_num_clients_)))
+            distribution = list(distribute_fun())
         class_datasets = [
             DataTools.get_dataset_class_samples(
                 dataset=dataset, class_number=class_number
@@ -250,7 +247,7 @@ class DataTools:
             parts = list(
                 itertools.chain.from_iterable(
                     [
-                        [i for i in range(len(c))]
+                        list(range(len(c)))
                         for c in class_datasets
                         if type(c) is list
                     ]
@@ -381,7 +378,7 @@ class DataTools:
                 else (distribution[idx], remain_samples)
             )
         # Add error due to rounding to random positions.
-        for i in range(round(round_error)):
+        for _i in range(round(round_error)):
             idx = random.randint(0, len(distribution) - 1)
             distribution[idx] = (
                 distribution[idx] + 1

@@ -6,19 +6,20 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 os.environ["GRPC_VERBOSITY"] = "ERROR"
 GRPC_MAX_MESSAGE_LENGTH: int = 536_870_912
 ##########################################
-import argparse
-import pathlib
-import uuid
 import gc
-import time
-import flwr
 import logging
-import tensorflow as tf
-from fedstar.model import Network
-from fedstar.data import DataBuilder
+import time
+import uuid
+
+import flwr
 import hydra
+import tensorflow as tf
+
+from fedstar.data import DataBuilder
+from fedstar.model import Network
 
 parent_path = os.getcwd()
+
 
 class AudioServer:
     def __init__(
@@ -37,7 +38,7 @@ class AudioServer:
         # Flower Parameters
         self.evalution_step = flwr_evalution_step
         self.sample_fraction = float(flwr_min_sample_size / flwr_min_num_clients)
-        print("-"*100)
+        print("-" * 100)
         print(self.sample_fraction)
         self.min_sample_size = flwr_min_sample_size
         self.min_num_clients = flwr_min_num_clients
@@ -68,7 +69,7 @@ class AudioServer:
         tf.keras.backend.clear_session()
 
     def server_start(self, server_address):
-        print("|"*50)
+        print("|" * 50)
         print(server_address)
         flwr.server.start_server(
             server_address=server_address,
@@ -173,14 +174,17 @@ def set_gpu_limits(gpu_id, gpu_memory):
         except RuntimeError as e:
             print(e)
 
+
 """
     Change the config path and yaml file name based on expermients you want to run.
     The current configs will call the basic config file which runs the small experiment to check integrity.
-    Eg:- 
+    Eg:-
     To carry out results for experiment in row 3 row 1 col 1. The parameters will be
     config_path = conf/table_3/row_2_clients_10
     config_name = speech_commands
 """
+
+
 @hydra.main(config_path="conf/table_3", config_name="base")
 def main(cfg):
     # Set Experiment Parameters
@@ -199,7 +203,11 @@ def main(cfg):
     set_gpu_limits(gpu_id="0", gpu_memory=cfg["server"]["gpu_memory"])
     # Load Test Dataset
     ds_test, num_classes = DataBuilder.get_ds_test(
-        parent_path=parent_path, data_dir=dataset_name, batch_size=cfg["server"]['batch_size'], buffer=1024, seed=cfg["server"]['seed']
+        parent_path=parent_path,
+        data_dir=dataset_name,
+        batch_size=cfg["server"]["batch_size"],
+        buffer=1024,
+        seed=cfg["server"]["seed"],
     )
     # Create Server Object
     audio_server = AudioServer(

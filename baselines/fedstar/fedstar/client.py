@@ -1,12 +1,15 @@
 import os
 
 os.environ["GRPC_VERBOSITY"] = "ERROR"
-import flwr
 import gc
 import logging
+
+import flwr
 import tensorflow as tf
+
 from fedstar.data import DataBuilder
 from fedstar.model import Network, PSL_Network
+
 LOG_LEVEL = logging.ERROR
 
 
@@ -26,7 +29,7 @@ class AudioClient(flwr.client.NumPyClient):
         class_distribute=False,
         mean_class_distribution=3,
         seed=2021,
-        verbose=2
+        verbose=2,
     ):
         # Client Parameters
         self.server_address = server_address
@@ -36,7 +39,7 @@ class AudioClient(flwr.client.NumPyClient):
         self.fedstar = fedstar
         self.aux_loss_weight = 0.5
         self.parent_path = parent_path
-        print("/*/*"*150)
+        print("/*/*" * 150)
         print(self.parent_path)
         # Load Clients Data
         (

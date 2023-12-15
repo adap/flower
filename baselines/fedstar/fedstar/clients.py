@@ -4,19 +4,21 @@ import sys
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 os.environ["GRPC_VERBOSITY"] = "ERROR"
-##########################################
-import pathlib
-import argparse
-import multiprocessing
 import distutils.util
+import multiprocessing
+
+##########################################
 from multiprocessing import Process
+
 import hydra
-from fedstar.client import AudioClient
 import tensorflow as tf
+
+from fedstar.client import AudioClient
 
 multiprocessing.set_start_method("spawn", force=True)
 
 parent_path = os.getcwd()
+
 
 class Client(Process):
     def __init__(self, queue):
@@ -74,26 +76,28 @@ class Client(Process):
             except RuntimeError as e:
                 print(e)
 
+
 def distribute_gpus(num_clients, client_memory=1024):
+    """To Use GPU on client side a high memory or multiple gpu's might required.
+
+    Uncomment the lines accordingle to use it
     """
-        To Use GPU on client side a high memory or multiple gpu's might required.
-        Uncomment the lines accordingle to use it
+    """provide gpu id list, the current list is for 1 gpu.
+
+    For 2 gpu's the list will be
+    gpus = ["0","1"]
     """
-    """
-     provide gpu id list, the current list is for 1 gpu. For 2 gpu's the list will be
-     gpus = ["0","1"]
-    """
-    #gpus = tf.config.list_physical_devices("GPU")
+    # gpus = tf.config.list_physical_devices("GPU")
     gpus = None
     clients_gpu = [None] * num_clients
     if not gpus:
         return clients_gpu
     else:
+        """based on your gpu's memory define list accordingly.
+
+        Currently it defines to use 5000 MB of gpu vram from both GPU's
         """
-            based on your gpu's memory define list accordingly.
-            Currently it defines to use 5000 MB of gpu vram from both GPU's
-        """
-        gpu_free_mem = [5000] # set the gpu limit based on your system.
+        gpu_free_mem = [5000]  # set the gpu limit based on your system.
         for client_id in range(num_clients):
             gpu_id = gpu_free_mem.index(max(gpu_free_mem))
             if gpu_free_mem[gpu_id] >= client_memory:
@@ -103,10 +107,12 @@ def distribute_gpus(num_clients, client_memory=1024):
                 clients_gpu[client_id] = None
     return clients_gpu
 
+
 @hydra.main(config_path="conf/table_3", config_name="base")
 def main(cfg):
     clients_gpu = distribute_gpus(
-        num_clients=cfg["client"]["num_clients"], client_memory=cfg["client"]["gpu_memory"]
+        num_clients=cfg["client"]["num_clients"],
+        client_memory=cfg["client"]["gpu_memory"],
     )
     dataset_name = cfg["client"]["dataset_name"]
 
@@ -137,6 +143,7 @@ def main(cfg):
     [clients_queue.put(client) for client in clients_data]
     [clients_queue.put(None) for i in range(cfg["client"]["num_clients"])]
     clients_queue.join()
+
 
 if __name__ == "__main__":
     multiprocessing.freeze_support()

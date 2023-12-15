@@ -1,7 +1,9 @@
-import time
 import itertools
+import time
+
 import numpy as np
 import tensorflow as tf
+
 
 class History(tf.keras.callbacks.History):
     def __init__(self):
