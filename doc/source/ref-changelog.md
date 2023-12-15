@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **General updates to Flower Examples** ([#2381](https://github.com/adap/flower/pull/2381))
+
+- **Update Flower Baselines**
+
+  - HFedXGBoost [#2226](https://github.com/adap/flower/pull/2226)
+
 ## v1.6.0 (2023-11-28)
 
 ### Thanks to our contributors
@@ -49,6 +55,8 @@ We would like to give our special thanks to all the contributors who made the ne
   The new `Bulyan` strategy implements Bulyan by [El Mhamdi et al., 2018](https://arxiv.org/abs/1802.07927)
 
 - **Add new** `XGB Bagging` **strategy** ([#2611](https://github.com/adap/flower/pull/2611))
+
+- **Introduce `WorkloadState`** ([#2564](https://github.com/adap/flower/pull/2564), [#2632](https://github.com/adap/flower/pull/2632))
 
 - **Introduce `WorkloadState`** ([#2564](https://github.com/adap/flower/pull/2564), [#2632](https://github.com/adap/flower/pull/2632))
 
