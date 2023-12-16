@@ -146,7 +146,7 @@ def get_client_fn(
 
         return WhisperFlowerClient(
             full_train_dataset, num_classes, disable_tqdm, compile
-        )
+        ).to_client()
 
     return client_fn
 
@@ -174,7 +174,7 @@ def run_client():
         client_data_path=CLIENT_DATA,
     )
 
-    fl.client.start_numpy_client(
+    fl.client.start_client(
         server_address=f"{args.server_address}:8080", client=client_fn(args.cid)
     )
 

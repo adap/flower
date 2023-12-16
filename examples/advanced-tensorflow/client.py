@@ -106,9 +106,9 @@ def main() -> None:
         x_test, y_test = x_test[:10], y_test[:10]
 
     # Start Flower client
-    client = CifarClient(model, x_train, y_train, x_test, y_test)
+    client = CifarClient(model, x_train, y_train, x_test, y_test).to_client()
 
-    fl.client.start_numpy_client(
+    fl.client.start_client(
         server_address="127.0.0.1:8080",
         client=client,
         root_certificates=Path(".cache/certificates/ca.crt").read_bytes(),
