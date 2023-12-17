@@ -88,8 +88,7 @@ Enabling SSL for secure connections
 To enable SSL, you will need a CA certificate, a server certificate and a server private key.
 
 .. note::
-  For testing purposes, you can generate your own self-signed certificates. We have a bash script
-  for your convenience. The
+  For testing purposes, you can generate your own self-signed certificates. The
   `Enable SSL connections <https://flower.dev/docs/framework/how-to-enable-ssl-connections.html#certificates>`_
   page contains a section that will guide you through the process.
 
