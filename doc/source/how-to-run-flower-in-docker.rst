@@ -1,4 +1,4 @@
-Run Flower in Docker
+Run Flower using Docker
 ====================
 
 The simplest way to get started with Flower is by using the pre-made Docker images, which you can
@@ -36,12 +36,12 @@ If you're looking to try out Flower, you can use the following command:
 
 The command will pull the Docker image with the tag ``1.6.0-py3.11-ubuntu22.04`` from Docker Hub.
 The tag contains the information which Flower, Python and Ubuntu is used. In this case, it
-uses Flower 1.6.0, Python 3.11 and Ubuntu 22.04. The ``--rm`` flag that tells Docker to remove
+uses Flower 1.6.0, Python 3.11 and Ubuntu 22.04. The ``--rm`` flag tells Docker to remove
 the container after it exits.
 
 .. note::
 
-  By default, Flower uses a SQLite in-memory database to store its state. When using the Docker flag
+  By default, the Flower server keeps state in-memory. When using the Docker flag
   ``--rm``, the state is not persisted between container starts. We will show below how to save the
   state in a file on your host system.
 
@@ -52,7 +52,7 @@ to the Flower server. Here, we are passing the flag ``--insecure``.
 
 .. attention::
 
-  The ``--insecure`` flag enables insecure communication (not using HTTPS) and should only be used
+  The ``--insecure`` flag enables insecure communication (using HTTP, not HTTPS) and should only be used
   for testing purposes. We strongly recommend enabling
   `SSL <https://flower.dev/docs/framework/how-to-run-flower-in-docker.html#enabling-ssl-for-secure-connections>`_
   when deploying to a production environment.

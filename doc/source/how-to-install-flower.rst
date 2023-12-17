@@ -35,7 +35,7 @@ Advanced installation options
 Install via Docker
 ~~~~~~~~~~~~~~~~~~
 
-`How to run Flower in Docker <https://flower.dev/docs/framework/how-to-run-flower-in-docker.html>`_
+`How to run Flower using Docker <https://flower.dev/docs/framework/how-to-run-flower-in-docker.html>`_
 
 Install pre-release
 ~~~~~~~~~~~~~~~~~~~
