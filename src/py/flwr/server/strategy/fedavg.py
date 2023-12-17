@@ -48,8 +48,43 @@ than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
 """
 
 
+# pylint: disable=line-too-long
 class FedAvg(Strategy):
-    """Configurable FedAvg strategy implementation."""
+    """Federated Averaging strategy.
+
+    Implementation based on https://arxiv.org/abs/1602.05629
+
+    Parameters
+    ----------
+    fraction_fit : float, optional
+        Fraction of clients used during training. In case `min_fit_clients`
+        is larger than `fraction_fit * available_clients`, `min_fit_clients`
+        will still be sampled. Defaults to 1.0.
+    fraction_evaluate : float, optional
+        Fraction of clients used during validation. In case `min_evaluate_clients`
+        is larger than `fraction_evaluate * available_clients`,
+        `min_evaluate_clients` will still be sampled. Defaults to 1.0.
+    min_fit_clients : int, optional
+        Minimum number of clients used during training. Defaults to 2.
+    min_evaluate_clients : int, optional
+        Minimum number of clients used during validation. Defaults to 2.
+    min_available_clients : int, optional
+        Minimum number of total clients in the system. Defaults to 2.
+    evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]],Optional[Tuple[float, Dict[str, Scalar]]]]]
+        Optional function used for validation. Defaults to None.
+    on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
+        Function used to configure training. Defaults to None.
+    on_evaluate_config_fn : Callable[[int], Dict[str, Scalar]], optional
+        Function used to configure validation. Defaults to None.
+    accept_failures : bool, optional
+        Whether or not accept rounds containing failures. Defaults to True.
+    initial_parameters : Parameters, optional
+        Initial global model parameters.
+    fit_metrics_aggregation_fn : Optional[MetricsAggregationFn]
+        Metrics aggregation function, optional.
+    evaluate_metrics_aggregation_fn : Optional[MetricsAggregationFn]
+        Metrics aggregation function, optional.
+    """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
     def __init__(
@@ -73,41 +108,6 @@ class FedAvg(Strategy):
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
     ) -> None:
-        """Federated Averaging strategy.
-
-        Implementation based on https://arxiv.org/abs/1602.05629
-
-        Parameters
-        ----------
-        fraction_fit : float, optional
-            Fraction of clients used during training. In case `min_fit_clients`
-            is larger than `fraction_fit * available_clients`, `min_fit_clients`
-            will still be sampled. Defaults to 1.0.
-        fraction_evaluate : float, optional
-            Fraction of clients used during validation. In case `min_evaluate_clients`
-            is larger than `fraction_evaluate * available_clients`,
-            `min_evaluate_clients` will still be sampled. Defaults to 1.0.
-        min_fit_clients : int, optional
-            Minimum number of clients used during training. Defaults to 2.
-        min_evaluate_clients : int, optional
-            Minimum number of clients used during validation. Defaults to 2.
-        min_available_clients : int, optional
-            Minimum number of total clients in the system. Defaults to 2.
-        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
-            Optional function used for validation. Defaults to None.
-        on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
-            Function used to configure training. Defaults to None.
-        on_evaluate_config_fn : Callable[[int], Dict[str, Scalar]], optional
-            Function used to configure validation. Defaults to None.
-        accept_failures : bool, optional
-            Whether or not accept rounds containing failures. Defaults to True.
-        initial_parameters : Parameters, optional
-            Initial global model parameters.
-        fit_metrics_aggregation_fn : Optional[MetricsAggregationFn]
-            Metrics aggregation function, optional.
-        evaluate_metrics_aggregation_fn : Optional[MetricsAggregationFn]
-            Metrics aggregation function, optional.
-        """
         super().__init__()
 
         if (
