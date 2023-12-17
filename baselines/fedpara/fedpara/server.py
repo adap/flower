@@ -49,10 +49,10 @@ def gen_evaluate_fn(
         net.to(device)
 
         loss, accuracy = test(net, test_loader, device=device)
-        
+
         experiment.log_metric("loss", loss, epoch=server_round)
-        experiment.log_metric("accuracy", accuracy*100, epoch=server_round)
-        
+        experiment.log_metric("accuracy", accuracy * 100, epoch=server_round)
+
         return loss, {"accuracy": accuracy}
 
     return evaluate

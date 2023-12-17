@@ -1,14 +1,15 @@
 """Main script for running FedPara."""
-from comet_ml import Experiment
 import flwr as fl
 import hydra
-import numpy as np
+from comet_ml import Experiment
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
+
 from fedpara import client, server, utils
-from fedpara.dataset import load_datasets
+from fedpara.dataset_preparation import load_datasets
 from fedpara.utils import get_parameters, seed_everything
+
 
 @hydra.main(config_path="conf", config_name="cifar10", version_base=None)
 def main(cfg: DictConfig) -> None:
@@ -25,16 +26,17 @@ def main(cfg: DictConfig) -> None:
     # # Comet ML tracking
     credentials = OmegaConf.load("fedpara/conf/credentials.yaml")
     experiment = Experiment(
-    api_key=credentials.api_key,
-    project_name=credentials.project_name,
-    workspace=credentials.workspace,
+        api_key=credentials.api_key,
+        project_name=credentials.project_name,
+        workspace=credentials.workspace,
     )
-    experiment.set_name(f"flower | {cfg.strategy.algorithm} | {cfg.dataset_config.name} | Seed {cfg.seed}")
-    hyper_params = {
-        "dataset": cfg.dataset_config.name,
-        "seed": cfg.seed,
-        }
-    # experiment.log_parameters(hyper_params)
+    experiment.set_name(
+        f"flower | {cfg.strategy.algorithm} "
+        f"| {cfg.dataset_config.name} | Seed {cfg.seed}"
+    )
+    hyper_params = OmegaConf.to_container(cfg, resolve=True)
+    experiment.log_parameters(hyper_params)
+
     # 2. Prepare dataset
     train_loaders, test_loader = load_datasets(
         config=cfg.dataset_config,
