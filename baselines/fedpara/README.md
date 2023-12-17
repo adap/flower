@@ -1,5 +1,5 @@
 ---
-title: title of the paper
+title: FedPara: Low-rank Hadamard Product for Communication-Efficient Federated Learning 
 url:  https://openreview.net/forum?id=d71n4ftoCBy
 labels: [image classification, personalization, low-rank training, tensor decomposition]
 dataset: [CIFAR10, CIFAR100, FEMNIST]
