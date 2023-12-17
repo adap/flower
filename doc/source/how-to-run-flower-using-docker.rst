@@ -54,7 +54,7 @@ to the Flower server. Here, we are passing the flag ``--insecure``.
 
   The ``--insecure`` flag enables insecure communication (using HTTP, not HTTPS) and should only be used
   for testing purposes. We strongly recommend enabling
-  `SSL <https://flower.dev/docs/framework/how-to-run-flower-in-docker.html#enabling-ssl-for-secure-connections>`_
+  `SSL <https://flower.dev/docs/framework/how-to-run-flower-using-docker.html#enabling-ssl-for-secure-connections>`_
   when deploying to a production environment.
 
 You can use ``--help`` to view all available flags that the server supports:
