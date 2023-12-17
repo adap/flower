@@ -36,16 +36,16 @@ Building the base image
      - Description
      - Required
    * - ``PYTHON_VERSION``
-     -
+     - Version of ``python`` to be installed.
      - Yes
    * - ``PIP_VERSION``
-     -
+     - Version of ``pip`` to be installed.
      - Yes
    * - ``SETUPTOOLS_VERSION``
-     -
+     - Version of ``setuptools`` to be installed.
      - Yes
    * - ``UBUNTU_VERSION``
-     -
+     - Version of the official Ubuntu Docker image.
      - Defaults to ``22.04``
 
 .. code-block:: bash
@@ -69,20 +69,20 @@ Building the server image
      - Description
      - Required
    * - ``BASE_REPOSITORY``
-     -
+     - The repository name of the base image.
      - Defaults to ``flwr/server``
-   * - ``BASE_IMAGE_VERSION``
-     -
+   * - ``BASE_IMAGE_TAG``
+     - The image tag of the base image.
      - Defaults to ``py3.11-ubuntu22.04``
    * - ``FLWR_VERSION``
-     -
+     - Version of Flower to be installed.
      - Yes
 
 .. code-block:: bash
 
   $ cd src/docker/server/
   $ docker build \
-    --build-arg BASE_IMAGE_VERSION=py3.11-ubuntu22.04 \
+    --build-arg BASE_IMAGE_TAG=py3.11-ubuntu22.04 \
     --build-arg FLWR_VERSION=1.6.0 \
     -t local:my-server-image .
 
@@ -96,7 +96,7 @@ note:
   $ cd src/docker/server/
   $ docker build \
     --build-arg BASE_REPOSITORY=local \
-    --build-arg BASE_IMAGE_VERSION=my-base-image \
+    --build-arg BASE_IMAGE_TAG=my-base-image \
     --build-arg FLWR_VERSION=1.6.0 \
     -t local:my-server-image .
 
