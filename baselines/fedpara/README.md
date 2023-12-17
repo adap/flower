@@ -56,7 +56,7 @@ In IID settings:
 | Dataset  | #classes | #partitions |  partitioning method   |
 |:---------|:--------:|:-----------:|:----------------------:|
 | Cifar10  |    10    |     100     | random split |
-| Cifar100 |   100    |     50     | randpm split|
+| Cifar100 |   100    |     50     | random split|
 
 In non-IID settings:
 
