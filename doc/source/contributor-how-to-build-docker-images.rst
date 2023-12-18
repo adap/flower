@@ -8,17 +8,17 @@ In this guide, we will explain what images exist and how to build them locally.
 
 Before we can start, we need to meet a few prerequisites in our local development environment.
 
-1. Clone the flower repository.
+#. Clone the flower repository.
 
-.. code-block:: bash
+    .. code-block:: bash
 
-  $ git clone https://github.com/adap/flower.git && cd flower
+      $ git clone https://github.com/adap/flower.git && cd flower
 
-2. Verify the Docker daemon is running.
+#. Verify the Docker daemon is running.
 
-Please follow the first section on
-`Run Flower in Docker <https://flower.dev/docs/framework/how-to-run-flower-using-docker>`_
-which covers this step in more detail.
+    Please follow the first section on
+    `Run Flower using Docker <https://flower.dev/docs/framework/how-to-run-flower-using-docker>`_
+    which covers this step in more detail.
 
 Currently, Flower provides two images, a base image and a server image. There will also be a client
 image soon. The base image, as the name suggests, contains basic dependencies that both the server
@@ -128,7 +128,7 @@ the tag of your image.
     --build-arg FLWR_VERSION=1.6.0 \
     -t flwr_server:0.1.0 .
 
-After creating the image, we can test whether the server is working:
+After creating the image, we can test whether the image is working:
 
 .. code-block:: bash
 
