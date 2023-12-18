@@ -14,7 +14,7 @@ hydra:
 
 dataset:
   name:
-    #- income
+    - income
     #- house
     - mnist
     #- cifar
@@ -27,7 +27,7 @@ server:
   num_rounds: 50
   pool_size: 10
   num_malicious: 
-    #- 0
+    - 0
     - 1
     - 2
     - 3
@@ -42,8 +42,8 @@ server:
   history_dir: clients_params
   magnitude: 100
   attack_fn:
-    #- gaussian_attack
-    #- lie_attack
+    - gaussian_attack
+    - lie_attack
     - fang_attack
     - minmax_attack
   threshold: 1e-05
