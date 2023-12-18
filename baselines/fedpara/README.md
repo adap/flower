@@ -68,11 +68,17 @@ In non-IID settings:
 
 ****Training Hyperparameters:****
 
-| Dataset    | IID   | Non-IID | Classes (K) | Tasks (T) | Epochs (E) | Batch Size (B) | Learning Rate (η) | Temperature (τ) | Regularization (λ) |
-|------------|-------|---------|-------------|-----------|------------|-----------------|-------------------|------------------|---------------------|
-| CIFAR-10   | 16    | 16      | 10          | 200       | 10         | 64              | 0.1               | 0.992            | 1                   |
-| CIFAR-100  | 16    | 16      | 16          | 200       | 5          | 64              | 0.1               | 0.992            | 1                   |
-| FEMNIST    | 8     | 8       | 10          | 400       | 10         | 64              | 0.1               | 0.992            | 1                   |
+|   |   Cifar10 IID   | Cifar10 Non-IID      | Cifar100 IID     | Cifar100 Non-IID      | FEMNIST        |
+|---|-------|-------|------|-------|----------|
+| K | 16    | 16    | 8    | 8     | 10       |
+| T | 200   | 200   | 400  | 400   | 100      |
+| E | 10    | 5     | 10   | 5     | 5       |
+| B | 64    | 64    | 64   | 64    | 10       |
+| η | 0.1   | 0.1   | 0.1  | 0.1   | 0.1-0.01      |
+| τ | 0.992 | 0.992 | 0.992| 0.992 | 0.999    |
+| λ | 1     | 1     | 1    | 1     | 0        |
+
+
 
 For Dataset:
 Choice of alpha parameter for the Dirichlet distribution used to create heterogeneity in the client datasets for CIFAR
