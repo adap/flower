@@ -105,14 +105,14 @@ poetry run python -m <baseline-name>.main  <override_some_hyperparameters>
 
 ## Expected Results
 
-### Cifar100
+### Cifar100 (accuracy vs epochs)
 
 | IID | Non-IID |
 |:----:|:----:|
 |![Cifar100 iid](_static/Cifar100_iid.jpeg) | ![Cifar100 non-iid](_static/Cifar100_noniid.jpeg) |
 
 
-### Cifar10
+### Cifar10 (accuracy vs epochs)
 
 | IID | Non-IID |
 |:----:|:----:|
