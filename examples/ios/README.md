@@ -31,7 +31,7 @@ Write the command below in your terminal to install the dependencies according t
 pip install -r requirements.txt
 ```
 
-# Run Federated Learning on iOS Clients
+## Run Federated Learning on iOS Clients
 
 To start the server, write the following command in the terminal in the ios folder (with the conda environment created above):
 
@@ -43,7 +43,7 @@ Open the FLiOS.xcodeproj with XCode, wait until the dependencies are fetched, th
 
 When the iOS app runs, load both the training and test dataset first. Then enter the hostname and port of your server in the TextField provided. Finally press `Start` which will start the federated training.
 
-# Adding further Scenarios
+## Adding further Scenarios
 
 If you want to add more scenarios beyond MNIST, do the following:
 

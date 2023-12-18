@@ -33,6 +33,13 @@ class FlowerClient(fl.client.NumPyClient):
             {},
         )
 
+def client_fn(cid):
+    return FlowerClient().to_client()
+
+flower = fl.flower.Flower(
+    client_fn=client_fn,
+)
+
 if __name__ == "__main__":
     # Start Flower client
     fl.client.start_numpy_client(

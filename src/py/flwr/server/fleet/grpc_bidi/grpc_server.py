@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -233,6 +233,10 @@ def generic_create_grpc_server(  # pylint: disable=too-many-arguments
         # Setting this to zero will allow sending unlimited keepalive pings in between
         # sending actual data frames.
         ("grpc.http2.max_pings_without_data", 0),
+        # Is it permissible to send keepalive pings from the client without
+        # any outstanding streams. More explanation here:
+        # https://github.com/adap/flower/pull/2197
+        ("grpc.keepalive_permit_without_calls", 0),
     ]
 
     server = grpc.server(

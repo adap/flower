@@ -133,6 +133,14 @@ class FlowerClient(fl.client.NumPyClient):
         return float(loss), len(testloader), {"accuracy": float(accuracy)}
 
 
+def client_fn(cid):
+    model = Net()
+    return FlowerClient(model).to_client()
+
+flower = fl.flower.Flower(
+    client_fn=client_fn,
+)
+
 if __name__ == "__main__":
     fl.client.start_numpy_client(
         server_address="127.0.0.1:8080",

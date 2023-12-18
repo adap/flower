@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,9 +19,12 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
+import numpy as np
 import numpy.typing as npt
 
 NDArray = npt.NDArray[Any]
+NDArrayInt = npt.NDArray[np.int_]
+NDArrayFloat = npt.NDArray[np.float_]
 NDArrays = List[NDArray]
 
 # The following union type contains Python types corresponding to ProtoBuf types that
@@ -29,6 +32,18 @@ NDArrays = List[NDArray]
 # not conform to other definitions of what a scalar is. Source:
 # https://developers.google.com/protocol-buffers/docs/overview#scalar
 Scalar = Union[bool, bytes, float, int, str]
+Value = Union[
+    bool,
+    bytes,
+    float,
+    int,
+    str,
+    List[bool],
+    List[bytes],
+    List[float],
+    List[int],
+    List[str],
+]
 
 Metrics = Dict[str, Scalar]
 MetricsAggregationFn = Callable[[List[Tuple[int, Metrics]]], Metrics]

@@ -1,0 +1,4 @@
+---
+# will instantiate TorchVision's ResNet18 and set the number of classes to ${foo}
+_target_: torchvision.models.resnet18
+num_classes: ${foo}

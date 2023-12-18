@@ -1,0 +1,39 @@
+# @package _global_
+---
+loglevel: info
+logfile: run.log
+
+manual_seed: 123
+model: resnet18
+dataset: cifar10
+num_clients: 100
+data_path: "./data"
+num_workers: 4
+evaluate_every: 10
+
+cuda: true
+batch_size: 32
+lr: 0.1
+lr_scheduler: static
+optimiser: sgd
+momentum: 0
+nesterov: false
+weight_decay: 1e-4
+
+sampled_clients: 10
+min_fit_clients: 2
+client_selection: random  # or balanced
+num_rounds: 500
+local_epochs: 1
+strategy: fjord_fedavg
+client_resources:
+  num_cpus: 1
+  num_gpus: 0.2
+knowledge_distillation: ???
+p_s:
+  - 0.2
+  - 0.4
+  - 0.6
+  - 0.8
+  - 1.0
+client_tier_allocation: uniform
