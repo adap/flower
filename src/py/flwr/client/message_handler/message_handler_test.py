@@ -19,6 +19,7 @@ import uuid
 
 from flwr.client import Client
 from flwr.client.typing import ClientFn
+from flwr.client.workload_state import WorkloadState
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -36,7 +37,7 @@ from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, Code, ServerMessage, Status
 
-from .message_handler import handle
+from .message_handler import handle, handle_control_message
 
 
 class ClientWithoutProps(Client):
@@ -130,8 +131,13 @@ def test_client_without_get_properties() -> None:
     )
 
     # Execute
-    task_res, actual_sleep_duration, actual_keep_going = handle(
-        client_fn=_get_client_fn(client), task_ins=task_ins
+    disconnect_task_res, actual_sleep_duration = handle_control_message(
+        task_ins=task_ins
+    )
+    task_res, _ = handle(
+        client_fn=_get_client_fn(client),
+        state=WorkloadState(state={}),
+        task_ins=task_ins,
     )
 
     if not task_res.HasField("task"):
@@ -171,8 +177,8 @@ def test_client_without_get_properties() -> None:
     expected_msg = ClientMessage(get_properties_res=expected_get_properties_res)
 
     assert actual_msg == expected_msg
+    assert not disconnect_task_res
     assert actual_sleep_duration == 0
-    assert actual_keep_going is True
 
 
 def test_client_with_get_properties() -> None:
@@ -193,8 +199,13 @@ def test_client_with_get_properties() -> None:
     )
 
     # Execute
-    task_res, actual_sleep_duration, actual_keep_going = handle(
-        client_fn=_get_client_fn(client), task_ins=task_ins
+    disconnect_task_res, actual_sleep_duration = handle_control_message(
+        task_ins=task_ins
+    )
+    task_res, _ = handle(
+        client_fn=_get_client_fn(client),
+        state=WorkloadState(state={}),
+        task_ins=task_ins,
     )
 
     if not task_res.HasField("task"):
@@ -237,5 +248,5 @@ def test_client_with_get_properties() -> None:
     expected_msg = ClientMessage(get_properties_res=expected_get_properties_res)
 
     assert actual_msg == expected_msg
+    assert not disconnect_task_res
     assert actual_sleep_duration == 0
-    assert actual_keep_going is True

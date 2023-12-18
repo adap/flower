@@ -19,6 +19,14 @@ std::optional<flwr::proto::Node> get_node_from_store() {
   return node->second;
 }
 
+void delete_node_from_store() {
+  std::lock_guard<std::mutex> lock(node_store_mutex);
+  auto node = node_store.find(KEY_NODE);
+  if (node == node_store.end() || !node->second.has_value()) {
+    node_store.erase(node);
+  }
+}
+
 std::optional<flwr::proto::TaskIns> get_current_task_ins() {
   std::lock_guard<std::mutex> state_lock(state_mutex);
   auto current_task_ins = state.find(KEY_TASK_INS);
@@ -80,8 +88,7 @@ void delete_node(const std::unique_ptr<flwr::proto::Fleet::Stub> &stub) {
     delete_node_request.release_node(); // Release if status is ok
   }
 
-  // TODO: Check if Node needs to be removed from local map
-  // node_store.erase(node);
+  delete_node_from_store();
 }
 
 std::optional<flwr::proto::TaskIns>
@@ -110,18 +117,14 @@ receive(const std::unique_ptr<flwr::proto::Fleet::Stub> &stub) {
 
   if (response.task_ins_list_size() > 0) {
     flwr::proto::TaskIns task_ins = response.task_ins_list().at(0);
-    // TODO: Validate TaskIns
-
-    {
+    if (validate_task_ins(task_ins, true)) {
       std::lock_guard<std::mutex> state_lock(state_mutex);
       state[KEY_TASK_INS] = task_ins;
+      return task_ins;
     }
-
-    return task_ins;
-  } else {
-    std::cerr << "TaskIns list is empty." << std::endl;
-    return std::nullopt;
   }
+  std::cerr << "TaskIns list is empty." << std::endl;
+  return std::nullopt;
 }
 
 void send(const std::unique_ptr<flwr::proto::Fleet::Stub> &stub,
@@ -136,7 +139,12 @@ void send(const std::unique_ptr<flwr::proto::Fleet::Stub> &stub,
     return;
   }
 
-  // TODO: Validate TaskIns
+  if (!validate_task_res(task_res)) {
+    std::cerr << "TaskRes is invalid" << std::endl;
+    std::lock_guard<std::mutex> state_lock(state_mutex);
+    state[KEY_TASK_INS].reset();
+    return;
+  }
 
   flwr::proto::TaskRes new_task_res =
       configure_task_res(task_res, *task_ins, *node);
@@ -151,8 +159,8 @@ void send(const std::unique_ptr<flwr::proto::Fleet::Stub> &stub,
   if (!status.ok()) {
     std::cerr << "PushTaskRes RPC failed with status: "
               << status.error_message() << std::endl;
-    return;
-  } else {
+  }
+  {
     std::lock_guard<std::mutex> state_lock(state_mutex);
     state[KEY_TASK_INS].reset();
   }
