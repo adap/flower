@@ -59,9 +59,10 @@ def lie_attack(
     n = len(ordered_results)                                        # number of clients
     m = sum(val == True for val in states.values())                 # number of corrupted clients
     s = math.floor((n / 2) + 1) - m                                 # number of supporters
-    if s < 0:
-        s = 1
-    z_max = norm.ppf((n - m - s) / (n - m))
+
+    z_max = norm.cdf((n - m - s) / (n - m))
+    print(f"z_max: {z_max}")
+    print(f"n: {n}, m: {m}, s: {s}")
 
     for proxy, fitres in ordered_results:
         if states[fitres.metrics["cid"]]:
@@ -106,6 +107,7 @@ def fang_attack(
         # to avoid division by 0
         c = 2
 
+    print(f"old_lambda: {old_lambda}")
     # lambda initialization
     if old_lambda == 0:
         benign = [

@@ -193,18 +193,18 @@ class EnhancedServer(Server):
         if self.warmup_rounds > server_round:
             size = 0
         print(f"fit_round - Selecting {size} malicious clients")
-        self.malicious_selected = np.random.choice(
+        self.malicious_lst = np.random.choice(
             [proxy.cid for proxy, _ in client_instructions], size=size, replace=False
         )
         log(
             DEBUG,
             "fit_round %s: malicious clients selected %s",
             server_round,
-            self.malicious_selected,
+            self.malicious_lst,
         )
         # Save instruction for malicious clients into FitIns
         for proxy, ins in client_instructions:
-            if proxy.cid in self.malicious_selected:
+            if proxy.cid in self.malicious_lst:
                 ins.config["malicious"] = True
             else:
                 ins.config["malicious"] = False
@@ -289,8 +289,17 @@ class EnhancedServer(Server):
         print("fit_round - Aggregating training results")
         aggregated_result = self.strategy.aggregate_fit(server_round, results, failures, clients_state)
 
-        parameters_aggregated, metrics_aggregated, malicious_clients_idx = aggregated_result
+        parameters_aggregated, metrics_aggregated, good_clients_idx, malicious_clients_idx = aggregated_result
         print(f"fit_round - Malicious clients: {malicious_clients_idx}")
+
+        print(f"aggregate_fit - clients_state: {clients_state}")
+        for idx in good_clients_idx:
+            if clients_state[str(idx)]:
+                self.malicious_selected = True
+                break
+            else:
+                self.malicious_selected = False
+
         # For clients detected as malicious, set their parameters to be the averaged ones in their files
         # otherwise the forecasting in next round won't be reliable
         if self.warmup_rounds > server_round:

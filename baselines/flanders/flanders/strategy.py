@@ -56,13 +56,10 @@ class Flanders(FedAvg):
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         dataset_name: str = "mnist",
-        attack_name: str = "not specified",
-        iid: bool = True,
         warmup_rounds: int = 1,
         to_keep: int = 1,
         window: int = 0,
         maxiter: int = 100,
-        sampling: str = None,
         alpha: float = 1,
         beta: float = 1,
         distance_function: Callable = None,
@@ -89,13 +86,10 @@ class Flanders(FedAvg):
                 evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
             )
         self.dataset_name = dataset_name
-        self.attack_name = attack_name
-        self.iid = iid
         self.warmup_rounds = warmup_rounds
         self.to_keep = to_keep
         self.window = window
         self.maxiter = maxiter
-        self.sampling = sampling
         self.alpha = alpha
         self.beta = beta
         self.params_indexes = None
@@ -153,6 +147,7 @@ class Flanders(FedAvg):
         malicious_clients_idx: List[int]
             List of malicious clients' cids (indexes).
         """
+        good_clients_idx = []
         malicious_clients_idx = []
         if server_round > 1:
             win = self.window
@@ -176,14 +171,6 @@ class Flanders(FedAvg):
             results = np.array(results)[good_clients_idx].tolist()
             print(f"aggregate_fit - Good clients: {good_clients_idx}")
 
-            print(f"aggregate_fit - clients_state: {clients_state}")
-            for idx in good_clients_idx:
-                if clients_state[str(idx)]:
-                    self.malicious_selected = True
-                    break
-                else:
-                    self.malicious_selected = False
-
             # Apply FedAvg for the remaining clients
             print("aggregate_fit - Applying FedAvg for the remaining clients")
             parameters_aggregated, metrics_aggregated = super().aggregate_fit(server_round, results, failures)
@@ -191,7 +178,7 @@ class Flanders(FedAvg):
             # Apply FedAvg on every clients' params during the first round
             parameters_aggregated, metrics_aggregated = super().aggregate_fit(server_round, results, failures)
 
-        return parameters_aggregated, metrics_aggregated, malicious_clients_idx
+        return parameters_aggregated, metrics_aggregated, good_clients_idx, malicious_clients_idx
 
 
     def evaluate(

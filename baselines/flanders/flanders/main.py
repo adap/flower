@@ -83,13 +83,6 @@ def main(cfg: DictConfig) -> None:
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
 
-    print(cfg.dataset.name)
-    print(cfg.server.pool_size)
-
-    # Delete old client_params and clients_predicted_params
-    if os.path.exists(cfg.server.history_dir):
-        shutil.rmtree(cfg.server.history_dir)
-
     attacks = {
         "gaussian_attack": gaussian_attack,
         "lie_attack": lie_attack,
@@ -104,72 +97,68 @@ def main(cfg: DictConfig) -> None:
         "income": (IncomeClient, income_evaluate)
     }
 
-    evaluate_fn = clients[cfg.dataset.name][1]
-
-    # 2. Prepare your dataset
-    # here you should call a function in datasets.py that returns whatever is needed to:
-    # (1) ensure the server can access the dataset used to evaluate your model after
-    # aggregation
-    # (2) tell each client what dataset partitions they should use (e.g. a this could
-    # be a location in the file system, a list of dataloader, a list of ids to extract
-    # from a dataset, it's up to you)
-    if cfg.dataset.name == "cifar":
-        train_path, testset = get_cifar_10()
-        fed_dir = do_fl_partitioning(
-            train_path, pool_size=cfg.server.pool_size, alpha=10000, num_classes=10, val_ratio=0.5, seed=1234
-        )
-    elif cfg.dataset.name == "income":
-        X_train, X_test, y_train, y_test = get_partitioned_income("flanders/datasets_files/adult.csv", cfg.server.pool_size)
-    elif cfg.dataset.name == "house":
-        X_train, X_test, y_train, y_test = get_partitioned_house("flanders/datasets_files/houses_preprocessed.csv", cfg.server.pool_size)
-
-    # 3. Define your clients
-    # Define a function that returns another function that will be used during
-    # simulation to instantiate each individual client
-    # client_fn = client.<my_function_that_returns_a_function>()
-    def client_fn(cid: str, pool_size: int = 10, dataset_name: str = cfg.dataset.name):
-        client = clients[dataset_name][0]
-        cid_idx = int(cid)
-        if dataset_name == "cifar":
-            return client(cid, fed_dir)
-        elif dataset_name == "mnist":
-            return client(cid, pool_size)
-        elif dataset_name == "income":
-            return client(cid, X_train[cid_idx], y_train[cid_idx], X_test[cid_idx], y_test[cid_idx])
-        elif dataset_name == "house":
-            return client(cid, X_train[cid_idx], y_train[cid_idx], X_test[cid_idx], y_test[cid_idx])
-        else:
-            raise ValueError("Dataset not supported")
-
-
-    # 4. Define your strategy
-    # pass all relevant argument (including the global dataset used after aggregation,
-    # if needed by your method.)
-    # strategy = instantiate(cfg.strategy, <additional arguments if desired>)
-    strategy = instantiate(
-        cfg.strategy,
-        evaluate_fn=evaluate_fn,
-        on_fit_config_fn=fit_config,
-        fraction_fit=1,
-        fraction_evaluate=0,
-        min_fit_clients=2,
-        min_evaluate_clients=0,
-        warmup_rounds=2,
-        to_keep=1,
-        min_available_clients=2,
-        window=2,
-        sampling=1,
-        distance_function=l2_norm
-    )
-
-    # 5. Start Simulation
-    # history = fl.simulation.start_simulation(<arguments for simulation>)
     for dataset_name in cfg.dataset.name:
         for attack_fn in cfg.server.attack_fn:
             for num_malicious in cfg.server.num_malicious:
                 # the experiment with num_malicious = 0 should be done only one time
                 if num_malicious == 0 and attack_fn != "gaussian_attack":
                     continue
+
+                if attack_fn == "fang_attack" and num_malicious == 1:
+                    continue
+
+                # Delete old client_params and clients_predicted_params
+                if os.path.exists(cfg.server.history_dir):
+                    shutil.rmtree(cfg.server.history_dir)
+
+                # 2. Prepare your dataset
+                sampling = cfg.server.sampling
+                if dataset_name == "cifar":
+                    train_path, testset = get_cifar_10()
+                    fed_dir = do_fl_partitioning(
+                        train_path, pool_size=cfg.server.pool_size, alpha=10000, num_classes=10, val_ratio=0.5, seed=1234
+                    )
+                elif dataset_name == "income":
+                    sampling = 0
+                    X_train, X_test, y_train, y_test = get_partitioned_income("flanders/datasets_files/adult.csv", cfg.server.pool_size)
+                elif dataset_name == "house":
+                    sampling = 0
+                    X_train, X_test, y_train, y_test = get_partitioned_house("flanders/datasets_files/houses_preprocessed.csv", cfg.server.pool_size)
+
+                
+                # 3. Define your clients
+                def client_fn(cid: str, pool_size: int = 10, dataset_name: str = dataset_name):
+                    client = clients[dataset_name][0]
+                    cid_idx = int(cid)
+                    if dataset_name == "cifar":
+                        return client(cid, fed_dir)
+                    elif dataset_name == "mnist":
+                        return client(cid, pool_size)
+                    elif dataset_name == "income":
+                        return client(cid, X_train[cid_idx], y_train[cid_idx], X_test[cid_idx], y_test[cid_idx])
+                    elif dataset_name == "house":
+                        return client(cid, X_train[cid_idx], y_train[cid_idx], X_test[cid_idx], y_test[cid_idx])
+                    else:
+                        raise ValueError("Dataset not supported")
+
+                # 4. Define your strategy
+                strategy = instantiate(
+                    cfg.strategy,
+                    evaluate_fn = clients[dataset_name][1],
+                    on_fit_config_fn=fit_config,
+                    fraction_fit=1,
+                    fraction_evaluate=0,
+                    min_fit_clients=cfg.server.pool_size,
+                    min_evaluate_clients=0,
+                    warmup_rounds=cfg.server.warmup_rounds,
+                    to_keep=1,
+                    min_available_clients=cfg.server.pool_size,
+                    window=cfg.server.warmup_rounds,
+                    distance_function=l2_norm,
+                    maxiter=50
+                )
+
+                # 5. Start Simulation
                 history = fl.simulation.start_simulation(
                     client_fn=client_fn,
                     client_resources={"num_cpus": 10},
@@ -183,7 +172,8 @@ def main(cfg: DictConfig) -> None:
                         strategy=strategy,
                         sampling=cfg.server.sampling,
                         history_dir=cfg.server.history_dir,
-                        dataset_name=dataset_name
+                        dataset_name=dataset_name,
+                        threshold=cfg.server.threshold,
                     ),
                     config=fl.server.ServerConfig(num_rounds=cfg.server.num_rounds),
                     strategy=strategy

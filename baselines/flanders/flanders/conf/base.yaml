@@ -13,26 +13,37 @@ hydra:
     dir: .
 
 dataset:
-  # dataset config
-  name: house
-
-model:
-  # model config
-  _target_: flanders.models.MnistNet
+  name:
+    #- income
+    #- house
+    - mnist
+    #- cifar
 
 strategy:
   _target_: flanders.strategy.Flanders
 
 server:
   _target_: flanders.server.EnhancedServer
-  num_rounds: 3
-  pool_size: 3
-  num_malicious: 1
-  warmup_rounds: 1
+  num_rounds: 50
+  pool_size: 10
+  num_malicious: 
+    #- 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+  warmup_rounds: 30
   sampling: 500
   history_dir: clients_params
   magnitude: 100
-  attack_fn: minmax_attack
-
-client:
-  # client config
+  attack_fn:
+    #- gaussian_attack
+    #- lie_attack
+    - fang_attack
+    - minmax_attack
+  threshold: 1e-05
