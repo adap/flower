@@ -311,7 +311,7 @@
       "renderer": "flot",
       "seriesOverrides": [],
       "spaceLength": 10,
-      "stack": true,
+      "stack": false,
       "steppedLine": false,
       "targets": [
         {
@@ -433,7 +433,7 @@
       "renderer": "flot",
       "seriesOverrides": [],
       "spaceLength": 10,
-      "stack": true,
+      "stack": false,
       "steppedLine": false,
       "targets": [
         {
@@ -529,7 +529,7 @@
       "renderer": "flot",
       "seriesOverrides": [],
       "spaceLength": 10,
-      "stack": true,
+      "stack": false,
       "steppedLine": false,
       "targets": [
         {
@@ -970,7 +970,7 @@
       "type": "table"
     }
   ],
-  "refresh": "5s",
+  "refresh": false,
   "schemaVersion": 38,
   "tags": [],
   "templating": {
@@ -1040,8 +1040,8 @@
     ]
   },
   "time": {
-    "from": "now-5m",
-    "to": "now"
+    "from": "2023-12-18T15:21:22.188Z",
+    "to": "2023-12-18T15:22:22.357Z"
   },
   "timepicker": {},
   "timezone": "",
