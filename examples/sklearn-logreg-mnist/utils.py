@@ -18,9 +18,7 @@ def get_model_parameters(model: LogisticRegression) -> NDArrays:
     return params
 
 
-def set_model_params(
-        model: LogisticRegression, params: NDArrays
-) -> LogisticRegression:
+def set_model_params(model: LogisticRegression, params: NDArrays) -> LogisticRegression:
     """Sets the parameters of a sklean LogisticRegression model."""
     model.coef_ = params[0]
     if model.fit_intercept:

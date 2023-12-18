@@ -72,6 +72,7 @@ python3 client.py --node-id 1 # or any integer in {0-9}
 ```
 
 Alternatively, you can run all of it in one shell as follows:
+
 ```bash
 bash run.sh
 ```
