@@ -17,7 +17,7 @@ Before we can start, we need to meet a few prerequisites in our local developmen
 2. Verify the Docker daemon is running.
 
 Please follow the first section on
-`Run Flower in Docker <https://flower.dev/docs/framework/how-to-run-flower-in-docker>`_
+`Run Flower in Docker <https://flower.dev/docs/framework/how-to-run-flower-using-docker>`_
 which covers this step in more detail.
 
 Currently, Flower provides two images, a base image and a server image. There will also be a client
@@ -25,28 +25,44 @@ image soon. The base image, as the name suggests, contains basic dependencies th
 and the client need. This includes system dependencies, Python and Python tools. The server image is
 based on the base image, but it additionally installs the Flower server using ``pip``.
 
+The build instructions that assemble the images are located in the respective Dockerfiles. You
+can find them in the subdirectories of ``src/docker``.
+
+Both, base and server image are configured via build arguments. Through build arguments, we can make
+our build more flexible. For example, in the base image, we can specify the version of Python to
+install using the ``PYTHON_VERSION`` build argument. Some of the build arguments have default
+values, others must be specified when building the image. All available build arguments for each
+image are listed in one of the tables below.
+
 Building the base image
 -----------------------
 
 .. list-table::
-   :widths: 25 50 25
+   :widths: 25 45 15 15
    :header-rows: 1
 
    * - Build argument
      - Description
      - Required
+     - Example
    * - ``PYTHON_VERSION``
      - Version of ``python`` to be installed.
      - Yes
+     - ``3.11``
    * - ``PIP_VERSION``
      - Version of ``pip`` to be installed.
      - Yes
+     - ``23.0.1``
    * - ``SETUPTOOLS_VERSION``
      - Version of ``setuptools`` to be installed.
      - Yes
+     - ``69.0.2``
    * - ``UBUNTU_VERSION``
      - Version of the official Ubuntu Docker image.
-     - Defaults to ``22.04``
+     - Defaults to ``22.04``.
+     -
+
+The following example creates a base image with Python 3.11.0, pip 23.0.1 and setuptools 69.0.2:
 
 .. code-block:: bash
 
@@ -55,28 +71,37 @@ Building the base image
     --build-arg PYTHON_VERSION=3.11.0 \
     --build-arg PIP_VERSION=23.0.1 \
     --build-arg SETUPTOOLS_VERSION=69.0.2 \
-    --build-arg UBUNTU_VERSION=22.04 \
-    -t local:my-base-image .
+    -t flwr_base:0.1.0 .
+
+The name of image is ``flwr_base`` and the tag ``0.1.0``. Remember that the build arguments as well
+as the name and tag can be adapted to your needs. These values serve as examples only.
 
 Building the server image
 -------------------------
 
 .. list-table::
-   :widths: 25 50 25
+   :widths: 25 45 15 15
    :header-rows: 1
 
    * - Build argument
      - Description
      - Required
+     - Example
    * - ``BASE_REPOSITORY``
      - The repository name of the base image.
-     - Defaults to ``flwr/server``
+     - Defaults to ``flwr/server``.
+     -
    * - ``BASE_IMAGE_TAG``
      - The image tag of the base image.
-     - Defaults to ``py3.11-ubuntu22.04``
+     - Defaults to ``py3.11-ubuntu22.04``.
+     -
    * - ``FLWR_VERSION``
      - Version of Flower to be installed.
      - Yes
+     - ``1.6.0``
+
+The following example creates a server image with the official Flower base image py3.11-ubuntu22.04
+and Flower 1.6.0:
 
 .. code-block:: bash
 
@@ -84,20 +109,27 @@ Building the server image
   $ docker build \
     --build-arg BASE_IMAGE_TAG=py3.11-ubuntu22.04 \
     --build-arg FLWR_VERSION=1.6.0 \
-    -t local:my-server-image .
+    -t flwr_server:0.1.0 .
 
-  $ docker run --rm local:my-server-image --help
+The name of image is ``flwr_server`` and the tag ``0.1.0``. Remember that the build arguments as well
+as the name and tag can be adapted to your needs. These values serve as examples only.
 
-note:
-- if you want to use a different your own base image, you will need to set he `BASE_REPOSITORY`.
+If you want to use your own base image instead of the official Flower base image, all you need to do
+is set the ``BASE_REPOSITORY`` and ``BASE_IMAGE_TAG`` build arguments. The value of
+``BASE_REPOSITORY`` must match the name of your image and the value of ``BASE_IMAGE_TAG`` must match
+the tag of your image.
 
 .. code-block:: bash
 
   $ cd src/docker/server/
   $ docker build \
-    --build-arg BASE_REPOSITORY=local \
-    --build-arg BASE_IMAGE_TAG=my-base-image \
+    --build-arg BASE_REPOSITORY=flwr_base \
+    --build-arg BASE_IMAGE_TAG=0.1.0 \
     --build-arg FLWR_VERSION=1.6.0 \
-    -t local:my-server-image .
+    -t flwr_server:0.1.0 .
 
-  $ docker run --rm local:my-server-image --help
+After creating the image, we can test whether the server is working:
+
+.. code-block:: bash
+
+  $ docker run --rm flwr_server:0.1.0 --help
