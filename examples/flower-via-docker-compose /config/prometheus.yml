@@ -13,7 +13,7 @@ scrape_configs:
         labels:
           group: 'cadvisor'
   - job_name: 'server_metrics'
-    scrape_interval: 5s
+    scrape_interval: 1s
     metrics_path: '/metrics'
     static_configs:
       - targets: ['server:8000']
