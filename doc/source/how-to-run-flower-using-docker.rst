@@ -74,7 +74,8 @@ flag ``--database`` to specify the name of the database file.
 
 .. code-block:: bash
 
-  $ docker run --rm -v ~/:/app/ flwr/server:1.6.0-py3.11-ubuntu22.04 \
+  $ docker run --rm \
+    -p 9091:9091 -p 9092:9092 -v ~/:/app/ flwr/server:1.6.0-py3.11-ubuntu22.04 \
     --insecure \
     --database state.db
 
@@ -99,7 +100,8 @@ the server with the ``--certificates`` flag.
 
 .. code-block:: bash
 
-  $ docker run --rm -v ./certificates/:/app/ flwr/server:1.6.0-py3.11-ubuntu22.04 \
+  $ docker run --rm \
+    -p 9091:9091 -p 9092:9092 -v ./certificates/:/app/ flwr/server:1.6.0-py3.11-ubuntu22.04 \
     --certificates ca.crt server.pem server.key
 
 Using a different Flower or Python version
