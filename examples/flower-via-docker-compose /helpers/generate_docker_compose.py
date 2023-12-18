@@ -57,9 +57,6 @@ services:
       - ./config/grafana.ini:/etc/grafana/grafana.ini
       - ./config/provisioning/datasources:/etc/grafana/provisioning/datasources
       - ./config/provisioning/dashboards:/etc/grafana/provisioning/dashboards
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
     depends_on:
       - prometheus
       - cadvisor

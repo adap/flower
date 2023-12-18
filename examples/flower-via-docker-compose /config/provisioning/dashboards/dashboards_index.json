@@ -1,80 +1,842 @@
 {
-    "annotations": {
-      "list": [
-        {
-          "builtIn": 1,
-          "datasource": {
-            "type": "grafana",
-            "uid": "-- Grafana --"
-          },
-          "enable": true,
-          "hide": true,
-          "iconColor": "rgba(0, 211, 255, 1)",
-          "name": "Annotations & Alerts",
-          "type": "dashboard"
-        }
-      ]
-    },
-    "editable": true,
-    "fiscalYearStartMonth": 0,
-    "graphTooltip": 0,
-    "id": 4,
-    "links": [],
-    "liveNow": false,
-    "panels": [
+  "annotations": {
+    "list": [
       {
+        "builtIn": 1,
         "datasource": {
-          "type": "prometheus",
-          "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
+          "type": "grafana",
+          "uid": "-- Grafana --"
         },
-        "gridPos": {
-          "h": 20,
-          "w": 24,
-          "x": 0,
-          "y": 0
-        },
-        "id": 1,
-        "options": {
-          "code": {
-            "language": "plaintext",
-            "showLineNumbers": false,
-            "showMiniMap": false
-          },
-          "mode": "markdown",
-          "content": "# Grafana Dashboards Index\n\nWelcome to the Grafana Dashboard Index. Below, you'll find an organized view of all available dashboards categorized for easy navigation.\n\n## Dashboard Categories\n\n| Category                           | Dashboard Description                               | Link                                          |\n|------------------------------------|----------------------------------------------------|-----------------------------------------------|\n| **Server-Specific Metrics**        |                                                    |                                               |\n| Server Memory Usage                | Memory usage metrics for the server                | [View Dashboard](/d/cdd71a29-8e29-4608-ac80-4f94741f63e4/container_memory_usage_bytes{name=\"server\"}) |\n| Server Cumulative CPU Time         | Cumulative CPU time consumed by the server         | [View Dashboard](/d/fbad3f40-4404-43b4-a8de-a03a08cd4ef9/container_cpu_usage_seconds_total{name=\"server\"}) |\n| Model Accuracy                     | Model accuracy as reported by the server           | [View Dashboard](/d/f63a7d0f-d29a-4a2e-b748-7bb66f9c17d7/model_accuracy{instance=\"server:8000\"}) |\n| Model Loss                         | Model loss as reported by the server               | [View Dashboard](/d/b697e6b8-0590-4ffb-a4f3-d14f004fb6ce/model_loss{instance=\"server:8000\"}) |\n| **Client-Specific Metrics**        |                                                    |                                               |\n| Memory Usage                       | Insights into `client1` memory usage               | [View Dashboard](/d/cd0d5026-20aa-4614-9dfe-0c14f1d6522f/container_memory_usage_bytes{name=\"client1\"})  |\n| Cumulative CPU Time                | Cumulative CPU time consumed by `client1`          | [View Dashboard](/d/be38333d-f7bb-40c9-809f-662d1e27fbad/container_cpu_usage_seconds_total{name=\"client1\"}) |\n| Cumulative Packets Received                | Cumulative count of packets received by `client1`          | [View Dashboard](/d/a6be6c63-6243-4d55-99d9-1db2d9f5f6d5/container_network_receive_packets_total{name=\"client1\"}) |\n| Cumulative Packets transmitted                | Cumulative count of packets transmitted by `client1`          | [View Dashboard](/d/c30ee11e-5cfc-4d93-a76b-410c2cb05909/container_network_transmit_packets_total{name=\"client1\"})|"
-          
-        },
-        "pluginVersion": "10.1.5",
-        "targets": [
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
-            },
-            "expr": "",
-            "instant": false,
-            "range": true,
-            "refId": "A"
-          }
-        ],
-        "type": "text"
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
       }
-    ],
-    "refresh": "",
-    "schemaVersion": 38,
-    "style": "dark",
-    "tags": [],
-    "templating": {
-      "list": []
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "{__name__=\"container_network_receive_packets_total\", container_label_com_docker_compose_config_hash=\"b681de79eb57dfed350b9e8c1248f599e4832f2ed964a49bb18b9a59d22bacca\", container_label_com_docker_compose_container_number=\"1\", container_label_com_docker_compose_depends_on=\"server:service_started\", container_label_com_docker_compose_image=\"sha256:8c4c51797ea545857b3188b9ef2a5a0292127592ee92782d4fb01a9a9f460f9a\", container_label_com_docker_compose_oneoff=\"False\", container_label_com_docker_compose_project=\"flower-via-docker-compose\", container_label_com_docker_compose_project_config_files=\"/Users/nickvlachakis/Desktop/Flower-Contribution/flower/examples/flower-via-docker-compose /docker-compose.yml\", container_label_com_docker_compose_project_working_dir=\"/Users/nickvlachakis/Desktop/Flower-Contribution/flower/examples/flower-via-docker-compose \", container_label_com_docker_compose_service=\"client1\", container_label_com_docker_compose_version=\"2.6.1\", group=\"cadvisor\", id=\"/docker/351b646fac58bdfa95d43b63483363ba451690ca78d3ca31c0223ab3b66660d2\", image=\"flower-via-docker-compose_client1\", instance=\"cadvisor:8080\", interface=\"eth0\", job=\"cadvisor\", name=\"client1\"}"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 9, "w": 8, "x": 0, "y": 0 },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "container_network_receive_packets_total{name=\"client1\"}",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Client1 - Cumulative count of packets received\t",
+      "type": "timeseries"
     },
-    "time": {
-      "from": "now-6h",
-      "to": "now"
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "{__name__=\"container_network_transmit_packets_total\", container_label_com_docker_compose_config_hash=\"b681de79eb57dfed350b9e8c1248f599e4832f2ed964a49bb18b9a59d22bacca\", container_label_com_docker_compose_container_number=\"1\", container_label_com_docker_compose_depends_on=\"server:service_started\", container_label_com_docker_compose_image=\"sha256:8c4c51797ea545857b3188b9ef2a5a0292127592ee92782d4fb01a9a9f460f9a\", container_label_com_docker_compose_oneoff=\"False\", container_label_com_docker_compose_project=\"flower-via-docker-compose\", container_label_com_docker_compose_project_config_files=\"/Users/nickvlachakis/Desktop/Flower-Contribution/flower/examples/flower-via-docker-compose /docker-compose.yml\", container_label_com_docker_compose_project_working_dir=\"/Users/nickvlachakis/Desktop/Flower-Contribution/flower/examples/flower-via-docker-compose \", container_label_com_docker_compose_service=\"client1\", container_label_com_docker_compose_version=\"2.6.1\", group=\"cadvisor\", id=\"/docker/351b646fac58bdfa95d43b63483363ba451690ca78d3ca31c0223ab3b66660d2\", image=\"flower-via-docker-compose_client1\", instance=\"cadvisor:8080\", interface=\"eth0\", job=\"cadvisor\", name=\"client1\"}"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 9, "w": 8, "x": 8, "y": 0 },
+      "id": 2,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "container_network_transmit_packets_total{name=\"client1\"}",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Client1 - Cumulative count of packets transmitted",
+      "type": "timeseries"
     },
-    "timepicker": {},
-    "timezone": "",
-    "title": "Dashboards index",
-    "uid": "f1dbc02e-f23e-477f-81ea-f48c4f997db9",
-    "version": 1,
-    "weekStart": ""
-  }
+
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
+      },
+      "description": "The total amount of time that the CPU has spent executing a specific process or set of processes.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 9, "w": 8, "x": 16, "y": 0 },
+      "id": 3,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "container_cpu_usage_seconds_total{name=\"client1\"}",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Client1 - Cumulative cpu time consumed in seconds",
+      "type": "barchart"
+    },
+
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 9, "w": 8, "x": 0, "y": 9 },
+      "id": 4,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "container_memory_usage_bytes{name=\"client1\"}",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Client1 - Memory Usage",
+      "type": "barchart"
+    },
+
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 9, "w": 8, "x": 8, "y": 9 },
+      "id": 5,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "container_cpu_usage_seconds_total{name=\"server\"}",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Server - Cumulative cpu time consumed in seconds",
+      "type": "barchart"
+    },
+
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 9, "w": 8, "x": 16, "y": 9 },
+      "id": 6,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "container_memory_usage_bytes{name=\"server\"}",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Server - Memory Usage",
+      "type": "barchart"
+    },
+
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 27 },
+      "id": 7,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "model_loss{instance=\"server:8000\"}",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Server - Model Loss",
+      "type": "barchart"
+    },
+
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 27 },
+      "id": 8,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "10.1.5",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "model_accuracy{instance=\"server:8000\"}",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Server - Model Accuracy",
+      "type": "barchart"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Dashboard Index",
+  "uid": "a6be6c63-6243-4d55-99d9-1db2d9f5f6d5",
+  "version": 5,
+  "weekStart": ""
+}
