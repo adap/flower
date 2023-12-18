@@ -70,13 +70,13 @@ In non-IID settings:
 
 |   |   Cifar10 IID   | Cifar10 Non-IID      | Cifar100 IID     | Cifar100 Non-IID      | FEMNIST        |
 |---|-------|-------|------|-------|----------|
-| K | 16    | 16    | 8    | 8     | 10       |
-| T | 200   | 200   | 400  | 400   | 100      |
-| E | 10    | 5     | 10   | 5     | 5       |
-| B | 64    | 64    | 64   | 64    | 10       |
-| η | 0.1   | 0.1   | 0.1  | 0.1   | 0.1-0.01      |
-| τ | 0.992 | 0.992 | 0.992| 0.992 | 0.999    |
-| λ | 1     | 1     | 1    | 1     | 0        |
+| Fraction of client (K) | 16    | 16    | 8    | 8     | 10       |
+| Total rounds (T) | 200   | 200   | 400  | 400   | 100      |
+| Number of SGD epochs (E) | 10    | 5     | 10   | 5     | 5       |
+| Batch size (B) | 64    | 64    | 64   | 64    | 10       |
+| Initial learning rate (η) | 0.1   | 0.1   | 0.1  | 0.1   | 0.1-0.01      |
+| Learning rate decay (τ) | 0.992 | 0.992 | 0.992| 0.992 | 0.999    |
+| Regularization coefficient (λ) | 1     | 1     | 1    | 1     | 0        |
 
 
 
