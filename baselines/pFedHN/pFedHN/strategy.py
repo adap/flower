@@ -47,6 +47,7 @@ class pFedHN(fl.server.strategy.Strategy):
                 Optional[Tuple[float, Dict[str, Scalar]]],
             ]
         ] = None,
+        evaluate_every: int = 1,
     ) -> None:
         super().__init__()
         self.fraction_fit = fraction_fit
@@ -57,6 +58,7 @@ class pFedHN(fl.server.strategy.Strategy):
         self.accept_failures = accept_failures
         self.initial_parameters = initial_parameters
         self.evaluate_fn = evaluate_fn
+        self.evaluate_every = evaluate_every
 
     def __repr__(self) -> str:
         """Return the strategy name."""
@@ -125,7 +127,7 @@ class pFedHN(fl.server.strategy.Strategy):
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
-        if server_round % 10 != 0:
+        if server_round % self.evaluate_every != 0:
             return []
 
         sample_size, min_num_clients = self.num_evaluate_clients(
@@ -150,9 +152,6 @@ class pFedHN(fl.server.strategy.Strategy):
         failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation metrics."""
-        if server_round % 10 != 0:
-            return None, {}
-
         if not results:
             return None, {}
 

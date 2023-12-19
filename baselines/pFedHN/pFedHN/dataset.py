@@ -79,6 +79,17 @@ def gen_classes_per_node(
 ):
     """Create the data distribution of each client.
 
+    :param dataset: pytorch dataset object
+    :param num_users: number of clients
+    :param classes_per_user: number of classes assigned to each client
+    :param high_prob: highest prob sampled
+    :param low_prob: lowest prob sampled
+    :return: dictionary mapping between classes and proportions, each entry
+    refers to other client
+    """
+    num_classes, num_samples, _ = get_num_classes_samples(dataset)
+    """Create the data distribution of each client.
+
     :param dataset: pytorch dataset
     object :param num_users: number of clients :param classes_per_user: number of
     classes assigned to each client :param high_prob: highest prob sampled :param
@@ -180,6 +191,7 @@ def gen_random_loaders(data_name, data_path, num_users, batch_size, classes_per_
         subsets = [torch.utils.data.Subset(dataset, x) for x in usr_subset_idx]
         # create dataloaders from subsets
         dataloaders.append(
+            [torch.utils.data.DataLoader(x, **loader_params) for x in subsets]
             [torch.utils.data.DataLoader(x, **loader_params) for x in subsets]
         )
 

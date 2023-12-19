@@ -1,50 +1,43 @@
 package dev.flower.android
 
-import androidx.annotation.IntDef
-import com.google.protobuf.ByteString
 import java.nio.ByteBuffer
 
 /**
  * Represents a map of metric values.
  */
-typealias Metrics = Map<String, Scalar<Any>>
+typealias Metrics = Map<String, Scalar>
 
 /**
  * Represents a map of configuration values.
  */
-typealias Config = Map<String, Scalar<Any>>
+typealias Config = Map<String, Scalar>
 
 /**
  * Represents a map of properties.
  */
-typealias Properties = Map<String, Scalar<Any>>
+typealias Properties = Map<String, Scalar>
 
-@IntDef(
-    Code.OK,
-    Code.GET_PROPERTIES_NOT_IMPLEMENTED,
-    Code.GET_PARAMETERS_NOT_IMPLEMENTED,
-    Code.FIT_NOT_IMPLEMENTED,
-    Code.EVALUATE_NOT_IMPLEMENTED
-)
-@Retention(AnnotationRetention.SOURCE)
-annotation class CodeAnnotation
+
 
 /**
  * The `Code` class defines client status codes used in the application.
  */
-object Code {
-    // Client status codes.
-    const val OK: Int = 0
-    const val GET_PROPERTIES_NOT_IMPLEMENTED: Int = 1
-    const val GET_PARAMETERS_NOT_IMPLEMENTED: Int = 2
-    const val FIT_NOT_IMPLEMENTED: Int = 3
-    const val EVALUATE_NOT_IMPLEMENTED: Int = 4
+enum class Code(val value: Int) {
+    OK(0),
+    GET_PROPERTIES_NOT_IMPLEMENTED(1),
+    GET_PARAMETERS_NOT_IMPLEMENTED(2),
+    FIT_NOT_IMPLEMENTED(3),
+    EVALUATE_NOT_IMPLEMENTED(4);
+
+    companion object {
+        fun fromInt(value: Int): Code = values().first { it.value == value }
+    }
 }
 
 /**
  * Client status.
  */
-data class Status(val code: Int, val message: String)
+data class Status(val code: Code, val message: String)
 
 /**
  * The `Scalar` class represents a scalar value that can have different data types.
@@ -54,13 +47,12 @@ data class Status(val code: Int, val message: String)
  * some of them arguably do not conform to other definitions of what a scalar is. Source:
  * https://developers.google.com/protocol-buffers/docs/overview#scalar
  */
-sealed class Scalar<T> {
-    abstract val value: T
-    data class BoolValue(override val value: Boolean): Scalar<Boolean>()
-    data class BytesValue(override val value: ByteString): Scalar<ByteString>()
-    data class SInt64Value(override val value: Long): Scalar<Long>()
-    data class DoubleValue(override val value: Double): Scalar<Double>()
-    data class StringValue(override val value: String): Scalar<String>()
+sealed class Scalar {
+    class BoolValue(val value: Boolean) : Scalar()
+    class BytesValue(val value: ByteBuffer) : Scalar()
+    class SInt64Value(val value: Long) : Scalar()
+    class DoubleValue(val value: Double) : Scalar()
+    class StringValue(val value: String) : Scalar()
 }
 
 /**

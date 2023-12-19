@@ -50,7 +50,7 @@ isort = "==5.11.5"
 black = "==23.1.0"
 docformatter = "==1.5.1"
 mypy = "==1.4.1"
-pylint = "==2.17.5"
+pylint = "==2.8.2"
 flake8 = "==3.9.2"
 pytest = "==6.2.4"
 pytest-watch = "==4.2.0"
@@ -82,7 +82,7 @@ strict = false
 plugins = "numpy.typing.mypy_plugin"
 
 [tool.pylint."MESSAGES CONTROL"]
-disable = "duplicate-code,too-few-public-methods,useless-import-alias"
+disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
 good-names = "i,j,k,_,x,y,X,Y"
 signature-mutators="hydra.main.main"
 
