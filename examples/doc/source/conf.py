@@ -22,8 +22,11 @@
 
 # -- Project information -----------------------------------------------------
 
+import datetime
+
+
 project = "Flower"
-copyright = "2022 Flower Labs GmbH"
+copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
