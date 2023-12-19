@@ -352,7 +352,7 @@ def resnet18(
 
 
 class MLP(nn.Module):
-    """Convolutional Neural Network architecture."""
+    """Multi Layer Perceptron."""
 
     def __init__(self):
         super().__init__()
@@ -409,6 +409,54 @@ class MLP(nn.Module):
         return output
 
 
+class CNNCifar(nn.Module):
+    """Convolutional Neural Network architecture for cifar dataset."""
+
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(3, 6, 5)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.conv2 = nn.Conv2d(6, 16, 5)
+        self.fc1 = nn.Linear(16 * 5 * 5, 120)
+        self.fc2 = nn.Linear(120, 100)
+        self.fc3 = nn.Linear(100, 10)
+
+        self.weight_keys = [
+            ["fc1.weight", "fc1.bias"],
+            ["fc2.weight", "fc2.bias"],
+            ["fc3.weight", "fc3.bias"],
+            ["conv2.weight", "conv2.bias"],
+            ["conv1.weight", "conv1.bias"],
+        ]
+
+    def forward(self, input_dict):
+        """Forward pass of the Conv.
+
+        Parameters
+        ----------
+        input_dict : Dict
+            Conatins input Tensor that will pass through the network.
+            label of that input to calculate loss.
+            label_split if masking is required.
+
+        Returns
+        -------
+        Dict
+            The resulting Tensor after it has passed through the network and the loss.
+        """
+        output = {}
+        x = input_dict["img"]
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        x = x.view(-1, 16 * 5 * 5)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        out = self.fc3(x)
+        output["score"] = out
+        output["loss"] = F.cross_entropy(out, input_dict["label"], reduction="mean")
+        return output
+
+
 def create_model(model_config, model_rate=None, track=False, device="cpu"):
     """Create the model based on the configuration given in hydra."""
     model = None
@@ -417,6 +465,9 @@ def create_model(model_config, model_rate=None, track=False, device="cpu"):
 
     if model_config["model"] == "MLP":
         model = MLP()
+        model.to(device)
+    elif model_config["model"] == "CNNCifar":
+        model = CNNCifar()
         model.to(device)
     elif model_config["model"] == "conv":
         model = conv(model_rate=model_rate, model_config=model_config, device=device)

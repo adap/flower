@@ -136,6 +136,7 @@ def main(cfg: DictConfig) -> None:
 
     if "HeteroFL" in cfg.strategy._target_:
         strategy_heterofl = instantiate(
+            cfg.strategy,
             model_name=cfg.model.model_name,
             net=models.create_model(
                 model_config,
@@ -166,6 +167,7 @@ def main(cfg: DictConfig) -> None:
         )
     else:
         strategy_fedavg = instantiate(
+            cfg.strategy,
             evaluate_fn=evaluate_fn,
             min_available_clients=cfg.num_clients,
         )
