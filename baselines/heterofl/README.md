@@ -209,6 +209,8 @@ Results of the combination of various computation complexity levels for **MNIST*
 | d | 1 | 25.274  K | 1.418 M | 0.096 | 99.07 | 99.77 | 97.58 |
 | d-e | 0.63 | 15.934  K | 0.909  M | 0.0608 | 99.12 | 99.65 | 97.33 |
 | e | 1 | 6.594  K | 0.4005  M | 0.025 | 98.46 | 99.53 | 96.5 |
+| FedAvg | 1 | 633.226  K | 1.264128  M | 2.416 | 97.85 | 97.76 | 97.74 |
+
 
 <br>
 
