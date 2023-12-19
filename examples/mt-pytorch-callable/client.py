@@ -4,17 +4,17 @@ import time
 import warnings
 from collections import OrderedDict
 
-import flwr as fl
 import tensorflow as tf
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from flwr.common.serde import client_message_from_proto, server_message_from_proto
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
 
+import flwr as fl
+from flwr.common.serde import client_message_from_proto, server_message_from_proto
 
 # #############################################################################
 # 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
