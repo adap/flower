@@ -12,33 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Custom types for Flower clients."""
-
-from dataclasses import dataclass
-from typing import Callable
-
-from flwr.client.workload_state import WorkloadState
-from flwr.proto.task_pb2 import TaskIns, TaskRes
-
-from .client import Client as Client
+"""Utility functions for middleware layers."""
 
 
-@dataclass
-class Fwd:
+from typing import List
+
+from flwr.client.typing import Bwd, FlowerCallable, Fwd, Layer
+
+
+def make_ffn(ffn: FlowerCallable, layers: List[Layer]) -> FlowerCallable:
     """."""
 
-    task_ins: TaskIns
-    state: WorkloadState
+    def wrap_ffn(_ffn: FlowerCallable, _layer: Layer) -> FlowerCallable:
+        def new_ffn(fwd: Fwd) -> Bwd:
+            return _layer(fwd, _ffn)
 
+        return new_ffn
 
-@dataclass
-class Bwd:
-    """."""
+    for layer in reversed(layers):
+        ffn = wrap_ffn(ffn, layer)
 
-    task_res: TaskRes
-    state: WorkloadState
-
-
-FlowerCallable = Callable[[Fwd], Bwd]
-ClientFn = Callable[[str], Client]
-Layer = Callable[[Fwd, FlowerCallable], Bwd]
+    return ffn
