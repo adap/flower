@@ -20,9 +20,7 @@ def get_model_parameters(model: LogisticRegression) -> NDArrays:
     return params
 
 
-def set_model_params(
-        model: LogisticRegression, params: NDArrays
-) -> LogisticRegression:
+def set_model_params(model: LogisticRegression, params: NDArrays) -> LogisticRegression:
     """Set the parameters of a sklean LogisticRegression model."""
     model.coef_ = params[0]
     if model.fit_intercept:
@@ -47,8 +45,8 @@ def set_initial_params(model: LogisticRegression, n_classes: int, n_features: in
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Dict[str, Scalar]:
     """Compute weighted average.
 
-    It is generic implementation that averages only over floats and ints
-    and drops the other data types of the Metrics.
+    It is generic implementation that averages only over floats and ints and drops the
+    other data types of the Metrics.
     """
     print(metrics)
     # num_samples_list can represent number of sample or batches depending on the client

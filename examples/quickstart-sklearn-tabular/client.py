@@ -26,12 +26,12 @@ if __name__ == "__main__":
     fds = FederatedDataset(dataset="hitorilabs/iris", partitioners={"train": N_CLIENTS})
 
     dataset = fds.load_partition(partition_id, "train").with_format("pandas")[:]
-    X = dataset[['petal_length', 'petal_width', 'sepal_length', 'sepal_width']]
+    X = dataset[["petal_length", "petal_width", "sepal_length", "sepal_width"]]
     y = dataset["species"]
     unique_labels = fds.load_full("train").unique("species")
     # Split the on edge data: 80% train, 20% test
-    X_train, X_test = X[:int(0.8 * len(X))], X[int(0.8 * len(X)):]
-    y_train, y_test = y[:int(0.8 * len(y))], y[int(0.8 * len(y)):]
+    X_train, X_test = X[: int(0.8 * len(X))], X[int(0.8 * len(X)) :]
+    y_train, y_test = y[: int(0.8 * len(y))], y[int(0.8 * len(y)) :]
 
     # Create LogisticRegression Model
     model = LogisticRegression(
@@ -42,7 +42,6 @@ if __name__ == "__main__":
 
     # Setting initial parameters, akin to model.compile for keras models
     utils.set_initial_params(model, n_features=X_train.shape[1], n_classes=3)
-
 
     # Define Flower client
     class IrisClient(fl.client.NumPyClient):
@@ -56,15 +55,17 @@ if __name__ == "__main__":
                 warnings.simplefilter("ignore")
                 model.fit(X_train, y_train)
             accuracy = model.score(X_train, y_train)
-            return utils.get_model_parameters(model), len(X_train), {
-                "train_accuracy": accuracy}
+            return (
+                utils.get_model_parameters(model),
+                len(X_train),
+                {"train_accuracy": accuracy},
+            )
 
         def evaluate(self, parameters, config):  # type: ignore
             utils.set_model_params(model, parameters)
             loss = log_loss(y_test, model.predict_proba(X_test), labels=unique_labels)
             accuracy = model.score(X_test, y_test)
             return loss, len(X_test), {"test_accuracy": accuracy}
-
 
     # Start Flower client
     fl.client.start_numpy_client(server_address="0.0.0.0:8080", client=IrisClient())

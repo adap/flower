@@ -10,7 +10,7 @@ if __name__ == "__main__":
     strategy = fl.server.strategy.FedAvg(
         min_available_clients=2,
         fit_metrics_aggregation_fn=utils.weighted_average,
-        evaluate_metrics_aggregation_fn=utils.weighted_average
+        evaluate_metrics_aggregation_fn=utils.weighted_average,
     )
     fl.server.start_server(
         server_address="0.0.0.0:8080",
