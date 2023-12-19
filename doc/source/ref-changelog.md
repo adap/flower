@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- **General updates to Flower Examples** ([#2381](https://github.com/adap/flower/pull/2381))
+- **General updates to Flower Examples** ([#2381](https://github.com/adap/flower/pull/2381), [#2726](https://github.com/adap/flower/pull/2726))
 
 - **Update Flower Baselines**
 
