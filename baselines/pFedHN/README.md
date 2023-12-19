@@ -135,6 +135,6 @@ python -m pFedHN.main dataset.data="cifar100" model.out_dim=100 client.num_class
 
 | Algorithm | Dataset | Num_Clients | Paper_Accuracy | Experimented_Accuracy | Experimented_Loss | Hardware | Time-Taken |
 | ----------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
-| pFedHN | MNIST | 50 | 99.28 ± 0.11 | 99.18 | 0.04258 | NVIDIA A100-PCIE-40GB, num_gpus=0.5 |  9602.4372 seconds |
+| pFedHN | MNIST | 50 | 99.28 ± 0.11 | 99.26 | 0.0262 | NVIDIA A100-PCIE-40GB, num_gpus=1 |  11245.3352 seconds |
 | pFedHN | CIFAR-10 | 50 | 88.38 ± 0.29 | 88.01 | 0.81694 | MacBook Pro M2 Pro, 12 Core CPU | 15227.9250 seconds |
 | pFedHN | CIFAR-100 | 50 | 59.48 ± 0.67 | 57.21 | 3.6549 | MacBook Pro M2 Pro, 12 Core CPU | 20808.95235 seconds |
