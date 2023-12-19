@@ -12,33 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Custom types for Flower clients."""
-
-from dataclasses import dataclass
-from typing import Callable
-
-from flwr.client.workload_state import WorkloadState
-from flwr.proto.task_pb2 import TaskIns, TaskRes
-
-from .client import Client as Client
+"""Middleware layers."""
 
 
-@dataclass
-class Fwd:
-    """."""
+from .utils import make_ffn
 
-    task_ins: TaskIns
-    state: WorkloadState
-
-
-@dataclass
-class Bwd:
-    """."""
-
-    task_res: TaskRes
-    state: WorkloadState
-
-
-FlowerCallable = Callable[[Fwd], Bwd]
-ClientFn = Callable[[str], Client]
-Layer = Callable[[Fwd, FlowerCallable], Bwd]
+__all__ = [
+    "make_ffn",
+]
