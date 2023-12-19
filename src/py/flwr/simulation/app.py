@@ -160,7 +160,7 @@ def start_simulation(
     -------
     hist : flwr.server.history.History
         Object containing metrics from training.
-    """
+    """  # noqa: E501
     # pylint: disable-msg=too-many-locals
     event(
         EventType.START_SIMULATION_ENTER,
