@@ -1,5 +1,7 @@
 """Strategy of the Federated Learning."""
 
+import json
+from logging import DEBUG
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import flwr as fl
@@ -14,8 +16,14 @@ from flwr.common import (
     Scalar,
     parameters_to_ndarrays,
 )
+from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
+from flwr.server.strategy.aggregate import weighted_loss_avg
+
+from pFedHN.utils import set_seed
+
+set_seed(42)
 
 
 # pylint: disable=invalid-name
@@ -109,15 +117,15 @@ class pFedHN(fl.server.strategy.Strategy):
         """
         _, fit_res = results[0]
 
-        delta_theta = fit_res.parameters
+        final_state_val = fit_res.parameters
 
-        return delta_theta, {}
+        return final_state_val, {}
 
     def configure_evaluate(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
-        if server_round % 30 != 0:
+        if server_round % 10 != 0:
             return []
 
         sample_size, min_num_clients = self.num_evaluate_clients(
@@ -142,7 +150,7 @@ class pFedHN(fl.server.strategy.Strategy):
         failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation metrics."""
-        if server_round % 30 != 0:
+        if server_round % 10 != 0:
             return None, {}
 
         if not results:
@@ -172,3 +180,79 @@ class pFedHN(fl.server.strategy.Strategy):
             return None
         loss, metrics = eval_res
         return loss, metrics
+
+
+results_fedavg = []
+
+
+class FedAvgWithSaveJson(fl.server.strategy.FedAvg):
+    """Federated strategy for aggregating the weights of the clients as well as logging.
+
+    them.
+    """
+
+    def configure_evaluate(
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
+    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
+        """Configure the next round of evaluation."""
+        if server_round % 30 != 0:
+            return []
+        sample_size, min_num_clients = super().num_evaluation_clients(
+            client_manager.num_available()
+        )
+
+        clients = client_manager.sample(
+            num_clients=sample_size,
+            min_num_clients=min_num_clients,
+        )
+
+        fit_configurations = []
+        for _idx, client in enumerate(clients):
+            fit_configurations.append((client, EvaluateIns(parameters, {})))
+
+        return fit_configurations
+
+    def aggregate_evaluate(
+        self,
+        server_round: int,
+        results: List[Tuple[ClientProxy, EvaluateRes]],
+        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
+    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
+        """Aggregate evaluation metrics."""
+        if server_round % 30 != 0:
+            return None, {}
+
+        if not results:
+            return None, {}
+
+        lossavg = weighted_loss_avg(
+            [
+                (evaluate_res.num_examples, evaluate_res.loss)
+                for _, evaluate_res in results
+            ]
+        )
+
+        accuracies = [r.metrics["eval_acc"] * r.num_examples for _, r in results]
+        examples = [r.num_examples for _, r in results]
+
+        accavg: float = sum(accuracies) / sum(examples)  # type: ignore[arg-type]
+
+        data = {
+            "round": server_round,
+            "avg_loss": lossavg,
+            "avg_accuracy": accavg,
+        }
+
+        results_fedavg.append(data)
+
+        with open("fedavg.json", "w", encoding="utf-8") as f:
+            json.dump(results_fedavg, f)
+
+        log(
+            DEBUG,
+            "AvgLoss: %.4f, AvgAcc: %.4f",
+            lossavg,
+            accavg,
+        )
+
+        return lossavg, {"avg_acc": accavg}  # type: ignore[return-value]

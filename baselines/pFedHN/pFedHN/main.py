@@ -35,7 +35,7 @@ def main(cfg: DictConfig):
         cfg.client.num_classes_per_node,
     )
 
-    if cfg.model.variant == 1:
+    if cfg.model.variant == "pFedHNPC":
         node_local_layers = [
             LocalLayer(n_input=84, n_output=cfg.model.out_dim)
             for _ in range(cfg.client.num_nodes)
@@ -65,10 +65,36 @@ def main(cfg: DictConfig):
         )
 
     # instantiate strategy according to config
-    strategy = instantiate(cfg.strategy, cfg)
+    if cfg.model.variant == "fedavg":
+        strategy = instantiate(
+            cfg.fedavgstrategy,
+            fraction_fit=0.1,
+            min_fit_clients=5,
+            fraction_evaluate=1.0,
+            min_evaluate_clients=1.0,
+            min_available_clients=5,
+        )
+        fl.simulation.start_simulation(
+            client_fn=client_fn,
+            num_clients=cfg.client.num_nodes,
+            config=fl.server.ServerConfig(num_rounds=cfg.client.num_rounds),
+            strategy=strategy,
+            client_resources=cfg.client_resources,
+        )
+    else:
+        strategy = instantiate(cfg.strategy)
+        fl.simulation.start_simulation(
+            client_fn=client_fn,
+            num_clients=cfg.client.num_nodes,
+            server=pFedHNServer(
+                client_manager=SimpleClientManager(), strategy=strategy, cfg=cfg
+            ),
+            config=fl.server.ServerConfig(num_rounds=cfg.client.num_rounds),
+            strategy=strategy,
+            client_resources=cfg.client_resources,
+        )
 
     # Start simulation
-
     fl.simulation.start_simulation(
         client_fn=client_fn,
         num_clients=cfg.client.num_nodes,

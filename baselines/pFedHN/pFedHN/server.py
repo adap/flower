@@ -9,7 +9,6 @@ from collections import OrderedDict
 from logging import DEBUG, INFO
 from typing import List, Optional, Tuple, Union
 
-import flwr as fl
 import torch
 from flwr.common import (
     Code,
@@ -19,6 +18,7 @@ from flwr.common import (
     FitRes,
     Parameters,
     ndarrays_to_parameters,
+    parameters_to_ndarrays,
 )
 from flwr.common.logger import log
 from flwr.server import Server
@@ -28,6 +28,7 @@ from flwr.server.history import History
 from flwr.server.strategy import Strategy
 
 from pFedHN.models import CNNHyper
+from pFedHN.utils import set_seed
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
@@ -37,6 +38,9 @@ EvaluateResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, EvaluateRes]],
     List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
 ]
+
+
+set_seed(42)
 
 
 # pylint: disable=invalid-name
@@ -156,7 +160,7 @@ class pFedHNServer(Server):
 
         self.data.append(data)
 
-        with open("res2.json", "w", encoding="utf-8") as f:
+        with open("pfedhn.json", "w", encoding="utf-8") as f:
             json.dump(self.data, f)
 
         log(
@@ -183,7 +187,7 @@ class pFedHNServer(Server):
 
         client_instructions = self.strategy.configure_fit(
             server_round=server_round,
-            parameters=None,  # type: ignore[arg-type]
+            parameters=self.parameters,  # type: ignore[arg-type]
             client_manager=self._client_manager,
         )
 
@@ -198,7 +202,6 @@ class pFedHNServer(Server):
 
         array = [val.cpu().detach().numpy() for _, val in one_client_weights.items()]
         parameters = ndarrays_to_parameters(array)
-
         one_client[1].parameters = parameters
 
         if not client_instructions:
@@ -230,12 +233,12 @@ class pFedHNServer(Server):
         )
         final_dict = zip(
             one_client_weights.keys(),
-            fl.common.parameters_to_ndarrays(final_state_val),  # type: ignore[arg-type]
+            parameters_to_ndarrays(final_state_val),  # type: ignore[arg-type]
         )
 
         final_state = OrderedDict(
             {
-                k: torch.Tensor(v).to(
+                k: torch.tensor(v).to(
                     torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
                 )
                 for k, v in final_dict
@@ -272,6 +275,7 @@ class pFedHNServer(Server):
         start_time = timeit.default_timer()
 
         for current_round in range(1, num_rounds + 1):
+            # self.hnet.train()
             res_fit = self.fit_round(
                 server_round=current_round,
                 timeout=timeout,
@@ -304,6 +308,7 @@ class pFedHNServer(Server):
                     history.add_metrics_centralized(
                         server_round=current_round, metrics=metrics_cen
                     )
+            # self.hnet.eval()
             res_fed = self.evaluate_round(
                 server_round=current_round,
                 timeout=timeout,

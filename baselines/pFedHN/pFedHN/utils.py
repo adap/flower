@@ -24,7 +24,7 @@ def set_seed(seed):
 
 def show_plots():
     """Display the plots based on results stored in res.json."""
-    with open("res.json", "r", encoding="utf-8") as json_file:
+    with open("<>.json", "r", encoding="utf-8") as json_file:
         data = json.load(json_file)
 
     # Use the loaded data
@@ -47,4 +47,4 @@ def show_plots():
     plt.show()
 
 
-show_plots()
+# show_plots()

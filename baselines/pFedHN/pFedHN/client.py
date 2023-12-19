@@ -6,7 +6,10 @@ import flwr as fl
 import torch
 
 from pFedHN.models import CNNTarget
-from pFedHN.trainer import test, train
+from pFedHN.trainer import test, test_fedavg, train, train_fedavg
+from pFedHN.utils import set_seed
+
+set_seed(42)
 
 
 # pylint: disable=too-many-instance-attributes
@@ -14,7 +17,6 @@ class FlowerClient(fl.client.NumPyClient):
     """Flower client for federated learning.
 
     Args:
-        cid (str): The client ID.
         trainloader (torch.utils.data.DataLoader): DataLoader for training data.
         testloader (torch.utils.data.DataLoader): DataLoader for test data.
         valloader (torch.utils.data.DataLoader): DataLoader for validation data
@@ -25,7 +27,6 @@ class FlowerClient(fl.client.NumPyClient):
 
     Attributes
     ----------
-        cid (str): The client ID.
         trainloader (torch.utils.data.DataLoader): DataLoader for training data.
         testloader (torch.utils.data.DataLoader): DataLoader for test data.
         valloader (torch.utils.data.DataLoader): DataLoader for validation data
@@ -55,12 +56,14 @@ class FlowerClient(fl.client.NumPyClient):
         super().__init__()
 
         self.cid = cid
+        self.variant = cfg.model.variant
         self.trainloader = trainloader
         self.testloader = testloader
         self.valloader = valloader
-        self.local_layers = local_layers
-        self.local_optims = local_optims
+        self.local_layer = local_layers
+        self.local_optim = local_optims
         self.local = local
+        # pylint: disable=no-member
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.epochs = cfg.client.num_epochs
         self.n_kernels = cfg.model.n_kernels
@@ -78,7 +81,6 @@ class FlowerClient(fl.client.NumPyClient):
 
         Args:
             parameters (list): List of parameter values.
-
         """
         state_dict = OrderedDict(
             {
@@ -87,6 +89,10 @@ class FlowerClient(fl.client.NumPyClient):
             }
         )
         self.net.to(self.device).load_state_dict(state_dict, strict=True)
+
+    def get_parameters(self, config):
+        """Extract model parameters and return them as a list of numpy arrays."""
+        return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
 
     def fit(self, parameters, config):
         """Perform federated training on the client.
@@ -102,13 +108,27 @@ class FlowerClient(fl.client.NumPyClient):
         """
         self.set_parameters(parameters)
 
+        if self.variant == "fedavg":
+            train_fedavg(
+                self.net,
+                self.trainloader,
+                self.epochs,
+                self.learning_rate,
+                self.weight_decay,
+                self.device,
+            )
+            return (
+                self.get_parameters({}),
+                len(self.trainloader),
+                {},
+            )
+
         final_state = train(
             self.net,
             self.trainloader,
-            self.testloader,
             self.valloader,
-            self.local_layers,
-            self.local_optims,
+            self.local_layer,
+            self.local_optim,
             self.local,
             self.epochs,
             self.learning_rate,
@@ -118,7 +138,6 @@ class FlowerClient(fl.client.NumPyClient):
         )
 
         final_state_val = [val.cpu().numpy() for _, val in final_state.items()]
-
         return (
             final_state_val,
             len(self.trainloader),
@@ -128,13 +147,24 @@ class FlowerClient(fl.client.NumPyClient):
     def evaluate(self, parameters, config):
         """Evaluate function."""
         self.set_parameters(parameters)
+        if self.variant == "fedavg":
+            eval_loss, eval_acc = test_fedavg(
+                self.net,
+                self.testloader,
+                self.device,
+            )
+            return (
+                float(eval_loss),
+                len(self.testloader),
+                {"eval_acc": eval_acc},
+            )
         eval_loss, eval_correct, eval_total = test(
             self.net,
             self.testloader,
             self.local,
-            self.local_layers,
-            self.cid,
+            self.local_layer,
             self.device,
+            self.cid,
         )
         return (
             float(eval_loss),
@@ -172,9 +202,9 @@ def generate_client_fn(
     def client_fn(cid: str):
         return FlowerClient(
             cid,
-            trainloaders,
-            testloaders,
-            valloaders,
+            trainloaders[int(cid)],
+            testloaders[int(cid)],
+            valloaders[int(cid)],
             config,
             local_layers,
             local_optims,
