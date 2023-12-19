@@ -8,7 +8,6 @@ import tensorflow as tf
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import wandb
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
@@ -114,7 +113,7 @@ def client_fn(cid: str):
     return FlowerClient().to_client()
 
 
-def get_middleware(logdir):
+def get_tensorboard_middleware(logdir):
     os.makedirs(logdir, exist_ok=True)
 
     # To allow multiple runs and group those we will create a subdir
@@ -131,7 +130,7 @@ def get_middleware(logdir):
     run_id = run_id + "-" + datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
     logdir_run = os.path.join(logdir, run_id)
 
-    def wandb_middleware(fwd, app):
+    def tensorboard_middleware(fwd, app):
         start_time = None
 
         project_name = logdir
@@ -206,12 +205,12 @@ def get_middleware(logdir):
 
         return bwd
 
-    return wandb_middleware
+    return tensorboard_middleware
 
 
 # To run this: `flower-client --callable client:flower`
 flower = fl.flower.Flower(
-    client_fn=client_fn, middleware=[get_middleware("MT PyTorch Callable")]
+    client_fn=client_fn, middleware=[get_tensorboard_middleware(".runs_history")]
 )
 
 
