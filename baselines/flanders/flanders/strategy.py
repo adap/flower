@@ -3,13 +3,7 @@ import numpy as np
 from typing import Callable, Dict, List, Optional, Tuple, Union
 from flwr.server.strategy.fedavg import FedAvg
 from flwr.server.client_manager import ClientManager
-from .utils import (
-    save_params, 
-    save_predicted_params,
-    load_all_time_series, 
-    load_time_series, 
-    flatten_params
-)
+from .utils import load_all_time_series
 
 from flwr.common import (
     FitRes,

@@ -4,8 +4,8 @@ Optionally, also define a new Server class (please note this is not needed in mo
 settings).
 """
 from flwr.server.server import fit_clients, Server
+from flwr.server.history import History
 
-import concurrent.futures
 import timeit
 import numpy as np
 from logging import DEBUG, INFO
@@ -13,29 +13,18 @@ from typing import Dict, List, Optional, Tuple, Union
 
 from typing import Callable, Dict, List, Optional, Tuple, Union, Any
 from flwr.common import (
-    Code,
     DisconnectRes,
-    EvaluateIns,
     EvaluateRes,
-    FitIns,
     FitRes,
     Parameters,
-    ReconnectIns,
     Scalar,
-    parameters_to_ndarrays
+    parameters_to_ndarrays,
 )
 from flwr.common.logger import log
-from flwr.common.typing import GetParametersIns
-from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
-from flwr.server.history import History
-from flwr.server.strategy import FedAvg, Strategy
 
 from .utils import (
-    save_params, 
-    save_predicted_params,
-    load_all_time_series, 
-    load_time_series, 
+    save_params,
     flatten_params
 )
 
@@ -66,6 +55,7 @@ class EnhancedServer(Server):
             magnitude: float = 0.0,
             sampling: int = 0,
             history_dir: str = "clients_params",
+            omniscent: bool = True,
             *args: Any,
             **kwargs: Any
         ) -> None:
@@ -85,6 +75,7 @@ class EnhancedServer(Server):
         self.threshold = threshold
         self.old_lambda = 0.0
         self.to_keep = to_keep
+        self.omniscent = omniscent
 
 
     # pylint: disable=too-many-locals
@@ -260,7 +251,7 @@ class EnhancedServer(Server):
         if self.attack_fn is not None and server_round > self.warmup_rounds:
             print("fit_round - Applying attack function")
             results, others = self.attack_fn(
-                ordered_results, clients_state, magnitude=self.magnitude,
+                ordered_results, clients_state, omniscent=self.omniscent, magnitude=self.magnitude,
                 w_re=self.aggregated_parameters, malicious_selected=self.malicious_selected,
                 threshold=self.threshold, d=len(self.aggregated_parameters), old_lambda=self.old_lambda,
                 dataset_name=self.dataset_name, to_keep = self.to_keep,

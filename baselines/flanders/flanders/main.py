@@ -10,28 +10,19 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
 
-import argparse
 import shutil
-import numpy as np
 import flwr as fl
 from flwr.common.typing import Scalar
 from flwr.server.client_manager import SimpleClientManager
-import torch
 import os
-import random
-import pandas as pd
 
-from typing import Dict, Callable, Optional, Tuple, List
+from typing import Dict
 
 from .client import (
     CifarClient, 
     HouseClient, 
-    IncomeClient, 
-    set_params, 
-    get_params, 
-    MnistClient, 
-    set_sklearn_model_params, 
-    get_sklearn_model_params
+    IncomeClient,
+    MnistClient,
 )
 from .attacks import (
     fang_attack,
@@ -54,21 +45,6 @@ from .dataset import (
     do_fl_partitioning
 )
 from .server import EnhancedServer
-
-from torch.utils.data import DataLoader
-from torchvision import transforms
-from torchvision.datasets import MNIST
-
-from .strategy import Flanders
-
-from flwr.server.strategy.fedavg import FedAvg
-from flwr.common import (
-    ndarrays_to_parameters,
-    parameters_to_ndarrays,
-)
-
-from sklearn.linear_model import LogisticRegression, LinearRegression, Ridge, Lasso, ElasticNet
-from sklearn.metrics import accuracy_score, log_loss, roc_auc_score, mean_squared_error, mean_absolute_percentage_error, r2_score
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -151,15 +127,15 @@ def main(cfg: DictConfig) -> None:
                     min_fit_clients=cfg.server.pool_size,
                     min_evaluate_clients=0,
                     warmup_rounds=cfg.server.warmup_rounds,
-                    to_keep=1,
+                    to_keep=cfg.strategy.to_keep,
                     min_available_clients=cfg.server.pool_size,
                     window=cfg.server.warmup_rounds,
                     distance_function=l2_norm,
-                    maxiter=50
+                    maxiter=cfg.strategy.maxiter,
                 )
 
                 # 5. Start Simulation
-                history = fl.simulation.start_simulation(
+                fl.simulation.start_simulation(
                     client_fn=client_fn,
                     client_resources={"num_cpus": 10},
                     num_clients=cfg.server.pool_size,
@@ -174,22 +150,11 @@ def main(cfg: DictConfig) -> None:
                         history_dir=cfg.server.history_dir,
                         dataset_name=dataset_name,
                         threshold=cfg.server.threshold,
+                        omniscent=cfg.server.omniscent,
                     ),
                     config=fl.server.ServerConfig(num_rounds=cfg.server.num_rounds),
                     strategy=strategy
                 )
-
-                print(f"history: {history}")
-
-    # 6. Save your results
-    # Here you can save the `history` returned by the simulation and include
-    # also other buffers, statistics, info needed to be saved in order to later
-    # on generate the plots you provide in the README.md. You can for instance
-    # access elements that belong to the strategy for example:
-    # data = strategy.get_my_custom_data() -- assuming you have such method defined.
-    # Hydra will generate for you a directory each time you run the code. You
-    # can retrieve the path to that directory with this:
-    # save_path = HydraConfig.get().runtime.output_dir
 
 def fit_config(server_round: int) -> Dict[str, Scalar]:
     """Return a configuration with static batch size and (local) epochs."""

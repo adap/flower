@@ -5,13 +5,13 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
     FitRes,
+    Parameters,
     NDArrays,
     NDArray,
-    Parameters,
 )
 from flwr.server.client_proxy import ClientProxy
 from scipy.stats import norm
-#from strategy.krum import krum, _compute_distances
+
 
 def no_attack(
         ordered_results:List[Tuple[ClientProxy, FitRes]], 
@@ -22,7 +22,7 @@ def no_attack(
 
 def gaussian_attack(
         ordered_results:List[Tuple[ClientProxy, FitRes]], 
-        states:Dict[str, bool], 
+        states:Dict[str, bool],
         **kwargs
     ) -> List[Tuple[ClientProxy, FitRes]]:
     magnitude = kwargs.get("magnitude", 0.0)
@@ -46,6 +46,7 @@ def gaussian_attack(
 def lie_attack(
         ordered_results:List[Tuple[ClientProxy, FitRes]], 
         states:Dict[str, bool],
+        omniscent:bool=True,
         **kwargs
     ) -> List[Tuple[ClientProxy, FitRes]]:
     """
@@ -55,6 +56,11 @@ def lie_attack(
     params = [parameters_to_ndarrays(fitres.parameters) for _, fitres in results]
     grads_mean = [np.mean(layer, axis=0) for layer in zip(*params)]
     grads_stdev = [np.std(layer, axis=0) ** 0.5 for layer in zip(*params)]
+
+    if not omniscent:
+        # if not omniscent, the attacker doesn't know the 
+        # local models of all clients, but only of the corrupted ones
+        params = [params[i] for i in range(len(params)) if states[results[i][1].metrics["cid"]]]
 
     n = len(ordered_results)                                        # number of clients
     m = sum(val == True for val in states.values())                 # number of corrupted clients
@@ -75,6 +81,7 @@ def lie_attack(
 def fang_attack(
         ordered_results:List[Tuple[ClientProxy, FitRes]], 
         states:Dict[str, bool],
+        omniscent:bool=True,
         **kwargs
     ) -> List[Tuple[ClientProxy, FitRes]]:
     """
@@ -98,7 +105,12 @@ def fang_attack(
     old_lambda = kwargs.get("old_lambda", 0.0)
     threshold = kwargs.get("threshold", 0.0)
     malicious_selected = kwargs.get("malicious_selected", False)
-    agr_func = kwargs.get("agr_function", None)
+
+    if not omniscent:
+        # if not omniscent, the attacker doesn't know the 
+        # local models of all clients, but only of the corrupted ones
+        ordered_results = [ordered_results[i] for i in range(len(ordered_results)) if states[ordered_results[i][1].metrics["cid"]]]
+
     
     n = len(ordered_results)                                        # number of clients
     c = sum(val == True for val in states.values())                 # number of corrupted clients
@@ -107,7 +119,6 @@ def fang_attack(
         # to avoid division by 0
         c = 2
 
-    print(f"old_lambda: {old_lambda}")
     # lambda initialization
     if old_lambda == 0:
         benign = [
@@ -119,7 +130,7 @@ def fang_attack(
             for _, fitres in ordered_results
         ]
         # Compute the smallest distance that Krum would choose
-        _, _, _, distances = krum(all, c, 1)
+        _, _, _, distances = _krum(all, c, 1)
 
         idx_benign = [int(cid) for cid in states.keys() if states[cid]==False]
         
@@ -163,7 +174,8 @@ def fang_attack(
 
 def minmax_attack(
         ordered_results:List[Tuple[ClientProxy, FitRes]], 
-        states:Dict[str, bool], 
+        states:Dict[str, bool],
+        omniscent:bool=True,
         **kwargs
     ) -> List[Tuple[ClientProxy, FitRes]]:
     """
@@ -183,6 +195,12 @@ def minmax_attack(
     results = ordered_results.copy()
     params = [parameters_to_ndarrays(fitres.parameters) for _, fitres in results]
     params_avg = [np.mean(param, axis=0) for param in zip(*params)]
+
+    if not omniscent:
+        # if not omniscent, the attacker doesn't know the 
+        # local models of all clients, but only of the corrupted ones
+        results = [results[i] for i in range(len(results)) if states[results[i][1].metrics["cid"]]]
+
 
     # Decide what perturbation to use according to the
     # results presented in the paper.
@@ -246,7 +264,7 @@ def minmax_attack(
             results[int(fitres.metrics['cid'])] = (proxy, fitres)
     return results, {"lambda": l}
 
-def krum(results: List[Tuple[List, int]], m: int, to_keep: int, num_closest=None):
+def _krum(results: List[Tuple[List, int]], m: int, to_keep: int, num_closest=None):
     """
     Get the best parameters vector according to the Krum function.
     Output: the best parameters vector.

@@ -8,11 +8,10 @@ from flwr.common.typing import Scalar
 import ray
 import torch
 import numpy as np
-import pandas as pd
 from collections import OrderedDict
 from typing import Dict, List, Union, Tuple
 from pathlib import Path
-from .dataset import get_mnist, do_fl_partitioning, get_dataloader
+from .dataset import get_mnist, get_dataloader
 from .models import CifarNet, train_cifar, test_cifar, MnistNet, train_mnist, test_mnist
 from sklearn.linear_model import LogisticRegression, ElasticNet
 from sklearn.metrics import accuracy_score, log_loss
