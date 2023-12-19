@@ -120,11 +120,12 @@ poetry shell
 Once the poetry environment is active, you can use the following command to run the various experiments in Table 1.
 You would need to specify the below two command line parameters to iterate through various experiment configurations. They are as follows:
 
-1. `experiment`: This parameter specifies the local optimizer configuration. It can take the following values:
+1. `optimizer`: This parameter specifies the local optimizer configuration. It can take the following values:
     - `vanilla`: This corresponds to the vanilla SGD as the client optimizer
-    - `momentum`: This corresponds to the SGD optimizer with momentum.
+    - `momentum`: This corresponds to the SGD optimizer with momentum. It is the default optimizer setting.
     - `proximal`: This corresponds to the SGD optimizer with proximal term in the loss.
-    - `hybrd`: This corresponds to hybrid momentum scheme where both the local client optimizer and the server maintain a momentum buffer (only for FedNova strategy).
+    - `server`: This corresponds to momentum updates of global weights on the strategy or server side. The client optimizers do not use momentum in this setting. This setting is only valid for FedNova strategy. 
+    - `hybrid`: This corresponds to hybrid momentum scheme where both the local client optimizer and the server maintain a momentum buffer. This setting is only valid for FedNova strategy. 
 
 2. `strategy`: This specifies the aggregation strategy for the client updates. The default is `fednova`. 
 If you do not specify this parameter, all experiments will run with FedNova as the strategy and reproduce the rightmost columns of Table 1. 
@@ -138,11 +139,14 @@ It takes the following values:
    - `True`: This corresponds to the variable number of local epochs for each client. This corresponds to the second part of the Table 1.
 
 ```bash  
-# general format
-python -m fednova.main +experiment=<exp_value> strategy=<strategy_value (fednova/fedavg)> var_local_epochs=<var_local_epochs_value (True/False)>
+# Run experiments for first 6 rows of Table-1 below. 
+python -m fednova.main --multirun optimizer=vanilla,momentum,proximal strategy=fedavg,fednova var_local_epochs=False,True seed=4,5,6
 
-# example script
-python -m fednova.main +experiment=momentum strategy=fednova var_local_epochs=True
+# Run experiments to compare Local vs Server vs Hybrid momentum
+python -m fednova.main --multirun optimizer=serverMomentum,hybridMomentum strategy=fednova var_local_epochs=True seed=4,5,6
+
+# Plot results and generate Results table
+python fednova/utils.py
 
 ```
 
@@ -163,8 +167,8 @@ Centralized Evaluation: Accuracy(in %) on centralized Test set. Mean and Confide
 | Random(2-5)  | Vanilla          | 64.30 ± 1.75 | 70.54 ± 0.43 |
 | Random(2-5)  | Momentum         | 72.75 ± 1.28 | 74.26 ± 0.39 |
 | Random(2-5)  | Proximal         | 64.47 ± 0.28 | 69.25 ± 1.30 |
-| Random(2-5)  | Server           |  N/A   |  -      |
-| Random(2-5)  | Hybrid           |   N/A    |  -      |
+| Random(2-5)  | Server           |      N/A     | 73.65 ± 0.51 |
+| Random(2-5)  | Hybrid           |      N/A     | 75.54 ± 1.05 |
 
 ## Plots
 
@@ -172,17 +176,13 @@ The plots below correspond to Figure 6 (page 11) and Figure 7 in the Addendum se
 
 **FedAvg vs FedNova for various local solvers with fixed local epochs = 2**
 
-<!-- ![FedAvg vs FedNova](_static/testAccuracy_vanilla_varEpochs_False.png)
-![FedAvg vs FedNova](_static/testAccuracy_momentum_varEpochs_False.png)
-![FedAvg vs FedNova](_static/testAccuracy_proximal_varEpochs_False.png) -->
-
 <img alt="FedAvg vs FedNova (vanilla)" src="_static/testAccuracy_vanilla_varEpochs_False.png" width="250"/> <img alt="FedAvg vs FedNova (momentum)" src="_static/testAccuracy_momentum_varEpochs_False.png" width="250"/> <img alt="FedAvg vs FedNova (proximal)" src="_static/testAccuracy_proximal_varEpochs_False.png" width="250"/>
 
 
 **FedAvg vs FedNova for various local solvers with variable local epochs ~ U(2,5)**
 
-<!-- ![FedAvg vs FedNova](_static/testAccuracy_vanilla_varEpochs_True.png)
-![FedAvg vs FedNova](_static/testAccuracy_momentum_varEpochs_True.png)
-![FedAvg vs FedNova](_static/testAccuracy_proximal_varEpochs_True.png) -->
-
 <img alt="FedAvg vs FedNova (vanilla)" src="_static/testAccuracy_vanilla_varEpochs_True.png" width="250"/> <img alt="FedAvg vs FedNova (momentum)" src="_static/testAccuracy_momentum_varEpochs_True.png" width="250"/> <img alt="FedAvg vs FedNova (proximal)" src="_static/testAccuracy_proximal_varEpochs_True.png" width="250"/>
+
+**Comparison of Momentum schemes for FedNova( No Momentum vs Server Momentum vs Hybrid(both client and strategy side)**
+<img alt="Momentum Comparison" src="_static/testAccuracy_momentum_plot_varEpochs_True.png" width="360"/>
+
