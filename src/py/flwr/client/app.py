@@ -399,6 +399,10 @@ def start_numpy_client(
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
+    .. deprecated:: 1.7.0
+       Use flwr.client.start_client() instead and pass your client of NumPyClient type
+       by first exectuing its .to_client method.
+
     Parameters
     ----------
     server_address : str
@@ -456,12 +460,13 @@ def start_numpy_client(
     """
     warnings.warn(
         "flwr.client.start_numpy_client() is deprecated and will "
-        "be removed in a future version of Flower. Instead, pass "
-        "your client to `flwr.client.start_client()` by calling "
-        "first the `.to_client()` method as shown below: \n"
+        "be removed in a future version of Flower. Instead, use "
+        "`flwr.client.start_client()` by ensuring you first call "
+        "the `.to_client()` method as shown below: \n"
         "\tflwr.client.start_client(\n"
         "\t\tserver_address='<IP>:<PORT>',\n"
-        "\t\tclient=FlowerClient().to_client()\n"
+        "\t\tclient=FlowerClient().to_client()," 
+        " # <-- where FlowerClient is of type flwr.client.NumPyClient object\n"
         "\t)",
         DeprecationWarning,
         stacklevel=2,
