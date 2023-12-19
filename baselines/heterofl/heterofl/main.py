@@ -13,7 +13,6 @@ from heterofl import client, models, server
 from heterofl.client_manager_heterofl import ClientManagerHeteroFL
 from heterofl.dataset import load_datasets
 from heterofl.model_properties import get_model_properties
-from heterofl.strategy import HeteroFL
 from heterofl.utils import ModelRateManager, get_global_model_rate, preprocess_input
 
 
@@ -136,7 +135,7 @@ def main(cfg: DictConfig) -> None:
     }
 
     if "HeteroFL" in cfg.strategy._target_:
-        strategy_heterofl = HeteroFL(
+        strategy_heterofl = instantiate(
             model_name=cfg.model.model_name,
             net=models.create_model(
                 model_config,
