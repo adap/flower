@@ -10,6 +10,8 @@
 
   - FedVSSL [#2412](https://github.com/adap/flower/pull/2412)
 
+- **Deprecating TF-privacy example** We are bring a Flower-native way of adding DP and other PET to your FL settings. This example will be updated accordintly soon ([#2725](https://github.com/adap/flower/pull/2725))
+
 ## v1.6.0 (2023-11-28)
 
 ### Thanks to our contributors
