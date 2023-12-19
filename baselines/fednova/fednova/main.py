@@ -109,7 +109,7 @@ def main(cfg: DictConfig) -> None:  # pylint: disable=too-many-locals
         num_clients=cfg.num_clients,
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
         strategy=strategy,
-        client_resources=cfg.client_resources
+        client_resources=cfg.client_resources,
     )
     # in case if you are running experiment on a slurm cluster, it could be helpful
     # to add : ray_init_args={"ignore_reinit_error": True, "num_cpus": 8} as an extra
