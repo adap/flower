@@ -1,6 +1,6 @@
 """Defines the MNIST Flower Client and a function to instantiate it."""
 
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 import flwr as fl
 import torch
@@ -19,7 +19,7 @@ class FlowerNumPyClient(fl.client.NumPyClient):
         # cid: str,
         net: torch.nn.Module,
         dataloader,
-        model_rate: float,
+        model_rate: Optional[float],
         client_train_settings: Dict,
     ):
         # self.cid = cid
@@ -47,7 +47,8 @@ class FlowerNumPyClient(fl.client.NumPyClient):
         """Implement distributed fit function for a given client."""
         # print(f"cid = {self.cid}")
         set_parameters(self.net, parameters)
-        self.client_train_settings["lr"] = config["lr"]
+        if "lr" in config:
+            self.client_train_settings["lr"] = config["lr"]
         train(
             self.net,
             self.trainloader,
@@ -67,7 +68,7 @@ class FlowerNumPyClient(fl.client.NumPyClient):
 
 def gen_client_fn(
     model_config: Dict,
-    client_to_model_rate_mapping: List[float],
+    client_to_model_rate_mapping: Optional[List[float]],
     client_train_settings: Dict,
     data_loaders,
 ) -> Callable[[str], FlowerNumPyClient]:  # pylint: disable=too-many-arguments
@@ -113,7 +114,9 @@ def gen_client_fn(
         }
         # trainloader = data_loaders["trainloaders"][int(cid)]
         # valloader = data_loaders["valloaders"][int(cid)]
-        model_rate = client_to_model_rate_mapping[int(cid)]
+        model_rate = None
+        if client_to_model_rate_mapping is not None:
+            model_rate = client_to_model_rate_mapping[int(cid)]
 
         return FlowerNumPyClient(
             # cid=cid,

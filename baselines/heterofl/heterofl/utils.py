@@ -35,11 +35,14 @@ def preprocess_input(cfg_model, cfg_data):
         model_config["data_shape"] = [3, 32, 32]
         model_config["classes_size"] = 10
 
-    model_config["hidden_layers"] = cfg_model.hidden_layers
-    model_config["norm"] = cfg_model.norm
-    model_config["scale"] = cfg_model.scale
-    # print("scale = ", model_config["scale"])
-    model_config["mask"] = cfg_model.mask
+    if "hidden_layers" in cfg_model:
+        model_config["hidden_layers"] = cfg_model.hidden_layers
+    if "norm" in cfg_model:
+        model_config["norm"] = cfg_model.norm
+    if "scale" in cfg_model:
+        model_config["scale"] = cfg_model.scale
+    if "mask" in cfg_model:
+        model_config["mask"] = cfg_model.mask
 
     return model_config
 

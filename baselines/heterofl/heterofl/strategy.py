@@ -44,7 +44,7 @@ class HeteroFL(fl.server.strategy.Strategy):
         model_name: str,
         net: nn.Module,
         optim_scheduler_settings: Dict,
-        global_model_rate: float,
+        global_model_rate: float = 1.0,
         evaluate_fn=None,
         fraction_fit: float = 1.0,
         fraction_evaluate: float = 1.0,

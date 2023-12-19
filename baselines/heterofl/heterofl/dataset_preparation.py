@@ -174,7 +174,7 @@ def non_iid(
 
 
 def _split_dataset_targets_idx(dataset, shard_per_user, num_clients, classes_size):
-    label = np.array(dataset.target)
+    label = np.array(dataset.target) if hasattr(dataset, "target") else dataset.targets
     label_idx_split: Dict = {}
     for i, _ in enumerate(label):
         label_i = label[i].item()
@@ -212,14 +212,15 @@ def _balance_classes(
     trainset: Dataset,
     seed: Optional[int] = 42,
 ) -> Dataset:
-    class_counts = np.bincount(trainset.targets)
+    class_counts = np.bincount(trainset.target)
+    targets = torch.Tensor(trainset.target)
     smallest = np.min(class_counts)
-    idxs = trainset.targets.argsort()
+    idxs = targets.argsort()
     tmp = [Subset(trainset, idxs[: int(smallest)])]
-    tmp_targets = [trainset.targets[idxs[: int(smallest)]]]
+    tmp_targets = [targets[idxs[: int(smallest)]]]
     for count in np.cumsum(class_counts):
         tmp.append(Subset(trainset, idxs[int(count) : int(count + smallest)]))
-        tmp_targets.append(trainset.targets[idxs[int(count) : int(count + smallest)]])
+        tmp_targets.append(targets[idxs[int(count) : int(count + smallest)]])
     unshuffled = ConcatDataset(tmp)
     unshuffled_targets = torch.cat(tmp_targets)
     shuffled_idxs = torch.randperm(

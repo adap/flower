@@ -10,14 +10,13 @@ from torch import nn
 from heterofl.models import test
 from heterofl.utils import save_model
 
-# from torch.utils.data import DataLoader
-
 
 def gen_evaluate_fn(
     data_loaders,
     device: torch.device,
     model: nn.Module,
     keys,
+    enable_train_on_train_data: bool,
 ) -> Callable[
     [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]
 ]:
@@ -60,16 +59,17 @@ def gen_evaluate_fn(
         if server_round % 100 == 0:
             save_model(net, f"model_after_round_{server_round}.pth")
 
-        print("start of testing")
-        start_time = time.time()
-        with torch.no_grad():
-            net.train(True)
-            for images, labels in data_loaders["entire_trainloader"]:
-                input_dict = {}
-                input_dict["img"] = images.to(device)
-                input_dict["label"] = labels.to(device)
-                net(input_dict)
-        print(f"end of stat, time taken = {time.time() - start_time}")
+        if enable_train_on_train_data is True:
+            print("start of testing")
+            start_time = time.time()
+            with torch.no_grad():
+                net.train(True)
+                for images, labels in data_loaders["entire_trainloader"]:
+                    input_dict = {}
+                    input_dict["img"] = images.to(device)
+                    input_dict["label"] = labels.to(device)
+                    net(input_dict)
+            print(f"end of stat, time taken = {time.time() - start_time}")
 
         local_metrics = {}
         local_metrics["loss"] = 0

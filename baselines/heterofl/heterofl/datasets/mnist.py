@@ -64,13 +64,11 @@ class MNIST(Dataset):
 
     def __getitem__(self, index):
         """Get the item with index."""
-        img, target = Image.fromarray(self.img[index], mode="L"), torch.tensor(
-            self.target[index]
-        )
+        img, target = Image.fromarray(self.img[index]), torch.tensor(self.target[index])
         inp = {"img": img, self.subset: target}
         if self.transform is not None:
             inp = self.transform(inp)
-        return inp
+        return inp["img"], inp["label"]
 
     def __len__(self):
         """Length of the dataset."""

@@ -10,24 +10,33 @@ def get_model_properties(
     model_config, model_split_rate, model_mode, data_loader, batch_size
 ):
     """Calculate space occupied & number of parameters of model."""
-    model_mode = model_mode.split("-")
+    model_mode = model_mode.split("-") if model_mode is not None else None
     # model = create_model(model_config, model_rate=model_split_rate(i[0]))
 
     total_flops = 0
     total_model_parameters = 0
     ttl_prcntg = 0
-    for i in model_mode:
-        total_flops += _calculate_model_memory(
-            create_model(model_config, model_rate=model_split_rate[i[0]]), data_loader
-        ) * int(i[1])
-        total_model_parameters += _count_parameters(
-            create_model(model_config, model_rate=model_split_rate[i[0]])
-        ) * int(i[1])
-        ttl_prcntg += int(i[1])
+    if model_mode is None:
+        total_flops = _calculate_model_memory(create_model(model_config), data_loader)
+        total_model_parameters = _count_parameters(create_model(model_config))
+    else:
+        for i in model_mode:
+            total_flops += _calculate_model_memory(
+                create_model(model_config, model_rate=model_split_rate[i[0]]),
+                data_loader,
+            ) * int(i[1])
+            total_model_parameters += _count_parameters(
+                create_model(model_config, model_rate=model_split_rate[i[0]])
+            ) * int(i[1])
+            ttl_prcntg += int(i[1])
 
-    total_flops /= ttl_prcntg
+    total_flops = total_flops / ttl_prcntg if ttl_prcntg != 0 else total_flops
     total_flops /= batch_size
-    total_model_parameters /= ttl_prcntg
+    total_model_parameters = (
+        total_model_parameters / ttl_prcntg
+        if ttl_prcntg != 0
+        else total_model_parameters
+    )
 
     space = total_model_parameters * 32.0 / 8 / (1024**2.0)
     print("num_of_parameters = ", total_model_parameters / 1000, " K")

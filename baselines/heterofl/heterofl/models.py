@@ -351,12 +351,74 @@ def resnet18(
     return model.to(device)
 
 
-def create_model(model_config, model_rate, track=False, device="cpu"):
+class MLP(nn.Module):
+    """Convolutional Neural Network architecture."""
+
+    def __init__(self):
+        super().__init__()
+        self.layer_input = nn.Linear(784, 512)
+        self.relu = nn.ReLU()
+        self.dropout = nn.Dropout()
+        self.layer_hidden1 = nn.Linear(512, 256)
+        self.layer_hidden2 = nn.Linear(256, 256)
+        self.layer_hidden3 = nn.Linear(256, 128)
+        self.layer_out = nn.Linear(128, 10)
+        self.softmax = nn.Softmax(dim=1)
+        self.weight_keys = [
+            ["layer_input.weight", "layer_input.bias"],
+            ["layer_hidden1.weight", "layer_hidden1.bias"],
+            ["layer_hidden2.weight", "layer_hidden2.bias"],
+            ["layer_hidden3.weight", "layer_hidden3.bias"],
+            ["layer_out.weight", "layer_out.bias"],
+        ]
+
+    def forward(self, input_dict):
+        """Forward pass of the Conv.
+
+        Parameters
+        ----------
+        input_dict : Dict
+            Conatins input Tensor that will pass through the network.
+            label of that input to calculate loss.
+            label_split if masking is required.
+
+        Returns
+        -------
+        Dict
+            The resulting Tensor after it has passed through the network and the loss.
+        """
+        output = {}
+        x = input_dict["img"]
+        x = x.view(-1, x.shape[1] * x.shape[-2] * x.shape[-1])
+        x = self.layer_input(x)
+        x = self.relu(x)
+
+        x = self.layer_hidden1(x)
+        x = self.relu(x)
+
+        x = self.layer_hidden2(x)
+        x = self.relu(x)
+
+        x = self.layer_hidden3(x)
+        x = self.relu(x)
+
+        x = self.layer_out(x)
+        out = self.softmax(x)
+        output["score"] = out
+        output["loss"] = F.cross_entropy(out, input_dict["label"], reduction="mean")
+        return output
+
+
+def create_model(model_config, model_rate=None, track=False, device="cpu"):
     """Create the model based on the configuration given in hydra."""
     model = None
     model_config = model_config.copy()
     model_config["track"] = track
-    if model_config["model"] == "conv":
+
+    if model_config["model"] == "MLP":
+        model = MLP()
+        model.to(device)
+    elif model_config["model"] == "conv":
         model = conv(model_rate=model_rate, model_config=model_config, device=device)
     elif model_config["model"] == "resnet18":
         model = resnet18(
@@ -433,7 +495,10 @@ def train(model, train_loader, label_split, settings):
             optimizer.zero_grad()
             output = model(input_dict)
             output["loss"].backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
+            if ("clip" not in settings) or (
+                "clip" in settings and settings["clip"] is True
+            ):
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
             optimizer.step()
 
 
