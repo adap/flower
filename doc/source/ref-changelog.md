@@ -10,6 +10,8 @@
 
   - FedVSSL [#2412](https://github.com/adap/flower/pull/2412)
 
+- **Retiring MXNet examples** The development of the MXNet fremework as ended and the project is now [archived on GitHub](https://github.com/apache/mxnet). Exiting MXNet examples won't receive updates [#2724](https://github.com/adap/flower/pull/2724)
+
 ## v1.6.0 (2023-11-28)
 
 ### Thanks to our contributors
