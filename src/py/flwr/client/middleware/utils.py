@@ -20,18 +20,16 @@ from typing import List
 from flwr.client.typing import Bwd, FlowerCallable, Fwd, Layer
 
 
-def make_fc(
-    flower_callable: FlowerCallable, middleware_layers: List[Layer]
-) -> FlowerCallable:
+def make_ffn(ffn: FlowerCallable, layers: List[Layer]) -> FlowerCallable:
     """."""
 
-    def wrap_fc(_fc: FlowerCallable, _layer: Layer) -> FlowerCallable:
-        def new_app(fwd: Fwd) -> Bwd:
-            return _layer(fwd, _fc)
+    def wrap_ffn(_ffn: FlowerCallable, _layer: Layer) -> FlowerCallable:
+        def new_ffn(fwd: Fwd) -> Bwd:
+            return _layer(fwd, _ffn)
 
-        return new_app
+        return new_ffn
 
-    for layer in reversed(middleware_layers):
-        flower_callable = wrap_fc(flower_callable, layer)
+    for layer in reversed(layers):
+        ffn = wrap_ffn(ffn, layer)
 
-    return flower_callable
+    return ffn

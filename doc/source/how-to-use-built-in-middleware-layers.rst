@@ -19,9 +19,9 @@ A typical middleware function might look something like this:
 
 .. code-block:: python
 
-    def example_middleware(fwd: Fwd, fc: FlowerCallable) -> Bwd:
+    def example_middleware(fwd: Fwd, ffn: FlowerCallable) -> Bwd:
         # Do something with Fwd before passing to the inner ``FlowerCallable``.
-        bwd = fc(fwd)
+        bwd = ffn(fwd)
         # Do something with Bwd before returning.
         return bwd
 
@@ -54,13 +54,13 @@ Define your client function (``client_fn``) that will be wrapped by the middlewa
 3. Create the ``FlowerCallable`` with middleware
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Create your ``FlowerCallable`` and pass the middleware layers as a list to the ``middleware`` argument. The order in which you provide the middleware layers matters:
+Create your ``FlowerCallable`` and pass the middleware layers as a list to the ``layers`` argument. The order in which you provide the middleware layers matters:
 
 .. code-block:: python
 
     flower = fl.app.Flower(
         client_fn=client_fn,
-        middleware=[
+        layers=[
             example_middleware1,  # Middleware layer 1
             example_middleware2,  # Middleware layer 2
         ]
