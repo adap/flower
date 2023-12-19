@@ -18,7 +18,8 @@
 import argparse
 import sys
 import time
-from logging import INFO
+from logging import INFO, WARN
+from pathlib import Path
 from typing import Callable, ContextManager, Optional, Tuple, Union
 
 from flwr.client.client import Client
@@ -36,20 +37,42 @@ from flwr.common.constant import (
 from flwr.common.logger import log, warn_experimental_feature
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 
-from .flower import load_callable
+from .flower import load_flower_callable
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
+from .node_state import NodeState
 from .numpy_client import NumPyClient
-from .workload_state import WorkloadState
 
 
 def run_client() -> None:
     """Run Flower client."""
+    event(EventType.RUN_CLIENT_ENTER)
+
     log(INFO, "Long-running Flower client starting")
 
     args = _parse_args_client().parse_args()
 
+    # Obtain certificates
+    if args.insecure:
+        if args.root_certificates is not None:
+            sys.exit(
+                "Conflicting options: The '--insecure' flag disables HTTPS, "
+                "but '--root-certificates' was also specified. Please remove "
+                "the '--root-certificates' option when running in insecure mode, "
+                "or omit '--insecure' to use HTTPS."
+            )
+        log(WARN, "Option `--insecure` was set. Starting insecure HTTP client.")
+        root_certificates = None
+    else:
+        # Load the certificates if provided, or load the system certificates
+        cert_path = args.root_certificates
+        if cert_path is None:
+            root_certificates = None
+        else:
+            root_certificates = Path(cert_path).read_bytes()
+
+    print(args.root_certificates)
     print(args.server)
     print(args.callable_dir)
     print(args.callable)
@@ -59,14 +82,17 @@ def run_client() -> None:
         sys.path.insert(0, callable_dir)
 
     def _load() -> Flower:
-        flower: Flower = load_callable(args.callable)
+        flower: Flower = load_flower_callable(args.callable)
         return flower
 
-    return start_client(
+    _start_client_internal(
         server_address=args.server,
-        load_callable_fn=_load,
+        load_flower_callable_fn=_load,
         transport="grpc-rere",  # Only
+        root_certificates=root_certificates,
+        insecure=args.insecure,
     )
+    event(EventType.RUN_CLIENT_LEAVE)
 
 
 def _parse_args_client() -> argparse.ArgumentParser:
@@ -75,6 +101,19 @@ def _parse_args_client() -> argparse.ArgumentParser:
         description="Start a long-running Flower client",
     )
 
+    parser.add_argument(
+        "--insecure",
+        action="store_true",
+        help="Run the client without HTTPS. By default, the client runs with "
+        "HTTPS enabled. Use this flag only if you understand the risks.",
+    )
+    parser.add_argument(
+        "--root-certificates",
+        metavar="ROOT_CERT",
+        type=str,
+        help="Specifies the path to the PEM-encoded root certificate file for "
+        "establishing secure HTTPS connections.",
+    )
     parser.add_argument(
         "--server",
         default="0.0.0.0:9092",
@@ -113,11 +152,11 @@ def _check_actionable_client(
 def start_client(
     *,
     server_address: str,
-    load_callable_fn: Optional[Callable[[], Flower]] = None,
     client_fn: Optional[ClientFn] = None,
     client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
+    insecure: Optional[bool] = None,
     transport: Optional[str] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
@@ -128,8 +167,6 @@ def start_client(
         The IPv4 or IPv6 address of the server. If the Flower
         server runs on the same machine on port 8080, then `server_address`
         would be `"[::]:8080"`.
-    load_callable_fn : Optional[Callable[[], Flower]] (default: None)
-        ...
     client_fn : Optional[ClientFn]
         A callable that instantiates a Client. (default: None)
     client : Optional[flwr.client.Client]
@@ -146,6 +183,9 @@ def start_client(
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
+    insecure : bool (default: True)
+        Starts an insecure gRPC connection when True. Enables HTTPS connection
+        when False, using system certificates if `root_certificates` is None.
     transport : Optional[str] (default: None)
         Configure the transport layer. Allowed values:
         - 'grpc-bidi': gRPC, bidirectional streaming
@@ -156,19 +196,25 @@ def start_client(
     --------
     Starting a gRPC client with an insecure server connection:
 
+    >>> start_client(
+    >>>     server_address=localhost:8080,
+    >>>     client_fn=client_fn,
+    >>> )
+
+    Starting an SSL-enabled gRPC client using system certificates:
+
     >>> def client_fn(cid: str):
     >>>     return FlowerClient()
     >>>
     >>> start_client(
     >>>     server_address=localhost:8080,
     >>>     client_fn=client_fn,
+    >>>     insecure=False,
     >>> )
 
-    Starting an SSL-enabled gRPC client:
+    Starting an SSL-enabled gRPC client using provided certificates:
 
     >>> from pathlib import Path
-    >>> def client_fn(cid: str):
-    >>>     return FlowerClient()
     >>>
     >>> start_client(
     >>>     server_address=localhost:8080,
@@ -177,8 +223,73 @@ def start_client(
     >>> )
     """
     event(EventType.START_CLIENT_ENTER)
+    _start_client_internal(
+        server_address=server_address,
+        load_flower_callable_fn=None,
+        client_fn=client_fn,
+        client=client,
+        grpc_max_message_length=grpc_max_message_length,
+        root_certificates=root_certificates,
+        insecure=insecure,
+        transport=transport,
+    )
+    event(EventType.START_CLIENT_LEAVE)
 
-    if load_callable_fn is None:
+
+# pylint: disable=import-outside-toplevel
+# pylint: disable=too-many-branches
+# pylint: disable=too-many-locals
+# pylint: disable=too-many-statements
+def _start_client_internal(
+    *,
+    server_address: str,
+    load_flower_callable_fn: Optional[Callable[[], Flower]] = None,
+    client_fn: Optional[ClientFn] = None,
+    client: Optional[Client] = None,
+    grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+    root_certificates: Optional[Union[bytes, str]] = None,
+    insecure: Optional[bool] = None,
+    transport: Optional[str] = None,
+) -> None:
+    """Start a Flower client node which connects to a Flower server.
+
+    Parameters
+    ----------
+    server_address : str
+        The IPv4 or IPv6 address of the server. If the Flower
+        server runs on the same machine on port 8080, then `server_address`
+        would be `"[::]:8080"`.
+    load_flower_callable_fn : Optional[Callable[[], Flower]] (default: None)
+        A function that can be used to load a `Flower` callable instance.
+    client_fn : Optional[ClientFn]
+        A callable that instantiates a Client. (default: None)
+    client : Optional[flwr.client.Client]
+        An implementation of the abstract base
+        class `flwr.client.Client` (default: None)
+    grpc_max_message_length : int (default: 536_870_912, this equals 512MB)
+        The maximum length of gRPC messages that can be exchanged with the
+        Flower server. The default should be sufficient for most models.
+        Users who train very large models might need to increase this
+        value. Note that the Flower server needs to be started with the
+        same value (see `flwr.server.start_server`), otherwise it will not
+        know about the increased limit and block larger messages.
+    root_certificates : Optional[Union[bytes, str]] (default: None)
+        The PEM-encoded root certificates as a byte string or a path string.
+        If provided, a secure connection using the certificates will be
+        established to an SSL-enabled Flower server.
+    insecure : bool (default: True)
+        Starts an insecure gRPC connection when True. Enables HTTPS connection
+        when False, using system certificates if `root_certificates` is None.
+    transport : Optional[str] (default: None)
+        Configure the transport layer. Allowed values:
+        - 'grpc-bidi': gRPC, bidirectional streaming
+        - 'grpc-rere': gRPC, request-response (experimental)
+        - 'rest': HTTP (experimental)
+    """
+    if insecure is None:
+        insecure = root_certificates is None
+
+    if load_flower_callable_fn is None:
         _check_actionable_client(client, client_fn)
 
         if client_fn is None:
@@ -197,20 +308,23 @@ def start_client(
         def _load_app() -> Flower:
             return Flower(client_fn=client_fn)
 
-        load_callable_fn = _load_app
+        load_flower_callable_fn = _load_app
     else:
-        warn_experimental_feature("`load_callable_fn`")
+        warn_experimental_feature("`load_flower_callable_fn`")
 
-    # At this point, only `load_callable_fn` should be used
+    # At this point, only `load_flower_callable_fn` should be used
     # Both `client` and `client_fn` must not be used directly
 
     # Initialize connection context manager
     connection, address = _init_connection(transport, server_address)
 
+    node_state = NodeState()
+
     while True:
         sleep_duration: int = 0
         with connection(
             address,
+            insecure,
             grpc_max_message_length,
             root_certificates,
         ) as conn:
@@ -233,15 +347,26 @@ def start_client(
                     send(task_res)
                     break
 
+                # Register state
+                node_state.register_workloadstate(workload_id=task_ins.workload_id)
+
                 # Load app
-                app: Flower = load_callable_fn()
+                app: Flower = load_flower_callable_fn()
 
                 # Handle task message
                 fwd_msg: Fwd = Fwd(
                     task_ins=task_ins,
-                    state=WorkloadState(state={}),
+                    state=node_state.retrieve_workloadstate(
+                        workload_id=task_ins.workload_id
+                    ),
                 )
                 bwd_msg: Bwd = app(fwd=fwd_msg)
+
+                # Update node state
+                node_state.update_workloadstate(
+                    workload_id=bwd_msg.task_res.workload_id,
+                    workload_state=bwd_msg.state,
+                )
 
                 # Send
                 send(bwd_msg.task_res)
@@ -261,8 +386,6 @@ def start_client(
         )
         time.sleep(sleep_duration)
 
-    event(EventType.START_CLIENT_LEAVE)
-
 
 def start_numpy_client(
     *,
@@ -270,6 +393,7 @@ def start_numpy_client(
     client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
+    insecure: Optional[bool] = None,
     transport: Optional[str] = None,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
@@ -293,6 +417,9 @@ def start_numpy_client(
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
+    insecure : Optional[bool] (default: None)
+        Starts an insecure gRPC connection when True. Enables HTTPS connection
+        when False, using system certificates if `root_certificates` is None.
     transport : Optional[str] (default: None)
         Configure the transport layer. Allowed values:
         - 'grpc-bidi': gRPC, bidirectional streaming
@@ -301,16 +428,25 @@ def start_numpy_client(
 
     Examples
     --------
-    Starting a client with an insecure server connection:
+    Starting a gRPC client with an insecure server connection:
 
     >>> start_numpy_client(
     >>>     server_address=localhost:8080,
     >>>     client=FlowerClient(),
     >>> )
 
-    Starting an SSL-enabled gRPC client:
+    Starting an SSL-enabled gRPC client using system certificates:
+
+    >>> start_numpy_client(
+    >>>     server_address=localhost:8080,
+    >>>     client=FlowerClient(),
+    >>>     insecure=False,
+    >>> )
+
+    Starting an SSL-enabled gRPC client using provided certificates:
 
     >>> from pathlib import Path
+    >>>
     >>> start_numpy_client(
     >>>     server_address=localhost:8080,
     >>>     client=FlowerClient(),
@@ -340,6 +476,7 @@ def start_numpy_client(
         client=wrp_client,
         grpc_max_message_length=grpc_max_message_length,
         root_certificates=root_certificates,
+        insecure=insecure,
         transport=transport,
     )
 
@@ -348,7 +485,7 @@ def _init_connection(
     transport: Optional[str], server_address: str
 ) -> Tuple[
     Callable[
-        [str, int, Union[bytes, str, None]],
+        [str, bool, int, Union[bytes, str, None]],
         ContextManager[
             Tuple[
                 Callable[[], Optional[TaskIns]],
