@@ -12,12 +12,16 @@ model:
   in_channels: 3 # 3 for CIFAR10 and CIFAR100, 1 for MNIST
   out_dim: 10 # 10 for MNIST and CIFAR10, 100 for CIFAR100
   local: False # True: for pFedHNPC, False: pFedHN
-  variant: 0 # 0: pFedHN , 1: pFedHNPC
+  variant: "pFedHN"
   n_hidden: 3 # number of hidden layers for the hypernetwork: 3 for CIFAR10 and CIFAR100, 1 for MNIST
 
 
 strategy:
   _target_: pFedHN.strategy.pFedHN
+  # strategy config
+
+fedavgstrategy:
+  _target_: pFedHN.strategy.FedAvgWithSaveJson
   # strategy config
 
 server: # Hyperparameters for the hypernetwork which is in the server
