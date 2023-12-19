@@ -94,18 +94,6 @@ def main(cfg: DictConfig):
             client_resources=cfg.client_resources,
         )
 
-    # Start simulation
-    fl.simulation.start_simulation(
-        client_fn=client_fn,
-        num_clients=cfg.num_clients,
-        server=pFedHNServer(
-            client_manager=SimpleClientManager(), strategy=strategy, cfg=cfg
-        ),
-        config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
-        strategy=strategy,
-        client_resources=cfg.client_resources,
-    )
-
 
 if __name__ == "__main__":
     main()
