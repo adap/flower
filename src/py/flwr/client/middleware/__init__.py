@@ -15,8 +15,8 @@
 """Middleware layers."""
 
 
-from .utils import make_fc
+from .utils import make_ffn
 
 __all__ = [
-    "make_fc",
+    "make_ffn",
 ]
