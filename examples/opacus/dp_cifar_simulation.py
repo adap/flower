@@ -45,7 +45,7 @@ def client_fn(cid: str) -> fl.client.Client:
     client_trainloader = DataLoader(client_trainset, PARAMS["batch_size"])
     client_testloader = DataLoader(client_testset, PARAMS["batch_size"])
 
-    return DPCifarClient(model, client_trainloader, client_testloader)
+    return DPCifarClient(model, client_trainloader, client_testloader).to_client()
 
 
 # Define an evaluation function for centralized evaluation (using whole CIFAR10 testset).
