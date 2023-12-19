@@ -84,7 +84,7 @@ in the [paper](https://arxiv.org/abs/2002.06440). Each client gets a different s
 
 | Hyperparameter                  | Description                                                                               | Default value |
 |----------------------------------|-------------------------------------------------------------------------------------------|---------------|
-| optimizer.learning_rate          | Learning rate of local client optimizers                                                  | 0.05          |
+| optimizer.learning_rate          | Learning rate of local client optimizers                                                  | 0.02          |
 | optimizer.momentum               | Momentum factor                                                                          | 0.9             |
 | optimizer.mu                     | Proximal updates factor                                                                  | 0             |
 | optimizer.weight_decay          | Weight decay for regularization                                                          | 1e-4          |
