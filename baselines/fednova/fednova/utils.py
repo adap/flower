@@ -1,6 +1,7 @@
 """Utility functions for FedNova such as computing accuracy, plotting results, etc."""
 
 
+import glob
 import os
 from typing import List, Tuple
 
@@ -61,120 +62,124 @@ def fit_config(exp_config: DictConfig, server_round: int):
 
 
 # pylint: disable=too-many-locals, too-many-statements
-def generate_plots(local_solver: str = "vanilla", var_epochs: bool = False):
-    """Generate plots for the experiment."""
-    metrics = ["test_accuracy"]
-    base_path = "results/"
-    save_path = "../_static/"
-    all_files = os.listdir(base_path)
+def generate_plots(
+    local_solvers: List[str], strategy: List[str], var_epochs: bool, momentum_plot=False
+):
+    """Generate plots for all experiments, saved in directory _static."""
+    root_path = "multirun/"
+    save_path = "_static/"
 
-    if local_solver == "proximal":
-        baseline_strategy = "fedprox"
-    else:
-        baseline_strategy = "fedavg"
+    def load_exp(exp_name: str, strat: str, var_epoch: bool):
+        exp_dirs = os.path.join(
+            root_path,
+            f"optimizer_{exp_name.lower()}_strategy_"
+            f"{strat.lower()}_var_local_epochs_{var_epoch}",
+        )
+        exp_files = glob.glob(f"{exp_dirs}/*/*.csv")
 
-    baseline_files = [
-        os.path.join(base_path, f)
-        for f in all_files
-        if f.startswith(f"{local_solver}_fedavg_varEpoch_{var_epochs}_")
-    ]
-    fednova_files = [
-        os.path.join(base_path, f)
-        for f in all_files
-        if f.startswith(f"{local_solver}_fednova_varEpoch_{var_epochs}_")
-    ]
+        exp_df = [pd.read_csv(f) for f in exp_files]
+        exp_df = [df for df in exp_df if not df.isna().any().any()]
 
-    baseline_df = [pd.read_csv(f) for f in baseline_files]
-    baseline_df = [df for df in baseline_df if not df.isna().any().any()]
-
-    assert len(baseline_df) >= 1, (
-        f"Atleast one results file must contain non-NaN values. "
-        f"NaN values found in {baseline_files}"
-    )
-
-    fednova_df = [pd.read_csv(f) for f in fednova_files]
-    fednova_df = [df for df in fednova_df if not df.isna().any().any()]
-
-    assert len(fednova_df) >= 1, (
-        f"Atleast one results file must contain non-NaN values. "
-        f"NaN values found in {fednova_files}"
-    )
+        assert len(exp_df) >= 1, (
+            f"Atleast one results file must contain non-NaN values. "
+            f"NaN values found in all seed runs of {exp_df}"
+        )
+        return exp_df
 
     def get_confidence_interval(data):
         """Return 95% confidence intervals along with mean."""
-        mean = np.mean(data, axis=0)
+        avg = np.mean(data, axis=0)
         std = np.std(data, axis=0)
-        lower = mean - 1.96 * std / np.sqrt(len(data))
-        upper = mean + 1.96 * std / np.sqrt(len(data))
-        return mean, lower, upper
+        lower = avg - 1.96 * std / np.sqrt(len(data))
+        upper = avg + 1.96 * std / np.sqrt(len(data))
+        return avg, lower, upper
 
-    for metric in metrics:
-        baseline_metric_data = np.array([df[metric].values for df in baseline_df])
-        fednova_metric_data = np.array([df[metric].values for df in fednova_df])
-
-        baseline_mean, baseline_lower, baseline_upper = get_confidence_interval(
-            baseline_metric_data
+    # create tuple combination of experiment configuration for plotting
+    # [("vanilla", "fedavg", True), ("vanilla", "fednova", True)]
+    max_exp_len = max([len(local_solvers), len(strategy)])
+    optim_exp_len = int(max_exp_len / len(local_solvers))
+    strategy_exp_len = int(max_exp_len / len(strategy))
+    var_epochs_len = int(max_exp_len)
+    exp_list = list(
+        zip(
+            local_solvers * optim_exp_len,
+            strategy * strategy_exp_len,
+            [var_epochs] * var_epochs_len,
         )
-        fednova_mean, fednova_lower, fednova_upper = get_confidence_interval(
-            fednova_metric_data
-        )
+    )
 
-        epochs = np.arange(1, len(baseline_mean) + 1)
+    exp_data = [load_exp(*args) for args in exp_list]
 
-        plt.figure()
-        if baseline_strategy == "fedavg":
-            baseline_label = "FedAvg"
-        elif baseline_strategy == "fedprox":
-            baseline_label = "FedProx"
+    # Iterate over each experiment
+    plt.figure()
+    title = ""
+    for i, data_dfs in enumerate(exp_data):
+        # Iterate over multiple seeds of same experiment
+        combined_data = np.array([df["test_accuracy"].values for df in data_dfs])
 
-        plt.plot(epochs, baseline_mean, label=baseline_label)
-        plt.fill_between(epochs, baseline_lower, baseline_upper, alpha=0.3)
-        plt.plot(epochs, fednova_mean, label="FedNova", c="red")
-        plt.fill_between(epochs, fednova_lower, fednova_upper, alpha=0.3, color="red")
-        plt.ylabel("Test Accuracy %")
-        plt.xlabel("Communication rounds")
-        plt.xlim([0, 103])
-        plt.ylim([30, 80])
-        plt.legend(loc="lower right")
-        plt.grid()
-        if local_solver == "momentum":
-            optimizer = "SGD-M"
-        elif local_solver == "proximal":
-            optimizer = "SGD w/ Proximal"
+        mean, lower_ci, upper_ci = get_confidence_interval(combined_data)
+
+        epochs = np.arange(1, len(mean) + 1)
+
+        optimizer, server_strategy, variable_epoch = exp_list[i]
+
+        # Assign more readable legends for each plot according to paper
+        if optimizer == "proximal" and server_strategy == "FedAvg":
+            label = "FedProx"
+        elif optimizer.lower() in ["server", "hybrid"]:
+            label = optimizer
+        elif optimizer.lower() == "vanilla" and momentum_plot:
+            label = "No Momentum"
         else:
-            optimizer = "SGD"
+            label = server_strategy
+
+        plt.plot(epochs, mean, label=label)
+        plt.fill_between(epochs, lower_ci, upper_ci, alpha=0.3)
+
+        if optimizer == "momentum":
+            optimizer_label = "SGD-M"
+        elif optimizer == "proximal":
+            optimizer_label = "SGD w/ Proximal"
+        else:
+            optimizer_label = "SGD"
+
         if var_epochs:
-            title = f"Local Solver: {optimizer}, Epochs ~ U(2, 5)"
+            title = f"Local Solver: {optimizer_label}, Epochs ~ U(2, 5)"
         else:
-            title = f"Local Solver: {optimizer}, Epochs = 2"
-        plt.title(title)
-        plt.savefig(
-            f"{save_path}testAccuracy_{local_solver}_varEpochs_{var_epochs}.png"
-        )
+            title = f"Local Solver: {optimizer_label}, Epochs = 2"
 
         print(
-            f"---------------------------Local Solver: {local_solver.upper()} "
-            f"Var Epochs: {var_epochs}---------------------------"
+            f"---------------------Local Solver: {optimizer.upper()}, "
+            f"Strategy: {server_strategy.upper()} Local Epochs Fixed: {variable_epoch}"
+            f"---------------------"
         )
+        print(f"Number of valid(not NaN) seeds for this experiment: {len(data_dfs)}")
 
-        print(
-            f"Number of valid seeds: Baseline: {len(baseline_df)} "
-            f"FedNova: {len(fednova_df)}"
-        )
+        print(f"Test Accuracy: {mean[-1]:.2f} ± {upper_ci[-1] - mean[-1]:.2f}")
 
-        print(
-            f"{baseline_label}: {baseline_mean[-1]:.2f} ± "
-            f"{baseline_upper[-1] - baseline_mean[-1]:.2f}"
-        )
-        print(
-            f"FedNova: {fednova_mean[-1]:.2f} ± "
-            f"{fednova_upper[-1] - fednova_mean[-1]:.2f}"
-        )
+    if momentum_plot:
+        title = "Comparison of Momentum Schemes: FedNova"
+        save_name = "momentum_plot"
+    else:
+        save_name = local_solvers[0]
 
-        plt.show()
+    plt.ylabel("Test Accuracy %", fontsize=12)
+    plt.xlabel("Communication rounds", fontsize=12)
+    plt.xlim([0, 103])
+    plt.ylim([30, 80])
+    plt.legend(loc="lower right", fontsize=12)
+    plt.grid()
+    plt.title(title, fontsize=15)
+    plt.savefig(f"{save_path}testAccuracy_{save_name}_varEpochs_{var_epochs}.png")
+
+    plt.show()
 
 
 if __name__ == "__main__":
-    for variable_epochs in [False, True]:
+    for type_epoch_exp in [False, True]:
         for solver in ["vanilla", "momentum", "proximal"]:
-            generate_plots(local_solver=solver, var_epochs=variable_epochs)
+            generate_plots([solver], ["FedAvg", "FedNova"], type_epoch_exp)
+
+    generate_plots(
+        ["Hybrid", "Server", "Vanilla"], ["FedNova"], True, momentum_plot=True
+    )

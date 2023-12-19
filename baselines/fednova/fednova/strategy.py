@@ -27,6 +27,7 @@ class FedNova(FedAvg):
     def __init__(self, exp_config: DictConfig, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        # Maintain a momentum buffer for the weight updates across rounds of training
         self.global_momentum_buffer: List[NDArray] = []
         if self.initial_parameters is not None:
             self.global_parameters: List[NDArray] = parameters_to_ndarrays(
@@ -35,6 +36,8 @@ class FedNova(FedAvg):
 
         self.exp_config = exp_config
         self.lr = exp_config.optimizer.lr
+
+        # momentum parameter for the server/strategy side momentum buffer
         self.gmf = exp_config.optimizer.gmf
         self.best_test_acc = 0.0
 
@@ -52,6 +55,7 @@ class FedNova(FedAvg):
         if not self.accept_failures and failures:
             return None, {}
 
+        # Compute tau_effective from summation of local client tau: Eqn-6: Section 4.1
         local_tau = [res.metrics["tau"] for _, res in results]
         tau_eff = np.sum(local_tau)
 
@@ -59,11 +63,22 @@ class FedNova(FedAvg):
 
         for _client, res in results:
             params = parameters_to_ndarrays(res.parameters)
+            # compute the scale by which to weight each client's gradient
+            # res.metrics["local_norm"] contains total number of local update steps
+            # for each client
+            # res.metrics["weight"] contains the ratio of client dataset size
+            # Below corresponds to Eqn-6: Section 4.1
             scale = tau_eff / float(res.metrics["local_norm"])
             scale *= float(res.metrics["weight"])
+
             aggregate_parameters.append((params, scale))
 
+        # Aggregate all client parameters with a weighted average using the scale
+        # calculated above
         agg_cum_gradient = aggregate(aggregate_parameters)
+
+        # In case of Server or Hybrid Momentum, we decay the aggregated gradients
+        # with a momentum factor
         self.update_server_params(agg_cum_gradient)
 
         return ndarrays_to_parameters(self.global_parameters), {}
@@ -74,17 +89,22 @@ class FedNova(FedAvg):
             if self.gmf != 0:
                 # check if it's the first round of aggregation, if so, initialize the
                 # global momentum buffer
-                if len(self.global_momentum_buffer) == 0:
+
+                if len(self.global_momentum_buffer) < len(cum_grad):
                     buf = layer_cum_grad / self.lr
                     self.global_momentum_buffer.append(buf)
 
                 else:
+                    # momentum updates using the global accumulated weights buffer
+                    # for each layer of network
                     self.global_momentum_buffer[i] *= self.gmf
                     self.global_momentum_buffer[i] += layer_cum_grad / self.lr
 
                 self.global_parameters[i] -= self.global_momentum_buffer[i] * self.lr
 
             else:
+                # weight updated eqn: x_new = x_old - gradient
+                # the layer_cum_grad already has all the learning rate multiple
                 self.global_parameters[i] -= layer_cum_grad
 
     def evaluate(

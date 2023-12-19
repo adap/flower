@@ -31,8 +31,19 @@ class FedNovaClient(
     ):
         self.net = net
         self.exp_config = config
+
+        if self.exp_config.var_local_epochs and (
+            self.exp_config.exp_name == "proximal"
+        ):
+            # For only FedNova with proximal local solver and variable local epochs,
+            # mu = 0.001 works best.
+            # For other experiments, the default setting of mu = 0.005 works best
+            # Ref: https://arxiv.org/pdf/2007.07481.pdf (Page 33, Section:
+            # More Experiment Details)
+            self.exp_config.optimizer.mu = 0.001
+
         self.optimizer = instantiate(
-            config.optimizer, params=self.net.parameters(), ratio=ratio
+            self.exp_config.optimizer, params=self.net.parameters(), ratio=ratio
         )
         self.trainloader = trainloader
         self.valloader = valloader

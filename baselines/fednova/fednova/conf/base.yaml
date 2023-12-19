@@ -6,12 +6,11 @@
 defaults:
   - _self_
   - strategy: fednova
-  - optimizer: vanilla
+  - optimizer: momentum
 
 var_local_epochs: False
 datapath: fednova/data/
 checkpoint_path: fednova/checkpoints/
-results_dir: fednova/results/
 num_clients: 16
 num_epochs: 2
 num_rounds: 100
@@ -30,3 +29,16 @@ model:
 client_resources:
   num_cpus: 1
   num_gpus: 0.125
+
+hydra:
+  sweep:
+    dir: multirun
+    subdir: ${hydra.job.override_dirname}/${seed}
+  job:
+    config:
+      override_dirname:
+        exclude_keys:
+          - seed
+          - num_rounds
+        kv_sep: _
+        item_sep: _

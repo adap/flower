@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 import torch
 from flwr.common import ndarrays_to_parameters
+from hydra.core.hydra_config import HydraConfig
 from hydra.utils import call, instantiate
 from omegaconf import DictConfig, OmegaConf
 
@@ -113,10 +114,7 @@ def main(cfg: DictConfig) -> None:  # pylint: disable=too-many-locals
     )
 
     # 6. Save your results
-    # save_path = HydraConfig.get().runtime.output_dir
-    save_path = cfg.results_dir
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
+    save_path = HydraConfig.get().runtime.output_dir
 
     # rounds, train_loss = zip(*history.losses_distributed)
     # _, train_accuracy = zip(*history.metrics_distributed["accuracy"])
@@ -129,9 +127,10 @@ def main(cfg: DictConfig) -> None:  # pylint: disable=too-many-locals
         test_accuracy = test_accuracy[1:]
         rounds = rounds[1:]
 
-    file_name = (
-        f"{save_path}{cfg.exp_name}_{cfg.strategy}_varEpoch_"
-        f"{cfg.var_local_epochs}_seed_{cfg.seed}.csv"
+    file_name = os.path.join(
+        save_path,
+        f"{cfg.exp_name}_{cfg.strategy.name}_varEpoch_"
+        f"{cfg.var_local_epochs}_seed_{cfg.seed}.csv",
     )
 
     # df = pd.DataFrame({"round": rounds, "train_loss": train_loss, "train_accuracy":

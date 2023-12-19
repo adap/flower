@@ -142,14 +142,16 @@ It takes the following values:
 # Run experiments for first 6 rows of Table-1 below. 
 python -m fednova.main --multirun optimizer=vanilla,momentum,proximal strategy=fedavg,fednova var_local_epochs=False,True seed=4,5,6
 
-# Run experiments to compare Local vs Server vs Hybrid momentum
-python -m fednova.main --multirun optimizer=serverMomentum,hybridMomentum strategy=fednova var_local_epochs=True seed=4,5,6
+# Run experiments to compare effect of Momentum (No momentum vs Server vs Hybrid)
+python -m fednova.main --multirun optimizer=server,hybrid strategy=fednova var_local_epochs=True seed=4,5,6
 
-# Plot results and generate Results table
+# Plot results and generate Results table. The plots are saved in _static/ directory. 
 python fednova/utils.py
 
 ```
 
+> **Note**: Due to instability in weight updates in hetrogeneous learning setting on Non-IID datasets, one or two experiments may show NaNs in the loss for few very unlucky seeds. 
+> It is recommended to run each experiment for at-least 2-3 seeds for best results.
 
 ## Expected Results
 
@@ -157,7 +159,7 @@ The results below correspond to Table 1 of the paper on the non-IID CIFAR-10 dat
 
 Centralized Evaluation: Accuracy(in %) on centralized Test set. Mean and Confidence Intervals plotted over at least 3 seeds.
 
-> Add comment about FedAvg+moment collapsing sometimes (not the case w/ FedNova)
+
 
 | Local Epochs | Client Optimizer | FedAvg | FedNova |
 | ------------ | ---------------- | ------ | ------- |
