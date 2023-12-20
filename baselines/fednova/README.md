@@ -1,8 +1,8 @@
 ---
-title: FedNova (NeurIPS 2020)
+title: Tackling the Objective Inconsistency Problem in Heterogeneous Federated Optimization
 url: https://arxiv.org/abs/2007.07481
-labels: [normalized averaging, heterogeneous optimization, federated learning]
-dataset: [non-iid, cifar10, dataset]
+labels: [normalized averaging, heterogeneous optimization, image classification]
+dataset: [CIFAR-10]
 ---
 
 # Tackling the Objective Inconsistency Problem in Heterogeneous Federated Optimization
@@ -185,6 +185,7 @@ The plots below correspond to Figure 6 (page 11) and Figure 7 in the Addendum se
 
 <img alt="FedAvg vs FedNova (vanilla)" src="_static/testAccuracy_vanilla_varEpochs_True.png" width="250"/> <img alt="FedAvg vs FedNova (momentum)" src="_static/testAccuracy_momentum_varEpochs_True.png" width="250"/> <img alt="FedAvg vs FedNova (proximal)" src="_static/testAccuracy_proximal_varEpochs_True.png" width="250"/>
 
-**Comparison of Momentum schemes for FedNova( No Momentum vs Server Momentum vs Hybrid(both client and strategy side)**
+**Comparison of Momentum schemes for FedNova (both client and strategy side)**
+
 <img alt="Momentum Comparison" src="_static/testAccuracy_momentum_plot_varEpochs_True.png" width="360"/>
 
