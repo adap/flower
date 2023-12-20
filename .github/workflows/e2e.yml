@@ -17,7 +17,8 @@ env:
 
 jobs:
   wheel:
-    runs-on: ubuntu-22.04
+    runs-on: 
+      group: ubuntu-runners
     name: Build, test and upload wheel
     steps:
       - uses: actions/checkout@v4
@@ -50,7 +51,8 @@ jobs:
       dir: ${{ steps.upload.outputs.DIR }}
 
   frameworks:
-    runs-on: ubuntu-22.04
+    runs-on: 
+      group: ubuntu-runners
     timeout-minutes: 10
     needs: wheel
     # Using approach described here:
