@@ -36,7 +36,8 @@ permissions:
 jobs:
   build:
     name: Build server image
-    runs-on: ubuntu-22.04
+    runs-on: 
+      group: ubuntu-runners
     timeout-minutes: 60
     outputs:
       build-id: ${{ steps.build-id.outputs.id }}
@@ -107,7 +108,8 @@ jobs:
 
   build-manifest:
     name: Build and push docker manifest for all platforms
-    runs-on: ubuntu-22.04
+    runs-on: 
+      group: ubuntu-runners
     timeout-minutes: 10
     needs: build
     outputs:
