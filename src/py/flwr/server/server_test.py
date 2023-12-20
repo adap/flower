@@ -57,7 +57,7 @@ class SuccessClient(ClientProxy):
         raise Exception()
 
     def fit(
-        self, ins: FitIns, timeout: Optional[float], group_id: Optional[int]
+        self, ins: FitIns, timeout: Optional[float], group_id: Optional[str]
     ) -> FitRes:
         """Simulate fit by returning a success FitRes with simple set of weights."""
         arr = np.array([[1, 2], [3, 4], [5, 6]])
@@ -70,7 +70,7 @@ class SuccessClient(ClientProxy):
         )
 
     def evaluate(
-        self, ins: EvaluateIns, timeout: Optional[float], group_id: Optional[int]
+        self, ins: EvaluateIns, timeout: Optional[float], group_id: Optional[str]
     ) -> EvaluateRes:
         """Simulate evaluate by returning a success EvaluateRes with loss 1.0."""
         return EvaluateRes(
@@ -101,13 +101,13 @@ class FailingClient(ClientProxy):
         raise Exception()
 
     def fit(
-        self, ins: FitIns, timeout: Optional[float], group_id: Optional[int]
+        self, ins: FitIns, timeout: Optional[float], group_id: Optional[str]
     ) -> FitRes:
         """Raise an Exception to simulate failure in the client."""
         raise Exception()
 
     def evaluate(
-        self, ins: EvaluateIns, timeout: Optional[float], group_id: Optional[int]
+        self, ins: EvaluateIns, timeout: Optional[float], group_id: Optional[str]
     ) -> EvaluateRes:
         """Raise an Exception to simulate failure in the client."""
         raise Exception()

@@ -142,7 +142,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
         ins: flwr.common.FitIns = flwr.common.FitIns(parameters, {})
 
         # Execute
-        fit_res = client.fit(ins=ins, timeout=None, group_id=1)
+        fit_res = client.fit(ins=ins, timeout=None, group_id=str(1))
 
         # Assert
         assert fit_res.parameters.tensor_type == "np"
@@ -178,7 +178,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
         evaluate_ins: flwr.common.EvaluateIns = flwr.common.EvaluateIns(parameters, {})
 
         # Execute
-        evaluate_res = client.evaluate(evaluate_ins, timeout=None, group_id=1)
+        evaluate_res = client.evaluate(evaluate_ins, timeout=None, group_id=str(1))
 
         # Assert
         assert 0.0 == evaluate_res.loss

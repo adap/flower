@@ -63,7 +63,7 @@ class ClientProxy(ABC):
         self,
         ins: FitIns,
         timeout: Optional[float],
-        group_id: Optional[int],
+        group_id: Optional[str],
     ) -> FitRes:
         """Refine the provided parameters using the locally held dataset."""
 
@@ -72,7 +72,7 @@ class ClientProxy(ABC):
         self,
         ins: EvaluateIns,
         timeout: Optional[float],
-        group_id: Optional[int],
+        group_id: Optional[str],
     ) -> EvaluateRes:
         """Evaluate the provided parameters using the locally held dataset."""
 

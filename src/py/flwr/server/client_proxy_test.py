@@ -61,7 +61,7 @@ class CustomClientProxy(ClientProxy):
         self,
         ins: FitIns,
         timeout: Optional[float],
-        group_id: Optional[int],
+        group_id: Optional[str],
     ) -> FitRes:
         """Refine the provided weights using the locally held dataset."""
         return FitRes(
@@ -75,7 +75,7 @@ class CustomClientProxy(ClientProxy):
         self,
         ins: EvaluateIns,
         timeout: Optional[float],
-        group_id: Optional[int],
+        group_id: Optional[str],
     ) -> EvaluateRes:
         """Evaluate the provided weights using the locally held dataset."""
         return EvaluateRes(

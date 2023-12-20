@@ -73,7 +73,7 @@ class DriverClientProxy(ClientProxy):
         )
 
     def fit(
-        self, ins: common.FitIns, timeout: Optional[float], group_id: Optional[int]
+        self, ins: common.FitIns, timeout: Optional[float], group_id: Optional[str]
     ) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
         server_message_proto: transport_pb2.ServerMessage = (
@@ -87,7 +87,7 @@ class DriverClientProxy(ClientProxy):
         )
 
     def evaluate(
-        self, ins: common.EvaluateIns, timeout: Optional[float], group_id: Optional[int]
+        self, ins: common.EvaluateIns, timeout: Optional[float], group_id: Optional[str]
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
         server_message_proto: transport_pb2.ServerMessage = (
@@ -112,12 +112,12 @@ class DriverClientProxy(ClientProxy):
         self,
         server_message: transport_pb2.ServerMessage,
         timeout: Optional[float],
-        group_id: Optional[int],
+        group_id: Optional[str],
     ) -> transport_pb2.ClientMessage:
         task_ins = task_pb2.TaskIns(
             task_id="",
             workload_id=self.workload_id,
-            group_id=str(group_id) if group_id else "",
+            group_id=group_id if group_id else "",
             task=task_pb2.Task(
                 producer=node_pb2.Node(
                     node_id=0,
