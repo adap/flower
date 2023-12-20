@@ -16,7 +16,7 @@ client_resources:
 
 dataset_config:
   name: CIFAR100
-  partition: -iid
+  partition: non-iid
   num_classes: 100
   alpha: 0.5
 

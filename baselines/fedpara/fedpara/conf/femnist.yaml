@@ -34,8 +34,8 @@ hyperparams:
   weight_decay: 0
 
 strategy:
-  _target_: fedpara.strategy.FedPara
-  algorithm: FedPara
+  _target_: fedpara.strategy.pFedPara
+  algorithm: pFedPara
   fraction_fit: 0.00001
   fraction_evaluate: 0.0
   min_evaluate_clients: 0

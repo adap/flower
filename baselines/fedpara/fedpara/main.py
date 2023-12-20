@@ -7,7 +7,7 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
 from fedpara import client, server, utils
-from fedpara.dataset_preparation import load_datasets
+from fedpara.dataset import load_datasets
 from fedpara.utils import get_parameters, seed_everything
 
 
