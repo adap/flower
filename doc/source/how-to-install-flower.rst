@@ -23,7 +23,7 @@ For simulations that use the Virtual Client Engine, ``flwr`` should be installed
 Verify installation
 -------------------
 
-The following command can be used to verfiy if Flower was successfully installed. If everything worked, it should print the version of Flower to the command line::
+The following command can be used to verify if Flower was successfully installed. If everything worked, it should print the version of Flower to the command line::
 
   python -c "import flwr;print(flwr.__version__)"
   1.5.0
@@ -31,6 +31,11 @@ The following command can be used to verfiy if Flower was successfully installed
 
 Advanced installation options
 -----------------------------
+
+Install via Docker
+~~~~~~~~~~~~~~~~~~
+
+`How to run Flower using Docker <https://flower.dev/docs/framework/how-to-run-flower-using-docker.html>`_
 
 Install pre-release
 ~~~~~~~~~~~~~~~~~~~
