@@ -10,6 +10,8 @@
 
   - FedVSSL [#2412](https://github.com/adap/flower/pull/2412)
 
+- **Deprecated `start_numpy_client`**. ([#2563](https://github.com/adap/flower/pull/2563)) Until now, clients of type `NumPyClient` needed to be started via `start_numpy_client`. In our efforts to consolidate the core freamework we have introduced changes and now all client types should start via `start_client`. To continue using `NumPyClient` clients, you simply need to first all the `.to_client()` method then pass the client object to `start_client`. The examples and the documentation have been updated accordigntly.
+
 ## v1.6.0 (2023-11-28)
 
 ### Thanks to our contributors
