@@ -23,6 +23,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Check copyright line
+        run: ./dev/test-copyright.sh
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Install pandoc
