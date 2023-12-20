@@ -1,7 +1,7 @@
 # Flower Example using TensorFlow/Keras
 
-This introductory example to Flower uses Keras but deep knowledge of Keras is not necessarily required to run the example. However, it will help you understanding how to adapt Flower to your use-cases.
-Running this example in itself is quite easy.
+This introductory example to Flower uses Keras but deep knowledge of Keras is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case.
+Running this example in itself is quite easy. This example uses [Flower Datasets](https://flower.dev/docs/datasets/) to download, partition and preprocess the CIFAR-10 dataset.
 
 ## Project Setup
 
@@ -50,7 +50,7 @@ pip install -r requirements.txt
 
 ## Run Federated Learning with TensorFlow/Keras and Flower
 
-Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
+Afterward, you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
 
 ```shell
 poetry run python3 server.py
@@ -62,7 +62,7 @@ Now you are ready to start the Flower clients which will participate in the lear
 poetry run python3 client.py
 ```
 
-Alternatively you can run all of it in one shell as follows:
+Alternatively, you can run all of it in one shell as follows:
 
 ```shell
 poetry run python3 server.py &
