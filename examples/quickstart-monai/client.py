@@ -1,12 +1,12 @@
 import warnings
 from collections import OrderedDict
 
-import flwr as fl
 import torch
+from data import load_data
+from model import test, train
 from monai.networks.nets.densenet import DenseNet121
 
-from data import load_data
-from model import train, test
+import flwr as fl
 
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")

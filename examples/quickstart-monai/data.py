@@ -1,9 +1,12 @@
 import os
+import tarfile
+from urllib import request
+
 import numpy as np
-from PIL import Image
+from monai.data import DataLoader, Dataset
 from monai.transforms import (
-    EnsureChannelFirst,
     Compose,
+    EnsureChannelFirst,
     LoadImage,
     RandFlip,
     RandRotate,
@@ -11,10 +14,7 @@ from monai.transforms import (
     ScaleIntensity,
     ToTensor,
 )
-
-from monai.data import Dataset, DataLoader
-from urllib import request
-import tarfile
+from PIL import Image
 
 
 def load_data():
@@ -130,4 +130,3 @@ def _download_and_extract(url, dest_folder):
         # Extract the tar.gz file
         with tarfile.open(tar_gz_filename, "r:gz") as tar_ref:
             tar_ref.extractall()
-
