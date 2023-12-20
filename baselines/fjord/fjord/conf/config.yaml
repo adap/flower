@@ -1,0 +1,8 @@
+---
+hydra:
+  run:
+    dir: ./runs/${now:%Y-%m-%d}:${now:%H-%M-%S}
+
+defaults:
+  - train_mode/fjord
+  - override hydra/job_logging: disabled

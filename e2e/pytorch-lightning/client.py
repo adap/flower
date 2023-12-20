@@ -53,7 +53,11 @@ def client_fn(cid):
     train_loader, val_loader, test_loader = mnist.load_data()
 
     # Flower client
-    return FlowerClient(model, train_loader, val_loader, test_loader)
+    return FlowerClient(model, train_loader, val_loader, test_loader).to_client()
+
+flower = fl.flower.Flower(
+    client_fn=client_fn,
+)
 
 def main() -> None:
     # Model and data

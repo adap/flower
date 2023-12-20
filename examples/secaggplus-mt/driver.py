@@ -6,7 +6,7 @@ import numpy as np
 from workflows import get_workflow_factory
 
 from flwr.common import Metrics, ndarrays_to_parameters
-from flwr.driver import Driver
+from flwr.driver import GrpcDriver
 from flwr.proto import driver_pb2, node_pb2, task_pb2
 from flwr.server import History
 
@@ -71,7 +71,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 # -------------------------------------------------------------------------- Driver SDK
-driver = Driver(driver_service_address="0.0.0.0:9091", certificates=None)
+driver = GrpcDriver(driver_service_address="0.0.0.0:9091", certificates=None)
 # -------------------------------------------------------------------------- Driver SDK
 
 anonymous_client_nodes = False
