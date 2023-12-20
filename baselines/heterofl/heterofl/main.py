@@ -168,6 +168,10 @@ def main(cfg: DictConfig) -> None:
     else:
         strategy_fedavg = instantiate(
             cfg.strategy,
+            # on_fit_config_fn=lambda server_round: {
+            #     "lr": cfg.optim_scheduler.lr
+            #     * pow(cfg.optim_scheduler.lr_decay_rate, server_round)
+            # },
             evaluate_fn=evaluate_fn,
             min_available_clients=cfg.num_clients,
         )

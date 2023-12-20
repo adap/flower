@@ -27,6 +27,7 @@ model:
 optim_scheduler:
   optimizer: SGD
   lr: 0.05
+  lr_decay_rate: 1.0
   momentum: 0.5
   weight_decay: 0
   scheduler: MultiStepLR

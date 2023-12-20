@@ -451,7 +451,8 @@ class CNNCifar(nn.Module):
         x = x.view(-1, 16 * 5 * 5)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        out = self.fc3(x)
+        x = self.fc3(x)
+        out = F.log_softmax(x, dim=1)
         output["score"] = out
         output["loss"] = F.cross_entropy(out, input_dict["label"], reduction="mean")
         return output
