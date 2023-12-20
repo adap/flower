@@ -10,7 +10,7 @@ Update the changelog (``changelog.md``) with all relevant changes that happened 
 
 `GitHub: Compare v1.2.0...main <https://github.com/adap/flower/compare/v1.2.0...main>`_
 
-Thank the authors who contributed since the last release. This can be done by running the ``./dev/add-shortlog.sh`` convenience script (it can be ran multiple times and will update the names in the list if new contributors were added in the meantime).
+Thank the authors who contributed since the last release. This can be done by running the ``./dev/add-shortlog.sh <new version>`` convenience script (it can be ran multiple times and will update the names in the list if new contributors were added in the meantime).
 
 During the release
 ------------------

@@ -19,7 +19,7 @@ from flwr_datasets.partitioner.size_partitioner import SizePartitioner
 
 
 class LinearPartitioner(SizePartitioner):
-    """Partitioner creates partitions of size that are linearly correlated with idx.
+    """Partitioner creates partitions of size that are linearly correlated with node_id.
 
     The amount of data each client gets is linearly correlated with the partition ID.
     For instance, if the IDs range from 1 to M, client with ID 1 gets 1 unit of data,
