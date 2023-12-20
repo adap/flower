@@ -12,6 +12,8 @@
 
   - FedVSSL [#2412](https://github.com/adap/flower/pull/2412)
 
+  - FedNova [#2179](https://github.com/adap/flower/pull/2179)
+
 ## v1.6.0 (2023-11-28)
 
 ### Thanks to our contributors
