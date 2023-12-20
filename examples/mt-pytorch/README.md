@@ -49,3 +49,25 @@ Terminal 2+3: start two clients
 ```bash
 python client.py
 ```
+
+## Run with Driver API (REST transport layer)
+
+Terminal 1: start Flower server and enable REST transport layer
+
+```bash
+flower-server --rest
+```
+
+Terminal 2: start Driver script
+
+```bash
+python driver.py
+```
+
+Open file `client.py` adjust `server_address` and `transport`.
+
+Terminal 3+4: start two Flower client nodes
+
+```bash
+python client.py
+```

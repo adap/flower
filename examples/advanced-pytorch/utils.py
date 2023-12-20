@@ -102,8 +102,8 @@ def replace_classifying_layer(efficientnet_model, num_classes: int = 10):
 
 
 def load_efficientnet(entrypoint: str = "nvidia_efficientnet_b0", classes: int = None):
-    """Loads pretrained efficientnet model from torch hub. Replaces final
-    classifying layer if classes is specified.
+    """Loads pretrained efficientnet model from torch hub. Replaces final classifying
+    layer if classes is specified.
 
     Args:
         entrypoint: EfficientNet model to download.
