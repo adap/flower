@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **General updates to Flower Examples** ([#2381](https://github.com/adap/flower/pull/2381))
+
+- **Update Flower Baselines**
+
+  - HFedXGBoost [#2226](https://github.com/adap/flower/pull/2226)
+
+  - FedVSSL [#2412](https://github.com/adap/flower/pull/2412)
+
 ## v1.6.0 (2023-11-28)
 
 ### Thanks to our contributors
