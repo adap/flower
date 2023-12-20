@@ -92,6 +92,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    how-to-enable-ssl-connections
    how-to-upgrade-to-flower-1.0
    how-to-use-built-in-middleware-layers
+   how-to-run-flower-using-docker
 
 .. toctree::
    :maxdepth: 1
