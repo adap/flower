@@ -121,7 +121,7 @@ References
 Information-oriented API reference and other reference material.
 
 .. autosummary::
-   :toctree: ref-api
+   :toctree: ref-api-flwr
    :template: autosummary/module.rst
    :caption: API reference
    :recursive:

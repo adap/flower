@@ -77,7 +77,7 @@ END
     # Restore branch as it was to avoid conflicts
     git restore source/_templates
     git restore source/_templates/autosummary || rm -rf source/_templates/autosummary
-    rm source/ref-api/*.rst
+    rm source/ref-api-flwr/*.rst
 
     if [ "$current_version" = "v1.5.0" ]; then
       git restore source/conf.py
@@ -103,7 +103,7 @@ for current_language in ${languages}; do
   export current_language
   sphinx-build -b html source/ build/html/${current_version}/${current_language} -A lang=True -D language=${current_language}
 done
-rm source/ref-api/*.rst
+rm source/ref-api-flwr/*.rst
 
 # Copy main version to the root of the built docs
 cp -r build/html/main/en/* build/html/
