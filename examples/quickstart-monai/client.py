@@ -3,7 +3,7 @@ from collections import OrderedDict
 
 import flwr as fl
 import torch
-from monai.networks.nets import DenseNet121
+from monai.networks.nets.densenet import DenseNet121
 
 from data import load_data
 from model import train, test
@@ -20,7 +20,6 @@ class FlowerClient(fl.client.NumPyClient):
         self.trainloader = trainloader
         self.testloader = testloader
         self.device = device
-        print(len(self.testloader))
 
     def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
