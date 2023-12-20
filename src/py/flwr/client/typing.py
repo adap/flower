@@ -41,3 +41,4 @@ class Bwd:
 
 FlowerCallable = Callable[[Fwd], Bwd]
 ClientFn = Callable[[str], Client]
+Layer = Callable[[Fwd, FlowerCallable], Bwd]
