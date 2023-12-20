@@ -10,7 +10,7 @@ Update the changelog (``changelog.md``) with all relevant changes that happened 
 
 `GitHub: Compare v1.2.0...main <https://github.com/adap/flower/compare/v1.2.0...main>`_
 
-Thank the authors who contributed since the last release. This can be done by running the ``./dev/add-shortlog.sh`` convenience script (it can be ran multiple times and will update the names in the list if new contributors were added in the meantime).
+Thank the authors who contributed since the last release. This can be done by running the ``./dev/add-shortlog.sh <new version>`` convenience script (it can be ran multiple times and will update the names in the list if new contributors were added in the meantime).
 
 During the release
 ------------------
@@ -18,8 +18,7 @@ During the release
 The version number of a release is stated in ``pyproject.toml``. To release a new version of Flower, the following things need to happen (in that order):
 
 1. Update the ``changelog.md`` section header ``Unreleased`` to contain the version number and date for the release you are building. Create a pull request with the change.
-2. Tag the release commit with the version number as soon as the PR is merged: ``git tag v0.12.3``, then ``git push --tags``. This will create a draft release on GitHub 
-containing the correct artifacts and the relevant part of the changelog.
+2. Tag the release commit with the version number as soon as the PR is merged: ``git tag v0.12.3``, then ``git push --tags``. This will create a draft release on GitHub containing the correct artifacts and the relevant part of the changelog.
 3. Check the draft release on GitHub, and if everything is good, publish it.
 
 After the release

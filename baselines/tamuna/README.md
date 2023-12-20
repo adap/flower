@@ -5,33 +5,33 @@ labels: [local training, communication compression, partial participation, varia
 dataset: [MNIST]
 ---
 
-# Tamuna baseline
+# TAMUNA: Doubly Accelerated Federated Learning with Local Training, Compression, and Partial Participation
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
-****Paper:**** [arxiv.org/abs/2302.09832](https://arxiv.org/abs/2302.098320)
+**Paper:** [arxiv.org/abs/2302.09832](https://arxiv.org/abs/2302.09832)
 
-****Authors:**** Laurent Condat, Ivan Agarský, Grigory Malinovsky, Peter Richtárik
+**Authors:** Laurent Condat, Ivan Agarský, Grigory Malinovsky, Peter Richtárik
 
-****Abstract:**** In federated learning, a large number of users collaborate to learn a global model. They alternate local computations and communication with a distant server. Communication, which can be slow and costly, is the main bottleneck in this setting. In addition to communication-efficiency, a robust algorithm should allow for partial participation, the desirable feature that not all clients need to participate to every round of the training process. To reduce the communication load and therefore accelerate distributed gradient descent, two strategies are popular: 1) communicate less frequently; that is, perform several iterations of local computations between the communication rounds; and 2) communicate compressed information instead of full-dimensional vectors. We propose TAMUNA, the first algorithm for distributed optimization and federated learning, which harnesses these two strategies jointly and allows for partial participation. TAMUNA converges linearly to an exact solution in the strongly convex setting, with a doubly accelerated rate: it provably benefits from the two acceleration mechanisms provided by local training and compression, namely a better dependency on the condition number of the functions and on the model dimension, respectively.
+**Abstract:** In federated learning, a large number of users collaborate to learn a global model. They alternate local computations and communication with a distant server. Communication, which can be slow and costly, is the main bottleneck in this setting. In addition to communication-efficiency, a robust algorithm should allow for partial participation, the desirable feature that not all clients need to participate to every round of the training process. To reduce the communication load and therefore accelerate distributed gradient descent, two strategies are popular: 1) communicate less frequently; that is, perform several iterations of local computations between the communication rounds; and 2) communicate compressed information instead of full-dimensional vectors. We propose TAMUNA, the first algorithm for distributed optimization and federated learning, which harnesses these two strategies jointly and allows for partial participation. TAMUNA converges linearly to an exact solution in the strongly convex setting, with a doubly accelerated rate: it provably benefits from the two acceleration mechanisms provided by local training and compression, namely a better dependency on the condition number of the functions and on the model dimension, respectively.
 
 
 ## About this baseline
 
-****What’s implemented:**** The code in this directory compares Tamuna with FedAvg. It produces three plots comparing loss, accuracy and communication complexity of the two algorithms. 
+**What’s implemented:** The code in this directory compares Tamuna with FedAvg. It produces three plots comparing loss, accuracy and communication complexity of the two algorithms. 
 
-****Datasets:**** MNIST
+**Datasets:** MNIST
 
-****Hardware Setup:**** By default, the experiments expect at least one gpu, but this can be changed to cpu only by specifying client and server devices. Default setup less than 5 GB of dedicated GPU memory.
+**Hardware Setup:** By default, the experiments expect at least one gpu, but this can be changed to cpu only by specifying client and server devices. Default setup less than 5 GB of dedicated GPU memory.
 
-****Contributors:**** Ivan Agarský [github.com/Crabzmatic](https://github.com/Crabzmatic), Grigory Malinovsky [github.com/gsmalinovsky](https://github.com/gsmalinovsky)
+**Contributors:** Ivan Agarský [github.com/Crabzmatic](https://github.com/Crabzmatic), Grigory Malinovsky [github.com/gsmalinovsky](https://github.com/gsmalinovsky)
 
 
 ## Experimental Setup
 
-****Task:**** image classification
+**Task:** image classification
 
-****Model:**** 
+**Model:** 
 
 As described in (McMahan, 2017): _Communication-Efficient Learning of Deep Networks from Decentralized Data_ ([arxiv.org/abs/1602.05629](https://arxiv.org/abs/1602.05629))
 
@@ -47,9 +47,9 @@ As described in (McMahan, 2017): _Communication-Efficient Learning of Deep Netwo
 
 Total trainable params: 1,663,370
 
-****Dataset:**** By default, training split of MNIST dataset is divided in iid fashion across all 1000 clients, while test split stays on the server for centralized evaluation. Training dataset can also be divided using power law by setting `dataset.iid` to `False` in `base.yaml` config.
+**Dataset:** By default, training split of MNIST dataset is divided in iid fashion across all 1000 clients, while test split stays on the server for centralized evaluation. Training dataset can also be divided using power law by setting `dataset.iid` to `False` in `base.yaml` config.
 
-****Training Hyperparameters:**** 
+**Training Hyperparameters:** 
 
 | Hyperparameter             | Description                                                                                                                                                                                                                                                 | Default value |
 |----------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
