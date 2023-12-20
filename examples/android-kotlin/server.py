@@ -1,5 +1,7 @@
 """Start a Flower server.
-Derived from Flower Android example."""
+
+Derived from Flower Android example.
+"""
 
 from flwr.server import ServerConfig, start_server
 from flwr.server.strategy import FedAvgAndroid
@@ -10,8 +12,8 @@ PORT = 8080
 def fit_config(server_round: int):
     """Return training configuration dict for each round.
 
-    Keep batch size fixed at 32, perform two rounds of training with one
-    local epoch, increase to two local epochs afterwards.
+    Keep batch size fixed at 32, perform two rounds of training with one local epoch,
+    increase to two local epochs afterwards.
     """
     config = {
         "batch_size": 32,

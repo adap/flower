@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -66,7 +66,10 @@ class StateTest(unittest.TestCase):
         # Prepare
         consumer_node_id = 1
         state = self.state_factory()
-        task_ins = create_task_ins(consumer_node_id=consumer_node_id, anonymous=False)
+        workload_id = state.create_workload()
+        task_ins = create_task_ins(
+            consumer_node_id=consumer_node_id, anonymous=False, workload_id=workload_id
+        )
 
         assert task_ins.task.created_at == ""  # pylint: disable=no-member
         assert task_ins.task.delivered_at == ""  # pylint: disable=no-member
@@ -105,9 +108,16 @@ class StateTest(unittest.TestCase):
         # Prepare
         consumer_node_id = 1
         state = self.state_factory()
-        task_ins_0 = create_task_ins(consumer_node_id=consumer_node_id, anonymous=False)
-        task_ins_1 = create_task_ins(consumer_node_id=consumer_node_id, anonymous=False)
-        task_ins_2 = create_task_ins(consumer_node_id=consumer_node_id, anonymous=False)
+        workload_id = state.create_workload()
+        task_ins_0 = create_task_ins(
+            consumer_node_id=consumer_node_id, anonymous=False, workload_id=workload_id
+        )
+        task_ins_1 = create_task_ins(
+            consumer_node_id=consumer_node_id, anonymous=False, workload_id=workload_id
+        )
+        task_ins_2 = create_task_ins(
+            consumer_node_id=consumer_node_id, anonymous=False, workload_id=workload_id
+        )
 
         # Insert three TaskIns
         task_id_0 = state.store_task_ins(task_ins=task_ins_0)
@@ -123,7 +133,10 @@ class StateTest(unittest.TestCase):
 
         # Insert one TaskRes and retrive it to mark it as delivered
         task_res_0 = create_task_res(
-            producer_node_id=100, anonymous=False, ancestry=[str(task_id_0)]
+            producer_node_id=100,
+            anonymous=False,
+            ancestry=[str(task_id_0)],
+            workload_id=workload_id,
         )
 
         _ = state.store_task_res(task_res=task_res_0)
@@ -131,7 +144,10 @@ class StateTest(unittest.TestCase):
 
         # Insert one TaskRes, but don't retrive it
         task_res_1: TaskRes = create_task_res(
-            producer_node_id=100, anonymous=False, ancestry=[str(task_id_1)]
+            producer_node_id=100,
+            anonymous=False,
+            ancestry=[str(task_id_1)],
+            workload_id=workload_id,
         )
         _ = state.store_task_res(task_res=task_res_1)
 
@@ -166,7 +182,10 @@ class StateTest(unittest.TestCase):
         """
         # Prepare
         state: State = self.state_factory()
-        task_ins = create_task_ins(consumer_node_id=0, anonymous=True)
+        workload_id = state.create_workload()
+        task_ins = create_task_ins(
+            consumer_node_id=0, anonymous=True, workload_id=workload_id
+        )
 
         # Execute
         task_ins_uuid = state.store_task_ins(task_ins)
@@ -180,7 +199,10 @@ class StateTest(unittest.TestCase):
         """Store anonymous TaskIns and fail to retrieve it."""
         # Prepare
         state: State = self.state_factory()
-        task_ins = create_task_ins(consumer_node_id=0, anonymous=True)
+        workload_id = state.create_workload()
+        task_ins = create_task_ins(
+            consumer_node_id=0, anonymous=True, workload_id=workload_id
+        )
 
         # Execute
         _ = state.store_task_ins(task_ins)
@@ -193,7 +215,10 @@ class StateTest(unittest.TestCase):
         """Store identity TaskIns and fail retrieving it as anonymous."""
         # Prepare
         state: State = self.state_factory()
-        task_ins = create_task_ins(consumer_node_id=1, anonymous=False)
+        workload_id = state.create_workload()
+        task_ins = create_task_ins(
+            consumer_node_id=1, anonymous=False, workload_id=workload_id
+        )
 
         # Execute
         _ = state.store_task_ins(task_ins)
@@ -206,7 +231,10 @@ class StateTest(unittest.TestCase):
         """Store identity TaskIns and retrieve it."""
         # Prepare
         state: State = self.state_factory()
-        task_ins = create_task_ins(consumer_node_id=1, anonymous=False)
+        workload_id = state.create_workload()
+        task_ins = create_task_ins(
+            consumer_node_id=1, anonymous=False, workload_id=workload_id
+        )
 
         # Execute
         task_ins_uuid = state.store_task_ins(task_ins)
@@ -222,7 +250,10 @@ class StateTest(unittest.TestCase):
         """Fail retrieving delivered task."""
         # Prepare
         state: State = self.state_factory()
-        task_ins = create_task_ins(consumer_node_id=1, anonymous=False)
+        workload_id = state.create_workload()
+        task_ins = create_task_ins(
+            consumer_node_id=1, anonymous=False, workload_id=workload_id
+        )
 
         # Execute
         _ = state.store_task_ins(task_ins)
@@ -247,14 +278,32 @@ class StateTest(unittest.TestCase):
         with self.assertRaises(AssertionError):
             state.get_task_ins(node_id=1, limit=0)
 
+    def test_task_ins_store_invalid_workload_id_and_fail(self) -> None:
+        """Store TaskIns with invalid workload_id and fail."""
+        # Prepare
+        state: State = self.state_factory()
+        task_ins = create_task_ins(
+            consumer_node_id=0, anonymous=True, workload_id=61016
+        )
+
+        # Execute
+        task_id = state.store_task_ins(task_ins)
+
+        # Assert
+        assert task_id is None
+
     # TaskRes tests
     def test_task_res_store_and_retrieve_by_task_ins_id(self) -> None:
         """Store TaskRes retrieve it by task_ins_id."""
         # Prepare
         state: State = self.state_factory()
+        workload_id = state.create_workload()
         task_ins_id = uuid4()
         task_res = create_task_res(
-            producer_node_id=0, anonymous=True, ancestry=[str(task_ins_id)]
+            producer_node_id=0,
+            anonymous=True,
+            ancestry=[str(task_ins_id)],
+            workload_id=workload_id,
         )
 
         # Execute
@@ -269,38 +318,54 @@ class StateTest(unittest.TestCase):
         """Test retrieving all node_ids and empty initial state."""
         # Prepare
         state: State = self.state_factory()
+        workload_id = state.create_workload()
 
         # Execute
-        retrieved_node_ids = state.get_nodes()
+        retrieved_node_ids = state.get_nodes(workload_id)
 
         # Assert
         assert len(retrieved_node_ids) == 0
 
-    def test_register_node_and_get_nodes(self) -> None:
-        """Test registering a client node."""
+    def test_create_node_and_get_nodes(self) -> None:
+        """Test creating a client node."""
         # Prepare
         state: State = self.state_factory()
-        node_ids = list(range(1, 11))
+        workload_id = state.create_workload()
+        node_ids = []
 
         # Execute
-        for i in node_ids:
-            state.register_node(i)
-        retrieved_node_ids = state.get_nodes()
+        for _ in range(10):
+            node_ids.append(state.create_node())
+        retrieved_node_ids = state.get_nodes(workload_id)
 
         # Assert
         for i in retrieved_node_ids:
             assert i in node_ids
 
-    def test_unregister_node(self) -> None:
-        """Test unregistering a client node."""
+    def test_delete_node(self) -> None:
+        """Test deleting a client node."""
         # Prepare
         state: State = self.state_factory()
-        node_id = 2
+        workload_id = state.create_workload()
+        node_id = state.create_node()
 
         # Execute
-        state.register_node(node_id)
-        state.unregister_node(node_id)
-        retrieved_node_ids = state.get_nodes()
+        state.delete_node(node_id)
+        retrieved_node_ids = state.get_nodes(workload_id)
+
+        # Assert
+        assert len(retrieved_node_ids) == 0
+
+    def test_get_nodes_invalid_workload_id(self) -> None:
+        """Test retrieving all node_ids with invalid workload_id."""
+        # Prepare
+        state: State = self.state_factory()
+        state.create_workload()
+        invalid_workload_id = 61016
+        state.create_node()
+
+        # Execute
+        retrieved_node_ids = state.get_nodes(invalid_workload_id)
 
         # Assert
         assert len(retrieved_node_ids) == 0
@@ -309,8 +374,13 @@ class StateTest(unittest.TestCase):
         """Test if num_tasks returns correct number of not delivered task_ins."""
         # Prepare
         state: State = self.state_factory()
-        task_0 = create_task_ins(consumer_node_id=0, anonymous=True)
-        task_1 = create_task_ins(consumer_node_id=0, anonymous=True)
+        workload_id = state.create_workload()
+        task_0 = create_task_ins(
+            consumer_node_id=0, anonymous=True, workload_id=workload_id
+        )
+        task_1 = create_task_ins(
+            consumer_node_id=0, anonymous=True, workload_id=workload_id
+        )
 
         # Store two tasks
         state.store_task_ins(task_0)
@@ -326,8 +396,13 @@ class StateTest(unittest.TestCase):
         """Test if num_tasks returns correct number of not delivered task_res."""
         # Prepare
         state: State = self.state_factory()
-        task_0 = create_task_res(producer_node_id=0, anonymous=True, ancestry=["1"])
-        task_1 = create_task_res(producer_node_id=0, anonymous=True, ancestry=["1"])
+        workload_id = state.create_workload()
+        task_0 = create_task_res(
+            producer_node_id=0, anonymous=True, ancestry=["1"], workload_id=workload_id
+        )
+        task_1 = create_task_res(
+            producer_node_id=0, anonymous=True, ancestry=["1"], workload_id=workload_id
+        )
 
         # Store two tasks
         state.store_task_res(task_0)
@@ -341,7 +416,10 @@ class StateTest(unittest.TestCase):
 
 
 def create_task_ins(
-    consumer_node_id: int, anonymous: bool, delivered_at: str = ""
+    consumer_node_id: int,
+    anonymous: bool,
+    workload_id: int,
+    delivered_at: str = "",
 ) -> TaskIns:
     """Create a TaskIns for testing."""
     consumer = Node(
@@ -351,7 +429,7 @@ def create_task_ins(
     task = TaskIns(
         task_id="",
         group_id="",
-        workload_id="",
+        workload_id=workload_id,
         task=Task(
             delivered_at=delivered_at,
             producer=Node(node_id=0, anonymous=True),
@@ -365,13 +443,16 @@ def create_task_ins(
 
 
 def create_task_res(
-    producer_node_id: int, anonymous: bool, ancestry: List[str]
+    producer_node_id: int,
+    anonymous: bool,
+    ancestry: List[str],
+    workload_id: int,
 ) -> TaskRes:
     """Create a TaskRes for testing."""
     task_res = TaskRes(
         task_id="",
         group_id="",
-        workload_id="",
+        workload_id=workload_id,
         task=Task(
             producer=Node(node_id=producer_node_id, anonymous=anonymous),
             consumer=Node(node_id=0, anonymous=True),
@@ -414,7 +495,7 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 6
+        assert len(result) == 8
 
 
 class SqliteFileBasedTest(StateTest, unittest.TestCase):
@@ -439,7 +520,7 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 6
+        assert len(result) == 8
 
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@ description = "Federated Learning E2E test with Flower and PyTorch Lightning"
 authors = ["The Flower Authors <hello@flower.dev>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 flwr = { path = "../../", develop = true, extras = ["simulation"] }
 pytorch-lightning = "1.6.0"
-torchvision = "0.13.0"
+torchvision = "0.14.1"

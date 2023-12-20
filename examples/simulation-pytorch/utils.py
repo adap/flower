@@ -2,23 +2,31 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from torchvision.transforms import ToTensor, Normalize, Compose
+
+
+# transformation to convert images to tensors and apply normalization
+def apply_transforms(batch):
+    transforms = Compose([ToTensor(), Normalize((0.1307,), (0.3081,))])
+    batch["image"] = [transforms(img) for img in batch["image"]]
+    return batch
+
 
 # Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')
-# borrowed from Pytorch quickstart example
 class Net(nn.Module):
-    def __init__(self) -> None:
+    def __init__(self, num_classes: int = 10) -> None:
         super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(3, 6, 5)
+        self.conv1 = nn.Conv2d(1, 6, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)
+        self.fc1 = nn.Linear(16 * 4 * 4, 120)
         self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, 10)
+        self.fc3 = nn.Linear(84, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(-1, 16 * 5 * 5)
+        x = x.view(-1, 16 * 4 * 4)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
@@ -26,18 +34,17 @@ class Net(nn.Module):
 
 
 # borrowed from Pytorch quickstart example
-def train(net, trainloader, epochs, device: str):
+def train(net, trainloader, optim, epochs, device: str):
     """Train the network on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(net.parameters(), lr=0.01, momentum=0.9)
     net.train()
     for _ in range(epochs):
-        for images, labels in trainloader:
-            images, labels = images.to(device), labels.to(device)
-            optimizer.zero_grad()
+        for batch in trainloader:
+            images, labels = batch["image"].to(device), batch["label"].to(device)
+            optim.zero_grad()
             loss = criterion(net(images), labels)
             loss.backward()
-            optimizer.step()
+            optim.step()
 
 
 # borrowed from Pytorch quickstart example
@@ -48,7 +55,7 @@ def test(net, testloader, device: str):
     net.eval()
     with torch.no_grad():
         for data in testloader:
-            images, labels = data[0].to(device), data[1].to(device)
+            images, labels = data["image"].to(device), data["label"].to(device)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
             _, predicted = torch.max(outputs.data, 1)

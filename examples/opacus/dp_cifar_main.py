@@ -55,9 +55,7 @@ def train(net, trainloader, privacy_engine, optimizer, epochs):
             loss = criterion(net(images), labels)
             loss.backward()
             optimizer.step()
-    epsilon = privacy_engine.get_epsilon(
-        delta=PRIVACY_PARAMS["target_delta"]
-    )
+    epsilon = privacy_engine.get_epsilon(delta=PRIVACY_PARAMS["target_delta"])
     return epsilon
 
 
@@ -102,7 +100,11 @@ class DPCifarClient(fl.client.NumPyClient):
     def fit(self, parameters, config):
         self.set_parameters(parameters)
         epsilon = train(
-            self.model, self.trainloader, self.privacy_engine, self.optimizer, PARAMS["local_epochs"]
+            self.model,
+            self.trainloader,
+            self.privacy_engine,
+            self.optimizer,
+            PARAMS["local_epochs"],
         )
         print(f"epsilon = {epsilon:.2f}")
         return (

@@ -14,6 +14,11 @@ class DriverStub(object):
         Args:
             channel: A grpc.Channel.
         """
+        self.CreateWorkload = channel.unary_unary(
+                '/flwr.proto.Driver/CreateWorkload',
+                request_serializer=flwr_dot_proto_dot_driver__pb2.CreateWorkloadRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_driver__pb2.CreateWorkloadResponse.FromString,
+                )
         self.GetNodes = channel.unary_unary(
                 '/flwr.proto.Driver/GetNodes',
                 request_serializer=flwr_dot_proto_dot_driver__pb2.GetNodesRequest.SerializeToString,
@@ -33,6 +38,13 @@ class DriverStub(object):
 
 class DriverServicer(object):
     """Missing associated documentation comment in .proto file."""
+
+    def CreateWorkload(self, request, context):
+        """Request workload_id
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def GetNodes(self, request, context):
         """Return a set of nodes
@@ -58,6 +70,11 @@ class DriverServicer(object):
 
 def add_DriverServicer_to_server(servicer, server):
     rpc_method_handlers = {
+            'CreateWorkload': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreateWorkload,
+                    request_deserializer=flwr_dot_proto_dot_driver__pb2.CreateWorkloadRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_driver__pb2.CreateWorkloadResponse.SerializeToString,
+            ),
             'GetNodes': grpc.unary_unary_rpc_method_handler(
                     servicer.GetNodes,
                     request_deserializer=flwr_dot_proto_dot_driver__pb2.GetNodesRequest.FromString,
@@ -82,6 +99,23 @@ def add_DriverServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class Driver(object):
     """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def CreateWorkload(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Driver/CreateWorkload',
+            flwr_dot_proto_dot_driver__pb2.CreateWorkloadRequest.SerializeToString,
+            flwr_dot_proto_dot_driver__pb2.CreateWorkloadResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def GetNodes(request,
