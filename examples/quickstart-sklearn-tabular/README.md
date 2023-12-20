@@ -11,10 +11,10 @@ download, partition and preprocess the dataset.
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/sklearn-logreg-mnist . && rm -rf flower && cd sklearn-logreg-mnist
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-sklearn-tabular . && rm -rf flower && cd quickstart-sklearn-tabular
 ```
 
-This will create a new directory called `sklearn-logreg-mnist` containing the following files:
+This will create a new directory called `quickstart-sklearn-tabular` containing the following files:
 
 ```shell
 -- pyproject.toml
