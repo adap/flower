@@ -30,12 +30,12 @@ jobs:
       - name: Test wheel
         run: ./dev/test-wheel.sh
       - name: Upload wheel
-        if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
+        if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         id: upload
         env:
-          AWS_DEFAULT_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           cd ./dist
           echo "WHL_PATH=$(ls *.whl)" >> "$GITHUB_OUTPUT"
@@ -60,6 +60,8 @@ jobs:
         include:
           - directory: bare
 
+          - directory: bare-https
+
           - directory: jax
 
           - directory: pytorch
@@ -71,7 +73,7 @@ jobs:
             dataset: |
               import tensorflow as tf
               tf.keras.datasets.cifar10.load_data()
-              
+
           - directory: tabnet
             dataset: |
               import tensorflow_datasets as tfds
@@ -81,7 +83,7 @@ jobs:
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
-              
+
           - directory: pytorch-lightning
             dataset: |
               from torchvision.datasets import MNIST
@@ -100,7 +102,7 @@ jobs:
           - directory: fastai
             dataset: |
               from fastai.vision.all import untar_data, URLs
-              untar_data(URLs.MNIST) 
+              untar_data(URLs.MNIST)
 
           - directory: pandas
             dataset: |
@@ -135,7 +137,7 @@ jobs:
       - name: Run virtual client test
         run: python simulation.py
       - name: Run driver test
-        run: ./../test_driver.sh
+        run: ./../test_driver.sh "${{ matrix.directory }}"
 
   strategies:
     runs-on: ubuntu-22.04

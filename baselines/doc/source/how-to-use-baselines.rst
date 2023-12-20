@@ -3,7 +3,7 @@ Use Baselines
 
 .. warning::
   We are changing the way we structure the Flower baselines. While we complete the transition to the new format, you can still find the existing baselines and use them: `baselines (old) <https://github.com/adap/flower/tree/main/baselines/flwr_baselines>`_.
-  Currently, you can make use of baselines for `FedAvg <https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/fedavg_mnist>`_, `FedProx <https://github.com/adap/flower/tree/main/baselines/fedprox>`_, `FedOpt <https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/adaptive_federated_optimization>`_, `FedBN <https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/fedbn/convergence_rate>`_, and `LEAF-FEMNIST <https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/leaf/femnist>`_.
+  Currently, you can make use of baselines for `FedAvg <https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/fedavg_mnist>`_, `FedOpt <https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/adaptive_federated_optimization>`_,  and `LEAF-FEMNIST <https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/leaf/femnist>`_.
 
   The documentation below has been updated to reflect the new way of using Flower baselines.
 

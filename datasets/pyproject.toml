@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "flwr-datasets"
-version = "0.0.1"
+version = "0.0.2"
 description = "Flower Datasets"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.dev>"]

@@ -105,7 +105,7 @@ class TestNaturalIdPartitioner(unittest.TestCase):
     ) -> None:
         """Test if the # of available partitions is equal to # of unique clients."""
         _, partitioner = _dummy_setup(num_rows, num_unique_natural_ids)
-        _ = partitioner.load_partition(idx=0)
+        _ = partitioner.load_partition(node_id=0)
         self.assertEqual(len(partitioner.node_id_to_natural_id), num_unique_natural_ids)
 
     def test_cannot_set_node_id_to_natural_id(self) -> None:

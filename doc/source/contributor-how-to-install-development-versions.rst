@@ -59,5 +59,5 @@ Open a development version of the same notebook from branch `branch-name` by cha
 Install a `whl` on Google Colab:
 
 1. In the vertical icon grid on the left hand side, select ``Files`` > ``Upload to session storage``
-2. Upload the whl (e.g., ``flwr-1.6.0-py3-none-any.whl``)
-3. Change ``!pip install -q 'flwr[simulation]' torch torchvision matplotlib`` to ``!pip install -q 'flwr-1.6.0-py3-none-any.whl[simulation]' torch torchvision matplotlib``
+2. Upload the whl (e.g., ``flwr-1.7.0-py3-none-any.whl``)
+3. Change ``!pip install -q 'flwr[simulation]' torch torchvision matplotlib`` to ``!pip install -q 'flwr-1.7.0-py3-none-any.whl[simulation]' torch torchvision matplotlib``
