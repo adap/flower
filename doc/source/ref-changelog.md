@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **Add scikit-learn tabular data example** ([#2719](https://github.com/adap/flower/pull/2719))
+
 - **General updates to Flower Examples** ([#2381](https://github.com/adap/flower/pull/2381))
 
 - **Update Flower Baselines**
