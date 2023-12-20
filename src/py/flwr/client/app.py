@@ -399,10 +399,10 @@ def start_numpy_client(
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
-    .. deprecated:: 1.7.0
-
-       Use flwr.client.start_client() instead and pass your client of NumPyClient type
-       by first exectuing its .to_client method.
+    .. warning::
+        This function is deprecated since 1.7.0. Use :code:`flwr.client.start_client`
+        instead and pass your client of type :code:`flwr.client.NumPyClient` by first
+        exectuing its :code:`.to_client()` method.
 
     Parameters
     ----------
