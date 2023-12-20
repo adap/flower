@@ -86,7 +86,7 @@ function checkPageExistence(versionName, current_language, pagename) {
         {%- for item in versions %}
         <li>
           <a href="javascript:void(0);"
-             onclick="checkPageExistence('{{ item.name }}','{{ current_language }}',  '{{ pagename }}')"
+             onclick="checkPageExistence('{{ item.name }}', '{{ current_language }}', '{{ pagename }}')"
              style="text-decoration:none">
              {{ item.name }}
           </a>
