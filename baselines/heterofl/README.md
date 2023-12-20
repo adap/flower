@@ -249,6 +249,7 @@ Results of the combination of various computation complexity levels for **CIFAR1
 <tr> <td align="center"> d			</td><td> 1 </td><td> 151.762  K	</td><td> 5.498 M	 </td><td> 0.579	</td><td> 82.91 </td><td> 90.81 </td><td> 91.47	</td><td> 55.95 </td><td> 58.34	</td></tr>
 <tr> <td align="center"> d-e		</td><td> 0.626 </td><td> 95.056  K		</td><td> 3.485 M	 </td><td> 0.363	</td><td> 82.77 </td><td> 88.79 </td><td> 90.13	</td><td> 48.49 </td><td> 54.18	</td></tr>
 <tr> <td align="center"> e			</td><td> 1 </td><td> 38.35  K		</td><td> 1.471 M	 </td><td> 0.146	</td><td> 76.53 </td><td> 90.05 </td><td> 90.91	</td><td> 54.68 </td><td> 57.05	</td></tr>
+<tr> <td align="center"> FedAvg			</td><td> 1 </td><td> 64.102  K		</td><td> 1.3202  M	 </td><td> 0.2446	</td><td> </td><td> 56.69 </td><td> 58.72	</td><td> 56.76 </td><td> 58.64 </td></tr>
 </tbody>
 
 </table>
