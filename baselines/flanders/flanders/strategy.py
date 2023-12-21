@@ -1,4 +1,6 @@
 import numpy as np
+from logging import INFO
+from flwr.common.logger import log
 
 from typing import Callable, Dict, List, Optional, Tuple, Union
 from flwr.server.strategy.fedavg import FedAvg
@@ -152,21 +154,21 @@ class Flanders(FedAvg):
 
             M_hat = M[:,:,-1].copy()
             pred_step = 1
-            print(f"aggregate_fit - Computing MAR on M {M.shape}")
+            log(INFO, f"Computing MAR on M {M.shape}")
             Mr = mar(M[:,:,:-1], pred_step, maxiter=self.maxiter, alpha=self.alpha, beta=self.beta)
 
-            print("aggregate_fit - Computing anomaly scores")
+            log(INFO, "Computing anomaly scores")
             anomaly_scores = self.distance_function(M_hat, Mr[:,:,0])
-            print(f"aggregate_fit - Anomaly scores: {anomaly_scores}")
+            log(INFO, f"Anomaly scores: {anomaly_scores}")
 
-            print("aggregate_fit - Selecting good clients")
+            log(INFO, "Selecting good clients")
             good_clients_idx = sorted(np.argsort(anomaly_scores)[:self.to_keep])
             malicious_clients_idx = sorted(np.argsort(anomaly_scores)[self.to_keep:])
             results = np.array(results)[good_clients_idx].tolist()
-            print(f"aggregate_fit - Good clients: {good_clients_idx}")
+            log(INFO, f"Good clients: {good_clients_idx}")
 
             # Apply FedAvg for the remaining clients
-            print("aggregate_fit - Applying FedAvg for the remaining clients")
+            log(INFO, "Applying FedAvg for the remaining clients")
             parameters_aggregated, metrics_aggregated = super().aggregate_fit(server_round, results, failures)
         else:
             # Apply FedAvg on every clients' params during the first round

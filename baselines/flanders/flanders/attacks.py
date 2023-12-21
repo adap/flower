@@ -67,9 +67,7 @@ def lie_attack(
     s = math.floor((n / 2) + 1) - m                                 # number of supporters
 
     z_max = norm.cdf((n - m - s) / (n - m))
-    print(f"z_max: {z_max}")
-    print(f"n: {n}, m: {m}, s: {s}")
-
+    
     for proxy, fitres in ordered_results:
         if states[fitres.metrics["cid"]]:
             mul_std = [layer * z_max for layer in grads_stdev]
