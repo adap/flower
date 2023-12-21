@@ -14,7 +14,7 @@ dataset: [MNIST, Income, California Housing]
 
 ## About this baseline
 
-****What’s implemented:**** The code in this directory replicates the results on MNIST and Income datasets under all attack settings (Gaussian, LIE, OPT and AGR-MM), but I've also implemented the code for California Housing and CIFAR-10.
+****What’s implemented:**** The code in this directory replicates the results on MNIST and Income datasets under all attack settings (Gaussian, LIE, OPT and AGR-MM), but I've also implemented the code for California Housing and CIFAR-10. More specifically, you can reproduce part of Fig. 3 (a) and (b), and part of Fig. 4 and Fig. 5 in Appendix G.2 (there's no division between $b\lt50%$, and $b\ge50%$.). Since here I do not compare FLANDERS with other defence baselines, all attacks are grouped into the same plot.
 
 ****Datasets:**** MNIST, Income
 
