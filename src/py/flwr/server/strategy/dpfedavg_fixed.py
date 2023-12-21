@@ -18,8 +18,8 @@ Paper: arxiv.org/pdf/1710.06963.pdf
 """
 
 
-from typing import Dict, List, Optional, Tuple, Union
 import warnings
+from typing import Dict, List, Optional, Tuple, Union
 
 from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, Parameters, Scalar
 from flwr.common.dp import add_gaussian_noise
@@ -30,8 +30,10 @@ from flwr.server.strategy.strategy import Strategy
 
 
 class DPFedAvgFixed(Strategy):
-
-    warnings.warn("DPFedAvgFixed is deprecated and will be removed in future versions.", DeprecationWarning)
+    warnings.warn(
+        "DPFedAvgFixed is deprecated and will be removed in future versions.",
+        DeprecationWarning,
+    )
 
     """Wrapper for configuring a Strategy for DP with Fixed Clipping."""
 
@@ -44,8 +46,11 @@ class DPFedAvgFixed(Strategy):
         noise_multiplier: float = 1,
         server_side_noising: bool = True,
     ) -> None:
-        warnings.warn("DPFedAvgFixed is deprecated and will be removed in future versions.", DeprecationWarning)
-        
+        warnings.warn(
+            "DPFedAvgFixed is deprecated and will be removed in future versions.",
+            DeprecationWarning,
+        )
+
         super().__init__()
         self.strategy = strategy
         # Doing fixed-size subsampling as in https://arxiv.org/abs/1905.03871.
