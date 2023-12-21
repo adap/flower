@@ -95,7 +95,7 @@ python -m flanders.main dataset=income server.attack_fn=lie server.num_malicious
 Finally, to run multiple custom experiments:
 
 ```bash
-python -m flanders.main --multirun dataset=income,mnist server.attack_fn=gaussian,lie,fang,minmax server.num_malicious=0,1,2,3,4,5
+python -m flanders.main --multirun dataset=income,mnist,house,cifar server.attack_fn=gaussian,lie,fang,minmax server.num_malicious=0,1,2,3,4,5
 ```
 
 
