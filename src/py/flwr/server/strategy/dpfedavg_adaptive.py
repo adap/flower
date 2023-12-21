@@ -36,7 +36,6 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
         "DPFedAvgAdaptive is deprecated and will be removed in future versions.",
         DeprecationWarning,
     )
-
     """Wrapper for configuring a Strategy for DP with Adaptive Clipping."""
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
