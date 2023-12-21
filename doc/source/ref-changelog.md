@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- **Add scikit-learn tabular data example** ([#2719](https://github.com/adap/flower/pull/2719))
+
+- **General updates to Flower Examples** ([#2381](https://github.com/adap/flower/pull/2381))
+
+- **Update Flower Baselines**
+
+  - HFedXGBoost [#2226](https://github.com/adap/flower/pull/2226)
+
+  - FedVSSL [#2412](https://github.com/adap/flower/pull/2412)
+
+  - FedNova [#2179](https://github.com/adap/flower/pull/2179)
+
 ## v1.6.0 (2023-11-28)
 
 ### Thanks to our contributors

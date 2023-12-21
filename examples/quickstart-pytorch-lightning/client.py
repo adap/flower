@@ -1,9 +1,14 @@
+import argparse
+from collections import OrderedDict
+
+import pytorch_lightning as pl
+import torch
+from datasets.utils.logging import disable_progress_bar
+
 import flwr as fl
 import mnist
-import pytorch_lightning as pl
-from collections import OrderedDict
-import torch
 
+disable_progress_bar()
 
 class FlowerClient(fl.client.NumPyClient):
     def __init__(self, model, train_loader, val_loader, test_loader):
@@ -50,9 +55,21 @@ def _set_parameters(model, parameters):
 
 
 def main() -> None:
+
+    parser = argparse.ArgumentParser(description="Flower")
+    parser.add_argument(
+        "--node-id",
+        type=int,
+        choices=range(0, 10),
+        required=True,
+        help="Specifies the artificial data partition",
+    )
+    args = parser.parse_args()
+    node_id = args.node_id
+
     # Model and data
     model = mnist.LitAutoEncoder()
-    train_loader, val_loader, test_loader = mnist.load_data()
+    train_loader, val_loader, test_loader = mnist.load_data(node_id)
 
     # Flower client
     client = FlowerClient(model, train_loader, val_loader, test_loader)
