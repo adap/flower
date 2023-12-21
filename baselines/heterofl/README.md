@@ -1,11 +1,11 @@
 ---
-title: HeteroFL - Computation And Communication Efficient Federated Learning For Heterogeneous Clients
+title: "HeteroFL: Computation And Communication Efficient Federated Learning For Heterogeneous Clients"
 url: https://openreview.net/forum?id=TNkPBBYFkXg
 labels: [system heterogeneity, image classification]
-dataset: [MNIST, CIFAR10]
+dataset: [MNIST, CIFAR-10]
 ---
 
-# HeteroFL : Computation And Communication Efficient Federated Learning For Heterogeneous Clients
+# HeteroFL: Computation And Communication Efficient Federated Learning For Heterogeneous Clients
 
 **Paper:** [openreview.net/forum?id=TNkPBBYFkXg](https://openreview.net/forum?id=TNkPBBYFkXg)
 
@@ -16,23 +16,23 @@ dataset: [MNIST, CIFAR10]
 
 ## About this baseline
 
-**What’s implemented:**  The code in this directory is an implementation of HeteroFL in pytorch using flower. The code incorporates references from the authors' implementation. Implementation of custom model split and aggregation as suggested by @negedng, is available [here](https://github.com/msck72/heterofl_custom_aggregation). By modifying the configuration in the base.yaml, the results in the paper can be replicated, with both fixed and dynamic computational complexities among clients.
+**What’s implemented:**  The code in this directory is an implementation of HeteroFL in PyTorch using Flower. The code incorporates references from the authors' implementation. Implementation of custom model split and aggregation as suggested by [@negedng](https://github.com/negedng), is available [here](https://github.com/msck72/heterofl_custom_aggregation). By modifying the configuration in the `base.yaml`, the results in the paper can be replicated, with both fixed and dynamic computational complexities among clients.
 
 **Key Terminology:**
-+ *Model rate* defines the computational complextiy of a client. Authors have defined five different computation complexity levels {a, b, c, d, e} with the hidden channel shrinkage ratio r = 0.5. 
++ *Model rate* defines the computational complexity of a client. Authors have defined five different computation complexity levels {a, b, c, d, e} with the hidden channel shrinkage ratio r = 0.5. 
 
-+ *Model split mode* specifies whether the computaional complexities of clients are fixed (throughout the experiment), or whether they are dynamic (change their mode_rate/computational-complexity every-round). 
++ *Model split mode* specifies whether the computational complexities of clients are fixed (throughout the experiment), or whether they are dynamic (change their mode_rate/computational-complexity every-round). 
 
-+ *Model mode* determines the proportionality of clients with various computation complexity levels, for example, a4-b2-e4 determines at each round, proportion of clients with computational complexity level a = 4 / (4 + 2 + 4) * num_clients , similarly, proportion of clients with computational complexity level b = 2 / (4 + 2 + 4) * num_clients and so on.
++ *Model mode* determines the proportionality of clients with various computation complexity levels, for example, a4-b2-e4 determines at each round, proportion of clients with computational complexity level a = 4 / (4 + 2 + 4) * num_clients, similarly, proportion of clients with computational complexity level b = 2 / (4 + 2 + 4) * num_clients and so on.
 
 **Implementation Insights:**
 *ModelRateManager* manages the model rate of client in simulation, which changes the model rate based on the model mode of the setup and *ClientManagerHeterofl* keeps track of model rates of the clients, so configure fit knows which/how-much subset of the model that needs to be sent to the client.
 
 **Datasets:** The code utilized benchmark MNIST and CIFAR-10 datasets from Pytorch's torchvision for its experimentation.
 
-**Hardware Setup:**  The experiments were run on Google colab pro with 50GB RAM and T4 TPU. For MNIST dataset & CNN model, it approximatemy takes 1.5 hours to complete 200 rounds while for CIFAR10 dataset & ResNet18 model it takes around 3-4 hours to complete 400 rounds (may vary based on the model-mode of the setup).
+**Hardware Setup:**  The experiments were run on Google colab pro with 50GB RAM and T4 TPU. For MNIST dataset & CNN model, it approximately takes 1.5 hours to complete 200 rounds while for CIFAR10 dataset & ResNet18 model it takes around 3-4 hours to complete 400 rounds (may vary based on the model-mode of the setup).
 
-**Contributors:** M S Chaitanya Kumar [(github.com/msck72)](github.com/msck72)
+**Contributors:** M S Chaitanya Kumar [(github.com/msck72)](https://github.com/msck72)
 
 
 ## Experimental Setup
@@ -45,102 +45,35 @@ dataset: [MNIST, CIFAR10]
 These models use static batch normalization (sBN) and they incorporate a Scaler module following each convolutional layer.
 
 **Dataset:** This baseline includes MNIST and CIFAR10 datasets. 
-<table>
-  <thead>
-    <tr>
-      <th>Dataset</th>
-      <th>#classes</th>
-      <th>IID partition</th>
-      <th>non-IID partition</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>MNIST</td>
-      <td>10</td>
-      <td rowspan="2">Distribution of equal number of data examples among n clients</td>
-      <td rowspan="2">Distribution of data examples such that each client has at most 2 (customizable) classes</td>
-    </tr>
-    <tr>
-      <td>CIFAR10</td>
-      <td>10</td>
-    </tr>
-  </tbody>
-</table>
+
+| Dataset | #Classes | IID Partition | non-IID Partition |
+| :---: | :---: | :---: | :---: | 
+| MNIST<br>CIFAR10 |  10| Distribution of equal number of data examples among n clients | Distribution of data examples such that each client has at most 2 (customizable) classes |
+
 
 **Training Hyperparameters:** 
-<table>
-  <thead>
-    <tr>
-      <th colspan="2">Description</th>
-      <th>MNIST</th>
-      <th>CIFAR10</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td colspan="2">total clients</td>
-      <td colspan="2">100</td>
-    </tr>
-    <tr>
-      <td colspan="2">clients per round</td>
-      <td colspan="2">100</td>
-    </tr>
-    <tr>
-      <td colspan="2">#local epochs</td>
-      <td colspan="2">5</td>
-    </tr>
-    <tr>
-      <td rowspan="2">number of rounds</td>
-      <td>IID</td>
-      <td>200</td>
-      <td>400</td>
-    </tr>
-    <tr>
-      <td>non-IID</td>
-      <td>400</td>
-      <td>800</td>
-    </tr>
-    <tr>
-      <td colspan="2">optimizer</td>
-      <td colspan="2">SGD</td>
-    </tr>
-    <tr>
-      <td colspan="2">momentum</td>
-      <td colspan="2">5.00e-04</td>
-    </tr>
-    <tr>
-      <td colspan="2">weight-decay</td>
-      <td colspan="2">0.9</td>
-    </tr>
-    <tr>
-      <td colspan="2">learning rate</td>
-      <td>0.01</td>
-      <td>0.1</td>
-    </tr>
-        <tr>
-      <td rowspan="2">decay schedule</td>
-      <td>IID</td>
-      <td>[100]</td>
-      <td>[200]</td>
-    </tr>
-    <tr>
-      <td>non-IID</td>
-      <td>[150, 250]</td>
-      <td>[300, 500]</td>
-    </tr>
-    <tr>
-      <td colspan="2">hidden layers</td>
-      <td colspan="2">[64 , 128 , 256 , 512]</td>
-    </tr>
-  </tbody>
-</table>
+
+| Description | Data Setting | MNIST | CIFAR-10 |
+| :---: | :---: |  :---:| :---: |
+Total Clients  | both | 100 | 100 |
+Clients Per Round | both | 100 | 100
+Local Epcohs | both | 5 | 5
+Num. ROunds | IID <br> non-IID| 200<br>400 | 400<br>800
+Optimizer | both | SGD | SGD
+Momentum | both | 0.9 | 0.9
+Weight-decay | both | 5.00e-04 | 5.00e-04
+Learning Rate | both | 0.01 | 0.1
+Decay Schedule | IID <br> non-IID| [100]<br>[150, 250] | [200]<br>[300,500]
+Hidden Layers | both | [64 , 128 , 256 , 512] | [64 , 128 , 256 , 512]
+
 
 The hyperparameters of Fedavg baseline are available in [Liang et al (2020)](https://arxiv.org/abs/2001.01523).
 
 ## Environment Setup
 
-```
+To construct the Python environment, simply run:
+
+```bash
 # Set python version
 pyenv install 3.10.6
 pyenv local 3.10.6
@@ -215,9 +148,9 @@ Results of the combination of various computation complexity levels for **MNIST*
 <br>
 
 Results of the combination of various computation complexity levels for **CIFAR10** dataset with **dynamic** scenario(where a client does not belong to a fixed computational complexity level):
-> *The HeteroFL paper reports a model with 1.8M parameters for their FedAvg baseline. However, as stated by the paper authors, those results are borrowed from [Liang et al (2020)](https://arxiv.org/abs/2001.01523), which uses a small CNN with fewer parameters (~64K as shown in this table below). We believe the HeteroFL authors made a mistake when reporting the number of parameters. We borrowed the model from Liang et al (2020)'s [repo](https://github.com/pliang279/LG-FedAvg/blob/master/models/Nets.py)*
+> *The HeteroFL paper reports a model with 1.8M parameters for their FedAvg baseline. However, as stated by the paper authors, those results are borrowed from [Liang et al (2020)](https://arxiv.org/abs/2001.01523), which uses a small CNN with fewer parameters (~64K as shown in this table below). We believe the HeteroFL authors made a mistake when reporting the number of parameters. We borrowed the model from Liang et al (2020)'s [repo](https://github.com/pliang279/LG-FedAvg/blob/master/models/Nets.py).*
 
-<table align="center">
+<table align="left">
 <tbody>
 	<tr>
 		<th rowspan=3>Model</th>
