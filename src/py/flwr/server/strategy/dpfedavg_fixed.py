@@ -33,10 +33,11 @@ class DPFedAvgFixed(Strategy):
     warnings.warn(
         "DPFedAvgFixed is deprecated and will be removed in future versions.",
         DeprecationWarning,
+        stacklevel=2,
     )
     """Wrapper for configuring a Strategy for DP with Fixed Clipping."""
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes
+    # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
     def __init__(
         self,
         strategy: Strategy,
@@ -48,6 +49,7 @@ class DPFedAvgFixed(Strategy):
         warnings.warn(
             "DPFedAvgFixed is deprecated and will be removed in future versions.",
             DeprecationWarning,
+            stacklevel=2,
         )
 
         super().__init__()
