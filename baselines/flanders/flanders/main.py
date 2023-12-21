@@ -7,6 +7,7 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 # feel free to remove some if aren't needed
 import hydra
 from hydra.utils import instantiate
+from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
 
@@ -73,9 +74,12 @@ def main(cfg: DictConfig) -> None:
         "income": (IncomeClient, income_evaluate)
     }
 
-    # Delete old client_params and clients_predicted_params
+    # Delete old client_params
     if os.path.exists(cfg.server.history_dir):
         shutil.rmtree(cfg.server.history_dir)
+
+    # Output directory for results
+    save_path = HydraConfig.get().runtime.output_dir
 
     dataset_name = cfg.dataset
     attack_fn = cfg.server.attack_fn
@@ -145,10 +149,12 @@ def main(cfg: DictConfig) -> None:
             dataset_name=dataset_name,
             threshold=cfg.server.threshold,
             omniscent=cfg.server.omniscent,
+            output_dir=save_path,
         ),
         config=fl.server.ServerConfig(num_rounds=cfg.server.num_rounds),
         strategy=strategy
     )
+
 
 def fit_config(server_round: int) -> Dict[str, Scalar]:
     """Return a configuration with static batch size and (local) epochs."""

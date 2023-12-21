@@ -57,10 +57,37 @@ class EnhancedServer(Server):
             sampling: int = 0,
             history_dir: str = "clients_params",
             omniscent: bool = True,
+            output_dir: str = "results",
             *args: Any,
             **kwargs: Any
         ) -> None:
-        """Initialize."""
+        """Create a new EnhancedServer instance.
+        
+        Parameters
+        ----------
+        num_malicious : int
+            Number of malicious clients
+        warmup_rounds : int
+            Number of warmup rounds
+        attack_fn : Callable
+            Attack function to be used
+        dataset_name : str
+            Name of the dataset
+        threshold : float, optional
+            Threshold used by the attacks, by default 0.0
+        to_keep : int, optional
+            Number of clients to keep (i.e., to classify as "good"), by default 1
+        magnitude : float, optional
+            Magnitude of the Gaussian attack, by default 0.0
+        sampling : int, optional
+            Number of parameters to sample, by default 0
+        history_dir : str, optional
+            Directory where to save the parameters, by default "clients_params"
+        omniscent : bool, optional
+            Whether to use the omniscent attack, by default True
+        output_dir : str, optional
+            Directory where to save the results, by default "results"
+        """
 
         super().__init__(*args, **kwargs)
         self.num_malicious = num_malicious
@@ -77,6 +104,7 @@ class EnhancedServer(Server):
         self.old_lambda = 0.0
         self.to_keep = to_keep
         self.omniscent = omniscent
+        self.output_dir = f"{output_dir}/outputs"
 
 
     # pylint: disable=too-many-locals
@@ -89,7 +117,7 @@ class EnhancedServer(Server):
         self.parameters = self._get_initial_parameters(timeout=timeout)
         log(INFO, "Evaluating initial parameters")
         config = {"num_malicious": self.num_malicious, "attack_fn": self.attack_fn, "dataset_name": self.dataset_name}
-        res = self.strategy.evaluate(0, parameters=self.parameters, config=config)
+        res = self.strategy.evaluate(0, parameters=self.parameters, config=config, output_dir=self.output_dir)
         if res is not None:
             log(
                 INFO,
@@ -119,7 +147,7 @@ class EnhancedServer(Server):
                 )
 
             # Evaluate model using strategy implementation
-            res_cen = self.strategy.evaluate(current_round, parameters=self.parameters, config=config)
+            res_cen = self.strategy.evaluate(current_round, parameters=self.parameters, config=config, output_dir=self.output_dir)
             if res_cen is not None:
                 loss_cen, metrics_cen = res_cen
                 log(

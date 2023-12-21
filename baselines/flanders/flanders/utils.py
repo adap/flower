@@ -75,40 +75,20 @@ def save_params(parameters, cid, dir="clients_params", remove_last=False, rrl=Fa
                 new_params = old_params[-1]
         # add new parameters
         new_params = np.vstack((old_params, new_params))
-    print(f"new_params shape of {cid}: {new_params.shape}")
+
     # save parameters
     np.save(path_file, new_params)
 
 
-def save_predicted_params(parameters, cid):
-    """
-    Args:
-    - parameters (ndarray): decoded parameters to append at the end of the file
-    - cid (int): identifier of the client
-    """
-    new_params = parameters
-    # Save parameters in client_params/cid_params
-    path = f"strategy/clients_predicted_params/{cid}_params.npy"
-    if os.path.exists("strategy/clients_predicted_params") == False:
-        os.mkdir("strategy/clients_predicted_params")
-    if os.path.exists(path):
-        # load old parameters
-        old_params = np.load(path, allow_pickle=True)
-        # add new parameters
-        new_params = np.vstack((old_params, new_params))
-    # save parameters
-    np.save(path, new_params)
-
-
-def save_results(loss, accuracy, config=None):
+def save_results(loss, accuracy, config=None, output_dir="results"):
     # Generate csv
     config["accuracy"] = accuracy
     config["loss"] = loss
     df = pd.DataFrame.from_records([config])
-    csv_path = "results/all_results.csv"
+    csv_path = f"{output_dir}/all_results.csv"
     # check that dir exists
-    if os.path.exists("results") == False:
-        os.mkdir("results")
+    if os.path.exists(output_dir) == False:
+        os.mkdir(output_dir)
     # Lock is needed when multiple clients are running concurrently
     with lock:
         if os.path.exists(csv_path):
@@ -134,22 +114,6 @@ def load_all_time_series(dir="clients_params", window=0):
         return np.array(data)[:,-window:,:]
 
 
-def load_time_series(dir="", cid=0):
-    """
-    Load time series of client cid in order to have a matrix of shape (T,n)
-    where:
-    - T := time;
-    - n := number of parameters
-    """
-    files = os.listdir(dir)
-    files.sort()
-    data = []
-    for file in files:
-        if file == f"{cid}_params.npy":
-            data = np.load(os.path.join(dir, file), allow_pickle=True)
-    return np.array(data)
-
-
 def flatten_params(params):
     """
     Transform a list of (layers-)parameters into a single vector of shape (n).
@@ -172,7 +136,7 @@ def evaluate_aggregated(
     return loss, metrics
 
 def mnist_evaluate(
-    server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
+    server_round: int, parameters: NDArrays, config: Dict[str, Scalar], output_dir: str
 ):
     # determine device
     device = torch.device("cpu")
@@ -187,14 +151,13 @@ def mnist_evaluate(
 
     config["round"] = server_round
     config["auc"] = auc
-    save_results(loss, accuracy, config=config)
-    print(f"Round {server_round} accuracy: {accuracy} loss: {loss} auc: {auc}")
+    save_results(loss, accuracy, config=config, output_dir=output_dir)
 
     return loss, {"accuracy": accuracy, "auc": auc}
 
 
 def cifar_evaluate(
-    server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
+    server_round: int, parameters: NDArrays, config: Dict[str, Scalar], output_dir: str
 ) -> Optional[Tuple[float, float]]:
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -208,14 +171,14 @@ def cifar_evaluate(
 
     config["round"] = server_round
     config["auc"] = auc
-    save_results(loss, accuracy, config=config)
+    save_results(loss, accuracy, config=config, output_dir=output_dir)
 
     # return statistics
     return loss, {"accuracy": accuracy, "auc": auc}
 
 
 def income_evaluate(
-    server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
+    server_round: int, parameters: NDArrays, config: Dict[str, Scalar], output_dir: str
 ) -> Optional[Tuple[float, float]]:
     model = LogisticRegression()
     model = set_sklearn_model_params(model, parameters)
@@ -231,13 +194,13 @@ def income_evaluate(
     
     config["round"] = server_round
     config["auc"] = auc
-    save_results(loss, accuracy, config=config)
+    save_results(loss, accuracy, config=config, output_dir=output_dir)
 
     return loss, {"accuracy": accuracy, "auc": auc}
 
 
 def house_evaluate(
-    server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
+    server_round: int, parameters: NDArrays, config: Dict[str, Scalar], output_dir: str
 ) -> Optional[Tuple[float, float]]:
     model = ElasticNet(alpha=1, warm_start=True)
     model = set_sklearn_model_params(model, parameters)
@@ -251,6 +214,6 @@ def house_evaluate(
     arsq = 1 - (1-rsq) * (len(y_test)-1)/(len(y_test)-x_test.shape[1]-1)
     config["round"] = server_round
     config["auc"] = mape
-    save_results(loss, arsq, config=config)
+    save_results(loss, arsq, config=config, output_dir=output_dir)
 
     return loss, {"Adj-R2": arsq, "MAPE": mape}

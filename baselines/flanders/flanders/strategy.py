@@ -51,20 +51,55 @@ class Flanders(FedAvg):
         initial_parameters: Optional[Parameters] = None,
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
-        dataset_name: str = "mnist",
-        warmup_rounds: int = 1,
         to_keep: int = 1,
         window: int = 0,
         maxiter: int = 100,
         alpha: float = 1,
         beta: float = 1,
         distance_function: Callable = None,
+        output_dir: str = "results",
     ) -> None:
-        """
+        """Aggregation function based on MAR.
+        Take a look at the paper for more details about the parameters.
+
         Parameters
         ----------
-        fraction_malicious : float, otional
-            Fraction of malicious clients. Defaults to 0.
+        fraction_fit : float, optional
+            Fraction of clients used during the fit phase, by default 1.0
+        fraction_evaluate : float, optional
+            Fraction of clients used during the evaluate phase, by default 1.0
+        min_fit_clients : int, optional
+            Minimum number of clients used during the fit phase, by default 2
+        min_evaluate_clients : int, optional
+            Minimum number of clients used during the evaluate phase, by default 2
+        min_available_clients : int, optional
+            Minimum number of clients available for training and evaluation, by default 2
+        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]], optional
+            Evaluation function, by default None
+        on_fit_config_fn : Optional[Callable[[int], Dict[str, Scalar]]], optional
+            Function to generate the config fed to the clients during the fit phase, by default None
+        on_evaluate_config_fn : Optional[Callable[[int], Dict[str, Scalar]]], optional
+            Function to generate the config fed to the clients during the evaluate phase, by default None
+        accept_failures : bool, optional
+            Whether to accept failures from clients, by default True
+        initial_parameters : Optional[Parameters], optional
+            Initial model parameters, by default None
+        fit_metrics_aggregation_fn : Optional[MetricsAggregationFn], optional
+            Function to aggregate metrics during the fit phase, by default None
+        evaluate_metrics_aggregation_fn : Optional[MetricsAggregationFn], optional
+            Function to aggregate metrics during the evaluate phase, by default None
+        to_keep : int, optional
+            Number of clients to keep (i.e., to classify as "good"), by default 1
+        window : int, optional
+            Sliding window size used as a "training set" of MAR, by default 0
+        maxiter : int, optional
+            Maximum number of iterations of MAR, by default 100
+        alpha : float, optional
+            Alpha parameter (regularization), by default 1
+        beta : float, optional
+            Beta parameter (regularization), by default 1
+        distance_function : Callable, optional
+            Distance function used to compute the distance between predicted params and real ones, by default None
         """
 
         super().__init__(
@@ -81,8 +116,6 @@ class Flanders(FedAvg):
                 fit_metrics_aggregation_fn = fit_metrics_aggregation_fn,
                 evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
             )
-        self.dataset_name = dataset_name
-        self.warmup_rounds = warmup_rounds
         self.to_keep = to_keep
         self.window = window
         self.maxiter = maxiter
@@ -178,13 +211,13 @@ class Flanders(FedAvg):
 
 
     def evaluate(
-        self, server_round: int, parameters: Parameters, config: Dict[str, Scalar]
+        self, server_round: int, parameters: Parameters, config: Dict[str, Scalar], output_dir: str
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         if self.evaluate_fn is None:
             # No evaluation function provided
             return None
             
-        eval_res = self.evaluate_fn(server_round, parameters_to_ndarrays(parameters), config)
+        eval_res = self.evaluate_fn(server_round, parameters_to_ndarrays(parameters), config, output_dir)
         if eval_res is None:
             return None
         loss, metrics = eval_res
