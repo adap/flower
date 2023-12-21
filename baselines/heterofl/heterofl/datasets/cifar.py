@@ -138,9 +138,13 @@ def _read_pickle_file(path, filenames):
         with open(file_path, "rb") as file:
             entry = pickle.load(file, encoding="latin1")
             img.append(entry["data"])
-            label.extend(entry["labels"]) if "labels" in entry else label.extend(
-                entry["fine_labels"]
-            )
+            if "labels" in entry:
+                label.extend(entry["labels"])
+            else:
+                label.extend(entry["fine_labels"])
+            # label.extend(entry["labels"]) if "labels" in entry else label.extend(
+            #     entry["fine_labels"]
+            # )
     img = np.vstack(img).reshape(-1, 3, 32, 32)
     img = img.transpose((0, 2, 3, 1))
     return img, label

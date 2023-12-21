@@ -22,7 +22,7 @@ dataset:
 
 
 model:
-  model_name: MLP
+  model_name: MLP #use CNNCifar for CIFAR10
 
 optim_scheduler:
   optimizer: SGD

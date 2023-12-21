@@ -16,7 +16,7 @@ from heterofl.model_properties import get_model_properties
 from heterofl.utils import ModelRateManager, get_global_model_rate, preprocess_input
 
 
-# pylint: disable=too-many-locals
+# pylint: disable=too-many-locals,protected-access
 @hydra.main(config_path="conf", config_name="base.yaml", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.

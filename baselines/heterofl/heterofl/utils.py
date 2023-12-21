@@ -207,6 +207,7 @@ def save(inp, path, protocol=2, mode="torch"):
         raise ValueError("Not valid save mode")
 
 
+# pylint: disable=no-else-return
 def load(path, mode="torch"):
     """Load the file from given path."""
     if mode == "torch":

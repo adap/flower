@@ -24,7 +24,7 @@ dataset:
 
 
 model:
-  model_name: resnet18  # use 'resnet18' for cifar10
+  model_name: resnet18  # use 'conv' for MNIST
   hidden_layers: [64 , 128 , 256 , 512]
   norm: bn
   scale: 1
