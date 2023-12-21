@@ -1,8 +1,8 @@
 ---
 title: A Byzantine-Resilient Aggregation Scheme for Federated Learning via Matrix Autoregression on Client Updates
 url: https://arxiv.org/abs/2303.16668
-labels: [robustness, model poisoning, anomaly detection, autoregressive model] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [MNIST, Income, California Housing] # list of datasets you include in your baseline
+labels: [robustness, model poisoning, anomaly detection, autoregressive model]
+dataset: [MNIST, Income, California Housing]
 ---
 
 ****Paper:**** https://arxiv.org/abs/2303.16668
