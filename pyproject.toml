@@ -81,7 +81,7 @@ rest = ["requests", "starlette", "uvicorn"]
 [tool.poetry.group.dev.dependencies]
 types-dataclasses = "==0.6.6"
 types-protobuf = "==3.19.18"
-types-requests = "==2.31.0.2"
+types-requests = "==2.31.0.10"
 types-setuptools = "==68.2.0.0"
 clang-format = "==17.0.4"
 isort = "==5.12.0"
