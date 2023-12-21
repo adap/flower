@@ -20,6 +20,7 @@ Paper: arxiv.org/pdf/1905.03871.pdf
 
 import math
 from typing import Dict, List, Optional, Tuple, Union
+import warnings
 
 import numpy as np
 
@@ -31,6 +32,9 @@ from flwr.server.strategy.strategy import Strategy
 
 
 class DPFedAvgAdaptive(DPFedAvgFixed):
+
+    warnings.warn("DPFedAvgAdaptive is deprecated and will be removed in future versions.", DeprecationWarning)
+
     """Wrapper for configuring a Strategy for DP with Adaptive Clipping."""
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
@@ -45,6 +49,8 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
         clip_norm_target_quantile: float = 0.5,
         clip_count_stddev: Optional[float] = None,
     ) -> None:
+        warnings.warn("DPFedAvgAdaptive is deprecated and will be removed in future versions.", DeprecationWarning)
+        
         super().__init__(
             strategy=strategy,
             num_sampled_clients=num_sampled_clients,
