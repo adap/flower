@@ -20,7 +20,7 @@ dataset: [MNIST, Income, California Housing]
 
 ****Hardware Setup:**** Apple M2 Pro, 16gb RAM
 
-****Contributors:**** Edoardo Gabrielli, University of Rome "La Sapienza"
+****Contributors:**** Edoardo Gabrielli, University of Rome "La Sapienza" ([GitHub](https://github.com/edogab33), [LinkedIn](https://www.linkedin.com/in/edoardog/), [Scholar](https://scholar.google.com/citations?user=b3bePdYAAAAJ))
 
 
 ## Experimental Setup
