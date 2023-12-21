@@ -969,7 +969,7 @@
       "type": "table"
     }
   ],
-  "refresh": "",
+  "refresh": "auto",
   "schemaVersion": 38,
   "tags": [],
   "templating": {

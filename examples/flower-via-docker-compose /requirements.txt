@@ -1,4 +1,4 @@
-flwr==1.5.0  
+flwr==1.6.0  
 tensorflow==2.13.1  
 psutil==5.9.6  
 ping3==4.0.4  

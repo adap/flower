@@ -40,6 +40,8 @@ if __name__ == "__main__":
     start_http_server(8000) 
     
     # Initialize Strategy Instance and Start FL Server 
-    strategy_instance = FedCustom(accuracy_gauge = accuracy_gauge, loss_gauge = loss_gauge, total_clients = args.total_clients)
-    start_fl_server(strategy_instance, args.number_of_rounds)
+    strategy_instance = FedCustom(accuracy_gauge=accuracy_gauge,
+                                  loss_gauge=loss_gauge,
+                                  total_clients=args.total_clients)
+    start_fl_server(strategy=strategy_instance, rounds=args.number_of_rounds)
  

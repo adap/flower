@@ -14,11 +14,10 @@ def load_data(data_sampling_percentage=0.0005,batch_size=32,client_id=1,total_cl
         batch_size (int): Batch size for training and evaluation.
         client_id (int): Unique ID for the client.
         total_clients (int): Total number of clients.
-        data_sampling_percentage (float): Percentage of the dataset to use for training and evaluation.
+        data_sampling_percentage (float): Percentage of the dataset to use for training.
 
     Returns:
-        Tuple of TensorFlow datasets for training and evaluation,
-        and the number of samples in each dataset.
+        Tuple of TensorFlow datasets for training and evaluation.
     """
 
     logger.info("Loaded federated dataset partition for client %s", client_id)
@@ -38,13 +37,12 @@ def load_data(data_sampling_percentage=0.0005,batch_size=32,client_id=1,total_cl
     train_dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train))
     test_dataset = tf.data.Dataset.from_tensor_slices((x_test, y_test))
 
-    # Calculate subset size for train and test datasets
+    # Calculate subset size for train dataset
     train_subset_size = int(len(x_train) * data_sampling_percentage)
-    test_subset_size = int(len(x_test) * data_sampling_percentage)
 
     # Shuffle and subset data
     train_dataset = train_dataset.shuffle(buffer_size=len(x_train)).take(train_subset_size)
-    test_dataset = test_dataset.shuffle(buffer_size=len(x_test)).take(test_subset_size)
+    test_dataset = test_dataset.shuffle(buffer_size=len(x_test))
 
     # Batch data
     train_dataset = train_dataset.batch(batch_size)
@@ -56,6 +54,5 @@ def load_data(data_sampling_percentage=0.0005,batch_size=32,client_id=1,total_cl
 
     logger.info("Created data generators with batch size: %s", batch_size)
     logger.info("Created data generators with train_subset_size: %s", train_subset_size)
-    logger.info("Created data generators with test_subset_size: %s", test_subset_size)
     
-    return train_dataset, test_dataset, train_subset_size, test_subset_size
+    return train_dataset, test_dataset

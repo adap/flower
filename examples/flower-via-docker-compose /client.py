@@ -21,6 +21,7 @@ parser.add_argument('--batch_size', type=int, default=32, help="Batch size for t
 parser.add_argument('--learning_rate', type=float, default=0.1, help="Learning rate for the optimizer")
 parser.add_argument('--client_id', type=int, default=1, help="Unique ID for the client")
 parser.add_argument('--total_clients', type=int, default=2, help="Total number of clients")
+parser.add_argument('--data_percentage', type=float, default=0.5, help='Portion of client data to use')
 
 args = parser.parse_args()
 
@@ -34,6 +35,15 @@ class Client(fl.client.NumPyClient):
     def __init__(self, args):
         self.args = args
 
+        logger.info("Preparing data...")
+        train_d, test_d = load_data(data_sampling_percentage=self.args.data_percentage,
+                                    batch_size=self.args.batch_size,
+                                    client_id=self.args.client_id,
+                                    total_clients=self.args.total_clients)
+
+        self.train_dataset = train_d
+        self.test_dataset = test_d
+
     def get_parameters(self, config):
         # Return the parameters of the model
         return model.get_model().get_weights()
@@ -43,12 +53,9 @@ class Client(fl.client.NumPyClient):
 
         # Set the weights of the model
         model.get_model().set_weights(parameters)
-
-        # Load the training dataset and get the number of examples
-        train_dataset, _, num_examples_train, _ = load_data(batch_size=self.args.batch_size,client_id=self.args.client_id,total_clients=self.args.total_clients)
         
         # Train the model
-        history = model.get_model().fit(train_dataset)
+        history = model.get_model().fit(self.train_dataset)
 
         # Calculate evaluation metric
         results = {
@@ -59,8 +66,7 @@ class Client(fl.client.NumPyClient):
         parameters_prime = model.get_model().get_weights()
        
         # Directly return the parameters and the number of examples trained on
-        return parameters_prime, num_examples_train, results
-
+        return parameters_prime, len(self.train_dataset), results
 
     
     def evaluate(self, parameters, config):
@@ -68,20 +74,18 @@ class Client(fl.client.NumPyClient):
         # Set the weights of the model
         model.get_model().set_weights(parameters)
 
-        # Use the test dataset for evaluation
-        _, test_dataset, _, num_examples_test = load_data(batch_size=self.args.batch_size)
-
         # Evaluate the model and get the loss and accuracy
-        loss, accuracy = model.get_model().evaluate(test_dataset)
+        loss, accuracy = model.get_model().evaluate(self.test_dataset)
 
         # Return the loss, the number of examples evaluated on and the accuracy
-        return float(loss), num_examples_test, {"accuracy": float(accuracy)}
+        return float(loss), len(self.test_dataset), {"accuracy": float(accuracy)}
     
 
 # Function to Start the Client
 def start_fl_client():
     try:
-        fl.client.start_numpy_client(server_address=args.server_address, client=Client(args))
+        client = Client(args).to_client()
+        fl.client.start_client(server_address=args.server_address, client=client)
     except Exception as e:
         logger.error("Error starting FL client: %s", e)
         return {"status": "error", "message": str(e)}
