@@ -5,7 +5,7 @@ labels: [robustness, model poisoning, anomaly detection, autoregressive model]
 dataset: [MNIST, Income, California Housing]
 ---
 
-****Paper:**** https://arxiv.org/abs/2303.16668
+****Paper:**** [arxiv.org/abs/2303.16668](https://arxiv.org/abs/2303.16668)
 
 ****Authors:**** Gabriele Tolomei, Edoardo Gabrielli, Dimitri Belli, Vittorio Miori
 
