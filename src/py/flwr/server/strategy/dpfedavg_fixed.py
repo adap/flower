@@ -17,7 +17,7 @@
 Paper: arxiv.org/pdf/1710.06963.pdf
 """
 
-
+import warnings
 from typing import Dict, List, Optional, Tuple, Union
 
 from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, Parameters, Scalar
@@ -31,6 +31,12 @@ from flwr.server.strategy.strategy import Strategy
 class DPFedAvgFixed(Strategy):
     """Wrapper for configuring a Strategy for DP with Fixed Clipping."""
 
+    warnings.warn(
+        "DPFedAvgFixed is deprecated and will be removed in future versions.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+
     # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
@@ -40,6 +46,11 @@ class DPFedAvgFixed(Strategy):
         noise_multiplier: float = 1,
         server_side_noising: bool = True,
     ) -> None:
+        warnings.warn(
+            "DPFedAvgFixed is deprecated and will be removed in future versions.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         super().__init__()
         self.strategy = strategy
         # Doing fixed-size subsampling as in https://arxiv.org/abs/1905.03871.
