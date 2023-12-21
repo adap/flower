@@ -94,7 +94,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: python client.py --server_address=server:8080 --batch_size={config["batch_size"]} --learning_rate={config["learning_rate"]}
+    command: python client.py --server_address=server:8080 --client_id={i} --total_clients={total_clients} --batch_size={config["batch_size"]} --learning_rate={config["learning_rate"]}
     mem_limit: {config['mem_limit']}
     deploy:
       resources:
@@ -120,5 +120,5 @@ services:
 
 if __name__ == "__main__":
     total_clients = 2  # Number of clients that will be created
-    number_of_rounds = 5  # Number of rounds that the server will run for
+    number_of_rounds = 50  # Number of rounds that the server will run for
     create_docker_compose(total_clients,number_of_rounds)

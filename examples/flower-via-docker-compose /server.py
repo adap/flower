@@ -8,9 +8,11 @@ from prometheus_client import start_http_server, Gauge
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Define Prometheus Metrics
-accuracy_gauge = Gauge('model_accuracy', 'Global model accuracy')
-loss_gauge = Gauge('model_loss', 'Global model loss')
+# Define a gauge to track the global model accuracy
+accuracy_gauge = Gauge('model_accuracy', 'Current accuracy of the global model')
+
+# Define a gauge to track the global model loss
+loss_gauge = Gauge('model_loss', 'Current loss of the global model')
 
 # Parse command line arguments
 parser = argparse.ArgumentParser(description='Flower Server')
@@ -34,7 +36,7 @@ def start_fl_server(strategy, rounds):
 # Main Function
 if __name__ == "__main__":   
     
-     # Start Prometheus Metrics Server
+    # Start Prometheus Metrics Server
     start_http_server(8000) 
     
     # Initialize Strategy Instance and Start FL Server 

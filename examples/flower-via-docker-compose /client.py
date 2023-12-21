@@ -16,9 +16,11 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 # Parse command line arguments
 parser = argparse.ArgumentParser(description='Flower client')
 
-parser.add_argument('--server_address', type=str, default="server:8080")
-parser.add_argument('--batch_size', type=int, default=32)
-parser.add_argument('--learning_rate', type=float, default=0.1)
+parser.add_argument('--server_address', type=str, default="server:8080", help="Address of the server")
+parser.add_argument('--batch_size', type=int, default=32, help="Batch size for training")
+parser.add_argument('--learning_rate', type=float, default=0.1, help="Learning rate for the optimizer")
+parser.add_argument('--client_id', type=int, default=1, help="Unique ID for the client")
+parser.add_argument('--total_clients', type=int, default=2, help="Total number of clients")
 
 args = parser.parse_args()
 
@@ -43,7 +45,7 @@ class Client(fl.client.NumPyClient):
         model.get_model().set_weights(parameters)
 
         # Load the training dataset and get the number of examples
-        train_dataset, _, num_examples_train, _ = load_data(batch_size=self.args.batch_size)
+        train_dataset, _, num_examples_train, _ = load_data(batch_size=self.args.batch_size,client_id=self.args.client_id,total_clients=self.args.total_clients)
         
         # Train the model
         history = model.get_model().fit(train_dataset)

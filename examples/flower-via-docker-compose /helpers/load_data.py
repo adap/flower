@@ -1,31 +1,50 @@
 import tensorflow as tf
+from flwr_datasets import FederatedDataset
 import logging
 
 logging.basicConfig(level=logging.INFO)  # Configure logging
 logger = logging.getLogger(__name__)     # Create logger for the module
 
 
-def load_data(data_sampling_percentage=0.005,batch_size=32):
-    # The use of data_sampling_percentage allows us to use a subset of the data and not the entire dataset in order to avoid out of memory errors
+def load_data(data_sampling_percentage=0.0005,batch_size=32,client_id=1,total_clients=2):
+    """
+     Load federated dataset partition based on client ID.
 
-    # Load CIFAR-10 dataset
-    (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.cifar10.load_data()
+    Args:
+        batch_size (int): Batch size for training and evaluation.
+        client_id (int): Unique ID for the client.
+        total_clients (int): Total number of clients.
+        data_sampling_percentage (float): Percentage of the dataset to use for training and evaluation.
 
-    # Preprocess the data: normalize images
-    train_images = train_images.astype('float32') / 255.0
-    test_images = test_images.astype('float32') / 255.0
+    Returns:
+        Tuple of TensorFlow datasets for training and evaluation,
+        and the number of samples in each dataset.
+    """
+
+    logger.info("Loaded federated dataset partition for client %s", client_id)
+    logger.info("total_clients in load_data %s", total_clients)
+
+    # Download and partition dataset
+    fds = FederatedDataset(dataset="cifar10", partitioners={"train": total_clients})
+    partition = fds.load_partition(client_id-1, "train")
+    partition.set_format("numpy")
+
+    # Divide data on each client: 80% train, 20% test
+    partition = partition.train_test_split(test_size=0.2)
+    x_train, y_train = partition["train"]["img"] / 255.0, partition["train"]["label"]
+    x_test, y_test = partition["test"]["img"] / 255.0, partition["test"]["label"]
 
     # Convert the datasets to tf.data.Dataset
-    train_dataset = tf.data.Dataset.from_tensor_slices((train_images, train_labels))
-    test_dataset = tf.data.Dataset.from_tensor_slices((test_images, test_labels))
+    train_dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train))
+    test_dataset = tf.data.Dataset.from_tensor_slices((x_test, y_test))
 
     # Calculate subset size for train and test datasets
-    train_subset_size = int(len(train_images) * data_sampling_percentage)
-    test_subset_size = int(len(test_images) * data_sampling_percentage)
+    train_subset_size = int(len(x_train) * data_sampling_percentage)
+    test_subset_size = int(len(x_test) * data_sampling_percentage)
 
     # Shuffle and subset data
-    train_dataset = train_dataset.shuffle(buffer_size=len(train_images)).take(train_subset_size)
-    test_dataset = test_dataset.shuffle(buffer_size=len(test_images)).take(test_subset_size)
+    train_dataset = train_dataset.shuffle(buffer_size=len(x_train)).take(train_subset_size)
+    test_dataset = test_dataset.shuffle(buffer_size=len(x_test)).take(test_subset_size)
 
     # Batch data
     train_dataset = train_dataset.batch(batch_size)
@@ -36,5 +55,7 @@ def load_data(data_sampling_percentage=0.005,batch_size=32):
     test_dataset = test_dataset.prefetch(buffer_size=tf.data.AUTOTUNE)
 
     logger.info("Created data generators with batch size: %s", batch_size)
+    logger.info("Created data generators with train_subset_size: %s", train_subset_size)
+    logger.info("Created data generators with test_subset_size: %s", test_subset_size)
     
     return train_dataset, test_dataset, train_subset_size, test_subset_size

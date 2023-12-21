@@ -132,7 +132,7 @@ class FedCustom(fl.server.strategy.Strategy):
         examples = [evaluate_res.num_examples for _, evaluate_res in results]
         accuracy_aggregated = sum(accuracies) / sum(examples) if sum(examples) != 0 else 0
 
-        # Set Prometheus metrics
+        # Update the Prometheus gauges with the latest aggregated accuracy and loss values
         self.accuracy_gauge.set(accuracy_aggregated)
         self.loss_gauge.set(loss_aggregated)
 

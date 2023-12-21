@@ -38,7 +38,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "db868329-6ed2-4822-a3b6-eacbe2b67342"
+        "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
       },
       "description": "Averaged federated accuracy across clients",
       "fieldConfig": {
@@ -121,7 +121,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "db868329-6ed2-4822-a3b6-eacbe2b67342"
+            "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
           },
           "disableTextWrap": false,
           "editorMode": "builder",
@@ -141,7 +141,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "db868329-6ed2-4822-a3b6-eacbe2b67342"
+        "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
       },
       "description": "Averaged Federated Loss across clients",
       "fieldConfig": {
@@ -221,7 +221,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "db868329-6ed2-4822-a3b6-eacbe2b67342"
+            "uid": "db69454e-e558-479e-b4fc-80db52bf91da"
           },
           "disableTextWrap": false,
           "editorMode": "builder",

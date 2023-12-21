@@ -43,7 +43,8 @@ Before starting, ensure the following prerequisites are met:
      ```bash
      python helpers/generate_docker_compose.py
      ```
-   - Within the script, specify the number of clients (`total_clients`), the number of training rounds (`number_of_rounds`), and resource limitations for each client in the `client_configs` array.
+     - Within the script, specify the number of clients (`total_clients`) and resource limitations for each client in the `client_configs` array. The number of training rounds is hardcoded to 50. To adjust the number of rounds, modify the `number_of_rounds` variable in the script.
+
 
 ### Step 2: Build and Launch Containers
 1. **Execute Initialization Script**: 
@@ -83,7 +84,12 @@ Before starting, ensure the following prerequisites are met:
      ```
 
 3. **Automated Grafana Configuration**:
-   - Grafana is set up to automatically load pre-defined data sources and dashboards for immediate monitoring. This automation is facilitated by provisioning files: `prometheus-datasource.yml` for data sources and `default_dashboard.json` for dashboards. These files are located in the `./config/provisioning/` directory of the project and are mounted directly into the Grafana container through Docker Compose volume mappings. This ensures that upon startup, Grafana is pre-configured with the necessary settings for monitoring without any manual setup.
+   - Grafana is configured to load pre-defined data sources and dashboards for immediate monitoring, facilitated by provisioning files. The provisioning files include `prometheus-datasource.yml` for data sources, located in the `./config/provisioning/datasources` directory, and `dashboard_index.json` for dashboards, in the `./config/provisioning/dashboards` directory. The `grafana.ini` file is also tailored to enhance user experience:
+     - **Admin Credentials**: We provide default admin credentials in the `grafana.ini` configuration, which simplifies access by eliminating the need for users to go through the initial login process.
+     - **Default Dashboard Path**: A default dashboard path is set in `grafana.ini` to ensure that the dashboard with all the necessary panels is rendered when Grafana is accessed.
+
+   These files and settings are directly mounted into the Grafana container via Docker Compose volume mappings. This setup guarantees that upon startup, Grafana is pre-configured for monitoring, requiring no additional manual setup.
+
 
 4. **Begin Training Process**: 
    - The federated learning training automatically begins once all client containers are successfully connected to the Flower server. This synchronizes the learning process across all participating clients.
@@ -92,20 +98,86 @@ Before starting, ensure the following prerequisites are met:
 By following these steps, you will have a fully functional federated learning environment with device heterogeneity and monitoring capabilities.
 
 
+## Model Training and Dataset Integration
+
+### Data Pipeline with FLWR-Datasets
+We have integrated [`flwr-datasets`](https://flower.dev/docs/datasets/) into our data pipeline, which is managed within the `load_data.py` file in the `helpers` folder. This script facilitates standardized access to datasets across the federated network and incorporates a `data_sampling_percentage` argument. This argument allows users to specify the percentage of the dataset to be used for training and evaluation, accommodating devices with lower memory capabilities to prevent Out-of-Memory (OOM) errors.
+
+
+### Model Selection and Dataset
+For the federated learning system, we have selected the MobileNet model due to its efficiency in image classification tasks. The model is trained and evaluated on the CIFAR-10 dataset, which consists of 60,000 32x32 color images in 10 classes. The combination of MobileNet and CIFAR-10 is ideal for demonstrating the capabilities of our federated learning solution in a heterogeneous device environment.
+
+- **MobileNet**: A streamlined architecture for mobile and embedded devices that balances performance and computational cost.
+- **CIFAR-10 Dataset**: A standard benchmark dataset for image classification, containing various object classes that pose a comprehensive challenge for the learning model.
+
+By integrating these components, our framework is well-prepared to handle the intricacies of training over a distributed network with varying device capabilities and data availability.
+
+
 
 ## Monitoring with Grafana
+
 1. **Access and Customize Grafana Dashboard**:
-   - Visit `http://localhost:3000` to enter Grafana. Thanks to the automated setup, Grafana will already have Prometheus as a data source and a pre-configured dashboard for monitoring, similar to the example provided below.
-   - You can further customize or create new dashboards as per your requirements.
+   - Visit `http://localhost:3000` to enter Grafana. The automated setup ensures that you're greeted with a series of pre-configured dashboards, including the default screen with a comprehensive set of graphs. These dashboards are ready for immediate monitoring and can be customized to suit your specific requirements.
 
-2. **Grafana Dashboard Example**:
-Below is an example of a Grafana dashboard showing a Bar Chart of memory usage for a specific client-container:
-
-
-<img src="public/grafana-memory-usage.png" alt="Grafana Memory Usage Histogram" width="600"/>
+2. **Grafana Default Dashboard Example**:
+Below is the default Grafana dashboard that users will see upon accessing Grafana:
 
 
-This histogram offers a visual representation of the container's memory usage over time, highlighting the contrast in resource utilization between training and non-training periods. As evident from the graph, there are noticeable differences in memory consumption during active training phases compared to times when the container is not engaged in training.
+![Grafana Home Dashboard](public/grafana_home_screen.png "Grafana Federated Learning Metrics")
+
+This comprehensive dashboard provides insights into various system metrics across client-containers. It includes visualizations such as:
+- **Application Metrics**: Track the model accuracy and loss over time to understand the learning progression.
+- **CPU Usage**: Assess the CPU consumption across different clients, delineating maximum and average usage to pinpoint processing bottlenecks.
+- **Memory Utilization**: Observe memory usage and cache sizes, comparing client containers to manage resources efficiently.
+- **Network Traffic**: Monitor incoming and outgoing network traffic to each client, which is crucial for understanding data exchange volumes during federated learning cycles.
+
+
+These graphs collectively offer a multifaceted view of the federated learning operation, from resource utilization to model performance metrics. They highlight the dynamics of the system during training periods versus idle times, providing essential data to optimize the process.
+
+
+## Custom Metrics and Monitoring Integration
+
+### Capturing Container Metrics with cAdvisor
+cAdvisor is seamlessly integrated into our monitoring setup to capture a variety of system and container metrics, such as CPU, memory, and network usage. These metrics are vital for analyzing the performance and resource consumption of the containers in the federated learning environment.
+
+### Tracking Custom Metrics in Grafana
+In addition to the standard metrics captured by cAdvisor, we have implemented a process to track custom metrics like model's accuracy and loss within Grafana, using Prometheus as the backbone for metric collection.
+
+1. **Prometheus Client Installation**:
+   - We began by installing the `prometheus_client` library in our Python environment, enabling us to define and expose custom metrics that Prometheus can scrape.
+
+2. **Defining Metrics in Server Script**:
+   - Within our `server.py` script, we have established two key Prometheus Gauge metrics, specifically tailored for monitoring our federated learning model: `model_accuracy` and `model_loss`. These custom gauges are instrumental in capturing the most recent values of the model's accuracy and loss, which are essential metrics for evaluating the model's performance. The gauges are defined as follows:
+   
+   ```python
+   from prometheus_client import Gauge
+
+   accuracy_gauge = Gauge('model_accuracy', 'Current accuracy of the global model')
+   loss_gauge = Gauge('model_loss', 'Current loss of the global model')
+   ```
+3. **Exposing Metrics via HTTP Endpoint**:
+   - We leveraged the `start_http_server` function from the `prometheus_client` library to launch an HTTP server on port 8000. This server provides the `/metrics` endpoint, where the custom metrics are accessible for Prometheus scraping. The function is called at the end of the `main` method in `server.py`:
+   ```python
+   start_http_server(8000)
+   ```
+
+4. **Updating Metrics Recording Strategy**:
+   - The core of our metrics tracking lies in the `strategy.py` file, particularly within the `aggregate_evaluate` method. This method is crucial as it's where the federated learning model's accuracy and loss values are computed after each round of training with the aggregated data from all clients.
+   ```python
+       self.accuracy_gauge.set(accuracy_aggregated)
+       self.loss_gauge.set(loss_aggregated)
+    ```
+       
+
+5. **Configuring Prometheus Scraping**:
+   - In the `prometheus.yml` file, under `scrape_configs`, we configured a new job to scrape the custom metrics from the HTTP server. This setup includes the job's name, the scraping interval, and the target server's URL.
+   
+   
+By incorporating these steps, we have enriched our monitoring capabilities to not only include system-level metrics but also critical performance indicators of our federated learning model. This approach is pivotal for understanding and improving the learning process. Similarly, you can apply this methodology to track any other metric that you find interesting or relevant to your specific needs. This flexibility allows for a comprehensive and customized monitoring environment, tailored to the unique aspects and requirements of your federated learning system.
+
+
+
+
 
 ## Additional Resources
 - **Grafana Tutorials**: Explore a variety of tutorials on Grafana at [Grafana Tutorials](https://grafana.com/tutorials/).
