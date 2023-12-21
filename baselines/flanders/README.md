@@ -84,14 +84,29 @@ Ensure that the environment is properly set up, then run:
 python -m flanders.main
 ```
 
-This will run the entire batch of experiments with all the settings specified in `conf/base.yaml`. You can change them if you want to run single experiments.
+To execute a single experiment with the default values in `conf/base.yaml`.
 
-Note that also CIFAR-10 and California Housing are implemented.
+To run custom experiments, you can override the defaults values like that:
+
+```bash
+python -m flanders.main dataset=income server.attack_fn=lie server.num_malicious=1
+```
+
+Finally, to run multiple custom experiments:
+
+```bash
+python -m flanders.main --multirun dataset=income,mnist server.attack_fn=gaussian,lie,fang,minmax server.num_malicious=0,1,2,3,4,5
+```
 
 
 ## Expected Results
 
-By running the above command, it will generate the results in `results/all_results.csv`. To generate the plots, use the notebook in `plotting/plots.ipynb`.
+By running;
+```bash
+python -m flanders.main --multirun dataset=income,mnist server.attack_fn=gaussian,lie,fang,minmax server.num_malicious=0,1,2,3,4,5,6,7,8,9
+```
+
+It will generate the results in `results/all_results.csv`. To generate the plots, use the notebook in `plotting/plots.ipynb`.
 
 Expected maximum accuracy achieved across different number of malicious clients and different attacks:
 ![](_static/max_acc.jpg)

@@ -12,12 +12,7 @@ hydra:
   run:
     dir: .
 
-dataset:
-  name:
-    - income
-    #- house
-    - mnist
-    #- cifar
+dataset: mnist
 
 strategy:
   _target_: flanders.strategy.Flanders
@@ -28,25 +23,11 @@ server:
   _target_: flanders.server.EnhancedServer
   num_rounds: 50
   pool_size: 10
-  num_malicious: 
-    - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    - 5
-    - 6
-    - 7
-    - 8
-    - 9
   warmup_rounds: 30
   sampling: 500
   history_dir: clients_params
   magnitude: 100
-  attack_fn:
-    - gaussian_attack
-    - lie_attack
-    - fang_attack
-    - minmax_attack
   threshold: 1e-05
+  attack_fn: gaussian
+  num_malicious: 0
   omniscent: True
