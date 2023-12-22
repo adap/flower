@@ -15,11 +15,8 @@
 """Middleware layers."""
 
 
-from .typing import App, Layer
-from .utils import make_app
+from .utils import make_ffn
 
 __all__ = [
-    "App",
-    "Layer",
-    "make_app",
+    "make_ffn",
 ]
