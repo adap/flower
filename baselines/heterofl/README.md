@@ -148,25 +148,25 @@ Results of the combination of various computation complexity levels for **MNIST*
 <br>
 
 Results of the combination of various computation complexity levels for **CIFAR10** dataset with **dynamic** scenario(where a client does not belong to a fixed computational complexity level):
-> *The HeteroFL paper reports a model with 1.8M parameters for their FedAvg baseline. However, as stated by the paper authors, those results are borrowed from [Liang et al (2020)](https://arxiv.org/abs/2001.01523), which uses a small CNN with fewer parameters (~64K as shown in this table below). We believe the HeteroFL authors made a mistake when reporting the number of parameters. We borrowed the model from Liang et al (2020)'s [repo](https://github.com/pliang279/LG-FedAvg/blob/master/models/Nets.py).*
+> *The HeteroFL paper reports a model with 1.8M parameters for their FedAvg baseline. However, as stated by the paper authors, those results are borrowed from [Liang et al (2020)](https://arxiv.org/abs/2001.01523), which uses a small CNN with fewer parameters (~64K as shown in this table below). We believe the HeteroFL authors made a mistake when reporting the number of parameters. We borrowed the model from Liang et al (2020)'s [repo](https://github.com/pliang279/LG-FedAvg/blob/master/models/Nets.py). As in the paper, FedAvg was run for 1800 rounds.*
 
 
-| Model | Ratio | Parameters | FLOPS | Space(MB) | IID-accuracy | non-IId  local-acc <br> 800th &#8195;&#8195;Best of 800| non-IID  global-acc <br> 800th &#8195;&#8195; Best of 800|
+| Model | Ratio | Parameters | FLOPS | Space(MB) | IID-acc | non-IId  local-acc <br> Final &#8195;&#8195;Best| non-IID  global-acc <br> Final &#8195;&#8195; Best|
 | :--: | :----: | :-----: | :-------: | :-------: | :----------: | :-----: | :------: |
- a		| 1     | 9622.09  K	| 330.246 M  	 | 36.705	| 90.83 | 89.04   &#8195;&#8195;  92.41 | 48.72  &#8195;&#8195;  59.29	|
- a-e		| 0.502 | 4830.22  K	| 165.859 M  	 | 18.426	| 89.98 | 87.98   &#8195;&#8195;  91.25	| 50.16  &#8195;&#8195;  57.66	|
- a-b-c-d-e	| 0.267 | 2564.95  K	| 88.354 M	 | 9.785	| 87.46 | 89.75   &#8195;&#8195;  91.19	| 46.96  &#8195;&#8195;  55.6	|
- b		| 1     | 2408.746  K	| 83.334 M	 | 9.189	| 88.59 | 89.31   &#8195;&#8195;  92.07	| 49.85  &#8195;&#8195;  60.79	|
- b-e		| 0.508 | 1223.548  K	| 42.403 M	 | 4.667	| 89.23 | 90.93   &#8195;&#8195;  92.3	| 55.46  &#8195;&#8195;  61.98	|
- b-c-d-e	| 0.332 | 800.665  K	| 27.881 M	 | 3.054	| 87.61 | 89.23   &#8195;&#8195;  91.83	| 51.59  &#8195;&#8195;  59.4	| 
- c		| 1     | 603.802  K	| 21.220 M	 | 2.303	| 85.74 | 89.83   &#8195;&#8195;  91.75	| 44.03  &#8195;&#8195;  58.26	|
- c-e		| 0.532 | 321.076  K	| 11.345 M	 | 1.225	| 87.32 | 89.28   &#8195;&#8195;  91.56	| 53.43  &#8195;&#8195;  59.5	| 
- c-d-e		| 0.438 | 264.638  K	| 9.396 M	 | 1.010	| 85.59 | 91.48   &#8195;&#8195;  92.05	| 58.26  &#8195;&#8195;  61.79	|
- d		| 1     | 151.762  K	| 5.498 M	 | 0.579	| 82.91 | 90.81   &#8195;&#8195;  91.47	| 55.95  &#8195;&#8195;  58.34	|
- d-e		| 0.626 | 95.056  K	| 3.485 M	 | 0.363	| 82.77 | 88.79   &#8195;&#8195;  90.13	| 48.49  &#8195;&#8195;  54.18	|
- e		| 1     | 38.35  K	| 1.471 M	 | 0.146	| 76.53 | 90.05   &#8195;&#8195;  90.91	| 54.68  &#8195;&#8195;  57.05	|
-| 		|     	| 		| **FedAvg**	 | 		| 	 | <sub>**1800th**</sub> &#8195;&#8195; <sub>**Best of 1800**</sub>| <sub>**1800th**</sub> &#8195;&#8195;<sub>**Best of 1800**</sub> |
-|FedAvg	| 1 | 64.102  K| 1.3202  M | 0.2446 | 70.65 | 56.69 &#8195;&#8195; 58.72 | 56.76 &#8195;&#8195; 58.64 |
+ a		| 1     | 9622  K	| 330.2 M  	 | 36.705	| 90.83 | 89.04   &#8195;&#8195;  92.41 | 48.72  &#8195;&#8195;  59.29	|
+ a-e		| 0.502 | 4830  K	| 165.9 M  	 | 18.426	| 89.98 | 87.98   &#8195;&#8195;  91.25	| 50.16  &#8195;&#8195;  57.66	|
+ a-b-c-d-e	| 0.267 | 2565  K	| 88.4 M	 | 9.785	| 87.46 | 89.75   &#8195;&#8195;  91.19	| 46.96  &#8195;&#8195;  55.6	|
+ b		| 1     | 2409  K	| 83.3 M	 | 9.189	| 88.59 | 89.31   &#8195;&#8195;  92.07	| 49.85  &#8195;&#8195;  60.79	|
+ b-e		| 0.508 | 1224  K	| 42.4 M	 | 4.667	| 89.23 | 90.93   &#8195;&#8195;  92.3	| 55.46  &#8195;&#8195;  61.98	|
+ b-c-d-e	| 0.332 | 801  K	| 27.9 M	 | 3.054	| 87.61 | 89.23   &#8195;&#8195;  91.83	| 51.59  &#8195;&#8195;  59.4	| 
+ c		| 1     | 604  K	| 21.2 M	 | 2.303	| 85.74 | 89.83   &#8195;&#8195;  91.75	| 44.03  &#8195;&#8195;  58.26	|
+ c-e		| 0.532 | 321  K	| 11.4 M	 | 1.225	| 87.32 | 89.28   &#8195;&#8195;  91.56	| 53.43  &#8195;&#8195;  59.5	| 
+ c-d-e		| 0.438 | 265  K	| 9.4 M	 | 1.010	| 85.59 | 91.48   &#8195;&#8195;  92.05	| 58.26  &#8195;&#8195;  61.79	|
+ d		| 1     | 152  K	| 5.5 M	 | 0.579	| 82.91 | 90.81   &#8195;&#8195;  91.47	| 55.95  &#8195;&#8195;  58.34	|
+ d-e		| 0.626 | 95  K	| 3.5 M	 | 0.363	| 82.77 | 88.79   &#8195;&#8195;  90.13	| 48.49  &#8195;&#8195;  54.18	|
+ e		| 1     | 38  K	| 1.5 M	 | 0.146	| 76.53 | 90.05   &#8195;&#8195;  90.91	| 54.68  &#8195;&#8195;  57.05	|
+|FedAvg	| 1 | 64  K| 1.3  M | 0.2446 | 70.65 | 56.69 &#8195;&#8195; 58.72 | 56.76 &#8195;&#8195; 58.64 |
+
 
 <!--
 | Model | Ratio | Parameters | FLOPS | Space(MB) | IID-accuracy | non-IId-|-local-acc | non-IID-|-global-acc | 
