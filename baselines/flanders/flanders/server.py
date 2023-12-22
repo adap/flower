@@ -3,15 +3,11 @@
 Optionally, also define a new Server class (please note this is not needed in most
 settings).
 """
-from flwr.server.server import fit_clients, Server
-from flwr.server.history import History
-
 import timeit
-import numpy as np
 from logging import DEBUG, INFO
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-from typing import Callable, Dict, List, Optional, Tuple, Union, Any
+import numpy as np
 from flwr.common import (
     DisconnectRes,
     EvaluateRes,
@@ -20,14 +16,12 @@ from flwr.common import (
     Scalar,
     parameters_to_ndarrays,
 )
-
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
+from flwr.server.history import History
+from flwr.server.server import Server, fit_clients
 
-from .utils import (
-    save_params,
-    flatten_params
-)
+from .utils import flatten_params, save_params
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
@@ -42,27 +36,28 @@ ReconnectResultsAndFailures = Tuple[
     List[Union[Tuple[ClientProxy, DisconnectRes], BaseException]],
 ]
 
+
 class EnhancedServer(Server):
     """Server with enhanced functionality."""
 
     def __init__(
-            self,
-            num_malicious: int,
-            warmup_rounds: int,
-            attack_fn:Callable,
-            dataset_name: str,
-            threshold: float = 0.0,
-            to_keep: int = 1,
-            magnitude: float = 0.0,
-            sampling: int = 0,
-            history_dir: str = "clients_params",
-            omniscent: bool = True,
-            output_dir: str = "results",
-            *args: Any,
-            **kwargs: Any
-        ) -> None:
+        self,
+        num_malicious: int,
+        warmup_rounds: int,
+        attack_fn: Callable,
+        dataset_name: str,
+        threshold: float = 0.0,
+        to_keep: int = 1,
+        magnitude: float = 0.0,
+        sampling: int = 0,
+        history_dir: str = "clients_params",
+        omniscent: bool = True,
+        output_dir: str = "results",
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         """Create a new EnhancedServer instance.
-        
+
         Parameters
         ----------
         num_malicious : int
@@ -88,7 +83,6 @@ class EnhancedServer(Server):
         output_dir : str, optional
             Directory where to save the results, by default "results"
         """
-
         super().__init__(*args, **kwargs)
         self.num_malicious = num_malicious
         self.warmup_rounds = warmup_rounds
@@ -106,7 +100,6 @@ class EnhancedServer(Server):
         self.omniscent = omniscent
         self.output_dir = f"{output_dir}/outputs"
 
-
     # pylint: disable=too-many-locals
     def fit(self, num_rounds: int, timeout: Optional[float]) -> History:
         """Run federated averaging for a number of rounds."""
@@ -116,8 +109,14 @@ class EnhancedServer(Server):
         log(INFO, "Initializing global parameters")
         self.parameters = self._get_initial_parameters(timeout=timeout)
         log(INFO, "Evaluating initial parameters")
-        config = {"num_malicious": self.num_malicious, "attack_fn": self.attack_fn, "dataset_name": self.dataset_name}
-        res = self.strategy.evaluate(0, parameters=self.parameters, config=config, output_dir=self.output_dir)
+        config = {
+            "num_malicious": self.num_malicious,
+            "attack_fn": self.attack_fn,
+            "dataset_name": self.dataset_name,
+        }
+        res = self.strategy.evaluate(
+            0, parameters=self.parameters, config=config, output_dir=self.output_dir
+        )
         if res is not None:
             log(
                 INFO,
@@ -147,7 +146,12 @@ class EnhancedServer(Server):
                 )
 
             # Evaluate model using strategy implementation
-            res_cen = self.strategy.evaluate(current_round, parameters=self.parameters, config=config, output_dir=self.output_dir)
+            res_cen = self.strategy.evaluate(
+                current_round,
+                parameters=self.parameters,
+                config=config,
+                output_dir=self.output_dir,
+            )
             if res_cen is not None:
                 loss_cen, metrics_cen = res_cen
                 log(
@@ -181,7 +185,6 @@ class EnhancedServer(Server):
         log(INFO, "FL finished in %s", elapsed)
         return history
 
-    
     def fit_round(
         self,
         server_round: int,
@@ -230,12 +233,12 @@ class EnhancedServer(Server):
                 ins.config["malicious"] = False
 
         for proxy, ins in client_instructions:
-            log(INFO, f"Client {proxy.cid} malicious: {ins.config['malicious']}")        
+            log(INFO, f"Client {proxy.cid} malicious: {ins.config['malicious']}")
         # Collect `fit` results from all clients participating in this round
         results, failures = fit_clients(
             client_instructions=client_instructions,
             max_workers=self.max_workers,
-            timeout=timeout
+            timeout=timeout,
         )
         log(
             DEBUG,
@@ -245,34 +248,44 @@ class EnhancedServer(Server):
             len(failures),
         )
 
-        clients_state = {}      # dictionary of clients representing wether they are malicious or not
+        clients_state = (
+            {}
+        )  # dictionary of clients representing wether they are malicious or not
 
         # Save parameters of each client as time series
         ordered_results = [0 for _ in range(len(results))]
         cids = np.array([])
         for proxy, fitres in results:
             cids = np.append(cids, int(fitres.metrics["cid"]))
-            clients_state[fitres.metrics['cid']] = fitres.metrics['malicious']
+            clients_state[fitres.metrics["cid"]] = fitres.metrics["malicious"]
             params = flatten_params(parameters_to_ndarrays(fitres.parameters))
             if self.sampling > 0:
                 if len(self.params_indexes) == 0:
                     # Sample a random subset of parameters
-                    self.params_indexes = np.random.randint(0, len(params), size=self.sampling)
+                    self.params_indexes = np.random.randint(
+                        0, len(params), size=self.sampling
+                    )
 
                 params = params[self.params_indexes]
 
-            log(INFO, f"Saving parameters of client {fitres.metrics['cid']} with shape {params.shape}")
-            save_params(params, fitres.metrics['cid'], dir=self.history_dir)
+            log(
+                INFO,
+                f"Saving parameters of client {fitres.metrics['cid']} with"
+                f"shape {params.shape}",
+            )
+            save_params(params, fitres.metrics["cid"], dir=self.history_dir)
 
             # Re-arrange results in the same order as clients' cids impose
             log(INFO, "Re-arranging results in the same order as clients' cids impose")
-            ordered_results[int(fitres.metrics['cid'])] = (proxy, fitres)
+            ordered_results[int(fitres.metrics["cid"])] = (proxy, fitres)
 
         # Initialize aggregated_parameters if it is the first round
         if self.aggregated_parameters == []:
             for key, val in clients_state.items():
-                if val == False:
-                    self.aggregated_parameters = parameters_to_ndarrays(ordered_results[int(key)][1].parameters)
+                if val is False:
+                    self.aggregated_parameters = parameters_to_ndarrays(
+                        ordered_results[int(key)][1].parameters
+                    )
                     break
 
         # Apply attack function
@@ -280,23 +293,43 @@ class EnhancedServer(Server):
         if self.attack_fn is not None and server_round > self.warmup_rounds:
             log(INFO, "Applying attack function")
             results, others = self.attack_fn(
-                ordered_results, clients_state, omniscent=self.omniscent, magnitude=self.magnitude,
-                w_re=self.aggregated_parameters, malicious_selected=self.malicious_selected,
-                threshold=self.threshold, d=len(self.aggregated_parameters), old_lambda=self.old_lambda,
-                dataset_name=self.dataset_name, to_keep = self.to_keep,
-                malicious_num=self.num_malicious
+                ordered_results,
+                clients_state,
+                omniscent=self.omniscent,
+                magnitude=self.magnitude,
+                w_re=self.aggregated_parameters,
+                malicious_selected=self.malicious_selected,
+                threshold=self.threshold,
+                d=len(self.aggregated_parameters),
+                old_lambda=self.old_lambda,
+                dataset_name=self.dataset_name,
+                to_keep=self.to_keep,
+                malicious_num=self.num_malicious,
             )
-            self.old_lambda = others.get('lambda', 0.0)
+            self.old_lambda = others.get("lambda", 0.0)
 
             # Update saved parameters time series after the attack
-            for proxy, fitres in results:
-                if fitres.metrics['malicious']:
+            for _, fitres in results:
+                if fitres.metrics["malicious"]:
                     if self.sampling > 0:
-                        params = flatten_params(parameters_to_ndarrays(fitres.parameters))[self.params_indexes]
+                        params = flatten_params(
+                            parameters_to_ndarrays(fitres.parameters)
+                        )[self.params_indexes]
                     else:
-                        params = flatten_params(parameters_to_ndarrays(fitres.parameters))
-                    log(INFO, f"Saving parameters of client {fitres.metrics['cid']} with shape {params.shape}")
-                    save_params(params, fitres.metrics['cid'], dir=self.history_dir, remove_last=True)
+                        params = flatten_params(
+                            parameters_to_ndarrays(fitres.parameters)
+                        )
+                    log(
+                        INFO,
+                        f"Saving parameters of client {fitres.metrics['cid']}"
+                        f"with shape {params.shape}",
+                    )
+                    save_params(
+                        params,
+                        fitres.metrics["cid"],
+                        dir=self.history_dir,
+                        remove_last=True,
+                    )
         else:
             results = ordered_results
             others = {}
@@ -307,9 +340,16 @@ class EnhancedServer(Server):
 
         # Aggregate training results
         log(INFO, "fit_round - Aggregating training results")
-        aggregated_result = self.strategy.aggregate_fit(server_round, results, failures, clients_state)
+        aggregated_result = self.strategy.aggregate_fit(
+            server_round, results, failures, clients_state
+        )
 
-        parameters_aggregated, metrics_aggregated, good_clients_idx, malicious_clients_idx = aggregated_result
+        (
+            parameters_aggregated,
+            metrics_aggregated,
+            good_clients_idx,
+            malicious_clients_idx,
+        ) = aggregated_result
         log(INFO, f"Malicious clients: {malicious_clients_idx}")
 
         log(INFO, f"clients_state: {clients_state}")
@@ -320,15 +360,22 @@ class EnhancedServer(Server):
             else:
                 self.malicious_selected = False
 
-        # For clients detected as malicious, set their parameters to be the averaged ones in their files
-        # otherwise the forecasting in next round won't be reliable
+        # For clients detected as malicious, set their parameters to be the
+        # averaged ones in their files otherwise the forecasting in next round
+        # won't be reliable
         if self.warmup_rounds > server_round:
-            log(INFO, f"Saving parameters of clients")
+            log(INFO, "Saving parameters of clients")
             for idx in malicious_clients_idx:
                 if self.sampling > 0:
-                    new_params = flatten_params(parameters_to_ndarrays(parameters_aggregated))[self.params_indexes]
+                    new_params = flatten_params(
+                        parameters_to_ndarrays(parameters_aggregated)
+                    )[self.params_indexes]
                 else:
-                    new_params = flatten_params(parameters_to_ndarrays(parameters_aggregated))
-                save_params(new_params, idx, dir=self.history_dir, remove_last=True, rrl=True)
+                    new_params = flatten_params(
+                        parameters_to_ndarrays(parameters_aggregated)
+                    )
+                save_params(
+                    new_params, idx, dir=self.history_dir, remove_last=True, rrl=True
+                )
 
         return parameters_aggregated, metrics_aggregated, (results, failures)

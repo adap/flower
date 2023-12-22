@@ -3,49 +3,37 @@
 It includes processioning the dataset, instantiate strategy, specify how the global
 model is going to be evaluated, etc. At the end, this script saves the results.
 """
+import os
+import shutil
+from typing import Dict
+
+import flwr as fl
+
 # these are the basic packages you'll need here
 # feel free to remove some if aren't needed
 import hydra
-from hydra.utils import instantiate
-from hydra.core.hydra_config import HydraConfig
-from omegaconf import DictConfig, OmegaConf
-
-
-import shutil
-import flwr as fl
 from flwr.common.typing import Scalar
 from flwr.server.client_manager import SimpleClientManager
-import os
+from hydra.core.hydra_config import HydraConfig
+from hydra.utils import instantiate
+from omegaconf import DictConfig, OmegaConf
 
-from typing import Dict
-
-from .client import (
-    CifarClient, 
-    HouseClient, 
-    IncomeClient,
-    MnistClient,
-)
-from .attacks import (
-    fang_attack,
-    gaussian_attack,
-    lie_attack,
-    no_attack,
-    minmax_attack
-)
-from .utils import (
-    l2_norm,
-    mnist_evaluate,
-    cifar_evaluate,
-    house_evaluate,
-    income_evaluate
-)
+from .attacks import fang_attack, gaussian_attack, lie_attack, minmax_attack
+from .client import CifarClient, HouseClient, IncomeClient, MnistClient
 from .dataset import (
-    get_partitioned_income,
-    get_partitioned_house,
+    do_fl_partitioning,
     get_cifar_10,
-    do_fl_partitioning
+    get_partitioned_house,
+    get_partitioned_income,
 )
 from .server import EnhancedServer
+from .utils import (
+    cifar_evaluate,
+    house_evaluate,
+    income_evaluate,
+    l2_norm,
+    mnist_evaluate,
+)
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -64,14 +52,14 @@ def main(cfg: DictConfig) -> None:
         "gaussian": gaussian_attack,
         "lie": lie_attack,
         "fang": fang_attack,
-        "minmax": minmax_attack
+        "minmax": minmax_attack,
     }
 
     clients = {
         "mnist": (MnistClient, mnist_evaluate),
         "cifar": (CifarClient, cifar_evaluate),
         "house": (HouseClient, house_evaluate),
-        "income": (IncomeClient, income_evaluate)
+        "income": (IncomeClient, income_evaluate),
     }
 
     # Delete old client_params
@@ -86,20 +74,25 @@ def main(cfg: DictConfig) -> None:
     num_malicious = cfg.server.num_malicious
 
     # 2. Prepare your dataset
-    sampling = cfg.server.sampling
     if dataset_name == "cifar":
         train_path, testset = get_cifar_10()
         fed_dir = do_fl_partitioning(
-            train_path, pool_size=cfg.server.pool_size, alpha=10000, num_classes=10, val_ratio=0.5, seed=1234
+            train_path,
+            pool_size=cfg.server.pool_size,
+            alpha=10000,
+            num_classes=10,
+            val_ratio=0.5,
+            seed=1234,
         )
     elif dataset_name == "income":
-        sampling = 0
-        X_train, X_test, y_train, y_test = get_partitioned_income("flanders/datasets_files/adult.csv", cfg.server.pool_size)
+        X_train, X_test, y_train, y_test = get_partitioned_income(
+            "flanders/datasets_files/adult.csv", cfg.server.pool_size
+        )
     elif dataset_name == "house":
-        sampling = 0
-        X_train, X_test, y_train, y_test = get_partitioned_house("flanders/datasets_files/houses_preprocessed.csv", cfg.server.pool_size)
+        X_train, X_test, y_train, y_test = get_partitioned_house(
+            "flanders/datasets_files/houses_preprocessed.csv", cfg.server.pool_size
+        )
 
-    
     # 3. Define your clients
     def client_fn(cid: str, pool_size: int = 10, dataset_name: str = dataset_name):
         client = clients[dataset_name][0]
@@ -109,16 +102,28 @@ def main(cfg: DictConfig) -> None:
         elif dataset_name == "mnist":
             return client(cid, pool_size)
         elif dataset_name == "income":
-            return client(cid, X_train[cid_idx], y_train[cid_idx], X_test[cid_idx], y_test[cid_idx])
+            return client(
+                cid,
+                X_train[cid_idx],
+                y_train[cid_idx],
+                X_test[cid_idx],
+                y_test[cid_idx],
+            )
         elif dataset_name == "house":
-            return client(cid, X_train[cid_idx], y_train[cid_idx], X_test[cid_idx], y_test[cid_idx])
+            return client(
+                cid,
+                X_train[cid_idx],
+                y_train[cid_idx],
+                X_test[cid_idx],
+                y_test[cid_idx],
+            )
         else:
             raise ValueError("Dataset not supported")
 
     # 4. Define your strategy
     strategy = instantiate(
         cfg.strategy,
-        evaluate_fn = clients[dataset_name][1],
+        evaluate_fn=clients[dataset_name][1],
         on_fit_config_fn=fit_config,
         fraction_fit=1,
         fraction_evaluate=0,
@@ -152,7 +157,7 @@ def main(cfg: DictConfig) -> None:
             output_dir=save_path,
         ),
         config=fl.server.ServerConfig(num_rounds=cfg.server.num_rounds),
-        strategy=strategy
+        strategy=strategy,
     )
 
 
@@ -163,6 +168,7 @@ def fit_config(server_round: int) -> Dict[str, Scalar]:
         "batch_size": 32,
     }
     return config
+
 
 if __name__ == "__main__":
     main()

@@ -1,35 +1,45 @@
+"""Dataset utilities for FL experiments."""
+
 # Borrowed from adap/Flower examples
 
+import shutil
 from pathlib import Path
+from typing import Any, Callable, Optional, Tuple
+
 import numpy as np
 import pandas as pd
 import torch
-from torchvision import datasets, transforms
-from torch.utils.data import DataLoader, SubsetRandomSampler
-import shutil
 from PIL import Image
-from torchvision.datasets import VisionDataset
-from typing import Callable, Optional, Tuple, Any
-from .dataset_preparation import create_lda_partitions
-from sklearn.preprocessing import OrdinalEncoder
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
-from sklearn.utils import check_random_state
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OrdinalEncoder
+from torch.utils.data import DataLoader, SubsetRandomSampler
+from torchvision import datasets, transforms
+from torchvision.datasets import VisionDataset
+
+from .dataset_preparation import create_lda_partitions
+
 
 class Data(torch.utils.data.Dataset):
+    """Dataset class."""
+
     def __init__(self, X, y):
+        """Initialize dataset."""
         self.X = torch.from_numpy(X.astype(np.float32))
         self.y = torch.from_numpy(y.astype(np.float32))
         self.len = self.X.shape[0]
-       
+
     def __getitem__(self, index):
+        """Return data and label pair."""
         return self.X[index], self.y[index]
-   
+
     def __len__(self):
+        """Return size of dataset."""
         return self.len
 
+
 def get_dataset(path_to_data: Path, cid: str, partition: str):
+    """Return TorchVision_FL dataset object."""
     # generate path to cid's data
     path_to_data = path_to_data / cid / (partition + ".pt")
 
@@ -39,8 +49,7 @@ def get_dataset(path_to_data: Path, cid: str, partition: str):
 def get_dataloader(
     path_to_data: str, cid: str, is_train: bool, batch_size: int, workers: int
 ):
-    """Generates trainset/valset object and returns appropiate dataloader."""
-
+    """Generate trainset/valset object and returns appropiate dataloader."""
     partition = "train" if is_train else "val"
     dataset = get_dataset(Path(path_to_data), str(cid), partition)
 
@@ -50,13 +59,13 @@ def get_dataloader(
 
 
 def get_random_id_splits(total: int, val_ratio: float, shuffle: bool = True):
-    """splits a list of length `total` into two following a
-    (1-val_ratio):val_ratio partitioning.
+    """Random split.
 
-    By default the indices are shuffled before creating the split and
-    returning.
+    Split a list of length `total` into two following a (1-val_ratio):val_ratio
+    partitioning.
+
+    By default the indices are shuffled before creating the split and returning.
     """
-
     if isinstance(total, int):
         indices = list(range(total))
     else:
@@ -69,21 +78,27 @@ def get_random_id_splits(total: int, val_ratio: float, shuffle: bool = True):
     return indices[split:], indices[:split]
 
 
-def do_fl_partitioning(path_to_dataset, pool_size, alpha, num_classes, val_ratio=0.0, seed=None):
+def do_fl_partitioning(
+    path_to_dataset, pool_size, alpha, num_classes, val_ratio=0.0, seed=None
+):
     """Torchvision (e.g. CIFAR-10) datasets using LDA."""
-
     images, labels = torch.load(path_to_dataset)
     idx = np.array(range(len(images)))
     dataset = [idx, labels]
     partitions, _ = create_lda_partitions(
-        dataset, num_partitions=pool_size, concentration=alpha, accept_imbalanced=True, seed=seed
+        dataset,
+        num_partitions=pool_size,
+        concentration=alpha,
+        accept_imbalanced=True,
+        seed=seed,
     )
 
     # Show label distribution for first partition (purely informative)
     partition_zero = partitions[0][1]
     hist, _ = np.histogram(partition_zero, bins=list(range(num_classes + 1)))
     print(
-        f"Class histogram for 0-th partition (alpha={alpha}, {num_classes} classes): {hist}"
+        "Class histogram for 0-th partition"
+        f"(alpha={alpha}, {num_classes} classes): {hist}"
     )
 
     # now save partitioned dataset to disk
@@ -94,7 +109,6 @@ def do_fl_partitioning(path_to_dataset, pool_size, alpha, num_classes, val_ratio
     Path.mkdir(splits_dir, parents=True)
 
     for p in range(pool_size):
-
         labels = partitions[p][1]
         image_idx = partitions[p][0]
         imgs = images[image_idx]
@@ -122,7 +136,7 @@ def do_fl_partitioning(path_to_dataset, pool_size, alpha, num_classes, val_ratio
 
 
 def cifar10Transformation():
-
+    """Return a torchvision.transforms object for CIFAR10 dataset."""
     return transforms.Compose(
         [
             transforms.ToTensor(),
@@ -132,11 +146,12 @@ def cifar10Transformation():
 
 
 class TorchVision_FL(VisionDataset):
-    """This is just a trimmed down version of torchvision.datasets.MNIST.
+    """TorchVision FL class.
 
-    Use this class by either passing a path to a torch file (.pt)
-    containing (data, targets) or pass the data, targets directly
-    instead.
+    Use this class by either passing a path to a torch file (.pt) containing
+    (data, targets) or pass the data, targets directly instead.
+
+    This is just a trimmed down version of torchvision.datasets.MNIST.
     """
 
     def __init__(
@@ -146,6 +161,7 @@ class TorchVision_FL(VisionDataset):
         targets=None,
         transform: Optional[Callable] = None,
     ) -> None:
+        """Initialize dataset."""
         path = path_to_data.parent if path_to_data else None
         super(TorchVision_FL, self).__init__(path, transform=transform)
         self.transform = transform
@@ -158,6 +174,7 @@ class TorchVision_FL(VisionDataset):
             self.targets = targets
 
     def __getitem__(self, index: int) -> Tuple[Any, Any]:
+        """Return a tuple (data, target)."""
         img, target = self.data[index], int(self.targets[index])
 
         # doing this so that it is consistent with all other datasets
@@ -177,13 +194,12 @@ class TorchVision_FL(VisionDataset):
         return img, target
 
     def __len__(self) -> int:
+        """Return length of dataset."""
         return len(self.data)
 
 
 def get_cifar_10(path_to_data="flanders/datasets_files/cifar_10/data"):
-    """Downloads CIFAR10 dataset and generates a unified training set (it will
-    be partitioned later using the LDA partitioning mechanism."""
-
+    """Download CIFAR10 dataset."""
     # download dataset and load train set
     train_set = datasets.CIFAR10(root=path_to_data, train=True, download=True)
 
@@ -200,6 +216,7 @@ def get_cifar_10(path_to_data="flanders/datasets_files/cifar_10/data"):
     # returns path where training data is and testset
     return training_data, test_set
 
+
 def get_mnist(
     data_root: str,
     batch_size: int,
@@ -208,7 +225,8 @@ def get_mnist(
     nb_clients=10,
     is_train=True,
 ):
-    """Helper function that loads both training and test datasets for MNIST.
+    """Load both training and test datasets for MNIST.
+
     Parameters
     ----------
     data_root: str
@@ -220,13 +238,14 @@ def get_mnist(
     cid: int
         Client ID used to select a specific partition.
     nb_clients: int
-        Total number of clients launched during training. This value dictates the number of unique to be created.
+        Total number of clients launched during training.
+        This value dictates the number of unique to be created.
+
     Returns
     -------
     (train_loader, test_loader): Tuple[DataLoader, DataLoader]
         Tuple contaning DataLoaders for training and test sets.
     """
-
     transform = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
     )
@@ -247,6 +266,7 @@ def get_mnist(
 
     return loader
 
+
 def dataset_partitioner(
     dataset: torch.utils.data.Dataset,
     batch_size: int,
@@ -254,7 +274,8 @@ def dataset_partitioner(
     number_of_clients: int,
     workers: int = 1,
 ) -> torch.utils.data.DataLoader:
-    """Helper function to partition datasets
+    """Make datasets partitions for a specific client_id.
+
     Parameters
     ----------
     dataset: torch.utils.data.Dataset
@@ -264,13 +285,14 @@ def dataset_partitioner(
     client_id: int
         Unique integer used for selecting a specific partition.
     number_of_clients: int
-        Total number of clients launched during training. This value dictates the number of partitions to be created.
+        Total number of clients launched during training.
+        This value dictates the number of partitions to be created.
+
     Returns
     -------
     data_loader: torch.utils.data.Dataset
         DataLoader for specific client_id considering number_of_clients partitions.
     """
-
     # Set the seed so we are sure to generate the same global batches
     # indices across all clients
     np.random.seed(123)
@@ -286,30 +308,37 @@ def dataset_partitioner(
     end_ind = start_ind + nb_samples_per_clients
     data_sampler = SubsetRandomSampler(dataset_indices[start_ind:end_ind])
     data_loader = torch.utils.data.DataLoader(
-        dataset, batch_size=batch_size, shuffle=False, sampler=data_sampler, num_workers=workers
+        dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        sampler=data_sampler,
+        num_workers=workers,
     )
     return data_loader
 
+
 def get_partitioned_income(path: str, pool_size: int, train_size=0.8, test_size=0.2):
+    """Return partitioned income dataset."""
     data = pd.read_csv(path)
     copy = data
     encoder = OrdinalEncoder()
     encoded_values = encoder.fit_transform(data)
-    data = pd.DataFrame(data = encoded_values, columns = copy.columns)
+    data = pd.DataFrame(data=encoded_values, columns=copy.columns)
     Y = data["income"]
-    data = data.loc[:,data.columns != "income"]
+    data = data.loc[:, data.columns != "income"]
 
     X_train, X_test, y_train, y_test = [], [], [], []
-    train_size = int((len(data) * train_size) // pool_size)+2
-    test_size = int((len(data) * test_size) // pool_size)-2
+    train_size = int((len(data) * train_size) // pool_size) + 2
+    test_size = int((len(data) * test_size) // pool_size) - 2
     for i in range(pool_size):
         xtrain, xtest, ytrain, ytest = train_test_split(
-            data, Y, 
-            train_size=train_size, 
-            test_size=test_size, 
-            random_state=i, 
+            data,
+            Y,
+            train_size=train_size,
+            test_size=test_size,
+            random_state=i,
             shuffle=True,
-            stratify=Y
+            stratify=Y,
         )
         X_train.append(xtrain)
         X_test.append(xtest)
@@ -318,21 +347,24 @@ def get_partitioned_income(path: str, pool_size: int, train_size=0.8, test_size=
 
     return X_train, X_test, y_train, y_test
 
+
 def get_partitioned_house(path: str, pool_size: int, train_size=0.8, test_size=0.2):
+    """Return partitioned house dataset."""
     data = pd.read_csv(path)
-    Y = data['median_house_value'].values
-    data = data.drop(['median_house_value'] , axis = 1).values
+    Y = data["median_house_value"].values
+    data = data.drop(["median_house_value"], axis=1).values
 
     X_train, X_test, y_train, y_test = [], [], [], []
-    train_size = int((len(data) * train_size) // pool_size)+2
-    test_size = int((len(data) * test_size) // pool_size)-2
+    train_size = int((len(data) * train_size) // pool_size) + 2
+    test_size = int((len(data) * test_size) // pool_size) - 2
     for i in range(pool_size):
         xtrain, xtest, ytrain, ytest = train_test_split(
-            data, Y, 
-            train_size=train_size, 
-            test_size=test_size, 
-            random_state=i, 
-            shuffle=True
+            data,
+            Y,
+            train_size=train_size,
+            test_size=test_size,
+            random_state=i,
+            shuffle=True,
         )
         sd = preprocessing.RobustScaler()
         xtrain = sd.fit_transform(xtrain)

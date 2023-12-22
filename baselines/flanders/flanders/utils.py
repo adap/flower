@@ -1,41 +1,36 @@
-"""
-Collection of help functions needed by the strategies.
-"""
+"""Collection of help functions needed by the strategies."""
+
+import os
+from threading import Lock
+from typing import Dict, Optional, Tuple
 
 import numpy as np
-import os
-import torch
 import pandas as pd
+import torch
+from flwr.common import Callable, NDArrays, Parameters, Scalar, parameters_to_ndarrays
 from natsort import natsorted
-from typing import Dict, Optional, Tuple, List
-from flwr.common import (
-    Parameters,
-    Scalar,
-    parameters_to_ndarrays,
-    NDArrays,
+from sklearn.linear_model import ElasticNet, LogisticRegression
+from sklearn.metrics import (
+    accuracy_score,
+    log_loss,
+    mean_absolute_percentage_error,
+    mean_squared_error,
+    r2_score,
+    roc_auc_score,
 )
-from threading import Lock
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.datasets import MNIST
-from sklearn.linear_model import LogisticRegression, ElasticNet
-from sklearn.metrics import accuracy_score, log_loss, roc_auc_score, mean_squared_error, mean_absolute_percentage_error, r2_score
 
-from .models import (
-    MnistNet, 
-    test_mnist,
-    CifarNet,
-    train_cifar,
-    test_cifar
-)
-from .client import set_params, set_sklearn_model_params, get_sklearn_model_params
-from .dataset import get_cifar_10, get_partitioned_income, get_partitioned_house
+from .client import set_params, set_sklearn_model_params
+from .dataset import get_cifar_10, get_partitioned_house, get_partitioned_income
+from .models import CifarNet, MnistNet, test_cifar, test_mnist
 
 lock = Lock()
 
+
 def l2_norm(true_matrix, predicted_matrix):
-    """
-    Compute the l2 norm between two matrices.
+    """Compute the l2 norm between two matrices.
 
     Parameters
     ----------
@@ -50,21 +45,26 @@ def l2_norm(true_matrix, predicted_matrix):
         1-d array of anomaly scores.
     """
     delta = np.subtract(true_matrix, predicted_matrix)
-    anomaly_scores = np.sum(delta**2,axis=-1)**(1./2)
+    anomaly_scores = np.sum(delta**2, axis=-1) ** (1.0 / 2)
     return anomaly_scores
 
+
 def save_params(parameters, cid, dir="clients_params", remove_last=False, rrl=False):
-    """
+    """Save parameters in a file.
+
     Args:
     - parameters (ndarray): decoded parameters to append at the end of the file
     - cid (int): identifier of the client
-    - remove_last (bool): if True, remove the last saved parameters and replace with "parameters"
-    - rrl (bool): if True, remove the last saved parameters and replace with the ones saved before this round
+    - remove_last (bool):
+        if True, remove the last saved parameters and replace with "parameters"
+    - rrl (bool):
+        if True, remove the last saved parameters and replace with the ones
+        saved before this round.
     """
     new_params = parameters
     # Save parameters in clients_params/cid_params
     path_file = f"{dir}/{cid}_params.npy"
-    if os.path.exists(dir) == False:
+    if os.path.exists(dir) is False:
         os.mkdir(dir)
     if os.path.exists(path_file):
         # load old parameters
@@ -81,13 +81,26 @@ def save_params(parameters, cid, dir="clients_params", remove_last=False, rrl=Fa
 
 
 def save_results(loss, accuracy, config=None, output_dir="results"):
+    """Save results in a csv file.
+
+    Parameters
+    ----------
+    loss : float
+        Loss value.
+    accuracy : float
+        Accuracy value.
+    config : dict, optional
+        Configurations to save, by default None.
+    output_dir : str, optional
+        Output directory, by default "results".
+    """
     # Generate csv
     config["accuracy"] = accuracy
     config["loss"] = loss
     df = pd.DataFrame.from_records([config])
     csv_path = f"{output_dir}/all_results.csv"
     # check that dir exists
-    if os.path.exists(output_dir) == False:
+    if os.path.exists(output_dir) is False:
         os.mkdir(output_dir)
     # Lock is needed when multiple clients are running concurrently
     with lock:
@@ -98,31 +111,35 @@ def save_results(loss, accuracy, config=None, output_dir="results"):
 
 
 def load_all_time_series(dir="clients_params", window=0):
-        """
-        Load all time series in order to have a tensor of shape (m,T,n)
-        where:
-        - T := time;
-        - m := number of clients;
-        - n := number of parameters
-        """
-        files = os.listdir(dir)
-        files = natsorted(files)
-        data = []
-        for file in files:
-            data.append(np.load(os.path.join(dir, file), allow_pickle=True))
+    """Load all time series.
 
-        return np.array(data)[:,-window:,:]
+    Load all time series in order to have a tensor of shape (m,T,n)
+    where:
+    - T := time;
+    - m := number of clients;
+    - n := number of parameters.
+    """
+    files = os.listdir(dir)
+    files = natsorted(files)
+    data = []
+    for file in files:
+        data.append(np.load(os.path.join(dir, file), allow_pickle=True))
+
+    return np.array(data)[:, -window:, :]
 
 
 def flatten_params(params):
-    """
-    Transform a list of (layers-)parameters into a single vector of shape (n).
-    """
+    """Transform a list of (layers-)parameters into a single vector of shape (n)."""
     return np.concatenate(params, axis=None).ravel()
 
 
 def evaluate_aggregated(
-    evaluate_fn, server_round: int, parameters: Parameters, config: Dict[str, Scalar]
+    evaluate_fn: Optional[
+        Callable[[int, NDArrays, Dict[str, Scalar]], Tuple[float, Dict[str, Scalar]]]
+    ],
+    server_round: int,
+    parameters: Parameters,
+    config: Dict[str, Scalar],
 ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
     """Evaluate model parameters using an evaluation function."""
     if evaluate_fn is None:
@@ -135,9 +152,11 @@ def evaluate_aggregated(
     loss, metrics = eval_res
     return loss, metrics
 
+
 def mnist_evaluate(
     server_round: int, parameters: NDArrays, config: Dict[str, Scalar], output_dir: str
 ):
+    """Evaluate MNIST model on the test set."""
     # determine device
     device = torch.device("cpu")
 
@@ -159,6 +178,7 @@ def mnist_evaluate(
 def cifar_evaluate(
     server_round: int, parameters: NDArrays, config: Dict[str, Scalar], output_dir: str
 ) -> Optional[Tuple[float, float]]:
+    """Evaluate CIFAR-10 model on the test set."""
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     model = CifarNet()
@@ -180,18 +200,21 @@ def cifar_evaluate(
 def income_evaluate(
     server_round: int, parameters: NDArrays, config: Dict[str, Scalar], output_dir: str
 ) -> Optional[Tuple[float, float]]:
+    """Evaluate Income model on the test set."""
     model = LogisticRegression()
     model = set_sklearn_model_params(model, parameters)
     model.classes_ = np.array([0.0, 1.0])
 
-    _, x_test, _, y_test = get_partitioned_income("flanders/datasets_files/adult_server.csv", 1, train_size=0.0, test_size=1.0)
+    _, x_test, _, y_test = get_partitioned_income(
+        "flanders/datasets_files/adult_server.csv", 1, train_size=0.0, test_size=1.0
+    )
     x_test = x_test[0]
     y_test = y_test[0]
     y_pred = model.predict(x_test)
     accuracy = accuracy_score(y_test, y_pred)
     loss = log_loss(y_test, model.predict_proba(x_test))
-    auc = roc_auc_score(y_test, model.predict_proba(x_test)[:,1])
-    
+    auc = roc_auc_score(y_test, model.predict_proba(x_test)[:, 1])
+
     config["round"] = server_round
     config["auc"] = auc
     save_results(loss, accuracy, config=config, output_dir=output_dir)
@@ -202,16 +225,21 @@ def income_evaluate(
 def house_evaluate(
     server_round: int, parameters: NDArrays, config: Dict[str, Scalar], output_dir: str
 ) -> Optional[Tuple[float, float]]:
+    """Evaluate House model on the test set."""
     model = ElasticNet(alpha=1, warm_start=True)
     model = set_sklearn_model_params(model, parameters)
-    _, x_test, _, y_test = get_partitioned_house("flanders/datasets_files/houses_server.csv", 1, train_size=0.0, test_size=1.0)
+    _, x_test, _, y_test = get_partitioned_house(
+        "flanders/datasets_files/houses_server.csv", 1, train_size=0.0, test_size=1.0
+    )
     x_test = x_test[0]
     y_test = y_test[0]
     y_pred = model.predict(x_test)
     loss = mean_squared_error(y_test, y_pred)
     mape = mean_absolute_percentage_error(y_test, y_pred)
     rsq = r2_score(y_test, y_pred)
-    arsq = 1 - (1-rsq) * (len(y_test)-1)/(len(y_test)-x_test.shape[1]-1)
+    arsq = 1 - (1 - rsq) * (len(y_test) - 1) / (
+        len(y_test) - x_test.shape[1] - 1
+    )  # noqa
     config["round"] = server_round
     config["auc"] = mape
     save_results(loss, arsq, config=config, output_dir=output_dir)

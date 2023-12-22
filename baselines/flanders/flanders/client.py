@@ -1,27 +1,27 @@
-"""Define your client class and a function to construct such clients.
+"""Clients implementation for Flanders."""
+from collections import OrderedDict
+from pathlib import Path
+from typing import Dict, List, Tuple, Union
 
-Please overwrite `flwr.client.NumPyClient` or `flwr.client.Client` and create a function
-to instantiate your client.
-"""
 import flwr as fl
-from flwr.common.typing import Scalar
+import numpy as np
 import ray
 import torch
-import numpy as np
-from collections import OrderedDict
-from typing import Dict, List, Union, Tuple
-from pathlib import Path
-from .dataset import get_mnist, get_dataloader
-from .models import CifarNet, train_cifar, test_cifar, MnistNet, train_mnist, test_mnist
-from sklearn.linear_model import LogisticRegression, ElasticNet
+from flwr.common.typing import Scalar
+from sklearn.linear_model import ElasticNet, LogisticRegression
 from sklearn.metrics import accuracy_score, log_loss
+
+from .dataset import get_dataloader, get_mnist
+from .models import CifarNet, MnistNet, test_cifar, test_mnist, train_cifar, train_mnist
 
 XY = Tuple[np.ndarray, np.ndarray]
 LogRegParams = Union[XY, Tuple[np.ndarray]]
 
+
 def get_params(model: torch.nn.ModuleList) -> List[np.ndarray]:
     """Get model weights as a list of NumPy ndarrays."""
     return [val.cpu().numpy() for _, val in model.state_dict().items()]
+
 
 def set_params(model: torch.nn.ModuleList, params: List[np.ndarray]):
     """Set model weights from a list of NumPy ndarrays."""
@@ -29,8 +29,9 @@ def set_params(model: torch.nn.ModuleList, params: List[np.ndarray]):
     state_dict = OrderedDict({k: torch.from_numpy(np.copy(v)) for k, v in params_dict})
     model.load_state_dict(state_dict, strict=True)
 
+
 def get_sklearn_model_params(model: LogisticRegression) -> LogRegParams:
-    """Returns the paramters of a sklearn LogisticRegression model."""
+    """Return the paramters of a sklearn LogisticRegression model."""
     if model.fit_intercept:
         params = [
             model.coef_,
@@ -42,41 +43,42 @@ def get_sklearn_model_params(model: LogisticRegression) -> LogRegParams:
         ]
     return params
 
+
 def set_sklearn_model_params(
     model: LogisticRegression, params: LogRegParams
 ) -> LogisticRegression:
-    """Sets the parameters of a sklean LogisticRegression model."""
+    """Set the parameters of a sklean LogisticRegression model."""
     model.coef_ = params[0]
     if model.fit_intercept:
         model.intercept_ = params[1]
     return model
 
-def set_initial_params_logistic_regr(model: LogisticRegression):
-    """
-    Sets initial parameters as zeros. Required since model params are
-    uninitialized until model.fit is called.
 
-    Server asks for initial parameters from clients at launch. 
-    Refer to sklearn.linear_model.LogisticRegression documentation for more
-    information.
+def set_initial_params_logistic_regr(model: LogisticRegression):
+    """Set initial parameters as zeros.
+
+    Required since model params are uninitialized until model.fit is called.
+
+    Server asks for initial parameters from clients at launch. Refer to
+    sklearn.linear_model.LogisticRegression documentation for more information.
     """
     n_classes = 2
     n_features = 14
-    model.classes_ = np.array([i for i in range(n_classes)])
+    model.classes_ = np.array(list(range(n_classes)))
 
     model.coef_ = np.zeros((n_classes, n_features))
     if model.fit_intercept:
         model.intercept_ = np.zeros((n_classes,))
     return model
 
-def set_initial_params_linear_regr(model: ElasticNet):
-    """
-    Sets initial parameters as zeros. Required since model params are
-    uninitialized until model.fit is called.
 
-    Server asks for initial parameters from clients at launch. 
-    Refer to sklearn.linear_model.LinearRegression documentation for more
-    information.
+def set_initial_params_linear_regr(model: ElasticNet):
+    """Set initial parameters as zeros.
+
+    Required since model params are uninitialized until model.fit is called.
+
+    Server asks for initial parameters from clients at launch. Refer to
+    sklearn.linear_model.LinearRegression documentation for more information.
     """
     n_features = 18
     model.coef_ = np.zeros((n_features,))
@@ -87,7 +89,10 @@ def set_initial_params_linear_regr(model: ElasticNet):
 
 # Adapted from Pytorch quickstart example
 class MnistClient(fl.client.NumPyClient):
+    """Flower client implementing MNIST image classification using PyTorch."""
+
     def __init__(self, cid: str, pool_size: int):
+        """Instantiate a client for the MNIST dataset."""
         self.cid = cid
         self.properties: Dict[str, Scalar] = {"tensor_type": "numpy.ndarray"}
         self.net = MnistNet()
@@ -95,15 +100,24 @@ class MnistClient(fl.client.NumPyClient):
         self.pool_size = pool_size
 
     def get_parameters(self, config):
+        """Get model parameters as a list of NumPy ndarrays."""
         return get_params(self.net)
 
     def fit(self, parameters, config):
+        """Set model parameters from a list of NumPy ndarrays."""
         set_params(self.net, parameters)
 
         # Load data for this client and get trainloader
         num_workers = 1
 
-        trainloader = get_mnist("flanders/datasets_files", 32, self.cid, nb_clients=self.pool_size, is_train=True, workers=num_workers)
+        trainloader = get_mnist(
+            "flanders/datasets_files",
+            32,
+            self.cid,
+            nb_clients=self.pool_size,
+            is_train=True,
+            workers=num_workers,
+        )
 
         # Send model to device
         self.net.to(self.device)
@@ -114,14 +128,26 @@ class MnistClient(fl.client.NumPyClient):
         new_parameters = self.get_parameters(config={})
 
         # Return local model and statistics
-        return new_parameters, len(trainloader.dataset), {"malicious": config["malicious"], "cid": self.cid}
+        return (
+            new_parameters,
+            len(trainloader.dataset),
+            {"malicious": config["malicious"], "cid": self.cid},
+        )
 
     def evaluate(self, parameters, config):
+        """Evaluate using local test dataset."""
         set_params(self.net, parameters)
 
         # Load data for this client and get trainloader
         num_workers = len(ray.worker.get_resource_ids()["CPU"])
-        testloader = get_mnist("flanders/datasets_files", 32, self.cid, nb_clients=self.pool_size, is_train=False, workers=num_workers)
+        testloader = get_mnist(
+            "flanders/datasets_files",
+            32,
+            self.cid,
+            nb_clients=self.pool_size,
+            is_train=False,
+            workers=num_workers,
+        )
 
         # Send model to device
         self.net.to(self.device)
@@ -135,7 +161,10 @@ class MnistClient(fl.client.NumPyClient):
 
 # Adapted from Pytorch quickstart example
 class CifarClient(fl.client.NumPyClient):
+    """Implementation of CIFAR-10 image classification using PyTorch."""
+
     def __init__(self, cid: str, fed_dir_data: str):
+        """Instantiate a client for the CIFAR-10 dataset."""
         self.cid = cid
         self.fed_dir = Path(fed_dir_data)
         self.properties: Dict[str, Scalar] = {"tensor_type": "numpy.ndarray"}
@@ -145,11 +174,14 @@ class CifarClient(fl.client.NumPyClient):
 
         # Determine device
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        #self.device = torch.device("mps")
+        # self.device = torch.device("mps")
+
     def get_parameters(self, config):
+        """Get model parameters as a list of NumPy ndarrays."""
         return get_params(self.net)
 
     def fit(self, parameters, config):
+        """Set model parameters from a list of NumPy ndarrays."""
         set_params(self.net, parameters)
 
         # Load data for this client and get trainloader
@@ -161,13 +193,18 @@ class CifarClient(fl.client.NumPyClient):
             batch_size=config["batch_size"],
             workers=num_workers,
         )
-        
+
         self.net.to(self.device)
         train_cifar(self.net, trainloader, epochs=config["epochs"], device=self.device)
-        
-        return get_params(self.net), len(trainloader.dataset), {"malicious": config["malicious"], "cid": self.cid}
+
+        return (
+            get_params(self.net),
+            len(trainloader.dataset),
+            {"malicious": config["malicious"], "cid": self.cid},
+        )
 
     def evaluate(self, parameters, config):
+        """Evaluate using local test dataset."""
         set_params(self.net, parameters)
 
         # Load data for this client and get trainloader
@@ -183,8 +220,13 @@ class CifarClient(fl.client.NumPyClient):
 
 
 class IncomeClient(fl.client.NumPyClient):
+    """Implementation income classification using scikit-learn."""
+
     def __init__(self, cid: str, x_train, y_train, x_test, y_test):
-        self.model = LogisticRegression(penalty="l1", solver="liblinear", max_iter=1, warm_start=True)
+        """Instantiate a client for the income dataset."""
+        self.model = LogisticRegression(
+            penalty="l1", solver="liblinear", max_iter=1, warm_start=True
+        )
         set_initial_params_logistic_regr(self.model)
         self.cid = cid
         self.x_train = x_train
@@ -193,16 +235,23 @@ class IncomeClient(fl.client.NumPyClient):
         self.y_test = y_test
 
     def get_parameters(self, config: Dict[str, Scalar]):
+        """Get model parameters as a list of NumPy ndarrays."""
         return get_sklearn_model_params(self.model)
 
     def fit(self, parameters, config):
+        """Set model parameters from a list of NumPy ndarrays."""
         # Set scikit logistic regression model parameters
         self.model = set_sklearn_model_params(self.model, parameters)
         self.model.fit(self.x_train, self.y_train)
         new_parameters = get_sklearn_model_params(self.model)
-        return new_parameters, len(self.x_train), {"malicious": config["malicious"], "cid": self.cid}
-    
+        return (
+            new_parameters,
+            len(self.x_train),
+            {"malicious": config["malicious"], "cid": self.cid},
+        )
+
     def evaluate(self, parameters, config):
+        """Evaluate using local test dataset."""
         # Set scikit logistic regression model parameters
         self.model = set_sklearn_model_params(self.model, parameters)
         y_pred = self.model.predict(self.x_test)
@@ -212,7 +261,10 @@ class IncomeClient(fl.client.NumPyClient):
 
 
 class HouseClient(fl.client.NumPyClient):
+    """Implementation of house price prediction using scikit-learn."""
+
     def __init__(self, cid: str, x_train, y_train, x_test, y_test):
+        """Instantiate a client for the house dataset."""
         self.model = ElasticNet(alpha=1, max_iter=1, warm_start=True)
         set_initial_params_linear_regr(self.model)
         self.cid = cid
@@ -222,13 +274,20 @@ class HouseClient(fl.client.NumPyClient):
         self.y_test = y_test
 
     def get_parameters(self, config: Dict[str, Scalar]):
+        """Get model parameters as a list of NumPy ndarrays."""
         return get_sklearn_model_params(self.model)
 
     def fit(self, parameters, config):
+        """Set model parameters from a list of NumPy ndarrays."""
         self.model = set_sklearn_model_params(self.model, parameters)
         self.model.fit(self.x_train, self.y_train)
         new_parameters = get_sklearn_model_params(self.model)
-        return new_parameters, len(self.x_train), {"malicious": config["malicious"], "cid": self.cid}
-    
+        return (
+            new_parameters,
+            len(self.x_train),
+            {"malicious": config["malicious"], "cid": self.cid},
+        )
+
     def evaluate(self, parameters, config):
+        """Evaluate using local test dataset."""
         raise NotImplementedError("HouseClient.evaluate not implemented")

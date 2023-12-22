@@ -1,28 +1,28 @@
-"""Define our models, and training and eval functions.
-
-If your model is 100% off-the-shelf (e.g. directly from torchvision without requiring
-modifications) you might be better off instantiating your  model directly from the Hydra
-config. In this way, swapping your model for  another one can be done without changing
-the python code at all
-"""
+"""Models for FLANDERS experiments."""
 import itertools
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
 from sklearn.metrics import roc_auc_score
 from sklearn.preprocessing import LabelBinarizer
 
+
 def roc_auc_multiclass(y_true, y_pred):
+    """Compute the ROC AUC for multiclass classification."""
     lb = LabelBinarizer()
     lb.fit(y_true)
     y_true = lb.transform(y_true)
     y_pred = lb.transform(y_pred)
     return roc_auc_score(y_true, y_pred, multi_class="ovr")
 
+
 # Source: https://github.com/bladesteam/blades/blob/master/src/blades/models/mnist/mlp.py
 class MnistNet(nn.Module):
+    """Simple MLP for MNIST."""
+
     def __init__(self):
+        """Initialize the model."""
         super(MnistNet, self).__init__()
         # number of hidden nodes in each layer (512)
         hidden_1 = 128
@@ -38,6 +38,7 @@ class MnistNet(nn.Module):
         self.dropout = nn.Dropout(0.2)
 
     def forward(self, x):
+        """Forward pass through the network."""
         # flatten image input
         x = x.view(-1, 28 * 28)
         # add hidden layer, with relu activation function
@@ -53,31 +54,39 @@ class MnistNet(nn.Module):
         x = F.log_softmax(x, dim=1)
         return x
 
+
 def train_mnist(model, dataloader, epochs, device):
+    """Train the network on the training set."""
     n_total_steps = len(dataloader)
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)  
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     for epoch in range(epochs):
-        for i, (images, labels) in enumerate(dataloader):  
+        for i, (images, labels) in enumerate(dataloader):
             # origin shape: [100, 1, 28, 28]
             # resized: [100, 784]
-            images = images.reshape(-1, 28*28).to(device)
+            images = images.reshape(-1, 28 * 28).to(device)
             labels = labels.to(device)
-            
+
             # Forward pass
             outputs = model(images)
             loss = criterion(outputs, labels)
-            
+
             # Backward and optimize
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            
-            if (i+1) % 100 == 0:
-                print (f'Epoch [{epoch+1}/{epochs}], Step [{i+1}/{n_total_steps}], Loss: {loss.item():.4f}')
+
+            if (i + 1) % 100 == 0:
+                print(
+                    f"Epoch [{epoch+1}/{epochs}], "
+                    f"Step [{i+1}/{n_total_steps}], "
+                    f"Loss: {loss.item():.4f}"
+                )
+
 
 def test_mnist(model, dataloader, device):
-    loss=0
+    """Validate the network on the entire test set."""
+    loss = 0
     model.eval()
     criterion = nn.CrossEntropyLoss()
     y_true, y_pred = [], []
@@ -85,7 +94,7 @@ def test_mnist(model, dataloader, device):
         n_correct = 0
         n_samples = 0
         for images, labels in dataloader:
-            images = images.reshape(-1, 28*28).to(device)
+            images = images.reshape(-1, 28 * 28).to(device)
             labels = labels.to(device)
             outputs = model(images)
             # max returns (value ,index)
@@ -101,9 +110,12 @@ def test_mnist(model, dataloader, device):
         acc = n_correct / n_samples
     return loss, acc, auc
 
+
 # Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')
 # borrowed from Pytorch quickstart example
 class CifarNet(nn.Module):
+    """Simple CNN for CIFAR-10."""
+
     def __init__(self) -> None:
         super(CifarNet, self).__init__()
         self.conv1 = nn.Conv2d(3, 6, 5)
@@ -114,6 +126,7 @@ class CifarNet(nn.Module):
         self.fc3 = nn.Linear(84, 10)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward pass through the network."""
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
         x = x.view(-1, 16 * 5 * 5)
@@ -121,6 +134,7 @@ class CifarNet(nn.Module):
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
+
 
 # borrowed from Pytorch quickstart example
 def train_cifar(net, trainloader, epochs, device: str):
