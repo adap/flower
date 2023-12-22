@@ -129,6 +129,7 @@ def _call_client_proxy(
         get_properties_res: GetPropertiesRes = client_proxy.get_properties(
             ins=get_properties_ins,
             timeout=timeout,
+            group_id=None,
         )
         get_properties_res_proto = serde.get_properties_res_to_proto(
             res=get_properties_res
@@ -142,6 +143,7 @@ def _call_client_proxy(
         get_parameters_res: GetParametersRes = client_proxy.get_parameters(
             ins=get_parameters_ins,
             timeout=timeout,
+            group_id=None,
         )
         get_parameters_res_proto = serde.get_parameters_res_to_proto(
             res=get_parameters_res

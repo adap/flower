@@ -45,13 +45,13 @@ class SuccessClient(ClientProxy):
     """Test class."""
 
     def get_properties(
-        self, ins: GetPropertiesIns, timeout: Optional[float]
+        self, ins: GetPropertiesIns, timeout: Optional[float], group_id: Optional[str]
     ) -> GetPropertiesRes:
         """Raise an Exception because this method is not expected to be called."""
         raise Exception()
 
     def get_parameters(
-        self, ins: GetParametersIns, timeout: Optional[float]
+        self, ins: GetParametersIns, timeout: Optional[float], group_id: Optional[str]
     ) -> GetParametersRes:
         """Raise an Exception because this method is not expected to be called."""
         raise Exception()
@@ -80,7 +80,9 @@ class SuccessClient(ClientProxy):
             metrics={},
         )
 
-    def reconnect(self, ins: ReconnectIns, timeout: Optional[float]) -> DisconnectRes:
+    def reconnect(
+        self, ins: ReconnectIns, timeout: Optional[float], group_id: Optional[str]
+    ) -> DisconnectRes:
         """Simulate reconnect by returning a DisconnectRes with UNKNOWN reason."""
         return DisconnectRes(reason="UNKNOWN")
 
@@ -89,13 +91,13 @@ class FailingClient(ClientProxy):
     """Test class."""
 
     def get_properties(
-        self, ins: GetPropertiesIns, timeout: Optional[float]
+        self, ins: GetPropertiesIns, timeout: Optional[float], group_id: Optional[str]
     ) -> GetPropertiesRes:
         """Raise an Exception to simulate failure in the client."""
         raise Exception()
 
     def get_parameters(
-        self, ins: GetParametersIns, timeout: Optional[float]
+        self, ins: GetParametersIns, timeout: Optional[float], group_id: Optional[str]
     ) -> GetParametersRes:
         """Raise an Exception to simulate failure in the client."""
         raise Exception()
@@ -112,7 +114,9 @@ class FailingClient(ClientProxy):
         """Raise an Exception to simulate failure in the client."""
         raise Exception()
 
-    def reconnect(self, ins: ReconnectIns, timeout: Optional[float]) -> DisconnectRes:
+    def reconnect(
+        self, ins: ReconnectIns, timeout: Optional[float], group_id: Optional[str]
+    ) -> DisconnectRes:
         """Raise an Exception to simulate failure in the client."""
         raise Exception()
 
