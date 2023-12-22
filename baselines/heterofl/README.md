@@ -90,7 +90,7 @@ poetry shell
 
 
 ## Running the Experiments
-
+To run HeteroFL experiments in poetry activated environment:
 ```bash  
 # The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs)
 # should run (including dataset download and necessary partitioning) by executing the command:
@@ -108,7 +108,11 @@ python -m heterofl.main num_rounds=400 control.model_split_mode='dynamic' contro
 python -m heterofl.main num_rounds=400 control.model_split_mode='dynamic' control.model_mode='a1-b1'
 
 ```
-
+To run FedAvg experiments:
+```bash
+python -m heterofl.main --config-name fedavg
+# Similarly to the commands illustrated above, we can modify the default settings in the fedavg.yaml file.
+```
 
 ## Expected Results
 
@@ -117,12 +121,18 @@ python -m heterofl.main num_rounds=400 control.model_split_mode='dynamic' contro
 python -m heterofl.main --multirun control.model_mode='a1','a1-e1','a1-b1-c1-d1-e1'
 
 # running the multirun for IID-CIFAR10 dataset with various model-modes by modifying default config
-python -m heterofl.main --multirun control.model_mode='a1','a1-e1','a1-b1-c1-d1-e1' dataset.dataset_name='CIFAR10' model.model_name='resnet18' num_rounds=400 strategy.lr=0.1 strategy.milestones=[150, 250]
+python -m heterofl.main --multirun control.model_mode='a1','a1-e1','a1-b1-c1-d1-e1' dataset.dataset_name='CIFAR10' model.model_name='resnet18' num_rounds=400 optim_scheduler.lr=0.1 strategy.milestones=[150, 250]
 
 # running the multirun for non-IID-MNIST with various model-modes by modifying default config
-python -m heterofl.main --multirun control.model_mode='a1','a1-e1','a1-b1-c1-d1-e1' dataset.iid=False num_rounds=400 strategy.milestones=[200]
+python -m heterofl.main --multirun control.model_mode='a1','a1-e1','a1-b1-c1-d1-e1' dataset.iid=False num_rounds=400 optim_scheduler.milestones=[200]
 
 # similarly, we can perform for various model-modes, datasets. But we cannot multirun with both non-iid and iid at once for reproducing the tables below, since the number of rounds and milestones for MultiStepLR are different for non-iid and iid. The tables below are the reproduced results of various multiruns.
+
+#To reproduce the fedavg results
+#for MNIST dataset
+python -m heterofl.main --config-name fedavg --multirun dataset.iid=True,False
+# for CIFAR10 dataset
+python -m heterofl.main --config-name fedavg --multirun num_rounds=1800 dataset.dataset_name='CIFAR10' dataset.iid=True,False dataset.batch_size.train=50 model.model_name='CNNCifar' optim_scheduler.lr=0.1
 ```
 <br>
  
