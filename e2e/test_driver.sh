@@ -19,7 +19,7 @@ sleep 3
 timeout 2m flower-client client:flower $client_arg --server 127.0.0.1:9092 &
 sleep 3
 
-timeout 2m flower-client client:flower $client_arg --server 127.0.0.1:9092 &
+timeout 2m flower-client --insecure  client:flower $client_arg --server 127.0.0.1:9092 &
 sleep 3
 
 timeout 2m python driver.py &
