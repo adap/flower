@@ -42,6 +42,7 @@ class CustomClientProxy(ClientProxy):
         self,
         ins: GetPropertiesIns,
         timeout: Optional[float],
+        group_id: Optional[str],
     ) -> GetPropertiesRes:
         """Return the client's properties."""
         return GetPropertiesRes(status=Status(code=Code.OK, message=""), properties={})
@@ -50,6 +51,7 @@ class CustomClientProxy(ClientProxy):
         self,
         ins: GetParametersIns,
         timeout: Optional[float],
+        group_id: Optional[str],
     ) -> GetParametersRes:
         """Return the current local model parameters."""
         return GetParametersRes(
@@ -86,6 +88,7 @@ class CustomClientProxy(ClientProxy):
         self,
         ins: ReconnectIns,
         timeout: Optional[float],
+        group_id: Optional[str],
     ) -> DisconnectRes:
         """Disconnect and (optionally) reconnect later."""
         return DisconnectRes(reason="")

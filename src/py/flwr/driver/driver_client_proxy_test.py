@@ -106,7 +106,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
 
         # Execute
         value: flwr.common.GetParametersRes = client.get_parameters(
-            ins=get_parameters_ins, timeout=None
+            ins=get_parameters_ins, timeout=None, group_id=None
         )
 
         # Assert

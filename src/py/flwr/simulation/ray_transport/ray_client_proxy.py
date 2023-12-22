@@ -48,7 +48,10 @@ class RayClientProxy(ClientProxy):
         self.resources = resources
 
     def get_properties(
-        self, ins: common.GetPropertiesIns, timeout: Optional[float]
+        self,
+        ins: common.GetPropertiesIns,
+        timeout: Optional[float],
+        group_id: Optional[str],
     ) -> common.GetPropertiesRes:
         """Return client's properties."""
         future_get_properties_res = launch_and_get_properties.options(  # type: ignore
@@ -65,7 +68,10 @@ class RayClientProxy(ClientProxy):
         )
 
     def get_parameters(
-        self, ins: common.GetParametersIns, timeout: Optional[float]
+        self,
+        ins: common.GetParametersIns,
+        timeout: Optional[float],
+        group_id: Optional[str],
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
         future_paramseters_res = launch_and_get_parameters.options(  # type: ignore
@@ -116,7 +122,10 @@ class RayClientProxy(ClientProxy):
         )
 
     def reconnect(
-        self, ins: common.ReconnectIns, timeout: Optional[float]
+        self,
+        ins: common.ReconnectIns,
+        timeout: Optional[float],
+        group_id: Optional[str],
     ) -> common.DisconnectRes:
         """Disconnect and (optionally) reconnect later."""
         return common.DisconnectRes(reason="")  # Nothing to do here (yet)
@@ -169,7 +178,10 @@ class RayActorClientProxy(ClientProxy):
         return res
 
     def get_properties(
-        self, ins: common.GetPropertiesIns, timeout: Optional[float]
+        self,
+        ins: common.GetPropertiesIns,
+        timeout: Optional[float],
+        group_id: Optional[str],
     ) -> common.GetPropertiesRes:
         """Return client's properties."""
 
@@ -187,7 +199,10 @@ class RayActorClientProxy(ClientProxy):
         )
 
     def get_parameters(
-        self, ins: common.GetParametersIns, timeout: Optional[float]
+        self,
+        ins: common.GetParametersIns,
+        timeout: Optional[float],
+        group_id: Optional[str],
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
 
@@ -241,7 +256,10 @@ class RayActorClientProxy(ClientProxy):
         )
 
     def reconnect(
-        self, ins: common.ReconnectIns, timeout: Optional[float]
+        self,
+        ins: common.ReconnectIns,
+        timeout: Optional[float],
+        group_id: Optional[str],
     ) -> common.DisconnectRes:
         """Disconnect and (optionally) reconnect later."""
         return common.DisconnectRes(reason="")  # Nothing to do here (yet)

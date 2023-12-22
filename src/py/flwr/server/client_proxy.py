@@ -47,6 +47,7 @@ class ClientProxy(ABC):
         self,
         ins: GetPropertiesIns,
         timeout: Optional[float],
+        group_id: Optional[str],
     ) -> GetPropertiesRes:
         """Return the client's properties."""
 
@@ -55,6 +56,7 @@ class ClientProxy(ABC):
         self,
         ins: GetParametersIns,
         timeout: Optional[float],
+        group_id: Optional[str],
     ) -> GetParametersRes:
         """Return the current local model parameters."""
 
@@ -81,5 +83,6 @@ class ClientProxy(ABC):
         self,
         ins: ReconnectIns,
         timeout: Optional[float],
+        group_id: Optional[str],
     ) -> DisconnectRes:
         """Disconnect and (optionally) reconnect later."""

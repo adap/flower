@@ -41,7 +41,10 @@ class DriverClientProxy(ClientProxy):
         self.anonymous = anonymous
 
     def get_properties(
-        self, ins: common.GetPropertiesIns, timeout: Optional[float]
+        self,
+        ins: common.GetPropertiesIns,
+        timeout: Optional[float],
+        group_id: Optional[str],
     ) -> common.GetPropertiesRes:
         """Return client's properties."""
         server_message_proto: transport_pb2.ServerMessage = (
@@ -52,12 +55,15 @@ class DriverClientProxy(ClientProxy):
         return cast(
             common.GetPropertiesRes,
             self._send_receive_msg(
-                server_message_proto, timeout, None
+                server_message_proto, timeout, group_id
             ).get_properties_res,
         )
 
     def get_parameters(
-        self, ins: common.GetParametersIns, timeout: Optional[float]
+        self,
+        ins: common.GetParametersIns,
+        timeout: Optional[float],
+        group_id: Optional[str],
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
         server_message_proto: transport_pb2.ServerMessage = (
@@ -68,7 +74,7 @@ class DriverClientProxy(ClientProxy):
         return cast(
             common.GetParametersRes,
             self._send_receive_msg(
-                server_message_proto, timeout, None
+                server_message_proto, timeout, group_id
             ).get_parameters_res,
         )
 
@@ -103,7 +109,10 @@ class DriverClientProxy(ClientProxy):
         )
 
     def reconnect(
-        self, ins: common.ReconnectIns, timeout: Optional[float]
+        self,
+        ins: common.ReconnectIns,
+        timeout: Optional[float],
+        group_id: Optional[str],
     ) -> common.DisconnectRes:
         """Disconnect and (optionally) reconnect later."""
         return common.DisconnectRes(reason="")  # Nothing to do here (yet)
