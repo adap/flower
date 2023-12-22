@@ -15,22 +15,44 @@ from monai.transforms import (
     ToTensor,
 )
 from PIL import Image
+from torch.utils.data import Subset
 
 
-def load_data():
+def _partition(dataset, num_shards, index):
+    total_size = len(dataset)
+    shard_size = total_size // num_shards
+
+    # Calculate start and end indices for the shard
+    start_idx = index * shard_size
+    if index == num_shards - 1:
+        # Last shard takes the remainder
+        end_idx = total_size
+    else:
+        end_idx = start_idx + shard_size
+
+    # Create a subset for the shard
+    shard = Subset(dataset, range(start_idx, end_idx))
+    return shard
+
+
+def load_data(num_shards, index):
     image_file_list, image_label_list, num_total, num_class = _download_data()
     trainX, trainY, valX, valY, testX, testY = _split_data(
         image_file_list, image_label_list, num_total
     )
     train_transforms, val_transforms = _get_transforms()
 
-    train_ds = MedNISTDataset(trainX, trainY, train_transforms)
+    train_ds = _partition(
+        MedNISTDataset(trainX, trainY, train_transforms), num_shards, index
+    )
     train_loader = DataLoader(train_ds, batch_size=300, shuffle=True, num_workers=2)
 
-    val_ds = MedNISTDataset(valX, valY, val_transforms)
+    val_ds = _partition(MedNISTDataset(valX, valY, val_transforms), num_shards, index)
     val_loader = DataLoader(val_ds, batch_size=300, num_workers=2)
 
-    test_ds = MedNISTDataset(testX, testY, val_transforms)
+    test_ds = _partition(
+        MedNISTDataset(testX, testY, val_transforms), num_shards, index
+    )
     test_loader = DataLoader(test_ds, batch_size=300, num_workers=2)
 
     return train_loader, val_loader, test_loader, num_class

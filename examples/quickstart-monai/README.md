@@ -73,13 +73,13 @@ Now you are ready to start the Flower clients which will participate in the lear
 Start client 1 in the first terminal:
 
 ```shell
-python3 client.py
+python3 client.py --node_id 0
 ```
 
 Start client 2 in the second terminal:
 
 ```shell
-python3 client.py
+python3 client.py --node_id 1
 ```
 
 You will see that the federated training is starting. Look at the [code](https://github.com/adap/flower/tree/main/examples/quickstart-monai) for a detailed explanation.
