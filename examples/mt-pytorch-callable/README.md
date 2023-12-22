@@ -33,7 +33,7 @@ flower-server --insecure
 In a new terminal window, start the first long-running Flower client:
 
 ```bash
-flower-client client:flower
+flower-client --insecure client:flower
 ```
 
 In yet another new terminal window, start the second long-running Flower client:
