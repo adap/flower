@@ -8,9 +8,6 @@ import shutil
 from typing import Dict
 
 import flwr as fl
-
-# these are the basic packages you'll need here
-# feel free to remove some if aren't needed
 import hydra
 from flwr.common.typing import Scalar
 from flwr.server.client_manager import SimpleClientManager

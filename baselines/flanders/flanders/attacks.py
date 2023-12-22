@@ -17,7 +17,7 @@ from scipy.stats import norm
 
 def no_attack(
     ordered_results: List[Tuple[ClientProxy, FitRes]], states: Dict[str, bool], **kwargs
-) -> List[Tuple[ClientProxy, FitRes]]:
+):
     """No attack."""
     return ordered_results, {}
 
