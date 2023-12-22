@@ -262,6 +262,7 @@ class Server:
             client_instructions=client_instructions,
             max_workers=self.max_workers,
             timeout=timeout,
+            group_id=None,
         )
 
     def _get_initial_parameters(self, timeout: Optional[float]) -> Parameters:
@@ -278,7 +279,9 @@ class Server:
         log(INFO, "Requesting initial parameters from one random client")
         random_client = self._client_manager.sample(1)[0]
         ins = GetParametersIns(config={})
-        get_parameters_res = random_client.get_parameters(ins=ins, timeout=timeout)
+        get_parameters_res = random_client.get_parameters(
+            ins=ins, timeout=timeout, group_id=None
+        )
         log(INFO, "Received initial parameters from one random client")
         return get_parameters_res.parameters
 
@@ -287,11 +290,12 @@ def reconnect_clients(
     client_instructions: List[Tuple[ClientProxy, ReconnectIns]],
     max_workers: Optional[int],
     timeout: Optional[float],
+    group_id: Optional[str],
 ) -> ReconnectResultsAndFailures:
     """Instruct clients to disconnect and never reconnect."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         submitted_fs = {
-            executor.submit(reconnect_client, client_proxy, ins, timeout)
+            executor.submit(reconnect_client, client_proxy, ins, timeout, group_id)
             for client_proxy, ins in client_instructions
         }
         finished_fs, _ = concurrent.futures.wait(
@@ -316,11 +320,13 @@ def reconnect_client(
     client: ClientProxy,
     reconnect: ReconnectIns,
     timeout: Optional[float],
+    group_id: Optional[str],
 ) -> Tuple[ClientProxy, DisconnectRes]:
     """Instruct client to disconnect and (optionally) reconnect later."""
     disconnect = client.reconnect(
         reconnect,
         timeout=timeout,
+        group_id=group_id,
     )
     return client, disconnect
 
