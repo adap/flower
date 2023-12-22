@@ -110,7 +110,7 @@ Flower client
 Docker client images come with a pre-installed version of Flower and serve as a base for building
 your own client image. Therefore, they don't run anything when you try to start them. We will use an
 example to illustrate how you can dockerize your client code. You can find the full example
-`here <>`_.
+`here <https://github.com/adap/flower/tree/main/examples/docker-client>`_.
 
 Project layout
 ~~~~~~~~~~~~~~
@@ -137,7 +137,7 @@ The ``Dockerfile`` contains the instructions that assemble the client image.
 .. code-block:: dockerfile
   :linenos:
 
-  FROM flwr/client:1.6.0-py3.8-ubuntu22.04-dev
+  FROM flwr/client:1.6.0-py3.8-ubuntu22.04
 
   WORKDIR /app
   COPY requirements.txt .
@@ -147,7 +147,7 @@ The ``Dockerfile`` contains the instructions that assemble the client image.
   ENTRYPOINT ["python", "-c", "from flwr.client import run_client; run_client()", "--callable", "client:flower"]
 
 In the first two instructions, we instruct Docker to use the client image tagged
-``1.6.0-py3.8-ubuntu22.04-dev`` as a base and set our working directory to ``/app``. All of the
+``1.6.0-py3.8-ubuntu22.04`` as a base and set our working directory to ``/app``. All of the
 following instructions will now be executed in the ``/app`` directory. In lines 4-5, we install the
 Python dependencies by first copying the ``client-code/requirements.txt`` into the image and running
 ``pip`` install on it. In the last two lines, we first copy the file ``client-code/client.py`` into
