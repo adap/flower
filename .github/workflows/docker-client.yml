@@ -28,8 +28,8 @@ jobs:
         FLWR_VERSION=${{ github.event.inputs.flwr-version }}
         BASE_IMAGE_TAG=py${{ matrix.python-version }}-ubuntu22.04
       tags: |
-        ${{ github.event.inputs.flwr-version }}-py${{ matrix.python-version }}-ubuntu22.04-dev
-        ${{ github.event.inputs.flwr-version }}-dev
+        ${{ github.event.inputs.flwr-version }}-py${{ matrix.python-version }}-ubuntu22.04
+        ${{ github.event.inputs.flwr-version }}
         latest
     secrets:
       dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
