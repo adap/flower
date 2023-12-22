@@ -97,28 +97,6 @@ def handle(
         The task response that should be returned to the server.
     """
     server_msg = get_server_message_from_task_ins(task_ins, exclude_reconnect_ins=False)
-    if server_msg is None:
-        # Instantiate the client
-        client = client_fn("-1")
-        client.set_state(state)
-        # Secure Aggregation
-        if task_ins.task.HasField("sa") and isinstance(
-            client, SecureAggregationHandler
-        ):
-            # pylint: disable-next=invalid-name
-            named_values = serde.named_values_from_proto(task_ins.task.sa.named_values)
-            res = client.handle_secure_aggregation(named_values)
-            task_res = TaskRes(
-                task_id="",
-                group_id="",
-                workload_id=0,
-                task=Task(
-                    ancestry=[],
-                    sa=SecureAggregation(named_values=serde.named_values_to_proto(res)),
-                ),
-            )
-            return task_res, client.get_state()
-        raise NotImplementedError()
     client_msg, updated_state = handle_legacy_message(client_fn, state, server_msg)
     task_res = wrap_client_message_in_task_res(client_msg)
     return task_res, updated_state
