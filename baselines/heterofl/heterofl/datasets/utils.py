@@ -13,6 +13,7 @@ from collections import Counter
 import anytree
 import numpy as np
 from PIL import Image
+from six.moves import urllib
 from tqdm import tqdm
 
 from heterofl.utils import makedir_exist_ok
@@ -35,24 +36,22 @@ def pil_loader(path):
         return img.convert("RGB")
 
 
-def accimage_loader(path):
-    """Load image from path using accimage_loader."""
-    import accimage
+# def accimage_loader(path):
+#     """Load image from path using accimage_loader."""
+#     import accimage
 
-    try:
-        return accimage.Image(path)
-    except IOError:
-        return pil_loader(path)
+#     try:
+#         return accimage.Image(path)
+#     except IOError:
+#         return pil_loader(path)
 
 
 def default_loader(path):
     """Load image from path using default loader."""
-    from torchvision import get_image_backend
+    # if get_image_backend() == "accimage":
+    #     return accimage_loader(path)
 
-    if get_image_backend() == "accimage":
-        return accimage_loader(path)
-    else:
-        return pil_loader(path)
+    return pil_loader(path)
 
 
 def has_file_allowed_extension(filename, extensions):
@@ -102,8 +101,6 @@ def _check_integrity(path, md5=None):
 
 def download_url(url, root, filename, md5):
     """Download files from the url."""
-    from six.moves import urllib
-
     path = os.path.join(root, filename)
     makedir_exist_ok(root)
     if os.path.isfile(path) and _check_integrity(path, md5):
