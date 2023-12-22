@@ -17,6 +17,7 @@
 #define START_H
 #pragma once
 #include "client.h"
+#include "communicator.h"
 #include "grpc_rere.h"
 #include "message_handler.h"
 #include <grpcpp/grpcpp.h>
