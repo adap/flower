@@ -1,7 +1,7 @@
 """Clients implementation for Flanders."""
 from collections import OrderedDict
 from pathlib import Path
-from typing import Dict, List, Tuple, Union
+from typing import Dict, Tuple, Union
 
 import flwr as fl
 import numpy as np
@@ -18,19 +18,19 @@ XY = Tuple[np.ndarray, np.ndarray]
 LogRegParams = Union[XY, Tuple[np.ndarray]]
 
 
-def get_params(model: torch.nn.ModuleList) -> List[np.ndarray]:
+def get_params(model):
     """Get model weights as a list of NumPy ndarrays."""
     return [val.cpu().numpy() for _, val in model.state_dict().items()]
 
 
-def set_params(model: torch.nn.ModuleList, params: List[np.ndarray]):
+def set_params(model, params):
     """Set model weights from a list of NumPy ndarrays."""
     params_dict = zip(model.state_dict().keys(), params)
     state_dict = OrderedDict({k: torch.from_numpy(np.copy(v)) for k, v in params_dict})
     model.load_state_dict(state_dict, strict=True)
 
 
-def get_sklearn_model_params(model: LogisticRegression) -> LogRegParams:
+def get_sklearn_model_params(model):
     """Return the paramters of a sklearn LogisticRegression model."""
     if model.fit_intercept:
         params = [
@@ -44,9 +44,7 @@ def get_sklearn_model_params(model: LogisticRegression) -> LogRegParams:
     return params
 
 
-def set_sklearn_model_params(
-    model: LogisticRegression, params: LogRegParams
-) -> LogisticRegression:
+def set_sklearn_model_params(model, params):
     """Set the parameters of a sklean LogisticRegression model."""
     model.coef_ = params[0]
     if model.fit_intercept:
@@ -54,7 +52,7 @@ def set_sklearn_model_params(
     return model
 
 
-def set_initial_params_logistic_regr(model: LogisticRegression):
+def set_initial_params_logistic_regr(model):
     """Set initial parameters as zeros.
 
     Required since model params are uninitialized until model.fit is called.
@@ -72,7 +70,7 @@ def set_initial_params_logistic_regr(model: LogisticRegression):
     return model
 
 
-def set_initial_params_linear_regr(model: ElasticNet):
+def set_initial_params_linear_regr(model):
     """Set initial parameters as zeros.
 
     Required since model params are uninitialized until model.fit is called.
@@ -163,11 +161,11 @@ class MnistClient(fl.client.NumPyClient):
 class CifarClient(fl.client.NumPyClient):
     """Implementation of CIFAR-10 image classification using PyTorch."""
 
-    def __init__(self, cid: str, fed_dir_data: str):
+    def __init__(self, cid, fed_dir_data):
         """Instantiate a client for the CIFAR-10 dataset."""
         self.cid = cid
         self.fed_dir = Path(fed_dir_data)
-        self.properties: Dict[str, Scalar] = {"tensor_type": "numpy.ndarray"}
+        self.properties = {"tensor_type": "numpy.ndarray"}
 
         # Instantiate model
         self.net = CifarNet()

@@ -5,17 +5,10 @@ settings).
 """
 import timeit
 from logging import DEBUG, INFO
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, List, Tuple, Union
 
 import numpy as np
-from flwr.common import (
-    DisconnectRes,
-    EvaluateRes,
-    FitRes,
-    Parameters,
-    Scalar,
-    parameters_to_ndarrays,
-)
+from flwr.common import DisconnectRes, EvaluateRes, FitRes, parameters_to_ndarrays
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
@@ -88,8 +81,8 @@ class EnhancedServer(Server):
         self.warmup_rounds = warmup_rounds
         self.attack_fn = attack_fn
         self.sampling = sampling
-        self.aggregated_parameters = []
-        self.params_indexes = []
+        self.aggregated_parameters: List = []
+        self.params_indexes: List = []
         self.history_dir = history_dir
         self.dataset_name = dataset_name
         self.magnitude = magnitude
@@ -101,7 +94,7 @@ class EnhancedServer(Server):
         self.output_dir = f"{output_dir}/outputs"
 
     # pylint: disable=too-many-locals
-    def fit(self, num_rounds: int, timeout: Optional[float]) -> History:
+    def fit(self, num_rounds, timeout):
         """Run federated averaging for a number of rounds."""
         history = History()
 
@@ -187,11 +180,9 @@ class EnhancedServer(Server):
 
     def fit_round(
         self,
-        server_round: int,
-        timeout: Optional[float],
-    ) -> Optional[
-        Tuple[Optional[Parameters], Dict[str, Scalar], FitResultsAndFailures]
-    ]:
+        server_round,
+        timeout,
+    ):
         """Perform a single round of federated learning."""
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_fit(
@@ -232,8 +223,6 @@ class EnhancedServer(Server):
             else:
                 ins.config["malicious"] = False
 
-        for proxy, ins in client_instructions:
-            log(INFO, f"Client {proxy.cid} malicious: {ins.config['malicious']}")
         # Collect `fit` results from all clients participating in this round
         results, failures = fit_clients(
             client_instructions=client_instructions,
@@ -268,15 +257,9 @@ class EnhancedServer(Server):
 
                 params = params[self.params_indexes]
 
-            log(
-                INFO,
-                f"Saving parameters of client {fitres.metrics['cid']} with"
-                f"shape {params.shape}",
-            )
             save_params(params, fitres.metrics["cid"], dir=self.history_dir)
 
             # Re-arrange results in the same order as clients' cids impose
-            log(INFO, "Re-arranging results in the same order as clients' cids impose")
             ordered_results[int(fitres.metrics["cid"])] = (proxy, fitres)
 
         # Initialize aggregated_parameters if it is the first round

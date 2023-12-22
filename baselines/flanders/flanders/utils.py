@@ -2,12 +2,12 @@
 
 import os
 from threading import Lock
-from typing import Dict, Optional, Tuple
+from typing import Callable, Dict, Optional, Tuple
 
 import numpy as np
 import pandas as pd
 import torch
-from flwr.common import Callable, NDArrays, Parameters, Scalar, parameters_to_ndarrays
+from flwr.common import NDArrays, Parameters, Scalar, parameters_to_ndarrays
 from natsort import natsorted
 from sklearn.linear_model import ElasticNet, LogisticRegression
 from sklearn.metrics import (
@@ -140,7 +140,7 @@ def evaluate_aggregated(
     server_round: int,
     parameters: Parameters,
     config: Dict[str, Scalar],
-) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+):
     """Evaluate model parameters using an evaluation function."""
     if evaluate_fn is None:
         # No evaluation function provided
@@ -177,7 +177,7 @@ def mnist_evaluate(
 
 def cifar_evaluate(
     server_round: int, parameters: NDArrays, config: Dict[str, Scalar], output_dir: str
-) -> Optional[Tuple[float, float]]:
+):
     """Evaluate CIFAR-10 model on the test set."""
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -199,7 +199,7 @@ def cifar_evaluate(
 
 def income_evaluate(
     server_round: int, parameters: NDArrays, config: Dict[str, Scalar], output_dir: str
-) -> Optional[Tuple[float, float]]:
+):
     """Evaluate Income model on the test set."""
     model = LogisticRegression()
     model = set_sklearn_model_params(model, parameters)
@@ -224,7 +224,7 @@ def income_evaluate(
 
 def house_evaluate(
     server_round: int, parameters: NDArrays, config: Dict[str, Scalar], output_dir: str
-) -> Optional[Tuple[float, float]]:
+):
     """Evaluate House model on the test set."""
     model = ElasticNet(alpha=1, warm_start=True)
     model = set_sklearn_model_params(model, parameters)

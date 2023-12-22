@@ -4,13 +4,7 @@ import math
 from typing import Dict, List, Tuple
 
 import numpy as np
-from flwr.common import (
-    FitRes,
-    NDArray,
-    NDArrays,
-    ndarrays_to_parameters,
-    parameters_to_ndarrays,
-)
+from flwr.common import FitRes, ndarrays_to_parameters, parameters_to_ndarrays
 from flwr.server.client_proxy import ClientProxy
 from scipy.stats import norm
 
@@ -22,25 +16,23 @@ def no_attack(
     return ordered_results, {}
 
 
-def gaussian_attack(
-    ordered_results: List[Tuple[ClientProxy, FitRes]], states: Dict[str, bool], **kwargs
-) -> List[Tuple[ClientProxy, FitRes]]:
+def gaussian_attack(ordered_results, states, **kwargs):
     """Apply Gaussian attack on parameters.
 
     Parameters
     ----------
-    ordered_results : List[Tuple[ClientProxy, FitRes]]
+    ordered_results
         List of tuples (client_proxy, fit_result) ordered by client id.
-    states : Dict[str, bool]
+    states
         Dictionary of client ids and their states (True if malicious, False otherwise).
-    magnitude : float
+    magnitude
         Magnitude of the attack.
-    dataset_name : str
+    dataset_name
         Name of the dataset.
 
     Returns
     -------
-    results : List[Tuple[ClientProxy, FitRes]]
+    results
         List of tuples (client_proxy, fit_result) ordered by client id.
     """
     magnitude = kwargs.get("magnitude", 0.0)
@@ -65,25 +57,25 @@ def gaussian_attack(
 
 
 def lie_attack(
-    ordered_results: List[Tuple[ClientProxy, FitRes]],
-    states: Dict[str, bool],
-    omniscent: bool = True,
+    ordered_results,
+    states,
+    omniscent,
     **kwargs,
-) -> List[Tuple[ClientProxy, FitRes]]:
+):
     """Apply Omniscent LIE attack, Baruch et al. (2019) on parameters.
 
     Parameters
     ----------
-    ordered_results : List[Tuple[ClientProxy, FitRes]]
+    ordered_results
         List of tuples (client_proxy, fit_result) ordered by client id.
-    states : Dict[str, bool]
+    states
         Dictionary of client ids and their states (True if malicious, False otherwise).
-    omniscent : bool
+    omniscent
         Whether the attacker knows the local models of all clients or not.
 
     Returns
     -------
-    results : List[Tuple[ClientProxy, FitRes]]
+    results
         List of tuples (client_proxy, fit_result) ordered by client id.
     """
     results = ordered_results.copy()
@@ -116,11 +108,11 @@ def lie_attack(
 
 
 def fang_attack(
-    ordered_results: List[Tuple[ClientProxy, FitRes]],
-    states: Dict[str, bool],
-    omniscent: bool = True,
+    ordered_results,
+    states,
+    omniscent,
     **kwargs,
-) -> List[Tuple[ClientProxy, FitRes]]:
+):
     """Apply Local Model Poisoning Attacks.
 
     (Fang et al. (2020))
@@ -130,27 +122,27 @@ def fang_attack(
 
     Parameters
     ----------
-    ordered_results : List[Tuple[ClientProxy, FitRes]]
+    ordered_results
         List of tuples (client_proxy, fit_result) ordered by client id.
-    states : Dict[str, bool]
+    states
         Dictionary of client ids and their states (True if malicious, False
         otherwise).
-    omniscent : bool
+    omniscent
         Whether the attacker knows the local models of all clients or not.
-    d : int
+    d
         Number of parameters.
-    w_re : ndarray
+    w_re
         The received global model.
-    old_lambda : float
+    old_lambda
         The lambda from the previous round.
-    threshold : float
+    threshold
         The threshold for lambda.
-    malicious_selected : bool
+    malicious_selected
         Whether the attacker was selected as malicious in the previous round.
 
     Returns
     -------
-    results : List[Tuple[ClientProxy, FitRes]]
+    results
         List of tuples (client_proxy, fit_result) ordered by client id.
     """
     d = kwargs.get("d", 1)
@@ -240,11 +232,11 @@ def fang_attack(
 
 
 def minmax_attack(
-    ordered_results: List[Tuple[ClientProxy, FitRes]],
-    states: Dict[str, bool],
-    omniscent: bool = True,
+    ordered_results,
+    states,
+    omniscent,
     **kwargs,
-) -> List[Tuple[ClientProxy, FitRes]]:
+):
     """Apply Min-Max agnostic attack.
 
     Full-knowledge, perturbation function chosen according to our experimental
@@ -255,21 +247,21 @@ def minmax_attack(
 
     Parameters
     ----------
-    ordered_results : List[Tuple[ClientProxy, FitRes]]
+    ordered_results
         List of tuples (client_proxy, fit_result) ordered by client id.
-    states : Dict[str, bool]
+    states
         Dictionary of client ids and their states (True if malicious, False
         otherwise).
-    omniscent : bool
+    omniscent
         Whether the attacker knows the local models of all clients or not.
-    threshold : float
+    threshold
         Threshold for lambda.
-    lambda_init : float
+    lambda_init
         Initial value for lambda.
 
     Returns
     -------
-    results : List[Tuple[ClientProxy, FitRes]]
+    results
         List of tuples (client_proxy, fit_result) ordered by client id.
     """
     dataset_name = kwargs.get("dataset_name", None)
@@ -378,7 +370,7 @@ def minmax_attack(
     return results, {"lambda": curr_lambda}
 
 
-def _krum(results: List[Tuple[List, int]], m: int, to_keep: int, num_closest=None):
+def _krum(results, m, to_keep, num_closest=None):
     """Get the best parameters vector according to the Krum function.
 
     Output: the best parameters vector.
@@ -405,7 +397,7 @@ def _krum(results: List[Tuple[List, int]], m: int, to_keep: int, num_closest=Non
     return weights[best_index], best_index, best_indices, scores
 
 
-def _compute_distances(weights: List[NDArrays]) -> NDArray:
+def _compute_distances(weights):
     """Compute distances between vectors.
 
     Input: weights - list of weights vectors
@@ -421,7 +413,7 @@ def _compute_distances(weights: List[NDArrays]) -> NDArray:
     return distance_matrix
 
 
-def _get_closest_indices(M, num_closest: int) -> List[int]:
+def _get_closest_indices(M, num_closest):
     """Get the indices of the closest points.
 
     Args:

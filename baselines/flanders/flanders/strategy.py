@@ -60,7 +60,7 @@ class Flanders(FedAvg):
         maxiter: int = 100,
         alpha: float = 1,
         beta: float = 1,
-        distance_function: Callable = None,
+        distance_function=None,
         output_dir: str = "results",
     ) -> None:
         """Initialize FLANDERS.

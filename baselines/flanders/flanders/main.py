@@ -5,11 +5,9 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 """
 import os
 import shutil
-from typing import Dict
 
 import flwr as fl
 import hydra
-from flwr.common.typing import Scalar
 from flwr.server.client_manager import SimpleClientManager
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
@@ -142,7 +140,7 @@ def main(cfg: DictConfig) -> None:
         server=EnhancedServer(
             warmup_rounds=cfg.server.warmup_rounds,
             num_malicious=num_malicious,
-            attack_fn=attacks[attack_fn],
+            attack_fn=attacks[attack_fn],  # type: ignore
             magnitude=cfg.server.magnitude,
             client_manager=SimpleClientManager(),
             strategy=strategy,
@@ -158,7 +156,7 @@ def main(cfg: DictConfig) -> None:
     )
 
 
-def fit_config(server_round: int) -> Dict[str, Scalar]:
+def fit_config(server_round):
     """Return a configuration with static batch size and (local) epochs."""
     config = {
         "epochs": 1,  # number of local epochs
