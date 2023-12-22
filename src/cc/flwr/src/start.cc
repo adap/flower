@@ -24,9 +24,10 @@ void start::start_client(std::string server_address, flwr_local::Client *client,
     std::shared_ptr<grpc::ClientReaderWriter<flwr::proto::ClientMessage,
                                              flwr::proto::ServerMessage>>
         reader_writer(stub_->Join(&context));
-    ServerMessage sm;
+    flwr::proto::ServerMessage sm;
     while (reader_writer->Read(&sm)) {
-      std::tuple<ClientMessage, int, bool> receive = handle(client, sm);
+      std::tuple<flwr::proto::ClientMessage, int, bool> receive =
+          handle(client, sm);
       sleep_duration = std::get<1>(receive);
       reader_writer->Write(std::get<0>(receive));
       if (std::get<2>(receive) == false) {
