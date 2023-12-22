@@ -19,10 +19,6 @@ def load_data(data_sampling_percentage=0.0005,batch_size=32,client_id=1,total_cl
     Returns:
         Tuple of TensorFlow datasets for training and evaluation.
     """
-
-    logger.info("Loaded federated dataset partition for client %s", client_id)
-    logger.info("total_clients in load_data %s", total_clients)
-
     # Download and partition dataset
     fds = FederatedDataset(dataset="cifar10", partitioners={"train": total_clients})
     partition = fds.load_partition(client_id-1, "train")
