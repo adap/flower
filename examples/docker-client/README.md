@@ -8,7 +8,7 @@ example can be found [here]().
 ## Build image and install dependencies
 
 ```bash
-docker build -t flwr-client:0.1.0 client-code
+docker build -t flwr-client:0.1.0 -f Dockerfile client-code
 pip install -r requirements.txt
 docker network create --driver bridge flwr-net
 ```
