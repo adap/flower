@@ -107,8 +107,8 @@ def start_simulation(
         List `client_id`s for each client. This is only required if
         `num_clients` is not set. Setting both `num_clients` and `clients_ids`
         with `len(clients_ids)` not equal to `num_clients` generates an error.
-    client_resources : Optional[Dict[str, float]] (default: `{"num_cpus": 1,
-        "num_gpus": 0.0}` CPU and GPU resources for a single client. Supported keys
+    client_resources : Optional[Dict[str, float]] (default: `{"num_cpus": 1, "num_gpus": 0.0}`)
+        CPU and GPU resources for a single client. Supported keys
         are `num_cpus` and `num_gpus`. To understand the GPU utilization caused by
         `num_gpus`, as well as using custom resources, please consult the Ray
         documentation.
@@ -160,7 +160,7 @@ def start_simulation(
     -------
     hist : flwr.server.history.History
         Object containing metrics from training.
-    """
+    """  # noqa: E501
     # pylint: disable-msg=too-many-locals
     event(
         EventType.START_SIMULATION_ENTER,
