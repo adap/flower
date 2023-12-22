@@ -152,6 +152,10 @@ class EventType(str, Enum):
     START_DRIVER_ENTER = auto()
     START_DRIVER_LEAVE = auto()
 
+    # SuperNode: flower-client
+    RUN_CLIENT_ENTER = auto()
+    RUN_CLIENT_LEAVE = auto()
+
 
 # Use the ThreadPoolExecutor with max_workers=1 to have a queue
 # and also ensure that telemetry calls are not blocking.
