@@ -7,8 +7,8 @@ on:
         description: "Version of Flower e.g. (1.6.0)."
         required: true
         type: string
-      base-image-version:
-        description: "Version of the Flower base image."
+      base-image-tag:
+        description: "The tag of the Flower base image."
         required: false
         type: string
         default: "py3.11-ubuntu22.04"
@@ -27,9 +27,9 @@ jobs:
       file-dir: src/docker/server
       build-args: |
         FLWR_VERSION=${{ github.event.inputs.flwr-version }}
-        BASE_IMAGE_VERSION=${{ github.event.inputs.base-image-version }}
+        BASE_IMAGE_TAG=${{ github.event.inputs.base-image-tag }}
       tags: |
-        ${{ github.event.inputs.flwr-version }}-${{ github.event.inputs.base-image-version }}
+        ${{ github.event.inputs.flwr-version }}-${{ github.event.inputs.base-image-tag }}
         ${{ github.event.inputs.flwr-version }}
         latest
     secrets:
