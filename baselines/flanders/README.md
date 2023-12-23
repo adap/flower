@@ -1,8 +1,8 @@
 ---
 title: A Byzantine-Resilient Aggregation Scheme for Federated Learning via Matrix Autoregression on Client Updates
 url: https://arxiv.org/abs/2303.16668
-labels: [robustness, model poisoning, anomaly detection, autoregressive model]
-dataset: [MNIST, Income, California Housing]
+labels: [robustness, model poisoning, anomaly detection, autoregressive model, regression, classification]
+dataset: [MNIST, Income, CIFAR-10, California Housing]
 ---
 
 ****Paper:**** [arxiv.org/abs/2303.16668](https://arxiv.org/abs/2303.16668)
@@ -19,6 +19,8 @@ dataset: [MNIST, Income, California Housing]
 ****Datasets:**** MNIST, Income
 
 ****Hardware Setup:**** Apple M2 Pro, 16gb RAM
+
+****Estimated time to run:**** For **Income**, 117 seconds. For **MNIST**, 24 minutes. This is the time estimated for a *single experiment* (i.e. 50 rounds, 10 clients sampled each round, 1 local epoch).
 
 ****Contributors:**** Edoardo Gabrielli, University of Rome "La Sapienza" ([GitHub](https://github.com/edogab33), [LinkedIn](https://www.linkedin.com/in/edoardog/), [Scholar](https://scholar.google.com/citations?user=b3bePdYAAAAJ))
 
