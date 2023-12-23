@@ -38,7 +38,7 @@ class Flanders:
     Take a look at the paper for more details about the parameters.
     """
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes
+    # pylint: disable=too-many-arguments,too-many-instance-attributes, too-many-locals
     def __init__(
         self,
         fraction_fit: float = 1.0,
@@ -64,7 +64,6 @@ class Flanders:
         alpha: float = 1,
         beta: float = 1,
         distance_function=None,
-        output_dir: str = "results",
     ) -> None:
         """Initialize FLANDERS.
 
@@ -156,6 +155,7 @@ class Flanders:
         num_clients = int(num_available_clients * self.fraction_evaluate)
         return max(num_clients, self.min_evaluate_clients), self.min_available_clients
 
+    # pylint: disable=unused-argument
     @typing.no_type_check
     def initialize_parameters(
         self, client_manager: ClientManager
@@ -191,8 +191,12 @@ class Flanders:
         )
 
         # Return client/config pairs
-        return [(client, fit) for client, fit in zip(clients, fit_ins_list)]
+        result = []
+        for client, fit in zip(clients, fit_ins_list):
+            result.append((client, fit))
+        return result
 
+    # pylint: disable=too-many-locals
     @typing.no_type_check
     def aggregate_fit(
         self,
@@ -227,14 +231,18 @@ class Flanders:
             win = self.window
             if server_round < self.window:
                 win = server_round
-            M = load_all_time_series(dir="clients_params", window=win)
-            M = np.transpose(M, (0, 2, 1))  # (clients, params, time)
+            params_tensor = load_all_time_series(
+                params_dir="clients_params", window=win
+            )
+            params_tensor = np.transpose(
+                params_tensor, (0, 2, 1)
+            )  # (clients, params, time)
 
-            M_hat = M[:, :, -1].copy()
+            ground_truth = params_tensor[:, :, -1].copy()
             pred_step = 1
-            log(INFO, f"Computing MAR on M {M.shape}")
-            Mr = mar(
-                M[:, :, :-1],
+            log(INFO, f"Computing MAR on params_tensor {params_tensor.shape}")
+            predicted_matrix = mar(
+                params_tensor[:, :, :-1],
                 pred_step,
                 maxiter=self.maxiter,
                 alpha=self.alpha,
@@ -242,7 +250,9 @@ class Flanders:
             )
 
             log(INFO, "Computing anomaly scores")
-            anomaly_scores = self.distance_function(M_hat, Mr[:, :, 0])
+            anomaly_scores = self.distance_function(
+                ground_truth, predicted_matrix[:, :, 0]
+            )
             log(INFO, f"Anomaly scores: {anomaly_scores}")
 
             log(INFO, "Selecting good clients")
@@ -267,7 +277,7 @@ class Flanders:
         metrics_aggregated = {}
         if self.fit_metrics_aggregation_fn:
             fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
-            metrics_aggregated = self.fit_metrics_aggregation_f(fit_metrics)
+            metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
         elif server_round == 1:  # Only log this warning once
             log(WARNING, "No fit_metrics_aggregation_fn provided")
 
@@ -335,10 +345,7 @@ class Flanders:
         failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation losses using weighted average."""
-        if not results:
-            return None, {}
-        # Do not aggregate if there are failures and failures are not accepted
-        if not self.accept_failures and failures:
+        if (not results) or (not self.accept_failures and failures):
             return None, {}
 
         # Aggregate loss
@@ -360,6 +367,7 @@ class Flanders:
         return loss_aggregated, metrics_aggregated
 
 
+# pylint: disable=too-many-locals, too-many-arguments, invalid-name
 def mar(X, pred_step, alpha=1, beta=1, maxiter=100, window=0):
     """Forecast the next tensor of params.
 

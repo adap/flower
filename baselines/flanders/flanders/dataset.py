@@ -39,11 +39,11 @@ class Data(torch.utils.data.Dataset):
 
 
 def get_dataset(path_to_data: Path, cid: str, partition: str):
-    """Return TorchVision_FL dataset object."""
+    """Return TorchVisionFL dataset object."""
     # generate path to cid's data
     path_to_data = path_to_data / cid / (partition + ".pt")
 
-    return TorchVision_FL(path_to_data, transform=cifar10Transformation())
+    return TorchVisionFL(path_to_data, transform=cifar10_transformation())
 
 
 def get_dataloader(
@@ -78,6 +78,7 @@ def get_random_id_splits(total: int, val_ratio: float, shuffle: bool = True):
     return indices[split:], indices[:split]
 
 
+# pylint: disable=too-many-arguments, too-many-locals
 def do_fl_partitioning(
     path_to_dataset, pool_size, alpha, num_classes, val_ratio=0.0, seed=None
 ):
@@ -108,13 +109,13 @@ def do_fl_partitioning(
         shutil.rmtree(splits_dir)
     Path.mkdir(splits_dir, parents=True)
 
-    for p in range(pool_size):
-        labels = partitions[p][1]
-        image_idx = partitions[p][0]
+    for _, idx in enumerate(pool_size):
+        labels = partitions[idx][1]
+        image_idx = partitions[idx][0]
         imgs = images[image_idx]
 
         # create dir
-        Path.mkdir(splits_dir / str(p))
+        Path.mkdir(splits_dir / str(idx))
 
         if val_ratio > 0.0:
             # split data according to val_ratio
@@ -122,20 +123,20 @@ def do_fl_partitioning(
             val_imgs = imgs[val_idx]
             val_labels = labels[val_idx]
 
-            with open(splits_dir / str(p) / "val.pt", "wb") as f:
-                torch.save([val_imgs, val_labels], f)
+            with open(splits_dir / str(idx) / "val.pt", "wb") as fil:
+                torch.save([val_imgs, val_labels], fil)
 
             # remaining images for training
             imgs = imgs[train_idx]
             labels = labels[train_idx]
 
-        with open(splits_dir / str(p) / "train.pt", "wb") as f:
-            torch.save([imgs, labels], f)
+        with open(splits_dir / str(idx) / "train.pt", "wb") as fil:
+            torch.save([imgs, labels], fil)
 
     return splits_dir
 
 
-def cifar10Transformation():
+def cifar10_transformation():
     """Return a torchvision.transforms object for CIFAR10 dataset."""
     return transforms.Compose(
         [
@@ -145,7 +146,7 @@ def cifar10Transformation():
     )
 
 
-class TorchVision_FL(VisionDataset):
+class TorchVisionFL(VisionDataset):
     """TorchVision FL class.
 
     Use this class by either passing a path to a torch file (.pt) containing
@@ -163,7 +164,7 @@ class TorchVision_FL(VisionDataset):
     ) -> None:
         """Initialize dataset."""
         path = path_to_data.parent if path_to_data else None
-        super(TorchVision_FL, self).__init__(path, transform=transform)
+        super().__init__(path, transform=transform)
         self.transform = transform
 
         if path_to_data:
@@ -210,7 +211,7 @@ def get_cifar_10(path_to_data="flanders/datasets_files/cifar_10/data"):
     torch.save([train_set.data, np.array(train_set.targets)], training_data)
 
     test_set = datasets.CIFAR10(
-        root=path_to_data, train=False, transform=cifar10Transformation()
+        root=path_to_data, train=False, transform=cifar10_transformation()
     )
 
     # returns path where training data is and testset
@@ -327,7 +328,7 @@ def get_partitioned_income(path: str, pool_size: int, train_size=0.8, test_size=
     Y = data["income"]
     data = data.loc[:, data.columns != "income"]
 
-    X_train, X_test, y_train, y_test = [], [], [], []
+    x_train, x_test, y_train, y_test = [], [], [], []
     train_size = int((len(data) * train_size) // pool_size) + 2
     test_size = int((len(data) * test_size) // pool_size) - 2
     for i in range(pool_size):
@@ -340,12 +341,12 @@ def get_partitioned_income(path: str, pool_size: int, train_size=0.8, test_size=
             shuffle=True,
             stratify=Y,
         )
-        X_train.append(xtrain)
-        X_test.append(xtest)
+        x_train.append(xtrain)
+        x_test.append(xtest)
         y_train.append(ytrain)
         y_test.append(ytest)
 
-    return X_train, X_test, y_train, y_test
+    return x_train, x_test, y_train, y_test
 
 
 def get_partitioned_house(path: str, pool_size: int, train_size=0.8, test_size=0.2):
@@ -354,7 +355,7 @@ def get_partitioned_house(path: str, pool_size: int, train_size=0.8, test_size=0
     Y = data["median_house_value"].values
     data = data.drop(["median_house_value"], axis=1).values
 
-    X_train, X_test, y_train, y_test = [], [], [], []
+    x_train, x_test, y_train, y_test = [], [], [], []
     train_size = int((len(data) * train_size) // pool_size) + 2
     test_size = int((len(data) * test_size) // pool_size) - 2
     for i in range(pool_size):
@@ -366,13 +367,13 @@ def get_partitioned_house(path: str, pool_size: int, train_size=0.8, test_size=0
             random_state=i,
             shuffle=True,
         )
-        sd = preprocessing.RobustScaler()
-        xtrain = sd.fit_transform(xtrain)
-        xtest = sd.fit_transform(xtest)
+        transf = preprocessing.RobustScaler()
+        xtrain = transf.fit_transform(xtrain)
+        xtest = transf.fit_transform(xtest)
 
-        X_train.append(xtrain)
-        X_test.append(xtest)
+        x_train.append(xtrain)
+        x_test.append(xtest)
         y_train.append(ytrain)
         y_test.append(ytest)
 
-    return X_train, X_test, y_train, y_test
+    return x_train, x_test, y_train, y_test

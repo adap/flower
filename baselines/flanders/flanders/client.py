@@ -220,6 +220,7 @@ class CifarClient(fl.client.NumPyClient):
 class IncomeClient(fl.client.NumPyClient):
     """Implementation income classification using scikit-learn."""
 
+    # pylint: disable=too-many-arguments
     def __init__(self, cid: str, x_train, y_train, x_test, y_test):
         """Instantiate a client for the income dataset."""
         self.model = LogisticRegression(
@@ -261,6 +262,7 @@ class IncomeClient(fl.client.NumPyClient):
 class HouseClient(fl.client.NumPyClient):
     """Implementation of house price prediction using scikit-learn."""
 
+    # pylint: disable=too-many-arguments
     def __init__(self, cid: str, x_train, y_train, x_test, y_test):
         """Instantiate a client for the house dataset."""
         self.model = ElasticNet(alpha=1, max_iter=1, warm_start=True)

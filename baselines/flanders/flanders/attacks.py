@@ -9,6 +9,7 @@ from flwr.server.client_proxy import ClientProxy
 from scipy.stats import norm
 
 
+# pylint: disable=unused-argument
 def no_attack(
     ordered_results: List[Tuple[ClientProxy, FitRes]], states: Dict[str, bool], **kwargs
 ):
@@ -39,8 +40,8 @@ def gaussian_attack(ordered_results, states, **kwargs):
     dataset_name = kwargs.get("dataset_name", "no name")
     results = ordered_results.copy()
 
-    def perturbate(a):
-        return a + np.random.normal(loc=0, scale=magnitude, size=len(a))
+    def perturbate(vect):
+        return vect + np.random.normal(loc=0, scale=magnitude, size=len(vect))
 
     for proxy, fitres in ordered_results:
         if states[fitres.metrics["cid"]]:
@@ -49,13 +50,14 @@ def gaussian_attack(ordered_results, states, **kwargs):
                 new_params = [perturbate(layer) for layer in params]
             else:
                 new_params = []
-                for p in params:
-                    new_params.append(np.apply_along_axis(perturbate, 0, p))
+                for par in params:
+                    new_params.append(np.apply_along_axis(perturbate, 0, par))
             fitres.parameters = ndarrays_to_parameters(new_params)
             results[int(fitres.metrics["cid"])] = (proxy, fitres)
     return results, {}
 
 
+# pylint: disable=too-many-locals, unused-argument
 def lie_attack(
     ordered_results,
     states,
@@ -92,11 +94,14 @@ def lie_attack(
             if states[results[i][1].metrics["cid"]]
         ]
 
-    n = len(ordered_results)  # number of clients
-    m = sum(val is True for val in states.values())  # number of corrupted clients
-    s = math.floor((n / 2) + 1) - m  # number of supporters
+    num_clients = len(ordered_results)
+    num_malicious = sum(val is True for val in states.values())
+    # pylint: disable=c-extension-no-member
+    num_supporters = math.floor((num_clients / 2) + 1) - num_malicious
 
-    z_max = norm.cdf((n - m - s) / (n - m))
+    z_max = norm.cdf(
+        (num_clients - num_malicious - num_supporters) / (num_clients - num_malicious)
+    )
 
     for proxy, fitres in ordered_results:
         if states[fitres.metrics["cid"]]:
@@ -129,7 +134,7 @@ def fang_attack(
         otherwise).
     omniscent
         Whether the attacker knows the local models of all clients or not.
-    d
+    num_params
         Number of parameters.
     w_re
         The received global model.
@@ -145,7 +150,7 @@ def fang_attack(
     results
         List of tuples (client_proxy, fit_result) ordered by client id.
     """
-    d = kwargs.get("d", 1)
+    num_params = kwargs.get("num_params", 1)
     w_re = kwargs.get("w_re", None)  # the received global model
     old_lambda = kwargs.get("old_lambda", 0.0)
     threshold = kwargs.get("threshold", 0.0)
@@ -160,12 +165,12 @@ def fang_attack(
             if states[ordered_results[i][1].metrics["cid"]]
         ]
 
-    n = len(ordered_results)  # number of clients
-    c = sum(val is True for val in states.values())  # number of corrupted clients
-    if c < 2:
-        # there can't be an attack with less than 2 malicious clients
-        # to avoid division by 0
-        c = 2
+    num_clients = len(ordered_results)
+    num_corrupted = sum(val is True for val in states.values())
+
+    # there can't be an attack with less than 2 malicious clients
+    # to avoid division by 0
+    num_corrupted = max(num_corrupted, 2)
 
     # lambda initialization
     if old_lambda == 0:
@@ -174,29 +179,29 @@ def fang_attack(
             for _, fitres in ordered_results
             if states[fitres.metrics["cid"]] is False
         ]
-        all = [
+        all_params = [
             (parameters_to_ndarrays(fitres.parameters), fitres.num_examples)
             for _, fitres in ordered_results
         ]
         # Compute the smallest distance that Krum would choose
-        _, _, _, distances = _krum(all, c, 1)
+        _, _, _, distances = _krum(all_params, num_corrupted, 1)
 
         idx_benign = [int(cid) for cid in states.keys() if states[cid] is False]
 
         min_dist = np.min(np.array(distances)[idx_benign]) / (
-            (n - 2 * c - 1) * np.sqrt(d)
+            (num_clients - 2 * num_corrupted - 1) * np.sqrt(num_params)
         )
 
         # Compute max distance from w_re
         dist_wre = np.zeros((len(benign)))
         for i in range(len(benign)):
-            dist = [benign[i][0][j] - w_re[j] for j in range(d)]
+            dist = [benign[i][0][j] - w_re[j] for j in range(num_params)]
             norm_sums = 0
             for k in dist:
                 norm_sums += np.linalg.norm(k)
             dist_wre[i] = norm_sums**2
 
-        max_dist = np.max(dist_wre) / np.sqrt(d)
+        max_dist = np.max(dist_wre) / np.sqrt(num_params)
         curr_lambda = min_dist + max_dist  # lambda
     else:
         # lambda halving search
@@ -204,9 +209,9 @@ def fang_attack(
         if old_lambda > threshold and malicious_selected is False:
             curr_lambda = old_lambda * 0.5
 
-    # Compute sign vector s
+    # Compute sign vector num_supporters
     magnitude = []
-    for i in range(len(w_re)):
+    for _, _idx in enumerate(w_re):
         magnitude.append(np.sign(w_re[i]) * curr_lambda)
 
     w_1 = [w_re[i] - magnitude[i] for i in range(len(w_re))]  # corrupted model
@@ -306,44 +311,66 @@ def minmax_attack(
         and malicious_num > 0
     ):
         # Compute malicious gradients
-        pv = [curr_lambda * perturbation_vect[i] for i in range(len(perturbation_vect))]
-        corrupted_params = [params_avg[i] + pv[i] for i in range(len(params_avg))]
+        perturbed_params = [
+            curr_lambda * perturbation_vect[i] for i in range(len(perturbation_vect))
+        ]
+        corrupted_params = [
+            params_avg[i] + perturbed_params[i] for i in range(len(params_avg))
+        ]
 
         # Set corrupted clients' updates to corrupted_params
         params_c = [
             corrupted_params if states[i] else params[i] for i in range(len(params))
         ]
-        M = _compute_distances(params_c)
+        distance_matrix = _compute_distances(params_c)
 
-        # Remove from matrix M all malicious clients in both rows and columns
-        M_b = np.delete(
-            M,
-            [i for i in range(len(M)) if states[results[i][1].metrics["cid"]]],
+        # Remove from matrix distance_matrix all malicious clients in both
+        # rows and columns
+        distance_matrix_b = np.delete(
+            distance_matrix,
+            [
+                i
+                for i in range(len(distance_matrix))
+                if states[results[i][1].metrics["cid"]]
+            ],
             axis=0,
         )
-        M_b = np.delete(
-            M_b,
-            [i for i in range(len(M)) if states[results[i][1].metrics["cid"]]],
+        distance_matrix_b = np.delete(
+            distance_matrix_b,
+            [
+                i
+                for i in range(len(distance_matrix))
+                if states[results[i][1].metrics["cid"]]
+            ],
             axis=1,
         )
 
-        # Remove from M all benign clients on rows and all malicious on columns
-        M_m = np.delete(
-            M,
-            [i for i in range(len(M)) if not states[results[i][1].metrics["cid"]]],
+        # Remove from distance_matrix all benign clients on
+        # rows and all malicious on columns
+        distance_matrix_m = np.delete(
+            distance_matrix,
+            [
+                i
+                for i in range(len(distance_matrix))
+                if not states[results[i][1].metrics["cid"]]
+            ],
             axis=0,
         )
-        M_m = np.delete(
-            M_m,
-            [i for i in range(len(M)) if states[results[i][1].metrics["cid"]]],
+        distance_matrix_m = np.delete(
+            distance_matrix_m,
+            [
+                i
+                for i in range(len(distance_matrix))
+                if states[results[i][1].metrics["cid"]]
+            ],
             axis=1,
         )
 
         # Take the maximum distance between any benign client and any malicious one
-        max_dist_m = np.max(M_m)
+        max_dist_m = np.max(distance_matrix_m)
 
         # Take the maximum distance between any two benign clients
-        max_dist_b = np.max(M_b)
+        max_dist_b = np.max(distance_matrix_b)
 
         # Compute lambda (best scaling coefficient)
         if max_dist_m < max_dist_b:
@@ -370,24 +397,29 @@ def minmax_attack(
     return results, {"lambda": curr_lambda}
 
 
-def _krum(results, m, to_keep, num_closest=None):
+def _krum(results, num_malicious, to_keep, num_closest=None):
     """Get the best parameters vector according to the Krum function.
 
     Output: the best parameters vector.
     """
     weights = [w for w, _ in results]  # list of weights
-    M = _compute_distances(weights)  # matrix of distances
+    distance_matrix = _compute_distances(weights)  # matrix of distances
 
     if not num_closest:
-        num_closest = len(weights) - m - 2  # number of closest points to use
+        num_closest = (
+            len(weights) - num_malicious - 2
+        )  # number of closest points to use
     if num_closest <= 0:
         num_closest = 1
     elif num_closest > len(weights):
         num_closest = len(weights)
 
-    closest_indices = _get_closest_indices(M, num_closest)  # indices of closest points
+    closest_indices = _get_closest_indices(
+        distance_matrix, num_closest
+    )  # indices of closest points
     scores = [
-        np.sum(M[i, closest_indices[i]]) for i in range(len(M))
+        np.sum(distance_matrix[i, closest_indices[i]])
+        for i in range(len(distance_matrix))
     ]  # scores i->j for each i
 
     best_index = np.argmin(scores)  # index of the best score
@@ -403,21 +435,21 @@ def _compute_distances(weights):
     Input: weights - list of weights vectors
     Output: distances - matrix distance_matrix of squared distances between the vectors
     """
-    flat_w = np.array([np.concatenate(p, axis=None).ravel() for p in weights])
+    flat_w = np.array([np.concatenate(par, axis=None).ravel() for par in weights])
     distance_matrix = np.zeros((len(weights), len(weights)))
     for i, _ in enumerate(flat_w):
         for j, _ in enumerate(flat_w):
             delta = flat_w[i] - flat_w[j]
-            norm = np.linalg.norm(delta)
-            distance_matrix[i, j] = norm**2
+            dist = np.linalg.norm(delta)
+            distance_matrix[i, j] = dist**2
     return distance_matrix
 
 
-def _get_closest_indices(M, num_closest):
+def _get_closest_indices(distance_matrix, num_closest):
     """Get the indices of the closest points.
 
     Args:
-        M
+        distance_matrix
             matrix of distances
         num_closest
             number of closest points to get for each parameter vector
@@ -426,6 +458,8 @@ def _get_closest_indices(M, num_closest):
             list of lists of indices of the closest points for each vector.
     """
     closest_indices = []
-    for i in range(len(M)):
-        closest_indices.append(np.argsort(M[i])[1 : num_closest + 1].tolist())
+    for _, idx in enumerate(distance_matrix):
+        closest_indices.append(
+            np.argsort(distance_matrix[idx])[1 : num_closest + 1].tolist()
+        )
     return closest_indices

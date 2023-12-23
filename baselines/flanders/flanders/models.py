@@ -10,10 +10,10 @@ from sklearn.preprocessing import LabelBinarizer
 
 def roc_auc_multiclass(y_true, y_pred):
     """Compute the ROC AUC for multiclass classification."""
-    lb = LabelBinarizer()
-    lb.fit(y_true)
-    y_true = lb.transform(y_true)
-    y_pred = lb.transform(y_pred)
+    l_b = LabelBinarizer()
+    l_b.fit(y_true)
+    y_true = l_b.transform(y_true)
+    y_pred = l_b.transform(y_pred)
     return roc_auc_score(y_true, y_pred, multi_class="ovr")
 
 
@@ -23,7 +23,7 @@ class MnistNet(nn.Module):
 
     def __init__(self):
         """Initialize the model."""
-        super(MnistNet, self).__init__()
+        super().__init__()
         # number of hidden nodes in each layer (512)
         hidden_1 = 128
         hidden_2 = 256
@@ -84,6 +84,7 @@ def train_mnist(model, dataloader, epochs, device):
                 )
 
 
+# pylint: disable=too-many-locals
 def test_mnist(model, dataloader, device):
     """Validate the network on the entire test set."""
     loss = 0
@@ -117,7 +118,7 @@ class CifarNet(nn.Module):
     """Simple CNN for CIFAR-10."""
 
     def __init__(self) -> None:
-        super(CifarNet, self).__init__()
+        super().__init__()
         self.conv1 = nn.Conv2d(3, 6, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)
@@ -152,6 +153,7 @@ def train_cifar(net, trainloader, epochs, device: str):
 
 
 # borrowed from Pytorch quickstart example
+# pylint: disable=too-many-locals
 def test_cifar(net, testloader, device: str):
     """Validate the network on the entire test set."""
     criterion = torch.nn.CrossEntropyLoss()

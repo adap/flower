@@ -49,7 +49,9 @@ def l2_norm(true_matrix, predicted_matrix):
     return anomaly_scores
 
 
-def save_params(parameters, cid, dir="clients_params", remove_last=False, rrl=False):
+def save_params(
+    parameters, cid, params_dir="clients_params", remove_last=False, rrl=False
+):
     """Save parameters in a file.
 
     Args:
@@ -63,9 +65,9 @@ def save_params(parameters, cid, dir="clients_params", remove_last=False, rrl=Fa
     """
     new_params = parameters
     # Save parameters in clients_params/cid_params
-    path_file = f"{dir}/{cid}_params.npy"
-    if os.path.exists(dir) is False:
-        os.mkdir(dir)
+    path_file = f"{params_dir}/{cid}_params.npy"
+    if os.path.exists(params_dir) is False:
+        os.mkdir(params_dir)
     if os.path.exists(path_file):
         # load old parameters
         old_params = np.load(path_file, allow_pickle=True)
@@ -97,7 +99,7 @@ def save_results(loss, accuracy, config=None, output_dir="results"):
     # Generate csv
     config["accuracy"] = accuracy
     config["loss"] = loss
-    df = pd.DataFrame.from_records([config])
+    data = pd.DataFrame.from_records([config])
     csv_path = f"{output_dir}/all_results.csv"
     # check that dir exists
     if os.path.exists(output_dir) is False:
@@ -105,12 +107,12 @@ def save_results(loss, accuracy, config=None, output_dir="results"):
     # Lock is needed when multiple clients are running concurrently
     with lock:
         if os.path.exists(csv_path):
-            df.to_csv(csv_path, mode="a", header=False, index=False)
+            data.to_csv(csv_path, mode="a", header=False, index=False)
         else:
-            df.to_csv(csv_path, index=False, header=True)
+            data.to_csv(csv_path, index=False, header=True)
 
 
-def load_all_time_series(dir="clients_params", window=0):
+def load_all_time_series(params_dir="clients_params", window=0):
     """Load all time series.
 
     Load all time series in order to have a tensor of shape (m,T,n)
@@ -119,11 +121,11 @@ def load_all_time_series(dir="clients_params", window=0):
     - m := number of clients;
     - n := number of parameters.
     """
-    files = os.listdir(dir)
+    files = os.listdir(params_dir)
     files = natsorted(files)
     data = []
     for file in files:
-        data.append(np.load(os.path.join(dir, file), allow_pickle=True))
+        data.append(np.load(os.path.join(params_dir, file), allow_pickle=True))
 
     return np.array(data)[:, -window:, :]
 

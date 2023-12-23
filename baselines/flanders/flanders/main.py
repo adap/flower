@@ -31,6 +31,7 @@ from .utils import (
 )
 
 
+# pylint: disable=too-many-locals
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.
@@ -70,7 +71,7 @@ def main(cfg: DictConfig) -> None:
 
     # 2. Prepare your dataset
     if dataset_name == "cifar":
-        train_path, testset = get_cifar_10()
+        train_path, _ = get_cifar_10()
         fed_dir = do_fl_partitioning(
             train_path,
             pool_size=cfg.server.pool_size,
@@ -80,15 +81,16 @@ def main(cfg: DictConfig) -> None:
             seed=1234,
         )
     elif dataset_name == "income":
-        X_train, X_test, y_train, y_test = get_partitioned_income(
+        x_train, x_test, y_train, y_test = get_partitioned_income(
             "flanders/datasets_files/adult.csv", cfg.server.pool_size
         )
     elif dataset_name == "house":
-        X_train, X_test, y_train, y_test = get_partitioned_house(
+        x_train, x_test, y_train, y_test = get_partitioned_house(
             "flanders/datasets_files/houses_preprocessed.csv", cfg.server.pool_size
         )
 
     # 3. Define your clients
+    # pylint: disable=no-else-return
     def client_fn(cid: str, pool_size: int = 10, dataset_name: str = dataset_name):
         client = clients[dataset_name][0]
         cid_idx = int(cid)
@@ -99,17 +101,17 @@ def main(cfg: DictConfig) -> None:
         elif dataset_name == "income":
             return client(
                 cid,
-                X_train[cid_idx],
+                x_train[cid_idx],
                 y_train[cid_idx],
-                X_test[cid_idx],
+                x_test[cid_idx],
                 y_test[cid_idx],
             )
         elif dataset_name == "house":
             return client(
                 cid,
-                X_train[cid_idx],
+                x_train[cid_idx],
                 y_train[cid_idx],
-                X_test[cid_idx],
+                x_test[cid_idx],
                 y_test[cid_idx],
             )
         else:
@@ -156,6 +158,7 @@ def main(cfg: DictConfig) -> None:
     )
 
 
+# pylint: disable=unused-argument
 def fit_config(server_round):
     """Return a configuration with static batch size and (local) epochs."""
     config = {

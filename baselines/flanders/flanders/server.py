@@ -33,12 +33,14 @@ ReconnectResultsAndFailures = Tuple[
 class EnhancedServer(Server):
     """Server with enhanced functionality."""
 
+    # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
         num_malicious: int,
         warmup_rounds: int,
         attack_fn: Callable,
         dataset_name: str,
+        *args: Any,
         threshold: float = 0.0,
         to_keep: int = 1,
         magnitude: float = 0.0,
@@ -46,7 +48,6 @@ class EnhancedServer(Server):
         history_dir: str = "clients_params",
         omniscent: bool = True,
         output_dir: str = "results",
-        *args: Any,
         **kwargs: Any,
     ) -> None:
         """Create a new EnhancedServer instance.
@@ -92,6 +93,7 @@ class EnhancedServer(Server):
         self.to_keep = to_keep
         self.omniscent = omniscent
         self.output_dir = f"{output_dir}/outputs"
+        self.malicious_lst: List = []
 
     # pylint: disable=too-many-locals
     def fit(self, num_rounds, timeout):
@@ -178,11 +180,13 @@ class EnhancedServer(Server):
         log(INFO, "FL finished in %s", elapsed)
         return history
 
+    # pylint: disable-msg=R0915
     def fit_round(
         self,
         server_round,
         timeout,
     ):
+        # pylint: disable-msg=R0912
         """Perform a single round of federated learning."""
         # Get clients and their respective instructions from strategy
         client_instructions = self.strategy.configure_fit(
@@ -257,7 +261,7 @@ class EnhancedServer(Server):
 
                 params = params[self.params_indexes]
 
-            save_params(params, fitres.metrics["cid"], dir=self.history_dir)
+            save_params(params, fitres.metrics["cid"], params_dir=self.history_dir)
 
             # Re-arrange results in the same order as clients' cids impose
             ordered_results[int(fitres.metrics["cid"])] = (proxy, fitres)
@@ -310,7 +314,7 @@ class EnhancedServer(Server):
                     save_params(
                         params,
                         fitres.metrics["cid"],
-                        dir=self.history_dir,
+                        params_dir=self.history_dir,
                         remove_last=True,
                     )
         else:
@@ -340,8 +344,7 @@ class EnhancedServer(Server):
             if clients_state[str(idx)]:
                 self.malicious_selected = True
                 break
-            else:
-                self.malicious_selected = False
+            self.malicious_selected = False
 
         # For clients detected as malicious, set their parameters to be the
         # averaged ones in their files otherwise the forecasting in next round
@@ -358,7 +361,11 @@ class EnhancedServer(Server):
                         parameters_to_ndarrays(parameters_aggregated)
                     )
                 save_params(
-                    new_params, idx, dir=self.history_dir, remove_last=True, rrl=True
+                    new_params,
+                    idx,
+                    params_dir=self.history_dir,
+                    remove_last=True,
+                    rrl=True,
                 )
 
         return parameters_aggregated, metrics_aggregated, (results, failures)
