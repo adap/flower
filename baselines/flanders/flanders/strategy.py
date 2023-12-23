@@ -240,7 +240,7 @@ class Flanders:
 
             ground_truth = params_tensor[:, :, -1].copy()
             pred_step = 1
-            log(INFO, f"Computing MAR on params_tensor {params_tensor.shape}")
+            log(INFO, "Computing MAR on params_tensor %s", params_tensor.shape)
             predicted_matrix = mar(
                 params_tensor[:, :, :-1],
                 pred_step,
@@ -253,7 +253,7 @@ class Flanders:
             anomaly_scores = self.distance_function(
                 ground_truth, predicted_matrix[:, :, 0]
             )
-            log(INFO, f"Anomaly scores: {anomaly_scores}")
+            log(INFO, "Anomaly scores: %s", anomaly_scores)
 
             log(INFO, "Selecting good clients")
             good_clients_idx = sorted(
@@ -263,7 +263,7 @@ class Flanders:
                 np.argsort(anomaly_scores)[self.to_keep :]
             )  # noqa
             results = np.array(results)[good_clients_idx].tolist()
-            log(INFO, f"Good clients: {good_clients_idx}")
+            log(INFO, "Good clients: %s", good_clients_idx)
 
         log(INFO, "Applying FedAvg")
         # Convert results

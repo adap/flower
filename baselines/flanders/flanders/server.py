@@ -210,7 +210,7 @@ class EnhancedServer(Server):
         size = self.num_malicious
         if self.warmup_rounds > server_round:
             size = 0
-        log(INFO, f"Selecting {size} malicious clients")
+        log(INFO, "Selecting %s malicious clients", size)
         self.malicious_lst = np.random.choice(
             [proxy.cid for proxy, _ in client_instructions], size=size, replace=False
         )
@@ -308,8 +308,9 @@ class EnhancedServer(Server):
                         )
                     log(
                         INFO,
-                        f"Saving parameters of client {fitres.metrics['cid']}"
-                        f"with shape {params.shape}",
+                        "Saving parameters of client %s with shape %s",
+                        fitres.metrics["cid"],
+                        params.shape,
                     )
                     save_params(
                         params,
@@ -323,7 +324,7 @@ class EnhancedServer(Server):
 
         # Sort clients states
         clients_state = {k: clients_state[k] for k in sorted(clients_state)}
-        log(INFO, f"Clients state: {clients_state}")
+        log(INFO, "Clients state: %s", clients_state)
 
         # Aggregate training results
         log(INFO, "fit_round - Aggregating training results")
@@ -337,9 +338,9 @@ class EnhancedServer(Server):
             good_clients_idx,
             malicious_clients_idx,
         ) = aggregated_result
-        log(INFO, f"Malicious clients: {malicious_clients_idx}")
+        log(INFO, "Malicious clients: %s", malicious_clients_idx)
 
-        log(INFO, f"clients_state: {clients_state}")
+        log(INFO, "clients_state: %s", clients_state)
         for idx in good_clients_idx:
             if clients_state[str(idx)]:
                 self.malicious_selected = True

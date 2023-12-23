@@ -17,7 +17,8 @@ def roc_auc_multiclass(y_true, y_pred):
     return roc_auc_score(y_true, y_pred, multi_class="ovr")
 
 
-# Source: https://github.com/bladesteam/blades/blob/master/src/blades/models/mnist/mlp.py
+# Source:
+# github.com/bladesteam/blades/blob/master/src/blades/models/mnist/mlp.py
 class MnistNet(nn.Module):
     """Simple MLP for MNIST."""
 
