@@ -10,7 +10,7 @@ from torchvision import transforms
 import heterofl.datasets as dt
 
 
-def _download_data(dataset_name: str) -> Tuple[Dataset, Dataset]:
+def _download_data(dataset_name: str, strategy_name: str) -> Tuple[Dataset, Dataset]:
     root = "./data/{}".format(dataset_name)
     if dataset_name == "MNIST":
         trainset = dt.MNIST(
@@ -30,6 +30,13 @@ def _download_data(dataset_name: str) -> Tuple[Dataset, Dataset]:
             ),
         )
     elif dataset_name == "CIFAR10":
+        normalize = transforms.Normalize(
+            mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+        )
+        if strategy_name == "heterofl":
+            normalize = transforms.Normalize(
+                (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
+            )
         trainset = dt.CIFAR10(
             root=root,
             split="train",
@@ -39,9 +46,7 @@ def _download_data(dataset_name: str) -> Tuple[Dataset, Dataset]:
                     transforms.RandomCrop(32, padding=4),
                     transforms.RandomHorizontalFlip(),
                     transforms.ToTensor(),
-                    transforms.Normalize(
-                        (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
-                    ),
+                    normalize,
                 ]
             ),
         )
@@ -52,9 +57,7 @@ def _download_data(dataset_name: str) -> Tuple[Dataset, Dataset]:
             transform=dt.Compose(
                 [
                     transforms.ToTensor(),
-                    transforms.Normalize(
-                        (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
-                    ),
+                    normalize,
                 ]
             ),
         )
@@ -64,14 +67,16 @@ def _download_data(dataset_name: str) -> Tuple[Dataset, Dataset]:
     return trainset, testset
 
 
+# pylint: disable=too-many-arguments
 def _partition_data(
     num_clients: int,
     dataset_name: str,
+    strategy_name: str,
     iid: Optional[bool] = False,
     dataset_division=None,
     seed: Optional[int] = 42,
 ) -> Tuple[Dataset, List[Dataset], List[torch.tensor], List[Dataset], Dataset]:
-    trainset, testset = _download_data(dataset_name)
+    trainset, testset = _download_data(dataset_name, strategy_name)
 
     if dataset_name in ("MNIST", "CIFAR10"):
         classes_size = 10

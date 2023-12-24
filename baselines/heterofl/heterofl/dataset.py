@@ -10,6 +10,7 @@ from heterofl.dataset_preparation import _partition_data
 
 
 def load_datasets(  # pylint: disable=too-many-arguments
+    strategy_name: str,
     config: DictConfig,
     num_clients: int,
     seed: Optional[int] = 42,
@@ -38,6 +39,7 @@ def load_datasets(  # pylint: disable=too-many-arguments
     trainset, datasets, label_split, client_testsets, testset = _partition_data(
         num_clients,
         dataset_name=config.dataset_name,
+        strategy_name=strategy_name,
         iid=config.iid,
         dataset_division={
             "shard_per_user": config.shard_per_user,

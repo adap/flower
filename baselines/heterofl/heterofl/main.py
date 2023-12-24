@@ -38,7 +38,12 @@ def main(cfg: DictConfig) -> None:
         data_loaders["label_split"],
         data_loaders["valloaders"],
         data_loaders["testloader"],
-    ) = load_datasets(config=cfg.dataset, num_clients=cfg.num_clients, seed=cfg.seed)
+    ) = load_datasets(
+        "heterofl" if "heterofl" in cfg.strategy._target_ else "fedavg",
+        config=cfg.dataset,
+        num_clients=cfg.num_clients,
+        seed=cfg.seed,
+    )
 
     model_config = preprocess_input(cfg.model, cfg.dataset)
 
