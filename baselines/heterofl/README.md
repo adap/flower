@@ -132,7 +132,7 @@ python -m heterofl.main --multirun control.model_mode='a1','a1-e1','a1-b1-c1-d1-
 #for MNIST dataset
 python -m heterofl.main --config-name fedavg --multirun dataset.iid=True,False
 # for CIFAR10 dataset
-python -m heterofl.main --config-name fedavg --multirun num_rounds=1800 dataset.dataset_name='CIFAR10' dataset.iid=True,False dataset.batch_size.train=50 model.model_name='CNNCifar' optim_scheduler.lr=0.1
+python -m heterofl.main --config-name fedavg --multirun num_rounds=1800 dataset.dataset_name='CIFAR10' dataset.iid=True,False dataset.batch_size.train=50 dataset.batch_size.test=128 model.model_name='CNNCifar' optim_scheduler.lr=0.1
 ```
 <br>
  
