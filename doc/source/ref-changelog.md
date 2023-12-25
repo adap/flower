@@ -14,6 +14,8 @@
 
   - FedNova [#2179](https://github.com/adap/flower/pull/2179)
 
+  - HeteroFL [#2439](https://github.com/adap/flower/pull/2439)
+
 ## v1.6.0 (2023-11-28)
 
 ### Thanks to our contributors
