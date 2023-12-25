@@ -1,0 +1,10 @@
+---
+name: fedavg
+strategy:
+  _target_: flwr.server.strategy.FedAvg
+  _recursive_: false
+    
+
+client_fn:
+  _target_: fednova.baseline_client.gen_clients_fedavg
+  _recursive_: false
