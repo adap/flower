@@ -6,7 +6,7 @@
 
 - **General updates to Flower Examples** ([#2381](https://github.com/adap/flower/pull/2381))
 
-- **Retiring MXNet examples** The development of the MXNet fremework as ended and the project is now [archived on GitHub](https://github.com/apache/mxnet). Exiting MXNet examples won't receive updates [#2724](https://github.com/adap/flower/pull/2724)
+- **Retiring MXNet examples** The development of the MXNet fremework has ended and the project is now [archived on GitHub](https://github.com/apache/mxnet). Existing MXNet examples won't receive updates [#2724](https://github.com/adap/flower/pull/2724)
 
 - **Update Flower Baselines**
 
