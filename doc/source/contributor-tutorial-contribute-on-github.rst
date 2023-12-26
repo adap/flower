@@ -46,7 +46,7 @@ Setting up the repository
 
         $ git clone <URL>
 
-    This will create a `flower/` (or the name of your fork if you renamed it) folder in the current working directory.
+    This will create a ``flower/`` (or the name of your fork if you renamed it) folder in the current working directory.
 
 4. **Add origin**
     You can then go into the repository folder:
@@ -180,9 +180,9 @@ Creating and merging a pull request (PR)
 
     .. image:: _static/compare_and_pr.png
 
-    Otherwise you can always find this option in the `Branches` page.
+    Otherwise you can always find this option in the ``Branches`` page.
 
-    Once you click the `Compare & pull request` button, you should see something similar to this:
+    Once you click the ``Compare & pull request`` button, you should see something similar to this:
 
     .. image:: _static/creating_pr.png
     
@@ -194,6 +194,10 @@ Creating and merging a pull request (PR)
 
     The input box in the middle is there for you to describe what your PR does and to link it to existing issues. 
     We have placed comments (that won't be rendered once the PR is opened) to guide you through the process.
+
+    It is important to follow the instructions described in comments. For instance, in order to not break how our changelog system works,
+    you should read the information above the ``Changelog entry`` section carefully.
+    You can also checkout some examples and details in the :ref:`changelogentry` appendix.
 
     At the bottom you will find the button to open the PR. This will notify reviewers that a new PR has been opened and 
     that they should look over it to merge or to request changes.
@@ -272,8 +276,8 @@ Solution
 
 This is a tiny change, but it’ll allow us to test your end-to-end setup. After cloning and setting up the Flower repo, here’s what you should do:
 
-- Find the source file in `doc/source`
-- Make the change in the `.rst` file (beware, the dashes under the title should be the same length as the title itself)
+- Find the source file in ``doc/source``
+- Make the change in the ``.rst`` file (beware, the dashes under the title should be the same length as the title itself)
 - Build the docs and check the result: `<https://flower.dev/docs/writing-documentation.html#edit-an-existing-page>`_
 
 Rename file
@@ -284,18 +288,18 @@ If we just change the file, then we break all existing links to it - it is **ver
 
 Here’s how to change the file name:
 
-- Change the file name to `save-progress.rst`
-- Add a redirect rule to `doc/source/conf.py`
+- Change the file name to ``save-progress.rst``
+- Add a redirect rule to ``doc/source/conf.py``
 
-This will cause a redirect from `saving-progress.html` to `save-progress.html`, old links will continue to work.
+This will cause a redirect from ``saving-progress.html`` to ``save-progress.html``, old links will continue to work.
 
 Apply changes in the index file
 :::::::::::::::::::::::::::::::
 
-For the lateral navigation bar to work properly, it is very important to update the `index.rst` file as well. 
+For the lateral navigation bar to work properly, it is very important to update the ``index.rst`` file as well. 
 This is where we define the whole arborescence of the navbar.
 
-- Find and modify the file name in `index.rst`
+- Find and modify the file name in ``index.rst``
 
 Open PR
 :::::::
@@ -331,7 +335,7 @@ Here are a few positive examples which provide helpful information without repea
 * Update docs banner to mention Flower Summit 2023
 * Remove unnecessary XGBoost dependency
 * Remove redundant attributes in strategies subclassing FedAvg
-* Add CI job to deploy the staging system when the `main` branch changes
+* Add CI job to deploy the staging system when the ``main`` branch changes
 * Add new amazing library which will be used to improve the simulation engine
 
 
@@ -341,3 +345,75 @@ Next steps
 Once you have made your first PR, and want to contribute more, be sure to check out the following :
 
 - `Good first contributions <https://flower.dev/docs/framework/contributor-ref-good-first-contributions.html>`_, where you should particularly look into the :code:`baselines` contributions.
+
+
+Appendix
+--------
+
+.. _changelogentry:
+
+Changelog entry
+***************
+
+When opening a new PR, inside its description, there should be a ``Changelog entry`` header.
+
+As per the comment above this section::
+
+    Inside the following 'Changelog entry' section, 
+    you should put the description of your changes that will be added to the changelog alongside your PR title.
+
+    If the section is completely empty (without any token), 
+    the changelog will just contain the title of the PR for the changelog entry, without any description. 
+    If the 'Changelog entry' section is removed entirely, 
+    it will categorize the PR as "General improvement" and add it to the changelog accordingly. 
+    If the section contains some text other than tokens, it will use it to add a description to the change. 
+    If the section contains one of the following tokens it will ignore any other text and put the PR under the corresponding section of the changelog:
+
+    <general> is for classifying a PR as a general improvement.
+    <skip> is to not add the PR to the changelog
+    <baselines> is to add a general baselines change to the PR
+    <examples> is to add a general examples change to the PR
+    <sdk> is to add a general sdk change to the PR
+    <simulations> is to add a general simulations change to the PR
+
+    Note that only one token should be used.
+
+Its content must have a specific format. We will break down what each possibility does:
+
+- If the ``### Changelog entry`` section is removed, the following text will be added to the changelog::
+
+    - **General improvements** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
+
+- If the ``### Changelog entry`` section contains nothing but exists, the following text will be added to the changelog::
+
+    - **PR TITLE** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
+
+- If the ``### Changelog entry`` section contains a description (and no token), the following text will be added to the changelog::
+
+    - **PR TITLE** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
+
+        DESCRIPTION FROM THE CHANGELOG ENTRY
+
+- If the ``### Changelog entry`` section contains ``<skip>``, nothing will change in the changelog.
+
+- If the ``### Changelog entry`` section contains ``<general>``, the following text will be added to the changelog::
+
+    - **General improvements** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
+
+- If the ``### Changelog entry`` section contains ``<baselines>``, the following text will be added to the changelog::
+
+    - **General updates to Flower Baselines** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
+
+- If the ``### Changelog entry`` section contains ``<examples>``, the following text will be added to the changelog::
+
+    - **General updates to Flower Examples** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
+
+- If the ``### Changelog entry`` section contains ``<sdk>``, the following text will be added to the changelog::
+
+    - **General updates to Flower SDKs** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
+
+- If the ``### Changelog entry`` section contains ``<simulations>``, the following text will be added to the changelog::
+
+    - **General updates to Flower Simulations** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
+
+Note that only one token must be provided, otherwise, only the first action (in the order listed above), will be performed.
