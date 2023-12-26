@@ -1,7 +1,7 @@
 import random
 
 
-def create_docker_compose(total_clients, number_of_rounds):
+def create_docker_compose():
     # cpus is used to set the number of CPUs available to the container as a fraction of the total number of CPUs on the host machine.
     # mem_limit is used to set the memory limit for the container.
     client_configs = [
@@ -120,6 +120,6 @@ services:
 
 if __name__ == "__main__":
     total_clients = 2  # Number of clients that will be created
-    number_of_rounds = 50  # Number of rounds that the server will run for
-    data_percentage = 0.5 # Percentage of data to use for training
-    create_docker_compose(total_clients,number_of_rounds)
+    number_of_rounds = 100  # Number of rounds that the server will run for
+    data_percentage = 0.6 # Percentage of data to use for training
+    create_docker_compose()

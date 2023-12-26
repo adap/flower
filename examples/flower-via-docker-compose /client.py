@@ -36,14 +36,16 @@ class Client(fl.client.NumPyClient):
         self.args = args
 
         logger.info("Preparing data...")
-        train_d, test_d = load_data(data_sampling_percentage=self.args.data_percentage,
-                                    batch_size=self.args.batch_size,
+        (x_train, y_train), (x_test, y_test) = load_data(data_sampling_percentage=self.args.data_percentage,
                                     client_id=self.args.client_id,
                                     total_clients=self.args.total_clients)
 
-        self.train_dataset = train_d
-        self.test_dataset = test_d
+        self.x_train = x_train
+        self.y_train = y_train
+        self.x_test = x_test
+        self.y_test = y_test
 
+        
     def get_parameters(self, config):
         # Return the parameters of the model
         return model.get_model().get_weights()
@@ -55,7 +57,7 @@ class Client(fl.client.NumPyClient):
         model.get_model().set_weights(parameters)
         
         # Train the model
-        history = model.get_model().fit(self.train_dataset)
+        history = model.get_model().fit(self.x_train, self.y_train, batch_size=self.args.batch_size)
 
         # Calculate evaluation metric
         results = {
@@ -66,7 +68,7 @@ class Client(fl.client.NumPyClient):
         parameters_prime = model.get_model().get_weights()
        
         # Directly return the parameters and the number of examples trained on
-        return parameters_prime, len(self.train_dataset), results
+        return parameters_prime, len(self.x_train), results
 
     
     def evaluate(self, parameters, config):
@@ -75,10 +77,10 @@ class Client(fl.client.NumPyClient):
         model.get_model().set_weights(parameters)
 
         # Evaluate the model and get the loss and accuracy
-        loss, accuracy = model.get_model().evaluate(self.test_dataset)
+        loss, accuracy = model.get_model().evaluate(self.x_test, self.y_test, batch_size=self.args.batch_size)
 
         # Return the loss, the number of examples evaluated on and the accuracy
-        return float(loss), len(self.test_dataset), {"accuracy": float(accuracy)}
+        return float(loss), len(self.x_test), {"accuracy": float(accuracy)}
     
 
 # Function to Start the Client

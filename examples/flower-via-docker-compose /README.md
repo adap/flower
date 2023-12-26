@@ -43,7 +43,7 @@ Before starting, ensure the following prerequisites are met:
      ```bash
      python helpers/generate_docker_compose.py
      ```
-     - Within the script, specify the number of clients (`total_clients`) and resource limitations for each client in the `client_configs` array. The number of training rounds is hardcoded to 50. To adjust the number of rounds, modify the `number_of_rounds` variable in the script.
+     - Within the script, specify the number of clients (`total_clients`) and resource limitations for each client in the `client_configs` array. The number of training rounds is hardcoded. To adjust the number of rounds, modify the `number_of_rounds` variable in the script.
 
 
 ### Step 2: Build and Launch Containers
@@ -105,7 +105,7 @@ We have integrated [`flwr-datasets`](https://flower.dev/docs/datasets/) into our
 
 
 ### Model Selection and Dataset
-For the federated learning system, we have selected the MobileNet model due to its efficiency in image classification tasks. The model is trained and evaluated on the CIFAR-10 dataset, which consists of 60,000 32x32 color images in 10 classes. The combination of MobileNet and CIFAR-10 is ideal for demonstrating the capabilities of our federated learning solution in a heterogeneous device environment.
+For the federated learning system, we have selected the MobileNet model due to its efficiency in image classification tasks. The model is trained and evaluated on the CIFAR-10 dataset. The combination of MobileNet and CIFAR-10 is ideal for demonstrating the capabilities of our federated learning solution in a heterogeneous device environment.
 
 - **MobileNet**: A streamlined architecture for mobile and embedded devices that balances performance and computational cost.
 - **CIFAR-10 Dataset**: A standard benchmark dataset for image classification, containing various object classes that pose a comprehensive challenge for the learning model.
@@ -114,33 +114,44 @@ By integrating these components, our framework is well-prepared to handle the in
 
 
 
-## Monitoring with Grafana
+## Visualizing with Grafana
 
-1. **Access and Customize Grafana Dashboard**:
-   - Visit `http://localhost:3000` to enter Grafana. The automated setup ensures that you're greeted with a series of pre-configured dashboards, including the default screen with a comprehensive set of graphs. These dashboards are ready for immediate monitoring and can be customized to suit your specific requirements.
+### Access Grafana Dashboard
+   Visit `http://localhost:3000` to enter Grafana. The automated setup ensures that you're greeted with a series of pre-configured dashboards, including the default screen with a comprehensive set of graphs. These dashboards are ready for immediate monitoring and can be customized to suit your specific requirements.
 
-2. **Grafana Default Dashboard Example**:
+### Dashboard Configuration
+The `dashboard_index.json` file, located in the `./config/provisioning/dashboards` directory, serves as the backbone of our Grafana dashboard's configuration. It defines the structure and settings of the dashboard panels, which are rendered when you access Grafana. This JSON file contains the specifications for various panels such as model accuracy, CPU usage, memory utilization, and network traffic. Each panel's configuration includes the data source, queries, visualization type, and other display settings like thresholds and colors.
+
+For instance, in our project setup, the `dashboard_index.json` configures a panel to display the model's accuracy over time using a time-series graph, and another panel to show the CPU usage across clients using a graph that plots data points as they are received. This file is fundamental for creating a customized and informative dashboard that provides a snapshot of the federated learning system's health and performance metrics.
+
+By modifying the `dashboard_index.json` file, users can tailor the Grafana dashboard to include additional metrics or change the appearance and behavior of existing panels to better fit their monitoring requirements.
+
+
+### Grafana Default Dashboard
 Below is the default Grafana dashboard that users will see upon accessing Grafana:
 
 
 ![Grafana Home Dashboard](public/grafana_home_screen.png "Grafana Federated Learning Metrics")
 
-This comprehensive dashboard provides insights into various system metrics across client-containers. It includes visualizations such as:
-- **Application Metrics**: Track the model accuracy and loss over time to understand the learning progression.
-- **CPU Usage**: Assess the CPU consumption across different clients, delineating maximum and average usage to pinpoint processing bottlenecks.
-- **Memory Utilization**: Observe memory usage and cache sizes, comparing client containers to manage resources efficiently.
+This comprehensive dashboard provides insights into various system metrics across client-server containers. It includes visualizations such as:
+- **Application Metrics**: The "Model Accuracy" graph shows an upward trend as rounds of training progress, which is a positive indicator of the model learning and improving over time. Conversely, the "Model Loss" graph trends downward, suggesting that the model is becoming more precise and making fewer mistakes as it trains.
+
+- **CPU Usage**: The sharp spikes in the red graph, representing "client1", indicate peak CPU usage, which is considerably higher than that of "client2" (blue graph). This difference is due to "client1" being allocated more computing resources (up to 4 CPU cores) compared to "client2", which is limited to just 1 CPU core, hence the more subdued CPU usage pattern.
+
+- **Memory Utilization**: Both clients are allocated a similar amount of memory, reflected in the nearly same lines for memory usage. This uniform allocation allows for a straightforward comparison of how each client manages memory under similar conditions.
+
 - **Network Traffic**: Monitor incoming and outgoing network traffic to each client, which is crucial for understanding data exchange volumes during federated learning cycles.
 
 
-These graphs collectively offer a multifaceted view of the federated learning operation, from resource utilization to model performance metrics. They highlight the dynamics of the system during training periods versus idle times, providing essential data to optimize the process.
+Together, these metrics paint a detailed picture of the federated learning operation, showcasing resource usage and model performance. Such insights are invaluable for system optimization, ensuring balanced load distribution and efficient model training.
 
 
-## Custom Metrics and Monitoring Integration
+## Comprehensive Monitoring System Integration
 
 ### Capturing Container Metrics with cAdvisor
 cAdvisor is seamlessly integrated into our monitoring setup to capture a variety of system and container metrics, such as CPU, memory, and network usage. These metrics are vital for analyzing the performance and resource consumption of the containers in the federated learning environment.
 
-### Tracking Custom Metrics in Grafana
+### Custom Metrics: Setup and Monitoring via Prometheus
 In addition to the standard metrics captured by cAdvisor, we have implemented a process to track custom metrics like model's accuracy and loss within Grafana, using Prometheus as the backbone for metric collection.
 
 1. **Prometheus Client Installation**:
@@ -171,7 +182,20 @@ In addition to the standard metrics captured by cAdvisor, we have implemented a 
 
 5. **Configuring Prometheus Scraping**:
    - In the `prometheus.yml` file, under `scrape_configs`, we configured a new job to scrape the custom metrics from the HTTP server. This setup includes the job's name, the scraping interval, and the target server's URL.
-   
+
+### Visualizing the Monitoring Architecture
+
+The image below depicts the Prometheus scraping process as it is configured in our monitoring setup. Within this architecture:
+- The "Prometheus server" is the central component that retrieves and stores metrics.
+- "cAdvisor" and the "HTTP server" we set up to expose our custom metrics are represented as "Prometheus targets" in the diagram. cAdvisor captures container metrics, while the HTTP server serves our custom `model_accuracy` and `model_loss` metrics at the `/metrics` endpoint.
+- These targets are periodically scraped by the Prometheus server, aggregating data from both system-level and custom performance metrics.
+- The aggregated data is then made available to the "Prometheus web UI" and "Grafana," as shown, enabling detailed visualization and analysis through the Grafana dashboard.
+
+![Prometheus Architecture](public/prometheus-architecture.png "Prometheus Monitoring Architecture")
+
+
+
+
    
 By incorporating these steps, we have enriched our monitoring capabilities to not only include system-level metrics but also critical performance indicators of our federated learning model. This approach is pivotal for understanding and improving the learning process. Similarly, you can apply this methodology to track any other metric that you find interesting or relevant to your specific needs. This flexibility allows for a comprehensive and customized monitoring environment, tailored to the unique aspects and requirements of your federated learning system.
 
