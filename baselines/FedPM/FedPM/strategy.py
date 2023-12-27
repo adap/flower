@@ -242,6 +242,22 @@ class DenseStrategy(flwr.server.strategy.Strategy):
         else:
             self.server_lr = params.fedavg.server_lr
 
+<<<<<<< HEAD
+=======
+        if self.sim_folder is not None:
+            try:
+                import wandb
+            except ImportError as error:
+                print(error)
+                print("Please install wandb via PIP \n\t $pip install wandb")
+            self.wandb_runner = wandb.init(
+                project='fed_rec',
+                config=self.params,
+                reinit=True
+            )
+            self.wandb_runner.name = self.sim_folder
+            self.wandb_runner.watch(self.global_model)
+>>>>>>> main
         self.layer_id = []
         i = 0
         for name, layer in self.global_model.named_parameters():
