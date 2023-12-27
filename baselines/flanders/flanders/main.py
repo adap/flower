@@ -136,7 +136,7 @@ def main(cfg: DictConfig) -> None:
     # 5. Start Simulation
     fl.simulation.start_simulation(
         client_fn=client_fn,
-        client_resources={"num_cpus": 10},
+        client_resources=cfg.client_resources,
         num_clients=cfg.server.pool_size,
         server=EnhancedServer(
             warmup_rounds=cfg.server.warmup_rounds,
