@@ -1,14 +1,9 @@
-from flower_fl.compressors.compressor import Compressor
-
 from typing import Dict
 import torch
 import math
-import numpy as np
-import random
-from scipy.stats import entropy
 
 
-class SignSGDCompressor(Compressor):
+class SignSGDCompressor:
     def __init__(
             self,
             params: Dict,
@@ -22,9 +17,7 @@ class SignSGDCompressor(Compressor):
     def compress(
             self,
             updates: torch.Tensor,
-            compress_config: Dict = None,
-            iter_num=None,
-    ) -> torch.Tensor:
+    ):
         compressed_delta = []
         num_params = 0
         num_ones = 0
@@ -39,7 +32,6 @@ class SignSGDCompressor(Compressor):
         local_bitrate = self.find_bitrate([local_freq + 1e-50, 1 - local_freq + 1e-50], num_params)
 
         return compressed_delta, (local_bitrate / num_params).cpu().numpy()
-
 
     def find_bitrate(self, probs, num_params):
         local_bitrate = 0

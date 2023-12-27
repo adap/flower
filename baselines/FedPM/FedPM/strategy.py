@@ -211,7 +211,7 @@ class FedPMStrategy(flwr.server.strategy.Strategy):
 class DenseStrategy(flwr.server.strategy.Strategy):
     def __init__(
         self,
-        params: Dict,
+        params,
         global_data_loader: DataLoader,
         loss_fn=torch.nn.CrossEntropyLoss(),
         device='cpu',
@@ -234,17 +234,13 @@ class DenseStrategy(flwr.server.strategy.Strategy):
         self.device = device
         self.global_model = load_model(self.params).to(self.device)
         self.sim_folder = sim_folder
-        if params.get('compressor').get('compress'):
-            if params.get('compressor').get('type') == 'sign_sgd':
-                self.server_lr = params.get('sign_sgd').get('server_lr')
-            if params.get('compressor').get('type') == 'sign_sgd_rec':
-                self.server_lr = params.get('sign_sgd_rec').get('server_lr')
-            if params.get('compressor').get('type') == 'qsgd':
-                self.server_lr = params.get('compressor').get('qsgd').get('server_lr')
-            if params.get('compressor').get('type') == 'qsgd_rec':
-                self.server_lr = params.get('qsgd_rec').get('server_lr')
+        if params.compressor.compress:
+            if params.compressor.type == 'sign_sgd':
+                self.server_lr = params.sign_sgd.server_lr
+            if params.compressor.type == 'qsgd':
+                self.server_lr = params.compressor.qsgd.server_lr
         else:
-            self.server_lr = params.get('fedavg').get('server_lr')
+            self.server_lr = params.fedavg.server_lr
 
         if self.sim_folder is not None:
             try:
@@ -309,7 +305,7 @@ class DenseStrategy(flwr.server.strategy.Strategy):
         }
         for _, fit_res in results:
             for name, val in fit_res.metrics.items():
-                if log_metrics.get(name) is None:
+                if log_metrics.name is None:
                     log_metrics[name] = [val]
                 else:
                     log_metrics[name].append(val)

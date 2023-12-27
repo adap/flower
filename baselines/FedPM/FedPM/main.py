@@ -34,7 +34,7 @@ def main(cfg: DictConfig) -> None:
     """
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
-    if not cfg.get('simulation').get('verbose'):
+    if not cfg.simulation.verbose:
         logging.disable()
 
     # 2. Prepare your dataset

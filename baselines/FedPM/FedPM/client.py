@@ -196,11 +196,11 @@ class DenseClient(flwr.client.Client):
         self.device = device
         self.local_model = load_model(self.params).to(self.device)
         self.compressor = None
-        self.compression = self.params.get('compressor').get('compress')
+        self.compression = self.params.compressor.compress
         if self.compression:
             self.compressor = get_compressor(
-                compressor_type=self.params.get('compressor').get('type'),
-                params=self.params.get('compressor'),
+                compressor_type=self.params.compressor.type,
+                params=self.params.compressor,
                 device=self.device
             )
 
@@ -220,7 +220,7 @@ class DenseClient(flwr.client.Client):
         if self.compression:
             compressed_delta, avg_bitrate = self.compressor.compress(
                 updates=deltas,
-                compress_config=self.params.get('compressor').get('rec'),
+                compress_config=self.params.compressor.rec,
                 iter_num=fitins.config.get('iter_num')
             )
             round_rate = avg_bitrate
@@ -284,18 +284,18 @@ class DenseClient(flwr.client.Client):
                     optimizer: torch.optim.Optimizer = None
     ):
         """Train the network on the training set."""
-        if params.get('compressor').get('compress'):
-            if params.get('compressor').get('type') == 'sign_sgd':
+        if params.compressor.compress:
+            if params.compressor.type == 'sign_sgd':
                 optimizer = torch.optim.SGD(model.parameters(), lr=params.sign_sgd.local_lr)
-            if params.get('compressor').get('type') == 'qsgd':
+            if params.compressor.type == 'qsgd':
                 optimizer = torch.optim.Adam(model.parameters(),
-                                             lr=params.get('compressor').qsgd.local_lr)
+                                             lr=params.compressor.qsgd.local_lr)
         else:
             optimizer = torch.optim.Adam(model.parameters(), lr=params.fedavg.local_lr)
 
         global_model = deepcopy(model.state_dict())
         model.train()
-        for epoch in range(params.get('compressor').qsgd.local_epochs):
+        for epoch in range(params.compressor.qsgd.local_epochs):
             correct, total, epoch_loss = 0, 0, 0.0
             for images, labels in trainloader:
                 images, labels = images.to(device), labels.to(device)

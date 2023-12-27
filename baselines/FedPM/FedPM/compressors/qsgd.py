@@ -1,6 +1,3 @@
-from .compressor import Compressor
-
-from typing import Dict
 import torch
 import math
 import numpy as np
@@ -9,8 +6,8 @@ import numpy as np
 class QSGDCompressor:
     def __init__(
             self,
-            params: Dict,
-            device: torch.device
+            params,
+            device
     ) -> None:
         self.device = device
         self.params = params
@@ -18,9 +15,9 @@ class QSGDCompressor:
     def compress(
             self,
             updates: torch.Tensor,
-    ) -> torch.Tensor:
+    ):
         compressed_delta = []
-        num_levels = self.params.get('qsgd').get('num_level')
+        num_levels = self.params.qsgd.num_level
         num_params = 0
         elias_bitrate = 0
         for i, (name, param) in enumerate(updates.items()):
