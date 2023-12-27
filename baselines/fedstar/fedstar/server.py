@@ -14,6 +14,7 @@ import uuid
 import flwr
 import hydra
 import tensorflow as tf
+from omegaconf import DictConfig, OmegaConf
 
 from fedstar.data import DataBuilder
 from fedstar.model import Network
@@ -185,12 +186,15 @@ def set_gpu_limits(gpu_id, gpu_memory):
 """
 
 
-@hydra.main(config_path="conf/table_3", config_name="base")
-def main(cfg):
+@hydra.main(config_path="conf/table_3", config_name="base", version_base=None)
+def main(cfg: DictConfig):
     # Set Experiment Parameters
     unique_id = str(uuid.uuid1())
-    print(cfg)
-    dataset_name = cfg["server"]["dataset_name"]
+
+    # print config structured as YAML
+    print(OmegaConf.to_yaml(cfg))
+
+    dataset_name = cfg.server.dataset_name
     # Notify Experiment ID to console.
     print(
         "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n"
@@ -200,31 +204,31 @@ def main(cfg):
         + "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n"
     )
     # GPU Setup
-    set_gpu_limits(gpu_id="0", gpu_memory=cfg["server"]["gpu_memory"])
+    set_gpu_limits(gpu_id="0", gpu_memory=cfg.server.gpu_memory)
     # Load Test Dataset
     ds_test, num_classes = DataBuilder.get_ds_test(
         parent_path=parent_path,
         data_dir=dataset_name,
-        batch_size=cfg["server"]["batch_size"],
+        batch_size=cfg.server.batch_size,
         buffer=1024,
-        seed=cfg["server"]["seed"],
+        seed=cfg.server.seed,
     )
     # Create Server Object
     audio_server = AudioServer(
-        flwr_evalution_step=cfg["server"]["eval_step"],
-        flwr_min_sample_size=cfg["server"]["min_sample_size"],
-        flwr_min_num_clients=cfg["server"]["num_clients"],
-        flwr_rounds=cfg["server"]["rounds"],
+        flwr_evalution_step=cfg.server.eval_step,
+        flwr_min_sample_size=cfg.server.min_sample_size,
+        flwr_min_num_clients=cfg.server.num_clients,
+        flwr_rounds=cfg.server.rounds,
         model_num_classes=num_classes,
-        model_lr=cfg["server"]["learning_rate"],
-        model_batch_size=cfg["server"]["batch_size"],
-        model_epochs=cfg["server"]["train_epochs"],
+        model_lr=cfg.server.learning_rate,
+        model_batch_size=cfg.server.batch_size,
+        model_epochs=cfg.server.train_epochs,
         model_ds_test=ds_test,
-        model_verbose=cfg["server"]["verbose"],
+        model_verbose=cfg.server.verbose,
     )
     # Run server
     set_logger_level()
-    audio_server.server_start(cfg["server"]["server_address"])
+    audio_server.server_start(cfg.serverserver_address)
     return f"\nFinal Accuracy on experiment  {unique_id}: {audio_server.get_accuracy():.04f}\n"
 
 

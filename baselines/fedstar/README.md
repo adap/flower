@@ -44,6 +44,9 @@ chmod +x setup_datasets.sh
 ```
 
 ## Running the Experiments
+
+By default, the `Ambient Context` experiment in Table 3 with 10 clients will be run.
+
 ```bash
 python -m fedstar.server
 python -m fedstar.clients
