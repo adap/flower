@@ -5,15 +5,17 @@ parser = argparse.ArgumentParser(description='Generated Docker Compose')
 parser.add_argument('--total_clients', type=int, default=2, help="Total clients to spawn (default: 2)")
 parser.add_argument('--num_rounds', type=int, default=100, help="Number of FL rounds (default: 100)")
 parser.add_argument('--data_percentage', type=float, default=0.6, help='Portion of client data to use (default: 0.6)')
+parser.add_argument('--random', type=bool, default=False, help='Randomize client configurations (default: False)')
 
 def create_docker_compose(args):
     # cpus is used to set the number of CPUs available to the container as a fraction of the total number of CPUs on the host machine.
     # mem_limit is used to set the memory limit for the container.
     client_configs = [
-        {'mem_limit': '3g', 'batch_size': 32,  "cpus": 3.5, 'learning_rate': 0.001},
-        {'mem_limit': '4g', 'batch_size': 64,  "cpus": 3, 'learning_rate': 0.02},
-        {'mem_limit': '5g', 'batch_size': 128, "cpus": 2.5, 'learning_rate': 0.09},
+        {'mem_limit': '3g', 'batch_size': 32,  "cpus": 4, 'learning_rate': 0.001},
+        # {'mem_limit': '4g', 'batch_size': 64,  "cpus": 3, 'learning_rate': 0.02},
+        # {'mem_limit': '5g', 'batch_size': 128, "cpus": 2.5, 'learning_rate': 0.09},
         {'mem_limit': '6g', 'batch_size': 256, "cpus": 1, 'learning_rate': 0.15},
+        
         # Add or modify the configurations depending on your host machine
     ]
 
@@ -92,7 +94,10 @@ services:
 """
     # Add client services
     for i in range(1, args.total_clients + 1):
-        config = random.choice(client_configs)
+        if args.random:
+            config = random.choice(client_configs)
+        else:
+            config = client_configs[(i-1) % len(client_configs)]
         docker_compose_content += f"""
   client{i}:
     container_name: client{i}
