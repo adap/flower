@@ -2,7 +2,6 @@
 import logging
 import flwr as fl
 import hydra
-from comet_ml import Experiment
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
@@ -24,19 +23,7 @@ def main(cfg: DictConfig) -> None:
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
     seed_everything(cfg.seed)
-    # # Comet ML tracking
-    credentials = OmegaConf.load("fedpara/conf/credentials.yaml")
-    experiment = Experiment(
-        api_key=credentials.api_key,
-        project_name=credentials.project_name,
-        workspace=credentials.workspace,
-    )
-    experiment.set_name(
-        f"flower | {cfg.strategy.algorithm} "
-        f"| {cfg.dataset_config.name} | Seed {cfg.seed}"
-    )
     hyper_params = OmegaConf.to_container(cfg, resolve=True)
-    experiment.log_parameters(hyper_params)
     # log the hyperparameters
     logging.info(f"Hyperparameters: {hyper_params}")
     # 2. Prepare dataset
@@ -59,7 +46,6 @@ def main(cfg: DictConfig) -> None:
         test_loader=test_loader,
         model=cfg.model,
         device=cfg.server_device,
-        experiment=experiment,
     )
 
     def get_on_fit_config():
@@ -110,9 +96,9 @@ def main(cfg: DictConfig) -> None:
             f"{cfg.clients_per_round}",
         ]
     )
-
+    
     utils.plot_metric_from_history(
-        hist=history, save_plot_path=save_path, suffix=file_suffix, cfg=cfg
+        hist=history, save_plot_path=save_path, suffix=file_suffix, cfg=cfg, model_size=net_glob.model_size()[1]
     )
 
 

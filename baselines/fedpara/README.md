@@ -36,7 +36,7 @@ Specifically, it replicates the results for Cifar10 and Cifar100 in Figure 3 and
 
 ****Hardware Setup:**** The experiment has been conducted on our server with the following specs:
 
-- **GPU:** 1 Tesla V100 GPU 32GB VRAM
+- **GPU:** 1 RTX A6000 GPU 50GB VRAM
 - **CPU:** 1x24 cores Intel Xeon(R) 6248R
 - **RAM:** 150 GB
 
@@ -89,32 +89,45 @@ Choice of alpha parameter for the Dirichlet distribution used to create heteroge
 
 
 ## Environment Setup
+To construct the Python environment follow these steps:
 
-:warning: _The Python environment for all baselines should follow these guidelines in the `EXTENDED_README`. Specify the steps to create and activate your environment. If there are any external system-wide requirements, please include instructions for them too. These instructions should be comprehensive enough so anyone can run them (if non standard, describe them step-by-step)._
+```bash
+# Set Python 3.10
+pyenv local 3.10.6
+# Tell poetry to use python 3.10
+poetry env use 3.10.6
 
+# Install the base Poetry environment
+poetry install
+
+# Activate the environment
+poetry shell
+```
 
 ## Running the Experiments
 
-:warning: _Provide instructions on the steps to follow to run all the experiments._
 ```bash  
-# The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs) should run (including dataset download and necessary partitioning) by executing the command:
 
-poetry run python -m <baseline-name>.main <no additional arguments> # where <baseline-name> is the name of this directory and that of the only sub-directory in this directory (i.e. where all your source code is)
+**Essential commands**
+# To run fedpara
+poetry run python -m fedpara.main
+# Important configs
+- model.conv_type --> choose parameterization scheme: lowrank or original(normal weights)
+- dataset_config.partition --> choosing between non IID and IID scheme
+- model.ratio --> choosing the ratio (lambda) of number of parameters
 
-# If you are using a dataset that requires a complicated download (i.e. not using one natively supported by TF/PyTorch) + preprocessing logic, you might want to tell people to run one script first that will do all that. Please ensure the download + preprocessing can be configured to suit (at least!) a different download directory (and use as default the current directory). The expected command to run to do this is:
+**Multi-runs**
 
-poetry run python -m <baseline-name>.dataset_preparation <optional arguments, but default should always run>
+# To run fedpara for non-iid cifar 10 on vgg16 for lowrank and original schemes
+poetry run python -m fedpara.main --multirun model.conv_type=standard,lowrank 
+# To run fedpara for non-iid cifar 100 on vgg16 for lowrank and original schemes
+poetry run python -m fedpara.main --config-name cifar100 --multirun model.conv_type=standard,lowrank 
+# To run fedpara for iid cifar 10 on vgg16 for lowrank and original schemes
+poetry run python -m fedpara.main --multirun model.conv_type=standard,lowrank num_epochs=10 dataset_config.partition=iid 
+# To run fedpara for iid cifar 100 on vgg16 for lowrank and original schemes
+poetry run python -m fedpara.main --config-name cifar100 --multirun model.conv_type=standard,lowrank num_epochs=10 dataset_config.partition=iid
 
-# It is expected that you baseline supports more than one dataset and different FL settings (e.g. different number of clients, dataset partitioning methods, etc). Please provide a list of commands showing how these experiments are run. Include also a short explanation of what each one does. Here it is expected you'll be using the Hydra syntax to override the default config.
-
-poetry run python -m <baseline-name>.main  <override_some_hyperparameters>
-.
-.
-.
-poetry run python -m <baseline-name>.main  <override_some_hyperparameters>
 ```
-
-
 ## Expected Results
 ### From the [Fedpara](https://arxiv.org/pdf/2108.06098.pdf) paper:
 #### Communication Cost: 
@@ -137,6 +150,8 @@ poetry run python -m <baseline-name>.main  <override_some_hyperparameters>
 
 ** We are using parameter ratio of 0.1 for Cifar10 and 0.4 for Cifar100
 Parameters from 
+
+The rank is calculated by the equation provided in paper R = r_max* lamda + (1-lambda)*r_min
 
 ### Cifar100 (Accuracy vs Communication Cost)
 

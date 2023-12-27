@@ -17,7 +17,6 @@ def gen_evaluate_fn(
     test_loader: DataLoader,
     model: DictConfig,
     device,
-    experiment=None,
 ) -> Callable[
     [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]
 ]:
@@ -50,10 +49,6 @@ def gen_evaluate_fn(
         net.to(device)
 
         loss, accuracy = test(net, test_loader, device=device)
-
-        experiment.log_metric("loss", loss, epoch=server_round)
-        experiment.log_metric("accuracy", accuracy * 100, epoch=server_round*2*net.model_size[1]*num_clients/1024)
-
         return loss, {"accuracy": accuracy}
 
     return evaluate

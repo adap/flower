@@ -18,6 +18,7 @@ def plot_metric_from_history(
     save_plot_path: str,
     suffix: Optional[str] = "",
     cfg: Optional[DictConfig] = None,
+    model_size: float = None,
 ) -> None:
     """Plot the metrics from the history of the server.
 
@@ -39,10 +40,11 @@ def plot_metric_from_history(
         else hist.metrics_distributed
     )
     rounds, values_accuracy = zip(*metric_dict["accuracy"])
+    rounds*=2*model_size*cfg.clients_per_round/1024
     _, axs = plt.subplots()
     # Set the title
     axs.set_title(
-        f"{cfg.strategy.algorithm} | {cfg.dataset_config.name} | Seed {cfg.seed}"
+        f"{cfg.strategy.algorithm} | parameters: {cfg.model.conv_type} | {cfg.dataset_config.name} {cfg.dataset_config.partition} | Seed {cfg.seed}"
     )
     axs.plot(np.asarray(rounds), np.asarray(values_accuracy))
     axs.set_ylabel("Accuracy")
