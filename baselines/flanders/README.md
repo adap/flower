@@ -66,7 +66,8 @@ Where $\lambda_1$ and $\lambda_2$ are Lasso and Ridge regularization terms, $L$ 
 
 ```bash  
 # Use a version of Python >=3.9 and <3.12.0.
-poetry env use 3.9.18
+pyenv local 3.10.12
+poetry env use 3.10.12
 
 # Install everything from the toml
 poetry install
