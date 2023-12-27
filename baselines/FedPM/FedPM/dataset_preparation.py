@@ -44,13 +44,16 @@ def shuffle_list_data(x, y):
     return x[indices], y[indices]
 
 
-def get_cifar100(iid=False, transform=None):
+def get_cifar100(iid=False, transform=None, data_path=None):
     """
         Return CIFAR10 train/test data and labels as numpy arrays
     """
 
-    data_train = torchvision.datasets.CIFAR100('data/cifar100', train=True, download=True, transform=transform)
-    data_test = torchvision.datasets.CIFAR100('data/cifar100', train=False, download=True, transform=transform)
+    if data_path is None:
+        data_path = Path(__file__).parent.parent.parent.resolve().joinpath("data/cifar10")
+
+    data_train = torchvision.datasets.CIFAR100(data_path, train=True, download=True, transform=transform)
+    data_test = torchvision.datasets.CIFAR100(data_path, train=False, download=True, transform=transform)
 
     if iid:
         return data_train, data_test
@@ -61,13 +64,14 @@ def get_cifar100(iid=False, transform=None):
     return x_train, y_train, x_test, y_test
 
 
-def get_cifar10(iid=False, transform=None):
+def get_cifar10(iid=False, transform=None, data_path=None):
     """
         Return CIFAR10 train/test data and labels as numpy arrays
     """
-
-    data_train = torchvision.datasets.CIFAR10('data/cifar10', train=True, download=True, transform=transform)
-    data_test = torchvision.datasets.CIFAR10('data/cifar10', train=False, download=True, transform=transform)
+    if data_path is None:
+        data_path = Path(__file__).parent.parent.parent.resolve().joinpath("data/cifar10")
+    data_train = torchvision.datasets.CIFAR10(data_path, train=True, download=True, transform=transform)
+    data_test = torchvision.datasets.CIFAR10(data_path, train=False, download=True, transform=transform)
 
     if iid:
         return data_train, data_test
@@ -78,12 +82,12 @@ def get_cifar10(iid=False, transform=None):
     return x_train, y_train, x_test, y_test
 
 
-def get_emnist(iid=False, transform=None):
+def get_emnist(iid=False, transform=None, data_path=None):
     """
         Return global train and test datasets for EMNIST
     """
-
-    data_path = Path(__file__).parent.parent.parent.resolve().joinpath("data/emnist")
+    if data_path is None:
+        data_path = Path(__file__).parent.parent.parent.resolve().joinpath("data/emnist")
     train_dataset = torchvision.datasets.EMNIST(root=str(data_path),
                                                 train=True,
                                                 download=True,
@@ -104,12 +108,13 @@ def get_emnist(iid=False, transform=None):
     return x_train, y_train, x_test, y_test
 
 
-def get_mnist(iid=False, transform=None):
+def get_mnist(iid=False, transform=None, data_path=None):
     """
         Return global train and test datasets for MNIST
     """
+    if data_path is None:
+        data_path = Path(__file__).parent.parent.parent.resolve().joinpath("data/mnist")
 
-    data_path = Path(__file__).parent.parent.parent.resolve().joinpath("data/mnist")
     train_dataset = torchvision.datasets.MNIST(root=str(data_path),
                                                train=True,
                                                download=True,

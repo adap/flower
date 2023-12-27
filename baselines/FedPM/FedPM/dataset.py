@@ -11,14 +11,20 @@ defined here of course.
 
 from FedPM.dataset_preparation import *
 from torch.utils.data import DataLoader
+from pathlib import Path
 
 
-def get_data_loaders(dataset, nclients, batch_size, classes_pc=10, split='iid'):
+def get_data_loaders(dataset, nclients, batch_size, classes_pc=10, split='iid', data_path=None):
     transforms_train, transforms_eval = get_default_data_transforms(dataset=dataset, verbose=True)
     # This is to evaluate models at the devices
     client_val_loader = [[] for _ in range(nclients)]
+    data_path = Path(data_path).joinpath(dataset)
     if split == 'iid':
-        data_train, data_test = dataset_dict[dataset](transform=transforms_train, iid=True)
+        data_train, data_test = dataset_dict[dataset](
+            transform=transforms_train,
+            iid=True,
+            data_path=data_path
+        )
         data_train_list = split_dataset(dataset=data_train, n_clients=nclients)
         data_loader_client_list = [DataLoader(local_data,
                                               batch_size=batch_size,
@@ -27,7 +33,10 @@ def get_data_loaders(dataset, nclients, batch_size, classes_pc=10, split='iid'):
         return data_loader_client_list, client_val_loader, data_loader_test
     else:
         # Get data
-        x_train, y_train, x_test, y_test = dataset_dict[dataset](iid=False)
+        x_train, y_train, x_test, y_test = dataset_dict[dataset](
+            iid=False,
+            data_path=filename
+        )
         split = split_image_data(x_train, y_train, n_clients=nclients, classes_per_client=classes_pc)
 
         split_tmp = shuffle_list(split)

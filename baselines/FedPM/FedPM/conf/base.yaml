@@ -4,14 +4,17 @@
 # a similar configuration structure and hence be easy to customise)
 
 dataset:
-  name: 'mnist' # [cifar10, mnist]
+  name: 'cifar10' # [cifar10, mnist]
+  # If path is specified, look for (or download) the dataset in that path,
+  # otherwise use current folder.
+  data_path: '/home/signet/Documenti/repo/flower_fl/data'
   split: 'iid' # {iid, non-iid}
   classes_pc: 4
-  minibatch_size: 64 #32
+  minibatch_size: 64
 
 model:
-  name: 'LeNet' # [Conv8/6/4, LeNet, Mask, Conv6]
-  mode: 'dense' # [mask, dense]
+  name: 'Conv6' # [Conv8/6/4, LeNet]
+  mode: 'mask' # [mask, dense]
   local_epochs: 3
   activation: 'relu'
   agg_steps: 5
@@ -22,33 +25,32 @@ strategy:
     local_epochs: 3
     local_lr: 0.1
 
-  fedavg:
-    local_lr: 0.0003
-    server_lr: 0.1
-
-  dense:
-    local_epochs: 3
+compressor:
+  compress: True
+  type: 'qsgd' # {sign_sgd, qsgd}
 
   sign_sgd:
     local_lr: 0.01
     server_lr: 0.0002
 
-client:
-  local_epochs: 3
-  local_lr: 0.1
+  qsgd:
+    local_lr: 0.0003
+    server_lr: 0.1
+    num_level: 2
+    local_epochs: 3
 
 simulation:
-  fraction_fit: 0.2
+  fraction_fit: 0.5
   fraction_evaluate: 0
   n_clients: 10
   n_rounds: 200
   verbose: 0
-  store_output: True
-  strategy: 'fedpm' # [fedpm, dense]
+  store_output: False
+  client_type: 'fedpm' # [fedpm, dense]
 
 ray_init_args:
   ignore_reinit_error: True
-  include_dashboard: True
+  include_dashboard: False
   num_cpus: 6
   num_gpus: 1
   local_mode: True
