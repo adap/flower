@@ -20,10 +20,10 @@ In this example, we tackle device heterogeneity in federated learning, arising f
 
 ```python
 client_configs = [
-    {'mem_limit': '3g', 'batch_size': 32,  "cpus": 3.5, 'learning_rate': 0.001},
-   #  {'mem_limit': '4g', 'batch_size': 64,  "cpus": 3, 'learning_rate': 0.02},
-   #  {'mem_limit': '5g', 'batch_size': 128, "cpus": 2.5, 'learning_rate': 0.09},
-    {'mem_limit': '6g', 'batch_size': 256, "cpus": 1, 'learning_rate': 0.05}
+    {'mem_limit': '3g', 'batch_size': 32,  "cpus": 4, 'learning_rate': 0.001},
+      # {'mem_limit': '4g', 'batch_size': 64,  "cpus": 3, 'learning_rate': 0.02},
+      # {'mem_limit': '5g', 'batch_size': 128, "cpus": 2.5, 'learning_rate': 0.09},
+    {'mem_limit': '6g', 'batch_size': 256, "cpus": 1, 'learning_rate': 0.15},
 ]
 ```
 
