@@ -2,11 +2,21 @@
 
 ## Unreleased
 
+- **Add scikit-learn tabular data example** ([#2719](https://github.com/adap/flower/pull/2719))
+
 - **General updates to Flower Examples** ([#2381](https://github.com/adap/flower/pull/2381))
+
+- **Retiring MXNet examples** The development of the MXNet fremework has ended and the project is now [archived on GitHub](https://github.com/apache/mxnet). Existing MXNet examples won't receive updates [#2724](https://github.com/adap/flower/pull/2724)
 
 - **Update Flower Baselines**
 
   - HFedXGBoost [#2226](https://github.com/adap/flower/pull/2226)
+
+  - FedVSSL [#2412](https://github.com/adap/flower/pull/2412)
+
+  - FedNova [#2179](https://github.com/adap/flower/pull/2179)
+
+  - HeteroFL [#2439](https://github.com/adap/flower/pull/2439)
 
 ## v1.6.0 (2023-11-28)
 

@@ -6,7 +6,7 @@ from typing import List, Tuple
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
-from baselines.fedpara.fedpara.dataset_preparation import iid, noniid, DatasetSplit
+from fedpara.dataset_preparation import iid, noniid, DatasetSplit
 
 
 def load_datasets(
