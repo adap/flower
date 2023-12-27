@@ -314,7 +314,7 @@ def start_simulation(
         log(ERROR, traceback.format_exc())
         log(
             ERROR,
-            "Your simulation crashed :(. This could be because of several reasons."
+            "Your simulation crashed :(. This could be because of several reasons. "
             "The most common are: "
             "\n\t > Your system couldn't fit a single VirtualClient: try lowering "
             "`client_resources`."
