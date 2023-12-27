@@ -6,7 +6,7 @@
 
 
 ## Introduction
-In this example, we tackle device heterogeneity in federated learning, arising from differences in memory and CPU capabilities across devices. This diversity affects training efficiency and inclusivity. Our strategy includes simulating this heterogeneity by setting CPU and memory limits in a Docker setup, using a custom docker compose generator script. This approach creates a varied training environment and enables us to develop strategies to manage these disparities effectively.
+In this example, we tackle device heterogeneity in federated learning, arising from differences in memory and CPU capabilities across devices. This diversity affects training efficiency and inclusivity. Our strategy includes simulating this heterogeneity by setting CPU and memory limits in a Docker setup, using a custom Docker compose generator script. This approach creates a varied training environment and enables us to develop strategies to manage these disparities effectively.
 
 
 ## Handling Device Heterogeneity
@@ -21,9 +21,9 @@ In this example, we tackle device heterogeneity in federated learning, arising f
 ```python
 client_configs = [
     {'mem_limit': '3g', 'batch_size': 32,  "cpus": 3.5, 'learning_rate': 0.001},
-    {'mem_limit': '4g', 'batch_size': 64,  "cpus": 3, 'learning_rate': 0.02},
-    {'mem_limit': '5g', 'batch_size': 128, "cpus": 2.5, 'learning_rate': 0.09},
-    {'mem_limit': '6g', 'batch_size': 256, "cpus": 1, 'learning_rate': 0.15}
+   #  {'mem_limit': '4g', 'batch_size': 64,  "cpus": 3, 'learning_rate': 0.02},
+   #  {'mem_limit': '5g', 'batch_size': 128, "cpus": 2.5, 'learning_rate': 0.09},
+    {'mem_limit': '6g', 'batch_size': 256, "cpus": 1, 'learning_rate': 0.05}
 ]
 ```
 
@@ -43,13 +43,14 @@ Before starting, ensure the following prerequisites are met:
      ```bash
      python helpers/generate_docker_compose.py
      ```
-     - Within the script, specify the number of clients (`total_clients`) and resource limitations for each client in the `client_configs` array. The number of training rounds is hardcoded. To adjust the number of rounds, modify the `number_of_rounds` variable in the script.
+     - Within the script, specify the number of clients (`total_clients`) and resource limitations for each client in the `client_configs` array. You can adjust the number of rounds by passing `--num_rounds` to the above command.
 
 
 ### Step 2: Build and Launch Containers
 1. **Execute Initialization Script**: 
    - To build the Docker images and start the containers, use the following command:
      ```bash
+     # this is the only command you need to execute to run the entire example
      docker-compose up
      ```
    - If you make any changes to the Dockerfile or other configuration files, you should rebuild the images to reflect these changes. This can be done by adding the `--build` flag to the command:
@@ -62,7 +63,7 @@ Before starting, ensure the following prerequisites are met:
      - Press `Ctrl+C` once in the terminal where `docker-compose up` is running. This will stop the containers but won't remove them or the networks and volumes they use.
    
 2. **Services Startup**: 
-   - Several services will launch as defined in your `docker-compose.yml` file:
+   - Several services will automatically launch as defined in your `docker-compose.yml` file:
      - **Monitoring Services**: Prometheus for metrics collection, Cadvisor for container monitoring, and Grafana for data visualization.
      - **Flower Federated Learning Environment**: The Flower server and client containers are initialized and start running.
    - After launching the services, verify that all Docker containers are running correctly by executing the `docker ps` command. Here's an example output:

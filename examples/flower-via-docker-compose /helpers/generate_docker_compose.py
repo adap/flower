@@ -1,7 +1,12 @@
 import random
+import argparse
 
+parser = argparse.ArgumentParser(description='Generated Docker Compose')
+parser.add_argument('--total_clients', type=int, default=2, help="Total clients to spawn (default: 2)")
+parser.add_argument('--num_rounds', type=int, default=100, help="Number of FL rounds (default: 100)")
+parser.add_argument('--data_percentage', type=float, default=0.6, help='Portion of client data to use (default: 0.6)')
 
-def create_docker_compose():
+def create_docker_compose(args):
     # cpus is used to set the number of CPUs available to the container as a fraction of the total number of CPUs on the host machine.
     # mem_limit is used to set the memory limit for the container.
     client_configs = [
@@ -70,7 +75,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: python server.py --number_of_rounds={number_of_rounds} --total_clients={total_clients}
+    command: python server.py --number_of_rounds={args.num_rounds} --total_clients={args.total_clients}
     environment:
       FLASK_RUN_PORT: 6000
       DOCKER_HOST_IP: host.docker.internal
@@ -86,7 +91,7 @@ services:
       - grafana
 """
     # Add client services
-    for i in range(1, total_clients + 1):
+    for i in range(1, args.total_clients + 1):
         config = random.choice(client_configs)
         docker_compose_content += f"""
   client{i}:
@@ -94,7 +99,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: python client.py --server_address=server:8080 --data_percentage={data_percentage}  --client_id={i} --total_clients={total_clients} --batch_size={config["batch_size"]} --learning_rate={config["learning_rate"]}
+    command: python client.py --server_address=server:8080 --data_percentage={args.data_percentage}  --client_id={i} --total_clients={args.total_clients} --batch_size={config["batch_size"]} --learning_rate={config["learning_rate"]}
     mem_limit: {config['mem_limit']}
     deploy:
       resources:
@@ -119,7 +124,5 @@ services:
         file.write(docker_compose_content)
 
 if __name__ == "__main__":
-    total_clients = 2  # Number of clients that will be created
-    number_of_rounds = 100  # Number of rounds that the server will run for
-    data_percentage = 0.6 # Percentage of data to use for training
-    create_docker_compose()
+    args = parser.parse_args()
+    create_docker_compose(args)
