@@ -16,8 +16,7 @@ loss_gauge = Gauge('model_loss', 'Current loss of the global model')
 
 # Parse command line arguments
 parser = argparse.ArgumentParser(description='Flower Server')
-parser.add_argument('--number_of_rounds', type=int, default=10)
-parser.add_argument('--total_clients', type=int, default=2)
+parser.add_argument('--number_of_rounds', type=int, default=100, help="Number of FL rounds (default: 100)")
 args = parser.parse_args()
 
 
@@ -41,7 +40,6 @@ if __name__ == "__main__":
     
     # Initialize Strategy Instance and Start FL Server 
     strategy_instance = FedCustom(accuracy_gauge=accuracy_gauge,
-                                  loss_gauge=loss_gauge,
-                                  total_clients=args.total_clients)
+                                  loss_gauge=loss_gauge)
     start_fl_server(strategy=strategy_instance, rounds=args.number_of_rounds)
  

@@ -77,7 +77,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: python server.py --number_of_rounds={args.num_rounds} --total_clients={args.total_clients}
+    command: python server.py --number_of_rounds={args.num_rounds}
     environment:
       FLASK_RUN_PORT: 6000
       DOCKER_HOST_IP: host.docker.internal

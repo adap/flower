@@ -14,13 +14,12 @@ logger = logging.getLogger(__name__)     # Create logger for the module
 
 
 class FedCustom(fl.server.strategy.FedAvg):
-    def __init__(self, total_clients: int = 2,
+    def __init__(self,
         accuracy_gauge: Gauge = None,
         loss_gauge: Gauge = None,*args, **kwargs):
 
         super().__init__(*args, **kwargs)
 
-        self.total_clients = total_clients
         self.accuracy_gauge = accuracy_gauge
         self.loss_gauge = loss_gauge
 
