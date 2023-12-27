@@ -29,7 +29,7 @@ dataset: [MNIST, Income, CIFAR-10, California Housing]
 
 ****Task:**** Image classification, logistic regression, linear regression
 
-****Models:**** Appendix C of the paper describe the models, but here's a summary.
+****Models:**** Appendix C of the paper describes the models, but here's a summary.
 
 Income (binary classification):
 - cyclic coordinate descent (CCD)
@@ -88,7 +88,7 @@ python -m flanders.main
 
 To execute a single experiment with the default values in `conf/base.yaml`.
 
-To run custom experiments, you can override the defaults values like that:
+To run custom experiments, you can override the default values like that:
 
 ```bash
 python -m flanders.main dataset=income server.attack_fn=lie server.num_malicious=1
@@ -110,10 +110,12 @@ python -m flanders.main --multirun dataset=income,mnist server.attack_fn=gaussia
 
 It will generate the results in `results/all_results.csv`. To generate the plots, use the notebook in `plotting/plots.ipynb`.
 
-Expected maximum accuracy achieved across different number of malicious clients and different attacks:
+Expected maximum accuracy achieved across different numbers of malicious clients and different attacks:
+
 ![](_static/max_acc.jpg)
 
 Expected distribution of accuracy from round $L$ to the final round across all the experiments:
+
 ![](_static/boxplot_Income.jpg)
 
 ![](_static/boxplot_MNIST.jpg)
