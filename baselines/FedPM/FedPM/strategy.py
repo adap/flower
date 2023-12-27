@@ -242,25 +242,9 @@ class DenseStrategy(flwr.server.strategy.Strategy):
         else:
             self.server_lr = params.fedavg.server_lr
 
-<<<<<<< HEAD
-=======
-        if self.sim_folder is not None:
-            try:
-                import wandb
-            except ImportError as error:
-                print(error)
-                print("Please install wandb via PIP \n\t $pip install wandb")
-            self.wandb_runner = wandb.init(
-                project='fed_rec',
-                config=self.params,
-                reinit=True
-            )
-            self.wandb_runner.name = self.sim_folder
-            self.wandb_runner.watch(self.global_model)
->>>>>>> main
         self.layer_id = []
         i = 0
-        for name, layer in self.global_model.named_parameters():
+        for _, _ in self.global_model.named_parameters():
             self.layer_id.append(i)
             i += 1
 
@@ -396,4 +380,3 @@ class DenseStrategy(flwr.server.strategy.Strategy):
         """Use a fraction of available clients for evaluation."""
         num_clients = int(num_available_clients * self.fraction_evaluate)
         return max(num_clients, self.min_evaluate_clients), self.min_available_clients
-

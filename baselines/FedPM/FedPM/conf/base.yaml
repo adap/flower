@@ -45,12 +45,10 @@ simulation:
   n_clients: 10
   n_rounds: 200
   verbose: 0
-  store_output: False
   client_type: 'fedpm' # [fedpm, dense]
 
 ray_init_args:
   ignore_reinit_error: True
-  include_dashboard: False
   num_cpus: 6
   num_gpus: 1
   local_mode: True

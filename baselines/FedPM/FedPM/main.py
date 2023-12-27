@@ -48,10 +48,10 @@ def main(cfg: DictConfig) -> None:
     trainloaders, valloaders, testloader = get_data_loaders(
         dataset=cfg.dataset.name,
         nclients=NUM_CLIENTS,
-        batch_size=cfg.datatset.minibatch_size,
-        classes_pc=cfg.datset.classes_pc,
+        batch_size=cfg.dataset.minibatch_size,
+        classes_pc=cfg.dataset.classes_pc,
         split=cfg.dataset.split,
-        data_path=cfg.datset.data_path
+        data_path=cfg.dataset.data_path
     )
 
     # 3. Define your clients
@@ -91,7 +91,6 @@ def main(cfg: DictConfig) -> None:
         strategy=strategy,
         ray_init_args={
             "ignore_reinit_error": cfg.ray_init_args.ignore_reinit_error,
-            "include_dashboard": cfg.ray_init_args.ray_init_args,
             "num_cpus": cfg.ray_init_args.num_cpus,
             "num_gpus": cfg.ray_init_args.num_gpus,
             "local_mode": cfg.ray_init_args.local_mode

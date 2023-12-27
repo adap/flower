@@ -8,8 +8,6 @@ block) that this file should be executed first.
 """
 import hydra
 import random
-from hydra.core.hydra_config import HydraConfig
-from hydra.utils import call, instantiate
 import numpy as np
 import torch
 import torchvision
