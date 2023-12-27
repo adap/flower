@@ -84,22 +84,28 @@ class Conv2d(nn.Module):
 
     def _calc_from_ratio(self):
         # Return the low-rank of sub-matrices given the compression ratio
+        
+        # minimum possible parameter
         r1 = int(np.ceil(np.sqrt(self.out_channels)))
         r2 = int(np.ceil(np.sqrt(self.in_channels)))
-        r = np.max((r1, r2))
-
+        r = np.min((r1, r2))
+        
+        # maximum possible rank, 
+        """
+        To solve it we need to know the roots of quadratic equation: ax^2+bx+c=0
+        a = kernel**2
+        b = out channel+ in channel
+        c = - num_target_params/2
+        r3 is floored because we cannot take the ceil as it results a bigger number of parameters than the original problem 
+        """
         num_target_params = (
-            self.out_channels * self.in_channels * (self.kernel_size**2) * self.ratio
+            self.out_channels * self.in_channels * (self.kernel_size**2)
         )
-        r3 = np.sqrt(
-            ((self.out_channels + self.in_channels) ** 2)
-            / (4 * (self.kernel_size**4))
-            + num_target_params / (2 * (self.kernel_size**2))
-        ) - (self.out_channels + self.in_channels) / (2 * (self.kernel_size**2))
-        r3 = int(np.ceil(r3))
-        r = np.max((r, r3))
-
-        return r
+        a, b, c = self.kernel_size**2, self.out_channels + self.in_channels,- num_target_params/2
+        discriminant = b**2 - 4 * a * c
+        r3 = math.floor((-b+math.sqrt(discriminant))/(2*a))
+        ratio=math.ceil((1-self.ratio)*r+ self.ratio*r3)
+        return ratio
 
     def forward(self, x):
         """Forward pass."""
@@ -167,9 +173,9 @@ class VGG(nn.Module):
             self.activation,
             nn.Linear(512, num_classes),
         )
-        self.init_weights()
+        self._init_weights()
 
-    def init_weights(self):
+    def _init_weights(self):
         """Initialize the weights."""
         for name, module in self.features.named_children():
             module = getattr(self.features, name)
@@ -219,6 +225,22 @@ class VGG(nn.Module):
                     layers += [conv2d, self.activation]
                 in_channels = v
         return nn.Sequential(*layers)
+    
+    @property
+    def model_size(self):
+        """
+        Return the total number of trainable parameters (in million paramaters) and the size of the model in MB.
+        """
+        total_trainable_params = sum(
+        p.numel() for p in model.parameters() if p.requires_grad)/1e6
+        param_size = 0
+        for param in model.parameters():
+            param_size += param.nelement() * param.element_size()
+        buffer_size = 0
+        for buffer in model.buffers():
+            buffer_size += buffer.nelement() * buffer.element_size()
+        size_all_mb = (param_size + buffer_size) / 1024**2
+        return total_trainable_params, size_all_mb
 
     def forward(self, input):
         """Forward pass."""
@@ -353,20 +375,6 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
 
 
 if __name__ == "__main__":
-    model = VGG(num_classes=10, num_groups=2, conv_type="standard")
-    model = torch.nn.Sequential(*list(model.features.children()))
+    model = VGG(num_classes=10, num_groups=2, conv_type="standard", ratio=0.4)
     # Print the modified VGG16GN model architecture
-    print(model)
-    total_trainable_params = sum(
-        p.numel() for p in model.parameters() if p.requires_grad
-    )
-    print(f"Total number of parameters: {total_trainable_params / 1e6}")
-    param_size = 0
-    for param in model.parameters():
-        param_size += param.nelement() * param.element_size()
-    buffer_size = 0
-    for buffer in model.buffers():
-        buffer_size += buffer.nelement() * buffer.element_size()
-
-    size_all_mb = (param_size + buffer_size) / 1024**2
-    print("model size: {:.3f}MB".format(size_all_mb))
+    print(model.model_size)

@@ -13,6 +13,7 @@ from fedpara.models import test
 
 
 def gen_evaluate_fn(
+    num_clients: int,
     test_loader: DataLoader,
     model: DictConfig,
     device,
@@ -51,7 +52,7 @@ def gen_evaluate_fn(
         loss, accuracy = test(net, test_loader, device=device)
 
         experiment.log_metric("loss", loss, epoch=server_round)
-        experiment.log_metric("accuracy", accuracy * 100, epoch=server_round)
+        experiment.log_metric("accuracy", accuracy * 100, epoch=server_round*2*net.model_size[1]*num_clients/1024)
 
         return loss, {"accuracy": accuracy}
 

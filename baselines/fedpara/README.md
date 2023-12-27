@@ -27,7 +27,7 @@ page: https://github.com/South-hw/FedPara_ICLR22
 
 ## About this baseline
 
-****What’s implemented:****  The code in this directory replicates the experiments in FedPara paper implementing the Low-rank scheme for Convolution module inspired by the [author's code]( https://github.com/South-hw/FedPara_ICLR22).
+****What’s implemented:****  The code in this directory replicates the experiments in FedPara paper implementing the Low-rank scheme for Convolution module.
 
 Specifically, it replicates the results for Cifar10 and Cifar100 in Figure 3 and the results for Feminist in Figure 5(a).
 
@@ -116,15 +116,36 @@ poetry run python -m <baseline-name>.main  <override_some_hyperparameters>
 
 
 ## Expected Results
+### From the [Fedpara](https://arxiv.org/pdf/2108.06098.pdf) paper:
+#### Communication Cost: 
+*"FL evaluation typically measures the required rounds to achieve the target accuracy as communication costs, but we instead assess total transferred bit sizes, 2 ×
+(#participants)×(model size)×(#rounds)"*
+#### Parameters ratio 
 
-### Cifar100 (accuracy vs epochs)
+| Parameters ratio | Cifar10 | Cifar100 |
+|----------|--------|--------|
+| Original | 15.25M | 15.30M |
+| 0.1      | 1.55M  | 1.59M  |
+| 0.2      | 2.33M  | 2.38M  |
+| 0.3      | 3.31M  | 3.36M  |
+| 0.4      | 4.45M  | 4.50M  |
+| 0.5      | 5.79M  | 5.84M  |
+| 0.6      | 7.33M  | 7.38M  |
+| 0.7      | 9.01M  | 9.05M  |
+| 0.8      | 10.90M | 10.94M |
+| 0.9      | 12.92M | 12.96M |
+
+** We are using parameter ratio of 0.1 for Cifar10 and 0.4 for Cifar100
+Parameters from 
+
+### Cifar100 (Accuracy vs Communication Cost)
 
 | IID | Non-IID |
 |:----:|:----:|
 |![Cifar100 iid](_static/Cifar100_iid.jpeg) | ![Cifar100 non-iid](_static/Cifar100_noniid.jpeg) |
 
 
-### Cifar10 (accuracy vs epochs)
+### Cifar10 (Accuracy vs Communication Cost)
 
 | IID | Non-IID |
 |:----:|:----:|

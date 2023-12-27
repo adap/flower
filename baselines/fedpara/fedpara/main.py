@@ -1,4 +1,5 @@
 """Main script for running FedPara."""
+import logging
 import flwr as fl
 import hydra
 from comet_ml import Experiment
@@ -36,7 +37,8 @@ def main(cfg: DictConfig) -> None:
     )
     hyper_params = OmegaConf.to_container(cfg, resolve=True)
     experiment.log_parameters(hyper_params)
-
+    # log the hyperparameters
+    logging.info(f"Hyperparameters: {hyper_params}")
     # 2. Prepare dataset
     train_loaders, test_loader = load_datasets(
         config=cfg.dataset_config,
@@ -53,6 +55,7 @@ def main(cfg: DictConfig) -> None:
     )
 
     evaluate_fn = server.gen_evaluate_fn(
+        num_clients=cfg.num_clients,
         test_loader=test_loader,
         model=cfg.model,
         device=cfg.server_device,
