@@ -97,7 +97,7 @@ services:
         if args.random:
             config = random.choice(client_configs)
         else:
-            config = client_configs[i-1]
+            config = client_configs[(i-1) % len(client_configs)]
         docker_compose_content += f"""
   client{i}:
     container_name: client{i}
