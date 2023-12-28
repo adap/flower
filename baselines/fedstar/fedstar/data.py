@@ -35,9 +35,9 @@ class DataBuilder:
         train_path = os.path.join(path, "train_split.txt")
         test_path = os.path.join(path, "test_split.txt")
         path_data_dir = os.path.join(parent_path, "datasets", data_dir)
-        print(train_path)
-        print(test_path)
-        print(path_data_dir)
+        print(f"{train_path = }")
+        print(f"{test_path = }")
+        print(f"{path_data_dir = }")
         if train:
             train_files_path, train_labels = [], []
             if data_dir == "speech_commands":
@@ -279,7 +279,7 @@ class DataBuilder:
             )
             .map(AudioTools.prepare_example, num_parallel_calls=__class__.AUTOTUNE)
             .batch(batch_size=batch_size)
-            .prefetch(__class__.AUTOTUNE)
+            # .prefetch(__class__.AUTOTUNE)
             if ds_train_L
             else None
         )
@@ -298,8 +298,46 @@ class DataBuilder:
             )
             .map(AudioTools.prepare_example, num_parallel_calls=__class__.AUTOTUNE)
             .batch(batch_size=batch_size)
-            .prefetch(__class__.AUTOTUNE)
+            # .prefetch(__class__.AUTOTUNE)
             if ds_train_U
             else None
         )
+
+        # make balanced
+        if ds_train_L:
+            ds_train_L = balance_sampler(ds_train_L, batch_size)
+            # print(f"{len(ds_train_L) = }")
+        if ds_train_U:
+            ds_train_U = balance_sampler(ds_train_U, batch_size)
+            # print(f"{len(ds_train_U) = }")
+
         return ds_train_L, ds_train_U, ds_test
+
+
+def balance_sampler(dataset, batch_size):
+    """The speechcommands dataset is skewed. Here we resample it so we see the same
+    number of instances for all classes. Here we use TF's rejection_resample functionality
+    https://www.tensorflow.org/guide/data#rejection_resampling."""
+
+    def class_func(features, label):
+        return label
+
+    # Measure initial distribution over labels
+    ddd = np.concatenate([lbl for _, lbl in list(dataset.as_numpy_iterator())])
+    initial_dist = np.bincount(ddd) / len(ddd)
+    print(f"{initial_dist = }")
+
+    # target distribution is uniform
+    target_dist = np.ones_like(initial_dist) / len(initial_dist)
+    print(f"{target_dist = }")
+
+    # resample
+    dataset_resampled = (dataset
+                         .unbatch()
+                         .rejection_resample(class_func, target_dist=target_dist,
+                                          initial_dist=initial_dist)
+                         .batch(batch_size))
+
+    dataset_balanced = dataset_resampled.map(lambda extra_label, features_and_label: features_and_label)
+
+    return dataset_balanced

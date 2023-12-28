@@ -5,13 +5,12 @@
 
 dataset_name: ambient_context # or speech_commands
 num_clients: 10
-min_sample_size: 10
 
 server:
   server_address: "localhost:8080"
   rounds: 100
   num_clients: ${num_clients}
-  min_sample_size: ${min_sample_size}
+  min_sample_size: ${num_clients} # all clients participate
   gpu_memory: 2048
   eval_step: 1
   train_epochs: 1

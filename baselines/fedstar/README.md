@@ -37,10 +37,26 @@ poetry env use 3.10.6
 poetry install
 # Start the shell to activate your environment.
 poetry shell
-# making the shell script executable
+```
+
+Next, you'll need to download the datasets. In the case of SpeechCommands, some preprocessing is also required:
+
+```bash
+# Make the shell script executable
 chmod +x setup_datasets.sh
+
 # The below script will download the datasets and create a directory structure requir to run this experiment.
 ./setup_datasets.sh
+
+# If you want to run the SpeechCommands experiment, pre-process the dataset
+# This will genereate a few training example from the _silence_ category
+python -m fedstar.silence_processing
+# Please not the above will:
+#    * Add new files to datasets/speech_commands/Data/Train/_silence_
+#    * Add new entries to data_splits/speech_commands/train_split.txt
+# Therefore the above command should only be run once. If you want to run it again
+# after making modifications to the script, please either revert the changes outlinedo
+# above or erase the dataset and repeat the download + preprocessing
 ```
 
 ## Running the Experiments
@@ -50,6 +66,13 @@ By default, the `Ambient Context` experiment in Table 3 with 10 clients will be 
 ```bash
 python -m fedstar.server
 python -m fedstar.clients
+```
+
+You can change the dataset and number of clients like this:
+
+```bash
+python -m fedstar.server num_clients=5 dataset_name=speech_commands
+# the use the same settings when launching fedstar.clients
 ```
 
 

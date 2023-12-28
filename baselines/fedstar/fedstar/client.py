@@ -5,6 +5,7 @@ import gc
 import logging
 
 import flwr
+import numpy as np
 import tensorflow as tf
 
 from fedstar.data import DataBuilder

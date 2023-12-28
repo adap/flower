@@ -33,7 +33,7 @@ class Client(Process):
                 break
             # Configure GPU
             Client.setup_gpu(gpu=cfg["gpu_id"], gpu_memory=cfg["gpu_memory"])
-            process_path = (os.sep).join(parent_path.split(os.sep)[:-3]) + os.sep
+            process_path = (os.sep).join(parent_path.split(os.sep)) + os.sep
             # Create Client
             client = AudioClient(
                 client_id=cfg["client_id"],
@@ -108,40 +108,40 @@ def distribute_gpus(num_clients, client_memory=1024):
     return clients_gpu
 
 
-@hydra.main(config_path="conf/table_3", config_name="base")
+@hydra.main(config_path="conf/table_3", config_name="base", version_base=None)
 def main(cfg):
     clients_gpu = distribute_gpus(
-        num_clients=cfg["client"]["num_clients"],
-        client_memory=cfg["client"]["gpu_memory"],
+        num_clients=cfg.client.num_clients,
+        client_memory=cfg.client.gpu_memory,
     )
-    dataset_name = cfg["client"]["dataset_name"]
+    dataset_name = cfg.client.dataset_name
 
     # Load Configurations of Clients
     clients_data = [
         {
             "client_id": i,
-            "num_clients": cfg["client"]["num_clients"],
-            "server_address": cfg["client"]["server_address"],
+            "num_clients": cfg.client.num_clients,
+            "server_address": cfg.client.server_address,
             "dataset_dir": dataset_name,
-            "batch_size": cfg["client"]["batch_size"],
+            "batch_size": cfg.client.batch_size,
             "gpu_id": clients_gpu[i],
-            "gpu_memory": cfg["client"]["gpu_memory"],
-            "seed": cfg["client"]["seed"],
-            "l_per": cfg["client"]["l_per"],
-            "u_per": cfg["client"]["u_per"],
-            "fedstar": cfg["client"]["fedstar"],
-            "class_distribute": cfg["client"]["class_distribute"],
-            "verbose": cfg["client"]["verbose"],
+            "gpu_memory": cfg.client.gpu_memory,
+            "seed": cfg.client.seed,
+            "l_per": cfg.client.l_per,
+            "u_per": cfg.client.u_per,
+            "fedstar": cfg.client.fedstar,
+            "class_distribute": cfg.client.class_distribute,
+            "verbose": cfg.client.verbose,
         }
-        for i in range(cfg["client"]["num_clients"])
+        for i in range(cfg.client.num_clients)
     ]
 
     # Start Multi-processing Clients and wait for them to finish
     clients_queue = multiprocessing.JoinableQueue()
-    clients = [Client(clients_queue) for i in range(cfg["client"]["num_clients"])]
+    clients = [Client(clients_queue) for i in range(cfg.client.num_clients)]
     [client.start() for client in clients]
     [clients_queue.put(client) for client in clients_data]
-    [clients_queue.put(None) for i in range(cfg["client"]["num_clients"])]
+    [clients_queue.put(None) for i in range(cfg.client.num_clients)]
     clients_queue.join()
 
 
