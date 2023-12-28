@@ -9,7 +9,7 @@ partitioned, please include all those functions and logic in the
 defined here of course.
 """
 
-from FedPM.dataset_preparation import *
+from dataset_preparation import *
 from torch.utils.data import DataLoader
 from pathlib import Path
 

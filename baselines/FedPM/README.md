@@ -1,11 +1,11 @@
 ---
-title: title of the paper
-url: URL to the paper page (not the pdf)
-labels: [label1, label2] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [dataset1, dataset2] # list of datasets you include in your baseline
+title: Sparse Random Networks for Communication-Efficient Federated Learning
+url: https://openreview.net/forum?id=k1FHgri5y3-
+labels: "Communication-efficiency", "mask training", "compression",    # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
+dataset: MNIST, CIFAR-10, CIFAR-100 # list of datasets you include in your baseline
 ---
 
-# :warning:*_Title of your baseline_*
+# :warning:*_FedPM_*
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
