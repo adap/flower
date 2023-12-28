@@ -228,7 +228,7 @@ def main(cfg: DictConfig):
     )
     # Run server
     set_logger_level()
-    audio_server.server_start(cfg.serverserver_address)
+    audio_server.server_start(cfg.server.server_address)
     return f"\nFinal Accuracy on experiment  {unique_id}: {audio_server.get_accuracy():.04f}\n"
 
 
