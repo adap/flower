@@ -86,39 +86,20 @@ To use the original Flower implementation, use the argument `strategy=fedavgm`. 
 ## Environment Setup
 
 ### Specifying the Python Version
-This baseline was tested with Python 3.10.6.
 
-By default, Poetry will use the Python version in your system. In some settings, you might want to specify a particular version of Python to use inside your Poetry environment. You can do so with [`pyenv`](https://github.com/pyenv/pyenv). Check the documentation for the different ways of installing `pyenv`, but one easy way is using the [automatic installer](https://github.com/pyenv/pyenv-installer):
-
-```bash
-curl https://pyenv.run | bash # then, don't forget links to your .bashrc/.zshrc
-```
-
-You can then install any Python version with `pyenv install <python-version>` (e.g. `pyenv install 3.10.6`). Then, in order to use that version for this baseline, you'd do the following:
+This baseline was tested with Python 3.10.6 and following the steps below to construct the Python environment and install all dependencies. Both [`pyenv`](https://github.com/pyenv/pyenv) and [`poetry`](https://python-poetry.org/docs/) are assumed to be already present in your system.
 
 ```bash
-# cd to your baseline directory (i.e. where the `pyproject.toml` is)
+# Cd to your baseline directory (i.e. where the `pyproject.toml` is), then
 pyenv local 3.10.6
 
-# set that version for poetry
+# Set that version for poetry
 poetry env use 3.10.6
 
-# then you can install your Poetry environment (see the next setp)
-```
-
-### Dependencies
-
-This baseline works with TensorFlow 2.10, no additional step required once using Poetry to set up the environment.
-
-We use Poetry to manage the Python environment for each individual baseline. You can follow the instructions [here](https://python-poetry.org/docs/) to install Poetry in your machine. 
-
-To construct the Python environment with Poetry follow these steps:
-
-```bash
-# install the base Poetry environment
+# Install the base Poetry environment
 poetry install
 
-# activate the environment
+# Activate the environment
 poetry shell
 ```
 
@@ -150,6 +131,8 @@ python -m fedavgm.main server.reporting_fraction=0.2 client.local_epochs=5 # wil
 
 ### CIFAR-10
 Similar to FedAvgM paper as reference, the CIFAR-10 evaluation runs 10,000 rounds.
+
+> In order to speedup the execution of these experiments, the evaluation of the _global model_ on the test set only takes place after the last round. The highest accuracy is achieved towards the last rounds, not necessarily in the last. If you wish to evaluate the _global model_ on the test set (or a validation set) more frequently, edit `get_evaluate_fn` in `server.py`. Overal, running the experiments as shown below demonstrate that `FedAvgM` is consistently superior to `FedAvg`.
 
 For FedAvgM evaluation, it was performed a hyperparameter search of server momentum and client learning rate (similar to Figure 6 reported below) for each of the concentrations under analysis, using the following commands:
 
