@@ -32,9 +32,9 @@ server:
   num_malicious: 0
   omniscent: True
  
- server_device: cpu
+server_device: cpu
  
- client_resources:
-   num_cpus: 10
-   num_gpus: 0.0
+client_resources:
+  num_cpus: 10
+  num_gpus: 0.0
   
