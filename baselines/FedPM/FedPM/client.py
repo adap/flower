@@ -77,7 +77,6 @@ class FedPMClient(flwr.client.Client):
         mask_probs = self.train_fedpm(
             model=self.local_model,
             trainloader=self.train_data_loader,
-            iter_num=fitins.config.get('iter_num'),
             params=self.params,
         )
         sampled_mask = self.sample_mask(mask_probs)
@@ -130,7 +129,6 @@ class FedPMClient(flwr.client.Client):
             self,
             model: nn.Module,
             trainloader: DataLoader,
-            iter_num: int,
             params: Dict,
             loss_fn=nn.CrossEntropyLoss(reduction='mean'),
             optimizer: torch.optim.Optimizer = None
@@ -182,7 +180,7 @@ class FedPMClient(flwr.client.Client):
 class DenseClient(flwr.client.Client):
     def __init__(
             self,
-            params: Dict,
+            params,
             client_id: int,
             train_data_loader: DataLoader,
             test_data_loader: DataLoader,
@@ -212,7 +210,6 @@ class DenseClient(flwr.client.Client):
         deltas = self.train_dense(
             model=self.local_model,
             trainloader=self.train_data_loader,
-            iter_num=fitins.config.get('iter_num'),
             device=self.device,
             params=self.params,
         )
@@ -220,8 +217,6 @@ class DenseClient(flwr.client.Client):
         if self.compression:
             compressed_delta, avg_bitrate = self.compressor.compress(
                 updates=deltas,
-                compress_config=self.params.compressor.rec,
-                iter_num=fitins.config.get('iter_num')
             )
             round_rate = avg_bitrate
         else:
@@ -286,16 +281,18 @@ class DenseClient(flwr.client.Client):
         """Train the network on the training set."""
         if params.compressor.compress:
             if params.compressor.type == 'sign_sgd':
-                optimizer = torch.optim.SGD(model.parameters(), lr=params.sign_sgd.local_lr)
+                optimizer = torch.optim.SGD(model.parameters(),
+                                            lr=params.compressor.sign_sgd.local_lr)
             if params.compressor.type == 'qsgd':
                 optimizer = torch.optim.Adam(model.parameters(),
                                              lr=params.compressor.qsgd.local_lr)
         else:
-            optimizer = torch.optim.Adam(model.parameters(), lr=params.fedavg.local_lr)
+            optimizer = torch.optim.Adam(model.parameters(),
+                                         lr=params.compressor.fedavg.local_lr)
 
         global_model = deepcopy(model.state_dict())
         model.train()
-        for epoch in range(params.compressor.qsgd.local_epochs):
+        for epoch in range(params.compressor.local_epochs):
             correct, total, epoch_loss = 0, 0, 0.0
             for images, labels in trainloader:
                 images, labels = images.to(device), labels.to(device)

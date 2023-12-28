@@ -236,7 +236,7 @@ class DenseStrategy(flwr.server.strategy.Strategy):
         self.sim_folder = sim_folder
         if params.compressor.compress:
             if params.compressor.type == 'sign_sgd':
-                self.server_lr = params.sign_sgd.server_lr
+                self.server_lr = params.compressor.sign_sgd.server_lr
             if params.compressor.type == 'qsgd':
                 self.server_lr = params.compressor.qsgd.server_lr
         else:
@@ -292,7 +292,7 @@ class DenseStrategy(flwr.server.strategy.Strategy):
         }
         for _, fit_res in results:
             for name, val in fit_res.metrics.items():
-                if log_metrics.name is None:
+                if log_metrics.get("name") is None:
                     log_metrics[name] = [val]
                 else:
                     log_metrics[name].append(val)
@@ -300,16 +300,8 @@ class DenseStrategy(flwr.server.strategy.Strategy):
             log_metrics[name] = np.mean(val)
 
         deltas_aggregated = aggregate(deltas_results)
-        updated_params = []
 
-        with torch.no_grad():
-            print('len of deltas_aggregated:{}' .format(len(deltas_aggregated)))
-            for k, (name, param) in enumerate(self.global_model.named_parameters()):
-                print('layer name:{}' .format(name))
-                print('idx of layer:{}' .format(k))
-                updated_params.append(param.cpu().numpy() + (self.server_lr * deltas_aggregated[k]))
-
-        return ndarrays_to_parameters(updated_params), {}
+        return ndarrays_to_parameters(deltas_aggregated), {}
 
     def configure_evaluate(
             self,

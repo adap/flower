@@ -1,0 +1,43 @@
+dataset:
+  name: cifar10
+  data_path: /home/signet/Documenti/repo/flower_fl/data
+  split: iid
+  classes_pc: 4
+  minibatch_size: 64
+model:
+  name: Conv6
+  mode: dense
+  local_epochs: 3
+  activation: relu
+  agg_steps: 5
+strategy:
+  _target_: null
+  fedpm:
+    local_epochs: 3
+    local_lr: 0.1
+compressor:
+  compress: true
+  type: sign_sgd
+  sign_sgd:
+    local_lr: 0.01
+    server_lr: 0.0002
+  qsgd:
+    local_lr: 0.0003
+    server_lr: 0.1
+    num_level: 6
+    local_epochs: 3
+  fedavg:
+    local_lr: 0.01
+    server_lr: 0.0002
+simulation:
+  fraction_fit: 0.5
+  fraction_evaluate: 0
+  n_clients: 10
+  n_rounds: 200
+  verbose: 0
+  client_type: dense
+ray_init_args:
+  ignore_reinit_error: true
+  num_cpus: 6
+  num_gpus: 1
+  local_mode: true

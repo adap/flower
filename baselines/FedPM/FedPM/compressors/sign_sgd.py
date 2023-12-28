@@ -6,13 +6,11 @@ import math
 class SignSGDCompressor:
     def __init__(
             self,
-            params: Dict,
+            params,
             device: torch.device
     ) -> None:
-        super().__init__(
-            params=params,
-            device=device
-        )
+        self.device = device
+        self.params = params
 
     def compress(
             self,

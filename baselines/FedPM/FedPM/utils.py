@@ -6,8 +6,10 @@ results, plotting.
 """
 
 from compressors.qsgd import QSGDCompressor
+from compressors.sign_sgd import SignSGDCompressor
 
-compressor_dict = {'qsgd': QSGDCompressor}
+compressor_dict = {'qsgd': QSGDCompressor,
+                   'sign_sgd': SignSGDCompressor}
 
 
 def get_compressor(
