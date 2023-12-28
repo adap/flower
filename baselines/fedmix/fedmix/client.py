@@ -13,13 +13,15 @@ from hydra.utils import instantiate
 class FedAvgClient(NumPyClient):
     """..."""
 
-    def __init__(self, net, trainloader, device, num_epochs, learning_rate):
+    def __init__(self, net, trainloader, device, num_epochs, learning_rate, momentum, weight_decay):
         """..."""
         self.net = net
         self.trainloader = trainloader
         self.device = device
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
+        self.momentum = momentum
+        self.weight_decay = weight_decay
 
     def get_parameters(self, config):
         """..."""
@@ -42,7 +44,7 @@ class FedAvgClient(NumPyClient):
         """..."""
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.SGD(
-            self.net.parameters(), lr=self.learning_rate * self.lr_decay_accumulated
+            self.net.parameters(), lr=self.learning_rate * self.lr_decay_accumulated, momentum=self.momentum, weight_decay=self.weight_decay
         )
         self.net.train()
         for _ in range(self.num_epochs):
@@ -61,13 +63,15 @@ class FedAvgClient(NumPyClient):
 class NaiveMixClient(NumPyClient):
     """..."""
 
-    def __init__(self, net, trainloader, device, num_epochs, learning_rate):
+    def __init__(self, net, trainloader, device, num_epochs, learning_rate, momentum, weight_decay):
         """..."""
         self.net = net
         self.trainloader = trainloader
         self.device = device
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
+        self.momentum = momentum
+        self.weight_decay = weight_decay
 
     def get_parameters(self, config):
         """..."""
@@ -92,7 +96,7 @@ class NaiveMixClient(NumPyClient):
         """..."""
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.SGD(
-            self.net.parameters(), lr=self.learning_rate * self.lr_decay_accumulated
+            self.net.parameters(), lr=self.learning_rate * self.lr_decay_accumulated, momentum=self.momentum, weight_decay=self.weight_decay
         )
         self.net.train()
         for _ in range(self.num_epochs):
@@ -127,13 +131,15 @@ class NaiveMixClient(NumPyClient):
 class FedMixClient(NumPyClient):
     """..."""
 
-    def __init__(self, net, trainloader, device, num_epochs, learning_rate):
+    def __init__(self, net, trainloader, device, num_epochs, learning_rate, momentum, weight_decay):
         """..."""
         self.net = net
         self.trainloader = trainloader
         self.device = device
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
+        self.momentum = momentum
+        self.weight_decay = weight_decay
 
     def get_parameters(self, config):
         """..."""
@@ -158,7 +164,7 @@ class FedMixClient(NumPyClient):
         """..."""
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.SGD(
-            self.net.parameters(), lr=self.learning_rate * self.lr_decay_accumulated
+            self.net.parameters(), lr=self.learning_rate * self.lr_decay_accumulated, momentum=self.momentum, weight_decay=self.weight_decay
         )
         self.net.train()
         for _ in range(self.num_epochs):

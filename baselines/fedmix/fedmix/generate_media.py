@@ -26,6 +26,13 @@ def get_accuracies(path):
     return np.asarray(rounds), np.asarray(values) * 100
 
 
+def get_round_when_x_acc(accuracies, rounds, x):
+    for i, acc in enumerate(accuracies):
+        if acc >= x:
+            return rounds[i]
+    return rounds[-1]
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--output_type", choices=["table", "figure"])
@@ -43,25 +50,35 @@ def main():
         input_directory = args.input_directory
         
         required_folders = [
-            "femnist_0", "femnist_1", "femnist_2",
+            # "femnist_0", "femnist_1", "femnist_2",
             "cifar10_0", "cifar10_1", "cifar10_2",
             "cifar100_0", "cifar100_1", "cifar100_2"
         ]
 
         check_folders(input_directory, required_folders)
 
-        femnist = [f'{max(accs):.2f}' for rnds, accs in [get_accuracies(f'{input_directory}/femnist_{i}/results.pkl') for i in [0, 1, 2]]]
-        cifar10 = [f'{max(accs):.2f}' for rnds, accs in [get_accuracies(f'{input_directory}/cifar10_{i}/results.pkl') for i in [0, 1, 2]]]
-        cifar100 = [f'{max(accs):.2f}' for rnds, accs in [get_accuracies(f'{input_directory}/cifar100_{i}/results.pkl') for i in [0, 1, 2]]]
+        # max_femnist = [f'{max(accs):.2f}' for rnds, accs in [get_accuracies(f'{input_directory}/femnist_{i}/results.pkl') for i in [0, 1, 2]]]
+        max_cifar10 = [f'{max(accs):.2f}' for rnds, accs in [get_accuracies(f'{input_directory}/cifar10_{i}/results.pkl') for i in [0, 1, 2]]]
+        max_cifar100 = [f'{max(accs):.2f}' for rnds, accs in [get_accuracies(f'{input_directory}/cifar100_{i}/results.pkl') for i in [0, 1, 2]]]
+
+        # rnd_femnist = [f'{get_round_when_x_acc(accs, rnds, 80):.0f}' for rnds, accs in [get_accuracies(f'{input_directory}/femnist_{i}/results.pkl') for i in [0, 1, 2]]]
+        rnd_cifar10 = [f'{get_round_when_x_acc(accs, rnds, 70):.0f}' for rnds, accs in [get_accuracies(f'{input_directory}/cifar10_{i}/results.pkl') for i in [0, 1, 2]]]
+        rnd_cifar100 = [f'{get_round_when_x_acc(accs, rnds, 40):.0f}' for rnds, accs in [get_accuracies(f'{input_directory}/cifar100_{i}/results.pkl') for i in [0, 1, 2]]]
 
         fig, ax = plt.subplots()
         table = ax.table(
-            cellText=[list(i) for i in zip(*[femnist, cifar10, cifar100])],
+            # cellText=[list(i) for i in zip(*[max_femnist, rnd_femnist, max_cifar10, rnd_cifar10, max_cifar100, rnd_cifar100])],
+            cellText=[list(i) for i in zip(*[max_cifar10, rnd_cifar10, max_cifar100, rnd_cifar100])],
             cellLoc="center",
-            colLabels=['FEMNIST', 'CIFAR10', 'CIFAR100'],
+            # colLabels=['FEMNIST (max test, 200 rnds)', 'FEMNIST (rnd to 80%)', 'CIFAR10 (max test, 500 rnds)', 'CIFAR10 (rnd to 70%)', 'CIFAR100 (max test, 500 rnds)', 'CIFAR100 (rnd to 40%)'],
+            colLabels=['CIFAR10\n(500 rnds)', 'CIFAR10\n(rnd to 70%)', 'CIFAR100\n(500 rnds)', 'CIFAR100\n(rnd to 40%)'],
             rowLabels=["FedAvg", "NaiveMix", "FedMix"],
             loc="center"
         )
+
+        for (row, col), cell in table.get_celld().items():
+            if row == 0:
+                cell.set_height(.1)
 
         table.auto_set_font_size(False)
         table.set_fontsize(12)
@@ -93,11 +110,27 @@ def main():
             return averaged_values
 
         for (lbl, accuracies), (_, rounds) in zip(all_accuracies.items(), all_rounds.items()):
-            plt.plot(rounds, average_list_values(accuracies, 5), label=lbl)
+            plt.plot(rounds, average_list_values(accuracies, 5), label=lbl, alpha=0.6)
 
         plt.xlabel('Comm. Round')
         plt.ylabel('Test Acc. (%)')
-        plt.text(0.7*len(rounds), 0.5*max(accuracies), 'Max Accuracy:\n' + '\n'.join([f'{l}: {a:.2f}' for l, a in max_accuracies.items()]))
+
+        if dataset_name == 'femnist':
+            lim1 = 80
+            lim2 = 90
+        elif dataset_name == 'cifar10':
+            lim1 = 55
+            lim2 = 85
+        elif dataset_name == 'cifar100':
+            lim1 = 45
+            lim2 = 60
+
+        plt.ylim(lim1, lim2)
+
+        plt.grid(True, 'both', 'both')
+        props = dict(boxstyle='round', facecolor='wheat', alpha=0.8)
+        plt.text(0.75*len(rounds), lim1+2, 'Max Accuracy:\n' + '\n'.join([f'{l}: {a:.2f}' for l, a in max_accuracies.items()]), bbox=props)
+        
         plt.legend()
 
         plt.savefig(args.output_path)

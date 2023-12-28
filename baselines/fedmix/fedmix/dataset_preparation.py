@@ -14,7 +14,7 @@ from torch.utils.data import ConcatDataset, Dataset, Subset, random_split
 
 def _download_cifar10():
     """..."""
-    transform = transforms.Compose(
+    train_transform = transforms.Compose(
         [
             transforms.ToTensor(),
             transforms.RandomCrop(32, padding=4),
@@ -30,7 +30,7 @@ def _download_cifar10():
         ]
     )
 
-    trainset = CIFAR10("./dataset", train=True, download=True, transform=transform)
+    trainset = CIFAR10("./dataset", train=True, download=True, transform=train_transform)
     testset = CIFAR10("./dataset", train=False, download=True, transform=test_transform)
     return trainset, testset
 
@@ -46,8 +46,15 @@ def _download_cifar100():
         ]
     )
 
+    test_transform = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
+        ]
+    )
+
     trainset = CIFAR100("./dataset", train=True, download=True, transform=transform)
-    testset = CIFAR100("./dataset", train=False, download=True, transform=transform)
+    testset = CIFAR100("./dataset", train=False, download=True, transform=test_transform)
     return trainset, testset
 
 
@@ -186,26 +193,26 @@ def _partition_cifar_new_new(
         imgs_per_data_bucket = imgs_bucket // buckets_per_class
         data_buckets = [Subset(cls_bucket, np.arange(i*imgs_per_data_bucket, min(imgs_bucket, (i+1)*imgs_per_data_bucket))) for i in range(buckets_per_class)]
         data_buckets_dict[cls_id] = data_buckets
-    
+
     def get_data_buckets_for_client(buckets_dict):
 
         def _pop_from_buckets(class_id):
-            
+
             val = buckets_dict[class_id].pop(-1)
             if len(buckets_dict[class_id]) == 0:
                 del buckets_dict[class_id]
-            
+
             return val
-        
+
         classes_remaining = list(buckets_dict.keys())
         if len(classes_remaining) == 1:
             # If one class remains, take all the samples
             classes_to_use = classes_remaining * len(buckets_dict[classes_remaining[0]])
         else:
             classes_to_use = random.sample(classes_remaining, min(len(classes_remaining), num_classes_per_client))
-        
+
         return ConcatDataset([_pop_from_buckets(i) for i in classes_to_use])
-    
+
     datasets = [get_data_buckets_for_client(data_buckets_dict) for _ in range(num_clients)]
 
     print('number of data points of each client:', [len(dd) for dd in datasets])
@@ -222,9 +229,11 @@ def _download_femnist(num_clients):
     os.system(f'cd fedmix/femnist && ./preprocess.sh -s niid --iu {num_clients / 3550} --sf 0.1 -t sample --smplseed 1697538548 --spltseed 1697539598')
 
 
-def _partition_femnist(num_clients):
-    # train_path = 'fedmix/femnist/data/train'
-    train_path = '/scratch/apoorva_v.iitr/femnist/data/train'
+def _partition_femnist(num_clients, seed):
+    train_path = 'fedmix/femnist/data/train'
+    random.seed(seed)
+
+    # train_path = '/scratch/apoorva_v.iitr/femnist/data/train'
     train_json_files = [f for f in os.listdir(train_path) if f.endswith('.json')]
     client_datasets_dict = {}
 
@@ -337,5 +346,8 @@ def _mash_data(client_datasets, mash_batch_size, num_classes):
     print('length of mashed data:', len(mashed_data))
     print('shapes of mashed data:', mashed_data[0][0].shape, mashed_data[0][1].shape)
     print('sample mashed label:', mashed_data[0][1])
+
+    # save sample image
+    transforms.ToPILImage()(mashed_data[0][0]).save('./_static/sample_mashed_image.png')
 
     return mashed_data

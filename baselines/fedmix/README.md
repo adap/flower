@@ -129,8 +129,14 @@ The expected results are shown below:
 
 | Algorithm | FEMNIST | CIFAR10 | CIFAR100 |
 | -- | -- | -- | -- |
-| FedAvg | **80.58** (85.3) | **65.16** (73.8) | - (50.4) |
-| NaiveMix | 78.78 (85.9) | 61.30 (77.4) | - (53.8) |
-| FedMix | 73.46 (**86.5**) | 62.91 (**81.2**) | - (**56.7**) |
+| FedAvg | - (85.3) | 80.96 (73.8) | 48.37 (50.4) |
+| NaiveMix | - (85.9) | 81.21 (77.4) | 52.55 (53.8) |
+| FedMix | - (**86.5**) | **81.59** (**81.2**) | **52.93** (**56.7**) |
 
 Numbers within `()` are the reported results from the paper.
+
+![](_static/table.png)
+
+| CIFAR10 | CIFAR100 |
+| ---------|----------|
+| ![CIFAR10 Learning Curve](_static/cifar10.png) | ![CIFAR100 Learning Curve](_static/cifar100.png) |

@@ -47,9 +47,9 @@ def main(cfg):
 
     print(OmegaConf.to_yaml(cfg))
 
-    print("----------------------")
-    print(history)
-    print("----------------------")
+    # print("----------------------")
+    # print(history)
+    # print("----------------------")
 
     save_path = HydraConfig.get().runtime.output_dir
     save_results_as_pickle(history, file_path=save_path, extra_results={})
