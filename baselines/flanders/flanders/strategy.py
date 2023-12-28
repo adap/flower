@@ -6,8 +6,6 @@ from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from flwr.common import (
-    EvaluateIns,
-    EvaluateRes,
     FitIns,
     FitRes,
     MetricsAggregationFn,
@@ -20,7 +18,8 @@ from flwr.common import (
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
-from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
+from flwr.server.strategy.aggregate import aggregate
+from flwr.server.strategy.fedavg import FedAvg
 
 from .utils import load_all_time_series
 
@@ -32,7 +31,7 @@ than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
 """
 
 
-class Flanders:
+class Flanders(FedAvg):
     """Aggregation function based on MAR.
 
     Take a look at the paper for more details about the parameters.
@@ -117,18 +116,20 @@ class Flanders:
             Distance function used to compute the distance between predicted
             params and real ones, by default None
         """
-        self.fraction_fit = fraction_fit
-        self.fraction_evaluate = fraction_evaluate
-        self.min_fit_clients = min_fit_clients
-        self.min_evaluate_clients = min_evaluate_clients
-        self.min_available_clients = min_available_clients
-        self.evaluate_fn = evaluate_fn
-        self.on_fit_config_fn = on_fit_config_fn
-        self.on_evaluate_config_fn = on_evaluate_config_fn
-        self.accept_failures = accept_failures
-        self.initial_parameters = initial_parameters
-        self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
-        self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
+        super().__init__(
+            fraction_fit=fraction_fit,
+            fraction_evaluate=fraction_evaluate,
+            min_fit_clients=min_fit_clients,
+            min_evaluate_clients=min_evaluate_clients,
+            min_available_clients=min_available_clients,
+            evaluate_fn=evaluate_fn,
+            on_fit_config_fn=on_fit_config_fn,
+            on_evaluate_config_fn=on_evaluate_config_fn,
+            accept_failures=accept_failures,
+            initial_parameters=initial_parameters,
+            fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
+            evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
+        )
         self.to_keep = to_keep
         self.window = window
         self.maxiter = maxiter
@@ -137,33 +138,6 @@ class Flanders:
         self.params_indexes = None
         self.malicious_selected = False
         self.distance_function = distance_function
-
-    def __repr__(self) -> str:
-        """Compute a string representation of the strategy."""
-        rep = f"FLANDERS(accept_failures={self.accept_failures})"
-        return rep
-
-    @typing.no_type_check
-    def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Return the sample size and the required number of available clients."""
-        num_clients = int(num_available_clients * self.fraction_fit)
-        return max(num_clients, self.min_fit_clients), self.min_available_clients
-
-    @typing.no_type_check
-    def num_evaluation_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Use a fraction of available clients for evaluation."""
-        num_clients = int(num_available_clients * self.fraction_evaluate)
-        return max(num_clients, self.min_evaluate_clients), self.min_available_clients
-
-    # pylint: disable=unused-argument
-    @typing.no_type_check
-    def initialize_parameters(
-        self, client_manager: ClientManager
-    ) -> Optional[Parameters]:
-        """Initialize global model parameters."""
-        initial_parameters = self.initial_parameters
-        self.initial_parameters = None  # Don't keep initial parameters in memory
-        return initial_parameters
 
     @typing.no_type_check
     def configure_fit(
@@ -203,7 +177,6 @@ class Flanders:
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-        clients_state: Dict[int, bool],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Apply MAR forecasting to exclude malicious clients from FedAvg.
 
@@ -288,39 +261,12 @@ class Flanders:
             malicious_clients_idx,
         )
 
-    @typing.no_type_check
-    def configure_evaluate(
-        self, server_round: int, parameters: Parameters, client_manager: ClientManager
-    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
-        """Configure the next round of evaluation."""
-        # Do not configure federated evaluation if fraction eval is 0.
-        if self.fraction_evaluate == 0.0:
-            return []
-
-        # Parameters and config
-        config = {}
-        if self.on_evaluate_config_fn is not None:
-            # Custom evaluation config function provided
-            config = self.on_evaluate_config_fn(server_round)
-        evaluate_ins = EvaluateIns(parameters, config)
-
-        # Sample clients
-        sample_size, min_num_clients = self.num_evaluation_clients(
-            client_manager.num_available()
-        )
-        clients = client_manager.sample(
-            num_clients=sample_size, min_num_clients=min_num_clients
-        )
-
-        # Return client/config pairs
-        return [(client, evaluate_ins) for client in clients]
-
     def evaluate(
         self,
-        server_round: int,
-        parameters: Parameters,
-        config: Dict[str, Scalar],
-        output_dir: str,
+        server_round,
+        parameters,
+        config=None,
+        output_dir=None,
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model parameters.
 
@@ -329,6 +275,10 @@ class Flanders:
         if self.evaluate_fn is None:
             # No evaluation function provided
             return None
+        if output_dir is None:
+            raise ValueError("output_dir must not be None")
+        if config is None:
+            config = {}
 
         eval_res = self.evaluate_fn(
             server_round, parameters_to_ndarrays(parameters), config, output_dir
@@ -337,34 +287,6 @@ class Flanders:
             return None
         loss, metrics = eval_res
         return loss, metrics
-
-    def aggregate_evaluate(
-        self,
-        server_round: int,
-        results: List[Tuple[ClientProxy, EvaluateRes]],
-        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
-    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
-        """Aggregate evaluation losses using weighted average."""
-        if (not results) or (not self.accept_failures and failures):
-            return None, {}
-
-        # Aggregate loss
-        loss_aggregated = weighted_loss_avg(
-            [
-                (evaluate_res.num_examples, evaluate_res.loss)
-                for _, evaluate_res in results
-            ]
-        )
-
-        # Aggregate custom metrics if aggregation fn was provided
-        metrics_aggregated = {}
-        if self.evaluate_metrics_aggregation_fn:
-            eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
-            metrics_aggregated = self.evaluate_metrics_aggregation_fn(eval_metrics)
-        elif server_round == 1:  # Only log this warning once
-            log(WARNING, "No evaluate_metrics_aggregation_fn provided")
-
-        return loss_aggregated, metrics_aggregated
 
 
 # pylint: disable=too-many-locals, too-many-arguments, invalid-name

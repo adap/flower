@@ -329,7 +329,7 @@ class EnhancedServer(Server):
         # Aggregate training results
         log(INFO, "fit_round - Aggregating training results")
         aggregated_result = self.strategy.aggregate_fit(
-            server_round, results, failures, clients_state
+            server_round, results, failures
         )
 
         (
