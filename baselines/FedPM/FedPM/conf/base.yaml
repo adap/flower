@@ -14,7 +14,7 @@ dataset:
 
 model:
   name: 'Conv4' # [Conv8/6/4, LeNet]
-  mode: 'dense' # [mask, dense]
+  mode: 'mask' # [mask, dense]
   local_epochs: 3
   activation: 'relu'
   agg_steps: 5
@@ -44,12 +44,12 @@ compressor:
     server_lr: 0.0002
 
 simulation:
-  fraction_fit: 0.5
+  fraction_fit: 0.02
   fraction_evaluate: 0
-  n_clients: 10
+  n_clients: 100
   n_rounds: 200
   verbose: 0
-  client_type: 'dense' # [fedpm, dense]
+  client_type: 'fedpm' # [fedpm, dense]
 
 ray_init_args:
   ignore_reinit_error: True
