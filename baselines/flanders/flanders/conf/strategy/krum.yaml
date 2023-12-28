@@ -1,0 +1,5 @@
+---
+name: krum
+
+strategy:
+  _target_: flwr.server.strategy.krum

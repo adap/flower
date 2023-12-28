@@ -7,17 +7,16 @@
 #  - override hydra/hydra_logging: disabled
 #  - override hydra/job_logging: disabled
 
+defaults:
+  - _self_
+  - strategy: flanders
+
 hydra:
   output_subdir: null
   run:
     dir: .
 
 dataset: mnist
-
-strategy:
-  _target_: flanders.strategy.Flanders
-  to_keep: 1  # number of benign local models to keep for the aggregation (FedAvg)
-  maxiter: 50 # number of iterations done by MAR
 
 server:
   _target_: flanders.server.EnhancedServer

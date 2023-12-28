@@ -126,7 +126,7 @@ def main(cfg: DictConfig) -> None:
         fraction_evaluate=0,
         min_fit_clients=cfg.server.pool_size,
         min_evaluate_clients=0,
-        to_keep=cfg.strategy.to_keep,
+        num_clients_to_keep=cfg.strategy.to_keep,
         min_available_clients=cfg.server.pool_size,
         window=cfg.server.warmup_rounds,
         distance_function=l2_norm,
