@@ -145,7 +145,6 @@ poetry run python -m fedpara.main --config-name cifar100 --multirun model.conv_t
 | 0.4      | - | 4.53M  |
 
 ** We are using a parameter ratio of 0.1 for Cifar10 and 0.4 for Cifar100
-The rank is calculated by the equation provided in paper R = r_max* lamda + (1-lambda)*r_min
 
 ### Cifar100 (Accuracy vs Communication Cost)
 
