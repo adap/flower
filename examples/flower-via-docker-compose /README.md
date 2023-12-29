@@ -32,7 +32,7 @@ client_configs = [
 
 ## Prerequisites
 
-Docker must be installed and the Docker daemon running on your server. If you don't already have Docker installed, you can get [installation instructions for your specific Linux distribution or macOS from Docker](https://docs.docker.com/engine/install/). Besides Docker, the only extra requirements is having Python installed. You don't need to create a new environment for this examples since all dependencies will be installed inside Docker containers automatically.
+Docker must be installed and the Docker daemon running on your server. If you don't already have Docker installed, you can get [installation instructions for your specific Linux distribution or macOS from Docker](https://docs.docker.com/engine/install/). Besides Docker, the only extra requirement is having Python installed. You don't need to create a new environment for this example since all dependencies will be installed inside Docker containers automatically.
 
 ## Running the Example
 
@@ -104,7 +104,7 @@ Within the script, specify the number of clients (`total_clients`) and resource 
       e9f4c9644a1c   gcr.io/cadvisor/cadvisor:v0.47.0    "/usr/bin/cadvisor -…"   50 seconds ago   Up 49 seconds   0.0.0.0:8080->8080/tcp                                                   cadvisor
      ```
 
-   - To monitor the resource utilization of your containers in real time and see the limits imposed in the Docker Compose file, you can use the `docker stats` command. This command provides a live stream of container CPU, memory, and network usage statistics.
+   - To monitor the resource utilization of your containers in real-time and see the limits imposed in the Docker Compose file, you can use the `docker stats` command. This command provides a live stream of container CPU, memory, and network usage statistics.
 
      ```bash
      ➜  ~ docker stats
@@ -135,7 +135,7 @@ By following these steps, you will have a fully functional federated learning en
 
 ### Data Pipeline with FLWR-Datasets
 
-We have integrated [`flwr-datasets`](https://flower.dev/docs/datasets/) into our data pipeline, which is managed within the `load_data.py` file in the `helpers` folder. This script facilitates standardized access to datasets across the federated network and incorporates a `data_sampling_percentage` argument. This argument allows users to specify the percentage of the dataset to be used for training and evaluation, accommodating devices with lower memory capabilities to prevent Out-of-Memory (OOM) errors.
+We have integrated [`flwr-datasets`](https://flower.dev/docs/datasets/) into our data pipeline, which is managed within the `load_data.py` file in the `helpers/` directory. This script facilitates standardized access to datasets across the federated network and incorporates a `data_sampling_percentage` argument. This argument allows users to specify the percentage of the dataset to be used for training and evaluation, accommodating devices with lower memory capabilities to prevent Out-of-Memory (OOM) errors.
 
 ### Model Selection and Dataset
 
