@@ -23,31 +23,48 @@ In this example, we tackle device heterogeneity in federated learning, arising f
 
 ```python
 client_configs = [
-    {'mem_limit': '3g', 'batch_size': 32,  "cpus": 4, 'learning_rate': 0.001},
-      # {'mem_limit': '4g', 'batch_size': 64,  "cpus": 3, 'learning_rate': 0.02},
-      # {'mem_limit': '5g', 'batch_size': 128, "cpus": 2.5, 'learning_rate': 0.09},
-    {'mem_limit': '6g', 'batch_size': 256, "cpus": 1, 'learning_rate': 0.15},
+        {"mem_limit": "3g", "batch_size": 32, "cpus": 4, "learning_rate": 0.001},
+        {"mem_limit": "6g", "batch_size": 256, "cpus": 1, "learning_rate": 0.05},
+        {"mem_limit": "4g", "batch_size": 64, "cpus": 3, "learning_rate": 0.02},
+        {"mem_limit": "5g", "batch_size": 128, "cpus": 2.5, "learning_rate": 0.09},
 ]
 ```
 
-## Installation and Setup
+## Prerequisites
 
-To get the project up and running, follow these steps:
+Docker must be installed and the Docker daemon running on your server. If you don't already have Docker installed, you can get [installation instructions for your specific Linux distribution or macOS from Docker](https://docs.docker.com/engine/install/). Besides Docker, the only extra requirements is having Python installed. You don't need to create a new environment for this examples since all dependencies will be installed inside Docker containers automatically.
 
-### Prerequisites
+## Running the Example
 
-Before starting, ensure the following prerequisites are met:
+Running this example is easy. For a more detailed step-by-step guide, including more useful material, refer to the detailed guide in the following section.
 
-- **Docker Installation**: Docker must be installed and the Docker daemon running on your server. If you don't already have Docker installed, you can get [installation instructions for your specific Linux distribution from Docker](https://docs.docker.com/engine/install/).
+```bash
+
+# Generate docker compose file
+python helpers/generate_docker_compose.py # by default will spanw 2 clients and do FL for 100 rounds
+
+# Build docker images
+docker-compose build
+
+# Launch everything
+docker-compose up
+```
+
+On your favourite browser, go to `http://localhost:3000` to see the Graphana dashboard showing system-level and application-level metrics.
+
+To stop all containers, open a new terminal and `cd` into this directory, then run `docker-compose down`. Alternatively, you can do `ctrl+c` on the same terminal and then run `docker-compose down` to ensure everything is terminated.
+
+## Running the Example (detailed)
 
 ### Step 1: Configure Docker Compose
 
-1. **Generate Docker Compose File**:
-   - Execute the following command to run the `helpers/generate_docker_compose.py` script. This script creates the docker-compose configuration needed to set up the environment.
-     ```bash
-     python helpers/generate_docker_compose.py
-     ```
-     - Within the script, specify the number of clients (`total_clients`) and resource limitations for each client in the `client_configs` array. You can adjust the number of rounds by passing `--num_rounds` to the above command.
+Execute the following command to run the `helpers/generate_docker_compose.py` script. This script creates the docker-compose configuration needed to set up the environment.
+
+```bash
+python helpers/generate_docker_compose.py
+```
+
+Within the script, specify the number of clients (`total_clients`) and resource limitations for each client in the `client_configs` array. You can adjust the number of rounds by passing `--num_rounds` to the above command.
 
 ### Step 2: Build and Launch Containers
 
@@ -78,20 +95,26 @@ Before starting, ensure the following prerequisites are met:
 
      ```bash
      ➜  ~ docker ps
-     CONTAINER ID   IMAGE                               COMMAND                  CREATED          STATUS                   PORTS                                            NAMES
-     72063c8968d3   flower-via-docker-compose-client3   "python client.py --…"   12 minutes ago   Up 13 seconds            0.0.0.0:6003->6003/tcp                           client3
-     77ca59fc42e6   flower-via-docker-compose-client2   "python client.py --…"   12 minutes ago   Up 13 seconds            0.0.0.0:6002->6002/tcp                           client2
-     2dc33f0b4ef6   flower-via-docker-compose-client1   "python client.py --…"   12 minutes ago   Up 13 seconds            0.0.0.0:6001->6001/tcp                           client1
-     8d87f3655476   flower-via-docker-compose-server    "python server.py --…"   12 minutes ago   Up 13 seconds            0.0.0.0:6000->6000/tcp, 0.0.0.0:8265->8265/tcp   server
-     dbcd8cf1faf1   grafana/grafana:latest              "/run.sh --config=/e…"   12 minutes ago   Up 5 minutes             0.0.0.0:3000->3000/tcp                           grafana
-     80c4a599b2a3   prom/prometheus:latest              "/bin/prometheus --c…"   12 minutes ago   Up 5 minutes             0.0.0.0:9090->9090/tcp                           prometheus
-     169880ab80bd   gcr.io/cadvisor/cadvisor:v0.47.0    "/usr/bin/cadvisor -…"   12 minutes ago   Up 5 minutes (healthy)   0.0.0.0:8080->8080/tcp                           cadvisor
+      CONTAINER ID   IMAGE                               COMMAND                  CREATED          STATUS                 PORTS                                                              NAMES
+      9f05820eba45   flower-via-docker-compose-client2   "python client.py --…"   50 seconds ago   Up 48 seconds   0.0.0.0:6002->6002/tcp                                                   client2
+      a0333715d504   flower-via-docker-compose-client1   "python client.py --…"   50 seconds ago   Up 48 seconds   0.0.0.0:6001->6001/tcp                                                   client1
+      0da2bf735965   flower-via-docker-compose-server    "python server.py --…"   50 seconds ago   Up 48 seconds   0.0.0.0:6000->6000/tcp, 0.0.0.0:8000->8000/tcp, 0.0.0.0:8265->8265/tcp   server
+      c57ef50657ae   grafana/grafana:latest              "/run.sh --config=/e…"   50 seconds ago   Up 49 seconds   0.0.0.0:3000->3000/tcp                                                   grafana
+      4f274c2083dc   prom/prometheus:latest              "/bin/prometheus --c…"   50 seconds ago   Up 49 seconds   0.0.0.0:9090->9090/tcp                                                   prometheus
+      e9f4c9644a1c   gcr.io/cadvisor/cadvisor:v0.47.0    "/usr/bin/cadvisor -…"   50 seconds ago   Up 49 seconds   0.0.0.0:8080->8080/tcp                                                   cadvisor
      ```
 
-   - To monitor the resource utilization of your containers in real-time and see the limits imposed in the Docker Compose file, you can use the `docker stats` command. This command provides a live stream of container CPU, memory, and network usage statistics.
+   - To monitor the resource utilization of your containers in real time and see the limits imposed in the Docker Compose file, you can use the `docker stats` command. This command provides a live stream of container CPU, memory, and network usage statistics.
 
      ```bash
      ➜  ~ docker stats
+         CONTAINER ID   NAME         CPU %     MEM USAGE / LIMIT     MEM %     NET I/O           BLOCK I/O         PIDS
+         9f05820eba45   client2      104.44%   1.968GiB / 6GiB       32.80%    148MB / 3.22MB    0B / 284MB        82
+         a0333715d504   client1      184.69%   1.498GiB / 3GiB       49.92%    149MB / 2.81MB    1.37MB / 284MB    82
+         0da2bf735965   server       0.12%     218.5MiB / 15.61GiB   1.37%     1.47MB / 2.89MB   2.56MB / 2.81MB   45
+         c57ef50657ae   grafana      0.24%     96.19MiB / 400MiB     24.05%    18.9kB / 3.79kB   77.8kB / 152kB    20
+         4f274c2083dc   prometheus   1.14%     52.73MiB / 500MiB     10.55%    6.79MB / 211kB    1.02MB / 1.31MB   15
+         e9f4c9644a1c   cadvisor     7.31%     32.14MiB / 500MiB     6.43%     139kB / 6.66MB    500kB / 0B        18
      ```
 
 1. **Automated Grafana Configuration**:
