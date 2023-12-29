@@ -16,6 +16,24 @@ import os
 
 let appDirectory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
 
+/// A class responsible for (de)serializing model parameters.
+///
+/// ## Topics
+///
+/// ### Usage
+///
+/// - ``shared``
+/// - ``finalize()``
+///
+/// ### Serialization
+///
+/// - ``multiArrayToData(multiArray:)``
+/// - ``arrayToData(array:shape:)``
+///
+/// ### Deserialization
+///
+/// - ``dataToMultiArray(data:)``
+/// - ``dataToArray(data:)``
 @available(iOS 14.0, *)
 public class ParameterConverter {
     private var np: PythonObject?
@@ -26,6 +44,8 @@ public class ParameterConverter {
     
     private let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? "flwr.Flower",
                                     category: String(describing: ParameterConverter.self))
+    
+    /// ParameterConverter singleton object.
     public static let shared = ParameterConverter()
     
     private init() {
@@ -126,6 +146,7 @@ public class ParameterConverter {
         return nil
     }
     
+    /// Deserialize bytes to MLMultiArray.
     public func dataToMultiArray(data: Data) -> MLMultiArray? {
         initGroup()
         let future = group?.next().submit {
@@ -145,6 +166,7 @@ public class ParameterConverter {
         
     }
     
+    /// Serialize MLMultiArray to bytes.
     public func multiArrayToData(multiArray: MLMultiArray) -> Data? {
         initGroup()
         let future = group?.next().submit {
@@ -164,6 +186,7 @@ public class ParameterConverter {
         
     }
     
+    /// Deserialize bytes into float array.
     public func dataToArray(data: Data) -> [Float]? {
         initGroup()
         let future = group?.next().submit {
@@ -183,6 +206,7 @@ public class ParameterConverter {
         
     }
     
+    /// Serialize float array to bytes.
     public func arrayToData(array: [Float], shape: [Int16]) -> Data? {
         initGroup()
         let future = group?.next().submit {
@@ -199,6 +223,7 @@ public class ParameterConverter {
         }
     }
     
+    /// Shutdown EventLoopGroup gracefully.
     public func finalize() {
         initGroup()
         let future = group?.next().submit {

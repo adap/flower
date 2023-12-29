@@ -72,7 +72,7 @@ Inside the server helper script *run-server.sh* you will find the following code
 
 .. code-block:: bash 
 
-    python -m flwr_example.quickstart_pytorch.server
+    python -m flwr_example.quickstart-pytorch.server
 
 
 We can go a bit deeper and see that :code:`server.py` simply launches a server that will coordinate three rounds of training.
@@ -92,7 +92,7 @@ Next, let's take a look at the *run-clients.sh* file. You will see that it conta
 
 .. code-block:: bash 
 
-    python -m flwr_example.quickstart_pytorch.client \
+    python -m flwr_example.quickstart-pytorch.client \
       --cid=$i \
       --server_address=$SERVER_ADDRESS \
       --nb_clients=$NUM_CLIENTS 
@@ -101,7 +101,7 @@ Next, let's take a look at the *run-clients.sh* file. You will see that it conta
 * **sever_address**: String that identifies IP and port of the server. 
 * **nb_clients**: This defines the number of clients being created. This piece of information is not required by the client, but it helps us partition the original MNIST dataset to make sure that every client is working on unique subsets of both *training* and *test* sets.
 
-Again, we can go deeper and look inside :code:`flwr_example/quickstart_pytorch/client.py`. 
+Again, we can go deeper and look inside :code:`flwr_example/quickstart-pytorch/client.py`. 
 After going through the argument parsing code at the beginning of our :code:`main` function, you will find a call to :code:`mnist.load_data`. This function is responsible for partitioning the original MNIST datasets (*training* and *test*) and returning a :code:`torch.utils.data.DataLoader` s for each of them.
 We then instantiate a :code:`PytorchMNISTClient` object with our client ID, our DataLoaders, the number of epochs in each round, and which device we want to use for training (CPU or GPU).
 
@@ -122,7 +122,7 @@ The :code:`PytorchMNISTClient` object when finally passed to :code:`fl.client.st
 A Closer Look
 -------------
 
-Now, let's look closely into the :code:`PytorchMNISTClient` inside :code:`flwr_example.quickstart_pytorch.mnist` and see what it is doing:
+Now, let's look closely into the :code:`PytorchMNISTClient` inside :code:`flwr_example.quickstart-pytorch.mnist` and see what it is doing:
 
 .. code-block:: python
 
@@ -241,7 +241,7 @@ The first thing to notice is that :code:`PytorchMNISTClient` instantiates a CNN 
         self.model = MNISTNet().to(device)
     ...
 
-The code for the CNN is available under :code:`quickstart_pytorch.mnist` and it is reproduced below. It is the same network found in `Basic MNIST Example <https://github.com/pytorch/examples/tree/master/mnist>`_.
+The code for the CNN is available under :code:`quickstart-pytorch.mnist` and it is reproduced below. It is the same network found in `Basic MNIST Example <https://github.com/pytorch/examples/tree/master/mnist>`_.
 
 .. code-block:: python
 
@@ -314,7 +314,7 @@ The second thing to notice is that :code:`PytorchMNISTClient` class inherits fro
 
 When comparing the abstract class to its derived class :code:`PytorchMNISTClient` you will notice that :code:`fit` calls a :code:`train` function and that :code:`evaluate` calls a :code:`test`: function. 
 
-These functions can both be found inside the same :code:`quickstart_pytorch.mnist` module:
+These functions can both be found inside the same :code:`quickstart-pytorch.mnist` module:
 
 .. code-block:: python
 

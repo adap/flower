@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ class QFedAvg(FedAvg):
         self.pre_weights: Optional[NDArrays] = None
 
     def __repr__(self) -> str:
-        # pylint: disable=line-too-long
+        """Compute a string representation of the strategy."""
         rep = f"QffedAvg(learning_rate={self.learning_rate}, "
         rep += f"q_param={self.q_param}, pre_weights={self.pre_weights})"
         return rep
@@ -174,7 +174,7 @@ class QFedAvg(FedAvg):
             # output: square of the L-2 norm
             client_grads = grad_list[0]
             for i in range(1, len(grad_list)):
-                client_grads = np.append(  # type: ignore
+                client_grads = np.append(
                     client_grads, grad_list[i]
                 )  # output a flattened array
             squared = np.square(client_grads)

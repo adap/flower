@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Federated XGBoost in the horizontal setting based on building Neural Network and
-averaging on prediction outcomes [Ma et al., 2023].
+"""Federated XGBoost [Ma et al., 2023] strategy.
 
-Paper: Coming
+Strategy in the horizontal setting based on building Neural Network and averaging on
+prediction outcomes.
+
+Paper: arxiv.org/abs/2304.07537
 """
 
 
@@ -30,11 +32,18 @@ from .aggregate import aggregate
 from .fedavg import FedAvg
 
 
-# flake8: noqa: E501
 class FedXgbNnAvg(FedAvg):
     """Configurable FedXgbNnAvg strategy implementation."""
 
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Federated XGBoost [Ma et al., 2023] strategy.
+
+        Implementation based on https://arxiv.org/abs/2304.07537.
+        """
+        super().__init__(*args, **kwargs)
+
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"FedXgbNnAvg(accept_failures={self.accept_failures})"
         return rep
 
@@ -56,7 +65,7 @@ class FedXgbNnAvg(FedAvg):
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-    ) -> Tuple[Optional[Any], Dict[str, Scalar],]:
+    ) -> Tuple[Optional[Any], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
         if not results:
             return None, {}
@@ -67,7 +76,7 @@ class FedXgbNnAvg(FedAvg):
         # Convert results
         weights_results = [
             (
-                parameters_to_ndarrays(fit_res.parameters[0].parameters),  # type: ignore
+                parameters_to_ndarrays(fit_res.parameters[0].parameters),  # type: ignore # noqa: E501 # pylint: disable=line-too-long
                 fit_res.num_examples,
             )
             for _, fit_res in results
@@ -75,7 +84,7 @@ class FedXgbNnAvg(FedAvg):
         parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
 
         # Aggregate XGBoost trees from all clients
-        trees_aggregated = [fit_res.parameters[1] for _, fit_res in results]  # type: ignore
+        trees_aggregated = [fit_res.parameters[1] for _, fit_res in results]  # type: ignore # noqa: E501 # pylint: disable=line-too-long
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}

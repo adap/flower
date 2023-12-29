@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import threading
 from dataclasses import dataclass
 from logging import ERROR, INFO, WARN
 from os.path import isfile
+from pathlib import Path
 from signal import SIGINT, SIGTERM, signal
 from types import FrameType
 from typing import List, Optional, Tuple
@@ -247,6 +248,9 @@ def run_driver_api() -> None:
     host, port, is_v6 = parsed_address
     address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
+    # Obtain certificates
+    certificates = _try_obtain_certificates(args)
+
     # Initialize StateFactory
     state_factory = StateFactory(args.database)
 
@@ -254,6 +258,7 @@ def run_driver_api() -> None:
     grpc_server: grpc.Server = _run_driver_api_grpc(
         address=address,
         state_factory=state_factory,
+        certificates=certificates,
     )
 
     # Graceful shutdown
@@ -273,6 +278,9 @@ def run_fleet_api() -> None:
     event(EventType.RUN_FLEET_API_ENTER)
     args = _parse_args_fleet().parse_args()
 
+    # Obtain certificates
+    certificates = _try_obtain_certificates(args)
+
     # Initialize StateFactory
     state_factory = StateFactory(args.database)
 
@@ -282,8 +290,7 @@ def run_fleet_api() -> None:
     # Start Fleet API
     if args.fleet_api_type == TRANSPORT_TYPE_REST:
         if (
-            importlib.util.find_spec("fastapi")
-            and importlib.util.find_spec("requests")
+            importlib.util.find_spec("requests")
             and importlib.util.find_spec("starlette")
             and importlib.util.find_spec("uvicorn")
         ) is None:
@@ -316,6 +323,7 @@ def run_fleet_api() -> None:
         fleet_server = _run_fleet_api_grpc_bidi(
             address=address,
             state_factory=state_factory,
+            certificates=certificates,
         )
         grpc_servers.append(fleet_server)
     elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
@@ -328,6 +336,7 @@ def run_fleet_api() -> None:
         fleet_server = _run_fleet_api_grpc_rere(
             address=address,
             state_factory=state_factory,
+            certificates=certificates,
         )
         grpc_servers.append(fleet_server)
     else:
@@ -347,7 +356,7 @@ def run_fleet_api() -> None:
         bckg_threads[0].join()
 
 
-# pylint: disable=too-many-branches
+# pylint: disable=too-many-branches, too-many-locals, too-many-statements
 def run_server() -> None:
     """Run Flower server (Driver API and Fleet API)."""
     log(INFO, "Starting Flower server")
@@ -361,6 +370,9 @@ def run_server() -> None:
     host, port, is_v6 = parsed_address
     address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
+    # Obtain certificates
+    certificates = _try_obtain_certificates(args)
+
     # Initialize StateFactory
     state_factory = StateFactory(args.database)
 
@@ -368,6 +380,7 @@ def run_server() -> None:
     driver_server: grpc.Server = _run_driver_api_grpc(
         address=address,
         state_factory=state_factory,
+        certificates=certificates,
     )
 
     grpc_servers = [driver_server]
@@ -376,8 +389,7 @@ def run_server() -> None:
     # Start Fleet API
     if args.fleet_api_type == TRANSPORT_TYPE_REST:
         if (
-            importlib.util.find_spec("fastapi")
-            and importlib.util.find_spec("requests")
+            importlib.util.find_spec("requests")
             and importlib.util.find_spec("starlette")
             and importlib.util.find_spec("uvicorn")
         ) is None:
@@ -410,6 +422,7 @@ def run_server() -> None:
         fleet_server = _run_fleet_api_grpc_bidi(
             address=address,
             state_factory=state_factory,
+            certificates=certificates,
         )
         grpc_servers.append(fleet_server)
     elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
@@ -422,6 +435,7 @@ def run_server() -> None:
         fleet_server = _run_fleet_api_grpc_rere(
             address=address,
             state_factory=state_factory,
+            certificates=certificates,
         )
         grpc_servers.append(fleet_server)
     else:
@@ -441,6 +455,29 @@ def run_server() -> None:
                 if not thread.is_alive():
                     sys.exit(1)
         driver_server.wait_for_termination(timeout=1)
+
+
+def _try_obtain_certificates(
+    args: argparse.Namespace,
+) -> Optional[Tuple[bytes, bytes, bytes]]:
+    # Obtain certificates
+    if args.insecure:
+        log(WARN, "Option `--insecure` was set. Starting insecure HTTP server.")
+        certificates = None
+    # Check if certificates are provided
+    elif args.certificates:
+        certificates = (
+            Path(args.certificates[0]).read_bytes(),  # CA certificate
+            Path(args.certificates[1]).read_bytes(),  # server certificate
+            Path(args.certificates[2]).read_bytes(),  # server private key
+        )
+    else:
+        sys.exit(
+            "Certificates are required unless running in insecure mode. "
+            "Please provide certificate paths with '--certificates' or run the server "
+            "in insecure mode using '--insecure' if you understand the risks."
+        )
+    return certificates
 
 
 def _register_exit_handlers(
@@ -492,6 +529,7 @@ def _register_exit_handlers(
 def _run_driver_api_grpc(
     address: str,
     state_factory: StateFactory,
+    certificates: Optional[Tuple[bytes, bytes, bytes]],
 ) -> grpc.Server:
     """Run Driver API (gRPC, request-response)."""
     # Create Driver API gRPC server
@@ -503,7 +541,7 @@ def _run_driver_api_grpc(
         servicer_and_add_fn=(driver_servicer, driver_add_servicer_to_server_fn),
         server_address=address,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        certificates=None,
+        certificates=certificates,
     )
 
     log(INFO, "Flower ECE: Starting Driver API (gRPC-rere) on %s", address)
@@ -515,6 +553,7 @@ def _run_driver_api_grpc(
 def _run_fleet_api_grpc_bidi(
     address: str,
     state_factory: StateFactory,
+    certificates: Optional[Tuple[bytes, bytes, bytes]],
 ) -> grpc.Server:
     """Run Fleet API (gRPC, bidirectional streaming)."""
     # DriverClientManager
@@ -531,7 +570,7 @@ def _run_fleet_api_grpc_bidi(
         servicer_and_add_fn=(fleet_servicer, fleet_add_servicer_to_server_fn),
         server_address=address,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        certificates=None,
+        certificates=certificates,
     )
 
     log(INFO, "Flower ECE: Starting Fleet API (gRPC-bidi) on %s", address)
@@ -543,6 +582,7 @@ def _run_fleet_api_grpc_bidi(
 def _run_fleet_api_grpc_rere(
     address: str,
     state_factory: StateFactory,
+    certificates: Optional[Tuple[bytes, bytes, bytes]],
 ) -> grpc.Server:
     """Run Fleet API (gRPC, request-response)."""
     # Create Fleet API gRPC server
@@ -554,7 +594,7 @@ def _run_fleet_api_grpc_rere(
         servicer_and_add_fn=(fleet_servicer, fleet_add_servicer_to_server_fn),
         server_address=address,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        certificates=None,
+        certificates=certificates,
     )
 
     log(INFO, "Flower ECE: Starting Fleet API (gRPC-rere) on %s", address)
@@ -628,7 +668,7 @@ def _validate_ssl_files(
     if not bool(ssl_keyfile) == bool(ssl_certfile):
         msg = (
             "When setting one of `--ssl-keyfile` and "
-            + "`--ssl-certfile`, both have to be used."
+            "`--ssl-certfile`, both have to be used."
         )
         log(ERROR, msg)
         validation_exceptions.append(ValueError(msg))
@@ -687,6 +727,22 @@ def _parse_args_server() -> argparse.ArgumentParser:
 
 def _add_args_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
+        "--insecure",
+        action="store_true",
+        help="Run the server without HTTPS, regardless of whether certificate "
+        "paths are provided. By default, the server runs with HTTPS enabled. "
+        "Use this flag only if you understand the risks.",
+    )
+    parser.add_argument(
+        "--certificates",
+        nargs=3,
+        metavar=("CA_CERT", "SERVER_CERT", "PRIVATE_KEY"),
+        type=str,
+        help="Paths to the CA certificate, server certificate, and server private "
+        "key, in that order. Note: The server can only be started without "
+        "certificates by enabling the `--insecure` flag.",
+    )
+    parser.add_argument(
         "--database",
         help="A string representing the path to the database "
         "file that will be opened. Note that passing ':memory:' "
@@ -709,18 +765,11 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     # Fleet API transport layer type
     ex_group = parser.add_mutually_exclusive_group()
     ex_group.add_argument(
-        "--grpc-bidi",
-        action="store_const",
-        dest="fleet_api_type",
-        const=TRANSPORT_TYPE_GRPC_BIDI,
-        default=TRANSPORT_TYPE_GRPC_BIDI,
-        help="Start a Fleet API server (gRPC-bidi)",
-    )
-    ex_group.add_argument(
         "--grpc-rere",
         action="store_const",
         dest="fleet_api_type",
         const=TRANSPORT_TYPE_GRPC_RERE,
+        default=TRANSPORT_TYPE_GRPC_RERE,
         help="Start a Fleet API server (gRPC-rere)",
     )
     ex_group.add_argument(
@@ -730,15 +779,12 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         const=TRANSPORT_TYPE_REST,
         help="Start a Fleet API server (REST, experimental)",
     )
-
-    # Fleet API gRPC-bidi options
-    grpc_bidi_group = parser.add_argument_group(
-        "Fleet API (gRPC-bidi) server options", ""
-    )
-    grpc_bidi_group.add_argument(
-        "--grpc-bidi-fleet-api-address",
-        help="Fleet API (gRPC-bidi) server address (IPv4, IPv6, or a domain name)",
-        default=ADDRESS_FLEET_API_GRPC_RERE,
+    ex_group.add_argument(
+        "--grpc-bidi",
+        action="store_const",
+        dest="fleet_api_type",
+        const=TRANSPORT_TYPE_GRPC_BIDI,
+        help="Start a Fleet API server (gRPC-bidi)",
     )
 
     # Fleet API gRPC-rere options
@@ -775,4 +821,14 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         help="Set the number of concurrent workers for the Fleet API REST server.",
         type=int,
         default=1,
+    )
+
+    # Fleet API gRPC-bidi options
+    grpc_bidi_group = parser.add_argument_group(
+        "Fleet API (gRPC-bidi) server options", ""
+    )
+    grpc_bidi_group.add_argument(
+        "--grpc-bidi-fleet-api-address",
+        help="Fleet API (gRPC-bidi) server address (IPv4, IPv6, or a domain name)",
+        default=ADDRESS_FLEET_API_GRPC_RERE,
     )

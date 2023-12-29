@@ -7,6 +7,14 @@
 
 import Foundation
 
+/// Set of Flower client exceptions.
+///
+/// ## Topics
+///
+/// ### Exceptions
+///
+/// - ``TypeException(_:)``
+/// - ``UnknownServerMessage``
 public enum FlowerException: Error {
     case TypeException(String)
     case UnknownServerMessage

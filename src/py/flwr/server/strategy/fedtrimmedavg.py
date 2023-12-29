@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Federated Averaging with Trimmed Mean [Dong Yin, et al., 2021]
+"""Federated Averaging with Trimmed Mean [Dong Yin, et al., 2021].
 
 Paper: arxiv.org/abs/1803.01498
 """
@@ -35,14 +35,39 @@ from .aggregate import aggregate_trimmed_avg
 from .fedavg import FedAvg
 
 
-# flake8: noqa: E501
+# pylint: disable=line-too-long
 class FedTrimmedAvg(FedAvg):
-    """Federated Averaging with Trimmed Mean [Dong Yin, et al., 2021]
+    """Federated Averaging with Trimmed Mean [Dong Yin, et al., 2021].
 
-    Paper: https://arxiv.org/abs/1803.01498
+    Implemented based on: https://arxiv.org/abs/1803.01498
+
+    Parameters
+    ----------
+    fraction_fit : float, optional
+        Fraction of clients used during training. Defaults to 1.0.
+    fraction_evaluate : float, optional
+        Fraction of clients used during validation. Defaults to 1.0.
+    min_fit_clients : int, optional
+        Minimum number of clients used during training. Defaults to 2.
+    min_evaluate_clients : int, optional
+        Minimum number of clients used during validation. Defaults to 2.
+    min_available_clients : int, optional
+        Minimum number of total clients in the system. Defaults to 2.
+    evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
+        Optional function used for validation. Defaults to None.
+    on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
+        Function used to configure training. Defaults to None.
+    on_evaluate_config_fn : Callable[[int], Dict[str, Scalar]], optional
+        Function used to configure validation. Defaults to None.
+    accept_failures : bool, optional
+        Whether or not accept rounds containing failures. Defaults to True.
+    initial_parameters : Parameters, optional
+        Initial global model parameters.
+    beta : float, optional
+        Fraction to cut off of both tails of the distribution. Defaults to 0.2.
     """
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes
+    # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
     def __init__(
         self,
         *,
@@ -65,34 +90,6 @@ class FedTrimmedAvg(FedAvg):
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         beta: float = 0.2,
     ) -> None:
-        """
-        Parameters
-        ----------
-        fraction_fit : float, optional
-            Fraction of clients used during training. Defaults to 0.1.
-        fraction_evaluate : float, optional
-            Fraction of clients used during validation. Defaults to 0.1.
-        min_fit_clients : int, optional
-            Minimum number of clients used during training. Defaults to 2.
-        min_evaluate_clients : int, optional
-            Minimum number of clients used during validation. Defaults to 2.
-        min_available_clients : int, optional
-            Minimum number of total clients in the system. Defaults to 2.
-        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]],
-            Optional[Tuple[float, Dict[str, Scalar]]]]]
-            Optional function used for validation. Defaults to None.
-        on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
-            Function used to configure training. Defaults to None.
-        on_evaluate_config_fn : Callable[[int], Dict[str, Scalar]], optional
-            Function used to configure validation. Defaults to None.
-        accept_failures : bool, optional
-            Whether or not accept rounds containing failures. Defaults to True.
-        initial_parameters : Parameters, optional
-            Initial global model parameters.
-        beta : float, optional
-            Fraction to cut off of both tails of the distribution. Defaults to 0.2.
-        """
-
         super().__init__(
             fraction_fit=fraction_fit,
             fraction_evaluate=fraction_evaluate,
@@ -110,6 +107,7 @@ class FedTrimmedAvg(FedAvg):
         self.beta = beta
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"FedTrimmedAvg(accept_failures={self.accept_failures})"
         return rep
 

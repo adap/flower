@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-version=${1:-3.7.15}
+version=${1:-3.8.17}
 
 # To install pyenv and virtualenv plugin
 function install_pyenv(){
@@ -31,7 +31,6 @@ else
     # If pyenv is already installed, check for a newer version
     read -p 'Pyenv already installed, do you want to updating it y/[n]? ' update
     update="${update:-"n"}"
-    update="${update,,}"
 
     if [ $update == "y" ]
     then

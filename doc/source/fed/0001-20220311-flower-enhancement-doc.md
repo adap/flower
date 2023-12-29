@@ -1,7 +1,7 @@
 ---
 fed-number: 0001
 title: Flower Enhancement Doc
-authors: ["@nfnt", "@orlandohohmeier"]
+authors: ['@nfnt', '@orlandohohmeier']
 creation-date: 2022-03-11
 last-updated: 2022-12-12
 status: provisional

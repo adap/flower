@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Adaptive Federated Optimization using Adam (FedAdam) [Reddi et al., 2020] strategy.
+"""Adaptive Federated Optimization using Adam (FedAdam) strategy.
+
+[Reddi et al., 2020]
 
 Paper: arxiv.org/abs/2003.00295
 """
@@ -36,15 +38,51 @@ from flwr.server.client_proxy import ClientProxy
 from .fedopt import FedOpt
 
 
-# flake8: noqa: E501
+# pylint: disable=line-too-long
 class FedAdam(FedOpt):
-    """Adaptive Federated Optimization using Adam (FedAdam) [Reddi et al., 2020]
-    strategy.
+    """FedAdam - Adaptive Federated Optimization using Adam.
 
-    Paper: https://arxiv.org/abs/2003.00295
+    Implementation based on https://arxiv.org/abs/2003.00295v5
+
+    Parameters
+    ----------
+    fraction_fit : float, optional
+        Fraction of clients used during training. Defaults to 1.0.
+    fraction_evaluate : float, optional
+        Fraction of clients used during validation. Defaults to 1.0.
+    min_fit_clients : int, optional
+        Minimum number of clients used during training. Defaults to 2.
+    min_evaluate_clients : int, optional
+        Minimum number of clients used during validation. Defaults to 2.
+    min_available_clients : int, optional
+        Minimum number of total clients in the system. Defaults to 2.
+    evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]],Optional[Tuple[float, Dict[str, Scalar]]]]]
+        Optional function used for validation. Defaults to None.
+    on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
+        Function used to configure training. Defaults to None.
+    on_evaluate_config_fn : Callable[[int], Dict[str, Scalar]], optional
+        Function used to configure validation. Defaults to None.
+    accept_failures : bool, optional
+        Whether or not accept rounds containing failures. Defaults to True.
+    initial_parameters : Parameters
+        Initial global model parameters.
+    fit_metrics_aggregation_fn : Optional[MetricsAggregationFn]
+        Metrics aggregation function, optional.
+    evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn]
+        Metrics aggregation function, optional.
+    eta : float, optional
+        Server-side learning rate. Defaults to 1e-1.
+    eta_l : float, optional
+        Client-side learning rate. Defaults to 1e-1.
+    beta_1 : float, optional
+        Momentum parameter. Defaults to 0.9.
+    beta_2 : float, optional
+        Second moment parameter. Defaults to 0.99.
+    tau : float, optional
+        Controls the algorithm's degree of adaptability. Defaults to 1e-9.
     """
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals,line-too-long
+    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals
     def __init__(
         self,
         *,
@@ -71,47 +109,6 @@ class FedAdam(FedOpt):
         beta_2: float = 0.99,
         tau: float = 1e-9,
     ) -> None:
-        """Federated learning strategy using Adagrad on server-side.
-
-        Implementation based on https://arxiv.org/abs/2003.00295v5
-
-        Parameters
-        ----------
-        fraction_fit : float, optional
-            Fraction of clients used during training. Defaults to 1.0.
-        fraction_evaluate : float, optional
-            Fraction of clients used during validation. Defaults to 1.0.
-        min_fit_clients : int, optional
-            Minimum number of clients used during training. Defaults to 2.
-        min_evaluate_clients : int, optional
-            Minimum number of clients used during validation. Defaults to 2.
-        min_available_clients : int, optional
-            Minimum number of total clients in the system. Defaults to 2.
-        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
-            Optional function used for validation. Defaults to None.
-        on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
-            Function used to configure training. Defaults to None.
-        on_evaluate_config_fn : Callable[[int], Dict[str, Scalar]], optional
-            Function used to configure validation. Defaults to None.
-        accept_failures : bool, optional
-            Whether or not accept rounds containing failures. Defaults to True.
-        initial_parameters : Parameters
-            Initial global model parameters.
-        fit_metrics_aggregation_fn : Optional[MetricsAggregationFn]
-            Metrics aggregation function, optional.
-        evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn]
-            Metrics aggregation function, optional.
-        eta : float, optional
-            Server-side learning rate. Defaults to 1e-1.
-        eta_l : float, optional
-            Client-side learning rate. Defaults to 1e-1.
-        beta_1 : float, optional
-            Momentum parameter. Defaults to 0.9.
-        beta_2 : float, optional
-            Second moment parameter. Defaults to 0.99.
-        tau : float, optional
-            Controls the algorithm's degree of adaptability. Defaults to 1e-9.
-        """
         super().__init__(
             fraction_fit=fraction_fit,
             fraction_evaluate=fraction_evaluate,
@@ -133,6 +130,7 @@ class FedAdam(FedOpt):
         )
 
     def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
         rep = f"FedAdam(accept_failures={self.accept_failures})"
         return rep
 

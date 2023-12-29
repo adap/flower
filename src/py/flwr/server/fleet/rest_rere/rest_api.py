@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,27 +12,88 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""REST API server."""
+"""Experimental REST API server."""
 
 
 import sys
 
 from flwr.common.constant import MISSING_EXTRA_REST
-from flwr.proto.fleet_pb2 import PullTaskInsRequest, PushTaskResRequest
+from flwr.proto.fleet_pb2 import (
+    CreateNodeRequest,
+    DeleteNodeRequest,
+    PullTaskInsRequest,
+    PushTaskResRequest,
+)
 from flwr.server.fleet.message_handler import message_handler
 from flwr.server.state import State
 
 try:
-    from fastapi import FastAPI, HTTPException, Request, Response
+    from starlette.applications import Starlette
     from starlette.datastructures import Headers
+    from starlette.exceptions import HTTPException
+    from starlette.requests import Request
+    from starlette.responses import Response
+    from starlette.routing import Route
 except ModuleNotFoundError:
     sys.exit(MISSING_EXTRA_REST)
 
 
-app: FastAPI = FastAPI()
+async def create_node(request: Request) -> Response:
+    """Create Node."""
+    _check_headers(request.headers)
+
+    # Get the request body as raw bytes
+    create_node_request_bytes: bytes = await request.body()
+
+    # Deserialize ProtoBuf
+    create_node_request_proto = CreateNodeRequest()
+    create_node_request_proto.ParseFromString(create_node_request_bytes)
+
+    # Get state from app
+    state: State = app.state.STATE_FACTORY.state()
+
+    # Handle message
+    create_node_response_proto = message_handler.create_node(
+        request=create_node_request_proto, state=state
+    )
+
+    # Return serialized ProtoBuf
+    create_node_response_bytes = create_node_response_proto.SerializeToString()
+    return Response(
+        status_code=200,
+        content=create_node_response_bytes,
+        headers={"Content-Type": "application/protobuf"},
+    )
 
 
-@app.post("/api/v0/fleet/pull-task-ins", response_class=Response)  # type: ignore
+async def delete_node(request: Request) -> Response:
+    """Delete Node Id."""
+    _check_headers(request.headers)
+
+    # Get the request body as raw bytes
+    delete_node_request_bytes: bytes = await request.body()
+
+    # Deserialize ProtoBuf
+    delete_node_request_proto = DeleteNodeRequest()
+    delete_node_request_proto.ParseFromString(delete_node_request_bytes)
+
+    # Get state from app
+    state: State = app.state.STATE_FACTORY.state()
+
+    # Handle message
+    delete_node_response_proto = message_handler.delete_node(
+        request=delete_node_request_proto, state=state
+    )
+
+    # Return serialized ProtoBuf
+    delete_node_response_bytes = delete_node_response_proto.SerializeToString()
+    return Response(
+        status_code=200,
+        content=delete_node_response_bytes,
+        headers={"Content-Type": "application/protobuf"},
+    )
+
+
 async def pull_task_ins(request: Request) -> Response:
     """Pull TaskIns."""
     _check_headers(request.headers)
@@ -62,7 +123,6 @@ async def pull_task_ins(request: Request) -> Response:
     )
 
 
-@app.post("/api/v0/fleet/push-task-res", response_class=Response)  # type: ignore
 async def push_task_res(request: Request) -> Response:  # Check if token is needed here
     """Push TaskRes."""
     _check_headers(request.headers)
@@ -90,6 +150,19 @@ async def push_task_res(request: Request) -> Response:  # Check if token is need
         content=push_task_res_response_bytes,
         headers={"Content-Type": "application/protobuf"},
     )
+
+
+routes = [
+    Route("/api/v0/fleet/create-node", create_node, methods=["POST"]),
+    Route("/api/v0/fleet/delete-node", delete_node, methods=["POST"]),
+    Route("/api/v0/fleet/pull-task-ins", pull_task_ins, methods=["POST"]),
+    Route("/api/v0/fleet/push-task-res", push_task_res, methods=["POST"]),
+]
+
+app: Starlette = Starlette(
+    debug=False,
+    routes=routes,
+)
 
 
 def _check_headers(headers: Headers) -> None:

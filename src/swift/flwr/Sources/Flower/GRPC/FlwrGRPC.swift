@@ -10,6 +10,52 @@ import GRPC
 import NIOCore
 import os
 
+/// A class that manages gRPC connection from client to the server.
+///
+/// ## Topics
+///
+/// ### Usage
+///
+/// - ``init(serverHost:serverPort:extendedInterceptor:)``
+/// - ``startFlwrGRPC(client:)``
+/// - ``startFlwrGRPC(client:completion:)``
+/// - ``abortGRPCConnection(reasonDisconnect:completion:)``
+/// - ``InterceptorExtension``
+/// - ``GRPCPartWrapper``
+///
+/// ### GetParameters
+///
+/// - ``Parameters``
+/// - ``GetParametersRes``
+///
+/// ### GetProperties
+///
+/// - ``GetPropertiesIns``
+/// - ``GetPropertiesRes``
+///
+/// ### Fit
+///
+/// - ``FitIns``
+/// - ``FitRes``
+///
+/// ### Evaluate
+///
+/// - ``EvaluateIns``
+/// - ``EvaluateRes``
+///
+/// ### Reconnect
+///
+/// - ``Reconnect``
+/// - ``Disconnect``
+/// - ``ReasonDisconnect``
+///
+/// ### Supporting Messages
+/// - ``Scalar``
+/// - ``Status``
+/// - ``Code``
+///
+/// ### Exceptions
+/// - ``FlowerException``
 @available(iOS 14.0, *)
 public class FlwrGRPC {
     typealias GRPCResponse = (Flwr_Proto_ClientMessage, Int, Bool)
@@ -54,7 +100,7 @@ public class FlwrGRPC {
         }
     }
     
-    /// Opens the bidirectional stream with the server and starts sending messages.
+    /// Start a Flower client node which connects to a Flower server.
     ///
     /// - Parameters:
     ///   - client: The implementation of the Client which includes the machine learning routines and results.
@@ -62,7 +108,7 @@ public class FlwrGRPC {
         startFlwrGRPC(client: client) {}
     }
     
-    /// Opens the bidirectional stream with the server and starts sending messages.
+    /// Start a Flower client node which connects to a Flower server.
     ///
     /// - Parameters:
     ///   - client: The implementation of the Client which includes the machine learning routines and results.

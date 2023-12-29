@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ To use the REST API, install `flwr` with the `rest` extra:
     `pip install flwr[rest]`.
 """
 
-TRANSPORT_TYPE_GRPC_BIDI = "grpc-bido"
+TRANSPORT_TYPE_GRPC_BIDI = "grpc-bidi"
 TRANSPORT_TYPE_GRPC_RERE = "grpc-rere"
 TRANSPORT_TYPE_REST = "rest"
 TRANSPORT_TYPES = [

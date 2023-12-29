@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -47,16 +47,17 @@ class SuccessClient(ClientProxy):
     def get_properties(
         self, ins: GetPropertiesIns, timeout: Optional[float]
     ) -> GetPropertiesRes:
-        # This method is not expected to be called
+        """Raise an Exception because this method is not expected to be called."""
         raise Exception()
 
     def get_parameters(
         self, ins: GetParametersIns, timeout: Optional[float]
     ) -> GetParametersRes:
-        # This method is not expected to be called
+        """Raise an Exception because this method is not expected to be called."""
         raise Exception()
 
     def fit(self, ins: FitIns, timeout: Optional[float]) -> FitRes:
+        """Simulate fit by returning a success FitRes with simple set of weights."""
         arr = np.array([[1, 2], [3, 4], [5, 6]])
         arr_serialized = ndarray_to_bytes(arr)
         return FitRes(
@@ -67,6 +68,7 @@ class SuccessClient(ClientProxy):
         )
 
     def evaluate(self, ins: EvaluateIns, timeout: Optional[float]) -> EvaluateRes:
+        """Simulate evaluate by returning a success EvaluateRes with loss 1.0."""
         return EvaluateRes(
             status=Status(code=Code.OK, message="Success"),
             loss=1.0,
@@ -75,6 +77,7 @@ class SuccessClient(ClientProxy):
         )
 
     def reconnect(self, ins: ReconnectIns, timeout: Optional[float]) -> DisconnectRes:
+        """Simulate reconnect by returning a DisconnectRes with UNKNOWN reason."""
         return DisconnectRes(reason="UNKNOWN")
 
 
@@ -84,20 +87,25 @@ class FailingClient(ClientProxy):
     def get_properties(
         self, ins: GetPropertiesIns, timeout: Optional[float]
     ) -> GetPropertiesRes:
+        """Raise an Exception to simulate failure in the client."""
         raise Exception()
 
     def get_parameters(
         self, ins: GetParametersIns, timeout: Optional[float]
     ) -> GetParametersRes:
+        """Raise an Exception to simulate failure in the client."""
         raise Exception()
 
     def fit(self, ins: FitIns, timeout: Optional[float]) -> FitRes:
+        """Raise an Exception to simulate failure in the client."""
         raise Exception()
 
     def evaluate(self, ins: EvaluateIns, timeout: Optional[float]) -> EvaluateRes:
+        """Raise an Exception to simulate failure in the client."""
         raise Exception()
 
     def reconnect(self, ins: ReconnectIns, timeout: Optional[float]) -> DisconnectRes:
+        """Raise an Exception to simulate failure in the client."""
         raise Exception()
 
 

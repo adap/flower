@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,11 @@
 """Client-side message handler tests."""
 
 
+import uuid
+
 from flwr.client import Client
+from flwr.client.typing import ClientFn
+from flwr.client.workload_state import WorkloadState
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -29,21 +33,25 @@ from flwr.common import (
     serde,
     typing,
 )
+from flwr.proto.node_pb2 import Node
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, Code, ServerMessage, Status
 
-from .message_handler import handle
+from .message_handler import handle, handle_control_message
 
 
 class ClientWithoutProps(Client):
     """Client not implementing get_properties."""
 
     def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
+        """Get empty parameters of the client with 'Success' status."""
         return GetParametersRes(
             status=typing.Status(code=typing.Code.OK, message="Success"),
             parameters=Parameters(tensors=[], tensor_type=""),
         )
 
     def fit(self, ins: FitIns) -> FitRes:
+        """Simulate successful training, return no parameters, no metrics."""
         return FitRes(
             status=typing.Status(code=typing.Code.OK, message="Success"),
             parameters=Parameters(tensors=[], tensor_type=""),
@@ -52,6 +60,7 @@ class ClientWithoutProps(Client):
         )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
+        """Simulate successful evaluation, return no metrics."""
         return EvaluateRes(
             status=typing.Status(code=typing.Code.OK, message="Success"),
             loss=1.0,
@@ -64,18 +73,21 @@ class ClientWithProps(Client):
     """Client implementing get_properties."""
 
     def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
+        """Get fixed properties of the client with 'Success' status."""
         return GetPropertiesRes(
             status=typing.Status(code=typing.Code.OK, message="Success"),
             properties={"str_prop": "val", "int_prop": 1},
         )
 
     def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
+        """Get empty parameters of the client with 'Success' status."""
         return GetParametersRes(
             status=typing.Status(code=typing.Code.OK, message="Success"),
             parameters=Parameters(tensors=[], tensor_type=""),
         )
 
     def fit(self, ins: FitIns) -> FitRes:
+        """Simulate successful training, return no parameters, no metrics."""
         return FitRes(
             status=typing.Status(code=typing.Code.OK, message="Success"),
             parameters=Parameters(tensors=[], tensor_type=""),
@@ -84,6 +96,7 @@ class ClientWithProps(Client):
         )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
+        """Simulate successful evaluation, return no metrics."""
         return EvaluateRes(
             status=typing.Status(code=typing.Code.OK, message="Success"),
             loss=1.0,
@@ -92,17 +105,67 @@ class ClientWithProps(Client):
         )
 
 
+def _get_client_fn(client: Client) -> ClientFn:
+    def client_fn(cid: str) -> Client:  # pylint: disable=unused-argument
+        return client
+
+    return client_fn
+
+
 def test_client_without_get_properties() -> None:
     """Test client implementing get_properties."""
     # Prepare
     client = ClientWithoutProps()
     ins = ServerMessage.GetPropertiesIns()
-    msg = ServerMessage(get_properties_ins=ins)
+
+    task_ins: TaskIns = TaskIns(
+        task_id=str(uuid.uuid4()),
+        group_id="",
+        workload_id=0,
+        task=Task(
+            producer=Node(node_id=0, anonymous=True),
+            consumer=Node(node_id=0, anonymous=True),
+            ancestry=[],
+            legacy_server_message=ServerMessage(get_properties_ins=ins),
+        ),
+    )
 
     # Execute
-    actual_msg, actual_sleep_duration, actual_keep_going = handle(
-        client=client, server_msg=msg
+    disconnect_task_res, actual_sleep_duration = handle_control_message(
+        task_ins=task_ins
     )
+    task_res, _ = handle(
+        client_fn=_get_client_fn(client),
+        state=WorkloadState(state={}),
+        task_ins=task_ins,
+    )
+
+    if not task_res.HasField("task"):
+        raise ValueError("Task value not found")
+
+    # pylint: disable=no-member
+    if not task_res.task.HasField("legacy_client_message"):
+        raise ValueError("Unexpected None value")
+    # pylint: enable=no-member
+
+    task_res.MergeFrom(
+        TaskRes(
+            task_id=str(uuid.uuid4()),
+            group_id="",
+            workload_id=0,
+        )
+    )
+    # pylint: disable=no-member
+    task_res.task.MergeFrom(
+        Task(
+            producer=Node(node_id=0, anonymous=True),
+            consumer=Node(node_id=0, anonymous=True),
+            ancestry=[task_ins.task_id],
+        )
+    )
+
+    actual_msg = task_res.task.legacy_client_message
+    # pylint: enable=no-member
 
     # Assert
     expected_get_properties_res = ClientMessage.GetPropertiesRes(
@@ -114,8 +177,8 @@ def test_client_without_get_properties() -> None:
     expected_msg = ClientMessage(get_properties_res=expected_get_properties_res)
 
     assert actual_msg == expected_msg
+    assert not disconnect_task_res
     assert actual_sleep_duration == 0
-    assert actual_keep_going is True
 
 
 def test_client_with_get_properties() -> None:
@@ -123,12 +186,54 @@ def test_client_with_get_properties() -> None:
     # Prepare
     client = ClientWithProps()
     ins = ServerMessage.GetPropertiesIns()
-    msg = ServerMessage(get_properties_ins=ins)
+    task_ins = TaskIns(
+        task_id=str(uuid.uuid4()),
+        group_id="",
+        workload_id=0,
+        task=Task(
+            producer=Node(node_id=0, anonymous=True),
+            consumer=Node(node_id=0, anonymous=True),
+            ancestry=[],
+            legacy_server_message=ServerMessage(get_properties_ins=ins),
+        ),
+    )
 
     # Execute
-    actual_msg, actual_sleep_duration, actual_keep_going = handle(
-        client=client, server_msg=msg
+    disconnect_task_res, actual_sleep_duration = handle_control_message(
+        task_ins=task_ins
     )
+    task_res, _ = handle(
+        client_fn=_get_client_fn(client),
+        state=WorkloadState(state={}),
+        task_ins=task_ins,
+    )
+
+    if not task_res.HasField("task"):
+        raise ValueError("Task value not found")
+
+    # pylint: disable=no-member
+    if not task_res.task.HasField("legacy_client_message"):
+        raise ValueError("Unexpected None value")
+    # pylint: enable=no-member
+
+    task_res.MergeFrom(
+        TaskRes(
+            task_id=str(uuid.uuid4()),
+            group_id="",
+            workload_id=0,
+        )
+    )
+    # pylint: disable=no-member
+    task_res.task.MergeFrom(
+        Task(
+            producer=Node(node_id=0, anonymous=True),
+            consumer=Node(node_id=0, anonymous=True),
+            ancestry=[task_ins.task_id],
+        )
+    )
+
+    actual_msg = task_res.task.legacy_client_message
+    # pylint: enable=no-member
 
     # Assert
     expected_get_properties_res = ClientMessage.GetPropertiesRes(
@@ -143,5 +248,5 @@ def test_client_with_get_properties() -> None:
     expected_msg = ClientMessage(get_properties_res=expected_get_properties_res)
 
     assert actual_msg == expected_msg
+    assert not disconnect_task_res
     assert actual_sleep_duration == 0
-    assert actual_keep_going is True

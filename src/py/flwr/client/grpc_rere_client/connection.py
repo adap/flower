@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,20 +16,30 @@
 
 
 from contextlib import contextmanager
-from logging import DEBUG, ERROR, WARN
+from logging import DEBUG, ERROR
 from pathlib import Path
 from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast
 
-from flwr.client.message_handler.task_handler import get_server_message
+from flwr.client.message_handler.task_handler import (
+    configure_task_res,
+    get_task_ins,
+    validate_task_ins,
+    validate_task_res,
+)
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.grpc import create_channel
-from flwr.common.logger import log
-from flwr.proto.fleet_pb2 import PullTaskInsRequest, PushTaskResRequest
+from flwr.common.logger import log, warn_experimental_feature
+from flwr.proto.fleet_pb2 import (
+    CreateNodeRequest,
+    DeleteNodeRequest,
+    PullTaskInsRequest,
+    PushTaskResRequest,
+)
 from flwr.proto.fleet_pb2_grpc import FleetStub
 from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
-from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.proto.task_pb2 import TaskIns, TaskRes
 
+KEY_NODE = "node"
 KEY_TASK_INS = "current_task_ins"
 
 
@@ -41,12 +51,16 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 @contextmanager
 def grpc_request_response(
     server_address: str,
+    insecure: bool,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
-    root_certificates: Optional[
-        Union[bytes, str]
-    ] = None,  # pylint: disable=unused-argument
+    root_certificates: Optional[Union[bytes, str]] = None,
 ) -> Iterator[
-    Tuple[Callable[[], Optional[ServerMessage]], Callable[[ClientMessage], None]]
+    Tuple[
+        Callable[[], Optional[TaskIns]],
+        Callable[[TaskRes], None],
+        Optional[Callable[[], None]],
+        Optional[Callable[[], None]],
+    ]
 ]:
     """Primitives for request/response-based interaction with a server.
 
@@ -68,76 +82,104 @@ def grpc_request_response(
 
     Returns
     -------
-    receive, send : Callable, Callable
+    receive : Callable
+    send : Callable
+    create_node : Optional[Callable]
+    delete_node : Optional[Callable]
     """
+    warn_experimental_feature("`grpc-rere`")
+
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
 
     channel = create_channel(
         server_address=server_address,
+        insecure=insecure,
         root_certificates=root_certificates,
         max_message_length=max_message_length,
     )
     channel.subscribe(on_channel_state_change)
     stub = FleetStub(channel)
 
-    log(
-        WARN,
-        """
-        EXPERIMENTAL: `grpc-rere` is an experimental transport layer, it might change
-        considerably in future versions of Flower
-        """,
-    )
-
     # Necessary state to link TaskRes to TaskIns
     state: Dict[str, Optional[TaskIns]] = {KEY_TASK_INS: None}
+
+    # Enable create_node and delete_node to store node
+    node_store: Dict[str, Optional[Node]] = {KEY_NODE: None}
 
     ###########################################################################
     # receive/send functions
     ###########################################################################
 
-    def receive() -> Optional[ServerMessage]:
-        """Receive next task from server."""
-        # Request instructions (task) from server
-        request = PullTaskInsRequest(
-            node=Node(node_id=0, anonymous=True),
+    def create_node() -> None:
+        """Set create_node."""
+        create_node_request = CreateNodeRequest()
+        create_node_response = stub.CreateNode(
+            request=create_node_request,
         )
+        node_store[KEY_NODE] = create_node_response.node
+
+    def delete_node() -> None:
+        """Set delete_node."""
+        # Get Node
+        if node_store[KEY_NODE] is None:
+            log(ERROR, "Node instance missing")
+            return
+        node: Node = cast(Node, node_store[KEY_NODE])
+
+        delete_node_request = DeleteNodeRequest(node=node)
+        stub.DeleteNode(request=delete_node_request)
+
+        del node_store[KEY_NODE]
+
+    def receive() -> Optional[TaskIns]:
+        """Receive next task from server."""
+        # Get Node
+        if node_store[KEY_NODE] is None:
+            log(ERROR, "Node instance missing")
+            return None
+        node: Node = cast(Node, node_store[KEY_NODE])
+
+        # Request instructions (task) from server
+        request = PullTaskInsRequest(node=node)
         response = stub.PullTaskIns(request=request)
 
-        # Remember the current TaskIns
-        task_ins_server_message_tuple = get_server_message(response)
-        if task_ins_server_message_tuple is None:
-            state[KEY_TASK_INS] = None
-            return None
+        # Get the current TaskIns
+        task_ins: Optional[TaskIns] = get_task_ins(response)
 
-        task_ins, server_message = task_ins_server_message_tuple
+        # Discard the current TaskIns if not valid
+        if task_ins is not None and not validate_task_ins(
+            task_ins, discard_reconnect_ins=True
+        ):
+            task_ins = None
 
         # Remember `task_ins` until `task_res` is available
         state[KEY_TASK_INS] = task_ins
 
-        # Return the ServerMessage
-        return server_message
+        # Return the TaskIns if available
+        return task_ins
 
-    def send(client_message_proto: ClientMessage) -> None:
+    def send(task_res: TaskRes) -> None:
         """Send task result back to server."""
+        # Get Node
+        if node_store[KEY_NODE] is None:
+            log(ERROR, "Node instance missing")
+            return
+        node: Node = cast(Node, node_store[KEY_NODE])
+
+        # Get incoming TaskIns
         if state[KEY_TASK_INS] is None:
             log(ERROR, "No current TaskIns")
             return
-
         task_ins: TaskIns = cast(TaskIns, state[KEY_TASK_INS])
 
-        # Wrap ClientMessage in TaskRes
-        task_res = TaskRes(
-            task_id="",  # This will be generated by the server
-            group_id=task_ins.group_id,
-            workload_id=task_ins.workload_id,
-            task=Task(
-                producer=Node(node_id=0, anonymous=True),
-                consumer=task_ins.task.producer,
-                legacy_client_message=client_message_proto,
-                ancestry=[task_ins.task_id],
-            ),
-        )
+        # Check if fields to be set are not initialized
+        if not validate_task_res(task_res):
+            state[KEY_TASK_INS] = None
+            log(ERROR, "TaskRes has been initialized accidentally")
+
+        # Configure TaskRes
+        task_res = configure_task_res(task_res, task_ins, node)
 
         # Serialize ProtoBuf to bytes
         request = PushTaskResRequest(task_res_list=[task_res])
@@ -145,8 +187,8 @@ def grpc_request_response(
 
         state[KEY_TASK_INS] = None
 
-    # yield methods
     try:
-        yield (receive, send)
+        # Yield methods
+        yield (receive, send, create_node, delete_node)
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)
