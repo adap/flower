@@ -1,0 +1,58 @@
+---
+# this is the config that will be loaded as default by main.py
+# Please follow the provided structure (this will ensuring all baseline follow
+# a similar configuration structure and hence be easy to customise)
+
+dataset:
+  name: 'mnist' # [cifar10, mnist]
+  # If path is specified, look for (or download) the dataset in that path,
+  # otherwise use current folder.
+  data_path: './dataset'
+  split: 'iid' # {iid, non-iid}
+  classes_pc: 4
+  minibatch_size: 128
+
+model:
+  name: 'Conv4' # [Conv8/6/4, LeNet]
+  mode: 'mask' # [mask, dense]
+  local_epochs: 3
+  activation: 'relu'
+  agg_steps: 5
+
+strategy:
+  _target_: # FedPM or DenseStrategy
+  fedpm:
+    local_epochs: 3
+    local_lr: 0.1
+
+compressor:
+  compress: True
+  type: 'sign_sgd' # {sign_sgd, qsgd}
+  local_epochs: 3
+
+  sign_sgd:
+    local_lr: 0.1
+    server_lr: 0.0002
+
+  qsgd:
+    local_lr: 0.0003
+    server_lr: 0.1
+    num_level: 6
+
+  fedavg:
+    local_lr: 0.01
+    server_lr: 0.0002
+
+simulation:
+  fraction_fit: 0.02
+  fraction_evaluate: 0
+  n_clients: 100
+  n_rounds: 200
+  verbose: 0
+  client_type: 'fedpm' # [fedpm, dense]
+
+ray_init_args:
+  # ignore_reinit_error: True
+  num_cpus: 6
+  num_gpus: 0
+  # local_mode: True
