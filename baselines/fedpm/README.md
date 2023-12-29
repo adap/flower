@@ -68,6 +68,8 @@ python -m fedpm.main
 python -m fedpm.main num_rounds=50 # will change to 50 rounds instead of the defaults
 python -m fedpm.main strategy.local_epochs=10 # will ensure clients do 10 local epochs instead of the default
 
+# To run the dense config (you can override its settings as done above too)
+python -m fedpm.main --config-name dense
 
 # TODO: add a couple more that are relevant, revise before merging
 ```

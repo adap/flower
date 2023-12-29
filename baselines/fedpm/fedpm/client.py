@@ -25,13 +25,13 @@ from flwr.common import (
     parameters_to_ndarrays,
 )
 from flwr.common.logger import log
+from hydra.utils import instantiate
 from omegaconf import DictConfig
 from scipy.stats import bernoulli
 from torch.utils.data import DataLoader, dataset
 
 # TO CHECK
 from fedpm.models import get_parameters, load_model, set_parameters
-from fedpm.utils import get_compressor
 
 
 class FedPMClient(flwr.client.Client):
@@ -160,24 +160,24 @@ class FedPMClient(flwr.client.Client):
 class DenseClient(flwr.client.Client):
     def __init__(
         self,
-        params,
+        model_cfg: DictConfig,
+        compressor_cfg: DictConfig,
         client_id: int,
         train_data_loader: DataLoader,
         test_data_loader: DataLoader,
     ) -> None:
         self.client_id = client_id
-        self.params = params
+        self.compressor_cfg = compressor_cfg
         self.train_data_loader = train_data_loader
         self.test_data_loader = test_data_loader
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        self.local_model = load_model(self.params).to(self.device)
+        self.local_model = load_model(model_cfg).to(self.device)
         self.compressor = None
-        self.compression = self.params.compressor.compress
+        self.compression = compressor_cfg.compress
         if self.compression:
-            self.compressor = get_compressor(
-                compressor_type=self.params.compressor.type,
-                params=self.params.compressor,
-                device=self.device,
+            # TODO: make this better in 2nd round of Hydra fixes
+            self.compressor = instantiate(
+                compressor_cfg[compressor_cfg.type], device=self.device
             )
 
     def fit(self, fitins: FitIns) -> FitRes:
@@ -185,8 +185,6 @@ class DenseClient(flwr.client.Client):
         deltas = self.train_dense(
             model=self.local_model,
             trainloader=self.train_data_loader,
-            device=self.device,
-            params=self.params,
         )
 
         if self.compression:
@@ -239,32 +237,31 @@ class DenseClient(flwr.client.Client):
         self,
         model: nn.Module,
         trainloader: dataset,
-        device: torch.device,
-        params,
         loss_fn=nn.CrossEntropyLoss(reduction="mean"),
         optimizer: torch.optim.Optimizer = None,
     ):
         """Train the network on the training set."""
-        if params.compressor.compress:
-            if params.compressor.type == "sign_sgd":
+        if self.compressor_cfg.compress:
+            # TODO: make this better in 2nd round of Hydra fixes
+            if self.compressor_cfg.type == "sign_sgd":
                 optimizer = torch.optim.SGD(
-                    model.parameters(), lr=params.compressor.sign_sgd.local_lr
+                    model.parameters(), lr=self.compressor.local_lr
                 )
-            if params.compressor.type == "qsgd":
+            if self.compressor_cfg.type == "qsgd":
                 optimizer = torch.optim.Adam(
-                    model.parameters(), lr=params.compressor.qsgd.local_lr
+                    model.parameters(), lr=self.compressor.local_lr
                 )
         else:
             optimizer = torch.optim.Adam(
-                model.parameters(), lr=params.compressor.fedavg.local_lr
+                model.parameters(), lr=self.compressor.local_lr
             )
 
         global_model = deepcopy(model.state_dict())
         model.train()
-        for _epoch in range(params.compressor.local_epochs):
+        for _epoch in range(self.compressor_cfg.local_epochs):
             correct, total, epoch_loss = 0, 0, 0.0
             for images, labels in trainloader:
-                images, labels = images.to(device), labels.to(device)
+                images, labels = images.to(self.device), labels.to(self.device)
                 optimizer.zero_grad()
                 outputs = model(images)
                 loss = loss_fn(model(images), labels)

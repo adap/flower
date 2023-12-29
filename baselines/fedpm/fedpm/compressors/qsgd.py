@@ -5,16 +5,20 @@ import torch
 
 
 class QSGDCompressor:
-    def __init__(self, params, device) -> None:
+    def __init__(
+        self, local_lr: float, server_lr: float, num_level: int, device
+    ) -> None:
         self.device = device
-        self.params = params
+        self.local_lr = local_lr
+        self.server_lr = server_lr
+        self.num_level = num_level
 
     def compress(
         self,
         updates: torch.Tensor,
     ):
         compressed_delta = []
-        num_levels = self.params.qsgd.num_level
+        num_levels = self.num_level
         num_params = 0
         elias_bitrate = 0
         for _i, (_name, param) in enumerate(updates.items()):

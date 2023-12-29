@@ -22,6 +22,7 @@ from flwr.common import (
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
+from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
@@ -215,7 +216,7 @@ class DenseStrategy(flwr.server.strategy.Strategy):
         model_cfg: DictConfig,
         compressor_cfg: DictConfig,
         global_data_loader: DataLoader,
-        loss_fn=torch.nn.CrossEntropyLoss(),
+        loss_fn,
         device="cpu",
         fraction_fit: float = 1.0,
         fraction_evaluate: float = 1.0,
@@ -233,7 +234,7 @@ class DenseStrategy(flwr.server.strategy.Strategy):
         self.model_cfg = model_cfg
         self.compressor_cfg = compressor_cfg
         self.global_dataset = global_data_loader
-        self.loss_fn = loss_fn
+        self.loss_fn = instantiate(loss_fn)
         self.device = device
         self.global_model = load_model(self.model_cfg).to(self.device)
         self.sim_folder = sim_folder

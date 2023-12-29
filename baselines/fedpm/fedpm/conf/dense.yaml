@@ -24,31 +24,36 @@ model:
   agg_steps: 5
 
 strategy:
-  _target_: fedpm.strategy.FedPMStrategy
+  _target_: fedpm.strategy.DenseStrategy
+  _recursive_: false
   fraction_fit: 0.02
   fraction_evaluate: 0
   min_fit_clients: 0
   min_evaluate_clients: 0
   min_available_clients: 0
-  local_epochs: 3
-  local_lr: 0.1
+  compressor_cfg: ${compressor}
   device: cpu
   loss_fn:
     _target_: torch.nn.CrossEntropyLoss
   
 client:
-  _target_: fedpm.client.FedPMClient
+  _target_: fedpm.client.DenseClient
+  _recursive_: false
   model_cfg: ${model}
+  compressor_cfg: ${compressor}
   
 
 compressor:
   compress: True
+  # _recursive_: false
   type: 'sign_sgd' # {sign_sgd, qsgd}
   local_epochs: 3
   sign_sgd:
+    _target_: fedpm.compressors.sign_sgd.SignSGDCompressor
     local_lr: 0.1
     server_lr: 0.0002
   qsgd:
+    _target_: fedpm.compressors.qsgd.QSGDCompressor
     local_lr: 0.0003
     server_lr: 0.1
     num_level: 6
@@ -60,7 +65,3 @@ compressor:
 client_resources:
   num_cpus: 6
   num_gpus: 0
-
-# ray_init_args:
-  # ignore_reinit_error: True
-  # local_mode: True

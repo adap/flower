@@ -47,7 +47,6 @@ def main(cfg: DictConfig) -> None:
 
         return instantiate(
             cfg.client,
-            model_cfg=cfg.model,
             client_id=cid,
             train_data_loader=trainloader,
             test_data_loader=valloader,

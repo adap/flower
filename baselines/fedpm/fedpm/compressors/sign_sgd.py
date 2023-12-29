@@ -4,9 +4,10 @@ import torch
 
 
 class SignSGDCompressor:
-    def __init__(self, params, device: torch.device) -> None:
+    def __init__(self, local_lr: float, server_lr: float, device) -> None:
         self.device = device
-        self.params = params
+        self.local_lr = local_lr
+        self.server_lr = server_lr
 
     def compress(
         self,
