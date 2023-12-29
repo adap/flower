@@ -1,9 +1,0 @@
-apiVersion: 1
-
-datasources:
-- name: Prometheus
-  type: prometheus
-  access: proxy  
-  uid: db69454e-e558-479e-b4fc-80db52bf91da 
-  url: http://host.docker.internal:9090
-  isDefault: true
