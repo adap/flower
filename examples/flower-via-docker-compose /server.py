@@ -9,14 +9,19 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Define a gauge to track the global model accuracy
-accuracy_gauge = Gauge('model_accuracy', 'Current accuracy of the global model')
+accuracy_gauge = Gauge("model_accuracy", "Current accuracy of the global model")
 
 # Define a gauge to track the global model loss
-loss_gauge = Gauge('model_loss', 'Current loss of the global model')
+loss_gauge = Gauge("model_loss", "Current loss of the global model")
 
 # Parse command line arguments
-parser = argparse.ArgumentParser(description='Flower Server')
-parser.add_argument('--number_of_rounds', type=int, default=100, help="Number of FL rounds (default: 100)")
+parser = argparse.ArgumentParser(description="Flower Server")
+parser.add_argument(
+    "--number_of_rounds",
+    type=int,
+    default=100,
+    help="Number of FL rounds (default: 100)",
+)
 args = parser.parse_args()
 
 
@@ -33,13 +38,10 @@ def start_fl_server(strategy, rounds):
 
 
 # Main Function
-if __name__ == "__main__":   
-    
+if __name__ == "__main__":
     # Start Prometheus Metrics Server
-    start_http_server(8000) 
-    
-    # Initialize Strategy Instance and Start FL Server 
-    strategy_instance = FedCustom(accuracy_gauge=accuracy_gauge,
-                                  loss_gauge=loss_gauge)
+    start_http_server(8000)
+
+    # Initialize Strategy Instance and Start FL Server
+    strategy_instance = FedCustom(accuracy_gauge=accuracy_gauge, loss_gauge=loss_gauge)
     start_fl_server(strategy=strategy_instance, rounds=args.number_of_rounds)
- 
