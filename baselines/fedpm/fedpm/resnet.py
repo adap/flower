@@ -14,7 +14,6 @@ __all__ = [
 
 
 def _weights_init(m):
-
     if isinstance(m, nn.Linear) or isinstance(m, nn.Conv2d):
         init.kaiming_normal_(m.weight)
 

@@ -44,22 +44,22 @@ def sigmoid(x):
 
 
 def load_model(params):
-    if params.model.name == "LeNet":
+    if params.name == "LeNet":
         return LeNet5()
-    elif params.model.name == "ResNet":
+    elif params.name == "ResNet":
         return resnet20(params)
-    elif params.model.name == "Conv8":
-        if params.model.mode == "mask":
+    elif params.name == "Conv8":
+        if params.mode == "mask":
             return Mask8CNN()
-    elif params.model.name == "Conv6":
-        if params.model.mode == "mask":
+    elif params.name == "Conv6":
+        if params.mode == "mask":
             return Mask6CNN()
-        elif params.model.mode == "dense":
+        elif params.mode == "dense":
             return Dense6CNN()
-    elif params.model.name == "Conv4":
-        if params.model.mode == "mask":
+    elif params.name == "Conv4":
+        if params.mode == "mask":
             return Mask4CNN()
-        elif params.model.mode == "dense":
+        elif params.mode == "dense":
             return Dense4CNN()
 
 

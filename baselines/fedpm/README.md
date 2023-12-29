@@ -63,6 +63,13 @@ poetry shell
 ```bash  
 # Run with default arguments
 python -m fedpm.main
+
+# You can override settings directly from the command line like this:
+python -m fedpm.main num_rounds=50 # will change to 50 rounds instead of the defaults
+python -m fedpm.main strategy.local_epochs=10 # will ensure clients do 10 local epochs instead of the default
+
+
+# TODO: add a couple more that are relevant, revise before merging
 ```
 
 

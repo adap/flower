@@ -22,6 +22,7 @@ from flwr.common import (
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
+from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
 from fedpm.models import get_parameters, load_model, set_parameters
@@ -30,10 +31,12 @@ from fedpm.models import get_parameters, load_model, set_parameters
 class FedPMStrategy(flwr.server.strategy.Strategy):
     def __init__(
         self,
-        params: Dict,
+        model_cfg: DictConfig,
         global_data_loader: DataLoader,
-        loss_fn=torch.nn.CrossEntropyLoss(),
-        device="cpu",
+        loss_fn,
+        device: str,
+        local_epochs: int,
+        local_lr: float,
         fraction_fit: float = 1.0,
         fraction_evaluate: float = 1.0,
         min_fit_clients: int = 2,
@@ -46,11 +49,15 @@ class FedPMStrategy(flwr.server.strategy.Strategy):
         self.min_fit_clients = min_fit_clients
         self.min_evaluate_clients = min_evaluate_clients
         self.min_available_clients = min_available_clients
-        self.params = params
+        self.model_cfg = model_cfg
         self.global_dataset = global_data_loader
         self.loss_fn = loss_fn
         self.device = device
-        self.global_model = load_model(self.params).to(self.device)
+        self.global_model = load_model(self.model_cfg).to(self.device)
+
+        # to send to client as part in configure fit
+        self.local_epochs = local_epochs
+        self.local_lr = local_lr
 
         self.alphas = None
         self.betas = None
@@ -90,7 +97,17 @@ class FedPMStrategy(flwr.server.strategy.Strategy):
 
         for _idx, client in enumerate(clients):
             fit_configurations.append(
-                (client, FitIns(parameters, {"iter_num": server_round}))
+                (
+                    client,
+                    FitIns(
+                        parameters,
+                        {
+                            "iter_num": server_round,
+                            "local_epochs": self.local_epochs,
+                            "local_lr": self.local_lr,
+                        },
+                    ),
+                )
             )
         return fit_configurations
 
@@ -195,7 +212,8 @@ class FedPMStrategy(flwr.server.strategy.Strategy):
 class DenseStrategy(flwr.server.strategy.Strategy):
     def __init__(
         self,
-        params,
+        model_cfg: DictConfig,
+        compressor_cfg: DictConfig,
         global_data_loader: DataLoader,
         loss_fn=torch.nn.CrossEntropyLoss(),
         device="cpu",
@@ -212,19 +230,20 @@ class DenseStrategy(flwr.server.strategy.Strategy):
         self.min_fit_clients = min_fit_clients
         self.min_evaluate_clients = min_evaluate_clients
         self.min_available_clients = min_available_clients
-        self.params = params
+        self.model_cfg = model_cfg
+        self.compressor_cfg = compressor_cfg
         self.global_dataset = global_data_loader
         self.loss_fn = loss_fn
         self.device = device
-        self.global_model = load_model(self.params).to(self.device)
+        self.global_model = load_model(self.model_cfg).to(self.device)
         self.sim_folder = sim_folder
-        if params.compressor.compress:
-            if params.compressor.type == "sign_sgd":
-                self.server_lr = params.compressor.sign_sgd.server_lr
-            if params.compressor.type == "qsgd":
-                self.server_lr = params.compressor.qsgd.server_lr
+        if compressor_cfg.compress:
+            if compressor_cfg.type == "sign_sgd":
+                self.server_lr = compressor_cfg.sign_sgd.server_lr
+            if compressor_cfg.type == "qsgd":
+                self.server_lr = compressor_cfg.qsgd.server_lr
         else:
-            self.server_lr = params.fedavg.server_lr
+            self.server_lr = compressor_cfg.server_lr
 
         self.layer_id = []
         i = 0

@@ -25,6 +25,7 @@ from flwr.common import (
     parameters_to_ndarrays,
 )
 from flwr.common.logger import log
+from omegaconf import DictConfig
 from scipy.stats import bernoulli
 from torch.utils.data import DataLoader, dataset
 
@@ -36,17 +37,17 @@ from fedpm.utils import get_compressor
 class FedPMClient(flwr.client.Client):
     def __init__(
         self,
-        params,
+        model_cfg: DictConfig,
         client_id: int,
         train_data_loader: DataLoader,
         test_data_loader: DataLoader,
     ) -> None:
-        self.params = params
+        self.model_cfg = model_cfg
         self.client_id = client_id
         self.train_data_loader = train_data_loader
         self.test_data_loader = test_data_loader
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        self.local_model = load_model(self.params).to(self.device)
+        self.local_model = load_model(self.model_cfg).to(self.device)
         self.epsilon = 0.01
 
     def sample_mask(self, mask_probs: Dict) -> List[np.ndarray]:
@@ -66,10 +67,17 @@ class FedPMClient(flwr.client.Client):
 
     def fit(self, fitins: FitIns) -> FitRes:
         self.set_parameters(fitins.parameters)
+
+        config = fitins.config
+
+        local_epochs = config["local_epochs"]
+        local_lr = config["local_lr"]
+
         mask_probs = self.train_fedpm(
             model=self.local_model,
             trainloader=self.train_data_loader,
-            params=self.params,
+            local_epochs=local_epochs,
+            local_lr=local_lr,
         )
         sampled_mask = self.sample_mask(mask_probs)
         parameters = ndarrays_to_parameters(sampled_mask)
@@ -110,7 +118,8 @@ class FedPMClient(flwr.client.Client):
         self,
         model: nn.Module,
         trainloader: DataLoader,
-        params: Dict,
+        local_epochs: int,
+        local_lr: float,
         loss_fn=nn.CrossEntropyLoss(reduction="mean"),
         optimizer: torch.optim.Optimizer = None,
     ) -> Dict:
@@ -118,11 +127,9 @@ class FedPMClient(flwr.client.Client):
         model.
         """
         if optimizer is None:
-            optimizer = torch.optim.Adam(
-                model.parameters(), lr=params.strategy.fedpm.local_lr
-            )
+            optimizer = torch.optim.Adam(model.parameters(), lr=local_lr)
 
-        for _epoch in range(params.strategy.fedpm.local_epochs):
+        for _epoch in range(local_epochs):
             running_loss = 0
             total = 0
             correct = 0
