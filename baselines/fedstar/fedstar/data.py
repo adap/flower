@@ -244,10 +244,10 @@ class DataBuilder:
         mean_class_distribution=5,
         fedstar=False,
         class_distribute=False,
+        balance_dataset: bool = False,
         seed=2021,
     ):
         batch_size = batch_size // 2 if fedstar else batch_size
-
         ds_train_L, ds_train_U, num_classes, num_batches = __class__.split_dataset(
             parent_path=parent_path,
             data_dir=data_dir,
@@ -268,11 +268,13 @@ class DataBuilder:
             ds_test=None,
             seed=seed,
             batch_size=batch_size,
+            balance_dataset=balance_dataset,
         )
         return ds_train_L, ds_train_U, num_classes, num_batches
 
     @staticmethod
-    def to_Dataset(ds_train_L, ds_train_U, ds_test, batch_size, buffer=1024, seed=2021):
+    def to_Dataset(ds_train_L, ds_train_U, ds_test, batch_size,
+                   buffer=1024, seed=2021, balance_dataset: bool=False):
         ds_train_L = (
             ds_train_L.shuffle(
                 buffer_size=buffer, seed=seed, reshuffle_each_iteration=True
@@ -304,12 +306,11 @@ class DataBuilder:
         )
 
         # make balanced
-        if ds_train_L:
-            ds_train_L = balance_sampler(ds_train_L, batch_size)
-            # print(f"{len(ds_train_L) = }")
-        if ds_train_U:
-            ds_train_U = balance_sampler(ds_train_U, batch_size)
-            # print(f"{len(ds_train_U) = }")
+        if balance_dataset:
+            if ds_train_L:
+                ds_train_L = balance_sampler(ds_train_L, batch_size)
+            if ds_train_U:
+                ds_train_U = balance_sampler(ds_train_U, batch_size)
 
         return ds_train_L, ds_train_U, ds_test
 

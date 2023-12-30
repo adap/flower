@@ -186,7 +186,7 @@ def set_gpu_limits(gpu_id, gpu_memory):
 """
 
 
-@hydra.main(config_path="conf/table_3", config_name="base", version_base=None)
+@hydra.main(config_path="conf", config_name="table3", version_base=None)
 def main(cfg: DictConfig):
     # Set Experiment Parameters
     unique_id = str(uuid.uuid1())

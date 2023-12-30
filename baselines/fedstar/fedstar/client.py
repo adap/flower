@@ -27,7 +27,8 @@ class AudioClient(flwr.client.NumPyClient):
         batch_size=64,
         l_per=0.2,
         u_per=1.0,
-        class_distribute=False,
+        class_distribute: bool =False,
+        balance_dataset: bool = False,
         mean_class_distribution=3,
         seed=2021,
         verbose=2,
@@ -60,6 +61,7 @@ class AudioClient(flwr.client.NumPyClient):
             fedstar=fedstar,
             class_distribute=class_distribute,
             mean_class_distribution=mean_class_distribution,
+            balance_dataset=balance_dataset,
             seed=seed,
         )
         self.num_examples_train = self.num_batches * batch_size if self.train_L else 0

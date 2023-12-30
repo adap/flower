@@ -68,16 +68,48 @@ python -m fedstar.server
 python -m fedstar.clients
 ```
 
-You can change the dataset and number of clients like this:
+You can change the dataset, number of clients and number of rounds like this:
 
 ```bash
-python -m fedstar.server num_clients=5 dataset_name=speech_commands
-# the use the same settings when launching fedstar.clients
+python -m fedstar.server num_clients=5 dataset_name=speech_commands server.rounds=20
+python -m fedstar.clients num_clients=5 dataset_name=speech_commands
 ```
+
+To run experiments for Table 4, you should pass a different cofig file (i.e. that in `fedstar/conf/table4.yaml`). You can do this as follows:
+
+```bash
+# by default will run FedStar with Ambient Context and L=3%
+python -m fedstar.server --config-name table4
+python -m fedstar.clients --config-name table4
+```
+
+To modify the ratio of labelled data do so as follows:
+```bash
+# To use a different L setting
+python -m fedstar.server --config-name table4 L=L5 # {L3, L5, L20, L50}
+# same for fedstar.clients
+```
+
+To run in supervised mode, pass `fedstar=false` to any of the commands above (when launching both the server and clients). Naturally, you can also override any other setting, like `dataset_name` and `num_clients` if desired.
 
 
 ## Expected Results
+This section indicates the commands to exectue to obtain the results shown below in Table 3 and Table 4. The commands below make use of Hydra's `--multirun` to run multiple experiments. This is better suited when using Flower simulations. Here they work fine but, if you encounter any issues, you can always "unroll" the multirun and run one configuration at a time. If you do this, results won't go into the `multirun/` directory, instead to the default `outputs/` directory.
+
 ### Table 3
+
+Results will be stored in `multirun/Table3/<dataset_name>/N_<num_clients>/<date>/<time>`. Please note since we are running two Hydra processes, both server and client will generate a log and therefore respective subdirectories in `multirun/`. This is a small compromise of not using Flower simulation. 
+
+```bash
+# For Ambient Context
+python -m fedstar.server --multirun num_clients=5,10,15,30
+python -m fedstar.clients --multirun num_clients=5,10,15,30
+
+# For SpeechCommands
+python -m fedstar.server --multirun num_clients=5,10,15,30 dataset_name=speech_commands
+python -m fedstar.clients --multirun num_clients=5,10,15,30 dataset_name=speech_commands
+```
+
 | Clients | Speech Commands |                | Ambient Context |                |
 |---------|-----------------|----------------|-----------------|----------------|
 |         | Actual          | Implementation | Actual          | Implementation |
@@ -88,6 +120,15 @@ python -m fedstar.server num_clients=5 dataset_name=speech_commands
 
 
 ### Table 4
+
+Following the logic presented for obtaining Table 3 results, the larger Table 4 set of results can be obtained by running the `--multirun` commands shown below.
+
+```bash
+# generate supervised results (note this will run 4x4=16 experiments)
+python -m fedstar.server --config-name table4 --multirun num_clients=5,10,15,30 L=L3,L5,L20,L50 fedstar=false
+python -m fedstar.clients --config-name table4 --multirun num_clients=5,10,15,30 L=L3,L5,L20,L50 fedstar=false
+```
+
 | Dataset | Clients | Supervised Federated Learnning | | |  |  |  |  |  | |  |  | Fedstar | | | | | | | |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 |  |  | L=3% |  | L=5% |  | L=20% |  | L=50% |  | L=100% |  |  | L=3% |  | L=5% |  | L=20% |  | L=50% |  |

@@ -14,6 +14,7 @@ import hydra
 import tensorflow as tf
 
 from fedstar.client import AudioClient
+from omegaconf import OmegaConf
 
 multiprocessing.set_start_method("spawn", force=True)
 
@@ -46,10 +47,9 @@ class Client(Process):
                 batch_size=cfg["batch_size"],
                 verbose=cfg["verbose"],
                 seed=cfg["seed"],
-                fedstar=bool(distutils.util.strtobool(cfg["fedstar"])),
-                class_distribute=bool(
-                    distutils.util.strtobool(cfg["class_distribute"])
-                ),
+                fedstar=cfg["fedstar"],
+                class_distribute=cfg["class_distribute"],
+                balance_dataset=cfg["balance_dataset"],
             )
             # Start Client
             client(introduce=bool(cfg["verbose"]))
@@ -108,8 +108,11 @@ def distribute_gpus(num_clients, client_memory=1024):
     return clients_gpu
 
 
-@hydra.main(config_path="conf/table_3", config_name="base", version_base=None)
+@hydra.main(config_path="conf", config_name="table3", version_base=None)
 def main(cfg):
+
+    print(OmegaConf.to_yaml(cfg))
+
     clients_gpu = distribute_gpus(
         num_clients=cfg.client.num_clients,
         client_memory=cfg.client.gpu_memory,
@@ -131,6 +134,7 @@ def main(cfg):
             "u_per": cfg.client.u_per,
             "fedstar": cfg.client.fedstar,
             "class_distribute": cfg.client.class_distribute,
+            "balance_dataset": cfg.dataset_name == "speech_commands",
             "verbose": cfg.client.verbose,
         }
         for i in range(cfg.client.num_clients)

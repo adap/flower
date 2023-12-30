@@ -29,6 +29,11 @@ client:
   batch_size: 64
   l_per: 1.00
   u_per: 0.00
-  fedstar: "false"
-  class_distribute: "false"
+  fedstar: false
+  class_distribute: false
   verbose: 1
+
+hydra:
+  sweep:
+    dir: multirun
+    subdir: Table3/${dataset_name}/N_${num_clients}/${now:%Y-%m-%d}/${now:%H-%M-%S}
