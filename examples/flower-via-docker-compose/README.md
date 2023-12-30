@@ -1,9 +1,11 @@
 # Leveraging Flower and Docker for Device Heterogeneity Management in Federated Learning
 
+<!-- markdownlint-disable MD033 -->
 <p align="center">
   <img src="https://flower.dev/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fflower_white_border.c2012e70.png&w=640&q=75" width="140px" alt="Flower Website" />
   <img src="public/01-symbol_blue-docker-logo.png" width="140px" alt="Docker Logo" />
 </p>
+<!-- markdownlint-enable MD033 -->
 
 ## Introduction
 
@@ -71,14 +73,18 @@ Within the script, specify the number of clients (`total_clients`) and resource 
 1. **Execute Initialization Script**:
 
    - To build the Docker images and start the containers, use the following command:
+
      ```bash
      # this is the only command you need to execute to run the entire example
      docker-compose up
      ```
+
    - If you make any changes to the Dockerfile or other configuration files, you should rebuild the images to reflect these changes. This can be done by adding the `--build` flag to the command:
+
      ```bash
      docker-compose up --build
      ```
+
    - The `--build` flag instructs Docker Compose to rebuild the images before starting the containers, ensuring that any code or configuration changes are included.
    - To stop all services, you have two options:
      - Run `docker-compose down` in another terminal if you are in the same directory. This command will stop and remove the containers, networks, and volumes created by `docker-compose up`.
