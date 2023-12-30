@@ -1,12 +1,5 @@
 # Leveraging Flower and Docker for Device Heterogeneity Management in Federated Learning
 
-<!-- markdownlint-disable MD033 -->
-<p align="center">
-  <img src="https://flower.dev/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fflower_white_border.c2012e70.png&w=640&q=75" width="140px" alt="Flower Website" />
-  <img src="public/01-symbol_blue-docker-logo.png" width="140px" alt="Docker Logo" />
-</p>
-<!-- markdownlint-enable MD033 -->
-
 ## Introduction
 
 In this example, we tackle device heterogeneity in federated learning, arising from differences in memory and CPU capabilities across devices. This diversity affects training efficiency and inclusivity. Our strategy includes simulating this heterogeneity by setting CPU and memory limits in a Docker setup, using a custom Docker compose generator script. This approach creates a varied training environment and enables us to develop strategies to manage these disparities effectively.
