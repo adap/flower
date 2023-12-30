@@ -9,9 +9,9 @@ tags=$(git tag --sort=-v:refname)
 new_version=$(echo "$tags" | sed -n '1p')
 old_version=$(echo "$tags" | sed -n '2p')
 
-awk -v start="$new_version" -v end="$old_version" '
+awk '{sub(/<!--.*-->/, ""); print}' doc/source/ref-changelog.md | awk -v start="$new_version" -v end="$old_version" '
     $0 ~ start {flag=1; next}
     $0 ~ end {flag=0}
     flag && !printed && /^$/ {next}  # skip the first blank line
     flag && !printed {printed=1}
-    flag' doc/source/ref-changelog.md
+    flag'
