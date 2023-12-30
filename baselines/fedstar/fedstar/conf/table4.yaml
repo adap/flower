@@ -37,4 +37,4 @@ client:
 hydra:
   sweep:
     dir: multirun
-    subdir: Table3/${dataset_name}/fedstar_{fedstar}/N_${num_clients}/L_${L}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: Table3/${dataset_name}/fedstar_${fedstar}/N_${num_clients}/L_${L}/${now:%Y-%m-%d}/${now:%H-%M-%S}
