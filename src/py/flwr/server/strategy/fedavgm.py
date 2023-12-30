@@ -138,9 +138,11 @@ class FedAvgM(FedAvg):
         """Aggregate fit results using weighted average."""
         if not results:
             return None, {}
+        
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
+        
         # Convert results
         weights_results = [
             (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
@@ -148,9 +150,11 @@ class FedAvgM(FedAvg):
         ]
 
         fedavg_result = aggregate(weights_results)
-        # following convention described in
+
+        # convention described in
         # https://pytorch.org/docs/stable/generated/torch.optim.SGD.html
-        if self.server_opt:
+
+        if self.server_opt: # TODO: Check if needed (not used on baseline)
             # You need to initialize the model
             assert (
                 self.initial_parameters is not None
@@ -164,6 +168,7 @@ class FedAvgM(FedAvg):
                     parameters_to_ndarrays(self.initial_parameters), fedavg_result
                 )
             ]
+
             if self.server_momentum > 0.0:
                 if server_round > 1:
                     assert (
@@ -173,21 +178,31 @@ class FedAvgM(FedAvg):
                         self.server_momentum * x + y
                         for x, y in zip(self.momentum_vector, pseudo_gradient)
                     ]
-                else:
+                else:   # Round 1
+                    # Initialize server-side model
+                    assert (
+                        self.initial_parameters is not None
+                    ), "When using server-side optimization, model needs to be initialized."
                     self.momentum_vector = pseudo_gradient
 
-                # No nesterov for now
-                pseudo_gradient = self.momentum_vector
+                # Applying Nesterov
+                pseudo_gradient = [
+                    g + self.server_momentum * v
+                    for g, v in zip(pseudo_gradient, self.momentum_vector)
+                ]
 
-            # SGD
-            fedavg_result = [
-                x - self.server_learning_rate * y
-                for x, y in zip(initial_weights, pseudo_gradient)
+            # Federated Averaging with Server Momentum
+            fedavgm_result = [
+                w - self.server_learning_rate * v
+                for w, v in zip(
+                    parameters_to_ndarrays(self.initial_parameters), pseudo_gradient
+                )
             ]
-            # Update current weights
-            self.initial_parameters = ndarrays_to_parameters(fedavg_result)
 
-        parameters_aggregated = ndarrays_to_parameters(fedavg_result)
+            # Update current weights
+            self.initial_parameters = ndarrays_to_parameters(fedavgm_result)
+
+        parameters_aggregated = ndarrays_to_parameters(fedavgm_result)
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
