@@ -124,9 +124,21 @@ python -m fedstar.clients --multirun num_clients=5,10,15,30 dataset_name=speech_
 Following the logic presented for obtaining Table 3 results, the larger Table 4 set of results can be obtained by running the `--multirun` commands shown below.
 
 ```bash
-# generate supervised results (note this will run 4x4=16 experiments)
+# Generate supervised results for Ambient Context (note this will run 4x4=16 experiments)
 python -m fedstar.server --config-name table4 --multirun num_clients=5,10,15,30 L=L3,L5,L20,L50 fedstar=false
 python -m fedstar.clients --config-name table4 --multirun num_clients=5,10,15,30 L=L3,L5,L20,L50 fedstar=false
+
+# Generate supervised results for Speech Commands (note this will run 4x4=16 experiments)
+python -m fedstar.server --config-name table4 --multirun num_clients=5,10,15,30 L=L3,L5,L20,L50 dataset_name=speech_commands fedstar=false
+python -m fedstar.clients --config-name table4 --multirun num_clients=5,10,15,30 L=L3,L5,L20,L50 dataset_name=speech_commands fedstar=false
+
+# Generate FedStar results for Ambient Context
+python -m fedstar.server --config-name table4 --multirun num_clients=5,10,15,30 L=L3,L5,L20,L50
+python -m fedstar.clients --config-name table4 --multirun num_clients=5,10,15,30 L=L3,L5,L20,L50
+
+# Generate FedStar results for Speech Commands
+python -m fedstar.server --config-name table4 --multirun num_clients=5,10,15,30 L=L3,L5,L20,L50 dataset_name=speech_commands
+python -m fedstar.clients --config-name table4 --multirun num_clients=5,10,15,30 L=L3,L5,L20,L50 dataset_name=speech_commands
 ```
 
 | Dataset | Clients | Supervised Federated Learnning | | |  |  |  |  |  | |  |  | Fedstar | | | | | | | |
@@ -142,3 +154,10 @@ python -m fedstar.clients --config-name table4 --multirun num_clients=5,10,15,30
 |  | 10.0 | 67.75 | 62.84 | 83.8 | 79.32 | 92.12 | 88.37 | 94.02 | 89.38 | 96.78 | 89.31 |  | 86.82 | 80.93 | 90.33 | 86.17 | 94.09 | 87.92 | 94.18 | 89.57 |
 |  | 15.0 | 62.98 | 60.33 | 72.84 | 68.47 | 92.14 | 86.95 | 93.14 | 87.02 | 96.33 | 88.87 |  | 86.82 | 81.52 | 89.33 | 85.59 | 93.16 | 86.35 | 93.39 | 87.52 |
 |  | 30.0 | 33.78 | 28.47 | 44.21 | 39.96 | 84.94 | 79.88 | 92.21 | 86.49 | 94.62 | 87.55 |  | 83.88 | 78.55 | 88.19 | 82.26 | 92.92 | 85.87 | 92.62 | 86.63 |
+
+
+
+| Dataset | Clients | Supervised Federated Learning <br> L=3% &#8195; &#8195; L=5%  &#8195; L=20%  &#8195; L=50% &#8195; L=100% | FedStar <br> L=3% &#8195; &#8195; L=5%  &#8195; L=20%  &#8195; L=50% | 
+| :--: | :--:| :---: | :---: |
+Ambient Context | 5<br> 10<br> 15 <br>30 | 48.23 &#8195; &#8195; 49.65 &#8195; &#8195; 65.22 &#8195; &#8195; 68.23 &#8195; 75.27 <br> 34.61 &#8195; &#8195; 44.29 &#8195; &#8195; 54.67 &#8195; &#8195; 62.51 &#8195; 70.39 <br> 33.46 &#8195; &#8195; 44.11 &#8195; &#8195; 52.31 &#8195; &#8195; 62.58 &#8195; 68.41 <br> 33.12 &#8195; &#8195; 39.88 &#8195; &#8195; 50.93 &#8195; &#8195; 59.46 &#8195; 67.23 | 50.21 &#8195; &#8195; 55.13 &#8195; &#8195; 67.58 &#8195; &#8195; 69.53 <br> 49.37 &#8195; &#8195; 49.51 &#8195; &#8195; 64.31 &#8195; &#8195; 68.31 <br> 49.28 &#8195; &#8195; 57.23 &#8195; &#8195; 64.87 &#8195; &#8195; 65.46 <br> 42.16 &#8195; &#8195; 47.32 &#8195; &#8195; 62.96 &#8195; &#8195; 55.98 |
+Speech Commands | 5<br> 10<br> 15 <br>30 | | |
