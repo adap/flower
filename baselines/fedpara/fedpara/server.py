@@ -16,10 +16,7 @@ def get_on_fit_config(hypearparams: Dict):
     """Generate fit config function."""
 
     def fit_config_fn(server_round: int):
-        print(server_round)
-        print(hypearparams)
         hypearparams["curr_round"] = server_round
-        print(f"{hypearparams = }")
         return hypearparams
 
     return fit_config_fn
