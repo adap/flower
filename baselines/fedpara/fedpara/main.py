@@ -39,7 +39,6 @@ def main(cfg: DictConfig) -> None:
         train_loaders=train_loaders,
         model=cfg.model,
         num_epochs=cfg.num_epochs,
-        args={"device": cfg.client_device},
     )
 
     evaluate_fn = server.gen_evaluate_fn(
@@ -49,23 +48,13 @@ def main(cfg: DictConfig) -> None:
         device=cfg.server_device,
     )
 
-    def get_on_fit_config():
-        def fit_config_fn(server_round: int):
-            fit_config = OmegaConf.to_container(  # type: ignore
-                cfg.hyperparams, resolve=True
-            )
-            fit_config["curr_round"] = server_round
-            return fit_config
-
-        return fit_config_fn
-
     net_glob = instantiate(cfg.model)
 
     # 4. Define strategy
     strategy = instantiate(
         cfg.strategy,
         evaluate_fn=evaluate_fn,
-        on_fit_config_fn=get_on_fit_config(),
+        on_fit_config_fn=server.get_on_fit_config(dict(cfg.hyperparams)),
         initial_parameters=fl.common.ndarrays_to_parameters(get_parameters(net_glob)),
     )
 
@@ -75,10 +64,7 @@ def main(cfg: DictConfig) -> None:
         num_clients=cfg.num_clients,
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
         strategy=strategy,
-        client_resources={
-            "num_cpus": cfg.client_resources.num_cpus,
-            "num_gpus": cfg.client_resources.num_gpus,
-        },
+        client_resources=cfg.client_resources,
         ray_init_args={
             "num_cpus": 40,
             "num_gpus": 1,

@@ -12,6 +12,19 @@ from torch.utils.data import DataLoader
 from fedpara.models import test
 
 
+def get_on_fit_config(hypearparams: Dict):
+    """Generate fit config function."""
+
+    def fit_config_fn(server_round: int):
+        print(server_round)
+        print(hypearparams)
+        hypearparams["curr_round"] = server_round
+        print(f"{hypearparams = }")
+        return hypearparams
+
+    return fit_config_fn
+
+
 def gen_evaluate_fn(
     num_clients: int,
     test_loader: DataLoader,
@@ -38,9 +51,12 @@ def gen_evaluate_fn(
         The centralized evaluation function.
     """
 
+    # pylint: disable=unused-argument
     def evaluate(
-        server_round, parameters_ndarrays: NDArrays, __
-    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:  # pylint: disable=unused-argument
+        server_round,
+        parameters_ndarrays: NDArrays,
+        __,
+    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Use the entire CIFAR-10/100 test set for evaluation."""
         net = instantiate(model)
         params_dict = zip(net.state_dict().keys(), parameters_ndarrays)

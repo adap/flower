@@ -67,17 +67,18 @@ def gen_client_fn(
     train_loaders: List[DataLoader],
     model: DictConfig,
     num_epochs: int,
-    args: Dict,
 ) -> Callable[[str], FlowerClient]:
     """Return a function which creates a new FlowerClient for a given cid."""
 
     def client_fn(cid: str) -> FlowerClient:
         """Create a new FlowerClient for a given cid."""
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
         return FlowerClient(
             cid=int(cid),
-            net=instantiate(model).to(args["device"]),
+            net=instantiate(model).to(device),
             train_loader=train_loaders[int(cid)],
-            device=args["device"],
+            device=device,
             num_epochs=num_epochs,
         )
 

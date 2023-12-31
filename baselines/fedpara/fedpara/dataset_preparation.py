@@ -48,6 +48,7 @@ def iid(dataset, num_users):
     return dict_users
 
 
+# pylint: disable=too-many-locals
 def noniid(dataset, no_participants, alpha=0.5):
     """Sample non-I.I.D client data from dataset.
 

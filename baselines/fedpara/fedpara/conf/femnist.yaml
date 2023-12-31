@@ -8,7 +8,6 @@ num_epochs: 5
 batch_size: 10
 
 server_device: cuda
-client_device: cuda
 
 client_resources:
   num_cpus: 2

@@ -16,7 +16,7 @@ from tqdm import tqdm
 class LowRank(nn.Module):
     """Low-rank convolutional layer."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         in_channels: int,
         out_channels: int,
@@ -47,10 +47,11 @@ class LowRank(nn.Module):
         return torch.einsum("xyzw,xo,yi->oizw", self.T, self.X, self.Y)
 
 
+# pylint: disable=too-many-instance-attributes
 class Conv2d(nn.Module):
     """Convolutional layer with low-rank weights."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         in_channels: int,
         out_channels: int,
@@ -125,10 +126,11 @@ class Conv2d(nn.Module):
         return out
 
 
+# pylint: disable=too-many-instance-attributes
 class VGG(nn.Module):
     """VGG16GN model."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         num_classes,
         num_groups=2,
@@ -137,7 +139,7 @@ class VGG(nn.Module):
         conv_type="lowrank",
         add_nonlinear=False,
     ):
-        super(VGG, self).__init__()
+        super().__init__()
         if activation == "relu":
             self.activation = nn.ReLU(inplace=True)
         elif activation == "leaky_relu":
