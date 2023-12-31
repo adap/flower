@@ -1,5 +1,6 @@
 """Main script for running FedPara."""
 import logging
+
 import flwr as fl
 import hydra
 from hydra.core.hydra_config import HydraConfig
@@ -50,7 +51,9 @@ def main(cfg: DictConfig) -> None:
 
     def get_on_fit_config():
         def fit_config_fn(server_round: int):
-            fit_config = OmegaConf.to_container(cfg.hyperparams, resolve=True)
+            fit_config = OmegaConf.to_container(  # type: ignore
+                cfg.hyperparams, resolve=True
+            )
             fit_config["curr_round"] = server_round
             return fit_config
 
@@ -96,9 +99,13 @@ def main(cfg: DictConfig) -> None:
             f"{cfg.clients_per_round}",
         ]
     )
-    
+
     utils.plot_metric_from_history(
-        hist=history, save_plot_path=save_path, suffix=file_suffix, cfg=cfg, model_size=net_glob.model_size()[1]
+        hist=history,
+        save_plot_path=save_path,
+        suffix=file_suffix,
+        cfg=cfg,
+        model_size=net_glob.model_size()[1],
     )
 
 

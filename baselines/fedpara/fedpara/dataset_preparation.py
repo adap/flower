@@ -32,8 +32,7 @@ class DatasetSplit(Dataset):
 
 
 def iid(dataset, num_users):
-    """
-    Sample I.I.D. clients data from a dataset.
+    """Sample I.I.D. clients data from a dataset.
 
     Args:
         dataset: dataset object
@@ -50,8 +49,7 @@ def iid(dataset, num_users):
 
 
 def noniid(dataset, no_participants, alpha=0.5):
-    """
-    Sample non-I.I.D client data from dataset.
+    """Sample non-I.I.D client data from dataset.
 
     Args:
         dataset: dataset object
@@ -89,7 +87,7 @@ def noniid(dataset, no_participants, alpha=0.5):
             datasize[user, n] = no_imgs
             sampled_list = cifar_classes[n][: min(len(cifar_classes[n]), no_imgs)]
             per_participant_list[user].extend(sampled_list)
-            cifar_classes[n] = cifar_classes[n][min(len(cifar_classes[n]), no_imgs):]
+            cifar_classes[n] = cifar_classes[n][min(len(cifar_classes[n]), no_imgs) :]
     train_img_size = np.zeros(no_participants)
     for i in range(no_participants):
         train_img_size[i] = sum([datasize[i, j] for j in range(no_classes)])
@@ -98,4 +96,3 @@ def noniid(dataset, no_participants, alpha=0.5):
         for j in range(no_classes):
             clas_weight[i, j] = float(datasize[i, j]) / float((train_img_size[i]))
     return per_participant_list, clas_weight
-

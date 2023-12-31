@@ -6,11 +6,11 @@ from typing import List, Tuple
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
-from fedpara.dataset_preparation import iid, noniid, DatasetSplit
+from fedpara.dataset_preparation import DatasetSplit, iid, noniid
 
 
 def load_datasets(
-        config, num_clients, batch_size
+    config, num_clients, batch_size
 ) -> Tuple[List[DataLoader], DataLoader]:
     """Load the dataset and return the dataloaders for the clients and the server."""
     print("Loading data...")

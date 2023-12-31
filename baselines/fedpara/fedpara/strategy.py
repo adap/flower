@@ -4,7 +4,6 @@
 from flwr.server.strategy import FedAvg
 
 
-
 class FedPara(FedAvg):
     """FedPara strategy."""
 

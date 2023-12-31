@@ -1,5 +1,5 @@
 ---
-title: FedPara Low-rank Hadamard Product for Communication-Efficient Federated Learning 
+title: "FedPara: Low-rank Hadamard Product for Communication-Efficient Federated Learning"
 url:  https://openreview.net/forum?id=d71n4ftoCBy
 labels: [image classification, personalization, low-rank training, tensor decomposition]
 dataset: [CIFAR10, CIFAR100, FEMNIST]
@@ -11,9 +11,9 @@ dataset: [CIFAR10, CIFAR100, FEMNIST]
 
 **Paper:** [openreview.net/forum?id=d71n4ftoCBy](https://openreview.net/forum?id=d71n4ftoCBy)
 
-****Authors:****  Nam Hyeon-Woo, Moon Ye-Bin, Tae-Hyun Oh
+**Authors:**  Nam Hyeon-Woo, Moon Ye-Bin, Tae-Hyun Oh
 
-****Abstract:**** In this work, we propose a communication-efficient parameterization, FedPara,
+**Abstract:** In this work, we propose a communication-efficient parameterization, FedPara,
 for federated learning (FL) to overcome the burdens on frequent model uploads
 and downloads. Our method re-parameterizes weight parameters of layers using
 low-rank weights followed by the Hadamard product. Compared to the conventional low-rank parameterization, our FedPara method is not restricted to lowrank constraints, and thereby it has a far larger capacity. This property enables to
@@ -27,29 +27,29 @@ page: https://github.com/South-hw/FedPara_ICLR22
 
 ## About this baseline
 
-****What’s implemented:****  The code in this directory replicates the experiments in FedPara paper implementing the Low-rank scheme for Convolution module.
+**What’s implemented:**  The code in this directory replicates the experiments in FedPara paper implementing the Low-rank scheme for Convolution module.
 
 Specifically, it replicates the results for Cifar10 and Cifar100 in Figure 3 and the results for Feminist in Figure 5(a).
 
 
-****Datasets:****  CIFAR10, CIFAR100, FEMNIST from PyTorch's Torchvision
+**Datasets:**  CIFAR10, CIFAR100, FEMNIST from PyTorch's Torchvision
 
-****Hardware Setup:**** The experiment has been conducted on our server with the following specs:
+**Hardware Setup:** The experiment has been conducted on our server with the following specs:
 
 - **GPU:** 1 RTX A6000 GPU 50GB VRAM
 - **CPU:** 1x24 cores Intel Xeon(R) 6248R
 - **RAM:** 150 GB
 
-****Contributors:**** Yahia Salaheldin Shaaban, Omar Mokhtar and Roeia Amr 
+**Contributors:** Yahia Salaheldin Shaaban, Omar Mokhtar and Roeia Amr 
 
 
 ## Experimental Setup
 
-****Task:****  Image classification
+**Task:**  Image classification
 
-****Model:****  This directory implements Vgg16 with group normalization.
+**Model:**  This directory implements Vgg16 with group normalization.
 
-****Dataset:**** 
+**Dataset:** 
 
 In IID settings:
 
@@ -66,7 +66,7 @@ In non-IID settings:
 | Cifar100 |   100    |     50     | Dirichlet distribution |
 
 
-****Training Hyperparameters:****
+**Training Hyperparameters:**
 
 |   |   Cifar10 IID   | Cifar10 Non-IID      | Cifar100 IID     | Cifar100 Non-IID      | FEMNIST        |
 |---|-------|-------|------|-------|----------|

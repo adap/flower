@@ -84,27 +84,32 @@ class Conv2d(nn.Module):
 
     def _calc_from_ratio(self):
         # Return the low-rank of sub-matrices given the compression ratio
-        
+
         # minimum possible parameter
         r1 = int(np.ceil(np.sqrt(self.out_channels)))
         r2 = int(np.ceil(np.sqrt(self.in_channels)))
         r = np.min((r1, r2))
-        
-        # maximum possible rank, 
+
+        # maximum possible rank,
         """
         To solve it we need to know the roots of quadratic equation: ax^2+bx+c=0
         a = kernel**2
         b = out channel+ in channel
         c = - num_target_params/2
-        r3 is floored because we cannot take the ceil as it results a bigger number of parameters than the original problem 
+        r3 is floored because we cannot take the ceil as it results a bigger number
+        of parameters than the original problem
         """
         num_target_params = (
             self.out_channels * self.in_channels * (self.kernel_size**2)
         )
-        a, b, c = self.kernel_size**2, self.out_channels + self.in_channels,- num_target_params/2
+        a, b, c = (
+            self.kernel_size**2,
+            self.out_channels + self.in_channels,
+            -num_target_params / 2,
+        )
         discriminant = b**2 - 4 * a * c
-        r3 = math.floor((-b+math.sqrt(discriminant))/(2*a))
-        ratio=math.ceil((1-self.ratio)*r+ self.ratio*r3)
+        r3 = math.floor((-b + math.sqrt(discriminant)) / (2 * a))
+        ratio = math.ceil((1 - self.ratio) * r + self.ratio * r3)
         return ratio
 
     def forward(self, x):
@@ -225,14 +230,16 @@ class VGG(nn.Module):
                     layers += [conv2d, self.activation]
                 in_channels = v
         return nn.Sequential(*layers)
-    
+
     @property
     def model_size(self):
+        """Return the total number of trainable parameters (in million paramaters) and.
+
+        the size of the model in MB.
         """
-        Return the total number of trainable parameters (in million paramaters) and the size of the model in MB.
-        """
-        total_trainable_params = sum(
-        p.numel() for p in self.parameters() if p.requires_grad)/1e6
+        total_trainable_params = (
+            sum(p.numel() for p in self.parameters() if p.requires_grad) / 1e6
+        )
         param_size = 0
         for param in self.parameters():
             param_size += param.nelement() * param.element_size()
@@ -313,7 +320,9 @@ def train(  # pylint: disable=too-many-arguments
     hyperparams : Dict[str, Scalar]
         The hyperparameters to use for training.
     """
-    lr = hyperparams["eta_l"] * hyperparams["learning_decay"] ** (round - 1)
+    lr = float(hyperparams["eta_l"]) * float(hyperparams["learning_decay"]) ** (
+        round - 1
+    )
     print(f"Learning rate: {lr}")
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(

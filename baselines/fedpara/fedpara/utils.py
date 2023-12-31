@@ -2,7 +2,6 @@
 
 import random
 from pathlib import Path
-from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -16,9 +15,9 @@ from torch.nn import Module
 def plot_metric_from_history(
     hist: History,
     save_plot_path: str,
-    suffix: Optional[str] = "",
-    cfg: Optional[DictConfig] = None,
-    model_size: float = None,
+    model_size: float,
+    cfg: DictConfig,
+    suffix: str = "",
 ) -> None:
     """Plot the metrics from the history of the server.
 
@@ -28,10 +27,12 @@ def plot_metric_from_history(
         Object containing evaluation for all rounds.
     save_plot_path : str
         Folder to save the plot to.
-    suffix: Optional[str]
-        Optional string to add at the end of the filename for the plot.
-    cfg : Optional[DictConfig]
+    model_size : float
+        Size of the model.
+    cfg : Optional
         Optional dictionary containing the configuration of the experiment.
+    suffix: Optional
+        Optional string to add at the end of the filename for the plot.
     """
     metric_type = "centralized"
     metric_dict = (
@@ -40,12 +41,14 @@ def plot_metric_from_history(
         else hist.metrics_distributed
     )
     rounds, values_accuracy = zip(*metric_dict["accuracy"])
-    rounds*=2*model_size*cfg.clients_per_round/1024
+    rounds *= 2 * model_size * cfg.clients_per_round / 1024
     _, axs = plt.subplots()
     # Set the title
-    axs.set_title(
-        f"{cfg.strategy.algorithm} | parameters: {cfg.model.conv_type} | {cfg.dataset_config.name} {cfg.dataset_config.partition} | Seed {cfg.seed}"
+    title = f"{cfg.strategy.algorithm} | parameters: {cfg.model.conv_type} | "
+    title += (
+        f"{cfg.dataset_config.name} {cfg.dataset_config.partition} | Seed {cfg.seed}"
     )
+    axs.set_title(title)
     axs.plot(np.asarray(rounds), np.asarray(values_accuracy))
     axs.set_ylabel("Accuracy")
     axs.set_xlabel("Rounds")
