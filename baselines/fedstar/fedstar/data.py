@@ -309,9 +309,9 @@ class DataBuilder:
         if balance_dataset:
             if ds_train_L:
                 ds_train_L = balance_sampler(ds_train_L, batch_size)
-            if ds_train_U:
-                ds_train_U = balance_sampler(ds_train_U, batch_size)
-
+            # re sampling not required for unlabelled data.
+            # if ds_train_U:
+            #     ds_train_U = balance_sampler(ds_train_U, batch_size)
         return ds_train_L, ds_train_U, ds_test
 
 
