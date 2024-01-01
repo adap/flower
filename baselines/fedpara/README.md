@@ -2,7 +2,7 @@
 title: "FedPara: Low-rank Hadamard Product for Communication-Efficient Federated Learning"
 url:  https://openreview.net/forum?id=d71n4ftoCBy
 labels: [image classification, personalization, low-rank training, tensor decomposition]
-dataset: [CIFAR10, CIFAR100, FEMNIST]
+dataset: [CIFAR-10, CIFAR- 100, FEMNIST]
 ---
 
 # FedPara: Low-rank Hadamard Product for Communication-Efficient Federated Learning 
@@ -122,13 +122,13 @@ poetry run python -m fedpara.main
 **Multi-runs**
 
 # To run fedpara for non-iid cifar 10 on vgg16 for lowrank and original schemes
-poetry run python -m fedpara.main --multirun model.conv_type=standard,lowrank 
+python -m fedpara.main --multirun model.conv_type=standard,lowrank 
 # To run fedpara for non-iid cifar 100 on vgg16 for lowrank and original schemes
-poetry run python -m fedpara.main --config-name cifar100 --multirun model.conv_type=standard,lowrank 
+python -m fedpara.main --config-name cifar100 --multirun model.conv_type=standard,lowrank 
 # To run fedpara for iid cifar 10 on vgg16 for lowrank and original schemes
-poetry run python -m fedpara.main --multirun model.conv_type=standard,lowrank num_epochs=10 dataset_config.partition=iid 
+python -m fedpara.main --multirun model.conv_type=standard,lowrank num_epochs=10 dataset_config.partition=iid 
 # To run fedpara for iid cifar 100 on vgg16 for lowrank and original schemes
-poetry run python -m fedpara.main --config-name cifar100 --multirun model.conv_type=standard,lowrank num_epochs=10 dataset_config.partition=iid
+python -m fedpara.main --config-name cifar100 --multirun model.conv_type=standard,lowrank num_epochs=10 dataset_config.partition=iid
 
 ```
 ## Expected Results
