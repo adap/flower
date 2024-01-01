@@ -178,7 +178,8 @@ class DPWrapper_fixed_clipping(Strategy):
         return ndarrays_to_parameters(
             self.add_gaussian_noise(
                 parameters_to_ndarrays(parameters),
-                self.noise_multiplier * self.clip_norm,
+                (self.noise_multiplier * self.clip_norm)
+                / (self.num_sampled_clients ** (0.5)),
             )
         )
 
