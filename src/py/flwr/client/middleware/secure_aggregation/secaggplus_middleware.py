@@ -75,7 +75,7 @@ from flwr.common.secure_aggregation.secaggplus_utils import (
 )
 from flwr.common.typing import FitRes, Value
 
-from .middleware import secure_aggregation_middleware
+from .middleware_decorator import secure_aggregation_middleware
 
 
 @dataclass

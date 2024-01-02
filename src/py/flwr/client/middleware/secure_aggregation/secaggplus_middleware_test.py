@@ -18,7 +18,7 @@ import unittest
 from itertools import product
 from typing import Callable, Dict, List
 
-from flwr.client.middleware import make_app
+from flwr.client.middleware import make_ffn
 from flwr.client.typing import Bwd, Fwd
 from flwr.client.workload_state import WorkloadState
 from flwr.common import serde
@@ -57,10 +57,10 @@ def get_test_handler(
 ) -> Callable[[Dict[str, Value]], Dict[str, Value]]:
     """."""
 
-    def empty_app(_: Fwd) -> Bwd:
+    def empty_ffn(_: Fwd) -> Bwd:
         return Bwd(task_res=TaskRes(), state=WorkloadState(state={}))
 
-    app = make_app(empty_app, [secaggplus_middleware])
+    app = make_ffn(empty_ffn, [secaggplus_middleware])
     workload_state = WorkloadState(state={KEY_SECAGGPLUS_STATE: state})  # type: ignore
 
     def func(named_values: Dict[str, Value]) -> Dict[str, Value]:

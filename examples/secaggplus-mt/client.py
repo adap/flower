@@ -35,7 +35,7 @@ def client_fn(cid: str):
 # To run this: `flower-client --callable client:flower`
 flower = fl.flower.Flower(
     client_fn=client_fn,
-    middleware=[secaggplus_middleware],
+    layers=[secaggplus_middleware],
 )
 
 

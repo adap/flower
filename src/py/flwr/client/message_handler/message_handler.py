@@ -97,6 +97,8 @@ def handle(
         The task response that should be returned to the server.
     """
     server_msg = get_server_message_from_task_ins(task_ins, exclude_reconnect_ins=False)
+    if server_msg is None:
+        raise UnknownServerMessage()
     client_msg, updated_state = handle_legacy_message(client_fn, state, server_msg)
     task_res = wrap_client_message_in_task_res(client_msg)
     return task_res, updated_state

@@ -16,8 +16,7 @@
 from typing import Callable, Dict
 
 from flwr.client.message_handler.task_handler import get_server_message_from_task_ins
-from flwr.client.middleware import App, Layer
-from flwr.client.typing import Bwd, Fwd
+from flwr.client.typing import Bwd, FlowerCallable, Fwd, Layer
 from flwr.client.workload_state import WorkloadState
 from flwr.common import serde
 from flwr.common.typing import FitRes, Value
@@ -68,14 +67,14 @@ def secure_aggregation_middleware(
     It ignores non-fit messages.
     """
 
-    def wrapper(fwd: Fwd, app: App) -> Bwd:
+    def wrapper(fwd: Fwd, fc: FlowerCallable) -> Bwd:
         # Ignore non-fit messages
         task_ins = fwd.task_ins
         server_msg = get_server_message_from_task_ins(
             task_ins, exclude_reconnect_ins=False
         )
         if server_msg is not None and server_msg.WhichOneof("msg") != "fit_ins":
-            return app(fwd)
+            return fc(fwd)
 
         named_values = serde.named_values_from_proto(task_ins.task.sa.named_values)
         workload_state = fwd.state
@@ -85,7 +84,7 @@ def secure_aggregation_middleware(
             # Raise an exception if TaskIns does not contain a FitIns
             if server_msg is None:
                 raise ValueError("TaskIns does not contain a FitIns message.")
-            fit_res_proto = app(fwd).task_res.task.legacy_client_message.fit_res
+            fit_res_proto = fc(fwd).task_res.task.legacy_client_message.fit_res
             return serde.fit_res_from_proto(fit_res_proto)
 
         res = fn(workload_state, named_values, fit)
