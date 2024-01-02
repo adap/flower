@@ -33,6 +33,7 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.strategy import Strategy
 
 
+# pylint: disable=line-too-long
 class DPWrapper_fixed_clipping(Strategy):
     """Wrapper for Configuring a Strategy for Central DP with Fixed Clipping.
 
@@ -49,6 +50,7 @@ class DPWrapper_fixed_clipping(Strategy):
         The number of clients that are sampled on each round.
     """
 
+    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals
     def __init__(
         self,
         strategy: Strategy,
@@ -73,6 +75,8 @@ class DPWrapper_fixed_clipping(Strategy):
         self.clip_norm = clip_norm
         self.num_sampled_clients = num_sampled_clients
 
+        self.current_round_params = None
+
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
         rep = f"DPWrapper_fixed_clipping(accept_failures={self.accept_failures})"
@@ -87,11 +91,14 @@ class DPWrapper_fixed_clipping(Strategy):
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
+        """Configure the next round of training."""
+        self.current_round_params = parameters
         return self.strategy.configure_fit(server_round, parameters, client_manager)
 
     def configure_evaluate(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
+        """Configure the next round of evaluation."""
         return self.strategy.configure_evaluate(
             server_round, parameters, client_manager
         )
@@ -106,12 +113,21 @@ class DPWrapper_fixed_clipping(Strategy):
         if failures:
             return None, {}
 
-        # Extract model updates
-        all_updates = [
+        # Extract all clients' model params
+        clients_params = [
             parameters_to_ndarrays(fit_res.parameters) for _, fit_res in results
         ]
+
+        # Compute the updates
+        all_clients_updates = self._compute_model_updates(clients_params)
+
         # Clip updates
-        clipped_updates = self._clip_model_updates(all_updates)
+        for client_update in all_clients_updates:
+            clipped_update = self._clip_model_update(client_update)
+
+        # Compute the new parameters with the clipped updates
+        for client_param, client_update in zip(clients_params, all_clients_updates):
+            self._update_clients_params(client_param, client_update)
 
         # Update the results with clipped updates
         updated_results = [
@@ -119,15 +135,15 @@ class DPWrapper_fixed_clipping(Strategy):
                 client,
                 FitRes(
                     fit_res.status,
-                    ndarrays_to_parameters(clipped_update),
+                    ndarrays_to_parameters(clients_params),
                     fit_res.num_examples,
                     fit_res.metrics,
                 ),
             )
-            for (client, fit_res), clipped_update in zip(results, clipped_updates)
+            for (client, fit_res), _ in zip(results, clients_params)
         ]
 
-        # Pass the clipped updates for aggregation
+        # Pass the new parameters for aggregation
         aggregated_updates, metrics = self.strategy.aggregate_fit(
             server_round, updated_results, failures
         )
@@ -153,19 +169,12 @@ class DPWrapper_fixed_clipping(Strategy):
         """Evaluate model parameters using an evaluation function from the strategy."""
         return self.strategy.evaluate(server_round, parameters)
 
-    def _clip_model_updates(self, updates: NDArrays) -> List[Parameters]:
-        """Clip model parameters based on the computed clip_norm."""
-        clip_norm = self._get_update_norm(updates)
-        clipped_updates = []
-
-        for update in updates:
-            clipped_update = {
-                key: np.clip(value, -clip_norm, clip_norm)
-                for key, value in update.items()
-            }
-            clipped_updates.append(clipped_update)
-
-        return clipped_updates
+    def _clip_model_update(self, update: NDArrays) -> NDArrays:
+        """Clip model update based on the computed clip_norm. FlatClip method of the paper: https://arxiv.org/pdf/1710.06963.pdf"""
+        update_norm = self._get_update_norm(update)
+        scaling_factor = min(1, self.clip_norm / update_norm)
+        update_clipped: NDArrays = [layer * scaling_factor for layer in update]
+        return update_clipped
 
     def _get_update_norm(update: NDArrays) -> float:
         flattened_update = np.concatenate(
@@ -188,3 +197,21 @@ class DPWrapper_fixed_clipping(Strategy):
             layer + np.random.normal(0, std_dev, layer.shape) for layer in update
         ]
         return update_noised
+
+    def _compute_model_updates(
+        self, all_clients_params: List[NDArrays]
+    ) -> List[NDArrays]:
+        all_client_updates = []
+        for client_param in all_clients_params:
+            client_update = [
+                np.subtract(x, y)
+                for (x, y) in zip(client_param, self.current_round_params)
+            ]
+            all_client_updates.append(client_update)
+        return all_client_updates
+
+    def _update_clients_params(
+        self, client_param: NDArrays, client_update: NDArrays
+    ) -> NDArrays:
+        for i, _ in enumerate(self.current_round_params):
+            client_param[i] = self.current_round_params[i] + client_update[i]
