@@ -24,7 +24,7 @@ from flwr.proto.task_pb2 import SecureAggregation, Task, TaskRes
 
 
 def secure_aggregation_middleware(
-    fn: Callable[
+    func: Callable[
         [WorkloadState, Dict[str, Value], Callable[[], FitRes]], Dict[str, Value]
     ]
 ) -> Layer:
@@ -37,7 +37,7 @@ def secure_aggregation_middleware(
 
     Parameters
     ----------
-    fn : Callable[
+    func : Callable[
         [WorkloadState, Dict[str, Value], Callable[[], FitRes]], Dict[str, Value]
     ]
         The user-defined function to be transformed into a middleware layer.
@@ -67,14 +67,14 @@ def secure_aggregation_middleware(
     It ignores non-fit messages.
     """
 
-    def wrapper(fwd: Fwd, fc: FlowerCallable) -> Bwd:
+    def wrapper(fwd: Fwd, ffn: FlowerCallable) -> Bwd:
         # Ignore non-fit messages
         task_ins = fwd.task_ins
         server_msg = get_server_message_from_task_ins(
             task_ins, exclude_reconnect_ins=False
         )
         if server_msg is not None and server_msg.WhichOneof("msg") != "fit_ins":
-            return fc(fwd)
+            return ffn(fwd)
 
         named_values = serde.named_values_from_proto(task_ins.task.sa.named_values)
         workload_state = fwd.state
@@ -84,10 +84,10 @@ def secure_aggregation_middleware(
             # Raise an exception if TaskIns does not contain a FitIns
             if server_msg is None:
                 raise ValueError("TaskIns does not contain a FitIns message.")
-            fit_res_proto = fc(fwd).task_res.task.legacy_client_message.fit_res
+            fit_res_proto = ffn(fwd).task_res.task.legacy_client_message.fit_res
             return serde.fit_res_from_proto(fit_res_proto)
 
-        res = fn(workload_state, named_values, fit)
+        res = func(workload_state, named_values, fit)
         return Bwd(
             task_res=TaskRes(
                 task_id="",
