@@ -40,18 +40,20 @@ def plot_metric_from_history(
         if metric_type == "centralized"
         else hist.metrics_distributed
     )
-    rounds, values_accuracy = zip(*metric_dict["accuracy"])
-    rounds *= 2 * model_size * cfg.clients_per_round / 1024
     _, axs = plt.subplots()
+    rounds, values_accuracy = zip(*metric_dict["accuracy"])
+    r_cc = (i * 2 * model_size * int(cfg.clients_per_round) / 1024 for i in rounds)
+
     # Set the title
     title = f"{cfg.strategy.algorithm} | parameters: {cfg.model.conv_type} | "
     title += (
         f"{cfg.dataset_config.name} {cfg.dataset_config.partition} | Seed {cfg.seed}"
     )
     axs.set_title(title)
-    axs.plot(np.asarray(rounds), np.asarray(values_accuracy))
+    axs.grid(True)
+    axs.plot(np.asarray([*r_cc]), np.asarray(values_accuracy))
     axs.set_ylabel("Accuracy")
-    axs.set_xlabel("Rounds")
+    axs.set_xlabel("Communication Cost (GB)")
     fig_name = "_".join([metric_type, "metrics", suffix]) + ".png"
     plt.savefig(Path(save_plot_path) / Path(fig_name))
     plt.close()

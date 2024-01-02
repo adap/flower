@@ -53,7 +53,7 @@ class FlowerClient(fl.client.NumPyClient):
             self.device,
             epochs=self.num_epochs,
             hyperparams=config,
-            round=int(config["curr_round"]),
+            epoch=int(config["curr_round"]),
         )
 
         return (

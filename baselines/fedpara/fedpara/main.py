@@ -1,5 +1,4 @@
 """Main script for running FedPara."""
-import logging
 
 import flwr as fl
 import hydra
@@ -24,9 +23,7 @@ def main(cfg: DictConfig) -> None:
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
     seed_everything(cfg.seed)
-    hyper_params = OmegaConf.to_container(cfg, resolve=True)
-    # log the hyperparameters
-    logging.info(f"Hyperparameters: {hyper_params}")
+    OmegaConf.to_container(cfg, resolve=True)
     # 2. Prepare dataset
     train_loaders, test_loader = load_datasets(
         config=cfg.dataset_config,
@@ -91,7 +88,7 @@ def main(cfg: DictConfig) -> None:
         save_plot_path=save_path,
         suffix=file_suffix,
         cfg=cfg,
-        model_size=net_glob.model_size()[1],
+        model_size=net_glob.model_size[1],
     )
 
 

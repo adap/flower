@@ -91,14 +91,13 @@ class Conv2d(nn.Module):
         r = np.min((r1, r2))
 
         # maximum possible rank,
-        """
-        To solve it we need to know the roots of quadratic equation: ax^2+bx+c=0
-        a = kernel**2
-        b = out channel+ in channel
-        c = - num_target_params/2
-        r3 is floored because we cannot take the ceil as it results a bigger number
-        of parameters than the original problem
-        """
+        # To solve it we need to know the roots of quadratic equation: ax^2+bx+c=0
+        # a = kernel**2
+        # b = out channel+ in channel
+        # c = - num_target_params/2
+        # r3 is floored because we cannot take the ceil as it results a bigger number
+        # of parameters than the original problem
+
         num_target_params = (
             self.out_channels * self.in_channels * (self.kernel_size**2)
         )
@@ -250,9 +249,9 @@ class VGG(nn.Module):
         size_all_mb = (param_size + buffer_size) / 1024**2
         return total_trainable_params, size_all_mb
 
-    def forward(self, input):
+    def forward(self, x):
         """Forward pass."""
-        x = self.features(input)
+        x = self.features(x)
         x = x.view(x.size(0), -1)
         x = self.classifier(x)
         return x
@@ -304,7 +303,7 @@ def train(  # pylint: disable=too-many-arguments
     device: torch.device,
     epochs: int,
     hyperparams: Dict[str, Scalar],
-    round: int,
+    epoch: int,
 ) -> None:
     """Train the network on the training set.
 
@@ -322,9 +321,8 @@ def train(  # pylint: disable=too-many-arguments
         The hyperparameters to use for training.
     """
     lr = float(hyperparams["eta_l"]) * float(hyperparams["learning_decay"]) ** (
-        round - 1
+        epoch - 1
     )
-    print(f"Learning rate: {lr}")
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(
         net.parameters(),
@@ -340,7 +338,6 @@ def train(  # pylint: disable=too-many-arguments
             device=device,
             criterion=criterion,
             optimizer=optimizer,
-            hyperparams=hyperparams,
         )
 
 
@@ -350,7 +347,6 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
     device: torch.device,
     criterion,
     optimizer,
-    hyperparams: Dict[str, Scalar],
 ) -> nn.Module:
     """Train for one epoch.
 
