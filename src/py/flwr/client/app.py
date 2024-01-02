@@ -74,10 +74,10 @@ def run_client() -> None:
 
     print(args.root_certificates)
     print(args.server)
-    print(args.callable_dir)
+    print(args.dir)
     print(args.callable)
 
-    callable_dir = args.callable_dir
+    callable_dir = args.dir
     if callable_dir is not None:
         sys.path.insert(0, callable_dir)
 
@@ -102,6 +102,10 @@ def _parse_args_client() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "callable",
+        help="For example: `client:flower` or `project.package.module:wrapper.flower`",
+    )
+    parser.add_argument(
         "--insecure",
         action="store_true",
         help="Run the client without HTTPS. By default, the client runs with "
@@ -120,13 +124,10 @@ def _parse_args_client() -> argparse.ArgumentParser:
         help="Server address",
     )
     parser.add_argument(
-        "--callable",
-        help="For example: `client:flower` or `project.package.module:wrapper.flower`",
-    )
-    parser.add_argument(
-        "--callable-dir",
+        "--dir",
         default="",
-        help="Add specified directory to the PYTHONPATH and load callable from there."
+        help="Add specified directory to the PYTHONPATH and load Flower "
+        "callable from there."
         " Default: current working directory.",
     )
 
