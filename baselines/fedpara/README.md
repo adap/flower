@@ -91,7 +91,7 @@ Choice of alpha parameter for the Dirichlet distribution used to create heteroge
 ## Environment Setup
 To construct the Python environment follow these steps:
 
-# Assumed that pyenv is installed, poetry is installed and python 3.10.6 is installed using pyenv
+It is assumed that `pyenv` is installed, `poetry` is installed and python 3.10.6 is installed using `pyenv`. Refer to this [documentation](https://flower.dev/docs/baselines/how-to-usef-baselines.html#setting-up-your-machine) to ensure that your machine is ready.
 Refer to this [documentation](https://flower.dev/docs/baselines/how-to-usef-baselines.html#setting-up-your-machine) to ensure that your machine is ready
 
 ```bash
