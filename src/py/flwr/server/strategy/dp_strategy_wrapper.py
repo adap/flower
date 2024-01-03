@@ -12,7 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+"""Central DP.
 
+Papers: https://arxiv.org/pdf/1712.07557.pdf, https://arxiv.org/pdf/1710.06963.pdf
+Note: unlike the above papers, we moved the clipping part to the server side.
+"""
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -33,7 +37,6 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.strategy import Strategy
 
 
-# pylint: disable=line-too-long
 class DPStrategyWrapperFixedClipping(Strategy):
     """Wrapper for Configuring a Strategy for Central DP with Fixed Clipping.
 
@@ -50,7 +53,7 @@ class DPStrategyWrapperFixedClipping(Strategy):
         The number of clients that are sampled on each round.
     """
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-locals
+    # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
         strategy: Strategy,
@@ -206,7 +209,6 @@ class DPStrategyWrapperFixedClipping(Strategy):
     def _compute_model_updates(
         self, all_clients_params: List[NDArrays]
     ) -> List[NDArrays]:
-        """Compute client updates by substracting the round params and the client params."""
         all_client_updates = []
         for client_param in all_clients_params:
             client_update = [
@@ -219,6 +221,5 @@ class DPStrategyWrapperFixedClipping(Strategy):
     def _update_clients_params(
         self, client_param: NDArrays, client_update: NDArrays
     ) -> NDArrays:
-        """Construct the new client params by adding the clients updates to the round params."""
         for i, _ in enumerate(self.current_round_params):
             client_param[i] = self.current_round_params[i] + client_update[i]
