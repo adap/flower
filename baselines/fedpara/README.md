@@ -150,7 +150,7 @@ Communication costs as measured as described in the paper:
 |![Cifar100 iid](_static/Cifar100_iid.jpeg) | ![Cifar100 non-iid](_static/Cifar100_noniid.jpeg) |
 
 
-### CIFAR-100 (Accuracy vs Communication Cost)
+### CIFAR-10 (Accuracy vs Communication Cost)
 
 | IID | Non-IID |
 |:----:|:----:|

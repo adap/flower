@@ -28,7 +28,7 @@ def plot_metric_from_history(
     save_plot_path : str
         Folder to save the plot to.
     model_size : float
-        Size of the model.
+        Size of the model in MB.
     cfg : Optional
         Optional dictionary containing the configuration of the experiment.
     suffix: Optional
