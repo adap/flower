@@ -1,5 +1,10 @@
 # Leveraging Flower and Docker for Device Heterogeneity Management in Federated Learning
 
+<p align="center">
+  <img src="https://flower.dev/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fflower_white_border.c2012e70.png&w=640&q=75" width="140px" alt="Flower Website" />
+  <img src="public/01-symbol_blue-docker-logo.png" width="140px" alt="Docker Logo" />
+</p>
+
 ## Introduction
 
 In this example, we tackle device heterogeneity in federated learning, arising from differences in memory and CPU capabilities across devices. This diversity affects training efficiency and inclusivity. Our strategy includes simulating this heterogeneity by setting CPU and memory limits in a Docker setup, using a custom Docker compose generator script. This approach creates a varied training environment and enables us to develop strategies to manage these disparities effectively.
@@ -12,18 +17,18 @@ In this example, we tackle device heterogeneity in federated learning, arising f
      - **Cadvisor**: Collects comprehensive metrics from each Docker container.
      - **Prometheus**: Using `prometheus.yaml` for configuration, it scrapes data from Cadvisor at scheduled intervals, serving as a robust time-series database. Users can access the Prometheus UI at `http://localhost:9090` to create and run queries using PromQL, allowing for detailed insight into container performance.
 
-2. **Mitigating Heterogeneity**:
+1. **Mitigating Heterogeneity**:
 
    - In this basic use case, we address device heterogeneity by establishing rules tailored to each container's system capabilities. This involves modifying training parameters, such as batch sizes and learning rates, based on each device's memory capacity and CPU availability. These settings are specified in the `client_configs` array in the `create_docker_compose` script. For example:
 
-      ```python
-      client_configs = [
-            {"mem_limit": "3g", "batch_size": 32, "cpus": 4, "learning_rate": 0.001},
-            {"mem_limit": "6g", "batch_size": 256, "cpus": 1, "learning_rate": 0.05},
-            {"mem_limit": "4g", "batch_size": 64, "cpus": 3, "learning_rate": 0.02},
-            {"mem_limit": "5g", "batch_size": 128, "cpus": 2.5, "learning_rate": 0.09},
-      ]
-      ```
+     ```python
+     client_configs = [
+           {"mem_limit": "3g", "batch_size": 32, "cpus": 4, "learning_rate": 0.001},
+           {"mem_limit": "6g", "batch_size": 256, "cpus": 1, "learning_rate": 0.05},
+           {"mem_limit": "4g", "batch_size": 64, "cpus": 3, "learning_rate": 0.02},
+           {"mem_limit": "5g", "batch_size": 128, "cpus": 2.5, "learning_rate": 0.09},
+     ]
+     ```
 
 ## Prerequisites
 
@@ -79,7 +84,9 @@ Within the script, specify the number of clients (`total_clients`) and resource 
      ```
 
    - The `--build` flag instructs Docker Compose to rebuild the images before starting the containers, ensuring that any code or configuration changes are included.
+
    - To stop all services, you have two options:
+
      - Run `docker-compose down` in another terminal if you are in the same directory. This command will stop and remove the containers, networks, and volumes created by `docker-compose up`.
      - Press `Ctrl+C` once in the terminal where `docker-compose up` is running. This will stop the containers but won't remove them or the networks and volumes they use.
 
@@ -195,29 +202,29 @@ In addition to the standard metrics captured by cAdvisor, we have implemented a 
 
    - Within our `server.py` script, we have established two key Prometheus Gauge metrics, specifically tailored for monitoring our federated learning model: `model_accuracy` and `model_loss`. These custom gauges are instrumental in capturing the most recent values of the model's accuracy and loss, which are essential metrics for evaluating the model's performance. The gauges are defined as follows:
 
-      ```python
-      from prometheus_client import Gauge
+     ```python
+     from prometheus_client import Gauge
 
-      accuracy_gauge = Gauge('model_accuracy', 'Current accuracy of the global model')
-      loss_gauge = Gauge('model_loss', 'Current loss of the global model')
-      ```
+     accuracy_gauge = Gauge('model_accuracy', 'Current accuracy of the global model')
+     loss_gauge = Gauge('model_loss', 'Current loss of the global model')
+     ```
 
 1. **Exposing Metrics via HTTP Endpoint**:
 
    - We leveraged the `start_http_server` function from the `prometheus_client` library to launch an HTTP server on port 8000. This server provides the `/metrics` endpoint, where the custom metrics are accessible for Prometheus scraping. The function is called at the end of the `main` method in `server.py`:
 
-      ```python
-      start_http_server(8000)
-      ```
+     ```python
+     start_http_server(8000)
+     ```
 
 1. **Updating Metrics Recording Strategy**:
 
    - The core of our metrics tracking lies in the `strategy.py` file, particularly within the `aggregate_evaluate` method. This method is crucial as it's where the federated learning model's accuracy and loss values are computed after each round of training with the aggregated data from all clients.
 
-      ```python
-         self.accuracy_gauge.set(accuracy_aggregated)
-         self.loss_gauge.set(loss_aggregated)
-      ```
+     ```python
+        self.accuracy_gauge.set(accuracy_aggregated)
+        self.loss_gauge.set(loss_aggregated)
+     ```
 
 1. **Configuring Prometheus Scraping**:
 
