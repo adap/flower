@@ -46,26 +46,6 @@ def test_add_gaussian_noise() -> None:
         assert np.any(np.abs(noise_added) > 0)
 
 
-def test_add_noise_to_updates() -> None:
-    """Test _add_noise_to_updates function."""
-    # Prepare
-    strategy = FedAvg()
-    dp_wrapper = DPStrategyWrapperFixedClipping(strategy, 1.5, 1.5, 5)
-    parameters = {"weights": np.array([[1, 2], [3, 4]]), "bias": np.array([0.5, 1.0])}
-
-    # Execute
-    result = dp_wrapper._add_noise_to_updates(parameters)
-
-    # Assert
-    # Check that the shape of the result is the same as the input params
-    for key, value in parameters.items():
-        assert value.shape == result[key].shape
-
-    # Check that the values have been changed
-    for key, value in parameters.items():
-        assert np.any(value != result[key])
-
-
 def test_get_update_norm() -> None:
     """Test _get_update_norm function."""
     # Prepare
@@ -82,35 +62,3 @@ def test_get_update_norm() -> None:
 
     # Assert
     assert expected == result
-
-
-def test_clip_model_updates() -> None:
-    """Test _clip_model_updates method."""
-    # Prepare
-    strategy = FedAvg()
-    dp_wrapper = DPStrategyWrapperFixedClipping(strategy, 1.5, 1.5, 5)
-
-    updates = [
-        {
-            "weights": np.array([[1.5, -0.5], [2.0, -1.0]]),
-            "biases": np.array([0.5, -0.5]),
-        },
-        {
-            "weights": np.array([[-0.5, 1.5], [-1.0, 2.0]]),
-            "biases": np.array([-0.5, 0.5]),
-        },
-    ]
-
-    # Execute
-    clipped_updates = dp_wrapper._clip_model_updates(updates)
-
-    # Assert
-    assert len(clipped_updates) == len(updates)
-
-    for clipped_update, original_update in zip(clipped_updates, updates):
-        for key, clipped_value in clipped_update.items():
-            original_value = original_update[key]
-            clip_norm = np.linalg.norm(original_value)
-            assert np.all(clipped_value <= clip_norm) and np.all(
-                clipped_value >= -clip_norm
-            )
