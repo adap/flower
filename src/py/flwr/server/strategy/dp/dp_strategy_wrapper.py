@@ -129,7 +129,7 @@ class DPWrapper_fixed_clipping(Strategy):
         for client_param, client_update in zip(clients_params, all_clients_updates):
             self._update_clients_params(client_param, client_update)
 
-        # Update the results with clipped updates
+        # Update the results with the new params
         updated_results = [
             (
                 client,
