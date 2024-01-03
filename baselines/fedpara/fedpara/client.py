@@ -24,7 +24,6 @@ class FlowerClient(fl.client.NumPyClient):
         device: str,
         num_epochs: int,
     ):  # pylint: disable=too-many-arguments
-        print(f"Initializing Client {cid}")
         self.cid = cid
         self.net = net
         self.train_loader = train_loader
@@ -45,7 +44,6 @@ class FlowerClient(fl.client.NumPyClient):
     ) -> Tuple[NDArrays, int, Dict]:
         """Train the network on the training set."""
         self._set_parameters(parameters)
-        print(f"Client {self.cid} Training...")
 
         train(
             self.net,

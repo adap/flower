@@ -2,7 +2,7 @@
 title: "FedPara: Low-rank Hadamard Product for Communication-Efficient Federated Learning"
 url:  https://openreview.net/forum?id=d71n4ftoCBy
 labels: [image classification, personalization, low-rank training, tensor decomposition]
-dataset: [CIFAR-10, CIFAR- 100, FEMNIST]
+dataset: [CIFAR-10, CIFAR-100, FEMNIST]
 ---
 
 # FedPara: Low-rank Hadamard Product for Communication-Efficient Federated Learning 
@@ -29,16 +29,19 @@ page: https://github.com/South-hw/FedPara_ICLR22
 
 **What’s implemented:**  The code in this directory replicates the experiments in FedPara paper implementing the Low-rank scheme for Convolution module.
 
-Specifically, it replicates the results for Cifar10 and Cifar100 in Figure 3 and the results for Feminist in Figure 5(a).
+Specifically, it replicates the results for CIFAR-10  and CIFAR-100  in Figure 3 and the results for Feminist in Figure 5(a).
 
 
-**Datasets:**  CIFAR10, CIFAR100, FEMNIST from PyTorch's Torchvision
+**Datasets:**  CIFAR-10, CIFAR-100, FEMNIST from PyTorch's Torchvision
 
-**Hardware Setup:** The experiment has been conducted on our server with the following specs:
+**Hardware Setup:** The experiments have been conducted on our server with the following specs:
 
-- **GPU:** 1 RTX A6000 GPU 50GB VRAM
+- **GPU:** 1x RTX A6000 GPU with 48GB VRAM
 - **CPU:** 1x24 cores Intel Xeon(R) 6248R
 - **RAM:** 150 GB
+
+On a machine with RTX 3090Ti (24GB VRAM) it takes approximately 1h to run each CIFAR-10/100 experiment while using < 12GB of VRAM. You can lower the VRAM footprint my reducing the number of clients allowed to run in parallel in your GPU (do this by raising `client_resources.num_gpus`).
+
 
 **Contributors:** Yahia Salaheldin Shaaban, Omar Mokhtar and Roeia Amr 
 
@@ -47,23 +50,14 @@ Specifically, it replicates the results for Cifar10 and Cifar100 in Figure 3 and
 
 **Task:**  Image classification
 
-**Model:**  This directory implements Vgg16 with group normalization.
+**Model:**  This baseline implements VGG16 with group normalization.
 
 **Dataset:** 
 
-In IID settings:
-
-| Dataset  | #classes | #partitions |  partitioning method   |
-|:---------|:--------:|:-----------:|:----------------------:|
-| Cifar10  |    10    |     100     | random split |
-| Cifar100 |   100    |     50     | random split|
-
-In non-IID settings:
-
-| Dataset  | #classes | #partitions |  partitioning method   |
-|:---------|:--------:|:-----------:|:----------------------:|
-| Cifar10  |    10    |     100     | Dirichlet distribution |
-| Cifar100 |   100    |     50     | Dirichlet distribution |
+| Dataset  | #classes | #partitions |  partitioning method IID  | partitioning method non-IID  |
+|:---------|:--------:|:-----------:|:----------------------:| :----------------------:|
+| CIFAR-10  |    10    |     100     | random split | Dirichlet distribution ($\alpha=0.5$)|
+| CIFAR-100  |   100    |     50     | random split| Dirichlet distribution ($\alpha=0.5$)|
 
 
 **Training Hyperparameters:**
@@ -78,15 +72,13 @@ In non-IID settings:
 | Learning rate decay (τ) | 0.992 | 0.992 | 0.992| 0.992 | 0.999    |
 | Regularization coefficient (λ) | 1     | 1     | 1    | 1     | 0        |
 
+As for the parameters ratio ($\gamma$) we use the following model sizes. As in the paper, $\gamma=0.1$ is used for CIFAR-10 and $\gamma=0.4$ for CIFAR-100:
 
-
-For Dataset:
-Choice of alpha parameter for the Dirichlet distribution used to create heterogeneity in the client datasets for CIFAR
-
-| Description | Default Value |
-|-------------|---------------|
-| alpha       | 0.5           |
-
+| Parameters ratio ($\gamma$) | CIFAR-10 | CIFAR-100 |
+|----------|--------|--------|
+| 1.0 (original) | 15.25M | 15.30M |
+| 0.1      | 1.55M  | - |
+| 0.4      | - | 4.53M  |
 
 ## Environment Setup
 To construct the Python environment follow these steps:
@@ -108,51 +100,57 @@ poetry shell
 
 ## Running the Experiments
 
+Running `FedPara` is easy. You can run it with default parameters directly or by tweaking them directly on the command line. Some command examples are shown below.
+
 ```bash  
+# To run fedpara with default parameters
+python -m fedpara.main
 
-**Essential commands**
-# To run fedpara
-poetry run python -m fedpara.main
-# Important configs
-- model.conv_type --> choose parameterization scheme: lowrank or original(normal weights)
-- dataset_config.partition --> choosing between non IID and IID scheme
-- model.ratio --> choosing the ratio (lambda) of number of parameters
+# Run for more rounds and a different number of local epochs
+python -m fedpara.main num_rounds=2024 num_epochs=1
 
-**Multi-runs**
+# Choose parameterization scheme: lowrank or original (normal weights)
+python -m fedpara.main model.conv_type=standard # or lowrank (default)
 
-# To run fedpara for non-iid cifar 10 on vgg16 for lowrank and original schemes
-python -m fedpara.main --multirun model.conv_type=standard,lowrank 
-# To run fedpara for non-iid cifar 100 on vgg16 for lowrank and original schemes
-python -m fedpara.main --config-name cifar100 --multirun model.conv_type=standard,lowrank 
-# To run fedpara for iid cifar 10 on vgg16 for lowrank and original schemes
-python -m fedpara.main --multirun model.conv_type=standard,lowrank num_epochs=10 dataset_config.partition=iid 
-# To run fedpara for iid cifar 100 on vgg16 for lowrank and original schemes
-python -m fedpara.main --config-name cifar100 --multirun model.conv_type=standard,lowrank num_epochs=10 dataset_config.partition=iid
+# Choosing between non IID and IID scheme
+python -m fedpara.main dataset_config.partition=iid # or non-iid (default)
 
+# Choosing the ratio (lambda) of number of parameters to communicate
+python -m fedpara.main model.ratio=0.1
+
+# Choosing the CIFAR-100 config
+python -m fedpara.main --config-name cifar100 # change settings as shown above if desired
 ```
+
 ## Expected Results
-### From the [Fedpara](https://arxiv.org/pdf/2108.06098.pdf) paper:
+
+To reproduce the curves shown below (which correspond to those in Figure 3 in the paper), run the following commands. Experiments running with `model.conv_type=lowrank` correspond to those with `-FedPara` in the legend of the figures below. Those with `model.conv_type=standard` are labelled with the `-orig` (as original) tag.
+
+```bash
+# To run fedpara for non-iid CIFAR-10 on vgg16 for lowrank and original schemes
+python -m fedpara.main --multirun model.conv_type=standard,lowrank 
+# To run fedpara for non-iid CIFAR-100 on vgg16 for lowrank and original schemes
+python -m fedpara.main --config-name cifar100 --multirun model.conv_type=standard,lowrank 
+# To run fedpara for iid CIFAR-10 on vgg16 for lowrank and original schemes
+python -m fedpara.main --multirun model.conv_type=standard,lowrank num_epochs=10 dataset_config.partition=iid 
+# To run fedpara for iid CIFAR-100 on vgg16 for lowrank and original schemes
+python -m fedpara.main --config-name cifar100 --multirun model.conv_type=standard,lowrank num_epochs=10 dataset_config.partition=iid
+```
+
 #### Communication Cost: 
+Communication costs as measured as described in the paper: 
 *"FL evaluation typically measures the required rounds to achieve the target accuracy as communication costs, but we instead assess total transferred bit sizes, 2 ×
 (#participants)×(model size)×(#rounds)"*
-#### Parameters ratio 
 
-| Parameters ratio | Cifar10 | Cifar100 |
-|----------|--------|--------|
-| Original | 15.25M | 15.30M |
-| 0.1      | 1.55M  | - |
-| 0.4      | - | 4.53M  |
 
-** We are using a parameter ratio of 0.1 for Cifar10 and 0.4 for Cifar100
-
-### Cifar100 (Accuracy vs Communication Cost)
+### CIFAR-100 (Accuracy vs Communication Cost)
 
 | IID | Non-IID |
 |:----:|:----:|
 |![Cifar100 iid](_static/Cifar100_iid.jpeg) | ![Cifar100 non-iid](_static/Cifar100_noniid.jpeg) |
 
 
-### Cifar10 (Accuracy vs Communication Cost)
+### CIFAR-100 (Accuracy vs Communication Cost)
 
 | IID | Non-IID |
 |:----:|:----:|

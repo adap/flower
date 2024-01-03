@@ -19,7 +19,6 @@ dataset_config:
   num_classes: 100
   alpha: 0.5
 
-
 model:
   _target_: fedpara.models.VGG
   num_classes: ${dataset_config.num_classes}
