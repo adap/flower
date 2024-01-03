@@ -34,7 +34,7 @@ from flwr.server.strategy.strategy import Strategy
 
 
 # pylint: disable=line-too-long
-class DPWrapper_fixed_clipping(Strategy):
+class DPStrategyWrapperFixedClipping(Strategy):
     """Wrapper for Configuring a Strategy for Central DP with Fixed Clipping.
 
     Parameters
