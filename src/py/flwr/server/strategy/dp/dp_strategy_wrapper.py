@@ -75,11 +75,11 @@ class DPStrategyWrapperFixedClipping(Strategy):
         self.clip_norm = clip_norm
         self.num_sampled_clients = num_sampled_clients
 
-        self.current_round_params = None
+        self.current_round_params: Parameters = {}
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
-        rep = f"DPWrapper_fixed_clipping(accept_failures={self.accept_failures})"
+        rep = f"DP Strategy Wrapper with Fixed Clipping"
         return rep
 
     def initialize_parameters(
