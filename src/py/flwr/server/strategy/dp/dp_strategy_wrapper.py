@@ -135,12 +135,12 @@ class DPWrapper_fixed_clipping(Strategy):
                 client,
                 FitRes(
                     fit_res.status,
-                    ndarrays_to_parameters(clients_params),
+                    ndarrays_to_parameters(client_param),
                     fit_res.num_examples,
                     fit_res.metrics,
                 ),
             )
-            for (client, fit_res), _ in zip(results, clients_params)
+            for (client, fit_res), client_param in zip(results, clients_params)
         ]
 
         # Pass the new parameters for aggregation
@@ -186,13 +186,14 @@ class DPWrapper_fixed_clipping(Strategy):
     def _add_noise_to_updates(self, parameters: Parameters) -> Parameters:
         """Add Gaussian noise to model updates."""
         return ndarrays_to_parameters(
-            self.add_gaussian_noise(
+            self._add_gaussian_noise(
                 parameters_to_ndarrays(parameters),
                 (self.noise_multiplier * self.clip_norm)
                 / (self.num_sampled_clients ** (0.5)),
             )
         )
 
+    @staticmethod
     def _add_gaussian_noise(update: NDArrays, std_dev: float) -> NDArrays:
         update_noised = [
             layer + np.random.normal(0, std_dev, layer.shape) for layer in update
