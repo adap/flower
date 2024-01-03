@@ -16,7 +16,7 @@
 
 import numpy as np
 
-from ..fedavg import FedAvg
+from .fedavg import FedAvg
 from .dp_strategy_wrapper import DPWrapper_fixed_clipping
 
 
