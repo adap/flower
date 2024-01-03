@@ -78,7 +78,7 @@ class DPStrategyWrapperFixedClipping(Strategy):
         self.clip_norm = clip_norm
         self.num_sampled_clients = num_sampled_clients
 
-        self.current_round_params: Parameters = {}
+        self.current_round_params: NDArrays = []
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
@@ -220,6 +220,6 @@ class DPStrategyWrapperFixedClipping(Strategy):
 
     def _update_clients_params(
         self, client_param: NDArrays, client_update: NDArrays
-    ) -> NDArrays:
+    ) -> None:
         for i, _ in enumerate(self.current_round_params):
             client_param[i] = self.current_round_params[i] + client_update[i]
