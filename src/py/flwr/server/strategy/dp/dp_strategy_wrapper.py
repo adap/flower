@@ -41,7 +41,7 @@ class DPWrapper_fixed_clipping(Strategy):
     ----------
     strategy: Strategy
         The strategy to which DP functionalities will be added by this wrapper.
-    noise_multiplier: float, optional
+    noise_multiplier: float
         The noise multiplier for the Gaussian mechanism for model updates.
         A value of 1.0 or higher is recommended for strong privacy.
     clip_norm: float
