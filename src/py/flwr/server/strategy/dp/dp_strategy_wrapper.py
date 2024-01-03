@@ -92,7 +92,7 @@ class DPWrapper_fixed_clipping(Strategy):
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
-        self.current_round_params = parameters
+        self.current_round_params = parameters_to_ndarrays(parameters)
         return self.strategy.configure_fit(server_round, parameters, client_manager)
 
     def configure_evaluate(
@@ -176,6 +176,7 @@ class DPWrapper_fixed_clipping(Strategy):
         update_clipped: NDArrays = [layer * scaling_factor for layer in update]
         return update_clipped
 
+    @staticmethod
     def _get_update_norm(update: NDArrays) -> float:
         flattened_update = np.concatenate(
             [np.asarray(sub_update).flatten() for sub_update in update]
