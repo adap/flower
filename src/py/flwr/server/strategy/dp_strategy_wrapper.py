@@ -79,7 +79,7 @@ class DPStrategyWrapperFixedClipping(Strategy):
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
-        rep = f"DP Strategy Wrapper with Fixed Clipping"
+        rep = "DP Strategy Wrapper with Fixed Clipping"
         return rep
 
     def initialize_parameters(
@@ -123,7 +123,7 @@ class DPStrategyWrapperFixedClipping(Strategy):
 
         # Clip updates
         for client_update in all_clients_updates:
-            clipped_update = self._clip_model_update(client_update)
+            client_update = self._clip_model_update(client_update)
 
         # Compute the new parameters with the clipped updates
         for client_param, client_update in zip(clients_params, all_clients_updates):
@@ -170,7 +170,10 @@ class DPStrategyWrapperFixedClipping(Strategy):
         return self.strategy.evaluate(server_round, parameters)
 
     def _clip_model_update(self, update: NDArrays) -> NDArrays:
-        """Clip model update based on the computed clip_norm. FlatClip method of the paper: https://arxiv.org/pdf/1710.06963.pdf"""
+        """Clip model update based on the computed clip_norm.
+
+        FlatClip method of the paper: https://arxiv.org/pdf/1710.06963.pdf
+        """
         update_norm = self._get_update_norm(update)
         scaling_factor = min(1, self.clip_norm / update_norm)
         update_clipped: NDArrays = [layer * scaling_factor for layer in update]
@@ -184,7 +187,7 @@ class DPStrategyWrapperFixedClipping(Strategy):
         return float(np.linalg.norm(flattened_update))
 
     def _add_noise_to_updates(self, parameters: Parameters) -> Parameters:
-        """Add Gaussian noise to model updates."""
+        """Add Gaussian noise to model params."""
         return ndarrays_to_parameters(
             self._add_gaussian_noise(
                 parameters_to_ndarrays(parameters),
@@ -203,6 +206,7 @@ class DPStrategyWrapperFixedClipping(Strategy):
     def _compute_model_updates(
         self, all_clients_params: List[NDArrays]
     ) -> List[NDArrays]:
+        """Compute client updates by substracting the round params and the client params."""
         all_client_updates = []
         for client_param in all_clients_params:
             client_update = [
@@ -215,5 +219,6 @@ class DPStrategyWrapperFixedClipping(Strategy):
     def _update_clients_params(
         self, client_param: NDArrays, client_update: NDArrays
     ) -> NDArrays:
+        """Construct the new client params by adding the clients updates to the round params."""
         for i, _ in enumerate(self.current_round_params):
             client_param[i] = self.current_round_params[i] + client_update[i]

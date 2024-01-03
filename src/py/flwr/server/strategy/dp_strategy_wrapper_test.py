@@ -16,15 +16,15 @@
 
 import numpy as np
 
+from .dp_strategy_wrapper import DPStrategyWrapperFixedClipping
 from .fedavg import FedAvg
-from .dp_strategy_wrapper import DPWrapper_fixed_clipping
 
 
 def test_add_gaussian_noise() -> None:
     """Test _add_gaussian_noise function."""
     # Prepare
     strategy = FedAvg()
-    dp_wrapper = DPWrapper_fixed_clipping(strategy, 1.5, 1.5, 5)
+    dp_wrapper = DPStrategyWrapperFixedClipping(strategy, 1.5, 1.5, 5)
 
     update = [np.array([[1, 2], [3, 4]]), np.array([[5, 6], [7, 8]])]
     std_dev = 0.1
@@ -50,7 +50,7 @@ def test_add_noise_to_updates() -> None:
     """Test _add_noise_to_updates function."""
     # Prepare
     strategy = FedAvg()
-    dp_wrapper = DPWrapper_fixed_clipping(strategy, 1.5, 1.5, 5)
+    dp_wrapper = DPStrategyWrapperFixedClipping(strategy, 1.5, 1.5, 5)
     parameters = {"weights": np.array([[1, 2], [3, 4]]), "bias": np.array([0.5, 1.0])}
 
     # Execute
@@ -70,7 +70,7 @@ def test_get_update_norm() -> None:
     """Test _get_update_norm function."""
     # Prepare
     strategy = FedAvg()
-    dp_wrapper = DPWrapper_fixed_clipping(strategy, 1.5, 1.5, 5)
+    dp_wrapper = DPStrategyWrapperFixedClipping(strategy, 1.5, 1.5, 5)
     update = [np.array([[1, 2], [3, 4]]), np.array([[5, 6], [7, 8]])]
 
     # Execute
@@ -88,7 +88,7 @@ def test_clip_model_updates() -> None:
     """Test _clip_model_updates method."""
     # Prepare
     strategy = FedAvg()
-    dp_wrapper = DPWrapper_fixed_clipping(strategy, 1.5, 1.5, 5)
+    dp_wrapper = DPStrategyWrapperFixedClipping(strategy, 1.5, 1.5, 5)
 
     updates = [
         {
