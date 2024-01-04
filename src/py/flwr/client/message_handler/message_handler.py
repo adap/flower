@@ -112,7 +112,7 @@ def handle(
             task_res = TaskRes(
                 task_id="",
                 group_id="",
-                workload_id=0,
+                run_id=0,
                 task=Task(
                     ancestry=[],
                     sa=SecureAggregation(named_values=serde.named_values_to_proto(res)),

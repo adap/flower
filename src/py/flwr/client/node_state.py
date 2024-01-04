@@ -27,24 +27,22 @@ class NodeState:
         self._meta: Dict[str, Any] = {}  # holds metadata about the node
         self.workload_states: Dict[int, WorkloadState] = {}
 
-    def register_workloadstate(self, workload_id: int) -> None:
+    def register_workloadstate(self, run_id: int) -> None:
         """Register new workload state for this node."""
-        if workload_id not in self.workload_states:
-            self.workload_states[workload_id] = WorkloadState({})
+        if run_id not in self.workload_states:
+            self.workload_states[run_id] = WorkloadState({})
 
-    def retrieve_workloadstate(self, workload_id: int) -> WorkloadState:
-        """Get workload state given a workload_id."""
-        if workload_id in self.workload_states:
-            return self.workload_states[workload_id]
+    def retrieve_workloadstate(self, run_id: int) -> WorkloadState:
+        """Get workload state given a run_id."""
+        if run_id in self.workload_states:
+            return self.workload_states[run_id]
 
         raise RuntimeError(
-            f"WorkloadState for workload_id={workload_id} doesn't exist."
+            f"WorkloadState for run_id={run_id} doesn't exist."
             " A workload must be registered before it can be retrieved or updated "
             " by a client."
         )
 
-    def update_workloadstate(
-        self, workload_id: int, workload_state: WorkloadState
-    ) -> None:
+    def update_workloadstate(self, run_id: int, workload_state: WorkloadState) -> None:
         """Update workload state."""
-        self.workload_states[workload_id] = workload_state
+        self.workload_states[run_id] = workload_state

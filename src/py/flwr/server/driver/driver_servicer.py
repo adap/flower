@@ -51,7 +51,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         """Get available nodes."""
         log(INFO, "DriverServicer.GetNodes")
         state: State = self.state_factory.state()
-        all_ids: Set[int] = state.get_nodes(request.workload_id)
+        all_ids: Set[int] = state.get_nodes(request.run_id)
         nodes: List[Node] = [
             Node(node_id=node_id, anonymous=False) for node_id in all_ids
         ]
@@ -63,8 +63,8 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         """Create workload ID."""
         log(INFO, "DriverServicer.CreateWorkload")
         state: State = self.state_factory.state()
-        workload_id = state.create_workload()
-        return CreateWorkloadResponse(workload_id=workload_id)
+        run_id = state.create_workload()
+        return CreateWorkloadResponse(run_id=run_id)
 
     def PushTaskIns(
         self, request: PushTaskInsRequest, context: grpc.ServicerContext
