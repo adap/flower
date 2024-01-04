@@ -71,8 +71,18 @@ class FlwrClient(fl.client.NumPyClient):
             batch size {batch_size}, learning rate {learning_rate}"""
         )
 
-        # During training, update the learning rate as needed
-        tf.keras.backend.set_value(self.model.optimizer.lr, learning_rate)
+        # Define optimizer with custom configuration
+        optimizer = tf.keras.optimizers.SGD(
+            learning_rate=learning_rate,
+            decay=1e-4  # Weight decay
+        )
+
+        # Compile the model
+        self.model.compile(
+            optimizer=optimizer,
+            loss='sparse_categorical_crossentropy',
+            metrics=['accuracy']
+        )
 
         self.model.set_weights(parameters)
 
@@ -138,7 +148,12 @@ def gen_client_fn(is_cnn: bool = False) -> Callable[[str], fl.client.Client]:
         else:
             model = create_MLP_model()
 
-        model.compile("sgd", "sparse_categorical_crossentropy", metrics=["accuracy"])
+        # Compile the model
+        model.compile(
+            optimizer='sgd',
+            loss='sparse_categorical_crossentropy',
+            metrics=['accuracy']
+        )
 
         # Load data partition (divide MNIST into NUM_CLIENTS distinct partitions)
         (x_train_cid, y_train_cid) = load_dataset(cid, is_cnn)

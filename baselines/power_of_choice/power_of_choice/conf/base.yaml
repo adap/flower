@@ -5,10 +5,10 @@
 
 num_clients: 100
 num_rounds: 400
-batch_size: 32
-local_epochs: 5
+batch_size: 64
+local_epochs: 30
 fraction_samples: 1.0
-seed: 42
+seed: 2
 alpha: 2
 is_cnn: False
 
