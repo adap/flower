@@ -2,7 +2,13 @@
 
 ## Unreleased
 
+- **Add scikit-learn tabular data example** ([#2719](https://github.com/adap/flower/pull/2719))
+
 - **General updates to Flower Examples** ([#2381](https://github.com/adap/flower/pull/2381))
+
+- **Retiring MXNet examples** The development of the MXNet fremework has ended and the project is now [archived on GitHub](https://github.com/apache/mxnet). Existing MXNet examples won't receive updates [#2724](https://github.com/adap/flower/pull/2724)
+
+- **Deprecated `start_numpy_client`**. ([#2563](https://github.com/adap/flower/pull/2563)) Until now, clients of type `NumPyClient` needed to be started via `start_numpy_client`. In our efforts to consolidate the core freamework we have introduced changes and now all client types should start via `start_client`. To continue using `NumPyClient` clients, you simply need to first all the `.to_client()` method then pass the client object to `start_client`. The examples and the documentation have been updated accordigntly.
 
 - **Update Flower Baselines**
 
@@ -10,7 +16,11 @@
 
   - FedVSSL [#2412](https://github.com/adap/flower/pull/2412)
 
-- **Deprecated `start_numpy_client`**. ([#2563](https://github.com/adap/flower/pull/2563)) Until now, clients of type `NumPyClient` needed to be started via `start_numpy_client`. In our efforts to consolidate the core freamework we have introduced changes and now all client types should start via `start_client`. To continue using `NumPyClient` clients, you simply need to first all the `.to_client()` method then pass the client object to `start_client`. The examples and the documentation have been updated accordigntly.
+  - FedNova [#2179](https://github.com/adap/flower/pull/2179)
+
+  - HeteroFL [#2439](https://github.com/adap/flower/pull/2439)
+
+  - FedAvgM [#2246](https://github.com/adap/flower/pull/2246)
 
 ## v1.6.0 (2023-11-28)
 
