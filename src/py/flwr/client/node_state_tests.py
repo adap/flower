@@ -32,7 +32,7 @@ def _run_dummy_task(state: WorkloadState) -> WorkloadState:
 def test_multiworkload_in_node_state() -> None:
     """Test basic NodeState logic."""
     # Tasks to perform
-    tasks = [TaskIns(workload_id=w_id) for w_id in [0, 1, 1, 2, 3, 2, 1, 5]]
+    tasks = [TaskIns(run_id=r_id) for r_id in [0, 1, 1, 2, 3, 2, 1, 5]]
     # the "tasks" is to count how many times each workload is executed
     expected_values = {0: "1", 1: "1" * 3, 2: "1" * 2, 3: "1", 5: "1"}
 
@@ -40,20 +40,20 @@ def test_multiworkload_in_node_state() -> None:
     node_state = NodeState()
 
     for task in tasks:
-        w_id = task.workload_id
+        r_id = task.run_id
 
         # Register
-        node_state.register_workloadstate(workload_id=w_id)
+        node_state.register_workloadstate(run_id=r_id)
 
         # Get workload state
-        state = node_state.retrieve_workloadstate(workload_id=w_id)
+        state = node_state.retrieve_workloadstate(run_id=r_id)
 
         # Run "task"
         updated_state = _run_dummy_task(state)
 
         # Update workload state
-        node_state.update_workloadstate(workload_id=w_id, workload_state=updated_state)
+        node_state.update_workloadstate(run_id=r_id, workload_state=updated_state)
 
     # Verify values
-    for w_id, state in node_state.workload_states.items():
-        assert state.state["counter"] == expected_values[w_id]
+    for r_id, state in node_state.workload_states.items():
+        assert state.state["counter"] == expected_values[r_id]
