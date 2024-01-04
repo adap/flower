@@ -88,7 +88,7 @@ def handle(
     client_fn : ClientFn
         A callable that instantiates a Client.
     state : RunState
-        A dataclass storing the state for the workload being executed by the client.
+        A dataclass storing the state for the run being executed by the client.
     task_ins: TaskIns
         The task instruction coming from the server, to be processed by the client.
 
