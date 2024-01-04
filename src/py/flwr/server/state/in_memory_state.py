@@ -32,7 +32,7 @@ class InMemoryState(State):
 
     def __init__(self) -> None:
         self.node_ids: Set[int] = set()
-        self.workload_ids: Set[int] = set()
+        self.run_ids: Set[int] = set()
         self.task_ins_store: Dict[UUID, TaskIns] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
 
@@ -43,9 +43,9 @@ class InMemoryState(State):
         if any(errors):
             log(ERROR, errors)
             return None
-        # Validate workload_id
-        if task_ins.workload_id not in self.workload_ids:
-            log(ERROR, "`workload_id` is invalid")
+        # Validate run_id
+        if task_ins.run_id not in self.run_ids:
+            log(ERROR, "`run_id` is invalid")
             return None
 
         # Create task_id, created_at and ttl
@@ -104,9 +104,9 @@ class InMemoryState(State):
             log(ERROR, errors)
             return None
 
-        # Validate workload_id
-        if task_res.workload_id not in self.workload_ids:
-            log(ERROR, "`workload_id` is invalid")
+        # Validate run_id
+        if task_res.run_id not in self.run_ids:
+            log(ERROR, "`run_id` is invalid")
             return None
 
         # Create task_id, created_at and ttl
@@ -199,25 +199,25 @@ class InMemoryState(State):
             raise ValueError(f"Node {node_id} not found")
         self.node_ids.remove(node_id)
 
-    def get_nodes(self, workload_id: int) -> Set[int]:
+    def get_nodes(self, run_id: int) -> Set[int]:
         """Return all available client nodes.
 
         Constraints
         -----------
-        If the provided `workload_id` does not exist or has no matching nodes,
+        If the provided `run_id` does not exist or has no matching nodes,
         an empty `Set` MUST be returned.
         """
-        if workload_id not in self.workload_ids:
+        if run_id not in self.run_ids:
             return set()
         return self.node_ids
 
     def create_workload(self) -> int:
         """Create one workload."""
-        # Sample a random int64 as workload_id
-        workload_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
+        # Sample a random int64 as run_id
+        run_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
-        if workload_id not in self.workload_ids:
-            self.workload_ids.add(workload_id)
-            return workload_id
+        if run_id not in self.run_ids:
+            self.run_ids.add(run_id)
+            return run_id
         log(ERROR, "Unexpected workload creation failure.")
         return 0
