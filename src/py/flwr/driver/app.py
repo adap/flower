@@ -170,8 +170,8 @@ def update_client_manager(
     and dead nodes will be removed from the ClientManager via
     `client_manager.unregister()`.
     """
-    # Request for workload_id
-    workload_id = driver.create_workload(driver_pb2.CreateWorkloadRequest()).workload_id
+    # Request for run_id
+    run_id = driver.create_workload(driver_pb2.CreateWorkloadRequest()).run_id
 
     # Loop until the driver is disconnected
     registered_nodes: Dict[int, DriverClientProxy] = {}
@@ -181,7 +181,7 @@ def update_client_manager(
             if driver.stub is None:
                 break
             get_nodes_res = driver.get_nodes(
-                req=driver_pb2.GetNodesRequest(workload_id=workload_id)
+                req=driver_pb2.GetNodesRequest(run_id=run_id)
             )
         all_node_ids = {node.node_id for node in get_nodes_res.nodes}
         dead_nodes = set(registered_nodes).difference(all_node_ids)
@@ -199,7 +199,7 @@ def update_client_manager(
                 node_id=node_id,
                 driver=driver,
                 anonymous=False,
-                workload_id=workload_id,
+                run_id=run_id,
             )
             if client_manager.register(client_proxy):
                 registered_nodes[node_id] = client_proxy

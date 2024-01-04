@@ -54,37 +54,37 @@ class Driver:
         self.addr = driver_service_address
         self.certificates = certificates
         self.grpc_driver: Optional[GrpcDriver] = None
-        self.workload_id: Optional[int] = None
+        self.run_id: Optional[int] = None
         self.node = Node(node_id=0, anonymous=True)
 
-    def _get_grpc_driver_and_workload_id(self) -> Tuple[GrpcDriver, int]:
+    def _get_grpc_driver_and_run_id(self) -> Tuple[GrpcDriver, int]:
         # Check if the GrpcDriver is initialized
-        if self.grpc_driver is None or self.workload_id is None:
+        if self.grpc_driver is None or self.run_id is None:
             # Connect and create workload
             self.grpc_driver = GrpcDriver(
                 driver_service_address=self.addr, certificates=self.certificates
             )
             self.grpc_driver.connect()
             res = self.grpc_driver.create_workload(CreateWorkloadRequest())
-            self.workload_id = res.workload_id
+            self.run_id = res.run_id
 
-        return self.grpc_driver, self.workload_id
+        return self.grpc_driver, self.run_id
 
     def get_nodes(self) -> List[Node]:
         """Get node IDs."""
-        grpc_driver, workload_id = self._get_grpc_driver_and_workload_id()
+        grpc_driver, run_id = self._get_grpc_driver_and_run_id()
 
         # Call GrpcDriver method
-        res = grpc_driver.get_nodes(GetNodesRequest(workload_id=workload_id))
+        res = grpc_driver.get_nodes(GetNodesRequest(run_id=run_id))
         return list(res.nodes)
 
     def push_task_ins(self, task_ins_list: List[TaskIns]) -> List[str]:
         """Schedule tasks."""
-        grpc_driver, workload_id = self._get_grpc_driver_and_workload_id()
+        grpc_driver, run_id = self._get_grpc_driver_and_run_id()
 
-        # Set workload_id
+        # Set run_id
         for task_ins in task_ins_list:
-            task_ins.workload_id = workload_id
+            task_ins.run_id = run_id
 
         # Call GrpcDriver method
         res = grpc_driver.push_task_ins(PushTaskInsRequest(task_ins_list=task_ins_list))
@@ -92,7 +92,7 @@ class Driver:
 
     def pull_task_res(self, task_ids: Iterable[str]) -> List[TaskRes]:
         """Get task results."""
-        grpc_driver, _ = self._get_grpc_driver_and_workload_id()
+        grpc_driver, _ = self._get_grpc_driver_and_run_id()
 
         # Call GrpcDriver method
         res = grpc_driver.pull_task_res(
