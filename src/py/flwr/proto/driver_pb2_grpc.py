@@ -40,7 +40,7 @@ class DriverServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def CreateWorkload(self, request, context):
-        """Request run_id
+        """Request workload_id
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
