@@ -1,4 +1,4 @@
-name: Reusable docker server image build workflow
+name: Reusable docker image build workflow
 
 on:
   workflow_call:
@@ -35,7 +35,7 @@ permissions:
 # based on https://docs.docker.com/build/ci/github-actions/multi-platform/#distribute-build-across-multiple-runners
 jobs:
   build:
-    name: Build server image
+    name: Build image
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     outputs:
