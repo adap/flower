@@ -80,6 +80,14 @@ As for the parameters ratio ($\gamma$) we use the following model sizes. As in t
 | 0.1      | 1.55M  | - |
 | 0.4      | - | 4.53M  |
 
+
+### Notes: 
+- Notably, Fedpara's low-rank training technique heavily relies on initialization, with our experiments revealing that employing a 'Fan-in' He initialization (or Kaiming) renders the model incapable of convergence, resulting in a performance akin to that of a random classifier. We found that only Fan-out initialization yielded the anticipated results, and we postulated that this is attributed to the variance conservation during backward propagation.
+
+- The paper lacks explicit guidance on calculating the rank, aside from the "Rank_min - Rank_max" equation. To address this, we devised an equation aligning with the literature's explanation and constraint, solving a quadratic equation to determine max_rank and utilizing proposition 2 from the paper to establish min_rank.
+
+- The Jacobian correction was not incorporated into our implementation, primarily due to the lack of explicit instructions in the paper regarding the specific implementation of the dual update principle mentioned in the Jacobian correction section.
+
 ## Environment Setup
 To construct the Python environment follow these steps:
 
