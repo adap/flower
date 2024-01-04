@@ -35,7 +35,7 @@ class TestDriver(unittest.TestCase):
         mock_response = Mock()
         mock_response.run_id = 61016
         self.mock_grpc_driver = Mock()
-        self.mock_grpc_driver.create_workload.return_value = mock_response
+        self.mock_grpc_driver.create_run.return_value = mock_response
         self.patcher = patch(
             "flwr.driver.driver.GrpcDriver", return_value=self.mock_grpc_driver
         )
@@ -47,7 +47,7 @@ class TestDriver(unittest.TestCase):
         self.patcher.stop()
 
     def test_check_and_init_grpc_driver_already_initialized(self) -> None:
-        """Test that GrpcDriver doesn't initialize if workload is created."""
+        """Test that GrpcDriver doesn't initialize if run is created."""
         # Prepare
         self.driver.grpc_driver = self.mock_grpc_driver
         self.driver.run_id = 61016
@@ -60,7 +60,7 @@ class TestDriver(unittest.TestCase):
         self.mock_grpc_driver.connect.assert_not_called()
 
     def test_check_and_init_grpc_driver_needs_initialization(self) -> None:
-        """Test GrpcDriver initialization when workload is not created."""
+        """Test GrpcDriver initialization when run is not created."""
         # Execute
         # pylint: disable-next=protected-access
         self.driver._get_grpc_driver_and_run_id()

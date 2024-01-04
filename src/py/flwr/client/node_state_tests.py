@@ -29,11 +29,11 @@ def _run_dummy_task(state: RunState) -> RunState:
     return state
 
 
-def test_multiworkload_in_node_state() -> None:
+def test_multirun_in_node_state() -> None:
     """Test basic NodeState logic."""
     # Tasks to perform
     tasks = [TaskIns(run_id=r_id) for r_id in [0, 1, 1, 2, 3, 2, 1, 5]]
-    # the "tasks" is to count how many times each workload is executed
+    # the "tasks" is to count how many times each run is executed
     expected_values = {0: "1", 1: "1" * 3, 2: "1" * 2, 3: "1", 5: "1"}
 
     # NodeState

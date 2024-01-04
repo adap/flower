@@ -46,7 +46,7 @@ def get_dummy_client(cid: str) -> Client:
     return DummyClient(cid).to_client()
 
 
-# A dummy workload
+# A dummy run
 def job_fn(cid: str) -> JobFn:  # pragma: no cover
     """Construct a simple job with cid dependency."""
 
@@ -112,7 +112,7 @@ def test_cid_consistency_one_at_a_time() -> None:
     ray.shutdown()
 
 
-def test_cid_consistency_all_submit_first_workload_consistency() -> None:
+def test_cid_consistency_all_submit_first_run_consistency() -> None:
     """Test that ClientProxies get the result of client job they submit.
 
     All jobs are submitted at the same time. Then fetched one at a time. This also tests

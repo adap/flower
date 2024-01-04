@@ -21,7 +21,7 @@ from flwr.client.run_state import RunState
 
 
 class NodeState:
-    """State of a node where client nodes execute workloads."""
+    """State of a node where client nodes execute runs."""
 
     def __init__(self) -> None:
         self._meta: Dict[str, Any] = {}  # holds metadata about the node
@@ -39,7 +39,7 @@ class NodeState:
 
         raise RuntimeError(
             f"RunState for run_id={run_id} doesn't exist."
-            " A workload must be registered before it can be retrieved or updated "
+            " A run must be registered before it can be retrieved or updated "
             " by a client."
         )
 

@@ -63,7 +63,7 @@ class VirtualClientEngineActor(ABC):
         cid: str,
         state: RunState,
     ) -> Tuple[str, ClientRes, RunState]:
-        """Run a client workload."""
+        """Run a client run."""
         # Execute tasks and return result
         # return also cid which is needed to ensure results
         # from the pool are correctly assigned to each ClientProxy
@@ -79,12 +79,12 @@ class VirtualClientEngineActor(ABC):
         except Exception as ex:
             client_trace = traceback.format_exc()
             message = (
-                "\n\tSomething went wrong when running your client workload."
+                "\n\tSomething went wrong when running your client run."
                 "\n\tClient "
                 + cid
                 + " crashed when the "
                 + self.__class__.__name__
-                + " was running its workload."
+                + " was running its run."
                 "\n\tException triggered on the client side: " + client_trace,
             )
             raise ClientException(str(message)) from ex
@@ -94,7 +94,7 @@ class VirtualClientEngineActor(ABC):
 
 @ray.remote
 class DefaultActor(VirtualClientEngineActor):
-    """A Ray Actor class that runs client workloads.
+    """A Ray Actor class that runs client runs.
 
     Parameters
     ----------
@@ -238,7 +238,7 @@ class VirtualClientEngineActorPool(ActorPool):
             self.num_actors += num_actors
 
     def submit(self, fn: Any, value: Tuple[ClientFn, JobFn, str, RunState]) -> None:
-        """Take idle actor and assign it a client workload.
+        """Take idle actor and assign it a client run.
 
         Submit a job to an actor by first removing it from the list of idle actors, then
         check if this actor was flagged to be removed from the pool

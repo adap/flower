@@ -211,13 +211,13 @@ class InMemoryState(State):
             return set()
         return self.node_ids
 
-    def create_workload(self) -> int:
-        """Create one workload."""
+    def create_run(self) -> int:
+        """Create one run."""
         # Sample a random int64 as run_id
         run_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
         if run_id not in self.run_ids:
             self.run_ids.add(run_id)
             return run_id
-        log(ERROR, "Unexpected workload creation failure.")
+        log(ERROR, "Unexpected run creation failure.")
         return 0
