@@ -39,7 +39,7 @@ jobs:
           echo "ubuntu-version=${{ env.DEFAULT_UBUNTU }}" >> "$GITHUB_OUTPUT"
 
   build-base-images:
-    name: Build images
+    name: Build base images
     uses: ./.github/workflows/_docker-build.yml
     needs: parameters
     strategy:
