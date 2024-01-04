@@ -13,14 +13,14 @@ import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-class CreateWorkloadRequest(google.protobuf.message.Message):
-    """CreateWorkload"""
+class CreateRunRequest(google.protobuf.message.Message):
+    """CreateRun"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     def __init__(self,
         ) -> None: ...
-global___CreateWorkloadRequest = CreateWorkloadRequest
+global___CreateRunRequest = CreateRunRequest
 
-class CreateWorkloadResponse(google.protobuf.message.Message):
+class CreateRunResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     RUN_ID_FIELD_NUMBER: builtins.int
     run_id: builtins.int
@@ -29,7 +29,7 @@ class CreateWorkloadResponse(google.protobuf.message.Message):
         run_id: builtins.int = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
-global___CreateWorkloadResponse = CreateWorkloadResponse
+global___CreateRunResponse = CreateRunResponse
 
 class GetNodesRequest(google.protobuf.message.Message):
     """GetNodes messages"""
