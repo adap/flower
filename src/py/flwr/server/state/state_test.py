@@ -66,9 +66,9 @@ class StateTest(unittest.TestCase):
         # Prepare
         consumer_node_id = 1
         state = self.state_factory()
-        workload_id = state.create_workload()
+        run_id = state.create_workload()
         task_ins = create_task_ins(
-            consumer_node_id=consumer_node_id, anonymous=False, workload_id=workload_id
+            consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
         )
 
         assert task_ins.task.created_at == ""  # pylint: disable=no-member
@@ -108,15 +108,15 @@ class StateTest(unittest.TestCase):
         # Prepare
         consumer_node_id = 1
         state = self.state_factory()
-        workload_id = state.create_workload()
+        run_id = state.create_workload()
         task_ins_0 = create_task_ins(
-            consumer_node_id=consumer_node_id, anonymous=False, workload_id=workload_id
+            consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
         )
         task_ins_1 = create_task_ins(
-            consumer_node_id=consumer_node_id, anonymous=False, workload_id=workload_id
+            consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
         )
         task_ins_2 = create_task_ins(
-            consumer_node_id=consumer_node_id, anonymous=False, workload_id=workload_id
+            consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
         )
 
         # Insert three TaskIns
@@ -136,7 +136,7 @@ class StateTest(unittest.TestCase):
             producer_node_id=100,
             anonymous=False,
             ancestry=[str(task_id_0)],
-            workload_id=workload_id,
+            run_id=run_id,
         )
 
         _ = state.store_task_res(task_res=task_res_0)
@@ -147,7 +147,7 @@ class StateTest(unittest.TestCase):
             producer_node_id=100,
             anonymous=False,
             ancestry=[str(task_id_1)],
-            workload_id=workload_id,
+            run_id=run_id,
         )
         _ = state.store_task_res(task_res=task_res_1)
 
@@ -182,10 +182,8 @@ class StateTest(unittest.TestCase):
         """
         # Prepare
         state: State = self.state_factory()
-        workload_id = state.create_workload()
-        task_ins = create_task_ins(
-            consumer_node_id=0, anonymous=True, workload_id=workload_id
-        )
+        run_id = state.create_workload()
+        task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
 
         # Execute
         task_ins_uuid = state.store_task_ins(task_ins)
@@ -199,10 +197,8 @@ class StateTest(unittest.TestCase):
         """Store anonymous TaskIns and fail to retrieve it."""
         # Prepare
         state: State = self.state_factory()
-        workload_id = state.create_workload()
-        task_ins = create_task_ins(
-            consumer_node_id=0, anonymous=True, workload_id=workload_id
-        )
+        run_id = state.create_workload()
+        task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
 
         # Execute
         _ = state.store_task_ins(task_ins)
@@ -215,10 +211,8 @@ class StateTest(unittest.TestCase):
         """Store identity TaskIns and fail retrieving it as anonymous."""
         # Prepare
         state: State = self.state_factory()
-        workload_id = state.create_workload()
-        task_ins = create_task_ins(
-            consumer_node_id=1, anonymous=False, workload_id=workload_id
-        )
+        run_id = state.create_workload()
+        task_ins = create_task_ins(consumer_node_id=1, anonymous=False, run_id=run_id)
 
         # Execute
         _ = state.store_task_ins(task_ins)
@@ -231,10 +225,8 @@ class StateTest(unittest.TestCase):
         """Store identity TaskIns and retrieve it."""
         # Prepare
         state: State = self.state_factory()
-        workload_id = state.create_workload()
-        task_ins = create_task_ins(
-            consumer_node_id=1, anonymous=False, workload_id=workload_id
-        )
+        run_id = state.create_workload()
+        task_ins = create_task_ins(consumer_node_id=1, anonymous=False, run_id=run_id)
 
         # Execute
         task_ins_uuid = state.store_task_ins(task_ins)
@@ -250,10 +242,8 @@ class StateTest(unittest.TestCase):
         """Fail retrieving delivered task."""
         # Prepare
         state: State = self.state_factory()
-        workload_id = state.create_workload()
-        task_ins = create_task_ins(
-            consumer_node_id=1, anonymous=False, workload_id=workload_id
-        )
+        run_id = state.create_workload()
+        task_ins = create_task_ins(consumer_node_id=1, anonymous=False, run_id=run_id)
 
         # Execute
         _ = state.store_task_ins(task_ins)
@@ -278,13 +268,11 @@ class StateTest(unittest.TestCase):
         with self.assertRaises(AssertionError):
             state.get_task_ins(node_id=1, limit=0)
 
-    def test_task_ins_store_invalid_workload_id_and_fail(self) -> None:
-        """Store TaskIns with invalid workload_id and fail."""
+    def test_task_ins_store_invalid_run_id_and_fail(self) -> None:
+        """Store TaskIns with invalid run_id and fail."""
         # Prepare
         state: State = self.state_factory()
-        task_ins = create_task_ins(
-            consumer_node_id=0, anonymous=True, workload_id=61016
-        )
+        task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=61016)
 
         # Execute
         task_id = state.store_task_ins(task_ins)
@@ -297,13 +285,13 @@ class StateTest(unittest.TestCase):
         """Store TaskRes retrieve it by task_ins_id."""
         # Prepare
         state: State = self.state_factory()
-        workload_id = state.create_workload()
+        run_id = state.create_workload()
         task_ins_id = uuid4()
         task_res = create_task_res(
             producer_node_id=0,
             anonymous=True,
             ancestry=[str(task_ins_id)],
-            workload_id=workload_id,
+            run_id=run_id,
         )
 
         # Execute
@@ -318,10 +306,10 @@ class StateTest(unittest.TestCase):
         """Test retrieving all node_ids and empty initial state."""
         # Prepare
         state: State = self.state_factory()
-        workload_id = state.create_workload()
+        run_id = state.create_workload()
 
         # Execute
-        retrieved_node_ids = state.get_nodes(workload_id)
+        retrieved_node_ids = state.get_nodes(run_id)
 
         # Assert
         assert len(retrieved_node_ids) == 0
@@ -330,13 +318,13 @@ class StateTest(unittest.TestCase):
         """Test creating a client node."""
         # Prepare
         state: State = self.state_factory()
-        workload_id = state.create_workload()
+        run_id = state.create_workload()
         node_ids = []
 
         # Execute
         for _ in range(10):
             node_ids.append(state.create_node())
-        retrieved_node_ids = state.get_nodes(workload_id)
+        retrieved_node_ids = state.get_nodes(run_id)
 
         # Assert
         for i in retrieved_node_ids:
@@ -346,26 +334,26 @@ class StateTest(unittest.TestCase):
         """Test deleting a client node."""
         # Prepare
         state: State = self.state_factory()
-        workload_id = state.create_workload()
+        run_id = state.create_workload()
         node_id = state.create_node()
 
         # Execute
         state.delete_node(node_id)
-        retrieved_node_ids = state.get_nodes(workload_id)
+        retrieved_node_ids = state.get_nodes(run_id)
 
         # Assert
         assert len(retrieved_node_ids) == 0
 
-    def test_get_nodes_invalid_workload_id(self) -> None:
-        """Test retrieving all node_ids with invalid workload_id."""
+    def test_get_nodes_invalid_run_id(self) -> None:
+        """Test retrieving all node_ids with invalid run_id."""
         # Prepare
         state: State = self.state_factory()
         state.create_workload()
-        invalid_workload_id = 61016
+        invalid_run_id = 61016
         state.create_node()
 
         # Execute
-        retrieved_node_ids = state.get_nodes(invalid_workload_id)
+        retrieved_node_ids = state.get_nodes(invalid_run_id)
 
         # Assert
         assert len(retrieved_node_ids) == 0
@@ -374,13 +362,9 @@ class StateTest(unittest.TestCase):
         """Test if num_tasks returns correct number of not delivered task_ins."""
         # Prepare
         state: State = self.state_factory()
-        workload_id = state.create_workload()
-        task_0 = create_task_ins(
-            consumer_node_id=0, anonymous=True, workload_id=workload_id
-        )
-        task_1 = create_task_ins(
-            consumer_node_id=0, anonymous=True, workload_id=workload_id
-        )
+        run_id = state.create_workload()
+        task_0 = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
+        task_1 = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
 
         # Store two tasks
         state.store_task_ins(task_0)
@@ -396,12 +380,12 @@ class StateTest(unittest.TestCase):
         """Test if num_tasks returns correct number of not delivered task_res."""
         # Prepare
         state: State = self.state_factory()
-        workload_id = state.create_workload()
+        run_id = state.create_workload()
         task_0 = create_task_res(
-            producer_node_id=0, anonymous=True, ancestry=["1"], workload_id=workload_id
+            producer_node_id=0, anonymous=True, ancestry=["1"], run_id=run_id
         )
         task_1 = create_task_res(
-            producer_node_id=0, anonymous=True, ancestry=["1"], workload_id=workload_id
+            producer_node_id=0, anonymous=True, ancestry=["1"], run_id=run_id
         )
 
         # Store two tasks
@@ -418,7 +402,7 @@ class StateTest(unittest.TestCase):
 def create_task_ins(
     consumer_node_id: int,
     anonymous: bool,
-    workload_id: int,
+    run_id: int,
     delivered_at: str = "",
 ) -> TaskIns:
     """Create a TaskIns for testing."""
@@ -429,7 +413,7 @@ def create_task_ins(
     task = TaskIns(
         task_id="",
         group_id="",
-        workload_id=workload_id,
+        run_id=run_id,
         task=Task(
             delivered_at=delivered_at,
             producer=Node(node_id=0, anonymous=True),
@@ -446,13 +430,13 @@ def create_task_res(
     producer_node_id: int,
     anonymous: bool,
     ancestry: List[str],
-    workload_id: int,
+    run_id: int,
 ) -> TaskRes:
     """Create a TaskRes for testing."""
     task_res = TaskRes(
         task_id="",
         group_id="",
-        workload_id=workload_id,
+        run_id=run_id,
         task=Task(
             producer=Node(node_id=producer_node_id, anonymous=anonymous),
             consumer=Node(node_id=0, anonymous=True),

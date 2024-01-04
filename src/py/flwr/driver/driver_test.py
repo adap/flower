@@ -33,7 +33,7 @@ class TestDriver(unittest.TestCase):
     def setUp(self) -> None:
         """Initialize mock GrpcDriver and Driver instance before each test."""
         mock_response = Mock()
-        mock_response.workload_id = 61016
+        mock_response.run_id = 61016
         self.mock_grpc_driver = Mock()
         self.mock_grpc_driver.create_workload.return_value = mock_response
         self.patcher = patch(
@@ -50,11 +50,11 @@ class TestDriver(unittest.TestCase):
         """Test that GrpcDriver doesn't initialize if workload is created."""
         # Prepare
         self.driver.grpc_driver = self.mock_grpc_driver
-        self.driver.workload_id = 61016
+        self.driver.run_id = 61016
 
         # Execute
         # pylint: disable-next=protected-access
-        self.driver._get_grpc_driver_and_workload_id()
+        self.driver._get_grpc_driver_and_run_id()
 
         # Assert
         self.mock_grpc_driver.connect.assert_not_called()
@@ -63,11 +63,11 @@ class TestDriver(unittest.TestCase):
         """Test GrpcDriver initialization when workload is not created."""
         # Execute
         # pylint: disable-next=protected-access
-        self.driver._get_grpc_driver_and_workload_id()
+        self.driver._get_grpc_driver_and_run_id()
 
         # Assert
         self.mock_grpc_driver.connect.assert_called_once()
-        self.assertEqual(self.driver.workload_id, 61016)
+        self.assertEqual(self.driver.run_id, 61016)
 
     def test_get_nodes(self) -> None:
         """Test retrieval of nodes."""
@@ -85,7 +85,7 @@ class TestDriver(unittest.TestCase):
         self.assertEqual(len(args), 1)
         self.assertEqual(len(kwargs), 0)
         self.assertIsInstance(args[0], GetNodesRequest)
-        self.assertEqual(args[0].workload_id, 61016)
+        self.assertEqual(args[0].run_id, 61016)
         self.assertEqual(nodes, mock_response.nodes)
 
     def test_push_task_ins(self) -> None:
@@ -107,7 +107,7 @@ class TestDriver(unittest.TestCase):
         self.assertIsInstance(args[0], PushTaskInsRequest)
         self.assertEqual(task_ids, mock_response.task_ids)
         for task_ins in args[0].task_ins_list:
-            self.assertEqual(task_ins.workload_id, 61016)
+            self.assertEqual(task_ins.run_id, 61016)
 
     def test_pull_task_res_with_given_task_ids(self) -> None:
         """Test pulling task results with specific task IDs."""
@@ -136,7 +136,7 @@ class TestDriver(unittest.TestCase):
         """Test cleanup behavior when Driver is initialized."""
         # Prepare
         # pylint: disable-next=protected-access
-        self.driver._get_grpc_driver_and_workload_id()
+        self.driver._get_grpc_driver_and_run_id()
 
         # Execute
         self.driver.__del__()
