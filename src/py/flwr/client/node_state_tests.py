@@ -16,11 +16,11 @@
 
 
 from flwr.client.node_state import NodeState
-from flwr.client.workload_state import WorkloadState
+from flwr.client.run_state import RunState
 from flwr.proto.task_pb2 import TaskIns
 
 
-def _run_dummy_task(state: WorkloadState) -> WorkloadState:
+def _run_dummy_task(state: RunState) -> RunState:
     if "counter" in state.state:
         state.state["counter"] += "1"
     else:
@@ -43,17 +43,17 @@ def test_multiworkload_in_node_state() -> None:
         r_id = task.run_id
 
         # Register
-        node_state.register_workloadstate(run_id=r_id)
+        node_state.register_runstate(run_id=r_id)
 
-        # Get workload state
-        state = node_state.retrieve_workloadstate(run_id=r_id)
+        # Get run state
+        state = node_state.retrieve_runstate(run_id=r_id)
 
         # Run "task"
         updated_state = _run_dummy_task(state)
 
-        # Update workload state
-        node_state.update_workloadstate(run_id=r_id, workload_state=updated_state)
+        # Update run state
+        node_state.update_runstate(run_id=r_id, run_state=updated_state)
 
     # Verify values
-    for r_id, state in node_state.workload_states.items():
+    for r_id, state in node_state.run_states.items():
         assert state.state["counter"] == expected_values[r_id]
