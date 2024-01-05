@@ -37,13 +37,8 @@ CREATE TABLE IF NOT EXISTS node(
 );
 """
 
-<<<<<<< HEAD
 SQL_CREATE_TABLE_RUN = """
 CREATE TABLE IF NOT EXISTS run(
-=======
-SQL_CREATE_TABLE_WORKLOAD = """
-CREATE TABLE IF NOT EXISTS workload(
->>>>>>> main
     run_id INTEGER UNIQUE
 );
 """
@@ -63,11 +58,7 @@ CREATE TABLE IF NOT EXISTS task_ins(
     ancestry                TEXT,
     legacy_server_message   BLOB,
     legacy_client_message   BLOB,
-<<<<<<< HEAD
     FOREIGN KEY(run_id) REFERENCES run(run_id)
-=======
-    FOREIGN KEY(run_id) REFERENCES workload(run_id)
->>>>>>> main
 );
 """
 
@@ -87,11 +78,7 @@ CREATE TABLE IF NOT EXISTS task_res(
     ancestry                TEXT,
     legacy_server_message   BLOB,
     legacy_client_message   BLOB,
-<<<<<<< HEAD
     FOREIGN KEY(run_id) REFERENCES run(run_id)
-=======
-    FOREIGN KEY(run_id) REFERENCES workload(run_id)
->>>>>>> main
 );
 """
 
@@ -506,13 +493,8 @@ class SqliteState(State):
         If the provided `run_id` does not exist or has no matching nodes,
         an empty `Set` MUST be returned.
         """
-<<<<<<< HEAD
         # Validate run ID
         query = "SELECT COUNT(*) FROM run WHERE run_id = ?;"
-=======
-        # Validate workload ID
-        query = "SELECT COUNT(*) FROM workload WHERE run_id = ?;"
->>>>>>> main
         if self.query(query, (run_id,))[0]["COUNT(*)"] == 0:
             return set()
 
@@ -522,18 +504,12 @@ class SqliteState(State):
         result: Set[int] = {row["node_id"] for row in rows}
         return result
 
-<<<<<<< HEAD
     def create_run(self) -> int:
         """Create one run and store it in state."""
-=======
-    def create_workload(self) -> int:
-        """Create one workload and store it in state."""
->>>>>>> main
         # Sample a random int64 as run_id
         run_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
         # Check conflicts
-<<<<<<< HEAD
         query = "SELECT COUNT(*) FROM run WHERE run_id = ?;"
         # If run_id does not exist
         if self.query(query, (run_id,))[0]["COUNT(*)"] == 0:
@@ -541,15 +517,6 @@ class SqliteState(State):
             self.query(query, {"run_id": run_id})
             return run_id
         log(ERROR, "Unexpected run creation failure.")
-=======
-        query = "SELECT COUNT(*) FROM workload WHERE run_id = ?;"
-        # If run_id does not exist
-        if self.query(query, (run_id,))[0]["COUNT(*)"] == 0:
-            query = "INSERT INTO workload VALUES(:run_id);"
-            self.query(query, {"run_id": run_id})
-            return run_id
-        log(ERROR, "Unexpected workload creation failure.")
->>>>>>> main
         return 0
 
 
