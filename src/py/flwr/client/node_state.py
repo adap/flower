@@ -17,32 +17,32 @@
 
 from typing import Any, Dict
 
-from flwr.client.workload_state import WorkloadState
+from flwr.client.run_state import RunState
 
 
 class NodeState:
-    """State of a node where client nodes execute workloads."""
+    """State of a node where client nodes execute runs."""
 
     def __init__(self) -> None:
         self._meta: Dict[str, Any] = {}  # holds metadata about the node
-        self.workload_states: Dict[int, WorkloadState] = {}
+        self.run_states: Dict[int, RunState] = {}
 
-    def register_workloadstate(self, run_id: int) -> None:
-        """Register new workload state for this node."""
-        if run_id not in self.workload_states:
-            self.workload_states[run_id] = WorkloadState({})
+    def register_runstate(self, run_id: int) -> None:
+        """Register new run state for this node."""
+        if run_id not in self.run_states:
+            self.run_states[run_id] = RunState({})
 
-    def retrieve_workloadstate(self, run_id: int) -> WorkloadState:
-        """Get workload state given a run_id."""
-        if run_id in self.workload_states:
-            return self.workload_states[run_id]
+    def retrieve_runstate(self, run_id: int) -> RunState:
+        """Get run state given a run_id."""
+        if run_id in self.run_states:
+            return self.run_states[run_id]
 
         raise RuntimeError(
-            f"WorkloadState for run_id={run_id} doesn't exist."
-            " A workload must be registered before it can be retrieved or updated "
+            f"RunState for run_id={run_id} doesn't exist."
+            " A run must be registered before it can be retrieved or updated "
             " by a client."
         )
 
-    def update_workloadstate(self, run_id: int, workload_state: WorkloadState) -> None:
-        """Update workload state."""
-        self.workload_states[run_id] = workload_state
+    def update_runstate(self, run_id: int, run_state: RunState) -> None:
+        """Update run state."""
+        self.run_states[run_id] = run_state

@@ -132,16 +132,16 @@ class RayActorClientProxy(ClientProxy):
         self.proxy_state = NodeState()
 
     def _submit_job(self, job_fn: JobFn, timeout: Optional[float]) -> ClientRes:
-        # The VCE is not exposed to TaskIns, it won't handle multilple workloads
+        # The VCE is not exposed to TaskIns, it won't handle multilple runs
         # For the time being, fixing run_id is a small compromise
         # This will be one of the first points to address integrating VCE + DriverAPI
         run_id = 0
 
         # Register state
-        self.proxy_state.register_workloadstate(run_id=run_id)
+        self.proxy_state.register_runstate(run_id=run_id)
 
         # Retrieve state
-        state = self.proxy_state.retrieve_workloadstate(run_id=run_id)
+        state = self.proxy_state.retrieve_runstate(run_id=run_id)
 
         try:
             self.actor_pool.submit_client_job(
@@ -151,14 +151,12 @@ class RayActorClientProxy(ClientProxy):
             res, updated_state = self.actor_pool.get_client_result(self.cid, timeout)
 
             # Update state
-            self.proxy_state.update_workloadstate(
-                run_id=run_id, workload_state=updated_state
-            )
+            self.proxy_state.update_runstate(run_id=run_id, run_state=updated_state)
 
         except Exception as ex:
             if self.actor_pool.num_actors == 0:
                 # At this point we want to stop the simulation.
-                # since no more client workloads will be executed
+                # since no more client runs will be executed
                 log(ERROR, "ActorPool is empty!!!")
             log(ERROR, traceback.format_exc())
             log(ERROR, ex)

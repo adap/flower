@@ -54,12 +54,12 @@ parameters = ndarrays_to_parameters(get_parameters(net=Net()))
 
 # -------------------------------------------------------------------------- Driver SDK
 driver.connect()
-create_workload_res: driver_pb2.CreateWorkloadResponse = driver.create_workload(
-    req=driver_pb2.CreateWorkloadRequest()
+create_run_res: driver_pb2.CreateRunResponse = driver.create_run(
+    req=driver_pb2.CreateRunRequest()
 )
 # -------------------------------------------------------------------------- Driver SDK
 
-run_id = create_workload_res.run_id
+run_id = create_run_res.run_id
 print(f"Created run id {run_id}")
 
 history = History()

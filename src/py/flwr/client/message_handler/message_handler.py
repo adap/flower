@@ -28,9 +28,9 @@ from flwr.client.message_handler.task_handler import (
     get_server_message_from_task_ins,
     wrap_client_message_in_task_res,
 )
+from flwr.client.run_state import RunState
 from flwr.client.secure_aggregation import SecureAggregationHandler
 from flwr.client.typing import ClientFn
-from flwr.client.workload_state import WorkloadState
 from flwr.common import serde
 from flwr.proto.task_pb2 import SecureAggregation, Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
@@ -79,16 +79,16 @@ def handle_control_message(task_ins: TaskIns) -> Tuple[Optional[TaskRes], int]:
 
 
 def handle(
-    client_fn: ClientFn, state: WorkloadState, task_ins: TaskIns
-) -> Tuple[TaskRes, WorkloadState]:
+    client_fn: ClientFn, state: RunState, task_ins: TaskIns
+) -> Tuple[TaskRes, RunState]:
     """Handle incoming TaskIns from the server.
 
     Parameters
     ----------
     client_fn : ClientFn
         A callable that instantiates a Client.
-    state : WorkloadState
-        A dataclass storing the state for the workload being executed by the client.
+    state : RunState
+        A dataclass storing the state for the run being executed by the client.
     task_ins: TaskIns
         The task instruction coming from the server, to be processed by the client.
 
@@ -126,16 +126,16 @@ def handle(
 
 
 def handle_legacy_message(
-    client_fn: ClientFn, state: WorkloadState, server_msg: ServerMessage
-) -> Tuple[ClientMessage, WorkloadState]:
+    client_fn: ClientFn, state: RunState, server_msg: ServerMessage
+) -> Tuple[ClientMessage, RunState]:
     """Handle incoming messages from the server.
 
     Parameters
     ----------
     client_fn : ClientFn
         A callable that instantiates a Client.
-    state : WorkloadState
-        A dataclass storing the state for the workload being executed by the client.
+    state : RunState
+        A dataclass storing the state for the run being executed by the client.
     server_msg: ServerMessage
         The message coming from the server, to be processed by the client.
 
