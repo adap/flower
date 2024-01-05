@@ -43,7 +43,7 @@ constexpr TaskIns::TaskIns(
   : task_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , group_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , task_(nullptr)
-  , workload_id_(int64_t{0}){}
+  , run_id_(int64_t{0}){}
 struct TaskInsDefaultTypeInternal {
   constexpr TaskInsDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -58,7 +58,7 @@ constexpr TaskRes::TaskRes(
   : task_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , group_id_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , task_(nullptr)
-  , workload_id_(int64_t{0}){}
+  , run_id_(int64_t{0}){}
 struct TaskResDefaultTypeInternal {
   constexpr TaskResDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -194,7 +194,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_flwr_2fproto_2ftask_2eproto::o
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::flwr::proto::TaskIns, task_id_),
   PROTOBUF_FIELD_OFFSET(::flwr::proto::TaskIns, group_id_),
-  PROTOBUF_FIELD_OFFSET(::flwr::proto::TaskIns, workload_id_),
+  PROTOBUF_FIELD_OFFSET(::flwr::proto::TaskIns, run_id_),
   PROTOBUF_FIELD_OFFSET(::flwr::proto::TaskIns, task_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::flwr::proto::TaskRes, _internal_metadata_),
@@ -204,7 +204,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_flwr_2fproto_2ftask_2eproto::o
   ~0u,  // no _inlined_string_donated_
   PROTOBUF_FIELD_OFFSET(::flwr::proto::TaskRes, task_id_),
   PROTOBUF_FIELD_OFFSET(::flwr::proto::TaskRes, group_id_),
-  PROTOBUF_FIELD_OFFSET(::flwr::proto::TaskRes, workload_id_),
+  PROTOBUF_FIELD_OFFSET(::flwr::proto::TaskRes, run_id_),
   PROTOBUF_FIELD_OFFSET(::flwr::proto::TaskRes, task_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::flwr::proto::Value_DoubleList, _internal_metadata_),
@@ -315,28 +315,28 @@ const char descriptor_table_protodef_flwr_2fproto_2ftask_2eproto[] PROTOBUF_SECT
   "ion\022<\n\025legacy_server_message\030e \001(\0132\031.flw"
   "r.proto.ServerMessageB\002\030\001\022<\n\025legacy_clie"
   "nt_message\030f \001(\0132\031.flwr.proto.ClientMess"
-  "ageB\002\030\001\"a\n\007TaskIns\022\017\n\007task_id\030\001 \001(\t\022\020\n\010g"
-  "roup_id\030\002 \001(\t\022\023\n\013workload_id\030\003 \001(\022\022\036\n\004ta"
-  "sk\030\004 \001(\0132\020.flwr.proto.Task\"a\n\007TaskRes\022\017\n"
-  "\007task_id\030\001 \001(\t\022\020\n\010group_id\030\002 \001(\t\022\023\n\013work"
-  "load_id\030\003 \001(\022\022\036\n\004task\030\004 \001(\0132\020.flwr.proto"
-  ".Task\"\363\003\n\005Value\022\020\n\006double\030\001 \001(\001H\000\022\020\n\006sin"
-  "t64\030\002 \001(\022H\000\022\016\n\004bool\030\003 \001(\010H\000\022\020\n\006string\030\004 "
-  "\001(\tH\000\022\017\n\005bytes\030\005 \001(\014H\000\0223\n\013double_list\030\025 "
-  "\001(\0132\034.flwr.proto.Value.DoubleListH\000\0223\n\013s"
-  "int64_list\030\026 \001(\0132\034.flwr.proto.Value.Sint"
-  "64ListH\000\022/\n\tbool_list\030\027 \001(\0132\032.flwr.proto"
-  ".Value.BoolListH\000\0223\n\013string_list\030\030 \001(\0132\034"
-  ".flwr.proto.Value.StringListH\000\0221\n\nbytes_"
-  "list\030\031 \001(\0132\033.flwr.proto.Value.BytesListH"
-  "\000\032\032\n\nDoubleList\022\014\n\004vals\030\001 \003(\001\032\032\n\nSint64L"
-  "ist\022\014\n\004vals\030\001 \003(\022\032\030\n\010BoolList\022\014\n\004vals\030\001 "
-  "\003(\010\032\032\n\nStringList\022\014\n\004vals\030\001 \003(\t\032\031\n\tBytes"
-  "List\022\014\n\004vals\030\001 \003(\014B\007\n\005value\"\240\001\n\021SecureAg"
-  "gregation\022D\n\014named_values\030\001 \003(\0132..flwr.p"
-  "roto.SecureAggregation.NamedValuesEntry\032"
-  "E\n\020NamedValuesEntry\022\013\n\003key\030\001 \001(\t\022 \n\005valu"
-  "e\030\002 \001(\0132\021.flwr.proto.Value:\0028\001b\006proto3"
+  "ageB\002\030\001\"\\\n\007TaskIns\022\017\n\007task_id\030\001 \001(\t\022\020\n\010g"
+  "roup_id\030\002 \001(\t\022\016\n\006run_id\030\003 \001(\022\022\036\n\004task\030\004 "
+  "\001(\0132\020.flwr.proto.Task\"\\\n\007TaskRes\022\017\n\007task"
+  "_id\030\001 \001(\t\022\020\n\010group_id\030\002 \001(\t\022\016\n\006run_id\030\003 "
+  "\001(\022\022\036\n\004task\030\004 \001(\0132\020.flwr.proto.Task\"\363\003\n\005"
+  "Value\022\020\n\006double\030\001 \001(\001H\000\022\020\n\006sint64\030\002 \001(\022H"
+  "\000\022\016\n\004bool\030\003 \001(\010H\000\022\020\n\006string\030\004 \001(\tH\000\022\017\n\005b"
+  "ytes\030\005 \001(\014H\000\0223\n\013double_list\030\025 \001(\0132\034.flwr"
+  ".proto.Value.DoubleListH\000\0223\n\013sint64_list"
+  "\030\026 \001(\0132\034.flwr.proto.Value.Sint64ListH\000\022/"
+  "\n\tbool_list\030\027 \001(\0132\032.flwr.proto.Value.Boo"
+  "lListH\000\0223\n\013string_list\030\030 \001(\0132\034.flwr.prot"
+  "o.Value.StringListH\000\0221\n\nbytes_list\030\031 \001(\013"
+  "2\033.flwr.proto.Value.BytesListH\000\032\032\n\nDoubl"
+  "eList\022\014\n\004vals\030\001 \003(\001\032\032\n\nSint64List\022\014\n\004val"
+  "s\030\001 \003(\022\032\030\n\010BoolList\022\014\n\004vals\030\001 \003(\010\032\032\n\nStr"
+  "ingList\022\014\n\004vals\030\001 \003(\t\032\031\n\tBytesList\022\014\n\004va"
+  "ls\030\001 \003(\014B\007\n\005value\"\240\001\n\021SecureAggregation\022"
+  "D\n\014named_values\030\001 \003(\0132..flwr.proto.Secur"
+  "eAggregation.NamedValuesEntry\032E\n\020NamedVa"
+  "luesEntry\022\013\n\003key\030\001 \001(\t\022 \n\005value\030\002 \001(\0132\021."
+  "flwr.proto.Value:\0028\001b\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_flwr_2fproto_2ftask_2eproto_deps[2] = {
   &::descriptor_table_flwr_2fproto_2fnode_2eproto,
@@ -344,7 +344,7 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_flwr_2fproto_2ftask_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_flwr_2fproto_2ftask_2eproto = {
-  false, false, 1278, descriptor_table_protodef_flwr_2fproto_2ftask_2eproto, "flwr/proto/task.proto", 
+  false, false, 1268, descriptor_table_protodef_flwr_2fproto_2ftask_2eproto, "flwr/proto/task.proto", 
   &descriptor_table_flwr_2fproto_2ftask_2eproto_once, descriptor_table_flwr_2fproto_2ftask_2eproto_deps, 2, 11,
   schemas, file_default_instances, TableStruct_flwr_2fproto_2ftask_2eproto::offsets,
   file_level_metadata_flwr_2fproto_2ftask_2eproto, file_level_enum_descriptors_flwr_2fproto_2ftask_2eproto, file_level_service_descriptors_flwr_2fproto_2ftask_2eproto,
@@ -956,7 +956,7 @@ TaskIns::TaskIns(const TaskIns& from)
   } else {
     task_ = nullptr;
   }
-  workload_id_ = from.workload_id_;
+  run_id_ = from.run_id_;
   // @@protoc_insertion_point(copy_constructor:flwr.proto.TaskIns)
 }
 
@@ -965,8 +965,8 @@ task_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlre
 group_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&task_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&workload_id_) -
-    reinterpret_cast<char*>(&task_)) + sizeof(workload_id_));
+    0, static_cast<size_t>(reinterpret_cast<char*>(&run_id_) -
+    reinterpret_cast<char*>(&task_)) + sizeof(run_id_));
 }
 
 TaskIns::~TaskIns() {
@@ -1005,7 +1005,7 @@ void TaskIns::Clear() {
     delete task_;
   }
   task_ = nullptr;
-  workload_id_ = int64_t{0};
+  run_id_ = int64_t{0};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -1035,10 +1035,10 @@ const char* TaskIns::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::in
         } else
           goto handle_unusual;
         continue;
-      // sint64 workload_id = 3;
+      // sint64 run_id = 3;
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
-          workload_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarintZigZag64(&ptr);
+          run_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarintZigZag64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1100,10 +1100,10 @@ failure:
         2, this->_internal_group_id(), target);
   }
 
-  // sint64 workload_id = 3;
-  if (this->_internal_workload_id() != 0) {
+  // sint64 run_id = 3;
+  if (this->_internal_run_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteSInt64ToArray(3, this->_internal_workload_id(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteSInt64ToArray(3, this->_internal_run_id(), target);
   }
 
   // .flwr.proto.Task task = 4;
@@ -1151,9 +1151,9 @@ size_t TaskIns::ByteSizeLong() const {
         *task_);
   }
 
-  // sint64 workload_id = 3;
-  if (this->_internal_workload_id() != 0) {
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SInt64SizePlusOne(this->_internal_workload_id());
+  // sint64 run_id = 3;
+  if (this->_internal_run_id() != 0) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SInt64SizePlusOne(this->_internal_run_id());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
@@ -1187,8 +1187,8 @@ void TaskIns::MergeFrom(const TaskIns& from) {
   if (from._internal_has_task()) {
     _internal_mutable_task()->::flwr::proto::Task::MergeFrom(from._internal_task());
   }
-  if (from._internal_workload_id() != 0) {
-    _internal_set_workload_id(from._internal_workload_id());
+  if (from._internal_run_id() != 0) {
+    _internal_set_run_id(from._internal_run_id());
   }
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -1220,8 +1220,8 @@ void TaskIns::InternalSwap(TaskIns* other) {
       &other->group_id_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(TaskIns, workload_id_)
-      + sizeof(TaskIns::workload_id_)
+      PROTOBUF_FIELD_OFFSET(TaskIns, run_id_)
+      + sizeof(TaskIns::run_id_)
       - PROTOBUF_FIELD_OFFSET(TaskIns, task_)>(
           reinterpret_cast<char*>(&task_),
           reinterpret_cast<char*>(&other->task_));
@@ -1271,7 +1271,7 @@ TaskRes::TaskRes(const TaskRes& from)
   } else {
     task_ = nullptr;
   }
-  workload_id_ = from.workload_id_;
+  run_id_ = from.run_id_;
   // @@protoc_insertion_point(copy_constructor:flwr.proto.TaskRes)
 }
 
@@ -1280,8 +1280,8 @@ task_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlre
 group_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&task_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&workload_id_) -
-    reinterpret_cast<char*>(&task_)) + sizeof(workload_id_));
+    0, static_cast<size_t>(reinterpret_cast<char*>(&run_id_) -
+    reinterpret_cast<char*>(&task_)) + sizeof(run_id_));
 }
 
 TaskRes::~TaskRes() {
@@ -1320,7 +1320,7 @@ void TaskRes::Clear() {
     delete task_;
   }
   task_ = nullptr;
-  workload_id_ = int64_t{0};
+  run_id_ = int64_t{0};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -1350,10 +1350,10 @@ const char* TaskRes::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::in
         } else
           goto handle_unusual;
         continue;
-      // sint64 workload_id = 3;
+      // sint64 run_id = 3;
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
-          workload_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarintZigZag64(&ptr);
+          run_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarintZigZag64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1415,10 +1415,10 @@ failure:
         2, this->_internal_group_id(), target);
   }
 
-  // sint64 workload_id = 3;
-  if (this->_internal_workload_id() != 0) {
+  // sint64 run_id = 3;
+  if (this->_internal_run_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteSInt64ToArray(3, this->_internal_workload_id(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteSInt64ToArray(3, this->_internal_run_id(), target);
   }
 
   // .flwr.proto.Task task = 4;
@@ -1466,9 +1466,9 @@ size_t TaskRes::ByteSizeLong() const {
         *task_);
   }
 
-  // sint64 workload_id = 3;
-  if (this->_internal_workload_id() != 0) {
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SInt64SizePlusOne(this->_internal_workload_id());
+  // sint64 run_id = 3;
+  if (this->_internal_run_id() != 0) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SInt64SizePlusOne(this->_internal_run_id());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
@@ -1502,8 +1502,8 @@ void TaskRes::MergeFrom(const TaskRes& from) {
   if (from._internal_has_task()) {
     _internal_mutable_task()->::flwr::proto::Task::MergeFrom(from._internal_task());
   }
-  if (from._internal_workload_id() != 0) {
-    _internal_set_workload_id(from._internal_workload_id());
+  if (from._internal_run_id() != 0) {
+    _internal_set_run_id(from._internal_run_id());
   }
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -1535,8 +1535,8 @@ void TaskRes::InternalSwap(TaskRes* other) {
       &other->group_id_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(TaskRes, workload_id_)
-      + sizeof(TaskRes::workload_id_)
+      PROTOBUF_FIELD_OFFSET(TaskRes, run_id_)
+      + sizeof(TaskRes::run_id_)
       - PROTOBUF_FIELD_OFFSET(TaskRes, task_)>(
           reinterpret_cast<char*>(&task_),
           reinterpret_cast<char*>(&other->task_));

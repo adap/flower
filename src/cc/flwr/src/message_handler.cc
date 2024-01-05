@@ -92,7 +92,7 @@ handle_task(flwr_local::Client *client, const flwr::proto::TaskIns &task_ins) {
   flwr::proto::TaskRes task_res;
   task_res.set_task_id("");
   task_res.set_group_id("");
-  task_res.set_workload_id(0);
+  task_res.set_run_id(0);
 
   std::unique_ptr<flwr::proto::Task> task =
       std::make_unique<flwr::proto::Task>();
