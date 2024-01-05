@@ -24,6 +24,7 @@ def task_dict_to_task_ins_list(
             task_id="",  # Do not set, will be created and set by the DriverAPI
             group_id="",
             run_id=run_id,
+            run_id=run_id,
             task=merge(
                 task,
                 task_pb2.Task(
