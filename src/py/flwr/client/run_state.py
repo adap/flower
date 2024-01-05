@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Workload state."""
+"""Run state."""
 
 from dataclasses import dataclass
 from typing import Dict
 
 
 @dataclass
-class WorkloadState:
-    """State of a workload executed by a client node."""
+class RunState:
+    """State of a run executed by a client node."""
 
     state: Dict[str, str]

@@ -119,7 +119,7 @@ def grpc_connection(
         return TaskIns(
             task_id=str(uuid.uuid4()),
             group_id="",
-            workload_id=0,
+            run_id=0,
             task=Task(
                 producer=Node(node_id=0, anonymous=True),
                 consumer=Node(node_id=0, anonymous=True),

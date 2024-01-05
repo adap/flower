@@ -73,10 +73,10 @@ def load_data(node_id: int):
 
 
 def train(
-        net: Net,
-        trainloader: torch.utils.data.DataLoader,
-        epochs: int,
-        device: torch.device,  # pylint: disable=no-member
+    net: Net,
+    trainloader: torch.utils.data.DataLoader,
+    epochs: int,
+    device: torch.device,  # pylint: disable=no-member
 ) -> None:
     """Train the network."""
     # Define loss and optimizer
@@ -110,9 +110,9 @@ def train(
 
 
 def test(
-        net: Net,
-        testloader: torch.utils.data.DataLoader,
-        device: torch.device,  # pylint: disable=no-member
+    net: Net,
+    testloader: torch.utils.data.DataLoader,
+    device: torch.device,  # pylint: disable=no-member
 ) -> Tuple[float, float]:
     """Validate the network on the entire test set."""
     # Define loss and metrics
