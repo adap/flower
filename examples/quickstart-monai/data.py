@@ -45,15 +45,15 @@ def load_data(num_shards, index):
     train_ds = _partition(
         MedNISTDataset(trainX, trainY, train_transforms), num_shards, index
     )
-    train_loader = DataLoader(train_ds, batch_size=300, shuffle=True, num_workers=2)
+    train_loader = DataLoader(train_ds, batch_size=300, shuffle=True, num_workers=0)
 
     val_ds = _partition(MedNISTDataset(valX, valY, val_transforms), num_shards, index)
-    val_loader = DataLoader(val_ds, batch_size=300, num_workers=2)
+    val_loader = DataLoader(val_ds, batch_size=300, num_workers=0)
 
     test_ds = _partition(
         MedNISTDataset(testX, testY, val_transforms), num_shards, index
     )
-    test_loader = DataLoader(test_ds, batch_size=300, num_workers=2)
+    test_loader = DataLoader(test_ds, batch_size=300, num_workers=0)
 
     return train_loader, val_loader, test_loader, num_class
 
