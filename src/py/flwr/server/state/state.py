@@ -43,7 +43,7 @@ class State(abc.ABC):
         If `task_ins.task.consumer.anonymous` is `False`, then
         `task_ins.task.consumer.node_id` MUST be set (not 0)
 
-        If `task_ins.workload_id` is invalid, then
+        If `task_ins.run_id` is invalid, then
         storing the `task_ins` MUST fail.
         """
 
@@ -92,7 +92,7 @@ class State(abc.ABC):
         If `task_res.task.consumer.anonymous` is `False`, then
         `task_res.task.consumer.node_id` MUST be set (not 0)
 
-        If `task_res.workload_id` is invalid, then
+        If `task_res.run_id` is invalid, then
         storing the `task_res` MUST fail.
         """
 
@@ -140,12 +140,12 @@ class State(abc.ABC):
         """Remove `node_id` from state."""
 
     @abc.abstractmethod
-    def get_nodes(self, workload_id: int) -> Set[int]:
+    def get_nodes(self, run_id: int) -> Set[int]:
         """Retrieve all currently stored node IDs as a set.
 
         Constraints
         -----------
-        If the provided `workload_id` does not exist or has no matching nodes,
+        If the provided `run_id` does not exist or has no matching nodes,
         an empty `Set` MUST be returned.
         """
 
