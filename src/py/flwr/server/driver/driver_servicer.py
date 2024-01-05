@@ -24,8 +24,8 @@ import grpc
 from flwr.common.logger import log
 from flwr.proto import driver_pb2_grpc
 from flwr.proto.driver_pb2 import (
-    CreateWorkloadRequest,
-    CreateWorkloadResponse,
+    CreateRunRequest,
+    CreateRunResponse,
     GetNodesRequest,
     GetNodesResponse,
     PullTaskResRequest,
@@ -57,14 +57,14 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         ]
         return GetNodesResponse(nodes=nodes)
 
-    def CreateWorkload(
-        self, request: CreateWorkloadRequest, context: grpc.ServicerContext
-    ) -> CreateWorkloadResponse:
-        """Create workload ID."""
-        log(INFO, "DriverServicer.CreateWorkload")
+    def CreateRun(
+        self, request: CreateRunRequest, context: grpc.ServicerContext
+    ) -> CreateRunResponse:
+        """Create run ID."""
+        log(INFO, "DriverServicer.CreateRun")
         state: State = self.state_factory.state()
-        run_id = state.create_workload()
-        return CreateWorkloadResponse(run_id=run_id)
+        run_id = state.create_run()
+        return CreateRunResponse(run_id=run_id)
 
     def PushTaskIns(
         self, request: PushTaskInsRequest, context: grpc.ServicerContext

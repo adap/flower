@@ -19,7 +19,7 @@ from typing import Iterable, List, Optional, Tuple
 
 from flwr.driver.grpc_driver import DEFAULT_SERVER_ADDRESS_DRIVER, GrpcDriver
 from flwr.proto.driver_pb2 import (
-    CreateWorkloadRequest,
+    CreateRunRequest,
     GetNodesRequest,
     PullTaskResRequest,
     PushTaskInsRequest,
@@ -60,12 +60,12 @@ class Driver:
     def _get_grpc_driver_and_run_id(self) -> Tuple[GrpcDriver, int]:
         # Check if the GrpcDriver is initialized
         if self.grpc_driver is None or self.run_id is None:
-            # Connect and create workload
+            # Connect and create run
             self.grpc_driver = GrpcDriver(
                 driver_service_address=self.addr, certificates=self.certificates
             )
             self.grpc_driver.connect()
-            res = self.grpc_driver.create_workload(CreateWorkloadRequest())
+            res = self.grpc_driver.create_run(CreateRunRequest())
             self.run_id = res.run_id
 
         return self.grpc_driver, self.run_id

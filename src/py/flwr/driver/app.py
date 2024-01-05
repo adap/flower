@@ -171,7 +171,7 @@ def update_client_manager(
     `client_manager.unregister()`.
     """
     # Request for run_id
-    run_id = driver.create_workload(driver_pb2.CreateWorkloadRequest()).run_id
+    run_id = driver.create_run(driver_pb2.CreateRunRequest()).run_id
 
     # Loop until the driver is disconnected
     registered_nodes: Dict[int, DriverClientProxy] = {}
