@@ -1,4 +1,4 @@
-"""Main script for pFedHN."""
+"""Main script for pFedHN, pFedHNPC, and FedAvg."""
 
 import flwr as fl
 import hydra
@@ -36,6 +36,7 @@ def main(cfg: DictConfig):
     )
 
     if cfg.model.variant == "pFedHNPC":
+        # create local layers and optimizers for each client . Used in pFedHNPC
         node_local_layers = [
             LocalLayer(n_input=84, n_output=cfg.model.out_dim)
             for _ in range(cfg.num_clients)
@@ -49,6 +50,7 @@ def main(cfg: DictConfig):
             )
             for i in range(cfg.num_clients)
         ]
+        # simulation to instantiate each individual client for pFedHNPC
         client_fn = generate_client_fn(
             trainloaders,
             testloaders,
@@ -59,37 +61,32 @@ def main(cfg: DictConfig):
             local=True,
         )
     else:
-        # prepare function that will be used to spawn each client
+        # simulation to instantiate each individual client for pFedHN/ FedAvg
         client_fn = generate_client_fn(
             trainloaders, testloaders, valloaders, cfg, None, None, False
         )
 
     # instantiate strategy according to config
     if cfg.model.variant == "fedavg":
-        strategy = instantiate(
-            cfg.fedavgstrategy,
-            fraction_fit=0.1,
-            min_fit_clients=5,
-            fraction_evaluate=1.0,
-            min_evaluate_clients=1.0,
-            min_available_clients=5,
-        )
+        # For FedAvg
+        strategy = instantiate(cfg.fedavgstrategy)
         fl.simulation.start_simulation(
             client_fn=client_fn,
-            num_clients=cfg.client.num_nodes,
-            config=fl.server.ServerConfig(num_rounds=cfg.client.num_rounds),
+            num_clients=cfg.num_clients,
+            config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
             strategy=strategy,
             client_resources=cfg.client_resources,
         )
     else:
+        # For pFedHN/ pFedHNPC
         strategy = instantiate(cfg.strategy)
         fl.simulation.start_simulation(
             client_fn=client_fn,
-            num_clients=cfg.client.num_nodes,
+            num_clients=cfg.num_clients,
             server=pFedHNServer(
                 client_manager=SimpleClientManager(), strategy=strategy, cfg=cfg
             ),
-            config=fl.server.ServerConfig(num_rounds=cfg.client.num_rounds),
+            config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
             strategy=strategy,
             client_resources=cfg.client_resources,
         )

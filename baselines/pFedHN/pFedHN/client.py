@@ -7,16 +7,13 @@ import torch
 
 from pFedHN.models import CNNTarget
 from pFedHN.trainer import test, test_fedavg, train, train_fedavg
-from pFedHN.utils import set_seed
-
-set_seed(42)
-
 
 # pylint: disable=too-many-instance-attributes
 class FlowerClient(fl.client.NumPyClient):
     """Flower client for federated learning.
 
     Args:
+        cid (str): Client ID
         trainloader (torch.utils.data.DataLoader): DataLoader for training data.
         testloader (torch.utils.data.DataLoader): DataLoader for test data.
         valloader (torch.utils.data.DataLoader): DataLoader for validation data
@@ -27,14 +24,16 @@ class FlowerClient(fl.client.NumPyClient):
 
     Attributes
     ----------
+        cid (str): Client ID
+        variant (str): Variant of the strategy(pFedHN / pFedHNPC / fedavg)
         trainloader (torch.utils.data.DataLoader): DataLoader for training data.
         testloader (torch.utils.data.DataLoader): DataLoader for test data.
         valloader (torch.utils.data.DataLoader): DataLoader for validation data
-        local_layers (list): List of local layers.
-        local_optims (list): List of local optimizers.
+        local_layer (list): List of local layers.
+        local_optim (list): List of local optimizers.
         local (bool): Whether to use local layers.
         device (torch.device): The device to run the model on.
-        epochs (int): Number of training epochs.
+        epochs (int): Number of training epochs
         n_kernels (int): Number of convolutional kernels.
         learning_rate (float): Learning rate.
         weight_decay (float): Weight decay.
@@ -91,7 +90,10 @@ class FlowerClient(fl.client.NumPyClient):
         self.net.to(self.device).load_state_dict(state_dict, strict=True)
 
     def get_parameters(self, config):
-        """Extract model parameters and return them as a list of numpy arrays."""
+        """Extract model parameters and return them as a list of numpy arrays.
+
+        (Used for fedavg)
+        """
         return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
 
     def fit(self, parameters, config):
@@ -103,7 +105,8 @@ class FlowerClient(fl.client.NumPyClient):
 
         Returns
         -------
-            tuple: A tuple containing final_state(parameters),
+            tuple: A tuple containing final_state(parameters) in case of pFedHN/pFedHNPC
+                   / get_parameters' result in case of fedavg,
                    the number of training samples, and metrics.
         """
         self.set_parameters(parameters)
@@ -145,7 +148,17 @@ class FlowerClient(fl.client.NumPyClient):
         )
 
     def evaluate(self, parameters, config):
-        """Evaluate function."""
+        """Evaluate function for the client during federated evaluation.
+
+        Args:
+            parameters (list): List of parameter values.
+            config (dict): Configuration dictionary.
+
+        Returns
+        -------
+            tuple: A tuple containing evaluation loss,
+                the number of testing samples, and metrics.
+        """
         self.set_parameters(parameters)
         if self.variant == "fedavg":
             eval_loss, eval_acc = test_fedavg(
@@ -183,15 +196,16 @@ def generate_client_fn(
     local_optims,
     local=False,
 ):
-    """Generate a function which returns a new FlowerClient.
+    """Responsible for creation of new FlowerClient.
 
     Args:
         trainloaders (list): List of DataLoader objects for training data.
         testloaders (list): List of DataLoader objects for test data.
+        valloaders (list): List of DataLoader objects for validation data.
         config (Config): Hydra Configuration.
-        local_layers (list): List of local layers.
-        local_optims (list): List of local optimizers.
-        local (bool): Whether to use local layers.
+        local_layers (list): List of local layers. (For pFedHNPC, else None)
+        local_optims (list): List of local optimizers. (For pFedHNPC, else None)
+        local (bool): Whether to use local layers. (True for pFedHNPC, else False)
 
 
     Returns

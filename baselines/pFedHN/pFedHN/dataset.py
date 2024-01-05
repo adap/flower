@@ -9,13 +9,17 @@ from torchvision.datasets import CIFAR10, CIFAR100, MNIST
 
 
 def get_datasets(data_name, dataroot, normalize=True, val_size=10000):
-    """get_datasets returns train/val/test data splits of CIFAR10/100 datasets.
+    """Create train,val and test set splits for CIFAR10/100, MNIST datasets.
 
-    :param
-    data_name: name of dataset, choose from [cifar10, cifar100] :param dataroot: root to
-    data dir :param normalize: True/False to normalize the data :param val_size:
-    validation split size (in #samples) :return: train_set, val_set, test_set (tuple of
-    pytorch dataset/subset).
+    Args:
+        data_name: name of dataset, choose from [mnsit, cifar10, cifar100]
+        dataroot: root to data dir
+        normalize: True/False to normalize the data.
+        val_size: validation split size (in #samples). By default, 10000.
+
+    Returns
+    -------
+        tuple: train_set, val_set, test_set
     """
     if data_name == "mnist":
         normalization = transforms.Normalize((0.1307,), (0.3081,))
@@ -51,14 +55,16 @@ def get_datasets(data_name, dataroot, normalize=True, val_size=10000):
 
 
 def get_num_classes_samples(dataset):
-    """Extract info about certain dataset.
+    """Extract information about certain dataset.
 
-    :param dataset: pytorch dataset object
-    :return: dataset info number of classes, number of samples, list of labels.
+    Args:
+        dataset: pytorch dataset object
+
+    Returns
+    -------
+        tuple: number of classes, number of samples, list of labels.
     """
-    # ---------------#
-    # Extract labels #
-    # ---------------#
+    # extract labels
     if isinstance(dataset, torch.utils.data.Subset):
         if isinstance(dataset.dataset.targets, list):
             data_labels_list = np.array(dataset.dataset.targets)[dataset.indices]
@@ -79,31 +85,32 @@ def gen_classes_per_node(
 ):
     """Create the data distribution of each client.
 
-    :param dataset: pytorch dataset object
-    :param num_users: number of clients
-    :param classes_per_user: number of classes assigned to each client
-    :param high_prob: highest prob sampled
-    :param low_prob: lowest prob sampled
-    :return: dictionary mapping between classes and proportions, each entry refers to
-        other client
+    Args:
+        dataset: pytorch dataset object
+        num_users: number of clients
+        - (Section `5.1. Heterogeneous Data` of paper)
+        classes_per_user: number of classes assigned to each client
+                          (2 for MNIST and CIFAR10, 10 for CIFAR100 )
+        high_prob: highest prob sampled(0.6 as defined in section mentioned above)
+        low_prob: lowest prob sampled(0.4 as defined in section mentioned above)
+
+    Returns
+    -------
+        dict: mapping between classes and proportions
     """
     num_classes, _, _ = get_num_classes_samples(dataset)
 
-    # -------------------------------------------#
-    # Divide classes + num samples for each user #
-    # -------------------------------------------#
+    # divide classes and num samples for each user
     count_per_class = (classes_per_user * num_users) // num_classes + 1
     class_dict = {}
     for i in range(num_classes):
-        # sampling alpha_i_c
+        # sampling alpha_i_c as given in the paper (section 5.1. Heterogeneous Data)
         probs = np.random.uniform(low_prob, high_prob, size=count_per_class)
         # normalizing
         probs_norm = (probs / probs.sum()).tolist()
         class_dict[i] = {"count": count_per_class, "prob": probs_norm}
 
-    # -------------------------------------#
-    # Assign each client with data indexes #
-    # -------------------------------------#
+    # assign each client with data indexes
     class_partitions = defaultdict(list)
     for i in range(num_users):
         c_max = []
@@ -120,27 +127,24 @@ def gen_classes_per_node(
 def gen_data_split(dataset, num_users, class_partitions):
     """Divide data indexes for each client based on class_partition.
 
-    :param dataset:
-    pytorch dataset object (train/val/test) :param num_users: number of clients :param
-    class_partitions: proportion of classes per client :return: dictionary mapping
-    client to its indexes.
+    Args:
+        dataset: pytorch dataset object (train/val/test)
+        num_users: number of clients
+        class_partitions: proportion of classes per client
+
+    Returns
+    -------
+        dict: mapping client to its indexes
     """
     num_classes, num_samples, data_labels_list = get_num_classes_samples(dataset)
 
-    # -------------------------- #
-    # Create class index mapping #
-    # -------------------------- #
+    # create class index mapping
     data_class_idx = {i: np.where(data_labels_list == i)[0] for i in range(num_classes)}
 
-    # --------- #
-    # Shuffling #
-    # --------- #
     for data_idx in data_class_idx.values():
         random.shuffle(data_idx)
 
-    # ------------------------------ #
-    # Assigning samples to each user #
-    # ------------------------------ #
+    # assigning samples to each client
     user_data_idx = [[] for i in range(num_users)]
     for usr_i in range(num_users):
         for class_usr, prob_usr in zip(
@@ -154,15 +158,20 @@ def gen_data_split(dataset, num_users, class_partitions):
 
 
 def gen_random_loaders(data_name, data_path, num_users, batch_size, classes_per_user):
-    """Generate train/val/test loaders of each client.
+    """Generate train,validation and test loaders for the clients.
 
-    :param data_name: name of dataset, choose from [cifar10, cifar100]
-    :param data_path: root path for data dir
-    :param num_users: number of clients
-    :param batch_size: batch size
-    :param classes_per_user:
+    Args:
+        data_name: name of dataset, choose from [mnist, cifar10, cifar100]
+        data_path: root path for data dir
+        num_users: number of clients
+        batch_size: batch size
+        - (Section `5.1. Heterogeneous Data` of paper)
+        classes_per_user: number of classes assigned to each client
+                          (2 in case of MNIST and CIFAR10, 10 in case of CIFAR100)
 
-    :return: train/val/test loaders of each client, list of pytorch dataloaders.
+    Returns
+    -------
+        list: list of pytorch train, validation and test datalodes for all the clients
     """
     loader_params = {
         "batch_size": batch_size,

@@ -19,11 +19,16 @@ model:
 # strategy config
 strategy:
   _target_: pFedHN.strategy.pFedHN
-  evaluate_every: 2
+  evaluate_every: 30
 
 fedavgstrategy:
   _target_: pFedHN.strategy.FedAvgWithSaveJson
-  # strategy config
+  evaluate_every: 30
+  fraction_fit: 0.1
+  min_fit_clients: 5
+  fraction_evaluate: 1.0
+  min_evaluate_clients: 1.0
+  min_available_clients: 5
 
 server: # Hyperparameters for the hypernetwork which is in the server
   embedding_dim_denominator: 4 ## Explained at Hypernetwork initialisation in server.py

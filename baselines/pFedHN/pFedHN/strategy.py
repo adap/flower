@@ -1,4 +1,7 @@
-"""Strategy of the Federated Learning."""
+"""Strategy of Federated Learning.
+
+Contains pFedHN/pFedHNPC and FedAvg strategies.
+"""
 
 import json
 from logging import DEBUG
@@ -74,7 +77,7 @@ class pFedHN(fl.server.strategy.Strategy):
         return initial_parameters
 
     def num_fit_clients(self, num_available_clients: int) -> Tuple[int, int]:
-        """Return sample size and required number of clients."""
+        """Return sample size and required number of clients for fit."""
         return min(1, num_available_clients), self.min_available_clients
 
     def num_evaluate_clients(self, num_available_clients: int) -> Tuple[int, int]:
@@ -113,7 +116,9 @@ class pFedHN(fl.server.strategy.Strategy):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """Send delta_theta and other metrics to server for Hypernetwork update.
+        """Send final state_dict of the selected client to.
+
+        the server for updating the Hypernetwork.
 
         These are recieved from only one client which was selected during configure_fit
         """
@@ -126,7 +131,11 @@ class pFedHN(fl.server.strategy.Strategy):
     def configure_evaluate(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
-        """Configure the next round of evaluation."""
+        """Configure the next round of evaluation.
+
+        This is the stage where all clients are being selected for Federated Evaluation
+        . By default evaluation is done once in 30 rounds
+        """
         if server_round % self.evaluate_every != 0:
             return []
 
@@ -151,7 +160,11 @@ class pFedHN(fl.server.strategy.Strategy):
         results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
-        """Aggregate evaluation metrics."""
+        """Aggregate evaluation metrics.
+
+        This function is responsible for the federated evaluation of various metircs
+        recieved from all the clients selected in the configure_evalute function
+        """
         if not results:
             return None, {}
 
@@ -181,20 +194,37 @@ class pFedHN(fl.server.strategy.Strategy):
         return loss, metrics
 
 
-results_fedavg = []
-
-
 class FedAvgWithSaveJson(fl.server.strategy.FedAvg):
-    """Federated strategy for aggregating the weights of the clients as well as logging.
+    """FedAvg strategy along with saving results in json file."""
 
-    them.
-    """
+    # pylint: disable=too-many-arguments
+    def __init__(
+        self,
+        evaluate_every,
+        fraction_fit,
+        min_fit_clients,
+        fraction_evaluate,
+        min_evaluate_clients,
+        min_available_clients,
+    ):
+        super().__init__(
+            fraction_fit=fraction_fit,
+            min_fit_clients=min_fit_clients,
+            fraction_evaluate=fraction_evaluate,
+            min_evaluate_clients=min_evaluate_clients,
+            min_available_clients=min_available_clients,
+        )
+        self.evaluate_every = evaluate_every
+        self.results_fedavg = []
 
     def configure_evaluate(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
-        """Configure the next round of evaluation."""
-        if server_round % 30 != 0:
+        """Configure the next round of evaluation.
+
+        By default all clients are selected for federated evaluation once in 30 rounds
+        """
+        if server_round % self.evaluate_every != 0:
             return []
         sample_size, min_num_clients = super().num_evaluation_clients(
             client_manager.num_available()
@@ -218,9 +248,6 @@ class FedAvgWithSaveJson(fl.server.strategy.FedAvg):
         failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
         """Aggregate evaluation metrics."""
-        if server_round % 30 != 0:
-            return None, {}
-
         if not results:
             return None, {}
 
@@ -242,10 +269,10 @@ class FedAvgWithSaveJson(fl.server.strategy.FedAvg):
             "avg_accuracy": accavg,
         }
 
-        results_fedavg.append(data)
+        self.results_fedavg.append(data)
 
         with open("fedavg.json", "w", encoding="utf-8") as f:
-            json.dump(results_fedavg, f)
+            json.dump(self.results_fedavg, f)
 
         log(
             DEBUG,

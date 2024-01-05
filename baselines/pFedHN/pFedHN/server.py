@@ -1,6 +1,6 @@
-"""Server for pFedHN . Here the HyperNetwork lies and it performs the necessary.
+"""Server for pFedHN, pFedHNPC .
 
-actions.
+Here the HyperNetwork performs the necessary steps
 """
 import concurrent.futures
 import json

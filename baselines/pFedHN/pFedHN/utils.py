@@ -23,7 +23,10 @@ def set_seed(seed):
 
 
 def show_plots():
-    """Display the plots based on results stored in res.json."""
+    """Display the plots based on results stored in <>.json.
+
+    <> can be fedavg.json / pfedhn.json , based on the experiment.
+    """
     with open("<>.json", "r", encoding="utf-8") as json_file:
         data = json.load(json_file)
 
@@ -45,6 +48,3 @@ def show_plots():
     plt.xlabel("Round")
     plt.ylabel("Accuracy")
     plt.show()
-
-
-# show_plots()
