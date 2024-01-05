@@ -53,7 +53,7 @@ def aggregate_inplace(results: List[Tuple[ClientProxy, FitRes]]) -> NDArrays:
     ]
 
     # Let's do in-place aggregation
-    # get first result, then add up each other
+    # Get first result, then add up each other
     params = [
         scaling_factors[0] * x for x in parameters_to_ndarrays(results[0][1].parameters)
     ]
