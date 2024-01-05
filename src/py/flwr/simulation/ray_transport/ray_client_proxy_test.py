@@ -119,15 +119,15 @@ def test_cid_consistency_all_submit_first_workload_consistency() -> None:
     NodeState (at each Proxy) and WorkloadState basic functionality.
     """
     proxies, _ = prep()
-    workload_id = 0
+    run_id = 0
 
     # submit all jobs (collect later)
     shuffle(proxies)
     for prox in proxies:
         # Register state
-        prox.proxy_state.register_workloadstate(workload_id=workload_id)
+        prox.proxy_state.register_workloadstate(run_id=run_id)
         # Retrieve state
-        state = prox.proxy_state.retrieve_workloadstate(workload_id=workload_id)
+        state = prox.proxy_state.retrieve_workloadstate(run_id=run_id)
 
         job = job_fn(prox.cid)
         prox.actor_pool.submit_client_job(
@@ -139,12 +139,12 @@ def test_cid_consistency_all_submit_first_workload_consistency() -> None:
     shuffle(proxies)
     for prox in proxies:
         res, updated_state = prox.actor_pool.get_client_result(prox.cid, timeout=None)
-        prox.proxy_state.update_workloadstate(workload_id, workload_state=updated_state)
+        prox.proxy_state.update_workloadstate(run_id, workload_state=updated_state)
         res = cast(GetPropertiesRes, res)
         assert int(prox.cid) * pi == res.properties["result"]
         assert (
             str(int(prox.cid) * pi)
-            == prox.proxy_state.retrieve_workloadstate(workload_id).state["result"]
+            == prox.proxy_state.retrieve_workloadstate(run_id).state["result"]
         )
 
     ray.shutdown()
