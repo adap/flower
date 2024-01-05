@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from abc import ABC
 
-from flwr.client.workload_state import WorkloadState
+from flwr.client.run_state import RunState
 from flwr.common import (
     Code,
     EvaluateIns,
@@ -38,7 +38,7 @@ from flwr.common import (
 class Client(ABC):
     """Abstract base class for Flower clients."""
 
-    state: WorkloadState
+    state: RunState
 
     def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
         """Return set of client's properties.
@@ -141,12 +141,12 @@ class Client(ABC):
             metrics={},
         )
 
-    def get_state(self) -> WorkloadState:
-        """Get the workload state from this client."""
+    def get_state(self) -> RunState:
+        """Get the run state from this client."""
         return self.state
 
-    def set_state(self, state: WorkloadState) -> None:
-        """Apply a workload state to this client."""
+    def set_state(self, state: RunState) -> None:
+        """Apply a run state to this client."""
         self.state = state
 
     def to_client(self) -> Client:
