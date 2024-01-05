@@ -16,11 +16,11 @@
 
 
 from flwr.client.node_state import NodeState
-from flwr.client.workload_state import WorkloadState
+from flwr.client.run_state import RunState
 from flwr.proto.task_pb2 import TaskIns
 
 
-def _run_dummy_task(state: WorkloadState) -> WorkloadState:
+def _run_dummy_task(state: RunState) -> RunState:
     if "counter" in state.state:
         state.state["counter"] += "1"
     else:
@@ -29,31 +29,31 @@ def _run_dummy_task(state: WorkloadState) -> WorkloadState:
     return state
 
 
-def test_multiworkload_in_node_state() -> None:
+def test_multirun_in_node_state() -> None:
     """Test basic NodeState logic."""
     # Tasks to perform
-    tasks = [TaskIns(run_id=r_id) for r_id in [0, 1, 1, 2, 3, 2, 1, 5]]
-    # the "tasks" is to count how many times each workload is executed
+    tasks = [TaskIns(run_id=run_id) for run_id in [0, 1, 1, 2, 3, 2, 1, 5]]
+    # the "tasks" is to count how many times each run is executed
     expected_values = {0: "1", 1: "1" * 3, 2: "1" * 2, 3: "1", 5: "1"}
 
     # NodeState
     node_state = NodeState()
 
     for task in tasks:
-        r_id = task.run_id
+        run_id = task.run_id
 
         # Register
-        node_state.register_workloadstate(run_id=r_id)
+        node_state.register_runstate(run_id=run_id)
 
-        # Get workload state
-        state = node_state.retrieve_workloadstate(run_id=r_id)
+        # Get run state
+        state = node_state.retrieve_runstate(run_id=run_id)
 
         # Run "task"
         updated_state = _run_dummy_task(state)
 
-        # Update workload state
-        node_state.update_workloadstate(run_id=r_id, workload_state=updated_state)
+        # Update run state
+        node_state.update_runstate(run_id=run_id, run_state=updated_state)
 
     # Verify values
-    for r_id, state in node_state.workload_states.items():
-        assert state.state["counter"] == expected_values[r_id]
+    for run_id, state in node_state.run_states.items():
+        assert state.state["counter"] == expected_values[run_id]

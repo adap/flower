@@ -22,7 +22,7 @@ from typing import List, Tuple, Type, cast
 import ray
 
 from flwr.client import Client, NumPyClient
-from flwr.client.workload_state import WorkloadState
+from flwr.client.run_state import RunState
 from flwr.common import Code, GetPropertiesRes, Status
 from flwr.simulation.ray_transport.ray_actor import (
     ClientRes,
@@ -46,7 +46,7 @@ def get_dummy_client(cid: str) -> Client:
     return DummyClient(cid).to_client()
 
 
-# A dummy workload
+# A dummy run
 def job_fn(cid: str) -> JobFn:  # pragma: no cover
     """Construct a simple job with cid dependency."""
 
@@ -112,11 +112,11 @@ def test_cid_consistency_one_at_a_time() -> None:
     ray.shutdown()
 
 
-def test_cid_consistency_all_submit_first_workload_consistency() -> None:
+def test_cid_consistency_all_submit_first_run_consistency() -> None:
     """Test that ClientProxies get the result of client job they submit.
 
     All jobs are submitted at the same time. Then fetched one at a time. This also tests
-    NodeState (at each Proxy) and WorkloadState basic functionality.
+    NodeState (at each Proxy) and RunState basic functionality.
     """
     proxies, _ = prep()
     run_id = 0
@@ -125,9 +125,9 @@ def test_cid_consistency_all_submit_first_workload_consistency() -> None:
     shuffle(proxies)
     for prox in proxies:
         # Register state
-        prox.proxy_state.register_workloadstate(run_id=run_id)
+        prox.proxy_state.register_runstate(run_id=run_id)
         # Retrieve state
-        state = prox.proxy_state.retrieve_workloadstate(run_id=run_id)
+        state = prox.proxy_state.retrieve_runstate(run_id=run_id)
 
         job = job_fn(prox.cid)
         prox.actor_pool.submit_client_job(
@@ -139,12 +139,12 @@ def test_cid_consistency_all_submit_first_workload_consistency() -> None:
     shuffle(proxies)
     for prox in proxies:
         res, updated_state = prox.actor_pool.get_client_result(prox.cid, timeout=None)
-        prox.proxy_state.update_workloadstate(run_id, workload_state=updated_state)
+        prox.proxy_state.update_runstate(run_id, run_state=updated_state)
         res = cast(GetPropertiesRes, res)
         assert int(prox.cid) * pi == res.properties["result"]
         assert (
             str(int(prox.cid) * pi)
-            == prox.proxy_state.retrieve_workloadstate(run_id).state["result"]
+            == prox.proxy_state.retrieve_runstate(run_id).state["result"]
         )
 
     ray.shutdown()
@@ -162,7 +162,7 @@ def test_cid_consistency_without_proxies() -> None:
         job = job_fn(cid)
         pool.submit_client_job(
             lambda a, c_fn, j_fn, cid_, state: a.run.remote(c_fn, j_fn, cid_, state),
-            (get_dummy_client, job, cid, WorkloadState(state={})),
+            (get_dummy_client, job, cid, RunState(state={})),
         )
 
     # fetch results one at a time

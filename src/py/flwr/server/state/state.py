@@ -150,5 +150,5 @@ class State(abc.ABC):
         """
 
     @abc.abstractmethod
-    def create_workload(self) -> int:
-        """Create one workload."""
+    def create_run(self) -> int:
+        """Create one run."""
