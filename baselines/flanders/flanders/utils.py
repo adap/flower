@@ -48,6 +48,39 @@ def l2_norm(true_matrix, predicted_matrix):
     anomaly_scores = np.sum(delta**2, axis=-1) ** (1.0 / 2)
     return anomaly_scores
 
+
+def save_params(
+    parameters, cid, params_dir="clients_params", remove_last=False, rrl=False
+):
+    """Save parameters in a file.
+
+    Args:
+    - parameters (ndarray): decoded parameters to append at the end of the file
+    - cid (int): identifier of the client
+    - remove_last (bool):
+        if True, remove the last saved parameters and replace with "parameters"
+    - rrl (bool):
+        if True, remove the last saved parameters and replace with the ones
+        saved before this round.
+    """
+    new_params = parameters
+    # Save parameters in clients_params/cid_params
+    path_file = f"{params_dir}/{cid}_params.npy"
+    if os.path.exists(params_dir) is False:
+        os.mkdir(params_dir)
+    if os.path.exists(path_file):
+        # load old parameters
+        old_params = np.load(path_file, allow_pickle=True)
+        if remove_last:
+            old_params = old_params[:-1]
+            if rrl:
+                new_params = old_params[-1]
+        # add new parameters
+        new_params = np.vstack((old_params, new_params))
+
+    # save parameters
+    np.save(path_file, new_params)
+
 def load_all_time_series(params_dir="clients_params", window=0):
     """Load all time series.
 
