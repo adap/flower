@@ -322,7 +322,7 @@ def start_simulation(
             "\n\t\t - You clients hit an out-of-memory (OOM) error and actors couldn't "
             "recover from it. Try launching your simulation with more generous "
             "`client_resources` setting (i.e. it seems %s is "
-            "not enough for your workload). Use fewer concurrent actors. "
+            "not enough for your run). Use fewer concurrent actors. "
             "\n\t\t - You were running a multi-node simulation and all worker nodes "
             "disconnected. The head node might still be alive but cannot accommodate "
             "any actor with resources: %s.",
