@@ -29,11 +29,7 @@ class CreateRunResponse(google.protobuf.message.Message):
         run_id: builtins.int = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
-<<<<<<< HEAD
 global___CreateRunResponse = CreateRunResponse
-=======
-global___CreateWorkloadResponse = CreateWorkloadResponse
->>>>>>> main
 
 class GetNodesRequest(google.protobuf.message.Message):
     """GetNodes messages"""

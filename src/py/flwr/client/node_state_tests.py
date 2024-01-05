@@ -32,7 +32,7 @@ def _run_dummy_task(state: RunState) -> RunState:
 def test_multirun_in_node_state() -> None:
     """Test basic NodeState logic."""
     # Tasks to perform
-    tasks = [TaskIns(run_id=r_id) for r_id in [0, 1, 1, 2, 3, 2, 1, 5]]
+    tasks = [TaskIns(run_id=run_id) for run_id in [0, 1, 1, 2, 3, 2, 1, 5]]
     # the "tasks" is to count how many times each run is executed
     expected_values = {0: "1", 1: "1" * 3, 2: "1" * 2, 3: "1", 5: "1"}
 
@@ -40,20 +40,20 @@ def test_multirun_in_node_state() -> None:
     node_state = NodeState()
 
     for task in tasks:
-        r_id = task.run_id
+        run_id = task.run_id
 
         # Register
-        node_state.register_runstate(run_id=r_id)
+        node_state.register_runstate(run_id=run_id)
 
         # Get run state
-        state = node_state.retrieve_runstate(run_id=r_id)
+        state = node_state.retrieve_runstate(run_id=run_id)
 
         # Run "task"
         updated_state = _run_dummy_task(state)
 
         # Update run state
-        node_state.update_runstate(run_id=r_id, run_state=updated_state)
+        node_state.update_runstate(run_id=run_id, run_state=updated_state)
 
     # Verify values
-    for r_id, state in node_state.run_states.items():
-        assert state.state["counter"] == expected_values[r_id]
+    for run_id, state in node_state.run_states.items():
+        assert state.state["counter"] == expected_values[run_id]
