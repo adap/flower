@@ -171,7 +171,7 @@ def test_inplace_aggregate_fit_equivalence() -> None:
     inplace, _ = fedavg_inplace.aggregate_fit(1, results, failures)
     assert inplace
 
-    # convert to numpy to check similarity
+    # Convert to NumPy to check similarity
     reference_np = parameters_to_ndarrays(reference)
     inplace_np = parameters_to_ndarrays(inplace)
 
