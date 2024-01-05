@@ -47,7 +47,6 @@ class EnhancedServer(Server):
         sampling: int = 0,
         history_dir: str = "clients_params",
         omniscent: bool = True,
-        output_dir: str = "results",
         **kwargs: Any,
     ) -> None:
         """Create a new EnhancedServer instance.
@@ -74,8 +73,6 @@ class EnhancedServer(Server):
             Directory where to save the parameters, by default "clients_params"
         omniscent : bool, optional
             Whether to use the omniscent attack, by default True
-        output_dir : str, optional
-            Directory where to save the results, by default "results"
         """
         super().__init__(*args, **kwargs)
         self.num_malicious = num_malicious
@@ -92,7 +89,6 @@ class EnhancedServer(Server):
         self.old_lambda = 0.0
         self.to_keep = to_keep
         self.omniscent = omniscent
-        self.output_dir = f"{output_dir}/outputs"
         self.malicious_lst: List = []
 
     # pylint: disable=too-many-locals
@@ -109,9 +105,8 @@ class EnhancedServer(Server):
             "attack_fn": self.attack_fn,
             "dataset_name": self.dataset_name,
         }
-        res = self.strategy.evaluate(
-            0, parameters=self.parameters, config=config, output_dir=self.output_dir
-        )
+        res = self.strategy.evaluate(0, parameters=self.parameters)
+
         if res is not None:
             log(
                 INFO,
@@ -141,12 +136,7 @@ class EnhancedServer(Server):
                 )
 
             # Evaluate model using strategy implementation
-            res_cen = self.strategy.evaluate(
-                current_round,
-                parameters=self.parameters,
-                config=config,
-                output_dir=self.output_dir,
-            )
+            res_cen = self.strategy.evaluate(current_round, parameters=self.parameters)
             if res_cen is not None:
                 loss_cen, metrics_cen = res_cen
                 log(

@@ -7,6 +7,7 @@ import os
 import shutil
 
 import flwr as fl
+import pandas as pd
 import hydra
 from flwr.server.client_manager import SimpleClientManager
 from hydra.core.hydra_config import HydraConfig
@@ -62,9 +63,6 @@ def main(cfg: DictConfig) -> None:
     if os.path.exists(cfg.server.history_dir):
         shutil.rmtree(cfg.server.history_dir)
 
-    # Output directory for results
-    save_path = HydraConfig.get().runtime.output_dir
-
     dataset_name = cfg.dataset
     attack_fn = cfg.server.attack_fn
     num_malicious = cfg.server.num_malicious
@@ -118,23 +116,39 @@ def main(cfg: DictConfig) -> None:
             raise ValueError("Dataset not supported")
 
     # 4. Define your strategy
-    strategy = instantiate(
-        cfg.strategy,
-        evaluate_fn=clients[dataset_name][1],
-        on_fit_config_fn=fit_config,
-        fraction_fit=1,
-        fraction_evaluate=0,
-        min_fit_clients=cfg.server.pool_size,
-        min_evaluate_clients=0,
-        num_clients_to_keep=cfg.strategy.to_keep,
-        min_available_clients=cfg.server.pool_size,
-        window=cfg.server.warmup_rounds,
-        distance_function=l2_norm,
-        maxiter=cfg.strategy.maxiter,
-    )
-
+    strategy = None
+    if cfg.strategy.name == "flanders":
+        strategy = instantiate(
+            cfg.strategy.strategy,
+            evaluate_fn=clients[dataset_name][1],
+            on_fit_config_fn=fit_config,
+            fraction_fit=1,
+            fraction_evaluate=0,
+            min_fit_clients=cfg.server.pool_size,
+            min_evaluate_clients=0,
+            num_clients_to_keep=cfg.strategy.strategy.num_clients_to_keep,
+            min_available_clients=cfg.server.pool_size,
+            window=cfg.server.warmup_rounds,
+            distance_function=l2_norm,
+            maxiter=cfg.strategy.strategy.maxiter,
+        )
+    elif cfg.strategy.name == "krum":
+        strategy = instantiate(
+            cfg.strategy.strategy,
+            evaluate_fn=clients[dataset_name][1],
+            on_fit_config_fn=fit_config,
+            fraction_fit=1,
+            fraction_evaluate=0,
+            min_fit_clients=cfg.server.pool_size,
+            min_evaluate_clients=0,
+            num_clients_to_keep=cfg.strategy.strategy.num_clients_to_keep,
+            min_available_clients=cfg.server.pool_size,
+        )
+    else:
+        raise ValueError("Strategy not supported")
+        
     # 5. Start Simulation
-    fl.simulation.start_simulation(
+    history = fl.simulation.start_simulation(
         client_fn=client_fn,
         client_resources=cfg.client_resources,
         num_clients=cfg.server.pool_size,
@@ -150,11 +164,37 @@ def main(cfg: DictConfig) -> None:
             dataset_name=dataset_name,
             threshold=cfg.server.threshold,
             omniscent=cfg.server.omniscent,
-            output_dir=save_path,
         ),
         config=fl.server.ServerConfig(num_rounds=cfg.server.num_rounds),
         strategy=strategy,
     )
+
+    save_path = HydraConfig.get().runtime.output_dir
+
+    # rounds, train_loss = zip(*history.losses_distributed)
+    # _, train_accuracy = zip(*history.metrics_distributed["accuracy"])
+    rounds, test_loss = zip(*history.losses_centralized)
+    _, test_accuracy = zip(*history.metrics_centralized["accuracy"])
+    _, test_auc = zip(*history.metrics_centralized["auc"])
+
+    file_name = os.path.join(save_path, "outputs/all_results.csv",)
+
+    data = pd.DataFrame(
+        {
+            "round": rounds,
+            "test_loss": test_loss,
+            "test_accuracy": test_accuracy,
+            "test_auc": test_auc,
+            "attack": [attack_fn for _ in range(len(rounds))],
+            "dataset_name": [dataset_name for _ in range(len(rounds))],
+            "num_malicious": [num_malicious for _ in range(len(rounds))],
+        }
+    )
+
+    if os.path.exists(file_name):
+        data.to_csv(file_name, mode="a", header=False, index=False)
+    else:
+        data.to_csv(file_name, index=False, header=True)
 
 
 # pylint: disable=unused-argument

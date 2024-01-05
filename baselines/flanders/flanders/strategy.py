@@ -57,7 +57,7 @@ class Flanders(FedAvg):
         initial_parameters: Optional[Parameters] = None,
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
-        to_keep: int = 1,
+        num_clients_to_keep: int = 1,
         window: int = 0,
         maxiter: int = 100,
         alpha: float = 1,
@@ -101,7 +101,7 @@ class Flanders(FedAvg):
         optional
             Function to aggregate metrics during the evaluate phase, by default
             None
-        to_keep : int, optional
+        num_clients_to_keep : int, optional
             Number of clients to keep (i.e., to classify as "good"), by default
             1
         window : int, optional
@@ -130,7 +130,7 @@ class Flanders(FedAvg):
             fit_metrics_aggregation_fn=fit_metrics_aggregation_fn,
             evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation_fn,
         )
-        self.to_keep = to_keep
+        self.num_clients_to_keep = num_clients_to_keep
         self.window = window
         self.maxiter = maxiter
         self.alpha = alpha
@@ -230,10 +230,10 @@ class Flanders(FedAvg):
 
             log(INFO, "Selecting good clients")
             good_clients_idx = sorted(
-                np.argsort(anomaly_scores)[: self.to_keep]
+                np.argsort(anomaly_scores)[: self.num_clients_to_keep]
             )  # noqa
             malicious_clients_idx = sorted(
-                np.argsort(anomaly_scores)[self.to_keep :]
+                np.argsort(anomaly_scores)[self.num_clients_to_keep :]
             )  # noqa
             results = np.array(results)[good_clients_idx].tolist()
             log(INFO, "Good clients: %s", good_clients_idx)
@@ -264,9 +264,7 @@ class Flanders(FedAvg):
     def evaluate(
         self,
         server_round,
-        parameters,
-        config=None,
-        output_dir=None,
+        parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model parameters.
 
@@ -275,13 +273,9 @@ class Flanders(FedAvg):
         if self.evaluate_fn is None:
             # No evaluation function provided
             return None
-        if output_dir is None:
-            raise ValueError("output_dir must not be None")
-        if config is None:
-            config = {}
-
+        
         eval_res = self.evaluate_fn(
-            server_round, parameters_to_ndarrays(parameters), config, output_dir
+            server_round, parameters_to_ndarrays(parameters)
         )  # type: ignore [call-arg]
         if eval_res is None:
             return None

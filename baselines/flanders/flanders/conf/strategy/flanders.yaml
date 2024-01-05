@@ -3,5 +3,6 @@ name: flanders
 
 strategy:
   _target_: flanders.strategy.Flanders
-  to_keep: 1  # number of benign local models to keep for the aggregation (FedAvg)
+  _recursive_: false
+  num_clients_to_keep: 1  # number of benign local models to filter-out before the aggregation
   maxiter: 50 # number of iterations done by MAR
