@@ -14,11 +14,11 @@ from monai.transforms import (
     ScaleIntensity,
     ToTensor,
 )
-from torch.utils.data import Subset
 
 
-def _partition(dataset, num_shards, index):
-    total_size = len(dataset)
+def _partition(files_list, labels_list, num_shards, index):
+    total_size = len(files_list)
+    assert total_size == len(labels_list), f"List of datapoints and labels must be of the same length"
     shard_size = total_size // num_shards
 
     # Calculate start and end indices for the shard
@@ -30,28 +30,33 @@ def _partition(dataset, num_shards, index):
         end_idx = start_idx + shard_size
 
     # Create a subset for the shard
-    shard = Subset(dataset, range(start_idx, end_idx))
-    return shard
+    files = files_list[start_idx: end_idx]
+    labels = labels_list[start_idx: end_idx]
+    return files, labels
 
 
 def load_data(num_shards, index):
     image_file_list, image_label_list, num_total, num_class = _download_data()
+
+    # get partition given index
+    files_list, labels_list = _partition(image_file_list, image_label_list, num_shards, index)
+
+
     trainX, trainY, valX, valY, testX, testY = _split_data(
-        image_file_list, image_label_list, num_total
+        files_list, labels_list, len(files_list)
     )
     train_transforms, val_transforms = _get_transforms()
 
-    train_ds = _partition(
-        MedNISTDataset(trainX, trainY, train_transforms), num_shards, index
-    )
+    train_ds = MedNISTDataset(trainX, trainY, train_transforms)
     train_loader = DataLoader(train_ds, batch_size=300, shuffle=True)
 
-    val_ds = _partition(MedNISTDataset(valX, valY, val_transforms), num_shards, index)
+    val_ds = MedNISTDataset(valX, valY, val_transforms)
     val_loader = DataLoader(val_ds, batch_size=300)
 
-    test_ds = _partition(
-        MedNISTDataset(testX, testY, val_transforms), num_shards, index
-    )
+    test_ds = MedNISTDataset(testX, testY, val_transforms)
+    test_loader = DataLoader(test_ds, batch_size=300)
+
+    return train_loader, val_loader, test_loader, num_class
     test_loader = DataLoader(test_ds, batch_size=300)
 
     return train_loader, val_loader, test_loader, num_class
