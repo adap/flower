@@ -68,7 +68,7 @@ Afterwards you are ready to start the Flower server as well as the clients. You 
 python3 server.py
 ```
 
-Now you are ready to start the Flower clients which will participate in the learning. To do so simply open two more terminal windows and run the following commands.
+Now you are ready to start the Flower clients which will participate in the learning. To do so simply open two more terminal windows and run the following commands.  Clients will train a [DenseNet121](https://docs.monai.io/en/stable/networks.html#densenet121) from MONAI. If a GPU is present in your system, clients will use it.
 
 Start client 1 in the first terminal:
 
