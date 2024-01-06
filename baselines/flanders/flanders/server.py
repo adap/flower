@@ -14,8 +14,8 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.server import Server, fit_clients
 
-from .utils import flatten_params, save_params
 from .strategy import Flanders
+from .utils import flatten_params, save_params
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
@@ -101,11 +101,6 @@ class EnhancedServer(Server):
         log(INFO, "Initializing global parameters")
         self.parameters = self._get_initial_parameters(timeout=timeout)
         log(INFO, "Evaluating initial parameters")
-        config = {
-            "num_malicious": self.num_malicious,
-            "attack_fn": self.attack_fn,
-            "dataset_name": self.dataset_name,
-        }
         res = self.strategy.evaluate(0, parameters=self.parameters)
 
         if res is not None:
@@ -319,9 +314,7 @@ class EnhancedServer(Server):
 
         # Aggregate training results
         log(INFO, "fit_round - Aggregating training results")
-        aggregated_result = self.strategy.aggregate_fit(
-            server_round, results, failures
-        )
+        aggregated_result = self.strategy.aggregate_fit(server_round, results, failures)
 
         if isinstance(self.strategy, Flanders):
             (
@@ -339,7 +332,10 @@ class EnhancedServer(Server):
                     break
                 self.malicious_selected = False
 
-            # For clients detected as malicious, replace the last params in their history with tha current global model, otherwise the forecasting in next round won't be reliable (see the paper for more details)
+            # For clients detected as malicious, replace the last params in
+            # their history with tha current global model, otherwise the
+            # forecasting in next round won't be reliable (see the paper for
+            # more details)
             if self.warmup_rounds > server_round:
                 log(INFO, "Saving parameters of clients")
                 for idx in malicious_clients_idx:

@@ -5,7 +5,6 @@ from threading import Lock
 from typing import Callable, Dict, Optional, Tuple
 
 import numpy as np
-import pandas as pd
 import torch
 from flwr.common import NDArrays, Parameters, Scalar, parameters_to_ndarrays
 from natsort import natsorted
@@ -81,6 +80,7 @@ def save_params(
     # save parameters
     np.save(path_file, new_params)
 
+
 def load_all_time_series(params_dir="clients_params", window=0):
     """Load all time series.
 
@@ -104,19 +104,20 @@ def flatten_params(params):
     return np.concatenate(params, axis=None).ravel()
 
 
+# pylint: disable=unused-argument
 def evaluate_aggregated(
     evaluate_fn: Optional[
         Callable[[int, NDArrays, Dict[str, Scalar]], Tuple[float, Dict[str, Scalar]]]
     ],
     server_round: int,
-    parameters: Parameters
+    parameters: Parameters,
 ):
     """Evaluate model parameters using an evaluation function."""
     if evaluate_fn is None:
         # No evaluation function provided
         return None
     parameters_ndarrays = parameters_to_ndarrays(parameters)
-    eval_res = evaluate_fn(server_round, parameters_ndarrays)
+    eval_res = evaluate_fn(server_round, parameters_ndarrays, {})
     if eval_res is None:
         return None
     loss, metrics = eval_res
@@ -124,9 +125,8 @@ def evaluate_aggregated(
     return loss, metrics
 
 
-def mnist_evaluate(
-    server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
-):
+# pylint: disable=unused-argument
+def mnist_evaluate(server_round: int, parameters: NDArrays, config: Dict[str, Scalar]):
     """Evaluate MNIST model on the test set."""
     # determine device
     device = torch.device("cpu")
@@ -142,9 +142,8 @@ def mnist_evaluate(
     return loss, {"accuracy": accuracy, "auc": auc}
 
 
-def cifar_evaluate(
-    server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
-):
+# pylint: disable=unused-argument
+def cifar_evaluate(server_round: int, parameters: NDArrays, config: Dict[str, Scalar]):
     """Evaluate CIFAR-10 model on the test set."""
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -160,9 +159,8 @@ def cifar_evaluate(
     return loss, {"accuracy": accuracy, "auc": auc}
 
 
-def income_evaluate(
-    server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
-):
+# pylint: disable=unused-argument
+def income_evaluate(server_round: int, parameters: NDArrays, config: Dict[str, Scalar]):
     """Evaluate Income model on the test set."""
     model = LogisticRegression()
     model = set_sklearn_model_params(model, parameters)
@@ -181,9 +179,8 @@ def income_evaluate(
     return loss, {"accuracy": accuracy, "auc": auc}
 
 
-def house_evaluate(
-    server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
-):
+# pylint: disable=unused-argument
+def house_evaluate(server_round: int, parameters: NDArrays, config: Dict[str, Scalar]):
     """Evaluate House model on the test set."""
     model = ElasticNet(alpha=1, warm_start=True)
     model = set_sklearn_model_params(model, parameters)

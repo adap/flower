@@ -7,8 +7,8 @@ import os
 import shutil
 
 import flwr as fl
-import pandas as pd
 import hydra
+import pandas as pd
 from flwr.server.client_manager import SimpleClientManager
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
@@ -146,7 +146,7 @@ def main(cfg: DictConfig) -> None:
         )
     else:
         raise ValueError("Strategy not supported")
-        
+
     # 5. Start Simulation
     history = fl.simulation.start_simulation(
         client_fn=client_fn,
@@ -175,7 +175,10 @@ def main(cfg: DictConfig) -> None:
     _, test_accuracy = zip(*history.metrics_centralized["accuracy"])
     _, test_auc = zip(*history.metrics_centralized["auc"])
 
-    file_name = os.path.join(save_path, "outputs/all_results.csv",)
+    file_name = os.path.join(
+        save_path,
+        "outputs/all_results.csv",
+    )
 
     data = pd.DataFrame(
         {
@@ -186,7 +189,7 @@ def main(cfg: DictConfig) -> None:
             "attack": [attack_fn for _ in range(len(rounds))],
             "dataset_name": [dataset_name for _ in range(len(rounds))],
             "num_malicious": [num_malicious for _ in range(len(rounds))],
-            "strategy": [cfg.strategy.name for _ in range(len(rounds))]
+            "strategy": [cfg.strategy.name for _ in range(len(rounds))],
         }
     )
 
