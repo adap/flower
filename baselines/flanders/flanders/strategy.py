@@ -261,27 +261,6 @@ class Flanders(FedAvg):
             malicious_clients_idx,
         )
 
-    def evaluate(
-        self,
-        server_round,
-        parameters
-    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
-        """Evaluate model parameters.
-
-        Evaluate model parameters using an evaluation function (centralized evaluation).
-        """
-        if self.evaluate_fn is None:
-            # No evaluation function provided
-            return None
-        
-        eval_res = self.evaluate_fn(
-            server_round, parameters_to_ndarrays(parameters)
-        )  # type: ignore [call-arg]
-        if eval_res is None:
-            return None
-        loss, metrics = eval_res
-        return loss, metrics
-
 
 # pylint: disable=too-many-locals, too-many-arguments, invalid-name
 def mar(X, pred_step, alpha=1, beta=1, maxiter=100, window=0):

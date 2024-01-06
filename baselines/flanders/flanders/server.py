@@ -15,6 +15,7 @@ from flwr.server.history import History
 from flwr.server.server import Server, fit_clients
 
 from .utils import flatten_params, save_params
+from .strategy import Flanders
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
@@ -322,41 +323,42 @@ class EnhancedServer(Server):
             server_round, results, failures
         )
 
-        (
-            parameters_aggregated,
-            metrics_aggregated,
-            good_clients_idx,
-            malicious_clients_idx,
-        ) = aggregated_result
-        log(INFO, "Malicious clients: %s", malicious_clients_idx)
+        if isinstance(self.strategy, Flanders):
+            (
+                parameters_aggregated,
+                metrics_aggregated,
+                good_clients_idx,
+                malicious_clients_idx,
+            ) = aggregated_result
+            log(INFO, "Malicious clients: %s", malicious_clients_idx)
 
-        log(INFO, "clients_state: %s", clients_state)
-        for idx in good_clients_idx:
-            if clients_state[str(idx)]:
-                self.malicious_selected = True
-                break
-            self.malicious_selected = False
+            log(INFO, "clients_state: %s", clients_state)
+            for idx in good_clients_idx:
+                if clients_state[str(idx)]:
+                    self.malicious_selected = True
+                    break
+                self.malicious_selected = False
 
-        # For clients detected as malicious, set their parameters to be the
-        # averaged ones in their files otherwise the forecasting in next round
-        # won't be reliable
-        if self.warmup_rounds > server_round:
-            log(INFO, "Saving parameters of clients")
-            for idx in malicious_clients_idx:
-                if self.sampling > 0:
-                    new_params = flatten_params(
-                        parameters_to_ndarrays(parameters_aggregated)
-                    )[self.params_indexes]
-                else:
-                    new_params = flatten_params(
-                        parameters_to_ndarrays(parameters_aggregated)
+            # For clients detected as malicious, replace the last params in their history with tha current global model, otherwise the forecasting in next round won't be reliable (see the paper for more details)
+            if self.warmup_rounds > server_round:
+                log(INFO, "Saving parameters of clients")
+                for idx in malicious_clients_idx:
+                    if self.sampling > 0:
+                        new_params = flatten_params(
+                            parameters_to_ndarrays(parameters_aggregated)
+                        )[self.params_indexes]
+                    else:
+                        new_params = flatten_params(
+                            parameters_to_ndarrays(parameters_aggregated)
+                        )
+                    save_params(
+                        new_params,
+                        idx,
+                        params_dir=self.history_dir,
+                        remove_last=True,
+                        rrl=True,
                     )
-                save_params(
-                    new_params,
-                    idx,
-                    params_dir=self.history_dir,
-                    remove_last=True,
-                    rrl=True,
-                )
+        else:
+            parameters_aggregated, metrics_aggregated = aggregated_result
 
         return parameters_aggregated, metrics_aggregated, (results, failures)

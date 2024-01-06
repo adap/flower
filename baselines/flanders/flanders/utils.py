@@ -125,7 +125,7 @@ def evaluate_aggregated(
 
 
 def mnist_evaluate(
-    server_round: int, parameters: NDArrays
+    server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
 ):
     """Evaluate MNIST model on the test set."""
     # determine device
@@ -143,7 +143,7 @@ def mnist_evaluate(
 
 
 def cifar_evaluate(
-    server_round: int, parameters: NDArrays
+    server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
 ):
     """Evaluate CIFAR-10 model on the test set."""
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -161,7 +161,7 @@ def cifar_evaluate(
 
 
 def income_evaluate(
-    server_round: int, parameters: NDArrays
+    server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
 ):
     """Evaluate Income model on the test set."""
     model = LogisticRegression()
@@ -182,7 +182,7 @@ def income_evaluate(
 
 
 def house_evaluate(
-    server_round: int, parameters: NDArrays
+    server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
 ):
     """Evaluate House model on the test set."""
     model = ElasticNet(alpha=1, warm_start=True)

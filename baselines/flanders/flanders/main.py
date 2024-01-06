@@ -171,8 +171,6 @@ def main(cfg: DictConfig) -> None:
 
     save_path = HydraConfig.get().runtime.output_dir
 
-    # rounds, train_loss = zip(*history.losses_distributed)
-    # _, train_accuracy = zip(*history.metrics_distributed["accuracy"])
     rounds, test_loss = zip(*history.losses_centralized)
     _, test_accuracy = zip(*history.metrics_centralized["accuracy"])
     _, test_auc = zip(*history.metrics_centralized["auc"])
@@ -188,6 +186,7 @@ def main(cfg: DictConfig) -> None:
             "attack": [attack_fn for _ in range(len(rounds))],
             "dataset_name": [dataset_name for _ in range(len(rounds))],
             "num_malicious": [num_malicious for _ in range(len(rounds))],
+            "strategy": [cfg.strategy.name for _ in range(len(rounds))]
         }
     )
 
