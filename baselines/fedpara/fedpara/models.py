@@ -2,7 +2,6 @@
 
 import math
 from typing import Dict, Tuple
-
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -10,7 +9,137 @@ from flwr.common import Scalar
 from torch import nn
 from torch.nn import init
 from torch.utils.data import DataLoader
+class LowRankNN(nn.Module):
+    def __init__(self,input, output, rank,activation: str = "relu",) -> None:
+        super(LowRankNN, self).__init__()
+        
+        self.X = nn.Parameter(
+            torch.empty(size=(input, rank)),
+            requires_grad=True,
+        )
+        self.Y = nn.Parameter(
+            torch.empty(size=(output,rank)), requires_grad=True
+        )
 
+        if activation == "leakyrelu":
+            activation = "leaky_relu"
+        init.kaiming_normal_(self.X, mode="fan_out", nonlinearity=activation)
+        init.kaiming_normal_(self.Y, mode="fan_out", nonlinearity=activation)
+    
+    def forward(self,x):
+        out = torch.einsum("xr,yr->xy", self.X, self.Y)
+        return out
+    
+class Linear(nn.Module):
+    def __init__(self, input, output, ratio, activation: str = "relu",bias= True, pfedpara=True) -> None:
+        super(Linear, self).__init__()
+        rank = self._calc_from_ratio(ratio,input, output)
+        self.w1 = LowRankNN(input, output, rank, activation)
+        self.w2 = LowRankNN(input, output, rank, activation)
+        # make the bias for each layer
+        if bias:
+            self.bias = nn.Parameter(torch.zeros(output))
+        self.pfedpara = pfedpara
+
+    def _calc_from_ratio(self, ratio,input, output):
+        # Return the low-rank of sub-matrices given the compression ratio
+        # minimum possible parameter
+        r1 = int(np.ceil(np.sqrt(output)))
+        r2 = int(np.ceil(np.sqrt(input)))
+        r = np.min((r1, r2))
+        # maximum possible rank, 
+        """
+        To solve it we need to know the roots of quadratic equation: ax^2+bx+c=0
+        a = kernel**2
+        b = out channel+ in channel
+        c = - num_target_params/2
+        r3 is floored because we cannot take the ceil as it results a bigger number of parameters than the original problem 
+        """
+        num_target_params = (
+            output * input
+        )
+        a, b, c = input, output,- num_target_params/2
+        discriminant = b**2 - 4 * a * c
+        r3 = math.floor((-b+math.sqrt(discriminant))/(2*a))
+        rank=math.ceil((1-ratio)*r+ ratio*r3)
+        return rank
+    
+    def forward(self,x):
+        # personalized
+        if self.pfedpara:
+            w = self.w1() * self.w2() + self.w1()
+        else:
+            w = self.w1() * self.w2()
+        out = F.linear(x, w,self.bias)
+        return out
+
+        
+class FC(nn.Module):
+    def __init__(self, input_size=28**2, hidden_size=256, num_classes=10, ratio=0.1, param_type="standard",activation: str = "relu",):
+        super(FC, self).__init__()
+
+        if param_type == "standard":
+            self.fc1 = nn.Linear(input_size, hidden_size) 
+            self.relu = nn.ReLU()
+            self.fc2 = nn.Linear(hidden_size, num_classes)
+            self.softmax = nn.Softmax(dim=1)
+        elif param_type == "lowrank":
+            self.fc1 = Linear(input_size, hidden_size, ratio, activation)
+            self.relu = nn.ReLU()
+            self.fc2 = Linear(hidden_size, num_classes, ratio, activation)
+            self.softmax = nn.Softmax(dim=1)
+        else:
+            raise ValueError("param_type must be either standard or lowrank")
+    @property
+    def per_param(self):
+        """
+            Return the personalized parameters of the model
+        """
+        if self.method == "pfedpara":
+            params = {"fc1.X":self.fc1.w1.X, "fc1.Y":self.fc1.w1.Y, "fc2.X":self.fc2.w1.X, "fc2.Y":self.fc2.w1.Y}
+        # return the w1 only of each layer, same format as the state_dict
+        elif self.method == "fedper":
+            params = {"fc2.w1":self.fc2.w1, "fc2.w2":self.fc2.w2}
+        else:
+            raise ValueError("method must be either pfedpara, fedper")
+        return params
+    @property
+    def load_per_param(self,state_dict):
+        """
+            Load the personalized parameters of the model
+        """
+        if self.method == "pfedpara":
+            self.fc1.w1.X = state_dict["fc1.X"]
+            self.fc1.w1.Y = state_dict["fc1.Y"]
+            self.fc2.w1.X = state_dict["fc2.X"]
+            self.fc2.w1.Y = state_dict["fc2.Y"]
+        elif self.method == "fedper":
+            self.fc2.w1 = state_dict["fc2.w1"]
+            self.fc2.w2 = state_dict["fc2.w2"]
+        else:
+            raise ValueError("method must be either pfedpara, fedper")
+    @property
+    def model_size(self):
+        """
+        Return the total number of trainable parameters (in million paramaters) and the size of the model in MB.
+        """
+        total_trainable_params = sum(
+        p.numel() for p in self.parameters() if p.requires_grad)/1e6
+        param_size = 0
+        for param in self.parameters():
+            param_size += param.nelement() * param.element_size()
+        buffer_size = 0
+        for buffer in self.buffers():
+            buffer_size += buffer.nelement() * buffer.element_size()
+        size_all_mb = (param_size + buffer_size) / 1024**2
+        return total_trainable_params, size_all_mb
+    
+    def forward(self,x):
+        out = self.fc1(x)
+        out = self.relu(out)
+        out = self.fc2(out)
+        out = self.softmax(out)
+        return out
 
 class LowRank(nn.Module):
     """Low-rank convolutional layer."""

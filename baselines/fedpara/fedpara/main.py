@@ -32,28 +32,58 @@ def main(cfg: DictConfig) -> None:
     )
 
     # 3. Define clients
-    client_fn = client.gen_client_fn(
-        train_loaders=train_loaders,
-        model=cfg.model,
-        num_epochs=cfg.num_epochs,
-    )
+    # In this scheme the responsability of choosing the client is on the client manager
+    if cfg.strategy.min_evaluate_clients:
+        client_fn = client.gen_client_fn(
+            train_loaders=train_loaders,
+            test_loader=test_loader,
+            model=cfg.model,
+            num_epochs=cfg.num_epochs,
+            args={"device": cfg.client_device, "algorithm": cfg.strategy.algorithm},
+            state_path=cfg.state_path,
+        )
+    else :
+        client_fn = client.gen_client_fn(
+            train_loaders=train_loaders,
+            model=cfg.model,
+            num_epochs=cfg.num_epochs,
+            args={"device": cfg.client_device, "algorithm": cfg.strategy.algorithm},
+        )
 
-    evaluate_fn = server.gen_evaluate_fn(
-        num_clients=cfg.num_clients,
-        test_loader=test_loader,
-        model=cfg.model,
-        device=cfg.server_device,
-    )
+    if not cfg.strategy.min_evaluate_clients :
+        evaluate_fn = server.gen_evaluate_fn(
+            num_clients=cfg.num_clients,
+            test_loader=test_loader,
+            model=cfg.model,
+            device=cfg.server_device,
+            state_path=cfg.state_path,
+        )
+
+    def get_on_fit_config():
+        def fit_config_fn(server_round: int):
+            fit_config = OmegaConf.to_container(cfg.hyperparams, resolve=True)
+            fit_config["curr_round"] = server_round
+            return fit_config
+
+        return fit_config_fn
 
     net_glob = instantiate(cfg.model)
 
     # 4. Define strategy
-    strategy = instantiate(
-        cfg.strategy,
-        evaluate_fn=evaluate_fn,
-        on_fit_config_fn=server.get_on_fit_config(dict(cfg.hyperparams)),
-        initial_parameters=fl.common.ndarrays_to_parameters(get_parameters(net_glob)),
-    )
+    if cfg.strategy.min_evaluate_clients:
+        strategy = instantiate(
+            cfg.strategy,
+            on_fit_config_fn=get_on_fit_config(),
+            initial_parameters=fl.common.ndarrays_to_parameters(get_parameters(net_glob)),
+        )
+    else :
+        strategy = instantiate(
+            cfg.strategy,
+            evaluate_fn=evaluate_fn,
+            on_fit_config_fn=get_on_fit_config(),
+            initial_parameters=fl.common.ndarrays_to_parameters(get_parameters(net_glob)),
+        )
+
 
     # 5. Start Simulation
     history = fl.simulation.start_simulation(

@@ -6,7 +6,7 @@ num_rounds: 100
 clients_per_round: 10
 num_epochs: 5
 batch_size: 10
-
+state_pah: ./state/
 server_device: cuda
 
 client_resources:
@@ -14,31 +14,26 @@ client_resources:
   num_gpus: 0.0625
 
 dataset_config:
-  name: FEMNIST
-  partition: non-iid #redundent
-  num_classes: 62
-  alpha: 0 # redundant
-
+  name: MNIST
+  num_classes: 10
+  shard_size: 300
+  data_seed: ${seed}
 model:
-  _target_: fedpara.models.VGG
+  _target_: fedpara.models.FC
   num_classes: ${dataset_config.num_classes}
-  conv_type: lowrank # lowrank or standard
+  weights: lowrank # lowrank or standard 
   activation: relu # relu or leaky_relu
-  ratio: 0.1 # lowrank ratio
+  ratio: 0.5 # lowrank ratio
 
 hyperparams:
-  eta_l: 0.1
+  eta_l: 0.01
   learning_decay: 0.999
-  momentum: 0.0
-  weight_decay: 0
 
 strategy:
   _target_: fedpara.strategy.pFedPara
   algorithm: pFedPara
   fraction_fit: 0.00001
   fraction_evaluate: 0.0
-  min_evaluate_clients: 0
+  min_evaluate_clients: ${clients_per_round}
   min_fit_clients: ${clients_per_round}
   min_available_clients: ${clients_per_round}
-  accept_failures: false
-

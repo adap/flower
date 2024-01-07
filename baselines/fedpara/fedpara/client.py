@@ -1,8 +1,8 @@
 """Client for FedPara."""
 
 from collections import OrderedDict
-from typing import Callable, Dict, List, Tuple
-
+from typing import Callable, Dict, List, Tuple, Optional
+import copy
 import flwr as fl
 import torch
 from flwr.common import NDArrays, Scalar
@@ -60,24 +60,98 @@ class FlowerClient(fl.client.NumPyClient):
             {},
         )
 
+class PFedParaClient(fl.client.NumPyClient):
+    """personalized FedPara Client"""
+    def __init__(
+        self,
+        cid: int,
+        net: torch.nn.Module,
+        train_loader: DataLoader,
+        test_dataset: List[DataLoader],
+        device: str,
+        num_epochs: int,
+        state_path: str,
+    ): 
+        
+        self.cid = cid
+        self.net = net
+        self.train_loader = train_loader
+        self.test_dataset = test_dataset
+        self.device = torch.device(device)
+        self.num_epochs = num_epochs
+        self.state_path = state_path
+    
+    def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
+        """Return the parameters of the current net."""
+        return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
+        
+    def _set_parameters(self, parameters: NDArrays) -> None:
+        params_dict = zip(self.net.state_dict().keys(), parameters)
+        state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+        self.net.load_state_dict(state_dict, strict=True)
+            
+    def fit(
+        self, parameters: NDArrays, config: Dict[str, Scalar]
+    ) -> Tuple[NDArrays, int, Dict]:
+        """Train the network on the training set."""
+        self._set_parameters(parameters)
+        print(f"Client {self.cid} Training...")
+
+        train(
+            self.net,
+            self.train_loader,
+            self.device,
+            epochs=self.num_epochs,
+            hyperparams=config,
+            round=config["curr_round"],
+        )
+
+        return (
+            self.get_parameters({}),
+            len(self.train_loader),
+            {}, 
+        )
+    def evaluate(self, parameters: NDArrays, config: Dict[str, Scalar]) -> Tuple[int, float, Dict]:
+        """Evaluate the network on the test set."""
+        self._set_parameters(parameters)
+        print(f"Client {self.cid} Evaluating...")
+
+        return (
+            len(self.test_dataset[self.cid]),
+            train.test(self.net, self.test_dataset[self.cid], self.device),
+            {},
+        )
 
 def gen_client_fn(
     train_loaders: List[DataLoader],
     model: DictConfig,
     num_epochs: int,
-) -> Callable[[str], FlowerClient]:
+    args: Dict,
+    test_loader: Optional[List[DataLoader]]=None,
+    state_path: Optional[str]=None,    
+) -> Callable[[str], fl.client.NumPyClient]:
     """Return a function which creates a new FlowerClient for a given cid."""
 
-    def client_fn(cid: str) -> FlowerClient:
+    def client_fn(cid: str) -> fl.client.NumPyClient:
         """Create a new FlowerClient for a given cid."""
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-        return FlowerClient(
-            cid=int(cid),
-            net=instantiate(model).to(device),
-            train_loader=train_loaders[int(cid)],
-            device=device,
-            num_epochs=num_epochs,
-        )
-
+        cid = int(cid)
+        if args['algorithm'] == "pfedpara" or args['algorithm'] == "fedper":
+            return PFedParaClient(
+                cid=cid,
+                net=instantiate(model).to(args["device"]),
+                train_loader=train_loaders[cid],
+                test_dataset=copy.deepcopy(test_loader),
+                device=args["device"],
+                num_epochs=num_epochs,
+                state_path=state_path,
+            )
+        else:
+            return FlowerClient(
+                cid=cid,
+                net=instantiate(model).to(args["device"]),
+                train_loader=train_loaders[cid],
+                device=args["device"],
+                num_epochs=num_epochs,
+            )
+       
     return client_fn

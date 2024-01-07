@@ -11,7 +11,8 @@ from collections import defaultdict
 
 import numpy as np
 from torch.utils.data import Dataset
-
+import logging
+from collections import Counter
 
 class DatasetSplit(Dataset):
     """An abstract Dataset class wrapped around Pytorch Dataset class."""
@@ -97,3 +98,15 @@ def noniid(dataset, no_participants, alpha=0.5):
         for j in range(no_classes):
             clas_weight[i, j] = float(datasize[i, j]) / float((train_img_size[i]))
     return per_participant_list, clas_weight
+
+def mnist_niid(dataset: Dataset, num_clients: int, shard_size: int, seed: int) -> np.ndarray:
+    """ Partitioning technique as mentioned in https://arxiv.org/pdf/1602.05629.pdf"""
+    indices = dataset.targets[np.argsort(dataset.targets)].numpy()
+    logging.debug(Counter(dataset.targets[indices].numpy()))
+    silos = np.array_split(indices, len(dataset) // shard_size)# randomly assign silos to clients
+    np.random.seed(seed+17)
+    np.random.shuffle(silos)
+    clients = np.array(np.array_split(silos, num_clients)).reshape(num_clients, -1)
+    logging.debug(clients.shape)
+    logging.debug(Counter([len(Counter(dataset.targets[client].numpy())) for client in clients]))
+    return clients
