@@ -9,6 +9,7 @@ from flwr.common import Scalar
 from torch import nn
 from torch.nn import init
 from torch.utils.data import DataLoader
+
 class LowRankNN(nn.Module):
     def __init__(self,input, output, rank,activation: str = "relu",) -> None:
         super(LowRankNN, self).__init__()
@@ -26,8 +27,8 @@ class LowRankNN(nn.Module):
         init.kaiming_normal_(self.X, mode="fan_out", nonlinearity=activation)
         init.kaiming_normal_(self.Y, mode="fan_out", nonlinearity=activation)
     
-    def forward(self,x):
-        out = torch.einsum("xr,yr->xy", self.X, self.Y)
+    def forward(self):
+        out = torch.einsum("yr,xr->yx",self.Y, self.X)
         return out
     
 class Linear(nn.Module):
@@ -75,49 +76,27 @@ class Linear(nn.Module):
 
         
 class FC(nn.Module):
-    def __init__(self, input_size=28**2, hidden_size=256, num_classes=10, ratio=0.1, param_type="standard",activation: str = "relu",):
+    def __init__(self, input_size=28**2, hidden_size=256, num_classes=10, ratio=0.5, param_type="lowrank",activation: str = "relu",algorithm="pfedpara"):
         super(FC, self).__init__()
-
+        self.input_size = input_size
+        self.method = algorithm.lower()
         if param_type == "standard":
             self.fc1 = nn.Linear(input_size, hidden_size) 
             self.relu = nn.ReLU()
             self.fc2 = nn.Linear(hidden_size, num_classes)
             self.softmax = nn.Softmax(dim=1)
         elif param_type == "lowrank":
-            self.fc1 = Linear(input_size, hidden_size, ratio, activation)
+            pfedpara = False
+            if self.method == "pfedpara":
+                pfedpara = True
+            
+            self.fc1 = Linear(input_size, hidden_size, ratio, activation, pfedpara=pfedpara)
             self.relu = nn.ReLU()
-            self.fc2 = Linear(hidden_size, num_classes, ratio, activation)
+            self.fc2 = Linear(hidden_size, num_classes, ratio, activation, pfedpara=pfedpara)
             self.softmax = nn.Softmax(dim=1)
         else:
             raise ValueError("param_type must be either standard or lowrank")
-    @property
-    def per_param(self):
-        """
-            Return the personalized parameters of the model
-        """
-        if self.method == "pfedpara":
-            params = {"fc1.X":self.fc1.w1.X, "fc1.Y":self.fc1.w1.Y, "fc2.X":self.fc2.w1.X, "fc2.Y":self.fc2.w1.Y}
-        # return the w1 only of each layer, same format as the state_dict
-        elif self.method == "fedper":
-            params = {"fc2.w1":self.fc2.w1, "fc2.w2":self.fc2.w2}
-        else:
-            raise ValueError("method must be either pfedpara, fedper")
-        return params
-    @property
-    def load_per_param(self,state_dict):
-        """
-            Load the personalized parameters of the model
-        """
-        if self.method == "pfedpara":
-            self.fc1.w1.X = state_dict["fc1.X"]
-            self.fc1.w1.Y = state_dict["fc1.Y"]
-            self.fc2.w1.X = state_dict["fc2.X"]
-            self.fc2.w1.Y = state_dict["fc2.Y"]
-        elif self.method == "fedper":
-            self.fc2.w1 = state_dict["fc2.w1"]
-            self.fc2.w2 = state_dict["fc2.w2"]
-        else:
-            raise ValueError("method must be either pfedpara, fedper")
+
     @property
     def model_size(self):
         """
@@ -135,6 +114,7 @@ class FC(nn.Module):
         return total_trainable_params, size_all_mb
     
     def forward(self,x):
+        x = x.view(-1, self.input_size)
         out = self.fc1(x)
         out = self.relu(out)
         out = self.fc2(out)
@@ -456,8 +436,8 @@ def train(  # pylint: disable=too-many-arguments
     optimizer = torch.optim.SGD(
         net.parameters(),
         lr=lr,
-        momentum=hyperparams["momentum"],
-        weight_decay=hyperparams["weight_decay"],
+        momentum=0,
+        weight_decay=0,
     )
     net.train()
     for _ in range(epochs):

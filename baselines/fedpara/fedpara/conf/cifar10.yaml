@@ -29,8 +29,7 @@ model:
 hyperparams:
   eta_l: 0.1
   learning_decay: 0.992
-  momentum: 0.0
-  weight_decay: 0
+
 
 strategy:
   _target_: fedpara.strategy.FedPara

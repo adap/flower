@@ -14,7 +14,7 @@ def load_datasets(
 ) -> Tuple[List[DataLoader], DataLoader]:
     """Load the dataset and return the dataloaders for the clients and the server."""
     print("Loading data...")
-    match config.name:
+    match config['name']:
         case "CIFAR10":
             Dataset = datasets.CIFAR10
         case "CIFAR100":
@@ -23,8 +23,8 @@ def load_datasets(
             Dataset = datasets.MNIST
         case _:
             raise NotImplementedError
-    data_directory = f"./data/{config.name.lower()}/"
-    match config.name:
+    data_directory = f"./data/{config['name'].lower()}/"
+    match config['name']:
         case "CIFAR10" | "CIFAR100":
             ds_path = f"{data_directory}train_{num_clients}_{config.alpha:.2f}.pkl"
             transform_train = transforms.Compose(
@@ -44,6 +44,12 @@ def load_datasets(
             try:
                 with open(ds_path, "rb") as file:
                     train_datasets = pickle.load(file)
+                dataset_train = Dataset(
+                data_directory, train=True, download=False, transform=transform_train
+                )
+                dataset_test = Dataset(
+                    data_directory, train=False, download=False, transform=transform_test
+                )
             except FileNotFoundError:
                 dataset_train = Dataset(
                     data_directory, train=True, download=True, transform=transform_train
@@ -54,6 +60,9 @@ def load_datasets(
                     train_datasets, _ = noniid(dataset_train, num_clients, config.alpha)
                 pickle.dump(train_datasets, open(ds_path, "wb"))
                 train_datasets = train_datasets.values()
+                dataset_test = Dataset(
+                    data_directory, train=False, download=True, transform=transform_test
+                )
    
         case "MNIST":
             ds_path = f"{data_directory}train_{num_clients}.pkl"
@@ -68,16 +77,23 @@ def load_datasets(
             )
             try:
                 train_datasets = pickle.load(open(ds_path, "rb"))
+                dataset_train = Dataset(
+                    data_directory, train=True, download=False, transform=transform_train
+                )
+                dataset_test = Dataset(
+                    data_directory, train=False, download=False, transform=transform_test
+                )
             except FileNotFoundError:
                 dataset_train = Dataset(
                     data_directory, train=True, download=True, transform=transform_train
                 )
                 train_datasets = mnist_niid(dataset_train, num_clients, config.shard_size, config.data_seed)
                 pickle.dump(train_datasets, open(ds_path, "wb"))
+                dataset_test = Dataset(
+                    data_directory, train=False, download=True, transform=transform_test
+                )
 
-    dataset_test = Dataset(
-        data_directory, train=False, download=True, transform=transform_test
-    )
+
     test_loader = DataLoader(dataset_test, batch_size=batch_size, num_workers=2)
     train_loaders = [
         DataLoader(

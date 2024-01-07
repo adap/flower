@@ -6,8 +6,10 @@ num_rounds: 100
 clients_per_round: 10
 num_epochs: 5
 batch_size: 10
-state_pah: ./state/
-server_device: cuda
+state_path: ./client_states/
+client_device: cuda
+algorithm: pFedPara
+
 
 client_resources:
   num_cpus: 2
@@ -17,23 +19,24 @@ dataset_config:
   name: MNIST
   num_classes: 10
   shard_size: 300
+
   data_seed: ${seed}
+  
 model:
   _target_: fedpara.models.FC
   num_classes: ${dataset_config.num_classes}
-  weights: lowrank # lowrank or standard 
+  param_type: lowrank # lowrank or standard 
   activation: relu # relu or leaky_relu
   ratio: 0.5 # lowrank ratio
-
+  algorithm: ${algorithm}
 hyperparams:
   eta_l: 0.01
   learning_decay: 0.999
 
 strategy:
-  _target_: fedpara.strategy.pFedPara
-  algorithm: pFedPara
+  _target_: fedpara.strategy.FedAvg
   fraction_fit: 0.00001
-  fraction_evaluate: 0.0
+  fraction_evaluate: 0.00001
   min_evaluate_clients: ${clients_per_round}
   min_fit_clients: ${clients_per_round}
   min_available_clients: ${clients_per_round}

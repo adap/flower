@@ -1,8 +1,8 @@
 """Utility functions for FedPara."""
-
 import random
 from pathlib import Path
-
+from secrets import token_hex
+from typing import Optional, Union
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
@@ -10,7 +10,7 @@ from flwr.common import NDArrays
 from flwr.server import History
 from omegaconf import DictConfig
 from torch.nn import Module
-
+import time, os, pickle
 
 def plot_metric_from_history(
     hist: History,
@@ -70,3 +70,71 @@ def seed_everything(seed):
 def get_parameters(net: Module) -> NDArrays:
     """Get the parameters of the network."""
     return [val.cpu().numpy() for _, val in net.state_dict().items()]
+
+def save_results_as_pickle(
+    history: History,
+    default_filename: Optional[str] = "results.pkl",
+) -> None:
+    """Save results from simulation to pickle.
+
+    Parameters
+    ----------
+    history: History
+        History returned by start_simulation.
+    file_path: Union[str, Path]
+        Path to file to create and store both history and extra_results.
+        If path is a directory, the default_filename will be used.
+        path doesn't exist, it will be created. If file exists, a
+        randomly generated suffix will be added to the file name. This
+        is done to avoid overwritting results.
+    extra_results : Optional[Dict]
+        A dictionary containing additional results you would like
+        to be saved to disk. Default: {} (an empty dictionary)
+    default_filename: Optional[str]
+        File used by default if file_path points to a directory instead
+        to a file. Default: "results.pkl"
+    """
+    file_path = set_client_state_save_path("./outputs/")
+    path = Path(file_path)
+
+    # ensure path exists
+    path.mkdir(exist_ok=True, parents=True)
+
+    def _add_random_suffix(path_: Path):
+        """Add a random suffix to the file name."""
+        print(f"File `{path_}` exists! ")
+        suffix = token_hex(4)
+        print(f"New results to be saved with suffix: {suffix}")
+        return path_.parent / (path_.stem + "_" + suffix + ".pkl")
+
+    def _complete_path_with_default_name(path_: Path):
+        """Append the default file name to the path."""
+        print("Using default filename")
+        if default_filename is None:
+            return path_
+        return path_ / default_filename
+
+    if path.is_dir():
+        path = _complete_path_with_default_name(path)
+
+    if path.is_file():
+        path = _add_random_suffix(path)
+
+    print(f"Results will be saved into: {path}")
+    # data = {"history": history, **extra_results}
+    data = {"history": history}
+    # save results to pickle
+    with open(str(path), "wb") as handle:
+        pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+def set_client_state_save_path(path: str) -> str:
+    """Set the client state save path."""
+    client_state_save_path = time.strftime("%Y-%m-%d")
+    client_state_sub_path = time.strftime("%H-%M-%S")
+    client_state_save_path = (
+        f"{path}{client_state_save_path}/{client_state_sub_path}"
+    )
+    if not os.path.exists(client_state_save_path):
+        os.makedirs(client_state_save_path)
+    return client_state_save_path

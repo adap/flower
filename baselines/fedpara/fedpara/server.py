@@ -2,13 +2,11 @@
 
 from collections import OrderedDict
 from typing import Callable, Dict, Optional, Tuple
-
 import torch
 from flwr.common import NDArrays, Scalar
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
-
 from fedpara.models import test
 
 
@@ -18,7 +16,6 @@ def get_on_fit_config(hypearparams: Dict):
     def fit_config_fn(server_round: int):
         hypearparams["curr_round"] = server_round
         return hypearparams
-
     return fit_config_fn
 
 

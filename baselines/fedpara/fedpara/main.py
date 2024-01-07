@@ -5,13 +5,12 @@ import hydra
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
-
 from fedpara import client, server, utils
 from fedpara.dataset import load_datasets
-from fedpara.utils import get_parameters, seed_everything
+from fedpara.utils import get_parameters, save_results_as_pickle, seed_everything, set_client_state_save_path
 
 
-@hydra.main(config_path="conf", config_name="cifar10", version_base=None)
+@hydra.main(config_path="conf", config_name="mnist", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.
 
@@ -24,6 +23,9 @@ def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
     seed_everything(cfg.seed)
     OmegaConf.to_container(cfg, resolve=True)
+    if 'state_path' in cfg: state_path=set_client_state_save_path(cfg.state_path)
+    else: state_path = None
+
     # 2. Prepare dataset
     train_loaders, test_loader = load_datasets(
         config=cfg.dataset_config,
@@ -33,31 +35,15 @@ def main(cfg: DictConfig) -> None:
 
     # 3. Define clients
     # In this scheme the responsability of choosing the client is on the client manager
-    if cfg.strategy.min_evaluate_clients:
-        client_fn = client.gen_client_fn(
-            train_loaders=train_loaders,
-            test_loader=test_loader,
-            model=cfg.model,
-            num_epochs=cfg.num_epochs,
-            args={"device": cfg.client_device, "algorithm": cfg.strategy.algorithm},
-            state_path=cfg.state_path,
-        )
-    else :
-        client_fn = client.gen_client_fn(
-            train_loaders=train_loaders,
-            model=cfg.model,
-            num_epochs=cfg.num_epochs,
-            args={"device": cfg.client_device, "algorithm": cfg.strategy.algorithm},
-        )
 
-    if not cfg.strategy.min_evaluate_clients :
-        evaluate_fn = server.gen_evaluate_fn(
-            num_clients=cfg.num_clients,
-            test_loader=test_loader,
-            model=cfg.model,
-            device=cfg.server_device,
-            state_path=cfg.state_path,
-        )
+    client_fn = client.gen_client_fn(
+        train_loaders=train_loaders,
+        test_loader=test_loader,
+        model=cfg.model,
+        num_epochs=cfg.num_epochs,
+        args={"device": cfg.client_device, "algorithm": cfg.algorithm},
+        state_path=state_path,
+    )
 
     def get_on_fit_config():
         def fit_config_fn(server_round: int):
@@ -76,7 +62,15 @@ def main(cfg: DictConfig) -> None:
             on_fit_config_fn=get_on_fit_config(),
             initial_parameters=fl.common.ndarrays_to_parameters(get_parameters(net_glob)),
         )
+
     else :
+        evaluate_fn = server.gen_evaluate_fn(
+            num_clients=cfg.num_clients,
+            test_loader=test_loader,
+            model=cfg.model,
+            device=cfg.server_device,
+            state_path=cfg.state_path,
+        )
         strategy = instantiate(
             cfg.strategy,
             evaluate_fn=evaluate_fn,
@@ -98,7 +92,8 @@ def main(cfg: DictConfig) -> None:
             "_memory": 30 * 1024 * 1024 * 1024,
         },
     )
-
+    save_results_as_pickle(history)
+    
     # 6. Save results
     save_path = HydraConfig.get().runtime.output_dir
     file_suffix = "_".join(
