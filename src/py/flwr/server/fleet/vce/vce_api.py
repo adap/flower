@@ -18,7 +18,7 @@ from logging import INFO
 from time import sleep
 
 # construct nodes
-from typing import cast
+from typing import cast, Dict
 
 import ray
 
@@ -44,6 +44,7 @@ from flwr.server.fleet.message_handler.message_handler import (
     push_task_res,
 )
 from flwr.server.state import StateFactory
+from flwr.client.node_state import NodeState
 
 
 def _construct_actor_pool():
@@ -138,11 +139,13 @@ def run_vce(num_clients: int, state_factory: StateFactory):
     log(INFO, f"Constructed ActorPool with: {pool.num_actors} actors")
 
     # Register nodes (as many as number of possible clients)
+    # Each node has its own state
+    node_states: Dict[int, NodeState] = {}
     create_node_responses = []
-
     for _ in range(num_clients):
         res = create_node(request=None, state=state_factory.state())
         create_node_responses.append(res)
+        node_states[res.node.node_id] = NodeState()
 
     log(INFO, f"Registered {len(create_node_responses)} nodes")
 
@@ -154,6 +157,7 @@ def run_vce(num_clients: int, state_factory: StateFactory):
             task_ins_pulled = pull_task_ins(request=res, state=state_factory.state())
             if task_ins_pulled.task_ins_list:
                 print(f"Tasks PULLED for NODE {res.node}")
+                node_id = res.node.node_id
 
                 for task_ins in task_ins_pulled.task_ins_list:
                     # get message field
@@ -162,6 +166,10 @@ def run_vce(num_clients: int, state_factory: StateFactory):
                     )
                     if server_msg is None:
                         raise NotImplementedError("Can only handle legacy messages...")
+                    
+                    # register and retrive runstate
+                    node_states[node_id].register_runstate(run_id=task_ins.run_id)
+                    run_state = node_states[node_id].retrieve_runstate(run_id=task_ins.run_id)
 
                     # Determine how to process message and prepare response
                     (
@@ -173,13 +181,15 @@ def run_vce(num_clients: int, state_factory: StateFactory):
 
                     # Submite a task to the pool
                     pool.submit_client_job(
-                        lambda a, c_fn, j_fn, cid_: a.run.remote(c_fn, j_fn, cid_),
-                        (client_fn, func, res.node.node_id),
+                        lambda a, c_fn, j_fn, cid_, state: a.run.remote(c_fn, j_fn, cid_, run_state),
+                        (client_fn, func, res.node.node_id, run_state),
                     )
 
                     # Wait until result is ready
-                    result = pool.get_client_result(res.node.node_id, timeout=None)
+                    result, updated_runstate = pool.get_client_result(res.node.node_id, timeout=None)
 
+                    # Update runstate
+                    node_states[node_id].update_runstate(task_ins.run_id, updated_runstate)
                     client_message = post_func(result)
                     task_res = wrap_client_message_in_task_res(client_message)
                     task_res = configure_task_res(task_res, task_ins, res.node)
