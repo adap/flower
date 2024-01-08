@@ -18,7 +18,7 @@ from logging import INFO
 from time import sleep
 
 # construct nodes
-from typing import cast, Dict
+from typing import Dict, cast
 
 import ray
 
@@ -33,6 +33,7 @@ from flwr.client.message_handler.task_handler import (
     get_server_message_from_task_ins,
     wrap_client_message_in_task_res,
 )
+from flwr.client.node_state import NodeState
 from flwr.common import EvaluateRes, FitRes, GetParametersRes, GetPropertiesRes, serde
 from flwr.common.logger import log
 from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
@@ -44,7 +45,6 @@ from flwr.server.fleet.message_handler.message_handler import (
     push_task_res,
 )
 from flwr.server.state import StateFactory
-from flwr.client.node_state import NodeState
 
 
 def _construct_actor_pool():
@@ -54,6 +54,7 @@ def _construct_actor_pool():
         DefaultActor,
         VirtualClientEngineActorPool,
     )
+
     client_resources = {"num_cpus": 2, "num_gpus": 0.0}
 
     def create_actor_fn():
@@ -166,10 +167,12 @@ def run_vce(num_clients: int, state_factory: StateFactory):
                     )
                     if server_msg is None:
                         raise NotImplementedError("Can only handle legacy messages...")
-                    
+
                     # register and retrive runstate
                     node_states[node_id].register_runstate(run_id=task_ins.run_id)
-                    run_state = node_states[node_id].retrieve_runstate(run_id=task_ins.run_id)
+                    run_state = node_states[node_id].retrieve_runstate(
+                        run_id=task_ins.run_id
+                    )
 
                     # Determine how to process message and prepare response
                     (
@@ -181,15 +184,21 @@ def run_vce(num_clients: int, state_factory: StateFactory):
 
                     # Submite a task to the pool
                     pool.submit_client_job(
-                        lambda a, c_fn, j_fn, cid_, state: a.run.remote(c_fn, j_fn, cid_, run_state),
+                        lambda a, c_fn, j_fn, cid_, run_state: a.run.remote(
+                            c_fn, j_fn, cid_, run_state
+                        ),
                         (client_fn, func, res.node.node_id, run_state),
                     )
 
                     # Wait until result is ready
-                    result, updated_runstate = pool.get_client_result(res.node.node_id, timeout=None)
+                    result, updated_runstate = pool.get_client_result(
+                        res.node.node_id, timeout=None
+                    )
 
                     # Update runstate
-                    node_states[node_id].update_runstate(task_ins.run_id, updated_runstate)
+                    node_states[node_id].update_runstate(
+                        task_ins.run_id, updated_runstate
+                    )
                     client_message = post_func(result)
                     task_res = wrap_client_message_in_task_res(client_message)
                     task_res = configure_task_res(task_res, task_ins, res.node)
@@ -209,19 +218,29 @@ def run_vce(num_clients: int, state_factory: StateFactory):
 
 ### Dummy code providing a Client and client_fn
 from random import random
-from flwr.client import NumPyClient
+
 import tensorflow as tf
 
+from flwr.client import NumPyClient
+
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
-NUM_TRAIN=512
-NUM_TEST=256
+NUM_TRAIN = 512
+NUM_TEST = 256
+
 
 # Define a dummy client
 class DummyFlowerClient(NumPyClient):
     def __init__(self):
-        self.model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
+        self.model = tf.keras.applications.MobileNetV2(
+            (32, 32, 3), classes=10, weights=None
+        )
         opt = tf.keras.optimizers.Adam(learning_rate=0.01)
-        self.model.compile(optimizer=opt, loss="sparse_categorical_crossentropy", metrics=["accuracy"],)
+        self.model.compile(
+            optimizer=opt,
+            loss="sparse_categorical_crossentropy",
+            metrics=["accuracy"],
+        )
+
     def get_parameters(self, config):
         return self.model.get_weights()
 
@@ -247,5 +266,6 @@ class DummyFlowerClient(NumPyClient):
         loss, accuracy = self.model.evaluate(x_test[:NUM_TEST], y_test[:NUM_TEST])
         return random(), len(x_test[:NUM_TEST]), {"accuracy": accuracy}
 
+
 def client_fn(cid: str = None):
-    return DummyFlowerClient()
+    return DummyFlowerClient().to_client()
