@@ -16,12 +16,14 @@
 
 import numpy as np
 
+from flwr.common import Parameters
+
 from .dp_strategy_wrapper import DPStrategyWrapperFixedClipping
 from .fedavg import FedAvg
 
 
 def test_add_gaussian_noise() -> None:
-    """Test _add_gaussian_noise function."""
+    """Test add_gaussian_noise function."""
     # Prepare
     strategy = FedAvg()
     dp_wrapper = DPStrategyWrapperFixedClipping(strategy, 1.5, 1.5, 5)
@@ -30,7 +32,7 @@ def test_add_gaussian_noise() -> None:
     std_dev = 0.1
 
     # Execute
-    update_noised = dp_wrapper._add_gaussian_noise(update, std_dev)
+    update_noised = dp_wrapper.add_gaussian_noise(update, std_dev)
 
     # Assert
     # Check that the shape of the result is the same as the input
@@ -46,36 +48,38 @@ def test_add_gaussian_noise() -> None:
         assert np.any(np.abs(noise_added) > 0)
 
 
-# def test_add_noise_to_updates() -> None:
-#     """Test _add_noise_to_updates function."""
-#     # Prepare
-#     strategy = FedAvg()
-#     dp_wrapper = DPStrategyWrapperFixedClipping(strategy, 1.5, 1.5, 5)
-#     parameters = {"weights": np.array([[1, 2], [3, 4]]), "bias": np.array([0.5, 1.0])}
+def test_add_noise_to_updates() -> None:
+    """Test _add_noise_to_updates function."""
+    # Prepare
+    strategy = FedAvg()
+    dp_wrapper = DPStrategyWrapperFixedClipping(strategy, 1.5, 1.5, 5)
+    parameters = Parameters(
+        weights=np.array([[1, 2], [3, 4]]), bias=np.array([0.5, 1.0])
+    )
 
+    # Execute
+    # pylint: disable-next=protected-access
+    result = dp_wrapper._add_noise_to_updates(parameters)
 
-#     # Execute
-#     result = dp_wrapper._add_noise_to_updates(parameters)
+    # Assert
+    # Check that the shape of the result is the same as the input params
+    for key, value in parameters._asdict().items():
+        assert value.shape == result._asdict()[key].shape
 
-#     # Assert
-#     # Check that the shape of the result is the same as the input params
-#     for key, value in parameters.items():
-#         assert value.shape == result[key].shape
-
-#     # Check that the values have been changed
-#     for key, value in parameters.items():
-#         assert np.any(value != result[key])
+    # Check that the values have been changed
+    for key, value in parameters._asdict().items():
+        assert np.any(value != result._asdict()[key])
 
 
 def test_get_update_norm() -> None:
-    """Test _get_update_norm function."""
+    """Test get_update_norm function."""
     # Prepare
     strategy = FedAvg()
     dp_wrapper = DPStrategyWrapperFixedClipping(strategy, 1.5, 1.5, 5)
     update = [np.array([[1, 2], [3, 4]]), np.array([[5, 6], [7, 8]])]
 
     # Execute
-    result = dp_wrapper._get_update_norm(update)
+    result = dp_wrapper.get_update_norm(update)
 
     expected = float(
         np.linalg.norm(np.concatenate([sub_update.flatten() for sub_update in update]))
@@ -84,33 +88,29 @@ def test_get_update_norm() -> None:
     # Assert
     assert expected == result
 
-    # def test_clip_model_updates() -> None:
-    #     """Test _clip_model_updates method."""
-    #     # Prepare
-    #     strategy = FedAvg()
-    #     dp_wrapper = DPStrategyWrapperFixedClipping(strategy, 1.5, 1.5, 5)
 
-    #     updates = [
-    #         {
-    #             "weights": np.array([[1.5, -0.5], [2.0, -1.0]]),
-    #             "biases": np.array([0.5, -0.5]),
-    #         },
-    #         {
-    #             "weights": np.array([[-0.5, 1.5], [-1.0, 2.0]]),
-    #             "biases": np.array([-0.5, 0.5]),
-    #         },
-    #     ]
+def test_clip_model_updates() -> None:
+    """Test _clip_model_updates method."""
+    # Prepare
+    strategy = FedAvg()
+    dp_wrapper = DPStrategyWrapperFixedClipping(strategy, 1.5, 1.5, 5)
+
+    updates = [
+        np.array([[1.5, -0.5], [2.0, -1.0]]),
+        np.array([0.5, -0.5]),
+        np.array([[-0.5, 1.5], [-1.0, 2.0]]),
+        np.array([-0.5, 0.5]),
+    ]
 
     # Execute
-    # clipped_updates = dp_wrapper._clip_model_update(updates)
+    # pylint: disable-next=protected-access
+    clipped_updates = dp_wrapper._clip_model_update(updates)
 
     # Assert
-    # assert len(clipped_updates) == len(updates)
+    assert len(clipped_updates) == len(updates)
 
-    # for clipped_update, original_update in zip(clipped_updates, updates):
-    #     for key, clipped_value in clipped_update.items():
-    #         original_value = original_update[key]
-    #         clip_norm = np.linalg.norm(original_value)
-    #         assert np.all(clipped_value <= clip_norm) and np.all(
-    #             clipped_value >= -clip_norm
-    #         )
+    for clipped_update, original_update in zip(clipped_updates, updates):
+        clip_norm = np.linalg.norm(original_update)
+        assert np.all(clipped_update <= clip_norm) and np.all(
+            clipped_update >= -clip_norm
+        )
