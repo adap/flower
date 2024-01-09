@@ -86,16 +86,20 @@ def load_data(partition):
     # 60 % for the federated train and 20 % for the federated validation (both in fit)
     partition_train_valid = partition_full["train"].train_test_split(train_size=0.75)
     trainloader = DataLoader(
-        partition_train_valid["train"], batch_size=32,
-        shuffle=True, collate_fn=collate_fn, num_workers=1
+        partition_train_valid["train"],
+        batch_size=32,
+        shuffle=True,
+        collate_fn=collate_fn,
+        num_workers=1,
     )
     valloader = DataLoader(
-        partition_train_valid["test"], batch_size=32,
-        collate_fn=collate_fn, num_workers=1
+        partition_train_valid["test"],
+        batch_size=32,
+        collate_fn=collate_fn,
+        num_workers=1,
     )
     testloader = DataLoader(
-        partition_full["test"], batch_size=32,
-        collate_fn=collate_fn, num_workers=1
+        partition_full["test"], batch_size=32, collate_fn=collate_fn, num_workers=1
     )
     return trainloader, valloader, testloader
 
