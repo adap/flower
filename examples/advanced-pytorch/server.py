@@ -88,7 +88,8 @@ def main():
 
     args = parser.parse_args()
 
-    model = utils.load_efficientnet(classes=10)
+    # model = utils.load_efficientnet(classes=10)
+    model = utils.load_alexnet(classes=10)
 
     model_parameters = [val.cpu().numpy() for _, val in model.state_dict().items()]
 
