@@ -58,6 +58,7 @@ def test_add_noise_to_updates() -> None:
 
     # Execute
     result = parameters_to_ndarrays(
+        # pylint: disable-next=protected-access
         dp_wrapper._add_noise_to_updates(ndarrays_to_parameters(parameters))
     )
 
