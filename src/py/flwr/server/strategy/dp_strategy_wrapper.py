@@ -47,8 +47,8 @@ class DPStrategyWrapperFixedClipping(Strategy):
     noise_multiplier: float
         The noise multiplier for the Gaussian mechanism for model updates.
         A value of 1.0 or higher is recommended for strong privacy.
-    clip_norm: float
-        The value of the clipping norm.
+    clipping_threshold: float
+        The value of the clipping threshold.
     num_sampled_clients: int
         The number of clients that are sampled on each round.
     """
@@ -58,7 +58,7 @@ class DPStrategyWrapperFixedClipping(Strategy):
         self,
         strategy: Strategy,
         noise_multiplier: float,
-        clip_norm: float,
+        clipping_threshold: float,
         num_sampled_clients: int,
     ) -> None:
         super().__init__()
@@ -68,14 +68,14 @@ class DPStrategyWrapperFixedClipping(Strategy):
         if noise_multiplier < 0:
             raise Exception("The noise multiplier should be a non-negative value.")
 
-        if clip_norm <= 0:
+        if clipping_threshold <= 0:
             raise Exception("The clipping threshold should be a positive value.")
 
         if num_sampled_clients <= 0:
             raise Exception("The clipping threshold should be a positive value.")
 
         self.noise_multiplier = noise_multiplier
-        self.clip_norm = clip_norm
+        self.clipping_threshold = clipping_threshold
         self.num_sampled_clients = num_sampled_clients
 
         self.current_round_params: NDArrays = []
@@ -173,12 +173,12 @@ class DPStrategyWrapperFixedClipping(Strategy):
         return self.strategy.evaluate(server_round, parameters)
 
     def _clip_model_update(self, update: NDArrays) -> NDArrays:
-        """Clip model update based on the computed clip_norm.
+        """Clip model update based on the computed clipping_threshold.
 
         FlatClip method of the paper: https://arxiv.org/pdf/1710.06963.pdf
         """
         update_norm = self._get_update_norm(update)
-        scaling_factor = min(1, self.clip_norm / update_norm)
+        scaling_factor = min(1, self.clipping_threshold / update_norm)
         update_clipped: NDArrays = [layer * scaling_factor for layer in update]
         return update_clipped
 
@@ -194,8 +194,8 @@ class DPStrategyWrapperFixedClipping(Strategy):
         return ndarrays_to_parameters(
             self._add_gaussian_noise(
                 parameters_to_ndarrays(parameters),
-                (self.noise_multiplier * self.clip_norm)
-                / (self.num_sampled_clients ** (0.5)),
+                float((self.noise_multiplier * self.clipping_threshold)
+                / self.num_sampled_clients ** (0.5)),
             )
         )
 
