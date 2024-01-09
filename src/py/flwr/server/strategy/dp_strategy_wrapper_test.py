@@ -16,7 +16,7 @@
 
 import numpy as np
 
-from flwr.common import Parameters
+from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
 
 from .dp_strategy_wrapper import DPStrategyWrapperFixedClipping
 from .fedavg import FedAvg
@@ -40,7 +40,8 @@ def test_add_gaussian_noise() -> None:
         assert layer.shape == layer_noised.shape
 
     # Check that the values have been changed and is not equal to the original update
-    assert update != update_noised
+    for layer, layer_noised in zip(update, update_noised):
+        assert not np.array_equal(layer, layer_noised)
 
     # Check that the noise has been added
     for layer, layer_noised in zip(update, update_noised):
@@ -49,26 +50,21 @@ def test_add_gaussian_noise() -> None:
 
 
 def test_add_noise_to_updates() -> None:
-    """Test _add_noise_to_updates function."""
+    """Test _add_noise_to_updates method."""
     # Prepare
     strategy = FedAvg()
     dp_wrapper = DPStrategyWrapperFixedClipping(strategy, 1.5, 1.5, 5)
-    parameters = Parameters(
-        weights=np.array([[1, 2], [3, 4]]), bias=np.array([0.5, 1.0])
-    )
+    parameters = [np.array([[1, 2], [3, 4]]), np.array([[5, 6], [7, 8]])]
 
     # Execute
-    # pylint: disable-next=protected-access
-    result = dp_wrapper._add_noise_to_updates(parameters)
+    result = parameters_to_ndarrays(
+        dp_wrapper._add_noise_to_updates(ndarrays_to_parameters(parameters))
+    )
 
     # Assert
-    # Check that the shape of the result is the same as the input params
-    for key, value in parameters._asdict().items():
-        assert value.shape == result._asdict()[key].shape
-
-    # Check that the values have been changed
-    for key, value in parameters._asdict().items():
-        assert np.any(value != result._asdict()[key])
+    for layer in result:
+        assert layer.shape == parameters[0].shape  # Check shape consistency
+        assert not np.array_equal(layer, parameters[0])  # Check if noise was added
 
 
 def test_get_update_norm() -> None:
