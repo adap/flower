@@ -1,5 +1,5 @@
 Run Flower using Docker
-====================
+=======================
 
 The simplest way to get started with Flower is by using the pre-made Docker images, which you can
 find on `Docker Hub <https://hub.docker.com/r/flwr/server/tags>`_.
@@ -237,7 +237,7 @@ Using a different Flower or Python version
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you want to use a different version of Flower or Python, you can do so by changing the tag.
-All versions we provide are available on `Docker Hub <https://hub.docker.com/r/flwr/server/tags>`_.
+All versions we provide are available on `Docker Hub <https://hub.docker.com/r/flwr>`_.
 
 Pinning a Docker image to a specific version
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
