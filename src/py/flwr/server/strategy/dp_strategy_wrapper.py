@@ -172,6 +172,7 @@ class DPStrategyWrapperFixedClipping(Strategy):
         """Evaluate model parameters using an evaluation function from the strategy."""
         return self.strategy.evaluate(server_round, parameters)
 
+    # pylint: disable-next=protected-access
     def _clip_model_update(self, update: NDArrays) -> NDArrays:
         """Clip model update based on the computed clipping_threshold.
 
@@ -182,6 +183,7 @@ class DPStrategyWrapperFixedClipping(Strategy):
         update_clipped: NDArrays = [layer * scaling_factor for layer in update]
         return update_clipped
 
+    # pylint: disable-next=protected-access
     @staticmethod
     def _get_update_norm(update: NDArrays) -> float:
         flattened_update = np.concatenate(
@@ -189,16 +191,20 @@ class DPStrategyWrapperFixedClipping(Strategy):
         )
         return float(np.linalg.norm(flattened_update))
 
+    # pylint: disable-next=protected-access
     def _add_noise_to_updates(self, parameters: Parameters) -> Parameters:
         """Add Gaussian noise to model params."""
         return ndarrays_to_parameters(
             self._add_gaussian_noise(
                 parameters_to_ndarrays(parameters),
-                float((self.noise_multiplier * self.clipping_threshold)
-                / self.num_sampled_clients ** (0.5)),
+                float(
+                    (self.noise_multiplier * self.clipping_threshold)
+                    / self.num_sampled_clients ** (0.5)
+                ),
             )
         )
 
+    # pylint: disable-next=protected-access
     @staticmethod
     def _add_gaussian_noise(update: NDArrays, std_dev: float) -> NDArrays:
         update_noised = [
