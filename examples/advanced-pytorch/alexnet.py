@@ -3,9 +3,9 @@ import torch.nn as nn
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-class Net(nn.Module):  #lr = 0.01
+class AlexNet(nn.Module):  #lr = 0.01
     def __init__(self, class_num=10):
-        super(Net, self).__init__()
+        super(AlexNet, self).__init__()
         self.features = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1),
             nn.ReLU(inplace=True),

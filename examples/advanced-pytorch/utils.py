@@ -1,7 +1,6 @@
 import torch
 import torchvision.transforms as transforms
 from torchvision.datasets import CIFAR10
-from alexnet import Net
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -129,5 +128,6 @@ def get_model_params(model):
     """Returns a model's parameters."""
     return [val.cpu().numpy() for _, val in model.state_dict().items()]
 
-def load_alexnet():
-    return Net
+def load_alexnet(class_num):
+    from alexnet import AlexNet
+    return AlexNet(class_num)
