@@ -146,20 +146,21 @@ The ``Dockerfile`` contains the instructions that assemble the client image.
   COPY client.py .
   ENTRYPOINT ["python", "-c", "from flwr.client import run_client; run_client()", "--callable", "client:flower"]
 
-In the first two instructions, we instruct Docker to use the client image tagged
+In the first three lines, we instruct Docker to use the client image tagged
 ``1.6.0-py3.8-ubuntu22.04`` as a base and set our working directory to ``/app``. All of the
 following instructions will now be executed in the ``/app`` directory. In lines 4-5, we install the
-Python dependencies by first copying the ``client-code/requirements.txt`` into the image and running
-``pip`` install on it. In the last two lines, we first copy the file ``client-code/client.py`` into
-the image and set the entry point. The entry point may look a bit unusual, but it corresponds to the
-``flower-client --callable client:flower`` command.
+Python dependencies by copying the ``client-code/requirements.txt`` file into the image and running
+``pip`` install on it. In the last two lines, we copy the ``client-code/client.py`` file into
+the image and set the entry point. The entry point may look a little unusual, but it is the same as
+if we ran the command ``flower-client --callable client:flower`` in a terminal.
 
-You may be wondering why we don't copy all files in the client code directory in a single
-``COPY`` instruction and then install the dependencies. The reason we do this split is cache
-optimization. If both files are copied at once, exactly one image layer is created, which can be
-cached. However, the layer is always recreated as soon as one of the files is changed. This means
-that the dependencies are reinstalled every time, even though the ``requirements.txt`` file has not
-been changed.
+You may be wondering why we don't copy all files in the client-code directory in a single
+``COPY`` instruction and then install the dependencies. The reason we do this split is to use the
+Docker build cache to reduce build time. If both files are copied in a single ``COPY`` instruction,
+exactly one image layer will be created. The layer will be cached for future builds. However, the
+layer is recreated as soon as one of the files is changed. This means that the dependencies are
+reinstalled every time, even though we only change the client code. To prevent this behavior, we
+first install the dependencies and after that copy the client code.
 
 **client-code directory**
 
@@ -174,19 +175,22 @@ dependencies which are used in the driver code.
 Building the client image
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In this step we will build the client image and install the ``driver.py`` dependencies.
+First, we will build the client image and install the ``driver.py`` dependencies.
 
 .. code-block:: bash
 
   $ cd examples/docker-client
-  $ docker build -t flwr-client:0.1.0 client-code
+  $ docker build -f Dockerfile -t flwr-client:0.1.0 client-code
   $ pip install -r requirements.txt
-  $ docker network create --driver bridge flwr-net
 
-In the last step we create a new bridge network called ``flwr-net``. User-defined networks like
+Next, we create a new bridge network called ``flwr-net``. User-defined networks like
 ``flwr-net`` can resolve a container name to an IP address. This feature is not available in the
 default bridge network. Using container names simplifies the example because we don't have to first
 figure out what the server's IP address is.
+
+.. code-block:: bash
+
+  $ docker network create --driver bridge flwr-net
 
 Running the example
 ~~~~~~~~~~~~~~~~~~~
