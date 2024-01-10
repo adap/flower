@@ -80,7 +80,7 @@ class VirtualClientEngineActor(ABC):
                 raise UnexpectedServerMessage()
 
             # Instantiate the client
-            client = client_fn(cid)
+            client = client_fn(cid)  # client_fn must return Client type
             client.set_state(state)
             # Execute task
             message = None

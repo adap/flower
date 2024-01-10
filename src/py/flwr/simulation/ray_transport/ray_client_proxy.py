@@ -17,15 +17,10 @@
 
 import traceback
 from logging import ERROR
-from typing import Optional, Union, cast
+from typing import Optional
 
 from flwr import common
-from flwr.client import Client, ClientFn
-from flwr.client.client import (
-    maybe_call_evaluate,
-    maybe_call_fit,
-    maybe_call_get_properties,
-)
+from flwr.client import ClientFn
 from flwr.client.node_state import NodeState
 from flwr.common import serde
 from flwr.common.logger import log
@@ -103,7 +98,6 @@ class RayActorClientProxy(ClientProxy):
         self, ins: common.GetPropertiesIns, timeout: Optional[float]
     ) -> common.GetPropertiesRes:
         """Return client's properties."""
-
         ins_proto = serde.get_properties_ins_to_proto(ins)
         server_msg = ServerMessage(get_properties_ins=ins_proto)
 
@@ -128,7 +122,6 @@ class RayActorClientProxy(ClientProxy):
 
     def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
-
         ins_proto = serde.fit_ins_to_proto(ins)
         server_msg = ServerMessage(fit_ins=ins_proto)
 
@@ -142,7 +135,6 @@ class RayActorClientProxy(ClientProxy):
         self, ins: common.EvaluateIns, timeout: Optional[float]
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
-
         ins_proto = serde.evaluate_ins_to_proto(ins)
         server_msg = ServerMessage(evaluate_ins=ins_proto)
 
