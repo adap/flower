@@ -239,6 +239,9 @@ class EnhancedServer(Server):
             clients_state[fitres.metrics["cid"]] = fitres.metrics["malicious"]
             params = flatten_params(parameters_to_ndarrays(fitres.parameters))
             if self.sampling > 0:
+                # if the sampling number is greater than the number of
+                # parameters, just sample all of them
+                self.sampling = min(self.sampling, len(params))
                 if len(self.params_indexes) == 0:
                     # Sample a random subset of parameters
                     self.params_indexes = np.random.randint(
