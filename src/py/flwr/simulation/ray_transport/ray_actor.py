@@ -40,6 +40,8 @@ from flwr.client.run_state import RunState
 from flwr.common.logger import log
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 
+from .utils import check_clientfn_returns_client
+
 
 class ClientException(Exception):
     """Raised when client side logic crashes with an exception."""
@@ -80,7 +82,9 @@ class VirtualClientEngineActor(ABC):
                 raise UnexpectedServerMessage()
 
             # Instantiate the client
-            client = client_fn(cid)  # client_fn must return Client type
+            client = check_clientfn_returns_client(
+                client_fn(cid)
+            )  # client_fn must return Client type
             client.set_state(state)
             # Execute task
             message = None
