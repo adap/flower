@@ -18,8 +18,8 @@
 import unittest
 from typing import List
 
+from flwr.client.run_state import RunState
 from flwr.client.typing import Bwd, FlowerCallable, Fwd, Layer
-from flwr.client.workload_state import WorkloadState
 from flwr.proto.task_pb2 import TaskIns, TaskRes
 
 from .utils import make_ffn
@@ -45,7 +45,7 @@ def make_mock_app(name: str, footprint: List[str]) -> FlowerCallable:
     def app(fwd: Fwd) -> Bwd:
         footprint.append(name)
         fwd.task_ins.task_id += f"{name}"
-        return Bwd(task_res=TaskRes(task_id=name), state=WorkloadState({}))
+        return Bwd(task_res=TaskRes(task_id=name), state=RunState({}))
 
     return app
 
@@ -66,7 +66,7 @@ class TestMakeApp(unittest.TestCase):
 
         # Execute
         wrapped_app = make_ffn(mock_app, mock_middleware_layers)
-        task_res = wrapped_app(Fwd(task_ins=task_ins, state=WorkloadState({}))).task_res
+        task_res = wrapped_app(Fwd(task_ins=task_ins, state=RunState({}))).task_res
 
         # Assert
         trace = mock_middleware_names + ["app"]
@@ -86,11 +86,11 @@ class TestMakeApp(unittest.TestCase):
             footprint.append("filter")
             fwd.task_ins.task_id += "filter"
             # Skip calling app
-            return Bwd(task_res=TaskRes(task_id="filter"), state=WorkloadState({}))
+            return Bwd(task_res=TaskRes(task_id="filter"), state=RunState({}))
 
         # Execute
         wrapped_app = make_ffn(mock_app, [filter_layer])
-        task_res = wrapped_app(Fwd(task_ins=task_ins, state=WorkloadState({}))).task_res
+        task_res = wrapped_app(Fwd(task_ins=task_ins, state=RunState({}))).task_res
 
         # Assert
         self.assertEqual(footprint, ["filter"])
