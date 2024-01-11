@@ -22,7 +22,7 @@ import unittest
 from unittest.mock import MagicMock
 
 from flwr.driver.app import update_client_manager
-from flwr.proto.driver_pb2 import CreateWorkloadResponse, GetNodesResponse
+from flwr.proto.driver_pb2 import CreateRunResponse, GetNodesResponse
 from flwr.proto.node_pb2 import Node
 from flwr.server.client_manager import SimpleClientManager
 
@@ -43,7 +43,7 @@ class TestClientManagerWithDriver(unittest.TestCase):
         ]
         driver = MagicMock()
         driver.stub = "driver stub"
-        driver.create_workload.return_value = CreateWorkloadResponse(run_id=1)
+        driver.create_run.return_value = CreateRunResponse(run_id=1)
         driver.get_nodes.return_value = GetNodesResponse(nodes=expected_nodes)
         client_manager = SimpleClientManager()
         lock = threading.Lock()
@@ -76,7 +76,7 @@ class TestClientManagerWithDriver(unittest.TestCase):
         driver.stub = None
 
         # Assert
-        driver.create_workload.assert_called_once()
+        driver.create_run.assert_called_once()
         assert node_ids == {node.node_id for node in expected_nodes}
         assert updated_node_ids == {node.node_id for node in expected_updated_nodes}
 

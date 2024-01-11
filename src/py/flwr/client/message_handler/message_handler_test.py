@@ -18,8 +18,8 @@
 import uuid
 
 from flwr.client import Client
+from flwr.client.run_state import RunState
 from flwr.client.typing import ClientFn
-from flwr.client.workload_state import WorkloadState
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -136,7 +136,7 @@ def test_client_without_get_properties() -> None:
     )
     task_res, _ = handle(
         client_fn=_get_client_fn(client),
-        state=WorkloadState(state={}),
+        state=RunState(state={}),
         task_ins=task_ins,
     )
 
@@ -204,7 +204,7 @@ def test_client_with_get_properties() -> None:
     )
     task_res, _ = handle(
         client_fn=_get_client_fn(client),
-        state=WorkloadState(state={}),
+        state=RunState(state={}),
         task_ins=task_ins,
     )
 
