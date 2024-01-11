@@ -18,25 +18,13 @@ from logging import INFO
 from time import sleep
 
 # construct nodes
-from typing import Dict, cast
+from typing import Dict
 
 import ray
 
-from flwr.client.client import (
-    maybe_call_evaluate,
-    maybe_call_fit,
-    maybe_call_get_parameters,
-    maybe_call_get_properties,
-)
-from flwr.client.message_handler.task_handler import (
-    configure_task_res,
-    get_server_message_from_task_ins,
-    wrap_client_message_in_task_res,
-)
+from flwr.client.message_handler.task_handler import configure_task_res
 from flwr.client.node_state import NodeState
-from flwr.common import EvaluateRes, FitRes, GetParametersRes, GetPropertiesRes, serde
 from flwr.common.logger import log
-from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
 from flwr.server.fleet.message_handler.message_handler import (
     PushTaskResRequest,
     create_node,
@@ -69,70 +57,6 @@ def _construct_actor_pool():
     return pool
 
 
-def _get_job_fn_and_response_conversion_for_legacy_message(server_msg: ServerMessage):
-    """Return job clients should execute given the message and how to prepare result."""
-    field = server_msg.WhichOneof("msg")
-
-    if field == "get_properties_ins":
-
-        def func(client):
-            return maybe_call_get_properties(
-                client=client,
-                get_properties_ins=server_msg.get_properties_ins,
-            )
-
-        def post_func(get_properties_res):
-            return ClientMessage(
-                get_properties_res=serde.get_properties_res_to_proto(
-                    cast(GetPropertiesRes, get_properties_res)
-                )
-            )
-
-    elif field == "get_parameters_ins":
-
-        def func(client):
-            return maybe_call_get_parameters(
-                client=client,
-                get_parameters_ins=server_msg.get_parameters_ins,
-            )
-
-        def post_func(get_params_res):
-            return ClientMessage(
-                get_parameters_res=serde.get_parameters_res_to_proto(
-                    cast(GetParametersRes, get_params_res)
-                )
-            )
-
-    elif field == "fit_ins":
-
-        def func(client):
-            return maybe_call_fit(
-                client=client,
-                fit_ins=server_msg.fit_ins,
-            )
-
-        def post_func(fit_res):
-            return ClientMessage(fit_res=serde.fit_res_to_proto(cast(FitRes, fit_res)))
-
-    elif field == "evaluate_ins":
-
-        def func(client):
-            return maybe_call_evaluate(
-                client=client,
-                evaluate_ins=server_msg.evaluate_ins,
-            )
-
-        def post_func(eval_res):
-            return ClientMessage(
-                evaluate_res=serde.evaluate_res_to_proto(cast(EvaluateRes, eval_res))
-            )
-
-    else:
-        raise NotImplementedError(f"Message with field '{field}' not understood.")
-
-    return func, post_func
-
-
 def run_vce(num_clients: int, state_factory: StateFactory):
     """Run VirtualClientEnginge."""
     # Create actor pool
@@ -161,46 +85,31 @@ def run_vce(num_clients: int, state_factory: StateFactory):
                 node_id = res.node.node_id
 
                 for task_ins in task_ins_pulled.task_ins_list:
-                    # get message field
-                    server_msg = get_server_message_from_task_ins(
-                        task_ins, exclude_reconnect_ins=False
-                    )
-                    if server_msg is None:
-                        raise NotImplementedError("Can only handle legacy messages...")
-
                     # register and retrive runstate
                     node_states[node_id].register_runstate(run_id=task_ins.run_id)
                     run_state = node_states[node_id].retrieve_runstate(
                         run_id=task_ins.run_id
                     )
 
-                    # Determine how to process message and prepare response
-                    (
-                        func,
-                        post_func,
-                    ) = _get_job_fn_and_response_conversion_for_legacy_message(
-                        server_msg
-                    )
-
                     # Submite a task to the pool
-                    pool.submit_client_job(
-                        lambda a, c_fn, j_fn, cid_, run_state: a.run.remote(
-                            c_fn, j_fn, cid_, run_state
+                    pool.submit_task_ins(
+                        lambda a, c_fn, t_ins, cid, state: a.run.remote(
+                            c_fn, t_ins, cid, state
                         ),
-                        (client_fn, func, res.node.node_id, run_state),
+                        (client_fn, task_ins, node_id, run_state),
                     )
 
                     # Wait until result is ready
-                    result, updated_runstate = pool.get_client_result(
-                        res.node.node_id, timeout=None
+                    task_res, updated_runstate = pool.get_client_result(
+                        node_id, timeout=None
                     )
 
                     # Update runstate
                     node_states[node_id].update_runstate(
                         task_ins.run_id, updated_runstate
                     )
-                    client_message = post_func(result)
-                    task_res = wrap_client_message_in_task_res(client_message)
+
+                    # TODO: can we do the below in the VCE? this currently works because we run things sequentially
                     task_res = configure_task_res(task_res, task_ins, res.node)
                     to_push = PushTaskResRequest(task_res_list=[task_res])
                     push_task_res(request=to_push, state=state_factory.state())
