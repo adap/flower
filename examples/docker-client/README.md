@@ -3,7 +3,7 @@
 🧪 = this page covers experimental features that might change in future versions of Flower
 
 This example shows how to dockerize Flower client implememntaion. A detailed explanation of this
-example can be found [here](https://flower.dev/docs/framework/how-to-run-flower-using-docker.html#flower-client).
+example can be found in the [Flower Documentation](https://flower.dev/docs/framework/how-to-run-flower-using-docker.html#flower-client).
 
 ## Build image and install dependencies
 
