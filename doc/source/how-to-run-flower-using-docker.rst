@@ -181,6 +181,8 @@ First, we will build the client image and install the ``driver.py`` dependencies
 
   $ cd examples/docker-client
   $ docker build -f Dockerfile -t flwr-client:0.1.0 client-code
+  # Install dependencies for driver.py on your local machine
+  # you might want to do this in a python environment
   $ pip install -r requirements.txt
 
 Next, we create a new bridge network called ``flwr-net``. User-defined networks like
