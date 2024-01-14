@@ -11,20 +11,25 @@ dataset: MNIST, CIFAR-10, CIFAR-100]
 
 **Paper:** [openreview.net/forum?id=k1FHgri5y3-](https://openreview.net/forum?id=k1FHgri5y3-)
 
-**Authors:** Berivan Isik, Francesco Pase, Deniz Gunduz, Tsachy Weissman, Zorzi Michele
+**Authors:** Berivan Isik*, Francesco Pase*, Deniz Gunduz, Tsachy Weissman, Zorzi Michele
 
 **Abstract:** One main challenge in federated learning is the large communication cost of exchanging weight updates from clients to the server at each round. While prior work has made great progress in compressing the weight updates through gradient compression methods, we propose a radically different approach that does not update the weights at all. Instead, our method freezes the weights at their initial \emph{random} values and learns how to sparsify the random network for the best performance. To this end, the clients collaborate in training a \emph{stochastic} binary mask to find the optimal sparse random network within the original one. At the end of the training, the final model is a sparse network with random weights -- or a subnetwork inside the dense random network. We show improvements in accuracy, communication (less than 1 bit per parameter (bpp)), convergence speed, and final model size (less than 1 bpp) over relevant baselines on MNIST, EMNIST, CIFAR-10, and CIFAR-100 datasets, in the low bitrate regime.
 
 
 ## About this baseline
 
-**What’s implemented:** :warning: *_Concisely describe what experiment(s) in the publication can be replicated by running the code. Please only use a few sentences. Start with: “The code in this directory …”_*
+**What’s implemented:** The code in this directory contains the official Flower implementations of the FedPM algorithm and runs experiments with different data distribution. It also implements the comparing baselines QSGD and SignSGD.
 
-**Datasets:** :warning: *_List the datasets you used (if you used a medium to large dataset, >10GB please also include the sizes of the dataset)._*
+**Datasets:** MNIST, EMNIST, CIFAR-10, and CIFAR-100.
 
-**Hardware Setup:** :warning: *_Give some details about the hardware (e.g. a server with 8x V100 32GB and 256GB of RAM) you used to run the experiments for this baseline. Someone out there might not have access to the same resources you have so, could list the absolute minimum hardware needed to run the experiment in a reasonable amount of time ? (e.g. minimum is 1x 16GB GPU otherwise a client model can’t be trained with a sufficiently large batch size). Could you test this works too?_*
+**Hardware Setup:** Tested on a Dell Laptop with 32BG of RAM, CPU 11th Gen Intel® Core™ i7-11800H @ 2.30GHz × 16 , GeForce RTX 3050 Ti Mobile.
 
-**Contributors:** :warning: *_let the world know who contributed to this baseline. This could be either your name, your name and affiliation at the time, or your GitHub profile name if you prefer. If multiple contributors signed up for this baseline, please list yourself and your colleagues_*
+**Contributors:** \
+Francesco Pase, PhD candidate @ University of Padova and Lead AI Research Engineer @ [Newtwen](https://www.newtwen.com/) \
+Email: francesco.pase.work@gmail.com \
+Personal Website: [Home Page](https://sites.google.com/view/pasefrance/home) \
+Scholar Page: [Publications](https://scholar.google.com/citations?hl=it&user=XIGmengAAAAJ) \
+GitHub: [Link](https://github.com/FrancescoPase) 
 
 
 ## Experimental Setup
