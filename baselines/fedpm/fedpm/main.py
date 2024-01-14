@@ -10,6 +10,7 @@ import flwr
 import hydra
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
+import argparse
 
 from fedpm.dataset import get_data_loaders
 
@@ -63,7 +64,6 @@ def main(cfg: DictConfig) -> None:
         num_clients=cfg.num_clients,
         config=flwr.server.ServerConfig(num_rounds=cfg.num_rounds),
         strategy=strategy,
-        client_resources=cfg.client_resources,
         # ray_init_args=cfg.ray_init_args,
     )
 

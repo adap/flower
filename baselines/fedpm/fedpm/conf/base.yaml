@@ -55,12 +55,3 @@ compressor:
   fedavg:
     local_lr: 0.01
     server_lr: 0.0002
-
-
-client_resources:
-  num_cpus: 6
-  num_gpus: 0
-
-# ray_init_args:
-  # ignore_reinit_error: True
-  # local_mode: True
