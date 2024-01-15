@@ -1,5 +1,6 @@
 import warnings
 from logging import INFO
+import xgboost as xgb
 
 import flwr as fl
 from flwr_datasets import FederatedDataset
@@ -10,6 +11,7 @@ from dataset import (
     instantiate_partitioner,
     train_test_split,
     transform_dataset_to_dmatrix,
+    separate_xy,
     resplit,
 )
 from utils import (
@@ -30,36 +32,27 @@ from client_utils import XgbClient
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
-def get_client_fn(fds, args, params, num_local_round):
+def get_client_fn(
+    train_data_list, valid_data_list, train_method, params, num_local_round
+):
     """Return a function to construct a client.
 
-    The VirtualClientEngine will exectue this function whenever a client is sampled by
+    The VirtualClientEngine will execute this function whenever a client is sampled by
     the strategy to participate.
     """
 
     def client_fn(cid: str) -> fl.client.Client:
         """Construct a FlowerClient with its own dataset partition."""
+        x_train, y_train = train_data_list[int(cid)][0]
+        x_valid, y_valid = valid_data_list[int(cid)][0]
 
-        # Extract partition for client with node_id = cid
-        partition = fds.load_partition(node_id=int(cid), split="train")
-        partition.set_format("numpy")
+        # Reformat data to DMatrix
+        train_dmatrix = xgb.DMatrix(x_train, label=y_train)
+        valid_dmatrix = xgb.DMatrix(x_valid, label=y_valid)
 
-        if args.centralised_eval_client:
-            # Use centralised test set for evaluation
-            train_data = partition
-            valid_data = fds.load_full("test")
-            valid_data.set_format("numpy")
-            num_train = train_data.shape[0]
-            num_val = valid_data.shape[0]
-        else:
-            # Train/test splitting
-            train_data, valid_data, num_train, num_val = train_test_split(
-                partition, test_fraction=args.test_fraction, seed=args.seed
-            )
-
-        # Reformat data to DMatrix for xgboost
-        train_dmatrix = transform_dataset_to_dmatrix(train_data)
-        valid_dmatrix = transform_dataset_to_dmatrix(valid_data)
+        # Fetch the number of examples
+        num_train = train_data_list[int(cid)][1]
+        num_val = valid_data_list[int(cid)][1]
 
         # Create and return client
         return XgbClient(
@@ -69,7 +62,7 @@ def get_client_fn(fds, args, params, num_local_round):
             num_val,
             num_local_round,
             params,
-            args.train_method,
+            train_method,
         )
 
     return client_fn
@@ -90,14 +83,39 @@ def main():
     )
 
     # Load centralised test set
-    if args.centralised_eval:
-        fds = FederatedDataset(
-            dataset="jxie/higgs", partitioners={"train": 20}, resplitter=resplit
-        )
+    if args.centralised_eval or args.centralised_eval_client:
         log(INFO, "Loading centralised test set...")
-        test_set = fds.load_full("test")
-        test_set.set_format("numpy")
-        test_dmatrix = transform_dataset_to_dmatrix(test_set)
+        test_data = fds.load_full("test")
+        test_data.set_format("numpy")
+        num_test = test_data.shape[0]
+        test_dmatrix = transform_dataset_to_dmatrix(test_data)
+
+    # Load partitions and reformat data to DMatrix for xgboost
+    log(INFO, "Loading client local partitions...")
+    train_data_list = []
+    valid_data_list = []
+
+    for node_id in range(args.pool_size):
+        # Extract partition for client with node_id
+        partition = fds.load_partition(node_id=node_id, split="train")
+        partition.set_format("numpy")
+
+        if args.centralised_eval_client:
+            # Use centralised test set for evaluation
+            train_data = partition
+            num_train = train_data.shape[0]
+            x_test, y_test = separate_xy(test_data)
+            valid_data_list.append(((x_test, y_test), num_test))
+        else:
+            # Train/test splitting
+            train_data, valid_data, num_train, num_val = train_test_split(
+                partition, test_fraction=args.test_fraction, seed=args.seed
+            )
+            x_valid, y_valid = separate_xy(valid_data)
+            valid_data_list.append(((x_valid, y_valid), num_val))
+
+        x_train, y_train = separate_xy(train_data)
+        train_data_list.append(((x_train, y_train), num_train))
 
     # Define strategy
     if args.train_method == "bagging":
@@ -143,7 +161,13 @@ def main():
 
     # Start simulation
     fl.simulation.start_simulation(
-        client_fn=get_client_fn(fds, args, params, num_local_round),
+        client_fn=get_client_fn(
+            train_data_list,
+            valid_data_list,
+            args.train_method,
+            params,
+            num_local_round,
+        ),
         num_clients=args.pool_size,
         client_resources=client_resources,
         config=fl.server.ServerConfig(num_rounds=args.num_rounds),
