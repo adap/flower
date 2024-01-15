@@ -30,7 +30,7 @@ class MetricsRecord:
 
 @dataclass
 class ConfigsRecord:
-    """Config record."""
+    """Configs record."""
 
 
 @dataclass
