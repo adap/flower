@@ -16,7 +16,7 @@
 
 
 from .bulyan import Bulyan as Bulyan
-from .dp_strategy_wrapper import DPStrategyWrapperFixedClipping
+from .dp_strategy_wrapper_fixed_clipping import DPStrategyWrapperFixedClipping
 from .dpfedavg_adaptive import DPFedAvgAdaptive as DPFedAvgAdaptive
 from .dpfedavg_fixed import DPFedAvgFixed as DPFedAvgFixed
 from .fault_tolerant_fedavg import FaultTolerantFedAvg as FaultTolerantFedAvg
