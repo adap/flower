@@ -38,7 +38,7 @@ from flwr.server.strategy.strategy import Strategy
 
 
 class DPStrategyWrapperFixedClipping(Strategy):
-    """Wrapper for Configuring a Strategy for Central DP with Fixed Clipping.
+    """Wrapper for Configuring a Strategy for Central DP with Server Side Fixed Clipping.
 
     Parameters
     ----------
@@ -133,22 +133,12 @@ class DPStrategyWrapperFixedClipping(Strategy):
             self._update_clients_params(client_param, client_update)
 
         # Update the results with the new params
-        updated_results = [
-            (
-                client,
-                FitRes(
-                    fit_res.status,
-                    ndarrays_to_parameters(client_param),
-                    fit_res.num_examples,
-                    fit_res.metrics,
-                ),
-            )
-            for (client, fit_res), client_param in zip(results, clients_params)
-        ]
+        for res, params in zip(results, clients_params):
+            res[1].parameters = ndarrays_to_parameters(params)
 
         # Pass the new parameters for aggregation
         aggregated_updates, metrics = self.strategy.aggregate_fit(
-            server_round, updated_results, failures
+            server_round, results, failures
         )
 
         # Add Gaussian noise to the aggregated parameters
