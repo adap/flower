@@ -50,7 +50,7 @@ class RecordSet:
         return self.parameters[name]
 
     def del_parameters(self, name: str) -> None:
-        """Get a ParametersRecord."""
+        """Delete a ParametersRecord."""
         del self.parameters[name]
 
     def set_metrics(self, name: str, record: MetricsRecord) -> None:
