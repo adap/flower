@@ -20,7 +20,7 @@ from typing import Dict
 
 @dataclass
 class ParametersRecord:
-    """Parameter record."""
+    """Parameters record."""
 
 
 @dataclass
