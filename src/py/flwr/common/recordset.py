@@ -14,13 +14,43 @@
 # ==============================================================================
 """RecordSet."""
 
-from dataclasses import dataclass
-from typing import Dict
+from dataclasses import dataclass, field
+from typing import Dict, List
+
+
+@dataclass
+class Tensor:
+    """Tensor type."""
+
+    data: bytes
+    dtype: str
+    shape: List[int]
+    ref: str = ""  # future functionality
 
 
 @dataclass
 class ParametersRecord:
     """Parameters record."""
+
+    data: Dict[str, Tensor] = field(default_factory=dict)
+
+    def add_parameters(self, tensor_dict: Dict[str, Tensor]) -> None:
+        """Add parameters to record.
+
+        This not implemented as a constructor so we can cleanly create and empyt
+        ParametersRecord object.
+        """
+        if any(not isinstance(k, str) for k in tensor_dict.keys()):
+            raise TypeError(f"Not all keys are of valide type. Expected {str}")
+        if any(not isinstance(v, Tensor) for v in tensor_dict.values()):
+            raise TypeError(f"Not all values are of valide type. Expected {Tensor}")
+
+        # Add entries to dataclass without duplicating memor footprint
+        for key in list(tensor_dict.keys()):
+            self.data[key] = tensor_dict[key]
+            del tensor_dict[key]
+
+        self.data = tensor_dict
 
 
 @dataclass
@@ -37,9 +67,9 @@ class ConfigsRecord:
 class RecordSet:
     """Definition of RecordSet."""
 
-    parameters: Dict[str, ParametersRecord] = {}
-    metrics: Dict[str, MetricsRecord] = {}
-    configs: Dict[str, ConfigsRecord] = {}
+    parameters: Dict[str, ParametersRecord] = field(default_factory=dict)
+    metrics: Dict[str, MetricsRecord] = field(default_factory=dict)
+    configs: Dict[str, ConfigsRecord] = field(default_factory=dict)
 
     def set_parameters(self, name: str, record: ParametersRecord) -> None:
         """Add a ParametersRecord."""
