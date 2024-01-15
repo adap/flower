@@ -15,12 +15,12 @@
 """RecordSet."""
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Dict, List, Tuple
 
-from .typing import Parameters, Value
+from .typing import Value
 
 
-def _check(allowed_types: Any, element: Any) -> [bool, str]:
+def _check(allowed_types: Any, element: Any) -> Tuple[bool, str]:
     """Check if passed element is of allowed type."""
     msg = ""
     check = isinstance(element, allowed_types)
@@ -30,53 +30,86 @@ def _check(allowed_types: Any, element: Any) -> [bool, str]:
     return check, msg
 
 
-class TypeCheckedDict(dict):
-    """A dictionary with key and values checks for type validity."""
+class Tensor:
+    """Tensor type."""
 
-    def __init__(self):
-        pass
+    def __init__(self) -> None:
+        self._data: List[bytes]
+        self._shape: List[int]
+        self._dtype: str  # tbd
+        self.ref: str  # future functionality
 
-    def __setitem__(self, key, value):
+
+class ParameterRecord(Dict[str, Tensor]):
+    """Parameter record."""
+
+    def __setitem__(self, key: str, value: Tensor) -> None:
         """Set item after key and value checks."""
-        check, mssg = _check(self._key_types, key)
+        check, mssg = _check(str, key)
         if not check:
             raise TypeError(f"Key `{key}` is of invalid key type. {mssg}")
-        check, mssg = _check(self._value_types, value)
+        check, mssg = _check(Tensor, value)
         if not check:
-            raise TypeError(
-                f"Value `{value}` for key `{key}` is of invalid value type. {mssg}"
-            )
+            raise TypeError(f"Value for key `{key}` is of invalid value type. {mssg}")
         super().__setitem__(key, value)
 
 
-class TypeCheckedParametersDict(TypeCheckedDict):
-    """A TypeCheckedDict for parameters."""
+class MetricsRecord(Dict[str, Value]):
+    """Metrics record."""
 
-    def __init__(self):
-        self._key_types = str
-        self._value_types = Parameters
-
-
-class TypeCheckedMetricsDict(TypeCheckedDict):
-    """A TypeCheckedDict for metrics."""
-
-    def __init__(self):
-        self._key_types = (str, int)
-        self._value_types = Value
+    def __setitem__(self, key: str, value: Value) -> None:
+        """Set item after key and value checks."""
+        check, mssg = _check(str, key)
+        if not check:
+            raise TypeError(f"Key `{key}` is of invalid key type. {mssg}")
+        check, mssg = _check(Value, value)
+        if not check:
+            raise TypeError(f"Value for key `{key}` is of invalid value type. {mssg}")
+        super().__setitem__(key, value)
 
 
-class TypeCheckedConfigsDict(TypeCheckedDict):
-    """A TypeCheckedDict for configs."""
+class ConfigsRecord(Dict[str, Value]):
+    """Config record."""
 
-    def __init__(self):
-        self._key_types = str
-        self._value_types = Value
+    def __setitem__(self, key: str, value: Value) -> None:
+        """Set item after key and value checks."""
+        check, mssg = _check(str, key)
+        if not check:
+            raise TypeError(f"Key `{key}` is of invalid key type. {mssg}")
+        check, mssg = _check(Value, value)
+        if not check:
+            raise TypeError(f"Value for key `{key}` is of invalid value type. {mssg}")
+        super().__setitem__(key, value)
 
 
 @dataclass
 class RecordSet:
     """Definition of RecordSet."""
 
-    parameters: TypeCheckedParametersDict
-    metrics: TypeCheckedMetricsDict
-    configs: TypeCheckedConfigsDict
+    parameters: Dict[str, ParameterRecord]
+    metrics: Dict[str, MetricsRecord]
+    configs: Dict[str, ConfigsRecord]
+
+    def set_parameters(self, name: str, record: ParameterRecord) -> None:
+        """Add a ParameterRecord."""
+        self.parameters[name] = record
+
+    def get_parameters(self, name: str) -> ParameterRecord:
+        """Get a ParameterRecord."""
+        return self.parameters[name]
+
+    def set_metrics(self, name: str, record: MetricsRecord) -> None:
+        """Add a MetricsRecord."""
+        self.metrics[name] = record
+
+    def get_metrics(self, name: str) -> MetricsRecord:
+        """Get a MetricsRecord."""
+        return self.metrics[name]
+
+    def set_configs(self, name: str, record: ConfigsRecord) -> None:
+        """Add a ConfigsRecord."""
+        self.configs[name] = record
+
+    def get_configs(self, name: str) -> ConfigsRecord:
+        """Get a ConfigsRecord."""
+        return self.configs[name]
