@@ -45,12 +45,10 @@ class ParametersRecord:
         if any(not isinstance(v, Tensor) for v in tensor_dict.values()):
             raise TypeError(f"Not all values are of valide type. Expected {Tensor}")
 
-        # Add entries to dataclass without duplicating memor footprint
+        # Add entries to dataclass without duplicating memory
         for key in list(tensor_dict.keys()):
             self.data[key] = tensor_dict[key]
             del tensor_dict[key]
-
-        self.data = tensor_dict
 
 
 @dataclass
