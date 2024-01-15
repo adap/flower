@@ -37,7 +37,7 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.strategy import Strategy
 
 
-class DPStrategyWrapperFixedClipping(Strategy):
+class DPStrategyWrapperServerSideFixedClipping(Strategy):
     """Wrapper for Configuring a Strategy for Central DP with Server Side Fixed
     Clipping.
 

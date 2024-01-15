@@ -18,7 +18,7 @@ import numpy as np
 
 from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
 
-from .dp_strategy_wrapper import DPStrategyWrapperFixedClipping
+from .dp_strategy_wrapper_fixed_clipping import DPStrategyWrapperFixedClipping
 from .fedavg import FedAvg
 
 
