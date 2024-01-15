@@ -42,14 +42,14 @@ def _check(allowed_types: Any, element: Any) -> Tuple[bool, str]:
     return check, msg
 
 
+@dataclass
 class Tensor:
     """Tensor type."""
 
-    def __init__(self) -> None:
-        self.data: List[bytes]
-        self.shape: List[int]
-        self.dtype: str  # tbd
-        self.ref: str  # future functionality
+    data: List[bytes]
+    dtype: str
+    shape: List[int] = []
+    ref: str = ""  # future functionality
 
 
 class ParameterRecord(Dict[str, Tensor]):
@@ -66,7 +66,7 @@ class ParameterRecord(Dict[str, Tensor]):
         super().__setitem__(key, value)
 
 
-# TODO: MetricsRecord and ConfigsRecord should support type Value instead of just the set of types in Scalar
+# TODO: MetricsRecord should support type Value instead of just Scalar
 class MetricsRecord(Dict[str, Scalar]):
     """Metrics record."""
 
@@ -81,6 +81,7 @@ class MetricsRecord(Dict[str, Scalar]):
         super().__setitem__(key, value)
 
 
+# TODO: ConfigsRecord should support type Value instead of just Scalar
 class ConfigsRecord(Dict[str, Scalar]):
     """Config record."""
 
@@ -128,16 +129,16 @@ class RecordSet:
         return self.configs[name]
 
 
-
 ################################## Fit
+
 
 def fit_ins_to_recordset(fit_ins: FitIns) -> RecordSet:
     """."""
     r_set = RecordSet()
 
-    tensor = Tensor()
-    tensor.data = fit_ins.parameters.tensors
-    tensor.dtype = fit_ins.parameters.tensor_type
+    tensor = Tensor(
+        data=fit_ins.parameters.tensors, dtype=fit_ins.parameters.tensor_type
+    )
 
     r_set.set_parameters(name="fitins", record=ParameterRecord({"parameters": tensor}))
     r_set.set_configs(name="fitins.config", record=ConfigsRecord(fit_ins.config))
@@ -157,9 +158,9 @@ def fit_res_to_recordset(fit_res: FitRes) -> RecordSet:
     """."""
     r_set = RecordSet()
 
-    tensor = Tensor()
-    tensor.data = fit_res.parameters.tensors
-    tensor.dtype = fit_res.parameters.tensor_type
+    tensor = Tensor(
+        data=fit_res.parameters.tensors, dtype=fit_res.parameters.tensor_type
+    )
     r_set.set_parameters(name="fitres", record=ParameterRecord({"parameters": tensor}))
 
     r_set.set_metrics(
@@ -195,9 +196,10 @@ def recordset_to_fit_res(recordset: RecordSet) -> FitRes:
 def evaluate_ins_to_recordset(evaluate_ins: EvaluateIns) -> RecordSet:
     """."""
     r_set = RecordSet()
-    tensor = Tensor()
-    tensor.data = evaluate_ins.parameters.tensors
-    tensor.dtype = evaluate_ins.parameters.tensor_type
+
+    tensor = Tensor(
+        data=evaluate_ins.parameters.tensors, dtype=evaluate_ins.parameters.tensor_type
+    )
 
     r_set.set_parameters(
         name="evaluateins", record=ParameterRecord({"parameters": tensor})
@@ -278,9 +280,10 @@ def getparameters_res_to_recordset(getparameters_res: GetParametersRes) -> Recor
     """."""
     r_set = RecordSet()
 
-    tensor = Tensor()
-    tensor.data = getparameters_res.parameters.tensors
-    tensor.dtype = getparameters_res.parameters.tensor_type
+    tensor = Tensor(
+        data=getparameters_res.parameters.tensors,
+        dtype=getparameters_res.parameters.tensor_type,
+    )
 
     r_set.set_parameters(
         name="getparametersres", record=ParameterRecord({"parameters": tensor})
