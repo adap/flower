@@ -38,8 +38,9 @@ from flwr.server.strategy.strategy import Strategy
 
 
 class DPStrategyWrapperServerSideFixedClipping(Strategy):
-    """Wrapper for Configuring a Strategy for Central DP with Server Side Fixed
-    Clipping.
+    """Wrapper for Configuring a Strategy for Central DP.
+
+    The clipping is at the server side.
 
     Parameters
     ----------
