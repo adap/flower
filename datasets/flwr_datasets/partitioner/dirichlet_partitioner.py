@@ -26,11 +26,20 @@ from flwr_datasets.partitioner.partitioner import Partitioner
 class DirichletPartitioner(Partitioner):  # pylint: disable=R0902
     """Partitioner based on Dirichlet distribution.
 
-    The balancing (not mentioned in paper but implemented in the code) is controlled by
-    `self_balancing` parameter.
-
     Implementation based on Bayesian Nonparametric Federated Learning of Neural Networks
-    https://arxiv.org/abs/1905.12022
+    https://arxiv.org/abs/1905.12022.
+
+    The algorithm sequentially divides the data with each label. The fractions of the
+    data with each label is drawn from Dirichlet distribution and adjusted in case of
+    balancing. The data is assigned. In case the `min_partition_size` is not satisfied
+    the algorithm is run again (the fractions will change since it is a random process
+    even though the alpha stays the same).
+
+    The notion of balancing is explicitly introduced here (not mentioned in paper but
+    implemented in the code). It is a mechanism that excludes the node from
+    assigning new samples to it if the current number of samples on that node exceeds
+    the average number that the node would get in case of even data distribution.
+    It is controlled by`self_balancing` parameter.
 
     Parameters
     ----------
