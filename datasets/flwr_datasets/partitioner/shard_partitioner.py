@@ -115,6 +115,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
     >>> print(sorted(partition_sizes))
     [5550, 5940, 5940, 5940, 5940, 5940, 5940, 5940, 5940, 6930]
     """
+
     def __init__(  # pylint: disable=R0913
         self,
         num_partitions: int,
