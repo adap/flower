@@ -24,7 +24,8 @@ from flwr_datasets.partitioner.partitioner import Partitioner
 class PowerLawPartitioner(Partitioner):  # pylint: disable=R0902
     """Partitioner based on Power Law distribution and restricting the unique classes.
 
-    Implementation based on: https://arxiv.org/abs/1812.06127
+    Implementation based on Federated Optimization in Heterogeneous Networks
+    https://arxiv.org/abs/1812.06127.
 
     Parameters
     ----------
@@ -52,6 +53,23 @@ class PowerLawPartitioner(Partitioner):  # pylint: disable=R0902
         samples assignment to nodes.
     seed : int
         Seed used for dataset shuffling. It has no effect if `shuffle` is False.
+
+    Examples
+    --------
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.partitioner import InnerDirichletPartitioner
+    >>>
+    >>> partitioner = InnerDirichletPartitioner(
+    >>>     partition_sizes=[6_000] * 10, partition_by="label", alpha=0.5
+    >>> )
+    >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": partitioner})
+    >>> partition = fds.load_partition(0)
+    >>> print(partition[0])  # Print the first example
+    {'image': <PIL.PngImagePlugin.PngImageFile image mode=L size=28x28 at 0x127BF6950>,
+    'label': 3}
+    >>> partition_sizes = [len(fds.load_partition(node_id)) for node_id in range(10)]
+    >>> print(sorted(partition_sizes))
+    [1762, 2667, 2958, 3034, 4895, 7743, 8054, 9280, 9726, 9855]
     """
 
     def __init__(  # pylint: disable=R0913
@@ -232,3 +250,17 @@ class PowerLawPartitioner(Partitioner):  # pylint: disable=R0902
                 self._label_to_remaining_for_allocation[
                     class_index
                 ] -= self._n_samples_per_class_to_preassign
+
+
+if __name__ == "__main__":
+    from flwr_datasets import FederatedDataset
+    from flwr_datasets.partitioner import PowerLawPartitioner
+
+    partitioner = PowerLawPartitioner(
+        num_partitions=10, partition_by="label", num_labels_per_partition=5
+    )
+    fds = FederatedDataset(dataset="mnist", partitioners={"train": partitioner})
+    partition = fds.load_partition(0)
+    print(partition[0])  # Print the first example
+    partition_sizes = [len(fds.load_partition(node_id)) for node_id in range(10)]
+    print(sorted(partition_sizes))
