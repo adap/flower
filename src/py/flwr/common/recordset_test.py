@@ -18,6 +18,7 @@ from typing import Dict, Union
 
 import numpy as np
 
+from .configsrecord import ConfigsRecord
 from .metricsrecord import MetricsRecord
 from .parameter import ndarrays_to_parameters, parameters_to_ndarrays
 from .parametersrecord import Array
@@ -111,6 +112,24 @@ def test_add_metrics_to_metricsrecord() -> None:
     }
 
     m_record.add_metrics(my_metrics)
+
+
+def test_add_config_to_configsrecord() -> None:
+    """Test adding configs of various types to a ConfigsRecord."""
+    m_record = ConfigsRecord()
+
+    some_stage_id = 12345
+    some_bytes = np.random.randn(256).tobytes()
+
+    my_metrics: Dict[Union[int, str], Union[Scalar, ScalarList]] = {
+        "loss": 0.12445,
+        "converged": True,
+        "my_int": 2,
+        "embeddings": np.random.randn(10).tolist(),
+        some_stage_id: some_bytes,
+    }
+
+    m_record.add_configs(my_metrics)
 
 
 # def test_torch_statedict_to_parametersrecord() -> None:
