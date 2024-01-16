@@ -62,6 +62,10 @@ valid_dmatrix = transform_dataset_to_dmatrix(valid_data)
 num_local_round = NUM_LOCAL_ROUND
 params = BST_PARAMS
 
+# Setup learning rate
+if args.train_method == "bagging" and args.scaled_lr:
+    new_lr = params["eta"] / args.num_partitions
+    params.update({"eta": new_lr})
 
 # Start Flower client
 fl.client.start_client(

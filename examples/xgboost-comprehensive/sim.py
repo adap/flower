@@ -159,6 +159,11 @@ def main():
     num_local_round = NUM_LOCAL_ROUND
     params = BST_PARAMS
 
+    # Setup learning rate
+    if args.train_method == "bagging" and args.scaled_lr:
+        new_lr = params["eta"] / args.pool_size
+        params.update({"eta": new_lr})
+
     # Start simulation
     fl.simulation.start_simulation(
         client_fn=get_client_fn(

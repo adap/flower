@@ -56,6 +56,11 @@ def client_args_parser():
         action="store_true",
         help="Conduct evaluation on centralised test set (True), or on hold-out data (False).",
     )
+    parser.add_argument(
+        "--scaled-lr",
+        action="store_true",
+        help="Perform scaled learning rate based on the number of clients (True).",
+    )
 
     args = parser.parse_args()
     return args
@@ -164,6 +169,11 @@ def sim_args_parser():
         "--centralised-eval-client",
         action="store_true",
         help="Conduct evaluation on centralised test set (True), or on hold-out data (False).",
+    )
+    parser.add_argument(
+        "--scaled-lr",
+        action="store_true",
+        help="Perform scaled learning rate based on the number of clients (True).",
     )
 
     args = parser.parse_args()
