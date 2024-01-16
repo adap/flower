@@ -15,40 +15,9 @@
 """RecordSet."""
 
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Dict
 
-
-@dataclass
-class Tensor:
-    """Tensor type."""
-
-    data: bytes
-    dtype: str
-    shape: List[int]
-    ref: str = ""  # future functionality
-
-
-@dataclass
-class ParametersRecord:
-    """Parameters record."""
-
-    data: Dict[str, Tensor] = field(default_factory=dict)
-
-    def add_parameters(self, tensor_dict: Dict[str, Tensor]) -> None:
-        """Add parameters to record.
-
-        This not implemented as a constructor so we can cleanly create and empyt
-        ParametersRecord object.
-        """
-        if any(not isinstance(k, str) for k in tensor_dict.keys()):
-            raise TypeError(f"Not all keys are of valide type. Expected {str}")
-        if any(not isinstance(v, Tensor) for v in tensor_dict.values()):
-            raise TypeError(f"Not all values are of valide type. Expected {Tensor}")
-
-        # Add entries to dataclass without duplicating memory
-        for key in list(tensor_dict.keys()):
-            self.data[key] = tensor_dict[key]
-            del tensor_dict[key]
+from .parametersrecord import ParametersRecord
 
 
 @dataclass

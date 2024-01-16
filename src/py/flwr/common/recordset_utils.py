@@ -14,9 +14,7 @@
 # ==============================================================================
 """RecordSet utilities."""
 
-from secrets import token_hex
-
-from .recordset import ParametersRecord, Tensor
+from .parametersrecord import Array, ParametersRecord
 from .typing import Parameters
 
 
@@ -41,16 +39,16 @@ def parameters_to_parametersrecord(parameters: Parameters) -> ParametersRecord:
 
     The memory ocupied by inputed parameters will be freed. Because there is no concept
     of names in the legacy Paramters, arbitrary keys will be used when constructing the
-    ParametersRecord. Similarly, the shape won't be recorded in the Tensor objects.
+    ParametersRecord. Similarly, the shape won't be recorded in the Array objects.
     """
     tensor_type = parameters.tensor_type
 
     p_record = ParametersRecord()
 
-    for _ in range(len(parameters.tensors)):
+    for idx in range(len(parameters.tensors)):
         tensor = parameters.tensors.pop(0)
         p_record.add_parameters(
-            {token_hex(8): Tensor(data=tensor, dtype=tensor_type, shape=[])}
+            {str(idx): Array(data=tensor, dtype=tensor_type, stype="", shape=[])}
         )
 
     return p_record

@@ -18,7 +18,7 @@ import secrets
 import numpy as np
 
 from .parameter import ndarrays_to_parameters, parameters_to_ndarrays
-from .recordset import Tensor
+from .parametersrecord import Array
 from .recordset_utils import (
     parameters_to_parametersrecord,
     parametersrecord_to_parameters,
@@ -34,14 +34,15 @@ def get_ndarrays() -> NDArrays:
     return [arr1, arr2]
 
 
-def test_ndarray_to_tensor() -> None:
-    """Test creation of Tensor object from NumPy array."""
+def test_ndarray_to_array() -> None:
+    """Test creation of Array object from NumPy array."""
     shape = (2, 7, 9)
     arr = np.eye(*shape)
 
-    tensor = Tensor(
+    tensor = Array(
         arr.tobytes(),
         dtype=str(arr.dtype),
+        stype="np.tobytes",
         shape=list(arr.shape),
         ref=secrets.token_hex(16),
     )
@@ -51,19 +52,21 @@ def test_ndarray_to_tensor() -> None:
     assert np.allclose(arr, arr_)
 
 
-def test_parameters_to_tensor_and_back() -> None:
-    """Test conversion between legacy Parameters and Tensor."""
+def test_parameters_to_array_and_back() -> None:
+    """Test conversion between legacy Parameters and Array."""
     ndarrays = get_ndarrays()
 
-    # Tensor represents a single array, unlike Paramters, which represent a
+    # Array represents a single array, unlike Paramters, which represent a
     # list of arrays
     ndarray = ndarrays[0]
 
     parameters = ndarrays_to_parameters([ndarray])
 
-    tensor = Tensor(data=parameters.tensors[0], dtype=parameters.tensor_type, shape=[])
+    array = Array(
+        data=parameters.tensors[0], dtype=parameters.tensor_type, stype="", shape=[]
+    )
 
-    parameters = Parameters(tensors=[tensor.data], tensor_type=tensor.dtype)
+    parameters = Parameters(tensors=[array.data], tensor_type=array.dtype)
 
     ndarray_ = parameters_to_ndarrays(parameters=parameters)[0]
 
