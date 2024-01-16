@@ -14,6 +14,7 @@
 # ==============================================================================
 """ParametersRecord and Tensor."""
 
+from collections import OrderedDict
 from dataclasses import dataclass, field
 from typing import Dict, List
 
@@ -33,7 +34,7 @@ class Array:
 class ParametersRecord:
     """Parameters record."""
 
-    data: Dict[str, Array] = field(default_factory=dict)
+    data: OrderedDict[str, Array] = field(default_factory=OrderedDict[str, Array])
 
     def add_parameters(self, tensor_dict: Dict[str, Array]) -> None:
         """Add parameters to record.

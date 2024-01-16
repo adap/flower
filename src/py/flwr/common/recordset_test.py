@@ -23,7 +23,7 @@ from .recordset_utils import (
     parameters_to_parametersrecord,
     parametersrecord_to_parameters,
 )
-from .typing import NDArrays, Parameters
+from .typing import NDArray, NDArrays, Parameters
 
 
 def get_ndarrays() -> NDArrays:
@@ -34,20 +34,25 @@ def get_ndarrays() -> NDArrays:
     return [arr1, arr2]
 
 
+def nparray_to_array(np_array: NDArray) -> Array:
+    """Represent NumPy array as Array."""
+    return Array(
+        np_array.tobytes(),
+        dtype=str(np_array.dtype),
+        stype="np.tobytes",
+        shape=list(np_array.shape),
+        ref=secrets.token_hex(16),
+    )
+
+
 def test_ndarray_to_array() -> None:
     """Test creation of Array object from NumPy array."""
     shape = (2, 7, 9)
     arr = np.eye(*shape)
 
-    tensor = Array(
-        arr.tobytes(),
-        dtype=str(arr.dtype),
-        stype="np.tobytes",
-        shape=list(arr.shape),
-        ref=secrets.token_hex(16),
-    )
+    array = nparray_to_array(arr)
 
-    arr_ = np.frombuffer(buffer=tensor.data, dtype=tensor.dtype).reshape(tensor.shape)
+    arr_ = np.frombuffer(buffer=array.data, dtype=array.dtype).reshape(array.shape)
 
     assert np.allclose(arr, arr_)
 
@@ -90,3 +95,19 @@ def test_parameters_to_parametersrecord_and_back() -> None:
 
     for arr, arr_ in zip(ndarrays, ndarrays_):
         assert np.allclose(arr, arr_)
+
+
+# def test_torch_statedict_to_parametersrecord() -> None:
+#     """."""
+#     import torch
+#     from .parametersrecord import ParametersRecord
+
+#     layer = torch.nn.Conv2d(3, 5, 16)
+#     layer_sd = layer.state_dict()
+
+#     p_c = ParametersRecord()
+
+#     for k in layer_sd.keys():
+#         layer_sd[k] = nparray_to_array(layer_sd[k].numpy())
+
+#     p_c.add_parameters(layer_sd)
