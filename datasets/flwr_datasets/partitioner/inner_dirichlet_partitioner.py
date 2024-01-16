@@ -33,22 +33,34 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
     ----------
     partition_sizes : Union[List[int], NDArrayInt]
         The sizes of all partitions.
-    alpha : Union[float, List[float], NDArrayFloat]
-        Concentration parameter to the Dirichlet distribution
     partition_by : str
         Column name of the labels (targets) based on which Dirichlet sampling works.
+    alpha : Union[float, List[float], NDArrayFloat]
+        Concentration parameter to the Dirichlet distribution
     shuffle: bool
         Whether to randomize the order of samples. Shuffling applied after the
         samples assignment to nodes.
     seed: int
         Seed used for dataset shuffling. It has no effect if `shuffle` is False.
+
+    Examples
+    --------
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.partitioner import InnerDirichletPartitioner
+    >>>
+    >>> partitioner = InnerDirichletPartitioner(
+    >>>     partition_sizes=[6_000] * 10, partition_by="label", alpha=0.5
+    >>> )
+    >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": partitioner})
+    >>> partition = fds.load_partition(0)
+    >>> print(partition[0])  # Print the first example
     """
 
     def __init__(  # pylint: disable=R0913
         self,
         partition_sizes: Union[List[int], NDArrayInt],
-        alpha: Union[float, List[float], NDArrayFloat],
         partition_by: str,
+        alpha: Union[float, List[float], NDArrayFloat],
         shuffle: bool = True,
         seed: Optional[int] = 42,
     ) -> None:
@@ -107,8 +119,8 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
 
         Parameters
         ----------
-            alpha : Union[float, List[float], NDArrayFloat]
-                Concentration parameter to the Dirichlet distribution
+        alpha : Union[float, List[float], NDArrayFloat]
+            Concentration parameter to the Dirichlet distribution
 
         Returns
         -------
