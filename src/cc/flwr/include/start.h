@@ -17,15 +17,10 @@
 #define START_H
 #pragma once
 #include "client.h"
+#include "grpc_rere.h"
 #include "message_handler.h"
 #include <grpcpp/grpcpp.h>
-using flwr::proto::ClientMessage;
-using flwr::proto::FlowerService;
-using flwr::proto::ServerMessage;
-using grpc::Channel;
-using grpc::ClientContext;
-using grpc::ClientReaderWriter;
-using grpc::Status;
+#include <thread>
 
 #define GRPC_MAX_MESSAGE_LENGTH 536870912 //  == 512 * 1024 * 1024
 
@@ -56,5 +51,8 @@ public:
   static void
   start_client(std::string server_address, flwr_local::Client *client,
                int grpc_max_message_length = GRPC_MAX_MESSAGE_LENGTH);
+  static void
+  start_rere_client(std::string server_address, flwr_local::Client *client,
+                    int grpc_max_message_length = GRPC_MAX_MESSAGE_LENGTH);
 };
 #endif
