@@ -73,15 +73,55 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         samples assignment to nodes.
     seed: int
         Seed used for dataset shuffling. It has no effect if `shuffle` is False.
-    """
 
+    Examples
+    --------
+    1) If you need same number of shards per nodes + the same shard size (and you know
+    both of these values)
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.partitioner import ShardPartitioner
+    >>>
+    >>> partitioner = ShardPartitioner(num_partitions=10, partition_by="label",
+    >>>                                num_shards_per_node=2, shard_size=1_000)
+    >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": partitioner})
+    >>> partition = fds.load_partition(0)
+    >>> print(partition[0])  # Print the first example
+    {'image': <PIL.PngImagePlugin.PngImageFile image mode=L size=28x28 at 0x15F616C50>,
+    'label': 3}
+    >>> partition_sizes = [len(fds.load_partition(node_id)) for node_id in range(10)]
+    >>> print(partition_sizes)
+    [2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000]
+
+    2) If you want to use nearly all the data and do not need to have the number of
+    shard per each node
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.partitioner import ShardPartitioner
+    >>>
+    >>> partitioner = ShardPartitioner(num_partitions=9, partition_by="label",
+    >>>                                shard_size=1_000)
+    >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": partitioner})
+    >>> partition_sizes = [len(fds.load_partition(node_id)) for node_id in range(9)]
+    >>> print(partition_sizes)
+    [7000, 7000, 7000, 7000, 7000, 7000, 6000, 6000, 6000]
+
+    3) If you want ot use all the data
+        >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.partitioner import ShardPartitioner
+    >>>
+    >>> partitioner = ShardPartitioner(num_partitions=10, partition_by="label",
+    >>>                                shard_size=990, keep_incomplete_shard=True)
+    >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": partitioner})
+    >>> partition_sizes = [len(fds.load_partition(node_id)) for node_id in range(10)]
+    >>> print(sorted(partition_sizes))
+    [5550, 5940, 5940, 5940, 5940, 5940, 5940, 5940, 5940, 6930]
+    """
     def __init__(  # pylint: disable=R0913
         self,
         num_partitions: int,
         partition_by: str,
-        num_shards_per_node: Optional[int],
-        keep_incomplete_shard: bool,
+        num_shards_per_node: Optional[int] = None,
         shard_size: Optional[int] = None,
+        keep_incomplete_shard: bool = False,
         shuffle: bool = True,
         seed: Optional[int] = 42,
     ) -> None:
