@@ -17,6 +17,7 @@
 
 from .exponential_partitioner import ExponentialPartitioner
 from .iid_partitioner import IidPartitioner
+from .inner_dirichlet_partitioner import InnerDirichletPartitioner
 from .linear_partitioner import LinearPartitioner
 from .natural_id_partitioner import NaturalIdPartitioner
 from .partitioner import Partitioner
@@ -29,6 +30,7 @@ __all__ = [
     "NaturalIdPartitioner",
     "SizePartitioner",
     "LinearPartitioner",
+    "InnerDirichletPartitioner",
     "SquarePartitioner",
     "ExponentialPartitioner",
 ]
