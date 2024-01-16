@@ -32,6 +32,13 @@ NDArrays = List[NDArray]
 # not conform to other definitions of what a scalar is. Source:
 # https://developers.google.com/protocol-buffers/docs/overview#scalar
 Scalar = Union[bool, bytes, float, int, str]
+ScalarList = Union[
+    List[bool],
+    List[bytes],
+    List[float],
+    List[int],
+    List[str],
+]
 Value = Union[
     bool,
     bytes,

@@ -14,16 +14,18 @@
 # ==============================================================================
 """RecordSet tests."""
 import secrets
+from typing import Dict, Union
 
 import numpy as np
 
+from .metricsrecord import MetricsRecord
 from .parameter import ndarrays_to_parameters, parameters_to_ndarrays
 from .parametersrecord import Array
 from .recordset_utils import (
     parameters_to_parametersrecord,
     parametersrecord_to_parameters,
 )
-from .typing import NDArray, NDArrays, Parameters
+from .typing import NDArray, NDArrays, Parameters, Scalar, ScalarList
 
 
 def get_ndarrays() -> NDArrays:
@@ -95,6 +97,20 @@ def test_parameters_to_parametersrecord_and_back() -> None:
 
     for arr, arr_ in zip(ndarrays, ndarrays_):
         assert np.allclose(arr, arr_)
+
+
+def test_add_metrics_to_metricsrecord() -> None:
+    """Test adding metrics of various types to a MetricsRecord."""
+    m_record = MetricsRecord()
+
+    my_metrics: Dict[str, Union[Scalar, ScalarList]] = {
+        "loss": 0.12445,
+        "converged": True,
+        "my_int": 2,
+        "embeddings": np.random.randn(10).tolist(),
+    }
+
+    m_record.add_metrics(my_metrics)
 
 
 # def test_torch_statedict_to_parametersrecord() -> None:
