@@ -32,7 +32,7 @@ class MetricsRecord:
         This not implemented as a constructor so we can cleanly create and empyt
         MetricsRecord object.
         """
-        if any(not (k, str) for k in metrics_dict.keys()):
+        if any(not isinstance(k, str) for k in metrics_dict.keys()):
             raise TypeError(f"Not all keys are of valide type. Expected {str}")
 
         def is_valid(value: Scalar) -> None:
