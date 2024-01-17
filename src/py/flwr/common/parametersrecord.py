@@ -36,8 +36,8 @@ class Array:
         metadata field.
 
     stype : str
-        For compatibility when converting from/to `flwr.common.typing.Parameters`. A
-        sting stating that then data comes from a NumPy NDArray.
+        A string indicating the type of serialisation mechanism used to generate the bytes
+        in `data` from an array-like or tensor-like object.
 
     data: bytes
         A buffer of bytes containing the data.
