@@ -15,6 +15,8 @@
 """RecordSet utilities."""
 
 
+from typing import OrderedDict
+
 from .parametersrecord import Array, ParametersRecord
 from .typing import Parameters
 
@@ -77,7 +79,9 @@ def parameters_to_parametersrecord(
         else:
             tensor = parameters.tensors.pop(0)
         p_record.set_parameters(
-            {str(idx): Array(data=tensor, dtype="", stype=tensor_type, shape=[])}
+            OrderedDict(
+                {str(idx): Array(data=tensor, dtype="", stype=tensor_type, shape=[])}
+            )
         )
 
     return p_record

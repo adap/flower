@@ -16,7 +16,7 @@
 
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, OrderedDict
+from typing import List, Optional, OrderedDict
 
 
 @dataclass
@@ -64,14 +64,14 @@ class ParametersRecord:
 
     def __init__(
         self,
-        array_dict: Optional[Dict[str, Array]] = None,
+        array_dict: Optional[OrderedDict[str, Array]] = None,
         keep_input: bool = False,
     ) -> None:
         """Construct a ParametersRecord object.
 
         Parameters
         ----------
-        array_dict : Optional[Dict[str, Array]]
+        array_dict : Optional[OrderedDict[str, Array]]
             A dictionary that stores serialized array-like or tensor-like objects.
         keep_input : bool (default: False)
             A boolean indicating whether parameters should be deleted from the input
@@ -87,12 +87,12 @@ class ParametersRecord:
         if array_dict:
             self.set_parameters(array_dict)
 
-    def set_parameters(self, array_dict: Dict[str, Array]) -> None:
+    def set_parameters(self, array_dict: OrderedDict[str, Array]) -> None:
         """Add parameters to record.
 
         Parameters
         ----------
-        array_dict : Dict[str, Array]
+        array_dict : OrderedDict[str, Array]
             A dictionary that stores serialized array-like or tensor-like objects.
         """
         if any(not isinstance(k, str) for k in array_dict.keys()):

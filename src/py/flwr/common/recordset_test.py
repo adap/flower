@@ -15,7 +15,7 @@
 """RecordSet tests."""
 
 
-from typing import Callable, List, Type, Union
+from typing import Callable, List, OrderedDict, Type, Union
 
 import numpy as np
 import pytest
@@ -100,9 +100,9 @@ def test_set_parameters_while_keeping_intputs() -> None:
     """Tests keep_input functionality in ParametersRecord."""
     # Adding parameters to a record that doesn't erase entries in the input `array_dict`
     p_record = ParametersRecord(keep_input=True)
-    array_dict = {
-        str(i): ndarray_to_array(ndarray) for i, ndarray in enumerate(get_ndarrays())
-    }
+    array_dict = OrderedDict(
+        {str(i): ndarray_to_array(ndarray) for i, ndarray in enumerate(get_ndarrays())}
+    )
     p_record.set_parameters(array_dict)
 
     # Creating a second parametersrecord passing the same `array_dict` (not erased)
@@ -116,9 +116,9 @@ def test_set_parameters_while_keeping_intputs() -> None:
 def test_set_parameters_with_correct_types() -> None:
     """Test adding dictionary of Arrays to ParametersRecord."""
     p_record = ParametersRecord()
-    array_dict = {
-        str(i): ndarray_to_array(ndarray) for i, ndarray in enumerate(get_ndarrays())
-    }
+    array_dict = OrderedDict(
+        {str(i): ndarray_to_array(ndarray) for i, ndarray in enumerate(get_ndarrays())}
+    )
     p_record.set_parameters(array_dict)
 
 
