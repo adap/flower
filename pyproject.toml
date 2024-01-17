@@ -184,7 +184,7 @@ target-version = "py38"
 line-length = 88
 select = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
 fixable = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
-ignore = ["B024", "B027"]
+ignore = ["B024", "B027", "D205", "D209"]
 exclude = [
     ".bzr",
     ".direnv",
