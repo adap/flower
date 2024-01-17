@@ -47,13 +47,15 @@ class SuccessClient(ClientProxy):
     def get_properties(
         self, ins: GetPropertiesIns, timeout: Optional[float]
     ) -> GetPropertiesRes:
-        """Raise a NotImplementedError because this method is not expected to be called."""
+        """Raise a NotImplementedError because this method is not expected to be
+        called."""
         raise NotImplementedError()
 
     def get_parameters(
         self, ins: GetParametersIns, timeout: Optional[float]
     ) -> GetParametersRes:
-        """Raise a NotImplementedError because this method is not expected to be called."""
+        """Raise a NotImplementedError because this method is not expected to be
+        called."""
         raise NotImplementedError()
 
     def fit(self, ins: FitIns, timeout: Optional[float]) -> FitRes:
