@@ -4,7 +4,7 @@ Differential privacy
 Flower provides differential privacy (DP) wrapper classes for the easy integration of the central DP guarantees provided by DP-FedAvg into training pipelines defined in any of the various ML frameworks that Flower is compatible with. 
 
 .. warning::
-  Please note that these components are still experimental, the correct configuration of DP for a specific task is still an unsolved problem.
+  Please note that these components are still experimental; the correct configuration of DP for a specific task is still an unsolved problem.
 
 .. note::
   The name DP-FedAvg is misleading since it can be applied on top of any FL algorithm that conforms to the general structure prescribed by the FedOpt family of algorithms.
@@ -17,18 +17,18 @@ DP-FedAvg, originally proposed by McMahan et al. [mcmahan]_ and extended by Andr
 * **Clipping** : The influence of each client's update is bounded by clipping it. This is achieved by enforcing a cap on the L2 norm of the update, scaling it down if needed.
 * **Noising** :  Gaussian noise, calibrated to the clipping threshold, is added to the average computed at the server.
 
-The distribution of the update norm has been shown to vary from task-to-task and to evolve as training progresses. Therefore, we use an adaptive approach [andrew]_ that continuously adjusts the clipping threshold to track a prespecified quantile of the update norm distribution. 
+The distribution of the update norm has been shown to vary from task-to-task and to evolve as training progresses. This variability is crucial in understanding its impact on differential privacy guarantees, emphasizing the need for an adaptive approach [andrew]_ that continuously adjusts the clipping threshold to track a prespecified quantile of the update norm distribution.
 
 Simplifying Assumptions
 ***********************
 
-We make (and attempt to enforce) a number of assumptions that must be satisfied to ensure that the training process actually realises the :math:`(\epsilon, \delta)` guarantees the user has in mind when configuring the setup. 
+We make (and attempt to enforce) a number of assumptions that must be satisfied to ensure that the training process actually realizes the :math:`(\epsilon, \delta)` guarantees the user has in mind when configuring the setup. 
 
 * **Fixed-size subsampling** :Fixed-size subsamples of the clients must be taken at each round, as opposed to variable-sized Poisson subsamples. 
 * **Unweighted averaging** : The contributions from all the clients must weighted equally in the aggregate to eliminate the requirement for the server to know in advance the sum of the weights of all clients available for selection.
 * **No client failures** : The set of available clients must stay constant across all rounds of training. In other words, clients cannot drop out or fail. 
 
-The first two are useful for eliminating a multitude of complications associated with calibrating the noise to the clipping threshold while the third one is required to comply with the assumptions of the privacy analysis.
+The first two are useful for eliminating a multitude of complications associated with calibrating the noise to the clipping threshold, while the third one is required to comply with the assumptions of the privacy analysis.
 
 .. note::
    These restrictions are in line with constraints imposed by Andrew et al. [andrew]_.
@@ -48,7 +48,7 @@ Introducing DP to an existing workload can be thought of as adding an extra laye
 Server-side logic
 *****************
 
-The first version of our solution was to define a decorator whose constructor accepted, among other things, a boolean valued variable indicating whether adaptive clipping was to be enabled or not. We quickly realized that this would clutter its :code:`__init__()` function with variables corresponding to hyperparameters of adaptive clipping that would remain unused when it was disabled. A cleaner implementation could be achieved by splitting the functionality into two decorators, :code:`DPFedAvgFixed` and :code:`DPFedAvgAdaptive`, with the latter sub- classing the former. The constructors for both classes accept a boolean parameter :code:`server_side_noising`, which, as the name suggests, determines where noising is to be performed.
+The first version of our solution was to define a decorator whose constructor accepted, among other things, a boolean-valued variable indicating whether adaptive clipping was to be enabled or not. We quickly realized that this would clutter its :code:`__init__()` function with variables corresponding to hyperparameters of adaptive clipping that would remain unused when it was disabled. A cleaner implementation could be achieved by splitting the functionality into two decorators, :code:`DPFedAvgFixed` and :code:`DPFedAvgAdaptive`, with the latter sub- classing the former. The constructors for both classes accept a boolean parameter :code:`server_side_noising`, which, as the name suggests, determines where noising is to be performed.
 
 DPFedAvgFixed
 :::::::::::::
@@ -56,7 +56,7 @@ DPFedAvgFixed
 The server-side capabilities required for the original version of DP-FedAvg, i.e., the one which performed fixed clipping, can be completely captured with the help of wrapper logic for just the following two methods of the :code:`Strategy` abstract class.
 
 #. :code:`configure_fit()` : The config dictionary being sent by the wrapped :code:`Strategy` to each client needs to be augmented with an additional value equal to the clipping threshold (keyed under :code:`dpfedavg_clip_norm`) and, if :code:`server_side_noising=true`, another one equal to the scale of the Gaussian noise that needs to be added at the client (keyed under :code:`dpfedavg_noise_stddev`). This entails *post*-processing of the results returned by the wrappee's implementation of :code:`configure_fit()`.
-#. :code:`aggregate_fit()`: We check whether any of the sampled clients dropped out or failed to upload an update before the round timed out. In that case, we need to abort the current round, discarding any successful updates that were received, and move on to the next one. On the other hand, if all clients responded successfully, we must force the averaging of the updates to happen in an unweighted manner by intercepting the :code:`parameters` field of :code:`FitRes` for each received update and setting it to 1. Furthermore, if :code:`server_side_noising=true`, each update is perturbed with an amount of noise equal to what it would have been subjected to had client-side noising being enabled.  This entails *pre*-processing of the arguments to this method before passing them on to the wrappee's implementation of :code:`aggregate_fit()`.
+#. :code:`aggregate_fit()`: We check whether any of the sampled clients dropped out or failed to upload an update before the round timed out. In that case, we need to abort the current round, discarding any successful updates that were received, and move on to the next one. On the other hand, if all clients responded successfully, we must force the averaging of the updates to happen in an unweighted manner by intercepting the :code:`parameters` field of :code:`FitRes` for each received update and setting it to 1. Furthermore, if :code:`server_side_noising=true`, each update is perturbed with an amount of noise equal to what it would have been subjected to had client-side noising being enabled. This entails *pre*-processing of the arguments to this method before passing them on to the wrappee's implementation of :code:`aggregate_fit()`.
 
 .. note::
   We can't directly change the aggregation function of the wrapped strategy to force it to add noise to the aggregate, hence we simulate client-side noising to implement server-side noising. 
@@ -95,6 +95,6 @@ Assume you have trained for :math:`n` rounds with sampling fraction :math:`q` an
    rdp = tfp.compute_rdp_sample_without_replacement(q, z, n, orders)
    eps, _, _ = tfp.rdp_accountant.get_privacy_spent(rdp, target_delta=delta)
 
-.. [mcmahan] McMahan, H. Brendan, et al. "Learning differentially private recurrent language models." arXiv preprint arXiv:1710.06963 (2017).
+.. [mcmahan] McMahan et al. "Learning Differentially Private Recurrent Language Models." International Conference on Learning Representations (ICLR), 2017.
 
-.. [andrew] Andrew, Galen, et al. "Differentially private learning with adaptive clipping." Advances in Neural Information Processing Systems 34 (2021): 17455-17466.
+.. [andrew] Andrew, Galen, et al. "Differentially Private Learning with Adaptive Clipping." Advances in Neural Information Processing Systems (NeurIPS), 2021.

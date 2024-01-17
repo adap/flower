@@ -61,8 +61,8 @@ PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 # pylint: disable-next=too-many-statements
 def http_request_response(
     server_address: str,
-    # pylint: disable-next=unused-argument
-    max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+    insecure: bool,  # pylint: disable=unused-argument
+    max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
     root_certificates: Optional[
         Union[bytes, str]
     ] = None,  # pylint: disable=unused-argument

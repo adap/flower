@@ -13,8 +13,3 @@
 # limitations under the License.
 # ==============================================================================
 """Common components in Flower Datasets."""
-
-
-from .typing import Resplitter
-
-__all__ = ["Resplitter"]

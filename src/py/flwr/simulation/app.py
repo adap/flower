@@ -107,8 +107,8 @@ def start_simulation(
         List `client_id`s for each client. This is only required if
         `num_clients` is not set. Setting both `num_clients` and `clients_ids`
         with `len(clients_ids)` not equal to `num_clients` generates an error.
-    client_resources : Optional[Dict[str, float]] (default: `{"num_cpus": 1,
-        "num_gpus": 0.0}` CPU and GPU resources for a single client. Supported keys
+    client_resources : Optional[Dict[str, float]] (default: `{"num_cpus": 1, "num_gpus": 0.0}`)
+        CPU and GPU resources for a single client. Supported keys
         are `num_cpus` and `num_gpus`. To understand the GPU utilization caused by
         `num_gpus`, as well as using custom resources, please consult the Ray
         documentation.
@@ -160,7 +160,7 @@ def start_simulation(
     -------
     hist : flwr.server.history.History
         Object containing metrics from training.
-    """
+    """  # noqa: E501
     # pylint: disable-msg=too-many-locals
     event(
         EventType.START_SIMULATION_ENTER,
@@ -314,18 +314,30 @@ def start_simulation(
         log(ERROR, traceback.format_exc())
         log(
             ERROR,
-            "Your simulation crashed :(. This could be because of several reasons."
+            "Your simulation crashed :(. This could be because of several reasons. "
             "The most common are: "
+            "\n\t > Sometimes, issues in the simulation code itself can cause crashes. "
+            "It's always a good idea to double-check your code for any potential bugs "
+            "or inconsistencies that might be contributing to the problem. "
+            "For example: "
+            "\n\t\t - You might be using a class attribute in your clients that "
+            "hasn't been defined."
+            "\n\t\t - There could be an incorrect method call to a 3rd party library "
+            "(e.g., PyTorch)."
+            "\n\t\t - The return types of methods in your clients/strategies might be "
+            "incorrect."
             "\n\t > Your system couldn't fit a single VirtualClient: try lowering "
             "`client_resources`."
             "\n\t > All the actors in your pool crashed. This could be because: "
             "\n\t\t - You clients hit an out-of-memory (OOM) error and actors couldn't "
             "recover from it. Try launching your simulation with more generous "
             "`client_resources` setting (i.e. it seems %s is "
-            "not enough for your workload). Use fewer concurrent actors. "
+            "not enough for your run). Use fewer concurrent actors. "
             "\n\t\t - You were running a multi-node simulation and all worker nodes "
             "disconnected. The head node might still be alive but cannot accommodate "
-            "any actor with resources: %s.",
+            "any actor with resources: %s."
+            "\nTake a look at the Flower simulation examples for guidance "
+            "<https://flower.dev/docs/framework/how-to-run-simulations.html>.",
             client_resources,
             client_resources,
         )

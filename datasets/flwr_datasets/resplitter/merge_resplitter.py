@@ -32,7 +32,7 @@ class MergeResplitter:
 
     Parameters
     ----------
-    merge_config: Dict[str, Tuple[str, ...]]
+    merge_config : Dict[str, Tuple[str, ...]]
         Dictionary with keys - the desired split names to values - tuples of the current
         split names that will be merged together
 

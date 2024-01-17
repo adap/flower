@@ -18,8 +18,8 @@
 import warnings
 from typing import Dict, Optional, Tuple, Union, cast
 
-from flwr_datasets.common import Resplitter
 from flwr_datasets.partitioner import IidPartitioner, Partitioner
+from flwr_datasets.resplitter import Resplitter
 from flwr_datasets.resplitter.merge_resplitter import MergeResplitter
 
 tested_datasets = [
@@ -38,12 +38,12 @@ def _instantiate_partitioners(
 
     Parameters
     ----------
-    partitioners: Dict[str, Union[Partitioner, int]]
+    partitioners : Dict[str, Union[Partitioner, int]]
         Dataset split to the Partitioner or a number of IID partitions.
 
     Returns
     -------
-    partitioners: Dict[str, Partitioner]
+    partitioners : Dict[str, Partitioner]
         Partitioners specified as split to Partitioner object.
     """
     instantiated_partitioners: Dict[str, Partitioner] = {}

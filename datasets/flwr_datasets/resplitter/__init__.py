@@ -16,7 +16,9 @@
 
 
 from .merge_resplitter import MergeResplitter
+from .resplitter import Resplitter
 
 __all__ = [
     "MergeResplitter",
+    "Resplitter",
 ]
