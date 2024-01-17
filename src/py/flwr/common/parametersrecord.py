@@ -36,8 +36,8 @@ class Array:
         metadata field.
 
     stype : str
-        A string indicating the type of serialisation mechanism used to generate the bytes
-        in `data` from an array-like or tensor-like object.
+        A string indicating the type of serialisation mechanism used to generate the
+        bytes in `data` from an array-like or tensor-like object.
 
     data: bytes
         A buffer of bytes containing the data.
