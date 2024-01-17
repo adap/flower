@@ -13,34 +13,34 @@ import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-class CreateWorkloadRequest(google.protobuf.message.Message):
-    """CreateWorkload"""
+class CreateRunRequest(google.protobuf.message.Message):
+    """CreateRun"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     def __init__(self,
         ) -> None: ...
-global___CreateWorkloadRequest = CreateWorkloadRequest
+global___CreateRunRequest = CreateRunRequest
 
-class CreateWorkloadResponse(google.protobuf.message.Message):
+class CreateRunResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    WORKLOAD_ID_FIELD_NUMBER: builtins.int
-    workload_id: builtins.int
+    RUN_ID_FIELD_NUMBER: builtins.int
+    run_id: builtins.int
     def __init__(self,
         *,
-        workload_id: builtins.int = ...,
+        run_id: builtins.int = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["workload_id",b"workload_id"]) -> None: ...
-global___CreateWorkloadResponse = CreateWorkloadResponse
+    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
+global___CreateRunResponse = CreateRunResponse
 
 class GetNodesRequest(google.protobuf.message.Message):
     """GetNodes messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    WORKLOAD_ID_FIELD_NUMBER: builtins.int
-    workload_id: builtins.int
+    RUN_ID_FIELD_NUMBER: builtins.int
+    run_id: builtins.int
     def __init__(self,
         *,
-        workload_id: builtins.int = ...,
+        run_id: builtins.int = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["workload_id",b"workload_id"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
 global___GetNodesRequest = GetNodesRequest
 
 class GetNodesResponse(google.protobuf.message.Message):

@@ -23,7 +23,8 @@ def task_dict_to_task_ins_list(
         task_pb2.TaskIns(
             task_id="",  # Do not set, will be created and set by the DriverAPI
             group_id="",
-            workload_id=workload_id,
+            run_id=run_id,
+            run_id=run_id,
             task=merge(
                 task,
                 task_pb2.Task(
@@ -84,13 +85,13 @@ wf_factory = get_workflow_factory()
 
 # -------------------------------------------------------------------------- Driver SDK
 driver.connect()
-create_workload_res: driver_pb2.CreateWorkloadResponse = driver.create_workload(
-    req=driver_pb2.CreateWorkloadRequest()
+create_run_res: driver_pb2.CreateRunResponse = driver.create_run(
+    req=driver_pb2.CreateRunRequest()
 )
 # -------------------------------------------------------------------------- Driver SDK
 
-workload_id = create_workload_res.workload_id
-print(f"Created workload id {workload_id}")
+run_id = create_run_res.run_id
+print(f"Created run id {run_id}")
 
 history = History()
 for server_round in range(num_rounds):
@@ -119,7 +120,7 @@ for server_round in range(num_rounds):
         # loop and wait until enough client nodes are available.
         while True:
             # Get a list of node ID's from the server
-            get_nodes_req = driver_pb2.GetNodesRequest(workload_id=workload_id)
+            get_nodes_req = driver_pb2.GetNodesRequest(run_id=run_id)
 
             # ---------------------------------------------------------------------- Driver SDK
             get_nodes_res: driver_pb2.GetNodesResponse = driver.get_nodes(
