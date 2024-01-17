@@ -333,7 +333,7 @@ def _share_keys(
 
     # Check if the size is larger than threshold
     if len(state.public_keys_dict) < state.threshold:
-        raise Exception("Available neighbours number smaller than threshold")
+        raise ValueError("Available neighbours number smaller than threshold")
 
     # Check if all public keys are unique
     pk_list: List[bytes] = []
@@ -341,14 +341,14 @@ def _share_keys(
         pk_list.append(pk1)
         pk_list.append(pk2)
     if len(set(pk_list)) != len(pk_list):
-        raise Exception("Some public keys are identical")
+        raise ValueError("Some public keys are identical")
 
     # Check if public keys of this client are correct in the dictionary
     if (
         state.public_keys_dict[state.sid][0] != state.pk1
         or state.public_keys_dict[state.sid][1] != state.pk2
     ):
-        raise Exception(
+        raise ValueError(
             "Own public keys are displayed in dict incorrectly, should not happen!"
         )
 
@@ -393,7 +393,7 @@ def _collect_masked_input(
     ciphertexts = cast(List[bytes], named_values[KEY_CIPHERTEXT_LIST])
     srcs = cast(List[int], named_values[KEY_SOURCE_LIST])
     if len(ciphertexts) + 1 < state.threshold:
-        raise Exception("Not enough available neighbour clients.")
+        raise ValueError("Not enough available neighbour clients.")
 
     # Decrypt ciphertexts, verify their sources, and store shares.
     for src, ciphertext in zip(srcs, ciphertexts):
@@ -409,7 +409,7 @@ def _collect_masked_input(
                 f"from {actual_src} instead of {src}."
             )
         if dst != state.sid:
-            ValueError(
+            raise ValueError(
                 f"Client {state.sid}: received an encrypted message"
                 f"for Client {dst} from Client {src}."
             )
@@ -476,7 +476,7 @@ def _unmask(state: SecAggPlusState, named_values: Dict[str, Value]) -> Dict[str,
     # Send private mask seed share for every avaliable client (including itclient)
     # Send first private key share for building pairwise mask for every dropped client
     if len(active_sids) < state.threshold:
-        raise Exception("Available neighbours number smaller than threshold")
+        raise ValueError("Available neighbours number smaller than threshold")
 
     sids, shares = [], []
     sids += active_sids

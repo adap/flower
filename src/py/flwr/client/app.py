@@ -74,10 +74,10 @@ def run_client() -> None:
 
     print(args.root_certificates)
     print(args.server)
-    print(args.callable_dir)
+    print(args.dir)
     print(args.callable)
 
-    callable_dir = args.callable_dir
+    callable_dir = args.dir
     if callable_dir is not None:
         sys.path.insert(0, callable_dir)
 
@@ -102,6 +102,10 @@ def _parse_args_client() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "callable",
+        help="For example: `client:flower` or `project.package.module:wrapper.flower`",
+    )
+    parser.add_argument(
         "--insecure",
         action="store_true",
         help="Run the client without HTTPS. By default, the client runs with "
@@ -120,13 +124,10 @@ def _parse_args_client() -> argparse.ArgumentParser:
         help="Server address",
     )
     parser.add_argument(
-        "--callable",
-        help="For example: `client:flower` or `project.package.module:wrapper.flower`",
-    )
-    parser.add_argument(
-        "--callable-dir",
+        "--dir",
         default="",
-        help="Add specified directory to the PYTHONPATH and load callable from there."
+        help="Add specified directory to the PYTHONPATH and load Flower "
+        "callable from there."
         " Default: current working directory.",
     )
 
@@ -137,10 +138,12 @@ def _check_actionable_client(
     client: Optional[Client], client_fn: Optional[ClientFn]
 ) -> None:
     if client_fn is None and client is None:
-        raise Exception("Both `client_fn` and `client` are `None`, but one is required")
+        raise ValueError(
+            "Both `client_fn` and `client` are `None`, but one is required"
+        )
 
     if client_fn is not None and client is not None:
-        raise Exception(
+        raise ValueError(
             "Both `client_fn` and `client` are provided, but only one is allowed"
         )
 
@@ -149,6 +152,7 @@ def _check_actionable_client(
 # pylint: disable=too-many-branches
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
+# pylint: disable=too-many-arguments
 def start_client(
     *,
     server_address: str,
@@ -298,7 +302,7 @@ def _start_client_internal(
                 cid: str,  # pylint: disable=unused-argument
             ) -> Client:
                 if client is None:  # Added this to keep mypy happy
-                    raise Exception(
+                    raise ValueError(
                         "Both `client_fn` and `client` are `None`, but one is required"
                     )
                 return client  # Always return the same instance
@@ -348,7 +352,7 @@ def _start_client_internal(
                     break
 
                 # Register state
-                node_state.register_workloadstate(workload_id=task_ins.workload_id)
+                node_state.register_runstate(run_id=task_ins.run_id)
 
                 # Load app
                 app: Flower = load_flower_callable_fn()
@@ -356,16 +360,14 @@ def _start_client_internal(
                 # Handle task message
                 fwd_msg: Fwd = Fwd(
                     task_ins=task_ins,
-                    state=node_state.retrieve_workloadstate(
-                        workload_id=task_ins.workload_id
-                    ),
+                    state=node_state.retrieve_runstate(run_id=task_ins.run_id),
                 )
                 bwd_msg: Bwd = app(fwd=fwd_msg)
 
                 # Update node state
-                node_state.update_workloadstate(
-                    workload_id=bwd_msg.task_res.workload_id,
-                    workload_state=bwd_msg.state,
+                node_state.update_runstate(
+                    run_id=bwd_msg.task_res.run_id,
+                    run_state=bwd_msg.state,
                 )
 
                 # Send

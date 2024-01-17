@@ -68,4 +68,6 @@ if __name__ == "__main__":
             return loss, len(X_test), {"test_accuracy": accuracy}
 
     # Start Flower client
-    fl.client.start_client(server_address="0.0.0.0:8080", client=IrisClient().to_client())
+    fl.client.start_client(
+        server_address="0.0.0.0:8080", client=IrisClient().to_client()
+    )
