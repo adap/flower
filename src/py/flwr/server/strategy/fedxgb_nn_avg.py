@@ -37,7 +37,7 @@ class FedXgbNnAvg(FedAvg):
 
     Warning
     -------
-    This strategy will be deprecated, and move to this baseline directory
+    This strategy is deprecated.
     https://github.com/adap/flower/tree/main/baselines/hfedxgboost.
     """
 
