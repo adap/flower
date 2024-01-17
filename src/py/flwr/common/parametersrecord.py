@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""ParametersRecord and Tensor."""
+"""ParametersRecord and Array."""
 
 from collections import OrderedDict
 from dataclasses import dataclass, field
@@ -23,10 +23,11 @@ from typing import Dict, List
 class Array:
     """Array type."""
 
-    data: bytes
     dtype: str
-    stype: str
     shape: List[int]
+
+    stype: str
+    data: bytes
     ref: str = ""  # future functionality
 
 
@@ -39,8 +40,8 @@ class ParametersRecord:
     def add_parameters(self, tensor_dict: Dict[str, Array]) -> None:
         """Add parameters to record.
 
-        This not implemented as a constructor so we can cleanly create and empyt
-        ParametersRecord object.
+        This is not implemented as a constructor so we can cleanly create and empty
+        the ParametersRecord object.
         """
         if any(not isinstance(k, str) for k in tensor_dict.keys()):
             raise TypeError(f"Not all keys are of valide type. Expected {str}")

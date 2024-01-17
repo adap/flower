@@ -13,6 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 """RecordSet tests."""
+
+
 import secrets
 
 import numpy as np
@@ -39,14 +41,14 @@ def nparray_to_array(np_array: NDArray) -> Array:
     return Array(
         np_array.tobytes(),
         dtype=str(np_array.dtype),
-        stype="np.tobytes",
+        stype="numpy.ndarray.tobytes",
         shape=list(np_array.shape),
         ref=secrets.token_hex(16),
     )
 
 
 def test_ndarray_to_array() -> None:
-    """Test creation of Array object from NumPy array."""
+    """Test creation of Array object from NumPy ndarray."""
     shape = (2, 7, 9)
     arr = np.eye(*shape)
 
