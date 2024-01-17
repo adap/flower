@@ -59,44 +59,44 @@ class TaskIns(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     TASK_ID_FIELD_NUMBER: builtins.int
     GROUP_ID_FIELD_NUMBER: builtins.int
-    WORKLOAD_ID_FIELD_NUMBER: builtins.int
+    RUN_ID_FIELD_NUMBER: builtins.int
     TASK_FIELD_NUMBER: builtins.int
     task_id: typing.Text
     group_id: typing.Text
-    workload_id: builtins.int
+    run_id: builtins.int
     @property
     def task(self) -> global___Task: ...
     def __init__(self,
         *,
         task_id: typing.Text = ...,
         group_id: typing.Text = ...,
-        workload_id: builtins.int = ...,
+        run_id: builtins.int = ...,
         task: typing.Optional[global___Task] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["task",b"task"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["group_id",b"group_id","task",b"task","task_id",b"task_id","workload_id",b"workload_id"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["group_id",b"group_id","run_id",b"run_id","task",b"task","task_id",b"task_id"]) -> None: ...
 global___TaskIns = TaskIns
 
 class TaskRes(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     TASK_ID_FIELD_NUMBER: builtins.int
     GROUP_ID_FIELD_NUMBER: builtins.int
-    WORKLOAD_ID_FIELD_NUMBER: builtins.int
+    RUN_ID_FIELD_NUMBER: builtins.int
     TASK_FIELD_NUMBER: builtins.int
     task_id: typing.Text
     group_id: typing.Text
-    workload_id: builtins.int
+    run_id: builtins.int
     @property
     def task(self) -> global___Task: ...
     def __init__(self,
         *,
         task_id: typing.Text = ...,
         group_id: typing.Text = ...,
-        workload_id: builtins.int = ...,
+        run_id: builtins.int = ...,
         task: typing.Optional[global___Task] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["task",b"task"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["group_id",b"group_id","task",b"task","task_id",b"task_id","workload_id",b"workload_id"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["group_id",b"group_id","run_id",b"run_id","task",b"task","task_id",b"task_id"]) -> None: ...
 global___TaskRes = TaskRes
 
 class Value(google.protobuf.message.Message):
