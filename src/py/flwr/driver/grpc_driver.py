@@ -24,8 +24,8 @@ from flwr.common import EventType, event
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.proto.driver_pb2 import (
-    CreateWorkloadRequest,
-    CreateWorkloadResponse,
+    CreateRunRequest,
+    CreateRunResponse,
     GetNodesRequest,
     GetNodesResponse,
     PullTaskResRequest,
@@ -66,6 +66,7 @@ class GrpcDriver:
             return
         self.channel = create_channel(
             server_address=self.driver_service_address,
+            insecure=(self.certificates is None),
             root_certificates=self.certificates,
         )
         self.stub = DriverStub(self.channel)
@@ -83,15 +84,15 @@ class GrpcDriver:
         channel.close()
         log(INFO, "[Driver] Disconnected")
 
-    def create_workload(self, req: CreateWorkloadRequest) -> CreateWorkloadResponse:
-        """Request for workload ID."""
+    def create_run(self, req: CreateRunRequest) -> CreateRunResponse:
+        """Request for run ID."""
         # Check if channel is open
         if self.stub is None:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
             raise Exception("`GrpcDriver` instance not connected")
 
         # Call Driver API
-        res: CreateWorkloadResponse = self.stub.CreateWorkload(request=req)
+        res: CreateRunResponse = self.stub.CreateRun(request=req)
         return res
 
     def get_nodes(self, req: GetNodesRequest) -> GetNodesResponse:

@@ -18,6 +18,7 @@
 import uuid
 
 from flwr.client import Client
+from flwr.client.run_state import RunState
 from flwr.client.typing import ClientFn
 from flwr.common import (
     EvaluateIns,
@@ -120,7 +121,7 @@ def test_client_without_get_properties() -> None:
     task_ins: TaskIns = TaskIns(
         task_id=str(uuid.uuid4()),
         group_id="",
-        workload_id=0,
+        run_id=0,
         task=Task(
             producer=Node(node_id=0, anonymous=True),
             consumer=Node(node_id=0, anonymous=True),
@@ -133,7 +134,11 @@ def test_client_without_get_properties() -> None:
     disconnect_task_res, actual_sleep_duration = handle_control_message(
         task_ins=task_ins
     )
-    task_res = handle(client_fn=_get_client_fn(client), task_ins=task_ins)
+    task_res, _ = handle(
+        client_fn=_get_client_fn(client),
+        state=RunState(state={}),
+        task_ins=task_ins,
+    )
 
     if not task_res.HasField("task"):
         raise ValueError("Task value not found")
@@ -147,7 +152,7 @@ def test_client_without_get_properties() -> None:
         TaskRes(
             task_id=str(uuid.uuid4()),
             group_id="",
-            workload_id=0,
+            run_id=0,
         )
     )
     # pylint: disable=no-member
@@ -184,7 +189,7 @@ def test_client_with_get_properties() -> None:
     task_ins = TaskIns(
         task_id=str(uuid.uuid4()),
         group_id="",
-        workload_id=0,
+        run_id=0,
         task=Task(
             producer=Node(node_id=0, anonymous=True),
             consumer=Node(node_id=0, anonymous=True),
@@ -197,7 +202,11 @@ def test_client_with_get_properties() -> None:
     disconnect_task_res, actual_sleep_duration = handle_control_message(
         task_ins=task_ins
     )
-    task_res = handle(client_fn=_get_client_fn(client), task_ins=task_ins)
+    task_res, _ = handle(
+        client_fn=_get_client_fn(client),
+        state=RunState(state={}),
+        task_ins=task_ins,
+    )
 
     if not task_res.HasField("task"):
         raise ValueError("Task value not found")
@@ -211,7 +220,7 @@ def test_client_with_get_properties() -> None:
         TaskRes(
             task_id=str(uuid.uuid4()),
             group_id="",
-            workload_id=0,
+            run_id=0,
         )
     )
     # pylint: disable=no-member
