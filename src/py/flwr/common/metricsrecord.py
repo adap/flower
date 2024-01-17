@@ -25,7 +25,7 @@ MetricsRecordValues = Union[MetricsScalar, MetricsScalarList]
 
 @dataclass
 class MetricsRecord:
-    """Parameters record."""
+    """Metrics record."""
 
     data: Dict[str, MetricsRecordValues] = field(default_factory=dict)
 
@@ -43,7 +43,7 @@ class MetricsRecord:
             self.set_metrics(metrics_dict)
 
     def set_metrics(self, metrics_dict: Dict[str, MetricsRecordValues]) -> None:
-        """Add metrics to record.
+        """Add metrics to the record.
 
         Parameters
         ----------
