@@ -15,7 +15,7 @@
 """RecordSet tests."""
 
 
-from typing import Callable, List, OrderedDict, Type, Union
+from typing import Callable, Dict, List, OrderedDict, Type, Union
 
 import numpy as np
 import pytest
@@ -27,7 +27,7 @@ from .recordset_utils import (
     parameters_to_parametersrecord,
     parametersrecord_to_parameters,
 )
-from .typing import NDArray, NDArrays, Parameters, Scalar, ScalarList
+from .typing import NDArray, NDArrays, Parameters
 
 
 def get_ndarrays() -> NDArrays:
@@ -148,17 +148,71 @@ def test_set_parameters_with_incorrect_types(
         p_record.set_parameters(array_dict)  # type: ignore
 
 
-def test_add_metrics_to_metricsrecord() -> None:
+@pytest.mark.parametrize(
+    "key_type, value_fn",
+    [
+        (str, lambda x: str(x.flatten()[0])),  # str: str
+        (str, lambda x: int(x.flatten()[0])),  # str: int
+        (str, lambda x: float(x.flatten()[0])),  # str: float
+        (str, lambda x: x.flatten().astype("str").tolist()),  # str: List[str]
+        (str, lambda x: x.flatten().astype("int").tolist()),  # str: List[int]
+        (str, lambda x: x.flatten().astype("float").tolist()),  # str: List[float]
+    ],
+)
+def test_set_metrics_to_metricsrecord_with_correct_types(
+    key_type: Type[str],
+    value_fn: Callable[
+        [NDArray], Union[str, int, float, List[str], List[int], List[float]]
+    ],
+) -> None:
     """Test adding metrics of various types to a MetricsRecord."""
     m_record = MetricsRecord()
 
-    my_metrics: OrderedDict[str, Union[Scalar, ScalarList]] = OrderedDict(
-        {
-            "loss": 0.12445,
-            "converged": True,
-            "my_int": 2,
-            "embeddings": np.random.randn(10).tolist(),
-        }
+    labels = [1, 2.0]
+    arrays = get_ndarrays()
+
+    my_metrics = OrderedDict(
+        {key_type(label): value_fn(arr) for label, arr in zip(labels, arrays)}
     )
 
-    m_record.add_metrics(my_metrics)
+    m_record.set_metrics(my_metrics)
+
+
+@pytest.mark.parametrize(
+    "key_type, value_fn",
+    [
+        (str, lambda x: x),  # str: NDArray (supported: unsupported)
+        (
+            str,
+            lambda x: {str(v): v for v in x.flatten()},
+        ),  # str: dict[str: float] (supported: unsupported)
+        (
+            str,
+            lambda x: [{str(v): v for v in x.flatten()}],
+        ),  # str: List[dict[str: float]] (supported: unsupported)
+        (
+            int,
+            lambda x: x.flatten().tolist(),
+        ),  # int: List[str] (unsupported: supported)
+        (
+            float,
+            lambda x: x.flatten().tolist(),
+        ),  # float: List[int] (unsupported: supported)
+    ],
+)
+def test_set_metrics_to_metricsrecord_with_incorrect_types(
+    key_type: Type[Union[str, int, float]],
+    value_fn: Callable[[NDArray], Union[NDArray, Dict[str, NDArray], List[float]]],
+) -> None:
+    """Test adding metrics of various unsupported types to a MetricsRecord."""
+    m_record = MetricsRecord()
+
+    labels = [1, 2.0]
+    arrays = get_ndarrays()
+
+    my_metrics = OrderedDict(
+        {key_type(label): value_fn(arr) for label, arr in zip(labels, arrays)}
+    )
+
+    with pytest.raises(TypeError):
+        m_record.set_metrics(my_metrics)  # type: ignore
