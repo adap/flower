@@ -31,13 +31,11 @@ SLEEP_TIME = 1
 class DriverClientProxy(ClientProxy):
     """Flower client proxy which delegates work using the Driver API."""
 
-    def __init__(
-        self, node_id: int, driver: GrpcDriver, anonymous: bool, workload_id: int
-    ):
+    def __init__(self, node_id: int, driver: GrpcDriver, anonymous: bool, run_id: int):
         super().__init__(str(node_id))
         self.node_id = node_id
         self.driver = driver
-        self.workload_id = workload_id
+        self.run_id = run_id
         self.anonymous = anonymous
 
     def get_properties(
@@ -125,8 +123,8 @@ class DriverClientProxy(ClientProxy):
     ) -> transport_pb2.ClientMessage:
         task_ins = task_pb2.TaskIns(
             task_id="",
-            workload_id=self.workload_id,
             group_id=group_id if group_id else "",
+            run_id=self.run_id,
             task=task_pb2.Task(
                 producer=node_pb2.Node(
                     node_id=0,

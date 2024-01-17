@@ -27,7 +27,7 @@ from ray.util.actor_pool import ActorPool
 
 from flwr import common
 from flwr.client import Client, ClientFn
-from flwr.client.workload_state import WorkloadState
+from flwr.client.run_state import RunState
 from flwr.common.logger import log
 from flwr.simulation.ray_transport.utils import check_clientfn_returns_client
 
@@ -61,9 +61,9 @@ class VirtualClientEngineActor(ABC):
         client_fn: ClientFn,
         job_fn: JobFn,
         cid: str,
-        state: WorkloadState,
-    ) -> Tuple[str, ClientRes, WorkloadState]:
-        """Run a client workload."""
+        state: RunState,
+    ) -> Tuple[str, ClientRes, RunState]:
+        """Run a client run."""
         # Execute tasks and return result
         # return also cid which is needed to ensure results
         # from the pool are correctly assigned to each ClientProxy
@@ -79,12 +79,12 @@ class VirtualClientEngineActor(ABC):
         except Exception as ex:
             client_trace = traceback.format_exc()
             message = (
-                "\n\tSomething went wrong when running your client workload."
+                "\n\tSomething went wrong when running your client run."
                 "\n\tClient "
                 + cid
                 + " crashed when the "
                 + self.__class__.__name__
-                + " was running its workload."
+                + " was running its run."
                 "\n\tException triggered on the client side: " + client_trace,
             )
             raise ClientException(str(message)) from ex
@@ -94,7 +94,7 @@ class VirtualClientEngineActor(ABC):
 
 @ray.remote
 class DefaultActor(VirtualClientEngineActor):
-    """A Ray Actor class that runs client workloads.
+    """A Ray Actor class that runs client runs.
 
     Parameters
     ----------
@@ -237,10 +237,8 @@ class VirtualClientEngineActorPool(ActorPool):
             self._idle_actors.extend(new_actors)
             self.num_actors += num_actors
 
-    def submit(
-        self, fn: Any, value: Tuple[ClientFn, JobFn, str, WorkloadState]
-    ) -> None:
-        """Take idle actor and assign it a client workload.
+    def submit(self, fn: Any, value: Tuple[ClientFn, JobFn, str, RunState]) -> None:
+        """Take idle actor and assign it a client run.
 
         Submit a job to an actor by first removing it from the list of idle actors, then
         check if this actor was flagged to be removed from the pool
@@ -257,7 +255,7 @@ class VirtualClientEngineActorPool(ActorPool):
             self._cid_to_future[cid]["future"] = future_key
 
     def submit_client_job(
-        self, actor_fn: Any, job: Tuple[ClientFn, JobFn, str, WorkloadState]
+        self, actor_fn: Any, job: Tuple[ClientFn, JobFn, str, RunState]
     ) -> None:
         """Submit a job while tracking client ids."""
         _, _, cid, _ = job
@@ -297,7 +295,7 @@ class VirtualClientEngineActorPool(ActorPool):
 
         return self._cid_to_future[cid]["ready"]  # type: ignore
 
-    def _fetch_future_result(self, cid: str) -> Tuple[ClientRes, WorkloadState]:
+    def _fetch_future_result(self, cid: str) -> Tuple[ClientRes, RunState]:
         """Fetch result and updated state for a VirtualClient from Object Store.
 
         The job submitted by the ClientProxy interfacing with client with cid=cid is
@@ -307,7 +305,7 @@ class VirtualClientEngineActorPool(ActorPool):
             future: ObjectRef[Any] = self._cid_to_future[cid]["future"]  # type: ignore
             res_cid, res, updated_state = ray.get(
                 future
-            )  # type: (str, ClientRes, WorkloadState)
+            )  # type: (str, ClientRes, RunState)
         except ray.exceptions.RayActorError as ex:
             log(ERROR, ex)
             if hasattr(ex, "actor_id"):
@@ -411,7 +409,7 @@ class VirtualClientEngineActorPool(ActorPool):
 
     def get_client_result(
         self, cid: str, timeout: Optional[float]
-    ) -> Tuple[ClientRes, WorkloadState]:
+    ) -> Tuple[ClientRes, RunState]:
         """Get result from VirtualClient with specific cid."""
         # Loop until all jobs submitted to the pool are completed. Break early
         # if the result for the ClientProxy calling this method is ready
@@ -423,5 +421,5 @@ class VirtualClientEngineActorPool(ActorPool):
                 break
 
         # Fetch result belonging to the VirtualClient calling this method
-        # Return both result from tasks and (potentially) updated workload state
+        # Return both result from tasks and (potentially) updated run state
         return self._fetch_future_result(cid)
