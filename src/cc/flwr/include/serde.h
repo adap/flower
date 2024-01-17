@@ -13,14 +13,10 @@
  * ********************************************************************************************************/
 
 #pragma once
-// cppcheck-suppress missingInclude
-#include "flwr/proto/transport.grpc.pb.h"
-// cppcheck-suppress missingInclude
-#include "flwr/proto/transport.pb.h"
-// cppcheck-suppress missingInclude
 #include "flwr/proto/fleet.grpc.pb.h"
-// cppcheck-suppress missingInclude
 #include "flwr/proto/fleet.pb.h"
+#include "flwr/proto/transport.grpc.pb.h"
+#include "flwr/proto/transport.pb.h"
 #include "typing.h"
 
 /**

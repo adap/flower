@@ -15,6 +15,7 @@ matplotlib >= 3.5.0
 scikit-image >= 0.18.1
 scikit-learn >= 0.24.2
 wget >= 3.2
+virtualenv >= 20.24.6
 
 ##### dev-dependencies
 isort == 5.11.5
@@ -26,3 +27,4 @@ flake8 == 3.9.2
 pytest == 6.2.4
 pytest-watch == 4.2.0
 types-requests == 2.27.7
+pydantic ==2.4.2

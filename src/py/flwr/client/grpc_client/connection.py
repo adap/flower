@@ -45,6 +45,7 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 @contextmanager
 def grpc_connection(
     server_address: str,
+    insecure: bool,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
 ) -> Iterator[
@@ -100,6 +101,7 @@ def grpc_connection(
 
     channel = create_channel(
         server_address=server_address,
+        insecure=insecure,
         root_certificates=root_certificates,
         max_message_length=max_message_length,
     )
@@ -117,7 +119,7 @@ def grpc_connection(
         return TaskIns(
             task_id=str(uuid.uuid4()),
             group_id="",
-            workload_id=0,
+            run_id=0,
             task=Task(
                 producer=Node(node_id=0, anonymous=True),
                 consumer=Node(node_id=0, anonymous=True),

@@ -3,6 +3,7 @@ project(SimpleCppFlowerClient VERSION 0.10
   DESCRIPTION "Creates a Simple C++ Flower client that trains a linear model on synthetic data."
   LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
+option(USE_LOCAL_FLWR "Use local Flower directory instead of fetching from GitHub" OFF)
 
 ######################
 ### Download gRPC 
@@ -28,8 +29,24 @@ endif()
 
 ######################
 ### FLWR_LIB
+if(USE_LOCAL_FLWR)
+  set(FLWR_SOURCE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../..")
+else()
+  FetchContent_Declare(
+    flwr_repo
+    GIT_REPOSITORY https://github.com/adap/flower.git
+    GIT_TAG        main
+  )
 
-set(FLWR_SDK_PATH "../../src/cc/flwr")
+  FetchContent_GetProperties(flwr_repo)
+  if(NOT flwr_repo_POPULATED)
+    FetchContent_Populate(flwr_repo)
+  endif()
+
+  set(FLWR_SOURCE_ROOT "${flwr_repo_SOURCE_DIR}")
+endif()
+
+set(FLWR_SDK_PATH "${FLWR_SOURCE_ROOT}/src/cc/flwr")
 
 file(GLOB FLWR_SRCS "${FLWR_SDK_PATH}/src/*.cc")
 file(GLOB FLWR_PROTO_SRCS "${FLWR_SDK_PATH}/include/flwr/proto/*.cc")
