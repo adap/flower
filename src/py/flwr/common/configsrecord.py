@@ -26,9 +26,5 @@ class ConfigsRecord(MetricsRecord):
     """Configs record."""
 
     def set_configs(self, configs_dict: Dict[str, MetricsRecordValues]) -> None:
-        """Add configs to record.
-
-        This not implemented as a constructor so we can cleanly create and empyt
-        ConfigsRecord object.
-        """
+        """Add configs to record."""
         super().set_metrics(configs_dict)
