@@ -22,8 +22,8 @@ from typing import Dict, List, Optional, OrderedDict
 class Array:
     """Array type.
 
-    A datacalss conatining serialized data from an array-like or tensor-like object
-    alongwith some metata about it.
+    A dataclass containing serialized data from an array-like or tensor-like object
+    along with some metadata about it.
 
     Parameters
     ----------
