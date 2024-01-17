@@ -28,7 +28,7 @@ def eval_learning(y_test, y_pred):
 
 
 # Define Flower client
-class CifarClient(fl.client.NumPyClient):
+class FlowerClient(fl.client.NumPyClient):
     def get_parameters(self, config):
         return model.get_weights()
 
