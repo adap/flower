@@ -99,14 +99,29 @@ def test_parameters_to_parametersrecord_and_back() -> None:
         assert np.array_equal(arr, arr_)
 
 
-def test_set_parameters_with_correct_types() -> None:
-    """Test adding dictionary of Arrays to ParametersRecord."""
-    p_record = ParametersRecord()
-
+def test_set_parameters_while_keeping_intputs() -> None:
+    """Tests keep_input functionality in ParametersRecord."""
+    # Adding parameters to a record that doesn't erase entries in the input `array_dict`
+    p_record = ParametersRecord(keep_input=True)
     array_dict = {
         str(i): ndarray_to_array(ndarray) for i, ndarray in enumerate(get_ndarrays())
     }
+    p_record.set_parameters(array_dict)
 
+    # Creating a second parametersrecord passing the same `array_dict` (not erased)
+    p_record_2 = ParametersRecord(array_dict)
+    assert p_record.data == p_record_2.data
+
+    # Now it should be empty (the second ParametersRecord wasn't flagged to keep it)
+    assert len(array_dict) == 0
+
+
+def test_set_parameters_with_correct_types() -> None:
+    """Test adding dictionary of Arrays to ParametersRecord."""
+    p_record = ParametersRecord()
+    array_dict = {
+        str(i): ndarray_to_array(ndarray) for i, ndarray in enumerate(get_ndarrays())
+    }
     p_record.set_parameters(array_dict)
 
 
@@ -115,7 +130,7 @@ def test_set_parameters_with_correct_types() -> None:
     [
         (str, lambda x: x),  # correct key, incorrect value
         (str, lambda x: x.tolist()),  # correct key, incorrect value
-        (int, lambda x: ndarray_to_array(x)),  # incorrect key, correct value
+        (int, ndarray_to_array),  # incorrect key, correct value
         (int, lambda x: x),  # incorrect key, incorrect value
         (int, lambda x: x.tolist()),  # incorrect key, incorrect value
     ],
@@ -133,19 +148,3 @@ def test_set_parameters_with_incorrect_types(
 
     with pytest.raises(TypeError):
         p_record.set_parameters(array_dict)  # type: ignore
-
-
-# def test_torch_statedict_to_parametersrecord() -> None:
-#     """."""
-#     import torch
-#     from .parametersrecord import ParametersRecord
-
-#     layer = torch.nn.Conv2d(3, 5, 16)
-#     layer_sd = layer.state_dict()
-
-#     p_c = ParametersRecord()
-
-#     for k in layer_sd.keys():
-#         layer_sd[k] = ndarray_to_array(layer_sd[k].numpy())
-
-#     p_c.set_parameters(layer_sd)
