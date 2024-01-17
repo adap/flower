@@ -44,7 +44,7 @@ if __name__ == "__main__":
     total_partitions = 10
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--node_id", type=int, choices=range(total_partitions), required=True
+        "--node-id", type=int, choices=range(total_partitions), required=True
     )
     args = parser.parse_args()
 
