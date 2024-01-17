@@ -45,7 +45,7 @@ def aggregate(results: List[Tuple[NDArrays, int]]) -> NDArrays:
 def aggregate_inplace(results: List[Tuple[ClientProxy, FitRes]]) -> NDArrays:
     """Compute in-place weighted average."""
     # Count total examples
-    num_examples_total = sum([fit_res.num_examples for _, fit_res in results])
+    num_examples_total = sum(fit_res.num_examples for (_, fit_res) in results)
 
     # Compute scaling factors for each result
     scaling_factors = [
