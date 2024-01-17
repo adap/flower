@@ -36,7 +36,7 @@ from .fedavg import FedAvg
 
 
 class FedMedian(FedAvg):
-    """Configurable FedAvg with Momentum strategy implementation."""
+    """Configurable FedMedian strategy implementation."""
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""

@@ -113,7 +113,7 @@ class GrpcBridge:
         ):
             self._status = next_status
         else:
-            raise Exception(f"Invalid transition: {self._status} to {next_status}")
+            raise ValueError(f"Invalid transition: {self._status} to {next_status}")
 
         self._cv.notify_all()
 
@@ -129,7 +129,7 @@ class GrpcBridge:
             self._raise_if_closed()
 
             if self._status != Status.AWAITING_INS_WRAPPER:
-                raise Exception("This should not happen")
+                raise ValueError("This should not happen")
 
             self._ins_wrapper = ins_wrapper  # Write
             self._transition(Status.INS_WRAPPER_AVAILABLE)
@@ -146,7 +146,7 @@ class GrpcBridge:
             self._transition(Status.AWAITING_INS_WRAPPER)
 
         if res_wrapper is None:
-            raise Exception("ResWrapper can not be None")
+            raise ValueError("ResWrapper can not be None")
 
         return res_wrapper
 
@@ -170,7 +170,7 @@ class GrpcBridge:
                 self._transition(Status.AWAITING_RES_WRAPPER)
 
             if ins_wrapper is None:
-                raise Exception("InsWrapper can not be None")
+                raise ValueError("InsWrapper can not be None")
 
             yield ins_wrapper
 
@@ -180,7 +180,7 @@ class GrpcBridge:
             self._raise_if_closed()
 
             if self._status != Status.AWAITING_RES_WRAPPER:
-                raise Exception("This should not happen")
+                raise ValueError("This should not happen")
 
             self._res_wrapper = res_wrapper  # Write
             self._transition(Status.RES_WRAPPER_AVAILABLE)
