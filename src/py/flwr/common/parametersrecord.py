@@ -32,7 +32,7 @@ class Array:
         A string representing the data type of the serialised object (e.g. `np.float32`)
 
     shape : List[int]
-        A list representing the shape of the unserliazed array-like object. This is used
+        A list representing the shape of the unserialized array-like object. This is used
         to deserialize the data (depending on the serialization method) or simply as a
         metadata field.
 
