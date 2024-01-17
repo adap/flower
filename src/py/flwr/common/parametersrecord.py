@@ -32,9 +32,9 @@ class Array:
         A string representing the data type of the serialised object (e.g. `np.float32`)
 
     shape : List[int]
-        A list representing the shape of the unserialized array-like object. This is used
-        to deserialize the data (depending on the serialization method) or simply as a
-        metadata field.
+        A list representing the shape of the unserialized array-like object. This is
+        used to deserialize the data (depending on the serialization method) or simply
+        as a metadata field.
 
     stype : str
         A string indicating the type of serialisation mechanism used to generate the
@@ -73,12 +73,12 @@ class ParametersRecord:
         ----------
         keep_input : bool (default: False)
             A boolean indicating whether parameters should be deleted from the input
-            dictionary immediately after adding them to the record. If True, the
+            dictionary immediately after adding them to the record. If False, the
             dictionary passed to `set_parameters()` will be empty once exiting from that
             function. This is the desired behaviour when working with very large
             models/tensors/arrays. However, if you plan to continue working with your
-            parameters after adding it to the record, set this flag to False. When set
-            to False, the data is duplicated in memory.
+            parameters after adding it to the record, set this flag to True. When set
+            to True, the data is duplicated in memory.
 
         data : Optional[OrderedDict[str, Array]] (default: None)
             An OrderedDict that stores serialized array-like or tensor-like objects.

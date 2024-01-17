@@ -37,8 +37,8 @@ def parametersrecord_to_parameters(record: ParametersRecord) -> Parameters:
 def parameters_to_parametersrecord(parameters: Parameters) -> ParametersRecord:
     """Convert legacy Parameters into a single ParametersRecord.
 
-    The memory ocupied by inputed parameters will be freed. Because there is no concept
-    of names in the legacy Paramters, arbitrary keys will be used when constructing the
+    The memory occupied by inputed parameters will be freed. Because there is no concept
+    of names in the legacy Parameters, arbitrary keys will be used when constructing the
     ParametersRecord. Similarly, the shape won't be recorded in the Array objects.
     """
     tensor_type = parameters.tensor_type
