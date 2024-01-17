@@ -3,7 +3,7 @@
 This example demonstrates an advanced federated learning setup using Flower with TensorFlow/Keras. It differs from the quickstart example in the following ways:
 
 - 10 clients (instead of just 2)
-- Each client holds a local dataset of 5000 training examples and 1000 test examples (note that by default only a small subset of this data is used when running the `run.sh` script)
+- Each client holds a local dataset of 1/10 of the train datasets and 80% is training examples and 20% as test examples (note that by default only a small subset of this data is used when running the `run.sh` script)
 - Server-side model evaluation after parameter aggregation
 - Hyperparameter schedule using config functions
 - Custom return values
