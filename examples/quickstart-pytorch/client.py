@@ -99,6 +99,7 @@ parser = argparse.ArgumentParser(description="Flower")
 parser.add_argument(
     "--node-id",
     choices=[0, 1, 2],
+    required=True,
     type=int,
     help="Partition of the dataset divided into 3 iid partitions created artificially.",
 )

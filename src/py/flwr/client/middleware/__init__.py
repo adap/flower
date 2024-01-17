@@ -12,14 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Workload state."""
-
-from dataclasses import dataclass
-from typing import Dict
+"""Middleware layers."""
 
 
-@dataclass
-class WorkloadState:
-    """State of a workload executed by a client node."""
+from .utils import make_ffn
 
-    state: Dict[str, str]
+__all__ = [
+    "make_ffn",
+]
