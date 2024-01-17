@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Tests all state implemenations have to conform to."""
-# pylint: disable=no-self-use, invalid-name, disable=R0904
+# pylint: disable=invalid-name, disable=R0904
 
 import tempfile
 import unittest
