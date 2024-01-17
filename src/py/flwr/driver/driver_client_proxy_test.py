@@ -161,7 +161,6 @@ class DriverClientProxyTestCase(unittest.TestCase):
             task_res_list=[
                 task_pb2.TaskRes(
                     task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
-                    workload_id=0,
                     group_id="1",
                     run_id=0,
                     task=task_pb2.Task(
