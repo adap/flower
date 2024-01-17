@@ -73,12 +73,12 @@ class ParametersRecord:
         ----------
         keep_input : bool (default: False)
             A boolean indicating whether parameters should be deleted from the input
-            dictionary inmediately after adding them to the record. If True, the
+            dictionary immediately after adding them to the record. If True, the
             dictionary passed to `set_parameters()` will be empty once exiting from that
             function. This is the desired behaviour when working with very large
             models/tensors/arrays. However, if you plan to continue working with your
             parameters after adding it to the record, set this flag to False. When set
-            to False, the data is duplicated inmemory.
+            to False, the data is duplicated in memory.
 
         data : Optional[OrderedDict[str, Array]] (default: None)
             An OrderedDict that stores serialized array-like or tensor-like objects.
@@ -97,9 +97,9 @@ class ParametersRecord:
             An OrderedDict that stores serialized array-like or tensor-like objects.
         """
         if any(not isinstance(k, str) for k in array_dict.keys()):
-            raise TypeError(f"Not all keys are of valide type. Expected {str}")
+            raise TypeError(f"Not all keys are of valid type. Expected {str}")
         if any(not isinstance(v, Array) for v in array_dict.values()):
-            raise TypeError(f"Not all values are of valide type. Expected {Array}")
+            raise TypeError(f"Not all values are of valid type. Expected {Array}")
 
         if self.keep_input:
             # Copy
