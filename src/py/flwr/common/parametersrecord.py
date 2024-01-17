@@ -55,7 +55,7 @@ class ParametersRecord:
 
     A dataclass storing named Arrays in order. This means that it holds entries as an
     OrderedDict[str, Array]. ParametersRecord objects can be viewed as an equivalent to
-    PyTorch's state_dict but holding serialised tensors instead.
+    PyTorch's state_dict, but holding serialised tensors instead.
     """
 
     keep_input: bool
