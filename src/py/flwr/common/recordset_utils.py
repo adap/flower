@@ -19,37 +19,65 @@ from .parametersrecord import Array, ParametersRecord
 from .typing import Parameters
 
 
-def parametersrecord_to_parameters(record: ParametersRecord) -> Parameters:
+def parametersrecord_to_parameters(
+    record: ParametersRecord, keep_input: bool = False
+) -> Parameters:
     """Convert ParameterRecord to legacy Parameters.
 
-    The data in ParameterRecord will be freed. Because legacy Parameters do not keep
-    names of tensors, this information will be discarded.
+    Warning: Because `Arrays` in `ParametersRecord` encode more information of the
+    array-like or tensor-like data (e.g their datatype, shape) than `Parameters` it
+    might not be possible to reconstruct such data structures from `Parameters` objects
+    alone. Additional information or metadta must be provided from elsewhere.
+
+    Parameters
+    ----------
+    record : ParametersRecord
+        The record to be conveted into Parameters.
+    keep_input : bool (default: False)
+        A boolean indicating whether entries in the record should be deleted from the
+        input dictionary immediately after adding them to the record.
     """
     parameters = Parameters(tensors=[], tensor_type="")
 
     for key in list(record.data.keys()):
         parameters.tensors.append(record.data[key].data)
 
-        del record.data[key]
+        if not keep_input:
+            del record.data[key]
 
     return parameters
 
 
-def parameters_to_parametersrecord(parameters: Parameters) -> ParametersRecord:
+def parameters_to_parametersrecord(
+    parameters: Parameters, keep_input: bool = False
+) -> ParametersRecord:
     """Convert legacy Parameters into a single ParametersRecord.
 
-    The memory occupied by inputed parameters will be freed. Because there is no concept
-    of names in the legacy Parameters, arbitrary keys will be used when constructing the
-    ParametersRecord. Similarly, the shape won't be recorded in the Array objects.
+    Because there is no concept of names in the legacy Parameters, arbitrary keys will
+    be used when constructing the ParametersRecord. Similarly, the shape and data type
+    won't be recorded in the Array objects.
+
+    Parameters
+    ----------
+    parameters : Parameters
+        Parameters object to be represented as a ParametersRecord.
+    keep_input : bool (default: False)
+        A boolean indicating whether parameters should be deleted from the input
+        Parameters object (i.e. a list of serialized NumPy arrays) immediately after
+        adding them to the record.
     """
     tensor_type = parameters.tensor_type
 
     p_record = ParametersRecord()
 
-    for idx in range(len(parameters.tensors)):
-        tensor = parameters.tensors.pop(0)
+    num_arrays = len(parameters.tensors)
+    for idx in range(num_arrays):
+        if keep_input:
+            tensor = parameters.tensors[idx]
+        else:
+            tensor = parameters.tensors.pop(0)
         p_record.set_parameters(
-            {str(idx): Array(data=tensor, dtype=tensor_type, stype="", shape=[])}
+            {str(idx): Array(data=tensor, dtype="", stype=tensor_type, shape=[])}
         )
 
     return p_record

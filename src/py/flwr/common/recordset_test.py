@@ -81,10 +81,7 @@ def test_parameters_to_array_and_back() -> None:
 
 
 def test_parameters_to_parametersrecord_and_back() -> None:
-    """Test utility function to convert between legacy Parameters.
-
-    and ParametersRecords.
-    """
+    """Test conversion between legacy Parameters and ParametersRecords."""
     ndarrays = get_ndarrays()
 
     parameters = ndarrays_to_parameters(ndarrays)

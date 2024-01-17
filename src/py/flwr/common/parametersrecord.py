@@ -71,6 +71,8 @@ class ParametersRecord:
 
         Parameters
         ----------
+        array_dict : Optional[OrderedDict[str, Array]]
+            An OrderedDict that stores serialized array-like or tensor-like objects.
         keep_input : bool (default: False)
             A boolean indicating whether parameters should be deleted from the input
             dictionary immediately after adding them to the record. If False, the
@@ -79,9 +81,6 @@ class ParametersRecord:
             models/tensors/arrays. However, if you plan to continue working with your
             parameters after adding it to the record, set this flag to True. When set
             to True, the data is duplicated in memory.
-
-        data : Optional[OrderedDict[str, Array]] (default: None)
-            An OrderedDict that stores serialized array-like or tensor-like objects.
         """
         self.keep_input = keep_input
         self.data = OrderedDict()
