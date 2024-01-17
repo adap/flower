@@ -25,10 +25,8 @@ class Array:
 
     dtype: str
     shape: List[int]
-
     stype: str
     data: bytes
-    ref: str = ""  # future functionality
 
 
 @dataclass
@@ -37,18 +35,18 @@ class ParametersRecord:
 
     data: OrderedDict[str, Array] = field(default_factory=OrderedDict[str, Array])
 
-    def add_parameters(self, tensor_dict: Dict[str, Array]) -> None:
+    def add_parameters(self, array_dict: Dict[str, Array]) -> None:
         """Add parameters to record.
 
-        This is not implemented as a constructor so we can cleanly create and empty
-        the ParametersRecord object.
+        This is not implemented as a constructor so we can cleanly create and empty the
+        ParametersRecord object.
         """
-        if any(not isinstance(k, str) for k in tensor_dict.keys()):
+        if any(not isinstance(k, str) for k in array_dict.keys()):
             raise TypeError(f"Not all keys are of valide type. Expected {str}")
-        if any(not isinstance(v, Array) for v in tensor_dict.values()):
+        if any(not isinstance(v, Array) for v in array_dict.values()):
             raise TypeError(f"Not all values are of valide type. Expected {Array}")
 
         # Add entries to dataclass without duplicating memory
-        for key in list(tensor_dict.keys()):
-            self.data[key] = tensor_dict[key]
-            del tensor_dict[key]
+        for key in list(array_dict.keys()):
+            self.data[key] = array_dict[key]
+            del array_dict[key]

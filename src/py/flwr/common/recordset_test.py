@@ -15,8 +15,6 @@
 """RecordSet tests."""
 
 
-import secrets
-
 import numpy as np
 
 from .parameter import ndarrays_to_parameters, parameters_to_ndarrays
@@ -36,14 +34,13 @@ def get_ndarrays() -> NDArrays:
     return [arr1, arr2]
 
 
-def nparray_to_array(np_array: NDArray) -> Array:
-    """Represent NumPy array as Array."""
+def ndarray_to_array(ndarray: NDArray) -> Array:
+    """Represent NumPy ndarray as Array."""
     return Array(
-        np_array.tobytes(),
-        dtype=str(np_array.dtype),
+        data=ndarray.tobytes(),
+        dtype=str(ndarray.dtype),
         stype="numpy.ndarray.tobytes",
-        shape=list(np_array.shape),
-        ref=secrets.token_hex(16),
+        shape=list(ndarray.shape),
     )
 
 
@@ -52,11 +49,11 @@ def test_ndarray_to_array() -> None:
     shape = (2, 7, 9)
     arr = np.eye(*shape)
 
-    array = nparray_to_array(arr)
+    array = ndarray_to_array(arr)
 
     arr_ = np.frombuffer(buffer=array.data, dtype=array.dtype).reshape(array.shape)
 
-    assert np.allclose(arr, arr_)
+    assert np.array_equal(arr, arr_)
 
 
 def test_parameters_to_array_and_back() -> None:
@@ -70,14 +67,14 @@ def test_parameters_to_array_and_back() -> None:
     parameters = ndarrays_to_parameters([ndarray])
 
     array = Array(
-        data=parameters.tensors[0], dtype=parameters.tensor_type, stype="", shape=[]
+        data=parameters.tensors[0], dtype="", stype=parameters.tensor_type, shape=[]
     )
 
-    parameters = Parameters(tensors=[array.data], tensor_type=array.dtype)
+    parameters = Parameters(tensors=[array.data], tensor_type=array.stype)
 
     ndarray_ = parameters_to_ndarrays(parameters=parameters)[0]
 
-    assert np.allclose(ndarray, ndarray_)
+    assert np.array_equal(ndarray, ndarray_)
 
 
 def test_parameters_to_parametersrecord_and_back() -> None:
@@ -96,7 +93,7 @@ def test_parameters_to_parametersrecord_and_back() -> None:
     ndarrays_ = parameters_to_ndarrays(parameters=parameters_)
 
     for arr, arr_ in zip(ndarrays, ndarrays_):
-        assert np.allclose(arr, arr_)
+        assert np.array_equal(arr, arr_)
 
 
 # def test_torch_statedict_to_parametersrecord() -> None:
@@ -110,6 +107,6 @@ def test_parameters_to_parametersrecord_and_back() -> None:
 #     p_c = ParametersRecord()
 
 #     for k in layer_sd.keys():
-#         layer_sd[k] = nparray_to_array(layer_sd[k].numpy())
+#         layer_sd[k] = ndarray_to_array(layer_sd[k].numpy())
 
 #     p_c.add_parameters(layer_sd)
