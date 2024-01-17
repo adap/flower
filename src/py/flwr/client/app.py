@@ -302,7 +302,7 @@ def _start_client_internal(
                 cid: str,  # pylint: disable=unused-argument
             ) -> Client:
                 if client is None:  # Added this to keep mypy happy
-                    raise Exception(
+                    raise ValueError(
                         "Both `client_fn` and `client` are `None`, but one is required"
                     )
                 return client  # Always return the same instance
