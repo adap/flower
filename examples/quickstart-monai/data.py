@@ -18,7 +18,9 @@ from monai.transforms import (
 
 def _partition(files_list, labels_list, num_shards, index):
     total_size = len(files_list)
-    assert total_size == len(labels_list), f"List of datapoints and labels must be of the same length"
+    assert total_size == len(
+        labels_list
+    ), f"List of datapoints and labels must be of the same length"
     shard_size = total_size // num_shards
 
     # Calculate start and end indices for the shard
@@ -30,17 +32,18 @@ def _partition(files_list, labels_list, num_shards, index):
         end_idx = start_idx + shard_size
 
     # Create a subset for the shard
-    files = files_list[start_idx: end_idx]
-    labels = labels_list[start_idx: end_idx]
+    files = files_list[start_idx:end_idx]
+    labels = labels_list[start_idx:end_idx]
     return files, labels
 
 
 def load_data(num_shards, index):
-    image_file_list, image_label_list, num_total, num_class = _download_data()
+    image_file_list, image_label_list, _, num_class = _download_data()
 
-    # get partition given index
-    files_list, labels_list = _partition(image_file_list, image_label_list, num_shards, index)
-
+    # Get partition given index
+    files_list, labels_list = _partition(
+        image_file_list, image_label_list, num_shards, index
+    )
 
     trainX, trainY, valX, valY, testX, testY = _split_data(
         files_list, labels_list, len(files_list)
@@ -54,9 +57,6 @@ def load_data(num_shards, index):
     val_loader = DataLoader(val_ds, batch_size=300)
 
     test_ds = MedNISTDataset(testX, testY, val_transforms)
-    test_loader = DataLoader(test_ds, batch_size=300)
-
-    return train_loader, val_loader, test_loader, num_class
     test_loader = DataLoader(test_ds, batch_size=300)
 
     return train_loader, val_loader, test_loader, num_class
