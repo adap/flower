@@ -34,7 +34,7 @@ design of Flower is based on a few guiding principles:
 - **Framework-agnostic**: Different machine learning frameworks have different
   strengths. Flower can be used with any machine learning framework, for
   example, [PyTorch](https://pytorch.org),
-  [TensorFlow](https://tensorflow.org), [Hugging Face Transformers](https://huggingface.co/), [PyTorch Lightning](https://pytorchlightning.ai/), [scikit-learn](https://scikit-learn.org/), [JAX](https://jax.readthedocs.io/), [TFLite](https://tensorflow.org/lite/), [fastai](https://www.fast.ai/), [Pandas](https://pandas.pydata.org/) for federated analytics, or even raw [NumPy](https://numpy.org/)
+  [TensorFlow](https://tensorflow.org), [Hugging Face Transformers](https://huggingface.co/), [PyTorch Lightning](https://pytorchlightning.ai/), [scikit-learn](https://scikit-learn.org/), [JAX](https://jax.readthedocs.io/), [TFLite](https://tensorflow.org/lite/), [fastai](https://www.fast.ai/), [MONAI](https://docs.monai.io/en/latest/index.html), [Pandas](https://pandas.pydata.org/) for federated analytics, or even raw [NumPy](https://numpy.org/)
   for users who enjoy computing gradients by hand.
 
 - **Understandable**: Flower is written with maintainability in mind. The
@@ -124,6 +124,7 @@ Quickstart examples:
 - [Quickstart (fastai)](https://github.com/adap/flower/tree/main/examples/quickstart-fastai)
 - [Quickstart (Pandas)](https://github.com/adap/flower/tree/main/examples/quickstart-pandas)
 - [Quickstart (JAX)](https://github.com/adap/flower/tree/main/examples/quickstart-jax)
+- [Quickstart (MONAI)](https://github.com/adap/flower/tree/main/examples/quickstart-monai)
 - [Quickstart (scikit-learn)](https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist)
 - [Quickstart (Android [TFLite])](https://github.com/adap/flower/tree/main/examples/android)
 - [Quickstart (iOS [CoreML])](https://github.com/adap/flower/tree/main/examples/ios)
