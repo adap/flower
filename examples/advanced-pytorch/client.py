@@ -100,7 +100,7 @@ def main() -> None:
         help="Do a dry-run to check the client",
     )
     parser.add_argument(
-        "--partition",
+        "--client-id",
         type=int,
         default=0,
         choices=range(0, 10),
@@ -110,9 +110,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--toy",
-        type=bool,
-        default=False,
-        required=False,
+        action='store_true',
         help="Set to true to quicky run the client using only 10 datasamples. \
         Useful for testing purposes. Default: False",
     )
@@ -134,7 +132,7 @@ def main() -> None:
         client_dry_run(device)
     else:
         # Load a subset of CIFAR-10 to simulate the local data partition
-        trainset, testset = utils.load_partition(args.partition)
+        trainset, testset = utils.load_partition(args.client_id)
 
         if args.toy:
             trainset = trainset.select(range(10))
