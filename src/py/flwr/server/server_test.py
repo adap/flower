@@ -47,14 +47,14 @@ class SuccessClient(ClientProxy):
     def get_properties(
         self, ins: GetPropertiesIns, timeout: Optional[float]
     ) -> GetPropertiesRes:
-        """Raise an Exception because this method is not expected to be called."""
-        raise Exception()
+        """Raise an error because this method is not expected to be called."""
+        raise NotImplementedError()
 
     def get_parameters(
         self, ins: GetParametersIns, timeout: Optional[float]
     ) -> GetParametersRes:
-        """Raise an Exception because this method is not expected to be called."""
-        raise Exception()
+        """Raise a error because this method is not expected to be called."""
+        raise NotImplementedError()
 
     def fit(self, ins: FitIns, timeout: Optional[float]) -> FitRes:
         """Simulate fit by returning a success FitRes with simple set of weights."""
@@ -87,26 +87,26 @@ class FailingClient(ClientProxy):
     def get_properties(
         self, ins: GetPropertiesIns, timeout: Optional[float]
     ) -> GetPropertiesRes:
-        """Raise an Exception to simulate failure in the client."""
-        raise Exception()
+        """Raise a NotImplementedError to simulate failure in the client."""
+        raise NotImplementedError()
 
     def get_parameters(
         self, ins: GetParametersIns, timeout: Optional[float]
     ) -> GetParametersRes:
-        """Raise an Exception to simulate failure in the client."""
-        raise Exception()
+        """Raise a NotImplementedError to simulate failure in the client."""
+        raise NotImplementedError()
 
     def fit(self, ins: FitIns, timeout: Optional[float]) -> FitRes:
-        """Raise an Exception to simulate failure in the client."""
-        raise Exception()
+        """Raise a NotImplementedError to simulate failure in the client."""
+        raise NotImplementedError()
 
     def evaluate(self, ins: EvaluateIns, timeout: Optional[float]) -> EvaluateRes:
-        """Raise an Exception to simulate failure in the client."""
-        raise Exception()
+        """Raise a NotImplementedError to simulate failure in the client."""
+        raise NotImplementedError()
 
     def reconnect(self, ins: ReconnectIns, timeout: Optional[float]) -> DisconnectRes:
-        """Raise an Exception to simulate failure in the client."""
-        raise Exception()
+        """Raise a NotImplementedError to simulate failure in the client."""
+        raise NotImplementedError()
 
 
 def test_fit_clients() -> None:
