@@ -4,9 +4,8 @@
 """Generated protocol buffer code."""
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import descriptor_pool as _descriptor_pool
-from google.protobuf import message as _message
-from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
+from google.protobuf.internal import builder as _builder
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
@@ -18,115 +17,33 @@ from flwr.proto import task_pb2 as flwr_dot_proto_dot_task__pb2
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16\x66lwr/proto/fleet.proto\x12\nflwr.proto\x1a\x15\x66lwr/proto/node.proto\x1a\x15\x66lwr/proto/task.proto\"\x13\n\x11\x43reateNodeRequest\"4\n\x12\x43reateNodeResponse\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\"3\n\x11\x44\x65leteNodeRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\"\x14\n\x12\x44\x65leteNodeResponse\"F\n\x12PullTaskInsRequest\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.flwr.proto.Node\x12\x10\n\x08task_ids\x18\x02 \x03(\t\"k\n\x13PullTaskInsResponse\x12(\n\treconnect\x18\x01 \x01(\x0b\x32\x15.flwr.proto.Reconnect\x12*\n\rtask_ins_list\x18\x02 \x03(\x0b\x32\x13.flwr.proto.TaskIns\"@\n\x12PushTaskResRequest\x12*\n\rtask_res_list\x18\x01 \x03(\x0b\x32\x13.flwr.proto.TaskRes\"\xae\x01\n\x13PushTaskResResponse\x12(\n\treconnect\x18\x01 \x01(\x0b\x32\x15.flwr.proto.Reconnect\x12=\n\x07results\x18\x02 \x03(\x0b\x32,.flwr.proto.PushTaskResResponse.ResultsEntry\x1a.\n\x0cResultsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\r:\x02\x38\x01\"\x1e\n\tReconnect\x12\x11\n\treconnect\x18\x01 \x01(\x04\x32\xc9\x02\n\x05\x46leet\x12M\n\nCreateNode\x12\x1d.flwr.proto.CreateNodeRequest\x1a\x1e.flwr.proto.CreateNodeResponse\"\x00\x12M\n\nDeleteNode\x12\x1d.flwr.proto.DeleteNodeRequest\x1a\x1e.flwr.proto.DeleteNodeResponse\"\x00\x12P\n\x0bPullTaskIns\x12\x1e.flwr.proto.PullTaskInsRequest\x1a\x1f.flwr.proto.PullTaskInsResponse\"\x00\x12P\n\x0bPushTaskRes\x12\x1e.flwr.proto.PushTaskResRequest\x1a\x1f.flwr.proto.PushTaskResResponse\"\x00\x62\x06proto3')
 
-
-
-_CREATENODEREQUEST = DESCRIPTOR.message_types_by_name['CreateNodeRequest']
-_CREATENODERESPONSE = DESCRIPTOR.message_types_by_name['CreateNodeResponse']
-_DELETENODEREQUEST = DESCRIPTOR.message_types_by_name['DeleteNodeRequest']
-_DELETENODERESPONSE = DESCRIPTOR.message_types_by_name['DeleteNodeResponse']
-_PULLTASKINSREQUEST = DESCRIPTOR.message_types_by_name['PullTaskInsRequest']
-_PULLTASKINSRESPONSE = DESCRIPTOR.message_types_by_name['PullTaskInsResponse']
-_PUSHTASKRESREQUEST = DESCRIPTOR.message_types_by_name['PushTaskResRequest']
-_PUSHTASKRESRESPONSE = DESCRIPTOR.message_types_by_name['PushTaskResResponse']
-_PUSHTASKRESRESPONSE_RESULTSENTRY = _PUSHTASKRESRESPONSE.nested_types_by_name['ResultsEntry']
-_RECONNECT = DESCRIPTOR.message_types_by_name['Reconnect']
-CreateNodeRequest = _reflection.GeneratedProtocolMessageType('CreateNodeRequest', (_message.Message,), {
-  'DESCRIPTOR' : _CREATENODEREQUEST,
-  '__module__' : 'flwr.proto.fleet_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.proto.CreateNodeRequest)
-  })
-_sym_db.RegisterMessage(CreateNodeRequest)
-
-CreateNodeResponse = _reflection.GeneratedProtocolMessageType('CreateNodeResponse', (_message.Message,), {
-  'DESCRIPTOR' : _CREATENODERESPONSE,
-  '__module__' : 'flwr.proto.fleet_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.proto.CreateNodeResponse)
-  })
-_sym_db.RegisterMessage(CreateNodeResponse)
-
-DeleteNodeRequest = _reflection.GeneratedProtocolMessageType('DeleteNodeRequest', (_message.Message,), {
-  'DESCRIPTOR' : _DELETENODEREQUEST,
-  '__module__' : 'flwr.proto.fleet_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.proto.DeleteNodeRequest)
-  })
-_sym_db.RegisterMessage(DeleteNodeRequest)
-
-DeleteNodeResponse = _reflection.GeneratedProtocolMessageType('DeleteNodeResponse', (_message.Message,), {
-  'DESCRIPTOR' : _DELETENODERESPONSE,
-  '__module__' : 'flwr.proto.fleet_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.proto.DeleteNodeResponse)
-  })
-_sym_db.RegisterMessage(DeleteNodeResponse)
-
-PullTaskInsRequest = _reflection.GeneratedProtocolMessageType('PullTaskInsRequest', (_message.Message,), {
-  'DESCRIPTOR' : _PULLTASKINSREQUEST,
-  '__module__' : 'flwr.proto.fleet_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.proto.PullTaskInsRequest)
-  })
-_sym_db.RegisterMessage(PullTaskInsRequest)
-
-PullTaskInsResponse = _reflection.GeneratedProtocolMessageType('PullTaskInsResponse', (_message.Message,), {
-  'DESCRIPTOR' : _PULLTASKINSRESPONSE,
-  '__module__' : 'flwr.proto.fleet_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.proto.PullTaskInsResponse)
-  })
-_sym_db.RegisterMessage(PullTaskInsResponse)
-
-PushTaskResRequest = _reflection.GeneratedProtocolMessageType('PushTaskResRequest', (_message.Message,), {
-  'DESCRIPTOR' : _PUSHTASKRESREQUEST,
-  '__module__' : 'flwr.proto.fleet_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.proto.PushTaskResRequest)
-  })
-_sym_db.RegisterMessage(PushTaskResRequest)
-
-PushTaskResResponse = _reflection.GeneratedProtocolMessageType('PushTaskResResponse', (_message.Message,), {
-
-  'ResultsEntry' : _reflection.GeneratedProtocolMessageType('ResultsEntry', (_message.Message,), {
-    'DESCRIPTOR' : _PUSHTASKRESRESPONSE_RESULTSENTRY,
-    '__module__' : 'flwr.proto.fleet_pb2'
-    # @@protoc_insertion_point(class_scope:flwr.proto.PushTaskResResponse.ResultsEntry)
-    })
-  ,
-  'DESCRIPTOR' : _PUSHTASKRESRESPONSE,
-  '__module__' : 'flwr.proto.fleet_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.proto.PushTaskResResponse)
-  })
-_sym_db.RegisterMessage(PushTaskResResponse)
-_sym_db.RegisterMessage(PushTaskResResponse.ResultsEntry)
-
-Reconnect = _reflection.GeneratedProtocolMessageType('Reconnect', (_message.Message,), {
-  'DESCRIPTOR' : _RECONNECT,
-  '__module__' : 'flwr.proto.fleet_pb2'
-  # @@protoc_insertion_point(class_scope:flwr.proto.Reconnect)
-  })
-_sym_db.RegisterMessage(Reconnect)
-
-_FLEET = DESCRIPTOR.services_by_name['Fleet']
+_globals = globals()
+_builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'flwr.proto.fleet_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
-
   DESCRIPTOR._options = None
   _PUSHTASKRESRESPONSE_RESULTSENTRY._options = None
   _PUSHTASKRESRESPONSE_RESULTSENTRY._serialized_options = b'8\001'
-  _CREATENODEREQUEST._serialized_start=84
-  _CREATENODEREQUEST._serialized_end=103
-  _CREATENODERESPONSE._serialized_start=105
-  _CREATENODERESPONSE._serialized_end=157
-  _DELETENODEREQUEST._serialized_start=159
-  _DELETENODEREQUEST._serialized_end=210
-  _DELETENODERESPONSE._serialized_start=212
-  _DELETENODERESPONSE._serialized_end=232
-  _PULLTASKINSREQUEST._serialized_start=234
-  _PULLTASKINSREQUEST._serialized_end=304
-  _PULLTASKINSRESPONSE._serialized_start=306
-  _PULLTASKINSRESPONSE._serialized_end=413
-  _PUSHTASKRESREQUEST._serialized_start=415
-  _PUSHTASKRESREQUEST._serialized_end=479
-  _PUSHTASKRESRESPONSE._serialized_start=482
-  _PUSHTASKRESRESPONSE._serialized_end=656
-  _PUSHTASKRESRESPONSE_RESULTSENTRY._serialized_start=610
-  _PUSHTASKRESRESPONSE_RESULTSENTRY._serialized_end=656
-  _RECONNECT._serialized_start=658
-  _RECONNECT._serialized_end=688
-  _FLEET._serialized_start=691
-  _FLEET._serialized_end=1020
+  _globals['_CREATENODEREQUEST']._serialized_start=84
+  _globals['_CREATENODEREQUEST']._serialized_end=103
+  _globals['_CREATENODERESPONSE']._serialized_start=105
+  _globals['_CREATENODERESPONSE']._serialized_end=157
+  _globals['_DELETENODEREQUEST']._serialized_start=159
+  _globals['_DELETENODEREQUEST']._serialized_end=210
+  _globals['_DELETENODERESPONSE']._serialized_start=212
+  _globals['_DELETENODERESPONSE']._serialized_end=232
+  _globals['_PULLTASKINSREQUEST']._serialized_start=234
+  _globals['_PULLTASKINSREQUEST']._serialized_end=304
+  _globals['_PULLTASKINSRESPONSE']._serialized_start=306
+  _globals['_PULLTASKINSRESPONSE']._serialized_end=413
+  _globals['_PUSHTASKRESREQUEST']._serialized_start=415
+  _globals['_PUSHTASKRESREQUEST']._serialized_end=479
+  _globals['_PUSHTASKRESRESPONSE']._serialized_start=482
+  _globals['_PUSHTASKRESRESPONSE']._serialized_end=656
+  _globals['_PUSHTASKRESRESPONSE_RESULTSENTRY']._serialized_start=610
+  _globals['_PUSHTASKRESRESPONSE_RESULTSENTRY']._serialized_end=656
+  _globals['_RECONNECT']._serialized_start=658
+  _globals['_RECONNECT']._serialized_end=688
+  _globals['_FLEET']._serialized_start=691
+  _globals['_FLEET']._serialized_end=1020
 # @@protoc_insertion_point(module_scope)
