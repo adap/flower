@@ -14,33 +14,52 @@
 # ==============================================================================
 """MetricsRecord."""
 
-from dataclasses import dataclass, field
-from typing import Dict, Union, get_args
 
-from .typing import Scalar, ScalarList
+from dataclasses import dataclass, field
+from typing import Dict, Optional, Union, get_args
+
+from .typing import MetricsScalar, MetricsScalarList
+
+MetricsRecordValues = Union[MetricsScalar, MetricsScalarList]
 
 
 @dataclass
 class MetricsRecord:
-    """Parameters record."""
+    """Metrics record."""
 
-    data: Dict[str, Union[Scalar, ScalarList]] = field(default_factory=dict)
+    data: Dict[str, MetricsRecordValues] = field(default_factory=dict)
 
-    def add_metrics(self, metrics_dict: Dict[str, Union[Scalar, ScalarList]]) -> None:
-        """Add metrics to record.
+    def __init__(self, metrics_dict: Optional[Dict[str, MetricsRecordValues]] = None):
+        """Construct a MetricsRecord object.
 
-        This not implemented as a constructor so we can cleanly create and empyt
-        MetricsRecord object.
+        Parameters
+        ----------
+        array_dict : Optional[Dict[str, MetricsRecordValues]]
+            A dictionary that stores basic types (i.e. `str`, `int`, `float` as defined
+            in `MetricsScalar`) and list of such types (see `MetricsScalarList`).
+        """
+        self.data = {}
+        if metrics_dict:
+            self.set_metrics(metrics_dict)
+
+    def set_metrics(self, metrics_dict: Dict[str, MetricsRecordValues]) -> None:
+        """Add metrics to the record.
+
+        Parameters
+        ----------
+        array_dict : Optional[Dict[str, MetricsRecordValues]]
+            A dictionary that stores basic types (i.e. `str`, `int`, `float` as defined
+            in `MetricsScalar`) and list of such types (see `MetricsScalarList`).
         """
         if any(not isinstance(k, str) for k in metrics_dict.keys()):
-            raise TypeError(f"Not all keys are of valide type. Expected {str}")
+            raise TypeError(f"Not all keys are of valid type. Expected {str}")
 
-        def is_valid(value: Scalar) -> None:
+        def is_valid(value: MetricsScalar) -> None:
             """Check if value is of expected type."""
-            if not isinstance(value, get_args(Scalar)):
+            if not isinstance(value, get_args(MetricsScalar)):
                 raise TypeError(
-                    "Not all values are of valide type."
-                    f" Expected {Union[Scalar, ScalarList]}"
+                    "Not all values are of valid type."
+                    f" Expected {MetricsRecordValues}"
                 )
 
         # Check types of values
@@ -56,8 +75,3 @@ class MetricsRecord:
                     is_valid(list_value)
             else:
                 is_valid(value)
-
-        # Add entries to dataclass without duplicating memory
-        for key in list(metrics_dict.keys()):
-            self.data[key] = metrics_dict[key]
-            del metrics_dict[key]

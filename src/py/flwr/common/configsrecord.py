@@ -14,54 +14,21 @@
 # ==============================================================================
 """ConfigsRecord."""
 
-from dataclasses import dataclass, field
-from typing import Dict, Union, get_args
 
-from .typing import Scalar, ScalarList
+from dataclasses import dataclass
+from typing import Dict
 
-ConfigKeys = Union[str, int]
+from .metricsrecord import MetricsRecord, MetricsRecordValues
 
 
 @dataclass
-class ConfigsRecord:
+class ConfigsRecord(MetricsRecord):
     """Configs record."""
 
-    data: Dict[ConfigKeys, Union[Scalar, ScalarList]] = field(default_factory=dict)
-
-    def add_configs(
-        self, configs_dict: Dict[ConfigKeys, Union[Scalar, ScalarList]]
-    ) -> None:
+    def set_configs(self, configs_dict: Dict[str, MetricsRecordValues]) -> None:
         """Add configs to record.
 
         This not implemented as a constructor so we can cleanly create and empyt
         ConfigsRecord object.
         """
-        if any(not isinstance(k, get_args(ConfigKeys)) for k in configs_dict.keys()):
-            raise TypeError(f"Not all keys are of valide type. Expected {ConfigKeys}")
-
-        def is_valid(value: Scalar) -> None:
-            """Check if value is of expected type."""
-            if not isinstance(value, get_args(Scalar)):
-                raise TypeError(
-                    "Not all values are of valide type."
-                    f" Expected {Union[Scalar, ScalarList]}"
-                )
-
-        # Check types of values
-        # Split between those values that are list and those that aren't
-        # then process in the same way
-        for value in configs_dict.values():
-            if isinstance(value, list):
-                # If your lists are large (e.g. 1M+ elements) this will be slow
-                # 1s to check 10M element list on a M2 Pro
-                # In such settings, you'd be better of treating such metric as
-                # an array and pass it to a ParametersRecord.
-                for list_value in value:
-                    is_valid(list_value)
-            else:
-                is_valid(value)
-
-        # Add entries to dataclass without duplicating memory
-        for key in list(configs_dict.keys()):
-            self.data[key] = configs_dict[key]
-            del configs_dict[key]
+        super().set_metrics(configs_dict)
