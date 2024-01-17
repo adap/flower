@@ -10,7 +10,7 @@ It differs from the [xgboost-quickstart](https://github.com/adap/flower/tree/mai
 - Customised partitioner type (uniform, linear, square, exponential).
 - Centralised/distributed evaluation.
 - Bagging/cyclic training methods.
-- Flower simulation
+- You can run it with Flower Simulation
 
 ## Training Strategies
 
@@ -91,7 +91,7 @@ pip install -r requirements.txt
 
 ## Run Federated Learning with XGBoost and Flower
 
-You can run this example in two ways: either by manually launching the server, and then several clients that connect to it; or by launching a Flower simulation. Both run the same workload, yielding identical results. The former is ideal for deployments on different machines, while the latter makes it easy to simulate large client cohorts in a resource-aware maner. You can read more about how Flower Simulation works in the [Documentation](https://flower.dev/docs/framework/how-to-run-simulations.html).
+You can run this example in two ways: either by manually launching the server, and then several clients that connect to it; or by launching a Flower simulation. Both run the same workload, yielding identical results. The former is ideal for deployments on different machines, while the latter makes it easy to simulate large client cohorts in a resource-aware manner. You can read more about how Flower Simulation works in the [Documentation](https://flower.dev/docs/framework/how-to-run-simulations.html). The commands shown below assume you have activated your environment (if you decide to use Poetry, you can activate it via `poetry shell`).
 
 ### Independent Client/Server Setup
 
@@ -99,40 +99,31 @@ We have two scripts to run bagging and cyclic (client-by-client) experiments.
 The included `run_bagging.sh` or `run_cyclic.sh` will start the Flower server (using `server.py`),
 sleep for 15 seconds to ensure that the server is up,
 and then start 5 Flower clients (using `client.py`) with a small subset of the data from exponential partition distribution.
+
 You can simply start everything in a terminal as follows:
 
 ```shell
-poetry run ./run_bagging.sh
+./run_bagging.sh
 ```
 
 Or
 
 ```shell
-poetry run ./run_cyclic.sh
+./run_cyclic.sh
 ```
 
 The script starts processes in the background so that you don't have to open six terminal windows.
-If you experiment with the code example and something goes wrong, simply using `CTRL + C` on Linux (or `CMD + C` on macOS) wouldn't normally kill all these processes,
-which is why the script ends with
-
-```bash
-trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT` and `wait`.
-```
-
-This simply allows you to stop the experiment using `CTRL + C` (or `CMD + C`).
-If you change the script and anything goes wrong you can still use `killall python` (or `killall python`)
-to kill all background processes. Consider using a more specific command if you have other Python processes running that you don't want to kill.
 
 You can also run the example without the scripts. First, launch the server:
 
 ```bash
-poetry run python server.py --train-method=bagging/cyclic --pool-size=N --num-clients-per-round=N
+python server.py --train-method=bagging/cyclic --pool-size=N --num-clients-per-round=N
 ```
 
 Then run at least two clients (each on a new terminal or computer in your network) passing different `NODE_ID` and all using the same `N` (denoting the total number of clients or data partitions):
 
 ```bash
-poetry run python client.py --train-method=bagging/cyclic --node-id=NODE_ID --num-partitions=N
+python client.py --train-method=bagging/cyclic --node-id=NODE_ID --num-partitions=N
 ```
 
 ### Flower Simulation Setup
@@ -142,13 +133,13 @@ We also provide an example code (`sim.py`) to use the simulation capabilities of
 To run bagging aggregation with 5 clients for 30 rounds evaluated on centralised test set:
 
 ```shell
-poetry run python sim.py --train-method=bagging --pool-size=5 --num-clients-per-round=5 --num-rounds=30 --centralised-eval
+python sim.py --train-method=bagging --pool-size=5 --num-clients-per-round=5 --num-rounds=30 --centralised-eval
 ```
 
 To run cyclic training with 5 clients for 30 rounds evaluated on centralised test set:
 
 ```shell
-poetry run python sim.py --train-method=cyclic --pool-size=5 --num-rounds=30 --centralised-eval-client
+python sim.py --train-method=cyclic --pool-size=5 --num-rounds=30 --centralised-eval-client
 ```
 
 In addition, we provide more options to customise the experimental settings, including data partitioning and centralised/distributed evaluation (see `utils.py`).
@@ -172,4 +163,4 @@ This figure shows the cyclic training results on centralised test set.
 The models with cyclic training requires more rounds to converge
 because only a single client participate in the training per round.
 
-Feel free to explore more interesting experiments by yourself!
+Feel free to explore more interesting experiments by yourself !

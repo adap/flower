@@ -1,6 +1,7 @@
 import warnings
 from logging import INFO
 import xgboost as xgb
+from tqdm import tqdm
 
 import flwr as fl
 from flwr_datasets import FederatedDataset
@@ -95,7 +96,9 @@ def main():
     train_data_list = []
     valid_data_list = []
 
-    for node_id in range(args.pool_size):
+    # Load and process all client partitions. This upfront cost is amortized soon
+    # after the simulation begins since clients wont need to preprocess their partition.
+    for node_id in tqdm(range(args.pool_size), desc="Extracting client partition"):
         # Extract partition for client with node_id
         partition = fds.load_partition(node_id=node_id, split="train")
         partition.set_format("numpy")
@@ -149,7 +152,7 @@ def main():
         )
 
     # Resources to be assigned to each virtual client
-    # In this example we use CPU in default
+    # In this example we use CPU by default
     client_resources = {
         "num_cpus": args.num_cpus_per_client,
         "num_gpus": 0.0,
