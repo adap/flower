@@ -143,7 +143,6 @@ def http_request_response(
             },
             data=create_node_req_bytes,
             verify=verify,
-            timeout=None,
         )
 
         # Check status code and headers
@@ -186,7 +185,6 @@ def http_request_response(
             },
             data=delete_node_req_req_bytes,
             verify=verify,
-            timeout=None,
         )
 
         # Check status code and headers
@@ -227,7 +225,6 @@ def http_request_response(
             },
             data=pull_task_ins_req_bytes,
             verify=verify,
-            timeout=None,
         )
 
         # Check status code and headers
@@ -306,7 +303,6 @@ def http_request_response(
             },
             data=push_task_res_request_bytes,
             verify=verify,
-            timeout=None,
         )
 
         state[KEY_TASK_INS] = None
