@@ -47,7 +47,7 @@ class FedXgbNnAvg(FedAvg):
         Implementation based on https://arxiv.org/abs/2304.07537.
         """
         super().__init__(*args, **kwargs)
-        warn_deprecated_feature("`FedXgbNnAvg`")
+        warn_deprecated_feature("`FedXgbNnAvg` strategy")
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
