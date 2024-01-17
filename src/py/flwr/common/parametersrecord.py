@@ -71,8 +71,8 @@ class ParametersRecord:
 
         Parameters
         ----------
-        array_dict : Optional[OrderedDict[str, Array]]
-            An OrderedDict that stores serialized array-like or tensor-like objects.
+        array_dict : Optional[Dict[str, Array]]
+            A dictionary that stores serialized array-like or tensor-like objects.
         keep_input : bool (default: False)
             A boolean indicating whether parameters should be deleted from the input
             dictionary immediately after adding them to the record. If False, the
@@ -92,8 +92,8 @@ class ParametersRecord:
 
         Parameters
         ----------
-        data : Optional[OrderedDict[str, Array]] (default: None)
-            An OrderedDict that stores serialized array-like or tensor-like objects.
+        array_dict : Dict[str, Array]
+            A dictionary that stores serialized array-like or tensor-like objects.
         """
         if any(not isinstance(k, str) for k in array_dict.keys()):
             raise TypeError(f"Not all keys are of valid type. Expected {str}")
