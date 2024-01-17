@@ -28,19 +28,19 @@ class Array:
 
     Parameters
     ----------
-        dtype : str
+    dtype : str
         A string representing the data type of the serialised object (e.g. `np.float32`)
 
-        shape : List[int]
+    shape : List[int]
         A list representing the shape of the unserliazed array-like object. This is used
         to deserialize the data (depending on the serialization method) or simply as a
         metadata field.
 
-        stype : str
+    stype : str
         For compatibility when converting from/to `flwr.common.typing.Parameters`. A
         sting stating that then data comes from a NumPy NDArray.
 
-        data: bytes
+    data: bytes
         A buffer of bytes containing the data.
     """
 
@@ -71,7 +71,7 @@ class ParametersRecord:
 
         Parameters
         ----------
-            keep_input : bool (default: False)
+        keep_input : bool (default: False)
             A boolean indicating whether parameters should be deleted from the input
             dictionary inmediately after adding them to the record. If True, the
             dictionary passed to `set_parameters()` will be empty once exiting from that
@@ -80,7 +80,7 @@ class ParametersRecord:
             parameters after adding it to the record, set this flag to False. When set
             to False, the data is duplicated inmemory.
 
-            data : Optional[OrderedDict[str, Array]] (default: None)
+        data : Optional[OrderedDict[str, Array]] (default: None)
             An OrderedDict that stores serialized array-like or tensor-like objects.
         """
         self.keep_input = keep_input
@@ -93,7 +93,7 @@ class ParametersRecord:
 
         Parameters
         ----------
-            data : Optional[OrderedDict[str, Array]] (default: None)
+        data : Optional[OrderedDict[str, Array]] (default: None)
             An OrderedDict that stores serialized array-like or tensor-like objects.
         """
         if any(not isinstance(k, str) for k in array_dict.keys()):
