@@ -5,7 +5,7 @@
 echo "Starting server"
 
 python server.py &
-sleep 10  # Sleep for 10s to give the server enough time to start
+sleep 10  # Sleep for 10s to give the server enough time to start and download the dataset
 
 for i in $(seq 0 9); do
     echo "Starting client $i"
