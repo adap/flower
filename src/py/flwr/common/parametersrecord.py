@@ -14,9 +14,8 @@
 # ==============================================================================
 """ParametersRecord and Array."""
 
-from collections import OrderedDict
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, OrderedDict
 
 
 @dataclass
