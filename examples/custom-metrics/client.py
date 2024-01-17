@@ -4,16 +4,27 @@ import flwr as fl
 import numpy as np
 import tensorflow as tf
 from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
+from flwr_datasets import FederatedDataset
 
 
 # Make TensorFlow log less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 
-# Load model and data (MobileNetV2, CIFAR-10)
+# Load model (MobileNetV2)
 model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
 model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
-(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+
+# Load data with Flower Datasets (CIFAR-10)
+fds = FederatedDataset(dataset="cifar10", partitioners={"train": 10})
+train = fds.load_full("train")
+test = fds.load_full("test")
+
+# using Numpy format
+train_np = train.with_format("numpy")
+test_np = test.with_format("numpy")
+x_train, y_train = train_np["img"], train_np["label"]
+x_test, y_test = test_np["img"], test_np["label"]
 
 
 # method for extra learning metrics calculation
