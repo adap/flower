@@ -76,7 +76,7 @@ def main() -> None:
     # Parse command line argument `partition`
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
-        "--partition",
+        "--client-id",
         type=int,
         default=0,
         choices=range(0, 10),
@@ -86,9 +86,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--toy",
-        type=bool,
-        default=False,
-        required=False,
+        action='store_true',
         help="Set to true to quicky run the client using only 10 datasamples. "
         "Useful for testing purposes. Default: False",
     )
@@ -101,7 +99,7 @@ def main() -> None:
     model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
 
     # Load a subset of CIFAR-10 to simulate the local data partition
-    x_train, y_train, x_test, y_test = load_partition(args.partition)
+    x_train, y_train, x_test, y_test = load_partition(args.client_id)
 
     if args.toy:
         x_train, y_train = x_train[:10], y_train[:10]
