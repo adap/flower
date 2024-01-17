@@ -15,10 +15,13 @@
 """RecordSet tests."""
 
 
+from typing import Callable, List, Type, Union
+
 import numpy as np
+import pytest
 
 from .parameter import ndarrays_to_parameters, parameters_to_ndarrays
-from .parametersrecord import Array
+from .parametersrecord import Array, ParametersRecord
 from .recordset_utils import (
     parameters_to_parametersrecord,
     parametersrecord_to_parameters,
@@ -96,6 +99,42 @@ def test_parameters_to_parametersrecord_and_back() -> None:
         assert np.array_equal(arr, arr_)
 
 
+def test_set_parameters_with_correct_types() -> None:
+    """Test adding dictionary of Arrays to ParametersRecord."""
+    p_record = ParametersRecord()
+
+    array_dict = {
+        str(i): ndarray_to_array(ndarray) for i, ndarray in enumerate(get_ndarrays())
+    }
+
+    p_record.set_parameters(array_dict)
+
+
+@pytest.mark.parametrize(
+    "key_type, value_fn",
+    [
+        (str, lambda x: x),  # correct key, incorrect value
+        (str, lambda x: x.tolist()),  # correct key, incorrect value
+        (int, lambda x: ndarray_to_array(x)),  # incorrect key, correct value
+        (int, lambda x: x),  # incorrect key, incorrect value
+        (int, lambda x: x.tolist()),  # incorrect key, incorrect value
+    ],
+)
+def test_set_parameters_with_incorrect_types(
+    key_type: Type[Union[int, str]],
+    value_fn: Callable[[NDArray], Union[NDArray, List[float]]],
+) -> None:
+    """Test adding dictionary of unsupported types to ParametersRecord."""
+    p_record = ParametersRecord()
+
+    array_dict = {
+        key_type(i): value_fn(ndarray) for i, ndarray in enumerate(get_ndarrays())
+    }
+
+    with pytest.raises(TypeError):
+        p_record.set_parameters(array_dict)  # type: ignore
+
+
 # def test_torch_statedict_to_parametersrecord() -> None:
 #     """."""
 #     import torch
@@ -109,4 +148,4 @@ def test_parameters_to_parametersrecord_and_back() -> None:
 #     for k in layer_sd.keys():
 #         layer_sd[k] = ndarray_to_array(layer_sd[k].numpy())
 
-#     p_c.add_parameters(layer_sd)
+#     p_c.set_parameters(layer_sd)

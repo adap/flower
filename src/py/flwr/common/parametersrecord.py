@@ -35,7 +35,7 @@ class ParametersRecord:
 
     data: OrderedDict[str, Array] = field(default_factory=OrderedDict[str, Array])
 
-    def add_parameters(self, array_dict: Dict[str, Array]) -> None:
+    def set_parameters(self, array_dict: Dict[str, Array]) -> None:
         """Add parameters to record.
 
         This is not implemented as a constructor so we can cleanly create and empty the

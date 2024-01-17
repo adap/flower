@@ -47,7 +47,7 @@ def parameters_to_parametersrecord(parameters: Parameters) -> ParametersRecord:
 
     for idx in range(len(parameters.tensors)):
         tensor = parameters.tensors.pop(0)
-        p_record.add_parameters(
+        p_record.set_parameters(
             {str(idx): Array(data=tensor, dtype=tensor_type, stype="", shape=[])}
         )
 
