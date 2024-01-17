@@ -46,11 +46,11 @@ class DPFedAvgFixed(Strategy):
         self.num_sampled_clients = num_sampled_clients
 
         if clip_norm <= 0:
-            raise Exception("The clipping threshold should be a positive value.")
+            raise ValueError("The clipping threshold should be a positive value.")
         self.clip_norm = clip_norm
 
         if noise_multiplier < 0:
-            raise Exception("The noise multiplier should be a non-negative value.")
+            raise ValueError("The noise multiplier should be a non-negative value.")
         self.noise_multiplier = noise_multiplier
 
         self.server_side_noising = server_side_noising
