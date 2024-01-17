@@ -25,7 +25,7 @@ from logging import WARNING
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from flwr.common import FitRes, Scalar, ndarrays_to_parameters, parameters_to_ndarrays
-from flwr.common.logger import log
+from flwr.common.logger import log, warn_deprecated_feature
 from flwr.server.client_proxy import ClientProxy
 
 from .aggregate import aggregate
@@ -47,6 +47,7 @@ class FedXgbNnAvg(FedAvg):
         Implementation based on https://arxiv.org/abs/2304.07537.
         """
         super().__init__(*args, **kwargs)
+        warn_deprecated_feature("`FedXgbNnAvg`")
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
