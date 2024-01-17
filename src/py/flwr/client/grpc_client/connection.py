@@ -23,6 +23,7 @@ from queue import Queue
 from typing import Callable, Iterator, Optional, Tuple, Union
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common.constant import TRANSPORT_TIMEOUT_DEFAULT
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.proto.node_pb2 import Node
@@ -48,6 +49,7 @@ def grpc_connection(
     insecure: bool,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
+    timeout: int = TRANSPORT_TIMEOUT_DEFAULT,  # pylint: disable=unused-argument
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[TaskIns]],
@@ -76,6 +78,8 @@ def grpc_connection(
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
+    timeout : int (default: 60)
+        A timeout (in seconds) for making requests to the server.
 
     Returns
     -------

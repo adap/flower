@@ -27,6 +27,7 @@ from flwr.client.message_handler.task_handler import (
     validate_task_res,
 )
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common.constant import TRANSPORT_TIMEOUT_DEFAULT
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log, warn_experimental_feature
 from flwr.proto.fleet_pb2 import (
@@ -54,6 +55,7 @@ def grpc_request_response(
     insecure: bool,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
     root_certificates: Optional[Union[bytes, str]] = None,
+    timeout: int = TRANSPORT_TIMEOUT_DEFAULT,
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[TaskIns]],
@@ -79,6 +81,8 @@ def grpc_request_response(
         Path of the root certificate. If provided, a secure
         connection using the certificates will be established to an SSL-enabled
         Flower server. Bytes won't work for the REST API.
+    timeout : int (default: 60)
+        A timeout (in seconds) for making requests to the server.
 
     Returns
     -------
@@ -116,6 +120,7 @@ def grpc_request_response(
         create_node_request = CreateNodeRequest()
         create_node_response = stub.CreateNode(
             request=create_node_request,
+            timeout=timeout,
         )
         node_store[KEY_NODE] = create_node_response.node
 
@@ -128,7 +133,7 @@ def grpc_request_response(
         node: Node = cast(Node, node_store[KEY_NODE])
 
         delete_node_request = DeleteNodeRequest(node=node)
-        stub.DeleteNode(request=delete_node_request)
+        stub.DeleteNode(request=delete_node_request, timeout=timeout)
 
         del node_store[KEY_NODE]
 
@@ -142,7 +147,7 @@ def grpc_request_response(
 
         # Request instructions (task) from server
         request = PullTaskInsRequest(node=node)
-        response = stub.PullTaskIns(request=request)
+        response = stub.PullTaskIns(request=request, timeout=timeout)
 
         # Get the current TaskIns
         task_ins: Optional[TaskIns] = get_task_ins(response)
@@ -183,7 +188,7 @@ def grpc_request_response(
 
         # Serialize ProtoBuf to bytes
         request = PushTaskResRequest(task_res_list=[task_res])
-        _ = stub.PushTaskRes(request)
+        _ = stub.PushTaskRes(request=request, timeout=timeout)
 
         state[KEY_TASK_INS] = None
 

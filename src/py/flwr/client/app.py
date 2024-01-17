@@ -29,6 +29,7 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
+    TRANSPORT_TIMEOUT_DEFAULT,
     TRANSPORT_TYPE_GRPC_BIDI,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
@@ -159,6 +160,7 @@ def start_client(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
+    timeout: int = TRANSPORT_TIMEOUT_DEFAULT,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -192,6 +194,8 @@ def start_client(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    timeout : int (default: 60)
+        A timeout (in seconds) for making requests to the server.
 
     Examples
     --------
@@ -233,6 +237,7 @@ def start_client(
         root_certificates=root_certificates,
         insecure=insecure,
         transport=transport,
+        timeout=timeout,
     )
     event(EventType.START_CLIENT_LEAVE)
 
@@ -251,6 +256,7 @@ def _start_client_internal(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
+    timeout: int = TRANSPORT_TIMEOUT_DEFAULT,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -286,6 +292,8 @@ def _start_client_internal(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    timeout : int (default: 60)
+        A timeout (in seconds) for making requests to the server.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -328,6 +336,7 @@ def _start_client_internal(
             insecure,
             grpc_max_message_length,
             root_certificates,
+            timeout,
         ) as conn:
             receive, send, create_node, delete_node = conn
 
@@ -394,6 +403,7 @@ def start_numpy_client(
     root_certificates: Optional[bytes] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
+    timeout: int = TRANSPORT_TIMEOUT_DEFAULT,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
@@ -424,6 +434,8 @@ def start_numpy_client(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    timeout : int (default: 60)
+        A timeout (in seconds) for making requests to the server.
 
     Examples
     --------
@@ -477,6 +489,7 @@ def start_numpy_client(
         root_certificates=root_certificates,
         insecure=insecure,
         transport=transport,
+        timeout=timeout,
     )
 
 
@@ -484,7 +497,7 @@ def _init_connection(
     transport: Optional[str], server_address: str
 ) -> Tuple[
     Callable[
-        [str, bool, int, Union[bytes, str, None]],
+        [str, bool, int, Union[bytes, str, None], int],
         ContextManager[
             Tuple[
                 Callable[[], Optional[TaskIns]],

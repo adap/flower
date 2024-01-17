@@ -27,7 +27,7 @@ from flwr.client.message_handler.task_handler import (
     validate_task_res,
 )
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from flwr.common.constant import MISSING_EXTRA_REST
+from flwr.common.constant import MISSING_EXTRA_REST, TRANSPORT_TIMEOUT_DEFAULT
 from flwr.common.logger import log
 from flwr.proto.fleet_pb2 import (
     CreateNodeRequest,
@@ -66,6 +66,7 @@ def http_request_response(
     root_certificates: Optional[
         Union[bytes, str]
     ] = None,  # pylint: disable=unused-argument
+    timeout: int = TRANSPORT_TIMEOUT_DEFAULT,
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[TaskIns]],
@@ -91,6 +92,8 @@ def http_request_response(
         Path of the root certificate. If provided, a secure
         connection using the certificates will be established to an SSL-enabled
         Flower server. Bytes won't work for the REST API.
+    timeout : int (default: 60)
+        A timeout (in seconds) for making requests to the server.
 
     Returns
     -------
@@ -135,15 +138,19 @@ def http_request_response(
         create_node_req_proto = CreateNodeRequest()
         create_node_req_bytes: bytes = create_node_req_proto.SerializeToString()
 
-        res = requests.post(
-            url=f"{base_url}/{PATH_CREATE_NODE}",
-            headers={
-                "Accept": "application/protobuf",
-                "Content-Type": "application/protobuf",
-            },
-            data=create_node_req_bytes,
-            verify=verify,
-        )
+        try:
+            res = requests.post(
+                url=f"{base_url}/{PATH_CREATE_NODE}",
+                headers={
+                    "Accept": "application/protobuf",
+                    "Content-Type": "application/protobuf",
+                },
+                data=create_node_req_bytes,
+                verify=verify,
+                timeout=timeout,
+            )
+        except requests.Timeout:
+            return
 
         # Check status code and headers
         if res.status_code != 200:
@@ -177,15 +184,19 @@ def http_request_response(
         node: Node = cast(Node, node_store[KEY_NODE])
         delete_node_req_proto = DeleteNodeRequest(node=node)
         delete_node_req_req_bytes: bytes = delete_node_req_proto.SerializeToString()
-        res = requests.post(
-            url=f"{base_url}/{PATH_DELETE_NODE}",
-            headers={
-                "Accept": "application/protobuf",
-                "Content-Type": "application/protobuf",
-            },
-            data=delete_node_req_req_bytes,
-            verify=verify,
-        )
+        try:
+            res = requests.post(
+                url=f"{base_url}/{PATH_DELETE_NODE}",
+                headers={
+                    "Accept": "application/protobuf",
+                    "Content-Type": "application/protobuf",
+                },
+                data=delete_node_req_req_bytes,
+                verify=verify,
+                timeout=timeout,
+            )
+        except requests.Timeout:
+            return
 
         # Check status code and headers
         if res.status_code != 200:
@@ -216,16 +227,20 @@ def http_request_response(
         pull_task_ins_req_proto = PullTaskInsRequest(node=node)
         pull_task_ins_req_bytes: bytes = pull_task_ins_req_proto.SerializeToString()
 
-        # Request instructions (task) from server
-        res = requests.post(
-            url=f"{base_url}/{PATH_PULL_TASK_INS}",
-            headers={
-                "Accept": "application/protobuf",
-                "Content-Type": "application/protobuf",
-            },
-            data=pull_task_ins_req_bytes,
-            verify=verify,
-        )
+        try:
+            # Request instructions (task) from server
+            res = requests.post(
+                url=f"{base_url}/{PATH_PULL_TASK_INS}",
+                headers={
+                    "Accept": "application/protobuf",
+                    "Content-Type": "application/protobuf",
+                },
+                data=pull_task_ins_req_bytes,
+                verify=verify,
+                timeout=timeout,
+            )
+        except requests.Timeout:
+            return None
 
         # Check status code and headers
         if res.status_code != 200:
@@ -294,16 +309,20 @@ def http_request_response(
             push_task_res_request_proto.SerializeToString()
         )
 
-        # Send ClientMessage to server
-        res = requests.post(
-            url=f"{base_url}/{PATH_PUSH_TASK_RES}",
-            headers={
-                "Accept": "application/protobuf",
-                "Content-Type": "application/protobuf",
-            },
-            data=push_task_res_request_bytes,
-            verify=verify,
-        )
+        try:
+            # Send ClientMessage to server
+            res = requests.post(
+                url=f"{base_url}/{PATH_PUSH_TASK_RES}",
+                headers={
+                    "Accept": "application/protobuf",
+                    "Content-Type": "application/protobuf",
+                },
+                data=push_task_res_request_bytes,
+                verify=verify,
+                timeout=timeout,
+            )
+        except requests.Timeout:
+            return
 
         state[KEY_TASK_INS] = None
 
