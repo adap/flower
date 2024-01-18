@@ -17,12 +17,8 @@
 from dataclasses import dataclass, field
 from typing import Dict
 
+from .metricsrecord import MetricsRecord
 from .parametersrecord import ParametersRecord
-
-
-@dataclass
-class MetricsRecord:
-    """Metrics record."""
 
 
 @dataclass

@@ -45,6 +45,11 @@ Value = Union[
     List[str],
 ]
 
+# Value types for common.MetricsRecord
+MetricsScalar = Union[int, float]
+MetricsScalarList = Union[List[int], List[float]]
+MetricsRecordValues = Union[MetricsScalar, MetricsScalarList]
+
 Metrics = Dict[str, Scalar]
 MetricsAggregationFn = Callable[[List[Tuple[int, Metrics]]], Metrics]
 
