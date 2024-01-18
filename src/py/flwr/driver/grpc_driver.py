@@ -23,7 +23,7 @@ import grpc
 from flwr.common import EventType, event
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from flwr.proto.driver_pb2 import (
+from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
     CreateRunResponse,
     GetNodesRequest,
@@ -32,7 +32,7 @@ from flwr.proto.driver_pb2 import (
     PullTaskResResponse,
     PushTaskInsRequest,
     PushTaskInsResponse,
-)  # pylint: disable=E0611
+)
 from flwr.proto.driver_pb2_grpc import DriverStub  # pylint: disable=E0611
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"

@@ -20,12 +20,12 @@ from typing import List, Optional, cast
 
 from flwr import common
 from flwr.common import serde
-from flwr.proto import (
+from flwr.proto import (  # pylint: disable=E0611
     driver_pb2,
     node_pb2,
     task_pb2,
     transport_pb2,
-)  # pylint: disable=E0611
+)
 from flwr.server.client_proxy import ClientProxy
 
 from .grpc_driver import GrpcDriver

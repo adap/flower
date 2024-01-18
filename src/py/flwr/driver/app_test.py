@@ -21,10 +21,10 @@ import unittest
 from unittest.mock import MagicMock
 
 from flwr.driver.app import update_client_manager
-from flwr.proto.driver_pb2 import (
+from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunResponse,
     GetNodesResponse,
-)  # pylint: disable=E0611
+)
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.server.client_manager import SimpleClientManager
 

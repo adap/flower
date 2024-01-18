@@ -21,7 +21,7 @@ import grpc
 
 from flwr.common.logger import log
 from flwr.proto import fleet_pb2_grpc  # pylint: disable=E0611
-from flwr.proto.fleet_pb2 import (
+from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
     DeleteNodeRequest,
@@ -30,7 +30,7 @@ from flwr.proto.fleet_pb2 import (
     PullTaskInsResponse,
     PushTaskResRequest,
     PushTaskResResponse,
-)  # pylint: disable=E0611
+)
 from flwr.server.fleet.message_handler import message_handler
 from flwr.server.state import State
 

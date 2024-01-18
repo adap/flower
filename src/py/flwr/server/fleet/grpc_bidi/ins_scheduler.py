@@ -25,10 +25,10 @@ from flwr.common import EvaluateRes, FitRes, GetParametersRes, GetPropertiesRes,
 from flwr.common.logger import log
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
-from flwr.proto.transport_pb2 import (
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
     ServerMessage,
-)  # pylint: disable=E0611
+)
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.state import State, StateFactory
 

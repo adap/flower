@@ -27,10 +27,10 @@ from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
-from flwr.proto.transport_pb2 import (
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
     ServerMessage,
-)  # pylint: disable=E0611
+)
 from flwr.proto.transport_pb2_grpc import FlowerServiceStub  # pylint: disable=E0611
 
 # The following flags can be uncommented for debugging. Other possible values:

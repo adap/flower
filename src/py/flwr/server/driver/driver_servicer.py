@@ -23,7 +23,7 @@ import grpc
 
 from flwr.common.logger import log
 from flwr.proto import driver_pb2_grpc  # pylint: disable=E0611
-from flwr.proto.driver_pb2 import (
+from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
     CreateRunResponse,
     GetNodesRequest,
@@ -32,7 +32,7 @@ from flwr.proto.driver_pb2 import (
     PullTaskResResponse,
     PushTaskInsRequest,
     PushTaskInsResponse,
-)  # pylint: disable=E0611
+)
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
 from flwr.server.state import State, StateFactory

@@ -23,16 +23,16 @@ from flwr.client.message_handler.task_handler import (
     wrap_client_message_in_task_res,
 )
 from flwr.proto.fleet_pb2 import PullTaskInsResponse  # pylint: disable=E0611
-from flwr.proto.task_pb2 import (
+from flwr.proto.task_pb2 import (  # pylint: disable=E0611
     SecureAggregation,
     Task,
     TaskIns,
     TaskRes,
-)  # pylint: disable=E0611
-from flwr.proto.transport_pb2 import (
+)
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
     ServerMessage,
-)  # pylint: disable=E0611
+)
 
 
 def test_validate_task_ins_no_task() -> None:
