@@ -17,7 +17,7 @@
 
 from flwr.client.node_state import NodeState
 from flwr.client.run_state import RunState
-from flwr.proto.task_pb2 import TaskIns
+from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 
 def _run_dummy_task(state: RunState) -> RunState:
