@@ -151,19 +151,15 @@ def test_set_parameters_with_incorrect_types(
 @pytest.mark.parametrize(
     "key_type, value_fn",
     [
-        (str, lambda x: str(x.flatten()[0])),  # str: str
         (str, lambda x: int(x.flatten()[0])),  # str: int
         (str, lambda x: float(x.flatten()[0])),  # str: float
-        (str, lambda x: x.flatten().astype("str").tolist()),  # str: List[str]
         (str, lambda x: x.flatten().astype("int").tolist()),  # str: List[int]
         (str, lambda x: x.flatten().astype("float").tolist()),  # str: List[float]
     ],
 )
 def test_set_metrics_to_metricsrecord_with_correct_types(
     key_type: Type[str],
-    value_fn: Callable[
-        [NDArray], Union[str, int, float, List[str], List[int], List[float]]
-    ],
+    value_fn: Callable[[NDArray], Union[int, float, List[int], List[float]]],
 ) -> None:
     """Test adding metrics of various types to a MetricsRecord."""
     m_record = MetricsRecord()
@@ -181,6 +177,11 @@ def test_set_metrics_to_metricsrecord_with_correct_types(
 @pytest.mark.parametrize(
     "key_type, value_fn",
     [
+        (str, lambda x: str(x.flatten()[0])),  # str: str  (supported: unsupported)
+        (
+            str,
+            lambda x: x.flatten().astype("str").tolist(),
+        ),  # str: List[str] (supported: unsupported)
         (str, lambda x: x),  # str: NDArray (supported: unsupported)
         (
             str,

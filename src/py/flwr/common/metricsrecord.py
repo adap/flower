@@ -35,7 +35,7 @@ class MetricsRecord:
         Parameters
         ----------
         array_dict : Optional[Dict[str, MetricsRecordValues]]
-            A dictionary that stores basic types (i.e. `str`, `int`, `float` as defined
+            A dictionary that stores basic types (i.e. `int`, `float` as defined
             in `MetricsScalar`) and list of such types (see `MetricsScalarList`).
         """
         self.data = {}
@@ -48,7 +48,7 @@ class MetricsRecord:
         Parameters
         ----------
         array_dict : Optional[Dict[str, MetricsRecordValues]]
-            A dictionary that stores basic types (i.e. `str`, `int`, `float` as defined
+            A dictionary that stores basic types (i.e. `int`, `float` as defined
             in `MetricsScalar`) and list of such types (see `MetricsScalarList`).
         """
         if any(not isinstance(k, str) for k in metrics_dict.keys()):
