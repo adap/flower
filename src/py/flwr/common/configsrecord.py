@@ -15,16 +15,63 @@
 """ConfigsRecord."""
 
 
-from dataclasses import dataclass
-from typing import Dict
+from dataclasses import dataclass, field
+from typing import Dict, Optional, Union, get_args
 
-from .metricsrecord import MetricsRecord, MetricsRecordValues
+from .typing import ConfigsScalar, ConfigsScalarList
+
+ConfigsRecordValues = Union[ConfigsScalar, ConfigsScalarList]
 
 
 @dataclass
-class ConfigsRecord(MetricsRecord):
+class ConfigsRecord:
     """Configs record."""
 
-    def set_configs(self, configs_dict: Dict[str, MetricsRecordValues]) -> None:
-        """Add configs to record."""
-        super().set_metrics(configs_dict)
+    data: Dict[str, ConfigsRecordValues] = field(default_factory=dict)
+
+    def __init__(self, configs_dict: Optional[Dict[str, ConfigsRecordValues]] = None):
+        """Construct a ConfigsRecord object.
+
+        Parameters
+        ----------
+        configs_dict : Optional[Dict[str, ConfigsRecordValues]]
+            A dictionary that stores basic types (i.e. `str`, `int`, `float` as defined
+            in `MetricsScalar`) and list of such types (see `ConfigsScalarList`).
+        """
+        self.data = {}
+        if configs_dict:
+            self.set_configs(configs_dict)
+
+    def set_configs(self, configs_dict: Dict[str, ConfigsRecordValues]) -> None:
+        """Add configs to the record.
+
+        Parameters
+        ----------
+        configs_dict : Optional[Dict[str, ConfigsRecordValues]]
+            A dictionary that stores basic types (i.e. `str`,`int`, `float` as defined
+            in `ConfigsRecordValues`) and list of such types (see `ConfigsScalarList`).
+        """
+        if any(not isinstance(k, str) for k in configs_dict.keys()):
+            raise TypeError(f"Not all keys are of valid type. Expected {str}")
+
+        def is_valid(value: ConfigsScalar) -> None:
+            """Check if value is of expected type."""
+            if not isinstance(value, get_args(ConfigsScalar)):
+                raise TypeError(
+                    "Not all values are of valid type."
+                    f" Expected {ConfigsRecordValues}"
+                )
+
+        # Check types of values
+        # Split between those values that are list and those that aren't
+        # then process in the same way
+        for value in configs_dict.values():
+            if isinstance(value, list):
+                # If your lists are large (e.g. 1M+ elements) this will be slow
+                # 1s to check 10M element list on a M2 Pro
+                # In such settings, you'd be better of treating such metric as
+                # an array and pass it to a ParametersRecord.
+                for list_value in value:
+                    is_valid(list_value)
+            else:
+                is_valid(value)
