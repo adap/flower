@@ -23,9 +23,9 @@ from flwr.proto.driver_pb2 import (
     GetNodesRequest,
     PullTaskResRequest,
     PushTaskInsRequest,
-)
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+)  # pylint: disable=E0611
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 
 class Driver:

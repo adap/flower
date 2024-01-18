@@ -23,7 +23,7 @@ from flwr.proto.fleet_pb2 import (
     DeleteNodeRequest,
     PullTaskInsRequest,
     PushTaskResRequest,
-)
+)  # pylint: disable=E0611
 from flwr.server.fleet.message_handler import message_handler
 from flwr.server.state import State
 

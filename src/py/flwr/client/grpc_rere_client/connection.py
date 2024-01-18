@@ -34,10 +34,10 @@ from flwr.proto.fleet_pb2 import (
     DeleteNodeRequest,
     PullTaskInsRequest,
     PushTaskResRequest,
-)
-from flwr.proto.fleet_pb2_grpc import FleetStub
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+)  # pylint: disable=E0611
+from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 KEY_NODE = "node"
 KEY_TASK_INS = "current_task_ins"

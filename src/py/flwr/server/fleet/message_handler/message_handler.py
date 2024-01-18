@@ -28,9 +28,9 @@ from flwr.proto.fleet_pb2 import (
     PushTaskResRequest,
     PushTaskResResponse,
     Reconnect,
-)
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+)  # pylint: disable=E0611
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.state import State
 
 

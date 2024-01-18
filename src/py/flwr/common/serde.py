@@ -17,7 +17,7 @@
 
 from typing import Any, Dict, List, MutableMapping, cast
 
-from flwr.proto.task_pb2 import Value
+from flwr.proto.task_pb2 import Value  # pylint: disable=E0611
 from flwr.proto.transport_pb2 import (
     ClientMessage,
     Code,
@@ -26,7 +26,7 @@ from flwr.proto.transport_pb2 import (
     Scalar,
     ServerMessage,
     Status,
-)
+)  # pylint: disable=E0611
 
 from . import typing
 

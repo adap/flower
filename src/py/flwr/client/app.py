@@ -35,7 +35,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPES,
 )
 from flwr.common.logger import log, warn_experimental_feature
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 from .flower import load_flower_callable
 from .grpc_client.connection import grpc_connection
