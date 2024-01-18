@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 
 
-class AudioTools:
+class AudioTools:  # pylint: disable=too-many-instance-attributes
     """Provide static methods for audio data processing in a machine learning context.
 
     This class includes methods for reading, padding, extracting, and transforming audio
@@ -66,6 +66,7 @@ class AudioTools:
         waveform = AudioTools.pad(waveform)
         return tf.image.random_crop(waveform, [seg_length])
 
+    # pylint: disable=too-many-arguments, too-many-locals
     @staticmethod
     def extract_spectrogram(
         waveform,
@@ -161,7 +162,7 @@ class AudioTools:
         return log_mel_spectrogram, label
 
 
-class DataTools:
+class DataTools:  # pylint: disable=too-many-instance-attributes
     """Provide methods for dataset manipulation and distribution in federated learning.
 
     Includes methods for calculating statistics, distributing datasets among clients,
@@ -335,7 +336,7 @@ class DataTools:
         """
         dataset = tuple(list(t) for t in zip(*dataset))
         num_samples = DataTools.get_num_samples(dataset=dataset)
-        mean, var, limits, errors = DataTools.get_statistics(
+        _, _, limits, errors = DataTools.get_statistics(
             num_samples=num_samples, num_clients=num_clients, var=variance
         )
         distribution = DataTools.create_distribution(
@@ -355,6 +356,7 @@ class DataTools:
                 itertools.islice(iter_labels, distribution[i])
             )
 
+    # pylint: disable=too-many-locals
     @staticmethod
     def distribute_per_class(
         dataset, num_clients, num_classes, class_variance=0.0, seed=2021
@@ -379,7 +381,7 @@ class DataTools:
             if num_classes < num_clients
             else (False, num_classes, num_clients)
         )
-        mean, var, limits, errors = DataTools.get_statistics(
+        _, _, limits, errors = DataTools.get_statistics(
             num_samples=_num_classes_, num_clients=_num_clients_, var=class_variance
         )
         distribution = DataTools.create_distribution(
@@ -487,6 +489,7 @@ class DataTools:
         datasets = [(list(dataset[0]), list(dataset[1])) for dataset in datasets]
         return datasets
 
+    # pylint: disable=too-many-arguments
     @staticmethod
     def distribute_per_class_with_class_limit(
         dataset,
@@ -550,7 +553,7 @@ class DataTools:
         datasets = [
             [
                 class_datasets[j]
-                if (len(parts[j]) == 1 and type(class_datasets[j]) == tuple)
+                if (len(parts[j]) == 1 and isinstance(class_datasets[j], tuple))
                 else class_datasets[j][parts[j].pop()]
                 for j in dis
             ]
@@ -568,6 +571,7 @@ class DataTools:
         datasets = [DataTools.shuffle_dataset(d) for d in datasets]
         return datasets
 
+    # pylint: disable=too-many-arguments
     @staticmethod
     def create_distribution(
         num_clients,
