@@ -138,10 +138,12 @@ def _check_actionable_client(
     client: Optional[Client], client_fn: Optional[ClientFn]
 ) -> None:
     if client_fn is None and client is None:
-        raise Exception("Both `client_fn` and `client` are `None`, but one is required")
+        raise ValueError(
+            "Both `client_fn` and `client` are `None`, but one is required"
+        )
 
     if client_fn is not None and client is not None:
-        raise Exception(
+        raise ValueError(
             "Both `client_fn` and `client` are provided, but only one is allowed"
         )
 
@@ -150,6 +152,7 @@ def _check_actionable_client(
 # pylint: disable=too-many-branches
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
+# pylint: disable=too-many-arguments
 def start_client(
     *,
     server_address: str,
@@ -299,7 +302,7 @@ def _start_client_internal(
                 cid: str,  # pylint: disable=unused-argument
             ) -> Client:
                 if client is None:  # Added this to keep mypy happy
-                    raise Exception(
+                    raise ValueError(
                         "Both `client_fn` and `client` are `None`, but one is required"
                     )
                 return client  # Always return the same instance
