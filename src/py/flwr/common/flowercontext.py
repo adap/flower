@@ -22,9 +22,7 @@ from .recordset import RecordSet
 
 @dataclass
 class Metadata:
-    """A dataclass holding metadata associated.
-
-    with the current task.
+    """A dataclass holding metadata associated with the current task.
 
     Parameters
     ----------
@@ -39,7 +37,7 @@ class Metadata:
         An identifier for grouping runs. In some settings
         this is used as the FL round.
     ttl : str
-        Time-to-live for this run
+        Time-to-live for this run.
     """
 
     task_id: str
@@ -51,10 +49,7 @@ class Metadata:
 
 @dataclass
 class FlowerContext:
-    """A dataclass representing the state of your application.
-
-    from the viewpoint of the entity (e.g. a client, the driver)
-    making use of a given FlowerContext object.
+    """State of your application from the viewpoint of the entity using it.
 
     Parameters
     ----------
@@ -64,11 +59,14 @@ class FlowerContext:
     out_message : RecordSet
         Holds records added by the current entity. This `RecordSet` will
         be sent out (e.g. back to the server-side for aggregation of
-        parameter, metrics, etc)
+        parameter, or to the client to perform a certain task)
     local : RecordSet
         Holds record added by the current entity and that will stay local.
+        This means that the data it holds will never leave the system it's running fom.
         This can be used as an intermediate storage or scratchpad when
-        executing middleware layers.
+        executing middleware layers. It can also be used as a memory to access
+        at different points during the lifecycle of this entity (e.g. across
+        multiple rounds)
     metadata : Metadata
         A dataclass including information about the task to be executed.
     """
