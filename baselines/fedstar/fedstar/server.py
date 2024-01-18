@@ -1,13 +1,8 @@
-##########################################
-import os
-import sys
-
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
-os.environ["GRPC_VERBOSITY"] = "ERROR"
-GRPC_MAX_MESSAGE_LENGTH: int = 536_870_912
-##########################################
+"""Required imports for server.py script."""
 import gc
 import logging
+import os
+import sys
 import time
 import uuid
 
@@ -19,10 +14,34 @@ from omegaconf import DictConfig, OmegaConf
 from fedstar.data import DataBuilder
 from fedstar.model import Network
 
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+os.environ["GRPC_VERBOSITY"] = "ERROR"
+GRPC_MAX_MESSAGE_LENGTH: int = 536_870_912
+
 parent_path = os.getcwd()
 
 
 class AudioServer:
+    """A server class for federated learning using Flower framework.
+
+    This class sets up and runs a federated learning server using the Flower framework,
+    handling the orchestration of training across multiple clients. It manages model
+    training rounds, evaluation steps, and tracks overall progress and performance.
+
+    Attributes
+    ----------
+    - flwr_evalution_step (int): Steps between evaluations in federated learning.
+    - flwr_min_sample_size (int): Minimum sample size for federated learning.
+    - flwr_min_num_clients (int): Minimum number of clients for federated learning.
+    - flwr_rounds (int): Number of federated learning rounds.
+    - model_num_classes (int): Number of classes for the model.
+    - model_lr (float): Learning rate for the model.
+    - model_batch_size (int): Batch size for model training.
+    - model_epochs (int): Number of epochs for model training.
+    - model_ds_test (tf.data.Dataset): Dataset for testing the model.
+    - model_verbose (int): Verbosity level for model training.
+    """
+
     def __init__(
         self,
         flwr_evalution_step,
@@ -39,8 +58,8 @@ class AudioServer:
         # Flower Parameters
         self.evalution_step = flwr_evalution_step
         self.sample_fraction = float(flwr_min_sample_size / flwr_min_num_clients)
-        print("-" * 100)
-        print(self.sample_fraction)
+        # print("-" * 100)
+        # print(self.sample_fraction)
         self.min_sample_size = flwr_min_sample_size
         self.min_num_clients = flwr_min_num_clients
         self.rounds = flwr_rounds
@@ -70,8 +89,17 @@ class AudioServer:
         tf.keras.backend.clear_session()
 
     def server_start(self, server_address):
-        print("|" * 50)
-        print(server_address)
+        """Start the federated learning server with the given address.
+
+        Initializes and runs the Flower federated learning server using the specified
+        server address and pre-configured strategy and client manager.
+
+        Parameters
+        ----------
+        - server_address (str): The address at which the server will be accessible.
+        """
+        # print("|" * 50)
+        # print(server_address)
         flwr.server.start_server(
             server_address=server_address,
             server=flwr.server.Server(
@@ -83,6 +111,17 @@ class AudioServer:
         )
 
     def get_on_fit_config_fn(self):
+        """Return a function to configure the federated learning fit process.
+
+        This function is called by the Flower framework to obtain configuration
+        parameters for each training round.
+
+        Returns
+        -------
+        - Function: A function that takes rounds, epochs, batch_size, and learning_rate
+        as parameters and returns a configuration dictionary.
+        """
+
         def fit_config(
             rounds=self.rounds,
             epochs=self.epochs,
@@ -96,11 +135,9 @@ class AudioServer:
                     + " seconds."
                 )
             print(
-                "\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n"
-                + "               Server started "
-                + str(self.current_round)
-                + "th round of training.\n"
-                + "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n"
+                f"\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n"
+                f"Server started {self.current_round}th round of training.\n"
+                f"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n"
             )
             # Update round start time
             self.round_time = time.time()
@@ -115,6 +152,21 @@ class AudioServer:
         return fit_config
 
     def get_eval_fn(self, ds_test):
+        """Return a function to evaluate the model during federated learning.
+
+        This function is used by the Flower framework to evaluate the model at specified
+        intervals using the provided test dataset.
+
+        Parameters
+        ----------
+        - ds_test (tf.data.Dataset): The dataset used for evaluation.
+
+        Returns
+        -------
+        - Function: An evaluation function that takes server_round, weights, and configs
+        as parameters and returns the loss and accuracy.
+        """
+
         def evaluate(servr_round, weights, configs):
             loss, acc = 0, 0
             self.current_round += 1
@@ -139,15 +191,34 @@ class AudioServer:
         return evaluate
 
     def get_accuracy(self):
+        """Retrieve the final accuracy achieved by the model.
+
+        Returns the accuracy metric recorded in the last
+        evaluation step of the federated learning process.
+
+        Returns
+        -------
+        - float: The final accuracy value.
+        """
         return self.final_accuracy
 
 
 def clear_memory():
+    """Clear the TensorFlow session and collect garbage.
+
+    This function is used to free up memory by clearing the TensorFlow backend session
+    and invoking garbage collection.
+    """
     gc.collect()
     tf.keras.backend.clear_session()
 
 
 def set_logger_level():
+    """Set the logging level for the 'flower' logger.
+
+    Adjusts the logging level to INFO for the 'flower' logger if it is present in the
+    logging manager's dictionary.
+    """
     if "flower" in [
         logging.getLogger(name).__repr__()[8:].split(" ")[0]
         for name in logging.root.manager.loggerDict
@@ -157,6 +228,16 @@ def set_logger_level():
 
 
 def set_gpu_limits(gpu_id, gpu_memory):
+    """Configure GPU settings for TensorFlow.
+
+    Sets the CUDA_VISIBLE_DEVICES environment variable and configures TensorFlow's
+    virtual device settings for GPU memory limits.
+
+    Parameters
+    ----------
+    - gpu_id (str): Identifier for the GPU to be used.
+    - gpu_memory (int): The maximum amount of memory (in MB) to be allocated to the GPU.
+    """
     os.environ["CUDA_VISIBLE_DEVICES"] = gpu_id
 
     gpus = tf.config.list_physical_devices("GPU")
@@ -178,7 +259,8 @@ def set_gpu_limits(gpu_id, gpu_memory):
 
 """
     Change the config path and yaml file name based on expermients you want to run.
-    The current configs will call the basic config file which runs the small experiment to check integrity.
+    The current configs will call the basic config file which runs the small
+    experiment to check integrity.
     Eg:-
     To carry out results for experiment in row 3 row 1 col 1. The parameters will be
     config_path = conf/table_3/row_2_clients_10
@@ -188,6 +270,16 @@ def set_gpu_limits(gpu_id, gpu_memory):
 
 @hydra.main(config_path="conf", config_name="table3", version_base=None)
 def main(cfg: DictConfig):
+    """Run the federated learning server with Hydra configuration.
+
+    Initializes and starts the federated learning server based on configurations
+    provided by Hydra. It sets up the environment, loads the test dataset, and
+    initiates the AudioServer instance to manage the federated learning process.
+
+    Parameters
+    ----------
+    - cfg (DictConfig): The configuration object provided by Hydra.
+    """
     # Set Experiment Parameters
     unique_id = str(uuid.uuid1())
 
@@ -197,12 +289,11 @@ def main(cfg: DictConfig):
     dataset_name = cfg.server.dataset_name
     # Notify Experiment ID to console.
     print(
-        "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n"
-        + " Experiment ID : "
-        + unique_id
-        + "\n"
-        + "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n"
+        f"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n"
+        f" Experiment ID : {unique_id}\n"
+        f"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n"
     )
+
     # GPU Setup
     set_gpu_limits(gpu_id="0", gpu_memory=cfg.server.gpu_memory)
     # Load Test Dataset
@@ -229,7 +320,8 @@ def main(cfg: DictConfig):
     # Run server
     set_logger_level()
     audio_server.server_start(cfg.server.server_address)
-    return f"\nFinal Accuracy on experiment  {unique_id}: {audio_server.get_accuracy():.04f}\n"
+    return f"""\nFinal Accuracy on experiment  {unique_id}:
+                {audio_server.get_accuracy():.04f}\n"""
 
 
 if __name__ == "__main__":

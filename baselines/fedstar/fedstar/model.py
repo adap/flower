@@ -1,15 +1,35 @@
+"""Required imports for data.py script."""
 import itertools
 import time
+
 import numpy as np
 import tensorflow as tf
 
 
 class History(tf.keras.callbacks.History):
+    """A custom implementation of the Keras History callback for logging history.
+
+    This class extends tf.keras.callbacks.History to provide custom functionalities for
+    tracking the training process. It captures and stores metrics at the end of each
+    epoch.
+    """
+
     def __init__(self):
         super(tf.keras.callbacks.History, self).__init__()
         self.history = {}
 
     def on_epoch_end(self, epoch, logs=None):
+        """Handle the end of an epoch during model training.
+
+        Updates the history attribute with information about the completed epoch,
+        including any provided logs such as loss and accuracy metrics.
+
+        Parameters
+        ----------
+        - epoch (int): The index of the recently completed epoch.
+        - logs (dict, optional): A dictionary containing metrics and their values
+        for the completed epoch.
+        """
         logs = logs or {}
         self.epoch.append(epoch)
         for k, v in logs.items():
@@ -17,6 +37,20 @@ class History(tf.keras.callbacks.History):
 
 
 class Network:
+    """A network class for building a custom audio classification model.
+
+    This class constructs a convolutional neural network for audio data classification.
+    It includes methods to define convolutional blocks and assemble the full model.
+
+    Attributes
+    ----------
+    - num_classes (int): Number of classes for classification.
+    - dropout_rate (float): Dropout rate for regularization.
+    - l2_rate (float): L2 regularization rate.
+    - input_shape (tuple): Shape of the input data.
+    - sequence_length (int): Length of the input sequences.
+    """
+
     def __init__(
         self,
         num_classes,
@@ -35,6 +69,23 @@ class Network:
     def _conv_block(
         input_shape, num_features, l2_rate, dropout_rate=0.1, add_max_pool=True
     ):
+        """Define a convolutional block for the neural network.
+
+        Constructs a block with convolutional layers, normalization, activation,
+        and optional pooling and dropout, based on the specified parameters.
+
+        Parameters
+        ----------
+        - input_shape (tuple): Shape of the input to the convolutional block.
+        - num_features (int): Number of filters in the convolutional layers.
+        - l2_rate (float): L2 regularization rate.
+        - dropout_rate (float, optional): Dropout rate for regularization.
+        - add_max_pool (bool, optional): Whether to include max pooling in the block.
+
+        Returns
+        -------
+        - tf.keras.Model: A Keras model representing the convolutional block.
+        """
         inputs = tf.keras.layers.Input(shape=input_shape)
         x_t = tf.keras.layers.Conv2D(
             num_features,
@@ -67,6 +118,16 @@ class Network:
         return tf.keras.Model(inputs, x)
 
     def get_network(self):
+        """Assembles and returns the custom audio classification model.
+
+        Constructs the neural network layer by layer using the class attributes and
+        predefined convolutional blocks.
+
+        Returns
+        -------
+        - tf.keras.Model: The assembled TensorFlow Keras model
+          ready for training or inference.
+        """
         inputs = tf.keras.layers.Input(shape=self._input_shape, name="audio_input")
         x = __class__._conv_block(
             self._input_shape, 24, self._l2_rate, dropout_rate=self._dropout_rate
@@ -86,6 +147,20 @@ class Network:
         return model
 
     def get_evaluation_network(self, input_shape=(None, None, 64, 1)):
+        """Create an evaluation model for the network.
+
+        Constructs a model for evaluation which applies the primary network to a
+        time-distributed input and computes the mean output.
+
+        Parameters
+        ----------
+        - input_shape (tuple, optional):
+          Shape of the input data for the evaluation model.
+
+        Returns
+        -------
+        - tf.keras.Model: The evaluation model based on the primary network.
+        """
         model = self.get_network()
         input = tf.keras.layers.Input(shape=input_shape, name="audio_input")
         output = tf.reduce_mean(tf.keras.layers.TimeDistributed(model)(input), axis=1)
@@ -93,6 +168,21 @@ class Network:
 
     @staticmethod
     def get_init_weights(num_classes, input_shape=(None, 64, 1), l2_rate=0.0001):
+        """Generate and return initial weights for the network.
+
+        Constructs a temporary model for the sole purpose of initializing weights,
+        based on the specified number of classes, input shape, and regularization rate.
+
+        Parameters
+        ----------
+        - num_classes (int): Number of classes for the classification task.
+        - input_shape (tuple, optional): Shape of the input data.
+        - l2_rate (float, optional): L2 regularization rate.
+
+        Returns
+        -------
+        - List: A list of numpy arrays representing the initial weights of the model.
+        """
         inputs = tf.keras.layers.Input(shape=input_shape, name="audio_input")
         x = Network._conv_block(input_shape, 24, l2_rate)(inputs)
         x = Network._conv_block(x.shape[1:], 32, l2_rate)(x)
@@ -105,6 +195,20 @@ class Network:
 
 
 class PSL_Network(tf.keras.Model):
+    """A TensorFlow Keras model for Pseudo-Label Semi-supervised Learning (PSL).
+
+    This class extends tf.keras.Model to implement a specific architecture and
+    training procedure for semi-supervised learning using pseudo-labeling.
+
+    Attributes
+    ----------
+    - num_classes (int): Number of classes for classification.
+    - aux_loss_weight (float): Weight for the auxiliary loss in training.
+    - dropout_rate (float): Dropout rate for regularization.
+    - model (tf.keras.Model): The underlying audio classification model.
+    - confidence (float): Confidence threshold for pseudo-labeling.
+    """
+
     def __init__(self, num_classes, aux_loss_weight=0.5, dropout_rate=0.1):
         super(PSL_Network, self).__init__()
         self.model = Network(
@@ -115,6 +219,14 @@ class PSL_Network(tf.keras.Model):
         self.history = History()
 
     def compile(self, optimizer):
+        """Configure the model for training.
+
+        Sets the optimizer and loss function for the model.
+
+        Parameters
+        ----------
+        - optimizer: The optimizer to use for training the model.
+        """
         super(PSL_Network, self).compile()
         self.optimizer = optimizer
         self.loss_fn = tf.nn.sparse_softmax_cross_entropy_with_logits
@@ -123,6 +235,23 @@ class PSL_Network(tf.keras.Model):
     def cosine_confidence_scheduler(
         step, total_steps, confidence_min=0.5, confidence_max=0.9
     ):
+        """Determine the confidence level for pseudo-labeling using a cosine schedule.
+
+        Gradually adjusts the confidence threshold over the course of training based
+        on the cosine function.
+
+        Parameters
+        ----------
+        - step (int): The current training step or round.
+        - total_steps (int): The total number of steps or rounds
+                             in the training process.
+        - confidence_min (float, optional): Minimum confidence threshold.
+        - confidence_max (float, optional): Maximum confidence threshold.
+
+        Returns
+        -------
+        - float: The computed confidence threshold for the current step.
+        """
         return confidence_max - (confidence_max - confidence_min) * 0.5 * (
             1 + np.cos(step / total_steps * np.pi)
         )
@@ -130,6 +259,26 @@ class PSL_Network(tf.keras.Model):
     def fit(
         self, train_datasets, epochs, c_round, rounds, num_batches=None, T=1, verbose=0
     ):
+        """Trains the model on given datasets for a specified number of epochs.
+
+        This custom training loop handles both labeled and unlabeled data, applying
+        pseudo-labeling for semi-supervised learning.
+
+        Parameters
+        ----------
+        - train_datasets (tuple): A tuple containing labeled
+                                  and unlabeled training datasets.
+        - epochs (int): Number of epochs to train the model.
+        - c_round (int): Current round of training in a federated learning scenario.
+        - rounds (int): Total number of rounds in the federated learning scenario.
+        - num_batches (int, optional): Number of batches per epoch.
+        - T (float, optional): Temperature parameter for softmax in pseudo-labeling.
+        - verbose (int, optional): Verbosity mode.
+
+        Returns
+        -------
+        - History: An object containing training history information.
+        """
         l_dataset, u_dataset = train_datasets
         self.history.on_train_begin()
         for epoch in range(epochs):
@@ -179,6 +328,21 @@ class PSL_Network(tf.keras.Model):
 
     # @tf.function
     def train_step(self, x, y, T=4):
+        """Perform a single training step on a batch of data.
+
+        Applies the forward pass, loss computation, and backpropagation to update
+        the model weights using both labeled and unlabeled data.
+
+        Parameters
+        ----------
+        - x (Tensor): Input data.
+        - y (Tensor): Corresponding labels (or -1 for unlabeled data).
+        - T (float, optional): Temperature parameter for softmax in pseudo-labeling.
+
+        Returns
+        -------
+        - dict: A dictionary containing the computed losses for the training step.
+        """
         with tf.GradientTape() as tape:
             logits, labels = self.model(x, training=True), y
             labeled_mask, unlabeled_mask = tf.not_equal(-1, labels), tf.cast(
@@ -231,6 +395,20 @@ class PSL_Network(tf.keras.Model):
         }
 
     def get_evaluation_model(self, input_shape=(None, None, 64, 1)):
+        """Create an evaluation model based on the trained PSL network.
+
+        Constructs a model for evaluation by applying the trained network in a
+        time-distributed manner to process variable-length inputs.
+
+        Parameters
+        ----------
+        - input_shape (tuple, optional): Shape of the input
+                                         data for the evaluation model.
+
+        Returns
+        -------
+        - tf.keras.Model: The evaluation model based on the PSL network.
+        """
         input = tf.keras.layers.Input(shape=input_shape)
         output = tf.reduce_mean(
             tf.keras.layers.TimeDistributed(self.model)(input), axis=1

@@ -1,3 +1,4 @@
+"""Required imports for data.py script."""
 import os
 
 import numpy as np
@@ -8,12 +9,46 @@ from fedstar.utils import AudioTools, DataTools
 
 
 def ambient_context_path_extracter(path):
+    """Extract and construct a file path for ambient context from a given path string.
+
+    This function takes a path string, splits it at underscores,
+    removes the last segment, and then reconstructs the path by
+    re-joining the segments and appending the original
+    path at the end, separated by the OS-specific directory separator.
+
+    Parameters
+    ----------
+    - path (str): The original path string to be processed.
+
+    Returns
+    -------
+    - str: The reconstructed file path suitable for ambient context usage.
+
+    Example:
+    Given a path string 'dir_subdir_file_xyz', the function will return
+    'dir_subdir/dir_subdir_file_xyz'.
+    """
     arr = path.split("_")[:-1]
     file_path = "_".join(arr) + os.sep + path
     return file_path
 
 
 class DataBuilder:
+    """A utility class for building and processing datasets for audio analysis.
+
+    This class provides methods to load, split, and prepare datasets for training
+    and testing in audio-related machine learning tasks. It supports operations like
+    loading data from files, splitting datasets into labelled and unlabelled sets,
+    balancing datasets, and converting them into TensorFlow dataset objects.
+
+    Class Attributes:
+    - AUTOTUNE: TensorFlow's setting for optimized parallel data loading.
+    - WORDS: List of specific words used in the audio processing context.
+
+    Methods are designed to work with specific data structures and assume a certain
+    directory and file naming convention.
+    """
+
     AUTOTUNE = tf.data.experimental.AUTOTUNE
     WORDS = [
         "down",
@@ -31,6 +66,25 @@ class DataBuilder:
 
     @staticmethod
     def get_files(parent_path, data_dir, train=False, raw=False):
+        """Load audio file paths and labels from specified directories.
+
+        Reads training or testing data file paths and their corresponding labels from
+        given directories. Supports different dataset types like 'speech_commands' and
+        'ambient_context'. Can return raw file paths and labels or a TensorFlow dataset.
+
+        Parameters
+        ----------
+        - parent_path (str): Base path for the dataset directories.
+        - data_dir (str): Specific directory name containing the dataset.
+        - train (bool): If True, load training data; otherwise, load testing data.
+        - raw (bool): If True, return raw file paths and labels; otherwise, return a
+        TensorFlow dataset.
+
+        Returns
+        -------
+        - A TensorFlow dataset or a tuple of file paths and labels,
+        along with the number of classes in the dataset.
+        """
         path = os.path.join(parent_path, "data_splits", data_dir)
         train_path = os.path.join(path, "train_split.txt")
         test_path = os.path.join(path, "test_split.txt")
@@ -137,6 +191,32 @@ class DataBuilder:
         fedstar=False,
         seed=2021,
     ):
+        """Split dataset into labelled and unlabelled sets for federated learning.
+
+        This method divides the dataset into portions suitable for training by multiple
+        clients in a federated learning context. It handles both labelled and unlabelled
+        data, and supports class-based and sample-based distribution strategies.
+
+        Parameters
+        ----------
+        - parent_path (str): Base path for the dataset directories.
+        - data_dir (str): Specific directory name containing the dataset.
+        - num_clients (int): Total number of clients in the federated learning setup.
+        - client (int): Identifier for the current client.
+        - batch_size (int): Size of the batches for training.
+        - variance (float): Variance allowed in the distribution of samples/classes.
+        - l_per (float): Percentage of labelled data to be used.
+        - u_per (float): Percentage of unlabelled data to be used.
+        - mean_class_distribution (int): Average number of classes per client.
+        - class_distribute (bool): If True, distribute data based on classes.
+        - fedstar (bool): If True, apply federated star learning setup.
+        - seed (int): Random seed for reproducibility.
+
+        Returns
+        -------
+        - Labelled and unlabelled TensorFlow datasets, number of classes, and number
+        of batches for the specified client.
+        """
         # Load data
         ds_train, num_classes = __class__.get_files(
             parent_path=parent_path, data_dir=data_dir, train=True, raw=True
@@ -212,12 +292,30 @@ class DataBuilder:
         )
         # Print datasets sizes
         print(
-            f"Client {client}: Train data {labelled_size+unlabelled_size} (Unlabelled: {unlabelled_size} - Labelled: {labelled_size})"
+            f"""Client {client}: Train data {labelled_size+unlabelled_size}
+            (Unlabelled: {unlabelled_size} - Labelled: {labelled_size})"""
         )
         return ds_train_labelled, ds_train_unlabelled, num_classes, num_batches
 
     @staticmethod
     def get_ds_test(parent_path, data_dir, batch_size, buffer=1024, seed=2021):
+        """Load and prepare the testing dataset.
+
+        Reads testing data from specified paths, converts it into a TensorFlow dataset,
+        and prepares it for model evaluation or testing.
+
+        Parameters
+        ----------
+        - parent_path (str): Base path for the dataset directories.
+        - data_dir (str): Specific directory name containing the testing dataset.
+        - batch_size (int): Size of the batches for testing.
+        - buffer (int): Buffer size for shuffling the dataset.
+        - seed (int): Random seed for reproducibility.
+
+        Returns
+        -------
+        - A TensorFlow dataset for testing and the number of classes in the dataset.
+        """
         ds_test, num_classes = __class__.get_files(
             parent_path=parent_path, data_dir=data_dir
         )
@@ -247,6 +345,33 @@ class DataBuilder:
         balance_dataset: bool = False,
         seed=2021,
     ):
+        """Load and shard the dataset for federated learning scenarios.
+
+        This method prepares a dataset specifically sharded for a given client in a
+        federated learning setup. It supports configurations for balanced and unbalanced
+        datasets, federated star learning, and class-based distribution.
+
+        Parameters
+        ----------
+        - parent_path (str): Base path for the dataset directories.
+        - data_dir (str): Specific directory name containing the dataset.
+        - num_clients (int): Total number of clients in the federated learning setup.
+        - client (int): Identifier for the current client.
+        - variance (float): Variance allowed in the distribution of samples/classes.
+        - batch_size (int): Size of the batches for training.
+        - l_per (float): Percentage of labelled data to be used.
+        - u_per (float): Percentage of unlabelled data to be used.
+        - mean_class_distribution (int): Average number of classes per client.
+        - fedstar (bool): If True, apply federated star learning setup.
+        - class_distribute (bool): If True, distribute data based on classes.
+        - balance_dataset (bool): If True, balance the dataset for each class.
+        - seed (int): Random seed for reproducibility.
+
+        Returns
+        -------
+        - Labelled and unlabelled TensorFlow datasets, number of classes, and number
+        of batches for the specified client.
+        """
         batch_size = batch_size // 2 if fedstar else batch_size
         ds_train_L, ds_train_U, num_classes, num_batches = __class__.split_dataset(
             parent_path=parent_path,
@@ -273,8 +398,34 @@ class DataBuilder:
         return ds_train_L, ds_train_U, num_classes, num_batches
 
     @staticmethod
-    def to_Dataset(ds_train_L, ds_train_U, ds_test, batch_size,
-                   buffer=1024, seed=2021, balance_dataset: bool=False):
+    def to_Dataset(
+        ds_train_L,
+        ds_train_U,
+        ds_test,
+        batch_size,
+        buffer=1024,
+        seed=2021,
+        balance_dataset: bool = False,
+    ):
+        """Convert data into TensorFlow datasets for training and testing.
+
+        Transforms raw data into shuffled and batched TensorFlow datasets. It handles
+        both labelled and unlabelled training data, as well as testing data.
+
+        Parameters
+        ----------
+        - ds_train_L: Labelled training data.
+        - ds_train_U: Unlabelled training data.
+        - ds_test: Testing data.
+        - batch_size (int): Size of the batches for the datasets.
+        - buffer (int): Buffer size for shuffling the dataset.
+        - seed (int): Random seed for shuffling reproducibility.
+        - balance_dataset (bool): If True, balance the training dataset.
+
+        Returns
+        -------
+        - Labelled and unlabelled training TensorFlow datasets and a testing dataset.
+        """
         ds_train_L = (
             ds_train_L.shuffle(
                 buffer_size=buffer, seed=seed, reshuffle_each_iteration=True
@@ -316,9 +467,12 @@ class DataBuilder:
 
 
 def balance_sampler(dataset, batch_size):
-    """The speechcommands dataset is skewed. Here we resample it so we see the same
-    number of instances for all classes. Here we use TF's rejection_resample functionality
-    https://www.tensorflow.org/guide/data#rejection_resampling."""
+    """Address the skew in the speechcommands dataset.
+
+    Here we resample it so we see the same number of instances for all classes. Here we
+    use TF's rejection_resample functionality
+    https://www.tensorflow.org/guide/data#rejection_resampling.
+    """
 
     def class_func(features, label):
         return label
@@ -333,12 +487,16 @@ def balance_sampler(dataset, batch_size):
     print(f"{target_dist = }")
 
     # resample
-    dataset_resampled = (dataset
-                         .unbatch()
-                         .rejection_resample(class_func, target_dist=target_dist,
-                                          initial_dist=initial_dist)
-                         .batch(batch_size))
+    dataset_resampled = (
+        dataset.unbatch()
+        .rejection_resample(
+            class_func, target_dist=target_dist, initial_dist=initial_dist
+        )
+        .batch(batch_size)
+    )
 
-    dataset_balanced = dataset_resampled.map(lambda extra_label, features_and_label: features_and_label)
+    dataset_balanced = dataset_resampled.map(
+        lambda extra_label, features_and_label: features_and_label
+    )
 
     return dataset_balanced

@@ -1,20 +1,25 @@
-import os
-
-os.environ["GRPC_VERBOSITY"] = "ERROR"
+"""Required imports for client.py script."""
 import gc
 import logging
+import os
 
 import flwr
-import numpy as np
 import tensorflow as tf
 
 from fedstar.data import DataBuilder
 from fedstar.model import Network, PSL_Network
 
+os.environ["GRPC_VERBOSITY"] = "ERROR"
+
 LOG_LEVEL = logging.ERROR
 
 
 class AudioClient(flwr.client.NumPyClient):
+    """AudioClient class act as a client for FedStar implementation.
+
+    It extends NumpyClient feature because flower internally requires a NumpyClient.
+    """
+
     def __init__(
         self,
         client_id,
@@ -27,7 +32,7 @@ class AudioClient(flwr.client.NumPyClient):
         batch_size=64,
         l_per=0.2,
         u_per=1.0,
-        class_distribute: bool =False,
+        class_distribute: bool = False,
         balance_dataset: bool = False,
         mean_class_distribution=3,
         seed=2021,
@@ -41,8 +46,8 @@ class AudioClient(flwr.client.NumPyClient):
         self.fedstar = fedstar
         self.aux_loss_weight = 0.5
         self.parent_path = parent_path
-        print("/*/*" * 150)
-        print(self.parent_path)
+        # print("/*/*" * 150)
+        # print(self.parent_path)
         # Load Clients Data
         (
             self.train_L,
@@ -73,10 +78,13 @@ class AudioClient(flwr.client.NumPyClient):
         tf.keras.backend.clear_session()
 
     def __call__(self, introduce=False):
+        """Override the internal call method to start the numpy client."""
         try:
             if introduce:
                 print(
-                    f"This is client {self.client_id} with train dataset of {self.num_examples_train} elements."
+                    f"""This is client {self.client_id}
+                    with train dataset of {self.num_examples_train}
+                    elements."""
                 )
             set_logger_level()
             flwr.client.start_numpy_client(
@@ -88,9 +96,11 @@ class AudioClient(flwr.client.NumPyClient):
         return 0
 
     def get_parameters(self, config):
+        """Return the current client model weights."""
         return self.weights
 
     def fit(self, parameters, config):
+        """Update the current client model weights."""
         self.local_train_round += 1
         self.weights = parameters
         # Run Training Proccess
@@ -128,7 +138,10 @@ class AudioClient(flwr.client.NumPyClient):
             )
         # Print Results
         print(
-            f"Client {self.client_id} finished {self.local_train_round}th round of training with loss {history.history['loss'][0]:.4f} and accuracy {history.history['accuracy'][0]:.4f}"
+            f"""Client {self.client_id}
+            finished {self.local_train_round}th round of training with
+            loss {history.history['loss'][0]:.4f} and
+            accuracy {history.history['accuracy'][0]:.4f}"""
         )
         # Clear Memory
         tf.keras.backend.clear_session()
@@ -141,10 +154,12 @@ class AudioClient(flwr.client.NumPyClient):
         )
 
     def evaluate(self, parameters, config):
+        """Essential function for Numpy Client but not required for FedStar."""
         raise NotImplementedError("Client Side evaluation not required.")
 
 
 def set_logger_level():
+    """Set the logging level for the 'flower' logger."""
     if "flower" in [
         logging.getLogger(name).__repr__()[8:].split(" ")[0]
         for name in logging.root.manager.loggerDict
