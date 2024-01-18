@@ -103,7 +103,7 @@ class DataBuilder:
                         os.path.join(path_data_dir, "Data", "Train", path_tr_uf)
                     )
                     label = tr_uf.split("/")[0]
-                    if label in __class__.WORDS:
+                    if label in DataBuilder.WORDS:
                         train_labels.append(tr_uf.split("/")[0])
                     else:
                         train_labels.append("_unknown_")
@@ -134,7 +134,7 @@ class DataBuilder:
                 if raw
                 else tf.data.Dataset.from_tensor_slices(
                     (train_files_path, train_labels)
-                ).map(AudioTools.read_audio, num_parallel_calls=__class__.AUTOTUNE)
+                ).map(AudioTools.read_audio, num_parallel_calls=DataBuilder.AUTOTUNE)
             )
         else:
             # Read files from txt file.
@@ -172,7 +172,7 @@ class DataBuilder:
                 if raw
                 else tf.data.Dataset.from_tensor_slices(
                     (test_files_path, test_labels)
-                ).map(AudioTools.read_audio, num_parallel_calls=__class__.AUTOTUNE)
+                ).map(AudioTools.read_audio, num_parallel_calls=DataBuilder.AUTOTUNE)
             )
         return ds, num_classes
 
@@ -218,7 +218,7 @@ class DataBuilder:
         of batches for the specified client.
         """
         # Load data
-        ds_train, num_classes = __class__.get_files(
+        ds_train, num_classes = DataBuilder.get_files(
             parent_path=parent_path, data_dir=data_dir, train=True, raw=True
         )
         (ds_train_l, labelled_size), (
@@ -272,11 +272,11 @@ class DataBuilder:
         # Convert to tf dataset objects
         ds_train_labelled = tf.data.Dataset.from_tensor_slices(
             (labelled_sets[client][0], labelled_sets[client][1])
-        ).map(AudioTools.read_audio, num_parallel_calls=__class__.AUTOTUNE)
+        ).map(AudioTools.read_audio, num_parallel_calls=DataBuilder.AUTOTUNE)
         ds_train_unlabelled = (
             tf.data.Dataset.from_tensor_slices(
                 (unlabelled_sets[client][0], unlabelled_sets[client][1])
-            ).map(AudioTools.read_audio, num_parallel_calls=__class__.AUTOTUNE)
+            ).map(AudioTools.read_audio, num_parallel_calls=DataBuilder.AUTOTUNE)
             if fedstar
             else None
         )
@@ -316,10 +316,10 @@ class DataBuilder:
         -------
         - A TensorFlow dataset for testing and the number of classes in the dataset.
         """
-        ds_test, num_classes = __class__.get_files(
+        ds_test, num_classes = DataBuilder.get_files(
             parent_path=parent_path, data_dir=data_dir
         )
-        _, _, ds_test = __class__.to_Dataset(
+        _, _, ds_test = DataBuilder.to_Dataset(
             ds_train_L=None,
             ds_train_U=None,
             ds_test=ds_test,
@@ -373,7 +373,7 @@ class DataBuilder:
         of batches for the specified client.
         """
         batch_size = batch_size // 2 if fedstar else batch_size
-        ds_train_L, ds_train_U, num_classes, num_batches = __class__.split_dataset(
+        ds_train_L, ds_train_U, num_classes, num_batches = DataBuilder.split_dataset(
             parent_path=parent_path,
             data_dir=data_dir,
             client=client,
@@ -387,7 +387,7 @@ class DataBuilder:
             variance=variance,
             seed=seed,
         )
-        ds_train_L, ds_train_U, _ = __class__.to_Dataset(
+        ds_train_L, ds_train_U, _ = DataBuilder.to_Dataset(
             ds_train_L=ds_train_L,
             ds_train_U=ds_train_U,
             ds_test=None,
@@ -430,18 +430,18 @@ class DataBuilder:
             ds_train_L.shuffle(
                 buffer_size=buffer, seed=seed, reshuffle_each_iteration=True
             )
-            .map(AudioTools.prepare_example, num_parallel_calls=__class__.AUTOTUNE)
+            .map(AudioTools.prepare_example, num_parallel_calls=DataBuilder.AUTOTUNE)
             .batch(batch_size=batch_size)
-            # .prefetch(__class__.AUTOTUNE)
+            # .prefetch(DataBuilder.AUTOTUNE)
             if ds_train_L
             else None
         )
         ds_test = (
             ds_test.map(
-                AudioTools.prepare_test_example, num_parallel_calls=__class__.AUTOTUNE
+                AudioTools.prepare_test_example, num_parallel_calls=DataBuilder.AUTOTUNE
             )
             .batch(1)
-            .prefetch(__class__.AUTOTUNE)
+            .prefetch(DataBuilder.AUTOTUNE)
             if ds_test
             else None
         )
@@ -449,9 +449,9 @@ class DataBuilder:
             ds_train_U.shuffle(
                 buffer_size=buffer, seed=seed + 1, reshuffle_each_iteration=True
             )
-            .map(AudioTools.prepare_example, num_parallel_calls=__class__.AUTOTUNE)
+            .map(AudioTools.prepare_example, num_parallel_calls=DataBuilder.AUTOTUNE)
             .batch(batch_size=batch_size)
-            # .prefetch(__class__.AUTOTUNE)
+            # .prefetch(DataBuilder.AUTOTUNE)
             if ds_train_U
             else None
         )

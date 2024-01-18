@@ -2,6 +2,7 @@
 import gc
 import logging
 import os
+from typing import Dict, List
 
 import flwr
 import tensorflow as tf
@@ -74,7 +75,7 @@ class AudioClient(flwr.client.NumPyClient):
         self.local_train_round = 0
         self.local_evaluate_round = 0
         self.weights = Network.get_init_weights(num_classes=self.num_classes)
-        self.history = {"loss": [], "accuracy": []}
+        self.history: Dict[str, List[float]] = {"loss": [], "accuracy": []}
         tf.keras.backend.clear_session()
 
     def __call__(self, introduce=False):
