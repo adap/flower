@@ -34,7 +34,7 @@ class MetricsRecord:
 
         Parameters
         ----------
-        array_dict : Optional[Dict[str, MetricsRecordValues]]
+        metrics_dict : Optional[Dict[str, MetricsRecordValues]]
             A dictionary that stores basic types (i.e. `int`, `float` as defined
             in `MetricsScalar`) and list of such types (see `MetricsScalarList`).
         """
@@ -47,7 +47,7 @@ class MetricsRecord:
 
         Parameters
         ----------
-        array_dict : Optional[Dict[str, MetricsRecordValues]]
+        metrics_dict : Optional[Dict[str, MetricsRecordValues]]
             A dictionary that stores basic types (i.e. `int`, `float` as defined
             in `MetricsScalar`) and list of such types (see `MetricsScalarList`).
         """
