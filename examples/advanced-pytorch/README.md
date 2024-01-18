@@ -68,3 +68,11 @@ poetry run ./run.sh
 The `run.sh` script starts processes in the background so that you don't have to open eleven terminal windows. If you experiment with the code example and something goes wrong, simply using `CTRL + C` on Linux (or `CMD + C` on macOS) wouldn't normally kill all these processes, which is why the script ends with `trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT` and `wait`. This simply allows you to stop the experiment using `CTRL + C` (or `CMD + C`). If you change the script and anything goes wrong you can still use `killall python` (or `killall python3`) to kill all background processes (or a more specific command if you have other Python processes running that you don't want to kill).
 
 You can also manually run `poetry run python3 server.py` and `poetry run python3 client.py` for as many clients as you want but you have to make sure that each command is ran in a different terminal window (or a different computer on the network).
+
+
+## About Differential Privacy
+If you want to achieve differential privacy, please use `alexnet` model, because efficientnet is particularly affected by noise. 
+
+If you add a little noise when using `efficientnet`, the loss will be Nan. This is issue:https://github.com/adap/flower/issues/2342
+
+Therefore, if you want to achieve differential privacy, please use `alexnet`

@@ -5,6 +5,7 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
+
 # DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
@@ -128,6 +129,7 @@ def get_model_params(model):
     """Returns a model's parameters."""
     return [val.cpu().numpy() for _, val in model.state_dict().items()]
 
-def load_alexnet(class_num):
+
+def load_alexnet(classes):
     from alexnet import AlexNet
-    return AlexNet(class_num)
+    return AlexNet(classes)

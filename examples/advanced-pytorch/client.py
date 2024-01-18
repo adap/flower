@@ -12,20 +12,22 @@ warnings.filterwarnings("ignore")
 
 class CifarClient(fl.client.NumPyClient):
     def __init__(
-        self,
-        trainset: torchvision.datasets,
-        testset: torchvision.datasets,
-        device: str,
-        validation_split: int = 0.1,
+            self,
+            trainset: torchvision.datasets,
+            testset: torchvision.datasets,
+            device: str,
+            validation_split: int = 0.1,
     ):
         self.device = device
         self.trainset = trainset
         self.testset = testset
         self.validation_split = validation_split
 
-    def set_parameters(self, parameters):
+    def set_parameters(self, parameters, use_model):
         """Loads a alexnet model and replaces it parameters with the ones given."""
-        model = utils.load_alexnet(classes=10)
+        model = utils.load_efficientnet(classes=10)
+        if use_model == "alexnet":
+            model = utils.load_alexnet(classes=10)
         params_dict = zip(model.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
         model.load_state_dict(state_dict, strict=True)
@@ -35,7 +37,7 @@ class CifarClient(fl.client.NumPyClient):
         """Train parameters on the locally held training set."""
 
         # Update local model parameters
-        model = self.set_parameters(parameters)
+        model = self.set_parameters(parameters, config['use_model'])
 
         # Get hyperparameters for this round
         batch_size: int = config["batch_size"]
@@ -124,6 +126,15 @@ def main() -> None:
         default=False,
         required=False,
         help="Set to true to use GPU. Default: False",
+    )
+
+    parser.add_argument(
+        "--dp",
+        type=str,
+        default="efficientnet",
+        required=False,
+        help="Use either Efficientnet or Alexnet models. \
+                 If you want to achieve differential privacy, please use the Alexnet model",
     )
 
     args = parser.parse_args()

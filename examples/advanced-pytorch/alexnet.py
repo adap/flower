@@ -3,7 +3,8 @@ import torch.nn as nn
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-class AlexNet(nn.Module):  #lr = 0.01
+
+class AlexNet(nn.Module):  # lr = 0.01
     def __init__(self, class_num=10):
         super(AlexNet, self).__init__()
         self.features = nn.Sequential(
@@ -32,7 +33,7 @@ class AlexNet(nn.Module):  #lr = 0.01
             nn.Linear(4096, class_num),
         )
 
-    def forward(self, x):  
+    def forward(self, x):
         x = self.features(x)
         x = x.view(x.size(0), 256 * 4 * 4)
         x = self.classifier(x)
