@@ -119,11 +119,11 @@ def handle(
             named_values = serde.named_values_from_proto(task_ins.task.sa.named_values)
             res = client.handle_secure_aggregation(named_values)
             task_res = TaskRes(
-                task_id="",
-                group_id="",
-                run_id=0,
+                task_id="",  # Created by the server
+                group_id=task_ins.group_id,
+                run_id=task_ins.run_id,
                 task=Task(
-                    ancestry=[],
+                    ancestry=[task_ins.task_id],
                     sa=SecureAggregation(named_values=serde.named_values_to_proto(res)),
                 ),
             )
