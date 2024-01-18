@@ -59,7 +59,7 @@ class ConfigsRecord:
             if not isinstance(value, get_args(ConfigsScalar)):
                 raise TypeError(
                     "Not all values are of valid type."
-                    f" Expected {ConfigsRecordValues}"
+                    f" Expected {ConfigsRecordValues} but you passed {type(value)}."
                 )
 
         # Check types of values
