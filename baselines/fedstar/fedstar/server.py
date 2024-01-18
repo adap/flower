@@ -21,7 +21,7 @@ GRPC_MAX_MESSAGE_LENGTH: int = 536_870_912
 parent_path = os.getcwd()
 
 
-class AudioServer:
+class AudioServer:  # pylint: disable=too-many-instance-attributes
     """A server class for federated learning using Flower framework.
 
     This class sets up and runs a federated learning server using the Flower framework,
@@ -42,6 +42,7 @@ class AudioServer:
     - model_verbose (int): Verbosity level for model training.
     """
 
+    # pylint: disable=too-many-arguments, too-many-locals
     def __init__(
         self,
         flwr_evalution_step,
@@ -65,7 +66,7 @@ class AudioServer:
         self.rounds = flwr_rounds
         # Model Parameters
         self.num_classes = model_num_classes
-        self.lr = model_lr
+        self.learning_rate = model_lr
         self.batch_size = model_batch_size
         self.epochs = model_epochs
         self.verbose = model_verbose
@@ -122,11 +123,12 @@ class AudioServer:
         as parameters and returns a configuration dictionary.
         """
 
+        # pylint: disable=unused-argument
         def fit_config(
             rounds=self.rounds,
             epochs=self.epochs,
             batch_size=self.batch_size,
-            learning_rate=self.lr,
+            learning_rate=self.learning_rate,
         ):
             if self.current_round != 1:
                 print(
@@ -167,13 +169,14 @@ class AudioServer:
         as parameters and returns the loss and accuracy.
         """
 
+        # pylint: disable=unused-argument
         def evaluate(servr_round, weights, configs):
             loss, acc = 0, 0
             self.current_round += 1
             if (self.current_round - 1) % self.evalution_step == 0:
                 model = Network(num_classes=self.num_classes).get_evaluation_network()
                 model.compile(
-                    optimizer=tf.keras.optimizers.Adam(self.lr),
+                    optimizer=tf.keras.optimizers.Adam(self.learning_rate),
                     loss=tf.keras.losses.SparseCategoricalCrossentropy(
                         from_logits=True, name="loss"
                     ),
@@ -220,8 +223,8 @@ def set_logger_level():
     logging manager's dictionary.
     """
     if "flower" in [
-        logging.getLogger(name).__repr__()[8:].split(" ")[0]
-        for name in logging.root.manager.loggerDict
+        repr(logging.getLogger(name))[8:].split(" ")[0]
+        for name in logging.Logger.manager.loggerDict
     ]:
         logger = logging.getLogger("flower")
         logger.setLevel(logging.INFO)
@@ -253,21 +256,17 @@ def set_gpu_limits(gpu_id, gpu_memory):
                     )
                 ],
             )
-        except RuntimeError as e:
-            print(e)
+        except RuntimeError as runtime_error:
+            print(runtime_error)
 
 
-"""
-    Change the config path and yaml file name based on expermients you want to run.
-    The current configs will call the basic config file which runs the small
-    experiment to check integrity.
-    Eg:-
-    To carry out results for experiment in row 3 row 1 col 1. The parameters will be
-    config_path = conf/table_3/row_2_clients_10
-    config_name = speech_commands
-"""
-
-
+# Change the config path and yaml file name based on expermients you want to run.
+# The current configs will call the basic config file which runs the small
+# experiment to check integrity.
+# Eg:-
+# To carry out results for experiment in row 3 row 1 col 1. The parameters will be
+# config_path = conf/table_3/row_2_clients_10
+# config_name = speech_commands
 @hydra.main(config_path="conf", config_name="table3", version_base=None)
 def main(cfg: DictConfig):
     """Run the federated learning server with Hydra configuration.
