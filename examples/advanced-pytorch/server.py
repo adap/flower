@@ -22,7 +22,7 @@ def fit_config(server_round: int, use_model: str):
     config = {
         "batch_size": 16,
         "local_epochs": 1 if server_round < 2 else 2,
-        "model": use_model if use_model == "alexnet" else "efficientnet",
+        "use_model": use_model if use_model == "alexnet" else "efficientnet",
     }
     return config
 

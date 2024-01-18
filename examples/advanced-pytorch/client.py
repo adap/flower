@@ -24,7 +24,7 @@ class CifarClient(fl.client.NumPyClient):
         self.validation_split = validation_split
 
     def set_parameters(self, parameters, use_model):
-        """Loads a alexnet model and replaces it parameters with the ones given."""
+        """Loads a alexnet or efficientnet model and replaces it parameters with the ones given."""
         model = utils.load_efficientnet(classes=10)
         if use_model == "alexnet":
             model = utils.load_alexnet(classes=10)
