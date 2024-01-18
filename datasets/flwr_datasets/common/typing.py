@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Datasets type definitions (partially copied from Flower)."""
+"""Flower Datasets type definitions."""
 from typing import Any, List
 
 import numpy as np
