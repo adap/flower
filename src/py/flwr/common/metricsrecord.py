@@ -52,14 +52,14 @@ class MetricsRecord:
             in `MetricsScalar`) and list of such types (see `MetricsScalarList`).
         """
         if any(not isinstance(k, str) for k in metrics_dict.keys()):
-            raise TypeError(f"Not all keys are of valid type. Expected {str}")
+            raise TypeError(f"Not all keys are of valid type. Expected {str}.")
 
         def is_valid(value: MetricsScalar) -> None:
             """Check if value is of expected type."""
             if not isinstance(value, get_args(MetricsScalar)):
                 raise TypeError(
                     "Not all values are of valid type."
-                    f" Expected {MetricsRecordValues}"
+                    f" Expected {MetricsRecordValues} but you passed {type(value)}."
                 )
 
         # Check types of values
