@@ -10,6 +10,8 @@ import utils
 
 import warnings
 
+from flwr_datasets import FederatedDataset
+
 warnings.filterwarnings("ignore")
 
 
@@ -39,18 +41,13 @@ def evaluate_config(server_round: int):
 def get_evaluate_fn(model: torch.nn.Module, toy: bool):
     """Return an evaluation function for server-side evaluation."""
 
-    # Load data and model here to avoid the overhead of doing it in `evaluate` itself
-    trainset, _, _ = utils.load_data()
-
-    n_train = len(trainset)
+    # Load data here to avoid the overhead of doing it in `evaluate` itself
+    centralized_data = utils.load_centralized_data()
     if toy:
         # use only 10 samples as validation set
-        valset = torch.utils.data.Subset(trainset, range(n_train - 10, n_train))
-    else:
-        # Use the last 5k training examples as a validation set
-        valset = torch.utils.data.Subset(trainset, range(n_train - 5000, n_train))
+        centralized_data = centralized_data.select(range(10))
 
-    valLoader = DataLoader(valset, batch_size=16)
+    val_loader = DataLoader(centralized_data, batch_size=16)
 
     # The `evaluate` function will be called after every round
     def evaluate(
@@ -63,7 +60,7 @@ def get_evaluate_fn(model: torch.nn.Module, toy: bool):
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
         model.load_state_dict(state_dict, strict=True)
 
-        loss, accuracy = utils.test(model, valLoader)
+        loss, accuracy = utils.test(model, val_loader)
         return loss, {"accuracy": accuracy}
 
     return evaluate
@@ -79,9 +76,7 @@ def main():
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
         "--toy",
-        type=bool,
-        default=False,
-        required=False,
+        action='store_true',
         help="Set to true to use only 10 datasamples for validation. \
             Useful for testing purposes. Default: False",
     )
