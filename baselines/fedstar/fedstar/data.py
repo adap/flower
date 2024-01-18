@@ -64,6 +64,7 @@ class DataBuilder:
         "_silence_",
     ]
 
+    # pylint: disable=too-many-arguments, too-many-locals, too-many-statements
     @staticmethod
     def get_files(parent_path, data_dir, train=False, raw=False):
         """Load audio file paths and labels from specified directories.
@@ -129,7 +130,7 @@ class DataBuilder:
             # Change from object type to int
             train_labels = np.array(train_labels, dtype=np.int64)
             # Convert to dataset (if necessary)
-            ds = (
+            dataset = (
                 (train_files_path, train_labels)
                 if raw
                 else tf.data.Dataset.from_tensor_slices(
@@ -167,15 +168,16 @@ class DataBuilder:
             # Change from object type to int
             test_labels = np.array(test_labels, dtype=np.int64)
             # Convert to dataset (if necessary)
-            ds = (
+            dataset = (
                 (test_files_path, test_labels)
                 if raw
                 else tf.data.Dataset.from_tensor_slices(
                     (test_files_path, test_labels)
                 ).map(AudioTools.read_audio, num_parallel_calls=DataBuilder.AUTOTUNE)
             )
-        return ds, num_classes
+        return dataset, num_classes
 
+    # pylint: disable=too-many-arguments, too-many-locals
     @staticmethod
     def split_dataset(
         parent_path,
@@ -221,8 +223,8 @@ class DataBuilder:
         ds_train, num_classes = DataBuilder.get_files(
             parent_path=parent_path, data_dir=data_dir, train=True, raw=True
         )
-        (ds_train_l, labelled_size), (
-            ds_train_u,
+        (ds_train_labelled, labelled_size), (
+            ds_train_un_labelled,
             unlabelled_size,
         ) = DataTools.get_subset(
             dataset=ds_train,
@@ -231,9 +233,9 @@ class DataBuilder:
             num_classes=num_classes,
             seed=seed,
         )
-        ds_train_u = (
+        ds_train_un_labelled = (
             DataTools.convert_to_unlabelled(
-                dataset=ds_train_u, unlabelled_data_identifier=-1
+                dataset=ds_train_un_labelled, unlabelled_data_identifier=-1
             )
             if fedstar
             else []
@@ -242,7 +244,7 @@ class DataBuilder:
         if not class_distribute:  # Split according to number of samples
             labelled_sets = list(
                 DataTools.distribute_per_samples(
-                    dataset=ds_train_l,
+                    dataset=ds_train_labelled,
                     num_clients=num_clients,
                     variance=variance,
                     seed=seed,
@@ -250,7 +252,7 @@ class DataBuilder:
             )
         else:  # Split according to classes
             labelled_sets = DataTools.distribute_per_class_with_class_limit(
-                dataset=ds_train_l,
+                dataset=ds_train_labelled,
                 num_clients=num_clients,
                 num_classes=num_classes,
                 mean_class_distribution=mean_class_distribution,
@@ -260,7 +262,7 @@ class DataBuilder:
         unlabelled_sets = (
             list(
                 DataTools.distribute_per_samples(
-                    dataset=ds_train_u,
+                    dataset=ds_train_un_labelled,
                     num_clients=num_clients,
                     variance=variance,
                     seed=seed,
@@ -319,9 +321,9 @@ class DataBuilder:
         ds_test, num_classes = DataBuilder.get_files(
             parent_path=parent_path, data_dir=data_dir
         )
-        _, _, ds_test = DataBuilder.to_Dataset(
-            ds_train_L=None,
-            ds_train_U=None,
+        _, _, ds_test = DataBuilder.to_dataset(
+            ds_train_labelled=None,
+            ds_train_un_labelled=None,
             ds_test=ds_test,
             buffer=buffer,
             batch_size=batch_size,
@@ -329,6 +331,7 @@ class DataBuilder:
         )
         return ds_test, num_classes
 
+    # pylint: disable=too-many-arguments, too-many-locals
     @staticmethod
     def load_sharded_dataset(
         parent_path,
@@ -373,7 +376,12 @@ class DataBuilder:
         of batches for the specified client.
         """
         batch_size = batch_size // 2 if fedstar else batch_size
-        ds_train_L, ds_train_U, num_classes, num_batches = DataBuilder.split_dataset(
+        (
+            ds_train_labelled,
+            ds_train_un_labelled,
+            num_classes,
+            num_batches,
+        ) = DataBuilder.split_dataset(
             parent_path=parent_path,
             data_dir=data_dir,
             client=client,
@@ -387,20 +395,21 @@ class DataBuilder:
             variance=variance,
             seed=seed,
         )
-        ds_train_L, ds_train_U, _ = DataBuilder.to_Dataset(
-            ds_train_L=ds_train_L,
-            ds_train_U=ds_train_U,
+        ds_train_labelled, ds_train_un_labelled, _ = DataBuilder.to_dataset(
+            ds_train_labelled=ds_train_labelled,
+            ds_train_un_labelled=ds_train_un_labelled,
             ds_test=None,
             seed=seed,
             batch_size=batch_size,
             balance_dataset=balance_dataset,
         )
-        return ds_train_L, ds_train_U, num_classes, num_batches
+        return ds_train_labelled, ds_train_un_labelled, num_classes, num_batches
 
+    # pylint: disable=too-many-arguments, too-many-locals
     @staticmethod
-    def to_Dataset(
-        ds_train_L,
-        ds_train_U,
+    def to_dataset(
+        ds_train_labelled,
+        ds_train_un_labelled,
         ds_test,
         batch_size,
         buffer=1024,
@@ -414,8 +423,8 @@ class DataBuilder:
 
         Parameters
         ----------
-        - ds_train_L: Labelled training data.
-        - ds_train_U: Unlabelled training data.
+        - ds_train_labelled: Labelled training data.
+        - ds_train_un_labelled: Unlabelled training data.
         - ds_test: Testing data.
         - batch_size (int): Size of the batches for the datasets.
         - buffer (int): Buffer size for shuffling the dataset.
@@ -426,14 +435,14 @@ class DataBuilder:
         -------
         - Labelled and unlabelled training TensorFlow datasets and a testing dataset.
         """
-        ds_train_L = (
-            ds_train_L.shuffle(
+        ds_train_labelled = (
+            ds_train_labelled.shuffle(
                 buffer_size=buffer, seed=seed, reshuffle_each_iteration=True
             )
             .map(AudioTools.prepare_example, num_parallel_calls=DataBuilder.AUTOTUNE)
             .batch(batch_size=batch_size)
             # .prefetch(DataBuilder.AUTOTUNE)
-            if ds_train_L
+            if ds_train_labelled
             else None
         )
         ds_test = (
@@ -445,25 +454,25 @@ class DataBuilder:
             if ds_test
             else None
         )
-        ds_train_U = (
-            ds_train_U.shuffle(
+        ds_train_un_labelled = (
+            ds_train_un_labelled.shuffle(
                 buffer_size=buffer, seed=seed + 1, reshuffle_each_iteration=True
             )
             .map(AudioTools.prepare_example, num_parallel_calls=DataBuilder.AUTOTUNE)
             .batch(batch_size=batch_size)
             # .prefetch(DataBuilder.AUTOTUNE)
-            if ds_train_U
+            if ds_train_un_labelled
             else None
         )
 
         # make balanced
         if balance_dataset:
-            if ds_train_L:
-                ds_train_L = balance_sampler(ds_train_L, batch_size)
+            if ds_train_labelled:
+                ds_train_labelled = balance_sampler(ds_train_labelled, batch_size)
             # re sampling not required for unlabelled data.
-            # if ds_train_U:
-            #     ds_train_U = balance_sampler(ds_train_U, batch_size)
-        return ds_train_L, ds_train_U, ds_test
+            # if ds_train_un_labelled:
+            #     ds_train_un_labelled=balance_sampler(ds_train_un_labelled, batch_size)
+        return ds_train_labelled, ds_train_un_labelled, ds_test
 
 
 def balance_sampler(dataset, batch_size):
@@ -474,6 +483,7 @@ def balance_sampler(dataset, batch_size):
     https://www.tensorflow.org/guide/data#rejection_resampling.
     """
 
+    # pylint: disable=unused-argument
     def class_func(features, label):
         return label
 

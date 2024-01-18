@@ -15,7 +15,7 @@ class History(tf.keras.callbacks.History):
     """
 
     def __init__(self):
-        super(tf.keras.callbacks.History, self).__init__()
+        super().__init__()
         self.history = {}
 
     def on_epoch_end(self, epoch, logs=None):
@@ -32,8 +32,8 @@ class History(tf.keras.callbacks.History):
         """
         logs = logs or {}
         self.epoch.append(epoch)
-        for k, v in logs.items():
-            self.history.setdefault(k, []).append(v)
+        for key, value in logs.items():
+            self.history.setdefault(key, []).append(value)
 
 
 class Network:
@@ -51,6 +51,7 @@ class Network:
     - sequence_length (int): Length of the input sequences.
     """
 
+    # pylint: disable=too-many-arguments, too-many-locals
     def __init__(
         self,
         num_classes,
@@ -66,7 +67,7 @@ class Network:
         self._sequence_length = sequence_length
 
     @staticmethod
-    def _conv_block(
+    def conv_block(
         input_shape, num_features, l2_rate, dropout_rate=0.1, add_max_pool=True
     ):
         """Define a convolutional block for the neural network.
@@ -129,16 +130,16 @@ class Network:
           ready for training or inference.
         """
         inputs = tf.keras.layers.Input(shape=self._input_shape, name="audio_input")
-        x = __class__._conv_block(
+        x = __class__.conv_block(
             self._input_shape, 24, self._l2_rate, dropout_rate=self._dropout_rate
         )(inputs)
-        x = __class__._conv_block(
+        x = __class__.conv_block(
             x.shape[1:], 32, self._l2_rate, dropout_rate=self._dropout_rate
         )(x)
-        x = __class__._conv_block(
+        x = __class__.conv_block(
             x.shape[1:], 64, self._l2_rate, dropout_rate=self._dropout_rate
         )(x)
-        x = __class__._conv_block(
+        x = __class__.conv_block(
             x.shape[1:], 128, self._l2_rate, dropout_rate=self._dropout_rate
         )(x)
         x = tf.keras.layers.GlobalMaxPool2D()(x)
@@ -162,9 +163,11 @@ class Network:
         - tf.keras.Model: The evaluation model based on the primary network.
         """
         model = self.get_network()
-        input = tf.keras.layers.Input(shape=input_shape, name="audio_input")
-        output = tf.reduce_mean(tf.keras.layers.TimeDistributed(model)(input), axis=1)
-        return tf.keras.Model(input, output)
+        input_layer = tf.keras.layers.Input(shape=input_shape, name="audio_input")
+        output = tf.reduce_mean(
+            tf.keras.layers.TimeDistributed(model)(input_layer), axis=1
+        )
+        return tf.keras.Model(input_layer, output)
 
     @staticmethod
     def get_init_weights(num_classes, input_shape=(None, 64, 1), l2_rate=0.0001):
@@ -184,17 +187,17 @@ class Network:
         - List: A list of numpy arrays representing the initial weights of the model.
         """
         inputs = tf.keras.layers.Input(shape=input_shape, name="audio_input")
-        x = Network._conv_block(input_shape, 24, l2_rate)(inputs)
-        x = Network._conv_block(x.shape[1:], 32, l2_rate)(x)
-        x = Network._conv_block(x.shape[1:], 64, l2_rate)(x)
-        x = Network._conv_block(x.shape[1:], 128, l2_rate)(x)
+        x = Network.conv_block(input_shape, 24, l2_rate)(inputs)
+        x = Network.conv_block(x.shape[1:], 32, l2_rate)(x)
+        x = Network.conv_block(x.shape[1:], 64, l2_rate)(x)
+        x = Network.conv_block(x.shape[1:], 128, l2_rate)(x)
         x = tf.keras.layers.GlobalMaxPool2D()(x)
         outputs = tf.keras.layers.Dense(num_classes)(x)
         model = tf.keras.Model(inputs, outputs, name="audio_classifier")
         return model.get_weights()
 
 
-class PSL_Network(tf.keras.Model):
+class PslNetwork(tf.keras.Model):  # pylint: disable=abstract-method
     """A TensorFlow Keras model for Pseudo-Label Semi-supervised Learning (PSL).
 
     This class extends tf.keras.Model to implement a specific architecture and
@@ -210,14 +213,17 @@ class PSL_Network(tf.keras.Model):
     """
 
     def __init__(self, num_classes, aux_loss_weight=0.5, dropout_rate=0.1):
-        super(PSL_Network, self).__init__()
+        super().__init__()
         self.model = Network(
             num_classes=num_classes, dropout_rate=dropout_rate
         ).get_network()
         self.confidence = 0.5
         self.aux_loss_weight = aux_loss_weight
         self.history = History()
+        self.optimizer = None
+        self.loss_fn = None
 
+    # pylint: disable=arguments-differ
     def compile(self, optimizer):
         """Configure the model for training.
 
@@ -227,7 +233,7 @@ class PSL_Network(tf.keras.Model):
         ----------
         - optimizer: The optimizer to use for training the model.
         """
-        super(PSL_Network, self).compile()
+        super().compile()
         self.optimizer = optimizer
         self.loss_fn = tf.nn.sparse_softmax_cross_entropy_with_logits
 
@@ -256,6 +262,7 @@ class PSL_Network(tf.keras.Model):
             1 + np.cos(step / total_steps * np.pi)
         )
 
+    # pylint: disable=too-many-arguments, too-many-locals, arguments-differ
     def fit(
         self, train_datasets, epochs, c_round, rounds, num_batches=None, T=1, verbose=0
     ):
@@ -295,7 +302,8 @@ class PSL_Network(tf.keras.Model):
                 unit_name="step",
             )
             if verbose == 1:
-                tf.print("Epoch %d/%d" % (epoch + 1, epochs))
+                tf.print(f"Epoch {epoch+1}/{epochs}")
+            step = 0
             # Run train step on each batch
             for step, ((l_batch_x, l_batch_y), (u_batch_x, u_batch_y)) in enumerate(
                 zip(itertools.cycle(l_dataset), u_dataset)
@@ -313,19 +321,14 @@ class PSL_Network(tf.keras.Model):
             )
             if verbose == 2:
                 tf.print(
-                    "Epoch %d/%d\n%d/%d - %.1fs - loss: %.4f - accuracy: %.4f"
-                    % (
-                        epoch + 1,
-                        epochs,
-                        step,
-                        step,
-                        time.time() - start,
-                        epoch_loss / num_batches,
-                        float(0.0),
-                    )
+                    f"Epoch {epoch + 1}/{epochs}\n"
+                    f"{step}/{step} - {time.time() - start:.1f}s - "
+                    f"loss: {epoch_loss / num_batches:.4f} - "
+                    f"accuracy: {float(0.0):.4f}"
                 )
         return self.history
 
+    # pylint: disable=too-many-arguments, too-many-locals, arguments-differ
     # @tf.function
     def train_step(self, x, y, T=4):
         """Perform a single training step on a batch of data.
@@ -409,8 +412,8 @@ class PSL_Network(tf.keras.Model):
         -------
         - tf.keras.Model: The evaluation model based on the PSL network.
         """
-        input = tf.keras.layers.Input(shape=input_shape)
+        input_layer = tf.keras.layers.Input(shape=input_shape)
         output = tf.reduce_mean(
-            tf.keras.layers.TimeDistributed(self.model)(input), axis=1
+            tf.keras.layers.TimeDistributed(self.model)(input_layer), axis=1
         )
-        return tf.keras.Model(input, output)
+        return tf.keras.Model(input_layer, output)

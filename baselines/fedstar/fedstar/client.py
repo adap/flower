@@ -8,7 +8,7 @@ import flwr
 import tensorflow as tf
 
 from fedstar.data import DataBuilder
-from fedstar.model import Network, PSL_Network
+from fedstar.model import Network, PslNetwork
 
 os.environ["GRPC_VERBOSITY"] = "ERROR"
 
@@ -106,7 +106,7 @@ class AudioClient(flwr.client.NumPyClient):
         self.weights = parameters
         # Run Training Proccess
         if self.fedstar:
-            model = PSL_Network(
+            model = PslNetwork(
                 num_classes=self.num_classes, aux_loss_weight=self.aux_loss_weight
             )
             model.compile(
