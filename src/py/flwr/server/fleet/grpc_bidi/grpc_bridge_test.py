@@ -19,7 +19,10 @@ import time
 from threading import Thread
 from typing import List, Union
 
-from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+    ClientMessage,
+    ServerMessage,
+)
 from flwr.server.fleet.grpc_bidi.grpc_bridge import (
     GrpcBridge,
     GrpcBridgeClosed,

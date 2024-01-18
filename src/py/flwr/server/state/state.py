@@ -19,7 +19,7 @@ import abc
 from typing import List, Optional, Set
 from uuid import UUID
 
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 
 class State(abc.ABC):

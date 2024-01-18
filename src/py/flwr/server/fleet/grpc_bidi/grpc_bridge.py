@@ -20,7 +20,10 @@ from enum import Enum
 from threading import Condition
 from typing import Iterator, Optional
 
-from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+    ClientMessage,
+    ServerMessage,
+)
 
 
 @dataclass
