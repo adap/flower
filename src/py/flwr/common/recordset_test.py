@@ -271,6 +271,7 @@ def test_set_metrics_to_metricsrecord_with_and_without_keeping_input(
         (str, lambda x: int(x.flatten()[0])),  # str: int
         (str, lambda x: float(x.flatten()[0])),  # str: float
         (str, lambda x: x.flatten().tobytes()),  # str: bytes
+        (str, lambda x: x.flatten().astype("str").tolist()),  # str: List[str]
         (str, lambda x: x.flatten().astype("int").tolist()),  # str: List[int]
         (str, lambda x: x.flatten().astype("float").tolist()),  # str: List[float]
         (str, lambda x: [x.flatten().tobytes()]),  # str: List[bytes]
