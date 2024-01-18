@@ -116,7 +116,7 @@ def main():
     assert args.cid < NUM_CLIENTS
 
     use_mnist = args.mnist
-    # Download CIFAR-10 dataset and partition it
+    # Download dataset and partition it
     partitions, _ = prepare_dataset(use_mnist)
     trainset, valset = partitions[args.cid]
 
