@@ -24,8 +24,11 @@ from typing import Callable, Iterator
 import grpc
 from iterators import TimeoutIterator
 
-from flwr.proto import transport_pb2_grpc
-from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.proto import transport_pb2_grpc  # pylint: disable=E0611
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+    ClientMessage,
+    ServerMessage,
+)
 from flwr.server.client_manager import ClientManager
 from flwr.server.fleet.grpc_bidi.grpc_bridge import GrpcBridge, InsWrapper, ResWrapper
 from flwr.server.fleet.grpc_bidi.grpc_client_proxy import GrpcClientProxy

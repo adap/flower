@@ -24,7 +24,9 @@ import grpc
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
-from flwr.proto.transport_pb2_grpc import add_FlowerServiceServicer_to_server
+from flwr.proto.transport_pb2_grpc import (  # pylint: disable=E0611
+    add_FlowerServiceServicer_to_server,
+)
 from flwr.server.client_manager import ClientManager
 from flwr.server.driver.driver_servicer import DriverServicer
 from flwr.server.fleet.grpc_bidi.flower_service_servicer import FlowerServiceServicer
