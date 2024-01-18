@@ -20,7 +20,7 @@ fds = FederatedDataset(dataset="cifar10", partitioners={"train": 10})
 train = fds.load_full("train")
 test = fds.load_full("test")
 
-# using Numpy format
+# Using Numpy format
 train_np = train.with_format("numpy")
 test_np = test.with_format("numpy")
 x_train, y_train = train_np["img"], train_np["label"]
