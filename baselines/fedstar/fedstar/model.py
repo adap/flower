@@ -1,6 +1,5 @@
 import itertools
 import time
-import gc
 import numpy as np
 import tensorflow as tf
 
@@ -156,7 +155,6 @@ class PSL_Network(tf.keras.Model):
                     [l_batch_y, u_batch_y], 0
                 )
                 loss = self.train_step(x=batch_x, y=batch_y, T=T)
-                gc.collect()
                 progbar.update(current=step, values=[("loss", float(loss["loss"]))])
                 epoch_loss += float(loss["loss"])
             # Store result in history
@@ -179,7 +177,7 @@ class PSL_Network(tf.keras.Model):
                 )
         return self.history
 
-    @tf.function
+    # @tf.function
     def train_step(self, x, y, T=4):
         with tf.GradientTape() as tape:
             logits, labels = self.model(x, training=True), y
