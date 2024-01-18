@@ -17,7 +17,7 @@ def average_metrics(metrics):
         "f1": f1s,
     }
 
-
+# Define strategy
 strategy = fl.server.strategy.FedAvg(evaluate_metrics_aggregation_fn=average_metrics)
 
 
