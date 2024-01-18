@@ -166,6 +166,6 @@ def _call_client_proxy(
         evaluate_res_proto = serde.evaluate_res_to_proto(res=evaluate_res)
         return ClientMessage(evaluate_res=evaluate_res_proto)
 
-    raise Exception(
+    raise ValueError(
         "Unsupported instruction in ServerMessage, cannot deserialize from ProtoBuf"
     )
