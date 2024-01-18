@@ -19,7 +19,6 @@ from flwr.server.strategy import Strategy
 
 
 class FedAnalytics(Strategy):
-
     def initialize_parameters(
         self, client_manager: Optional[ClientManager] = None
     ) -> Optional[Parameters]:

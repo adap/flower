@@ -23,7 +23,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.X = X
 
     def fit(
-            self, parameters: List[np.ndarray], config: Dict[str, str]
+        self, parameters: List[np.ndarray], config: Dict[str, str]
     ) -> Tuple[List[np.ndarray], int, Dict]:
         hist_list = []
         # Execute query locally
