@@ -20,7 +20,12 @@ from typing import List, Optional, cast
 
 from flwr import common
 from flwr.common import serde
-from flwr.proto import driver_pb2, node_pb2, task_pb2, transport_pb2
+from flwr.proto import (  # pylint: disable=E0611
+    driver_pb2,
+    node_pb2,
+    task_pb2,
+    transport_pb2,
+)
 from flwr.server.client_proxy import ClientProxy
 
 from .grpc_driver import GrpcDriver
@@ -42,7 +47,7 @@ class DriverClientProxy(ClientProxy):
         self, ins: common.GetPropertiesIns, timeout: Optional[float]
     ) -> common.GetPropertiesRes:
         """Return client's properties."""
-        server_message_proto: transport_pb2.ServerMessage = (
+        server_message_proto: transport_pb2.ServerMessage = (  # pylint: disable=E1101
             serde.server_message_to_proto(
                 server_message=common.ServerMessage(get_properties_ins=ins)
             )
@@ -56,7 +61,7 @@ class DriverClientProxy(ClientProxy):
         self, ins: common.GetParametersIns, timeout: Optional[float]
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
-        server_message_proto: transport_pb2.ServerMessage = (
+        server_message_proto: transport_pb2.ServerMessage = (  # pylint: disable=E1101
             serde.server_message_to_proto(
                 server_message=common.ServerMessage(get_parameters_ins=ins)
             )
@@ -68,7 +73,7 @@ class DriverClientProxy(ClientProxy):
 
     def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
-        server_message_proto: transport_pb2.ServerMessage = (
+        server_message_proto: transport_pb2.ServerMessage = (  # pylint: disable=E1101
             serde.server_message_to_proto(
                 server_message=common.ServerMessage(fit_ins=ins)
             )
@@ -82,7 +87,7 @@ class DriverClientProxy(ClientProxy):
         self, ins: common.EvaluateIns, timeout: Optional[float]
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
-        server_message_proto: transport_pb2.ServerMessage = (
+        server_message_proto: transport_pb2.ServerMessage = (  # pylint: disable=E1101
             serde.server_message_to_proto(
                 server_message=common.ServerMessage(evaluate_ins=ins)
             )
@@ -99,25 +104,29 @@ class DriverClientProxy(ClientProxy):
         return common.DisconnectRes(reason="")  # Nothing to do here (yet)
 
     def _send_receive_msg(
-        self, server_message: transport_pb2.ServerMessage, timeout: Optional[float]
-    ) -> transport_pb2.ClientMessage:
-        task_ins = task_pb2.TaskIns(
+        self,
+        server_message: transport_pb2.ServerMessage,  # pylint: disable=E1101
+        timeout: Optional[float],
+    ) -> transport_pb2.ClientMessage:  # pylint: disable=E1101
+        task_ins = task_pb2.TaskIns(  # pylint: disable=E1101
             task_id="",
             group_id="",
             run_id=self.run_id,
-            task=task_pb2.Task(
-                producer=node_pb2.Node(
+            task=task_pb2.Task(  # pylint: disable=E1101
+                producer=node_pb2.Node(  # pylint: disable=E1101
                     node_id=0,
                     anonymous=True,
                 ),
-                consumer=node_pb2.Node(
+                consumer=node_pb2.Node(  # pylint: disable=E1101
                     node_id=self.node_id,
                     anonymous=self.anonymous,
                 ),
                 legacy_server_message=server_message,
             ),
         )
-        push_task_ins_req = driver_pb2.PushTaskInsRequest(task_ins_list=[task_ins])
+        push_task_ins_req = driver_pb2.PushTaskInsRequest(  # pylint: disable=E1101
+            task_ins_list=[task_ins]
+        )
 
         # Send TaskIns to Driver API
         push_task_ins_res = self.driver.push_task_ins(req=push_task_ins_req)
@@ -133,15 +142,15 @@ class DriverClientProxy(ClientProxy):
             start_time = time.time()
 
         while True:
-            pull_task_res_req = driver_pb2.PullTaskResRequest(
-                node=node_pb2.Node(node_id=0, anonymous=True),
+            pull_task_res_req = driver_pb2.PullTaskResRequest(  # pylint: disable=E1101
+                node=node_pb2.Node(node_id=0, anonymous=True),  # pylint: disable=E1101
                 task_ids=[task_id],
             )
 
             # Ask Driver API for TaskRes
             pull_task_res_res = self.driver.pull_task_res(req=pull_task_res_req)
 
-            task_res_list: List[task_pb2.TaskRes] = list(
+            task_res_list: List[task_pb2.TaskRes] = list(  # pylint: disable=E1101
                 pull_task_res_res.task_res_list
             )
             if len(task_res_list) == 1:
