@@ -78,6 +78,7 @@ Alternatively you can run all of it in one shell as follows:
 
 ```shell
 python server.py &
+# Wait for a few seconds to give the server enough time to start, then:
 python client.py &
 python client.py
 ```
