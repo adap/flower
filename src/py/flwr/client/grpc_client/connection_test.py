@@ -23,8 +23,11 @@ from unittest.mock import patch
 
 import grpc
 
-from flwr.proto.task_pb2 import Task, TaskRes
-from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+    ClientMessage,
+    ServerMessage,
+)
 from flwr.server.client_manager import SimpleClientManager
 from flwr.server.fleet.grpc_bidi.grpc_server import start_grpc_server
 

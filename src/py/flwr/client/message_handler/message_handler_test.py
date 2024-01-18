@@ -33,9 +33,14 @@ from flwr.common import (
     serde,
     typing,
 )
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
-from flwr.proto.transport_pb2 import ClientMessage, Code, ServerMessage, Status
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+    ClientMessage,
+    Code,
+    ServerMessage,
+    Status,
+)
 
 from .message_handler import handle, handle_control_message
 
