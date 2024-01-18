@@ -16,28 +16,38 @@
 
 
 from dataclasses import dataclass, field
-from typing import Dict, Optional, Union, get_args
+from typing import Dict, Optional, get_args
 
-from .typing import ConfigsScalar, ConfigsScalarList
-
-ConfigsRecordValues = Union[ConfigsScalar, ConfigsScalarList]
+from .typing import ConfigsRecordValues, ConfigsScalar
 
 
 @dataclass
 class ConfigsRecord:
     """Configs record."""
 
+    keep_input: bool
     data: Dict[str, ConfigsRecordValues] = field(default_factory=dict)
 
-    def __init__(self, configs_dict: Optional[Dict[str, ConfigsRecordValues]] = None):
+    def __init__(
+        self,
+        configs_dict: Optional[Dict[str, ConfigsRecordValues]] = None,
+        keep_input: bool = True,
+    ):
         """Construct a ConfigsRecord object.
 
         Parameters
         ----------
         configs_dict : Optional[Dict[str, ConfigsRecordValues]]
-            A dictionary that stores basic types (i.e. `str`, `int`, `float` as defined
-            in `MetricsScalar`) and list of such types (see `ConfigsScalarList`).
+            A dictionary that stores basic types (i.e. `str`, `int`, `float`, `bytes` as
+            defined in `ConfigsScalar`) and list of such types (see
+            `ConfigsScalarList`).
+        keep_input : bool (default: True)
+            A boolean indicating whether config passed should be deleted from the input
+            dictionary immediately after adding them to the record. When set
+            to True, the data is duplicated in memory. If memory is a concern, set
+            it to False.
         """
+        self.keep_input = keep_input
         self.data = {}
         if configs_dict:
             self.set_configs(configs_dict)
@@ -47,9 +57,10 @@ class ConfigsRecord:
 
         Parameters
         ----------
-        configs_dict : Optional[Dict[str, ConfigsRecordValues]]
-            A dictionary that stores basic types (i.e. `str`,`int`, `float` as defined
-            in `ConfigsRecordValues`) and list of such types (see `ConfigsScalarList`).
+        configs_dict : Dict[str, ConfigsRecordValues]
+            A dictionary that stores basic types (i.e. `str`,`int`, `float`, `bytes` as
+            defined in `ConfigsRecordValues`) and list of such types (see
+            `ConfigsScalarList`).
         """
         if any(not isinstance(k, str) for k in configs_dict.keys()):
             raise TypeError(f"Not all keys are of valid type. Expected {str}")
@@ -69,9 +80,19 @@ class ConfigsRecord:
             if isinstance(value, list):
                 # If your lists are large (e.g. 1M+ elements) this will be slow
                 # 1s to check 10M element list on a M2 Pro
-                # In such settings, you'd be better of treating such metric as
+                # In such settings, you'd be better of treating such config as
                 # an array and pass it to a ParametersRecord.
                 for list_value in value:
                     is_valid(list_value)
             else:
                 is_valid(value)
+
+        # Add configs to record
+        if self.keep_input:
+            # Copy
+            self.data = configs_dict.copy()
+        else:
+            # Add entries to dataclass without duplicating memory
+            for key in list(configs_dict.keys()):
+                self.data[key] = configs_dict[key]
+                del configs_dict[key]

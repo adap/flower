@@ -28,7 +28,13 @@ from .recordset_utils import (
     parameters_to_parametersrecord,
     parametersrecord_to_parameters,
 )
-from .typing import ConfigsScalar, ConfigsScalarList, NDArray, NDArrays, Parameters
+from .typing import (
+    ConfigsRecordValues,
+    MetricsRecordValues,
+    NDArray,
+    NDArrays,
+    Parameters,
+)
 
 
 def get_ndarrays() -> NDArrays:
@@ -160,7 +166,7 @@ def test_set_parameters_with_incorrect_types(
 )
 def test_set_metrics_to_metricsrecord_with_correct_types(
     key_type: Type[str],
-    value_fn: Callable[[NDArray], Union[int, float, List[int], List[float]]],
+    value_fn: Callable[[NDArray], MetricsRecordValues],
 ) -> None:
     """Test adding metrics of various types to a MetricsRecord."""
     m_record = MetricsRecord()
@@ -172,7 +178,11 @@ def test_set_metrics_to_metricsrecord_with_correct_types(
         {key_type(label): value_fn(arr) for label, arr in zip(labels, arrays)}
     )
 
+    # Add metric
     m_record.set_metrics(my_metrics)
+
+    # Check metrics are actually added
+    assert list(my_metrics.keys()) == list(m_record.data.keys())
 
 
 @pytest.mark.parametrize(
@@ -221,18 +231,54 @@ def test_set_metrics_to_metricsrecord_with_incorrect_types(
 
 
 @pytest.mark.parametrize(
+    "keep_input",
+    [
+        (True),
+        (False),
+    ],
+)
+def test_set_metrics_to_metricsrecord_with_and_without_keeping_input(
+    keep_input: bool,
+) -> None:
+    """Test keep_input functionality for MetricsRecord."""
+    m_record = MetricsRecord(keep_input=keep_input)
+
+    # constructing a valid input
+    labels = [1, 2.0]
+    arrays = get_ndarrays()
+    my_metrics = OrderedDict(
+        {str(label): arr.flatten().tolist() for label, arr in zip(labels, arrays)}
+    )
+
+    my_metrics_copy = my_metrics.copy()
+
+    # Add metric
+    m_record.set_metrics(my_metrics)
+
+    # Check metrics are actually added
+    # Check that input dict has been emptied when enabled such behaviour
+    if keep_input:
+        assert my_metrics == m_record.data
+    else:
+        assert my_metrics_copy == m_record.data
+        assert len(my_metrics) == 0
+
+
+@pytest.mark.parametrize(
     "key_type, value_fn",
     [
         (str, lambda x: str(x.flatten()[0])),  # str: str
         (str, lambda x: int(x.flatten()[0])),  # str: int
         (str, lambda x: float(x.flatten()[0])),  # str: float
+        (str, lambda x: x.flatten().tobytes()),  # str: bytes
         (str, lambda x: x.flatten().astype("int").tolist()),  # str: List[int]
         (str, lambda x: x.flatten().astype("float").tolist()),  # str: List[float]
+        (str, lambda x: [x.flatten().tobytes()]),  # str: List[bytes]
     ],
 )
 def test_set_configs_to_configsrecord_with_correct_types(
     key_type: Type[str],
-    value_fn: Callable[[NDArray], Union[ConfigsScalar, ConfigsScalarList]],
+    value_fn: Callable[[NDArray], ConfigsRecordValues],
 ) -> None:
     """Test adding configs of various types to a ConfigsRecord."""
     labels = [1, 2.0]
@@ -242,7 +288,10 @@ def test_set_configs_to_configsrecord_with_correct_types(
         {key_type(label): value_fn(arr) for label, arr in zip(labels, arrays)}
     )
 
-    _ = ConfigsRecord(my_configs)
+    c_record = ConfigsRecord(my_configs)
+
+    # check values are actually there
+    assert c_record.data == my_configs
 
 
 @pytest.mark.parametrize(
