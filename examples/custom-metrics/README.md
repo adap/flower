@@ -1,6 +1,6 @@
 # Flower Example using Custom Metrics
 
-This simple example demonstrate how to calculate custom metrics over multiple clients beyond the traditional ones available in the ML frameworks. In this case, it demonstrate the use of ready-available scikit-learn metrics: accuracy, recall, precision, and f1-score.
+This simple example demonstrates how to calculate custom metrics over multiple clients beyond the traditional ones available in the ML frameworks. In this case, it demonstrates the use of ready-available `scikit-learn` metrics: accuracy, recall, precision, and f1-score.
 
 Once both the test values (`y_test`) and the predictions (`y_pred`) are available on the client side (`client.py`), other metrics or custom ones are possible to be calculated.
 
