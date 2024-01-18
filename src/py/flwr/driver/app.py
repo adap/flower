@@ -172,8 +172,8 @@ def update_client_manager(
     """
     # Request for run_id
     run_id = driver.create_run(
-        driver_pb2.CreateRunRequest()
-    ).run_id  # pylint: disable=E1101
+        driver_pb2.CreateRunRequest()  # pylint: disable=E1101
+    ).run_id
 
     # Loop until the driver is disconnected
     registered_nodes: Dict[int, DriverClientProxy] = {}

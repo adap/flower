@@ -44,8 +44,8 @@ class DriverClientProxyTestCase(unittest.TestCase):
         self.driver.get_nodes.return_value = (
             driver_pb2.GetNodesResponse(  # pylint: disable=E1101
                 nodes=[
-                    node_pb2.Node(node_id=1, anonymous=False)
-                ]  # pylint: disable=E1101
+                    node_pb2.Node(node_id=1, anonymous=False)  # pylint: disable=E1101
+                ]
             )
         )
 

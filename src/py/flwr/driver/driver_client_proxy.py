@@ -105,8 +105,8 @@ class DriverClientProxy(ClientProxy):
 
     def _send_receive_msg(
         self,
-        server_message: transport_pb2.ServerMessage,
-        timeout: Optional[float],  # pylint: disable=E1101
+        server_message: transport_pb2.ServerMessage,  # pylint: disable=E1101
+        timeout: Optional[float],
     ) -> transport_pb2.ClientMessage:  # pylint: disable=E1101
         task_ins = task_pb2.TaskIns(  # pylint: disable=E1101
             task_id="",
@@ -124,9 +124,9 @@ class DriverClientProxy(ClientProxy):
                 legacy_server_message=server_message,
             ),
         )
-        push_task_ins_req = driver_pb2.PushTaskInsRequest(
+        push_task_ins_req = driver_pb2.PushTaskInsRequest(  # pylint: disable=E1101
             task_ins_list=[task_ins]
-        )  # pylint: disable=E1101
+        )
 
         # Send TaskIns to Driver API
         push_task_ins_res = self.driver.push_task_ins(req=push_task_ins_req)
