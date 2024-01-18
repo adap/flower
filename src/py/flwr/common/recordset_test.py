@@ -27,7 +27,7 @@ from .recordset_utils import (
     parameters_to_parametersrecord,
     parametersrecord_to_parameters,
 )
-from .typing import NDArray, NDArrays, Parameters
+from .typing import MetricsRecordValues, NDArray, NDArrays, Parameters
 
 
 def get_ndarrays() -> NDArrays:
@@ -159,7 +159,7 @@ def test_set_parameters_with_incorrect_types(
 )
 def test_set_metrics_to_metricsrecord_with_correct_types(
     key_type: Type[str],
-    value_fn: Callable[[NDArray], Union[int, float, List[int], List[float]]],
+    value_fn: Callable[[NDArray], MetricsRecordValues],
 ) -> None:
     """Test adding metrics of various types to a MetricsRecord."""
     m_record = MetricsRecord()
@@ -171,7 +171,11 @@ def test_set_metrics_to_metricsrecord_with_correct_types(
         {key_type(label): value_fn(arr) for label, arr in zip(labels, arrays)}
     )
 
+    # Add metric
     m_record.set_metrics(my_metrics)
+
+    # Check metrics are actually added
+    assert list(my_metrics.keys()) == list(m_record.data.keys())
 
 
 @pytest.mark.parametrize(
@@ -217,3 +221,37 @@ def test_set_metrics_to_metricsrecord_with_incorrect_types(
 
     with pytest.raises(TypeError):
         m_record.set_metrics(my_metrics)  # type: ignore
+
+
+@pytest.mark.parametrize(
+    "keep_input",
+    [
+        (True),
+        (False),
+    ],
+)
+def test_set_metrics_to_metricsrecord_with_and_without_keeping_input(
+    keep_input: bool,
+) -> None:
+    """Test keep_input functionality for MetricsRecord."""
+    m_record = MetricsRecord(keep_input=keep_input)
+
+    # constructing a valid input
+    labels = [1, 2.0]
+    arrays = get_ndarrays()
+    my_metrics = OrderedDict(
+        {str(label): arr.flatten().tolist() for label, arr in zip(labels, arrays)}
+    )
+
+    my_metrics_copy = my_metrics.copy()
+
+    # Add metric
+    m_record.set_metrics(my_metrics)
+
+    # Check metrics are actually added
+    # Check that input dict has been emptied when enabled such behaviour
+    if keep_input:
+        assert my_metrics == m_record.data
+    else:
+        assert my_metrics_copy == m_record.data
+        assert len(my_metrics) == 0
