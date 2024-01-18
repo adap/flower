@@ -1,7 +1,7 @@
 import flwr as fl
 import numpy as np
 
-
+# Define metrics aggregation function
 def average_metrics(metrics):
     accuracies_tf = np.mean([metric["accuracy"] for _, metric in metrics])
     accuracies = np.mean([metric["acc"] for _, metric in metrics])
