@@ -38,9 +38,15 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
 )
 from flwr.common.logger import log
-from flwr.proto.driver_pb2_grpc import add_DriverServicer_to_server
-from flwr.proto.fleet_pb2_grpc import add_FleetServicer_to_server
-from flwr.proto.transport_pb2_grpc import add_FlowerServiceServicer_to_server
+from flwr.proto.driver_pb2_grpc import (  # pylint: disable=E0611
+    add_DriverServicer_to_server,
+)
+from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
+    add_FleetServicer_to_server,
+)
+from flwr.proto.transport_pb2_grpc import (  # pylint: disable=E0611
+    add_FlowerServiceServicer_to_server,
+)
 from flwr.server.client_manager import ClientManager, SimpleClientManager
 from flwr.server.driver.driver_servicer import DriverServicer
 from flwr.server.fleet.grpc_bidi.driver_client_manager import DriverClientManager

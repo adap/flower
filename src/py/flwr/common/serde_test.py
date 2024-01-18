@@ -18,7 +18,7 @@
 from typing import Dict, Union, cast
 
 from flwr.common import typing
-from flwr.proto import transport_pb2 as pb2
+from flwr.proto import transport_pb2 as pb2  # pylint: disable=E0611
 
 from .serde import (
     named_values_from_proto,
@@ -50,8 +50,8 @@ def test_serialisation_deserialisation() -> None:
 def test_status_to_proto() -> None:
     """Test status message (de-)serialization."""
     # Prepare
-    code_msg = pb2.Code.OK
-    status_msg = pb2.Status(code=code_msg, message="Success")
+    code_msg = pb2.Code.OK  # pylint: disable=E1101
+    status_msg = pb2.Status(code=code_msg, message="Success")  # pylint: disable=E1101
 
     code = typing.Code.OK
     status = typing.Status(code=code, message="Success")
@@ -66,8 +66,8 @@ def test_status_to_proto() -> None:
 def test_status_from_proto() -> None:
     """Test status message (de-)serialization."""
     # Prepare
-    code_msg = pb2.Code.OK
-    status_msg = pb2.Status(code=code_msg, message="Success")
+    code_msg = pb2.Code.OK  # pylint: disable=E1101
+    status_msg = pb2.Status(code=code_msg, message="Success")  # pylint: disable=E1101
 
     code = typing.Code.OK
     status = typing.Status(code=code, message="Success")
