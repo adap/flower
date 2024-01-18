@@ -39,7 +39,7 @@ class ConfigsRecord:
         ----------
         configs_dict : Optional[Dict[str, ConfigsRecordValues]]
             A dictionary that stores basic types (i.e. `str`, `int`, `float`, `bytes` as
-            defined in `ConfigsScalar`) and list of such types (see
+            defined in `ConfigsScalar`) and lists of such types (see
             `ConfigsScalarList`).
         keep_input : bool (default: True)
             A boolean indicating whether config passed should be deleted from the input
