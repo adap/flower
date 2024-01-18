@@ -14,16 +14,13 @@
 # ==============================================================================
 """RecordSet."""
 
+
 from dataclasses import dataclass, field
 from typing import Dict
 
+from .configsrecord import ConfigsRecord
 from .metricsrecord import MetricsRecord
 from .parametersrecord import ParametersRecord
-
-
-@dataclass
-class ConfigsRecord:
-    """Configs record."""
 
 
 @dataclass

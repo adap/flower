@@ -20,6 +20,7 @@ from typing import Callable, Dict, List, OrderedDict, Type, Union
 import numpy as np
 import pytest
 
+from .configsrecord import ConfigsRecord
 from .metricsrecord import MetricsRecord
 from .parameter import ndarrays_to_parameters, parameters_to_ndarrays
 from .parametersrecord import Array, ParametersRecord
@@ -27,7 +28,13 @@ from .recordset_utils import (
     parameters_to_parametersrecord,
     parametersrecord_to_parameters,
 )
-from .typing import MetricsRecordValues, NDArray, NDArrays, Parameters
+from .typing import (
+    ConfigsRecordValues,
+    MetricsRecordValues,
+    NDArray,
+    NDArrays,
+    Parameters,
+)
 
 
 def get_ndarrays() -> NDArrays:
@@ -255,3 +262,74 @@ def test_set_metrics_to_metricsrecord_with_and_without_keeping_input(
     else:
         assert my_metrics_copy == m_record.data
         assert len(my_metrics) == 0
+
+
+@pytest.mark.parametrize(
+    "key_type, value_fn",
+    [
+        (str, lambda x: str(x.flatten()[0])),  # str: str
+        (str, lambda x: int(x.flatten()[0])),  # str: int
+        (str, lambda x: float(x.flatten()[0])),  # str: float
+        (str, lambda x: x.flatten().tobytes()),  # str: bytes
+        (str, lambda x: x.flatten().astype("str").tolist()),  # str: List[str]
+        (str, lambda x: x.flatten().astype("int").tolist()),  # str: List[int]
+        (str, lambda x: x.flatten().astype("float").tolist()),  # str: List[float]
+        (str, lambda x: [x.flatten().tobytes()]),  # str: List[bytes]
+    ],
+)
+def test_set_configs_to_configsrecord_with_correct_types(
+    key_type: Type[str],
+    value_fn: Callable[[NDArray], ConfigsRecordValues],
+) -> None:
+    """Test adding configs of various types to a ConfigsRecord."""
+    labels = [1, 2.0]
+    arrays = get_ndarrays()
+
+    my_configs = OrderedDict(
+        {key_type(label): value_fn(arr) for label, arr in zip(labels, arrays)}
+    )
+
+    c_record = ConfigsRecord(my_configs)
+
+    # check values are actually there
+    assert c_record.data == my_configs
+
+
+@pytest.mark.parametrize(
+    "key_type, value_fn",
+    [
+        (str, lambda x: x),  # str: NDArray (supported: unsupported)
+        (
+            str,
+            lambda x: {str(v): v for v in x.flatten()},
+        ),  # str: dict[str: float] (supported: unsupported)
+        (
+            str,
+            lambda x: [{str(v): v for v in x.flatten()}],
+        ),  # str: List[dict[str: float]] (supported: unsupported)
+        (
+            int,
+            lambda x: x.flatten().tolist(),
+        ),  # int: List[str] (unsupported: supported)
+        (
+            float,
+            lambda x: x.flatten().tolist(),
+        ),  # float: List[int] (unsupported: supported)
+    ],
+)
+def test_set_configs_to_configsrecord_with_incorrect_types(
+    key_type: Type[Union[str, int, float]],
+    value_fn: Callable[[NDArray], Union[NDArray, Dict[str, NDArray], List[float]]],
+) -> None:
+    """Test adding configs of various unsupported types to a ConfigsRecord."""
+    m_record = ConfigsRecord()
+
+    labels = [1, 2.0]
+    arrays = get_ndarrays()
+
+    my_metrics = OrderedDict(
+        {key_type(label): value_fn(arr) for label, arr in zip(labels, arrays)}
+    )
+
+    with pytest.raises(TypeError):
+        m_record.set_configs(my_metrics)  # type: ignore
