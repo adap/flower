@@ -175,7 +175,7 @@ def test_set_metrics_to_metricsrecord_with_correct_types(
     m_record.set_metrics(my_metrics)
 
     # Check metrics are actually added
-    assert list(my_metrics.keys()) == list(m_record.data.keys())
+    assert my_metrics == m_record.data
 
 
 @pytest.mark.parametrize(
