@@ -28,6 +28,7 @@ This will create a new directory called `custom-metrics` containing the followin
 -- requirements.txt
 -- client.py
 -- server.py
+-- run.sh
 -- README.md
 ```
 
