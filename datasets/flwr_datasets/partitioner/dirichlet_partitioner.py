@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ class DirichletPartitioner(Partitioner):  # pylint: disable=R0902
         The minimum number of samples that each partitions will have (the sampling
         process is repeated if any partition is too small).
     self_balancing : bool
-        Weather assign further samples to a partition after the number of samples
+        Whether assign further samples to a partition after the number of samples
         exceeded the average number of samples per partition. (True in the original
         paper's code although not mentioned in paper itself).
     shuffle: bool
