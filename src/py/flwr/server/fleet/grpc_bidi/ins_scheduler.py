@@ -23,9 +23,12 @@ from typing import Dict, List, Optional
 from flwr.client.message_handler.task_handler import configure_task_res
 from flwr.common import EvaluateRes, FitRes, GetParametersRes, GetPropertiesRes, serde
 from flwr.common.logger import log
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
-from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+    ClientMessage,
+    ServerMessage,
+)
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.state import State, StateFactory
 
