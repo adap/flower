@@ -27,7 +27,7 @@ x_train, y_train = train_np["img"], train_np["label"]
 x_test, y_test = test_np["img"], test_np["label"]
 
 
-# method for extra learning metrics calculation
+# Method for extra learning metrics calculation
 def eval_learning(y_test, y_pred):
     acc = accuracy_score(y_test, y_pred)
     rec = recall_score(
