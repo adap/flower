@@ -63,7 +63,7 @@ class CifarClient(fl.client.NumPyClient):
     def evaluate(self, parameters, config):
         """Evaluate parameters on the locally held test set."""
         # Update local model parameters
-        model = self.set_parameters(parameters)
+        model = self.set_parameters(parameters, config['use_model'])
 
         # Get config values
         steps: int = config["val_steps"]
@@ -78,7 +78,7 @@ class CifarClient(fl.client.NumPyClient):
 def client_dry_run(device: str = "cpu"):
     """Weak tests to check whether all client methods are working as expected."""
 
-    model = utils.load_alexnet(classes=10)
+    model = utils.load_efficientnet(classes=10)
     trainset, testset = utils.load_partition(0)
     trainset = torch.utils.data.Subset(trainset, range(10))
     testset = torch.utils.data.Subset(testset, range(10))
@@ -126,15 +126,6 @@ def main() -> None:
         default=False,
         required=False,
         help="Set to true to use GPU. Default: False",
-    )
-
-    parser.add_argument(
-        "--dp",
-        type=str,
-        default="efficientnet",
-        required=False,
-        help="Use either Efficientnet or Alexnet models. \
-                 If you want to achieve differential privacy, please use the Alexnet model",
     )
 
     args = parser.parse_args()
