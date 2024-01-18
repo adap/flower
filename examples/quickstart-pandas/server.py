@@ -53,8 +53,6 @@ class FedAnalytics(Strategy):
         ndarr = np.concatenate(
             (["Length:"], length_agg_hist, ["Width:"], width_agg_hist)
         )
-        print("ndarr in fit")
-        print(ndarr)
         return ndarrays_to_parameters(ndarr), {}
 
     def evaluate(
