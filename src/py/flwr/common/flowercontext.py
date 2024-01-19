@@ -34,7 +34,7 @@ class Metadata:
         A string that encodes a action to be executed on
         the receiving end.
     group_id : str
-        An identifier for grouping runs. In some settings
+        An identifier for grouping tasks. In some settings
         this is used as the FL round.
     ttl : str
         Time-to-live for this task.
