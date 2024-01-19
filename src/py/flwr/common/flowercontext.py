@@ -37,7 +37,7 @@ class Metadata:
         An identifier for grouping runs. In some settings
         this is used as the FL round.
     ttl : str
-        Time-to-live for this run.
+        Time-to-live for this task.
     """
 
     task_id: str
