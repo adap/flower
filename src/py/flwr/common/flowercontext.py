@@ -62,7 +62,7 @@ class FlowerContext:
         parameter, or to the client to perform a certain task)
     local : RecordSet
         Holds record added by the current entity and that will stay local.
-        This means that the data it holds will never leave the system it's running fom.
+        This means that the data it holds will never leave the system it's running from.
         This can be used as an intermediate storage or scratchpad when
         executing middleware layers. It can also be used as a memory to access
         at different points during the lifecycle of this entity (e.g. across
