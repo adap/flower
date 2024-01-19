@@ -64,7 +64,7 @@ def parametersrecord_to_parameters(
 
         if not parameters.tensor_type:
             # Setting from first array in record. Recall the warning in the docstrings
-            # of this function. 
+            # of this function.
             parameters.tensor_type = record[key].stype
 
         if not keep_input:
@@ -173,13 +173,15 @@ def _recordset_to_fit_or_evaluate_ins_components(
     return parameters, config_dict
 
 
-def _fit_or_evaluate_ins_to_recordset(ins: Union[FitIns, EvaluateIns]) -> RecordSet:
+def _fit_or_evaluate_ins_to_recordset(
+    ins: Union[FitIns, EvaluateIns], keep_input: bool
+) -> RecordSet:
     recordset = RecordSet()
 
     ins_str = "fitins" if isinstance(ins, FitIns) else "evaluateins"
     recordset.set_parameters(
         name=f"{ins_str}.parameters",
-        record=parameters_to_parametersrecord(ins.parameters),
+        record=parameters_to_parametersrecord(ins.parameters, keep_input=keep_input),
     )
 
     config = _check_mapping_from_scalar_to_configsrecordstypes(ins.config)
@@ -195,12 +197,14 @@ def _embed_status_into_recordset(
         "code": int(status.code.value),
         "message": status.message,
     }
-    recordset.set_metrics(f"{res_str}.status", record=ConfigsRecord(status_dict))
+    # we add it to a `ConfigsRecord`` because the `status.message`` is a string
+    # and `str` values aren't supported in `MetricsRecords`
+    recordset.set_configs(f"{res_str}.status", record=ConfigsRecord(status_dict))
     return recordset
 
 
 def _extract_status_from_recordset(res_str: str, recordset: RecordSet) -> Status:
-    status = recordset.get_metrics(f"{res_str}.status")
+    status = recordset.get_configs(f"{res_str}.status")
     code = cast(int, status["code"])
     return Status(code=Code(code), message=str(status["message"]))
 
@@ -216,20 +220,20 @@ def recordset_to_fit_ins(recordset: RecordSet, keep_input: bool) -> FitIns:
     return FitIns(parameters=parameters, config=config)
 
 
-def fit_ins_to_recordset(fitins: FitIns) -> RecordSet:
+def fit_ins_to_recordset(fitins: FitIns, keep_input: bool) -> RecordSet:
     """Construct a RecordSet from a FitIns object."""
-    return _fit_or_evaluate_ins_to_recordset(fitins)
+    return _fit_or_evaluate_ins_to_recordset(fitins, keep_input)
 
 
-def recordset_to_fit_res(recordset: RecordSet) -> FitRes:
+def recordset_to_fit_res(recordset: RecordSet, keep_input: bool) -> FitRes:
     """Derive FitRes from a RecordSet object."""
     ins_str = "fitres"
     parameters = parametersrecord_to_parameters(
-        recordset.get_parameters(f"{ins_str}.parameters")
+        recordset.get_parameters(f"{ins_str}.parameters"), keep_input=keep_input
     )
 
     num_examples = cast(
-        int, recordset.get_metrics(f"{ins_str}.num_examples")["num_exampes"]
+        int, recordset.get_metrics(f"{ins_str}.num_examples")["num_examples"]
     )
     metrics_record = recordset.get_metrics(f"{ins_str}.metrics")
 
@@ -241,7 +245,7 @@ def recordset_to_fit_res(recordset: RecordSet) -> FitRes:
     )
 
 
-def fit_res_to_recordset(fitres: FitRes) -> RecordSet:
+def fit_res_to_recordset(fitres: FitRes, keep_input: bool) -> RecordSet:
     """Construct a RecordSet from a FitRes object."""
     recordset = RecordSet()
 
@@ -255,7 +259,7 @@ def fit_res_to_recordset(fitres: FitRes) -> RecordSet:
     )
     recordset.set_parameters(
         name=f"{res_str}.parameters",
-        record=parameters_to_parametersrecord(fitres.parameters),
+        record=parameters_to_parametersrecord(fitres.parameters, keep_input),
     )
 
     # status
@@ -275,9 +279,9 @@ def recordset_to_evaluate_ins(recordset: RecordSet, keep_input: bool) -> Evaluat
     return EvaluateIns(parameters=parameters, config=config)
 
 
-def evaluate_ins_to_recordset(evaluateins: EvaluateIns) -> RecordSet:
+def evaluate_ins_to_recordset(evaluateins: EvaluateIns, keep_input: bool) -> RecordSet:
     """Construct a RecordSet from a EvaluateIns object."""
-    return _fit_or_evaluate_ins_to_recordset(evaluateins)
+    return _fit_or_evaluate_ins_to_recordset(evaluateins, keep_input)
 
 
 def recordset_to_evaluate_res(recordset: RecordSet) -> EvaluateRes:
@@ -287,7 +291,7 @@ def recordset_to_evaluate_res(recordset: RecordSet) -> EvaluateRes:
     loss = cast(int, recordset.get_metrics(f"{ins_str}.loss")["loss"])
 
     num_examples = cast(
-        int, recordset.get_metrics(f"{ins_str}.num_examples")["num_exampes"]
+        int, recordset.get_metrics(f"{ins_str}.num_examples")["num_examples"]
     )
     metrics_record = recordset.get_metrics(f"{ins_str}.metrics")
 
