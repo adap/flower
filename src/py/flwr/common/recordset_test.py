@@ -14,7 +14,7 @@
 # ==============================================================================
 """RecordSet tests."""
 
-
+from functools import partial
 from typing import Callable, Dict, List, OrderedDict, Type, Union
 
 import numpy as np
@@ -24,12 +24,19 @@ from .configsrecord import ConfigsRecord
 from .metricsrecord import MetricsRecord
 from .parameter import ndarrays_to_parameters, parameters_to_ndarrays
 from .parametersrecord import Array, ParametersRecord
+from .recordset import RecordSet
 from .recordset_utils import (
+    evaluate_ins_to_recordset,
+    fit_ins_to_recordset,
     parameters_to_parametersrecord,
     parametersrecord_to_parameters,
+    recordset_to_evaluate_ins,
+    recordset_to_fit_ins,
 )
 from .typing import (
     ConfigsRecordValues,
+    EvaluateIns,
+    FitIns,
     MetricsRecordValues,
     NDArray,
     NDArrays,
@@ -333,3 +340,55 @@ def test_set_configs_to_configsrecord_with_incorrect_types(
 
     with pytest.raises(TypeError):
         m_record.set_configs(my_metrics)  # type: ignore
+
+
+def _get_recordset_compatible_with_legacy_ins(ins_str: str) -> RecordSet:
+    recordset = RecordSet()
+
+    # add a ParametersRecord
+    array_dict = OrderedDict(
+        {str(i): ndarray_to_array(ndarray) for i, ndarray in enumerate(get_ndarrays())}
+    )
+    recordset.set_parameters(
+        f"{ins_str}.parameters", record=ParametersRecord(array_dict)
+    )
+
+    # add a ConfigsRecord
+    recordset.set_configs(
+        f"{ins_str}.config",
+        record=ConfigsRecord({"a": 1, "b": 2.0, "c": np.eye(2).flatten().tobytes()}),
+    )
+
+    return recordset
+
+
+@pytest.mark.parametrize(
+    "ins_str, do_func, undo_func",
+    [
+        (
+            "fitins",
+            partial(recordset_to_fit_ins, keep_input=True),
+            fit_ins_to_recordset,
+        ),
+        (
+            "evaluateins",
+            partial(recordset_to_evaluate_ins, keep_input=True),
+            evaluate_ins_to_recordset,
+        ),
+    ],
+)
+def test_recordset_to_fit_or_evaluate_ins(
+    ins_str: str,
+    do_func: Callable[[RecordSet], Union[FitIns, EvaluateIns]],
+    undo_func: Callable[[Union[FitIns, EvaluateIns]], RecordSet],
+) -> None:
+    """."""
+    valid_record_set = _get_recordset_compatible_with_legacy_ins(ins_str)
+
+    ins = do_func(valid_record_set)
+
+    reverted_record_set = undo_func(ins)
+
+    assert valid_record_set.configs == reverted_record_set.configs
+    # TODO: how to check parameters consistency (given than Array->Parameters is
+    # a destructive process ? (i.e. different metadata encoded))
