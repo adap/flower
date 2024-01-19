@@ -94,4 +94,4 @@ To load your progress, you simply append the following lines to your code. Note 
     state_dict_ndarrays = [v.cpu().numpy() for v in net.state_dict().values()]
     parameters = fl.common.ndarrays_to_parameters(state_dict_ndarrays)
 
-Return this parameter object wherever necessary, such as in the `initial_parameters` when defining a `Strategy`.
+Return/use this object of type ``Parameters`` wherever necessary, such as in the ``initial_parameters`` when defining a ``Strategy``.
