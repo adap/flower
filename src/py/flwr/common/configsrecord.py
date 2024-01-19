@@ -96,3 +96,7 @@ class ConfigsRecord:
             for key in list(configs_dict.keys()):
                 self.data[key] = configs_dict[key]
                 del configs_dict[key]
+
+    def __getitem__(self, key: str) -> ConfigsRecordValues:
+        """Retrieve an element stored in record."""
+        return self.data[key]

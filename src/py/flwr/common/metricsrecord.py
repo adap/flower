@@ -94,3 +94,7 @@ class MetricsRecord:
             for key in list(metrics_dict.keys()):
                 self.data[key] = metrics_dict[key]
                 del metrics_dict[key]
+
+    def __getitem__(self, key: str) -> MetricsRecordValues:
+        """Retrieve an element stored in record."""
+        return self.data[key]

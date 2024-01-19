@@ -108,3 +108,7 @@ class ParametersRecord:
             for key in list(array_dict.keys()):
                 self.data[key] = array_dict[key]
                 del array_dict[key]
+
+    def __getitem__(self, key: str) -> Array:
+        """Retrieve an element stored in record."""
+        return self.data[key]
