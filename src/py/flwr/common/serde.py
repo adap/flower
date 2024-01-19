@@ -17,12 +17,13 @@
 
 from typing import Any, Dict, List, MutableMapping, OrderedDict, cast
 
+# pylint: disable=E0611
 from flwr.proto.recordset_pb2 import Array as ArrayProto
 from flwr.proto.recordset_pb2 import ConfigsRecord as ConfigsRecordProto
 from flwr.proto.recordset_pb2 import MetricsRecord as MetricsRecordProto
 from flwr.proto.recordset_pb2 import ParametersRecord as ParametersRecordProto
-from flwr.proto.task_pb2 import Value  # pylint: disable=E0611
-from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+from flwr.proto.task_pb2 import Value
+from flwr.proto.transport_pb2 import (
     ClientMessage,
     Code,
     Parameters,
@@ -32,6 +33,7 @@ from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     Status,
 )
 
+# pylint: enable=E0611
 from . import typing
 from .configsrecord import ConfigsRecord
 from .metricsrecord import MetricsRecord

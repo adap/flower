@@ -17,13 +17,15 @@
 
 from typing import Dict, OrderedDict, Union, cast
 
-from flwr.common import typing
-from flwr.proto import transport_pb2 as pb2  # pylint: disable=E0611
+# pylint: disable=E0611
+from flwr.proto import transport_pb2 as pb2
 from flwr.proto.recordset_pb2 import Array as ArrayProto
 from flwr.proto.recordset_pb2 import ConfigsRecord as ConfigsRecordProto
 from flwr.proto.recordset_pb2 import MetricsRecord as MetricsRecordProto
 from flwr.proto.recordset_pb2 import ParametersRecord as ParametersRecordProto
 
+# pylint: enable=E0611
+from . import typing
 from .configsrecord import ConfigsRecord
 from .metricsrecord import MetricsRecord
 from .parametersrecord import Array, ParametersRecord
