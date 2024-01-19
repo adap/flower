@@ -26,25 +26,25 @@ class Metadata:
 
     Parameters
     ----------
-    task_id : str
-        An identifier for the current task.
     run_id : int
         An identifier for the current run.
-    task_type : str
-        A string that encodes a action to be executed on
-        the receiving end.
+    task_id : str
+        An identifier for the current task.
     group_id : str
         An identifier for grouping tasks. In some settings
         this is used as the FL round.
     ttl : str
         Time-to-live for this task.
+    task_type : str
+        A string that encodes the action to be executed on
+        the receiving end.
     """
 
-    task_id: str
     run_id: int
-    task_type: str
+    task_id: str
     group_id: str
     ttl: str
+    task_type: str
 
 
 @dataclass
