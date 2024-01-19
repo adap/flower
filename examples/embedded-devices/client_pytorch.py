@@ -74,7 +74,9 @@ def test(net, testloader, device):
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
     with torch.no_grad():
-        for images, labels in tqdm(testloader):
+        for batch in tqdm(testloader):
+            batch = list(batch.values())
+            images, labels = batch[0], batch[1]
             outputs = net(images.to(device))
             labels = labels.to(device)
             loss += criterion(outputs, labels).item()
