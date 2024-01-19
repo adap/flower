@@ -105,29 +105,28 @@ class Client(Process):
                         )
                     ],
                 )
-            except RuntimeError as e:
-                print(e)
+            except RuntimeError as runtime_error:
+                print(runtime_error)
 
 
+# pylint: disable=unsubscriptable-object
 def distribute_gpus(num_clients, client_memory=1024):
     """To Use GPU on client side a high memory or multiple gpu's might required.
 
     Uncomment the lines accordingle to use it
-    """
-    """Provide gpu id list, the current list is for 1 gpu.
+
+    Provide gpu id list, the current list is for 1 gpu.
 
     For 2 gpu's the list will be gpus = ["0","1"]
     """
     # gpus = tf.config.list_physical_devices("GPU")
     gpus = None
-    clients_gpu = [None] * num_clients
     if not gpus:
-        return clients_gpu
+        clients_gpu = [None] * num_clients
     else:
-        """Based on your gpu's memory define list accordingly.
+        # Based on your gpu's memory define list accordingly.
 
-        Currently it defines to use 5000 MB of gpu vram from both GPU's
-        """
+        # Currently it defines to use 5000 MB of gpu vram from both GPU's
         gpu_free_mem = [5000]  # set the gpu limit based on your system.
         for client_id in range(num_clients):
             gpu_id = gpu_free_mem.index(max(gpu_free_mem))
@@ -139,6 +138,7 @@ def distribute_gpus(num_clients, client_memory=1024):
     return clients_gpu
 
 
+# pylint: disable=expression-not-assigned
 @hydra.main(config_path="conf", config_name="table3", version_base=None)
 def main(cfg):
     """Initialize and run a multi-processing client setup using Hydra configuration.

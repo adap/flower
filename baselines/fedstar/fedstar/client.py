@@ -15,12 +15,15 @@ os.environ["GRPC_VERBOSITY"] = "ERROR"
 LOG_LEVEL = logging.ERROR
 
 
-class AudioClient(flwr.client.NumPyClient):
+class AudioClient(
+    flwr.client.NumPyClient
+):  # pylint: disable=too-many-instance-attributes
     """AudioClient class act as a client for FedStar implementation.
 
     It extends NumpyClient feature because flower internally requires a NumpyClient.
     """
 
+    # pylint: disable=too-many-arguments, too-many-locals
     def __init__(
         self,
         client_id,
@@ -51,8 +54,8 @@ class AudioClient(flwr.client.NumPyClient):
         # print(self.parent_path)
         # Load Clients Data
         (
-            self.train_L,
-            self.train_U,
+            self.train_labelled,
+            self.train_unlabelled,
             self.num_classes,
             self.num_batches,
         ) = DataBuilder.load_sharded_dataset(
@@ -70,7 +73,9 @@ class AudioClient(flwr.client.NumPyClient):
             balance_dataset=balance_dataset,
             seed=seed,
         )
-        self.num_examples_train = self.num_batches * batch_size if self.train_L else 0
+        self.num_examples_train = (
+            self.num_batches * batch_size if self.train_labelled else 0
+        )
         # Local Variables Initialize
         self.local_train_round = 0
         self.local_evaluate_round = 0
@@ -92,8 +97,8 @@ class AudioClient(flwr.client.NumPyClient):
                 server_address=self.server_address, client=self
             )
             print("Client Shutdown.")
-        except RuntimeError as e:
-            print(e)
+        except RuntimeError as runtime_error:
+            print(runtime_error)
         return 0
 
     def get_parameters(self, config):
@@ -114,7 +119,7 @@ class AudioClient(flwr.client.NumPyClient):
             )
             model.set_weights(parameters)
             history = model.fit(
-                (self.train_L, self.train_U),
+                (self.train_labelled, self.train_unlabelled),
                 num_batches=self.num_batches,
                 epochs=int(config["epochs"]),
                 c_round=int(config["c_round"]),
@@ -132,7 +137,7 @@ class AudioClient(flwr.client.NumPyClient):
             )
             model.set_weights(parameters)
             history = model.fit(
-                self.train_L,
+                self.train_labelled,
                 batch_size=int(config["batch_size"]),
                 epochs=int(config["epochs"]),
                 verbose=self.verbose,
@@ -162,8 +167,8 @@ class AudioClient(flwr.client.NumPyClient):
 def set_logger_level():
     """Set the logging level for the 'flower' logger."""
     if "flower" in [
-        logging.getLogger(name).__repr__()[8:].split(" ")[0]
-        for name in logging.root.manager.loggerDict
+        repr(logging.getLogger(name))[8:].split(" ")[0]
+        for name in logging.Logger.manager.loggerDict
     ]:
         logger = logging.getLogger("flower")
         logger.setLevel(LOG_LEVEL)
