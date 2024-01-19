@@ -38,21 +38,23 @@ services:
     container_name: prometheus
     ports:
       - 9090:9090
-    mem_limit: 500m
+    deploy:
+      restart_policy:
+        condition: on-failure
     command:
       - --config.file=/etc/prometheus/prometheus.yml
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     depends_on:
       - cadvisor
-    restart: on-failure
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.0
     container_name: cadvisor
-    restart: on-failure
     privileged: true
-    mem_limit: 500m
+    deploy:
+      restart_policy:
+        condition: on-failure
     ports:
       - "8080:8080"
     volumes:
@@ -68,8 +70,9 @@ services:
     container_name: grafana
     ports:
       - 3000:3000
-    mem_limit: 400m
-    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
     volumes:
       - grafana-storage:/var/lib/grafana
       - ./config/grafana.ini:/etc/grafana/grafana.ini
@@ -84,7 +87,6 @@ services:
 
   server:
     container_name: server
-    shm_size: '6g'
     build:
       context: .
       dockerfile: Dockerfile
@@ -116,11 +118,11 @@ services:
       context: .
       dockerfile: Dockerfile
     command: python client.py --server_address=server:8080 --data_percentage={args.data_percentage}  --client_id={i} --total_clients={args.total_clients} --batch_size={config["batch_size"]} --learning_rate={config["learning_rate"]}
-    mem_limit: {config['mem_limit']}
     deploy:
       resources:
         limits:
           cpus: "{(config['cpus'])}"
+          memory: "{config['mem_limit']}"
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
