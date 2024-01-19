@@ -15,10 +15,23 @@
 """RecordSet utilities."""
 
 
-from typing import OrderedDict
+from typing import OrderedDict, Dict
 
+from .configsrecord import ConfigsRecord
 from .parametersrecord import Array, ParametersRecord
-from .typing import Parameters
+from .recordset import RecordSet
+from .typing import (
+    EvaluateIns,
+    EvaluateRes,
+    FitIns,
+    FitRes,
+    GetParametersIns,
+    GetParametersRes,
+    GetPropertiesIns,
+    GetPropertiesRes,
+    Parameters,
+    ConfigsRecordValues
+)
 
 
 def parametersrecord_to_parameters(
@@ -85,3 +98,43 @@ def parameters_to_parametersrecord(
         )
 
     return p_record
+
+
+def fuse_configsrecord_data(configs: ConfigsRecord) -> Dict[str, ConfigsRecordValues]:
+    """Fuse all config entries into a single dictionary."""
+    
+
+
+def recordset_to_fit_ins(recordset: RecordSet) -> FitIns:
+
+    config = recordset.configs
+
+    return FitIns()
+
+
+def fit_res_to_recordset(fitres: FitRes) -> RecordSet:
+    return RecordSet()
+
+
+def recodset_to_evaluate_ins(recordset: RecordSet) -> EvaluateIns:
+    return EvaluateIns()
+
+
+def evaluate_res_to_recordset(evaluateres: EvaluateRes) -> RecordSet:
+    return RecordSet()
+
+
+def recordset_to_getparameters_ins(recordset: RecordSet) -> GetParametersIns:
+    return GetParametersIns
+
+
+def getparameters_res_to_recordset(getparametersres: GetParametersRes) -> RecordSet:
+    return RecordSet()
+
+
+def recordset_to_getproperties_ins(recordset: RecordSet) -> GetPropertiesIns:
+    return GetPropertiesIns()
+
+
+def getproperties_res_to_recorset(getpropertiesres: GetPropertiesRes) -> RecordSet:
+    return RecordSet()
