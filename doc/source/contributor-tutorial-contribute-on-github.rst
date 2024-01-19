@@ -357,7 +357,7 @@ Changelog entry
 
 When opening a new PR, inside its description, there should be a ``Changelog entry`` header.
 
-As per the comment above this section
+Above this header you should see the following comment that explains how to write your changelog entry:
 
     Inside the following 'Changelog entry' section, 
     you should put the description of your changes that will be added to the changelog alongside your PR title.
