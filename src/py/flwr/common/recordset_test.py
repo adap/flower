@@ -111,7 +111,7 @@ def test_set_parameters_while_keeping_intputs() -> None:
     array_dict = OrderedDict(
         {str(i): ndarray_to_array(ndarray) for i, ndarray in enumerate(get_ndarrays())}
     )
-    p_record.set_parameters(array_dict)
+    p_record.set_parameters(array_dict, keep_input=True)
 
     # Creating a second parametersrecord passing the same `array_dict` (not erased)
     p_record_2 = ParametersRecord(array_dict)
@@ -253,7 +253,7 @@ def test_set_metrics_to_metricsrecord_with_and_without_keeping_input(
     my_metrics_copy = my_metrics.copy()
 
     # Add metric
-    m_record.set_metrics(my_metrics)
+    m_record.set_metrics(my_metrics, keep_input=keep_input)
 
     # Check metrics are actually added
     # Check that input dict has been emptied when enabled such behaviour
