@@ -66,7 +66,7 @@ class FlowerClient(fl.client.NumPyClient):
         # Instantiate model
         if use_mnist:
             # small model for MNIST
-            self.model = model = keras.Sequential(
+            self.model = keras.Sequential(
                 [
                     keras.Input(shape=(28, 28, 1)),
                     keras.layers.Conv2D(32, kernel_size=(5, 5), activation="relu"),

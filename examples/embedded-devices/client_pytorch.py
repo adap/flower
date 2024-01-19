@@ -36,19 +36,6 @@ parser.add_argument(
 warnings.filterwarnings("ignore", category=UserWarning)
 NUM_CLIENTS = 50
 
-# a config for mobilenetv2 that works for
-# small input sizes (i.e. 32x32 as in CIFAR)
-mb2_cfg = [
-    (1, 16, 1, 1),
-    (6, 24, 2, 1),
-    (6, 32, 3, 2),
-    (6, 64, 4, 2),
-    (6, 96, 3, 1),
-    (6, 160, 3, 2),
-    (6, 320, 1, 1),
-]
-
-
 class Net(nn.Module):
     """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')."""
 
@@ -139,8 +126,6 @@ class FlowerClient(fl.client.NumPyClient):
             self.model = Net()
         else:
             self.model = mobilenet_v3_small(num_classes=10)
-            # let's not reduce spatial resolution too early
-            self.model.features[0][0].stride = (1, 1)
         # Determine device
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.model.to(self.device)  # send model to device
