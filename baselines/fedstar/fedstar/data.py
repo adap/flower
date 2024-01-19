@@ -90,9 +90,9 @@ class DataBuilder:
         train_path = os.path.join(path, "train_split.txt")
         test_path = os.path.join(path, "test_split.txt")
         path_data_dir = os.path.join(parent_path, "datasets", data_dir)
-        print(f"{train_path = }")
-        print(f"{test_path = }")
-        print(f"{path_data_dir = }")
+        # print(f"{train_path = }")
+        # print(f"{test_path = }")
+        # print(f"{path_data_dir = }")
         if train:
             train_files_path, train_labels = [], []
             if data_dir == "speech_commands":
@@ -118,7 +118,7 @@ class DataBuilder:
                     )
                     train_labels.append(label)
             # One-hot labels transformation
-            print(train_files_path[:5])
+            # print(train_files_path[:5])
             train_labels = np.array(train_labels, dtype=object)
             # Map labels to 0-11
             unique_labels = np.unique(train_labels)
@@ -490,11 +490,11 @@ def balance_sampler(dataset, batch_size):
     # Measure initial distribution over labels
     ddd = np.concatenate([lbl for _, lbl in list(dataset.as_numpy_iterator())])
     initial_dist = np.bincount(ddd) / len(ddd)
-    print(f"{initial_dist = }")
+    # print(f"{initial_dist = }")
 
     # target distribution is uniform
     target_dist = np.ones_like(initial_dist) / len(initial_dist)
-    print(f"{target_dist = }")
+    # print(f"{target_dist = }")
 
     # resample
     dataset_resampled = (
