@@ -60,7 +60,12 @@ def parametersrecord_to_parameters(
     parameters = Parameters(tensors=[], tensor_type="")
 
     for key in list(record.data.keys()):
-        parameters.tensors.append(record.data[key].data)
+        parameters.tensors.append(record[key].data)
+
+        if not parameters.tensor_type:
+            # Setting from first array in record. Recall the warning in the docstrings
+            # of this function. 
+            parameters.tensor_type = record[key].stype
 
         if not keep_input:
             del record.data[key]
@@ -190,14 +195,14 @@ def _embed_status_into_recordset(
         "code": int(status.code.value),
         "message": status.message,
     }
-    recordset.set_configs(f"{res_str}.status", record=ConfigsRecord(status_dict))
+    recordset.set_metrics(f"{res_str}.status", record=ConfigsRecord(status_dict))
     return recordset
 
 
 def _extract_status_from_recordset(res_str: str, recordset: RecordSet) -> Status:
     status = recordset.get_metrics(f"{res_str}.status")
-    code = cast(int, status.data["code"])
-    return Status(code=Code(code), message=str(status.data["message"]))
+    code = cast(int, status["code"])
+    return Status(code=Code(code), message=str(status["message"]))
 
 
 def recordset_to_fit_ins(recordset: RecordSet, keep_input: bool) -> FitIns:
@@ -224,7 +229,7 @@ def recordset_to_fit_res(recordset: RecordSet) -> FitRes:
     )
 
     num_examples = cast(
-        int, recordset.get_metrics(f"{ins_str}.num_examples").data["num_exampes"]
+        int, recordset.get_metrics(f"{ins_str}.num_examples")["num_exampes"]
     )
     metrics_record = recordset.get_metrics(f"{ins_str}.metrics")
 
@@ -279,10 +284,10 @@ def recordset_to_evaluate_res(recordset: RecordSet) -> EvaluateRes:
     """Derive EvaluateRes from a RecordSet object."""
     ins_str = "evaluateres"
 
-    loss = cast(int, recordset.get_metrics(f"{ins_str}.loss").data["loss"])
+    loss = cast(int, recordset.get_metrics(f"{ins_str}.loss")["loss"])
 
     num_examples = cast(
-        int, recordset.get_metrics(f"{ins_str}.num_examples").data["num_exampes"]
+        int, recordset.get_metrics(f"{ins_str}.num_examples")["num_exampes"]
     )
     metrics_record = recordset.get_metrics(f"{ins_str}.metrics")
 
@@ -344,12 +349,13 @@ def getparameters_ins_to_recordset(getparameters_ins: GetParametersIns) -> Recor
 def getparameters_res_to_recordset(getparametersres: GetParametersRes) -> RecordSet:
     """Construct a RecordSet from a GetParametersRes object."""
     recordset = RecordSet()
+    res_str = "getparametersres"
     parameters_record = parameters_to_parametersrecord(getparametersres.parameters)
-    recordset.set_parameters("getparametersres.parameters", parameters_record)
+    recordset.set_parameters(f"{res_str}.parameters", parameters_record)
 
     # status
     recordset = _embed_status_into_recordset(
-        "getparametersres", getparametersres.status, recordset
+        res_str, getparametersres.status, recordset
     )
 
     return recordset
@@ -389,7 +395,7 @@ def getproperties_ins_to_recordset(getpropertiesins: GetPropertiesIns) -> Record
 def recordset_to_getproperties_res(recordset: RecordSet) -> GetPropertiesRes:
     """Derive GetPropertiesRes from a RecordSet object."""
     res_str = "getpropertiesres"
-    config_record = recordset.get_configs(f"{res_str}.config")
+    config_record = recordset.get_configs(f"{res_str}.properties")
     properties = _check_mapping_from_recordscalartype_to_scalar(config_record.data)
 
     status = _extract_status_from_recordset(res_str, recordset=recordset)
@@ -400,15 +406,14 @@ def recordset_to_getproperties_res(recordset: RecordSet) -> GetPropertiesRes:
 def getproperties_res_to_recordset(getpropertiesres: GetPropertiesRes) -> RecordSet:
     """Construct a RecordSet from a GetPropertiesRes object."""
     recordset = RecordSet()
+    res_str = "getpropertiesres"
     configs = _check_mapping_from_scalar_to_configsrecordstypes(
         getpropertiesres.properties
     )
-    recordset.set_configs(
-        name="getpropertiesres.properties", record=ConfigsRecord(configs)
-    )
+    recordset.set_configs(name=f"{res_str}.properties", record=ConfigsRecord(configs))
     # status
     recordset = _embed_status_into_recordset(
-        "getpropertiesres", getpropertiesres.status, recordset
+        res_str, getpropertiesres.status, recordset
     )
 
     return recordset
