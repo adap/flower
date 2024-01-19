@@ -25,7 +25,6 @@ from .typing import ConfigsRecordValues, ConfigsScalar
 class ConfigsRecord:
     """Configs record."""
 
-    keep_input: bool
     data: Dict[str, ConfigsRecordValues] = field(default_factory=dict)
 
     def __init__(
@@ -47,12 +46,13 @@ class ConfigsRecord:
             to True, the data is duplicated in memory. If memory is a concern, set
             it to False.
         """
-        self.keep_input = keep_input
         self.data = {}
         if configs_dict:
-            self.set_configs(configs_dict)
+            self.set_configs(configs_dict, keep_input=keep_input)
 
-    def set_configs(self, configs_dict: Dict[str, ConfigsRecordValues]) -> None:
+    def set_configs(
+        self, configs_dict: Dict[str, ConfigsRecordValues], keep_input: bool = True
+    ) -> None:
         """Add configs to the record.
 
         Parameters
@@ -61,6 +61,11 @@ class ConfigsRecord:
             A dictionary that stores basic types (i.e. `str`,`int`, `float`, `bytes` as
             defined in `ConfigsRecordValues`) and list of such types (see
             `ConfigsScalarList`).
+        keep_input : bool (default: True)
+            A boolean indicating whether config passed should be deleted from the input
+            dictionary immediately after adding them to the record. When set
+            to True, the data is duplicated in memory. If memory is a concern, set
+            it to False.
         """
         if any(not isinstance(k, str) for k in configs_dict.keys()):
             raise TypeError(f"Not all keys are of valid type. Expected {str}")
@@ -88,7 +93,7 @@ class ConfigsRecord:
                 is_valid(value)
 
         # Add configs to record
-        if self.keep_input:
+        if keep_input:
             # Copy
             self.data = configs_dict.copy()
         else:
@@ -96,3 +101,7 @@ class ConfigsRecord:
             for key in list(configs_dict.keys()):
                 self.data[key] = configs_dict[key]
                 del configs_dict[key]
+
+    def __getitem__(self, key: str) -> ConfigsRecordValues:
+        """Retrieve an element stored in record."""
+        return self.data[key]
