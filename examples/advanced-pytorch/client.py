@@ -6,6 +6,7 @@ import flwr as fl
 import argparse
 from collections import OrderedDict
 import warnings
+import datasets
 
 warnings.filterwarnings("ignore")
 
@@ -13,9 +14,9 @@ warnings.filterwarnings("ignore")
 class CifarClient(fl.client.NumPyClient):
     def __init__(
         self,
-        trainset: torchvision.datasets,
-        testset: torchvision.datasets,
-        device: str,
+        trainset: datasets.Dataset,
+        testset: datasets.Dataset,
+        device: torch.device,
         validation_split: int = 0.1,
     ):
         self.device = device
@@ -41,17 +42,14 @@ class CifarClient(fl.client.NumPyClient):
         batch_size: int = config["batch_size"]
         epochs: int = config["local_epochs"]
 
-        n_valset = int(len(self.trainset) * self.validation_split)
+        train_valid = self.trainset.train_test_split(self.validation_split)
+        trainset = train_valid["train"]
+        valset = train_valid["test"]
 
-        valset = torch.utils.data.Subset(self.trainset, range(0, n_valset))
-        trainset = torch.utils.data.Subset(
-            self.trainset, range(n_valset, len(self.trainset))
-        )
+        train_loader = DataLoader(trainset, batch_size=batch_size, shuffle=True)
+        val_loader = DataLoader(valset, batch_size=batch_size)
 
-        trainLoader = DataLoader(trainset, batch_size=batch_size, shuffle=True)
-        valLoader = DataLoader(valset, batch_size=batch_size)
-
-        results = utils.train(model, trainLoader, valLoader, epochs, self.device)
+        results = utils.train(model, train_loader, val_loader, epochs, self.device)
 
         parameters_prime = utils.get_model_params(model)
         num_examples_train = len(trainset)
@@ -73,13 +71,13 @@ class CifarClient(fl.client.NumPyClient):
         return float(loss), len(self.testset), {"accuracy": float(accuracy)}
 
 
-def client_dry_run(device: str = "cpu"):
+def client_dry_run(device: torch.device = "cpu"):
     """Weak tests to check whether all client methods are working as expected."""
 
     model = utils.load_efficientnet(classes=10)
     trainset, testset = utils.load_partition(0)
-    trainset = torch.utils.data.Subset(trainset, range(10))
-    testset = torch.utils.data.Subset(testset, range(10))
+    trainset = trainset.select(range(10))
+    testset = testset.select(range(10))
     client = CifarClient(trainset, testset, device)
     client.fit(
         utils.get_model_params(model),
@@ -102,7 +100,7 @@ def main() -> None:
         help="Do a dry-run to check the client",
     )
     parser.add_argument(
-        "--partition",
+        "--client-id",
         type=int,
         default=0,
         choices=range(0, 10),
@@ -112,9 +110,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--toy",
-        type=bool,
-        default=False,
-        required=False,
+        action='store_true',
         help="Set to true to quicky run the client using only 10 datasamples. \
         Useful for testing purposes. Default: False",
     )
@@ -136,12 +132,11 @@ def main() -> None:
         client_dry_run(device)
     else:
         # Load a subset of CIFAR-10 to simulate the local data partition
-        trainset, testset = utils.load_partition(args.partition)
+        trainset, testset = utils.load_partition(args.client_id)
 
         if args.toy:
-            trainset = torch.utils.data.Subset(trainset, range(10))
-            testset = torch.utils.data.Subset(testset, range(10))
-
+            trainset = trainset.select(range(10))
+            testset = testset.select(range(10))
         # Start Flower client
         client = CifarClient(trainset, testset, device)
 
