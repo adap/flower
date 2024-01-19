@@ -26,25 +26,25 @@ class Metadata:
 
     Parameters
     ----------
-    task_id : str
-        An identifier for the current task.
     run_id : int
         An identifier for the current run.
-    task_type : str
-        A string that encodes a action to be executed on
-        the receiving end.
+    task_id : str
+        An identifier for the current task.
     group_id : str
-        An identifier for grouping runs. In some settings
+        An identifier for grouping tasks. In some settings
         this is used as the FL round.
     ttl : str
-        Time-to-live for this run.
+        Time-to-live for this task.
+    task_type : str
+        A string that encodes the action to be executed on
+        the receiving end.
     """
 
-    task_id: str
     run_id: int
-    task_type: str
+    task_id: str
     group_id: str
     ttl: str
+    task_type: str
 
 
 @dataclass
@@ -62,7 +62,7 @@ class FlowerContext:
         parameter, or to the client to perform a certain task)
     local : RecordSet
         Holds record added by the current entity and that will stay local.
-        This means that the data it holds will never leave the system it's running fom.
+        This means that the data it holds will never leave the system it's running from.
         This can be used as an intermediate storage or scratchpad when
         executing middleware layers. It can also be used as a memory to access
         at different points during the lifecycle of this entity (e.g. across

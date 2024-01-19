@@ -213,6 +213,7 @@ def test_set_metrics_to_metricsrecord_with_correct_types(
     "key_type, value_fn",
     [
         (str, lambda x: str(x.flatten()[0])),  # str: str  (supported: unsupported)
+        (str, lambda x: bool(x.flatten()[0])),  # str: bool  (supported: unsupported)
         (
             str,
             lambda x: x.flatten().astype("str").tolist(),
@@ -237,7 +238,7 @@ def test_set_metrics_to_metricsrecord_with_correct_types(
     ],
 )
 def test_set_metrics_to_metricsrecord_with_incorrect_types(
-    key_type: Type[Union[str, int, float]],
+    key_type: Type[Union[str, int, float, bool]],
     value_fn: Callable[[NDArray], Union[NDArray, Dict[str, NDArray], List[float]]],
 ) -> None:
     """Test adding metrics of various unsupported types to a MetricsRecord."""
@@ -294,10 +295,12 @@ def test_set_metrics_to_metricsrecord_with_and_without_keeping_input(
         (str, lambda x: str(x.flatten()[0])),  # str: str
         (str, lambda x: int(x.flatten()[0])),  # str: int
         (str, lambda x: float(x.flatten()[0])),  # str: float
+        (str, lambda x: bool(x.flatten()[0])),  # str: bool
         (str, lambda x: x.flatten().tobytes()),  # str: bytes
         (str, lambda x: x.flatten().astype("str").tolist()),  # str: List[str]
         (str, lambda x: x.flatten().astype("int").tolist()),  # str: List[int]
         (str, lambda x: x.flatten().astype("float").tolist()),  # str: List[float]
+        (str, lambda x: x.flatten().astype("bool").tolist()),  # str: List[bool]
         (str, lambda x: [x.flatten().tobytes()]),  # str: List[bytes]
     ],
 )
