@@ -1,19 +1,14 @@
 import argparse
-from collections import OrderedDict
 import warnings
+from collections import OrderedDict
 
 import flwr as fl
 import torch
-
-import random
-from torch.utils.data import DataLoader
-
-from datasets import load_dataset
 from evaluate import load as load_metric
-
-from transformers import AutoTokenizer, DataCollatorWithPadding
-from transformers import AutoModelForSequenceClassification
 from torch.optim import AdamW
+from torch.utils.data import DataLoader
+from transformers import AutoModelForSequenceClassification
+from transformers import AutoTokenizer, DataCollatorWithPadding
 
 from flwr_datasets import FederatedDataset
 
