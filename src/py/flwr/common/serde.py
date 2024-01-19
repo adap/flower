@@ -15,8 +15,12 @@
 """ProtoBuf serialization and deserialization."""
 
 
-from typing import Any, Dict, List, MutableMapping, cast
+from typing import Any, Dict, List, MutableMapping, OrderedDict, cast
 
+from flwr.proto.recordset_pb2 import Array as ArrayProto
+from flwr.proto.recordset_pb2 import ConfigsRecord as ConfigsRecordProto
+from flwr.proto.recordset_pb2 import MetricsRecord as MetricsRecordProto
+from flwr.proto.recordset_pb2 import ParametersRecord as ParametersRecordProto
 from flwr.proto.task_pb2 import Value  # pylint: disable=E0611
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
@@ -29,6 +33,9 @@ from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
 )
 
 from . import typing
+from .configsrecord import ConfigsRecord
+from .metricsrecord import MetricsRecord
+from .parametersrecord import Array, ParametersRecord
 
 #  === ServerMessage message ===
 
@@ -573,3 +580,77 @@ def named_values_from_proto(
 ) -> Dict[str, typing.Value]:
     """Deserialize named values from ProtoBuf."""
     return {name: value_from_proto(value) for name, value in named_values_proto.items()}
+
+
+# === Record messages ===
+
+
+def array_to_proto(array: Array) -> ArrayProto:
+    """Serialize Array to ProtoBuf."""
+    return ArrayProto(**vars(array))
+
+
+def array_from_proto(array_proto: ArrayProto) -> Array:
+    """Deserialize Array from ProtoBuf."""
+    return Array(
+        dtype=array_proto.dtype,
+        shape=list(array_proto.shape),
+        stype=array_proto.stype,
+        data=array_proto.data,
+    )
+
+
+def parameters_record_to_proto(record: ParametersRecord) -> ParametersRecordProto:
+    """Serialize ParametersRecord to ProtoBuf."""
+    return ParametersRecordProto(
+        data_keys=record.data.keys(),
+        data_values=map(array_to_proto, record.data.values()),
+    )
+
+
+def parameters_record_from_proto(
+    record_proto: ParametersRecordProto,
+) -> ParametersRecord:
+    """Deserialize ParametersRecord from ProtoBuf."""
+    return ParametersRecord(
+        array_dict=OrderedDict(
+            zip(record_proto.data_keys, map(array_from_proto, record_proto.data_values))
+        ),
+        keep_input=False,
+    )
+
+
+def metrics_record_to_proto(record: MetricsRecord) -> MetricsRecordProto:
+    """Serialize MetricsRecord to ProtoBuf."""
+    return MetricsRecordProto(
+        data=named_values_to_proto(cast(Dict[str, typing.Value], record.data))
+    )
+
+
+def metrics_record_from_proto(record_proto: MetricsRecordProto) -> MetricsRecord:
+    """Deserialize MetricsRecord from ProtoBuf."""
+    return MetricsRecord(
+        metrics_dict=cast(
+            Dict[str, typing.MetricsRecordValues],
+            named_values_from_proto(record_proto.data),
+        ),
+        keep_input=False,
+    )
+
+
+def configs_record_to_proto(record: ConfigsRecord) -> ConfigsRecordProto:
+    """Serialize ConfigsRecord to ProtoBuf."""
+    return ConfigsRecordProto(
+        data=named_values_to_proto(cast(Dict[str, typing.Value], record.data))
+    )
+
+
+def configs_record_from_proto(record_proto: ConfigsRecordProto) -> ConfigsRecord:
+    """Deserialize ConfigsRecord from ProtoBuf."""
+    return ConfigsRecord(
+        configs_dict=cast(
+            Dict[str, typing.ConfigsRecordValues],
+            named_values_from_proto(record_proto.data),
+        ),
+        keep_input=False,
+    )
