@@ -602,7 +602,7 @@ Let's take a look!
 Cyclic training
 ~~~~~~~~~~~~~~~~~~
 
-In addition to bagging aggregation, we offer another cyclic training scheme, which performs FL in a client-by-client fashion.
+In addition to bagging aggregation, we offer a cyclic training scheme, which performs FL in a client-by-client fashion.
 Instead of aggregating multiple clients, there is only one single client participating in the training per round in the cyclic training scenario.
 The trained local XGBoost trees will be passed to the next client as an initialised model for next round's boosting.
 
