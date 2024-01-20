@@ -247,6 +247,7 @@ def set_gpu_limits(gpu_id, gpu_memory):
     if not gpus:
         print("No GPU's available. Server will run on CPU.")
     else:
+        print("GPU is available trying to configure memory.")
         try:
             tf.config.experimental.set_virtual_device_configuration(
                 gpus[0],

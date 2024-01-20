@@ -49,7 +49,11 @@ class Client(Process):
                 self.queue.task_done()
                 break
             # Configure GPU
-            Client.setup_gpu(gpu=cfg["gpu_id"], gpu_memory=cfg["gpu_memory"])
+            Client.setup_gpu(
+                gpu=cfg["gpu_id"],
+                gpu_memory=cfg["gpu_memory"],
+                client_id=cfg["client_id"],
+            )
             process_path = (os.sep).join(parent_path.split(os.sep)) + os.sep
             # Create Client
             client = AudioClient(
@@ -85,7 +89,7 @@ class Client(Process):
             self.queue.task_done()
 
     @staticmethod
-    def setup_gpu(gpu, gpu_memory):
+    def setup_gpu(gpu, gpu_memory, client_id):
         """Configure GPU settings for TensorFlow.
 
         Sets the environment variable for CUDA_VISIBLE_DEVICES based on the provided
@@ -107,7 +111,7 @@ class Client(Process):
 
         gpus = tf.config.list_physical_devices("GPU")
         if not gpus:
-            print("No GPU's available. Client will run on CPU.")
+            print(f"No GPU's available. Client {client_id} will run on CPU.")
         else:
             try:
                 tf.config.experimental.set_virtual_device_configuration(
@@ -124,30 +128,45 @@ class Client(Process):
 
 # pylint: disable=unsubscriptable-object
 def distribute_gpus(num_clients, client_memory=1024):
-    """To Use GPU on client side a high memory or multiple gpu's might required.
+    """Distribute GPU resources among multiple clients.
 
-    Uncomment the lines accordingle to use it
+    Parameters
+    ----------
+    - num_clients (int): Number of clients to distribute GPUs among.
+    - client_memory (int): The amount of memory (in MB) to allocate per client.
 
-    Provide gpu id list, the current list is for 1 gpu.
-
-    For 2 gpu's the list will be gpus = ["0","1"]
+    Returns
+    -------
+    - List of GPU IDs or None for each client, based on memory availability.
     """
-    # gpus = tf.config.list_physical_devices("GPU")
-    gpus = None
+    gpus = tf.config.experimental.list_physical_devices("GPU")
     if not gpus:
-        clients_gpu = [None] * num_clients
-    else:
-        # Based on your gpu's memory define list accordingly.
+        # Scenario 1: No GPUs available, return None for all clients
+        return [None] * num_clients
 
-        # Currently it defines to use 5000 MB of gpu vram from both GPU's
-        gpu_free_mem = [5000]  # set the gpu limit based on your system.
-        for client_id in range(num_clients):
-            gpu_id = gpu_free_mem.index(max(gpu_free_mem))
-            if gpu_free_mem[gpu_id] >= client_memory:
-                gpu_free_mem[gpu_id] -= client_memory
-                clients_gpu[client_id] = gpus[gpu_id]
-            else:
-                clients_gpu[client_id] = None
+    # Manually specify the total memory for each GPU in MB
+    gpu_total_mem = [4000]  # Example for two GPUs, adjust based on your GPUs
+
+    gpu_free_mem = gpu_total_mem.copy()
+    clients_gpu = [None] * num_clients
+
+    for client_id in range(num_clients):
+        suitable_gpus = [
+            i for i, mem in enumerate(gpu_free_mem) if mem >= client_memory
+        ]
+        if suitable_gpus:
+            # Scenario 2: Allocate GPU if memory is available
+            chosen_gpu = min(
+                suitable_gpus, key=lambda i: gpu_total_mem[i] - gpu_free_mem[i]
+            )
+            gpu_free_mem[chosen_gpu] -= client_memory
+            gpu_id = gpus[chosen_gpu].name.split(":")[-1]
+            clients_gpu[client_id] = gpu_id
+        else:
+            # Scenario 3: No sufficient memory in GPUs, allocate CPU (None)
+            clients_gpu[client_id] = None
+    print("*" * 50)
+    print(clients_gpu)
     return clients_gpu
 
 
