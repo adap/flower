@@ -145,7 +145,7 @@ def distribute_gpus(num_clients, client_memory=1024):
         return [None] * num_clients
 
     # Manually specify the total memory for each GPU in MB
-    gpu_total_mem = [4000]  # Example for two GPUs, adjust based on your GPUs
+    gpu_total_mem = []  # Example for two GPUs, adjust based on your GPUs
 
     gpu_free_mem = gpu_total_mem.copy()
     clients_gpu = [None] * num_clients

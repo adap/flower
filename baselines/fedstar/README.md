@@ -22,11 +22,11 @@ dataset: [Ambient Context, Speech Commands]
 
 **Datasets:** Ambient Context, Speech Commands
 
-**Hardware Setup:** These experiments were run on a linux server with 56 CPU threads with 325 GB Ram with A10 GPU in it. Any machine with 8 CPU cores and 16 GB memory or more would be able to run initall experiments with small number of clients in a reasonable amount of time. Note: I have install tensorflow with GPU support but by default, the entire experiment runs on CPU-only mode. For cpu you need to replace value of gpus to None present in distribute_gpus function inside clients.py file.
+**Hardware Setup:** These experiments were run on a linux server with 56 CPU threads with 325 GB Ram with A10 GPU in it. Any machine with 8 CPU cores and 16 GB memory or more would be able to run initall experiments with small number of clients in a reasonable amount of time. 
+
+**Note:** The experiment is designed to run on both GPU and CPU, depending on memory constraints. By default, it will run only on the CPU. Please update the value of the list 'gpu_total_mem' with the corresponding memory available for each gpu's of your machine. The variable is in the distribute_gpus function inside the clients.py file.
 
 **Contributors:** Raj Parekh [GitHub](https://github.com/Raj-Parekh24), [Mail](rajparekhwc@gmail.com)
-
-**Note:** Its observed that tf.functions in model.py decorator consumes a high amount of memory, so currently we have commented out that function in case for future version of tensorflow if it causes any issues please uncomment it. 
 
 ## Environment Setup
 ```bash
@@ -96,6 +96,8 @@ To run in supervised mode, pass `fedstar=false` to any of the commands above (wh
 
 ## Expected Results
 This section indicates the commands to exectue to obtain the results shown below in Table 3 and Table 4. The commands below make use of Hydra's `--multirun` to run multiple experiments. This is better suited when using Flower simulations. Here they work fine but, if you encounter any issues, you can always "unroll" the multirun and run one configuration at a time. If you do this, results won't go into the `multirun/` directory, instead to the default `outputs/` directory.
+
+**Note:** Its observed that tf.functions in model.py decorator consumes a high amount of memory, so currently we have commented out that function in case for future version of tensorflow if it causes any issues please uncomment it. 
 
 ### Table 3
 
