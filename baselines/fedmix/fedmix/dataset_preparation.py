@@ -14,21 +14,15 @@ from torch.utils.data import ConcatDataset, Dataset, Subset, random_split
 
 def _download_cifar10():
     """..."""
-    train_transform = transforms.Compose(
-        [
-            transforms.ToTensor(),
-            transforms.RandomCrop(32, padding=4),
-            transforms.RandomHorizontalFlip(),
-            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-        ]
-    )
+    train_transform = transforms.Compose([transforms.RandomCrop(32, padding=4),
+                                          transforms.RandomHorizontalFlip(),
+                                          transforms.ToTensor(),
+                                          transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                               std=[0.229, 0.224, 0.225])])
 
-    test_transform = transforms.Compose(
-        [
-            transforms.ToTensor(),
-            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-        ]
-    )
+    test_transform = transforms.Compose([transforms.ToTensor(),
+                                        transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                             std=[0.229, 0.224, 0.225])])
 
     trainset = CIFAR10("./dataset", train=True, download=True, transform=train_transform)
     testset = CIFAR10("./dataset", train=False, download=True, transform=test_transform)
@@ -37,21 +31,15 @@ def _download_cifar10():
 
 def _download_cifar100():
     """..."""
-    transform = transforms.Compose(
-        [
-            transforms.ToTensor(),
-            transforms.RandomCrop(32, padding=4),
-            transforms.RandomHorizontalFlip(),
-            transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
-        ]
-    )
+    transform = transforms.Compose([transforms.RandomCrop(32, padding=4),
+                                          transforms.RandomHorizontalFlip(),
+                                          transforms.ToTensor(),
+                                          transforms.Normalize(mean=[0.507, 0.487, 0.441],
+                                                               std=[0.267, 0.256, 0.276])])
 
-    test_transform = transforms.Compose(
-        [
-            transforms.ToTensor(),
-            transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
-        ]
-    )
+    test_transform = transforms.Compose([transforms.ToTensor(),
+                                         transforms.Normalize(mean=[0.507, 0.487, 0.441],
+                                                              std=[0.267, 0.256, 0.276])])
 
     trainset = CIFAR100("./dataset", train=True, download=True, transform=transform)
     testset = CIFAR100("./dataset", train=False, download=True, transform=test_transform)

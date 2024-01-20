@@ -173,36 +173,39 @@ class FedMixClient(NumPyClient):
     def training_loop(self, criterion, optimizer):
         """..."""
         for images, labels in self.trainloader:
+            batch_size = labels.size()[0]
+
             mashed_image, mashed_label = random.choice(self.mashed_data)
             images, labels = images.to(self.device), labels.to(self.device)
+            images.requires_grad_()
 
-            mashed_image = mashed_image[None, :].to(self.device)
-            mashed_label = mashed_label[None, :].to(self.device)
+            mashed_image = mashed_image.to(self.device)
+            mashed_label = mashed_label.to(self.device)
 
-            num_classes = len(mashed_label[0])
+            mashed_image = mashed_image.repeat(batch_size, 1, 1, 1)
+
+            num_classes = len(mashed_label)
             mashed_labels = mashed_label.expand_as(F.one_hot(labels, num_classes))
 
             optimizer.zero_grad()
 
             scaled_images = (1 - self.mixup_ratio) * images
-            scaled_images.requires_grad_()
 
             intermediate_output = self.net(scaled_images)
 
+            jacobian = autograd.grad(
+                outputs=intermediate_output[:, labels].sum(), inputs=images, retain_graph=True)[0].view(batch_size, 1, -1)
+
             l1 = (1 - self.mixup_ratio) * criterion(intermediate_output, labels)
-            l2 = self.mixup_ratio * criterion(intermediate_output, mashed_labels)
+            l2 = (1 - self.mixup_ratio) * self.mixup_ratio * torch.mean(torch.bmm(jacobian, mashed_image.view(batch_size, -1, 1)))
 
-            gradients = autograd.grad(
-                outputs=l1, inputs=scaled_images, create_graph=True, retain_graph=True
-            )[0]
+            for i in range(num_classes):
+                if mashed_labels[0, i] > 0:
+                    mashed_labels_ = i * torch.ones_like(labels).to(self.device)
+                    l1 = l1 + mashed_labels[0, i] * self.mixup_ratio * criterion(
+                        intermediate_output, mashed_labels_)
 
-            l3 = self.mixup_ratio * torch.inner(
-                gradients.flatten(start_dim=1), mashed_image.flatten(start_dim=1)
-            )
-
-            l3 = torch.mean(l3)
-
-            loss = l1 + l2 + l3
+            loss = l1 + l2
             loss.backward()
             optimizer.step()
 
