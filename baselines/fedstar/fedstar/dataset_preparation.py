@@ -1,6 +1,7 @@
-"""Required imports for silence_processing.py script."""
+"""Generate 1-second audio clip from background sounds in speechcommands."""
 import os
 import random
+from tqdm import tqdm
 
 import scipy.io.wavfile as wav
 
@@ -23,7 +24,7 @@ def split_audio_v2(read_file_path, samples_per_clip=1000):
     sample_rate, data = wav.read(read_file_path)
 
     # extract `samples_per_clip` 1-second long clips at random
-    for i in range(samples_per_clip):
+    for i in tqdm(range(samples_per_clip)):
         start = random.randint(0, len(data) - sample_rate)
         segment = data[start : start + sample_rate]
         new_filename = file_path.replace(".wav", "") + f"_{i:05d}.wav"

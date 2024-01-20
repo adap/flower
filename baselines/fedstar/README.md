@@ -51,7 +51,7 @@ chmod +x setup_datasets.sh
 
 # If you want to run the SpeechCommands experiment, pre-process the dataset
 # This will genereate a few training example from the _silence_ category
-python -m fedstar.silence_processing
+python -m fedstar.dataset_preparation
 # Please note the above will make following changes:
 #    * Add new files to datasets/speech_commands/Data/Train/_silence_
 #    * Add new entries to data_splits/speech_commands/train_split.txt

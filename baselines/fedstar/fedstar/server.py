@@ -11,8 +11,8 @@ import hydra
 import tensorflow as tf
 from omegaconf import DictConfig, OmegaConf
 
-from fedstar.data import DataBuilder
-from fedstar.model import Network
+from fedstar.dataset import DataBuilder
+from fedstar.models import Network
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 os.environ["GRPC_VERBOSITY"] = "ERROR"

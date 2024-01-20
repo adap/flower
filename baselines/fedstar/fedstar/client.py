@@ -7,8 +7,8 @@ from typing import Dict, List
 import flwr
 import tensorflow as tf
 
-from fedstar.data import DataBuilder
-from fedstar.model import Network, PslNetwork
+from fedstar.dataset import DataBuilder
+from fedstar.models import Network, PslNetwork
 
 os.environ["GRPC_VERBOSITY"] = "ERROR"
 
