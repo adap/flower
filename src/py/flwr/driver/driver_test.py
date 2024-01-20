@@ -19,12 +19,12 @@ import unittest
 from unittest.mock import Mock, patch
 
 from flwr.driver.driver import Driver
-from flwr.proto.driver_pb2 import (
+from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     PullTaskResRequest,
     PushTaskInsRequest,
 )
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 
 
 class TestDriver(unittest.TestCase):
@@ -139,6 +139,7 @@ class TestDriver(unittest.TestCase):
         self.driver._get_grpc_driver_and_run_id()
 
         # Execute
+        # pylint: disable-next=unnecessary-dunder-call
         self.driver.__del__()
 
         # Assert
@@ -147,6 +148,7 @@ class TestDriver(unittest.TestCase):
     def test_del_with_uninitialized_driver(self) -> None:
         """Test cleanup behavior when Driver is not initialized."""
         # Execute
+        # pylint: disable-next=unnecessary-dunder-call
         self.driver.__del__()
 
         # Assert

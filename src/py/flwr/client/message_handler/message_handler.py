@@ -32,8 +32,17 @@ from flwr.client.run_state import RunState
 from flwr.client.secure_aggregation import SecureAggregationHandler
 from flwr.client.typing import ClientFn
 from flwr.common import serde
-from flwr.proto.task_pb2 import SecureAggregation, Task, TaskIns, TaskRes
-from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
+from flwr.proto.task_pb2 import (  # pylint: disable=E0611
+    SecureAggregation,
+    Task,
+    TaskIns,
+    TaskRes,
+)
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+    ClientMessage,
+    Reason,
+    ServerMessage,
+)
 
 
 class UnexpectedServerMessage(Exception):
