@@ -70,7 +70,9 @@ class MetricsRecord:
 
         def is_valid(value: MetricsScalar) -> None:
             """Check if value is of expected type."""
-            if not isinstance(value, get_args(MetricsScalar)):
+            if not isinstance(value, get_args(MetricsScalar)) or isinstance(
+                value, bool
+            ):
                 raise TypeError(
                     "Not all values are of valid type."
                     f" Expected {MetricsRecordValues} but you passed {type(value)}."
