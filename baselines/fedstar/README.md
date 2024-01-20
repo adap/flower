@@ -24,8 +24,6 @@ dataset: [Ambient Context, Speech Commands]
 
 **Hardware Setup:** These experiments were run on a linux server with 56 CPU threads with 325 GB Ram with A10 GPU in it. Any machine with 8 CPU cores and 16 GB memory or more would be able to run initall experiments with small number of clients in a reasonable amount of time. 
 
-**Note:** The experiment is designed to run on both GPU and CPU, depending on memory constraints. By default, it will run only on the CPU. Please update the value of the list 'gpu_total_mem' with the corresponding memory available for each gpu's of your machine. The variable is in the distribute_gpus function inside the clients.py file.
-
 **Contributors:** Raj Parekh [GitHub](https://github.com/Raj-Parekh24), [Mail](rajparekhwc@gmail.com)
 
 ## Environment Setup
@@ -59,6 +57,17 @@ python -m fedstar.dataset_preparation
 # after making modifications to the script, please either revert the changes outlined
 # above or erase the dataset and repeat the download + preprocessing as defined in setup_datasets.sh script.
 ```
+
+## Setting up GPU Memory
+
+**Note:** The experiment is designed to run on both GPU and CPU, depending on memory constraints. By default, it will run only on the CPU. Please update the value of the list 'gpu_total_mem' with the corresponding memory available for each gpu's of your machine. The variable is in the distribute_gpus function inside the clients.py file. Reference is shown below.
+
+```python
+# For Eg:- We have a system with a 8gb and 4gb vram.
+#          The modified varaible will looks like below.
+gpu_free_mem = [8000,4000]
+```
+
 
 ## Running the Experiments
 
