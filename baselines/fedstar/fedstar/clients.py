@@ -4,11 +4,12 @@ import os
 import sys
 from multiprocessing import Process
 
+import flwr as fl
 import hydra
 import tensorflow as tf
 from omegaconf import OmegaConf
 
-from fedstar.client import AudioClient
+from fedstar.client import AudioClient, set_logger_level
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 os.environ["GRPC_VERBOSITY"] = "ERROR"
@@ -53,7 +54,6 @@ class Client(Process):
             # Create Client
             client = AudioClient(
                 client_id=cfg["client_id"],
-                server_address=cfg["server_address"],
                 num_clients=cfg["num_clients"],
                 dataset_dir=cfg["dataset_dir"],
                 parent_path=process_path,
@@ -67,7 +67,20 @@ class Client(Process):
                 balance_dataset=cfg["balance_dataset"],
             )
             # Start Client
-            client(introduce=bool(cfg["verbose"]))
+            try:
+                if bool(cfg["verbose"]):
+                    print(
+                        f"""This is client {client.client_id}
+                        with train dataset of {client.num_examples_train}
+                        elements."""
+                    )
+                set_logger_level()
+                fl.client.start_numpy_client(
+                    server_address=cfg["server_address"], client=client
+                )
+                print("Client Shutdown.")
+            except RuntimeError as runtime_error:
+                print(runtime_error)
             # Return job done once client is terminated.
             self.queue.task_done()
 

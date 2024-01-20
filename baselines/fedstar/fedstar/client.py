@@ -27,7 +27,6 @@ class AudioClient(
     def __init__(
         self,
         client_id,
-        server_address,
         num_clients,
         dataset_dir,
         fedstar,
@@ -43,7 +42,6 @@ class AudioClient(
         verbose=2,
     ):
         # Client Parameters
-        self.server_address = server_address
         self.client_id = client_id
         self.batch_size = batch_size
         self.verbose = verbose
@@ -82,24 +80,6 @@ class AudioClient(
         self.weights = Network.get_init_weights(num_classes=self.num_classes)
         self.history: Dict[str, List[float]] = {"loss": [], "accuracy": []}
         tf.keras.backend.clear_session()
-
-    def __call__(self, introduce=False):
-        """Override the internal call method to start the numpy client."""
-        try:
-            if introduce:
-                print(
-                    f"""This is client {self.client_id}
-                    with train dataset of {self.num_examples_train}
-                    elements."""
-                )
-            set_logger_level()
-            flwr.client.start_numpy_client(
-                server_address=self.server_address, client=self
-            )
-            print("Client Shutdown.")
-        except RuntimeError as runtime_error:
-            print(runtime_error)
-        return 0
 
     def get_parameters(self, config):
         """Return the current client model weights."""
