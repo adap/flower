@@ -1,9 +1,9 @@
 """Generate 1-second audio clip from background sounds in speechcommands."""
 import os
 import random
-from tqdm import tqdm
 
 import scipy.io.wavfile as wav
+from tqdm import tqdm
 
 # Folder path where your audio files are stored
 FOLDER_PATH = "datasets/speech_commands/Data/Train/_silence_"
