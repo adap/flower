@@ -15,7 +15,7 @@ from flwr_datasets import FederatedDataset
 warnings.filterwarnings("ignore")
 
 
-def fit_config(server_round: int, use_model: str):
+def fit_config(server_round: int):
     """Return training configuration dict for each round.
 
     Keep batch size fixed at 32, perform two rounds of training with one local epoch,
@@ -24,7 +24,6 @@ def fit_config(server_round: int, use_model: str):
     config = {
         "batch_size": 16,
         "local_epochs": 1 if server_round < 2 else 2,
-        "use_model": use_model if use_model == "alexnet" else "efficientnet",
     }
     return config
 
@@ -81,33 +80,33 @@ def main():
         help="Set to true to use only 10 datasamples for validation. \
             Useful for testing purposes. Default: False",
     )
-
     parser.add_argument(
-        "--use_model",
+        "--model",
         type=str,
         default="efficientnet",
-        required=False,
+        choices=['efficientnet', 'alexnet'],
         help="Use either Efficientnet or Alexnet models. \
              If you want to achieve differential privacy, please use the Alexnet model",
     )
 
     args = parser.parse_args()
 
-    model = utils.load_efficientnet(classes=10)
-    if args.use_model == "alexnet":
+    if args.model == "alexnet":
         model = utils.load_alexnet(classes=10)
+    else:
+        model = utils.load_efficientnet(classes=10)
 
     model_parameters = [val.cpu().numpy() for _, val in model.state_dict().items()]
 
     # Create strategy
     strategy = fl.server.strategy.FedAvg(
-        fraction_fit=0.2,
-        fraction_evaluate=0.2,
+        fraction_fit=1.0,
+        fraction_evaluate=1.0,
         min_fit_clients=2,
         min_evaluate_clients=2,
-        min_available_clients=10,
+        min_available_clients=2,
         evaluate_fn=get_evaluate_fn(model, args.toy),
-        on_fit_config_fn=fit_config(2, args.use_model),
+        on_fit_config_fn=fit_config,
         on_evaluate_config_fn=evaluate_config,
         initial_parameters=fl.common.ndarrays_to_parameters(model_parameters),
     )

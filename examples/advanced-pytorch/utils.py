@@ -1,7 +1,7 @@
 import torch
 from torchvision.transforms import Compose, ToTensor, Normalize, Resize, CenterCrop
 from torch.utils.data import DataLoader
-
+from alexnet import AlexNet
 import warnings
 
 from flwr_datasets import FederatedDataset
@@ -133,5 +133,4 @@ def get_model_params(model):
 
 
 def load_alexnet(classes):
-    from alexnet import AlexNet
     return AlexNet(classes)
