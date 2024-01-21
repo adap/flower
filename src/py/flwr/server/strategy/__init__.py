@@ -57,4 +57,5 @@ __all__ = [
     "DPFedAvgAdaptive",
     "DPFedAvgFixed",
     "Strategy",
+    "DPStrategyWrapperClientSideAdaptiveClipping"
 ]
