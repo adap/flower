@@ -21,6 +21,74 @@ GRPC_MAX_MESSAGE_LENGTH: int = 536_870_912
 parent_path = os.getcwd()
 
 
+def get_eval_fn(ds_test, evaluation_step, num_classes, verbose):
+    """Return a function to evaluate the model during federated learning.
+
+    This function is used by the Flower framework to evaluate the model at specified
+    intervals using the provided test dataset.
+
+    Parameters
+    ----------
+    - ds_test (tf.data.Dataset): The dataset used for evaluation.
+
+    Returns
+    -------
+    - Function: An evaluation function that takes server_round, weights, and configs
+    as parameters and returns the loss and accuracy.
+    """
+
+    # pylint: disable=unused-argument
+    def evaluate(server_round, weights, configs):
+        # Clear session
+        # https://www.tensorflow.org/api_docs/python/tf/keras/backend/clear_session
+        tf.keras.backend.clear_session()
+        loss, acc = 0, 0
+        if (server_round - 1) % evaluation_step == 0:
+            model = Network(num_classes=num_classes).get_evaluation_network()
+            model.compile(
+                optimizer=tf.keras.optimizers.Adam(),
+                loss=tf.keras.losses.SparseCategoricalCrossentropy(
+                    from_logits=True, name="loss"
+                ),
+                metrics=[tf.keras.metrics.SparseCategoricalAccuracy(name="accuracy")],
+            )
+            model.set_weights(weights)
+            loss, acc = model.evaluate(ds_test, verbose=verbose)
+        gc.collect()
+        return float(loss), {"accuracy": float(acc)}
+
+    return evaluate
+
+
+def get_on_fit_config_fn(total_rounds: int, epochs: int, batch_size: int):
+    """Return a function to configure the federated learning fit process.
+
+    This function is called by the Flower framework to obtain configuration
+    parameters for each training round.
+
+    Returns
+    -------
+    - Function: A function that takes rounds, epochs, and batch_size
+    as parameters and returns a configuration dictionary.
+    """
+
+    # pylint: disable=unused-argument
+    def fit_config(server_round: int):
+        print(
+            f"\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n"
+            f"Server started {server_round}th round of training.\n"
+            f"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n"
+        )
+        return {
+            "rounds": str(total_rounds),
+            "c_round": str(server_round),
+            "epochs": str(epochs),
+            "batch_size": str(batch_size),
+        }
+
+    return fit_config
+
+
 class AudioServer:  # pylint: disable=too-many-instance-attributes
     """A server class for federated learning using Flower framework.
 
@@ -55,19 +123,12 @@ class AudioServer:  # pylint: disable=too-many-instance-attributes
         model_verbose,
     ):
         # Flower Parameters
-        self.evalution_step = flwr_evalution_step
         self.sample_fraction = float(flwr_min_sample_size / flwr_min_num_clients)
         # print("-" * 100)
         # print(self.sample_fraction)
         self.min_sample_size = flwr_min_sample_size
         self.min_num_clients = flwr_min_num_clients
         self.rounds = flwr_rounds
-        # Model Parameters
-        self.num_classes = model_num_classes
-        self.batch_size = model_batch_size
-        self.epochs = model_epochs
-        self.verbose = model_verbose
-        self.ds_test = model_ds_test
         # Local Variables Counters and Variables
         self.current_round = 0
         self.final_accuracy = 0.0
@@ -76,11 +137,18 @@ class AudioServer:  # pylint: disable=too-many-instance-attributes
             fraction_fit=self.sample_fraction,
             min_fit_clients=self.min_sample_size,
             min_available_clients=self.min_num_clients,
-            on_fit_config_fn=self.get_on_fit_config_fn(),
+            on_fit_config_fn=get_on_fit_config_fn(
+                self.rounds, model_epochs, model_batch_size
+            ),
             fraction_evaluate=0,
             min_evaluate_clients=0,
             on_evaluate_config_fn=None,
-            evaluate_fn=self.get_eval_fn(ds_test=self.ds_test),
+            evaluate_fn=get_eval_fn(
+                model_ds_test,
+                flwr_evalution_step,
+                num_classes=model_num_classes,
+                verbose=model_verbose,
+            ),
             accept_failures=True,
         )
         self.client_manager = flwr.server.client_manager.SimpleClientManager()
@@ -106,100 +174,6 @@ class AudioServer:  # pylint: disable=too-many-instance-attributes
             strategy=self.strategy,
             grpc_max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         )
-
-    def get_on_fit_config_fn(self):
-        """Return a function to configure the federated learning fit process.
-
-        This function is called by the Flower framework to obtain configuration
-        parameters for each training round.
-
-        Returns
-        -------
-        - Function: A function that takes rounds, epochs, and batch_size
-        as parameters and returns a configuration dictionary.
-        """
-
-        # pylint: disable=unused-argument
-        def fit_config(
-            rounds=self.rounds,
-            epochs=self.epochs,
-            batch_size=self.batch_size,
-        ):
-            if self.current_round != 1:
-                print(
-                    "\nTraining round completed in "
-                    + str(round(time.time() - self.round_time, 2))
-                    + " seconds."
-                )
-            print(
-                f"\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n"
-                f"Server started {self.current_round}th round of training.\n"
-                f"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n"
-            )
-            # Update round start time
-            self.round_time = time.time()
-            return {
-                "rounds": str(self.rounds),
-                "c_round": str(self.current_round),
-                "epochs": str(epochs),
-                "batch_size": str(batch_size),
-            }
-
-        return fit_config
-
-    def get_eval_fn(self, ds_test):
-        """Return a function to evaluate the model during federated learning.
-
-        This function is used by the Flower framework to evaluate the model at specified
-        intervals using the provided test dataset.
-
-        Parameters
-        ----------
-        - ds_test (tf.data.Dataset): The dataset used for evaluation.
-
-        Returns
-        -------
-        - Function: An evaluation function that takes server_round, weights, and configs
-        as parameters and returns the loss and accuracy.
-        """
-
-        # pylint: disable=unused-argument
-        def evaluate(servr_round, weights, configs):
-            # Clear session
-            # https://www.tensorflow.org/api_docs/python/tf/keras/backend/clear_session
-            tf.keras.backend.clear_session()
-            loss, acc = 0, 0
-            self.current_round += 1
-            if (self.current_round - 1) % self.evalution_step == 0:
-                model = Network(num_classes=self.num_classes).get_evaluation_network()
-                model.compile(
-                    optimizer=tf.keras.optimizers.Adam(),
-                    loss=tf.keras.losses.SparseCategoricalCrossentropy(
-                        from_logits=True, name="loss"
-                    ),
-                    metrics=[
-                        tf.keras.metrics.SparseCategoricalAccuracy(name="accuracy")
-                    ],
-                )
-                model.set_weights(weights)
-                loss, acc = model.evaluate(ds_test, verbose=self.verbose)
-                self.final_accuracy = acc
-            gc.collect()
-            return float(loss), {"accuracy": float(acc)}
-
-        return evaluate
-
-    def get_accuracy(self):
-        """Retrieve the final accuracy achieved by the model.
-
-        Returns the accuracy metric recorded in the last
-        evaluation step of the federated learning process.
-
-        Returns
-        -------
-        - float: The final accuracy value.
-        """
-        return self.final_accuracy
 
 
 def set_logger_level():
@@ -305,8 +279,6 @@ def main(cfg: DictConfig):
     # Run server
     set_logger_level()
     audio_server.server_start(cfg.server.server_address)
-    return f"""\nFinal Accuracy on experiment  {unique_id}:
-                {audio_server.get_accuracy():.04f}\n"""
 
 
 if __name__ == "__main__":
