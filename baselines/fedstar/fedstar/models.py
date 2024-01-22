@@ -290,6 +290,7 @@ class PslNetwork(tf.keras.Model):  # pylint: disable=abstract-method
         self.history.on_train_begin()
         for epoch in range(epochs):
             start, epoch_loss = time.time(), 0.0
+            # Threshold value to get good psuedo labels, part of Eq-5
             self.confidence = __class__.cosine_confidence_scheduler(
                 step=c_round, total_steps=rounds
             )
@@ -357,15 +358,18 @@ class PslNetwork(tf.keras.Model):  # pylint: disable=abstract-method
             masked_logits, masked_labels = tf.boolean_mask(
                 logits, labeled_mask
             ), tf.boolean_mask(labels, labeled_mask)
+            # Equation 4: Loss function for labelled images.
             loss_labeled = (
                 tf.reduce_sum(self.loss_fn(labels=masked_labels, logits=masked_logits))
                 / num_labeled
             )
+            # Equation 5: Psuedo labels for the unlabelled images.
             pseudo_labels = tf.stop_gradient(input=tf.nn.softmax(logits / T))
             pseudo_mask = tf.cast(
                 tf.reduce_max(pseudo_labels, axis=1) >= self.confidence,
                 dtype=tf.float32,
             )
+            # Equation 6: Loss function for unlabelled images.
             loss_unlabeled = (
                 tf.reduce_sum(
                     (
@@ -381,6 +385,7 @@ class PslNetwork(tf.keras.Model):  # pylint: disable=abstract-method
                 )
                 / num_unlabeled
             )
+            # Equation 7: loss of kth client in rth round (Eq-4 + Eq-6)
             total_loss = tf.add_n(
                 [
                     ((1 - self.aux_loss_weight) * loss_labeled)

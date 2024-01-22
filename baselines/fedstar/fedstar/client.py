@@ -23,7 +23,7 @@ class AudioClient(
     It extends NumpyClient feature because flower internally requires a NumpyClient.
     """
 
-    # pylint: disable=too-many-arguments, too-many-locals
+    # pylint: disable=too-many-arguments, too-many-locals, unexpected-keyword-arg
     def __init__(
         self,
         client_id,
@@ -92,7 +92,7 @@ class AudioClient(
                     from_logits=True, name="loss"
                 ),
                 metrics=[tf.keras.metrics.SparseCategoricalAccuracy(name="accuracy")],
-            )
+            )  # type: ignore
 
         # tf.keras.backend.clear_session()
 
@@ -100,6 +100,7 @@ class AudioClient(
         """Return the current client model weights."""
         return self.weights
 
+    # pylint: disable=no-value-for-parameter
     def fit(self, parameters, config):
         """Update the current client model weights."""
         self.local_train_round += 1
