@@ -5,3 +5,9 @@
 
 # Flower Baselines
 /baselines @jafermarq @tanertopal @danieljanes
+
+# Flower Examples
+/examples @jafermarq @tanertopal @danieljanes
+
+# Changelog
+/doc/source/ref-changelog.md @jafermarq @tanertopal @danieljanes

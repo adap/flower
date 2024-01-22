@@ -22,8 +22,8 @@ from grpc import RpcError, StatusCode
 
 from flwr.common.retry_invoker import RetryInvoker, exponential
 from flwr.driver.grpc_driver import DEFAULT_SERVER_ADDRESS_DRIVER, GrpcDriver
-from flwr.proto.driver_pb2 import (
-    CreateWorkloadRequest,
+from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
+    CreateRunRequest,
     GetNodesRequest,
     GetNodesResponse,
     PullTaskResRequest,
@@ -31,8 +31,8 @@ from flwr.proto.driver_pb2 import (
     PushTaskInsRequest,
     PushTaskInsResponse,
 )
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 
 class Driver:
@@ -63,7 +63,7 @@ class Driver:
         self.addr = driver_service_address
         self.root_certificates = root_certificates
         self.grpc_driver: Optional[GrpcDriver] = None
-        self.workload_id: Optional[int] = None
+        self.run_id: Optional[int] = None
         self.node = Node(node_id=0, anonymous=True)
         self.lock = Lock()
         # Initialize invoker
@@ -91,11 +91,11 @@ class Driver:
                 res = self.grpc_driver.create_workload(CreateWorkloadRequest())
                 self.workload_id = res.workload_id
 
-        return self.grpc_driver, self.workload_id
+        return self.grpc_driver, self.run_id
 
     def get_nodes(self) -> List[Node]:
         """Get node IDs."""
-        grpc_driver, workload_id = self._get_grpc_driver_and_workload_id()
+        grpc_driver, run_id = self._get_grpc_driver_and_run_id()
 
         # Call GrpcDriver method
         req = GetNodesRequest(workload_id=workload_id)
@@ -107,11 +107,11 @@ class Driver:
 
     def push_task_ins(self, task_ins_list: List[TaskIns]) -> List[str]:
         """Schedule tasks."""
-        grpc_driver, workload_id = self._get_grpc_driver_and_workload_id()
+        grpc_driver, run_id = self._get_grpc_driver_and_run_id()
 
-        # Set workload_id
+        # Set run_id
         for task_ins in task_ins_list:
-            task_ins.workload_id = workload_id
+            task_ins.run_id = run_id
 
         # Call GrpcDriver method
         req = PushTaskInsRequest(task_ins_list=task_ins_list)
@@ -123,7 +123,7 @@ class Driver:
 
     def pull_task_res(self, task_ids: Iterable[str]) -> List[TaskRes]:
         """Get task results."""
-        grpc_driver, _ = self._get_grpc_driver_and_workload_id()
+        grpc_driver, _ = self._get_grpc_driver_and_run_id()
 
         # Call GrpcDriver method
         req = PullTaskResRequest(node=self.node, task_ids=task_ids)
