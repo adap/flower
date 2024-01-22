@@ -32,6 +32,16 @@ from flwr.client.run_state import RunState
 from flwr.client.secure_aggregation import SecureAggregationHandler
 from flwr.client.typing import ClientFn
 from flwr.common import serde
+from flwr.common.flowercontext import FlowerContext
+from flwr.common.recordset_utils import (
+    evaluate_res_to_recordset,
+    fit_res_to_recordset,
+    getparameters_res_to_recordset,
+    getproperties_res_to_recordset,
+    recordset_to_evaluate_ins,
+    recordset_to_fit_ins,
+    recordset_to_getparameters_ins,
+)
 from flwr.proto.task_pb2 import (  # pylint: disable=E0611
     SecureAggregation,
     Task,
@@ -175,6 +185,48 @@ def handle_legacy_message(
     if message:
         return message, client.get_state()
     raise UnknownServerMessage()
+
+
+def handle_legacy_message_from_tasktype(
+    client_fn: ClientFn, context: FlowerContext
+) -> FlowerContext:
+    """Handles legacy message inthe inner most middleware layer."""
+    client = client_fn("-1")
+    task_type = context.metadata.task_type
+
+    if task_type == "get_properties_ins":
+        get_properties_ins = recordset_to_getparameters_ins(context.in_message)
+        get_properties_res = maybe_call_get_properties(
+            client=client,
+            get_properties_ins=get_properties_ins,
+        )
+        context.out_message = getproperties_res_to_recordset(get_properties_res)
+    elif task_type == "get_parameteres_ins":
+        get_parameters_ins = recordset_to_getparameters_ins(context.in_message)
+        get_parameters_res = maybe_call_get_parameters(
+            client=client,
+            get_parameters_ins=get_parameters_ins,
+        )
+        context.out_message = getparameters_res_to_recordset(get_parameters_res)
+    elif task_type == "fit_ins":
+        fit_ins = recordset_to_fit_ins(context.in_message)
+        fit_res = maybe_call_fit(
+            client=client,
+            fit_ins=fit_ins,
+        )
+        context.out_message = fit_res_to_recordset(fit_res, keep_input=False)
+    elif task_type == "evaluate_ins":
+        evaluate_ins = recordset_to_evaluate_ins(context.in_message)
+        evaluate_res = maybe_call_evaluate(
+            client=client,
+            evaluate_ins=evaluate_ins,
+        )
+        context.out_message = evaluate_res_to_recordset(evaluate_res)
+    else:
+        # TODO: what to do with reconnect?
+        print("do something")
+
+    return context
 
 
 def _reconnect(
