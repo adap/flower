@@ -19,10 +19,10 @@ from typing import Dict, OrderedDict, Union, cast
 
 # pylint: disable=E0611
 from flwr.proto import transport_pb2 as pb2
-from flwr.proto.recordset_pb2 import Array as ArrayProto
-from flwr.proto.recordset_pb2 import ConfigsRecord as ConfigsRecordProto
-from flwr.proto.recordset_pb2 import MetricsRecord as MetricsRecordProto
-from flwr.proto.recordset_pb2 import ParametersRecord as ParametersRecordProto
+from flwr.proto.recordset_pb2 import Array as ProtoArray
+from flwr.proto.recordset_pb2 import ConfigsRecord as ProtoConfigsRecord
+from flwr.proto.recordset_pb2 import MetricsRecord as ProtoMetricsRecord
+from flwr.proto.recordset_pb2 import ParametersRecord as ProtoParametersRecord
 
 # pylint: enable=E0611
 from . import typing
@@ -186,7 +186,7 @@ def test_array_serialization_deserialization() -> None:
     deserialized = array_from_proto(proto)
 
     # Assert
-    assert isinstance(proto, ArrayProto)
+    assert isinstance(proto, ProtoArray)
     assert original == deserialized
 
 
@@ -208,7 +208,7 @@ def test_parameters_record_serialization_deserialization() -> None:
     deserialized = parameters_record_from_proto(proto)
 
     # Assert
-    assert isinstance(proto, ParametersRecordProto)
+    assert isinstance(proto, ProtoParametersRecord)
     assert original.data == deserialized.data
 
 
@@ -224,7 +224,7 @@ def test_metrics_record_serialization_deserialization() -> None:
     deserialized = metrics_record_from_proto(proto)
 
     # Assert
-    assert isinstance(proto, MetricsRecordProto)
+    assert isinstance(proto, ProtoMetricsRecord)
     assert original.data == deserialized.data
 
 
@@ -240,5 +240,5 @@ def test_configs_record_serialization_deserialization() -> None:
     deserialized = configs_record_from_proto(proto)
 
     # Assert
-    assert isinstance(proto, ConfigsRecordProto)
+    assert isinstance(proto, ProtoConfigsRecord)
     assert original.data == deserialized.data
