@@ -15,7 +15,6 @@ server:
   eval_step: 1
   train_epochs: 1
   batch_size: 64
-  learning_rate: 0.001
   dataset_name: ${dataset_name}
   seed: 2021
   verbose: 1
@@ -27,6 +26,7 @@ client:
   dataset_name: ${dataset_name}
   seed: 2021
   batch_size: 64
+  learning_rate: 0.001
   l_per: 1.00
   u_per: 0.00
   fedstar: false

@@ -33,6 +33,7 @@ class AudioClient(
         parent_path,
         variance=0.25,
         batch_size=64,
+        learning_rate=0.001,
         l_per=0.2,
         u_per=1.0,
         class_distribute: bool = False,
@@ -77,7 +78,23 @@ class AudioClient(
         self.local_evaluate_round = 0
         self.weights = Network.get_init_weights(num_classes=self.num_classes)
         self.history: Dict[str, List[float]] = {"loss": [], "accuracy": []}
-        tf.keras.backend.clear_session()
+
+        if self.fedstar:
+            self.model = PslNetwork(
+                num_classes=self.num_classes, aux_loss_weight=self.aux_loss_weight
+            )
+            self.model.compile(optimizer=tf.keras.optimizers.Adam(float(learning_rate)))
+        else:
+            self.model = Network(num_classes=self.num_classes).get_network()
+            self.model.compile(
+                optimizer=tf.keras.optimizers.Adam(float(learning_rate)),
+                loss=tf.keras.losses.SparseCategoricalCrossentropy(
+                    from_logits=True, name="loss"
+                ),
+                metrics=[tf.keras.metrics.SparseCategoricalAccuracy(name="accuracy")],
+            )
+
+        # tf.keras.backend.clear_session()
 
     def get_parameters(self, config):
         """Return the current client model weights."""
@@ -86,17 +103,10 @@ class AudioClient(
     def fit(self, parameters, config):
         """Update the current client model weights."""
         self.local_train_round += 1
-        self.weights = parameters
         # Run Training Proccess
         if self.fedstar:
-            model = PslNetwork(
-                num_classes=self.num_classes, aux_loss_weight=self.aux_loss_weight
-            )
-            model.compile(
-                optimizer=tf.keras.optimizers.Adam(float(config["learning_rate"]))
-            )
-            model.set_weights(parameters)
-            history = model.fit(
+            self.model.set_weights(parameters)
+            history = self.model.fit(
                 (self.train_labelled, self.train_unlabelled),
                 num_batches=self.num_batches,
                 epochs=int(config["epochs"]),
@@ -105,16 +115,8 @@ class AudioClient(
                 verbose=self.verbose,
             )
         else:
-            model = Network(num_classes=self.num_classes).get_network()
-            model.compile(
-                optimizer=tf.keras.optimizers.Adam(float(config["learning_rate"])),
-                loss=tf.keras.losses.SparseCategoricalCrossentropy(
-                    from_logits=True, name="loss"
-                ),
-                metrics=[tf.keras.metrics.SparseCategoricalAccuracy(name="accuracy")],
-            )
-            model.set_weights(parameters)
-            history = model.fit(
+            self.model.set_weights(parameters)
+            history = self.model.fit(
                 self.train_labelled,
                 batch_size=int(config["batch_size"]),
                 epochs=int(config["epochs"]),
@@ -128,11 +130,10 @@ class AudioClient(
             accuracy {history.history['accuracy'][0]:.4f}"""
         )
         # Clear Memory
-        tf.keras.backend.clear_session()
+        # tf.keras.backend.clear_session()
         gc.collect()
-        weights = model.get_weights()
         return (
-            weights,
+            self.model.get_weights(),
             self.num_examples_train,
             {"local_train_round": self.local_train_round},
         )

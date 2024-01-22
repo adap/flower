@@ -64,6 +64,7 @@ class Client(Process):
                 l_per=cfg["l_per"],
                 u_per=cfg["u_per"],
                 batch_size=cfg["batch_size"],
+                learning_rate=cfg["learning_rate"],
                 verbose=cfg["verbose"],
                 seed=cfg["seed"],
                 fedstar=cfg["fedstar"],
@@ -147,7 +148,7 @@ def distribute_gpus(num_clients, client_memory=1024):
     # Manually specify the memory you want to expose in each GPU
     gpu_total_mem = []  # Adjust based on your GPUs
 
-    if gpus and len(gpu_total_mem)==0:
+    if gpus and len(gpu_total_mem) == 0:
         print("If you want to enable GPU training, please set `gpu_total_mem`")
 
     gpu_free_mem = gpu_total_mem.copy()
@@ -208,6 +209,7 @@ def main(cfg):
             "server_address": cfg.client.server_address,
             "dataset_dir": dataset_name,
             "batch_size": cfg.client.batch_size,
+            "learning_rate": cfg.client.learning_rate,
             "gpu_id": clients_gpu[i],
             "gpu_memory": cfg.client.gpu_memory,
             "seed": cfg.client.seed,

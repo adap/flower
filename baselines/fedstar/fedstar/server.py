@@ -35,7 +35,6 @@ class AudioServer:  # pylint: disable=too-many-instance-attributes
     - flwr_min_num_clients (int): Minimum number of clients for federated learning.
     - flwr_rounds (int): Number of federated learning rounds.
     - model_num_classes (int): Number of classes for the model.
-    - model_lr (float): Learning rate for the model.
     - model_batch_size (int): Batch size for model training.
     - model_epochs (int): Number of epochs for model training.
     - model_ds_test (tf.data.Dataset): Dataset for testing the model.
@@ -50,7 +49,6 @@ class AudioServer:  # pylint: disable=too-many-instance-attributes
         flwr_min_num_clients,
         flwr_rounds,
         model_num_classes,
-        model_lr,
         model_batch_size,
         model_epochs,
         model_ds_test,
@@ -66,7 +64,6 @@ class AudioServer:  # pylint: disable=too-many-instance-attributes
         self.rounds = flwr_rounds
         # Model Parameters
         self.num_classes = model_num_classes
-        self.learning_rate = model_lr
         self.batch_size = model_batch_size
         self.epochs = model_epochs
         self.verbose = model_verbose
@@ -87,7 +84,6 @@ class AudioServer:  # pylint: disable=too-many-instance-attributes
             accept_failures=True,
         )
         self.client_manager = flwr.server.client_manager.SimpleClientManager()
-        tf.keras.backend.clear_session()
 
     def server_start(self, server_address):
         """Start the federated learning server with the given address.
@@ -119,7 +115,7 @@ class AudioServer:  # pylint: disable=too-many-instance-attributes
 
         Returns
         -------
-        - Function: A function that takes rounds, epochs, batch_size, and learning_rate
+        - Function: A function that takes rounds, epochs, and batch_size
         as parameters and returns a configuration dictionary.
         """
 
@@ -128,7 +124,6 @@ class AudioServer:  # pylint: disable=too-many-instance-attributes
             rounds=self.rounds,
             epochs=self.epochs,
             batch_size=self.batch_size,
-            learning_rate=self.learning_rate,
         ):
             if self.current_round != 1:
                 print(
@@ -148,7 +143,6 @@ class AudioServer:  # pylint: disable=too-many-instance-attributes
                 "c_round": str(self.current_round),
                 "epochs": str(epochs),
                 "batch_size": str(batch_size),
-                "learning_rate": str(learning_rate),
             }
 
         return fit_config
@@ -171,12 +165,15 @@ class AudioServer:  # pylint: disable=too-many-instance-attributes
 
         # pylint: disable=unused-argument
         def evaluate(servr_round, weights, configs):
+            # Clear session
+            # https://www.tensorflow.org/api_docs/python/tf/keras/backend/clear_session
+            tf.keras.backend.clear_session()
             loss, acc = 0, 0
             self.current_round += 1
             if (self.current_round - 1) % self.evalution_step == 0:
                 model = Network(num_classes=self.num_classes).get_evaluation_network()
                 model.compile(
-                    optimizer=tf.keras.optimizers.Adam(self.learning_rate),
+                    optimizer=tf.keras.optimizers.Adam(),
                     loss=tf.keras.losses.SparseCategoricalCrossentropy(
                         from_logits=True, name="loss"
                     ),
@@ -187,8 +184,7 @@ class AudioServer:  # pylint: disable=too-many-instance-attributes
                 model.set_weights(weights)
                 loss, acc = model.evaluate(ds_test, verbose=self.verbose)
                 self.final_accuracy = acc
-                # Clear Memory
-                clear_memory()
+            gc.collect()
             return float(loss), {"accuracy": float(acc)}
 
         return evaluate
@@ -204,16 +200,6 @@ class AudioServer:  # pylint: disable=too-many-instance-attributes
         - float: The final accuracy value.
         """
         return self.final_accuracy
-
-
-def clear_memory():
-    """Clear the TensorFlow session and collect garbage.
-
-    This function is used to free up memory by clearing the TensorFlow backend session
-    and invoking garbage collection.
-    """
-    gc.collect()
-    tf.keras.backend.clear_session()
 
 
 def set_logger_level():
@@ -311,7 +297,6 @@ def main(cfg: DictConfig):
         flwr_min_num_clients=cfg.server.num_clients,
         flwr_rounds=cfg.server.rounds,
         model_num_classes=num_classes,
-        model_lr=cfg.server.learning_rate,
         model_batch_size=cfg.server.batch_size,
         model_epochs=cfg.server.train_epochs,
         model_ds_test=ds_test,
