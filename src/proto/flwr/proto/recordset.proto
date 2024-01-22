@@ -1,4 +1,4 @@
-// Copyright 2022 Flower Labs GmbH. All Rights Reserved.
+// Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,39 +17,32 @@ syntax = "proto3";
 
 package flwr.proto;
 
-import "flwr/proto/node.proto";
-import "flwr/proto/recordset.proto";
-import "flwr/proto/transport.proto";
+message DoubleList { repeated double vals = 1; }
+message Sint64List { repeated sint64 vals = 1; }
+message BoolList { repeated bool vals = 1; }
+message StringList { repeated string vals = 1; }
+message BytesList { repeated bytes vals = 1; }
 
-message Task {
-  Node producer = 1;
-  Node consumer = 2;
-  string created_at = 3;
-  string delivered_at = 4;
-  string ttl = 5;
-  repeated string ancestry = 6;
-  string task_type = 7;
-  SecureAggregation sa = 8;
-
-  ServerMessage legacy_server_message = 101 [ deprecated = true ];
-  ClientMessage legacy_client_message = 102 [ deprecated = true ];
+message Array {
+  string dtype = 1;
+  repeated int32 shape = 2;
+  string stype = 3;
+  bytes data = 4;
 }
 
-message TaskIns {
-  string task_id = 1;
-  string group_id = 2;
-  sint64 run_id = 3;
-  Task task = 4;
+message MetricsRecordValue {
+  oneof value {
+    // Single element
+    double double = 1;
+    sint64 sint64 = 2;
+
+    // List types
+    DoubleList double_list = 21;
+    Sint64List sint64_list = 22;
+  }
 }
 
-message TaskRes {
-  string task_id = 1;
-  string group_id = 2;
-  sint64 run_id = 3;
-  Task task = 4;
-}
-
-message Value {
+message ConfigsRecordValue {
   oneof value {
     // Single element
     double double = 1;
@@ -67,4 +60,11 @@ message Value {
   }
 }
 
-message SecureAggregation { map<string, Value> named_values = 1; }
+message ParametersRecord {
+  repeated string data_keys = 1;
+  repeated Array data_values = 2;
+}
+
+message MetricsRecord { map<string, MetricsRecordValue> data = 1; }
+
+message ConfigsRecord { map<string, ConfigsRecordValue> data = 1; }
