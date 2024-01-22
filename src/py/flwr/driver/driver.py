@@ -78,18 +78,18 @@ class Driver:
             )
         self.invoker = invoker
 
-    def _get_grpc_driver_and_workload_id(self) -> Tuple[GrpcDriver, int]:
+    def _get_grpc_driver_and_run_id(self) -> Tuple[GrpcDriver, int]:
         # Check if the GrpcDriver is initialized
         with self.lock:
-            if self.grpc_driver is None or self.workload_id is None:
-                # Connect and create workload
+            if self.grpc_driver is None or self.run_id is None:
+                # Connect and create run
                 self.grpc_driver = GrpcDriver(
                     driver_service_address=self.addr,
                     root_certificates=self.root_certificates,
                 )
                 self.grpc_driver.connect()
-                res = self.grpc_driver.create_workload(CreateWorkloadRequest())
-                self.workload_id = res.workload_id
+                res = self.grpc_driver.create_run(CreateRunRequest())
+                self.run_id = res.run_id
 
         return self.grpc_driver, self.run_id
 
@@ -98,7 +98,7 @@ class Driver:
         grpc_driver, run_id = self._get_grpc_driver_and_run_id()
 
         # Call GrpcDriver method
-        req = GetNodesRequest(workload_id=workload_id)
+        req = GetNodesRequest(run_id=run_id)
         with self.lock:
             res = cast(
                 GetNodesResponse, self.invoker.invoke(grpc_driver.get_nodes, req)
