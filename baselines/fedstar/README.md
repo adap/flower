@@ -22,7 +22,7 @@ dataset: [Ambient Context, Speech Commands]
 
 **Datasets:** Ambient Context, Speech Commands
 
-**Hardware Setup:** These experiments were run on a linux server with 56 CPU threads with 325 GB Ram with A10 GPU in it. Any machine with 8 CPU cores and 16 GB memory or more would be able to run initall experiments with small number of clients in a reasonable amount of time. 
+**Hardware Setup:** These experiments were run on a linux server with 56 CPU threads with 325 GB Ram with A10 GPU in it. Any machine with 16 CPU cores and 32 GB memory would be able to run experiments with small number of clients in a reasonable amount of time. For context, a machine with 24 cores and a RTX3090Ti ran the Speech Commands experiment with 10 clients in 1h. For this examperiment 30GB of RAM was used and clients required ~1.4GB of VRAM each.
 
 **Contributors:** Raj Parekh [GitHub](https://github.com/Raj-Parekh24), [Mail](rajparekhwc@gmail.com)
 
@@ -67,6 +67,7 @@ python -m fedstar.dataset_preparation
 #          The modified varaible will looks like below.
 gpu_free_mem = [8000,4000]
 ```
+
 
 
 ## Running the Experiments
