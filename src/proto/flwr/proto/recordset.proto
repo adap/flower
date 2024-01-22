@@ -17,8 +17,6 @@ syntax = "proto3";
 
 package flwr.proto;
 
-import "flwr/proto/task.proto";
-
 message DoubleList { repeated double list = 1; }
 message Sint64List { repeated sint64 list = 1; }
 message BoolList { repeated bool list = 1; }
@@ -67,6 +65,6 @@ message ParametersRecord {
   repeated Array data_values = 2;
 }
 
-message MetricsRecord { map<string, Value> data = 1; }
+message MetricsRecord { map<string, MetricsRecordValue> data = 1; }
 
-message ConfigsRecord { map<string, Value> data = 1; }
+message ConfigsRecord { map<string, ConfigsRecordValue> data = 1; }

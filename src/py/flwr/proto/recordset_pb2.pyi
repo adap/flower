@@ -3,7 +3,6 @@
 isort:skip_file
 """
 import builtins
-import flwr.proto.task_pb2
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
 import google.protobuf.message
@@ -194,21 +193,21 @@ class MetricsRecord(google.protobuf.message.Message):
         VALUE_FIELD_NUMBER: builtins.int
         key: typing.Text
         @property
-        def value(self) -> flwr.proto.task_pb2.Value: ...
+        def value(self) -> global___MetricsRecordValue: ...
         def __init__(self,
             *,
             key: typing.Text = ...,
-            value: typing.Optional[flwr.proto.task_pb2.Value] = ...,
+            value: typing.Optional[global___MetricsRecordValue] = ...,
             ) -> None: ...
         def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
         def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
     DATA_FIELD_NUMBER: builtins.int
     @property
-    def data(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.task_pb2.Value]: ...
+    def data(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___MetricsRecordValue]: ...
     def __init__(self,
         *,
-        data: typing.Optional[typing.Mapping[typing.Text, flwr.proto.task_pb2.Value]] = ...,
+        data: typing.Optional[typing.Mapping[typing.Text, global___MetricsRecordValue]] = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["data",b"data"]) -> None: ...
 global___MetricsRecord = MetricsRecord
@@ -221,21 +220,21 @@ class ConfigsRecord(google.protobuf.message.Message):
         VALUE_FIELD_NUMBER: builtins.int
         key: typing.Text
         @property
-        def value(self) -> flwr.proto.task_pb2.Value: ...
+        def value(self) -> global___ConfigsRecordValue: ...
         def __init__(self,
             *,
             key: typing.Text = ...,
-            value: typing.Optional[flwr.proto.task_pb2.Value] = ...,
+            value: typing.Optional[global___ConfigsRecordValue] = ...,
             ) -> None: ...
         def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
         def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
     DATA_FIELD_NUMBER: builtins.int
     @property
-    def data(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.task_pb2.Value]: ...
+    def data(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___ConfigsRecordValue]: ...
     def __init__(self,
         *,
-        data: typing.Optional[typing.Mapping[typing.Text, flwr.proto.task_pb2.Value]] = ...,
+        data: typing.Optional[typing.Mapping[typing.Text, global___ConfigsRecordValue]] = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["data",b"data"]) -> None: ...
 global___ConfigsRecord = ConfigsRecord

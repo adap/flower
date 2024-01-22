@@ -18,6 +18,7 @@ syntax = "proto3";
 package flwr.proto;
 
 import "flwr/proto/node.proto";
+import "flwr/proto/recordset.proto";
 import "flwr/proto/transport.proto";
 
 message Task {
@@ -49,12 +50,6 @@ message TaskRes {
 }
 
 message Value {
-  message DoubleList { repeated double vals = 1; }
-  message Sint64List { repeated sint64 vals = 1; }
-  message BoolList { repeated bool vals = 1; }
-  message StringList { repeated string vals = 1; }
-  message BytesList { repeated bytes vals = 1; }
-
   oneof value {
     // Single element
     double double = 1;
