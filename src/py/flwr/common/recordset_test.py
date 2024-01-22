@@ -16,15 +16,18 @@
 
 from contextlib import nullcontext
 from copy import deepcopy
+from functools import partial
 from typing import Any, Callable, Dict, List, OrderedDict, Type, Union
 
 import numpy as np
 import pytest
 
 from .configsrecord import ConfigsRecord
+from .flowercontext import FlowerContext, Metadata
 from .metricsrecord import MetricsRecord
 from .parameter import ndarrays_to_parameters, parameters_to_ndarrays
 from .parametersrecord import Array, ParametersRecord
+from .recordset import RecordSet
 from .recordset_utils import (
     evaluate_ins_to_recordset,
     evaluate_res_to_recordset,
@@ -372,12 +375,34 @@ def test_set_configs_to_configsrecord_with_incorrect_types(
 ##################################################
 
 
+def _get_valid_fitins() -> FitIns:
+    arrays = get_ndarrays()
+    return FitIns(parameters=ndarrays_to_parameters(arrays), config={"a": 1.0, "b": 0})
+
+
+def _get_valid_evaluateins() -> EvaluateIns:
+    fit_ins = _get_valid_fitins()
+    return EvaluateIns(parameters=fit_ins.parameters, config=fit_ins.config)
+
+
+def _get_valid_getparametersins() -> GetParametersIns:
+    config_dict: Dict[str, Scalar] = {
+        "a": 1.0,
+        "b": 3,
+        "c": True,
+    }  # valid since both Ins/Res communicate over ConfigsRecord
+
+    return GetParametersIns(config_dict)
+
+
+def _get_valid_getpropertiesins() -> GetPropertiesIns:
+    getparamsins = _get_valid_getparametersins()
+    return GetPropertiesIns(config=getparamsins.config)
+
+
 def test_fitins_to_recordset_and_back() -> None:
     """Test conversion FitIns --> RecordSet --> FitIns."""
-    arrays = get_ndarrays()
-    fitins = FitIns(
-        parameters=ndarrays_to_parameters(arrays), config={"a": 1.0, "b": 0}
-    )
+    fitins = _get_valid_fitins()
 
     fitins_copy = deepcopy(fitins)
 
@@ -423,10 +448,7 @@ def test_fitres_to_recordset_and_back(context: Any, metrics: Dict[str, Scalar]) 
 
 def test_evaluateins_to_recordset_and_back() -> None:
     """Test conversion EvaluateIns --> RecordSet --> EvaluateIns."""
-    arrays = get_ndarrays()
-    evaluateins = EvaluateIns(
-        parameters=ndarrays_to_parameters(arrays), config={"a": 1.0, "b": 0}
-    )
+    evaluateins = _get_valid_evaluateins()
 
     evaluateins_copy = deepcopy(evaluateins)
 
@@ -473,13 +495,7 @@ def test_evaluateres_to_recordset_and_back(
 
 def test_get_properties_ins_to_recordset_and_back() -> None:
     """Test conversion GetPropertiesIns --> RecordSet --> GetPropertiesIns."""
-    config_dict: Dict[str, Scalar] = {
-        "a": 1.0,
-        "b": 3,
-        "c": True,
-    }  # valid since both Ins/Res communicate over ConfigsRecord
-
-    getproperties_ins = GetPropertiesIns(config_dict)
+    getproperties_ins = _get_valid_getpropertiesins()
 
     getproperties_ins_copy = deepcopy(getproperties_ins)
 
@@ -511,13 +527,7 @@ def test_get_properties_res_to_recordset_and_back() -> None:
 
 def test_get_parameters_ins_to_recordset_and_back() -> None:
     """Test conversion GetParametersIns --> RecordSet --> GetParametersIns."""
-    config_dict: Dict[str, Scalar] = {
-        "a": 1.0,
-        "b": 3,
-        "c": True,
-    }  # valid since both Ins/Res communicate over ConfigsRecord
-
-    getparameters_ins = GetParametersIns(config_dict)
+    getparameters_ins = _get_valid_getparametersins()
 
     getparameters_ins_copy = deepcopy(getparameters_ins)
 
@@ -541,3 +551,49 @@ def test_get_parameters_res_to_recordset_and_back() -> None:
     getparameteres_res_ = recordset_to_getparameters_res(recordset)
 
     assert getparameters_res_copy == getparameteres_res_
+
+
+@pytest.mark.parametrize(
+    "ins, convert_fn, task_type",
+    [
+        (_get_valid_fitins, partial(fit_ins_to_recordset, keep_input=False), "fit_ins"),
+        (
+            _get_valid_evaluateins,
+            partial(evaluate_ins_to_recordset, keep_input=False),
+            "evaluate_ins",
+        ),
+        (
+            _get_valid_getpropertiesins,
+            getproperties_ins_to_recordset,
+            "get_properties_ins",
+        ),
+        (
+            _get_valid_getparametersins,
+            getparameters_ins_to_recordset,
+            "get_parameters_ins",
+        ),
+    ],
+)
+def test_flowercontext_driver_to_client(
+    ins: Union[FitIns, EvaluateIns, GetPropertiesIns, GetParametersIns],
+    convert_fn: Union[
+        Callable[[FitIns], RecordSet],
+        Callable[[EvaluateIns], RecordSet],
+        Callable[[GetPropertiesIns], RecordSet],
+        Callable[[GetParametersIns], RecordSet],
+    ],
+    task_type: str,
+) -> None:
+    """."""
+    f_context = FlowerContext(
+        in_message=RecordSet,
+        out_message=convert_fn(ins()),
+        local=RecordSet(),
+        metadata=Metadata(
+            run_id=0, task_id="", group_id="", ttl="", task_type=task_type
+        ),
+    )
+
+    # TODO: embedd `f_context` in TaskIns
+
+    # Construct FlowerContext from TaskIns
