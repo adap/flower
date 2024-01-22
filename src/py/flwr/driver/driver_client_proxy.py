@@ -155,6 +155,10 @@ class DriverClientProxy(ClientProxy):
             )
             if len(task_res_list) == 1:
                 task_res = task_res_list[0]
+                if not task_res.HasField("task") or not task_res.HasField(
+                    "legacy_client_message"
+                ):
+                    raise ValueError("Exception during client-side task execution")
                 return serde.client_message_from_proto(  # type: ignore
                     task_res.task.legacy_client_message
                 )

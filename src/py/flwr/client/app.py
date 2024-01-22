@@ -18,7 +18,7 @@
 import argparse
 import sys
 import time
-from logging import INFO, WARN
+from logging import ERROR, INFO, WARN
 from pathlib import Path
 from typing import Callable, ContextManager, Optional, Tuple, Union
 
@@ -35,7 +35,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPES,
 )
 from flwr.common.logger import log, warn_experimental_feature
-from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 
 from .flower import load_flower_callable
 from .grpc_client.connection import grpc_connection
@@ -362,7 +362,23 @@ def _start_client_internal(
                     task_ins=task_ins,
                     state=node_state.retrieve_runstate(run_id=task_ins.run_id),
                 )
-                bwd_msg: Bwd = app(fwd=fwd_msg)
+                try:
+                    bwd_msg: Bwd = app(fwd=fwd_msg)
+                except Exception as ex:
+                    log(ERROR, "FlowerCallable raised the following exception:\n\n", ex)
+
+                    # Don't update/change RunState
+                    # Return empty TaskRes
+                    error_task_res = TaskRes(
+                        task_id="",
+                        group_id="",
+                        run_id=0,
+                        task=Task(
+                            ancestry=[],
+                        ),
+                    )
+                    send(error_task_res)
+                    continue
 
                 # Update node state
                 node_state.update_runstate(
