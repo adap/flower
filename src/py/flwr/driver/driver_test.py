@@ -170,9 +170,9 @@ class TestDriverRetryMechanism(unittest.TestCase):
     def setUp(self) -> None:
         """Initialize mock GrpcDriver and Driver instance before each test."""
         mock_response = Mock()
-        mock_response.workload_id = 61016
+        mock_response.run_id = 61016
         self.mock_grpc_driver = Mock()
-        self.mock_grpc_driver.create_workload.return_value = mock_response
+        self.mock_grpc_driver.create_run.return_value = mock_response
         self.patcher = patch(
             "flwr.driver.driver.GrpcDriver", return_value=self.mock_grpc_driver
         )
