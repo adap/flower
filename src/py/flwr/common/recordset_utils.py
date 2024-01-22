@@ -110,32 +110,6 @@ def parameters_to_parametersrecord(
     return p_record
 
 
-def _check_mapping_from_scalar_to_metricsrecordstypes(
-    scalar_config: Dict[str, Scalar],
-) -> Dict[str, MetricsRecordValues]:
-    """."""
-    for value in scalar_config.values():
-        if not isinstance(value, get_args(MetricsRecordValues)):
-            raise TypeError(
-                f"Supported types are {MetricsRecordValues}. "
-                f"But you used type: {type(value)}"
-            )
-    return cast(Dict[str, MetricsRecordValues], scalar_config)
-
-
-def _check_mapping_from_scalar_to_configsrecordstypes(
-    scalar_config: Dict[str, Scalar],
-) -> Dict[str, ConfigsRecordValues]:
-    """."""
-    for value in scalar_config.values():
-        if not isinstance(value, get_args(ConfigsRecordValues)):
-            raise TypeError(
-                f"Supported types are {ConfigsRecordValues}. "
-                f"But you used type: {type(value)}"
-            )
-    return cast(Dict[str, ConfigsRecordValues], scalar_config)
-
-
 def _check_mapping_from_recordscalartype_to_scalar(
     record_data: Mapping[str, Union[ConfigsRecordValues, MetricsRecordValues]]
 ) -> Dict[str, Scalar]:
@@ -184,8 +158,7 @@ def _fit_or_evaluate_ins_to_recordset(
         record=parameters_to_parametersrecord(ins.parameters, keep_input=keep_input),
     )
 
-    config = _check_mapping_from_scalar_to_configsrecordstypes(ins.config)
-    recordset.set_configs(name=f"{ins_str}.config", record=ConfigsRecord(config))
+    recordset.set_configs(name=f"{ins_str}.config", record=ConfigsRecord(ins.config))
 
     return recordset
 
@@ -251,8 +224,9 @@ def fit_res_to_recordset(fitres: FitRes, keep_input: bool) -> RecordSet:
 
     res_str = "fitres"
 
-    metrics = _check_mapping_from_scalar_to_metricsrecordstypes(fitres.metrics)
-    recordset.set_metrics(name=f"{res_str}.metrics", record=MetricsRecord(metrics))
+    recordset.set_metrics(
+        name=f"{res_str}.metrics", record=MetricsRecord(fitres.metrics)
+    )
     recordset.set_metrics(
         name=f"{res_str}.num_examples",
         record=MetricsRecord({"num_examples": fitres.num_examples}),
@@ -321,8 +295,9 @@ def evaluate_res_to_recordset(evaluateres: EvaluateRes) -> RecordSet:
     )
 
     # metrics
-    metrics = _check_mapping_from_scalar_to_metricsrecordstypes(evaluateres.metrics)
-    recordset.set_metrics(name=f"{res_str}.metrics", record=MetricsRecord(metrics))
+    recordset.set_metrics(
+        name=f"{res_str}.metrics", record=MetricsRecord(evaluateres.metrics)
+    )
 
     # status
     recordset = _embed_status_into_recordset(
@@ -345,8 +320,9 @@ def getparameters_ins_to_recordset(getparameters_ins: GetParametersIns) -> Recor
     """Construct a RecordSet from a GetParametersIns object."""
     recordset = RecordSet()
 
-    config = _check_mapping_from_scalar_to_configsrecordstypes(getparameters_ins.config)
-    recordset.set_configs(name="getparametersins.config", record=ConfigsRecord(config))
+    recordset.set_configs(
+        name="getparametersins.config", record=ConfigsRecord(getparameters_ins.config)
+    )
     return recordset
 
 
@@ -387,11 +363,8 @@ def recordset_to_getproperties_ins(recordset: RecordSet) -> GetPropertiesIns:
 def getproperties_ins_to_recordset(getpropertiesins: GetPropertiesIns) -> RecordSet:
     """Construct a RecordSet from a GetPropertiesRes object."""
     recordset = RecordSet()
-    config_dict = _check_mapping_from_scalar_to_configsrecordstypes(
-        getpropertiesins.config
-    )
     recordset.set_configs(
-        name="getpropertiesins.config", record=ConfigsRecord(config_dict)
+        name="getpropertiesins.config", record=ConfigsRecord(getpropertiesins.config)
     )
     return recordset
 
@@ -411,10 +384,9 @@ def getproperties_res_to_recordset(getpropertiesres: GetPropertiesRes) -> Record
     """Construct a RecordSet from a GetPropertiesRes object."""
     recordset = RecordSet()
     res_str = "getpropertiesres"
-    configs = _check_mapping_from_scalar_to_configsrecordstypes(
-        getpropertiesres.properties
+    recordset.set_configs(
+        name=f"{res_str}.properties", record=ConfigsRecord(getpropertiesres.properties)
     )
-    recordset.set_configs(name=f"{res_str}.properties", record=ConfigsRecord(configs))
     # status
     recordset = _embed_status_into_recordset(
         res_str, getpropertiesres.status, recordset

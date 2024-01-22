@@ -387,9 +387,30 @@ def _get_valid_fitins() -> FitIns:
     return FitIns(parameters=ndarrays_to_parameters(arrays), config={"a": 1.0, "b": 0})
 
 
+def _get_valid_fitres_with_config(metrics: Dict[str, Scalar]) -> FitRes:
+    """Returnn Valid parameters but potentially invalid config."""
+    arrays = get_ndarrays()
+    return FitRes(
+        parameters=ndarrays_to_parameters(arrays),
+        num_examples=1,
+        status=Status(code=Code(0), message=""),
+        metrics=metrics,
+    )
+
+
 def _get_valid_evaluateins() -> EvaluateIns:
     fit_ins = _get_valid_fitins()
     return EvaluateIns(parameters=fit_ins.parameters, config=fit_ins.config)
+
+
+def _get_valid_evaluateres_with_config(metrics: Dict[str, Scalar]) -> EvaluateRes:
+    """Return potentially invalid config."""
+    return EvaluateRes(
+        num_examples=1,
+        loss=0.1,
+        status=Status(code=Code(0), message=""),
+        metrics=metrics,
+    )
 
 
 def _get_valid_getparametersins() -> GetParametersIns:
@@ -402,9 +423,29 @@ def _get_valid_getparametersins() -> GetParametersIns:
     return GetParametersIns(config_dict)
 
 
+def _get_valid_getparametersres() -> GetParametersRes:
+    arrays = get_ndarrays()
+    return GetParametersRes(
+        status=Status(code=Code(0), message=""),
+        parameters=ndarrays_to_parameters(arrays),
+    )
+
+
 def _get_valid_getpropertiesins() -> GetPropertiesIns:
     getparamsins = _get_valid_getparametersins()
     return GetPropertiesIns(config=getparamsins.config)
+
+
+def _get_valid_getpropertiesres() -> GetPropertiesRes:
+    config_dict: Dict[str, Scalar] = {
+        "a": 1.0,
+        "b": 3,
+        "c": True,
+    }  # valid since both Ins/Res communicate over ConfigsRecord
+
+    return GetPropertiesRes(
+        status=Status(code=Code(0), message=""), properties=config_dict
+    )
 
 
 def test_fitins_to_recordset_and_back() -> None:
@@ -432,13 +473,7 @@ def test_fitins_to_recordset_and_back() -> None:
 )
 def test_fitres_to_recordset_and_back(context: Any, metrics: Dict[str, Scalar]) -> None:
     """Test conversion FitRes --> RecordSet --> FitRes."""
-    arrays = get_ndarrays()
-    fitres = FitRes(
-        parameters=ndarrays_to_parameters(arrays),
-        num_examples=1,
-        status=Status(code=Code(0), message=""),
-        metrics=metrics,
-    )
+    fitres = _get_valid_fitres_with_config(metrics)
 
     fitres_copy = deepcopy(fitres)
 
@@ -480,12 +515,7 @@ def test_evaluateres_to_recordset_and_back(
     context: Any, metrics: Dict[str, Scalar]
 ) -> None:
     """Test conversion EvaluateRes --> RecordSet --> EvaluateRes."""
-    evaluateres = EvaluateRes(
-        num_examples=1,
-        loss=0.1,
-        status=Status(code=Code(0), message=""),
-        metrics=metrics,
-    )
+    evaluateres = _get_valid_evaluateres_with_config(metrics)
 
     evaluateres_copy = deepcopy(evaluateres)
 
@@ -514,15 +544,7 @@ def test_get_properties_ins_to_recordset_and_back() -> None:
 
 def test_get_properties_res_to_recordset_and_back() -> None:
     """Test conversion GetPropertiesRes --> RecordSet --> GetPropertiesRes."""
-    config_dict: Dict[str, Scalar] = {
-        "a": 1.0,
-        "b": 3,
-        "c": True,
-    }  # valid since both Ins/Res communicate over ConfigsRecord
-
-    getproperties_res = GetPropertiesRes(
-        status=Status(code=Code(0), message=""), properties=config_dict
-    )
+    getproperties_res = _get_valid_getpropertiesres()
 
     getproperties_res_copy = deepcopy(getproperties_res)
 
@@ -546,11 +568,7 @@ def test_get_parameters_ins_to_recordset_and_back() -> None:
 
 def test_get_parameters_res_to_recordset_and_back() -> None:
     """Test conversion GetParametersRes --> RecordSet --> GetParametersRes."""
-    arrays = get_ndarrays()
-    getparameteres_res = GetParametersRes(
-        status=Status(code=Code(0), message=""),
-        parameters=ndarrays_to_parameters(arrays),
-    )
+    getparameteres_res = _get_valid_getparametersres()
 
     getparameters_res_copy = deepcopy(getparameteres_res)
 
