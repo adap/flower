@@ -51,10 +51,10 @@ class GrpcDriver:
     def __init__(
         self,
         driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
-        root_certificates: Optional[bytes] = None,
+        certificates: Optional[bytes] = None,
     ) -> None:
         self.driver_service_address = driver_service_address
-        self.root_certificates = root_certificates
+        self.certificates = certificates
         self.channel: Optional[grpc.Channel] = None
         self.stub: Optional[DriverStub] = None
 
@@ -66,8 +66,8 @@ class GrpcDriver:
             return
         self.channel = create_channel(
             server_address=self.driver_service_address,
-            insecure=(self.root_certificates is None),
-            root_certificates=self.root_certificates,
+            insecure=(self.certificates is None),
+            root_certificates=self.certificates,
         )
         self.stub = DriverStub(self.channel)
         log(INFO, "[Driver] Connected to %s", self.driver_service_address)

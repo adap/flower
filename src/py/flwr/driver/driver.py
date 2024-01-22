@@ -36,7 +36,7 @@ class Driver:
     driver_service_address : Optional[str]
         The IPv4 or IPv6 address of the Driver API server.
         Defaults to `"[::]:9091"`.
-    root_certificates : bytes (default: None)
+    certificates : bytes (default: None)
         Tuple containing root certificate, server certificate, and private key
         to start a secure SSL-enabled server. The tuple is expected to have
         three bytes elements in the following order:
@@ -49,10 +49,10 @@ class Driver:
     def __init__(
         self,
         driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
-        root_certificates: Optional[bytes] = None,
+        certificates: Optional[bytes] = None,
     ) -> None:
         self.addr = driver_service_address
-        self.root_certificates = root_certificates
+        self.certificates = certificates
         self.grpc_driver: Optional[GrpcDriver] = None
         self.run_id: Optional[int] = None
         self.node = Node(node_id=0, anonymous=True)
@@ -62,8 +62,7 @@ class Driver:
         if self.grpc_driver is None or self.run_id is None:
             # Connect and create run
             self.grpc_driver = GrpcDriver(
-                driver_service_address=self.addr,
-                root_certificates=self.root_certificates,
+                driver_service_address=self.addr, certificates=self.certificates
             )
             self.grpc_driver.connect()
             res = self.grpc_driver.create_run(CreateRunRequest())
