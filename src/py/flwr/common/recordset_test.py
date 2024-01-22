@@ -586,7 +586,7 @@ def test_flowercontext_driver_to_client(
 ) -> None:
     """."""
     f_context = FlowerContext(
-        in_message=RecordSet,
+        in_message=RecordSet(),
         out_message=convert_fn(ins()),
         local=RecordSet(),
         metadata=Metadata(
