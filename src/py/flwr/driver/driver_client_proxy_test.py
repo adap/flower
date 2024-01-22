@@ -23,7 +23,8 @@ import numpy as np
 import flwr
 from flwr.common.typing import Config, GetParametersIns
 from flwr.driver.driver_client_proxy import DriverClientProxy
-from flwr.proto import driver_pb2, node_pb2, task_pb2  # pylint: disable=E0611
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
     Parameters,
@@ -41,7 +42,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
     def setUp(self) -> None:
         """Set up mocks for tests."""
         self.driver = MagicMock()
-        self.driver.get_nodes.return_value = [node_pb2.Node(node_id=1, anonymous=False)]
+        self.driver.get_nodes.return_value = [Node(node_id=1, anonymous=False)]
 
     def test_get_properties(self) -> None:
         """Test positive case."""
@@ -50,11 +51,11 @@ class DriverClientProxyTestCase(unittest.TestCase):
             "19341fd7-62e1-4eb4-beb4-9876d3acda32"
         ]
         self.driver.pull_task_res.return_value = [
-            task_pb2.TaskRes(
+            TaskRes(
                 task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
                 group_id="",
-                workload_id=0,
-                task=task_pb2.Task(
+                run_id=0,
+                task=Task(
                     legacy_client_message=ClientMessage(
                         get_properties_res=ClientMessage.GetPropertiesRes(
                             properties=CLIENT_PROPERTIES
@@ -82,11 +83,11 @@ class DriverClientProxyTestCase(unittest.TestCase):
             "19341fd7-62e1-4eb4-beb4-9876d3acda32"
         ]
         self.driver.pull_task_res.return_value = [
-            task_pb2.TaskRes(
+            TaskRes(
                 task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
                 group_id="",
-                workload_id=0,
-                task=task_pb2.Task(
+                run_id=0,
+                task=Task(
                     legacy_client_message=ClientMessage(
                         get_parameters_res=ClientMessage.GetParametersRes(
                             parameters=MESSAGE_PARAMETERS,
@@ -113,11 +114,11 @@ class DriverClientProxyTestCase(unittest.TestCase):
             "19341fd7-62e1-4eb4-beb4-9876d3acda32"
         ]
         self.driver.pull_task_res.return_value = [
-            task_pb2.TaskRes(
+            TaskRes(
                 task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
                 group_id="",
-                workload_id=0,
-                task=task_pb2.Task(
+                run_id=0,
+                task=Task(
                     legacy_client_message=ClientMessage(
                         fit_res=ClientMessage.FitRes(
                             parameters=MESSAGE_PARAMETERS,
@@ -146,11 +147,11 @@ class DriverClientProxyTestCase(unittest.TestCase):
             "19341fd7-62e1-4eb4-beb4-9876d3acda32"
         ]
         self.driver.pull_task_res.return_value = [
-            task_pb2.TaskRes(
+            TaskRes(
                 task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
                 group_id="",
-                workload_id=0,
-                task=task_pb2.Task(
+                run_id=0,
+                task=Task(
                     legacy_client_message=ClientMessage(
                         evaluate_res=ClientMessage.EvaluateRes(loss=0.0, num_examples=0)
                     )

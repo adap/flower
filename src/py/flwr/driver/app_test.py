@@ -21,7 +21,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 from flwr.driver.app import update_client_manager
-from flwr.proto.node_pb2 import Node
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.server.client_manager import SimpleClientManager
 
 

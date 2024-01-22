@@ -20,11 +20,11 @@ from typing import Optional, cast
 
 from flwr import common
 from flwr.common import serde
-from flwr.proto import (  # pylint: disable=E0611
-    driver_pb2,
-    node_pb2,
-    task_pb2,
-    transport_pb2,
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import Task, TaskIns  # pylint: disable=E0611
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+    ClientMessage,
+    ServerMessage,
 )
 from flwr.server.client_proxy import ClientProxy
 
@@ -46,10 +46,8 @@ class DriverClientProxy(ClientProxy):
         self, ins: common.GetPropertiesIns, timeout: Optional[float]
     ) -> common.GetPropertiesRes:
         """Return client's properties."""
-        server_message_proto: transport_pb2.ServerMessage = (  # pylint: disable=E1101
-            serde.server_message_to_proto(
-                server_message=common.ServerMessage(get_properties_ins=ins)
-            )
+        server_message_proto: ServerMessage = serde.server_message_to_proto(
+            server_message=common.ServerMessage(get_properties_ins=ins)
         )
         return cast(
             common.GetPropertiesRes,
@@ -60,10 +58,8 @@ class DriverClientProxy(ClientProxy):
         self, ins: common.GetParametersIns, timeout: Optional[float]
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
-        server_message_proto: transport_pb2.ServerMessage = (  # pylint: disable=E1101
-            serde.server_message_to_proto(
-                server_message=common.ServerMessage(get_parameters_ins=ins)
-            )
+        server_message_proto: ServerMessage = serde.server_message_to_proto(
+            server_message=common.ServerMessage(get_parameters_ins=ins)
         )
         return cast(
             common.GetParametersRes,
@@ -72,10 +68,8 @@ class DriverClientProxy(ClientProxy):
 
     def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
-        server_message_proto: transport_pb2.ServerMessage = (  # pylint: disable=E1101
-            serde.server_message_to_proto(
-                server_message=common.ServerMessage(fit_ins=ins)
-            )
+        server_message_proto: ServerMessage = serde.server_message_to_proto(
+            server_message=common.ServerMessage(fit_ins=ins)
         )
         return cast(
             common.FitRes,
@@ -86,10 +80,8 @@ class DriverClientProxy(ClientProxy):
         self, ins: common.EvaluateIns, timeout: Optional[float]
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
-        server_message_proto: transport_pb2.ServerMessage = (  # pylint: disable=E1101
-            serde.server_message_to_proto(
-                server_message=common.ServerMessage(evaluate_ins=ins)
-            )
+        server_message_proto: ServerMessage = serde.server_message_to_proto(
+            server_message=common.ServerMessage(evaluate_ins=ins)
         )
         return cast(
             common.EvaluateRes,
@@ -103,15 +95,15 @@ class DriverClientProxy(ClientProxy):
         return common.DisconnectRes(reason="")  # Nothing to do here (yet)
 
     def _send_receive_msg(
-        self, server_message: transport_pb2.ServerMessage, timeout: Optional[float]
-    ) -> transport_pb2.ClientMessage:
-        task_ins = task_pb2.TaskIns(
-            task=task_pb2.Task(
-                producer=node_pb2.Node(
+        self, server_message: ServerMessage, timeout: Optional[float]
+    ) -> ClientMessage:
+        task_ins = TaskIns(
+            task=Task(
+                producer=Node(
                     node_id=0,
                     anonymous=True,
                 ),
-                consumer=node_pb2.Node(  # pylint: disable=E1101
+                consumer=Node(
                     node_id=self.node_id,
                     anonymous=self.anonymous,
                 ),
