@@ -19,11 +19,47 @@ package flwr.proto;
 
 import "flwr/proto/task.proto";
 
+message DoubleList { repeated double list = 1; }
+message Sint64List { repeated sint64 list = 1; }
+message BoolList { repeated bool list = 1; }
+message StringList { repeated string list = 1; }
+message BytesList { repeated bytes list = 1; }
+
 message Array {
   string dtype = 1;
   repeated int32 shape = 2;
   string stype = 3;
   bytes data = 4;
+}
+
+message MetricsRecordValue {
+  oneof value {
+    // Single element
+    double double = 1;
+    sint64 sint64 = 2;
+
+    // List types
+    DoubleList double_list = 21;
+    Sint64List sint64_list = 22;
+  }
+}
+
+message ConfigsRecordValue {
+  oneof value {
+    // Single element
+    double double = 1;
+    sint64 sint64 = 2;
+    bool bool = 3;
+    string string = 4;
+    bytes bytes = 5;
+
+    // List types
+    DoubleList double_list = 21;
+    Sint64List sint64_list = 22;
+    BoolList bool_list = 23;
+    StringList string_list = 24;
+    BytesList bytes_list = 25;
+  }
 }
 
 message ParametersRecord {
