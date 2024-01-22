@@ -129,7 +129,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     thread = threading.Thread(
         target=update_client_manager,
         args=(
-            Driver(driver_service_address=address, certificates=root_certificates),
+            Driver(driver_service_address=address, root_certificates=root_certificates),
             initialized_server.client_manager(),
             ref_exit_flag,
         ),
