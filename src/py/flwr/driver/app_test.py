@@ -13,7 +13,6 @@
 # limitations under the License.
 # ==============================================================================
 """Flower Driver app tests."""
-# pylint: disable=no-self-use
 
 
 import threading

@@ -34,7 +34,7 @@ design of Flower is based on a few guiding principles:
 - **Framework-agnostic**: Different machine learning frameworks have different
   strengths. Flower can be used with any machine learning framework, for
   example, [PyTorch](https://pytorch.org),
-  [TensorFlow](https://tensorflow.org), [Hugging Face Transformers](https://huggingface.co/), [PyTorch Lightning](https://pytorchlightning.ai/), [MXNet](https://mxnet.apache.org/), [scikit-learn](https://scikit-learn.org/), [JAX](https://jax.readthedocs.io/), [TFLite](https://tensorflow.org/lite/), [fastai](https://www.fast.ai/), [Pandas](https://pandas.pydata.org/) for federated analytics, or even raw [NumPy](https://numpy.org/)
+  [TensorFlow](https://tensorflow.org), [Hugging Face Transformers](https://huggingface.co/), [PyTorch Lightning](https://pytorchlightning.ai/), [scikit-learn](https://scikit-learn.org/), [JAX](https://jax.readthedocs.io/), [TFLite](https://tensorflow.org/lite/), [fastai](https://www.fast.ai/), [Pandas](https://pandas.pydata.org/) for federated analytics, or even raw [NumPy](https://numpy.org/)
   for users who enjoy computing gradients by hand.
 
 - **Understandable**: Flower is written with maintainability in mind. The
@@ -81,7 +81,6 @@ Stay tuned, more tutorials are coming soon. Topics include **Privacy and Securit
 - [Quickstart (PyTorch)](https://flower.dev/docs/framework/tutorial-quickstart-pytorch.html)
 - [Quickstart (Hugging Face)](https://flower.dev/docs/framework/tutorial-quickstart-huggingface.html)
 - [Quickstart (PyTorch Lightning [code example])](https://flower.dev/docs/framework/tutorial-quickstart-pytorch-lightning.html)
-- [Quickstart (MXNet)](https://flower.dev/docs/framework/example-mxnet-walk-through.html)
 - [Quickstart (Pandas)](https://flower.dev/docs/framework/tutorial-quickstart-pandas.html)
 - [Quickstart (fastai)](https://flower.dev/docs/framework/tutorial-quickstart-fastai.html)
 - [Quickstart (JAX)](https://flower.dev/docs/framework/tutorial-quickstart-jax.html)
@@ -124,7 +123,6 @@ Quickstart examples:
 - [Quickstart (PyTorch Lightning)](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch-lightning)
 - [Quickstart (fastai)](https://github.com/adap/flower/tree/main/examples/quickstart-fastai)
 - [Quickstart (Pandas)](https://github.com/adap/flower/tree/main/examples/quickstart-pandas)
-- [Quickstart (MXNet)](https://github.com/adap/flower/tree/main/examples/quickstart-mxnet)
 - [Quickstart (JAX)](https://github.com/adap/flower/tree/main/examples/quickstart-jax)
 - [Quickstart (scikit-learn)](https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist)
 - [Quickstart (Android [TFLite])](https://github.com/adap/flower/tree/main/examples/android)
@@ -134,7 +132,6 @@ Other [examples](https://github.com/adap/flower/tree/main/examples):
 
 - [Raspberry Pi & Nvidia Jetson Tutorial](https://github.com/adap/flower/tree/main/examples/embedded-devices)
 - [PyTorch: From Centralized to Federated](https://github.com/adap/flower/tree/main/examples/pytorch-from-centralized-to-federated)
-- [MXNet: From Centralized to Federated](https://github.com/adap/flower/tree/main/examples/mxnet-from-centralized-to-federated)
 - [Advanced Flower with TensorFlow/Keras](https://github.com/adap/flower/tree/main/examples/advanced-tensorflow)
 - [Advanced Flower with PyTorch](https://github.com/adap/flower/tree/main/examples/advanced-pytorch)
 - Single-Machine Simulation of Federated Learning Systems ([PyTorch](https://github.com/adap/flower/tree/main/examples/simulation_pytorch)) ([Tensorflow](https://github.com/adap/flower/tree/main/examples/simulation_tensorflow))
