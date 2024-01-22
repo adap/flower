@@ -16,18 +16,15 @@
 
 from contextlib import nullcontext
 from copy import deepcopy
-from functools import partial
 from typing import Any, Callable, Dict, List, OrderedDict, Type, Union
 
 import numpy as np
 import pytest
 
 from .configsrecord import ConfigsRecord
-from .flowercontext import FlowerContext, Metadata
 from .metricsrecord import MetricsRecord
 from .parameter import ndarrays_to_parameters, parameters_to_ndarrays
 from .parametersrecord import Array, ParametersRecord
-from .recordset import RecordSet
 from .recordset_utils import (
     evaluate_ins_to_recordset,
     evaluate_res_to_recordset,
@@ -561,49 +558,3 @@ def test_get_parameters_res_to_recordset_and_back() -> None:
     getparameteres_res_ = recordset_to_getparameters_res(recordset)
 
     assert getparameters_res_copy == getparameteres_res_
-
-
-@pytest.mark.parametrize(
-    "ins, convert_fn, task_type",
-    [
-        (_get_valid_fitins, partial(fit_ins_to_recordset, keep_input=False), "fit_ins"),
-        (
-            _get_valid_evaluateins,
-            partial(evaluate_ins_to_recordset, keep_input=False),
-            "evaluate_ins",
-        ),
-        (
-            _get_valid_getpropertiesins,
-            getproperties_ins_to_recordset,
-            "get_properties_ins",
-        ),
-        (
-            _get_valid_getparametersins,
-            getparameters_ins_to_recordset,
-            "get_parameters_ins",
-        ),
-    ],
-)
-def test_flowercontext_driver_to_client(
-    ins: Union[FitIns, EvaluateIns, GetPropertiesIns, GetParametersIns],
-    convert_fn: Union[
-        Callable[[FitIns], RecordSet],
-        Callable[[EvaluateIns], RecordSet],
-        Callable[[GetPropertiesIns], RecordSet],
-        Callable[[GetParametersIns], RecordSet],
-    ],
-    task_type: str,
-) -> None:
-    """."""
-    f_context = FlowerContext(
-        in_message=RecordSet(),
-        out_message=convert_fn(ins()),
-        local=RecordSet(),
-        metadata=Metadata(
-            run_id=0, task_id="", group_id="", ttl="", task_type=task_type
-        ),
-    )
-
-    # TODO: embedd `f_context` in TaskIns
-
-    # Construct FlowerContext from TaskIns
