@@ -79,20 +79,23 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
         if clip_norm_lr <= 0:
             raise Exception("The learning rate must be positive.")
 
-        if clipped_count_stddev is None:
+        if clipped_count_stddev is not None:
             if clipped_count_stddev < 0:
                 raise Exception("The `clipped_count_stddev` must be non-negative.")
 
-        strategy = strategy,
-        noise_multiplier=noise_multiplier,
-        num_sampled_clients=num_sampled_clients,
-        initial_clip_norm=initial_clip_norm,
-        target_clipped_quantile=target_clipped_quantile,
-        clip_norm_lr=clip_norm_lr,
-        clipped_count_stddev=clipped_count_stddev,
+        self.strategy = strategy,
+        self.noise_multiplier=noise_multiplier,
+        self.num_sampled_clients=num_sampled_clients,
+        self.initial_clip_norm=initial_clip_norm,
+        self.target_clipped_quantile=target_clipped_quantile,
+        self.clip_norm_lr=clip_norm_lr,
+        self.clipped_count_stddev=_compute_noise_params(clipped_count_stddev),
 
 
 
+
+
+    def _compute_noise_params(self, noise_multiplier, num_sampled_clients, clipped_count_stddev):
 
 
 
