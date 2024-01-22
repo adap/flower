@@ -18,6 +18,8 @@ Paper (Andrew et al.): https://arxiv.org/pdf/1905.03871.pdf
 """
 
 from flwr.server.strategy.strategy import Strategy
+import warnings
+
 
 class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
     """Wrapper for Configuring a Strategy for Central DP with Adaptive Clipping.
@@ -57,7 +59,7 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
         initial_clip_norm: float = 0.1,
         target_clipped_quantile: float = 0.5,
         clip_norm_lr: float = 0.2,
-        clipped_count_stddev: Optional[float] = None
+        clipped_count_stddev: Optional[float] = None,
     ) -> None:
         super().__init__()
 
@@ -74,7 +76,9 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
             raise Exception("The initial clip norm should be a positive value.")
 
         if not 0 <= target_clipped_quantile <= 1:
-            raise Exception("The target clipped quantile must be between 0 and 1 (inclusive).")
+            raise Exception(
+                "The target clipped quantile must be between 0 and 1 (inclusive)."
+            )
 
         if clip_norm_lr <= 0:
             raise Exception("The learning rate must be positive.")
@@ -83,19 +87,104 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
             if clipped_count_stddev < 0:
                 raise Exception("The `clipped_count_stddev` must be non-negative.")
 
-        self.strategy = strategy,
-        self.noise_multiplier=noise_multiplier,
-        self.num_sampled_clients=num_sampled_clients,
-        self.initial_clip_norm=initial_clip_norm,
-        self.target_clipped_quantile=target_clipped_quantile,
-        self.clip_norm_lr=clip_norm_lr,
-        self.clipped_count_stddev=_compute_noise_params(clipped_count_stddev),
+        self.strategy = strategy
+        self.num_sampled_clients = num_sampled_clients
+        self.initial_clip_norm = initial_clip_norm
+        self.target_clipped_quantile = target_clipped_quantile
+        self.clip_norm_lr = clip_norm_lr
+        self.clipped_count_stddev, self.noise_multiplier = _compute_noise_params(clipped_count_stddev)
+
+    def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
+        rep = "DP Strategy Wrapper with Client Side Adaptive Clipping"
+        return rep
+
+    def initialize_parameters(
+            self, client_manager: ClientManager
+    ) -> Optional[Parameters]:
+        """Initialize global model parameters using given strategy."""
+        return self.strategy.initialize_parameters(client_manager)
+
+    def configure_fit(
+            self, server_round: int, parameters: Parameters, client_manager: ClientManager
+    ) -> List[Tuple[ClientProxy, FitIns]]:
+        """Configure the next round of training."""
+        return self.strategy.configure_fit(server_round, parameters, client_manager)
+
+    def configure_evaluate(
+            self, server_round: int, parameters: Parameters, client_manager: ClientManager
+    ) -> List[Tuple[ClientProxy, EvaluateIns]]:
+        """Configure the next round of evaluation."""
+        return self.strategy.configure_evaluate(
+            server_round, parameters, client_manager
+        )
+
+    def aggregate_fit(
+            self,
+            server_round: int,
+            results: List[Tuple[ClientProxy, FitRes]],
+            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+        """Aggregate training results and update clip norms."""
+        if failures:
+            return None, {}
+        new_global_model = super().aggregate_fit(server_round, results, failures)
+        self._update_clip_norm(results)
+        return new_global_model
+
+
+    def _update_clip_norm(self, results: List[Tuple[ClientProxy, FitRes]]) -> None:
+        # Calculating number of clients which set the norm indicator bit
+        norm_bit_set_count = 0
+        for client_proxy, fit_res in results:
+            if "dpfedavg_norm_bit" not in fit_res.metrics:
+                raise Exception(
+                    f"Indicator bit not returned by client with id {client_proxy.cid}."
+                )
+            if fit_res.metrics["dpfedavg_norm_bit"]:
+                norm_bit_set_count += 1
+        # Noising the count
+        noised_norm_bit_set_count = float(
+            np.random.normal(norm_bit_set_count, self.clipped_count_stddev)
+        )
+
+        noised_norm_bit_set_fraction = noised_norm_bit_set_count / len(results)
+        # Geometric update
+        self.initial_clip_norm *= math.exp(
+            -self.clip_norm_lr
+            * (noised_norm_bit_set_fraction - self.target_clipped_quantile)
+        )
 
 
 
+    def _compute_noise_params(
+        self,
+        noise_multiplier: float,
+        num_sampled_clients: float,
+        clipped_count_stddev: Optional[float],
+    ):
+        if noise_multiplier > 0:
+            if clipped_count_stddev is None:
+                clipped_count_stddev = num_sampled_clients / 20
+            if noise_multiplier >= 2 * clipped_count_stddev:
+                raise ValueError(
+                    f"If not specified, `clipped_count_stddev` is set to `num_sampled_clients`/20 by default. "
+                    f"This value ({num_sampled_clients / 20}) is too low to achieve the desired effective `noise_multiplier` ({noise_multiplier})."
+                    f"Consider increasing `clipped_count_stddev` or decreasing `noise_multiplier`.")
+            noise_multiplier_value = (noise_multiplier ** (-2) - (2 * clipped_count_stddev) ** (-2)) ** -0.5
+
+            adding_noise = noise_multiplier_value / noise_multiplier
+            if noise >= 2:
+                warnings.warn(
+                    f"A significant amount of noise ({adding_noise}) has to be added. Consider increasing"
+                    f" `clipped_count_stddev` or `num_sampled_clients`."
+                )
 
 
-    def _compute_noise_params(self, noise_multiplier, num_sampled_clients, clipped_count_stddev):
+        else:
+            if clipped_count_stddev is None:
+                clipped_count_stddev = 0.0
+            noise_multiplier_value = 0.0
 
-
+        return clipped_count_stddev, noise_multiplier_value
 
