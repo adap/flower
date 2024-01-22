@@ -144,8 +144,11 @@ def distribute_gpus(num_clients, client_memory=1024):
         # Scenario 1: No GPUs available, return None for all clients
         return [None] * num_clients
 
-    # Manually specify the total memory for each GPU in MB
-    gpu_total_mem = []  # Example for two GPUs, adjust based on your GPUs
+    # Manually specify the memory you want to expose in each GPU
+    gpu_total_mem = []  # Adjust based on your GPUs
+
+    if gpus and len(gpu_total_mem)==0:
+        print("If you want to enable GPU training, please set `gpu_total_mem`")
 
     gpu_free_mem = gpu_total_mem.copy()
     clients_gpu = [None] * num_clients

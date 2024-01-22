@@ -60,10 +60,10 @@ python -m fedstar.dataset_preparation
 
 ## Setting up GPU Memory
 
-**Note:** The experiment is designed to run on both GPU and CPU, depending on memory constraints. By default, it will run only on the CPU. Please update the value of the list 'gpu_total_mem' with the corresponding memory available for each gpu's of your machine. The variable is in the distribute_gpus function inside the clients.py file. Reference is shown below.
+**Note:** The experiment is designed to run on both GPU and CPU, depending on memory constraints. By default, it will run only on the CPU. Please update the value of the list `gpu_total_mem` with the corresponding memory for each GPU in your machine that you want to expose to the experiment. The variable is in the `distribute_gpus` function inside the `clients.py`. Reference is shown below.
 
 ```python
-# For Eg:- We have a system with a 8gb and 4gb vram.
+# For Eg:- We have a system with two GPUs with 8GB and 4GB VRAM.
 #          The modified varaible will looks like below.
 gpu_free_mem = [8000,4000]
 ```
@@ -104,9 +104,11 @@ To run in supervised mode, pass `fedstar=false` to any of the commands above (wh
 
 
 ## Expected Results
+
+> **Note:** We observed a very large memory utilization when using `@tf.function` decorate for `train_step` in `fedstar/models.py` and therefore we have commented it. This causes the experiments to run slower while keeping the memory footpring somewhat under control. If you have some suggestions on how to overcome this issue please reach out. 
+
 This section indicates the commands to exectue to obtain the results shown below in Table 3 and Table 4. The commands below make use of Hydra's `--multirun` to run multiple experiments. This is better suited when using Flower simulations. Here they work fine but, if you encounter any issues, you can always "unroll" the multirun and run one configuration at a time. If you do this, results won't go into the `multirun/` directory, instead to the default `outputs/` directory.
 
-**Note:** Its observed that tf.functions in model.py decorator consumes a high amount of memory, so currently we have commented out that function in case for future version of tensorflow if it causes any issues please uncomment it. 
 
 ### Table 3
 

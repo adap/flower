@@ -48,8 +48,6 @@ class AudioClient(
         self.fedstar = fedstar
         self.aux_loss_weight = 0.5
         self.parent_path = parent_path
-        # print("/*/*" * 150)
-        # print(self.parent_path)
         # Load Clients Data
         (
             self.train_labelled,
