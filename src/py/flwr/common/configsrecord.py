@@ -87,8 +87,17 @@ class ConfigsRecord:
                 # 1s to check 10M element list on a M2 Pro
                 # In such settings, you'd be better of treating such config as
                 # an array and pass it to a ParametersRecord.
-                for list_value in value:
-                    is_valid(list_value)
+                # Empty lists are valid
+                if len(value) > 0:
+                    is_valid(value[0])
+                    # all elements in the list must be of the same valid type
+                    # this is needed for protobuf
+                    value_type = type(value[0])
+                    if not all(isinstance(v, value_type) for v in value):
+                        raise TypeError(
+                            "All values in a list must be of the same valid type. "
+                            f"One of {ConfigsScalar}."
+                        )
             else:
                 is_valid(value)
 
