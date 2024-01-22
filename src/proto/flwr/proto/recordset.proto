@@ -17,11 +17,11 @@ syntax = "proto3";
 
 package flwr.proto;
 
-message DoubleList { repeated double list = 1; }
-message Sint64List { repeated sint64 list = 1; }
-message BoolList { repeated bool list = 1; }
-message StringList { repeated string list = 1; }
-message BytesList { repeated bytes list = 1; }
+message DoubleList { repeated double vals = 1; }
+message Sint64List { repeated sint64 vals = 1; }
+message BoolList { repeated bool vals = 1; }
+message StringList { repeated string vals = 1; }
+message BytesList { repeated bytes vals = 1; }
 
 message Array {
   string dtype = 1;
