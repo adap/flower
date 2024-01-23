@@ -91,7 +91,7 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
         norm_bit_set_count = 0
         for client_proxy, fit_res in results:
             if "dpfedavg_norm_bit" not in fit_res.metrics:
-                raise Exception(
+                raise KeyError(
                     f"Indicator bit not returned by client with id {client_proxy.cid}."
                 )
             if fit_res.metrics["dpfedavg_norm_bit"]:

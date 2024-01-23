@@ -17,10 +17,13 @@
 
 from typing import Optional
 
-from flwr.proto.fleet_pb2 import PullTaskInsResponse
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
-from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.proto.fleet_pb2 import PullTaskInsResponse  # pylint: disable=E0611
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+    ClientMessage,
+    ServerMessage,
+)
 
 
 def validate_task_ins(task_ins: TaskIns, discard_reconnect_ins: bool) -> bool:
@@ -80,8 +83,7 @@ def validate_task_res(task_res: TaskRes) -> bool:
     initialized_fields_in_task = {field.name for field, _ in task_res.task.ListFields()}
 
     # Check if certain fields are already initialized
-    # pylint: disable-next=too-many-boolean-expressions
-    if (
+    if (  # pylint: disable-next=too-many-boolean-expressions
         "task_id" in initialized_fields_in_task_res
         or "group_id" in initialized_fields_in_task_res
         or "run_id" in initialized_fields_in_task_res
