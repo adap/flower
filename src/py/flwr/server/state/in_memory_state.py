@@ -22,7 +22,7 @@ from typing import Dict, List, Optional, Set
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.state.state import State
 from flwr.server.utils import validate_task_ins_or_res
 

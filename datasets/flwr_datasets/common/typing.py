@@ -12,33 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Custom types for Flower clients."""
-
-from dataclasses import dataclass
-from typing import Callable
-
-from flwr.client.run_state import RunState
-from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
-
-from .client import Client as Client
+"""Flower Datasets type definitions."""
 
 
-@dataclass
-class Fwd:
-    """."""
+from typing import Any, List
 
-    task_ins: TaskIns
-    state: RunState
+import numpy as np
+import numpy.typing as npt
 
-
-@dataclass
-class Bwd:
-    """."""
-
-    task_res: TaskRes
-    state: RunState
-
-
-FlowerCallable = Callable[[Fwd], Bwd]
-ClientFn = Callable[[str], Client]
-Layer = Callable[[Fwd, FlowerCallable], Bwd]
+NDArray = npt.NDArray[Any]
+NDArrayInt = npt.NDArray[np.int_]
+NDArrayFloat = npt.NDArray[np.float_]
+NDArrays = List[NDArray]
