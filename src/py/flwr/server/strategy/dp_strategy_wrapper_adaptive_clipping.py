@@ -17,8 +17,24 @@
 Paper (Andrew et al.): https://arxiv.org/pdf/1905.03871.pdf
 """
 
-from flwr.server.strategy.strategy import Strategy
+import math
 import warnings
+from typing import Dict, List, Optional, Tuple, Union
+
+import numpy as np
+
+from flwr.common import (
+    EvaluateIns,
+    FitIns,
+    FitRes,
+    Parameters,
+    Scalar,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
+)
+from flwr.server.client_manager import ClientManager
+from flwr.server.client_proxy import ClientProxy
+from flwr.server.strategy.strategy import Strategy
 
 
 class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
@@ -89,10 +105,12 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
 
         self.strategy = strategy
         self.num_sampled_clients = num_sampled_clients
-        self.initial_clip_norm = initial_clip_norm
+        self.clip_norm = initial_clip_norm
         self.target_clipped_quantile = target_clipped_quantile
         self.clip_norm_lr = clip_norm_lr
-        self.clipped_count_stddev, self.noise_multiplier = _compute_noise_params(clipped_count_stddev)
+        self.clipped_count_stddev, self.noise_multiplier = self._compute_noise_params(
+            clipped_count_stddev
+        )
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
@@ -100,19 +118,19 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
         return rep
 
     def initialize_parameters(
-            self, client_manager: ClientManager
+        self, client_manager: ClientManager
     ) -> Optional[Parameters]:
         """Initialize global model parameters using given strategy."""
         return self.strategy.initialize_parameters(client_manager)
 
     def configure_fit(
-            self, server_round: int, parameters: Parameters, client_manager: ClientManager
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
         return self.strategy.configure_fit(server_round, parameters, client_manager)
 
     def configure_evaluate(
-            self, server_round: int, parameters: Parameters, client_manager: ClientManager
+        self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, EvaluateIns]]:
         """Configure the next round of evaluation."""
         return self.strategy.configure_evaluate(
@@ -120,21 +138,25 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
         )
 
     def aggregate_fit(
-            self,
-            server_round: int,
-            results: List[Tuple[ClientProxy, FitRes]],
-            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+        self,
+        server_round: int,
+        results: List[Tuple[ClientProxy, FitRes]],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate training results and update clip norms."""
         if failures:
             return None, {}
-        new_global_model = super().aggregate_fit(server_round, results, failures)
-        self._update_clip_norm(results)
-        return new_global_model
 
+        aggregated_params, metrics = self.strategy.aggregate_fit(
+            server_round, results, failures
+        )
+        self._update_clip_norm(results)
+        if aggregated_params:
+            aggregated_params = self._add_noise_to_updates(aggregated_params)
+        return aggregated_params
 
     def _update_clip_norm(self, results: List[Tuple[ClientProxy, FitRes]]) -> None:
-        # Calculating number of clients which set the norm indicator bit
+        # calculate the number of clients which set the norm indicator bit
         norm_bit_set_count = 0
         for client_proxy, fit_res in results:
             if "dpfedavg_norm_bit" not in fit_res.metrics:
@@ -150,19 +172,33 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
 
         noised_norm_bit_set_fraction = noised_norm_bit_set_count / len(results)
         # Geometric update
-        self.initial_clip_norm *= math.exp(
+        self.clip_norm *= math.exp(
             -self.clip_norm_lr
             * (noised_norm_bit_set_fraction - self.target_clipped_quantile)
         )
 
+    def _add_noise_to_updates(self, parameters: Parameters) -> Parameters:
+        """Add Gaussian noise to model params."""
+        return ndarrays_to_parameters(
+            self.add_gaussian_noise(
+                parameters_to_ndarrays(parameters),
+                float(
+                    (self.noise_multiplier * self.clip_norm)
+                    / self.num_sampled_clients ** (0.5)
+                ),
+            )
+        )
 
-
+    @staticmethod
     def _compute_noise_params(
-        self,
         noise_multiplier: float,
         num_sampled_clients: float,
         clipped_count_stddev: Optional[float],
     ):
+        """Compute noising parameters for the adaptive clipping.
+
+        paper: https://arxiv.org/abs/1905.03871
+        """
         if noise_multiplier > 0:
             if clipped_count_stddev is None:
                 clipped_count_stddev = num_sampled_clients / 20
@@ -170,16 +206,19 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
                 raise ValueError(
                     f"If not specified, `clipped_count_stddev` is set to `num_sampled_clients`/20 by default. "
                     f"This value ({num_sampled_clients / 20}) is too low to achieve the desired effective `noise_multiplier` ({noise_multiplier})."
-                    f"Consider increasing `clipped_count_stddev` or decreasing `noise_multiplier`.")
-            noise_multiplier_value = (noise_multiplier ** (-2) - (2 * clipped_count_stddev) ** (-2)) ** -0.5
+                    f"Consider increasing `clipped_count_stddev` or decreasing `noise_multiplier`."
+                )
+            noise_multiplier_value = (
+                noise_multiplier ** (-2) - (2 * clipped_count_stddev) ** (-2)
+            ) ** -0.5
 
             adding_noise = noise_multiplier_value / noise_multiplier
-            if noise >= 2:
+            if adding_noise >= 2:
                 warnings.warn(
                     f"A significant amount of noise ({adding_noise}) has to be added. Consider increasing"
-                    f" `clipped_count_stddev` or `num_sampled_clients`."
+                    f" `clipped_count_stddev` or `num_sampled_clients`.",
+                    stacklevel=2,
                 )
-
 
         else:
             if clipped_count_stddev is None:
@@ -187,4 +226,3 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
             noise_multiplier_value = 0.0
 
         return clipped_count_stddev, noise_multiplier_value
-
