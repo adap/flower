@@ -30,6 +30,9 @@ def get_eval_fn(ds_test, evaluation_step, num_classes, verbose):
     Parameters
     ----------
     - ds_test (tf.data.Dataset): The dataset used for evaluation.
+    - evaluation_step: After how many rounds of aggregartion server will evaluate the model.
+    - num_classes: Number of classes/labels model has to classify.
+    - verbose: How much details should be displayed.
 
     Returns
     -------
@@ -66,6 +69,12 @@ def get_on_fit_config_fn(total_rounds: int, epochs: int, batch_size: int):
     This function is called by the Flower framework to obtain configuration
     parameters for each training round.
 
+    Parameters
+    ----------
+    - total_rounds: Number of coummunication rounds between client and server.
+    - epochs: Number of epochs/ iterations
+    - batch_size: The number of training instances in the batch
+
     Returns
     -------
     - Function: A function that takes rounds, epochs, and batch_size
@@ -98,11 +107,11 @@ class AudioServer:  # pylint: disable=too-many-instance-attributes
 
     Attributes
     ----------
-    - flwr_evalution_step (int): Steps between evaluations in federated learning.
-    - flwr_min_sample_size (int): Minimum sample size for federated learning.
-    - flwr_min_num_clients (int): Minimum number of clients for federated learning.
-    - flwr_rounds (int): Number of federated learning rounds.
-    - model_num_classes (int): Number of classes for the model.
+    - flwr_evalution_step (int): After how many rounds of aggregartion server will evaluate the model.
+    - flwr_min_sample_size (int): Minimum number of clients participate in current communication round.
+    - flwr_num_clients (int): Total number of clients for federated learning.
+    - flwr_rounds (int): Number of coummunication rounds between client and server.
+    - model_num_classes (int): Number of classes/labels model has to classify.
     - model_batch_size (int): Batch size for model training.
     - model_epochs (int): Number of epochs for model training.
     - model_ds_test (tf.data.Dataset): Dataset for testing the model.
@@ -114,7 +123,7 @@ class AudioServer:  # pylint: disable=too-many-instance-attributes
         self,
         flwr_evalution_step,
         flwr_min_sample_size,
-        flwr_min_num_clients,
+        flwr_num_clients,
         flwr_rounds,
         model_num_classes,
         model_batch_size,
@@ -123,11 +132,11 @@ class AudioServer:  # pylint: disable=too-many-instance-attributes
         model_verbose,
     ):
         # Flower Parameters
-        self.sample_fraction = float(flwr_min_sample_size / flwr_min_num_clients)
+        self.sample_fraction = float(flwr_min_sample_size / flwr_num_clients)
         # print("-" * 100)
         # print(self.sample_fraction)
         self.min_sample_size = flwr_min_sample_size
-        self.min_num_clients = flwr_min_num_clients
+        self.min_num_clients = flwr_num_clients
         self.rounds = flwr_rounds
         # Local Variables Counters and Variables
         self.current_round = 0
@@ -268,7 +277,7 @@ def main(cfg: DictConfig):
     audio_server = AudioServer(
         flwr_evalution_step=cfg.server.eval_step,
         flwr_min_sample_size=cfg.server.min_sample_size,
-        flwr_min_num_clients=cfg.server.num_clients,
+        flwr_num_clients=cfg.server.num_clients,
         flwr_rounds=cfg.server.rounds,
         model_num_classes=num_classes,
         model_batch_size=cfg.server.batch_size,
