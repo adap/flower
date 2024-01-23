@@ -18,9 +18,17 @@
 import unittest
 from typing import List, Tuple
 
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import SecureAggregation, Task, TaskIns, TaskRes
-from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import (  # pylint: disable=E0611
+    SecureAggregation,
+    Task,
+    TaskIns,
+    TaskRes,
+)
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+    ClientMessage,
+    ServerMessage,
+)
 
 from .validator import validate_task_ins_or_res
 
@@ -135,7 +143,7 @@ def create_task_ins(
     task = TaskIns(
         task_id="",
         group_id="",
-        workload_id=0,
+        run_id=0,
         task=Task(
             delivered_at=delivered_at,
             producer=Node(node_id=0, anonymous=True),
@@ -162,7 +170,7 @@ def create_task_res(
     task_res = TaskRes(
         task_id="",
         group_id="",
-        workload_id=0,
+        run_id=0,
         task=Task(
             producer=Node(node_id=producer_node_id, anonymous=anonymous),
             consumer=Node(node_id=0, anonymous=True),

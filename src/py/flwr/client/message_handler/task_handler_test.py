@@ -22,9 +22,17 @@ from flwr.client.message_handler.task_handler import (
     validate_task_res,
     wrap_client_message_in_task_res,
 )
-from flwr.proto.fleet_pb2 import PullTaskInsResponse
-from flwr.proto.task_pb2 import SecureAggregation, Task, TaskIns, TaskRes
-from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.proto.fleet_pb2 import PullTaskInsResponse  # pylint: disable=E0611
+from flwr.proto.task_pb2 import (  # pylint: disable=E0611
+    SecureAggregation,
+    Task,
+    TaskIns,
+    TaskRes,
+)
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+    ClientMessage,
+    ServerMessage,
+)
 
 
 def test_validate_task_ins_no_task() -> None:
@@ -92,7 +100,7 @@ def test_validate_task_res() -> None:
     assert not validate_task_res(task_res)
 
     task_res.Clear()
-    task_res.workload_id = 61016
+    task_res.run_id = 61016
     assert not validate_task_res(task_res)
 
     task_res.Clear()

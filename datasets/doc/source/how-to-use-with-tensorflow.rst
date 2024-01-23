@@ -25,7 +25,7 @@ In case of CIFAR10, you should see the following output.
   'label': ClassLabel(names=['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog',
   'frog', 'horse', 'ship', 'truck'], id=None)}
 
-We will use the keys in the partition features in order to construct a `tf.data.Dataset <https://www.tensorflow.org/api_docs/python/tf/data/Dataset>_`. Let's move to the transformations.
+We will use the keys in the partition features in order to construct a `tf.data.Dataset <https://www.tensorflow.org/api_docs/python/tf/data/Dataset>`_. Let's move to the transformations.
 
 NumPy
 -----

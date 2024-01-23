@@ -18,7 +18,10 @@
 import unittest
 from unittest.mock import MagicMock, call
 
-from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+    ClientMessage,
+    ServerMessage,
+)
 from flwr.server.fleet.grpc_bidi.flower_service_servicer import (
     FlowerServiceServicer,
     register_client_proxy,

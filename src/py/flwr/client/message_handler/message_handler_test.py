@@ -18,8 +18,8 @@
 import uuid
 
 from flwr.client import Client
+from flwr.client.run_state import RunState
 from flwr.client.typing import ClientFn
-from flwr.client.workload_state import WorkloadState
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -33,9 +33,14 @@ from flwr.common import (
     serde,
     typing,
 )
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
-from flwr.proto.transport_pb2 import ClientMessage, Code, ServerMessage, Status
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+    ClientMessage,
+    Code,
+    ServerMessage,
+    Status,
+)
 
 from .message_handler import handle, handle_control_message
 
@@ -121,7 +126,7 @@ def test_client_without_get_properties() -> None:
     task_ins: TaskIns = TaskIns(
         task_id=str(uuid.uuid4()),
         group_id="",
-        workload_id=0,
+        run_id=0,
         task=Task(
             producer=Node(node_id=0, anonymous=True),
             consumer=Node(node_id=0, anonymous=True),
@@ -136,7 +141,7 @@ def test_client_without_get_properties() -> None:
     )
     task_res, _ = handle(
         client_fn=_get_client_fn(client),
-        state=WorkloadState(state={}),
+        state=RunState(state={}),
         task_ins=task_ins,
     )
 
@@ -152,7 +157,7 @@ def test_client_without_get_properties() -> None:
         TaskRes(
             task_id=str(uuid.uuid4()),
             group_id="",
-            workload_id=0,
+            run_id=0,
         )
     )
     # pylint: disable=no-member
@@ -189,7 +194,7 @@ def test_client_with_get_properties() -> None:
     task_ins = TaskIns(
         task_id=str(uuid.uuid4()),
         group_id="",
-        workload_id=0,
+        run_id=0,
         task=Task(
             producer=Node(node_id=0, anonymous=True),
             consumer=Node(node_id=0, anonymous=True),
@@ -204,7 +209,7 @@ def test_client_with_get_properties() -> None:
     )
     task_res, _ = handle(
         client_fn=_get_client_fn(client),
-        state=WorkloadState(state={}),
+        state=RunState(state={}),
         task_ins=task_ins,
     )
 
@@ -220,7 +225,7 @@ def test_client_with_get_properties() -> None:
         TaskRes(
             task_id=str(uuid.uuid4()),
             group_id="",
-            workload_id=0,
+            run_id=0,
         )
     )
     # pylint: disable=no-member
