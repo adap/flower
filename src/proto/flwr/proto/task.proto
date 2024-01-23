@@ -29,10 +29,11 @@ message Task {
   string ttl = 5;
   repeated string ancestry = 6;
   string task_type = 7;
-  SecureAggregation sa = 8;
+  RecordSet recordset = 8;
 
   ServerMessage legacy_server_message = 101 [ deprecated = true ];
   ClientMessage legacy_client_message = 102 [ deprecated = true ];
+  SecureAggregation sa = 103 [ deprecated = true ];
 }
 
 message TaskIns {
