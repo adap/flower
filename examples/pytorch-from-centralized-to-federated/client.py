@@ -24,10 +24,10 @@ class CifarClient(fl.client.NumPyClient):
     """Flower client implementing CIFAR-10 image classification using PyTorch."""
 
     def __init__(
-            self,
-            model: cifar.Net,
-            trainloader: DataLoader,
-            testloader: DataLoader,
+        self,
+        model: cifar.Net,
+        trainloader: DataLoader,
+        testloader: DataLoader,
     ) -> None:
         self.model = model
         self.trainloader = trainloader
@@ -61,7 +61,7 @@ class CifarClient(fl.client.NumPyClient):
             self.model.load_state_dict(state_dict, strict=True)
 
     def fit(
-            self, parameters: List[np.ndarray], config: Dict[str, str]
+        self, parameters: List[np.ndarray], config: Dict[str, str]
     ) -> Tuple[List[np.ndarray], int, Dict]:
         # Set model parameters, train model, return updated model parameters
         self.set_parameters(parameters)
@@ -69,7 +69,7 @@ class CifarClient(fl.client.NumPyClient):
         return self.get_parameters(config={}), len(self.trainloader.dataset), {}
 
     def evaluate(
-            self, parameters: List[np.ndarray], config: Dict[str, str]
+        self, parameters: List[np.ndarray], config: Dict[str, str]
     ) -> Tuple[float, int, Dict]:
         # Set model parameters, evaluate model on local test dataset, return result
         self.set_parameters(parameters)

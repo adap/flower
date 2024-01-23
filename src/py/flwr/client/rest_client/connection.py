@@ -29,7 +29,7 @@ from flwr.client.message_handler.task_handler import (
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import MISSING_EXTRA_REST
 from flwr.common.logger import log
-from flwr.proto.fleet_pb2 import (
+from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
     DeleteNodeRequest,
@@ -38,8 +38,8 @@ from flwr.proto.fleet_pb2 import (
     PushTaskResRequest,
     PushTaskResResponse,
 )
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 try:
     import requests
@@ -143,6 +143,7 @@ def http_request_response(
             },
             data=create_node_req_bytes,
             verify=verify,
+            timeout=None,
         )
 
         # Check status code and headers
@@ -185,6 +186,7 @@ def http_request_response(
             },
             data=delete_node_req_req_bytes,
             verify=verify,
+            timeout=None,
         )
 
         # Check status code and headers
@@ -225,6 +227,7 @@ def http_request_response(
             },
             data=pull_task_ins_req_bytes,
             verify=verify,
+            timeout=None,
         )
 
         # Check status code and headers
@@ -303,6 +306,7 @@ def http_request_response(
             },
             data=push_task_res_request_bytes,
             verify=verify,
+            timeout=None,
         )
 
         state[KEY_TASK_INS] = None

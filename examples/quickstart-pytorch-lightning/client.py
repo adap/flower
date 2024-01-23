@@ -10,6 +10,7 @@ import mnist
 
 disable_progress_bar()
 
+
 class FlowerClient(fl.client.NumPyClient):
     def __init__(self, model, train_loader, val_loader, test_loader):
         self.model = model
@@ -55,7 +56,6 @@ def _set_parameters(model, parameters):
 
 
 def main() -> None:
-
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
         "--node-id",
