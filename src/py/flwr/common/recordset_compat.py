@@ -210,9 +210,9 @@ def recordset_to_fitres(recordset: RecordSet, keep_input: bool) -> FitRes:
     num_examples = cast(
         int, recordset.get_metrics(f"{ins_str}.num_examples")["num_examples"]
     )
-    metrics_record = recordset.get_metrics(f"{ins_str}.metrics")
+    configs_record = recordset.get_configs(f"{ins_str}.metrics")
 
-    metrics = _check_mapping_from_recordscalartype_to_scalar(metrics_record.data)
+    metrics = _check_mapping_from_recordscalartype_to_scalar(configs_record.data)
     status = _extract_status_from_recordset(ins_str, recordset)
 
     return FitRes(
@@ -226,8 +226,8 @@ def fitres_to_recordset(fitres: FitRes, keep_input: bool) -> RecordSet:
 
     res_str = "fitres"
 
-    recordset.set_metrics(
-        name=f"{res_str}.metrics", record=MetricsRecord(fitres.metrics)  # type: ignore
+    recordset.set_configs(
+        name=f"{res_str}.metrics", record=ConfigsRecord(fitres.metrics)  # type: ignore
     )
     recordset.set_metrics(
         name=f"{res_str}.num_examples",
@@ -269,9 +269,9 @@ def recordset_to_evaluateres(recordset: RecordSet) -> EvaluateRes:
     num_examples = cast(
         int, recordset.get_metrics(f"{ins_str}.num_examples")["num_examples"]
     )
-    metrics_record = recordset.get_metrics(f"{ins_str}.metrics")
+    configs_record = recordset.get_configs(f"{ins_str}.metrics")
 
-    metrics = _check_mapping_from_recordscalartype_to_scalar(metrics_record.data)
+    metrics = _check_mapping_from_recordscalartype_to_scalar(configs_record.data)
     status = _extract_status_from_recordset(ins_str, recordset)
 
     return EvaluateRes(
@@ -297,9 +297,9 @@ def evaluateres_to_recordset(evaluateres: EvaluateRes) -> RecordSet:
     )
 
     # metrics
-    recordset.set_metrics(
+    recordset.set_configs(
         name=f"{res_str}.metrics",
-        record=MetricsRecord(evaluateres.metrics),  # type: ignore
+        record=ConfigsRecord(evaluateres.metrics),  # type: ignore
     )
 
     # status
