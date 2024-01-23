@@ -30,7 +30,7 @@ def get_eval_fn(ds_test, evaluation_step, num_classes, verbose):
     Parameters
     ----------
     - ds_test (tf.data.Dataset): The dataset used for evaluation.
-    - evaluation_step: After how many rounds of aggregartion server will evaluate the model.
+    - evaluation_step: After this rounds of aggregartion server evaluates the model.
     - num_classes: Number of classes/labels model has to classify.
     - verbose: How much details should be displayed.
 
@@ -107,8 +107,8 @@ class AudioServer:  # pylint: disable=too-many-instance-attributes
 
     Attributes
     ----------
-    - flwr_evalution_step (int): After how many rounds of aggregartion server will evaluate the model.
-    - flwr_min_sample_size (int): Minimum number of clients participate in current communication round.
+    - flwr_evalution_step (int): After this many rounds the server evaluates the model.
+    - flwr_min_sample_size (int): Minimum number of clients participate in a FL round.
     - flwr_num_clients (int): Total number of clients for federated learning.
     - flwr_rounds (int): Number of coummunication rounds between client and server.
     - model_num_classes (int): Number of classes/labels model has to classify.
