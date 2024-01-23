@@ -110,32 +110,6 @@ def parameters_to_parametersrecord(
     return p_record
 
 
-def _check_mapping_from_scalar_to_metricsrecordstypes(
-    scalar_config: Dict[str, Scalar],
-) -> Dict[str, MetricsRecordValues]:
-    """."""
-    for value in scalar_config.values():
-        if not isinstance(value, get_args(MetricsRecordValues)):
-            raise TypeError(
-                f"Supported types are {MetricsRecordValues}. "
-                f"But you used type: {type(value)}"
-            )
-    return cast(Dict[str, MetricsRecordValues], scalar_config)
-
-
-def _check_mapping_from_scalar_to_configsrecordstypes(
-    scalar_config: Dict[str, Scalar],
-) -> Dict[str, ConfigsRecordValues]:
-    """."""
-    for value in scalar_config.values():
-        if not isinstance(value, get_args(ConfigsRecordValues)):
-            raise TypeError(
-                f"Supported types are {ConfigsRecordValues}. "
-                f"But you used type: {type(value)}"
-            )
-    return cast(Dict[str, ConfigsRecordValues], scalar_config)
-
-
 def _check_mapping_from_recordscalartype_to_scalar(
     record_data: Mapping[str, Union[ConfigsRecordValues, MetricsRecordValues]]
 ) -> Dict[str, Scalar]:
@@ -184,8 +158,9 @@ def _fit_or_evaluate_ins_to_recordset(
         record=parameters_to_parametersrecord(ins.parameters, keep_input=keep_input),
     )
 
-    config = _check_mapping_from_scalar_to_configsrecordstypes(ins.config)
-    recordset.set_configs(name=f"{ins_str}.config", record=ConfigsRecord(config))
+    recordset.set_configs(
+        name=f"{ins_str}.config", record=ConfigsRecord(ins.config)  # type: ignore
+    )
 
     return recordset
 
@@ -209,7 +184,7 @@ def _extract_status_from_recordset(res_str: str, recordset: RecordSet) -> Status
     return Status(code=Code(code), message=str(status["message"]))
 
 
-def recordset_to_fit_ins(recordset: RecordSet, keep_input: bool) -> FitIns:
+def recordset_to_fitins(recordset: RecordSet, keep_input: bool) -> FitIns:
     """Derive FitIns from a RecordSet object."""
     parameters, config = _recordset_to_fit_or_evaluate_ins_components(
         recordset,
@@ -220,12 +195,12 @@ def recordset_to_fit_ins(recordset: RecordSet, keep_input: bool) -> FitIns:
     return FitIns(parameters=parameters, config=config)
 
 
-def fit_ins_to_recordset(fitins: FitIns, keep_input: bool) -> RecordSet:
+def fitins_to_recordset(fitins: FitIns, keep_input: bool) -> RecordSet:
     """Construct a RecordSet from a FitIns object."""
     return _fit_or_evaluate_ins_to_recordset(fitins, keep_input)
 
 
-def recordset_to_fit_res(recordset: RecordSet, keep_input: bool) -> FitRes:
+def recordset_to_fitres(recordset: RecordSet, keep_input: bool) -> FitRes:
     """Derive FitRes from a RecordSet object."""
     ins_str = "fitres"
     parameters = parametersrecord_to_parameters(
@@ -235,9 +210,9 @@ def recordset_to_fit_res(recordset: RecordSet, keep_input: bool) -> FitRes:
     num_examples = cast(
         int, recordset.get_metrics(f"{ins_str}.num_examples")["num_examples"]
     )
-    metrics_record = recordset.get_metrics(f"{ins_str}.metrics")
+    configs_record = recordset.get_configs(f"{ins_str}.metrics")
 
-    metrics = _check_mapping_from_recordscalartype_to_scalar(metrics_record.data)
+    metrics = _check_mapping_from_recordscalartype_to_scalar(configs_record.data)
     status = _extract_status_from_recordset(ins_str, recordset)
 
     return FitRes(
@@ -245,14 +220,15 @@ def recordset_to_fit_res(recordset: RecordSet, keep_input: bool) -> FitRes:
     )
 
 
-def fit_res_to_recordset(fitres: FitRes, keep_input: bool) -> RecordSet:
+def fitres_to_recordset(fitres: FitRes, keep_input: bool) -> RecordSet:
     """Construct a RecordSet from a FitRes object."""
     recordset = RecordSet()
 
     res_str = "fitres"
 
-    metrics = _check_mapping_from_scalar_to_metricsrecordstypes(fitres.metrics)
-    recordset.set_metrics(name=f"{res_str}.metrics", record=MetricsRecord(metrics))
+    recordset.set_configs(
+        name=f"{res_str}.metrics", record=ConfigsRecord(fitres.metrics)  # type: ignore
+    )
     recordset.set_metrics(
         name=f"{res_str}.num_examples",
         record=MetricsRecord({"num_examples": fitres.num_examples}),
@@ -268,7 +244,7 @@ def fit_res_to_recordset(fitres: FitRes, keep_input: bool) -> RecordSet:
     return recordset
 
 
-def recordset_to_evaluate_ins(recordset: RecordSet, keep_input: bool) -> EvaluateIns:
+def recordset_to_evaluateins(recordset: RecordSet, keep_input: bool) -> EvaluateIns:
     """Derive EvaluateIns from a RecordSet object."""
     parameters, config = _recordset_to_fit_or_evaluate_ins_components(
         recordset,
@@ -279,12 +255,12 @@ def recordset_to_evaluate_ins(recordset: RecordSet, keep_input: bool) -> Evaluat
     return EvaluateIns(parameters=parameters, config=config)
 
 
-def evaluate_ins_to_recordset(evaluateins: EvaluateIns, keep_input: bool) -> RecordSet:
+def evaluateins_to_recordset(evaluateins: EvaluateIns, keep_input: bool) -> RecordSet:
     """Construct a RecordSet from a EvaluateIns object."""
     return _fit_or_evaluate_ins_to_recordset(evaluateins, keep_input)
 
 
-def recordset_to_evaluate_res(recordset: RecordSet) -> EvaluateRes:
+def recordset_to_evaluateres(recordset: RecordSet) -> EvaluateRes:
     """Derive EvaluateRes from a RecordSet object."""
     ins_str = "evaluateres"
 
@@ -293,9 +269,9 @@ def recordset_to_evaluate_res(recordset: RecordSet) -> EvaluateRes:
     num_examples = cast(
         int, recordset.get_metrics(f"{ins_str}.num_examples")["num_examples"]
     )
-    metrics_record = recordset.get_metrics(f"{ins_str}.metrics")
+    configs_record = recordset.get_configs(f"{ins_str}.metrics")
 
-    metrics = _check_mapping_from_recordscalartype_to_scalar(metrics_record.data)
+    metrics = _check_mapping_from_recordscalartype_to_scalar(configs_record.data)
     status = _extract_status_from_recordset(ins_str, recordset)
 
     return EvaluateRes(
@@ -303,7 +279,7 @@ def recordset_to_evaluate_res(recordset: RecordSet) -> EvaluateRes:
     )
 
 
-def evaluate_res_to_recordset(evaluateres: EvaluateRes) -> RecordSet:
+def evaluateres_to_recordset(evaluateres: EvaluateRes) -> RecordSet:
     """Construct a RecordSet from a EvaluateRes object."""
     recordset = RecordSet()
 
@@ -321,8 +297,10 @@ def evaluate_res_to_recordset(evaluateres: EvaluateRes) -> RecordSet:
     )
 
     # metrics
-    metrics = _check_mapping_from_scalar_to_metricsrecordstypes(evaluateres.metrics)
-    recordset.set_metrics(name=f"{res_str}.metrics", record=MetricsRecord(metrics))
+    recordset.set_configs(
+        name=f"{res_str}.metrics",
+        record=ConfigsRecord(evaluateres.metrics),  # type: ignore
+    )
 
     # status
     recordset = _embed_status_into_recordset(
@@ -332,7 +310,7 @@ def evaluate_res_to_recordset(evaluateres: EvaluateRes) -> RecordSet:
     return recordset
 
 
-def recordset_to_getparameters_ins(recordset: RecordSet) -> GetParametersIns:
+def recordset_to_getparametersins(recordset: RecordSet) -> GetParametersIns:
     """Derive GetParametersIns from a RecordSet object."""
     config_record = recordset.get_configs("getparametersins.config")
 
@@ -341,16 +319,18 @@ def recordset_to_getparameters_ins(recordset: RecordSet) -> GetParametersIns:
     return GetParametersIns(config=config_dict)
 
 
-def getparameters_ins_to_recordset(getparameters_ins: GetParametersIns) -> RecordSet:
+def getparametersins_to_recordset(getparameters_ins: GetParametersIns) -> RecordSet:
     """Construct a RecordSet from a GetParametersIns object."""
     recordset = RecordSet()
 
-    config = _check_mapping_from_scalar_to_configsrecordstypes(getparameters_ins.config)
-    recordset.set_configs(name="getparametersins.config", record=ConfigsRecord(config))
+    recordset.set_configs(
+        name="getparametersins.config",
+        record=ConfigsRecord(getparameters_ins.config),  # type: ignore
+    )
     return recordset
 
 
-def getparameters_res_to_recordset(getparametersres: GetParametersRes) -> RecordSet:
+def getparametersres_to_recordset(getparametersres: GetParametersRes) -> RecordSet:
     """Construct a RecordSet from a GetParametersRes object."""
     recordset = RecordSet()
     res_str = "getparametersres"
@@ -365,7 +345,7 @@ def getparameters_res_to_recordset(getparametersres: GetParametersRes) -> Record
     return recordset
 
 
-def recordset_to_getparameters_res(recordset: RecordSet) -> GetParametersRes:
+def recordset_to_getparametersres(recordset: RecordSet) -> GetParametersRes:
     """Derive GetParametersRes from a RecordSet object."""
     res_str = "getparametersres"
     parameters = parametersrecord_to_parameters(
@@ -376,7 +356,7 @@ def recordset_to_getparameters_res(recordset: RecordSet) -> GetParametersRes:
     return GetParametersRes(status=status, parameters=parameters)
 
 
-def recordset_to_getproperties_ins(recordset: RecordSet) -> GetPropertiesIns:
+def recordset_to_getpropertiesins(recordset: RecordSet) -> GetPropertiesIns:
     """Derive GetPropertiesIns from a RecordSet object."""
     config_record = recordset.get_configs("getpropertiesins.config")
     config_dict = _check_mapping_from_recordscalartype_to_scalar(config_record.data)
@@ -384,19 +364,17 @@ def recordset_to_getproperties_ins(recordset: RecordSet) -> GetPropertiesIns:
     return GetPropertiesIns(config=config_dict)
 
 
-def getproperties_ins_to_recordset(getpropertiesins: GetPropertiesIns) -> RecordSet:
+def getpropertiesins_to_recordset(getpropertiesins: GetPropertiesIns) -> RecordSet:
     """Construct a RecordSet from a GetPropertiesRes object."""
     recordset = RecordSet()
-    config_dict = _check_mapping_from_scalar_to_configsrecordstypes(
-        getpropertiesins.config
-    )
     recordset.set_configs(
-        name="getpropertiesins.config", record=ConfigsRecord(config_dict)
+        name="getpropertiesins.config",
+        record=ConfigsRecord(getpropertiesins.config),  # type: ignore
     )
     return recordset
 
 
-def recordset_to_getproperties_res(recordset: RecordSet) -> GetPropertiesRes:
+def recordset_to_getpropertiesres(recordset: RecordSet) -> GetPropertiesRes:
     """Derive GetPropertiesRes from a RecordSet object."""
     res_str = "getpropertiesres"
     config_record = recordset.get_configs(f"{res_str}.properties")
@@ -407,14 +385,14 @@ def recordset_to_getproperties_res(recordset: RecordSet) -> GetPropertiesRes:
     return GetPropertiesRes(status=status, properties=properties)
 
 
-def getproperties_res_to_recordset(getpropertiesres: GetPropertiesRes) -> RecordSet:
+def getpropertiesres_to_recordset(getpropertiesres: GetPropertiesRes) -> RecordSet:
     """Construct a RecordSet from a GetPropertiesRes object."""
     recordset = RecordSet()
     res_str = "getpropertiesres"
-    configs = _check_mapping_from_scalar_to_configsrecordstypes(
-        getpropertiesres.properties
+    recordset.set_configs(
+        name=f"{res_str}.properties",
+        record=ConfigsRecord(getpropertiesres.properties),  # type: ignore
     )
-    recordset.set_configs(name=f"{res_str}.properties", record=ConfigsRecord(configs))
     # status
     recordset = _embed_status_into_recordset(
         res_str, getpropertiesres.status, recordset
