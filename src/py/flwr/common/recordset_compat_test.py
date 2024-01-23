@@ -23,22 +23,22 @@ import pytest
 
 from .parameter import ndarrays_to_parameters
 from .recordset_compat import (
-    evaluate_ins_to_recordset,
-    evaluate_res_to_recordset,
-    fit_ins_to_recordset,
-    fit_res_to_recordset,
-    getparameters_ins_to_recordset,
-    getparameters_res_to_recordset,
-    getproperties_ins_to_recordset,
-    getproperties_res_to_recordset,
-    recordset_to_evaluate_ins,
-    recordset_to_evaluate_res,
-    recordset_to_fit_ins,
-    recordset_to_fit_res,
-    recordset_to_getparameters_ins,
-    recordset_to_getparameters_res,
-    recordset_to_getproperties_ins,
-    recordset_to_getproperties_res,
+    evaluateins_to_recordset,
+    evaluateres_to_recordset,
+    fitins_to_recordset,
+    fitres_to_recordset,
+    getparametersins_to_recordset,
+    getparametersres_to_recordset,
+    getpropertiesins_to_recordset,
+    getpropertiesres_to_recordset,
+    recordset_to_evaluateins,
+    recordset_to_evaluateres,
+    recordset_to_fitins,
+    recordset_to_fitres,
+    recordset_to_getparametersins,
+    recordset_to_getparametersres,
+    recordset_to_getpropertiesins,
+    recordset_to_getpropertiesres,
 )
 from .typing import (
     Code,
@@ -142,9 +142,9 @@ def test_fitins_to_recordset_and_back() -> None:
 
     fitins_copy = deepcopy(fitins)
 
-    recordset = fit_ins_to_recordset(fitins, keep_input=False)
+    recordset = fitins_to_recordset(fitins, keep_input=False)
 
-    fitins_ = recordset_to_fit_ins(recordset, keep_input=False)
+    fitins_ = recordset_to_fitins(recordset, keep_input=False)
 
     assert fitins_copy == fitins_
 
@@ -166,8 +166,8 @@ def test_fitres_to_recordset_and_back(context: Any, metrics: Dict[str, Scalar]) 
     fitres_copy = deepcopy(fitres)
 
     with context:
-        recordset = fit_res_to_recordset(fitres, keep_input=False)
-        fitres_ = recordset_to_fit_res(recordset, keep_input=False)
+        recordset = fitres_to_recordset(fitres, keep_input=False)
+        fitres_ = recordset_to_fitres(recordset, keep_input=False)
 
     # only check if we didn't test for an invalid setting. Only in valid settings
     # makes sense to evaluate the below, since both functions above have succesfully
@@ -182,9 +182,9 @@ def test_evaluateins_to_recordset_and_back() -> None:
 
     evaluateins_copy = deepcopy(evaluateins)
 
-    recordset = evaluate_ins_to_recordset(evaluateins, keep_input=False)
+    recordset = evaluateins_to_recordset(evaluateins, keep_input=False)
 
-    evaluateins_ = recordset_to_evaluate_ins(recordset, keep_input=False)
+    evaluateins_ = recordset_to_evaluateins(recordset, keep_input=False)
 
     assert evaluateins_copy == evaluateins_
 
@@ -208,8 +208,8 @@ def test_evaluateres_to_recordset_and_back(
     evaluateres_copy = deepcopy(evaluateres)
 
     with context:
-        recordset = evaluate_res_to_recordset(evaluateres)
-        evaluateres_ = recordset_to_evaluate_res(recordset)
+        recordset = evaluateres_to_recordset(evaluateres)
+        evaluateres_ = recordset_to_evaluateres(recordset)
 
     # only check if we didn't test for an invalid setting. Only in valid settings
     # makes sense to evaluate the below, since both functions above have succesfully
@@ -224,8 +224,8 @@ def test_get_properties_ins_to_recordset_and_back() -> None:
 
     getproperties_ins_copy = deepcopy(getproperties_ins)
 
-    recordset = getproperties_ins_to_recordset(getproperties_ins)
-    getproperties_ins_ = recordset_to_getproperties_ins(recordset)
+    recordset = getpropertiesins_to_recordset(getproperties_ins)
+    getproperties_ins_ = recordset_to_getpropertiesins(recordset)
 
     assert getproperties_ins_copy == getproperties_ins_
 
@@ -236,8 +236,8 @@ def test_get_properties_res_to_recordset_and_back() -> None:
 
     getproperties_res_copy = deepcopy(getproperties_res)
 
-    recordset = getproperties_res_to_recordset(getproperties_res)
-    getproperties_res_ = recordset_to_getproperties_res(recordset)
+    recordset = getpropertiesres_to_recordset(getproperties_res)
+    getproperties_res_ = recordset_to_getpropertiesres(recordset)
 
     assert getproperties_res_copy == getproperties_res_
 
@@ -248,8 +248,8 @@ def test_get_parameters_ins_to_recordset_and_back() -> None:
 
     getparameters_ins_copy = deepcopy(getparameters_ins)
 
-    recordset = getparameters_ins_to_recordset(getparameters_ins)
-    getparameters_ins_ = recordset_to_getparameters_ins(recordset)
+    recordset = getparametersins_to_recordset(getparameters_ins)
+    getparameters_ins_ = recordset_to_getparametersins(recordset)
 
     assert getparameters_ins_copy == getparameters_ins_
 
@@ -260,7 +260,7 @@ def test_get_parameters_res_to_recordset_and_back() -> None:
 
     getparameters_res_copy = deepcopy(getparameteres_res)
 
-    recordset = getparameters_res_to_recordset(getparameteres_res)
-    getparameteres_res_ = recordset_to_getparameters_res(recordset)
+    recordset = getparametersres_to_recordset(getparameteres_res)
+    getparameteres_res_ = recordset_to_getparametersres(recordset)
 
     assert getparameters_res_copy == getparameteres_res_

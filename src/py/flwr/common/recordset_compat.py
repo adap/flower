@@ -184,7 +184,7 @@ def _extract_status_from_recordset(res_str: str, recordset: RecordSet) -> Status
     return Status(code=Code(code), message=str(status["message"]))
 
 
-def recordset_to_fit_ins(recordset: RecordSet, keep_input: bool) -> FitIns:
+def recordset_to_fitins(recordset: RecordSet, keep_input: bool) -> FitIns:
     """Derive FitIns from a RecordSet object."""
     parameters, config = _recordset_to_fit_or_evaluate_ins_components(
         recordset,
@@ -195,12 +195,12 @@ def recordset_to_fit_ins(recordset: RecordSet, keep_input: bool) -> FitIns:
     return FitIns(parameters=parameters, config=config)
 
 
-def fit_ins_to_recordset(fitins: FitIns, keep_input: bool) -> RecordSet:
+def fitins_to_recordset(fitins: FitIns, keep_input: bool) -> RecordSet:
     """Construct a RecordSet from a FitIns object."""
     return _fit_or_evaluate_ins_to_recordset(fitins, keep_input)
 
 
-def recordset_to_fit_res(recordset: RecordSet, keep_input: bool) -> FitRes:
+def recordset_to_fitres(recordset: RecordSet, keep_input: bool) -> FitRes:
     """Derive FitRes from a RecordSet object."""
     ins_str = "fitres"
     parameters = parametersrecord_to_parameters(
@@ -220,7 +220,7 @@ def recordset_to_fit_res(recordset: RecordSet, keep_input: bool) -> FitRes:
     )
 
 
-def fit_res_to_recordset(fitres: FitRes, keep_input: bool) -> RecordSet:
+def fitres_to_recordset(fitres: FitRes, keep_input: bool) -> RecordSet:
     """Construct a RecordSet from a FitRes object."""
     recordset = RecordSet()
 
@@ -244,7 +244,7 @@ def fit_res_to_recordset(fitres: FitRes, keep_input: bool) -> RecordSet:
     return recordset
 
 
-def recordset_to_evaluate_ins(recordset: RecordSet, keep_input: bool) -> EvaluateIns:
+def recordset_to_evaluateins(recordset: RecordSet, keep_input: bool) -> EvaluateIns:
     """Derive EvaluateIns from a RecordSet object."""
     parameters, config = _recordset_to_fit_or_evaluate_ins_components(
         recordset,
@@ -255,12 +255,12 @@ def recordset_to_evaluate_ins(recordset: RecordSet, keep_input: bool) -> Evaluat
     return EvaluateIns(parameters=parameters, config=config)
 
 
-def evaluate_ins_to_recordset(evaluateins: EvaluateIns, keep_input: bool) -> RecordSet:
+def evaluateins_to_recordset(evaluateins: EvaluateIns, keep_input: bool) -> RecordSet:
     """Construct a RecordSet from a EvaluateIns object."""
     return _fit_or_evaluate_ins_to_recordset(evaluateins, keep_input)
 
 
-def recordset_to_evaluate_res(recordset: RecordSet) -> EvaluateRes:
+def recordset_to_evaluateres(recordset: RecordSet) -> EvaluateRes:
     """Derive EvaluateRes from a RecordSet object."""
     ins_str = "evaluateres"
 
@@ -279,7 +279,7 @@ def recordset_to_evaluate_res(recordset: RecordSet) -> EvaluateRes:
     )
 
 
-def evaluate_res_to_recordset(evaluateres: EvaluateRes) -> RecordSet:
+def evaluateres_to_recordset(evaluateres: EvaluateRes) -> RecordSet:
     """Construct a RecordSet from a EvaluateRes object."""
     recordset = RecordSet()
 
@@ -310,7 +310,7 @@ def evaluate_res_to_recordset(evaluateres: EvaluateRes) -> RecordSet:
     return recordset
 
 
-def recordset_to_getparameters_ins(recordset: RecordSet) -> GetParametersIns:
+def recordset_to_getparametersins(recordset: RecordSet) -> GetParametersIns:
     """Derive GetParametersIns from a RecordSet object."""
     config_record = recordset.get_configs("getparametersins.config")
 
@@ -319,7 +319,7 @@ def recordset_to_getparameters_ins(recordset: RecordSet) -> GetParametersIns:
     return GetParametersIns(config=config_dict)
 
 
-def getparameters_ins_to_recordset(getparameters_ins: GetParametersIns) -> RecordSet:
+def getparametersins_to_recordset(getparameters_ins: GetParametersIns) -> RecordSet:
     """Construct a RecordSet from a GetParametersIns object."""
     recordset = RecordSet()
 
@@ -330,7 +330,7 @@ def getparameters_ins_to_recordset(getparameters_ins: GetParametersIns) -> Recor
     return recordset
 
 
-def getparameters_res_to_recordset(getparametersres: GetParametersRes) -> RecordSet:
+def getparametersres_to_recordset(getparametersres: GetParametersRes) -> RecordSet:
     """Construct a RecordSet from a GetParametersRes object."""
     recordset = RecordSet()
     res_str = "getparametersres"
@@ -345,7 +345,7 @@ def getparameters_res_to_recordset(getparametersres: GetParametersRes) -> Record
     return recordset
 
 
-def recordset_to_getparameters_res(recordset: RecordSet) -> GetParametersRes:
+def recordset_to_getparametersres(recordset: RecordSet) -> GetParametersRes:
     """Derive GetParametersRes from a RecordSet object."""
     res_str = "getparametersres"
     parameters = parametersrecord_to_parameters(
@@ -356,7 +356,7 @@ def recordset_to_getparameters_res(recordset: RecordSet) -> GetParametersRes:
     return GetParametersRes(status=status, parameters=parameters)
 
 
-def recordset_to_getproperties_ins(recordset: RecordSet) -> GetPropertiesIns:
+def recordset_to_getpropertiesins(recordset: RecordSet) -> GetPropertiesIns:
     """Derive GetPropertiesIns from a RecordSet object."""
     config_record = recordset.get_configs("getpropertiesins.config")
     config_dict = _check_mapping_from_recordscalartype_to_scalar(config_record.data)
@@ -364,7 +364,7 @@ def recordset_to_getproperties_ins(recordset: RecordSet) -> GetPropertiesIns:
     return GetPropertiesIns(config=config_dict)
 
 
-def getproperties_ins_to_recordset(getpropertiesins: GetPropertiesIns) -> RecordSet:
+def getpropertiesins_to_recordset(getpropertiesins: GetPropertiesIns) -> RecordSet:
     """Construct a RecordSet from a GetPropertiesRes object."""
     recordset = RecordSet()
     recordset.set_configs(
@@ -374,7 +374,7 @@ def getproperties_ins_to_recordset(getpropertiesins: GetPropertiesIns) -> Record
     return recordset
 
 
-def recordset_to_getproperties_res(recordset: RecordSet) -> GetPropertiesRes:
+def recordset_to_getpropertiesres(recordset: RecordSet) -> GetPropertiesRes:
     """Derive GetPropertiesRes from a RecordSet object."""
     res_str = "getpropertiesres"
     config_record = recordset.get_configs(f"{res_str}.properties")
@@ -385,7 +385,7 @@ def recordset_to_getproperties_res(recordset: RecordSet) -> GetPropertiesRes:
     return GetPropertiesRes(status=status, properties=properties)
 
 
-def getproperties_res_to_recordset(getpropertiesres: GetPropertiesRes) -> RecordSet:
+def getpropertiesres_to_recordset(getpropertiesres: GetPropertiesRes) -> RecordSet:
     """Construct a RecordSet from a GetPropertiesRes object."""
     recordset = RecordSet()
     res_str = "getpropertiesres"
