@@ -24,7 +24,7 @@ from typing import Callable, ContextManager, Optional, Tuple, Union
 
 from flwr.client.client import Client
 from flwr.client.flower import Flower
-from flwr.client.typing import Bwd, ClientFn, Fwd
+from flwr.client.typing import ClientFn
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
@@ -34,8 +34,11 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
 )
+from flwr.common.flowercontext import FlowerContext, Metadata
 from flwr.common.logger import log, warn_experimental_feature
-from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.common.recordset import RecordSet
+from flwr.common.serde import recordset_to_proto
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 
 from .flower import load_flower_callable
 from .grpc_client.connection import grpc_connection
@@ -323,6 +326,15 @@ def _start_client_internal(
     connection, address = _init_connection(transport, server_address)
 
     node_state = NodeState()
+    # TODO: remove NodeState/RunState logic ?
+
+    # TODO: initialize context here?
+    context = FlowerContext(
+        in_message=RecordSet(),
+        out_message=RecordSet(),
+        local=RecordSet(),
+        metadata=Metadata(run_id=-1, task_id="", group_id="", ttl="", task_type=""),
+    )
 
     while True:
         sleep_duration: int = 0
@@ -354,24 +366,30 @@ def _start_client_internal(
                 # Register state
                 node_state.register_runstate(run_id=task_ins.run_id)
 
+                # TODO: pulate context.metadata and context.in_message from TaskIns
+
                 # Load app
                 app: Flower = load_flower_callable_fn()
 
                 # Handle task message
-                fwd_msg: Fwd = Fwd(
-                    task_ins=task_ins,
-                    state=node_state.retrieve_runstate(run_id=task_ins.run_id),
-                )
-                bwd_msg: Bwd = app(fwd=fwd_msg)
+                context_ = app(context=context)
 
                 # Update node state
-                node_state.update_runstate(
-                    run_id=bwd_msg.task_res.run_id,
-                    run_state=bwd_msg.state,
+                # node_state.update_runstate(
+                #     run_id=bwd_msg.task_res.run_id,
+                #     run_state=bwd_msg.state,
+                # )
+
+                # TODO: Construct TaskRes from context.out_message
+                task_res = TaskRes(
+                    task_id=context_.metadata.task_id,
+                    group_id=context_.metadata.group_id,
+                    run_id=context_.metadata.run_id,
+                    task=Task(recordset=recordset_to_proto(context_.out_message)),
                 )
 
                 # Send
-                send(bwd_msg.task_res)
+                send(task_res)
 
             # Unregister node
             if delete_node is not None:

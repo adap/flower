@@ -18,6 +18,7 @@ from dataclasses import dataclass
 from typing import Callable
 
 from flwr.client.run_state import RunState
+from flwr.common.flowercontext import FlowerContext
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 from .client import Client as Client
@@ -39,6 +40,6 @@ class Bwd:
     state: RunState
 
 
-FlowerCallable = Callable[[Fwd], Bwd]
+FlowerCallable = Callable[[FlowerContext], FlowerContext]
 ClientFn = Callable[[str], Client]
-Layer = Callable[[Fwd, FlowerCallable], Bwd]
+Layer = Callable[[FlowerContext, FlowerCallable], FlowerContext]

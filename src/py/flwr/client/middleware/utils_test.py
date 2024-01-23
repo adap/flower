@@ -20,6 +20,9 @@ from typing import List
 
 from flwr.client.run_state import RunState
 from flwr.client.typing import Bwd, FlowerCallable, Fwd, Layer
+from flwr.common.configsrecord import ConfigsRecord
+from flwr.common.flowercontext import FlowerContext, Metadata
+from flwr.common.recordset import RecordSet
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 from .utils import make_ffn
@@ -28,13 +31,13 @@ from .utils import make_ffn
 def make_mock_middleware(name: str, footprint: List[str]) -> Layer:
     """Make a mock middleware layer."""
 
-    def middleware(fwd: Fwd, app: FlowerCallable) -> Bwd:
+    def middleware(context: FlowerContext, app: FlowerCallable) -> FlowerContext:
         footprint.append(name)
-        fwd.task_ins.task_id += f"{name}"
-        bwd = app(fwd)
+        context.in_message.set_configs(name=name, record=ConfigsRecord())
+        ctx: FlowerContext = app(context)
         footprint.append(name)
-        bwd.task_res.task_id += f"{name}"
-        return bwd
+        ctx.out_message.set_configs(name=name, record=ConfigsRecord())
+        return ctx
 
     return middleware
 
@@ -42,10 +45,11 @@ def make_mock_middleware(name: str, footprint: List[str]) -> Layer:
 def make_mock_app(name: str, footprint: List[str]) -> FlowerCallable:
     """Make a mock app."""
 
-    def app(fwd: Fwd) -> Bwd:
+    def app(context: FlowerContext) -> FlowerContext:
         footprint.append(name)
-        fwd.task_ins.task_id += f"{name}"
-        return Bwd(task_res=TaskRes(task_id=name), state=RunState({}))
+        context.in_message.set_configs(name=name, record=ConfigsRecord())
+        context.out_message.set_configs(name=name, record=ConfigsRecord())
+        return context
 
     return app
 
@@ -62,18 +66,28 @@ class TestMakeApp(unittest.TestCase):
         mock_middleware_layers = [
             make_mock_middleware(name, footprint) for name in mock_middleware_names
         ]
-        task_ins = TaskIns()
+
+        context = FlowerContext(
+            in_message=RecordSet(),
+            out_message=RecordSet(),
+            local=RecordSet(),
+            metadata=Metadata(
+                run_id=0, task_id="", group_id="", ttl="", task_type="mock"
+            ),
+        )
 
         # Execute
         wrapped_app = make_ffn(mock_app, mock_middleware_layers)
-        task_res = wrapped_app(Fwd(task_ins=task_ins, state=RunState({}))).task_res
+        context_ = wrapped_app(context)
 
         # Assert
         trace = mock_middleware_names + ["app"]
         self.assertEqual(footprint, trace + list(reversed(mock_middleware_names)))
         # pylint: disable-next=no-member
-        self.assertEqual(task_ins.task_id, "".join(trace))
-        self.assertEqual(task_res.task_id, "".join(reversed(trace)))
+        self.assertEqual("".join(context_.in_message.configs.keys()), "".join(trace))
+        self.assertEqual(
+            "".join(context_.out_message.configs.keys()), "".join(reversed(trace))
+        )
 
     def test_filter(self) -> None:
         """Test if a middleware can filter incoming TaskIns."""
