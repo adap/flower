@@ -1,0 +1,4 @@
+flwr[simulation]>=1.0, <2.0
+torch==2.1.1
+torchvision==0.16.1
+flwr-datasets[vision]>=0.0.2, <1.0.0
