@@ -1,0 +1,9 @@
+n_estimators_client: 25
+num_rounds: 500
+client_num: 5
+num_iterations: 100
+
+xgb:
+  max_depth: 6
+CNN:
+  lr: .000457414512764587

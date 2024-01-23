@@ -4,6 +4,8 @@
 Quickstart MXNet
 ================
 
+.. warning:: MXNet is no longer maintained and has been moved into `Attic <https://attic.apache.org/projects/mxnet.html>`_. As a result, we would encourage you to use other ML frameworks alongise Flower, for example, PyTorch. This tutorial might be removed in future versions of Flower.
+
 .. meta::
    :description: Check out this Federated Learning quickstart tutorial for using Flower with MXNet to train a Sequential model on MNIST.
 
