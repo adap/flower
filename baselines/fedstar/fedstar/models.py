@@ -333,7 +333,7 @@ class PslNetwork(tf.keras.Model):  # pylint: disable=abstract-method
         return self.history
 
     # pylint: disable=too-many-arguments, too-many-locals, arguments-differ
-    # @tf.function
+    @tf.function
     def train_step(self, x, y, T=4):
         """Perform a single training step on a batch of data.
 

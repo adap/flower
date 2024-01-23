@@ -22,7 +22,7 @@ dataset: [Ambient Context, Speech Commands]
 
 **Datasets:** Ambient Context, Speech Commands
 
-**Hardware Setup:** These experiments were run on a linux server with 56 CPU threads with 325 GB Ram with A10 GPU in it. Any machine with 16 CPU cores and 32 GB memory would be able to run experiments with small number of clients in a reasonable amount of time. For context, a machine with 24 cores and a RTX3090Ti ran the Speech Commands experiment with 10 clients in 1h. For this examperiment 30GB of RAM was used and clients required ~1.4GB of VRAM each.
+**Hardware Setup:** These experiments were run on a linux server with 56 CPU threads with 325 GB Ram with A10 GPU in it. Any machine with 16 CPU cores and 32 GB memory would be able to run experiments with small number of clients in a reasonable amount of time. For context, a machine with 24 cores and a RTX3090Ti ran the Speech Commands experiment in Table 3 with 10 clients in 1h. For this examperiment 30GB of RAM was used and clients required ~1.4GB of VRAM each.
 
 **Contributors:** Raj Parekh [GitHub](https://github.com/Raj-Parekh24), [Mail](rajparekhwc@gmail.com)
 
@@ -106,7 +106,6 @@ To run in supervised mode, pass `fedstar=false` to any of the commands above (wh
 
 ## Expected Results
 
-> **Note:** We observed a very large memory utilization when using `@tf.function` decorate for `train_step` in `fedstar/models.py` and therefore we have commented it. This causes the experiments to run slower while keeping the memory footpring somewhat under control. If you have some suggestions on how to overcome this issue please reach out. 
 
 This section indicates the commands to exectue to obtain the results shown below in Table 3 and Table 4. While both configs fix the number of rounds to 100, in many settings fewer rounds are enough for the model to converge. The commands below make use of Hydra's `--multirun` to run multiple experiments. This is better suited when using Flower simulations. Here they work fine but, if you encounter any issues, you can always "unroll" the multirun and run one configuration at a time. If you do this, results won't go into the `multirun/` directory, instead to the default `outputs/` directory.
 
