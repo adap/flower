@@ -28,6 +28,7 @@ from flwr.proto.recordset_pb2 import DoubleList
 from flwr.proto.recordset_pb2 import MetricsRecord as ProtoMetricsRecord
 from flwr.proto.recordset_pb2 import MetricsRecordValue as ProtoMetricsRecordValue
 from flwr.proto.recordset_pb2 import ParametersRecord as ProtoParametersRecord
+from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
 from flwr.proto.recordset_pb2 import Sint64List, StringList
 from flwr.proto.task_pb2 import Value
 from flwr.proto.transport_pb2 import (
@@ -45,6 +46,7 @@ from . import typing
 from .configsrecord import ConfigsRecord
 from .metricsrecord import MetricsRecord
 from .parametersrecord import Array, ParametersRecord
+from .recordset import RecordSet
 
 #  === ServerMessage message ===
 
@@ -718,4 +720,34 @@ def configs_record_from_proto(record_proto: ProtoConfigsRecord) -> ConfigsRecord
             _record_value_dict_from_proto(record_proto.data),
         ),
         keep_input=False,
+    )
+
+
+# === RecordSet message ===
+
+
+def recordset_to_proto(recordset: RecordSet) -> ProtoRecordSet:
+    """Serialize RecordSet to ProtoBuf."""
+    return ProtoRecordSet(
+        parameters={
+            k: parameters_record_to_proto(v) for k, v in recordset.parameters.items()
+        },
+        metrics={k: metrics_record_to_proto(v) for k, v in recordset.metrics.items()},
+        configs={k: configs_record_to_proto(v) for k, v in recordset.configs.items()},
+    )
+
+
+def recordset_from_proto(recordset_proto: ProtoRecordSet) -> RecordSet:
+    """Deserialize RecordSet from ProtoBuf."""
+    return RecordSet(
+        parameters={
+            k: parameters_record_from_proto(v)
+            for k, v in recordset_proto.parameters.items()
+        },
+        metrics={
+            k: metrics_record_from_proto(v) for k, v in recordset_proto.metrics.items()
+        },
+        configs={
+            k: configs_record_from_proto(v) for k, v in recordset_proto.configs.items()
+        },
     )
