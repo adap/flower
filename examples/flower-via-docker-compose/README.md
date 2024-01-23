@@ -41,7 +41,7 @@ Running this example is easy. For a more detailed step-by-step guide, including 
 ```bash
 
 # Generate docker compose file
-python helpers/generate_docker_compose.py # by default will spanw 2 clients and do FL for 100 rounds
+python helpers/generate_docker_compose.py # by default will configure to use 2 clients for 100 rounds
 
 # Build docker images
 docker-compose build
