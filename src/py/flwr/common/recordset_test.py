@@ -111,7 +111,7 @@ def test_set_parameters_while_keeping_intputs() -> None:
     array_dict = OrderedDict(
         {str(i): ndarray_to_array(ndarray) for i, ndarray in enumerate(get_ndarrays())}
     )
-    p_record.set_parameters(array_dict)
+    p_record.set_parameters(array_dict, keep_input=True)
 
     # Creating a second parametersrecord passing the same `array_dict` (not erased)
     p_record_2 = ParametersRecord(array_dict)
@@ -162,6 +162,7 @@ def test_set_parameters_with_incorrect_types(
         (str, lambda x: float(x.flatten()[0])),  # str: float
         (str, lambda x: x.flatten().astype("int").tolist()),  # str: List[int]
         (str, lambda x: x.flatten().astype("float").tolist()),  # str: List[float]
+        (str, lambda x: []),  # str: empty list
     ],
 )
 def test_set_metrics_to_metricsrecord_with_correct_types(
@@ -189,6 +190,7 @@ def test_set_metrics_to_metricsrecord_with_correct_types(
     "key_type, value_fn",
     [
         (str, lambda x: str(x.flatten()[0])),  # str: str  (supported: unsupported)
+        (str, lambda x: bool(x.flatten()[0])),  # str: bool  (supported: unsupported)
         (
             str,
             lambda x: x.flatten().astype("str").tolist(),
@@ -203,6 +205,10 @@ def test_set_metrics_to_metricsrecord_with_correct_types(
             lambda x: [{str(v): v for v in x.flatten()}],
         ),  # str: List[dict[str: float]] (supported: unsupported)
         (
+            str,
+            lambda x: [1, 2.0, 3.0, 4],
+        ),  # str: List[mixing valid types] (supported: unsupported)
+        (
             int,
             lambda x: x.flatten().tolist(),
         ),  # int: List[str] (unsupported: supported)
@@ -213,7 +219,7 @@ def test_set_metrics_to_metricsrecord_with_correct_types(
     ],
 )
 def test_set_metrics_to_metricsrecord_with_incorrect_types(
-    key_type: Type[Union[str, int, float]],
+    key_type: Type[Union[str, int, float, bool]],
     value_fn: Callable[[NDArray], Union[NDArray, Dict[str, NDArray], List[float]]],
 ) -> None:
     """Test adding metrics of various unsupported types to a MetricsRecord."""
@@ -253,7 +259,7 @@ def test_set_metrics_to_metricsrecord_with_and_without_keeping_input(
     my_metrics_copy = my_metrics.copy()
 
     # Add metric
-    m_record.set_metrics(my_metrics)
+    m_record.set_metrics(my_metrics, keep_input=keep_input)
 
     # Check metrics are actually added
     # Check that input dict has been emptied when enabled such behaviour
@@ -270,11 +276,14 @@ def test_set_metrics_to_metricsrecord_with_and_without_keeping_input(
         (str, lambda x: str(x.flatten()[0])),  # str: str
         (str, lambda x: int(x.flatten()[0])),  # str: int
         (str, lambda x: float(x.flatten()[0])),  # str: float
+        (str, lambda x: bool(x.flatten()[0])),  # str: bool
         (str, lambda x: x.flatten().tobytes()),  # str: bytes
         (str, lambda x: x.flatten().astype("str").tolist()),  # str: List[str]
         (str, lambda x: x.flatten().astype("int").tolist()),  # str: List[int]
         (str, lambda x: x.flatten().astype("float").tolist()),  # str: List[float]
+        (str, lambda x: x.flatten().astype("bool").tolist()),  # str: List[bool]
         (str, lambda x: [x.flatten().tobytes()]),  # str: List[bytes]
+        (str, lambda x: []),  # str: empyt list
     ],
 )
 def test_set_configs_to_configsrecord_with_correct_types(
@@ -307,6 +316,10 @@ def test_set_configs_to_configsrecord_with_correct_types(
             str,
             lambda x: [{str(v): v for v in x.flatten()}],
         ),  # str: List[dict[str: float]] (supported: unsupported)
+        (
+            str,
+            lambda x: [1, 2.0, 3.0, 4],
+        ),  # str: List[mixing valid types] (supported: unsupported)
         (
             int,
             lambda x: x.flatten().tolist(),
