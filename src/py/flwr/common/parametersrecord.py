@@ -59,7 +59,6 @@ class ParametersRecord:
     PyTorch's state_dict, but holding serialised tensors instead.
     """
 
-    keep_input: bool
     data: OrderedDict[str, Array] = field(default_factory=OrderedDict[str, Array])
 
     def __init__(
@@ -82,25 +81,29 @@ class ParametersRecord:
             parameters after adding it to the record, set this flag to True. When set
             to True, the data is duplicated in memory.
         """
-        self.keep_input = keep_input
         self.data = OrderedDict()
         if array_dict:
-            self.set_parameters(array_dict)
+            self.set_parameters(array_dict, keep_input=keep_input)
 
-    def set_parameters(self, array_dict: OrderedDict[str, Array]) -> None:
+    def set_parameters(
+        self, array_dict: OrderedDict[str, Array], keep_input: bool = False
+    ) -> None:
         """Add parameters to record.
 
         Parameters
         ----------
         array_dict : OrderedDict[str, Array]
             A dictionary that stores serialized array-like or tensor-like objects.
+        keep_input : bool (default: False)
+            A boolean indicating whether parameters should be deleted from the input
+            dictionary immediately after adding them to the record.
         """
         if any(not isinstance(k, str) for k in array_dict.keys()):
             raise TypeError(f"Not all keys are of valid type. Expected {str}")
         if any(not isinstance(v, Array) for v in array_dict.values()):
             raise TypeError(f"Not all values are of valid type. Expected {Array}")
 
-        if self.keep_input:
+        if keep_input:
             # Copy
             self.data = OrderedDict(array_dict)
         else:
@@ -108,3 +111,7 @@ class ParametersRecord:
             for key in list(array_dict.keys()):
                 self.data[key] = array_dict[key]
                 del array_dict[key]
+
+    def __getitem__(self, key: str) -> Array:
+        """Retrieve an element stored in record."""
+        return self.data[key]

@@ -17,10 +17,13 @@
 
 from typing import Optional
 
-from flwr.proto.fleet_pb2 import PullTaskInsResponse
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
-from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.proto.fleet_pb2 import PullTaskInsResponse  # pylint: disable=E0611
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+    ClientMessage,
+    ServerMessage,
+)
 
 
 def validate_task_ins(task_ins: TaskIns, discard_reconnect_ins: bool) -> bool:
