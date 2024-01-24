@@ -76,7 +76,7 @@ def main():
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
         "--toy",
-        action='store_true',
+        action="store_true",
         help="Set to true to use only 10 datasamples for validation. \
             Useful for testing purposes. Default: False",
     )
