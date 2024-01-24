@@ -18,7 +18,6 @@ android {
         }
         minSdk = 28
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        version = "0.0.2"
     }
 
     buildTypes {
@@ -47,13 +46,15 @@ android {
     }
 }
 
+val grpcVersion = "1.56.1"
+
 protobuf {
     protoc {
         artifact = "com.google.protobuf:protoc:3.23.4"
     }
     plugins {
         create("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:1.58.0"
+            artifact = "io.grpc:protoc-gen-grpc-java:$grpcVersion"
         }
     }
     generateProtoTasks {
@@ -75,12 +76,12 @@ protobuf {
 dependencies {
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.compose.runtime:runtime:1.5.0")
-    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.9.10"))
-    implementation("io.grpc:grpc-okhttp:1.58.0")
-    implementation("io.grpc:grpc-protobuf-lite:1.58.0")
-    implementation("io.grpc:grpc-stub:1.58.0")
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.0"))
+    implementation("io.grpc:grpc-okhttp:$grpcVersion")
+    implementation("io.grpc:grpc-protobuf-lite:$grpcVersion")
+    implementation("io.grpc:grpc-stub:$grpcVersion")
     implementation("javax.annotation:javax.annotation-api:1.3.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
 
     // define a BOM and its version
