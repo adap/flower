@@ -14,7 +14,6 @@
 # ==============================================================================
 """RecordSet tests."""
 
-
 from typing import Callable, Dict, List, OrderedDict, Type, Union
 
 import numpy as np
@@ -24,7 +23,7 @@ from .configsrecord import ConfigsRecord
 from .metricsrecord import MetricsRecord
 from .parameter import ndarrays_to_parameters, parameters_to_ndarrays
 from .parametersrecord import Array, ParametersRecord
-from .recordset_utils import (
+from .recordset_compat import (
     parameters_to_parametersrecord,
     parametersrecord_to_parameters,
 )
@@ -162,6 +161,7 @@ def test_set_parameters_with_incorrect_types(
         (str, lambda x: float(x.flatten()[0])),  # str: float
         (str, lambda x: x.flatten().astype("int").tolist()),  # str: List[int]
         (str, lambda x: x.flatten().astype("float").tolist()),  # str: List[float]
+        (str, lambda x: []),  # str: empty list
     ],
 )
 def test_set_metrics_to_metricsrecord_with_correct_types(
@@ -203,6 +203,10 @@ def test_set_metrics_to_metricsrecord_with_correct_types(
             str,
             lambda x: [{str(v): v for v in x.flatten()}],
         ),  # str: List[dict[str: float]] (supported: unsupported)
+        (
+            str,
+            lambda x: [1, 2.0, 3.0, 4],
+        ),  # str: List[mixing valid types] (supported: unsupported)
         (
             int,
             lambda x: x.flatten().tolist(),
@@ -278,6 +282,7 @@ def test_set_metrics_to_metricsrecord_with_and_without_keeping_input(
         (str, lambda x: x.flatten().astype("float").tolist()),  # str: List[float]
         (str, lambda x: x.flatten().astype("bool").tolist()),  # str: List[bool]
         (str, lambda x: [x.flatten().tobytes()]),  # str: List[bytes]
+        (str, lambda x: []),  # str: empyt list
     ],
 )
 def test_set_configs_to_configsrecord_with_correct_types(
@@ -310,6 +315,10 @@ def test_set_configs_to_configsrecord_with_correct_types(
             str,
             lambda x: [{str(v): v for v in x.flatten()}],
         ),  # str: List[dict[str: float]] (supported: unsupported)
+        (
+            str,
+            lambda x: [1, 2.0, 3.0, 4],
+        ),  # str: List[mixing valid types] (supported: unsupported)
         (
             int,
             lambda x: x.flatten().tolist(),
