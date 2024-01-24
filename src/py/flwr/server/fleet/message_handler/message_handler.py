@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,11 +15,10 @@
 """Fleet API message handlers."""
 
 
-import random
 from typing import List, Optional
 from uuid import UUID
 
-from flwr.proto.fleet_pb2 import (
+from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
     DeleteNodeRequest,
@@ -30,8 +29,8 @@ from flwr.proto.fleet_pb2 import (
     PushTaskResResponse,
     Reconnect,
 )
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.state import State
 
 
@@ -40,12 +39,9 @@ def create_node(
     state: State,
 ) -> CreateNodeResponse:
     """."""
-    # Generate random node_id
-    random_node_id: int = random.randrange(9223372036854775808)
-
-    # Update state
-    state.register_node(node_id=random_node_id)
-    return CreateNodeResponse(node=Node(node_id=random_node_id, anonymous=False))
+    # Create node
+    node_id = state.create_node()
+    return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))
 
 
 def delete_node(request: DeleteNodeRequest, state: State) -> DeleteNodeResponse:
@@ -55,7 +51,7 @@ def delete_node(request: DeleteNodeRequest, state: State) -> DeleteNodeResponse:
         return DeleteNodeResponse()
 
     # Update state
-    state.unregister_node(node_id=request.node.node_id)
+    state.delete_node(node_id=request.node.node_id)
     return DeleteNodeResponse()
 
 

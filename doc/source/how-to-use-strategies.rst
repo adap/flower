@@ -86,4 +86,4 @@ Server-side evaluation can be enabled by passing an evaluation function to :code
 Implement a novel strategy
 --------------------------
 
-Writing a fully custom strategy is a bit more involved, but it provides the most flexibility. Read the `Implementing Strategies <implementing-strategies.html>`_ guide to learn more.
+Writing a fully custom strategy is a bit more involved, but it provides the most flexibility. Read the `Implementing Strategies <how-to-implement-strategies.html>`_ guide to learn more.

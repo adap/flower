@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,10 +25,13 @@ from typing import Callable, Iterator, Optional, Tuple, Union
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
-from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
-from flwr.proto.transport_pb2_grpc import FlowerServiceStub
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+    ClientMessage,
+    ServerMessage,
+)
+from flwr.proto.transport_pb2_grpc import FlowerServiceStub  # pylint: disable=E0611
 
 # The following flags can be uncommented for debugging. Other possible values:
 # https://github.com/grpc/grpc/blob/master/doc/environment_variables.md
@@ -45,6 +48,7 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 @contextmanager
 def grpc_connection(
     server_address: str,
+    insecure: bool,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
 ) -> Iterator[
@@ -100,6 +104,7 @@ def grpc_connection(
 
     channel = create_channel(
         server_address=server_address,
+        insecure=insecure,
         root_certificates=root_certificates,
         max_message_length=max_message_length,
     )
@@ -117,7 +122,7 @@ def grpc_connection(
         return TaskIns(
             task_id=str(uuid.uuid4()),
             group_id="",
-            workload_id="",
+            run_id=0,
             task=Task(
                 producer=Node(node_id=0, anonymous=True),
                 consumer=Node(node_id=0, anonymous=True),

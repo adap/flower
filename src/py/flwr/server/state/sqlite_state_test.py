@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Test for utility functions."""
-# pylint: disable=no-self-use, invalid-name, disable=R0904
+# pylint: disable=invalid-name, disable=R0904
 
 import unittest
 
@@ -27,11 +27,11 @@ class SqliteStateTest(unittest.TestCase):
     def test_ins_res_to_dict(self) -> None:
         """Check if all required keys are included in return value."""
         # Prepare
-        ins_res = create_task_ins(consumer_node_id=1, anonymous=True)
+        ins_res = create_task_ins(consumer_node_id=1, anonymous=True, run_id=0)
         expected_keys = [
             "task_id",
             "group_id",
-            "workload_id",
+            "run_id",
             "producer_anonymous",
             "producer_node_id",
             "consumer_anonymous",

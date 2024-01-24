@@ -17,27 +17,44 @@
 
 from math import pi
 from random import shuffle
-from typing import Callable, List, Tuple, Type, cast
+from typing import List, Tuple, Type, cast
 
 import ray
 
-from flwr.client import NumPyClient
+from flwr.client import Client, NumPyClient
+from flwr.client.run_state import RunState
 from flwr.common import Code, GetPropertiesRes, Status
 from flwr.simulation.ray_transport.ray_actor import (
     ClientRes,
     DefaultActor,
+    JobFn,
     VirtualClientEngineActor,
     VirtualClientEngineActorPool,
 )
 from flwr.simulation.ray_transport.ray_client_proxy import RayActorClientProxy
 
 
-# A dummy workload
-def job_fn(cid: str) -> Callable[[], ClientRes]:  # pragma: no cover
+class DummyClient(NumPyClient):
+    """A dummy NumPyClient for tests."""
+
+    def __init__(self, cid: str) -> None:
+        self.cid = int(cid)
+
+
+def get_dummy_client(cid: str) -> Client:
+    """Return a DummyClient converted to Client type."""
+    return DummyClient(cid).to_client()
+
+
+# A dummy run
+def job_fn(cid: str) -> JobFn:  # pragma: no cover
     """Construct a simple job with cid dependency."""
 
-    def cid_times_pi() -> ClientRes:
+    def cid_times_pi(client: Client) -> ClientRes:  # pylint: disable=unused-argument
         result = int(cid) * pi
+
+        # store something in state
+        client.numpy_client.state.state["result"] = str(result)  # type: ignore
 
         # now let's convert it to a GetPropertiesRes response
         return GetPropertiesRes(
@@ -63,14 +80,11 @@ def prep(
         client_resources=client_resources,
     )
 
-    def dummy_client(cid: str) -> NumPyClient:  # pylint: disable=unused-argument
-        return NumPyClient()
-
     # Create 373 client proxies
     num_proxies = 373  # a prime number
     proxies = [
         RayActorClientProxy(
-            client_fn=dummy_client,
+            client_fn=get_dummy_client,
             cid=str(cid),
             actor_pool=pool,
         )
@@ -98,27 +112,40 @@ def test_cid_consistency_one_at_a_time() -> None:
     ray.shutdown()
 
 
-def test_cid_consistency_all_submit_first() -> None:
+def test_cid_consistency_all_submit_first_run_consistency() -> None:
     """Test that ClientProxies get the result of client job they submit.
 
-    All jobs are submitted at the same time. Then fetched one at a time.
+    All jobs are submitted at the same time. Then fetched one at a time. This also tests
+    NodeState (at each Proxy) and RunState basic functionality.
     """
     proxies, _ = prep()
+    run_id = 0
 
     # submit all jobs (collect later)
     shuffle(proxies)
     for prox in proxies:
+        # Register state
+        prox.proxy_state.register_runstate(run_id=run_id)
+        # Retrieve state
+        state = prox.proxy_state.retrieve_runstate(run_id=run_id)
+
         job = job_fn(prox.cid)
         prox.actor_pool.submit_client_job(
-            lambda a, v, cid: a.run.remote(v, cid), (job, prox.cid)
+            lambda a, c_fn, j_fn, cid, state: a.run.remote(c_fn, j_fn, cid, state),
+            (prox.client_fn, job, prox.cid, state),
         )
 
     # fetch results one at a time
     shuffle(proxies)
     for prox in proxies:
-        res = prox.actor_pool.get_client_result(prox.cid, timeout=None)
+        res, updated_state = prox.actor_pool.get_client_result(prox.cid, timeout=None)
+        prox.proxy_state.update_runstate(run_id, run_state=updated_state)
         res = cast(GetPropertiesRes, res)
         assert int(prox.cid) * pi == res.properties["result"]
+        assert (
+            str(int(prox.cid) * pi)
+            == prox.proxy_state.retrieve_runstate(run_id).state["result"]
+        )
 
     ray.shutdown()
 
@@ -133,12 +160,15 @@ def test_cid_consistency_without_proxies() -> None:
     shuffle(cids)
     for cid in cids:
         job = job_fn(cid)
-        pool.submit_client_job(lambda a, v, cid_: a.run.remote(v, cid_), (job, cid))
+        pool.submit_client_job(
+            lambda a, c_fn, j_fn, cid_, state: a.run.remote(c_fn, j_fn, cid_, state),
+            (get_dummy_client, job, cid, RunState(state={})),
+        )
 
     # fetch results one at a time
     shuffle(cids)
     for cid in cids:
-        res = pool.get_client_result(cid, timeout=None)
+        res, _ = pool.get_client_result(cid, timeout=None)
         res = cast(GetPropertiesRes, res)
         assert int(cid) * pi == res.properties["result"]
 

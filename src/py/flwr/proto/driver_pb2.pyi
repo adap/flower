@@ -13,23 +13,46 @@ import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-class GetNodesRequest(google.protobuf.message.Message):
-    """GetNodes messages"""
+class CreateRunRequest(google.protobuf.message.Message):
+    """CreateRun"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     def __init__(self,
         ) -> None: ...
+global___CreateRunRequest = CreateRunRequest
+
+class CreateRunResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    RUN_ID_FIELD_NUMBER: builtins.int
+    run_id: builtins.int
+    def __init__(self,
+        *,
+        run_id: builtins.int = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
+global___CreateRunResponse = CreateRunResponse
+
+class GetNodesRequest(google.protobuf.message.Message):
+    """GetNodes messages"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    RUN_ID_FIELD_NUMBER: builtins.int
+    run_id: builtins.int
+    def __init__(self,
+        *,
+        run_id: builtins.int = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
 global___GetNodesRequest = GetNodesRequest
 
 class GetNodesResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    NODE_IDS_FIELD_NUMBER: builtins.int
+    NODES_FIELD_NUMBER: builtins.int
     @property
-    def node_ids(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
+    def nodes(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[flwr.proto.node_pb2.Node]: ...
     def __init__(self,
         *,
-        node_ids: typing.Optional[typing.Iterable[builtins.int]] = ...,
+        nodes: typing.Optional[typing.Iterable[flwr.proto.node_pb2.Node]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["node_ids",b"node_ids"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["nodes",b"nodes"]) -> None: ...
 global___GetNodesResponse = GetNodesResponse
 
 class PushTaskInsRequest(google.protobuf.message.Message):

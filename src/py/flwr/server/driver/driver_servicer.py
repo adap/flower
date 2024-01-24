@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,8 +22,10 @@ from uuid import UUID
 import grpc
 
 from flwr.common.logger import log
-from flwr.proto import driver_pb2_grpc
-from flwr.proto.driver_pb2 import (
+from flwr.proto import driver_pb2_grpc  # pylint: disable=E0611
+from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
+    CreateRunRequest,
+    CreateRunResponse,
     GetNodesRequest,
     GetNodesResponse,
     PullTaskResRequest,
@@ -31,7 +33,8 @@ from flwr.proto.driver_pb2 import (
     PushTaskInsRequest,
     PushTaskInsResponse,
 )
-from flwr.proto.task_pb2 import TaskRes
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
 from flwr.server.state import State, StateFactory
 from flwr.server.utils.validator import validate_task_ins_or_res
 
@@ -48,8 +51,20 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         """Get available nodes."""
         log(INFO, "DriverServicer.GetNodes")
         state: State = self.state_factory.state()
-        all_ids: Set[int] = state.get_nodes()
-        return GetNodesResponse(node_ids=list(all_ids))
+        all_ids: Set[int] = state.get_nodes(request.run_id)
+        nodes: List[Node] = [
+            Node(node_id=node_id, anonymous=False) for node_id in all_ids
+        ]
+        return GetNodesResponse(nodes=nodes)
+
+    def CreateRun(
+        self, request: CreateRunRequest, context: grpc.ServicerContext
+    ) -> CreateRunResponse:
+        """Create run ID."""
+        log(INFO, "DriverServicer.CreateRun")
+        state: State = self.state_factory.state()
+        run_id = state.create_run()
+        return CreateRunResponse(run_id=run_id)
 
     def PushTaskIns(
         self, request: PushTaskInsRequest, context: grpc.ServicerContext

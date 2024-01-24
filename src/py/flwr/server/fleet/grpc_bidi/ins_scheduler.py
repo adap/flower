@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,11 +20,15 @@ import time
 from logging import DEBUG, ERROR
 from typing import Dict, List, Optional
 
+from flwr.client.message_handler.task_handler import configure_task_res
 from flwr.common import EvaluateRes, FitRes, GetParametersRes, GetPropertiesRes, serde
 from flwr.common.logger import log
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
-from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+    ClientMessage,
+    ServerMessage,
+)
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.state import State, StateFactory
 
@@ -99,17 +103,11 @@ def _worker(
             timeout=None,
         )
 
-        # Step 3: wrap FitRes in a ServerMessage in a Task in a TaskRes
-        task_res = TaskRes(
-            task_id="",  # Will be created and set by the State
-            group_id="",
-            workload_id="",
-            task=Task(
-                producer=Node(node_id=client_proxy.node_id, anonymous=False),
-                consumer=Node(node_id=0, anonymous=True),
-                legacy_client_message=client_message_proto,
-                ancestry=[task_ins.task_id],
-            ),
+        # Step 3: wrap FitRes in a ClientMessage in a Task in a TaskRes
+        task_res = configure_task_res(
+            TaskRes(task=Task(legacy_client_message=client_message_proto)),
+            task_ins,
+            Node(node_id=client_proxy.node_id, anonymous=False),
         )
 
         # Step 4: write *Res (result) back to `state`
@@ -171,6 +169,6 @@ def _call_client_proxy(
         evaluate_res_proto = serde.evaluate_res_to_proto(res=evaluate_res)
         return ClientMessage(evaluate_res=evaluate_res_proto)
 
-    raise Exception(
+    raise ValueError(
         "Unsupported instruction in ServerMessage, cannot deserialize from ProtoBuf"
     )

@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,26 +17,26 @@
 
 import traceback
 from logging import ERROR
-from typing import Callable, Dict, Optional, cast
+from typing import Dict, Optional, cast
 
 import ray
 
 from flwr import common
-from flwr.client import Client, ClientLike, to_client
+from flwr.client import Client, ClientFn
 from flwr.client.client import (
     maybe_call_evaluate,
     maybe_call_fit,
     maybe_call_get_parameters,
     maybe_call_get_properties,
 )
+from flwr.client.node_state import NodeState
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
 from flwr.simulation.ray_transport.ray_actor import (
     ClientRes,
+    JobFn,
     VirtualClientEngineActorPool,
 )
-
-ClientFn = Callable[[str], ClientLike]
 
 
 class RayClientProxy(ClientProxy):
@@ -129,20 +129,34 @@ class RayActorClientProxy(ClientProxy):
         super().__init__(cid)
         self.client_fn = client_fn
         self.actor_pool = actor_pool
+        self.proxy_state = NodeState()
 
-    def _submit_job(
-        self, job_fn: Callable[[], ClientRes], timeout: Optional[float]
-    ) -> ClientRes:
+    def _submit_job(self, job_fn: JobFn, timeout: Optional[float]) -> ClientRes:
+        # The VCE is not exposed to TaskIns, it won't handle multilple runs
+        # For the time being, fixing run_id is a small compromise
+        # This will be one of the first points to address integrating VCE + DriverAPI
+        run_id = 0
+
+        # Register state
+        self.proxy_state.register_runstate(run_id=run_id)
+
+        # Retrieve state
+        state = self.proxy_state.retrieve_runstate(run_id=run_id)
+
         try:
             self.actor_pool.submit_client_job(
-                lambda a, v, cid: a.run.remote(v, cid), (job_fn, self.cid)
+                lambda a, c_fn, j_fn, cid, state: a.run.remote(c_fn, j_fn, cid, state),
+                (self.client_fn, job_fn, self.cid, state),
             )
-            res = self.actor_pool.get_client_result(self.cid, timeout)
+            res, updated_state = self.actor_pool.get_client_result(self.cid, timeout)
+
+            # Update state
+            self.proxy_state.update_runstate(run_id=run_id, run_state=updated_state)
 
         except Exception as ex:
             if self.actor_pool.num_actors == 0:
                 # At this point we want to stop the simulation.
-                # since no more client workloads will be executed
+                # since no more client runs will be executed
                 log(ERROR, "ActorPool is empty!!!")
             log(ERROR, traceback.format_exc())
             log(ERROR, ex)
@@ -155,8 +169,7 @@ class RayActorClientProxy(ClientProxy):
     ) -> common.GetPropertiesRes:
         """Return client's properties."""
 
-        def get_properties() -> common.GetPropertiesRes:
-            client: Client = _create_client(self.client_fn, self.cid)
+        def get_properties(client: Client) -> common.GetPropertiesRes:
             return maybe_call_get_properties(
                 client=client,
                 get_properties_ins=ins,
@@ -174,8 +187,7 @@ class RayActorClientProxy(ClientProxy):
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
 
-        def get_parameters() -> common.GetParametersRes:
-            client: Client = _create_client(self.client_fn, self.cid)
+        def get_parameters(client: Client) -> common.GetParametersRes:
             return maybe_call_get_parameters(
                 client=client,
                 get_parameters_ins=ins,
@@ -191,8 +203,7 @@ class RayActorClientProxy(ClientProxy):
     def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
 
-        def fit() -> common.FitRes:
-            client: Client = _create_client(self.client_fn, self.cid)
+        def fit(client: Client) -> common.FitRes:
             return maybe_call_fit(
                 client=client,
                 fit_ins=ins,
@@ -210,8 +221,7 @@ class RayActorClientProxy(ClientProxy):
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
 
-        def evaluate() -> common.EvaluateRes:
-            client: Client = _create_client(self.client_fn, self.cid)
+        def evaluate(client: Client) -> common.EvaluateRes:
             return maybe_call_evaluate(
                 client=client,
                 evaluate_ins=ins,
@@ -281,5 +291,5 @@ def launch_and_evaluate(
 
 def _create_client(client_fn: ClientFn, cid: str) -> Client:
     """Create a client instance."""
-    client_like: ClientLike = client_fn(cid)
-    return to_client(client_like=client_like)
+    # Materialize client
+    return client_fn(cid)

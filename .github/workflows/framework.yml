@@ -8,6 +8,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   FLWR_TELEMETRY_ENABLED: 0
 
@@ -21,12 +25,12 @@ jobs:
         # In case of a mismatch, the job has to download Python to install it.
         # Note: Due to a bug in actions/setup-python we have to put 3.10 in
         # qoutes as it will otherwise will assume 3.1
-        python: [3.8, 3.9, '3.10']
+        python: [3.8, 3.9, '3.10', '3.11']
 
     name: Python ${{ matrix.python }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
         with:

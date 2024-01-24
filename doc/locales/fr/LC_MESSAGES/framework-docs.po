@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-09-06 13:53+0200\n"
-"PO-Revision-Date: 2023-08-30 17:38+0000\n"
+"POT-Creation-Date: 2023-08-30 18:55+0200\n"
+"PO-Revision-Date: 2023-09-05 17:54+0000\n"
 "Last-Translator: Charles Beauville <charles@adap.com>\n"
 "Language: fr\n"
 "Language-Team: French <https://hosted.weblate.org/projects/flower-"
@@ -2031,15 +2031,15 @@ msgstr "Compiler les définitions ProtoBuf"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:69
 msgid "Auto-Format Code"
-msgstr ""
+msgstr "Formatter le code"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:76
 msgid "Run Linters and Tests"
-msgstr ""
+msgstr "Vérifier le format et tester le code"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:83
 msgid "Run Github Actions (CI) locally"
-msgstr ""
+msgstr "Exécuter les GitHub Actions (CI) localement"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:85
 msgid ""
@@ -2048,12 +2048,19 @@ msgid ""
 "Please refer to the installation instructions under the linked repository"
 " and run the next command under Flower main cloned repository folder::"
 msgstr ""
+"Il est possible d'exécuter l'ensemble des Github Actions sous leur "
+"environnement local en utilisant `Act <https ://github.com/nektos/act>_`. En "
+"suivant le lien vous trouverez les instructions d'installation. Une fois "
+"installé, exécuter la commande suivante dans le dossier principale de Flower "
+":"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:92
 msgid ""
 "The Flower default workflow would run by setting up the required Docker "
 "machines underneath."
 msgstr ""
+"Le workflow par défaut de Flower sera exécuté en configurant les machines "
+"Docker requises en arrière plan."
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:97
 #, fuzzy
@@ -2065,12 +2072,16 @@ msgid ""
 "Flower uses Poetry to build releases. The necessary command is wrapped in"
 " a simple script::"
 msgstr ""
+"Flower utilise Poetry pour construire les nouvelles versions. La commande "
+"nécessaire est comprise dans un script simple ::"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:104
 msgid ""
 "The resulting :code:`.whl` and :code:`.tar.gz` releases will be stored in"
 " the :code:`/dist` subdirectory."
 msgstr ""
+"Les versions résultantes :code:`.whl` et :code:`.tar.gz` seront stockées "
+"dans le sous-répertoire:code:`/dist`."
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:109
 #, fuzzy
@@ -5039,7 +5050,7 @@ msgstr ""
 msgid ""
 "This can be achieved by customizing an existing strategy or by "
 "`implementing a custom strategy from scratch <https://flower.dev/docs"
-"/implementing-strategies.html>`_. Here's a nonsensical example that "
+"/how-to-implement-strategies.html>`_. Here's a nonsensical example that "
 "customizes :code:`FedAvg` by adding a custom ``\"hello\": \"world\"`` "
 "configuration key/value pair to the config dict of a *single client* "
 "(only the first client in the list, the other clients in this round to "
@@ -5047,7 +5058,7 @@ msgid ""
 msgstr ""
 "Ceci peut être réalisé en personnalisant une stratégie existante ou en "
 "`mettant en œuvre une stratégie personnalisée à partir de zéro "
-"<https://flower.dev/docs/implementing-strategies.html>`_. Voici un "
+"<https://flower.dev/docs/framework/how-to-implement-strategies.html>`_. Voici un "
 "exemple absurde qui personnalise :code:`FedAvg` en ajoutant une paire "
 "clé/valeur de configuration personnalisée ``\"hello\" : \"world\"`` au "
 "config dict d'un *seul client* (uniquement le premier client de la liste,"
@@ -5098,10 +5109,15 @@ msgid ""
 "you are running the code from. If we inspect we see the log above is also"
 " recorded but prefixing with :code:`identifier` each line:"
 msgstr ""
+"Avec ce qui précède, Flower enregistrera le log que vous voyez sur votre "
+"terminal dans :code:`log.txt`. Ce fichier sera créé dans le répertoire "
+"depuis lequel le code est exécuté. Si nous inspectons nous voyons que le log "
+"ci-dessous est également enregistré mais préfixé avec :code:`identifier` sur "
+"chaque ligne :"
 
 #: ../../source/how-to-configure-logging.rst:74
 msgid "Log your own messages"
-msgstr ""
+msgstr "Loggez vos propres messages"
 
 #: ../../source/how-to-configure-logging.rst:76
 msgid ""
@@ -7071,7 +7087,7 @@ msgid ""
 msgstr ""
 "L'écriture d'une stratégie entièrement personnalisée est un peu plus "
 "complexe, mais c'est celle qui offre le plus de souplesse. Lis le guide "
-"`Implémentation des stratégies <implementing-strategies.html>`_ pour en "
+"`Implémentation des stratégies <how-to-implement-strategies.html>`_ pour en "
 "savoir plus."
 
 #: ../../source/index.rst:31
@@ -10052,12 +10068,12 @@ msgstr ""
 #: ../../source/ref-changelog.md:517
 msgid ""
 "New documentation for [implementing strategies](https://flower.dev/docs"
-"/implementing-strategies.html) "
+"/how-to-implement-strategies.html) "
 "([#1097](https://github.com/adap/flower/pull/1097), "
 "[#1175](https://github.com/adap/flower/pull/1175))"
 msgstr ""
 "Nouvelle documentation pour [mettre en œuvre des "
-"stratégies](https://flower.dev/docs/implementing-strategies.html) "
+"stratégies](https://flower.dev/docs/framework/how-to-implement-strategies.html) "
 "([#1097](https://github.com/adap/flower/pull/1097), "
 "[#1175](https://github.com/adap/flower/pull/1175))"
 
