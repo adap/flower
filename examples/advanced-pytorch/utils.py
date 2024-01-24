@@ -1,10 +1,10 @@
 import torch
 from torchvision.transforms import Compose, ToTensor, Normalize, Resize, CenterCrop
-from torch.utils.data import DataLoader
-
+from torchvision.models import efficientnet_b0, AlexNet
 import warnings
 
 from flwr_datasets import FederatedDataset
+
 
 warnings.filterwarnings("ignore")
 
@@ -48,7 +48,7 @@ def train(
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
     optimizer = torch.optim.SGD(
-        net.parameters(), lr=0.1, momentum=0.9, weight_decay=1e-4
+        net.parameters(), lr=0.001, momentum=0.9, weight_decay=1e-4
     )
     net.train()
     for _ in range(epochs):
@@ -98,38 +98,21 @@ def test(
     return loss, accuracy
 
 
-def replace_classifying_layer(efficientnet_model, num_classes: int = 10):
-    """Replaces the final layer of the classifier."""
-    num_features = efficientnet_model.classifier.fc.in_features
-    efficientnet_model.classifier.fc = torch.nn.Linear(num_features, num_classes)
-
-
-def load_efficientnet(entrypoint: str = "nvidia_efficientnet_b0", classes: int = None):
-    """Loads pretrained efficientnet model from torch hub. Replaces final classifying
-    layer if classes is specified.
-
-    Args:
-        entrypoint: EfficientNet model to download.
-                    For supported entrypoints, please refer
-                    https://pytorch.org/hub/nvidia_deeplearningexamples_efficientnet/
-        classes: Number of classes in final classifying layer. Leave as None to get
-        the downloaded
-                 model untouched.
-    Returns:
-        EfficientNet Model
-
-    Note: One alternative implementation can be found at
-    https://github.com/lukemelas/EfficientNet-PyTorch
-    """
-    efficientnet = torch.hub.load(
-        "NVIDIA/DeepLearningExamples:torchhub", entrypoint, pretrained=True
-    )
-
-    if classes is not None:
-        replace_classifying_layer(efficientnet, classes)
+def load_efficientnet(classes: int = 10):
+    """Loads EfficienNetB0 from TorchVision."""
+    efficientnet = efficientnet_b0(pretrained=True)
+    # Re-init output linear layer with the right number of classes
+    model_classes = efficientnet.classifier[1].in_features
+    if classes != model_classes:
+        efficientnet.classifier[1] = torch.nn.Linear(model_classes, classes)
     return efficientnet
 
 
 def get_model_params(model):
     """Returns a model's parameters."""
     return [val.cpu().numpy() for _, val in model.state_dict().items()]
+
+
+def load_alexnet(classes):
+    """Load AlexNet model from TorchVision."""
+    return AlexNet(num_classes=classes)
