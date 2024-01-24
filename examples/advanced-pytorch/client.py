@@ -110,7 +110,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--toy",
-        action='store_true',
+        action="store_true",
         help="Set to true to quicky run the client using only 10 datasamples. \
         Useful for testing purposes. Default: False",
     )

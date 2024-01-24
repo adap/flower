@@ -28,18 +28,21 @@ def load_centralized_data():
 
 def apply_transforms(batch):
     """Apply transforms to the partition from FederatedDataset."""
-    pytorch_transforms = Compose([
-        Resize(256),
-        CenterCrop(224),
-        ToTensor(),
-        Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ])
+    pytorch_transforms = Compose(
+        [
+            Resize(256),
+            CenterCrop(224),
+            ToTensor(),
+            Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ]
+    )
     batch["img"] = [pytorch_transforms(img) for img in batch["img"]]
     return batch
 
 
-def train(net, trainloader, valloader, epochs,
-          device: torch.device = torch.device("cpu")):
+def train(
+    net, trainloader, valloader, epochs, device: torch.device = torch.device("cpu")
+):
     """Train the network on the training set."""
     print("Starting training...")
     net.to(device)  # move model to GPU if available
@@ -71,8 +74,9 @@ def train(net, trainloader, valloader, epochs,
     return results
 
 
-def test(net, testloader, steps: int = None,
-         device: torch.device = torch.device("cpu")):
+def test(
+    net, testloader, steps: int = None, device: torch.device = torch.device("cpu")
+):
     """Validate the network on the entire test set."""
     print("Starting evalutation...")
     net.to(device)  # move model to GPU if available
