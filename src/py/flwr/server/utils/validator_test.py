@@ -18,9 +18,17 @@
 import unittest
 from typing import List, Tuple
 
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import SecureAggregation, Task, TaskIns, TaskRes
-from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import (  # pylint: disable=E0611
+    SecureAggregation,
+    Task,
+    TaskIns,
+    TaskRes,
+)
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+    ClientMessage,
+    ServerMessage,
+)
 
 from .validator import validate_task_ins_or_res
 

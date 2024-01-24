@@ -20,7 +20,7 @@ from typing import List
 
 from flwr.client.run_state import RunState
 from flwr.client.typing import Bwd, FlowerCallable, Fwd, Layer
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 from .utils import make_ffn
 
