@@ -196,6 +196,10 @@ class RandomMaker:
     def __init__(self, seed: int = 42) -> None:
         self.rng = random.Random(seed)
 
+    def randbytes(self, n: int) -> bytes:
+        """Create a random bytes."""
+        return self.rng.getrandbits(n * 8).to_bytes(n, "little")
+
     def get_str(self, length: Optional[int] = None) -> str:
         """Create a random string."""
         char_pool = (
@@ -217,7 +221,7 @@ class RandomMaker:
         elif dtype == float:
             ret = (self.rng.random() - 0.5) * (2.0 ** self.rng.randint(0, 50))
         elif dtype == bytes:
-            ret = self.rng.randbytes(self.rng.randint(10, 100))
+            ret = self.randbytes(self.rng.randint(10, 100))
         else:
             raise NotImplementedError(f"Unsupported dtype: {dtype}")
         return cast(T, ret)
@@ -236,7 +240,7 @@ class RandomMaker:
             for _ in range(self.rng.randint(1, max_shape_dim))
         ]
         stype = self.rng.choice(stypes)
-        data = self.rng.randbytes(self.rng.randint(*min_max_bytes_size))
+        data = self.randbytes(self.rng.randint(*min_max_bytes_size))
         return Array(dtype=dtype, shape=shape, stype=stype, data=data)
 
     def parameters_record(self) -> ParametersRecord:
