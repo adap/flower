@@ -1,6 +1,5 @@
 import utils
 from torch.utils.data import DataLoader
-import torchvision.datasets
 import torch
 import flwr as fl
 import argparse
@@ -30,7 +29,8 @@ class CifarClient(fl.client.NumPyClient):
             self.model = utils.load_efficientnet(classes=10)
 
     def set_parameters(self, parameters):
-        """Loads a alexnet or efficientnet model and replaces it parameters with the ones given."""
+        """Loads a alexnet or efficientnet model and replaces it parameters with the
+        ones given."""
 
         params_dict = zip(self.model.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
@@ -129,7 +129,7 @@ def main() -> None:
         "--model",
         type=str,
         default="efficientnet",
-        choices=['efficientnet', 'alexnet'],
+        choices=["efficientnet", "alexnet"],
         help="Use either Efficientnet or Alexnet models. \
              If you want to achieve differential privacy, please use the Alexnet model",
     )

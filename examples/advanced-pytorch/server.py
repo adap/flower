@@ -51,9 +51,9 @@ def get_evaluate_fn(model: torch.nn.Module, toy: bool):
 
     # The `evaluate` function will be called after every round
     def evaluate(
-            server_round: int,
-            parameters: fl.common.NDArrays,
-            config: Dict[str, fl.common.Scalar],
+        server_round: int,
+        parameters: fl.common.NDArrays,
+        config: Dict[str, fl.common.Scalar],
     ) -> Optional[Tuple[float, Dict[str, fl.common.Scalar]]]:
         # Update model with the latest parameters
         params_dict = zip(model.state_dict().keys(), parameters)
@@ -84,7 +84,7 @@ def main():
         "--model",
         type=str,
         default="efficientnet",
-        choices=['efficientnet', 'alexnet'],
+        choices=["efficientnet", "alexnet"],
         help="Use either Efficientnet or Alexnet models. \
              If you want to achieve differential privacy, please use the Alexnet model",
     )
