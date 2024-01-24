@@ -119,7 +119,7 @@ if __name__ == "__main__":
         required=True,
         type=int,
         help="Partition of the dataset divided into 1,000 iid partitions created "
-             "artificially.",
+        "artificially.",
     )
     node_id = parser.parse_args().node_id
     main(node_id)

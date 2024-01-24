@@ -14,7 +14,6 @@
 # ==============================================================================
 """RecordSet tests."""
 
-
 from typing import Callable, Dict, List, OrderedDict, Type, Union
 
 import numpy as np
@@ -24,7 +23,7 @@ from .configsrecord import ConfigsRecord
 from .metricsrecord import MetricsRecord
 from .parameter import ndarrays_to_parameters, parameters_to_ndarrays
 from .parametersrecord import Array, ParametersRecord
-from .recordset_utils import (
+from .recordset_compat import (
     parameters_to_parametersrecord,
     parametersrecord_to_parameters,
 )

@@ -68,3 +68,9 @@ message ParametersRecord {
 message MetricsRecord { map<string, MetricsRecordValue> data = 1; }
 
 message ConfigsRecord { map<string, ConfigsRecordValue> data = 1; }
+
+message RecordSet {
+  map<string, ParametersRecord> parameters = 1;
+  map<string, MetricsRecord> metrics = 2;
+  map<string, ConfigsRecord> configs = 3;
+}
