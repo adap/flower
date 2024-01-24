@@ -21,6 +21,9 @@ from typing import Callable, Dict, Union
 import numpy as np
 import pytest
 
+from flwr.proto.task_pb2 import Task, TaskIns
+from flwr.proto.transport_pb2 import ServerMessage
+
 from .flowercontext import FlowerContext, Metadata
 from .parameter import ndarrays_to_parameters
 from .recordset import RecordSet
@@ -41,6 +44,13 @@ from .recordset_compat import (
     recordset_to_getparametersres,
     recordset_to_getpropertiesins,
     recordset_to_getpropertiesres,
+)
+from .serde import (
+    evaluate_ins_to_proto,
+    fit_ins_to_proto,
+    flowercontext_from_task_ins,
+    get_parameters_ins_to_proto,
+    get_properties_ins_to_proto,
 )
 from .typing import (
     Code,
@@ -239,21 +249,29 @@ def test_get_parameters_res_to_recordset_and_back() -> None:
 
 
 @pytest.mark.parametrize(
-    "ins, convert_fn, task_type",
+    "ins, ins_to_serde, convert_fn, task_type",
     [
-        (_get_valid_fitins, partial(fitins_to_recordset, keep_input=False), "fit_ins"),
+        (
+            _get_valid_fitins,
+            fit_ins_to_proto,
+            partial(fitins_to_recordset, keep_input=False),
+            "fit_ins",
+        ),
         (
             _get_valid_evaluateins,
+            evaluate_ins_to_proto,
             partial(evaluateins_to_recordset, keep_input=False),
             "evaluate_ins",
         ),
         (
             _get_valid_getpropertiesins,
+            get_properties_ins_to_proto,
             getpropertiesins_to_recordset,
             "get_properties_ins",
         ),
         (
             _get_valid_getparametersins,
+            get_parameters_ins_to_proto,
             getparametersins_to_recordset,
             "get_parameters_ins",
         ),
@@ -261,6 +279,15 @@ def test_get_parameters_res_to_recordset_and_back() -> None:
 )
 def test_flowercontext_driver_to_client(
     ins: Union[FitIns, EvaluateIns, GetPropertiesIns, GetParametersIns],
+    ins_to_serde: Callable[
+        [Union[FitIns, EvaluateIns, GetPropertiesIns, GetParametersIns]],
+        Union[
+            ServerMessage.FitIns,
+            ServerMessage.EvaluateIns,
+            ServerMessage.GetPropertiesIns,
+            ServerMessage.GetParametersIns,
+        ],
+    ],
     convert_fn: Union[
         Callable[[FitIns], RecordSet],
         Callable[[EvaluateIns], RecordSet],
@@ -270,15 +297,43 @@ def test_flowercontext_driver_to_client(
     task_type: str,
 ) -> None:
     """."""
+    # TaskIns from legacy ins
+    run_id = 1234
+    server_mssg = ServerMessage(**{task_type: ins_to_serde(ins())})
+
+    task_ins = TaskIns(
+        task_id="00001",
+        group_id="8888",
+        run_id=run_id,
+        task=Task(legacy_server_message=server_mssg, task_type=task_type),
+    )
+
+    # Blank FlowerContext
     f_context = FlowerContext(
         in_message=RecordSet(),
-        out_message=convert_fn(ins()),
+        out_message=RecordSet(),
         local=RecordSet(),
         metadata=Metadata(
             run_id=0, task_id="", group_id="", ttl="", task_type=task_type
         ),
     )
 
-    # TODO: embedd `f_context` in TaskIns
+    # FlowerContext from TaskIns
+    f_context = flowercontext_from_task_ins(context=f_context, task_ins=task_ins)
 
-    # Construct FlowerContext from TaskIns
+    print(f_context)
+
+    print(f_context.metadata.task_type)
+    # Legacy *Ins from FlowerContext
+    if f_context.metadata.task_type == "fit_ins":
+        legacy_ins = recordset_to_fitins(f_context.in_message, keep_input=False)
+    elif f_context.metadata.task_type == "evaluate_ins":
+        legacy_ins = recordset_to_evaluateins(f_context.in_message, keep_input=False)
+    elif f_context.metadata.task_type == "get_properties_ins":
+        legacy_ins = recordset_to_getpropertiesins(f_context.in_message)
+    elif f_context.metadata.task_type == "get_parameters_ins":
+        legacy_ins = recordset_to_getparametersins(f_context.in_message)
+    else:
+        raise ValueError()
+    
+    
