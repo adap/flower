@@ -55,15 +55,9 @@ data class HW(@SerialName("cpu_count")
 data class Platform(val system: String,
                     val release: String,
                     val platform: String,
-                    @SerialName("python_implementation")
-                    val pythonImplementation: String,
-                    @SerialName("python_version")
-                    val pythonVersion: String,
                     @SerialName("android_sdk_version")
                     val androidSdkVersion: String,
-                    val machine: String,
-                    val architecture: String,
-                    val version: String)
+                    val cpus: String)
 
 fun getSourceId(homeDir: File): UUID {
     val flwrFile = File(homeDir, ".flwr")
@@ -91,12 +85,8 @@ fun createEventContext(homeDir: File, context: android.content.Context): Context
         "Android",
         Build.VERSION.RELEASE.toString(),
         Build.FINGERPRINT.toString(),
-        "",
-        "",
         Build.VERSION.SDK_INT.toString(),
         Build.SUPPORTED_ABIS[0].toString(),
-        "",
-        ""
     )
     val flower = Flower("flwr", version)
 
