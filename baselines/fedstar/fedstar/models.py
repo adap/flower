@@ -1,4 +1,5 @@
 """Required imports for data.py script."""
+import itertools
 import time
 
 import numpy as np
@@ -286,9 +287,6 @@ class PslNetwork(tf.keras.Model):  # pylint: disable=abstract-method
         - History: An object containing training history information.
         """
         l_dataset, u_dataset = train_datasets
-        l_num_batch = len(l_dataset)
-        repeat_factor = -(-num_batches // l_num_batch)
-        repeated_l_dataset = l_dataset.repeat(repeat_factor)
         self.history.on_train_begin()
         for epoch in range(epochs):
             start, epoch_loss = time.time(), 0.0
@@ -309,7 +307,7 @@ class PslNetwork(tf.keras.Model):  # pylint: disable=abstract-method
             step = 0
             # Run train step on each batch
             for step, ((l_batch_x, l_batch_y), (u_batch_x, u_batch_y)) in enumerate(
-                zip(repeated_l_dataset, u_dataset)
+                zip(itertools.cycle(l_dataset), u_dataset)
             ):
                 batch_x, batch_y = tf.concat([l_batch_x, u_batch_x], 0), tf.concat(
                     [l_batch_y, u_batch_y], 0
