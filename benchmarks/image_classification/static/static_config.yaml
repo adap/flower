@@ -1,0 +1,14 @@
+---
+# This is the config that is fixed for all experiments
+
+# FL training settings
+num_clients: 100
+num_rounds: 100
+fraction_fit: 0.1
+min_fit_clients: 10
+local_epoch: 1
+
+# Client train/test split
+# Let's split it into train (90%) and test (10%)
+test_size: 0.1
+seed: 1234

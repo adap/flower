@@ -1,0 +1,17 @@
+---
+# This is the config that will be loaded as default by main.py
+
+# Define strategy
+strategy:
+  _target_: flwr.server.strategy.FedAvg
+
+# Client training hyper-parameters
+batch_size: 32
+lr: 0.01
+momentum: 0.9
+
+# Set ray config
+client_resources:
+  num_gpus: 0.5
+  num_cpus: 2
+  include_dashboard: false
