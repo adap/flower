@@ -30,7 +30,7 @@ class NodeState:
     def register_runstate(self, run_id: int) -> None:
         """Register new run state for this node."""
         if run_id not in self.run_states:
-            self.run_states[run_id] = RecordSet({})
+            self.run_states[run_id] = RecordSet()
 
     def retrieve_runstate(self, run_id: int) -> RecordSet:
         """Get run state given a run_id."""
