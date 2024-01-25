@@ -44,10 +44,12 @@ def parametersrecord_to_parameters(
 ) -> Parameters:
     """Convert ParameterRecord to legacy Parameters.
 
-    Warning: Because `Arrays` in `ParametersRecord` encode more information of the
+    Warnings
+    --------
+    Because `Arrays` in `ParametersRecord` encode more information of the
     array-like or tensor-like data (e.g their datatype, shape) than `Parameters` it
     might not be possible to reconstruct such data structures from `Parameters` objects
-    alone. Additional information or metadta must be provided from elsewhere.
+    alone. Additional information or metadata must be provided from elsewhere.
 
     Parameters
     ----------
@@ -74,7 +76,7 @@ def parametersrecord_to_parameters(
 
 
 def parameters_to_parametersrecord(
-    parameters: Parameters, keep_input: bool = False
+    parameters: Parameters, keep_input: bool = True
 ) -> ParametersRecord:
     """Convert legacy Parameters into a single ParametersRecord.
 
@@ -96,17 +98,17 @@ def parameters_to_parametersrecord(
     p_record = ParametersRecord()
 
     num_arrays = len(parameters.tensors)
+    ordered_dict = OrderedDict()
     for idx in range(num_arrays):
         if keep_input:
             tensor = parameters.tensors[idx]
         else:
             tensor = parameters.tensors.pop(0)
-        p_record.set_parameters(
-            OrderedDict(
-                {str(idx): Array(data=tensor, dtype="", stype=tensor_type, shape=[])}
-            )
+        ordered_dict[str(idx)] = Array(
+            data=tensor, dtype="", stype=tensor_type, shape=[]
         )
 
+    p_record.set_parameters(ordered_dict)
     return p_record
 
 
