@@ -87,15 +87,32 @@ def test_parameters_to_array_and_back() -> None:
     assert np.array_equal(ndarray, ndarray_)
 
 
-def test_parameters_to_parametersrecord_and_back() -> None:
+@pytest.mark.parametrize(
+    "keep_input",
+    [False, True],
+)
+def test_parameters_to_parametersrecord_and_back(keep_input: bool) -> None:
     """Test conversion between legacy Parameters and ParametersRecords."""
     ndarrays = get_ndarrays()
 
     parameters = ndarrays_to_parameters(ndarrays)
 
-    params_record = parameters_to_parametersrecord(parameters=parameters)
+    params_record = parameters_to_parametersrecord(
+        parameters=parameters, keep_input=keep_input
+    )
 
-    parameters_ = parametersrecord_to_parameters(params_record)
+    if keep_input:
+        # Verify inputed parameters are indeed as originally passed
+        assert parameters == ndarrays_to_parameters(ndarrays)
+    else:
+        # Verify tensors have been erased
+        assert len(parameters.tensors) == 0
+
+    parameters_ = parametersrecord_to_parameters(params_record, keep_input=keep_input)
+
+    if not keep_input:
+        # Verify Arrays in record have been erased
+        assert len(params_record.data) == 0
 
     ndarrays_ = parameters_to_ndarrays(parameters=parameters_)
 
