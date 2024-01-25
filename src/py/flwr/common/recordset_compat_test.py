@@ -23,7 +23,6 @@ import pytest
 
 from flwr.proto.task_pb2 import Task, TaskIns
 
-from .flowercontext import FlowerContext, Metadata
 from .parameter import ndarrays_to_parameters
 from .recordset import RecordSet
 from .recordset_compat import (
@@ -44,7 +43,7 @@ from .recordset_compat import (
     recordset_to_getpropertiesins,
     recordset_to_getpropertiesres,
 )
-from .serde import flowercontext_from_task_ins, recordset_to_proto
+from .serde import message_from_task_ins, recordset_to_proto
 from .typing import (
     Code,
     EvaluateIns,
@@ -292,28 +291,18 @@ def test_flowercontext_driver_to_client(
         ),
     )
 
-    # Blank FlowerContext
-    f_context = FlowerContext(
-        in_message=RecordSet(),
-        out_message=RecordSet(),
-        local=RecordSet(),
-        metadata=Metadata(
-            run_id=0, task_id="", group_id="", ttl="", task_type=task_type
-        ),
-    )
-
     # FlowerContext from TaskIns
-    f_context = flowercontext_from_task_ins(context=f_context, task_ins=task_ins)
+    message = message_from_task_ins(task_ins=task_ins)
 
     # Legacy *Ins from FlowerContext
-    if f_context.metadata.task_type == "fit_ins":
-        legacy_ins = recordset_to_fitins(f_context.in_message, keep_input=False)
-    elif f_context.metadata.task_type == "evaluate_ins":
-        legacy_ins = recordset_to_evaluateins(f_context.in_message, keep_input=False)
-    elif f_context.metadata.task_type == "get_properties_ins":
-        legacy_ins = recordset_to_getpropertiesins(f_context.in_message)
-    elif f_context.metadata.task_type == "get_parameters_ins":
-        legacy_ins = recordset_to_getparametersins(f_context.in_message)
+    if message.metadata.task_type == "fit_ins":
+        legacy_ins = recordset_to_fitins(message.message, keep_input=False)
+    elif message.metadata.task_type == "evaluate_ins":
+        legacy_ins = recordset_to_evaluateins(message.message, keep_input=False)
+    elif message.metadata.task_type == "get_properties_ins":
+        legacy_ins = recordset_to_getpropertiesins(message.message)
+    elif message.metadata.task_type == "get_parameters_ins":
+        legacy_ins = recordset_to_getparametersins(message.message)
     else:
         raise ValueError()
 
