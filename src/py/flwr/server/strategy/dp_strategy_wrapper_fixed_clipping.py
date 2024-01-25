@@ -116,7 +116,11 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """Aggregate training results using unweighted aggregation."""
+        """Compute the updates, clip them, and pass them to the child strategy for
+        aggregation.
+
+        Afterward, add noise to the aggregated parameters.
+        """
         if failures:
             return None, {}
 
@@ -141,16 +145,15 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
             res[1].parameters = ndarrays_to_parameters(params)
 
         # Pass the new parameters for aggregation
-        aggregated_updates, metrics = self.strategy.aggregate_fit(
+        aggregated_params, metrics = self.strategy.aggregate_fit(
             server_round, results, failures
         )
 
         # Add Gaussian noise to the aggregated parameters
+        if aggregated_params:
+            aggregated_params = self._add_noise_to_updates(aggregated_params)
 
-        if aggregated_updates:
-            aggregated_updates = self._add_noise_to_updates(aggregated_updates)
-
-        return aggregated_updates, metrics
+        return aggregated_params, metrics
 
     def aggregate_evaluate(
         self,
