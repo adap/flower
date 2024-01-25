@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""DPWrapper_fixed_clipping tests."""
+"""dp_strategy_wrapper_fixed_clipping tests."""
 
 import numpy as np
 
@@ -20,33 +20,6 @@ from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
 
 from .dp_strategy_wrapper_fixed_clipping import DPStrategyWrapperServerSideFixedClipping
 from .fedavg import FedAvg
-
-
-def test_add_gaussian_noise() -> None:
-    """Test add_gaussian_noise function."""
-    # Prepare
-    strategy = FedAvg()
-    dp_wrapper = DPStrategyWrapperServerSideFixedClipping(strategy, 1.5, 1.5, 5)
-
-    update = [np.array([[1, 2], [3, 4]]), np.array([[5, 6], [7, 8]])]
-    std_dev = 0.1
-
-    # Execute
-    update_noised = dp_wrapper.add_gaussian_noise(update, std_dev)
-
-    # Assert
-    # Check that the shape of the result is the same as the input
-    for layer, layer_noised in zip(update, update_noised):
-        assert layer.shape == layer_noised.shape
-
-    # Check that the values have been changed and is not equal to the original update
-    for layer, layer_noised in zip(update, update_noised):
-        assert not np.array_equal(layer, layer_noised)
-
-    # Check that the noise has been added
-    for layer, layer_noised in zip(update, update_noised):
-        noise_added = layer_noised - layer
-        assert np.any(np.abs(noise_added) > 0)
 
 
 def test_add_noise_to_updates() -> None:

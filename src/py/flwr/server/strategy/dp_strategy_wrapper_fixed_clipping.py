@@ -32,6 +32,7 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
+from flwr.common.differential_privacy import add_gaussian_noise, get_norm
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.strategy import Strategy
@@ -169,23 +170,15 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
 
         FlatClip method of the paper: https://arxiv.org/pdf/1710.06963.pdf
         """
-        update_norm = self.get_update_norm(update)
+        update_norm = get_norm(update)
         scaling_factor = min(1, self.clipping_threshold / update_norm)
         update_clipped: NDArrays = [layer * scaling_factor for layer in update]
         return update_clipped
 
-    @staticmethod
-    def get_update_norm(update: NDArrays) -> float:
-        """Compute the L2 norm of the flattened update."""
-        flattened_update = np.concatenate(
-            [np.asarray(sub_update).flatten() for sub_update in update]
-        )
-        return float(np.linalg.norm(flattened_update))
-
     def _add_noise_to_updates(self, parameters: Parameters) -> Parameters:
         """Add Gaussian noise to model params."""
         return ndarrays_to_parameters(
-            self.add_gaussian_noise(
+            add_gaussian_noise(
                 parameters_to_ndarrays(parameters),
                 float(
                     (self.noise_multiplier * self.clipping_threshold)
@@ -193,14 +186,6 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
                 ),
             )
         )
-
-    @staticmethod
-    def add_gaussian_noise(update: NDArrays, std_dev: float) -> NDArrays:
-        """Add Gaussian noise to each element of the provided update."""
-        update_noised = [
-            layer + np.random.normal(0, std_dev, layer.shape) for layer in update
-        ]
-        return update_noised
 
     def _compute_model_updates(
         self, all_clients_params: List[NDArrays]
