@@ -55,7 +55,7 @@ def parametersrecord_to_parameters(
     ----------
     record : ParametersRecord
         The record to be conveted into Parameters.
-    keep_input : bool (default: False)
+    keep_input : bool (default: True)
         A boolean indicating whether entries in the record should be deleted from the
         input dictionary immediately after adding them to the record.
     """
