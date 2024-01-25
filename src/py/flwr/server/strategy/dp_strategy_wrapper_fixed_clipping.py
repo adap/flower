@@ -32,16 +32,15 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
-from flwr.common.differential_privacy import add_gaussian_noise, get_norm
+from flwr.common.differential_privacy import add_gaussian_noise, clip_inputs, get_norm
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.strategy import Strategy
 
 
 class DPStrategyWrapperServerSideFixedClipping(Strategy):
-    """Wrapper for Configuring a Strategy for Central DP.
-
-    The clipping is at the server side.
+    """Wrapper for Configuring a Strategy for Central DP with Server Side Fixed
+    Clipping.
 
     Parameters
     ----------
@@ -50,8 +49,8 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
     noise_multiplier: float
         The noise multiplier for the Gaussian mechanism for model updates.
         A value of 1.0 or higher is recommended for strong privacy.
-    clipping_threshold: float
-        The value of the clipping threshold.
+    clipping_norm: float
+        The value of the clipping norm.
     num_sampled_clients: int
         The number of clients that are sampled on each round.
     """
@@ -61,7 +60,7 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         self,
         strategy: Strategy,
         noise_multiplier: float,
-        clipping_threshold: float,
+        clipping_norm: float,
         num_sampled_clients: int,
     ) -> None:
         super().__init__()
@@ -71,14 +70,14 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         if noise_multiplier < 0:
             raise Exception("The noise multiplier should be a non-negative value.")
 
-        if clipping_threshold <= 0:
+        if clipping_norm <= 0:
             raise Exception("The clipping threshold should be a positive value.")
 
         if num_sampled_clients <= 0:
             raise Exception("The number of sampled clients should be a positive value.")
 
         self.noise_multiplier = noise_multiplier
-        self.clipping_threshold = clipping_threshold
+        self.clipping_norm = clipping_norm
         self.num_sampled_clients = num_sampled_clients
 
         self.current_round_params: NDArrays = []
@@ -129,7 +128,7 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
 
         # Clip updates
         for client_update in all_clients_updates:
-            client_update = self._clip_model_update(client_update)
+            client_update = clip_inputs(client_update, self.clipping_norm)
 
         # Compute the new parameters with the clipped updates
         for client_param, client_update in zip(clients_params, all_clients_updates):
@@ -145,6 +144,7 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         )
 
         # Add Gaussian noise to the aggregated parameters
+
         if aggregated_updates:
             aggregated_updates = self._add_noise_to_updates(aggregated_updates)
 
@@ -165,24 +165,14 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         """Evaluate model parameters using an evaluation function from the strategy."""
         return self.strategy.evaluate(server_round, parameters)
 
-    def _clip_model_update(self, update: NDArrays) -> NDArrays:
-        """Clip model update based on the computed clipping_threshold.
-
-        FlatClip method of the paper: https://arxiv.org/pdf/1710.06963.pdf
-        """
-        update_norm = get_norm(update)
-        scaling_factor = min(1, self.clipping_threshold / update_norm)
-        update_clipped: NDArrays = [layer * scaling_factor for layer in update]
-        return update_clipped
-
     def _add_noise_to_updates(self, parameters: Parameters) -> Parameters:
         """Add Gaussian noise to model params."""
         return ndarrays_to_parameters(
             add_gaussian_noise(
                 parameters_to_ndarrays(parameters),
                 float(
-                    (self.noise_multiplier * self.clipping_threshold)
-                    / self.num_sampled_clients ** (0.5)
+                    (self.noise_multiplier * self.clipping_norm)
+                    / self.num_sampled_clients
                 ),
             )
         )

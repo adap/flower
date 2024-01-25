@@ -14,6 +14,8 @@
 
 import numpy as np
 
+from flwr.common.typing import NDArrays
+
 
 def get_norm(input: NDArrays) -> float:
     """Compute the L2 norm of the flattened input."""
@@ -27,16 +29,17 @@ def add_gaussian_noise(input: NDArrays, std_dev: float) -> NDArrays:
     """Add noise to each element of the provided input from Gaussian (Normal)
     distribution with respect to the passed standard deviation."""
     noised_input = [
-        layer + np.random.normal(0, std_dev, layer.shape) for layer in input
+        layer + np.random.normal(0, std_dev**2, layer.shape) for layer in input
     ]
     return noised_input
 
-def clip_inputs(self, update: NDArrays, ) -> NDArrays:
-    """Clip model update based on the computed clipping_threshold.
+
+def clip_inputs(input: NDArrays, clipping_norm: float) -> NDArrays:
+    """Clip model update based on the clipping norm.
 
     FlatClip method of the paper: https://arxiv.org/pdf/1710.06963.pdf
     """
-    update_norm = get_norm(update)
-    scaling_factor = min(1, self.clipping_threshold / update_norm)
-    update_clipped: NDArrays = [layer * scaling_factor for layer in update]
-    return update_clipped
+    input_norm = get_norm(input)
+    scaling_factor = min(1, clipping_norm / input_norm)
+    clipped_inputs: NDArrays = [layer * scaling_factor for layer in input]
+    return clipped_inputs
