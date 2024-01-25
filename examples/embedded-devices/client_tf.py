@@ -123,9 +123,9 @@ def main():
     trainset, valset = partitions[args.cid]
 
     # Start Flower client setting its associated data partition
-    fl.client.start_numpy_client(
+    fl.client.start_client(
         server_address=args.server_address,
-        client=FlowerClient(trainset=trainset, valset=valset, use_mnist=use_mnist),
+        client=FlowerClient(trainset=trainset, valset=valset, use_mnist=use_mnist).to_client(),
     )
 
 
