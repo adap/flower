@@ -43,4 +43,4 @@ class Bwd:
 
 FlowerCallable = Callable[[Message, Context], Message]
 ClientFn = Callable[[str], Client]
-Layer = Callable[[Message, FlowerCallable, Context], Message]
+Layer = Callable[[Message, Context, FlowerCallable], Message]

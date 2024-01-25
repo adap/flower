@@ -22,22 +22,34 @@ from flwr.client.typing import FlowerCallable, Layer
 from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.context import Context
 from flwr.common.message import Message, Metadata
+from flwr.common.metricsrecord import MetricsRecord
 from flwr.common.recordset import RecordSet
 
 from .utils import make_ffn
+
+METRIC = "context"
+COUNTER = "counter"
+
+
+def _increment_context_counter(context: Context) -> None:
+    # Read from context
+    current_counter: int = context.state.get_metrics(METRIC)[COUNTER]  # type: ignore
+    # update and override context
+    current_counter += 1
+    context.state.set_metrics(METRIC, record=MetricsRecord({COUNTER: current_counter}))
 
 
 def make_mock_middleware(name: str, footprint: List[str]) -> Layer:
     """Make a mock middleware layer."""
 
-    def middleware(message: Message, app: FlowerCallable, context: Context) -> Message:
+    def middleware(message: Message, context: Context, app: FlowerCallable) -> Message:
         footprint.append(name)
         # add empty ConfigRegcord to in_message for this middleware layer
         message.message.set_configs(name=name, record=ConfigsRecord())
-        context.state.metrics['context']['counter'] += 1
+        _increment_context_counter(context)
         out_message: Message = app(message, context)
         footprint.append(name)
-        context.state.metrics['context']['counter'] += 1
+        _increment_context_counter(context)
         # add empty ConfigRegcord to out_message for this middleware layer
         out_message.message.set_configs(name=name, record=ConfigsRecord())
         return out_message
@@ -80,7 +92,7 @@ class TestMakeApp(unittest.TestCase):
         ]
 
         state = RecordSet()
-        state.set_metrics('context', {'counter': 0.0})
+        state.set_metrics(METRIC, record=MetricsRecord({COUNTER: 0.0}))
         context = Context(state=state)
         message = _get_dummy_flower_message()
 
@@ -96,7 +108,9 @@ class TestMakeApp(unittest.TestCase):
         self.assertEqual(
             "".join(out_message.message.configs.keys()), "".join(reversed(trace))
         )
-        self.assertEqual(state.get_metrics('context')['counter'], 2*len(mock_middleware_layers))
+        self.assertEqual(
+            state.get_metrics(METRIC)[COUNTER], 2 * len(mock_middleware_layers)
+        )
 
     def test_filter(self) -> None:
         """Test if a middleware can filter incoming TaskIns."""
@@ -107,10 +121,13 @@ class TestMakeApp(unittest.TestCase):
         message = _get_dummy_flower_message()
 
         def filter_layer(
-            message: Message, _: FlowerCallable, context: Context
+            message: Message,
+            context: Context,
+            _: FlowerCallable,
         ) -> Message:
             footprint.append("filter")
             message.message.set_configs(name="filter", record=ConfigsRecord())
+            context = context  # we need to do something with it else mypy issue
             out_message = Message(metadata=message.metadata, message=RecordSet())
             out_message.message.set_configs(name="filter", record=ConfigsRecord())
             # Skip calling app

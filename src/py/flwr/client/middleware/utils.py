@@ -27,7 +27,7 @@ def make_ffn(ffn: FlowerCallable, layers: List[Layer]) -> FlowerCallable:
 
     def wrap_ffn(_ffn: FlowerCallable, _layer: Layer) -> FlowerCallable:
         def new_ffn(message: Message, context: Context) -> Message:
-            return _layer(message, _ffn, context)
+            return _layer(message, context, _ffn)
 
         return new_ffn
 
