@@ -43,12 +43,7 @@ struct HW: Codable {
 struct Platform: Codable {
     let system: String
     let release: String
-    let pythonImplementation: String
-    let pythonVersion: String
-    let androidSdkVersion: String
     let machine: String
-    let architecture: String
-    let version: String
 }
 
 func getSourceId() -> UUID {
@@ -79,12 +74,7 @@ func createEventContext() -> Context {
                 batteryLevel: UIDevice.current.batteryLevel.formatted())
     let platform = Platform(system: "iOS",
                             release: UIDevice.current.systemVersion,
-                            pythonImplementation: "",
-                            pythonVersion: "",
-                            androidSdkVersion: "",
-                            machine: "arm64e",
-                            architecture: "",
-                            version: "")
+                            machine: "arm64e")
     let flower = Flower(packageName: "flwr", packageVersion: version)
     
     return Context(source: getSourceId().uuidString, cluster: UUID().uuidString, date: date, flower: flower, hw: hw, platform: platform)
