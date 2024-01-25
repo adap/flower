@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""FlowerContext and Metadata."""
+"""Message."""
 
 
 from dataclasses import dataclass
@@ -48,30 +48,17 @@ class Metadata:
 
 
 @dataclass
-class FlowerContext:
+class Message:
     """State of your application from the viewpoint of the entity using it.
 
     Parameters
     ----------
-    in_message : RecordSet
-        Holds records sent by another entity (e.g. sent by the server-side
-        logic to a client, or vice-versa)
-    out_message : RecordSet
-        Holds records added by the current entity. This `RecordSet` will
-        be sent out (e.g. back to the server-side for aggregation of
-        parameter, or to the client to perform a certain task)
-    local : RecordSet
-        Holds record added by the current entity and that will stay local.
-        This means that the data it holds will never leave the system it's running from.
-        This can be used as an intermediate storage or scratchpad when
-        executing middleware layers. It can also be used as a memory to access
-        at different points during the lifecycle of this entity (e.g. across
-        multiple rounds)
     metadata : Metadata
         A dataclass including information about the task to be executed.
+    message : RecordSet
+        Holds records either sent by another entity (e.g. sent by the server-side
+        logic to a client, or vice-versa) or that will be sent to it.
     """
 
-    in_message: RecordSet
-    out_message: RecordSet
-    local: RecordSet
     metadata: Metadata
+    message: RecordSet
