@@ -172,7 +172,6 @@ Below is the default Grafana dashboard that users will see upon accessing Grafan
 
 <img width="1440" alt="grafana_home_screen" src="https://github.com/ChoosyDevs/Choosy/assets/59146613/46c1016d-2376-4fdc-ae5f-68c550fc8e46">
 
-
 This comprehensive dashboard provides insights into various system metrics across client-server containers. It includes visualizations such as:
 
 - **Application Metrics**: The "Model Accuracy" graph shows an upward trend as rounds of training progress, which is a positive indicator of the model learning and improving over time. Conversely, the "Model Loss" graph trends downward, suggesting that the model is becoming more precise and making fewer mistakes as it trains.
