@@ -16,7 +16,7 @@
 # mypy: disallow_untyped_calls=False
 
 from functools import reduce
-from typing import Any, Callable, Iterable, List, Tuple
+from typing import Any, Callable, Iterable, List, Optional, Tuple
 
 import numpy as np
 
@@ -26,12 +26,12 @@ from flwr.server.client_proxy import ClientProxy
 
 def aggregate_cumulative_average(
     results: Iterable[Tuple[ClientProxy, FitRes]]
-) -> NDArrays | None:
+) -> Optional[NDArrays]:
     """Compute in-place weighted average, lazily and async."""
     # Initialize params,
     # the iterator may not contain anything
     # and we do not want a next+try-except
-    params: NDArrays | None = None
+    params: Optional[NDArrays] = None
 
     num_total_examples: int = 0  # total number of examples, aggregated over time
 
