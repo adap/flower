@@ -50,7 +50,7 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
         The noise multiplier for the Gaussian mechanism for model updates.
     num_sampled_clients: int
         The number of clients that are sampled on each round.
-    initial_clip_norm: float
+    initial_clipping_norm: float
         The initial value of clipping norm. Deafults to 0.1.
         Andrew et al. recommends to set to 0.1.
     target_clipped_quantile: float
@@ -72,7 +72,7 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
         strategy: Strategy,
         noise_multiplier: float,
         num_sampled_clients: int,
-        initial_clip_norm: float = 0.1,
+        initial_clipping_norm: float = 0.1,
         target_clipped_quantile: float = 0.5,
         clip_norm_lr: float = 0.2,
         clipped_count_stddev: Optional[float] = None,
@@ -88,8 +88,8 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
         if num_sampled_clients <= 0:
             raise Exception("The number of sampled clients should be a positive value.")
 
-        if initial_clip_norm <= 0:
-            raise Exception("The initial clip norm should be a positive value.")
+        if initial_clipping_norm <= 0:
+            raise Exception("The initial clipping norm should be a positive value.")
 
         if not 0 <= target_clipped_quantile <= 1:
             raise Exception(
@@ -105,7 +105,7 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
 
         self.strategy = strategy
         self.num_sampled_clients = num_sampled_clients
-        self.clip_norm = initial_clip_norm
+        self.clipping_norm = initial_clipping_norm
         self.target_clipped_quantile = target_clipped_quantile
         self.clip_norm_lr = clip_norm_lr
         self.clipped_count_stddev, self.noise_multiplier = self._compute_noise_params(
@@ -172,7 +172,7 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
 
         noised_norm_bit_set_fraction = noised_norm_bit_set_count / len(results)
         # Geometric update
-        self.clip_norm *= math.exp(
+        self.clipping_norm *= math.exp(
             -self.clip_norm_lr
             * (noised_norm_bit_set_fraction - self.target_clipped_quantile)
         )
@@ -183,7 +183,7 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
             self.add_gaussian_noise(
                 parameters_to_ndarrays(parameters),
                 float(
-                    (self.noise_multiplier * self.clip_norm)
+                    (self.noise_multiplier * self.clipping_norm)
                     / self.num_sampled_clients ** (0.5)
                 ),
             )
