@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://flower.dev/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fflower_white_border.c2012e70.png&w=640&q=75" width="140px" alt="Flower Website" />
-  <img src="public/01-symbol_blue-docker-logo.png" width="140px" alt="Docker Logo" />
+  <img src="https://github.com/ChoosyDevs/Choosy/assets/59146613/73d15990-453b-4da6-b8d6-df0f956a127c" width="140px" alt="Docker Logo" />
 </p>
 
 ## Introduction
@@ -170,7 +170,8 @@ By modifying the `dashboard_index.json` file, users can tailor the Grafana dashb
 
 Below is the default Grafana dashboard that users will see upon accessing Grafana:
 
-![Grafana Home Dashboard](public/grafana_home_screen.png "Grafana Federated Learning Metrics")
+<img width="1440" alt="grafana_home_screen" src="https://github.com/ChoosyDevs/Choosy/assets/59146613/46c1016d-2376-4fdc-ae5f-68c550fc8e46">
+
 
 This comprehensive dashboard provides insights into various system metrics across client-server containers. It includes visualizations such as:
 
@@ -239,7 +240,7 @@ The image below depicts the Prometheus scraping process as it is configured in o
 - These targets are periodically scraped by the Prometheus server, aggregating data from both system-level and custom performance metrics.
 - The aggregated data is then made available to the "Prometheus web UI" and "Grafana," as shown, enabling detailed visualization and analysis through the Grafana dashboard.
 
-![Prometheus Architecture](public/prometheus-architecture.png "Prometheus Monitoring Architecture")
+<img width="791" alt="prometheus-architecture" src="https://github.com/ChoosyDevs/Choosy/assets/59146613/3b915e04-f12c-4aef-99ff-d75853234728">
 
 By incorporating these steps, we have enriched our monitoring capabilities to not only include system-level metrics but also critical performance indicators of our federated learning model. This approach is pivotal for understanding and improving the learning process. Similarly, you can apply this methodology to track any other metric that you find interesting or relevant to your specific needs. This flexibility allows for a comprehensive and customized monitoring environment, tailored to the unique aspects and requirements of your federated learning system.
 
