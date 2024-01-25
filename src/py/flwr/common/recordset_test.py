@@ -105,7 +105,7 @@ def test_parameters_to_parametersrecord_and_back(keep_input: bool) -> None:
         # Verify inputed parameters are indeed as originally passed
         assert parameters == ndarrays_to_parameters(ndarrays)
     else:
-        # Verify tensors have beene erased
+        # Verify tensors have been erased
         assert len(parameters.tensors) == 0
 
     parameters_ = parametersrecord_to_parameters(params_record, keep_input=keep_input)
