@@ -19,7 +19,6 @@ from abc import ABC
 from typing import Callable, Dict, Tuple
 
 from flwr.client.client import Client
-from flwr.client.run_state import RunState
 from flwr.common import (
     Config,
     NDArrays,
@@ -27,6 +26,7 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
+from flwr.common.recordset import RecordSet
 from flwr.common.typing import (
     Code,
     EvaluateIns,
@@ -70,7 +70,7 @@ Example
 class NumPyClient(ABC):
     """Abstract base class for Flower clients using NumPy."""
 
-    state: RunState
+    state: RecordSet
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         """Return a client's set of properties.
@@ -174,11 +174,11 @@ class NumPyClient(ABC):
         _ = (self, parameters, config)
         return 0.0, 0, {}
 
-    def get_state(self) -> RunState:
+    def get_state(self) -> RecordSet:
         """Get the run state from this client."""
         return self.state
 
-    def set_state(self, state: RunState) -> None:
+    def set_state(self, state: RecordSet) -> None:
         """Apply a run state to this client."""
         self.state = state
 
@@ -278,12 +278,12 @@ def _evaluate(self: Client, ins: EvaluateIns) -> EvaluateRes:
     )
 
 
-def _get_state(self: Client) -> RunState:
+def _get_state(self: Client) -> RecordSet:
     """Return state of underlying NumPyClient."""
     return self.numpy_client.get_state()  # type: ignore
 
 
-def _set_state(self: Client, state: RunState) -> None:
+def _set_state(self: Client, state: RecordSet) -> None:
     """Apply state to underlying NumPyClient."""
     self.numpy_client.set_state(state)  # type: ignore
 
