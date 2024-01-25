@@ -23,6 +23,7 @@ import numpy as np
 from flwr.common import FitRes, NDArray, NDArrays, parameters_to_ndarrays
 from flwr.server.client_proxy import ClientProxy
 
+
 def aggregate_cumulative_average(
     results: Iterable[Tuple[ClientProxy, FitRes]]
 ) -> NDArrays | None:
@@ -34,7 +35,7 @@ def aggregate_cumulative_average(
 
     num_total_examples: int = 0  # total number of examples, aggregated over time
 
-    for client_proxy, fit_res in results:
+    for _, fit_res in results:
         # Compute the new total number of samples
         new_total_samples = num_total_examples + fit_res.num_examples
 
