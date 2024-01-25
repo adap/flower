@@ -23,7 +23,7 @@ from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 def _run_dummy_task(state: RecordSet) -> RecordSet:
     counter_value: str = "1"
-    if "counter" in state.metrics.keys():
+    if "counter" in state.configs.keys():
         counter_value = state.get_configs("counter")["count"]  # type: ignore
         counter_value += "1"
 
