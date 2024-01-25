@@ -773,7 +773,7 @@ def message_to_task_ins(message: Message) -> TaskIns:
 
 def message_from_task_ins(task_ins: TaskIns) -> Message:
     """Create a Message from the TaskIns."""
-    # Retrieve the MetaData
+    # Retrieve the Metadata
     metadata = Metadata(
         run_id=task_ins.run_id,
         task_id=task_ins.task_id,
