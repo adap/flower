@@ -104,7 +104,6 @@ class DirichletPartitioner(Partitioner):  # pylint: disable=R0902
 
         # Utility attributes
         # The attributes below are determined during the first call to load_partition
-        self._num_unique_classes: Optional[int] = None
         self._avg_num_of_samples_per_node: Optional[float] = None
         self._unique_classes: Optional[Union[List[int], List[str]]] = None
         self._node_id_to_indices: Dict[int, List[int]] = {}
@@ -191,7 +190,6 @@ class DirichletPartitioner(Partitioner):  # pylint: disable=R0902
         # Generate information needed for Dirichlet partitioning
         self._unique_classes = self.dataset.unique(self._partition_by)
         assert self._unique_classes is not None
-        self._num_unique_classes = len(self._unique_classes)
         # This is needed only if self._self_balancing is True (the default option)
         self._avg_num_of_samples_per_node = self.dataset.num_rows / self._num_partitions
 
