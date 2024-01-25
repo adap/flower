@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,9 +23,12 @@ from typing import Dict, List, Optional
 from flwr.client.message_handler.task_handler import configure_task_res
 from flwr.common import EvaluateRes, FitRes, GetParametersRes, GetPropertiesRes, serde
 from flwr.common.logger import log
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
-from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+    ClientMessage,
+    ServerMessage,
+)
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.state import State, StateFactory
 
@@ -166,6 +169,6 @@ def _call_client_proxy(
         evaluate_res_proto = serde.evaluate_res_to_proto(res=evaluate_res)
         return ClientMessage(evaluate_res=evaluate_res_proto)
 
-    raise Exception(
+    raise ValueError(
         "Unsupported instruction in ServerMessage, cannot deserialize from ProtoBuf"
     )

@@ -14,10 +14,31 @@
 # ==============================================================================
 """Custom types for Flower clients."""
 
-from typing import Callable, Union
+from dataclasses import dataclass
+from typing import Callable
+
+from flwr.client.run_state import RunState
+from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 from .client import Client as Client
-from .numpy_client import NumPyClient as NumPyClient
 
-ClientLike = Union[Client, NumPyClient]
-ClientFn = Callable[[str], ClientLike]
+
+@dataclass
+class Fwd:
+    """."""
+
+    task_ins: TaskIns
+    state: RunState
+
+
+@dataclass
+class Bwd:
+    """."""
+
+    task_res: TaskRes
+    state: RunState
+
+
+FlowerCallable = Callable[[Fwd], Bwd]
+ClientFn = Callable[[str], Client]
+Layer = Callable[[Fwd, FlowerCallable], Bwd]

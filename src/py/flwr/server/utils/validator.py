@@ -1,4 +1,4 @@
-# Copyright 2023 Adap GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 
 from typing import List, Union
 
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 
 # pylint: disable-next=too-many-branches,too-many-statements

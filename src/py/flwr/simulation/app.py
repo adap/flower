@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 import sys
 import threading
 import traceback
+import warnings
 from logging import ERROR, INFO
 from typing import Any, Dict, List, Optional, Type, Union
 
@@ -68,7 +69,8 @@ REASON:
 """
 
 
-def start_simulation(  # pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-statements,too-many-branches
+def start_simulation(
     *,
     client_fn: ClientFn,
     num_clients: Optional[int] = None,
@@ -91,7 +93,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
     client_fn : ClientFn
         A function creating client instances. The function must take a single
         `str` argument called `cid`. It should return a single client instance
-        of type ClientLike. Note that the created client instances are ephemeral
+        of type Client. Note that the created client instances are ephemeral
         and will often be destroyed after a single method invocation. Since client
         instances are not long-lived, they should not attempt to carry state over
         method invocations. Any state required by the instance (model, dataset,
@@ -105,8 +107,8 @@ def start_simulation(  # pylint: disable=too-many-arguments
         List `client_id`s for each client. This is only required if
         `num_clients` is not set. Setting both `num_clients` and `clients_ids`
         with `len(clients_ids)` not equal to `num_clients` generates an error.
-    client_resources : Optional[Dict[str, float]] (default: `{"num_cpus": 1,
-        "num_gpus": 0.0}` CPU and GPU resources for a single client. Supported keys
+    client_resources : Optional[Dict[str, float]] (default: `{"num_cpus": 1, "num_gpus": 0.0}`)
+        CPU and GPU resources for a single client. Supported keys
         are `num_cpus` and `num_gpus`. To understand the GPU utilization caused by
         `num_gpus`, as well as using custom resources, please consult the Ray
         documentation.
@@ -158,7 +160,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
     -------
     hist : flwr.server.history.History
         Object containing metrics from training.
-    """
+    """  # noqa: E501
     # pylint: disable-msg=too-many-locals
     event(
         EventType.START_SIMULATION_ENTER,
@@ -214,6 +216,12 @@ def start_simulation(  # pylint: disable=too-many-arguments
         cluster_resources,
     )
 
+    log(
+        INFO,
+        "Optimize your simulation with Flower VCE: "
+        "https://flower.dev/docs/framework/how-to-run-simulations.html",
+    )
+
     # Log the resources that a single client will be able to use
     if client_resources is None:
         log(
@@ -221,6 +229,15 @@ def start_simulation(  # pylint: disable=too-many-arguments
             "No `client_resources` specified. Using minimal resources for clients.",
         )
         client_resources = {"num_cpus": 1, "num_gpus": 0.0}
+
+    # Each client needs at the very least one CPU
+    if "num_cpus" not in client_resources:
+        warnings.warn(
+            "No `num_cpus` specified in `client_resources`. "
+            "Using `num_cpus=1` for each client.",
+            stacklevel=2,
+        )
+        client_resources["num_cpus"] = 1
 
     log(
         INFO,
@@ -284,6 +301,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
         )
         initialized_server.client_manager().register(client=client_proxy)
 
+    hist = History()
     # pylint: disable=broad-except
     try:
         # Start training
@@ -296,26 +314,38 @@ def start_simulation(  # pylint: disable=too-many-arguments
         log(ERROR, traceback.format_exc())
         log(
             ERROR,
-            "Your simulation crashed :(. This could be because of several reasons."
+            "Your simulation crashed :(. This could be because of several reasons. "
             "The most common are: "
+            "\n\t > Sometimes, issues in the simulation code itself can cause crashes. "
+            "It's always a good idea to double-check your code for any potential bugs "
+            "or inconsistencies that might be contributing to the problem. "
+            "For example: "
+            "\n\t\t - You might be using a class attribute in your clients that "
+            "hasn't been defined."
+            "\n\t\t - There could be an incorrect method call to a 3rd party library "
+            "(e.g., PyTorch)."
+            "\n\t\t - The return types of methods in your clients/strategies might be "
+            "incorrect."
             "\n\t > Your system couldn't fit a single VirtualClient: try lowering "
             "`client_resources`."
             "\n\t > All the actors in your pool crashed. This could be because: "
             "\n\t\t - You clients hit an out-of-memory (OOM) error and actors couldn't "
             "recover from it. Try launching your simulation with more generous "
             "`client_resources` setting (i.e. it seems %s is "
-            "not enough for your workload). Use fewer concurrent actors. "
+            "not enough for your run). Use fewer concurrent actors. "
             "\n\t\t - You were running a multi-node simulation and all worker nodes "
             "disconnected. The head node might still be alive but cannot accommodate "
-            "any actor with resources: %s.",
+            "any actor with resources: %s."
+            "\nTake a look at the Flower simulation examples for guidance "
+            "<https://flower.dev/docs/framework/how-to-run-simulations.html>.",
             client_resources,
             client_resources,
         )
-        hist = History()
+        raise RuntimeError("Simulation crashed.") from ex
 
-    # Stop time monitoring resources in cluster
-    f_stop.set()
-
-    event(EventType.START_SIMULATION_LEAVE)
+    finally:
+        # Stop time monitoring resources in cluster
+        f_stop.set()
+        event(EventType.START_SIMULATION_LEAVE)
 
     return hist

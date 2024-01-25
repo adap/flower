@@ -1,4 +1,4 @@
-# Copyright 2023 Adap GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 """SQLite based implemenation of server state."""
 
 
-import random
+import os
 import re
 import sqlite3
 from datetime import datetime, timedelta
@@ -24,9 +24,12 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
-from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+    ClientMessage,
+    ServerMessage,
+)
 from flwr.server.utils.validator import validate_task_ins_or_res
 
 from .state import State
@@ -37,9 +40,9 @@ CREATE TABLE IF NOT EXISTS node(
 );
 """
 
-SQL_CREATE_TABLE_WORKLOAD = """
-CREATE TABLE IF NOT EXISTS workload(
-    workload_id TEXT UNIQUE
+SQL_CREATE_TABLE_RUN = """
+CREATE TABLE IF NOT EXISTS run(
+    run_id INTEGER UNIQUE
 );
 """
 
@@ -47,7 +50,7 @@ SQL_CREATE_TABLE_TASK_INS = """
 CREATE TABLE IF NOT EXISTS task_ins(
     task_id                 TEXT UNIQUE,
     group_id                TEXT,
-    workload_id             TEXT,
+    run_id             INTEGER,
     producer_anonymous      BOOLEAN,
     producer_node_id        INTEGER,
     consumer_anonymous      BOOLEAN,
@@ -58,7 +61,7 @@ CREATE TABLE IF NOT EXISTS task_ins(
     ancestry                TEXT,
     legacy_server_message   BLOB,
     legacy_client_message   BLOB,
-    FOREIGN KEY(workload_id) REFERENCES workload(workload_id)
+    FOREIGN KEY(run_id) REFERENCES run(run_id)
 );
 """
 
@@ -67,7 +70,7 @@ SQL_CREATE_TABLE_TASK_RES = """
 CREATE TABLE IF NOT EXISTS task_res(
     task_id                 TEXT UNIQUE,
     group_id                TEXT,
-    workload_id             TEXT,
+    run_id             INTEGER,
     producer_anonymous      BOOLEAN,
     producer_node_id        INTEGER,
     consumer_anonymous      BOOLEAN,
@@ -78,7 +81,7 @@ CREATE TABLE IF NOT EXISTS task_res(
     ancestry                TEXT,
     legacy_server_message   BLOB,
     legacy_client_message   BLOB,
-    FOREIGN KEY(workload_id) REFERENCES workload(workload_id)
+    FOREIGN KEY(run_id) REFERENCES run(run_id)
 );
 """
 
@@ -119,7 +122,7 @@ class SqliteState(State):
         cur = self.conn.cursor()
 
         # Create each table if not exists queries
-        cur.execute(SQL_CREATE_TABLE_WORKLOAD)
+        cur.execute(SQL_CREATE_TABLE_RUN)
         cur.execute(SQL_CREATE_TABLE_TASK_INS)
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
         cur.execute(SQL_CREATE_TABLE_NODE)
@@ -134,7 +137,7 @@ class SqliteState(State):
     ) -> List[Dict[str, Any]]:
         """Execute a SQL query."""
         if self.conn is None:
-            raise Exception("State is not initialized.")
+            raise AttributeError("State is not initialized.")
 
         if data is None:
             data = []
@@ -146,10 +149,8 @@ class SqliteState(State):
             with self.conn:
                 if (
                     len(data) > 0
-                    # pylint: disable-next=C0123
-                    and (type(data) == tuple or type(data) == list)
-                    # pylint: disable-next=C0123
-                    and (type(data[0]) == tuple or type(data[0]) == dict)
+                    and isinstance(data, (tuple, list))
+                    and isinstance(data[0], (tuple, dict))
                 ):
                     rows = self.conn.executemany(query, data)
                 else:
@@ -200,12 +201,12 @@ class SqliteState(State):
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_ins VALUES({columns});"
 
-        # Only invalid workload_id can trigger IntegrityError.
+        # Only invalid run_id can trigger IntegrityError.
         # This may need to be changed in the future version with more integrity checks.
         try:
             self.query(query, data)
         except sqlite3.IntegrityError:
-            log(ERROR, "`workload` is invalid")
+            log(ERROR, "`run` is invalid")
             return None
 
         return task_id
@@ -335,12 +336,12 @@ class SqliteState(State):
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_res VALUES({columns});"
 
-        # Only invalid workload_id can trigger IntegrityError.
+        # Only invalid run_id can trigger IntegrityError.
         # This may need to be changed in the future version with more integrity checks.
         try:
             self.query(query, data)
         except sqlite3.IntegrityError:
-            log(ERROR, "`workload` is invalid")
+            log(ERROR, "`run` is invalid")
             return None
 
         return task_id
@@ -461,7 +462,7 @@ class SqliteState(State):
         """
 
         if self.conn is None:
-            raise Exception("State not intitialized")
+            raise AttributeError("State not intitialized")
 
         with self.conn:
             self.conn.execute(query_1, data)
@@ -469,27 +470,35 @@ class SqliteState(State):
 
         return None
 
-    def register_node(self, node_id: int) -> None:
-        """Store `node_id` in state."""
-        query = "INSERT INTO node VALUES(:node_id);"
-        self.query(query, {"node_id": node_id})
+    def create_node(self) -> int:
+        """Create, store in state, and return `node_id`."""
+        # Sample a random int64 as node_id
+        node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
-    def unregister_node(self, node_id: int) -> None:
-        """Remove `node_id` from state."""
+        query = "INSERT INTO node VALUES(:node_id);"
+        try:
+            self.query(query, {"node_id": node_id})
+        except sqlite3.IntegrityError:
+            log(ERROR, "Unexpected node registration failure.")
+            return 0
+        return node_id
+
+    def delete_node(self, node_id: int) -> None:
+        """Delete a client node."""
         query = "DELETE FROM node WHERE node_id = :node_id;"
         self.query(query, {"node_id": node_id})
 
-    def get_nodes(self, workload_id: str) -> Set[int]:
+    def get_nodes(self, run_id: int) -> Set[int]:
         """Retrieve all currently stored node IDs as a set.
 
         Constraints
         -----------
-        If the provided `workload_id` does not exist or has no matching nodes,
+        If the provided `run_id` does not exist or has no matching nodes,
         an empty `Set` MUST be returned.
         """
-        # Validate workload ID
-        query = "SELECT COUNT(*) FROM workload WHERE workload_id = ?;"
-        if self.query(query, (workload_id,))[0]["COUNT(*)"] == 0:
+        # Validate run ID
+        query = "SELECT COUNT(*) FROM run WHERE run_id = ?;"
+        if self.query(query, (run_id,))[0]["COUNT(*)"] == 0:
             return set()
 
         # Get nodes
@@ -498,21 +507,20 @@ class SqliteState(State):
         result: Set[int] = {row["node_id"] for row in rows}
         return result
 
-    def create_workload(self) -> str:
-        """Create one workload and store it in state."""
-        # String representation of random integer from 0 to 9223372036854775807
-        random_workload_id: int = random.randrange(9223372036854775808)
-        workload_id = str(random_workload_id)
+    def create_run(self) -> int:
+        """Create one run and store it in state."""
+        # Sample a random int64 as run_id
+        run_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
         # Check conflicts
-        query = "SELECT COUNT(*) FROM workload WHERE workload_id = ?;"
-        # If workload_id does not exist
-        if self.query(query, (workload_id,))[0]["COUNT(*)"] == 0:
-            query = "INSERT INTO workload VALUES(:workload_id);"
-            self.query(query, {"workload_id": workload_id})
-            return workload_id
-        log(ERROR, "Unexpected workload creation failure.")
-        return ""
+        query = "SELECT COUNT(*) FROM run WHERE run_id = ?;"
+        # If run_id does not exist
+        if self.query(query, (run_id,))[0]["COUNT(*)"] == 0:
+            query = "INSERT INTO run VALUES(:run_id);"
+            self.query(query, {"run_id": run_id})
+            return run_id
+        log(ERROR, "Unexpected run creation failure.")
+        return 0
 
 
 def dict_factory(
@@ -532,7 +540,7 @@ def task_ins_to_dict(task_msg: TaskIns) -> Dict[str, Any]:
     result = {
         "task_id": task_msg.task_id,
         "group_id": task_msg.group_id,
-        "workload_id": task_msg.workload_id,
+        "run_id": task_msg.run_id,
         "producer_anonymous": task_msg.task.producer.anonymous,
         "producer_node_id": task_msg.task.producer.node_id,
         "consumer_anonymous": task_msg.task.consumer.anonymous,
@@ -554,7 +562,7 @@ def task_res_to_dict(task_msg: TaskRes) -> Dict[str, Any]:
     result = {
         "task_id": task_msg.task_id,
         "group_id": task_msg.group_id,
-        "workload_id": task_msg.workload_id,
+        "run_id": task_msg.run_id,
         "producer_anonymous": task_msg.task.producer.anonymous,
         "producer_node_id": task_msg.task.producer.node_id,
         "consumer_anonymous": task_msg.task.consumer.anonymous,
@@ -579,7 +587,7 @@ def dict_to_task_ins(task_dict: Dict[str, Any]) -> TaskIns:
     result = TaskIns(
         task_id=task_dict["task_id"],
         group_id=task_dict["group_id"],
-        workload_id=task_dict["workload_id"],
+        run_id=task_dict["run_id"],
         task=Task(
             producer=Node(
                 node_id=task_dict["producer_node_id"],
@@ -607,7 +615,7 @@ def dict_to_task_res(task_dict: Dict[str, Any]) -> TaskRes:
     result = TaskRes(
         task_id=task_dict["task_id"],
         group_id=task_dict["group_id"],
-        workload_id=task_dict["workload_id"],
+        run_id=task_dict["run_id"],
         task=Task(
             producer=Node(
                 node_id=task_dict["producer_node_id"],

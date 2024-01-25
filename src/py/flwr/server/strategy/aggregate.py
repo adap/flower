@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,20 +13,21 @@
 # limitations under the License.
 # ==============================================================================
 """Aggregation functions for strategy implementations."""
-
+# mypy: disallow_untyped_calls=False
 
 from functools import reduce
-from typing import List, Tuple
+from typing import Any, Callable, List, Tuple
 
 import numpy as np
 
-from flwr.common import NDArray, NDArrays
+from flwr.common import FitRes, NDArray, NDArrays, parameters_to_ndarrays
+from flwr.server.client_proxy import ClientProxy
 
 
 def aggregate(results: List[Tuple[NDArrays, int]]) -> NDArrays:
     """Compute weighted average."""
     # Calculate the total number of examples used during training
-    num_examples_total = sum([num_examples for _, num_examples in results])
+    num_examples_total = sum(num_examples for (_, num_examples) in results)
 
     # Create a list of weights, each multiplied by the related number of examples
     weighted_weights = [
@@ -39,6 +40,31 @@ def aggregate(results: List[Tuple[NDArrays, int]]) -> NDArrays:
         for layer_updates in zip(*weighted_weights)
     ]
     return weights_prime
+
+
+def aggregate_inplace(results: List[Tuple[ClientProxy, FitRes]]) -> NDArrays:
+    """Compute in-place weighted average."""
+    # Count total examples
+    num_examples_total = sum(fit_res.num_examples for (_, fit_res) in results)
+
+    # Compute scaling factors for each result
+    scaling_factors = [
+        fit_res.num_examples / num_examples_total for _, fit_res in results
+    ]
+
+    # Let's do in-place aggregation
+    # Get first result, then add up each other
+    params = [
+        scaling_factors[0] * x for x in parameters_to_ndarrays(results[0][1].parameters)
+    ]
+    for i, (_, fit_res) in enumerate(results[1:]):
+        res = (
+            scaling_factors[i + 1] * x
+            for x in parameters_to_ndarrays(fit_res.parameters)
+        )
+        params = [reduce(np.add, layer_updates) for layer_updates in zip(params, res)]
+
+    return params
 
 
 def aggregate_median(results: List[Tuple[NDArrays, int]]) -> NDArrays:
@@ -56,7 +82,7 @@ def aggregate_median(results: List[Tuple[NDArrays, int]]) -> NDArrays:
 def aggregate_krum(
     results: List[Tuple[NDArrays, int]], num_malicious: int, to_keep: int
 ) -> NDArrays:
-    """Choose one parameter vector according to the Krum fucntion.
+    """Choose one parameter vector according to the Krum function.
 
     If to_keep is not None, then MultiKrum is applied.
     """
@@ -69,9 +95,9 @@ def aggregate_krum(
     # For each client, take the n-f-2 closest parameters vectors
     num_closest = max(1, len(weights) - num_malicious - 2)
     closest_indices = []
-    for i, _ in enumerate(distance_matrix):
+    for distance in distance_matrix:
         closest_indices.append(
-            np.argsort(distance_matrix[i])[1 : num_closest + 1].tolist()  # noqa: E203
+            np.argsort(distance)[1 : num_closest + 1].tolist()  # noqa: E203
         )
 
     # Compute the score for each client, that is the sum of the distances
@@ -91,9 +117,92 @@ def aggregate_krum(
     return weights[np.argmin(scores)]
 
 
+# pylint: disable=too-many-locals
+def aggregate_bulyan(
+    results: List[Tuple[NDArrays, int]],
+    num_malicious: int,
+    aggregation_rule: Callable,  # type: ignore
+    **aggregation_rule_kwargs: Any,
+) -> NDArrays:
+    """Perform Bulyan aggregation.
+
+    Parameters
+    ----------
+    results: List[Tuple[NDArrays, int]]
+        Weights and number of samples for each of the client.
+    num_malicious: int
+        The maximum number of malicious clients.
+    aggregation_rule: Callable
+        Byzantine resilient aggregation rule used as the first step of the Bulyan
+    aggregation_rule_kwargs: Any
+        The arguments to the aggregation rule.
+
+    Returns
+    -------
+    aggregated_parameters: NDArrays
+        Aggregated parameters according to the Bulyan strategy.
+    """
+    byzantine_resilient_single_ret_model_aggregation = [aggregate_krum]
+    # also GeoMed (but not implemented yet)
+    byzantine_resilient_many_return_models_aggregation = []  # type: ignore
+    # Brute, Medoid (but not implemented yet)
+
+    num_clients = len(results)
+    if num_clients < 4 * num_malicious + 3:
+        raise ValueError(
+            "The Bulyan aggregation requires then number of clients to be greater or "
+            "equal to the 4 * num_malicious + 3. This is the assumption of this method."
+            "It is needed to ensure that the method reduces the attacker's leeway to "
+            "the one proved in the paper."
+        )
+    selected_models_set: List[Tuple[NDArrays, int]] = []
+
+    theta = len(results) - 2 * num_malicious
+    beta = theta - 2 * num_malicious
+
+    for _ in range(theta):
+        best_model = aggregation_rule(
+            results=results, num_malicious=num_malicious, **aggregation_rule_kwargs
+        )
+        list_of_weights = [weights for weights, num_samples in results]
+        # This group gives exact result
+        if aggregation_rule in byzantine_resilient_single_ret_model_aggregation:
+            best_idx = _find_reference_weights(best_model, list_of_weights)
+        # This group requires finding the closest model to the returned one
+        # (weights distance wise)
+        elif aggregation_rule in byzantine_resilient_many_return_models_aggregation:
+            # when different aggregation strategies available
+            # write a function to find the closest model
+            raise NotImplementedError(
+                "aggregate_bulyan currently does not support the aggregation rules that"
+                " return many models as results. "
+                "Such aggregation rules are currently not available in Flower."
+            )
+        else:
+            raise ValueError(
+                "The given aggregation rule is not added as Byzantine resilient. "
+                "Please choose from Byzantine resilient rules."
+            )
+
+        selected_models_set.append(results[best_idx])
+
+        # remove idx from tracker and weights_results
+        results.pop(best_idx)
+
+    # Compute median parameter vector across selected_models_set
+    median_vect = aggregate_median(selected_models_set)
+
+    # Take the averaged beta parameters of the closest distance to the median
+    # (coordinate-wise)
+    parameters_aggregated = _aggregate_n_closest_weights(
+        median_vect, selected_models_set, beta_closest=beta
+    )
+    return parameters_aggregated
+
+
 def weighted_loss_avg(results: List[Tuple[int, float]]) -> float:
     """Aggregate evaluation results obtained from multiple clients."""
-    num_total_evaluation_examples = sum([num_examples for num_examples, _ in results])
+    num_total_evaluation_examples = sum(num_examples for (num_examples, _) in results)
     weighted_losses = [num_examples * loss for num_examples, loss in results]
     return sum(weighted_losses) / num_total_evaluation_examples
 
@@ -124,9 +233,9 @@ def _compute_distances(weights: List[NDArrays]) -> NDArray:
     """
     flat_w = np.array([np.concatenate(p, axis=None).ravel() for p in weights])
     distance_matrix = np.zeros((len(weights), len(weights)))
-    for i, _ in enumerate(flat_w):
-        for j, _ in enumerate(flat_w):
-            delta = flat_w[i] - flat_w[j]
+    for i, flat_w_i in enumerate(flat_w):
+        for j, flat_w_j in enumerate(flat_w):
+            delta = flat_w_i - flat_w_j
             norm = np.linalg.norm(delta)
             distance_matrix[i, j] = norm**2
     return distance_matrix
@@ -168,3 +277,90 @@ def aggregate_trimmed_avg(
     ]
 
     return trimmed_w
+
+
+def _check_weights_equality(weights1: NDArrays, weights2: NDArrays) -> bool:
+    """Check if weights are the same."""
+    if len(weights1) != len(weights2):
+        return False
+    return all(
+        np.array_equal(layer_weights1, layer_weights2)
+        for layer_weights1, layer_weights2 in zip(weights1, weights2)
+    )
+
+
+def _find_reference_weights(
+    reference_weights: NDArrays, list_of_weights: List[NDArrays]
+) -> int:
+    """Find the reference weights by looping through the `list_of_weights`.
+
+    Raise Error if the reference weights is not found.
+
+    Parameters
+    ----------
+    reference_weights: NDArrays
+        Weights that will be searched for.
+    list_of_weights: List[NDArrays]
+        List of weights that will be searched through.
+
+    Returns
+    -------
+    index: int
+        The index of `reference_weights` in the `list_of_weights`.
+
+    Raises
+    ------
+    ValueError
+        If `reference_weights` is not found in `list_of_weights`.
+    """
+    for idx, weights in enumerate(list_of_weights):
+        if _check_weights_equality(reference_weights, weights):
+            return idx
+    raise ValueError("The reference weights not found in list_of_weights.")
+
+
+def _aggregate_n_closest_weights(
+    reference_weights: NDArrays, results: List[Tuple[NDArrays, int]], beta_closest: int
+) -> NDArrays:
+    """Calculate element-wise mean of the `N` closest values.
+
+    Note, each i-th coordinate of the result weight is the average of the beta_closest
+    -ith coordinates to the reference weights
+
+
+    Parameters
+    ----------
+    reference_weights: NDArrays
+        The weights from which the distances will be computed
+    results: List[Tuple[NDArrays, int]]
+        The weights from models
+    beta_closest: int
+        The number of the closest distance weights that will be averaged
+
+    Returns
+    -------
+    aggregated_weights: NDArrays
+        Averaged (element-wise) beta weights that have the closest distance to
+         reference weights
+    """
+    list_of_weights = [weights for weights, num_examples in results]
+    aggregated_weights = []
+
+    for layer_id, layer_weights in enumerate(reference_weights):
+        other_weights_layer_list = []
+        for other_w in list_of_weights:
+            other_weights_layer = other_w[layer_id]
+            other_weights_layer_list.append(other_weights_layer)
+        other_weights_layer_np = np.array(other_weights_layer_list)
+        diff_np = np.abs(layer_weights - other_weights_layer_np)
+        # Create indices of the smallest differences
+        # We do not need the exact order but just the beta closest weights
+        # therefore np.argpartition is used instead of np.argsort
+        indices = np.argpartition(diff_np, kth=beta_closest - 1, axis=0)
+        # Take the weights (coordinate-wise) corresponding to the beta of the
+        # closest distances
+        beta_closest_weights = np.take_along_axis(
+            other_weights_layer_np, indices=indices, axis=0
+        )[:beta_closest]
+        aggregated_weights.append(np.mean(beta_closest_weights, axis=0))
+    return aggregated_weights

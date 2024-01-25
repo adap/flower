@@ -1,4 +1,4 @@
-# Copyright 2022 Adap GmbH. All Rights Reserved.
+# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,20 +19,21 @@ import sys
 import threading
 import time
 from logging import INFO
-from typing import Dict, Optional
+from pathlib import Path
+from typing import Dict, Optional, Union
 
 from flwr.common import EventType, event
 from flwr.common.address import parse_address
 from flwr.common.logger import log
-from flwr.proto import driver_pb2
+from flwr.proto import driver_pb2  # pylint: disable=E0611
 from flwr.server.app import ServerConfig, init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.server import Server
 from flwr.server.strategy import Strategy
 
-from .driver import Driver
 from .driver_client_proxy import DriverClientProxy
+from .grpc_driver import GrpcDriver
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
 
@@ -51,7 +52,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     config: Optional[ServerConfig] = None,
     strategy: Optional[Strategy] = None,
     client_manager: Optional[ClientManager] = None,
-    certificates: Optional[bytes] = None,
+    root_certificates: Optional[Union[bytes, str]] = None,
 ) -> History:
     """Start a Flower Driver API server.
 
@@ -76,14 +77,10 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         `flwr.driver.driver_client_manager.DriverClientManager`. If no
         implementation is provided, then `start_driver` will use
         `flwr.driver.driver_client_manager.DriverClientManager`.
-    certificates : bytes (default: None)
-        Tuple containing root certificate, server certificate, and private key
-        to start a secure SSL-enabled server. The tuple is expected to have
-        three bytes elements in the following order:
-
-            * CA certificate.
-            * server certificate.
-            * server private key.
+    root_certificates : Optional[Union[bytes, str]] (default: None)
+        The PEM-encoded root certificates as a byte string or a path string.
+        If provided, a secure connection using the certificates will be
+        established to an SSL-enabled Flower server.
 
     Returns
     -------
@@ -99,7 +96,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     Starting a driver that connects to an SSL-enabled server:
 
     >>> start_driver(
-    >>>     certificates=Path("/crts/root.pem").read_bytes()
+    >>>     root_certificates=Path("/crts/root.pem").read_bytes()
     >>> )
     """
     event(EventType.START_DRIVER_ENTER)
@@ -112,7 +109,9 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
     # Create the Driver
-    driver = Driver(driver_service_address=address, certificates=certificates)
+    if isinstance(root_certificates, str):
+        root_certificates = Path(root_certificates).read_bytes()
+    driver = GrpcDriver(driver_service_address=address, certificates=root_certificates)
     driver.connect()
     lock = threading.Lock()
 
@@ -157,7 +156,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
 
 
 def update_client_manager(
-    driver: Driver,
+    driver: GrpcDriver,
     client_manager: ClientManager,
     lock: threading.Lock,
 ) -> None:
@@ -171,8 +170,10 @@ def update_client_manager(
     and dead nodes will be removed from the ClientManager via
     `client_manager.unregister()`.
     """
-    # Request for workload_id
-    workload_id = driver.create_workload(driver_pb2.CreateWorkloadRequest()).workload_id
+    # Request for run_id
+    run_id = driver.create_run(
+        driver_pb2.CreateRunRequest()  # pylint: disable=E1101
+    ).run_id
 
     # Loop until the driver is disconnected
     registered_nodes: Dict[int, DriverClientProxy] = {}
@@ -182,7 +183,7 @@ def update_client_manager(
             if driver.stub is None:
                 break
             get_nodes_res = driver.get_nodes(
-                req=driver_pb2.GetNodesRequest(workload_id=workload_id)
+                req=driver_pb2.GetNodesRequest(run_id=run_id)  # pylint: disable=E1101
             )
         all_node_ids = {node.node_id for node in get_nodes_res.nodes}
         dead_nodes = set(registered_nodes).difference(all_node_ids)
@@ -200,7 +201,7 @@ def update_client_manager(
                 node_id=node_id,
                 driver=driver,
                 anonymous=False,
-                workload_id=workload_id,
+                run_id=run_id,
             )
             if client_manager.register(client_proxy):
                 registered_nodes[node_id] = client_proxy

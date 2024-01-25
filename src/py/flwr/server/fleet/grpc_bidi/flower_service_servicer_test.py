@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,10 @@
 import unittest
 from unittest.mock import MagicMock, call
 
-from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+    ClientMessage,
+    ServerMessage,
+)
 from flwr.server.fleet.grpc_bidi.flower_service_servicer import (
     FlowerServiceServicer,
     register_client_proxy,

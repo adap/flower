@@ -1,4 +1,4 @@
-# Copyright 2022 Adap GmbH. All Rights Reserved.
+# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import abc
 from typing import List, Optional, Set
 from uuid import UUID
 
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 
 class State(abc.ABC):
@@ -43,7 +43,7 @@ class State(abc.ABC):
         If `task_ins.task.consumer.anonymous` is `False`, then
         `task_ins.task.consumer.node_id` MUST be set (not 0)
 
-        If `task_ins.workload_id` is invalid, then
+        If `task_ins.run_id` is invalid, then
         storing the `task_ins` MUST fail.
         """
 
@@ -92,7 +92,7 @@ class State(abc.ABC):
         If `task_res.task.consumer.anonymous` is `False`, then
         `task_res.task.consumer.node_id` MUST be set (not 0)
 
-        If `task_res.workload_id` is invalid, then
+        If `task_res.run_id` is invalid, then
         storing the `task_res` MUST fail.
         """
 
@@ -132,23 +132,23 @@ class State(abc.ABC):
         """Delete all delivered TaskIns/TaskRes pairs."""
 
     @abc.abstractmethod
-    def register_node(self, node_id: int) -> None:
-        """Store `node_id` in state."""
+    def create_node(self) -> int:
+        """Create, store in state, and return `node_id`."""
 
     @abc.abstractmethod
-    def unregister_node(self, node_id: int) -> None:
+    def delete_node(self, node_id: int) -> None:
         """Remove `node_id` from state."""
 
     @abc.abstractmethod
-    def get_nodes(self, workload_id: str) -> Set[int]:
+    def get_nodes(self, run_id: int) -> Set[int]:
         """Retrieve all currently stored node IDs as a set.
 
         Constraints
         -----------
-        If the provided `workload_id` does not exist or has no matching nodes,
+        If the provided `run_id` does not exist or has no matching nodes,
         an empty `Set` MUST be returned.
         """
 
     @abc.abstractmethod
-    def create_workload(self) -> str:
-        """Create one workload."""
+    def create_run(self) -> int:
+        """Create one run."""

@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ class Strategy(ABC):
 
         Returns
         -------
-        parameters : Optional[Parameters]
+        parameters : Tuple[Optional[Parameters], Dict[str, Scalar]]
             If parameters are returned, then the server will treat these as the
             new global model parameters (i.e., it will replace the previous
             parameters with the ones returned from this method). If `None` is
@@ -156,7 +156,7 @@ class Strategy(ABC):
 
         Returns
         -------
-        aggregation_result : Optional[float]
+        aggregation_result : Tuple[Optional[float], Dict[str, Scalar]]
             The aggregated evaluation result. Aggregation typically uses some variant
             of a weighted average.
         """

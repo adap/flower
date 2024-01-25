@@ -15,7 +15,8 @@ jobs:
         run:
             working-directory: src/kotlin
     name: Release build and publish
-    runs-on: ubuntu-latest
+    if: github.repository == 'adap/flower'
+    runs-on: ubuntu-22.04
     steps:
       - name: Check out code
         uses: actions/checkout@v4
