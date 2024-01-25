@@ -36,10 +36,9 @@ from flwr.common.constant import (
 )
 from flwr.common.context import Context
 from flwr.common.logger import log, warn_experimental_feature
-from flwr.common.message import Message, Metadata
 from flwr.common.recordset import RecordSet
-from flwr.common.serde import recordset_to_proto
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.common.serde import message_from_taskins, message_to_taskres
+from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 from .flower import load_flower_callable
 from .grpc_client.connection import grpc_connection
@@ -362,14 +361,8 @@ def _start_client_internal(
                 # TODO: get runstate from nodestate and construct context for this run
                 context = Context(state=RecordSet())
 
-                # TODO: get Message from TaskIns
-
-                message = Message(
-                    metadata=Metadata(
-                        run_id=0, task_id="", group_id="", ttl="", task_type="mock"
-                    ),
-                    message=RecordSet(),
-                )
+                # Get Message from TaskIns
+                message = message_from_taskins(task_ins)
 
                 # Load app
                 app: Flower = load_flower_callable_fn()
@@ -383,13 +376,8 @@ def _start_client_internal(
                 #     run_state=bwd_msg.state,
                 # )
 
-                # TODO: Construct TaskRes from context.out_message
-                task_res = TaskRes(
-                    task_id=message.metadata.task_id,
-                    group_id=message.metadata.group_id,
-                    run_id=message.metadata.run_id,
-                    task=Task(recordset=recordset_to_proto(out_message.message)),
-                )
+                # Construct TaskRes from out_message
+                task_res = message_to_taskres(out_message)
 
                 # Send
                 send(task_res)

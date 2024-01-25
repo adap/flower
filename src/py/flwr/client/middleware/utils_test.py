@@ -122,12 +122,11 @@ class TestMakeApp(unittest.TestCase):
 
         def filter_layer(
             message: Message,
-            context: Context,
-            _: FlowerCallable,
+            _1: Context,
+            _2: FlowerCallable,
         ) -> Message:
             footprint.append("filter")
             message.message.set_configs(name="filter", record=ConfigsRecord())
-            context = context  # we need to do something with it else mypy issue
             out_message = Message(metadata=message.metadata, message=RecordSet())
             out_message.message.set_configs(name="filter", record=ConfigsRecord())
             # Skip calling app
