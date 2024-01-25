@@ -68,13 +68,15 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         self.strategy = strategy
 
         if noise_multiplier < 0:
-            raise Exception("The noise multiplier should be a non-negative value.")
+            raise ValueError("The noise multiplier should be a non-negative value.")
 
         if clipping_norm <= 0:
-            raise Exception("The clipping threshold should be a positive value.")
+            raise ValueError("The clipping threshold should be a positive value.")
 
         if num_sampled_clients <= 0:
-            raise Exception("The number of sampled clients should be a positive value.")
+            raise ValueError(
+                "The number of sampled clients should be a positive value."
+            )
 
         self.noise_multiplier = noise_multiplier
         self.clipping_norm = clipping_norm
