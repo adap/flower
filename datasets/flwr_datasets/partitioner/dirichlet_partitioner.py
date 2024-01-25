@@ -270,6 +270,7 @@ class DirichletPartitioner(Partitioner):  # pylint: disable=R0902
                           f"distribution will be repeated. Note: It is not a desired "
                           f"behavior. It is recommended to adjust the alpha or "
                           f"min_partition_size instead.")
+            sampling_try += 1
 
         # Shuffle the indices not to have the datasets with targets in sequences like
         # [00000, 11111, ...]) if the shuffle is True
