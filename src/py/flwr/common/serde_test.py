@@ -311,8 +311,8 @@ class RecordMaker:
 def test_array_serialization_deserialization() -> None:
     """Test serialization and deserialization of Array."""
     # Prepare
-    rng = RecordMaker()
-    original = rng.array()
+    maker = RecordMaker()
+    original = maker.array()
 
     # Execute
     proto = array_to_proto(original)
@@ -411,7 +411,7 @@ def test_message_to_and_from_task_ins() -> None:
     assert metadata == deserialized.metadata
 
 
-def test_flowercontext_to_and_from_task_res() -> None:
+def test_message_to_and_from_task_res() -> None:
     """Test Message to and from TaskRes."""
     # Prepare
     maker = RecordMaker(state=2)
