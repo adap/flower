@@ -15,11 +15,16 @@
 """RecordSet from legacy messages tests."""
 
 from copy import deepcopy
-from typing import Dict
+from functools import partial
+from typing import Callable, Dict, Union
 
 import numpy as np
+import pytest
+
+from flwr.proto.task_pb2 import Task, TaskIns
 
 from .parameter import ndarrays_to_parameters
+from .recordset import RecordSet
 from .recordset_compat import (
     evaluateins_to_recordset,
     evaluateres_to_recordset,
@@ -38,6 +43,7 @@ from .recordset_compat import (
     recordset_to_getpropertiesins,
     recordset_to_getpropertiesres,
 )
+from .serde import message_from_taskins, recordset_to_proto
 from .typing import (
     Code,
     EvaluateIns,
@@ -232,3 +238,71 @@ def test_get_parameters_res_to_recordset_and_back() -> None:
     getparameteres_res_ = recordset_to_getparametersres(recordset)
 
     assert getparameters_res_copy == getparameteres_res_
+
+
+@pytest.mark.parametrize(
+    "ins, ins_to_recordset, task_type",
+    [
+        (
+            _get_valid_fitins(),
+            partial(fitins_to_recordset, keep_input=False),
+            "fit_ins",
+        ),
+        (
+            _get_valid_evaluateins(),
+            partial(evaluateins_to_recordset, keep_input=False),
+            "evaluate_ins",
+        ),
+        (
+            _get_valid_getpropertiesins(),
+            getpropertiesins_to_recordset,
+            "get_properties_ins",
+        ),
+        (
+            _get_valid_getparametersins(),
+            getparametersins_to_recordset,
+            "get_parameters_ins",
+        ),
+    ],
+)
+def test_flowercontext_driver_to_client(
+    ins: Union[FitIns, EvaluateIns, GetPropertiesIns, GetParametersIns],
+    ins_to_recordset: Callable[
+        [Union[FitIns, EvaluateIns, GetPropertiesIns, GetParametersIns]],
+        RecordSet,
+    ],
+    task_type: str,
+) -> None:
+    """."""
+    # Generate *Ins and convert to RecordSet
+    ins_original = deepcopy(ins)
+    recordset = ins_to_recordset(ins)
+
+    # TaskIns from legacy ins
+    run_id = 1234
+
+    task_ins = TaskIns(
+        task_id="00001",
+        group_id="8888",
+        run_id=run_id,
+        task=Task(
+            recordset=recordset_to_proto(recordset=recordset), task_type=task_type
+        ),
+    )
+
+    # FlowerContext from TaskIns
+    message = message_from_taskins(taskins=task_ins)
+
+    # Legacy *Ins from FlowerContext
+    if message.metadata.task_type == "fit_ins":
+        legacy_ins = recordset_to_fitins(message.message, keep_input=False)
+    elif message.metadata.task_type == "evaluate_ins":
+        legacy_ins = recordset_to_evaluateins(message.message, keep_input=False)
+    elif message.metadata.task_type == "get_properties_ins":
+        legacy_ins = recordset_to_getpropertiesins(message.message)
+    elif message.metadata.task_type == "get_parameters_ins":
+        legacy_ins = recordset_to_getparametersins(message.message)
+    else:
+        raise ValueError()
+
+    assert ins_original == legacy_ins
