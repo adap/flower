@@ -21,7 +21,7 @@ import numpy as np
 import datasets
 from flwr_datasets.common.typing import NDArrayFloat
 from flwr_datasets.partitioner.partitioner import Partitioner
-
+import warnings
 
 class DirichletPartitioner(Partitioner):  # pylint: disable=R0902
     """Partitioner based on Dirichlet distribution.
@@ -198,6 +198,7 @@ class DirichletPartitioner(Partitioner):  # pylint: disable=R0902
 
         # Repeat the sampling procedure based on the Dirichlet distribution until the
         # min_partition_size is reached.
+        sampling_try = 0
         while True:
             # Prepare data structure to store indices assigned to node ids
             node_id_to_indices: Dict[int, List[int]] = {}
@@ -262,6 +263,13 @@ class DirichletPartitioner(Partitioner):  # pylint: disable=R0902
             )
             if min_sample_size_on_client >= self._min_partition_size:
                 break
+            warnings.warn(f"The specified min_partition_size of the create the "
+                          f"partitions was not satisfied as the direct result of the "
+                          f"{sampling_try} st/nd/rd/th sampling from the Dirichlet "
+                          f"distribution. The probability sampling from the Dirichlet "
+                          f"distribution will be repeated. Note: It is not a desired "
+                          f"behavior. It is recommended to adjust the alpha or "
+                          f"min_partition_size instead.")
 
         # Shuffle the indices not to have the datasets with targets in sequences like
         # [00000, 11111, ...]) if the shuffle is True
