@@ -14,6 +14,10 @@
 # ==============================================================================
 """DP utility functions tests."""
 
+import numpy as np
+
+from .differential_privacy import add_gaussian_noise, clip_inputs, get_norm
+
 
 def test_add_gaussian_noise() -> None:
     """Test add_gaussian_noise function."""
@@ -39,7 +43,7 @@ def test_add_gaussian_noise() -> None:
         assert np.any(np.abs(noise_added) > 0)
 
 
-def test_get_update_norm() -> None:
+def test_get_norm() -> None:
     """Test get_norm function."""
     # Prepare
     update = [np.array([[1, 2], [3, 4]]), np.array([[5, 6], [7, 8]])]
@@ -55,7 +59,7 @@ def test_get_update_norm() -> None:
     assert expected == result
 
 
-def test_clip_model_updates() -> None:
+def test_clip_inputs() -> None:
     """Test clip_inputs function."""
     # Prepare
     updates = [

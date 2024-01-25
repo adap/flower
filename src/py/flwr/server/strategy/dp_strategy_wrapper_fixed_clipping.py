@@ -32,7 +32,7 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
-from flwr.common.differential_privacy import add_gaussian_noise, clip_inputs, get_norm
+from flwr.common.differential_privacy import add_gaussian_noise, clip_inputs
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.strategy import Strategy
