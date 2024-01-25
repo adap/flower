@@ -20,7 +20,8 @@ from typing import List
 
 from flwr.client.typing import FlowerCallable, Layer
 from flwr.common.configsrecord import ConfigsRecord
-from flwr.common.flowercontext import FlowerContext, Metadata
+from flwr.common.context import Context
+from flwr.common.message import Message, Metadata
 from flwr.common.recordset import RecordSet
 
 from .utils import make_ffn
@@ -29,15 +30,17 @@ from .utils import make_ffn
 def make_mock_middleware(name: str, footprint: List[str]) -> Layer:
     """Make a mock middleware layer."""
 
-    def middleware(context: FlowerContext, app: FlowerCallable) -> FlowerContext:
+    def middleware(message: Message, app: FlowerCallable, context: Context) -> Message:
         footprint.append(name)
         # add empty ConfigRegcord to in_message for this middleware layer
-        context.in_message.set_configs(name=name, record=ConfigsRecord())
-        ctx: FlowerContext = app(context)
+        message.message.set_configs(name=name, record=ConfigsRecord())
+        context.state.metrics['context']['counter'] += 1
+        out_message: Message = app(message, context)
         footprint.append(name)
+        context.state.metrics['context']['counter'] += 1
         # add empty ConfigRegcord to out_message for this middleware layer
-        ctx.out_message.set_configs(name=name, record=ConfigsRecord())
-        return ctx
+        out_message.message.set_configs(name=name, record=ConfigsRecord())
+        return out_message
 
     return middleware
 
@@ -45,20 +48,20 @@ def make_mock_middleware(name: str, footprint: List[str]) -> Layer:
 def make_mock_app(name: str, footprint: List[str]) -> FlowerCallable:
     """Make a mock app."""
 
-    def app(context: FlowerContext) -> FlowerContext:
+    def app(message: Message, context: Context) -> Message:
         footprint.append(name)
-        context.in_message.set_configs(name=name, record=ConfigsRecord())
-        context.out_message.set_configs(name=name, record=ConfigsRecord())
-        return context
+        message.message.set_configs(name=name, record=ConfigsRecord())
+        out_message = Message(metadata=message.metadata, message=RecordSet())
+        out_message.message.set_configs(name=name, record=ConfigsRecord())
+        print(context)
+        return out_message
 
     return app
 
 
-def _get_dummy_flower_context() -> FlowerContext:
-    return FlowerContext(
-        in_message=RecordSet(),
-        out_message=RecordSet(),
-        local=RecordSet(),
+def _get_dummy_flower_message() -> Message:
+    return Message(
+        message=RecordSet(),
         metadata=Metadata(run_id=0, task_id="", group_id="", ttl="", task_type="mock"),
     )
 
@@ -76,41 +79,49 @@ class TestMakeApp(unittest.TestCase):
             make_mock_middleware(name, footprint) for name in mock_middleware_names
         ]
 
-        context = _get_dummy_flower_context()
+        state = RecordSet()
+        state.set_metrics('context', {'counter': 0.0})
+        context = Context(state=state)
+        message = _get_dummy_flower_message()
 
         # Execute
         wrapped_app = make_ffn(mock_app, mock_middleware_layers)
-        context_ = wrapped_app(context)
+        out_message = wrapped_app(message, context)
 
         # Assert
         trace = mock_middleware_names + ["app"]
         self.assertEqual(footprint, trace + list(reversed(mock_middleware_names)))
         # pylint: disable-next=no-member
-        self.assertEqual("".join(context_.in_message.configs.keys()), "".join(trace))
+        self.assertEqual("".join(message.message.configs.keys()), "".join(trace))
         self.assertEqual(
-            "".join(context_.out_message.configs.keys()), "".join(reversed(trace))
+            "".join(out_message.message.configs.keys()), "".join(reversed(trace))
         )
+        self.assertEqual(state.get_metrics('context')['counter'], 2*len(mock_middleware_layers))
 
     def test_filter(self) -> None:
         """Test if a middleware can filter incoming TaskIns."""
         # Prepare
         footprint: List[str] = []
         mock_app = make_mock_app("app", footprint)
-        context = _get_dummy_flower_context()
+        context = Context(state=RecordSet())
+        message = _get_dummy_flower_message()
 
-        def filter_layer(context: FlowerContext, _: FlowerCallable) -> FlowerContext:
+        def filter_layer(
+            message: Message, _: FlowerCallable, context: Context
+        ) -> Message:
             footprint.append("filter")
-            context.in_message.set_configs(name="filter", record=ConfigsRecord())
-            context.out_message.set_configs(name="filter", record=ConfigsRecord())
+            message.message.set_configs(name="filter", record=ConfigsRecord())
+            out_message = Message(metadata=message.metadata, message=RecordSet())
+            out_message.message.set_configs(name="filter", record=ConfigsRecord())
             # Skip calling app
-            return context
+            return out_message
 
         # Execute
         wrapped_app = make_ffn(mock_app, [filter_layer])
-        context_ = wrapped_app(context)
+        out_message = wrapped_app(message, context)
 
         # Assert
         self.assertEqual(footprint, ["filter"])
         # pylint: disable-next=no-member
-        self.assertEqual(list(context_.in_message.configs.keys())[0], "filter")
-        self.assertEqual(list(context_.out_message.configs.keys())[0], "filter")
+        self.assertEqual(list(message.message.configs.keys())[0], "filter")
+        self.assertEqual(list(out_message.message.configs.keys())[0], "filter")

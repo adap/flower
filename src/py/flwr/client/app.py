@@ -34,8 +34,9 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
 )
-from flwr.common.flowercontext import FlowerContext, Metadata
+from flwr.common.context import Context
 from flwr.common.logger import log, warn_experimental_feature
+from flwr.common.message import Message, Metadata
 from flwr.common.recordset import RecordSet
 from flwr.common.serde import recordset_to_proto
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
@@ -326,15 +327,7 @@ def _start_client_internal(
     connection, address = _init_connection(transport, server_address)
 
     node_state = NodeState()
-    # TODO: remove NodeState/RunState logic ?
-
-    # TODO: initialize context here?
-    context = FlowerContext(
-        in_message=RecordSet(),
-        out_message=RecordSet(),
-        local=RecordSet(),
-        metadata=Metadata(run_id=-1, task_id="", group_id="", ttl="", task_type=""),
-    )
+    # TODO: make NodeState work with RecordSet
 
     while True:
         sleep_duration: int = 0
@@ -366,13 +359,23 @@ def _start_client_internal(
                 # Register state
                 node_state.register_runstate(run_id=task_ins.run_id)
 
-                # TODO: pulate context.metadata and context.in_message from TaskIns
+                # TODO: get runstate from nodestate and construct context for this run
+                context = Context(state=RecordSet())
+
+                # TODO: get Message from TaskIns
+
+                message = Message(
+                    metadata=Metadata(
+                        run_id=0, task_id="", group_id="", ttl="", task_type="mock"
+                    ),
+                    message=RecordSet(),
+                )
 
                 # Load app
                 app: Flower = load_flower_callable_fn()
 
                 # Handle task message
-                context_ = app(context=context)
+                out_message = app(message=message, context=context)
 
                 # Update node state
                 # node_state.update_runstate(
@@ -382,10 +385,10 @@ def _start_client_internal(
 
                 # TODO: Construct TaskRes from context.out_message
                 task_res = TaskRes(
-                    task_id=context_.metadata.task_id,
-                    group_id=context_.metadata.group_id,
-                    run_id=context_.metadata.run_id,
-                    task=Task(recordset=recordset_to_proto(context_.out_message)),
+                    task_id=message.metadata.task_id,
+                    group_id=message.metadata.group_id,
+                    run_id=message.metadata.run_id,
+                    task=Task(recordset=recordset_to_proto(out_message.message)),
                 )
 
                 # Send

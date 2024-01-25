@@ -18,15 +18,16 @@
 from typing import List
 
 from flwr.client.typing import FlowerCallable, Layer
-from flwr.common.flowercontext import FlowerContext
+from flwr.common.context import Context
+from flwr.common.message import Message
 
 
 def make_ffn(ffn: FlowerCallable, layers: List[Layer]) -> FlowerCallable:
     """."""
 
     def wrap_ffn(_ffn: FlowerCallable, _layer: Layer) -> FlowerCallable:
-        def new_ffn(context: FlowerContext) -> FlowerContext:
-            return _layer(context, _ffn)
+        def new_ffn(message: Message, context: Context) -> Message:
+            return _layer(message, _ffn, context)
 
         return new_ffn
 
