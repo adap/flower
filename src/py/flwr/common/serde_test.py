@@ -15,7 +15,9 @@
 """(De-)serialization tests."""
 
 
-from typing import Dict, OrderedDict, Union, cast
+import random
+import string
+from typing import Any, Dict, Optional, OrderedDict, Type, TypeVar, Union, cast
 
 # pylint: disable=E0611
 from flwr.proto import transport_pb2 as pb2
@@ -28,6 +30,7 @@ from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
 # pylint: enable=E0611
 from . import typing
 from .configsrecord import ConfigsRecord
+from .message import Message, Metadata
 from .metricsrecord import MetricsRecord
 from .parametersrecord import Array, ParametersRecord
 from .recordset import RecordSet
@@ -36,6 +39,10 @@ from .serde import (
     array_to_proto,
     configs_record_from_proto,
     configs_record_to_proto,
+    message_from_task_ins,
+    message_from_task_res,
+    message_to_task_ins,
+    message_to_task_res,
     metrics_record_from_proto,
     metrics_record_to_proto,
     named_values_from_proto,
@@ -180,10 +187,132 @@ def test_named_values_serialization_deserialization() -> None:
             assert expected == actual
 
 
+T = TypeVar("T")
+
+
+class RandomMaker:
+    """A test random maker."""
+
+    def __init__(self, seed: int = 42) -> None:
+        self.rng = random.Random(seed)
+
+    def randbytes(self, n: int) -> bytes:
+        """Create a random bytes."""
+        return self.rng.getrandbits(n * 8).to_bytes(n, "little")
+
+    def get_str(self, length: Optional[int] = None) -> str:
+        """Create a random string."""
+        char_pool = (
+            string.ascii_letters + string.digits + " !@#$%^&*()_-+=[]|;':,./<>?{}"
+        )
+        if length is None:
+            length = self.rng.randint(1, 10)
+        return "".join(self.rng.choices(char_pool, k=length))
+
+    def get_random(self, dtype: Type[T]) -> T:
+        """Create a random value of a given type."""
+        ret: Any = None
+        if dtype == bool:
+            ret = self.rng.random() < 0.5
+        elif dtype == str:
+            ret = self.get_str(self.rng.randint(10, 100))
+        elif dtype == int:
+            ret = self.rng.randint(-1 << 30, 1 << 30)
+        elif dtype == float:
+            ret = (self.rng.random() - 0.5) * (2.0 ** self.rng.randint(0, 50))
+        elif dtype == bytes:
+            ret = self.randbytes(self.rng.randint(10, 100))
+        else:
+            raise NotImplementedError(f"Unsupported dtype: {dtype}")
+        return cast(T, ret)
+
+    def array(self) -> Array:
+        """Create a random Array."""
+        dtypes = ("float", "int")
+        stypes = ("torch", "tf", "numpy")
+        max_shape_size = 100
+        max_shape_dim = 10
+        min_max_bytes_size = (10, 1000)
+
+        dtype = self.rng.choice(dtypes)
+        shape = [
+            self.rng.randint(1, max_shape_size)
+            for _ in range(self.rng.randint(1, max_shape_dim))
+        ]
+        stype = self.rng.choice(stypes)
+        data = self.randbytes(self.rng.randint(*min_max_bytes_size))
+        return Array(dtype=dtype, shape=shape, stype=stype, data=data)
+
+    def parameters_record(self) -> ParametersRecord:
+        """Create a random ParametersRecord."""
+        num_arrays = self.rng.randint(1, 5)
+        arrays = OrderedDict(
+            [(self.get_str(), self.array()) for i in range(num_arrays)]
+        )
+        return ParametersRecord(arrays, keep_input=False)
+
+    def metrics_record(self) -> MetricsRecord:
+        """Create a random MetricsRecord."""
+        num_entries = self.rng.randint(1, 5)
+        types = (float, int)
+        return MetricsRecord(
+            metrics_dict={
+                self.get_str(): self.get_random(self.rng.choice(types))
+                for _ in range(num_entries)
+            },
+            keep_input=False,
+        )
+
+    def configs_record(self) -> ConfigsRecord:
+        """Create a random ConfigsRecord."""
+        num_entries = self.rng.randint(1, 5)
+        types = (str, int, float, bytes, bool)
+        return ConfigsRecord(
+            configs_dict={
+                self.get_str(): self.get_random(self.rng.choice(types))
+                for _ in range(num_entries)
+            },
+            keep_input=False,
+        )
+
+    def recordset(
+        self,
+        num_params_records: int,
+        num_metrics_records: int,
+        num_configs_records: int,
+    ) -> RecordSet:
+        """Create a random RecordSet."""
+        return RecordSet(
+            parameters={
+                self.get_str(): self.parameters_record()
+                for _ in range(num_params_records)
+            },
+            metrics={
+                self.get_str(): self.metrics_record()
+                for _ in range(num_metrics_records)
+            },
+            configs={
+                self.get_str(): self.configs_record()
+                for _ in range(num_configs_records)
+            },
+        )
+
+    def metadata(self) -> Metadata:
+        """Create a random Metadata."""
+        return Metadata(
+            run_id=self.rng.randint(0, 1 << 30),
+            task_id="",
+            group_id=self.get_str(30),
+            ttl=self.get_str(10),
+            task_type=self.get_str(10),
+        )
+
+
 def test_array_serialization_deserialization() -> None:
     """Test serialization and deserialization of Array."""
     # Prepare
-    original = Array(dtype="float", shape=[2, 2], stype="dense", data=b"1234")
+    rng = RandomMaker()
+    original = rng.array()
 
     # Execute
     proto = array_to_proto(original)
@@ -197,15 +326,8 @@ def test_array_serialization_deserialization() -> None:
 def test_parameters_record_serialization_deserialization() -> None:
     """Test serialization and deserialization of ParametersRecord."""
     # Prepare
-    original = ParametersRecord(
-        array_dict=OrderedDict(
-            [
-                ("k1", Array(dtype="float", shape=[2, 2], stype="dense", data=b"1234")),
-                ("k2", Array(dtype="int", shape=[3], stype="sparse", data=b"567")),
-            ]
-        ),
-        keep_input=False,
-    )
+    rng = RandomMaker()
+    original = rng.parameters_record()
 
     # Execute
     proto = parameters_record_to_proto(original)
@@ -219,9 +341,8 @@ def test_parameters_record_serialization_deserialization() -> None:
 def test_metrics_record_serialization_deserialization() -> None:
     """Test serialization and deserialization of MetricsRecord."""
     # Prepare
-    original = MetricsRecord(
-        metrics_dict={"accuracy": 0.95, "loss": 0.1}, keep_input=False
-    )
+    rng = RandomMaker()
+    original = rng.metrics_record()
 
     # Execute
     proto = metrics_record_to_proto(original)
@@ -235,9 +356,8 @@ def test_metrics_record_serialization_deserialization() -> None:
 def test_configs_record_serialization_deserialization() -> None:
     """Test serialization and deserialization of ConfigsRecord."""
     # Prepare
-    original = ConfigsRecord(
-        configs_dict={"learning_rate": 0.01, "batch_size": 32}, keep_input=False
-    )
+    rng = RandomMaker()
+    original = rng.configs_record()
 
     # Execute
     proto = configs_record_to_proto(original)
@@ -251,54 +371,8 @@ def test_configs_record_serialization_deserialization() -> None:
 def test_recordset_serialization_deserialization() -> None:
     """Test serialization and deserialization of RecordSet."""
     # Prepare
-    encoder_params_record = ParametersRecord(
-        array_dict=OrderedDict(
-            [
-                (
-                    "k1",
-                    Array(dtype="float", shape=[2, 2], stype="dense", data=b"1234"),
-                ),
-                ("k2", Array(dtype="int", shape=[3], stype="sparse", data=b"567")),
-            ]
-        ),
-        keep_input=False,
-    )
-    decoder_params_record = ParametersRecord(
-        array_dict=OrderedDict(
-            [
-                (
-                    "k1",
-                    Array(
-                        dtype="float", shape=[32, 32, 4], stype="dense", data=b"0987"
-                    ),
-                ),
-            ]
-        ),
-        keep_input=False,
-    )
-
-    original = RecordSet(
-        parameters={
-            "encoder_parameters": encoder_params_record,
-            "decoder_parameters": decoder_params_record,
-        },
-        metrics={
-            "acc_metrics": MetricsRecord(
-                metrics_dict={"accuracy": 0.95, "loss": 0.1}, keep_input=False
-            )
-        },
-        configs={
-            "my_configs": ConfigsRecord(
-                configs_dict={
-                    "learning_rate": 0.01,
-                    "batch_size": 32,
-                    "public_key": b"21f8sioj@!#",
-                    "log": "Hello, world!",
-                },
-                keep_input=False,
-            )
-        },
-    )
+    rng = RandomMaker()
+    original = rng.recordset(2, 2, 1)
 
     # Execute
     proto = recordset_to_proto(original)
@@ -306,4 +380,38 @@ def test_recordset_serialization_deserialization() -> None:
 
     # Assert
     assert isinstance(proto, ProtoRecordSet)
+    assert original == deserialized
+
+
+def test_message_to_and_from_task_ins() -> None:
+    """Test Message to and from TaskIns."""
+    # Prepare
+    rng = RandomMaker()
+    original = Message(
+        metadata=rng.metadata(),
+        message=rng.recordset(1, 1, 1),
+    )
+
+    # Execute
+    task_ins = message_to_task_ins(original)
+    deserialized = message_from_task_ins(task_ins)
+
+    # Assert
+    assert original == deserialized
+
+
+def test_flowercontext_to_and_from_task_res() -> None:
+    """Test Message to and from TaskRes."""
+    # Prepare
+    rng = RandomMaker()
+    original = Message(
+        metadata=rng.metadata(),
+        message=rng.recordset(1, 1, 1),
+    )
+
+    # Execute
+    task_res = message_to_task_res(original)
+    deserialized = message_from_task_res(task_res)
+
+    # Assert
     assert original == deserialized
