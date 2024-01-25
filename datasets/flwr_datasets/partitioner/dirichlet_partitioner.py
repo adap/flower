@@ -47,7 +47,7 @@ class DirichletPartitioner(Partitioner):  # pylint: disable=R0902
         The total number of partitions that the data will be divided into.
     partition_by : str
         Column name of the labels (targets) based on which Dirichlet sampling works.
-    alpha : Union[float, List[float], NDArrayFloat]
+    alpha : Union[int, float, List[float], NDArrayFloat]
         Concentration parameter to the Dirichlet distribution
     min_partition_size : int
         The minimum number of samples that each partitions will have (the sampling
@@ -84,7 +84,7 @@ class DirichletPartitioner(Partitioner):  # pylint: disable=R0902
         self,
         num_partitions: int,
         partition_by: str,
-        alpha: Union[float, List[float], NDArrayFloat],
+        alpha: Union[int, float, List[float], NDArrayFloat],
         min_partition_size: int = 10,
         self_balancing: bool = True,
         shuffle: bool = True,
@@ -131,7 +131,7 @@ class DirichletPartitioner(Partitioner):  # pylint: disable=R0902
         return self.dataset.select(self._node_id_to_indices[node_id])
 
     def _initialize_alpha(
-        self, alpha: Union[float, List[float], NDArrayFloat]
+        self, alpha: Union[int, float, List[float], NDArrayFloat]
     ) -> NDArrayFloat:
         """Convert alpha to the used format in the code a NDArrayFloat.
 
@@ -141,7 +141,7 @@ class DirichletPartitioner(Partitioner):  # pylint: disable=R0902
 
         Parameters
         ----------
-            alpha : Union[float, List[float], NDArrayFloat]
+            alpha : Union[int, float, List[float], NDArrayFloat]
                 Concentration parameter to the Dirichlet distribution
 
         Returns
@@ -149,7 +149,9 @@ class DirichletPartitioner(Partitioner):  # pylint: disable=R0902
         alpha : NDArrayFloat
             Concentration parameter in a format ready to used in computation.
         """
-        if isinstance(alpha, float):
+        if isinstance(alpha, int):
+            alpha = np.array([float(alpha)], dtype=float).repeat(self._num_partitions)
+        elif isinstance(alpha, float):
             alpha = np.array([alpha], dtype=float).repeat(self._num_partitions)
         elif isinstance(alpha, List):
             if len(alpha) != self._num_partitions:
