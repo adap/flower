@@ -30,7 +30,7 @@ from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
 # pylint: enable=E0611
 from . import typing
 from .configsrecord import ConfigsRecord
-from .flowercontext import FlowerContext, Metadata
+from .message import Message, Metadata
 from .metricsrecord import MetricsRecord
 from .parametersrecord import Array, ParametersRecord
 from .recordset import RecordSet
@@ -39,10 +39,10 @@ from .serde import (
     array_to_proto,
     configs_record_from_proto,
     configs_record_to_proto,
-    flowercontext_from_task_ins,
-    flowercontext_from_task_res,
-    flowercontext_to_task_ins,
-    flowercontext_to_task_res,
+    message_from_task_ins,
+    message_from_task_res,
+    message_to_task_ins,
+    message_to_task_res,
     metrics_record_from_proto,
     metrics_record_to_proto,
     named_values_from_proto,
@@ -383,53 +383,35 @@ def test_recordset_serialization_deserialization() -> None:
     assert original == deserialized
 
 
-def test_flowercontext_to_and_from_task_ins() -> None:
-    """Test FlowerContext to and from TaskIns."""
+def test_message_to_and_from_task_ins() -> None:
+    """Test Message to and from TaskIns."""
     # Prepare
     rng = RandomMaker()
-    sender = FlowerContext(
-        in_message=RecordSet(),
-        out_message=rng.recordset(1, 1, 1),
-        local=RecordSet(),
+    original = Message(
         metadata=rng.metadata(),
-    )
-    receiver = FlowerContext(
-        in_message=RecordSet(),
-        out_message=RecordSet(),
-        local=RecordSet(),
-        metadata=Metadata(0, "", "", "", ""),
+        message=rng.recordset(1, 1, 1),
     )
 
     # Execute
-    task_ins = flowercontext_to_task_ins(sender)
-    deserialized = flowercontext_from_task_ins(receiver, task_ins)
+    task_ins = message_to_task_ins(original)
+    deserialized = message_from_task_ins(task_ins)
 
     # Assert
-    assert sender.out_message == deserialized.in_message
-    assert sender.metadata == deserialized.metadata
+    assert original == deserialized
 
 
 def test_flowercontext_to_and_from_task_res() -> None:
-    """Test FlowerContext to and from TaskRes."""
+    """Test Message to and from TaskRes."""
     # Prepare
     rng = RandomMaker()
-    sender = FlowerContext(
-        in_message=RecordSet(),
-        out_message=rng.recordset(1, 1, 1),
-        local=RecordSet(),
+    original = Message(
         metadata=rng.metadata(),
-    )
-    receiver = FlowerContext(
-        in_message=RecordSet(),
-        out_message=RecordSet(),
-        local=RecordSet(),
-        metadata=Metadata(0, "", "", "", ""),
+        message=rng.recordset(1, 1, 1),
     )
 
     # Execute
-    task_res = flowercontext_to_task_res(sender)
-    deserialized = flowercontext_from_task_res(receiver, task_res)
+    task_res = message_to_task_res(original)
+    deserialized = message_from_task_res(task_res)
 
     # Assert
-    assert sender.out_message == deserialized.in_message
-    assert sender.metadata == deserialized.metadata
+    assert original == deserialized
