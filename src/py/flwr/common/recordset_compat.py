@@ -40,7 +40,7 @@ from .typing import (
 
 
 def parametersrecord_to_parameters(
-    record: ParametersRecord, keep_input: bool = False
+    record: ParametersRecord, keep_input: bool = True
 ) -> Parameters:
     """Convert ParameterRecord to legacy Parameters.
 
@@ -76,7 +76,8 @@ def parametersrecord_to_parameters(
 
 
 def parameters_to_parametersrecord(
-    parameters: Parameters, keep_input: bool = True
+    parameters: Parameters,
+    keep_input: bool = True,
 ) -> ParametersRecord:
     """Convert legacy Parameters into a single ParametersRecord.
 
@@ -88,7 +89,7 @@ def parameters_to_parametersrecord(
     ----------
     parameters : Parameters
         Parameters object to be represented as a ParametersRecord.
-    keep_input : bool (default: False)
+    keep_input : bool (default=True)
         A boolean indicating whether parameters should be deleted from the input
         Parameters object (i.e. a list of serialized NumPy arrays) immediately after
         adding them to the record.
@@ -108,7 +109,7 @@ def parameters_to_parametersrecord(
             data=tensor, dtype="", stype=tensor_type, shape=[]
         )
 
-    p_record.set_parameters(ordered_dict)
+    p_record.set_parameters(ordered_dict, keep_input=keep_input)
     return p_record
 
 
