@@ -190,18 +190,18 @@ def test_named_values_serialization_deserialization() -> None:
 T = TypeVar("T")
 
 
-class RandomMaker:
-    """A test random maker."""
+class RecordMaker:
+    """A record maker based on a seeded random number generator."""
 
-    def __init__(self, seed: int = 42) -> None:
-        self.rng = random.Random(seed)
+    def __init__(self, state: int = 42) -> None:
+        self.rng = random.Random(state)
 
     def randbytes(self, n: int) -> bytes:
-        """Create a random bytes."""
+        """Create a bytes."""
         return self.rng.getrandbits(n * 8).to_bytes(n, "little")
 
     def get_str(self, length: Optional[int] = None) -> str:
-        """Create a random string."""
+        """Create a string."""
         char_pool = (
             string.ascii_letters + string.digits + " !@#$%^&*()_-+=[]|;':,./<>?{}"
         )
@@ -209,8 +209,8 @@ class RandomMaker:
             length = self.rng.randint(1, 10)
         return "".join(self.rng.choices(char_pool, k=length))
 
-    def get_random(self, dtype: Type[T]) -> T:
-        """Create a random value of a given type."""
+    def get_value(self, dtype: Type[T]) -> T:
+        """Create a value of a given type."""
         ret: Any = None
         if dtype == bool:
             ret = self.rng.random() < 0.5
@@ -227,7 +227,7 @@ class RandomMaker:
         return cast(T, ret)
 
     def array(self) -> Array:
-        """Create a random Array."""
+        """Create a Array."""
         dtypes = ("float", "int")
         stypes = ("torch", "tf", "numpy")
         max_shape_size = 100
@@ -244,7 +244,7 @@ class RandomMaker:
         return Array(dtype=dtype, shape=shape, stype=stype, data=data)
 
     def parameters_record(self) -> ParametersRecord:
-        """Create a random ParametersRecord."""
+        """Create a ParametersRecord."""
         num_arrays = self.rng.randint(1, 5)
         arrays = OrderedDict(
             [(self.get_str(), self.array()) for i in range(num_arrays)]
@@ -252,24 +252,24 @@ class RandomMaker:
         return ParametersRecord(arrays, keep_input=False)
 
     def metrics_record(self) -> MetricsRecord:
-        """Create a random MetricsRecord."""
+        """Create a MetricsRecord."""
         num_entries = self.rng.randint(1, 5)
         types = (float, int)
         return MetricsRecord(
             metrics_dict={
-                self.get_str(): self.get_random(self.rng.choice(types))
+                self.get_str(): self.get_value(self.rng.choice(types))
                 for _ in range(num_entries)
             },
             keep_input=False,
         )
 
     def configs_record(self) -> ConfigsRecord:
-        """Create a random ConfigsRecord."""
+        """Create a ConfigsRecord."""
         num_entries = self.rng.randint(1, 5)
         types = (str, int, float, bytes, bool)
         return ConfigsRecord(
             configs_dict={
-                self.get_str(): self.get_random(self.rng.choice(types))
+                self.get_str(): self.get_value(self.rng.choice(types))
                 for _ in range(num_entries)
             },
             keep_input=False,
@@ -281,7 +281,7 @@ class RandomMaker:
         num_metrics_records: int,
         num_configs_records: int,
     ) -> RecordSet:
-        """Create a random RecordSet."""
+        """Create a RecordSet."""
         return RecordSet(
             parameters={
                 self.get_str(): self.parameters_record()
@@ -298,10 +298,10 @@ class RandomMaker:
         )
 
     def metadata(self) -> Metadata:
-        """Create a random Metadata."""
+        """Create a Metadata."""
         return Metadata(
             run_id=self.rng.randint(0, 1 << 30),
-            task_id="",
+            task_id=self.get_str(64),
             group_id=self.get_str(30),
             ttl=self.get_str(10),
             task_type=self.get_str(10),
@@ -311,7 +311,7 @@ class RandomMaker:
 def test_array_serialization_deserialization() -> None:
     """Test serialization and deserialization of Array."""
     # Prepare
-    rng = RandomMaker()
+    rng = RecordMaker()
     original = rng.array()
 
     # Execute
@@ -326,8 +326,8 @@ def test_array_serialization_deserialization() -> None:
 def test_parameters_record_serialization_deserialization() -> None:
     """Test serialization and deserialization of ParametersRecord."""
     # Prepare
-    rng = RandomMaker()
-    original = rng.parameters_record()
+    maker = RecordMaker()
+    original = maker.parameters_record()
 
     # Execute
     proto = parameters_record_to_proto(original)
@@ -341,8 +341,8 @@ def test_parameters_record_serialization_deserialization() -> None:
 def test_metrics_record_serialization_deserialization() -> None:
     """Test serialization and deserialization of MetricsRecord."""
     # Prepare
-    rng = RandomMaker()
-    original = rng.metrics_record()
+    maker = RecordMaker()
+    original = maker.metrics_record()
 
     # Execute
     proto = metrics_record_to_proto(original)
@@ -356,8 +356,8 @@ def test_metrics_record_serialization_deserialization() -> None:
 def test_configs_record_serialization_deserialization() -> None:
     """Test serialization and deserialization of ConfigsRecord."""
     # Prepare
-    rng = RandomMaker()
-    original = rng.configs_record()
+    maker = RecordMaker()
+    original = maker.configs_record()
 
     # Execute
     proto = configs_record_to_proto(original)
@@ -371,8 +371,8 @@ def test_configs_record_serialization_deserialization() -> None:
 def test_recordset_serialization_deserialization() -> None:
     """Test serialization and deserialization of RecordSet."""
     # Prepare
-    rng = RandomMaker()
-    original = rng.recordset(2, 2, 1)
+    maker = RecordMaker(state=0)
+    original = maker.recordset(2, 2, 1)
 
     # Execute
     proto = recordset_to_proto(original)
@@ -386,32 +386,54 @@ def test_recordset_serialization_deserialization() -> None:
 def test_message_to_and_from_task_ins() -> None:
     """Test Message to and from TaskIns."""
     # Prepare
-    rng = RandomMaker()
+    maker = RecordMaker(state=1)
+    metadata = maker.metadata()
     original = Message(
-        metadata=rng.metadata(),
-        message=rng.recordset(1, 1, 1),
+        metadata=Metadata(
+            run_id=0,
+            task_id="",
+            group_id="",
+            ttl=metadata.ttl,
+            task_type=metadata.task_type,
+        ),
+        message=maker.recordset(1, 1, 1),
     )
 
     # Execute
     task_ins = message_to_task_ins(original)
+    task_ins.run_id = metadata.run_id
+    task_ins.task_id = metadata.task_id
+    task_ins.group_id = metadata.group_id
     deserialized = message_from_task_ins(task_ins)
 
     # Assert
-    assert original == deserialized
+    assert original.message == deserialized.message
+    assert metadata == deserialized.metadata
 
 
 def test_flowercontext_to_and_from_task_res() -> None:
     """Test Message to and from TaskRes."""
     # Prepare
-    rng = RandomMaker()
+    maker = RecordMaker(state=2)
+    metadata = maker.metadata()
     original = Message(
-        metadata=rng.metadata(),
-        message=rng.recordset(1, 1, 1),
+        metadata=Metadata(
+            run_id=0,
+            task_id="",
+            group_id="",
+            ttl=metadata.ttl,
+            task_type=metadata.task_type,
+        ),
+        message=maker.recordset(1, 1, 1),
     )
 
     # Execute
     task_res = message_to_task_res(original)
+    task_res.run_id = metadata.run_id
+    task_res.task_id = metadata.task_id
+    task_res.group_id = metadata.group_id
     deserialized = message_from_task_res(task_res)
 
     # Assert
-    assert original == deserialized
+    assert original.message == deserialized.message
+    assert metadata == deserialized.metadata
