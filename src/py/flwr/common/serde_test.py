@@ -39,10 +39,10 @@ from .serde import (
     array_to_proto,
     configs_record_from_proto,
     configs_record_to_proto,
-    message_from_task_ins,
-    message_from_task_res,
-    message_to_task_ins,
-    message_to_task_res,
+    message_from_taskins,
+    message_from_taskres,
+    message_to_taskins,
+    message_to_taskres,
     metrics_record_from_proto,
     metrics_record_to_proto,
     named_values_from_proto,
@@ -383,7 +383,7 @@ def test_recordset_serialization_deserialization() -> None:
     assert original == deserialized
 
 
-def test_message_to_and_from_task_ins() -> None:
+def test_message_to_and_from_taskins() -> None:
     """Test Message to and from TaskIns."""
     # Prepare
     maker = RecordMaker(state=1)
@@ -400,18 +400,18 @@ def test_message_to_and_from_task_ins() -> None:
     )
 
     # Execute
-    task_ins = message_to_task_ins(original)
-    task_ins.run_id = metadata.run_id
-    task_ins.task_id = metadata.task_id
-    task_ins.group_id = metadata.group_id
-    deserialized = message_from_task_ins(task_ins)
+    taskins = message_to_taskins(original)
+    taskins.run_id = metadata.run_id
+    taskins.task_id = metadata.task_id
+    taskins.group_id = metadata.group_id
+    deserialized = message_from_taskins(taskins)
 
     # Assert
     assert original.message == deserialized.message
     assert metadata == deserialized.metadata
 
 
-def test_message_to_and_from_task_res() -> None:
+def test_message_to_and_from_taskres() -> None:
     """Test Message to and from TaskRes."""
     # Prepare
     maker = RecordMaker(state=2)
@@ -428,11 +428,11 @@ def test_message_to_and_from_task_res() -> None:
     )
 
     # Execute
-    task_res = message_to_task_res(original)
-    task_res.run_id = metadata.run_id
-    task_res.task_id = metadata.task_id
-    task_res.group_id = metadata.group_id
-    deserialized = message_from_task_res(task_res)
+    taskres = message_to_taskres(original)
+    taskres.run_id = metadata.run_id
+    taskres.task_id = metadata.task_id
+    taskres.group_id = metadata.group_id
+    deserialized = message_from_taskres(taskres)
 
     # Assert
     assert original.message == deserialized.message

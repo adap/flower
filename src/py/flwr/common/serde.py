@@ -757,7 +757,7 @@ def recordset_from_proto(recordset_proto: ProtoRecordSet) -> RecordSet:
 # === Message ===
 
 
-def message_to_task_ins(message: Message) -> TaskIns:
+def message_to_taskins(message: Message) -> TaskIns:
     """Create a TaskIns from the Message."""
     return TaskIns(
         task=Task(
@@ -768,25 +768,25 @@ def message_to_task_ins(message: Message) -> TaskIns:
     )
 
 
-def message_from_task_ins(task_ins: TaskIns) -> Message:
+def message_from_taskins(taskins: TaskIns) -> Message:
     """Create a Message from the TaskIns."""
     # Retrieve the Metadata
     metadata = Metadata(
-        run_id=task_ins.run_id,
-        task_id=task_ins.task_id,
-        group_id=task_ins.group_id,
-        ttl=task_ins.task.ttl,
-        task_type=task_ins.task.task_type,
+        run_id=taskins.run_id,
+        task_id=taskins.task_id,
+        group_id=taskins.group_id,
+        ttl=taskins.task.ttl,
+        task_type=taskins.task.task_type,
     )
 
     # Return the Message
     return Message(
         metadata=metadata,
-        message=recordset_from_proto(task_ins.task.recordset),
+        message=recordset_from_proto(taskins.task.recordset),
     )
 
 
-def message_to_task_res(message: Message) -> TaskRes:
+def message_to_taskres(message: Message) -> TaskRes:
     """Create a TaskRes from the Message."""
     return TaskRes(
         task=Task(
@@ -797,19 +797,19 @@ def message_to_task_res(message: Message) -> TaskRes:
     )
 
 
-def message_from_task_res(task_res: TaskRes) -> Message:
+def message_from_taskres(taskres: TaskRes) -> Message:
     """Create a Message from the TaskIns."""
     # Retrieve the MetaData
     metadata = Metadata(
-        run_id=task_res.run_id,
-        task_id=task_res.task_id,
-        group_id=task_res.group_id,
-        ttl=task_res.task.ttl,
-        task_type=task_res.task.task_type,
+        run_id=taskres.run_id,
+        task_id=taskres.task_id,
+        group_id=taskres.group_id,
+        ttl=taskres.task.ttl,
+        task_type=taskres.task.task_type,
     )
 
     # Return the Message
     return Message(
         metadata=metadata,
-        message=recordset_from_proto(task_res.task.recordset),
+        message=recordset_from_proto(taskres.task.recordset),
     )
