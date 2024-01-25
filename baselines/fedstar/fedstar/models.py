@@ -306,6 +306,7 @@ class PslNetwork(tf.keras.Model):  # pylint: disable=abstract-method
                 tf.print(f"Epoch {epoch+1}/{epochs}")
             step = 0
             # Run train step on each batch
+            # tf.data.Dataset.repeat can also be used instead of itertools.cycle
             for step, ((l_batch_x, l_batch_y), (u_batch_x, u_batch_y)) in enumerate(
                 zip(itertools.cycle(l_dataset), u_dataset)
             ):
