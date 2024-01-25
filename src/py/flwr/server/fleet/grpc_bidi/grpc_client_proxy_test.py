@@ -22,7 +22,11 @@ import numpy as np
 
 import flwr
 from flwr.common.typing import Config, GetParametersIns
-from flwr.proto.transport_pb2 import ClientMessage, Parameters, Scalar
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+    ClientMessage,
+    Parameters,
+    Scalar,
+)
 from flwr.server.fleet.grpc_bidi.grpc_bridge import ResWrapper
 from flwr.server.fleet.grpc_bidi.grpc_client_proxy import GrpcClientProxy
 
