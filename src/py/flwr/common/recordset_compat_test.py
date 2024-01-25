@@ -43,7 +43,7 @@ from .recordset_compat import (
     recordset_to_getpropertiesins,
     recordset_to_getpropertiesres,
 )
-from .serde import message_from_task_ins, recordset_to_proto
+from .serde import message_from_taskins, recordset_to_proto
 from .typing import (
     Code,
     EvaluateIns,
@@ -244,22 +244,22 @@ def test_get_parameters_res_to_recordset_and_back() -> None:
     "ins, ins_to_recordset, task_type",
     [
         (
-            _get_valid_fitins,
+            _get_valid_fitins(),
             partial(fitins_to_recordset, keep_input=False),
             "fit_ins",
         ),
         (
-            _get_valid_evaluateins,
+            _get_valid_evaluateins(),
             partial(evaluateins_to_recordset, keep_input=False),
             "evaluate_ins",
         ),
         (
-            _get_valid_getpropertiesins,
+            _get_valid_getpropertiesins(),
             getpropertiesins_to_recordset,
             "get_properties_ins",
         ),
         (
-            _get_valid_getparametersins,
+            _get_valid_getparametersins(),
             getparametersins_to_recordset,
             "get_parameters_ins",
         ),
@@ -275,7 +275,6 @@ def test_flowercontext_driver_to_client(
 ) -> None:
     """."""
     # Generate *Ins and convert to RecordSet
-    ins = ins()
     ins_original = deepcopy(ins)
     recordset = ins_to_recordset(ins)
 
@@ -292,7 +291,7 @@ def test_flowercontext_driver_to_client(
     )
 
     # FlowerContext from TaskIns
-    message = message_from_task_ins(task_ins=task_ins)
+    message = message_from_taskins(taskins=task_ins)
 
     # Legacy *Ins from FlowerContext
     if message.metadata.task_type == "fit_ins":
