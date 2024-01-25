@@ -47,7 +47,9 @@ class DriverClientProxy(ClientProxy):
         # Ins to RecordSet
         out_recordset = compat.getpropertiesins_to_recordset(ins)
         # Fetch response
-        in_recordset = self._send_receive_recordset(out_recordset, timeout)
+        in_recordset = self._send_receive_recordset(
+            out_recordset, "get_properties_ins", timeout
+        )
         # RecordSet to Res
         return compat.recordset_to_getpropertiesres(in_recordset)
 
@@ -58,7 +60,9 @@ class DriverClientProxy(ClientProxy):
         # Ins to RecordSet
         out_recordset = compat.getparametersins_to_recordset(ins)
         # Fetch response
-        in_recordset = self._send_receive_recordset(out_recordset, timeout)
+        in_recordset = self._send_receive_recordset(
+            out_recordset, "get_parameters_ins", timeout
+        )
         # RecordSet to Res
         return compat.recordset_to_getparametersres(in_recordset)
 
@@ -67,7 +71,7 @@ class DriverClientProxy(ClientProxy):
         # Ins to RecordSet
         out_recordset = compat.fitins_to_recordset(ins, keep_input=False)
         # Fetch response
-        in_recordset = self._send_receive_recordset(out_recordset, timeout)
+        in_recordset = self._send_receive_recordset(out_recordset, "fit_ins", timeout)
         # RecordSet to Res
         return compat.recordset_to_fitres(in_recordset, keep_input=False)
 
@@ -78,7 +82,9 @@ class DriverClientProxy(ClientProxy):
         # Ins to RecordSet
         out_recordset = compat.evaluateins_to_recordset(ins, keep_input=False)
         # Fetch response
-        in_recordset = self._send_receive_recordset(out_recordset, timeout)
+        in_recordset = self._send_receive_recordset(
+            out_recordset, "evaluate_ins", timeout
+        )
         # RecordSet to Res
         return compat.recordset_to_evaluateres(in_recordset)
 
@@ -91,6 +97,7 @@ class DriverClientProxy(ClientProxy):
     def _send_receive_recordset(
         self,
         recordset: RecordSet,
+        task_type: str,
         timeout: Optional[float],
     ) -> RecordSet:
         task_ins = task_pb2.TaskIns(  # pylint: disable=E1101
@@ -106,6 +113,7 @@ class DriverClientProxy(ClientProxy):
                     node_id=self.node_id,
                     anonymous=self.anonymous,
                 ),
+                task_type=task_type,
                 recordset=serde.recordset_to_proto(recordset),
             ),
         )
