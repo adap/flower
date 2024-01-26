@@ -28,7 +28,6 @@ from flwr.client.message_handler.task_handler import (
     get_server_message_from_task_ins,
     wrap_client_message_in_task_res,
 )
-from flwr.client.run_state import RunState
 from flwr.client.secure_aggregation import SecureAggregationHandler
 from flwr.client.typing import ClientFn
 from flwr.common import serde
@@ -101,16 +100,16 @@ def handle_control_message(task_ins: TaskIns) -> Tuple[Optional[TaskRes], int]:
 
 
 def handle(
-    client_fn: ClientFn, state: RunState, task_ins: TaskIns
-) -> Tuple[TaskRes, RunState]:
+    client_fn: ClientFn, context: Context, task_ins: TaskIns
+) -> Tuple[TaskRes, Context]:
     """Handle incoming TaskIns from the server.
 
     Parameters
     ----------
     client_fn : ClientFn
         A callable that instantiates a Client.
-    state : RunState
-        A dataclass storing the state for the run being executed by the client.
+    context : Context
+        A dataclass storing the context for the run being executed by the client.
     task_ins: TaskIns
         The task instruction coming from the server, to be processed by the client.
 
@@ -123,7 +122,7 @@ def handle(
     if server_msg is None:
         # Instantiate the client
         client = client_fn("-1")
-        client.set_state(state)
+        client.set_context(context)
         # Secure Aggregation
         if task_ins.task.HasField("sa") and isinstance(
             client, SecureAggregationHandler
@@ -140,24 +139,24 @@ def handle(
                     sa=SecureAggregation(named_values=serde.named_values_to_proto(res)),
                 ),
             )
-            return task_res, client.get_state()
+            return task_res, client.get_context()
         raise NotImplementedError()
-    client_msg, updated_state = handle_legacy_message(client_fn, state, server_msg)
+    client_msg, updated_context = handle_legacy_message(client_fn, context, server_msg)
     task_res = wrap_client_message_in_task_res(client_msg)
-    return task_res, updated_state
+    return task_res, updated_context
 
 
 def handle_legacy_message(
-    client_fn: ClientFn, state: RunState, server_msg: ServerMessage
-) -> Tuple[ClientMessage, RunState]:
+    client_fn: ClientFn, context: Context, server_msg: ServerMessage
+) -> Tuple[ClientMessage, Context]:
     """Handle incoming messages from the server.
 
     Parameters
     ----------
     client_fn : ClientFn
         A callable that instantiates a Client.
-    state : RunState
-        A dataclass storing the state for the run being executed by the client.
+    context : Context
+        A dataclass storing the context for the run being executed by the client.
     server_msg: ServerMessage
         The message coming from the server, to be processed by the client.
 
@@ -174,7 +173,7 @@ def handle_legacy_message(
 
     # Instantiate the client
     client = client_fn("-1")
-    client.set_state(state)
+    client.set_context(context)
     # Execute task
     message = None
     if field == "get_properties_ins":
@@ -186,7 +185,7 @@ def handle_legacy_message(
     if field == "evaluate_ins":
         message = _evaluate(client, server_msg.evaluate_ins)
     if message:
-        return message, client.get_state()
+        return message, client.get_context()
     raise UnknownServerMessage()
 
 
@@ -196,7 +195,7 @@ def handle_legacy_message_from_tasktype(
     """Handle legacy message in the inner most middleware layer."""
     client = client_fn("-1")
 
-    # TODO: inject state (i.e. context.state) into client?
+    client.set_context(context)
 
     task_type = message.metadata.task_type
 
@@ -212,7 +211,9 @@ def handle_legacy_message_from_tasktype(
             client=client,
             get_parameters_ins=recordset_to_getparametersins(message.message),
         )
-        out_message.message = getparametersres_to_recordset(get_parameters_res)
+        out_message.message = getparametersres_to_recordset(
+            get_parameters_res, keep_input=False
+        )
     elif task_type == "fit_ins":
         fit_res = maybe_call_fit(
             client=client,
@@ -226,8 +227,7 @@ def handle_legacy_message_from_tasktype(
         )
         out_message.message = evaluateres_to_recordset(evaluate_res)
     else:
-        # TODO: what to do with reconnect?
-        print("do something")
+        raise ValueError()
 
     return out_message
 

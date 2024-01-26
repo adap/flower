@@ -34,9 +34,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
 )
-from flwr.common.context import Context
 from flwr.common.logger import log, warn_experimental_feature
-from flwr.common.recordset import RecordSet
 from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
@@ -326,7 +324,6 @@ def _start_client_internal(
     connection, address = _init_connection(transport, server_address)
 
     node_state = NodeState()
-    # TODO: make NodeState work with RecordSet
 
     while True:
         sleep_duration: int = 0
@@ -355,11 +352,11 @@ def _start_client_internal(
                     send(task_res)
                     break
 
-                # Register state
-                node_state.register_runstate(run_id=task_ins.run_id)
+                # Register context for this run
+                node_state.register_context(run_id=task_ins.run_id)
 
-                # TODO: get runstate from nodestate and construct context for this run
-                context = Context(state=RecordSet())
+                # Retrieve context for this run
+                context = node_state.retrieve_context(run_id=task_ins.run_id)
 
                 # Get Message from TaskIns
                 message = message_from_taskins(task_ins)
@@ -371,10 +368,10 @@ def _start_client_internal(
                 out_message = app(message=message, context=context)
 
                 # Update node state
-                # node_state.update_runstate(
-                #     run_id=bwd_msg.task_res.run_id,
-                #     run_state=bwd_msg.state,
-                # )
+                node_state.update_context(
+                    run_id=message.metadata.run_id,
+                    context=context,
+                )
 
                 # Construct TaskRes from out_message
                 task_res = message_to_taskres(out_message)

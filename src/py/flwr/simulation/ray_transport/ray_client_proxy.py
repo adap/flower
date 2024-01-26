@@ -138,20 +138,20 @@ class RayActorClientProxy(ClientProxy):
         run_id = 0
 
         # Register state
-        self.proxy_state.register_runstate(run_id=run_id)
+        self.proxy_state.register_context(run_id=run_id)
 
         # Retrieve state
-        state = self.proxy_state.retrieve_runstate(run_id=run_id)
+        state = self.proxy_state.retrieve_context(run_id=run_id)
 
         try:
             self.actor_pool.submit_client_job(
                 lambda a, c_fn, j_fn, cid, state: a.run.remote(c_fn, j_fn, cid, state),
                 (self.client_fn, job_fn, self.cid, state),
             )
-            res, updated_state = self.actor_pool.get_client_result(self.cid, timeout)
+            res, updated_context = self.actor_pool.get_client_result(self.cid, timeout)
 
             # Update state
-            self.proxy_state.update_runstate(run_id=run_id, run_state=updated_state)
+            self.proxy_state.update_context(run_id=run_id, context=updated_context)
 
         except Exception as ex:
             if self.actor_pool.num_actors == 0:
