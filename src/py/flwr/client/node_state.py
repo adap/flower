@@ -26,17 +26,17 @@ class NodeState:
 
     def __init__(self) -> None:
         self._meta: Dict[str, Any] = {}  # holds metadata about the node
-        self.run_context: Dict[int, Context] = {}
+        self.run_contexts: Dict[int, Context] = {}
 
     def register_context(self, run_id: int) -> None:
         """Register new run context for this node."""
-        if run_id not in self.run_context:
-            self.run_context[run_id] = Context(state=RecordSet())
+        if run_id not in self.run_contexts:
+            self.run_contexts[run_id] = Context(state=RecordSet())
 
     def retrieve_context(self, run_id: int) -> Context:
         """Get run context given a run_id."""
-        if run_id in self.run_context:
-            return self.run_context[run_id]
+        if run_id in self.run_contexts:
+            return self.run_contexts[run_id]
 
         raise RuntimeError(
             f"Context for run_id={run_id} doesn't exist."
@@ -46,4 +46,4 @@ class NodeState:
 
     def update_context(self, run_id: int, context: Context) -> None:
         """Update run context."""
-        self.run_context[run_id] = context
+        self.run_contexts[run_id] = context

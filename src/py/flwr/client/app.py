@@ -366,7 +366,7 @@ def _start_client_internal(
 
                 # Update node state
                 node_state.update_context(
-                    run_id=fwd_msg.task_res.run_id,
+                    run_id=fwd_msg.task_ins.run_id,
                     context=bwd_msg.context,
                 )
 
