@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Central DP.
+"""Central differential privacy with fixed clipping.
 
 Papers: https://arxiv.org/pdf/1712.07557.pdf, https://arxiv.org/pdf/1710.06963.pdf
-Note: unlike the above papers, we moved the clipping part to the server side.
 """
 from typing import Dict, List, Optional, Tuple, Union
 
