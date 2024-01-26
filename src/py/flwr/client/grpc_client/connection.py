@@ -20,11 +20,12 @@ from contextlib import contextmanager
 from logging import DEBUG
 from pathlib import Path
 from queue import Queue
-from typing import Callable, Iterator, Optional, Tuple, Union
+from typing import Callable, Iterator, Optional, Tuple, Union, cast
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common import recordset_compat as compat
-from flwr.common import serde, typing
+from flwr.common import serde
+from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import (
     TASK_TYPE_EVALUATE,
     TASK_TYPE_FIT,
@@ -33,10 +34,12 @@ from flwr.common.constant import (
 )
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
+from flwr.common.recordset import RecordSet
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
+    Reason,
     ServerMessage,
 )
 from flwr.proto.transport_pb2_grpc import FlowerServiceStub  # pylint: disable=E0611
@@ -54,7 +57,7 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 
 
 @contextmanager
-def grpc_connection(
+def grpc_connection(  # pylint: disable=R0915
     server_address: str,
     insecure: bool,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
@@ -152,6 +155,12 @@ def grpc_connection(
                 serde.evaluate_ins_from_proto(proto.evaluate_ins), False
             )
             task_type = TASK_TYPE_EVALUATE
+        elif field == "reconnect_ins":
+            recordset = RecordSet()
+            recordset.set_configs(
+                "config", ConfigsRecord({"seconds": proto.reconnect_ins.seconds})
+            )
+            task_type = "reconnect"
         else:
             raise ValueError(
                 "Unsupported instruction in ServerMessage, "
@@ -180,33 +189,33 @@ def grpc_connection(
         recordset = serde.recordset_from_proto(task_res.task.recordset)
         task_type = task_res.task.task_type
 
-        # RecordSet --> *Res --> ClientMessage
+        # RecordSet --> *Res --> *Res proto -> ClientMessage proto
         if task_type == TASK_TYPE_GET_PROPERTIES:
-            client_message = typing.ClientMessage(
-                get_properties_res=compat.recordset_to_getpropertiesres(recordset)
+            getpropres = compat.recordset_to_getpropertiesres(recordset)
+            msg_proto = ClientMessage(
+                get_properties_res=serde.get_properties_res_to_proto(getpropres)
             )
         elif task_type == TASK_TYPE_GET_PARAMETERS:
-            client_message = typing.ClientMessage(
-                get_parameters_res=compat.recordset_to_getparametersres(
-                    recordset, False
-                )
+            getparamres = compat.recordset_to_getparametersres(recordset, False)
+            msg_proto = ClientMessage(
+                get_parameters_res=serde.get_parameters_res_to_proto(getparamres)
             )
         elif task_type == TASK_TYPE_FIT:
-            client_message = typing.ClientMessage(
-                fit_res=compat.recordset_to_fitres(recordset, False)
-            )
+            fitres = compat.recordset_to_fitres(recordset, False)
+            msg_proto = ClientMessage(fit_res=serde.fit_res_to_proto(fitres))
         elif task_type == TASK_TYPE_EVALUATE:
-            client_message = typing.ClientMessage(
-                evaluate_res=compat.recordset_to_evaluateres(recordset)
+            evalres = compat.recordset_to_evaluateres(recordset)
+            msg_proto = ClientMessage(evaluate_res=serde.evaluate_res_to_proto(evalres))
+        elif task_type == "reconnect":
+            reason = cast(Reason.ValueType, recordset.get_configs("config")["reason"])
+            msg_proto = ClientMessage(
+                disconnect_res=ClientMessage.DisconnectRes(reason=reason)
             )
         else:
             raise ValueError(f"Invalid task type: {task_type}")
 
-        # ClientMessage --> ClientMessage proto
-        client_message_proto = serde.client_message_to_proto(client_message)
-
         # Send ClientMessage proto
-        return queue.put(client_message_proto, block=False)
+        return queue.put(msg_proto, block=False)
 
     try:
         # Yield methods
