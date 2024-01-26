@@ -41,6 +41,7 @@ def test_add_noise_to_updates() -> None:
         assert not np.array_equal(layer, parameters[0])  # Check if noise was added
 
 
+# pylint: disable-next=protected-access
 def test_compute_model_updates() -> None:
     """Test _compute_model_updates method."""
     # Prepare
@@ -74,6 +75,7 @@ def test_compute_model_updates() -> None:
             np.testing.assert_array_equal(e, a)
 
 
+# pylint: disable-next=protected-access
 def test_update_clients_params() -> None:
     """Test _update_clients_params method."""
     # Prepare
