@@ -97,7 +97,7 @@ def handle(
     client_fn : ClientFn
         A callable that instantiates a Client.
     context : Context
-        A dataclass storing the state for the run being executed by the client.
+        A dataclass storing the context for the run being executed by the client.
     task_ins: TaskIns
         The task instruction coming from the server, to be processed by the client.
 
@@ -129,9 +129,9 @@ def handle(
             )
             return task_res, client.get_context()
         raise NotImplementedError()
-    client_msg, updated_state = handle_legacy_message(client_fn, context, server_msg)
+    client_msg, updated_context = handle_legacy_message(client_fn, context, server_msg)
     task_res = wrap_client_message_in_task_res(client_msg)
-    return task_res, updated_state
+    return task_res, updated_context
 
 
 def handle_legacy_message(
