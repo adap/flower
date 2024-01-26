@@ -32,6 +32,7 @@ from flwr.common import (
     serde,
     typing,
 )
+from flwr.common.context import Context
 from flwr.common.recordset import RecordSet
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
@@ -141,7 +142,7 @@ def test_client_without_get_properties() -> None:
     )
     task_res, _ = handle(
         client_fn=_get_client_fn(client),
-        state=RecordSet(),
+        context=Context(state=RecordSet()),
         task_ins=task_ins,
     )
 
@@ -209,7 +210,7 @@ def test_client_with_get_properties() -> None:
     )
     task_res, _ = handle(
         client_fn=_get_client_fn(client),
-        state=RecordSet(),
+        context=Context(state=RecordSet()),
         task_ins=task_ins,
     )
 

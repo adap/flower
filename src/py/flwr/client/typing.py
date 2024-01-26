@@ -17,7 +17,7 @@
 from dataclasses import dataclass
 from typing import Callable
 
-from flwr.common.recordset import RecordSet
+from flwr.common.context import Context
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 from .client import Client as Client
@@ -28,7 +28,7 @@ class Fwd:
     """."""
 
     task_ins: TaskIns
-    state: RecordSet
+    context: Context
 
 
 @dataclass
@@ -36,7 +36,7 @@ class Bwd:
     """."""
 
     task_res: TaskRes
-    state: RecordSet
+    context: Context
 
 
 FlowerCallable = Callable[[Fwd], Bwd]

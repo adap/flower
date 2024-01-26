@@ -17,6 +17,7 @@
 
 from typing import Any, Dict
 
+from flwr.common.context import Context
 from flwr.common.recordset import RecordSet
 
 
@@ -25,24 +26,24 @@ class NodeState:
 
     def __init__(self) -> None:
         self._meta: Dict[str, Any] = {}  # holds metadata about the node
-        self.run_states: Dict[int, RecordSet] = {}
+        self.run_contexts: Dict[int, Context] = {}
 
-    def register_runstate(self, run_id: int) -> None:
-        """Register new run state for this node."""
-        if run_id not in self.run_states:
-            self.run_states[run_id] = RecordSet()
+    def register_context(self, run_id: int) -> None:
+        """Register new run context for this node."""
+        if run_id not in self.run_contexts:
+            self.run_contexts[run_id] = Context(state=RecordSet())
 
-    def retrieve_runstate(self, run_id: int) -> RecordSet:
-        """Get run state given a run_id."""
-        if run_id in self.run_states:
-            return self.run_states[run_id]
+    def retrieve_context(self, run_id: int) -> Context:
+        """Get run context given a run_id."""
+        if run_id in self.run_contexts:
+            return self.run_contexts[run_id]
 
         raise RuntimeError(
-            f"RunState for run_id={run_id} doesn't exist."
-            " A run must be registered before it can be retrieved or updated "
+            f"Context for run_id={run_id} doesn't exist."
+            " A run context must be registered before it can be retrieved or updated "
             " by a client."
         )
 
-    def update_runstate(self, run_id: int, run_state: RecordSet) -> None:
-        """Update run state."""
-        self.run_states[run_id] = run_state
+    def update_context(self, run_id: int, context: Context) -> None:
+        """Update run context."""
+        self.run_contexts[run_id] = context

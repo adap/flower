@@ -27,8 +27,8 @@ from ray.util.actor_pool import ActorPool
 
 from flwr import common
 from flwr.client import Client, ClientFn
+from flwr.common.context import Context
 from flwr.common.logger import log
-from flwr.common.recordset import RecordSet
 from flwr.simulation.ray_transport.utils import check_clientfn_returns_client
 
 # All possible returns by a client
@@ -61,8 +61,8 @@ class VirtualClientEngineActor(ABC):
         client_fn: ClientFn,
         job_fn: JobFn,
         cid: str,
-        state: RecordSet,
-    ) -> Tuple[str, ClientRes, RecordSet]:
+        context: Context,
+    ) -> Tuple[str, ClientRes, Context]:
         """Run a client run."""
         # Execute tasks and return result
         # return also cid which is needed to ensure results
@@ -70,12 +70,12 @@ class VirtualClientEngineActor(ABC):
         try:
             # Instantiate client (check 'Client' type is returned)
             client = check_clientfn_returns_client(client_fn(cid))
-            # Inject state
-            client.set_state(state)
+            # Inject context
+            client.set_context(context)
             # Run client job
             job_results = job_fn(client)
-            # Retrieve state (potentially updated)
-            updated_state = client.get_state()
+            # Retrieve context (potentially updated)
+            updated_context = client.get_context()
         except Exception as ex:
             client_trace = traceback.format_exc()
             message = (
@@ -89,7 +89,7 @@ class VirtualClientEngineActor(ABC):
             )
             raise ClientException(str(message)) from ex
 
-        return cid, job_results, updated_state
+        return cid, job_results, updated_context
 
 
 @ray.remote
@@ -237,16 +237,16 @@ class VirtualClientEngineActorPool(ActorPool):
             self._idle_actors.extend(new_actors)
             self.num_actors += num_actors
 
-    def submit(self, fn: Any, value: Tuple[ClientFn, JobFn, str, RecordSet]) -> None:
+    def submit(self, fn: Any, value: Tuple[ClientFn, JobFn, str, Context]) -> None:
         """Take idle actor and assign it a client run.
 
         Submit a job to an actor by first removing it from the list of idle actors, then
         check if this actor was flagged to be removed from the pool
         """
-        client_fn, job_fn, cid, state = value
+        client_fn, job_fn, cid, context = value
         actor = self._idle_actors.pop()
         if self._check_and_remove_actor_from_pool(actor):
-            future = fn(actor, client_fn, job_fn, cid, state)
+            future = fn(actor, client_fn, job_fn, cid, context)
             future_key = tuple(future) if isinstance(future, List) else future
             self._future_to_actor[future_key] = (self._next_task_index, actor, cid)
             self._next_task_index += 1
@@ -255,7 +255,7 @@ class VirtualClientEngineActorPool(ActorPool):
             self._cid_to_future[cid]["future"] = future_key
 
     def submit_client_job(
-        self, actor_fn: Any, job: Tuple[ClientFn, JobFn, str, RecordSet]
+        self, actor_fn: Any, job: Tuple[ClientFn, JobFn, str, Context]
     ) -> None:
         """Submit a job while tracking client ids."""
         _, _, cid, _ = job
@@ -295,17 +295,17 @@ class VirtualClientEngineActorPool(ActorPool):
 
         return self._cid_to_future[cid]["ready"]  # type: ignore
 
-    def _fetch_future_result(self, cid: str) -> Tuple[ClientRes, RecordSet]:
-        """Fetch result and updated state for a VirtualClient from Object Store.
+    def _fetch_future_result(self, cid: str) -> Tuple[ClientRes, Context]:
+        """Fetch result and updated context for a VirtualClient from Object Store.
 
         The job submitted by the ClientProxy interfacing with client with cid=cid is
         ready. Here we fetch it from the object store and return.
         """
         try:
             future: ObjectRef[Any] = self._cid_to_future[cid]["future"]  # type: ignore
-            res_cid, res, updated_state = ray.get(
+            res_cid, res, updated_context = ray.get(
                 future
-            )  # type: (str, ClientRes, RecordSet)
+            )  # type: (str, ClientRes, Context)
         except ray.exceptions.RayActorError as ex:
             log(ERROR, ex)
             if hasattr(ex, "actor_id"):
@@ -322,7 +322,7 @@ class VirtualClientEngineActorPool(ActorPool):
         # Reset mapping
         self._reset_cid_to_future_dict(cid)
 
-        return res, updated_state
+        return res, updated_context
 
     def _flag_actor_for_removal(self, actor_id_hex: str) -> None:
         """Flag actor that should be removed from pool."""
@@ -409,7 +409,7 @@ class VirtualClientEngineActorPool(ActorPool):
 
     def get_client_result(
         self, cid: str, timeout: Optional[float]
-    ) -> Tuple[ClientRes, RecordSet]:
+    ) -> Tuple[ClientRes, Context]:
         """Get result from VirtualClient with specific cid."""
         # Loop until all jobs submitted to the pool are completed. Break early
         # if the result for the ClientProxy calling this method is ready
@@ -421,5 +421,5 @@ class VirtualClientEngineActorPool(ActorPool):
                 break
 
         # Fetch result belonging to the VirtualClient calling this method
-        # Return both result from tasks and (potentially) updated run state
+        # Return both result from tasks and (potentially) updated run context
         return self._fetch_future_result(cid)

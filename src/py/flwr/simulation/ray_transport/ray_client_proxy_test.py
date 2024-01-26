@@ -24,6 +24,7 @@ import ray
 from flwr.client import Client, NumPyClient
 from flwr.common import Code, GetPropertiesRes, Status
 from flwr.common.configsrecord import ConfigsRecord
+from flwr.common.context import Context
 from flwr.common.recordset import RecordSet
 from flwr.simulation.ray_transport.ray_actor import (
     ClientRes,
@@ -54,8 +55,8 @@ def job_fn(cid: str) -> JobFn:  # pragma: no cover
     def cid_times_pi(client: Client) -> ClientRes:  # pylint: disable=unused-argument
         result = int(cid) * pi
 
-        # store something in state
-        client.numpy_client.state.set_configs(  # type: ignore
+        # store something in context
+        client.numpy_client.context.state.set_configs(  # type: ignore
             "result", record=ConfigsRecord({"result": str(result)})
         )
 
@@ -128,9 +129,9 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
     shuffle(proxies)
     for prox in proxies:
         # Register state
-        prox.proxy_state.register_runstate(run_id=run_id)
+        prox.proxy_state.register_context(run_id=run_id)
         # Retrieve state
-        state = prox.proxy_state.retrieve_runstate(run_id=run_id)
+        state = prox.proxy_state.retrieve_context(run_id=run_id)
 
         job = job_fn(prox.cid)
         prox.actor_pool.submit_client_job(
@@ -141,14 +142,14 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
     # fetch results one at a time
     shuffle(proxies)
     for prox in proxies:
-        res, updated_state = prox.actor_pool.get_client_result(prox.cid, timeout=None)
-        prox.proxy_state.update_runstate(run_id, run_state=updated_state)
+        res, updated_context = prox.actor_pool.get_client_result(prox.cid, timeout=None)
+        prox.proxy_state.update_context(run_id, context=updated_context)
         res = cast(GetPropertiesRes, res)
 
         assert int(prox.cid) * pi == res.properties["result"]
         assert (
             str(int(prox.cid) * pi)
-            == prox.proxy_state.retrieve_runstate(run_id).get_configs("result")[
+            == prox.proxy_state.retrieve_context(run_id).state.get_configs("result")[
                 "result"
             ]
         )
@@ -168,7 +169,7 @@ def test_cid_consistency_without_proxies() -> None:
         job = job_fn(cid)
         pool.submit_client_job(
             lambda a, c_fn, j_fn, cid_, state: a.run.remote(c_fn, j_fn, cid_, state),
-            (get_dummy_client, job, cid, RecordSet()),
+            (get_dummy_client, job, cid, Context(state=RecordSet())),
         )
 
     # fetch results one at a time
