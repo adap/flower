@@ -2,11 +2,6 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/
 
-# Download the EfficientNetB0 model
-python -c "import torch; torch.hub.load( \
-        'NVIDIA/DeepLearningExamples:torchhub', \
-        'nvidia_efficientnet_b0', pretrained=True)"
-
 python server.py --toy  &
 sleep 10  # Sleep for 10s to give the server enough time to start and dowload the dataset
 

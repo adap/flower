@@ -1,14 +1,14 @@
 import math
 from collections import OrderedDict
-from typing import Callable, Optional, Tuple
+from typing import Callable, Dict, Optional, Tuple
 
 import flwr as fl
 import numpy as np
 import torch
 import torchvision.transforms as transforms
-from opacus.dp_model_inspector import DPModelInspector
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
+from flwr.common.typing import Scalar
 
 from dp_cifar_main import DEVICE, PARAMS, DPCifarClient, Net, test
 
@@ -23,8 +23,6 @@ def client_fn(cid: str) -> fl.client.Client:
     # Load model.
     model = Net()
     # Check model is compatible with Opacus.
-    # inspector = DPModelInspector()
-    # print(f"Is the model valid? {inspector.validate(model)}")
 
     # Load data partition (divide CIFAR10 into NUM_CLIENTS distinct partitions, using 30% for validation).
     transform = transforms.Compose(
@@ -45,12 +43,14 @@ def client_fn(cid: str) -> fl.client.Client:
     client_trainloader = DataLoader(client_trainset, PARAMS["batch_size"])
     client_testloader = DataLoader(client_testset, PARAMS["batch_size"])
 
-    return DPCifarClient(model, client_trainloader, client_testloader)
+    return DPCifarClient(model, client_trainloader, client_testloader).to_client()
 
 
 # Define an evaluation function for centralized evaluation (using whole CIFAR10 testset).
 def get_evaluate_fn() -> Callable[[fl.common.NDArrays], Optional[Tuple[float, float]]]:
-    def evaluate(weights: fl.common.NDArrays) -> Optional[Tuple[float, float]]:
+    def evaluate(
+        server_round: int, parameters: fl.common.NDArrays, config: Dict[str, Scalar]
+    ):
         transform = transforms.Compose(
             [
                 transforms.ToTensor(),
@@ -63,7 +63,7 @@ def get_evaluate_fn() -> Callable[[fl.common.NDArrays], Optional[Tuple[float, fl
         state_dict = OrderedDict(
             {
                 k: torch.tensor(np.atleast_1d(v))
-                for k, v in zip(model.state_dict().keys(), weights)
+                for k, v in zip(model.state_dict().keys(), parameters)
             }
         )
         model.load_state_dict(state_dict, strict=True)
@@ -82,7 +82,7 @@ def main() -> None:
         client_fn=client_fn,
         num_clients=NUM_CLIENTS,
         client_resources={"num_cpus": 1},
-        num_rounds=3,
+        config=fl.server.ServerConfig(num_rounds=3),
         strategy=fl.server.strategy.FedAvg(
             fraction_fit=0.1, fraction_evaluate=0.1, evaluate_fn=get_evaluate_fn()
         ),

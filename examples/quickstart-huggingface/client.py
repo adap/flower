@@ -108,7 +108,7 @@ def main(node_id):
             return float(loss), len(testloader), {"accuracy": float(accuracy)}
 
     # Start client
-    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=IMDBClient())
+    fl.client.start_client(server_address="127.0.0.1:8080", client=IMDBClient().to_client())
 
 
 if __name__ == "__main__":
@@ -119,7 +119,7 @@ if __name__ == "__main__":
         required=True,
         type=int,
         help="Partition of the dataset divided into 1,000 iid partitions created "
-             "artificially.",
+        "artificially.",
     )
     node_id = parser.parse_args().node_id
     main(node_id)
