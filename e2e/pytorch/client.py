@@ -11,6 +11,7 @@ from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
 
 import flwr as fl
+from flwr.common.configsrecord import ConfigsRecord
 
 # #############################################################################
 # 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
@@ -95,14 +96,15 @@ class FlowerClient(fl.client.NumPyClient):
     def _record_timestamp_to_state(self):
         """Record timestamp to client's state."""
         t_stamp = datetime.now().timestamp()
-        if STATE_VAR in self.state.state:
-            self.state.state[STATE_VAR] += f",{t_stamp}"
-        else:
-            self.state.state[STATE_VAR] = str(t_stamp)
+        value = str(t_stamp)
+        if STATE_VAR in self.state.configs.keys():
+            value = self.state.get_configs(STATE_VAR)[STATE_VAR]  # type: ignore
+            value += f",{t_stamp}"
+
+        self.state.set_configs(name=STATE_VAR, record=ConfigsRecord({STATE_VAR: value}))
     
     def _retrieve_timestamp_from_state(self):
-        return self.state.state[STATE_VAR]
-
+        return self.state.get_configs(STATE_VAR)[STATE_VAR]
     def fit(self, parameters, config):
         set_parameters(net, parameters)
         train(net, trainloader, epochs=1)

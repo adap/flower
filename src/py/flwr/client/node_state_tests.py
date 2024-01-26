@@ -16,15 +16,18 @@
 
 
 from flwr.client.node_state import NodeState
-from flwr.client.run_state import RunState
+from flwr.common.configsrecord import ConfigsRecord
+from flwr.common.recordset import RecordSet
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 
-def _run_dummy_task(state: RunState) -> RunState:
-    if "counter" in state.state:
-        state.state["counter"] += "1"
-    else:
-        state.state["counter"] = "1"
+def _run_dummy_task(state: RecordSet) -> RecordSet:
+    counter_value: str = "1"
+    if "counter" in state.configs.keys():
+        counter_value = state.get_configs("counter")["count"]  # type: ignore
+        counter_value += "1"
+
+    state.set_configs(name="counter", record=ConfigsRecord({"count": counter_value}))
 
     return state
 
@@ -56,4 +59,4 @@ def test_multirun_in_node_state() -> None:
 
     # Verify values
     for run_id, state in node_state.run_states.items():
-        assert state.state["counter"] == expected_values[run_id]
+        assert state.get_configs("counter")["count"] == expected_values[run_id]

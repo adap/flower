@@ -17,7 +17,7 @@
 
 from typing import Any, Dict
 
-from flwr.client.run_state import RunState
+from flwr.common.recordset import RecordSet
 
 
 class NodeState:
@@ -25,14 +25,14 @@ class NodeState:
 
     def __init__(self) -> None:
         self._meta: Dict[str, Any] = {}  # holds metadata about the node
-        self.run_states: Dict[int, RunState] = {}
+        self.run_states: Dict[int, RecordSet] = {}
 
     def register_runstate(self, run_id: int) -> None:
         """Register new run state for this node."""
         if run_id not in self.run_states:
-            self.run_states[run_id] = RunState({})
+            self.run_states[run_id] = RecordSet()
 
-    def retrieve_runstate(self, run_id: int) -> RunState:
+    def retrieve_runstate(self, run_id: int) -> RecordSet:
         """Get run state given a run_id."""
         if run_id in self.run_states:
             return self.run_states[run_id]
@@ -43,6 +43,6 @@ class NodeState:
             " by a client."
         )
 
-    def update_runstate(self, run_id: int, run_state: RunState) -> None:
+    def update_runstate(self, run_id: int, run_state: RecordSet) -> None:
         """Update run state."""
         self.run_states[run_id] = run_state

@@ -22,8 +22,9 @@ from typing import List, Tuple, Type, cast
 import ray
 
 from flwr.client import Client, NumPyClient
-from flwr.client.run_state import RunState
 from flwr.common import Code, GetPropertiesRes, Status
+from flwr.common.configsrecord import ConfigsRecord
+from flwr.common.recordset import RecordSet
 from flwr.simulation.ray_transport.ray_actor import (
     ClientRes,
     DefaultActor,
@@ -54,7 +55,9 @@ def job_fn(cid: str) -> JobFn:  # pragma: no cover
         result = int(cid) * pi
 
         # store something in state
-        client.numpy_client.state.state["result"] = str(result)  # type: ignore
+        client.numpy_client.state.set_configs(  # type: ignore
+            "result", record=ConfigsRecord({"result": str(result)})
+        )
 
         # now let's convert it to a GetPropertiesRes response
         return GetPropertiesRes(
@@ -141,10 +144,13 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
         res, updated_state = prox.actor_pool.get_client_result(prox.cid, timeout=None)
         prox.proxy_state.update_runstate(run_id, run_state=updated_state)
         res = cast(GetPropertiesRes, res)
+
         assert int(prox.cid) * pi == res.properties["result"]
         assert (
             str(int(prox.cid) * pi)
-            == prox.proxy_state.retrieve_runstate(run_id).state["result"]
+            == prox.proxy_state.retrieve_runstate(run_id).get_configs("result")[
+                "result"
+            ]
         )
 
     ray.shutdown()
@@ -162,7 +168,7 @@ def test_cid_consistency_without_proxies() -> None:
         job = job_fn(cid)
         pool.submit_client_job(
             lambda a, c_fn, j_fn, cid_, state: a.run.remote(c_fn, j_fn, cid_, state),
-            (get_dummy_client, job, cid, RunState(state={})),
+            (get_dummy_client, job, cid, RecordSet()),
         )
 
     # fetch results one at a time
