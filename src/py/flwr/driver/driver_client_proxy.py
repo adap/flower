@@ -21,6 +21,12 @@ from typing import List, Optional
 from flwr import common
 from flwr.common import recordset_compat as compat
 from flwr.common import serde
+from flwr.common.constant import (
+    TASK_TYPE_EVALUATE,
+    TASK_TYPE_FIT,
+    TASK_TYPE_GET_PARAMETERS,
+    TASK_TYPE_GET_PROPERTIES,
+)
 from flwr.common.recordset import RecordSet
 from flwr.proto import driver_pb2, node_pb2, task_pb2  # pylint: disable=E0611
 from flwr.server.client_proxy import ClientProxy
@@ -48,7 +54,7 @@ class DriverClientProxy(ClientProxy):
         out_recordset = compat.getpropertiesins_to_recordset(ins)
         # Fetch response
         in_recordset = self._send_receive_recordset(
-            out_recordset, "get_properties_ins", timeout
+            out_recordset, TASK_TYPE_GET_PROPERTIES, timeout
         )
         # RecordSet to Res
         return compat.recordset_to_getpropertiesres(in_recordset)
@@ -61,17 +67,19 @@ class DriverClientProxy(ClientProxy):
         out_recordset = compat.getparametersins_to_recordset(ins)
         # Fetch response
         in_recordset = self._send_receive_recordset(
-            out_recordset, "get_parameters_ins", timeout
+            out_recordset, TASK_TYPE_GET_PARAMETERS, timeout
         )
         # RecordSet to Res
-        return compat.recordset_to_getparametersres(in_recordset)
+        return compat.recordset_to_getparametersres(in_recordset, False)
 
     def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
         # Ins to RecordSet
         out_recordset = compat.fitins_to_recordset(ins, keep_input=False)
         # Fetch response
-        in_recordset = self._send_receive_recordset(out_recordset, "fit_ins", timeout)
+        in_recordset = self._send_receive_recordset(
+            out_recordset, TASK_TYPE_FIT, timeout
+        )
         # RecordSet to Res
         return compat.recordset_to_fitres(in_recordset, keep_input=False)
 
@@ -83,7 +91,7 @@ class DriverClientProxy(ClientProxy):
         out_recordset = compat.evaluateins_to_recordset(ins, keep_input=False)
         # Fetch response
         in_recordset = self._send_receive_recordset(
-            out_recordset, "evaluate_ins", timeout
+            out_recordset, TASK_TYPE_EVALUATE, timeout
         )
         # RecordSet to Res
         return compat.recordset_to_evaluateres(in_recordset)

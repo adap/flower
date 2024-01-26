@@ -55,11 +55,11 @@ def _make_recordset_proto(
     res: Union[GetParametersRes, GetPropertiesRes, FitRes, EvaluateRes]
 ) -> recordset_pb2.RecordSet:  # pylint: disable=E1101
     if isinstance(res, GetParametersRes):
-        recordset = compat.getparametersres_to_recordset(res)
+        recordset = compat.getparametersres_to_recordset(res, True)
     elif isinstance(res, GetPropertiesRes):
         recordset = compat.getpropertiesres_to_recordset(res)
     elif isinstance(res, FitRes):
-        recordset = compat.fitres_to_recordset(res, keep_input=True)
+        recordset = compat.fitres_to_recordset(res, True)
     elif isinstance(res, EvaluateRes):
         recordset = compat.evaluateres_to_recordset(res)
     else:
