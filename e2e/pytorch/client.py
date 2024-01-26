@@ -105,7 +105,6 @@ class FlowerClient(fl.client.NumPyClient):
     
     def _retrieve_timestamp_from_state(self):
         return self.state.get_configs(STATE_VAR)[STATE_VAR]
-    
     def fit(self, parameters, config):
         set_parameters(net, parameters)
         train(net, trainloader, epochs=1)
