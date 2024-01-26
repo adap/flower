@@ -41,7 +41,6 @@ def test_add_noise_to_updates() -> None:
         assert not np.array_equal(layer, parameters[0])  # Check if noise was added
 
 
-# pylint: disable-next=protected-access
 def test_compute_model_updates() -> None:
     """Test _compute_model_updates method."""
     # Prepare
@@ -68,6 +67,7 @@ def test_compute_model_updates() -> None:
     dp_wrapper.current_round_params = current_round_params
 
     # Execute
+    # pylint: disable-next=protected-access
     computed_updates = dp_wrapper._compute_model_updates(client_params)
 
     for expected, actual in zip(expected_updates, computed_updates):
@@ -75,7 +75,6 @@ def test_compute_model_updates() -> None:
             np.testing.assert_array_equal(e, a)
 
 
-# pylint: disable-next=protected-access
 def test_update_clients_params() -> None:
     """Test _update_clients_params method."""
     # Prepare
@@ -97,6 +96,7 @@ def test_update_clients_params() -> None:
 
     # Execute
     for params, update in zip(client_params, client_update):
+        # pylint: disable-next=protected-access
         dp_wrapper._update_clients_params(params, update)
 
     # Assert
