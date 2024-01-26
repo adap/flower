@@ -185,6 +185,8 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
     def _compute_model_updates(
         self, all_clients_params: List[NDArrays]
     ) -> List[NDArrays]:
+        """Compute model updates for each client based on the current round
+        parameters."""
         all_client_updates = []
         for client_param in all_clients_params:
             client_update = [
@@ -197,5 +199,6 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
     def _update_clients_params(
         self, client_param: NDArrays, client_update: NDArrays
     ) -> None:
+        """Update the client parameters based on the model updates."""
         for i, _ in enumerate(self.current_round_params):
             client_param[i] = self.current_round_params[i] + client_update[i]
