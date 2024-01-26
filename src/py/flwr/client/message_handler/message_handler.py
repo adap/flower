@@ -32,6 +32,12 @@ from flwr.client.run_state import RunState
 from flwr.client.secure_aggregation import SecureAggregationHandler
 from flwr.client.typing import ClientFn
 from flwr.common import serde
+from flwr.common.constant import (
+    TASK_TYPE_EVALUATE,
+    TASK_TYPE_FIT,
+    TASK_TYPE_GET_PARAMETERS,
+    TASK_TYPE_GET_PROPERTIES,
+)
 from flwr.common.context import Context
 from flwr.common.message import Message
 from flwr.common.recordset import RecordSet
@@ -201,34 +207,38 @@ def handle_legacy_message_from_tasktype(
     task_type = message.metadata.task_type
 
     out_message = Message(metadata=message.metadata, message=RecordSet())
-    if task_type == "get_properties_ins":
+    # Handle GetPropertiesIns
+    if task_type == TASK_TYPE_GET_PROPERTIES:
         get_properties_res = maybe_call_get_properties(
             client=client,
             get_properties_ins=recordset_to_getpropertiesins(message.message),
         )
         out_message.message = getpropertiesres_to_recordset(get_properties_res)
-    elif task_type == "get_parameteres_ins":
+    # Handle GetParametersIns
+    elif task_type == TASK_TYPE_GET_PARAMETERS:
         get_parameters_res = maybe_call_get_parameters(
             client=client,
             get_parameters_ins=recordset_to_getparametersins(message.message),
         )
-        out_message.message = getparametersres_to_recordset(get_parameters_res)
-    elif task_type == "fit_ins":
+        out_message.message = getparametersres_to_recordset(
+            get_parameters_res, keep_input=False
+        )
+    # Handle FitIns
+    elif task_type == TASK_TYPE_FIT:
         fit_res = maybe_call_fit(
             client=client,
             fit_ins=recordset_to_fitins(message.message, keep_input=False),
         )
         out_message.message = fitres_to_recordset(fit_res, keep_input=False)
-    elif task_type == "evaluate_ins":
+    # Handle EvaluateIns
+    elif task_type == TASK_TYPE_EVALUATE:
         evaluate_res = maybe_call_evaluate(
             client=client,
             evaluate_ins=recordset_to_evaluateins(message.message, keep_input=False),
         )
         out_message.message = evaluateres_to_recordset(evaluate_res)
     else:
-        # TODO: what to do with reconnect?
-        print("do something")
-
+        raise ValueError(f"Invalid task type: {task_type}")
     return out_message
 
 

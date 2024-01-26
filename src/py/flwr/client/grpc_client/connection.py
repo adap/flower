@@ -23,6 +23,14 @@ from queue import Queue
 from typing import Callable, Iterator, Optional, Tuple, Union
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common import recordset_compat as compat
+from flwr.common import serde, typing
+from flwr.common.constant import (
+    TASK_TYPE_EVALUATE,
+    TASK_TYPE_FIT,
+    TASK_TYPE_GET_PARAMETERS,
+    TASK_TYPE_GET_PROPERTIES,
+)
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
@@ -118,7 +126,42 @@ def grpc_connection(
     server_message_iterator: Iterator[ServerMessage] = stub.Join(iter(queue.get, None))
 
     def receive() -> TaskIns:
-        server_message = next(server_message_iterator)
+        # Receive ServerMessage proto
+        proto = next(server_message_iterator)
+
+        # ServerMessage proto --> *Ins --> RecordSet
+        field = proto.WhichOneof("msg")
+        task_type = ""
+        if field == "get_properties_ins":
+            recordset = compat.getpropertiesins_to_recordset(
+                serde.get_properties_ins_from_proto(proto.get_properties_ins)
+            )
+            task_type = TASK_TYPE_GET_PROPERTIES
+        elif field == "get_parameters_ins":
+            recordset = compat.getparametersins_to_recordset(
+                serde.get_parameters_ins_from_proto(proto.get_parameters_ins)
+            )
+            task_type = TASK_TYPE_GET_PARAMETERS
+        elif field == "fit_ins":
+            recordset = compat.fitins_to_recordset(
+                serde.fit_ins_from_proto(proto.fit_ins), False
+            )
+            task_type = TASK_TYPE_FIT
+        elif field == "evaluate_ins":
+            recordset = compat.evaluateins_to_recordset(
+                serde.evaluate_ins_from_proto(proto.evaluate_ins), False
+            )
+            task_type = TASK_TYPE_EVALUATE
+        else:
+            raise ValueError(
+                "Unsupported instruction in ServerMessage, "
+                "cannot deserialize from ProtoBuf"
+            )
+
+        # RecordSet --> RecordSet proto
+        recordset_proto = serde.recordset_to_proto(recordset)
+
+        # Construct TaskIns
         return TaskIns(
             task_id=str(uuid.uuid4()),
             group_id="",
@@ -127,13 +170,43 @@ def grpc_connection(
                 producer=Node(node_id=0, anonymous=True),
                 consumer=Node(node_id=0, anonymous=True),
                 ancestry=[],
-                legacy_server_message=server_message,
+                task_type=task_type,
+                recordset=recordset_proto,
             ),
         )
 
     def send(task_res: TaskRes) -> None:
-        msg = task_res.task.legacy_client_message
-        return queue.put(msg, block=False)
+        # Retrieve RecordSet and task_type
+        recordset = serde.recordset_from_proto(task_res.task.recordset)
+        task_type = task_res.task.task_type
+
+        # RecordSet --> *Res --> ClientMessage
+        if task_type == TASK_TYPE_GET_PROPERTIES:
+            client_message = typing.ClientMessage(
+                get_properties_res=compat.recordset_to_getpropertiesres(recordset)
+            )
+        elif task_type == TASK_TYPE_GET_PARAMETERS:
+            client_message = typing.ClientMessage(
+                get_parameters_res=compat.recordset_to_getparametersres(
+                    recordset, False
+                )
+            )
+        elif task_type == TASK_TYPE_FIT:
+            client_message = typing.ClientMessage(
+                fit_res=compat.recordset_to_fitres(recordset, False)
+            )
+        elif task_type == TASK_TYPE_EVALUATE:
+            client_message = typing.ClientMessage(
+                evaluate_res=compat.recordset_to_evaluateres(recordset)
+            )
+        else:
+            raise ValueError(f"Invalid task type: {task_type}")
+
+        # ClientMessage --> ClientMessage proto
+        client_message_proto = serde.client_message_to_proto(client_message)
+
+        # Send ClientMessage proto
+        return queue.put(client_message_proto, block=False)
 
     try:
         # Yield methods
