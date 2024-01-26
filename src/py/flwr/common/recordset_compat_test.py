@@ -15,9 +15,10 @@
 """RecordSet from legacy messages tests."""
 
 from copy import deepcopy
-from typing import Dict
+from typing import Callable, Dict
 
 import numpy as np
+import pytest
 
 from .parameter import ndarrays_to_parameters
 from .recordset_compat import (
@@ -136,42 +137,88 @@ def _get_valid_getpropertiesres() -> GetPropertiesRes:
     )
 
 
-def test_fitins_to_recordset_and_back() -> None:
+@pytest.mark.parametrize(
+    "keep_input, validate_freed_fn",
+    [
+        (
+            False,
+            lambda x, x_copy, y: len(x.parameters.tensors) == 0 and x_copy == y,
+        ),  # check tensors were freed
+        (
+            True,
+            lambda x, x_copy, y: x == y,
+        ),
+    ],
+)
+def test_fitins_to_recordset_and_back(
+    keep_input: bool, validate_freed_fn: Callable[[FitIns, FitIns, FitIns], bool]
+) -> None:
     """Test conversion FitIns --> RecordSet --> FitIns."""
     fitins = _get_valid_fitins()
 
     fitins_copy = deepcopy(fitins)
 
-    recordset = fitins_to_recordset(fitins, keep_input=False)
+    recordset = fitins_to_recordset(fitins, keep_input=keep_input)
 
-    fitins_ = recordset_to_fitins(recordset, keep_input=False)
+    fitins_ = recordset_to_fitins(recordset, keep_input=keep_input)
 
-    assert fitins_copy == fitins_
+    assert validate_freed_fn(fitins, fitins_copy, fitins_)
 
 
-def test_fitres_to_recordset_and_back() -> None:
+@pytest.mark.parametrize(
+    "keep_input, validate_freed_fn",
+    [
+        (
+            False,
+            lambda x, x_copy, y: len(x.parameters.tensors) == 0 and x_copy == y,
+        ),  # check tensors were freed
+        (
+            True,
+            lambda x, x_copy, y: x == y,
+        ),
+    ],
+)
+def test_fitres_to_recordset_and_back(
+    keep_input: bool, validate_freed_fn: Callable[[FitRes, FitRes, FitRes], bool]
+) -> None:
     """Test conversion FitRes --> RecordSet --> FitRes."""
     fitres = _get_valid_fitres()
 
     fitres_copy = deepcopy(fitres)
 
-    recordset = fitres_to_recordset(fitres, keep_input=False)
-    fitres_ = recordset_to_fitres(recordset, keep_input=False)
+    recordset = fitres_to_recordset(fitres, keep_input=keep_input)
+    fitres_ = recordset_to_fitres(recordset, keep_input=keep_input)
 
-    assert fitres_copy == fitres_
+    assert validate_freed_fn(fitres, fitres_copy, fitres_)
 
 
-def test_evaluateins_to_recordset_and_back() -> None:
+@pytest.mark.parametrize(
+    "keep_input, validate_freed_fn",
+    [
+        (
+            False,
+            lambda x, x_copy, y: len(x.parameters.tensors) == 0 and x_copy == y,
+        ),  # check tensors were freed
+        (
+            True,
+            lambda x, x_copy, y: x == y,
+        ),
+    ],
+)
+def test_evaluateins_to_recordset_and_back(
+    keep_input: bool,
+    validate_freed_fn: Callable[[EvaluateIns, EvaluateIns, EvaluateIns], bool],
+) -> None:
     """Test conversion EvaluateIns --> RecordSet --> EvaluateIns."""
     evaluateins = _get_valid_evaluateins()
 
     evaluateins_copy = deepcopy(evaluateins)
 
-    recordset = evaluateins_to_recordset(evaluateins, keep_input=False)
+    recordset = evaluateins_to_recordset(evaluateins, keep_input=keep_input)
 
-    evaluateins_ = recordset_to_evaluateins(recordset, keep_input=False)
+    evaluateins_ = recordset_to_evaluateins(recordset, keep_input=keep_input)
 
-    assert evaluateins_copy == evaluateins_
+    assert validate_freed_fn(evaluateins, evaluateins_copy, evaluateins_)
 
 
 def test_evaluateres_to_recordset_and_back() -> None:
@@ -222,13 +269,35 @@ def test_get_parameters_ins_to_recordset_and_back() -> None:
     assert getparameters_ins_copy == getparameters_ins_
 
 
-def test_get_parameters_res_to_recordset_and_back() -> None:
+@pytest.mark.parametrize(
+    "keep_input, validate_freed_fn",
+    [
+        (
+            False,
+            lambda x, x_copy, y: len(x.parameters.tensors) == 0 and x_copy == y,
+        ),  # check tensors were freed
+        (
+            True,
+            lambda x, x_copy, y: x == y,
+        ),
+    ],
+)
+def test_get_parameters_res_to_recordset_and_back(
+    keep_input: bool,
+    validate_freed_fn: Callable[
+        [GetParametersRes, GetParametersRes, GetParametersRes], bool
+    ],
+) -> None:
     """Test conversion GetParametersRes --> RecordSet --> GetParametersRes."""
     getparameteres_res = _get_valid_getparametersres()
 
     getparameters_res_copy = deepcopy(getparameteres_res)
 
-    recordset = getparametersres_to_recordset(getparameteres_res)
-    getparameteres_res_ = recordset_to_getparametersres(recordset)
+    recordset = getparametersres_to_recordset(getparameteres_res, keep_input=keep_input)
+    getparameteres_res_ = recordset_to_getparametersres(
+        recordset, keep_input=keep_input
+    )
 
-    assert getparameters_res_copy == getparameteres_res_
+    assert validate_freed_fn(
+        getparameteres_res, getparameters_res_copy, getparameteres_res_
+    )

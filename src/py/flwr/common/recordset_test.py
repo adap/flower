@@ -14,6 +14,7 @@
 # ==============================================================================
 """RecordSet tests."""
 
+from copy import deepcopy
 from typing import Callable, Dict, List, OrderedDict, Type, Union
 
 import numpy as np
@@ -88,36 +89,36 @@ def test_parameters_to_array_and_back() -> None:
 
 
 @pytest.mark.parametrize(
-    "keep_input",
-    [False, True],
+    "keep_input, validate_freed_fn",
+    [
+        (False, lambda x, x_copy, y: len(x.tensors) == 0),  # check tensors were freed
+        (True, lambda x, x_copy, y: x.tensors == y.tensors),  # check they are equal
+    ],
 )
-def test_parameters_to_parametersrecord_and_back(keep_input: bool) -> None:
+def test_parameters_to_parametersrecord_and_back(
+    keep_input: bool,
+    validate_freed_fn: Callable[[Parameters, Parameters, Parameters], bool],
+) -> None:
     """Test conversion between legacy Parameters and ParametersRecords."""
     ndarrays = get_ndarrays()
 
     parameters = ndarrays_to_parameters(ndarrays)
+    parameters_copy = deepcopy(parameters)
 
     params_record = parameters_to_parametersrecord(
         parameters=parameters, keep_input=keep_input
     )
 
-    if keep_input:
-        # Verify inputed parameters are indeed as originally passed
-        assert parameters == ndarrays_to_parameters(ndarrays)
-    else:
-        # Verify tensors have been erased
-        assert len(parameters.tensors) == 0
-
     parameters_ = parametersrecord_to_parameters(params_record, keep_input=keep_input)
-
-    if not keep_input:
-        # Verify Arrays in record have been erased
-        assert len(params_record.data) == 0
 
     ndarrays_ = parameters_to_ndarrays(parameters=parameters_)
 
+    # Validate returned NDArrays match those at the beginning
     for arr, arr_ in zip(ndarrays, ndarrays_):
-        assert np.array_equal(arr, arr_)
+        assert np.array_equal(arr, arr_), "no"
+
+    # Validate initial Parameters object has been handled according to `keep_input`
+    assert validate_freed_fn(parameters, parameters_copy, parameters_)
 
 
 def test_set_parameters_while_keeping_intputs() -> None:
