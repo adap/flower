@@ -175,28 +175,29 @@ def main(cfg: DictConfig) -> None:
     _, test_accuracy = zip(*history.metrics_centralized["accuracy"])
     _, test_auc = zip(*history.metrics_centralized["auc"])
 
-    file_name = os.path.join(
-        save_path,
-        "outputs/all_results.csv",
-    )
+    # Save results as .csv in the output directory of this experiment as well as
+    # in outputs/all_results.csv. For the latter results are appended if the file
+    # already exists. This is useful when running multiruns.
+    path_to_save = [os.path.join(save_path,"results.csv"), "outputs/all_results.csv"]
 
-    data = pd.DataFrame(
-        {
-            "round": rounds,
-            "test_loss": test_loss,
-            "test_accuracy": test_accuracy,
-            "test_auc": test_auc,
-            "attack": [attack_fn for _ in range(len(rounds))],
-            "dataset_name": [dataset_name for _ in range(len(rounds))],
-            "num_malicious": [num_malicious for _ in range(len(rounds))],
-            "strategy": [cfg.strategy.name for _ in range(len(rounds))],
-        }
-    )
+    for file_name in path_to_save:
+        data = pd.DataFrame(
+            {
+                "round": rounds,
+                "loss": test_loss,
+                "accuracy": test_accuracy,
+                "auc": test_auc,
+                "attack_fn": [attack_fn for _ in range(len(rounds))],
+                "dataset_name": [dataset_name for _ in range(len(rounds))],
+                "num_malicious": [num_malicious for _ in range(len(rounds))],
+                "strategy": [cfg.strategy.name for _ in range(len(rounds))],
+            }
+        )
 
-    if os.path.exists(file_name):
-        data.to_csv(file_name, mode="a", header=False, index=False)
-    else:
-        data.to_csv(file_name, index=False, header=True)
+        if os.path.exists(file_name):
+            data.to_csv(file_name, mode="a", header=False, index=False)
+        else:
+            data.to_csv(file_name, index=False, header=True)
 
 
 # pylint: disable=unused-argument
