@@ -126,20 +126,20 @@ def handle_legacy_message_from_tasktype(
             get_parameters_ins=recordset_to_getparametersins(message.message),
         )
         out_recordset = getparametersres_to_recordset(
-            get_parameters_res, keep_input=False
+            get_parameters_res, keep_input=True
         )
     # Handle FitIns
     elif task_type == TASK_TYPE_FIT:
         fit_res = maybe_call_fit(
             client=client,
-            fit_ins=recordset_to_fitins(message.message, keep_input=False),
+            fit_ins=recordset_to_fitins(message.message, keep_input=True),
         )
-        out_recordset = fitres_to_recordset(fit_res, keep_input=False)
+        out_recordset = fitres_to_recordset(fit_res, keep_input=True)
     # Handle EvaluateIns
     elif task_type == TASK_TYPE_EVALUATE:
         evaluate_res = maybe_call_evaluate(
             client=client,
-            evaluate_ins=recordset_to_evaluateins(message.message, keep_input=False),
+            evaluate_ins=recordset_to_evaluateins(message.message, keep_input=True),
         )
         out_recordset = evaluateres_to_recordset(evaluate_res)
     else:
