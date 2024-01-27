@@ -264,7 +264,9 @@ def main(cfg: DictConfig):
     )
 
     # GPU Setup
-    set_gpu_limits(gpu_id="0", gpu_memory=cfg.server.gpu_memory)
+    gpus = tf.config.experimental.list_physical_devices("GPU")
+    if gpus:
+        set_gpu_limits(gpu_id="0", gpu_memory=cfg.server.gpu_memory)
     # Load Test Dataset
     ds_test, num_classes = DataBuilder.get_ds_test(
         parent_path=parent_path,

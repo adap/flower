@@ -32,7 +32,7 @@ client:
   u_per: ${L.u_per}
   fedstar: ${fedstar}
   class_distribute: false
-  verbose: 1
+  verbose: 0
 
 hydra:
   sweep:

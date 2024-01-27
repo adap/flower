@@ -31,7 +31,7 @@ client:
   u_per: 0.00
   fedstar: false
   class_distribute: false
-  verbose: 1
+  verbose: 0
 
 hydra:
   sweep:
