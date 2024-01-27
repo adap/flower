@@ -33,7 +33,7 @@ from flwr.common.constant import (
     TASK_TYPE_GET_PROPERTIES,
 )
 from flwr.common.context import Context
-from flwr.common.message import Message
+from flwr.common.message import Message, Metadata
 from flwr.common.recordset import RecordSet
 from flwr.common.recordset_compat import (
     evaluateres_to_recordset,
@@ -112,21 +112,20 @@ def handle_legacy_message_from_tasktype(
 
     task_type = message.metadata.task_type
 
-    out_message = Message(metadata=message.metadata, message=RecordSet())
     # Handle GetPropertiesIns
     if task_type == TASK_TYPE_GET_PROPERTIES:
         get_properties_res = maybe_call_get_properties(
             client=client,
             get_properties_ins=recordset_to_getpropertiesins(message.message),
         )
-        out_message.message = getpropertiesres_to_recordset(get_properties_res)
+        out_recordset = getpropertiesres_to_recordset(get_properties_res)
     # Handle GetParametersIns
     elif task_type == TASK_TYPE_GET_PARAMETERS:
         get_parameters_res = maybe_call_get_parameters(
             client=client,
             get_parameters_ins=recordset_to_getparametersins(message.message),
         )
-        out_message.message = getparametersres_to_recordset(
+        out_recordset = getparametersres_to_recordset(
             get_parameters_res, keep_input=False
         )
     # Handle FitIns
@@ -135,16 +134,28 @@ def handle_legacy_message_from_tasktype(
             client=client,
             fit_ins=recordset_to_fitins(message.message, keep_input=False),
         )
-        out_message.message = fitres_to_recordset(fit_res, keep_input=False)
+        out_recordset = fitres_to_recordset(fit_res, keep_input=False)
     # Handle EvaluateIns
     elif task_type == TASK_TYPE_EVALUATE:
         evaluate_res = maybe_call_evaluate(
             client=client,
             evaluate_ins=recordset_to_evaluateins(message.message, keep_input=False),
         )
-        out_message.message = evaluateres_to_recordset(evaluate_res)
+        out_recordset = evaluateres_to_recordset(evaluate_res)
     else:
         raise ValueError(f"Invalid task type: {task_type}")
+
+    # Return Message
+    out_message = Message(
+        metadata=Metadata(
+            run_id=0,  # Non-user defined
+            task_id="",  # Non-user defined
+            group_id="",  # Non-user defined
+            ttl="",
+            task_type=task_type,
+        ),
+        message=out_recordset,
+    )
     return out_message
 
 
