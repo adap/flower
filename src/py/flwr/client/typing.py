@@ -14,31 +14,12 @@
 # ==============================================================================
 """Custom types for Flower clients."""
 
-from dataclasses import dataclass
 from typing import Callable
 
 from flwr.common.context import Context
 from flwr.common.message import Message
-from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 from .client import Client as Client
-
-
-@dataclass
-class Fwd:
-    """."""
-
-    task_ins: TaskIns
-    context: Context
-
-
-@dataclass
-class Bwd:
-    """."""
-
-    task_res: TaskRes
-    context: Context
-
 
 FlowerCallable = Callable[[Message, Context], Message]
 ClientFn = Callable[[str], Client]

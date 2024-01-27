@@ -44,7 +44,7 @@ def make_mock_middleware(name: str, footprint: List[str]) -> Layer:
 
     def middleware(message: Message, context: Context, app: FlowerCallable) -> Message:
         footprint.append(name)
-        # add empty ConfigRegcord to in_message for this middleware layer
+        # add empty ConfigRecord to in_message for this middleware layer
         message.message.set_configs(name=name, record=ConfigsRecord())
         _increment_context_counter(context)
         out_message: Message = app(message, context)
