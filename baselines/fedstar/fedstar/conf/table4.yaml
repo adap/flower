@@ -11,7 +11,7 @@ server:
   server_address: "localhost:8080"
   rounds: 100
   num_clients: ${num_clients}
-  min_sample_size: ${num_clients} # all clients participate
+  fraction_fit: 0.8
   gpu_memory: 2048
   eval_step: 1
   train_epochs: 1

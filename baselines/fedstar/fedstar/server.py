@@ -122,7 +122,7 @@ class AudioServer:  # pylint: disable=too-many-instance-attributes
     def __init__(
         self,
         flwr_evalution_step,
-        flwr_min_sample_size,
+        fraction_fit,
         flwr_num_clients,
         flwr_rounds,
         model_num_classes,
@@ -132,20 +132,14 @@ class AudioServer:  # pylint: disable=too-many-instance-attributes
         model_verbose,
     ):
         # Flower Parameters
-        self.sample_fraction = float(flwr_min_sample_size / flwr_num_clients)
-        # print("-" * 100)
-        # print(self.sample_fraction)
-        self.min_sample_size = flwr_min_sample_size
-        self.min_num_clients = flwr_num_clients
         self.rounds = flwr_rounds
         # Local Variables Counters and Variables
         self.current_round = 0
         self.final_accuracy = 0.0
         self.round_time = time.time()
         self.strategy = flwr.server.strategy.FedAvg(
-            fraction_fit=self.sample_fraction,
-            min_fit_clients=self.min_sample_size,
-            min_available_clients=self.min_num_clients,
+            fraction_fit=fraction_fit,
+            min_available_clients=flwr_num_clients,
             on_fit_config_fn=get_on_fit_config_fn(
                 self.rounds, model_epochs, model_batch_size
             ),
@@ -278,7 +272,7 @@ def main(cfg: DictConfig):
     # Create Server Object
     audio_server = AudioServer(
         flwr_evalution_step=cfg.server.eval_step,
-        flwr_min_sample_size=cfg.server.min_sample_size,
+        fraction_fit=cfg.server.fraction_fit,
         flwr_num_clients=cfg.server.num_clients,
         flwr_rounds=cfg.server.rounds,
         model_num_classes=num_classes,
