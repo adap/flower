@@ -5,31 +5,31 @@ labels: [robustness, model poisoning, anomaly detection, autoregressive model, r
 dataset: [MNIST, Income, CIFAR-10, California Housing]
 ---
 
-****Paper:**** [arxiv.org/abs/2303.16668](https://arxiv.org/abs/2303.16668)
+**Paper:** [arxiv.org/abs/2303.16668](https://arxiv.org/abs/2303.16668)
 
-****Authors:**** Gabriele Tolomei, Edoardo Gabrielli, Dimitri Belli, Vittorio Miori
+**Authors:** Gabriele Tolomei, Edoardo Gabrielli, Dimitri Belli, Vittorio Miori
 
-****Abstract:**** In this work, we propose FLANDERS, a novel federated learning (FL) aggregation scheme robust to Byzantine attacks. FLANDERS considers the local model updates sent by clients at each FL round as a matrix-valued time series. Then, it identifies malicious clients as outliers of this time series by comparing actual observations with those estimated by a matrix autoregressive forecasting model. Experiments conducted on several datasets under different FL settings demonstrate that FLANDERS matches the robustness of the most powerful baselines against Byzantine clients. Furthermore, FLANDERS remains highly effective even under extremely severe attack scenarios, as opposed to existing defense strategies. 
+**Abstract:** In this work, we propose FLANDERS, a novel federated learning (FL) aggregation scheme robust to Byzantine attacks. FLANDERS considers the local model updates sent by clients at each FL round as a matrix-valued time series. Then, it identifies malicious clients as outliers of this time series by comparing actual observations with those estimated by a matrix autoregressive forecasting model. Experiments conducted on several datasets under different FL settings demonstrate that FLANDERS matches the robustness of the most powerful baselines against Byzantine clients. Furthermore, FLANDERS remains highly effective even under extremely severe attack scenarios, as opposed to existing defense strategies. 
 
 
 ## About this baseline
 
-****What’s implemented:**** The code in this directory replicates the results on MNIST and Income datasets under all attack settings (Gaussian, LIE, OPT and AGR-MM), but I've also implemented the code for California Housing and CIFAR-10. More specifically, you can reproduce part of Fig. 3 (a) and (b), and part of Fig. 4 and Fig. 5 in Appendix G.2 (there's no division between $b\lt50%$, and $b\ge50%$.). Since here I do not compare FLANDERS with other defence baselines, all attacks are grouped into the same plot.
+**What’s implemented:** The code in this directory replicates the results on MNIST and Income datasets under all attack settings (Gaussian, LIE, OPT and AGR-MM), but I've also implemented the code for California Housing and CIFAR-10. More specifically, you can reproduce part of Fig. 3 (a) and (b), and part of Fig. 4 and Fig. 5 in Appendix G.2 (there's no division between $b\lt50%$, and $b\ge50%$.). Since here I do not compare FLANDERS with other defence baselines, all attacks are grouped into the same plot.
 
-****Datasets:**** MNIST, Income
+**Datasets:** MNIST, Income
 
-****Hardware Setup:**** Apple M2 Pro, 16gb RAM
+**Hardware Setup:** Apple M2 Pro, 16gb RAM
 
-****Estimated time to run:**** For **Income**, 117 seconds. For **MNIST**, 24 minutes. This is the time estimated for a *single experiment* (i.e. 50 rounds, 10 clients sampled each round, 1 local epoch).
+**Estimated time to run:** For **Income**, 117 seconds. For **MNIST**, 24 minutes. This is the time estimated for a *single experiment* (i.e. 50 rounds, 10 clients sampled each round, 1 local epoch).
 
-****Contributors:**** Edoardo Gabrielli, University of Rome "La Sapienza" ([GitHub](https://github.com/edogab33), [LinkedIn](https://www.linkedin.com/in/edoardog/), [Scholar](https://scholar.google.com/citations?user=b3bePdYAAAAJ))
+**Contributors:** Edoardo Gabrielli, University of Rome "La Sapienza" ([GitHub](https://github.com/edogab33), [LinkedIn](https://www.linkedin.com/in/edoardog/), [Scholar](https://scholar.google.com/citations?user=b3bePdYAAAAJ))
 
 
 ## Experimental Setup
 
-****Task:**** Image classification, logistic regression, linear regression
+**Task:** Image classification, logistic regression, linear regression
 
-****Models:**** Appendix C of the paper describes the models, but here's a summary.
+**Models:** Appendix C of the paper describes the models, but here's a summary.
 
 Income (binary classification):
 - cyclic coordinate descent (CCD)
@@ -43,7 +43,7 @@ MNIST (multilabel classification, fully connected, feed forward NN):
 - hidden layer 2: 256
 
 
-****Dataset:**** Every dataset is partitioned into two disjoint sets: 80% for training and 20% for testing. The training set is distributed uniformly across all clients (100), while the testing set is held by the server to evaluate the global model.
+**Dataset:** Every dataset is partitioned into two disjoint sets: 80% for training and 20% for testing. The training set is distributed uniformly across all clients (100), while the testing set is held by the server to evaluate the global model.
 
 | Description | Default Value |
 | ----------- | ----- |
@@ -52,7 +52,7 @@ MNIST (multilabel classification, fully connected, feed forward NN):
 | Training set | 80% |
 | Testing set | 20% |
 
-****Training Hyperparameters:****
+**Training Hyperparameters:**
 
 | Dataset | # of clients  | Clients per round | # of rounds | $L$ | Batch size | Learning rate | $\lambda_1$ | $\lambda_2$ | Optimizer | Dropout | Alpha | Beta | # of clients to keep | Sampling |
 | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
@@ -74,9 +74,6 @@ poetry install
 
 # Activate the env
 poetry shell
-
-# Manually install natsort
-pip install natsort
 ```
 
 
