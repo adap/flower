@@ -22,7 +22,7 @@ dataset: [Ambient Context, Speech Commands]
 
 **Datasets:** Ambient Context, Speech Commands
 
-**Hardware Setup:** These experiments were run on a linux server with 56 CPU threads with 325 GB Ram with A10 GPU in it. Any machine with 16 CPU cores and 32 GB memory would be able to run experiments with small number of clients in a reasonable amount of time. For context, a machine with 24 cores and a RTX3090Ti ran the Speech Commands experiment in Table 3 with 10 clients in 1h. For this examperiment 30GB of RAM was used and clients required ~1.4GB of VRAM each. The same experiment but with the Ambient Context dataset too 13minutes.
+**Hardware Setup:** These experiments were run on a linux server with 56 CPU threads with 325 GB Ram with A10 GPU in it. Any machine with 16 CPU cores and 32 GB memory would be able to run experiments with small number of clients in a reasonable amount of time. For context, a machine with 24 cores and a RTX3090Ti ran the Speech Commands experiment in Table 3 with 10 clients in 1h. For this experiment 30GB of RAM was used and clients required ~1.4GB of VRAM each. The same experiment but with the Ambient Context dataset too 13minutes.
 
 **Contributors:** Raj Parekh [GitHub](https://github.com/Raj-Parekh24), [Mail](rajparekhwc@gmail.com)
 
@@ -60,7 +60,7 @@ python -m fedstar.dataset_preparation
 
 ## Setting up GPU Memory
 
-**Note:** The experiment is designed to run on both GPU and CPU, but runs better ona system with GPU (specially when using the SpeechCommands dataset). If you wish to use GPU, make sure you have installed the [CUDA Toolkit](https://developer.nvidia.com/cuda-downloads). This baseline has been tested with CUDA 12.3. By default, it will run only on the CPU. Please update the value of the list `gpu_total_mem` with the corresponding memory for each GPU in your machine that you want to expose to the experiment. The variable is in the `distribute_gpus` function inside the `clients.py`. Reference is shown below.
+**Note:** The experiment is designed to run on both GPU and CPU, but runs better on a system with GPU (specially when using the SpeechCommands dataset). If you wish to use GPU, make sure you have installed the [CUDA Toolkit](https://developer.nvidia.com/cuda-downloads). This baseline has been tested with CUDA 12.3. By default, it will run only on the CPU. Please update the value of the list `gpu_total_mem` with the corresponding memory for each GPU in your machine that you want to expose to the experiment. The variable is in the `distribute_gpus` function inside the `clients.py`. Reference is shown below.
 
 ```python
 # For Eg:- We have a system with two GPUs with 8GB and 4GB VRAM.
@@ -86,7 +86,7 @@ python -m fedstar.server num_clients=5 dataset_name=speech_commands server.round
 python -m fedstar.clients num_clients=5 dataset_name=speech_commands
 ```
 
-To run experiments for Table 4, you should pass a different cofig file (i.e. that in `fedstar/conf/table4.yaml`). You can do this as follows:
+To run experiments for Table 4, you should pass a different config file (i.e. that in `fedstar/conf/table4.yaml`). You can do this as follows:
 
 ```bash
 # by default will run FedStar with Ambient Context and L=3%
@@ -107,7 +107,7 @@ To run in supervised mode, pass `fedstar=false` to any of the commands above (wh
 ## Expected Results
 
 
-This section indicates the commands to exectue to obtain the results shown below in Table 3 and Table 4. While both configs fix the number of rounds to 100, in many settings fewer rounds are enough for the model to reach the accuracy shown in the tables. The commands below make use of Hydra's `--multirun` to run multiple experiments. This is better suited when using Flower simulations. Here they work fine but, if you encounter any issues, you can always "unroll" the multirun and run one configuration at a time. If you do this, results won't go into the `multirun/` directory, instead to the default `outputs/` directory.
+This section indicates the commands to execute to obtain the results shown below in Table 3 and Table 4. While both configs fix the number of rounds to 100, in many settings fewer rounds are enough for the model to reach the accuracy shown in the tables. The commands below make use of Hydra's `--multirun` to run multiple experiments. This is better suited when using Flower simulations. Here they work fine but, if you encounter any issues, you can always "unroll" the multirun and run one configuration at a time. If you do this, results won't go into the `multirun/` directory, instead to the default `outputs/` directory.
 
 
 ### Table 3
